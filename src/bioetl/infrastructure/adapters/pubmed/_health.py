@@ -10,9 +10,6 @@ __all__ = ["PUBMED_HEALTH_ERRORS", "PubMedHealthMixin"]
 import time
 from typing import TYPE_CHECKING
 
-from httpx import RequestError
-
-from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.common.source_metadata_capability import (
@@ -26,6 +23,9 @@ from bioetl.infrastructure.adapters.health_probe_policy import (
 from bioetl.infrastructure.adapters.health_status_policy import (
     classify_health_probe_status,
 )
+from bioetl.infrastructure.adapters.pubmed._errors import (
+    PUBMED_COMMON_ERRORS as PUBMED_HEALTH_ERRORS,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import ErrorHandlerPort, LoggerPort
@@ -36,16 +36,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 from .constants import ENTREZ_API_BASE
-
-PUBMED_HEALTH_ERRORS = (
-    BioETLError,
-    NetworkError,
-    RequestError,
-    OSError,
-    ValueError,
-    TypeError,
-    RuntimeError,
-)
 
 
 class PubMedHealthMixin:

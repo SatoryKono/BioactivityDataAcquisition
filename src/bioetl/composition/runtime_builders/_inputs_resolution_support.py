@@ -7,7 +7,7 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING, Literal, Protocol, cast
 
 from bioetl.domain.config import RuntimeConfig
-from bioetl.infrastructure.config.silver_filter_migration import (
+from bioetl.domain.filtering.silver_filter_identity import (
     resolve_silver_filter_compatibility_mode,
 )
 

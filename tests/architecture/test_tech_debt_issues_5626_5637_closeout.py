@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import json
 from datetime import UTC, date, datetime
 from pathlib import Path
@@ -89,8 +90,17 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 
 
 def _src_importers(module_name: str) -> set[str]:
-    usage = collect_exact_module_import_usage(ROOT, module_name)
-    return {str(path) for path in usage["src"]}
+    importers: set[str] = set()
+    for path in (ROOT / "src").rglob("*.py"):
+        repo_path = path.relative_to(ROOT).as_posix()
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                if any(alias.name == module_name for alias in node.names):
+                    importers.add(repo_path)
+            elif isinstance(node, ast.ImportFrom) and node.module == module_name:
+                importers.add(repo_path)
+    return importers
 
 
 def _test_importers(module_name: str) -> set[str]:

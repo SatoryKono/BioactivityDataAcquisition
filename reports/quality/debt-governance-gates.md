@@ -7,7 +7,7 @@
 - warn_count: 1
 - fail_count: 0
 - release_gate_status: `warning`
-- architecture_quality_scorecard_integral_score: `8.27`
+- architecture_quality_scorecard_integral_score: `8.31`
 - architecture_quality_scorecard_interpretation: `satisfactory_system_refactoring_required`
 
 | gate | status | metric | current | limit | source |
@@ -15,10 +15,10 @@
 | `debt_scorecard_budget_violations` | `pass` | `violation_count` | `0` | `0` | `configs/quality/debt_scorecard.yaml` |
 | `retained_public_entrypoint_burden` | `pass` | `current_count` | `0` | `0` | `configs/quality/debt_scorecard.yaml#compatibility_debt_metrics` |
 | `debt_budget_growth_policy` | `pass` | `budget_growth_allowed` | `False` | `False` | `configs/quality/debt_scorecard.yaml` |
-| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `f662128e22673056570453a82266657bf607915df05678890af5221e3751e1d5` | `f662128e22673056570453a82266657bf607915df05678890af5221e3751e1d5` | `reports/quality/module-coverage-inventory.json` |
+| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `059c18cfad34a3f0eaf8bebd4bd86c90017eef718a4f796a8ca92be2cc33b252` | `059c18cfad34a3f0eaf8bebd4bd86c90017eef718a4f796a8ca92be2cc33b252` | `reports/quality/module-coverage-inventory.json` |
 | `module_coverage_unmeasured_modules` | `pass` | `unmeasured_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `module_coverage_uncovered_modules` | `pass` | `uncovered_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
-| `hotspot_family_baseline_budget_warnings` | `warn` | `budget_warnings` | `7` | `0` | `reports/quality/hotspot-family-baseline.json` |
+| `hotspot_family_baseline_budget_warnings` | `warn` | `budget_warnings` | `6` | `0` | `reports/quality/hotspot-family-baseline.json` |
 | `compatibility_twin_pairs` | `pass` | `twin_pair_count` | `0` | `0` | `reports/quality/compatibility-importer-census.json` |
 | `retained_public_export_facade_growth` | `pass` | `retained_public_export_facade_count` | `4` | `4` | `reports/quality/compatibility-importer-census.json` |
 | `dead_code_untriaged_zero_import_candidates` | `pass` | `repo_wide_untriaged_zero_import_candidate_count` | `0` | `0` | `reports/quality/dead-code-inventory.json` |

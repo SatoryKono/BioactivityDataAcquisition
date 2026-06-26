@@ -2,24 +2,11 @@
 
 from __future__ import annotations
 
-from bioetl.application.pipelines.pubmed.block_definitions import (
-    _PubMedAuthorBlock,
-    _PubMedClassificationBlock,
-    _PubMedCoreBlock,
-    _PubMedDateBlock,
-    _PubMedIdentifierBlock,
-    _PubMedJournalBlock,
-    _PubMedMetricsBlock,
-    _PubMedXmlBlock,
-)
+import bioetl.application.pipelines.pubmed.block_definitions as _blocks
 
-__all__ = [
-    "_PubMedAuthorBlock",
-    "_PubMedClassificationBlock",
-    "_PubMedCoreBlock",
-    "_PubMedDateBlock",
-    "_PubMedIdentifierBlock",
-    "_PubMedJournalBlock",
-    "_PubMedMetricsBlock",
-    "_PubMedXmlBlock",
-]
+__all__ = list(_blocks.__all__)
+
+for _name in __all__:
+    globals()[_name] = getattr(_blocks, _name)
+
+del _name

@@ -24,7 +24,6 @@ from bioetl.interfaces.cli.commands.domains.composite.execution import (
     run_composite_inner as _run_composite_inner_impl,
 )
 from bioetl.interfaces.cli.commands.domains.composite.runtime import (
-    CompositeRuntimeCliInput,
     build_runtime_config,
 )
 from bioetl.interfaces.cli.commands.domains.composite.support import (
@@ -328,25 +327,11 @@ def run_composite(**options: object) -> None:
         backend_result=backend_result,
     ):
         cli_input = replace(cli_input, health_server=False)
-    runtime = build_runtime_config(
-        CompositeRuntimeCliInput(
-            resume=cli_input.resume,
-            dry_run=cli_input.dry_run,
-            seed_limit=cli_input.seed_limit,
-            enrich_only=cli_input.enrich_only,
-            required_only=cli_input.required_only,
-            force_enricher=cli_input.force_enricher,
-            use_cached_bronze=cli_input.use_cached_bronze,
-            cached_bronze_date=cli_input.cached_bronze_date,
-            cached_bronze_path=cli_input.cached_bronze_path,
-            cached_bronze_enrichers=cli_input.cached_bronze_enrichers,
-            cached_bronze_dependencies=cli_input.cached_bronze_dependencies,
-        )
-    )
+    runtime = build_runtime_config(cli_input.runtime)
     _echo_composite_startup(
         composite=cli_input.composite,
-        dry_run=cli_input.dry_run,
-        resume=cli_input.resume,
+        dry_run=cli_input.runtime.dry_run,
+        resume=cli_input.runtime.resume,
         cached_bronze_enabled=(
             runtime.use_cached_bronze
             or runtime.cached_bronze_enrichers is True

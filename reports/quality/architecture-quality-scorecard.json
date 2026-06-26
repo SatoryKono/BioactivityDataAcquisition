@@ -8,7 +8,7 @@
     },
     "module_coverage_inventory": {
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "f662128e22673056570453a82266657bf607915df05678890af5221e3751e1d5",
+      "source_tree_sha256": "059c18cfad34a3f0eaf8bebd4bd86c90017eef718a4f796a8ca92be2cc33b252",
       "coverage_xml_sha256": "688fdd5cf7e086bb0ac2178265406f9e8395532fb1067e9e6e2fc0c7b5e1632a"
     },
     "compatibility_importer_census": {
@@ -37,12 +37,12 @@
     "duplication_baseline": {
       "path": "reports/quality/full-app-duplication-baseline.json",
       "snapshot_date": "2026-06-26",
-      "total_duplicate_clusters": 88
+      "total_duplicate_clusters": 82
     },
     "hotspot_family_baseline": {
       "path": "reports/quality/hotspot-family-baseline.json",
       "snapshot_date": "2026-06-01",
-      "budget_warnings": 7
+      "budget_warnings": 6
     },
     "test_governance_report": {
       "path": "reports/quality/test-governance-current.json",
@@ -56,7 +56,7 @@
     }
   },
   "weights_sum": 1.0,
-  "integral_score": 8.27,
+  "integral_score": 8.31,
   "interpretation": "satisfactory_system_refactoring_required",
   "categories": [
     {
@@ -87,7 +87,7 @@
       "score": 9.0,
       "weighted_score": 0.81,
       "evidence_metrics": {
-        "source_module_count": 2185,
+        "source_module_count": 2189,
         "uncovered_module_count": 0
       }
     },
@@ -106,13 +106,13 @@
       "id": "module_boundaries_coupling",
       "name": "Module boundaries / coupling",
       "weight": 0.14,
-      "score": 6.5,
-      "weighted_score": 0.91,
+      "score": 6.7,
+      "weighted_score": 0.938,
       "evidence_metrics": {
-        "source_module_count": 2185,
+        "source_module_count": 2189,
         "hotspot_family_count": 5,
-        "hotspot_budget_warning_count": 7,
-        "total_duplicate_clusters": 88
+        "hotspot_budget_warning_count": 6,
+        "total_duplicate_clusters": 82
       }
     },
     {
@@ -169,24 +169,24 @@
       "id": "debt_burden_evolution_friction",
       "name": "Debt burden / evolution friction",
       "weight": 0.06,
-      "score": 6.3,
-      "weighted_score": 0.378,
+      "score": 6.5,
+      "weighted_score": 0.39,
       "evidence_metrics": {
         "retained_entrypoint_count": 12,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
-        "hotspot_budget_warning_count": 7,
-        "total_duplicate_clusters": 88
+        "hotspot_budget_warning_count": 6,
+        "total_duplicate_clusters": 82
       }
     }
   ],
   "metrics": {
     "layer_violations": 0,
-    "source_module_count": 2185,
+    "source_module_count": 2189,
     "unmeasured_module_count": 0,
     "uncovered_module_count": 0,
     "hotspot_family_count": 5,
-    "hotspot_budget_warning_count": 7,
-    "total_duplicate_clusters": 88,
+    "hotspot_budget_warning_count": 6,
+    "total_duplicate_clusters": 82,
     "retained_entrypoint_count": 12,
     "retained_public_export_facade_count": 4,
     "twin_pair_count": 0,
