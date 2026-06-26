@@ -16,10 +16,12 @@
 .secrets.baseline
 .wsl_proxy_env.sh
 AGENTS.md
+best_practices.md
 CHANGELOG.md
 GEMINI.md
 LICENSE
 Makefile
+pr_compliance_checklist.yaml
 README.md
 commitlint.config.mjs
 docker-compose.monitoring.yml
