@@ -115,3 +115,34 @@ class TestFixtureGovernanceLedger:
                     f"fixture governance artifact path missing for '{entry['field']}': "
                     f"{relative_path}"
                 )
+
+    def test_fixture_pruning_policy_is_inventory_and_owner_driven(self) -> None:
+        matrix = _load_matrix()
+        ledger = _load_ledger(matrix)
+        policy = ledger.get("pruning_policy")
+        assert isinstance(policy, dict), (
+            "fixture governance ledger must define pruning_policy"
+        )
+
+        assert policy["linked_issue"] == "#5583"
+        assert policy["default_action"] == "retain"
+        assert policy["owner"].startswith("@bioetl-")
+
+        required_evidence = set(policy["required_evidence"])
+        assert {
+            "metadata_owner",
+            "reachability_owner_paths",
+            "generator_or_catalog_drift_check",
+            "targeted_replay_or_contract_test",
+            "rollback_or_rerecord_path",
+        } <= required_evidence
+
+        forbidden_basis = set(policy["forbidden_basis"])
+        assert {
+            "filename_age_only",
+            "unreferenced_by_text_search_only",
+            "local_disk_pressure_only",
+        } <= forbidden_basis
+
+        for relative_path in policy["canonical_checks"]:
+            assert (ROOT / relative_path).exists(), relative_path

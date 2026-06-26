@@ -131,8 +131,8 @@ ______________________________________________________________________
   - [ ] `dataset` (SHOULD)
   - [ ] `record_count` (SHOULD)
 - [ ] DQ metrics exported (Prometheus format):
-  - [ ] `dq-validation-score`
-  - [ ] `data-freshness-seconds`
+  - [ ] `bioetl_dq_validation_score`
+  - [ ] `bioetl_data_freshness_seconds`
 - [ ] Provider health monitoring configured
 
 ## 11. Delta Maintenance (RULES.md §2.1.1)

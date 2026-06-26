@@ -4,6 +4,25 @@ source_of_truth:
   matrix_path: configs/quality/test_matrix.yaml
   matrix_rollout_path: fixture_governance.rollout
 backlog_reference: docs/reports/evidence/residual-test-ci-debt/06-backlog/BACKLOG-residual-test-ci-debt-implementation-2026-04-01.md
+pruning_policy:
+  linked_issue: "#5583"
+  default_action: retain
+  owner: "@bioetl-platform"
+  required_evidence:
+    - metadata_owner
+    - reachability_owner_paths
+    - generator_or_catalog_drift_check
+    - targeted_replay_or_contract_test
+    - rollback_or_rerecord_path
+  forbidden_basis:
+    - filename_age_only
+    - unreferenced_by_text_search_only
+    - local_disk_pressure_only
+  canonical_checks:
+    - tests/architecture/test_vcr_metadata_catalog_drift.py
+    - tests/architecture/test_fixture_governance_ledger.py
+    - tests/architecture/test_bronze_fixture_replay_baseline.py
+    - tests/architecture/test_config_golden_master.py
 entries:
   - field: cassette_metadata
     status: enforced

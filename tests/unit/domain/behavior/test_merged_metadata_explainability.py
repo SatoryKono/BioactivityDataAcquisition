@@ -21,11 +21,6 @@ pytestmark = pytest.mark.unit
 
 _REPO_ROOT = Path(__file__).resolve().parents[4]
 _SRC_ROOT = _REPO_ROOT / "src"
-_SUBPROCESS_SITE_PATHS = [
-    path
-    for path in sys.path
-    if "site-packages" in path or "dist-packages" in path
-]
 
 
 def _run_record_id_subprocess(code: str) -> str:
@@ -34,7 +29,7 @@ def _run_record_id_subprocess(code: str) -> str:
         import sys
         sys.path[:0] = {bootstrap_paths!r}
         """
-    ).format(bootstrap_paths=[str(_SRC_ROOT), *_SUBPROCESS_SITE_PATHS])
+    ).format(bootstrap_paths=[str(_SRC_ROOT)])
     env = {
         key: value
         for key, value in os.environ.items()
@@ -157,11 +152,15 @@ def test_record_id_fallback_is_stable_across_python_processes() -> None:
         from bioetl.domain.behavior.merged_metadata_explainability import (
             MergedMetadataExplainer,
         )
-        from bioetl.domain.models.metadata import CompositeOutputExt
+        from types import SimpleNamespace
 
         explanation = MergedMetadataExplainer().generate_explainability_metadata(
             [{"doi": "10.1/example", "title": "D"}],
-            CompositeOutputExt(composite_run_id="run-1"),
+            SimpleNamespace(
+                composite_run_id="run-1",
+                source_providers=[],
+                enrichment_status={},
+            ),
         )[0]
         print(explanation.record_id)
         """

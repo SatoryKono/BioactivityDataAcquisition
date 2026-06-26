@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.10
+Version: 1.11
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-16'
+  Last verified: '2026-06-25'
 
 ______________________________________________________________________
 
 # BioETL: Требования к Проекту
 
-*Синхронизировано с RULES.md v6.1.3 (2026-06-16); ADR registry verified through ADR-050 (2026-06-15).*
+*Синхронизировано с RULES.md v6.1.4 (2026-06-25); ADR registry verified through ADR-050 (2026-06-15).*
 
 ______________________________________________________________________
 
@@ -22,7 +22,7 @@ ______________________________________________________________________
 Каждое требование имеет:
 
 - **ID**: Уникальный идентификатор `REQ-{раздел}-{номер}`
-- **Уровень**: MUST / SHOULD / MAY (по RFC 2119)
+- **Уровень**: MUST / MUST NOT / SHOULD / MAY (по RFC 2119)
 - **Описание**: Что требуется
 - **Проверка**: Как можно протестировать
 
@@ -489,7 +489,7 @@ ______________________________________________________________________
 #### REQ-CB-004
 
 - **Уровень**: MUST
-- **Описание**: Метрика `circuit-breaker-state` (0=Closed, 1=Half-Open, 2=Open)
+- **Описание**: Метрика `bioetl_circuit_breaker_state` (0=Closed, 1=Half-Open, 2=Open)
 - **Проверка**: Проверить экспорт метрики в правильном формате
 
 #### REQ-CB-005
@@ -503,8 +503,8 @@ ______________________________________________________________________
 #### REQ-OBS-001
 
 - **Уровень**: MUST
-- **Описание**: `run_id` обязателен во всех логах, метриках и блокировках
-- **Проверка**: Статический анализ — все log вызовы содержат `run_id`
+- **Описание**: `run_id` обязателен в логах, блокировках и control-plane correlation surfaces (`RunManifest`, `RunLedger`, sidecar/audit artifacts); в Prometheus `run_id` **MUST NOT** использоваться как label из-за high cardinality.
+- **Проверка**: Статический анализ и observability/architecture tests подтверждают наличие `run_id` в лог-схеме и запрет high-cardinality `run_id` labels.
 
 #### REQ-OBS-002
 
@@ -591,19 +591,19 @@ ______________________________________________________________________
 #### REQ-DQ-001
 
 - **Уровень**: MUST
-- **Описание**: Метрики экспортируются в формате Prometheus
+- **Описание**: Метрики экспортируются в формате Prometheus с каноническими именами `bioetl_*` и bounded label vocabulary
 - **Проверка**: Проверить endpoint /metrics возвращает Prometheus формат
 
 #### REQ-DQ-002
 
 - **Уровень**: MUST
-- **Описание**: Метрика `dq-validation-score` с лейблами check, column
+- **Описание**: Метрика `bioetl_dq_validation_score` с bounded labels `check`, `column`
 - **Проверка**: Проверить наличие метрики с правильными лейблами
 
 #### REQ-DQ-003
 
 - **Уровень**: MUST
-- **Описание**: Метрика `data-freshness-seconds`
+- **Описание**: Метрика `bioetl_data_freshness_seconds`
 - **Проверка**: Проверить наличие метрики freshness
 
 ### 3.8 DQ Anomaly Detection
@@ -661,7 +661,7 @@ ______________________________________________________________________
 #### REQ-HEALTH-003
 
 - **Уровень**: MUST
-- **Описание**: Метрика `provider-health-status` (0=Unhealthy, 1=Degraded, 2=Healthy)
+- **Описание**: Метрика `bioetl_provider_health_status` (0=Unhealthy, 1=Degraded, 2=Healthy)
 - **Проверка**: Проверить экспорт метрики
 
 ______________________________________________________________________
@@ -1078,24 +1078,25 @@ ______________________________________________________________________
 
 ## Сводка Требований
 
-| Категория            | MUST    | SHOULD | MUST NOT | Всего   |
-| -------------------- | ------- | ------ | -------- | ------- |
-| Архитектура          | 5       | 1      | 1        | 7       |
-| Данные/Medallion     | 45      | 0      | 6        | 51      |
-| Ошибки/Observability | 36      | 2      | 1        | 39      |
-| Код/Тесты            | 12      | 0      | 1        | 13      |
-| Операции             | 24      | 1      | 3        | 28      |
-| Документация         | 2       | 0      | 0        | 2       |
-| Изменения            | 5       | 0      | 1        | 6       |
-| DX                   | 5       | 0      | 0        | 5       |
-| Dependencies         | 2       | 0      | 0        | 2       |
-| Providers            | 3       | 0      | 0        | 3       |
-| **Итого**            | **139** | **4**  | **13**   | **156** |
+| Категория            | MUST    | SHOULD | MUST NOT | MAY   | Всего   |
+| -------------------- | ------- | ------ | -------- | ----- | ------- |
+| Архитектура          | 5       | 1      | 1        | 0     | 7       |
+| Данные/Medallion     | 45      | 0      | 6        | 0     | 51      |
+| Ошибки/Observability | 36      | 2      | 1        | 0     | 39      |
+| Код/Тесты            | 12      | 0      | 1        | 0     | 13      |
+| Операции             | 24      | 1      | 3        | 0     | 28      |
+| Документация         | 2       | 0      | 0        | 0     | 2       |
+| Изменения            | 5       | 0      | 1        | 0     | 6       |
+| DX                   | 4       | 0      | 0        | 1     | 5       |
+| Dependencies         | 2       | 0      | 0        | 0     | 2       |
+| Providers            | 3       | 0      | 0        | 0     | 3       |
+| **Итого**            | **138** | **4**  | **13**   | **1** | **156** |
 
 ______________________________________________________________________
 
 ## История Изменений
 
+- **1.11** (2026-06-25): Governance closure sync. Исправлена summary-таблица (138 MUST + 13 MUST NOT + 4 SHOULD + 1 MAY = 156), `MAY` явно выведен в агрегированной сводке, а conflict wording для `run_id` в observability и canonical Prometheus metric names синхронизирован с RULES.md v6.1.4.
 - **1.10** (2026-06-16): ADR-050 governance sync. Header verification marker обновлён через ADR-050; REQ-DATA-008 теперь явно закрепляет structural-only Silver filter boundary и запрет semantic bucket keys под `filters.silver_filters`.
 - **1.9** (2026-05-26, updated 2026-06-22): ADR-048 alignment. Зафиксирована граница Domain schema boundary: Pandera/Pandas разрешены только в `domain/schemas` + `domain/contracts`; runtime Pandera monkeypatching retired, а seam `apply_runtime_compatibility_patches` в composition/bootstrap теперь выполняет только explicit validation через infrastructure implementation. Обновлены формулировки REQ-ARCH-003 и REQ-STACK-003, добавлены прямые cross-reference на ADR-048.
 - **1.8** (2026-03-13): Уточнён REQ-DOC-001: docs guardrails и generated-doc checks синхронизированы с текущей publication/navigation governance.

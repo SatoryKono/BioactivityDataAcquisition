@@ -42,7 +42,7 @@
       ],
       "duplication_clusters": 0,
       "files": 48,
-      "total_loc": 5886,
+      "total_loc": 5908,
       "files_ge_250_loc": 0,
       "helper_function_ratio": 0.307,
       "max_internal_fan_in": 3,
@@ -91,8 +91,8 @@
       ],
       "duplication_clusters": 0,
       "files": 115,
-      "total_loc": 14630,
-      "files_ge_250_loc": 16,
+      "total_loc": 14626,
+      "files_ge_250_loc": 15,
       "helper_function_ratio": 0.472,
       "max_internal_fan_in": 3,
       "max_internal_fan_in_module": "bioetl.application.services.control_plane.workflow.manifest_service",
@@ -101,7 +101,7 @@
         "max_internal_fan_in": 4
       },
       "budget_warnings": [
-        "at_budget:files_ge_250_loc=16/16"
+        "near_budget:files_ge_250_loc=15/16"
       ]
     },
     {

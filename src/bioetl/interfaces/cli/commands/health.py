@@ -17,13 +17,11 @@ from bioetl.interfaces.cli.commands.domains.health.rendering import (
 )
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
+    _handle_health_failure,
     run_long_lived_health_server_command,
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
-)
-from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
-    handle_cli_failure as handle_cli_execution_failure,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
@@ -69,28 +67,6 @@ def get_health_server_quarantine_service() -> QuarantineService:
     )
 
     return _impl()
-
-
-def _handle_health_failure(
-    exc: BaseException,
-    *,
-    reason_code: str,
-    target: str,
-    domain_error_title: str,
-    unexpected_error_title: str,
-    interrupted_message: str,
-) -> None:
-    """Handle health command failures with the shared CLI execution policy."""
-    handle_cli_execution_failure(
-        exc,
-        reason_code=reason_code,
-        subject_key="target",
-        subject_value=target,
-        domain_error_title=domain_error_title,
-        unexpected_error_title=unexpected_error_title,
-        interrupted_message=interrupted_message,
-        default_exit_code=ExitCode.FAIL,
-    )
 
 
 def _provider_subject(provider: tuple[str, ...]) -> str:

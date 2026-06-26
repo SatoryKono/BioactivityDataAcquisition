@@ -102,6 +102,27 @@ This document defines deterministic cleanup rules and automation for removing ca
 | `.trae/**`                | Trae rules       |
 | `.cursor/rules/**`        | Cursor rules     |
 
+### 2.1. Root Env and Tooling Surfaces
+
+Root env-like files are security-review surfaces, not cleanup targets:
+
+- `.env`, `.env.*`, `*.env`, and `new.env` MUST NOT be read, printed, moved,
+  renamed, overwritten, or deleted by automated cleanup.
+- `.env.example` is the only tracked root env template and MUST remain free of
+  real secrets.
+- Any local env cleanup requires explicit per-task user approval and a
+  path-specific security review.
+- Cleanup evidence MUST classify env-like local files as
+  `SECURITY_REVIEW_REQUIRED` or blocked, never as automatically safe.
+
+Root AI/editor/runtime tooling decisions live in
+`configs/quality/root_hygiene_review_registry.yaml`. Canonical runtime roots
+such as `.codex/**` and `.gemini/**` are retained unless a separate runtime
+migration decision changes the source of truth. Local cache/editor/vendor roots
+such as `.agents`, `.ai`, `.cache`, `.npm-cache`, `caddy`, `.junie`,
+`.sonarlint`, and `.windsurf` must remain untracked or be reclassified through
+the registry before any rehome/delete action.
+
 ## 3. Data Retention (Medallion Architecture)
 
 ### 3.1. Bronze Layer
@@ -172,6 +193,17 @@ dedicated GitHub template
 `.github/ISSUE_TEMPLATE/retention_sensitive_cleanup.yml` or include the same
 candidate inventory, classification table, dry-run evidence, reviewed apply
 list, verification output, and rollback note.
+
+Fixture, VCR, and golden pruning is inventory-driven only:
+
+- VCR cassette removal requires metadata ownership, reachability evidence from
+  `reports/quality/vcr-metadata-catalog.json`, and targeted replay/contract
+  verification.
+- Bronze fixture changes must keep `configs/base/bronze_fixture_gaps.yaml`
+  empty unless every residual gap is explicitly owned.
+- Golden fixture removal requires a reviewed replacement or replay/golden-test
+  evidence. Filename age or broad text-search absence is not sufficient.
+- The pruning policy is tracked in `configs/quality/fixture_governance_ledger.yaml`.
 
 ### 4.3. Delta Lake VACUUM (MUST)
 
@@ -289,8 +321,11 @@ Enforcement:
 - CI **MUST** run cleanup governance checks that block broad cleanup guidance
   from active docs/scripts and export deterministic cleanup classification
   evidence for review.
-- GitHub branch protection for `main` **MUST** require the `root-hygiene`
-  status check.
+- Target state: GitHub branch protection for `main` **SHOULD** require the
+  `root-hygiene` status check when repository rulesets are enabled.
+- Current-state enforcement is tracked in
+  `docs/00-project/governance/05-github-policy.md`; do not treat this cleanup
+  guide as live branch-protection evidence on its own.
 - Any intentional new root-level tracked file **MUST** be added to `.github/root-allowlist.txt` in the same PR with justification.
 
 ### 7.4. Scheduled Jobs (SHOULD)

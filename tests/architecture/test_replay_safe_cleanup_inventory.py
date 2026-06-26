@@ -16,6 +16,7 @@ _PRETEST_GUARDRAILS_TIMESTAMP_RE = re.compile(
     r"^pretest_guardrails_(\d{8})_(\d{6})\.json$"
 )
 REQUIRED_REPLAY_ANCHORS = {
+    "fixture_input",
     "run_manifest",
     "run_ledger",
     "effective_config",
@@ -173,3 +174,56 @@ def test_debug_exports_cleanup_surface_is_inventory_backed() -> None:
     assert entry["dry_run_required"] is True
     assert entry["protection"] == "owner-reviewed-retention-sensitive-cleanup"
     assert Path(str(entry["runbook"])).name == "retention-sensitive-cleanup.md"
+
+
+@pytest.mark.architecture
+def test_data_cleanup_families_have_explicit_retention_classes() -> None:
+    payload = _inventory()
+    entries = payload["entries"]
+    assert isinstance(entries, list)
+
+    by_id = {str(entry["id"]): entry for entry in entries if isinstance(entry, dict)}
+
+    expected_classes = {
+        "tracked_input_datasets": ("data/input/**", "reproducibility_fixture"),
+        "debug_exports": ("data/debug_exports/**", "tracked_debug_evidence"),
+        "control_plane_run_manifest": (
+            "data/output/control/run_manifest/**",
+            "checkpoint_control_plane_state",
+        ),
+        "control_plane_run_ledger": (
+            "data/output/control/run_ledger/**",
+            "checkpoint_control_plane_state",
+        ),
+        "control_plane_effective_config": (
+            "data/output/control/effective_config/**",
+            "checkpoint_control_plane_state",
+        ),
+        "control_plane_lineage": (
+            "data/output/control/lineage/**",
+            "checkpoint_control_plane_state",
+        ),
+        "checkpoints": (
+            "data/output/checkpoints/**",
+            "checkpoint_control_plane_state",
+        ),
+        "cached_bronze_snapshots": (
+            "data/output/bronze/**",
+            "local_runtime_output",
+        ),
+        "silver_gold_outputs": (
+            "data/output/{silver,gold}/**",
+            "local_runtime_output",
+        ),
+        "quarantine_records": (
+            "data/output/quarantine/**",
+            "local_runtime_output",
+        ),
+    }
+
+    for entry_id, (path, retention_class) in expected_classes.items():
+        entry = by_id[entry_id]
+        assert entry["path"] == path
+        assert entry["retention_class"] == retention_class
+        assert entry["dry_run_required"] is True
+        assert str(entry["runbook"]).strip()

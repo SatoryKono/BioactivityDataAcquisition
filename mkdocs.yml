@@ -133,6 +133,7 @@ nav:
     -   "Project Rules":
             -   "RULES": 00-project/RULES.md
             -   "Requirements": 01-requirements/REQUIREMENTS.md
+            -   "Requirements Traceability Crosswalk": 01-requirements/traceability/requirements-traceability-crosswalk.md
             -   "Rules Summary": 00-project/rules-summary.md
             -   "Glossary": 00-project/glossary.md
             -   "Tools Hub": 00-project/TOOLS.md
@@ -145,6 +146,8 @@ nav:
                     -   "Docs Publication Policy": 00-project/governance/06-doc-publication-policy.md
                     -   "Docs Navigation Policy": 00-project/governance/07-doc-nav-policy.md
                     -   "Debt Ownership Playbook": 00-project/governance/08-debt-ownership-playbook.md
+                    -   "Governance Sync Audit 2026-06-25": 00-project/governance/governance-sync-audit-2026-06-25.md
+                    -   "Qodo Governance Mirror": 00-project/governance/qodo/README.md
     -   Architecture:
             -   "Overview": 02-architecture/00-overview.md
             -   "Current State Inventory": 02-architecture/current-state-inventory.md
