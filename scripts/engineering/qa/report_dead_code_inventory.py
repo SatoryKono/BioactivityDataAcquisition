@@ -159,6 +159,10 @@ ZERO_IMPORT_OWNER_TEST_EVIDENCE: dict[str, dict[str, object]] = {
             "tests/unit/composition/bootstrap/runtime/test_composite_support_service_builders.py",
         ),
     },
+    "src/bioetl/application/core/wiring/_lazy_export_facade.py": {
+        "evidence_lane": "canonical_owner_contract",
+        "owner_tests": ("tests/architecture/test_tech_debt_issue_5647_closeout.py",),
+    },
 }
 
 NON_STATIC_REACHABILITY_DISPOSITIONS = frozenset(

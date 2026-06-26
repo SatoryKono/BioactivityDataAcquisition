@@ -62,7 +62,7 @@ def test_issue_5642_adapter_duplication_is_below_opening_baseline() -> None:
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
 
-    assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] == 67
+    assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] == 63
     assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] < 70
 
 
@@ -70,9 +70,9 @@ def test_issue_5643_pipeline_and_cli_duplication_are_below_opening_baselines() -
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
 
-    assert by_target["src/bioetl/application/pipelines"]["duplicate_count"] == 18
+    assert by_target["src/bioetl/application/pipelines"]["duplicate_count"] == 17
     assert by_target["src/bioetl/application/pipelines"]["duplicate_count"] < 20
-    assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] == 3
+    assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] == 2
     assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] < 5
 
 
@@ -89,7 +89,7 @@ def test_issue_5645_hotspot_warning_count_is_ratcheted_down() -> None:
     scorecard_family = scorecard_families["composition_runtime_builders"]
     hotspot_gate = _gate(gates, "hotspot_family_baseline_budget_warnings")
 
-    assert baseline["summary"]["budget_warnings"] == 7
+    assert baseline["summary"]["budget_warnings"] == 6
     assert baseline["summary"]["budget_warnings"] < 8
     assert baseline_family["files_ge_250_loc"] == 1
     assert baseline_family["max_internal_fan_in"] == 5

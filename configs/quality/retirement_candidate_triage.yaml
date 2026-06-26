@@ -105,6 +105,15 @@ repo_wide_zero_import_classification:
     review_by: '2026-09-14'
     linked_issue: '#4541'
     rationale: Port owner module for resilience; imports now go through bioetl.domain.ports facade per REQ-ARCH-027
+  - module_path: src/bioetl/application/core/wiring/_lazy_export_facade.py
+    module_name: bioetl.application.core.wiring._lazy_export_facade
+    disposition: retain_canonical_owner_module
+    reviewed_on: '2026-06-26'
+    review_by: '2026-09-26'
+    linked_issue: '#5647'
+    rationale: Shared lazy-export helpers for composition wiring facades; extracted as reusable module for lazy-export helper unification
+    owner_test_paths:
+    - tests/architecture/test_tech_debt_issue_5647_closeout.py
 families:
 - name: adapter_layer
   owner: '@bioetl-platform'
