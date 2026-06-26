@@ -8,7 +8,7 @@
     },
     "module_coverage_inventory": {
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "a01cd5773302a5f54b963fdc895d031666742c308c656559fdd4ab7686a40d98",
+      "source_tree_sha256": "b04db14021889784a9d6664c35b9de20eeba942d4c5be28e0c9881807f59fc99",
       "coverage_xml_sha256": "688fdd5cf7e086bb0ac2178265406f9e8395532fb1067e9e6e2fc0c7b5e1632a"
     },
     "compatibility_importer_census": {
@@ -34,6 +34,20 @@
       "dashboarded_without_emission_count": 0,
       "dashboarded_without_declaration_count": 0
     },
+    "duplication_baseline": {
+      "path": "reports/quality/full-app-duplication-baseline.json",
+      "snapshot_date": "2026-06-26",
+      "total_duplicate_clusters": 95
+    },
+    "hotspot_family_baseline": {
+      "path": "reports/quality/hotspot-family-baseline.json",
+      "snapshot_date": "2026-06-01",
+      "budget_warnings": 8
+    },
+    "test_governance_report": {
+      "path": "reports/quality/test-governance-current.json",
+      "compatibility_test_files": 25
+    },
     "adr_enforcement_matrix": {
       "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload",
       "generated_artifact": "reports/quality/adr-enforcement-matrix.json",
@@ -42,15 +56,15 @@
     }
   },
   "weights_sum": 1.0,
-  "integral_score": 7.98,
+  "integral_score": 8.24,
   "interpretation": "satisfactory_system_refactoring_required",
   "categories": [
     {
       "id": "layer_compliance",
       "name": "Layer compliance",
       "weight": 0.13,
-      "score": 9.2,
-      "weighted_score": 1.196,
+      "score": 9.5,
+      "weighted_score": 1.235,
       "evidence_metrics": {
         "layer_violations": 0
       }
@@ -59,8 +73,8 @@
       "id": "hexagonal_ports_adapters",
       "name": "Hexagonal / Ports & Adapters",
       "weight": 0.11,
-      "score": 8.4,
-      "weighted_score": 0.924,
+      "score": 8.6,
+      "weighted_score": 0.946,
       "evidence_metrics": {
         "layer_violations": 0,
         "retained_entrypoint_count": 12
@@ -70,8 +84,8 @@
       "id": "ddd_invariants",
       "name": "DDD / aggregates / invariants",
       "weight": 0.09,
-      "score": 8.0,
-      "weighted_score": 0.72,
+      "score": 9.0,
+      "weighted_score": 0.81,
       "evidence_metrics": {
         "source_module_count": 2180,
         "uncovered_module_count": 0
@@ -92,19 +106,21 @@
       "id": "module_boundaries_coupling",
       "name": "Module boundaries / coupling",
       "weight": 0.14,
-      "score": 7.0,
-      "weighted_score": 0.98,
+      "score": 6.3,
+      "weighted_score": 0.882,
       "evidence_metrics": {
         "source_module_count": 2180,
-        "hotspot_family_count": 5
+        "hotspot_family_count": 5,
+        "hotspot_budget_warning_count": 8,
+        "total_duplicate_clusters": 95
       }
     },
     {
       "id": "naming_package_consistency",
       "name": "Naming / package consistency",
       "weight": 0.08,
-      "score": 7.5,
-      "weighted_score": 0.6,
+      "score": 8.1,
+      "weighted_score": 0.648,
       "evidence_metrics": {
         "retained_entrypoint_count": 12,
         "twin_pair_count": 0
@@ -114,19 +130,20 @@
       "id": "test_strategy_testability",
       "name": "Test strategy / testability",
       "weight": 0.12,
-      "score": 7.4,
-      "weighted_score": 0.888,
+      "score": 8.3,
+      "weighted_score": 0.996,
       "evidence_metrics": {
         "unmeasured_module_count": 0,
-        "uncovered_module_count": 0
+        "uncovered_module_count": 0,
+        "compatibility_test_file_count": 25
       }
     },
     {
       "id": "config_contracts_entrypoints",
       "name": "Config / contracts / entrypoints",
       "weight": 0.09,
-      "score": 8.5,
-      "weighted_score": 0.765,
+      "score": 9.2,
+      "weighted_score": 0.828,
       "evidence_metrics": {
         "contract_blocking_issue_count": 0,
         "dq_blocking_issue_count": 0,
@@ -137,8 +154,8 @@
       "id": "determinism_replay_observability",
       "name": "Determinism / replay / observability",
       "weight": 0.08,
-      "score": 8.2,
-      "weighted_score": 0.656,
+      "score": 9.0,
+      "weighted_score": 0.72,
       "evidence_metrics": {
         "layer_violations": 0,
         "contract_blocking_issue_count": 0,
@@ -152,11 +169,13 @@
       "id": "debt_burden_evolution_friction",
       "name": "Debt burden / evolution friction",
       "weight": 0.06,
-      "score": 7.5,
-      "weighted_score": 0.45,
+      "score": 6.2,
+      "weighted_score": 0.372,
       "evidence_metrics": {
         "retained_entrypoint_count": 12,
-        "repo_wide_untriaged_zero_import_candidate_count": 0
+        "repo_wide_untriaged_zero_import_candidate_count": 0,
+        "hotspot_budget_warning_count": 8,
+        "total_duplicate_clusters": 95
       }
     }
   ],
@@ -166,9 +185,12 @@
     "unmeasured_module_count": 0,
     "uncovered_module_count": 0,
     "hotspot_family_count": 5,
+    "hotspot_budget_warning_count": 8,
+    "total_duplicate_clusters": 95,
     "retained_entrypoint_count": 12,
     "retained_public_export_facade_count": 4,
     "twin_pair_count": 0,
+    "compatibility_test_file_count": 25,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
     "contract_blocking_issue_count": 0,
     "dq_blocking_issue_count": 0,

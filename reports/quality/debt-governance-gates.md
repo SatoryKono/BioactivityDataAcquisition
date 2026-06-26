@@ -7,7 +7,7 @@
 - warn_count: 1
 - fail_count: 0
 - release_gate_status: `warning`
-- architecture_quality_scorecard_integral_score: `7.98`
+- architecture_quality_scorecard_integral_score: `8.24`
 - architecture_quality_scorecard_interpretation: `satisfactory_system_refactoring_required`
 
 | gate | status | metric | current | limit | source |
@@ -15,7 +15,7 @@
 | `debt_scorecard_budget_violations` | `pass` | `violation_count` | `0` | `0` | `configs/quality/debt_scorecard.yaml` |
 | `retained_public_entrypoint_burden` | `pass` | `current_count` | `12` | `12` | `configs/quality/debt_scorecard.yaml#compatibility_debt_metrics` |
 | `debt_budget_growth_policy` | `pass` | `budget_growth_allowed` | `False` | `False` | `configs/quality/debt_scorecard.yaml` |
-| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `a22723b8578b35550c52d2934d44e970f41066b7c84640517f26dcaaeb0e3f76` | `a22723b8578b35550c52d2934d44e970f41066b7c84640517f26dcaaeb0e3f76` | `reports/quality/module-coverage-inventory.json` |
+| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `8c23bc62904f5495ed90a69e2d8191b0db5a3aac6f71a329cc91989925f2dad1` | `8c23bc62904f5495ed90a69e2d8191b0db5a3aac6f71a329cc91989925f2dad1` | `reports/quality/module-coverage-inventory.json` |
 | `module_coverage_unmeasured_modules` | `pass` | `unmeasured_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `module_coverage_uncovered_modules` | `pass` | `uncovered_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `hotspot_family_baseline_budget_warnings` | `warn` | `budget_warnings` | `8` | `0` | `reports/quality/hotspot-family-baseline.json` |

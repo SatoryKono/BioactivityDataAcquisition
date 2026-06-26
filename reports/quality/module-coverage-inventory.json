@@ -18393,7 +18393,7 @@
       "missing_lines": 7,
       "module": "bioetl.infrastructure.quality.architecture_quality_scorecard",
       "path": "src/bioetl/infrastructure/quality/architecture_quality_scorecard.py",
-      "source_lines": 386
+      "source_lines": 544
     },
     {
       "coverage_percent": 92.68,
@@ -19783,7 +19783,7 @@
       "missing_lines": 2,
       "module": "bioetl.infrastructure.storage.silver.delta_write_execution",
       "path": "src/bioetl/infrastructure/storage/silver/delta_write_execution.py",
-      "source_lines": 119
+      "source_lines": 168
     },
     {
       "coverage_percent": 76.71,
@@ -21808,7 +21808,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-22",
-  "source_tree_sha256": "a01cd5773302a5f54b963fdc895d031666742c308c656559fdd4ab7686a40d98",
+  "source_tree_sha256": "b04db14021889784a9d6664c35b9de20eeba942d4c5be28e0c9881807f59fc99",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

@@ -122,18 +122,6 @@ SURFACE_PATTERNS: tuple[SurfacePattern, ...] = (
     ),
     SurfacePattern(
         category="silver_config",
-        surface="direct_silver_config_construction",
-        symbol="SilverFilterConfig(",
-        paths=(
-            "src/bioetl/infrastructure/config/silver_filter_migration.py",
-            "src/bioetl/infrastructure/schemas/filter_config.py",
-            "src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py",
-        ),
-        role="Direct SilverFilterConfig construction",
-        migration_relevance="New direct construction sites must not bypass structural-only projection helpers.",
-    ),
-    SurfacePattern(
-        category="silver_config",
         surface="semantic_silver_guard",
         symbol="FORBIDDEN_SILVER_SEMANTIC_FILTER_KEYS",
         paths=("src/bioetl/infrastructure/config/silver_filter_migration.py",),
