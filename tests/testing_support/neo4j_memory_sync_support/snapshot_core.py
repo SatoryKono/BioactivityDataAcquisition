@@ -8,10 +8,13 @@ import pytest
 
 from .common import *  # noqa: F403
 
-pytestmark = pytest.mark.skipif(
-    sys.platform.startswith("win"),
-    reason="Snapshot tests require full repo walk which is prohibitively slow on Windows",
-)
+
+@pytest.fixture(autouse=True)
+def _skip_snapshot_core_on_windows() -> None:
+    if sys.platform.startswith("win"):
+        pytest.skip(
+            "Snapshot tests require full repo walk which is prohibitively slow on Windows"
+        )
 
 
 def _assert_node_keys_present(

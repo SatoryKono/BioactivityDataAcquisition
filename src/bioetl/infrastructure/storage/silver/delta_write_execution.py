@@ -3,12 +3,16 @@
 from __future__ import annotations
 
 import asyncio
+import json
+import subprocess
+import sys
 import threading
 from collections.abc import Callable
 from contextlib import suppress
 from dataclasses import replace
 from typing import Any, cast
 
+import pyarrow as pa
 from deltalake import DeltaTable as DeltaTableType
 
 from bioetl.domain.medallion import SilverWriteMode
@@ -23,6 +27,27 @@ __all__ = [
     "_load_delta_table",
     "_write_plain_delta_request",
 ]
+
+_PLAIN_DELTA_WRITE_SUBPROCESS_CODE = (
+    "import json\n"
+    "import sys\n"
+    "import pyarrow as pa\n"
+    "import pyarrow.ipc as ipc\n"
+    "from deltalake import write_deltalake\n"
+    "metadata = json.loads(sys.argv[1])\n"
+    "table = ipc.open_stream(pa.py_buffer(sys.stdin.buffer.read())).read_all()\n"
+    "kwargs = {\n"
+    "    'table_or_uri': metadata['table_or_uri'],\n"
+    "    'data': table,\n"
+    "    'mode': metadata['mode'],\n"
+    "}\n"
+    "if metadata.get('partition_by') is not None:\n"
+    "    kwargs['partition_by'] = metadata['partition_by']\n"
+    "if metadata.get('schema_mode') is not None:\n"
+    "    kwargs['schema_mode'] = metadata['schema_mode']\n"
+    "write_deltalake(**kwargs)\n"
+)
+
 
 async def _await_blocking_deltalake_call[BlockingResult](
     *,
@@ -93,6 +118,57 @@ def _build_plain_delta_write_kwargs(
     return kwargs
 
 
+def _serialize_arrow_table_for_subprocess(table: pa.Table) -> bytes:
+    """Serialize an Arrow table for a one-shot Delta writer subprocess."""
+    sink = pa.BufferOutputStream()
+    with pa.ipc.new_stream(sink, table.schema) as writer:
+        writer.write_table(table)
+    return sink.getvalue().to_pybytes()
+
+
+def _decode_subprocess_output(payload: bytes) -> str:
+    """Decode bounded subprocess output for deterministic error messages."""
+    return payload.decode("utf-8", errors="replace").strip()[-4000:]
+
+
+def _run_plain_delta_write_subprocess(
+    *,
+    kwargs: dict[str, Any],  # Any: Delta Lake write kwargs are heterogeneous
+    arrow_data: pa.Table,
+    timeout_seconds: float,
+) -> None:
+    """Execute one plain Delta write in a child process.
+
+    This path is used by Windows E2E runs where a hung delta-rs native call can
+    outlive Python thread timeouts. The child process keeps the timeout
+    enforceable without changing the default production write path.
+    """
+    metadata = {key: value for key, value in kwargs.items() if key != "data"}
+    try:
+        completed = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                _PLAIN_DELTA_WRITE_SUBPROCESS_CODE,
+                json.dumps(metadata),
+            ],
+            input=_serialize_arrow_table_for_subprocess(arrow_data),
+            capture_output=True,
+            check=False,
+            timeout=timeout_seconds,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise TimeoutError from exc
+
+    if completed.returncode != 0:
+        stderr = _decode_subprocess_output(completed.stderr)
+        stdout = _decode_subprocess_output(completed.stdout)
+        raise RuntimeError(
+            "Delta write subprocess failed "
+            f"(exit_code={completed.returncode}, stderr={stderr!r}, stdout={stdout!r})"
+        )
+
+
 async def _write_plain_delta_request(
     *,
     load_module: Callable[[], Any],  # Any: lazy-loaded deltalake module
@@ -100,6 +176,7 @@ async def _write_plain_delta_request(
     mode: str,
     schema_mode: str | None = None,
     timeout_seconds: float = 60.0,
+    process_isolation: bool = False,
 ) -> None:
     """Execute a non-merge Delta write for an already prepared request."""
     kwargs = _build_plain_delta_write_kwargs(
@@ -108,6 +185,17 @@ async def _write_plain_delta_request(
         schema_mode=schema_mode,
     )
     try:
+        if process_isolation:
+            await _await_blocking_deltalake_call(
+                operation_name="plain-write-subprocess",
+                call=lambda: _run_plain_delta_write_subprocess(
+                    kwargs=kwargs,
+                    arrow_data=request.arrow_data,
+                    timeout_seconds=timeout_seconds,
+                ),
+                timeout_seconds=timeout_seconds + 5.0,
+            )
+            return
         await _await_blocking_deltalake_call(
             operation_name="plain-write",
             call=lambda: load_module().write_deltalake(**kwargs),

@@ -543,6 +543,23 @@ def test_complexity_analysis_reuses_declared_surface_metrics_without_ast_parsing
     assert candidate.properties["helper_call_count"] == 4
 
 
+def test_analysis_source_text_timeout_degrades_to_empty_marker_context(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    from memory.graph.sync_pkg import _core as sync_core
+
+    def _raise_timeout(_path):
+        raise TimeoutError("slow cloud-synced read")
+
+    monkeypatch.setattr(sync_core, "_read_analysis_source_text", _raise_timeout)
+
+    text_cache: dict[str, str] = {}
+    source_path = "src/a.py"
+    assert sync_core._analysis_read_source_text(tmp_path, source_path, text_cache) == ""
+    assert text_cache[source_path] == ""
+
+
 def test_neo4j_http_client_distinguishes_query_runtime_http_errors(monkeypatch) -> None:
     def _raise_http_error(_req: object, _timeout: int = 60) -> object:
         raise error.HTTPError(

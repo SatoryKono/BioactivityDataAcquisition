@@ -9,6 +9,9 @@ from bioetl.composition.factories.pipeline._registry_factory_catalog import (
     LazyFactoryCatalog,
     list_pipeline_names,
 )
+from bioetl.composition.factories.pipeline.registry_manifest import (
+    PIPELINE_CONFIGS as PIPELINE_CONFIGS,
+)
 from bioetl.composition.factories.pipeline.registry_core import (
     PipelineDefinition as PipelineDefinition,
     PipelineRegistry as PipelineRegistry,
