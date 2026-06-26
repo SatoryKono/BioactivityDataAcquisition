@@ -1,0 +1,2 @@
+test_nodeid,total_runs,intermittent_fails,flaky_index,triage_status,suspected_cause
+tests/architecture/test_compatibility_facade_inventory.py::test_inventory_doc_tables_match_yaml_registry,5,1,0.2,manual-review,Data mismatch
