@@ -1,7 +1,7 @@
 ______________________________________________________________________
 
-Version: 6.1.3
-Last verified: 2026-06-16
+Version: 6.1.4
+Last verified: 2026-06-25
 Status: active
 Class: published
 Owner: BioETL Team
@@ -330,6 +330,22 @@ Lock key включает тип запуска:
 | `INCREMENTAL` | ❌ MUST NOT  | ❌ MUST NOT | Merge/Upsert, сохранение данных |
 
 **Инвариант Medallion**: Incremental runs **MUST NOT** вызывать `clear-silver()` или `clear-gold()`. Нарушение этого правила приводит к потере данных.
+
+#### 2.4.3. Pipeline ID Governance
+
+Публичный pipeline ID для CLI, config, metrics, locks и published run artifacts
+остается в формате `<provider>_<entity>`.
+
+- **Canonical runtime policy**: текущий repo-wide runtime/config corpus использует
+  `chembl_activity`, `pubchem_compound`, `uniprot_protein` и аналогичные
+  underscore IDs как стабильные внешние идентификаторы.
+- **Conflict guardrail**: legacy/external wording `<entity>_<source>` не
+  считается санкционированной альтернативой для текущего runtime. Массовое
+  переименование, ввод третьего варианта или смешивание схем именования
+  запрещены без отдельного ADR и migration plan.
+- **Controlled resolution scope**: любой approved rename **MUST** покрывать
+  configs, CLI, metrics, locks, paths, docs и migration aliases в одном
+  change set.
 
 **Реализация:**
 
@@ -783,7 +799,7 @@ pmid → pmid → pubmed-id
 - **Trigger**: 5 последовательных ошибок соединения/таймаута.
 - **Open Duration**: 5 минут (configurable: `circuit-breaker.recovery-timeout`).
 - **Recovery**: Half-Open → 1 пробный запрос. Success → Closed, Failure → Open +5 мин.
-- **Observability**: Метрики `circuit-breaker-state` (0=Closed, 1=Half-Open, 2=Open), `trips-total`. Алерт при зависании в Open > 10 мин.
+- **Observability**: Метрики `bioetl_circuit_breaker_state` (0=Closed, 1=Half-Open, 2=Open), `bioetl_circuit_breaker_trips_total`. Алерт при зависании в Open > 10 мин.
 
 ### 3.2. Наблюдаемость (Observability)
 
@@ -894,10 +910,10 @@ pmid → pmid → pubmed-id
 
 Метрики экспортируются в формате Prometheus с использованием лейблов для агрегации (`pipeline`, `entity`, `column`, `check`):
 
-- `dq-validation-score{check="null-rate", column="..."}`: % NULL значений.
-- `dq-validation-score{check="unique-count", column="..."}`: кардинальность.
-- `dq-validation-score{check="schema-violations", column="all"}`: кол-во невалидных записей.
-- `data-freshness-seconds`: разница между `now()` и `max(updated-at)`.
+- `bioetl_dq_validation_score{check="null-rate", column="..."}`: % NULL значений.
+- `bioetl_dq_validation_score{check="unique-count", column="..."}`: кардинальность.
+- `bioetl_dq_validation_score{check="schema-violations", column="all"}`: кол-во невалидных записей.
+- `bioetl_data_freshness_seconds`: разница между `now()` и `max(updated-at)`.
 
 ### 3.4.1. Детекция Аномалий DQ
 
@@ -923,7 +939,7 @@ pmid → pmid → pubmed-id
 | Unhealthy | ≥3 errors или health_check fail | Pause pipeline, Alert P2  |
 
 **Recovery**: Unhealthy → Degraded после 1 успешного health_check.
-**Metric**: `provider-health-status{provider}` (0=Unhealthy, 1=Degraded, 2=Healthy).
+**Metric**: `bioetl_provider_health_status{provider}` (0=Unhealthy, 1=Degraded, 2=Healthy).
 
 ## 4. Стандарты Кода и Тестирование
 
@@ -941,6 +957,14 @@ pmid → pmid → pubmed-id
 ### 4.1.1. Унифицированный HTTP-клиент (UnifiedHTTPClient)
 
 **Все HTTP-адаптеры используют единую инфраструктуру для HTTP-запросов.**
+
+`UnifiedHTTPClient` является каноническим runtime именем. Формулировка
+`UnifiedAPIClient` из legacy/helper surfaces не даёт права создавать второй
+клиент того же смысла. Разрешены только:
+
+1. использование текущего `UnifiedHTTPClient`;
+1. controlled rename через ADR с migration plan и удалением superseded
+   implementation.
 
 | Адаптер                  | Базовый класс     | HTTP-клиент              | Статус            |
 | ------------------------ | ----------------- | ------------------------ | ----------------- |
@@ -1958,6 +1982,7 @@ fields:
 
 ## История Изменений (Changelog)
 
+- **6.1.4** (2026-06-25): Governance closure follow-up. Явно закреплены policy guardrails для pipeline IDs (`<provider>_<entity>` как current stable external identifier, конфликтующее legacy wording `<entity>_<source>` запрещено без ADR/migration plan) и для HTTP abstraction naming (`UnifiedHTTPClient` как единственный sanctioned runtime client, `UnifiedAPIClient` допустим только как controlled rename через ADR).
 - **5.28** (2026-06-16): ADR Registry Governance Sync. Приложение F и generated ADR registry mirrors синхронизированы через ADR-050; published appendix теперь перечисляет ADR-049/050, а generated registry surfaces явно помечены как derived mirrors с canonical owner в `decisions/README.md`.
 - **5.27** (2026-05-26, updated 2026-06-22): Domain Schema Boundary Sync. Добавлен ADR-048 и закреплено, что Pandera/Pandas допустимы в domain только как schema-contract representation под `domain/schemas` и `domain/contracts`; runtime Pandera monkeypatching retired, а retained bootstrap seam теперь выполняет только explicit validation без package import side effects.
 - **5.26** (2026-05-15): ADR Governance Sync. Приложение F синхронизировано с ADR-046/047 и теперь явно делегирует canonical live registry в `decisions/README.md` и `adr-registry.md`. Исправлен generated ADR registry status parsing для explicit `Status:` metadata; `mkdocs.yml` синхронизирован с активной `scripts.docs check-links` guardrail surface.

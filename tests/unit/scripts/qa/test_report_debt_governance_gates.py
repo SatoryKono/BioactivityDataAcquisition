@@ -65,8 +65,8 @@ def test_module_coverage_source_tree_hash_gate_fails_for_stale_inventory(
 ) -> None:
     monkeypatch.setattr(
         gates,
-        "compute_source_tree_sha256",
-        lambda *, repo_root: "live-source-hash",
+        "_refresh_existing_inventory_source_tree",
+        lambda payload, *, repo_root: {"source_tree_sha256": "live-source-hash"},
     )
 
     gate = gates._module_coverage_source_tree_hash_gate(
@@ -85,8 +85,8 @@ def test_module_coverage_source_tree_hash_gate_passes_for_current_inventory(
 ) -> None:
     monkeypatch.setattr(
         gates,
-        "compute_source_tree_sha256",
-        lambda *, repo_root: "live-source-hash",
+        "_refresh_existing_inventory_source_tree",
+        lambda payload, *, repo_root: {"source_tree_sha256": "live-source-hash"},
     )
 
     gate = gates._module_coverage_source_tree_hash_gate(
@@ -124,8 +124,8 @@ def test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stal
 ) -> None:
     monkeypatch.setattr(
         gates,
-        "compute_source_tree_sha256",
-        lambda *, repo_root: "stale-source-hash",
+        "_refresh_existing_inventory_source_tree",
+        lambda payload, *, repo_root: {"source_tree_sha256": "stale-source-hash"},
     )
 
     payload = gates.build_payload(repo_root=gates.PROJECT_ROOT)
@@ -144,8 +144,8 @@ def test_build_payload_treats_remote_main_baseline_builder_failure_as_stale_arti
 ) -> None:
     monkeypatch.setattr(
         gates,
-        "compute_source_tree_sha256",
-        lambda *, repo_root: "live-source-hash",
+        "_refresh_existing_inventory_source_tree",
+        lambda payload, *, repo_root: {"source_tree_sha256": "live-source-hash"},
     )
     monkeypatch.setattr(
         gates.report_architecture_debt_remote_main_baseline,
@@ -196,6 +196,34 @@ def test_render_markdown_separates_weighted_score_from_release_gate_status() -> 
 
     assert "release_gate_status: `failing`" in markdown
     assert "architecture_quality_scorecard_integral_score: `7.98`" in markdown
+
+
+def test_check_artifacts_can_skip_artifact_comparison_for_changed_path_gate(
+    tmp_path,
+) -> None:
+    payload = {
+        "summary": {
+            "gate_count": 1,
+            "pass_count": 1,
+            "warn_count": 0,
+            "fail_count": 0,
+            "release_gate_status": "passing",
+            "architecture_quality_scorecard_integral_score": 7.98,
+            "architecture_quality_scorecard_interpretation": (
+                "satisfactory_system_refactoring_required"
+            ),
+        },
+        "gates": [],
+    }
+
+    errors = gates._check_artifacts(
+        payload,
+        json_out=tmp_path / "missing.json",
+        md_out=tmp_path / "missing.md",
+        compare_artifacts=False,
+    )
+
+    assert errors == []
 
 
 def test_observability_touched_metric_review_gate_passes_without_metric_changes() -> (

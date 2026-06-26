@@ -43,19 +43,17 @@ __all__ = [
     "_resolve_silver_filter_error_code",
     "_show_quarantine_stats",
     "_show_quarantine_stats_for_cli_options",
+    "_show_quarantine_stats_for_pipeline_cli_options",
 ]
 
 
 class _QuarantineRuntimeService(Protocol):
-    """Protocol for quarantine runtime service methods used by CLI."""
-
     async def inspect(
         self,
         limit: int,
         error_code: str | None = None,
         run_id: str | None = None,
     ) -> list[JsonDict]:
-        """Return quarantined records."""
         ...
 
     async def get_stats(
@@ -63,13 +61,10 @@ class _QuarantineRuntimeService(Protocol):
         error_code: str | None = None,
         run_id: str | None = None,
     ) -> JsonDict:
-        """Return aggregate quarantine statistics."""
         ...
 
 
 class _QuarantineService(Protocol):
-    """Protocol for quarantine service methods used by CLI."""
-
     def replay(
         self,
         *,
@@ -77,30 +72,23 @@ class _QuarantineService(Protocol):
         error_code: str | None,
         max_age_days: int,
     ) -> list[JsonDict]:
-        """Find records eligible for replay."""
         ...
 
     def mark_as_reprocessed(self, records: list[JsonDict]) -> int:
-        """Mark replay candidates as reprocessed."""
         ...
 
     async def get_stats(self, pipeline: str) -> JsonDict:
-        """Return stats for purge preview."""
         ...
 
     def purge(self, *, pipeline: str, older_than_days: int) -> int:
-        """Purge old quarantine records."""
         ...
 
     def update_status(self, payload_hash: str, status: QuarantineRecordStatus) -> bool:
-        """Update one quarantine record status."""
         ...
 
 
 @dataclass(frozen=True, slots=True)
 class _QuarantineCommandContext:
-    """Shared execution context for one quarantine CLI command."""
-
     pipeline: str
 
     def run_async(
@@ -111,7 +99,6 @@ class _QuarantineCommandContext:
         domain_error_title: str,
         unexpected_error_title: str,
     ) -> _T | None:
-        """Run one async quarantine operation with a consistent policy."""
         return run_quarantine_async(
             coro,
             policy=self._build_policy(
@@ -129,7 +116,6 @@ class _QuarantineCommandContext:
         domain_error_title: str,
         unexpected_error_title: str,
     ) -> _T | None:
-        """Run one sync quarantine operation with a consistent policy."""
         return run_quarantine_sync(
             fn,
             policy=self._build_policy(
@@ -146,7 +132,6 @@ class _QuarantineCommandContext:
         domain_error_title: str,
         unexpected_error_title: str,
     ) -> QuarantineExecutionPolicy:
-        """Build the shared execution policy for one operation."""
         return QuarantineExecutionPolicy(
             pipeline=self.pipeline,
             reason_prefix=reason_prefix,
@@ -162,7 +147,6 @@ def _render_stats_dashboard(
     top: int,
     group_by: str | None,
 ) -> None:
-    """Render human-readable quarantine statistics."""
     for line in build_quarantine_grouped_lines(
         stats,
         pipeline=pipeline,
@@ -178,7 +162,6 @@ def _resolve_silver_filter_error_code(
     error_code: str | None,
     silver_filter_error_code: str,
 ) -> str | None:
-    """Resolve the effective quarantine error code for the legacy silver alias."""
     return silver_filter_error_code if silver_filter_only else error_code
 
 
@@ -284,6 +267,33 @@ def _show_quarantine_stats_for_cli_options(
     )
 
 
+def _show_quarantine_stats_for_pipeline_cli_options(
+    get_runtime_service: Callable[[str], _QuarantineRuntimeService],
+    get_run_manifest_service: Callable[[], RunManifestInspectionServiceProtocol],
+    *,
+    pipeline: str,
+    output_json: bool,
+    error_code: str | None,
+    silver_filter_only: bool,
+    silver_filter_error_code: str,
+    top: int = 10,
+    group_by: str | None = None,
+    run_id: str | None = None,
+) -> None:
+    _show_quarantine_stats_for_cli_options(
+        get_runtime_service(pipeline),
+        pipeline=pipeline,
+        output_json=output_json,
+        error_code=error_code,
+        silver_filter_only=silver_filter_only,
+        silver_filter_error_code=silver_filter_error_code,
+        top=top,
+        group_by=group_by,
+        run_id=run_id,
+        run_manifest_service=get_run_manifest_service() if run_id else None,
+    )
+
+
 def _replay_quarantine(
     service: _QuarantineService,
     *,
@@ -338,7 +348,6 @@ def _purge_quarantine(
     """Purge old quarantine records or preview the purge."""
     context = _QuarantineCommandContext(pipeline=pipeline)
     if dry_run:
-
         async def _get_stats() -> JsonDict:
             return await service.get_stats(pipeline)
 

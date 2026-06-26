@@ -1,4 +1,4 @@
-"""Guardrails for active checkpoint compatibility policy surfaces."""
+"""Guardrails for active checkpoint policy surfaces."""
 
 from __future__ import annotations
 
@@ -49,6 +49,6 @@ def test_active_checkpoint_policy_surfaces_do_not_expose_removed_legacy_modes() 
                 violations.append(f"{path.relative_to(ROOT)}: {token}")
 
     assert not violations, (
-        "Active checkpoint compatibility surfaces must not expose removed legacy "
+        "Active checkpoint policy surfaces must not expose removed legacy "
         "modes:\n" + "\n".join(violations)
     )

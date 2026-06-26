@@ -51,10 +51,36 @@ if TYPE_CHECKING:
     from bioetl.domain.resilience import RetryConfig
     from bioetl.domain.types import RunID, RunType
 
-# Default timeout for E2E tests (seconds)
-# E2E tests run full pipelines with HTTP calls, Delta Lake operations,
-# and PyArrow imports which can be slow, especially on Python 3.14
-E2E_DEFAULT_TIMEOUT = 120
+def _resolve_e2e_default_timeout(*, platform: str = sys.platform) -> int:
+    """Return the platform-aware pytest timeout budget for one E2E test.
+
+    Windows runs need materially more headroom than the inner Silver Delta
+    timeout because pipeline bootstrap and Bronze staging can consume tens of
+    seconds before the bounded Delta write starts. The pytest timeout must stay
+    above the internal Delta budget so E2E failures surface as governed storage
+    errors instead of outer watchdog aborts.
+    """
+    if platform == "win32":
+        return 300
+    return 120
+
+
+def _resolve_e2e_merge_execution_timeout_seconds(
+    *,
+    platform: str = sys.platform,
+) -> int:
+    """Return the platform-aware inner Silver merge timeout for E2E runs."""
+    if platform == "win32":
+        return 180
+    return 90
+
+
+# Default timeout for E2E tests (seconds).
+# E2E tests run full pipelines with HTTP calls, Delta Lake operations, and
+# PyArrow imports. Keep the outer pytest budget above the inner bounded Delta
+# timeout so storage failures raise deterministic domain errors before the test
+# watchdog interrupts the event loop.
+E2E_DEFAULT_TIMEOUT = _resolve_e2e_default_timeout()
 _TRANSIENT_EXTERNAL_ERROR_MARKERS: tuple[str, ...] = (
     "429",
     "500",
@@ -140,6 +166,10 @@ def _load_pyarrow_parquet() -> Any:
     return pq
 
 
+class E2EDeltaTableCorruptionError(RuntimeError):
+    """Raised when the E2E harness cannot trust the local Delta log state."""
+
+
 def _prefer_active_parquet_delta_reads(*, platform: str = sys.platform) -> bool:
     """Return whether E2E Delta assertions should bypass DeltaTable Arrow scans."""
     return platform == "win32"
@@ -177,6 +207,23 @@ def _read_active_parquet_records(
     return cast(list[dict[str, Any]], pa.concat_tables(tables).to_pylist())
 
 
+def _read_active_parquet_records_from_delta_log(
+    table_path: Path,
+    columns: list[str] | None = None,
+) -> list[dict[str, Any]]:
+    """Read active parquet rows using only Delta log metadata."""
+    try:
+        table = _load_delta_table()(str(table_path))
+        return _read_active_parquet_records(table, columns)
+    except (KeyboardInterrupt, SystemExit):
+        raise
+    except BaseException as exc:
+        raise E2EDeltaTableCorruptionError(
+            "E2E Delta log fallback could not read active parquet files: "
+            f"path={table_path}; fallback_status=corrupt_delta_log"
+        ) from exc
+
+
 async def _read_delta_records(table_path: Path) -> list[dict[str, Any]]:
     """Read active Delta rows via the shared Delta scanner helper with timeout protection."""
     loop = asyncio.get_running_loop()
@@ -184,30 +231,34 @@ async def _read_delta_records(table_path: Path) -> list[dict[str, Any]]:
     # Use a shorter timeout for delta reads to prevent indefinite hangs
     # The default E2E timeout (120s) is for the whole test, but individual reads should be faster
     DELTA_READ_TIMEOUT = 30
+
+    def _read_records_with_primary_strategy() -> list[dict[str, Any]]:
+        table = _load_delta_table()(str(table_path))
+        if _prefer_active_parquet_delta_reads():
+            return _read_active_parquet_records_from_delta_log(table_path)
+        return _load_delta_record_reader()(table)
+
     try:
         return await asyncio.wait_for(
-            loop.run_in_executor(
-                None,
-                lambda: (
-                    (
-                        _read_active_parquet_records(table)
-                        if _prefer_active_parquet_delta_reads()
-                        else _load_delta_record_reader()(table)
-                    )
-                    if (table := _load_delta_table()(str(table_path)))
-                    else []
-                ),
-            ),
+            loop.run_in_executor(None, _read_records_with_primary_strategy),
             timeout=DELTA_READ_TIMEOUT,
         )
     except TimeoutError as exc:
         delta_log_present = (table_path / "_delta_log").exists()
+        fallback_records = await loop.run_in_executor(
+            None,
+            lambda: _read_active_parquet_records_from_delta_log(table_path),
+        )
+        if fallback_records:
+            return fallback_records
+
         raise TimeoutError(
             f"Delta table read timed out after {DELTA_READ_TIMEOUT}s at {table_path}. "
             "This is a bounded local Delta-read timeout, not an empty-table "
             "assertion. "
             f"delta_log_present={delta_log_present}; "
             f"prefer_active_parquet={_prefer_active_parquet_delta_reads()}. "
+            "fallback_status=delta_log_parquet_empty. "
             "Higher-level E2E helpers may recover via Bronze-backed fallback."
         ) from exc
 
@@ -303,7 +354,7 @@ def e2e_environment():
     os.environ.setdefault("BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__PROFILE", "e2e")
     os.environ.setdefault(
         "BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__E2E_EXECUTION_TIMEOUT_SECONDS",
-        "180",
+        str(_resolve_e2e_merge_execution_timeout_seconds()),
     )
     # Prevent shutil.get_terminal_size hangs in CI/Test environments
     os.environ["COLUMNS"] = "80"

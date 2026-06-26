@@ -438,7 +438,9 @@ def test_collect_root_review_evidence_skips_expensive_probes_for_local_only_surf
     monkeypatch.setattr(
         module,
         "_count_reference_hits",
-        lambda repo_root, path: (_ for _ in ()).throw(AssertionError("reference probe")),
+        lambda repo_root, path: (_ for _ in ()).throw(
+            AssertionError("reference probe")
+        ),
     )
 
     evidence = module.collect_root_review_evidence(tmp_path)
@@ -508,7 +510,12 @@ def test_build_cleanup_classification_report_distinguishes_policy_classes(
     )
 
     loaded = json.loads(report_path.read_text(encoding="utf-8"))
-    assert loaded["summary"] == {"BLOCKED": 1, "REVIEW_REQUIRED": 1, "SAFE": 1}
+    assert loaded["summary"] == {
+        "BLOCKED": 1,
+        "REVIEW_REQUIRED": 1,
+        "SAFE": 1,
+        "SECURITY_REVIEW_REQUIRED": 0,
+    }
     assert loaded["cleanup_candidates"][0]["classification"] == "SAFE"
     assert loaded["root_review_evidence"][0]["classification"] == "BLOCKED"
 
@@ -695,7 +702,9 @@ def test_collect_reports_workspace_evidence_skips_expensive_probes_for_local_pru
     monkeypatch.setattr(
         module,
         "_count_reference_hits",
-        lambda repo_root, path: (_ for _ in ()).throw(AssertionError("reference probe")),
+        lambda repo_root, path: (_ for _ in ()).throw(
+            AssertionError("reference probe")
+        ),
     )
 
     evidence = module.collect_reports_workspace_evidence(tmp_path)

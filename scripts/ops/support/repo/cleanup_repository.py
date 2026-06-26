@@ -23,7 +23,7 @@ import subprocess  # nosec B404
 import sys
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from functools import lru_cache
+from functools import cache
 from pathlib import Path
 
 import yaml
@@ -36,7 +36,9 @@ from scripts.engineering.repo._root_governance import (
     is_within_blocked_cleanup_zone,
     load_root_governance_policy,
 )
-from scripts.engineering.repo.audit_root_cleanliness import _is_forbidden_tracked_artifact
+from scripts.engineering.repo.audit_root_cleanliness import (
+    _is_forbidden_tracked_artifact,
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -149,6 +151,10 @@ class ReviewLaneEvidence:
     current_live_state: str
     canonical_path: Path | None
     action_if_reintroduced: str | None
+    owner: str | None
+    retention_class: str | None
+    retention_action: str | None
+    cleanup_policy: str | None
     exists: bool
     tracked: bool
     has_history: bool
@@ -234,7 +240,7 @@ def _git_path_has_history(repo_root: Path, path: Path) -> bool:
     return bool(completed.stdout.strip())
 
 
-@lru_cache(maxsize=None)
+@cache
 def _tracked_paths(repo_root: Path) -> list[str]:
     completed = _run_git(repo_root, "ls-files", "-z")
     return [
@@ -244,12 +250,12 @@ def _tracked_paths(repo_root: Path) -> list[str]:
     ]
 
 
-@lru_cache(maxsize=None)
+@cache
 def _tracked_path_set(repo_root: Path) -> set[str]:
     return set(_tracked_paths(repo_root))
 
 
-@lru_cache(maxsize=None)
+@cache
 def _tracked_ancestor_dirs(repo_root: Path) -> set[str]:
     ancestors: set[str] = set()
     for tracked_path in _tracked_paths(repo_root):
@@ -279,7 +285,7 @@ def _path_is_tracked_or_has_tracked_descendants(
     )
 
 
-@lru_cache(maxsize=None)
+@cache
 def _local_status_paths(repo_root: Path) -> list[str] | None:
     try:
         completed = subprocess.run(  # nosec
@@ -654,7 +660,7 @@ def _tracked_policy_candidates(repo_root: Path) -> list[CleanupCandidate]:
     return candidates
 
 
-@lru_cache(maxsize=None)
+@cache
 def _load_root_review_registry(repo_root: Path) -> dict[str, object]:
     return _load_yaml_object(repo_root / ROOT_HYGIENE_REVIEW_REGISTRY)
 
@@ -692,6 +698,7 @@ def _review_evidence_from_candidate(
     *,
     lane_id: str,
     classification: str,
+    lane_metadata: dict[str, object],
     candidate: dict[str, object],
 ) -> ReviewLaneEvidence | None:
     raw_path = candidate.get("path")
@@ -736,6 +743,42 @@ def _review_evidence_from_candidate(
             str(candidate.get("action_if_reintroduced"))
             if candidate.get("action_if_reintroduced") is not None
             else None
+        ),
+        owner=(
+            str(candidate.get("owner"))
+            if candidate.get("owner") is not None
+            else (
+                str(lane_metadata.get("owner"))
+                if lane_metadata.get("owner") is not None
+                else None
+            )
+        ),
+        retention_class=(
+            str(candidate.get("retention_class"))
+            if candidate.get("retention_class") is not None
+            else (
+                str(lane_metadata.get("retention_class"))
+                if lane_metadata.get("retention_class") is not None
+                else None
+            )
+        ),
+        retention_action=(
+            str(candidate.get("retention_action"))
+            if candidate.get("retention_action") is not None
+            else (
+                str(lane_metadata.get("retention_action"))
+                if lane_metadata.get("retention_action") is not None
+                else None
+            )
+        ),
+        cleanup_policy=(
+            str(candidate.get("cleanup_policy"))
+            if candidate.get("cleanup_policy") is not None
+            else (
+                str(lane_metadata.get("cleanup_policy"))
+                if lane_metadata.get("cleanup_policy") is not None
+                else None
+            )
         ),
         exists=exists,
         tracked=tracked,
@@ -789,6 +832,7 @@ def collect_root_review_evidence(repo_root: Path) -> list[ReviewLaneEvidence]:
                 tracked_ancestor_dirs,
                 lane_id=lane_id,
                 classification=classification,
+                lane_metadata=lane,
                 candidate=candidate,
             )
             if row is not None:
@@ -801,8 +845,8 @@ def collect_root_policy_mismatches(repo_root: Path) -> list[RootPolicyMismatch]:
     allowed_root_files = root_cleanliness._load_allowed_root_files(repo_root)
     structure_catalog = root_cleanliness._load_structure_catalog(repo_root)
     allowed_root_dirs = root_cleanliness._approved_root_directories(structure_catalog)
-    tracked_root_files, tracked_root_dirs = root_cleanliness._collect_tracked_root_entries(
-        tracked_paths
+    tracked_root_files, tracked_root_dirs = (
+        root_cleanliness._collect_tracked_root_entries(tracked_paths)
     )
     mismatches: list[RootPolicyMismatch] = []
     mismatch_specs = (
@@ -830,7 +874,7 @@ def collect_root_policy_mismatches(repo_root: Path) -> list[RootPolicyMismatch]:
     return sorted(mismatches, key=lambda item: (item.mismatch_type, item.rel_path))
 
 
-@lru_cache(maxsize=None)
+@cache
 def _load_generated_artifact_routes(repo_root: Path) -> list[dict[str, object]]:
     routing_path = repo_root / "configs" / "quality" / "generated_artifact_routing.yaml"
     if not routing_path.exists():
@@ -842,7 +886,7 @@ def _load_generated_artifact_routes(repo_root: Path) -> list[dict[str, object]]:
     return [route for route in routes if isinstance(route, dict)]
 
 
-@lru_cache(maxsize=None)
+@cache
 def _load_replay_safe_cleanup_entries(repo_root: Path) -> list[dict[str, object]]:
     inventory_path = repo_root / REPLAY_SAFE_CLEANUP_INVENTORY
     if not inventory_path.exists():
@@ -1013,9 +1057,13 @@ def _reports_workspace_row(
     tracked = _path_is_tracked_or_has_tracked_descendants(
         path, tracked_paths, tracked_ancestor_dirs
     )
-    skip_local_review_probes = exists and not tracked and (
-        classification == "PRUNE_CANDIDATE"
-        or _is_reports_retained_dir_transient_path(path)
+    skip_local_review_probes = (
+        exists
+        and not tracked
+        and (
+            classification == "PRUNE_CANDIDATE"
+            or _is_reports_retained_dir_transient_path(path)
+        )
     )
     age_days = (
         _artifact_age_days(repo_root / path, now=datetime.now(tz=UTC))
@@ -1237,6 +1285,8 @@ def _candidate_classification(candidate: CleanupCandidate) -> str:
 def _review_evidence_classification(row: ReviewLaneEvidence) -> str:
     if row.classification == "blocked_cleanup_zone":
         return "BLOCKED"
+    if row.classification == "security_review_required":
+        return "SECURITY_REVIEW_REQUIRED"
     return "REVIEW_REQUIRED"
 
 
@@ -1245,7 +1295,12 @@ def _summarize_classifications(
     candidates: list[CleanupCandidate],
     review_evidence: list[ReviewLaneEvidence],
 ) -> dict[str, int]:
-    summary = {"SAFE": 0, "REVIEW_REQUIRED": 0, "BLOCKED": 0}
+    summary = {
+        "SAFE": 0,
+        "REVIEW_REQUIRED": 0,
+        "SECURITY_REVIEW_REQUIRED": 0,
+        "BLOCKED": 0,
+    }
     for candidate in candidates:
         summary[_candidate_classification(candidate)] += 1
     for row in review_evidence:
@@ -1264,6 +1319,11 @@ def _summarize_root_review(
             1
             for row in review_evidence
             if _review_evidence_classification(row) == "REVIEW_REQUIRED"
+        ),
+        "SECURITY_REVIEW_REQUIRED": sum(
+            1
+            for row in review_evidence
+            if _review_evidence_classification(row) == "SECURITY_REVIEW_REQUIRED"
         ),
         "BLOCKED": sum(
             1
@@ -1328,6 +1388,10 @@ def build_cleanup_classification_report(
                 "cmp_status": row.cmp_status,
                 "reference_hits": row.reference_hits,
                 "action_if_reintroduced": row.action_if_reintroduced,
+                "owner": row.owner,
+                "retention_class": row.retention_class,
+                "retention_action": row.retention_action,
+                "cleanup_policy": row.cleanup_policy,
             }
             for row in review_evidence
         ],
@@ -1376,6 +1440,10 @@ def build_root_review_evidence_report(
                 "cmp_status": row.cmp_status,
                 "reference_hits": row.reference_hits,
                 "action_if_reintroduced": row.action_if_reintroduced,
+                "owner": row.owner,
+                "retention_class": row.retention_class,
+                "retention_action": row.retention_action,
+                "cleanup_policy": row.cleanup_policy,
             }
             for row in review_evidence
         ],

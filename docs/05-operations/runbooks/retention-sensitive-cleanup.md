@@ -75,13 +75,30 @@ operator checklist for destructive or semi-destructive cleanup paths. Any new
 cleanup path that can touch replay evidence must be added there before it is
 used operationally.
 
+Retention classes used by the inventory:
+
+- `reproducibility_fixture`: tracked inputs or fixtures used to recreate or
+  prove replay behavior; retain unless an owner-reviewed replacement exists.
+- `tracked_debug_evidence`: debug export bundles with manifests, schema
+  sidecars, DQ summaries, lineage, and Bronze/Silver/Gold CSV evidence; prune
+  only after owner review and regenerate/archive proof.
+- `checkpoint_control_plane_state`: manifests, ledgers, effective configs,
+  lineage, and checkpoints; route through the control-plane lifecycle planner.
+- `local_runtime_output`: medallion or quarantine outputs that may be
+  regenerable but still need path-specific retention and replay-impact review.
+- `disposable_local_output`: bounded generated diagnostics that can be pruned
+  only after dry-run, TTL, and owner checks.
+
 ## Surface Matrix
 
 | Surface | Cleanup status | Required procedure |
 | ------- | -------------- | ------------------ |
+| `data/input/**` | Reproducibility fixture/input | Retain tracked inputs by default; require owner approval and replacement/replay proof before deletion. |
 | `data/output/control/**` | Protected | Use [Control-Plane Lifecycle](../control-plane-lifecycle.md); preserve retained manifests, ledgers, effective configs, lineage, and protected references. |
 | `data/output/checkpoints/**` | Protected | Use [Control-Plane Lifecycle](../control-plane-lifecycle.md) or a checkpoint-specific runbook; preserve resume/replay anchors. |
 | cached Bronze snapshots | Protected | Use [Control-Plane Lifecycle](../control-plane-lifecycle.md); retain snapshots referenced by retained manifests. |
+| `data/output/silver/**`, `data/output/gold/**` | Local runtime output | Require dry-run, owner retention note, and rebuild/backfill proof before cleanup. |
+| `data/output/quarantine/**` | Quality exception evidence | Inspect/replay before purge; preserve records needed for DQ investigation or replay proof. |
 | `data/debug_exports/**` | Owner-reviewed replay-adjacent evidence | Require debug-export inventory review, retention reason, and restore/regenerate path before purge; do not broad-delete export bundles. |
 | `data/**` outside control-plane | Separate retention | Require owner approval, backup/restore path, and path-specific retention note. |
 | `tests/fixtures/**` | Fixture-governed | Require fixture owner review and targeted test verification. |
@@ -185,6 +202,10 @@ replay-impact checklist:
 - surfaces outside the control-plane lifecycle planner must still record why
   the deletion does not affect exact replay, resume-only recovery, or forensic
   traceability.
+- fixture/VCR/golden pruning must follow
+  `configs/quality/fixture_governance_ledger.yaml`: metadata owner,
+  reachability evidence, generator/catalog drift check, targeted replay or
+  contract test, and rollback/rerecord path are required.
 
 ### 5. Apply
 

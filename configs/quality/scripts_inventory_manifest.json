@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-25T17:36:48.614017+00:00",
+  "generated_at": "2026-06-26T08:16:42.888192+00:00",
   "summary": {
     "total_scripts": 439,
     "status_counts": {
@@ -4658,7 +4658,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 131,
+      "reference_count": 132,
       "references": [
         {
           "path": ".github/workflows/docs-kpi-weekly.yml",
@@ -4960,7 +4960,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 32,
+      "reference_count": 33,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -4988,7 +4988,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1274,
+          "line": 1298,
           "source_group": "docs",
           "text": "автоматические docs-проверки (`python -m scripts.docs check-links` и"
         },
@@ -6547,7 +6547,7 @@
       "references": [
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1618,
+          "line": 1642,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.dev run-tests cov"
         },
@@ -7508,7 +7508,7 @@
         },
         {
           "path": "docs/03-guides/cleanup-policy.md",
-          "line": 159,
+          "line": 180,
           "source_group": "docs",
           "text": "| `make clean`                                   | Local-only cleanup через `python -m scripts.engineering.diagnostics cleanup`    |"
         }
@@ -7562,7 +7562,7 @@
         },
         {
           "path": "docs/03-guides/cleanup-policy.md",
-          "line": 213,
+          "line": 245,
           "source_group": "docs",
           "text": "python3 scripts/engineering/diagnostics/audit_structure.py --path ."
         },
@@ -8573,7 +8573,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1488,
+          "line": 1512,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/generate_architecture_dependency_map.py --update`"
         },
@@ -10088,31 +10088,31 @@
         },
         {
           "path": "docs/03-guides/cleanup-policy.md",
-          "line": 204,
+          "line": 236,
           "source_group": "docs",
           "text": "| Structure policy green | `python3 scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked` |"
         },
         {
           "path": "docs/03-guides/cleanup-policy.md",
-          "line": 212,
+          "line": 244,
           "source_group": "docs",
           "text": "python3 scripts/engineering/repo/audit_root_cleanliness.py"
         },
         {
           "path": "docs/03-guides/cleanup-policy.md",
-          "line": 283,
+          "line": 315,
           "source_group": "docs",
           "text": "- CI **MUST** run `scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked`;"
         },
         {
           "path": "docs/03-guides/cleanup-policy.md",
-          "line": 310,
+          "line": 345,
           "source_group": "docs",
           "text": "python3 scripts/engineering/repo/audit_root_cleanliness.py"
         },
         {
           "path": "docs/05-operations/runbooks/retention-sensitive-cleanup.md",
-          "line": 217,
+          "line": 238,
           "source_group": "docs",
           "text": "- root placement: `python scripts/engineering/repo/audit_root_cleanliness.py`"
         },
@@ -12539,7 +12539,7 @@
         },
         {
           "path": "docs/03-guides/cleanup-policy.md",
-          "line": 166,
+          "line": 187,
           "source_group": "docs",
           "text": "`scripts/ops/support/repo/cleanup_repository.py` больше не является broad"
         },

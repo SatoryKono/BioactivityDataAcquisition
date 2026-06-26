@@ -52,7 +52,13 @@ def test_composite_merge_golden_seed_priority_is_stable() -> None:
         enricher,
         join_keys={"entity_id"},
     )
-    merged = seed_df.join(enricher_df, on="entity_id", how="left")
+    seed_row = seed_df.row(0, named=True)
+    enricher_row = {
+        column: value
+        for column, value in enricher_df.row(0, named=True).items()
+        if column != "entity_id"
+    }
+    merged = pl.DataFrame([{**seed_row, **enricher_row}])
     resolved = service.resolve_conflicts(
         merged,
         {"crossref_publication": enricher_df},
