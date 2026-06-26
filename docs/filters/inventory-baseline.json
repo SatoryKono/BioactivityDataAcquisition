@@ -12,20 +12,19 @@
     "conflict": 0
   },
   "surface_totals": {
-    "surfaces_total": 112,
+    "surfaces_total": 109,
     "by_category": {
-      "consumer_alias": 32,
+      "consumer_alias": 31,
       "observability": 11,
       "runtime_gate": 11,
-      "silver_config": 11,
-      "source_profile": 47
+      "silver_config": 10,
+      "source_profile": 46
     },
     "by_symbol": {
-      "--silver-filter-only": 8,
+      "--silver-filter-only": 7,
       "FILTERED_OUT_SILVER": 17,
       "FORBIDDEN_SILVER_SEMANTIC_FILTER_KEYS": 1,
       "SilverFilterConfig": 1,
-      "SilverFilterConfig(": 1,
       "SilverFiltersConfig": 1,
       "SilverFiltersFileConfig": 1,
       "_apply_pre_silver_filter": 2,
@@ -40,7 +39,7 @@
       "should_write_silver": 1,
       "silver_filter_compatibility_mode": 2,
       "silver_filter_rejects": 7,
-      "source_profile": 11,
+      "source_profile": 10,
       "validate_no_semantic_silver_filter_payload": 4
     }
   },
@@ -1487,20 +1486,9 @@
       "category": "consumer_alias",
       "surface": "cli_silver_filter_shortcut",
       "symbol": "--silver-filter-only",
-      "path": "src/bioetl/interfaces/cli/commands/diagnostics.py",
-      "occurrence_count": 1,
-      "first_line": 304,
-      "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
-      "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
-      "notes": ""
-    },
-    {
-      "category": "consumer_alias",
-      "surface": "cli_silver_filter_shortcut",
-      "symbol": "--silver-filter-only",
       "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
-      "occurrence_count": 2,
-      "first_line": 93,
+      "occurrence_count": 1,
+      "first_line": 97,
       "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
       "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
       "notes": ""
@@ -1676,7 +1664,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "src/bioetl/interfaces/cli/commands/diagnostics.py",
       "occurrence_count": 2,
-      "first_line": 66,
+      "first_line": 68,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1687,7 +1675,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "src/bioetl/interfaces/cli/commands/quarantine.py",
       "occurrence_count": 2,
-      "first_line": 31,
+      "first_line": 35,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -2013,22 +2001,11 @@
     },
     {
       "category": "silver_config",
-      "surface": "direct_silver_config_construction",
-      "symbol": "SilverFilterConfig(",
-      "path": "src/bioetl/infrastructure/config/silver_filter_migration.py",
-      "occurrence_count": 1,
-      "first_line": 37,
-      "role": "Direct SilverFilterConfig construction",
-      "migration_relevance": "New direct construction sites must not bypass structural-only projection helpers.",
-      "notes": ""
-    },
-    {
-      "category": "silver_config",
       "surface": "domain_silver_config",
       "symbol": "SilverFilterConfig",
       "path": "src/bioetl/domain/filtering/silver_config.py",
-      "occurrence_count": 2,
-      "first_line": 17,
+      "occurrence_count": 5,
+      "first_line": 21,
       "role": "Domain Silver filter object",
       "migration_relevance": "Domain Silver config must remain structural-only after schema validation.",
       "notes": ""
@@ -2083,7 +2060,7 @@
       "symbol": "validate_no_semantic_silver_filter_payload",
       "path": "src/bioetl/infrastructure/config/filter_config_loader.py",
       "occurrence_count": 3,
-      "first_line": 29,
+      "first_line": 23,
       "role": "Fail-fast Silver semantic key guard",
       "migration_relevance": "Boundary hook that rejects semantic Silver keys before domain conversion.",
       "notes": ""
@@ -2093,8 +2070,8 @@
       "surface": "semantic_silver_guard",
       "symbol": "FORBIDDEN_SILVER_SEMANTIC_FILTER_KEYS",
       "path": "src/bioetl/infrastructure/config/silver_filter_migration.py",
-      "occurrence_count": 3,
-      "first_line": 28,
+      "occurrence_count": 2,
+      "first_line": 13,
       "role": "Forbidden semantic Silver key set",
       "migration_relevance": "Defines semantic keys that fail validation when present under silver_filters.",
       "notes": ""
@@ -2105,7 +2082,7 @@
       "symbol": "validate_no_semantic_silver_filter_payload",
       "path": "src/bioetl/infrastructure/config/silver_filter_migration.py",
       "occurrence_count": 2,
-      "first_line": 114,
+      "first_line": 18,
       "role": "Fail-fast Silver semantic key guard",
       "migration_relevance": "Boundary hook that rejects semantic Silver keys before domain conversion.",
       "notes": ""
@@ -2172,17 +2149,6 @@
       "path": "src/bioetl/infrastructure/config/filter_config_loader.py",
       "occurrence_count": 2,
       "first_line": 237,
-      "role": "Versioned source-profile metadata",
-      "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
-      "notes": ""
-    },
-    {
-      "category": "source_profile",
-      "surface": "config_source_profile_metadata",
-      "symbol": "source_profile",
-      "path": "src/bioetl/infrastructure/config/silver_filter_migration.py",
-      "occurrence_count": 1,
-      "first_line": 110,
       "role": "Versioned source-profile metadata",
       "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
       "notes": ""

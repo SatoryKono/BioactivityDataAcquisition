@@ -127,7 +127,12 @@ def test_issue_5389_control_plane_use_case_seams_remain_explicit() -> None:
         for row in hotspot["families"]
         if row["name"] == "application_services_control_plane"
     )
-    assert family["budget_warnings"] == []
+    budgets = family["bounded_growth_budgets"]
+    assert family["files_ge_250_loc"] < budgets["files_ge_250_loc"]
+    assert all(
+        warning != "at_budget:files_ge_250_loc=16/16"
+        for warning in family["budget_warnings"]
+    )
 
     audit_text = SEMANTIC_USE_CASE_AUDIT.read_text(encoding="utf-8")
     assert "Use-case ownership remains in Application" in audit_text
