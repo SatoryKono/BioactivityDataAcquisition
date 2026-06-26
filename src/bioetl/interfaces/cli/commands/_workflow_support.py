@@ -167,26 +167,78 @@ def build_workflow_run_options_override_from_mapping(
     return build_workflow_run_options_override(
         dry_run=bool(override_values["dry_run"]),
         run_type=override_values["run_type"] if isinstance(override_values["run_type"], str) else None,
-        start_offset=override_values["start_offset"] if isinstance(override_values["start_offset"], int) else None,
+        start_offset=(
+            override_values["start_offset"]
+            if isinstance(override_values["start_offset"], int)
+            else None
+        ),
         limit=override_values["limit"] if isinstance(override_values["limit"], int) else None,
         input_csv=override_values["input_csv"] if isinstance(override_values["input_csv"], str) else None,
-        filter_column=override_values["filter_column"] if isinstance(override_values["filter_column"], str) else None,
+        filter_column=(
+            override_values["filter_column"]
+            if isinstance(override_values["filter_column"], str)
+            else None
+        ),
         filter_field=override_values["filter_field"] if isinstance(override_values["filter_field"], str) else None,
-        vacuum_after_run=override_values["vacuum_after_run"] if isinstance(override_values["vacuum_after_run"], bool) else None,
-        vacuum_retention_days=override_values["vacuum_retention_days"] if isinstance(override_values["vacuum_retention_days"], int) else None,
+        vacuum_after_run=(
+            override_values["vacuum_after_run"]
+            if isinstance(override_values["vacuum_after_run"], bool)
+            else None
+        ),
+        vacuum_retention_days=(
+            override_values["vacuum_retention_days"]
+            if isinstance(override_values["vacuum_retention_days"], int)
+            else None
+        ),
         log_level=override_values["log_level"] if isinstance(override_values["log_level"], str) else None,
-        ignore_yaml_filter=override_values["ignore_yaml_filter"] if isinstance(override_values["ignore_yaml_filter"], bool) else None,
+        ignore_yaml_filter=(
+            override_values["ignore_yaml_filter"]
+            if isinstance(override_values["ignore_yaml_filter"], bool)
+            else None
+        ),
         skip_gold=override_values["skip_gold"] if isinstance(override_values["skip_gold"], bool) else None,
-        execution_context=override_values["execution_context"] if isinstance(override_values["execution_context"], str) else None,
-        use_cached_bronze=override_values["use_cached_bronze"] if isinstance(override_values["use_cached_bronze"], bool) else None,
-        cached_bronze_path=override_values["cached_bronze_path"] if isinstance(override_values["cached_bronze_path"], str) else None,
-        cached_bronze_date=override_values["cached_bronze_date"] if isinstance(override_values["cached_bronze_date"], str) else None,
+        execution_context=(
+            override_values["execution_context"]
+            if isinstance(override_values["execution_context"], str)
+            else None
+        ),
+        use_cached_bronze=(
+            override_values["use_cached_bronze"]
+            if isinstance(override_values["use_cached_bronze"], bool)
+            else None
+        ),
+        cached_bronze_path=(
+            override_values["cached_bronze_path"]
+            if isinstance(override_values["cached_bronze_path"], str)
+            else None
+        ),
+        cached_bronze_date=(
+            override_values["cached_bronze_date"]
+            if isinstance(override_values["cached_bronze_date"], str)
+            else None
+        ),
         exact_replay=override_values["exact_replay"] if isinstance(override_values["exact_replay"], bool) else None,
-        required_persistence_profile=override_values["required_persistence_profile"] if isinstance(override_values["required_persistence_profile"], str) else None,
-        replay_of_run_id=override_values["replay_of_run_id"] if isinstance(override_values["replay_of_run_id"], str) else None,
-        replay_of_manifest_id=override_values["replay_of_manifest_id"] if isinstance(override_values["replay_of_manifest_id"], str) else None,
+        required_persistence_profile=(
+            override_values["required_persistence_profile"]
+            if isinstance(override_values["required_persistence_profile"], str)
+            else None
+        ),
+        replay_of_run_id=(
+            override_values["replay_of_run_id"]
+            if isinstance(override_values["replay_of_run_id"], str)
+            else None
+        ),
+        replay_of_manifest_id=(
+            override_values["replay_of_manifest_id"]
+            if isinstance(override_values["replay_of_manifest_id"], str)
+            else None
+        ),
         enable_tracing=override_values["enable_tracing"] if isinstance(override_values["enable_tracing"], bool) else None,
-        debug_export_enabled=override_values["debug_export_enabled"] if isinstance(override_values["debug_export_enabled"], bool) else None,
+        debug_export_enabled=(
+            override_values["debug_export_enabled"]
+            if isinstance(override_values["debug_export_enabled"], bool)
+            else None
+        ),
         debug_export_formats=tuple(str(item) for item in override_values["debug_export_formats"])
         if isinstance(override_values["debug_export_formats"], tuple)
         else (),
