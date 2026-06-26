@@ -9,9 +9,6 @@ from bioetl.application.core.wiring.registry import GenericPipeline
 from bioetl.composition.factories.datasource.data_source_factory import (
     get_data_source_creator,
 )
-from bioetl.composition.factories.pipeline.registry_manifest import (
-    PipelineFactoryConfig,
-)
 from bioetl.composition.providers.provider_registry import (
     ProviderDataSourceAccessProtocol,
 )
@@ -33,7 +30,10 @@ if TYPE_CHECKING:
     from bioetl.composition.factories.pipeline._assembler_factory import (
         GenericPipelineFactory,
     )
-    from bioetl.composition.factories.pipeline.config_types import TransformerClassRef
+    from bioetl.composition.factories.pipeline.config_types import (
+        PipelineFactoryConfig,
+        TransformerClassRef,
+    )
 
 
 def _schema_columns(
