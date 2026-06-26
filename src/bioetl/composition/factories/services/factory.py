@@ -35,6 +35,7 @@ from bioetl.composition.factories.services.port_factories import (
     create_metrics,
     create_quarantine,
 )
+from bioetl.composition.factories.storage import StorageFactory
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
@@ -71,19 +72,6 @@ __all__ = [
     "create_quarantine",
     "extract_pipeline_callbacks",
 ]
-
-
-class _LazyStorageFactory:
-    """Patchable storage factory seam without importing storage at module load."""
-
-    @staticmethod
-    def create(*args: object, **kwargs: object) -> object:
-        from bioetl.composition.factories.storage import StorageFactory
-
-        return StorageFactory.create(*args, **kwargs)
-
-
-StorageFactory = _LazyStorageFactory
 
 
 def __getattr__(name: str) -> object:

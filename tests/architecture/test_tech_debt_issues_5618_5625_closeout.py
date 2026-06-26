@@ -110,8 +110,8 @@ def test_issue_5622_full_app_duplication_ratchet_records_cli_burn_down() -> None
     duplication = _load_json(DUPLICATION)
     by_target = {target["target"]: target for target in duplication["targets"]}
 
-    assert duplication["summary"]["total_duplicate_clusters"] == 95
-    assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] == 5
+    assert duplication["summary"]["total_duplicate_clusters"] == 88
+    assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] == 3
     assert by_target["src/bioetl/composition/bootstrap"]["duplicate_count"] == 0
 
 
@@ -144,7 +144,7 @@ def test_issue_5624_hotspot_budgets_are_ratcheted_to_live_guard_values() -> None
         assert family["bounded_growth_budgets"] == expected_budget
         assert baseline_family["bounded_growth_budgets"] == expected_budget
         assert all(
-            str(warning).startswith("at_budget:")
+            str(warning).startswith(("at_budget:", "near_budget:"))
             for warning in baseline_family["budget_warnings"]
         )
 

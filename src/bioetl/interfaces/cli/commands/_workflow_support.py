@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import replace
 
 from bioetl.application.services.control_plane.workflow.inspection_service import (
@@ -19,12 +20,43 @@ from bioetl.interfaces.cli.formatters import echo_info
 
 __all__ = [
     "apply_cli_overrides",
+    "apply_cli_override_config",
     "build_status_payload",
+    "build_workflow_run_options_override",
+    "build_workflow_run_options_override_from_mapping",
     "parse_only_steps",
     "render_run_result",
     "render_status_payload",
     "select_workflow_steps",
+    "WorkflowRunOptionsConfig",
 ]
+
+_WORKFLOW_RUN_OPTIONS_OVERRIDE_FIELDS = (
+    "dry_run",
+    "run_type",
+    "start_offset",
+    "limit",
+    "input_csv",
+    "filter_column",
+    "filter_field",
+    "vacuum_after_run",
+    "vacuum_retention_days",
+    "log_level",
+    "ignore_yaml_filter",
+    "skip_gold",
+    "execution_context",
+    "use_cached_bronze",
+    "cached_bronze_path",
+    "cached_bronze_date",
+    "exact_replay",
+    "required_persistence_profile",
+    "replay_of_run_id",
+    "replay_of_manifest_id",
+    "enable_tracing",
+    "debug_export_enabled",
+    "debug_export_formats",
+    "debug_export_dir",
+)
 
 
 def parse_only_steps(raw_value: str | None) -> tuple[str, ...] | None:
@@ -68,6 +100,127 @@ def select_workflow_steps(
     return replace(config, steps=filtered_steps)
 
 
+def build_workflow_run_options_override(
+    *,
+    dry_run: bool,
+    run_type: str | None,
+    start_offset: int | None,
+    limit: int | None,
+    input_csv: str | None,
+    filter_column: str | None,
+    filter_field: str | None,
+    vacuum_after_run: bool | None,
+    vacuum_retention_days: int | None,
+    log_level: str | None,
+    ignore_yaml_filter: bool | None,
+    skip_gold: bool | None,
+    execution_context: str | None,
+    use_cached_bronze: bool | None,
+    cached_bronze_path: str | None,
+    cached_bronze_date: str | None,
+    exact_replay: bool | None,
+    required_persistence_profile: str | None,
+    replay_of_run_id: str | None,
+    replay_of_manifest_id: str | None,
+    enable_tracing: bool | None,
+    debug_export_enabled: bool | None,
+    debug_export_formats: tuple[str, ...],
+    debug_export_dir: str | None,
+) -> WorkflowRunOptionsConfig:
+    """Build one workflow override config from CLI flags."""
+    return WorkflowRunOptionsConfig(
+        dry_run=True if dry_run else None,
+        run_type=run_type,
+        start_offset=start_offset,
+        limit=limit,
+        input_csv=input_csv,
+        filter_column=filter_column,
+        filter_field=filter_field,
+        vacuum_after_run=vacuum_after_run,
+        vacuum_retention_days=vacuum_retention_days,
+        log_level=log_level,
+        ignore_yaml_filter=ignore_yaml_filter,
+        skip_gold=skip_gold,
+        execution_context=execution_context,
+        use_cached_bronze=use_cached_bronze,
+        cached_bronze_path=cached_bronze_path,
+        cached_bronze_date=cached_bronze_date,
+        exact_replay=exact_replay,
+        required_persistence_profile=required_persistence_profile,
+        replay_of_run_id=replay_of_run_id,
+        replay_of_manifest_id=replay_of_manifest_id,
+        enable_tracing=enable_tracing,
+        debug_export_enabled=debug_export_enabled,
+        debug_export_formats=debug_export_formats or None,
+        debug_export_dir=debug_export_dir,
+    )
+
+
+def build_workflow_run_options_override_from_mapping(
+    values: Mapping[str, object],
+) -> WorkflowRunOptionsConfig:
+    """Build one workflow override config from a CLI/local variable mapping."""
+    override_values = {
+        field_name: values.get(field_name)
+        for field_name in _WORKFLOW_RUN_OPTIONS_OVERRIDE_FIELDS
+    }
+    return build_workflow_run_options_override(
+        dry_run=bool(override_values["dry_run"]),
+        run_type=override_values["run_type"] if isinstance(override_values["run_type"], str) else None,
+        start_offset=override_values["start_offset"] if isinstance(override_values["start_offset"], int) else None,
+        limit=override_values["limit"] if isinstance(override_values["limit"], int) else None,
+        input_csv=override_values["input_csv"] if isinstance(override_values["input_csv"], str) else None,
+        filter_column=override_values["filter_column"] if isinstance(override_values["filter_column"], str) else None,
+        filter_field=override_values["filter_field"] if isinstance(override_values["filter_field"], str) else None,
+        vacuum_after_run=override_values["vacuum_after_run"] if isinstance(override_values["vacuum_after_run"], bool) else None,
+        vacuum_retention_days=override_values["vacuum_retention_days"] if isinstance(override_values["vacuum_retention_days"], int) else None,
+        log_level=override_values["log_level"] if isinstance(override_values["log_level"], str) else None,
+        ignore_yaml_filter=override_values["ignore_yaml_filter"] if isinstance(override_values["ignore_yaml_filter"], bool) else None,
+        skip_gold=override_values["skip_gold"] if isinstance(override_values["skip_gold"], bool) else None,
+        execution_context=override_values["execution_context"] if isinstance(override_values["execution_context"], str) else None,
+        use_cached_bronze=override_values["use_cached_bronze"] if isinstance(override_values["use_cached_bronze"], bool) else None,
+        cached_bronze_path=override_values["cached_bronze_path"] if isinstance(override_values["cached_bronze_path"], str) else None,
+        cached_bronze_date=override_values["cached_bronze_date"] if isinstance(override_values["cached_bronze_date"], str) else None,
+        exact_replay=override_values["exact_replay"] if isinstance(override_values["exact_replay"], bool) else None,
+        required_persistence_profile=override_values["required_persistence_profile"] if isinstance(override_values["required_persistence_profile"], str) else None,
+        replay_of_run_id=override_values["replay_of_run_id"] if isinstance(override_values["replay_of_run_id"], str) else None,
+        replay_of_manifest_id=override_values["replay_of_manifest_id"] if isinstance(override_values["replay_of_manifest_id"], str) else None,
+        enable_tracing=override_values["enable_tracing"] if isinstance(override_values["enable_tracing"], bool) else None,
+        debug_export_enabled=override_values["debug_export_enabled"] if isinstance(override_values["debug_export_enabled"], bool) else None,
+        debug_export_formats=tuple(str(item) for item in override_values["debug_export_formats"])
+        if isinstance(override_values["debug_export_formats"], tuple)
+        else (),
+        debug_export_dir=override_values["debug_export_dir"] if isinstance(override_values["debug_export_dir"], str) else None,
+    )
+
+
+def apply_cli_override_config(
+    config: WorkflowConfig,
+    override: WorkflowRunOptionsConfig,
+) -> WorkflowConfig:
+    """Apply one prebuilt workflow override config to defaults and steps."""
+    if not override.to_mapping():
+        return config
+
+    updated_steps = []
+    for step in config.steps:
+        if isinstance(step, WorkflowStepConfig):
+            updated_steps.append(
+                replace(
+                    step,
+                    run_options=step.run_options.merged_with(override),
+                )
+            )
+            continue
+        updated_steps.append(step)
+
+    return replace(
+        config,
+        defaults=config.defaults.merged_with(override),
+        steps=tuple(updated_steps),
+    )
+
+
 def apply_cli_overrides(
     config: WorkflowConfig,
     *,
@@ -97,52 +250,8 @@ def apply_cli_overrides(
     debug_export_dir: str | None,
 ) -> WorkflowConfig:
     """Apply CLI overrides to workflow defaults and pipeline steps."""
-    override = WorkflowRunOptionsConfig(
-        dry_run=True if dry_run else None,
-        run_type=run_type,
-        start_offset=start_offset,
-        limit=limit,
-        input_csv=input_csv,
-        filter_column=filter_column,
-        filter_field=filter_field,
-        vacuum_after_run=vacuum_after_run,
-        vacuum_retention_days=vacuum_retention_days,
-        log_level=log_level,
-        ignore_yaml_filter=ignore_yaml_filter,
-        skip_gold=skip_gold,
-        execution_context=execution_context,
-        use_cached_bronze=use_cached_bronze,
-        cached_bronze_path=cached_bronze_path,
-        cached_bronze_date=cached_bronze_date,
-        exact_replay=exact_replay,
-        required_persistence_profile=required_persistence_profile,
-        replay_of_run_id=replay_of_run_id,
-        replay_of_manifest_id=replay_of_manifest_id,
-        enable_tracing=enable_tracing,
-        debug_export_enabled=debug_export_enabled,
-        debug_export_formats=debug_export_formats or None,
-        debug_export_dir=debug_export_dir,
-    )
-    if not override.to_mapping():
-        return config
-
-    updated_steps = []
-    for step in config.steps:
-        if isinstance(step, WorkflowStepConfig):
-            updated_steps.append(
-                replace(
-                    step,
-                    run_options=step.run_options.merged_with(override),
-                )
-            )
-            continue
-        updated_steps.append(step)
-
-    return replace(
-        config,
-        defaults=config.defaults.merged_with(override),
-        steps=tuple(updated_steps),
-    )
+    override = build_workflow_run_options_override_from_mapping(locals())
+    return apply_cli_override_config(config, override)
 
 
 def build_status_payload(

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from dataclasses import asdict, is_dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, cast
@@ -10,6 +9,12 @@ from uuid import UUID
 
 from bioetl.composition.runtime_builders._runtime_launch_context_fields import (
     build_runtime_launch_field_snapshot,
+)
+from bioetl.composition.runtime_builders._run_manifest_snapshot_resolution import (
+    as_runtime_config_mapping,
+    coerce_optional_text,
+    resolve_name_component,
+    resolve_replay_parentage_mapping_value,
 )
 
 if TYPE_CHECKING:
@@ -159,7 +164,7 @@ def resolve_replay_parentage(
     runtime_config: object,
 ) -> tuple[str | None, str | None]:
     """Resolve the replay parentage."""
-    runtime_config_mapping = _as_runtime_config_mapping(runtime_config)
+    runtime_config_mapping = as_runtime_config_mapping(runtime_config)
     replay_of_run_id = _resolve_replay_id(
         ctx, "replay_of_run_id", runtime_config_mapping
     )
@@ -172,15 +177,18 @@ def resolve_replay_parentage(
 def _resolve_replay_id(
     ctx: PipelineRunContext,
     attr_name: str,
-    runtime_config_mapping: Mapping[str, object],
+    runtime_config_mapping: object,
 ) -> str | None:
     """Resolve the replay ID from context or runtime config."""
-    ctx_value = _coerce_optional_text(getattr(ctx, attr_name, None))
+    ctx_value = coerce_optional_text(getattr(ctx, attr_name, None))
     if ctx_value is not None:
         return ctx_value
 
     keys = (attr_name, f"exact_replay_parent_{attr_name}")
-    return _resolve_replay_parentage_mapping_value(runtime_config_mapping, *keys)
+    return resolve_replay_parentage_mapping_value(
+        as_runtime_config_mapping(runtime_config_mapping),
+        *keys,
+    )
 
 
 def resolve_provider_entity(
@@ -205,7 +213,7 @@ def _determine_fallbacks(pipeline_name: str) -> tuple[str, str]:
 
 def _resolve_provider(yaml_config: object, fallback: str) -> str:
     """Resolve provider from config or use fallback."""
-    return _resolve_name_component(
+    return resolve_name_component(
         getattr(yaml_config, "provider", None),
         fallback=fallback,
     )
@@ -213,54 +221,7 @@ def _resolve_provider(yaml_config: object, fallback: str) -> str:
 
 def _resolve_entity(yaml_config: object, fallback: str) -> str:
     """Resolve entity from config or use fallback."""
-    return _resolve_name_component(
+    return resolve_name_component(
         getattr(yaml_config, "entity_type", None),
         fallback=fallback,
     )
-
-
-def _as_runtime_config_mapping(runtime_config: object) -> Mapping[str, object]:
-    if isinstance(runtime_config, Mapping):
-        return runtime_config
-    return {}
-
-
-def _resolve_mapping_text(mapping: object, key: str) -> str | None:
-    """Read one optional text value from a mapping-like object."""
-    if not isinstance(mapping, Mapping):
-        return None
-    return _coerce_optional_text(mapping.get(key))
-
-
-def _resolve_replay_parentage_mapping_value(
-    runtime_config: Mapping[str, object],
-    *keys: str,
-) -> str | None:
-    """Resolve replay parentage from direct and nested runtime config mappings."""
-    candidate_mappings: tuple[object, ...] = (
-        runtime_config,
-        runtime_config.get("control_plane"),
-        runtime_config.get("pipeline"),
-        _as_runtime_config_mapping(runtime_config.get("pipeline")).get("control_plane"),
-    )
-    for key in keys:
-        for mapping in candidate_mappings:
-            resolved = _resolve_mapping_text(mapping, key)
-            if resolved is not None:
-                return resolved
-    return None
-
-
-def _resolve_name_component(value: object, *, fallback: str) -> str:
-    if isinstance(value, str):
-        normalized = value.strip()
-        if normalized:
-            return normalized
-    return fallback
-
-
-def _coerce_optional_text(value: object) -> str | None:
-    if value is None:
-        return None
-    text = str(value).strip()
-    return text or None

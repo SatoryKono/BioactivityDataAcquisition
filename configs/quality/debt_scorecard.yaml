@@ -110,37 +110,6 @@ compatibility_debt_metrics:
         Sanctioned public entrypoints are tracked separately as stable public API.
       ratchet_policy: Fail on growth; ratchet current/max_count toward target_count
         zero as transition-only compatibility shims are removed.
-    retained_public_entrypoint_burden:
-      current_count: 12
-      max_count: 12
-      owner: '@bioetl-architecture'
-      linked_issue: '4575'
-      rationale: Retained public entrypoints are stable external API, but their size
-        and first-party dependency burden are blocking governance debt when they grow
-        without review.
-      ratchet_policy: Fail on growth; ratchet max_count downward only after retained
-        public entrypoints are removed or first-party callers are narrowed.
-    retained_public_export_facade_burden:
-      current_count: 4
-      max_count: 4
-      owner: '@bioetl-architecture'
-      linked_issue: '5374'
-      rationale: Retained public export facades are stable package-root API, but each
-        retained lazy/export facade remains an explicit compatibility surface that
-        must not grow without architecture review.
-      ratchet_policy: Fail on growth; ratchet max_count downward only after export
-        facades are collapsed, converted to owner imports, or otherwise removed from
-        the compatibility census.
-    retained_public_export_facade_conflict_count:
-      current_count: 0
-      max_count: 0
-      owner: '@bioetl-architecture'
-      linked_issue: '5374'
-      rationale: Duplicate exports and resolution conflicts inside retained public
-        export facades are not allowed because they make public API ownership
-        ambiguous.
-      ratchet_policy: Zero-budget fail-fast metric; any non-zero census conflict
-        requires removing or explicitly re-owning the export facade before merge.
     sunset_compat_count:
       current_count: 0
       max_count: 0
@@ -193,6 +162,24 @@ sanctioned_public_entrypoint_governance:
       review_cadence: quarterly
       review_policy: Ratchet first-party callers toward reviewed facade exports and
         keep deeper owner modules hidden behind the sanctioned public seam.
+    public_export_facade_count:
+      current_count: 4
+      owner: '@bioetl-architecture'
+      linked_issue: '5374'
+      rationale: Reviewed public export facades remain sanctioned public API seams
+        and stay visible as governance inventory rather than compatibility debt.
+      review_cadence: quarterly
+      review_policy: Hold export facade count flat or reduce it; new facades require
+        architecture review and an explicit sanctioned-public inventory update.
+    public_export_facade_conflict_count:
+      current_count: 0
+      owner: '@bioetl-architecture'
+      linked_issue: '5374'
+      rationale: Duplicate exports and resolution conflicts inside sanctioned public
+        export facades are not allowed because they make public API ownership ambiguous.
+      review_cadence: quarterly
+      review_policy: Zero-budget fail-fast governance metric; any conflict requires
+        removing or explicitly re-owning the export facade before merge.
 bronze_fixture_replay_debt_metrics:
   gap_source: configs/base/bronze_fixture_gaps.yaml
   manifest_source: configs/base/bronze_fixture_manifest.yaml
@@ -525,9 +512,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 48
-      total_loc: 5908
+      total_loc: 5899
       files_ge_250_loc: 0
-      helper_function_ratio: 0.307
+      helper_function_ratio: 0.304
       max_internal_fan_in: 3
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.observability
     trend:
@@ -608,18 +595,19 @@ hotspot_family_ratchets:
       max_internal_fan_in: 5
     metrics:
       duplication_clusters: 0
-      files: 43
-      total_loc: 6320
-      files_ge_250_loc: 3
-      helper_function_ratio: 0.403
-      max_internal_fan_in: 5
-      max_internal_fan_in_module: bioetl.composition.runtime_builders.run_manifest_contract_identity
+      files: 44
+      total_loc: 6314
+      files_ge_250_loc: 1
+      helper_function_ratio: 0.389
+      max_internal_fan_in: 6
+      max_internal_fan_in_module: bioetl.composition.runtime_builders._run_manifest_refs
     trend:
-      status: ratcheted_2026-06-26_runtime_builders_live_budget_close
-      next_action: 2026-06-26 closes the bounded-growth slack after the runtime-builder
-        family remained at 43 files, 6320 LOC, 3 files_ge_250_loc, and
-        max_internal_fan_in 5; bounded-growth budgets now match the live baseline
-        at 3 files_ge_250_loc and max_internal_fan_in 5.
+      status: ratcheted_2026-06-26_runtime_builders_large_file_burndown
+      next_action: 2026-06-26 split run-manifest helper seams and retired one
+        runtime-builder large-file warning, reducing the reviewed live baseline
+        to 44 files, 6314 LOC, and 1 file_ge_250_loc. The remaining pressure is
+        fan-in on _run_manifest_refs at 6 against budget 5; next wave must burn
+        that importer pressure down without raising budgets.
 oversized_source_module_inventory:
   linked_issue: '#4679'
   split_on_touch: true

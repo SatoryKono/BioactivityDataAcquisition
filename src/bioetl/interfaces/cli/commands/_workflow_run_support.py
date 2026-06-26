@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable
+from collections.abc import Mapping
 from typing import TYPE_CHECKING
 from uuid import UUID
 
@@ -19,9 +20,12 @@ from bioetl.domain.control_plane.reproducibility_profiles import (
 )
 from bioetl.domain.types import RunID
 from bioetl.interfaces.cli.commands._workflow_support import (
-    apply_cli_overrides,
+    apply_cli_override_config,
+    build_workflow_run_options_override_from_mapping,
+    build_workflow_run_options_override,
     parse_only_steps,
     select_workflow_steps,
+    WorkflowRunOptionsConfig,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
@@ -46,7 +50,7 @@ if TYPE_CHECKING:
     from bioetl.domain.workflow import WorkflowConfig
 
 __all__ = [
-    "_build_workflow_override_kwargs",
+    "_build_workflow_override_config",
     "_execute_workflow_and_publish_metrics",
     "_handle_workflow_result",
     "_load_and_apply_workflow_config",
@@ -100,60 +104,11 @@ def _validate_run_workflow_options(
         raise click.exceptions.Exit(ExitCode.CONFIG_ERROR)
 
 
-def _build_workflow_override_kwargs(
-    *,
-    dry_run: bool,
-    run_type: str | None,
-    start_offset: int | None,
-    limit: int | None,
-    input_csv: str | None,
-    filter_column: str | None,
-    filter_field: str | None,
-    vacuum_after_run: bool | None,
-    vacuum_retention_days: int | None,
-    log_level: str | None,
-    ignore_yaml_filter: bool | None,
-    skip_gold: bool | None,
-    execution_context: str | None,
-    use_cached_bronze: bool | None,
-    cached_bronze_path: str | None,
-    cached_bronze_date: str | None,
-    exact_replay: bool | None,
-    required_persistence_profile: str | None,
-    replay_of_run_id: str | None,
-    replay_of_manifest_id: str | None,
-    enable_tracing: bool | None,
-    debug_export_enabled: bool | None,
-    debug_export_formats: tuple[str, ...],
-    debug_export_dir: str | None,
-) -> dict[str, object]:
-    """Bundle workflow CLI override kwargs for config loading/application."""
-    return {
-        "dry_run": dry_run,
-        "run_type": run_type,
-        "start_offset": start_offset,
-        "limit": limit,
-        "input_csv": input_csv,
-        "filter_column": filter_column,
-        "filter_field": filter_field,
-        "vacuum_after_run": vacuum_after_run,
-        "vacuum_retention_days": vacuum_retention_days,
-        "log_level": log_level,
-        "ignore_yaml_filter": ignore_yaml_filter,
-        "skip_gold": skip_gold,
-        "execution_context": execution_context,
-        "use_cached_bronze": use_cached_bronze,
-        "cached_bronze_path": cached_bronze_path,
-        "cached_bronze_date": cached_bronze_date,
-        "exact_replay": exact_replay,
-        "required_persistence_profile": required_persistence_profile,
-        "replay_of_run_id": replay_of_run_id,
-        "replay_of_manifest_id": replay_of_manifest_id,
-        "enable_tracing": enable_tracing,
-        "debug_export_enabled": debug_export_enabled,
-        "debug_export_formats": debug_export_formats,
-        "debug_export_dir": debug_export_dir,
-    }
+def _build_workflow_override_config(
+    values: Mapping[str, object],
+) -> WorkflowRunOptionsConfig:
+    """Build one workflow override config for config loading/application."""
+    return build_workflow_run_options_override_from_mapping(values)
 
 
 def _load_and_apply_workflow_config(
@@ -161,13 +116,13 @@ def _load_and_apply_workflow_config(
     load_workflow_config_fn: Callable[[str], WorkflowConfig],
     name: str,
     only_steps: str | None,
-    override_kwargs: dict[str, object],
+    override_config: WorkflowRunOptionsConfig,
 ) -> object:
     """Load workflow config and apply CLI overrides."""
     try:
         config = load_workflow_config_fn(name)
         config = select_workflow_steps(config, only_steps)
-        config = apply_cli_overrides(config, **override_kwargs)
+        config = apply_cli_override_config(config, override_config)
         _validate_workflow_pipeline_replay_prerequisites(config)
         return config
     except (FileNotFoundError, ValueError) as exc:

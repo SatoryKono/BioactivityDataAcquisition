@@ -30,6 +30,9 @@ from bioetl.composition.bootstrap.runtime._composite_plan_support import (
     load_composite_config_impl as _load_runtime_composite_config_impl,
 )
 from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
+    _load_field_group_registry,
+)
+from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
     bootstrap_runtime_basics_facade as _bootstrap_runtime_basics_facade,
 )
 from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
@@ -182,18 +185,6 @@ def _build_support_services(
         resolve_gold_schema_fn=_resolve_composite_gold_schema,
         load_field_group_registry_fn=_load_field_group_registry,
     )
-
-
-def _load_field_group_registry(
-    composite_name: str,
-    logger: LoggerPort,
-) -> object | None:
-    """Compatibility seam exposing the canonical field-group loader helper."""
-    from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
-        _load_field_group_registry as _impl,
-    )
-
-    return _impl(composite_name, logger)
 
 
 def _build_composite_bootstrap_plan(

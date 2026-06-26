@@ -25,15 +25,15 @@ from bioetl.composition.runtime_builders._effective_config_artifact_builder_supp
 from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
     to_serializable_mapping as _to_serializable_mapping,
 )
-from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
-    RunManifestContractIdentity,
-)
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigResolutionPolicy,
 )
 
 if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
+    from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
+        RunManifestContractIdentity,
+    )
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.types import RunID
     from bioetl.infrastructure.config.settings_api import Settings
