@@ -121,6 +121,50 @@ def _json_blob_summary(blob: bytes | None) -> dict[str, object]:
     return summary
 
 
+def _baseline_semantic_signature(payload: dict[str, object]) -> dict[str, object]:
+    """Return the stable evidence identity, excluding commit metadata churn."""
+    artifacts = payload.get("artifacts")
+    assert isinstance(artifacts, list)
+    artifact_rows: list[dict[str, object]] = []
+    for row in artifacts:
+        assert isinstance(row, dict)
+        artifact_rows.append(
+            {
+                "path": row.get("path"),
+                "blob_sha256": row.get("blob_sha256"),
+                "required": row.get("required"),
+                "summary": row.get("summary"),
+            }
+        )
+
+    return {
+        "schema_version": payload.get("schema_version"),
+        "generated_by": payload.get("generated_by"),
+        "evidence_source": payload.get("evidence_source"),
+        "remote": payload.get("remote"),
+        "branch": payload.get("branch"),
+        "remote_main_ref": payload.get("remote_main_ref"),
+        "generator_commands": payload.get("generator_commands"),
+        "artifacts": artifact_rows,
+    }
+
+
+def baseline_artifact_fingerprint(payload: dict[str, object]) -> str:
+    """Fingerprint the tracked baseline evidence without volatile commit SHAs."""
+    signature = _baseline_semantic_signature(payload)
+    encoded = json.dumps(signature, sort_keys=True, separators=(",", ":")).encode(
+        "utf-8"
+    )
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def payloads_semantically_equivalent(
+    left: dict[str, object], right: dict[str, object]
+) -> bool:
+    """Return True when baseline evidence is unchanged apart from commit metadata."""
+    return _baseline_semantic_signature(left) == _baseline_semantic_signature(right)
+
+
 def build_payload(
     *,
     repo_root: Path = PROJECT_ROOT,
@@ -150,7 +194,7 @@ def build_payload(
             }
         )
 
-    return {
+    payload: dict[str, object] = {
         "schema_version": 1,
         "generated_by": "scripts.engineering.qa.report_architecture_debt_remote_main_baseline",
         "evidence_source": "remote_main_git_tree",
@@ -169,6 +213,8 @@ def build_payload(
         "generator_commands": list(_GENERATOR_COMMANDS),
         "artifacts": artifact_rows,
     }
+    payload["baseline_artifact_fingerprint"] = baseline_artifact_fingerprint(payload)
+    return payload
 
 
 def render_markdown(payload: dict[str, object]) -> str:
@@ -181,7 +227,8 @@ def render_markdown(payload: dict[str, object]) -> str:
         "",
         f"- evidence_source: `{payload['evidence_source']}`",
         f"- remote_main_ref: `{payload['remote_main_ref']}`",
-        f"- remote_main_sha: `{payload['remote_main_sha']}`",
+        "- baseline_artifact_fingerprint: "
+        f"`{payload.get('baseline_artifact_fingerprint') or baseline_artifact_fingerprint(payload)}`",
         f"- local_tracking_ref_matches_remote: `{payload['local_tracking_ref_matches_remote']}`",
         "",
         "| artifact | blob_sha256 | available |",
@@ -220,7 +267,20 @@ def _check_artifacts(
     errors: list[str] = []
     expected_json = json.dumps(payload, indent=2, sort_keys=True) + "\n"
     expected_md = render_markdown(payload)
-    if not json_out.exists() or json_out.read_text(encoding="utf-8") != expected_json:
+    json_matches = False
+    if json_out.exists():
+        actual_json = json_out.read_text(encoding="utf-8")
+        json_matches = actual_json == expected_json
+        if not json_matches:
+            try:
+                committed_payload = json.loads(actual_json)
+            except json.JSONDecodeError:
+                committed_payload = None
+            if isinstance(committed_payload, dict):
+                json_matches = payloads_semantically_equivalent(
+                    committed_payload, payload
+                )
+    if not json_matches:
         errors.append(f"Remote-main debt baseline JSON artifact is stale: {json_out}")
     if not md_out.exists() or md_out.read_text(encoding="utf-8") != expected_md:
         errors.append(f"Remote-main debt baseline Markdown artifact is stale: {md_out}")

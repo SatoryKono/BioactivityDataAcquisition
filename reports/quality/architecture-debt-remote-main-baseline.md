@@ -4,7 +4,7 @@
 
 - evidence_source: `remote_main_git_tree`
 - remote_main_ref: `refs/heads/main`
-- remote_main_sha: `1fb528da02fb15a59d7ac5e35a8e244b6e8a822d`
+- baseline_artifact_fingerprint: `5a0fc03bdd54f934165e50d139720f0bb95e1cb078ec1b776a09f79e6453857b`
 - local_tracking_ref_matches_remote: `True`
 
 | artifact | blob_sha256 | available |
