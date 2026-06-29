@@ -875,6 +875,25 @@ compatibility_test_inventory:
     review_date: '2026-12-31'
     rationale: Tracked compatibility test surface; retained only while the referenced
       public or migration contract remains supported.
+platform_sensitive_snapshot_tests:
+  issue_ref: '#5663'
+  decision: retained_memory_lane_with_platform_skip
+  owner: memory-governance
+  review_date: '2026-09-30'
+  rationale: Neo4j memory snapshot invariant tests intentionally build a full repo
+    snapshot; they remain outside fast lanes through explicit memory markers,
+    bounded timeout policy, shared snapshot caching, and Windows skip guards.
+  required_markers:
+  - memory
+  min_timeout_seconds: 180
+  windows_skip_required: true
+  shared_snapshot_cache_required: true
+  entries:
+  - path: tests/unit/scripts/ops/neo4j_memory_sync/test_snapshot_invariants.py
+    support_module: tests/testing_support/neo4j_memory_sync_support/snapshot_invariants.py
+    cache_provider: tests/testing_support/neo4j_memory_sync_support/common.py::_snapshot_base
+    runtime_policy: memory_lane_only
+    platform_policy: skip_on_windows
 remediation_closeout:
   parent_issue: '#4200'
   audit_snapshot:

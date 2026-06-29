@@ -482,19 +482,19 @@ hotspot_family_ratchets:
       max_internal_fan_in: 11
     metrics:
       duplication_clusters: 0
-      files: 180
-      total_loc: 22288
+      files: 181
+      total_loc: 22360
       files_ge_250_loc: 7
-      helper_function_ratio: 0.355
+      helper_function_ratio: 0.356
       max_internal_fan_in: 11
       max_internal_fan_in_module: bioetl.application.core.batch_operation_errors
     trend:
-      status: ratcheted_2026-06-26_application_core_live_budget_close
-      next_action: 2026-06-26 closes the bounded-growth slack against the tracked
-        reviewed baseline artifact and live family census at 180 files, 22288
-        LOC, 7 files_ge_250_loc, helper_function_ratio 0.355, and
-        max_internal_fan_in 11; bounded-growth budgets now match the live
-        baseline at 7 files_ge_250_loc and max_internal_fan_in 11.
+      status: reviewed_2026-06-29_application_core_live_metric_refresh
+      next_action: 2026-06-29 refreshes measured application_core metrics against
+        the committed hotspot-family baseline at 181 files, 22360 LOC, 7
+        files_ge_250_loc, helper_function_ratio 0.356, and max_internal_fan_in
+        11. Bounded-growth budgets remain flat at 7 files_ge_250_loc and
+        max_internal_fan_in 11; no technical-debt budget is increased.
   - name: composition_bootstrap_runtime
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -540,19 +540,19 @@ hotspot_family_ratchets:
       max_internal_fan_in: 3
     metrics:
       duplication_clusters: 0
-      files: 34
-      total_loc: 4610
+      files: 35
+      total_loc: 4657
       files_ge_250_loc: 2
-      helper_function_ratio: 0.42
+      helper_function_ratio: 0.417
       max_internal_fan_in: 3
       max_internal_fan_in_module: bioetl.composition.factories.pipeline.registry_manifest
     trend:
-      status: reduced_2026-06-26_pipeline_factories_files_ge_250_below_budget
-      next_action: 2026-06-26 extracts the lazy factory catalog from registry.py,
-        reducing live files_ge_250_loc from 3 to 2 while holding max_internal_fan_in
-        at 3. The files_ge_250_loc budget stays at the reviewed ceiling of 3 so
-        the live family remains below budget; max_internal_fan_in remains pinned
-        for a follow-up fan-in reduction.
+      status: reviewed_2026-06-29_pipeline_factories_live_metric_refresh
+      next_action: 2026-06-29 refreshes measured pipeline-factory metrics against
+        the committed hotspot-family baseline at 35 files, 4657 LOC, 2
+        files_ge_250_loc, helper_function_ratio 0.417, and max_internal_fan_in
+        3. Bounded-growth budgets remain flat at 3 files_ge_250_loc and
+        max_internal_fan_in 3; no technical-debt budget is increased.
   - name: application_services_control_plane
     owner: '@bioetl-platform'
     linked_rf: RF-023

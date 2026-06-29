@@ -187,3 +187,8 @@ entries:
     classification: budget_closeout_ratchet
     live_guard: "debt issue #5647 remains aligned with live lazy-export helper unification evidence without budget growth."
     rationale: Keeps the current issue tied to executable live closeout invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issues_5646_5663_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt roadmap #5646 and issue batch #5656/#5660/#5662/#5663 remain aligned with passing governance gates, zero hotspot budget warnings, release-grade config/DQ/observability evidence, and classified test inventory without budget growth."
+    rationale: Keeps the final TDX roadmap closeout tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.

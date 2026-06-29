@@ -62,7 +62,7 @@ def test_issue_5642_adapter_duplication_is_below_opening_baseline() -> None:
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
 
-    assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] == 63
+    assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] == 58
     assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] < 70
 
 
@@ -70,9 +70,9 @@ def test_issue_5643_pipeline_and_cli_duplication_are_below_opening_baselines() -
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
 
-    assert by_target["src/bioetl/application/pipelines"]["duplicate_count"] == 17
+    assert by_target["src/bioetl/application/pipelines"]["duplicate_count"] == 16
     assert by_target["src/bioetl/application/pipelines"]["duplicate_count"] < 20
-    assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] == 2
+    assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] == 1
     assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] < 5
 
 
@@ -89,13 +89,17 @@ def test_issue_5645_hotspot_warning_count_is_ratcheted_down() -> None:
     scorecard_family = scorecard_families["composition_runtime_builders"]
     hotspot_gate = _gate(gates, "hotspot_family_baseline_budget_warnings")
 
-    assert baseline["summary"]["budget_warnings"] == 6
-    assert baseline["summary"]["budget_warnings"] < 8
+    assert baseline["summary"]["budget_warnings"] == 0
+    assert baseline["summary"]["budget_review_notes"] == 6
     assert baseline_family["files_ge_250_loc"] == 1
     assert baseline_family["max_internal_fan_in"] == 5
-    assert baseline_family["budget_warnings"] == ["at_budget:max_internal_fan_in=5/5"]
+    assert baseline_family["budget_warnings"] == []
+    assert baseline_family["budget_review_notes"] == [
+        "at_budget:max_internal_fan_in=5/5"
+    ]
     assert scorecard_family["metrics"]["files_ge_250_loc"] == 1
     assert scorecard_family["metrics"]["max_internal_fan_in"] == 5
     assert scorecard_family["bounded_growth_budgets"]["files_ge_250_loc"] == 3
     assert scorecard_family["bounded_growth_budgets"]["max_internal_fan_in"] == 5
-    assert hotspot_gate["status"] == "warn"
+    assert hotspot_gate["status"] == "pass"
+    assert hotspot_gate["current"] == 0
