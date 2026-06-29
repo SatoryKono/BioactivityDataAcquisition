@@ -1687,6 +1687,10 @@
   "documented_without_registry": [],
   "documented_without_runtime": [],
   "domain_event_emitters": [
+    "src/bioetl/application/core/_batch_write_support.py",
+    "src/bioetl/application/core/_quarantine_write_support.py",
+    "src/bioetl/application/core/batch_processing_service.py",
+    "src/bioetl/application/core/batch_processing_support.py",
     "src/bioetl/application/observability/observer_context_mixin.py"
   ],
   "emitted_metrics": [

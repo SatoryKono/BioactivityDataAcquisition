@@ -33,6 +33,7 @@ NON_MUTATING_DEFAULT_MARKERS = (
 ENV_WRITE_SURFACES = (
     "scripts/ops/docker-setup.sh",
     "scripts/ops/docker-setup.ps1",
+    "scripts/ai/codex/setup.ps1",
     "scripts/ai/codex/run-codex.sh",
     "scripts/ai/gemini/run-gemini.sh",
     "scripts/ai/codex/helper/setup-env.sh",

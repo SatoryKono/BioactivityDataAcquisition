@@ -547,12 +547,12 @@ hotspot_family_ratchets:
       max_internal_fan_in: 3
       max_internal_fan_in_module: bioetl.composition.factories.pipeline.registry_manifest
     trend:
-      status: reviewed_2026-06-29_pipeline_factories_live_metric_refresh
-      next_action: 2026-06-29 refreshes measured pipeline-factory metrics against
-        the committed hotspot-family baseline at 35 files, 4657 LOC, 2
-        files_ge_250_loc, helper_function_ratio 0.417, and max_internal_fan_in
-        3. Bounded-growth budgets remain flat at 3 files_ge_250_loc and
-        max_internal_fan_in 3; no technical-debt budget is increased.
+      status: reduced_2026-06-29_pipeline_factories_files_ge_250_loc_below_reviewed_budget
+      next_action: 2026-06-29 refresh confirms the pipeline-factory family holds
+        zero duplication and sits below the reviewed files_ge_250_loc budget at
+        2 live files_ge_250_loc versus the budget of 3, while max_internal_fan_in
+        remains pinned at 3. Bounded-growth budgets stay flat pending a future
+        reviewed ratchet; no technical-debt budget is increased.
   - name: application_services_control_plane
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -614,7 +614,7 @@ oversized_source_module_inventory:
   max_tracked_lines: 500
   top_modules:
   - path: src/bioetl/application/pipelines/common/base_publication_transformer.py
-    lines: 284
+    lines: 294
     owner: '@bioetl-application'
     target_split: separate publication normalization, persistence shaping, and provenance
       helpers
@@ -644,7 +644,7 @@ oversized_source_module_inventory:
     owner: '@bioetl-reproducibility'
     target_split: separate score-card policy rules from manifest projection helpers
   - path: src/bioetl/interfaces/cli/commands/domains/health/server_integration.py
-    lines: 355
+    lines: 371
     owner: '@bioetl-interfaces'
     target_split: split health server integration, metrics server wiring, and quarantine
       service helpers

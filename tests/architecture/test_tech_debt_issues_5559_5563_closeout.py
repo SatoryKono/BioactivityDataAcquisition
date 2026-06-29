@@ -88,9 +88,7 @@ def test_issue_5559_module_coverage_gate_current_values_match_zero_residuals() -
     assert gate_rows["module_coverage_uncovered_modules"]["current"] == 0
     assert gate_rows["module_coverage_uncovered_modules"]["limit"] == 0
     assert gate_rows["module_coverage_uncovered_modules"]["status"] == "pass"
-    assert debt_gates["summary"]["warning_gates"] == [
-        "hotspot_family_baseline_budget_warnings"
-    ]
+    assert debt_gates["summary"]["warning_gates"] == []
 
 
 def test_issue_5560_public_merge_entrypoint_has_zero_first_party_importers() -> None:
