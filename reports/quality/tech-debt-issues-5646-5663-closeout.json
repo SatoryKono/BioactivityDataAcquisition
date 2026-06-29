@@ -55,7 +55,7 @@
       "outcome": "release_grade_evidence_enforced",
       "evidence": [
         "reports/quality/contract-registry-diagnostics.json",
-        "reports/quality/contract-registry-dq-diagnostics.json",
+        "scripts/engineering/ci/validate_registry_dq_refs.py",
         "reports/quality/config-discrepancy-baseline.json",
         "reports/observability/runtime_cardinality_inventory.json",
         "reports/observability/runtime_cardinality_review.json",

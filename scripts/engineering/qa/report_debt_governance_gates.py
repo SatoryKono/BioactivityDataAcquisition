@@ -709,7 +709,10 @@ def build_payload(
             metric="blocking_issue_count",
             current=dq_diagnostics["blocking_issue_count"],
             limit=0,
-            source_artifact="reports/quality/contract-registry-dq-diagnostics.json",
+            source_artifact=(
+                "scripts/engineering/ci/validate_registry_dq_refs.py::"
+                "build_diagnostics_payload"
+            ),
             remediation="Fix DQ contract diagnostics before closeout.",
         )
     )

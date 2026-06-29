@@ -13,11 +13,17 @@ pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 CLOSEOUT = ROOT / "reports" / "quality" / "tech-debt-issues-5510-5516-closeout.json"
-COMPATIBILITY_CENSUS = ROOT / "reports" / "quality" / "compatibility-importer-census.json"
-DUPLICATION_BASELINE = ROOT / "reports" / "quality" / "full-app-duplication-baseline.json"
+COMPATIBILITY_CENSUS = (
+    ROOT / "reports" / "quality" / "compatibility-importer-census.json"
+)
+DUPLICATION_BASELINE = (
+    ROOT / "reports" / "quality" / "full-app-duplication-baseline.json"
+)
 MODULE_COVERAGE_GATES = ROOT / "configs" / "quality" / "module_coverage_gates.yaml"
 FLAKY_REVIEW = ROOT / "reports" / "quality" / "flaky-test-burndown-review.json"
-UNUSED_EVENT_REVIEW = ROOT / "reports" / "quality" / "unused-observability-event-debt.json"
+RUNTIME_CARDINALITY_INVENTORY = (
+    ROOT / "reports" / "observability" / "runtime_cardinality_inventory.json"
+)
 CONTRACT_POLICY_LOADER = (
     ROOT / "src" / "bioetl" / "infrastructure" / "config" / "contract_policy_loader.py"
 )
@@ -41,7 +47,15 @@ def test_closeout_artifact_covers_requested_issues__5510_5516() -> None:
 
     assert payload["schema_version"] == "tech-debt-issues-5510-5516-closeout-v1"
     assert payload["debt_budget_outcome"] == "reduced_or_unchanged"
-    assert {issue["number"] for issue in issues} == {5510, 5511, 5512, 5513, 5514, 5515, 5516}
+    assert {issue["number"] for issue in issues} == {
+        5510,
+        5511,
+        5512,
+        5513,
+        5514,
+        5515,
+        5516,
+    }
     assert all(issue["status"] == "closed-ready" for issue in issues)
 
     for issue in issues:
@@ -63,9 +77,7 @@ def test_issue_5510_control_plane_root_facade_stays_zero_src_importers() -> None
 
 def test_issues_5511_5512_duplication_wave_reduced_live_baseline_counts() -> None:
     payload = _load_json(DUPLICATION_BASELINE)
-    rows = {
-        row["target"]: row for row in payload["targets"] if isinstance(row, dict)
-    }
+    rows = {row["target"]: row for row in payload["targets"] if isinstance(row, dict)}
 
     assert rows["src/bioetl/interfaces/cli"]["duplicate_count"] <= 10
     assert rows["src/bioetl/composition/bootstrap"]["duplicate_count"] <= 1
@@ -93,14 +105,17 @@ def test_issue_5514_flaky_review_stays_zero() -> None:
 
 
 def test_issue_5515_unused_event_review_stays_zero() -> None:
-    payload = _load_json(UNUSED_EVENT_REVIEW)
+    payload = _load_json(RUNTIME_CARDINALITY_INVENTORY)
 
-    assert payload["summary"]["unused_declared_observability_events_count"] == 0
-    assert payload["summary"]["runtime_cardinality_review_required_count"] == 0
-    assert payload["reviewed_unused_events"] == []
+    assert payload["unused_declared_observability_events"] == []
+    assert payload["unused_declared_metrics"] == []
+    assert payload["runtime_cardinality_review_required"] == []
+    assert payload["runtime_cardinality_threshold_violations"] == []
 
 
-def test_issue_5516_contract_policy_loader_no_longer_projects_root_hash_selectors() -> None:
+def test_issue_5516_contract_policy_loader_no_longer_projects_root_hash_selectors() -> (
+    None
+):
     source = CONTRACT_POLICY_LOADER.read_text(encoding="utf-8")
 
     assert "_root_runtime_hash_selectors" not in source
