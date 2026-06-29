@@ -39,6 +39,12 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return payload
 
 
+def _assert_lower_hex_digest(value: object, *, length: int) -> None:
+    assert isinstance(value, str)
+    assert len(value) == length
+    assert all(c in "0123456789abcdef" for c in value)
+
+
 def _hotspot_row(payload: dict[str, Any], family_name: str) -> dict[str, Any]:
     families = payload["families"]
     assert isinstance(families, list)
@@ -75,11 +81,11 @@ def test_issue_5553_governance_artifacts_are_aligned_to_committed_inventory() ->
     assert gate_rows["module_coverage_unmeasured_modules"]["status"] == "pass"
     assert gate_rows["module_coverage_uncovered_modules"]["status"] == "pass"
     assert gate_rows["generated_artifact_drift"]["status"] == "pass"
-    # Verify both SHAs are valid SHA format (40 hex characters for full SHA)
-    assert len(closeout_metrics["remote_main_sha"]) == 40
-    assert all(c in "0123456789abcdef" for c in closeout_metrics["remote_main_sha"])
-    assert len(gate_rows["remote_main_architecture_debt_baseline"]["current"]) == 40
-    assert all(c in "0123456789abcdef" for c in gate_rows["remote_main_architecture_debt_baseline"]["current"])
+    _assert_lower_hex_digest(closeout_metrics["remote_main_sha"], length=40)
+
+    remote_baseline_gate = gate_rows["remote_main_architecture_debt_baseline"]
+    assert remote_baseline_gate["metric"] == "baseline_artifact_fingerprint"
+    _assert_lower_hex_digest(remote_baseline_gate["current"], length=64)
 
 
 def test_issue_5554_control_plane_public_facade_has_zero_first_party_interface_importers() -> (
