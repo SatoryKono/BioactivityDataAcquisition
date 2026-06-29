@@ -244,9 +244,9 @@
       "status": "pass"
     },
     {
-      "current": "1fb528da02fb15a59d7ac5e35a8e244b6e8a822d",
-      "limit": "clean remote-main tree evidence",
-      "metric": "remote_main_sha",
+      "current": "5a0fc03bdd54f934165e50d139720f0bb95e1cb078ec1b776a09f79e6453857b",
+      "limit": "clean remote-main artifact blobs",
+      "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
       "remediation": "Fetch origin/main and regenerate the remote-main architecture debt baseline.",
       "source_artifact": "reports/quality/architecture-debt-remote-main-baseline.json",
