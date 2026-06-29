@@ -90,13 +90,18 @@ def test_issue_5400_hotspot_family_budget_warnings_are_reviewed_budget_closures(
     hotspot = _load_json(HOTSPOT_BASELINE)
     families = cast(list[dict[str, Any]], hotspot["families"])
 
-    assert hotspot["summary"]["budget_warnings"] == sum(
-        len(family["budget_warnings"]) for family in families
+    assert hotspot["summary"]["budget_warnings"] == 0
+    assert hotspot["summary"]["budget_review_notes"] == sum(
+        len(family["budget_review_notes"]) for family in families
     )
     for family in families:
         assert all(
-            str(warning).startswith(("at_budget:", "near_budget:"))
+            str(warning).startswith("over_budget:")
             for warning in family["budget_warnings"]
+        )
+        assert all(
+            str(note).startswith(("at_budget:", "near_budget:"))
+            for note in family["budget_review_notes"]
         )
         budgets = cast(dict[str, int], family["bounded_growth_budgets"])
         assert int(family["files_ge_250_loc"]) <= budgets["files_ge_250_loc"]

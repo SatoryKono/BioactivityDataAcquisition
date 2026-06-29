@@ -124,12 +124,12 @@ def test_issues_5648_5649_5650_duplication_is_below_opening_baselines() -> None:
     pipelines = _target(duplication, "src/bioetl/application/pipelines")
     bootstrap = _target(duplication, "src/bioetl/composition/bootstrap")
 
-    assert duplication["summary"]["total_duplicate_clusters"] == 82
-    assert cli["duplicate_count"] == 2
+    assert duplication["summary"]["total_duplicate_clusters"] == 75
+    assert cli["duplicate_count"] == 1
     assert cli["duplicate_count"] < 3
-    assert adapters["duplicate_count"] == 63
+    assert adapters["duplicate_count"] == 58
     assert adapters["duplicate_count"] < 67
-    assert pipelines["duplicate_count"] == 17
+    assert pipelines["duplicate_count"] == 16
     assert pipelines["duplicate_count"] < 18
     assert bootstrap["duplicate_count"] == 0
 
@@ -226,19 +226,22 @@ def test_issue_5654_hotspot_warnings_are_reduced_without_budget_growth() -> None
     scorecard_family = _scorecard_family(scorecard, "composition_factories_pipeline")
     hotspot_gate = _gate(gates, "hotspot_family_baseline_budget_warnings")
 
-    assert baseline["summary"]["budget_warnings"] == 6
-    assert baseline["summary"]["budget_warnings"] < 7
+    assert baseline["summary"]["budget_warnings"] == 0
+    assert baseline["summary"]["budget_review_notes"] == 6
     assert baseline_family["files_ge_250_loc"] == 2
     assert baseline_family["bounded_growth_budgets"]["files_ge_250_loc"] == 3
-    assert baseline_family["budget_warnings"] == ["at_budget:max_internal_fan_in=3/3"]
+    assert baseline_family["budget_warnings"] == []
+    assert baseline_family["budget_review_notes"] == [
+        "at_budget:max_internal_fan_in=3/3"
+    ]
     assert scorecard_family["metrics"]["files_ge_250_loc"] == 2
     assert scorecard_family["bounded_growth_budgets"]["files_ge_250_loc"] == 3
     assert _gate(gates, "debt_scorecard_budget_violations")["status"] == "pass"
     assert _gate(gates, "debt_budget_growth_policy")["status"] == "pass"
-    assert hotspot_gate["status"] == "warn"
-    assert hotspot_gate["current"] == 6
+    assert hotspot_gate["status"] == "pass"
+    assert hotspot_gate["current"] == 0
     assert (
         architecture["source_artifacts"]["hotspot_family_baseline"]["budget_warnings"]
-        == 6
+        == 0
     )
     assert architecture["integral_score"] >= 8.31

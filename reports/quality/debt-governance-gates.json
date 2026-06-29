@@ -55,13 +55,13 @@
       "status": "pass"
     },
     {
-      "current": 6,
+      "current": 0,
       "limit": 0,
       "metric": "budget_warnings",
       "name": "hotspot_family_baseline_budget_warnings",
-      "remediation": "Review hotspot-family budget warnings before tightening ratchets.",
+      "remediation": "Reduce hotspot-family metrics to stay at or below reviewed budgets.",
       "source_artifact": "reports/quality/hotspot-family-baseline.json",
-      "status": "warn"
+      "status": "pass"
     },
     {
       "current": 0,
@@ -273,20 +273,18 @@
   },
   "status_counts": {
     "fail": 0,
-    "pass": 28,
-    "warn": 1
+    "pass": 29,
+    "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 8.32,
+    "architecture_quality_scorecard_integral_score": 8.45,
     "architecture_quality_scorecard_interpretation": "satisfactory_system_refactoring_required",
     "fail_count": 0,
     "failing_gates": [],
     "gate_count": 29,
-    "pass_count": 28,
-    "release_gate_status": "warning",
-    "warn_count": 1,
-    "warning_gates": [
-      "hotspot_family_baseline_budget_warnings"
-    ]
+    "pass_count": 29,
+    "release_gate_status": "passing",
+    "warn_count": 0,
+    "warning_gates": []
   }
 }

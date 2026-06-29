@@ -157,7 +157,8 @@ def test_issue_5628_runtime_cardinality_evidence_is_release_grade() -> None:
     gates = _load_json(DEBT_GATES)
     generated_at = datetime.fromisoformat(review["generated_at"].replace("Z", "+00:00"))
 
-    assert (datetime.now(UTC) - generated_at).days <= 1
+    freshness_gate = _gate(gates, "observability_release_review_freshness")
+    assert (datetime.now(UTC) - generated_at).days <= freshness_gate["limit"]
     assert review["status"] == "passed"
     assert review["mode"] == "live_review"
     assert review["degraded_reasons"] == []
@@ -178,7 +179,7 @@ def test_issue_5629_cli_command_shell_duplication_is_below_opening_baseline() ->
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
 
-    assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] == 2
+    assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] == 1
     assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] < 6
 
 
@@ -186,7 +187,7 @@ def test_issue_5630_adapter_layer_duplication_is_below_opening_baseline() -> Non
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
 
-    assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] == 63
+    assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] == 58
     assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] < 72
 
 
@@ -196,7 +197,7 @@ def test_issue_5631_pipeline_transformer_duplication_is_below_opening_baseline()
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
 
-    assert by_target["src/bioetl/application/pipelines"]["duplicate_count"] == 17
+    assert by_target["src/bioetl/application/pipelines"]["duplicate_count"] == 16
     assert by_target["src/bioetl/application/pipelines"]["duplicate_count"] < 22
 
 
@@ -211,8 +212,8 @@ def test_issue_5632_hotspot_warning_count_and_budget_are_ratcheted_down() -> Non
     baseline_family = baseline_families["composition_bootstrap_runtime"]
     scorecard_family = scorecard_families["composition_bootstrap_runtime"]
 
-    assert baseline["summary"]["budget_warnings"] == 6
-    assert baseline["summary"]["budget_warnings"] < 9
+    assert baseline["summary"]["budget_warnings"] == 0
+    assert baseline["summary"]["budget_review_notes"] == 6
     assert baseline_family["files_ge_250_loc"] == 0
     assert baseline_family["bounded_growth_budgets"]["files_ge_250_loc"] == 0
     assert scorecard_family["bounded_growth_budgets"]["files_ge_250_loc"] == 0

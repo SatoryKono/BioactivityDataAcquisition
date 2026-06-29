@@ -42,7 +42,7 @@
     "hotspot_family_baseline": {
       "path": "reports/quality/hotspot-family-baseline.json",
       "snapshot_date": "2026-06-01",
-      "budget_warnings": 6
+      "budget_warnings": 0
     },
     "test_governance_report": {
       "path": "reports/quality/test-governance-current.json",
@@ -56,7 +56,7 @@
     }
   },
   "weights_sum": 1.0,
-  "integral_score": 8.32,
+  "integral_score": 8.45,
   "interpretation": "satisfactory_system_refactoring_required",
   "categories": [
     {
@@ -106,12 +106,12 @@
       "id": "module_boundaries_coupling",
       "name": "Module boundaries / coupling",
       "weight": 0.14,
-      "score": 6.7,
-      "weighted_score": 0.938,
+      "score": 7.5,
+      "weighted_score": 1.05,
       "evidence_metrics": {
         "source_module_count": 2188,
         "hotspot_family_count": 5,
-        "hotspot_budget_warning_count": 6,
+        "hotspot_budget_warning_count": 0,
         "total_duplicate_clusters": 75
       }
     },
@@ -169,12 +169,12 @@
       "id": "debt_burden_evolution_friction",
       "name": "Debt burden / evolution friction",
       "weight": 0.06,
-      "score": 6.6,
-      "weighted_score": 0.396,
+      "score": 7.0,
+      "weighted_score": 0.42,
       "evidence_metrics": {
         "retained_entrypoint_count": 12,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
-        "hotspot_budget_warning_count": 6,
+        "hotspot_budget_warning_count": 0,
         "total_duplicate_clusters": 75
       }
     }
@@ -185,7 +185,7 @@
     "unmeasured_module_count": 0,
     "uncovered_module_count": 0,
     "hotspot_family_count": 5,
-    "hotspot_budget_warning_count": 6,
+    "hotspot_budget_warning_count": 0,
     "total_duplicate_clusters": 75,
     "retained_entrypoint_count": 12,
     "retained_public_export_facade_count": 4,

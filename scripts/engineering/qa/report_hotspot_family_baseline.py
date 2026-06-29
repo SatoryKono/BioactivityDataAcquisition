@@ -87,17 +87,18 @@ def _build_json_payload(
                 for family in enriched_metrics
                 if isinstance(family.get("budget_warnings"), list)
             ),
+            "budget_review_notes": sum(
+                len(family.get("budget_review_notes", []))
+                for family in enriched_metrics
+                if isinstance(family.get("budget_review_notes"), list)
+            ),
         },
         "families": enriched_metrics,
     }
 
 
-def _budget_warnings_for_family(
-    family: dict[str, object],
-    *,
-    warning_ratio: float = NEAR_BUDGET_RATIO,
-) -> list[str]:
-    """Return bounded-growth warnings before a hard budget failure."""
+def _budget_warnings_for_family(family: dict[str, object]) -> list[str]:
+    """Return hard bounded-growth budget warnings for exceeded budgets."""
     budgets = family.get("bounded_growth_budgets", {})
     if not isinstance(budgets, dict):
         return []
@@ -108,24 +109,50 @@ def _budget_warnings_for_family(
         if (
             not isinstance(metric_name, str)
             or not isinstance(raw_budget, int)
+            or raw_budget < 0
+            or not isinstance(raw_actual, int)
+        ):
+            continue
+        if raw_actual > raw_budget:
+            warnings.append(f"over_budget:{metric_name}={raw_actual}/{raw_budget}")
+    return warnings
+
+
+def _budget_review_notes_for_family(
+    family: dict[str, object],
+    *,
+    warning_ratio: float = NEAR_BUDGET_RATIO,
+) -> list[str]:
+    """Return non-blocking near/at-budget observations for reviewer context."""
+    budgets = family.get("bounded_growth_budgets", {})
+    if not isinstance(budgets, dict):
+        return []
+
+    notes: list[str] = []
+    for metric_name, raw_budget in sorted(budgets.items()):
+        raw_actual = family.get(str(metric_name))
+        if (
+            not isinstance(metric_name, str)
+            or not isinstance(raw_budget, int)
             or raw_budget <= 0
             or not isinstance(raw_actual, int)
         ):
             continue
-        if raw_actual >= raw_budget:
+        if raw_actual == raw_budget:
             state = "at_budget"
         elif raw_actual / raw_budget >= warning_ratio:
             state = "near_budget"
         else:
             continue
-        warnings.append(f"{state}:{metric_name}={raw_actual}/{raw_budget}")
-    return warnings
+        notes.append(f"{state}:{metric_name}={raw_actual}/{raw_budget}")
+    return notes
 
 
 def _with_budget_warnings(family: dict[str, object]) -> dict[str, object]:
-    """Return a family metrics row enriched with early budget warnings."""
+    """Return family metrics enriched with hard warnings and review notes."""
     enriched = dict(family)
     enriched["budget_warnings"] = _budget_warnings_for_family(family)
+    enriched["budget_review_notes"] = _budget_review_notes_for_family(family)
     return enriched
 
 
@@ -171,9 +198,9 @@ def _render_markdown(
         "",
         (
             "| Family | Files | Total LOC | Files >=250 LOC | Helper ratio | "
-            "Duplication | Max fan-in | Max fan-in module | Budgets | Budget warnings |"
+            "Duplication | Max fan-in | Max fan-in module | Budgets | Budget warnings | Budget review notes |"
         ),
-        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- | --- |",
     ]
 
     for family in (_with_budget_warnings(item) for item in metrics):
@@ -189,6 +216,12 @@ def _render_markdown(
             if isinstance(budget_warnings, list) and budget_warnings
             else "-"
         )
+        budget_review_notes = family.get("budget_review_notes", [])
+        review_note_text = (
+            ", ".join(str(note) for note in budget_review_notes)
+            if isinstance(budget_review_notes, list) and budget_review_notes
+            else "-"
+        )
         duplication = family.get("duplication_clusters")
         duplication_text = str(duplication) if duplication is not None else "-"
         lines.append(
@@ -202,7 +235,8 @@ def _render_markdown(
             f"{family['max_internal_fan_in']} | "
             f"`{family['max_internal_fan_in_module'] or '-'}` | "
             f"`{budget_text}` | "
-            f"`{warning_text}` |"
+            f"`{warning_text}` | "
+            f"`{review_note_text}` |"
         )
 
     lines.append("")

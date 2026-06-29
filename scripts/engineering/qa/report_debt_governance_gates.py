@@ -636,12 +636,12 @@ def build_payload(
     gates.append(
         Gate(
             name="hotspot_family_baseline_budget_warnings",
-            status="warn" if budget_warnings else "pass",
+            status="fail" if budget_warnings else "pass",
             metric="budget_warnings",
             current=budget_warnings,
             limit=0,
             source_artifact="reports/quality/hotspot-family-baseline.json",
-            remediation="Review hotspot-family budget warnings before tightening ratchets.",
+            remediation="Reduce hotspot-family metrics to stay at or below reviewed budgets.",
         )
     )
 

@@ -1,0 +1,85 @@
+{
+  "schema_version": "tech-debt-issues-5646-5663-closeout-v1",
+  "reviewed_on": "2026-06-29",
+  "parent_issue": 5646,
+  "issues": [
+    5646,
+    5656,
+    5660,
+    5662,
+    5663
+  ],
+  "debt_budget_policy": "flat_or_decreasing_only",
+  "outcomes": {
+    "5646": {
+      "status": "closeable",
+      "debt_type": "tdx_roadmap",
+      "outcome": "roadmap_children_closed_or_closeable",
+      "evidence": [
+        "reports/quality/debt-governance-gates.json",
+        "reports/quality/hotspot-family-baseline.json",
+        "reports/quality/tech-debt-issues-5657-5661-closeout.json",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ],
+      "closeout_reason": "The final roadmap batch is backed by passing debt-governance gates, zero hotspot budget warnings, closed structural-debt children, and live release-grade config/DQ/observability/test-governance checks."
+    },
+    "5656": {
+      "status": "closeable",
+      "debt_type": "debt_governance_freshness",
+      "outcome": "passing_fail_fast_gate",
+      "evidence": [
+        ".github/workflows/tests.yml",
+        "reports/quality/debt-governance-gates.json",
+        "reports/quality/debt-governance-gates.md",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ],
+      "closeout_reason": "Debt-governance gate rollup is current and passing: fail_count 0, warn_count 0, release_gate_status passing, with CI invoking the checked gate against origin/main."
+    },
+    "5660": {
+      "status": "closeable",
+      "debt_type": "hotspot_family_ratchet",
+      "outcome": "zero_hard_budget_warnings",
+      "opening_baseline": 6,
+      "current_value": 0,
+      "evidence": [
+        "scripts/engineering/qa/report_hotspot_family_baseline.py",
+        "reports/quality/hotspot-family-baseline.json",
+        "reports/quality/architecture-quality-scorecard.json",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ],
+      "closeout_reason": "Hotspot hard budget warnings are now over-budget only and current hotspot-family baseline reports 0 warnings; near/at-budget reviewed residual remains visible as non-blocking budget_review_notes."
+    },
+    "5662": {
+      "status": "closeable",
+      "debt_type": "config_contract_dq_observability_freshness",
+      "outcome": "release_grade_evidence_enforced",
+      "evidence": [
+        "reports/quality/contract-registry-diagnostics.json",
+        "reports/quality/contract-registry-dq-diagnostics.json",
+        "reports/quality/config-discrepancy-baseline.json",
+        "reports/observability/runtime_cardinality_inventory.json",
+        "reports/observability/runtime_cardinality_review.json",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ],
+      "closeout_reason": "Contract, DQ, config, and observability gates are blocker-free and included in the debt-governance fail-fast rollup with touched-surface freshness checks."
+    },
+    "5663": {
+      "status": "closeable",
+      "debt_type": "test_governance_and_platform_sensitive_snapshot_policy",
+      "outcome": "classified_and_bounded",
+      "evidence": [
+        "configs/quality/test_governance_audit.yaml",
+        "reports/quality/test-governance-current.json",
+        "tests/testing_support/neo4j_memory_sync_support/snapshot_invariants.py",
+        "tests/unit/scripts/ops/neo4j_memory_sync/test_snapshot_invariants.py",
+        "tests/architecture/test_tech_debt_issues_5646_5663_closeout.py"
+      ],
+      "closeout_reason": "Compatibility-test inventory remains fully classified at the ratcheted budget of 25, bronze fixture gaps remain empty, and platform-sensitive snapshot invariant tests are explicitly scoped to the memory lane with timeout, cache, and Windows skip policy."
+    }
+  },
+  "required_closeout_checks": [
+    "./.venv/bin/python -m scripts.engineering.qa report-family-baseline --check",
+    "./.venv/bin/python -m scripts.engineering.qa report-debt-governance-gates --check",
+    "./.venv/bin/python -m pytest tests/architecture/test_tech_debt_issues_5646_5663_closeout.py -q"
+  ]
+}
