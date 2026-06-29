@@ -1,31 +1,59 @@
 #!/usr/bin/env pwsh
-# Canonical PowerShell transport for WSL Codex launcher
-# Properly handles output and arguments
+# Canonical PowerShell transport for the Codex WSL launcher.
 
 param(
+    [string]$Command = "start",
     [Parameter(ValueFromRemainingArguments = $true)]
-    [string[]]$Args
+    [string[]]$Prompt = @()
 )
 
-$ErrorActionPreference = "Continue"
-$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$ErrorActionPreference = "Stop"
 
-function ConvertTo-WslPath {
-    param([string]$Path)
-    $drive = $Path.Substring(0, 1).ToLowerInvariant()
-    $rest = $Path.Substring(2) -replace '\\', '/'
-    return "/mnt/$drive$rest"
+$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$WslSupport = Join-Path $ScriptDir "helper\wsl-support.ps1"
+. $WslSupport
+
+function Invoke-CodexInWsl {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$LauncherWSL,
+
+        [string[]]$Arguments = @()
+    )
+
+    $wslExe = Get-CodexWslCommand
+    if (-not $wslExe) {
+        Write-Host "ERROR: wsl.exe was not found from this PowerShell session." -ForegroundColor Red
+        Write-Host "Install WSL 2, restore C:\Windows\System32 in PATH, or verify with: where.exe wsl" -ForegroundColor Red
+        return 1
+    }
+
+    $wslDistro = if ($env:BIOETL_WSL_DISTRO) {
+        $env:BIOETL_WSL_DISTRO
+    } else {
+        ""
+    }
+
+    if ($wslDistro) {
+        & $wslExe -d $wslDistro -e bash -- $LauncherWSL @Arguments
+    } else {
+        & $wslExe -e bash -- $LauncherWSL @Arguments
+    }
+
+    return $LASTEXITCODE
 }
 
-$LauncherWSL = (ConvertTo-WslPath $ScriptDir) + "/run-codex.sh"
+$LauncherWSL = ConvertTo-CodexWslPath (Join-Path $ScriptDir "run-codex.sh")
 
-# Show help
-if ($Args.Count -gt 0 -and $Args[0] -match "^(help|-h|--help)$") {
+if ($Command -match "^(help|-h|--help)$" -and $Prompt.Count -eq 0) {
     Write-Host @"
 Usage: .\run-codex.ps1 [command] [prompt...]
 
+Delegates to the canonical WSL launcher at scripts/ai/codex/run-codex.sh.
+
 Commands:
   (no args)      Start interactive Codex
+  start          Start interactive mode
   exec           Auto-execute mode
   check          Check environment
   setup          Setup components
@@ -35,43 +63,17 @@ Commands:
   device-login   Device code auth
   help           Show this help
 
-Examples:
-  .\run-codex.ps1
-  .\run-codex.ps1 exec "analyze the code"
-  .\run-codex.ps1 check
+Set BIOETL_WSL_DISTRO to target a specific WSL distro; otherwise the default
+WSL distro is used.
 "@
     exit 0
 }
 
-# Resolve wsl.exe
-$wsl = Get-Command wsl -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source
-if (-not $wsl) {
-    $wsl = Join-Path $env:WINDIR "System32\wsl.exe"
-    if (-not (Test-Path $wsl)) {
-        Write-Error "WSL not found. Install WSL2 or run from Linux/WSL."
-        exit 1
-    }
+$ArgsToPass = @()
+if ($PSBoundParameters.ContainsKey("Command")) {
+    $ArgsToPass += $Command
+    $ArgsToPass += $Prompt
 }
 
-# Build command
-$cmdArgs = if ($Args.Count -gt 0) { $Args -join ' ' } else { "" }
-$bashCmd = "bash '$LauncherWSL' $cmdArgs"
-
-# Get distro if specified
-$distro = $env:BIOETL_WSL_DISTRO
-
-# Run with proper output handling
-try {
-    if ($distro) {
-        & $wsl -d $distro -e bash -c $bashCmd
-    }
-    else {
-        & $wsl -e bash -c $bashCmd
-    }
-}
-catch {
-    Write-Error "WSL execution failed: $_"
-    exit 1
-}
-
-exit $LASTEXITCODE
+$exitCode = Invoke-CodexInWsl -LauncherWSL $LauncherWSL -Arguments $ArgsToPass
+exit $exitCode
