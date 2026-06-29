@@ -439,13 +439,18 @@ class TestSilverWriter:
             }
         ]
 
-        # Use same schema as existing_schema mock
-        await writer.write_silver(
-            table_name="test_table",
-            records=records,
-            primary_keys=["id"],
-            schema=existing_schema,
-        )
+        # Mock _delta_table_has_parquet_data to return True to force merge path
+        with patch(
+            "bioetl.infrastructure.storage.silver.delta_merge_helpers._delta_table_has_parquet_data",
+            return_value=True,
+        ):
+            # Use same schema as existing_schema mock
+            await writer.write_silver(
+                table_name="test_table",
+                records=records,
+                primary_keys=["id"],
+                schema=existing_schema,
+            )
 
         mock_table_instance.merge.assert_called_once()
 

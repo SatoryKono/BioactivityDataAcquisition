@@ -131,7 +131,7 @@ try {
     Write-Host "Executing $setupBatPath... This may take several minutes."
     # Execute the .bat via cmd.exe for more reliable output and exit code capturing.
     # This also helps avoid some permission and path issues that can occur with Start-Process.
-    & cmd.exe /c "`"$setupBatPath`""
+    & cmd.exe /c "`"$setupBatPath`" /noninteractive"
     if ($LASTEXITCODE -ne 0) {
         throw "Script setup-codex-wsl.bat finished with an error. Code: $LASTEXITCODE"
     }
