@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import Counter
 import json
 
 import pytest
@@ -32,6 +33,31 @@ def test_scripts_inventory_manifest_exists_and_has_required_keys() -> None:
     assert isinstance(summary, dict)
     assert "total_scripts" in summary
     assert "status_counts" in summary
+
+
+def test_scripts_inventory_manifest_summary_matches_scripts_payload() -> None:
+    """Committed summary counts must be derived from the committed scripts list."""
+    root = repo_root()
+    manifest_path = root / "configs" / "quality" / "scripts_inventory_manifest.json"
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+    scripts = payload["scripts"]
+    assert isinstance(scripts, list)
+
+    summary = payload["summary"]
+    assert isinstance(summary, dict)
+    assert summary["total_scripts"] == len(scripts)
+
+    recomputed_status_counts: Counter[str] = Counter()
+    for index, item in enumerate(scripts):
+        assert isinstance(item, dict), f"scripts[{index}] must be an object"
+        status = item.get("status")
+        assert isinstance(status, str) and status, (
+            f"scripts[{index}].status must be a non-empty string"
+        )
+        recomputed_status_counts[status] += 1
+
+    assert summary["status_counts"] == dict(sorted(recomputed_status_counts.items()))
 
 
 def test_scripts_inventory_dispatcher_targets_canonical_checker() -> None:

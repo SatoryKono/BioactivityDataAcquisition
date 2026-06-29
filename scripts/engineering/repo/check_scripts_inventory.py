@@ -906,11 +906,106 @@ def _stable_manifest(data: dict[str, object]) -> dict[str, object]:
     return normalized
 
 
+def _manifest_summary_mismatches(payload: dict[str, object]) -> list[str]:
+    summary = payload.get("summary")
+    if not isinstance(summary, dict):
+        return ["Inventory payload must contain object field 'summary'"]
+
+    scripts = payload.get("scripts")
+    if not isinstance(scripts, list):
+        return ["Inventory payload must contain list field 'scripts'"]
+
+    mismatches: list[str] = []
+    summary_total = summary.get("total_scripts")
+    if not isinstance(summary_total, int):
+        mismatches.append("summary.total_scripts must be an int")
+    elif summary_total != len(scripts):
+        mismatches.append(
+            "summary.total_scripts does not match scripts[] "
+            f"({summary_total} != {len(scripts)})"
+        )
+
+    summary_counts_raw = summary.get("status_counts")
+    if not isinstance(summary_counts_raw, dict):
+        mismatches.append("summary.status_counts must be an object")
+        return mismatches
+
+    recomputed_counts: Counter[str] = Counter()
+    for index, item in enumerate(scripts):
+        if not isinstance(item, dict):
+            mismatches.append(f"scripts[{index}] must be an object")
+            continue
+        status = item.get("status")
+        if not isinstance(status, str) or not status.strip():
+            mismatches.append(f"scripts[{index}].status must be a non-empty string")
+            continue
+        recomputed_counts[status] += 1
+
+    normalized_summary_counts: dict[str, int] = {}
+    for key, value in sorted(summary_counts_raw.items()):
+        if not isinstance(key, str) or not key.strip():
+            mismatches.append("summary.status_counts keys must be non-empty strings")
+            continue
+        if not isinstance(value, int):
+            mismatches.append(f"summary.status_counts[{key!r}] must be an int")
+            continue
+        normalized_summary_counts[key] = value
+
+    if mismatches:
+        return mismatches
+
+    expected_counts = dict(sorted(recomputed_counts.items()))
+    if normalized_summary_counts != expected_counts:
+        mismatches.append(
+            "summary.status_counts does not match scripts[] statuses "
+            f"({normalized_summary_counts} != {expected_counts})"
+        )
+    return mismatches
+
+
 def _write_manifest(path: Path, payload: dict[str, object]) -> None:
-    _write_text_atomic(
-        path,
-        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
-    )
+    _write_text_atomic(path, _render_manifest(payload))
+
+
+def _render_manifest(payload: dict[str, object]) -> str:
+    return json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
+
+
+def _prepare_manifest_write(
+    path: Path,
+    payload: dict[str, object],
+) -> tuple[dict[str, object], bool]:
+    """Return the manifest payload to persist and whether a write is needed.
+
+    When the committed manifest differs only by the volatile ``generated_at``
+    field, preserve the existing timestamp and skip the rewrite entirely. This
+    keeps the inventory sync command idempotent and avoids timestamp-only repo
+    churn from write-capable guardrails.
+    """
+
+    if not path.exists():
+        return payload, True
+
+    try:
+        existing = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return payload, True
+
+    if not isinstance(existing, dict):
+        return payload, True
+
+    prepared = dict(payload)
+    if _stable_manifest(existing) == _stable_manifest(payload):
+        existing_generated_at = existing.get("generated_at")
+        if existing_generated_at is not None:
+            prepared["generated_at"] = existing_generated_at
+
+    rendered = _render_manifest(prepared)
+    try:
+        current = path.read_text(encoding="utf-8")
+    except OSError:
+        return prepared, True
+    return prepared, current != rendered
 
 
 def _write_text_atomic(path: Path, content: str) -> None:
@@ -935,7 +1030,22 @@ def _check(manifest_path: Path, actual: dict[str, object]) -> int:
         print("Run with --update to create baseline manifest.")
         return 1
 
+    actual_mismatches = _manifest_summary_mismatches(actual)
+    if actual_mismatches:
+        print("[FAIL] Generated inventory payload is internally inconsistent:")
+        for item in actual_mismatches:
+            print(f"  - {item}")
+        return 1
+
     expected = json.loads(manifest_path.read_text(encoding="utf-8"))
+    expected_mismatches = _manifest_summary_mismatches(expected)
+    if expected_mismatches:
+        print(f"[FAIL] Manifest summary drift detected inside: {manifest_path}")
+        for item in expected_mismatches:
+            print(f"  - {item}")
+        print("Run with --update to refresh manifest.")
+        return 1
+
     if _stable_manifest(expected) == _stable_manifest(actual):
         print(f"[OK] Scripts inventory is in sync: {manifest_path}")
         return 0
@@ -1114,8 +1224,26 @@ def _validate_target_registry_entries(
         absent = sorted(required - set(entry.keys()))
         if absent:
             invalid.append(f"{path}: missing fields {absent}")
-        if forbid_evaluate_active and str(entry.get("decision")) == "evaluate_active":
+        decision = entry.get("decision")
+        if not isinstance(decision, str) or not decision.strip():
+            invalid.append(f"{path}: decision must be a non-empty string")
+            continue
+        if forbid_evaluate_active and decision == "evaluate_active":
             forbidden.append(path)
+        expected_status = _status_from_lifecycle_decision(decision)
+        if status == "supporting" and decision not in SUPPORTING_LIFECYCLE_DECISIONS:
+            invalid.append(
+                f"{path}: supporting status requires decision in "
+                f"{sorted(SUPPORTING_LIFECYCLE_DECISIONS)}"
+            )
+        elif status == "temporary_diagnostic" and decision != "temporary_diagnostic":
+            invalid.append(
+                f"{path}: temporary_diagnostic status requires decision=temporary_diagnostic"
+            )
+        elif expected_status is not None and expected_status != status:
+            invalid.append(
+                f"{path}: decision {decision!r} is inconsistent with inventory status {status!r}"
+            )
 
     return missing, invalid, forbidden
 
@@ -1139,9 +1267,6 @@ def _validate_stale_registry_entries(
             continue
         status = str(row_value.get("status", "unknown"))
         if status not in target_statuses:
-            decision = entry_value.get("decision")
-            if _status_from_lifecycle_decision(str(decision)) == "supporting":
-                continue
             stale.append(f"{path}: status changed to {status}")
 
     return stale, invalid
@@ -1257,8 +1382,12 @@ def main(argv: list[str] | None = None) -> int:
     payload = _build_inventory(root)
 
     if args.update:
-        _write_manifest(manifest_path, payload)
-        print(f"[OK] Updated scripts inventory manifest: {manifest_path}")
+        prepared_payload, wrote_manifest = _prepare_manifest_write(manifest_path, payload)
+        if wrote_manifest:
+            _write_manifest(manifest_path, prepared_payload)
+            print(f"[OK] Updated scripts inventory manifest: {manifest_path}")
+        else:
+            print(f"[OK] Scripts inventory manifest is already synchronized: {manifest_path}")
 
     check_result = _run_requested_checks(
         root=root, args=args, payload=payload, manifest_path=manifest_path
