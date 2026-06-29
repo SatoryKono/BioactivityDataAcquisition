@@ -163,7 +163,7 @@ Notes:
 - Documentation site commands require the separate `docs` extra: `uv sync --extra dev --extra tests --extra tracing --extra docs` or `pip install -e ".[dev,tests,tracing,docs]"`.
 - `uv run python -m scripts.ops setup-plugins` configures local pytest and pre-commit tooling.
 - Hook-only reinstall remains available through `bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only`.
-- If you use Codex or GitHub Copilot MCP, run `uv run python -m scripts.engineering.dev setup-mcp` after install. If you activated the OS-appropriate environment instead of using `uv`, `python -m scripts.engineering.dev setup-mcp` is also valid.
+- If you use Codex, GitHub Copilot, or Devin MCP, run `uv run python -m scripts.engineering.dev setup-mcp` after install. If you activated the OS-appropriate environment instead of using `uv`, `python -m scripts.engineering.dev setup-mcp` is also valid.
 - For docs verification and strict site builds, use the published [Docs Verification Guide](docs/03-guides/docs-verification.md).
 
 #### Mixed Windows + WSL Development

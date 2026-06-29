@@ -40,6 +40,9 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
     codex_settings = json.loads(
         (output_root / ".codex" / "settings.json").read_text(encoding="utf-8")
     )
+    devin_config = json.loads(
+        (output_root / ".devin" / "config.json").read_text(encoding="utf-8")
+    )
     gemini_settings = json.loads(
         (output_root / ".gemini" / "settings.json").read_text(encoding="utf-8")
     )
@@ -47,6 +50,7 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
     wrapper_suffix = ".ps1" if os.name == "nt" else ".sh"
 
     assert codex_settings["mcpServers"] == servers
+    assert devin_config["mcpServers"] == servers
     assert qodo_payload["mcpServers"] == servers
     assert servers["filesystem"]["args"][-1] == str(workspace_root.resolve())
     assert servers["sequential-thinking"]["args"] == [

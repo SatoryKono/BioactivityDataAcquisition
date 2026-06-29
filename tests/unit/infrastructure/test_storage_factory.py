@@ -80,6 +80,7 @@ def mock_settings(tmp_path):
         ),
         silver_merge_timeout=SimpleNamespace(
             execution_timeout_seconds=45.0,
+            plain_write_process_isolation=False,
             retry_enabled=True,
             adaptive_backoff=True,
             max_retries=1,

@@ -8,12 +8,12 @@
     },
     "module_coverage_inventory": {
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "d1450f80495274c23e23e56ad43b7a480d348c1e67408e459400a3c613a7537a",
+      "source_tree_sha256": "cd8786711509cd553c514ddf25e2b1927f420fc9edeb59d68e581f9965d3636f",
       "coverage_xml_sha256": "688fdd5cf7e086bb0ac2178265406f9e8395532fb1067e9e6e2fc0c7b5e1632a"
     },
     "compatibility_importer_census": {
       "path": "reports/quality/compatibility-importer-census.json",
-      "snapshot_date": "2026-06-26"
+      "snapshot_date": "2026-06-29"
     },
     "dead_code_inventory": {
       "path": "reports/quality/dead-code-inventory.json",
@@ -36,8 +36,8 @@
     },
     "duplication_baseline": {
       "path": "reports/quality/full-app-duplication-baseline.json",
-      "snapshot_date": "2026-06-26",
-      "total_duplicate_clusters": 82
+      "snapshot_date": "2026-06-29",
+      "total_duplicate_clusters": 75
     },
     "hotspot_family_baseline": {
       "path": "reports/quality/hotspot-family-baseline.json",
@@ -56,7 +56,7 @@
     }
   },
   "weights_sum": 1.0,
-  "integral_score": 8.31,
+  "integral_score": 8.32,
   "interpretation": "satisfactory_system_refactoring_required",
   "categories": [
     {
@@ -87,7 +87,7 @@
       "score": 9.0,
       "weighted_score": 0.81,
       "evidence_metrics": {
-        "source_module_count": 2189,
+        "source_module_count": 2188,
         "uncovered_module_count": 0
       }
     },
@@ -109,10 +109,10 @@
       "score": 6.7,
       "weighted_score": 0.938,
       "evidence_metrics": {
-        "source_module_count": 2189,
+        "source_module_count": 2188,
         "hotspot_family_count": 5,
         "hotspot_budget_warning_count": 6,
-        "total_duplicate_clusters": 82
+        "total_duplicate_clusters": 75
       }
     },
     {
@@ -169,24 +169,24 @@
       "id": "debt_burden_evolution_friction",
       "name": "Debt burden / evolution friction",
       "weight": 0.06,
-      "score": 6.5,
-      "weighted_score": 0.39,
+      "score": 6.6,
+      "weighted_score": 0.396,
       "evidence_metrics": {
         "retained_entrypoint_count": 12,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
         "hotspot_budget_warning_count": 6,
-        "total_duplicate_clusters": 82
+        "total_duplicate_clusters": 75
       }
     }
   ],
   "metrics": {
     "layer_violations": 0,
-    "source_module_count": 2189,
+    "source_module_count": 2188,
     "unmeasured_module_count": 0,
     "uncovered_module_count": 0,
     "hotspot_family_count": 5,
     "hotspot_budget_warning_count": 6,
-    "total_duplicate_clusters": 82,
+    "total_duplicate_clusters": 75,
     "retained_entrypoint_count": 12,
     "retained_public_export_facade_count": 4,
     "twin_pair_count": 0,

@@ -1,5 +1,6 @@
 @echo off
-REM Compatibility facade for the canonical Codex launcher
+REM Fast Codex launcher - skips MCP setup which can hang
+REM Usage: codex-fast.bat [command] [args]
 
 setlocal EnableExtensions
 setlocal EnableDelayedExpansion
@@ -56,10 +57,11 @@ if not defined REPO_WSL (
     exit /b 1
 )
 
-REM Run bash script (interactive TTY for Codex prompts)
+REM Run bash script with CODEX_SKIP_MCP_SETUP=1 to skip MCP setup
+set "CODEX_SKIP_MCP_SETUP=1"
 if defined WSL_DISTRO (
-    "%WSL_EXE%" -d "%WSL_DISTRO%" -- bash -i "%REPO_WSL%/scripts/ops/launchers/codex/codex.sh" %*
+    "%WSL_EXE%" -d "%WSL_DISTRO%" -- bash -c "export CODEX_SKIP_MCP_SETUP=1; bash '%REPO_WSL%/scripts/ops/launchers/codex/codex.sh' %*"
 ) else (
-    "%WSL_EXE%" -- bash -i "%REPO_WSL%/scripts/ops/launchers/codex/codex.sh" %*
+    "%WSL_EXE%" -- bash -c "export CODEX_SKIP_MCP_SETUP=1; bash '%REPO_WSL%/scripts/ops/launchers/codex/codex.sh' %*"
 )
 exit /b %errorlevel%
