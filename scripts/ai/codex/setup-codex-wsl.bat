@@ -91,7 +91,9 @@ if defined WSL_DISTRO (
 if errorlevel 1 (
     echo.
     echo [ERROR] Setup failed. See output above for details.
-    pause
+    if /i not "%1" == "/noninteractive" (
+        pause
+    )
     exit /b %errorlevel%
 )
 
@@ -105,5 +107,7 @@ echo.
 echo For more info: notepad .\scripts\ai\codex\md\POWERSHELL_QUICK_START.md
 echo.
 
-pause
+if /i not "%1" == "/noninteractive" (
+    pause
+)
 exit /b 0
