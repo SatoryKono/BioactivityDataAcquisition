@@ -46,6 +46,33 @@ from bioetl.infrastructure.adapters.chembl.models_compound import (
     MoleculeStructures,
 )
 
+_CHEMBL_FACADE_MODEL_EXPORTS = (
+    "CHEMBL_RECORD_MODELS",
+    "CHEMBL_RESPONSE_MODELS",
+    "ChemblActivityRecord",
+    "ChemblActivityResponse",
+    "ChemblAssayRecord",
+    "ChemblAssayResponse",
+    "ChemblCompoundRecordApiRecord",
+    "ChemblCompoundRecordResponse",
+    "ChemblMoleculeRecord",
+    "ChemblMoleculeResponse",
+    "ChemblPageMeta",
+    "ChemblProteinClassApiRecord",
+    "ChemblProteinClassResponse",
+    "ChemblPublicationApiRecord",
+    "ChemblPublicationResponse",
+    "ChemblPublicationSimilarityApiRecord",
+    "ChemblPublicationSimilarityResponse",
+    "ChemblReleaseInfo",
+    "ChemblTargetComponentRecord",
+    "ChemblTargetComponentResponse",
+    "ChemblTargetRecord",
+    "ChemblTargetResponse",
+    "ChemblTissueApiRecord",
+    "ChemblTissueResponse",
+)
+
 __all__ = [
     "CHEMBL_RECORD_MODELS",
     "CHEMBL_RESPONSE_MODELS",

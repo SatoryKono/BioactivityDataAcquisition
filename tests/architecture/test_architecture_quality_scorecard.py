@@ -12,6 +12,11 @@ ARTIFACT = ROOT / "reports" / "quality" / "architecture-quality-scorecard.json"
 MODULE_COVERAGE_ARTIFACT = (
     ROOT / "reports" / "quality" / "module-coverage-inventory.json"
 )
+DUPLICATION_BASELINE_ARTIFACT = (
+    ROOT / "reports" / "quality" / "full-app-duplication-baseline.json"
+)
+HOTSPOT_BASELINE_ARTIFACT = ROOT / "reports" / "quality" / "hotspot-family-baseline.json"
+TEST_GOVERNANCE_ARTIFACT = ROOT / "reports" / "quality" / "test-governance-current.json"
 
 
 def _normalize_live_collector_comparison(
@@ -152,3 +157,46 @@ def test_architecture_quality_scorecard_includes_adr_and_observability_gates() -
     assert committed["metrics"]["dashboarded_without_emission_count"] == 0
     assert committed["metrics"]["dashboarded_without_declaration_count"] == 0
     assert committed["metrics"]["runtime_cardinality_review_required_count"] == 0
+
+
+@pytest.mark.architecture
+def test_architecture_quality_scorecard_includes_duplication_hotspot_and_test_governance_evidence() -> (
+    None
+):
+    committed = json.loads(ARTIFACT.read_text(encoding="utf-8"))
+    duplication = json.loads(DUPLICATION_BASELINE_ARTIFACT.read_text(encoding="utf-8"))
+    hotspot = json.loads(HOTSPOT_BASELINE_ARTIFACT.read_text(encoding="utf-8"))
+    test_governance = json.loads(TEST_GOVERNANCE_ARTIFACT.read_text(encoding="utf-8"))
+
+    duplication_artifact = committed["source_artifacts"]["duplication_baseline"]
+    assert duplication_artifact["path"] == "reports/quality/full-app-duplication-baseline.json"
+    assert duplication_artifact["snapshot_date"] == duplication["summary"]["snapshot_date"]
+    assert (
+        duplication_artifact["total_duplicate_clusters"]
+        == duplication["summary"]["total_duplicate_clusters"]
+    )
+
+    hotspot_artifact = committed["source_artifacts"]["hotspot_family_baseline"]
+    assert hotspot_artifact["path"] == "reports/quality/hotspot-family-baseline.json"
+    assert hotspot_artifact["snapshot_date"] == hotspot["summary"]["snapshot_date"]
+    assert hotspot_artifact["budget_warnings"] == hotspot["summary"]["budget_warnings"]
+
+    governance_artifact = committed["source_artifacts"]["test_governance_report"]
+    assert governance_artifact["path"] == "reports/quality/test-governance-current.json"
+    assert (
+        governance_artifact["compatibility_test_files"]
+        == test_governance["report"]["compatibility_test_files"]
+    )
+
+    assert (
+        committed["metrics"]["total_duplicate_clusters"]
+        == duplication["summary"]["total_duplicate_clusters"]
+    )
+    assert (
+        committed["metrics"]["hotspot_budget_warning_count"]
+        == hotspot["summary"]["budget_warnings"]
+    )
+    assert (
+        committed["metrics"]["compatibility_test_file_count"]
+        == test_governance["report"]["compatibility_test_files"]
+    )

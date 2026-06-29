@@ -28,3 +28,4 @@ def test_build_default_silver_merge_policy_matches_pipeline_defaults() -> None:
     assert policy.timeout_retry.max_delay_seconds == pytest.approx(2.0)
     assert policy.timeout_retry.jitter_seconds == pytest.approx(0.050)
     assert policy.timeout_retry.adaptive is True
+    assert policy.plain_write_process_isolation is False

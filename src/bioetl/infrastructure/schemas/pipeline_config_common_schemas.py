@@ -232,7 +232,7 @@ class SilverFiltersConfig(BaseGoldFiltersConfig):
     def reject_semantic_silver_filters(cls, data: object) -> object:
         """Reject semantic keys even when this sub-schema is validated directly."""
         if isinstance(data, dict):
-            from bioetl.infrastructure.config.silver_filter_migration import (
+            from bioetl.domain.filtering.silver_config import (
                 validate_structural_silver_filter_payload,
             )
 
@@ -241,7 +241,7 @@ class SilverFiltersConfig(BaseGoldFiltersConfig):
 
     def to_domain(self) -> SilverFilterConfig:  # type: ignore[override]
         """Convert to a structural-only SilverFilterConfig."""
-        from bioetl.infrastructure.config.silver_filter_migration import (
+        from bioetl.domain.filtering.silver_config import (
             build_silver_filter_config_for_compatibility,
         )
 

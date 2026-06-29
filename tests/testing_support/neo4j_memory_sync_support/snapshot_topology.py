@@ -8,10 +8,13 @@ import pytest
 
 from .common import *  # noqa: F403
 
-pytestmark = pytest.mark.skipif(
-    sys.platform.startswith("win"),
-    reason="Snapshot topology tests require full repo walk which is prohibitively slow on Windows",
-)
+
+@pytest.fixture(autouse=True)
+def _skip_snapshot_topology_on_windows() -> None:
+    if sys.platform.startswith("win"):
+        pytest.skip(
+            "Snapshot topology tests require full repo walk which is prohibitively slow on Windows"
+        )
 
 RelationKey = tuple[str, str, str, str, str]
 

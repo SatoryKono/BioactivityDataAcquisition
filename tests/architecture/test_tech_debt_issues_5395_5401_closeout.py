@@ -84,13 +84,25 @@ def test_issue_5398_layer_matrix_has_bronze_silver_gold_rows() -> None:
     assert payload["summary"]["coverage_levels"]["structural_only"] > 0
 
 
-def test_issue_5400_hotspot_family_budget_warnings_stay_zero() -> None:
+def test_issue_5400_hotspot_family_budget_warnings_are_reviewed_budget_closures() -> (
+    None
+):
     hotspot = _load_json(HOTSPOT_BASELINE)
     families = cast(list[dict[str, Any]], hotspot["families"])
 
     assert hotspot["summary"]["budget_warnings"] == 0
-    assert all(family["budget_warnings"] == [] for family in families)
+    assert hotspot["summary"]["budget_review_notes"] == sum(
+        len(family["budget_review_notes"]) for family in families
+    )
     for family in families:
+        assert all(
+            str(warning).startswith("over_budget:")
+            for warning in family["budget_warnings"]
+        )
+        assert all(
+            str(note).startswith(("at_budget:", "near_budget:"))
+            for note in family["budget_review_notes"]
+        )
         budgets = cast(dict[str, int], family["bounded_growth_budgets"])
         assert int(family["files_ge_250_loc"]) <= budgets["files_ge_250_loc"]
         assert int(family["max_internal_fan_in"]) <= budgets["max_internal_fan_in"]

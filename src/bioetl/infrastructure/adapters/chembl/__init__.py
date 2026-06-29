@@ -6,56 +6,15 @@ See RULES.md Appendix A for rate limits and retry strategy.
 
 from __future__ import annotations
 
+from bioetl.infrastructure.adapters.chembl import models as _chembl_models
 from bioetl.infrastructure.adapters.chembl.client import ChemblAdapter
 from bioetl.infrastructure.adapters.chembl.models import (
-    CHEMBL_RECORD_MODELS,
-    CHEMBL_RESPONSE_MODELS,
-    ChemblActivityRecord,
-    ChemblActivityResponse,
-    ChemblAssayRecord,
-    ChemblAssayResponse,
-    ChemblCompoundRecordApiRecord,
-    ChemblCompoundRecordResponse,
-    ChemblMoleculeRecord,
-    ChemblMoleculeResponse,
-    ChemblPageMeta,
-    ChemblProteinClassApiRecord,
-    ChemblProteinClassResponse,
-    ChemblPublicationApiRecord,
-    ChemblPublicationResponse,
-    ChemblPublicationSimilarityApiRecord,
-    ChemblPublicationSimilarityResponse,
-    ChemblTargetComponentRecord,
-    ChemblTargetComponentResponse,
-    ChemblTargetRecord,
-    ChemblTargetResponse,
-    ChemblTissueApiRecord,
-    ChemblTissueResponse,
+    _CHEMBL_FACADE_MODEL_EXPORTS,
 )
 
-__all__ = [
-    "CHEMBL_RECORD_MODELS",
-    "CHEMBL_RESPONSE_MODELS",
-    "ChemblActivityRecord",
-    "ChemblActivityResponse",
-    "ChemblAdapter",
-    "ChemblAssayRecord",
-    "ChemblAssayResponse",
-    "ChemblCompoundRecordApiRecord",
-    "ChemblCompoundRecordResponse",
-    "ChemblMoleculeRecord",
-    "ChemblMoleculeResponse",
-    "ChemblPageMeta",
-    "ChemblProteinClassApiRecord",
-    "ChemblProteinClassResponse",
-    "ChemblPublicationApiRecord",
-    "ChemblPublicationResponse",
-    "ChemblPublicationSimilarityApiRecord",
-    "ChemblPublicationSimilarityResponse",
-    "ChemblTargetComponentRecord",
-    "ChemblTargetComponentResponse",
-    "ChemblTargetRecord",
-    "ChemblTargetResponse",
-    "ChemblTissueApiRecord",
-    "ChemblTissueResponse",
-]
+for _export_name in _CHEMBL_FACADE_MODEL_EXPORTS:
+    globals()[_export_name] = getattr(_chembl_models, _export_name)
+
+del _export_name
+
+__all__ = ["ChemblAdapter", *_CHEMBL_FACADE_MODEL_EXPORTS]

@@ -82,7 +82,7 @@ ______________________________________________________________________
 | Trigger       | 5 consecutive errors                           |
 | Open Duration | 5 минут                                        |
 | Recovery      | Half-Open → 1 пробный запрос                   |
-| Metrics       | `circuit-breaker-state` (0/1/2), `trips-total` |
+| Metrics       | `bioetl_circuit_breaker_state` (0/1/2), `bioetl_circuit_breaker_trips_total` |
 
 ## 4. Блокировки (Local-Only)
 

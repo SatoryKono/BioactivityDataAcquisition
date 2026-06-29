@@ -1,95 +1,79 @@
 #!/usr/bin/env pwsh
-# Thin PowerShell transport for the canonical WSL/Bash Codex launcher.
+# Canonical PowerShell transport for the Codex WSL launcher.
 
 param(
     [string]$Command = "start",
+    [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]$Prompt = @()
 )
 
+$ErrorActionPreference = "Stop"
+
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$WslSupport = Join-Path $ScriptDir "helper\wsl-support.ps1"
+. $WslSupport
 
-function ConvertTo-WslPath {
-    param([string]$WindowsPath)
+function Invoke-CodexInWsl {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$LauncherWSL,
 
-    $drive = $WindowsPath.Substring(0, 1).ToLower()
-    $rest = $WindowsPath.Substring(2) -replace '\\', '/'
-    return "/mnt/$drive$rest"
+        [string[]]$Arguments = @()
+    )
+
+    $wslExe = Get-CodexWslCommand
+    if (-not $wslExe) {
+        Write-Host "ERROR: wsl.exe was not found from this PowerShell session." -ForegroundColor Red
+        Write-Host "Install WSL 2, restore C:\Windows\System32 in PATH, or verify with: where.exe wsl" -ForegroundColor Red
+        return 1
+    }
+
+    $wslDistro = if ($env:BIOETL_WSL_DISTRO) {
+        $env:BIOETL_WSL_DISTRO
+    } else {
+        ""
+    }
+
+    if ($wslDistro) {
+        & $wslExe -d $wslDistro -e bash -- $LauncherWSL @Arguments
+    } else {
+        & $wslExe -e bash -- $LauncherWSL @Arguments
+    }
+
+    return $LASTEXITCODE
 }
 
-$LauncherWSL = (ConvertTo-WslPath $ScriptDir) + "/run-codex.sh"
+$LauncherWSL = ConvertTo-CodexWslPath (Join-Path $ScriptDir "run-codex.sh")
 
-function Show-Usage {
+if ($Command -match "^(help|-h|--help)$" -and $Prompt.Count -eq 0) {
     Write-Host @"
-Usage: .\run-codex.ps1 [command] [prompt]
+Usage: .\run-codex.ps1 [command] [prompt...]
 
-This PowerShell entrypoint is a thin transport over the canonical WSL/Bash launcher:
-  bash run-codex.sh [command] [prompt]
+Delegates to the canonical WSL launcher at scripts/ai/codex/run-codex.sh.
 
 Commands:
   (no args)      Start interactive Codex
   start          Start interactive mode
-  exec           Auto-execute (no confirmations)
+  exec           Auto-execute mode
+  check          Check environment
+  setup          Setup components
+  mcp-check      Check MCP configuration
+  mcp-setup      Sync MCP configuration
   login          Login with API key
-  device-login   Login with device auth
-  check          Check environment setup
-  setup          Setup missing components
-  mcp-check      Check Codex MCP configuration
-  mcp-setup      Sync Codex MCP configuration
+  device-login   Device code auth
   help           Show this help
 
-Examples:
-  .\run-codex.ps1
-  .\run-codex.ps1 exec "analyze the code"
-  .\run-codex.ps1 mcp-setup
+Set BIOETL_WSL_DISTRO to target a specific WSL distro; otherwise the default
+WSL distro is used.
 "@
-}
-
-function Resolve-WslExecutable {
-    $wsl = Get-Command wsl -ErrorAction SilentlyContinue
-    if ($wsl) {
-        return $wsl.Source
-    }
-
-    $fallback = Join-Path $env:WINDIR "System32\wsl.exe"
-    if (Test-Path -LiteralPath $fallback) {
-        return $fallback
-    }
-
-    return $null
-}
-
-function Invoke-CodexInWsl {
-    param([string[]]$LauncherArgs)
-
-    $wslExe = Resolve-WslExecutable
-    if (-not $wslExe) {
-        Write-Error (
-            "WSL is required for run-codex.ps1. Install WSL or run bash run-codex.sh from Linux/WSL."
-        )
-        return 1
-    }
-
-    $wslDistro = $env:BIOETL_WSL_DISTRO
-    if ($wslDistro) {
-        & $wslExe -d $wslDistro -e bash -- $LauncherWSL @LauncherArgs
-    }
-    else {
-        & $wslExe -e bash -- $LauncherWSL @LauncherArgs
-    }
-    if ($LASTEXITCODE -ne $null) {
-        return $LASTEXITCODE
-    }
-    return 0
-}
-
-if ($Command -match "^(help|-h|--help)$") {
-    Show-Usage
     exit 0
 }
 
-$ArgsList = @($Command)
-if ($Prompt.Count -gt 0) {
-    $ArgsList += $Prompt
+$ArgsToPass = @()
+if ($PSBoundParameters.ContainsKey("Command")) {
+    $ArgsToPass += $Command
+    $ArgsToPass += $Prompt
 }
 
-exit (Invoke-CodexInWsl -LauncherArgs $ArgsList)
+$exitCode = Invoke-CodexInWsl -LauncherWSL $LauncherWSL -Arguments $ArgsToPass
+exit $exitCode

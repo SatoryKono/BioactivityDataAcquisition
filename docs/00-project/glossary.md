@@ -580,4 +580,4 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-*See also: [RULES.md](RULES.md) §2.4.1 for pipeline naming conventions.*
+*See also: [RULES.md](RULES.md) §2.4.3 for pipeline naming conventions.*

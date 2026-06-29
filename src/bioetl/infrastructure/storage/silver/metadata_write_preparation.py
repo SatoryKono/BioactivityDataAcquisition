@@ -18,11 +18,13 @@ from bioetl.infrastructure.storage.metadata.builder_base import (
 from bioetl.infrastructure.storage.silver.metadata_operation_protocols import (
     _SilverMetadataWriteHostProtocol,
 )
-from bioetl.infrastructure.storage.silver.metadata_request_models import (
+from bioetl.infrastructure.storage.silver.metadata_write_models import (
+    _SilverMetadataWriteRequest,
+)
+from bioetl.infrastructure.storage.silver.prepared_operation_models import (
     _PreparedSilverMetadataWriteOperation,
     _ResolvedSilverMetadataContext,
     _SilverMergedMetadataWriteRequest,
-    _SilverMetadataWriteRequest,
 )
 
 __all__ = [

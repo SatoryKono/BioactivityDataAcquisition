@@ -25,6 +25,7 @@ from bioetl.composition.factories.services.callbacks import (
 from bioetl.composition.factories.services.common_service_wiring import (
     CommonServicePorts,
     CommonServicePortsRequest,
+    StorageFactory,
     assemble_pipeline_service,
     build_common_service_ports,
     resolve_tracer,
@@ -71,19 +72,6 @@ __all__ = [
     "create_quarantine",
     "extract_pipeline_callbacks",
 ]
-
-
-class _LazyStorageFactory:
-    """Patchable storage factory seam without importing storage at module load."""
-
-    @staticmethod
-    def create(*args: object, **kwargs: object) -> object:
-        from bioetl.composition.factories.storage import StorageFactory
-
-        return StorageFactory.create(*args, **kwargs)
-
-
-StorageFactory = _LazyStorageFactory
 
 
 def __getattr__(name: str) -> object:

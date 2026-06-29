@@ -4,6 +4,7 @@ import pytest
 
 from pathlib import Path
 
+from scripts.engineering.qa import __main__ as qa_router
 from scripts.engineering.qa.report_dashboard_query_duplicates import (
     QueryUse,
     _render_markdown,
@@ -11,7 +12,7 @@ from scripts.engineering.qa.report_dashboard_query_duplicates import (
     build_near_duplicate_groups,
     evaluate_governance,
 )
-from tests.helpers.cli_process import assert_cli_succeeded, run_python_cli
+from tests.helpers import assert_cli_succeeded, run_main_in_process, run_python_cli
 
 
 pytestmark = pytest.mark.unit
@@ -255,9 +256,12 @@ def test_evaluate_governance_flags_near_duplicate_budget(tmp_path: Path) -> None
 
 
 def test_qa_cli_report_dashboard_query_duplicates_help_smoke() -> None:
-    result = run_python_cli(
-        "-m",
-        "scripts.engineering.qa",
+    spec = qa_router.COMMAND_SPECS["report-dashboard-query-duplicates"]
+    assert spec.runner == "module"
+    assert spec.target == "scripts.engineering.qa.report_dashboard_query_duplicates"
+
+    result = run_main_in_process(
+        qa_router.main,
         "report-dashboard-query-duplicates",
         "--help",
     )

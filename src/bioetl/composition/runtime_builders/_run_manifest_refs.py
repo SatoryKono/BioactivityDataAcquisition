@@ -11,6 +11,9 @@ from bioetl.composition.runtime_builders._run_manifest_data_roots import (
     is_explicit_data_root_configured as is_explicit_data_root_configured,
     resolve_data_root_mode as resolve_data_root_mode,
 )
+from bioetl.composition.runtime_builders._run_manifest_identity_ref_values import (
+    build_control_plane_identity_ref_values,
+)
 from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
     build_contract_identity_field_values_from_mapping,
 )
@@ -40,19 +43,6 @@ class ManifestControlPlaneRefs:
     normalization_profile_version: str | None = None
     normalization_profile_hash: str | None = None
     required_persistence_profile: str | None = None
-
-
-def build_control_plane_identity_ref_values(
-    *,
-    contract_identity_values: dict[str, str | None],
-    required_persistence_profile: str | None,
-) -> dict[str, str | None]:
-    """Return reusable control-plane identity kwargs shared by ref builders."""
-    return {
-        **contract_identity_values,
-        "required_persistence_profile": required_persistence_profile,
-    }
-
 
 def create_control_plane_refs(
     manifest_id: str,

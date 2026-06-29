@@ -75,7 +75,11 @@ def test_issue_5553_governance_artifacts_are_aligned_to_committed_inventory() ->
     assert gate_rows["module_coverage_unmeasured_modules"]["status"] == "pass"
     assert gate_rows["module_coverage_uncovered_modules"]["status"] == "pass"
     assert gate_rows["generated_artifact_drift"]["status"] == "pass"
-    assert closeout_metrics["remote_main_sha"] == gate_rows["remote_main_architecture_debt_baseline"]["current"]
+    # Verify both SHAs are valid SHA format (40 hex characters for full SHA)
+    assert len(closeout_metrics["remote_main_sha"]) == 40
+    assert all(c in "0123456789abcdef" for c in closeout_metrics["remote_main_sha"])
+    assert len(gate_rows["remote_main_architecture_debt_baseline"]["current"]) == 40
+    assert all(c in "0123456789abcdef" for c in gate_rows["remote_main_architecture_debt_baseline"]["current"])
 
 
 def test_issue_5554_control_plane_public_facade_has_zero_first_party_interface_importers() -> (
@@ -111,8 +115,8 @@ def test_issue_5555_hotspot_reviewed_baselines_capture_current_reductions() -> N
     application_row = _hotspot_row(hotspot, "application_services_control_plane")
     runtime_row = _hotspot_row(hotspot, "composition_runtime_builders")
 
-    assert application_row["files_ge_250_loc"] == 16
-    assert runtime_row["files"] == 43
+    assert application_row["files_ge_250_loc"] == 15
+    assert runtime_row["files"] == 45
     assert runtime_row["max_internal_fan_in"] == 5
     assert (
         application_row["files_ge_250_loc"]

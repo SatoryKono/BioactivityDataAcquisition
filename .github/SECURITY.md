@@ -114,20 +114,25 @@ make security-check
 - **Trivy**: Container image scanning in `.github/workflows/docker.yml` (SHA-pinned)
 - **Update policy**: Security patches applied within 72 hours
 
-### Pinned Dependencies
+### Dependency Versioning Policy
 
-All production dependencies are pinned in `pyproject.toml` with exact versions to ensure reproducible builds and prevent supply chain attacks.
+BioETL uses the canonical mixed dependency strategy:
+
+- compatibility ranges live in `pyproject.toml`
+- reproducibility is enforced through committed `uv.lock`
+- exact `==` pins are reserved for justified exceptions, not the default policy
 
 ## Reporting Vulnerabilities
 
-### Contact
+### Private Reporting Channel
 
-- **Email**: security@example.com
-- **Response time**: 72 hours for initial acknowledgment
+- Use GitHub Security Advisories private reporting for this repository:
+  `https://github.com/SatoryKono/BioactivityDataAcquisition/security/advisories/new`
+- Initial acknowledgment target: 72 hours
 
 ### Disclosure Process
 
-1. **Report** — Send details to security email (encrypted if needed)
+1. **Report** — Submit a private vulnerability report through GitHub Security Advisories
 1. **Acknowledgment** — We respond within 72 hours
 1. **Investigation** — We assess severity and impact
 1. **Fix** — Patch developed and tested
@@ -193,4 +198,4 @@ httpx.get(url)  # verify=True by default
 
 ______________________________________________________________________
 
-*Last updated: 2025-12-25*
+*Last updated: 2026-06-25*

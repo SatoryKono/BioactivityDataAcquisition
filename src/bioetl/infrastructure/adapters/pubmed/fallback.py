@@ -12,10 +12,10 @@ __all__ = ["PUBMED_FALLBACK_ERRORS", "PubMedTitleFallbackHandler"]
 
 from typing import TYPE_CHECKING
 
-from httpx import RequestError
-
-from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler, titles_match
+from bioetl.infrastructure.adapters.common.error_bundles import (
+    COMMON_TITLE_FALLBACK_ERRORS,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
@@ -23,16 +23,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import JsonDict
 
-PUBMED_FALLBACK_ERRORS = (
-    BioETLError,
-    NetworkError,
-    RequestError,
-    OSError,
-    ValueError,
-    TypeError,
-    RuntimeError,
-    KeyError,
-)
+PUBMED_FALLBACK_ERRORS = COMMON_TITLE_FALLBACK_ERRORS
 
 
 class PubMedTitleFallbackHandler(BaseTitleFallbackHandler):

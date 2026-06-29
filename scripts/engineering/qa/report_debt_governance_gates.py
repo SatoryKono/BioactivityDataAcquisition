@@ -30,13 +30,16 @@ from bioetl.infrastructure.quality.debt_scorecard import (  # noqa: E402
     evaluate_debt_scorecard,
     load_debt_scorecard,
 )
+from scripts.engineering.ci.validate_registry_dq_refs import (  # noqa: E402
+    build_diagnostics_payload as build_contract_registry_dq_diagnostics,
+)
 from scripts.engineering.qa import (  # noqa: E402
     report_adr_enforcement_matrix,
     report_architecture_debt_remote_main_baseline,
     report_observability_metric_inventory,
 )
 from scripts.engineering.qa.report_module_coverage_inventory import (  # noqa: E402
-    compute_source_tree_sha256,
+    _refresh_existing_inventory_source_tree,
 )
 
 DEFAULT_JSON_OUTPUT = (
@@ -234,7 +237,11 @@ def _module_coverage_source_tree_hash_gate(
     repo_root: Path,
 ) -> Gate:
     expected_hash = str(module_coverage.get("source_tree_sha256") or "")
-    current_hash = compute_source_tree_sha256(repo_root=repo_root)
+    refreshed_inventory = _refresh_existing_inventory_source_tree(
+        module_coverage,
+        repo_root=repo_root,
+    )
+    current_hash = str(refreshed_inventory.get("source_tree_sha256") or "")
     is_current = bool(expected_hash) and expected_hash == current_hash
     return Gate(
         name="module_coverage_source_tree_hash_current",
@@ -539,9 +546,7 @@ def build_payload(
     contract_diagnostics = _load_json(
         repo_root, "reports/quality/contract-registry-diagnostics.json"
     )
-    dq_diagnostics = _load_json(
-        repo_root, "reports/quality/contract-registry-dq-diagnostics.json"
-    )
+    dq_diagnostics = build_contract_registry_dq_diagnostics(repo_root)
     config_discrepancy = _load_json(
         repo_root, "reports/quality/config-discrepancy-baseline.json"
     )
@@ -631,12 +636,12 @@ def build_payload(
     gates.append(
         Gate(
             name="hotspot_family_baseline_budget_warnings",
-            status="warn" if budget_warnings else "pass",
+            status="fail" if budget_warnings else "pass",
             metric="budget_warnings",
             current=budget_warnings,
             limit=0,
             source_artifact="reports/quality/hotspot-family-baseline.json",
-            remediation="Review hotspot-family budget warnings before tightening ratchets.",
+            remediation="Reduce hotspot-family metrics to stay at or below reviewed budgets.",
         )
     )
 
@@ -897,6 +902,7 @@ def build_payload(
             "architecture_quality_scorecard": False,
             "adr_enforcement_matrix": False,
             "remote_main_baseline": False,
+            "dq_contract_registry_diagnostics": False,
         }
     else:
         stale_artifacts = {
@@ -924,6 +930,7 @@ def build_payload(
                     )
                 ),
             ),
+            "dq_contract_registry_diagnostics": False,
         }
     stale_count = sum(1 for stale in stale_artifacts.values() if stale)
     gates.append(
@@ -1022,15 +1029,23 @@ def _write_artifacts(
 
 
 def _check_artifacts(
-    payload: dict[str, object], *, json_out: Path, md_out: Path
+    payload: dict[str, object],
+    *,
+    json_out: Path,
+    md_out: Path,
+    compare_artifacts: bool = True,
 ) -> list[str]:
     errors: list[str] = []
-    expected_json = json.dumps(payload, indent=2, sort_keys=True) + "\n"
-    expected_md = render_markdown(payload)
-    if not json_out.exists() or json_out.read_text(encoding="utf-8") != expected_json:
-        errors.append(f"Debt governance gate JSON artifact is stale: {json_out}")
-    if not md_out.exists() or md_out.read_text(encoding="utf-8") != expected_md:
-        errors.append(f"Debt governance gate Markdown artifact is stale: {md_out}")
+    if compare_artifacts:
+        expected_json = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+        expected_md = render_markdown(payload)
+        if (
+            not json_out.exists()
+            or json_out.read_text(encoding="utf-8") != expected_json
+        ):
+            errors.append(f"Debt governance gate JSON artifact is stale: {json_out}")
+        if not md_out.exists() or md_out.read_text(encoding="utf-8") != expected_md:
+            errors.append(f"Debt governance gate Markdown artifact is stale: {md_out}")
     summary = payload["summary"]
     assert isinstance(summary, dict)
     if int(summary["fail_count"]) > 0:
@@ -1051,7 +1066,12 @@ def main(argv: list[str] | None = None) -> int:
     md_out = Path(args.md_out)
 
     if args.check:
-        errors = _check_artifacts(payload, json_out=json_out, md_out=md_out)
+        errors = _check_artifacts(
+            payload,
+            json_out=json_out,
+            md_out=md_out,
+            compare_artifacts=args.changed_from_ref is None,
+        )
         if errors:
             for error in errors:
                 print(error, file=sys.stderr)

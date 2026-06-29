@@ -23,8 +23,8 @@
   },
   "evidence": [
     "reports/quality/module-coverage-inventory.json",
-    "reports/coverage/coverage.xml",
-    "reports/codex/py-test-swarm_20260616_1922/FINAL-REPORT.md",
+    "reports/quality/architecture-quality-scorecard.json",
+    "configs/quality/module_coverage_gates.yaml",
     "tests/architecture/test_module_coverage_inventory.py"
   ],
   "module_expectations": {

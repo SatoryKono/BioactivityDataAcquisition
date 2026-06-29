@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 
+import json
 from datetime import UTC
 from datetime import datetime
 from pathlib import Path
@@ -34,6 +35,10 @@ def _write_registry(path: Path, *, registries: dict[str, object]) -> None:
         },
     }
     path.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
+
+
+def _write_json(path: Path, payload: dict[str, object]) -> None:
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def test_generate_tasks_payload_measures_file_size_entry(tmp_path: Path) -> None:
@@ -120,6 +125,99 @@ def test_generate_tasks_payload_resolves_function_symbol(tmp_path: Path) -> None
     assert task["symbol_name"] == "long_worker"
     assert task["current_value"] == 5
     assert task["status"] == "within_limit"
+
+
+def test_generate_tasks_payload_adds_artifact_backlog_tasks(tmp_path: Path) -> None:
+    registry_path = tmp_path / "registry.yaml"
+    _write_registry(registry_path, registries={})
+    compatibility_path = tmp_path / "compatibility.json"
+    duplication_path = tmp_path / "duplication.json"
+    hotspot_path = tmp_path / "hotspot.json"
+    dead_code_path = tmp_path / "dead-code.json"
+    debt_scorecard_path = tmp_path / "debt_scorecard.yaml"
+
+    _write_json(
+        compatibility_path,
+        {
+            "summary": {
+                "sanctioned_public_entrypoint_count": 3,
+                "sanctioned_public_export_facade_count": 2,
+            }
+        },
+    )
+    _write_json(
+        duplication_path,
+        {
+            "targets": [
+                {
+                    "target": "src/bioetl/interfaces/cli",
+                    "duplicate_count": 5,
+                    "actionability": [{"category": "command_shell_overlap"}],
+                }
+            ]
+        },
+    )
+    _write_json(
+        hotspot_path,
+        {
+            "families": [
+                {
+                    "name": "composition_bootstrap_runtime",
+                    "owner": "@bioetl-platform",
+                    "path_prefixes": ["src/bioetl/composition/bootstrap/runtime/"],
+                    "budget_warnings": ["at_budget:max_internal_fan_in=3/3"],
+                }
+            ]
+        },
+    )
+    _write_json(
+        dead_code_path,
+        {
+            "summary": {
+                "repo_wide_zero_import_candidate_count": 4,
+            },
+            "review_window": {
+                "mode": "fail-fast-zero-untriaged",
+            },
+        },
+    )
+    debt_scorecard_path.write_text(
+        yaml.safe_dump(
+            {
+                "sanctioned_public_entrypoint_governance": {
+                    "metrics": {
+                        "public_entrypoint_count": {
+                            "owner": "@bioetl-architecture"
+                        }
+                    }
+                }
+            },
+            sort_keys=False,
+        ),
+        encoding="utf-8",
+    )
+
+    payload = generate_architecture_debt_tasks_payload(
+        registry_path=registry_path,
+        project_root=tmp_path,
+        generated_at=datetime(2026, 4, 4, 10, 0, tzinfo=UTC),
+        compatibility_census_path=compatibility_path,
+        duplication_baseline_path=duplication_path,
+        hotspot_baseline_path=hotspot_path,
+        dead_code_inventory_path=dead_code_path,
+        debt_scorecard_path=debt_scorecard_path,
+    )
+
+    task_ids = {task["id"] for task in payload["tasks"]}
+    task_families = {task.get("task_family") for task in payload["tasks"]}
+    assert {"ARD-COMPAT-001", "ARD-COMPAT-002", "ARD-DUP-001", "ARD-HOT-001", "ARD-DEAD-001"} <= task_ids
+    assert {
+        "compatibility_surface",
+        "duplication_cluster",
+        "hotspot_family",
+        "dead_code_review",
+    } <= task_families
+    assert payload["registry_summary"]["total_tasks"] == 5
 
 
 def test_default_output_path_uses_quality_reports_directory(tmp_path: Path) -> None:

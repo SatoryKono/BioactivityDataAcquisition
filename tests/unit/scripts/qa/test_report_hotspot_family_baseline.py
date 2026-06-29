@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 
 from scripts.engineering.qa.report_hotspot_family_baseline import (
+    _budget_review_notes_for_family,
     _budget_warnings_for_family,
     _merge_reviewed_baseline_metrics,
     _resolve_snapshot_date,
@@ -32,7 +33,29 @@ def test_resolve_snapshot_date_falls_back_when_reviewed_snapshot_missing() -> No
     assert len(snapshot_date) == 10
 
 
-def test_budget_warnings_report_near_and_at_budget_metrics() -> None:
+def test_budget_warnings_report_only_exceeded_budget_metrics() -> None:
+    family = {
+        "files_ge_250_loc": 11,
+        "max_internal_fan_in": 10,
+        "bounded_growth_budgets": {
+            "files_ge_250_loc": 10,
+            "max_internal_fan_in": 10,
+        },
+    }
+
+    assert _budget_warnings_for_family(family) == ["over_budget:files_ge_250_loc=11/10"]
+
+
+def test_budget_warnings_ignore_metrics_at_or_below_budget() -> None:
+    family = {
+        "files_ge_250_loc": 10,
+        "bounded_growth_budgets": {"files_ge_250_loc": 10},
+    }
+
+    assert _budget_warnings_for_family(family) == []
+
+
+def test_budget_review_notes_report_near_and_at_budget_metrics() -> None:
     family = {
         "files_ge_250_loc": 8,
         "max_internal_fan_in": 10,
@@ -42,19 +65,10 @@ def test_budget_warnings_report_near_and_at_budget_metrics() -> None:
         },
     }
 
-    assert _budget_warnings_for_family(family) == [
+    assert _budget_review_notes_for_family(family) == [
         "near_budget:files_ge_250_loc=8/10",
         "at_budget:max_internal_fan_in=10/10",
     ]
-
-
-def test_budget_warnings_ignore_metrics_below_threshold() -> None:
-    family = {
-        "files_ge_250_loc": 7,
-        "bounded_growth_budgets": {"files_ge_250_loc": 10},
-    }
-
-    assert _budget_warnings_for_family(family) == []
 
 
 def test_merge_reviewed_baseline_metrics_prefers_scorecard_snapshot() -> None:

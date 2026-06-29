@@ -982,6 +982,7 @@
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
+      "docs/04-reference/templates/pipeline-review-checklist.md",
       "docs/05-operations/01-monitoring-guide.md",
       "docs/05-operations/sli-slo-baseline.md",
       "grafana/README.md",
@@ -1111,6 +1112,7 @@
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "docs/04-reference/publication-validation-index.md",
+      "docs/04-reference/templates/pipeline-review-checklist.md",
       "docs/05-operations/runbooks/publication-validation-runbook.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-dq-v2.json"
@@ -1685,6 +1687,10 @@
   "documented_without_registry": [],
   "documented_without_runtime": [],
   "domain_event_emitters": [
+    "src/bioetl/application/core/_batch_write_support.py",
+    "src/bioetl/application/core/_quarantine_write_support.py",
+    "src/bioetl/application/core/batch_processing_service.py",
+    "src/bioetl/application/core/batch_processing_support.py",
     "src/bioetl/application/observability/observer_context_mixin.py"
   ],
   "emitted_metrics": [

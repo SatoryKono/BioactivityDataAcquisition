@@ -10,6 +10,7 @@ import click
 from bioetl.interfaces.cli.commands.domains.maintenance import service_access
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CliBoundaryExecutionPolicy,
+    build_target_cli_boundary_policy,
     run_async_with_cli_failure_policy,
 )
 from bioetl.interfaces.cli.formatters import (
@@ -54,10 +55,9 @@ def _maintenance_policy(
     interrupted_message: str,
 ) -> CliBoundaryExecutionPolicy:
     """Build the shared CLI boundary policy for maintenance vacuum commands."""
-    return CliBoundaryExecutionPolicy(
+    return build_target_cli_boundary_policy(
         reason_prefix=reason_prefix,
-        subject_key="target",
-        subject_value=target,
+        target=target,
         domain_error_title=domain_error_title,
         unexpected_error_title=unexpected_error_title,
         interrupted_message=interrupted_message,

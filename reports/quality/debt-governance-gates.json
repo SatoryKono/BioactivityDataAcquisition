@@ -10,8 +10,8 @@
       "status": "pass"
     },
     {
-      "current": 12,
-      "limit": 12,
+      "current": 0,
+      "limit": 0,
       "metric": "current_count",
       "name": "retained_public_entrypoint_burden",
       "remediation": "Remove retained public entrypoints or lower callers before tightening max_count.",
@@ -28,8 +28,8 @@
       "status": "pass"
     },
     {
-      "current": "5ad1194c3670ee9877873d26e47c6c98f0e9187c146a41aea0c2bd3f139485da",
-      "limit": "5ad1194c3670ee9877873d26e47c6c98f0e9187c146a41aea0c2bd3f139485da",
+      "current": "cd8786711509cd553c514ddf25e2b1927f420fc9edeb59d68e581f9965d3636f",
+      "limit": "cd8786711509cd553c514ddf25e2b1927f420fc9edeb59d68e581f9965d3636f",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -59,7 +59,7 @@
       "limit": 0,
       "metric": "budget_warnings",
       "name": "hotspot_family_baseline_budget_warnings",
-      "remediation": "Review hotspot-family budget warnings before tightening ratchets.",
+      "remediation": "Reduce hotspot-family metrics to stay at or below reviewed budgets.",
       "source_artifact": "reports/quality/hotspot-family-baseline.json",
       "status": "pass"
     },
@@ -208,7 +208,7 @@
       "status": "pass"
     },
     {
-      "current": 21,
+      "current": 3,
       "limit": 21,
       "metric": "generated_at_age_days",
       "name": "observability_release_review_freshness",
@@ -244,7 +244,7 @@
       "status": "pass"
     },
     {
-      "current": "550056c9328dd4e2f85f693088d615e1e367dcf6",
+      "current": "c868cde5ff404398d08d99a3dc8eeced5a862fbc",
       "limit": "clean remote-main tree evidence",
       "metric": "remote_main_sha",
       "name": "remote_main_architecture_debt_baseline",
@@ -267,6 +267,7 @@
   "stale_artifacts": {
     "adr_enforcement_matrix": false,
     "architecture_quality_scorecard": false,
+    "dq_contract_registry_diagnostics": false,
     "module_coverage_inventory": false,
     "remote_main_baseline": false
   },
@@ -276,7 +277,7 @@
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 7.98,
+    "architecture_quality_scorecard_integral_score": 8.45,
     "architecture_quality_scorecard_interpretation": "satisfactory_system_refactoring_required",
     "fail_count": 0,
     "failing_gates": [],

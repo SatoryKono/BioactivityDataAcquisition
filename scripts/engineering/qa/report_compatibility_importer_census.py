@@ -749,6 +749,9 @@ def build_compatibility_importer_census(
         ),
         "summary": {
             "retained_entrypoint_count": len(retained_rows),
+            "retained_public_entrypoint_burden": sum(
+                int(row["src_importer_count"]) for row in retained_rows
+            ),
             "removed_compatibility_surface_count": len(removed_surface_rows),
             "removed_compatibility_surfaces_with_src_importers": sum(
                 1 for row in removed_surface_rows if row["src_importer_count"] > 0
@@ -834,6 +837,8 @@ def _render_markdown(payload: dict[str, object]) -> str:
         "",
         f"- snapshot_date: {payload['snapshot_date']}",
         f"- retained_entrypoint_count: {summary['retained_entrypoint_count']}",
+        "- retained_public_entrypoint_burden: "
+        f"{summary['retained_public_entrypoint_burden']}",
         f"- removed_compatibility_surface_count: {summary['removed_compatibility_surface_count']}",
         "- removed_compatibility_surfaces_with_src_importers: "
         f"{summary['removed_compatibility_surfaces_with_src_importers']}",
@@ -912,7 +917,8 @@ def _render_markdown(payload: dict[str, object]) -> str:
             "",
             "## Retained Public Export Facade Owner/Usage Map",
             "",
-            "| Path | Owner | Usage classification | Surface classification | src importers | test importers | Public exports |",
+            "| Path | Owner | Usage classification | Surface classification | "
+            "src importers | test importers | Public exports |",
             "| --- | --- | --- | --- | ---: | ---: | ---: |",
         ]
     )

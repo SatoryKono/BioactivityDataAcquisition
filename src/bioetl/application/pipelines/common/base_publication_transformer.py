@@ -38,6 +38,7 @@ from bioetl.application.pipelines.common.publication_transformer_records import 
 from bioetl.application.pipelines.common.publication_vocab_observability import (
     emit_unknown_publication_vocab_metrics,
 )
+from bioetl.domain.value_objects import PublicationYear
 
 if TYPE_CHECKING:
     from bioetl.application.core.pre_silver_record import PreSilverRecord
@@ -192,6 +193,15 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
             )
             return None
         return primary_id_field, primary_id
+
+    def _validate_publication_year_value(self, raw: object) -> int | None:
+        """Validate publication year and return the canonical integer value."""
+        value = self.validate_value_object(
+            PublicationYear,
+            raw,
+            as_string=False,
+        )
+        return value if isinstance(value, int) else None
 
     _CONTENT_FIELDS: tuple[str, ...] = ("abstract",)
     """Fields to normalize via ``strip_html_tags`` after extraction."""

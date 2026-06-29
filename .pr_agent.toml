@@ -28,3 +28,22 @@ ignore_pr_title = [
     "^Auto",
     "^\\[Bump\\]",
 ]
+
+[pr_description]
+publish_labels = true
+use_bullet_points = true
+keep_original_user_title = true
+extra_instructions = "Follow AGENTS.md conventions. Do not mention .env files."
+
+[pr_reviewer]
+num_code_suggestions = 4
+include_security_assessment = true
+extra_instructions = """
+Follow AGENTS.md as the repository operating contract.
+Do not suggest Docker/Redis/external orchestration unless already present in the PR.
+Never suggest changes to .env files.
+"""
+
+[pr_code_suggestions]
+num_code_suggestions = 4
+focus_only_on_problems = true

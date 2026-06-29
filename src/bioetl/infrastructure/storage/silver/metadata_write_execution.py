@@ -11,13 +11,15 @@ from bioetl.infrastructure.storage.lineage_persistence import (
 from bioetl.infrastructure.storage.silver.metadata_operation_protocols import (
     _SilverMetadataWriteHostProtocol,
 )
-from bioetl.infrastructure.storage.silver.metadata_request_models import (
-    _PreparedSilverMetadataWriteOperation,
-    _SilverMergedMetadataWriteRequest,
+from bioetl.infrastructure.storage.silver.metadata_write_models import (
     _SilverMetadataWriteRequest,
 )
 from bioetl.infrastructure.storage.silver.metadata_write_preparation import (
     _emit_prepared_silver_metadata_metrics,
+)
+from bioetl.infrastructure.storage.silver.prepared_operation_models import (
+    _PreparedSilverMetadataWriteOperation,
+    _SilverMergedMetadataWriteRequest,
 )
 
 __all__ = [

@@ -17,10 +17,7 @@ pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 CLOSEOUT = (
-    ROOT
-    / "reports"
-    / "quality"
-    / "issue-5272-application-core-coverage-closeout.json"
+    ROOT / "reports" / "quality" / "issue-5272-application-core-coverage-closeout.json"
 )
 INVENTORY = ROOT / "reports" / "quality" / "module-coverage-inventory.json"
 
@@ -69,8 +66,20 @@ def test_issue_5272_closeout_artifact_has_expected_shape() -> None:
             <= closeout["baseline_metrics"]["application_core_covered_line_percent"]
         )
     assert closeout["module_expectations"]
+    evidence = set(closeout["evidence"])
+    assert "reports/coverage/coverage.xml" not in evidence
+    assert "reports/quality/module-coverage-inventory.json" in evidence
+    assert "reports/quality/architecture-quality-scorecard.json" in evidence
+    assert "configs/quality/module_coverage_gates.yaml" in evidence
     for evidence_path in closeout["evidence"]:
         assert (ROOT / str(evidence_path)).exists(), evidence_path
+
+    inventory = _load_json(INVENTORY)
+    assert inventory["coverage_xml_path"] == "reports/coverage/coverage.xml"
+    assert (
+        isinstance(inventory["coverage_xml_sha256"], str)
+        and inventory["coverage_xml_sha256"]
+    )
 
 
 def test_issue_5272_closeout_matches_live_module_coverage_inventory() -> None:
@@ -125,9 +134,10 @@ def test_issue_5244_parent_epic_stays_open_until_default_floor_is_zero() -> None
     inventory = _load_json(INVENTORY)
     below_default_floor = _below_default_floor_count(inventory)
 
-    assert below_default_floor == closeout["parent_epic_status"][
-        "remaining_below_85_module_count"
-    ]
+    assert (
+        below_default_floor
+        == closeout["parent_epic_status"]["remaining_below_85_module_count"]
+    )
     assert below_default_floor > 0
     assert (
         closeout["parent_epic_status"]["status"]

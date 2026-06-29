@@ -91,4 +91,5 @@ def create_silver_merge_resilience_policy(
             jitter_seconds=timeout_cfg.jitter_seconds,
             adaptive=timeout_cfg.adaptive_backoff,
         ),
+        plain_write_process_isolation=timeout_cfg.plain_write_process_isolation,
     )

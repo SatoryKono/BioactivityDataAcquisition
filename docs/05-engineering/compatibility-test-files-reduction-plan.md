@@ -304,7 +304,6 @@ Need to verify if deprecated contracts are still needed.
 tests/architecture/test_application_composite_compat_surface_usage.py
 tests/architecture/test_application_core_lifecycle_shim_usage.py
 tests/architecture/test_batch_transformer_helpers_shim_usage.py
-tests/architecture/test_checkpoint_compatibility_policy_surface.py
 tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
 tests/architecture/test_compatibility_facade_inventory.py
 tests/architecture/test_compatibility_freeze_guards.py

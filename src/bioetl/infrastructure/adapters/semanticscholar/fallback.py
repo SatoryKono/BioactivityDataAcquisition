@@ -12,11 +12,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
-from httpx import RequestError
-
-from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.adapters.common import BaseTitleFallbackHandler, titles_match
+from bioetl.infrastructure.adapters.common.error_bundles import (
+    COMMON_TITLE_FALLBACK_ERRORS,
+)
 from bioetl.infrastructure.adapters.semanticscholar.constants import (
     SEMANTICSCHOLAR_BASE_URL,
 )
@@ -43,16 +43,7 @@ DEFAULT_SEARCH_FIELDS = (
     "openAccessPdf,tldr,fieldsOfStudy,publicationTypes,journal"
 )
 
-SEMANTICSCHOLAR_FALLBACK_ERRORS = (
-    BioETLError,
-    NetworkError,
-    RequestError,
-    OSError,
-    ValueError,
-    TypeError,
-    RuntimeError,
-    KeyError,
-)
+SEMANTICSCHOLAR_FALLBACK_ERRORS = COMMON_TITLE_FALLBACK_ERRORS
 
 
 class SemanticScholarTitleFallbackHandler(BaseTitleFallbackHandler):

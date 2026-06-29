@@ -18,7 +18,9 @@ PYPROJECT = ROOT / "pyproject.toml"
 TEST_MATRIX = ROOT / "configs" / "quality" / "test_matrix.yaml"
 PYTEST_SHARDS = ROOT / "configs" / "quality" / "pytest_shards.yaml"
 SLOWEST_TESTS = ROOT / "reports" / "test-telemetry" / "slowest-tests.json"
-EXPECTED_ISSUES = {5591, 5593, 5594, 5595}
+E2E_CONFTEST = ROOT / "tests" / "e2e" / "conftest.py"
+E2E_HELPER_TESTS = ROOT / "tests" / "unit" / "helpers" / "test_e2e_conftest.py"
+EXPECTED_ISSUES = {5591, 5592, 5593, 5594, 5595}
 SLOW_GOVERNANCE_PATHS = {
     "tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py",
     "tests/architecture/test_config_discrepancy_metrics_ratchets.py",
@@ -84,6 +86,25 @@ def test_issue_5591_repo_backed_unit_tests_stay_inside_dedicated_subtree() -> No
 
 
 @pytest.mark.architecture
+def test_issue_5592_delta_read_harness_has_timeout_fallback_diagnostics() -> None:
+    harness_text = E2E_CONFTEST.read_text(encoding="utf-8")
+    helper_tests_text = E2E_HELPER_TESTS.read_text(encoding="utf-8")
+
+    assert "E2EDeltaTableCorruptionError" in harness_text
+    assert "_read_active_parquet_records_from_delta_log" in harness_text
+    assert "fallback_status=delta_log_parquet_empty" in harness_text
+    assert "corrupt_delta_log" in harness_text
+    assert (
+        "test_read_delta_records_uses_delta_log_fallback_after_timeout"
+        in helper_tests_text
+    )
+    assert (
+        "test_read_delta_records_corrupt_delta_log_is_not_timeout_recovered"
+        in helper_tests_text
+    )
+
+
+@pytest.mark.architecture
 def test_issue_5593_slow_architecture_generators_stay_isolated_from_fast_boundary() -> (
     None
 ):
@@ -107,8 +128,7 @@ def test_issue_5593_slow_architecture_generators_stay_isolated_from_fast_boundar
         if str(entry["zone"]).startswith("tests.architecture.")
     }
     expected_zones = {
-        path.removesuffix(".py").replace("/", ".")
-        for path in SLOW_GOVERNANCE_PATHS
+        path.removesuffix(".py").replace("/", ".") for path in SLOW_GOVERNANCE_PATHS
     }
     assert expected_zones <= slow_zones
 
@@ -133,6 +153,12 @@ def test_issue_5595_subprocess_backed_domain_exception_is_explicit() -> None:
 
     assert "subprocess_backed" in pyproject_text
     assert "@pytest.mark.subprocess_backed" in domain_test_text
-    assert "test_subprocess_backed_domain_unit_tests_are_explicitly_marked_and_allowlisted" in purity_text
-    assert '"tests/unit/domain/behavior/test_merged_metadata_explainability.py"' in purity_text
+    assert (
+        "test_subprocess_backed_domain_unit_tests_are_explicitly_marked_and_allowlisted"
+        in purity_text
+    )
+    assert (
+        '"tests/unit/domain/behavior/test_merged_metadata_explainability.py"'
+        in purity_text
+    )
     assert '"subprocess.run"' in purity_text

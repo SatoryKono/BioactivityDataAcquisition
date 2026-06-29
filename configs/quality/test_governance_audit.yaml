@@ -62,7 +62,7 @@ budgets:
   refined_assertless_max: 0
   duplicate_test_names_max: 0
   duplicate_test_name_occurrences_max: 0
-  compatibility_test_file_max: 26
+  compatibility_test_file_max: 25
   markerless_test_functions_max: 0
   uuid4_call_sites_max: 0
   date_today_call_sites_max: 0
@@ -70,8 +70,17 @@ budget_ratchet:
   linked_issue: '#4901'
   mode: fail-fast-no-growth
   expected_direction: downward
-  refreshed_on: '2026-06-19'
+  refreshed_on: '2026-06-26'
   stream_g_owner_notes:
+  - issue: '#5625'
+    owner: test-governance
+    status: compatibility_inventory_reclassified_active_checkpoint_policy_25
+    note: >-
+      Renamed the active checkpoint policy retired-mode guard out of compatibility-style
+      filename inventory because it validates removed mode absence on current active
+      policy surfaces rather than preserving a legacy compatibility path. The live
+      compatibility filename inventory dropped from 26 to 25, and the fail-fast
+      budget was ratcheted to 25. No technical-debt budget was increased.
   - issue: '#5435'
     owner: test-governance
     status: compatibility_inventory_reclassified_live_26_budget_ratcheted_26
@@ -404,7 +413,7 @@ rf_009_closeout:
     refined_assertless_tests: 0
     duplicate_test_names: 0
     duplicate_test_name_occurrences: 0
-    compatibility_test_files: 26
+    compatibility_test_files: 25
     markerless_test_functions: 0
     uuid4_call_sites: 0
     date_today_call_sites: 0
@@ -441,7 +450,7 @@ test_audit_closeout_2026_06_19:
   - tests/architecture/test_test_telemetry_baseline.py
   - tests/architecture/test_test_telemetry_governance.py
   invariants:
-    compatibility_test_file_max: 26
+    compatibility_test_file_max: 25
     compatibility_test_files_less_than: 29
     repo_backed_unit_lane: repo-backed-unit
     repo_backed_unit_subtree: tests/unit/repo_backed/
@@ -663,7 +672,7 @@ oversized_test_module_inventory:
     owner: application-services
 compatibility_test_inventory:
   review_cadence: quarterly
-  total_files: 26
+  total_files: 25
   default_review_date: '2026-09-30'
   entries:
   - path: tests/architecture/test_application_composite_compat_surface_usage.py
@@ -686,14 +695,6 @@ compatibility_test_inventory:
     decision: retained_governance_guard
     owner: architecture-governance
     protected_surface: architecture/batch transformer helpers shim usage
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/architecture/test_checkpoint_compatibility_policy_surface.py
-    decision: retained_compatibility_contract
-    owner: architecture-governance
-    protected_surface: architecture/checkpoint compatibility policy surface
     policy_ref: '#4209'
     review_date: '2026-09-30'
     rationale: Tracked compatibility test surface; retained only while the referenced
@@ -874,6 +875,25 @@ compatibility_test_inventory:
     review_date: '2026-12-31'
     rationale: Tracked compatibility test surface; retained only while the referenced
       public or migration contract remains supported.
+platform_sensitive_snapshot_tests:
+  issue_ref: '#5663'
+  decision: retained_memory_lane_with_platform_skip
+  owner: memory-governance
+  review_date: '2026-09-30'
+  rationale: Neo4j memory snapshot invariant tests intentionally build a full repo
+    snapshot; they remain outside fast lanes through explicit memory markers,
+    bounded timeout policy, shared snapshot caching, and Windows skip guards.
+  required_markers:
+  - memory
+  min_timeout_seconds: 180
+  windows_skip_required: true
+  shared_snapshot_cache_required: true
+  entries:
+  - path: tests/unit/scripts/ops/neo4j_memory_sync/test_snapshot_invariants.py
+    support_module: tests/testing_support/neo4j_memory_sync_support/snapshot_invariants.py
+    cache_provider: tests/testing_support/neo4j_memory_sync_support/common.py::_snapshot_base
+    runtime_policy: memory_lane_only
+    platform_policy: skip_on_windows
 remediation_closeout:
   parent_issue: '#4200'
   audit_snapshot:

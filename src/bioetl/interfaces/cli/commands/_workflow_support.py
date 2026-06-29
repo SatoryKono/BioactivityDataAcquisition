@@ -10,16 +10,23 @@ from bioetl.application.services.control_plane.workflow.inspection_service impor
 from bioetl.application.services.workflow_runner_service import (
     WorkflowRunExecutionResult,
 )
-from bioetl.domain.workflow import (
-    WorkflowConfig,
+from bioetl.domain.workflow import WorkflowConfig, WorkflowStepConfig
+from bioetl.interfaces.cli.commands._workflow_override_support import (
     WorkflowRunOptionsConfig,
-    WorkflowStepConfig,
+    apply_cli_override_config,
+    apply_cli_overrides,
+    build_workflow_run_options_override,
+    build_workflow_run_options_override_from_mapping,
 )
 from bioetl.interfaces.cli.formatters import echo_info
 
 __all__ = [
+    "WorkflowRunOptionsConfig",
+    "apply_cli_override_config",
     "apply_cli_overrides",
     "build_status_payload",
+    "build_workflow_run_options_override",
+    "build_workflow_run_options_override_from_mapping",
     "parse_only_steps",
     "render_run_result",
     "render_status_payload",
@@ -66,83 +73,6 @@ def select_workflow_steps(
 
     filtered_steps = tuple(step for step in config.steps if step.step_id in required)
     return replace(config, steps=filtered_steps)
-
-
-def apply_cli_overrides(
-    config: WorkflowConfig,
-    *,
-    dry_run: bool,
-    run_type: str | None,
-    start_offset: int | None,
-    limit: int | None,
-    input_csv: str | None,
-    filter_column: str | None,
-    filter_field: str | None,
-    vacuum_after_run: bool | None,
-    vacuum_retention_days: int | None,
-    log_level: str | None,
-    ignore_yaml_filter: bool | None,
-    skip_gold: bool | None,
-    execution_context: str | None,
-    use_cached_bronze: bool | None,
-    cached_bronze_path: str | None,
-    cached_bronze_date: str | None,
-    exact_replay: bool | None,
-    required_persistence_profile: str | None,
-    replay_of_run_id: str | None,
-    replay_of_manifest_id: str | None,
-    enable_tracing: bool | None,
-    debug_export_enabled: bool | None,
-    debug_export_formats: tuple[str, ...],
-    debug_export_dir: str | None,
-) -> WorkflowConfig:
-    """Apply CLI overrides to workflow defaults and pipeline steps."""
-    override = WorkflowRunOptionsConfig(
-        dry_run=True if dry_run else None,
-        run_type=run_type,
-        start_offset=start_offset,
-        limit=limit,
-        input_csv=input_csv,
-        filter_column=filter_column,
-        filter_field=filter_field,
-        vacuum_after_run=vacuum_after_run,
-        vacuum_retention_days=vacuum_retention_days,
-        log_level=log_level,
-        ignore_yaml_filter=ignore_yaml_filter,
-        skip_gold=skip_gold,
-        execution_context=execution_context,
-        use_cached_bronze=use_cached_bronze,
-        cached_bronze_path=cached_bronze_path,
-        cached_bronze_date=cached_bronze_date,
-        exact_replay=exact_replay,
-        required_persistence_profile=required_persistence_profile,
-        replay_of_run_id=replay_of_run_id,
-        replay_of_manifest_id=replay_of_manifest_id,
-        enable_tracing=enable_tracing,
-        debug_export_enabled=debug_export_enabled,
-        debug_export_formats=debug_export_formats or None,
-        debug_export_dir=debug_export_dir,
-    )
-    if not override.to_mapping():
-        return config
-
-    updated_steps = []
-    for step in config.steps:
-        if isinstance(step, WorkflowStepConfig):
-            updated_steps.append(
-                replace(
-                    step,
-                    run_options=step.run_options.merged_with(override),
-                )
-            )
-            continue
-        updated_steps.append(step)
-
-    return replace(
-        config,
-        defaults=config.defaults.merged_with(override),
-        steps=tuple(updated_steps),
-    )
 
 
 def build_status_payload(

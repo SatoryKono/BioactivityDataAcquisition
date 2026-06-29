@@ -18,9 +18,8 @@ from bioetl.interfaces.cli.commands.domains.health.rendering import (
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
-)
-from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
-    handle_cli_failure as handle_cli_execution_failure,
+    build_target_cli_boundary_policy,
+    handle_boundary_cli_failure,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
@@ -38,6 +37,11 @@ DEFAULT_HEALTH_SERVER_PORT = 8081
 _HEALTH_SERVER_DOMAIN_ERROR_TITLE = "Health server failed with domain error"
 _HEALTH_SERVER_UNEXPECTED_ERROR_TITLE = "Unexpected error in health server command"
 _HEALTH_SERVER_INTERRUPTED_MESSAGE = "Health server interrupted by user (Ctrl+C)"
+_HEALTH_REASON_SUFFIXES = (
+    "DOMAIN_ERROR",
+    "UNEXPECTED_ERROR",
+    "SIGINT",
+)
 
 def get_health_server_dependencies() -> HealthServerDependenciesProtocol:
     """Load health-listener dependencies from the canonical composition seam."""
@@ -113,15 +117,27 @@ def _handle_health_failure(
     interrupted_message: str,
 ) -> None:
     """Handle health command failures with the shared CLI execution policy."""
-    handle_cli_execution_failure(
+    for suffix in _HEALTH_REASON_SUFFIXES:
+        token = f"_{suffix}"
+        if reason_code.endswith(token):
+            reason_prefix = reason_code.removesuffix(token)
+            reason_suffix = suffix
+            break
+    else:
+        reason_prefix = reason_code
+        reason_suffix = "UNEXPECTED_ERROR"
+
+    handle_boundary_cli_failure(
         exc,
-        reason_code=reason_code,
-        subject_key="target",
-        subject_value=target,
-        domain_error_title=domain_error_title,
-        unexpected_error_title=unexpected_error_title,
-        interrupted_message=interrupted_message,
-        default_exit_code=ExitCode.FAIL,
+        policy=build_target_cli_boundary_policy(
+            reason_prefix=reason_prefix,
+            target=target,
+            domain_error_title=domain_error_title,
+            unexpected_error_title=unexpected_error_title,
+            interrupted_message=interrupted_message,
+            default_exit_code=ExitCode.FAIL,
+        ),
+        reason_suffix=reason_suffix,
     )
 
 

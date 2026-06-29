@@ -83,7 +83,10 @@ _RUNTIME_EXCLUDE_PARTS = (
 _TEXT_SUFFIXES = {".py", ".md", ".json", ".yml", ".yaml"}
 _TEXT_FILE_DISCOVERY_CACHE: dict[str, tuple[Path, ...]] = {}
 _METRIC_INVENTORY_CACHE: dict[str, dict[str, object]] = {}
+_SOURCE_TEXT_CACHE: dict[str, str | None] = {}
 _RUNTIME_CANDIDATE_TEXT_CACHE: dict[str, str | None] = {}
+_RUNTIME_CANDIDATE_PATH_CACHE: dict[str, tuple[Path, ...]] = {}
+_RUNTIME_EVENT_CANDIDATE_PATH_CACHE: dict[str, tuple[Path, ...]] = {}
 _TEXT_DISCOVERY_TIMEOUT_SECONDS: Final[float] = 20.0
 _METRIC_MENTION_GREP_TIMEOUT_SECONDS: Final[float] = 20.0
 _METRIC_MENTION_GREP_CHUNK_SIZE: Final[int] = 128
@@ -562,21 +565,187 @@ def _normalize_mapping_lists(
     return {key: sorted(set(values)) for key, values in sorted(mapping.items())}
 
 
-def _read_runtime_candidate_text(path: Path) -> str | None:
+def _read_cached_text(path: Path) -> str | None:
     cache_key = path.as_posix()
-    cached = _RUNTIME_CANDIDATE_TEXT_CACHE.get(cache_key)
-    if cache_key in _RUNTIME_CANDIDATE_TEXT_CACHE:
+    cached = _SOURCE_TEXT_CACHE.get(cache_key)
+    if cache_key in _SOURCE_TEXT_CACHE:
         return cached
     try:
         text = path.read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError):
-        _RUNTIME_CANDIDATE_TEXT_CACHE[cache_key] = None
+        _SOURCE_TEXT_CACHE[cache_key] = None
         return None
-    if not any(marker in text for marker in _RUNTIME_SCAN_MARKERS):
+    _SOURCE_TEXT_CACHE[cache_key] = text
+    return text
+
+
+def _read_runtime_candidate_text(path: Path) -> str | None:
+    cache_key = f"{path.as_posix()}::runtime"
+    cached = _RUNTIME_CANDIDATE_TEXT_CACHE.get(cache_key)
+    if cache_key in _RUNTIME_CANDIDATE_TEXT_CACHE:
+        return cached
+    text = _read_cached_text(path)
+    if text is None or not any(marker in text for marker in _RUNTIME_SCAN_MARKERS):
         _RUNTIME_CANDIDATE_TEXT_CACHE[cache_key] = None
         return None
     _RUNTIME_CANDIDATE_TEXT_CACHE[cache_key] = text
     return text
+
+
+def _read_runtime_event_candidate_text(path: Path) -> str | None:
+    cache_key = f"{path.as_posix()}::runtime-event"
+    cached = _RUNTIME_CANDIDATE_TEXT_CACHE.get(cache_key)
+    if cache_key in _RUNTIME_CANDIDATE_TEXT_CACHE:
+        return cached
+    text = _read_cached_text(path)
+    if text is None or not any(marker in text for marker in _RUNTIME_EVENT_SCAN_MARKERS):
+        _RUNTIME_CANDIDATE_TEXT_CACHE[cache_key] = None
+        return None
+    _RUNTIME_CANDIDATE_TEXT_CACHE[cache_key] = text
+    return text
+
+
+def _iter_runtime_candidate_paths(repo_root: Path) -> list[Path]:
+    """Return runtime Python files that contain observability scan markers."""
+    root = repo_root / _RUNTIME_SCAN_ROOT
+    cache_key = root.as_posix()
+    cached = _RUNTIME_CANDIDATE_PATH_CACHE.get(cache_key)
+    if cached is not None:
+        return list(cached)
+
+    discovered = _iter_runtime_candidate_paths_with_rg(root)
+    if discovered:
+        _RUNTIME_CANDIDATE_PATH_CACHE[cache_key] = tuple(discovered)
+        return discovered
+
+    fallback: list[Path] = []
+    for path in _iter_text_files(root):
+        if path.suffix != ".py":
+            continue
+        path_str = path.as_posix()
+        if any(excluded in path_str for excluded in _RUNTIME_EXCLUDE_PARTS):
+            continue
+        if _read_runtime_candidate_text(path) is not None:
+            fallback.append(path)
+    fallback = sorted(fallback)
+    _RUNTIME_CANDIDATE_PATH_CACHE[cache_key] = tuple(fallback)
+    return fallback
+
+
+def _iter_runtime_candidate_paths_with_rg(root: Path) -> list[Path]:
+    """Discover runtime Python candidates with ripgrep before AST parsing."""
+    regexes = [
+        pattern
+        for marker in _RUNTIME_SCAN_MARKERS
+        for pattern in ("-e", re.escape(marker))
+    ]
+    try:
+        result, stdout = _run_text_discovery_command(
+            [
+                "rg",
+                "--files-with-matches",
+                "--color",
+                "never",
+                "--glob",
+                "*.py",
+                *regexes,
+                root.as_posix(),
+            ],
+            timeout=_TEXT_DISCOVERY_TIMEOUT_SECONDS,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return []
+    if result.returncode not in {0, 1}:
+        return []
+
+    paths: list[Path] = []
+    for line in stdout.splitlines():
+        if not line:
+            continue
+        path = _REPO_ROOT / line if not Path(line).is_absolute() else Path(line)
+        path_str = path.as_posix()
+        if path.suffix != ".py" or any(
+            excluded in path_str for excluded in _RUNTIME_EXCLUDE_PARTS
+        ):
+            continue
+        paths.append(path)
+    return sorted(set(paths))
+
+
+def _iter_runtime_event_candidate_paths(repo_root: Path) -> list[Path]:
+    """Return runtime Python files that contain observability event markers."""
+    root = repo_root / _RUNTIME_SCAN_ROOT
+    cache_key = root.as_posix()
+    cached = _RUNTIME_EVENT_CANDIDATE_PATH_CACHE.get(cache_key)
+    if cached is not None:
+        return list(cached)
+
+    discovered = _iter_runtime_event_candidate_paths_with_rg(root)
+    if discovered:
+        _RUNTIME_EVENT_CANDIDATE_PATH_CACHE[cache_key] = tuple(discovered)
+        return discovered
+
+    fallback: list[Path] = []
+    for path in _iter_text_files(root):
+        if path.suffix != ".py":
+            continue
+        path_str = path.as_posix()
+        if "src/bioetl/infrastructure" in path_str:
+            continue
+        if _read_runtime_event_candidate_text(path) is not None:
+            fallback.append(path)
+    fallback = sorted(fallback)
+    _RUNTIME_EVENT_CANDIDATE_PATH_CACHE[cache_key] = tuple(fallback)
+    return fallback
+
+
+def _iter_runtime_event_candidate_paths_with_rg(root: Path) -> list[Path]:
+    """Discover runtime event candidates with ripgrep before AST parsing."""
+    regexes = [
+        pattern
+        for marker in _RUNTIME_EVENT_SCAN_MARKERS
+        for pattern in ("-e", re.escape(marker))
+    ]
+    try:
+        result, stdout = _run_text_discovery_command(
+            [
+                "rg",
+                "--files-with-matches",
+                "--color",
+                "never",
+                "--glob",
+                "*.py",
+                *regexes,
+                root.as_posix(),
+            ],
+            timeout=_TEXT_DISCOVERY_TIMEOUT_SECONDS,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return []
+    if result.returncode not in {0, 1}:
+        return []
+
+    paths: list[Path] = []
+    for line in stdout.splitlines():
+        if not line:
+            continue
+        path = _REPO_ROOT / line if not Path(line).is_absolute() else Path(line)
+        path_str = path.as_posix()
+        if path.suffix != ".py" or "src/bioetl/infrastructure" in path_str:
+            continue
+        paths.append(path)
+    return sorted(set(paths))
+
+
+def _collect_runtime_candidate_texts(repo_root: Path) -> list[tuple[Path, str]]:
+    """Read runtime candidate texts once and reuse them across metric scans."""
+    candidates: list[tuple[Path, str]] = []
+    for path in _iter_runtime_candidate_paths(repo_root):
+        text = _read_runtime_candidate_text(path)
+        if text is None:
+            continue
+        candidates.append((path, text))
+    return candidates
 
 
 def _module_path_from_import(module_name: str, repo_root: Path) -> Path | None:
@@ -674,20 +843,16 @@ def _collect_class_attribute_bindings(tree: ast.AST) -> dict[str, str]:
     return bindings
 
 
-def _collect_repo_class_attribute_bindings(repo_root: Path) -> dict[str, str]:
+def _collect_repo_class_attribute_bindings(
+    candidate_files: list[tuple[Path, str]],
+) -> dict[str, str]:
     """Collect string-valued class attributes across runtime scan roots.
 
     This lets helper modules resolve ``self.METRIC_*`` style references even when
     the concrete string constant is declared on a subclass in another file.
     """
     bindings: dict[str, str] = {}
-    for path in _iter_text_files(repo_root / _RUNTIME_SCAN_ROOT):
-        path_str = path.as_posix()
-        if any(excluded in path_str for excluded in _RUNTIME_EXCLUDE_PARTS):
-            continue
-        text = _read_runtime_candidate_text(path)
-        if text is None:
-            continue
+    for _path, text in candidate_files:
         try:
             tree = ast.parse(text)
         except SyntaxError:
@@ -1181,16 +1346,15 @@ def _scan_runtime_metric_calls(
     label_contract_violations: list[str] = []
     label_contract_unresolved: list[str] = []
     import_binding_cache: dict[Path, dict[str, str]] = {}
-    repo_attribute_bindings = _collect_repo_class_attribute_bindings(repo_root)
-    for path in _iter_text_files(repo_root / _RUNTIME_SCAN_ROOT):
-        path_str = path.as_posix()
-        if any(excluded in path_str for excluded in _RUNTIME_EXCLUDE_PARTS):
-            continue
+    candidate_files = _collect_runtime_candidate_texts(repo_root)
+    repo_attribute_bindings = _collect_repo_class_attribute_bindings(candidate_files)
+    for path, preloaded_text in candidate_files:
         scan_result = _scan_runtime_metric_file(
             path,
             repo_root=repo_root,
             import_binding_cache=import_binding_cache,
             repo_attribute_bindings=repo_attribute_bindings,
+            preloaded_text=preloaded_text,
         )
         if scan_result is None:
             continue
@@ -1500,15 +1664,10 @@ def _scan_runtime_observability_event_calls(
 ) -> tuple[dict[str, list[str]], list[str]]:
     direct_emitters: dict[str, list[str]] = defaultdict(list)
     domain_event_emitters: list[str] = []
-    for path in _iter_text_files(repo_root / _RUNTIME_SCAN_ROOT):
+    for path in _iter_runtime_event_candidate_paths(repo_root):
         relative_path = _as_repo_relative(path, repo_root)
-        path_str = path.as_posix()
-        if "src/bioetl/infrastructure" in path_str:
-            continue
-        text = _read_runtime_candidate_text(path)
-        if text is None or not any(
-            marker in text for marker in _RUNTIME_EVENT_SCAN_MARKERS
-        ):
+        text = _read_runtime_event_candidate_text(path)
+        if text is None:
             continue
         try:
             tree = ast.parse(text)

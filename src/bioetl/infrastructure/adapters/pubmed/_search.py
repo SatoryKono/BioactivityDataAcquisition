@@ -13,9 +13,9 @@ import contextlib
 import time
 from typing import TYPE_CHECKING
 
-from httpx import RequestError
-
-from bioetl.domain.exceptions import BioETLError, NetworkError
+from bioetl.infrastructure.adapters.pubmed._errors import (
+    PUBMED_RECORD_ERRORS as PUBMED_SEARCH_ERRORS,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -28,17 +28,6 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
 from .constants import ENTREZ_API_BASE
-
-PUBMED_SEARCH_ERRORS = (
-    BioETLError,
-    NetworkError,
-    RequestError,
-    OSError,
-    ValueError,
-    TypeError,
-    RuntimeError,
-    KeyError,
-)
 
 
 class PubMedSearchMixin:
