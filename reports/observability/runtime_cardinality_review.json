@@ -6,7 +6,7 @@
     "bioetl_pipeline_runs_total": 500
   },
   "degraded_reasons": [],
-  "generated_at": "2026-06-04T15:01:29Z",
+  "generated_at": "2026-06-29T16:17:28Z",
   "live_observed_series": {
     "bioetl_checkpoint_load_events_total": 0,
     "bioetl_checkpoint_saved_at_seconds": 0,
@@ -23,7 +23,7 @@
   },
   "local_threshold_violations": [],
   "mode": "live_review",
-  "prometheus_base_url": "http://127.0.0.1:18090",
+  "prometheus_base_url": "http://127.0.0.1:18091",
   "prometheus_base_url_source": "cli",
   "prometheus_token_env_var": "BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN",
   "prometheus_url_env_var": "BIOETL_OBSERVABILITY_PROMETHEUS_URL",

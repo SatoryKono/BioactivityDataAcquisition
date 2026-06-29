@@ -332,6 +332,18 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as the bounded non-interactive WSL helper used to avoid Codex launch hangs while the surrounding Windows bootstrap flow is still being consolidated; remove it if launch-codex-wsl.ps1 is retired or rewritten onto a different startup path."
     },
+    "scripts/ai/codex/helper/wsl-support.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the shared Windows-side WSL path and invocation helper for Codex PowerShell launchers; promote to active only if the Windows launcher flow becomes a governed first-class runtime entrypoint."
+    },
+    "scripts/ops/launchers/codex/SETUP_GUIDE.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded manual quick-start guide for the Codex launcher setup flow while launcher documentation is being consolidated; retire it once the canonical docs and launcher help cover the same operator guidance."
+    },
     "scripts/engineering/qa/import_graph_inventory.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",

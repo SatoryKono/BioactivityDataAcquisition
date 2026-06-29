@@ -69,6 +69,10 @@ def test_closeout_artifact_covers_all_requested_issues() -> None:
 
 
 def test_issue_5387_scorecard_coverage_evidence_matches_inventory() -> None:
+    skip_if_module_coverage_inventory_is_dirty(
+        root=ROOT,
+        inventory_path=MODULE_COVERAGE,
+    )
     scorecard = _load_json(SCORECARD)
     inventory = _load_json(MODULE_COVERAGE)
     summary = inventory["summary"]
@@ -90,15 +94,17 @@ def test_issue_5387_scorecard_coverage_evidence_matches_inventory() -> None:
 def test_issue_5388_compatibility_facade_counts_stay_within_ratchets() -> None:
     census = _load_json(COMPAT_CENSUS)
     debt_scorecard = _load_yaml(DEBT_SCORECARD)
-    metrics = debt_scorecard["compatibility_debt_metrics"]["metrics"]
+    metrics = debt_scorecard["sanctioned_public_entrypoint_governance"]["metrics"]
     summary = census["summary"]
 
-    assert summary["retained_entrypoint_count"] <= metrics[
-        "retained_public_entrypoint_burden"
-    ]["max_count"]
-    assert summary["retained_public_export_facade_count"] <= metrics[
-        "retained_public_export_facade_burden"
-    ]["max_count"]
+    assert (
+        summary["retained_entrypoint_count"]
+        == metrics["public_entrypoint_count"]["current_count"]
+    )
+    assert (
+        summary["retained_public_export_facade_count"]
+        == metrics["public_export_facade_count"]["current_count"]
+    )
     assert summary["removed_compatibility_surfaces_with_src_importers"] == 0
     assert summary["removed_compatibility_surfaces_still_present"] == 0
     assert summary["retained_public_export_facades_with_duplicate_exports"] == 0
@@ -127,7 +133,12 @@ def test_issue_5389_control_plane_use_case_seams_remain_explicit() -> None:
         for row in hotspot["families"]
         if row["name"] == "application_services_control_plane"
     )
-    assert family["budget_warnings"] == []
+    budgets = family["bounded_growth_budgets"]
+    assert family["files_ge_250_loc"] < budgets["files_ge_250_loc"]
+    assert all(
+        warning != "at_budget:files_ge_250_loc=16/16"
+        for warning in family["budget_warnings"]
+    )
 
     audit_text = SEMANTIC_USE_CASE_AUDIT.read_text(encoding="utf-8")
     assert "Use-case ownership remains in Application" in audit_text

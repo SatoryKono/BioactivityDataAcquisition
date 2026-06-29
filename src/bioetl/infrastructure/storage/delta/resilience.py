@@ -112,6 +112,7 @@ class SilverMergeResiliencePolicy:
     execution_timeout_seconds: float
     commit_retry: AdaptiveRetryPolicy
     timeout_retry: AdaptiveRetryPolicy
+    plain_write_process_isolation: bool = False
 
 
 WINDOWS_ATOMIC_REPLACE_RETRY_POLICY = AdaptiveRetryPolicy(

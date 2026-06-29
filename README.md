@@ -163,7 +163,7 @@ Notes:
 - Documentation site commands require the separate `docs` extra: `uv sync --extra dev --extra tests --extra tracing --extra docs` or `pip install -e ".[dev,tests,tracing,docs]"`.
 - `uv run python -m scripts.ops setup-plugins` configures local pytest and pre-commit tooling.
 - Hook-only reinstall remains available through `bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only`.
-- If you use Codex or GitHub Copilot MCP, run `uv run python -m scripts.engineering.dev setup-mcp` after install. If you activated the OS-appropriate environment instead of using `uv`, `python -m scripts.engineering.dev setup-mcp` is also valid.
+- If you use Codex, GitHub Copilot, or Devin MCP, run `uv run python -m scripts.engineering.dev setup-mcp` after install. If you activated the OS-appropriate environment instead of using `uv`, `python -m scripts.engineering.dev setup-mcp` is also valid.
 - For docs verification and strict site builds, use the published [Docs Verification Guide](docs/03-guides/docs-verification.md).
 
 #### Mixed Windows + WSL Development
@@ -359,7 +359,7 @@ If you do not want to activate the environment, call the interpreter directly:
 - Логи локальных запусков сохраняйте в `reports/logs/`.
 - Для ad-hoc команд используйте явное перенаправление (`> reports/logs/<name>.log 2>&1` или `> tmp/<name>.txt 2>&1`).
 
-### MCP Setup (GitHub Copilot + Codex)
+### MCP Setup (GitHub Copilot + Codex + Qodo)
 
 To configure the core MCP servers for both VS Code Copilot and Codex CLI:
 
@@ -376,7 +376,7 @@ python scripts\ai\codex\setup_mcp.py
 What this script does:
 
 - Writes workspace MCP config for Copilot at `.vscode/mcp.json`.
-- Synchronizes `.mcp.json`, `.vscode/mcp.json`, `.codex/settings.json`, and the managed MCP block in `~/.codex/config.toml`.
+- Synchronizes `.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`, `.qodo/mcp.json`, `.codex/settings.json`, and the managed MCP block in `~/.codex/config.toml`.
 - Registers the current MCP set: `memory`, `filesystem`, `fetch`, `github`, `docker`, `context7`, `ast-grep`, `mcp-code-interpreter`, `prometheus`, `grafana`, `brave-search`, `sonarqube`, `neo4j-cypher`, `neo4j-memory`, `chembl`, `pubchem`, `pubmed`, `mermaid`, `biomoltechDocs`, `mintlify`, and `deepwiki`.
 - Uses repo-local wrappers for local and Docker-backed servers so auth and machine-local settings stay out of tracked MCP config files.
 - Uses local defaults when not overridden:
@@ -385,6 +385,22 @@ What this script does:
   - Grafana auth prefers `GRAFANA_SERVICE_ACCOUNT_TOKEN`; otherwise it can use `GRAFANA_USERNAME` / `GRAFANA_PASSWORD`.
 - Repo wrappers auto-load local secrets from untracked `.env` before launch. Existing shell variables still win over `.env`, so ad-hoc session overrides continue to work.
 - Does **not** store real tokens in repository MCP files.
+
+To refresh only the Qodo Desktop MCP config without touching Codex or Gemini settings:
+
+```bash
+uv run python scripts/ai/codex/setup_mcp.py --qodo-only
+```
+
+Windows PowerShell:
+
+```powershell
+python scripts\ai\codex\setup_mcp.py --qodo-only
+```
+
+For Qodo on Windows, make sure both `C:\Program Files\nodejs` and
+`%APPDATA%\npm` are present in the user `Path` before restarting Qodo, because
+the generated `.qodo/mcp.json` launches several MCP servers via `npx`.
 
 Common MCP environment variables:
 

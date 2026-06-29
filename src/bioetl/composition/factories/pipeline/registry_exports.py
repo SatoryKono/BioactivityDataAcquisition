@@ -28,6 +28,7 @@ FACTORY_EXPORTS: dict[str, str] = {
 
 REGISTRY_PUBLIC_EXPORTS: tuple[str, ...] = (
     "PipelineDefinition",
+    "PIPELINE_CONFIGS",
     "PipelineFactoryRegistrationState",
     "PipelineRegistry",
     "chembl_activity_factory",

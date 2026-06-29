@@ -3,10 +3,15 @@
 from __future__ import annotations
 
 import threading
-from collections.abc import Iterator, Mapping
 from typing import Protocol, cast
 
-from bioetl.composition.factories.pipeline.contract_validator import create_factory
+from bioetl.composition.factories.pipeline._registry_factory_catalog import (
+    LazyFactoryCatalog,
+    list_pipeline_names,
+)
+from bioetl.composition.factories.pipeline.registry_manifest import (
+    PIPELINE_CONFIGS as PIPELINE_CONFIGS,
+)
 from bioetl.composition.factories.pipeline.registry_core import (
     PipelineDefinition as PipelineDefinition,
     PipelineRegistry as PipelineRegistry,
@@ -16,9 +21,6 @@ from bioetl.composition.factories.pipeline.registry_core import (
 from bioetl.composition.factories.pipeline.registry_exports import (
     FACTORY_EXPORTS,
     REGISTRY_PUBLIC_EXPORTS,
-)
-from bioetl.composition.factories.pipeline.registry_manifest import (
-    PIPELINE_CONFIGS,
 )
 from bioetl.domain.ports import PipelineFactoryPort
 
@@ -39,43 +41,7 @@ class PipelineRegistryProtocol(Protocol):
         ...
 
 
-def _build_factories() -> dict[str, object]:
-    """Build factory instances from the canonical pipeline config table."""
-    return {config.pipeline_name: create_factory(config) for config in PIPELINE_CONFIGS}
-
-
-_configs_by_name = {config.pipeline_name: config for config in PIPELINE_CONFIGS}
-
-
-class _LazyFactoryCatalog(Mapping[str, object]):
-    """Read-only lazy pipeline factory catalog."""
-
-    def __init__(self) -> None:
-        self._lock = threading.RLock()
-        self._cache: dict[str, object] = {}
-
-    def __getitem__(self, pipeline_name: str) -> object:
-        if pipeline_name in self._cache:
-            return self._cache[pipeline_name]
-        with self._lock:
-            if pipeline_name in self._cache:
-                return self._cache[pipeline_name]
-            try:
-                config = _configs_by_name[pipeline_name]
-            except KeyError as exc:
-                raise KeyError(pipeline_name) from exc
-            factory = create_factory(config)
-            self._cache[pipeline_name] = factory
-            return factory
-
-    def __iter__(self) -> Iterator[str]:
-        return iter(_configs_by_name)
-
-    def __len__(self) -> int:
-        return len(_configs_by_name)
-
-
-_factories = _LazyFactoryCatalog()
+_factories = LazyFactoryCatalog()
 
 
 class PipelineFactoryRegistrationState:
@@ -180,7 +146,7 @@ def _register_factories_to(registry: PipelineRegistryProtocol) -> None:
 
 def _list_pipeline_names() -> list[str]:
     """Return available pipeline names in canonical sorted order."""
-    return sorted(_configs_by_name.keys())
+    return list_pipeline_names()
 
 
 def is_registered(

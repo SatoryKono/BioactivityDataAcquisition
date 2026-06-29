@@ -16,14 +16,16 @@ from bioetl.infrastructure.storage.silver.metadata_operations import (
     _prepare_silver_metadata_write,
     _SilverMetadataWriteHostProtocol,
 )
-from bioetl.infrastructure.storage.silver.metadata_request_models import (
-    _build_silver_merged_metadata_write_request,
-    _SilverMergedMetadataWriteRequest,
+from bioetl.infrastructure.storage.silver.metadata_write_models import (
     _SilverMetadataWriteRequest,
 )
 from bioetl.infrastructure.storage.silver.operations.metadata_write_support import (
     _SilverMetadataWriteSupportRequest,
     _write_silver_metadata,
+)
+from bioetl.infrastructure.storage.silver.prepared_operation_models import (
+    _build_silver_merged_metadata_write_request,
+    _SilverMergedMetadataWriteRequest,
 )
 
 

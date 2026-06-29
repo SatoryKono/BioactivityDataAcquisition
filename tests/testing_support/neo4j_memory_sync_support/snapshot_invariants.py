@@ -8,10 +8,13 @@ import pytest
 
 from .common import *  # noqa: F403
 
-pytestmark = pytest.mark.skipif(
-    sys.platform.startswith("win"),
-    reason="Snapshot invariant tests require full repo walk which is prohibitively slow on Windows",
-)
+
+@pytest.fixture(autouse=True)
+def _skip_snapshot_invariants_on_windows() -> None:
+    if sys.platform.startswith("win"):
+        pytest.skip(
+            "Snapshot invariant tests require full repo walk which is prohibitively slow on Windows"
+        )
 
 
 def test_snapshot_invariants_are_clean() -> None:

@@ -20,14 +20,18 @@ from bioetl.domain.ports import (
     MetricsPort,
 )
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
+from bioetl.infrastructure.storage.silver.finalization_models import (
+    _SilverWriteFinalizationPreparationRequest,
+)
 from bioetl.infrastructure.storage.silver.metadata_operation_protocols import (
     _SilverMetadataWriteHostProtocol,
     _SilverWriteFinalizationHostProtocol,
 )
-from bioetl.infrastructure.storage.silver.metadata_request_models import (
-    _PreparedSilverWriteFinalizationContext,
+from bioetl.infrastructure.storage.silver.metadata_write_models import (
     _SilverMetadataWriteRequest,
-    _SilverWriteFinalizationPreparationRequest,
+)
+from bioetl.infrastructure.storage.silver.prepared_operation_models import (
+    _PreparedSilverWriteFinalizationContext,
 )
 
 __all__ = ["_SilverWriterMetadataRuntimeProtocol"]

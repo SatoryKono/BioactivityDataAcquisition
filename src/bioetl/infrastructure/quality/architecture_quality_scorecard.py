@@ -24,56 +24,57 @@ _CATEGORY_BASELINES: tuple[dict[str, object], ...] = (
         "id": "layer_compliance",
         "name": "Layer compliance",
         "weight": 0.13,
-        "score": 9.2,
         "metric_keys": ("layer_violations",),
     },
     {
         "id": "hexagonal_ports_adapters",
         "name": "Hexagonal / Ports & Adapters",
         "weight": 0.11,
-        "score": 8.4,
         "metric_keys": ("layer_violations", "retained_entrypoint_count"),
     },
     {
         "id": "ddd_invariants",
         "name": "DDD / aggregates / invariants",
         "weight": 0.09,
-        "score": 8.0,
         "metric_keys": ("source_module_count", "uncovered_module_count"),
     },
     {
         "id": "composition_di",
         "name": "Composition root / DI",
         "weight": 0.10,
-        "score": 8.0,
         "metric_keys": ("layer_violations", "retained_public_export_facade_count"),
     },
     {
         "id": "module_boundaries_coupling",
         "name": "Module boundaries / coupling",
         "weight": 0.14,
-        "score": 7.0,
-        "metric_keys": ("source_module_count", "hotspot_family_count"),
+        "metric_keys": (
+            "source_module_count",
+            "hotspot_family_count",
+            "hotspot_budget_warning_count",
+            "total_duplicate_clusters",
+        ),
     },
     {
         "id": "naming_package_consistency",
         "name": "Naming / package consistency",
         "weight": 0.08,
-        "score": 7.5,
         "metric_keys": ("retained_entrypoint_count", "twin_pair_count"),
     },
     {
         "id": "test_strategy_testability",
         "name": "Test strategy / testability",
         "weight": 0.12,
-        "score": 7.4,
-        "metric_keys": ("unmeasured_module_count", "uncovered_module_count"),
+        "metric_keys": (
+            "unmeasured_module_count",
+            "uncovered_module_count",
+            "compatibility_test_file_count",
+        ),
     },
     {
         "id": "config_contracts_entrypoints",
         "name": "Config / contracts / entrypoints",
         "weight": 0.09,
-        "score": 8.5,
         "metric_keys": (
             "contract_blocking_issue_count",
             "dq_blocking_issue_count",
@@ -84,7 +85,6 @@ _CATEGORY_BASELINES: tuple[dict[str, object], ...] = (
         "id": "determinism_replay_observability",
         "name": "Determinism / replay / observability",
         "weight": 0.08,
-        "score": 8.2,
         "metric_keys": (
             "layer_violations",
             "contract_blocking_issue_count",
@@ -98,10 +98,11 @@ _CATEGORY_BASELINES: tuple[dict[str, object], ...] = (
         "id": "debt_burden_evolution_friction",
         "name": "Debt burden / evolution friction",
         "weight": 0.06,
-        "score": 7.5,
         "metric_keys": (
             "retained_entrypoint_count",
             "repo_wide_untriaged_zero_import_candidate_count",
+            "hotspot_budget_warning_count",
+            "total_duplicate_clusters",
         ),
     },
 )
@@ -126,11 +127,123 @@ def _metric_value(metrics: dict[str, object], key: str) -> object:
     return metrics.get(key, "[missing]")
 
 
+def _metric_int(metrics: dict[str, object], key: str) -> int:
+    value = metrics.get(key, 0)
+    return int(value) if isinstance(value, (int, float)) else 0
+
+
+def _clamp_score(value: float) -> float:
+    return round(max(0.0, min(10.0, value)), 1)
+
+
+def _score_layer_compliance(metrics: dict[str, object]) -> float:
+    return _clamp_score(9.5 - 2.5 * _metric_int(metrics, "layer_violations"))
+
+
+def _score_hexagonal_ports_adapters(metrics: dict[str, object]) -> float:
+    return _clamp_score(
+        9.2
+        - 1.5 * _metric_int(metrics, "layer_violations")
+        - 0.05 * _metric_int(metrics, "retained_entrypoint_count")
+    )
+
+
+def _score_ddd_invariants(metrics: dict[str, object]) -> float:
+    return _clamp_score(
+        9.0
+        - 1.5 * _metric_int(metrics, "uncovered_module_count")
+        - 0.75 * _metric_int(metrics, "unmeasured_module_count")
+    )
+
+
+def _score_composition_di(metrics: dict[str, object]) -> float:
+    return _clamp_score(
+        9.0
+        - 1.5 * _metric_int(metrics, "layer_violations")
+        - 0.25 * _metric_int(metrics, "retained_public_export_facade_count")
+    )
+
+
+def _score_module_boundaries_coupling(metrics: dict[str, object]) -> float:
+    return _clamp_score(
+        8.8
+        - 0.12 * _metric_int(metrics, "hotspot_family_count")
+        - 0.12 * _metric_int(metrics, "hotspot_budget_warning_count")
+        - 0.01 * _metric_int(metrics, "total_duplicate_clusters")
+    )
+
+
+def _score_naming_package_consistency(metrics: dict[str, object]) -> float:
+    return _clamp_score(
+        8.8
+        - 0.06 * _metric_int(metrics, "retained_entrypoint_count")
+        - 0.8 * _metric_int(metrics, "twin_pair_count")
+    )
+
+
+def _score_test_strategy_testability(metrics: dict[str, object]) -> float:
+    return _clamp_score(
+        8.8
+        - 1.5 * _metric_int(metrics, "unmeasured_module_count")
+        - 1.0 * _metric_int(metrics, "uncovered_module_count")
+        - 0.02 * _metric_int(metrics, "compatibility_test_file_count")
+    )
+
+
+def _score_config_contracts_entrypoints(metrics: dict[str, object]) -> float:
+    return _clamp_score(
+        9.2
+        - 2.0 * _metric_int(metrics, "contract_blocking_issue_count")
+        - 2.0 * _metric_int(metrics, "dq_blocking_issue_count")
+        - 1.5 * _metric_int(metrics, "adr_enforcement_blocking_gap_count")
+    )
+
+
+def _score_determinism_replay_observability(metrics: dict[str, object]) -> float:
+    return _clamp_score(
+        9.0
+        - 1.5 * _metric_int(metrics, "dashboarded_without_emission_count")
+        - 1.5 * _metric_int(metrics, "dashboarded_without_declaration_count")
+        - 1.0 * _metric_int(metrics, "runtime_cardinality_review_required_count")
+        - 1.0 * _metric_int(metrics, "runtime_cardinality_threshold_violation_count")
+        - 0.5 * _metric_int(metrics, "layer_violations")
+    )
+
+
+def _score_debt_burden_evolution_friction(metrics: dict[str, object]) -> float:
+    return _clamp_score(
+        8.5
+        - 0.06 * _metric_int(metrics, "retained_entrypoint_count")
+        - 0.5 * _metric_int(metrics, "repo_wide_untriaged_zero_import_candidate_count")
+        - 0.08 * _metric_int(metrics, "hotspot_budget_warning_count")
+        - 0.01 * _metric_int(metrics, "total_duplicate_clusters")
+    )
+
+
+_CATEGORY_SCORERS = {
+    "layer_compliance": _score_layer_compliance,
+    "hexagonal_ports_adapters": _score_hexagonal_ports_adapters,
+    "ddd_invariants": _score_ddd_invariants,
+    "composition_di": _score_composition_di,
+    "module_boundaries_coupling": _score_module_boundaries_coupling,
+    "naming_package_consistency": _score_naming_package_consistency,
+    "test_strategy_testability": _score_test_strategy_testability,
+    "config_contracts_entrypoints": _score_config_contracts_entrypoints,
+    "determinism_replay_observability": _score_determinism_replay_observability,
+    "debt_burden_evolution_friction": _score_debt_burden_evolution_friction,
+}
+
+
+def _score_category(category_id: str, metrics: dict[str, object]) -> float:
+    scorer = _CATEGORY_SCORERS[category_id]
+    return scorer(metrics)
+
+
 def _build_categories(metrics: dict[str, object]) -> list[dict[str, object]]:
     categories: list[dict[str, object]] = []
     for item in _CATEGORY_BASELINES:
         weight = float(item["weight"])
-        score = float(item["score"])
+        score = _score_category(str(item["id"]), metrics)
         metric_keys = tuple(str(key) for key in item["metric_keys"])
         categories.append(
             {
@@ -150,7 +263,7 @@ def _build_categories(metrics: dict[str, object]) -> list[dict[str, object]]:
 def _interpretation(score: float) -> str:
     if score < 5.0:
         return "critical"
-    if score < 8.0:
+    if score < 8.5:
         return "satisfactory_system_refactoring_required"
     return "good_targeted_improvements"
 
@@ -158,6 +271,9 @@ def _interpretation(score: float) -> str:
 def _load_scorecard_inputs(
     repo_root: Path,
 ) -> tuple[
+    dict[str, Any],  # Any: JSON artifacts can have any value type
+    dict[str, Any],  # Any: JSON artifacts can have any value type
+    dict[str, Any],  # Any: JSON artifacts can have any value type
     dict[str, Any],  # Any: JSON artifacts can have any value type
     dict[str, Any],  # Any: JSON artifacts can have any value type
     dict[str, Any],  # Any: JSON artifacts can have any value type
@@ -181,6 +297,9 @@ def _load_scorecard_inputs(
         _load_json(
             repo_root, "reports/observability/runtime_cardinality_inventory.json"
         ),
+        _load_json(repo_root, "reports/quality/full-app-duplication-baseline.json"),
+        _load_json(repo_root, "reports/quality/hotspot-family-baseline.json"),
+        _load_json(repo_root, "reports/quality/test-governance-current.json"),
         build_adr_enforcement_matrix(repo_root=repo_root),
         _load_yaml(repo_root, "configs/quality/debt_scorecard.yaml"),
     )
@@ -194,6 +313,11 @@ def _build_source_artifacts(
     contract_diagnostics: dict[str, Any],  # Any: JSON artifact can have any value type
     dq_diagnostics: dict[str, Any],  # Any: JSON artifact can have any value type
     observability_inventory: dict[
+        str, Any  # Any: JSON artifact can have any value type
+    ],  # Any: JSON artifact can have any value type
+    duplication_baseline: dict[str, Any],  # Any: JSON artifact can have any value type
+    hotspot_baseline: dict[str, Any],  # Any: JSON artifact can have any value type
+    test_governance_report: dict[
         str, Any  # Any: JSON artifact can have any value type
     ],  # Any: JSON artifact can have any value type
     adr_enforcement_matrix: dict[
@@ -240,6 +364,24 @@ def _build_source_artifacts(
                 observability_inventory.get("dashboarded_without_declaration", [])
             ),
         },
+        "duplication_baseline": {
+            "path": "reports/quality/full-app-duplication-baseline.json",
+            "snapshot_date": duplication_baseline["summary"]["snapshot_date"],
+            "total_duplicate_clusters": duplication_baseline["summary"][
+                "total_duplicate_clusters"
+            ],
+        },
+        "hotspot_family_baseline": {
+            "path": "reports/quality/hotspot-family-baseline.json",
+            "snapshot_date": hotspot_baseline["summary"]["snapshot_date"],
+            "budget_warnings": hotspot_baseline["summary"]["budget_warnings"],
+        },
+        "test_governance_report": {
+            "path": "reports/quality/test-governance-current.json",
+            "compatibility_test_files": test_governance_report["report"][
+                "compatibility_test_files"
+            ],
+        },
         "adr_enforcement_matrix": {
             "path": (
                 "scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload"
@@ -264,42 +406,49 @@ def _current_compatibility_debt_metrics(
     return metrics if isinstance(metrics, dict) else {}
 
 
-def build_architecture_quality_scorecard(
-    *,
-    repo_root: Path = PROJECT_ROOT,
+def _build_architecture_quality_metrics(
+    dependency_map: dict[str, Any],  # Any: JSON artifact can have any value type
+    coverage_inventory: dict[str, Any],  # Any: JSON artifact can have any value type
+    compatibility_census: dict[str, Any],  # Any: JSON artifact can have any value type
+    dead_code_inventory: dict[str, Any],  # Any: JSON artifact can have any value type
+    contract_diagnostics: dict[str, Any],  # Any: JSON artifact can have any value type
+    dq_diagnostics: dict[str, Any],  # Any: JSON artifact can have any value type
+    observability_inventory: dict[
+        str, Any  # Any: JSON artifact can have any value type
+    ],  # Any: JSON artifact can have any value type
+    duplication_baseline: dict[str, Any],  # Any: JSON artifact can have any value type
+    hotspot_baseline: dict[str, Any],  # Any: JSON artifact can have any value type
+    test_governance_report: dict[
+        str, Any  # Any: JSON artifact can have any value type
+    ],  # Any: JSON artifact can have any value type
+    adr_enforcement_matrix: dict[
+        str, Any  # Any: JSON artifact can have any value type
+    ],  # Any: JSON artifact can have any value type
 ) -> dict[str, object]:
-    """Build the deterministic architecture quality scorecard payload."""
-    repo_root = repo_root.resolve()
-    (
-        dependency_map,
-        coverage_inventory,
-        compatibility_census,
-        dead_code_inventory,
-        contract_diagnostics,
-        dq_diagnostics,
-        observability_inventory,
-        adr_enforcement_matrix,
-        scorecard,
-    ) = _load_scorecard_inputs(repo_root)
-
     coverage_summary = coverage_inventory["summary"]
     status_counts = coverage_summary["status_counts"]
     compatibility_summary = compatibility_census["summary"]
     dead_code_summary = dead_code_inventory["summary"]
-    hotspot_family_coverage = coverage_summary["hotspot_family_coverage"]
+    duplication_summary = duplication_baseline["summary"]
+    hotspot_summary = hotspot_baseline["summary"]
     adr_summary = adr_enforcement_matrix["summary"]
-
-    metrics: dict[str, object] = {
+    test_governance_summary = test_governance_report["report"]
+    return {
         "layer_violations": len(dependency_map.get("violations", [])),
         "source_module_count": coverage_summary["source_module_count"],
         "unmeasured_module_count": coverage_summary["unmeasured_module_count"],
         "uncovered_module_count": status_counts.get("uncovered", 0),
-        "hotspot_family_count": len(hotspot_family_coverage),
+        "hotspot_family_count": len(coverage_summary["hotspot_family_coverage"]),
+        "hotspot_budget_warning_count": hotspot_summary["budget_warnings"],
+        "total_duplicate_clusters": duplication_summary["total_duplicate_clusters"],
         "retained_entrypoint_count": compatibility_summary["retained_entrypoint_count"],
         "retained_public_export_facade_count": compatibility_summary[
             "retained_public_export_facade_count"
         ],
         "twin_pair_count": compatibility_summary["twin_pair_count"],
+        "compatibility_test_file_count": test_governance_summary[
+            "compatibility_test_files"
+        ],
         "repo_wide_untriaged_zero_import_candidate_count": dead_code_summary[
             "repo_wide_untriaged_zero_import_candidate_count"
         ],
@@ -322,6 +471,54 @@ def build_architecture_quality_scorecard(
         "adr_enforcement_manual_exception_count": adr_summary["manual_exception_count"],
     }
 
+
+def _build_debt_budget_policy(scorecard: dict[str, Any]) -> dict[str, object]:
+    debt_budgets = scorecard.get("compatibility_debt_metrics", {})
+    return {
+        "budget_growth_allowed": False,
+        "compatibility_debt_metrics_source": (
+            "configs/quality/debt_scorecard.yaml#compatibility_debt_metrics"
+        ),
+        "current_compatibility_debt_metrics": _current_compatibility_debt_metrics(
+            debt_budgets
+        ),
+    }
+
+
+def build_architecture_quality_scorecard(
+    *,
+    repo_root: Path = PROJECT_ROOT,
+) -> dict[str, object]:
+    """Build the deterministic architecture quality scorecard payload."""
+    repo_root = repo_root.resolve()
+    (
+        dependency_map,
+        coverage_inventory,
+        compatibility_census,
+        dead_code_inventory,
+        contract_diagnostics,
+        dq_diagnostics,
+        observability_inventory,
+        duplication_baseline,
+        hotspot_baseline,
+        test_governance_report,
+        adr_enforcement_matrix,
+        scorecard,
+    ) = _load_scorecard_inputs(repo_root)
+
+    metrics = _build_architecture_quality_metrics(
+        dependency_map,
+        coverage_inventory,
+        compatibility_census,
+        dead_code_inventory,
+        contract_diagnostics,
+        dq_diagnostics,
+        observability_inventory,
+        duplication_baseline,
+        hotspot_baseline,
+        test_governance_report,
+        adr_enforcement_matrix,
+    )
     categories = _build_categories(metrics)
     integral_score = round(
         sum(float(category["weighted_score"]) for category in categories),
@@ -331,7 +528,6 @@ def build_architecture_quality_scorecard(
         sum(float(category["weight"]) for category in categories),
         2,
     )
-    debt_budgets = scorecard.get("compatibility_debt_metrics", {})
     source_artifacts = _build_source_artifacts(
         dependency_map,
         coverage_inventory,
@@ -340,6 +536,9 @@ def build_architecture_quality_scorecard(
         contract_diagnostics,
         dq_diagnostics,
         observability_inventory,
+        duplication_baseline,
+        hotspot_baseline,
+        test_governance_report,
         adr_enforcement_matrix,
     )
 
@@ -352,15 +551,7 @@ def build_architecture_quality_scorecard(
         "interpretation": _interpretation(integral_score),
         "categories": categories,
         "metrics": metrics,
-        "debt_budget_policy": {
-            "budget_growth_allowed": False,
-            "compatibility_debt_metrics_source": (
-                "configs/quality/debt_scorecard.yaml#compatibility_debt_metrics"
-            ),
-            "current_compatibility_debt_metrics": _current_compatibility_debt_metrics(
-                debt_budgets
-            ),
-        },
+        "debt_budget_policy": _build_debt_budget_policy(scorecard),
     }
 
 
@@ -381,6 +572,8 @@ def write_architecture_quality_scorecard(
 
 __all__ = [
     "DEFAULT_OUTPUT",
+    "_build_categories",
+    "_score_category",
     "build_architecture_quality_scorecard",
     "write_architecture_quality_scorecard",
 ]

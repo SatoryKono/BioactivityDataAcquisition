@@ -6,32 +6,26 @@ param(
     [string[]]$Args
 )
 
+$ErrorActionPreference = "Stop"
+
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$WslSupport = Join-Path $ScriptDir "helper\wsl-support.ps1"
+. $WslSupport
 
-function ConvertTo-WslPath {
-    param([string]$WindowsPath)
-
-    $drive = $WindowsPath.Substring(0, 1).ToLowerInvariant()
-    $rest = $WindowsPath.Substring(2).Replace('\', '/')
-    return "/mnt/$drive$rest"
-}
-
-$LauncherWSL = ConvertTo-WslPath (Join-Path $ScriptDir "headless.sh")
+$LauncherWSL = ConvertTo-CodexWslPath (Join-Path $ScriptDir "headless.sh")
 
 if ($Args.Count -gt 0 -and $Args[0] -match "^(help|-h|--help)$") {
     Write-Host @"
-Usage: .\headless.ps1 [command] [prompt]
+Usage: .\headless.ps1 [command] [prompt...]
 
 Delegates to the canonical WSL launcher at scripts/ai/codex/headless.sh and
 skips MCP synchronization before launching Codex.
+
+Set BIOETL_WSL_DISTRO to target a specific WSL distro; otherwise the default
+WSL distro is used.
 "@
     exit 0
 }
 
-if ($env:BIOETL_WSL_DISTRO) {
-    wsl -d $env:BIOETL_WSL_DISTRO -e bash -- $LauncherWSL @Args
-}
-else {
-    wsl -e bash -- $LauncherWSL @Args
-}
-exit $LASTEXITCODE
+$exitCode = Invoke-CodexWslScript -ScriptPath $LauncherWSL -Arguments $Args
+exit $exitCode

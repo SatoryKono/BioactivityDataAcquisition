@@ -39,7 +39,7 @@
     "configs/**/*.csv": 2,
     "configs/**/*.json": 9,
     "configs/**/*.yaml": 125,
-    "reports/quality/*contract*.json": 7,
+    "reports/quality/*contract*.json": 5,
     "reports/quality/*contract*.md": 3,
     "reports/quality/*matrix*.json": 1,
     "reports/quality/*matrix*.md": 1,
@@ -54,10 +54,10 @@
     "config": 157,
     "contract": 42,
     "golden": 20,
-    "quality_report": 10,
+    "quality_report": 8,
     "registry": 18
   },
-  "total_files": 247,
+  "total_files": 245,
   "tracked_extensions": [
     ".csv",
     ".json",

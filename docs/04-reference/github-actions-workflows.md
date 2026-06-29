@@ -57,6 +57,7 @@ Use it when you need to answer:
 | `tests.yml` | `Tests` | `push`, `pull_request` | Main test matrix, DQ gates, coverage, telemetry, control-plane E2E |
 | `type-checking.yml` | `Type Checking (Strict)` | `push`, `pull_request`, `workflow_dispatch` | Strict mypy lane |
 | `validate-mermaid.yml` | `Validate vendored Mermaid` | `push`, `pull_request` | Mermaid vendor/runtime validation |
+| `qodo-merge.yml` | `Qodo Merge` | `pull_request`, `pull_request_review_comment`, `issue_comment`, `push` | Qodo Merge PR Agent for automated code review |
 
 ### Scheduled / periodic workflows
 

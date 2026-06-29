@@ -297,11 +297,17 @@ def _critical_envelope_template() -> dict[str, dict[str, Any]]:
     }
 
 
+def _normalize_repo_relative_path(relative_path: str) -> str:
+    """Normalize repo-relative paths for cross-platform governance scans."""
+    return relative_path.replace("\\", "/")
+
+
 def _matching_critical_envelopes(relative_path: str) -> tuple[str, ...]:
+    normalized_path = _normalize_repo_relative_path(relative_path)
     return tuple(
         name
         for name, paths in CRITICAL_BEHAVIOR_ENVELOPES.items()
-        if relative_path in paths
+        if normalized_path in paths
     )
 
 
@@ -432,9 +438,10 @@ def _classify_assertless_candidate(
 ) -> str:
     name = function.name
     lower_name = name.lower()
-    if "tests/architecture/" in relative_path:
+    normalized_path = _normalize_repo_relative_path(relative_path)
+    if normalized_path.startswith("tests/architecture/"):
         return "architecture_helper_guard"
-    if "tests/performance/" in relative_path or "benchmark" in {
+    if normalized_path.startswith("tests/performance/") or "benchmark" in {
         arg.arg for arg in function.args.args
     }:
         return "benchmark_or_performance"
@@ -466,7 +473,7 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
     date_today_call_sites = 0
 
     for path in test_files:
-        relative = path.relative_to(root).as_posix()
+        relative = _normalize_repo_relative_path(path.relative_to(root).as_posix())
         if COMPATIBILITY_FILE_RE.search(relative):
             compatibility_files.append(relative)
 

@@ -9,10 +9,6 @@ ENSURE_SCRIPT="${REPO_ROOT}/scripts/ai/codex/helper/ensure-codex-cli.sh"
 ENSURE_MCP_SCRIPT="${REPO_ROOT}/scripts/ai/codex/helper/ensure-mcp.sh"
 
 if [[ ! -f "${ENSURE_SCRIPT}" ]]; then
-    ENSURE_SCRIPT="${REPO_ROOT}/script-codex/helper/ensure-codex-cli.sh"
-fi
-
-if [[ ! -f "${ENSURE_SCRIPT}" ]]; then
     echo "[codex] ERROR: bootstrap helper not found: ${ENSURE_SCRIPT}" >&2
     exit 1
 fi

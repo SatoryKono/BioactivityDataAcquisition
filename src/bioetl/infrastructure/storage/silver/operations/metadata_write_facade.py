@@ -10,11 +10,12 @@ from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
-from bioetl.infrastructure.storage.silver.metadata_request_models import (
-    _PreparedSilverWriteFinalizationContext,
-    _SilverMetadataWriteRequest,
+from bioetl.infrastructure.storage.silver.finalization_models import (
     _SilverWriteFinalizationPreparationRequest,
     _SilverWriteResultFinalizationRequest,
+)
+from bioetl.infrastructure.storage.silver.metadata_write_models import (
+    _SilverMetadataWriteRequest,
 )
 from bioetl.infrastructure.storage.silver.operations.metadata_audit_operations import (
     log_internal_silver_audit_operation,
@@ -31,6 +32,9 @@ from bioetl.infrastructure.storage.silver.operations.metadata_write_operations i
 )
 from bioetl.infrastructure.storage.silver.operations.metadata_write_support import (
     _SilverMetadataAuditSupportRequest,
+)
+from bioetl.infrastructure.storage.silver.prepared_operation_models import (
+    _PreparedSilverWriteFinalizationContext,
 )
 
 __all__ = ["_SilverMetadataWriteFacade"]

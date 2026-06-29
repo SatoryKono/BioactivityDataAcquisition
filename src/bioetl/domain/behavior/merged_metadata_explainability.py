@@ -5,9 +5,12 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-from bioetl.domain.models.metadata import CompositeOutputExt
 from bioetl.domain.types import JsonDict
+
+if TYPE_CHECKING:
+    from bioetl.domain.models.metadata import CompositeOutputExt
 
 
 @dataclass(frozen=True)

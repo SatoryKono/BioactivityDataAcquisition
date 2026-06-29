@@ -39,7 +39,6 @@ from bioetl.application.pipelines.crossref._business_data_builder import (
 )
 from bioetl.domain.entities.crossref import CrossRefPublicationEntity
 from bioetl.domain.types import GoldRecord, JsonDict
-from bioetl.domain.value_objects import PublicationYear
 from bioetl.domain.value_objects.publications import DOI
 
 if TYPE_CHECKING:
@@ -134,12 +133,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
     def _validate_publication_year(self, raw: object) -> int | None:
         """Validate publication year and return integer value."""
-        value = self.validate_value_object(
-            PublicationYear,
-            raw,
-            as_string=False,
-        )
-        return value if isinstance(value, int) else None
+        return self._validate_publication_year_value(raw)
 
     def _get_primary_id_field(self) -> str:
         """Return the primary ID field name for CrossRef publications.

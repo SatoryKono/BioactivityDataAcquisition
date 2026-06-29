@@ -18,9 +18,8 @@ from bioetl.interfaces.cli.commands.domains.health.metrics_server_integration im
 )
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
     attach_observability_backend_to_cli_input,
-    build_observability_backend_cli_kwargs,
+    build_observability_backend_cli_kwargs_from_options,
     build_observability_backend_required_probe_paths,
-    resolve_observability_backend_cli_options,
     should_disable_transient_health_server,
 )
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
@@ -263,12 +262,6 @@ def _build_run_command_input_from_options(
     options: Mapping[str, object],
 ) -> RunCommandInput:
     """Build typed run-command input from Click's object-valued kwargs mapping."""
-    ensure_observability_backend, observability_backend_port = (
-        resolve_observability_backend_cli_options(
-            options,
-            default_port=DEFAULT_HEALTH_SERVER_PORT,
-        )
-    )
     return RunCommandInput(
         pipeline=cast("str", options["pipeline"]),
         run_type=cast("str", options["run_type"]),
@@ -285,9 +278,9 @@ def _build_run_command_input_from_options(
         debug=cast("bool", options["debug"]),
         health_server=cast("bool", options["health_server"]),
         health_port=cast("int", options["health_port"]),
-        **build_observability_backend_cli_kwargs(
-            ensure_observability_backend=ensure_observability_backend,
-            observability_backend_port=observability_backend_port,
+        **build_observability_backend_cli_kwargs_from_options(
+            options,
+            default_port=DEFAULT_HEALTH_SERVER_PORT,
         ),
         enable_tracing=cast("bool | None", options["enable_tracing"]),
         use_cached_bronze=cast("bool", options["use_cached_bronze"]),

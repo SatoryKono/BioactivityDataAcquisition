@@ -56,7 +56,7 @@ if not defined REPO_WSL (
     exit /b 1
 )
 
-REM Run with stdin/stdout/stderr connected to terminal
+REM Run bash script (interactive TTY for Codex prompts)
 if defined WSL_DISTRO (
     "%WSL_EXE%" -d "%WSL_DISTRO%" -- bash -i "%REPO_WSL%/scripts/ops/launchers/codex/codex.sh" %*
 ) else (

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+import threading
 from pathlib import Path
 
 import yaml
@@ -12,6 +14,69 @@ DEFAULT_CONTRACT_REGISTRY_PATH = Path("configs/base/contract_registry.yaml")
 _CONTRACT_REGISTRY_PATH_FROM_CONFIGS_ROOT = DEFAULT_CONTRACT_REGISTRY_PATH.relative_to(
     "configs"
 )
+
+_YAML_LOAD_TIMEOUT_SECONDS = 30.0
+
+
+def _is_likely_network_drive(path: Path) -> bool:
+    """Detect if a path is likely on a network drive (Windows only)."""
+    if os.name != "nt":
+        return False
+    try:
+        # Check if the drive root is a network drive
+        drive = path.drive if path.drive else os.path.splitdrive(str(path))[0]
+        if not drive:
+            return False
+        # UNC paths (\\server\share) are network paths
+        if str(path).startswith("\\\\"):
+            return True
+        # Check drive type using Windows API
+        import ctypes
+        from ctypes import wintypes
+
+        DRIVE_REMOTE = 4
+        kernel32 = ctypes.windll.kernel32
+        kernel32.GetDriveTypeW.argtypes = [wintypes.LPCWSTR]
+        kernel32.GetDriveTypeW.restype = wintypes.DWORD
+
+        drive_type = kernel32.GetDriveTypeW(drive + "\\")
+        return drive_type == DRIVE_REMOTE
+    except (OSError, AttributeError, TypeError):
+        # If detection fails, assume local to avoid false positives
+        return False
+
+
+def _load_yaml_with_timeout(path: Path, timeout: float = _YAML_LOAD_TIMEOUT_SECONDS) -> JsonDict:
+    """Load YAML file with timeout protection for network drives."""
+    if not _is_likely_network_drive(path):
+        # Direct read for local drives
+        return yaml.safe_load(path.read_text(encoding="utf-8"))
+
+    # Timeout-protected read for network drives
+    result: JsonDict | None = None
+    exception: Exception | None = None
+
+    def _target() -> None:
+        nonlocal result, exception
+        try:
+            result = yaml.safe_load(path.read_text(encoding="utf-8"))
+        except (OSError, yaml.YAMLError, ValueError) as e:
+            exception = e
+
+    thread = threading.Thread(target=_target, daemon=True)
+    thread.start()
+    thread.join(timeout=timeout)
+
+    if thread.is_alive():
+        raise TimeoutError(f"YAML load did not complete within {timeout} seconds: {path}")
+
+    if exception is not None:
+        raise exception
+
+    if result is None:
+        raise ValueError(f"YAML load returned None: {path}")
+
+    return result
 
 __all__ = [
     "DEFAULT_CONTRACT_REGISTRY_PATH",
@@ -48,7 +113,9 @@ def load_contract_registry_payload(registry_path: Path | None = None) -> JsonDic
     if not path.exists():
         raise FileNotFoundError(f"Contract registry not found: {path}")
     try:
-        payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+        payload = _load_yaml_with_timeout(path)
+    except TimeoutError as exc:
+        raise TimeoutError(f"Contract registry load timeout: {path}") from exc
     except OSError as exc:
         raise OSError(f"Failed to read contract registry: {path}") from exc
     except yaml.YAMLError as exc:

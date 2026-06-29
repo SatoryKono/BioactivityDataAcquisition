@@ -83,7 +83,7 @@ class SilverFiltersFileConfig(BaseGoldFiltersConfig):
     def reject_semantic_silver_filters(cls, data: object) -> object:
         """Reject semantic keys even when this sub-schema is validated directly."""
         if isinstance(data, dict):
-            from bioetl.infrastructure.config.silver_filter_migration import (
+            from bioetl.domain.filtering.silver_config import (
                 validate_structural_silver_filter_payload,
             )
 
@@ -96,7 +96,7 @@ class SilverFiltersFileConfig(BaseGoldFiltersConfig):
         Returns:
             SilverFilterConfig: Immutable domain filter configuration.
         """
-        from bioetl.infrastructure.config.silver_filter_migration import (
+        from bioetl.domain.filtering.silver_config import (
             build_silver_filter_config_for_compatibility,
         )
 
@@ -188,7 +188,7 @@ class FilterConfigFile(BaseModel):
         """Reject semantic Silver rules before field validation."""
         if not isinstance(data, dict):
             return data
-        from bioetl.infrastructure.config.silver_filter_migration import (
+        from bioetl.domain.filtering.silver_config import (
             validate_no_semantic_silver_filter_payload,
         )
 

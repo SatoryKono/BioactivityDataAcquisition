@@ -19,6 +19,10 @@ review_lanes:
   - lane_id: root_env_security
     classification: security_review_required
     scope: tracked root env-like files
+    owner: Engineering / Security
+    retention_class: secret_bearing_local_env_surface
+    retention_action: block_automated_delete_move_rename_overwrite_and_content_scan
+    cleanup_policy: explicit_per_task_user_approval_required
     verification:
       - git ls-files .env .env.local new.env
       - git log -- .env .env.local new.env
@@ -86,6 +90,10 @@ review_lanes:
   - lane_id: root_tooling_transitions
     classification: owner_decision_required
     scope: AI/editor/tooling root surfaces with transitional or owned status
+    owner: Engineering / AI Runtime
+    retention_class: canonical_or_transitional_tooling_runtime_surface
+    retention_action: retain_curated_runtime_roots_and_keep_local_generated_state_untracked
+    cleanup_policy: owner_decision_required_before_rehome_or_delete
     verification:
       - git ls-files .claude .vibe .ai .gemini .jules
       - rg -n "\\.claude/|\\.vibe|\\.ai/|\\.gemini/|\\.jules/" .github docs scripts tests configs README.md pyproject.toml
@@ -115,6 +123,10 @@ review_lanes:
   - lane_id: local_runtime_root_dirs
     classification: review_required
     scope: local runtime/cache roots that may exist in the working tree but must remain untracked
+    owner: Local operator / Engineering Tools
+    retention_class: local_ignored_cache_or_runtime_state
+    retention_action: keep_untracked_or_prune_only_when_rebuildable_and_outside_blocked_zones
+    cleanup_policy: exact_candidate_review_only_no_root_allowlist_promotion
     verification:
       - git ls-files .agent-work .agentbridge .agents .benchmarks .cache .codex_tmp .coverage-sharded-current-main .hypothesis .import_linter_cache node_modules .npm-cache .pytest_cache .ruff_cache test-output tmp .venv caddy '~'
       - git check-ignore -v .agent-work .agentbridge .agents .benchmarks .cache .codex_tmp .coverage-sharded-current-main .hypothesis .import_linter_cache node_modules .npm-cache .pytest_cache .ruff_cache test-output tmp .venv caddy '~'
@@ -196,6 +208,10 @@ review_lanes:
   - lane_id: local_vendor_tooling_roots
     classification: review_required
     scope: local vendor/editor tooling roots that must remain untracked unless explicitly promoted
+    owner: Local operator / Vendor Tooling
+    retention_class: local_ignored_editor_or_vendor_state
+    retention_action: keep_untracked_or_promote_only_after_explicit_owner_review
+    cleanup_policy: exact_candidate_review_only_no_blind_delete
     verification:
       - git ls-files .junie .qodo .sonarlint .windsurf
       - git check-ignore -v .junie .qodo .sonarlint .windsurf
@@ -281,6 +297,10 @@ review_lanes:
   - lane_id: retention_sensitive_boundaries
     classification: blocked_cleanup_zone
     scope: runtime, fixture, archive, and curated-report surfaces
+    owner: Engineering / Reproducibility
+    retention_class: retention_sensitive_replay_fixture_or_curated_evidence
+    retention_action: block_broad_cleanup_and_require_inventory_backed_procedure
+    cleanup_policy: retention_specific_runbook_required
     verification:
       - git ls-files data docs/99-archive docs/reports reports tests/fixtures tests/fixtures/vcr
       - .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked

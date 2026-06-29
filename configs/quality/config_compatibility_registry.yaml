@@ -172,7 +172,7 @@ retired_rejected_shapes:
     test_files:
       - tests/unit/application/services/control_plane/manifest/diagnostics/test_replay_invariant_persistence_profile.py
       - tests/unit/application/services/test_run_manifest_diagnostics.py
-      - tests/architecture/test_checkpoint_compatibility_policy_surface.py
+      - tests/architecture/test_checkpoint_policy_retired_modes_surface.py
     retired_on: "2026-06-25"
     migration_evidence: >
       Current config settings own checkpoint compatibility under

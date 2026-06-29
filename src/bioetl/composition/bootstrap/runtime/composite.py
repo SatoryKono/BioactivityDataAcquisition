@@ -29,6 +29,18 @@ from bioetl.composition.bootstrap.runtime._composite_plan_support import (
 from bioetl.composition.bootstrap.runtime._composite_plan_support import (
     load_composite_config_impl as _load_runtime_composite_config_impl,
 )
+from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
+    _load_field_group_registry,
+)
+from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
+    bootstrap_runtime_basics_facade as _bootstrap_runtime_basics_facade,
+)
+from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
+    build_runner_factories_facade as _build_runner_factories_facade,
+)
+from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
+    build_support_services_facade as _build_support_services_facade,
+)
 from bioetl.composition.bootstrap.runtime.pipeline import (
     apply_runtime_compatibility_patches,
 )
@@ -125,43 +137,10 @@ def _bootstrap_runtime_basics(
     run_id: str | None,
 ) -> CompositeInfrastructureContext:
     """Build base runtime dependencies shared across composite bootstrap."""
-    from uuid import UUID
-
-    from bioetl.composition.bootstrap.assembly.storage import bootstrap_storage_adapter
-    from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
-        bootstrap_runtime_basics as _bootstrap_runtime_basics_builder_impl,
-    )
-    from bioetl.composition.bootstrap.runtime.observability import (
-        bootstrap_logger,
-    )
-    from bioetl.composition.bootstrap.runtime.tracing_bootstrap import (
-        bootstrap_tracer,
-    )
-    from bioetl.composition.runtime_builders.config_access import get_settings
-    from bioetl.composition.occurrence_identity import create_runtime_occurrence_uuid
-    from bioetl.infrastructure.locking.memory_lock import MemoryLock
-
-    def _bootstrap_logger(
-        pipeline_name: str,
-        run_uuid: UUID,
-        level: str,
-    ) -> LoggerPort:
-        return bootstrap_logger(
-            pipeline=pipeline_name,
-            run_id=run_uuid,
-            log_level=level,
-        )
-
-    return _bootstrap_runtime_basics_impl(
+    return _bootstrap_runtime_basics_facade(
         config=config,
         run_id=run_id,
-        bootstrap_runtime_basics_builder_fn=_bootstrap_runtime_basics_builder_impl,
-        settings_provider=get_settings,
-        logger_bootstrapper=_bootstrap_logger,
-        tracer_bootstrapper=bootstrap_tracer,
-        storage_bootstrapper=bootstrap_storage_adapter,
-        lock_factory=MemoryLock,
-        uuid_factory=lambda: create_runtime_occurrence_uuid("composite_basics"),
+        bootstrap_runtime_basics_impl=_bootstrap_runtime_basics_impl,
     )
 
 
@@ -176,33 +155,16 @@ def _build_runner_factories(
     Callable[[str, pl.DataFrame], PipelineRunner],
 ]:
     """Build seed/dependency/enricher runner factories for composite phases."""
-    from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
-        build_runner_factories as _build_runner_factories_builder_impl,
-    )
-    from bioetl.composition.bootstrap.runtime.composite_filter_extraction_service import (
-        CompositeFilterExtractor,
-    )
-    from bioetl.composition.bootstrap.runtime.pipeline import (
-        bootstrap_pipeline_runner as bootstrap_pipeline_runner_impl,
-    )
-    from bioetl.composition.bootstrap.runtime.runner_factory_builder_service import (
-        RunnerFactoryBuilder,
-        resolve_bronze_opts,
-    )
 
     factories: tuple[
         Callable[[], PipelineRunner],
         Callable[[str, pl.DataFrame], PipelineRunner],
         Callable[[str, pl.DataFrame], PipelineRunner],
-    ] = _build_runner_factories_impl(
+    ] = _build_runner_factories_facade(
         config=config,
         runtime=runtime,
         logger=logger,
-        build_runner_factories_builder_fn=_build_runner_factories_builder_impl,
-        runner_factory_builder_cls=RunnerFactoryBuilder,
-        filter_extraction_service_cls=CompositeFilterExtractor,
-        pipeline_runner_builder=bootstrap_pipeline_runner_impl,
-        resolve_bronze_opts_fn=resolve_bronze_opts,
+        build_runner_factories_impl=_build_runner_factories_impl,
     )
     return factories
 
@@ -214,39 +176,15 @@ def _build_support_services(
     infra_context: CompositeInfrastructureContext,
 ) -> CompositeSupportServices:
     """Build composite support service bundle consumed by runner facade."""
-    from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
-        build_support_services as _build_support_services_builder_impl,
-    )
-    from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
-        _create_dq_report_service,
-        _load_field_group_registry,
-    )
-    from bioetl.composition.bootstrap.runtime.composite_support_services_factory import (
-        CompositeSupportServicesFactory,
-    )
 
-    return _build_support_services_impl(
+    return _build_support_services_facade(
         config=config,
         runtime=runtime,
         infra_context=infra_context,
-        build_support_services_builder_fn=_build_support_services_builder_impl,
-        support_services_factory_cls=CompositeSupportServicesFactory,
+        build_support_services_impl=_build_support_services_impl,
         resolve_gold_schema_fn=_resolve_composite_gold_schema,
         load_field_group_registry_fn=_load_field_group_registry,
-        create_dq_report_service_fn=_create_dq_report_service,
     )
-
-
-def _load_field_group_registry(
-    composite_name: str,
-    logger: LoggerPort,
-) -> object | None:
-    """Compatibility seam exposing the canonical field-group loader helper."""
-    from bioetl.composition.bootstrap.runtime.composite_support_helpers import (
-        _load_field_group_registry as _impl,
-    )
-
-    return _impl(composite_name, logger)
 
 
 def _build_composite_bootstrap_plan(

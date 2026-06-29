@@ -13,7 +13,7 @@ from bioetl.composition.runtime_builders.inputs_runtime_models import (
 from bioetl.domain.config import RuntimeConfig
 from bioetl.domain.context import CachedBronzeContext
 from bioetl.domain.types import RunType
-from bioetl.infrastructure.config.silver_filter_migration import (
+from bioetl.domain.filtering.silver_filter_identity import (
     resolve_silver_filter_compatibility_mode,
 )
 

@@ -32,9 +32,11 @@ __all__ = [
     "CliBoundaryExecutionPolicy",
     "ExecutionFailureReasonCodes",
     "build_failure_context",
+    "build_target_cli_boundary_policy",
     "execute_prepared_cli_flow",
     "execute_with_cli_failure_policy",
     "finalize_cli_execution",
+    "handle_boundary_cli_failure",
     "handle_cli_failure",
     "map_batch_run_result_to_exit_code",
     "map_run_status_to_exit_code",
@@ -125,6 +127,27 @@ class CliBoundaryExecutionPolicy:
     unexpected_error_title: str
     interrupted_message: str
     default_exit_code: ExitCode = ExitCode.FAIL
+
+
+def build_target_cli_boundary_policy(
+    *,
+    reason_prefix: str,
+    target: str,
+    domain_error_title: str,
+    unexpected_error_title: str,
+    interrupted_message: str,
+    default_exit_code: ExitCode = ExitCode.FAIL,
+) -> CliBoundaryExecutionPolicy:
+    """Build the canonical target-scoped CLI boundary policy."""
+    return CliBoundaryExecutionPolicy(
+        reason_prefix=reason_prefix,
+        subject_key="target",
+        subject_value=target,
+        domain_error_title=domain_error_title,
+        unexpected_error_title=unexpected_error_title,
+        interrupted_message=interrupted_message,
+        default_exit_code=default_exit_code,
+    )
 
 
 def map_run_status_to_exit_code(
@@ -273,6 +296,20 @@ def _handle_boundary_failure(
         unexpected_error_title=policy.unexpected_error_title,
         interrupted_message=policy.interrupted_message,
         default_exit_code=policy.default_exit_code,
+    )
+
+
+def handle_boundary_cli_failure(
+    exc: BaseException,
+    *,
+    policy: CliBoundaryExecutionPolicy,
+    reason_suffix: str,
+) -> None:
+    """Handle one exception using a prepared command-boundary policy."""
+    _handle_boundary_failure(
+        exc,
+        policy=policy,
+        reason_suffix=reason_suffix,
     )
 
 

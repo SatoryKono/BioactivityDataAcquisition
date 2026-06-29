@@ -22,13 +22,13 @@ __all__ = ["OPENALEX_API_BASE", "OPENALEX_RUNTIME_ERRORS", "OpenAlexAdapter"]
 from dataclasses import KW_ONLY, dataclass, field
 from typing import TYPE_CHECKING, Any
 
-from httpx import HTTPStatusError, RequestError
-
-from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.common import (
     FallbackFetchOrchestrator,
     FallbackPolicyMixin,
+)
+from bioetl.infrastructure.adapters.common.error_bundles import (
+    COMMON_ADAPTER_HEALTH_ERRORS_WITH_KEYERROR,
 )
 from bioetl.infrastructure.adapters.openalex.client_helpers_adapter_mixin import (
     OpenAlexAdapterHelpersMixin,
@@ -73,18 +73,7 @@ if TYPE_CHECKING:
 
 from bioetl.infrastructure.adapters.openalex._constants import OPENALEX_API_BASE
 
-OPENALEX_RUNTIME_ERRORS = (
-    BioETLError,
-    NetworkError,
-    RequestError,
-    HTTPStatusError,
-    OSError,
-    ValueError,
-    TypeError,
-    RuntimeError,
-    KeyError,
-    Exception,
-)
+OPENALEX_RUNTIME_ERRORS = COMMON_ADAPTER_HEALTH_ERRORS_WITH_KEYERROR
 
 
 @dataclass

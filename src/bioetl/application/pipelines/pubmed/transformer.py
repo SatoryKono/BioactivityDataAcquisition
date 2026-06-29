@@ -42,7 +42,6 @@ from bioetl.domain.mapping.pubmed_publication import (
     build_pubmed_publication_type_fields,
 )
 from bioetl.domain.types import GoldRecord, JsonDict
-from bioetl.domain.value_objects import PublicationYear
 
 if TYPE_CHECKING:
     from bioetl.domain.behavior import EntityIdentityGenerator
@@ -226,12 +225,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
 
     def _validate_publication_year(self, raw: object) -> int | None:
         """Validate publication year and return integer value."""
-        value = self.validate_value_object(
-            PublicationYear,
-            raw,
-            as_string=False,
-        )
-        return value if isinstance(value, int) else None
+        return self._validate_publication_year_value(raw)
 
     def _is_valid_date_format(self, date_str: str | None) -> bool:
         """Validate PubMed date strings against supported ISO-like formats."""

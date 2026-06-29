@@ -131,6 +131,24 @@ def build_observability_backend_cli_kwargs(
     }
 
 
+def build_observability_backend_cli_kwargs_from_options(
+    options: Mapping[str, object],
+    *,
+    default_port: int = DEFAULT_HEALTH_SERVER_PORT,
+) -> dict[str, object]:
+    """Resolve and normalize backend startup kwargs from raw Click options."""
+    ensure_observability_backend, observability_backend_port = (
+        resolve_observability_backend_cli_options(
+            options,
+            default_port=default_port,
+        )
+    )
+    return build_observability_backend_cli_kwargs(
+        ensure_observability_backend=ensure_observability_backend,
+        observability_backend_port=observability_backend_port,
+    )
+
+
 def attach_observability_backend_to_cli_input(
     cli_input: _ObservabilityBackendCliInput,
     *,

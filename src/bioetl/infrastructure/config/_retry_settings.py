@@ -43,6 +43,7 @@ class SilverMergeTimeoutSettings(BaseSettings):
     execution_timeout_seconds: float = Field(default=45.0, ge=1.0, le=600.0)
     unit_execution_timeout_seconds: float = Field(default=15.0, ge=1.0, le=600.0)
     e2e_execution_timeout_seconds: float = Field(default=90.0, ge=1.0, le=600.0)
+    plain_write_process_isolation: bool = Field(default=False)
     retry_enabled: bool = Field(default=True)
     adaptive_backoff: bool = Field(default=True)
     max_retries: int = Field(default=1, ge=0, le=10)

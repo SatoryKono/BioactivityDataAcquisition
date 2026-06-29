@@ -172,7 +172,6 @@ def _read_source_module_snapshots(
         relative = _repo_relative(path, repo_root)
         try:
             raw_source = path.read_bytes()
-            stat = path.stat()
         except FileNotFoundError:
             # Shared-drive worktrees can briefly report a stale path as present and
             # then fail on open a few milliseconds later. Skip the vanished file so
@@ -180,9 +179,7 @@ def _read_source_module_snapshots(
             continue
         digest.update(relative.encode("utf-8"))
         digest.update(b"\0")
-        digest.update(str(len(raw_source)).encode("utf-8"))
-        digest.update(b"\0")
-        digest.update(str(stat.st_mtime_ns).encode("utf-8"))
+        digest.update(raw_source)
         digest.update(b"\0")
         source_text = raw_source.decode("utf-8")
         snapshots.append(
@@ -196,25 +193,23 @@ def _read_source_module_snapshots(
     return snapshots, digest.hexdigest()
 
 
-def _read_source_module_metadata_digest(
+def _read_source_module_content_digest(
     source_paths: list[Path],
     repo_root: Path,
 ) -> str:
-    """Hash current source-tree metadata without reading full file contents."""
+    """Hash current source-tree paths and file contents."""
     digest = hashlib.sha256()
     for path in source_paths:
         if not path.exists():
             continue
         relative = _repo_relative(path, repo_root)
         try:
-            stat = path.stat()
+            raw_source = path.read_bytes()
         except FileNotFoundError:
             continue
         digest.update(relative.encode("utf-8"))
         digest.update(b"\0")
-        digest.update(str(stat.st_size).encode("utf-8"))
-        digest.update(b"\0")
-        digest.update(str(stat.st_mtime_ns).encode("utf-8"))
+        digest.update(raw_source)
         digest.update(b"\0")
     return digest.hexdigest()
 
@@ -317,13 +312,12 @@ def compute_source_tree_sha256(
 ) -> str:
     """Return the current source-tree digest for verification paths.
 
-    The full inventory generator uses the stabilized multi-read path because it
-    also materializes per-module rows. Architecture tests only need a current
-    digest check, so keep verification to a single source-tree pass to avoid
-    timeout-prone rereads on mounted/shared-drive worktrees.
+    The digest intentionally uses repo-relative paths and file contents only.
+    Shared-drive metadata such as ``mtime_ns`` can drift without a source
+    change and must not affect release-governance freshness.
     """
     repo_root = repo_root.resolve()
-    source_tree_sha256 = _read_source_module_metadata_digest(
+    source_tree_sha256 = _read_source_module_content_digest(
         _iter_source_modules(repo_root), repo_root
     )
     return source_tree_sha256

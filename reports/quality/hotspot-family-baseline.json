@@ -3,7 +3,8 @@
     "snapshot_date": "2026-06-01",
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
-    "budget_warnings": 0
+    "budget_warnings": 0,
+    "budget_review_notes": 6
   },
   "families": [
     {
@@ -16,17 +17,21 @@
         "src/bioetl/application/core/"
       ],
       "duplication_clusters": 0,
-      "files": 180,
-      "total_loc": 22325,
+      "files": 181,
+      "total_loc": 22360,
       "files_ge_250_loc": 7,
-      "helper_function_ratio": 0.355,
+      "helper_function_ratio": 0.356,
       "max_internal_fan_in": 11,
       "max_internal_fan_in_module": "bioetl.application.core.batch_operation_errors",
       "bounded_growth_budgets": {
-        "files_ge_250_loc": 13,
-        "max_internal_fan_in": 14
+        "files_ge_250_loc": 7,
+        "max_internal_fan_in": 11
       },
-      "budget_warnings": []
+      "budget_warnings": [],
+      "budget_review_notes": [
+        "at_budget:files_ge_250_loc=7/7",
+        "at_budget:max_internal_fan_in=11/11"
+      ]
     },
     {
       "name": "composition_bootstrap_runtime",
@@ -39,16 +44,19 @@
       ],
       "duplication_clusters": 0,
       "files": 48,
-      "total_loc": 5832,
-      "files_ge_250_loc": 1,
-      "helper_function_ratio": 0.312,
+      "total_loc": 5899,
+      "files_ge_250_loc": 0,
+      "helper_function_ratio": 0.304,
       "max_internal_fan_in": 3,
       "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.observability",
       "bounded_growth_budgets": {
-        "files_ge_250_loc": 2,
-        "max_internal_fan_in": 5
+        "files_ge_250_loc": 0,
+        "max_internal_fan_in": 3
       },
-      "budget_warnings": []
+      "budget_warnings": [],
+      "budget_review_notes": [
+        "at_budget:max_internal_fan_in=3/3"
+      ]
     },
     {
       "name": "composition_factories_pipeline",
@@ -60,17 +68,20 @@
         "src/bioetl/composition/factories/pipeline/"
       ],
       "duplication_clusters": 0,
-      "files": 34,
-      "total_loc": 4644,
-      "files_ge_250_loc": 3,
-      "helper_function_ratio": 0.424,
+      "files": 35,
+      "total_loc": 4657,
+      "files_ge_250_loc": 2,
+      "helper_function_ratio": 0.417,
       "max_internal_fan_in": 3,
       "max_internal_fan_in_module": "bioetl.composition.factories.pipeline.registry_manifest",
       "bounded_growth_budgets": {
-        "files_ge_250_loc": 4,
-        "max_internal_fan_in": 4
+        "files_ge_250_loc": 3,
+        "max_internal_fan_in": 3
       },
-      "budget_warnings": []
+      "budget_warnings": [],
+      "budget_review_notes": [
+        "at_budget:max_internal_fan_in=3/3"
+      ]
     },
     {
       "name": "application_services_control_plane",
@@ -83,16 +94,19 @@
       ],
       "duplication_clusters": 0,
       "files": 115,
-      "total_loc": 14630,
-      "files_ge_250_loc": 16,
+      "total_loc": 14626,
+      "files_ge_250_loc": 15,
       "helper_function_ratio": 0.472,
       "max_internal_fan_in": 3,
       "max_internal_fan_in_module": "bioetl.application.services.control_plane.workflow.manifest_service",
       "bounded_growth_budgets": {
-        "files_ge_250_loc": 22,
+        "files_ge_250_loc": 16,
         "max_internal_fan_in": 4
       },
-      "budget_warnings": []
+      "budget_warnings": [],
+      "budget_review_notes": [
+        "near_budget:files_ge_250_loc=15/16"
+      ]
     },
     {
       "name": "composition_runtime_builders",
@@ -104,17 +118,20 @@
         "src/bioetl/composition/runtime_builders/"
       ],
       "duplication_clusters": 0,
-      "files": 43,
-      "total_loc": 6320,
-      "files_ge_250_loc": 3,
-      "helper_function_ratio": 0.403,
+      "files": 45,
+      "total_loc": 6367,
+      "files_ge_250_loc": 1,
+      "helper_function_ratio": 0.382,
       "max_internal_fan_in": 5,
-      "max_internal_fan_in_module": "bioetl.composition.runtime_builders.run_manifest_contract_identity",
+      "max_internal_fan_in_module": "bioetl.composition.runtime_builders.config_access",
       "bounded_growth_budgets": {
-        "files_ge_250_loc": 7,
-        "max_internal_fan_in": 10
+        "files_ge_250_loc": 3,
+        "max_internal_fan_in": 5
       },
-      "budget_warnings": []
+      "budget_warnings": [],
+      "budget_review_notes": [
+        "at_budget:max_internal_fan_in=5/5"
+      ]
     }
   ]
 }

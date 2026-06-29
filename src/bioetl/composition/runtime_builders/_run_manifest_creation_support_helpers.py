@@ -20,17 +20,17 @@ from bioetl.composition.runtime_builders._run_manifest_data_roots import (
 from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
     to_serializable_mapping,
 )
-from bioetl.infrastructure.config.silver_filter_migration import (
+from bioetl.domain.filtering.silver_filter_identity import (
     resolve_silver_filter_compatibility_mode,
-)
-from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
-    RunManifestContractIdentity,
 )
 from bioetl.composition.services.versioning import get_pipeline_version
 from bioetl.domain.control_plane import ReplayCapability
 
 if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
+    from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
+        RunManifestContractIdentity,
+    )
     from bioetl.domain.context import PipelineRunContext
 
 

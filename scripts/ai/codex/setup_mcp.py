@@ -136,9 +136,27 @@ def _write_workspace_codex_settings(output_root: Path, workspace_root: Path) -> 
     return settings_path
 
 
+def _write_devin_config(output_root: Path, workspace_root: Path) -> Path:
+    settings_path = output_root / ".devin" / "config.json"
+    settings_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if settings_path.exists():
+        existing = json.loads(settings_path.read_text(encoding="utf-8"))
+        if not isinstance(existing, dict):
+            raise ValueError(
+                f"Devin workspace config must be a JSON object: {settings_path}"
+            )
+    else:
+        existing = {}
+
+    existing["mcpServers"] = deepcopy(_canonical_servers(workspace_root))
+    _write_json(settings_path, existing)
+    return settings_path
+
+
 def _write_configs(
-    output_root: Path, workspace_root: Path
-) -> tuple[Path, Path, Path, Path, Path]:
+    output_root: Path, workspace_root: Path, *, qodo_only: bool = False
+) -> tuple[Path | None, Path | None, Path | None, Path, Path | None, Path | None]:
     servers = _canonical_servers(workspace_root)
     codex_payload = {"mcpServers": deepcopy(servers)}
     vscode_payload = {"servers": deepcopy(servers)}
@@ -148,12 +166,23 @@ def _write_configs(
     vscode_path = output_root / ".vscode" / "mcp.json"
     cursor_path = output_root / ".cursor" / "mcp.json"
     qodo_path = output_root / ".qodo" / "mcp.json"
-    codex_settings_path = _write_workspace_codex_settings(output_root, workspace_root)
-    _write_json(mcp_path, codex_payload)
-    _write_json(vscode_path, vscode_payload)
-    _write_json(cursor_path, codex_payload)
+    codex_settings_path: Path | None = None
+    devin_config_path: Path | None = None
+    if not qodo_only:
+        codex_settings_path = _write_workspace_codex_settings(output_root, workspace_root)
+        devin_config_path = _write_devin_config(output_root, workspace_root)
+        _write_json(mcp_path, codex_payload)
+        _write_json(vscode_path, vscode_payload)
+        _write_json(cursor_path, codex_payload)
     _write_json(qodo_path, qodo_payload)
-    return mcp_path, vscode_path, cursor_path, qodo_path, codex_settings_path
+    return (
+        mcp_path,
+        vscode_path,
+        cursor_path,
+        qodo_path,
+        codex_settings_path,
+        devin_config_path,
+    )
 
 
 def _gemini_server_config(server: dict[str, Any]) -> dict[str, Any]:
@@ -317,7 +346,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         default=REPO_ROOT,
         help=(
             "Directory where .mcp.json, .vscode/mcp.json, .cursor/mcp.json, "
-            ".qodo/mcp.json, and .codex/settings.json should be written."
+            ".qodo/mcp.json, .codex/settings.json, and .devin/config.json "
+            "should be written."
         ),
     )
     parser.add_argument(
@@ -341,18 +371,39 @@ def main(argv: Sequence[str] | None = None) -> int:
         action="store_true",
         help="Do not update .gemini/settings.json with the generated MCP servers.",
     )
+    parser.add_argument(
+        "--qodo-only",
+        action="store_true",
+        help="Write only .qodo/mcp.json and skip Codex/Gemini side effects.",
+    )
     args = parser.parse_args(list(argv) if argv is not None else None)
 
     output_root = args.root.absolute()
     workspace_root = args.workspace_root.absolute()
-    mcp_path, vscode_path, cursor_path, qodo_path, codex_settings_path = _write_configs(
-        output_root, workspace_root
-    )
-    print(f"Wrote {mcp_path}")
-    print(f"Wrote {vscode_path}")
-    print(f"Wrote {cursor_path}")
+    if args.qodo_only:
+        args.skip_codex = True
+        args.skip_codex_config = True
+        args.skip_gemini_settings = True
+
+    (
+        mcp_path,
+        vscode_path,
+        cursor_path,
+        qodo_path,
+        codex_settings_path,
+        devin_config_path,
+    ) = _write_configs(output_root, workspace_root, qodo_only=args.qodo_only)
+    if mcp_path is not None and not args.qodo_only:
+        print(f"Wrote {mcp_path}")
+    if vscode_path is not None and not args.qodo_only:
+        print(f"Wrote {vscode_path}")
+    if cursor_path is not None and not args.qodo_only:
+        print(f"Wrote {cursor_path}")
     print(f"Wrote {qodo_path}")
-    print(f"Wrote {codex_settings_path}")
+    if codex_settings_path is not None and not args.qodo_only:
+        print(f"Wrote {codex_settings_path}")
+    if devin_config_path is not None and not args.qodo_only:
+        print(f"Wrote {devin_config_path}")
     if not args.skip_codex_config:
         codex_config_path = _write_codex_config(workspace_root)
         print(f"Wrote {codex_config_path}")
