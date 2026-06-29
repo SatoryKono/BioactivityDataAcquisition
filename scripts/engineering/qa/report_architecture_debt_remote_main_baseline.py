@@ -26,7 +26,6 @@ REQUIRED_BASELINE_ARTIFACTS = (
     "reports/quality/contract-registry-diagnostics.json",
 )
 OPTIONAL_BASELINE_ARTIFACTS = (
-    "reports/quality/contract-registry-dq-diagnostics.json",
     "reports/observability/runtime_cardinality_inventory.json",
 )
 _BASELINE_ARTIFACTS = REQUIRED_BASELINE_ARTIFACTS + OPTIONAL_BASELINE_ARTIFACTS
@@ -203,7 +202,9 @@ def render_markdown(payload: dict[str, object]) -> str:
     return "\n".join(lines)
 
 
-def _write_artifacts(payload: dict[str, object], *, json_out: Path, md_out: Path) -> None:
+def _write_artifacts(
+    payload: dict[str, object], *, json_out: Path, md_out: Path
+) -> None:
     json_out.parent.mkdir(parents=True, exist_ok=True)
     md_out.parent.mkdir(parents=True, exist_ok=True)
     json_out.write_text(
@@ -213,7 +214,9 @@ def _write_artifacts(payload: dict[str, object], *, json_out: Path, md_out: Path
     md_out.write_text(render_markdown(payload), encoding="utf-8")
 
 
-def _check_artifacts(payload: dict[str, object], *, json_out: Path, md_out: Path) -> list[str]:
+def _check_artifacts(
+    payload: dict[str, object], *, json_out: Path, md_out: Path
+) -> list[str]:
     errors: list[str] = []
     expected_json = json.dumps(payload, indent=2, sort_keys=True) + "\n"
     expected_md = render_markdown(payload)
@@ -224,7 +227,9 @@ def _check_artifacts(payload: dict[str, object], *, json_out: Path, md_out: Path
     if payload["evidence_source"] != "remote_main_git_tree":
         errors.append("Remote-main debt baseline evidence_source is not clean")
     if not payload["local_tracking_ref_matches_remote"]:
-        errors.append("Local tracking ref does not match remote main; fetch before closeout")
+        errors.append(
+            "Local tracking ref does not match remote main; fetch before closeout"
+        )
     for row in payload["artifacts"]:
         assert isinstance(row, dict)
         summary = row["summary"]

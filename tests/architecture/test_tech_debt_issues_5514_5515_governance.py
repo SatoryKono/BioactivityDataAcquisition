@@ -13,9 +13,6 @@ pytestmark = pytest.mark.architecture
 ROOT = Path(__file__).resolve().parents[2]
 FLAKY_REVIEW = ROOT / "reports" / "quality" / "flaky-test-burndown-review.json"
 FLAKINESS_DB = ROOT / "reports" / "test-swarm" / "SWARM-001" / "flakiness-database.json"
-UNUSED_EVENT_REVIEW = (
-    ROOT / "reports" / "quality" / "unused-observability-event-debt.json"
-)
 RUNTIME_CARDINALITY_INVENTORY = (
     ROOT / "reports" / "observability" / "runtime_cardinality_inventory.json"
 )
@@ -49,38 +46,12 @@ def test_issue_5514_flaky_test_burndown_review_matches_swarm_telemetry() -> None
     assert review["reviewed_flaky_tests"] == source["flaky_tests"] == []
 
 
-def test_issue_5515_unused_event_review_matches_runtime_inventory() -> None:
-    review = _load_json(UNUSED_EVENT_REVIEW)
+def test_issue_5515_runtime_cardinality_inventory_has_no_unused_event_debt() -> None:
     inventory = _load_json(RUNTIME_CARDINALITY_INVENTORY)
     runtime_review = _load_json(RUNTIME_CARDINALITY_REVIEW)
 
-    assert review["linked_issue"] == "#5515"
-    assert review["decision"] == (
-        "closeable_zero_unused_observability_event_residual"
-    )
-    for relative_path in review["source_artifacts"]:
-        assert (ROOT / relative_path).exists(), relative_path
-
-    assert (
-        review["summary"]["unused_declared_observability_events_count"]
-        == len(inventory["unused_declared_observability_events"])
-        == 0
-    )
-    assert (
-        review["summary"]["unused_declared_metrics_count"]
-        == len(inventory["unused_declared_metrics"])
-        == 0
-    )
-    assert (
-        review["summary"]["runtime_cardinality_review_required_count"]
-        == len(inventory["runtime_cardinality_review_required"])
-        == 0
-    )
-    assert review["summary"]["runtime_cardinality_reviewed_count"] == len(
-        inventory["runtime_cardinality_reviewed"]
-    )
-    assert review["reviewed_runtime_metrics"] == inventory[
-        "runtime_cardinality_reviewed"
-    ]
-    assert review["reviewed_unused_events"] == []
+    assert inventory["unused_declared_observability_events"] == []
+    assert inventory["unused_declared_metrics"] == []
+    assert inventory["runtime_cardinality_review_required"] == []
+    assert inventory["runtime_cardinality_threshold_violations"] == []
     assert runtime_review["review_required_metrics"] == []

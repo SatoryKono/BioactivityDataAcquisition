@@ -11,6 +11,8 @@ from typing import Any
 import pytest
 import yaml
 
+from scripts.engineering.ci.validate_registry_dq_refs import build_diagnostics_payload
+
 pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -29,16 +31,12 @@ DEBT_GATES = ROOT / "reports" / "quality" / "debt-governance-gates.json"
 CONTRACT_DIAGNOSTICS = (
     ROOT / "reports" / "quality" / "contract-registry-diagnostics.json"
 )
-DQ_DIAGNOSTICS = ROOT / "reports" / "quality" / "contract-registry-dq-diagnostics.json"
 CONFIG_DISCREPANCY = ROOT / "reports" / "quality" / "config-discrepancy-baseline.json"
 RUNTIME_CARDINALITY_REVIEW = (
     ROOT / "reports" / "observability" / "runtime_cardinality_review.json"
 )
 RUNTIME_CARDINALITY_INVENTORY = (
     ROOT / "reports" / "observability" / "runtime_cardinality_inventory.json"
-)
-UNUSED_OBSERVABILITY_DEBT = (
-    ROOT / "reports" / "quality" / "unused-observability-event-debt.json"
 )
 BRONZE_FIXTURE_GAPS = ROOT / "configs" / "base" / "bronze_fixture_gaps.yaml"
 TESTS_WORKFLOW = ROOT / ".github" / "workflows" / "tests.yml"
@@ -101,11 +99,10 @@ def test_stream_b_closeout_artifact_is_complete_and_budget_safe() -> None:
 def test_issue_5655_freshness_gates_are_fail_fast_and_clean() -> None:
     gates = _load_json(DEBT_GATES)
     contract = _load_json(CONTRACT_DIAGNOSTICS)
-    dq = _load_json(DQ_DIAGNOSTICS)
+    dq = build_diagnostics_payload(ROOT)
     config = _load_json(CONFIG_DISCREPANCY)
     review = _load_json(RUNTIME_CARDINALITY_REVIEW)
     inventory = _load_json(RUNTIME_CARDINALITY_INVENTORY)
-    unused = _load_json(UNUSED_OBSERVABILITY_DEBT)
     bronze_gaps = _load_yaml(BRONZE_FIXTURE_GAPS)
     workflow = TESTS_WORKFLOW.read_text(encoding="utf-8")
     contract_workflow = CONTRACT_WORKFLOW.read_text(encoding="utf-8")
@@ -128,13 +125,17 @@ def test_issue_5655_freshness_gates_are_fail_fast_and_clean() -> None:
     assert contract["blocking_issue_count"] == 0
     assert dq["valid"] is True
     assert dq["blocking_issue_count"] == 0
+    assert (
+        _gate(gates, "dq_contract_registry_blocking_drift")["source_artifact"]
+        == "scripts/engineering/ci/validate_registry_dq_refs.py::build_diagnostics_payload"
+    )
     assert config["metrics"]["inconsistent_parameter_count"] == 0
     assert config["metrics"]["raw_inconsistent_parameter_count"] == 0
     assert review["status"] == "passed"
     assert inventory["runtime_cardinality_review_required"] == []
     assert inventory["runtime_cardinality_threshold_violations"] == []
-    assert unused["summary"]["unused_declared_observability_events_count"] == 0
-    assert unused["summary"]["unused_declared_metrics_count"] == 0
+    assert inventory["unused_declared_observability_events"] == []
+    assert inventory["unused_declared_metrics"] == []
     assert bronze_gaps["gaps"] == {}
     assert "report-debt-governance-gates --check --changed-from-ref" in workflow
     assert "report-observability-metric-inventory" in workflow

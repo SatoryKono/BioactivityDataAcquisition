@@ -10,6 +10,8 @@ from typing import Any
 import pytest
 import yaml
 
+from scripts.engineering.ci.validate_registry_dq_refs import build_diagnostics_payload
+
 pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -36,7 +38,6 @@ DEAD_CODE_INVENTORY = ROOT / "reports" / "quality" / "dead-code-inventory.json"
 CONTRACT_DIAGNOSTICS = (
     ROOT / "reports" / "quality" / "contract-registry-diagnostics.json"
 )
-DQ_DIAGNOSTICS = ROOT / "reports" / "quality" / "contract-registry-dq-diagnostics.json"
 
 EXPECTED_ISSUES = {5648, 5649, 5650, 5651, 5652, 5653, 5654}
 PUBLIC_EXPORT_FACADE_PATHS = {
@@ -137,7 +138,7 @@ def test_issues_5648_5649_5650_duplication_is_below_opening_baselines() -> None:
 def test_issue_5650_contract_and_dq_diagnostics_remain_clean() -> None:
     gates = _load_json(DEBT_GATES)
     contract = _load_json(CONTRACT_DIAGNOSTICS)
-    dq = _load_json(DQ_DIAGNOSTICS)
+    dq = build_diagnostics_payload(ROOT)
 
     assert _gate(gates, "contract_registry_blocking_drift")["status"] == "pass"
     assert _gate(gates, "dq_contract_registry_blocking_drift")["status"] == "pass"

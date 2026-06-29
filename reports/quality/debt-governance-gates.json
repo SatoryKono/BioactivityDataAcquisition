@@ -28,8 +28,8 @@
       "status": "pass"
     },
     {
-      "current": "cd8786711509cd553c514ddf25e2b1927f420fc9edeb59d68e581f9965d3636f",
-      "limit": "cd8786711509cd553c514ddf25e2b1927f420fc9edeb59d68e581f9965d3636f",
+      "current": "f972342574db9ced1987ed5699e0829021624de63ee9167cb2dbcd926fe3d193",
+      "limit": "f972342574db9ced1987ed5699e0829021624de63ee9167cb2dbcd926fe3d193",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -114,7 +114,7 @@
       "metric": "blocking_issue_count",
       "name": "dq_contract_registry_blocking_drift",
       "remediation": "Fix DQ contract diagnostics before closeout.",
-      "source_artifact": "reports/quality/contract-registry-dq-diagnostics.json",
+      "source_artifact": "scripts/engineering/ci/validate_registry_dq_refs.py::build_diagnostics_payload",
       "status": "pass"
     },
     {
@@ -208,7 +208,7 @@
       "status": "pass"
     },
     {
-      "current": 3,
+      "current": 0,
       "limit": 21,
       "metric": "generated_at_age_days",
       "name": "observability_release_review_freshness",
@@ -244,7 +244,7 @@
       "status": "pass"
     },
     {
-      "current": "c868cde5ff404398d08d99a3dc8eeced5a862fbc",
+      "current": "7dbf8972885d50c70d7b4e886871e38fddc7a9b7",
       "limit": "clean remote-main tree evidence",
       "metric": "remote_main_sha",
       "name": "remote_main_architecture_debt_baseline",

@@ -351,7 +351,7 @@ def _build_source_artifacts(
                 "scripts/engineering/ci/validate_registry_dq_refs.py"
                 "::build_diagnostics_payload"
             ),
-            "generated_artifact": "reports/quality/contract-registry-dq-diagnostics.json",
+            "source_check": "python -m scripts.engineering.ci validate-dq-consistency",
             "valid": dq_diagnostics["valid"],
             "blocking_issue_count": dq_diagnostics["blocking_issue_count"],
         },
