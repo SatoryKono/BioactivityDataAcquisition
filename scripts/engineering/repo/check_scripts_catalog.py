@@ -15,6 +15,7 @@ import json
 import re
 import sys
 import time
+from collections import Counter
 from pathlib import Path
 from typing import Final
 
@@ -340,6 +341,52 @@ def _check_active_script_count_budget(
     manifest_rel: str,
     violations: list[str],
 ) -> None:
+    scripts = manifest_payload.get("scripts")
+    if not isinstance(scripts, list):
+        violations.append(f"manifest scripts payload malformed: {manifest_rel}")
+        return
+
+    summary = _as_dict(manifest_payload.get("summary"))
+    summary_total = summary.get("total_scripts")
+    if not isinstance(summary_total, int):
+        violations.append(f"manifest summary total missing or malformed: {manifest_rel}")
+    elif summary_total != len(scripts):
+        violations.append(
+            f"manifest summary total does not match scripts list: {manifest_rel} "
+            f"({summary_total} != {len(scripts)})"
+        )
+
+    recomputed_status_counts: Counter[str] = Counter()
+    for index, item in enumerate(scripts):
+        if not isinstance(item, dict):
+            violations.append(f"manifest script row malformed at index {index}: {manifest_rel}")
+            continue
+        status = item.get("status")
+        if not isinstance(status, str) or not status.strip():
+            violations.append(
+                f"manifest script status missing or malformed at index {index}: {manifest_rel}"
+            )
+            continue
+        recomputed_status_counts[status] += 1
+
+    status_counts = _as_dict(summary.get("status_counts"))
+    normalized_summary_counts: dict[str, int] = {}
+    for key, value in status_counts.items():
+        if isinstance(key, str) and isinstance(value, int):
+            normalized_summary_counts[key] = value
+        else:
+            violations.append(
+                f"manifest summary status_counts entry malformed: {manifest_rel}"
+            )
+            return
+
+    expected_status_counts = dict(sorted(recomputed_status_counts.items()))
+    if normalized_summary_counts != expected_status_counts:
+        violations.append(
+            "manifest summary status_counts does not match scripts list: "
+            f"{manifest_rel}"
+        )
+
     budget = lifecycle.get("active_script_count_max")
     if budget is None:
         return
@@ -349,14 +396,7 @@ def _check_active_script_count_budget(
         )
         return
 
-    summary = _as_dict(manifest_payload.get("summary"))
-    status_counts = _as_dict(summary.get("status_counts"))
-    active_count = status_counts.get("active")
-    if not isinstance(active_count, int):
-        violations.append(
-            f"manifest active script count missing or malformed: {manifest_rel}"
-        )
-        return
+    active_count = recomputed_status_counts.get("active", 0)
     if active_count > budget:
         violations.append(
             "active script count exceeds lifecycle.active_script_count_max "

@@ -15,6 +15,7 @@ param()
 
 $ErrorActionPreference = 'Stop'
 $ScriptDir = $PSScriptRoot
+$CanCreateEnvFile = $env:BIOETL_CREATE_LOCAL_ENV_FILES -eq "1"
 
 function Write-Header {
     param([string]$Message)
@@ -88,7 +89,12 @@ $envCodexPath = Join-Path -Path $ScriptDir -ChildPath ".env.codex"
 $envExamplePath = Join-Path -Path $ScriptDir -ChildPath ".env.codex.example"
 
 if (-not (Test-Path $envCodexPath)) {
-    Write-Warning ".env.codex not found. Creating from example..."
+    if (-not $CanCreateEnvFile) {
+        Write-Error-Message ".env.codex not found. Create it manually, or rerun with BIOETL_CREATE_LOCAL_ENV_FILES=1 to generate a local template."
+        exit 1
+    }
+
+    Write-Warning "BIOETL_CREATE_LOCAL_ENV_FILES=1 set; creating .env.codex from example..."
     if (Test-Path $envExamplePath) {
         Copy-Item -Path $envExamplePath -Destination $envCodexPath
     }
@@ -102,6 +108,11 @@ $envContent = Get-Content $envCodexPath -Raw
 # Check for modern (sk-proj-) or legacy (sk-) key formats.
 if ($envContent -notmatch "OPENAI_API_KEY=sk-(proj-)?[a-zA-Z0-9]+") {
     Write-Warning "OPENAI_API_KEY not found or is invalid in .env.codex."
+    if (-not $CanCreateEnvFile) {
+        Write-Error-Message ".env.codex is not modified without BIOETL_CREATE_LOCAL_ENV_FILES=1. Edit it manually, or rerun with BIOETL_CREATE_LOCAL_ENV_FILES=1 to update it interactively."
+        exit 1
+    }
+
     $apiKey = Read-Host "Please enter your OpenAI API key (starts with sk-)"
     if ($apiKey -like "sk-*") {
         "OPENAI_API_KEY=$apiKey" | Set-Content -Path $envCodexPath
