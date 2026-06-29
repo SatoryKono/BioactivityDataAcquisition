@@ -39,6 +39,18 @@ pushd "%SCRIPT_DIR%..\..\..\" >nul || (
 set "REPO_WIN=%CD%"
 popd >nul
 
+REM Backward-compatible script-codex junction (local only, gitignored)
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%REPO_WIN%\scripts\ai\codex\helper\ensure-script-codex-link.ps1" -RepoRoot "%REPO_WIN%" >nul 2>nul
+
+REM Check .env.codex before WSL setup
+if not exist "%REPO_WIN%\scripts\ai\codex\.env.codex" (
+    echo [WARN] scripts\ai\codex\.env.codex not found
+    echo [INFO] Copy the template and add your OpenAI API key:
+    echo        copy scripts\ai\codex\.env.codex.example scripts\ai\codex\.env.codex
+    echo        notepad scripts\ai\codex\.env.codex
+    echo.
+)
+
 REM Try to convert path using wslpath
 if defined WSL_DISTRO (
     for /f "usebackq delims=" %%I in (`"%WSL_EXE%" -d "%WSL_DISTRO%" -- wslpath -a "%REPO_WIN%" 2^>nul`) do set "REPO_WSL=%%I"

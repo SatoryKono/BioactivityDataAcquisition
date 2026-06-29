@@ -11,8 +11,7 @@ import click
 from bioetl.application.services.execution.pipeline_runner_models import RunOptions
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
     attach_observability_backend_to_cli_input,
-    build_observability_backend_cli_kwargs,
-    resolve_observability_backend_cli_options,
+    build_observability_backend_cli_kwargs_from_options,
 )
 from bioetl.interfaces.cli.commands.domains.run_all.command_policy import (
     RunAllCommandInput,
@@ -157,9 +156,6 @@ def build_run_all_command_input_from_options(
     *,
     build_input: Callable[..., RunAllCommandInput] = build_run_all_command_input,
 ) -> RunAllCommandInput:
-    ensure_observability_backend, observability_backend_port = (
-        resolve_observability_backend_cli_options(options)
-    )
     return build_input(
         source=cast("str", options["source"]),
         run_type=cast("str", options["run_type"]),
@@ -170,10 +166,7 @@ def build_run_all_command_input_from_options(
         debug=cast("bool", options["debug"]),
         health_server=cast("bool", options["health_server"]),
         health_port=cast("int", options["health_port"]),
-        **build_observability_backend_cli_kwargs(
-            ensure_observability_backend=ensure_observability_backend,
-            observability_backend_port=observability_backend_port,
-        ),
+        **build_observability_backend_cli_kwargs_from_options(options),
     )
 
 

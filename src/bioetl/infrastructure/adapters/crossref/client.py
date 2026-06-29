@@ -19,12 +19,6 @@ from bioetl.infrastructure.adapters.common.error_bundles import (
 from bioetl.infrastructure.adapters.crossref._client_fallback_policy import (
     _CrossRefFallbackPolicyMixin,
 )
-from bioetl.infrastructure.adapters.crossref.client_fetch_helpers import (
-    aclose_crossref_http_client,
-    fetch_crossref_publications,
-    fetch_crossref_publications_filtered,
-    fetch_crossref_publications_with_fallback,
-)
 from bioetl.infrastructure.adapters.crossref.client_observability_helpers import (
     build_crossref_source_metadata,
     clear_crossref_request_collector,
@@ -151,8 +145,7 @@ class CrossRefAdapter(
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch CrossRef publications by DOI list (FilterableDataSourcePort)."""
-        async for publication in fetch_crossref_publications_filtered(
-            fetch_flow=self._fetch_flow,
+        async for publication in self._fetch_flow.fetch_filtered(
             entity_type=entity_type,
             filter_ids=filter_ids,
             filter_field=filter_field,
@@ -184,8 +177,7 @@ class CrossRefAdapter(
         limit: int | None = None,
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch publications by DOI with title-search fallback for misses."""
-        async for publication in fetch_crossref_publications_with_fallback(
-            fetch_flow=self._fetch_flow,
+        async for publication in self._fetch_flow.fetch_filtered_with_fallback(
             entity_type=entity_type,
             filter_ids=filter_ids,
             filter_field=filter_field,
@@ -205,8 +197,7 @@ class CrossRefAdapter(
     ) -> AsyncIterator[BronzeRecord]:
         """Fetch CrossRef publications via DOI filters or free-text query."""
         del offset
-        async for publication in fetch_crossref_publications(
-            fetch_flow=self._fetch_flow,
+        async for publication in self._fetch_flow.fetch(
             entity_type=entity_type,
             limit=limit,
             query=query,
@@ -266,4 +257,5 @@ class CrossRefAdapter(
 
     async def aclose(self) -> None:
         """Close adapter resources via underlying HTTP client context manager."""
-        await aclose_crossref_http_client(http_client=self._http_client)
+        if self._http_client:
+            await self._http_client.__aexit__(None, None, None)
