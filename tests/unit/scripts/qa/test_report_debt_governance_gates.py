@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+import json
 import subprocess
 
 import pytest
@@ -165,6 +166,61 @@ def test_build_payload_treats_remote_main_baseline_builder_failure_as_stale_arti
     failing_gates = summary["failing_gates"]
     assert isinstance(failing_gates, list)
     assert "generated_artifact_drift" in failing_gates
+
+
+def test_remote_main_baseline_stale_check_ignores_revision_metadata_only(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    baseline_dir = tmp_path / "reports" / "quality"
+    baseline_dir.mkdir(parents=True)
+    committed = {
+        "schema_version": 1,
+        "generated_by": "scripts.engineering.qa.report_architecture_debt_remote_main_baseline",
+        "evidence_source": "remote_main_git_tree",
+        "remote": "origin",
+        "branch": "main",
+        "remote_main_ref": "refs/heads/main",
+        "remote_main_sha": "old",
+        "local_tracking_ref": "origin/main",
+        "local_tracking_ref_sha": "old",
+        "local_tracking_ref_matches_remote": True,
+        "generator_commands": ["python -m scripts.engineering.qa report-module-coverage --check"],
+        "artifacts": [
+            {
+                "path": "reports/quality/module-coverage-inventory.json",
+                "source_revision": "old",
+                "blob_sha256": "same-blob",
+                "required": True,
+                "summary": {"available": True, "source_tree_sha256": "same-source"},
+            }
+        ],
+    }
+    live = {
+        **committed,
+        "remote_main_sha": "new",
+        "local_tracking_ref_sha": "new",
+        "artifacts": [
+            {
+                **committed["artifacts"][0],
+                "source_revision": "new",
+            }
+        ],
+    }
+    (baseline_dir / "architecture-debt-remote-main-baseline.json").write_text(
+        json.dumps(committed),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        gates.report_architecture_debt_remote_main_baseline,
+        "build_payload",
+        lambda **kwargs: live,
+    )
+
+    assert (
+        gates._remote_main_baseline_artifact_matches_builder(repo_root=tmp_path)
+        is True
+    )
 
 
 def test_render_markdown_separates_weighted_score_from_release_gate_status() -> None:

@@ -180,6 +180,21 @@ def _artifact_matches_builder(
     )
 
 
+def _remote_main_baseline_artifact_matches_builder(*, repo_root: Path) -> bool:
+    try:
+        live_payload = report_architecture_debt_remote_main_baseline.build_payload(
+            repo_root=repo_root
+        )
+        committed = _load_json(
+            repo_root, "reports/quality/architecture-debt-remote-main-baseline.json"
+        )
+    except Exception:
+        return False
+    return report_architecture_debt_remote_main_baseline.payloads_semantically_equivalent(
+        committed, live_payload
+    )
+
+
 def _parse_generated_at(value: object) -> datetime | None:
     if not isinstance(value, str) or not value.strip():
         return None
@@ -888,9 +903,12 @@ def build_payload(
                 and not unavailable_remote_artifacts
                 else "fail"
             ),
-            metric="remote_main_sha",
-            current=remote_baseline["remote_main_sha"],
-            limit="clean remote-main tree evidence",
+            metric="baseline_artifact_fingerprint",
+            current=remote_baseline.get("baseline_artifact_fingerprint")
+            or report_architecture_debt_remote_main_baseline.baseline_artifact_fingerprint(
+                remote_baseline
+            ),
+            limit="clean remote-main artifact blobs",
             source_artifact="reports/quality/architecture-debt-remote-main-baseline.json",
             remediation="Fetch origin/main and regenerate the remote-main architecture debt baseline.",
         )
@@ -924,14 +942,8 @@ def build_payload(
                     repo_root=repo_root
                 ),
             ),
-            "remote_main_baseline": not _artifact_matches_builder(
-                repo_root=repo_root,
-                rel_path="reports/quality/architecture-debt-remote-main-baseline.json",
-                payload_builder=lambda: (
-                    report_architecture_debt_remote_main_baseline.build_payload(
-                        repo_root=repo_root,
-                    )
-                ),
+            "remote_main_baseline": not _remote_main_baseline_artifact_matches_builder(
+                repo_root=repo_root
             ),
             "dq_contract_registry_diagnostics": False,
         }
