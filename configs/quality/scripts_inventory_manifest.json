@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-29T17:48:03.701816+00:00",
+  "generated_at": "2026-06-29T18:19:26.389557+00:00",
   "summary": {
     "total_scripts": 444,
     "status_counts": {
@@ -6467,7 +6467,7 @@
         },
         {
           "path": "scripts/engineering/qa/report_debt_governance_gates.py",
-          "line": 713,
+          "line": 730,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py::\""
         },
@@ -7794,7 +7794,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 238,
+      "reference_count": 239,
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",

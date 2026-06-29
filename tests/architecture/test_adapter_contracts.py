@@ -215,27 +215,17 @@ def _iter_python_files_matching_any(
 
         git = shutil.which("git")
         if git is not None:
-            try:
-                repo_root_result = subprocess.run(
-                    [git, "rev-parse", "--show-toplevel"],
-                    check=False,
-                    capture_output=True,
-                    text=True,
-                    cwd=existing_roots[0],
-                    timeout=30.0,
-                )
-            except OSError:
-                repo_root_result = None
-            if (
-                repo_root_result is not None
-                and repo_root_result.returncode == 0
-                and repo_root_result.stdout.strip()
-            ):
-                repo_root = Path(repo_root_result.stdout.strip())
+            repo_root: Path | None = None
+            candidate = existing_roots[0].resolve()
+            for base in (candidate, *candidate.parents):
+                if (base / ".git").exists() or (base / "pyproject.toml").exists():
+                    repo_root = base
+                    break
+            if repo_root is not None:
                 relative_roots = [
-                    root.relative_to(repo_root)
+                    root.resolve().relative_to(repo_root)
                     for root in existing_roots
-                    if root.is_relative_to(repo_root)
+                    if root.resolve().is_relative_to(repo_root)
                 ]
                 if relative_roots:
                     command = [git, "grep", "-l", "-F"]
