@@ -185,7 +185,9 @@ def test_remote_main_baseline_stale_check_ignores_revision_metadata_only(
         "local_tracking_ref": "origin/main",
         "local_tracking_ref_sha": "old",
         "local_tracking_ref_matches_remote": True,
-        "generator_commands": ["python -m scripts.engineering.qa report-module-coverage --check"],
+        "generator_commands": [
+            "python -m scripts.engineering.qa report-module-coverage --check"
+        ],
         "artifacts": [
             {
                 "path": "reports/quality/module-coverage-inventory.json",
@@ -218,8 +220,7 @@ def test_remote_main_baseline_stale_check_ignores_revision_metadata_only(
     )
 
     assert (
-        gates._remote_main_baseline_artifact_matches_builder(repo_root=tmp_path)
-        is True
+        gates._remote_main_baseline_artifact_matches_builder(repo_root=tmp_path) is True
     )
 
 
