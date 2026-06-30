@@ -36,7 +36,7 @@ shims:
     max_src_importer_count: 0
     allowed_src_importers: []
     owner_tests:
-      - tests/architecture/test_silver_filter_compatibility_surface.py
+      - tests/architecture/test_silver_filter_identity_surface.py
       - tests/unit/infrastructure/config/test_silver_filter_migration.py
     exit_criteria: >-
       Composition/runtime code must import Silver filter runtime identity helpers

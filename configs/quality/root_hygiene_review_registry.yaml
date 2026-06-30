@@ -119,6 +119,10 @@ review_lanes:
         current_live_state: present_curated_root_surface
         canonical_path: .vibe
         action_if_reintroduced: keep_only_with_documented_owner_and_transition_note
+      - path: script-codex
+        current_live_state: present_local_only_root_surface
+        canonical_path: scripts/ai/codex
+        action_if_reintroduced: keep_local_only_root_alias_untracked_or converge to the canonical scripts/ai/codex owner surface before any promotion
 
   - lane_id: local_runtime_root_dirs
     classification: review_required

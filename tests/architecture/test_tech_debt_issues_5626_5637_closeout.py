@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 import json
+import subprocess
 from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
@@ -89,9 +90,24 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return payload
 
 
+def _src_python_files() -> list[Path]:
+    result = subprocess.run(
+        ["git", "ls-files", "src"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return [
+        ROOT / relative_path
+        for relative_path in result.stdout.splitlines()
+        if relative_path.endswith(".py")
+    ]
+
+
 def _src_importers(module_name: str) -> set[str]:
     importers: set[str] = set()
-    for path in (ROOT / "src").rglob("*.py"):
+    for path in _src_python_files():
         repo_path = path.relative_to(ROOT).as_posix()
         tree = ast.parse(path.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
