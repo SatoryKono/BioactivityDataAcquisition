@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 import json
+import os
+import shutil
+import tempfile
+from collections.abc import Generator
 from pathlib import Path
 
 import pytest
@@ -15,6 +19,34 @@ from bioetl.interfaces.cli.commands._run_manifest_historical_support import (
 
 
 pytestmark = pytest.mark.unit
+
+
+def _local_test_temp_root() -> Path:
+    """Prefer a fast local temp root for Windows-hosted pytest runs."""
+    if os.name == "nt":
+        local_appdata = os.environ.get("LOCALAPPDATA")
+        if local_appdata:
+            local_temp = Path(local_appdata) / "Temp"
+            if local_temp.exists():
+                return local_temp
+    local_tmp = Path("/tmp")
+    if local_tmp.exists():
+        return local_tmp
+    return Path(tempfile.gettempdir())
+
+
+@pytest.fixture
+def historical_support_local_tmp_path() -> Generator[Path, None, None]:
+    sandbox_dir = Path(
+        tempfile.mkdtemp(
+            prefix="bioetl-historical-support-tests-",
+            dir=str(_local_test_temp_root()),
+        )
+    )
+    try:
+        yield sandbox_dir
+    finally:
+        shutil.rmtree(sandbox_dir, ignore_errors=True)
 
 
 def test_coerce_bulk_certification_specs_normalizes_snapshot_entries() -> None:
@@ -101,9 +133,11 @@ def test_coerce_bulk_certification_specs_rejects_malformed_payloads(
 
 
 def test_load_residual_dispositions_reads_optional_evidence_refs(
-    tmp_path: Path,
+    historical_support_local_tmp_path: Path,
 ) -> None:
-    dispositions_path = tmp_path / "residual-dispositions.json"
+    dispositions_path = (
+        historical_support_local_tmp_path / "residual-dispositions.json"
+    )
     dispositions_path.write_text(
         json.dumps(
             {
@@ -158,11 +192,11 @@ def test_load_residual_dispositions_reads_optional_evidence_refs(
     ],
 )
 def test_load_residual_dispositions_rejects_malformed_files(
-    tmp_path: Path,
+    historical_support_local_tmp_path: Path,
     payload: object,
     message: str,
 ) -> None:
-    dispositions_path = tmp_path / "invalid-dispositions.json"
+    dispositions_path = historical_support_local_tmp_path / "invalid-dispositions.json"
     dispositions_path.write_text(json.dumps(payload), encoding="utf-8")
 
     with pytest.raises(ValueError, match=message):
@@ -188,9 +222,9 @@ def test_load_universe_external_records_reads_archived_pack_fixture() -> None:
 
 
 def test_load_universe_external_records_rejects_missing_required_fields(
-    tmp_path: Path,
+    historical_support_local_tmp_path: Path,
 ) -> None:
-    pack_path = tmp_path / "invalid-pack.json"
+    pack_path = historical_support_local_tmp_path / "invalid-pack.json"
     pack_path.write_text(
         json.dumps(
             {
@@ -241,11 +275,11 @@ def test_load_universe_external_records_rejects_missing_required_fields(
     ],
 )
 def test_load_universe_external_records_rejects_malformed_packs(
-    tmp_path: Path,
+    historical_support_local_tmp_path: Path,
     payload: object,
     message: str,
 ) -> None:
-    pack_path = tmp_path / "invalid-universe-pack.json"
+    pack_path = historical_support_local_tmp_path / "invalid-universe-pack.json"
     pack_path.write_text(json.dumps(payload), encoding="utf-8")
 
     with pytest.raises(ValueError, match=message):
