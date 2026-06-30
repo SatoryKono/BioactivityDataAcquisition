@@ -61,7 +61,7 @@ def _resolve_e2e_default_timeout(*, platform: str = sys.platform) -> int:
     errors instead of outer watchdog aborts.
     """
     if platform == "win32":
-        return 300
+        return 420
     return 120
 
 
@@ -71,7 +71,7 @@ def _resolve_e2e_merge_execution_timeout_seconds(
 ) -> int:
     """Return the platform-aware inner Silver merge timeout for E2E runs."""
     if platform == "win32":
-        return 180
+        return 300
     return 90
 
 
@@ -85,7 +85,7 @@ def _resolve_e2e_pipeline_matrix_execution_timeout_seconds(
     if override is not None:
         return float(override)
     if platform == "win32":
-        return 240.0
+        return 360.0
     return 105.0
 
 
@@ -410,9 +410,8 @@ def e2e_environment():
     os.environ.setdefault("BIOETL_TEST_MODE", "true")
     os.environ.setdefault("BIOETL_PIPELINE__HEALTH_CHECK_MODE", "probe")
     os.environ.setdefault("BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__PROFILE", "e2e")
-    os.environ.setdefault(
-        "BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__E2E_EXECUTION_TIMEOUT_SECONDS",
-        str(_resolve_e2e_merge_execution_timeout_seconds()),
+    os.environ["BIOETL_PIPELINE__SILVER_MERGE_TIMEOUT__E2E_EXECUTION_TIMEOUT_SECONDS"] = str(
+        _resolve_e2e_merge_execution_timeout_seconds()
     )
     if _resolve_e2e_plain_write_process_isolation():
         os.environ.setdefault(

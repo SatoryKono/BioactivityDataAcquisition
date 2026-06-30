@@ -287,7 +287,8 @@ def test_windows_e2e_timeout_exceeds_inner_merge_budget() -> None:
     )
 
     assert outer_timeout > inner_timeout
-    assert inner_timeout == 180
+    assert inner_timeout == 300
+    assert outer_timeout == 420
 
 
 def test_windows_two_pipeline_timeout_exceeds_single_run_budget() -> None:
@@ -303,7 +304,33 @@ def test_windows_two_pipeline_timeout_exceeds_single_run_budget() -> None:
     )
 
     assert two_pipeline_timeout > inner_timeout
-    assert two_pipeline_timeout == 540
+    assert two_pipeline_timeout == 780
+
+
+def test_windows_three_pipeline_timeout_scales_with_pipeline_count() -> None:
+    """Three sequential pipelines must budget three full Silver write envelopes."""
+    inner_timeout = e2e_conftest._resolve_e2e_merge_execution_timeout_seconds(
+        platform="win32"
+    )
+    three_pipeline_timeout = (
+        e2e_conftest._resolve_e2e_sequential_pipeline_timeout_seconds(
+            pipeline_count=3,
+            platform="win32",
+        )
+    )
+
+    assert three_pipeline_timeout > inner_timeout
+    assert three_pipeline_timeout == 1170
+
+
+def test_exported_three_pipeline_timeout_matches_resolver() -> None:
+    """Exported three-pipeline timeout constant should follow the active platform."""
+    assert (
+        e2e_conftest.E2E_THREE_SEQUENTIAL_PIPELINE_TIMEOUT
+        == e2e_conftest._resolve_e2e_sequential_pipeline_timeout_seconds(
+            pipeline_count=3
+        )
+    )
 
 
 def test_exported_two_pipeline_timeout_matches_resolver() -> None:
@@ -344,7 +371,7 @@ def test_windows_pipeline_matrix_timeout_stays_between_inner_and_outer() -> None
     )
 
     assert outer_timeout > matrix_timeout > inner_timeout
-    assert matrix_timeout == pytest.approx(240.0)
+    assert matrix_timeout == pytest.approx(360.0)
 
 
 def test_windows_e2e_plain_delta_writes_are_process_isolated() -> None:
