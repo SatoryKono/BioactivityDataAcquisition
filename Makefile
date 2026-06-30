@@ -1,15 +1,31 @@
 # BioETL local-first Makefile
 
-.PHONY: help docker-check docker-build docker-start docker-stop docker-logs docker-health docker-clean docker-compose-check
+.PHONY: help install test lint test-fast test-cov-fast-stable test-architecture test-unit test-integration test-ci-local test-profile test-deps run-local
+.PHONY: docker-check docker-build docker-start docker-stop docker-logs docker-health docker-clean docker-compose-check
 .PHONY: precommit-install qa-arch-fast quarantine-inspect quarantine-replay quarantine-purge release-lock
 
 RUN ?= uv run
 PIPELINE ?= chembl_activity
 RUN_ID ?=
+LOCAL_COV_FAIL_UNDER ?= 80
 
 # Default target
 help:
 	@echo "BioETL Local-First Commands"
+	@echo ""
+	@echo "Local development:"
+	@echo "  make install               Sync local development dependencies"
+	@echo "  make test                  Run stable local tests with coverage"
+	@echo "  make lint                  Run ruff and mypy checks"
+	@echo "  make test-fast             Run fast non-slow tests"
+	@echo "  make test-cov-fast-stable  Run fast coverage check"
+	@echo "  make test-architecture     Run architecture tests"
+	@echo "  make test-unit             Run unit tests"
+	@echo "  make test-integration      Run non-e2e integration tests"
+	@echo "  make test-ci-local         Run local CI-oriented test subset"
+	@echo "  make test-profile          Run pytest duration profiling"
+	@echo "  make test-deps             Verify test dependencies import"
+	@echo "  make run-local             Run sample local pipeline"
 	@echo ""
 	@echo "Local governance:"
 	@echo "  make precommit-install      Install local pre-commit hooks"
@@ -36,6 +52,43 @@ help:
 	@echo "  make docker-compose-check   Validate docker-compose.yml"
 	@echo "  make docker-shell-bioetl    Open shell in bioetl container"
 	@echo "  make docker-shell-warp      Open shell in warp container"
+
+install:
+	uv sync --extra dev --extra tests --extra tests_full --extra export
+
+test-deps:
+	$(RUN) python -c "import pytest, pytest_cov, pytest_asyncio, hypothesis, vcr; print('test dependencies available')"
+
+lint:
+	$(RUN) ruff check src tests scripts
+	$(RUN) mypy src/bioetl
+
+test:
+	$(RUN) pytest tests/ --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-fail-under=85
+
+test-fast:
+	$(RUN) pytest tests/ -q -m "not slow and not benchmark and not e2e and not memory" --ignore=tests/e2e
+
+test-cov-fast-stable:
+	$(RUN) pytest tests/unit tests/architecture -q --cov=src/bioetl --cov-fail-under=$(LOCAL_COV_FAIL_UNDER)
+
+test-architecture:
+	$(RUN) pytest tests/architecture/
+
+test-unit:
+	$(RUN) pytest tests/unit/
+
+test-integration:
+	$(RUN) pytest tests/integration/ -m "not e2e and not live"
+
+test-ci-local:
+	$(RUN) pytest tests/ -q --ignore=tests/e2e --ignore=tests/contract -m "not slow and not benchmark and not memory"
+
+test-profile:
+	$(RUN) pytest tests/ --durations=25 --durations-min=1.0 -q
+
+run-local:
+	$(RUN) bioetl run --pipeline $(PIPELINE) --limit 10
 
 # Check Docker
 docker-check:

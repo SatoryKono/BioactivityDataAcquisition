@@ -10,6 +10,11 @@ import sys
 from pathlib import Path
 
 from tests.helpers import repo_root, run_repo_python
+from tests.helpers.cli_process import resolve_scripts_inventory_json_timeout_seconds
+
+SCRIPTS_INVENTORY_JSON_TIMEOUT_SECONDS = (
+    resolve_scripts_inventory_json_timeout_seconds()
+)
 
 
 pytestmark = pytest.mark.architecture
@@ -182,6 +187,16 @@ def test_agent_usage_includes_codex_agents_and_skills() -> None:
     ]
 
 
+def test_json_stdout_uses_fast_path_without_reference_scan() -> None:
+    """``--json`` stdout should skip repository-wide reference discovery."""
+    module = _load_inventory_module()
+
+    args = module.parse_args(["--json"])
+
+    assert module._can_fast_path_json(args) is True
+
+
+@pytest.mark.timeout(int(SCRIPTS_INVENTORY_JSON_TIMEOUT_SECONDS) + 30)
 def test_inventory_json_output_is_ascii_safe_for_windows_codepages() -> None:
     """--json should not fail when stdout encoding cannot represent Unicode text."""
     root = repo_root()
@@ -190,6 +205,7 @@ def test_inventory_json_output_is_ascii_safe_for_windows_codepages() -> None:
         "--json",
         cwd=root,
         env={"PYTHONIOENCODING": "cp1251"},
+        timeout=SCRIPTS_INVENTORY_JSON_TIMEOUT_SECONDS,
     )
 
     assert result.returncode == 0, result.stderr or result.stdout

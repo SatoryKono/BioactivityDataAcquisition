@@ -20,27 +20,27 @@ class TestNoOpLogger:
     def test_info_accepts_context_without_error(self) -> None:
         """info() should silently accept arbitrary context."""
         logger = NoOpLogger()
-        logger.info("test message", key="value")
+        assert logger.info("test message", key="value") is None
 
     def test_warning_accepts_context_without_error(self) -> None:
         """warning() should silently accept arbitrary context."""
         logger = NoOpLogger()
-        logger.warning("test warning", key="value")
+        assert logger.warning("test warning", key="value") is None
 
     def test_error_accepts_context_without_error(self) -> None:
         """error() should silently accept arbitrary context."""
         logger = NoOpLogger()
-        logger.error("test error", key="value")
+        assert logger.error("test error", key="value") is None
 
     def test_debug_accepts_context_without_error(self) -> None:
         """debug() should silently accept arbitrary context."""
         logger = NoOpLogger()
-        logger.debug("test debug", key="value")
+        assert logger.debug("test debug", key="value") is None
 
     def test_exception_accepts_context_without_error(self) -> None:
         """exception() should silently accept arbitrary context."""
         logger = NoOpLogger()
-        logger.exception("test exception", key="value")
+        assert logger.exception("test exception", key="value") is None
 
     def test_bind_returns_self(self) -> None:
         """bind() should return self (no new instance)."""

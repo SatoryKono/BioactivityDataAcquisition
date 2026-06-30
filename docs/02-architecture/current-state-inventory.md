@@ -152,6 +152,17 @@ the narrow domain storage ports for one pipeline service bundle.
 
 ## Infrastructure Layer
 
+Infrastructure -> Domain imports use BioETL's pragmatic Domain contract model:
+infrastructure implementations may depend on Domain ports, exceptions,
+entities, value objects, schema/config/lineage/control-plane contracts, and pure
+Domain behavior helpers when implementing adapters, persistence, observability,
+quality, export, or config loading. That scope is explicit and enforced by
+`tests/architecture/test_layer_matrix_guards.py`; adding a new imported
+`bioetl.domain.*` top-level package from Infrastructure requires policy review.
+The existing outer-layer constraints remain unchanged: Infrastructure must not
+import Application, Composition, or Interfaces, and Domain must not import
+Infrastructure.
+
 | Component | Source files | Purpose | Dependencies | Layer |
 | --- | --- | --- | --- | --- |
 | Provider adapters | `src/bioetl/infrastructure/adapters/{chembl,crossref,openalex,pubchem,pubmed,semanticscholar,uniprot}/` | External API clients, health probes, parsing, fallback, and response mapping. | Domain ports/entities; HTTP client/resilience helpers. | Infrastructure |

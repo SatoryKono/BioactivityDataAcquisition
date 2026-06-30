@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-30T09:47:53.699471+00:00",
+  "generated_at": "2026-06-30T12:52:49.675702+00:00",
   "summary": {
     "total_scripts": 448,
     "status_counts": {
@@ -14,7 +14,7 @@
       "docs": 156,
       "scripts": 345,
       "skills": 11,
-      "tests": 181
+      "tests": 182
     }
   },
   "scripts": [
@@ -5167,7 +5167,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1298,
+          "line": 1299,
           "source_group": "docs",
           "text": "автоматические docs-проверки (`python -m scripts.docs check-links` и"
         },
@@ -6750,7 +6750,7 @@
       "references": [
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1642,
+          "line": 1643,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.dev run-tests cov"
         },
@@ -8782,7 +8782,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1512,
+          "line": 1513,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/generate_architecture_dependency_map.py --update`"
         },
@@ -9346,7 +9346,7 @@
       "references": [
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 266,
+          "line": 277,
           "source_group": "docs",
           "text": "| Generated artifact drift gate did not include module coverage source-tree hash freshness | `report-module-coverage --check` could fail stale source-tree evidence while `report-debt-governance-gates "
         },
@@ -10665,7 +10665,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/engineering/dev/pretest_guardrails.sh",
@@ -10690,6 +10690,12 @@
           "line": 51,
           "source_group": "scripts",
           "text": "\"preflight-cleanup\": \"preflight_cleanup.sh\","
+        },
+        {
+          "path": "tests/unit/scripts/repo/test_preflight_cleanup.py",
+          "line": 13,
+          "source_group": "tests",
+          "text": "SCRIPT = ROOT / \"scripts\" / \"engineering\" / \"repo\" / \"preflight_cleanup.sh\""
         }
       ]
     },
@@ -11868,7 +11874,7 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 150,
+          "line": 203,
           "source_group": "build",
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only"
         },
@@ -11886,7 +11892,7 @@
         },
         {
           "path": "makefile",
-          "line": 150,
+          "line": 203,
           "source_group": "build",
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only"
         },
