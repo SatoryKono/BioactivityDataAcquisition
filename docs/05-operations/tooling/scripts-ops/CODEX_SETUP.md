@@ -11,6 +11,29 @@ Codex is an AI-powered code assistant that helps analyze, refactor, and improve 
 - WSL2 with Debian distro
 - wsl-vpnkit (for API connectivity)
 - Codex CLI (v0.118.0+)
+- OpenAI API key configured in `scripts/ai/codex/.env.codex`
+
+### API Key Configuration
+
+Setup scripts do not create `.env.codex` by default. Create it manually:
+
+```powershell
+copy scripts\ai\codex\.env.codex.example scripts\ai\codex\.env.codex
+notepad scripts\ai\codex\.env.codex
+```
+
+Add your OpenAI API key:
+```
+OPENAI_API_KEY=sk-your-key-here
+```
+
+Get API key from: https://platform.openai.com/api-keys
+
+**Alternative**: Run setup with explicit opt-in to generate a local template:
+```powershell
+$env:BIOETL_CREATE_LOCAL_ENV_FILES="1"
+.\scripts\ai\codex\setup.ps1
+```
 
 ## Quick Start
 

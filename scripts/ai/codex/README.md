@@ -108,7 +108,13 @@ manually, or set `BIOETL_CREATE_LOCAL_ENV_FILES=1` when you explicitly want a
 local template generated.
 
 ```powershell
+# Option 1: Create manually
+copy .env.codex.example .env.codex
 notepad .env.codex
+
+# Option 2: Generate with opt-in flag
+$env:BIOETL_CREATE_LOCAL_ENV_FILES="1"
+.\run-codex.ps1 setup
 ```
 
 Add your OpenAI API key:

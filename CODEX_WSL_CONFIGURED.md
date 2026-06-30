@@ -163,6 +163,8 @@ notepad .\scripts\ai\codex\.env.codex
 
 **Получить новый ключ**: https://platform.openai.com/api-keys
 
+**Примечание**: Скрипты настройки не создают `.env.codex` автоматически. Создайте его вручную из `.env.codex.example`, или используйте флаг `BIOETL_CREATE_LOCAL_ENV_FILES=1` при запуске setup для автоматической генерации шаблона.
+
 ---
 
 ## 📂 Структура файлов
