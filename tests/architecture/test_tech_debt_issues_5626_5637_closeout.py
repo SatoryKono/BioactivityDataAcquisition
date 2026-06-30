@@ -262,17 +262,13 @@ def test_issue_5634_retained_compatibility_test_inventory_is_reviewed() -> None:
     assert config["budgets"]["compatibility_test_file_max"] == 0
     assert inventory["total_files"] == 0
     assert report["compatibility_test_files"] == 0
+    assert report["compatibility_files"] == []
     assert report_payload["budget_violations"] == []
+    assert inventory["review_cadence"] == "quarterly"
     assert date.fromisoformat(str(inventory["default_review_date"])) >= date(
         2026, 9, 30
     )
-    assert {entry["path"] for entry in inventory["entries"]} == set(
-        report["compatibility_files"]
-    )
-    for entry in inventory["entries"]:
-        assert (ROOT / entry["path"]).is_file(), entry["path"]
-        assert entry["decision"].startswith("retained_")
-        assert date.fromisoformat(str(entry["review_date"])) >= date(2026, 9, 30)
+    assert inventory["entries"] == []
 
 
 def test_issue_5635_dead_code_inventory_review_window_is_current() -> None:
