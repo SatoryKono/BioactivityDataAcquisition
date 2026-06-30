@@ -30,7 +30,7 @@ Your project has existing Codex scripts for Windows:
    - Requires a prompt argument
    - Direct WSL context for performance
 
-1. **`script-codex/helper/setup-wsl.sh`**
+1. **`scripts/ai/codex/helper/setup-wsl.sh`**
 
    - Comprehensive WSL setup script
    - Installs Node.js, npm, and Codex CLI
@@ -73,13 +73,13 @@ Your project has existing Codex scripts for Windows:
 From PowerShell in project root:
 
 ```powershell
-wsl -d Debian -- bash ./script-codex/helper/setup-wsl.sh
+wsl -d Debian -- bash ./scripts/ai/codex/helper/setup-wsl.sh
 ```
 
 Or from WSL directly:
 
 ```bash
-bash ./script-codex/helper/setup-wsl.sh
+bash ./scripts/ai/codex/helper/setup-wsl.sh
 ```
 
 ### Step 2: Verify Installation
@@ -160,7 +160,7 @@ OpenAI API (via proxy if behind VPN)
 
 ✅ **Comprehensive Setup**
 
-- Single command setup: `script-codex/helper/setup-wsl.sh`
+- Single command setup: `scripts/ai/codex/helper/setup-wsl.sh`
 - Dependency verification
 - Connectivity testing
 - Clear diagnostic output
@@ -178,7 +178,7 @@ OpenAI API (via proxy if behind VPN)
 | ---------------------------------- | ---------------------------------- | ---------------- |
 | `codex.sh`                         | **NEW** WSL launcher (interactive) | WSL bash         |
 | `codex-exec.sh`                    | **NEW** WSL auto-exec launcher     | WSL bash         |
-| `script-codex/helper/setup-wsl.sh` | **NEW** Installation & setup       | WSL bash         |
+| `scripts/ai/codex/helper/setup-wsl.sh` | **NEW** Installation & setup       | WSL bash         |
 | `codex-wsl.bat`                    | **NEW** Windows wrapper for WSL    | PowerShell       |
 | `codex.bat`                        | Original Windows launcher          | PowerShell       |
 | `codex-exec.bat`                   | Original Windows auto-exec         | PowerShell       |
@@ -226,7 +226,7 @@ OpenAI API (via proxy if behind VPN)
 
 ## Troubleshooting Quick Links
 
-- **Codex not found**: Run `script-codex/helper/setup-wsl.sh`
+- **Codex not found**: Run `scripts/ai/codex/helper/setup-wsl.sh`
 - **API unreachable**: Run `wsl -d Debian -- source .wsl_proxy_env.sh`
 - **WSL not installed**: `wsl --install -d Debian` (requires Windows Admin)
 - **Permission issues**: Add `-d Debian --` after `wsl` in batch files
@@ -236,7 +236,7 @@ See `CODEX_WSL_SETUP.md` for comprehensive troubleshooting.
 
 ## Next Steps
 
-1. ✅ Run setup: `bash ./script-codex/helper/setup-wsl.sh`
+1. ✅ Run setup: `bash ./scripts/ai/codex/helper/setup-wsl.sh`
 1. ✅ Test: `./scripts/ops/launchers/codex/codex.sh --version`
 1. ✅ Try: `./scripts/ops/launchers/codex/codex.sh "explain the pipeline"`
 1. ✅ Explore: Review `CODEX_WSL_QUICK_REF.md` for examples

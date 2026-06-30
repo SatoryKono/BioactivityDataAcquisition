@@ -308,6 +308,28 @@ def test_blocked_cleanup_lane_matches_structure_catalog() -> None:
         assert candidate.get("cleanup_runbook") == catalog_runbooks[candidate["path"]]
 
 
+def test_root_tooling_transition_lane_tracks_script_codex_as_local_only() -> None:
+    registry = _load_yaml(REGISTRY_PATH)
+    lanes = registry["review_lanes"]
+    assert isinstance(lanes, list)
+
+    transition_lane = next(
+        lane
+        for lane in lanes
+        if isinstance(lane, dict) and lane.get("lane_id") == "root_tooling_transitions"
+    )
+    candidates = transition_lane["candidates"]
+    assert isinstance(candidates, list)
+    by_path = {
+        candidate["path"]: candidate
+        for candidate in candidates
+        if isinstance(candidate, dict) and isinstance(candidate.get("path"), str)
+    }
+
+    assert by_path["script-codex"]["current_live_state"] == "present_local_only_root_surface"
+    assert by_path["script-codex"]["canonical_path"] == "scripts/ai/codex"
+
+
 def test_remediation_plan_links_github_issue_set_and_required_sources() -> None:
     text = REMEDIATION_PLAN_PATH.read_text(encoding="utf-8")
 

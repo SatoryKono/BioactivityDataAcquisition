@@ -2485,5 +2485,5 @@
       "uniqueness_constraint_source": "pipeline.business_primary_keys"
     }
   ],
-  "snapshot_date": "2026-06-23"
+  "snapshot_date": "2026-06-30"
 }

@@ -8,6 +8,9 @@ This surface mirrors the operational shape of `scripts/ai/codex`: one entrypoint
 
 ```text
 scripts/ai/gemini/
+├── setup.ps1                      # PowerShell setup orchestrator for WSL
+├── setup-gemini-wsl.bat           # cmd.exe WSL setup transport
+├── launch-gemini-wsl.ps1          # Thin PowerShell alias over run-gemini.ps1
 ├── run-gemini.ps1                 # PowerShell entrypoint, delegates to WSL
 ├── run-gemini.sh                  # WSL/Bash entrypoint
 ├── headless.ps1                   # PowerShell transport that skips MCP sync
@@ -28,10 +31,10 @@ scripts/ai/gemini/
 From PowerShell:
 
 ```powershell
+.\scripts\ai\gemini\setup.ps1
 .\scripts\ai\gemini\run-gemini.ps1 check
-.\scripts\ai\gemini\run-gemini.ps1 setup
 notepad .\scripts\ai\gemini\.env.gemini
-.\scripts\ai\gemini\run-gemini.ps1
+.\scripts\ai\gemini\launch-gemini-wsl.ps1
 ```
 
 From WSL/Bash:
@@ -59,6 +62,18 @@ bash scripts/ai/gemini/run-gemini.sh update        # Reinstall/update CLI
 bash scripts/ai/gemini/headless.sh exec "..."      # Launch without MCP sync
 ```
 
+```powershell
+.\scripts\ai\gemini\run-gemini.ps1                 # Interactive Gemini CLI via WSL
+.\scripts\ai\gemini\run-gemini.ps1 "prompt"        # Headless prompt mode via WSL
+.\scripts\ai\gemini\run-gemini.ps1 exec "..."      # Headless YOLO approvals via WSL
+.\scripts\ai\gemini\run-gemini.ps1 check           # Check setup via WSL
+.\scripts\ai\gemini\run-gemini.ps1 setup           # Install managed CLI via WSL
+.\scripts\ai\gemini\run-gemini.ps1 mcp-check       # Check MCP configuration
+.\scripts\ai\gemini\run-gemini.ps1 mcp-setup       # Sync MCP configuration
+.\scripts\ai\gemini\run-gemini.ps1 update          # Reinstall/update CLI
+.\scripts\ai\gemini\launch-gemini-wsl.ps1 start    # Thin alias for interactive mode
+```
+
 `exec` maps to Gemini CLI headless mode with `--approval-mode yolo`. Use it only for tasks where auto-approved file/tool actions are acceptable.
 
 `gemini-interactive.sh` remains as a thin compatibility wrapper over
@@ -83,7 +98,8 @@ Create or edit `scripts/ai/gemini/.env.gemini`:
 
 Launcher and setup scripts do not create `.env.gemini` by default. Create it
 manually, or set `BIOETL_CREATE_LOCAL_ENV_FILES=1` when you explicitly want a
-local template generated.
+local template generated. Agents must not create, edit, rename, move, overwrite,
+or delete `.env*` files without explicit per-task approval.
 
 ```bash
 GEMINI_API_KEY=your-api-key-here
@@ -96,7 +112,7 @@ Get an API key from https://aistudio.google.com/app/apikeys.
 
 Gemini CLI reads MCP servers from Gemini settings, not from the repository `.mcp.json` file directly. The launcher synchronizes the workspace-level `.gemini/settings.json` before startup so the CLI sees the repository MCP servers after `cd "${REPO_ROOT}"`.
 
-`run-gemini.sh` writes only the workspace settings file and does not mutate the managed user home at `.cache/tools/gemini-cli/home/.gemini/settings.json`, because that file can contain OAuth state and user UI preferences.
+`run-gemini.sh` writes only the workspace settings file and does not mutate the managed user home at `.cache/tools/gemini-cli/home/.gemini/settings.json`, because that file can contain OAuth state and user UI preferences. The workspace `.gemini/settings.json` file is local-only/untracked on `main` and may contain machine-local absolute WSL paths.
 
 Environment switches:
 
@@ -113,4 +129,5 @@ Docker-backed MCP servers require Docker Desktop or a working Docker CLI. If Doc
 - `.env.gemini` is local and git-ignored. Do not copy real keys into docs, logs, reports, or PRs.
 - `.wsl_proxy_env.sh` is sourced automatically when present before network/API operations.
 - PowerShell does not duplicate setup logic; it resolves the repository WSL path and delegates to `run-gemini.sh`. PowerShell launchers use `BIOETL_WSL_DISTRO` when it is set and otherwise use the default WSL distro.
+- `setup.ps1` and `setup-gemini-wsl.bat` are Windows setup transports. They delegate to `run-gemini.sh setup` inside WSL and then run `mcp-check`.
 - `headless.sh` / `headless.ps1` set `GEMINI_SKIP_MCP_SETUP=1` for one launch and then delegate back to the canonical launcher.

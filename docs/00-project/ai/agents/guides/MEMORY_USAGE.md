@@ -49,7 +49,8 @@ Use different precedence depending on the type of conflict.
 When agent behavior instructions disagree, use this priority:
 
 1. active runtime source for the current agent or skill in `.codex/**` or
-   `.gemini/**`
+   the tracked runtime tree for the active agent; on the current `main`
+   checkout that means `.codex/**`
 1. `docs/00-project/RULES.md`
 1. `docs/01-requirements/REQUIREMENTS.md`
 1. accepted ADRs in `docs/02-architecture/decisions/`
@@ -63,7 +64,8 @@ use this priority:
 
 1. active code, configs, tests, workflows, and governance-sensitive artifacts
 1. `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`, accepted ADRs
-1. active runtime maps and profiles in `.codex/**` or `.gemini/**`
+1. active runtime maps and profiles in tracked runtime trees; on the current
+   `main` checkout that means `.codex/**`
 1. `agent-memory.md` and `memory-py-*.md`
 1. machine-readable memory artifacts such as `mcp-memory.json`
 

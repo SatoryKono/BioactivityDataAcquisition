@@ -248,10 +248,10 @@ def test_issue_5675_compatibility_tests_and_snapshot_lane_are_bounded() -> None:
     report = report_payload["report"]
     today = datetime.now(UTC).date()
 
-    assert int(config["budgets"]["compatibility_test_file_max"]) == 25
-    assert inventory["total_files"] == 25
-    assert report["compatibility_test_files"] == 25
-    assert report["compatibility_test_files"] < 26
+    assert int(config["budgets"]["compatibility_test_file_max"]) == 24
+    assert inventory["total_files"] == 24
+    assert report["compatibility_test_files"] == 24
+    assert report["compatibility_test_files"] < 25
     assert report_payload["budget_violations"] == []
     assert bronze_gaps["gaps"] == {}
 

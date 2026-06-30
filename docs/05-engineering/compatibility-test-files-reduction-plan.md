@@ -323,7 +323,7 @@ tests/architecture/test_pipeline_storage_compat_shim_usage.py
 tests/architecture/test_project_legacy_compatibility_remediation_evidence_surface.py
 tests/architecture/test_root_script_compatibility_surfaces.py
 tests/architecture/test_run_execution_context_compat_shim_usage.py
-tests/architecture/test_silver_filter_compatibility_surface.py
+tests/architecture/test_silver_filter_identity_surface.py
 ```
 
 **Acceptance Criteria:**

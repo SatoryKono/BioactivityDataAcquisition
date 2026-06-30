@@ -42,8 +42,9 @@ profiles в BioETL.
 | `py-test-swarm` | `memory-py-test-swarm.md` | dedicated |
 
 If a runtime profile is renamed or added, update this matrix and the matching
-role profile anchors in `.codex/agents/*.md` and `.gemini/agents/*.md` in the
-same change set.
+tracked runtime profile anchors in the same change set. On the current `main`
+checkout that means `.codex/agents/*.md`; a Gemini agent tree is not tracked on
+`main` today.
 - **Machine-readable memory artifact**:
   `mcp-memory.json`
   — служебный memory snapshot для tooling/integration сценариев, не human

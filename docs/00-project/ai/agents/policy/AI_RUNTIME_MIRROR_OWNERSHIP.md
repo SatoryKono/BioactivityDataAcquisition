@@ -20,19 +20,25 @@ ______________________________________________________________________
 
 ## Ownership Matrix
 
-| Surface                 | Primary role                      | Source-of-truth status                | Editable for behavior                  | Expected content                                                                                |
-| ----------------------- | --------------------------------- | ------------------------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `.codex/**`             | Codex runtime surface             | Canonical for Codex runtime behavior  | Yes                                    | live agent registry, skills, Codex-specific orchestration, runtime settings                     |
-| `.gemini/**`            | Gemini runtime surface            | Canonical for Gemini runtime behavior | Yes                                    | live Gemini agent registry, skills, Gemini-specific orchestration, runtime settings             |
-| `docs/00-project/ai/**` | Published/internal mirror surface | Not canonical for runtime behavior    | Only for mirror/index/guidance updates | curated mirrors, navigation, contributor guidance, memory entrypoints, prompt and skill indexes |
+| Surface | Primary role | Source-of-truth status | Editable for behavior | Expected content |
+| ----------------------- | --------------------------------- | ---------------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `.codex/**` | Codex runtime surface | Canonical for tracked runtime behavior on `main` | Yes | live agent registry, skills, Codex-specific orchestration, runtime settings |
+| `.gemini/settings.json` | Gemini local config surface | Local-only runtime config; not a tracked behavior tree on `main` | Yes, for machine-local settings only | optional local checkout settings with machine-specific paths |
+| `.gemini/agents/**`, `.gemini/skills/**` | Gemini runtime behavior tree | Not present in the current `main` checkout | No tracked source on `main` today | if a future task adds them, they must be verified and documented in the same change |
+| `docs/00-project/ai/**` | Published/internal mirror surface | Not canonical for runtime behavior | Only for mirror/index/guidance updates | curated mirrors, navigation, contributor guidance, memory entrypoints, prompt and skill indexes |
 
 ## Source-of-Truth Rules
 
-1. `.codex/**` is the authoritative source for Codex runtime behavior.
-1. `.gemini/**` is the authoritative source for Gemini runtime behavior.
+1. `.codex/**` is the authoritative source for tracked Codex runtime behavior.
+1. `.gemini/settings.json` and other optional Gemini local config files are
+   machine-local config surfaces, not proof of a tracked Gemini behavior tree
+   on `main`.
 1. `docs/00-project/ai/**` is a repo-only or internal-published mirror layer for
    discoverability and contributor guidance; it MUST NOT redefine runtime
    behavior on its own.
+1. If a future task introduces tracked `.gemini/agents/**` or
+   `.gemini/skills/**` surfaces, it MUST update this ownership contract,
+   `AGENTS.md`, and affected mirrors in the same change set.
 1. Canonical project rules still come from:
    - `docs/00-project/RULES.md`
    - `docs/01-requirements/REQUIREMENTS.md`
@@ -42,8 +48,9 @@ ______________________________________________________________________
 
 Default precedence for AI behavior and guidance:
 
-1. active runtime source for the current agent or skill in `.codex/**` or
-   `.gemini/**`
+1. active runtime source for the current agent or skill in `.codex/**`
+1. a matching tracked `.gemini/**` surface only when that tree exists in the
+   current checkout and has been verified in the same change
 1. `docs/00-project/RULES.md`
 1. `docs/01-requirements/REQUIREMENTS.md`
 1. accepted ADRs
@@ -56,14 +63,15 @@ override the active runtime tree.
 
 Default sync direction is:
 
-1. runtime tree changes first (`.codex/**` or `.gemini/**`)
+1. runtime tree changes first (`.codex/**`, and tracked `.gemini/**` only when
+   such a tree actually exists on `main`)
 1. published/internal mirror refresh second (`docs/00-project/ai/**`)
 1. validation third
 1. governance/index refresh fourth, if the mirror contract changed
 
 This means:
 
-- runtime-specific behavior MUST be edited in the runtime tree first
+- runtime-specific behavior MUST be edited in the tracked runtime tree first
 - docs mirrors SHOULD be updated after runtime changes when they affect
   discoverability, contributor guidance, or published examples
 - docs-only edits MAY improve wording, indexes, and navigation, but MUST NOT
@@ -88,11 +96,14 @@ The following divergence is intentional and not a bug by itself:
 - runtime-specific commands, wrappers, and settings may differ between runtimes
 - docs mirrors may summarize or normalize runtime concepts for navigation
   purposes instead of reproducing every runtime file verbatim
+- local-only Gemini config may exist without a tracked Gemini agent/skill tree
+  on `main`
 
 The following divergence is not acceptable:
 
 - mirror docs contradict runtime source about which file is authoritative
-- mirror docs describe a runtime entrypoint that no longer exists
+- mirror docs describe a tracked Gemini runtime entrypoint that does not exist
+  on `main`
 - contributor guidance tells users to edit a docs mirror instead of the runtime
   source for behavior changes
 - active Codex/Gemini runtime surfaces depend on `.claude/**` as a canonical
@@ -103,18 +114,25 @@ The following divergence is not acceptable:
 ## Edit Rules
 
 - Change runtime behavior:
-  edit the matching runtime tree first (`.codex/**` or `.gemini/**`).
+  edit the matching tracked runtime tree first (`.codex/**`; `.gemini/**` only
+  when the tree exists on `main`).
 - Change published navigation or contributor guidance:
   edit `docs/00-project/ai/**`.
+- Change Gemini local-config classification:
+  edit `MCP_LOCAL_RUNTIME_CONFIG.md` and the affected contributor guidance.
 - Change project-wide rules:
   edit governance/RULES/ADR surfaces, not AI mirrors.
 
 ## Practical Routing
 
 - Agent orchestration behavior for Codex -> `.codex/agents/**`
-- Agent orchestration behavior for Gemini -> `.gemini/agents/**`
+- Agent orchestration behavior for Gemini -> only when a tracked
+  `.gemini/agents/**` tree exists on `main`; otherwise treat Gemini references
+  in docs as mirrors or local-only guidance
 - Skill trigger/runtime behavior for Codex -> `.codex/skills/**`
-- Skill trigger/runtime behavior for Gemini -> `.gemini/skills/**`
+- Skill trigger/runtime behavior for Gemini -> only when a tracked
+  `.gemini/skills/**` tree exists on `main`
+- Gemini local config classification -> `MCP_LOCAL_RUNTIME_CONFIG.md`
 - Human-readable indexes, mirrors, and onboarding pointers -> `docs/00-project/ai/**`
 
 ## Related Entry Points

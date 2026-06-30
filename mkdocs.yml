@@ -305,6 +305,7 @@ nav:
                     -   "Ports": 04-reference/domain/ports.md
                     -   "Contexts": 04-reference/domain/contexts.md
                     -   "Invariants": 04-reference/domain/invariants.md
+                    -   "Aggregate State Machines": 04-reference/domain/aggregate-state-machines.md
                     -   "Workflow State Machine": 04-reference/domain/workflow-state-machine.md
             -   Engineering:
                     -   "Overview": 05-engineering/README.md

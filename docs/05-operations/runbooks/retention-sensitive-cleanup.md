@@ -115,7 +115,12 @@ diagnostics under `reports/quality/`:
 | Path family | Owner | TTL | Notes |
 | --- | --- | --- | --- |
 | `reports/quality/_tmp_*` | `Engineering / Quality` | 7 days | Transitional local diagnostics inside a retained reports surface; prune only after TTL expiry |
+| `reports/quality/architecture_debt_execution_plan_*.json` | `Engineering / Architecture` | 30 days | Timestamped architecture-debt execution plans are working snapshots; prune only after TTL expiry and after a newer reviewed plan exists |
+| `reports/quality/tasks_architecture_metric_exemptions_*.json` | `Engineering / Architecture` | 30 days | Generated architecture-debt task backlog snapshots are local working outputs; prune only after TTL expiry |
+| `reports/quality/duplication-baseline.*` | `Engineering / Architecture` | 30 days | Unreviewed duplication working snapshots are short-lived diagnostics; tracked hotspot/full-app baselines remain separate governed artifacts |
+| `reports/quality/contract-registry-dq-diagnostics.json` | `Engineering / Quality` | 30 days | Registry-to-DQ diagnostics are bounded working outputs; prune only after TTL expiry or superseding rerun |
 | `reports/quality/pretest_guardrails_*.json` | `Engineering / Quality` | 30 days | Timestamped pretest guardrail snapshots kept for short-lived review/history; prune only after TTL expiry |
+| `reports/quality/test-runs` | `Engineering / Quality` | 30 days | Local test-health run histories are working reports, not curated retained evidence; prune only after TTL expiry |
 
 These TTL classes do not override the fail-closed review model. They narrow the
 approved candidate families for bounded prune waves, and they only become

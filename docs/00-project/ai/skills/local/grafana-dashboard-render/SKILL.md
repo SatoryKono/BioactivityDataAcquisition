@@ -3,6 +3,12 @@ name: grafana-dashboard-render
 description: Render, preflight-check, and capture evidence for shipped BioETL Grafana dashboards. Use when the task is to produce reproducible dashboard screenshots, validate Grafana render/auth readiness, run live reviewed panel audits, or explain why full render is blocked on the current host.
 ---
 
+> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
+> Canonical runtime source:
+> - Codex: `.codex/skills/grafana-dashboard-render/SKILL.md`
+> Governance: [AI Runtime Mirror Ownership](../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../agents/policy/POST_CHANGE_VALIDATION.md).
+> Edit the runtime source first, then refresh this mirror.
+
 # Grafana Dashboard Render
 
 ## Overview

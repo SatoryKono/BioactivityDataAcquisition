@@ -132,7 +132,7 @@ def test_issue_5658_adapter_duplication_is_below_opening_baseline() -> None:
     by_target = {target["target"]: target for target in duplication["targets"]}
     adapters = by_target["src/bioetl/infrastructure/adapters"]
 
-    assert adapters["duplicate_count"] == 58
+    assert adapters["duplicate_count"] == 56
     assert adapters["duplicate_count"] < 63
     assert {item["category"] for item in adapters["actionability"]} == {
         "adapter_resilience_or_contract_template",
@@ -147,13 +147,11 @@ def test_issue_5659_cli_and_pipeline_duplication_are_below_opening_baselines() -
     cli = by_target["src/bioetl/interfaces/cli"]
     pipelines = by_target["src/bioetl/application/pipelines"]
 
-    assert cli["duplicate_count"] == 1
+    assert cli["duplicate_count"] == 0
     assert cli["duplicate_count"] < 2
-    assert {item["category"] for item in cli["actionability"]} == {
-        "cli_command_contract_shell"
-    }
+    assert cli["actionability"] == []
 
-    assert pipelines["duplicate_count"] == 16
+    assert pipelines["duplicate_count"] == 15
     assert pipelines["duplicate_count"] < 17
     assert {item["category"] for item in pipelines["actionability"]} == {
         "pipeline_transformer_contract_pattern"

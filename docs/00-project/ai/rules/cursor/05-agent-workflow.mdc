@@ -7,7 +7,8 @@ alwaysApply: true
 
 ## Precedence
 
-1. Runtime source: `.codex/agents/`, `.gemini/agents/`
+1. Runtime source: `.codex/agents/`; use `.gemini/agents/` only when a tracked
+   Gemini runtime tree exists in the current checkout
 2. `docs/00-project/RULES.md`
 3. `docs/01-requirements/REQUIREMENTS.md`
 4. Accepted ADRs in `docs/02-architecture/decisions/`

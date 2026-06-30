@@ -620,10 +620,26 @@ def _resolve_e2e_temp_root(
     platform: str = sys.platform,
     posix_tmp: Path = Path("/tmp"),
     fallback_tmp: str | None = None,
+    env: Mapping[str, str] = os.environ,
 ) -> Path:
-    """Resolve a local temp root that avoids Windows drive-relative ``/tmp``."""
+    """Resolve a fast local temp root for E2E sandboxes.
+
+    On Windows, ``tempfile.gettempdir()`` can resolve to a user-customized
+    ``TEMP/TMP`` directory on a mounted or cloud-synced drive. Delta Lake writes
+    become materially slower there, so prefer an explicit local-app-data temp
+    root when available unless the operator set an explicit override.
+    """
     fallback = Path(fallback_tmp or tempfile.gettempdir())
     if platform == "win32":
+        override = env.get("BIOETL_E2E_TEMP_ROOT")
+        if override:
+            return Path(override).expanduser()
+
+        local_appdata = env.get("LOCALAPPDATA")
+        if local_appdata:
+            local_temp = Path(local_appdata) / "Temp"
+            if local_temp.exists():
+                return local_temp
         return fallback
     if posix_tmp.exists():
         return posix_tmp

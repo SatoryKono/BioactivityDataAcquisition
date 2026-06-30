@@ -1,15 +1,52 @@
+______________________________________________________________________
+
+Version: 1.0.0
+Status: active
+Class: published
+Owner: BioETL Team
+Reviewers:
+
+- BioETL Team
+  Priority: P2
+  Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, MemoryLock.
+  Last verified: '2026-06-30'
+
+______________________________________________________________________
+
 # Generated Artifact Drift Workflow
 
-This runbook is the local/CI workflow for generated artifact drift. It is a
-workflow mirror only; it does not redefine runtime behavior. Canonical runtime
-behavior remains in `.codex/**`, `.gemini/**`, ADRs, and source code.
+## Trigger
 
-## Scope
+- Use this runbook when generated repo artifacts drift from their generators or
+  architecture guard baselines.
+- Use it for local or CI failures involving generated evidence, config
+  governance inventories, VCR metadata, date-only compatibility inventories, or
+  debt closeout reports.
 
-Use this workflow when touching generated evidence, config governance, VCR
-metadata, date-only compatibility inventories, or debt closeout reports.
+## Impact
 
-## Required Commands
+- Priority: P2.
+- Leaving generated artifacts stale hides governance drift and makes CI results
+  non-reproducible across local and automation environments.
+
+## Preconditions
+
+- Runtime profile: Local-Only single-instance (ADR-010), local filesystem
+  storage, MemoryLock.
+- Required access: repository checkout, local shell, the impacted generator or
+  guard test, and the affected artifact path under `reports/**`, `configs/**`,
+  or `docs/**`.
+- Confirm whether the failure is a true generator mismatch or an intentional
+  behavior change that still lacks regenerated evidence.
+
+## Procedure
+
+### 1. Identify the drift family
+
+Use the failing test or CI step to place the mismatch into one of the governed
+artifact families below.
+
+### 2. Run the matching check and refresh commands
 
 Run the same commands locally and in CI:
 
@@ -25,7 +62,7 @@ Run the same commands locally and in CI:
 | Hotspot family baseline | `python -m scripts.engineering.qa report-family-baseline --check` | `python -m scripts.engineering.qa report-family-baseline --update` |
 | Contract coverage matrix | `python -m scripts.engineering.qa report-contract-coverage-matrix --check` | `python -m scripts.engineering.qa report-contract-coverage-matrix --update` |
 
-## Debt Outcome
+### 3. Classify the debt outcome
 
 Every generated-artifact drift closeout must report one of:
 
@@ -39,7 +76,7 @@ Budget edits are not a remedy for drift. If an increase is real, record the
 review and remediation plan; do not relax `configs/quality/debt_scorecard.yaml`
 or other ratchets as part of the closeout.
 
-## Closeout Evidence
+### 4. Capture closeout evidence
 
 Closeout evidence must include:
 
@@ -48,3 +85,37 @@ Closeout evidence must include:
 - The matching architecture guard or generator `--check` command.
 - A `decreased`, `flat`, or `increased` debt outcome.
 - A statement that no technical-debt budget was increased.
+
+### 5. Re-run the guard
+
+After regenerating the artifact, re-run the corresponding `--check` command or
+architecture test before closing the task.
+
+## Compliance
+
+- This runbook governs the generated-artifact drift surface on `main`; it is no
+  longer an ungoverned mirror note.
+- Generated-artifact drift closeout MUST preserve the repository guardrail that
+  technical-debt budgets cannot increase.
+
+## Verification
+
+- Confirm the regenerated artifact matches the current code/config/docs source.
+- Confirm the paired `--check` command or architecture test now passes.
+- Confirm the closeout note states `decreased`, `flat`, or `increased` and
+  explicitly says no debt budget was increased.
+
+## Rollback
+
+- If regeneration reveals an unintended behavior change, revert the underlying
+  code/config/doc change instead of hand-editing the artifact to match stale
+  expectations.
+- If the failure belongs to a different generator family than originally
+  assumed, stop and reroute to the correct generator or architecture owner.
+
+## Post-incident
+
+- Record the artifact family, failing guard, regeneration command, and outcome
+  classification in the task or PR closeout.
+- Add follow-up governance work when drift exposed a missing validator or an
+  ambiguous ownership boundary.

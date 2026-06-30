@@ -59,7 +59,10 @@ The target and shipped workflow control plane is the **manifest + ledger + execu
 
 - Start: `bioetl workflow run <name>`
 - Safe resume: `bioetl workflow run <name> --resume-last`
+- Pinned resume by manifest: `bioetl workflow run <name> --resume-manifest-id <manifest_id>`
+- Pinned resume by workflow run: `bioetl workflow run <name> --resume-run-id <workflow_run_id>`
 - Ambiguous destructive recovery: `--repair-steps ...` or `--force-steps ...` (explicit operator intent)
+- Incremental workflow launch: `bioetl workflow run <name> --incremental`
 - Inspection: `bioetl workflow status <name> [--run-id <workflow_run_id>]`
 
 ### Ownership boundary (what each seam MUST NOT do)
@@ -415,6 +418,7 @@ Present in the current tree:
 - transform-step fingerprinting and skip support;
 - workflow-level manifest, ledger, and execution-state persistence;
 - workflow CLI with `bioetl workflow run`, `--resume-last`,
+  `--resume-manifest-id`, `--resume-run-id`, `--incremental`,
   `--repair-steps`, `--force-steps`, and persisted `workflow status`;
 - `bioetl workflow run --tracing` when operator trace drilldowns are expected;
 - best-effort workflow metrics publication at the CLI command boundary so
@@ -486,6 +490,101 @@ These packs are:
 - allowed to express light dependency edges where the pack wants a stable
   operator order, but they do not become the only supported entrypoint for the
   child pipelines.
+
+#### Operator run pattern for pack workflows
+
+Pack workflows use the same operator surface as any other workflow:
+
+```bash
+bioetl workflow run <pack-name> [workflow options]
+```
+
+The current CLI surface that matters most for packs is:
+
+- `--use-cached-bronze` and optional `--cached-bronze-path` /
+  `--cached-bronze-date` when the child pipelines require immutable cached
+  Bronze inputs;
+- `--resume-last`, `--resume-manifest-id`, or `--resume-run-id` for safe
+  control-plane recovery;
+- `--incremental` for ordinary offset-driven launches that should advance from
+  the latest successful execution rather than replay an old occurrence;
+- `--only-steps` when an operator needs one bounded subset of the pack DAG;
+- `--ensure-observability-backend` and `--observability-backend-port` when the
+  operator wants Grafana ID/detail panels to have a live detached backend.
+
+#### `chembl_reference_pack`
+
+`configs/workflows/chembl_reference_pack.yaml` bundles ten ChEMBL
+reference-data pipelines with six declared dependency edges so target-related
+dimensions land in a stable operator order.
+
+Use it when the goal is to refresh ChEMBL reference/supporting dimensions as
+one unit instead of running each child wrapper independently.
+
+Canonical examples:
+
+```bash
+bioetl workflow run chembl_reference_pack --dry-run
+bioetl workflow run chembl_reference_pack --use-cached-bronze --cached-bronze-date 2026-06-29
+bioetl workflow run chembl_reference_pack --resume-last
+bioetl workflow run chembl_reference_pack --only-steps run_chembl_target,run_chembl_target_component
+```
+
+Operator notes:
+
+- prefer cached Bronze when one or more child steps require a
+  `replay_ready` persistence floor;
+- use `--only-steps` for bounded target/classification refreshes, but remember
+  the workflow engine still pulls required dependencies into the execution set;
+- use `workflow status` after partial or repaired runs because the pack can have
+  multiple in-flight step outcomes at once.
+
+#### `publication_provider_pack`
+
+`configs/workflows/publication_provider_pack.yaml` groups the four independent
+publication-provider ingestion workflows: Crossref, OpenAlex, PubMed, and
+Semantic Scholar.
+
+Use it when publication coverage should advance as one operator action without
+implying cross-provider data dependencies.
+
+Canonical examples:
+
+```bash
+bioetl workflow run publication_provider_pack --dry-run
+bioetl workflow run publication_provider_pack --incremental
+bioetl workflow run publication_provider_pack --resume-run-id 00000000-0000-0000-0000-000000000111
+```
+
+Operator notes:
+
+- the pack has zero declared dependency edges, so failures are usually isolated
+  to one provider step rather than the full pack topology;
+- pinned resume is useful when several recent pack runs exist and the operator
+  must recover one exact occurrence.
+
+#### `uniprot_support_pack`
+
+`configs/workflows/uniprot_support_pack.yaml` bundles the two UniProt support
+pipelines used for support/reference enrichment.
+
+Use it when the operator wants the UniProt support pair refreshed together
+without promoting it into a composite-pipeline entrypoint.
+
+Canonical examples:
+
+```bash
+bioetl workflow run uniprot_support_pack --dry-run
+bioetl workflow run uniprot_support_pack --incremental --observability-backend-port 18081
+bioetl workflow run uniprot_support_pack --resume-manifest-id wf-manifest-2026-06-30-001
+```
+
+Operator notes:
+
+- the small DAG makes it a good bounded smoke target for workflow control-plane
+  validation;
+- use a non-default observability backend port when another local BioETL HTTP
+  backend already occupies `8081`.
 
 ### 3. Canonical ChemblBaseline Workflow
 

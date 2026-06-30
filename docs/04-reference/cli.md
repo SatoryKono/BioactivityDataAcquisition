@@ -94,8 +94,13 @@ bioetl workflow status <NAME> [OPTIONS]
 | `--debug-export-format csv|xlsx` | Repeatable override форматов debug-export pack |
 | `--debug-export-dir` | Override root directory для workflow debug-export pack |
 | `--resume-last` | Возобновить последний `failed` или `incomplete` workflow run с тем же execution fingerprint |
+| `--resume-manifest-id` | Возобновить один конкретный workflow run по `manifest_id` вместо auto-selection через `--resume-last` |
+| `--resume-run-id` | Возобновить один конкретный workflow run по `workflow_run_id` |
 | `--force-steps a,b` | Явно форсировать указанные шаги при resume вместо обычного skip поведения |
 | `--repair-steps a,b` | Явно пометить шаги как repair path для destructive ambiguity recovery |
+| `--incremental` | Автоматически продвинуть `start_offset` от последнего успешного workflow execution; несовместим с resume selectors и явным `--start-offset` |
+| `--ensure-observability-backend/--no-ensure-observability-backend` | Автозапуск detached Quarantine Explorer backend для Grafana ID/detail panels |
+| `--observability-backend-port` | Порт detached observability backend, запускаемого для Grafana ID/detail panels |
 
 **`workflow status` опции:**
 
@@ -138,6 +143,12 @@ bioetl workflow status <NAME> [OPTIONS]
 - pipeline-level `--resume` is intentionally not exposed on `workflow run`;
   workflow control-plane resume stays on `--resume-last`.
 - `--resume-last` использует semantic `execution_fingerprint`, а не только имя workflow.
+- `--resume-manifest-id` и `--resume-run-id` pin-ят resume на один конкретный
+  persisted workflow occurrence, когда оператору недостаточно latest-match
+  поведения `--resume-last`.
+- `--incremental` разрешён только для обычного workflow launch path и не может
+  смешиваться с `--resume-last`, `--resume-manifest-id`, `--resume-run-id` или
+  явным `--start-offset`.
 - destructive ambiguity recovery не делает silent replay: при `repair_required`
   оператор должен использовать `--repair-steps` или `--force-steps`.
 
@@ -149,13 +160,17 @@ bioetl workflow run chembl_activity --limit 1000
 bioetl workflow run chembl_activity --input-csv data/filter-ids.csv --filter-column molecule_id --filter-field molecule_chembl_id
 bioetl workflow run chembl_activity --use-cached-bronze --exact-replay --replay-of-run-id parent-run-1 --replay-of-manifest-id manifest-parent-1
 bioetl workflow run chembl_baseline --log-level DEBUG --debug-export --debug-export-format csv --debug-export-format xlsx
+bioetl workflow run chembl_target --incremental --use-cached-bronze --cached-bronze-date 2026-06-29
 bioetl workflow status chembl_activity
 bioetl workflow run publication_provider_pack --dry-run
 bioetl workflow run chembl_baseline --dry-run
 bioetl workflow run chembl_core --dry-run
 bioetl workflow run chembl_core --only-steps summarize_core_extracts
 bioetl workflow run chembl_core --resume-last
+bioetl workflow run chembl_core --resume-manifest-id wf-manifest-2026-06-30-001
+bioetl workflow run chembl_core --resume-run-id 00000000-0000-0000-0000-000000000111
 bioetl workflow run chembl_core --resume-last --repair-steps reconcile_assay_target_orphans
+bioetl workflow run chembl_reference_pack --observability-backend-port 18081
 bioetl workflow status chembl_core
 bioetl workflow status chembl_core --run-id 00000000-0000-0000-0000-000000000111
 bioetl workflow status chembl_core --format json

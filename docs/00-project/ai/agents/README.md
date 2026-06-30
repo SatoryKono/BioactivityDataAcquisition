@@ -49,7 +49,9 @@ Ownership and sync rules are fixed in
 ## Related Files
 
 - Repository path `.codex/agents/ORCHESTRATION.md` — Codex source-of-truth orchestration
-- Repository path `.gemini/agents/ORCHESTRATION.md` — Gemini runtime copy
+- Gemini runtime copy: not tracked on `main`; treat Gemini orchestration refs as
+  local-only or mirror guidance until a verified `.gemini/agents/**` tree is
+  added
 - [ORCHESTRATION.md](agents/ORCHESTRATION.md) — published mirror for documentation/navigation
 - [AGENT.md](guides/AGENT.md) — Core Engineering Guide
 - [CLAUDE.md](guides/CLAUDE.md) — Claude CLI specific guide

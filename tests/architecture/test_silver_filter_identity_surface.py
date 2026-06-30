@@ -1,4 +1,4 @@
-"""Guardrails for retired Silver filter compatibility modes."""
+"""Guardrails for Silver filter runtime identity modes."""
 
 from __future__ import annotations
 
@@ -175,12 +175,12 @@ def test_historical_auto_promote_mode_is_alias_only_in_source() -> None:
 
 
 @pytest.mark.architecture
-def test_silver_filter_compatibility_guard_is_explicit_in_fail_fast_ci() -> None:
-    """The Silver compatibility guard must stay in a blocking CI test slice."""
+def test_silver_filter_identity_guard_is_explicit_in_fail_fast_ci() -> None:
+    """The Silver filter identity guard must stay in a blocking CI test slice."""
     workflow = TESTS_WORKFLOW.read_text(encoding="utf-8")
 
-    assert "tests/architecture/test_silver_filter_compatibility_surface.py" in workflow
+    assert "tests/architecture/test_silver_filter_identity_surface.py" in workflow
     assert (
-        "--deselect tests/architecture/test_silver_filter_compatibility_surface.py"
+        "--deselect tests/architecture/test_silver_filter_identity_surface.py"
         not in workflow
     )

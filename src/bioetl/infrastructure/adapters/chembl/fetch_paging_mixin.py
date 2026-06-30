@@ -8,16 +8,12 @@ import time
 from collections.abc import Callable
 from typing import TYPE_CHECKING, NoReturn, cast
 
-import httpx
-
-from bioetl.domain.exceptions import (
-    BioETLError,
-    ExternalServiceError,
-    RetryExhaustedError,
-)
 from bioetl.domain.types import BronzeRecord, JsonDict
 from bioetl.infrastructure.adapters.chembl._fetch_paging_filtered import (
     _ChemblFetchPagingFilteredMixin,
+)
+from bioetl.infrastructure.adapters.chembl._fetch_resilience_error import (
+    CHEMBL_ADAPTER_ERRORS as _CHEMBL_ADAPTER_ERRORS,
 )
 
 if TYPE_CHECKING:
@@ -33,23 +29,13 @@ if TYPE_CHECKING:
     )
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
-CHEMBL_ADAPTER_ERRORS = (
-    BioETLError,
-    ExternalServiceError,
-    RetryExhaustedError,
-    httpx.HTTPError,
-    OSError,
-    ValueError,
-    TypeError,
-    RuntimeError,
-    KeyError,
-    AttributeError,
-    Exception,
-)
+CHEMBL_ADAPTER_ERRORS = _CHEMBL_ADAPTER_ERRORS
 
 
 class ChemblFetchPagingMixin(_ChemblFetchPagingFilteredMixin):
     """Provides ChEMBL pagination and filtered-page iteration helpers."""
+
+    CHEMBL_ADAPTER_ERRORS = _CHEMBL_ADAPTER_ERRORS
 
     # Host-class attributes (provided by ChemblAdapter.__init__)
     logger: LoggerPort

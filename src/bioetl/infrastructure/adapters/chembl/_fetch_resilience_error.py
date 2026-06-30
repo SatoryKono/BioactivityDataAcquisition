@@ -4,10 +4,34 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, NoReturn, Protocol
 
+import httpx
+
+from bioetl.domain.exceptions import (
+    BioETLError,
+    ExternalServiceError,
+    RetryExhaustedError,
+)
+
+__all__ = ["CHEMBL_ADAPTER_ERRORS", "ChemblErrorHost", "handle_fetch_error"]
+
 if TYPE_CHECKING:
     from bioetl.domain.ports import ErrorHandlerPort
     from bioetl.domain.types import HealthStatus
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+
+CHEMBL_ADAPTER_ERRORS = (
+    BioETLError,
+    ExternalServiceError,
+    RetryExhaustedError,
+    httpx.HTTPError,
+    OSError,
+    ValueError,
+    TypeError,
+    RuntimeError,
+    KeyError,
+    AttributeError,
+    Exception,
+)
 
 
 class ChemblErrorHost(Protocol):

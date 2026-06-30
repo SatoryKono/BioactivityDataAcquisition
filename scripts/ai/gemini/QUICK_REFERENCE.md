@@ -5,7 +5,7 @@
 **From Windows (PowerShell):**
 ```powershell
 # Optional when the default WSL distro is not the target distro:
-# :BIOETL_WSL_DISTRO="Ubuntu-22.04"
+# $env:BIOETL_WSL_DISTRO="Ubuntu-22.04"
 .\scripts\ai\gemini\run-gemini.ps1
 ```
 
@@ -29,7 +29,12 @@ bash scripts/ai/gemini/run-gemini.sh "explain how Docker works"
 
 ## ⚡ Auto-Execute Mode (YOLO - Auto-Approve All Actions)
 
-**Bash only:**
+**PowerShell:**
+```powershell
+.\scripts\ai\gemini\run-gemini.ps1 exec "refactor all Python files"
+```
+
+**Bash:**
 ```bash
 bash scripts/ai/gemini/run-gemini.sh exec "refactor all Python files"
 ```
@@ -37,6 +42,28 @@ bash scripts/ai/gemini/run-gemini.sh exec "refactor all Python files"
 
 ## 🔧 Administration Commands
 
+**PowerShell:**
+```powershell
+# First-time setup through WSL
+.\scripts\ai\gemini\setup.ps1
+
+# Check environment (Node, npm, Gemini CLI, API key, MCP)
+.\scripts\ai\gemini\run-gemini.ps1 check
+
+# Install or repair managed Gemini CLI runtime
+.\scripts\ai\gemini\run-gemini.ps1 setup
+
+# Update Gemini CLI to latest version
+.\scripts\ai\gemini\run-gemini.ps1 update
+
+# Verify MCP server configuration
+.\scripts\ai\gemini\run-gemini.ps1 mcp-check
+
+# Sync MCP configuration
+.\scripts\ai\gemini\run-gemini.ps1 mcp-setup
+```
+
+**Bash:**
 ```bash
 # Check environment (Node, npm, Gemini CLI, API key, MCP)
 bash scripts/ai/gemini/run-gemini.sh check
@@ -106,7 +133,7 @@ Commands in interactive mode:
 └── home/                      # ← Settings & cache
 
 .env.gemini                    # ← Your API key (git-ignored)
-.gemini/settings.json          # ← Workspace MCP config (created at startup)
+.gemini/settings.json          # ← Local-only workspace MCP config, created/synced at startup
 ```
 
 ## 🔍 Examples

@@ -476,7 +476,7 @@ Runtime-конфигурация зависит от активного AI-кл�
 | ------- | -------------------------------------------------------------------------------- |
 | Codex   | `.codex/config.toml`, `.codex/settings.json`, `.codex/agents/`, `.codex/skills/` |
 | Claude  | runtime-specific settings, agent registry, and skill registry                    |
-| Gemini  | `.gemini/agents/`, `.gemini/skills/`, runtime helper docs                        |
+| Gemini  | local-only Gemini settings/runtime helper docs; no tracked `.gemini/agents/` or `.gemini/skills/` tree on `main` |
 | Copilot | `.github/copilot-instructions.md`, workspace MCP config                          |
 
 ### 6.1 MCP / Tool Policy

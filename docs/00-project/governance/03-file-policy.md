@@ -43,9 +43,14 @@ ______________________________________________________________________
   MUST route into approved `reports/**` or archive/report surfaces instead of a
   root-level txt dump.
 - Root-level tracked директории MUST ограничиваться approved runtime/tooling and
-  project surfaces: `.codex`, `.cursor`, `.gemini`, `.github`, `.idea`,
-  `.vibe`, `.vscode`, `assets`, `configs`, `data`, `docs`, `grafana`,
-  `reports`, `scripts`, `src`, and `tests`.
+  project surfaces: `.codex`, `.cursor`, `.devin`, `.gemini`, `.github`,
+  `.idea`, `.vibe`, `.vscode`, `assets`, `configs`, `data`, `docs`,
+  `grafana`, `reports`, `scripts`, `src`, and `tests`.
+- Canonical machine-readable root governance lives in `.github/root-allowlist.txt`,
+  `configs/quality/repo_structure_catalog.yaml`,
+  `configs/quality/root_hygiene_review_registry.yaml`, and
+  `configs/quality/generated_artifact_routing.yaml`; prose docs in this section
+  MUST stay aligned with those enforcement surfaces.
 - Служебные локальные деревья (`.worktrees/`, `.rollback/`) MUST NOT попадать в git-index.
 - Shared repo tooling surfaces such as `.codex/`, `.gemini/`, curated `.vibe/`,
   and curated shared editor metadata roots such as `.cursor/`, `.idea/`, and
@@ -66,6 +71,11 @@ ______________________________________________________________________
 - Generated/runtime root trees such as `node_modules/`, `output/`, `test-output/`,
   `logs/`, `MagicMock/`, `caddy/`, and local package trees like
   `.python-user/` MUST NOT попадать в git-index.
+- Legacy root compatibility carryovers such as `script-codex/` or
+  `script-gemini/` MUST NOT be treated as approved tracked roots. If they exist
+  locally, they remain untracked compatibility copies; canonical maintained
+  entrypoints live under `scripts/ai/codex/**`, `scripts/ai/gemini/**`, and the
+  reviewed root launcher/setup surfaces.
 - Root `logs/` MUST NOT использоваться как canonical retained log sink.
   Long-lived local/runtime log outputs MUST route into `reports/logs/`; any
   reintroduced root `logs/` tree is local clutter unless an explicit structure

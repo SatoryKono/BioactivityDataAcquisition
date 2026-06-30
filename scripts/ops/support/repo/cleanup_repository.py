@@ -126,7 +126,13 @@ REPORTS_ROOT_PRUNE_PATTERNS: tuple[str, ...] = (
 )
 REPORTS_RETAINED_DIR_TRANSIENT_PATTERNS: tuple[str, ...] = (
     "_tmp_*",
+    "architecture_debt_execution_plan_*.json",
+    "contract-registry-dq-diagnostics.json",
+    "duplication-baseline.json",
+    "duplication-baseline.md",
     "pretest_guardrails_*.json",
+    "tasks_architecture_metric_exemptions_*.json",
+    "test-runs",
 )
 
 

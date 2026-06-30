@@ -20,6 +20,9 @@ workflow orchestration, control-plane ownership, and domain/schema boundaries.
 
 ## Aggregate Invariants
 
+See [Aggregate State Machines](aggregate-state-machines.md) for the formal
+transition tables behind these summaries.
+
 | Surface | Invariants |
 | --- | --- |
 | `Batch` | Records may be added or quarantined only while `OPEN`; write flow cannot skip `SEALED`; terminal write result is `COMMITTED` or `FAILED`. |
@@ -82,6 +85,7 @@ ADR-048 ratifies the current boundary:
 ## Related References
 
 - [Aggregates](aggregates.md)
+- [Aggregate State Machines](aggregate-state-machines.md)
 - [Ports](ports.md)
 - [Workflow State Machine](workflow-state-machine.md)
 - [ADR-044](../../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)
