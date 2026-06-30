@@ -28,6 +28,9 @@ jobs:
       - name: Validate cleanup governance guidance
         run: uv run python -m scripts.engineering.repo check-cleanup-governance
 
+      - name: Validate root governance docs
+        run: uv run python -m scripts.engineering.repo check-root-governance-docs
+
       - name: Validate root-hygiene review registry
         run: uv run python -m scripts.engineering.repo check-root-review-registry
 
@@ -67,6 +70,7 @@ jobs:
           uv run pytest
           tests/unit/scripts/repo/test_audit_root_cleanliness.py
           tests/unit/scripts/repo/test_check_cleanup_governance.py
+          tests/unit/scripts/repo/test_check_root_governance_docs.py
           tests/unit/scripts/repo/test_audit_structure.py
           tests/unit/scripts/repo/test_check_root_hygiene_review_registry.py
           tests/unit/scripts/repo/test_cleanup_repository.py

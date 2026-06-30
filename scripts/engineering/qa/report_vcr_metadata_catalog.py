@@ -26,6 +26,38 @@ RF013_HEALTH_CASE_OWNER = Path("tests/integration/adapters/vcr_rebalance_support
 CLASS_METHOD_STEM_PATTERN = re.compile(
     r"^(?P<class_name>[A-Za-z_][A-Za-z0-9_]*)\.(?P<method_name>[A-Za-z_][A-Za-z0-9_]*)$"
 )
+LEGACY_METADATA_OWNER_ALIASES: dict[str, tuple[Path, ...]] = {
+    "tests/fixtures/vcr/chembl/test_chembl_subcellular_fraction_full_cycle.yaml": (
+        Path("tests/e2e/test_pipeline_matrix_e2e.py"),
+    ),
+    "tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_tissue.yaml": (
+        Path("tests/e2e/test_pipeline_matrix_e2e.py"),
+    ),
+    "tests/fixtures/vcr/chembl/TestChEMBLIntegration.test_chembl_extract_transform_load.yaml": (
+        Path("tests/e2e/test_full_pipeline.py"),
+    ),
+    "tests/fixtures/vcr/crossref/test_crossref_batch_fetch.yaml": (
+        Path("tests/integration/adapters/test_crossref.py"),
+    ),
+    "tests/fixtures/vcr/crossref/test_crossref_fetch_by_doi.yaml": (
+        Path("tests/integration/adapters/test_crossref.py"),
+    ),
+    "tests/fixtures/vcr/crossref/test_crossref_health_check.yaml": (
+        Path("tests/integration/adapters/test_crossref.py"),
+    ),
+    "tests/fixtures/vcr/uniprot/TestUniProtAdapterIntegration.test_health_check.yaml": (
+        Path("tests/integration/adapters/test_uniprot.py"),
+    ),
+    "tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_fetch_proteins.yaml": (
+        Path("tests/integration/adapters/test_uniprot.py"),
+    ),
+    "tests/fixtures/vcr/uniprot/TestUniProtClientIntegration.test_health_check.yaml": (
+        Path("tests/integration/adapters/test_uniprot.py"),
+    ),
+    "tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.test_health_check.yaml": (
+        Path("tests/integration/adapters/test_uniprot_idmapping.py"),
+    ),
+}
 
 
 @dataclass(frozen=True)
@@ -311,6 +343,11 @@ def _generated_reference_owner_paths(
     cassette_path: Path,
     repo_root: Path,
 ) -> list[str]:
+    alias_owners = LEGACY_METADATA_OWNER_ALIASES.get(cassette_path.as_posix())
+    if alias_owners is not None:
+        return [
+            owner.as_posix() for owner in alias_owners if (repo_root / owner).exists()
+        ]
     if not RF013_HEALTH_CASE_PATTERN.match(cassette_path.stem):
         return []
     owner = repo_root / RF013_HEALTH_CASE_OWNER

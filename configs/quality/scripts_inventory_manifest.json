@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-30T05:22:06.733966+00:00",
+  "generated_at": "2026-06-30T05:47:48.025416+00:00",
   "summary": {
     "total_scripts": 448,
     "status_counts": {
@@ -7669,7 +7669,7 @@
       "references": [
         {
           "path": ".github/workflows/root-hygiene.yml",
-          "line": 35,
+          "line": 38,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.diagnostics audit-structure --path ."
         },
@@ -8542,13 +8542,19 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
           "line": 240,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/check_test_audit_preflight.py --strict"
+        },
+        {
+          "path": "tests/architecture/test_tech_debt_issues_5700_5706_closeout.py",
+          "line": 92,
+          "source_group": "tests",
+          "text": "assert \"scripts/engineering/qa/check_test_audit_preflight.py --strict\" in workflow"
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
@@ -10216,7 +10222,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 54,
+      "reference_count": 55,
       "references": [
         {
           "path": ".github/workflows/compiled-artifacts-block.yml",
@@ -10252,6 +10258,12 @@
           "path": ".github/workflows/root-hygiene.yml",
           "line": 32,
           "source_group": "ci",
+          "text": "run: uv run python -m scripts.engineering.repo check-root-governance-docs"
+        },
+        {
+          "path": ".github/workflows/root-hygiene.yml",
+          "line": 35,
+          "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.repo check-root-review-registry"
         },
         {
@@ -10259,12 +10271,6 @@
           "line": 117,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.repo check-versions"
-        },
-        {
-          "path": ".github/workflows/tests.yml",
-          "line": 229,
-          "source_group": "ci",
-          "text": "uv run python -m scripts.engineering.repo check-inventory \\"
         }
       ]
     },
@@ -12804,7 +12810,7 @@
       "references": [
         {
           "path": ".github/workflows/root-hygiene.yml",
-          "line": 40,
+          "line": 43,
           "source_group": "ci",
           "text": "uv run python scripts/ops/support/repo/cleanup_repository.py"
         },

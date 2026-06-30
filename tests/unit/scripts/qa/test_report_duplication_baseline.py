@@ -410,6 +410,38 @@ def test_build_payload_includes_actionability_classification() -> None:
     )
 
 
+def test_build_payload_keeps_reviewed_cli_zero_actionability_category() -> None:
+    report = TargetDuplicationReport(
+        target="src/bioetl/interfaces/cli",
+        returncode=0,
+        duplicate_count=0,
+        raw_duplicate_count=0,
+        clusters=(),
+    )
+
+    payload = _build_payload(
+        [report],
+        snapshot_date="2026-06-30",
+        exclude_module_patterns=[],
+        trend_summary={"status": "no_prior_snapshot"},
+    )
+
+    row = payload["targets"][0]
+    assert row["actionability"] == [
+        {
+            "category": "cli_command_contract_shell",
+            "duplicate_clusters": 0,
+        }
+    ]
+    ranking = payload["reduction_leverage_ranking"]
+    assert ranking[0]["target"] == "src/bioetl/interfaces/cli"
+    assert ranking[0]["dominant_actionability_category"] == (
+        "cli_command_contract_shell"
+    )
+    assert ranking[0]["dominant_actionability_cluster_count"] == 0
+    assert ranking[0]["recommended_first_wave"] is False
+
+
 def test_render_markdown_includes_actionability_table() -> None:
     report = TargetDuplicationReport(
         target="src/bioetl/interfaces/cli",

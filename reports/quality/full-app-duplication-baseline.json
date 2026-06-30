@@ -44,7 +44,7 @@
     {
       "target": "src/bioetl/interfaces/cli",
       "duplicate_clusters": 0,
-      "dominant_actionability_category": null,
+      "dominant_actionability_category": "cli_command_contract_shell",
       "dominant_actionability_cluster_count": 0,
       "low_risk_cluster_count": 0,
       "low_risk_cluster_share": 0.0,
@@ -65,7 +65,12 @@
       "duplicate_count": 0,
       "raw_duplicate_count": 0,
       "excluded_duplicate_count": 0,
-      "actionability": [],
+      "actionability": [
+        {
+          "category": "cli_command_contract_shell",
+          "duplicate_clusters": 0
+        }
+      ],
       "top_pairs": [],
       "clusters": []
     },

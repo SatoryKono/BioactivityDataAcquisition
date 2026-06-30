@@ -67,6 +67,14 @@ _LOW_RISK_ACTIONABILITY_CATEGORIES = frozenset(
 )
 
 
+def _zero_actionability_category(target: str) -> str | None:
+    """Return the reviewed zero-duplication category for governed targets."""
+    normalized_target = target.replace("\\", "/").rstrip("/")
+    if normalized_target.endswith("src/bioetl/interfaces/cli"):
+        return "cli_command_contract_shell"
+    return None
+
+
 def _cluster_actionability_category(cluster: DuplicateCluster) -> str:
     """Classify duplicate-code findings by likely remediation path."""
     module_names = [module.module for module in cluster.modules]
@@ -91,10 +99,20 @@ def _cluster_actionability_category(cluster: DuplicateCluster) -> str:
 
 
 def _actionability_summary(
+    target: str,
     clusters: tuple[DuplicateCluster, ...],
 ) -> list[dict[str, object]]:
     """Return deterministic actionability counts for report triage."""
     counts = Counter(_cluster_actionability_category(cluster) for cluster in clusters)
+    if not counts:
+        zero_category = _zero_actionability_category(target)
+        if zero_category is not None:
+            return [
+                {
+                    "category": zero_category,
+                    "duplicate_clusters": 0,
+                }
+            ]
     return [
         {
             "category": category,
@@ -141,7 +159,12 @@ def _build_reduction_leverage_ranking(
     ranking_rows: list[dict[str, object]] = []
     for report in reports:
         category_counts = Counter(
-            _cluster_actionability_category(cluster) for cluster in report.clusters
+            {
+                str(item["category"]): int(item["duplicate_clusters"])
+                for item in _actionability_summary(report.target, report.clusters)
+                if isinstance(item.get("category"), str)
+                and isinstance(item.get("duplicate_clusters"), int)
+            }
         )
         dominant_category = None
         dominant_count = 0
@@ -499,7 +522,10 @@ def _build_payload(
                     )
                     - report.duplicate_count
                 ),
-                "actionability": _actionability_summary(report.clusters),
+                "actionability": _actionability_summary(
+                    report.target,
+                    report.clusters,
+                ),
                 "top_pairs": _top_duplicate_pairs(report.clusters),
                 "clusters": [
                     {
@@ -609,7 +635,7 @@ def _markdown_summary_lines(
 
 def _actionability_markdown_section(report: TargetDuplicationReport) -> list[str]:
     """Render actionability counts for one target."""
-    summary = _actionability_summary(report.clusters)
+    summary = _actionability_summary(report.target, report.clusters)
     if not summary:
         return []
     lines = [

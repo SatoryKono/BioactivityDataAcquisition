@@ -18,6 +18,10 @@
 ## src/bioetl/interfaces/cli
 
 - duplicate clusters: 0
+
+| Actionability category | Duplicate clusters |
+| --- | ---: |
+| `cli_command_contract_shell` | 0 |
 - no `R0801` findings
 
 ## src/bioetl/infrastructure/adapters
@@ -99,7 +103,7 @@
 | `src/bioetl/infrastructure/adapters` | 56 | `export_facade_or_package_barrel` | 0.80 | no |
 | `src/bioetl/application/pipelines` | 15 | `pipeline_transformer_contract_pattern` | 0.00 | no |
 | `src/bioetl/composition/bootstrap` | 0 | `n/a` | 0.00 | no |
-| `src/bioetl/interfaces/cli` | 0 | `n/a` | 0.00 | no |
+| `src/bioetl/interfaces/cli` | 0 | `cli_command_contract_shell` | 0.00 | no |
 
 ## First Wave Selection
 
