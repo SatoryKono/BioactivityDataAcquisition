@@ -41,7 +41,7 @@ def _run_record_id_subprocess(code: str) -> str:
         }
     }
     completed = subprocess.run(
-        [sys.executable, "-I", "-S", "-c", bootstrap + code],
+        [sys.executable, "-c", bootstrap + code],
         check=True,
         capture_output=True,
         cwd=_REPO_ROOT,

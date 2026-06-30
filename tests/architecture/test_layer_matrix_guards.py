@@ -71,6 +71,36 @@ EDGE_DEFINITIONS = (
 # Keep this map explicit so sanctioned production exceptions stay visible.
 SANCTIONED_EDGE_EXCEPTIONS: dict[tuple[str, str], set[str]] = {}
 
+INFRASTRUCTURE_ALLOWED_DOMAIN_IMPORT_PREFIXES = (
+    "bioetl.domain.behavior",
+    "bioetl.domain.composite",
+    "bioetl.domain.config",
+    "bioetl.domain.constants",
+    "bioetl.domain.contracts",
+    "bioetl.domain.control_plane",
+    "bioetl.domain.deterministic_identity",
+    "bioetl.domain.entities",
+    "bioetl.domain.error_classifier",
+    "bioetl.domain.exceptions",
+    "bioetl.domain.filtering",
+    "bioetl.domain.lineage",
+    "bioetl.domain.locking",
+    "bioetl.domain.mapping",
+    "bioetl.domain.medallion",
+    "bioetl.domain.models",
+    "bioetl.domain.normalization",
+    "bioetl.domain.observability_contract",
+    "bioetl.domain.ports",
+    "bioetl.domain.registry",
+    "bioetl.domain.resilience",
+    "bioetl.domain.schemas",
+    "bioetl.domain.serialization",
+    "bioetl.domain.transformations",
+    "bioetl.domain.types",
+    "bioetl.domain.value_objects",
+    "bioetl.domain.workflow",
+)
+
 
 def _module_name_for_path(src_dir: Path, file_path: Path) -> str:
     rel_parts = file_path.relative_to(src_dir).with_suffix("").parts
@@ -212,6 +242,24 @@ def _node_edge_violations(
     return []
 
 
+def _imported_module_names(
+    *,
+    node: ast.AST,
+    importer_module: str,
+) -> list[str]:
+    """Return absolute imported module names for import nodes."""
+    if isinstance(node, ast.Import):
+        return [alias.name for alias in node.names]
+    if isinstance(node, ast.ImportFrom):
+        resolved = _resolve_relative_module(
+            importer_module=importer_module,
+            module=node.module,
+            level=node.level,
+        )
+        return [resolved] if resolved else []
+    return []
+
+
 def _collect_edge_violations(
     *,
     src_dir: Path,
@@ -274,5 +322,45 @@ def test_layer_matrix_edge_guards(
     assert not violations, (
         f"{requirement_id}: {importer_layer} layer must not import "
         f"{forbidden_layer} layer in production code.\n"
+        + "\n".join(f"  - {violation}" for violation in violations[:100])
+    )
+
+
+@pytest.mark.architecture
+def test_infrastructure_domain_import_scope_is_explicit(
+    src_dir: Path,
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
+    """Keep Infrastructure -> Domain imports within the documented policy."""
+    violations: list[str] = []
+
+    for py_file, tree in _iter_layer_modules(
+        src_dir=src_dir,
+        source_ast_cache=source_ast_cache,
+        layer_name="infrastructure",
+    ):
+        parents = _parent_map(tree)
+        importer_module = _module_name_for_path(src_dir, py_file)
+        rel_path = py_file.relative_to(src_dir)
+        for node in ast.walk(tree):
+            if _is_inside_type_checking(node, parents):
+                continue
+            for module_name in _imported_module_names(
+                node=node,
+                importer_module=importer_module,
+            ):
+                if not _matches_forbidden_prefix(module_name, ("bioetl.domain",)):
+                    continue
+                if not _matches_forbidden_prefix(
+                    module_name,
+                    INFRASTRUCTURE_ALLOWED_DOMAIN_IMPORT_PREFIXES,
+                ):
+                    violations.append(
+                        f"{rel_path.as_posix()}:{getattr(node, 'lineno', '?')} imports {module_name}"
+                    )
+
+    assert not violations, (
+        "Infrastructure -> Domain imports must stay within the explicit "
+        "contract/value-object policy.\n"
         + "\n".join(f"  - {violation}" for violation in violations[:100])
     )

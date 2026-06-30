@@ -7,6 +7,9 @@ DETAIL_LIMIT="${BIOETL_PREFLIGHT_DETAIL_LIMIT:-25}"
 COMPUTE_SIZE="${BIOETL_PREFLIGHT_COMPUTE_SIZE:-0}"
 INCLUDE_LOCAL_CACHE_ROOTS="${BIOETL_PREFLIGHT_INCLUDE_LOCAL_CACHE_ROOTS:-0}"
 INCLUDE_LOCAL_VENDOR="${BIOETL_PREFLIGHT_INCLUDE_LOCAL_VENDOR:-0}"
+ALLOW_SLOW_FS_DELETE="${BIOETL_PREFLIGHT_ALLOW_SLOW_FS_DELETE:-0}"
+SLOW_FS="${BIOETL_PREFLIGHT_SLOW_FS:-auto}"
+SLOW_FS_MAX_TARGETS="${BIOETL_PREFLIGHT_SLOW_FS_MAX_TARGETS:-50}"
 
 for arg in "$@"; do
   case "$arg" in
@@ -32,6 +35,13 @@ Options:
                                .coverage-sharded-current-main/.
   --include-local-vendor       Also remove reviewed local vendor/editor roots such
                                as .junie/, .qodo/, .sonarlint/, and .windsurf/.
+Environment:
+  BIOETL_PREFLIGHT_ALLOW_SLOW_FS_DELETE=1
+                               Allow large cleanup deletes on WSL /mnt checkouts.
+  BIOETL_PREFLIGHT_SLOW_FS=0|1|auto
+                               Override slow filesystem detection.
+  BIOETL_PREFLIGHT_SLOW_FS_MAX_TARGETS=N
+                               Max targets before slow-FS cleanup is skipped.
   -h, --help                   Show this help message.
 USAGE
       exit 0
@@ -75,6 +85,39 @@ safe_file_size_bytes() {
     return 0
   fi
   printf '0\n'
+}
+
+is_wsl_runtime() {
+  if [[ -r /proc/version ]] && grep -qiE 'microsoft|wsl' /proc/version; then
+    return 0
+  fi
+  return 1
+}
+
+is_slow_fs_checkout() {
+  case "$SLOW_FS" in
+    1|true|TRUE|yes|YES)
+      return 0
+      ;;
+    0|false|FALSE|no|NO)
+      return 1
+      ;;
+    auto|"")
+      ;;
+    *)
+      echo "[preflight_cleanup][warn] Unsupported BIOETL_PREFLIGHT_SLOW_FS=$SLOW_FS; using auto detection" >&2
+      ;;
+  esac
+
+  is_wsl_runtime || return 1
+  case "$(pwd -P)" in
+    /mnt/*)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
 }
 
 print_limited_list() {
@@ -259,6 +302,15 @@ if [[ "$DRY_RUN" == "true" ]]; then
   echo "[dry-run] No files were deleted."
   print_limited_list "[dry-run] Directories to remove:" "${DIR_TARGETS[@]}"
   print_limited_list "[dry-run] Files to remove:" "${FILE_TARGETS[@]}"
+  exit 0
+fi
+
+if is_slow_fs_checkout \
+  && [[ "$ALLOW_SLOW_FS_DELETE" != "1" ]] \
+  && [[ "$SLOW_FS_MAX_TARGETS" =~ ^[0-9]+$ ]] \
+  && (( total_targets > SLOW_FS_MAX_TARGETS )); then
+  echo "[preflight_cleanup][warn] Skipped cleanup on slow WSL mount: ${total_targets} targets exceed BIOETL_PREFLIGHT_SLOW_FS_MAX_TARGETS=${SLOW_FS_MAX_TARGETS}."
+  echo "[preflight_cleanup][warn] Re-run with BIOETL_PREFLIGHT_ALLOW_SLOW_FS_DELETE=1 for explicit cleanup."
   exit 0
 fi
 

@@ -474,7 +474,7 @@ def _json_payload(violations: list[TermViolation]) -> list[dict[str, object]]:
 
 def resolve_default_paths() -> list[Path]:
     """Return default lint scope when no explicit paths are provided."""
-    candidates = [Path("src/bioetl"), Path("docs")]
+    candidates = [Path("src/bioetl")]
     existing = [path for path in candidates if path.exists()]
     return existing if existing else [Path(".")]
 
@@ -517,7 +517,7 @@ def main() -> int:
         "paths",
         nargs="*",
         type=Path,
-        help="Files or directories to check (defaults to src/bioetl and docs)",
+        help="Files or directories to check (defaults to src/bioetl)",
     )
     parser.add_argument(
         "--strict",

@@ -15,6 +15,21 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_REPO_COMMAND_TIMEOUT_SECONDS = 60.0
 
 
+def resolve_scripts_inventory_json_timeout_seconds(
+    *,
+    platform: str = sys.platform,
+) -> float:
+    """Return subprocess timeout for ``check_scripts_inventory.py --json`` smoke tests.
+
+    The JSON stdout path skips repository-wide reference discovery, but Windows
+  runs on slow repo mounts still need more headroom than the default 60s helper
+    budget for Python startup and script enumeration.
+    """
+    if platform == "win32":
+        return 180.0
+    return 90.0
+
+
 def repo_root() -> Path:
     """Return the repository root used by subprocess-backed test helpers."""
     return REPO_ROOT

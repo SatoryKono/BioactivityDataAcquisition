@@ -7,17 +7,13 @@ import contextlib
 import time
 from typing import TYPE_CHECKING, Protocol
 
-import httpx
-
-from bioetl.domain.exceptions import (
-    BioETLError,
-    ExternalServiceError,
-    RetryExhaustedError,
-)
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.adapters.common.deduplication import (
     async_iter_deduplicated_records,
     is_new_record,
+)
+from bioetl.infrastructure.adapters.common.error_bundles import (
+    COMMON_ADAPTER_FETCH_RESILIENCE_ERRORS,
 )
 
 if TYPE_CHECKING:
@@ -55,19 +51,7 @@ if TYPE_CHECKING:
 else:
     _ChemblFallbackHost = object
 
-CHEMBL_FALLBACK_ERRORS = (
-    BioETLError,
-    ExternalServiceError,
-    RetryExhaustedError,
-    httpx.HTTPError,
-    OSError,
-    ValueError,
-    TypeError,
-    RuntimeError,
-    KeyError,
-    AttributeError,
-    Exception,
-)
+CHEMBL_FALLBACK_ERRORS = COMMON_ADAPTER_FETCH_RESILIENCE_ERRORS
 
 
 def _log_single_id_failure(
