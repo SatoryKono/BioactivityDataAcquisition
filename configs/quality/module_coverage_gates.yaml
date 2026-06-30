@@ -54,6 +54,13 @@ coverage_tail:
       owner_tests:
         - tests/unit/domain/test_public_api_facade.py
       status: focused_owner_tests_added
+    - rank: 6
+      path: src/bioetl/infrastructure/observability/tracing.py
+      risk: tracing_exporter_selection_and_env_priority
+      target_test_type: focused_unit_tracing_branch_paths
+      owner_tests:
+        - tests/unit/infrastructure/observability/test_tracing.py
+      status: focused_owner_tests_added
 aggregate_residual_ratchets:
   linked_issue: '#5559'
   mode: fail-fast-current-inventory

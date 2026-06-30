@@ -4,8 +4,6 @@ Defines the structure and logic of a pipeline (config, transformations, filters)
 Does NOT handle execution orchestration.
 
 Refactored per ADR-005.
-Updated: Transformer injection via DI (Phase 1 refactoring).
-Updated: Removed default_transformer_class fallback (REQ-ARCH-DI-007).
 """
 
 from __future__ import annotations
@@ -177,8 +175,7 @@ class BasePipeline(ABC):  # noqa: B024
     @property
     def logger(self) -> LoggerPort:
         """Access bound logger."""
-        logger: LoggerPort = self._logger
-        return logger
+        return self._logger
 
     @property
     def shutdown_signal(self) -> ShutdownSignal:
@@ -190,20 +187,17 @@ class BasePipeline(ABC):  # noqa: B024
     @property
     def pipeline_name(self) -> str:
         """Pipeline name (from config)."""
-        pipeline_name: str = self._config.pipeline_name
-        return pipeline_name
+        return self._config.pipeline_name
 
     @property
     def provider(self) -> str:
         """Provider name (from config)."""
-        provider: str = self._config.provider
-        return provider
+        return self._config.provider
 
     @property
     def entity_type(self) -> str:
         """Entity type (from config)."""
-        entity_type: str = self._config.entity_type
-        return entity_type
+        return self._config.entity_type
 
     @property
     def run_type(self) -> RunType:
@@ -213,14 +207,12 @@ class BasePipeline(ABC):  # noqa: B024
     @property
     def resume(self) -> bool:
         """Resume flag (from runtime)."""
-        resume: bool = self._runtime.resume
-        return resume
+        return self._runtime.resume
 
     @property
     def limit(self) -> int | None:
         """Record limit (from runtime)."""
-        limit: int | None = self._runtime.limit
-        return limit
+        return self._runtime.limit
 
     @property
     def transformer(self) -> BaseTransformer | None:

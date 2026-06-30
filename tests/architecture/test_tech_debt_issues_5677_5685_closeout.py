@@ -183,10 +183,16 @@ def test_issue_5683_dead_code_inventory_has_no_untriaged_candidates() -> None:
     inventory = _load_json(DEAD_CODE_INVENTORY)
     summary = inventory["summary"]
 
-    assert summary["repo_wide_zero_import_candidate_count"] == 10
-    assert summary["repo_wide_classified_zero_import_candidate_count"] == 10
+    assert summary["repo_wide_zero_import_candidate_count"] <= 9
+    assert (
+        summary["repo_wide_classified_zero_import_candidate_count"]
+        == summary["repo_wide_zero_import_candidate_count"]
+    )
     assert summary["repo_wide_untriaged_zero_import_candidate_count"] == 0
-    assert summary["repo_wide_owner_test_anchored_candidate_count"] == 10
+    assert (
+        summary["repo_wide_owner_test_anchored_candidate_count"]
+        == summary["repo_wide_zero_import_candidate_count"]
+    )
     assert summary["repo_wide_candidates_without_owner_tests_count"] == 0
     assert set(summary["repo_wide_disposition_counts"]) == {
         "retain_canonical_owner_module",

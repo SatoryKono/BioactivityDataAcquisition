@@ -166,6 +166,26 @@ class TestBuildExportOptions:
 
         assert options.format == "xlsx"
 
+    def test_builds_governed_export_options(self) -> None:
+        """Test that governance CLI fields are passed into ExportOptions."""
+        options = _build_export_options(
+            output_format="csv",
+            output=None,
+            limit=None,
+            columns=None,
+            requester="operator@example.test",
+            role="exporter",
+            filters_hash="filters-sha256",
+            expires_at="2026-07-01T00:00:00Z",
+            redaction_profile="none",
+        )
+
+        assert options.requester == "operator@example.test"
+        assert options.role == "exporter"
+        assert options.filters_hash == "filters-sha256"
+        assert options.expires_at == "2026-07-01T00:00:00Z"
+        assert options.redaction_profile == "none"
+
 
 @pytest.mark.unit
 class TestListTablesOrExit:

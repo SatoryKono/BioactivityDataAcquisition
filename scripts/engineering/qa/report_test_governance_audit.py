@@ -575,7 +575,41 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
         or int(envelope["assertion_backed_tests"]) <= 0
     )
 
-    return {
+    # Build assertless_families for file-level aggregation
+    assertless_families: dict[str, dict[str, Any]] = {}
+    for candidate in assertless_candidates:
+        path = candidate["path"]
+        if path not in assertless_families:
+            assertless_families[path] = {
+                "assertless_tests": 0,
+                "categories": {},
+            }
+        assertless_families[path]["assertless_tests"] += 1
+        category = candidate["category"]
+        assertless_families[path]["categories"][category] = (
+            assertless_families[path]["categories"].get(category, 0) + 1
+        )
+
+    # Build summary metrics
+    intentional_no_exception_contract = assertless_category_counts.get(
+        "intentional_no_exception_contract", 0
+    )
+
+    summary = {
+        "assertless_total_candidates": assertless_total_candidates,
+        "compatibility_test_files": len(compatibility_files),
+        "date_today_call_sites": date_today_call_sites,
+        "duplicate_test_name_occurrences": sum(
+            len(locations) for locations in duplicate_names.values()
+        ),
+        "duplicate_test_names": len(duplicate_names),
+        "intentional_no_exception_contract": intentional_no_exception_contract,
+        "markerless_test_functions": markerless_test_functions,
+        "refined_assertless_tests": refined_assertless_tests,
+        "uuid4_call_sites": uuid4_call_sites,
+    }
+
+    report = {
         "root": ".",
         "total_test_files": len(test_files),
         "total_test_functions": total_functions,
@@ -605,6 +639,15 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
         "critical_behavior_envelopes": critical_behavior_envelopes,
         "fixture_asset_duplication": _collect_fixture_asset_duplication(root),
         "parse_errors": parse_errors,
+    }
+
+    return {
+        **report,
+        **summary,
+        "assertless_families": assertless_families,
+        "budget_violations": [],
+        "report": report,
+        "summary": summary,
     }
 
 
@@ -683,8 +726,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
 
-    report = collect_test_governance_report(args.root)
-    payload: dict[str, Any] = {"report": report}
+    payload = collect_test_governance_report(args.root)
     json_out = args.json_out
     duplicate_name_inventory_out = args.duplicate_name_inventory_out
     fixture_duplication_out = args.fixture_duplication_out
@@ -704,16 +746,16 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.config.exists():
         config = load_config(args.config)
-        violations = evaluate_budgets(report, config)
+        violations = evaluate_budgets(payload["report"], config)
         payload["budget_violations"] = violations
         if args.check and violations:
             exit_code = 1
 
     duplicate_inventory_payload = {
-        "summary": report["duplicate_test_name_inventory_summary"],
-        "inventory": report["duplicate_test_name_inventory"],
+        "summary": payload["report"]["duplicate_test_name_inventory_summary"],
+        "inventory": payload["report"]["duplicate_test_name_inventory"],
     }
-    fixture_duplication_payload = report["fixture_asset_duplication"]
+    fixture_duplication_payload = payload["report"]["fixture_asset_duplication"]
     output = _canonical_json(payload)
     if args.check:
         if json_out is not None and not _check_json_artifact(json_out, payload):

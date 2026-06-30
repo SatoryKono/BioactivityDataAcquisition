@@ -63,13 +63,6 @@ repo_wide_zero_import_classification:
     review_by: '2026-09-14'
     linked_issue: '#4541'
     rationale: Port owner module for delta_reader; imports now go through bioetl.domain.ports facade per REQ-ARCH-027
-  - module_path: src/bioetl/domain/ports/export.py
-    module_name: bioetl.domain.ports.export
-    disposition: retain_canonical_owner_module
-    reviewed_on: '2026-06-16'
-    review_by: '2026-09-14'
-    linked_issue: '#4541'
-    rationale: Port owner module for export; imports now go through bioetl.domain.ports facade per REQ-ARCH-027
   - module_path: src/bioetl/domain/ports/filtering.py
     module_name: bioetl.domain.ports.filtering
     disposition: retain_canonical_owner_module

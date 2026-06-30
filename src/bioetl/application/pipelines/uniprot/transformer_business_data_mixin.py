@@ -3,21 +3,17 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING
 
 from bioetl.application.pipelines.uniprot.extractors import (
+    _COMMENT_ANNOTATION_OUTPUT_KEYS,
     CommentExtractor,
     CrossRefExtractor,
     ExtractorHelper,
     FeatureExtractor,
     GeneExtractor,
     TaxonomyExtractor,
-    _COMMENT_ANNOTATION_OUTPUT_KEYS,
 )
-from bioetl.domain.types import GoldRecord
-
-if TYPE_CHECKING:
-    from bioetl.domain.types import BronzeRecord
+from bioetl.domain.types import BronzeRecord, GoldRecord
 
 
 class UniProtBusinessDataMixin:

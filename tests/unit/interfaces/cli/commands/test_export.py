@@ -429,6 +429,57 @@ class TestExportToFile:
         options = call_args[1]["options"]
         assert options.output_path == output_dir
 
+    def test_export_with_governance_options(
+        self,
+        cli_runner: CliRunner,
+        mock_export_service: MagicMock,
+        tmp_path: Path,
+    ) -> None:
+        """Test governed export CLI options are propagated to the service."""
+        export_result = ExportResult(
+            table_name="chembl.activity",
+            layer="silver",
+            format="csv",
+            output_path=tmp_path / "silver_chembl_activity.csv",
+            row_count=100,
+            audit_ref="export-audit:abc123",
+            expires_at="2026-07-01T00:00:00Z",
+            redaction_profile="none",
+        )
+        mock_export_service.export = AsyncMock(return_value=export_result)
+
+        with patch(
+            "bioetl.interfaces.cli.commands.export.get_export_service",
+            return_value=mock_export_service,
+        ):
+            result = cli_runner.invoke(
+                cli,
+                [
+                    "export",
+                    "chembl.activity",
+                    "--requester",
+                    "operator@example.test",
+                    "--role",
+                    "exporter",
+                    "--filters-hash",
+                    "filters-sha256",
+                    "--expires-at",
+                    "2026-07-01T00:00:00Z",
+                    "--redaction-profile",
+                    "none",
+                ],
+            )
+
+        assert result.exit_code == 0
+        assert "Audit ref: export-audit:abc123" in result.output
+        call_args = mock_export_service.export.call_args
+        options = call_args[1]["options"]
+        assert options.requester == "operator@example.test"
+        assert options.role == "exporter"
+        assert options.filters_hash == "filters-sha256"
+        assert options.expires_at == "2026-07-01T00:00:00Z"
+        assert options.redaction_profile == "none"
+
     def test_export_gold_layer(
         self,
         cli_runner: CliRunner,

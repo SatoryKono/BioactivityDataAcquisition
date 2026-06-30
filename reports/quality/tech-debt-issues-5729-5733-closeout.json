@@ -59,8 +59,8 @@
       "max": 2
     },
     "assertless_total_candidates": {
-      "current": 129,
-      "max": 129
+      "current": 113,
+      "max": 113
     },
     "slowest_test_hotspot_removed": {
       "current": true,
@@ -90,10 +90,9 @@
       }
     },
     "5732": {
-      "assertless_total_candidates": 129,
-      "intentional_no_exception_contract": 115,
+      "assertless_total_candidates": 113,
+      "intentional_no_exception_contract": 99,
       "target_file_family_counts": {
-        "tests/unit/domain/ports/test_noop.py": 12,
         "tests/unit/infrastructure/observability/test_unified_logger.py": 10
       }
     },

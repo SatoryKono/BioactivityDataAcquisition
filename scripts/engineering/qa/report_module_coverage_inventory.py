@@ -317,9 +317,7 @@ def compute_source_tree_sha256(
     change and must not affect release-governance freshness.
     """
     repo_root = repo_root.resolve()
-    source_tree_sha256 = _read_source_module_content_digest(
-        _iter_source_modules(repo_root), repo_root
-    )
+    _, source_tree_sha256 = _read_stable_source_module_snapshots(repo_root)
     return source_tree_sha256
 
 
@@ -1021,6 +1019,7 @@ def _refresh_existing_inventory_source_tree(
         }
     )
     refreshed["modules"] = refreshed_rows
+    refreshed["rows"] = refreshed_rows
     refreshed["summary"] = summary
     refreshed["source_tree_sha256"] = compute_source_tree_sha256(repo_root=repo_root)
     return refreshed

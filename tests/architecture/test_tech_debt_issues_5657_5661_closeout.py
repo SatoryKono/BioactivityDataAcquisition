@@ -181,10 +181,16 @@ def test_issue_5661_dead_code_review_window_is_current_and_fully_triaged() -> No
     assert review["max_untriaged_zero_import_candidates"] == 0
     assert review["snapshot_matches_last_reviewed"] is True
     assert next_review_by.date() >= datetime.now(UTC).date()
-    assert summary["repo_wide_zero_import_candidate_count"] == 10
-    assert summary["repo_wide_classified_zero_import_candidate_count"] == 10
+    assert summary["repo_wide_zero_import_candidate_count"] <= 9
+    assert (
+        summary["repo_wide_classified_zero_import_candidate_count"]
+        == summary["repo_wide_zero_import_candidate_count"]
+    )
     assert summary["repo_wide_untriaged_zero_import_candidate_count"] == 0
-    assert summary["repo_wide_owner_test_anchored_candidate_count"] == 10
+    assert (
+        summary["repo_wide_owner_test_anchored_candidate_count"]
+        == summary["repo_wide_zero_import_candidate_count"]
+    )
     assert summary["repo_wide_candidates_without_owner_tests_count"] == 0
 
     for row in inventory["repo_wide_zero_import_candidates"]:

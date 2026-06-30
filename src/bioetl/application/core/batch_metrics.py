@@ -54,13 +54,11 @@ class BatchMetricsRecorderService:
         self._metrics = metrics
         self._pipeline_label = pipeline_label
         self._run_type_label = run_type_label
-        resolved_pipeline_metrics = pipeline_metrics
-        if resolved_pipeline_metrics is None:
-            resolved_pipeline_metrics = PipelineMetricsRecorder(
-                metrics,
-                pipeline_label,
-            )
-        self._pipeline_metrics = resolved_pipeline_metrics
+        self._pipeline_metrics = (
+            pipeline_metrics
+            if pipeline_metrics is not None
+            else PipelineMetricsRecorder(metrics, pipeline_label)
+        )
         self._error_count = 0
 
     @property
@@ -268,7 +266,6 @@ class BatchMetricsRecorderService:
         """
         if not self._metrics:
             return
-
         reason_code: str | None = None
         rule_type: str | None = None
         field: str | None = None
@@ -287,7 +284,6 @@ class BatchMetricsRecorderService:
             maybe_field = details.get("field")
             if isinstance(maybe_field, str):
                 field = maybe_field
-
         self._pipeline_metrics.record_silver_filter_rejections(
             run_type=self._run_type_label,
             reason_code=reason_code,

@@ -6,7 +6,21 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.export_manifests import write_export_sidecar_manifests
+from bioetl.application.services.export_execution import (
+    create_failed_result as _create_failed_result,
+)
+from bioetl.application.services.export_execution import (
+    create_missing_table_result as _create_missing_table_result,
+)
+from bioetl.application.services.export_execution import (
+    create_success_result as _create_success_result,
+)
+from bioetl.application.services.export_execution import (
+    export_existing_table as _export_existing_table,
+)
+from bioetl.application.services.export_execution import (
+    get_layer_base_path as _get_layer_base_path,
+)
 from bioetl.application.services.export_models import (
     ColumnInfo,
     ExportFormat,
@@ -141,7 +155,11 @@ class ExportService:
                     options=options,
                     table_path=table_path,
                 )
-            return await self._export_existing_table(
+            return await _export_existing_table(
+                reader=self.reader,
+                writer=self.writer,
+                logger=self.logger,
+                export_path=self.export_path,
                 table_name=table_name,
                 layer=layer,
                 options=options,
@@ -158,70 +176,6 @@ class ExportService:
                 error=str(e),
             )
 
-    async def _export_existing_table(
-        self,
-        *,
-        table_name: str,
-        layer: str,
-        options: ExportOptions,
-        table_path: Path,
-    ) -> ExportResult:
-        """Export an existing table and build success result."""
-        self.logger.info(
-            "Reading table for export",
-            table=table_name,
-            layer=layer,
-            format=options.format,
-            limit=options.limit,
-        )
-        table = await self.reader.read_table(
-            str(table_path), columns=options.columns, limit=options.limit
-        )
-        row_count = table.num_rows
-        output_dir = options.output_path or self.export_path
-        output_path = self.writer.write_export(
-            table=table,
-            table_name=table_name,
-            layer=layer,
-            fmt=options.format,
-            output_dir=output_dir,
-        )
-        manifest_paths = (
-            write_export_sidecar_manifests(
-                writer=self.writer,
-                table=table,
-                table_name=table_name,
-                layer=layer,
-                export_format=options.format,
-                output_path=output_path,
-                row_count=row_count,
-                generated_at=options.manifest_generated_at,
-                allow_nondeterministic_generated_at=(
-                    options.allow_nondeterministic_manifest_timestamp
-                ),
-                run_ids=options.run_ids,
-                code_revision=options.code_revision,
-                strict=options.manifest_strict,
-            )
-            if options.include_manifests
-            else ()
-        )
-        self.logger.info(
-            "Export completed",
-            table=table_name,
-            rows=row_count,
-            output=str(output_path),
-            manifests=[str(path) for path in manifest_paths],
-        )
-        return self._create_success_result(
-            table_name=table_name,
-            layer=layer,
-            options=options,
-            output_path=output_path,
-            row_count=row_count,
-            manifest_paths=manifest_paths,
-        )
-
     def _create_missing_table_result(
         self,
         *,
@@ -231,13 +185,11 @@ class ExportService:
         table_path: Path,
     ) -> ExportResult:
         """Build result payload for missing table case."""
-        return ExportResult(
+        return _create_missing_table_result(
             table_name=table_name,
             layer=layer,
-            format=options.format,
-            output_path=None,
-            row_count=0,
-            error=f"Table not found: {table_path}",
+            options=options,
+            table_path=table_path,
         )
 
     def _create_success_result(
@@ -249,15 +201,19 @@ class ExportService:
         output_path: Path,
         row_count: int,
         manifest_paths: tuple[Path, ...] = (),
+        audit_ref: str | None = None,
+        redacted_columns: tuple[str, ...] = (),
     ) -> ExportResult:
         """Build result payload for successful export case."""
-        return ExportResult(
+        return _create_success_result(
             table_name=table_name,
             layer=layer,
-            format=options.format,
+            options=options,
             output_path=output_path,
             row_count=row_count,
             manifest_paths=manifest_paths,
+            audit_ref=audit_ref,
+            redacted_columns=redacted_columns,
         )
 
     def _create_failed_result(
@@ -269,12 +225,10 @@ class ExportService:
         error: str,
     ) -> ExportResult:
         """Build result payload for failed export case."""
-        return ExportResult(
+        return _create_failed_result(
             table_name=table_name,
             layer=layer,
-            format=options.format,
-            output_path=None,
-            row_count=0,
+            options=options,
             error=error,
         )
 
@@ -289,11 +243,11 @@ class ExportService:
 
     def _get_layer_base_path(self, layer: str) -> Path:
         """Resolve the root path for one export layer."""
-        if layer == "silver":
-            return self.silver_path
-        if layer == "gold":
-            return self.gold_path
-        raise ValueError(f"Invalid layer: {layer}")
+        return _get_layer_base_path(
+            layer=layer,
+            silver_path=self.silver_path,
+            gold_path=self.gold_path,
+        )
 
 
 __all__ = [

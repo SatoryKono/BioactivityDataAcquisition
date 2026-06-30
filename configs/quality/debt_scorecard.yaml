@@ -947,23 +947,22 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed triage recalibration
         updates the tracked debt budget intentionally.
     repo_wide_zero_import_candidate_count:
-      current_count: 10
-      max_count: 10
+      current_count: 9
+      max_count: 9
       linked_issue: '#5278'
       owner: '@bioetl-architecture'
       rationale: REQ-ARCH-027 port facade refactoring moved all port imports to bioetl.domain.ports,
-        leaving 9 zero-import port owner modules plus the package module entrypoint.
-        The retired composition.registry facade is no longer counted.
+        leaving 9 zero-import port owner modules. The retired composition.registry facade
+        is no longer counted.
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh
         updates the classified candidate set intentionally.
     repo_wide_classified_zero_import_candidate_count:
-      current_count: 10
-      max_count: 10
+      current_count: 9
+      max_count: 9
       linked_issue: '#5278'
       owner: '@bioetl-architecture'
       rationale: Every repo-wide zero-import candidate remains covered by an explicit
-        disposition ledger entry. The classified residue now includes 9 port owner modules
-        plus __main__.py.
+        disposition ledger entry. The classified residue includes 9 port owner modules.
       ratchet_policy: Non-growth fail-fast unless the repo-wide classification ledger
         is intentionally rebaselined during review.
     repo_wide_untriaged_zero_import_candidate_count:
@@ -975,14 +974,14 @@ retirement_governance_metrics:
         after review.
       ratchet_policy: Zero-budget fail-fast metric.
     repo_wide_owner_test_anchored_candidate_count:
-      current_count: 10
-      max_count: 10
+      current_count: 9
+      max_count: 9
       linked_issue: '#5278'
       owner: '@bioetl-architecture'
       rationale: >-
-        All 10 repo-wide zero-import candidates are now anchored by evidence:
-        __main__.py has explicit owner-test suites, and the 9 port owner modules
-        are anchored by canonical_owner_contract evidence.
+        All 9 repo-wide zero-import candidates are now anchored by evidence:
+        __main__.py has explicit owner-test suites, and the remaining 8 port
+        owner modules are anchored by canonical_owner_contract evidence.
       ratchet_policy: Non-growth fail-fast unless the reviewed candidate set intentionally
         shrinks and the owner-test evidence is regenerated in lockstep.
     repo_wide_candidates_without_owner_tests_count:

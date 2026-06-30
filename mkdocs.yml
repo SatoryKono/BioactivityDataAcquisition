@@ -388,6 +388,7 @@ nav:
                     -   "Gold Schemas": 04-reference/contracts/gold-schemas.md
                     -   "Data Quality Contracts": 04-reference/contracts/dq-contracts.md
                     -   "Observability Metrics": 04-reference/contracts/observability.md
+                    -   "Observability Rollout Contracts": 04-reference/contracts/observability-rollout-contracts.md
                     -   "Run Manifest & Ledger": 04-reference/contracts/run-manifest-ledger.md
             -   Observability:
                     -   "Metrics Catalog": 04-reference/observability/metrics-catalog.md

@@ -297,11 +297,14 @@ def test_issue_5576_zero_import_deadcode_candidates_have_owner_test_proof() -> N
     summary = dead_code["summary"]
     candidates = dead_code["repo_wide_zero_import_candidates"]
 
-    assert summary["repo_wide_zero_import_candidate_count"] == 10
+    assert summary["repo_wide_zero_import_candidate_count"] <= 9
     assert summary["repo_wide_untriaged_zero_import_candidate_count"] == 0
     assert summary["repo_wide_candidates_without_owner_tests_count"] == 0
-    assert summary["repo_wide_owner_test_anchored_candidate_count"] == 10
-    assert len(candidates) == 10
+    assert (
+        summary["repo_wide_owner_test_anchored_candidate_count"]
+        == summary["repo_wide_zero_import_candidate_count"]
+    )
+    assert len(candidates) == summary["repo_wide_zero_import_candidate_count"]
 
     for candidate in candidates:
         assert candidate["classification_status"] == "classified"
