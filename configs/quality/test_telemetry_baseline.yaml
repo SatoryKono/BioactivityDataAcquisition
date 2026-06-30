@@ -41,10 +41,10 @@ duration_telemetry:
   total_cases: 8507
   top_slowest:
   - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_checkpoint_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_tests
+    test: tests.architecture.test_checkpoint_compatibility_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_tests
     duration_s: 42.785
   - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_checkpoint_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_src
+    test: tests.architecture.test_checkpoint_compatibility_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_src
     duration_s: 28.12
   - source: S7-crosscutting-architecture-a2.xml
     test: tests.architecture.test_config_discrepancy_metrics_ratchets::test_config_discrepancy_baseline_matches_live_generator
@@ -68,7 +68,7 @@ duration_telemetry:
     test: tests.architecture.test_add_svg_text_fallback::test_build_fallback_text_emits_multiline_tspans
     duration_s: 13.15
   - source: S7-crosscutting-architecture-a2.xml
-    test: tests.architecture.test_removed_surface_freeze_guards::test_cli_run_orchestration_singleton_stays_private_compat_owner
+    test: tests.architecture.test_compatibility_freeze_guards::test_cli_run_orchestration_singleton_stays_private_compat_owner
     duration_s: 12.274
   - source: S7-crosscutting-architecture-a2.xml
     test: tests.architecture.test_config_discrepancy_metrics_ratchets::test_config_discrepancy_metrics_within_scorecard_budget
@@ -113,7 +113,7 @@ duration_telemetry:
     test: tests.unit.composition.factories.pipeline.test_registry_consistency.TestRegistryConfigConsistency::test_all_registered_pipelines_have_config_files
     duration_s: 3.464
   top_slowest_zones:
-  - zone: tests.architecture.test_checkpoint_runtime_facade_usage
+  - zone: tests.architecture.test_checkpoint_compatibility_runtime_facade_usage
     test_count: 2
     total_duration_s: 70.905
     max_duration_s: 42.785
@@ -141,7 +141,7 @@ duration_telemetry:
     test_count: 1
     total_duration_s: 13.15
     max_duration_s: 13.15
-  - zone: tests.architecture.test_removed_surface_freeze_guards
+  - zone: tests.architecture.test_compatibility_freeze_guards
     test_count: 1
     total_duration_s: 12.274
     max_duration_s: 12.274

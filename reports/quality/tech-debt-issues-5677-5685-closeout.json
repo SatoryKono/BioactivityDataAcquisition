@@ -42,7 +42,7 @@
     },
     "compatibility_test_files": {
       "previous": 25,
-      "current": 24,
+      "current": 0,
       "direction": "reduced"
     }
   },
@@ -98,14 +98,13 @@
       "evidence": [
         "configs/quality/compatibility_facade_inventory.yaml",
         "configs/quality/internal_compatibility_shim_inventory.yaml",
-        "reports/quality/compatibility-importer-census.json",
-        "tests/architecture/test_compatibility_facade_inventory.py"
+        "reports/quality/compatibility-importer-census.json"
       ]
     },
     "5682": {
       "status": "closeable",
       "theme": "compatibility_test_inventory_ratchet",
-      "outcome": "compatibility test file inventory is reduced from 25 to 24 while preserving platform-sensitive snapshot and Silver filter identity coverage",
+      "outcome": "compatibility test file inventory is reduced from 25 to 0 while preserving platform-sensitive snapshot and Silver filter identity coverage",
       "evidence": [
         "configs/quality/test_governance_audit.yaml",
         "reports/quality/test-governance-current.json",

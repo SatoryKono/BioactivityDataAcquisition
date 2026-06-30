@@ -129,9 +129,9 @@
       "release_gate_status": "passing",
       "fail_count": 0,
       "warn_count": 0,
-      "architecture_quality_score": 8.47,
-      "module_coverage_source_tree_sha256": "6c9d1e04b03915f840ebf5d394a218e7e0d854f5527274dd16dd371bf928cfc7",
-      "remote_main_baseline_fingerprint": "87a870bca59cbc8d1159f709eee377214f2f1a3479cc79d10d73f9e2e84ed8cc"
+      "architecture_quality_score": 8.53,
+      "module_coverage_source_tree_sha256": "139ac5bd008c163d4210bba7360fd2d0ac49b7407c90f0821e92e01e4771afc6",
+      "remote_main_baseline_fingerprint": "624a9cdb3d283482a3042c57dd2985b2bfad290935bad7ea84b9a80dd19c97be"
     },
     "5745": {
       "opening_adapter_duplicate_clusters": 55,
@@ -165,7 +165,7 @@
       "assertless_total_candidates": 0,
       "opening_intentional_no_exception_contract": 99,
       "intentional_no_exception_contract": 94,
-      "compatibility_test_files": 24,
+      "compatibility_test_files": 0,
       "markerless_test_functions": 0
     },
     "5750": {

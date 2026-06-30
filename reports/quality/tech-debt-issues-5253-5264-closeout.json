@@ -72,7 +72,7 @@
       "evidence": [
         "tests/unit/composition/test_lazy_exports.py::test_resolve_lazy_export_supports_explicit_target_attribute",
         "tests/unit/composition/test_lazy_exports.py::test_install_lazy_exports_installs_stable_hooks_without_eager_imports",
-        "tests/architecture/test_compatibility_facade_inventory.py::test_compatibility_review_and_remove_dates_are_not_expired"
+        "tests/architecture/test_public_facade_inventory.py::test_compatibility_review_and_remove_dates_are_not_expired"
       ]
     },
     {
@@ -139,7 +139,7 @@
       "action": "Added a date-sensitive architecture guard for compatibility review/remove dates and linked closeout evidence to the no-growth budget policy.",
       "risk": "medium",
       "evidence": [
-        "tests/architecture/test_compatibility_facade_inventory.py::test_compatibility_review_and_remove_dates_are_not_expired",
+        "tests/architecture/test_public_facade_inventory.py::test_compatibility_review_and_remove_dates_are_not_expired",
         "configs/quality/compatibility_facade_inventory.yaml",
         "configs/quality/config_compatibility_registry.yaml"
       ]

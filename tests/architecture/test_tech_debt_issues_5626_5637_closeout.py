@@ -259,9 +259,9 @@ def test_issue_5634_retained_compatibility_test_inventory_is_reviewed() -> None:
     report = report_payload["report"]
     inventory = config["compatibility_test_inventory"]
 
-    assert config["budgets"]["compatibility_test_file_max"] == 24
-    assert inventory["total_files"] == 24
-    assert report["compatibility_test_files"] == 24
+    assert config["budgets"]["compatibility_test_file_max"] == 0
+    assert inventory["total_files"] == 0
+    assert report["compatibility_test_files"] == 0
     assert report_payload["budget_violations"] == []
     assert date.fromisoformat(str(inventory["default_review_date"])) >= date(
         2026, 9, 30
