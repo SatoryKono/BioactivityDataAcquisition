@@ -116,8 +116,8 @@ def test_issue_5599_active_hotspot_total_loc_decreases_without_budget_growth() -
         if isinstance(row, dict)
     }
 
-    assert application_core["total_loc"] <= 22360
-    assert application_core["files_ge_250_loc"] == 7
+    assert application_core["total_loc"] <= 22358
+    assert application_core["files_ge_250_loc"] == 6
     assert application_core["max_internal_fan_in"] <= 11
     assert application_core["bounded_growth_budgets"] == {
         "files_ge_250_loc": 7,

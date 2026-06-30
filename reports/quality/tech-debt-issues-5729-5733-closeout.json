@@ -59,7 +59,7 @@
       "max": 2
     },
     "assertless_total_candidates": {
-      "current": 113,
+      "current": 108,
       "max": 113
     },
     "slowest_test_hotspot_removed": {
@@ -69,11 +69,11 @@
   },
   "outcomes": {
     "5729": {
-      "source_commit": "32f8274ca6df6944cb0a33dba5c7b2f1edbf0b4a",
-      "source_run_id": "origin-main-telemetry-20260630",
-      "refreshed_at_utc": "2026-06-30T09:12:47.196108+00:00",
-      "coverage_percent": 92.81,
-      "coverage_actual_percent": 92.81
+      "source_commit": "51979de96630ce1eff88b6a2b82df04a5c9be157",
+      "source_run_id": "local-issues-5710-5711-20260630",
+      "refreshed_at_utc": "2026-06-30T13:06:54.324571+00:00",
+      "coverage_percent": 95.61,
+      "coverage_actual_percent": 95.61
     },
     "5730": {
       "target_modules": [
@@ -90,8 +90,8 @@
       }
     },
     "5732": {
-      "assertless_total_candidates": 113,
-      "intentional_no_exception_contract": 99,
+      "assertless_total_candidates": 108,
+      "intentional_no_exception_contract": 94,
       "target_file_family_counts": {
         "tests/unit/infrastructure/observability/test_unified_logger.py": 10
       }

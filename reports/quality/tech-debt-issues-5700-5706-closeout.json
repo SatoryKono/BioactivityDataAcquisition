@@ -91,12 +91,12 @@
       "testing_guide_mentions_preflight": true
     },
     "5701": {
-      "source_commit": "32f8274ca6df6944cb0a33dba5c7b2f1edbf0b4a",
-      "source_run_id": "origin-main-telemetry-20260630",
-      "refreshed_at_utc": "2026-06-30T09:12:47.196108+00:00",
+      "source_commit": "51979de96630ce1eff88b6a2b82df04a5c9be157",
+      "source_run_id": "local-issues-5710-5711-20260630",
+      "refreshed_at_utc": "2026-06-30T13:06:54.324571+00:00",
       "coverage_xml_present": false,
       "coverage_percent_fallback_used": true,
-      "coverage_actual_percent": 92.81,
+      "coverage_actual_percent": 95.61,
       "slowest_total_cases": 8507,
       "top_slow_zone": {
         "zone": "tests.architecture.test_checkpoint_compatibility_runtime_facade_usage",

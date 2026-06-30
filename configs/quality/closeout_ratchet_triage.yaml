@@ -222,3 +222,8 @@ entries:
     classification: budget_closeout_ratchet
     live_guard: "debt issue batch #5729-#5733 remains aligned with live test telemetry freshness, storage/control-plane coverage-tail reduction, runner and observability branch closure, assert-less contract shrinkage, and runtime-builder hotspot removal without budget growth."
     rationale: Keeps the newest test-system closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issues_5744_5751_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue batch #5744-#5751 remains aligned with live governance freshness, duplication reduction, compatibility review, hotspot pressure, test debt, root hygiene, layer guard, and documentation inventory evidence without budget growth."
+    rationale: Keeps the newest architecture-debt closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.

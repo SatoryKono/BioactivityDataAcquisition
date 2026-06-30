@@ -72,6 +72,22 @@ def _gate(payload: dict[str, Any], name: str) -> dict[str, Any]:
     raise AssertionError(f"Missing debt governance gate: {name}")
 
 
+def _under_coverage_floor(
+    inventory: dict[str, Any],
+    *,
+    threshold: float,
+) -> list[dict[str, Any]]:
+    rows = inventory.get("modules") or inventory.get("rows") or []
+    assert isinstance(rows, list)
+    return [
+        row
+        for row in rows
+        if isinstance(row, dict)
+        and row.get("coverage_percent") is not None
+        and float(row["coverage_percent"]) < threshold
+    ]
+
+
 def test_closeout_artifact_covers_requested_issues_5707_5715() -> None:
     payload = _load_json(CLOSEOUT)
 
@@ -223,6 +239,10 @@ def test_issue_5711_coverage_tail_is_zero_unmeasured_and_owner_anchored() -> Non
         "no_executable_line_modules"
     ]
     assert coverage["source_tree_sha256"] == outcome["source_tree_sha256"]
+    under_70 = _under_coverage_floor(coverage, threshold=70.0)
+    assert outcome["under70_module_count_before"] == 18
+    assert outcome["under70_module_count_after"] == len(under_70)
+    assert outcome["under70_module_count_after"] < outcome["under70_module_count_before"]
     assert (
         scorecard["metrics"]["unmeasured_module_count"]
         == outcome["unmeasured_module_count"]
