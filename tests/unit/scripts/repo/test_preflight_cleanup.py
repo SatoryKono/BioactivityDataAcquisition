@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -35,6 +36,7 @@ def _run_cleanup(tmp_path: Path, *, allow_slow_delete: bool = False) -> subproce
     )
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="bash script not available on Windows")
 def test_preflight_cleanup_skips_large_delete_on_slow_filesystem(
     tmp_path: Path,
 ) -> None:
@@ -49,6 +51,7 @@ def test_preflight_cleanup_skips_large_delete_on_slow_filesystem(
     assert (tmp_path / "pkg_1" / "__pycache__").is_dir()
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="bash script not available on Windows")
 def test_preflight_cleanup_allows_large_delete_when_explicitly_overridden(
     tmp_path: Path,
 ) -> None:

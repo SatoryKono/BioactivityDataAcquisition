@@ -109,14 +109,15 @@ class ExportService:
         """
         table_path = self._get_table_path(table_name, layer)
 
-        schema = await self.reader.get_schema(str(table_path))
+        table_path_ref = table_path.as_posix()
+        schema = await self.reader.get_schema(table_path_ref)
         columns = tuple(
             ColumnInfo(name=f.name, type=str(f.type), nullable=f.nullable)
             for f in schema
         )
 
-        row_count = await self.reader.get_row_count(str(table_path))
-        sample_table = await self.reader.read_table(str(table_path), limit=sample_rows)
+        row_count = await self.reader.get_row_count(table_path_ref)
+        sample_table = await self.reader.read_table(table_path_ref, limit=sample_rows)
         samples = tuple(sample_table.to_pylist())
 
         return TablePreview(
@@ -148,7 +149,7 @@ class ExportService:
         table_path = self._get_table_path(table_name, layer)
 
         try:
-            if not await self.reader.table_exists(str(table_path)):
+            if not await self.reader.table_exists(table_path.as_posix()):
                 return self._create_missing_table_result(
                     table_name=table_name,
                     layer=layer,

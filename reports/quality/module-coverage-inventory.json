@@ -3553,7 +3553,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.pipelines.openalex.extractors",
       "path": "src/bioetl/application/pipelines/openalex/extractors.py",
-      "source_lines": 51
+      "source_lines": 18
     },
     {
       "coverage_percent": 98.55,
@@ -6123,7 +6123,7 @@
       "missing_lines": 15,
       "module": "bioetl.application.services.export_service",
       "path": "src/bioetl/application/services/export_service.py",
-      "source_lines": 261
+      "source_lines": 262
     },
     {
       "coverage_percent": 100.0,
@@ -25465,7 +25465,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.pipelines.openalex.extractors",
       "path": "src/bioetl/application/pipelines/openalex/extractors.py",
-      "source_lines": 51
+      "source_lines": 18
     },
     {
       "coverage_percent": 98.55,
@@ -28035,7 +28035,7 @@
       "missing_lines": 15,
       "module": "bioetl.application.services.export_service",
       "path": "src/bioetl/application/services/export_service.py",
-      "source_lines": 261
+      "source_lines": 262
     },
     {
       "coverage_percent": 100.0,
@@ -43830,7 +43830,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-30",
-  "source_tree_sha256": "d64fa96d7ec630c1d2cadf124a73db5cacbf0161971d4e8467d9c3d916ffd30d",
+  "source_tree_sha256": "d6b4c854568e0251bcd60cae25b9babaafd5de9c51ddc6800f773cd21b79f50e",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
