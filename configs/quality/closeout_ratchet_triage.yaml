@@ -207,3 +207,8 @@ entries:
     classification: budget_closeout_ratchet
     live_guard: "debt issue batch #5700-#5706 remains aligned with live test-audit preflight, telemetry baseline, topology retirement, VCR reachability, and coverage-tail evidence without budget growth."
     rationale: Keeps the latest test-system closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issues_5707_5715_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue batch #5707-#5715 remains aligned with live governance freshness, duplication no-growth, coverage-tail, compatibility, dead-code, performance, and no-growth enforcement evidence without budget growth."
+    rationale: Keeps the current architecture-debt closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.

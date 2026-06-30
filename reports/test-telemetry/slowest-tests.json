@@ -1,8 +1,8 @@
 {
   "source_branch": "main",
-  "source_commit": "cdecddaa00c71b65000b0d6918dcfabbfea2e707",
-  "source_run_id": "local-current-head-telemetry-20260630",
-  "refreshed_at_utc": "2026-06-30T05:35:46.133759+00:00",
+  "source_commit": "32f8274ca6df6944cb0a33dba5c7b2f1edbf0b4a",
+  "source_run_id": "origin-main-telemetry-20260630",
+  "refreshed_at_utc": "2026-06-30T06:47:08.533709+00:00",
   "refresh_status": "captured",
   "total_cases": 8507,
   "top_slowest": [

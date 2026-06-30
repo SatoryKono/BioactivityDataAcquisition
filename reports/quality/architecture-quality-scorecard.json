@@ -8,7 +8,7 @@
     },
     "module_coverage_inventory": {
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "90001cde6b66f966dcb7a0ac80dfacd93587c471023eaa7e2267887f302d127f",
+      "source_tree_sha256": "761dee19c6553ae4f9c86d913bafc82e82074024674056a415bb536a6fc4b92d",
       "coverage_xml_sha256": "688fdd5cf7e086bb0ac2178265406f9e8395532fb1067e9e6e2fc0c7b5e1632a"
     },
     "compatibility_importer_census": {
@@ -37,7 +37,7 @@
     "duplication_baseline": {
       "path": "reports/quality/full-app-duplication-baseline.json",
       "snapshot_date": "2026-06-30",
-      "total_duplicate_clusters": 71
+      "total_duplicate_clusters": 70
     },
     "hotspot_family_baseline": {
       "path": "reports/quality/hotspot-family-baseline.json",
@@ -87,7 +87,7 @@
       "score": 9.0,
       "weighted_score": 0.81,
       "evidence_metrics": {
-        "source_module_count": 2188,
+        "source_module_count": 2190,
         "uncovered_module_count": 0
       }
     },
@@ -109,10 +109,10 @@
       "score": 7.5,
       "weighted_score": 1.05,
       "evidence_metrics": {
-        "source_module_count": 2188,
+        "source_module_count": 2190,
         "hotspot_family_count": 5,
         "hotspot_budget_warning_count": 0,
-        "total_duplicate_clusters": 71
+        "total_duplicate_clusters": 70
       }
     },
     {
@@ -175,18 +175,18 @@
         "retained_entrypoint_count": 12,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
         "hotspot_budget_warning_count": 0,
-        "total_duplicate_clusters": 71
+        "total_duplicate_clusters": 70
       }
     }
   ],
   "metrics": {
     "layer_violations": 0,
-    "source_module_count": 2188,
+    "source_module_count": 2190,
     "unmeasured_module_count": 0,
     "uncovered_module_count": 0,
     "hotspot_family_count": 5,
     "hotspot_budget_warning_count": 0,
-    "total_duplicate_clusters": 71,
+    "total_duplicate_clusters": 70,
     "retained_entrypoint_count": 12,
     "retained_public_export_facade_count": 4,
     "twin_pair_count": 0,

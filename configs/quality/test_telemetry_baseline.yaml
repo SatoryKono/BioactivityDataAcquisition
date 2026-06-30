@@ -2,10 +2,10 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: main
-refreshed_at_utc: '2026-06-30T05:35:46.133759+00:00'
+refreshed_at_utc: '2026-06-30T06:47:08.533709+00:00'
 refresh_status: captured
-source_commit: cdecddaa00c71b65000b0d6918dcfabbfea2e707
-source_run_id: local-current-head-telemetry-20260630
+source_commit: 32f8274ca6df6944cb0a33dba5c7b2f1edbf0b4a
+source_run_id: origin-main-telemetry-20260630
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45

@@ -45,6 +45,14 @@ from bioetl.infrastructure.adapters.decorators._circuit_breaker_support import (
 from bioetl.infrastructure.adapters.decorators._circuit_breaker_support import (
     unhealthy_status_if_circuit_open as unhealthy_status_for_open_circuit,
 )
+from bioetl.infrastructure.adapters.decorators._data_source_delegation import (
+    DataSourceFetchRequest,
+    close_delegated_data_source,
+    delegated_provider_name,
+    enter_delegated_data_source,
+    exit_delegated_data_source,
+    iter_delegated_fetch,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
@@ -97,11 +105,11 @@ class CircuitBreakerDataSourceDecorator:
     @property
     def provider_name(self) -> str:
         """Delegate to wrapped data source."""
-        return str(self.data_source.provider_name)
+        return delegated_provider_name(self.data_source)
 
     async def __aenter__(self) -> Self:
         """Enter async context by delegating to wrapped data source."""
-        await self.data_source.__aenter__()
+        await enter_delegated_data_source(self.data_source)
         return self
 
     async def __aexit__(
@@ -111,7 +119,12 @@ class CircuitBreakerDataSourceDecorator:
         exc_tb: TracebackType | None,
     ) -> None:
         """Exit async context by delegating to wrapped data source."""
-        await self.data_source.__aexit__(exc_type, exc_val, exc_tb)
+        await exit_delegated_data_source(
+            self.data_source,
+            exc_type,
+            exc_val,
+            exc_tb,
+        )
 
     def _check_circuit_state(self) -> None:
         """Check circuit breaker state and raise if open.
@@ -152,36 +165,24 @@ class CircuitBreakerDataSourceDecorator:
 
         """
         self._check_circuit_state()
-        async for record in self._iterate_with_error_recording(
+        request = DataSourceFetchRequest(
             entity_type=entity_type,
             limit=limit,
             query=query,
             filter_ids=filter_ids,
             filter_field=filter_field,
             offset=offset,
-        ):
+        )
+        async for record in self._iterate_with_error_recording(request):
             yield record
 
     async def _iterate_with_error_recording(
         self,
-        *,
-        entity_type: str,
-        limit: int | None,
-        query: str | None,
-        filter_ids: list[str] | None,
-        filter_field: str | None,
-        offset: int | None,
+        request: DataSourceFetchRequest,
     ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
         """Iterate protected fetch and record non-circuit errors."""
         try:
-            async for record in self.data_source.fetch(
-                entity_type=entity_type,
-                limit=limit,
-                query=query,
-                filter_ids=filter_ids,
-                filter_field=filter_field,
-                offset=offset,
-            ):
+            async for record in iter_delegated_fetch(self.data_source, request):
                 yield record
         except CircuitBreakerOpenError:
             raise
@@ -218,7 +219,7 @@ class CircuitBreakerDataSourceDecorator:
 
     async def aclose(self) -> None:
         """Close the wrapped data source."""
-        await self.data_source.aclose()
+        await close_delegated_data_source(self.data_source)
 
     def get_circuit_state(self) -> CircuitBreakerState:
         """Get current circuit breaker state.
