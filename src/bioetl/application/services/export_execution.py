@@ -61,7 +61,7 @@ async def export_existing_table(
         limit=options.limit,
     )
     table = await reader.read_table(
-        str(table_path), columns=options.columns, limit=options.limit
+        table_path.as_posix(), columns=options.columns, limit=options.limit
     )
     export_table, redacted_columns = apply_redaction_policy(
         table=table,

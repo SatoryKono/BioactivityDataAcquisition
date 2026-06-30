@@ -415,41 +415,6 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "20",
-      "path": "tests/unit/infrastructure/observability/test_noop_logger.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_info_accepts_context_without_error"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "25",
-      "path": "tests/unit/infrastructure/observability/test_noop_logger.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_warning_accepts_context_without_error"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "30",
-      "path": "tests/unit/infrastructure/observability/test_noop_logger.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_error_accepts_context_without_error"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "35",
-      "path": "tests/unit/infrastructure/observability/test_noop_logger.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_debug_accepts_context_without_error"
-    },
-    {
-      "category": "intentional_no_exception_contract",
-      "line": "40",
-      "path": "tests/unit/infrastructure/observability/test_noop_logger.py",
-      "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-      "test_name": "test_exception_accepts_context_without_error"
-    },
-    {
-      "category": "intentional_no_exception_contract",
       "line": "161",
       "path": "tests/unit/infrastructure/observability/test_tracing.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -796,7 +761,7 @@
     "architecture_helper_guard": 14,
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
-    "intentional_no_exception_contract": 99,
+    "intentional_no_exception_contract": 94,
     "weak_no_value": 0
   },
   "assertless_examples": [
@@ -1019,12 +984,6 @@
         "intentional_no_exception_contract": 1
       }
     },
-    "tests/unit/infrastructure/observability/test_noop_logger.py": {
-      "assertless_tests": 5,
-      "categories": {
-        "intentional_no_exception_contract": 5
-      }
-    },
     "tests/unit/infrastructure/observability/test_tracing.py": {
       "assertless_tests": 2,
       "categories": {
@@ -1134,7 +1093,7 @@
       }
     }
   },
-  "assertless_total_candidates": 113,
+  "assertless_total_candidates": 108,
   "budget_violations": [],
   "compatibility_examples": [
     "tests/architecture/test_application_composite_compat_surface_usage.py",
@@ -1334,7 +1293,7 @@
       ".yml"
     ]
   },
-  "intentional_no_exception_contract": 99,
+  "intentional_no_exception_contract": 94,
   "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
@@ -1755,41 +1714,6 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "20",
-        "path": "tests/unit/infrastructure/observability/test_noop_logger.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_info_accepts_context_without_error"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "25",
-        "path": "tests/unit/infrastructure/observability/test_noop_logger.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_warning_accepts_context_without_error"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "30",
-        "path": "tests/unit/infrastructure/observability/test_noop_logger.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_error_accepts_context_without_error"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "35",
-        "path": "tests/unit/infrastructure/observability/test_noop_logger.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_debug_accepts_context_without_error"
-      },
-      {
-        "category": "intentional_no_exception_contract",
-        "line": "40",
-        "path": "tests/unit/infrastructure/observability/test_noop_logger.py",
-        "rationale": "explicit no-op/smoke/does-not-raise contract tests",
-        "test_name": "test_exception_accepts_context_without_error"
-      },
-      {
-        "category": "intentional_no_exception_contract",
         "line": "161",
         "path": "tests/unit/infrastructure/observability/test_tracing.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
@@ -2136,7 +2060,7 @@
       "architecture_helper_guard": 14,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
-      "intentional_no_exception_contract": 99,
+      "intentional_no_exception_contract": 94,
       "weak_no_value": 0
     },
     "assertless_examples": [
@@ -2166,7 +2090,7 @@
       "tests/unit/application/pipelines/crossref/test_crossref_transformer.py:278",
       "tests/unit/composition/test_observability_contract.py:371"
     ],
-    "assertless_total_candidates": 113,
+    "assertless_total_candidates": 108,
     "compatibility_examples": [
       "tests/architecture/test_application_composite_compat_surface_usage.py",
       "tests/architecture/test_application_core_lifecycle_shim_usage.py",
@@ -2370,24 +2294,24 @@
     "refined_assertless_tests": 0,
     "root": ".",
     "top_duplicate_test_names": [],
-    "total_test_files": 1883,
-    "total_test_functions": 21377,
+    "total_test_files": 1884,
+    "total_test_functions": 21381,
     "uuid4_call_sites": 0
   },
   "root": ".",
   "summary": {
-    "assertless_total_candidates": 113,
+    "assertless_total_candidates": 108,
     "compatibility_test_files": 24,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
-    "intentional_no_exception_contract": 99,
+    "intentional_no_exception_contract": 94,
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "uuid4_call_sites": 0
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 1883,
-  "total_test_functions": 21377,
+  "total_test_files": 1884,
+  "total_test_functions": 21381,
   "uuid4_call_sites": 0
 }

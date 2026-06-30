@@ -2,50 +2,17 @@
 
 from __future__ import annotations
 
+from bioetl.application.pipelines.openalex._extractors_authors import *  # noqa: F403
 from bioetl.application.pipelines.openalex._extractors_authors import (
-    extract_affiliations,
-    extract_author_ids,
-    extract_author_orcids,
-    extract_authors,
-    extract_institution_country_codes,
-    extract_institution_ids,
-    extract_institution_ror_ids,
+    __all__ as _AUTHOR_EXPORTS,
 )
+from bioetl.application.pipelines.openalex._extractors_publication_fields import *  # noqa: F403
 from bioetl.application.pipelines.openalex._extractors_publication_fields import (
-    extract_biblio_info,
-    extract_doi,
-    extract_external_ids,
-    extract_journal_info,
-    extract_keywords,
-    extract_mesh_terms,
-    extract_open_access_info,
-    extract_openalex_id,
-    reconstruct_abstract,
+    __all__ as _PUBLICATION_FIELD_EXPORTS,
 )
+from bioetl.application.pipelines.openalex._extractors_topics_grants import *  # noqa: F403
 from bioetl.application.pipelines.openalex._extractors_topics_grants import (
-    extract_grants,
-    extract_primary_topic,
-    extract_topics,
+    __all__ as _TOPIC_GRANT_EXPORTS,
 )
 
-__all__ = [
-    "extract_affiliations",
-    "extract_author_ids",
-    "extract_author_orcids",
-    "extract_authors",
-    "extract_biblio_info",
-    "extract_doi",
-    "extract_external_ids",
-    "extract_grants",
-    "extract_institution_country_codes",
-    "extract_institution_ids",
-    "extract_institution_ror_ids",
-    "extract_journal_info",
-    "extract_keywords",
-    "extract_mesh_terms",
-    "extract_open_access_info",
-    "extract_openalex_id",
-    "extract_primary_topic",
-    "extract_topics",
-    "reconstruct_abstract",
-]
+__all__ = [*_AUTHOR_EXPORTS, *_PUBLICATION_FIELD_EXPORTS, *_TOPIC_GRANT_EXPORTS]
