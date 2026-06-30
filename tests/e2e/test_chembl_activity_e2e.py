@@ -14,6 +14,7 @@ import pytest
 
 from bioetl.composition.bootstrap.runtime.pipeline import bootstrap_pipeline_runner
 from .conftest import (
+    E2E_TWO_SEQUENTIAL_PIPELINE_TIMEOUT,
     assert_bronze_files_exist,
     assert_silver_table_has_records,
     create_test_context,
@@ -64,7 +65,7 @@ async def test_chembl_activity_full_cycle(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-@pytest.mark.timeout(180)  # 2 pipeline runs need more time
+@pytest.mark.timeout(E2E_TWO_SEQUENTIAL_PIPELINE_TIMEOUT)
 async def test_pipeline_idempotency(e2e_data_dir: Path):
     """E2E: Append-mode activity pipeline reruns remain bounded.
 
@@ -102,7 +103,7 @@ async def test_pipeline_idempotency(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-@pytest.mark.timeout(180)  # 2 pipeline runs need more time
+@pytest.mark.timeout(E2E_TWO_SEQUENTIAL_PIPELINE_TIMEOUT)
 async def test_pipeline_resume_from_checkpoint(e2e_data_dir: Path):
     """E2E: Pipeline can resume from checkpoint.
 

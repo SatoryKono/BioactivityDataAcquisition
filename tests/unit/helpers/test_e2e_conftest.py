@@ -8,7 +8,6 @@ from pathlib import Path
 import pytest
 
 from tests.e2e import conftest as e2e_conftest
-
 pytestmark = pytest.mark.unit
 
 
@@ -289,6 +288,46 @@ def test_windows_e2e_timeout_exceeds_inner_merge_budget() -> None:
 
     assert outer_timeout > inner_timeout
     assert inner_timeout == 180
+
+
+def test_windows_two_pipeline_timeout_exceeds_single_run_budget() -> None:
+    """Sequential multi-pipeline E2E must outlive one full Silver write envelope."""
+    inner_timeout = e2e_conftest._resolve_e2e_merge_execution_timeout_seconds(
+        platform="win32"
+    )
+    two_pipeline_timeout = (
+        e2e_conftest._resolve_e2e_sequential_pipeline_timeout_seconds(
+            pipeline_count=2,
+            platform="win32",
+        )
+    )
+
+    assert two_pipeline_timeout > inner_timeout
+    assert two_pipeline_timeout == 540
+
+
+def test_exported_two_pipeline_timeout_matches_resolver() -> None:
+    """Exported timeout constant should follow the active platform resolver."""
+    assert (
+        e2e_conftest.E2E_TWO_SEQUENTIAL_PIPELINE_TIMEOUT
+        == e2e_conftest._resolve_e2e_sequential_pipeline_timeout_seconds(
+            pipeline_count=2
+        )
+    )
+
+
+def test_linux_two_pipeline_timeout_exceeds_default_single_run_budget() -> None:
+    """Linux sequential multi-pipeline timeout should scale with pipeline count."""
+    default_timeout = e2e_conftest._resolve_e2e_default_timeout(platform="linux")
+    two_pipeline_timeout = (
+        e2e_conftest._resolve_e2e_sequential_pipeline_timeout_seconds(
+            pipeline_count=2,
+            platform="linux",
+        )
+    )
+
+    assert two_pipeline_timeout > default_timeout
+    assert two_pipeline_timeout == 360
 
 
 def test_windows_pipeline_matrix_timeout_stays_between_inner_and_outer() -> None:

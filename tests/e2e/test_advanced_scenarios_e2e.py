@@ -25,6 +25,8 @@ from tests.helpers.deterministic_ids import (
     deterministic_uuid_from_callsite,
 )
 from .conftest import (
+    E2E_THREE_SEQUENTIAL_PIPELINE_TIMEOUT,
+    E2E_TWO_SEQUENTIAL_PIPELINE_TIMEOUT,
     _resolve_silver_table_path,
     assert_bronze_files_exist,
     assert_silver_table_has_records,
@@ -485,7 +487,7 @@ def _make_threadless_quarantine_harness_adapter(
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-@pytest.mark.timeout(180)  # Two sequential pipelines (ChEMBL + UniProt) need more time
+@pytest.mark.timeout(E2E_TWO_SEQUENTIAL_PIPELINE_TIMEOUT)
 async def test_chembl_and_uniprot_sequential_run(e2e_data_dir: Path):
     """E2E: ChEMBL and UniProt pipelines can run sequentially.
 
@@ -528,7 +530,7 @@ async def test_chembl_and_uniprot_sequential_run(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-@pytest.mark.timeout(180)  # Three sequential pipelines need more time
+@pytest.mark.timeout(E2E_THREE_SEQUENTIAL_PIPELINE_TIMEOUT)
 async def test_multiple_chembl_entities_parallel_safe(e2e_data_dir: Path):
     """E2E: Multiple ChEMBL entity pipelines can run without conflicts.
 
@@ -601,9 +603,7 @@ async def test_pipeline_resumes_from_checkpoint(e2e_data_dir: Path):
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-@pytest.mark.timeout(
-    300
-)  # Two pipeline runs plus cold observability imports need more time
+@pytest.mark.timeout(E2E_TWO_SEQUENTIAL_PIPELINE_TIMEOUT)
 async def test_failed_run_preserves_partial_data(
     e2e_data_dir: Path,
 ):
@@ -633,7 +633,7 @@ async def test_failed_run_preserves_partial_data(
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-@pytest.mark.timeout(120)  # Two pipeline runs need more time
+@pytest.mark.timeout(E2E_TWO_SEQUENTIAL_PIPELINE_TIMEOUT)
 async def test_rebuild_clears_existing_data(
     e2e_data_dir: Path,
 ):
@@ -666,7 +666,7 @@ async def test_rebuild_clears_existing_data(
 @pytest.mark.e2e
 @pytest.mark.vcr
 @pytest.mark.asyncio
-@pytest.mark.timeout(120)  # Two pipeline runs need more time
+@pytest.mark.timeout(E2E_TWO_SEQUENTIAL_PIPELINE_TIMEOUT)
 async def test_backfill_clears_silver_only(
     e2e_data_dir: Path,
 ):
