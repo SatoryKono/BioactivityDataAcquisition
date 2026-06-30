@@ -2,22 +2,40 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: main
-refreshed_at_utc: '2026-06-30T09:12:47.196108+00:00'
+refreshed_at_utc: '2026-06-30T13:06:54.324571+00:00'
 refresh_status: captured
-source_commit: 32f8274ca6df6944cb0a33dba5c7b2f1edbf0b4a
-source_run_id: origin-main-telemetry-20260630
+source_commit: 51979de96630ce1eff88b6a2b82df04a5c9be157
+source_run_id: local-issues-5710-5711-20260630
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
 artifact_inputs:
   coverage_xml: reports/coverage/coverage.xml
   coverage_log: .
-  coverage_percent_fallback: 92.81
+  coverage_percent_fallback: null
   slowest_tests_json: reports/test-telemetry/slowest-tests.json
-  junit_inputs: []
+  junit_inputs:
+  - reports/quality/test-runs/junit/issues-5710-5711/S1-domain-core.xml
+  - reports/quality/test-runs/junit/issues-5710-5711/S1-domain-services.xml
+  - reports/quality/test-runs/junit/issues-5710-5711/S2-comp-iface.xml
+  - reports/quality/test-runs/junit/issues-5710-5711/S3-app-foundation.xml
+  - reports/quality/test-runs/junit/issues-5710-5711/S4-app-services.xml
+  - reports/quality/test-runs/junit/issues-5710-5711/S5-infra-adapters.xml
+  - reports/quality/test-runs/junit/issues-5710-5711/S6-crosscutting-unit.xml
+  - reports/quality/test-runs/junit/issues-5710-5711/S7-crosscutting-architecture-a.xml
+  - reports/quality/test-runs/junit/issues-5710-5711/S7-crosscutting-architecture-a2.xml
+  - reports/quality/test-runs/junit/issues-5710-5711/S7-crosscutting-architecture-a3.xml
+  - reports/quality/test-runs/junit/issues-5710-5711/S7-crosscutting-architecture-b.xml
+  - reports/quality/test-runs/junit/issues-5710-5711/S7-crosscutting-architecture-c.xml
+  - reports/quality/test-runs/junit/issues-5710-5711/S7-crosscutting-architecture-d.xml
+  - reports/quality/test-runs/junit/issues-5710-5711/S8-crosscutting-governance.xml
+  - reports/quality/test-runs/junit/issues-5710-5711/coverage-tail-owner-addendum.xml
+  - reports/quality/test-runs/junit/issues-5710-5711/export-execution-addendum.xml
+  - reports/quality/test-runs/junit/issues-5710-5711/infrastructure-owner-addendum.xml
+  - reports/quality/test-runs/junit/issues-5710-5711/repo-backed-storage-addendum.xml
 coverage:
   threshold_percent: 85.0
-  actual_percent: 92.81
+  actual_percent: 95.61
   threshold_satisfied: true
 duration_telemetry:
   total_cases: 8507

@@ -106,15 +106,15 @@
       "max": 0
     },
     "full_app_duplicate_clusters": {
-      "current": 68,
+      "current": 65,
       "max": 68
     },
     "adapter_duplicate_clusters": {
-      "current": 55,
+      "current": 54,
       "max": 55
     },
     "pipeline_duplicate_clusters": {
-      "current": 13,
+      "current": 11,
       "max": 13
     },
     "compatibility_test_files": {
@@ -151,9 +151,9 @@
         "module_coverage_inventory": false,
         "remote_main_baseline": false
       },
-      "module_coverage_source_tree_sha256": "2430fafb9dd04a6adb5db01e846f22e88d1ce6f34e14fec94c0c239a0a7da09b",
-      "architecture_quality_score": 8.46,
-      "remote_main_baseline_fingerprint": "9ccb5a9761a4c97a98c9fd9b7f51c75c60632cf3cf996413ecde1df856d6af8c"
+      "module_coverage_source_tree_sha256": "d6b4c854568e0251bcd60cae25b9babaafd5de9c51ddc6800f773cd21b79f50e",
+      "architecture_quality_score": 8.47,
+      "remote_main_baseline_fingerprint": "87a870bca59cbc8d1159f709eee377214f2f1a3479cc79d10d73f9e2e84ed8cc"
     },
     "5708": {
       "shared_delegation_helper": "src/bioetl/infrastructure/adapters/decorators/_data_source_delegation.py",
@@ -161,7 +161,7 @@
         "src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py",
         "src/bioetl/infrastructure/adapters/decorators/retry.py"
       ],
-      "adapter_duplicate_clusters": 55,
+      "adapter_duplicate_clusters": 54,
       "adapter_duplicate_clusters_no_growth_max": 55,
       "bounded_actionability_categories": [
         "adapter_resilience_or_contract_template",
@@ -170,15 +170,15 @@
     },
     "5709": {
       "opening_pipeline_duplicate_clusters": 15,
-      "pipeline_duplicate_clusters": 13,
+      "pipeline_duplicate_clusters": 11,
       "pipeline_duplicate_clusters_no_growth_max": 13,
       "dominant_actionability_category": "pipeline_transformer_contract_pattern",
       "decision": "reduced_shared_uniprot_comment_annotation_output_keys"
     },
     "5710": {
-      "telemetry_source_commit": "32f8274ca6df6944cb0a33dba5c7b2f1edbf0b4a",
-      "telemetry_source_run_id": "origin-main-telemetry-20260630",
-      "refreshed_at_utc": "2026-06-30T09:12:47.196108+00:00",
+      "telemetry_source_commit": "51979de96630ce1eff88b6a2b82df04a5c9be157",
+      "telemetry_source_run_id": "local-issues-5710-5711-20260630",
+      "refreshed_at_utc": "2026-06-30T13:06:54.324571+00:00",
       "architecture_runner_backend": "run_pytest_sharded",
       "slow_governance_lane": "S7-architecture-slow-governance",
       "cache_probe": {
@@ -193,7 +193,10 @@
       "unmeasured_module_count": 0,
       "uncovered_module_count": 0,
       "no_executable_line_modules": 0,
-      "source_tree_sha256": "2430fafb9dd04a6adb5db01e846f22e88d1ce6f34e14fec94c0c239a0a7da09b"
+      "source_tree_sha256": "d6b4c854568e0251bcd60cae25b9babaafd5de9c51ddc6800f773cd21b79f50e",
+      "under70_module_count_before": 18,
+      "under70_module_count_after": 13,
+      "under85_module_count_after": 85
     },
     "5712": {
       "retained_entrypoint_count": 12,
