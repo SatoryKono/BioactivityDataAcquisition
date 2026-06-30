@@ -88,6 +88,29 @@ def _write_canonical_test_layout(tmp_path: Path) -> tuple[Path, Path, Path, Path
     (contracts_dir / "selector-contracts.yaml").write_text(
         yaml.safe_dump(selector_contract, sort_keys=False), encoding="utf-8"
     )
+    dashboard_inventory = {
+        "dashboards": [
+            {
+                "uid": "bioetl-overview-v2",
+                "title": "Overview",
+                "family": "primary",
+                "navigation_id": 1,
+                "data_sources": ["Prometheus"],
+                "panel_count": 1,
+                "key_panels": [
+                    {
+                        "id": 1000,
+                        "title": "Review Dashboard Navigation",
+                        "type": "text",
+                    }
+                ],
+                "selector_variables": ["pipeline", "run_type"],
+            }
+        ]
+    }
+    (contracts_dir / "dashboard-inventory.yaml").write_text(
+        yaml.safe_dump(dashboard_inventory, sort_keys=False), encoding="utf-8"
+    )
     provisioning = {
         "apiVersion": 1,
         "providers": [
@@ -149,6 +172,11 @@ def test_compare_deployed_dashboards_ignores_benign_export_noise(
     monkeypatch.setattr(inventory, "MONITORING_INDEX", docs_dir / "monitoring-index.md")
     monkeypatch.setattr(
         inventory, "SELECTOR_CONTRACT", contracts_dir / "selector-contracts.yaml"
+    )
+    monkeypatch.setattr(
+        inventory,
+        "DASHBOARD_INVENTORY_CONTRACT",
+        contracts_dir / "dashboard-inventory.yaml",
     )
     monkeypatch.setattr(inventory, "PROVISIONING_CONFIG", provisioning_path)
 
@@ -224,6 +252,11 @@ def test_build_health_summary_marks_noncanonical_root_config(
     monkeypatch.setattr(
         inventory, "SELECTOR_CONTRACT", contracts_dir / "selector-contracts.yaml"
     )
+    monkeypatch.setattr(
+        inventory,
+        "DASHBOARD_INVENTORY_CONTRACT",
+        contracts_dir / "dashboard-inventory.yaml",
+    )
     monkeypatch.setattr(inventory, "PROVISIONING_CONFIG", provisioning_path)
 
     dashboard_path = dashboards_dir / "bioetl-overview-v2.json"
@@ -256,6 +289,43 @@ def test_scripts_engineering_qa_router_exposes_report_dashboard_inventory_comman
     spec = qa_router.COMMAND_SPECS["report-dashboard-inventory"]
     assert spec.runner == "module"
     assert spec.target == "scripts.engineering.qa.report_dashboard_inventory"
+
+
+def test_check_parity_detects_dashboard_inventory_key_panel_drift(
+    tmp_path: Path, monkeypatch
+) -> None:
+    dashboards_dir, docs_dir, contracts_dir, provisioning_path = (
+        _write_canonical_test_layout(tmp_path)
+    )
+    monkeypatch.setattr(inventory, "DASHBOARDS_DIR", dashboards_dir)
+    monkeypatch.setattr(inventory, "VARIABLES_GUIDE", docs_dir / "variables-guide.md")
+    monkeypatch.setattr(inventory, "MONITORING_INDEX", docs_dir / "monitoring-index.md")
+    monkeypatch.setattr(
+        inventory, "SELECTOR_CONTRACT", contracts_dir / "selector-contracts.yaml"
+    )
+    monkeypatch.setattr(
+        inventory,
+        "DASHBOARD_INVENTORY_CONTRACT",
+        contracts_dir / "dashboard-inventory.yaml",
+    )
+    monkeypatch.setattr(inventory, "PROVISIONING_CONFIG", provisioning_path)
+
+    dashboard_inventory = yaml.safe_load(
+        (contracts_dir / "dashboard-inventory.yaml").read_text(encoding="utf-8")
+    )
+    dashboard_inventory["dashboards"][0]["key_panels"][0]["type"] = "stat"
+    (contracts_dir / "dashboard-inventory.yaml").write_text(
+        yaml.safe_dump(dashboard_inventory, sort_keys=False), encoding="utf-8"
+    )
+
+    errors, per_dashboard = inventory._check_parity(inventory._load_inventory())
+
+    assert any(
+        "dashboard-inventory: bioetl-overview-v2 key_panel id=1000 type mismatch"
+        in error
+        for error in errors
+    )
+    assert "bioetl-overview-v2" in per_dashboard
 
 
 def test_qa_cli_report_dashboard_inventory_help_mentions_health_and_deployed_dir() -> (

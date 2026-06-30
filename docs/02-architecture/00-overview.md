@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.1.0
+Version: 1.1.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-17'
+  Last verified: '2026-06-30'
 
 ______________________________________________________________________
 
 # Architecture Overview
 
-*Synced with RULES.md v6.1.3 (2026-06-17)*
+*Synced with RULES.md v6.1.4 (2026-06-25)*
 
 ## Quick Navigation
 

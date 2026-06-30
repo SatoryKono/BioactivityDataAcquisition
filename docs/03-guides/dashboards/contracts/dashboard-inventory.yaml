@@ -3,8 +3,8 @@
 # Machine-readable mapping of shipped dashboards to their panels, data sources,
 # and contract metadata. This file enables drift detection and audibility.
 #
-# Version: 1.0.0
-# Last updated: 2026-06-22
+# Version: 1.0.1
+# Last updated: 2026-06-30
 # Source: grafana/dashboards/*.json
 #
 # Schema:
@@ -38,15 +38,15 @@ dashboards:
         description: "Current replay safety state for selected pipeline"
       - id: 130
         title: "Track: Replay / Resume Blockers in Range"
-        type: table
+        type: stat
         description: "Replay and resume blockers in selected time range"
       - id: 9402
         title: "ID"
-        type: stat
+        type: table
         description: "Shared shell panel for run/manifest identity"
       - id: 9403
         title: "Processed Records"
-        type: stat
+        type: table
         description: "Shared shell panel for Bronze/Silver/Gold accounting"
     selector_variables:
       - workflow
@@ -69,7 +69,7 @@ dashboards:
         description: "Current system status summary"
       - id: 215
         title: "First Action"
-        type: text
+        type: table
         description: "Recommended first action for current state"
       - id: 1000
         title: "Navigation"
@@ -89,14 +89,18 @@ dashboards:
       - Prometheus
     panel_count: 42
     key_panels:
-      - id: 205
+      - id: 9100
         title: "Runtime Status"
         type: stat
         description: "Current runtime health status"
+      - id: 205
+        title: "Failed Runs"
+        type: stat
+        description: "Failed runs in the selected range"
       - id: 237
-        title: "Monitor: GLOBAL Provider Alert Conditions"
-        type: table
-        description: "Provider alert conditions across all pipelines"
+        title: "Worst Stage Lag"
+        type: stat
+        description: "Worst observed stage lag in the selected range"
     selector_variables:
       - workflow
       - pipeline
@@ -113,11 +117,11 @@ dashboards:
       - Prometheus
     panel_count: 29
     key_panels:
-      - id: 1
+      - id: 9101
         title: "Monitor GLOBAL Provider Severity Matrix"
         type: table
         description: "Provider health severity matrix"
-      - id: 2
+      - id: 9103
         title: "Inspect Provider Top Causes"
         type: table
         description: "Top causes of provider failures"
@@ -165,13 +169,13 @@ dashboards:
       - Prometheus
     panel_count: 16
     key_panels:
-      - id: 1
-        title: "Workflow Status"
-        type: stat
-        description: "Current workflow execution status"
       - id: 2
-        title: "Workflow Step Outcomes"
-        type: table
+        title: "Failed Workflow Runs / Range"
+        type: stat
+        description: "Failed workflow runs in the selected range"
+      - id: 5
+        title: "Step Outcomes by Kind / Step Status / Range"
+        type: timeseries
         description: "Step-by-step workflow execution results"
     selector_variables:
       - workflow
@@ -197,8 +201,8 @@ dashboards:
       - HTTP (quarantine backend)
     panel_count: 14
     key_panels:
-      - id: 1
-        title: "Main records table"
+      - id: 2
+        title: "Monitor Filtered Records Total"
         type: table
         description: "Quarantined/silver-rejected records table"
     selector_variables:
@@ -228,8 +232,8 @@ dashboards:
 
 # Contract metadata
 contract_metadata:
-  version: "1.0.0"
-  last_updated: "2026-06-22"
+  version: "1.0.1"
+  last_updated: "2026-06-30"
   source_files:
     - "grafana/dashboards/bioetl-control-plane-v1.json"
     - "grafana/dashboards/bioetl-overview-v2.json"

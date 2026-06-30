@@ -45,10 +45,12 @@ not_in_nav: |
     00-project/ai/skills/global/.system/**
     00-project/ai/skills/local/**/references/**
     00-project/ai/skills/local/grafana-dashboard-extension/SKILL.md
+    00-project/ai/skills/local/grafana-dashboard-render/SKILL.md
     00-project/ai/skills/local/prometheus-alert-rule-editor/SKILL.md
     00-project/ai/skills/local/prometheus-metric-discovery/SKILL.md
     00-project/ai/skills/local/prometheus-query-debugger/SKILL.md
     00-project/ai/skills/local/prometheus-rule-testing/SKILL.md
+    00-project/ai/skills/local/py-reproducibility-audit/SKILL.md
     02-architecture/adr-registry/README.md
     04-reference/templates/adr-template.md
     04-reference/templates/contract-spec-template.md

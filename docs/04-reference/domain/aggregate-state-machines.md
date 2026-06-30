@@ -93,6 +93,9 @@ Stage-level evidence is also recorded while the aggregate remains `RUNNING`:
 - `record_stage_success(...)` appends a `StageResult` with `StageStatus.SUCCESS`
 - `record_stage_failure(...)` appends a `StageResult` with `StageStatus.FAILED`
   and moves the aggregate to terminal `FAILED`
+- `StageStatus.SKIPPED` is public and exported, but current aggregate mutation
+  methods do not produce it; skipped workflow/composite dependency semantics are
+  represented outside the `PipelineRun` aggregate stage-completion transition.
 
 ### Guard conditions
 
@@ -101,7 +104,8 @@ Stage-level evidence is also recorded while the aggregate remains `RUNNING`:
 - `complete(...)` additionally requires:
   - no failed stages;
   - at least one recorded stage;
-  - every recorded stage in `StageStatus.SUCCESS`.
+  - every recorded aggregate stage in `StageStatus.SUCCESS` (`SKIPPED` is not a
+    successful aggregate completion status).
 - `COMPLETED`, `FAILED`, and `SHUTDOWN` are terminal by
   `PipelineRunState.is_terminal()`.
 

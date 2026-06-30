@@ -1,20 +1,20 @@
 ______________________________________________________________________
 
-Version: 1.0.1
+Version: 1.0.2
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-19'
+  Last verified: '2026-06-30'
 
 ______________________________________________________________________
 
 # Current State Inventory
 
 This inventory is synchronized against the current `main` worktree on
-2026-06-19. Code, configs, domain contracts, ADRs, and tests are the source of
+2026-06-30. Code, configs, domain contracts, ADRs, and tests are the source of
 truth; existing documentation is evidence only when it matches those sources.
 
 ## Scope
@@ -35,24 +35,24 @@ Current committed quality artifacts agree on the following architecture evidence
 
 | Artifact | Current value | Source |
 | --- | ---: | --- |
-| Architecture quality score | `7.98` (`satisfactory_system_refactoring_required`) | `reports/quality/architecture-quality-scorecard.json` |
+| Architecture quality score | `8.46` (`satisfactory_system_refactoring_required`) | `reports/quality/debt-governance-gates.json`, `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2172` | `reports/quality/module-coverage-inventory.json` |
-| Unmeasured / uncovered modules | `1` / `0` | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2190` | `reports/quality/module-coverage-inventory.json` |
+| Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
-| Debt-governance gates | `27` pass, `1` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
-| Full-app duplication hotspot baseline | `109` clusters (`adapters=72`, `pipelines=22`, `bootstrap=2`, `CLI=13`) | `reports/quality/full-app-duplication-baseline.json` |
+| Debt-governance gates | `29` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
+| Full-app duplication hotspot baseline | `68` clusters | `reports/quality/full-app-duplication-baseline.json` |
 
 Generated artifact drift is currently clear (`stale_artifacts` are all false in
 `reports/quality/debt-governance-gates.json`). The debt gate rollup now includes
 `module_coverage_source_tree_hash_current`, so stale
 `reports/quality/module-coverage-inventory.json` source-tree hashes are fail-fast
-release-gate failures rather than hidden warning-only coverage drift. The single
-current warning is `module_coverage_unmeasured_modules` for
-`src/bioetl/domain/aggregates/_batch_attrs.py`. Read-only audit evidence should
-use `python -m scripts.engineering.qa run-architecture-audit-read-only`, which
-runs check-only architecture diagnostics and fails if tracked governance
-surfaces mutate.
+release-gate failures rather than hidden warning-only coverage drift. Module
+coverage currently reports no unmeasured or uncovered source modules. Read-only
+audit evidence should use
+`python -m scripts.engineering.qa run-architecture-audit-read-only`, which runs
+check-only architecture diagnostics and fails if tracked governance surfaces
+mutate.
 
 ## Workflow Inventory
 
@@ -270,6 +270,7 @@ by storage technology. Current owner boundaries:
 | Runtime Gold Pandera strictness had no production-path non-strict guard | `tests/architecture/test_gold_validator_strict_runtime_paths.py` scans `src/bioetl` for `PanderaGoldValidator(..., strict=False)` and `ContractAwareGoldValidator(..., strict=False)`. | `src/bioetl/infrastructure/storage/silver/merged_operations.py`; `src/bioetl/infrastructure/validation/pandera_validator.py`. | Replaced the Silver merged-write non-strict Gold validator with `PanderaSilverValidator(strict=False)` and added the runtime guard. |
 | Quarantine payload immutability evidence stopped at aggregate/mock level | `tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineUpdateStatus::test_update_status_preserves_persisted_payload_and_hash` writes a real Delta table, updates status, and checks persisted `payload`, `payload_hash`, and `metadata`. | `src/bioetl/infrastructure/quarantine/unified.py`. | Added persisted immutability coverage and a read fallback for Delta string-view filter failures after status updates. |
 | Test governance assertless acceptance tests were implicit no-exception checks | `reports/quality/test-governance-current.json` now reports `assertless_total_candidates=497` with zero budget violations. | Contract schema tests under `tests/contract/**`. | Added observable assertions to selected contract acceptance tests, reducing the assertless candidate count from `509` to `497`. |
+| Current-state architecture evidence table lagged live quality reports | `reports/quality/debt-governance-gates.json` reports score `8.46`, `29` passing gates, and no warnings; `reports/quality/module-coverage-inventory.json` reports `2190` source modules with zero unmeasured/uncovered modules; `reports/quality/full-app-duplication-baseline.json` reports `68` clusters. | `reports/quality/*.json` generated on 2026-06-30. | Refreshed the current-state table and verification date from live report artifacts. |
 
 ## Open Questions
 
