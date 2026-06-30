@@ -97,12 +97,48 @@ def _resolve_e2e_plain_write_process_isolation(
     return platform == "win32"
 
 
+def _resolve_e2e_sequential_pipeline_timeout_seconds(
+    *,
+    pipeline_count: int,
+    platform: str = sys.platform,
+) -> int:
+    """Return the pytest timeout budget for tests that run pipelines sequentially.
+
+    Each sequential run may consume bootstrap/bronze staging time plus the full
+    inner Silver Delta budget. The outer pytest timeout must stay above that
+    per-run envelope so Windows E2E failures surface as governed storage errors
+    instead of watchdog aborts during a child-process Delta write.
+    """
+    if pipeline_count < 1:
+        msg = "pipeline_count must be >= 1"
+        raise ValueError(msg)
+
+    default_timeout = _resolve_e2e_default_timeout(platform=platform)
+    inner_merge_timeout = _resolve_e2e_merge_execution_timeout_seconds(
+        platform=platform
+    )
+    # Bootstrap, Bronze staging, and metadata finalization can consume tens of
+    # seconds before the bounded Silver write starts.
+    per_pipeline_overhead_seconds = 90
+    sequential_budget = pipeline_count * (
+        inner_merge_timeout + per_pipeline_overhead_seconds
+    )
+    single_pipeline_floor = max(default_timeout, inner_merge_timeout + 30)
+    return max(sequential_budget, single_pipeline_floor)
+
+
 # Default timeout for E2E tests (seconds).
 # E2E tests run full pipelines with HTTP calls, Delta Lake operations, and
 # PyArrow imports. Keep the outer pytest budget above the inner bounded Delta
 # timeout so storage failures raise deterministic domain errors before the test
 # watchdog interrupts the event loop.
 E2E_DEFAULT_TIMEOUT = _resolve_e2e_default_timeout()
+E2E_TWO_SEQUENTIAL_PIPELINE_TIMEOUT = (
+    _resolve_e2e_sequential_pipeline_timeout_seconds(pipeline_count=2)
+)
+E2E_THREE_SEQUENTIAL_PIPELINE_TIMEOUT = (
+    _resolve_e2e_sequential_pipeline_timeout_seconds(pipeline_count=3)
+)
 _TRANSIENT_EXTERNAL_ERROR_MARKERS: tuple[str, ...] = (
     "429",
     "500",
