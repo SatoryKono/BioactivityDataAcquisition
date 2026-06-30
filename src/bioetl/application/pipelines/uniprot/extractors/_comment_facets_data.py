@@ -75,6 +75,36 @@ _COMMENT_OUTPUT_KEYS: tuple[str, ...] = (
     "reaction_ec_numbers",
 )
 
+_COMMENT_ANNOTATION_OUTPUT_KEYS: tuple[str, ...] = (
+    "function_comment",
+    "catalytic_activity",
+    "activity_regulation",
+    "subunit",
+    "pathway",
+    "subcellular_location",
+    "tissue_specificity",
+    "alternative_products",
+    "alternative_products_raw_json",
+    "alternative_products_canonical_json",
+    "disease_involvement",
+    "similarity_comment",
+    "caution",
+    "cofactors",
+    "cofactors_raw_json",
+    "cofactors_canonical_json",
+    "biophysicochemical_properties",
+    "biophysicochemical_properties_raw_json",
+    "biophysicochemical_properties_canonical_json",
+    "induction",
+    "isoform_names",
+    "isoform_ids",
+    "isoform_synonyms",
+    "reactions",
+    "reactions_raw_json",
+    "reactions_canonical_json",
+    "reaction_ec_numbers",
+)
+
 
 def _normalize_comments(comments: list[JsonDict] | None) -> list[JsonDict] | None:
     """Validate and normalize comments input."""
@@ -133,6 +163,7 @@ def _serialize_comment_type_payload(
 
 
 __all__ = [
+    "_COMMENT_ANNOTATION_OUTPUT_KEYS",
     "_COMMENT_OUTPUT_KEYS",
     "_ISOFORM_SECTION_NORMALIZERS",
     "_TEXT_COMMENT_FIELD_MAP",

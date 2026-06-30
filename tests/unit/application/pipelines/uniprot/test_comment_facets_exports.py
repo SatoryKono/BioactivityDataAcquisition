@@ -5,6 +5,9 @@ from __future__ import annotations
 import pytest
 
 from bioetl.application.pipelines.uniprot.extractors import _comment_facets
+from bioetl.application.pipelines.uniprot.extractors._comment_facets_data import (
+    _COMMENT_ANNOTATION_OUTPUT_KEYS,
+)
 from bioetl.application.pipelines.uniprot.extractors._comment_facets_all import (
     extract_all_comments,
     extract_all_comments_raw,
@@ -62,3 +65,11 @@ def test_comment_facets_barrel_preserves_split_helper_exports() -> None:
         "extract_subcellular_locations",
         "extract_text_values",
     }
+
+
+def test_comment_annotation_keys_are_extractor_outputs() -> None:
+    """Transformer annotation keys must stay backed by comment extractor output."""
+    comment_data = extract_all_comments(None)
+
+    assert set(_COMMENT_ANNOTATION_OUTPUT_KEYS) <= set(comment_data)
+    assert "isoform_count" not in _COMMENT_ANNOTATION_OUTPUT_KEYS

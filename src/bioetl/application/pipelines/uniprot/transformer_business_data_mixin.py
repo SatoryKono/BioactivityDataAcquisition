@@ -13,6 +13,9 @@ from bioetl.application.pipelines.uniprot.extractors import (
     GeneExtractor,
     TaxonomyExtractor,
 )
+from bioetl.application.pipelines.uniprot.extractors._comment_facets_data import (
+    _COMMENT_ANNOTATION_OUTPUT_KEYS,
+)
 from bioetl.domain.types import GoldRecord
 
 if TYPE_CHECKING:
@@ -179,36 +182,7 @@ class UniProtBusinessDataMixin:
         comment_data: dict[str, str | int | None],
     ) -> None:
         """Add comment-derived fields from precomputed extractor output."""
-        comment_fields: tuple[str, ...] = (
-            "function_comment",
-            "catalytic_activity",
-            "activity_regulation",
-            "subunit",
-            "pathway",
-            "subcellular_location",
-            "tissue_specificity",
-            "alternative_products",
-            "alternative_products_raw_json",
-            "alternative_products_canonical_json",
-            "disease_involvement",
-            "similarity_comment",
-            "caution",
-            "cofactors",
-            "cofactors_raw_json",
-            "cofactors_canonical_json",
-            "biophysicochemical_properties",
-            "biophysicochemical_properties_raw_json",
-            "biophysicochemical_properties_canonical_json",
-            "induction",
-            "isoform_names",
-            "isoform_ids",
-            "isoform_synonyms",
-            "reactions",
-            "reactions_raw_json",
-            "reactions_canonical_json",
-            "reaction_ec_numbers",
-        )
-        for field_name in comment_fields:
+        for field_name in _COMMENT_ANNOTATION_OUTPUT_KEYS:
             data[field_name] = comment_data.get(field_name)
 
     def _add_cross_references(self, record: BronzeRecord, data: GoldRecord) -> None:

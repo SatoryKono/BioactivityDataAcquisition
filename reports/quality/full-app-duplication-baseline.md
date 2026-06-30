@@ -2,8 +2,8 @@
 
 - mode: fail-fast
 - targets: 4
-- total_duplicate_clusters: 70
-- max_duplicate_clusters: 70
+- total_duplicate_clusters: 68
+- max_duplicate_clusters: 69
 
 > Interpretation note: this is a visibility baseline. `R0801` can over-report
 > around facades, export barrels, and compatibility shims, so use it as
@@ -13,7 +13,7 @@
 | --- | ---: |
 | `src/bioetl/interfaces/cli` | 0 |
 | `src/bioetl/infrastructure/adapters` | 55 |
-| `src/bioetl/application/pipelines` | 15 |
+| `src/bioetl/application/pipelines` | 13 |
 | `src/bioetl/composition/bootstrap` | 0 |
 
 ## src/bioetl/interfaces/cli
@@ -61,19 +61,19 @@
 
 ## src/bioetl/application/pipelines
 
-- duplicate clusters: 15
+- duplicate clusters: 13
 
 | Actionability category | Duplicate clusters |
 | --- | ---: |
-| `pipeline_transformer_contract_pattern` | 15 |
+| `pipeline_transformer_contract_pattern` | 13 |
 
 | Top recurring module pairs | Duplicate clusters |
 | --- | ---: |
-| `bioetl.application.pipelines.uniprot.extractors._comment_facets_data` <-> `bioetl.application.pipelines.uniprot.transformer_business_data_mixin` | 2 |
 | `bioetl.application.pipelines.chembl._activity_transformer_maps` <-> `bioetl.application.pipelines.chembl.assay_parameters_transformer` | 1 |
 | `bioetl.application.pipelines.chembl.base_chembl_transformer` <-> `bioetl.application.pipelines.crossref.transformer` | 1 |
 | `bioetl.application.pipelines.crossref.__init__` <-> `bioetl.application.pipelines.crossref.extractors` | 1 |
 | `bioetl.application.pipelines.crossref.transformer` <-> `bioetl.application.pipelines.openalex.transformer` | 1 |
+| `bioetl.application.pipelines.openalex._extractors_authors` <-> `bioetl.application.pipelines.openalex.extractors` | 1 |
 
 | Cluster path | Compared modules |
 | --- | --- |
@@ -84,13 +84,13 @@
 | `src/bioetl/application/pipelines/uniprot/extractors/__init__.py:1` | `bioetl.application.pipelines.semanticscholar.transformer`[104:121], `bioetl.application.pipelines.uniprot.idmapping_transformer`[95:127] |
 | `src/bioetl/application/pipelines/uniprot/extractors/__init__.py:1` | `bioetl.application.pipelines.uniprot.extractors._comment_facets`[26:37], `bioetl.application.pipelines.uniprot.extractors._comment_facets_extractors`[139:150] |
 | `src/bioetl/application/pipelines/uniprot/extractors/__init__.py:1` | `bioetl.application.pipelines.chembl.base_chembl_transformer`[109:120], `bioetl.application.pipelines.crossref.transformer`[92:104] |
-| `src/bioetl/application/pipelines/uniprot/extractors/__init__.py:1` | `bioetl.application.pipelines.uniprot.extractors._comment_facets_data`[56:64], `bioetl.application.pipelines.uniprot.transformer_business_data_mixin`[182:190] |
 | `src/bioetl/application/pipelines/uniprot/extractors/__init__.py:1` | `bioetl.application.pipelines.chembl._activity_transformer_maps`[87:95], `bioetl.application.pipelines.chembl.assay_parameters_transformer`[35:43] |
 | `src/bioetl/application/pipelines/uniprot/extractors/__init__.py:1` | `bioetl.application.pipelines.pubmed._block_definitions_analytics`[48:55], `bioetl.application.pipelines.pubmed.transformer`[261:268] |
 | `src/bioetl/application/pipelines/uniprot/extractors/__init__.py:1` | `bioetl.application.pipelines.semanticscholar._author_extractors`[10:16], `bioetl.application.pipelines.semanticscholar.extractors`[293:299] |
 | `src/bioetl/application/pipelines/uniprot/extractors/__init__.py:1` | `bioetl.application.pipelines.openalex._extractors_authors`[182:187], `bioetl.application.pipelines.openalex.extractors`[30:35] |
+| `src/bioetl/application/pipelines/uniprot/extractors/__init__.py:1` | `bioetl.application.pipelines.openalex._extractors_publication_fields`[231:236], `bioetl.application.pipelines.openalex.extractors`[42:47] |
 
-- … truncated 3 additional clusters for brevity
+- … truncated 1 additional clusters for brevity
 
 ## src/bioetl/composition/bootstrap
 
@@ -102,7 +102,7 @@
 | Target | Duplicate clusters | Dominant actionability | Low-risk share | Recommended first wave |
 | --- | ---: | --- | ---: | --- |
 | `src/bioetl/infrastructure/adapters` | 55 | `export_facade_or_package_barrel` | 0.80 | no |
-| `src/bioetl/application/pipelines` | 15 | `pipeline_transformer_contract_pattern` | 0.00 | no |
+| `src/bioetl/application/pipelines` | 13 | `pipeline_transformer_contract_pattern` | 0.00 | no |
 | `src/bioetl/composition/bootstrap` | 0 | `n/a` | 0.00 | no |
 | `src/bioetl/interfaces/cli` | 0 | `cli_command_contract_shell` | 0.00 | no |
 

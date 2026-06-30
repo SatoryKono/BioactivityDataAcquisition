@@ -2,8 +2,8 @@
   "summary": {
     "snapshot_date": "2026-06-30",
     "targets": 4,
-    "total_duplicate_clusters": 70,
-    "total_raw_duplicate_clusters": 70,
+    "total_duplicate_clusters": 68,
+    "total_raw_duplicate_clusters": 68,
     "total_excluded_duplicate_clusters": 0
   },
   "normalization": {
@@ -25,9 +25,9 @@
     },
     {
       "target": "src/bioetl/application/pipelines",
-      "duplicate_clusters": 15,
+      "duplicate_clusters": 13,
       "dominant_actionability_category": "pipeline_transformer_contract_pattern",
-      "dominant_actionability_cluster_count": 15,
+      "dominant_actionability_cluster_count": 13,
       "low_risk_cluster_count": 0,
       "low_risk_cluster_share": 0.0,
       "recommended_first_wave": false
@@ -1068,23 +1068,16 @@
     {
       "target": "src/bioetl/application/pipelines",
       "returncode": 8,
-      "duplicate_count": 15,
-      "raw_duplicate_count": 15,
+      "duplicate_count": 13,
+      "raw_duplicate_count": 13,
       "excluded_duplicate_count": 0,
       "actionability": [
         {
           "category": "pipeline_transformer_contract_pattern",
-          "duplicate_clusters": 15
+          "duplicate_clusters": 13
         }
       ],
       "top_pairs": [
-        {
-          "modules": [
-            "bioetl.application.pipelines.uniprot.extractors._comment_facets_data",
-            "bioetl.application.pipelines.uniprot.transformer_business_data_mixin"
-          ],
-          "duplicate_clusters": 2
-        },
         {
           "modules": [
             "bioetl.application.pipelines.chembl._activity_transformer_maps",
@@ -1110,6 +1103,13 @@
           "modules": [
             "bioetl.application.pipelines.crossref.transformer",
             "bioetl.application.pipelines.openalex.transformer"
+          ],
+          "duplicate_clusters": 1
+        },
+        {
+          "modules": [
+            "bioetl.application.pipelines.openalex._extractors_authors",
+            "bioetl.application.pipelines.openalex.extractors"
           ],
           "duplicate_clusters": 1
         }
@@ -1240,23 +1240,6 @@
           "actionability_category": "pipeline_transformer_contract_pattern",
           "modules": [
             {
-              "module": "bioetl.application.pipelines.uniprot.extractors._comment_facets_data",
-              "start_line": 56,
-              "end_line": 64
-            },
-            {
-              "module": "bioetl.application.pipelines.uniprot.transformer_business_data_mixin",
-              "start_line": 182,
-              "end_line": 190
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/application/pipelines/uniprot/extractors/__init__.py",
-          "line": 1,
-          "actionability_category": "pipeline_transformer_contract_pattern",
-          "modules": [
-            {
               "module": "bioetl.application.pipelines.chembl._activity_transformer_maps",
               "start_line": 87,
               "end_line": 95
@@ -1350,23 +1333,6 @@
               "module": "bioetl.application.pipelines.semanticscholar.extractors",
               "start_line": 300,
               "end_line": 305
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/application/pipelines/uniprot/extractors/__init__.py",
-          "line": 1,
-          "actionability_category": "pipeline_transformer_contract_pattern",
-          "modules": [
-            {
-              "module": "bioetl.application.pipelines.uniprot.extractors._comment_facets_data",
-              "start_line": 69,
-              "end_line": 74
-            },
-            {
-              "module": "bioetl.application.pipelines.uniprot.transformer_business_data_mixin",
-              "start_line": 201,
-              "end_line": 206
             }
           ]
         }

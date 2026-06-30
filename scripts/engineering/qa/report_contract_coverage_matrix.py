@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config_from_root
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 CONFIGS_ROOT = PROJECT_ROOT / "configs"
@@ -321,10 +322,14 @@ def _build_row(
     pipeline = config_payload.get("pipeline")
     if not isinstance(pipeline, dict):
         pipeline = {}
+    effective_pipeline = load_pipeline_config_from_root(
+        f"{provider}_{entity}",
+        configs_root=CONFIGS_ROOT,
+    ).model_dump(mode="python")
     pipeline_name = str(pipeline.get("pipeline_name") or f"{provider}_{entity}")
     contract_ref = f"{provider}.{entity}"
-    gold_enabled = _gold_runtime_enabled(pipeline)
-    primary_key_fields = _primary_key_fields(pipeline)
+    gold_enabled = _gold_runtime_enabled(effective_pipeline)
+    primary_key_fields = _primary_key_fields(effective_pipeline)
 
     contract_yaml_path = CONFIGS_ROOT / "contracts" / provider / f"{entity}.yaml"
     contract_yaml_exists = contract_yaml_path.is_file()
