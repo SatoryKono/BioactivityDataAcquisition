@@ -1,4 +1,324 @@
 {
+  "assertless_families": {
+    "tests/architecture/test_code_metrics.py": {
+      "assertless_tests": 8,
+      "categories": {
+        "architecture_helper_guard": 8
+      }
+    },
+    "tests/architecture/test_di_constructors.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "architecture_helper_guard": 1
+      }
+    },
+    "tests/architecture/test_port_contracts_hypothesis.py": {
+      "assertless_tests": 3,
+      "categories": {
+        "architecture_helper_guard": 3
+      }
+    },
+    "tests/architecture/test_port_contracts_resilience_concurrency.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "architecture_helper_guard": 1
+      }
+    },
+    "tests/architecture/test_strict_architecture_contracts.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "architecture_helper_guard": 1
+      }
+    },
+    "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/integration/infrastructure/storage/test_delta_reader.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/application/core/test_batch_metrics.py": {
+      "assertless_tests": 3,
+      "categories": {
+        "intentional_no_exception_contract": 3
+      }
+    },
+    "tests/unit/application/core/test_batch_tracing.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/application/core/test_batch_writer_tracing_mixin.py": {
+      "assertless_tests": 2,
+      "categories": {
+        "intentional_no_exception_contract": 2
+      }
+    },
+    "tests/unit/application/core/test_dq_metrics.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/application/core/test_otel_spans.py": {
+      "assertless_tests": 2,
+      "categories": {
+        "intentional_no_exception_contract": 2
+      }
+    },
+    "tests/unit/application/core/test_postrun_cleanup_orchestrator.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/application/observability/test_pipeline_metrics.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/application/pipelines/crossref/test_crossref_transformer.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/composition/factories/storage/test_health_mixin.py": {
+      "assertless_tests": 2,
+      "categories": {
+        "intentional_no_exception_contract": 2
+      }
+    },
+    "tests/unit/composition/test_observability_contract.py": {
+      "assertless_tests": 2,
+      "categories": {
+        "intentional_no_exception_contract": 2
+      }
+    },
+    "tests/unit/domain/aggregates/test_pipeline_run_internal_mixins.py": {
+      "assertless_tests": 2,
+      "categories": {
+        "intentional_no_exception_contract": 2
+      }
+    },
+    "tests/unit/domain/aggregates/test_quarantine_entry_internal_mixins.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/domain/ports/test_noop.py": {
+      "assertless_tests": 12,
+      "categories": {
+        "intentional_no_exception_contract": 12
+      }
+    },
+    "tests/unit/domain/ports/test_noop_audit.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/domain/ports/test_protocol_stubs.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/domain/schemas/chembl/test_schemas.py": {
+      "assertless_tests": 4,
+      "categories": {
+        "intentional_no_exception_contract": 4
+      }
+    },
+    "tests/unit/domain/schemas/semanticscholar/test_publication_schema.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/infrastructure/adapters/decorators/test_circuit_breaker_decorator.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/infrastructure/adapters/test_cached_bronze_support.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/infrastructure/adapters/test_client_retry_mixin.py": {
+      "assertless_tests": 2,
+      "categories": {
+        "intentional_no_exception_contract": 2
+      }
+    },
+    "tests/unit/infrastructure/audit/test_file_audit.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/infrastructure/checkpoint/test_local_checkpoint.py": {
+      "assertless_tests": 2,
+      "categories": {
+        "intentional_no_exception_contract": 2
+      }
+    },
+    "tests/unit/infrastructure/factories/test_factories.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/infrastructure/factories/test_storage_adapter.py": {
+      "assertless_tests": 2,
+      "categories": {
+        "intentional_no_exception_contract": 2
+      }
+    },
+    "tests/unit/infrastructure/observability/test_anomaly.py": {
+      "assertless_tests": 4,
+      "categories": {
+        "intentional_no_exception_contract": 4
+      }
+    },
+    "tests/unit/infrastructure/observability/test_logging.py": {
+      "assertless_tests": 2,
+      "categories": {
+        "intentional_no_exception_contract": 2
+      }
+    },
+    "tests/unit/infrastructure/observability/test_metrics.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/infrastructure/observability/test_noop_logger.py": {
+      "assertless_tests": 5,
+      "categories": {
+        "intentional_no_exception_contract": 5
+      }
+    },
+    "tests/unit/infrastructure/observability/test_tracing.py": {
+      "assertless_tests": 2,
+      "categories": {
+        "intentional_no_exception_contract": 2
+      }
+    },
+    "tests/unit/infrastructure/observability/test_unified_logger.py": {
+      "assertless_tests": 10,
+      "categories": {
+        "intentional_no_exception_contract": 10
+      }
+    },
+    "tests/unit/infrastructure/quarantine/test_unified_quarantine.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_dq.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_lineage.py": {
+      "assertless_tests": 2,
+      "categories": {
+        "intentional_no_exception_contract": 2
+      }
+    },
+    "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_schema.py": {
+      "assertless_tests": 5,
+      "categories": {
+        "intentional_no_exception_contract": 5
+      }
+    },
+    "tests/unit/infrastructure/storage/test_bronze_writer_validation_mixin.py": {
+      "assertless_tests": 3,
+      "categories": {
+        "intentional_no_exception_contract": 3
+      }
+    },
+    "tests/unit/infrastructure/storage/test_gold_writer.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/infrastructure/storage/test_gold_writer_integration.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "intentional_no_exception_contract": 1
+      }
+    },
+    "tests/unit/infrastructure/storage/test_gold_writer_validation_mixin.py": {
+      "assertless_tests": 3,
+      "categories": {
+        "intentional_no_exception_contract": 3
+      }
+    },
+    "tests/unit/infrastructure/storage/test_metadata_writer.py": {
+      "assertless_tests": 2,
+      "categories": {
+        "intentional_no_exception_contract": 2
+      }
+    },
+    "tests/unit/infrastructure/storage/test_silver_writer_maintenance_boost.py": {
+      "assertless_tests": 2,
+      "categories": {
+        "intentional_no_exception_contract": 2
+      }
+    },
+    "tests/unit/infrastructure/storage/test_silver_writer_validation.py": {
+      "assertless_tests": 3,
+      "categories": {
+        "intentional_no_exception_contract": 3
+      }
+    },
+    "tests/unit/infrastructure/storage/test_silver_writer_validation_operations.py": {
+      "assertless_tests": 5,
+      "categories": {
+        "intentional_no_exception_contract": 5
+      }
+    },
+    "tests/unit/infrastructure/test_checkpoint.py": {
+      "assertless_tests": 2,
+      "categories": {
+        "intentional_no_exception_contract": 2
+      }
+    },
+    "tests/unit/infrastructure/test_storage_factory.py": {
+      "assertless_tests": 2,
+      "categories": {
+        "intentional_no_exception_contract": 2
+      }
+    },
+    "tests/unit/interfaces/http/test_health_server.py": {
+      "assertless_tests": 4,
+      "categories": {
+        "intentional_no_exception_contract": 4
+      }
+    },
+    "tests/unit/storage/gold/test_strict_validation.py": {
+      "assertless_tests": 4,
+      "categories": {
+        "intentional_no_exception_contract": 4
+      }
+    }
+  },
   "budget_violations": [],
   "report": {
     "assertless_candidates": [
@@ -1146,6 +1466,17 @@
     "top_duplicate_test_names": [],
     "total_test_files": 1876,
     "total_test_functions": 21309,
+    "uuid4_call_sites": 0
+  },
+  "summary": {
+    "assertless_total_candidates": 129,
+    "compatibility_test_files": 24,
+    "date_today_call_sites": 0,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
+    "intentional_no_exception_contract": 115,
+    "markerless_test_functions": 0,
+    "refined_assertless_tests": 0,
     "uuid4_call_sites": 0
   }
 }
