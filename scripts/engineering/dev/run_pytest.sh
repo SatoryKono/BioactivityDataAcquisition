@@ -425,7 +425,7 @@ _selected_is_compatibility_inventory_guard() {
     local target
     for target in "${_SELECTED_TEST_PATHS[@]}"; do
         case "$target" in
-            tests/architecture/test_compatibility_facade_inventory.py|tests/architecture/test_compatibility_telemetry_reporting.py)
+            tests/architecture/test_public_facade_inventory.py|tests/architecture/test_compatibility_telemetry_reporting.py)
                 matched=1
                 ;;
             *)

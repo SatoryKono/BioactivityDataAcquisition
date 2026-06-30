@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-30T13:49:42.871364+00:00",
+  "generated_at": "2026-06-30T14:41:46.826039+00:00",
   "summary": {
     "total_scripts": 448,
     "status_counts": {
@@ -4897,7 +4897,7 @@
       "reference_count": 1,
       "references": [
         {
-          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 51,
           "source_group": "tests",
           "text": "\"scripts/docs/_compat_shim.py\","
@@ -5065,7 +5065,7 @@
           "text": "python scripts/check_docstring_coverage.py --fail-under 95  # Custom threshold (%)"
         },
         {
-          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 15,
           "source_group": "tests",
           "text": "\"scripts/docs/check_docstring_coverage.py\","
@@ -5167,7 +5167,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1299,
+          "line": 1304,
           "source_group": "docs",
           "text": "автоматические docs-проверки (`python -m scripts.docs check-links` и"
         },
@@ -5247,7 +5247,7 @@
       "reference_count": 1,
       "references": [
         {
-          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 16,
           "source_group": "tests",
           "text": "\"scripts/docs/chembl_matrix_structural_contract.py\","
@@ -5307,7 +5307,7 @@
       "reference_count": 1,
       "references": [
         {
-          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 17,
           "source_group": "tests",
           "text": "\"scripts/docs/enrich_chembl_matrix_normalization_details.py\","
@@ -5322,7 +5322,7 @@
       "reference_count": 1,
       "references": [
         {
-          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 18,
           "source_group": "tests",
           "text": "\"scripts/docs/export_chembl_matrix_structural_contract.py\","
@@ -5337,7 +5337,7 @@
       "reference_count": 1,
       "references": [
         {
-          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 19,
           "source_group": "tests",
           "text": "\"scripts/docs/filter_chembl_matrix_rows.py\","
@@ -5352,7 +5352,7 @@
       "reference_count": 1,
       "references": [
         {
-          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 20,
           "source_group": "tests",
           "text": "\"scripts/docs/fix_doc_links_auto.py\","
@@ -5367,7 +5367,7 @@
       "reference_count": 1,
       "references": [
         {
-          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 21,
           "source_group": "tests",
           "text": "\"scripts/docs/fix_doc_links_explicit.py\","
@@ -5382,7 +5382,7 @@
       "reference_count": 1,
       "references": [
         {
-          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 22,
           "source_group": "tests",
           "text": "\"scripts/docs/fix_link_warnings.py\","
@@ -5502,7 +5502,7 @@
       "reference_count": 1,
       "references": [
         {
-          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 23,
           "source_group": "tests",
           "text": "\"scripts/docs/generate_chembl_activity_field_matrix.py\","
@@ -5517,7 +5517,7 @@
       "reference_count": 1,
       "references": [
         {
-          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 24,
           "source_group": "tests",
           "text": "\"scripts/docs/generate_chembl_matrix_dictionaries.py\","
@@ -5550,7 +5550,7 @@
           "text": "- [generate_pipeline_normalization_field_matrix.py](../../scripts/docs/generate_pipeline_normalization_field_matrix.py) already generates deterministic multi-pipeline artifacts"
         },
         {
-          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 25,
           "source_group": "tests",
           "text": "\"scripts/docs/generate_pipeline_normalization_field_matrix.py\","
@@ -5848,7 +5848,7 @@
       "reference_count": 1,
       "references": [
         {
-          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 26,
           "source_group": "tests",
           "text": "\"scripts/docs/normalize_chembl_matrix_workbook.py\","
@@ -5869,7 +5869,7 @@
           "text": "| `check-kpi`                              | `scripts/docs/checks/report_docs_kpi.py`                        | Report documentation KPI metrics                                                         "
         },
         {
-          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 27,
           "source_group": "tests",
           "text": "\"scripts/docs/report_docs_kpi.py\","
@@ -5884,7 +5884,7 @@
       "reference_count": 1,
       "references": [
         {
-          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 28,
           "source_group": "tests",
           "text": "\"scripts/docs/sentence_doc_audit.py\","
@@ -5899,7 +5899,7 @@
       "reference_count": 1,
       "references": [
         {
-          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 29,
           "source_group": "tests",
           "text": "\"scripts/docs/sync_chembl_matrix_structural_policy.py\","
@@ -5914,7 +5914,7 @@
       "reference_count": 1,
       "references": [
         {
-          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 30,
           "source_group": "tests",
           "text": "\"scripts/docs/sync_repo_identity.py\","
@@ -5929,7 +5929,7 @@
       "reference_count": 1,
       "references": [
         {
-          "path": "tests/architecture/test_docs_compat_shim_governance.py",
+          "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
           "line": 31,
           "source_group": "tests",
           "text": "\"scripts/docs/verify_docs.py\","
@@ -6145,14 +6145,14 @@
           "text": "| `scripts/engineering/ci/_compatibility_registry.py`       | Shared compatibility registry loader used by telemetry/reporting helpers      |"
         },
         {
-          "path": "tests/architecture/test_compatibility_facade_inventory.py",
-          "line": 64,
+          "path": "tests/architecture/test_curated_surface_telemetry_reporting.py",
+          "line": 35,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"_compatibility_registry.py\","
         },
         {
-          "path": "tests/architecture/test_curated_surface_telemetry_reporting.py",
-          "line": 35,
+          "path": "tests/architecture/test_public_facade_inventory.py",
+          "line": 64,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"_compatibility_registry.py\","
         }
@@ -6750,7 +6750,7 @@
       "references": [
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1643,
+          "line": 1648,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.dev run-tests cov"
         },
@@ -8782,7 +8782,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1513,
+          "line": 1518,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/generate_architecture_dependency_map.py --update`"
         },
@@ -9346,7 +9346,7 @@
       "references": [
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 277,
+          "line": 278,
           "source_group": "docs",
           "text": "| Generated artifact drift gate did not include module coverage source-tree hash freshness | `report-module-coverage --check` could fail stale source-tree evidence while `report-debt-governance-gates "
         },

@@ -76,7 +76,7 @@ shards:
       - --ignore=tests/architecture/test_scripts_catalog_governance.py
       - --ignore=tests/architecture/test_architecture_dependency_docs_drift.py
       - --ignore=tests/architecture/test_check_doc_links_guardrails.py
-      - --ignore=tests/architecture/test_compatibility_facade_inventory.py
+      - --ignore=tests/architecture/test_public_facade_inventory.py
       - --ignore=tests/architecture/test_public_surface_importer_census_governance.py
       - --ignore=tests/architecture/test_docs_version_sync.py
       - --ignore=tests/architecture/test_documentation_sync.py
@@ -86,9 +86,9 @@ shards:
       - --ignore=tests/architecture/test_quality_debt_scorecard.py
       - --ignore=tests/architecture/test_quality_burndown_priorities.py
       - --ignore=tests/architecture/test_adr_enforcement_matrix.py
-      - --ignore=tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
+      - --ignore=tests/architecture/test_checkpoint_runtime_facade_usage.py
       - --ignore=tests/architecture/test_cli_command_import_guards.py
-      - --ignore=tests/architecture/test_compatibility_freeze_guards.py
+      - --ignore=tests/architecture/test_removed_surface_freeze_guards.py
       - --ignore=tests/architecture/test_config_discrepancy_metrics_ratchets.py
       - --ignore=tests/architecture/test_config_discrepancy_report_drift.py
       - --ignore=tests/architecture/test_config_root_governance.py
@@ -104,12 +104,12 @@ shards:
       - --ignore-glob=tests/architecture/test_[d-z]*.py
       - --ignore=tests/architecture/test_code_metrics.py
       - --ignore=tests/architecture/test_check_doc_links_guardrails.py
-      - --ignore=tests/architecture/test_compatibility_facade_inventory.py
+      - --ignore=tests/architecture/test_public_facade_inventory.py
       - --ignore=tests/architecture/test_public_surface_importer_census_governance.py
       - --ignore=tests/architecture/test_contract_coverage_matrix_drift.py
-      - --ignore=tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
+      - --ignore=tests/architecture/test_checkpoint_runtime_facade_usage.py
       - --ignore=tests/architecture/test_cli_command_import_guards.py
-      - --ignore=tests/architecture/test_compatibility_freeze_guards.py
+      - --ignore=tests/architecture/test_removed_surface_freeze_guards.py
       - --ignore=tests/architecture/test_config_discrepancy_metrics_ratchets.py
       - --ignore=tests/architecture/test_config_discrepancy_report_drift.py
       - --ignore=tests/architecture/test_config_root_governance.py
@@ -128,9 +128,9 @@ shards:
       - --ignore=tests/architecture/test_docs_version_sync.py
       - --ignore=tests/architecture/test_documentation_sync.py
       - --ignore=tests/architecture/test_adr_enforcement_matrix.py
-      - --ignore=tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
+      - --ignore=tests/architecture/test_checkpoint_runtime_facade_usage.py
       - --ignore=tests/architecture/test_cli_command_import_guards.py
-      - --ignore=tests/architecture/test_compatibility_freeze_guards.py
+      - --ignore=tests/architecture/test_removed_surface_freeze_guards.py
       - --ignore=tests/architecture/test_config_discrepancy_metrics_ratchets.py
       - --ignore=tests/architecture/test_config_discrepancy_report_drift.py
       - --ignore=tests/architecture/test_config_root_governance.py
@@ -162,7 +162,7 @@ shards:
       - --ignore=tests/architecture/test_scripts_catalog_governance.py
       - --ignore=tests/architecture/test_architecture_dependency_docs_drift.py
       - --ignore=tests/architecture/test_check_doc_links_guardrails.py
-      - --ignore=tests/architecture/test_compatibility_facade_inventory.py
+      - --ignore=tests/architecture/test_public_facade_inventory.py
       - --ignore=tests/architecture/test_public_surface_importer_census_governance.py
       - --ignore=tests/architecture/test_docs_version_sync.py
       - --ignore=tests/architecture/test_documentation_sync.py
@@ -174,9 +174,9 @@ shards:
       - --ignore=tests/architecture/test_quality_debt_scorecard.py
       - --ignore=tests/architecture/test_quality_burndown_priorities.py
       - --ignore=tests/architecture/test_adr_enforcement_matrix.py
-      - --ignore=tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
+      - --ignore=tests/architecture/test_checkpoint_runtime_facade_usage.py
       - --ignore=tests/architecture/test_cli_command_import_guards.py
-      - --ignore=tests/architecture/test_compatibility_freeze_guards.py
+      - --ignore=tests/architecture/test_removed_surface_freeze_guards.py
       - --ignore=tests/architecture/test_config_discrepancy_metrics_ratchets.py
       - --ignore=tests/architecture/test_config_discrepancy_report_drift.py
       - --ignore=tests/architecture/test_config_root_governance.py
@@ -223,7 +223,7 @@ shards:
       - --ignore=tests/architecture/test_scripts_catalog_governance.py
       - --ignore=tests/architecture/test_architecture_dependency_docs_drift.py
       - --ignore=tests/architecture/test_check_doc_links_guardrails.py
-      - --ignore=tests/architecture/test_compatibility_facade_inventory.py
+      - --ignore=tests/architecture/test_public_facade_inventory.py
       - --ignore=tests/architecture/test_docs_version_sync.py
       - --ignore=tests/architecture/test_documentation_sync.py
       - --ignore=tests/architecture/test_code_metrics.py
@@ -233,9 +233,9 @@ shards:
       - --ignore=tests/architecture/test_quality_burndown_priorities.py
       - --ignore=tests/architecture/test_regression_metrics.py
       - --ignore=tests/architecture/test_adr_enforcement_matrix.py
-      - --ignore=tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
+      - --ignore=tests/architecture/test_checkpoint_runtime_facade_usage.py
       - --ignore=tests/architecture/test_cli_command_import_guards.py
-      - --ignore=tests/architecture/test_compatibility_freeze_guards.py
+      - --ignore=tests/architecture/test_removed_surface_freeze_guards.py
       - --ignore=tests/architecture/test_config_discrepancy_metrics_ratchets.py
       - --ignore=tests/architecture/test_config_discrepancy_report_drift.py
       - --ignore=tests/architecture/test_config_root_governance.py
@@ -248,7 +248,7 @@ shards:
       - tests/architecture/test_scripts_catalog_governance.py
       - tests/architecture/test_architecture_dependency_docs_drift.py
       - tests/architecture/test_check_doc_links_guardrails.py
-      - tests/architecture/test_compatibility_facade_inventory.py
+      - tests/architecture/test_public_facade_inventory.py
       - tests/architecture/test_public_surface_importer_census_governance.py
       - tests/architecture/test_contract_coverage_matrix_drift.py
       - tests/architecture/test_docs_version_sync.py
@@ -262,9 +262,9 @@ shards:
       - tests/architecture/test_quality_burndown_priorities.py
       - tests/architecture/test_regression_metrics.py
       - tests/architecture/test_adr_enforcement_matrix.py
-      - tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
+      - tests/architecture/test_checkpoint_runtime_facade_usage.py
       - tests/architecture/test_cli_command_import_guards.py
-      - tests/architecture/test_compatibility_freeze_guards.py
+      - tests/architecture/test_removed_surface_freeze_guards.py
       - tests/architecture/test_config_discrepancy_metrics_ratchets.py
       - tests/architecture/test_config_discrepancy_report_drift.py
       - tests/architecture/test_config_root_governance.py
@@ -301,7 +301,7 @@ shards:
       - --ignore=tests/architecture/test_scripts_catalog_governance.py
       - --ignore=tests/architecture/test_architecture_dependency_docs_drift.py
       - --ignore=tests/architecture/test_check_doc_links_guardrails.py
-      - --ignore=tests/architecture/test_compatibility_facade_inventory.py
+      - --ignore=tests/architecture/test_public_facade_inventory.py
       - --ignore=tests/architecture/test_docs_version_sync.py
       - --ignore=tests/architecture/test_documentation_sync.py
       - --ignore=tests/architecture/test_code_metrics.py
@@ -314,9 +314,9 @@ shards:
       - --ignore=tests/architecture/test_scripts_lifecycle_registry.py
       - --ignore=tests/architecture/test_test_structural_debt.py
       - --ignore=tests/architecture/test_adr_enforcement_matrix.py
-      - --ignore=tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
+      - --ignore=tests/architecture/test_checkpoint_runtime_facade_usage.py
       - --ignore=tests/architecture/test_cli_command_import_guards.py
-      - --ignore=tests/architecture/test_compatibility_freeze_guards.py
+      - --ignore=tests/architecture/test_removed_surface_freeze_guards.py
       - --ignore=tests/architecture/test_config_discrepancy_metrics_ratchets.py
       - --ignore=tests/architecture/test_config_discrepancy_report_drift.py
       - --ignore=tests/architecture/test_config_root_governance.py

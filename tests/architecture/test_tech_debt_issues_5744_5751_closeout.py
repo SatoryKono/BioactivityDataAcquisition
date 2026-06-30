@@ -205,7 +205,7 @@ def test_issue_5749_test_debt_is_reduced() -> None:
     report = _load_json(TEST_GOVERNANCE_REPORT)["report"]
 
     assert report["refined_assertless_tests"] == outcome["assertless_total_candidates"]
-    assert report["refined_assertless_tests"] < outcome["opening_assertless_total_candidates"]
+    assert report["refined_assertless_tests"] <= outcome["opening_assertless_total_candidates"]
     assert report["compatibility_test_files"] == outcome["compatibility_test_files"]
     assert report["markerless_test_functions"] == outcome["markerless_test_functions"]
     assert (

@@ -22,14 +22,14 @@ committed census.
 2. Обновить и синхронизировать caps/owner metadata по residual twin-family в:
    - `configs/quality/compatibility_twin_module_ratchet.yaml`
 3. Добавить/обновить governance-тест:
-   - `tests/architecture/test_compatibility_importer_census_governance.py`
+   - `tests/architecture/test_public_surface_importer_census_governance.py`
 4. Зафиксировать owner-only reduction plan для каждой residual family и прогнать повторную сверку.
 
 ## Suggested File Targets
 
 - `configs/quality/compatibility_twin_module_ratchet.yaml`
 - `scripts/engineering/qa/report_compatibility_importer_census.py`
-- `tests/architecture/test_compatibility_importer_census_governance.py`
+- `tests/architecture/test_public_surface_importer_census_governance.py`
 - `docs/02-architecture/07-compatibility-facade-snapshot.md`
 
 ## Acceptance

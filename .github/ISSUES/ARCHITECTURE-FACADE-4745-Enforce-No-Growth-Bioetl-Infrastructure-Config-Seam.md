@@ -21,14 +21,14 @@ follow-up issue.
 2. Зафиксировать no-growth/targeted-reduction правила в:
    - `configs/quality/infrastructure_config_root_facade_inventory.yaml`
 3. Прогнать governance test:
-   - `tests/architecture/test_compatibility_importer_census_governance.py`
+   - `tests/architecture/test_public_surface_importer_census_governance.py`
 4. Проверить/обновить контрактные тесты фасадов:
    - `tests/unit/composition/runtime_builders/test_runner_builder_contracts.py`
 
 ## Suggested File Targets
 
 - `configs/quality/infrastructure_config_root_facade_inventory.yaml`
-- `tests/architecture/test_compatibility_importer_census_governance.py`
+- `tests/architecture/test_public_surface_importer_census_governance.py`
 - `src/bioetl/infrastructure/config/__init__.py`
 - `tests/unit/composition/runtime_builders/test_runner_builder_contracts.py`
 

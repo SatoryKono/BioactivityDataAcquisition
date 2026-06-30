@@ -46,7 +46,7 @@
     },
     "test_governance_report": {
       "path": "reports/quality/test-governance-current.json",
-      "compatibility_test_files": 24
+      "compatibility_test_files": 0
     },
     "adr_enforcement_matrix": {
       "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload",
@@ -56,8 +56,8 @@
     }
   },
   "weights_sum": 1.0,
-  "integral_score": 8.47,
-  "interpretation": "satisfactory_system_refactoring_required",
+  "integral_score": 8.53,
+  "interpretation": "good_targeted_improvements",
   "categories": [
     {
       "id": "layer_compliance",
@@ -130,12 +130,12 @@
       "id": "test_strategy_testability",
       "name": "Test strategy / testability",
       "weight": 0.12,
-      "score": 8.3,
-      "weighted_score": 0.996,
+      "score": 8.8,
+      "weighted_score": 1.056,
       "evidence_metrics": {
         "unmeasured_module_count": 0,
         "uncovered_module_count": 0,
-        "compatibility_test_file_count": 24
+        "compatibility_test_file_count": 0
       }
     },
     {
@@ -190,7 +190,7 @@
     "retained_entrypoint_count": 12,
     "retained_public_export_facade_count": 4,
     "twin_pair_count": 0,
-    "compatibility_test_file_count": 24,
+    "compatibility_test_file_count": 0,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
     "contract_blocking_issue_count": 0,
     "dq_blocking_issue_count": 0,

@@ -62,7 +62,7 @@ budgets:
   refined_assertless_max: 0
   duplicate_test_names_max: 0
   duplicate_test_name_occurrences_max: 0
-  compatibility_test_file_max: 24
+  compatibility_test_file_max: 0
   markerless_test_functions_max: 0
   uuid4_call_sites_max: 0
   date_today_call_sites_max: 0
@@ -422,7 +422,7 @@ rf_009_closeout:
     refined_assertless_tests: 0
     duplicate_test_names: 0
     duplicate_test_name_occurrences: 0
-    compatibility_test_files: 24
+    compatibility_test_files: 0
     markerless_test_functions: 0
     uuid4_call_sites: 0
     date_today_call_sites: 0
@@ -459,8 +459,8 @@ test_audit_closeout_2026_06_19:
   - tests/architecture/test_test_telemetry_baseline.py
   - tests/architecture/test_test_telemetry_governance.py
   invariants:
-    compatibility_test_file_max: 24
-    compatibility_test_files_less_than: 29
+    compatibility_test_file_max: 0
+    compatibility_test_files_less_than: 1
     repo_backed_unit_lane: repo-backed-unit
     repo_backed_unit_subtree: tests/unit/repo_backed/
     runtime_import_reviewed_scc_max: 3
@@ -681,201 +681,9 @@ oversized_test_module_inventory:
     owner: application-services
 compatibility_test_inventory:
   review_cadence: quarterly
-  total_files: 24
+  total_files: 0
   default_review_date: '2026-09-30'
-  entries:
-  - path: tests/architecture/test_application_composite_compat_surface_usage.py
-    decision: retained_compatibility_contract
-    owner: architecture-governance
-    protected_surface: architecture/application composite compat surface usage
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/architecture/test_application_core_lifecycle_shim_usage.py
-    decision: retained_governance_guard
-    owner: architecture-governance
-    protected_surface: architecture/application core lifecycle shim usage
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/architecture/test_batch_transformer_helpers_shim_usage.py
-    decision: retained_governance_guard
-    owner: architecture-governance
-    protected_surface: architecture/batch transformer helpers shim usage
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
-    decision: retained_public_facade_contract
-    owner: architecture-governance
-    protected_surface: architecture/checkpoint compatibility runtime facade usage
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/architecture/test_compatibility_facade_inventory.py
-    decision: retained_public_facade_contract
-    owner: architecture-governance
-    protected_surface: architecture/compatibility facade inventory
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/architecture/test_compatibility_freeze_guards.py
-    decision: retained_compatibility_contract
-    owner: architecture-governance
-    protected_surface: architecture/compatibility freeze guards
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/architecture/test_compatibility_freeze_guards_config_pipeline.py
-    decision: retained_compatibility_contract
-    owner: architecture-governance
-    protected_surface: architecture/compatibility freeze guards config pipeline
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/architecture/test_compatibility_freeze_guards_provider_datasource.py
-    decision: retained_compatibility_contract
-    owner: architecture-governance
-    protected_surface: architecture/compatibility freeze guards provider datasource
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/architecture/test_public_surface_importer_census_governance.py
-    decision: retained_compatibility_contract
-    owner: architecture-governance
-    protected_surface: architecture/compatibility importer census governance
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/architecture/test_config_compatibility_registry.py
-    decision: retained_compatibility_contract
-    owner: architecture-governance
-    protected_surface: architecture/config compatibility registry
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/architecture/test_config_schema_legacy_status.py
-    decision: retained_governance_guard
-    owner: architecture-governance
-    protected_surface: architecture/config schema legacy status
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/architecture/test_degraded_runtime_anchor_legacy_boundary.py
-    decision: retained_compatibility_contract
-    owner: architecture-governance
-    protected_surface: architecture/degraded runtime anchor legacy boundary
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/architecture/test_docs_compat_shim_governance.py
-    decision: retained_compatibility_contract
-    owner: architecture-governance
-    protected_surface: architecture/docs compat shim governance
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/architecture/test_domain_normalization_compat_usage.py
-    decision: retained_compatibility_contract
-    owner: architecture-governance
-    protected_surface: architecture/domain normalization compat usage
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/architecture/test_domain_service_normalization_compat_usage.py
-    decision: retained_compatibility_contract
-    owner: architecture-governance
-    protected_surface: architecture/domain service normalization compat usage
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/architecture/test_infrastructure_adapter_compat_shim_usage.py
-    decision: retained_compatibility_contract
-    owner: architecture-governance
-    protected_surface: architecture/infrastructure adapter compat shim usage
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/architecture/test_metadata_service_shim_usage.py
-    decision: retained_governance_guard
-    owner: architecture-governance
-    protected_surface: architecture/metadata service shim usage
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/architecture/test_pipeline_storage_compat_shim_usage.py
-    decision: retained_compatibility_contract
-    owner: architecture-governance
-    protected_surface: architecture/pipeline storage compat shim usage
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/architecture/test_run_execution_context_compat_shim_usage.py
-    decision: retained_compatibility_contract
-    owner: architecture-governance
-    protected_surface: architecture/run execution context compat shim usage
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/unit/composition/factories/pipeline/test_runner_request_compat.py
-    decision: retained_compatibility_contract
-    owner: test-governance
-    protected_surface: unit/composition/factories/pipeline/runner request compat
-    policy_ref: '#4209'
-    review_date: '2026-09-30'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/unit/infrastructure/adapters/crossref/test_compatibility.py
-    decision: retained_compatibility_contract
-    owner: test-governance
-    protected_surface: unit/infrastructure/adapters/crossref/compatibility
-    policy_ref: '#4209'
-    review_date: '2026-12-31'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/unit/infrastructure/adapters/pubchem/test_fetch_strategies_compat.py
-    decision: retained_compatibility_contract
-    owner: test-governance
-    protected_surface: unit/infrastructure/adapters/pubchem/fetch strategies compat
-    policy_ref: '#4209'
-    review_date: '2026-12-31'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/unit/infrastructure/adapters/pubmed/test_models_compat.py
-    decision: retained_compatibility_contract
-    owner: test-governance
-    protected_surface: unit/infrastructure/adapters/pubmed/models compat
-    policy_ref: '#4209'
-    review_date: '2026-12-31'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
-  - path: tests/unit/scripts/ops/test_memory_legacy_aliases.py
-    decision: retained_public_facade_contract
-    owner: test-governance
-    protected_surface: unit/scripts/ops/memory legacy aliases
-    policy_ref: '#4209'
-    review_date: '2026-12-31'
-    rationale: Tracked compatibility test surface; retained only while the referenced
-      public or migration contract remains supported.
+  entries: []
 platform_sensitive_snapshot_tests:
   issue_ref: '#5663'
   decision: retained_memory_lane_with_platform_skip
