@@ -2561,22 +2561,23 @@ def _git_last_commit_age_days(
 ) -> int | None:
     if relative_path in cache:
         return cache[relative_path]
-    result = subprocess.run(
-        [
-            _resolve_git_executable(),
-            "-C",
-            str(root),
-            "log",
-            "-1",
-            "--format=%ct",
-            "--",
-            relative_path,
-        ],
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-    )
+    try:
+        result = _run_git_history_subprocess(
+            [
+                _resolve_git_executable(),
+                "-C",
+                str(root),
+                "log",
+                "-1",
+                "--format=%ct",
+                "--",
+                relative_path,
+            ],
+            timeout_seconds=10.0,
+        )
+    except subprocess.TimeoutExpired:
+        cache[relative_path] = None
+        return None
     timestamp = result.stdout.strip()
     if result.returncode != 0 or not timestamp.isdigit():
         cache[relative_path] = None
@@ -2635,17 +2636,23 @@ def _git_cached_commit_ages(
     return {path: cache[path] for path in unique_paths if path in cache}
 
 
-def _run_git_history_subprocess(command: list[str]) -> subprocess.CompletedProcess[str]:
+def _run_git_history_subprocess(
+    command: list[str], *, timeout_seconds: float | None = None
+) -> subprocess.CompletedProcess[str]:
     """Run Git history probes with compatibility fallbacks for test doubles."""
+    command_kwargs: dict[str, object] = {
+        "check": False,
+        "capture_output": True,
+        "text": True,
+        "encoding": "utf-8",
+        "errors": "replace",
+    }
+    if timeout_seconds is not None:
+        command_kwargs["timeout"] = timeout_seconds
     try:
-        return subprocess.run(
-            command,
-            check=False,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-        )
+        return subprocess.run(command, **command_kwargs)
+    except subprocess.TimeoutExpired:
+        raise
     except TypeError:
         # Some lightweight test doubles still implement the historical
         # positional-only signature (cmd, check, capture_output, text).
@@ -2659,18 +2666,41 @@ def _git_chunk_commit_ages(
     chunk: list[str],
     today: date,
 ) -> dict[str, int | None]:
-    result = _run_git_history_subprocess(
-        [
-            git_executable,
-            "-C",
-            str(root),
-            "log",
-            "--format=__TS__%ct",
-            "--name-only",
-            "--",
-            *chunk,
-        ]
-    )
+    try:
+        result = _run_git_history_subprocess(
+            [
+                git_executable,
+                "-C",
+                str(root),
+                "log",
+                "--format=__TS__%ct",
+                "--name-only",
+                "--",
+                *chunk,
+            ],
+            timeout_seconds=10.0,
+        )
+    except subprocess.TimeoutExpired:
+        if len(chunk) <= 1:
+            return {
+                path: _git_last_commit_age_days(root, path, today, {})
+                for path in chunk
+            }
+        middle = len(chunk) // 2
+        first_half = _git_chunk_commit_ages(
+            git_executable=git_executable,
+            root=root,
+            chunk=chunk[:middle],
+            today=today,
+        )
+        second_half = _git_chunk_commit_ages(
+            git_executable=git_executable,
+            root=root,
+            chunk=chunk[middle:],
+            today=today,
+        )
+        first_half.update(second_half)
+        return first_half
     chunk_results = dict.fromkeys(chunk)
     if result.returncode != 0:
         return chunk_results
