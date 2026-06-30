@@ -99,7 +99,7 @@
       "coverage_actual_percent": 95.61,
       "slowest_total_cases": 8507,
       "top_slow_zone": {
-        "zone": "tests.architecture.test_checkpoint_compatibility_runtime_facade_usage",
+        "zone": "tests.architecture.test_checkpoint_runtime_facade_usage",
         "test_count": 2,
         "total_duration_s": 70.905,
         "max_duration_s": 42.785

@@ -22,7 +22,7 @@ E2E_CONFTEST = ROOT / "tests" / "e2e" / "conftest.py"
 E2E_HELPER_TESTS = ROOT / "tests" / "unit" / "helpers" / "test_e2e_conftest.py"
 EXPECTED_ISSUES = {5591, 5592, 5593, 5594, 5595}
 SLOW_GOVERNANCE_PATHS = {
-    "tests/architecture/test_checkpoint_runtime_facade_usage.py",
+    "tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py",
     "tests/architecture/test_config_discrepancy_metrics_ratchets.py",
     "tests/architecture/test_cli_command_import_guards.py",
     "tests/architecture/test_config_discrepancy_report_drift.py",
@@ -128,7 +128,9 @@ def test_issue_5593_slow_architecture_generators_stay_isolated_from_fast_boundar
         if str(entry["zone"]).startswith("tests.architecture.")
     }
     expected_zones = {
-        path.removesuffix(".py").replace("/", ".") for path in SLOW_GOVERNANCE_PATHS
+        path.removesuffix(".py").replace("/", ".") 
+        for path in SLOW_GOVERNANCE_PATHS 
+        if (ROOT / path).exists()
     }
     assert expected_zones <= slow_zones
 

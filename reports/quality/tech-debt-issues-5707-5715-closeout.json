@@ -118,8 +118,8 @@
       "max": 13
     },
     "compatibility_test_files": {
-      "current": 24,
-      "max": 24
+      "current": 0,
+      "max": 0
     },
     "coverage_unmeasured_modules": {
       "current": 0,
@@ -151,9 +151,9 @@
         "module_coverage_inventory": false,
         "remote_main_baseline": false
       },
-      "module_coverage_source_tree_sha256": "6c9d1e04b03915f840ebf5d394a218e7e0d854f5527274dd16dd371bf928cfc7",
-      "architecture_quality_score": 8.47,
-      "remote_main_baseline_fingerprint": "87a870bca59cbc8d1159f709eee377214f2f1a3479cc79d10d73f9e2e84ed8cc"
+      "module_coverage_source_tree_sha256": "139ac5bd008c163d4210bba7360fd2d0ac49b7407c90f0821e92e01e4771afc6",
+      "architecture_quality_score": 8.53,
+      "remote_main_baseline_fingerprint": "624a9cdb3d283482a3042c57dd2985b2bfad290935bad7ea84b9a80dd19c97be"
     },
     "5708": {
       "shared_delegation_helper": "src/bioetl/infrastructure/adapters/decorators/_data_source_delegation.py",
@@ -193,7 +193,7 @@
       "unmeasured_module_count": 0,
       "uncovered_module_count": 0,
       "no_executable_line_modules": 0,
-      "source_tree_sha256": "6c9d1e04b03915f840ebf5d394a218e7e0d854f5527274dd16dd371bf928cfc7",
+      "source_tree_sha256": "139ac5bd008c163d4210bba7360fd2d0ac49b7407c90f0821e92e01e4771afc6",
       "under70_module_count_before": 18,
       "under70_module_count_after": 13,
       "under85_module_count_after": 85
@@ -207,8 +207,8 @@
       "twin_pair_count": 0
     },
     "5713": {
-      "compatibility_test_files": 24,
-      "compatibility_test_file_max": 24,
+      "compatibility_test_files": 0,
+      "compatibility_test_file_max": 0,
       "duplicate_test_names": 0,
       "duplicate_test_name_occurrences": 0,
       "refined_assertless_tests": 0,
@@ -228,7 +228,7 @@
       "debt_scorecard_budget_violations": 0,
       "module_coverage_unmeasured_limit": 0,
       "module_coverage_uncovered_limit": 0,
-      "compatibility_test_file_max": 24,
+      "compatibility_test_file_max": 0,
       "production_uuid4_budget": 0
     }
   }

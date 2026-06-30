@@ -157,16 +157,16 @@ def test_issue_5681_retained_compatibility_surfaces_are_reviewed() -> None:
         assert entry["src_importer_count"] == 0
 
 
-def test_issue_5682_compatibility_test_inventory_is_ratcheted_to_24() -> None:
+def test_issue_5682_compatibility_test_inventory_is_ratcheted_to_zero() -> None:
     config = _load_yaml(TEST_GOVERNANCE_CONFIG)
     report_payload = _load_json(TEST_GOVERNANCE_REPORT)
     bronze_gaps = _load_yaml(BRONZE_FIXTURE_GAPS)
     inventory = config["compatibility_test_inventory"]
     report = report_payload["report"]
 
-    assert config["budgets"]["compatibility_test_file_max"] == 24
-    assert inventory["total_files"] == 24
-    assert report["compatibility_test_files"] == 24
+    assert config["budgets"]["compatibility_test_file_max"] == 0
+    assert inventory["total_files"] == 0
+    assert report["compatibility_test_files"] == 0
     assert report_payload["budget_violations"] == []
     assert bronze_gaps["gaps"] == {}
 
