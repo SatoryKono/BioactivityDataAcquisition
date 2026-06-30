@@ -1,0 +1,108 @@
+{
+  "schema_version": "tech-debt-issues-5729-5733-closeout-v1",
+  "generated_on": "2026-06-30",
+  "generated_by": "codex",
+  "debt_budget_outcome": "reduced_or_unchanged",
+  "issues": [
+    {
+      "number": 5729,
+      "title": "P1 test telemetry freshness",
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/test_telemetry_baseline.yaml",
+        "reports/test-telemetry/coverage-summary.json",
+        "reports/test-telemetry/slowest-tests.json"
+      ]
+    },
+    {
+      "number": 5730,
+      "title": "P1 storage and control plane coverage tail",
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/module_coverage_gates.yaml",
+        "reports/quality/module-coverage-inventory.json"
+      ]
+    },
+    {
+      "number": 5731,
+      "title": "P1 runner and observer branch gaps",
+      "status": "closed-ready",
+      "evidence": [
+        "reports/quality/module-coverage-inventory.json"
+      ]
+    },
+    {
+      "number": 5732,
+      "title": "P1 assertless contract inventory",
+      "status": "closed-ready",
+      "evidence": [
+        "reports/quality/test-governance-current.json"
+      ]
+    },
+    {
+      "number": 5733,
+      "title": "P1 runtime mode bootstrap test hotspot",
+      "status": "closed-ready",
+      "evidence": [
+        "tests/unit/composition/runtime_builders/test_runner_builder_runtime_modes.py",
+        "reports/test-telemetry/slowest-tests.json"
+      ]
+    }
+  ],
+  "ratchets": {
+    "test_telemetry_freshness": {
+      "current": 0,
+      "max": 0
+    },
+    "coverage_tail_modules": {
+      "current": 2,
+      "max": 2
+    },
+    "assertless_total_candidates": {
+      "current": 129,
+      "max": 129
+    },
+    "slowest_test_hotspot_removed": {
+      "current": true,
+      "max": true
+    }
+  },
+  "outcomes": {
+    "5729": {
+      "source_commit": "32f8274ca6df6944cb0a33dba5c7b2f1edbf0b4a",
+      "source_run_id": "origin-main-telemetry-20260630",
+      "refreshed_at_utc": "2026-06-30T09:12:47.196108+00:00",
+      "coverage_percent": 92.81,
+      "coverage_actual_percent": 92.81
+    },
+    "5730": {
+      "target_modules": [
+        "bioetl.infrastructure.storage.support.checkpoint_writer",
+        "bioetl.infrastructure.control_plane._file_lineage_index"
+      ],
+      "minimum_coverage_percent": 54.0
+    },
+    "5731": {
+      "minimum_module_coverages": {
+        "bioetl.application.core.runner": 86.0,
+        "bioetl.application.observability.observer": 95.0,
+        "bioetl.application.composite.runner_pkg.runner_stage_dependency_state_flow": 77.0
+      }
+    },
+    "5732": {
+      "assertless_total_candidates": 129,
+      "intentional_no_exception_contract": 115,
+      "target_file_family_counts": {
+        "tests/unit/domain/ports/test_noop.py": 12,
+        "tests/unit/infrastructure/observability/test_unified_logger.py": 10
+      }
+    },
+    "5733": {
+      "removed_full_bootstrap_tests": [
+        "test_build_pipeline_runner_bootstraps_full_runtime_graph_outside_test_mode",
+        "test_build_pipeline_runner_bootstraps_full_runtime_graph_in_test_mode"
+      ],
+      "retired_hotspot_test": "tests.unit.composition.runtime_builders.test_runner_builder_runtime_modes::test_build_pipeline_runner_bootstraps_full_runtime_graph_outside_test_mode"
+    }
+  }
+}

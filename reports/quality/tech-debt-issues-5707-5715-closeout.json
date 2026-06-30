@@ -30,6 +30,8 @@
       "title": "P1 pipeline transformer duplication",
       "status": "closed-ready",
       "evidence": [
+        "src/bioetl/application/pipelines/uniprot/extractors/_comment_facets_data.py",
+        "src/bioetl/application/pipelines/uniprot/transformer_business_data_mixin.py",
         "reports/quality/full-app-duplication-baseline.json",
         "reports/quality/full-app-duplication-baseline.md"
       ]
@@ -104,16 +106,16 @@
       "max": 0
     },
     "full_app_duplicate_clusters": {
-      "current": 70,
-      "max": 70
+      "current": 68,
+      "max": 68
     },
     "adapter_duplicate_clusters": {
       "current": 55,
       "max": 55
     },
     "pipeline_duplicate_clusters": {
-      "current": 15,
-      "max": 15
+      "current": 13,
+      "max": 13
     },
     "compatibility_test_files": {
       "current": 24,
@@ -149,9 +151,9 @@
         "module_coverage_inventory": false,
         "remote_main_baseline": false
       },
-      "module_coverage_source_tree_sha256": "761dee19c6553ae4f9c86d913bafc82e82074024674056a415bb536a6fc4b92d",
+      "module_coverage_source_tree_sha256": "166b4bfec0242d28e3c237510c7540750a460c2286fe6ff597ca66f3a2286359",
       "architecture_quality_score": 8.46,
-      "remote_main_baseline_fingerprint": "f7f4ec48b54b7dfdc3aae4de22eabb207c7102b32bc15fbbe6eeef77d59a7826"
+      "remote_main_baseline_fingerprint": "0a84dd3a617d23580ebfa1c18331035b1507448ba344205485e5c9667930e2e1"
     },
     "5708": {
       "shared_delegation_helper": "src/bioetl/infrastructure/adapters/decorators/_data_source_delegation.py",
@@ -167,10 +169,11 @@
       ]
     },
     "5709": {
-      "pipeline_duplicate_clusters": 15,
-      "pipeline_duplicate_clusters_no_growth_max": 15,
+      "opening_pipeline_duplicate_clusters": 15,
+      "pipeline_duplicate_clusters": 13,
+      "pipeline_duplicate_clusters_no_growth_max": 13,
       "dominant_actionability_category": "pipeline_transformer_contract_pattern",
-      "decision": "bounded_no_growth_contract_pattern"
+      "decision": "reduced_shared_uniprot_comment_annotation_output_keys"
     },
     "5710": {
       "telemetry_source_commit": "32f8274ca6df6944cb0a33dba5c7b2f1edbf0b4a",
@@ -190,7 +193,7 @@
       "unmeasured_module_count": 0,
       "uncovered_module_count": 0,
       "no_executable_line_modules": 17,
-      "source_tree_sha256": "761dee19c6553ae4f9c86d913bafc82e82074024674056a415bb536a6fc4b92d"
+      "source_tree_sha256": "166b4bfec0242d28e3c237510c7540750a460c2286fe6ff597ca66f3a2286359"
     },
     "5712": {
       "retained_entrypoint_count": 12,
