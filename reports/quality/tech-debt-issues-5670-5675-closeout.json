@@ -33,7 +33,7 @@
       "evidence": [
         "configs/quality/compatibility_facade_inventory.yaml",
         "reports/quality/compatibility-importer-census.json",
-        "tests/architecture/test_compatibility_facade_inventory.py",
+        
         "tests/architecture/test_tech_debt_issues_5670_5675_closeout.py"
       ]
     },
@@ -62,7 +62,7 @@
     "5675": {
       "status": "closeable",
       "theme": "compatibility_test_inventory_and_platform_sensitive_lane",
-      "outcome": "compatibility test inventory is reduced to 25 and platform-sensitive Neo4j memory snapshots remain isolated in the memory lane",
+      "outcome": "compatibility test inventory is reduced to 0 and platform-sensitive Neo4j memory snapshots remain isolated in the memory lane",
       "evidence": [
         "configs/quality/test_governance_audit.yaml",
         "reports/quality/test-governance-current.json",

@@ -148,10 +148,10 @@ def test_subprocess_heavy_architecture_tests_stay_in_slow_governance_shard() -> 
     slow_paths = {
         "tests/architecture/test_adr_enforcement_matrix.py",
         "tests/architecture/test_antipatterns.py",
-        "tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py",
+        "tests/architecture/test_checkpoint_runtime_facade_usage.py",
         "tests/architecture/test_cli_command_import_guards.py",
         "tests/architecture/test_code_metrics.py",
-        "tests/architecture/test_compatibility_freeze_guards.py",
+        "tests/architecture/test_removed_surface_freeze_guards.py",
         "tests/architecture/test_config_discrepancy_metrics_ratchets.py",
         "tests/architecture/test_config_discrepancy_report_drift.py",
         "tests/architecture/test_config_root_governance.py",

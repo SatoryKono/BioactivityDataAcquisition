@@ -791,7 +791,7 @@ class TestAdapterPortCompliance:
             / "infrastructure"
             / "adapters"
             / "crossref"
-            / "test_compatibility.py",
+            / "test_public_contracts.py",
         }
 
         candidate_files = _iter_python_files_matching_any(

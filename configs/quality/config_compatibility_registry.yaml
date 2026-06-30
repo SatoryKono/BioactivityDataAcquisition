@@ -98,7 +98,7 @@ retired_rejected_shapes:
       - src/bioetl/infrastructure/config/source_normalizers/source.py
       - configs/_schema/source.json
     test_files:
-      - tests/architecture/test_config_schema_legacy_status.py
+      - tests/architecture/test_config_schema_migration_status.py
       - tests/unit/infrastructure/config/test_source_normalizers.py
       - tests/unit/infrastructure/config/source_normalizers/test_source.py
     risk: low
@@ -112,7 +112,7 @@ retired_rejected_shapes:
       - src/bioetl/infrastructure/config/source_normalizers/source.py
       - configs/_schema/source.json
     test_files:
-      - tests/architecture/test_config_schema_legacy_status.py
+      - tests/architecture/test_config_schema_migration_status.py
       - tests/unit/infrastructure/config/source_normalizers/test_source.py
     risk: low
 
@@ -146,7 +146,7 @@ retired_rejected_shapes:
       - configs/_schema/pipeline.json
       - src/bioetl/infrastructure/config/pipeline_normalizers.py
     test_files:
-      - tests/architecture/test_config_schema_legacy_status.py
+      - tests/architecture/test_config_schema_migration_status.py
       - tests/unit/infrastructure/config/test_pipeline_normalizers.py
     risk: low
 
@@ -158,7 +158,7 @@ retired_rejected_shapes:
     source_files:
       - configs/_schema/composite.json
     test_files:
-      - tests/architecture/test_config_schema_legacy_status.py
+      - tests/architecture/test_config_schema_migration_status.py
     risk: low
 
   - id: runtime_config.retired_top_level_checkpoint_compatibility_policy

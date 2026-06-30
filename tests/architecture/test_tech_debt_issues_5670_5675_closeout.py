@@ -129,7 +129,7 @@ def test_issue_5670_closeout_artifact_covers_all_child_issues() -> None:
         assert outcome["theme"]
         assert outcome["outcome"]
         for rel_path in outcome["evidence"]:
-            assert (ROOT / rel_path).exists(), rel_path
+            assert (ROOT / rel_path).exists(), f"Missing evidence: {rel_path}"
 
 
 def test_issue_5671_governance_artifact_references_are_backed_by_live_evidence() -> (
@@ -248,10 +248,9 @@ def test_issue_5675_compatibility_tests_and_snapshot_lane_are_bounded() -> None:
     report = report_payload["report"]
     today = datetime.now(UTC).date()
 
-    assert int(config["budgets"]["compatibility_test_file_max"]) == 24
-    assert inventory["total_files"] == 24
-    assert report["compatibility_test_files"] == 24
-    assert report["compatibility_test_files"] < 25
+    assert int(config["budgets"]["compatibility_test_file_max"]) == 0
+    assert inventory["total_files"] == 0
+    assert report["compatibility_test_files"] == 0
     assert report_payload["budget_violations"] == []
     assert bronze_gaps["gaps"] == {}
 

@@ -402,9 +402,9 @@ FINDINGS: tuple[FindingRebaseline, ...] = (
             "reports/quality/compatibility-importer-census.json",
         ),
         current_test_anchors=(
-            "tests/architecture/test_config_compatibility_registry.py",
-            "tests/architecture/test_compatibility_facade_inventory.py",
-            "tests/architecture/test_compatibility_importer_census_governance.py",
+            "tests/architecture/test_config_transition_registry.py",
+            "tests/architecture/test_public_facade_inventory.py",
+            "tests/architecture/test_public_surface_importer_census_governance.py",
         ),
         existing_issue_anchors=("#5410", "#5435", "#5450", "#5451"),
         rationale=(

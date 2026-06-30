@@ -47,8 +47,8 @@ COMMON_CHECKS: Final[tuple[str, ...]] = (
 )
 ARTIFACT_CHECKS: Final[dict[str, tuple[str, ...]]] = {
     "compatibility_surface": (
-        "python -m pytest -q tests/architecture/test_compatibility_facade_inventory.py",
-        "python -m pytest -q tests/architecture/test_compatibility_importer_census_governance.py",
+        "python -m pytest -q tests/architecture/test_public_facade_inventory.py",
+        "python -m pytest -q tests/architecture/test_public_surface_importer_census_governance.py",
     ),
     "duplication_cluster": (
         "python -m pytest -q tests/architecture/test_tech_debt_issues_5626_5637_closeout.py",

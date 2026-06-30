@@ -79,9 +79,9 @@ uv run python scripts/engineering/qa/generate_compatibility_facade_snapshot.py -
 uv run python scripts/engineering/qa/generate_compatibility_facade_snapshot.py --update
 ./.venv/Scripts/python.exe scripts/engineering/qa/generate_compatibility_facade_snapshot.py --check
 ./.venv/Scripts/python.exe scripts/engineering/qa/generate_compatibility_facade_snapshot.py --update
-uv run python -m pytest tests/architecture/test_compatibility_facade_inventory.py -q
-./.venv/Scripts/python.exe -m pytest tests/architecture/test_compatibility_facade_inventory.py -q
-uv run python -m pytest tests/architecture/test_config_schema_legacy_status.py -q
+uv run python -m pytest tests/architecture/test_public_facade_inventory.py -q
+./.venv/Scripts/python.exe -m pytest tests/architecture/test_public_facade_inventory.py -q
+uv run python -m pytest tests/architecture/test_config_schema_migration_status.py -q
 uv run python -m pytest tests/architecture/test_documentation_sync.py -q
 uv run python -m scripts.docs check-links --configs
 ```
@@ -92,16 +92,16 @@ Artifact-to-command policy:
 - dependency map markdown/JSON: layer-policy/topology snapshot only; hotspot, duplication, size, and churn pressure stay separate report-only signals and MUST NOT be inferred from zero layer violations alone
 - compatibility registry YAML: canonical SSOT for curated rows, measured-only allowlist, and tracked docstring prefixes
 - compatibility snapshot markdown: generated only by `scripts/engineering/qa/generate_compatibility_facade_snapshot.py`
-- compatibility inventory: curated operational doc guarded by `tests/architecture/test_compatibility_facade_inventory.py`
+- compatibility inventory: curated operational doc guarded by `tests/architecture/test_public_facade_inventory.py`
 - compatibility importer census JSON: committed governance artifact; markdown output is derived local convenience and MUST NOT require a repo allowlist exception
-- config/runtime guidance: active docs stay aligned through `tests/architecture/test_config_schema_legacy_status.py`
+- config/runtime guidance: active docs stay aligned through `tests/architecture/test_config_schema_migration_status.py`
 - internal docs references: validated through `python -m scripts.docs check-links --configs`
 
 Fast local repair path:
 
 1. If `test_architecture_dependency_docs_drift.py` fails, run `uv run python -m scripts.engineering.qa report-dep-map --update`.
 1. If compatibility snapshot drift fails, update `configs/quality/compatibility_facade_inventory.yaml` first when policy changed, then run `uv run python scripts/engineering/qa/generate_compatibility_facade_snapshot.py --update`.
-1. Re-run `test_architecture_dependency_docs_drift.py`, `test_compatibility_facade_inventory.py`, and `test_documentation_sync.py`.
+1. Re-run `test_architecture_dependency_docs_drift.py`, `test_public_facade_inventory.py`, and `test_documentation_sync.py`.
 1. Use `scripts/engineering/README.md` for the canonical scripts index; treat `docs/reports/**` as historical evidence only, not as repair guidance.
 
 ## Inventory

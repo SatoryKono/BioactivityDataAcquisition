@@ -68,7 +68,7 @@ modules:
       CrossRef client module is a thin compatibility facade over decomposed flow
       helpers, so ownership stays on the compatibility contract suite.
     owner_tests:
-      - tests/unit/infrastructure/adapters/crossref/test_compatibility.py
+      - tests/unit/infrastructure/adapters/crossref/test_public_contracts.py
 
   - source: src/bioetl/infrastructure/adapters/uniprot/__init__.py
     ownership: facade_contract

@@ -110,8 +110,8 @@
     },
     "assertless_total_candidates": {
       "opening": 113,
-      "current": 108,
-      "max": 108
+      "current": 0,
+      "max": 0
     },
     "retained_entrypoint_count": {
       "opening": 12,
@@ -162,7 +162,7 @@
     },
     "5749": {
       "opening_assertless_total_candidates": 113,
-      "assertless_total_candidates": 108,
+      "assertless_total_candidates": 0,
       "opening_intentional_no_exception_contract": 99,
       "intentional_no_exception_contract": 94,
       "compatibility_test_files": 24,

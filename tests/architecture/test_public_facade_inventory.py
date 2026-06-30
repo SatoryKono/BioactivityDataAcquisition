@@ -373,7 +373,7 @@ def test_inventory_doc_declares_canonical_sync_commands() -> None:
         "./.venv/Scripts/python.exe scripts/engineering/qa/generate_compatibility_facade_snapshot.py --update",
         "./.venv/Scripts/python.exe scripts/engineering/qa/generate_architecture_dependency_map.py --check",
         "./.venv/Scripts/python.exe scripts/engineering/qa/generate_architecture_dependency_map.py --update",
-        "./.venv/Scripts/python.exe -m pytest tests/architecture/test_compatibility_facade_inventory.py -q",
+        "./.venv/Scripts/python.exe -m pytest tests/architecture/test_public_facade_inventory.py -q",
     )
 
     for snippet in required_snippets:
