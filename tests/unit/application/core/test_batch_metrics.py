@@ -139,8 +139,8 @@ class TestTrackBatchSize:
         self, recorder_no_metrics: BatchMetricsRecorderService
     ) -> None:
         """Test that track_batch_size is a no-op when metrics is None."""
-        # Must not raise
-        recorder_no_metrics.track_batch_size(stage="bronze", size=100)
+        assert recorder_no_metrics.track_batch_size(stage="bronze", size=100) is None
+        assert recorder_no_metrics._metrics is None
 
     def test_handles_zero_size(
         self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock
@@ -496,9 +496,13 @@ class TestTrackSilverFilterRejection:
         self, recorder_no_metrics: BatchMetricsRecorderService
     ) -> None:
         """Test that track_error is no-op when metrics is None."""
-        recorder_no_metrics.track_error(
-            stage="transform", error_type=ErrorType.INVALID_DATA
+        assert (
+            recorder_no_metrics.track_error(
+                stage="transform", error_type=ErrorType.INVALID_DATA
+            )
+            is None
         )
+        assert recorder_no_metrics._metrics is None
 
     def test_different_error_types(
         self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock
@@ -556,9 +560,13 @@ class TestTrackDQValidationFailure:
         self, recorder_no_metrics: BatchMetricsRecorderService
     ) -> None:
         """Test that track_dq_validation_failure is no-op when metrics is None."""
-        recorder_no_metrics.track_dq_validation_failure(
-            stage="silver", severity="soft_fail"
+        assert (
+            recorder_no_metrics.track_dq_validation_failure(
+                stage="silver", severity="soft_fail"
+            )
+            is None
         )
+        assert recorder_no_metrics._metrics is None
 
     def test_includes_pipeline_label(
         self, recorder: BatchMetricsRecorderService, mock_metrics: MagicMock

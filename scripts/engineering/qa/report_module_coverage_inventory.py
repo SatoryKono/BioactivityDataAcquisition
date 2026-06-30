@@ -711,6 +711,7 @@ def build_module_coverage_inventory(
             "hotspot_family_coverage": hotspot_family_coverage,
         },
         "modules": rows,
+        "rows": rows,
     }
 
 

@@ -1004,13 +1004,6 @@ FORBIDDEN_RELATION_KEYS: tuple[RelationKey, ...] = (
         "package_family",
         "infrastructure/factories",
     ),
-    (
-        "test_artifact",
-        "tests/unit/interfaces/factories/test_pipeline_factories.py",
-        "TESTS_PACKAGE_FAMILY",
-        "package_family",
-        "interfaces/factories",
-    ),
 )
 
 

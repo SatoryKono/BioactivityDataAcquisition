@@ -213,7 +213,7 @@ def test_issue_5631_pipeline_transformer_duplication_is_below_opening_baseline()
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
 
-    assert by_target["src/bioetl/application/pipelines"]["duplicate_count"] == 15
+    assert by_target["src/bioetl/application/pipelines"]["duplicate_count"] <= 13
     assert by_target["src/bioetl/application/pipelines"]["duplicate_count"] < 22
 
 

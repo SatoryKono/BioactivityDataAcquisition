@@ -51,6 +51,32 @@ class TestFactoryMethodControlPlaneHelpers:
             "effective_config_hash": "effective-hash",
         }
 
+    def test_apply_optional_control_plane_kwargs_keeps_all_replay_references(
+        self,
+    ) -> None:
+        kwargs: dict[str, object] = {}
+
+        apply_optional_control_plane_kwargs(
+            kwargs,
+            manifest_id="manifest-1",
+            execution_fingerprint="fingerprint-1",
+            config_hash="config-hash",
+            resolved_config_hash="resolved-hash",
+            effective_config_hash="effective-hash",
+            dq_contract_compatibility_hash="dq-hash",
+            effective_config_artifact_id="artifact-1",
+        )
+
+        assert kwargs == {
+            "manifest_id": "manifest-1",
+            "execution_fingerprint": "fingerprint-1",
+            "config_hash": "config-hash",
+            "resolved_config_hash": "resolved-hash",
+            "effective_config_hash": "effective-hash",
+            "dq_contract_compatibility_hash": "dq-hash",
+            "effective_config_artifact_id": "artifact-1",
+        }
+
     @pytest.mark.parametrize(
         ("env", "test_mode", "runtime_flag", "expected"),
         [

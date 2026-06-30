@@ -300,8 +300,11 @@ class TestPipelineRunnerSpan:
     @pytest.mark.asyncio
     async def test_pipeline_run_explicit_noop_tracer(self) -> None:
         """Verify run() works without errors with an explicit NoOpTracing instance."""
-        runner = self._build_runner(tracer=NoOpTracing())
+        tracer = NoOpTracing()
+        runner = self._build_runner(tracer=tracer)
         await runner.run()
+        assert runner._tracer is tracer
+        assert getattr(runner._tracer, "is_noop", False) is True
 
     def test_none_tracer_is_rejected(self) -> None:
         """Construction fails fast when tracer defaults are left unresolved."""

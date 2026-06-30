@@ -494,6 +494,42 @@ class TestPipelineRunnerInit:
             "records_filtered_out": mock_executor.records_filtered_out,
         }
 
+    def test_logger_property_returns_injected_logger(self, runner, mock_logger) -> None:
+        assert runner.logger is mock_logger
+
+    def test_services_property_returns_injected_services(
+        self, runner, mock_services
+    ) -> None:
+        assert runner.services is mock_services
+
+    def test_debug_export_properties_return_none_without_debug_export_result(
+        self, runner
+    ) -> None:
+        runner._executor.debug_export_result = None
+
+        assert runner.debug_export_uri is None
+        assert runner.debug_export_hash is None
+
+    def test_debug_export_properties_return_result_fields(self, runner) -> None:
+        runner._executor.debug_export_result = DebugExportResult(
+            root_path="artifacts/debug_exports/standalone/test_runner_pipeline/run-1",
+            manifest_path="artifacts/debug_exports/standalone/test_runner_pipeline/run-1/manifest.json",
+            debug_export_hash="hash-1",
+        )
+
+        assert (
+            runner.debug_export_uri
+            == "artifacts/debug_exports/standalone/test_runner_pipeline/run-1"
+        )
+        assert runner.debug_export_hash == "hash-1"
+
+    def test_execution_diagnostics_returns_empty_dict_for_non_mapping(
+        self, runner
+    ) -> None:
+        runner._executor.execution_diagnostics = "not-a-mapping"
+
+        assert runner.execution_diagnostics == {}
+
 
 @pytest.mark.unit
 class TestPipelineRunnerRun:
@@ -712,6 +748,42 @@ class TestPipelineRunnerRun:
                 "manifest_path": "artifacts/debug_exports/standalone/test_runner_pipeline/run-1/manifest.json",
                 "debug_export_hash": "hash-1",
             },
+        )
+
+    @pytest.mark.asyncio
+    async def test_run_logs_warning_when_debug_export_finalize_fails(
+        self, runner, mock_logger
+    ) -> None:
+        runner._executor.finalize_debug_export = AsyncMock(
+            side_effect=RuntimeError("debug export failed")
+        )
+
+        await runner.run()
+
+        mock_logger.warning.assert_any_call(
+            "debug_export_finalize_failed",
+            error="debug export failed",
+            error_type="RuntimeError",
+            run_id=str(runner._context.run_id),
+        )
+
+    @pytest.mark.asyncio
+    async def test_run_does_not_publish_debug_export_without_run_ledger(
+        self, runner
+    ) -> None:
+        runner._executor.finalize_debug_export = AsyncMock(
+            return_value=DebugExportResult(
+                root_path="artifacts/debug_exports/standalone/test_runner_pipeline/run-1",
+                manifest_path="artifacts/debug_exports/standalone/test_runner_pipeline/run-1/manifest.json",
+                debug_export_hash="hash-1",
+            )
+        )
+
+        await runner.run()
+
+        runner._executor.finalize_debug_export.assert_awaited_once_with(
+            status="success",
+            manifest_id=runner.manifest_id,
         )
 
     @pytest.mark.asyncio

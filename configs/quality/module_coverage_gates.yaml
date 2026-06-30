@@ -20,39 +20,39 @@ branch_coverage:
 coverage_tail:
   ranked_targets:
     - rank: 1
-      path: src/bioetl/infrastructure/observability/tracing.py
-      risk: observability_exporter_configuration
-      target_test_type: focused_unit_branch_error_paths
+      path: src/bioetl/application/core/wiring/__init__.py
+      risk: composition_wiring_lazy_export_facade
+      target_test_type: focused_unit_lazy_facade_owner_paths
       owner_tests:
-        - tests/unit/infrastructure/observability/test_tracing.py
+        - tests/unit/application/core/test_wiring_api_facades.py
       status: focused_owner_tests_added
     - rank: 2
-      path: src/bioetl/infrastructure/storage/metadata/builder_base.py
-      risk: storage_metadata_builder_branching
-      target_test_type: focused_unit_builder_error_paths
+      path: src/bioetl/application/services/control_plane/workflow/execution_preparation_incremental.py
+      risk: incremental_workflow_replay_offset_determinism
+      target_test_type: focused_unit_control_plane_replay_paths
       owner_tests:
-        - tests/unit/infrastructure/storage/metadata/test_builder_base.py
+        - tests/unit/application/services/control_plane/workflow/test_execution_preparation_incremental.py
       status: focused_owner_tests_added
     - rank: 3
-      path: src/bioetl/infrastructure/storage/support/checkpoint_writer.py
-      risk: checkpoint_write_recovery_paths
-      target_test_type: focused_unit_storage_failure_paths
+      path: src/bioetl/composition/factories/pipeline/_factory_method_control_plane.py
+      risk: pipeline_factory_control_plane_replay_references
+      target_test_type: focused_unit_control_plane_kwarg_paths
       owner_tests:
-        - tests/unit/infrastructure/storage/support/test_checkpoint_writer.py
+        - tests/unit/composition/factories/pipeline/test_factory_method_helpers.py
       status: focused_owner_tests_added
     - rank: 4
-      path: src/bioetl/infrastructure/storage/silver/metadata_write_models.py
-      risk: silver_metadata_write_model_validation
-      target_test_type: focused_unit_validation_branches
+      path: src/bioetl/composition/factories/services/__init__.py
+      risk: services_factory_lazy_export_facade
+      target_test_type: focused_unit_lazy_facade_owner_paths
       owner_tests:
-        - tests/unit/infrastructure/storage/silver/test_metadata_write_models.py
+        - tests/unit/composition/factories/services/test_services_package_facade.py
       status: focused_owner_tests_added
     - rank: 5
-      path: src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py
-      risk: maintenance_cli_service_access
-      target_test_type: focused_unit_composition_error_paths
+      path: src/bioetl/domain/__init__.py
+      risk: domain_lazy_public_api_facade
+      target_test_type: focused_unit_lazy_facade_owner_paths
       owner_tests:
-        - tests/unit/interfaces/cli/commands/domains/maintenance/test_service_access.py
+        - tests/unit/domain/test_public_api_facade.py
       status: focused_owner_tests_added
 aggregate_residual_ratchets:
   linked_issue: '#5559'

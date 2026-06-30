@@ -46,5 +46,34 @@ def test_canonical_wiring_package_lazy_exports_owner_symbols() -> None:
     assert "ActivityTransformer" in dir(wiring)
     assert "TargetProteinClassificationTransformer" in wiring.__all__
 
-    with pytest.raises(AttributeError, match="does_not_exist"):
-        getattr(wiring, "does_not_exist")
+    missing_name = "does_not_exist"
+    with pytest.raises(AttributeError, match=missing_name):
+        getattr(wiring, missing_name)
+
+
+def test_canonical_wiring_export_groups_are_loaded_from_declared_submodules(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The lazy facade derives exports deterministically from owner modules."""
+    import types
+
+    import bioetl.application.core.wiring as wiring
+
+    calls: list[str] = []
+
+    def _fake_import_module(module_name: str) -> object:
+        calls.append(module_name)
+        return types.SimpleNamespace(__all__=(f"{module_name}.export",))
+
+    monkeypatch.setattr(
+        wiring,
+        "_WIRING_SUBMODULES",
+        ("bioetl.owner.one", "bioetl.owner.two"),
+    )
+    monkeypatch.setattr(wiring, "import_module", _fake_import_module)
+
+    assert wiring._build_export_groups() == {
+        "bioetl.owner.one": ("bioetl.owner.one.export",),
+        "bioetl.owner.two": ("bioetl.owner.two.export",),
+    }
+    assert calls == ["bioetl.owner.one", "bioetl.owner.two"]

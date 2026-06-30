@@ -125,6 +125,8 @@ def _read_slowest_summary(path: Path) -> dict[str, object]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     total_cases = payload.get("total_cases")
     top_slowest = payload.get("top_slowest")
+    if top_slowest is None:
+        top_slowest = payload.get("top_slowest_tests")
     if not isinstance(top_slowest, list):
         top_slowest = []
     return {
@@ -476,6 +478,10 @@ def build_branch_telemetry_reports(payload: dict[str, object]) -> dict[str, str]
     """Build committed branch-readable telemetry report payloads."""
     coverage = payload["coverage"]
     duration = payload["duration_telemetry"]
+    coverage_percent = (
+        coverage.get("actual_percent") if isinstance(coverage, dict) else None
+    )
+    top_slowest = duration["top_slowest"]
     return {
         "coverage-summary.json": json.dumps(
             {
@@ -484,6 +490,7 @@ def build_branch_telemetry_reports(payload: dict[str, object]) -> dict[str, str]
                 "source_run_id": payload.get("source_run_id"),
                 "refreshed_at_utc": payload["refreshed_at_utc"],
                 "refresh_status": payload["refresh_status"],
+                "coverage_percent": coverage_percent,
                 "coverage": coverage,
             },
             indent=2,
@@ -497,7 +504,8 @@ def build_branch_telemetry_reports(payload: dict[str, object]) -> dict[str, str]
                 "refreshed_at_utc": payload["refreshed_at_utc"],
                 "refresh_status": payload["refresh_status"],
                 "total_cases": duration["total_cases"],
-                "top_slowest": duration["top_slowest"],
+                "top_slowest": top_slowest,
+                "top_slowest_tests": top_slowest,
                 "top_slowest_zones": duration["top_slowest_zones"],
             },
             indent=2,

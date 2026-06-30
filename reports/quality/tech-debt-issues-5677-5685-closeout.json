@@ -22,7 +22,7 @@
     },
     "full_app_duplicate_clusters": {
       "previous": 75,
-      "current": 70,
+      "current": 68,
       "direction": "reduced"
     },
     "adapter_duplicate_clusters": {
@@ -32,7 +32,7 @@
     },
     "pipeline_duplicate_clusters": {
       "previous": 16,
-      "current": 15,
+      "current": 13,
       "direction": "reduced"
     },
     "cli_duplicate_clusters": {
@@ -82,10 +82,12 @@
     "5680": {
       "status": "closeable",
       "theme": "pipeline_duplication_burn_down",
-      "outcome": "application pipeline duplicate clusters are reduced from 16 to 15 by removing duplicated ChEMBL marker export listing",
+      "outcome": "application pipeline duplicate clusters are reduced from 16 to 13 by removing duplicated ChEMBL marker export listing and consolidating UniProt comment annotation output keys",
       "evidence": [
         "src/bioetl/application/pipelines/chembl/__init__.py",
         "src/bioetl/application/pipelines/chembl/pipeline_types.py",
+        "src/bioetl/application/pipelines/uniprot/extractors/_comment_facets_data.py",
+        "src/bioetl/application/pipelines/uniprot/transformer_business_data_mixin.py",
         "reports/quality/full-app-duplication-baseline.json"
       ]
     },

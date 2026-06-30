@@ -154,7 +154,7 @@ def test_issue_5708_adapter_delegation_duplication_is_bounded() -> None:
     } == set(outcome["bounded_actionability_categories"])
 
 
-def test_issue_5709_pipeline_transformer_duplication_is_no_growth() -> None:
+def test_issue_5709_pipeline_transformer_duplication_is_reduced() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5709"]
     duplication = _load_json(DUPLICATION)
@@ -165,13 +165,17 @@ def test_issue_5709_pipeline_transformer_duplication_is_no_growth() -> None:
         pipelines["duplicate_count"]
         <= outcome["pipeline_duplicate_clusters_no_growth_max"]
     )
+    assert pipelines["duplicate_count"] < outcome["opening_pipeline_duplicate_clusters"]
     assert pipelines["actionability"] == [
         {
             "category": outcome["dominant_actionability_category"],
             "duplicate_clusters": outcome["pipeline_duplicate_clusters"],
         }
     ]
-    assert outcome["decision"] == "bounded_no_growth_contract_pattern"
+    assert (
+        outcome["decision"]
+        == "reduced_shared_uniprot_comment_annotation_output_keys"
+    )
 
 
 def test_issue_5710_architecture_performance_evidence_is_isolated() -> None:
