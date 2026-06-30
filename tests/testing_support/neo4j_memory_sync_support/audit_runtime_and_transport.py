@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+import subprocess
 
 from .common import *  # noqa: F403
 
@@ -140,6 +141,49 @@ def test_git_last_commit_age_days_bulk_skips_untracked_paths(monkeypatch) -> Non
     assert result[PATH_SRC_A] is not None
     assert result[PATH_SRC_B] is None
     assert result[PATH_SRC_C] is not None
+    assert cache == result
+
+
+def test_git_last_commit_age_days_bulk_splits_timed_out_lookup(monkeypatch) -> None:
+    class Result:
+        def __init__(self, stdout: str, returncode: int = 0) -> None:
+            self.stdout = stdout
+            self.returncode = returncode
+
+    calls: list[list[str]] = []
+
+    def _run(cmd: list[str], *args: object, **kwargs: object) -> Result:
+        del args
+        calls.append(cmd)
+        if "ls-files" in cmd:
+            return Result("src/a.py\nsrc/b.py\nsrc/c.py\n")
+        timed_out_bulk_lookup = (
+            "--name-only" in cmd
+            and cmd[-3:] == [PATH_SRC_A, PATH_SRC_B, PATH_SRC_C]
+        )
+        if timed_out_bulk_lookup:
+            raise subprocess.TimeoutExpired(cmd, kwargs.get("timeout"))
+        path_start = cmd.index("--") + 1
+        return Result("__TS__1712448000\n" + "\n".join(cmd[path_start:]) + "\n")
+
+    monkeypatch.setattr(f"{SYNC_CORE_MODULE_PATH}.subprocess.run", _run)
+    monkeypatch.setattr(
+        f"{SYNC_CORE_MODULE_PATH}._resolve_git_executable", lambda: "git"
+    )
+
+    cache: dict[str, int | None] = {}
+    result = _git_last_commit_age_days_bulk(
+        Path("/repo"),
+        [PATH_SRC_A, PATH_SRC_B, PATH_SRC_C],
+        date(2026, 4, 10),
+        cache,
+        chunk_size=10,
+    )
+
+    assert result[PATH_SRC_A] is not None
+    assert result[PATH_SRC_B] is not None
+    assert result[PATH_SRC_C] is not None
+    assert len([cmd for cmd in calls if "log" in cmd]) == 3
     assert cache == result
 
 
