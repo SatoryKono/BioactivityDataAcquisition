@@ -105,6 +105,11 @@ class DataSourcePort(Protocol):
     async def health_check(self) -> HealthStatus: ...
 ```
 
+Documentation anchor: `datasource_port_fetch_includes_offset` confirms that the
+canonical `DataSourcePort.fetch(...)` contract includes the optional
+`offset: int | None = None` parameter and that docs must stay aligned with the
+live port signature.
+
 ### 1.1.2. Health Check Protocol
 
 Все адаптеры **MUST** реализовывать асинхронный метод `health_check()` возвращающий `HealthStatus` enum:

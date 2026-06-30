@@ -72,7 +72,7 @@ def _resolve_e2e_merge_execution_timeout_seconds(
     """Return the platform-aware inner Silver merge timeout for E2E runs."""
     if platform == "win32":
         return 300
-    return 300
+    return 90
 
 
 def _resolve_e2e_pipeline_matrix_execution_timeout_seconds(

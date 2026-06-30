@@ -77,7 +77,7 @@ shards:
       - --ignore=tests/architecture/test_architecture_dependency_docs_drift.py
       - --ignore=tests/architecture/test_check_doc_links_guardrails.py
       - --ignore=tests/architecture/test_compatibility_facade_inventory.py
-      - --ignore=tests/architecture/test_compatibility_importer_census_governance.py
+      - --ignore=tests/architecture/test_public_surface_importer_census_governance.py
       - --ignore=tests/architecture/test_docs_version_sync.py
       - --ignore=tests/architecture/test_documentation_sync.py
       - --ignore=tests/architecture/test_code_metrics.py
@@ -105,7 +105,7 @@ shards:
       - --ignore=tests/architecture/test_code_metrics.py
       - --ignore=tests/architecture/test_check_doc_links_guardrails.py
       - --ignore=tests/architecture/test_compatibility_facade_inventory.py
-      - --ignore=tests/architecture/test_compatibility_importer_census_governance.py
+      - --ignore=tests/architecture/test_public_surface_importer_census_governance.py
       - --ignore=tests/architecture/test_contract_coverage_matrix_drift.py
       - --ignore=tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
       - --ignore=tests/architecture/test_cli_command_import_guards.py
@@ -163,7 +163,7 @@ shards:
       - --ignore=tests/architecture/test_architecture_dependency_docs_drift.py
       - --ignore=tests/architecture/test_check_doc_links_guardrails.py
       - --ignore=tests/architecture/test_compatibility_facade_inventory.py
-      - --ignore=tests/architecture/test_compatibility_importer_census_governance.py
+      - --ignore=tests/architecture/test_public_surface_importer_census_governance.py
       - --ignore=tests/architecture/test_docs_version_sync.py
       - --ignore=tests/architecture/test_documentation_sync.py
       - --ignore=tests/architecture/test_code_metrics.py
@@ -249,7 +249,7 @@ shards:
       - tests/architecture/test_architecture_dependency_docs_drift.py
       - tests/architecture/test_check_doc_links_guardrails.py
       - tests/architecture/test_compatibility_facade_inventory.py
-      - tests/architecture/test_compatibility_importer_census_governance.py
+      - tests/architecture/test_public_surface_importer_census_governance.py
       - tests/architecture/test_contract_coverage_matrix_drift.py
       - tests/architecture/test_docs_version_sync.py
       - tests/architecture/test_documentation_sync.py

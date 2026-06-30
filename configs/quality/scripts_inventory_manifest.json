@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-30T12:52:49.675702+00:00",
+  "generated_at": "2026-06-30T13:49:42.871364+00:00",
   "summary": {
     "total_scripts": 448,
     "status_counts": {
@@ -4680,7 +4680,7 @@
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 39,
+          "line": 44,
           "source_group": "tests",
           "text": "svg2png_path = \"/\".join([\"scripts\", \"diagrams\", \"svg2png.mjs\"])"
         }
@@ -8171,13 +8171,13 @@
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 140,
+          "line": 145,
           "source_group": "tests",
           "text": "target = root / \"scripts\" / \"engineering\" / \"qa\" / \"check_docs_drift.py\""
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 156,
+          "line": 161,
           "source_group": "tests",
           "text": "for item in refs[\"scripts/engineering/qa/check_docs_drift.py\"]"
         }
@@ -10509,7 +10509,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 22,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -10693,7 +10693,7 @@
         },
         {
           "path": "tests/unit/scripts/repo/test_preflight_cleanup.py",
-          "line": 13,
+          "line": 14,
           "source_group": "tests",
           "text": "SCRIPT = ROOT / \"scripts\" / \"engineering\" / \"repo\" / \"preflight_cleanup.sh\""
         }
@@ -11598,7 +11598,7 @@
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 64,
+          "line": 69,
           "source_group": "tests",
           "text": "r\"scripts\\codex-exec.bat\","
         }

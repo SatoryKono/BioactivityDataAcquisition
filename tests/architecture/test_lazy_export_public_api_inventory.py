@@ -162,8 +162,8 @@ def test_module_level_lazy_export_public_api_surfaces_are_owner_classified() -> 
 def test_lazy_export_public_api_inventory_has_owner_test_coverage() -> None:
     """Compatibility-sensitive lazy export groups must have dedicated owner tests."""
     required_owner_tests = {
-        "tests/architecture/test_compatibility_importer_census_governance.py",
-        "tests/architecture/test_compatibility_freeze_guards.py",
+        "tests/architecture/test_public_surface_importer_census_governance.py",
+        "tests/architecture/test_removed_surface_freeze_guards.py",
         "tests/architecture/test_application_services_lazy_facade_governance.py",
         "tests/architecture/test_domain_public_api.py",
     }

@@ -33,7 +33,7 @@ LEGACY_SYMBOLS = (
 ALLOWED_LEGACY_REFERENCE_FILES = frozenset(
     {
         Path("tests/architecture/test_domain_service_canonical_imports.py"),
-        Path("tests/architecture/test_domain_service_normalization_compat_usage.py"),
+        Path("tests/architecture/test_domain_service_normalization_alias_usage.py"),
         Path("tests/architecture/test_domain_normalization_guardrails.py"),
     }
 )
