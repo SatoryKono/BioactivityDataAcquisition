@@ -8,7 +8,7 @@
     },
     "module_coverage_inventory": {
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "139ac5bd008c163d4210bba7360fd2d0ac49b7407c90f0821e92e01e4771afc6",
+      "source_tree_sha256": "3421513d95c17ae2590856169f3144d7cfe1a3f72800eb173c93fa09320025f5",
       "coverage_xml_sha256": "5550a63fb8ffe1f185cf1709777f4c4b3bc2ed042c812e7d8eb884895184cf33"
     },
     "compatibility_importer_census": {

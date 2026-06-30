@@ -29,12 +29,12 @@
     },
     {
       "current": "3421513d95c17ae2590856169f3144d7cfe1a3f72800eb173c93fa09320025f5",
-      "limit": "139ac5bd008c163d4210bba7360fd2d0ac49b7407c90f0821e92e01e4771afc6",
+      "limit": "3421513d95c17ae2590856169f3144d7cfe1a3f72800eb173c93fa09320025f5",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
       "source_artifact": "reports/quality/module-coverage-inventory.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": 0,
@@ -244,7 +244,7 @@
       "status": "pass"
     },
     {
-      "current": "624a9cdb3d283482a3042c57dd2985b2bfad290935bad7ea84b9a80dd19c97be",
+      "current": "f27654ac4f15c1877cd16d619130691ae429c57dc73772973a40860c8fede449",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -253,13 +253,13 @@
       "status": "pass"
     },
     {
-      "current": 1,
+      "current": 0,
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
       "remediation": "Regenerate stale quality artifacts with their canonical QA commands.",
       "source_artifact": "reports/quality/*.json",
-      "status": "fail"
+      "status": "pass"
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
@@ -268,25 +268,22 @@
     "adr_enforcement_matrix": false,
     "architecture_quality_scorecard": false,
     "dq_contract_registry_diagnostics": false,
-    "module_coverage_inventory": true,
+    "module_coverage_inventory": false,
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 2,
-    "pass": 27,
+    "fail": 0,
+    "pass": 29,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 8.53,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 2,
-    "failing_gates": [
-      "module_coverage_source_tree_hash_current",
-      "generated_artifact_drift"
-    ],
+    "fail_count": 0,
+    "failing_gates": [],
     "gate_count": 29,
-    "pass_count": 27,
-    "release_gate_status": "failing",
+    "pass_count": 29,
+    "release_gate_status": "passing",
     "warn_count": 0,
     "warning_gates": []
   }
