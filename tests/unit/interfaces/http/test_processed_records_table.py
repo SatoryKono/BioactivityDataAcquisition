@@ -253,6 +253,16 @@ class TestProcessedRecordsTable:
                     },
                 ),
                 RunLedgerEntry(
+                    entry_id="silver-artifact",
+                    manifest_id="manifest-chembl-target",
+                    run_id=run_id,
+                    event_type=ARTIFACT_PUBLISHED_EVENT,
+                    occurred_at=occurred_at,
+                    stage="silver",
+                    status="published",
+                    details={"stage": "silver", "record_count": 990},
+                ),
+                RunLedgerEntry(
                     entry_id="gold-artifact",
                     manifest_id="manifest-chembl-target",
                     run_id=run_id,
@@ -266,6 +276,17 @@ class TestProcessedRecordsTable:
         )
 
         rows = {row["parameter"]: row for row in payload["rows"]}
+        assert rows["02 silver_valid_records"]["value"] == (
+            "02 silver_valid_records|  990"
+        )
+        assert rows["06 silver_deduplicated_records"]["value"] == (
+            "06 silver_deduplicated_records|    3"
+        )
+        assert rows["06 silver_deduplicated_records"]["percintage"] == (
+            "06 silver_deduplicated_records|0.3%"
+        )
+        assert rows["02 silver_valid_records"]["row_status"] == ""
+        assert rows["06 silver_deduplicated_records"]["row_status"] == ""
         assert rows["07 gold_written_records"]["value"] == (
             "07 gold_written_records|  993"
         )
