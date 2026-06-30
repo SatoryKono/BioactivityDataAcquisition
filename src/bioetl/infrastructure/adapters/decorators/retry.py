@@ -39,6 +39,14 @@ from bioetl.domain.exceptions import (
 )
 from bioetl.domain.resilience import RetryConfig
 from bioetl.domain.types import HealthStatus, JsonDict
+from bioetl.infrastructure.adapters.decorators._data_source_delegation import (
+    DataSourceFetchRequest,
+    close_delegated_data_source,
+    delegated_provider_name,
+    enter_delegated_data_source,
+    exit_delegated_data_source,
+    iter_delegated_fetch,
+)
 from bioetl.infrastructure.adapters.decorators._retry_support import (
     calculate_and_wait_retry_delay,
     log_retry_attempt,
@@ -104,11 +112,11 @@ class RetryingDataSourceDecorator:
     @property
     def provider_name(self) -> str:
         """Delegate to wrapped data source."""
-        return str(self._data_source.provider_name)
+        return delegated_provider_name(self._data_source)
 
     async def __aenter__(self) -> Self:
         """Enter async context by delegating to wrapped data source."""
-        await self._data_source.__aenter__()
+        await enter_delegated_data_source(self._data_source)
         return self
 
     async def __aexit__(
@@ -118,7 +126,12 @@ class RetryingDataSourceDecorator:
         exc_tb: TracebackType | None,
     ) -> None:
         """Exit async context by delegating to wrapped data source."""
-        await self._data_source.__aexit__(exc_type, exc_val, exc_tb)
+        await exit_delegated_data_source(
+            self._data_source,
+            exc_type,
+            exc_val,
+            exc_tb,
+        )
 
     async def fetch(
         self,
@@ -132,17 +145,18 @@ class RetryingDataSourceDecorator:
         """Fetch records with retry logic."""
         last_error: Exception | None = None
         retries = 0
+        request = DataSourceFetchRequest(
+            entity_type=entity_type,
+            limit=limit,
+            query=query,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+            offset=offset,
+        )
 
         for attempt in range(self._retry_config.max_attempts):
             try:
-                async for record in self._fetch_once(
-                    entity_type=entity_type,
-                    limit=limit,
-                    query=query,
-                    filter_ids=filter_ids,
-                    filter_field=filter_field,
-                    offset=offset,
-                ):
+                async for record in self._fetch_once(request):
                     yield record
                 record_retry_metrics(
                     self._metrics,
@@ -179,30 +193,17 @@ class RetryingDataSourceDecorator:
             provider_name=self.provider_name,
             operation="fetch",
             retries=retries,
-            target=entity_type,
+            target=request.entity_type,
             max_attempts=self._retry_config.max_attempts,
             last_error=last_error,
         )
 
     async def _fetch_once(
         self,
-        *,
-        entity_type: str,
-        limit: int | None,
-        query: str | None,
-        filter_ids: list[str] | None,
-        filter_field: str | None,
-        offset: int | None,
+        request: DataSourceFetchRequest,
     ) -> AsyncIterator[JsonDict]:  # Any: untyped API JSON record
         """Run one fetch attempt against the wrapped data source."""
-        async for record in self._data_source.fetch(
-            entity_type=entity_type,
-            limit=limit,
-            query=query,
-            filter_ids=filter_ids,
-            filter_field=filter_field,
-            offset=offset,
-        ):
+        async for record in iter_delegated_fetch(self._data_source, request):
             yield record
 
     async def health_check(self) -> HealthStatus:
@@ -257,4 +258,4 @@ class RetryingDataSourceDecorator:
 
     async def aclose(self) -> None:
         """Close the wrapped data source."""
-        await self._data_source.aclose()
+        await close_delegated_data_source(self._data_source)

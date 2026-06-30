@@ -16,36 +16,17 @@ from typing import TYPE_CHECKING
 from bioetl.infrastructure.adapters.pubmed._errors import (
     PUBMED_RECORD_ERRORS as PUBMED_FETCH_ERRORS,
 )
+from bioetl.infrastructure.adapters.pubmed._state import PubMedAdapterStateMixin
 from bioetl.infrastructure.adapters.pubmed.xml_processor import PubMedXmlProcessor
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
-    from bioetl.infrastructure.adapters.common.api_request_collector import (
-        APIRequestCollector,
-    )
-    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-
 from .constants import ENTREZ_API_BASE
 
 
-class PubMedFetchMixin:
+class PubMedFetchMixin(PubMedAdapterStateMixin):
     """Mixin providing record fetching capabilities for PubMed."""
-
-    http_client: UnifiedHTTPClient
-    logger: LoggerPort
-    email: str
-    api_key: str | None
-    _http_client: UnifiedHTTPClient
-    _logger: LoggerPort
-    _adapter_metrics: AdapterMetricsRecorder
-    _request_collector: APIRequestCollector
-    _error_handler: ErrorHandlerPort
-    provider_name: str
-    batch_size: int
-    metrics: MetricsPort | None
 
     def _build_fetch_params(self, id_batch: list[str]) -> dict[str, str]:
         """Build parameters for efetch API call.

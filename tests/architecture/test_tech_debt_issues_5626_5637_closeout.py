@@ -203,7 +203,7 @@ def test_issue_5630_adapter_layer_duplication_is_below_opening_baseline() -> Non
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
 
-    assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] == 56
+    assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] <= 56
     assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] < 72
 
 

@@ -132,7 +132,7 @@ def test_issue_5658_adapter_duplication_is_below_opening_baseline() -> None:
     by_target = {target["target"]: target for target in duplication["targets"]}
     adapters = by_target["src/bioetl/infrastructure/adapters"]
 
-    assert adapters["duplicate_count"] == 56
+    assert adapters["duplicate_count"] <= 56
     assert adapters["duplicate_count"] < 63
     assert {item["category"] for item in adapters["actionability"]} == {
         "adapter_resilience_or_contract_template",

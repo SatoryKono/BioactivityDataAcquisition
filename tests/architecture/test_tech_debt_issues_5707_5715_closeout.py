@@ -1,0 +1,327 @@
+"""Closeout guards for technical-debt issues #5707 through #5715."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Any
+
+import pytest
+import yaml
+
+pytestmark = pytest.mark.architecture
+
+ROOT = Path(__file__).resolve().parents[2]
+CLOSEOUT = ROOT / "reports" / "quality" / "tech-debt-issues-5707-5715-closeout.json"
+DEBT_GATES = ROOT / "reports" / "quality" / "debt-governance-gates.json"
+MODULE_COVERAGE = ROOT / "reports" / "quality" / "module-coverage-inventory.json"
+SCORECARD = ROOT / "reports" / "quality" / "architecture-quality-scorecard.json"
+DUPLICATION = ROOT / "reports" / "quality" / "full-app-duplication-baseline.json"
+COMPATIBILITY = ROOT / "reports" / "quality" / "compatibility-importer-census.json"
+DEAD_CODE = ROOT / "reports" / "quality" / "dead-code-inventory.json"
+TEST_GOVERNANCE_REPORT = ROOT / "reports" / "quality" / "test-governance-current.json"
+TEST_GOVERNANCE_POLICY = ROOT / "configs" / "quality" / "test_governance_audit.yaml"
+TEST_MATRIX = ROOT / "configs" / "quality" / "test_matrix.yaml"
+MODULE_COVERAGE_POLICY = ROOT / "configs" / "quality" / "module_coverage_gates.yaml"
+TELEMETRY_BASELINE = ROOT / "configs" / "quality" / "test_telemetry_baseline.yaml"
+TELEMETRY_COVERAGE = ROOT / "reports" / "test-telemetry" / "coverage-summary.json"
+TELEMETRY_SLOWEST = ROOT / "reports" / "test-telemetry" / "slowest-tests.json"
+DELEGATION_HELPER = (
+    ROOT / "src" / "bioetl" / "infrastructure" / "adapters" / "decorators"
+    / "_data_source_delegation.py"
+)
+CIRCUIT_BREAKER = (
+    ROOT / "src" / "bioetl" / "infrastructure" / "adapters" / "decorators"
+    / "circuit_breaker.py"
+)
+RETRY = (
+    ROOT / "src" / "bioetl" / "infrastructure" / "adapters" / "decorators"
+    / "retry.py"
+)
+
+EXPECTED_ISSUES = {5707, 5708, 5709, 5710, 5711, 5712, 5713, 5714, 5715}
+
+
+def _load_json(path: Path) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    return payload
+
+
+def _load_yaml(path: Path) -> dict[str, Any]:
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    return payload
+
+
+def _target_row(payload: dict[str, Any], target: str) -> dict[str, Any]:
+    rows = payload["targets"]
+    assert isinstance(rows, list)
+    for row in rows:
+        if isinstance(row, dict) and row.get("target") == target:
+            return row
+    raise AssertionError(f"Missing duplication target row: {target}")
+
+
+def _gate(payload: dict[str, Any], name: str) -> dict[str, Any]:
+    gates = payload["gates"]
+    assert isinstance(gates, list)
+    for gate in gates:
+        if isinstance(gate, dict) and gate.get("name") == name:
+            return gate
+    raise AssertionError(f"Missing debt governance gate: {name}")
+
+
+def test_closeout_artifact_covers_requested_issues_5707_5715() -> None:
+    payload = _load_json(CLOSEOUT)
+
+    assert payload["schema_version"] == "tech-debt-issues-5707-5715-closeout-v1"
+    assert payload["debt_budget_outcome"] == "reduced_or_unchanged"
+    assert {issue["number"] for issue in payload["issues"]} == EXPECTED_ISSUES
+    assert all(issue["status"] == "closed-ready" for issue in payload["issues"])
+
+    for issue in payload["issues"]:
+        for relative_path in issue["evidence"]:
+            assert (ROOT / relative_path).exists(), (
+                f"Missing closeout evidence for #{issue['number']}: {relative_path}"
+            )
+
+    for name, ratchet in payload["ratchets"].items():
+        assert ratchet["current"] <= ratchet["max"], name
+
+
+def test_issue_5707_governance_artifacts_are_current_and_passing() -> None:
+    payload = _load_json(CLOSEOUT)
+    outcome = payload["outcomes"]["5707"]
+    gates = _load_json(DEBT_GATES)
+    coverage = _load_json(MODULE_COVERAGE)
+    scorecard = _load_json(SCORECARD)
+
+    assert gates["summary"]["release_gate_status"] == outcome["release_gate_status"]
+    assert gates["summary"]["fail_count"] == outcome["fail_count"] == 0
+    assert gates["summary"]["warn_count"] == outcome["warn_count"] == 0
+    assert gates["stale_artifacts"] == outcome["stale_artifacts"]
+    assert not any(gates["stale_artifacts"].values())
+    assert _gate(gates, "generated_artifact_drift")["current"] == 0
+    assert _gate(gates, "generated_artifact_drift")["status"] == "pass"
+
+    expected_hash = outcome["module_coverage_source_tree_sha256"]
+    assert coverage["source_tree_sha256"] == expected_hash
+    assert (
+        scorecard["source_artifacts"]["module_coverage_inventory"][
+            "source_tree_sha256"
+        ]
+        == expected_hash
+    )
+    assert (
+        _gate(gates, "module_coverage_source_tree_hash_current")["current"]
+        == expected_hash
+    )
+    assert scorecard["integral_score"] == outcome["architecture_quality_score"]
+    assert (
+        _gate(gates, "remote_main_architecture_debt_baseline")["current"]
+        == outcome["remote_main_baseline_fingerprint"]
+    )
+
+
+def test_issue_5708_adapter_delegation_duplication_is_bounded() -> None:
+    payload = _load_json(CLOSEOUT)
+    outcome = payload["outcomes"]["5708"]
+    duplication = _load_json(DUPLICATION)
+    adapters = _target_row(duplication, "src/bioetl/infrastructure/adapters")
+
+    assert DELEGATION_HELPER.exists()
+    helper_text = DELEGATION_HELPER.read_text(encoding="utf-8")
+    assert "delegated_provider_name" in helper_text
+    assert "enter_delegated_data_source" in helper_text
+    assert "exit_delegated_data_source" in helper_text
+    assert "close_delegated_data_source" in helper_text
+
+    for decorator_path in (CIRCUIT_BREAKER, RETRY):
+        text = decorator_path.read_text(encoding="utf-8")
+        assert "delegated_provider_name" in text
+        assert "enter_delegated_data_source" in text
+        assert "exit_delegated_data_source" in text
+        assert "close_delegated_data_source" in text
+
+    assert adapters["duplicate_count"] == outcome["adapter_duplicate_clusters"]
+    assert (
+        adapters["duplicate_count"]
+        <= outcome["adapter_duplicate_clusters_no_growth_max"]
+    )
+    assert {
+        row["category"] for row in adapters["actionability"]
+    } == set(outcome["bounded_actionability_categories"])
+
+
+def test_issue_5709_pipeline_transformer_duplication_is_no_growth() -> None:
+    payload = _load_json(CLOSEOUT)
+    outcome = payload["outcomes"]["5709"]
+    duplication = _load_json(DUPLICATION)
+    pipelines = _target_row(duplication, "src/bioetl/application/pipelines")
+
+    assert pipelines["duplicate_count"] == outcome["pipeline_duplicate_clusters"]
+    assert (
+        pipelines["duplicate_count"]
+        <= outcome["pipeline_duplicate_clusters_no_growth_max"]
+    )
+    assert pipelines["actionability"] == [
+        {
+            "category": outcome["dominant_actionability_category"],
+            "duplicate_clusters": outcome["pipeline_duplicate_clusters"],
+        }
+    ]
+    assert outcome["decision"] == "bounded_no_growth_contract_pattern"
+
+
+def test_issue_5710_architecture_performance_evidence_is_isolated() -> None:
+    payload = _load_json(CLOSEOUT)
+    outcome = payload["outcomes"]["5710"]
+    baseline = _load_yaml(TELEMETRY_BASELINE)
+    coverage = _load_json(TELEMETRY_COVERAGE)
+    slowest = _load_json(TELEMETRY_SLOWEST)
+    test_matrix = _load_yaml(TEST_MATRIX)
+
+    assert baseline["source_commit"] == outcome["telemetry_source_commit"]
+    assert coverage["source_commit"] == outcome["telemetry_source_commit"]
+    assert slowest["source_commit"] == outcome["telemetry_source_commit"]
+    assert baseline["source_run_id"] == outcome["telemetry_source_run_id"]
+    assert coverage["source_run_id"] == outcome["telemetry_source_run_id"]
+    assert slowest["source_run_id"] == outcome["telemetry_source_run_id"]
+    assert baseline["refreshed_at_utc"] == outcome["refreshed_at_utc"]
+    assert slowest["top_slowest_zones"], "slow-zone telemetry must stay published"
+
+    architecture_lane = test_matrix["test_lanes"]["lanes"]["architecture"]
+    assert architecture_lane["runner_backend"] == outcome["architecture_runner_backend"]
+    assert outcome["slow_governance_lane"] in architecture_lane["runner_options"]
+
+    probe = baseline["slow_governance_cache_probe"]["probes"][0]
+    assert probe["name"] == outcome["cache_probe"]["name"]
+    assert probe["first_duration_s"] == outcome["cache_probe"]["first_duration_s"]
+    assert probe["second_duration_s"] == outcome["cache_probe"]["second_duration_s"]
+    assert probe["improvement_factor"] == outcome["cache_probe"]["improvement_factor"]
+    assert float(probe["improvement_factor"]) > 1.0
+    assert baseline["slow_governance_cache_probe"]["lane_isolation"]["isolated"] is True
+
+
+def test_issue_5711_coverage_tail_is_zero_unmeasured_and_owner_anchored() -> None:
+    payload = _load_json(CLOSEOUT)
+    outcome = payload["outcomes"]["5711"]
+    coverage = _load_json(MODULE_COVERAGE)
+    scorecard = _load_json(SCORECARD)
+    policy = _load_yaml(MODULE_COVERAGE_POLICY)
+    summary = coverage["summary"]
+
+    assert summary["source_module_count"] == outcome["source_module_count"]
+    assert summary["unmeasured_module_count"] == outcome["unmeasured_module_count"]
+    assert summary["uncovered_module_count"] == outcome["uncovered_module_count"]
+    assert summary["status_counts"]["no_executable_lines"] == outcome[
+        "no_executable_line_modules"
+    ]
+    assert coverage["source_tree_sha256"] == outcome["source_tree_sha256"]
+    assert (
+        scorecard["metrics"]["unmeasured_module_count"]
+        == outcome["unmeasured_module_count"]
+    )
+    assert (
+        policy["aggregate_residual_ratchets"]["unmeasured_module_count"]["max_count"]
+        == 0
+    )
+    assert (
+        policy["aggregate_residual_ratchets"]["uncovered_module_count"]["max_count"]
+        == 0
+    )
+    for target in policy["coverage_tail"]["ranked_targets"]:
+        for owner_test in target["owner_tests"]:
+            assert (ROOT / owner_test).exists(), owner_test
+
+
+def test_issue_5712_retained_public_compatibility_seams_are_bounded() -> None:
+    payload = _load_json(CLOSEOUT)
+    outcome = payload["outcomes"]["5712"]
+    census = _load_json(COMPATIBILITY)
+    summary = census["summary"]
+
+    for key, expected in outcome.items():
+        assert summary[key] == expected
+
+    assert summary["retained_public_entrypoint_burden"] == 0
+    assert summary["retained_public_export_facades_with_duplicate_exports"] == 0
+    assert summary["retained_public_export_facades_with_resolution_conflicts"] == 0
+    assert summary["twin_pair_count"] == 0
+
+
+def test_issue_5713_compatibility_test_debt_is_ratcheted() -> None:
+    payload = _load_json(CLOSEOUT)
+    outcome = payload["outcomes"]["5713"]
+    report = _load_json(TEST_GOVERNANCE_REPORT)["report"]
+    policy = _load_yaml(TEST_GOVERNANCE_POLICY)
+
+    assert report["compatibility_test_files"] == outcome["compatibility_test_files"]
+    assert policy["budgets"]["compatibility_test_file_max"] == outcome[
+        "compatibility_test_file_max"
+    ]
+    assert report["compatibility_test_files"] <= policy["budgets"][
+        "compatibility_test_file_max"
+    ]
+    for key in (
+        "duplicate_test_names",
+        "duplicate_test_name_occurrences",
+        "refined_assertless_tests",
+        "markerless_test_functions",
+        "uuid4_call_sites",
+    ):
+        assert report[key] == outcome[key]
+
+
+def test_issue_5714_dead_code_governance_has_no_untriaged_candidates() -> None:
+    payload = _load_json(CLOSEOUT)
+    outcome = payload["outcomes"]["5714"]
+    dead_code = _load_json(DEAD_CODE)
+    summary = dead_code["summary"]
+
+    for key, expected in outcome.items():
+        if key == "review_window_next_review_by":
+            continue
+        assert summary[key] == expected
+
+    assert dead_code["review_window"]["next_review_by"] == outcome[
+        "review_window_next_review_by"
+    ]
+    assert summary["repo_wide_untriaged_zero_import_candidate_count"] == 0
+    assert summary["repo_wide_candidates_without_owner_tests_count"] == 0
+
+
+def test_issue_5715_no_growth_enforcement_gates_are_active() -> None:
+    payload = _load_json(CLOSEOUT)
+    outcome = payload["outcomes"]["5715"]
+    gates = _load_json(DEBT_GATES)
+    module_policy = _load_yaml(MODULE_COVERAGE_POLICY)
+    test_policy = _load_yaml(TEST_GOVERNANCE_POLICY)
+
+    assert _gate(gates, "debt_budget_growth_policy")["current"] is outcome[
+        "debt_budget_growth_allowed"
+    ]
+    assert _gate(gates, "debt_scorecard_budget_violations")["current"] == outcome[
+        "debt_scorecard_budget_violations"
+    ]
+    assert (
+        module_policy["aggregate_residual_ratchets"]["unmeasured_module_count"][
+            "max_count"
+        ]
+        == outcome["module_coverage_unmeasured_limit"]
+    )
+    assert (
+        module_policy["aggregate_residual_ratchets"]["uncovered_module_count"][
+            "max_count"
+        ]
+        == outcome["module_coverage_uncovered_limit"]
+    )
+    assert test_policy["budgets"]["compatibility_test_file_max"] == outcome[
+        "compatibility_test_file_max"
+    ]
+    assert _gate(gates, "production_uuid4_budget")["current"] == outcome[
+        "production_uuid4_budget"
+    ]
+    assert gates["summary"]["fail_count"] == 0
+    assert gates["summary"]["warning_gates"] == []

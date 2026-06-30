@@ -16,35 +16,16 @@ from typing import TYPE_CHECKING
 from bioetl.infrastructure.adapters.pubmed._errors import (
     PUBMED_RECORD_ERRORS as PUBMED_SEARCH_ERRORS,
 )
+from bioetl.infrastructure.adapters.pubmed._state import PubMedAdapterStateMixin
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from bioetl.domain.ports import ErrorHandlerPort, LoggerPort, MetricsPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
-    from bioetl.infrastructure.adapters.common.api_request_collector import (
-        APIRequestCollector,
-    )
-    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
-
 from .constants import ENTREZ_API_BASE
 
 
-class PubMedSearchMixin:
+class PubMedSearchMixin(PubMedAdapterStateMixin):
     """Mixin providing search capabilities for PubMed."""
-
-    http_client: UnifiedHTTPClient
-    logger: LoggerPort
-    email: str
-    api_key: str | None
-    _http_client: UnifiedHTTPClient
-    _logger: LoggerPort
-    _adapter_metrics: AdapterMetricsRecorder
-    _request_collector: APIRequestCollector
-    _error_handler: ErrorHandlerPort
-    provider_name: str
-    batch_size: int
-    metrics: MetricsPort | None
 
     # Provided by PubMedFetchMixin in the concrete class
     def _yield_articles_from_pmids(

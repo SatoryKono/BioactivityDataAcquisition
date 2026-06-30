@@ -28,10 +28,10 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `main`
-- Source commit: `cdecddaa00c71b65000b0d6918dcfabbfea2e707`
-- Source run id: `local-current-head-telemetry-20260630`
+- Source commit: `32f8274ca6df6944cb0a33dba5c7b2f1edbf0b4a`
+- Source run id: `origin-main-telemetry-20260630`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-06-30T05:35:46.133759+00:00`
+- Refreshed at (UTC): `2026-06-30T06:47:08.533709+00:00`
 
 ## Coverage
 
