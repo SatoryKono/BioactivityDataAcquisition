@@ -310,6 +310,7 @@ def test_resolve_e2e_temp_root_uses_system_temp_on_windows(tmp_path: Path) -> No
         platform="win32",
         posix_tmp=posix_tmp,
         fallback_tmp=str(windows_temp),
+        env={},  # Keep the assertion independent from host LOCALAPPDATA.
     )
 
     assert result == windows_temp

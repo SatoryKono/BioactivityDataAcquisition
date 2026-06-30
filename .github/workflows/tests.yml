@@ -270,7 +270,7 @@ jobs:
                       tests/architecture/test_compatibility_freeze_guards.py \
                       tests/architecture/test_compatibility_importer_census_governance.py \
                       tests/architecture/test_runtime_uuid_seam_inventory.py \
-                      tests/architecture/test_silver_filter_compatibility_surface.py \
+                      tests/architecture/test_silver_filter_identity_surface.py \
                       tests/architecture/test_quality_debt_scorecard.py \
                       -q --tb=short
 

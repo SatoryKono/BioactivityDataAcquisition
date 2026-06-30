@@ -1,18 +1,18 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-29T18:19:26.389557+00:00",
+  "generated_at": "2026-06-30T05:22:06.733966+00:00",
   "summary": {
-    "total_scripts": 444,
+    "total_scripts": 448,
     "status_counts": {
-      "active": 363,
-      "supporting": 81
+      "active": 360,
+      "supporting": 88
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 2,
       "ci": 62,
-      "docs": 155,
-      "scripts": 341,
+      "docs": 156,
+      "scripts": 345,
       "skills": 11,
       "tests": 181
     }
@@ -203,7 +203,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 150,
+          "line": 156,
           "source_group": "scripts",
           "text": "for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the"
         },
@@ -236,7 +236,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 150,
+          "line": 156,
           "source_group": "scripts",
           "text": "for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the"
         },
@@ -275,7 +275,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 150,
+          "line": 156,
           "source_group": "scripts",
           "text": "for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the"
         },
@@ -346,7 +346,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 149,
+          "line": 155,
           "source_group": "scripts",
           "text": "The canonical `headless.sh` / `headless.ps1` launchers set `CODEX_SKIP_MCP_SETUP=1`"
         }
@@ -373,7 +373,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 149,
+          "line": 155,
           "source_group": "scripts",
           "text": "The canonical `headless.sh` / `headless.ps1` launchers set `CODEX_SKIP_MCP_SETUP=1`"
         },
@@ -436,7 +436,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/QUICKSTART_WSL.md",
-          "line": 129,
+          "line": 131,
           "source_group": "scripts",
           "text": ".\\scripts\\ai\\codex\\helper\\diagnose-hang.ps1"
         },
@@ -448,19 +448,19 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 169,
+          "line": 175,
           "source_group": "scripts",
           "text": ".\\helper\\diagnose-hang.ps1"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 231,
+          "line": 237,
           "source_group": "scripts",
           "text": "- `diagnose-hang.ps1` - **NEW**: Debug tool for setup hangs"
         },
         {
           "path": "scripts/ai/codex/WSL_SETUP_INSTRUCTIONS.md",
-          "line": 181,
+          "line": 190,
           "source_group": "scripts",
           "text": ".\\helper\\diagnose-hang.ps1"
         },
@@ -483,7 +483,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 19,
       "references": [
         {
           "path": "scripts/ai/codex/QUICKSTART_WSL.md",
@@ -493,7 +493,7 @@
         },
         {
           "path": "scripts/ai/codex/WSL_SETUP_INSTRUCTIONS.md",
-          "line": 198,
+          "line": 207,
           "source_group": "scripts",
           "text": "│   ├── ensure-codex-cli.sh    # Установка Codex CLI"
         },
@@ -616,13 +616,13 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 232,
+          "line": 238,
           "source_group": "scripts",
           "text": "- `run-codex-impl.sh` - Launch Codex with environment"
         },
         {
           "path": "scripts/ai/codex/WSL_SETUP_INSTRUCTIONS.md",
-          "line": 200,
+          "line": 209,
           "source_group": "scripts",
           "text": "│   └── run-codex-impl.sh      # Реализация запуска Codex"
         },
@@ -696,19 +696,19 @@
         },
         {
           "path": "scripts/ai/codex/QUICKSTART_WSL.md",
-          "line": 134,
+          "line": 136,
           "source_group": "scripts",
           "text": "wsl -e bash -c \"bash scripts/ai/codex/helper/setup-wsl-complete.sh 2>&1 | tail -50\""
         },
         {
           "path": "scripts/ai/codex/WSL_SETUP_INSTRUCTIONS.md",
-          "line": 100,
+          "line": 109,
           "source_group": "scripts",
           "text": "bash ./helper/setup-wsl-complete.sh"
         },
         {
           "path": "scripts/ai/codex/WSL_SETUP_INSTRUCTIONS.md",
-          "line": 196,
+          "line": 205,
           "source_group": "scripts",
           "text": "│   ├── setup-wsl-complete.sh  # Полная настройка WSL"
         },
@@ -743,49 +743,49 @@
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 26,
           "source_group": "docs",
-          "text": "├── ../script-codex/helper/setup-wsl.sh          ⭐ NEW - Installation & setup"
+          "text": "├── ../scripts/ai/codex/helper/setup-wsl.sh          ⭐ NEW - Installation & setup"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 47,
           "source_group": "docs",
-          "text": "wsl -- bash ./script-codex/helper/setup-wsl.sh"
+          "text": "wsl -- bash ./scripts/ai/codex/helper/setup-wsl.sh"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 60,
           "source_group": "docs",
-          "text": "bash ./script-codex/helper/setup-wsl.sh"
+          "text": "bash ./scripts/ai/codex/helper/setup-wsl.sh"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 122,
           "source_group": "docs",
-          "text": "| `script-codex/helper/setup-wsl.sh`    | Install all dependencies & configure      | Medium     |"
+          "text": "| `scripts/ai/codex/helper/setup-wsl.sh`    | Install all dependencies & configure      | Medium     |"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 147,
           "source_group": "docs",
-          "text": "bash ./script-codex/helper/setup-wsl.sh"
+          "text": "bash ./scripts/ai/codex/helper/setup-wsl.sh"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 260,
           "source_group": "docs",
-          "text": "└─ script-codex/helper/setup-wsl.sh ─│"
+          "text": "└─ scripts/ai/codex/helper/setup-wsl.sh ─│"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 323,
           "source_group": "docs",
-          "text": "bash ./script-codex/helper/setup-wsl.sh"
+          "text": "bash ./scripts/ai/codex/helper/setup-wsl.sh"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 352,
           "source_group": "docs",
-          "text": "| **Installation Required** | ✅ Yes (`script-codex/helper/setup-wsl.sh`) |"
+          "text": "| **Installation Required** | ✅ Yes (`scripts/ai/codex/helper/setup-wsl.sh`) |"
         }
       ]
     },
@@ -800,13 +800,13 @@
           "path": "docs/05-operations/tooling/scripts-ops/INSTALLATION_COMPLETE.md",
           "line": 94,
           "source_group": "docs",
-          "text": "- `script-codex/helper/test-basic.sh` - Basic functionality test"
+          "text": "- `scripts/ai/codex/helper/test-basic.sh` - Basic functionality test"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/INSTALLATION_COMPLETE.md",
           "line": 203,
           "source_group": "docs",
-          "text": "- **Testing**: `bash ./script-codex/helper/test-basic.sh`"
+          "text": "- **Testing**: `bash ./scripts/ai/codex/helper/test-basic.sh`"
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
@@ -827,49 +827,49 @@
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 27,
           "source_group": "docs",
-          "text": "├── ../script-codex/helper/verify-setup.sh       ⭐ NEW - Verification script"
+          "text": "├── ../scripts/ai/codex/helper/verify-setup.sh       ⭐ NEW - Verification script"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 50,
           "source_group": "docs",
-          "text": "wsl -- bash ./script-codex/helper/verify-setup.sh"
+          "text": "wsl -- bash ./scripts/ai/codex/helper/verify-setup.sh"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 63,
           "source_group": "docs",
-          "text": "bash ./script-codex/helper/verify-setup.sh"
+          "text": "bash ./scripts/ai/codex/helper/verify-setup.sh"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 100,
           "source_group": "docs",
-          "text": "→ Run: script-codex/helper/verify-setup.sh (automated checker)"
+          "text": "→ Run: scripts/ai/codex/helper/verify-setup.sh (automated checker)"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 123,
           "source_group": "docs",
-          "text": "| `script-codex/helper/verify-setup.sh` | Check installation & connectivity         | Medium     |"
+          "text": "| `scripts/ai/codex/helper/verify-setup.sh` | Check installation & connectivity         | Medium     |"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 153,
           "source_group": "docs",
-          "text": "bash ./script-codex/helper/verify-setup.sh"
+          "text": "bash ./scripts/ai/codex/helper/verify-setup.sh"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 190,
           "source_group": "docs",
-          "text": "$ bash ./script-codex/helper/verify-setup.sh"
+          "text": "$ bash ./scripts/ai/codex/helper/verify-setup.sh"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 290,
           "source_group": "docs",
-          "text": "bash ./script-codex/helper/verify-setup.sh"
+          "text": "bash ./scripts/ai/codex/helper/verify-setup.sh"
         }
       ]
     },
@@ -896,43 +896,43 @@
         },
         {
           "path": "scripts/ai/codex/WSL_SETUP_INSTRUCTIONS.md",
-          "line": 116,
+          "line": 125,
           "source_group": "scripts",
           "text": ".\\launch-codex-wsl.ps1"
         },
         {
           "path": "scripts/ai/codex/WSL_SETUP_INSTRUCTIONS.md",
-          "line": 122,
+          "line": 131,
           "source_group": "scripts",
           "text": ".\\launch-codex-wsl.ps1 exec \"analyze the code\""
         },
         {
           "path": "scripts/ai/codex/WSL_SETUP_INSTRUCTIONS.md",
-          "line": 142,
+          "line": 151,
           "source_group": "scripts",
           "text": ".\\launch-codex-wsl.ps1 start          # Интерактивный режим"
         },
         {
           "path": "scripts/ai/codex/WSL_SETUP_INSTRUCTIONS.md",
-          "line": 143,
+          "line": 152,
           "source_group": "scripts",
           "text": ".\\launch-codex-wsl.ps1 exec \"prompt\"  # Авто-выполнение"
         },
         {
           "path": "scripts/ai/codex/WSL_SETUP_INSTRUCTIONS.md",
-          "line": 144,
+          "line": 153,
           "source_group": "scripts",
           "text": ".\\launch-codex-wsl.ps1 check          # Проверка окружения"
         },
         {
           "path": "scripts/ai/codex/WSL_SETUP_INSTRUCTIONS.md",
-          "line": 145,
+          "line": 154,
           "source_group": "scripts",
           "text": ".\\launch-codex-wsl.ps1 setup          # Настройка компонентов"
         },
         {
           "path": "scripts/ai/codex/WSL_SETUP_INSTRUCTIONS.md",
-          "line": 146,
+          "line": 155,
           "source_group": "scripts",
           "text": ".\\launch-codex-wsl.ps1 mcp-setup      # Настройка MCP"
         }
@@ -943,7 +943,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 110,
+      "reference_count": 111,
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
@@ -1057,7 +1057,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 10,
+      "reference_count": 11,
       "references": [
         {
           "path": "scripts/ai/codex/WSL_SETUP_INSTRUCTIONS.md",
@@ -1067,7 +1067,13 @@
         },
         {
           "path": "scripts/ai/codex/WSL_SETUP_INSTRUCTIONS.md",
-          "line": 193,
+          "line": 102,
+          "source_group": "scripts",
+          "text": ".\\setup-codex-wsl.bat"
+        },
+        {
+          "path": "scripts/ai/codex/WSL_SETUP_INSTRUCTIONS.md",
+          "line": 202,
           "source_group": "scripts",
           "text": "├── setup-codex-wsl.bat        # Batch файл для настройки WSL"
         },
@@ -1100,12 +1106,6 @@
           "line": 134,
           "source_group": "scripts",
           "text": "$setupBatPath = Join-Path -Path $ScriptDir -ChildPath \"setup-codex-wsl.bat\""
-        },
-        {
-          "path": "scripts/ai/codex/setup.ps1",
-          "line": 137,
-          "source_group": "scripts",
-          "text": "Write-Error-Message \"Script setup-codex-wsl.bat not found!\""
         }
       ]
     },
@@ -1114,8 +1114,14 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
+          "line": 35,
+          "source_group": "docs",
+          "text": ".\\scripts\\ai\\codex\\setup.ps1"
+        },
         {
           "path": "tests/architecture/test_env_file_write_governance.py",
           "line": 36,
@@ -1345,7 +1351,7 @@
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 64,
+          "line": 79,
           "source_group": "scripts",
           "text": "`gemini-interactive.sh` remains as a thin compatibility wrapper over"
         },
@@ -1402,13 +1408,13 @@
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 13,
+          "line": 16,
           "source_group": "scripts",
           "text": "├── headless.ps1                   # PowerShell transport that skips MCP sync"
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 116,
+          "line": 133,
           "source_group": "scripts",
           "text": "- `headless.sh` / `headless.ps1` set `GEMINI_SKIP_MCP_SETUP=1` for one launch and then delegate back to the canonical launcher."
         }
@@ -1435,31 +1441,31 @@
         },
         {
           "path": "scripts/ai/gemini/QUICK_REFERENCE.md",
-          "line": 60,
+          "line": 87,
           "source_group": "scripts",
           "text": "bash scripts/ai/gemini/headless.sh"
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 14,
+          "line": 17,
           "source_group": "scripts",
           "text": "├── headless.sh                    # WSL/Bash launcher without MCP sync"
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 44,
+          "line": 47,
           "source_group": "scripts",
           "text": "bash scripts/ai/gemini/headless.sh"
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 59,
+          "line": 62,
           "source_group": "scripts",
           "text": "bash scripts/ai/gemini/headless.sh exec \"...\"      # Launch without MCP sync"
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 116,
+          "line": 133,
           "source_group": "scripts",
           "text": "- `headless.sh` / `headless.ps1` set `GEMINI_SKIP_MCP_SETUP=1` for one launch and then delegate back to the canonical launcher."
         },
@@ -1516,13 +1522,13 @@
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 19,
+          "line": 22,
           "source_group": "scripts",
           "text": "│   ├── ensure-gemini-cli.sh       # Managed Gemini CLI bootstrap"
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 78,
+          "line": 93,
           "source_group": "scripts",
           "text": "`helper/ensure-gemini-cli.sh` installs `node@22` and `@google/gemini-cli@latest` into the repo-local prefix. The local Node 22 is required because current Gemini CLI uses JavaScript features unsupport"
         },
@@ -1600,7 +1606,7 @@
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 22,
+          "line": 25,
           "source_group": "scripts",
           "text": "│   └── run-gemini-impl.sh         # Runtime launcher implementation"
         },
@@ -1673,6 +1679,51 @@
       ]
     },
     {
+      "path": "scripts/ai/gemini/launch-gemini-wsl.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "├── launch-gemini-wsl.ps1          # Thin PowerShell alias over run-gemini.ps1"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 37,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ai\\gemini\\launch-gemini-wsl.ps1"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 74,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ai\\gemini\\launch-gemini-wsl.ps1 start    # Thin alias for interactive mode"
+        },
+        {
+          "path": "scripts/ai/gemini/setup-gemini-wsl.bat",
+          "line": 110,
+          "source_group": "scripts",
+          "text": "echo   - From Windows: .\\scripts\\ai\\gemini\\launch-gemini-wsl.ps1"
+        },
+        {
+          "path": "scripts/ai/gemini/setup.ps1",
+          "line": 104,
+          "source_group": "scripts",
+          "text": "Write-Host \"   .\\scripts\\ai\\gemini\\launch-gemini-wsl.ps1 start\""
+        },
+        {
+          "path": "scripts/ai/gemini/setup.ps1",
+          "line": 106,
+          "source_group": "scripts",
+          "text": "Write-Host \"   .\\scripts\\ai\\gemini\\launch-gemini-wsl.ps1 exec `\"review the current diff`\"\""
+        }
+      ]
+    },
+    {
       "path": "scripts/ai/gemini/run-gemini-docker.ps1",
       "type": "ps1",
       "status": "active",
@@ -1734,7 +1785,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 34,
       "references": [
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
@@ -1791,7 +1842,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 66,
+      "reference_count": 73,
       "references": [
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
@@ -1855,6 +1906,72 @@
           "line": 55,
           "source_group": "scripts",
           "text": "| `setup-bash-alias.sh` | Optional: Add `gemini` command alias to bash |"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/gemini/setup-gemini-wsl.bat",
+      "type": "bat",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 12,
+          "source_group": "scripts",
+          "text": "├── setup-gemini-wsl.bat           # cmd.exe WSL setup transport"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 132,
+          "source_group": "scripts",
+          "text": "- `setup.ps1` and `setup-gemini-wsl.bat` are Windows setup transports. They delegate to `run-gemini.sh setup` inside WSL and then run `mcp-check`."
+        },
+        {
+          "path": "scripts/ai/gemini/setup.ps1",
+          "line": 89,
+          "source_group": "scripts",
+          "text": "$setupBatPath = Join-Path $ScriptDir \"setup-gemini-wsl.bat\""
+        },
+        {
+          "path": "scripts/ai/gemini/setup.ps1",
+          "line": 91,
+          "source_group": "scripts",
+          "text": "Write-Error-Message \"Script setup-gemini-wsl.bat not found: $setupBatPath\""
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/gemini/setup.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "scripts/ai/gemini/QUICK_REFERENCE.md",
+          "line": 48,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ai\\gemini\\setup.ps1"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "├── setup.ps1                      # PowerShell setup orchestrator for WSL"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 34,
+          "source_group": "scripts",
+          "text": ".\\scripts\\ai\\gemini\\setup.ps1"
+        },
+        {
+          "path": "scripts/ai/gemini/README.md",
+          "line": 132,
+          "source_group": "scripts",
+          "text": "- `setup.ps1` and `setup-gemini-wsl.bat` are Windows setup transports. They delegate to `run-gemini.sh setup` inside WSL and then run `mcp-check`."
         }
       ]
     },
@@ -3697,7 +3814,7 @@
     {
       "path": "scripts/diagrams/diagram_paths.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -5062,7 +5179,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
-          "line": 44,
+          "line": 45,
           "source_group": "docs",
           "text": "- run `python -m scripts.docs check-links --links --specs --configs`"
         },
@@ -5155,7 +5272,7 @@
     {
       "path": "scripts/docs/common/paths.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -5170,7 +5287,7 @@
     {
       "path": "scripts/docs/common/xlsx.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -5984,13 +6101,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 132,
+          "line": 133,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.ci neo4j-memory`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 138,
+          "line": 139,
           "source_group": "docs",
           "text": "`python -m scripts.engineering.ci neo4j-memory-live`."
         },
@@ -6603,7 +6720,7 @@
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
-          "line": 23,
+          "line": 46,
           "source_group": "docs",
           "text": ".\\scripts\\engineering\\dev\\.setup_wsl_codex.sh"
         }
@@ -7642,7 +7759,7 @@
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 98,
+          "line": 108,
           "source_group": "docs",
           "text": "python3 scripts/engineering/diagnostics/audit_structure.py --path ."
         },
@@ -7777,7 +7894,7 @@
     {
       "path": "scripts/engineering/diagnostics/generate_src_bioetl_refactor_evidence.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -9143,7 +9260,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/grafana-dashboard-render/SKILL.md",
-          "line": 54,
+          "line": 60,
           "source_group": "docs",
           "text": "uv run python scripts/engineering/qa/report_dashboard_inventory.py --json"
         },
@@ -9361,7 +9478,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
-          "line": 62,
+          "line": 63,
           "source_group": "docs",
           "text": "generator from `scripts/engineering/qa/report_module_coverage_inventory.py`"
         },
@@ -10099,7 +10216,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 53,
+      "reference_count": 54,
       "references": [
         {
           "path": ".github/workflows/compiled-artifacts-block.yml",
@@ -10168,13 +10285,13 @@
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 97,
+          "line": 107,
           "source_group": "docs",
           "text": "python3 scripts/engineering/repo/audit_root_cleanliness.py"
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 128,
+          "line": 138,
           "source_group": "docs",
           "text": "`scripts/engineering/repo/audit_root_cleanliness.py` MUST использовать этот"
         },
@@ -10204,7 +10321,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/retention-sensitive-cleanup.md",
-          "line": 238,
+          "line": 243,
           "source_group": "docs",
           "text": "- root placement: `python scripts/engineering/repo/audit_root_cleanliness.py`"
         },
@@ -10231,13 +10348,13 @@
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 78,
+          "line": 80,
           "source_group": "scripts",
           "text": "| `check_cleanup_governance.py`  | Guard active docs/scripts against broad cleanup guidance  |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 47,
+          "line": 48,
           "source_group": "scripts",
           "text": "\"check-cleanup-governance\": \"check_cleanup_governance.py\","
         }
@@ -10276,9 +10393,30 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 45,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"check-actions-runtime-policy\": \"check_github_actions_runtime_policy.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/repo/check_root_governance_docs.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/README.md",
+          "line": 23,
+          "source_group": "scripts",
+          "text": "| `check-root-governance-docs` | `check_root_governance_docs.py` | Validate prose root-governance docs against allowlist/catalog sources |"
+        },
+        {
+          "path": "scripts/engineering/repo/__main__.py",
+          "line": 49,
+          "source_group": "scripts",
+          "text": "\"check-root-governance-docs\": \"check_root_governance_docs.py\","
         }
       ]
     },
@@ -10291,13 +10429,13 @@
       "references": [
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 23,
+          "line": 24,
           "source_group": "scripts",
           "text": "| `check-root-review-registry` | `check_root_hygiene_review_registry.py` | Validate review-required and blocked cleanup lanes              |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 48,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"check-root-review-registry\": \"check_root_hygiene_review_registry.py\","
         }
@@ -10432,7 +10570,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 44,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"check-versions\": \"check_version_consistency.py\","
         }
@@ -10447,37 +10585,37 @@
       "references": [
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 37,
+          "line": 38,
           "source_group": "scripts",
           "text": "bash scripts/engineering/repo/cleanup_branch_candidates.sh"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 38,
+          "line": 39,
           "source_group": "scripts",
           "text": "bash scripts/engineering/repo/cleanup_branch_candidates.sh --apply"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 39,
+          "line": 40,
           "source_group": "scripts",
           "text": "bash scripts/engineering/repo/cleanup_branch_candidates.sh --apply --with-remote"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 52,
+          "line": 53,
           "source_group": "scripts",
           "text": "`cleanup_branch_candidates.sh` when you want the same workflow through a"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 80,
+          "line": 82,
           "source_group": "scripts",
           "text": "| `cleanup_branch_candidates.sh` | Dry-run/apply cleanup for the curated branch deletion set |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 52,
+          "line": 54,
           "source_group": "scripts",
           "text": "\"cleanup-branch-candidates\": \"cleanup_branch_candidates.sh\","
         },
@@ -10510,7 +10648,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 42,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"sync-wrapper-caller-matrix\": \"generate_scripts_wrapper_caller_matrix.py\","
         }
@@ -10531,19 +10669,19 @@
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 24,
+          "line": 25,
           "source_group": "scripts",
           "text": "| `preflight-cleanup`     | `preflight_cleanup.sh`           | Preview/apply the bounded release-preflight cleanup set               |"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 79,
+          "line": 81,
           "source_group": "scripts",
           "text": "| `preflight_cleanup.sh`         | Bounded release-preflight cleanup helper                  |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 49,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"preflight-cleanup\": \"preflight_cleanup.sh\","
         }
@@ -10558,13 +10696,13 @@
       "references": [
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 25,
+          "line": 26,
           "source_group": "scripts",
           "text": "| `split-testing-roadmap` | `split_testing_roadmap_issue.py` | Preview or create child issues for testing roadmap issue `#2511`      |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 50,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"split-testing-roadmap\": \"split_testing_roadmap_issue.py\","
         }
@@ -10579,13 +10717,13 @@
       "references": [
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 26,
+          "line": 27,
           "source_group": "scripts",
           "text": "| `sync-docs-issues`      | `sync_docs_issues.py`            | Preview or apply labels, milestone, and comments for docs-sync issues |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 51,
+          "line": 53,
           "source_group": "scripts",
           "text": "\"sync-docs-issues\": \"sync_docs_issues.py\","
         }
@@ -10600,7 +10738,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 41,
+          "line": 42,
           "source_group": "scripts",
           "text": "\"sync-inventory\": \"sync_scripts_inventory.py\","
         }
@@ -10635,7 +10773,7 @@
           "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
           "line": 144,
           "source_group": "docs",
-          "text": "| `src/bioetl/interfaces/cli/commands/run.py` | Permanent public run command seam over the retained domain helper modules under `bioetl.interfaces.cli.commands.domains.run`. | `bioetl.interfaces.cli.c"
+          "text": "| `src/bioetl/interfaces/cli/commands/run.py` | Permanent public run command seam over the retained domain helper package under `bioetl.interfaces.cli.commands.domains.run`. | `bioetl.interfaces.cli.c"
         },
         {
           "path": "docs/02-architecture/07-compatibility-facade-snapshot.md",
@@ -10738,49 +10876,49 @@
       "references": [
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 61,
+          "line": 62,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync`"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 102,
+          "line": 103,
           "source_group": "docs",
           "text": "Для cleanup-режима используй `python -m scripts.memory sync --apply --prune-stale`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 106,
+          "line": 107,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync --export /tmp/storage-memory.json --only-storage-layer`,"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 107,
+          "line": 108,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync --export /tmp/runtime-memory.json --only-runtime-evidence-layer`,"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 108,
+          "line": 109,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync --export /tmp/workflow-memory.json --only-workflow-graph`,"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 109,
+          "line": 110,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync --export /tmp/docs-drift-memory.json --only-docs-drift`."
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 110,
+          "line": 111,
           "source_group": "docs",
           "text": "Для audit/report режима используй `python -m scripts.memory sync --report /tmp/neo4j-memory-audit.json`:"
         },
         {
           "path": "docs/00-project/ai/memory/README.md",
-          "line": 114,
+          "line": 115,
           "source_group": "docs",
           "text": "`python -m scripts.memory sync --report-fast --report /tmp/neo4j-memory-audit.json`:"
         }
@@ -10797,7 +10935,7 @@
     {
       "path": "scripts/memory/prompts/print_seed.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -11012,7 +11150,7 @@
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
-          "line": 51,
+          "line": 74,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\codex-exec.bat \"fix all TODO comments in the codebase\""
         },
@@ -11406,7 +11544,7 @@
       "references": [
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
-          "line": 134,
+          "line": 157,
           "source_group": "docs",
           "text": "- `scripts/ops/launchers/codex/codex-exec.bat` - Auto-execution launcher"
         },
@@ -11610,7 +11748,7 @@
       "references": [
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
-          "line": 133,
+          "line": 156,
           "source_group": "docs",
           "text": "- `scripts/ops/launchers/codex/codex.bat` - Main launcher (interactive & prompt modes)"
         },
@@ -11976,7 +12114,7 @@
     {
       "path": "scripts/ops/migrations/oneoff/migrate_exemption_keys_to_paths.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -11991,7 +12129,7 @@
     {
       "path": "scripts/ops/migrations/oneoff/migrate_vcr_extensionless.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -12633,7 +12771,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/grafana-dashboard-render/SKILL.md",
-          "line": 144,
+          "line": 150,
           "source_group": "docs",
           "text": "- Repo env bootstrap: `scripts/ops/support/load_repo_env.sh`"
         },
@@ -12690,7 +12828,7 @@
         },
         {
           "path": "tests/architecture/test_root_hygiene_workflow.py",
-          "line": 50,
+          "line": 52,
           "source_group": "tests",
           "text": "assert \"cleanup_repository.py\" in workflow"
         }

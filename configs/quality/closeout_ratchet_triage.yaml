@@ -197,3 +197,8 @@ entries:
     classification: budget_closeout_ratchet
     live_guard: "debt issue batch #5670-#5675 remains aligned with live governance, compatibility, duplication, shim-expiry, and compatibility-test boundary evidence without budget growth."
     rationale: Keeps the residual TDX closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issues_5677_5685_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue batch #5677-#5685 remains aligned with live contract-coverage, duplication, compatibility, test-governance, dead-code, and observability freshness evidence without budget growth."
+    rationale: Keeps the newest residual TDX closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
