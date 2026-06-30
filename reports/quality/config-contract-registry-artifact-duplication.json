@@ -52,12 +52,12 @@
   "schema_version": 1,
   "scope_file_counts": {
     "config": 157,
-    "contract": 42,
+    "contract": 44,
     "golden": 20,
     "quality_report": 8,
     "registry": 18
   },
-  "total_files": 245,
+  "total_files": 247,
   "tracked_extensions": [
     ".csv",
     ".json",

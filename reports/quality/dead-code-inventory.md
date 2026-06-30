@@ -6,10 +6,10 @@
 - next_review_by: 2026-09-14
 - review_cycle_days: 90
 - triaged_entry_count: 18
-- repo_wide_zero_import_candidate_count: 10
-- repo_wide_classified_zero_import_candidate_count: 10
+- repo_wide_zero_import_candidate_count: 9
+- repo_wide_classified_zero_import_candidate_count: 9
 - repo_wide_untriaged_zero_import_candidate_count: 0
-- repo_wide_owner_test_anchored_candidate_count: 10
+- repo_wide_owner_test_anchored_candidate_count: 9
 - repo_wide_candidates_without_owner_tests_count: 0
 - repo_wide_non_static_reachability_candidate_count: 1
 - triaged_retained_owner_test_anchored_count: 14
@@ -48,7 +48,6 @@
 | `bioetl.domain.ports.data_normalization` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/data_normalization.py` |
 | `bioetl.domain.ports.data_source` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/data_source.py` |
 | `bioetl.domain.ports.delta_reader` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/delta_reader.py` |
-| `bioetl.domain.ports.export` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/export.py` |
 | `bioetl.domain.ports.filtering` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/filtering.py` |
 | `bioetl.domain.ports.idmapping` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/idmapping.py` |
 | `bioetl.domain.ports.pii` | `retain_canonical_owner_module` | `src/bioetl/domain/ports/pii.py` |
@@ -77,7 +76,6 @@
 | `repo_wide_zero_import` | `src/bioetl/domain/ports/data_normalization.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
 | `repo_wide_zero_import` | `src/bioetl/domain/ports/data_source.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
 | `repo_wide_zero_import` | `src/bioetl/domain/ports/delta_reader.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
-| `repo_wide_zero_import` | `src/bioetl/domain/ports/export.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
 | `repo_wide_zero_import` | `src/bioetl/domain/ports/filtering.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
 | `repo_wide_zero_import` | `src/bioetl/domain/ports/idmapping.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |
 | `repo_wide_zero_import` | `src/bioetl/domain/ports/pii.py` | `canonical_owner_contract` | `tests/architecture/test_domain_public_api.py`, `tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py`, `tests/architecture/test_port_contracts.py` |

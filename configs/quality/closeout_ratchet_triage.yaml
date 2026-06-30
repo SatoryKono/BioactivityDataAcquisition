@@ -32,6 +32,11 @@ entries:
     classification: live_inventory_ratchet
     live_guard: application core closeout artifact must keep matching module coverage inventory.
     rationale: Keeps application-core coverage closeout evidence tied to the live module inventory.
+  - path: tests/architecture/test_observability_export_dashboard_rollout_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "observability/export/dashboard issue batch #5716-#5728 remains aligned with live rollout contracts, security policy, dashboards, and no-growth ratchets."
+    rationale: Keeps the observability/export/dashboard closeout program tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
   - path: tests/architecture/test_p1_config_topology_closeout.py
     disposition: retain_active
     classification: active_architecture_guard

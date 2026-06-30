@@ -86,9 +86,6 @@
 00-project/ai/skills/local/generating-constrained-specs/references/prd-template.md
 00-project/ai/skills/local/grafana-dashboard-extension/SKILL.md
 00-project/ai/skills/local/grafana-dashboard-render/SKILL.md
-00-project/ai/skills/local/py-reproducibility-audit/SKILL.md
-00-project/ai/skills/local/py-reproducibility-audit/references/github-issue-design.md
-00-project/ai/skills/local/py-reproducibility-audit/references/reproducibility-audit.md
 00-project/ai/skills/local/hierarchical-evidence-orchestration/references/orchestration-contract.md
 00-project/ai/skills/local/hierarchical-evidence-orchestration/references/shard-task-briefs.md
 00-project/ai/skills/local/initializing-ledger/references/brief-template.md
@@ -231,3 +228,5 @@ refactoring_plans/runtime_metadata_factory_refactoring_plan.md
 ru/00-project/index.md
 ru/INDEX.md
 ru/README.md
+security/export-policy.md
+security/rbac-matrix.md

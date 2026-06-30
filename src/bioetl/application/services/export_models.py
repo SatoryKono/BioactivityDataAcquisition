@@ -9,6 +9,8 @@ from typing import Literal
 from bioetl.domain.types import JsonDict
 
 ExportFormat = Literal["csv", "xlsx", "tsv"]
+ExportRole = Literal["viewer", "investigator", "exporter", "admin"]
+ExportRedactionProfile = Literal["default", "none"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -56,6 +58,11 @@ class ExportOptions:
     allow_nondeterministic_manifest_timestamp: bool = True
     run_ids: tuple[str, ...] = ()
     code_revision: str | None = None
+    requester: str | None = None
+    role: ExportRole = "viewer"
+    filters_hash: str | None = None
+    expires_at: str | None = None
+    redaction_profile: ExportRedactionProfile = "default"
 
 
 @dataclass(frozen=True, slots=True)
@@ -69,6 +76,11 @@ class ExportResult:
     row_count: int
     error: str | None = None
     manifest_paths: tuple[Path, ...] = ()
+    audit_ref: str | None = None
+    checksum_manifest_path: Path | None = None
+    expires_at: str | None = None
+    redaction_profile: ExportRedactionProfile | None = None
+    redacted_columns: tuple[str, ...] = ()
 
     @property
     def success(self) -> bool:
@@ -80,7 +92,9 @@ __all__ = [
     "ColumnInfo",
     "ExportFormat",
     "ExportOptions",
+    "ExportRedactionProfile",
     "ExportResult",
+    "ExportRole",
     "TableInfo",
     "TablePreview",
 ]

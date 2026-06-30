@@ -178,6 +178,12 @@ def _build_export_options(
     output: Path | None,
     limit: int | None,
     columns: str | None,
+    *,
+    requester: str | None = None,
+    role: str = "viewer",
+    filters_hash: str | None = None,
+    expires_at: str | None = None,
+    redaction_profile: str = "default",
 ) -> ExportOptions:
     """Build validated ExportOptions from CLI parameters."""
     return ExportOptions(
@@ -185,6 +191,15 @@ def _build_export_options(
         output_path=output,
         limit=limit,
         columns=_parse_columns(columns),
+        requester=requester,
+        role=role
+        if role in {"viewer", "investigator", "exporter", "admin"}
+        else "viewer",
+        filters_hash=filters_hash,
+        expires_at=expires_at,
+        redaction_profile=(
+            redaction_profile if redaction_profile in {"default", "none"} else "default"
+        ),
     )
 
 

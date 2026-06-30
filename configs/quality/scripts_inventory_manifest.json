@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-30T05:47:48.025416+00:00",
+  "generated_at": "2026-06-30T09:47:53.699471+00:00",
   "summary": {
     "total_scripts": 448,
     "status_counts": {
@@ -9514,7 +9514,7 @@
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 715,
+          "line": 716,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_module_coverage_inventory.py\""
         }

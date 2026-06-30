@@ -52,6 +52,7 @@ shards:
       - tests/unit/domain/config
       - tests/unit/domain/configs
       - tests/unit/domain/registry
+      - tests/unit/domain/services
       - tests/unit/domain/test_*.py
     workers_override: 0
   - name: S2-comp-iface
@@ -146,6 +147,7 @@ shards:
     paths:
       - tests/unit/application/services
       - tests/unit/application/pipelines
+      - tests/unit/application/workflow
     workers_override: 0
   - name: S7-crosscutting-architecture-b
     wave: 2
@@ -185,15 +187,29 @@ shards:
       - tests/unit/infrastructure/adapters
       - tests/unit/infrastructure/storage
       - tests/integration/adapters
+      - tests/integration/infrastructure/storage
       - tests/integration/interfaces
   - name: S6-crosscutting-unit
     wave: 3
     paths:
+      - tests/unit/infrastructure/adr
+      - tests/unit/infrastructure/audit
+      - tests/unit/infrastructure/checkpoint
       - tests/unit/infrastructure/config
       - tests/unit/infrastructure/control_plane
-      - tests/unit/infrastructure/quality
+      - tests/unit/infrastructure/errors
+      - tests/unit/infrastructure/export
+      - tests/unit/infrastructure/factories
+      - tests/unit/infrastructure/locking
       - tests/unit/infrastructure/observability
+      - tests/unit/infrastructure/quality
       - tests/unit/infrastructure/schemas
+      - tests/unit/infrastructure/security
+      - tests/unit/infrastructure/serialization
+      - tests/unit/infrastructure/system
+      - tests/unit/infrastructure/test_*.py
+      - tests/unit/infrastructure/time
+      - tests/unit/infrastructure/validation
   - name: S7-crosscutting-architecture-c
     wave: 3
     paths:
@@ -265,8 +281,11 @@ shards:
     paths:
       - tests/integration/pipelines
       - tests/integration/chembl
+      - tests/integration/workflow
+      - tests/integration/test_organism_classification_csv_coverage.py
       - tests/contract
       - tests/smoke
+      - tests/unit/repo_backed
     workers_override: 0
     extra_pytest_args:
       - --timeout=300

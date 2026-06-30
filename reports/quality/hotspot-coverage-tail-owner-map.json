@@ -17,7 +17,7 @@
   "families": [
     {
       "family": "application_core",
-      "current_min_coverage_percent": 61.11,
+      "current_min_coverage_percent": 76.92,
       "tail_module": "bioetl.application.core.wiring",
       "tail_path": "src/bioetl/application/core/wiring/__init__.py",
       "current_missing_lines": 7,
@@ -31,7 +31,7 @@
     },
     {
       "family": "application_services_control_plane",
-      "current_min_coverage_percent": 68.18,
+      "current_min_coverage_percent": 81.21,
       "tail_module": "bioetl.application.services.control_plane.workflow.execution_preparation_incremental",
       "tail_path": "src/bioetl/application/services/control_plane/workflow/execution_preparation_incremental.py",
       "current_missing_lines": 7,
@@ -57,7 +57,7 @@
     },
     {
       "family": "composition_runtime_builders",
-      "current_min_coverage_percent": 77.78,
+      "current_min_coverage_percent": 78.95,
       "tail_module": "bioetl.composition.runtime_builders",
       "tail_path": "src/bioetl/composition/runtime_builders/__init__.py",
       "current_missing_lines": 2,

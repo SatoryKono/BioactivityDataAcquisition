@@ -267,7 +267,8 @@ def collect_test_governance_snapshot(
     repo_root: Path = _REPO_ROOT,
 ) -> TestGovernanceDebtSnapshot:
     """Collect static test-governance counters from the cached governance scanner."""
-    report = collect_test_governance_report(repo_root)
+    payload = collect_test_governance_report(repo_root)
+    report = payload["report"]
     return TestGovernanceDebtSnapshot(
         compatibility_test_files=int(report["compatibility_test_files"]),
         refined_assertless_tests=int(report["refined_assertless_tests"]),

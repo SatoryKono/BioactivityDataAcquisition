@@ -90,6 +90,37 @@ def test_build_export_sidecar_payloads_includes_composite_provider_licenses() ->
     )
 
 
+def test_build_export_sidecar_payloads_records_governed_export_metadata() -> None:
+    sidecars = build_export_sidecar_payloads(
+        table_name="chembl.activity",
+        layer="silver",
+        export_format="csv",
+        row_count=2,
+        columns=("activity_id", "molecule_id"),
+        data_fingerprint=_fingerprint(),
+        generated_at="2026-04-28T00:00:00Z",
+        requester="operator@example.test",
+        role="viewer",
+        filters_hash="filters-sha256",
+        expires_at="2026-05-01T00:00:00Z",
+        redaction_profile="default",
+        audit_ref="export-audit:abc123",
+        redacted_columns=("raw_payload",),
+    )
+
+    governance = sidecars.provenance_manifest["export_governance"]
+
+    assert governance == {
+        "audit_ref": "export-audit:abc123",
+        "requester": "operator@example.test",
+        "role": "viewer",
+        "filters_hash": "filters-sha256",
+        "expires_at": "2026-05-01T00:00:00Z",
+        "redaction_profile": "default",
+        "redacted_columns": ["raw_payload"],
+    }
+
+
 def test_build_export_sidecar_payloads_unknown_provider_strict_mode_fails() -> None:
     with pytest.raises(ValueError, match="Missing provider attribution"):
         build_export_sidecar_payloads(

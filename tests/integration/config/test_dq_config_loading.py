@@ -460,6 +460,8 @@ class TestRealConfigValidation:
 
         for path in contract_paths:
             payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+            if payload.get("schema_version") == "error-catalog-v1":
+                continue
             assert "strict_dq_validation" in payload
             assert "strict_validation" not in payload
 

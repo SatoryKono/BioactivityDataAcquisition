@@ -258,6 +258,10 @@ def _collect_orphan_contract_files(
         if len(relative.parts) < 2:
             continue
         provider = relative.parts[0]
+        # Error catalog and other non-DQ registries live under configs/contracts
+        # but are governed outside contract-registry parity checks.
+        if provider == "errors":
+            continue
         entity = relative.stem
         contract_ref = f"{provider}.{entity}"
         if contract_ref in known_contract_refs:

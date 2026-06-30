@@ -134,7 +134,7 @@ def test_issue_5600_zero_import_inventory_is_owned_and_time_bounded() -> None:
     inventory = _load_json(DEAD_CODE_INVENTORY)
     summary = inventory["summary"]
 
-    assert summary["repo_wide_zero_import_candidate_count"] == 10
+    assert summary["repo_wide_zero_import_candidate_count"] <= 9
     assert summary["repo_wide_untriaged_zero_import_candidate_count"] == 0
     assert summary["repo_wide_candidates_without_owner_tests_count"] == 0
     assert summary["triaged_retained_without_owner_tests_count"] == 0

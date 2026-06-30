@@ -218,7 +218,7 @@ class TestCheckpointPortProperties:
     def test_save_load_roundtrip_preserves_data(
         self, pipeline: str, metadata: dict[str, Any]
     ) -> None:
-        """Property: save() followed by load() MUST preserve data exactly."""
+        """Property: save() followed by load() preserves caller metadata."""
         import tempfile
 
         from bioetl.infrastructure.checkpoint.local_checkpoint import (
@@ -240,9 +240,18 @@ class TestCheckpointPortProperties:
                     loaded_run_id, loaded_metadata = result
 
                     assert loaded_run_id == run_id, "Run ID mismatch after roundtrip"
-                    assert loaded_metadata == metadata, (
-                        "Metadata mismatch after roundtrip"
-                    )
+                    for key, expected_value in metadata.items():
+                        assert loaded_metadata[key] == expected_value, (
+                            "Caller metadata mismatch after roundtrip"
+                        )
+
+                    extra_keys = set(loaded_metadata) - set(metadata)
+                    assert extra_keys <= {"checkpoint_saved_at_epoch_seconds"}
+                    if "checkpoint_saved_at_epoch_seconds" not in metadata:
+                        assert isinstance(
+                            loaded_metadata["checkpoint_saved_at_epoch_seconds"],
+                            float,
+                        )
                 finally:
                     await checkpoint.aclose()
 

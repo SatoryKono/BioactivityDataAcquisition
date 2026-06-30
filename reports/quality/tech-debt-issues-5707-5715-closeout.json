@@ -151,9 +151,9 @@
         "module_coverage_inventory": false,
         "remote_main_baseline": false
       },
-      "module_coverage_source_tree_sha256": "166b4bfec0242d28e3c237510c7540750a460c2286fe6ff597ca66f3a2286359",
+      "module_coverage_source_tree_sha256": "2430fafb9dd04a6adb5db01e846f22e88d1ce6f34e14fec94c0c239a0a7da09b",
       "architecture_quality_score": 8.46,
-      "remote_main_baseline_fingerprint": "0a84dd3a617d23580ebfa1c18331035b1507448ba344205485e5c9667930e2e1"
+      "remote_main_baseline_fingerprint": "9ccb5a9761a4c97a98c9fd9b7f51c75c60632cf3cf996413ecde1df856d6af8c"
     },
     "5708": {
       "shared_delegation_helper": "src/bioetl/infrastructure/adapters/decorators/_data_source_delegation.py",
@@ -178,7 +178,7 @@
     "5710": {
       "telemetry_source_commit": "32f8274ca6df6944cb0a33dba5c7b2f1edbf0b4a",
       "telemetry_source_run_id": "origin-main-telemetry-20260630",
-      "refreshed_at_utc": "2026-06-30T06:47:08.533709+00:00",
+      "refreshed_at_utc": "2026-06-30T09:12:47.196108+00:00",
       "architecture_runner_backend": "run_pytest_sharded",
       "slow_governance_lane": "S7-architecture-slow-governance",
       "cache_probe": {
@@ -189,11 +189,11 @@
       }
     },
     "5711": {
-      "source_module_count": 2190,
+      "source_module_count": 2191,
       "unmeasured_module_count": 0,
       "uncovered_module_count": 0,
-      "no_executable_line_modules": 17,
-      "source_tree_sha256": "166b4bfec0242d28e3c237510c7540750a460c2286fe6ff597ca66f3a2286359"
+      "no_executable_line_modules": 0,
+      "source_tree_sha256": "2430fafb9dd04a6adb5db01e846f22e88d1ce6f34e14fec94c0c239a0a7da09b"
     },
     "5712": {
       "retained_entrypoint_count": 12,
@@ -213,10 +213,10 @@
       "uuid4_call_sites": 0
     },
     "5714": {
-      "repo_wide_zero_import_candidate_count": 10,
-      "repo_wide_classified_zero_import_candidate_count": 10,
+      "repo_wide_zero_import_candidate_count": 9,
+      "repo_wide_classified_zero_import_candidate_count": 9,
       "repo_wide_untriaged_zero_import_candidate_count": 0,
-      "repo_wide_owner_test_anchored_candidate_count": 10,
+      "repo_wide_owner_test_anchored_candidate_count": 9,
       "repo_wide_candidates_without_owner_tests_count": 0,
       "review_window_next_review_by": "2026-09-14"
     },

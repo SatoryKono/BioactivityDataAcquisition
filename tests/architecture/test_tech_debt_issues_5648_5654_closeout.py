@@ -204,7 +204,7 @@ def test_issue_5653_dead_code_review_window_is_fully_triaged() -> None:
     inventory = _load_json(DEAD_CODE_INVENTORY)
     summary = inventory["summary"]
 
-    assert summary["repo_wide_zero_import_candidate_count"] == 10
+    assert summary["repo_wide_zero_import_candidate_count"] <= 9
     assert (
         summary["repo_wide_classified_zero_import_candidate_count"]
         == summary["repo_wide_zero_import_candidate_count"]

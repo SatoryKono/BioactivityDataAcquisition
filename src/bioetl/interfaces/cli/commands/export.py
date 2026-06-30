@@ -86,6 +86,32 @@ def get_export_service() -> ExportService:
     "-c",
     help="Comma-separated list of columns to include",
 )
+@click.option(
+    "--requester",
+    help="Requester identity for governed export audit metadata",
+)
+@click.option(
+    "--role",
+    type=click.Choice(["viewer", "investigator", "exporter", "admin"]),
+    default="viewer",
+    show_default=True,
+    help="Governed export role used for redaction policy",
+)
+@click.option(
+    "--filters-hash",
+    help="Stable SHA/hash of the query filters used for parity auditing",
+)
+@click.option(
+    "--expires-at",
+    help="ISO-8601 expiry timestamp for governed export download semantics",
+)
+@click.option(
+    "--redaction-profile",
+    type=click.Choice(["default", "none"]),
+    default="default",
+    show_default=True,
+    help="Export redaction profile; 'none' requires a privileged role",
+)
 def export_command(
     table: str | None,
     list_tables: bool,
@@ -95,6 +121,11 @@ def export_command(
     output: Path | None,
     limit: int | None,
     columns: str | None,
+    requester: str | None,
+    role: str,
+    filters_hash: str | None,
+    expires_at: str | None,
+    redaction_profile: str,
 ) -> None:
     """Export Delta Lake tables.
 
@@ -118,5 +149,10 @@ def export_command(
         output=output,
         limit=limit,
         columns=columns,
+        requester=requester,
+        role=role,
+        filters_hash=filters_hash,
+        expires_at=expires_at,
+        redaction_profile=redaction_profile,
     )
     _run_export(service=service, table=resolved_table, layer=layer, options=options)

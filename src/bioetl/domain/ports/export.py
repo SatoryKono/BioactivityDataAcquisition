@@ -3,11 +3,46 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import StrEnum
 from typing import Literal, Protocol, runtime_checkable
 
-__all__ = ["ExportCatalogPort", "ExportFileFingerprint", "ExportWriterPort"]
+__all__ = [
+    "ExportCatalogPort",
+    "ExportFileFingerprint",
+    "ExportJobStatus",
+    "ExportRedactionProfile",
+    "ExportRole",
+    "ExportWriterPort",
+]
 
 ExportFormatLiteral = Literal["csv", "xlsx", "tsv"]
+
+
+class ExportJobStatus(StrEnum):
+    """Governed export job lifecycle states for projections and audit trails."""
+
+    REQUESTED = "requested"
+    AUTHORIZED = "authorized"
+    MATERIALIZED = "materialized"
+    EXPIRED = "expired"
+    REVOKED = "revoked"
+    FAILED = "failed"
+
+
+class ExportRole(StrEnum):
+    """Bounded export access roles used by application services and interfaces."""
+
+    VIEWER = "viewer"
+    INVESTIGATOR = "investigator"
+    EXPORTER = "exporter"
+    ADMIN = "admin"
+
+
+class ExportRedactionProfile(StrEnum):
+    """Stable redaction profiles for governed exports."""
+
+    DEFAULT = "default"
+    NONE = "none"
 
 
 @dataclass(frozen=True, slots=True)

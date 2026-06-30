@@ -296,6 +296,16 @@ def echo_export_result(result: ExportResult) -> None:
     if result.success:
         click.echo(f"\nExported {result.row_count:,} rows to {result.format.upper()}")
         click.echo(f"Output: {result.output_path}")
+        if result.audit_ref:
+            click.echo(f"Audit ref: {result.audit_ref}")
+        if result.expires_at:
+            click.echo(f"Expires at: {result.expires_at}")
+        if result.redaction_profile:
+            click.echo(f"Redaction profile: {result.redaction_profile}")
+        if result.redacted_columns:
+            click.echo(f"Redacted columns: {', '.join(result.redacted_columns)}")
+        if result.checksum_manifest_path:
+            click.echo(f"Checksum manifest: {result.checksum_manifest_path}")
         if result.manifest_paths:
             click.echo("Manifests:")
             for manifest_path in result.manifest_paths:

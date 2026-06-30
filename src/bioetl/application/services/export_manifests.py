@@ -67,6 +67,13 @@ def build_export_sidecar_payloads(
     clock: ClockPort | None = None,
     run_ids: tuple[str, ...] = (),
     code_revision: str | None = None,
+    requester: str | None = None,
+    role: str = "viewer",
+    filters_hash: str | None = None,
+    expires_at: str | None = None,
+    redaction_profile: str = "default",
+    audit_ref: str | None = None,
+    redacted_columns: tuple[str, ...] = (),
     strict: bool = False,
 ) -> ExportSidecarPayloads:
     """Build deterministic provenance and licensing payloads for one export."""
@@ -89,8 +96,64 @@ def build_export_sidecar_payloads(
         clock=clock,
     )
     exported_data_file = _fingerprint_payload(data_fingerprint)
+    return ExportSidecarPayloadsRecord(
+        dataset_bundle_id=dataset_bundle_id,
+        provenance_manifest=_build_export_provenance_manifest(
+            table_name=table_name,
+            layer=layer,
+            export_format=export_format,
+            row_count=row_count,
+            columns=columns,
+            providers=providers,
+            provider_entries=provider_entries,
+            dataset_bundle_id=dataset_bundle_id,
+            timestamp=timestamp,
+            data_fingerprint=data_fingerprint,
+            exported_data_file=exported_data_file,
+            code_revision=code_revision,
+            run_ids=run_ids,
+            requester=requester,
+            role=role,
+            filters_hash=filters_hash,
+            expires_at=expires_at,
+            redaction_profile=redaction_profile,
+            audit_ref=audit_ref,
+            redacted_columns=redacted_columns,
+        ),
+        licensing_manifest=_build_export_licensing_manifest(
+            providers=providers,
+            provider_entries=provider_entries,
+            dataset_bundle_id=dataset_bundle_id,
+            timestamp=timestamp,
+        ),
+    )
 
-    provenance_manifest: dict[str, object] = {
+
+def _build_export_provenance_manifest(
+    *,
+    table_name: str,
+    layer: str,
+    export_format: str,
+    row_count: int,
+    columns: tuple[str, ...],
+    providers: tuple[str, ...],
+    provider_entries: tuple[dict[str, object], ...],
+    dataset_bundle_id: str,
+    timestamp: str,
+    data_fingerprint: ExportFileFingerprint,
+    exported_data_file: dict[str, object],
+    code_revision: str | None,
+    run_ids: tuple[str, ...],
+    requester: str | None,
+    role: str,
+    filters_hash: str | None,
+    expires_at: str | None,
+    redaction_profile: str,
+    audit_ref: str | None,
+    redacted_columns: tuple[str, ...],
+) -> dict[str, object]:
+    """Build the deterministic export provenance sidecar payload."""
+    return {
         "schema_version": MANIFEST_SCHEMA_VERSION,
         "manifest_type": "bioetl.dataset_snapshot.provenance",
         "dataset_bundle_id": dataset_bundle_id,
@@ -103,6 +166,15 @@ def build_export_sidecar_payloads(
         "row_count": row_count,
         "columns": list(columns),
         "run_ids": list(run_ids),
+        "export_governance": {
+            "audit_ref": audit_ref,
+            "requester": requester,
+            "role": role,
+            "filters_hash": filters_hash,
+            "expires_at": expires_at,
+            "redaction_profile": redaction_profile,
+            "redacted_columns": list(redacted_columns),
+        },
         "providers": list(providers),
         "source_endpoints": [
             entry["source_url"] for entry in provider_entries if entry["source_url"]
@@ -132,7 +204,17 @@ def build_export_sidecar_payloads(
             "data_file_sha256": data_fingerprint.sha256,
         },
     }
-    licensing_manifest: dict[str, object] = {
+
+
+def _build_export_licensing_manifest(
+    *,
+    providers: tuple[str, ...],
+    provider_entries: tuple[dict[str, object], ...],
+    dataset_bundle_id: str,
+    timestamp: str,
+) -> dict[str, object]:
+    """Build the deterministic export licensing sidecar payload."""
+    return {
         "schema_version": MANIFEST_SCHEMA_VERSION,
         "manifest_type": "bioetl.dataset_snapshot.licensing",
         "dataset_bundle_id": dataset_bundle_id,
@@ -149,11 +231,6 @@ def build_export_sidecar_payloads(
             "caveats; it is not legal advice."
         ),
     }
-    return ExportSidecarPayloadsRecord(
-        dataset_bundle_id=dataset_bundle_id,
-        provenance_manifest=provenance_manifest,
-        licensing_manifest=licensing_manifest,
-    )
 
 
 def build_export_checksum_manifest(
@@ -194,6 +271,13 @@ def write_export_sidecar_manifests(
     clock: ClockPort | None = None,
     run_ids: tuple[str, ...] = (),
     code_revision: str | None = None,
+    requester: str | None = None,
+    role: str = "viewer",
+    filters_hash: str | None = None,
+    expires_at: str | None = None,
+    redaction_profile: str = "default",
+    audit_ref: str | None = None,
+    redacted_columns: tuple[str, ...] = (),
     strict: bool = False,
 ) -> tuple[Path, ...]:
     """Write deterministic provenance, licensing, and checksum manifests."""
@@ -210,6 +294,13 @@ def write_export_sidecar_manifests(
         clock=clock,
         run_ids=run_ids,
         code_revision=code_revision,
+        requester=requester,
+        role=role,
+        filters_hash=filters_hash,
+        expires_at=expires_at,
+        redaction_profile=redaction_profile,
+        audit_ref=audit_ref,
+        redacted_columns=redacted_columns,
         strict=strict,
     )
     manifest_prefix = output_path.stem

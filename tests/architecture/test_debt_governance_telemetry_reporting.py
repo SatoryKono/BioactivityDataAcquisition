@@ -53,6 +53,7 @@ def test_debt_governance_snapshot_matches_live_sources() -> None:
     assert isinstance(dead_code_summary, dict)
 
     test_governance = collect_test_governance_report(ROOT)
+    test_governance_summary = test_governance["summary"]
 
     assert snapshot.runtime_uuid.runtime_uuid_seam_count == len(
         [entry for entry in seams if isinstance(entry, dict)]
@@ -88,25 +89,25 @@ def test_debt_governance_snapshot_matches_live_sources() -> None:
         dead_code_summary["triaged_retained_without_owner_tests_count"]
     )
     assert snapshot.test_governance.compatibility_test_files == int(
-        test_governance["compatibility_test_files"]
+        test_governance_summary["compatibility_test_files"]
     )
     assert snapshot.test_governance.refined_assertless_tests == int(
-        test_governance["refined_assertless_tests"]
+        test_governance_summary["refined_assertless_tests"]
     )
     assert snapshot.test_governance.markerless_test_functions == int(
-        test_governance["markerless_test_functions"]
+        test_governance_summary["markerless_test_functions"]
     )
     assert snapshot.test_governance.duplicate_test_names == int(
-        test_governance["duplicate_test_names"]
+        test_governance_summary["duplicate_test_names"]
     )
     assert snapshot.test_governance.duplicate_test_name_occurrences == int(
-        test_governance["duplicate_test_name_occurrences"]
+        test_governance_summary["duplicate_test_name_occurrences"]
     )
     assert snapshot.test_governance.uuid4_call_sites == int(
-        test_governance["uuid4_call_sites"]
+        test_governance_summary["uuid4_call_sites"]
     )
     assert snapshot.test_governance.date_today_call_sites == int(
-        test_governance["date_today_call_sites"]
+        test_governance_summary["date_today_call_sites"]
     )
 
 

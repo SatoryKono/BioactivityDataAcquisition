@@ -59,6 +59,31 @@ class TestExportOptionsAndTableModels:
         assert options.allow_nondeterministic_manifest_timestamp is True
         assert options.run_ids == ()
         assert options.code_revision is None
+        assert options.requester is None
+        assert options.role == "viewer"
+        assert options.filters_hash is None
+        assert options.expires_at is None
+        assert options.redaction_profile == "default"
+
+    def test_export_result_carries_governance_metadata(self) -> None:
+        result = ExportResult(
+            table_name="silver.activity",
+            layer="silver",
+            format="csv",
+            output_path=ACTIVITY_CSV_PATH,
+            row_count=10,
+            audit_ref="export-audit:abc",
+            checksum_manifest_path=TEST_ROOT / "activity.checksums-manifest.json",
+            expires_at="2026-07-01T00:00:00Z",
+            redaction_profile="default",
+            redacted_columns=("raw_payload",),
+        )
+
+        assert result.audit_ref == "export-audit:abc"
+        assert result.checksum_manifest_path is not None
+        assert result.expires_at == "2026-07-01T00:00:00Z"
+        assert result.redaction_profile == "default"
+        assert result.redacted_columns == ("raw_payload",)
 
     def test_preview_and_table_info_preserve_payload(self) -> None:
         preview = TablePreview(
