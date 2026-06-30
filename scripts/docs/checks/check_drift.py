@@ -194,7 +194,6 @@ RUNTIME_DOC_TOKENS: tuple[str, ...] = (
 RUNTIME_DOC_TOKENS_WITH_CANONICAL_RUNTIME: tuple[str, ...] = (
     *RUNTIME_DOC_TOKENS,
     CODEX_RUNTIME_DOC_PATH,
-    GEMINI_RUNTIME_DOC_PATH,
 )
 RUNTIME_DOC_TOKENS_WITH_MEMORY: tuple[str, ...] = (
     *RUNTIME_DOC_TOKENS,
@@ -215,16 +214,6 @@ WRITE_CAPABLE_SKILL_PATHS = (
     ".codex/skills/prometheus-rule-testing/SKILL.md",
     ".codex/skills/technical-designer-mermaid/SKILL.md",
     ".codex/skills/vcr-record/SKILL.md",
-    ".gemini/skills/create-pr/SKILL.md",
-    ".gemini/skills/repo-config/SKILL.md",
-    ".gemini/skills/grafana-dashboard-extension/SKILL.md",
-    ".gemini/skills/prometheus-alert-rule-editor/SKILL.md",
-    ".gemini/skills/prometheus-metric-discovery/SKILL.md",
-    ".gemini/skills/prometheus-query-debugger/SKILL.md",
-    ".gemini/skills/prometheus-rule-testing/SKILL.md",
-    ".gemini/skills/technical-designer-mermaid/SKILL.md",
-    ".gemini/skills/vcr-record/SKILL.md",
-    ".gemini/skills/documentation-audit/SKILL.md",
 )
 ROLE_PROFILE_MEMO_DOC_TOKENS: tuple[str, ...] = (
     RUNTIME_AGENT_GUIDE_PATH,
@@ -290,15 +279,9 @@ AI_SURFACE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
     ),
     Path(".github/copilot-instructions.md"): RUNTIME_DOC_TOKENS,
     Path(CODEX_RUNTIME_DOC_PATH): RUNTIME_DOC_TOKENS,
-    Path(GEMINI_RUNTIME_DOC_PATH): RUNTIME_DOC_TOKENS,
     Path(CODEX_RUNTIME_DOC_README_PATH): (
         AGENTS_DOC_TOKEN,
         CODEX_RUNTIME_DOC_PATH,
-        *RUNTIME_DOC_TOKENS,
-    ),
-    Path(GEMINI_RUNTIME_DOC_README_PATH): (
-        AGENTS_DOC_TOKEN,
-        GEMINI_RUNTIME_DOC_PATH,
         *RUNTIME_DOC_TOKENS,
     ),
     Path("docs/00-project/ai/agents/guides/CODEX.md"): (
@@ -352,44 +335,6 @@ AI_ROLE_PROFILE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
         *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
         "docs/00-project/ai/memory/memory-py-test-swarm.md",
     ),
-    Path(GEMINI_PY_AUDIT_BOT_DOC_PATH): (
-        *RUNTIME_DOC_TOKENS,
-        RUNTIME_AGENT_MEMORY_PATH,
-        "docs/00-project/ai/memory/memory-py-audit-bot.md",
-    ),
-    Path(".gemini/agents/py-plan-bot.md"): (
-        *RUNTIME_DOC_TOKENS,
-        RUNTIME_AGENT_MEMORY_PATH,
-        "docs/00-project/ai/memory/memory-py-plan-bot.md",
-    ),
-    Path(GEMINI_PY_CONFIG_BOT_DOC_PATH): (
-        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-        "docs/00-project/ai/memory/memory-py-config-bot.md",
-    ),
-    Path(".gemini/agents/py-debug-bot.md"): (
-        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-        "docs/00-project/ai/memory/memory-py-debug-bot.md",
-    ),
-    Path(".gemini/agents/py-doc-bot.md"): (
-        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-        "docs/00-project/ai/memory/memory-py-doc-bot.md",
-    ),
-    Path(".gemini/agents/py-test-bot.md"): (
-        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-        "docs/00-project/ai/memory/memory-py-test-bot.md",
-    ),
-    Path(".gemini/agents/py-architecture-debt-bot.md"): (
-        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-        "docs/00-project/ai/memory/memory-py-architecture-debt-bot.md",
-    ),
-    Path(GEMINI_PY_REVIEW_ORCHESTRATOR_DOC_PATH): (
-        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-        "docs/00-project/ai/memory/memory-py-review-orchestrator.md",
-    ),
-    Path(".gemini/agents/py-test-swarm.md"): (
-        *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
-        "docs/00-project/ai/memory/memory-py-test-swarm.md",
-    ),
 }
 AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
     Path("docs/00-project/ai/memory/README.md"): (
@@ -408,13 +353,11 @@ AI_MIRROR_NOTICE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
         "Non-Canonical Mirror Notice",
         "docs/00-project/ai/skills/**",
         ".codex/skills/**",
-        ".gemini/skills/**",
     ),
     Path("docs/00-project/ai/agents/agents/README.md"): (
         "Non-Canonical Mirror Notice",
         "docs/00-project/ai/agents/agents/**",
         ".codex/agents/**",
-        ".gemini/agents/**",
     ),
 }
 AI_DOCS_RUNTIME_MIRROR_HEADER_LINE_LIMIT = 40
@@ -432,29 +375,8 @@ AI_SURFACE_STALE_PATTERNS: tuple[re.Pattern[str], ...] = (
 )
 AI_SURFACE_FORBIDDEN_PATTERNS: dict[Path, tuple[re.Pattern[str], ...]] = {
     Path(CODEX_RUNTIME_DOC_PATH): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
-    Path(GEMINI_RUNTIME_DOC_PATH): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
     Path(CODEX_PY_AUDIT_BOT_DOC_PATH): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
-    Path(GEMINI_PY_AUDIT_BOT_DOC_PATH): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
     Path(CODEX_PY_REVIEW_ORCHESTRATOR_DOC_PATH): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
-    Path(GEMINI_PY_REVIEW_ORCHESTRATOR_DOC_PATH): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
-    Path(".gemini/skills/new-pipeline/SKILL.md"): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
-    Path(".gemini/skills/verify-architecture/SKILL.md"): (
-        AI_SURFACE_CLAUDE_PATH_PATTERN,
-    ),
-    Path(".gemini/skills/vcr-record/SKILL.md"): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
-    Path(".gemini/skills/py-review-orchestrator/SKILL.md"): (
-        AI_SURFACE_CLAUDE_PATH_PATTERN,
-    ),
-    Path(".gemini/skills/py-test-swarm/SKILL.md"): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
-    Path(".gemini/skills/documentation-cascade-audit/SKILL.md"): (
-        AI_SURFACE_CLAUDE_PATH_PATTERN,
-    ),
-    Path(".gemini/skills/py-architecture-debt-bot/SKILL.md"): (
-        AI_SURFACE_CLAUDE_PATH_PATTERN,
-    ),
-    Path(".gemini/skills/capability-discovery/SKILL.md"): (
-        AI_SURFACE_CLAUDE_PATH_PATTERN,
-    ),
 }
 
 

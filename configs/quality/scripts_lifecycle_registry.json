@@ -440,6 +440,48 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded manual GitHub issue update utility after removing the scripts.ops router command; prefer the governed issue lifecycle workflow or GitHub API client paths before re-exposing it as an active ops command."
     },
+    "scripts/docs/common/paths.py": {
+      "owner": "@bioetl-docs",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a shared docs path-policy helper consumed by docs tooling; keep it non-active unless it becomes a documented standalone docs command surface."
+    },
+    "scripts/docs/common/xlsx.py": {
+      "owner": "@bioetl-docs",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a shared workbook helper consumed by docs matrix tooling; keep it non-active unless workbook mutation becomes a documented standalone docs command surface."
+    },
+    "scripts/diagrams/diagram_paths.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as the shared diagram path resolver during the diagrams layout migration; keep it non-active unless diagram path discovery becomes a standalone command surface."
+    },
+    "scripts/engineering/diagnostics/generate_src_bioetl_refactor_evidence.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded manual diagnostics utility for refactor evidence packs; route any recurring use through a governed QA report before promoting it back to active inventory."
+    },
+    "scripts/memory/prompts/print_seed.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded manual prompt-printing helper for memory seeding; replace with canonical memory workflow documentation before promoting it to an active command surface."
+    },
+    "scripts/ops/migrations/oneoff/migrate_exemption_keys_to_paths.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a completed one-off migration helper with explicit sunset review; do not re-run or promote unless the exemption-key migration is reopened under reviewed governance."
+    },
+    "scripts/ops/migrations/oneoff/migrate_vcr_extensionless.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a completed one-off migration helper with explicit sunset review; do not re-run or promote unless VCR extensionless cassette migration is reopened under reviewed governance."
+    },
     "scripts/schema/generate_protein_class_l1_target_type_artifacts.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",

@@ -9,7 +9,8 @@ For AI runtime behavior and workflow conflicts, use this priority:
 
 1. active runtime source for the current agent or skill:
    - `.codex/agents/CODEX-RUNTIME.md`
-   - `.gemini/agents/GEMINI-RUNTIME.md`
+   - a matching tracked `.gemini/**` runtime surface only when that tree exists
+     in the current checkout and is verified in the same change
 1. runtime profiles and skills in the matching runtime tree
 1. `docs/00-project/RULES.md`
 1. `docs/01-requirements/REQUIREMENTS.md`
@@ -62,7 +63,12 @@ Minimum expectation:
 - BioETL remains local-only by default; do not introduce Docker, Redis, or
   external orchestration requirements unless the task explicitly requires them.
 - `.codex/**` is the canonical Codex runtime source.
-- `.gemini/**` is the canonical Gemini runtime source.
+- `.gemini/settings.json` may exist as a machine-local Gemini config surface,
+  but the current `main` checkout does not contain a tracked Gemini
+  `agents/` or `skills/` runtime tree.
+- Treat `docs/00-project/ai/**` Gemini references as mirrors or historical
+  guidance unless a future task adds and verifies tracked `.gemini/agents/**`
+  or `.gemini/skills/**` surfaces on `main`.
 - `.claude/**` is not an active runtime source for Codex/Gemini behavior in
   this change program and is treated as unavailable until a local checkout
   proves otherwise.

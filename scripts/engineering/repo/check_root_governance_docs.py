@@ -32,8 +32,8 @@ def _missing_machine_readable_refs(text: str) -> list[str]:
     required_refs = (
         ".github/root-allowlist.txt",
         "configs/quality/repo_structure_catalog.yaml",
-        str(ROOT_REVIEW_REGISTRY),
-        str(GENERATED_ARTIFACT_ROUTING),
+        ROOT_REVIEW_REGISTRY.as_posix(),
+        GENERATED_ARTIFACT_ROUTING.as_posix(),
     )
     return [ref for ref in required_refs if ref not in text]
 

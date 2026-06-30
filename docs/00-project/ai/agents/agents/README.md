@@ -29,8 +29,8 @@ Consolidated agent registry for published docs navigation.
 ## Non-Canonical Mirror Notice
 
 `docs/00-project/ai/agents/agents/**` is a published/internal mirror surface.
-It must not define runtime behavior independently from `.codex/agents/**` or
-`.gemini/agents/**`. Edit the active runtime profile first, then refresh this
+It must not define runtime behavior independently from tracked runtime trees
+such as `.codex/agents/**`. Edit the active runtime profile first, then refresh this
 mirror when behavior or contributor guidance changes.
 
 ## BioETL Core (8 active agents)
