@@ -144,7 +144,6 @@
   },
   "guards": [
     "tests/architecture/test_config_taxonomy_review.py",
-    "tests/architecture/test_config_discrepancy_metrics_ratchets.py",
-    "tests/architecture/test_config_compatibility_registry.py"
+    "tests/architecture/test_config_discrepancy_metrics_ratchets.py"
   ]
 }

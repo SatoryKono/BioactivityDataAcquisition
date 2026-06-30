@@ -56,16 +56,16 @@ review_lanes:
 
   - lane_id: root_transient_helpers_and_outputs
     classification: review_required
-    scope: observed transient root helpers, raw test dumps, and forbidden root artifact routing
+    scope: observed transient root helpers, raw test dumps, and reviewed root artifact routing
     verification:
       - git ls-files temp_analyze_conflicting.py temp_get_hash.py test_output.txt tests.txt logs artifacts
-      - rg -n "temp_analyze_conflicting\\.py|temp_get_hash\\.py|test_output\\.txt|tests\\.txt|logs/|reports/logs/|reports/observability/runtime_cardinality_inventory\\.json|artifacts/observability/runtime_cardinality_inventory\\.json" .github docs scripts tests configs README.md Makefile pyproject.toml
+      - rg -n "temp_analyze_conflicting\\.py|temp_get_hash\\.py|test_output\\.txt|tests\\.txt|logs/|reports/logs/|artifacts/debug_exports/" .github docs scripts tests configs README.md Makefile pyproject.toml
       - .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
     candidates:
       - path: artifacts
-        current_live_state: absent_from_root_baseline
-        canonical_path: reports/observability/runtime_cardinality_inventory.json
-        action_if_reintroduced: rehome generated evidence or diagnostics into approved reports surfaces instead of reintroducing a root artifacts tree
+        current_live_state: present_approved_root_surface
+        canonical_path: artifacts/debug_exports
+        action_if_reintroduced: keep_tracked_only_for_governed_debug_export_evidence_and_route_other_diagnostics_into_approved_reports_or_data_surfaces
       - path: temp_analyze_conflicting.py
         current_live_state: absent_from_root_baseline
         canonical_path: null

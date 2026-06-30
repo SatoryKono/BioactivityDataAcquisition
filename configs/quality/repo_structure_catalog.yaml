@@ -141,6 +141,11 @@ root_tooling_roots:
     - path: .vscode
       role: curated_shared_editor_metadata_surface
 
+root_runtime_artifact_roots:
+  approved_roots:
+    - path: artifacts
+      role: curated_debug_export_evidence_surface
+
 local_tolerated_root_dirs:
   approved_roots:
     - path: .ai

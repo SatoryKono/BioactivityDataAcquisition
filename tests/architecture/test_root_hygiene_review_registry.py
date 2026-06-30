@@ -134,11 +134,8 @@ def test_root_hygiene_review_registry_tracks_observed_transient_root_families() 
         if isinstance(candidate, dict) and isinstance(candidate.get("path"), str)
     }
 
-    assert by_path["artifacts"]["current_live_state"] == "absent_from_root_baseline"
-    assert (
-        by_path["artifacts"]["canonical_path"]
-        == "reports/observability/runtime_cardinality_inventory.json"
-    )
+    assert by_path["artifacts"]["current_live_state"] == "present_approved_root_surface"
+    assert by_path["artifacts"]["canonical_path"] == "artifacts/debug_exports"
     assert (
         by_path["temp_analyze_conflicting.py"]["current_live_state"]
         == "absent_from_root_baseline"

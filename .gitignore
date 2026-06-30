@@ -79,6 +79,7 @@ data/input/bronze/
 /data/json
 
 # Logs and reports
+artifacts/
 logs/
 test-output/
 *.log
@@ -127,6 +128,7 @@ log_test.txt
 !/reports/quality/tech-debt-issues-5700-5706-closeout.json
 !/reports/quality/tech-debt-issues-5707-5715-closeout.json
 !/reports/quality/tech-debt-issues-5729-5733-closeout.json
+!/reports/quality/tech-debt-issues-5744-5751-closeout.json
 !/reports/quality/tech-debt-issue-5647-closeout.json
 !/reports/quality/issue-5272-application-core-coverage-closeout.json
 !/reports/quality/issue-5376-coverage-tail-closeout.json

@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.architecture.test_compatibility_freeze_guards import (
+from tests.architecture.test_removed_surface_freeze_guards import (
     ALLOWED_CONFIG_LOADER_SRC_FILES,
     ALLOWED_CONFIG_LOADER_TEST_FILES,
     ALLOWED_CONFIG_LOAD_API_SRC_FILES,
