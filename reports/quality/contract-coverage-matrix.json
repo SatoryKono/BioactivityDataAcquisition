@@ -71,7 +71,8 @@
       "parity_status": "covered",
       "pipeline_name": "chembl_activity",
       "primary_key_fields": [
-        "activity_id"
+        "activity_id",
+        "entity_id"
       ],
       "primary_key_required_in_published_contract": true,
       "provider": "chembl",
@@ -153,7 +154,8 @@
       "parity_status": "covered",
       "pipeline_name": "chembl_assay",
       "primary_key_fields": [
-        "assay_id"
+        "assay_id",
+        "entity_id"
       ],
       "primary_key_required_in_published_contract": true,
       "provider": "chembl",
@@ -228,7 +230,8 @@
       "parity_status": "covered",
       "pipeline_name": "chembl_assay_parameters",
       "primary_key_fields": [
-        "assay_param_id"
+        "assay_param_id",
+        "entity_id"
       ],
       "primary_key_required_in_published_contract": true,
       "provider": "chembl",
@@ -304,7 +307,8 @@
       "parity_status": "covered",
       "pipeline_name": "chembl_cell_line",
       "primary_key_fields": [
-        "cell_id"
+        "cell_id",
+        "entity_id"
       ],
       "primary_key_required_in_published_contract": true,
       "provider": "chembl",
@@ -379,6 +383,7 @@
       "parity_status": "covered",
       "pipeline_name": "chembl_compound_record",
       "primary_key_fields": [
+        "entity_id",
         "record_id"
       ],
       "primary_key_required_in_published_contract": true,
@@ -457,6 +462,7 @@
       "parity_status": "covered",
       "pipeline_name": "chembl_molecule",
       "primary_key_fields": [
+        "entity_id",
         "molecule_id"
       ],
       "primary_key_required_in_published_contract": true,
@@ -541,6 +547,7 @@
       "parity_status": "covered",
       "pipeline_name": "chembl_protein_class",
       "primary_key_fields": [
+        "entity_id",
         "protein_class_id"
       ],
       "primary_key_required_in_published_contract": true,
@@ -672,6 +679,7 @@
       "parity_status": "covered",
       "pipeline_name": "chembl_publication",
       "primary_key_fields": [
+        "entity_id",
         "publication_id"
       ],
       "primary_key_required_in_published_contract": true,
@@ -746,6 +754,7 @@
       "parity_status": "covered",
       "pipeline_name": "chembl_publication_similarity",
       "primary_key_fields": [
+        "entity_id",
         "sim_id"
       ],
       "primary_key_required_in_published_contract": true,
@@ -825,6 +834,7 @@
       "parity_status": "covered",
       "pipeline_name": "chembl_publication_term",
       "primary_key_fields": [
+        "entity_id",
         "publication_id",
         "term",
         "term_type"
@@ -904,6 +914,7 @@
       "parity_status": "covered",
       "pipeline_name": "chembl_subcellular_fraction",
       "primary_key_fields": [
+        "entity_id",
         "subcellular_fraction"
       ],
       "primary_key_required_in_published_contract": true,
@@ -988,6 +999,7 @@
       "parity_status": "covered",
       "pipeline_name": "chembl_target",
       "primary_key_fields": [
+        "entity_id",
         "target_id"
       ],
       "primary_key_required_in_published_contract": true,
@@ -1061,7 +1073,8 @@
       "parity_status": "covered",
       "pipeline_name": "chembl_target_component",
       "primary_key_fields": [
-        "component_id"
+        "component_id",
+        "entity_id"
       ],
       "primary_key_required_in_published_contract": true,
       "provider": "chembl",
@@ -1213,6 +1226,7 @@
       "parity_status": "covered",
       "pipeline_name": "chembl_tissue",
       "primary_key_fields": [
+        "entity_id",
         "tissue_id"
       ],
       "primary_key_required_in_published_contract": true,
@@ -1807,7 +1821,8 @@
       "parity_status": "covered",
       "pipeline_name": "crossref_publication",
       "primary_key_fields": [
-        "doi"
+        "doi",
+        "entity_id"
       ],
       "primary_key_required_in_published_contract": true,
       "provider": "crossref",
@@ -1941,6 +1956,7 @@
       "parity_status": "covered",
       "pipeline_name": "openalex_publication",
       "primary_key_fields": [
+        "entity_id",
         "openalex_id"
       ],
       "primary_key_required_in_published_contract": true,
@@ -2021,6 +2037,7 @@
       "parity_status": "covered",
       "pipeline_name": "pubchem_compound",
       "primary_key_fields": [
+        "entity_id",
         "molecule_id"
       ],
       "primary_key_required_in_published_contract": true,
@@ -2152,6 +2169,7 @@
       "parity_status": "covered",
       "pipeline_name": "pubmed_publication",
       "primary_key_fields": [
+        "entity_id",
         "pmid"
       ],
       "primary_key_required_in_published_contract": true,
@@ -2286,6 +2304,7 @@
       "parity_status": "covered",
       "pipeline_name": "semanticscholar_publication",
       "primary_key_fields": [
+        "entity_id",
         "paper_id"
       ],
       "primary_key_required_in_published_contract": true,
@@ -2370,6 +2389,7 @@
       "parity_status": "covered",
       "pipeline_name": "uniprot_idmapping",
       "primary_key_fields": [
+        "entity_id",
         "target_id"
       ],
       "primary_key_required_in_published_contract": true,
@@ -2456,7 +2476,8 @@
       "parity_status": "covered",
       "pipeline_name": "uniprot_protein",
       "primary_key_fields": [
-        "accession"
+        "accession",
+        "entity_id"
       ],
       "primary_key_required_in_published_contract": true,
       "provider": "uniprot",

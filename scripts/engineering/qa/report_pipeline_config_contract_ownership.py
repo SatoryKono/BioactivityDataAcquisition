@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config_from_root
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_JSON_OUTPUT = (
@@ -195,9 +196,12 @@ def _collect_entity_rows() -> list[dict[str, Any]]:
         entity = str(payload.get("entity") or config_path.stem)
         pipeline = payload.get("pipeline", {})
         assert isinstance(pipeline, dict)
+        effective_pipeline = load_pipeline_config_from_root(
+            f"{provider}_{entity}",
+            configs_root=PROJECT_ROOT / "configs",
+        ).model_dump(mode="python")
         pipeline_name = str(pipeline.get("pipeline_name") or f"{provider}_{entity}")
-        sink = pipeline.get("sink", {})
-        gold_enabled = _gold_runtime_enabled(pipeline)
+        gold_enabled = _gold_runtime_enabled(effective_pipeline)
         contract_ref = f"{provider}.{entity}"
         contract_config = (
             PROJECT_ROOT / "configs" / "contracts" / provider / f"{entity}.yaml"
@@ -232,7 +236,7 @@ def _collect_entity_rows() -> list[dict[str, Any]]:
             "gold_schema_title": gold_schema_title,
             "pipeline_code_owner": _pipeline_owner(provider, entity, pipeline_name),
             "gold_enabled": gold_enabled,
-            "gold_exclusion_reason": _gold_exclusion_reason(pipeline),
+            "gold_exclusion_reason": _gold_exclusion_reason(effective_pipeline),
         }
         row["coverage_status"] = _coverage_status(
             gold_enabled=gold_enabled,
