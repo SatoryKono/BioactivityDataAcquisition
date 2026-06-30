@@ -146,7 +146,8 @@ class MergeMetricsRecorderMixin:
         any_enriched = pl.any_horizontal(
             [pl.col(col).is_not_null() for col in enricher_cols]
         )
-        return len(df.filter(any_enriched))
+        # Avoid materializing a new dataframe with df.filter()
+        return df.select(any_enriched.sum()).item()
 
     def _count_fully_enriched(
         self,
@@ -180,13 +181,20 @@ class MergeMetricsRecorderMixin:
         if len(df) == 0:
             return {}
 
-        coverage: dict[str, float] = {}
-        for col in df.columns:
-            if not col.startswith("_"):
-                non_null = len(df.filter(df[col].is_not_null()))
-                coverage[col] = non_null / len(df)
+        import polars as pl
 
-        return coverage
+        target_cols = [col for col in df.columns if not col.startswith("_")]
+        if not target_cols:
+            return {}
+
+        total_rows = len(df)
+        exprs = [
+            (pl.col(col).is_not_null().sum() / total_rows).alias(col)
+            for col in target_cols
+        ]
+
+        # Evaluate all coverage expressions in a single operation
+        return df.select(exprs).row(0, named=True)
 
 
 __all__ = ["MergeMetricsRecorderMixin"]
