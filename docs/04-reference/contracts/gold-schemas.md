@@ -731,9 +731,10 @@ ______________________________________________________________________
 ### Composite
 
 Composite-схемы объединяют данные из нескольких провайдеров в единую сущность.
-Live shared base config uses `strict=True` and `coerce=True`, while business
-fields are provider-derived and intentionally not redeclared one-by-one in the
-shared composite base schema.
+Live shared base config uses `strict=True` and `coerce=True`. The shared base
+declares persisted common metadata fields; concrete composite schemas explicitly
+declare the current persisted lineage and selected business/provider-derived
+fields.
 
 **Файлы схем**:
 
@@ -749,9 +750,15 @@ shared composite base schema.
 
 Все composite-схемы гарантируют наличие следующих полей:
 
-| Поле        | Тип | Nullable | Описание                                              |
-| ----------- | --- | -------- | ----------------------------------------------------- |
-| `entity_id` | str | No       | Стабильный бизнес-идентификатор объединённой сущности |
+| Поле                 | Тип  | Nullable | Описание                                              |
+| -------------------- | ---- | -------- | ----------------------------------------------------- |
+| `entity_id`          | str  | No       | Стабильный бизнес-идентификатор объединённой сущности |
+| `_source`            | str  | Yes      | Source-family lineage marker                          |
+| `_dq_warn`           | bool | No       | Soft data-quality warning flag                        |
+| `_dq_error`          | bool | No       | Hard data-quality error flag                          |
+| `_index`             | int  | No       | Порядковый номер в batch/output                       |
+| `_source_providers`  | str  | No       | Провайдеры-источники (JSON-список)                    |
+| `_enrichment_status` | str  | No       | Статус обогащения (JSON/status payload)               |
 
 #### Поля линейности (composite lineage)
 
@@ -774,7 +781,13 @@ shared composite base schema.
 
 #### Примечание по composite-схемам
 
-Composite-схемы используют `strict=True` — бизнес-поля (например, `molecule_id`, `canonical_smiles`, `standard_value` для activity) берутся из соответствующих провайдерных схем и присутствуют в DataFrame, но не декларируются явно в composite-схеме. Валидируются только persisted semantic/system поля. Occurrence-scoped lineage anchors (`run_id`, `composite_run_id`, wall-clock timestamps) публикуются через sidecar/control-plane artifacts, а не через физические Gold rows.
+Composite-схемы используют `strict=True`: concrete classes under
+`src/bioetl/domain/contracts/gold/composite_bioassay.py`,
+`composite_molecule.py`, and `composite_publication.py` explicitly declare the
+persisted common, lineage, and selected business fields that are allowed in
+physical Gold rows. Occurrence-scoped lineage anchors (`run_id`,
+`composite_run_id`, wall-clock timestamps) публикуются через
+sidecar/control-plane artifacts, а не через физические Gold rows.
 
 ______________________________________________________________________
 

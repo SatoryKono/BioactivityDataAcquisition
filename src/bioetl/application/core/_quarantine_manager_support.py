@@ -79,6 +79,7 @@ class QuarantineManagerSupportMixin:
         *,
         ingestion_ts: datetime,
     ) -> None:
+        """Persist one DQ quarantine record through the configured port."""
         request = build_dq_quarantine_request(
             pipeline_name=self._pipeline_name,
             record=record,
@@ -106,6 +107,7 @@ class QuarantineManagerSupportMixin:
         *,
         ingestion_ts: datetime,
     ) -> None:
+        """Persist a batch of DQ quarantine records with shared run context."""
         if not records:
             return
 
@@ -140,6 +142,7 @@ class QuarantineManagerSupportMixin:
         details: JsonDict | None = None,
         ingestion_ts: datetime,
     ) -> None:
+        """Persist one filtered-out record as immutable quarantine evidence."""
         request = build_filtered_quarantine_request(
             pipeline_name=self._pipeline_name,
             record=record,
@@ -166,6 +169,7 @@ class QuarantineManagerSupportMixin:
         *,
         ingestion_ts: datetime,
     ) -> None:
+        """Persist filtered-out quarantine records in one port call."""
         if not records:
             return
 
@@ -196,6 +200,7 @@ class QuarantineManagerSupportMixin:
         error_code: str | None = None,
         run_id: str | None = None,
     ) -> list[JsonDict]:
+        """Return quarantine rows for the current pipeline scope."""
         return list(
             await self._quarantine.inspect(
                 pipeline=self._pipeline_name,
@@ -210,6 +215,7 @@ class QuarantineManagerSupportMixin:
         error_code: str | None = None,
         run_id: str | None = None,
     ) -> JsonDict:
+        """Return quarantine aggregate statistics for the current pipeline."""
         return {
             **await self._quarantine.get_stats(
                 self._pipeline_name,

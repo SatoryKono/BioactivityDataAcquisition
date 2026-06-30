@@ -31,6 +31,7 @@ class ColumnPriorityOrderingPolicy:
         available_columns: set[str],
         seed_pipeline: str | None = None,
     ) -> list[str]:
+        """Return available source-priority columns for one composite field."""
         columns, used_parse_fallback = collect_priority_field_columns(
             field=field,
             enrichers=enrichers,
@@ -52,6 +53,7 @@ class ColumnPriorityOrderingPolicy:
         priorities: Sequence[str],
         seed_pipeline: str | None = None,
     ) -> list[str]:
+        """Sort compatible columns according to configured source priorities."""
         ordered_cols, used_parse_fallback = order_priority_columns(
             field=field,
             columns=columns,
@@ -73,6 +75,7 @@ class ColumnPriorityOrderingPolicy:
         ordered_cols: list[str],
         can_coalesce: Callable[[pl.DataFrame, str, str], bool],
     ) -> tuple[list[str], list[str]]:
+        """Split ordered columns into coalescible and incompatible groups."""
         if not ordered_cols:
             return [], []
 

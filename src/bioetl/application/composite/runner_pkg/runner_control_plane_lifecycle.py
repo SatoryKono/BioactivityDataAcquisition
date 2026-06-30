@@ -20,6 +20,8 @@ if TYPE_CHECKING:
 
 
 class CompositeRunnerControlPlaneHostProtocol(Protocol):
+    """Host attributes required by composite control-plane lifecycle helpers."""
+
     _config: CompositeConfig
     _metrics: MetricsPort | None
     _run_ledger_service: RunLedgerService | None

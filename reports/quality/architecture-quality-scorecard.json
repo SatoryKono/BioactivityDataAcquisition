@@ -8,7 +8,7 @@
     },
     "module_coverage_inventory": {
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "761dee19c6553ae4f9c86d913bafc82e82074024674056a415bb536a6fc4b92d",
+      "source_tree_sha256": "166b4bfec0242d28e3c237510c7540750a460c2286fe6ff597ca66f3a2286359",
       "coverage_xml_sha256": "688fdd5cf7e086bb0ac2178265406f9e8395532fb1067e9e6e2fc0c7b5e1632a"
     },
     "compatibility_importer_census": {
@@ -37,7 +37,7 @@
     "duplication_baseline": {
       "path": "reports/quality/full-app-duplication-baseline.json",
       "snapshot_date": "2026-06-30",
-      "total_duplicate_clusters": 70
+      "total_duplicate_clusters": 68
     },
     "hotspot_family_baseline": {
       "path": "reports/quality/hotspot-family-baseline.json",
@@ -112,7 +112,7 @@
         "source_module_count": 2190,
         "hotspot_family_count": 5,
         "hotspot_budget_warning_count": 0,
-        "total_duplicate_clusters": 70
+        "total_duplicate_clusters": 68
       }
     },
     {
@@ -175,7 +175,7 @@
         "retained_entrypoint_count": 12,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
         "hotspot_budget_warning_count": 0,
-        "total_duplicate_clusters": 70
+        "total_duplicate_clusters": 68
       }
     }
   ],
@@ -186,7 +186,7 @@
     "uncovered_module_count": 0,
     "hotspot_family_count": 5,
     "hotspot_budget_warning_count": 0,
-    "total_duplicate_clusters": 70,
+    "total_duplicate_clusters": 68,
     "retained_entrypoint_count": 12,
     "retained_public_export_facade_count": 4,
     "twin_pair_count": 0,

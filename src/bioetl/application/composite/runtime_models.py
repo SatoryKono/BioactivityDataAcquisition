@@ -65,7 +65,9 @@ _DEFAULT_COMPOSITE_LOCK_TTL_SECONDS = 3600
 class CompositeMergerProtocol(Protocol):
     """Runtime merger dependency required by ``CompositePipelineRunner``."""
 
-    async def execute_request(self, request: MergeExecutionRequest) -> MergeResult: ...
+    async def execute_request(self, request: MergeExecutionRequest) -> MergeResult:
+        """Execute one fully resolved composite merge request."""
+        ...
 
 
 @dataclass(frozen=True, slots=True)

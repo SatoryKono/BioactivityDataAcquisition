@@ -22,6 +22,9 @@ DASHBOARDS_DIR = Path("grafana/dashboards")
 VARIABLES_GUIDE = Path("docs/03-guides/dashboards/variables-guide.md")
 MONITORING_INDEX = Path("docs/03-guides/dashboards/monitoring-index.md")
 SELECTOR_CONTRACT = Path("docs/03-guides/dashboards/contracts/selector-contracts.yaml")
+DASHBOARD_INVENTORY_CONTRACT = Path(
+    "docs/03-guides/dashboards/contracts/dashboard-inventory.yaml"
+)
 PROVISIONING_CONFIG = Path("grafana/provisioning/dashboards/bioetl.yaml")
 VOLATILE_ROOT_KEYS = frozenset({"id", "version"})
 VOLATILE_PANEL_KEYS = frozenset({"pluginVersion"})
@@ -156,6 +159,180 @@ def _parse_variables_guide(text: str) -> dict[str, list[str]]:
     return mapping
 
 
+def _normalize_contract_variables(raw_variables: object) -> list[str]:
+    if not isinstance(raw_variables, list):
+        return []
+    variables: list[str] = []
+    for name in raw_variables:
+        variable = str(name)
+        variables.append(variable if variable.startswith("$") else f"${variable}")
+    return sorted(variables)
+
+
+def _dashboard_inventory_contract_entries() -> tuple[dict[str, dict[str, Any]], list[str]]:
+    errors: list[str] = []
+    payload = yaml.safe_load(DASHBOARD_INVENTORY_CONTRACT.read_text(encoding="utf-8"))
+    dashboards = payload.get("dashboards", []) if isinstance(payload, dict) else []
+    if not isinstance(dashboards, list):
+        return {}, ["dashboard-inventory: dashboards must be a list"]
+
+    entries: dict[str, dict[str, Any]] = {}
+    for entry in dashboards:
+        if not isinstance(entry, dict):
+            errors.append("dashboard-inventory: dashboard entry must be a mapping")
+            continue
+        uid = entry.get("uid")
+        if not isinstance(uid, str) or not uid:
+            errors.append("dashboard-inventory: dashboard entry missing uid")
+            continue
+        if uid in entries:
+            errors.append(f"dashboard-inventory: duplicate dashboard uid {uid}")
+            continue
+        entries[uid] = entry
+    return entries, errors
+
+
+def _dashboard_panels_by_id(item: dict[str, object]) -> dict[int, dict[str, Any]]:
+    payload = _load_dashboard_file(Path(str(item["file"])))
+    panels_by_id: dict[int, dict[str, Any]] = {}
+    for panel in _iter_panels(payload):
+        panel_id = panel.get("id")
+        if isinstance(panel_id, int):
+            panels_by_id[panel_id] = panel
+    return panels_by_id
+
+
+def _check_dashboard_inventory_contract(
+    inventory: list[dict[str, object]],
+) -> tuple[list[str], dict[str, list[str]]]:
+    errors: list[str] = []
+    per_dashboard: dict[str, list[str]] = {}
+    contract_entries, load_errors = _dashboard_inventory_contract_entries()
+    for message in load_errors:
+        _register_issue(
+            errors=errors,
+            per_dashboard=per_dashboard,
+            uid=None,
+            message=message,
+        )
+
+    shipped_uids = {str(item["uid"]) for item in inventory}
+    contract_uids = set(contract_entries)
+    for uid in sorted(shipped_uids - contract_uids):
+        _register_issue(
+            errors=errors,
+            per_dashboard=per_dashboard,
+            uid=uid,
+            message=f"dashboard-inventory: missing dashboard entry for {uid}",
+        )
+    for uid in sorted(contract_uids - shipped_uids):
+        _register_issue(
+            errors=errors,
+            per_dashboard=per_dashboard,
+            uid=uid,
+            message=f"dashboard-inventory: unexpected dashboard entry for {uid}",
+        )
+
+    for item in inventory:
+        uid = str(item["uid"])
+        contract_entry = contract_entries.get(uid)
+        if contract_entry is None:
+            continue
+        if contract_entry.get("panel_count") != item.get("panel_count"):
+            _register_issue(
+                errors=errors,
+                per_dashboard=per_dashboard,
+                uid=uid,
+                message=(
+                    "dashboard-inventory: panel_count mismatch for "
+                    f"{uid}: contract={contract_entry.get('panel_count')} "
+                    f"actual={item.get('panel_count')}"
+                ),
+            )
+
+        contract_variables = _normalize_contract_variables(
+            contract_entry.get("selector_variables")
+        )
+        if contract_variables != list(item["variables"]):
+            _register_issue(
+                errors=errors,
+                per_dashboard=per_dashboard,
+                uid=uid,
+                message=(
+                    "dashboard-inventory: selector variables mismatch for "
+                    f"{uid}: contract={contract_variables} actual={item['variables']}"
+                ),
+            )
+
+        panels_by_id = _dashboard_panels_by_id(item)
+        key_panels = contract_entry.get("key_panels", [])
+        if not isinstance(key_panels, list):
+            _register_issue(
+                errors=errors,
+                per_dashboard=per_dashboard,
+                uid=uid,
+                message=f"dashboard-inventory: {uid} key_panels must be a list",
+            )
+            continue
+        for panel_contract in key_panels:
+            if not isinstance(panel_contract, dict):
+                _register_issue(
+                    errors=errors,
+                    per_dashboard=per_dashboard,
+                    uid=uid,
+                    message=f"dashboard-inventory: {uid} key_panel must be a mapping",
+                )
+                continue
+            panel_id = panel_contract.get("id")
+            if not isinstance(panel_id, int):
+                _register_issue(
+                    errors=errors,
+                    per_dashboard=per_dashboard,
+                    uid=uid,
+                    message=f"dashboard-inventory: {uid} key_panel missing integer id",
+                )
+                continue
+            actual_panel = panels_by_id.get(panel_id)
+            if actual_panel is None:
+                _register_issue(
+                    errors=errors,
+                    per_dashboard=per_dashboard,
+                    uid=uid,
+                    message=(
+                        f"dashboard-inventory: {uid} key_panel id={panel_id} "
+                        "missing from dashboard JSON"
+                    ),
+                )
+                continue
+            expected_title = panel_contract.get("title")
+            actual_title = actual_panel.get("title")
+            if expected_title != actual_title:
+                _register_issue(
+                    errors=errors,
+                    per_dashboard=per_dashboard,
+                    uid=uid,
+                    message=(
+                        f"dashboard-inventory: {uid} key_panel id={panel_id} "
+                        f"title mismatch: contract={expected_title!r} "
+                        f"actual={actual_title!r}"
+                    ),
+                )
+            expected_type = panel_contract.get("type")
+            actual_type = actual_panel.get("type")
+            if expected_type != actual_type:
+                _register_issue(
+                    errors=errors,
+                    per_dashboard=per_dashboard,
+                    uid=uid,
+                    message=(
+                        f"dashboard-inventory: {uid} key_panel id={panel_id} "
+                        f"type mismatch: contract={expected_type!r} "
+                        f"actual={actual_type!r}"
+                    ),
+                )
+    return errors, per_dashboard
+
+
 def _register_issue(
     *,
     errors: list[str],
@@ -177,6 +354,12 @@ def _check_parity(
     idx_text = MONITORING_INDEX.read_text(encoding="utf-8")
     vars_map = _parse_variables_guide(vars_text)
     selector_contract = yaml.safe_load(SELECTOR_CONTRACT.read_text(encoding="utf-8"))
+    dashboard_inventory_errors, dashboard_inventory_by_dashboard = (
+        _check_dashboard_inventory_contract(inventory)
+    )
+    errors.extend(dashboard_inventory_errors)
+    for uid, messages in dashboard_inventory_by_dashboard.items():
+        per_dashboard.setdefault(uid, []).extend(messages)
     shipped_registry = selector_contract.get("shipped_selector_registry", {})
     if not isinstance(shipped_registry, dict):
         _register_issue(

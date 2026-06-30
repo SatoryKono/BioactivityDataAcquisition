@@ -52,6 +52,7 @@ class RecordNormalizationHashSupportMixin:
         *,
         contract_version: str | None = None,
     ) -> str:
+        """Compute one deterministic content hash for the requested contract version."""
         include_fields, exclude_fields, datetime_policy = self._resolve_hash_policy(
             contract_version=contract_version
         )
@@ -71,6 +72,7 @@ class RecordNormalizationHashSupportMixin:
         )
 
     def compute_content_hashes_by_version(self, record: JsonDict) -> dict[str, str]:
+        """Compute projected content hashes for all configured hash-policy versions."""
         if not self._should_project_hashes_by_version():
             return {}
         assert self.content_hash_policy_by_version is not None

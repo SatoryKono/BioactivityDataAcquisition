@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.2.1
+Version: 1.2.2
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-19'
+  Last verified: '2026-06-30'
 
 ______________________________________________________________________
 
@@ -26,17 +26,17 @@ and be able to execute data pipelines.
 
 ## Prerequisites
 
-Ensure you have the following tools installed on your machine:
+Baseline Local-Only setup requires only the following local tools:
 
 - **Python 3.12** (baseline): [Download](https://www.python.org/downloads/)
 - **uv** (recommended): Python package/environment manager used by the maintained install path.
 - **Git**: Version control.
 - **Make** (optional): Build automation tool. On Windows, use Chocolatey or WSL, or run commands manually.
 
-**Not required:**
+**Optional adjunct tooling only, not baseline prerequisites:**
 
 - Docker Desktop
-- Redis, MinIO, Postgres
+- Redis, MinIO, Postgres helper stacks
 
 ## Runtime compatibility policy
 

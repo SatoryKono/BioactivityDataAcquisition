@@ -34,7 +34,9 @@ class BatchExecutionMemoryState(Protocol):
     batch_size_reductions: int
     min_batch_size_used: int
 
-    def decision_trace_dicts(self) -> tuple[JsonDict, ...]: ...
+    def decision_trace_dicts(self) -> tuple[JsonDict, ...]:
+        """Return immutable decision-trace payloads for batch sizing."""
+        ...
 
 
 class BatchResultBuilderProtocol(Protocol[_BatchResultT]):

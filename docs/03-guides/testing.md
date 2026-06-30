@@ -1061,7 +1061,8 @@ Active testing documentation в `docs/03-guides/testing.md` и связанны�
 ### Запрещённые артефакты в active docs
 
 - **VCR cassettes**: Запрещено включать VCR cassette файлы (`.yaml`, `.json`) в
-  active testing docs. VCR файлы MUST храниться только в `tests/cassettes/`
+  active testing docs. VCR файлы MUST храниться только в
+  `tests/fixtures/vcr/{provider}/`
   и ссылаться из active docs как repository-path evidence.
 - **Test output artifacts**: Запрещено включать stdout/stderr output, coverage reports,
   или тестовые логи в active testing docs. Такие артефакты MUST храниться в
