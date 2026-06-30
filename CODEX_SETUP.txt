@@ -34,10 +34,17 @@ This installs Node.js, Codex CLI, and verifies Docker/proxy connectivity inside 
 
 ## Step 3: API key
 
+The setup script does not create `.env.codex` by default. Create it manually:
+
     copy scripts\ai\codex\.env.codex.example scripts\ai\codex\.env.codex
     notepad scripts\ai\codex\.env.codex
 
 Add: OPENAI_API_KEY=sk-...
+
+Or run setup with explicit opt-in to generate a local template:
+
+    $env:BIOETL_CREATE_LOCAL_ENV_FILES="1"
+    .\setup-codex-wsl.ps1
 
 ## Step 4: Launch Codex
 
@@ -81,6 +88,7 @@ MCP setup hangs:
 
 API key missing:
     Create scripts\ai\codex\.env.codex from .env.codex.example
+    Or rerun setup with: $env:BIOETL_CREATE_LOCAL_ENV_FILES="1"
 
 ## Docs
 

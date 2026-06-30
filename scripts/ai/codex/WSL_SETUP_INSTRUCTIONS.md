@@ -68,6 +68,8 @@ sudo apt update && sudo apt upgrade -y
 
 ### 3.1. Создайте файл .env.codex
 
+Скрипты настройки не создают `.env.codex` по умолчанию. Создайте его вручную:
+
 Из Windows PowerShell:
 
 ```powershell
@@ -83,6 +85,13 @@ OPENAI_API_KEY=sk-ваш-ключ-здесь
 ```
 
 Получите ключ: https://platform.openai.com/api-keys
+
+**Альтернатива**: Запустите настройку с флагом opt-in для автоматического создания шаблона:
+
+```powershell
+$env:BIOETL_CREATE_LOCAL_ENV_FILES="1"
+.\setup-codex-wsl.bat
+```
 
 ### 3.2. Запустите автоматическую настройку
 

@@ -103,6 +103,8 @@ notepad .\scripts\ai\codex\.env.codex
 
 Get a new key: https://platform.openai.com/api-keys
 
+**Note**: Setup scripts do not create `.env.codex` by default. Create it manually from `.env.codex.example`, or set `BIOETL_CREATE_LOCAL_ENV_FILES=1` when running setup to generate a local template automatically.
+
 ## 🐛 Troubleshooting
 
 ### "WSL is not recognized"
