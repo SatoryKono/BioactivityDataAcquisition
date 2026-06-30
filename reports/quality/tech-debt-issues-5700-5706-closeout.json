@@ -93,7 +93,7 @@
     "5701": {
       "source_commit": "32f8274ca6df6944cb0a33dba5c7b2f1edbf0b4a",
       "source_run_id": "origin-main-telemetry-20260630",
-      "refreshed_at_utc": "2026-06-30T06:47:08.533709+00:00",
+      "refreshed_at_utc": "2026-06-30T09:12:47.196108+00:00",
       "coverage_xml_present": false,
       "coverage_percent_fallback_used": true,
       "coverage_actual_percent": 92.81,

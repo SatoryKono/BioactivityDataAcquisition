@@ -41,6 +41,36 @@ def test_read_slowest_summary_returns_empty_shape_when_missing(tmp_path: Path) -
     assert payload == {"total_cases": None, "top_slowest": []}
 
 
+def test_read_slowest_summary_accepts_compatibility_alias(tmp_path: Path) -> None:
+    slowest_json = tmp_path / "slowest-tests.json"
+    slowest_json.write_text(
+        json.dumps(
+            {
+                "total_cases": 1,
+                "top_slowest_tests": [
+                    {
+                        "source": "junit.xml",
+                        "test": "tests.example::test_case",
+                        "duration_s": 1.234,
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    payload = _read_slowest_summary(slowest_json)
+
+    assert payload["total_cases"] == 1
+    assert payload["top_slowest"] == [
+        {
+            "source": "junit.xml",
+            "test": "tests.example::test_case",
+            "duration_s": 1.234,
+        }
+    ]
+
+
 def test_read_coverage_percent_from_log_returns_percentage(tmp_path: Path) -> None:
     coverage_log = tmp_path / "parallel.log"
     coverage_log.write_text(
@@ -349,8 +379,10 @@ def test_build_branch_telemetry_reports_preserves_baseline_snapshot() -> None:
     coverage_summary = json.loads(reports["coverage-summary.json"])
     slowest_summary = json.loads(reports["slowest-tests.json"])
     assert coverage_summary["coverage"]["actual_percent"] == pytest.approx(91.23)
+    assert coverage_summary["coverage_percent"] == pytest.approx(91.23)
     assert slowest_summary["total_cases"] == 321
     assert slowest_summary["top_slowest"][0]["test"] == "tests.example::test_case"
+    assert slowest_summary["top_slowest_tests"] == slowest_summary["top_slowest"]
     assert slowest_summary["top_slowest_zones"][0]["zone"] == "tests.example"
     assert "Slowest Tests" in reports["slowest-tests.md"]
     assert "Top Slow Zones" in reports["slowest-tests.md"]

@@ -13,6 +13,9 @@ from bioetl.application.pipelines.uniprot.extractors.extractor_helpers import (
 from bioetl.application.pipelines.uniprot.extractors.features import FeatureExtractor
 from bioetl.application.pipelines.uniprot.extractors.genes import GeneExtractor
 from bioetl.application.pipelines.uniprot.extractors.taxonomy import TaxonomyExtractor
+from bioetl.application.pipelines.uniprot.extractors._comment_facets_data import (
+    _COMMENT_ANNOTATION_OUTPUT_KEYS,
+)
 
 __all__ = [
     "CommentExtractor",
@@ -21,4 +24,5 @@ __all__ = [
     "FeatureExtractor",
     "GeneExtractor",
     "TaxonomyExtractor",
+    "_COMMENT_ANNOTATION_OUTPUT_KEYS",
 ]

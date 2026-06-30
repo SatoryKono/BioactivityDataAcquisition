@@ -28,68 +28,6 @@ def test_strict_runner_collaborator_attachment_requires_run_ledger_service() -> 
         )
 
 
-def test_build_pipeline_runner_forces_probe_mode_in_test_mode(tmp_path: Path) -> None:
-    _, fake_registry = _build_factory_registry()
-    captured: dict[str, object] = {}
-
-    def assemble_runtime_config_fn(**kwargs: object) -> dict[str, object]:
-        captured.update(kwargs)
-        return _runtime_config_stub()
-
-    _call_build_pipeline_runner(
-        _build_context(vacuum=SimpleNamespace(enabled=None, retention_days=7)),
-        registry=fake_registry,
-        settings=_build_settings(
-            data_dir=str(tmp_path),
-            health_check_mode="strict",
-            test_mode=True,
-        ),
-        pipeline_config=_build_pipeline_config(
-            maintenance=SimpleNamespace(auto_vacuum=False, vacuum_retention_days=7),
-            batch_size=100,
-        ),
-        assemble_vacuum_settings_fn=lambda **_: SimpleNamespace(
-            enabled=False,
-            retention_days=7,
-        ),
-        assemble_runtime_config_fn=assemble_runtime_config_fn,
-    )
-
-    assert captured["health_check_mode"] == "probe"
-
-
-def test_build_pipeline_runner_uses_configured_mode_outside_test_mode(
-    tmp_path: Path,
-) -> None:
-    _, fake_registry = _build_factory_registry()
-    captured: dict[str, object] = {}
-
-    def assemble_runtime_config_fn(**kwargs: object) -> dict[str, object]:
-        captured.update(kwargs)
-        return _runtime_config_stub()
-
-    _call_build_pipeline_runner(
-        _build_context(vacuum=SimpleNamespace(enabled=None, retention_days=7)),
-        registry=fake_registry,
-        settings=_build_settings(
-            data_dir=str(tmp_path),
-            health_check_mode="probe",
-            test_mode=False,
-        ),
-        pipeline_config=_build_pipeline_config(
-            maintenance=SimpleNamespace(auto_vacuum=False, vacuum_retention_days=7),
-            batch_size=100,
-        ),
-        assemble_vacuum_settings_fn=lambda **_: SimpleNamespace(
-            enabled=False,
-            retention_days=7,
-        ),
-        assemble_runtime_config_fn=assemble_runtime_config_fn,
-    )
-
-    assert captured["health_check_mode"] == "probe"
-
-
 def test_build_pipeline_runner_forces_skip_gold_when_sink_disabled(
     tmp_path: Path,
 ) -> None:

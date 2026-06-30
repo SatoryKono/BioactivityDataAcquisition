@@ -130,7 +130,7 @@ def test_issues_5648_5649_5650_duplication_is_below_opening_baselines() -> None:
     assert cli["duplicate_count"] < 3
     assert adapters["duplicate_count"] <= 56
     assert adapters["duplicate_count"] < 67
-    assert pipelines["duplicate_count"] == 15
+    assert pipelines["duplicate_count"] <= 13
     assert pipelines["duplicate_count"] < 18
     assert bootstrap["duplicate_count"] == 0
 

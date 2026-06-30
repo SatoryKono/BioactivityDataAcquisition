@@ -42,22 +42,22 @@ class TestNoOpSpan:
     def test_set_attribute_no_error(self) -> None:
         """Test set_attribute is a no-op."""
         span = _NoOpSpan()
-        span.set_attribute("key", "value")  # Should not raise
+        assert span.set_attribute("key", "value") is None
 
     def test_set_status_no_error(self) -> None:
         """Test set_status is a no-op."""
         span = _NoOpSpan()
-        span.set_status("OK")  # Should not raise
+        assert span.set_status("OK") is None
 
     def test_record_exception_no_error(self) -> None:
         """Test record_exception is a no-op."""
         span = _NoOpSpan()
-        span.record_exception(ValueError("test"))  # Should not raise
+        assert span.record_exception(ValueError("test")) is None
 
     def test_add_event_no_error(self) -> None:
         """Test add_event is a no-op."""
         span = _NoOpSpan()
-        span.add_event("bioetl.memory.decision", {"index": 1})  # Should not raise
+        assert span.add_event("bioetl.memory.decision", {"index": 1}) is None
 
 
 @pytest.mark.unit
@@ -91,18 +91,18 @@ class TestNoOpTracing:
     def test_close_no_error(self) -> None:
         """Test close is a no-op."""
         tracing = NoOpTracing()
-        tracing.close()  # Should not raise
+        assert tracing.close() is None
 
     def test_close_idempotent(self) -> None:
         """Test close can be called multiple times."""
         tracing = NoOpTracing()
-        tracing.close()
-        tracing.close()  # Should not raise
+        assert tracing.close() is None
+        assert tracing.close() is None
 
     def test_flush_no_error(self) -> None:
         """Test flush is a no-op."""
         tracing = NoOpTracing()
-        tracing.flush()
+        assert tracing.flush() is None
 
 
 @pytest.mark.unit
@@ -136,17 +136,19 @@ class TestNoOpMetrics:
     def test_observe_histogram_no_error(self) -> None:
         """Test observe_histogram is a no-op."""
         metrics = NoOpMetrics()
-        metrics.observe_histogram("duration", 1.5, {"entity": "activity"})
+        assert (
+            metrics.observe_histogram("duration", 1.5, {"entity": "activity"}) is None
+        )
 
     def test_increment_counter_no_error(self) -> None:
         """Test increment_counter is a no-op."""
         metrics = NoOpMetrics()
-        metrics.increment_counter("errors", 1, {"type": "validation"})
+        assert metrics.increment_counter("errors", 1, {"type": "validation"}) is None
 
     def test_set_gauge_no_error(self) -> None:
         """Test set_gauge is a no-op."""
         metrics = NoOpMetrics()
-        metrics.set_gauge("memory_usage", 75.5, {"unit": "percent"})
+        assert metrics.set_gauge("memory_usage", 75.5, {"unit": "percent"}) is None
 
     def test_metrics_reject_legacy__labels_alias(self) -> None:
         """Legacy _labels keyword should remain rejected."""
@@ -173,15 +175,15 @@ class TestNoOpMetrics:
     ) -> None:
         """Test close is a no-op."""
         metrics = NoOpMetrics()
-        metrics.close()  # Should not raise
+        assert metrics.close() is None
 
     def test_close_idempotent__test_no_op_metrics_domain_ports_test_noop_145(
         self,
     ) -> None:
         """Test close can be called multiple times."""
         metrics = NoOpMetrics()
-        metrics.close()
-        metrics.close()  # Should not raise
+        assert metrics.close() is None
+        assert metrics.close() is None
 
 
 @pytest.mark.unit

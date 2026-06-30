@@ -140,6 +140,7 @@ def test_module_coverage_inventory_is_committed_and_shape_is_stable() -> None:
     )
     assert committed["canonical_coverage_lane"] == "coverage-verify"
     assert isinstance(committed["modules"], list) and committed["modules"]
+    assert committed["rows"] == committed["modules"]
     assert committed["summary"]["coverage_xml_present"] is True
     assert isinstance(committed["summary"]["unmeasured_module_count"], int)
     assert isinstance(committed["summary"]["unmeasured_modules"], list)

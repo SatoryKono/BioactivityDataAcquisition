@@ -12,8 +12,6 @@ from bioetl.application.pipelines.uniprot.extractors import (
     FeatureExtractor,
     GeneExtractor,
     TaxonomyExtractor,
-)
-from bioetl.application.pipelines.uniprot.extractors._comment_facets_data import (
     _COMMENT_ANNOTATION_OUTPUT_KEYS,
 )
 from bioetl.domain.types import GoldRecord

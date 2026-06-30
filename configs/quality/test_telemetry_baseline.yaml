@@ -2,7 +2,7 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: main
-refreshed_at_utc: '2026-06-30T06:47:08.533709+00:00'
+refreshed_at_utc: '2026-06-30T09:12:47.196108+00:00'
 refresh_status: captured
 source_commit: 32f8274ca6df6944cb0a33dba5c7b2f1edbf0b4a
 source_run_id: origin-main-telemetry-20260630
@@ -34,9 +34,6 @@ duration_telemetry:
   - source: S7-crosscutting-architecture-a2.xml
     test: tests.architecture.test_config_discrepancy_report_drift::test_config_discrepancy_report_matches_deterministic_generator
     duration_s: 23.018
-  - source: S2-comp-iface.xml
-    test: tests.unit.composition.runtime_builders.test_runner_builder_runtime_modes::test_build_pipeline_runner_uses_configured_mode_outside_test_mode
-    duration_s: 21.493
   - source: S7-crosscutting-architecture-a2.xml
     test: tests.architecture.test_cli_command_import_guards::test_non_cli_source_keeps_retained_public_cli_seams_outside_runtime_code
     duration_s: 16.084
@@ -114,10 +111,6 @@ duration_telemetry:
     test_count: 1
     total_duration_s: 23.018
     max_duration_s: 23.018
-  - zone: tests.unit.composition.runtime_builders.test_runner_builder_runtime_modes
-    test_count: 1
-    total_duration_s: 21.493
-    max_duration_s: 21.493
   - zone: tests.architecture.test_config_root_governance
     test_count: 1
     total_duration_s: 15.28
@@ -138,6 +131,10 @@ duration_telemetry:
     test_count: 2
     total_duration_s: 11.72
     max_duration_s: 7.029
+  - zone: tests.architecture.test_adapter_contracts.TestAdapterMixinPolicy
+    test_count: 1
+    total_duration_s: 8.951
+    max_duration_s: 8.951
 slow_governance_cache_probe:
   issue_ref: '#4663'
   refreshed_at_utc: '2026-05-26T04:32:00+00:00'
