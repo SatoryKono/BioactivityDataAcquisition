@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-23'
+  Last verified: '2026-06-30'
 
 ______________________________________________________________________
 
@@ -28,10 +28,10 @@ trend evidence only.
 ## Baseline Snapshot
 
 - Source branch: `main`
-- Source commit: `281a0ed48ad70bb108fb90ada50a6a6cdd77f409`
-- Source run id: `local-current-main-telemetry-20260623`
+- Source commit: `cdecddaa00c71b65000b0d6918dcfabbfea2e707`
+- Source run id: `local-current-head-telemetry-20260630`
 - Refresh status: `captured`
-- Refreshed at (UTC): `2026-06-23T09:51:39.091871+00:00`
+- Refreshed at (UTC): `2026-06-30T05:35:46.133759+00:00`
 
 ## Coverage
 

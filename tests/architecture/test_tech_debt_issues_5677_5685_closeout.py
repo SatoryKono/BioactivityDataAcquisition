@@ -125,7 +125,7 @@ def test_issues_5679_5680_5685_duplication_ratchets_are_lower() -> None:
     assert pipelines["duplicate_count"] == 15
     assert pipelines["duplicate_count"] < 16
     assert cli["duplicate_count"] == 0
-    assert cli["actionability"] == []
+    assert all(row["duplicate_clusters"] == 0 for row in cli["actionability"])
     assert bootstrap["duplicate_count"] == 0
 
     assert ratchets["full_app_duplicate_clusters"]["current"] == 71

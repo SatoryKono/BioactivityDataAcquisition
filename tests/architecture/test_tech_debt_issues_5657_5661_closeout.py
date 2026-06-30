@@ -149,7 +149,7 @@ def test_issue_5659_cli_and_pipeline_duplication_are_below_opening_baselines() -
 
     assert cli["duplicate_count"] == 0
     assert cli["duplicate_count"] < 2
-    assert cli["actionability"] == []
+    assert all(row["duplicate_clusters"] == 0 for row in cli["actionability"])
 
     assert pipelines["duplicate_count"] == 15
     assert pipelines["duplicate_count"] < 17

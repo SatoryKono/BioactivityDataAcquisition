@@ -1,7 +1,7 @@
 # Slowest Tests
 
-Source commit: `281a0ed48ad70bb108fb90ada50a6a6cdd77f409`
-Source run id: `local-current-main-telemetry-20260623`
+Source commit: `cdecddaa00c71b65000b0d6918dcfabbfea2e707`
+Source run id: `local-current-head-telemetry-20260630`
 Refresh status: `captured`
 Collected test cases: `8507`
 Freshness guard: `<=45 days`

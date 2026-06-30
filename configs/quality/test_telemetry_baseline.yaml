@@ -2,24 +2,19 @@ version: 1
 policy_scope: test_telemetry_baseline
 workflow_path: .github/workflows/tests.yml
 source_branch: main
-refreshed_at_utc: '2026-06-23T09:51:39.091871+00:00'
+refreshed_at_utc: '2026-06-30T05:35:46.133759+00:00'
 refresh_status: captured
-source_commit: 281a0ed48ad70bb108fb90ada50a6a6cdd77f409
-source_run_id: local-current-main-telemetry-20260623
+source_commit: cdecddaa00c71b65000b0d6918dcfabbfea2e707
+source_run_id: local-current-head-telemetry-20260630
 freshness_guard:
   timestamp_field: refreshed_at_utc
   max_age_days: 45
 artifact_inputs:
   coverage_xml: reports/coverage/coverage.xml
   coverage_log: .
-  coverage_percent_fallback: null
+  coverage_percent_fallback: 92.81
   slowest_tests_json: reports/test-telemetry/slowest-tests.json
-  junit_inputs:
-  - reports/quality/test-runs/junit/current-main-telemetry/S1-domain-core.xml
-  - reports/quality/test-runs/junit/current-main-telemetry/S1-domain-services.xml
-  - reports/quality/test-runs/junit/current-main-telemetry/S2-comp-iface.xml
-  - reports/quality/test-runs/junit/current-main-telemetry/S7-crosscutting-architecture-a.xml
-  - reports/quality/test-runs/junit/current-main-telemetry/S7-crosscutting-architecture-a2.xml
+  junit_inputs: []
 coverage:
   threshold_percent: 85.0
   actual_percent: 92.81

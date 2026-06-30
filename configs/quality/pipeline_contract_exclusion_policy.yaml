@@ -1,71 +1,36 @@
 version: 1
 policy_scope: pipeline_contract_exclusion_policy
 owner: "@bioetl-contracts"
-linked_issue: "#5563"
-review_date: "2026-06-23"
+linked_issue: "#5678"
+review_date: "2026-06-30"
 allowed_reasons:
   - gold_runtime_disabled
-exclusions:
-  chembl.cell_line:
-    owner: "@bioetl-contracts"
-    linked_issue: "#5563"
-    expected_reason: gold_runtime_disabled
-    decision: retain_non_gold_runtime
-    reentry_condition: Enable Gold runtime or formally retire the published contract artifact.
-    rationale: Cell-line contract metadata is published for traceability while Gold runtime remains disabled.
-  chembl.compound_record:
-    owner: "@bioetl-contracts"
-    linked_issue: "#5563"
-    expected_reason: gold_runtime_disabled
-    decision: retain_non_gold_runtime
-    reentry_condition: Enable Gold runtime or formally retire the published contract artifact.
-    rationale: Compound-record contract metadata is published for traceability while Gold runtime remains disabled.
-  chembl.subcellular_fraction:
-    owner: "@bioetl-contracts"
-    linked_issue: "#5563"
-    expected_reason: gold_runtime_disabled
-    decision: retain_non_gold_runtime
-    reentry_condition: Enable Gold runtime or formally retire the published contract artifact.
-    rationale: Subcellular-fraction contract metadata is published for traceability while Gold runtime remains disabled.
-  chembl.tissue:
-    owner: "@bioetl-contracts"
-    linked_issue: "#5563"
-    expected_reason: gold_runtime_disabled
-    decision: retain_non_gold_runtime
-    reentry_condition: Enable Gold runtime or formally retire the published contract artifact.
-    rationale: Tissue contract metadata is published for traceability while Gold runtime remains disabled.
-  crossref.publication:
-    owner: "@bioetl-contracts"
-    linked_issue: "#5563"
-    expected_reason: gold_runtime_disabled
-    decision: retain_non_gold_runtime
-    reentry_condition: Enable Gold runtime or formally retire the published contract artifact.
-    rationale: CrossRef publication contract metadata is published for traceability while Gold runtime remains disabled.
-  openalex.publication:
-    owner: "@bioetl-contracts"
-    linked_issue: "#5563"
-    expected_reason: gold_runtime_disabled
-    decision: retain_non_gold_runtime
-    reentry_condition: Enable Gold runtime or formally retire the published contract artifact.
-    rationale: OpenAlex publication contract metadata is published for traceability while Gold runtime remains disabled.
-  pubchem.compound:
-    owner: "@bioetl-contracts"
-    linked_issue: "#5563"
-    expected_reason: gold_runtime_disabled
-    decision: retain_non_gold_runtime
-    reentry_condition: Enable Gold runtime or formally retire the published contract artifact.
-    rationale: PubChem compound contract metadata is published for traceability while Gold runtime remains disabled.
-  semanticscholar.publication:
-    owner: "@bioetl-contracts"
-    linked_issue: "#5563"
-    expected_reason: gold_runtime_disabled
-    decision: retain_non_gold_runtime
-    reentry_condition: Enable Gold runtime or formally retire the published contract artifact.
-    rationale: Semantic Scholar publication contract metadata is published for traceability while Gold runtime remains disabled.
-  uniprot.idmapping:
-    owner: "@bioetl-contracts"
-    linked_issue: "#5563"
-    expected_reason: gold_runtime_disabled
-    decision: retain_non_gold_runtime
-    reentry_condition: Enable Gold runtime or formally retire the published contract artifact.
-    rationale: UniProt ID mapping contract metadata is published for traceability while Gold runtime remains disabled.
+exclusions: {}
+resolved_exclusions:
+  - contract_ref: chembl.cell_line
+    closed_by_issue: "#5678"
+    resolution: raw_entity_config_declares_gold_runtime
+  - contract_ref: chembl.compound_record
+    closed_by_issue: "#5678"
+    resolution: raw_entity_config_declares_gold_runtime
+  - contract_ref: chembl.subcellular_fraction
+    closed_by_issue: "#5678"
+    resolution: raw_entity_config_declares_gold_runtime
+  - contract_ref: chembl.tissue
+    closed_by_issue: "#5678"
+    resolution: raw_entity_config_declares_gold_runtime
+  - contract_ref: crossref.publication
+    closed_by_issue: "#5678"
+    resolution: raw_entity_config_declares_gold_runtime
+  - contract_ref: openalex.publication
+    closed_by_issue: "#5678"
+    resolution: raw_entity_config_declares_gold_runtime
+  - contract_ref: pubchem.compound
+    closed_by_issue: "#5678"
+    resolution: raw_entity_config_declares_gold_runtime
+  - contract_ref: semanticscholar.publication
+    closed_by_issue: "#5678"
+    resolution: raw_entity_config_declares_gold_runtime
+  - contract_ref: uniprot.idmapping
+    closed_by_issue: "#5678"
+    resolution: raw_entity_config_declares_gold_runtime

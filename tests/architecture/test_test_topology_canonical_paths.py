@@ -66,6 +66,7 @@ def test_infrastructure_unit_tests_use_canonical_roots() -> None:
 def test_legacy_unit_test_paths_are_retired() -> None:
     """Legacy top-level and duplicate unit test paths should stay retired."""
     deprecated_paths = [
+        "tests/unit/e2e/test_e2e_timeout_contract.py",
         "tests/unit/test_bootstrap.py",
         "tests/unit/test_context.py",
         "tests/unit/test_error_classifier.py",
@@ -111,6 +112,21 @@ def test_tests_root_has_no_legacy_top_level_test_modules() -> None:
         "top-level tests/test_*.py files are deprecated; move them into "
         "tests/architecture, tests/integration, or another owning lane:\n"
         + "\n".join(f"  - {path}" for path in top_level_tests)
+    )
+
+
+@pytest.mark.architecture
+def test_unit_e2e_compatibility_root_has_no_test_modules() -> None:
+    """E2E helper contracts should live under helper-owned unit roots, not tests/unit/e2e."""
+    legacy_e2e_tests = sorted(
+        path.relative_to(ROOT).as_posix()
+        for path in (ROOT / "tests" / "unit" / "e2e").rglob("test_*.py")
+    )
+
+    assert not legacy_e2e_tests, (
+        "legacy tests/unit/e2e ownership is deprecated; move helper contracts under "
+        "tests/unit/helpers or the owning lane:\n"
+        + "\n".join(f"  - {path}" for path in legacy_e2e_tests)
     )
 
 

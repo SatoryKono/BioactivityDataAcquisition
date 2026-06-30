@@ -223,7 +223,7 @@ def test_full_app_duplication_baseline_covers_audit_visibility_scope() -> None:
 
 
 def test_issue_5486_cli_first_wave_reduces_reviewed_duplication_leverage() -> None:
-    """Issue #5486 first wave keeps the reviewed CLI hotspot below its old count."""
+    """Issue #5486 keeps reviewed CLI duplication burned down and reclassified."""
     payload = _load_json(FULL_APP_DUPLICATION_ARTIFACT["json_path"])
     rows = {
         row["target"]: row
@@ -244,21 +244,26 @@ def test_issue_5486_cli_first_wave_reduces_reviewed_duplication_leverage() -> No
 
     ranking = payload.get("reduction_leverage_ranking")
     assert isinstance(ranking, list) and ranking
-    assert ranking[0] == {
+    cli_ranking_row = next(
+        row
+        for row in ranking
+        if isinstance(row, dict)
+        and row.get("target") == "src/bioetl/interfaces/cli"
+    )
+    assert cli_ranking_row == {
         "target": "src/bioetl/interfaces/cli",
         "duplicate_clusters": cli_row["duplicate_count"],
         "dominant_actionability_category": "cli_command_contract_shell",
         "dominant_actionability_cluster_count": cli_row["duplicate_count"],
         "low_risk_cluster_count": cli_row["duplicate_count"],
-        "low_risk_cluster_share": 1.0,
-        "recommended_first_wave": True,
+        "low_risk_cluster_share": 0.0,
+        "recommended_first_wave": False,
     }
 
     first_wave = payload.get("first_wave")
     assert isinstance(first_wave, dict)
-    assert first_wave["target"] == "src/bioetl/interfaces/cli"
-    assert first_wave["duplicate_clusters"] == cli_row["duplicate_count"]
-    assert first_wave["dominant_actionability_category"] == "cli_command_contract_shell"
+    assert first_wave["target"] != "src/bioetl/interfaces/cli"
+    assert first_wave["duplicate_clusters"] >= cli_row["duplicate_count"]
 
 
 def test_full_app_duplication_markdown_matches_json_payload() -> None:

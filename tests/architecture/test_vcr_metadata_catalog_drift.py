@@ -175,6 +175,10 @@ def test_vcr_metadata_catalog_tracks_cassettes_not_sidecars() -> None:
     assert pruning["unowned_cassettes"] == []
     assert pruning["metadata_review_required_cassettes"] == []
     assert not any(
+        cassette["reachability_status"] == "metadata_reviewed"
+        for cassette in cassettes
+    ), "legacy metadata-reviewed backlog must be burned down to explicit owner paths"
+    assert not any(
         cassette["cassette_rel_path"].endswith(("_meta.yaml", "_meta.yml"))
         for cassette in cassettes
     )
@@ -184,5 +188,4 @@ def test_vcr_metadata_catalog_tracks_cassettes_not_sidecars() -> None:
         "direct_reference",
         "generated_reference",
         "metadata_review_required",
-        "metadata_reviewed",
     }
