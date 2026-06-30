@@ -103,6 +103,36 @@ def _write_governance_files(tmp_path: Path) -> None:
                         "owner": "Engineering / Quality",
                         "ttl_days": 30,
                     },
+                    {
+                        "id": "reports_quality_architecture_debt_execution_plans",
+                        "path": "reports/quality/architecture_debt_execution_plan_*.json",
+                        "owner": "Engineering / Architecture",
+                        "ttl_days": 30,
+                    },
+                    {
+                        "id": "reports_quality_architecture_metric_exemption_tasks",
+                        "path": "reports/quality/tasks_architecture_metric_exemptions_*.json",
+                        "owner": "Engineering / Architecture",
+                        "ttl_days": 30,
+                    },
+                    {
+                        "id": "reports_quality_duplication_baseline_working_snapshots",
+                        "path": "reports/quality/duplication-baseline.*",
+                        "owner": "Engineering / Architecture",
+                        "ttl_days": 30,
+                    },
+                    {
+                        "id": "reports_quality_contract_registry_dq_diagnostics",
+                        "path": "reports/quality/contract-registry-dq-diagnostics.json",
+                        "owner": "Engineering / Quality",
+                        "ttl_days": 30,
+                    },
+                    {
+                        "id": "reports_quality_test_runs",
+                        "path": "reports/quality/test-runs",
+                        "owner": "Engineering / Quality",
+                        "ttl_days": 30,
+                    },
                 ],
             },
             sort_keys=False,
@@ -584,10 +614,39 @@ def test_collect_reports_workspace_evidence_marks_local_only_candidates_for_prun
         encoding="utf-8",
     )
     _set_age_days(quality_dir / "_tmp_field_level_diagnostics.csv", days=8)
+    (quality_dir / "architecture_debt_execution_plan_2026-06-01-00-00.json").write_text(
+        "{}\n",
+        encoding="utf-8",
+    )
+    _set_age_days(
+        quality_dir / "architecture_debt_execution_plan_2026-06-01-00-00.json",
+        days=31,
+    )
+    (quality_dir / "tasks_architecture_metric_exemptions_2026-06-01-00-00.json").write_text(
+        "{}\n",
+        encoding="utf-8",
+    )
+    _set_age_days(
+        quality_dir / "tasks_architecture_metric_exemptions_2026-06-01-00-00.json",
+        days=31,
+    )
+    (quality_dir / "duplication-baseline.json").write_text(
+        "{}\n",
+        encoding="utf-8",
+    )
+    _set_age_days(quality_dir / "duplication-baseline.json", days=31)
+    (quality_dir / "contract-registry-dq-diagnostics.json").write_text(
+        "{}\n",
+        encoding="utf-8",
+    )
+    _set_age_days(quality_dir / "contract-registry-dq-diagnostics.json", days=31)
     (quality_dir / "pretest_guardrails_20260419_174602.json").write_text(
         "{}\n",
         encoding="utf-8",
     )
+    _set_age_days(quality_dir / "pretest_guardrails_20260419_174602.json", days=31)
+    (quality_dir / "test-runs").mkdir()
+    _set_age_days(quality_dir / "test-runs", days=31)
     monkeypatch.setattr(
         module,
         "_tracked_paths",
@@ -648,6 +707,26 @@ def test_collect_reports_workspace_evidence_marks_local_only_candidates_for_prun
         ].retention_ttl_days
         == 30
     )
+    assert (
+        by_path[
+            "reports/quality/architecture_debt_execution_plan_2026-06-01-00-00.json"
+        ].classification
+        == "PRUNE_CANDIDATE"
+    )
+    assert (
+        by_path[
+            "reports/quality/tasks_architecture_metric_exemptions_2026-06-01-00-00.json"
+        ].classification
+        == "PRUNE_CANDIDATE"
+    )
+    assert by_path["reports/quality/duplication-baseline.json"].classification == (
+        "PRUNE_CANDIDATE"
+    )
+    assert (
+        by_path["reports/quality/contract-registry-dq-diagnostics.json"].classification
+        == "PRUNE_CANDIDATE"
+    )
+    assert by_path["reports/quality/test-runs"].classification == "PRUNE_CANDIDATE"
 
 
 def test_collect_reports_workspace_evidence_retains_fresh_ttl_artifacts(

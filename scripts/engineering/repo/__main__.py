@@ -14,6 +14,7 @@ Commands:
     check-actions-runtime-policy  Validate GitHub Actions runtime-compatible refs
     check-cleanliness  Audit repository root layout allowlist
     check-cleanup-governance  Block unsafe broad cleanup instructions
+    check-root-governance-docs  Validate root-governance docs against allowlist/catalog
     check-root-review-registry  Validate root-hygiene review registry
     split-testing-roadmap  Create or preview #2511 child issues
     sync-docs-issues   Preview or apply docs-sync issue metadata
@@ -45,6 +46,7 @@ COMMANDS = {
     "check-actions-runtime-policy": "check_github_actions_runtime_policy.py",
     "check-cleanliness": "audit_root_cleanliness.py",
     "check-cleanup-governance": "check_cleanup_governance.py",
+    "check-root-governance-docs": "check_root_governance_docs.py",
     "check-root-review-registry": "check_root_hygiene_review_registry.py",
     "preflight-cleanup": "preflight_cleanup.sh",
     "split-testing-roadmap": "split_testing_roadmap_issue.py",
@@ -68,6 +70,7 @@ CHECK_COMMANDS = (
     "check-actions-runtime-policy",
     "check-cleanliness",
     "check-cleanup-governance",
+    "check-root-governance-docs",
     "check-root-review-registry",
 )
 

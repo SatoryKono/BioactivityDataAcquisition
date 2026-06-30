@@ -5,21 +5,34 @@ DRY_RUN=false
 PRESERVE_PYTEST_CACHE="${BIOETL_PREFLIGHT_PRESERVE_PYTEST_CACHE:-0}"
 DETAIL_LIMIT="${BIOETL_PREFLIGHT_DETAIL_LIMIT:-25}"
 COMPUTE_SIZE="${BIOETL_PREFLIGHT_COMPUTE_SIZE:-0}"
+INCLUDE_LOCAL_CACHE_ROOTS="${BIOETL_PREFLIGHT_INCLUDE_LOCAL_CACHE_ROOTS:-0}"
+INCLUDE_LOCAL_VENDOR="${BIOETL_PREFLIGHT_INCLUDE_LOCAL_VENDOR:-0}"
 
 for arg in "$@"; do
   case "$arg" in
     --dry-run)
       DRY_RUN=true
       ;;
+    --include-local-cache-roots)
+      INCLUDE_LOCAL_CACHE_ROOTS=1
+      ;;
+    --include-local-vendor)
+      INCLUDE_LOCAL_VENDOR=1
+      ;;
     -h|--help)
       cat <<'USAGE'
-Usage: scripts/engineering/repo/preflight_cleanup.sh [--dry-run]
+Usage: scripts/engineering/repo/preflight_cleanup.sh [--dry-run] [--include-local-cache-roots] [--include-local-vendor]
 
 Removes common Python/build/cache artifacts before release checks.
 
 Options:
-  --dry-run    Show what would be deleted and report counts/sizes.
-  -h, --help   Show this help message.
+  --dry-run                    Show what would be deleted and report counts/sizes.
+  --include-local-cache-roots  Also remove reviewed local cache roots such as
+                               .cache/, .import_linter_cache/, .npm-cache/, and
+                               .coverage-sharded-current-main/.
+  --include-local-vendor       Also remove reviewed local vendor/editor roots such
+                               as .junie/, .qodo/, .sonarlint/, and .windsurf/.
+  -h, --help                   Show this help message.
 USAGE
       exit 0
       ;;
@@ -132,6 +145,22 @@ EXCLUDE_DIRS=(
 PROTECTED_BUILD_DIRS=(
   ./scripts/docs/build
 )
+SAFE_LOCAL_ROOT_DIRS=(
+  .benchmarks
+  .hypothesis
+)
+OPTIONAL_LOCAL_CACHE_ROOTS=(
+  .cache
+  .coverage-sharded-current-main
+  .import_linter_cache
+  .npm-cache
+)
+OPTIONAL_LOCAL_VENDOR_ROOTS=(
+  .junie
+  .qodo
+  .sonarlint
+  .windsurf
+)
 
 build_find_prune() {
   local expr=()
@@ -160,7 +189,7 @@ mapfile -t FILE_TARGETS < <(
 )
 
 # Add cache directories explicitly in case they were pruned
-for cache_dir in .pytest_cache .mypy_cache .ruff_cache; do
+for cache_dir in .pytest_cache .mypy_cache .ruff_cache "${SAFE_LOCAL_ROOT_DIRS[@]}"; do
   if [[ "$cache_dir" == ".pytest_cache" && "$PRESERVE_PYTEST_CACHE" == "1" ]]; then
     continue
   fi
@@ -168,6 +197,22 @@ for cache_dir in .pytest_cache .mypy_cache .ruff_cache; do
     DIR_TARGETS+=("./$cache_dir")
   fi
 done
+
+if [[ "$INCLUDE_LOCAL_CACHE_ROOTS" == "1" ]]; then
+  for cache_dir in "${OPTIONAL_LOCAL_CACHE_ROOTS[@]}"; do
+    if [[ -d "$cache_dir" ]]; then
+      DIR_TARGETS+=("./$cache_dir")
+    fi
+  done
+fi
+
+if [[ "$INCLUDE_LOCAL_VENDOR" == "1" ]]; then
+  for vendor_dir in "${OPTIONAL_LOCAL_VENDOR_ROOTS[@]}"; do
+    if [[ -d "$vendor_dir" ]]; then
+      DIR_TARGETS+=("./$vendor_dir")
+    fi
+  done
+fi
 
 if (( ${#DIR_TARGETS[@]} > 0 )); then
   mapfile -t DIR_TARGETS < <(printf '%s\n' "${DIR_TARGETS[@]}" | sort -u)

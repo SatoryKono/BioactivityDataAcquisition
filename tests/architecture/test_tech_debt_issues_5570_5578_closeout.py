@@ -342,13 +342,9 @@ def test_issue_5577_pipeline_config_contract_ownership_is_fail_fast() -> None:
             "pipeline_code_owner",
         ):
             assert (ROOT / row[field]).is_file(), row[field]
-        if row["gold_enabled"] is True:
-            assert row["coverage_status"] == "covered"
-            assert row["registry_status"] == "active"
-        else:
-            policy = row["gold_exclusion_policy"]
-            assert policy["linked_issue"] == "#5563"
-            assert policy["owner"].startswith("@bioetl-")
+        assert row["gold_enabled"] is True
+        assert row["coverage_status"] == "covered"
+        assert row["registry_status"] == "active"
 
 
 def test_issue_5578_umbrella_has_all_child_evidence() -> None:

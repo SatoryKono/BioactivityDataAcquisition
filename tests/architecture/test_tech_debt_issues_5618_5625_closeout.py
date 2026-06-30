@@ -162,9 +162,9 @@ def test_issue_5625_test_governance_compatibility_inventory_is_ratcheted() -> No
     report = _load_json(TEST_GOVERNANCE_REPORT)["report"]
     inventory = config["compatibility_test_inventory"]
 
-    assert config["budgets"]["compatibility_test_file_max"] == 25
-    assert inventory["total_files"] == 25
-    assert report["compatibility_test_files"] == 25
+    assert config["budgets"]["compatibility_test_file_max"] == 24
+    assert inventory["total_files"] == 24
+    assert report["compatibility_test_files"] == 24
     assert (
         "tests/architecture/test_checkpoint_compatibility_policy_surface.py"
         not in set(report["compatibility_files"])

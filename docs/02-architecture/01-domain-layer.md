@@ -417,9 +417,9 @@ stateDiagram-v2
 
 - `bioetl.domain.composite.config`
 
-`bioetl.domain.value_objects.activity_values` удалён из retained-entrypoint
-inventory; activity-related value-object symbols остаются доступны через package-root
-lazy exports `bioetl.domain.value_objects`.
+Former retained activity-value entrypoints were removed from the compatibility
+inventory; activity-related value-object symbols остаются доступны через
+package-root lazy exports `bioetl.domain.value_objects`.
 Split internal modules остаются implementation detail owner packages и не являются
 рекомендуемыми import path для нового first-party кода.
 Текущий lifecycle/status этих фасадов ведётся в

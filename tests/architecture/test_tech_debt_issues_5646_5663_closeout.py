@@ -174,9 +174,9 @@ def test_issue_5663_test_inventory_and_snapshot_policy_are_bounded() -> None:
     report = report_payload["report"]
     snapshot_policy = config["platform_sensitive_snapshot_tests"]
 
-    assert config["budgets"]["compatibility_test_file_max"] == 25
-    assert inventory["total_files"] == 25
-    assert report["compatibility_test_files"] == 25
+    assert config["budgets"]["compatibility_test_file_max"] == 24
+    assert inventory["total_files"] == 24
+    assert report["compatibility_test_files"] == 24
     assert report_payload["budget_violations"] == []
     assert bronze_gaps["gaps"] == {}
 

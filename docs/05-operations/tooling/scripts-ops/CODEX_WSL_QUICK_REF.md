@@ -4,7 +4,7 @@
 
 ```bash
 # From WSL in project root
-bash ./script-codex/helper/setup-wsl.sh
+bash ./scripts/ai/codex/helper/setup-wsl.sh
 
 # If issues, configure proxy manually:
 source .wsl_proxy_env.sh
@@ -61,7 +61,7 @@ cd <YOUR_WSL_REPO_PATH>
 
 | Problem              | Solution                                                                       |
 | -------------------- | ------------------------------------------------------------------------------ |
-| `Codex not found`    | Run: `bash ./script-codex/helper/setup-wsl.sh`                                 |
+| `Codex not found`    | Run: `bash ./scripts/ai/codex/helper/setup-wsl.sh`                                 |
 | `OpenAI timeout`     | Source proxy: `source .wsl_proxy_env.sh` then `curl -I https://api.openai.com` |
 | `WSL not found`      | From PowerShell: `wsl -l -v` then `wsl --install -d Ubuntu`                    |
 | `Permission denied`  | `chmod +x ./scripts/ops/launchers/codex/codex.sh`                              |
@@ -73,7 +73,7 @@ cd <YOUR_WSL_REPO_PATH>
 - `scripts/ops/launchers/codex/codex.sh` - WSL bash launcher
 - `scripts/ops/launchers/codex/codex-exec.sh` - WSL auto-exec launcher
 - `scripts/ops/launchers/codex/codex-wsl.bat` - Modern Windows wrapper
-- `script-codex/helper/setup-wsl.sh` - Installation script
+- `scripts/ai/codex/helper/setup-wsl.sh` - Installation script
 - `docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md` - Full guide (this document)
 
 ## Keyboard Shortcuts (Interactive Mode)

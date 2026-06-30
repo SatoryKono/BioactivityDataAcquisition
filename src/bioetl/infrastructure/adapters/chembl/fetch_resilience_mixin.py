@@ -6,14 +6,10 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import TYPE_CHECKING, cast
 
-import httpx
-
-from bioetl.domain.exceptions import (
-    BioETLError,
-    ExternalServiceError,
-    RetryExhaustedError,
-)
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.chembl._fetch_resilience_error import (
+    CHEMBL_ADAPTER_ERRORS as _CHEMBL_ADAPTER_ERRORS,
+)
 from bioetl.infrastructure.adapters.chembl._fetch_resilience_error import (
     handle_fetch_error,
 )
@@ -44,23 +40,13 @@ if TYPE_CHECKING:
     )
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
-CHEMBL_ADAPTER_ERRORS = (
-    BioETLError,
-    ExternalServiceError,
-    RetryExhaustedError,
-    httpx.HTTPError,
-    OSError,
-    ValueError,
-    TypeError,
-    RuntimeError,
-    KeyError,
-    AttributeError,
-    Exception,
-)
+CHEMBL_ADAPTER_ERRORS = _CHEMBL_ADAPTER_ERRORS
 
 
 class ChemblFetchResilienceMixin:
     """Provides retry, split-batch recovery, and single-ID fallback helpers."""
+
+    CHEMBL_ADAPTER_ERRORS = _CHEMBL_ADAPTER_ERRORS
 
     # Host-class attributes (provided by ChemblAdapter.__init__)
     logger: LoggerPort

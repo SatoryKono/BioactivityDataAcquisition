@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from tests.e2e import conftest as e2e_conftest
@@ -43,6 +45,51 @@ def test_windows_e2e_plain_delta_writes_are_process_isolated() -> None:
         e2e_conftest._resolve_e2e_plain_write_process_isolation(platform="win32")
         is True
     )
+
+
+def test_windows_e2e_temp_root_prefers_local_appdata_temp(tmp_path: Path) -> None:
+    """Windows E2E sandboxes should prefer a local temp root over TMP/TEMP."""
+    local_appdata = tmp_path / "local_appdata"
+    local_temp = local_appdata / "Temp"
+    local_temp.mkdir(parents=True)
+    fallback = tmp_path / "slow_temp"
+    fallback.mkdir()
+
+    resolved = e2e_conftest._resolve_e2e_temp_root(
+        platform="win32",
+        fallback_tmp=str(fallback),
+        env={"LOCALAPPDATA": str(local_appdata)},
+    )
+
+    assert resolved == local_temp
+
+
+def test_windows_e2e_temp_root_honors_explicit_override(tmp_path: Path) -> None:
+    """Operators may force an explicit sandbox root when diagnosing I/O issues."""
+    override = tmp_path / "override_temp"
+    override.mkdir()
+
+    resolved = e2e_conftest._resolve_e2e_temp_root(
+        platform="win32",
+        fallback_tmp=str(tmp_path / "fallback"),
+        env={"BIOETL_E2E_TEMP_ROOT": str(override)},
+    )
+
+    assert resolved == override
+
+
+def test_windows_e2e_temp_root_falls_back_without_local_appdata(tmp_path: Path) -> None:
+    """Windows E2E uses the process tempdir when no local-app-data temp exists."""
+    fallback = tmp_path / "fallback_temp"
+    fallback.mkdir()
+
+    resolved = e2e_conftest._resolve_e2e_temp_root(
+        platform="win32",
+        fallback_tmp=str(fallback),
+        env={},
+    )
+
+    assert resolved == fallback
 
 
 def test_non_windows_e2e_timeout_exceeds_inner_merge_budget() -> None:

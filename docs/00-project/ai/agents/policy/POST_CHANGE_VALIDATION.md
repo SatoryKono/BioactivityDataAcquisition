@@ -14,7 +14,8 @@ configs, docs, contracts, prompts, diagrams, and runtime instruction surfaces.
 - configs
 - docs and diagrams
 - prompts
-- runtime AI files in `.codex/**`, `.gemini/**`, and `AGENTS.md`
+- runtime AI files in `.codex/**`, any tracked `.gemini/**` tree that exists in
+  the current checkout, and `AGENTS.md`
 
 ## Required Protocol
 

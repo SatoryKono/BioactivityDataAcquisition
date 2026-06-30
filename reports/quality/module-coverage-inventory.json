@@ -3083,7 +3083,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.pipelines.chembl",
       "path": "src/bioetl/application/pipelines/chembl/__init__.py",
-      "source_lines": 117
+      "source_lines": 133
     },
     {
       "coverage_percent": 100.0,
@@ -14993,7 +14993,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.adapters.chembl._fetch_resilience_error",
       "path": "src/bioetl/infrastructure/adapters/chembl/_fetch_resilience_error.py",
-      "source_lines": 42
+      "source_lines": 66
     },
     {
       "coverage_percent": 100.0,
@@ -15073,7 +15073,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.adapters.chembl.fetch_paging_mixin",
       "path": "src/bioetl/infrastructure/adapters/chembl/fetch_paging_mixin.py",
-      "source_lines": 160
+      "source_lines": 146
     },
     {
       "coverage_percent": 93.48,
@@ -15083,7 +15083,7 @@
       "missing_lines": 3,
       "module": "bioetl.infrastructure.adapters.chembl.fetch_resilience_mixin",
       "path": "src/bioetl/infrastructure/adapters/chembl/fetch_resilience_mixin.py",
-      "source_lines": 172
+      "source_lines": 158
     },
     {
       "coverage_percent": 96.63,
@@ -21453,7 +21453,7 @@
       "missing_lines": 0,
       "module": "bioetl.interfaces.cli.commands.vacuum",
       "path": "src/bioetl/interfaces/cli/commands/vacuum.py",
-      "source_lines": 193
+      "source_lines": 194
     },
     {
       "coverage_percent": 95.83,
@@ -21888,7 +21888,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-22",
-  "source_tree_sha256": "f972342574db9ced1987ed5699e0829021624de63ee9167cb2dbcd926fe3d193",
+  "source_tree_sha256": "90001cde6b66f966dcb7a0ac80dfacd93587c471023eaa7e2267887f302d127f",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

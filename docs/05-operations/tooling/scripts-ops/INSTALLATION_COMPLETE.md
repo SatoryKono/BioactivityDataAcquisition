@@ -89,9 +89,9 @@ cd <YOUR_WSL_REPO_PATH>
 - `codex.sh` - Interactive/prompt launcher
 - `codex-exec.sh` - Auto-execution launcher
 - `codex-wsl.bat` - Windows wrapper
-- `script-codex/helper/setup-wsl.sh` - Setup script (already run)
-- `script-codex/helper/verify-setup.sh` - Verification script
-- `script-codex/helper/test-basic.sh` - Basic functionality test
+- `scripts/ai/codex/helper/setup-wsl.sh` - Setup script (already run)
+- `scripts/ai/codex/helper/verify-setup.sh` - Verification script
+- `scripts/ai/codex/helper/test-basic.sh` - Basic functionality test
 
 ### Documentation
 
@@ -117,7 +117,7 @@ cd <YOUR_WSL_REPO_PATH>
 ### "Codex not found" (unlikely, but just in case)
 
 ```bash
-bash ./script-codex/helper/setup-wsl.sh
+bash ./scripts/ai/codex/helper/setup-wsl.sh
 ```
 
 ### "API timeout" (if behind corporate VPN)
@@ -199,8 +199,8 @@ chmod +x ./scripts/ops/launchers/codex/codex-exec.sh
 - **Quick commands**: `CODEX_WSL_QUICK_REF.md`
 - **Setup help**: `CODEX_WSL_SETUP.md` § Troubleshooting
 - **Overview**: `00_START_HERE.md`
-- **Verification**: `bash ./script-codex/helper/verify-setup.sh`
-- **Testing**: `bash ./script-codex/helper/test-basic.sh`
+- **Verification**: `bash ./scripts/ai/codex/helper/verify-setup.sh`
+- **Testing**: `bash ./scripts/ai/codex/helper/test-basic.sh`
 
 ## Configuration
 

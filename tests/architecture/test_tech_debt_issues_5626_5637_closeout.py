@@ -179,7 +179,7 @@ def test_issue_5629_cli_command_shell_duplication_is_below_opening_baseline() ->
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
 
-    assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] == 1
+    assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] == 0
     assert by_target["src/bioetl/interfaces/cli"]["duplicate_count"] < 6
 
 
@@ -187,7 +187,7 @@ def test_issue_5630_adapter_layer_duplication_is_below_opening_baseline() -> Non
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
 
-    assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] == 58
+    assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] == 56
     assert by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"] < 72
 
 
@@ -197,7 +197,7 @@ def test_issue_5631_pipeline_transformer_duplication_is_below_opening_baseline()
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
 
-    assert by_target["src/bioetl/application/pipelines"]["duplicate_count"] == 16
+    assert by_target["src/bioetl/application/pipelines"]["duplicate_count"] == 15
     assert by_target["src/bioetl/application/pipelines"]["duplicate_count"] < 22
 
 
@@ -243,9 +243,9 @@ def test_issue_5634_retained_compatibility_test_inventory_is_reviewed() -> None:
     report = report_payload["report"]
     inventory = config["compatibility_test_inventory"]
 
-    assert config["budgets"]["compatibility_test_file_max"] == 25
-    assert inventory["total_files"] == 25
-    assert report["compatibility_test_files"] == 25
+    assert config["budgets"]["compatibility_test_file_max"] == 24
+    assert inventory["total_files"] == 24
+    assert report["compatibility_test_files"] == 24
     assert report_payload["budget_violations"] == []
     assert date.fromisoformat(str(inventory["default_review_date"])) >= date(
         2026, 9, 30

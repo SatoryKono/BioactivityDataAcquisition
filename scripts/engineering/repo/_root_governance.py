@@ -21,8 +21,6 @@ BASE_ALLOWED_ROOT_DIRECTORIES: frozenset[str] = frozenset(
         ".idea",
         ".vibe",
         ".vscode",
-        "script-codex",
-        "script-gemini",
         "assets",
         "configs",
         "data",

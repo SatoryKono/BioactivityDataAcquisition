@@ -20,6 +20,7 @@ python -m scripts.engineering.repo cleanup-branch-candidates --help
 | `check-versions`        | `check_version_consistency.py`   | Check version consistency across project files                        |
 | `check-cleanliness`     | `audit_root_cleanliness.py`      | Audit repository root layout allowlist                                |
 | `check-cleanup-governance` | `check_cleanup_governance.py` | Block unsafe broad cleanup guidance outside allowlisted examples       |
+| `check-root-governance-docs` | `check_root_governance_docs.py` | Validate prose root-governance docs against allowlist/catalog sources |
 | `check-root-review-registry` | `check_root_hygiene_review_registry.py` | Validate review-required and blocked cleanup lanes              |
 | `preflight-cleanup`     | `preflight_cleanup.sh`           | Preview/apply the bounded release-preflight cleanup set               |
 | `split-testing-roadmap` | `split_testing_roadmap_issue.py` | Preview or create child issues for testing roadmap issue `#2511`      |
@@ -63,6 +64,7 @@ the risky local branches.
 | `check-versions`            | Before release or after bumping version in any file                                      | CI gate (`docs.yml`)         |
 | `check-cleanliness`         | After adding files to repository root                                                    | Pre-commit hook              |
 | `check-cleanup-governance`  | After changing cleanup docs, runbooks, or repo maintenance scripts                       | Root-hygiene workflow        |
+| `check-root-governance-docs` | After changing root policy docs, docs/plans guidance, or root tooling references         | Root-hygiene workflow        |
 | `check-root-review-registry` | After updating review-required or blocked cleanup lanes                                 | Root-hygiene workflow        |
 | `preflight-cleanup`         | Before release or before expensive local verification waves                              | Manual / `make clean-preflight` |
 | `split-testing-roadmap`     | When converting a roadmap issue into executable GitHub child issues                      | Manual maintenance workflow  |
@@ -78,3 +80,15 @@ the risky local branches.
 | `check_cleanup_governance.py`  | Guard active docs/scripts against broad cleanup guidance  |
 | `preflight_cleanup.sh`         | Bounded release-preflight cleanup helper                  |
 | `cleanup_branch_candidates.sh` | Dry-run/apply cleanup for the curated branch deletion set |
+
+## Preflight Cleanup Flags
+
+`preflight-cleanup` defaults to safe Python/build/cache cleanup plus the
+confirmed root transient caches `.benchmarks/` and `.hypothesis/`.
+
+Use explicit opt-ins for review-only local roots:
+
+- `--include-local-cache-roots` adds `.cache/`, `.coverage-sharded-current-main/`,
+  `.import_linter_cache/`, and `.npm-cache/`.
+- `--include-local-vendor` adds `.junie/`, `.qodo/`, `.sonarlint/`, and
+  `.windsurf/`.

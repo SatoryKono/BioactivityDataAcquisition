@@ -261,6 +261,7 @@
         "docs/05-operations/runbooks/checkpoint-debugging.md",
         "docs/05-operations/runbooks/data-recovery.md",
         "docs/05-operations/runbooks/dq-failure-investigation.md",
+        "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",
         "docs/05-operations/runbooks/incident-response.md",
         "docs/05-operations/runbooks/index.md",
         "docs/05-operations/runbooks/merge-campaign.md",
@@ -1520,7 +1521,7 @@
         "scripts/data_quality/inventory_silver_filters_migration.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_pandera_schema_boundary_policy.py",
-        "tests/architecture/test_silver_filter_compatibility_surface.py"
+        "tests/architecture/test_silver_filter_identity_surface.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
@@ -1535,7 +1536,7 @@
         "src/bioetl/domain/README.md",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_pandera_schema_boundary_policy.py",
-        "tests/architecture/test_silver_filter_compatibility_surface.py"
+        "tests/architecture/test_silver_filter_identity_surface.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",
@@ -1572,7 +1573,7 @@
         "scripts/data_quality/run_silver_gold_filter_parity.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_silver_filter_boundary_inventory.py",
-        "tests/architecture/test_silver_filter_compatibility_surface.py",
+        "tests/architecture/test_silver_filter_identity_surface.py",
         "tests/snapshots/pipeline_configs.json",
         "tests/unit/infrastructure/config/test_filter_config_loader.py",
         "tests/unit/scripts/test_documentation_governance_check.py"
@@ -1594,7 +1595,7 @@
         "src/bioetl/domain/filtering/silver_config.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
         "tests/architecture/test_silver_filter_boundary_inventory.py",
-        "tests/architecture/test_silver_filter_compatibility_surface.py",
+        "tests/architecture/test_silver_filter_identity_surface.py",
         "tests/snapshots/pipeline_configs.json",
         "tests/unit/infrastructure/config/test_filter_config_loader.py",
         "tests/unit/scripts/test_documentation_governance_check.py"

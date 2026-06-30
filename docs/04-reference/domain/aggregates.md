@@ -50,6 +50,8 @@ and their enforced lifecycle boundaries.
 
 ## State-Machine Anchors
 
+Formal transition reference: [Aggregate State Machines](aggregate-state-machines.md)
+
 | Aggregate | State owner file | Notes |
 | --- | --- | --- |
 | `Batch` | `src/bioetl/domain/aggregates/_batch_lifecycle.py` | Write lifecycle only; storage adapters execute outside the aggregate. |
@@ -59,6 +61,7 @@ and their enforced lifecycle boundaries.
 ## Related References
 
 - [Invariants](invariants.md)
+- [Aggregate State Machines](aggregate-state-machines.md)
 - [Events](events.md)
 - [Workflow State Machine](workflow-state-machine.md)
 - [ADR-021 DDD Aggregates](../../02-architecture/decisions/ADR-021-ddd-aggregates-adoption.md)

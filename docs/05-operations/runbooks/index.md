@@ -81,6 +81,7 @@ ______________________________________________________________________
 | [Traceability Adoption Checklist](traceability-adoption-checklist.md)    | Evidence log and exit-gate checklist for operator adoption                                      | P2       |
 | [Traceability Wave 5 Closeout Pack](traceability-wave5-closeout-pack.md) | Canonical one-time execution pack for the final Wave 5 closeout gate                            | P2       |
 | [Merge Campaign](merge-campaign.md)                                      | Consolidation/merge order and reproducibility gate playbook                                      | P2       |
+| [Generated Artifact Drift Workflow](generated-artifact-drift-workflow.md) | Governed regeneration and closeout workflow for generated artifact drift                         | P2       |
 
 ### Control-Plane / Traceability Routing
 

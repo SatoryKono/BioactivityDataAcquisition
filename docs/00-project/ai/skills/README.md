@@ -31,13 +31,16 @@ This directory stores published documentation for BioETL AI skills across suppor
 ## Non-Canonical Mirror Notice
 
 `docs/00-project/ai/skills/**` is a published/internal mirror surface. It must
-not define runtime behavior independently from `.codex/skills/**` or
-`.gemini/skills/**`. Edit the active runtime skill first, then refresh this
+not define runtime behavior independently from tracked runtime skill trees such
+as `.codex/skills/**`. Edit the active runtime skill first, then refresh this
 mirror when behavior or contributor guidance changes.
 
 ## Canonical Source
 
 - Canonical Codex runtime skill source: `.codex/skills/`
+- No tracked Gemini skill tree exists on the current `main` checkout; treat
+  Gemini skill references in docs as mirror or local-only guidance until a
+  verified `.gemini/skills/**` tree is added.
 - Legacy Claude mirrors under `ai/claude/` are being retired and must not be
   treated as the primary source for local skill behavior.
 - `docs/00-project/ai/skills/local/` is a published mirror layer and may retain

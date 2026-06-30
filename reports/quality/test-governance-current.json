@@ -396,14 +396,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "775",
+        "line": "776",
         "path": "tests/unit/infrastructure/test_storage_factory.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_completes_without_error"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "787",
+        "line": "788",
         "path": "tests/unit/infrastructure/test_storage_factory.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_storage_bundle_aclose__aclose_is_idempotent__79d48809"
@@ -961,7 +961,6 @@
       "tests/architecture/test_metadata_service_shim_usage.py",
       "tests/architecture/test_pipeline_storage_compat_shim_usage.py",
       "tests/architecture/test_run_execution_context_compat_shim_usage.py",
-      "tests/architecture/test_silver_filter_compatibility_surface.py",
       "tests/unit/composition/factories/pipeline/test_runner_request_compat.py",
       "tests/unit/infrastructure/adapters/crossref/test_compatibility.py",
       "tests/unit/infrastructure/adapters/pubchem/test_fetch_strategies_compat.py",
@@ -988,14 +987,13 @@
       "tests/architecture/test_metadata_service_shim_usage.py",
       "tests/architecture/test_pipeline_storage_compat_shim_usage.py",
       "tests/architecture/test_run_execution_context_compat_shim_usage.py",
-      "tests/architecture/test_silver_filter_compatibility_surface.py",
       "tests/unit/composition/factories/pipeline/test_runner_request_compat.py",
       "tests/unit/infrastructure/adapters/crossref/test_compatibility.py",
       "tests/unit/infrastructure/adapters/pubchem/test_fetch_strategies_compat.py",
       "tests/unit/infrastructure/adapters/pubmed/test_models_compat.py",
       "tests/unit/scripts/ops/test_memory_legacy_aliases.py"
     ],
-    "compatibility_test_files": 25,
+    "compatibility_test_files": 24,
     "critical_behavior_envelope_assertion_gap_count": 0,
     "critical_behavior_envelope_count": 5,
     "critical_behavior_envelopes": {
@@ -1146,8 +1144,8 @@
     "refined_assertless_tests": 0,
     "root": ".",
     "top_duplicate_test_names": [],
-    "total_test_files": 1869,
-    "total_test_functions": 21254,
+    "total_test_files": 1874,
+    "total_test_functions": 21285,
     "uuid4_call_sites": 0
   }
 }

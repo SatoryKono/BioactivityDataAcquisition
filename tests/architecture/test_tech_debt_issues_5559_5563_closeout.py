@@ -142,19 +142,12 @@ def test_issue_5562_skip_inventory_entries_are_individually_accountable() -> Non
         assert str(entry["rationale"]).strip()
 
 
-def test_issue_5563_excluded_non_gold_rows_have_explicit_policy() -> None:
+def test_issue_5563_excluded_non_gold_rows_are_burned_down_to_zero() -> None:
     ownership = _load_json(CONTRACT_OWNERSHIP)
     rows = ownership["rows"]
     excluded_rows = [
         row for row in rows if row.get("coverage_status") == "excluded_non_gold"
     ]
 
-    assert len(excluded_rows) == 9
-    for row in excluded_rows:
-        policy = row["gold_exclusion_policy"]
-        assert policy["linked_issue"] == "#5563"
-        assert policy["expected_reason"] == row["gold_exclusion_reason"]
-        assert policy["owner"].startswith("@bioetl-")
-        assert policy["decision"]
-        assert policy["reentry_condition"]
-        assert policy["rationale"]
+    assert ownership["explicit_exclusions"] == []
+    assert excluded_rows == []

@@ -20,11 +20,11 @@ Your project has existing Windows-based Codex scripts:
 ### 4 New Executable Scripts
 
 ```
-./scripts/ops/ + ./script-codex/
+./scripts/ops/ + ./scripts/ai/codex/
 ├── codex.sh                    ⭐ NEW - WSL bash launcher
 ├── codex-exec.sh              ⭐ NEW - WSL auto-exec launcher
-├── ../script-codex/helper/setup-wsl.sh          ⭐ NEW - Installation & setup
-├── ../script-codex/helper/verify-setup.sh       ⭐ NEW - Verification script
+├── ../scripts/ai/codex/helper/setup-wsl.sh          ⭐ NEW - Installation & setup
+├── ../scripts/ai/codex/helper/verify-setup.sh       ⭐ NEW - Verification script
 └── codex-wsl.bat              ⭐ NEW - Modern Windows wrapper
 ```
 
@@ -44,10 +44,10 @@ Your project has existing Windows-based Codex scripts:
 
 ```powershell
 # Step 1: Setup (one-time)
-wsl -- bash ./script-codex/helper/setup-wsl.sh
+wsl -- bash ./scripts/ai/codex/helper/setup-wsl.sh
 
 # Step 2: Verify
-wsl -- bash ./script-codex/helper/verify-setup.sh
+wsl -- bash ./scripts/ai/codex/helper/verify-setup.sh
 
 # Step 3: Use it
 .\scripts\ops\codex-wsl.bat "analyze the pipeline"
@@ -57,10 +57,10 @@ wsl -- bash ./script-codex/helper/verify-setup.sh
 
 ```bash
 # Step 1: Setup (one-time)
-bash ./script-codex/helper/setup-wsl.sh
+bash ./scripts/ai/codex/helper/setup-wsl.sh
 
 # Step 2: Verify
-bash ./script-codex/helper/verify-setup.sh
+bash ./scripts/ai/codex/helper/verify-setup.sh
 
 # Step 3: Use it
 ./scripts/ops/launchers/codex/codex.sh "analyze the pipeline"
@@ -97,7 +97,7 @@ Where to find what:
    → Read: CODEX_WSL_QUICK_REF.md (one-page reference)
 
 🔵 Verify Installation?
-   → Run: script-codex/helper/verify-setup.sh (automated checker)
+   → Run: scripts/ai/codex/helper/verify-setup.sh (automated checker)
 
 🟣 Understand What's New?
    → Read: INDEX.md (file overview)
@@ -119,8 +119,8 @@ Where to find what:
 | ------------------------------------- | ----------------------------------------- | ---------- |
 | `codex.sh`                            | Launch Codex interactively or with prompt | Simple     |
 | `codex-exec.sh`                       | Auto-execute changes (full-auto mode)     | Simple     |
-| `script-codex/helper/setup-wsl.sh`    | Install all dependencies & configure      | Medium     |
-| `script-codex/helper/verify-setup.sh` | Check installation & connectivity         | Medium     |
+| `scripts/ai/codex/helper/setup-wsl.sh`    | Install all dependencies & configure      | Medium     |
+| `scripts/ai/codex/helper/verify-setup.sh` | Check installation & connectivity         | Medium     |
 
 ### Batch Scripts (Run from PowerShell)
 
@@ -144,13 +144,13 @@ Where to find what:
 ✅ **One-Command Setup**
 
 ```bash
-bash ./script-codex/helper/setup-wsl.sh
+bash ./scripts/ai/codex/helper/setup-wsl.sh
 ```
 
 ✅ **Automatic Verification**
 
 ```bash
-bash ./script-codex/helper/verify-setup.sh
+bash ./scripts/ai/codex/helper/verify-setup.sh
 ```
 
 ✅ **Multiple Execution Modes**
@@ -187,7 +187,7 @@ The setup script installs:
 After setup, you should see:
 
 ```bash
-$ bash ./script-codex/helper/verify-setup.sh
+$ bash ./scripts/ai/codex/helper/verify-setup.sh
 
 [1/5] Checking WSL environment...
 ✓ Running in WSL
@@ -257,7 +257,7 @@ $ bash ./script-codex/helper/verify-setup.sh
    │
    ├─ codex.sh ───────────┐
    ├─ codex-exec.sh ──────├─ npm/Node.js
-   └─ script-codex/helper/setup-wsl.sh ─│
+   └─ scripts/ai/codex/helper/setup-wsl.sh ─│
                           └─ Codex CLI → OpenAI API
 ```
 
@@ -287,7 +287,7 @@ policy = "read-only"  # or "workspace-write"
 1. **Run the verifier first**
 
    ```bash
-   bash ./script-codex/helper/verify-setup.sh
+   bash ./scripts/ai/codex/helper/verify-setup.sh
    ```
 
 1. **Check the quick troubleshooting**
@@ -320,13 +320,13 @@ policy = "read-only"  # or "workspace-write"
 1. **Run setup** (2 minutes)
 
    ```bash
-   bash ./script-codex/helper/setup-wsl.sh
+   bash ./scripts/ai/codex/helper/setup-wsl.sh
    ```
 
 1. **Verify installation** (1 minute)
 
    ```bash
-   bash ./script-codex/helper/verify-setup.sh
+   bash ./scripts/ai/codex/helper/verify-setup.sh
    ```
 
 1. **Try it out** (1 minute)
@@ -349,20 +349,20 @@ policy = "read-only"  # or "workspace-write"
 | **Scripts Created**       | ✅ 5 new scripts                            |
 | **Documentation Written** | ✅ 4 detailed guides                        |
 | **Ready to Use**          | ✅ Yes                                      |
-| **Installation Required** | ✅ Yes (`script-codex/helper/setup-wsl.sh`) |
+| **Installation Required** | ✅ Yes (`scripts/ai/codex/helper/setup-wsl.sh`) |
 
 ______________________________________________________________________
 
 **Everything is ready. Start with:**
 
 ```bash
-bash ./script-codex/helper/setup-wsl.sh
+bash ./scripts/ai/codex/helper/setup-wsl.sh
 ```
 
 **Then verify with:**
 
 ```bash
-bash ./script-codex/helper/verify-setup.sh
+bash ./scripts/ai/codex/helper/verify-setup.sh
 ```
 
 **Then use it:**

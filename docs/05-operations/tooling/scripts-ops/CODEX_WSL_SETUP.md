@@ -65,7 +65,7 @@ wsl
 cd <YOUR_WSL_REPO_PATH>
 
 # Run the setup script
-bash ./script-codex/helper/setup-wsl.sh
+bash ./scripts/ai/codex/helper/setup-wsl.sh
 ```
 
 This script will:
@@ -211,7 +211,7 @@ cd <YOUR_WSL_REPO_PATH>
 | `codex-exec.sh`                    | Auto-execution launcher      | WSL2 (bash)        |
 | `codex-exec.bat`                   | Original auto-exec launcher  | Windows PowerShell |
 | `codex-wsl.bat`                    | Modern WSL wrapper           | Windows PowerShell |
-| `script-codex/helper/setup-wsl.sh` | Installation script          | WSL2 (bash)        |
+| `scripts/ai/codex/helper/setup-wsl.sh` | Installation script          | WSL2 (bash)        |
 | `wsl_proxy.py`                     | HTTP proxy bridge            | Windows (Python)   |
 | `start-wsl-proxy.bat`              | Proxy launcher               | Windows PowerShell |
 | `.wsl_proxy_env.sh`                | Proxy environment setup      | WSL2 (bash)        |
@@ -295,7 +295,7 @@ Make scripts executable:
 ```bash
 chmod +x ./scripts/ops/launchers/codex/codex.sh
 chmod +x ./scripts/ops/launchers/codex/codex-exec.sh
-chmod +x ./script-codex/helper/setup-wsl.sh
+chmod +x ./scripts/ai/codex/helper/setup-wsl.sh
 ```
 
 ### WSL distro not found
@@ -392,7 +392,7 @@ no_alternate_screen = true
 
 ## Next Steps
 
-1. Run setup: `bash ./script-codex/helper/setup-wsl.sh`
+1. Run setup: `bash ./scripts/ai/codex/helper/setup-wsl.sh`
 1. Test: `./scripts/ops/launchers/codex/codex.sh "explain this pipeline"`
 1. Explore: Try the examples in Common Usage Examples section
 1. Integrate: Add Codex to your workflow for code reviews, refactoring, etc.
@@ -402,7 +402,7 @@ no_alternate_screen = true
 - `scripts/ops/launchers/codex/codex.sh` (new) - WSL bash launcher
 - `scripts/ops/launchers/codex/codex-exec.sh` (new) - WSL auto-exec launcher
 - `scripts/ops/launchers/codex/codex-wsl.bat` (new) - Modern Windows wrapper
-- `script-codex/helper/setup-wsl.sh` (new) - Installation script
+- `scripts/ai/codex/helper/setup-wsl.sh` (new) - Installation script
 
 Original files remain unchanged:
 

@@ -55,13 +55,14 @@ def _maintenance_policy(
     interrupted_message: str,
 ) -> CliBoundaryExecutionPolicy:
     """Build the shared CLI boundary policy for maintenance vacuum commands."""
-    return build_target_cli_boundary_policy(
-        reason_prefix=reason_prefix,
-        target=target,
-        domain_error_title=domain_error_title,
-        unexpected_error_title=unexpected_error_title,
-        interrupted_message=interrupted_message,
-    )
+    policy_kwargs = {
+        "reason_prefix": reason_prefix,
+        "target": target,
+        "domain_error_title": domain_error_title,
+        "unexpected_error_title": unexpected_error_title,
+        "interrupted_message": interrupted_message,
+    }
+    return build_target_cli_boundary_policy(**policy_kwargs)
 
 
 @click.command("vacuum")
