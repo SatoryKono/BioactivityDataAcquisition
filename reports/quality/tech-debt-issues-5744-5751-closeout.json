@@ -130,7 +130,7 @@
       "fail_count": 0,
       "warn_count": 0,
       "architecture_quality_score": 8.53,
-      "module_coverage_source_tree_sha256": "139ac5bd008c163d4210bba7360fd2d0ac49b7407c90f0821e92e01e4771afc6",
+      "module_coverage_source_tree_sha256": "3421513d95c17ae2590856169f3144d7cfe1a3f72800eb173c93fa09320025f5",
       "remote_main_baseline_fingerprint": "624a9cdb3d283482a3042c57dd2985b2bfad290935bad7ea84b9a80dd19c97be"
     },
     "5745": {
