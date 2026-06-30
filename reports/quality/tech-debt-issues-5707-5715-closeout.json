@@ -151,7 +151,7 @@
         "module_coverage_inventory": false,
         "remote_main_baseline": false
       },
-      "module_coverage_source_tree_sha256": "d6b4c854568e0251bcd60cae25b9babaafd5de9c51ddc6800f773cd21b79f50e",
+      "module_coverage_source_tree_sha256": "6c9d1e04b03915f840ebf5d394a218e7e0d854f5527274dd16dd371bf928cfc7",
       "architecture_quality_score": 8.47,
       "remote_main_baseline_fingerprint": "87a870bca59cbc8d1159f709eee377214f2f1a3479cc79d10d73f9e2e84ed8cc"
     },
@@ -193,7 +193,7 @@
       "unmeasured_module_count": 0,
       "uncovered_module_count": 0,
       "no_executable_line_modules": 0,
-      "source_tree_sha256": "d6b4c854568e0251bcd60cae25b9babaafd5de9c51ddc6800f773cd21b79f50e",
+      "source_tree_sha256": "6c9d1e04b03915f840ebf5d394a218e7e0d854f5527274dd16dd371bf928cfc7",
       "under70_module_count_before": 18,
       "under70_module_count_after": 13,
       "under85_module_count_after": 85

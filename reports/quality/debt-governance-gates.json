@@ -28,8 +28,8 @@
       "status": "pass"
     },
     {
-      "current": "d6b4c854568e0251bcd60cae25b9babaafd5de9c51ddc6800f773cd21b79f50e",
-      "limit": "d6b4c854568e0251bcd60cae25b9babaafd5de9c51ddc6800f773cd21b79f50e",
+      "current": "6c9d1e04b03915f840ebf5d394a218e7e0d854f5527274dd16dd371bf928cfc7",
+      "limit": "6c9d1e04b03915f840ebf5d394a218e7e0d854f5527274dd16dd371bf928cfc7",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",

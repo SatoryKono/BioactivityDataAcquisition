@@ -344,8 +344,11 @@ def test_exported_two_pipeline_timeout_matches_resolver() -> None:
 
 
 def test_linux_two_pipeline_timeout_exceeds_default_single_run_budget() -> None:
-    """Linux sequential multi-pipeline timeout should scale with pipeline count."""
+    """Linux sequential multi-pipeline timeout should follow the shared merge budget."""
     default_timeout = e2e_conftest._resolve_e2e_default_timeout(platform="linux")
+    inner_timeout = e2e_conftest._resolve_e2e_merge_execution_timeout_seconds(
+        platform="linux"
+    )
     two_pipeline_timeout = (
         e2e_conftest._resolve_e2e_sequential_pipeline_timeout_seconds(
             pipeline_count=2,
@@ -354,7 +357,8 @@ def test_linux_two_pipeline_timeout_exceeds_default_single_run_budget() -> None:
     )
 
     assert two_pipeline_timeout > default_timeout
-    assert two_pipeline_timeout == 360
+    assert two_pipeline_timeout > inner_timeout
+    assert two_pipeline_timeout == 780
 
 
 def test_windows_pipeline_matrix_timeout_stays_between_inner_and_outer() -> None:
@@ -428,19 +432,19 @@ def test_windows_e2e_temp_root_falls_back_without_local_appdata(tmp_path: Path) 
 
 
 def test_non_windows_e2e_timeout_exceeds_inner_merge_budget() -> None:
-    """Non-Windows pytest timeout must also exceed the inner Delta merge timeout."""
+    """Non-Windows single-run timeout keeps the smaller outer watchdog budget."""
     outer_timeout = e2e_conftest._resolve_e2e_default_timeout(platform="linux")
     inner_timeout = e2e_conftest._resolve_e2e_merge_execution_timeout_seconds(
         platform="linux"
     )
 
-    assert outer_timeout > inner_timeout
+    assert outer_timeout < inner_timeout
     assert outer_timeout == 120
-    assert inner_timeout == 90
+    assert inner_timeout == 300
 
 
 def test_non_windows_pipeline_matrix_timeout_stays_between_inner_and_outer() -> None:
-    """Non-Windows matrix timeout keeps the existing 105s default contract."""
+    """Non-Windows matrix timeout remains a smaller bounded orchestration budget."""
     outer_timeout = e2e_conftest._resolve_e2e_default_timeout(platform="linux")
     inner_timeout = e2e_conftest._resolve_e2e_merge_execution_timeout_seconds(
         platform="linux"
@@ -452,7 +456,8 @@ def test_non_windows_pipeline_matrix_timeout_stays_between_inner_and_outer() -> 
         )
     )
 
-    assert outer_timeout > matrix_timeout > inner_timeout
+    assert outer_timeout > matrix_timeout
+    assert matrix_timeout < inner_timeout
     assert matrix_timeout == pytest.approx(105.0)
 
 

@@ -15,7 +15,7 @@
 | `debt_scorecard_budget_violations` | `pass` | `violation_count` | `0` | `0` | `configs/quality/debt_scorecard.yaml` |
 | `retained_public_entrypoint_burden` | `pass` | `current_count` | `0` | `0` | `configs/quality/debt_scorecard.yaml#compatibility_debt_metrics` |
 | `debt_budget_growth_policy` | `pass` | `budget_growth_allowed` | `False` | `False` | `configs/quality/debt_scorecard.yaml` |
-| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `d6b4c854568e0251bcd60cae25b9babaafd5de9c51ddc6800f773cd21b79f50e` | `d6b4c854568e0251bcd60cae25b9babaafd5de9c51ddc6800f773cd21b79f50e` | `reports/quality/module-coverage-inventory.json` |
+| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `6c9d1e04b03915f840ebf5d394a218e7e0d854f5527274dd16dd371bf928cfc7` | `6c9d1e04b03915f840ebf5d394a218e7e0d854f5527274dd16dd371bf928cfc7` | `reports/quality/module-coverage-inventory.json` |
 | `module_coverage_unmeasured_modules` | `pass` | `unmeasured_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `module_coverage_uncovered_modules` | `pass` | `uncovered_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `hotspot_family_baseline_budget_warnings` | `pass` | `budget_warnings` | `0` | `0` | `reports/quality/hotspot-family-baseline.json` |
