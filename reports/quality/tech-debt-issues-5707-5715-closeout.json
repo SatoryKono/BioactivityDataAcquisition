@@ -118,20 +118,20 @@
       "max": 13
     },
     "compatibility_test_files": {
-      "current": 1,
-      "max": 1
+      "current": 0,
+      "max": 0
     },
     "duplicate_test_names": {
+      "current": 2,
+      "max": 2
+    },
+    "duplicate_test_name_occurrences": {
       "current": 4,
       "max": 4
     },
-    "duplicate_test_name_occurrences": {
-      "current": 8,
-      "max": 8
-    },
     "markerless_test_functions": {
-      "current": 28,
-      "max": 28
+      "current": 0,
+      "max": 0
     },
     "coverage_unmeasured_modules": {
       "current": 0,
@@ -220,12 +220,12 @@
       "twin_pair_count": 0
     },
     "5713": {
-      "compatibility_test_files": 1,
-      "compatibility_test_file_max": 1,
-      "duplicate_test_names": 4,
-      "duplicate_test_name_occurrences": 8,
+      "compatibility_test_files": 0,
+      "compatibility_test_file_max": 0,
+      "duplicate_test_names": 2,
+      "duplicate_test_name_occurrences": 4,
       "refined_assertless_tests": 0,
-      "markerless_test_functions": 28,
+      "markerless_test_functions": 0,
       "uuid4_call_sites": 0
     },
     "5714": {
@@ -241,10 +241,10 @@
       "debt_scorecard_budget_violations": 0,
       "module_coverage_unmeasured_limit": 0,
       "module_coverage_uncovered_limit": 0,
-      "compatibility_test_file_max": 1,
-      "duplicate_test_names_max": 4,
-      "duplicate_test_name_occurrences_max": 8,
-      "markerless_test_functions_max": 28,
+      "compatibility_test_file_max": 0,
+      "duplicate_test_names_max": 2,
+      "duplicate_test_name_occurrences_max": 4,
+      "markerless_test_functions_max": 0,
       "production_uuid4_budget": 0
     }
   }

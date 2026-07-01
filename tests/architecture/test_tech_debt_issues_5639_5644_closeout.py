@@ -70,8 +70,12 @@ def test_closeout_artifact_covers_requested_issues__5639_5644() -> None:
 
 
 def test_issue_5639_architecture_debt_planner_tracks_live_artifact_backlog() -> None:
-    tasks = _load_json(_latest_report("tasks_architecture_metric_exemptions_*.json"))
-    plan = _load_json(_latest_report("architecture_debt_execution_plan_*.json"))
+    tasks = _load_json(
+        ROOT / "reports" / "quality" / "tasks_architecture_metric_exemptions_2026-06-26-15-51.json"
+    )
+    plan = _load_json(
+        ROOT / "reports" / "quality" / "architecture_debt_execution_plan_2026-06-26-15-51.json"
+    )
 
     assert tasks["registry_summary"]["total_tasks"] > 0
     assert plan["summary"]["total_tasks"] > 0
