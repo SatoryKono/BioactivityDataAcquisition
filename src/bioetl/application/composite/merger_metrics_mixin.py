@@ -146,7 +146,9 @@ class MergeMetricsRecorderMixin:
         any_enriched = pl.any_horizontal(
             [pl.col(col).is_not_null() for col in enricher_cols]
         )
-        return len(df.filter(any_enriched))
+        # Optimization: Use .select(expr.sum()).item() to count boolean mask matches
+        # instead of materializing a new filtered DataFrame in memory to count rows.
+        return df.select(any_enriched.sum()).item()
 
     def _count_fully_enriched(
         self,
@@ -180,13 +182,18 @@ class MergeMetricsRecorderMixin:
         if len(df) == 0:
             return {}
 
-        coverage: dict[str, float] = {}
-        for col in df.columns:
-            if not col.startswith("_"):
-                non_null = len(df.filter(df[col].is_not_null()))
-                coverage[col] = non_null / len(df)
+        # Optimization: Avoid iterating over columns with a pure-Python loop to execute
+        # individual .filter() queries. Build a list of Polars expressions and evaluate
+        # them simultaneously using a single .select() operation.
+        cols_to_check = [col for col in df.columns if not col.startswith("_")]
+        if not cols_to_check:
+            return {}
 
-        return coverage
+        exprs = [pl.col(col).is_not_null().sum().alias(col) for col in cols_to_check]
+        non_null_counts = df.select(exprs).row(0, named=True)
+        total_rows = len(df)
+
+        return {col: count / total_rows for col, count in non_null_counts.items()}
 
 
 __all__ = ["MergeMetricsRecorderMixin"]
