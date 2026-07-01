@@ -28,12 +28,31 @@
       "status": "pass"
     },
     {
-      "current": "3e8365cd0a72ee50dd611b2759422a72a85dca8d88fea4eb0248dad86479063b",
-      "limit": "3e8365cd0a72ee50dd611b2759422a72a85dca8d88fea4eb0248dad86479063b",
+      "current": "038e174d7508fdbd7cf48ca6aeca894fa4c02b08240f491a550b695dfa7df3d2",
+      "limit": "038e174d7508fdbd7cf48ca6aeca894fa4c02b08240f491a550b695dfa7df3d2",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
       "source_artifact": "reports/quality/module-coverage-inventory.json",
+      "status": "pass"
+    },
+    {
+      "current": {
+        "source_module_count": 2192,
+        "source_tree_sha256": "038e174d7508fdbd7cf48ca6aeca894fa4c02b08240f491a550b695dfa7df3d2",
+        "uncovered_module_count": 0,
+        "unmeasured_module_count": 0
+      },
+      "limit": {
+        "source_module_count": 2192,
+        "source_tree_sha256": "038e174d7508fdbd7cf48ca6aeca894fa4c02b08240f491a550b695dfa7df3d2",
+        "uncovered_module_count": 0,
+        "unmeasured_module_count": 0
+      },
+      "metric": "module_coverage_scorecard_alignment",
+      "name": "module_coverage_scorecard_coherence",
+      "remediation": "Refresh architecture-quality scorecard and module coverage inventory until counts and source-tree hash match.",
+      "source_artifact": "reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json",
       "status": "pass"
     },
     {
@@ -79,6 +98,23 @@
       "name": "retained_public_export_facade_growth",
       "remediation": "Remove facade exports or update the scorecard only after approved reduction evidence.",
       "source_artifact": "reports/quality/compatibility-importer-census.json",
+      "status": "pass"
+    },
+    {
+      "current": {
+        "retained_entrypoint_count": 12,
+        "retained_public_export_facade_count": 4,
+        "twin_pair_count": 0
+      },
+      "limit": {
+        "retained_entrypoint_count": 12,
+        "retained_public_export_facade_count": 4,
+        "twin_pair_count": 0
+      },
+      "metric": "compatibility_scorecard_alignment",
+      "name": "compatibility_scorecard_coherence",
+      "remediation": "Refresh compatibility importer census and architecture-quality scorecard until sanctioned compatibility metrics match.",
+      "source_artifact": "reports/quality/compatibility-importer-census.json + reports/quality/architecture-quality-scorecard.json",
       "status": "pass"
     },
     {
@@ -244,7 +280,7 @@
       "status": "pass"
     },
     {
-      "current": "e07c5bd19bb1f919518ea158a0aecaacc62eeb6ec6cf8906e040f97adf4f4154",
+      "current": "422097d36bc8a9c9b535edca04b80ca8c451afd562914a43e273b70ad9af99e0",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -267,13 +303,14 @@
   "stale_artifacts": {
     "adr_enforcement_matrix": false,
     "architecture_quality_scorecard": false,
+    "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
     "module_coverage_inventory": false,
     "remote_main_baseline": false
   },
   "status_counts": {
     "fail": 0,
-    "pass": 29,
+    "pass": 31,
     "warn": 0
   },
   "summary": {
@@ -281,8 +318,8 @@
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
     "fail_count": 0,
     "failing_gates": [],
-    "gate_count": 29,
-    "pass_count": 29,
+    "gate_count": 31,
+    "pass_count": 31,
     "release_gate_status": "passing",
     "warn_count": 0,
     "warning_gates": []

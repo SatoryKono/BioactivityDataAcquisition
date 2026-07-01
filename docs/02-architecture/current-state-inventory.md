@@ -37,11 +37,11 @@ Current committed quality artifacts agree on the following architecture evidence
 | --- | ---: | --- |
 | Architecture quality score | `8.53` (`good_targeted_improvements`) | `reports/quality/debt-governance-gates.json`, `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2191` | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2192` | `reports/quality/module-coverage-inventory.json` |
 | Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
-| Debt-governance gates | `29` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
-| Full-app duplication hotspot baseline | `68` clusters | `reports/quality/full-app-duplication-baseline.json` |
+| Debt-governance gates | `31` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
+| Full-app duplication hotspot baseline | `65` clusters | `reports/quality/full-app-duplication-baseline.json` |
 
 Generated artifact drift is currently clear (`stale_artifacts` are all false in
 `reports/quality/debt-governance-gates.json`). The debt gate rollup now includes
@@ -282,7 +282,7 @@ by storage technology. Current owner boundaries:
 | Runtime Gold Pandera strictness had no production-path non-strict guard | `tests/architecture/test_gold_validator_strict_runtime_paths.py` scans `src/bioetl` for `PanderaGoldValidator(..., strict=False)` and `ContractAwareGoldValidator(..., strict=False)`. | `src/bioetl/infrastructure/storage/silver/merged_operations.py`; `src/bioetl/infrastructure/validation/pandera_validator.py`. | Replaced the Silver merged-write non-strict Gold validator with `PanderaSilverValidator(strict=False)` and added the runtime guard. |
 | Quarantine payload immutability evidence stopped at aggregate/mock level | `tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineUpdateStatus::test_update_status_preserves_persisted_payload_and_hash` writes a real Delta table, updates status, and checks persisted `payload`, `payload_hash`, and `metadata`. | `src/bioetl/infrastructure/quarantine/unified.py`. | Added persisted immutability coverage and a read fallback for Delta string-view filter failures after status updates. |
 | Test governance refined assertless residuals are now fully eliminated while compatibility coverage stays bounded | `reports/quality/test-governance-current.json` now reports `assertless_total_candidates=109`, `refined_assertless_tests=0`, `compatibility_test_files=0`, and zero budget violations. | Contract schema tests under `tests/contract/**` plus governance inventory under `tests/architecture/**`. | Tightened observable assertions and governance classification so the refined assertless residual count is zero without regrowing compatibility-test scope. |
-| Current-state architecture evidence table lagged live quality reports | `reports/quality/debt-governance-gates.json` reports score `8.53`, `29` passing gates, and no warnings; `reports/quality/module-coverage-inventory.json` reports `2191` source modules with zero unmeasured/uncovered modules; `reports/quality/full-app-duplication-baseline.json` reports `68` clusters. | `reports/quality/*.json` generated on 2026-07-01. | Refreshed the current-state table and verification date from live report artifacts. |
+| Current-state architecture evidence table lagged live quality reports | `reports/quality/debt-governance-gates.json` reports score `8.53`, `31` passing gates, and no warnings; `reports/quality/module-coverage-inventory.json` reports `2192` source modules with zero unmeasured/uncovered modules; `reports/quality/full-app-duplication-baseline.json` reports `65` clusters. | `reports/quality/*.json` generated on 2026-07-01. | Refreshed the current-state table and verification date from live report artifacts. |
 
 ## Open Questions
 

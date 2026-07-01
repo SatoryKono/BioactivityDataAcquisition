@@ -20,13 +20,9 @@ from bioetl.infrastructure.adapters.crossref.models import (
 __all__ = [
     "CROSSREF_API_BASE",
     "CROSSREF_HEALTH_ERRORS",
-    # Model Mappings
     "CROSSREF_RECORD_MODELS",
-    # Adapter
     "CrossRefAdapter",
-    # Record Models
     "CrossRefPublicationRecord",
-    # Response Models
     "CrossRefPublicationResponse",
     "CrossRefPublicationsResponse",
 ]

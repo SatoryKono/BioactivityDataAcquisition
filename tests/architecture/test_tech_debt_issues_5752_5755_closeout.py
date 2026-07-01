@@ -95,7 +95,7 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
     assert test_governance["report"]["total_test_files"] == 1890
     assert scorecard["integral_score"] == 8.53
     assert gates["summary"]["release_gate_status"] == "passing"
-    assert gates["summary"]["pass_count"] == 29
+    assert gates["summary"]["pass_count"] == 31
     assert gates["summary"]["fail_count"] == 0
 
     assert "Integral score is `8.53`" in debt_report

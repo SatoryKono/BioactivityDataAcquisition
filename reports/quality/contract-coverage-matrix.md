@@ -1,6 +1,6 @@
 # Contract Coverage Matrix
 
-- snapshot_date: 2026-06-30
+- snapshot_date: 2026-07-01
 - row_count: 27
 - gold_enabled_count: 27
 - covered_gold_enabled_count: 27
@@ -27,7 +27,7 @@
 | `chembl_target_protein_classification` | `gold` | `chembl.target_protein_classification` | True | `covered` | `covered` | True | 45 | 7 | 0 | `entity_id` | 7 | 2 | - | - |
 | `chembl_tissue` | `gold` | `chembl.tissue` | True | `covered` | `covered` | True | 11 | 7 | 0 | `entity_id, tissue_id` | 6 | 2 | - | - |
 | `composite_activity` | `gold` | `composite.activity` | True | `covered` | `covered` | True | 21 | 6 | 0 | `entity_id` | 21 | 2 | - | - |
-| `composite_assay` | `gold` | `composite.assay` | True | `covered` | `covered` | True | 15 | 6 | 0 | `entity_id` | 12 | 2 | - | - |
+| `composite_assay` | `gold` | `composite.assay` | True | `covered` | `covered` | True | 17 | 6 | 0 | `entity_id` | 12 | 2 | - | - |
 | `composite_molecule` | `gold` | `composite.molecule` | True | `covered` | `covered` | True | 12 | 6 | 0 | `entity_id` | 6 | 2 | - | - |
 | `composite_publication` | `gold` | `composite.publication` | True | `covered` | `covered` | True | 15 | 7 | 0 | `entity_id` | 62 | 2 | - | - |
 | `composite_target` | `gold` | `composite.target` | True | `covered` | `covered` | True | 41 | 6 | 0 | `entity_id` | 15 | 2 | - | - |
