@@ -387,3 +387,187 @@ class TestDispositionResolution:
         assert is_valid is False
         assert len(outcomes) == 1
         assert outcomes[0].disposition == DQDisposition.FAIL  # High severity escalates
+
+
+class TestInternalMethods:
+    """Test internal helper methods for better coverage."""
+
+    def test_prepare_df_for_validation_with_missing_nullable(self):
+        """Test _prepare_df_for_validation adds missing nullable columns."""
+        import pandera.pandas as pa
+
+        schema = pa.DataFrameSchema(
+            {
+                "required_field": pa.Column(str, nullable=False),
+                "optional_field": pa.Column(str, nullable=True),
+            }
+        )
+
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=schema, dq_config=config)
+
+        import pandas as pd
+
+        df = pd.DataFrame({"required_field": ["value"]})
+        prepared = validator._prepare_df_for_validation(df)
+
+        assert "optional_field" in prepared.columns
+        assert prepared["optional_field"].isna().all()
+
+    def test_extract_schema_error_field_name_with_column_name(self):
+        """Test _extract_schema_error_field_name extracts column_name attribute."""
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=None, dq_config=config)
+
+        # Create a mock error with column_name
+        class MockError:
+            column_name = "test_field"
+
+        field_name = validator._extract_schema_error_field_name(MockError())
+        assert field_name == "test_field"
+
+    def test_extract_schema_error_field_name_with_failure_cases(self):
+        """Test _extract_schema_error_field_name extracts failure_cases."""
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=None, dq_config=config)
+
+        class MockError:
+            failure_cases = "test_field"
+
+        field_name = validator._extract_schema_error_field_name(MockError())
+        assert field_name == "test_field"
+
+    def test_extract_schema_error_field_name_with_loc(self):
+        """Test _extract_schema_error_field_name extracts loc attribute."""
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=None, dq_config=config)
+
+        class MockError:
+            loc = "test_field"
+
+        field_name = validator._extract_schema_error_field_name(MockError())
+        assert field_name == "test_field"
+
+    def test_extract_schema_error_field_name_with_message(self):
+        """Test _extract_schema_error_field_name parses error message."""
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=None, dq_config=config)
+
+        class MockError:
+            def __str__(self):
+                return "Expected column 'my_field' to be present"
+
+        field_name = validator._extract_schema_error_field_name(MockError())
+        assert field_name == "my_field"
+
+    def test_extract_schema_error_field_name_fallback(self):
+        """Test _extract_schema_error_field_name returns None when no info found."""
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=None, dq_config=config)
+
+        class MockError:
+            def __str__(self):
+                return "Some generic error"
+
+        field_name = validator._extract_schema_error_field_name(MockError())
+        assert field_name is None
+
+    def test_determine_severity_null_violation(self):
+        """Test _determine_severity returns high for null violations."""
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=None, dq_config=config)
+
+        class MockError:
+            def __str__(self):
+                return "Expected column to not have null values"
+
+        severity = validator._determine_severity(MockError())
+        assert severity == "high"
+
+    def test_determine_severity_type_violation(self):
+        """Test _determine_severity returns high for type violations."""
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=None, dq_config=config)
+
+        class MockError:
+            def __str__(self):
+                return "Expected type str but got int"
+
+        severity = validator._determine_severity(MockError())
+        assert severity == "high"
+
+    def test_determine_severity_regex_violation(self):
+        """Test _determine_severity returns medium for regex violations."""
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=None, dq_config=config)
+
+        class MockError:
+            def __str__(self):
+                return "Value does not match regex pattern"
+
+        severity = validator._determine_severity(MockError())
+        assert severity == "medium"
+
+    def test_determine_severity_range_violation(self):
+        """Test _determine_severity returns medium for range violations."""
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=None, dq_config=config)
+
+        class MockError:
+            def __str__(self):
+                return "Value is outside min-max range"
+
+        severity = validator._determine_severity(MockError())
+        assert severity == "medium"
+
+    def test_determine_severity_default(self):
+        """Test _determine_severity returns high as default."""
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=None, dq_config=config)
+
+        class MockError:
+            def __str__(self):
+                return "Some unknown error"
+
+        severity = validator._determine_severity(MockError())
+        assert severity == "high"
+
+    def test_get_config_path_with_policy_ref(self):
+        """Test _get_config_path returns path when policy_ref exists."""
+        config = DQConfig(contract_ref="test_contract")
+        validator = ContractAwareGoldValidator(schema=None, dq_config=config)
+
+        path = validator._get_config_path()
+        assert path == "contracts/test_contract/dq_rules.yaml"
+
+    def test_get_config_path_without_policy_ref(self):
+        """Test _get_config_path returns None when no policy_ref."""
+        validator = ContractAwareGoldValidator(schema=None, strict=False)
+
+        path = validator._get_config_path()
+        assert path is None
+
+    def test_apply_contract_validations_gold_contract(self):
+        """Test _apply_contract_validations for Gold contracts."""
+        import pandas as pd
+
+        config = DQConfig(contract_ref="gold_molecule")
+        validator = ContractAwareGoldValidator(schema=None, dq_config=config)
+
+        df = pd.DataFrame({"field": ["value"]})
+        outcomes = validator._apply_contract_validations(df)
+
+        # Currently placeholder, should return empty list
+        assert outcomes == []
+
+    def test_apply_contract_validations_non_gold_contract(self):
+        """Test _apply_contract_validations for non-Gold contracts."""
+        import pandas as pd
+
+        config = DQConfig(contract_ref="silver_entity")
+        validator = ContractAwareGoldValidator(schema=None, dq_config=config)
+
+        df = pd.DataFrame({"field": ["value"]})
+        outcomes = validator._apply_contract_validations(df)
+
+        assert outcomes == []

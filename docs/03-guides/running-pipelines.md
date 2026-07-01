@@ -21,7 +21,9 @@ ______________________________________________________________________
 > **Boundary:** this guide owns execution and runtime control flow. For initial
 > environment bootstrap use [Quick Start](quick-start.md) or
 > [Getting Started](getting-started.md). For operator incident handling use
-> [Operations Runbooks](../05-operations/runbooks/index.md).
+> [Operations Runbooks](../05-operations/runbooks/index.md). For CLI command
+> reference, see [CLI Reference](../04-reference/cli.md). For declarative workflow
+> inventory, see [Workflow Catalog](../04-reference/workflow-catalog.md).
 
 ______________________________________________________________________
 

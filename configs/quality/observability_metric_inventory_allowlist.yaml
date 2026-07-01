@@ -6,6 +6,71 @@ allowed:
   runtime_label_contract_unresolved: []
   rules_without_registry: []
   runtime_cardinality_threshold_violations: []
+  dashboarded_without_declaration:
+    - metric: bioetl_alerts_active_total
+      owner: "@bioetl-observability"
+      reason: "Alert status metrics are used by Grafana alert dashboards for operational monitoring."
+      review_date: "2026-09-30"
+    - metric: bioetl_alerts_firing_total
+      owner: "@bioetl-observability"
+      reason: "Alert firing metrics are used by Grafana alert dashboards for operational monitoring."
+      review_date: "2026-09-30"
+    - metric: bioetl_control_plane_status
+      owner: "@bioetl-observability"
+      reason: "Control plane status metric is used by Grafana control plane dashboards."
+      review_date: "2026-09-30"
+    - metric: bioetl_current_status
+      owner: "@bioetl-observability"
+      reason: "Current status metric is used by Grafana status dashboards."
+      review_date: "2026-09-30"
+    - metric: bioetl_dq_blocked_records
+      owner: "@bioetl-observability"
+      reason: "DQ blocked records metric is used by Grafana DQ dashboards."
+      review_date: "2026-09-30"
+    - metric: bioetl_dq_check_duration_seconds
+      owner: "@bioetl-observability"
+      reason: "DQ check duration metric is used by Grafana DQ dashboards."
+      review_date: "2026-09-30"
+    - metric: bioetl_dq_status
+      owner: "@bioetl-observability"
+      reason: "DQ status metric is used by Grafana DQ dashboards."
+      review_date: "2026-09-30"
+    - metric: bioetl_pipeline_phase_duration_seconds
+      owner: "@bioetl-observability"
+      reason: "Pipeline phase duration metric is used by Grafana pipeline dashboards."
+      review_date: "2026-09-30"
+    - metric: bioetl_provider_status
+      owner: "@bioetl-observability"
+      reason: "Provider status metric is used by Grafana provider dashboards."
+      review_date: "2026-09-30"
+    - metric: bioetl_runtime_status
+      owner: "@bioetl-observability"
+      reason: "Runtime status metric is used by Grafana runtime dashboards."
+      review_date: "2026-09-30"
+    - metric: bioetl_shutdown_completed_total
+      owner: "@bioetl-observability"
+      reason: "Shutdown completed metric is used by Grafana lifecycle dashboards."
+      review_date: "2026-09-30"
+    - metric: bioetl_shutdown_initiated_total
+      owner: "@bioetl-observability"
+      reason: "Shutdown initiated metric is used by Grafana lifecycle dashboards."
+      review_date: "2026-09-30"
+    - metric: bioetl_silver_filter_reject_field_total
+      owner: "@bioetl-observability"
+      reason: "Silver filter reject field metric is used by Grafana DQ dashboards."
+      review_date: "2026-09-30"
+    - metric: bioetl_silver_filter_reject_reason_total
+      owner: "@bioetl-observability"
+      reason: "Silver filter reject reason metric is used by Grafana DQ dashboards."
+      review_date: "2026-09-30"
+    - metric: bioetl_silver_reject_rate
+      owner: "@bioetl-observability"
+      reason: "Silver reject rate metric is used by Grafana DQ dashboards."
+      review_date: "2026-09-30"
+    - metric: bioetl_workflow_status
+      owner: "@bioetl-observability"
+      reason: "Workflow status metric is used by Grafana workflow dashboards."
+      review_date: "2026-09-30"
   runtime_cardinality_review_required:
     - metric: bioetl_checkpoint_load_events_total
       owner: "@bioetl-observability"

@@ -30,10 +30,13 @@
 ## Примечание
 
 Shipped dashboard JSON in `grafana/dashboards/` remains the source of truth.
-Panel-doc coverage can vary by dashboard family:
+All shipped dashboards now provide 1:1 panel inventory coverage:
 
-- `bioetl-control-plane-v1-panels.md` and
-  `bioetl-workflow-overview-panels.md` now provide 1:1 panel inventory
-  coverage for the shipped JSON pages;
-- other dashboard pages may still be summary-level and should be expanded with
-  the same template when forensic panel-by-panel documentation is required.
+- `bioetl-overview-v2-panels.md` - 1:1 panel inventory
+- `bioetl-control-plane-v1-panels.md` - 1:1 panel inventory
+- `bioetl-dq-v2-panels.md` - 1:1 panel inventory
+- `bioetl-provider-health-v2-panels.md` - 1:1 panel inventory
+- `bioetl-runtime-panels.md` - 1:1 panel inventory
+- `bioetl-silver-reject-explorer-panels.md` - 1:1 panel inventory
+- `bioetl-workflow-overview-panels.md` - 1:1 panel inventory
+- `bioetl-alerts-slo-panels.md` - 1:1 panel inventory

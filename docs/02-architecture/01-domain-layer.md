@@ -30,6 +30,14 @@ ______________________________________________________________________
 - `src/bioetl/domain/README.md` следует трактовать как `code-navigation-only`
   package map, а не как operator/reference source of truth.
 
+### Aggregate invariants and lifecycle
+
+Для canonical документации инвариантов и state machine агрегатов:
+- [Aggregate Invariants](domain/aggregate-invariants.md) - Architecture-level FSM diagrams and invariants
+- [Domain Invariants (Reference)](../04-reference/domain/invariants.md) - Detailed invariants with examples
+- [Aggregate State Machines](../04-reference/domain/aggregate-state-machines.md) - Formal FSM transition tables
+- [Aggregates Overview](../04-reference/domain/aggregates.md) - Aggregate boundaries and responsibilities
+
 Ключевые характеристики:
 
 - Чистота: без I/O и без инфраструктурных зависимостей.

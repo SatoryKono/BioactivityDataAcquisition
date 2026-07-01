@@ -59,7 +59,7 @@
       "max": 2
     },
     "assertless_total_candidates": {
-      "current": 108,
+      "current": 109,
       "max": 113
     },
     "slowest_test_hotspot_removed": {
@@ -90,7 +90,7 @@
       }
     },
     "5732": {
-      "assertless_total_candidates": 108,
+      "assertless_total_candidates": 109,
       "intentional_no_exception_contract": 94,
       "target_file_family_counts": {
         "tests/unit/infrastructure/observability/test_unified_logger.py": 10

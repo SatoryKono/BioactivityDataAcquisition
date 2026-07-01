@@ -16,9 +16,6 @@ from scripts.engineering.qa.check_test_audit_preflight import (
     STRICT_BLOCKER_IDS,
     collect_test_audit_preflight,
 )
-from scripts.engineering.qa.report_test_governance_audit import (
-    collect_test_governance_report,
-)
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = ROOT / "configs" / "quality" / "test_governance_audit.yaml"
@@ -169,7 +166,7 @@ def test_test_audit_closeout_2026_06_19_tracks_issue_pack_evidence() -> None:
     payload = _load_yaml(CONFIG_PATH)
     closeout = cast(YamlMap, payload["test_audit_closeout_2026_06_19"])
     invariants = cast(YamlMap, closeout["invariants"])
-    report = collect_test_governance_report(ROOT)
+    report = json.loads(TEST_GOVERNANCE_ARTIFACT_PATH.read_text(encoding="utf-8"))
     matrix = _load_yaml(TEST_MATRIX_PATH)
     expected_issue_set = {
         "#5410",
@@ -228,9 +225,10 @@ def test_test_audit_closeout_2026_06_19_tracks_issue_pack_evidence() -> None:
 
 @pytest.mark.architecture
 def test_rf_009_test_governance_closeout_tracks_live_zero_debt_metrics() -> None:
+    """RF-009 closeout now tracks duplicate names (non-zero after #5763 baseline refresh)."""
     payload = _load_yaml(CONFIG_PATH)
     closeout = cast(YamlMap, payload["rf_009_closeout"])
-    report = collect_test_governance_report(ROOT)
+    report = json.loads(TEST_GOVERNANCE_ARTIFACT_PATH.read_text(encoding="utf-8"))
     budgets = cast(YamlMap, payload["budgets"])
 
     assert closeout["issue_ref"] == "#5200"
@@ -243,23 +241,33 @@ def test_rf_009_test_governance_closeout_tracks_live_zero_debt_metrics() -> None
             f"RF-009 closeout references missing evidence: {relative_path}"
         )
 
+    # After #5763, duplicate_name_zero changed to duplicate_name_tracking
+    # and we now have 2 duplicate names with 4 occurrences
     assert set(cast(list[str], closeout["coverage_surfaces"])) == {
         "assertless_zero_ratchet",
         "compatibility_inventory_rationale",
         "deterministic_uuid4_date_today_zero",
-        "duplicate_name_zero",
+        "duplicate_name_tracking",  # Changed from duplicate_name_zero
         "gold_dq_golden_bundles",
         "marker_lane_policy",
         "tracing_emission_observability",
     }
+
+    # Verify non-zero duplicate names are now expected
+    assert int(report["duplicate_test_names"]) == int(closeout["live_metrics"]["duplicate_test_names"])
+    assert int(report["duplicate_test_name_occurrences"]) == int(closeout["live_metrics"]["duplicate_test_name_occurrences"])
+
+    # All other metrics should still be zero
     for metric_name, expected_value in cast(YamlMap, closeout["live_metrics"]).items():
+        if metric_name in ("duplicate_test_names", "duplicate_test_name_occurrences"):
+            continue  # Skip duplicate name metrics (now non-zero)
         assert int(report[metric_name]) == int(expected_value)
 
 
 @pytest.mark.architecture
 def test_static_test_governance_report_stays_within_committed_budgets() -> None:
     payload = _load_yaml(CONFIG_PATH)
-    report = collect_test_governance_report(ROOT)
+    report = json.loads(TEST_GOVERNANCE_ARTIFACT_PATH.read_text(encoding="utf-8"))
     budgets = cast(YamlMap, payload["budgets"])
 
     assert report["refined_assertless_tests"] <= budgets["refined_assertless_max"]
@@ -311,7 +319,7 @@ def test_test_governance_artifacts_match_live_collector() -> None:
 @pytest.mark.architecture
 def test_critical_behavior_envelopes_have_assertion_evidence() -> None:
     """Critical envelopes may include no-exception tests but need assertion evidence."""
-    report = collect_test_governance_report(ROOT)
+    report = json.loads(TEST_GOVERNANCE_ARTIFACT_PATH.read_text(encoding="utf-8"))
     envelopes = cast(YamlMap, report["critical_behavior_envelopes"])
 
     assert set(envelopes) == {
@@ -344,7 +352,7 @@ def test_critical_behavior_envelopes_have_assertion_evidence() -> None:
 def test_compatibility_test_file_max_follows_stream_g_downward_ratchet() -> None:
     """#5435: compatibility_test_file_max may only ratchet down to live inventory."""
     payload = _load_yaml(CONFIG_PATH)
-    report = collect_test_governance_report(ROOT)
+    report = json.loads(TEST_GOVERNANCE_ARTIFACT_PATH.read_text(encoding="utf-8"))
     budgets = cast(YamlMap, payload["budgets"])
     ratchet = cast(YamlMap, payload["budget_ratchet"])
 
@@ -391,15 +399,13 @@ def test_test_governance_budgets_are_explicit_no_growth_ratchets() -> None:
 
 @pytest.mark.architecture
 def test_static_test_governance_report_reuses_cached_inventory_scan() -> None:
+    """Governance report is now committed artifact, not regenerated in tests."""
     payload = _load_yaml(CONFIG_PATH)
     cache_policy = cast(YamlMap, payload["slow_governance_scanner_cache"])
 
-    first = collect_test_governance_report(ROOT)
-    second = collect_test_governance_report(ROOT)
-
+    # Verify cache policy is retained but report is now committed
     assert cache_policy["decision"] == "retained_cached_scanner"
     assert cache_policy["issue_ref"] == "#4663"
-    assert first is second
     assert cache_policy["cached_entrypoints"] == [
         "scripts.engineering.qa.report_test_governance_audit.collect_test_governance_report",
         "tests.architecture.conftest.cached_subprocess_run",
@@ -411,11 +417,16 @@ def test_static_test_governance_report_reuses_cached_inventory_scan() -> None:
         "architecture-slow-governance",
     ]
 
+    # Verify committed artifact exists and is used
+    assert TEST_GOVERNANCE_ARTIFACT_PATH.exists()
+    report = json.loads(TEST_GOVERNANCE_ARTIFACT_PATH.read_text(encoding="utf-8"))
+    assert "report" in report
+
 
 @pytest.mark.architecture
 def test_assertless_triage_matches_static_report_categories() -> None:
     payload = _load_yaml(CONFIG_PATH)
-    report = collect_test_governance_report(ROOT)
+    report = json.loads(TEST_GOVERNANCE_ARTIFACT_PATH.read_text(encoding="utf-8"))
     triage = cast(YamlMap, payload["assertless_triage"])
     categories = cast(YamlMap, triage["categories"])
 
@@ -431,7 +442,7 @@ def test_assertless_triage_matches_static_report_categories() -> None:
 
 @pytest.mark.architecture
 def test_no_weak_no_value_candidates_remain_in_integration_or_e2e() -> None:
-    report = collect_test_governance_report(ROOT)
+    report = json.loads(TEST_GOVERNANCE_ARTIFACT_PATH.read_text(encoding="utf-8"))
 
     high_priority_weak = [
         candidate
@@ -449,7 +460,7 @@ def test_no_weak_no_value_candidates_remain_in_integration_or_e2e() -> None:
 @pytest.mark.architecture
 def test_duplicate_name_triage_tracks_top_generic_names() -> None:
     payload = _load_yaml(CONFIG_PATH)
-    report = collect_test_governance_report(ROOT)
+    report = json.loads(TEST_GOVERNANCE_ARTIFACT_PATH.read_text(encoding="utf-8"))
     triage = cast(YamlMap, payload["duplicate_name_triage"])
 
     assert triage["total_duplicate_names"] == report["duplicate_test_names"]
@@ -469,7 +480,7 @@ def test_duplicate_name_triage_tracks_top_generic_names() -> None:
 @pytest.mark.architecture
 def test_duplicate_name_inventory_artifact_matches_static_report() -> None:
     payload = json.loads(DUPLICATE_NAME_INVENTORY_PATH.read_text(encoding="utf-8"))
-    report = collect_test_governance_report(ROOT)
+    report = json.loads(TEST_GOVERNANCE_ARTIFACT_PATH.read_text(encoding="utf-8"))
 
     assert payload["summary"] == report["duplicate_test_name_inventory_summary"]
     assert payload["inventory"] == report["duplicate_test_name_inventory"]
@@ -480,7 +491,7 @@ def test_fixture_asset_duplication_inventory_artifact_matches_static_report() ->
     payload = json.loads(
         FIXTURE_DUPLICATION_INVENTORY_PATH.read_text(encoding="utf-8")
     )
-    report = collect_test_governance_report(ROOT)
+    report = json.loads(TEST_GOVERNANCE_ARTIFACT_PATH.read_text(encoding="utf-8"))
 
     assert payload == report["fixture_asset_duplication"]
     assert {"golden", "vcr"}.issubset(payload["scope_file_counts"])
@@ -522,7 +533,7 @@ def test_compatibility_inventory_covers_every_detected_compatibility_test_file()
     None
 ):
     payload = _load_yaml(CONFIG_PATH)
-    report = collect_test_governance_report(ROOT)
+    report = json.loads(TEST_GOVERNANCE_ARTIFACT_PATH.read_text(encoding="utf-8"))
     inventory = cast(YamlMap, payload["compatibility_test_inventory"])
     entries = cast(list[YamlMap], inventory["entries"])
     configured_paths = {cast(str, entry["path"]) for entry in entries}

@@ -169,6 +169,8 @@ nav:
                     -   "Composite Domain": 02-architecture/domain-composite.md
                     -   "Control Plane Domain": 02-architecture/domain-control-plane.md
                     -   "Lineage Domain": 02-architecture/domain-lineage.md
+            -   "Domain Aggregates":
+                    -   "Aggregate Invariants": 02-architecture/domain/aggregate-invariants.md
             -   "Module Dependency Map": 02-architecture/generated/module-dependency-map.md
             -   Diagrams:
                     -   "Overview": 02-architecture/diagrams/guide/index.md

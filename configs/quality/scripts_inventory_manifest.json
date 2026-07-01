@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-06-30T14:41:46.826039+00:00",
+  "generated_at": "2026-07-01T04:00:06.551687+00:00",
   "summary": {
     "total_scripts": 448,
     "status_counts": {
@@ -3245,7 +3245,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 118,
+          "line": 119,
           "source_group": "ci",
           "text": "run: uv run python scripts/check_entity_config_parity.py"
         },
@@ -3563,7 +3563,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 226,
+          "line": 227,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_artifacts.py \\"
         },
@@ -3620,7 +3620,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 246,
+          "line": 247,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_quality_gates.py \\"
         },
@@ -3685,7 +3685,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 236,
+          "line": 237,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py \\"
         },
@@ -3775,7 +3775,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 231,
+          "line": 232,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_svg_text_visibility.py \\"
         },
@@ -4263,7 +4263,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 194,
+          "line": 195,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json || true"
         },
@@ -4629,7 +4629,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 195,
+          "line": 196,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -4766,7 +4766,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 189,
+          "line": 190,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -4847,13 +4847,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 109,
+          "line": 110,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs check-links --links --specs --configs --report-json docs/reports/docs-link-check-report.json"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 121,
+          "line": 122,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs verify"
         },
@@ -5143,7 +5143,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 109,
+          "line": 110,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs check-links --links --specs --configs --report-json docs/reports/docs-link-check-report.json"
         },
@@ -7927,19 +7927,19 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 83,
+          "line": 84,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.qa check-xwalk-missing-backlog \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 88,
+          "line": 89,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.qa report-dashboard-inventory --check --json"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 91,
+          "line": 92,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.qa report-dashboard-panel-audit-matrix --check"
         },
@@ -8758,13 +8758,13 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 124,
+          "line": 125,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 128,
+          "line": 129,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --update"
         },
@@ -10232,7 +10232,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 106,
+          "line": 107,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.repo check-versions"
         },
@@ -13905,7 +13905,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 241,
+          "line": 242,
           "source_group": "ci",
           "text": "python3 src/tools/harmonize_link_styles.py --dry-run --fail-on-errors"
         }

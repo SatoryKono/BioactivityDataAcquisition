@@ -53,6 +53,7 @@ test-checkpoints/
 .ruff_cache_cli/
 .dmypy.json
 .import_linter_cache/
+.coverage-sharded-current-main/
 
 # Build / Distribution
 build/
@@ -133,10 +134,12 @@ log_test.txt
 !/reports/quality/issue-5272-application-core-coverage-closeout.json
 !/reports/quality/issue-5376-coverage-tail-closeout.json
 !/reports/quality/total-tech-debt-audit-main-2026-06-16.md
+!/reports/quality/total-tech-debt-audit-main-2026-07-01.md
 !/reports/quality/test-governance-current.json
 !/reports/quality/test-duplicate-name-inventory.json
 !/reports/quality/test-fixture-asset-duplication.json
 !/reports/quality/config-contract-registry-artifact-duplication.json
+!/reports/quality/config-surface-backlog.json
 !/reports/quality/pipeline-config-contract-ownership-map.json
 !/reports/quality/pipeline-config-contract-ownership-map.md
 !/reports/quality/contract-coverage-matrix.json
@@ -189,6 +192,7 @@ log_test.txt
 !.codex/skills/*/SKILL.md
 !.codex/skills/*/agents/
 !.codex/skills/*/agents/openai.yaml
+.devin/
 .gemini/
 .jules/
 .junie/
