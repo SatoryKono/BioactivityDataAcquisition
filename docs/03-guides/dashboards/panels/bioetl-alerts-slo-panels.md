@@ -2,45 +2,56 @@
 
 **Dashboard file:** `grafana/dashboards/bioetl-alerts-slo.json`
 
-## Обзор
+## Overview
 
-Dashboard `6. Alerts & SLO` is an alert-triage surface. Shipped dashboard JSON
-is the source of truth; this mirror lists only the currently declared data
-signals so stale metric names do not become governance drift.
+Dashboard `6. Alerts & SLO` monitors active alert state, SLO pressure, alert severity breakdown, and alert details. Shipped dashboard JSON is the source of truth.
 
 ## Key Panels
 
-### 1. Active Alert Status
-- **Type:** Stat
-- **Purpose:** Show whether any alert condition is active for the selected
-  operator scope.
-- **Data sources:** Grafana alert state; no standalone BioETL Prometheus metric
-  family is declared for this panel.
+### 1. Navigation
+- **Type:** Text
+- **Purpose:** Explain dashboard navigation and escalation flow.
+- **Data sources:** Dashboard variables and operator copy.
 
-### 2. Firing Alerts / Range
-- **Type:** Stat
-- **Purpose:** Count firing alerts in the selected range.
-- **Data sources:** Grafana alert state.
+### 2. Scope
+- **Type:** Text
+- **Purpose:** Explain dashboard scope and selectors.
+- **Data sources:** Dashboard variables and operator copy.
 
-### 3. Critical/Page Alerts
+### 3. Active Alert Status
 - **Type:** Stat
-- **Purpose:** Highlight page-worthy alert pressure.
-- **Data sources:** Grafana alert state.
+- **Purpose:** Show current active alert count and severity.
+- **Data sources:** `bioetl_alerts_active_total`, `bioetl_alerts_active_by_severity`
 
-### 4. SLO/SLA Alert Pressure
+### 4. Firing Alerts / Range
 - **Type:** Stat
-- **Purpose:** Summarize SLO/SLA-related alert pressure.
-- **Data sources:** Grafana alert state.
+- **Purpose:** Show firing alerts in selected range.
+- **Data sources:** `bioetl_alerts_firing_total`
 
-### 5. Firing Alert Details
+### 5. Critical/Page Alerts
+- **Type:** Stat
+- **Purpose:** Show critical and page alert count.
+- **Data sources:** `bioetl_alerts_active_by_severity`
+
+### 6. SLO/SLA Alert Pressure
+- **Type:** Stat
+- **Purpose:** Show SLO/SLA alert pressure indicators.
+- **Data sources:** `bioetl_slo_alert_pressure`, `bioetl_sla_alert_pressure`
+
+### 7. Firing Alert Details
 - **Type:** Table
-- **Purpose:** Inspect active alert labels, annotations, and runbook handoffs.
-- **Data sources:** Grafana alert state.
+- **Purpose:** Show detailed information for currently firing alerts.
+- **Data sources:** `bioetl_alerts_firing_total`, `bioetl_alerts_firing_by_alert_name`
+
+## Variables
+
+- `severity` narrows by alert severity level.
+- `provider` narrows by provider.
+- `pipeline` narrows by pipeline.
+- `alert_name` narrows by specific alert name.
 
 ## Notes
 
-- The dashboard keeps Prometheus metric-family drift at zero by avoiding legacy
-  SLO placeholder names in panel documentation.
-- Runtime throughput context is still available elsewhere through
-  `bioetl_records_processed_total`; alert-state panels do not redefine that
-  metric as an SLO signal.
+- This dashboard focuses on alert state and SLO pressure, not detailed metric breakdowns.
+- Use with monitoring-index.md for incident-time navigation.
+- SLO calculations are based on defined error budgets and burn rates.

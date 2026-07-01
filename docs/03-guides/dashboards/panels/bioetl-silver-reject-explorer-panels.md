@@ -2,56 +2,92 @@
 
 **Dashboard file:** `grafana/dashboards/bioetl-silver-reject-explorer.json`
 
-## Обзор
+## Overview
 
-Silver Reject Explorer is a forensic HTTP-backed dashboard for rejected records.
-It does not use Prometheus Silver reject metric families directly. The Data
-Quality dashboard owns Prometheus Silver/Gold reject summary metrics and hands
-off bounded filters into this explorer.
+Dashboard `Silver Reject Explorer` provides detailed Silver structural reject evidence with reject reason/field breakdowns and pipeline-specific filtering. Shipped dashboard JSON is the source of truth.
 
 ## Key Panels
 
-### 1. Inspect Explorer Scope
+### 1. Review Dashboard Navigation
 - **Type:** Text
-- **Purpose:** Explain the bounded forensic scope and zero-reject semantics.
+- **Purpose:** Explain dashboard navigation and escalation flow.
 - **Data sources:** Dashboard variables and operator copy.
 
-### 2. Monitor Explorer Backend Health
-- **Type:** Table
-- **Purpose:** Distinguish backend failure from an intentionally empty
-  zero-reject result set.
-- **Data sources:** `/ops/quarantine/health`
+### 2. Inspect Explorer Scope
+- **Type:** Text
+- **Purpose:** Explain explorer scope and selectors.
+- **Data sources:** Dashboard variables and operator copy.
 
-### 3. Summary and Trend Panels
-- **Type:** Table / Timeseries
-- **Purpose:** Show filtered reject totals, reject ratio versus Bronze, and
-  selected-range trend.
-- **Data sources:** `/ops/quarantine/filtered-stats`,
-  `/ops/quarantine/filtered-timeseries`
-
-### 4. Reject Breakdown Panels
+### 3. Monitor Explorer Backend Health
 - **Type:** Table
-- **Purpose:** Inspect top reject reasons, fields, reason signatures, and
-  filtered records.
-- **Data sources:** `/ops/quarantine/filtered-stats`,
-  `/ops/quarantine/records`
+- **Purpose:** Show explorer backend health status.
+- **Data sources:** HTTP quarantine backend health checks.
 
-### 5. Selected Record Details
+### 4. Review: First Action / No-Data Semantics
+- **Type:** Text
+- **Purpose:** Guide operator to next triage action or explain no-data semantics.
+- **Data sources:** Dashboard variables and operator copy.
+
+### 5. Monitor Filtered Records Total
 - **Type:** Table
-- **Purpose:** Inspect a selected payload and copy CLI resolve commands.
-- **Data sources:** `/ops/quarantine/records`
+- **Purpose:** Show total filtered records by pipeline.
+- **Data sources:** `bioetl_silver_filter_rejections_total`
+
+### 6. Track Reject Rate vs Bronze
+- **Type:** Table
+- **Purpose:** Show reject rate compared to Bronze records.
+- **Data sources:** `bioetl_silver_filter_rejections_total`, `bioetl_records_processed_total`
+
+### 7. Inspect Run Scope Summary
+- **Type:** Table
+- **Purpose:** Show run scope summary for selected filters.
+- **Data sources:** `bioetl_silver_filter_rejections_total`
+
+### 8. Track Filtered Rejects Over Time
+- **Type:** Timeseries
+- **Purpose:** Show Silver reject trend over time.
+- **Data sources:** `bioetl_silver_filter_rejections_total`
+
+### 9. Track Reject Ratio vs Bronze Over Time
+- **Type:** Timeseries
+- **Purpose:** Show reject ratio compared to Bronze over time.
+- **Data sources:** `bioetl_silver_filter_rejections_total`, `bioetl_records_processed_total`
+
+### 10. Inspect Top Reject Reasons
+- **Type:** Table
+- **Purpose:** Show top reject reasons.
+- **Data sources:** `bioetl_silver_filter_reject_reason_total`
+
+### 11. Inspect Top Reject Fields
+- **Type:** Table
+- **Purpose:** Show top reject fields.
+- **Data sources:** `bioetl_silver_filter_reject_field_total`
+
+### 12. Inspect Top Reason Signatures
+- **Type:** Table
+- **Purpose:** Show top reason signatures.
+- **Data sources:** `bioetl_silver_filter_reject_reason_total`
+
+### 13. Inspect Filtered Records Table
+- **Type:** Table
+- **Purpose:** Show detailed filtered records table.
+- **Data sources:** HTTP quarantine backend filtered records query.
+
+### 14. Inspect Selected Record Details
+- **Type:** Table
+- **Purpose:** Show detailed information for selected record.
+- **Data sources:** HTTP quarantine backend record detail query.
 
 ## Variables
 
-- `pipeline` is single-select and fail-closed.
-- `run_type`, `reason_code`, `field`, `quarantine_run_id`, and `payload_hash`
-  are forensic selectors owned by this explorer.
+- `pipeline` is the primary selector for pipeline-specific evidence.
+- `reject_reason` narrows by specific reject reason.
+- `field` narrows by specific field name.
+- `run_id` narrows by specific run.
 
 ## Notes
 
-- Generic primary-dashboard `run_id` must not be mapped into
-  `quarantine_run_id` except through explicit forensic record/payload
-  handoffs.
-- This dashboard intentionally avoids legacy Prometheus Silver reject rate or
-  quarantine placeholder metric names; the DQ dashboard documents the current
-  Prometheus summary families.
+- This dashboard focuses on Silver structural rejects, not Gold contract-semantic rejects.
+- Use with `bioetl quarantine inspect --pipeline <pipeline>` for detailed record-level evidence.
+- Reject reasons are derived from Silver validation rules and filter logic.
+- Explorer backend health is monitored via HTTP quarantine backend health checks.

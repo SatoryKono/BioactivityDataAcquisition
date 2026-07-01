@@ -67,6 +67,12 @@ The domain layer implements Domain-Driven Design patterns:
 | **Value Objects** | Immutable domain primitives (`domain/value_objects/`)                         |
 | **Entities**      | Domain entities per provider (`domain/entities/`)                             |
 | **Schemas**       | Pandera `DataFrameModel` schemas for dataframe validation (`domain/schemas/`) |
+**Domain Invariants & Lifecycle:**
+- [Aggregate Invariants (Architecture)](docs/02-architecture/domain/aggregate-invariants.md) - Architecture-level FSM diagrams and invariants
+- [Aggregate Invariants (Reference)](docs/04-reference/domain/invariants.md) - Domain rules and lifecycle documentation with examples
+- [Aggregate State Machines](docs/04-reference/domain/aggregate-state-machines.md) - Published FSM transitions for Batch, PipelineRun, QuarantineEntry
+- [Aggregates Overview](docs/04-reference/domain/aggregates.md) - Aggregate boundaries and responsibilities
+
 
 ## Supported Providers
 

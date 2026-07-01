@@ -93,6 +93,13 @@
     },
     {
       "category": "architecture_helper_guard",
+      "line": "1110",
+      "path": "tests/architecture/test_quality_debt_scorecard.py",
+      "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
+      "test_name": "test_growth_rollout_warns_registry_section_before_cutoff"
+    },
+    {
+      "category": "architecture_helper_guard",
       "line": "918",
       "path": "tests/architecture/test_strict_architecture_contracts.py",
       "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
@@ -758,7 +765,7 @@
     }
   ],
   "assertless_category_counts": {
-    "architecture_helper_guard": 14,
+    "architecture_helper_guard": 15,
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
     "intentional_no_exception_contract": 94,
@@ -778,6 +785,7 @@
     "tests/architecture/test_port_contracts_hypothesis.py:562",
     "tests/architecture/test_port_contracts_hypothesis.py:596",
     "tests/architecture/test_port_contracts_resilience_concurrency.py:183",
+    "tests/architecture/test_quality_debt_scorecard.py:1110",
     "tests/architecture/test_strict_architecture_contracts.py:918",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:74",
     "tests/integration/infrastructure/storage/test_delta_reader.py:576",
@@ -788,8 +796,7 @@
     "tests/unit/application/core/test_otel_spans.py:556",
     "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:102",
     "tests/unit/application/observability/test_pipeline_metrics.py:270",
-    "tests/unit/application/pipelines/crossref/test_crossref_transformer.py:278",
-    "tests/unit/composition/test_observability_contract.py:371"
+    "tests/unit/application/pipelines/crossref/test_crossref_transformer.py:278"
   ],
   "assertless_families": {
     "tests/architecture/test_code_metrics.py": {
@@ -811,6 +818,12 @@
       }
     },
     "tests/architecture/test_port_contracts_resilience_concurrency.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "architecture_helper_guard": 1
+      }
+    },
+    "tests/architecture/test_quality_debt_scorecard.py": {
       "assertless_tests": 1,
       "categories": {
         "architecture_helper_guard": 1
@@ -1093,11 +1106,15 @@
       }
     }
   },
-  "assertless_total_candidates": 108,
+  "assertless_total_candidates": 109,
   "budget_violations": [],
-  "compatibility_examples": [],
-  "compatibility_files": [],
-  "compatibility_test_files": 0,
+  "compatibility_examples": [
+    "tests/unit/infrastructure/compat/test_pandera_compat.py"
+  ],
+  "compatibility_files": [
+    "tests/unit/infrastructure/compat/test_pandera_compat.py"
+  ],
+  "compatibility_test_files": 1,
   "critical_behavior_envelope_assertion_gap_count": 0,
   "critical_behavior_envelope_count": 5,
   "critical_behavior_envelopes": {
@@ -1195,16 +1212,16 @@
     "test_governance": {
       "assertion_backed_tests": 34,
       "assertion_examples": [
-        "tests/architecture/test_test_governance_audit.py:97",
-        "tests/architecture/test_test_governance_audit.py:115",
-        "tests/architecture/test_test_governance_audit.py:126",
-        "tests/architecture/test_test_governance_audit.py:167",
-        "tests/architecture/test_test_governance_audit.py:230",
-        "tests/architecture/test_test_governance_audit.py:260",
-        "tests/architecture/test_test_governance_audit.py:281",
-        "tests/architecture/test_test_governance_audit.py:296",
-        "tests/architecture/test_test_governance_audit.py:312",
-        "tests/architecture/test_test_governance_audit.py:344"
+        "tests/architecture/test_test_governance_audit.py:94",
+        "tests/architecture/test_test_governance_audit.py:112",
+        "tests/architecture/test_test_governance_audit.py:123",
+        "tests/architecture/test_test_governance_audit.py:164",
+        "tests/architecture/test_test_governance_audit.py:227",
+        "tests/architecture/test_test_governance_audit.py:268",
+        "tests/architecture/test_test_governance_audit.py:289",
+        "tests/architecture/test_test_governance_audit.py:304",
+        "tests/architecture/test_test_governance_audit.py:320",
+        "tests/architecture/test_test_governance_audit.py:352"
       ],
       "assertless_tests": [],
       "intentional_no_exception_tests": 0,
@@ -1215,16 +1232,69 @@
     }
   },
   "date_today_call_sites": 0,
-  "duplicate_test_name_inventory": [],
+  "duplicate_test_name_inventory": [
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py:299",
+        "tests/unit/domain/aggregates/test_batch_internal_modules.py:211"
+      ],
+      "name": "test_mark_committed_emits_batch_written_event",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py:317",
+        "tests/unit/domain/aggregates/test_batch_internal_modules.py:296"
+      ],
+      "name": "test_mark_failed_emits_batch_failed_event",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "same_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/infrastructure/compat/test_pandera_compat.py:65",
+        "tests/unit/infrastructure/compat/test_pandera_compat.py:125"
+      ],
+      "name": "test_returns_true_on_attribute_error",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "same_file",
+      "count": 2,
+      "lane_counts": {
+        "unit": 2
+      },
+      "locations": [
+        "tests/unit/infrastructure/compat/test_pandera_compat.py:74",
+        "tests/unit/infrastructure/compat/test_pandera_compat.py:144"
+      ],
+      "name": "test_returns_true_on_type_error",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    }
+  ],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 0,
-    "duplicate_occurrences": 0,
+    "cross_file_groups": 2,
+    "duplicate_occurrences": 8,
     "mixed_groups": 0,
-    "same_file_groups": 0,
-    "total_duplicate_names": 0
+    "same_file_groups": 2,
+    "total_duplicate_names": 4
   },
-  "duplicate_test_name_occurrences": 0,
-  "duplicate_test_names": 0,
+  "duplicate_test_name_occurrences": 8,
+  "duplicate_test_names": 4,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1244,7 +1314,7 @@
     ]
   },
   "intentional_no_exception_contract": 94,
-  "markerless_test_functions": 0,
+  "markerless_test_functions": 28,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "report": {
@@ -1339,6 +1409,13 @@
         "path": "tests/architecture/test_port_contracts_resilience_concurrency.py",
         "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
         "test_name": "test_checkpoint_delete_non_existent_is_idempotent"
+      },
+      {
+        "category": "architecture_helper_guard",
+        "line": "1110",
+        "path": "tests/architecture/test_quality_debt_scorecard.py",
+        "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
+        "test_name": "test_growth_rollout_warns_registry_section_before_cutoff"
       },
       {
         "category": "architecture_helper_guard",
@@ -2007,7 +2084,7 @@
       }
     ],
     "assertless_category_counts": {
-      "architecture_helper_guard": 14,
+      "architecture_helper_guard": 15,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
       "intentional_no_exception_contract": 94,
@@ -2027,6 +2104,7 @@
       "tests/architecture/test_port_contracts_hypothesis.py:562",
       "tests/architecture/test_port_contracts_hypothesis.py:596",
       "tests/architecture/test_port_contracts_resilience_concurrency.py:183",
+      "tests/architecture/test_quality_debt_scorecard.py:1110",
       "tests/architecture/test_strict_architecture_contracts.py:918",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:74",
       "tests/integration/infrastructure/storage/test_delta_reader.py:576",
@@ -2037,13 +2115,16 @@
       "tests/unit/application/core/test_otel_spans.py:556",
       "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:102",
       "tests/unit/application/observability/test_pipeline_metrics.py:270",
-      "tests/unit/application/pipelines/crossref/test_crossref_transformer.py:278",
-      "tests/unit/composition/test_observability_contract.py:371"
+      "tests/unit/application/pipelines/crossref/test_crossref_transformer.py:278"
     ],
-    "assertless_total_candidates": 108,
-    "compatibility_examples": [],
-    "compatibility_files": [],
-    "compatibility_test_files": 0,
+    "assertless_total_candidates": 109,
+    "compatibility_examples": [
+      "tests/unit/infrastructure/compat/test_pandera_compat.py"
+    ],
+    "compatibility_files": [
+      "tests/unit/infrastructure/compat/test_pandera_compat.py"
+    ],
+    "compatibility_test_files": 1,
     "critical_behavior_envelope_assertion_gap_count": 0,
     "critical_behavior_envelope_count": 5,
     "critical_behavior_envelopes": {
@@ -2141,16 +2222,16 @@
       "test_governance": {
         "assertion_backed_tests": 34,
         "assertion_examples": [
-          "tests/architecture/test_test_governance_audit.py:97",
-          "tests/architecture/test_test_governance_audit.py:115",
-          "tests/architecture/test_test_governance_audit.py:126",
-          "tests/architecture/test_test_governance_audit.py:167",
-          "tests/architecture/test_test_governance_audit.py:230",
-          "tests/architecture/test_test_governance_audit.py:260",
-          "tests/architecture/test_test_governance_audit.py:281",
-          "tests/architecture/test_test_governance_audit.py:296",
-          "tests/architecture/test_test_governance_audit.py:312",
-          "tests/architecture/test_test_governance_audit.py:344"
+          "tests/architecture/test_test_governance_audit.py:94",
+          "tests/architecture/test_test_governance_audit.py:112",
+          "tests/architecture/test_test_governance_audit.py:123",
+          "tests/architecture/test_test_governance_audit.py:164",
+          "tests/architecture/test_test_governance_audit.py:227",
+          "tests/architecture/test_test_governance_audit.py:268",
+          "tests/architecture/test_test_governance_audit.py:289",
+          "tests/architecture/test_test_governance_audit.py:304",
+          "tests/architecture/test_test_governance_audit.py:320",
+          "tests/architecture/test_test_governance_audit.py:352"
         ],
         "assertless_tests": [],
         "intentional_no_exception_tests": 0,
@@ -2161,16 +2242,69 @@
       }
     },
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [],
+    "duplicate_test_name_inventory": [
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py:299",
+          "tests/unit/domain/aggregates/test_batch_internal_modules.py:211"
+        ],
+        "name": "test_mark_committed_emits_batch_written_event",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py:317",
+          "tests/unit/domain/aggregates/test_batch_internal_modules.py:296"
+        ],
+        "name": "test_mark_failed_emits_batch_failed_event",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "same_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/infrastructure/compat/test_pandera_compat.py:65",
+          "tests/unit/infrastructure/compat/test_pandera_compat.py:125"
+        ],
+        "name": "test_returns_true_on_attribute_error",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "same_file",
+        "count": 2,
+        "lane_counts": {
+          "unit": 2
+        },
+        "locations": [
+          "tests/unit/infrastructure/compat/test_pandera_compat.py:74",
+          "tests/unit/infrastructure/compat/test_pandera_compat.py:144"
+        ],
+        "name": "test_returns_true_on_type_error",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      }
+    ],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 0,
-      "duplicate_occurrences": 0,
+      "cross_file_groups": 2,
+      "duplicate_occurrences": 8,
       "mixed_groups": 0,
-      "same_file_groups": 0,
-      "total_duplicate_names": 0
+      "same_file_groups": 2,
+      "total_duplicate_names": 4
     },
-    "duplicate_test_name_occurrences": 0,
-    "duplicate_test_names": 0,
+    "duplicate_test_name_occurrences": 8,
+    "duplicate_test_names": 4,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -2189,29 +2323,95 @@
         ".yml"
       ]
     },
-    "markerless_test_functions": 0,
+    "markerless_test_functions": 28,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "root": ".",
-    "top_duplicate_test_names": [],
-    "total_test_files": 1885,
-    "total_test_functions": 21392,
+    "top_duplicate_test_names": [
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py:299",
+          "tests/unit/domain/aggregates/test_batch_internal_modules.py:211"
+        ],
+        "name": "test_mark_committed_emits_batch_written_event"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py:317",
+          "tests/unit/domain/aggregates/test_batch_internal_modules.py:296"
+        ],
+        "name": "test_mark_failed_emits_batch_failed_event"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/infrastructure/compat/test_pandera_compat.py:65",
+          "tests/unit/infrastructure/compat/test_pandera_compat.py:125"
+        ],
+        "name": "test_returns_true_on_attribute_error"
+      },
+      {
+        "count": 2,
+        "examples": [
+          "tests/unit/infrastructure/compat/test_pandera_compat.py:74",
+          "tests/unit/infrastructure/compat/test_pandera_compat.py:144"
+        ],
+        "name": "test_returns_true_on_type_error"
+      }
+    ],
+    "total_test_files": 1888,
+    "total_test_functions": 21465,
     "uuid4_call_sites": 0
   },
   "root": ".",
   "summary": {
-    "assertless_total_candidates": 108,
-    "compatibility_test_files": 0,
+    "assertless_total_candidates": 109,
+    "compatibility_test_files": 1,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 0,
-    "duplicate_test_names": 0,
+    "duplicate_test_name_occurrences": 8,
+    "duplicate_test_names": 4,
     "intentional_no_exception_contract": 94,
-    "markerless_test_functions": 0,
+    "markerless_test_functions": 28,
     "refined_assertless_tests": 0,
     "uuid4_call_sites": 0
   },
-  "top_duplicate_test_names": [],
-  "total_test_files": 1885,
-  "total_test_functions": 21392,
+  "top_duplicate_test_names": [
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py:299",
+        "tests/unit/domain/aggregates/test_batch_internal_modules.py:211"
+      ],
+      "name": "test_mark_committed_emits_batch_written_event"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py:317",
+        "tests/unit/domain/aggregates/test_batch_internal_modules.py:296"
+      ],
+      "name": "test_mark_failed_emits_batch_failed_event"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/infrastructure/compat/test_pandera_compat.py:65",
+        "tests/unit/infrastructure/compat/test_pandera_compat.py:125"
+      ],
+      "name": "test_returns_true_on_attribute_error"
+    },
+    {
+      "count": 2,
+      "examples": [
+        "tests/unit/infrastructure/compat/test_pandera_compat.py:74",
+        "tests/unit/infrastructure/compat/test_pandera_compat.py:144"
+      ],
+      "name": "test_returns_true_on_type_error"
+    }
+  ],
+  "total_test_files": 1888,
+  "total_test_functions": 21465,
   "uuid4_call_sites": 0
 }

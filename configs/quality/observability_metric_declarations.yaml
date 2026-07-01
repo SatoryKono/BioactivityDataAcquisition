@@ -1,7 +1,23 @@
 version: 1
 policy_scope: observability_metric_declarations
 recording_rule_metrics:
+  - bioetl_alerts_active_total
+  - bioetl_alerts_firing_total
   - bioetl_checkpoint_age_seconds
+  - bioetl_control_plane_status
+  - bioetl_current_status
+  - bioetl_dq_blocked_records
+  - bioetl_dq_check_duration_seconds
+  - bioetl_dq_status
+  - bioetl_pipeline_phase_duration_seconds
+  - bioetl_provider_status
+  - bioetl_runtime_status
+  - bioetl_shutdown_completed_total
+  - bioetl_shutdown_initiated_total
+  - bioetl_silver_filter_reject_field_total
+  - bioetl_silver_filter_reject_reason_total
+  - bioetl_silver_reject_rate
+  - bioetl_workflow_status
   - bioetl_processed_records_bronze_current
   - bioetl_processed_records_gold_deduplicated_current
   - bioetl_processed_records_gold_excluded_by_contract_current

@@ -20,6 +20,11 @@ BioETL command-line interface (CLI) - основной способ взаимо
 **Дата обновления:** 2026-05-08
 **Статус покрытия:** published command and operator surface
 
+> **Boundary:** this page is the CLI command reference (what commands exist and their options).
+> It does NOT own execution workflows, runtime control flow, or declarative workflow inventory.
+> For execution workflows and runtime control flow, see [Running Pipelines](../03-guides/running-pipelines.md).
+> For declarative workflow inventory, see [Workflow Catalog](workflow-catalog.md).
+
 ______________________________________________________________________
 
 ## Запуск CLI

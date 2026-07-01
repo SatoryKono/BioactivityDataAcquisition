@@ -22,6 +22,11 @@ from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 import pytest
 import yaml
 
+# Import governance report function for caching
+from scripts.engineering.qa.report_test_governance_audit import (
+    collect_test_governance_report,
+)
+
 _MIN_PARALLEL_CACHE_FILES = 128
 _DEFAULT_CACHE_WORKERS = 8
 _MAX_CACHE_WORKERS = 16
@@ -653,3 +658,19 @@ def cached_subprocess_run() -> Callable[..., subprocess.CompletedProcess[str]]:
         return cache[key]
 
     return _run
+
+
+@pytest.fixture(scope="session")
+def cached_governance_report() -> Callable[[], dict]:
+    """Cache expensive governance report collection once per session."""
+    cached_report: dict | None = None
+
+    def _get_report() -> dict:
+        nonlocal cached_report
+        if cached_report is None:
+            # Use the ROOT from the test file location
+            root = Path(__file__).resolve().parents[2]
+            cached_report = collect_test_governance_report(root)
+        return cached_report
+
+    return _get_report

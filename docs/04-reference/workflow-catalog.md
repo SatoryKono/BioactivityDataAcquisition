@@ -15,8 +15,11 @@ ______________________________________________________________________
 
 Current source of truth: `configs/workflows/*.yaml`.
 
-This page is the current declarative workflow inventory. It is not the formal
-lifecycle-state specification.
+**Boundary:** this page is the declarative workflow inventory (what workflows exist).
+For CLI command reference, see [CLI Reference](cli.md). For execution workflows and
+runtime control flow, see [Running Pipelines](../03-guides/running-pipelines.md).
+
+This page is not the formal lifecycle-state specification.
 
 Runtime model evidence:
 

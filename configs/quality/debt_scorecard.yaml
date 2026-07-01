@@ -61,7 +61,7 @@ governance:
     - classification is technical_debt or intentional_exception
     - linked_rf points to active
     - placeholder exemptions require concrete technical follow-up
-    - '2026-06-30'
+    - temporary exemptions must be reviewed by 2026-06-30
   owner_diversification:
     starts_quarter: 2026-Q3
     min_distinct_owners: 2

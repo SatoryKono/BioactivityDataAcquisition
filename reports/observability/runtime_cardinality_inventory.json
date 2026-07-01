@@ -749,6 +749,13 @@
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md"
     ],
+    "bioetl_alerts_active_total": [
+      "docs/03-guides/dashboards/panels/bioetl-alerts-slo-panels.md"
+    ],
+    "bioetl_alerts_firing_total": [
+      "docs/03-guides/dashboards/panels/bioetl-alerts-slo-panels.md",
+      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md"
+    ],
     "bioetl_audit_query_duration_seconds": [
       "docs/02-architecture/observability-layers.md",
       "docs/03-guides/metrics-monitoring.md",
@@ -969,16 +976,23 @@
       "docs/05-operations/sli-slo-baseline.md",
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
+    "bioetl_control_plane_status": [
+      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md"
+    ],
     "bioetl_control_plane_terminal_events_total": [
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
+    "bioetl_current_status": [
+      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md"
+    ],
     "bioetl_data_freshness_seconds": [
       "docs/02-architecture/decisions/ADR-017-observability-architecture.md",
       "docs/02-architecture/observability-layers.md",
       "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md",
+      "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1022,6 +1036,9 @@
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md"
     ],
+    "bioetl_dq_blocked_records": [
+      "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md"
+    ],
     "bioetl_dq_check_duration_ms": [
       "docs/03-guides/metrics-monitoring.md",
       "docs/03-guides/publication-validation-guide.md",
@@ -1030,6 +1047,9 @@
       "docs/05-operations/runbooks/publication-validation-runbook.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-dq-v2.json"
+    ],
+    "bioetl_dq_check_duration_seconds": [
+      "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md"
     ],
     "bioetl_dq_check_failures_total": [
       "docs/04-reference/observability/metrics-catalog.md"
@@ -1087,6 +1107,9 @@
       "grafana/README.md",
       "grafana/dashboards/bioetl-dq-v2.json"
     ],
+    "bioetl_dq_status": [
+      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md"
+    ],
     "bioetl_dq_validation_failures_total": [
       "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md",
       "docs/03-guides/metrics-monitoring.md",
@@ -1099,7 +1122,6 @@
       "grafana/dashboards/bioetl-dq-v2.json"
     ],
     "bioetl_dq_validation_record_count": [
-      "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-dq-v2.json"
@@ -1107,6 +1129,7 @@
     "bioetl_dq_validation_score": [
       "docs/02-architecture/decisions/ADR-017-observability-architecture.md",
       "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md",
+      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/03-guides/publication-validation-guide.md",
       "docs/04-reference/contracts/observability.md",
@@ -1119,6 +1142,7 @@
     ],
     "bioetl_errors_total": [
       "docs/02-architecture/decisions/ADR-017-observability-architecture.md",
+      "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/03-guides/running-pipelines.md",
       "docs/04-reference/contracts/observability.md",
@@ -1241,41 +1265,34 @@
     ],
     "bioetl_l0_status": [
       "docs/03-guides/dashboards/design-system.md",
-      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "docs/04-reference/observability/alerting-guide.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_l1_control_plane_current_status": [
-      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_l1_dq_status": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
-      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_l1_gold_lifecycle_status": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
-      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_l1_provider_global_status": [
-      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_l1_runtime_blocker_status": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
-      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-overview-v2.json"
     ],
     "bioetl_l1_workflow_global_status": [
-      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-overview-v2.json"
     ],
@@ -1306,6 +1323,7 @@
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_memory_pressure_state": [
+      "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/dashboards/bioetl-runtime.json"
@@ -1344,6 +1362,7 @@
     ],
     "bioetl_pipeline_duration_seconds": [
       "docs/02-architecture/decisions/ADR-017-observability-architecture.md",
+      "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/03-guides/running-pipelines.md",
       "docs/04-reference/contracts/observability.md",
@@ -1357,9 +1376,12 @@
       "docs/05-operations/sli-slo-baseline.md",
       "grafana/README.md"
     ],
+    "bioetl_pipeline_phase_duration_seconds": [
+      "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md"
+    ],
     "bioetl_pipeline_runs_total": [
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
-      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
+      "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/alerting-guide.md",
@@ -1371,6 +1393,7 @@
       "grafana/dashboards/bioetl-workflow-overview.json"
     ],
     "bioetl_pipeline_stage_expected": [
+      "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "docs/03-guides/dashboards/variable-reference.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md",
@@ -1434,6 +1457,9 @@
       "grafana/README.md",
       "grafana/dashboards/bioetl-provider-health-v2.json"
     ],
+    "bioetl_provider_status": [
+      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md"
+    ],
     "bioetl_publication_raw_vocab_unknown_total": [
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1484,9 +1510,11 @@
       "docs/02-architecture/decisions/ADR-017-observability-architecture.md",
       "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
-      "docs/03-guides/dashboards/panels/bioetl-alerts-slo-panels.md",
       "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md",
       "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
+      "docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md",
+      "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
+      "docs/03-guides/dashboards/panels/bioetl-silver-reject-explorer-panels.md",
       "docs/03-guides/dashboards/variable-reference.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/03-guides/publication-validation-guide.md",
@@ -1526,10 +1554,14 @@
       "docs/03-guides/dashboards/dashboard-checklist-per-dashboard.md",
       "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
       "docs/03-guides/dashboards/design-system.md",
+      "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "docs/04-reference/observability/alerting-guide.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-runtime.json",
       "grafana/dashboards/bioetl-workflow-overview.json"
+    ],
+    "bioetl_runtime_status": [
+      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md"
     ],
     "bioetl_shutdown_completed": [
       "docs/03-guides/metrics-monitoring.md",
@@ -1537,11 +1569,17 @@
       "grafana/README.md",
       "grafana/dashboards/bioetl-runtime.json"
     ],
+    "bioetl_shutdown_completed_total": [
+      "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md"
+    ],
     "bioetl_shutdown_initiated": [
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_shutdown_initiated_total": [
+      "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md"
     ],
     "bioetl_silver_csv_export_failures_total": [
       "docs/04-reference/observability/metrics-catalog.md"
@@ -1552,8 +1590,17 @@
     "bioetl_silver_csv_export_success_total": [
       "docs/04-reference/observability/metrics-catalog.md"
     ],
+    "bioetl_silver_filter_reject_field_total": [
+      "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md",
+      "docs/03-guides/dashboards/panels/bioetl-silver-reject-explorer-panels.md"
+    ],
+    "bioetl_silver_filter_reject_reason_total": [
+      "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md",
+      "docs/03-guides/dashboards/panels/bioetl-silver-reject-explorer-panels.md"
+    ],
     "bioetl_silver_filter_rejections_total": [
       "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md",
+      "docs/03-guides/dashboards/panels/bioetl-silver-reject-explorer-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md",
@@ -1570,6 +1617,9 @@
     ],
     "bioetl_silver_optimize_success_total": [
       "docs/04-reference/observability/metrics-catalog.md"
+    ],
+    "bioetl_silver_reject_rate": [
+      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md"
     ],
     "bioetl_silver_vacuum_files_removed": [
       "docs/04-reference/observability/metrics-catalog.md"
@@ -1590,6 +1640,7 @@
       "grafana/dashboards/bioetl-dq-v2.json"
     ],
     "bioetl_stage_backlog_records": [
+      "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1597,6 +1648,7 @@
       "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_stage_lag_seconds": [
+      "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
@@ -1673,6 +1725,9 @@
       "grafana/dashboards/bioetl-runtime.json",
       "grafana/dashboards/bioetl-workflow-overview.json"
     ],
+    "bioetl_workflow_status": [
+      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md"
+    ],
     "bioetl_workflow_step_duration_seconds": [
       "docs/04-reference/observability/metrics-catalog.md",
       "docs/05-operations/01-monitoring-guide.md"
@@ -1684,7 +1739,24 @@
     ]
   },
   "documented_only_metrics": [],
-  "documented_without_registry": [],
+  "documented_without_registry": [
+    "bioetl_alerts_active_total",
+    "bioetl_alerts_firing_total",
+    "bioetl_control_plane_status",
+    "bioetl_current_status",
+    "bioetl_dq_blocked_records",
+    "bioetl_dq_check_duration_seconds",
+    "bioetl_dq_status",
+    "bioetl_pipeline_phase_duration_seconds",
+    "bioetl_provider_status",
+    "bioetl_runtime_status",
+    "bioetl_shutdown_completed_total",
+    "bioetl_shutdown_initiated_total",
+    "bioetl_silver_filter_reject_field_total",
+    "bioetl_silver_filter_reject_reason_total",
+    "bioetl_silver_reject_rate",
+    "bioetl_workflow_status"
+  ],
   "documented_without_runtime": [],
   "domain_event_emitters": [
     "src/bioetl/application/core/_batch_write_support.py",

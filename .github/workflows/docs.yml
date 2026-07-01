@@ -76,6 +76,7 @@ jobs:
             tests/architecture/test_internal_orchestration_docs.py \
             tests/architecture/test_reproducibility_docs_contract_drift.py \
             tests/architecture/test_runtime_agent_docs_drift.py \
+            tests/architecture/test_workflow_cli_running_boundaries.py \
             -q --tb=short
 
       - name: Validate xwalk missing backlog

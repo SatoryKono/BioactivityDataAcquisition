@@ -43830,7 +43830,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-30",
-  "source_tree_sha256": "3421513d95c17ae2590856169f3144d7cfe1a3f72800eb173c93fa09320025f5",
+  "source_tree_sha256": "c45cfd12b98c422916243bc88ecee1d469fa78b99a62702380f59090daaf8c88",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

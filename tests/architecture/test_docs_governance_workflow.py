@@ -43,6 +43,7 @@ def test_docs_governance_profile_covers_doc_sync_architecture_tests() -> None:
         "tests/architecture/test_documentation_sync.py::test_mkdocs_nav_references_existing_markdown_files",
         "tests/architecture/test_internal_orchestration_docs.py",
         "tests/architecture/test_runtime_agent_docs_drift.py",
+        "tests/architecture/test_workflow_cli_running_boundaries.py",
     )
 
     for target in expected_targets:

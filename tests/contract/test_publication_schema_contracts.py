@@ -27,6 +27,12 @@ COMPATIBILITY_BASELINE_PATH = (
     / "contracts"
     / "publication_schema_compatibility.v1.yaml"
 )
+SEMANTIC_COMPATIBILITY_INVENTORY_PATH = (
+    Path(__file__).resolve().parents[2]
+    / "configs"
+    / "quality"
+    / "semantic_compatibility_residue_inventory.yaml"
+)
 ARCHITECTURE_MEDALLION_CONTRACT_PATH = (
     Path(__file__).resolve().parents[1]
     / "architecture"
@@ -57,6 +63,15 @@ def _load_compatibility_baseline() -> dict[str, object]:
     compatibility = payload["publication_schema_compatibility"]
     assert isinstance(compatibility, dict)
     return compatibility
+
+
+def _load_semantic_compatibility_inventory() -> dict[str, object]:
+    """Load the machine-readable semantic compatibility residue inventory."""
+    payload = yaml.safe_load(
+        SEMANTIC_COMPATIBILITY_INVENTORY_PATH.read_text(encoding="utf-8")
+    )
+    assert isinstance(payload, dict)
+    return payload
 
 
 @pytest.mark.architecture
@@ -462,6 +477,39 @@ class TestSchemaVersioning:
         "semanticscholar": SemanticScholarPublicationSchema,
     }
 
+    def test_machine_readable_inventory_exists_and_is_valid(self) -> None:
+        """Machine-readable semantic compatibility inventory must exist and be valid."""
+        inventory = _load_semantic_compatibility_inventory()
+        
+        # Verify structure
+        assert inventory["version"] == 1
+        assert inventory["policy_scope"] == "semantic_compatibility_residue"
+        assert inventory["schema_version"] == 1
+        assert "retained_fields" in inventory
+        assert isinstance(inventory["retained_fields"], list)
+
+    def test_inventory_has_required_fields_for_each_entry(self) -> None:
+        """Each inventory entry must have owner, rationale, sunset_policy, review_policy, review_date."""
+        inventory = _load_semantic_compatibility_inventory()
+        retained_fields = inventory["retained_fields"]
+        
+        for entry in retained_fields:
+            assert "field_name" in entry
+            assert "owner" in entry
+            assert "rationale" in entry
+            assert "sunset_policy" in entry
+            assert "review_policy" in entry
+            assert "review_date" in entry
+            assert "status" in entry
+            assert "external_breaking_change_required" in entry
+            assert "providers" in entry
+
+    def test_inventory_references_baseline_file(self) -> None:
+        """Publication baseline must reference the machine-readable inventory."""
+        compatibility = _load_compatibility_baseline()
+        assert "inventory_ref" in compatibility
+        assert compatibility["inventory_ref"] == "configs/quality/semantic_compatibility_residue_inventory.yaml"
+
     @pytest.mark.parametrize(
         "section_name",
         [
@@ -476,7 +524,7 @@ class TestSchemaVersioning:
         compatibility = _load_compatibility_baseline()
         section = compatibility[section_name]
         assert isinstance(section, dict)
-        assert str(section["review_date"]) >= "2026-05-20"
+        assert str(section["review_date"]) >= "2026-09-30"
         providers = section["providers"]
         assert isinstance(providers, dict)
         assert set(providers) == set(self.SCHEMA_MAP)

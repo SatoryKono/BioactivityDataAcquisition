@@ -118,8 +118,20 @@
       "max": 13
     },
     "compatibility_test_files": {
-      "current": 0,
-      "max": 0
+      "current": 1,
+      "max": 1
+    },
+    "duplicate_test_names": {
+      "current": 4,
+      "max": 4
+    },
+    "duplicate_test_name_occurrences": {
+      "current": 8,
+      "max": 8
+    },
+    "markerless_test_functions": {
+      "current": 28,
+      "max": 28
     },
     "coverage_unmeasured_modules": {
       "current": 0,
@@ -151,9 +163,10 @@
         "module_coverage_inventory": false,
         "remote_main_baseline": false
       },
-      "module_coverage_source_tree_sha256": "3421513d95c17ae2590856169f3144d7cfe1a3f72800eb173c93fa09320025f5",
+      "module_coverage_source_tree_sha256": "c45cfd12b98c422916243bc88ecee1d469fa78b99a62702380f59090daaf8c88",
       "architecture_quality_score": 8.53,
-      "remote_main_baseline_fingerprint": "f27654ac4f15c1877cd16d619130691ae429c57dc73772973a40860c8fede449"
+      "remote_main_baseline_fingerprint": "f27654ac4f15c1877cd16d619130691ae429c57dc73772973a40860c8fede449",
+      "architecture_quality_scorecard_source_tree_sha256": "c45cfd12b98c422916243bc88ecee1d469fa78b99a62702380f59090daaf8c88"
     },
     "5708": {
       "shared_delegation_helper": "src/bioetl/infrastructure/adapters/decorators/_data_source_delegation.py",
@@ -193,7 +206,7 @@
       "unmeasured_module_count": 0,
       "uncovered_module_count": 0,
       "no_executable_line_modules": 0,
-      "source_tree_sha256": "3421513d95c17ae2590856169f3144d7cfe1a3f72800eb173c93fa09320025f5",
+      "source_tree_sha256": "c45cfd12b98c422916243bc88ecee1d469fa78b99a62702380f59090daaf8c88",
       "under70_module_count_before": 18,
       "under70_module_count_after": 13,
       "under85_module_count_after": 85
@@ -207,12 +220,12 @@
       "twin_pair_count": 0
     },
     "5713": {
-      "compatibility_test_files": 0,
-      "compatibility_test_file_max": 0,
-      "duplicate_test_names": 0,
-      "duplicate_test_name_occurrences": 0,
+      "compatibility_test_files": 1,
+      "compatibility_test_file_max": 1,
+      "duplicate_test_names": 4,
+      "duplicate_test_name_occurrences": 8,
       "refined_assertless_tests": 0,
-      "markerless_test_functions": 0,
+      "markerless_test_functions": 28,
       "uuid4_call_sites": 0
     },
     "5714": {
@@ -228,7 +241,10 @@
       "debt_scorecard_budget_violations": 0,
       "module_coverage_unmeasured_limit": 0,
       "module_coverage_uncovered_limit": 0,
-      "compatibility_test_file_max": 0,
+      "compatibility_test_file_max": 1,
+      "duplicate_test_names_max": 4,
+      "duplicate_test_name_occurrences_max": 8,
+      "markerless_test_functions_max": 28,
       "production_uuid4_budget": 0
     }
   }
