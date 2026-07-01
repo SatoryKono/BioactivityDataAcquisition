@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+# SANCTIONED: pathlib.Path used as value object for path computation only.
+# No I/O operations (open, read, write) are performed here.
+# See domain/README.md#sanctioned-exceptions
 from pathlib import Path
 
 from bioetl.domain.types import JsonDict

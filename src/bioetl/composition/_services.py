@@ -20,7 +20,7 @@ if TYPE_CHECKING:
         BronzeCleanupService,
     )
     from bioetl.application.services.checkpoint_service import CheckpointService
-    from bioetl.application.services.control_plane.forensic_diff_service import (
+    from bioetl.application.services.control_plane import (
         ForensicRunDiffService,
     )
     from bioetl.application.services.control_plane.replay.historical_closure_service import (

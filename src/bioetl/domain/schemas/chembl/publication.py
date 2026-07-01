@@ -81,11 +81,6 @@ class ChemblPublicationSchema(PublicationBaseSchema):
         str_matches=r"^PMC\d+$",
         description="Publication PMC ID under the ChEMBL-prefixed compatibility contract.",
     )
-    oa_status: Series[str] | None = pa.Field(
-        nullable=True,
-        isin=OA_STATUS_VALUES,
-        description="Open-access status token retained for compatibility when present.",
-    )
 
     # === System Fields ===
     _source: Series[str] = pa.Field(
