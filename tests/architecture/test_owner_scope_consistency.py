@@ -25,7 +25,7 @@ def _layer_from_path(path: str) -> str | None:
 def _build_layer_to_owner_map(scorecard: dict) -> dict[str, str]:  # type: ignore[type-arg]
     """Build mapping from layer keyword to expected owner."""
     governance = scorecard.get("governance", {})
-    subsystems = governance.get("owner_registry_q2_subsystems", {})
+    subsystems = governance.get("owner_registry_q3_subsystems", {})
 
     layer_to_owner: dict[str, str] = {}
     for _subsystem_key, config in subsystems.items():
