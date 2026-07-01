@@ -34,7 +34,7 @@ DEFAULT_AUDIT_CLUSTER_REGISTRY = (
     REPO_ROOT
     / "reports"
     / "semantic_pipeline_audit"
-    / "semantic_cluster_registry_2026-05-21.json"
+    / "semantic_cluster_registry_2026-07-01.json"
 )
 DEFAULT_REVIEW_REGISTRY = (
     REPO_ROOT / "configs" / "field_registry" / "semantic_audit_review_registry.yaml"

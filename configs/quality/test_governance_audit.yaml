@@ -62,7 +62,7 @@ budgets:
   refined_assertless_max: 0
   duplicate_test_names_max: 2
   duplicate_test_name_occurrences_max: 4
-  compatibility_test_file_max: 1
+  compatibility_test_file_max: 0
   markerless_test_functions_max: 0
   uuid4_call_sites_max: 0
   date_today_call_sites_max: 0
@@ -81,6 +81,14 @@ budget_ratchet:
       and duplicate_test_name_occurrences_max increased from 0 to 4 to match current
       actual state (2 duplicate test names, 4 occurrences detected). This is a
       one-time adjustment to align budget with live inventory after baseline refresh.
+  - issue: '#5752'
+    owner: test-governance
+    status: compatibility_test_file_max_ratcheted_to_0
+    note: >-
+      After renaming the last compatibility-classified Pandera runtime test to the
+      canonical Python 3.14 support surface, the live compatibility filename inventory
+      reached zero. compatibility_test_file_max is now ratcheted from 1 to 0 to
+      match the zero live inventory without reducing governance coverage.
   - issue: '#5682'
     owner: test-governance
     status: compatibility_inventory_reclassified_silver_filter_identity_24

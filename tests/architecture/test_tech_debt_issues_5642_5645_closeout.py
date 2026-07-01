@@ -90,7 +90,7 @@ def test_issue_5645_hotspot_warning_count_is_ratcheted_down() -> None:
     hotspot_gate = _gate(gates, "hotspot_family_baseline_budget_warnings")
 
     assert baseline["summary"]["budget_warnings"] == 0
-    assert baseline["summary"]["budget_review_notes"] == 6
+    assert baseline["summary"]["budget_review_notes"] == 5
     assert baseline_family["files_ge_250_loc"] == 1
     assert baseline_family["max_internal_fan_in"] == 5
     assert baseline_family["budget_warnings"] == []

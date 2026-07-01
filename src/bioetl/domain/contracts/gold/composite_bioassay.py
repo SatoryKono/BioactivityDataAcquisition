@@ -91,6 +91,17 @@ class CompositeAssayGoldSchema(CompositeLookupLineageSchema):
         nullable=True,
         description="ChEMBL assay confidence score retained as source-scoped metadata.",
     )
+    cell_type: Series[str] = pa.Field(
+        nullable=True,
+        description="Inherited cell-line type retained as optional composite assay context metadata.",
+    )
+    clo_id: Series[str] = pa.Field(
+        nullable=True,
+        description=(
+            "Inherited CLO ontology identifier retained as optional "
+            "composite assay cell-line lineage metadata."
+        ),
+    )
 
 
 class CompositeTargetGoldSchema(CompositeLookupLineageSchema):

@@ -145,9 +145,9 @@
       "fail_count": 0,
       "warn_count": 0,
       "architecture_quality_score": 8.53,
-      "module_coverage_source_tree_sha256": "c45cfd12b98c422916243bc88ecee1d469fa78b99a62702380f59090daaf8c88",
+      "module_coverage_source_tree_sha256": "3e8365cd0a72ee50dd611b2759422a72a85dca8d88fea4eb0248dad86479063b",
       "remote_main_baseline_fingerprint": "624a9cdb3d283482a3042c57dd2985b2bfad290935bad7ea84b9a80dd19c97be",
-      "architecture_quality_scorecard_source_tree_sha256": "c45cfd12b98c422916243bc88ecee1d469fa78b99a62702380f59090daaf8c88"
+      "architecture_quality_scorecard_source_tree_sha256": "3e8365cd0a72ee50dd611b2759422a72a85dca8d88fea4eb0248dad86479063b"
     },
     "5745": {
       "opening_adapter_duplicate_clusters": 55,

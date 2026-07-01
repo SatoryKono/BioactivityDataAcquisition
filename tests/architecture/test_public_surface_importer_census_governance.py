@@ -463,6 +463,8 @@ def test_retained_public_export_facades_remain_unique_and_budgeted() -> None:
         assert row["duplicate_lazy_export_keys"] == [], row["path"]
         assert row["orphan_lazy_export_keys"] == [], row["path"]
         assert row["orphan_dunder_getattr_exports"] == [], row["path"]
+        assert row["missing_retained_wrappers_outside_all"] == [], row["path"]
+        assert row["unexpected_retained_wrappers_outside_all"] == [], row["path"]
         assert row["resolution_conflicts"] == {}, row["path"]
 
 

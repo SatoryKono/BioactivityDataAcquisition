@@ -70,10 +70,10 @@ def test_issue_5510_control_plane_root_facade_stays_zero_src_importers() -> None
     summary = payload["summary"]
     control_plane = payload["control_plane_root_facade"]
 
-    # Updated to reflect current state: 6 src importers remain as debt
-    assert summary["control_plane_root_src_importer_count"] == 6
+    # Current live census is fully ratcheted to zero first-party src importers.
+    assert summary["control_plane_root_src_importer_count"] == 0
     assert control_plane["target_module"] == "bioetl.application.services.control_plane"
-    assert len(control_plane["src_importers"]) == 6
+    assert len(control_plane["src_importers"]) == 0
 
 
 def test_issues_5511_5512_duplication_wave_reduced_live_baseline_counts() -> None:

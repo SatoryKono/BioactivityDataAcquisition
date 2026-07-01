@@ -137,21 +137,11 @@
       "unowned_cassette_count": 0
     },
     "5706": {
-      "under_85_count": 85,
-      "under_70_count": 13,
+      "under_85_count": 80,
+      "under_70_count": 9,
       "zero_coverage_count": 0,
       "unmeasured_count": 0,
       "top_under_70_modules": [
-        {
-          "path": "src/bioetl/infrastructure/validation/contract_validator.py",
-          "coverage_percent": 25.55,
-          "missing_lines": 102
-        },
-        {
-          "path": "src/bioetl/infrastructure/compat/pandera_compat.py",
-          "coverage_percent": 30.43,
-          "missing_lines": 48
-        },
         {
           "path": "src/bioetl/infrastructure/serialization/encoders.py",
           "coverage_percent": 45.59,
@@ -161,16 +151,6 @@
           "path": "src/bioetl/domain/workflow/_run_options_support.py",
           "coverage_percent": 51.61,
           "missing_lines": 15
-        },
-        {
-          "path": "src/bioetl/infrastructure/config/contract_registry_loader.py",
-          "coverage_percent": 59.8,
-          "missing_lines": 41
-        },
-        {
-          "path": "src/bioetl/infrastructure/storage/silver/support.py",
-          "coverage_percent": 62.07,
-          "missing_lines": 11
         },
         {
           "path": "src/bioetl/domain/entities/bioactivity/_converters.py",
@@ -191,6 +171,21 @@
           "path": "src/bioetl/composition/maintenance_api.py",
           "coverage_percent": 65.22,
           "missing_lines": 8
+        },
+        {
+          "path": "src/bioetl/infrastructure/export/debug_export_adapter.py",
+          "coverage_percent": 66.41,
+          "missing_lines": 43
+        },
+        {
+          "path": "src/bioetl/domain/normalization/_reference_id_openalex.py",
+          "coverage_percent": 68.75,
+          "missing_lines": 5
+        },
+        {
+          "path": "src/bioetl/infrastructure/observability/__init__.py",
+          "coverage_percent": 68.75,
+          "missing_lines": 5
         }
       ]
     }

@@ -228,7 +228,7 @@ def test_issue_5654_hotspot_warnings_are_reduced_without_budget_growth() -> None
     hotspot_gate = _gate(gates, "hotspot_family_baseline_budget_warnings")
 
     assert baseline["summary"]["budget_warnings"] == 0
-    assert baseline["summary"]["budget_review_notes"] == 6
+    assert baseline["summary"]["budget_review_notes"] == 5
     assert baseline_family["files_ge_250_loc"] == 2
     assert baseline_family["bounded_growth_budgets"]["files_ge_250_loc"] == 3
     assert baseline_family["budget_warnings"] == []

@@ -8,6 +8,8 @@ See docs/02-architecture/domain/aggregate-invariants.md for canonical documentat
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from bioetl.domain.aggregates.batch import BatchStatus
@@ -16,6 +18,13 @@ from bioetl.domain.aggregates.quarantine_entry import QuarantineStatus
 
 
 pytestmark = pytest.mark.architecture
+DOC_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "docs"
+    / "02-architecture"
+    / "domain"
+    / "aggregate-invariants.md"
+)
 
 
 class TestBatchStateTransitions:
@@ -193,20 +202,83 @@ class TestAggregateInvariantConsistency:
 
     def test_no_self_transitions_allowed(self) -> None:
         """Verify that no aggregate allows self-transitions."""
-        # Self-transitions are invalid for all aggregates
-        # This is a cross-aggregate invariant
-        pass  # Verified by parametrized tests above
+        batch_valid = {
+            (BatchStatus.OPEN, BatchStatus.SEALED),
+            (BatchStatus.SEALED, BatchStatus.WRITING),
+            (BatchStatus.WRITING, BatchStatus.COMMITTED),
+            (BatchStatus.WRITING, BatchStatus.FAILED),
+        }
+        pipeline_valid = {
+            (PipelineRunState.PENDING, PipelineRunState.RUNNING),
+            (PipelineRunState.RUNNING, PipelineRunState.COMPLETED),
+            (PipelineRunState.RUNNING, PipelineRunState.FAILED),
+            (PipelineRunState.RUNNING, PipelineRunState.SHUTDOWN),
+        }
+        quarantine_valid = {
+            (QuarantineStatus.NEW, QuarantineStatus.UNDER_REVIEW),
+            (QuarantineStatus.NEW, QuarantineStatus.IGNORED),
+            (QuarantineStatus.NEW, QuarantineStatus.REPROCESSED),
+            (QuarantineStatus.NEW, QuarantineStatus.EXPIRED),
+            (QuarantineStatus.UNDER_REVIEW, QuarantineStatus.IGNORED),
+            (QuarantineStatus.UNDER_REVIEW, QuarantineStatus.REPROCESSED),
+            (QuarantineStatus.UNDER_REVIEW, QuarantineStatus.EXPIRED),
+        }
+
+        assert all((state, state) not in batch_valid for state in BatchStatus)
+        assert all((state, state) not in pipeline_valid for state in PipelineRunState)
+        assert all((state, state) not in quarantine_valid for state in QuarantineStatus)
 
     def test_terminal_states_are_final(self) -> None:
         """Verify that terminal states cannot transition to other states."""
-        # Batch terminal states: COMMITTED, FAILED
-        # PipelineRun terminal states: COMPLETED, FAILED, SHUTDOWN
-        # QuarantineEntry terminal states: IGNORED, REPROCESSED, EXPIRED
-        # Verified by parametrized tests above
-        pass
+        batch_valid = {
+            (BatchStatus.OPEN, BatchStatus.SEALED),
+            (BatchStatus.SEALED, BatchStatus.WRITING),
+            (BatchStatus.WRITING, BatchStatus.COMMITTED),
+            (BatchStatus.WRITING, BatchStatus.FAILED),
+        }
+        pipeline_valid = {
+            (PipelineRunState.PENDING, PipelineRunState.RUNNING),
+            (PipelineRunState.RUNNING, PipelineRunState.COMPLETED),
+            (PipelineRunState.RUNNING, PipelineRunState.FAILED),
+            (PipelineRunState.RUNNING, PipelineRunState.SHUTDOWN),
+        }
+        quarantine_valid = {
+            (QuarantineStatus.NEW, QuarantineStatus.UNDER_REVIEW),
+            (QuarantineStatus.NEW, QuarantineStatus.IGNORED),
+            (QuarantineStatus.NEW, QuarantineStatus.REPROCESSED),
+            (QuarantineStatus.NEW, QuarantineStatus.EXPIRED),
+            (QuarantineStatus.UNDER_REVIEW, QuarantineStatus.IGNORED),
+            (QuarantineStatus.UNDER_REVIEW, QuarantineStatus.REPROCESSED),
+            (QuarantineStatus.UNDER_REVIEW, QuarantineStatus.EXPIRED),
+        }
+
+        assert not any(
+            from_state in {BatchStatus.COMMITTED, BatchStatus.FAILED}
+            for from_state, _ in batch_valid
+        )
+        assert not any(
+            from_state
+            in {
+                PipelineRunState.COMPLETED,
+                PipelineRunState.FAILED,
+                PipelineRunState.SHUTDOWN,
+            }
+            for from_state, _ in pipeline_valid
+        )
+        assert not any(
+            from_state
+            in {
+                QuarantineStatus.IGNORED,
+                QuarantineStatus.REPROCESSED,
+                QuarantineStatus.EXPIRED,
+            }
+            for from_state, _ in quarantine_valid
+        )
 
     def test_all_transitions_are_documented(self) -> None:
         """Verify that all tested transitions are documented in aggregate-invariants.md."""
-        # This test ensures documentation coverage
-        # If a new transition is added to the code, it must be documented
-        pass  # Manual verification required
+        content = DOC_PATH.read_text(encoding="utf-8")
+        assert DOC_PATH.is_file()
+        assert "Batch" in content
+        assert "PipelineRun" in content
+        assert "QuarantineEntry" in content

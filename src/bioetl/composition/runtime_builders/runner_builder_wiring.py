@@ -10,11 +10,6 @@ from bioetl.composition.factories.pipeline.registry import register_all_pipeline
 from bioetl.composition.observability import ObservabilityBundle
 from bioetl.composition.providers import ensure_providers_loaded
 from bioetl.composition.registry_api import PipelineRegistry, create_registry
-from bioetl.composition.runtime_builders.config_access import (
-    get_settings,
-    load_pipeline_config,
-    load_source_config,
-)
 from bioetl.composition.runtime_builders.inputs_runtime_assembly import (
     ResolvedVacuumSettings,
     assemble_cached_bronze_context,
@@ -22,7 +17,12 @@ from bioetl.composition.runtime_builders.inputs_runtime_assembly import (
     assemble_runtime_config,
     assemble_vacuum_settings,
 )
+from bioetl.composition.runtime_builders.config_access import (
+    load_source_config as load_runtime_builder_source_config,
+)
 from bioetl.domain.config import RuntimeConfig
+from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config
+from bioetl.infrastructure.config.settings_api import get_settings
 
 if TYPE_CHECKING:
     from bioetl.domain.context import CachedBronzeContext, PipelineRunContext
@@ -46,7 +46,7 @@ class RunnerInputWiring:
 
     get_settings: Callable[[], Settings] = get_settings
     load_pipeline_config: Callable[[str], PipelineYamlConfig] = load_pipeline_config
-    load_source_config: Callable[..., object] = load_source_config
+    load_source_config: Callable[..., object] = load_runtime_builder_source_config
     build_observability_bundle: Callable[..., ObservabilityBundle] | None = None
     assemble_vacuum_settings: Callable[..., ResolvedVacuumSettings] = (
         assemble_vacuum_settings

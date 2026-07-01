@@ -8,6 +8,7 @@ import csv
 import hashlib
 import io
 import json
+import re
 import sys
 from collections import Counter
 from datetime import UTC, datetime
@@ -33,7 +34,7 @@ DEFAULT_CANONICAL_REGISTRY = (
     REPO_ROOT / "configs" / "field_registry" / "canonical_registry.json"
 )
 BASE_CONFIG_DIR = REPO_ROOT / "configs" / "base"
-DEFAULT_SOURCE_DATE = "2026-05-21"
+DEFAULT_SOURCE_DATE = "2026-07-01"
 PAIR_MATRIX_PREFIX = "semantic_pair_matrix_"
 CLUSTER_REGISTRY_PREFIX = "semantic_cluster_registry_"
 PAIR_COLUMNS = (
@@ -323,19 +324,32 @@ def _path_for_pipeline(row: dict[str, str]) -> str:
     return f"configs/entities/{provider}/{entity}.yaml"
 
 
-def _gold_contract_path(pipeline: str) -> Path:
-    return (
-        REPO_ROOT
-        / "docs"
-        / "04-reference"
-        / "contracts"
-        / "gold"
-        / f"{pipeline}_v1.0.json"
+def resolve_latest_gold_contract_path(
+    pipeline: str,
+    *,
+    contracts_dir: Path | None = None,
+) -> Path:
+    contracts_root = (
+        contracts_dir
+        if contracts_dir is not None
+        else REPO_ROOT / "docs" / "04-reference" / "contracts" / "gold"
     )
+    pattern = re.compile(rf"^{re.escape(pipeline)}_v(?P<major>\d+)\.(?P<minor>\d+)\.json$")
+    candidates: list[tuple[tuple[int, int], Path]] = []
+    for path in contracts_root.glob(f"{pipeline}_v*.json"):
+        match = pattern.match(path.name)
+        if match is None:
+            continue
+        version = (int(match.group("major")), int(match.group("minor")))
+        candidates.append((version, path))
+
+    if not candidates:
+        return contracts_root / f"{pipeline}_v1.0.json"
+    return max(candidates, key=lambda item: item[0])[1]
 
 
 def _gold_field_payload(pipeline: str, field: str) -> tuple[str, bool, str]:
-    path = _gold_contract_path(pipeline)
+    path = resolve_latest_gold_contract_path(pipeline)
     if not path.exists():
         return "", False, ""
     payload = _load_json(path)

@@ -14,11 +14,13 @@ from bioetl.application.services.control_plane.forensic_diff_service import (
     _artifact_refs,
     _coerce_int,
     _dict_or_empty,
+    _forensic_diff_payload,
     _inspection_service_factory_from_ports,
     _lineage_closure_payload,
     _metadata_sidecar_missing_count,
     _missing_evidence,
     _replay_capability_payload,
+    _resolve_forensic_verdict,
     _string_list,
     _string_list_or_empty,
     _trace_complete,
@@ -670,3 +672,97 @@ class TestHelperFunctions:
         result = _missing_evidence(mock_result)
         assert "lineage_closure_boundary_unsupported" in result
         assert "run_ledger_entries_missing" not in result
+
+    def test_resolve_forensic_verdict_prefers_checkpoint_incompatibility(self):
+        """Checkpoint incompatibility should override semantic-equivalent replay verdicts."""
+        manifest_diff = MagicMock(
+            classification="identical",
+            occurrence_only=False,
+        )
+
+        verdict = _resolve_forensic_verdict(
+            manifest_diff=manifest_diff,
+            forensic_diff={"checkpoint_anchors": {"compatible": False}},
+        )
+
+        assert verdict == "checkpoint_incompatible"
+
+    def test_resolve_forensic_verdict_preserves_semantic_drift(self):
+        """Semantic drift should map directly to the terminal forensic verdict."""
+        manifest_diff = MagicMock(
+            classification="semantic_drift",
+            occurrence_only=False,
+        )
+
+        verdict = _resolve_forensic_verdict(
+            manifest_diff=manifest_diff,
+            forensic_diff={"checkpoint_anchors": {"compatible": True}},
+        )
+
+        assert verdict == "semantic_drift"
+
+    def test_resolve_forensic_verdict_occurrence_only_replay(self):
+        """Occurrence-only diffs should keep the replay-specific verdict."""
+        manifest_diff = MagicMock(
+            classification="occurrence_only",
+            occurrence_only=True,
+        )
+
+        verdict = _resolve_forensic_verdict(
+            manifest_diff=manifest_diff,
+            forensic_diff={"checkpoint_anchors": {"compatible": True}},
+        )
+
+        assert verdict == "occurrence_only_replay"
+
+    def test_resolve_forensic_verdict_semantic_equivalent_replay(self):
+        """Semantic equivalents without blockers should emit the stable replay verdict."""
+        manifest_diff = MagicMock(
+            classification="identical",
+            occurrence_only=False,
+        )
+
+        verdict = _resolve_forensic_verdict(
+            manifest_diff=manifest_diff,
+            forensic_diff={},
+        )
+
+        assert verdict == "semantic_equivalent_replay"
+
+    def test_forensic_diff_payload_backfills_missing_verdict(self):
+        """Missing forensic verdicts should be synthesized from the manifest diff."""
+        manifest_diff = MagicMock(
+            classification="occurrence_only",
+            occurrence_only=True,
+            cross_surface_replay_diff={"checkpoint_anchors": {"compatible": True}},
+        )
+
+        payload = _forensic_diff_payload(manifest_diff)
+
+        assert payload["verdict"] == "occurrence_only_replay"
+
+    def test_artifact_byte_equivalence_reports_missing_refs_when_port_cannot_compare(self):
+        """Comparison should stay unavailable when either side lacks artifact refs."""
+        mock_port = MagicMock()
+        mock_result = MagicMock()
+        mock_result.diagnostics = {"artifact_refs": []}
+
+        service = ForensicRunDiffService(
+            manifest_port=MagicMock(),
+            artifact_byte_comparison_port=mock_port,
+        )
+
+        payload = service._build_artifact_byte_equivalence(
+            left=mock_result,
+            right=mock_result,
+        )
+
+        assert payload == {
+            "available": False,
+            "equivalent": None,
+            "compared_artifacts": [],
+            "missing_artifacts": [],
+            "mismatched_artifacts": [],
+            "comparison_scope": "unavailable_missing_refs",
+        }
+        mock_port.compare_artifacts.assert_not_called()

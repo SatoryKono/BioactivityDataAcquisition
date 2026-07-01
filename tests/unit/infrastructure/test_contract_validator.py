@@ -80,6 +80,17 @@ class TestContractAwareGoldValidator:
         assert is_valid is True
         assert outcomes == []
 
+    def test_validation_without_schema_and_nonempty_records_in_nonstrict_mode(self):
+        """Non-strict mode should accept records when no schema has been configured."""
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(
+            schema=None, strict=False, dq_config=config
+        )
+
+        is_valid, outcomes = validator.validate_with_outcomes([{"field": "value"}])
+        assert is_valid is True
+        assert outcomes == []
+
     def test_validation_without_config_fallback(self):
         """Test fallback behavior when no DQ config is provided."""
         validator = ContractAwareGoldValidator(schema=None, strict=False)
@@ -462,6 +473,18 @@ class TestInternalMethods:
         field_name = validator._extract_schema_error_field_name(MockError())
         assert field_name == "my_field"
 
+    def test_extract_schema_error_field_name_with_empty_message_match(self):
+        """Empty extracted column names should fall back to ``None``."""
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=None, dq_config=config)
+
+        class MockError:
+            def __str__(self):
+                return "Expected column '' to be present"
+
+        field_name = validator._extract_schema_error_field_name(MockError())
+        assert field_name is None
+
     def test_extract_schema_error_field_name_fallback(self):
         """Test _extract_schema_error_field_name returns None when no info found."""
         config = DQConfig()
@@ -549,6 +572,15 @@ class TestInternalMethods:
         path = validator._get_config_path()
         assert path is None
 
+    def test_policy_summary_without_policy_resolver(self):
+        """Gold validator without DQ config should expose an empty policy summary."""
+        validator = ContractAwareGoldValidator(schema=None, strict=False)
+
+        assert validator.get_policy_summary() == {
+            "contract_ref": None,
+            "policy_hash": None,
+        }
+
     def test_apply_contract_validations_gold_contract(self):
         """Test _apply_contract_validations for Gold contracts."""
         import pandas as pd
@@ -574,6 +606,19 @@ class TestInternalMethods:
 
         # Currently placeholder, should return empty list
         assert outcomes == []
+
+    def test_prepare_df_for_validation_without_schema_columns_attribute(self):
+        """Schemas without a ``columns`` attribute should still be reordered cleanly."""
+        import pandas as pd
+
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=None, dq_config=config)
+        validator._schema = object()  # type: ignore[assignment]
+
+        df = pd.DataFrame({"required_field": ["value"]})
+        prepared = validator._prepare_df_for_validation(df)
+
+        assert list(prepared.columns) == ["required_field"]
 
     def test_validate_with_outcomes_empty_records(self):
         """Test validation with empty records list."""

@@ -7,9 +7,6 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.batch_operation_errors import (
-    OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
-)
 from bioetl.application.core.postrun._phase_descriptions import (
     record_run_span_attributes,
 )
@@ -25,6 +22,7 @@ from bioetl.application.core.span_helpers import (
 )
 from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.application.services.medallion_types import VacuumResult
+from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.ports import ExecutorMetricsPort
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
@@ -85,7 +83,13 @@ class PostrunService(PostrunServiceSupportMixin):
     TRACER_NAME = "bioetl.postrun"
     METRIC_POSTRUN_PHASE_EVENTS_TOTAL = "bioetl_postrun_phase_events_total"
     METRIC_POSTRUN_PHASE_DURATION_SECONDS = "bioetl_postrun_phase_duration_seconds"
-    OPERATION_ERRORS = _RF005_OPERATION_ERRORS
+    OPERATION_ERRORS = (
+        BioETLError,
+        OSError,
+        RuntimeError,
+        ValueError,
+        TypeError,
+    )
 
     def __init__(
         self,

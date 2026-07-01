@@ -183,7 +183,10 @@
       "contract_version": "1.0.0",
       "status": "updated",
       "diff": {
-        "added_properties": [],
+        "added_properties": [
+          "cell_type",
+          "clo_id"
+        ],
         "removed_properties": [],
         "changed_properties": [],
         "required_changed": false
@@ -216,20 +219,7 @@
       "contract_version": "1.0.0",
       "status": "updated",
       "diff": {
-        "added_properties": [
-          "canonical_top_levels",
-          "counted_top_levels",
-          "ignored_top_levels",
-          "l1_mapping_version",
-          "major_family",
-          "major_family_rule_version",
-          "multifunctional_origin",
-          "primary_top_level",
-          "target_protein_class_type",
-          "target_type_reason_code",
-          "target_type_rule_version",
-          "top_level_count"
-        ],
+        "added_properties": [],
         "removed_properties": [],
         "changed_properties": [],
         "required_changed": false

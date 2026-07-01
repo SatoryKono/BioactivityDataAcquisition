@@ -46,7 +46,7 @@ def _minimal_valid_scorecard() -> dict[str, object]:
                     "removal_step",
                 ]
             },
-            "owner_registry_q2_subsystems": {
+            "owner_registry_q3_subsystems": {
                 "sub_a": {"owner": "alice"},
                 "sub_b": {"owner": "bob"},
                 "sub_c": {"owner": "carol"},

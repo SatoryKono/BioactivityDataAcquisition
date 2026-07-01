@@ -106,6 +106,22 @@
       ],
       "nullable": true,
       "description": "ChEMBL assay confidence score retained as source-scoped metadata."
+    },
+    "cell_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Inherited cell-line type retained as optional composite assay context metadata."
+    },
+    "clo_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Inherited CLO ontology identifier retained as optional composite assay cell-line lineage metadata."
     }
   },
   "required": [

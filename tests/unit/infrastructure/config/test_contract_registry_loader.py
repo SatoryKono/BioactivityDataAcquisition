@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import ctypes
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from time import sleep
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -21,13 +23,19 @@ from bioetl.infrastructure.config.contract_registry_loader import (
     try_load_contract_registry_payload,
 )
 
+pytestmark = pytest.mark.unit
 
-@pytest.mark.unit
+
+def _install_mock_kernel32(monkeypatch: pytest.MonkeyPatch, kernel32: MagicMock) -> None:
+    """Install a mock ``ctypes.windll.kernel32`` surface for Windows-drive probes."""
+    windll = type("MockWindll", (), {"kernel32": kernel32})()
+    monkeypatch.setattr(ctypes, "windll", windll, raising=False)
+
+
 def test_resolve_contract_registry_path_defaults_to_canonical_relative_path() -> None:
     assert resolve_contract_registry_path() == DEFAULT_CONTRACT_REGISTRY_PATH
 
 
-@pytest.mark.unit
 def test_resolve_contract_registry_path_from_repo_root() -> None:
     repo_root = Path("/tmp/bioetl-repo")
 
@@ -36,7 +44,6 @@ def test_resolve_contract_registry_path_from_repo_root() -> None:
     )
 
 
-@pytest.mark.unit
 def test_resolve_contract_registry_path_from_configs_root() -> None:
     configs_root = Path("/tmp/bioetl-repo/configs")
 
@@ -45,7 +52,6 @@ def test_resolve_contract_registry_path_from_configs_root() -> None:
     )
 
 
-@pytest.mark.unit
 def test_resolve_contract_registry_path_rejects_conflicting_roots() -> None:
     with pytest.raises(ValueError, match="either repo_root or configs_root"):
         resolve_contract_registry_path(
@@ -54,7 +60,6 @@ def test_resolve_contract_registry_path_rejects_conflicting_roots() -> None:
         )
 
 
-@pytest.mark.unit
 def test_resolve_contract_registry_path_uses_explicit_path() -> None:
     explicit_path = Path("/custom/path/registry.yaml")
     result = resolve_contract_registry_path(registry_path=explicit_path)
@@ -84,7 +89,7 @@ class TestIsLikelyNetworkDrive:
         mock_kernel32 = MagicMock()
         mock_kernel32.GetDriveTypeW.return_value = 3  # DRIVE_FIXED
 
-        monkeypatch.setattr("ctypes.windll.kernel32", mock_kernel32)
+        _install_mock_kernel32(monkeypatch, mock_kernel32)
 
         result = _is_likely_network_drive(Path("C:\\local\\path"))
         assert result is False
@@ -97,7 +102,7 @@ class TestIsLikelyNetworkDrive:
         mock_kernel32 = MagicMock()
         mock_kernel32.GetDriveTypeW.return_value = 4  # DRIVE_REMOTE
 
-        monkeypatch.setattr("ctypes.windll.kernel32", mock_kernel32)
+        _install_mock_kernel32(monkeypatch, mock_kernel32)
 
         result = _is_likely_network_drive(Path("Z:\\network\\path"))
         assert result is True
@@ -110,7 +115,7 @@ class TestIsLikelyNetworkDrive:
         mock_kernel32 = MagicMock()
         mock_kernel32.GetDriveTypeW.side_effect = OSError()
 
-        monkeypatch.setattr("ctypes.windll.kernel32", mock_kernel32)
+        _install_mock_kernel32(monkeypatch, mock_kernel32)
 
         result = _is_likely_network_drive(Path("C:\\path"))
         assert result is False
@@ -126,6 +131,13 @@ class TestIsLikelyNetworkDrive:
 
         result = _is_likely_network_drive(mock_path)
         assert result is False
+
+    def test_returns_false_when_windows_path_has_no_drive_prefix(self, monkeypatch):
+        """Drive-less Windows paths should short-circuit before WinAPI probing."""
+        monkeypatch.setattr("os.name", "nt")
+        monkeypatch.setattr("os.path.splitdrive", lambda _value: ("", "relative/path"))
+
+        assert _is_likely_network_drive(Path("relative/path")) is False
 
 
 class TestLoadYamlWithTimeout:
@@ -175,16 +187,14 @@ class TestLoadYamlWithTimeout:
             test_file = Path(temp_dir) / "test.yaml"
             test_file.write_text("key: value", encoding="utf-8")
 
-            # Mock slow read by patching the actual function
-            import builtins
-            original_open = builtins.open
+            original_read_text = Path.read_text
 
-            def slow_open(*args, **kwargs):
-                if test_file in args:
-                    sleep(0.1)  # Simulate slow read
-                return original_open(*args, **kwargs)
+            def slow_read_text(self: Path, *args, **kwargs):
+                if self == test_file:
+                    sleep(0.1)  # Simulate slow network-drive read latency.
+                return original_read_text(self, *args, **kwargs)
 
-            monkeypatch.setattr(builtins, "open", slow_open)
+            monkeypatch.setattr(Path, "read_text", slow_read_text)
 
             with pytest.raises(TimeoutError, match="did not complete"):
                 _load_yaml_with_timeout(test_file, timeout=0.01)
@@ -215,9 +225,47 @@ class TestLoadYamlWithTimeout:
 
     def test_raises_value_error_on_none_result(self):
         """Test ValueError when YAML load returns None."""
-        # Skip this test as it's difficult to mock on Windows
-        # The None result check is already covered by integration tests
-        pytest.skip("Test skipped due to Windows monkeypatch limitations")
+        monkeypatch = pytest.MonkeyPatch()
+        monkeypatch.setattr(
+            "bioetl.infrastructure.config.contract_registry_loader._is_likely_network_drive",
+            lambda x: True,
+        )
+        monkeypatch.setattr(
+            "bioetl.infrastructure.config.contract_registry_loader.yaml.safe_load",
+            lambda _: None,
+        )
+
+        try:
+            with TemporaryDirectory() as temp_dir:
+                test_file = Path(temp_dir) / "empty.yaml"
+                test_file.write_text("null", encoding="utf-8")
+
+                with pytest.raises(ValueError, match="YAML load returned None"):
+                    _load_yaml_with_timeout(test_file)
+        finally:
+            monkeypatch.undo()
+
+    def test_reraises_thread_exception_for_network_drive_reads(self, monkeypatch):
+        """Exceptions raised inside the timeout thread should be surfaced to callers."""
+        monkeypatch.setattr(
+            "bioetl.infrastructure.config.contract_registry_loader._is_likely_network_drive",
+            lambda _path: True,
+        )
+
+        with TemporaryDirectory() as temp_dir:
+            test_file = Path(temp_dir) / "test.yaml"
+            test_file.write_text("key: value", encoding="utf-8")
+
+            def raising_read_text(self: Path, *args, **kwargs):
+                del args, kwargs
+                if self == test_file:
+                    raise ValueError("boom")
+                return Path.read_text(self, encoding="utf-8")
+
+            monkeypatch.setattr(Path, "read_text", raising_read_text)
+
+            with pytest.raises(ValueError, match="boom"):
+                _load_yaml_with_timeout(test_file)
 
 
 class TestLoadContractRegistryPayload:
@@ -312,7 +360,7 @@ class TestTryLoadContractRegistryPayload:
             result = try_load_contract_registry_payload(registry_path=Path("/test.yaml"))
             assert result is None
 
-    def test_returns_none_on_value_error(self):
+    def test_returns_none_on_value_error_for_invalid_payload(self):
         """Test returning None on validation errors."""
         with patch(
             "bioetl.infrastructure.config.contract_registry_loader.load_contract_registry_payload",

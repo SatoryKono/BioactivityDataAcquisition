@@ -430,6 +430,17 @@ def _collect_runtime_binding_names(tree: ast.Module) -> set[str]:
     return bindings
 
 
+def _collect_public_top_level_function_names(tree: ast.Module) -> list[str]:
+    names: list[str] = []
+    for node in tree.body:
+        if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+            continue
+        if node.name.startswith("_"):
+            continue
+        names.append(node.name)
+    return names
+
+
 def _collect_getattr_branch_names(tree: ast.Module) -> set[str]:
     def _visit_if(node: ast.If, names: set[str]) -> None:
         test = node.test
@@ -482,7 +493,11 @@ def _build_public_export_contract_row(
         if bool(export_contract.get("parse_dunder_getattr_string_branches"))
         else []
     )
+    retained_wrapper_contract = sorted(
+        str(name) for name in export_contract.get("retained_wrappers_outside_all", [])
+    )
     runtime_bindings = _collect_runtime_binding_names(tree)
+    public_function_bindings = set(_collect_public_top_level_function_names(tree))
     resolution_conflicts: dict[str, list[str]] = {}
     for export_name in public_exports:
         providers: list[str] = []
@@ -496,6 +511,7 @@ def _build_public_export_contract_row(
             resolution_conflicts[export_name] = providers
 
     public_export_set = set(public_exports)
+    retained_wrappers_outside_all = sorted(public_function_bindings - public_export_set)
     return {
         "path": inventory_row["path"],
         "module_name": _module_name_from_repo_path(str(inventory_row["path"])),
@@ -511,6 +527,14 @@ def _build_public_export_contract_row(
         "dunder_getattr_exports": getattr_branch_names,
         "orphan_dunder_getattr_exports": sorted(
             set(getattr_branch_names) - public_export_set
+        ),
+        "retained_wrapper_contract": retained_wrapper_contract,
+        "retained_wrappers_outside_all": retained_wrappers_outside_all,
+        "missing_retained_wrappers_outside_all": sorted(
+            set(retained_wrapper_contract) - set(retained_wrappers_outside_all)
+        ),
+        "unexpected_retained_wrappers_outside_all": sorted(
+            set(retained_wrappers_outside_all) - set(retained_wrapper_contract)
         ),
         "resolution_conflicts": resolution_conflicts,
     }
@@ -629,6 +653,10 @@ def build_compatibility_importer_census(
                             "orphan_lazy_export_keys",
                             "dunder_getattr_exports",
                             "orphan_dunder_getattr_exports",
+                            "retained_wrapper_contract",
+                            "retained_wrappers_outside_all",
+                            "missing_retained_wrappers_outside_all",
+                            "unexpected_retained_wrappers_outside_all",
                             "resolution_conflicts",
                         }
                     },
@@ -782,6 +810,12 @@ def build_compatibility_importer_census(
             "retained_public_export_facades_with_resolution_conflicts": sum(
                 1 for row in retained_public_export_rows if row["resolution_conflicts"]
             ),
+            "retained_public_export_facades_with_wrapper_contract_drift": sum(
+                1
+                for row in retained_public_export_rows
+                if row["missing_retained_wrappers_outside_all"]
+                or row["unexpected_retained_wrappers_outside_all"]
+            ),
         },
         "retained_entrypoints": retained_rows,
         "retained_entrypoint_owner_usage_map": retained_rows,
@@ -856,6 +890,8 @@ def _render_markdown(payload: dict[str, object]) -> str:
         f"{summary['retained_public_export_facades_with_duplicate_exports']}",
         "- retained_public_export_facades_with_resolution_conflicts: "
         f"{summary['retained_public_export_facades_with_resolution_conflicts']}",
+        "- retained_public_export_facades_with_wrapper_contract_drift: "
+        f"{summary['retained_public_export_facades_with_wrapper_contract_drift']}",
         "- purpose: measure sanctioned public seams and underscore/public twin usage",
         "",
         "## Retained Entrypoints",
@@ -894,8 +930,8 @@ def _render_markdown(payload: dict[str, object]) -> str:
             "",
             "## Retained Public Export Facades",
             "",
-            "| Path | Public exports | Lazy exports | Duplicate exports | Resolution conflicts |",
-            "| --- | ---: | ---: | --- | --- |",
+            "| Path | Public exports | Lazy exports | Retained wrappers outside `__all__` | Duplicate exports | Resolution conflicts |",
+            "| --- | ---: | ---: | --- | --- | --- |",
         ]
     )
     for row in public_export_rows:
@@ -905,9 +941,18 @@ def _render_markdown(payload: dict[str, object]) -> str:
             | set(row["duplicate_lazy_export_keys"])
         )
         conflicts = sorted(row["resolution_conflicts"])
+        wrapper_names = row["retained_wrappers_outside_all"]
+        wrapper_drift = sorted(
+            set(row["missing_retained_wrappers_outside_all"])
+            | set(row["unexpected_retained_wrappers_outside_all"])
+        )
+        wrapper_cell = ", ".join(wrapper_names) if wrapper_names else "none"
+        if wrapper_drift:
+            wrapper_cell = f"{wrapper_cell} (drift: {', '.join(wrapper_drift)})"
         lines.append(
             f"| `{row['path']}` | {row['public_export_count']} | "
             f"{len(row['lazy_export_keys']) + len(row['dunder_getattr_exports'])} | "
+            f"{wrapper_cell} | "
             f"{', '.join(duplicate_exports) if duplicate_exports else 'none'} | "
             f"{', '.join(conflicts) if conflicts else 'none'} |"
         )

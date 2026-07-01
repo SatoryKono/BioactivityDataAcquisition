@@ -31,7 +31,7 @@
     },
     {
       "family": "application_services_control_plane",
-      "current_min_coverage_percent": 81.21,
+      "current_min_coverage_percent": 82.5,
       "tail_module": "bioetl.application.services.control_plane.workflow.execution_preparation_incremental",
       "tail_path": "src/bioetl/application/services/control_plane/workflow/execution_preparation_incremental.py",
       "current_missing_lines": 7,

@@ -8,9 +8,7 @@ __all__ = [
     "SOURCE_METADATA_ERRORS",
 ]
 
-from bioetl.application.core.batch_operation_errors import (
-    OPERATION_ERRORS,
-)
+from bioetl.application.core.batch_operation_errors import OPERATION_ERRORS
 
 PIPELINE_EXECUTION_ERRORS = (
     *OPERATION_ERRORS,
