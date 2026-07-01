@@ -14,8 +14,8 @@ Refresh reason: #5752 - Correct stale claims and align with current governance b
 1. Compatibility transition debt is zero; retained compatibility burden is explicitly governed and sanctioned as public entrypoints, not unresolved debt.
 1. Root hygiene is governed: `new.env` and similar surfaces are classified as `present_local_only_root_surface` with explicit retention policy, not stale debt.
 1. Supporting scripts are inventoried: 87 supporting scripts are tracked in `scripts_inventory_manifest.json` with explicit ownership and usage tracking.
-1. Main test debt is not duplicate tests or flaky evidence; it is coverage/invariant debt: domain and infrastructure modules need focused unit tests.
-1. Domain has the most serious coverage debt: DQ rule evaluators, normalization, validation, schema policy, contract registry, and ledger/event surfaces need coverage.
+1. Main test debt is no longer an uncovered-module backlog: `module-coverage-inventory.json` reports `0` uncovered and `0` unmeasured modules, but partially covered tails remain across domain (`159`), application (`274`), and infrastructure (`255`) modules.
+1. Domain still carries the most determinism-sensitive partial-coverage tail: DQ rule evaluators, normalization, validation, schema policy, contract registry, and ledger/event surfaces remain only partially covered and need focused invariant tests.
 1. Hotspot duplication is currently zero; hotspot families are at reviewed budget ceilings and must not grow.
 1. Observability governance is defined with cardinality review and unused signal policy; runtime cardinality evidence is committed.
 
@@ -30,7 +30,7 @@ Refresh reason: #5752 - Correct stale claims and align with current governance b
 || Root hygiene | `new.env` classified as `present_local_only_root_surface` with canonical path `.env.example`. | `configs/quality/root_hygiene_review_registry.yaml` |
 || Supporting scripts | 87 supporting scripts tracked with ownership and usage. | `configs/quality/scripts_inventory_manifest.json` |
 || Dead/zero-import candidates | Repo-wide zero-import candidates are fully classified; untriaged count is `0` across `9` reviewed candidates. | `reports/quality/dead-code-inventory.json` |
-|| Coverage | 2,191 source modules: 1,335 fully covered, 856 partially covered, 0 uncovered, 0 unmeasured. | `reports/quality/module-coverage-inventory.json` |
+|| Coverage | 2,192 source modules: 1,336 fully covered, 855 partially covered, 1 with no executable lines, 0 uncovered, 0 unmeasured. | `reports/quality/module-coverage-inventory.json` |
 || Contracts | Registry entries `27`; blocking and warning issues `0`. | `reports/quality/contract-registry-diagnostics.json` |
 || Contract coverage | Gold-enabled coverage is 27/27; missing count `0`. | `reports/quality/contract-coverage-matrix.json` |
 || Silver/Gold parity | Overall status `pass`; failing scenarios `[]`. | `reports/quality/silver-gold-filter-parity-report.json` |
@@ -50,13 +50,13 @@ Refresh reason: #5752 - Correct stale claims and align with current governance b
 
 || Layer | Debt Type | Artifact | Finding | Risk |
 || --- | --- | --- | --- | --- |
-|| Domain | Test debt / Determinism risk | `src/bioetl/domain/behavior/_dq_rule_evaluators.py`, `dq_rule_evaluator.py`, `normalization_service.py`, `value_validator.py` | Domain behavior has uncovered modules; total domain uncovered count is 57. | DQ invariants can regress without golden/property tests. |
-|| Domain | Contract/invariant debt | `src/bioetl/domain/control_plane/contract_registry*.py`, `gold_contract.py`, `ledger/core_events.py` | These domain control-plane modules are uncovered. | Contract registry and ledger invariants are governance-critical but weakly covered. |
-|| Application | Hotspot debt | `src/bioetl/application/services/control_plane/**` | 100 files, 14,894 LOC, 20 files >=250 LOC, max fan-in 5, helper ratio 0.499. | Runtime control-plane is decomposed but still large and near budget. |
-|| Application | Test debt | `src/bioetl/application/core/**` | 176 modules, 6 uncovered, 132 below 85%; covered line percent 48.09 in hotspot summary. | Core runtime behavior has broad low-coverage tail. |
-|| Infrastructure | Test debt / Observability gap | `src/bioetl/infrastructure/observability/logging.py`, `tracing.py`, `debug_adapters.py` | Infrastructure has 61 uncovered modules; observability runtime modules appear in uncovered set. | Runtime signal correctness can drift from declared metrics. |
-|| Composition | Hotspot debt | `src/bioetl/composition/runtime_builders/**`, `bootstrap/runtime/**`, `factories/pipeline/**` | Runtime builders helper ratio 0.502 and fan-in 9; factories pipeline has 4 files >=250 LOC at budget. | DI/composition root remains a hotspot family and must not grow. |
-|| Interfaces | Test debt | `src/bioetl/__main__.py`, `src/bioetl/interfaces/cli/__main__.py` | Both are unmeasured in coverage inventory. | `python -m bioetl` and CLI module dispatch are owner-tested but not coverage-measured. |
+|| Domain | Test debt / Determinism risk | `src/bioetl/domain/behavior/_dq_rule_evaluators.py`, `dq_rule_evaluator.py`, `normalization_service.py`, `value_validator.py` | Domain has `159` partially covered modules and `0` uncovered / `0` unmeasured modules. | DQ invariants can still regress without golden/property tests. |
+|| Domain | Contract/invariant debt | `src/bioetl/domain/control_plane/contract_registry*.py`, `gold_contract.py`, `ledger/core_events.py` | Domain control-plane invariants now sit inside the partial-coverage tail rather than an uncovered backlog. | Contract registry and ledger invariants are governance-critical and still need stronger focused tests. |
+|| Application | Hotspot debt | `src/bioetl/application/services/control_plane/**` | Hotspot baseline shows `files_ge_250_loc=15/16` and `max_internal_fan_in=3/4`; pressure is reduced but still near the reviewed ceiling. | Runtime control-plane remains large and change-sensitive. |
+|| Application | Test debt | `src/bioetl/application/core/**` | Application has `274` partially covered modules and `0` uncovered / `0` unmeasured modules. | Core runtime behavior still has a broad low-coverage tail. |
+|| Infrastructure | Test debt / Observability gap | `src/bioetl/infrastructure/observability/logging.py`, `tracing.py`, `debug_adapters.py` | Infrastructure has `255` partially covered modules and `0` uncovered / `0` unmeasured modules. | Runtime signal correctness can drift from declared metrics without tighter adapter tests. |
+|| Composition | Hotspot debt | `src/bioetl/composition/runtime_builders/**`, `bootstrap/runtime/**`, `factories/pipeline/**` | `composition_runtime_builders` is back at `max_internal_fan_in=5/5`; `composition_factories_pipeline` remains at `files_ge_250_loc=2/3` and `max_internal_fan_in=3/3`. | DI/composition root remains a hotspot family and must not grow. |
+|| Interfaces | Test debt | `src/bioetl/__main__.py`, `src/bioetl/interfaces/cli/__main__.py` | Interface modules are measured now; the layer still has `62` partially covered modules and `0` uncovered / `0` unmeasured modules. | `python -m bioetl` and CLI dispatch are no longer invisible to coverage, but interface-path regressions still need explicit tests. |
 
 ## Compatibility Debt Analysis
 

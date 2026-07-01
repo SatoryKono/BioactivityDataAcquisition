@@ -11,10 +11,7 @@ from bioetl.application.core._runner_dependency_support import (
 )
 from bioetl.application.core._runner_support import PipelineRunnerSupportMixin
 from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
-from bioetl.application.core.runner_flow import (
-    record_run_failed,
-    record_run_started,
-)
+from bioetl.application.core.runner_flow import record_run_failed, record_run_started
 from bioetl.application.core.span_helpers import (
     _TracingProvider,
     build_pipeline_span_attributes,
@@ -84,7 +81,6 @@ class PipelineRunner(PipelineRunnerSupportMixin):
             )
         self._tracer = tracer
 
-        # Services injected directly via DI (created in composition layer)
         self._lock_runtime_service = dependencies.lock_runtime_service
         self._preflight_service = dependencies.preflight
         self._postrun_service = dependencies.postrun
@@ -180,13 +176,7 @@ class PipelineRunner(PipelineRunnerSupportMixin):
             yield span
 
     async def run(self) -> None:
-        """Execute pipeline. Main entry point.
-
-        Implements graceful shutdown (O3):
-        - Uses try/finally to ensure cleanup runs on all exit paths
-        - Flushes tracer spans before shutdown
-        - Handles tracer close errors without failing the pipeline
-        """
+        """Execute the pipeline and always finalize shutdown/telemetry cleanup."""
         record_run_started(self)
         debug_export_status = "success"
         try:

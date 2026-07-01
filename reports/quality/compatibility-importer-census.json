@@ -20,7 +20,8 @@
     "control_plane_root_src_importer_count": 0,
     "retained_public_export_facade_count": 4,
     "retained_public_export_facades_with_duplicate_exports": 0,
-    "retained_public_export_facades_with_resolution_conflicts": 0
+    "retained_public_export_facades_with_resolution_conflicts": 0,
+    "retained_public_export_facades_with_wrapper_contract_drift": 0
   },
   "retained_entrypoints": [
     {
@@ -184,6 +185,16 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
+      "retained_wrapper_contract": [
+        "load_pipeline_config",
+        "start_metrics_server"
+      ],
+      "retained_wrappers_outside_all": [
+        "load_pipeline_config",
+        "start_metrics_server"
+      ],
+      "missing_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {}
     },
     {
@@ -228,6 +239,14 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
+      "retained_wrapper_contract": [
+        "get_runtime_settings"
+      ],
+      "retained_wrappers_outside_all": [
+        "get_runtime_settings"
+      ],
+      "missing_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {}
     },
     {
@@ -266,6 +285,20 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
+      "retained_wrapper_contract": [
+        "archive_table",
+        "get_lifecycle_service",
+        "preview_cleanup",
+        "vacuum_table"
+      ],
+      "retained_wrappers_outside_all": [
+        "archive_table",
+        "get_lifecycle_service",
+        "preview_cleanup",
+        "vacuum_table"
+      ],
+      "missing_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {}
     },
     {
@@ -323,6 +356,10 @@
         "load_workflow_config"
       ],
       "orphan_dunder_getattr_exports": [],
+      "retained_wrapper_contract": [],
+      "retained_wrappers_outside_all": [],
+      "missing_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {}
     },
     {
@@ -564,6 +601,16 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
+      "retained_wrapper_contract": [
+        "load_pipeline_config",
+        "start_metrics_server"
+      ],
+      "retained_wrappers_outside_all": [
+        "load_pipeline_config",
+        "start_metrics_server"
+      ],
+      "missing_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {}
     },
     {
@@ -608,6 +655,14 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
+      "retained_wrapper_contract": [
+        "get_runtime_settings"
+      ],
+      "retained_wrappers_outside_all": [
+        "get_runtime_settings"
+      ],
+      "missing_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {}
     },
     {
@@ -646,6 +701,20 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
+      "retained_wrapper_contract": [
+        "archive_table",
+        "get_lifecycle_service",
+        "preview_cleanup",
+        "vacuum_table"
+      ],
+      "retained_wrappers_outside_all": [
+        "archive_table",
+        "get_lifecycle_service",
+        "preview_cleanup",
+        "vacuum_table"
+      ],
+      "missing_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {}
     },
     {
@@ -703,6 +772,10 @@
         "load_workflow_config"
       ],
       "orphan_dunder_getattr_exports": [],
+      "retained_wrapper_contract": [],
+      "retained_wrappers_outside_all": [],
+      "missing_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {}
     },
     {
@@ -825,6 +898,16 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
+      "retained_wrapper_contract": [
+        "load_pipeline_config",
+        "start_metrics_server"
+      ],
+      "retained_wrappers_outside_all": [
+        "load_pipeline_config",
+        "start_metrics_server"
+      ],
+      "missing_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {},
       "owner": "bioetl.composition",
       "status": "public-entrypoint",
@@ -864,6 +947,14 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
+      "retained_wrapper_contract": [
+        "get_runtime_settings"
+      ],
+      "retained_wrappers_outside_all": [
+        "get_runtime_settings"
+      ],
+      "missing_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {},
       "owner": "bioetl.composition",
       "status": "public-entrypoint",
@@ -898,6 +989,20 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
+      "retained_wrapper_contract": [
+        "archive_table",
+        "get_lifecycle_service",
+        "preview_cleanup",
+        "vacuum_table"
+      ],
+      "retained_wrappers_outside_all": [
+        "archive_table",
+        "get_lifecycle_service",
+        "preview_cleanup",
+        "vacuum_table"
+      ],
+      "missing_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {},
       "owner": "bioetl.composition",
       "status": "public-entrypoint",
@@ -947,6 +1052,10 @@
         "load_workflow_config"
       ],
       "orphan_dunder_getattr_exports": [],
+      "retained_wrapper_contract": [],
+      "retained_wrappers_outside_all": [],
+      "missing_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {},
       "owner": "bioetl.infrastructure.config",
       "status": "public-entrypoint",
@@ -1001,6 +1110,16 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
+      "retained_wrapper_contract": [
+        "load_pipeline_config",
+        "start_metrics_server"
+      ],
+      "retained_wrappers_outside_all": [
+        "load_pipeline_config",
+        "start_metrics_server"
+      ],
+      "missing_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {},
       "owner": "bioetl.composition",
       "status": "public-entrypoint",
@@ -1040,6 +1159,14 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
+      "retained_wrapper_contract": [
+        "get_runtime_settings"
+      ],
+      "retained_wrappers_outside_all": [
+        "get_runtime_settings"
+      ],
+      "missing_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {},
       "owner": "bioetl.composition",
       "status": "public-entrypoint",
@@ -1074,6 +1201,20 @@
       "orphan_lazy_export_keys": [],
       "dunder_getattr_exports": [],
       "orphan_dunder_getattr_exports": [],
+      "retained_wrapper_contract": [
+        "archive_table",
+        "get_lifecycle_service",
+        "preview_cleanup",
+        "vacuum_table"
+      ],
+      "retained_wrappers_outside_all": [
+        "archive_table",
+        "get_lifecycle_service",
+        "preview_cleanup",
+        "vacuum_table"
+      ],
+      "missing_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {},
       "owner": "bioetl.composition",
       "status": "public-entrypoint",
@@ -1123,6 +1264,10 @@
         "load_workflow_config"
       ],
       "orphan_dunder_getattr_exports": [],
+      "retained_wrapper_contract": [],
+      "retained_wrappers_outside_all": [],
+      "missing_retained_wrappers_outside_all": [],
+      "unexpected_retained_wrappers_outside_all": [],
       "resolution_conflicts": {},
       "owner": "bioetl.infrastructure.config",
       "status": "public-entrypoint",

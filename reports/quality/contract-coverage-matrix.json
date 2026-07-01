@@ -1312,9 +1312,9 @@
       "missing_constraint_surfaces": [],
       "missing_surfaces": [],
       "pandera_check_constraint_evidence_declared": true,
-      "pandera_check_count_in_source": 51,
+      "pandera_check_count_in_source": 53,
       "pandera_contract_declared": true,
-      "pandera_field_count_in_source": 50,
+      "pandera_field_count_in_source": 52,
       "parity_status": "covered",
       "pipeline_name": "composite_activity",
       "primary_key_fields": [
@@ -1393,9 +1393,9 @@
       "missing_constraint_surfaces": [],
       "missing_surfaces": [],
       "pandera_check_constraint_evidence_declared": true,
-      "pandera_check_count_in_source": 51,
+      "pandera_check_count_in_source": 53,
       "pandera_contract_declared": true,
-      "pandera_field_count_in_source": 50,
+      "pandera_field_count_in_source": 52,
       "parity_status": "covered",
       "pipeline_name": "composite_assay",
       "primary_key_fields": [
@@ -1409,9 +1409,9 @@
       ],
       "published_contract_check_constraint_count": 0,
       "published_contract_non_nullable_count": 6,
-      "published_contract_nullable_count": 9,
+      "published_contract_nullable_count": 11,
       "published_contract_nullable_policy_declared": true,
-      "published_contract_property_count": 15,
+      "published_contract_property_count": 17,
       "published_contract_required_count": 6,
       "published_contract_required_fields": [
         "_dq_error",
@@ -1684,9 +1684,9 @@
       "missing_constraint_surfaces": [],
       "missing_surfaces": [],
       "pandera_check_constraint_evidence_declared": true,
-      "pandera_check_count_in_source": 51,
+      "pandera_check_count_in_source": 53,
       "pandera_contract_declared": true,
-      "pandera_field_count_in_source": 50,
+      "pandera_field_count_in_source": 52,
       "parity_status": "covered",
       "pipeline_name": "composite_target",
       "primary_key_fields": [
@@ -2506,5 +2506,5 @@
       "uniqueness_constraint_source": "pipeline.business_primary_keys"
     }
   ],
-  "snapshot_date": "2026-06-30"
+  "snapshot_date": "2026-07-01"
 }

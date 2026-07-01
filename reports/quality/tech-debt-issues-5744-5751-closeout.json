@@ -95,13 +95,13 @@
     },
     "application_core_total_loc": {
       "opening": 22360,
-      "current": 22358,
-      "max": 22358
+      "current": 22319,
+      "max": 22319
     },
     "application_core_files_ge_250_loc": {
       "opening": 7,
-      "current": 6,
-      "max": 6
+      "current": 5,
+      "max": 5
     },
     "intentional_no_exception_contract": {
       "opening": 99,
@@ -145,9 +145,9 @@
       "fail_count": 0,
       "warn_count": 0,
       "architecture_quality_score": 8.53,
-      "module_coverage_source_tree_sha256": "3e8365cd0a72ee50dd611b2759422a72a85dca8d88fea4eb0248dad86479063b",
+      "module_coverage_source_tree_sha256": "038e174d7508fdbd7cf48ca6aeca894fa4c02b08240f491a550b695dfa7df3d2",
       "remote_main_baseline_fingerprint": "624a9cdb3d283482a3042c57dd2985b2bfad290935bad7ea84b9a80dd19c97be",
-      "architecture_quality_scorecard_source_tree_sha256": "3e8365cd0a72ee50dd611b2759422a72a85dca8d88fea4eb0248dad86479063b"
+      "architecture_quality_scorecard_source_tree_sha256": "038e174d7508fdbd7cf48ca6aeca894fa4c02b08240f491a550b695dfa7df3d2"
     },
     "5745": {
       "opening_adapter_duplicate_clusters": 55,
@@ -171,9 +171,9 @@
     "5748": {
       "family": "application_core",
       "opening_total_loc": 22360,
-      "total_loc": 22358,
+      "total_loc": 22319,
       "opening_files_ge_250_loc": 7,
-      "files_ge_250_loc": 6,
+      "files_ge_250_loc": 5,
       "budget_warning_count": 0
     },
     "5749": {

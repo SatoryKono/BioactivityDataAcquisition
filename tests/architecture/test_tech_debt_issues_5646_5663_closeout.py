@@ -108,7 +108,10 @@ def test_issue_5660_hotspot_family_warnings_are_zero_without_budget_growth() -> 
     scorecard = _load_json(ARCHITECTURE_SCORECARD)
 
     assert hotspot["summary"]["budget_warnings"] == 0
-    assert hotspot["summary"]["budget_review_notes"] == 6
+    assert hotspot["summary"]["budget_review_notes"] == sum(
+        len(family["budget_review_notes"]) for family in hotspot["families"]
+    )
+    assert hotspot["summary"]["budget_review_notes"] <= 6
     assert scorecard["metrics"]["hotspot_budget_warning_count"] == 0
     assert scorecard["source_artifacts"]["hotspot_family_baseline"]["budget_warnings"] == 0
     assert _gate(gates, "hotspot_family_baseline_budget_warnings")["status"] == "pass"

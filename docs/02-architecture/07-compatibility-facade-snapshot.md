@@ -17,7 +17,7 @@
 - Missing allowlisted measured-only modules: `0`
 - First-party src imports targeting measured-only modules: `0`
 - Curated rows requiring external breaking change process: `12`
-- Curated rows marked internal-callers-zero: `5`
+- Curated rows marked internal-callers-zero: `6`
 - First-party src imports targeting internal-callers-zero rows: `0`
 - Ratchet violations: `0`
 
@@ -59,7 +59,7 @@
 - `src/bioetl/composition/maintenance_api.py` — external breaking change required: `true`, internal callers zero: `false`
 - `src/bioetl/infrastructure/config/__init__.py` — external breaking change required: `true`, internal callers zero: `true`
 - `src/bioetl/domain/composite/config.py` — external breaking change required: `true`, internal callers zero: `false`
-- `src/bioetl/application/composite/merger.py` — external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/application/composite/merger.py` — external breaking change required: `true`, internal callers zero: `true`
 
 ## Measured-Only Allowlist
 

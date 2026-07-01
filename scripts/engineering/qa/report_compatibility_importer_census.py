@@ -511,7 +511,10 @@ def _build_public_export_contract_row(
             resolution_conflicts[export_name] = providers
 
     public_export_set = set(public_exports)
-    retained_wrappers_outside_all = sorted(public_function_bindings - public_export_set)
+    lazy_resolution_exports = set(lazy_export_keys) | set(getattr_branch_names)
+    retained_wrappers_outside_all = sorted(
+        public_function_bindings - lazy_resolution_exports
+    )
     return {
         "path": inventory_row["path"],
         "module_name": _module_name_from_repo_path(str(inventory_row["path"])),
