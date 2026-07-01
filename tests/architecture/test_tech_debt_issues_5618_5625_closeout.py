@@ -59,6 +59,13 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return payload
 
 
+def _gate(payload: dict[str, Any], name: str) -> dict[str, Any]:
+    for gate in payload["gates"]:
+        if gate["name"] == name:
+            return gate
+    raise AssertionError(f"missing gate: {name}")
+
+
 def test_closeout_artifact_covers_requested_issues__5618_5625() -> None:
     payload = _load_json(CLOSEOUT)
     issues = payload["issues"]
@@ -134,12 +141,14 @@ def test_issue_5622_full_app_duplication_ratchet_records_cli_burn_down() -> None
 
 
 def test_issue_5623_runtime_cardinality_review_is_fresh_and_passed() -> None:
+    gates = _load_json(DEBT_GATES)
     review = _load_json(RUNTIME_CARDINALITY_REVIEW)
     inventory = _load_json(RUNTIME_CARDINALITY_INVENTORY)
     generated_at = datetime.fromisoformat(review["generated_at"].replace("Z", "+00:00"))
     age_days = (datetime.now(UTC) - generated_at).days
+    freshness_gate = _gate(gates, "observability_release_review_freshness")
 
-    assert age_days <= 1
+    assert age_days <= int(freshness_gate["limit"])
     assert review["status"] == "passed"
     assert review["mode"] == "live_review"
     assert review["live_threshold_violations"] == []
