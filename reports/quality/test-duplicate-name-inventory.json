@@ -25,39 +25,13 @@
       ],
       "name": "test_mark_failed_emits_batch_failed_event",
       "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "same_file",
-      "count": 2,
-      "lane_counts": {
-        "unit": 2
-      },
-      "locations": [
-        "tests/unit/infrastructure/compat/test_pandera_compat.py:65",
-        "tests/unit/infrastructure/compat/test_pandera_compat.py:125"
-      ],
-      "name": "test_returns_true_on_attribute_error",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "same_file",
-      "count": 2,
-      "lane_counts": {
-        "unit": 2
-      },
-      "locations": [
-        "tests/unit/infrastructure/compat/test_pandera_compat.py:74",
-        "tests/unit/infrastructure/compat/test_pandera_compat.py:144"
-      ],
-      "name": "test_returns_true_on_type_error",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
     }
   ],
   "summary": {
     "cross_file_groups": 2,
-    "duplicate_occurrences": 8,
+    "duplicate_occurrences": 4,
     "mixed_groups": 0,
-    "same_file_groups": 2,
-    "total_duplicate_names": 4
+    "same_file_groups": 0,
+    "total_duplicate_names": 2
   }
 }

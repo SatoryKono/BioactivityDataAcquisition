@@ -60,13 +60,13 @@ issues:
   - tests/architecture/test_test_governance_audit.py
 budgets:
   refined_assertless_max: 0
-  duplicate_test_names_max: 4
-  duplicate_test_name_occurrences_max: 8
-  compatibility_test_file_max: 1
-  markerless_test_functions_max: 28
+  duplicate_test_names_max: 2
+  duplicate_test_name_occurrences_max: 4
+  compatibility_test_file_max: 0
+  markerless_test_functions_max: 0
   uuid4_call_sites_max: 0
   date_today_call_sites_max: 0
-  assertless_total_candidates_max: 113
+  assertless_total_candidates_max: 108
 budget_ratchet:
   linked_issue: '#4901'
   mode: fail-fast-no-growth
@@ -198,31 +198,6 @@ budget_ratchet:
       raw uuid4 test identities with shared deterministic helpers across unit, integration,
       architecture, benchmark, performance, e2e, and smoke surfaces; uuid4_call_sites_max
       is now fail-fast zero.
-  - issue: '#5762'
-    owner: test-governance
-    status: markerless_ratcheted_to_28
-    note: Added test_pandera_compat.py for Pandera compatibility layer coverage, which
-      added 28 markerless test functions. markerless_test_functions_max ratcheted from 0 to 28.
-  - issue: '#5762'
-    owner: test-governance
-    status: compatibility_test_file_max_ratcheted_to_1
-    note: Added test_pandera_compat.py for Pandera compatibility layer coverage, which
-      is classified as a compatibility test. compatibility_test_file_max ratcheted from 0 to 1.
-  - issue: '#5762'
-    owner: test-governance
-    status: duplicate_test_names_ratcheted_to_4
-    note: Duplicate test names increased from 2 to 4 due to new test additions. duplicate_test_names_max
-      ratcheted from 2 to 4.
-  - issue: '#5762'
-    owner: test-governance
-    status: duplicate_test_name_occurrences_ratcheted_to_8
-    note: Duplicate test name occurrences increased from 4 to 8 due to new test additions. duplicate_test_name_occurrences_max
-      ratcheted from 4 to 8.
-  - issue: '#5762'
-    owner: test-governance
-    status: assertless_total_candidates_ratcheted_to_109
-    note: Assertless total candidates increased from 108 to 109 due to new test additions. assertless_total_candidates_max
-      ratcheted from 108 to 109.
   - issue: '#4924'
     owner: test-governance
     status: refined_assertless_ratcheted_to_0
@@ -374,7 +349,6 @@ budget_ratchet:
     a separate governance review.
   ratcheted_fields:
   - refined_assertless_max
-  - assertless_total_candidates_max
   - duplicate_test_names_max
   - duplicate_test_name_occurrences_max
   - compatibility_test_file_max
