@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.core.base_transformer import FilteredOutError
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
-from bioetl.application.core.batch_operation_errors import OPERATION_ERRORS
 from bioetl.application.core.batch_transformer_attempt_failures import (
     _build_filtered_out_handling_context_from_mapping,
     handle_filtered_out_error,
@@ -19,6 +18,7 @@ from bioetl.application.core.batch_transformer_attempt_success import (
     build_transform_success_outcome,
 )
 from bioetl.application.core.batch_transformer_state import RecordTransformOutcome
+from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.types import BronzeRecord
 
 if TYPE_CHECKING:
@@ -36,7 +36,13 @@ if TYPE_CHECKING:
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.types import BatchID
 
-TRANSFORM_PROCESSING_ERRORS = OPERATION_ERRORS
+TRANSFORM_PROCESSING_ERRORS = (
+    BioETLError,
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+)
 
 
 def bind_record_context(

@@ -253,6 +253,42 @@ def test_target_organism_custom_rule_keeps_binomial_fallback_without_taxonomy_id
     )
 
 
+def test_target_organism_custom_rule_preserves_historical_binomial_acceptance() -> None:
+    rule = FieldValidation(
+        field="organism",
+        validation_type="custom",
+        validator="validate_target_organism_supported_name",
+    )
+
+    preserved_regex_cases = (
+        {"organism": "Homo sapiens"},
+        {"organism": "Mus musculus"},
+        {"organism": "Unknown blob"},
+    )
+
+    for record in preserved_regex_cases:
+        assert _field_rule_violated(record, rule) is False
+
+
+def test_target_organism_custom_rule_rejects_malformed_labels_without_supported_match() -> (
+    None
+):
+    rule = FieldValidation(
+        field="organism",
+        validation_type="custom",
+        validator="validate_target_organism_supported_name",
+    )
+
+    rejected_cases = (
+        {"organism": "unknown blob"},
+        {"organism": "UnknownBlob"},
+        {"organism": "??"},
+    )
+
+    for record in rejected_cases:
+        assert _field_rule_violated(record, rule) is True
+
+
 def test_field_rule_dispatch_covers_required_null_range_pattern_and_enum_rules() -> None:
     assert _field_rule_violated(
         {},

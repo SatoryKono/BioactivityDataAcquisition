@@ -41,6 +41,8 @@ def test_build_compatibility_importer_census_counts_retained_entrypoints_and_twi
                 "    public_export_contract:",
                 "      max_public_exports: 3",
                 "      lazy_export_table: _PUBLIC_EXPORTS",
+                "      retained_wrappers_outside_all:",
+                "        - get_runtime_settings",
             ]
         )
         + "\n",
@@ -105,6 +107,12 @@ def test_build_compatibility_importer_census_counts_retained_entrypoints_and_twi
     assert public_export_row["public_export_count"] == 3
     assert public_export_row["duplicate_public_exports"] == []
     assert public_export_row["duplicate_lazy_export_keys"] == []
+    assert public_export_row["retained_wrapper_contract"] == ["get_runtime_settings"]
+    assert public_export_row["retained_wrappers_outside_all"] == [
+        "get_runtime_settings"
+    ]
+    assert public_export_row["missing_retained_wrappers_outside_all"] == []
+    assert public_export_row["unexpected_retained_wrappers_outside_all"] == []
     assert public_export_row["resolution_conflicts"] == {}
     assert public_export_row["src_importer_count"] == 1
     removed_rows = {

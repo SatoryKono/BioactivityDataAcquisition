@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-from bioetl.application.core.batch_operation_errors import (
-    OPERATION_ERRORS as _RF005_OPERATION_ERRORS,
-)
 from bioetl.application.core.lifecycle._checkpoint_types import (
     CheckpointCompatibilityService,
 )
@@ -21,12 +18,19 @@ from bioetl.application.core.lifecycle.checkpoint_saved_at import (
     metadata_with_checkpoint_saved_at,
     set_checkpoint_saved_at,
 )
+from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.medallion import LoadingStrategy
 from bioetl.domain.ports import CheckpointPort, ClockPort, LoggerPort, MetricsPort
 from bioetl.domain.types import JsonDict, RunID
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
-_OPERATION_ERRORS = _RF005_OPERATION_ERRORS
+_OPERATION_ERRORS = (
+    BioETLError,
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+)
 
 
 class CheckpointRuntimeService:

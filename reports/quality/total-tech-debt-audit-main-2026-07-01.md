@@ -13,7 +13,7 @@ Refresh reason: #5752 - Correct stale claims and align with current governance b
 1. Active Bronze fixture gaps were not found: `configs/base/bronze_fixture_gaps.yaml` has `gaps: {}` and the scorecard keeps active/blocked/decision-recorded fixture gap budgets at zero.
 1. Compatibility transition debt is zero; retained compatibility burden is explicitly governed and sanctioned as public entrypoints, not unresolved debt.
 1. Root hygiene is governed: `new.env` and similar surfaces are classified as `present_local_only_root_surface` with explicit retention policy, not stale debt.
-1. Supporting scripts are inventoried: 85 supporting scripts are tracked in `scripts_inventory_manifest.json` with explicit ownership and usage tracking.
+1. Supporting scripts are inventoried: 87 supporting scripts are tracked in `scripts_inventory_manifest.json` with explicit ownership and usage tracking.
 1. Main test debt is not duplicate tests or flaky evidence; it is coverage/invariant debt: domain and infrastructure modules need focused unit tests.
 1. Domain has the most serious coverage debt: DQ rule evaluators, normalization, validation, schema policy, contract registry, and ledger/event surfaces need coverage.
 1. Hotspot duplication is currently zero; hotspot families are at reviewed budget ceilings and must not grow.
@@ -28,14 +28,14 @@ Refresh reason: #5752 - Correct stale claims and align with current governance b
 || Compatibility burden | Retained entrypoints `12`, public export facades `4`, twin pairs `0`. | `reports/quality/compatibility-importer-census.json` |
 || Compatibility transition debt | `transition_debt` is empty; scorecard transition count is zero. | `configs/quality/compatibility_facade_inventory.yaml` |
 || Root hygiene | `new.env` classified as `present_local_only_root_surface` with canonical path `.env.example`. | `configs/quality/root_hygiene_review_registry.yaml` |
-|| Supporting scripts | 85 supporting scripts tracked with ownership and usage. | `configs/quality/scripts_inventory_manifest.json` |
+|| Supporting scripts | 87 supporting scripts tracked with ownership and usage. | `configs/quality/scripts_inventory_manifest.json` |
 || Dead/zero-import candidates | Repo-wide zero-import candidates are fully classified; untriaged count is `0` across `9` reviewed candidates. | `reports/quality/dead-code-inventory.json` |
 || Coverage | 2,191 source modules: 1,335 fully covered, 856 partially covered, 0 uncovered, 0 unmeasured. | `reports/quality/module-coverage-inventory.json` |
 || Contracts | Registry entries `27`; blocking and warning issues `0`. | `reports/quality/contract-registry-diagnostics.json` |
 || Contract coverage | Gold-enabled coverage is 27/27; missing count `0`. | `reports/quality/contract-coverage-matrix.json` |
 || Silver/Gold parity | Overall status `pass`; failing scenarios `[]`. | `reports/quality/silver-gold-filter-parity-report.json` |
 || VCR inventory | 198 VCR cassettes, 198 metadata sidecars, 0 review-required cassettes, and 0 unowned cassettes. | `reports/quality/vcr-metadata-catalog.json` |
-|| Test governance | 21,437 test functions, 1,887 test files, 2 duplicate test names, 0 markerless test functions, 0 compatibility test files. | `reports/quality/test-governance-current.json` |
+|| Test governance | 21,595 test functions, 1,890 test files, 2 duplicate test names, 0 markerless test functions, 0 compatibility test files. | `reports/quality/test-governance-current.json` |
 || Observability governance | 45 recording-rule metrics and 48 declared label-contract metrics; runtime cardinality and unused signal policies exist; all dashboarded metrics are now declared. | `configs/quality/observability_metric_declarations.yaml`, `configs/quality/observability_metric_governance.yaml` |
 
 ## Corrections from Previous Audit
@@ -106,7 +106,7 @@ ADR-048 explicitly forbids Pandera import-time compatibility patching and allows
 This refreshed audit removes stale claims from the 2026-06-16 audit and aligns all findings with current committed governance artifacts on main. The primary corrections are:
 
 1. **Root hygiene**: `new.env` and similar surfaces are now correctly classified as governed local-only surfaces, not stale debt.
-2. **Supporting scripts**: The 85 supporting scripts count is now aligned with `scripts_inventory_manifest.json` after retiring three zero-reference supporting wrappers.
+2. **Supporting scripts**: The 87 supporting scripts count is now aligned with `scripts_inventory_manifest.json` after retiring three zero-reference supporting wrappers.
 3. **Compatibility test burden**: Duplicate test names are now at 2 (current actual state) instead of 0, matching the live governance baseline.
 4. **Public entrypoints**: Retained compatibility seams are explicitly distinguished from true transition debt and sanctioned as public API.
 

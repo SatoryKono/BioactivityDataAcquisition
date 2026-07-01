@@ -17,7 +17,6 @@ from bioetl.composition.runtime_builders._effective_config_source_refs_support i
     build_effective_config_source_refs as _build_effective_config_source_refs,
     resolve_effective_config_entity,
 )
-from bioetl.composition.runtime_builders.config_access import resolve_configs_root
 from bioetl.composition.runtime_builders._effective_config_secret_support import (
     build_secret_surface_inventory,
 )
@@ -28,7 +27,7 @@ from bioetl.domain.filtering.silver_filter_identity import (
 from bioetl.composition.runtime_builders._runtime_launch_context_fields import (
     build_runtime_launch_field_snapshot,
 )
-from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
+from bioetl.composition.runtime_builders._run_manifest_serialization_support import (
     to_serializable_mapping as _to_serializable_mapping,
 )
 from bioetl.composition.runtime_builders.run_manifest_support import (
@@ -38,6 +37,7 @@ from bioetl.composition.services.versioning import get_dependency_lock_hash
 from bioetl.domain.control_plane.effective_config_environment import (
     semantic_runtime_env_dependencies,
 )
+from bioetl.infrastructure.config.config_root import resolve_configs_root
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext

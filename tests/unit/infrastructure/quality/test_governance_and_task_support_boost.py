@@ -118,7 +118,7 @@ def test_validate_governance_section_reports_missing_mapping_and_invalid_review_
                 "governance": {
                     "baseline_policy": {"rationale": ""},
                     "review_policy": {"new_exemption_requires": []},
-                    "owner_registry_q2_subsystems": {"sub_a": {"owner": "alice"}},
+                    "owner_registry_q3_subsystems": {"sub_a": {"owner": "alice"}},
                     "growth_gate_default_mode": "warn",
                     "allow_grace_windows_only_for_rf": False,
                     "growth_section_gate_rollout": {"warn_until_by_section": {}},
@@ -158,7 +158,7 @@ def test_governance_validation_covers_mapping_and_section_key_errors() -> None:
             "governance": {
                 "baseline_policy": "bad",
                 "review_policy": "bad",
-                "owner_registry_q2_subsystems": {1: "bad", "sub_a": {}},
+                "owner_registry_q3_subsystems": {1: "bad", "sub_a": {}},
                 "growth_gate_default_mode": "block",
                 "allow_grace_windows_only_for_rf": False,
                 "growth_section_gate_rollout": {"warn_until_by_section": {None: "2026-01-01"}},

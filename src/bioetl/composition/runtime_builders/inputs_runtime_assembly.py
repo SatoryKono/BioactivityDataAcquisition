@@ -27,7 +27,6 @@ from bioetl.composition.runtime_builders._inputs_resolution_support import (
 from bioetl.composition.runtime_builders._inputs_resolution_support import (
     validate_pk_contract_impl as _validate_pk_contract_impl,
 )
-from bioetl.composition.runtime_builders.config_access import load_source_config
 from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
     resolve_health_check_mode_policy as _resolve_health_check_mode_policy,
 )
@@ -35,6 +34,7 @@ from bioetl.composition.runtime_builders.inputs_runtime_models import (
     ResolvedVacuumSettings,
 )
 from bioetl.domain.config import RuntimeConfig
+from bioetl.infrastructure.config.source_config_loader import load_source_config
 
 if TYPE_CHECKING:
     from bioetl.composition.observability import ObservabilityBundle

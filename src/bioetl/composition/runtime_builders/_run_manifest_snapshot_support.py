@@ -1,11 +1,8 @@
-"""Snapshot normalization helpers for run manifest construction."""
+"""Snapshot launch-context helpers for run manifest construction."""
 
 from __future__ import annotations
 
-from dataclasses import asdict, is_dataclass
-from enum import Enum
-from typing import TYPE_CHECKING, cast
-from uuid import UUID
+from typing import TYPE_CHECKING
 
 from bioetl.composition.runtime_builders._runtime_launch_context_fields import (
     build_runtime_launch_field_snapshot,
@@ -16,48 +13,12 @@ from bioetl.composition.runtime_builders._run_manifest_snapshot_resolution impor
     resolve_name_component,
     resolve_replay_parentage_mapping_value,
 )
+from bioetl.composition.runtime_builders._run_manifest_serialization_support import (
+    to_serializable_mapping,
+)
 
 if TYPE_CHECKING:
-    from _typeshed import DataclassInstance
-
     from bioetl.domain.context import PipelineRunContext
-
-
-def normalize_snapshot(value: object) -> object:
-    if not isinstance(value, type) and is_dataclass(value):
-        return normalize_snapshot(asdict(cast("DataclassInstance", value)))
-    if hasattr(value, "__dict__") and not isinstance(value, type):
-        return normalize_snapshot(
-            {key: item for key, item in vars(value).items() if not key.startswith("_")}
-        )
-    if isinstance(value, dict):
-        return {str(key): normalize_snapshot(item) for key, item in value.items()}
-    if isinstance(value, (list, tuple, set, frozenset)):
-        return [normalize_snapshot(item) for item in value]
-    if isinstance(value, Enum):
-        return value.value
-    if isinstance(value, UUID):
-        return str(value)
-    return value
-
-
-def to_serializable_mapping(value: object) -> dict[str, object]:
-    if hasattr(value, "model_dump"):
-        payload = value.model_dump(mode="json", exclude_none=True)
-    elif hasattr(value, "dict"):
-        payload = value.dict(exclude_none=True)
-    elif hasattr(value, "__dict__"):
-        payload = {
-            key: item for key, item in vars(value).items() if not key.startswith("_")
-        }
-    else:
-        payload = normalize_snapshot(value)
-    if not isinstance(payload, dict):
-        return {"value": normalize_snapshot(payload)}
-    normalized = normalize_snapshot(payload)
-    if not isinstance(normalized, dict):
-        raise TypeError("Manifest snapshot normalization must return a mapping")
-    return normalized
 
 
 def build_launch_context_snapshot(

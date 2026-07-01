@@ -105,6 +105,33 @@ def test_resolve_seed_artifact_falls_back_to_canonical_out_dir_for_custom_output
     assert resolved == latest
 
 
+def test_resolve_latest_gold_contract_path_prefers_highest_version_over_v1_default(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "chembl_target_v1.0.json").write_text("{}", encoding="utf-8")
+    latest = tmp_path / "chembl_target_v3.0.json"
+    latest.write_text("{}", encoding="utf-8")
+    (tmp_path / "chembl_target_v2.1.json").write_text("{}", encoding="utf-8")
+
+    resolved = audit.resolve_latest_gold_contract_path(
+        "chembl_target",
+        contracts_dir=tmp_path,
+    )
+
+    assert resolved == latest
+
+
+def test_resolve_latest_gold_contract_path_returns_default_when_pipeline_missing(
+    tmp_path: Path,
+) -> None:
+    resolved = audit.resolve_latest_gold_contract_path(
+        "missing_pipeline",
+        contracts_dir=tmp_path,
+    )
+
+    assert resolved == tmp_path / "missing_pipeline_v1.0.json"
+
+
 def test_build_current_member_facts_exposes_composite_inherited_field_types() -> None:
     seed_registry = json.loads(
         Path(

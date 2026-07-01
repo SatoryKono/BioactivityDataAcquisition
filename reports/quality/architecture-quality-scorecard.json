@@ -220,9 +220,9 @@
       "snapshot_date": "2026-06-01"
     },
     "module_coverage_inventory": {
-      "coverage_xml_sha256": "5550a63fb8ffe1f185cf1709777f4c4b3bc2ed042c812e7d8eb884895184cf33",
+      "coverage_xml_sha256": "fb15f6a63e251a6fa48645d07ddb739836aad21aa27f184eeda1ce3c84776e0c",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "bcbd7ff896a2ec90bbaacd28eeac7b02d01c8eb03b565ab90de9494ebe606e04"
+      "source_tree_sha256": "3e8365cd0a72ee50dd611b2759422a72a85dca8d88fea4eb0248dad86479063b"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

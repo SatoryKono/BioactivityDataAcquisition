@@ -98,6 +98,98 @@ def test_module_coverage_source_tree_hash_gate_passes_for_current_inventory(
     assert gate.status == "pass"
 
 
+def test_module_coverage_scorecard_coherence_gate_passes_when_metrics_align() -> None:
+    gate = gates._module_coverage_scorecard_coherence_gate(
+        {
+            "metrics": {
+                "source_module_count": 10,
+                "unmeasured_module_count": 0,
+                "uncovered_module_count": 0,
+            },
+            "source_artifacts": {
+                "module_coverage_inventory": {"source_tree_sha256": "same-hash"}
+            },
+        },
+        {
+            "summary": {
+                "source_module_count": 10,
+                "unmeasured_module_count": 0,
+                "uncovered_module_count": 0,
+            },
+            "source_tree_sha256": "same-hash",
+        },
+    )
+
+    assert gate.status == "pass"
+
+
+def test_module_coverage_scorecard_coherence_gate_fails_for_metric_drift() -> None:
+    gate = gates._module_coverage_scorecard_coherence_gate(
+        {
+            "metrics": {
+                "source_module_count": 11,
+                "unmeasured_module_count": 1,
+                "uncovered_module_count": 0,
+            },
+            "source_artifacts": {
+                "module_coverage_inventory": {"source_tree_sha256": "stale-hash"}
+            },
+        },
+        {
+            "summary": {
+                "source_module_count": 10,
+                "unmeasured_module_count": 0,
+                "uncovered_module_count": 0,
+            },
+            "source_tree_sha256": "live-hash",
+        },
+    )
+
+    assert gate.status == "fail"
+
+
+def test_compatibility_scorecard_coherence_gate_passes_when_metrics_align() -> None:
+    gate = gates._compatibility_scorecard_coherence_gate(
+        {
+            "metrics": {
+                "retained_entrypoint_count": 12,
+                "retained_public_export_facade_count": 4,
+                "twin_pair_count": 0,
+            }
+        },
+        {
+            "summary": {
+                "retained_entrypoint_count": 12,
+                "retained_public_export_facade_count": 4,
+                "twin_pair_count": 0,
+            }
+        },
+    )
+
+    assert gate.status == "pass"
+
+
+def test_compatibility_scorecard_coherence_gate_fails_for_metric_drift() -> None:
+    gate = gates._compatibility_scorecard_coherence_gate(
+        {
+            "metrics": {
+                "retained_entrypoint_count": 13,
+                "retained_public_export_facade_count": 4,
+                "twin_pair_count": 1,
+            }
+        },
+        {
+            "summary": {
+                "retained_entrypoint_count": 12,
+                "retained_public_export_facade_count": 4,
+                "twin_pair_count": 0,
+            }
+        },
+    )
+
+    assert gate.status == "fail"
+
+
 def test_module_coverage_aggregate_residual_limits_returns_none_without_ratchets() -> (
     None
 ):
@@ -166,6 +258,27 @@ def test_build_payload_treats_remote_main_baseline_builder_failure_as_stale_arti
     failing_gates = summary["failing_gates"]
     assert isinstance(failing_gates, list)
     assert "generated_artifact_drift" in failing_gates
+
+
+def test_build_payload_marks_config_surface_backlog_drift_as_stale_artifact(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        gates,
+        "_refresh_existing_inventory_source_tree",
+        lambda payload, *, repo_root: {"source_tree_sha256": "live-source-hash"},
+    )
+    monkeypatch.setattr(
+        gates,
+        "build_backlog",
+        lambda: {"schema_version": "drifted-live-backlog"},
+    )
+
+    payload = gates.build_payload(repo_root=gates.PROJECT_ROOT)
+    summary = payload["summary"]
+    assert isinstance(summary, dict)
+    assert payload["stale_artifacts"]["config_surface_backlog"] is True
+    assert "generated_artifact_drift" in summary["failing_gates"]
 
 
 def test_remote_main_baseline_stale_check_ignores_revision_metadata_only(

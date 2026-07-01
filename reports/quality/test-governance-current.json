@@ -2285,8 +2285,8 @@
         "name": "test_mark_failed_emits_batch_failed_event"
       }
     ],
-    "total_test_files": 1887,
-    "total_test_functions": 21437,
+    "total_test_files": 1890,
+    "total_test_functions": 21595,
     "uuid4_call_sites": 0
   },
   "root": ".",
@@ -2319,7 +2319,7 @@
       "name": "test_mark_failed_emits_batch_failed_event"
     }
   ],
-  "total_test_files": 1887,
-  "total_test_functions": 21437,
+  "total_test_files": 1890,
+  "total_test_functions": 21595,
   "uuid4_call_sites": 0
 }

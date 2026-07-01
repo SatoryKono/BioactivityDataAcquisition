@@ -11,6 +11,10 @@ from bioetl.infrastructure.config.dq_contract_config_loader import (
     DQContractConfigLoader,
 )
 from bioetl.infrastructure.control_plane import FileContractRegistryStore
+from bioetl.domain.control_plane.contract_registry_helpers import resolve_path
+from scripts.engineering.qa.generate_semantic_pipeline_audit import (
+    resolve_latest_gold_contract_path,
+)
 
 _CONFIGS_ROOT = Path("configs")
 _ENTITY_CONFIGS_ROOT = _CONFIGS_ROOT / "entities"
@@ -108,6 +112,32 @@ def test_contract_registry_dq_identity_metadata_is_entry_aligned() -> None:
         if entry.identity.dq_policy_ref != entry.dq_policy_ref
         or entry.identity.rule_bundle_version != entry.rule_bundle_version
     ]
+
+    assert mismatches == []
+
+
+@pytest.mark.integration
+def test_active_contract_registry_surfaces_resolve_latest_published_gold_artifact() -> (
+    None
+):
+    """Semantic governance must resolve the latest published Gold contract artifact."""
+    registry = FileContractRegistryStore(_REGISTRY_PATH).load()
+    registry_base = _REGISTRY_PATH.parent
+
+    mismatches: list[str] = []
+    for contract_ref, entry in sorted(registry.entries.items()):
+        if entry.status.value != "active":
+            continue
+        if not entry.published_artifacts:
+            continue
+        pipeline_name = contract_ref.replace(".", "_")
+        expected = resolve_path(entry.published_artifacts[0], registry_base).resolve()
+        resolved = resolve_latest_gold_contract_path(pipeline_name).resolve()
+        if resolved != expected:
+            mismatches.append(
+                f"{pipeline_name}: expected {expected.relative_to(Path.cwd())}, "
+                f"got {resolved.relative_to(Path.cwd())}"
+            )
 
     assert mismatches == []
 

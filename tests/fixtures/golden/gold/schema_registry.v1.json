@@ -2405,6 +2405,16 @@
           "dtype": "str",
           "nullable": true
         },
+        "cell_type": {
+          "description": "Inherited cell-line type retained as optional composite assay context metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
+        "clo_id": {
+          "description": "Inherited CLO ontology identifier retained as optional composite assay cell-line lineage metadata.",
+          "dtype": "str",
+          "nullable": true
+        },
         "description": {
           "description": "ChEMBL assay description retained as source-scoped metadata.",
           "dtype": "str",

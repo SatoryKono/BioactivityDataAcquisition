@@ -7,14 +7,14 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-30'
+  Last verified: '2026-07-01'
 
 ______________________________________________________________________
 
 # Current State Inventory
 
 This inventory is synchronized against the current `main` worktree on
-2026-06-30. Code, configs, domain contracts, ADRs, and tests are the source of
+2026-07-01. Code, configs, domain contracts, ADRs, and tests are the source of
 truth; existing documentation is evidence only when it matches those sources.
 
 ## Scope
@@ -37,7 +37,7 @@ Current committed quality artifacts agree on the following architecture evidence
 | --- | ---: | --- |
 | Architecture quality score | `8.53` (`good_targeted_improvements`) | `reports/quality/debt-governance-gates.json`, `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2190` | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2191` | `reports/quality/module-coverage-inventory.json` |
 | Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
 | Debt-governance gates | `29` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |

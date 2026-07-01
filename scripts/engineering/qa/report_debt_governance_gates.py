@@ -38,6 +38,9 @@ from scripts.engineering.qa import (  # noqa: E402
     report_architecture_debt_remote_main_baseline,
     report_observability_metric_inventory,
 )
+from scripts.engineering.qa.report_config_surface_backlog import (  # noqa: E402
+    build_backlog,
+)
 from scripts.engineering.qa.report_module_coverage_inventory import (  # noqa: E402
     _refresh_existing_inventory_source_tree,
 )
@@ -269,6 +272,85 @@ def _module_coverage_source_tree_hash_gate(
         source_artifact="reports/quality/module-coverage-inventory.json",
         remediation=(
             "Regenerate module coverage inventory before release gate closeout."
+        ),
+    )
+
+
+def _module_coverage_scorecard_coherence_gate(
+    architecture_scorecard: dict[str, Any],
+    module_coverage: dict[str, Any],
+) -> Gate:
+    """Verify module-coverage metrics agree across scorecard and inventory."""
+    coverage_summary = module_coverage.get("summary", {})
+    scorecard_metrics = architecture_scorecard.get("metrics", {})
+    source_artifacts = architecture_scorecard.get("source_artifacts", {})
+    coverage_source = source_artifacts.get("module_coverage_inventory", {})
+
+    expected = {
+        "source_module_count": coverage_summary.get("source_module_count"),
+        "unmeasured_module_count": coverage_summary.get("unmeasured_module_count"),
+        "uncovered_module_count": coverage_summary.get("uncovered_module_count"),
+        "source_tree_sha256": module_coverage.get("source_tree_sha256"),
+    }
+    current = {
+        "source_module_count": scorecard_metrics.get("source_module_count"),
+        "unmeasured_module_count": scorecard_metrics.get("unmeasured_module_count"),
+        "uncovered_module_count": scorecard_metrics.get("uncovered_module_count"),
+        "source_tree_sha256": coverage_source.get("source_tree_sha256"),
+    }
+    return Gate(
+        name="module_coverage_scorecard_coherence",
+        status="pass" if current == expected else "fail",
+        metric="module_coverage_scorecard_alignment",
+        current=current,
+        limit=expected,
+        source_artifact=(
+            "reports/quality/module-coverage-inventory.json + "
+            "reports/quality/architecture-quality-scorecard.json"
+        ),
+        remediation=(
+            "Refresh architecture-quality scorecard and module coverage inventory "
+            "until counts and source-tree hash match."
+        ),
+    )
+
+
+def _compatibility_scorecard_coherence_gate(
+    architecture_scorecard: dict[str, Any],
+    compatibility: dict[str, Any],
+) -> Gate:
+    """Verify sanctioned compatibility metrics agree across scorecard and census."""
+    compatibility_summary = compatibility.get("summary", {})
+    scorecard_metrics = architecture_scorecard.get("metrics", {})
+    expected = {
+        "retained_entrypoint_count": compatibility_summary.get(
+            "retained_entrypoint_count"
+        ),
+        "retained_public_export_facade_count": compatibility_summary.get(
+            "retained_public_export_facade_count"
+        ),
+        "twin_pair_count": compatibility_summary.get("twin_pair_count"),
+    }
+    current = {
+        "retained_entrypoint_count": scorecard_metrics.get("retained_entrypoint_count"),
+        "retained_public_export_facade_count": scorecard_metrics.get(
+            "retained_public_export_facade_count"
+        ),
+        "twin_pair_count": scorecard_metrics.get("twin_pair_count"),
+    }
+    return Gate(
+        name="compatibility_scorecard_coherence",
+        status="pass" if current == expected else "fail",
+        metric="compatibility_scorecard_alignment",
+        current=current,
+        limit=expected,
+        source_artifact=(
+            "reports/quality/compatibility-importer-census.json + "
+            "reports/quality/architecture-quality-scorecard.json"
+        ),
+        remediation=(
+            "Refresh compatibility importer census and architecture-quality "
+            "scorecard until sanctioned compatibility metrics match."
         ),
     )
 
@@ -602,6 +684,12 @@ def build_payload(
         repo_root=repo_root,
     )
     gates.append(module_coverage_hash_gate)
+    gates.append(
+        _module_coverage_scorecard_coherence_gate(
+            architecture_scorecard,
+            module_coverage,
+        )
+    )
     aggregate_residual_limits = _module_coverage_aggregate_residual_limits(
         module_coverage_policy
     )
@@ -683,6 +771,12 @@ def build_payload(
             ],
             source_artifact="reports/quality/compatibility-importer-census.json",
             remediation="Remove facade exports or update the scorecard only after approved reduction evidence.",
+        )
+    )
+    gates.append(
+        _compatibility_scorecard_coherence_gate(
+            architecture_scorecard,
+            compatibility,
         )
     )
 
@@ -923,6 +1017,11 @@ def build_payload(
         stale_artifacts = {
             "module_coverage_inventory": module_coverage_hash_gate.status != "pass",
             "architecture_quality_scorecard": False,
+            "config_surface_backlog": not _artifact_matches_builder(
+                repo_root=repo_root,
+                rel_path="reports/quality/config-surface-backlog.json",
+                payload_builder=build_backlog,
+            ),
             "adr_enforcement_matrix": False,
             "remote_main_baseline": False,
             "dq_contract_registry_diagnostics": False,
@@ -936,6 +1035,11 @@ def build_payload(
                 payload_builder=lambda: build_architecture_quality_scorecard(
                     repo_root=repo_root
                 ),
+            ),
+            "config_surface_backlog": not _artifact_matches_builder(
+                repo_root=repo_root,
+                rel_path="reports/quality/config-surface-backlog.json",
+                payload_builder=build_backlog,
             ),
             "adr_enforcement_matrix": not _artifact_matches_builder(
                 repo_root=repo_root,

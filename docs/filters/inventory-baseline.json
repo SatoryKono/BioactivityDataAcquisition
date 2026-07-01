@@ -2390,7 +2390,7 @@
       "symbol": "filters.extraction_params",
       "path": "configs/entities/chembl/publication.yaml",
       "occurrence_count": 1,
-      "first_line": 306,
+      "first_line": 311,
       "role": "Entity source-profile policy for chembl.publication",
       "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
       "notes": "non_empty; parameter_count=3"
@@ -2588,7 +2588,7 @@
       "symbol": "filters.source_profile",
       "path": "configs/entities/chembl/publication.yaml",
       "occurrence_count": 1,
-      "first_line": 310,
+      "first_line": 315,
       "role": "Entity source-profile metadata for chembl.publication",
       "migration_relevance": "Versioned source-profile metadata must change before source-side extraction widening.",
       "notes": "profile_id=chembl.publication.curated; version=1.0.0; status=baseline"

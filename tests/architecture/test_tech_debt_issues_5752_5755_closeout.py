@@ -42,7 +42,7 @@ def test_issue_5755_removed_supporting_wrappers_are_absent_and_untracked() -> No
     script_rows = manifest["scripts"]
 
     assert isinstance(script_rows, list)
-    assert isinstance(registry["registry"], dict)
+    assert isinstance(registry["entries"], dict)
 
     for relative_path in REMOVED_WRAPPERS:
         assert not (ROOT / relative_path).exists()
@@ -51,14 +51,14 @@ def test_issue_5755_removed_supporting_wrappers_are_absent_and_untracked() -> No
             for row in script_rows
             if isinstance(row, dict)
         )
-        assert relative_path not in registry["registry"]
+        assert relative_path not in registry["entries"]
 
     summary = manifest["summary"]
     assert isinstance(summary, dict)
     status_counts = summary["status_counts"]
     assert isinstance(status_counts, dict)
     assert summary["total_scripts"] == 447
-    assert status_counts["supporting"] == 85
+    assert status_counts["supporting"] == 87
 
 
 def test_issue_5754_forensic_public_imports_use_canonical_seam() -> None:
@@ -91,6 +91,8 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
     assert test_governance["report"]["compatibility_test_files"] == 0
     assert test_governance["report"]["duplicate_test_names"] == 2
     assert test_governance["report"]["markerless_test_functions"] == 0
+    assert test_governance["report"]["total_test_functions"] == 21595
+    assert test_governance["report"]["total_test_files"] == 1890
     assert scorecard["integral_score"] == 8.53
     assert gates["summary"]["release_gate_status"] == "passing"
     assert gates["summary"]["pass_count"] == 29
@@ -99,7 +101,8 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
     assert "Integral score is `8.53`" in debt_report
     assert "Retained entrypoints `12`" in debt_report
     assert "0 compatibility test files" in debt_report
-    assert "85 supporting scripts" in debt_report
+    assert "87 supporting scripts" in debt_report
+    assert "21,595 test functions, 1,890 test files" in debt_report
 
     assert "| Architecture quality score | `8.53` (`good_targeted_improvements`) |" in current_state
     assert "compatibility_test_files=0" in current_state

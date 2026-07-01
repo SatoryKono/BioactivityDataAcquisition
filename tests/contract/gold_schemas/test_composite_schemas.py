@@ -118,3 +118,18 @@ class TestCompositeGoldJsonContracts:
 
         assert taxonomy["type"] == ["integer", "null"]
         assert taxonomy["nullable"] is True
+
+    def test_composite_assay_cell_line_fields_publish_optional_string_contracts(
+        self,
+    ) -> None:
+        schema = CompositeAssayGoldSchema.to_schema()
+        path = CONTRACTS_DIR / "composite_assay_v1.0.json"
+        contract = json.loads(path.read_text(encoding="utf-8"))
+
+        for field_name in ("cell_type", "clo_id"):
+            column = schema.columns[field_name]
+            property_payload = contract["properties"][field_name]
+
+            assert column.nullable is True
+            assert property_payload["type"] == ["string", "null"]
+            assert property_payload["nullable"] is True
