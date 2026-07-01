@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import ast
+from functools import cache
 from pathlib import Path
 
 import pytest
+from scripts.engineering.qa.file_discovery import discover_files
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src"
@@ -73,8 +75,14 @@ ALLOWED_DEFAULT_PROVIDER_REGISTRY_CALL_SRC_FILES = {
 ALLOWED_DEFAULT_PROVIDER_REGISTRAR_CALL_SRC_FILES: set[Path] = set()
 
 
+@cache
+def _parsed_tree(path_str: str) -> ast.AST:
+    path = Path(path_str)
+    return ast.parse(path.read_text(encoding="utf-8"))
+
+
 def _import_from_modules(path: Path) -> set[str]:
-    tree = ast.parse(path.read_text(encoding="utf-8"))
+    tree = _parsed_tree(str(path.resolve()))
     return {
         node.module
         for node in ast.walk(tree)
@@ -83,7 +91,7 @@ def _import_from_modules(path: Path) -> set[str]:
 
 
 def _called_names(path: Path) -> set[str]:
-    tree = ast.parse(path.read_text(encoding="utf-8"))
+    tree = _parsed_tree(str(path.resolve()))
     called_names: set[str] = set()
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
@@ -97,11 +105,14 @@ def _called_names(path: Path) -> set[str]:
 
 
 def _iter_python_files(root: Path) -> list[Path]:
-    return sorted(path for path in root.rglob("*.py") if path.is_file())
+    return [
+        root / relative_path
+        for relative_path in discover_files(str(root.resolve()), ".py")
+    ]
 
 
 def _call_line_numbers(path: Path, function_name: str) -> list[int]:
-    tree = ast.parse(path.read_text(encoding="utf-8"))
+    tree = _parsed_tree(str(path.resolve()))
     return sorted(
         {
             node.lineno
