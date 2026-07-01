@@ -74,31 +74,31 @@ def _validate_owner_registry_subsystems(
     errors: list[str],
 ) -> None:
     if not isinstance(owner_subsystems, dict):
-        errors.append("governance.owner_registry_q2_subsystems: expected mapping")
+        errors.append("governance.owner_registry_q3_subsystems: expected mapping")
         return
 
     if len(owner_subsystems) < 3:
         errors.append(
-            "governance.owner_registry_q2_subsystems: expected at least 3 subsystems"
+            "governance.owner_registry_q3_subsystems: expected at least 3 subsystems"
         )
 
     owners: set[str] = set()
     for subsystem, cfg in owner_subsystems.items():
         if not isinstance(subsystem, str) or not subsystem.strip():
             errors.append(
-                "governance.owner_registry_q2_subsystems: "
+                "governance.owner_registry_q3_subsystems: "
                 "subsystem key must be non-empty string"
             )
             continue
         if not isinstance(cfg, dict):
             errors.append(
-                f"governance.owner_registry_q2_subsystems.{subsystem}: expected mapping"
+                f"governance.owner_registry_q3_subsystems.{subsystem}: expected mapping"
             )
             continue
         owner = cfg.get("owner")
         if not isinstance(owner, str) or not owner.strip():
             errors.append(
-                "governance.owner_registry_q2_subsystems."
+                "governance.owner_registry_q3_subsystems."
                 f"{subsystem}.owner: expected non-empty string"
             )
             continue
@@ -106,7 +106,7 @@ def _validate_owner_registry_subsystems(
 
     if len(owners) < 3:
         errors.append(
-            "governance.owner_registry_q2_subsystems: expected at least 3 distinct owners"
+            "governance.owner_registry_q3_subsystems: expected at least 3 distinct owners"
         )
 
 
@@ -338,7 +338,7 @@ def _validate_governance_section(
     _validate_baseline_policy(governance, errors=errors)
     _validate_review_policy(governance.get("review_policy"), errors=errors)
     _validate_owner_registry_subsystems(
-        governance.get("owner_registry_q2_subsystems"),
+        governance.get("owner_registry_q3_subsystems"),
         errors=errors,
     )
 

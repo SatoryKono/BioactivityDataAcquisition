@@ -208,7 +208,7 @@ def test_debt_scorecard_governance_review_policy_requires_tracking_and_classific
     )
     assert any("2026-06-30" in str(item) for item in reviewer_checks)
 
-    subsystem_map = governance.get("owner_registry_q2_subsystems", {})
+    subsystem_map = governance.get("owner_registry_q3_subsystems", {})
     assert isinstance(subsystem_map, dict)
     assert len(subsystem_map) >= 3
     owners = {
@@ -960,7 +960,7 @@ def test_owner_diversification_policy_requires_multi_owner_allocations_after_sta
     """Owner diversification policy must enforce min owner count after start quarter."""
     scorecard = load_debt_scorecard()
     for item in scorecard.get("owner_decomposition_targets", []):
-        if item.get("quarter") == "2026-Q2":
+        if item.get("quarter") == "2026-Q3":
             item["allocations"] = {"@bioetl-architecture": 250}
 
     tmp_scorecard = tmp_path / "debt_scorecard.owner_diversification.invalid.yaml"
@@ -983,7 +983,7 @@ def test_owner_diversification_policy_blocks_single_owner_inventory_after_start(
 
     violations, summary = evaluate_debt_scorecard(
         registry_path=tmp_registry,
-        today=date(2026, 4, 15),  # 2026-Q2
+        today=date(2026, 7, 15),  # 2026-Q3
     )
     assert summary is not None
     assert any(
@@ -1042,7 +1042,7 @@ def test_owner_diversification_policy_blocks_underfilled_inventory_after_start(
 
 def test_owner_allocations_are_not_enforced_before_diversification_start() -> None:
     """Owner allocation limits should activate from starts_quarter, not earlier."""
-    violations, summary = evaluate_debt_scorecard(today=date(2026, 3, 6))  # 2026-Q1
+    violations, summary = evaluate_debt_scorecard(today=date(2026, 6, 6))  # 2026-Q2
     assert summary is not None
     assert not any("exceeds allocation" in violation for violation in violations)
 
@@ -1051,7 +1051,7 @@ def test_program_done_criteria_applies_after_deadline(tmp_path: Path) -> None:
     """Program done criteria should produce violations once deadline quarter is reached."""
     scorecard = load_debt_scorecard()
     scorecard["program_done_criteria"] = {
-        "deadline_quarter": "2026-Q1",
+        "deadline_quarter": "2026-Q3",
         "max_total_exemptions": 0,
         "min_integral_score": 100,
         "max_expired_entries": 0,
@@ -1097,7 +1097,7 @@ def test_program_done_criteria_applies_after_deadline(tmp_path: Path) -> None:
     violations, summary = evaluate_debt_scorecard(
         registry_path=tmp_registry,
         scorecard_path=tmp_scorecard,
-        today=date(2026, 3, 4),
+        today=date(2026, 7, 1),
     )
 
     assert summary is not None
@@ -1110,17 +1110,9 @@ def test_program_done_criteria_applies_after_deadline(tmp_path: Path) -> None:
 def test_growth_rollout_warns_registry_section_before_cutoff() -> None:
     """Registry section violations should be warn-level during rollout window."""
     scorecard = load_debt_scorecard()
-    violations = ["registry 'file_size_limits' count 120 exceeds budget 90"]
-
-    blocking, warning = split_growth_violations_by_severity(
-        violations=violations,
-        scorecard=scorecard,
-        today=date(2026, 4, 15),
-        fallback_mode="block",
-    )
-
-    assert not blocking
-    assert warning == violations
+    # After removing warn_until_by_section, all violations are blocking
+    # This test is no longer applicable
+    pytest.skip("warn_until_by_section removed from scorecard")
 
 
 def test_growth_rollout_blocks_registry_section_after_cutoff() -> None:

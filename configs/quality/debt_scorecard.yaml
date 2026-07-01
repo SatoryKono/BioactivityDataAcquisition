@@ -63,9 +63,9 @@ governance:
     - placeholder exemptions require concrete technical follow-up
     - '2026-06-30'
   owner_diversification:
-    starts_quarter: 2026-Q2
+    starts_quarter: 2026-Q3
     min_distinct_owners: 2
-  owner_registry_q2_subsystems:
+  owner_registry_q3_subsystems:
     architecture:
       owner: '@bioetl-architecture'
     platform:
@@ -77,8 +77,7 @@ governance:
     max_window_days: 30
   growth_section_gate_rollout:
     default_mode: block
-    warn_until_by_section:
-      registry:file_size_limits: '2026-06-30'
+    warn_until_by_section: {}
   burn_down_priorities:
     registries:
     - file_size_limits
@@ -1050,6 +1049,21 @@ quarterly_targets:
     class_method_count: 0
     god_object: 1
     domain_complexity: 0
+- quarter: 2026-Q3
+  max_total_exemptions: 0
+  min_integral_score: 75
+  group_budgets:
+    size_metrics: 0
+    complexity_metrics: 0
+    structural_debt: 0
+  registry_budgets:
+    file_size_limits: 0
+    function_complexity: 0
+    function_length: 0
+    class_size: 0
+    class_method_count: 0
+    god_object: 0
+    domain_complexity: 0
 owner_decomposition_targets:
 - quarter: 2026-Q1
   allocations:
@@ -1061,11 +1075,18 @@ owner_decomposition_targets:
     '@bioetl-architecture': 9
     '@bioetl-platform': 1
     '@bioetl-data-model': 2
+- quarter: 2026-Q3
+  allocations:
+    '@bioetl-architecture': 0
+    '@bioetl-platform': 0
+    '@bioetl-data-model': 0
 expiry_decomposition_targets:
 - quarter: 2026-Q1
   max_entries_expiring_in_quarter: 29
 - quarter: 2026-Q2
   max_entries_expiring_in_quarter: 1
+- quarter: 2026-Q3
+  max_entries_expiring_in_quarter: 0
 test_governance_debt_metrics:
   inventory_source: configs/quality/test_governance_audit.yaml
   owner: '@bioetl-architecture'

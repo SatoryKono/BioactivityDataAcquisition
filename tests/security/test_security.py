@@ -418,6 +418,7 @@ class TestPIIHandling:
             "_health.py",  # PubMed adapter (NCBI required email)
             "_search.py",  # PubMed adapter (NCBI required email)
             "_fetch.py",  # PubMed adapter (NCBI required email)
+            "_state.py",  # PubMed adapter state mixin (NCBI required email)
             "pipeline_config.py",  # NCBI API source config
             "client.py",  # User-Agent header identification
             "source_config.py",  # NCBI API default_email for PubMed
