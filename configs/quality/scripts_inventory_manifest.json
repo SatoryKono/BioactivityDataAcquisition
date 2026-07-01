@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-01T04:00:06.551687+00:00",
+  "generated_at": "2026-07-01T11:19:34.713903+00:00",
   "summary": {
-    "total_scripts": 448,
+    "total_scripts": 447,
     "status_counts": {
       "active": 360,
-      "supporting": 88
+      "supporting": 87
     },
     "reference_group_coverage": {
       "agents": 4,
@@ -181,14 +181,6 @@
       ]
     },
     {
-      "path": "scripts/ai/codex/cursor-launch.ps1",
-      "type": "ps1",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
       "path": "scripts/ai/codex/diagnose_wsl.bat",
       "type": "bat",
       "status": "active",
@@ -203,7 +195,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 156,
+          "line": 159,
           "source_group": "scripts",
           "text": "for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the"
         },
@@ -236,7 +228,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 156,
+          "line": 159,
           "source_group": "scripts",
           "text": "for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the"
         },
@@ -275,7 +267,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 156,
+          "line": 159,
           "source_group": "scripts",
           "text": "for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the"
         },
@@ -312,14 +304,6 @@
       ]
     },
     {
-      "path": "scripts/ai/codex/fix-nodejs.sh",
-      "type": "sh",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
-    },
-    {
       "path": "scripts/ai/codex/headless.ps1",
       "type": "ps1",
       "status": "active",
@@ -346,7 +330,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 155,
+          "line": 158,
           "source_group": "scripts",
           "text": "The canonical `headless.sh` / `headless.ps1` launchers set `CODEX_SKIP_MCP_SETUP=1`"
         }
@@ -373,7 +357,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 155,
+          "line": 158,
           "source_group": "scripts",
           "text": "The canonical `headless.sh` / `headless.ps1` launchers set `CODEX_SKIP_MCP_SETUP=1`"
         },
@@ -448,13 +432,13 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 175,
+          "line": 178,
           "source_group": "scripts",
           "text": ".\\helper\\diagnose-hang.ps1"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 237,
+          "line": 240,
           "source_group": "scripts",
           "text": "- `diagnose-hang.ps1` - **NEW**: Debug tool for setup hangs"
         },
@@ -600,7 +584,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 16,
       "references": [
         {
           "path": "scripts/ai/codex/QUICKSTART_WSL.md",
@@ -616,7 +600,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 238,
+          "line": 241,
           "source_group": "scripts",
           "text": "- `run-codex-impl.sh` - Launch Codex with environment"
         },
@@ -625,12 +609,6 @@
           "line": 209,
           "source_group": "scripts",
           "text": "│   └── run-codex-impl.sh      # Реализация запуска Codex"
-        },
-        {
-          "path": "scripts/ai/codex/cursor-launch.ps1",
-          "line": 35,
-          "source_group": "scripts",
-          "text": "# Keep API keys in WSL only; run-codex-impl.sh sources .env.codex there."
         },
         {
           "path": "scripts/ai/codex/md/CONSOLIDATION_COMPLETE.md",
@@ -649,6 +627,12 @@
           "line": 82,
           "source_group": "scripts",
           "text": "1. **Launch** - helper/run-codex-impl.sh starts Codex"
+        },
+        {
+          "path": "scripts/ai/codex/md/CONSOLIDATION_COMPLETE.md",
+          "line": 119,
+          "source_group": "scripts",
+          "text": "Launch helper/run-codex-impl.sh"
         }
       ]
     },
@@ -943,7 +927,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 111,
+      "reference_count": 110,
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
@@ -1000,7 +984,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 50,
+      "reference_count": 47,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -1168,7 +1152,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/00-project/governance/qodo/README.md",
@@ -1207,16 +1191,16 @@
           "text": "SETUP_MCP=\"$REPO_ROOT/scripts/ai/codex/setup_mcp.py\""
         },
         {
-          "path": "scripts/ai/gemini/clean-gemini-config.ps1",
-          "line": 26,
-          "source_group": "scripts",
-          "text": "Write-Host \"1. Run: .venv-win\\Scripts\\python.exe scripts/ai/codex/setup_mcp.py --root . --workspace-root . --skip-codex --skip-codex-config\""
-        },
-        {
           "path": "scripts/ai/gemini/helper/ensure-mcp.sh",
           "line": 21,
           "source_group": "scripts",
           "text": "SETUP_MCP=\"${REPO_ROOT}/scripts/ai/codex/setup_mcp.py\""
+        },
+        {
+          "path": "scripts/engineering/dev/__main__.py",
+          "line": 49,
+          "source_group": "scripts",
+          "text": "COMMAND_SPECS[\"setup-mcp\"] = module_command(\"scripts.ai.codex.setup_mcp\")"
         }
       ]
     },
@@ -1276,14 +1260,6 @@
           "text": "SETUP_SKILLS=\"$SCRIPT_DIR/setup_skills.sh\""
         }
       ]
-    },
-    {
-      "path": "scripts/ai/gemini/clean-gemini-config.ps1",
-      "type": "ps1",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": []
     },
     {
       "path": "scripts/ai/gemini/gemini-interactive.ps1",
@@ -1785,7 +1761,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 34,
+      "reference_count": 33,
       "references": [
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
@@ -7911,7 +7887,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 239,
+      "reference_count": 241,
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
@@ -8558,7 +8534,7 @@
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
-          "line": 287,
+          "line": 295,
           "source_group": "tests",
           "text": "command = \"scripts/engineering/qa/check_test_audit_preflight.py --strict\""
         }
@@ -9110,6 +9086,14 @@
       ]
     },
     {
+      "path": "scripts/engineering/qa/refresh_test_governance_baseline.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/engineering/qa/report_adr_enforcement_matrix.py",
       "type": "py",
       "status": "supporting",
@@ -9156,6 +9140,14 @@
           "text": "\"scripts.engineering.qa.report_architecture_debt_remote_main_baseline\""
         }
       ]
+    },
+    {
+      "path": "scripts/engineering/qa/report_architecture_quality_scorecard.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
     },
     {
       "path": "scripts/engineering/qa/report_artifact_duplication_audit.py",
@@ -10509,7 +10501,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 24,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -10530,6 +10522,12 @@
           "text": "uv run python -m scripts.engineering.repo check-inventory --check"
         },
         {
+          "path": "docs/00-project/ai/architecture-audit-2025-07-01-corrected.md",
+          "line": 140,
+          "source_group": "docs",
+          "text": "python scripts/engineering/repo/check_scripts_inventory.py --check-lifecycle"
+        },
+        {
           "path": "docs/00-project/ai/memory/agent-memory.md",
           "line": 189,
           "source_group": "docs",
@@ -10548,16 +10546,10 @@
           "text": "python -m scripts.engineering.repo check-inventory --check"
         },
         {
-          "path": "docs/03-guides/script-management/README.md",
-          "line": 67,
+          "path": "docs/00-project/ai/refactoring-plan-2025-07-01.md",
+          "line": 97,
           "source_group": "docs",
-          "text": "python3 -m scripts.engineering.repo check-inventory --check"
-        },
-        {
-          "path": "scripts/engineering/README.md",
-          "line": 33,
-          "source_group": "scripts",
-          "text": "python -m scripts.engineering.repo check-inventory --check --manifest configs/quality/scripts_inventory_manifest.json"
+          "text": "python scripts/engineering/repo/check_scripts_inventory.py --check-lifecycle"
         }
       ]
     },
@@ -11140,7 +11132,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 19,
+      "reference_count": 18,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
@@ -11197,7 +11189,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 66,
+      "reference_count": 65,
       "references": [
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",

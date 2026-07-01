@@ -451,6 +451,41 @@ def test_cross_rule_dispatch_covers_standard_conditions_and_unknown_condition() 
     assert not _cross_rule_violated({"a": 1}, unknown_rule)  # type: ignore[arg-type]
 
 
+def test_cross_rule_equality_passes_with_zero_or_one_present_value() -> None:
+    rule = CrossFieldValidation(
+        name="alias_eq",
+        fields=("doi", "publication_doi"),
+        condition="equality",
+    )
+
+    assert _cross_rule_violated({}, rule) is False
+    assert _cross_rule_violated({"doi": "10.1000/xyz"}, rule) is False
+    assert _cross_rule_violated({"publication_doi": "10.1000/xyz"}, rule) is False
+
+
+def test_cross_rule_equality_detects_mismatched_present_values() -> None:
+    rule = CrossFieldValidation(
+        name="alias_eq",
+        fields=("doi", "publication_doi"),
+        condition="equality",
+    )
+
+    assert (
+        _cross_rule_violated(
+            {"doi": "10.1000/xyz", "publication_doi": "10.1000/xyz"},
+            rule,
+        )
+        is False
+    )
+    assert (
+        _cross_rule_violated(
+            {"doi": "10.1000/xyz", "publication_doi": "10.1000/abc"},
+            rule,
+        )
+        is True
+    )
+
+
 class _ConditionalRule:
     condition_field = "kind"
     condition_operator = "eq"

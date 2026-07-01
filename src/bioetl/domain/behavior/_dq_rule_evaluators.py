@@ -15,10 +15,9 @@ from bioetl.domain.behavior._dq_rule_evaluators_cross import (
     _any_present_rule_violated,
     _conditional_required_rule_violated,
     _custom_cross_field_rule_violated,
+    _custom_cross_rule_violated_impl,
+    _equality_rule_violated,
     _mutually_exclusive_rule_violated,
-)
-from bioetl.domain.behavior._dq_rule_evaluators_cross import (
-    _custom_cross_rule_violated as _custom_cross_rule_violated_impl,
 )
 from bioetl.domain.behavior._dq_rule_evaluators_vocab import (
     _resolve_custom_validation_strategy,
@@ -139,9 +138,15 @@ def _custom_rule_violated(
 
 def _custom_cross_rule_violated(
     record: JsonDict,
-    validator_name: str | None,
+    rule: CrossFieldValidation | str | None,
 ) -> bool:
-    return _custom_cross_rule_violated_impl(record, validator_name)
+    if isinstance(rule, str) or rule is None:
+        if rule == "validate_hierarchy_no_self_reference":
+            protein_class_id = record.get("protein_class_id")
+            parent_id = record.get("parent_id")
+            return _is_present(protein_class_id) and protein_class_id == parent_id
+        return False
+    return _custom_cross_rule_violated_impl(record, rule)
 
 
 def _required_rule_violated(
@@ -231,6 +236,7 @@ _FIELD_RULE_EVALUATORS = {
 _CROSS_RULE_EVALUATORS = {
     "all_present": _all_present_rule_violated,
     "any_present": _any_present_rule_violated,
+    "equality": _equality_rule_violated,
     "mutually_exclusive": _mutually_exclusive_rule_violated,
     "conditional_required": _conditional_required_rule_violated,
     "custom": _custom_cross_field_rule_violated,

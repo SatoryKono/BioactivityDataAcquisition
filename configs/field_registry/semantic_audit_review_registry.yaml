@@ -352,11 +352,12 @@ weak_cluster_decisions:
 
   - cluster_id: shared_oa_status
     field_name: oa_status
-    decision: source_owned_same_name
+    decision: promotable_candidate
     owner: BioETL Team
     rationale: >
-      oa_status remains source-owned because open-access status vocabularies are
-      not yet centralized into one canonical publication ownership surface.
+      oa_status already uses one reviewed open-access vocabulary surface across
+      publication-family DQ and shared Python normalization, so it is tracked
+      as a promotion candidate pending explicit canonical publication ownership.
 
   - cluster_id: shared_annotation_score
     field_name: annotation_score

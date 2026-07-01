@@ -382,7 +382,7 @@ python scripts\ai\codex\setup_mcp.py
 What this script does:
 
 - Writes workspace MCP config for Copilot at `.vscode/mcp.json`.
-- Synchronizes `.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`, `.qodo/mcp.json`, `.codex/settings.json`, and the managed MCP block in `~/.codex/config.toml`.
+- Synchronizes `.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`, `.qodo/mcp.json`, `.codex/settings.json`, `.devin/config.json`, and the managed MCP block in `~/.codex/config.toml`.
 - Registers the current MCP set: `memory`, `filesystem`, `fetch`, `github`, `docker`, `context7`, `ast-grep`, `mcp-code-interpreter`, `prometheus`, `grafana`, `brave-search`, `sonarqube`, `neo4j-cypher`, `neo4j-memory`, `chembl`, `pubchem`, `pubmed`, `mermaid`, `biomoltechDocs`, `mintlify`, and `deepwiki`.
 - Uses repo-local wrappers for local and Docker-backed servers so auth and machine-local settings stay out of tracked MCP config files.
 - Uses local defaults when not overridden:

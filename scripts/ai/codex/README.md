@@ -94,7 +94,7 @@ bash diagnose_wsl.sh              # Run WSL diagnostics
 
 1. **Check** - Validates the WSL/Bash environment and the managed Codex CLI path
 1. **Setup** (if needed) - Installs missing components through the repo-local helper flow
-1. **MCP sync before launch** - Regenerates `.mcp.json`, `.vscode/mcp.json`, `.codex/settings.json`, and the Codex-native `~/.codex/config.toml` MCP block
+1. **MCP sync before launch** - Regenerates `.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`, `.qodo/mcp.json`, `.codex/settings.json`, `.devin/config.json`, and the Codex-native `~/.codex/config.toml` MCP block
 1. **Launch** - Runs Codex from the repo root with the managed Codex CLI
 
 Codex does not read the workspace `.mcp.json` directly. The launcher keeps `~/.codex/config.toml` synchronized so Codex starts with the repository MCP servers configured.
@@ -147,7 +147,10 @@ delegates to that same flow, and the retained transport launchers
 
 - `.mcp.json` - workspace MCP config used by compatible tools
 - `.vscode/mcp.json` - VS Code MCP config
+- `.cursor/mcp.json` - Cursor MCP config mirror
+- `.qodo/mcp.json` - Qodo Desktop MCP config mirror
 - `.codex/settings.json` - tracked Codex workspace MCP settings mirror
+- `.devin/config.json` - tracked Devin workspace MCP settings mirror
 - `~/.codex/config.toml` - Codex-native MCP config used by `codex`
 
 Set `CODEX_SKIP_MCP_SETUP=1` only when you intentionally want to launch Codex without synchronizing MCP. Set `CODEX_VALIDATE_MCP_LIST=1` to additionally run `codex mcp list --json`; this validation is off by default because some local MCP/server environments can make the CLI list operation hang.

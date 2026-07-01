@@ -105,6 +105,13 @@ class ChemblPublicationSchema(PublicationBaseSchema):
         description="Record creation date in ChEMBL database (YYYY-MM-DD).",
     )
 
+    # === Open Access Status (compatibility field) ===
+    oa_status: Series[str] | None = pa.Field(
+        nullable=True,
+        isin=list(OA_STATUS_VALUES),
+        description="Open Access status (compatibility field for baseline contracts).",
+    )
+
     # === Provider-specific Journal Fields ===
     volume: Series[str] = pa.Field(nullable=True, description="Volume.")
     issue: Series[str] = pa.Field(nullable=True, description="Issue.")

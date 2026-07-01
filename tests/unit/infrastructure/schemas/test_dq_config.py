@@ -155,6 +155,20 @@ class TestDQConfigFile:
             config.entity_cross_field_validations[0].condition == "conditional_required"
         )
 
+    def test_config_accepts_cross_field_equality_condition(self) -> None:
+        """Equality is a supported cross-field condition for alias parity rules."""
+        config = DQConfigFile(
+            entity_cross_field_validations=[
+                CrossFieldValidationConfig(
+                    name="doi_alias_equality",
+                    fields=["doi", "publication_doi"],
+                    condition="equality",
+                )
+            ]
+        )
+
+        assert config.entity_cross_field_validations[0].condition == "equality"
+
     def test_config_with_conditional_validations(self) -> None:
         """Config with conditional validations."""
         config = DQConfigFile(

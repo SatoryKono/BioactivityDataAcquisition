@@ -2115,7 +2115,7 @@
       "symbol": "source_profile",
       "path": "configs/_schema/pipeline.json",
       "occurrence_count": 1,
-      "first_line": 2145,
+      "first_line": 2146,
       "role": "Versioned source-profile metadata",
       "migration_relevance": "Explicit source-profile metadata anchors extraction_params widening separately from Silver/Gold filter migration.",
       "notes": ""
@@ -2225,7 +2225,7 @@
       "symbol": "extraction_params",
       "path": "configs/_schema/pipeline.json",
       "occurrence_count": 4,
-      "first_line": 1795,
+      "first_line": 1796,
       "role": "Source-profile extraction policy",
       "migration_relevance": "extraction_params are provider request policy and must not be treated as Silver filters.",
       "notes": ""
@@ -2390,7 +2390,7 @@
       "symbol": "filters.extraction_params",
       "path": "configs/entities/chembl/publication.yaml",
       "occurrence_count": 1,
-      "first_line": 299,
+      "first_line": 306,
       "role": "Entity source-profile policy for chembl.publication",
       "migration_relevance": "Provider API request narrowing is source-profile policy, not Silver structural filtering.",
       "notes": "non_empty; parameter_count=3"
@@ -2588,7 +2588,7 @@
       "symbol": "filters.source_profile",
       "path": "configs/entities/chembl/publication.yaml",
       "occurrence_count": 1,
-      "first_line": 303,
+      "first_line": 310,
       "role": "Entity source-profile metadata for chembl.publication",
       "migration_relevance": "Versioned source-profile metadata must change before source-side extraction widening.",
       "notes": "profile_id=chembl.publication.curated; version=1.0.0; status=baseline"

@@ -212,6 +212,7 @@ class CrossFieldValidation:
     condition: Literal[
         "all_present",  # All fields must be non-null
         "any_present",  # At least one field must be non-null
+        "equality",  # Present fields must have equal values
         "mutually_exclusive",  # Only one field can be non-null
         "conditional_required",  # If field A present, field B required
         "custom",  # Custom validation function

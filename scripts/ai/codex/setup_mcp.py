@@ -118,19 +118,27 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(rendered, encoding="utf-8")
 
 
+def _load_existing_json_object(path: Path, *, label: str) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+
+    raw = path.read_text(encoding="utf-8")
+    if not raw.strip():
+        return {}
+
+    existing = json.loads(raw)
+    if not isinstance(existing, dict):
+        raise ValueError(f"{label} must be a JSON object: {path}")
+    return existing
+
+
 def _write_workspace_codex_settings(output_root: Path, workspace_root: Path) -> Path:
     settings_path = output_root / ".codex" / "settings.json"
     settings_path.parent.mkdir(parents=True, exist_ok=True)
 
-    if settings_path.exists():
-        existing = json.loads(settings_path.read_text(encoding="utf-8"))
-        if not isinstance(existing, dict):
-            raise ValueError(
-                f"Codex workspace settings must be a JSON object: {settings_path}"
-            )
-    else:
-        existing = {}
-
+    existing = _load_existing_json_object(
+        settings_path, label="Codex workspace settings"
+    )
     existing["mcpServers"] = deepcopy(_canonical_servers(workspace_root))
     _write_json(settings_path, existing)
     return settings_path
@@ -140,15 +148,9 @@ def _write_devin_config(output_root: Path, workspace_root: Path) -> Path:
     settings_path = output_root / ".devin" / "config.json"
     settings_path.parent.mkdir(parents=True, exist_ok=True)
 
-    if settings_path.exists():
-        existing = json.loads(settings_path.read_text(encoding="utf-8"))
-        if not isinstance(existing, dict):
-            raise ValueError(
-                f"Devin workspace config must be a JSON object: {settings_path}"
-            )
-    else:
-        existing = {}
-
+    existing = _load_existing_json_object(
+        settings_path, label="Devin workspace config"
+    )
     existing["mcpServers"] = deepcopy(_canonical_servers(workspace_root))
     _write_json(settings_path, existing)
     return settings_path
@@ -197,13 +199,7 @@ def _write_gemini_settings(output_root: Path, workspace_root: Path) -> Path:
     settings_path = output_root / ".gemini" / "settings.json"
     settings_path.parent.mkdir(parents=True, exist_ok=True)
 
-    if settings_path.exists():
-        existing = json.loads(settings_path.read_text(encoding="utf-8"))
-        if not isinstance(existing, dict):
-            raise ValueError(f"Gemini settings must be a JSON object: {settings_path}")
-    else:
-        existing = {}
-
+    existing = _load_existing_json_object(settings_path, label="Gemini settings")
     existing_servers = existing.get("mcpServers", {})
     if existing_servers and not isinstance(existing_servers, dict):
         raise ValueError(f"Gemini mcpServers must be a JSON object: {settings_path}")

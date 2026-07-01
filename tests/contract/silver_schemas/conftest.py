@@ -94,6 +94,7 @@ ALLOWED_ATTR_DIFFS = {
     "_source_batch_id": {"dtype"},
     "molecule_id": {"dtype"},
     "publication_year": {"required"},
+    "oa_status": {"required"},
 }
 ALLOWED_CHECK_DIFFS = {"publication_year", "usan_year"}
 

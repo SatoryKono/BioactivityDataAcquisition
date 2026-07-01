@@ -3233,7 +3233,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.pipelines.chembl.publication_transformer",
       "path": "src/bioetl/application/pipelines/chembl/publication_transformer.py",
-      "source_lines": 290
+      "source_lines": 288
     },
     {
       "coverage_percent": 98.15,
@@ -9463,7 +9463,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.behavior._dq_rule_evaluators",
       "path": "src/bioetl/domain/behavior/_dq_rule_evaluators.py",
-      "source_lines": 244
+      "source_lines": 250
     },
     {
       "coverage_percent": 96.55,
@@ -9473,7 +9473,7 @@
       "missing_lines": 1,
       "module": "bioetl.domain.behavior._dq_rule_evaluators_cross",
       "path": "src/bioetl/domain/behavior/_dq_rule_evaluators_cross.py",
-      "source_lines": 84
+      "source_lines": 110
     },
     {
       "coverage_percent": 96.84,
@@ -10293,7 +10293,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.config.validation",
       "path": "src/bioetl/domain/config/validation.py",
-      "source_lines": 254
+      "source_lines": 255
     },
     {
       "coverage_percent": 100.0,
@@ -10753,7 +10753,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.control_plane.contract_registry_helpers",
       "path": "src/bioetl/domain/control_plane/contract_registry_helpers.py",
-      "source_lines": 192
+      "source_lines": 195
     },
     {
       "coverage_percent": 95.45,
@@ -13693,7 +13693,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.schemas.chembl.publication",
       "path": "src/bioetl/domain/schemas/chembl/publication.py",
-      "source_lines": 129
+      "source_lines": 123
     },
     {
       "coverage_percent": 100.0,
@@ -18903,7 +18903,7 @@
       "missing_lines": 4,
       "module": "bioetl.infrastructure.schemas.pipeline_config_common",
       "path": "src/bioetl/infrastructure/schemas/pipeline_config_common.py",
-      "source_lines": 289
+      "source_lines": 290
     },
     {
       "coverage_percent": 87.66,
@@ -25145,7 +25145,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.pipelines.chembl.publication_transformer",
       "path": "src/bioetl/application/pipelines/chembl/publication_transformer.py",
-      "source_lines": 290
+      "source_lines": 288
     },
     {
       "coverage_percent": 98.15,
@@ -31375,7 +31375,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.behavior._dq_rule_evaluators",
       "path": "src/bioetl/domain/behavior/_dq_rule_evaluators.py",
-      "source_lines": 244
+      "source_lines": 250
     },
     {
       "coverage_percent": 96.55,
@@ -31385,7 +31385,7 @@
       "missing_lines": 1,
       "module": "bioetl.domain.behavior._dq_rule_evaluators_cross",
       "path": "src/bioetl/domain/behavior/_dq_rule_evaluators_cross.py",
-      "source_lines": 84
+      "source_lines": 110
     },
     {
       "coverage_percent": 96.84,
@@ -32205,7 +32205,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.config.validation",
       "path": "src/bioetl/domain/config/validation.py",
-      "source_lines": 254
+      "source_lines": 255
     },
     {
       "coverage_percent": 100.0,
@@ -32665,7 +32665,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.control_plane.contract_registry_helpers",
       "path": "src/bioetl/domain/control_plane/contract_registry_helpers.py",
-      "source_lines": 192
+      "source_lines": 195
     },
     {
       "coverage_percent": 95.45,
@@ -35605,7 +35605,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.schemas.chembl.publication",
       "path": "src/bioetl/domain/schemas/chembl/publication.py",
-      "source_lines": 129
+      "source_lines": 123
     },
     {
       "coverage_percent": 100.0,
@@ -40815,7 +40815,7 @@
       "missing_lines": 4,
       "module": "bioetl.infrastructure.schemas.pipeline_config_common",
       "path": "src/bioetl/infrastructure/schemas/pipeline_config_common.py",
-      "source_lines": 289
+      "source_lines": 290
     },
     {
       "coverage_percent": 87.66,
@@ -43830,7 +43830,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-06-30",
-  "source_tree_sha256": "c45cfd12b98c422916243bc88ecee1d469fa78b99a62702380f59090daaf8c88",
+  "source_tree_sha256": "bcbd7ff896a2ec90bbaacd28eeac7b02d01c8eb03b565ab90de9494ebe606e04",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

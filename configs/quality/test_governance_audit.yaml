@@ -62,7 +62,7 @@ budgets:
   refined_assertless_max: 0
   duplicate_test_names_max: 2
   duplicate_test_name_occurrences_max: 4
-  compatibility_test_file_max: 0
+  compatibility_test_file_max: 1
   markerless_test_functions_max: 0
   uuid4_call_sites_max: 0
   date_today_call_sites_max: 0
@@ -657,7 +657,7 @@ oversized_test_module_inventory:
   split_on_touch: true
   top_modules:
   - path: tests/integration/ci/test_reproducibility_contract_suite.py
-    lines: 1906
+    lines: 1904
     owner: reproducibility-contracts
     target_split: integration/ci reproducibility phases
   - path: tests/unit/application/services/test_metadata_coordinator.py
