@@ -18,19 +18,9 @@ seams:
       application-core orchestration helpers; new first-party callers must be
       reviewed because the module is already high fan-in.
     caller_guard:
-      max_src_importer_count: 11
+      max_src_importer_count: 1
       allowed_src_importers:
-        - src/bioetl/application/core/_record_processor_span_support.py
-        - src/bioetl/application/core/batch_checkpoint_recovery_service.py
-        - src/bioetl/application/core/batch_processing_support.py
         - src/bioetl/application/core/batch_runtime_failure_policy.py
-        - src/bioetl/application/core/batch_transformer_attempts.py
-        - src/bioetl/application/core/batch_transformer_quarantine.py
-        - src/bioetl/application/core/batch_writer_io_mixin.py
-        - src/bioetl/application/core/lifecycle/checkpoint_manager.py
-        - src/bioetl/application/core/postrun/service.py
-        - src/bioetl/application/core/preflight/health_aggregator.py
-        - src/bioetl/application/core/runner_execution_flow.py
   - module: bioetl.application.services.control_plane.replay.historical_certification_service
     path: src/bioetl/application/services/control_plane/replay/historical_certification_service.py
     semantic_role: use_case

@@ -1,7 +1,7 @@
 {
   "schema_version": "issue-5376-coverage-tail-closeout-v1",
   "generated_by": "codex",
-  "snapshot_date": "2026-06-23",
+  "snapshot_date": "2026-07-01",
   "issue": {
     "number": 5376,
     "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5376"
@@ -29,7 +29,7 @@
     "tests/architecture/test_module_coverage_inventory.py"
   ],
   "current_live_metrics": {
-    "below_85_module_count": 85,
+    "below_85_module_count": 80,
     "uncovered_module_count": 0,
     "unmeasured_module_count": 0,
     "tracked_module_coverage_percent": 94.12,
@@ -39,7 +39,7 @@
     "status": "regressed_after_closeout",
     "historical_status": "bounded_shard_complete",
     "residual_tail_remains": true,
-    "residual_below_85_module_count": 85,
+    "residual_below_85_module_count": 80,
     "rationale": "The bounded shard reduction remains reflected in the current canonical coverage inventory; residual below-floor modules stay tracked under the parent epic."
   }
 }
