@@ -339,17 +339,17 @@ class TestPublicationTransformer:
         assert result is not None
         assert result["publication_type_raw"] == "PUBLICATION"
         assert result["publication_type"] == "journal-article"
+        assert result["publication_type_unified"] == "Journal Article"
+        assert result["publication_subclass"] == "Original Experimental Data"
+        assert result["publication_class"] == "EXP"
         assert result["journal"] == "Journal Name"
         assert result["src_id"] == 1
         assert result["_source"] == "chembl"  # System field
+        assert result["pmc_id"] is None
+        assert result["oa_status"] is None
+        assert result["citations_received"] is None
+        assert result["citations_made"] is None
         for field_name in (
-            "pmc_id",
-            "publication_type_unified",
-            "publication_subclass",
-            "publication_class",
-            "oa_status",
-            "citations_received",
-            "citations_made",
             "affiliation_list",
             "author_orcids",
             "is_oa",
@@ -378,6 +378,30 @@ class TestPublicationTransformer:
         assert result["publication_class"] is None
 
     @pytest.mark.asyncio
+    async def test_transform_preserves_publication_identifier_alias_invariants(
+        self, transformer, mock_context
+    ):
+        """Canonical and prefixed publication identifiers must stay equal."""
+        record = {
+            "publication_id": "CHEMBL1234567",
+            "pubmed_id": " PMID:0012345 ",
+            "doi": " 10.1000/XYZ ",
+            "pmc_id": " pmc12345 ",
+            "doc_type": "PUBLICATION",
+            "title": "Alias invariant publication",
+        }
+
+        result = await transformer.transform(mock_context, record, index=0)
+
+        assert result is not None
+        assert result["doi"] == "10.1000/xyz"
+        assert result["publication_doi"] == "10.1000/xyz"
+        assert result["pmid"] == "12345"
+        assert result["publication_pmid"] == "12345"
+        assert result["pmc_id"] == "PMC12345"
+        assert result["publication_pmc_id"] == "PMC12345"
+
+    @pytest.mark.asyncio
     async def test_transform_survives_uninitialized_publication_classification(
         self, transformer, mock_context, monkeypatch
     ):
@@ -401,9 +425,9 @@ class TestPublicationTransformer:
         assert result is not None
         assert result["publication_type_raw"] == "PUBLICATION"
         assert result["publication_type"] == "journal-article"
-        assert "publication_type_unified" not in result
-        assert "publication_subclass" not in result
-        assert "publication_class" not in result
+        assert result["publication_type_unified"] is None
+        assert result["publication_subclass"] is None
+        assert result["publication_class"] is None
 
     @pytest.mark.asyncio
     async def test_transform_release_metadata_and_invalid_citations(
@@ -425,7 +449,7 @@ class TestPublicationTransformer:
         assert result is not None
         assert result["chembl_release"] == "34"
         assert result["creation_date"] == "2026-01-01"
-        assert "citations_received" not in result
+        assert result["citations_received"] is None
 
     @pytest.mark.asyncio
     async def test_transformer__document_id_fallback__540d6faa(

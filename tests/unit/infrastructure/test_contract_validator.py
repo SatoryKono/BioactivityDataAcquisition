@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
 import pytest
 
 import warnings
@@ -570,4 +572,230 @@ class TestInternalMethods:
         df = pd.DataFrame({"field": ["value"]})
         outcomes = validator._apply_contract_validations(df)
 
+        # Currently placeholder, should return empty list
         assert outcomes == []
+
+    def test_validate_with_outcomes_empty_records(self):
+        """Test validation with empty records list."""
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=None, dq_config=config)
+
+        is_valid, outcomes = validator.validate_with_outcomes([])
+        assert is_valid is True
+        assert outcomes == []
+
+    def test_validate_with_outcomes_key_error_in_schema(self):
+        """Test handling of KeyError during schema validation."""
+        import pandera.pandas as pa
+
+        schema = pa.DataFrameSchema({"field": pa.Column(str)})
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=schema, dq_config=config)
+
+        # Mock schema validation to raise KeyError
+        with patch.object(schema, "validate", side_effect=KeyError("missing_key")):
+            is_valid, outcomes = validator.validate_with_outcomes([{"field": "test"}])
+            assert is_valid is False
+            assert len(outcomes) > 0
+
+    def test_validate_with_outcomes_type_error_in_schema(self):
+        """Test handling of TypeError during schema validation."""
+        import pandera.pandas as pa
+
+        schema = pa.DataFrameSchema({"field": pa.Column(str)})
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=schema, dq_config=config)
+
+        # Mock schema validation to raise TypeError
+        with patch.object(schema, "validate", side_effect=TypeError("type_error")):
+            is_valid, outcomes = validator.validate_with_outcomes([{"field": "test"}])
+            assert is_valid is False
+            assert len(outcomes) > 0
+
+    def test_validate_with_outcomes_value_error_in_schema(self):
+        """Test handling of ValueError during schema validation."""
+        import pandera.pandas as pa
+
+        schema = pa.DataFrameSchema({"field": pa.Column(str)})
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=schema, dq_config=config)
+
+        # Mock schema validation to raise ValueError
+        with patch.object(schema, "validate", side_effect=ValueError("value_error")):
+            is_valid, outcomes = validator.validate_with_outcomes([{"field": "test"}])
+            assert is_valid is False
+            assert len(outcomes) > 0
+
+    def test_convert_schema_errors_with_complex_loc(self):
+        """Test _convert_schema_errors_to_outcomes with complex loc."""
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=None, dq_config=config)
+
+        class MockError:
+            loc = ["field1", "field2", "index"]
+
+        outcomes = validator._convert_schema_errors_to_outcomes(MockError())
+        assert len(outcomes) == 1
+        assert outcomes[0].rule_id == "schema.field1.field2.index"
+
+    def test_convert_schema_errors_with_list_loc(self):
+        """Test _convert_schema_errors_to_outcomes with list loc."""
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=None, dq_config=config)
+
+        class MockError:
+            loc = ["field1", 0]
+
+        outcomes = validator._convert_schema_errors_to_outcomes(MockError())
+        assert len(outcomes) == 1
+
+    def test_prepare_df_with_schema_none(self):
+        """Test _prepare_df_for_validation when schema is None."""
+        import pandas as pd
+
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=None, dq_config=config)
+
+        df = pd.DataFrame({"field1": ["value"], "field2": [42]})
+        # When schema is None, _prepare_df_for_validation should raise an assertion error
+        # because _reorder_to_schema requires a non-None schema
+        with pytest.raises(AssertionError):
+            validator._prepare_df_for_validation(df)
+
+    def test_silver_validator_validate_with_outcomes(self):
+        """Test Silver validator validate_with_outcomes method."""
+        config = DQConfig(contract_ref="test_silver")
+        validator = ContractAwareSilverValidator(schema=None, dq_config=config)
+
+        is_valid, outcomes = validator.validate_with_outcomes([])
+        assert is_valid is True
+        assert outcomes == []
+
+    def test_silver_validator_without_config(self):
+        """Test Silver validator without DQ config."""
+        validator = ContractAwareSilverValidator(schema=None)
+
+        assert validator.policy_ref is None
+        assert validator._policy_resolver is None
+
+    def test_validate_with_outcomes_multiple_errors(self):
+        """Test validation with multiple schema errors."""
+        import pandera.pandas as pa
+
+        schema = pa.DataFrameSchema(
+            {
+                "field1": pa.Column(str, nullable=False),
+                "field2": pa.Column(int, nullable=False),
+            }
+        )
+
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=schema, dq_config=config)
+
+        # Create records with multiple violations
+        records = [{"field1": None, "field2": None}]
+        is_valid, outcomes = validator.validate_with_outcomes(records)
+
+        assert is_valid is False
+        # Should have outcomes for each violation
+        assert len(outcomes) >= 1
+
+    def test_validate_with_outcomes_quarantine_disposition(self):
+        """Test that quarantine disposition is handled correctly."""
+        import pandera.pandas as pa
+
+        schema = pa.DataFrameSchema({"field": pa.Column(str, nullable=False)})
+
+        config = DQConfig(
+            default_disposition_policy=DQDisposition.QUARANTINE,
+        )
+
+        validator = ContractAwareGoldValidator(schema=schema, dq_config=config)
+
+        records = [{"field": None}]
+        is_valid, outcomes = validator.validate_with_outcomes(records)
+
+        assert is_valid is False
+        assert len(outcomes) == 1
+
+    def test_extract_schema_error_with_empty_message(self):
+        """Test _extract_schema_error_field_name with empty message."""
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=None, dq_config=config)
+
+        class MockError:
+            def __str__(self):
+                return ""
+
+        field_name = validator._extract_schema_error_field_name(MockError())
+        assert field_name is None
+
+    def test_extract_schema_error_with_no_column_marker(self):
+        """Test _extract_schema_error_field_name without column marker."""
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=None, dq_config=config)
+
+        class MockError:
+            def __str__(self):
+                return "Some error without column reference"
+
+        field_name = validator._extract_schema_error_field_name(MockError())
+        assert field_name is None
+
+    def test_determine_severity_unknown_marker(self):
+        """Test _determine_severity with unknown error marker."""
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=None, dq_config=config)
+
+        class MockError:
+            def __str__(self):
+                return "Unknown error type"
+
+        severity = validator._determine_severity(MockError())
+        assert severity == "high"  # Default
+
+    def test_reorder_to_schema_preserves_data(self):
+        """Test that _reorder_to_schema preserves data integrity."""
+        import pandas as pd
+        import pandera.pandas as pa
+
+        schema = pa.DataFrameSchema(
+            {"field2": pa.Column(int), "field1": pa.Column(str)}
+        )
+
+        config = DQConfig()
+        validator = ContractAwareGoldValidator(schema=schema, dq_config=config)
+
+        df = pd.DataFrame({"field1": ["a", "b"], "field2": [1, 2]})
+        prepared = validator._prepare_df_for_validation(df)
+
+        # Data should be preserved
+        assert len(prepared) == len(df)
+        assert list(prepared["field1"]) == list(df["field1"])
+        assert list(prepared["field2"]) == list(df["field2"])
+
+    def test_contract_validations_with_none_policy_ref(self):
+        """Test _apply_contract_validations when policy_ref is None."""
+        import pandas as pd
+
+        validator = ContractAwareGoldValidator(schema=None, strict=False)
+
+        df = pd.DataFrame({"field": ["value"]})
+        outcomes = validator._apply_contract_validations(df)
+
+        assert outcomes == []
+
+    def test_get_config_path_returns_none_without_policy_ref(self):
+        """Test _get_config_path when policy_ref is None."""
+        validator = ContractAwareGoldValidator(schema=None, strict=False)
+
+        path = validator._get_config_path()
+        assert path is None
+
+    def test_silver_validator_policy_summary_without_config(self):
+        """Test Silver validator policy summary without config."""
+        validator = ContractAwareSilverValidator(schema=None)
+
+        summary = validator.get_policy_summary()
+        assert summary["contract_ref"] is None
+        assert summary["policy_hash"] is None

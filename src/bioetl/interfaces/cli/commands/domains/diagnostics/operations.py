@@ -33,7 +33,7 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
 
 if TYPE_CHECKING:
-    from bioetl.application.services.control_plane import (
+    from bioetl.application.services.control_plane.forensic import (
         ForensicRunDiffService,
     )
     from bioetl.application.services.control_plane.manifest.inspection_service import (

@@ -36,7 +36,7 @@ from bioetl.interfaces.cli.commands.domains.shared.inspection_commands import (
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
 if TYPE_CHECKING:
-    from bioetl.application.services.control_plane import (
+    from bioetl.application.services.control_plane.forensic import (
         ForensicRunDiffService,
     )
     from bioetl.application.services.control_plane.manifest.inspection_service import (

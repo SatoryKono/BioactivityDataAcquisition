@@ -105,3 +105,38 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
         gemini_settings["mcpServers"]["openaiDeveloperDocs"]["httpUrl"]
         == "https://developers.openai.com/mcp"
     )
+
+
+def test_main_recreates_empty_workspace_json_configs(tmp_path: Path) -> None:
+    """Empty local runtime config files should be treated as missing and rewritten."""
+    workspace_root = tmp_path / "workspace-root"
+    output_root = tmp_path / "output-root"
+    workspace_root.mkdir()
+    (output_root / ".codex").mkdir(parents=True)
+    (output_root / ".devin").mkdir(parents=True)
+    (output_root / ".gemini").mkdir(parents=True)
+    (output_root / ".codex" / "settings.json").write_text("", encoding="utf-8")
+    (output_root / ".devin" / "config.json").write_text("", encoding="utf-8")
+    (output_root / ".gemini" / "settings.json").write_text("", encoding="utf-8")
+
+    exit_code = setup_mcp.main(
+        [
+            "--root",
+            str(output_root),
+            "--workspace-root",
+            str(workspace_root),
+            "--skip-codex",
+            "--skip-codex-config",
+        ]
+    )
+
+    assert exit_code == 0
+    assert json.loads(
+        (output_root / ".codex" / "settings.json").read_text(encoding="utf-8")
+    )["mcpServers"]["filesystem"]["args"][-1] == str(workspace_root.resolve())
+    assert json.loads(
+        (output_root / ".devin" / "config.json").read_text(encoding="utf-8")
+    )["mcpServers"]["filesystem"]["args"][-1] == str(workspace_root.resolve())
+    assert json.loads(
+        (output_root / ".gemini" / "settings.json").read_text(encoding="utf-8")
+    )["mcpServers"]["filesystem"]["args"][-1] == str(workspace_root.resolve())

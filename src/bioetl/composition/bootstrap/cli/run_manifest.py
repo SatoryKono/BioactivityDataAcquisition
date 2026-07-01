@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane import (
+from bioetl.application.services.control_plane.forensic import (
     ForensicRunDiffService,
 )
 from bioetl.application.services.control_plane.replay.historical_certification_service import (

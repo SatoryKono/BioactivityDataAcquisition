@@ -23,9 +23,7 @@ from bioetl.application.services.control_plane.effective_config.service import (
 from bioetl.application.services.checkpoint_compatibility_service import (
     CheckpointCompatibilityService,
 )
-from bioetl.application.services.control_plane.forensic_diff_service import (
-    ForensicRunDiffService,
-)
+from bioetl.application.services.control_plane.forensic import ForensicRunDiffService
 from bioetl.application.services.control_plane.replay.historical_certification_service import (
     HistoricalReplayCertificationService,
     HistoricalReplaySnapshotCertification,

@@ -32,6 +32,29 @@ def _any_present_rule_violated(
     return present_count == 0
 
 
+def _alias_equality_rule_violated(
+    record: JsonDict,
+    rule: CrossFieldValidation,
+) -> bool:
+    present_values = [
+        record.get(field) for field in rule.fields if _is_present(record.get(field))
+    ]
+    if len(present_values) <= 1:
+        return False
+
+    first_value = present_values[0]
+    return any(value != first_value for value in present_values[1:])
+
+
+def _equality_rule_violated(
+    record: JsonDict,
+    rule: CrossFieldValidation,
+    present_count: int,
+) -> bool:
+    del present_count
+    return _alias_equality_rule_violated(record, rule)
+
+
 def _mutually_exclusive_rule_violated(
     record: JsonDict,
     rule: CrossFieldValidation,
@@ -54,14 +77,16 @@ def _conditional_required_rule_violated(
     return not _is_present(record.get(rule.required_field))
 
 
-def _custom_cross_rule_violated(
+def _custom_cross_rule_violated_impl(
     record: JsonDict,
-    validator_name: str | None,
+    rule: CrossFieldValidation,
 ) -> bool:
-    if validator_name == "validate_hierarchy_no_self_reference":
+    if rule.validator == "validate_hierarchy_no_self_reference":
         protein_class_id = record.get("protein_class_id")
         parent_id = record.get("parent_id")
         return _is_present(protein_class_id) and protein_class_id == parent_id
+    if rule.validator == "validate_alias_equality":
+        return _alias_equality_rule_violated(record, rule)
     return False
 
 
@@ -71,7 +96,7 @@ def _custom_cross_field_rule_violated(
     present_count: int,
 ) -> bool:
     del present_count
-    return _custom_cross_rule_violated(record, rule.validator)
+    return _custom_cross_rule_violated_impl(record, rule)
 
 
 __all__ = [
@@ -79,6 +104,7 @@ __all__ = [
     "_any_present_rule_violated",
     "_conditional_required_rule_violated",
     "_custom_cross_field_rule_violated",
-    "_custom_cross_rule_violated",
+    "_custom_cross_rule_violated_impl",
+    "_equality_rule_violated",
     "_mutually_exclusive_rule_violated",
 ]

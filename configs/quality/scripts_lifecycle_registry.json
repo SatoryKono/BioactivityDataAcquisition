@@ -128,6 +128,18 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as a bounded manual test-governance report utility while testing guidance still references the direct script path; promote it into the canonical scripts.engineering.qa surface or retire it after the broader test-governance workflow is consolidated."
     },
+    "scripts/engineering/qa/refresh_test_governance_baseline.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a bounded cached refresh helper for test-governance baseline artifacts while pretest guardrails and review workflows still need a dedicated warm-path entrypoint; consolidate it into the canonical report command if the caching path stops being independently useful."
+    },
+    "scripts/engineering/qa/report_architecture_quality_scorecard.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain as a bounded architecture scorecard reporter while closeout audits and debt-governance artifacts still depend on the direct script surface; promote it into the canonical scripts.engineering.qa command router or retire it after scorecard generation fully consolidates there."
+    },
     "scripts/engineering/qa/report_artifact_duplication_audit.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -307,24 +319,6 @@
       "decision": "compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a backward-compatible import shim while the canonical Neo4j memory smoke implementation lives under scripts.ai.mcp.neo4j_memory_mcp_smoke; remove it only after tests and historical import paths stop referencing scripts.memory.mcp_smoke."
-    },
-    "scripts/ai/codex/cursor-launch.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "windows_compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as an unreferenced Windows compatibility launcher during the reviewed retirement window; remove it once an external-caller audit confirms no out-of-repo Cursor bootstrap consumers remain."
-    },
-    "scripts/ai/codex/fix-nodejs.sh": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded manual repair script for legacy local Node.js bootstrap incidents; retire it if the governed Codex setup flow no longer needs an emergency fallback."
-    },
-    "scripts/ai/gemini/clean-gemini-config.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "windows_compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as a Windows compatibility helper while the primary Gemini configuration flow remains in Linux/WSL-supported entry points; promote to active utility only if Windows-native usage becomes a governed path."
     },
     "scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh": {
       "owner": "@bioetl-platform",

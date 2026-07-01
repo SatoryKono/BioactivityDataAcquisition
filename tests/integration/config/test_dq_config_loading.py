@@ -603,6 +603,34 @@ class TestChemblPublicationCrossFieldRules:
         assert "publication_doi" in cross_ref.fields
         assert cross_ref.severity == "warn"
 
+    def test_chembl_publication_alias_equality_rules(
+        self, dq_loader: DQConfigLoader
+    ) -> None:
+        """ChEMBL publication aliases should enforce alias parity."""
+        config = dq_loader.load("chembl", "publication")
+        rules = {cfv.name: cfv for cfv in config.cross_field_validations}
+
+        doi_rule = rules["doi_alias_equality"]
+        assert doi_rule.fields == ("doi", "publication_doi")
+        assert doi_rule.severity == "error"
+        assert doi_rule.condition in {"equality", "custom"}
+        if doi_rule.condition == "custom":
+            assert doi_rule.validator == "validate_alias_equality"
+
+        pmid_rule = rules["pmid_alias_equality"]
+        assert pmid_rule.fields == ("pmid", "publication_pmid")
+        assert pmid_rule.severity == "error"
+        assert pmid_rule.condition in {"equality", "custom"}
+        if pmid_rule.condition == "custom":
+            assert pmid_rule.validator == "validate_alias_equality"
+
+        pmc_rule = rules["pmc_id_alias_equality"]
+        assert pmc_rule.fields == ("pmc_id", "publication_pmc_id")
+        assert pmc_rule.severity == "error"
+        assert pmc_rule.condition in {"equality", "custom"}
+        if pmc_rule.condition == "custom":
+            assert pmc_rule.validator == "validate_alias_equality"
+
     def test_chembl_publication_type_validation_is_non_nullable(
         self, dq_loader: DQConfigLoader
     ) -> None:

@@ -78,6 +78,7 @@ class CrossFieldValidationConfig(BaseModel):
     condition: Literal[
         "all_present",
         "any_present",
+        "equality",
         "mutually_exclusive",
         "conditional_required",
         "custom",

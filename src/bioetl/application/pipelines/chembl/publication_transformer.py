@@ -46,6 +46,7 @@ _PUBLICATION_IDS = FieldGroup(
         # Rename pubmed_id -> pmid for cross-provider consistency (PMID standardization)
         FieldSpec("pubmed_id", target="publication_pmid", converter=PMID),
         FieldSpec("doi", target="publication_doi"),
+        FieldSpec("pmc_id", target="publication_pmc_id"),
         # Note: patent_id excluded - not needed for unified publication schema
     ),
 )
@@ -95,11 +96,6 @@ _PUBLICATION_GROUPS: tuple[FieldGroup, ...] = (
 
 _EXCLUDED_OUTPUT_FIELDS: frozenset[str] = frozenset(
     {
-        "pmc_id",
-        "publication_type_unified",
-        "publication_subclass",
-        "publication_class",
-        "oa_status",
         "affiliation_list",
         "author_orcids",
         "is_oa",
@@ -186,8 +182,11 @@ class PublicationTransformer(BaseChemblTransformer):
         data["publication_type_unified"] = None
         data["publication_subclass"] = None
         data["publication_class"] = None
-        data["publication_pmid"] = data.get("publication_pmid") or PMID(
-            record.get("pmid")
+        data["publication_pmid"] = data.get("publication_pmid") or record.get(
+            "pmid"
+        ) or record.get("pubmed_id") or record.get("document_pubmed_id")
+        data["publication_pmc_id"] = data.get("publication_pmc_id") or record.get(
+            "document_pmc_id"
         )
         doi = DOI.from_raw(data.get("publication_doi"))
         data["publication_doi"] = str(doi) if doi else None
@@ -196,6 +195,7 @@ class PublicationTransformer(BaseChemblTransformer):
             PublicationYear, data.get("publication_year"), as_string=False
         )
         data["pmid"] = data.get("publication_pmid")
+        data["pmc_id"] = data.get("publication_pmc_id")
 
     def _normalize_publication_text(self, data: GoldRecord) -> None:
         """Apply Level-A text normalization for title and abstract fields."""
@@ -238,7 +238,7 @@ class PublicationTransformer(BaseChemblTransformer):
             record.get("citation_count")
         )
         data["citations_made"] = None
-        data["pmc_id"] = None
+        data.setdefault("pmc_id", None)
         data["affiliation_list"] = None
         data["author_orcids"] = None
         data["publication_date"] = None

@@ -14,7 +14,7 @@ if TYPE_CHECKING:
         AuditInspectionService,
     )
     from bioetl.application.services.config_service import ConfigService
-    from bioetl.application.services.control_plane import (
+    from bioetl.application.services.control_plane.forensic import (
         ForensicRunDiffService,
     )
     from bioetl.application.services.control_plane.manifest.inspection_service import (

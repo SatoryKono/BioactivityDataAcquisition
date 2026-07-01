@@ -403,7 +403,7 @@
       },
       {
         "block_path": "$defs.CrossFieldValidationConfig",
-        "fingerprint": "226aea66b629",
+        "fingerprint": "d3ef6ba00ead",
         "governance": {
           "decision": "retain_generated_schema_contract",
           "linked_issue": "#5568",
@@ -429,14 +429,14 @@
             "surface_kind": "other_config"
           }
         ],
-        "serialized_bytes": 1379,
+        "serialized_bytes": 1391,
         "surface_kind_counts": {
           "other_config": 3
         }
       },
       {
         "block_path": "$defs.CrossFieldValidationConfig.properties",
-        "fingerprint": "c2f64fff0760",
+        "fingerprint": "5b766ba073cd",
         "governance": {
           "decision": "retain_generated_schema_contract",
           "linked_issue": "#5568",
@@ -462,7 +462,7 @@
             "surface_kind": "other_config"
           }
         ],
-        "serialized_bytes": 1196,
+        "serialized_bytes": 1208,
         "surface_kind_counts": {
           "other_config": 3
         }
@@ -872,5 +872,5 @@
     "composite_runtime family is at zero inconsistent keys as of Stream B plateau.",
     "Residual entity drift is limited to intentional entity-specific filters, metadata policy blocks, schema field-alias surfaces, and pipeline overrides."
   ],
-  "snapshot_date": "2026-06-30"
+  "snapshot_date": "2026-07-01"
 }
