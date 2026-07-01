@@ -100,8 +100,6 @@ _EXCLUDED_OUTPUT_FIELDS: frozenset[str] = frozenset(
         "publication_subclass",
         "publication_class",
         "oa_status",
-        "citations_received",
-        "citations_made",
         "affiliation_list",
         "author_orcids",
         "is_oa",

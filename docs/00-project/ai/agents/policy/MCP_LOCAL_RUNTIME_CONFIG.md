@@ -17,6 +17,7 @@ This policy applies to:
 - `.codex/config.toml`
 - `.codex/config-headless.toml`
 - `.gemini/config.toml`
+- `.devin/config.json`
 
 ## Current Classification
 
@@ -28,6 +29,7 @@ This policy applies to:
 | `.gemini/settings.json` | no | local-only/untracked runtime config | may exist in local checkouts; not a tracked runtime source on `main` |
 | `.codex/config-headless.toml` | no | local-only/untracked runtime config | headless variant; not currently tracked on `main` |
 | `.gemini/config.toml` | no | local-only/untracked runtime config | may exist in local checkouts; not a tracked runtime source on `main` |
+| `.devin/config.json` | yes | tracked active local runtime config | checked-in config contains absolute local paths by design |
 | `.claude/**` | no | unavailable in current checkout | not an active source for Codex/Gemini behavior in this program |
 
 ## Strategy

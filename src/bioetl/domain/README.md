@@ -64,3 +64,22 @@ application, infrastructure, composition, or interface layers.
   domain ports when the field represents an execution contract. Keep concrete
   logger/client/storage instances outside the domain layer and inject them
   through composition/application boundaries.
+
+## Sanctioned Exceptions
+
+The following exceptions are explicitly sanctioned and documented:
+
+### pathlib.Path in control_plane/contract_registry_helpers.py
+
+**File**: `src/bioetl/domain/control_plane/contract_registry_helpers.py`
+
+**Usage**: `pathlib.Path` is used as a value object for path computation only.
+
+**Constraints**:
+- No I/O operations (`open()`, `read()`, `write()`) are performed
+- Path is used for pure path resolution and manipulation
+- Example: `resolve_path()` function resolves relative paths against optional base directory
+
+**Rationale**: Path computation is a pure value operation that does not violate domain layer purity. The function only manipulates path strings without performing any I/O.
+
+**Approval**: Documented as sanctioned exception to prevent cargo-cult copying of this pattern for actual I/O operations.
