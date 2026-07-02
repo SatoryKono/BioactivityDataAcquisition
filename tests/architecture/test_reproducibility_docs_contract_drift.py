@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 import subprocess
+import sys
 from dataclasses import fields
 from pathlib import Path
 
@@ -256,6 +257,7 @@ def test_run_manifest_docs_define_replay_equivalence_levels() -> None:
 
 
 @pytest.mark.architecture
+@pytest.mark.skipif(sys.platform == "win32", reason="ripgrep not available on Windows")
 def test_universal_exact_replay_claims_are_bound_to_full_universe_evidence() -> None:
     """Universal exact-replay wording must remain gated by certified evidence."""
     contract = _read("docs/04-reference/contracts/run-manifest-ledger.md")
