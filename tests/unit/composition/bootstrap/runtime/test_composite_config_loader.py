@@ -439,6 +439,7 @@ class TestCompositeDQExternalization:
         configs_root = tmp_path / "configs"
         composites_dir = configs_root / "composites"
         quality_dir = configs_root / "quality" / "entities" / "composite"
+        shared_policy_path = Path("configs/composites/field_groups/shared_policy.yaml")
 
         _copy_composite_shared_policy_if_present(
             source_config_path=current_path,
@@ -447,6 +448,10 @@ class TestCompositeDQExternalization:
         )
         _write_yaml(composites_dir / f"{entity}_inline.yaml", before_payload)
         _write_yaml(composites_dir / f"{entity}_external.yaml", after_payload)
+        _write_yaml(
+            composites_dir / "field_groups" / "shared_policy.yaml",
+            yaml.safe_load(shared_policy_path.read_text(encoding="utf-8")),
+        )
         _write_yaml(quality_dir / f"{entity}.yaml", external_payload)
 
         monkeypatch.setattr(

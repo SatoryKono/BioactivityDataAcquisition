@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from copy import deepcopy
 from dataclasses import dataclass
 from typing import Literal
 
@@ -34,7 +35,7 @@ class MigrationStatus:
 
 
 class PhasedMigrationCoordinator:
-    """Coordinator for phased migrations and backward compatibility."""
+    """Retired compatibility shim for phased-migration public API callers."""
 
     def __init__(self) -> None:
         self._current_version = get_version()
@@ -43,24 +44,8 @@ class PhasedMigrationCoordinator:
     def _define_migration_phases(self) -> list[MigrationPhaseConfig]:
         return [
             MigrationPhaseConfig(
-                phase_name="v1.0",
-                start_version="1.0.0",
-                end_version="1.2.0",
-                backward_compatible=True,
-                migration_strategy="immediate",
-                fallback_behavior="warn",
-            ),
-            MigrationPhaseConfig(
-                phase_name="v1.1",
-                start_version="1.1.0",
-                end_version="1.3.0",
-                backward_compatible=True,
-                migration_strategy="gradual",
-                fallback_behavior="warn",
-            ),
-            MigrationPhaseConfig(
-                phase_name="v1.2",
-                start_version="1.2.0",
+                phase_name="stable",
+                start_version="6.0.0",
                 end_version=None,
                 backward_compatible=True,
                 migration_strategy="gradual",
@@ -83,20 +68,7 @@ class PhasedMigrationCoordinator:
         )
 
     def _determine_current_phase(self) -> str:
-        if self._current_version in ("", "unknown", None):
-            return self._migration_phases[-1].phase_name
-        matching = [
-            phase
-            for phase in self._migration_phases
-            if _phase_matches_version(
-                self._current_version, phase, self._version_compare
-            )
-        ]
-        return (
-            matching[-1].phase_name
-            if matching
-            else self._migration_phases[-1].phase_name
-        )
+        return self._migration_phases[-1].phase_name
 
     def _version_compare(self, v1: str, v2: str) -> int:
         """Compare two version strings (-1 if v1<v2, 0 if equal, 1 if v1>v2)."""
@@ -123,6 +95,8 @@ class PhasedMigrationCoordinator:
     ) -> dict[str, str]:
         """Report backward-compatibility issues for the target migration phase."""
         phase_name = target_phase or self._determine_current_phase()
+        if phase_name in _RETIRED_PHASE_MESSAGES:
+            return {"phase_retired": _RETIRED_PHASE_MESSAGES[phase_name]}
         phase_config = self._find_phase(phase_name)
         if phase_config is None:
             return {"phase_not_found": f"Phase {phase_name} not found"}
@@ -138,23 +112,24 @@ class PhasedMigrationCoordinator:
         to_phase: str,
     ) -> dict[str, list[str]]:
         """Build transition guidance between two named migration phases."""
+        retired_guide = _retired_phase_migration_guide(from_phase, to_phase)
+        if retired_guide is not None:
+            return retired_guide
+
         guide = _empty_migration_guide()
         from_phase_config = self._find_phase(from_phase)
         to_phase_config = self._find_phase(to_phase)
         if from_phase_config is None or to_phase_config is None:
             guide["steps"].append("Invalid phase names provided")
             return guide
-        if (
-            self._version_compare(
-                to_phase_config.start_version,
-                from_phase_config.start_version,
-            )
-            > 0
+        if _is_upgrade_transition(
+            from_phase_config=from_phase_config,
+            to_phase_config=to_phase_config,
+            compare=self._version_compare,
         ):
             guide["steps"].append(
                 f"Upgrade to version {to_phase_config.start_version} or later"
             )
-        _extend_transition_guidance(guide, from_phase, to_phase)
         return guide
 
     def apply_migration_fallback(
@@ -165,14 +140,22 @@ class PhasedMigrationCoordinator:
     ) -> tuple[JsonDict, list[str]]:
         """Apply compatibility defaults needed for an older target phase."""
         warnings: list[str] = []
-        modified_config = config.copy()
+        modified_config = deepcopy(config)
+        if target_phase in _RETIRED_PHASE_MESSAGES:
+            warnings.append(_RETIRED_PHASE_MESSAGES[target_phase])
+            _raise_migration_fallback_errors(
+                warnings=warnings,
+                fallback_behavior=fallback_behavior,
+            )
+            return modified_config, warnings
         phase_config = self._find_phase(target_phase)
         if phase_config is None:
             warnings.append(f"Target phase {target_phase} not found")
             return modified_config, warnings
-        _apply_phase_specific_fallback(modified_config, target_phase, warnings)
-        if warnings and fallback_behavior == "error":
-            raise ValueError(f"Migration fallback errors: {', '.join(warnings)}")
+        _raise_migration_fallback_errors(
+            warnings=warnings,
+            fallback_behavior=fallback_behavior,
+        )
         return modified_config, warnings
 
     def get_supported_phases(self) -> list[dict[str, str]]:
@@ -225,67 +208,50 @@ def _empty_migration_guide() -> dict[str, list[str]]:
     }
 
 
-def _extend_transition_guidance(
-    guide: dict[str, list[str]],
+def _retired_phase_migration_guide(
     from_phase: str,
     to_phase: str,
-) -> None:
-    transition = (from_phase, to_phase)
-    if transition == ("v1.0", "v1.1"):
-        guide["steps"].extend(
-            [
-                "Update composite validation configurations",
-                "Review field priority settings",
-                "Test cross-validation configurations",
-            ]
-        )
-        guide["new_features"].append("Enhanced cross-validation governance")
-        return
-    if transition == ("v1.1", "v1.2"):
-        guide["steps"].extend(
-            [
-                "Update to latest aggregation validator",
-                "Review merged metadata explainability settings",
-                "Test phased migration support",
-            ]
-        )
-        guide["new_features"].extend(
-            ["Merged metadata explainability", "Phased migration support"]
-        )
+) -> dict[str, list[str]] | None:
+    retired_message = _RETIRED_PHASE_MESSAGES.get(from_phase)
+    if retired_message is None:
+        return None
+
+    guide = _empty_migration_guide()
+    guide["steps"].append(retired_message)
+    guide["steps"].append(
+        "Use configs/quality/config_compatibility_registry.yaml for any "
+        "remaining compatibility review instead of runtime phased fallbacks"
+    )
+    if to_phase == "stable":
+        guide["new_features"].append("Legacy v1.x phased runtime fallback retired")
+    return guide
 
 
-def _apply_phase_specific_fallback(
-    config: JsonDict,
-    target_phase: str,
+def _is_upgrade_transition(
+    *,
+    from_phase_config: MigrationPhaseConfig,
+    to_phase_config: MigrationPhaseConfig,
+    compare: Callable[[str, str], int],
+) -> bool:
+    return compare(
+        to_phase_config.start_version,
+        from_phase_config.start_version,
+    ) > 0
+
+
+def _raise_migration_fallback_errors(
+    *,
     warnings: list[str],
+    fallback_behavior: Literal["warn", "error", "silent"],
 ) -> None:
-    if target_phase == "v1.0":
-        _ensure_aggregation_provenance_tracking(config, warnings)
-        return
-    if target_phase == "v1.1":
-        _ensure_cross_validation_strict_mode(config, warnings)
+    if warnings and fallback_behavior == "error":
+        raise ValueError(f"Migration fallback errors: {', '.join(warnings)}")
 
-
-def _ensure_aggregation_provenance_tracking(
-    config: JsonDict,
-    warnings: list[str],
-) -> None:
-    aggregation = config.get("aggregation")
-    if not isinstance(aggregation, dict) or "provenance_tracking" in aggregation:
-        return
-    aggregation["provenance_tracking"] = False
-    warnings.append("Added missing provenance_tracking field with default value")
-
-
-def _ensure_cross_validation_strict_mode(
-    config: JsonDict,
-    warnings: list[str],
-) -> None:
-    cross_validation = config.get("cross_validation")
-    if not isinstance(cross_validation, dict) or "strict_mode" in cross_validation:
-        return
-    cross_validation["strict_mode"] = True
-    warnings.append("Added missing strict_mode field with default value")
+_RETIRED_PHASE_MESSAGES = {
+    "v1.0": "Legacy phased migration phase v1.0 is retired; use the governed config compatibility registry instead",
+    "v1.1": "Legacy phased migration phase v1.1 is retired; use the governed config compatibility registry instead",
+    "v1.2": "Legacy phased migration phase v1.2 is retired; use the governed config compatibility registry instead",
+}
 
 
 def create_phased_migration_support_service() -> PhasedMigrationCoordinator:

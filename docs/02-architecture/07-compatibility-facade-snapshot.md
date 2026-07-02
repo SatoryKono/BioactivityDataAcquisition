@@ -48,18 +48,18 @@
 
 ## Curated Row Governance Metadata
 
-- `src/bioetl/interfaces/cli/commands/run.py` — external breaking change required: `true`, internal callers zero: `false`
-- `src/bioetl/interfaces/cli/commands/run_all.py` — external breaking change required: `true`, internal callers zero: `false`
-- `src/bioetl/interfaces/cli/commands/run_composite.py` — external breaking change required: `true`, internal callers zero: `true`
-- `src/bioetl/interfaces/cli/commands/health.py` — external breaking change required: `true`, internal callers zero: `true`
-- `src/bioetl/interfaces/cli/commands/diagnostics.py` — external breaking change required: `true`, internal callers zero: `false`
-- `src/bioetl/interfaces/cli/commands/quarantine.py` — external breaking change required: `true`, internal callers zero: `false`
-- `src/bioetl/composition/entrypoints.py` — external breaking change required: `true`, internal callers zero: `true`
-- `src/bioetl/composition/health_api.py` — external breaking change required: `true`, internal callers zero: `true`
-- `src/bioetl/composition/maintenance_api.py` — external breaking change required: `true`, internal callers zero: `false`
-- `src/bioetl/infrastructure/config/__init__.py` — external breaking change required: `true`, internal callers zero: `true`
-- `src/bioetl/domain/composite/config.py` — external breaking change required: `true`, internal callers zero: `false`
-- `src/bioetl/application/composite/merger.py` — external breaking change required: `true`, internal callers zero: `true`
+- `src/bioetl/interfaces/cli/commands/run.py` — consumer class: `bioetl.interfaces.cli.commands`, sunset status: `public-entrypoint`, external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/interfaces/cli/commands/run_all.py` — consumer class: `bioetl.interfaces.cli.commands`, sunset status: `public-entrypoint`, external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/interfaces/cli/commands/run_composite.py` — consumer class: `bioetl.interfaces.cli.commands`, sunset status: `public-entrypoint`, external breaking change required: `true`, internal callers zero: `true`
+- `src/bioetl/interfaces/cli/commands/health.py` — consumer class: `bioetl.interfaces.cli.commands`, sunset status: `public-entrypoint`, external breaking change required: `true`, internal callers zero: `true`
+- `src/bioetl/interfaces/cli/commands/diagnostics.py` — consumer class: `bioetl.interfaces.cli.commands`, sunset status: `public-entrypoint`, external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/interfaces/cli/commands/quarantine.py` — consumer class: `bioetl.interfaces.cli.commands`, sunset status: `public-entrypoint`, external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/composition/entrypoints.py` — consumer class: `bioetl.composition`, sunset status: `public-entrypoint`, external breaking change required: `true`, internal callers zero: `true`
+- `src/bioetl/composition/health_api.py` — consumer class: `bioetl.composition`, sunset status: `public-entrypoint`, external breaking change required: `true`, internal callers zero: `true`
+- `src/bioetl/composition/maintenance_api.py` — consumer class: `bioetl.composition`, sunset status: `public-entrypoint`, external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/infrastructure/config/__init__.py` — consumer class: `bioetl.infrastructure.config`, sunset status: `public-entrypoint`, external breaking change required: `true`, internal callers zero: `true`
+- `src/bioetl/domain/composite/config.py` — consumer class: `bioetl.domain.composite`, sunset status: `public-entrypoint`, external breaking change required: `true`, internal callers zero: `false`
+- `src/bioetl/application/composite/merger.py` — consumer class: `bioetl.application.composite`, sunset status: `public-entrypoint`, external breaking change required: `true`, internal callers zero: `true`
 
 ## Measured-Only Allowlist
 

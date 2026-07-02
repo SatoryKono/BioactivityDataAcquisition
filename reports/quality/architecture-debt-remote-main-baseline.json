@@ -1,10 +1,10 @@
 {
   "artifacts": [
     {
-      "blob_sha256": "69114d4493c2c5ec82f55702ff51e111bc34f48f99a316c1f82733d8f7d499dc",
+      "blob_sha256": "4e69c3dda0748ad2ecc76c7fee933d8e6bf16fe34bc88fbb2a756c8bf861fc9b",
       "path": "reports/quality/architecture-quality-scorecard.json",
       "required": true,
-      "source_revision": "b4978a3426cdcbd7a9f1cd29b76e57d68cb34252",
+      "source_revision": "dbb0fc248dc1e6e3045eeb2216c13e854efa2cd3",
       "summary": {
         "available": true,
         "integral_score": 8.53,
@@ -13,25 +13,25 @@
       }
     },
     {
-      "blob_sha256": "bfe9df7653a091a7914e28c1a51acb57cbdcda51bab4d7c2bcbc0be78728aba1",
+      "blob_sha256": "cf0acb70f0030d9df62e72505c645c4699f9f35221b4408fd0f4398dd43c2ca2",
       "path": "reports/quality/module-coverage-inventory.json",
       "required": true,
-      "source_revision": "b4978a3426cdcbd7a9f1cd29b76e57d68cb34252",
+      "source_revision": "dbb0fc248dc1e6e3045eeb2216c13e854efa2cd3",
       "summary": {
         "available": true,
         "coverage_xml_sha256": "fb15f6a63e251a6fa48645d07ddb739836aad21aa27f184eeda1ce3c84776e0c",
         "schema_version": 1,
         "snapshot_date": "2026-07-01",
-        "source_module_count": 2191,
-        "source_tree_sha256": "3e8365cd0a72ee50dd611b2759422a72a85dca8d88fea4eb0248dad86479063b",
+        "source_module_count": 2194,
+        "source_tree_sha256": "05ce94cced8027c5d799359b45c2e9e2c78fad9166125df1639c04783c83ad01",
         "unmeasured_module_count": 0
       }
     },
     {
-      "blob_sha256": "661bec85b8b3fd28aeb6d1713caea03fdf6efacc48cfe6faaf6592bcf9b9bab7",
+      "blob_sha256": "27aa36e6ca1a1bfafc75cde94e2b956d3b5fe5b781d4ed9d0878b3d71a782e60",
       "path": "reports/quality/compatibility-importer-census.json",
       "required": true,
-      "source_revision": "b4978a3426cdcbd7a9f1cd29b76e57d68cb34252",
+      "source_revision": "dbb0fc248dc1e6e3045eeb2216c13e854efa2cd3",
       "summary": {
         "available": true,
         "retained_entrypoint_count": 12,
@@ -42,7 +42,7 @@
       "blob_sha256": "7edaeeb389142d94a5e216adbf321ee04b8c8c55981d16ef15a9759879af226b",
       "path": "reports/quality/dead-code-inventory.json",
       "required": true,
-      "source_revision": "b4978a3426cdcbd7a9f1cd29b76e57d68cb34252",
+      "source_revision": "dbb0fc248dc1e6e3045eeb2216c13e854efa2cd3",
       "summary": {
         "available": true,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
@@ -53,7 +53,7 @@
       "blob_sha256": "691ae784ed4f90f7835fed4706fbb586e7d7184b8ddc965a7fd5cab6ef3a2dce",
       "path": "reports/quality/contract-registry-diagnostics.json",
       "required": true,
-      "source_revision": "b4978a3426cdcbd7a9f1cd29b76e57d68cb34252",
+      "source_revision": "dbb0fc248dc1e6e3045eeb2216c13e854efa2cd3",
       "summary": {
         "available": true,
         "blocking_issue_count": 0,
@@ -64,13 +64,13 @@
       "blob_sha256": "d65eb9283100b0cce5e78e4cac3708c7971a23736a9fca6bf7c9fc79b5ac7a96",
       "path": "reports/observability/runtime_cardinality_inventory.json",
       "required": false,
-      "source_revision": "b4978a3426cdcbd7a9f1cd29b76e57d68cb34252",
+      "source_revision": "dbb0fc248dc1e6e3045eeb2216c13e854efa2cd3",
       "summary": {
         "available": true
       }
     }
   ],
-  "baseline_artifact_fingerprint": "422097d36bc8a9c9b535edca04b80ca8c451afd562914a43e273b70ad9af99e0",
+  "baseline_artifact_fingerprint": "7324704b79518e8b94fb75edbc86d81af1732e29be3ff8dd4ef56d3d43ecff31",
   "branch": "main",
   "dirty_closeout_guard": {
     "command": "git status --porcelain --untracked-files=no",
@@ -90,9 +90,9 @@
   ],
   "local_tracking_ref": "origin/main",
   "local_tracking_ref_matches_remote": true,
-  "local_tracking_ref_sha": "b4978a3426cdcbd7a9f1cd29b76e57d68cb34252",
+  "local_tracking_ref_sha": "dbb0fc248dc1e6e3045eeb2216c13e854efa2cd3",
   "remote": "origin",
   "remote_main_ref": "refs/heads/main",
-  "remote_main_sha": "b4978a3426cdcbd7a9f1cd29b76e57d68cb34252",
+  "remote_main_sha": "dbb0fc248dc1e6e3045eeb2216c13e854efa2cd3",
   "schema_version": 1
 }

@@ -38,14 +38,34 @@ ______________________________________________________________________
   root entrypoints. Операционные quick-reference материалы SHOULD жить в
   `docs/05-operations/`, а одноразовые status/recovery/final-summary артефакты
   MUST архивироваться под `docs/99-archive/`.
+- Reconciled `2026-07` tracked root baseline uses three explicit dispositions:
+  canonical project/tooling entrypoints retained at root, canonical
+  runtime/governance entrypoints retained at root, and reviewed ADR-010
+  adjunct helper files retained pending bounded owner-led relocation review.
+- Former root Codex / WSL setup notes were converged into canonical
+  `docs/05-operations/**` runbooks and archived under
+  `docs/99-archive/root-status-artifacts/ai-runtime-setup/`; they are no
+  longer approved root entrypoints.
+- Vendor-documented repo-wide guidance files MAY remain at root only when the
+  external review/runtime contract requires the exact root filename. Current
+  reviewed example: `best_practices.md` for Qodo policy ingestion, with its
+  retention rationale documented under `docs/00-project/governance/qodo/`.
+- Transitional root launcher/setup shims such as `.wsl_proxy_env.sh`,
+  `codex*.ps1`, `run-codex*.ps1`, and `setup-codex-wsl.*` MAY remain tracked
+  only as explicit compatibility entrypoints while their canonical maintained
+  owner surfaces converge under `scripts/ai/codex/**`. These retained root
+  shims MUST stay thin and MUST NOT regrow independent setup or launcher logic.
+- Root Docker helper relocation decisions MUST reference
+  `docs/05-operations/verification/docker-helper-root-relocation-audit.md`
+  before any helper/file move is approved.
 - Raw generated test inventories and dumps (for example `tests.txt`) MUST NOT
   оставаться tracked в корне. Retained diagnostics and auditable test outputs
   MUST route into approved `reports/**` or archive/report surfaces instead of a
   root-level txt dump.
 - Root-level tracked директории MUST ограничиваться approved runtime/tooling and
   project surfaces: `.codex`, `.cursor`, `.devin`, `.gemini`, `.github`,
-  `.idea`, `.vibe`, `.vscode`, `assets`, `configs`, `data`, `docs`,
-  `grafana`, `reports`, `scripts`, `src`, and `tests`.
+  `.idea`, `.vibe`, `.vscode`, `artifacts`, `assets`, `configs`, `data`,
+  `docs`, `grafana`, `reports`, `scripts`, `src`, and `tests`.
 - Canonical machine-readable root governance lives in `.github/root-allowlist.txt`,
   `configs/quality/repo_structure_catalog.yaml`,
   `configs/quality/root_hygiene_review_registry.yaml`, and

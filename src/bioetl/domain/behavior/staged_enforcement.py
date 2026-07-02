@@ -67,80 +67,13 @@ class EnforcementPolicy:
 class StagedEnforcementEngine:
     """Engine for managing staged CI enforcement."""
 
-    def __init__(self) -> None:
-        self.policies = self._load_policies()
+    def __init__(self, policies: dict[str, EnforcementPolicy] | None = None) -> None:
+        self.policies = policies or _build_default_policies()
         self.results: list[CheckResult] = []
-        self._contract_policies = self._load_contract_policies()
-
-    def _load_policies(self) -> dict[str, EnforcementPolicy]:
-        """Load enforcement policies from environment or defaults."""
-        # Default policies - can be overridden by environment variables
-        return {
-            "fixture_governance": EnforcementPolicy(
-                check_name="fixture_governance",
-                current_stage=EnforcementStage.SOFT_FAIL,
-                failure_threshold=0.8,  # 80% failure rate → hard fail
-                warning_threshold=0.3,  # 30% failure rate → soft fail
-                observe_until="2024-04-01",
-                soft_fail_until="2024-06-01",
-            ),
-            "checkpoint_compatibility": EnforcementPolicy(
-                check_name="checkpoint_compatibility",
-                current_stage=EnforcementStage.OBSERVE,
-                failure_threshold=0.9,  # 90% failure rate → hard fail
-                warning_threshold=0.4,  # 40% failure rate → soft fail
-                observe_until="2024-05-01",
-                soft_fail_until="2024-07-01",
-            ),
-            "effective_config_stability": EnforcementPolicy(
-                check_name="effective_config_stability",
-                current_stage=EnforcementStage.OBSERVE,
-                failure_threshold=0.7,  # 70% failure rate → hard fail
-                warning_threshold=0.2,  # 20% failure rate → soft fail
-                observe_until="2024-04-15",
-                soft_fail_until="2024-06-15",
-            ),
-            "contract_identity": EnforcementPolicy(
-                check_name="contract_identity",
-                current_stage=EnforcementStage.SOFT_FAIL,
-                failure_threshold=0.7,
-                warning_threshold=0.2,
-            ),
-            "registry_consistency": EnforcementPolicy(
-                check_name="registry_consistency",
-                current_stage=EnforcementStage.OBSERVE,
-                failure_threshold=0.8,
-                warning_threshold=0.3,
-            ),
-            "schema_compatibility": EnforcementPolicy(
-                check_name="schema_compatibility",
-                current_stage=EnforcementStage.OBSERVE,
-                failure_threshold=0.9,
-                warning_threshold=0.4,
-            ),
-        }
-
-    def _load_contract_policies(self) -> dict[str, EnforcementPolicy]:
-        """Load contract-specific enforcement policies."""
-        return {
-            "contract_identity": EnforcementPolicy(
-                check_name="contract_identity",
-                current_stage=EnforcementStage.SOFT_FAIL,
-                failure_threshold=0.7,
-                warning_threshold=0.2,
-            ),
-            "registry_consistency": EnforcementPolicy(
-                check_name="registry_consistency",
-                current_stage=EnforcementStage.OBSERVE,
-                failure_threshold=0.8,
-                warning_threshold=0.3,
-            ),
-            "schema_compatibility": EnforcementPolicy(
-                check_name="schema_compatibility",
-                current_stage=EnforcementStage.OBSERVE,
-                failure_threshold=0.9,
-                warning_threshold=0.4,
-            ),
+        self._contract_policies = {
+            name: self.policies[name]
+            for name in _CONTRACT_POLICY_NAMES
+            if name in self.policies
         }
 
     def register_result(self, result: CheckResult) -> None:
@@ -202,6 +135,62 @@ class StagedEnforcementEngine:
 def create_enforcement_engine() -> StagedEnforcementEngine:
     """Factory function for enforcement engine."""
     return StagedEnforcementEngine()
+
+
+_DEFAULT_POLICY_SPECS: tuple[dict[str, object], ...] = (
+    {
+        "check_name": "fixture_governance",
+        "current_stage": EnforcementStage.SOFT_FAIL,
+        "failure_threshold": 0.8,
+        "warning_threshold": 0.3,
+    },
+    {
+        "check_name": "checkpoint_compatibility",
+        "current_stage": EnforcementStage.OBSERVE,
+        "failure_threshold": 0.9,
+        "warning_threshold": 0.4,
+    },
+    {
+        "check_name": "effective_config_stability",
+        "current_stage": EnforcementStage.OBSERVE,
+        "failure_threshold": 0.7,
+        "warning_threshold": 0.2,
+    },
+    {
+        "check_name": "contract_identity",
+        "current_stage": EnforcementStage.SOFT_FAIL,
+        "failure_threshold": 0.7,
+        "warning_threshold": 0.2,
+    },
+    {
+        "check_name": "registry_consistency",
+        "current_stage": EnforcementStage.OBSERVE,
+        "failure_threshold": 0.8,
+        "warning_threshold": 0.3,
+    },
+    {
+        "check_name": "schema_compatibility",
+        "current_stage": EnforcementStage.OBSERVE,
+        "failure_threshold": 0.9,
+        "warning_threshold": 0.4,
+    },
+)
+
+_CONTRACT_POLICY_NAMES = frozenset(
+    {"contract_identity", "registry_consistency", "schema_compatibility"}
+)
+
+
+def _build_default_policies() -> dict[str, EnforcementPolicy]:
+    return {
+        str(spec["check_name"]): EnforcementPolicy(
+            check_name=str(spec["check_name"]),
+            current_stage=spec["current_stage"],
+            failure_threshold=float(spec["failure_threshold"]),
+            warning_threshold=float(spec["warning_threshold"]),
+        )
+        for spec in _DEFAULT_POLICY_SPECS
+    }
 
 
 def _serialize_policies(policies: dict[str, EnforcementPolicy]) -> JsonDict:

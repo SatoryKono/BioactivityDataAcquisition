@@ -2,8 +2,8 @@
   "summary": {
     "snapshot_date": "2026-07-02",
     "targets": 4,
-    "total_duplicate_clusters": 90,
-    "total_raw_duplicate_clusters": 90,
+    "total_duplicate_clusters": 61,
+    "total_raw_duplicate_clusters": 61,
     "total_excluded_duplicate_clusters": 0
   },
   "normalization": {
@@ -15,28 +15,28 @@
   },
   "reduction_leverage_ranking": [
     {
-      "target": "src/bioetl/composition",
-      "duplicate_clusters": 25,
-      "dominant_actionability_category": "composition_runtime_wiring_pattern",
-      "dominant_actionability_cluster_count": 25,
-      "low_risk_cluster_count": 25,
-      "low_risk_cluster_share": 1.0,
-      "recommended_first_wave": true
-    },
-    {
       "target": "src/bioetl/infrastructure/adapters",
-      "duplicate_clusters": 54,
+      "duplicate_clusters": 51,
       "dominant_actionability_category": "export_facade_or_package_barrel",
-      "dominant_actionability_cluster_count": 47,
-      "low_risk_cluster_count": 47,
-      "low_risk_cluster_share": 0.8704,
+      "dominant_actionability_cluster_count": 45,
+      "low_risk_cluster_count": 45,
+      "low_risk_cluster_share": 0.8824,
       "recommended_first_wave": false
     },
     {
       "target": "src/bioetl/application/pipelines",
-      "duplicate_clusters": 11,
+      "duplicate_clusters": 10,
       "dominant_actionability_category": "pipeline_transformer_contract_pattern",
-      "dominant_actionability_cluster_count": 11,
+      "dominant_actionability_cluster_count": 10,
+      "low_risk_cluster_count": 0,
+      "low_risk_cluster_share": 0.0,
+      "recommended_first_wave": false
+    },
+    {
+      "target": "src/bioetl/composition/bootstrap",
+      "duplicate_clusters": 0,
+      "dominant_actionability_category": null,
+      "dominant_actionability_cluster_count": 0,
       "low_risk_cluster_count": 0,
       "low_risk_cluster_share": 0.0,
       "recommended_first_wave": false
@@ -53,9 +53,9 @@
   ],
   "first_wave": {
     "status": "selected",
-    "target": "src/bioetl/composition",
-    "duplicate_clusters": 25,
-    "dominant_actionability_category": "composition_runtime_wiring_pattern",
+    "target": "src/bioetl/infrastructure/adapters",
+    "duplicate_clusters": 51,
+    "dominant_actionability_category": "export_facade_or_package_barrel",
     "selection_rule": "prefer low-risk actionability families with bounded cluster counts, then maximize duplicate reduction leverage"
   },
   "targets": [
@@ -77,17 +77,17 @@
     {
       "target": "src/bioetl/infrastructure/adapters",
       "returncode": 8,
-      "duplicate_count": 54,
-      "raw_duplicate_count": 54,
+      "duplicate_count": 51,
+      "raw_duplicate_count": 51,
       "excluded_duplicate_count": 0,
       "actionability": [
         {
           "category": "export_facade_or_package_barrel",
-          "duplicate_clusters": 47
+          "duplicate_clusters": 45
         },
         {
           "category": "adapter_resilience_or_contract_template",
-          "duplicate_clusters": 7
+          "duplicate_clusters": 6
         }
       ],
       "top_pairs": [
@@ -108,7 +108,7 @@
         {
           "modules": [
             "bioetl.infrastructure.adapters.common.error_bundles",
-            "bioetl.infrastructure.adapters.crossref._batch_support"
+            "bioetl.infrastructure.adapters.pubchem.fetch_strategies"
           ],
           "duplicate_clusters": 2
         },
@@ -128,23 +128,6 @@
         }
       ],
       "clusters": [
-        {
-          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
-          "line": 1,
-          "actionability_category": "adapter_resilience_or_contract_template",
-          "modules": [
-            {
-              "module": "bioetl.infrastructure.adapters.health_check_contract",
-              "start_line": 12,
-              "end_line": 22
-            },
-            {
-              "module": "bioetl.infrastructure.adapters.uniprot.client",
-              "start_line": 54,
-              "end_line": 64
-            }
-          ]
-        },
         {
           "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
           "line": 1,
@@ -193,23 +176,6 @@
               "module": "bioetl.infrastructure.adapters.pubchem.client_model_mixin",
               "start_line": 88,
               "end_line": 97
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
-          "line": 1,
-          "actionability_category": "export_facade_or_package_barrel",
-          "modules": [
-            {
-              "module": "bioetl.infrastructure.adapters.crossref._batch_support",
-              "start_line": 53,
-              "end_line": 61
-            },
-            {
-              "module": "bioetl.infrastructure.adapters.pubchem.fetch_strategies",
-              "start_line": 53,
-              "end_line": 75
             }
           ]
         },
@@ -276,8 +242,8 @@
             },
             {
               "module": "bioetl.infrastructure.adapters.uniprot.client",
-              "start_line": 199,
-              "end_line": 206
+              "start_line": 194,
+              "end_line": 201
             }
           ]
         },
@@ -491,14 +457,14 @@
           "actionability_category": "adapter_resilience_or_contract_template",
           "modules": [
             {
-              "module": "bioetl.infrastructure.adapters.crossref._batch_support",
-              "start_line": 53,
-              "end_line": 59
-            },
-            {
               "module": "bioetl.infrastructure.adapters.health_check_contract",
               "start_line": 16,
               "end_line": 22
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.pubchem.fetch_strategies",
+              "start_line": 53,
+              "end_line": 59
             }
           ]
         },
@@ -577,13 +543,13 @@
           "modules": [
             {
               "module": "bioetl.infrastructure.adapters.common.error_bundles",
-              "start_line": 64,
-              "end_line": 70
+              "start_line": 40,
+              "end_line": 47
             },
             {
-              "module": "bioetl.infrastructure.adapters.crossref._batch_support",
-              "start_line": 55,
-              "end_line": 61
+              "module": "bioetl.infrastructure.adapters.pubchem.client",
+              "start_line": 60,
+              "end_line": 68
             }
           ]
         },
@@ -594,13 +560,13 @@
           "modules": [
             {
               "module": "bioetl.infrastructure.adapters.common.error_bundles",
-              "start_line": 40,
-              "end_line": 47
+              "start_line": 64,
+              "end_line": 70
             },
             {
-              "module": "bioetl.infrastructure.adapters.pubchem.client",
-              "start_line": 60,
-              "end_line": 68
+              "module": "bioetl.infrastructure.adapters.pubchem.fetch_strategies",
+              "start_line": 55,
+              "end_line": 75
             }
           ]
         },
@@ -798,8 +764,8 @@
           "modules": [
             {
               "module": "bioetl.infrastructure.adapters.uniprot.client",
-              "start_line": 191,
-              "end_line": 198
+              "start_line": 186,
+              "end_line": 193
             },
             {
               "module": "bioetl.infrastructure.adapters.uniprot.filtering_adapter_mixin",
@@ -885,23 +851,6 @@
               "module": "bioetl.infrastructure.adapters.common.error_bundles",
               "start_line": 26,
               "end_line": 31
-            },
-            {
-              "module": "bioetl.infrastructure.adapters.crossref._batch_support",
-              "start_line": 55,
-              "end_line": 60
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
-          "line": 1,
-          "actionability_category": "export_facade_or_package_barrel",
-          "modules": [
-            {
-              "module": "bioetl.infrastructure.adapters.common.error_bundles",
-              "start_line": 52,
-              "end_line": 57
             },
             {
               "module": "bioetl.infrastructure.adapters.pubchem.fetch_strategies",
@@ -1051,13 +1000,13 @@
     {
       "target": "src/bioetl/application/pipelines",
       "returncode": 8,
-      "duplicate_count": 11,
-      "raw_duplicate_count": 11,
+      "duplicate_count": 10,
+      "raw_duplicate_count": 10,
       "excluded_duplicate_count": 0,
       "actionability": [
         {
           "category": "pipeline_transformer_contract_pattern",
-          "duplicate_clusters": 11
+          "duplicate_clusters": 10
         }
       ],
       "top_pairs": [
@@ -1092,7 +1041,7 @@
         {
           "modules": [
             "bioetl.application.pipelines.pubchem.transformer",
-            "bioetl.application.pipelines.pubmed.transformer"
+            "bioetl.application.pipelines.uniprot.idmapping_transformer"
           ],
           "duplicate_clusters": 1
         }
@@ -1143,26 +1092,9 @@
               "end_line": 99
             },
             {
-              "module": "bioetl.application.pipelines.pubmed.transformer",
-              "start_line": 95,
-              "end_line": 106
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/application/pipelines/uniprot/extractors/__init__.py",
-          "line": 1,
-          "actionability_category": "pipeline_transformer_contract_pattern",
-          "modules": [
-            {
               "module": "bioetl.application.pipelines.uniprot.idmapping_transformer",
               "start_line": 95,
               "end_line": 127
-            },
-            {
-              "module": "bioetl.application.pipelines.uniprot.transformer",
-              "start_line": 56,
-              "end_line": 75
             }
           ]
         },
@@ -1246,8 +1178,8 @@
             },
             {
               "module": "bioetl.application.pipelines.pubmed.transformer",
-              "start_line": 261,
-              "end_line": 268
+              "start_line": 254,
+              "end_line": 261
             }
           ]
         },
@@ -1288,481 +1220,14 @@
       ]
     },
     {
-      "target": "src/bioetl/composition",
-      "returncode": 8,
-      "duplicate_count": 25,
-      "raw_duplicate_count": 25,
+      "target": "src/bioetl/composition/bootstrap",
+      "returncode": 0,
+      "duplicate_count": 0,
+      "raw_duplicate_count": 0,
       "excluded_duplicate_count": 0,
-      "actionability": [
-        {
-          "category": "composition_runtime_wiring_pattern",
-          "duplicate_clusters": 25
-        }
-      ],
-      "top_pairs": [
-        {
-          "modules": [
-            "bioetl.composition.bootstrap.runtime._composite_control_plane_builder_support",
-            "bioetl.composition.runtime_builders.run_manifest_support"
-          ],
-          "duplicate_clusters": 2
-        },
-        {
-          "modules": [
-            "bioetl.composition.factories.services.builder",
-            "bioetl.composition.factories.services.pipeline_builder"
-          ],
-          "duplicate_clusters": 2
-        },
-        {
-          "modules": [
-            "bioetl.composition._pipeline_execution",
-            "bioetl.composition.execution_api"
-          ],
-          "duplicate_clusters": 1
-        },
-        {
-          "modules": [
-            "bioetl.composition._resource_management",
-            "bioetl.composition.resources_api"
-          ],
-          "duplicate_clusters": 1
-        },
-        {
-          "modules": [
-            "bioetl.composition.bootstrap.__init__",
-            "bioetl.composition.registry_api"
-          ],
-          "duplicate_clusters": 1
-        }
-      ],
-      "clusters": [
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.control_plane_api",
-              "start_line": 118,
-              "end_line": 140
-            },
-            {
-              "module": "bioetl.composition.control_plane_service_access",
-              "start_line": 50,
-              "end_line": 71
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.factories.services.builder",
-              "start_line": 84,
-              "end_line": 114
-            },
-            {
-              "module": "bioetl.composition.factories.services.pipeline_builder",
-              "start_line": 71,
-              "end_line": 99
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.factories.pipeline.control_plane_artifacts",
-              "start_line": 24,
-              "end_line": 35
-            },
-            {
-              "module": "bioetl.composition.pipeline_runner_request",
-              "start_line": 52,
-              "end_line": 63
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.factories.dq.__init__",
-              "start_line": 21,
-              "end_line": 39
-            },
-            {
-              "module": "bioetl.composition.providers.__init__",
-              "start_line": 68,
-              "end_line": 86
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.factories.pipeline.factory_method_helpers",
-              "start_line": 121,
-              "end_line": 131
-            },
-            {
-              "module": "bioetl.composition.factories.transformer_factory",
-              "start_line": 118,
-              "end_line": 128
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.factories.storage._bronze",
-              "start_line": 55,
-              "end_line": 65
-            },
-            {
-              "module": "bioetl.composition.factories.storage._gold",
-              "start_line": 59,
-              "end_line": 69
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition._pipeline_execution",
-              "start_line": 98,
-              "end_line": 107
-            },
-            {
-              "module": "bioetl.composition.execution_api",
-              "start_line": 102,
-              "end_line": 111
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition._resource_management",
-              "start_line": 25,
-              "end_line": 36
-            },
-            {
-              "module": "bioetl.composition.resources_api",
-              "start_line": 21,
-              "end_line": 31
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.bootstrap.runtime._composite_control_plane_builder_support",
-              "start_line": 44,
-              "end_line": 51
-            },
-            {
-              "module": "bioetl.composition.runtime_builders.run_manifest_contract_identity",
-              "start_line": 20,
-              "end_line": 29
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.factories.datasource.data_source_factory",
-              "start_line": 76,
-              "end_line": 84
-            },
-            {
-              "module": "bioetl.composition.providers.provider_registry",
-              "start_line": 181,
-              "end_line": 188
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.factories.services.builder",
-              "start_line": 120,
-              "end_line": 133
-            },
-            {
-              "module": "bioetl.composition.factories.services.pipeline_builder",
-              "start_line": 105,
-              "end_line": 125
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.factories.storage.factory",
-              "start_line": 31,
-              "end_line": 40
-            },
-            {
-              "module": "bioetl.composition.factories.storage.storage_factory",
-              "start_line": 16,
-              "end_line": 23
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.providers._creation",
-              "start_line": 49,
-              "end_line": 62
-            },
-            {
-              "module": "bioetl.composition.providers.provider_registry",
-              "start_line": 150,
-              "end_line": 161
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.entrypoints",
-              "start_line": 33,
-              "end_line": 39
-            },
-            {
-              "module": "bioetl.composition.execution_api",
-              "start_line": 30,
-              "end_line": 36
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.bootstrap.__init__",
-              "start_line": 105,
-              "end_line": 111
-            },
-            {
-              "module": "bioetl.composition.registry_api",
-              "start_line": 36,
-              "end_line": 42
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.bootstrap.runtime._composite_control_plane_builder_support",
-              "start_line": 184,
-              "end_line": 190
-            },
-            {
-              "module": "bioetl.composition.runtime_builders.run_manifest_support",
-              "start_line": 95,
-              "end_line": 101
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.factories.observability_api",
-              "start_line": 11,
-              "end_line": 17
-            },
-            {
-              "module": "bioetl.composition.factories.services.observability_api",
-              "start_line": 11,
-              "end_line": 17
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.factories.datasource.data_source_factory",
-              "start_line": 76,
-              "end_line": 82
-            },
-            {
-              "module": "bioetl.composition.providers.registration_biblio",
-              "start_line": 171,
-              "end_line": 177
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.providers._models",
-              "start_line": 7,
-              "end_line": 18
-            },
-            {
-              "module": "bioetl.composition.providers.provider_registry",
-              "start_line": 34,
-              "end_line": 45
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.bootstrap.assembly.health_server",
-              "start_line": 37,
-              "end_line": 44
-            },
-            {
-              "module": "bioetl.composition.health_api",
-              "start_line": 79,
-              "end_line": 86
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.pipeline_runner_request",
-              "start_line": 57,
-              "end_line": 62
-            },
-            {
-              "module": "bioetl.composition.runtime_builders._run_manifest_refs",
-              "start_line": 78,
-              "end_line": 83
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.bootstrap.runtime._composite_control_plane_builder_support",
-              "start_line": 203,
-              "end_line": 208
-            },
-            {
-              "module": "bioetl.composition.runtime_builders.run_manifest_support",
-              "start_line": 103,
-              "end_line": 108
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.factories._observability_wiring",
-              "start_line": 142,
-              "end_line": 147
-            },
-            {
-              "module": "bioetl.composition.factories.services._bundle_support",
-              "start_line": 79,
-              "end_line": 84
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.factories.pipeline._creation_wiring",
-              "start_line": 117,
-              "end_line": 122
-            },
-            {
-              "module": "bioetl.composition.factories.services._bundle_support",
-              "start_line": 96,
-              "end_line": 101
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/composition/services/__init__.py",
-          "line": 1,
-          "actionability_category": "composition_runtime_wiring_pattern",
-          "modules": [
-            {
-              "module": "bioetl.composition.providers._chembl_target_protein_classification_helpers",
-              "start_line": 175,
-              "end_line": 190
-            },
-            {
-              "module": "bioetl.composition.runtime_builders.input_snapshot_resolution",
-              "start_line": 123,
-              "end_line": 131
-            }
-          ]
-        }
-      ]
+      "actionability": [],
+      "top_pairs": [],
+      "clusters": []
     }
   ]
 }

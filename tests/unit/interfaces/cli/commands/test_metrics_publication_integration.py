@@ -13,9 +13,9 @@ from bioetl.interfaces.cli.commands.domains.health.metrics_publication_integrati
 pytestmark = pytest.mark.unit
 
 
-def test_publish_metrics_safely_delegates_to_execution_api() -> None:
+def test_publish_metrics_safely_delegates_to_observability_api() -> None:
     with patch(
-        "bioetl.composition.execution_api.push_metrics_to_gateway",
+        "bioetl.composition.observability_api.push_metrics_to_gateway",
         return_value=True,
     ) as mock_push:
         result = publish_metrics_safely(
@@ -38,7 +38,7 @@ def test_publish_metrics_safely_delegates_to_execution_api() -> None:
 
 def test_publish_metrics_safely_swallows_observability_failures() -> None:
     with patch(
-        "bioetl.composition.execution_api.push_metrics_to_gateway",
+        "bioetl.composition.observability_api.push_metrics_to_gateway",
         side_effect=RuntimeError("push failed"),
     ):
         result = publish_metrics_safely(

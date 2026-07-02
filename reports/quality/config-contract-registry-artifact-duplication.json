@@ -38,26 +38,30 @@
   "pattern_file_counts": {
     "configs/**/*.csv": 2,
     "configs/**/*.json": 9,
-    "configs/**/*.yaml": 130,
+    "configs/**/*.yaml": 194,
+    "docs/04-reference/contracts/**/*.md": 9,
     "reports/quality/*contract*.json": 5,
     "reports/quality/*contract*.md": 3,
-    "reports/quality/*matrix*.json": 1,
-    "reports/quality/*matrix*.md": 1,
-    "reports/quality/*registry*.json": 1,
+    "reports/quality/*matrix*.json": 3,
+    "reports/quality/*matrix*.md": 3,
+    "reports/quality/*ownership*.json": 1,
+    "reports/quality/*ownership*.md": 1,
+    "reports/quality/*registry*.json": 3,
     "tests/fixtures/contracts/**/*.json": 7,
+    "tests/fixtures/contracts/**/*.yaml": 1,
     "tests/fixtures/golden/**/*.json": 21
   },
   "policy_scope": "config_contract_registry_artifact_duplication",
   "scan_root": ".",
   "schema_version": 1,
   "scope_file_counts": {
-    "config": 159,
+    "config": 160,
     "contract": 44,
     "golden": 20,
     "quality_report": 8,
-    "registry": 21
+    "registry": 22
   },
-  "total_files": 252,
+  "total_files": 254,
   "tracked_extensions": [
     ".csv",
     ".json",

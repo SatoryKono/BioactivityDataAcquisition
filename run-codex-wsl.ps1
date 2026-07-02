@@ -1,5 +1,5 @@
 #!/usr/bin/env pwsh
-# Repository root entrypoint: launch Codex through WSL (canonical scripts/ai/codex).
+# Repository root legacy alias over codex.ps1.
 
 param(
     [string]$Command = "start",
@@ -9,10 +9,10 @@ param(
 $ErrorActionPreference = "Stop"
 
 $RepoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$CanonicalLauncher = Join-Path $RepoRoot "scripts\ai\codex\run-codex.ps1"
+$PrimaryRootLauncher = Join-Path $RepoRoot "codex.ps1"
 
-if (-not (Test-Path -LiteralPath $CanonicalLauncher)) {
-    Write-Error "Canonical Codex launcher not found: $CanonicalLauncher"
+if (-not (Test-Path -LiteralPath $PrimaryRootLauncher)) {
+    Write-Error "Primary root Codex launcher not found: $PrimaryRootLauncher"
     exit 1
 }
 
@@ -21,5 +21,5 @@ if ($Prompt.Count -gt 0) {
     $ArgsList += $Prompt
 }
 
-& $CanonicalLauncher @ArgsList
+& $PrimaryRootLauncher @ArgsList
 exit $LASTEXITCODE

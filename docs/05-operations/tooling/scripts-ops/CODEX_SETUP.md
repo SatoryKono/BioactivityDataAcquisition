@@ -1,5 +1,11 @@
 # Codex Setup Guide
 
+> Canonical root-governance note:
+> former root `CODEX_SETUP.txt` guidance was retired in July 2026. Keep active
+> setup guidance here, and use
+> `docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md`
+> for Docker/WSL sandbox failures.
+
 ## Overview
 
 Codex is an AI-powered code assistant that helps analyze, refactor, and improve your codebase. This guide explains how to use it in the BioactivityDataAcquisition project.

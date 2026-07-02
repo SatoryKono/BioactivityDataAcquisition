@@ -108,12 +108,18 @@ def test_issue_5560_public_merge_entrypoint_has_zero_first_party_importers() -> 
 
 
 def test_issue_5561_config_duplication_clusters_are_owner_addressable() -> None:
+    closeout = _load_json(CLOSEOUT)
     backlog = _load_json(CONFIG_BACKLOG)
     clusters = backlog["duplication_audit"]["clusters"]
     composite_clusters = _composite_duplication_clusters(backlog)
+    metrics = closeout["metrics"]
 
-    assert backlog["duplication_audit"]["summary"]["duplicate_cluster_count"] == 24
-    assert backlog["duplication_audit"]["summary"]["duplicate_occurrence_count"] == 75
+    assert backlog["duplication_audit"]["summary"]["duplicate_cluster_count"] == metrics[
+        "config_duplicate_cluster_count"
+    ]
+    assert backlog["duplication_audit"]["summary"]["duplicate_occurrence_count"] == metrics[
+        "config_duplicate_occurrence_count"
+    ]
     assert clusters
     assert composite_clusters
 

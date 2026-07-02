@@ -7,6 +7,14 @@ agent: "general-purpose"
 
 # Ledger Initialization
 
+## Source Of Truth
+
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../docs/02-architecture/decisions`
+
+
 This skill creates a complete Context Ledger workspace from a project brief.
 
 ## Prerequisites

@@ -57,8 +57,8 @@ def test_issue_5755_removed_supporting_wrappers_are_absent_and_untracked() -> No
     assert isinstance(summary, dict)
     status_counts = summary["status_counts"]
     assert isinstance(status_counts, dict)
-    assert summary["total_scripts"] == 447
-    assert status_counts["supporting"] == 87
+    assert summary["total_scripts"] == 448
+    assert status_counts["supporting"] == 88
 
 
 def test_issue_5754_forensic_public_imports_use_canonical_seam() -> None:
@@ -93,16 +93,16 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
     assert test_governance["report"]["markerless_test_functions"] == 0
     assert test_governance["report"]["total_test_functions"] == 21595
     assert test_governance["report"]["total_test_files"] == 1890
-    assert scorecard["integral_score"] == 8.53
+    assert scorecard["integral_score"] == 8.54
     assert gates["summary"]["release_gate_status"] == "passing"
     assert gates["summary"]["pass_count"] == 31
     assert gates["summary"]["fail_count"] == 0
 
-    assert "Integral score is `8.53`" in debt_report
+    assert "Integral score is `8.54`" in debt_report
     assert "Retained entrypoints `12`" in debt_report
     assert "0 compatibility test files" in debt_report
-    assert "87 supporting scripts" in debt_report
+    assert "88 supporting scripts" in debt_report
     assert "21,595 test functions, 1,890 test files" in debt_report
 
-    assert "| Architecture quality score | `8.53` (`good_targeted_improvements`) |" in current_state
+    assert "| Architecture quality score | `8.54` (`good_targeted_improvements`) |" in current_state
     assert "compatibility_test_files=0" in current_state

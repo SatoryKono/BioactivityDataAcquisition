@@ -8,12 +8,21 @@ from pathlib import Path
 
 import yaml
 
+from bioetl.infrastructure.config._composite_shared_policy_externalization import (
+    merge_external_shared_policy,
+)
+
 
 pytestmark = pytest.mark.unit
 
 
 def _load_yaml(path: str) -> dict[str, object]:
-    return yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+    config_path = Path(path)
+    payload = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    if path.startswith("configs/composites/") and config_path.name != "shared_policy.yaml":
+        merge_external_shared_policy(payload, config_path)
+    return payload
 
 
 def test_uniprot_reviewed_gold_filter_uses_boolean_value() -> None:

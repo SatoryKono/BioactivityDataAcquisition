@@ -19,6 +19,8 @@ contract source: `configs/quality/docker_helper_contracts.yaml`. Redis, MinIO,
 SonarQube and Alertmanager helper compose files MUST remain optional
 local-only adjunct tooling and MUST NOT become application storage, locking, or
 orchestration dependencies.
+Relocation audit source:
+`docs/05-operations/verification/docker-helper-root-relocation-audit.md`.
 
 ## ✓ Проверка Docker
 

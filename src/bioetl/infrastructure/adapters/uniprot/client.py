@@ -6,9 +6,8 @@ __all__ = ["UNIPROT_BATCH_SIZE", "UNIPROT_FETCH_ERRORS", "UniProtAdapter"]
 
 from typing import TYPE_CHECKING, Any, override
 
-from httpx import HTTPStatusError, RequestError
+from httpx import HTTPStatusError
 
-from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.types import BronzeRecord, HealthStatus
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
@@ -19,6 +18,9 @@ from bioetl.infrastructure.adapters.common import (
 )
 from bioetl.infrastructure.adapters.common.api_request_collector import (
     APIRequestCollector,
+)
+from bioetl.infrastructure.adapters.common.error_bundles import (
+    COMMON_TITLE_FALLBACK_ERRORS,
 )
 from bioetl.infrastructure.adapters.common.fallback_fetch_service import (
     ExtractRecordIdProtocol,
@@ -52,17 +54,10 @@ if TYPE_CHECKING:
 UNIPROT_BATCH_SIZE = 100
 
 UNIPROT_FETCH_ERRORS = (
-    BioETLError,
-    NetworkError,
-    RequestError,
+    *COMMON_TITLE_FALLBACK_ERRORS,
     HTTPStatusError,
     ConnectionError,
     TimeoutError,
-    OSError,
-    ValueError,
-    TypeError,
-    RuntimeError,
-    KeyError,
 )
 
 _UNIPROT_DEFAULT_FALLBACK_CONFIG = FallbackDecoratorConfig(

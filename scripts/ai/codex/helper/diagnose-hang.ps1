@@ -1,6 +1,6 @@
 #!/usr/bin/env pwsh
 # Codex Diagnostics - Find where setup hangs
-# Usage: .\script-codex\helper\diagnose-hang.ps1
+# Usage: .\scripts\ai\codex\helper\diagnose-hang.ps1
 
 Write-Host ""
 Write-Host "================================================" -ForegroundColor Cyan

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from types import SimpleNamespace
 from typing import cast
 from unittest.mock import MagicMock
@@ -131,6 +132,31 @@ class TestBootstrapRuntimeBasics:
         assert kwargs["tracing"] is tracer
         assert kwargs["run_context"].run_id == _FIXED_UUID
         assert kwargs["run_context"].pipeline_name == "p"
+
+    def test_runtime_basics_uses_injected_clock_factory(self) -> None:
+        """clock_factory owns runtime time instead of hidden wall-clock reads."""
+        started_at = datetime(2026, 7, 2, 8, 30, tzinfo=UTC)
+        clock = SimpleNamespace(now=MagicMock(return_value=started_at))
+        storage_bootstrapper = MagicMock(return_value=MagicMock())
+
+        result = bootstrap_runtime_basics(
+            config=_make_config("p"),
+            run_id=str(_FIXED_UUID),
+            settings_provider=MagicMock(
+                return_value=SimpleNamespace(metrics_enabled=False)
+            ),
+            logger_bootstrapper=lambda _n, _u, _l: MagicMock(),
+            tracer_bootstrapper=lambda _settings: MagicMock(),
+            storage_bootstrapper=storage_bootstrapper,
+            lock_factory=MagicMock(return_value=MagicMock()),
+            uuid_factory=MagicMock(),
+            clock_factory=lambda: clock,
+        )
+
+        assert result.clock is clock
+        assert storage_bootstrapper.call_args.kwargs["run_context"].started_at == (
+            started_at
+        )
 
     def test_logger_bootstrapper_receives_pipeline_name(self) -> None:
         """logger_bootstrapper receives config.name as the first argument."""

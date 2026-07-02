@@ -6,26 +6,158 @@
 
 # --- Wave 2: Out-of-Scope (Infrastructure & Domain Aggregates) ---
 
+CompositeCheckpointLoadService:
+  max_args: 12
+  owner: "@bioetl-composite"
+  expiry: "2026-12-31"
+  reason: "Checkpoint-load orchestration still bundles multiple collaborators pending composite service decomposition."
+
+MergeService:
+  max_args: 10
+  owner: "@bioetl-composite"
+  expiry: "2026-12-31"
+  reason: "Composite merge orchestration still carries collaborator fan-out pending conflict-policy extraction."
+
+BaseTransformer:
+  max_args: 9
+  owner: "@bioetl-application"
+  expiry: "2026-12-31"
+  reason: "Shared transformer base still centralizes common collaborator wiring across provider pipelines."
+
+BatchProcessingSupportService:
+  max_args: 10
+  owner: "@bioetl-application"
+  expiry: "2026-12-31"
+  reason: "Batch support still combines pagination, checkpoint, and presentation collaborators."
+
+BatchTransformer:
+  max_args: 10
+  owner: "@bioetl-application"
+  expiry: "2026-12-31"
+  reason: "Batch transformer still aggregates replay and metadata helpers pending decomposition."
+
+CheckpointRuntimeService:
+  max_args: 13
+  owner: "@bioetl-composite"
+  expiry: "2026-12-31"
+  reason: "Runtime checkpoint service still wires multiple checkpoint and health collaborators."
+
+PipelineObserver:
+  max_args: 13
+  owner: "@bioetl-observability"
+  expiry: "2026-12-31"
+  reason: "Observer currently aggregates multiple sinks and lifecycle reporters."
+
+BaseChemblTransformer:
+  max_args: 9
+  owner: "@bioetl-application"
+  expiry: "2026-12-31"
+  reason: "Provider transformer base remains shared until provider-specific parsing helpers are extracted."
+
+CrossRefPublicationTransformer:
+  max_args: 9
+  owner: "@bioetl-application"
+  expiry: "2026-12-31"
+  reason: "Publication transformer still requires multiple parsing and enrichment collaborators."
+
+OpenAlexPublicationTransformer:
+  max_args: 9
+  owner: "@bioetl-application"
+  expiry: "2026-12-31"
+  reason: "Publication transformer still requires multiple parsing and enrichment collaborators."
+
+PubChemCompoundTransformer:
+  max_args: 9
+  owner: "@bioetl-application"
+  expiry: "2026-12-31"
+  reason: "Compound transformer still centralizes parsing and metadata helpers."
+
+PubMedPublicationTransformer:
+  max_args: 11
+  owner: "@bioetl-application"
+  expiry: "2026-12-31"
+  reason: "Publication transformer still bundles fallback parsing, identity, and metadata collaborators."
+
+SemanticScholarPublicationTransformer:
+  max_args: 9
+  owner: "@bioetl-application"
+  expiry: "2026-12-31"
+  reason: "Publication transformer still centralizes parsing and enrichment helpers."
+
+IDMappingTransformer:
+  max_args: 9
+  owner: "@bioetl-application"
+  expiry: "2026-12-31"
+  reason: "IDMapping transformer still bundles normalization and enrichment collaborators."
+
+UniProtProteinTransformer:
+  max_args: 9
+  owner: "@bioetl-application"
+  expiry: "2026-12-31"
+  reason: "Protein transformer still centralizes normalization and metadata collaborators."
+
+GenericPipelineFactory:
+  max_args: 9
+  owner: "@bioetl-composition"
+  expiry: "2026-12-31"
+  reason: "Generic factory still wires multiple runtime collaborators pending factory split."
+
 QuarantineEntry:
-  allowed_args: 9
-  reason: "Domain aggregate; wide state constructor is valid."
-  owner: "@core-team"
-  expiry_date: "2026-09-15"
+  max_args: 9
+  owner: "@bioetl-domain"
+  expiry: "2026-12-31"
+  reason: "Domain aggregate still represents a wide state snapshot and is intentionally explicit."
+
+AdapterConfig:
+  max_args: 10
+  owner: "@bioetl-domain"
+  expiry: "2026-12-31"
+  reason: "Resilience config remains an explicit value object for adapter retry policy."
 
 PubChemAdapter:
-  allowed_args: 10
-  reason: "Requires separate infrastructure wave."
+  max_args: 11
   owner: "@bioetl-platform"
-  expiry_date: "2026-06-01"
+  expiry: "2026-12-31"
+  reason: "Adapter refactoring remains outside the current compatibility tranche."
 
 PubChemFetchStrategies:
-  allowed_args: 9
-  reason: "Adapter refactoring out of scope."
+  max_args: 9
   owner: "@bioetl-platform"
-  expiry_date: "2026-06-01"
+  expiry: "2026-12-31"
+  reason: "Fetch strategy decomposition remains pending the adapter cleanup wave."
+
+BaseSyncAdapter:
+  max_args: 9
+  owner: "@bioetl-platform"
+  expiry: "2026-12-31"
+  reason: "Shared sync adapter still wires multiple transport and state collaborators."
 
 UniProtAdapter:
-  allowed_args: 10
-  reason: "Adapter refactoring out of scope."
+  max_args: 11
   owner: "@bioetl-platform"
-  expiry_date: "2026-06-01"
+  expiry: "2026-12-31"
+  reason: "Adapter refactoring remains outside the current compatibility tranche."
+
+BronzeWriter:
+  max_args: 14
+  owner: "@bioetl-storage"
+  expiry: "2026-12-31"
+  reason: "Bronze writer still aggregates IO, metrics, manifest, and checkpoint collaborators."
+
+SilverWriter:
+  max_args: 20
+  owner: "@bioetl-storage"
+  expiry: "2026-12-31"
+  reason: "Silver writer remains the largest storage constructor and needs a dedicated decomposition wave."
+
+AnchorSpec:
+  max_args: 19
+  owner: "@bioetl-http"
+  expiry: "2026-12-31"
+  reason: "HTTP identity surface still exposes many explicit contract fields."
+
+HealthServer:
+  max_args: 9
+  owner: "@bioetl-http"
+  expiry: "2026-12-31"
+  reason: "Health server still wires multiple listener/runtime dependencies explicitly."

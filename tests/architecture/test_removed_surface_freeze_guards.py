@@ -521,6 +521,7 @@ ALLOWED_INTERNAL_ENTRYPOINT_TEST_FILES_BY_MODULE = {
             / "composition"
             / "test_maintenance_api_contract.py",
             ROOT / "tests" / "unit" / "composition" / "test_resources_api_contract.py",
+            ROOT / "tests" / "unit" / "composition" / "test_canonical_module_paths.py",
         }
     ),
     "bioetl.composition._resource_management": frozenset(

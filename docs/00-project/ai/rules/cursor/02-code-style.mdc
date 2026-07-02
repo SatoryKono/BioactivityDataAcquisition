@@ -5,6 +5,8 @@ globs: ["src/**/*.py", "tests/**/*.py"]
 
 # Future Annotations (PEP 563)
 
+**Canonical references:** `AGENTS.md`, `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`, `docs/02-architecture/decisions/`.
+
 **EVERY Python file MUST start with:**
 ```python
 from __future__ import annotations

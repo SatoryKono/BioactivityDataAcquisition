@@ -43,14 +43,16 @@ if TYPE_CHECKING:
     from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.context import PipelineRunContext
-    from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort, TracingPort
+    from bioetl.domain.ports import (
+        ClockPort,
+        LockPort,
+        LoggerPort,
+        MetricsPort,
+        TracingPort,
+    )
     from bioetl.infrastructure.config.settings_api import Settings
 
-__all__ = [
-    "bootstrap_runtime_basics",
-    "build_runner_factories",
-    "build_support_services",
-]
+__all__ = ["bootstrap_runtime_basics", "build_runner_factories", "build_support_services"]
 
 
 def bootstrap_runtime_basics(
@@ -63,6 +65,7 @@ def bootstrap_runtime_basics(
     storage_bootstrapper: Callable[..., object],
     lock_factory: Callable[[], LockPort],
     uuid_factory: Callable[[], UUID],
+    clock_factory: Callable[[], ClockPort] = SystemClock,
 ) -> CompositeInfrastructureContext:
     """Build base runtime dependencies shared across composite bootstrap.
 
@@ -79,6 +82,8 @@ def bootstrap_runtime_basics(
         lock_factory: Zero-argument callable returning a LockPort.
         uuid_factory: Zero-argument callable returning a new UUID; injectable
             for deterministic testing.
+        clock_factory: Zero-argument callable returning the runtime clock; injectable
+            so tests and deterministic runners do not rely on wall-clock reads.
 
     Returns:
         CompositeInfrastructureContext with the typed runtime resource bundle for the composite run.
@@ -88,15 +93,13 @@ def bootstrap_runtime_basics(
     logger = logger_bootstrapper(config.name, UUID(effective_run_id), "INFO")
 
     # Initialize domain layer enum fields with proper dependency injection
-    from bioetl.composition.bootstrap.runtime.enum_loader_wiring import (
-        initialize_domain_enum_fields,
-    )
+    from bioetl.composition.bootstrap.runtime.enum_loader_wiring import initialize_domain_enum_fields
 
     initialize_domain_enum_fields()
 
     metrics = create_metrics(settings)
     tracer = tracer_bootstrapper(settings)
-    clock = SystemClock()
+    clock = clock_factory()
     storage_run_context = RunContext(
         run_id=RunID(UUID(effective_run_id)),
         run_type=RunType.INCREMENTAL,
@@ -166,9 +169,7 @@ def build_runner_factories(
         normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
     )
     run_options_factory: Callable[..., RunOptions] = RunOptions
-    build_context_fn: Callable[[str, RunOptions], PipelineRunContext] = (
-        build_pipeline_context
-    )
+    build_context_fn: Callable[[str, RunOptions], PipelineRunContext] = build_pipeline_context
     runner_factory_builder = cast(
         "Callable[..., RunnerFactoryBuilder[RunOptions]]",
         runner_factory_builder_cls,

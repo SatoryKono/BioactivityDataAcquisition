@@ -15,7 +15,7 @@ This runs better in PowerShell than cmd.exe because it has proper color output.
 ### Step 2: Initial Setup
 
 ```powershell
-.\script-codex\setup-codex-wsl.bat
+.\setup-codex-wsl.bat
 ```
 
 This installs:
@@ -74,7 +74,7 @@ ______________________________________________________________________
 
 ```powershell
 # Complete setup
-.\script-codex\setup-codex-wsl.bat
+.\setup-codex-wsl.bat
 
 # Start proxy if needed
 .\scripts\ops\start-wsl-proxy.bat
@@ -134,7 +134,7 @@ wsl --install -d Ubuntu
 
 ```powershell
 # Run setup again
-.\script-codex\setup-codex-wsl.bat
+.\setup-codex-wsl.bat
 ```
 
 ### Issue: Docker Desktop not responding
@@ -165,7 +165,7 @@ From PowerShell:
 
 ```powershell
 # Main Codex guide
-notepad .\script-codex\README.md
+notepad .\scripts\ai\codex\README.md
 
 # WSL setup guide
 notepad .\docs\05-operations\tooling\scripts-ops\CODEX_WSL_SETUP.md
@@ -216,7 +216,7 @@ You can also open the WSL terminal directly and use:
 ```bash
 ./scripts/ops/codex.sh "your prompt"
 ./scripts/ops/codex-exec.sh "your prompt"
-bash ./script-codex/helper/setup-wsl-complete.sh
+bash ./scripts/ai/codex/helper/setup-wsl-complete.sh
 bash ./scripts/ai/codex/diagnose_wsl.sh
 ```
 
@@ -228,7 +228,7 @@ ______________________________________________________________________
 
 1. Open PowerShell
 1. `.\scripts\ops\verify-setup.ps1`
-1. `.\script-codex\setup-codex-wsl.bat`
+1. `.\setup-codex-wsl.bat`
 1. `.\scripts\ops\codex.bat "hello"`
 
 That's it! Enjoy using Codex! 🚀

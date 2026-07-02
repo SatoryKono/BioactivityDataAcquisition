@@ -1,7 +1,7 @@
 version: 1.0.0
 status: active
 owner: Engineering / Architecture
-last_verified: "2026-05-20"
+last_verified: "2026-07-02"
 
 current_live_root_baseline:
   tracked_root_audit_status: pass
@@ -13,7 +13,10 @@ current_live_root_baseline:
     The current local repository root satisfies the published allowlist and
     approved-root policy. Local AI/editor/cache root directories may exist as
     untracked local-only surfaces; this registry tracks their live state so the
-    review gate does not drift from the current workspace.
+    review gate does not drift from the current workspace. Tracked root
+    dispositions are reconciled by family in `.github/root-allowlist.txt`, and
+    follow-up reduction work executes through RH-018/RH-019/RH-020/RH-021 plus
+    the adjacent Codex/Docker owner issues.
 
 review_lanes:
   - lane_id: root_env_security
@@ -26,6 +29,7 @@ review_lanes:
     verification:
       - git ls-files .env .env.local new.env
       - git log -- .env .env.local new.env
+      - git check-ignore -v .env .env.local new.env
       - rg -n "^\\.env$|^\\.env\\.local$|^new\\.env$|\\.env\\.local|new\\.env" .gitignore .dockerignore docs scripts .github
     candidates:
       - path: .env
@@ -124,6 +128,98 @@ review_lanes:
         canonical_path: scripts/ai/codex
         action_if_reintroduced: keep_local_only_root_alias_untracked_or converge to the canonical scripts/ai/codex owner surface before any promotion
 
+  - lane_id: root_reviewed_human_facing_docs
+    classification: owner_decision_required
+    scope: reviewed non-runtime root docs retained only for explicit external-tool or governance contracts
+    owner: Engineering / Review Tooling
+    retention_class: reviewed_root_human_facing_entrypoint
+    retention_action: retain_only_when_the_exact_root_filename_is_part_of_the_documented_tool_contract
+    cleanup_policy: move_to_docs_or_archive_when_the_external_contract_no_longer_requires_root_retention
+    verification:
+      - git ls-files best_practices.md
+      - rg -n "best_practices\\.md" docs/00-project/governance/qodo/README.md .github/root-allowlist.txt docs/00-project/governance/03-file-policy.md
+    candidates:
+      - path: best_practices.md
+        current_live_state: present_approved_root_surface
+        canonical_path: docs/00-project/governance/qodo/README.md
+        action_if_reintroduced: retain_only_while_qodo_repo_level_guidance_requires_the_exact_root_filename_otherwise_move_under_docs_and_drop_the_root_copy
+
+  - lane_id: root_archived_ai_runtime_docs
+    classification: review_required
+    scope: formerly tracked root Codex/WSL setup notes retired into canonical docs and archive surfaces
+    owner: Engineering / AI Runtime
+    retention_class: archived_root_setup_note
+    retention_action: keep_canonical_runbooks_under_docs_and_archive_historical_status_notes_outside_the_root
+    cleanup_policy: do_not_reintroduce_as_tracked_root_docs_without_fresh_root_governance_review
+    verification:
+      - git ls-files CODEX_SANDBOX_TROUBLESHOOT.txt CODEX_SETUP.txt CODEX_WSL_CONFIGURED.md CODEX_WSL_SETUP.md CODEX_WSL_USAGE.md
+      - rg -n "CODEX_SANDBOX_TROUBLESHOOT|CODEX_SETUP\\.txt|CODEX_WSL_CONFIGURED|CODEX_WSL_USAGE" .github docs scripts tests configs README.md
+    candidates:
+      - path: CODEX_SANDBOX_TROUBLESHOOT.txt
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md
+        action_if_reintroduced: move_content_back_into_the_canonical_runbook_or_archive_note_instead_of_restoring_a_root_txt_surface
+      - path: CODEX_SETUP.txt
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md
+        action_if_reintroduced: route_operator_guidance_into_the_canonical_codex_setup_doc_or_archive_note_instead_of_restoring_a_root_txt_surface
+      - path: CODEX_WSL_CONFIGURED.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/99-archive/root-status-artifacts/ai-runtime-setup/codex-root-docs-archive-2026-07-02.md
+        action_if_reintroduced: preserve_as_archive_only_status_context_not_as_a_live_root_doc
+      - path: CODEX_WSL_SETUP.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md
+        action_if_reintroduced: route_setup_guidance_into_the_canonical_wsl_doc_or_archive_note_instead_of_restoring_a_root_md_surface
+      - path: CODEX_WSL_USAGE.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: scripts/ai/codex/QUICKSTART_WSL.md
+        action_if_reintroduced: keep_usage_quick_start_under_the_canonical_codex_runtime_docs_or_archive_it_outside_the_root
+
+  - lane_id: root_launcher_shims
+    classification: owner_decision_required
+    scope: reviewed root launcher and setup shims retained as compatibility entrypoints over canonical Codex owner surfaces
+    owner: Engineering / AI Runtime
+    retention_class: reviewed_root_launcher_compatibility_entrypoint
+    retention_action: retain_minimal_root_shims_only_while_their_owned_logic_stays_under_scripts_ai_codex
+    cleanup_policy: thin_wrapper_only_rehome_or_remove_when_docs_and_operator_flows_no_longer_need_the_root_entrypoint
+    verification:
+      - git ls-files .wsl_proxy_env.sh codex.bat codex.ps1 run-codex.ps1 run-codex-wsl.ps1 setup-codex-wsl.bat setup-codex-wsl.ps1 setup-codex-wsl.sh
+      - rg -n "codex\\.bat|codex\\.ps1|run-codex|setup-codex-wsl|wsl_proxy_env" docs scripts .github README.md
+    candidates:
+      - path: .wsl_proxy_env.sh
+        current_live_state: present_approved_root_surface
+        canonical_path: scripts/ai/codex/helper/wsl_proxy_env.sh
+        action_if_reintroduced: keep_only_as_a_root_sourcing_shim_and_preserve_the_canonical_logic_under_scripts_ai_codex_helper
+      - path: codex.bat
+        current_live_state: present_approved_root_surface
+        canonical_path: scripts/ai/codex/run-codex.ps1
+        action_if_reintroduced: retain_as_cmd_transport_only_while_the_primary_powershell_and_wsl_logic_stays_under_scripts_ai_codex
+      - path: codex.ps1
+        current_live_state: present_approved_root_surface
+        canonical_path: scripts/ai/codex/run-codex.ps1
+        action_if_reintroduced: retain_as_the_primary_root_powershell_shim_only_while_the_canonical_launcher_logic_stays_under_scripts_ai_codex
+      - path: run-codex.ps1
+        current_live_state: present_approved_root_surface
+        canonical_path: scripts/ai/codex/run-codex.ps1
+        action_if_reintroduced: retain_only_as_a_legacy_alias_over_the_primary_root_codex_ps1_shim
+      - path: run-codex-wsl.ps1
+        current_live_state: present_approved_root_surface
+        canonical_path: scripts/ai/codex/run-codex.ps1
+        action_if_reintroduced: retain_only_as_a_legacy_alias_over_the_primary_root_codex_ps1_shim
+      - path: setup-codex-wsl.bat
+        current_live_state: present_approved_root_surface
+        canonical_path: scripts/ai/codex/setup-codex-wsl.bat
+        action_if_reintroduced: retain_as_a_windows_setup_transport_only_while_canonical_setup_logic_lives_under_scripts_ai_codex
+      - path: setup-codex-wsl.ps1
+        current_live_state: present_approved_root_surface
+        canonical_path: scripts/ai/codex/setup-codex-wsl.bat
+        action_if_reintroduced: retain_as_a_powershell_setup_transport_only_while_canonical_setup_logic_lives_under_scripts_ai_codex
+      - path: setup-codex-wsl.sh
+        current_live_state: present_approved_root_surface
+        canonical_path: scripts/ai/codex/README.md
+        action_if_reintroduced: retain_only_as_a_reviewed_optional_sandbox_setup_entrypoint_until_the_docker_helper_family_has_a_final_owner_story
+
   - lane_id: local_runtime_root_dirs
     classification: review_required
     scope: local runtime/cache roots that may exist in the working tree but must remain untracked
@@ -157,7 +253,7 @@ review_lanes:
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_scope_to_a_documented_cache_surface
       - path: .codex_tmp
-        current_live_state: present_local_only_root_surface
+        current_live_state: absent_from_root_baseline
         canonical_path: null
         action_if_reintroduced: keep_untracked_as_local_codex_scratch_or_reclassify_through_explicit_structure_governance
       - path: .coverage-sharded-current-main

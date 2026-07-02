@@ -185,7 +185,8 @@ All scripts automatically convert paths between Windows and WSL.
 
 - Main README: `scripts/ai/codex/README.md`
 - Setup guide: `scripts/ai/codex/WSL_SETUP_INSTRUCTIONS.md`
-- Troubleshooting: `CODEX_SETUP.txt`
+- Troubleshooting:
+  `docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md`
 
 ---
 
