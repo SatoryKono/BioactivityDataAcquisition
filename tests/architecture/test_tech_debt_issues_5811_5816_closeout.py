@@ -184,7 +184,7 @@ def test_issue_5815_complexity_and_constructor_gates_are_blocking_and_reviewable
     assert "check-duplication-complexity-exemptions" in workflow_text
     assert "--warn-only" not in workflow_text
     assert violations == []
-    assert len(waived) >= 26
+    assert len(waived) == len(waivers)
 
     for row in waivers.values():
         assert "max_args" in row

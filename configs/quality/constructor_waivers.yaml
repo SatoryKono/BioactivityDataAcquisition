@@ -54,18 +54,6 @@ BaseChemblTransformer:
   expiry: "2026-12-31"
   reason: "Provider transformer base remains shared until provider-specific parsing helpers are extracted."
 
-CrossRefPublicationTransformer:
-  max_args: 9
-  owner: "@bioetl-application"
-  expiry: "2026-12-31"
-  reason: "Publication transformer still requires multiple parsing and enrichment collaborators."
-
-OpenAlexPublicationTransformer:
-  max_args: 9
-  owner: "@bioetl-application"
-  expiry: "2026-12-31"
-  reason: "Publication transformer still requires multiple parsing and enrichment collaborators."
-
 PubChemCompoundTransformer:
   max_args: 9
   owner: "@bioetl-application"
@@ -77,12 +65,6 @@ PubMedPublicationTransformer:
   owner: "@bioetl-application"
   expiry: "2026-12-31"
   reason: "Publication transformer still bundles fallback parsing, identity, and metadata collaborators."
-
-SemanticScholarPublicationTransformer:
-  max_args: 9
-  owner: "@bioetl-application"
-  expiry: "2026-12-31"
-  reason: "Publication transformer still centralizes parsing and enrichment helpers."
 
 IDMappingTransformer:
   max_args: 9

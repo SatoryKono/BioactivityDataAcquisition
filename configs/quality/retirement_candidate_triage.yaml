@@ -27,6 +27,7 @@ repo_wide_zero_import_review:
 repo_wide_zero_import_classification:
   linked_issue: '#4541'
   review_date: '2026-06-16'
+  owner: '@bioetl-architecture'
   allowed_dispositions:
   - retain_module_entrypoint
   - retain_dynamic_entrypoint

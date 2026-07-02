@@ -356,6 +356,7 @@
       "review_by": "2026-09-14",
       "linked_issue": "#4541",
       "rationale": "Module entrypoint for `python -m bioetl`; static import scans stay at zero because the interpreter dispatches the module directly.",
+      "owner": "@bioetl-architecture",
       "evidence_lane": "module_entrypoint_owner_suite",
       "owner_tests": [
         "tests/unit/interfaces/cli/test_cli_main_module.py"
@@ -375,6 +376,7 @@
       "review_by": "2026-09-14",
       "linked_issue": "#4541",
       "rationale": "Port owner module for data_normalization; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
+      "owner": "@bioetl-architecture",
       "evidence_lane": "canonical_owner_contract",
       "owner_tests": [
         "tests/architecture/test_domain_public_api.py",
@@ -396,6 +398,7 @@
       "review_by": "2026-09-14",
       "linked_issue": "#4541",
       "rationale": "Port owner module for data_source; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
+      "owner": "@bioetl-architecture",
       "evidence_lane": "canonical_owner_contract",
       "owner_tests": [
         "tests/architecture/test_domain_public_api.py",
@@ -417,6 +420,7 @@
       "review_by": "2026-09-14",
       "linked_issue": "#4541",
       "rationale": "Port owner module for delta_reader; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
+      "owner": "@bioetl-architecture",
       "evidence_lane": "canonical_owner_contract",
       "owner_tests": [
         "tests/architecture/test_domain_public_api.py",
@@ -438,6 +442,7 @@
       "review_by": "2026-09-14",
       "linked_issue": "#4541",
       "rationale": "Port owner module for filtering; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
+      "owner": "@bioetl-architecture",
       "evidence_lane": "canonical_owner_contract",
       "owner_tests": [
         "tests/architecture/test_domain_public_api.py",
@@ -459,6 +464,7 @@
       "review_by": "2026-09-14",
       "linked_issue": "#4541",
       "rationale": "Port owner module for idmapping; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
+      "owner": "@bioetl-architecture",
       "evidence_lane": "canonical_owner_contract",
       "owner_tests": [
         "tests/architecture/test_domain_public_api.py",
@@ -480,6 +486,7 @@
       "review_by": "2026-09-14",
       "linked_issue": "#4541",
       "rationale": "Port owner module for pii; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
+      "owner": "@bioetl-architecture",
       "evidence_lane": "canonical_owner_contract",
       "owner_tests": [
         "tests/architecture/test_domain_public_api.py",
@@ -501,6 +508,7 @@
       "review_by": "2026-09-14",
       "linked_issue": "#4541",
       "rationale": "Port owner module for protein_classification; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
+      "owner": "@bioetl-architecture",
       "evidence_lane": "canonical_owner_contract",
       "owner_tests": [
         "tests/architecture/test_domain_public_api.py",
@@ -522,6 +530,7 @@
       "review_by": "2026-09-14",
       "linked_issue": "#4541",
       "rationale": "Port owner module for resilience; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
+      "owner": "@bioetl-architecture",
       "evidence_lane": "canonical_owner_contract",
       "owner_tests": [
         "tests/architecture/test_domain_public_api.py",

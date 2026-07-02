@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import TransformerDependencyContext
@@ -150,8 +150,58 @@ def coerce_publication_transformer_init(
     )
 
 
+def build_runtime_publication_transformer_init(
+    *,
+    default_provider: str,
+    default_entity_type: str = "publication",
+):
+    """Return a shared runtime ``__init__`` for thin publication transformers.
+
+    The returned method keeps provider modules free from duplicated constructor
+    bodies while preserving the explicit DI signature that architecture tests
+    and composition code rely on.
+    """
+
+    def _runtime_init(
+        self: Any,
+        provider: str = default_provider,
+        entity_type: str = default_entity_type,
+        silver_filters: object = None,
+        gold_filters: object = None,
+        tracer: object = None,
+        metrics: object = None,
+        identity_service: object = None,
+        pii_hasher: object = None,
+        dependencies: object = None,
+    ) -> None:
+        from bioetl.application.pipelines.common.base_publication_transformer import (
+            BasePublicationTransformer,
+        )
+
+        BasePublicationTransformer.__init__(
+            self,
+            provider,
+            entity_type=entity_type,
+            silver_filters=silver_filters,
+            gold_filters=gold_filters,
+            tracer=tracer,
+            metrics=metrics,
+            identity_service=identity_service,
+            pii_hasher=pii_hasher,
+            dependencies=dependencies,
+        )
+
+    _runtime_init.__name__ = "__init__"
+    _runtime_init.__qualname__ = "__init__"
+    _runtime_init.__doc__ = (
+        "Shared runtime-generated publication transformer constructor."
+    )
+    return _runtime_init
+
+
 __all__ = [
     "BasePublicationTransformerContext",
+    "build_runtime_publication_transformer_init",
     "coerce_publication_transformer_init",
     "publication_transformer_kwargs",
 ]

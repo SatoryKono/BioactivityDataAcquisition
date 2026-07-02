@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import subprocess
 from dataclasses import fields
 from pathlib import Path
 
@@ -22,6 +23,40 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def _read(relative_path: str) -> str:
     return (ROOT / relative_path).read_text(encoding="utf-8")
+
+
+def _find_markdown_phrase_hits(*phrases: str) -> list[str]:
+    command = [
+        "rg",
+        "--files-with-matches",
+        "--fixed-strings",
+        "--ignore-case",
+        "--glob",
+        "*.md",
+        *[flag for phrase in phrases for flag in ("-e", phrase)],
+        "docs",
+    ]
+    result = subprocess.run(
+        command,
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+    if result.returncode not in (0, 1):
+        raise AssertionError(
+            "Failed to scan docs for reproducibility drift phrases:\n"
+            f"{result.stderr.strip()}"
+        )
+
+    hits: list[str] = []
+    for line in result.stdout.splitlines():
+        relative_path = Path(line).as_posix()
+        if any(part.startswith(".quarantined-") for part in Path(relative_path).parts):
+            continue
+        hits.append(relative_path)
+    return sorted(hits)
 
 
 def _string_set_literal(node: ast.AST) -> set[str] | None:
@@ -244,17 +279,11 @@ def test_universal_exact_replay_claims_are_bound_to_full_universe_evidence() -> 
         "universal exact replay",
         "universal historical exact replay",
     )
-    violations: list[str] = []
-    for path in sorted((ROOT / "docs").rglob("*.md")):
-        relative_path = path.relative_to(ROOT).as_posix()
-        if relative_path in allowed_docs:
-            continue
-        if any(part.startswith(".quarantined-") for part in path.parts):
-            continue
-        lowered = path.read_text(encoding="utf-8").lower()
-        for phrase in risky_phrases:
-            if phrase in lowered:
-                violations.append(f"{relative_path}: {phrase}")
+    violations = [
+        relative_path
+        for relative_path in _find_markdown_phrase_hits(*risky_phrases)
+        if relative_path not in allowed_docs
+    ]
 
     assert not violations, (
         "Universal exact-replay claims must stay in evidence-gated docs:\n"

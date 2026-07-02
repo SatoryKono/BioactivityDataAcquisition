@@ -770,7 +770,7 @@ def _status_from_lifecycle_decision(decision: str | None) -> str | None:
     return None
 
 
-def _load_lifecycle_decision_map(root: Path) -> dict[str, str]:
+def _load_lifecycle_registry_entries(root: Path) -> dict[str, dict[str, object]]:
     registry_path = root / LIFECYCLE_REGISTRY_DEFAULT
     if not registry_path.exists():
         return {}
@@ -783,10 +783,16 @@ def _load_lifecycle_decision_map(root: Path) -> dict[str, str]:
     if not isinstance(entries_raw, dict):
         return {}
 
-    decisions: dict[str, str] = {}
+    entries: dict[str, dict[str, object]] = {}
     for path_value, meta in entries_raw.items():
-        if not isinstance(path_value, str) or not isinstance(meta, dict):
-            continue
+        if isinstance(path_value, str) and isinstance(meta, dict):
+            entries[path_value] = meta
+    return entries
+
+
+def _load_lifecycle_decision_map(root: Path) -> dict[str, str]:
+    decisions: dict[str, str] = {}
+    for path_value, meta in _load_lifecycle_registry_entries(root).items():
         decision = meta.get("decision")
         if isinstance(decision, str):
             decisions[path_value] = decision
@@ -854,6 +860,7 @@ def _agent_usage(refs: list[RefEvidence]) -> list[str]:
 def _build_inventory(root: Path) -> dict[str, object]:
     scripts = _iter_scripts(root)
     refs_map = _discover_refs(root, scripts)
+    lifecycle_registry_entries = _load_lifecycle_registry_entries(root)
     lifecycle_decisions = _load_lifecycle_decision_map(root)
     rows: list[dict[str, object]] = []
     status_counts: Counter[str] = Counter()
@@ -867,24 +874,38 @@ def _build_inventory(root: Path) -> dict[str, object]:
         for group in {item.source_group for item in refs}:
             group_counts[group] += 1
 
-        rows.append(
-            {
-                "path": script_rel,
-                "type": script.suffix.lstrip("."),
-                "status": status,
-                "agent_usage": _agent_usage(refs),
-                "reference_count": len(refs),
-                "references": [
-                    {
-                        "path": item.path,
-                        "line": item.line,
-                        "source_group": item.source_group,
-                        "text": item.text,
-                    }
-                    for item in refs[:8]
-                ],
-            }
-        )
+        row = {
+            "path": script_rel,
+            "type": script.suffix.lstrip("."),
+            "status": status,
+            "agent_usage": _agent_usage(refs),
+            "reference_count": len(refs),
+            "references": [
+                {
+                    "path": item.path,
+                    "line": item.line,
+                    "source_group": item.source_group,
+                    "text": item.text,
+                }
+                for item in refs[:8]
+            ],
+        }
+        lifecycle_meta = lifecycle_registry_entries.get(script_rel, {})
+        if isinstance(lifecycle_meta, dict):
+            owner = lifecycle_meta.get("owner")
+            decision = lifecycle_meta.get("decision")
+            review_by = lifecycle_meta.get("review_by")
+            next_step = lifecycle_meta.get("next_step")
+            if isinstance(owner, str) and owner.strip():
+                row["owner"] = owner
+            if isinstance(decision, str) and decision.strip():
+                row["lifecycle_decision"] = decision
+            if isinstance(review_by, str) and review_by.strip():
+                row["review_by"] = review_by
+            if isinstance(next_step, str) and next_step.strip():
+                row["next_step"] = next_step
+
+        rows.append(row)
 
     rows.sort(key=lambda item: str(item["path"]))
     summary = {
