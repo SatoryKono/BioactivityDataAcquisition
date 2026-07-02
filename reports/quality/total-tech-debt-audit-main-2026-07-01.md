@@ -23,7 +23,7 @@ Refresh reason: #5752 - Correct stale claims and align with current governance b
 
 || Area | Finding | Evidence |
 || --- | --- | --- |
-|| Architecture scorecard | Integral score is `8.53`; budget growth is disallowed. | `reports/quality/architecture-quality-scorecard.json` |
+|| Architecture scorecard | Integral score is `8.54`; budget growth is disallowed. | `reports/quality/architecture-quality-scorecard.json` |
 || Layering | Reported layer violations are `0`. | `reports/quality/architecture-quality-scorecard.json` |
 || Compatibility burden | Retained entrypoints `12`, public export facades `4`, twin pairs `0`. | `reports/quality/compatibility-importer-census.json` |
 || Compatibility transition debt | `transition_debt` is empty; scorecard transition count is zero. | `configs/quality/compatibility_facade_inventory.yaml` |
