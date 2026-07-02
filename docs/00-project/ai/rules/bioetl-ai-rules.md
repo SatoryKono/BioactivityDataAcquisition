@@ -1,5 +1,15 @@
 # BioETL AI Rules — Unified
 
+## Canonical Sources
+
+This file is a condensed mirror, not a replacement for the canonical
+governance stack.
+
+- `AGENTS.md`
+- `docs/00-project/RULES.md`
+- `docs/01-requirements/REQUIREMENTS.md`
+- `docs/02-architecture/decisions/`
+
 ## Architecture (Clean / Ports & Adapters)
 
 **Layers** (dependency direction: domain → application → infrastructure):

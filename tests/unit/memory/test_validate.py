@@ -281,6 +281,43 @@ def test_bounded_episodic_note_paths_does_not_stat_notes(
     ]
 
 
+def test_bounded_episodic_note_paths_short_circuits_before_late_subtrees(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    sessions_dir = tmp_path / "sessions"
+    early_dir = sessions_dir / "a-early"
+    late_dir = sessions_dir / "z-late"
+    early_dir.mkdir(parents=True)
+    late_dir.mkdir(parents=True)
+    for index in range(3):
+        (early_dir / f"session-{index:03d}.md").write_text(
+            "# Session\n\n- Current context\n",
+            encoding="utf-8",
+        )
+    (late_dir / "session-late.md").write_text(
+        "# Session\n\n- Late subtree\n",
+        encoding="utf-8",
+    )
+
+    original_scandir = validation_module.os.scandir
+
+    def guarded_scandir(path: str | Path):
+        current = Path(path)
+        if current == late_dir:
+            raise AssertionError("late subtree should not be scanned once limit is met")
+        return original_scandir(path)
+
+    monkeypatch.setattr(validation_module.os, "scandir", guarded_scandir)
+
+    note_paths = _bounded_episodic_note_paths(sessions_dir, limit=2)
+
+    assert [path.name for path in note_paths] == [
+        "session-000.md",
+        "session-001.md",
+    ]
+
+
 def test_memory_scaffold_validation_flags_invalid_note_files(tmp_path: Path) -> None:
     memory_root = tmp_path / "memory"
     _copy_minimal_memory_scaffold(memory_root)

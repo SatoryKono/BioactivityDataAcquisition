@@ -149,7 +149,7 @@ def test_root_hygiene_review_registry_tracks_observed_transient_root_families() 
     assert by_path["tests.txt"]["current_live_state"] == "absent_from_root_baseline"
 
 
-def test_root_hygiene_review_registry_classifies_codex_tmp_as_local_only_surface() -> (
+def test_root_hygiene_review_registry_classifies_live_local_runtime_root_surfaces() -> (
     None
 ):
     payload = _load_yaml(REGISTRY_PATH)
@@ -169,9 +169,7 @@ def test_root_hygiene_review_registry_classifies_codex_tmp_as_local_only_surface
         if isinstance(candidate, dict) and isinstance(candidate.get("path"), str)
     }
 
-    assert (
-        by_path[".codex_tmp"]["current_live_state"] == "present_local_only_root_surface"
-    )
+    assert by_path[".codex_tmp"]["current_live_state"] == "absent_from_root_baseline"
     assert (
         by_path[".benchmarks"]["current_live_state"]
         == "present_local_only_root_surface"

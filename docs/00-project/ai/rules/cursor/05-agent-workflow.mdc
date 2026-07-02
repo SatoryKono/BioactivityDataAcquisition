@@ -5,6 +5,8 @@ alwaysApply: true
 
 # Agent Workflow (AGENTS.md)
 
+**Canonical references:** `AGENTS.md`, `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`, `docs/02-architecture/decisions/`.
+
 ## Precedence
 
 1. Runtime source: `.codex/agents/`; use `.gemini/agents/` only when a tracked

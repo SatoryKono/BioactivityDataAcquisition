@@ -164,7 +164,9 @@ def _render_curated_governance_metadata(registry: CompatibilityRegistry) -> list
         return [_NONE_BULLET]
 
     return [
-        f"- `{row.path}` — external breaking change required: "
+        f"- `{row.path}` — consumer class: `{getattr(row, 'consumer_class', row.owner)}`, "
+        f"sunset status: `{getattr(row, 'sunset_status', row.status)}`, "
+        f"external breaking change required: "
         f"`{str(row.external_breaking_change_required).lower()}`, "
         f"internal callers zero: `{str(row.internal_callers_zero).lower()}`"
         for row in registry.curated_rows

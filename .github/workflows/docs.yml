@@ -7,13 +7,21 @@ on:
   push:
     branches: [ "main" ]
     paths:
+      - 'AGENTS.md'
+      - 'GEMINI.md'
       - 'README.md'
+      - '.cursor/**'
+      - '.windsurf/**'
+      - '.codex/skills/**'
+      - '.devin/skills/**'
+      - '.github/copilot-instructions.md'
       - 'grafana/README.md'
       - 'configs/quality/xwalk_missing_backlog.yaml'
       - 'docs/**'
       - 'scripts/docs/**'
       - 'scripts/engineering/qa/check_xwalk_missing_backlog.py'
       - '.github/actions/setup-python-uv/**'
+      - 'tests/architecture/test_ai_runtime_governance_links.py'
       - 'tests/architecture/test_check_doc_links_guardrails.py'
       - 'tests/unit/scripts/qa/test_check_xwalk_missing_backlog.py'
       - 'mkdocs.yml'
@@ -23,13 +31,21 @@ on:
   pull_request:
     branches: [ "main" ]
     paths:
+      - 'AGENTS.md'
+      - 'GEMINI.md'
       - 'README.md'
+      - '.cursor/**'
+      - '.windsurf/**'
+      - '.codex/skills/**'
+      - '.devin/skills/**'
+      - '.github/copilot-instructions.md'
       - 'grafana/README.md'
       - 'configs/quality/xwalk_missing_backlog.yaml'
       - 'docs/**'
       - 'scripts/docs/**'
       - 'scripts/engineering/qa/check_xwalk_missing_backlog.py'
       - '.github/actions/setup-python-uv/**'
+      - 'tests/architecture/test_ai_runtime_governance_links.py'
       - 'tests/architecture/test_check_doc_links_guardrails.py'
       - 'tests/unit/scripts/qa/test_check_xwalk_missing_backlog.py'
       - 'mkdocs.yml'
@@ -75,6 +91,7 @@ jobs:
             tests/architecture/test_documentation_sync.py::test_mkdocs_nav_references_existing_markdown_files \
             tests/architecture/test_internal_orchestration_docs.py \
             tests/architecture/test_reproducibility_docs_contract_drift.py \
+            tests/architecture/test_ai_runtime_governance_links.py \
             tests/architecture/test_runtime_agent_docs_drift.py \
             tests/architecture/test_workflow_cli_running_boundaries.py \
             -q --tb=short

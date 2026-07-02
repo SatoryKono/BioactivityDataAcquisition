@@ -15,6 +15,8 @@ retained_entrypoints:
   canonical_target: bioetl.interfaces.cli.commands.run
   status: public-entrypoint
   owner: bioetl.interfaces.cli.commands
+  consumer_class: public_cli_entrypoint
+  sunset_status: permanent
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
   external_breaking_change_required: true
@@ -30,6 +32,8 @@ retained_entrypoints:
   canonical_target: bioetl.interfaces.cli.commands.run_all
   status: public-entrypoint
   owner: bioetl.interfaces.cli.commands
+  consumer_class: public_cli_entrypoint
+  sunset_status: permanent
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
   external_breaking_change_required: true
@@ -47,6 +51,8 @@ retained_entrypoints:
   canonical_target: bioetl.interfaces.cli.commands.run_composite
   status: public-entrypoint
   owner: bioetl.interfaces.cli.commands
+  consumer_class: public_cli_entrypoint
+  sunset_status: permanent
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
   external_breaking_change_required: true
@@ -64,6 +70,8 @@ retained_entrypoints:
   canonical_target: bioetl.interfaces.cli.commands.health
   status: public-entrypoint
   owner: bioetl.interfaces.cli.commands
+  consumer_class: public_cli_entrypoint
+  sunset_status: permanent
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
   external_breaking_change_required: true
@@ -81,6 +89,8 @@ retained_entrypoints:
   canonical_target: bioetl.interfaces.cli.commands.diagnostics
   status: public-entrypoint
   owner: bioetl.interfaces.cli.commands
+  consumer_class: public_cli_entrypoint
+  sunset_status: permanent
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
   external_breaking_change_required: true
@@ -99,6 +109,8 @@ retained_entrypoints:
   canonical_target: bioetl.interfaces.cli.commands.quarantine
   status: public-entrypoint
   owner: bioetl.interfaces.cli.commands
+  consumer_class: public_cli_entrypoint
+  sunset_status: permanent
   introduced_in: 2026-03 RF-024
   review_date: '2026-09-30'
   external_breaking_change_required: true
@@ -117,6 +129,8 @@ retained_entrypoints:
   canonical_target: bioetl.composition.entrypoints
   status: public-entrypoint
   owner: bioetl.composition
+  consumer_class: public_composition_entrypoint
+  sunset_status: permanent
   introduced_in: 2026-03 entrypoint freeze
   review_date: '2026-09-30'
   external_breaking_change_required: true
@@ -143,6 +157,8 @@ retained_entrypoints:
   canonical_target: bioetl.composition.health_api
   status: public-entrypoint
   owner: bioetl.composition
+  consumer_class: public_composition_entrypoint
+  sunset_status: permanent
   introduced_in: 2026-05 public export review
   review_date: '2026-09-30'
   external_breaking_change_required: true
@@ -167,6 +183,8 @@ retained_entrypoints:
   canonical_target: bioetl.composition.maintenance_api
   status: public-entrypoint
   owner: bioetl.composition
+  consumer_class: public_composition_entrypoint
+  sunset_status: permanent
   introduced_in: 2026-05 public export review
   review_date: '2026-09-30'
   external_breaking_change_required: true
@@ -194,6 +212,8 @@ retained_entrypoints:
   canonical_target: bioetl.infrastructure.config
   status: public-entrypoint
   owner: bioetl.infrastructure.config
+  consumer_class: public_config_facade
+  sunset_status: permanent
   introduced_in: legacy-pre-2026-05
   review_date: '2026-09-30'
   external_breaking_change_required: true
@@ -213,6 +233,8 @@ retained_entrypoints:
   canonical_target: bioetl.domain.composite.config
   status: public-entrypoint
   owner: bioetl.domain.composite
+  consumer_class: public_domain_facade
+  sunset_status: permanent
   introduced_in: legacy-pre-2026-03
   review_date: '2026-09-30'
   external_breaking_change_required: true
@@ -231,6 +253,8 @@ retained_entrypoints:
   canonical_target: bioetl.application.composite.merger
   status: public-entrypoint
   owner: bioetl.application.composite
+  consumer_class: public_application_facade
+  sunset_status: permanent
   introduced_in: 2026-03 merge collaborator migration
   review_date: '2026-09-30'
   external_breaking_change_required: true

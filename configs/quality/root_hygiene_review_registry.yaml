@@ -1,7 +1,7 @@
 version: 1.0.0
 status: active
 owner: Engineering / Architecture
-last_verified: "2026-05-20"
+last_verified: "2026-07-02"
 
 current_live_root_baseline:
   tracked_root_audit_status: pass
@@ -13,7 +13,10 @@ current_live_root_baseline:
     The current local repository root satisfies the published allowlist and
     approved-root policy. Local AI/editor/cache root directories may exist as
     untracked local-only surfaces; this registry tracks their live state so the
-    review gate does not drift from the current workspace.
+    review gate does not drift from the current workspace. Tracked root
+    dispositions are reconciled by family in `.github/root-allowlist.txt`, and
+    follow-up reduction work executes through RH-018/RH-019/RH-020/RH-021 plus
+    the adjacent Codex/Docker owner issues.
 
 review_lanes:
   - lane_id: root_env_security
@@ -157,7 +160,7 @@ review_lanes:
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_scope_to_a_documented_cache_surface
       - path: .codex_tmp
-        current_live_state: present_local_only_root_surface
+        current_live_state: absent_from_root_baseline
         canonical_path: null
         action_if_reintroduced: keep_untracked_as_local_codex_scratch_or_reclassify_through_explicit_structure_governance
       - path: .coverage-sharded-current-main

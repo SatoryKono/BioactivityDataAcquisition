@@ -5,6 +5,14 @@ description: Use when researching a specific pillar and need to create traceable
 
 # Evidence Collection
 
+## Source Of Truth
+
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../docs/02-architecture/decisions`
+
+
 This skill guides the creation of structured Evidence Objects for a single research pillar.
 
 ## Prerequisites

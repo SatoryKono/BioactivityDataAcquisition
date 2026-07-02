@@ -5,6 +5,14 @@ description: Use when transforming synthesis insights into explicit decisions wi
 
 # Decision Ledger
 
+## Source Of Truth
+
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../docs/02-architecture/decisions`
+
+
 This skill guides the creation of explicit decisions with full trade-off documentation.
 
 ## Prerequisites

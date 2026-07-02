@@ -5,6 +5,8 @@ globs: ["src/**/*.py", "configs/**/*.yaml"]
 
 # Creating HTTP Adapter
 
+**Canonical references:** `AGENTS.md`, `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`, `docs/02-architecture/decisions/`.
+
 ```python
 from bioetl.infrastructure.adapters.base import BaseHttpAdapter
 from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
