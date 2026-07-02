@@ -305,13 +305,14 @@ def _build_review_window(
 
 def _load_repo_wide_zero_import_classifications(
     triage_payload: dict[str, Any],
-) -> tuple[dict[str, dict[str, object]], set[str]]:
+) -> tuple[dict[str, dict[str, object]], set[str], str | None]:
     section = triage_payload.get("repo_wide_zero_import_classification", {})
     assert isinstance(section, dict)
     entries = section.get("entries", [])
     assert isinstance(entries, list)
     allowed = section.get("allowed_dispositions", [])
     assert isinstance(allowed, list)
+    section_owner = section.get("owner")
     classification_by_path: dict[str, dict[str, object]] = {}
     for entry in entries:
         if not isinstance(entry, dict):
@@ -319,7 +320,12 @@ def _load_repo_wide_zero_import_classifications(
         module_path = entry.get("module_path")
         if isinstance(module_path, str):
             classification_by_path[module_path] = entry
-    return classification_by_path, {str(item) for item in allowed}
+    default_owner = (
+        section_owner.strip()
+        if isinstance(section_owner, str) and section_owner.strip()
+        else None
+    )
+    return classification_by_path, {str(item) for item in allowed}, default_owner
 
 
 def _default_evidence_lane(disposition: str | None) -> str | None:
@@ -381,7 +387,11 @@ def build_dead_code_inventory(
     retained_entrypoint_paths = _load_retained_entrypoint_paths(
         repo_root
     ) | _load_lazy_cli_command_entrypoint_paths(repo_root)
-    repo_wide_classifications, allowed_repo_wide_dispositions = (
+    (
+        repo_wide_classifications,
+        allowed_repo_wide_dispositions,
+        repo_wide_default_owner,
+    ) = (
         _load_repo_wide_zero_import_classifications(triage_payload)
     )
 
@@ -493,7 +503,9 @@ def build_dead_code_inventory(
             }
         )
         if isinstance(classification_owner, str) and classification_owner.strip():
-            enriched["owner"] = classification_owner
+            enriched["owner"] = classification_owner.strip()
+        elif repo_wide_default_owner is not None:
+            enriched["owner"] = repo_wide_default_owner
         else:
             enriched.pop("owner", None)
         evidence = _owner_test_evidence(

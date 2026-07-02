@@ -1,5 +1,6 @@
 """Focused extraction facets for UniProt comment payloads."""
 
+# ruff: noqa: F401, I001
 from __future__ import annotations
 
 from bioetl.application.pipelines.uniprot.extractors._comment_facets_all import (

@@ -25,7 +25,17 @@ _FIXED_UUID = UUID("12345678-1234-5678-1234-567812345678")
 
 
 def _make_config(name: str = "test_pipeline") -> CompositeConfig:
-    return cast(CompositeConfig, SimpleNamespace(name=name))
+    return cast(
+        CompositeConfig,
+        SimpleNamespace(
+            name=name,
+            seed=SimpleNamespace(pipeline=f"{name}_seed"),
+            enrichers=[],
+            dependencies=[],
+            join_key_normalization={},
+            dependency_key_normalization={},
+        ),
+    )
 
 
 def _make_runtime() -> CompositeRuntimeConfig:
@@ -275,4 +285,3 @@ def test_build_runner_factories_wires_phase_builders_and_bronze_options() -> Non
     assert callable(result[0])
     assert callable(result[1])
     assert callable(result[2])
-

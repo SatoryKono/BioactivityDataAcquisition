@@ -41,19 +41,13 @@ from bioetl.application.pipelines.common.publication_vocab_observability import 
 from bioetl.domain.value_objects import PublicationYear
 
 if TYPE_CHECKING:
-    from bioetl.application.core.base_transformer import TransformerDependencyContext
     from bioetl.application.core.pre_silver_record import PreSilverRecord
-    from bioetl.domain.behavior import EntityIdentityGenerator
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.entities.base import BaseEntity
-    from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import (
         DataExtractorStrategy,
         IdentifierResolverStrategy,
-        MetricsPort,
-        PiiHasherPort,
         PublicationMetadataStrategy,
-        TracingPort,
     )
     from bioetl.domain.types import BronzeRecord, JsonDict, PrimaryId, SilverRecord
 
@@ -68,39 +62,30 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
         self,
         init: BasePublicationTransformerContext | str | None = None,
         /,
-        *,
-        provider: str | None = None,
-        entity_type: str | None = None,
-        silver_filters: SilverFilterConfig | None = None,
-        gold_filters: GoldFilterConfig | None = None,
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
-        identity_service: EntityIdentityGenerator | None = None,
-        pii_hasher: PiiHasherPort | None = None,
-        dependencies: TransformerDependencyContext | None = None,
-        data_extractor: DataExtractorStrategy | None = None,
-        identifier_resolver: IdentifierResolverStrategy | None = None,
-        metadata_strategy: PublicationMetadataStrategy | None = None,
-        record_normalizer: RecordNormalizationProcessor | None = None,
+        **kwargs: Any,
     ) -> None:
-        """Initialize publication transformer with explicit DI seams."""
+        """Initialize publication transformer with explicit DI seams.
+
+        Optional kwargs:
+        - provider: str | None
+        - entity_type: str | None
+        - silver_filters: SilverFilterConfig | None
+        - gold_filters: GoldFilterConfig | None
+        - tracer: TracingPort | None
+        - metrics: MetricsPort | None
+        - identity_service: EntityIdentityGenerator | None
+        - pii_hasher: PiiHasherPort | None
+        - dependencies: TransformerDependencyContext | None
+        - data_extractor: DataExtractorStrategy | None
+        - identifier_resolver: IdentifierResolverStrategy | None
+        - metadata_strategy: PublicationMetadataStrategy | None
+        - record_normalizer: RecordNormalizationProcessor | None
+        """
         resolved = coerce_publication_transformer_init(
             init,
-            provider=provider,
             default_provider=self.DEFAULT_PROVIDER,
-            entity_type=entity_type,
             default_entity_type=self.DEFAULT_ENTITY_TYPE,
-            silver_filters=silver_filters,
-            gold_filters=gold_filters,
-            tracer=tracer,
-            metrics=metrics,
-            identity_service=identity_service,
-            pii_hasher=pii_hasher,
-            dependencies=dependencies,
-            data_extractor=data_extractor,
-            identifier_resolver=identifier_resolver,
-            metadata_strategy=metadata_strategy,
-            record_normalizer=record_normalizer,
+            **kwargs,
         )
         super().__init__(
             provider=resolved.provider,

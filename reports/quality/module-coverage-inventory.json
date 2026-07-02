@@ -3383,7 +3383,7 @@
       "missing_lines": 7,
       "module": "bioetl.application.pipelines.common.publication_transformer_context",
       "path": "src/bioetl/application/pipelines/common/publication_transformer_context.py",
-      "source_lines": 157
+      "source_lines": 207
     },
     {
       "coverage_percent": 100.0,
@@ -3483,7 +3483,7 @@
       "missing_lines": 5,
       "module": "bioetl.application.pipelines.crossref.transformer",
       "path": "src/bioetl/application/pipelines/crossref/transformer.py",
-      "source_lines": 234
+      "source_lines": 243
     },
     {
       "coverage_percent": 100.0,
@@ -3563,7 +3563,7 @@
       "missing_lines": 1,
       "module": "bioetl.application.pipelines.openalex.transformer",
       "path": "src/bioetl/application/pipelines/openalex/transformer.py",
-      "source_lines": 290
+      "source_lines": 298
     },
     {
       "coverage_percent": 100.0,
@@ -3823,7 +3823,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.pipelines.semanticscholar.transformer",
       "path": "src/bioetl/application/pipelines/semanticscholar/transformer.py",
-      "source_lines": 285
+      "source_lines": 296
     },
     {
       "coverage_percent": 100.0,
@@ -25375,7 +25375,7 @@
       "missing_lines": 7,
       "module": "bioetl.application.pipelines.common.publication_transformer_context",
       "path": "src/bioetl/application/pipelines/common/publication_transformer_context.py",
-      "source_lines": 157
+      "source_lines": 207
     },
     {
       "coverage_percent": 100.0,
@@ -25475,7 +25475,7 @@
       "missing_lines": 5,
       "module": "bioetl.application.pipelines.crossref.transformer",
       "path": "src/bioetl/application/pipelines/crossref/transformer.py",
-      "source_lines": 234
+      "source_lines": 243
     },
     {
       "coverage_percent": 100.0,
@@ -25555,7 +25555,7 @@
       "missing_lines": 1,
       "module": "bioetl.application.pipelines.openalex.transformer",
       "path": "src/bioetl/application/pipelines/openalex/transformer.py",
-      "source_lines": 290
+      "source_lines": 298
     },
     {
       "coverage_percent": 100.0,
@@ -25815,7 +25815,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.pipelines.semanticscholar.transformer",
       "path": "src/bioetl/application/pipelines/semanticscholar/transformer.py",
-      "source_lines": 285
+      "source_lines": 296
     },
     {
       "coverage_percent": 100.0,
@@ -43990,7 +43990,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-01",
-  "source_tree_sha256": "a1c1e291381f9f1c03d0a7bea578fa4bbaf2903f155aed29515a50866d9c769c",
+  "source_tree_sha256": "a4654b44f2f9640655ccd64f2f19b78d7f16097cc436f800f869c149c9bee5b6",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

@@ -29,6 +29,9 @@ from bioetl.application.pipelines.common.blocks import (
     _CrossRefMetadataBlock,
 )
 from bioetl.application.pipelines.common.publication_blocks import ExtractionBlock
+from bioetl.application.pipelines.common.publication_transformer_context import (
+    build_runtime_publication_transformer_init,
+)
 from bioetl.application.pipelines.crossref._business_data_builder import (
     compute_publication_date,
     hash_author_details,
@@ -232,3 +235,9 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             silver_record.setdefault("issn_list", None)
 
         return silver_record
+
+
+CrossRefPublicationTransformer.__init__ = build_runtime_publication_transformer_init(
+    default_provider=CrossRefPublicationTransformer.DEFAULT_PROVIDER,
+    default_entity_type=CrossRefPublicationTransformer.DEFAULT_ENTITY_TYPE,
+)
