@@ -22,17 +22,17 @@
     },
     "full_app_duplicate_clusters": {
       "previous": 75,
-      "current": 65,
+      "current": 60,
       "direction": "reduced"
     },
     "adapter_duplicate_clusters": {
       "previous": 58,
-      "current": 54,
+      "current": 51,
       "direction": "reduced"
     },
     "pipeline_duplicate_clusters": {
       "previous": 16,
-      "current": 11,
+      "current": 9,
       "direction": "reduced"
     },
     "cli_duplicate_clusters": {
@@ -71,7 +71,7 @@
     "5679": {
       "status": "closeable",
       "theme": "adapter_duplication_burn_down",
-      "outcome": "adapter duplicate clusters are reduced from 58 to 55 without changing port ownership or layer direction",
+      "outcome": "adapter duplicate clusters are reduced from 58 to 51 without changing port ownership or layer direction",
       "evidence": [
         "src/bioetl/infrastructure/adapters/chembl/_fetch_resilience_error.py",
         "src/bioetl/infrastructure/adapters/chembl/fetch_paging_mixin.py",
@@ -82,7 +82,7 @@
     "5680": {
       "status": "closeable",
       "theme": "pipeline_duplication_burn_down",
-      "outcome": "application pipeline duplicate clusters are reduced from 16 to 13 by removing duplicated ChEMBL marker export listing and consolidating UniProt comment annotation output keys",
+      "outcome": "application pipeline duplicate clusters are reduced from 16 to 9 by removing duplicated ChEMBL marker export listing and consolidating UniProt comment annotation output keys",
       "evidence": [
         "src/bioetl/application/pipelines/chembl/__init__.py",
         "src/bioetl/application/pipelines/chembl/pipeline_types.py",
