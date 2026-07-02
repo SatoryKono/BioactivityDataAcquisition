@@ -242,3 +242,13 @@ entries:
     classification: budget_closeout_ratchet
     live_guard: "debt issue batch #5811-#5816 remains aligned with live phased-migration retirement, staged-enforcement registry externalization, duplication/complexity governance, constructor waiver no-growth, workflow enforcement, and observability metric inventory evidence without budget growth."
     rationale: Keeps the newest architecture-debt closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issues_5834_5838_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue batch #5834-#5838 remains aligned with live root-hygiene review lanes, env-security handling, launcher-shim governance, Docker adjunct review, and cleanup evidence without budget growth."
+    rationale: Keeps the current root-hygiene closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issues_5839_5845_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue batch #5839-#5845 remains aligned with live compatibility metadata, duplication reduction, zero-import governance, shared composite policy, coverage-tail ownership, and script lifecycle evidence without budget growth."
+    rationale: Keeps the newest architecture-debt audit closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.

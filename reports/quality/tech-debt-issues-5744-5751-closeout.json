@@ -85,13 +85,13 @@
   "ratchets": {
     "adapter_duplicate_clusters": {
       "opening": 55,
-      "current": 50,
-      "max": 50
+      "current": 48,
+      "max": 48
     },
     "pipeline_duplicate_clusters": {
       "opening": 13,
-      "current": 11,
-      "max": 11
+      "current": 9,
+      "max": 9
     },
     "application_core_total_loc": {
       "opening": 22360,
@@ -145,13 +145,13 @@
       "fail_count": 0,
       "warn_count": 0,
       "architecture_quality_score": 8.54,
-      "module_coverage_source_tree_sha256": "a9c673c723ed617b29d9a79a3727db0ae1bb34bcd303ff61c3de1dee58f23b34",
-      "remote_main_baseline_fingerprint": "bce79bb1c180d1e9279876518f7f2549d4a047ca30e69a8182f7020f8b820f4a",
-      "architecture_quality_scorecard_source_tree_sha256": "a9c673c723ed617b29d9a79a3727db0ae1bb34bcd303ff61c3de1dee58f23b34"
+      "module_coverage_source_tree_sha256": "a1c1e291381f9f1c03d0a7bea578fa4bbaf2903f155aed29515a50866d9c769c",
+      "remote_main_baseline_fingerprint": "8381504a304b524a1fb33769d0e8861085b4c2cb8661ad6f5ea9173e07668d9b",
+      "architecture_quality_scorecard_source_tree_sha256": "a1c1e291381f9f1c03d0a7bea578fa4bbaf2903f155aed29515a50866d9c769c"
     },
     "5745": {
       "opening_adapter_duplicate_clusters": 55,
-      "adapter_duplicate_clusters": 50,
+      "adapter_duplicate_clusters": 48,
       "shared_error_bundle": "COMMON_ADAPTER_FETCH_RESILIENCE_ERRORS"
     },
     "5746": {

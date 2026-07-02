@@ -13,6 +13,9 @@ __all__ = ["SemanticScholarPublicationTransformer"]
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
+from bioetl.application.pipelines.common.publication_transformer_context import (
+    build_runtime_publication_transformer_init,
+)
 from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_affiliations,
     extract_author_h_indices,
@@ -283,3 +286,11 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
         silver_record.pop("arxiv_id", None)
 
         return silver_record
+
+
+SemanticScholarPublicationTransformer.__init__ = (
+    build_runtime_publication_transformer_init(
+        default_provider=SemanticScholarPublicationTransformer.DEFAULT_PROVIDER,
+        default_entity_type=SemanticScholarPublicationTransformer.DEFAULT_ENTITY_TYPE,
+    )
+)

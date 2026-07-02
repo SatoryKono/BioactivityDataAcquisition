@@ -130,6 +130,8 @@ log_test.txt
 !/reports/quality/tech-debt-issues-5707-5715-closeout.json
 !/reports/quality/tech-debt-issues-5729-5733-closeout.json
 !/reports/quality/tech-debt-issues-5744-5751-closeout.json
+!/reports/quality/tech-debt-issues-5834-5838-closeout.json
+!/reports/quality/tech-debt-issues-5839-5845-closeout.json
 !/reports/quality/tech-debt-issue-5647-closeout.json
 !/reports/quality/issue-5272-application-core-coverage-closeout.json
 !/reports/quality/issue-5376-coverage-tail-closeout.json

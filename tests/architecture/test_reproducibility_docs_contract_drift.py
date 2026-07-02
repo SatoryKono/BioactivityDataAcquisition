@@ -257,9 +257,11 @@ def test_run_manifest_docs_define_replay_equivalence_levels() -> None:
 
 
 @pytest.mark.architecture
-@pytest.mark.skipif(sys.platform == "win32", reason="ripgrep not available on Windows")
 def test_universal_exact_replay_claims_are_bound_to_full_universe_evidence() -> None:
     """Universal exact-replay wording must remain gated by certified evidence."""
+    if sys.platform == "win32":
+        pytest.skip("ripgrep not available on Windows")
+
     contract = _read("docs/04-reference/contracts/run-manifest-ledger.md")
     runbook = _read("docs/05-operations/runbooks/run-manifest-inspection.md")
 
