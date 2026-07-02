@@ -1,20 +1,20 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-02T11:11:52.354026+00:00",
+  "generated_at": "2026-07-02T11:29:59.129260+00:00",
   "summary": {
-    "total_scripts": 449,
+    "total_scripts": 448,
     "status_counts": {
       "active": 360,
-      "supporting": 89
+      "supporting": 88
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 2,
       "ci": 62,
       "docs": 156,
-      "scripts": 347,
+      "scripts": 346,
       "skills": 11,
-      "tests": 186
+      "tests": 187
     }
   },
   "scripts": [
@@ -452,13 +452,13 @@
           "path": "scripts/ai/codex/md/SETUP_HANG_FIX.md",
           "line": 43,
           "source_group": "scripts",
-          "text": ".\\script-codex\\helper\\diagnose-hang.ps1"
+          "text": ".\\scripts\\ai\\codex\\helper\\diagnose-hang.ps1"
         },
         {
           "path": "scripts/ai/codex/md/SETUP_HANG_FIX.md",
           "line": 148,
           "source_group": "scripts",
-          "text": ".\\script-codex\\helper\\diagnose-hang.ps1"
+          "text": ".\\scripts\\ai\\codex\\helper\\diagnose-hang.ps1"
         }
       ]
     },
@@ -565,21 +565,6 @@
       ]
     },
     {
-      "path": "scripts/ai/codex/helper/ensure-script-codex-link.ps1",
-      "type": "ps1",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 1,
-      "references": [
-        {
-          "path": "scripts/ai/codex/setup-codex-wsl.bat",
-          "line": 43,
-          "source_group": "scripts",
-          "text": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"%REPO_WIN%\\scripts\\ai\\codex\\helper\\ensure-script-codex-link.ps1\" -RepoRoot \"%REPO_WIN%\" >nul 2>nul"
-        }
-      ]
-    },
-    {
       "path": "scripts/ai/codex/helper/run-codex-impl.sh",
       "type": "sh",
       "status": "active",
@@ -656,8 +641,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": "scripts/ai/codex/md/SETUP_HANG_FIX.md",
+          "line": 120,
+          "source_group": "scripts",
+          "text": "wsl -d Ubuntu -e bash \"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/codex/helper/setup-env.sh\""
+        },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
           "line": 213,
@@ -707,17 +698,17 @@
           "path": "scripts/ai/codex/md/POWERSHELL_QUICK_START.md",
           "line": 219,
           "source_group": "scripts",
-          "text": "bash ./script-codex/helper/setup-wsl-complete.sh"
+          "text": "bash ./scripts/ai/codex/helper/setup-wsl-complete.sh"
         },
         {
           "path": "scripts/ai/codex/setup-codex-wsl.bat",
-          "line": 86,
+          "line": 83,
           "source_group": "scripts",
           "text": "\"%WSL_EXE%\" -d \"%WSL_DISTRO%\" -- bash \"%REPO_WSL%/scripts/ai/codex/helper/setup-wsl-complete.sh\""
         },
         {
           "path": "scripts/ai/codex/setup-codex-wsl.bat",
-          "line": 88,
+          "line": 85,
           "source_group": "scripts",
           "text": "\"%WSL_EXE%\" -- bash \"%REPO_WSL%/scripts/ai/codex/helper/setup-wsl-complete.sh\""
         }
@@ -893,7 +884,7 @@
         },
         {
           "path": "tests/architecture/test_root_hygiene_review_registry.py",
-          "line": 404,
+          "line": 405,
           "source_group": "tests",
           "text": "== \"scripts/ai/codex/helper/wsl_proxy_env.sh\""
         }
@@ -961,23 +952,35 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 116,
+      "reference_count": 118,
       "references": [
         {
+          "path": "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
+          "line": 76,
+          "source_group": "docs",
+          "text": ".\\scripts\\ai\\codex\\run-codex.ps1 check"
+        },
+        {
+          "path": "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
+          "line": 106,
+          "source_group": "docs",
+          "text": ".\\scripts\\ai\\codex\\run-codex.ps1 check"
+        },
+        {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 247,
+          "line": 249,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\codex\\run-codex.ps1"
         },
         {
           "path": "docs/DOCKER_SETUP.md",
-          "line": 249,
+          "line": 251,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\codex\\run-codex.ps1 mcp-setup"
         },
         {
           "path": "docs/DOCKER_SETUP.md",
-          "line": 250,
+          "line": 252,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\codex\\run-codex.ps1"
         },
@@ -998,18 +1001,6 @@
           "line": 32,
           "source_group": "scripts",
           "text": ".\\scripts\\ai\\codex\\run-codex.ps1 exec \"analyze the pipeline\""
-        },
-        {
-          "path": "scripts/ai/codex/QUICKSTART_WSL.md",
-          "line": 65,
-          "source_group": "scripts",
-          "text": ".\\run-codex.ps1"
-        },
-        {
-          "path": "scripts/ai/codex/QUICKSTART_WSL.md",
-          "line": 70,
-          "source_group": "scripts",
-          "text": ".\\run-codex.ps1 exec \"analyze the ChemBL parser\""
         }
       ]
     },
@@ -1099,25 +1090,25 @@
           "path": "scripts/ai/codex/md/POWERSHELL_QUICK_START.md",
           "line": 18,
           "source_group": "scripts",
-          "text": ".\\script-codex\\setup-codex-wsl.bat"
+          "text": ".\\setup-codex-wsl.bat"
         },
         {
           "path": "scripts/ai/codex/md/POWERSHELL_QUICK_START.md",
           "line": 77,
           "source_group": "scripts",
-          "text": ".\\script-codex\\setup-codex-wsl.bat"
+          "text": ".\\setup-codex-wsl.bat"
         },
         {
           "path": "scripts/ai/codex/md/POWERSHELL_QUICK_START.md",
           "line": 137,
           "source_group": "scripts",
-          "text": ".\\script-codex\\setup-codex-wsl.bat"
+          "text": ".\\setup-codex-wsl.bat"
         },
         {
           "path": "scripts/ai/codex/md/POWERSHELL_QUICK_START.md",
           "line": 231,
           "source_group": "scripts",
-          "text": "1. `.\\script-codex\\setup-codex-wsl.bat`"
+          "text": "1. `.\\setup-codex-wsl.bat`"
         },
         {
           "path": "scripts/ai/codex/setup.ps1",
@@ -1136,7 +1127,7 @@
       "references": [
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
-          "line": 35,
+          "line": 41,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\codex\\setup.ps1"
         },
@@ -2329,14 +2320,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 3,
       "references": [
-        {
-          "path": "docs/CODEX_WSL_SETUP.md",
-          "line": 51,
-          "source_group": "docs",
-          "text": "\"args\": [\"exec\", \"-i\", \"bioetl-mcp-docker\", \"/mcp_docker_wrapper.sh\"]"
-        },
         {
           "path": "scripts/ai/.mcp.json",
           "line": 70,
@@ -6600,7 +6585,7 @@
         },
         {
           "path": "tests/architecture/test_architecture_quality_scorecard.py",
-          "line": 148,
+          "line": 153,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py::build_diagnostics_payload\""
         },
@@ -6730,7 +6715,7 @@
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
-          "line": 46,
+          "line": 52,
           "source_group": "docs",
           "text": ".\\scripts\\engineering\\dev\\.setup_wsl_codex.sh"
         }
@@ -6813,11 +6798,11 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 39,
+      "reference_count": 38,
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 50,
+          "line": 53,
           "source_group": "docs",
           "text": "- Transitional root launcher/setup shims such as `.wsl_proxy_env.sh`,"
         },
@@ -6859,7 +6844,7 @@
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md",
-          "line": 131,
+          "line": 136,
           "source_group": "docs",
           "text": "source .wsl_proxy_env.sh"
         }
@@ -7769,7 +7754,7 @@
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 122,
+          "line": 128,
           "source_group": "docs",
           "text": "python3 scripts/engineering/diagnostics/audit_structure.py --path ."
         },
@@ -7921,7 +7906,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 243,
+      "reference_count": 244,
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
@@ -9169,7 +9154,7 @@
         },
         {
           "path": "tests/architecture/test_architecture_quality_scorecard.py",
-          "line": 139,
+          "line": 144,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload\""
         }
@@ -9201,8 +9186,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "tests/architecture/test_architecture_quality_scorecard.py",
+          "line": 23,
+          "source_group": "tests",
+          "text": "\"`python scripts/engineering/qa/report_architecture_quality_scorecard.py`, \""
+        }
+      ]
     },
     {
       "path": "scripts/engineering/qa/report_artifact_duplication_audit.py",
@@ -10334,17 +10326,17 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 19,
+      "reference_count": 20,
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 121,
+          "line": 127,
           "source_group": "docs",
           "text": "python3 scripts/engineering/repo/audit_root_cleanliness.py"
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 152,
+          "line": 158,
           "source_group": "docs",
           "text": "`scripts/engineering/repo/audit_root_cleanliness.py` MUST использовать этот"
         },
@@ -10379,10 +10371,10 @@
           "text": "- root placement: `python scripts/engineering/repo/audit_root_cleanliness.py`"
         },
         {
-          "path": "scripts/engineering/ci/apply_ci_fixes.py",
-          "line": 278,
-          "source_group": "scripts",
-          "text": "`scripts/engineering/repo/audit_root_cleanliness.py` enforces a root-directory allowlist and"
+          "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
+          "line": 65,
+          "source_group": "docs",
+          "text": "python3 scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked"
         }
       ]
     },
@@ -10457,8 +10449,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
+        {
+          "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
+          "line": 64,
+          "source_group": "docs",
+          "text": "python3 scripts/engineering/repo/check_root_governance_docs.py"
+        },
         {
           "path": "scripts/engineering/repo/README.md",
           "line": 23,
@@ -11209,7 +11207,7 @@
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
-          "line": 74,
+          "line": 80,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\codex-exec.bat \"fix all TODO comments in the codebase\""
         },
@@ -11221,7 +11219,7 @@
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md",
-          "line": 176,
+          "line": 181,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\codex-exec.bat \"fix all TODO comments\""
         },
@@ -11500,13 +11498,13 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 253,
+          "line": 255,
           "source_group": "docs",
           "text": "- `.\\scripts\\ops\\docker-setup.ps1` - Canonical интерактивная настройка Docker для Windows; `.env` создается только с `-AllowEnvFileCreate` или `BIOETL_CREATE_LOCAL_ENV_FILES=1`"
         },
         {
           "path": "docs/DOCKER_SETUP.md",
-          "line": 81,
+          "line": 83,
           "source_group": "docs",
           "text": "Canonical helper scripts `scripts/ops/docker-setup.ps1` and"
         },
@@ -11533,13 +11531,13 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 254,
+          "line": 256,
           "source_group": "docs",
           "text": "- `scripts/ops/docker-setup.sh` - Canonical Bash версия для WSL/Linux; `.env` создается только с `BIOETL_CREATE_LOCAL_ENV_FILES=1`"
         },
         {
           "path": "docs/DOCKER_SETUP.md",
-          "line": 82,
+          "line": 84,
           "source_group": "docs",
           "text": "`scripts/ops/docker-setup.sh` automatically ensure these shared external"
         },
@@ -11603,13 +11601,13 @@
       "references": [
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
-          "line": 157,
+          "line": 163,
           "source_group": "docs",
           "text": "- `scripts/ops/launchers/codex/codex-exec.bat` - Auto-execution launcher"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md",
-          "line": 410,
+          "line": 415,
           "source_group": "docs",
           "text": "- `scripts/ops/launchers/codex/codex-exec.bat` - Original auto-exec"
         },
@@ -11807,13 +11805,13 @@
       "references": [
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
-          "line": 156,
+          "line": 162,
           "source_group": "docs",
           "text": "- `scripts/ops/launchers/codex/codex.bat` - Main launcher (interactive & prompt modes)"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md",
-          "line": 409,
+          "line": 414,
           "source_group": "docs",
           "text": "- `scripts/ops/launchers/codex/codex.bat` - Original Windows launcher"
         },
@@ -12738,19 +12736,19 @@
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md",
-          "line": 117,
+          "line": 122,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\start-wsl-proxy.bat"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md",
-          "line": 216,
+          "line": 221,
           "source_group": "docs",
           "text": "| `start-wsl-proxy.bat`              | Proxy launcher               | Windows PowerShell |"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md",
-          "line": 288,
+          "line": 293,
           "source_group": "docs",
           "text": "# PowerShell: .\\scripts\\ops\\start-wsl-proxy.bat"
         }
@@ -12795,19 +12793,19 @@
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md",
-          "line": 120,
+          "line": 125,
           "source_group": "docs",
           "text": "python .\\scripts\\ops\\wsl_proxy.py"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md",
-          "line": 215,
+          "line": 220,
           "source_group": "docs",
           "text": "| `wsl_proxy.py`                     | HTTP proxy bridge            | Windows (Python)   |"
         },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md",
-          "line": 411,
+          "line": 416,
           "source_group": "docs",
           "text": "- `scripts/ops/runtime/wsl/wsl_proxy.py` - HTTP proxy bridge"
         }

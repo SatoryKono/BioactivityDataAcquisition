@@ -1,5 +1,10 @@
 # Codex WSL Setup Guide
 
+> Canonical root-governance note:
+> former root `CODEX_WSL_SETUP.md` guidance was retired in July 2026. Keep
+> active WSL setup guidance here and archive status-only setup notes under
+> `docs/99-archive/root-status-artifacts/ai-runtime-setup/`.
+
 This guide explains how to run Codex AI assistant from Windows Subsystem for Linux (WSL) in this project.
 
 ## Overview

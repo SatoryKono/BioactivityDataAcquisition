@@ -338,12 +338,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as the bounded non-interactive WSL helper used to avoid Codex launch hangs while the surrounding Windows bootstrap flow is still being consolidated; remove it if launch-codex-wsl.ps1 is retired or rewritten onto a different startup path."
     },
-    "scripts/ai/codex/helper/ensure-script-codex-link.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "windows_compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a Windows compatibility helper for creating the local script-codex link during WSL setup; retire it if setup-codex-wsl.bat stops needing the link compatibility path."
-    },
     "scripts/ai/codex/helper/wsl-support.ps1": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",

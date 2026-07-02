@@ -1,6 +1,6 @@
 # Codex - Quick Start Guide
 
-## Структура папки `script-codex`
+## Структура папки `scripts/ai/codex`
 
 Здесь находятся все скрипты для запуска Codex на безголовой машине.
 
@@ -9,7 +9,7 @@
 ### 1. Отредактируйте `.env.codex`
 
 ```powershell
-notepad script-codex\.env.codex
+notepad scripts\ai\codex\.env.codex
 ```
 
 Добавьте ваш API key:
@@ -23,7 +23,7 @@ OPENAI_API_KEY=sk-your-key-here
 ### 2. Запустите
 
 ```powershell
-cd script-codex
+cd scripts\ai\codex
 .\run-codex.ps1 login
 ```
 
@@ -34,7 +34,7 @@ cd script-codex
 ### Интерактивный режим
 
 ```powershell
-cd script-codex
+cd scripts\ai\codex
 .\run-codex.ps1
 .\run-codex.ps1 "analyze the code"
 ```
@@ -42,14 +42,14 @@ cd script-codex
 ### Автоматический режим
 
 ```powershell
-cd script-codex
+cd scripts\ai\codex
 .\run-codex.ps1 exec "refactor the parser"
 ```
 
 ### Device Auth (для безголовой машины)
 
 ```powershell
-cd script-codex
+cd scripts\ai\codex
 .\run-codex.ps1 device-login
 ```
 

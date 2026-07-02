@@ -14,6 +14,9 @@ import defusedxml.ElementTree as defused_ET
 from bioetl.application.core.base_transformer import TransformerDependencyContext
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.common.publication_blocks import ExtractionBlock
+from bioetl.application.pipelines.common.publication_transformer_context import (
+    BasePublicationTransformerContext,
+)
 from bioetl.application.pipelines.pubmed._block_helpers import (
     build_authors_with_affiliations,
     compute_publication_date,
@@ -94,15 +97,17 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
     ) -> None:
         """Initialize PubMed publication transformer."""
         super().__init__(
-            provider,
-            entity_type=entity_type,
-            silver_filters=silver_filters,
-            gold_filters=gold_filters,
-            tracer=tracer,
-            metrics=metrics,
-            identity_service=identity_service,
-            pii_hasher=pii_hasher,
-            dependencies=dependencies,
+            BasePublicationTransformerContext(
+                provider=provider,
+                entity_type=entity_type,
+                silver_filters=silver_filters,
+                gold_filters=gold_filters,
+                tracer=tracer,
+                metrics=metrics,
+                identity_service=identity_service,
+                pii_hasher=pii_hasher,
+                dependencies=dependencies,
+            )
         )
         self._cached_xml_root = None
         self._author_extractor = author_extractor or AuthorExtractor()

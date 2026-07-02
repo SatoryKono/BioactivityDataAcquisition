@@ -24,6 +24,9 @@ from typing import TYPE_CHECKING
 from bioetl.application.core.base_transformer import TransformerDependencyContext
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.common.publication_issn import build_issn_fields
+from bioetl.application.pipelines.common.publication_transformer_context import (
+    BasePublicationTransformerContext,
+)
 from bioetl.application.pipelines.openalex.extractors import (
     extract_affiliations,
     extract_author_ids,
@@ -105,15 +108,17 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
 
         """
         super().__init__(
-            provider,
-            entity_type=entity_type,
-            silver_filters=silver_filters,
-            gold_filters=gold_filters,
-            tracer=tracer,
-            metrics=metrics,
-            identity_service=identity_service,
-            pii_hasher=pii_hasher,
-            dependencies=dependencies,
+            BasePublicationTransformerContext(
+                provider=provider,
+                entity_type=entity_type,
+                silver_filters=silver_filters,
+                gold_filters=gold_filters,
+                tracer=tracer,
+                metrics=metrics,
+                identity_service=identity_service,
+                pii_hasher=pii_hasher,
+                dependencies=dependencies,
+            )
         )
 
     # ========================================================================

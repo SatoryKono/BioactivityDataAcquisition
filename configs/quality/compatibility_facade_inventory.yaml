@@ -306,6 +306,43 @@ retained_public_entrypoint_burden_policy:
   - bioetl.application.services.control_plane
   rationale: Retained public entrypoints are stable external API, but first-party imports through those facades remain architectural
     burden and must be visible as blocking governance debt when the reviewed surface grows.
+retained_compatibility_freeze_policy:
+  linked_issue: '#5827'
+  owner: '@bioetl-architecture'
+  status: active_no_growth
+  review_date: '2026-09-30'
+  new_retained_surface_policy: blocked_without_public_api_decision
+  internal_importer_migration_policy: Migrate first-party callers to canonical owner modules or owner-only service-access
+    seams whenever the retained surface is not the external public API itself.
+  evidence_artifacts:
+  - reports/quality/compatibility-importer-census.json
+  - docs/02-architecture/07-compatibility-facade-snapshot.md
+  lane_priorities:
+  - consumer_class: public_cli_entrypoint
+    target_state: retain_public_cli_seam
+    rule: CLI command seams stay stable for external users; retired internal command wrappers must stay absent and new
+      direct owner-module imports outside approved boundary coverage are blocked.
+  - consumer_class: public_composition_entrypoint
+    target_state: freeze_facade_budget_and_narrow_first_party_callers
+    rule: Public composition facades stay stable, while ordinary first-party runtime callers move to owner-only
+      service-access seams where a narrower seam exists.
+  - consumer_class: public_config_facade
+    target_state: freeze_package_root_exports
+    rule: Package-root config exports stay bounded as external convenience API; first-party runtime code uses concrete
+      owner modules.
+  - consumer_class: public_domain_facade
+    target_state: retain_domain_model_entrypoint
+    rule: Domain config/model facades remain sanctioned public entrypoints and split internals stay confined to owner
+      packages plus dedicated boundary tests.
+  - consumer_class: public_application_facade
+    target_state: retain_application_seam_and_block_first_party_growth
+    rule: Application compatibility seams remain public only when external callers need them; first-party runtime usage
+      stays on canonical owner modules.
+  exit_criteria:
+  - retained_entrypoint_count stays at or below the reviewed inventory count of 12.
+  - retained_public_export_facade_count stays at or below the reviewed inventory count of 4.
+  - compatibility importer census remains conflict-free with no duplicate, unresolved, or unowned rows.
+  - every retained row keeps owner, consumer_class, sunset_status, migration_path, and exit_criteria metadata.
 retained_entrypoint_burn_down_plan:
   review_date: '2026-09-30'
   linked_issue: '#4565'

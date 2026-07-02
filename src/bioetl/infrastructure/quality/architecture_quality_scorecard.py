@@ -7,16 +7,17 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from bioetl.infrastructure.quality.architecture_quality_scoring import (
-    _build_categories,
-    _interpretation,
-    _score_category,
-)
 from scripts.engineering.ci.validate_registry_dq_refs import (
     build_diagnostics_payload as build_contract_registry_dq_diagnostics,
 )
 from scripts.engineering.qa.report_adr_enforcement_matrix import (
     build_payload as build_adr_enforcement_matrix,
+)
+
+from bioetl.infrastructure.quality.architecture_quality_scoring import (
+    _build_categories,
+    _interpretation,
+    _score_category,
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parents[4]

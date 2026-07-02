@@ -9,7 +9,7 @@
 $env:OPENAI_API_KEY = "sk-your-api-key-here"
 
 # 2. Запустить Codex
-.\script-codex\run-codex.ps1 login
+.\scripts\ai\codex\run-codex.ps1 login
 ```
 
 ### Из WSL:
@@ -19,7 +19,7 @@ $env:OPENAI_API_KEY = "sk-your-api-key-here"
 export OPENAI_API_KEY="sk-your-api-key-here"
 
 # 2. Запустить Codex
-bash ./script-codex/run-codex.sh login
+bash ./scripts/ai/codex/run-codex.sh login
 ```
 
 ______________________________________________________________________
@@ -41,7 +41,7 @@ OPENAI_API_KEY=sk-your-api-key-here
 ### 2. Запустите Codex:
 
 ```powershell
-.\script-codex\run-codex.ps1 login
+.\scripts\ai\codex\run-codex.ps1 login
 ```
 
 Скрипт автоматически загрузит API key из файла.
@@ -67,7 +67,7 @@ ______________________________________________________________________
 $env:OPENAI_API_KEY = "sk-..."
 
 # 2. Запустить с аутентификацией
-.\script-codex\run-codex.ps1 login
+.\scripts\ai\codex\run-codex.ps1 login
 
 # 3. Проверить что работает
 # Введите: analyze the repository
@@ -78,7 +78,7 @@ $env:OPENAI_API_KEY = "sk-..."
 Просто используйте:
 
 ```powershell
-.\script-codex\run-codex.ps1 login
+.\scripts\ai\codex\run-codex.ps1 login
 ```
 
 Ключ будет загружен автоматически из `.env.codex`.
@@ -89,7 +89,7 @@ ______________________________________________________________________
 
 **Используйте API Key метод** - это единственный способ без браузера.
 
-Команда `run-codex login` в `script-codex` специально подходит для этого:
+Команда `run-codex login` в `scripts/ai/codex` специально подходит для этого:
 
 - ✅ Не требуют браузера
 - ✅ Используют API key напрямую
@@ -102,7 +102,7 @@ ______________________________________________________________________
 
 ```powershell
 # После установки API key
-.\script-codex\run-codex.ps1 login
+.\scripts\ai\codex\run-codex.ps1 login
 
 # В Codex введите:
 show me the src directory structure
