@@ -344,9 +344,7 @@ def test_check_ai_surfaces_reports_missing_specialized_role_memory_coverage(
         encoding="utf-8",
     )
 
-    monkeypatch.setattr(check_drift, "AI_SURFACE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_ROLE_PROFILE_REQUIRED_TOKENS", {})
+    _disable_all_ai_surface_checks(monkeypatch)
     monkeypatch.setattr(
         check_drift,
         "AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS",
@@ -358,9 +356,6 @@ def test_check_ai_surfaces_reports_missing_specialized_role_memory_coverage(
             )
         },
     )
-    monkeypatch.setattr(check_drift, "AI_MIRROR_NOTICE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_SURFACE_STALE_PATTERNS", ())
-    monkeypatch.setattr(check_drift, "AI_SURFACE_FORBIDDEN_PATTERNS", {})
 
     report = check_drift.DriftReport()
     check_drift.check_ai_surfaces(report, root=tmp_path)
