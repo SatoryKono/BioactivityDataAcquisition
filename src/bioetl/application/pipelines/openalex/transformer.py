@@ -21,7 +21,6 @@ __all__ = ["OpenAlexPublicationTransformer"]
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.base_transformer import TransformerDependencyContext
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.common.publication_issn import build_issn_fields
 from bioetl.application.pipelines.openalex.extractors import (
@@ -50,9 +49,6 @@ from bioetl.domain.value_objects import PublicationYear
 from bioetl.domain.value_objects.publications import DOI
 
 if TYPE_CHECKING:
-    from bioetl.domain.behavior import EntityIdentityGenerator
-    from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
-    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
     from bioetl.domain.types import BronzeRecord
 
 
@@ -82,39 +78,8 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
     - Tracing and metrics observability (O1)
     """
 
-    def __init__(
-        self,
-        provider: str = "openalex",
-        entity_type: str = "publication",
-        silver_filters: SilverFilterConfig | None = None,
-        gold_filters: GoldFilterConfig | None = None,
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
-        identity_service: EntityIdentityGenerator | None = None,
-        pii_hasher: PiiHasherPort | None = None,
-        dependencies: TransformerDependencyContext | None = None,
-    ) -> None:
-        """Initialize OpenAlex transformer.
-
-        Args:
-            provider: Data provider identifier. Defaults to 'openalex'.
-            entity_type: Entity type for metrics labels. Defaults to 'publication'.
-            silver_filters: Optional filter configuration for Silver layer.
-            gold_filters: Optional filter configuration for Gold layer.
-            dependencies: Explicit collaborator bundle.
-
-        """
-        super().__init__(
-            provider,
-            entity_type=entity_type,
-            silver_filters=silver_filters,
-            gold_filters=gold_filters,
-            tracer=tracer,
-            metrics=metrics,
-            identity_service=identity_service,
-            pii_hasher=pii_hasher,
-            dependencies=dependencies,
-        )
+    DEFAULT_PROVIDER = "openalex"
+    DEFAULT_ENTITY_TYPE = "publication"
 
     # ========================================================================
     # Field Extraction Methods (Orchestration - delegates to extractors)

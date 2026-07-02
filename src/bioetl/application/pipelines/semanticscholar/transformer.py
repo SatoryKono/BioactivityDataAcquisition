@@ -12,7 +12,6 @@ __all__ = ["SemanticScholarPublicationTransformer"]
 
 from typing import TYPE_CHECKING, Any
 
-from bioetl.application.core.base_transformer import TransformerDependencyContext
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_affiliations,
@@ -33,9 +32,6 @@ from bioetl.domain.value_objects import PublicationYear
 from bioetl.domain.value_objects.publications import DOI, PubMedId
 
 if TYPE_CHECKING:
-    from bioetl.domain.behavior import EntityIdentityGenerator
-    from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
-    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
     from bioetl.domain.types import BronzeRecord
 
 
@@ -80,39 +76,8 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
     - Tracing and metrics observability (O1)
     """
 
-    def __init__(
-        self,
-        provider: str = "semanticscholar",
-        entity_type: str = "publication",
-        silver_filters: SilverFilterConfig | None = None,
-        gold_filters: GoldFilterConfig | None = None,
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
-        identity_service: EntityIdentityGenerator | None = None,
-        pii_hasher: PiiHasherPort | None = None,
-        dependencies: TransformerDependencyContext | None = None,
-    ) -> None:
-        """Initialize transformer.
-
-        Args:
-            provider: Data provider identifier.
-            entity_type: Entity type for metrics.
-            silver_filters: Optional filter configuration for Silver layer.
-            gold_filters: Optional filter configuration for Gold layer.
-            dependencies: Explicit collaborator bundle.
-
-        """
-        super().__init__(
-            provider,
-            entity_type=entity_type,
-            silver_filters=silver_filters,
-            gold_filters=gold_filters,
-            tracer=tracer,
-            metrics=metrics,
-            identity_service=identity_service,
-            pii_hasher=pii_hasher,
-            dependencies=dependencies,
-        )
+    DEFAULT_PROVIDER = "semanticscholar"
+    DEFAULT_ENTITY_TYPE = "publication"
 
     def _resolve_publication_type(
         self,

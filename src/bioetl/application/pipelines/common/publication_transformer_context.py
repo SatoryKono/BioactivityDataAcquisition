@@ -44,82 +44,88 @@ class BasePublicationTransformerContext:
 def coerce_publication_transformer_init(
     init: BasePublicationTransformerContext | str | None,
     /,
-    **kwargs: object,
+    *,
+    provider: str | None = None,
+    default_provider: str | None = None,
+    entity_type: str | None = None,
+    default_entity_type: str = "publication",
+    silver_filters: object = None,
+    gold_filters: object = None,
+    tracer: object = None,
+    metrics: object = None,
+    identity_service: object = None,
+    pii_hasher: object = None,
+    dependencies: object = None,
+    data_extractor: object = None,
+    identifier_resolver: object = None,
+    metadata_strategy: object = None,
+    record_normalizer: object = None,
 ) -> BasePublicationTransformerContext:
     """Normalize compact and legacy constructor styles to one typed input."""
     if isinstance(init, BasePublicationTransformerContext):
-        if kwargs:
-            unexpected = ", ".join(sorted(kwargs))
+        explicit_args = {
+            "provider": provider,
+            "entity_type": entity_type,
+            "silver_filters": silver_filters,
+            "gold_filters": gold_filters,
+            "tracer": tracer,
+            "metrics": metrics,
+            "identity_service": identity_service,
+            "pii_hasher": pii_hasher,
+            "dependencies": dependencies,
+            "data_extractor": data_extractor,
+            "identifier_resolver": identifier_resolver,
+            "metadata_strategy": metadata_strategy,
+            "record_normalizer": record_normalizer,
+        }
+        unexpected = ", ".join(
+            sorted(key for key, value in explicit_args.items() if value is not None)
+        )
+        if unexpected:
             raise TypeError(
-                "BasePublicationTransformer received unexpected keyword arguments "
+                "BasePublicationTransformer received unexpected explicit arguments "
                 f"with init spec: {unexpected}"
             )
         return init
 
-    provider = init if isinstance(init, str) else kwargs.pop("provider", None)
-    if not isinstance(provider, str) or not provider:
+    resolved_provider = init if isinstance(init, str) else provider or default_provider
+    if not isinstance(resolved_provider, str) or not resolved_provider:
         raise TypeError(
             "BasePublicationTransformer requires a provider string or "
             "BasePublicationTransformerContext."
         )
 
-    unexpected_keys = sorted(
-        kwargs.keys()
-        - {
-            "entity_type",
-            "silver_filters",
-            "gold_filters",
-            "tracer",
-            "metrics",
-            "identity_service",
-            "pii_hasher",
-            "dependencies",
-            "data_extractor",
-            "identifier_resolver",
-            "metadata_strategy",
-            "record_normalizer",
-        }
-    )
-    if unexpected_keys:
-        unexpected_args = ", ".join(unexpected_keys)
-        raise TypeError(
-            "BasePublicationTransformer received unexpected keyword arguments: "
-            f"{unexpected_args}"
-        )
-
     return BasePublicationTransformerContext(
-        provider=provider,
-        entity_type=cast(str, kwargs.pop("entity_type", "publication")),
-        silver_filters=cast(
-            "SilverFilterConfig | None", kwargs.pop("silver_filters", None)
-        ),
-        gold_filters=cast("GoldFilterConfig | None", kwargs.pop("gold_filters", None)),
-        tracer=cast("TracingPort | None", kwargs.pop("tracer", None)),
-        metrics=cast("MetricsPort | None", kwargs.pop("metrics", None)),
+        provider=resolved_provider,
+        entity_type=cast(str, entity_type or default_entity_type),
+        silver_filters=cast("SilverFilterConfig | None", silver_filters),
+        gold_filters=cast("GoldFilterConfig | None", gold_filters),
+        tracer=cast("TracingPort | None", tracer),
+        metrics=cast("MetricsPort | None", metrics),
         identity_service=cast(
             "EntityIdentityGenerator | None",
-            kwargs.pop("identity_service", None),
+            identity_service,
         ),
-        pii_hasher=cast("PiiHasherPort | None", kwargs.pop("pii_hasher", None)),
+        pii_hasher=cast("PiiHasherPort | None", pii_hasher),
         dependencies=cast(
             "TransformerDependencyContext | None",
-            kwargs.pop("dependencies", None),
+            dependencies,
         ),
         data_extractor=cast(
             "DataExtractorStrategy | None",
-            kwargs.pop("data_extractor", None),
+            data_extractor,
         ),
         identifier_resolver=cast(
             "IdentifierResolverStrategy | None",
-            kwargs.pop("identifier_resolver", None),
+            identifier_resolver,
         ),
         metadata_strategy=cast(
             "PublicationMetadataStrategy | None",
-            kwargs.pop("metadata_strategy", None),
+            metadata_strategy,
         ),
         record_normalizer=cast(
             "RecordNormalizationProcessor | None",
-            kwargs.pop("record_normalizer", None),
+            record_normalizer,
         ),
     )
 
