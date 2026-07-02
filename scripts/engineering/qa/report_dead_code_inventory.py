@@ -481,6 +481,7 @@ def build_dead_code_inventory(
         repo_wide_disposition_counts[disposition] = (
             repo_wide_disposition_counts.get(disposition, 0) + 1
         )
+        classification_owner = classification.get("owner")
         enriched.update(
             {
                 "classification_status": "classified",
@@ -491,6 +492,10 @@ def build_dead_code_inventory(
                 "rationale": classification.get("rationale"),
             }
         )
+        if isinstance(classification_owner, str) and classification_owner.strip():
+            enriched["owner"] = classification_owner
+        else:
+            enriched.pop("owner", None)
         evidence = _owner_test_evidence(
             repo_root,
             module_path=module_path,

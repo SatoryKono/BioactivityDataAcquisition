@@ -55,14 +55,47 @@ if TYPE_CHECKING:
 class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
     """Shared facade flow for publication transformers."""
 
+    DEFAULT_PROVIDER = ""
+    DEFAULT_ENTITY_TYPE = "publication"
+
     def __init__(
         self,
         init: BasePublicationTransformerContext | str | None = None,
         /,
-        **kwargs: object,
+        *,
+        provider: str | None = None,
+        entity_type: str | None = None,
+        silver_filters: SilverFilterConfig | None = None,
+        gold_filters: GoldFilterConfig | None = None,
+        tracer: TracingPort | None = None,
+        metrics: MetricsPort | None = None,
+        identity_service: EntityIdentityGenerator | None = None,
+        pii_hasher: PiiHasherPort | None = None,
+        dependencies: TransformerDependencyContext | None = None,
+        data_extractor: DataExtractorStrategy | None = None,
+        identifier_resolver: IdentifierResolverStrategy | None = None,
+        metadata_strategy: PublicationMetadataStrategy | None = None,
+        record_normalizer: RecordNormalizationProcessor | None = None,
     ) -> None:
         """Initialize publication transformer with explicit DI seams."""
-        resolved = coerce_publication_transformer_init(init, **kwargs)
+        resolved = coerce_publication_transformer_init(
+            init,
+            provider=provider,
+            default_provider=self.DEFAULT_PROVIDER,
+            entity_type=entity_type,
+            default_entity_type=self.DEFAULT_ENTITY_TYPE,
+            silver_filters=silver_filters,
+            gold_filters=gold_filters,
+            tracer=tracer,
+            metrics=metrics,
+            identity_service=identity_service,
+            pii_hasher=pii_hasher,
+            dependencies=dependencies,
+            data_extractor=data_extractor,
+            identifier_resolver=identifier_resolver,
+            metadata_strategy=metadata_strategy,
+            record_normalizer=record_normalizer,
+        )
         super().__init__(
             provider=resolved.provider,
             entity_type=resolved.entity_type,

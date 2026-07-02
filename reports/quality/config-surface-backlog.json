@@ -2,49 +2,6 @@
   "duplication_audit": {
     "clusters": [
       {
-        "block_path": "composite.merge.field_priorities",
-        "fingerprint": "fd70bce3fdca",
-        "governance": {
-          "decision": "retain_shared_composite_policy",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-composite",
-          "rationale": "Composite field-priority blocks intentionally share conflict resolution policy across the five composite runtime configs.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 5,
-        "occurrences": [
-          {
-            "block_path": "composite.merge.field_priorities",
-            "path": "configs/composites/activity.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "composite.merge.field_priorities",
-            "path": "configs/composites/assay.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "composite.merge.field_priorities",
-            "path": "configs/composites/molecule.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "composite.merge.field_priorities",
-            "path": "configs/composites/publication.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "composite.merge.field_priorities",
-            "path": "configs/composites/target.yaml",
-            "surface_kind": "composite_config"
-          }
-        ],
-        "serialized_bytes": 2614,
-        "surface_kind_counts": {
-          "composite_config": 5
-        }
-      },
-      {
         "block_path": "composite.normalized_anchor_policy",
         "fingerprint": "e46c148477ca",
         "governance": {
@@ -88,49 +45,6 @@
         }
       },
       {
-        "block_path": "composite.lineage.provider_lookup_fields",
-        "fingerprint": "ec9336bb7b0b",
-        "governance": {
-          "decision": "retain_shared_lineage_policy",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-lineage",
-          "rationale": "Provider lookup fields are duplicated intentionally while composite lineage policy remains entity-config-local.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 5,
-        "occurrences": [
-          {
-            "block_path": "composite.lineage.provider_lookup_fields",
-            "path": "configs/composites/activity.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "composite.lineage.provider_lookup_fields",
-            "path": "configs/composites/assay.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "composite.lineage.provider_lookup_fields",
-            "path": "configs/composites/molecule.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "composite.lineage.provider_lookup_fields",
-            "path": "configs/composites/publication.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "composite.lineage.provider_lookup_fields",
-            "path": "configs/composites/target.yaml",
-            "surface_kind": "composite_config"
-          }
-        ],
-        "serialized_bytes": 689,
-        "surface_kind_counts": {
-          "composite_config": 5
-        }
-      },
-      {
         "block_path": "composite.normalized_anchor_policy.pubchem_compound",
         "fingerprint": "4975749a62bd",
         "governance": {
@@ -169,49 +83,6 @@
           }
         ],
         "serialized_bytes": 402,
-        "surface_kind_counts": {
-          "composite_config": 5
-        }
-      },
-      {
-        "block_path": "composite.merge.field_mappings",
-        "fingerprint": "2f5b91a867e7",
-        "governance": {
-          "decision": "retain_shared_composite_policy",
-          "linked_issue": "#5568",
-          "owner": "@bioetl-composite",
-          "rationale": "Composite field mappings stay colocated with each composite runtime config until a schema-owned shared policy object exists.",
-          "review_date": "2026-09-30"
-        },
-        "occurrence_count": 5,
-        "occurrences": [
-          {
-            "block_path": "composite.merge.field_mappings",
-            "path": "configs/composites/activity.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "composite.merge.field_mappings",
-            "path": "configs/composites/assay.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "composite.merge.field_mappings",
-            "path": "configs/composites/molecule.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "composite.merge.field_mappings",
-            "path": "configs/composites/publication.yaml",
-            "surface_kind": "composite_config"
-          },
-          {
-            "block_path": "composite.merge.field_mappings",
-            "path": "configs/composites/target.yaml",
-            "surface_kind": "composite_config"
-          }
-        ],
-        "serialized_bytes": 329,
         "surface_kind_counts": {
           "composite_config": 5
         }
@@ -821,7 +692,7 @@
         ".yml",
         ".json"
       ],
-      "files_scanned": 197,
+      "files_scanned": 201,
       "ignored_by_jscpd_patterns": [
         "**/configs/**",
         "**/*.yaml",
@@ -834,9 +705,9 @@
     },
     "summary": {
       "affected_file_count": 14,
-      "duplicate_cluster_count": 24,
-      "duplicate_occurrence_count": 75,
-      "reported_cluster_count": 24
+      "duplicate_cluster_count": 21,
+      "duplicate_occurrence_count": 60,
+      "reported_cluster_count": 21
     }
   },
   "entity_effective": {
@@ -856,7 +727,7 @@
       "inconsistent_parameter_count": 0,
       "raw_inconsistent_parameter_count": 0,
       "sanctioned_partial_parameter_count": 0,
-      "unique_parameter_count": 187
+      "unique_parameter_count": 157
     },
     "entity_effective": {
       "config_count": 22,
@@ -872,5 +743,5 @@
     "composite_runtime family is at zero inconsistent keys as of Stream B plateau.",
     "Residual entity drift is limited to intentional entity-specific filters, metadata policy blocks, schema field-alias surfaces, and pipeline overrides."
   ],
-  "snapshot_date": "2026-07-01"
+  "snapshot_date": "2026-07-02"
 }

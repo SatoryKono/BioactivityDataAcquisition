@@ -53,6 +53,30 @@ def _write_yaml(path: Path, payload: dict[str, Any]) -> None:
         yaml.safe_dump(payload, f, sort_keys=False, allow_unicode=False)
 
 
+def _copy_composite_shared_policy_if_present(
+    *,
+    source_config_path: Path,
+    source_payload: dict[str, Any],
+    target_composites_dir: Path,
+) -> None:
+    maintenance = source_payload.get("maintenance")
+    if not isinstance(maintenance, dict):
+        return
+
+    policy_file = maintenance.get("composite_shared_policy_file")
+    if not isinstance(policy_file, str) or not policy_file.strip():
+        return
+
+    source_policy_path = source_config_path.parent / policy_file
+    policy_payload = yaml.safe_load(source_policy_path.read_text(encoding="utf-8"))
+    if not isinstance(policy_payload, dict):
+        raise ValueError(
+            f"Composite shared policy fixture must be a mapping: {source_policy_path}"
+        )
+
+    _write_yaml(target_composites_dir / policy_file, policy_payload)
+
+
 def _deep_merge_dicts(
     base: dict[str, Any],  # Any: test helper mirrors YAML merge semantics
     override: dict[str, Any],  # Any: test helper mirrors YAML merge semantics
@@ -416,6 +440,11 @@ class TestCompositeDQExternalization:
         composites_dir = configs_root / "composites"
         quality_dir = configs_root / "quality" / "entities" / "composite"
 
+        _copy_composite_shared_policy_if_present(
+            source_config_path=current_path,
+            source_payload=current_payload,
+            target_composites_dir=composites_dir,
+        )
         _write_yaml(composites_dir / f"{entity}_inline.yaml", before_payload)
         _write_yaml(composites_dir / f"{entity}_external.yaml", after_payload)
         _write_yaml(quality_dir / f"{entity}.yaml", external_payload)

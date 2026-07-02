@@ -105,6 +105,11 @@ JOIN_KEY_NORMALIZATION_POLICIES: Mapping[str, JoinKeyNormalizationPolicy] = {
         lowercase=True,
         domain_canonicalizer=_normalize_join_key_pmc_id,
     ),
+    "pmcid": JoinKeyNormalizationPolicy(
+        trim=True,
+        lowercase=True,
+        domain_canonicalizer=_normalize_join_key_pmc_id,
+    ),
     "pmid": JoinKeyNormalizationPolicy(
         trim=True,
         lowercase=True,
@@ -113,6 +118,7 @@ JOIN_KEY_NORMALIZATION_POLICIES: Mapping[str, JoinKeyNormalizationPolicy] = {
     "primary_component_id": _NOOP_POLICY,
     "protein_classification_id": _NOOP_POLICY,
     "publication_id": _NOOP_POLICY,
+    "source_record_id": _NOOP_POLICY,
     "target_id": JoinKeyNormalizationPolicy(
         trim=True,
         domain_canonicalizer=_normalize_join_key_target_id,
@@ -123,6 +129,10 @@ JOIN_KEY_NORMALIZATION_POLICIES: Mapping[str, JoinKeyNormalizationPolicy] = {
     ),
     "tissue_id": _NOOP_POLICY,
     "uniprot_accession": JoinKeyNormalizationPolicy(
+        trim=True,
+        domain_canonicalizer=_normalize_join_key_uniprot_accession,
+    ),
+    "uniprot_id": JoinKeyNormalizationPolicy(
         trim=True,
         domain_canonicalizer=_normalize_join_key_uniprot_accession,
     ),

@@ -11,6 +11,12 @@ from pydantic import ValidationError
 
 from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.types import JsonDict
+from bioetl.infrastructure.config._composite_config_paths import (
+    DEFAULT_COMPOSITE_CONFIG_DIR,
+    list_composite_config_names,
+    resolve_composite_config_dir,
+    resolve_composite_config_path,
+)
 from bioetl.infrastructure.config._composite_dq_externalization import (
     merge_external_dq_overrides,
 )
@@ -20,7 +26,6 @@ from bioetl.infrastructure.config._composite_gold_schema_registry import (
 from bioetl.infrastructure.config._composite_shared_policy_externalization import (
     merge_external_shared_policy,
 )
-from bioetl.infrastructure.config.config_root import resolve_config_subdir
 from bioetl.infrastructure.schemas.composite_config import (
     validate_composite_config_payload,
 )
@@ -39,8 +44,6 @@ ConfigPayloadValidator = Callable[[JsonDict], object]
 DQOverrideMerger = Callable[[dict[str, object], Path], None]
 SharedPolicyMerger = Callable[[dict[str, object], Path], None]
 
-DEFAULT_COMPOSITE_CONFIG_DIR = Path("configs/composites")
-
 
 def resolve_composite_gold_schema(
     composite_name: str,
@@ -51,63 +54,6 @@ def resolve_composite_gold_schema(
     registry = schema_registry or DEFAULT_COMPOSITE_GOLD_SCHEMA_REGISTRY
     key = composite_name.removeprefix("composite_")
     return registry.get(key)
-
-
-def resolve_composite_config_dir(
-    *,
-    config_dir: Path | None = None,
-    configs_root: Path | None = None,
-) -> Path:
-    """Resolve the canonical composite config directory independent of cwd."""
-    return resolve_config_subdir(
-        config_dir or DEFAULT_COMPOSITE_CONFIG_DIR,
-        configs_root=configs_root,
-    )
-
-
-def resolve_composite_config_path(
-    name: str,
-    *,
-    config_dir: Path | None = None,
-    configs_root: Path | None = None,
-) -> Path:
-    """Resolve composite config path from canonical composites directory."""
-    config_path = (
-        resolve_composite_config_dir(
-            config_dir=config_dir,
-            configs_root=configs_root,
-        )
-        / f"{name}.yaml"
-    )
-    if config_path.exists():
-        return config_path
-    raise FileNotFoundError(f"Composite config not found: {config_path}")
-
-
-def list_composite_config_names(
-    *,
-    config_dir: Path | None = None,
-    configs_root: Path | None = None,
-) -> tuple[str, ...]:
-    """Return canonical runtime composite config names.
-
-    Only top-level YAML files that expose a `composite` mapping are treated as
-    executable composite configs. Sidecar policy files such as
-    `shared_policy.yaml` are excluded from runtime family enumeration.
-    """
-    composite_dir = resolve_composite_config_dir(
-        config_dir=config_dir,
-        configs_root=configs_root,
-    )
-    names: list[str] = []
-    for path in sorted(composite_dir.glob("*.yaml")):
-        try:
-            raw_payload = yaml.safe_load(path.read_text(encoding="utf-8"))
-        except OSError:
-            continue
-        if isinstance(raw_payload, dict) and isinstance(raw_payload.get("composite"), dict):
-            names.append(path.stem)
-    return tuple(names)
 
 
 def load_composite_config(
