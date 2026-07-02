@@ -185,6 +185,7 @@
 05-operations/operations-doc-inventory.md
 05-operations/runbooks/generated-artifact-drift-workflow.md
 05-operations/runbooks/merge-campaign.md
+05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md
 05-operations/runbooks/neo4j-backend-recovery-quick-start.md
 05-operations/runbooks/neo4j-complete-recovery-guide.md
 05-operations/runbooks/workflow-control-plane.md
@@ -199,12 +200,11 @@
 05-operations/tooling/scripts-ops/SETUP_CHECKLIST.md
 05-operations/tooling/scripts-ops/WSL_SETUP_SUMMARY.md
 05-operations/verification/ci-failure-triage-2026-05-05.md
+05-operations/verification/docker-helper-root-relocation-audit.md
 05-operations/verification/docker-helper-credential-history-audit.md
 05-operations/verification/neo4j-memory-qa-examples.md
 05-operations/verification/neo4j-memory-windows-verification.md
 CODEX_HANG_FIX.md
-CODEX_QUICK_START.md
-CODEX_WSL_SETUP.md
 config-discrepancies-report.md
 D-01 Governance & Style Guide.md
 D-02 Provider Integration Handbook.md

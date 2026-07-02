@@ -43,7 +43,13 @@ if TYPE_CHECKING:
     from bioetl.domain.composite import CompositeConfig
     from bioetl.domain.composite.field_groups import FieldGroupRegistry
     from bioetl.domain.context import PipelineRunContext
-    from bioetl.domain.ports import LockPort, LoggerPort, MetricsPort, TracingPort
+    from bioetl.domain.ports import (
+        ClockPort,
+        LockPort,
+        LoggerPort,
+        MetricsPort,
+        TracingPort,
+    )
     from bioetl.infrastructure.config.settings_api import Settings
 
 __all__ = [
@@ -63,6 +69,7 @@ def bootstrap_runtime_basics(
     storage_bootstrapper: Callable[..., object],
     lock_factory: Callable[[], LockPort],
     uuid_factory: Callable[[], UUID],
+    clock_factory: Callable[[], ClockPort] = SystemClock,
 ) -> CompositeInfrastructureContext:
     """Build base runtime dependencies shared across composite bootstrap.
 
@@ -79,6 +86,8 @@ def bootstrap_runtime_basics(
         lock_factory: Zero-argument callable returning a LockPort.
         uuid_factory: Zero-argument callable returning a new UUID; injectable
             for deterministic testing.
+        clock_factory: Zero-argument callable returning the runtime clock; injectable
+            so tests and deterministic runners do not rely on wall-clock reads.
 
     Returns:
         CompositeInfrastructureContext with the typed runtime resource bundle for the composite run.
@@ -96,7 +105,7 @@ def bootstrap_runtime_basics(
 
     metrics = create_metrics(settings)
     tracer = tracer_bootstrapper(settings)
-    clock = SystemClock()
+    clock = clock_factory()
     storage_run_context = RunContext(
         run_id=RunID(UUID(effective_run_id)),
         run_type=RunType.INCREMENTAL,

@@ -16,9 +16,6 @@ Uses DefaultDataNormalizer for text normalization (DI pattern).
 
 from __future__ import annotations
 
-__all__ = ["CrossRefPublicationTransformer"]
-
-
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.core.base_transformer import TransformerDependencyContext
@@ -33,6 +30,9 @@ from bioetl.application.pipelines.common.blocks import (
     _CrossRefMetadataBlock,
 )
 from bioetl.application.pipelines.common.publication_blocks import ExtractionBlock
+from bioetl.application.pipelines.common.publication_transformer_context import (
+    BasePublicationTransformerContext,
+)
 from bioetl.application.pipelines.crossref._business_data_builder import (
     compute_publication_date,
     hash_author_details,
@@ -47,6 +47,9 @@ if TYPE_CHECKING:
     from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
     from bioetl.domain.types import BronzeRecord
+
+
+__all__ = ["CrossRefPublicationTransformer"]
 
 
 class CrossRefPublicationTransformer(BasePublicationTransformer):
@@ -88,15 +91,17 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
         """
         super().__init__(
-            provider,
-            entity_type=entity_type,
-            silver_filters=silver_filters,
-            gold_filters=gold_filters,
-            tracer=tracer,
-            metrics=metrics,
-            identity_service=identity_service,
-            pii_hasher=pii_hasher,
-            dependencies=dependencies,
+            BasePublicationTransformerContext(
+                provider=provider,
+                entity_type=entity_type,
+                silver_filters=silver_filters,
+                gold_filters=gold_filters,
+                tracer=tracer,
+                metrics=metrics,
+                identity_service=identity_service,
+                pii_hasher=pii_hasher,
+                dependencies=dependencies,
+            )
         )
 
     @property

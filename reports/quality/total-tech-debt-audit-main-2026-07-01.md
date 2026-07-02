@@ -13,7 +13,7 @@ Refresh reason: #5752 - Correct stale claims and align with current governance b
 1. Active Bronze fixture gaps were not found: `configs/base/bronze_fixture_gaps.yaml` has `gaps: {}` and the scorecard keeps active/blocked/decision-recorded fixture gap budgets at zero.
 1. Compatibility transition debt is zero; retained compatibility burden is explicitly governed and sanctioned as public entrypoints, not unresolved debt.
 1. Root hygiene is governed: `new.env` and similar surfaces are classified as `present_local_only_root_surface` with explicit retention policy, not stale debt.
-1. Supporting scripts are inventoried: 87 supporting scripts are tracked in `scripts_inventory_manifest.json` with explicit ownership and usage tracking.
+1. Supporting scripts are inventoried: 89 supporting scripts are tracked in `scripts_inventory_manifest.json` with explicit ownership and usage tracking.
 1. Main test debt is no longer an uncovered-module backlog: `module-coverage-inventory.json` reports `0` uncovered and `0` unmeasured modules, but partially covered tails remain across domain (`159`), application (`274`), and infrastructure (`255`) modules.
 1. Domain still carries the most determinism-sensitive partial-coverage tail: DQ rule evaluators, normalization, validation, schema policy, contract registry, and ledger/event surfaces remain only partially covered and need focused invariant tests.
 1. Hotspot duplication is currently zero; hotspot families are at reviewed budget ceilings and must not grow.
@@ -28,7 +28,7 @@ Refresh reason: #5752 - Correct stale claims and align with current governance b
 || Compatibility burden | Retained entrypoints `12`, public export facades `4`, twin pairs `0`. | `reports/quality/compatibility-importer-census.json` |
 || Compatibility transition debt | `transition_debt` is empty; scorecard transition count is zero. | `configs/quality/compatibility_facade_inventory.yaml` |
 || Root hygiene | `new.env` classified as `present_local_only_root_surface` with canonical path `.env.example`. | `configs/quality/root_hygiene_review_registry.yaml` |
-|| Supporting scripts | 87 supporting scripts tracked with ownership and usage. | `configs/quality/scripts_inventory_manifest.json` |
+|| Supporting scripts | 89 supporting scripts tracked with ownership and usage. | `configs/quality/scripts_inventory_manifest.json` |
 || Dead/zero-import candidates | Repo-wide zero-import candidates are fully classified; untriaged count is `0` across `9` reviewed candidates. | `reports/quality/dead-code-inventory.json` |
 || Coverage | 2,192 source modules: 1,336 fully covered, 855 partially covered, 1 with no executable lines, 0 uncovered, 0 unmeasured. | `reports/quality/module-coverage-inventory.json` |
 || Contracts | Registry entries `27`; blocking and warning issues `0`. | `reports/quality/contract-registry-diagnostics.json` |
@@ -106,7 +106,7 @@ ADR-048 explicitly forbids Pandera import-time compatibility patching and allows
 This refreshed audit removes stale claims from the 2026-06-16 audit and aligns all findings with current committed governance artifacts on main. The primary corrections are:
 
 1. **Root hygiene**: `new.env` and similar surfaces are now correctly classified as governed local-only surfaces, not stale debt.
-2. **Supporting scripts**: The 87 supporting scripts count is now aligned with `scripts_inventory_manifest.json` after retiring three zero-reference supporting wrappers.
+2. **Supporting scripts**: The 89 supporting scripts count is now aligned with `scripts_inventory_manifest.json`; the retired zero-reference supporting wrappers remain absent while newly reviewed helper surfaces stay in the supporting inventory.
 3. **Compatibility test burden**: Duplicate test names are now at 2 (current actual state) instead of 0, matching the live governance baseline.
 4. **Public entrypoints**: Retained compatibility seams are explicitly distinguished from true transition debt and sanctioned as public API.
 

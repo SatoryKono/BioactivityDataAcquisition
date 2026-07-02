@@ -36,13 +36,6 @@ pr_compliance_checklist.yaml
 # Vendor-documented repo-wide review guidance retained at the exact root filename.
 best_practices.md
 
-# Transitional human-facing Codex / WSL docs retained until canonical docs/archive closeout.
-CODEX_SANDBOX_TROUBLESHOOT.txt
-CODEX_SETUP.txt
-CODEX_WSL_CONFIGURED.md
-CODEX_WSL_SETUP.md
-CODEX_WSL_USAGE.md
-
 # Reviewed launcher and setup shims retained as minimal compatibility entrypoints
 # while maintained logic stays under scripts/ai/codex/**.
 .wsl_proxy_env.sh
@@ -54,7 +47,8 @@ setup-codex-wsl.bat
 setup-codex-wsl.ps1
 setup-codex-wsl.sh
 
-# Reviewed optional ADR-010 adjunct helper surfaces retained at root until audited rehome.
+# Reviewed optional ADR-010 adjunct helper surfaces retained at root after
+# relocation audit; rehome only behind an owner-approved shim plan.
 docker-compose.monitoring.yml
 docker-compose.alertmanager.yml
 docker-compose.codex.yml

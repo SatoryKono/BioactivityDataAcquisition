@@ -144,6 +144,38 @@ review_lanes:
         canonical_path: docs/00-project/governance/qodo/README.md
         action_if_reintroduced: retain_only_while_qodo_repo_level_guidance_requires_the_exact_root_filename_otherwise_move_under_docs_and_drop_the_root_copy
 
+  - lane_id: root_archived_ai_runtime_docs
+    classification: review_required
+    scope: formerly tracked root Codex/WSL setup notes retired into canonical docs and archive surfaces
+    owner: Engineering / AI Runtime
+    retention_class: archived_root_setup_note
+    retention_action: keep_canonical_runbooks_under_docs_and_archive_historical_status_notes_outside_the_root
+    cleanup_policy: do_not_reintroduce_as_tracked_root_docs_without_fresh_root_governance_review
+    verification:
+      - git ls-files CODEX_SANDBOX_TROUBLESHOOT.txt CODEX_SETUP.txt CODEX_WSL_CONFIGURED.md CODEX_WSL_SETUP.md CODEX_WSL_USAGE.md
+      - rg -n "CODEX_SANDBOX_TROUBLESHOOT|CODEX_SETUP\\.txt|CODEX_WSL_CONFIGURED|CODEX_WSL_USAGE" .github docs scripts tests configs README.md
+    candidates:
+      - path: CODEX_SANDBOX_TROUBLESHOOT.txt
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md
+        action_if_reintroduced: move_content_back_into_the_canonical_runbook_or_archive_note_instead_of_restoring_a_root_txt_surface
+      - path: CODEX_SETUP.txt
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md
+        action_if_reintroduced: route_operator_guidance_into_the_canonical_codex_setup_doc_or_archive_note_instead_of_restoring_a_root_txt_surface
+      - path: CODEX_WSL_CONFIGURED.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/99-archive/root-status-artifacts/ai-runtime-setup/codex-root-docs-archive-2026-07-02.md
+        action_if_reintroduced: preserve_as_archive_only_status_context_not_as_a_live_root_doc
+      - path: CODEX_WSL_SETUP.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md
+        action_if_reintroduced: route_setup_guidance_into_the_canonical_wsl_doc_or_archive_note_instead_of_restoring_a_root_md_surface
+      - path: CODEX_WSL_USAGE.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: scripts/ai/codex/QUICKSTART_WSL.md
+        action_if_reintroduced: keep_usage_quick_start_under_the_canonical_codex_runtime_docs_or_archive_it_outside_the_root
+
   - lane_id: root_launcher_shims
     classification: owner_decision_required
     scope: reviewed root launcher and setup shims retained as compatibility entrypoints over canonical Codex owner surfaces

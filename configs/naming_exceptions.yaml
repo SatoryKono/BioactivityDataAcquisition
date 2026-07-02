@@ -22,9 +22,6 @@ documentation_exceptions:
     - CODEX.md            # Codex runtime docs
     - GEMINI.md           # Gemini runtime docs
     # Governance-approved legacy docs retained without bulk rename churn.
-    - docs/CODEX_HANG_FIX.md       # Legacy root setup/troubleshooting entrypoint
-    - docs/CODEX_QUICK_START.md    # Legacy root setup/troubleshooting entrypoint
-    - docs/CODEX_WSL_SETUP.md      # Legacy root setup/troubleshooting entrypoint
     - docs/DOCKER_QUICKSTART.md    # Legacy root setup/troubleshooting entrypoint
     - docs/DOCKER_SETUP.md         # Legacy root setup/troubleshooting entrypoint
     - docs/00-project/DOCUMENTATION_GOVERNANCE.md

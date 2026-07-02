@@ -20,6 +20,7 @@ REMEDIATION_PLAN_PATH = (
 
 ALLOWED_CLASSIFICATIONS = {
     "blocked_cleanup_zone",
+    "cleanup_completed",
     "owner_decision_required",
     "review_required",
     "security_review_required",
