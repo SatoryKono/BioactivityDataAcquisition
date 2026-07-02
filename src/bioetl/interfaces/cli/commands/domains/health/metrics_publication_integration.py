@@ -16,7 +16,7 @@ def publish_metrics_safely(
     metric_names: tuple[str, ...] | None = None,
 ) -> bool:
     """Push process-local metrics without failing the completed CLI command."""
-    from bioetl.composition.execution_api import push_metrics_to_gateway
+    from bioetl.composition.observability_api import push_metrics_to_gateway
 
     try:
         gateway_kwargs: dict[str, object] = {

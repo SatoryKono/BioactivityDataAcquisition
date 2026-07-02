@@ -10,6 +10,7 @@ Commands:
     check-architecture   Infrastructure architecture compatibility check
     check-app-deps       Application dependency compatibility check
     check-constructor-args Constructor argument compatibility check
+    check-duplication-complexity-exemptions Validate duplication/complexity exemption registry
     check-c901           C901 complexity baseline enforcement
     check-naming-pkg     Package naming consistency check
     check-exemptions     Quality exemptions audit
@@ -74,6 +75,9 @@ COMMAND_MODULES: dict[str, str] = {
     "check-architecture": "scripts.engineering.qa.check_architecture",
     "check-app-deps": "scripts.engineering.qa.check_application_deps",
     "check-constructor-args": "scripts.engineering.qa.check_constructor_args",
+    "check-duplication-complexity-exemptions": (
+        "scripts.engineering.qa.check_duplication_complexity_exemptions"
+    ),
     "check-c901": "scripts.engineering.qa.check_c901_baseline",
     "check-naming-pkg": "scripts.engineering.qa.check_naming_package_consistency",
     "check-exemptions": "scripts.engineering.qa.check_quality_exemptions",

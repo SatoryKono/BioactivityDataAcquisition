@@ -1,7 +1,7 @@
 ______________________________________________________________________
 
-Version: 1.0.0
-Status: active
+Version: 1.1.0
+Status: retired-compat-shim
 Class: published
 Owner: BioETL Team
 Reviewers:
@@ -15,7 +15,11 @@ ______________________________________________________________________
 
 ## Overview
 
-The Phased Migration Support system enables safe, controlled adoption of breaking changes in the BioETL pipeline. It provides tools for managing backward compatibility, version transitions, and gradual rollout of new features.
+The runtime phased-migration fallback system is retired. The public
+`PhasedMigrationCoordinator` symbol remains as a compatibility shim so existing
+imports keep resolving, but v1.x runtime phase fallbacks no longer mutate live
+configs. Compatibility review now lives in
+`configs/quality/config_compatibility_registry.yaml`.
 
 ## Core Concepts
 

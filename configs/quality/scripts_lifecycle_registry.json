@@ -14,6 +14,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the shared CLI dispatch helper for canonical scripts.engineering and adjacent routers; promote it to active inventory once helper modules receive explicit catalog classification."
     },
+    "scripts/ai/codex/helper/wsl_proxy_env.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a sourced WSL proxy environment helper for Codex setup flows; keep it supporting unless it becomes a standalone, documented CLI entrypoint."
+    },
     "scripts/docs/common/markdown.py": {
       "owner": "@bioetl-docs",
       "decision": "shared_helper_module",
@@ -175,6 +181,12 @@
       "decision": "shared_helper_module",
       "review_by": "2026-07-15",
       "next_step": "Retain as the shared config-surface governance helper while canonical matrix generation and adjacent backlog scripts still import its sanctioned partial-key policy; fold it into a broader schema/governance helper only if those surfaces consolidate."
+    },
+    "scripts/engineering/qa/check_duplication_complexity_exemptions.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the governed duplication/complexity exemption registry validator behind the QA router and CI workflow; keep it supporting unless it is promoted to an operator-facing command."
     },
     "scripts/engineering/qa/report_config_surface_backlog.py": {
       "owner": "@bioetl-platform",

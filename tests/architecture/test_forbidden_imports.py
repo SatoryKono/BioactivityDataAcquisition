@@ -745,6 +745,7 @@ class TestInterfacesBootstrapIsolation:
             "bioetl.composition.composite_api",
             "bioetl.composition.control_plane_service_access",
             "bioetl.composition.execution_api",
+            "bioetl.composition.execution_service_access",
             "bioetl.composition.health_api",
             "bioetl.composition.health_service_access",
             "bioetl.composition.maintenance_api",
@@ -773,6 +774,7 @@ class TestInterfacesBootstrapIsolation:
             "  - bioetl.composition.composite_api\n"
             "  - bioetl.composition.control_plane_service_access\n"
             "  - bioetl.composition.execution_api\n"
+            "  - bioetl.composition.execution_service_access\n"
             "  - bioetl.composition.health_api\n"
             "  - bioetl.composition.health_service_access\n"
             "  - bioetl.composition.maintenance_api\n"

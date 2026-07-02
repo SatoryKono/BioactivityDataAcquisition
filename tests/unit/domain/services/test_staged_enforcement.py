@@ -134,8 +134,8 @@ def test_diagnostics_helpers_summarize_results_and_policies() -> None:
             current_stage=EnforcementStage.SOFT_FAIL,
             failure_threshold=0.8,
             warning_threshold=0.3,
-            observe_until="2024-04-01",
-            soft_fail_until="2024-06-01",
+            observe_until="2026-08-01",
+            soft_fail_until="2026-10-01",
         ),
     }
     results = [
@@ -157,8 +157,8 @@ def test_diagnostics_helpers_summarize_results_and_policies() -> None:
             "current_stage": "soft_fail",
             "failure_threshold": 0.8,
             "warning_threshold": 0.3,
-            "observe_until": "2024-04-01",
-            "soft_fail_until": "2024-06-01",
+            "observe_until": "2026-08-01",
+            "soft_fail_until": "2026-10-01",
         }
     }
     assert _pass_rates(grouped) == {
@@ -214,3 +214,16 @@ def test_create_enforcement_engine_returns_initialized_engine() -> None:
 
     assert isinstance(engine, StagedEnforcementEngine)
     assert "fixture_governance" in engine.policies
+
+
+def test_default_contract_policies_are_subset_of_one_registry() -> None:
+    engine = StagedEnforcementEngine()
+
+    assert set(engine._contract_policies) == {
+        "contract_identity",
+        "registry_consistency",
+        "schema_compatibility",
+    }
+    assert set(engine._contract_policies) <= set(engine.policies)
+    assert all(policy.observe_until is None for policy in engine.policies.values())
+    assert all(policy.soft_fail_until is None for policy in engine.policies.values())

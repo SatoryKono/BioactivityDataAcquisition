@@ -57,7 +57,7 @@ def test_issue_5755_removed_supporting_wrappers_are_absent_and_untracked() -> No
     assert isinstance(summary, dict)
     status_counts = summary["status_counts"]
     assert isinstance(status_counts, dict)
-    assert summary["total_scripts"] == 447
+    assert summary["total_scripts"] == 449
     assert status_counts["supporting"] == 87
 
 

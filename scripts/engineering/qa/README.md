@@ -17,6 +17,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `check-architecture`             | `check_architecture.py`                               | Canonical compatibility wrapper for the legacy infrastructure architecture check                  |
 | `check-app-deps`                 | `check_application_deps.py`                           | Canonical compatibility wrapper for the legacy application dependency check                       |
 | `check-constructor-args`         | `check_constructor_args.py`                           | Canonical compatibility wrapper for the legacy constructor argument audit                         |
+| `check-duplication-complexity-exemptions` | `check_duplication_complexity_exemptions.py` | Validate that workflow complexity exemptions stay owner-scoped, expiring, and registry-backed    |
 | `check-c901`                     | `check_c901_baseline.py`                              | C901 complexity baseline enforcement                                                              |
 | `check-naming-pkg`               | `check_naming_package_consistency.py`                 | Package naming consistency check                                                                  |
 | `check-exemptions`               | `check_quality_exemptions.py`                         | Quality exemptions audit                                                                          |
@@ -51,6 +52,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `check-architecture`             | When reproducing or migrating the legacy infrastructure architecture check through the canonical QA entrypoint                                   | Manual, Makefile migration path            |
 | `check-app-deps`                 | When reproducing or migrating the legacy application dependency check through the canonical QA entrypoint                                        | Manual, Makefile migration path            |
 | `check-constructor-args`         | When reproducing or migrating the legacy constructor-args audit through the canonical QA entrypoint                                              | CI migration path, manual use              |
+| `check-duplication-complexity-exemptions` | After editing `.github/workflows/duplication-complexity.yml` or the exemption registry; keeps owner/expiry metadata in sync                 | CI gate (`duplication-complexity.yml`)     |
 | `check-c901`                     | After modifying complex functions; prevents new C901 violations above baseline                                                                   | CI gate (`import-linter.yml`, every PR)    |
 | `check-naming-pkg`               | After restructuring packages or adding new modules; enforces factory isolation                                                                   | CI gate (`architecture.yml`)               |
 | `check-exemptions`               | After modifying quality exemption registry                                                                                                       | CI gate (`architecture.yml`)               |
@@ -128,7 +130,8 @@ python scripts/engineering/qa/report_duplication_baseline.py
 python -m scripts.engineering.qa report-artifact-duplication-audit --check
 python -m scripts.engineering.qa check-architecture
 python -m scripts.engineering.qa check-app-deps
-python -m scripts.engineering.qa check-constructor-args -- --warn-only
+python -m scripts.engineering.qa check-constructor-args
+python -m scripts.engineering.qa check-duplication-complexity-exemptions
 python -m scripts.engineering.qa check-xwalk-missing-backlog
 python -m scripts.engineering.qa analyze-duplicate-functions
 ```
