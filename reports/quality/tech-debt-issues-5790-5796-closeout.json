@@ -16,7 +16,7 @@
     "retained_public_export_facade_count": 4,
     "adapter_duplicate_clusters": {
       "opening_baseline": 54,
-      "current": 50
+      "current": 48
     },
     "pipeline_duplicate_clusters": {
       "opening_baseline": 11,
@@ -58,14 +58,14 @@
       "debt_type": "adapter_duplication",
       "outcome": "improved",
       "opening_baseline": 54,
-      "current_value": 50,
+      "current_value": 48,
       "evidence": [
         "src/bioetl/infrastructure/adapters/common/error_bundles.py",
         "src/bioetl/infrastructure/adapters/pubmed/_errors.py",
         "reports/quality/full-app-duplication-baseline.json",
         "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py"
       ],
-      "closeout_reason": "Shared adapter network/resilience bundles now flow through the canonical common helper and the committed duplication baseline remains at 50 clusters, below the opening 54-cluster tranche."
+      "closeout_reason": "Shared adapter network/resilience bundles now flow through the canonical common helper and the committed duplication baseline remains at 48 clusters, below the opening 54-cluster tranche."
     },
     "5792": {
       "status": "closeable",

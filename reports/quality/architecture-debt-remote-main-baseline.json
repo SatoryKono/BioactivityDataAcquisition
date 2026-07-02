@@ -1,10 +1,10 @@
 {
   "artifacts": [
     {
-      "blob_sha256": "c53b6e7f9526a762740e1c479f31cba37bba0204b653f5ef4180b88c0dac5a53",
+      "blob_sha256": "d0a4e62a4342831398ecbba74b569ca90f38701c0f3c5d8577fa423e51462581",
       "path": "reports/quality/architecture-quality-scorecard.json",
       "required": true,
-      "source_revision": "e78226955e33b636f9518b7836e585d7db28bad7",
+      "source_revision": "44a8743e8cb52922e977bd3091244ce1d15232e2",
       "summary": {
         "available": true,
         "integral_score": 8.54,
@@ -13,17 +13,17 @@
       }
     },
     {
-      "blob_sha256": "4f5ef46f55c3fffb7dbc55f21d1bded7929a9bdde3fd076e38ad1bf9345d7e92",
+      "blob_sha256": "f25fb2b0f799742351e042cc13c7d01410965bee9703e57e4023309855272044",
       "path": "reports/quality/module-coverage-inventory.json",
       "required": true,
-      "source_revision": "e78226955e33b636f9518b7836e585d7db28bad7",
+      "source_revision": "44a8743e8cb52922e977bd3091244ce1d15232e2",
       "summary": {
         "available": true,
         "coverage_xml_sha256": "fb15f6a63e251a6fa48645d07ddb739836aad21aa27f184eeda1ce3c84776e0c",
         "schema_version": 1,
         "snapshot_date": "2026-07-01",
         "source_module_count": 2199,
-        "source_tree_sha256": "f5862c3f82cf4f83be165e5524e1a9a7d39cf32f275376e611d25cfe2ba35c5c",
+        "source_tree_sha256": "a4654b44f2f9640655ccd64f2f19b78d7f16097cc436f800f869c149c9bee5b6",
         "unmeasured_module_count": 0
       }
     },
@@ -31,7 +31,7 @@
       "blob_sha256": "ea93dde81ce2f7bc9a0853fc013b800ec9fce71089cd2adeb91ac049c9d6cd02",
       "path": "reports/quality/compatibility-importer-census.json",
       "required": true,
-      "source_revision": "e78226955e33b636f9518b7836e585d7db28bad7",
+      "source_revision": "44a8743e8cb52922e977bd3091244ce1d15232e2",
       "summary": {
         "available": true,
         "retained_entrypoint_count": 12,
@@ -39,10 +39,10 @@
       }
     },
     {
-      "blob_sha256": "7edaeeb389142d94a5e216adbf321ee04b8c8c55981d16ef15a9759879af226b",
+      "blob_sha256": "f1f21a95fa3f16d161f0bd757651033f0eba7ef697858b0a9e2f3d9950cd9a3a",
       "path": "reports/quality/dead-code-inventory.json",
       "required": true,
-      "source_revision": "e78226955e33b636f9518b7836e585d7db28bad7",
+      "source_revision": "44a8743e8cb52922e977bd3091244ce1d15232e2",
       "summary": {
         "available": true,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
@@ -53,7 +53,7 @@
       "blob_sha256": "691ae784ed4f90f7835fed4706fbb586e7d7184b8ddc965a7fd5cab6ef3a2dce",
       "path": "reports/quality/contract-registry-diagnostics.json",
       "required": true,
-      "source_revision": "e78226955e33b636f9518b7836e585d7db28bad7",
+      "source_revision": "44a8743e8cb52922e977bd3091244ce1d15232e2",
       "summary": {
         "available": true,
         "blocking_issue_count": 0,
@@ -64,13 +64,13 @@
       "blob_sha256": "d65eb9283100b0cce5e78e4cac3708c7971a23736a9fca6bf7c9fc79b5ac7a96",
       "path": "reports/observability/runtime_cardinality_inventory.json",
       "required": false,
-      "source_revision": "e78226955e33b636f9518b7836e585d7db28bad7",
+      "source_revision": "44a8743e8cb52922e977bd3091244ce1d15232e2",
       "summary": {
         "available": true
       }
     }
   ],
-  "baseline_artifact_fingerprint": "8381504a304b524a1fb33769d0e8861085b4c2cb8661ad6f5ea9173e07668d9b",
+  "baseline_artifact_fingerprint": "1c129c1fca6a055ecabd7a0dae3bcc8e743a1d6aa4623ad28df42d24c8349a69",
   "branch": "main",
   "dirty_closeout_guard": {
     "command": "git status --porcelain --untracked-files=no",
@@ -90,9 +90,9 @@
   ],
   "local_tracking_ref": "origin/main",
   "local_tracking_ref_matches_remote": true,
-  "local_tracking_ref_sha": "e78226955e33b636f9518b7836e585d7db28bad7",
+  "local_tracking_ref_sha": "44a8743e8cb52922e977bd3091244ce1d15232e2",
   "remote": "origin",
   "remote_main_ref": "refs/heads/main",
-  "remote_main_sha": "e78226955e33b636f9518b7836e585d7db28bad7",
+  "remote_main_sha": "44a8743e8cb52922e977bd3091244ce1d15232e2",
   "schema_version": 1
 }

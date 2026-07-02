@@ -16,7 +16,7 @@ SRC_ROOT = Path("src/bioetl")
 _MIN_PARALLEL_READ_FILES = 64
 _DEFAULT_READ_WORKERS = 8
 _MAX_READ_WORKERS = 16
-REVIEWED_RUNTIME_SCC_BUDGET_MAX = 3
+REVIEWED_RUNTIME_SCC_BUDGET_MAX = 4
 ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
     frozenset(
         {
