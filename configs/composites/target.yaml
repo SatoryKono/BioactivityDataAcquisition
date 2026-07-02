@@ -193,15 +193,6 @@ composite:
     # Multiple sources with field overlap. Seed values take priority.
     preserve_all_sources: false
 
-    # Field renames for namespace disambiguation
-    field_mappings:
-      "chembl.cell_line.efo_id": "cell_efo_id"
-      "chembl.tissue.efo_id": "tissue_efo_id"
-      "chembl.tissue.pref_name": "tissue_pref_name"
-      "chembl.tissue.uberon_id": "tissue_uberon_id"
-      "chembl.tissue.bto_id": "tissue_bto_id"
-      "chembl.tissue.caloha_id": "tissue_caloha_id"
-      "chembl.target_component.description": "component_description"
     target_protein_classification_projection:
       source_prefix: "chembl.target_protein_classification"
       include_protein_classifications: true
@@ -218,18 +209,6 @@ composite:
       gold:
       - entity_id
       - target_id
-
-    # Field-level priority for overlapping fields
-    # seed_priority applies globally; these are explicit overrides per field.
-    field_priorities:
-      target_id:
-      - chembl    # Seed is authoritative for PK
-      primary_component_id:
-      - chembl    # Seed primary_component_id is authoritative
-      taxonomy_id:
-      - chembl    # ChEMBL taxonomy_id takes priority over UniProt
-      organism:
-      - chembl    # ChEMBL organism name is authoritative
 
     # -------------------------------------------------------------------------
     # Column Ordering by Semantic Categories
@@ -771,36 +750,7 @@ composite:
     # Include per-record enrichment status
     track_status: true
 
-    # Provider-specific lookup metadata
-    provider_lookup_fields:
-      chembl:
-        _lookup_method: chembl_lookup_method
-        _original_id: chembl_original_id
-      uniprot:
-        _lookup_method: uniprot_lookup_method
-        _original_id: uniprot_original_id
-
     # Field-level source tracking (for fields from multiple providers)
-      crossref:
-        _lookup_method: crossref_lookup_method
-        _original_id: crossref_original_id
-      openalex:
-        _lookup_method: openalex_lookup_method
-        _original_id: openalex_original_id
-      pubchem:
-        _lookup_method: pubchem_lookup_method
-        _original_id: pubchem_original_id
-
-    # Field-level source tracking for overlapping fields
-      pubmed:
-        _lookup_method: pubmed_lookup_method
-        _original_id: pubmed_original_id
-      semanticscholar:
-        _lookup_method: semanticscholar_lookup_method
-        _original_id: semanticscholar_original_id
-
-        # Field-level source tracking for overlapping fields
-        # These are fields that come from multiple providers
     track_source_for_fields:
     - target_id    # Overlapping field between seed and idmapping
     - primary_component_id        # Overlapping field between seed and target_component
@@ -813,3 +763,9 @@ composite:
 # Composite-local top-level `gold_filters` are unsupported.
 # Entity pipeline filter config remains authoritative unless explicit
 # composite runtime support is introduced.
+
+# -----------------------------------------------------------------------------
+# Maintenance Configuration
+# -----------------------------------------------------------------------------
+maintenance:
+  composite_shared_policy_file: field_groups/shared_policy.yaml
