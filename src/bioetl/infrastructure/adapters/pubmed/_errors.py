@@ -2,20 +2,12 @@
 
 from __future__ import annotations
 
-from httpx import RequestError
-
-from bioetl.domain.exceptions import BioETLError, NetworkError
+from bioetl.infrastructure.adapters.common.error_bundles import (
+    build_common_network_error_bundle,
+)
 
 __all__ = ["PUBMED_COMMON_ERRORS", "PUBMED_RECORD_ERRORS"]
 
-PUBMED_COMMON_ERRORS = (
-    BioETLError,
-    NetworkError,
-    RequestError,
-    OSError,
-    ValueError,
-    TypeError,
-    RuntimeError,
-)
+PUBMED_COMMON_ERRORS = build_common_network_error_bundle()
 
 PUBMED_RECORD_ERRORS = (*PUBMED_COMMON_ERRORS, KeyError)

@@ -243,3 +243,36 @@ class TestBuildSupportServices:
 
         call_kwargs = mock_cls.call_args[1]
         assert call_kwargs["config"] is config
+
+
+def test_build_runner_factories_wires_phase_builders_and_bronze_options() -> None:
+    """build_runner_factories wires phase builders and bronze options."""
+    from bioetl.composition.bootstrap.runtime.runtime_basics import build_runner_factories
+
+    config = _make_config("test")
+    runtime = _make_runtime()
+    logger = MagicMock()
+
+    # Mock the dependencies
+    runner_factory_builder_cls = MagicMock()
+    filter_extraction_service_cls = MagicMock()
+    pipeline_runner_builder = MagicMock()
+    resolve_bronze_opts_fn = MagicMock()
+
+    result = build_runner_factories(
+        config=config,
+        runtime=runtime,
+        logger=logger,
+        runner_factory_builder_cls=runner_factory_builder_cls,
+        filter_extraction_service_cls=filter_extraction_service_cls,
+        pipeline_runner_builder=pipeline_runner_builder,
+        resolve_bronze_opts_fn=resolve_bronze_opts_fn,
+    )
+
+    # Verify result is a tuple of 3 callables
+    assert isinstance(result, tuple)
+    assert len(result) == 3
+    assert callable(result[0])
+    assert callable(result[1])
+    assert callable(result[2])
+

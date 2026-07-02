@@ -3323,7 +3323,7 @@
       "missing_lines": 1,
       "module": "bioetl.application.pipelines.common.base_publication_transformer",
       "path": "src/bioetl/application/pipelines/common/base_publication_transformer.py",
-      "source_lines": 333
+      "source_lines": 318
     },
     {
       "coverage_percent": 100.0,
@@ -3853,7 +3853,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.pipelines.uniprot.extractors._comment_facets",
       "path": "src/bioetl/application/pipelines/uniprot/extractors/_comment_facets.py",
-      "source_lines": 28
+      "source_lines": 29
     },
     {
       "coverage_percent": 97.62,
@@ -15303,7 +15303,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.adapters.common.error_bundles",
       "path": "src/bioetl/infrastructure/adapters/common/error_bundles.py",
-      "source_lines": 70
+      "source_lines": 64
     },
     {
       "coverage_percent": 100.0,
@@ -16283,7 +16283,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.adapters.pubmed._errors",
       "path": "src/bioetl/infrastructure/adapters/pubmed/_errors.py",
-      "source_lines": 21
+      "source_lines": 13
     },
     {
       "coverage_percent": 97.62,
@@ -25315,7 +25315,7 @@
       "missing_lines": 1,
       "module": "bioetl.application.pipelines.common.base_publication_transformer",
       "path": "src/bioetl/application/pipelines/common/base_publication_transformer.py",
-      "source_lines": 333
+      "source_lines": 318
     },
     {
       "coverage_percent": 100.0,
@@ -25845,7 +25845,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.pipelines.uniprot.extractors._comment_facets",
       "path": "src/bioetl/application/pipelines/uniprot/extractors/_comment_facets.py",
-      "source_lines": 28
+      "source_lines": 29
     },
     {
       "coverage_percent": 97.62,
@@ -37295,7 +37295,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.adapters.common.error_bundles",
       "path": "src/bioetl/infrastructure/adapters/common/error_bundles.py",
-      "source_lines": 70
+      "source_lines": 64
     },
     {
       "coverage_percent": 100.0,
@@ -38275,7 +38275,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.adapters.pubmed._errors",
       "path": "src/bioetl/infrastructure/adapters/pubmed/_errors.py",
-      "source_lines": 21
+      "source_lines": 13
     },
     {
       "coverage_percent": 97.62,
@@ -43990,7 +43990,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-01",
-  "source_tree_sha256": "f5862c3f82cf4f83be165e5524e1a9a7d39cf32f275376e611d25cfe2ba35c5c",
+  "source_tree_sha256": "a1c1e291381f9f1c03d0a7bea578fa4bbaf2903f155aed29515a50866d9c769c",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
