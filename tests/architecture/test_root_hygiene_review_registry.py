@@ -137,6 +137,7 @@ def test_root_hygiene_review_registry_tracks_observed_transient_root_families() 
 
     assert by_path["artifacts"]["current_live_state"] == "present_approved_root_surface"
     assert by_path["artifacts"]["canonical_path"] == "artifacts/debug_exports"
+    assert by_path[".coverage"]["current_live_state"] == "present_local_only_root_surface"
     assert (
         by_path["temp_analyze_conflicting.py"]["current_live_state"]
         == "absent_from_root_baseline"
@@ -202,6 +203,7 @@ def test_root_hygiene_review_registry_classifies_live_local_runtime_root_surface
         by_path[".ruff_cache"]["current_live_state"]
         == "present_local_only_root_surface"
     )
+    assert by_path[".scannerwork"]["current_live_state"] == "absent_from_root_baseline"
     assert (
         by_path["test-output"]["current_live_state"]
         == "present_local_only_root_surface"
@@ -209,6 +211,18 @@ def test_root_hygiene_review_registry_classifies_live_local_runtime_root_surface
     assert by_path["tmp"]["current_live_state"] == "present_local_only_root_surface"
     assert by_path["~"]["current_live_state"] == "present_local_only_root_surface"
     assert by_path[".venv"]["current_live_state"] == "present_local_only_root_surface"
+    assert (
+        by_path[".venv-docs"]["current_live_state"]
+        == "present_local_only_root_surface"
+    )
+    assert (
+        by_path[".venv-win"]["current_live_state"]
+        == "present_local_only_root_surface"
+    )
+    assert (
+        by_path[".venv-win-corrupt"]["current_live_state"]
+        == "absent_from_root_baseline"
+    )
 
 
 def test_root_hygiene_review_registry_classifies_qodo_as_local_vendor_surface() -> None:
@@ -403,6 +417,63 @@ def test_root_launcher_shims_lane_tracks_reviewed_root_compatibility_entrypoints
     assert (
         by_path[".wsl_proxy_env.sh"]["canonical_path"]
         == "scripts/ai/codex/helper/wsl_proxy_env.sh"
+    )
+
+
+def test_root_docker_adjunct_lane_tracks_reviewed_root_docker_surfaces() -> None:
+    registry = _load_yaml(REGISTRY_PATH)
+    lanes = registry["review_lanes"]
+    assert isinstance(lanes, list)
+
+    docker_lane = next(
+        lane
+        for lane in lanes
+        if isinstance(lane, dict) and lane.get("lane_id") == "root_docker_adjuncts"
+    )
+    candidates = docker_lane["candidates"]
+    assert isinstance(candidates, list)
+    by_path = {
+        candidate["path"]: candidate
+        for candidate in candidates
+        if isinstance(candidate, dict) and isinstance(candidate.get("path"), str)
+    }
+
+    expected_root_surfaces = {
+        "docker-compose.monitoring.yml",
+        "docker-compose.alertmanager.yml",
+        "docker-compose.codex.yml",
+        "docker-compose.minio.yml",
+        "docker-compose.neo4j-audit.yml",
+        "docker-compose.neo4j.yml",
+        "docker-compose.redis.yml",
+        "docker-compose.sonarqube.yml",
+        "docker-compose.yml",
+        "docker-setup.ps1",
+        "docker-setup.sh",
+        "Dockerfile.bioetl",
+        "Dockerfile.mcp-fetch",
+        "Dockerfile.mcp-filesystem",
+        "Dockerfile.mcp-github",
+        "Dockerfile.mcp-memory",
+        "Dockerfile.warp",
+        "grafana-datasource.yml",
+    }
+    assert expected_root_surfaces == set(by_path)
+
+    for path in expected_root_surfaces:
+        assert by_path[path]["current_live_state"] == "present_approved_root_surface"
+
+    assert (
+        by_path["docker-setup.ps1"]["canonical_path"] == "scripts/ops/docker-setup.ps1"
+    )
+    assert (
+        by_path["docker-setup.sh"]["canonical_path"] == "scripts/ops/docker-setup.sh"
+    )
+    assert by_path["Dockerfile.bioetl"]["canonical_path"] == "Dockerfile.bioetl"
+    assert by_path["Dockerfile.warp"]["canonical_path"] == "Dockerfile.warp"
+    assert (
+        by_path["grafana-datasource.yml"]["canonical_path"]
+        == "docs/05-operations/verification/docker-helper-root-relocation-audit.md"
     )
 
 

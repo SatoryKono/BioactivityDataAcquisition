@@ -45,6 +45,91 @@ review_lanes:
         canonical_path: .env.example
         action_if_reintroduced: security_review_then_untrack_or_replace_with_example
 
+  - lane_id: root_docker_adjuncts
+    classification: owner_decision_required
+    scope: reviewed root Docker helper adjuncts and provisioning-sidecar entrypoints
+    owner: Engineering / Runtime Platform
+    retention_class: reviewed_root_docker_compatibility_surface
+    retention_action: retain_reviewed_root_docker_adjuncts_only_while_docs_compose_and_build_flows_require_the_exact_root_entrypoint
+    cleanup_policy: owner_decision_required_before_rehome_or_delete
+    verification:
+      - git ls-files docker-compose.monitoring.yml docker-compose.alertmanager.yml docker-compose.codex.yml docker-compose.minio.yml docker-compose.neo4j-audit.yml docker-compose.neo4j.yml docker-compose.redis.yml docker-compose.sonarqube.yml docker-compose.yml docker-setup.ps1 docker-setup.sh Dockerfile.bioetl Dockerfile.mcp-fetch Dockerfile.mcp-filesystem Dockerfile.mcp-github Dockerfile.mcp-memory Dockerfile.warp grafana-datasource.yml
+      - rg -n "docker-compose(\\.monitoring|\\.alertmanager|\\.codex|\\.minio|\\.neo4j-audit|\\.neo4j|\\.redis|\\.sonarqube)?\\.yml|docker-setup\\.ps1|docker-setup\\.sh|Dockerfile\\.(bioetl|mcp-fetch|mcp-filesystem|mcp-github|mcp-memory|warp)|grafana-datasource\\.yml" .github docs scripts README.md Makefile pyproject.toml
+      - docs/05-operations/verification/docker-helper-root-relocation-audit.md
+    candidates:
+      - path: docker-compose.monitoring.yml
+        current_live_state: present_approved_root_surface
+        canonical_path: docs/05-operations/verification/docker-helper-root-relocation-audit.md
+        action_if_reintroduced: retain_only_while_root_compose_entrypoints_and_operator_docs_still_require_the_exact_root_filename
+      - path: docker-compose.alertmanager.yml
+        current_live_state: present_approved_root_surface
+        canonical_path: docs/05-operations/verification/docker-helper-root-relocation-audit.md
+        action_if_reintroduced: retain_only_while_root_compose_entrypoints_and_operator_docs_still_require_the_exact_root_filename
+      - path: docker-compose.codex.yml
+        current_live_state: present_approved_root_surface
+        canonical_path: docs/05-operations/verification/docker-helper-root-relocation-audit.md
+        action_if_reintroduced: retain_only_while_root_compose_entrypoints_and_operator_docs_still_require_the_exact_root_filename
+      - path: docker-compose.minio.yml
+        current_live_state: present_approved_root_surface
+        canonical_path: docs/05-operations/verification/docker-helper-root-relocation-audit.md
+        action_if_reintroduced: retain_only_while_root_compose_entrypoints_and_operator_docs_still_require_the_exact_root_filename
+      - path: docker-compose.neo4j-audit.yml
+        current_live_state: present_approved_root_surface
+        canonical_path: docs/05-operations/verification/docker-helper-root-relocation-audit.md
+        action_if_reintroduced: retain_only_while_root_compose_entrypoints_and_operator_docs_still_require_the_exact_root_filename
+      - path: docker-compose.neo4j.yml
+        current_live_state: present_approved_root_surface
+        canonical_path: docs/05-operations/verification/docker-helper-root-relocation-audit.md
+        action_if_reintroduced: retain_only_while_root_compose_entrypoints_and_operator_docs_still_require_the_exact_root_filename
+      - path: docker-compose.redis.yml
+        current_live_state: present_approved_root_surface
+        canonical_path: docs/05-operations/verification/docker-helper-root-relocation-audit.md
+        action_if_reintroduced: retain_only_while_root_compose_entrypoints_and_operator_docs_still_require_the_exact_root_filename
+      - path: docker-compose.sonarqube.yml
+        current_live_state: present_approved_root_surface
+        canonical_path: docs/05-operations/verification/docker-helper-root-relocation-audit.md
+        action_if_reintroduced: retain_only_while_root_compose_entrypoints_and_operator_docs_still_require_the_exact_root_filename
+      - path: docker-compose.yml
+        current_live_state: present_approved_root_surface
+        canonical_path: docs/05-operations/verification/docker-helper-root-relocation-audit.md
+        action_if_reintroduced: retain_only_while_root_compose_entrypoints_and_operator_docs_still_require_the_exact_root_filename
+      - path: docker-setup.ps1
+        current_live_state: present_approved_root_surface
+        canonical_path: scripts/ops/docker-setup.ps1
+        action_if_reintroduced: retain_only_as_a_reviewed_root_setup_entrypoint_while_canonical_logic_lives_under_scripts_ops
+      - path: docker-setup.sh
+        current_live_state: present_approved_root_surface
+        canonical_path: scripts/ops/docker-setup.sh
+        action_if_reintroduced: retain_only_as_a_reviewed_root_setup_entrypoint_while_canonical_logic_lives_under_scripts_ops
+      - path: Dockerfile.bioetl
+        current_live_state: present_approved_root_surface
+        canonical_path: Dockerfile.bioetl
+        action_if_reintroduced: retain_only_while_compose_and_manual_build_flows_still_require_the_root_image_definition
+      - path: Dockerfile.mcp-fetch
+        current_live_state: present_approved_root_surface
+        canonical_path: Dockerfile.mcp-fetch
+        action_if_reintroduced: retain_only_while_the_root_filename_remains_part_of_reviewed_container_build_flows
+      - path: Dockerfile.mcp-filesystem
+        current_live_state: present_approved_root_surface
+        canonical_path: Dockerfile.mcp-filesystem
+        action_if_reintroduced: retain_only_while_the_root_filename_remains_part_of_reviewed_container_build_flows
+      - path: Dockerfile.mcp-github
+        current_live_state: present_approved_root_surface
+        canonical_path: Dockerfile.mcp-github
+        action_if_reintroduced: retain_only_while_the_root_filename_remains_part_of_reviewed_container_build_flows
+      - path: Dockerfile.mcp-memory
+        current_live_state: present_approved_root_surface
+        canonical_path: Dockerfile.mcp-memory
+        action_if_reintroduced: retain_only_while_the_root_filename_remains_part_of_reviewed_container_build_flows
+      - path: Dockerfile.warp
+        current_live_state: present_approved_root_surface
+        canonical_path: Dockerfile.warp
+        action_if_reintroduced: retain_only_while_the_root_filename_remains_part_of_reviewed_container_build_flows
+      - path: grafana-datasource.yml
+        current_live_state: present_approved_root_surface
+        canonical_path: docs/05-operations/verification/docker-helper-root-relocation-audit.md
+        action_if_reintroduced: retain_only_until_the_provisioning_mount_contract_is_rehomed_behind_an_owner_approved_refactor
+
   - lane_id: root_helper_duplicates
     classification: review_required
     scope: duplicate root helpers with canonical owners under scripts/engineering/dev
@@ -62,14 +147,18 @@ review_lanes:
     classification: review_required
     scope: observed transient root helpers, raw test dumps, and reviewed root artifact routing
     verification:
-      - git ls-files temp_analyze_conflicting.py temp_get_hash.py test_output.txt tests.txt logs artifacts
-      - rg -n "temp_analyze_conflicting\\.py|temp_get_hash\\.py|test_output\\.txt|tests\\.txt|logs/|reports/logs/|artifacts/debug_exports/" .github docs scripts tests configs README.md Makefile pyproject.toml
+      - git ls-files .coverage temp_analyze_conflicting.py temp_get_hash.py test_output.txt tests.txt logs artifacts
+      - rg -n "\\.coverage$|temp_analyze_conflicting\\.py|temp_get_hash\\.py|test_output\\.txt|tests\\.txt|logs/|reports/logs/|artifacts/debug_exports/" .github docs scripts tests configs README.md Makefile pyproject.toml .gitignore
       - .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
     candidates:
       - path: artifacts
         current_live_state: present_approved_root_surface
         canonical_path: artifacts/debug_exports
         action_if_reintroduced: keep_tracked_only_for_governed_debug_export_evidence_and_route_other_diagnostics_into_approved_reports_or_data_surfaces
+      - path: .coverage
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_as_local_coverage_database_or_prune_after_generating_the_reviewed_coverage_artifacts
       - path: temp_analyze_conflicting.py
         current_live_state: absent_from_root_baseline
         canonical_path: null
@@ -228,9 +317,9 @@ review_lanes:
     retention_action: keep_untracked_or_prune_only_when_rebuildable_and_outside_blocked_zones
     cleanup_policy: exact_candidate_review_only_no_root_allowlist_promotion
     verification:
-      - git ls-files .agent-work .agentbridge .agents .benchmarks .cache .codex_tmp .coverage-sharded-current-main .hypothesis .import_linter_cache node_modules .npm-cache .pytest_cache .ruff_cache test-output tmp .venv caddy '~'
-      - git check-ignore -v .agent-work .agentbridge .agents .benchmarks .cache .codex_tmp .coverage-sharded-current-main .hypothesis .import_linter_cache node_modules .npm-cache .pytest_cache .ruff_cache test-output tmp .venv caddy '~'
-      - rg -n "\\.agent-work/|\\.agentbridge/|\\.agents/|\\.benchmarks/|\\.cache/|\\.codex_tmp/|\\.coverage-sharded-current-main/|\\.hypothesis/|\\.import_linter_cache/|node_modules/|\\.npm-cache/|\\.pytest_cache/|\\.ruff_cache/|test-output/|tmp/|\\.venv/|caddy/|~/" .gitignore docs scripts .github tests configs README.md
+      - git ls-files .agent-work .agentbridge .agents .benchmarks .cache .codex_tmp .coverage-sharded-current-main .hypothesis .import_linter_cache node_modules .npm-cache .pytest_cache .ruff_cache .scannerwork test-output tmp .venv .venv-docs .venv-win .venv-win-corrupt caddy '~'
+      - git check-ignore -v .agent-work .agentbridge .agents .benchmarks .cache .codex_tmp .coverage-sharded-current-main .hypothesis .import_linter_cache node_modules .npm-cache .pytest_cache .ruff_cache .scannerwork test-output tmp .venv .venv-docs .venv-win .venv-win-corrupt caddy '~'
+      - rg -n "\\.agent-work/|\\.agentbridge/|\\.agents/|\\.benchmarks/|\\.cache/|\\.codex_tmp/|\\.coverage-sharded-current-main/|\\.hypothesis/|\\.import_linter_cache/|node_modules/|\\.npm-cache/|\\.pytest_cache/|\\.ruff_cache/|\\.scannerwork/|test-output/|tmp/|\\.venv/|\\.venv-docs/|\\.venv-win/|\\.venv-win-corrupt/|caddy/|~/" .gitignore docs scripts .github tests configs README.md
     candidates:
       - path: .agent-work
         current_live_state: present_local_only_root_surface
@@ -284,6 +373,10 @@ review_lanes:
         current_live_state: present_local_only_root_surface
         canonical_path: null
         action_if_reintroduced: keep_untracked_as_local_lint_cache_or_scope_to_a_documented_cache_surface
+      - path: .scannerwork
+        current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_as_local_sonar_workspace_or_prune_when_the_review_workspace_is_no_longer_needed
       - path: test-output
         current_live_state: present_local_only_root_surface
         canonical_path: reports
@@ -300,6 +393,18 @@ review_lanes:
         current_live_state: present_local_only_root_surface
         canonical_path: pyproject.toml
         action_if_reintroduced: keep_untracked_as_primary_local_virtualenv_or rebuild from project metadata
+      - path: .venv-docs
+        current_live_state: present_local_only_root_surface
+        canonical_path: mkdocs.yml
+        action_if_reintroduced: keep_untracked_as_local_docs_virtualenv_or rebuild_from_documentation_tooling_metadata
+      - path: .venv-win
+        current_live_state: present_local_only_root_surface
+        canonical_path: pyproject.toml
+        action_if_reintroduced: keep_untracked_as_local_windows_virtualenv_or rebuild_from_project_metadata
+      - path: .venv-win-corrupt
+        current_live_state: absent_from_root_baseline
+        canonical_path: pyproject.toml
+        action_if_reintroduced: keep_untracked_as_a_recovery_only_surface_and_prune_after_rebuilding_the_windows_virtualenv
       - path: caddy
         current_live_state: present_local_only_root_surface
         canonical_path: docker-compose.codex.yml

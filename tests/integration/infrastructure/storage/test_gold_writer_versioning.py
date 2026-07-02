@@ -104,7 +104,11 @@ def _load_delta_rows(table_path: Path) -> list[dict[str, object]]:
         if not file_uris:
             return []
         tables = [
-            pq.read_table(_resolve_parquet_file_uri(file_uri))
+            pq.ParquetFile(
+                _resolve_parquet_file_uri(file_uri),
+                memory_map=False,
+                pre_buffer=False,
+            ).read()
             for file_uri in file_uris
         ]
         if len(tables) == 1:

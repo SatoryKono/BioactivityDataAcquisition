@@ -42,7 +42,7 @@ governance:
       rationale: Strict typing is already stabilized repo-wide and stays zero-budget.
       ratchet_policy: ratchet only downward from zero
     architecture_skip_count:
-      max_count: 1
+      max_count: 0
       owner: '@bioetl-architecture'
       linked_rf: RF-ARCH-015
       rationale: Decorator-based architecture skip debt is retired; the suite must
