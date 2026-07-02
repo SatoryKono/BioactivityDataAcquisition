@@ -13,9 +13,6 @@ __all__ = ["SemanticScholarPublicationTransformer"]
 from typing import TYPE_CHECKING, Any
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
-from bioetl.application.pipelines.common.publication_transformer_context import (
-    publication_transformer_kwargs,
-)
 from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_affiliations,
     extract_author_h_indices,
@@ -81,30 +78,6 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
 
     DEFAULT_PROVIDER = "semanticscholar"
     DEFAULT_ENTITY_TYPE = "publication"
-
-    def __init__(
-        self,
-        provider: str = "semanticscholar",
-        entity_type: str = "publication",
-        silver_filters: SilverFilterConfig | None = None,
-        gold_filters: GoldFilterConfig | None = None,
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
-        identity_service: EntityIdentityGenerator | None = None,
-        pii_hasher: PiiHasherPort | None = None,
-        dependencies: TransformerDependencyContext | None = None,
-    ) -> None:
-        """Initialize transformer.
-
-        Args:
-            provider: Data provider identifier.
-            entity_type: Entity type for metrics.
-            silver_filters: Optional filter configuration for Silver layer.
-            gold_filters: Optional filter configuration for Gold layer.
-            dependencies: Explicit collaborator bundle.
-
-        """
-        super().__init__(provider, **publication_transformer_kwargs(locals()))
 
     def _resolve_publication_type(
         self,

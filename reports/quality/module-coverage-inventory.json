@@ -3323,7 +3323,7 @@
       "missing_lines": 1,
       "module": "bioetl.application.pipelines.common.base_publication_transformer",
       "path": "src/bioetl/application/pipelines/common/base_publication_transformer.py",
-      "source_lines": 327
+      "source_lines": 333
     },
     {
       "coverage_percent": 100.0,
@@ -3483,7 +3483,7 @@
       "missing_lines": 5,
       "module": "bioetl.application.pipelines.crossref.transformer",
       "path": "src/bioetl/application/pipelines/crossref/transformer.py",
-      "source_lines": 261
+      "source_lines": 234
     },
     {
       "coverage_percent": 100.0,
@@ -3563,7 +3563,7 @@
       "missing_lines": 1,
       "module": "bioetl.application.pipelines.openalex.transformer",
       "path": "src/bioetl/application/pipelines/openalex/transformer.py",
-      "source_lines": 317
+      "source_lines": 290
     },
     {
       "coverage_percent": 100.0,
@@ -3823,7 +3823,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.pipelines.semanticscholar.transformer",
       "path": "src/bioetl/application/pipelines/semanticscholar/transformer.py",
-      "source_lines": 312
+      "source_lines": 285
     },
     {
       "coverage_percent": 100.0,
@@ -3853,7 +3853,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.pipelines.uniprot.extractors._comment_facets",
       "path": "src/bioetl/application/pipelines/uniprot/extractors/_comment_facets.py",
-      "source_lines": 37
+      "source_lines": 28
     },
     {
       "coverage_percent": 97.62,
@@ -16123,7 +16123,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.adapters.pubchem",
       "path": "src/bioetl/infrastructure/adapters/pubchem/__init__.py",
-      "source_lines": 26
+      "source_lines": 10
     },
     {
       "coverage_percent": 100.0,
@@ -25315,7 +25315,7 @@
       "missing_lines": 1,
       "module": "bioetl.application.pipelines.common.base_publication_transformer",
       "path": "src/bioetl/application/pipelines/common/base_publication_transformer.py",
-      "source_lines": 327
+      "source_lines": 333
     },
     {
       "coverage_percent": 100.0,
@@ -25475,7 +25475,7 @@
       "missing_lines": 5,
       "module": "bioetl.application.pipelines.crossref.transformer",
       "path": "src/bioetl/application/pipelines/crossref/transformer.py",
-      "source_lines": 261
+      "source_lines": 234
     },
     {
       "coverage_percent": 100.0,
@@ -25555,7 +25555,7 @@
       "missing_lines": 1,
       "module": "bioetl.application.pipelines.openalex.transformer",
       "path": "src/bioetl/application/pipelines/openalex/transformer.py",
-      "source_lines": 317
+      "source_lines": 290
     },
     {
       "coverage_percent": 100.0,
@@ -25815,7 +25815,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.pipelines.semanticscholar.transformer",
       "path": "src/bioetl/application/pipelines/semanticscholar/transformer.py",
-      "source_lines": 312
+      "source_lines": 285
     },
     {
       "coverage_percent": 100.0,
@@ -25845,7 +25845,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.pipelines.uniprot.extractors._comment_facets",
       "path": "src/bioetl/application/pipelines/uniprot/extractors/_comment_facets.py",
-      "source_lines": 37
+      "source_lines": 28
     },
     {
       "coverage_percent": 97.62,
@@ -38115,7 +38115,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.adapters.pubchem",
       "path": "src/bioetl/infrastructure/adapters/pubchem/__init__.py",
-      "source_lines": 26
+      "source_lines": 10
     },
     {
       "coverage_percent": 100.0,
@@ -43990,7 +43990,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-01",
-  "source_tree_sha256": "c80506db03d93c4a1885b10e8ed20f10c623c10a9a43c8f20a3e88cd93d75d50",
+  "source_tree_sha256": "f5862c3f82cf4f83be165e5524e1a9a7d39cf32f275376e611d25cfe2ba35c5c",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
