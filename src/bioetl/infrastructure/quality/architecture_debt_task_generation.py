@@ -2,13 +2,25 @@
 
 from __future__ import annotations
 
-import json
 from datetime import datetime
 from pathlib import Path
 from typing import Final, cast
 
-import yaml
-
+from bioetl.infrastructure.quality.architecture_debt_artifact_tasks import (
+    artifact_defaults as _artifact_defaults,
+    build_compatibility_surface_tasks as _build_compatibility_surface_tasks,
+    build_dead_code_review_tasks as _build_dead_code_review_tasks,
+    build_duplication_tasks as _build_duplication_tasks,
+    build_hotspot_family_tasks as _build_hotspot_family_tasks,
+)
+from bioetl.infrastructure.quality.architecture_debt_task_policy import (
+    COMMON_ACCEPTANCE_CRITERIA,
+    COMMON_ALLOWED_PATHS,
+    COMMON_CHECKS,
+    COMMON_FORBIDDEN_PATHS,
+    build_checks as _build_checks,
+    build_goal as _build_goal,
+)
 from bioetl.infrastructure.quality.architecture_debt_task_support import (
     SymbolMetricLocation,
     build_symbol_index,
@@ -34,35 +46,6 @@ COMMON_ACCEPTANCE_CRITERIA: Final[tuple[str, ...]] = (
     "Докстринги не удалены; изменения соответствуют стандартам проекта",
 )
 COMMON_ALLOWED_PATHS: Final[tuple[str, ...]] = ("src/bioetl/**", "tests/**")
-COMMON_FORBIDDEN_PATHS: Final[tuple[str, ...]] = (
-    "configs/**",
-    "docs/**",
-    ".github/**",
-)
-COMMON_CHECKS: Final[tuple[str, ...]] = (
-    "python -m pytest -q "
-    "tests/architecture/test_quality_debt_scorecard.py "
-    "tests/architecture/test_quality_exemptions_registry.py",
-    "python -m scripts.engineering.qa check-exemptions --mode auto --growth-mode auto --trend-report off",
-)
-ARTIFACT_CHECKS: Final[dict[str, tuple[str, ...]]] = {
-    "compatibility_surface": (
-        "python -m pytest -q tests/architecture/test_public_facade_inventory.py",
-        "python -m pytest -q tests/architecture/test_public_surface_importer_census_governance.py",
-    ),
-    "duplication_cluster": (
-        "python -m pytest -q tests/architecture/test_tech_debt_issues_5626_5637_closeout.py",
-        "python -m scripts.engineering.qa report-duplication-baseline --help",
-    ),
-    "hotspot_family": (
-        "python -m pytest -q tests/architecture/test_quality_debt_scorecard.py",
-        "python -m scripts.engineering.qa report-family-baseline --help",
-    ),
-    "dead_code_review": (
-        "python -m pytest -q tests/architecture/test_tech_debt_issues_5626_5637_closeout.py",
-        "python -m scripts.engineering.qa report-dead-code-inventory --help",
-    ),
-}
 
 
 def _project_root() -> Path:
