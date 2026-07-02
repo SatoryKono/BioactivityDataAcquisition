@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
@@ -39,6 +40,25 @@ class BasePublicationTransformerContext:
     identifier_resolver: IdentifierResolverStrategy | None = None
     metadata_strategy: PublicationMetadataStrategy | None = None
     record_normalizer: RecordNormalizationProcessor | None = None
+
+
+_PUBLICATION_TRANSFORMER_KWARGS = (
+    "entity_type",
+    "silver_filters",
+    "gold_filters",
+    "tracer",
+    "metrics",
+    "identity_service",
+    "pii_hasher",
+    "dependencies",
+)
+
+
+def publication_transformer_kwargs(
+    init_locals: Mapping[str, object],
+) -> dict[str, object]:
+    """Extract common BasePublicationTransformer kwargs from subclass locals."""
+    return {key: init_locals[key] for key in _PUBLICATION_TRANSFORMER_KWARGS}
 
 
 def coerce_publication_transformer_init(
@@ -127,4 +147,5 @@ def coerce_publication_transformer_init(
 __all__ = [
     "BasePublicationTransformerContext",
     "coerce_publication_transformer_init",
+    "publication_transformer_kwargs",
 ]

@@ -31,7 +31,7 @@ from bioetl.application.pipelines.common.blocks import (
 )
 from bioetl.application.pipelines.common.publication_blocks import ExtractionBlock
 from bioetl.application.pipelines.common.publication_transformer_context import (
-    BasePublicationTransformerContext,
+    publication_transformer_kwargs,
 )
 from bioetl.application.pipelines.crossref._business_data_builder import (
     compute_publication_date,
@@ -90,19 +90,7 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
             dependencies: Explicit collaborator bundle.
 
         """
-        super().__init__(
-            BasePublicationTransformerContext(
-                provider=provider,
-                entity_type=entity_type,
-                silver_filters=silver_filters,
-                gold_filters=gold_filters,
-                tracer=tracer,
-                metrics=metrics,
-                identity_service=identity_service,
-                pii_hasher=pii_hasher,
-                dependencies=dependencies,
-            )
-        )
+        super().__init__(provider, **publication_transformer_kwargs(locals()))
 
     @property
     def extraction_blocks(self) -> list[ExtractionBlock]:

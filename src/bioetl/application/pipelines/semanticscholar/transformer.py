@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Any
 from bioetl.application.core.base_transformer import TransformerDependencyContext
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.common.publication_transformer_context import (
-    BasePublicationTransformerContext,
+    publication_transformer_kwargs,
 )
 from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_affiliations,
@@ -105,19 +105,7 @@ class SemanticScholarPublicationTransformer(BasePublicationTransformer):
             dependencies: Explicit collaborator bundle.
 
         """
-        super().__init__(
-            BasePublicationTransformerContext(
-                provider=provider,
-                entity_type=entity_type,
-                silver_filters=silver_filters,
-                gold_filters=gold_filters,
-                tracer=tracer,
-                metrics=metrics,
-                identity_service=identity_service,
-                pii_hasher=pii_hasher,
-                dependencies=dependencies,
-            )
-        )
+        super().__init__(provider, **publication_transformer_kwargs(locals()))
 
     def _resolve_publication_type(
         self,
