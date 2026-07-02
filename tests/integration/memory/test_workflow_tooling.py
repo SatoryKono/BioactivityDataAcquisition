@@ -369,6 +369,7 @@ def test_post_task_workflow_writes_summary_and_promotes_note(
         summary_note_path=summary_note_path,
         run_prune=True,
         promote_to="lesson",
+        validation_timeout_seconds=0,
     )
 
     assert payload["ok"] is True
@@ -382,6 +383,62 @@ def test_post_task_workflow_writes_summary_and_promotes_note(
     note = parse_markdown_note(summary_note_path)
     assert note.metadata["task_id"] == "task-summary"
     assert note.metadata["confidence"] == "episodic"
+
+
+def test_post_task_workflow_returns_degraded_payload_when_validation_times_out(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    def _fake_validation_runner(
+        *,
+        timeout_seconds: float | None,
+        repo_root: Path,
+    ) -> dict[str, object]:
+        assert timeout_seconds == 15.0
+        assert repo_root.exists()
+        return {
+            "status": "timed_out",
+            "issues": [],
+            "timeout_seconds": 15.0,
+        }
+
+    monkeypatch.setattr(workflow, "_run_post_task_validation", _fake_validation_runner)
+
+    summary_note_path = tmp_path / "summary-timeout.md"
+    payload = workflow.post_task_workflow(
+        task_id="task-timeout",
+        title="Timeout during memory validation",
+        summary="Summary note should still be written.",
+        source_refs=["src/memory/README.md"],
+        summary_note_path=summary_note_path,
+        validation_timeout_seconds=15.0,
+    )
+
+    assert payload == {
+        "kind": "post-task",
+        "task_id": "task-timeout",
+        "title": "Timeout during memory validation",
+        "summary_note": str(summary_note_path),
+        "ok": False,
+        "degraded": True,
+        "validation_status": "timed_out",
+        "validation_issues": [],
+        "validation_timeout_seconds": 15.0,
+    }
+    assert summary_note_path.exists()
+
+
+def test_post_task_workflow_timeout_payload_returns_nonzero_exit_code() -> None:
+    payload = {
+        "kind": "post-task",
+        "task_id": "task-timeout",
+        "summary_note": "summary.md",
+        "ok": False,
+        "degraded": True,
+        "validation_status": "timed_out",
+    }
+
+    assert workflow._emit(payload, as_json=False) == 1
 
 
 def test_compact_prune_report_accepts_minimal_stub_payload() -> None:

@@ -4,12 +4,15 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
+import sys
 import tempfile
 from pathlib import Path
 from typing import Any
 
 WORKFLOW_PRUNE_PREVIEW_LIMIT = 10
 DEFAULT_PROFILE = "general"
+DEFAULT_POST_TASK_VALIDATION_TIMEOUT_SECONDS = 15.0
 
 
 def _discover_memory_root() -> Path:
@@ -54,6 +57,81 @@ def validate_memory_scaffold() -> list[object]:
     from memory.validation import validate_memory_scaffold as _validate
 
     return _validate()
+
+
+def _format_validation_issues(issues: list[object]) -> list[dict[str, str]]:
+    formatted: list[dict[str, str]] = []
+    for issue in issues:
+        path = getattr(issue, "path", "<unknown>")
+        message = getattr(issue, "message", str(issue))
+        formatted.append({"path": str(path), "message": str(message)})
+    return formatted
+
+
+def _run_post_task_validation(
+    *,
+    timeout_seconds: float | None,
+    repo_root: Path,
+) -> dict[str, Any]:
+    if timeout_seconds is None or timeout_seconds <= 0:
+        issues = validate_memory_scaffold()
+        return {
+            "status": "completed",
+            "issues": _format_validation_issues(issues),
+        }
+
+    command = [sys.executable, "-m", "memory.tooling.validate", "--json"]
+    try:
+        result = subprocess.run(
+            command,
+            cwd=repo_root,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds,
+        )
+    except subprocess.TimeoutExpired as exc:
+        return {
+            "status": "timed_out",
+            "issues": [],
+            "timeout_seconds": timeout_seconds,
+            "stderr": (exc.stderr or "").strip(),
+        }
+    except OSError as exc:
+        return {
+            "status": "runtime_error",
+            "issues": [],
+            "timeout_seconds": timeout_seconds,
+            "error": str(exc),
+        }
+
+    stdout = result.stdout.strip()
+    stderr = result.stderr.strip()
+    try:
+        payload = json.loads(stdout) if stdout else {}
+    except json.JSONDecodeError:
+        return {
+            "status": "runtime_error",
+            "issues": [],
+            "timeout_seconds": timeout_seconds,
+            "error": "validation subprocess returned non-JSON output",
+            "stdout": stdout,
+            "stderr": stderr,
+            "returncode": result.returncode,
+        }
+
+    issues = payload.get("issues", [])
+    if isinstance(issues, list) and result.returncode in (0, 1):
+        return {"status": "completed", "issues": issues}
+
+    return {
+        "status": "runtime_error",
+        "issues": issues if isinstance(issues, list) else [],
+        "timeout_seconds": timeout_seconds,
+        "stdout": stdout,
+        "stderr": stderr,
+        "returncode": result.returncode,
+    }
 
 
 def prune_episodic_notes(*, apply: bool = False) -> dict[str, Any]:
@@ -438,6 +516,7 @@ def post_task_workflow(
     promote_to: str | None = None,
     move_on_promote: bool = False,
     summary_note_path: Path | None = None,
+    validation_timeout_seconds: float | None = DEFAULT_POST_TASK_VALIDATION_TIMEOUT_SECONDS,
 ) -> dict[str, Any]:
     """Run the standard post-task memory flow."""
     summary_path = summary_note_path or _default_note_path(task_id, kind="summary")
@@ -456,7 +535,33 @@ def post_task_workflow(
         body=_summary_note_body(title, summary),
     )
 
-    validation_issues = validate_memory_scaffold()
+    repo_root = _discover_repo_root() or Path(__file__).resolve().parents[3]
+    validation_result = _run_post_task_validation(
+        timeout_seconds=validation_timeout_seconds,
+        repo_root=repo_root.resolve(),
+    )
+    validation_issues = validation_result.get("issues", [])
+    validation_status = validation_result.get("status", "completed")
+    if validation_status != "completed":
+        payload: dict[str, Any] = {
+            "kind": "post-task",
+            "task_id": task_id,
+            "title": title,
+            "summary_note": str(summary_path),
+            "ok": False,
+            "degraded": True,
+            "validation_status": validation_status,
+            "validation_issues": validation_issues,
+        }
+        if "timeout_seconds" in validation_result:
+            payload["validation_timeout_seconds"] = validation_result[
+                "timeout_seconds"
+            ]
+        for key in ("error", "stderr", "stdout", "returncode"):
+            if key in validation_result and validation_result[key]:
+                payload[f"validation_{key}"] = validation_result[key]
+        return payload
+
     if validation_issues:
         return {
             "kind": "post-task",
@@ -475,11 +580,7 @@ def post_task_workflow(
     if run_refresh:
         if output_root is None:
             output_root = Path(tempfile.mkdtemp(prefix="memory-post-task-"))
-        repo_root = (
-            refresh_repo_root
-            or _discover_repo_root()
-            or Path(__file__).resolve().parents[3]
-        )
+        repo_root = refresh_repo_root or repo_root
         refresh_report = refresh_all(
             repo_root.resolve(),
             output_root.resolve(),
@@ -576,6 +677,15 @@ def _build_parser() -> argparse.ArgumentParser:
     post_parser.add_argument("--skip-refresh", action="store_true")
     post_parser.add_argument("--prune", action="store_true")
     post_parser.add_argument(
+        "--validation-timeout-seconds",
+        type=float,
+        default=DEFAULT_POST_TASK_VALIDATION_TIMEOUT_SECONDS,
+        help=(
+            "Timeout for memory validation before returning a degraded payload; "
+            "set to 0 to disable the timeout."
+        ),
+    )
+    post_parser.add_argument(
         "--promote-to",
         choices=("decision", "incident", "lesson", "domain_knowledge"),
         default=None,
@@ -620,7 +730,14 @@ def _emit(payload: dict[str, Any], *, as_json: bool) -> int:
         if payload.get("promoted_note"):
             print(f"- promoted note: {payload['promoted_note']}")
         if payload.get("degraded"):
-            print("- degraded: refresh completed with partial artifact failures")
+            validation_status = payload.get("validation_status")
+            if validation_status:
+                print(
+                    "- degraded: validation did not complete "
+                    f"({validation_status})"
+                )
+            else:
+                print("- degraded: refresh completed with partial artifact failures")
     return _payload_exit_code(payload)
 
 
@@ -655,6 +772,7 @@ def main(argv: list[str] | None = None) -> int:
             run_prune=args.prune,
             promote_to=args.promote_to,
             move_on_promote=args.move_on_promote,
+            validation_timeout_seconds=args.validation_timeout_seconds,
         )
         return _emit(payload, as_json=args.json)
 

@@ -11,6 +11,10 @@ Run the role-specific workflow as defined in the py-review-orchestrator profile.
 
 ## Source Of Truth
 
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../docs/02-architecture/decisions`
 - Canonical runtime entrypoint: this `SKILL.md`
 - Team orchestration: `../../../.codex/agents/ORCHESTRATION.md`
 - Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`

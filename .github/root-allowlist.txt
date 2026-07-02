@@ -1,36 +1,57 @@
 # Tracked files allowed at repository root.
 # Any new root-level tracked file must be explicitly reviewed and added here.
+# Canonical project / packaging / security / docs tooling entrypoints retained at root.
 .dockerignore
 .editorconfig
 .env.example
-.npmrc
 .gitattributes
 .gitignore
 .gitleaks.toml
 .importlinter
 .jscpd.json
 .mcp.json
+.npmrc
 .pr_agent.toml
 .pre-commit-config.yaml
 .python-version
 .secrets.baseline
-.wsl_proxy_env.sh
+commitlint.config.mjs
+LICENSE
+Makefile
+README.md
+mkdocs.yml
+mint.json
+package-lock.json
+package.json
+pyproject.toml
+sonar-project.properties
+uv.lock
+
+# Canonical runtime / governance entrypoints retained at root.
 AGENTS.md
 best_practices.md
 CHANGELOG.md
+GEMINI.md
+pr_compliance_checklist.yaml
+
+# Transitional human-facing Codex / WSL docs retained until canonical docs/archive closeout.
 CODEX_SANDBOX_TROUBLESHOOT.txt
 CODEX_SETUP.txt
 CODEX_WSL_CONFIGURED.md
 CODEX_WSL_SETUP.md
 CODEX_WSL_USAGE.md
-GEMINI.md
-LICENSE
-Makefile
-pr_compliance_checklist.yaml
-README.md
+
+# Transitional launcher and setup shims retained until runtime owner convergence.
+.wsl_proxy_env.sh
 codex.bat
 codex.ps1
-commitlint.config.mjs
+run-codex-wsl.ps1
+run-codex.ps1
+setup-codex-wsl.bat
+setup-codex-wsl.ps1
+setup-codex-wsl.sh
+
+# Reviewed optional ADR-010 adjunct helper surfaces retained at root until audited rehome.
 docker-compose.monitoring.yml
 docker-compose.alertmanager.yml
 docker-compose.codex.yml
@@ -49,15 +70,3 @@ Dockerfile.mcp-github
 Dockerfile.mcp-memory
 Dockerfile.warp
 grafana-datasource.yml
-mkdocs.yml
-package-lock.json
-package.json
-pyproject.toml
-run-codex-wsl.ps1
-run-codex.ps1
-setup-codex-wsl.bat
-setup-codex-wsl.ps1
-setup-codex-wsl.sh
-sonar-project.properties
-uv.lock
-mint.json

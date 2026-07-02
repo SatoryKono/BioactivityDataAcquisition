@@ -5,13 +5,17 @@ This file contains the core architectural constraints, governance rules, and dev
 ## 0. Canonical Sources For AI Work
 
 - `AGENTS.md`
-- `.gemini/agents/GEMINI-RUNTIME.md`
-- active `.gemini/agents/**` and `.gemini/skills/**` surfaces for the current task
+- `.codex/agents/CODEX-RUNTIME.md`
 - `docs/00-project/RULES.md`
 - `docs/01-requirements/REQUIREMENTS.md`
 - accepted ADRs in `docs/02-architecture/decisions/`
 - `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+
+For the current `main` checkout, `.gemini/settings.json` is a machine-local
+config surface only. Treat tracked Gemini runtime trees (`.gemini/agents/**`,
+`.gemini/skills/**`) as unavailable unless the same change explicitly adds and
+verifies them.
 
 When AI runtime guidance conflicts, use the list above in that order. For
 implementation facts, verify against code, configs, tests, workflows, and
@@ -66,7 +70,9 @@ accepted ADRs before trusting memory or mirrors.
 
 ## 7. AI Workflows
 
-- `.gemini/**` is the active Gemini runtime tree.
+- `.codex/**` is the tracked runtime source of truth on `main`.
+- `.gemini/settings.json` may exist for machine-local setup, but it does not
+  prove a tracked Gemini behavior tree on `main`.
 - `docs/00-project/ai/**` is a docs mirror/guidance layer and must not override runtime behavior.
 - `.claude/**` is not a canonical runtime source for Gemini behavior unless it
   is explicitly verified in the local checkout for a separate change program.

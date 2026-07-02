@@ -21,6 +21,9 @@ if __package__ in {None, ""}:
 from bioetl.domain.normalization.join_keys import (  # noqa: E402
     get_join_key_normalization_policy,
 )
+from bioetl.infrastructure.config._composite_shared_policy_externalization import (  # noqa: E402
+    merge_external_shared_policy,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -511,12 +514,18 @@ ANCHOR_SPECS: tuple[AnchorSpec, ...] = (
 )
 
 
-def _load_mapping(path: Path) -> dict[str, Any]:
+def _load_mapping(
+    path: Path,
+    *,
+    merge_composite_shared_policy: bool = False,
+) -> dict[str, Any]:
     if path.suffix == ".json":
         payload = json.loads(path.read_text(encoding="utf-8"))
     else:
         payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     if isinstance(payload, dict):
+        if merge_composite_shared_policy:
+            merge_external_shared_policy(payload, path)
         return payload
     raise ValueError(f"Expected mapping payload in {path}")
 
@@ -925,7 +934,8 @@ def _validate_composite_surface(
     for requirement in spec.composite_requirements:
         if requirement.composite_path not in cache:
             cache[requirement.composite_path] = _load_mapping(
-                repo_root / requirement.composite_path
+                repo_root / requirement.composite_path,
+                merge_composite_shared_policy=True,
             )
         if _has_composite_requirement(
             cache[requirement.composite_path],

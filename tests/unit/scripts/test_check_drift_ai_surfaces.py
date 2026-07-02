@@ -12,6 +12,21 @@ from scripts.docs.checks import check_drift
 pytestmark = pytest.mark.unit
 
 
+def _disable_all_ai_surface_checks(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Helper to disable all AI surface checks except the one being tested."""
+    monkeypatch.setattr(check_drift, "AI_SURFACE_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_ROLE_PROFILE_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_MIRROR_NOTICE_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_SURFACE_STALE_PATTERNS", ())
+    monkeypatch.setattr(check_drift, "AI_RULES_MIRROR_REQUIRED_TOKENS", {})
+    monkeypatch.setattr(check_drift, "AI_GEMINI_RUNTIME_CLAIM_GUARD_PATHS", ())
+    monkeypatch.setattr(check_drift, "_iter_cursor_rule_entrypoints", lambda _: ())
+    monkeypatch.setattr(check_drift, "_iter_runtime_skill_entrypoints", lambda _: ())
+    monkeypatch.setattr(check_drift, "AI_SURFACE_FORBIDDEN_PATTERNS", {})
+
+
 def test_check_modules_allows_governed_tracing_attributes(
     monkeypatch, tmp_path: Path
 ) -> None:
@@ -86,17 +101,12 @@ def test_check_ai_surfaces_reports_missing_policy_token(
     target = tmp_path / "AGENTS.md"
     target.write_text("root contract without policy links\n", encoding="utf-8")
 
+    _disable_all_ai_surface_checks(monkeypatch)
     monkeypatch.setattr(
         check_drift,
         "AI_SURFACE_REQUIRED_TOKENS",
         {Path("AGENTS.md"): ("MEMORY_USAGE.md",)},
     )
-    monkeypatch.setattr(check_drift, "AI_SURFACE_STALE_PATTERNS", ())
-    monkeypatch.setattr(check_drift, "AI_SURFACE_FORBIDDEN_PATTERNS", {})
-    monkeypatch.setattr(check_drift, "AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_ROLE_PROFILE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_MIRROR_NOTICE_REQUIRED_TOKENS", {})
 
     report = check_drift.DriftReport()
     check_drift.check_ai_surfaces(report, root=tmp_path)
@@ -115,12 +125,7 @@ def test_check_ai_surfaces_reports_forbidden_legacy_runtime_dependency(
         encoding="utf-8",
     )
 
-    monkeypatch.setattr(check_drift, "AI_SURFACE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_ROLE_PROFILE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_MIRROR_NOTICE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_SURFACE_STALE_PATTERNS", ())
+    _disable_all_ai_surface_checks(monkeypatch)
     monkeypatch.setattr(
         check_drift,
         "AI_SURFACE_FORBIDDEN_PATTERNS",
@@ -147,7 +152,7 @@ def test_check_ai_surfaces_reports_write_capable_skill_without_post_change_polic
         "Project runtime contract: ../../../AGENTS.md\n", encoding="utf-8"
     )
 
-    monkeypatch.setattr(check_drift, "AI_SURFACE_REQUIRED_TOKENS", {})
+    _disable_all_ai_surface_checks(monkeypatch)
     monkeypatch.setattr(
         check_drift,
         "AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS",
@@ -159,11 +164,6 @@ def test_check_ai_surfaces_reports_write_capable_skill_without_post_change_polic
             )
         },
     )
-    monkeypatch.setattr(check_drift, "AI_ROLE_PROFILE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_MIRROR_NOTICE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_SURFACE_STALE_PATTERNS", ())
-    monkeypatch.setattr(check_drift, "AI_SURFACE_FORBIDDEN_PATTERNS", {})
 
     report = check_drift.DriftReport()
     check_drift.check_ai_surfaces(report, root=tmp_path)
@@ -184,10 +184,7 @@ def test_check_ai_surfaces_reports_docs_mirror_without_non_canonical_notice(
         "Skills catalog without mirror ownership notice\n", encoding="utf-8"
     )
 
-    monkeypatch.setattr(check_drift, "AI_SURFACE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_ROLE_PROFILE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS", {})
+    _disable_all_ai_surface_checks(monkeypatch)
     monkeypatch.setattr(
         check_drift,
         "AI_MIRROR_NOTICE_REQUIRED_TOKENS",
@@ -198,8 +195,6 @@ def test_check_ai_surfaces_reports_docs_mirror_without_non_canonical_notice(
             )
         },
     )
-    monkeypatch.setattr(check_drift, "AI_SURFACE_STALE_PATTERNS", ())
-    monkeypatch.setattr(check_drift, "AI_SURFACE_FORBIDDEN_PATTERNS", {})
 
     report = check_drift.DriftReport()
     check_drift.check_ai_surfaces(report, root=tmp_path)
@@ -236,13 +231,7 @@ def test_check_ai_surfaces_reports_agent_mirror_without_runtime_header(
     gemini_runtime.parent.mkdir(parents=True, exist_ok=True)
     gemini_runtime.write_text("# runtime\n", encoding="utf-8")
 
-    monkeypatch.setattr(check_drift, "AI_SURFACE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_ROLE_PROFILE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_MIRROR_NOTICE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_SURFACE_STALE_PATTERNS", ())
-    monkeypatch.setattr(check_drift, "AI_SURFACE_FORBIDDEN_PATTERNS", {})
+    _disable_all_ai_surface_checks(monkeypatch)
 
     report = check_drift.DriftReport()
     check_drift.check_ai_surfaces(report, root=tmp_path)
@@ -294,13 +283,7 @@ def test_check_ai_surfaces_accepts_skill_mirror_with_runtime_header(
     runtime.parent.mkdir(parents=True, exist_ok=True)
     runtime.write_text("# runtime\n", encoding="utf-8")
 
-    monkeypatch.setattr(check_drift, "AI_SURFACE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_ROLE_PROFILE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_MIRROR_NOTICE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_SURFACE_STALE_PATTERNS", ())
-    monkeypatch.setattr(check_drift, "AI_SURFACE_FORBIDDEN_PATTERNS", {})
+    _disable_all_ai_surface_checks(monkeypatch)
 
     report = check_drift.DriftReport()
     check_drift.check_ai_surfaces(report, root=tmp_path)
@@ -329,8 +312,7 @@ def test_check_ai_surfaces_reports_missing_role_profile_post_change_anchor(
         encoding="utf-8",
     )
 
-    monkeypatch.setattr(check_drift, "AI_SURFACE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS", {})
+    _disable_all_ai_surface_checks(monkeypatch)
     monkeypatch.setattr(
         check_drift,
         "AI_ROLE_PROFILE_REQUIRED_TOKENS",
@@ -343,10 +325,6 @@ def test_check_ai_surfaces_reports_missing_role_profile_post_change_anchor(
             )
         },
     )
-    monkeypatch.setattr(check_drift, "AI_ROLE_MEMORY_COVERAGE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_MIRROR_NOTICE_REQUIRED_TOKENS", {})
-    monkeypatch.setattr(check_drift, "AI_SURFACE_STALE_PATTERNS", ())
-    monkeypatch.setattr(check_drift, "AI_SURFACE_FORBIDDEN_PATTERNS", {})
 
     report = check_drift.DriftReport()
     check_drift.check_ai_surfaces(report, root=tmp_path)

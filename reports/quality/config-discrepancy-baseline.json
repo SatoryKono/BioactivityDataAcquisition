@@ -5,7 +5,7 @@
       "inconsistent_parameter_count": 0,
       "raw_inconsistent_parameter_count": 0,
       "sanctioned_partial_parameter_count": 0,
-      "unique_parameter_count": 187
+      "unique_parameter_count": 157
     },
     "entity_effective": {
       "config_count": 22,
@@ -20,7 +20,7 @@
     "inconsistent_parameter_count": 0,
     "raw_inconsistent_parameter_count": 0,
     "sanctioned_partial_parameter_count": 0,
-    "unique_parameter_count": 449
+    "unique_parameter_count": 419
   },
   "parameter_taxonomy": {
     "classification_mode": "derived_from_flattened_config_parameter_paths",
@@ -56,10 +56,10 @@
           ],
           "replay_provenance": [
             "composite.lineage",
-            "composite.lineage.provider_lookup_fields",
-            "composite.lineage.provider_lookup_fields.chembl",
-            "composite.lineage.provider_lookup_fields.chembl._lookup_method",
-            "composite.lineage.provider_lookup_fields.chembl._original_id"
+            "composite.lineage.track_field_sources",
+            "composite.lineage.track_source_for_fields",
+            "composite.lineage.track_status",
+            "composite.lineage.track_timestamps"
           ],
           "runtime_control_plane": [
             "composite.execution",
@@ -70,15 +70,15 @@
           ]
         },
         "groups": {
-          "domain_entity_contract": 108,
+          "domain_entity_contract": 100,
           "dq_validation": 36,
           "medallion_write_policy": 5,
           "provider_source_access": 3,
-          "replay_provenance": 27,
+          "replay_provenance": 5,
           "runtime_control_plane": 8
         },
         "owner": "BioETL Team",
-        "parameter_count": 187,
+        "parameter_count": 157,
         "unclassified_parameter_count": 0,
         "unclassified_parameters": []
       },
@@ -141,5 +141,5 @@
     },
     "owner": "BioETL Team"
   },
-  "snapshot_date": "2026-07-01"
+  "snapshot_date": "2026-07-02"
 }

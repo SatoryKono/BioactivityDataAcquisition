@@ -5,6 +5,14 @@ description: Use when creating PRs to suggest reviewers, when creating issues to
 
 # Suggest Users
 
+## Source Of Truth
+
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../docs/02-architecture/decisions`
+
+
 This skill provides intelligent user suggestions for PRs (reviewers) and issues (assignees) based on GitHub repository data, file ownership, and activity patterns.
 
 ## Purpose

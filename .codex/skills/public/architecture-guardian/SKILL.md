@@ -9,6 +9,15 @@ description: "Validate BioETL architecture boundaries, ADR compliance, naming co
 
 Protect the BioETL hexagonal architecture by auditing code changes for boundary violations, DI issues, naming conventions, and ADR compliance.
 
+
+
+## Source Of Truth
+
+- Root runtime contract: `../../../../AGENTS.md`
+- Project rules: `../../../../docs/00-project/RULES.md`
+- Requirements: `../../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../../docs/02-architecture/decisions`
+
 ## Core Responsibilities
 
 - Validate import rules across layers.
