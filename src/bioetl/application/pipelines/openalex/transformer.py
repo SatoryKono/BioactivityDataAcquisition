@@ -23,9 +23,6 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.pipelines.common import BasePublicationTransformer
 from bioetl.application.pipelines.common.publication_issn import build_issn_fields
-from bioetl.application.pipelines.common.publication_transformer_context import (
-    publication_transformer_kwargs,
-)
 from bioetl.application.pipelines.openalex.extractors import (
     extract_affiliations,
     extract_author_ids,
@@ -83,30 +80,6 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
 
     DEFAULT_PROVIDER = "openalex"
     DEFAULT_ENTITY_TYPE = "publication"
-
-    def __init__(
-        self,
-        provider: str = "openalex",
-        entity_type: str = "publication",
-        silver_filters: SilverFilterConfig | None = None,
-        gold_filters: GoldFilterConfig | None = None,
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
-        identity_service: EntityIdentityGenerator | None = None,
-        pii_hasher: PiiHasherPort | None = None,
-        dependencies: TransformerDependencyContext | None = None,
-    ) -> None:
-        """Initialize OpenAlex transformer.
-
-        Args:
-            provider: Data provider identifier. Defaults to 'openalex'.
-            entity_type: Entity type for metrics labels. Defaults to 'publication'.
-            silver_filters: Optional filter configuration for Silver layer.
-            gold_filters: Optional filter configuration for Gold layer.
-            dependencies: Explicit collaborator bundle.
-
-        """
-        super().__init__(provider, **publication_transformer_kwargs(locals()))
 
     # ========================================================================
     # Field Extraction Methods (Orchestration - delegates to extractors)

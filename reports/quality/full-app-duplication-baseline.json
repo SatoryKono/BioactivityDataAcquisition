@@ -2,8 +2,8 @@
   "summary": {
     "snapshot_date": "2026-07-02",
     "targets": 4,
-    "total_duplicate_clusters": 61,
-    "total_raw_duplicate_clusters": 61,
+    "total_duplicate_clusters": 59,
+    "total_raw_duplicate_clusters": 59,
     "total_excluded_duplicate_clusters": 0
   },
   "normalization": {
@@ -16,18 +16,18 @@
   "reduction_leverage_ranking": [
     {
       "target": "src/bioetl/infrastructure/adapters",
-      "duplicate_clusters": 51,
+      "duplicate_clusters": 50,
       "dominant_actionability_category": "export_facade_or_package_barrel",
-      "dominant_actionability_cluster_count": 45,
-      "low_risk_cluster_count": 45,
-      "low_risk_cluster_share": 0.8824,
+      "dominant_actionability_cluster_count": 44,
+      "low_risk_cluster_count": 44,
+      "low_risk_cluster_share": 0.88,
       "recommended_first_wave": false
     },
     {
       "target": "src/bioetl/application/pipelines",
-      "duplicate_clusters": 10,
+      "duplicate_clusters": 9,
       "dominant_actionability_category": "pipeline_transformer_contract_pattern",
-      "dominant_actionability_cluster_count": 10,
+      "dominant_actionability_cluster_count": 9,
       "low_risk_cluster_count": 0,
       "low_risk_cluster_share": 0.0,
       "recommended_first_wave": false
@@ -54,7 +54,7 @@
   "first_wave": {
     "status": "selected",
     "target": "src/bioetl/infrastructure/adapters",
-    "duplicate_clusters": 51,
+    "duplicate_clusters": 50,
     "dominant_actionability_category": "export_facade_or_package_barrel",
     "selection_rule": "prefer low-risk actionability families with bounded cluster counts, then maximize duplicate reduction leverage"
   },
@@ -77,13 +77,13 @@
     {
       "target": "src/bioetl/infrastructure/adapters",
       "returncode": 8,
-      "duplicate_count": 51,
-      "raw_duplicate_count": 51,
+      "duplicate_count": 50,
+      "raw_duplicate_count": 50,
       "excluded_duplicate_count": 0,
       "actionability": [
         {
           "category": "export_facade_or_package_barrel",
-          "duplicate_clusters": 45
+          "duplicate_clusters": 44
         },
         {
           "category": "adapter_resilience_or_contract_template",
@@ -712,23 +712,6 @@
           "actionability_category": "export_facade_or_package_barrel",
           "modules": [
             {
-              "module": "bioetl.infrastructure.adapters.pubchem.__init__",
-              "start_line": 20,
-              "end_line": 26
-            },
-            {
-              "module": "bioetl.infrastructure.adapters.pubchem.models",
-              "start_line": 15,
-              "end_line": 28
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
-          "line": 1,
-          "actionability_category": "export_facade_or_package_barrel",
-          "modules": [
-            {
               "module": "bioetl.infrastructure.adapters.pubmed._filter_fetch_support",
               "start_line": 168,
               "end_line": 174
@@ -1000,13 +983,13 @@
     {
       "target": "src/bioetl/application/pipelines",
       "returncode": 8,
-      "duplicate_count": 10,
-      "raw_duplicate_count": 10,
+      "duplicate_count": 9,
+      "raw_duplicate_count": 9,
       "excluded_duplicate_count": 0,
       "actionability": [
         {
           "category": "pipeline_transformer_contract_pattern",
-          "duplicate_clusters": 10
+          "duplicate_clusters": 9
         }
       ],
       "top_pairs": [
@@ -1104,23 +1087,6 @@
           "actionability_category": "pipeline_transformer_contract_pattern",
           "modules": [
             {
-              "module": "bioetl.application.pipelines.uniprot.extractors._comment_facets",
-              "start_line": 26,
-              "end_line": 37
-            },
-            {
-              "module": "bioetl.application.pipelines.uniprot.extractors._comment_facets_extractors",
-              "start_line": 139,
-              "end_line": 150
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/application/pipelines/uniprot/extractors/__init__.py",
-          "line": 1,
-          "actionability_category": "pipeline_transformer_contract_pattern",
-          "modules": [
-            {
               "module": "bioetl.application.pipelines.chembl.base_chembl_transformer",
               "start_line": 109,
               "end_line": 120
@@ -1161,8 +1127,8 @@
             },
             {
               "module": "bioetl.application.pipelines.common.base_publication_transformer",
-              "start_line": 86,
-              "end_line": 93
+              "start_line": 92,
+              "end_line": 99
             }
           ]
         },

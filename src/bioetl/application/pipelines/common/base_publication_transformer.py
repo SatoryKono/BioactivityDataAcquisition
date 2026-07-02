@@ -41,13 +41,19 @@ from bioetl.application.pipelines.common.publication_vocab_observability import 
 from bioetl.domain.value_objects import PublicationYear
 
 if TYPE_CHECKING:
+    from bioetl.application.core.base_transformer import TransformerDependencyContext
     from bioetl.application.core.pre_silver_record import PreSilverRecord
+    from bioetl.domain.behavior import EntityIdentityGenerator
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.entities.base import BaseEntity
+    from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
     from bioetl.domain.ports import (
         DataExtractorStrategy,
         IdentifierResolverStrategy,
+        MetricsPort,
+        PiiHasherPort,
         PublicationMetadataStrategy,
+        TracingPort,
     )
     from bioetl.domain.types import BronzeRecord, JsonDict, PrimaryId, SilverRecord
 

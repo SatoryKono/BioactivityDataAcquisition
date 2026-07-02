@@ -218,7 +218,7 @@ review_lanes:
       - path: setup-codex-wsl.sh
         current_live_state: present_approved_root_surface
         canonical_path: scripts/ai/codex/README.md
-        action_if_reintroduced: retain_only_as_a_reviewed_optional_sandbox_setup_entrypoint_until_the_docker_helper_family_has_a_final_owner_story
+        action_if_reintroduced: retain_only_as_a_thin_root_wrapper_while_operator_setup_guidance_stays_under_the_canonical_codex_runtime_docs
 
   - lane_id: local_runtime_root_dirs
     classification: review_required

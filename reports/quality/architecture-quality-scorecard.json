@@ -48,7 +48,7 @@
         "hotspot_budget_warning_count": 0,
         "hotspot_family_count": 5,
         "source_module_count": 2199,
-        "total_duplicate_clusters": 61
+        "total_duplicate_clusters": 59
       },
       "id": "module_boundaries_coupling",
       "name": "Module boundaries / coupling",
@@ -111,7 +111,7 @@
         "hotspot_budget_warning_count": 0,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
         "retained_entrypoint_count": 12,
-        "total_duplicate_clusters": 61
+        "total_duplicate_clusters": 59
       },
       "id": "debt_burden_evolution_friction",
       "name": "Debt burden / evolution friction",
@@ -174,7 +174,7 @@
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
     "source_module_count": 2199,
-    "total_duplicate_clusters": 61,
+    "total_duplicate_clusters": 59,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
     "unmeasured_module_count": 0
@@ -212,7 +212,7 @@
     "duplication_baseline": {
       "path": "reports/quality/full-app-duplication-baseline.json",
       "snapshot_date": "2026-07-02",
-      "total_duplicate_clusters": 61
+      "total_duplicate_clusters": 59
     },
     "hotspot_family_baseline": {
       "budget_warnings": 0,
@@ -222,7 +222,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "fb15f6a63e251a6fa48645d07ddb739836aad21aa27f184eeda1ce3c84776e0c",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "c80506db03d93c4a1885b10e8ed20f10c623c10a9a43c8f20a3e88cd93d75d50"
+      "source_tree_sha256": "f5862c3f82cf4f83be165e5524e1a9a7d39cf32f275376e611d25cfe2ba35c5c"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

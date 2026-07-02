@@ -28,8 +28,8 @@
       "status": "pass"
     },
     {
-      "current": "c80506db03d93c4a1885b10e8ed20f10c623c10a9a43c8f20a3e88cd93d75d50",
-      "limit": "c80506db03d93c4a1885b10e8ed20f10c623c10a9a43c8f20a3e88cd93d75d50",
+      "current": "1459836ea02a14d7614bd9cb34aa0cb7a57bfeccc23a7a91db608f615187b7cd",
+      "limit": "1459836ea02a14d7614bd9cb34aa0cb7a57bfeccc23a7a91db608f615187b7cd",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -39,13 +39,13 @@
     {
       "current": {
         "source_module_count": 2199,
-        "source_tree_sha256": "c80506db03d93c4a1885b10e8ed20f10c623c10a9a43c8f20a3e88cd93d75d50",
+        "source_tree_sha256": "0ca6121b2a75bcf249f626a55044b53666265160bc6a8890721ef27a6831a1ae",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2199,
-        "source_tree_sha256": "c80506db03d93c4a1885b10e8ed20f10c623c10a9a43c8f20a3e88cd93d75d50",
+        "source_tree_sha256": "1459836ea02a14d7614bd9cb34aa0cb7a57bfeccc23a7a91db608f615187b7cd",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -53,7 +53,7 @@
       "name": "module_coverage_scorecard_coherence",
       "remediation": "Refresh architecture-quality scorecard and module coverage inventory until counts and source-tree hash match.",
       "source_artifact": "reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": 0,
@@ -289,13 +289,13 @@
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": 1,
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
       "remediation": "Regenerate stale quality artifacts with their canonical QA commands.",
       "source_artifact": "reports/quality/*.json",
-      "status": "pass"
+      "status": "fail"
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
@@ -306,21 +306,24 @@
     "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
     "module_coverage_inventory": false,
-    "remote_main_baseline": false
+    "remote_main_baseline": true
   },
   "status_counts": {
-    "fail": 0,
-    "pass": 31,
+    "fail": 2,
+    "pass": 29,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 8.54,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 0,
-    "failing_gates": [],
+    "fail_count": 2,
+    "failing_gates": [
+      "module_coverage_scorecard_coherence",
+      "generated_artifact_drift"
+    ],
     "gate_count": 31,
-    "pass_count": 31,
-    "release_gate_status": "passing",
+    "pass_count": 29,
+    "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []
   }

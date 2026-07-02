@@ -2,7 +2,7 @@
 
 - mode: report-only
 - targets: 4
-- total_duplicate_clusters: 61
+- total_duplicate_clusters: 59
 
 > Interpretation note: this is a visibility baseline. `R0801` can over-report
 > around facades, export barrels, and compatibility shims, so use it as
@@ -11,8 +11,8 @@
 | Target | Duplicate clusters |
 | --- | ---: |
 | `src/bioetl/interfaces/cli` | 0 |
-| `src/bioetl/infrastructure/adapters` | 51 |
-| `src/bioetl/application/pipelines` | 10 |
+| `src/bioetl/infrastructure/adapters` | 50 |
+| `src/bioetl/application/pipelines` | 9 |
 | `src/bioetl/composition/bootstrap` | 0 |
 
 ## src/bioetl/interfaces/cli
@@ -26,11 +26,11 @@
 
 ## src/bioetl/infrastructure/adapters
 
-- duplicate clusters: 51
+- duplicate clusters: 50
 
 | Actionability category | Duplicate clusters |
 | --- | ---: |
-| `export_facade_or_package_barrel` | 45 |
+| `export_facade_or_package_barrel` | 44 |
 | `adapter_resilience_or_contract_template` | 6 |
 
 | Top recurring module pairs | Duplicate clusters |
@@ -56,15 +56,15 @@
 | `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.crossref.client`[81:88], `bioetl.infrastructure.adapters.pubmed.adapter`[101:108] |
 | `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.crossref.client_builders`[170:179], `bioetl.infrastructure.adapters.crossref.client_runtime_helpers`[104:111] |
 
-- … truncated 39 additional clusters for brevity
+- … truncated 38 additional clusters for brevity
 
 ## src/bioetl/application/pipelines
 
-- duplicate clusters: 10
+- duplicate clusters: 9
 
 | Actionability category | Duplicate clusters |
 | --- | ---: |
-| `pipeline_transformer_contract_pattern` | 10 |
+| `pipeline_transformer_contract_pattern` | 9 |
 
 | Top recurring module pairs | Duplicate clusters |
 | --- | ---: |
@@ -79,10 +79,9 @@
 | `src/bioetl/application/pipelines/uniprot/extractors/__init__.py:1` | `bioetl.application.pipelines.crossref.__init__`[26:38], `bioetl.application.pipelines.crossref.extractors`[35:80] |
 | `src/bioetl/application/pipelines/uniprot/extractors/__init__.py:1` | `bioetl.application.pipelines.pubchem.transformer`[70:100], `bioetl.application.pipelines.uniprot.transformer`[56:76] |
 | `src/bioetl/application/pipelines/uniprot/extractors/__init__.py:1` | `bioetl.application.pipelines.pubchem.transformer`[70:99], `bioetl.application.pipelines.uniprot.idmapping_transformer`[95:127] |
-| `src/bioetl/application/pipelines/uniprot/extractors/__init__.py:1` | `bioetl.application.pipelines.uniprot.extractors._comment_facets`[26:37], `bioetl.application.pipelines.uniprot.extractors._comment_facets_extractors`[139:150] |
 | `src/bioetl/application/pipelines/uniprot/extractors/__init__.py:1` | `bioetl.application.pipelines.chembl.base_chembl_transformer`[109:120], `bioetl.application.pipelines.pubchem.transformer`[73:99] |
 | `src/bioetl/application/pipelines/uniprot/extractors/__init__.py:1` | `bioetl.application.pipelines.chembl._activity_transformer_maps`[87:95], `bioetl.application.pipelines.chembl.assay_parameters_transformer`[35:43] |
-| `src/bioetl/application/pipelines/uniprot/extractors/__init__.py:1` | `bioetl.application.pipelines.chembl.base_chembl_transformer`[109:116], `bioetl.application.pipelines.common.base_publication_transformer`[86:93] |
+| `src/bioetl/application/pipelines/uniprot/extractors/__init__.py:1` | `bioetl.application.pipelines.chembl.base_chembl_transformer`[109:116], `bioetl.application.pipelines.common.base_publication_transformer`[92:99] |
 | `src/bioetl/application/pipelines/uniprot/extractors/__init__.py:1` | `bioetl.application.pipelines.pubmed._block_definitions_analytics`[48:55], `bioetl.application.pipelines.pubmed.transformer`[254:261] |
 | `src/bioetl/application/pipelines/uniprot/extractors/__init__.py:1` | `bioetl.application.pipelines.semanticscholar._author_extractors`[10:16], `bioetl.application.pipelines.semanticscholar.extractors`[293:299] |
 | `src/bioetl/application/pipelines/uniprot/extractors/__init__.py:1` | `bioetl.application.pipelines.semanticscholar.__init__`[25:30], `bioetl.application.pipelines.semanticscholar.extractors`[300:305] |
@@ -96,14 +95,14 @@
 
 | Target | Duplicate clusters | Dominant actionability | Low-risk share | Recommended first wave |
 | --- | ---: | --- | ---: | --- |
-| `src/bioetl/infrastructure/adapters` | 51 | `export_facade_or_package_barrel` | 0.88 | no |
-| `src/bioetl/application/pipelines` | 10 | `pipeline_transformer_contract_pattern` | 0.00 | no |
+| `src/bioetl/infrastructure/adapters` | 50 | `export_facade_or_package_barrel` | 0.88 | no |
+| `src/bioetl/application/pipelines` | 9 | `pipeline_transformer_contract_pattern` | 0.00 | no |
 | `src/bioetl/composition/bootstrap` | 0 | `n/a` | 0.00 | no |
 | `src/bioetl/interfaces/cli` | 0 | `cli_command_contract_shell` | 0.00 | no |
 
 ## First Wave Selection
 
 - target: `src/bioetl/infrastructure/adapters`
-- duplicate_clusters: 51
+- duplicate_clusters: 50
 - dominant_actionability_category: `export_facade_or_package_barrel`
 - selection_rule: prefer low-risk actionability families with bounded cluster counts, then maximize duplicate reduction leverage

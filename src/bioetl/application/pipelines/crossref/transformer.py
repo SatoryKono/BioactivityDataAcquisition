@@ -29,9 +29,6 @@ from bioetl.application.pipelines.common.blocks import (
     _CrossRefMetadataBlock,
 )
 from bioetl.application.pipelines.common.publication_blocks import ExtractionBlock
-from bioetl.application.pipelines.common.publication_transformer_context import (
-    publication_transformer_kwargs,
-)
 from bioetl.application.pipelines.crossref._business_data_builder import (
     compute_publication_date,
     hash_author_details,
@@ -66,30 +63,6 @@ class CrossRefPublicationTransformer(BasePublicationTransformer):
 
     DEFAULT_PROVIDER = "crossref"
     DEFAULT_ENTITY_TYPE = "publication"
-
-    def __init__(
-        self,
-        provider: str = "crossref",
-        entity_type: str = "publication",
-        silver_filters: SilverFilterConfig | None = None,
-        gold_filters: GoldFilterConfig | None = None,
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
-        identity_service: EntityIdentityGenerator | None = None,
-        pii_hasher: PiiHasherPort | None = None,
-        dependencies: TransformerDependencyContext | None = None,
-    ) -> None:
-        """Initialize CrossRef transformer.
-
-        Args:
-            provider: Data provider identifier. Defaults to 'crossref'.
-            entity_type: Entity type for metrics labels. Defaults to 'publication'.
-            silver_filters: Optional filter configuration for Silver layer.
-            gold_filters: Optional filter configuration for Gold layer.
-            dependencies: Explicit collaborator bundle.
-
-        """
-        super().__init__(provider, **publication_transformer_kwargs(locals()))
 
     @property
     def extraction_blocks(self) -> list[ExtractionBlock]:

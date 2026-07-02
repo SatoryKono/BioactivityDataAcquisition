@@ -139,7 +139,7 @@ def test_closeout_artifact_is_complete_and_budget_safe() -> None:
     assert closeout["metrics"]["adapter_duplicate_clusters"]["current"] == 51
     assert closeout["metrics"]["pipeline_duplicate_clusters"]["current"] == 10
     assert closeout["metrics"]["config_surface_duplicate_clusters"]["current"] == 21
-    assert closeout["metrics"]["zero_reference_supporting_scripts"]["count"] == 52
+    assert closeout["metrics"]["zero_reference_supporting_scripts"]["count"] == 50
 
     for outcome in closeout["outcomes"].values():
         for relative_path in outcome["evidence"]:
@@ -308,7 +308,7 @@ def test_issue_5796_zero_reference_supporting_scripts_have_owner_or_removal_gove
     ]
 
     assert registry["schema_version"]
-    assert len(zero_ref_rows) == 52
+    assert len(zero_ref_rows) == 50
     assert {row["status"] for row in zero_ref_rows} == {"supporting"}
 
     for row in zero_ref_rows:
