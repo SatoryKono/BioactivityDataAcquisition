@@ -7,6 +7,14 @@ agent: "general-purpose"
 
 # Conducting Deep Research
 
+## Source Of Truth
+
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../docs/02-architecture/decisions`
+
+
 This skill uses an iterative methodology treating research as a diffusion process: start with noise (rough draft), apply guidance (research brief), denoise through cycles of critique → research → refine until quality converges.
 
 Use TodoWrite to track these mandatory steps:

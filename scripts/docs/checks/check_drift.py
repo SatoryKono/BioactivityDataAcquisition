@@ -34,6 +34,7 @@ from __future__ import annotations
 import argparse
 import ast
 import json
+import os
 import re
 import sys
 from dataclasses import dataclass, field
@@ -150,16 +151,53 @@ CODEX_PY_REVIEW_ORCHESTRATOR_DOC_PATH = ".codex/agents/py-review-orchestrator.md
 CODEX_RUNTIME_DOC_TOKEN = CODEX_RUNTIME_DOC_PATH
 GEMINI_RUNTIME_DOC_TOKEN = GEMINI_RUNTIME_DOC_PATH
 AGENTS_DOC_TOKEN = "AGENTS.md"
+RULES_DOC_TOKEN = "docs/00-project/RULES.md"
+REQUIREMENTS_DOC_TOKEN = "docs/01-requirements/REQUIREMENTS.md"
+ADR_DIR_DOC_TOKEN = "docs/02-architecture/decisions/"
 MEMORY_USAGE_TOKEN = "MEMORY_USAGE.md"
 POST_CHANGE_TOKEN = "POST_CHANGE_VALIDATION.md"
 POST_CHANGE_DOC_TOKEN = "../policy/POST_CHANGE_VALIDATION.md"
 MEMORY_DOC_TOKEN = "../memory/agent-memory.md"
 GEMINI_AUDIT_BOT_TOKEN = GEMINI_PY_AUDIT_BOT_DOC_PATH
 RUNTIME_VERSION_PATTERN = re.compile(r"(?m)^\*Версия:\s*(\d+(?:\.\d+)*)")
+RULES_VERSION_PATTERN = re.compile(r"(?m)^Version:\s*(\d+(?:\.\d+)*)")
 AGENT_MEMORY_SYNC_PATTERN = re.compile(
     r"Синхронизировано с ORCHESTRATION\.md v(\d+(?:\.\d+)*)"
 )
 LAST_UPDATED_PATTERN = re.compile(r"Последнее обновление:\s*(\d{4}-\d{2}-\d{2})")
+AI_RULES_README_PATH = Path("docs/00-project/ai/rules/README.md")
+CURSOR_RULE_DOCS_DIR = Path("docs/00-project/ai/rules/cursor")
+CURSOR_RULES_DIR = Path(".cursor/rules")
+WINDSURF_REVIEW_PATH = Path(".windsurf/workflows/review.md")
+CURSOR_RULE_EXCLUDED_FILENAMES = frozenset({"sonarqube_mcp_instructions.mdc"})
+AI_RULES_MIRROR_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
+    AI_RULES_README_PATH: (
+        AGENTS_DOC_TOKEN,
+        RULES_DOC_TOKEN,
+        REQUIREMENTS_DOC_TOKEN,
+        ADR_DIR_DOC_TOKEN,
+    ),
+    Path("docs/00-project/ai/rules/bioetl-ai-rules.md"): (
+        AGENTS_DOC_TOKEN,
+        RULES_DOC_TOKEN,
+        REQUIREMENTS_DOC_TOKEN,
+        ADR_DIR_DOC_TOKEN,
+    ),
+}
+AI_GEMINI_RUNTIME_CLAIM_GUARD_PATHS: tuple[Path, ...] = (
+    Path("GEMINI.md"),
+    Path(".github/copilot-instructions.md"),
+    Path(".cursor/rules/05-agent-workflow.mdc"),
+    Path("docs/00-project/ai/rules/cursor/05-agent-workflow.mdc"),
+)
+AI_GEMINI_RUNTIME_CLAIM_FORBIDDEN_PATTERNS: tuple[re.Pattern[str], ...] = (
+    re.compile(r"\.gemini/\*\*\s+is\s+the\s+active\s+Gemini\s+runtime\s+tree"),
+    re.compile(r"\.codex/\*\*\s+and\s+\.gemini/\*\*\s+are\s+active\s+runtime\s+trees"),
+    re.compile(
+        r"active\s+\.gemini/agents/\*\*\s+and\s+\.gemini/skills/\*\*\s+surfaces"
+    ),
+    re.compile(r"Runtime source:\s*`?\.codex/agents/?`?,\s*`?\.gemini/agents/?"),
+)
 
 RUNTIME_MIRROR_RULES: tuple[RuntimeMirrorRule, ...] = (
     RuntimeMirrorRule(
@@ -272,12 +310,27 @@ REQUIRED_EVIDENCE_METADATA_FIELDS = frozenset(
     }
 )
 AI_SURFACE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
-    Path("AGENTS.md"): RUNTIME_DOC_TOKENS_WITH_CANONICAL_RUNTIME,
+    Path("AGENTS.md"): (
+        *RUNTIME_DOC_TOKENS_WITH_CANONICAL_RUNTIME,
+        RULES_DOC_TOKEN,
+        REQUIREMENTS_DOC_TOKEN,
+        ADR_DIR_DOC_TOKEN,
+    ),
     Path("GEMINI.md"): (
         *RUNTIME_DOC_TOKENS,
         RUNTIME_AGENT_MEMORY_PATH,
+        AGENTS_DOC_TOKEN,
+        RULES_DOC_TOKEN,
+        REQUIREMENTS_DOC_TOKEN,
+        ADR_DIR_DOC_TOKEN,
     ),
-    Path(".github/copilot-instructions.md"): RUNTIME_DOC_TOKENS,
+    Path(".github/copilot-instructions.md"): (
+        *RUNTIME_DOC_TOKENS,
+        AGENTS_DOC_TOKEN,
+        RULES_DOC_TOKEN,
+        REQUIREMENTS_DOC_TOKEN,
+        ADR_DIR_DOC_TOKEN,
+    ),
     Path(CODEX_RUNTIME_DOC_PATH): RUNTIME_DOC_TOKENS,
     Path(CODEX_RUNTIME_DOC_README_PATH): (
         AGENTS_DOC_TOKEN,
@@ -291,6 +344,12 @@ AI_SURFACE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
         MEMORY_USAGE_TOKEN,
         POST_CHANGE_DOC_TOKEN,
         MEMORY_DOC_TOKEN,
+    ),
+    WINDSURF_REVIEW_PATH: (
+        AGENTS_DOC_TOKEN,
+        RULES_DOC_TOKEN,
+        REQUIREMENTS_DOC_TOKEN,
+        ADR_DIR_DOC_TOKEN,
     ),
 }
 AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
@@ -423,6 +482,11 @@ def _read_doc(path: Path) -> str:
     return ""
 
 
+def _relative_token(from_dir: Path, target: Path) -> str:
+    """Return a stable POSIX relative token from one directory to another path."""
+    return Path(os.path.relpath(target, start=from_dir)).as_posix()
+
+
 def _display_relative_path(path: Path) -> str:
     """Return stable POSIX-style report paths across platforms."""
     return path.as_posix()
@@ -468,6 +532,12 @@ def _normalize_markdown_block(text: str) -> str:
 def _extract_runtime_version(text: str) -> str | None:
     """Extract runtime document version from the standard header marker."""
     match = RUNTIME_VERSION_PATTERN.search(text)
+    return match.group(1) if match else None
+
+
+def _extract_rules_version(text: str) -> str | None:
+    """Extract the canonical RULES version marker from text."""
+    match = RULES_VERSION_PATTERN.search(text)
     return match.group(1) if match else None
 
 
@@ -1113,6 +1183,8 @@ def check_freshness(report: DriftReport) -> None:
     canonical_orchestration = PROJECT_ROOT / ".codex" / "agents" / "ORCHESTRATION.md"
     orchestration_text = _read_doc(canonical_orchestration)
     current_orchestration_version = _extract_runtime_version(orchestration_text)
+    rules_text = _read_doc(PROJECT_ROOT / RULES_DOC_TOKEN)
+    current_rules_version = _extract_rules_version(rules_text)
 
     agent_memory_text = _read_doc(PROJECT_ROOT / AGENT_MEMORY_PATH)
     if not agent_memory_text:
@@ -1151,6 +1223,23 @@ def check_freshness(report: DriftReport) -> None:
                 "Agent memory still documents the legacy reports/plans/<task_id>/ output layout",
             )
 
+    ai_rules_readme_text = _read_doc(PROJECT_ROOT / AI_RULES_README_PATH)
+    if not ai_rules_readme_text:
+        report.add(
+            "freshness",
+            "ERROR",
+            _rel(PROJECT_ROOT / AI_RULES_README_PATH),
+            "AI rules README missing",
+        )
+    elif current_rules_version and f"(v{current_rules_version})" not in ai_rules_readme_text:
+        report.add(
+            "freshness",
+            "ERROR",
+            _rel(PROJECT_ROOT / AI_RULES_README_PATH),
+            "AI rules README references an outdated RULES version "
+            f"(expected v{current_rules_version})",
+        )
+
     file_policy_text = _read_doc(PROJECT_ROOT / FILE_POLICY_PATH)
     if not file_policy_text:
         report.add(
@@ -1186,6 +1275,9 @@ def check_freshness(report: DriftReport) -> None:
 def check_ai_surfaces(report: DriftReport, *, root: Path | None = None) -> None:
     """Verify AI runtime control points keep required policy links and no stale refs."""
     project_root = root or PROJECT_ROOT
+    run_repo_global_surface_checks = (
+        root is None or project_root.resolve() == PROJECT_ROOT.resolve()
+    )
 
     for relative_path, required_tokens in AI_SURFACE_REQUIRED_TOKENS.items():
         _check_ai_surface_required_tokens(
@@ -1251,6 +1343,11 @@ def check_ai_surfaces(report: DriftReport, *, root: Path | None = None) -> None:
             forbidden_patterns=forbidden_patterns,
         )
 
+    if run_repo_global_surface_checks:
+        _check_runtime_skill_entrypoints(report, project_root=project_root)
+        _check_cursor_rule_entrypoints(report, project_root=project_root)
+        _check_ai_rules_mirrors(report, project_root=project_root)
+        _check_unverified_gemini_runtime_claims(report, project_root=project_root)
     _check_ai_docs_runtime_mirror_headers(report, project_root=project_root)
 
 
@@ -1427,6 +1524,118 @@ def _check_ai_docs_runtime_mirror_headers(
                     target_report_path,
                     "AI docs mirror header missing canonical runtime source: "
                     f"{source_text}",
+                )
+
+
+def _iter_runtime_skill_entrypoints(project_root: Path) -> tuple[Path, ...]:
+    paths: list[Path] = []
+    for runtime_root in (Path(".codex/skills"), Path(".devin/skills")):
+        root = project_root / runtime_root
+        if not root.exists():
+            continue
+        for path in sorted(root.rglob(SKILL_FILE_NAME)):
+            paths.append(path.relative_to(project_root))
+    return tuple(paths)
+
+
+def _required_runtime_skill_tokens(
+    project_root: Path, relative_path: Path
+) -> tuple[str, ...]:
+    skill_dir = relative_path.parent
+    return (
+        _relative_token(skill_dir, project_root / AGENTS_DOC_TOKEN),
+        _relative_token(skill_dir, project_root / RULES_DOC_TOKEN),
+        _relative_token(skill_dir, project_root / REQUIREMENTS_DOC_TOKEN),
+        _relative_token(skill_dir, project_root / ADR_DIR_DOC_TOKEN),
+    )
+
+
+def _check_runtime_skill_entrypoints(
+    report: DriftReport,
+    *,
+    project_root: Path,
+) -> None:
+    for relative_path in _iter_runtime_skill_entrypoints(project_root):
+        _check_ai_surface_required_tokens(
+            report,
+            project_root=project_root,
+            relative_path=relative_path,
+            required_tokens=_required_runtime_skill_tokens(project_root, relative_path),
+        )
+
+
+def _iter_cursor_rule_entrypoints(project_root: Path) -> tuple[Path, ...]:
+    paths: list[Path] = []
+    for rules_root in (CURSOR_RULES_DIR, CURSOR_RULE_DOCS_DIR):
+        root = project_root / rules_root
+        if not root.exists():
+            continue
+        for path in sorted(root.glob("*.mdc")):
+            if path.name in CURSOR_RULE_EXCLUDED_FILENAMES:
+                continue
+            paths.append(path.relative_to(project_root))
+    return tuple(paths)
+
+
+def _check_cursor_rule_entrypoints(
+    report: DriftReport,
+    *,
+    project_root: Path,
+) -> None:
+    required_tokens = (
+        AGENTS_DOC_TOKEN,
+        RULES_DOC_TOKEN,
+        REQUIREMENTS_DOC_TOKEN,
+        ADR_DIR_DOC_TOKEN,
+    )
+    for relative_path in _iter_cursor_rule_entrypoints(project_root):
+        _check_ai_surface_required_tokens(
+            report,
+            project_root=project_root,
+            relative_path=relative_path,
+            required_tokens=required_tokens,
+        )
+
+
+def _check_ai_rules_mirrors(
+    report: DriftReport,
+    *,
+    project_root: Path,
+) -> None:
+    for relative_path, required_tokens in AI_RULES_MIRROR_REQUIRED_TOKENS.items():
+        _check_ai_surface_required_tokens(
+            report,
+            project_root=project_root,
+            relative_path=relative_path,
+            required_tokens=required_tokens,
+        )
+
+
+def _check_unverified_gemini_runtime_claims(
+    report: DriftReport,
+    *,
+    project_root: Path,
+) -> None:
+    for relative_path in AI_GEMINI_RUNTIME_CLAIM_GUARD_PATHS:
+        path = project_root / relative_path
+        text = _read_doc(path)
+        if not text:
+            report.add(
+                "ai-surfaces",
+                "ERROR",
+                _display_relative_path(relative_path),
+                AI_SURFACE_FILE_MISSING_MESSAGE,
+            )
+            continue
+        for pattern in AI_GEMINI_RUNTIME_CLAIM_FORBIDDEN_PATTERNS:
+            match = pattern.search(text)
+            if match is not None:
+                report.add(
+                    "ai-surfaces",
+                    "ERROR",
+                    _display_relative_path(relative_path),
+                    "Unverified Gemini runtime-tree claim detected: "
+                    f"{match.group(0)}",
                 )
 
 

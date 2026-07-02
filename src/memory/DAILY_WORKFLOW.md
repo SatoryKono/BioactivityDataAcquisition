@@ -115,6 +115,7 @@ python -m memory.tooling.workflow post-task \
   --title "Audit chembl activity ownership" \
   --summary "Confirmed ownership path and updated memory workflow docs." \
   --source-ref src/memory/README.md \
+  --validation-timeout-seconds 15 \
   --prune \
   --json
 ```
@@ -123,6 +124,9 @@ What it does:
 
 - creates an episodic summary note in `src/memory/episodic/summaries/`
 - validates the memory subsystem
+- runs validation with a bounded timeout during the workflow path and returns a
+  degraded payload instead of hanging indefinitely when validation exhausts the
+  time budget
 - refreshes rebuild-only RAG and timeline artifacts into a temporary output root
   with the same bounded workflow-time RAG scope used by `pre-task`
 - treats partial refresh failures as degraded follow-up signals instead of
@@ -138,6 +142,9 @@ target ceiling of 1000 active episodic notes. Use
 Python cache files under `src/memory/` should fail validation. Memory tooling
 processes disable Python bytecode writes by default, and dev wrappers should
 preserve `PYTHONDONTWRITEBYTECODE=1`.
+
+Set `--validation-timeout-seconds 0` only when you intentionally want the
+workflow to wait for a full in-process validation scan regardless of duration.
 
 If the outcome is durable, promote the summary:
 

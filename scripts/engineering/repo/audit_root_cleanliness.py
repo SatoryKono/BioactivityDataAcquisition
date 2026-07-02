@@ -25,11 +25,6 @@ CANONICAL_ROOT_TEXT_FILES: frozenset[str] = frozenset(
     {
         "AGENTS.md",
         "CHANGELOG.md",
-        "CODEX_SANDBOX_TROUBLESHOOT.txt",
-        "CODEX_SETUP.txt",
-        "CODEX_WSL_CONFIGURED.md",
-        "CODEX_WSL_SETUP.md",
-        "CODEX_WSL_USAGE.md",
         "GEMINI.md",
         "README.md",
         # Qodo documents this exact root filename for repo-level guidance.

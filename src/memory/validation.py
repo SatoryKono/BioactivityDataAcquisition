@@ -6,7 +6,7 @@ import os
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 from memory.notes import (
     NOTE_READ_TIMEOUT_SECONDS,
@@ -198,7 +198,7 @@ def _validate_working_tree_junk(
 ) -> None:
     if not memory_root.exists():
         return
-    for path in sorted(memory_root.rglob("*")):
+    for path in _iter_tree_paths(memory_root):
         if _is_tolerated_memory_bootstrap_cache(path, memory_root):
             continue
         if path.is_file() and _is_working_tree_junk(path):
@@ -396,27 +396,67 @@ def _note_dirs(root: Path) -> dict[str, list[Path]]:
     }
 
 
+def _sorted_scandir_entries(directory: Path) -> list[os.DirEntry[str]]:
+    with os.scandir(directory) as iterator:
+        return sorted(iterator, key=lambda entry: entry.name)
+
+
+def _iter_tree_paths(root: Path) -> Iterator[Path]:
+    if not root.exists():
+        return
+    directories = [root]
+    while directories:
+        current = directories.pop()
+        child_directories: list[Path] = []
+        for entry in _sorted_scandir_entries(current):
+            child_path = current / entry.name
+            yield child_path
+            if entry.is_dir(follow_symlinks=False):
+                child_directories.append(child_path)
+        directories.extend(reversed(child_directories))
+
+
+def _iter_markdown_note_paths(
+    directory: Path,
+    *,
+    limit: int | None,
+) -> Iterator[Path]:
+    if not directory.exists():
+        return
+    emitted = 0
+    directories = [directory]
+    while directories:
+        current = directories.pop()
+        child_directories: list[Path] = []
+        for entry in _sorted_scandir_entries(current):
+            child_path = current / entry.name
+            if "templates" in child_path.parts:
+                continue
+            if entry.is_dir(follow_symlinks=False):
+                child_directories.append(child_path)
+                continue
+            if entry.name == "README.md" or not entry.name.endswith(".md"):
+                continue
+            yield child_path
+            emitted += 1
+            if limit is not None and emitted >= limit:
+                return
+        directories.extend(reversed(child_directories))
+
+
 def _bounded_episodic_note_paths(
     directory: Path,
     *,
     limit: int | None,
 ) -> list[Path]:
-    paths = sorted(
-        path
-        for path in directory.rglob("*.md")
-        if path.name != "README.md" and "templates" not in path.parts
-    )
-    if limit is None:
-        return paths
-    return paths[:limit]
+    return list(_iter_markdown_note_paths(directory, limit=limit))
 
 
 def _iter_note_paths(
     root: Path,
     *,
     include_all_episodic_notes: bool = False,
-) -> list[tuple[str, Path]]:
-    result: list[tuple[str, Path]] = []
+) -> Iterator[tuple[str, Path]]:
     for artifact_class, directories in _note_dirs(root).items():
         for directory in directories:
             if not directory.exists():
@@ -429,14 +469,9 @@ def _iter_note_paths(
                 )
                 note_paths = _bounded_episodic_note_paths(directory, limit=limit)
             else:
-                note_paths = [
-                    path
-                    for path in sorted(directory.rglob("*.md"))
-                    if path.name != "README.md" and "templates" not in path.parts
-                ]
+                note_paths = _iter_markdown_note_paths(directory, limit=None)
             for path in note_paths:
-                result.append((artifact_class, path))
-    return result
+                yield (artifact_class, path)
 
 
 def _normalize_target_dir(target_dir: str) -> str:

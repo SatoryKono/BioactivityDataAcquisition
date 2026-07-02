@@ -17,6 +17,12 @@ DUPLICATION_BASELINE_ARTIFACT = (
 )
 HOTSPOT_BASELINE_ARTIFACT = ROOT / "reports" / "quality" / "hotspot-family-baseline.json"
 TEST_GOVERNANCE_ARTIFACT = ROOT / "reports" / "quality" / "test-governance-current.json"
+SCORECARD_REFRESH_HINT = (
+    "Refresh architecture artifacts with: "
+    "`python _refresh_module_coverage_inventory.py`, "
+    "`python scripts/engineering/qa/report_architecture_quality_scorecard.py`, "
+    "and `python -m scripts.engineering.qa report-debt-governance-gates --update`."
+)
 
 
 def _normalize_live_collector_comparison(
@@ -63,9 +69,9 @@ def test_architecture_quality_scorecard_artifact_matches_live_collector() -> Non
 
     live = build_architecture_quality_scorecard(repo_root=ROOT)
 
-    assert _normalize_live_collector_comparison(committed) == (
-        _normalize_live_collector_comparison(live)
-    )
+    assert _normalize_live_collector_comparison(
+        committed
+    ) == _normalize_live_collector_comparison(live), SCORECARD_REFRESH_HINT
 
 
 @pytest.mark.architecture
@@ -90,27 +96,26 @@ def test_architecture_quality_scorecard_module_coverage_evidence_is_consistent()
 
     source_artifact = committed["source_artifacts"]["module_coverage_inventory"]
     assert source_artifact["path"] == "reports/quality/module-coverage-inventory.json"
-    assert (
-        source_artifact["source_tree_sha256"]
-        == coverage_inventory["source_tree_sha256"]
-    )
+    assert source_artifact["source_tree_sha256"] == coverage_inventory[
+        "source_tree_sha256"
+    ], SCORECARD_REFRESH_HINT
     assert (
         source_artifact["coverage_xml_sha256"]
         == coverage_inventory["coverage_xml_sha256"]
-    )
+    ), SCORECARD_REFRESH_HINT
 
     assert (
         committed["metrics"]["source_module_count"]
         == inventory_summary["source_module_count"]
-    )
+    ), SCORECARD_REFRESH_HINT
     assert (
         committed["metrics"]["unmeasured_module_count"]
         == inventory_summary["unmeasured_module_count"]
-    )
+    ), SCORECARD_REFRESH_HINT
     assert (
         committed["metrics"]["uncovered_module_count"]
         == inventory_summary["uncovered_module_count"]
-    )
+    ), SCORECARD_REFRESH_HINT
 
     for category in committed["categories"]:
         evidence_metrics = category.get("evidence_metrics", {})
@@ -118,17 +123,17 @@ def test_architecture_quality_scorecard_module_coverage_evidence_is_consistent()
             assert (
                 evidence_metrics["source_module_count"]
                 == inventory_summary["source_module_count"]
-            )
+            ), SCORECARD_REFRESH_HINT
         if "unmeasured_module_count" in evidence_metrics:
             assert (
                 evidence_metrics["unmeasured_module_count"]
                 == inventory_summary["unmeasured_module_count"]
-            )
+            ), SCORECARD_REFRESH_HINT
         if "uncovered_module_count" in evidence_metrics:
             assert (
                 evidence_metrics["uncovered_module_count"]
                 == inventory_summary["uncovered_module_count"]
-            )
+            ), SCORECARD_REFRESH_HINT
 
 
 @pytest.mark.architecture
@@ -169,34 +174,43 @@ def test_architecture_quality_scorecard_includes_duplication_hotspot_and_test_go
     test_governance = json.loads(TEST_GOVERNANCE_ARTIFACT.read_text(encoding="utf-8"))
 
     duplication_artifact = committed["source_artifacts"]["duplication_baseline"]
-    assert duplication_artifact["path"] == "reports/quality/full-app-duplication-baseline.json"
-    assert duplication_artifact["snapshot_date"] == duplication["summary"]["snapshot_date"]
+    assert (
+        duplication_artifact["path"]
+        == "reports/quality/full-app-duplication-baseline.json"
+    )
+    assert (
+        duplication_artifact["snapshot_date"] == duplication["summary"]["snapshot_date"]
+    ), SCORECARD_REFRESH_HINT
     assert (
         duplication_artifact["total_duplicate_clusters"]
         == duplication["summary"]["total_duplicate_clusters"]
-    )
+    ), SCORECARD_REFRESH_HINT
 
     hotspot_artifact = committed["source_artifacts"]["hotspot_family_baseline"]
     assert hotspot_artifact["path"] == "reports/quality/hotspot-family-baseline.json"
-    assert hotspot_artifact["snapshot_date"] == hotspot["summary"]["snapshot_date"]
-    assert hotspot_artifact["budget_warnings"] == hotspot["summary"]["budget_warnings"]
+    assert (
+        hotspot_artifact["snapshot_date"] == hotspot["summary"]["snapshot_date"]
+    ), SCORECARD_REFRESH_HINT
+    assert (
+        hotspot_artifact["budget_warnings"] == hotspot["summary"]["budget_warnings"]
+    ), SCORECARD_REFRESH_HINT
 
     governance_artifact = committed["source_artifacts"]["test_governance_report"]
     assert governance_artifact["path"] == "reports/quality/test-governance-current.json"
     assert (
         governance_artifact["compatibility_test_files"]
         == test_governance["report"]["compatibility_test_files"]
-    )
+    ), SCORECARD_REFRESH_HINT
 
     assert (
         committed["metrics"]["total_duplicate_clusters"]
         == duplication["summary"]["total_duplicate_clusters"]
-    )
+    ), SCORECARD_REFRESH_HINT
     assert (
         committed["metrics"]["hotspot_budget_warning_count"]
         == hotspot["summary"]["budget_warnings"]
-    )
+    ), SCORECARD_REFRESH_HINT
     assert (
         committed["metrics"]["compatibility_test_file_count"]
         == test_governance["report"]["compatibility_test_files"]
-    )
+    ), SCORECARD_REFRESH_HINT

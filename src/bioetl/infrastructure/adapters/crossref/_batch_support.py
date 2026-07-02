@@ -7,9 +7,11 @@ import time
 from contextlib import AbstractContextManager
 from typing import TYPE_CHECKING, Protocol
 
-from httpx import RequestError, Response
+from httpx import Response
 
-from bioetl.domain.exceptions import BioETLError, NetworkError
+from bioetl.infrastructure.adapters.common.error_bundles import (
+    COMMON_TITLE_FALLBACK_ERRORS,
+)
 from bioetl.infrastructure.adapters.crossref.exceptions import CrossRefApiError
 
 if TYPE_CHECKING:
@@ -48,16 +50,9 @@ class HeadersProvider(Protocol):
 
 
 CROSSREF_RUNTIME_ERRORS = (
-    BioETLError,
-    NetworkError,
-    RequestError,
+    *COMMON_TITLE_FALLBACK_ERRORS,
     ConnectionError,
     TimeoutError,
-    OSError,
-    ValueError,
-    TypeError,
-    RuntimeError,
-    KeyError,
 )
 CROSSREF_FALLBACK_ERRORS = (CrossRefApiError, *CROSSREF_RUNTIME_ERRORS)
 

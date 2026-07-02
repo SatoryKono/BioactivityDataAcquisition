@@ -5,6 +5,14 @@ description: Use before workflow execution to discover available agents, skills,
 
 # Capability Discovery
 
+## Source Of Truth
+
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../docs/02-architecture/decisions`
+
+
 This skill discovers available capabilities (skills, agents, commands) in the user's environment to enable dynamic workflow adaptation.
 
 ## Purpose

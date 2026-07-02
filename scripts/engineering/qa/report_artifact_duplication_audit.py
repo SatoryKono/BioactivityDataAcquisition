@@ -108,12 +108,24 @@ def collect_artifact_duplication_report(
     total_bytes_by_hash: dict[str, int] = defaultdict(int)
     scope_file_counts: Counter[str] = Counter()
     pattern_file_counts: Counter[str] = Counter()
+    paths_by_relative: dict[str, Path] = {}
 
-    for path in _iter_tracked_paths(
-        resolved_root,
-        include_patterns=include_patterns,
-        exclude_patterns=exclude_patterns,
-    ):
+    for pattern in include_patterns:
+        pattern_seen: set[str] = set()
+        for path in resolved_root.glob(pattern):
+            if not path.is_file():
+                continue
+            if path.suffix.lower() not in TRACKED_EXTENSIONS:
+                continue
+            relative = path.relative_to(resolved_root).as_posix()
+            if _matches_any(relative, exclude_patterns):
+                continue
+            if relative not in pattern_seen:
+                pattern_file_counts[pattern] += 1
+                pattern_seen.add(relative)
+            paths_by_relative[relative] = path
+
+    for relative, path in sorted(paths_by_relative.items()):
         relative = path.relative_to(resolved_root).as_posix()
         payload = path.read_bytes()
         digest = hashlib.sha256(payload).hexdigest()
@@ -122,10 +134,6 @@ def collect_artifact_duplication_report(
         groups_by_hash[digest].append(relative)
         total_bytes_by_hash[digest] += len(payload)
         scope_file_counts[scope] += 1
-        for pattern in include_patterns:
-            if Path(relative).match(pattern):
-                pattern_file_counts[pattern] += 1
-                break
 
     duplicate_groups: list[dict[str, Any]] = []
     duplicate_file_count = 0

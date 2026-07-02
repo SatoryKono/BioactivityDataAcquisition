@@ -17,7 +17,10 @@ defined in `AGENTS.md`.
 
 ## AI Runtime Notes
 
-- `.codex/**` and `.gemini/**` are active runtime trees.
+- `.codex/**` is the tracked runtime source of truth on `main`.
+- `.gemini/settings.json` may exist as a machine-local config surface, but a
+  tracked `.gemini/agents/**` or `.gemini/skills/**` tree is not part of the
+  current `main` checkout unless added and verified in the same change.
 - `docs/00-project/ai/**` is a mirror/guidance layer, not the runtime behavior source.
 - Do not rely on `.claude/**` as a canonical behavior source for Codex/Gemini work.
 

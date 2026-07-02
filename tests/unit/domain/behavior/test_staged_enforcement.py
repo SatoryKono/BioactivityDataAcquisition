@@ -106,3 +106,14 @@ def test_grouping_and_policy_serialization_helpers_are_stable() -> None:
     assert _calculate_pass_rate([]) == 0.0
     assert policies["a"]["current_stage"] == "soft_fail"
     assert policies["a"]["observe_until"] == "2026-01-01"
+
+
+def test_engine_contract_subset_comes_from_single_default_policy_map() -> None:
+    engine = StagedEnforcementEngine()
+
+    assert set(engine._contract_policies) == {
+        "contract_identity",
+        "registry_consistency",
+        "schema_compatibility",
+    }
+    assert all(name in engine.policies for name in engine._contract_policies)

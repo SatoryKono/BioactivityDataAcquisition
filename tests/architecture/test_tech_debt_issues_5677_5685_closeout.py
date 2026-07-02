@@ -118,19 +118,19 @@ def test_issues_5679_5680_5685_duplication_ratchets_are_lower() -> None:
     closeout = _load_json(CLOSEOUT)
     ratchets = closeout["ratchets"]
 
-    assert duplication["summary"]["total_duplicate_clusters"] <= 68
+    assert duplication["summary"]["total_duplicate_clusters"] <= 60
     assert duplication["summary"]["total_duplicate_clusters"] < 75
-    assert adapters["duplicate_count"] == 54
+    assert adapters["duplicate_count"] == 51
     assert adapters["duplicate_count"] < 58
-    assert pipelines["duplicate_count"] <= 13
+    assert pipelines["duplicate_count"] == 9
     assert pipelines["duplicate_count"] < 16
     assert cli["duplicate_count"] == 0
     assert all(row["duplicate_clusters"] == 0 for row in cli["actionability"])
     assert bootstrap["duplicate_count"] == 0
 
-    assert ratchets["full_app_duplicate_clusters"]["current"] <= 68
-    assert ratchets["adapter_duplicate_clusters"]["current"] == 54
-    assert ratchets["pipeline_duplicate_clusters"]["current"] <= 13
+    assert ratchets["full_app_duplicate_clusters"]["current"] <= 60
+    assert ratchets["adapter_duplicate_clusters"]["current"] == 51
+    assert ratchets["pipeline_duplicate_clusters"]["current"] == 9
     assert ratchets["cli_duplicate_clusters"]["current"] == 0
     assert {row["direction"] for row in ratchets.values()} == {"reduced"}
 

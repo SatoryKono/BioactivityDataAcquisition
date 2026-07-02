@@ -1,4 +1,6 @@
-"""Path and discovery helpers for canonical composite config files."""
+"""
+Path and discovery helpers for canonical composite runtime configs.
+"""
 
 from __future__ import annotations
 
@@ -29,7 +31,7 @@ def resolve_composite_config_path(
     config_dir: Path | None = None,
     configs_root: Path | None = None,
 ) -> Path:
-    """Resolve composite config path from canonical composites directory."""
+    """Resolve composite config path from the canonical composites directory."""
     config_path = (
         resolve_composite_config_dir(
             config_dir=config_dir,
@@ -47,7 +49,7 @@ def list_composite_config_names(
     config_dir: Path | None = None,
     configs_root: Path | None = None,
 ) -> tuple[str, ...]:
-    """Return canonical runtime composite config names."""
+    """Return runtime composite config names, excluding sidecar policy files."""
     composite_dir = resolve_composite_config_dir(
         config_dir=config_dir,
         configs_root=configs_root,

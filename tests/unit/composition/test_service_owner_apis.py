@@ -29,6 +29,13 @@ def test_retired_services_api_module_stays_absent() -> None:
             },
         ),
         (
+            "bioetl.composition.execution_service_access",
+            {
+                "ensure_metrics_server_started",
+                "get_pipeline_runner_service",
+            },
+        ),
+        (
             "bioetl.composition.control_plane_api",
             {
                 "get_adr_service",

@@ -44,7 +44,6 @@ ConfigPayloadValidator = Callable[[JsonDict], object]
 DQOverrideMerger = Callable[[dict[str, object], Path], None]
 SharedPolicyMerger = Callable[[dict[str, object], Path], None]
 
-
 def resolve_composite_gold_schema(
     composite_name: str,
     *,

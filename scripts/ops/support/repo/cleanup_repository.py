@@ -324,6 +324,7 @@ def _is_venv_path(path: Path) -> bool:
     return bool(VENV_SEGMENTS.intersection(path.parts))
 
 
+@cache
 def _count_reference_hits(repo_root: Path, path: Path) -> int:
     absolute_path = repo_root / path
     if absolute_path.is_dir():
@@ -334,15 +335,23 @@ def _count_reference_hits(repo_root: Path, path: Path) -> int:
     pattern = rf"{path_pattern}|{filename_pattern}"
     try:
         completed = subprocess.run(  # nosec
-            ["rg", "-n", "-S", "-e", pattern, *REVIEW_REFERENCE_SEARCH_PATHS],
+            [
+                "rg",
+                "-n",
+                "-S",
+                "-e",
+                pattern,
+                *REVIEW_REFERENCE_SEARCH_PATHS,
+            ],
             cwd=repo_root,
             check=False,
             capture_output=True,
             text=True,
             encoding="utf-8",
             errors="replace",
+            timeout=5,
         )
-    except OSError:
+    except (OSError, subprocess.TimeoutExpired):
         return 0
     if completed.returncode not in {0, 1}:
         return 0

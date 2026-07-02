@@ -227,8 +227,10 @@ docker compose up --build -d
 ## 📚 Документация
 
 - Полное описание: `docs/DOCKER_SETUP.md`
-- Codex MCP: `docs/CODEX_QUICK_START.md`
-- WSL интеграция: `docs/CODEX_WSL_SETUP.md`
+- Codex launcher docs: `docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md`
+- WSL интеграция: `docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md`
+- Root Docker helper relocation audit:
+  `docs/05-operations/verification/docker-helper-root-relocation-audit.md`
 
 ## ✨ Что дальше
 
@@ -266,5 +268,7 @@ docker compose up --build -d
   Alertmanager have Prometheus scrape contracts; SonarQube is healthcheck-only
   in repo-default Prometheus because its native metrics endpoint requires a
   runtime passcode.
+- Before moving any reviewed root Docker helper surface, consult
+  `docs/05-operations/verification/docker-helper-root-relocation-audit.md`.
 
 **Все готово к запуску!** 🚀

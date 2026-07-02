@@ -624,6 +624,8 @@ def build_compatibility_importer_census(
             row,
             src_importer_count=int(retained_row["src_importer_count"]),
         )
+        retained_row["consumer_class"] = retained_row["usage_classification"]
+        retained_row["sunset_status"] = retained_row["surface_classification"]
         export_contract = row.get("public_export_contract")
         if isinstance(export_contract, dict):
             export_row = _build_public_export_contract_row(repo_root / repo_path, row)
@@ -671,6 +673,8 @@ def build_compatibility_importer_census(
                     "internal_callers_zero": retained_row["internal_callers_zero"],
                     "usage_classification": retained_row["usage_classification"],
                     "surface_classification": retained_row["surface_classification"],
+                    "consumer_class": retained_row["consumer_class"],
+                    "sunset_status": retained_row["sunset_status"],
                     "src_importer_count": retained_row["src_importer_count"],
                     "test_importer_count": retained_row["test_importer_count"],
                 }

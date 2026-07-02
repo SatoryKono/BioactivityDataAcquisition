@@ -104,6 +104,8 @@ plans:
       lifecycle: supporting_context
     - path: docs/plans/tech-debt-eradication-blueprint-v4-2026-05-31.md
       lifecycle: supporting_context
+    - path: docs/plans/dashboard-observability-baseline-audit.md
+      lifecycle: supporting_context
 
 src_sidecars:
   path_prefix: src/
@@ -196,6 +198,8 @@ local_tolerated_root_dirs:
       role: local_test_output_surface_untracked
     - path: tmp
       role: local_temp_workspace_untracked
+    - path: script-codex
+      role: local_legacy_codex_compatibility_root_untracked
     - path: "~"
       role: local_external_tool_mirror_untracked
     - path: .venv

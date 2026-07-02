@@ -45,7 +45,9 @@ def get_pipeline_runner_service(
     registry: PipelineRegistry | None = None,
 ) -> PipelineRunnerService:
     """Resolve the pipeline runner service lazily for CLI runtime helpers."""
-    from bioetl.composition.execution_api import get_pipeline_runner_service as _impl
+    from bioetl.composition.execution_service_access import (
+        get_pipeline_runner_service as _impl,
+    )
 
     return cast(PipelineRunnerService, _impl(registry=registry))
 

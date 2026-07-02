@@ -40,7 +40,7 @@
 ### ✅ Вариант 3: Диагностика (найти точное место зависания)
 
 ```powershell
-.\script-codex\helper\diagnose-hang.ps1
+.\scripts\ai\codex\helper\diagnose-hang.ps1
 ```
 
 Покажет:
@@ -117,7 +117,7 @@ wsl -d Ubuntu -- sudo dpkg --configure -a
 ### 4. Установите Node.js вручную
 
 ```bash
-wsl -d Ubuntu -e bash "$HOME/script-codex/helper/setup-env.sh"
+wsl -d Ubuntu -e bash "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/codex/helper/setup-env.sh"
 ```
 
 ### 5. Последний вариант - ручная установка
@@ -145,7 +145,7 @@ npm install -g @openai/codex
 ❌ Если зависает > 5 сек на любом этапе → запустите диагностику:
 
 ```powershell
-.\script-codex\helper\diagnose-hang.ps1
+.\scripts\ai\codex\helper\diagnose-hang.ps1
 ```
 
 ## Дополнительная информация

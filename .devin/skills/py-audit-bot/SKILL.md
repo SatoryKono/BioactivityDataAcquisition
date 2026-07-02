@@ -11,6 +11,10 @@ Run the role-specific workflow as defined in the py-audit-bot profile.
 
 ## Source Of Truth
 
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../docs/02-architecture/decisions`
 - Primary profile: `../../agents/py-audit-bot.md`
 - Team orchestration: `../../agents/ORCHESTRATION.md`
 - Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`

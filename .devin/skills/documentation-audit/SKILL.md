@@ -9,6 +9,15 @@ description: Full audit and update of BioETL project documentation for v5.23+. U
 
 Perform a full documentation audit of BioETL and bring docs in sync with code and ADRs (v5.23+). Produce a clear audit report, a prioritized plan, and updated documentation changes.
 
+
+
+## Source Of Truth
+
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../docs/02-architecture/decisions`
+
 ## Required inputs (before starting)
 
 - Load `references/audit-checklist.md` — checklist for each audit area.

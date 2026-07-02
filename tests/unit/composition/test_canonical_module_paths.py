@@ -111,6 +111,21 @@ def test_execution_api_reexports_pipeline_runner_service() -> None:
     assert canonical_get_pipeline_runner_service is get_pipeline_runner_service
 
 
+def test_execution_service_access_routes_to_owner_seams() -> None:
+    """First-party execution access should bypass the retained public facade."""
+    from bioetl.composition.execution_api import (
+        ensure_metrics_server_started,
+        get_pipeline_runner_service,
+    )
+    from bioetl.composition.execution_service_access import (
+        ensure_metrics_server_started as canonical_ensure_metrics_server_started,
+        get_pipeline_runner_service as canonical_get_pipeline_runner_service,
+    )
+
+    assert canonical_ensure_metrics_server_started is ensure_metrics_server_started
+    assert canonical_get_pipeline_runner_service is get_pipeline_runner_service
+
+
 def test_control_plane_api_reexports_canonical_control_plane_services() -> None:
     """Control-plane API should expose canonical admin and inspection seams."""
     from bioetl.composition.control_plane_api import (

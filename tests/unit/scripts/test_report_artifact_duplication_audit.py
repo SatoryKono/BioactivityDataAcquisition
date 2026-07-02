@@ -57,3 +57,25 @@ def test_collect_artifact_duplication_report_groups_exact_byte_duplicates(
             ],
         }
     ]
+
+
+def test_collect_artifact_duplication_report_counts_patterns_from_glob_matches(
+    tmp_path,
+) -> None:
+    _write(
+        tmp_path / "configs" / "entities" / "chembl" / "activity.yaml",
+        "a: 1\n",
+    )
+    _write(
+        tmp_path / "configs" / "contracts" / "chembl" / "activity.yaml",
+        "b: 2\n",
+    )
+    _write(
+        tmp_path / "tests" / "fixtures" / "contracts" / "chembl.yaml",
+        "c: 3\n",
+    )
+
+    report = collect_artifact_duplication_report(tmp_path)
+
+    assert report["pattern_file_counts"]["configs/**/*.yaml"] == 2
+    assert report["pattern_file_counts"]["tests/fixtures/contracts/**/*.yaml"] == 1

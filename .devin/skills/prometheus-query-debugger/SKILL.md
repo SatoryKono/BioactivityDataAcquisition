@@ -5,6 +5,14 @@ description: Debug PromQL semantics, empty results, aggregation mistakes, histog
 
 # Prometheus Query Debugger
 
+## Source Of Truth
+
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../docs/02-architecture/decisions`
+
+
 ## Overview
 
 Use this skill to diagnose why a PromQL expression is empty, noisy,
