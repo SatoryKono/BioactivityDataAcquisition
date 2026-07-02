@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from collections.abc import Sequence
 from datetime import datetime
+from typing import cast
 
 import polars as pl
 
@@ -146,7 +147,8 @@ class MergeMetricsRecorderMixin:
         any_enriched = pl.any_horizontal(
             [pl.col(col).is_not_null() for col in enricher_cols]
         )
-        return len(df.filter(any_enriched))
+        # ⚡ Bolt: Replace len(df.filter(expr)) with df.select(expr.sum()).item() to avoid DataFrame materialization
+        return cast(int, df.select(any_enriched.sum()).item())
 
     def _count_fully_enriched(
         self,
@@ -180,13 +182,17 @@ class MergeMetricsRecorderMixin:
         if len(df) == 0:
             return {}
 
-        coverage: dict[str, float] = {}
-        for col in df.columns:
-            if not col.startswith("_"):
-                non_null = len(df.filter(df[col].is_not_null()))
-                coverage[col] = non_null / len(df)
+        cols_to_check = [col for col in df.columns if not col.startswith("_")]
+        if not cols_to_check:
+            return {}
 
-        return coverage
+        # ⚡ Bolt: Build expression list and select concurrently to avoid
+        # looping over columns and materializing DataFrames
+        exprs = [
+            (pl.col(col).is_not_null().sum() / pl.len()).alias(col)
+            for col in cols_to_check
+        ]
+        return cast(dict[str, float], df.select(exprs).row(0, named=True))
 
 
 __all__ = ["MergeMetricsRecorderMixin"]
