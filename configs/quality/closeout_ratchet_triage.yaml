@@ -232,3 +232,8 @@ entries:
     classification: budget_closeout_ratchet
     live_guard: "debt issue batch #5752-#5755 remains aligned with live governance narrative sync, runtime support cleanup, and compatibility residue evidence without budget growth."
     rationale: Keeps the current architecture-debt closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issues_5790_5796_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue batch #5790-#5796 remains aligned with live compatibility metadata, adapter/pipeline duplication, zero-import governance, shared composite policy externalization, runtime-basics coverage, and zero-reference script governance without budget growth."
+    rationale: Keeps the current architecture-debt closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
