@@ -221,7 +221,7 @@ review_lanes:
         canonical_path: null
         action_if_reintroduced: keep_untracked_or_scope_to_a_documented_cache_surface
       - path: .codex_tmp
-        current_live_state: present_local_only_root_surface
+        current_live_state: absent_from_root_baseline
         canonical_path: null
         action_if_reintroduced: keep_untracked_as_local_codex_scratch_or_reclassify_through_explicit_structure_governance
       - path: .coverage-sharded-current-main

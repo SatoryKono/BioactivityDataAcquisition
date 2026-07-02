@@ -2,6 +2,11 @@
 
 Единая точка входа для запуска Codex через canonical WSL/Bash launcher.
 
+Retained root-level launchers such as `codex.ps1`, `codex.bat`,
+`run-codex.ps1`, `run-codex-wsl.ps1`, `setup-codex-wsl.*`, and
+`.wsl_proxy_env.sh` are compatibility shims only. Maintained launcher/setup
+logic lives under `scripts/ai/codex/**`.
+
 ## 📁 Структура
 
 ```

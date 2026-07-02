@@ -98,7 +98,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.debug",
         "get_pipeline_runner_service",
-        "bioetl.composition.execution_api.get_pipeline_runner_service",
+        "bioetl.composition.execution_service_access.get_pipeline_runner_service",
         _registry_kwarg,
         object(),
         "identity",
@@ -146,7 +146,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.domains.health.metrics_server_integration",
         "ensure_metrics_server_started",
-        "bioetl.composition.execution_api.ensure_metrics_server_started",
+        "bioetl.composition.execution_service_access.ensure_metrics_server_started",
         _no_args,
         True,
         True,
@@ -154,7 +154,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.run_all",
         "get_pipeline_runner_service",
-        "bioetl.composition.execution_api.get_pipeline_runner_service",
+        "bioetl.composition.execution_service_access.get_pipeline_runner_service",
         _registry_kwarg,
         object(),
         "identity",
@@ -178,7 +178,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.domains.composite.support",
         "push_metrics_to_gateway",
-        "bioetl.composition.execution_api.push_metrics_to_gateway",
+        "bioetl.composition.observability_api.push_metrics_to_gateway",
         _push_metrics_kwargs,
         True,
         True,
@@ -186,7 +186,7 @@ COMMAND_DELEGATION_CASES: tuple[
     (
         "bioetl.interfaces.cli.commands.domains.health.metrics_publication_integration",
         "publish_metrics_safely",
-        "bioetl.composition.execution_api.push_metrics_to_gateway",
+        "bioetl.composition.observability_api.push_metrics_to_gateway",
         _cli_metrics_publish_kwargs,
         True,
         True,

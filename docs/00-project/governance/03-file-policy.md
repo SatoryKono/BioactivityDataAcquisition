@@ -43,10 +43,15 @@ ______________________________________________________________________
   runtime/governance entrypoints retained at root, transitional Codex/WSL docs
   pending docs/archive convergence, and reviewed ADR-010 adjunct helper files
   pending bounded owner-led relocation review.
+- Vendor-documented repo-wide guidance files MAY remain at root only when the
+  external review/runtime contract requires the exact root filename. Current
+  reviewed example: `best_practices.md` for Qodo policy ingestion, with its
+  retention rationale documented under `docs/00-project/governance/qodo/`.
 - Transitional root launcher/setup shims such as `.wsl_proxy_env.sh`,
   `codex*.ps1`, `run-codex*.ps1`, and `setup-codex-wsl.*` MAY remain tracked
   only as explicit compatibility entrypoints while their canonical maintained
-  owner surfaces converge under `scripts/ai/codex/**`.
+  owner surfaces converge under `scripts/ai/codex/**`. These retained root
+  shims MUST stay thin and MUST NOT regrow independent setup or launcher logic.
 - Raw generated test inventories and dumps (for example `tests.txt`) MUST NOT
   оставаться tracked в корне. Retained diagnostics and auditable test outputs
   MUST route into approved `reports/**` or archive/report surfaces instead of a

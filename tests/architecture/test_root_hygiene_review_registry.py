@@ -171,7 +171,7 @@ def test_root_hygiene_review_registry_classifies_live_local_runtime_root_surface
 
     assert (
         by_path[".codex_tmp"]["current_live_state"]
-        == "present_local_only_root_surface"
+        == "absent_from_root_baseline"
     )
     assert (
         by_path[".benchmarks"]["current_live_state"]

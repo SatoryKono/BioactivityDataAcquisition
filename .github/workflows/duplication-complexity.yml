@@ -95,6 +95,9 @@ jobs:
           echo "=== Maintainability Index ===" >> reports/high_complexity.txt
           radon mi src -s >> reports/high_complexity.txt
 
+      - name: Validate duplication/complexity exemption registry
+        run: python -m scripts.engineering.qa check-duplication-complexity-exemptions
+
       - name: Check for critical complexity violations
         run: |
           python - <<'PY'
@@ -222,7 +225,7 @@ jobs:
         run: pip install pyyaml
 
       - name: Check constructor argument counts
-        run: python -m scripts.engineering.qa check-constructor-args --warn-only
+        run: python -m scripts.engineering.qa check-constructor-args
 
   executor-complexity:
     name: Executor Complexity Check
