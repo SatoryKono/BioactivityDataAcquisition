@@ -169,7 +169,10 @@ def test_root_hygiene_review_registry_classifies_live_local_runtime_root_surface
         if isinstance(candidate, dict) and isinstance(candidate.get("path"), str)
     }
 
-    assert by_path[".codex_tmp"]["current_live_state"] == "absent_from_root_baseline"
+    assert (
+        by_path[".codex_tmp"]["current_live_state"]
+        == "present_local_only_root_surface"
+    )
     assert (
         by_path[".benchmarks"]["current_live_state"]
         == "present_local_only_root_surface"
@@ -323,6 +326,83 @@ def test_root_tooling_transition_lane_tracks_script_codex_as_local_only() -> Non
 
     assert by_path["script-codex"]["current_live_state"] == "present_local_only_root_surface"
     assert by_path["script-codex"]["canonical_path"] == "scripts/ai/codex"
+
+
+def test_root_reviewed_human_facing_docs_lane_tracks_best_practices() -> None:
+    registry = _load_yaml(REGISTRY_PATH)
+    lanes = registry["review_lanes"]
+    assert isinstance(lanes, list)
+
+    docs_lane = next(
+        lane
+        for lane in lanes
+        if isinstance(lane, dict)
+        and lane.get("lane_id") == "root_reviewed_human_facing_docs"
+    )
+    candidates = docs_lane["candidates"]
+    assert isinstance(candidates, list)
+    by_path = {
+        candidate["path"]: candidate
+        for candidate in candidates
+        if isinstance(candidate, dict) and isinstance(candidate.get("path"), str)
+    }
+
+    assert (
+        by_path["best_practices.md"]["current_live_state"]
+        == "present_approved_root_surface"
+    )
+    assert (
+        by_path["best_practices.md"]["canonical_path"]
+        == "docs/00-project/governance/qodo/README.md"
+    )
+
+
+def test_root_launcher_shims_lane_tracks_reviewed_root_compatibility_entrypoints() -> None:
+    registry = _load_yaml(REGISTRY_PATH)
+    lanes = registry["review_lanes"]
+    assert isinstance(lanes, list)
+
+    shim_lane = next(
+        lane
+        for lane in lanes
+        if isinstance(lane, dict) and lane.get("lane_id") == "root_launcher_shims"
+    )
+    candidates = shim_lane["candidates"]
+    assert isinstance(candidates, list)
+    by_path = {
+        candidate["path"]: candidate
+        for candidate in candidates
+        if isinstance(candidate, dict) and isinstance(candidate.get("path"), str)
+    }
+
+    assert by_path["codex.bat"]["current_live_state"] == "present_approved_root_surface"
+    assert (
+        by_path["codex.ps1"]["current_live_state"]
+        == "present_approved_root_surface"
+    )
+    assert by_path["codex.bat"]["canonical_path"] == "scripts/ai/codex/run-codex.ps1"
+    assert by_path["codex.ps1"]["canonical_path"] == "scripts/ai/codex/run-codex.ps1"
+    assert (
+        by_path["run-codex.ps1"]["canonical_path"]
+        == "scripts/ai/codex/run-codex.ps1"
+    )
+    assert (
+        by_path["run-codex-wsl.ps1"]["canonical_path"]
+        == "scripts/ai/codex/run-codex.ps1"
+    )
+    assert (
+        by_path["setup-codex-wsl.bat"]["canonical_path"]
+        == "scripts/ai/codex/setup-codex-wsl.bat"
+    )
+    assert (
+        by_path["setup-codex-wsl.ps1"]["canonical_path"]
+        == "scripts/ai/codex/setup-codex-wsl.bat"
+    )
+    assert by_path["setup-codex-wsl.sh"]["canonical_path"] == "scripts/ai/codex/README.md"
+    assert (
+        by_path[".wsl_proxy_env.sh"]["canonical_path"]
+        == "scripts/ai/codex/helper/wsl_proxy_env.sh"
+    )
 
 
 def test_remediation_plan_links_github_issue_set_and_required_sources() -> None:
