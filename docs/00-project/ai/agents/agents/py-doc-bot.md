@@ -21,6 +21,7 @@ description: |
 - CHANGELOG обновление
 - Glossary и cross-reference sync
 - RULES.md statistics validation
+- REQUIREMENTS.md alignment checks
 - Запрос на обновление/рендер диаграмм
 - Проверка diagram quality gates перед PR
   model: sonnet
@@ -55,6 +56,7 @@ ______________________________________________________________________
 - Архитектура: Hexagonal (Ports & Adapters) + Medallion (Bronze->Silver->Gold) + DDD
 - Deployment: Local-Only (ADR-010) — без Docker/Redis
 - Текущее состояние: используй текущий ADR set из `docs/02-architecture/decisions/`; ADR-008 исторически superseded
+- Нормативные документы: `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`
 
 **Ключевые файлы:**
 

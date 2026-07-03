@@ -168,7 +168,9 @@ LAST_UPDATED_PATTERN = re.compile(r"Последнее обновление:\s*(
 AI_RULES_README_PATH = Path("docs/00-project/ai/rules/README.md")
 CURSOR_RULE_DOCS_DIR = Path("docs/00-project/ai/rules/cursor")
 CURSOR_RULES_DIR = Path(".cursor/rules")
-WINDSURF_REVIEW_PATH = Path(".windsurf/workflows/review.md")
+WINDSURF_RULE_DOCS_DIR = Path("docs/00-project/ai/rules/windsurf/rules")
+WINDSURF_WORKFLOW_DOCS_DIR = Path("docs/00-project/ai/rules/windsurf/workflows")
+WINDSURF_REVIEW_PATH = Path("docs/00-project/ai/rules/windsurf/workflows/review.md")
 CURSOR_RULE_EXCLUDED_FILENAMES = frozenset({"sonarqube_mcp_instructions.mdc"})
 AI_RULES_MIRROR_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
     AI_RULES_README_PATH: (
@@ -1346,6 +1348,7 @@ def check_ai_surfaces(report: DriftReport, *, root: Path | None = None) -> None:
     if run_repo_global_surface_checks:
         _check_runtime_skill_entrypoints(report, project_root=project_root)
         _check_cursor_rule_entrypoints(report, project_root=project_root)
+        _check_windsurf_rule_entrypoints(report, project_root=project_root)
         _check_ai_rules_mirrors(report, project_root=project_root)
         _check_unverified_gemini_runtime_claims(report, project_root=project_root)
     _check_ai_docs_runtime_mirror_headers(report, project_root=project_root)
@@ -1589,6 +1592,49 @@ def _check_cursor_rule_entrypoints(
         ADR_DIR_DOC_TOKEN,
     )
     for relative_path in _iter_cursor_rule_entrypoints(project_root):
+        _check_ai_surface_required_tokens(
+            report,
+            project_root=project_root,
+            relative_path=relative_path,
+            required_tokens=required_tokens,
+        )
+
+
+def _iter_windsurf_rule_entrypoints(project_root: Path) -> tuple[Path, ...]:
+    root = project_root / WINDSURF_RULE_DOCS_DIR
+    if not root.exists():
+        return ()
+    return tuple(
+        path.relative_to(project_root)
+        for path in sorted(root.glob("*.md"))
+    )
+
+
+def _iter_windsurf_workflow_entrypoints(project_root: Path) -> tuple[Path, ...]:
+    root = project_root / WINDSURF_WORKFLOW_DOCS_DIR
+    if not root.exists():
+        return ()
+    return tuple(
+        path.relative_to(project_root)
+        for path in sorted(root.glob("*.md"))
+    )
+
+
+def _check_windsurf_rule_entrypoints(
+    report: DriftReport,
+    *,
+    project_root: Path,
+) -> None:
+    required_tokens = (
+        AGENTS_DOC_TOKEN,
+        RULES_DOC_TOKEN,
+        REQUIREMENTS_DOC_TOKEN,
+        ADR_DIR_DOC_TOKEN,
+    )
+    for relative_path in (
+        *_iter_windsurf_rule_entrypoints(project_root),
+        *_iter_windsurf_workflow_entrypoints(project_root),
+    ):
         _check_ai_surface_required_tokens(
             report,
             project_root=project_root,

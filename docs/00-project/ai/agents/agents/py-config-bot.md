@@ -47,6 +47,7 @@ ______________________________________________________________________
 - Архитектура: Hexagonal + Medallion (Bronze→Silver→Gold) + DDD
 - Deployment: Local-Only (ADR-010)
 - Ключевые ADR: ADR-014 (Deterministic Writes), ADR-025 (Pipeline Config Unification), ADR-026 (Composite Pipeline Pattern), ADR-027 (DQ Rules Externalization), ADR-028 (Filter Rules Externalization)
+- Нормативные документы: `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`
 
 ______________________________________________________________________
 

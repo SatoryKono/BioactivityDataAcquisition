@@ -13,7 +13,7 @@ from bioetl.composition.runtime_builders._run_manifest_snapshot_resolution impor
     resolve_name_component,
     resolve_replay_parentage_mapping_value,
 )
-from bioetl.composition.runtime_builders._run_manifest_serialization_support import (
+from bioetl.composition.runtime_builders._snapshot_mapping_support import (
     to_serializable_mapping,
 )
 

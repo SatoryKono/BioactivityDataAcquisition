@@ -26,6 +26,9 @@ ______________________________________________________________________
 | `.gemini/settings.json` | Gemini local config surface | Local-only runtime config; not a tracked behavior tree on `main` | Yes, for machine-local settings only | optional local checkout settings with machine-specific paths |
 | `.gemini/agents/**`, `.gemini/skills/**` | Gemini runtime behavior tree | Not present in the current `main` checkout | No tracked source on `main` today | if a future task adds them, they must be verified and documented in the same change |
 | `docs/00-project/ai/**` | Published/internal mirror surface | Not canonical for runtime behavior | Only for mirror/index/guidance updates | curated mirrors, navigation, contributor guidance, memory entrypoints, prompt and skill indexes |
+| `docs/00-project/ai/rules/cursor/**` | Cursor rules source | Canonical for Cursor AI guidance in-repo | Yes | thematic `.mdc` rules derived from governance stack |
+| `docs/00-project/ai/rules/windsurf/**` | Windsurf/Cascade rules mirror | Derived from `cursor/` via sync script | Regenerate via `scripts/ai/sync_windsurf_rules.py` | `.md` rules + workflows for Cascade |
+| `.windsurf/**` | Windsurf local deploy surface | Machine-local deploy target | Deploy only | generated from `docs/00-project/ai/rules/windsurf/` |
 
 ## Source-of-Truth Rules
 

@@ -23,12 +23,13 @@ make lint && make test && git commit
 
 Before contributing, read these documents:
 
-| Document                                                           | Purpose                           |
-| ------------------------------------------------------------------ | --------------------------------- |
-| [docs/00-project/RULES.md](../docs/00-project/RULES.md)            | Project constitution (MUST read)  |
-| [AGENTS.md](../AGENTS.md)                                          | Development workflow and patterns |
-| [docs/00-project/00-map.md](../docs/00-project/00-map.md)          | Documentation navigator           |
-| [GitHub Policy](../docs/00-project/governance/05-github-policy.md) | CI/CD, branch protection, reviews |
+|| Document                                                           | Purpose                           |
+|| ------------------------------------------------------------------ | --------------------------------- |
+|| [docs/00-project/RULES.md](../docs/00-project/RULES.md)            | Project constitution (MUST read)  |
+|| [docs/01-requirements/REQUIREMENTS.md](../docs/01-requirements/REQUIREMENTS.md) | Testable requirements (MUST read) |
+|| [AGENTS.md](../AGENTS.md)                                          | Development workflow and patterns |
+|| [docs/00-project/00-map.md](../docs/00-project/00-map.md)          | Documentation navigator           |
+|| [GitHub Policy](../docs/00-project/governance/05-github-policy.md) | CI/CD, branch protection, reviews |
 
 ## Workflow
 
@@ -69,13 +70,13 @@ For the full local GitHub workflow, including worktrees, sync/rebase, PR creatio
 
 ### Layer Dependencies (MUST follow)
 
-| From ↓ / To →      | domain | application | composition | infrastructure | interfaces |
-| ------------------ | ------ | ----------- | ----------- | -------------- | ---------- |
-| **domain**         | ✅     | ❌          | ❌          | ❌             | ❌         |
-| **application**    | ✅     | ✅          | ❌          | ❌             | ❌         |
-| **composition**    | ✅     | ✅          | ✅          | ✅             | ❌         |
-| **infrastructure** | ✅     | ❌          | ❌          | ✅             | ❌         |
-| **interfaces**     | ✅     | ✅          | ✅          | ❌             | ✅         |
+|| From ↓ / To →      | domain | application | composition | infrastructure | interfaces |
+|| ------------------ | ------ | ----------- | ----------- | -------------- | ---------- |
+|| **domain**         | ✅     | ❌          | ❌          | ❌             | ❌         |
+|| **application**    | ✅     | ✅          | ❌          | ❌             | ❌         |
+|| **composition**    | ✅     | ✅          | ✅          | ✅             | ❌         |
+|| **infrastructure** | ✅     | ❌          | ❌          | ✅             | ❌         |
+|| **interfaces**     | ✅     | ✅          | ✅          | ❌             | ✅         |
 
 ### Key Rules
 
@@ -92,11 +93,11 @@ instead of importing infrastructure modules directly.
 
 ## Testing Requirements
 
-| Type         | Directory             | Requirements                                           |
-| ------------ | --------------------- | ------------------------------------------------------ |
-| Unit         | `tests/unit/`         | No mocking domain entities, mock ports only            |
-| Integration  | `tests/integration/`  | VCR.py for HTTP, sanitize secrets from cassettes       |
-| Architecture | `tests/architecture/` | Validates layer imports, contracts, naming, governance |
+|| Type         | Directory             | Requirements                                           |
+|| ------------ | --------------------- | ------------------------------------------------------ |
+|| Unit         | `tests/unit/`         | No mocking domain entities, mock ports only            |
+|| Integration  | `tests/integration/`  | VCR.py for HTTP, sanitize secrets from cassettes       |
+|| Architecture | `tests/architecture/` | Validates layer imports, contracts, naming, governance |
 
 **Coverage target:** ≥85% line coverage
 

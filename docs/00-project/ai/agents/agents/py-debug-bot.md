@@ -43,6 +43,7 @@ ______________________________________________________________________
 - Архитектура: Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD
 - Deployment: Local-Only (ADR-010) — без Docker/Redis
 - Тесты: `tests/` (unit, integration, architecture, e2e, contract, benchmarks, performance, security, smoke)
+- Нормативные документы: `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`
 
 ______________________________________________________________________
 

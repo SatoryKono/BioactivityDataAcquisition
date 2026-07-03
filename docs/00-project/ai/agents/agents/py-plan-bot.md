@@ -45,6 +45,7 @@ ______________________________________________________________________
 - Архитектура: Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD
 - Deployment: Local-Only (ADR-010)
 - Провайдеры: ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar
+- Нормативные документы: `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`
 
 ______________________________________________________________________
 

@@ -1,6 +1,6 @@
 # BioETL local-first Makefile
 
-.PHONY: help install test lint test-fast test-cov-fast-stable test-architecture test-unit test-integration test-ci-local test-profile test-deps run-local
+.PHONY: help install test lint test-fast test-cov-fast-stable test-architecture test-unit test-integration test-ci-local test-profile test-deps run-local sync-windsurf-rules
 .PHONY: docker-check docker-build docker-start docker-stop docker-logs docker-health docker-clean docker-compose-check
 .PHONY: precommit-install qa-arch-fast quarantine-inspect quarantine-replay quarantine-purge release-lock
 
@@ -30,6 +30,7 @@ help:
 	@echo "Local governance:"
 	@echo "  make precommit-install      Install local pre-commit hooks"
 	@echo "  make qa-arch-fast           Run fast architecture checks"
+	@echo "  make sync-windsurf-rules    Sync Cursor rules to Windsurf/Cascade"
 	@echo ""
 	@echo "Local operations:"
 	@echo "  make quarantine-inspect     Inspect quarantine state for PIPELINE=$(PIPELINE)"
@@ -199,6 +200,9 @@ docker-dev: docker-start
 	@echo "  Warp Proxy: http://localhost:9999"
 
 # Local governance and live-ops shortcuts
+sync-windsurf-rules:
+	$(RUN) python scripts/ai/sync_windsurf_rules.py
+
 precommit-install:
 	bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only
 
