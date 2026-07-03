@@ -17,10 +17,12 @@ from typing import TYPE_CHECKING, Protocol
 from bioetl.application.core._runner_observability import (
     emit_postrun_observability,
 )
+from bioetl.application.core.batch_operation_errors import (
+    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
+)
 from bioetl.application.core.preflight.service import validate_infrastructure
 from bioetl.application.observability.observer import LifecyclePhase
 from bioetl.domain.control_plane.run_ledger import ORDINARY_RUN_LEDGER_STAGE_NAMES
-from bioetl.domain.exceptions import BioETLError
 
 if TYPE_CHECKING:
     from bioetl.application.core.batch_executor import BatchExecutor
@@ -44,13 +46,7 @@ _PREPARE_MEDALLION_LAYERS_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[1]
 _EXECUTE_PIPELINE_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[2]
 _POSTRUN_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[3]
 _CHECKPOINT_FINALIZE_STAGE_NAME = ORDINARY_RUN_LEDGER_STAGE_NAMES[4]
-_OPERATION_ERRORS = (
-    BioETLError,
-    OSError,
-    RuntimeError,
-    ValueError,
-    TypeError,
-)
+_OPERATION_ERRORS = SHARED_OPERATION_ERRORS
 _PHASE_BY_STAGE_NAME = {
     _PREFLIGHT_STAGE_NAME: LifecyclePhase.PREFLIGHT,
     _PREPARE_MEDALLION_LAYERS_STAGE_NAME: LifecyclePhase.LIFECYCLE_CLEAR,

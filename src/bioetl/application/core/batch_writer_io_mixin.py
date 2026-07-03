@@ -10,7 +10,10 @@ from unittest.mock import Mock
 
 import orjson
 
-from bioetl.domain.exceptions import BioETLError, SchemaViolationError
+from bioetl.application.core.batch_operation_errors import (
+    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
+)
+from bioetl.domain.exceptions import SchemaViolationError
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BatchID, BronzeRecord, GoldRecord
@@ -18,13 +21,7 @@ if TYPE_CHECKING:
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
-_WRITE_SPAN_ERRORS = (
-    BioETLError,
-    OSError,
-    RuntimeError,
-    ValueError,
-    TypeError,
-)
+_WRITE_SPAN_ERRORS = SHARED_OPERATION_ERRORS
 
 
 class BatchWriterIOMixin:

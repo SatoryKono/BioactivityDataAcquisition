@@ -10,12 +10,11 @@ from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock
 
 from bioetl.application.services.control_plane.forensic import ForensicRunDiffService
-from bioetl.application.services.control_plane.forensic_diff_service import (
+from bioetl.application.services.control_plane.forensic_diff_diagnostics_support import (
     _artifact_refs,
     _coerce_int,
     _dict_or_empty,
     _forensic_diff_payload,
-    _inspection_service_factory_from_ports,
     _lineage_closure_payload,
     _metadata_sidecar_missing_count,
     _missing_evidence,
@@ -25,6 +24,9 @@ from bioetl.application.services.control_plane.forensic_diff_service import (
     _string_list_or_empty,
     _trace_complete,
     _trace_missing_requirements,
+)
+from bioetl.application.services.control_plane.forensic_diff_service import (
+    _inspection_service_factory_from_ports,
 )
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.types import RunType

@@ -27,6 +27,7 @@ python -m scripts.engineering.repo cleanup-branch-candidates --help
 | `preflight-cleanup`     | `preflight_cleanup.sh`           | Preview/apply the bounded release-preflight cleanup set               |
 | `split-testing-roadmap` | `split_testing_roadmap_issue.py` | Preview or create child issues for testing roadmap issue `#2511`      |
 | `sync-docs-issues`      | `sync_docs_issues.py`            | Preview or apply labels, milestone, and comments for docs-sync issues |
+| `publish-tdx-audit-issues` | `publish_tdx_audit_issues.py` | Publish or reopen TDX-AUDIT GitHub issues from local issue templates |
 | `check-all`             | *(read-only checks)*             | Run the repository governance checks without sync/apply commands      |
 | `all`                   | *(alias)*                        | Alias for `check-all`; intentionally read-only                        |
 
@@ -72,6 +73,7 @@ the risky local branches.
 | `preflight-cleanup`         | Before release or before expensive local verification waves                              | Manual / `make clean-preflight` |
 | `split-testing-roadmap`     | When converting a roadmap issue into executable GitHub child issues                      | Manual maintenance workflow  |
 | `sync-docs-issues`          | When applying the documentation-sync issue package metadata and execution-order comments | Manual maintenance workflow  |
+| `publish-tdx-audit-issues`  | When publishing or reopening TDX-AUDIT GitHub issues from `.github/ISSUES/` templates   | Manual maintenance workflow  |
 | `cleanup-branch-candidates` | When applying the agreed local-branch cleanup set with optional remote deletion          | Manual maintenance workflow  |
 | `check-all`                 | Quick local sanity check before PR without refreshing manifests or applying cleanup plans | Manual                       |
 | `all`                       | Backward-compatible alias for `check-all`; never runs sync/apply commands                | Manual                       |

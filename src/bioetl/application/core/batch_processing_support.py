@@ -25,9 +25,11 @@ from bioetl.application.core.batch_runtime_failure_policy import (
     PIPELINE_EXECUTION_ERRORS as _RF005_SHARED_FAILURE_POLICY,
 )
 from bioetl.application.core.batch_transformer import TransformResult
+from bioetl.application.core.batch_operation_errors import (
+    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
+)
 from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
 from bioetl.domain.aggregates.events import DomainEvent
-from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import BatchID, BronzeRecord, RunID
 
@@ -51,13 +53,7 @@ if TYPE_CHECKING:
 
 _ResultT = TypeVar("_ResultT")
 _SHARED_FAILURE_POLICY = _RF005_SHARED_FAILURE_POLICY
-_OPERATION_ERRORS = (
-    BioETLError,
-    OSError,
-    RuntimeError,
-    ValueError,
-    TypeError,
-)
+_OPERATION_ERRORS = SHARED_OPERATION_ERRORS
 
 
 class BatchProcessingSupportService:

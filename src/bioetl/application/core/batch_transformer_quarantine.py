@@ -8,24 +8,20 @@ from bioetl.application.core.batch_transformer_state import (
     RecordTransformOutcome,
     TransformedRecord,
 )
+from bioetl.application.core.batch_operation_errors import (
+    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
+)
 from bioetl.application.core.quarantine_manager import (
     DQQuarantineEntry,
     FilteredQuarantineEntry,
     QuarantineRuntimeService,
 )
-from bioetl.domain.exceptions import BioETLError
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import BatchID
 
-QUARANTINE_WRITE_WARN_ONLY_ERRORS = (
-    BioETLError,
-    OSError,
-    RuntimeError,
-    ValueError,
-    TypeError,
-)
+QUARANTINE_WRITE_WARN_ONLY_ERRORS = SHARED_OPERATION_ERRORS
 
 
 async def flush_filtered_records(

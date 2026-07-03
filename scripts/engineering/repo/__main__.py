@@ -20,6 +20,7 @@ Commands:
     cleanup-root-local-clutter  Preview/apply reviewed root-local clutter cleanup
     split-testing-roadmap  Create or preview #2511 child issues
     sync-docs-issues   Preview or apply docs-sync issue metadata
+    publish-tdx-audit-issues  Publish or reopen TDX-AUDIT GitHub issues
     cleanup-branch-candidates  Preview or apply curated branch cleanup plan
     check-all          Run read-only checks sequentially
     all                Alias for check-all
@@ -55,6 +56,7 @@ COMMANDS = {
     "preflight-cleanup": "preflight_cleanup.sh",
     "split-testing-roadmap": "split_testing_roadmap_issue.py",
     "sync-docs-issues": "sync_docs_issues.py",
+    "publish-tdx-audit-issues": "publish_tdx_audit_issues.py",
     "cleanup-branch-candidates": "cleanup_branch_candidates.sh",
 }
 COMMAND_SPECS = {

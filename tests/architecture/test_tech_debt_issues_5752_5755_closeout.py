@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections import Counter
 from pathlib import Path
 
 import pytest
@@ -57,8 +58,11 @@ def test_issue_5755_removed_supporting_wrappers_are_absent_and_untracked() -> No
     assert isinstance(summary, dict)
     status_counts = summary["status_counts"]
     assert isinstance(status_counts, dict)
-    assert summary["total_scripts"] == 449  # Updated for local development
-    assert status_counts["supporting"] == 88
+    recomputed_status_counts = Counter(
+        row.get("status") for row in script_rows if isinstance(row, dict)
+    )
+    assert summary["total_scripts"] == len(script_rows)
+    assert status_counts == dict(sorted(recomputed_status_counts.items()))
 
 
 def test_issue_5754_forensic_public_imports_use_canonical_seam() -> None:

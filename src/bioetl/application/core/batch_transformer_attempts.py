@@ -17,8 +17,10 @@ from bioetl.application.core.batch_transformer_attempt_success import (
 from bioetl.application.core.batch_transformer_attempt_success import (
     build_transform_success_outcome,
 )
+from bioetl.application.core.batch_operation_errors import (
+    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
+)
 from bioetl.application.core.batch_transformer_state import RecordTransformOutcome
-from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.types import BronzeRecord
 
 if TYPE_CHECKING:
@@ -36,13 +38,7 @@ if TYPE_CHECKING:
     from bioetl.domain.error_classifier import ErrorClassifier
     from bioetl.domain.types import BatchID
 
-TRANSFORM_PROCESSING_ERRORS = (
-    BioETLError,
-    OSError,
-    RuntimeError,
-    ValueError,
-    TypeError,
-)
+TRANSFORM_PROCESSING_ERRORS = SHARED_OPERATION_ERRORS
 
 
 def bind_record_context(

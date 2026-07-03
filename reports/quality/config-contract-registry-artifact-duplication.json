@@ -49,7 +49,7 @@
     "reports/quality/*registry*.json": 3,
     "tests/fixtures/contracts/**/*.json": 7,
     "tests/fixtures/contracts/**/*.yaml": 1,
-    "tests/fixtures/golden/**/*.json": 21
+    "tests/fixtures/golden/**/*.json": 23
   },
   "policy_scope": "config_contract_registry_artifact_duplication",
   "scan_root": ".",
@@ -57,11 +57,11 @@
   "scope_file_counts": {
     "config": 160,
     "contract": 44,
-    "golden": 20,
+    "golden": 22,
     "quality_report": 8,
     "registry": 22
   },
-  "total_files": 254,
+  "total_files": 256,
   "tracked_extensions": [
     ".csv",
     ".json",
