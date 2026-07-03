@@ -101,6 +101,11 @@ def _find_listening_backend_pid_by_port(port: int) -> int | None:
     return pids[0] if pids else None
 
 
+def find_listening_backend_pid_by_port(port: int) -> int | None:
+    """Return one listening backend PID for a port when one is currently bound."""
+    return _find_listening_backend_pid_by_port(port)
+
+
 def drop_listening_backend_on_port(
     port: int,
     *,
@@ -259,3 +264,12 @@ def python_executable_to_tuple(args: object) -> tuple[str, ...]:
     if isinstance(args, (list, tuple)):
         return tuple(str(item) for item in args)
     return (str(args),)
+
+
+__all__ = [
+    "build_detached_backend_log_path",
+    "drop_listening_backend_on_port",
+    "find_listening_backend_pid_by_port",
+    "python_executable_to_tuple",
+    "start_detached_quarantine_backend",
+]
