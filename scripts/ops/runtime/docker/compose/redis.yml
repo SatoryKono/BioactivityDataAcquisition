@@ -4,13 +4,13 @@ services:
     container_name: bioetl-redis
     ports:
       - "127.0.0.1:6379:6379"
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:?Set REDIS_PASSWORD before starting docker-compose.redis.yml}
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:?Set REDIS_PASSWORD before starting scripts/ops/runtime/docker/compose/redis.yml}
     volumes:
       - redis-data:/data
     networks:
       - monitoring
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:?Set REDIS_PASSWORD before starting docker-compose.redis.yml}", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:?Set REDIS_PASSWORD before starting scripts/ops/runtime/docker/compose/redis.yml}", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -27,7 +27,7 @@ services:
     ports:
       - "127.0.0.1:9121:9121"
     environment:
-      - REDIS_ADDR=redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD before starting docker-compose.redis.yml}@redis:6379
+      - REDIS_ADDR=redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD before starting scripts/ops/runtime/docker/compose/redis.yml}@redis:6379
     depends_on:
       redis:
         condition: service_healthy

@@ -66,12 +66,12 @@ start_services() {
         
         # Start Redis
         log_info "Starting Redis..."
-        docker compose -f docker-compose.redis.yml up -d
+        docker compose -f scripts/ops/runtime/docker/compose/redis.yml up -d
         log_success "Redis started"
         
         # Start MinIO
         log_info "Starting MinIO..."
-        docker compose -f docker-compose.minio.yml up -d
+        docker compose -f scripts/ops/runtime/docker/compose/minio.yml up -d
         log_success "MinIO started"
         
         # Start Monitoring stack
@@ -93,8 +93,8 @@ stop_services() {
     
     if [ "$1" == "full" ] || [ "$1" == "all" ]; then
         docker compose -f docker-compose.neo4j.yml down || true
-        docker compose -f docker-compose.redis.yml down || true
-        docker compose -f docker-compose.minio.yml down || true
+        docker compose -f scripts/ops/runtime/docker/compose/redis.yml down || true
+        docker compose -f scripts/ops/runtime/docker/compose/minio.yml down || true
         docker compose -f docker-compose.monitoring.yml down || true
     fi
     

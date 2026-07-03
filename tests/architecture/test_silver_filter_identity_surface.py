@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import subprocess
 
 import pytest
 
@@ -93,12 +94,98 @@ ACTIVE_SURFACES = (
 
 
 def _iter_guarded_runtime_config_paths() -> tuple[Path, ...]:
+    tracked_paths = _iter_guarded_runtime_config_paths_from_git()
+    if tracked_paths is not None:
+        return tracked_paths
+
     paths: list[Path] = []
     for root in GUARDED_RUNTIME_CONFIG_ROOTS:
         for path in sorted(root.rglob("*")):
             if path.is_file() and path.suffix in GUARDED_SUFFIXES:
                 paths.append(path)
     return tuple(paths)
+
+
+def _iter_guarded_runtime_config_paths_from_git() -> tuple[Path, ...] | None:
+    relative_roots = [
+        root.relative_to(ROOT).as_posix()
+        for root in GUARDED_RUNTIME_CONFIG_ROOTS
+        if root.exists()
+    ]
+    if not relative_roots:
+        return ()
+
+    tracked = _git_list_files(*relative_roots)
+    untracked = _git_list_files("--others", "--exclude-standard", "--", *relative_roots)
+    if tracked is None or untracked is None:
+        return None
+
+    seen: set[Path] = set()
+    paths: list[Path] = []
+    for raw_path in (*tracked, *untracked):
+        normalized = raw_path.strip()
+        if not normalized:
+            continue
+        path = ROOT / normalized
+        if path.suffix not in GUARDED_SUFFIXES or path in seen or not path.exists():
+            continue
+        seen.add(path)
+        paths.append(path)
+    return tuple(sorted(paths))
+
+
+def _git_list_files(*args: str) -> tuple[str, ...] | None:
+    command = ["git", "ls-files", *args]
+    result = subprocess.run(
+        command,
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    return tuple(line for line in result.stdout.splitlines() if line.strip())
+
+
+def _git_grep_token(token: str, *pathspecs: str) -> tuple[Path, ...] | None:
+    result = subprocess.run(
+        ["git", "grep", "-l", "-F", "--", token, *pathspecs],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+    )
+    if result.returncode not in {0, 1}:
+        return None
+    return tuple(
+        sorted(
+            ROOT / raw_path.strip()
+            for raw_path in result.stdout.splitlines()
+            if raw_path.strip()
+        )
+    )
+
+
+def _grep_runtime_surface_token_violations(tokens: tuple[str, ...]) -> list[str] | None:
+    relative_roots = tuple(
+        root.relative_to(ROOT).as_posix()
+        for root in GUARDED_RUNTIME_CONFIG_ROOTS
+        if root.exists()
+    )
+    violations: list[str] = []
+    for token in tokens:
+        matches = _git_grep_token(token, *relative_roots)
+        if matches is None:
+            return None
+        for path in matches:
+            if path.suffix in GUARDED_SUFFIXES:
+                violations.append(f"{path.relative_to(ROOT)}: {token}")
+    return violations
 
 
 @pytest.mark.architecture
@@ -143,13 +230,14 @@ def test_runtime_config_and_ci_surfaces_do_not_reintroduce_retired_silver_semant
         *FORBIDDEN_LEGACY_MODE_TOKENS,
         *FORBIDDEN_DUPLICATE_IDENTITY_TOKENS,
     )
-    violations: list[str] = []
-
-    for path in _iter_guarded_runtime_config_paths():
-        text = path.read_text(encoding="utf-8")
-        for token in forbidden_tokens:
-            if token in text:
-                violations.append(f"{path.relative_to(ROOT)}: {token}")
+    violations = _grep_runtime_surface_token_violations(forbidden_tokens)
+    if violations is None:
+        violations = []
+        for path in _iter_guarded_runtime_config_paths():
+            text = path.read_text(encoding="utf-8")
+            for token in forbidden_tokens:
+                if token in text:
+                    violations.append(f"{path.relative_to(ROOT)}: {token}")
 
     assert not violations, (
         "Retired Silver semantic compatibility aliases or duplicate mode fields "
@@ -160,13 +248,18 @@ def test_runtime_config_and_ci_surfaces_do_not_reintroduce_retired_silver_semant
 @pytest.mark.architecture
 def test_historical_auto_promote_mode_is_alias_only_in_source() -> None:
     """Old mode name is readable history, not current runtime identity."""
-    violations: list[str] = []
+    matches = _git_grep_token(
+        HISTORICAL_AUTO_PROMOTE_MODE_TOKEN,
+        (ROOT / "src" / "bioetl").relative_to(ROOT).as_posix(),
+    )
+    if matches is None:
+        matches = tuple(sorted((ROOT / "src" / "bioetl").rglob("*.py")))
 
-    for path in (ROOT / "src" / "bioetl").rglob("*.py"):
-        if path in HISTORICAL_AUTO_PROMOTE_ALLOWED_SOURCE_PATHS:
-            continue
-        if HISTORICAL_AUTO_PROMOTE_MODE_TOKEN in path.read_text(encoding="utf-8"):
-            violations.append(path.relative_to(ROOT).as_posix())
+    violations = [
+        path.relative_to(ROOT).as_posix()
+        for path in matches
+        if path not in HISTORICAL_AUTO_PROMOTE_ALLOWED_SOURCE_PATHS
+    ]
 
     assert not violations, (
         "structural_only_auto_promote may only appear in explicit historical "

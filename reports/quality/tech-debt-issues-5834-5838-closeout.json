@@ -67,17 +67,17 @@
     "5834": {
       "committed_root_review_summary": {
         "BLOCKED": 6,
-        "REVIEW_REQUIRED": 85,
+        "REVIEW_REQUIRED": 88,
         "ROOT_POLICY_MISMATCH": 0,
         "SECURITY_REVIEW_REQUIRED": 3
       },
       "committed_cleanup_summary": {
         "BLOCKED": 6,
-        "REVIEW_REQUIRED": 85,
+        "REVIEW_REQUIRED": 88,
         "SAFE": 5,
         "SECURITY_REVIEW_REQUIRED": 3
       },
-      "root_review_rows": 94,
+      "root_review_rows": 97,
       "cleanup_candidates": 5,
       "reports_workspace_review": "reports/quality/reports-workspace-review.json"
     },

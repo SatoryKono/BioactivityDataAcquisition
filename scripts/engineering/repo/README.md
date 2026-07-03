@@ -7,6 +7,7 @@ Repository hygiene and inventory governance tooling.
 ```bash
 python -m scripts.engineering.repo --help
 python -m scripts.engineering.repo <command> [args...]
+python -m scripts.engineering.repo cleanup-root-local-clutter --help
 python -m scripts.engineering.repo cleanup-branch-candidates --help
 ```
 
@@ -22,6 +23,7 @@ python -m scripts.engineering.repo cleanup-branch-candidates --help
 | `check-cleanup-governance` | `check_cleanup_governance.py` | Block unsafe broad cleanup guidance outside allowlisted examples       |
 | `check-root-governance-docs` | `check_root_governance_docs.py` | Validate prose root-governance docs against allowlist/catalog sources |
 | `check-root-review-registry` | `check_root_hygiene_review_registry.py` | Validate review-required and blocked cleanup lanes              |
+| `cleanup-root-local-clutter` | `cleanup_root_local_clutter.py` | Preview/apply exact reviewed root-local clutter cleanup candidates |
 | `preflight-cleanup`     | `preflight_cleanup.sh`           | Preview/apply the bounded release-preflight cleanup set               |
 | `split-testing-roadmap` | `split_testing_roadmap_issue.py` | Preview or create child issues for testing roadmap issue `#2511`      |
 | `sync-docs-issues`      | `sync_docs_issues.py`            | Preview or apply labels, milestone, and comments for docs-sync issues |
@@ -66,6 +68,7 @@ the risky local branches.
 | `check-cleanup-governance`  | After changing cleanup docs, runbooks, or repo maintenance scripts                       | Root-hygiene workflow        |
 | `check-root-governance-docs` | After changing root policy docs, docs/plans guidance, or root tooling references         | Root-hygiene workflow        |
 | `check-root-review-registry` | After updating review-required or blocked cleanup lanes                                 | Root-hygiene workflow        |
+| `cleanup-root-local-clutter` | When pruning reviewed local-only root caches/output trees after dry-run review          | Manual operator workflow     |
 | `preflight-cleanup`         | Before release or before expensive local verification waves                              | Manual / `make clean-preflight` |
 | `split-testing-roadmap`     | When converting a roadmap issue into executable GitHub child issues                      | Manual maintenance workflow  |
 | `sync-docs-issues`          | When applying the documentation-sync issue package metadata and execution-order comments | Manual maintenance workflow  |

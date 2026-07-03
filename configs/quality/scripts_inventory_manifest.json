@@ -1,20 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-03T06:36:33.489580+00:00",
+  "generated_at": "2026-07-03T08:29:20.335862+00:00",
   "summary": {
-    "total_scripts": 449,
+    "total_scripts": 452,
     "status_counts": {
-      "active": 361,
+      "active": 363,
+      "orphan": 1,
       "supporting": 88
     },
     "reference_group_coverage": {
       "agents": 4,
-      "build": 2,
+      "build": 3,
       "ci": 62,
-      "docs": 156,
-      "scripts": 347,
+      "docs": 157,
+      "scripts": 348,
       "skills": 11,
-      "tests": 187
+      "tests": 188
     }
   },
   "scripts": [
@@ -189,13 +190,13 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 20,
+          "line": 21,
           "source_group": "scripts",
           "text": "├── diagnose_wsl.bat           Windows batch transport for WSL diagnostics"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 164,
+          "line": 165,
           "source_group": "scripts",
           "text": "for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the"
         },
@@ -216,19 +217,19 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 18,
+          "line": 19,
           "source_group": "scripts",
           "text": "├── diagnose_wsl.ps1           PowerShell transport for WSL diagnostics"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 79,
+          "line": 80,
           "source_group": "scripts",
           "text": ".\\diagnose_wsl.ps1                # Run WSL diagnostics"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 164,
+          "line": 165,
           "source_group": "scripts",
           "text": "for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the"
         },
@@ -255,19 +256,19 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 19,
+          "line": 20,
           "source_group": "scripts",
           "text": "├── diagnose_wsl.sh            WSL diagnostics entrypoint"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 95,
+          "line": 96,
           "source_group": "scripts",
           "text": "bash diagnose_wsl.sh              # Run WSL diagnostics"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 164,
+          "line": 165,
           "source_group": "scripts",
           "text": "for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the"
         },
@@ -312,25 +313,25 @@
       "references": [
         {
           "path": "scripts/ai/codex/QUICKSTART_WSL.md",
-          "line": 89,
+          "line": 90,
           "source_group": "scripts",
           "text": "- **`headless.ps1`** → Launch Codex without MCP sync"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 16,
+          "line": 17,
           "source_group": "scripts",
           "text": "├── headless.ps1               PowerShell transport for headless Codex launch"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 78,
+          "line": 79,
           "source_group": "scripts",
           "text": ".\\headless.ps1 exec \"prompt\"      # Launch without MCP sync"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 163,
+          "line": 164,
           "source_group": "scripts",
           "text": "The canonical `headless.sh` / `headless.ps1` launchers set `CODEX_SKIP_MCP_SETUP=1`"
         }
@@ -345,19 +346,19 @@
       "references": [
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 17,
+          "line": 18,
           "source_group": "scripts",
           "text": "├── headless.sh                Headless Codex launch without MCP sync"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 94,
+          "line": 95,
           "source_group": "scripts",
           "text": "bash headless.sh exec \"prompt\"    # Launch without MCP sync"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 163,
+          "line": 164,
           "source_group": "scripts",
           "text": "The canonical `headless.sh` / `headless.ps1` launchers set `CODEX_SKIP_MCP_SETUP=1`"
         },
@@ -420,25 +421,25 @@
       "references": [
         {
           "path": "scripts/ai/codex/QUICKSTART_WSL.md",
-          "line": 131,
+          "line": 132,
           "source_group": "scripts",
           "text": ".\\scripts\\ai\\codex\\helper\\diagnose-hang.ps1"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 28,
+          "line": 29,
           "source_group": "scripts",
           "text": "│   ├── diagnose-hang.ps1      # 🔧 Debug setup hangs"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 183,
+          "line": 184,
           "source_group": "scripts",
           "text": ".\\helper\\diagnose-hang.ps1"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 245,
+          "line": 246,
           "source_group": "scripts",
           "text": "- `diagnose-hang.ps1` - **NEW**: Debug tool for setup hangs"
         },
@@ -471,7 +472,7 @@
       "references": [
         {
           "path": "scripts/ai/codex/QUICKSTART_WSL.md",
-          "line": 91,
+          "line": 92,
           "source_group": "scripts",
           "text": "- **`helper/ensure-codex-cli.sh`** → Install/verify Codex binary"
         },
@@ -573,19 +574,19 @@
       "references": [
         {
           "path": "scripts/ai/codex/QUICKSTART_WSL.md",
-          "line": 93,
+          "line": 94,
           "source_group": "scripts",
           "text": "- **`helper/run-codex-impl.sh`** → Final Codex executor"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 29,
+          "line": 30,
           "source_group": "scripts",
           "text": "│   └── run-codex-impl.sh      # Codex launcher implementation"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 246,
+          "line": 247,
           "source_group": "scripts",
           "text": "- `run-codex-impl.sh` - Launch Codex with environment"
         },
@@ -676,13 +677,13 @@
       "references": [
         {
           "path": "scripts/ai/codex/QUICKSTART_WSL.md",
-          "line": 90,
+          "line": 91,
           "source_group": "scripts",
           "text": "- **`helper/setup-wsl-complete.sh`** → Full WSL setup (Node.js, Codex CLI, Docker check)"
         },
         {
           "path": "scripts/ai/codex/QUICKSTART_WSL.md",
-          "line": 136,
+          "line": 137,
           "source_group": "scripts",
           "text": "wsl -e bash -c \"bash scripts/ai/codex/helper/setup-wsl-complete.sh 2>&1 | tail -50\""
         },
@@ -892,13 +893,13 @@
         },
         {
           "path": "tests/architecture/test_root_hygiene_review_registry.py",
-          "line": 419,
+          "line": 451,
           "source_group": "tests",
           "text": "== \"scripts/ai/codex/helper/wsl_proxy_env.sh\""
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5834_5838_closeout.py",
-          "line": 224,
+          "line": 254,
           "source_group": "tests",
           "text": "== \"scripts/ai/codex/helper/wsl_proxy_env.sh\""
         }
@@ -970,8 +971,14 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 120,
+      "reference_count": 111,
       "references": [
+        {
+          "path": "docs/00-project/governance/03-file-policy.md",
+          "line": 60,
+          "source_group": "docs",
+          "text": "`run-codex.ps1` and `run-codex-wsl.ps1` MUST NOT be restored without fresh"
+        },
         {
           "path": "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
           "line": 76,
@@ -986,19 +993,19 @@
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 249,
+          "line": 253,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\codex\\run-codex.ps1"
         },
         {
           "path": "docs/DOCKER_SETUP.md",
-          "line": 251,
+          "line": 256,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\codex\\run-codex.ps1 mcp-setup"
         },
         {
           "path": "docs/DOCKER_SETUP.md",
-          "line": 252,
+          "line": 257,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\codex\\run-codex.ps1"
         },
@@ -1013,12 +1020,6 @@
           "line": 20,
           "source_group": "scripts",
           "text": ".\\scripts\\ai\\codex\\run-codex.ps1"
-        },
-        {
-          "path": "scripts/ai/codex/QUICKSTART_WSL.md",
-          "line": 32,
-          "source_group": "scripts",
-          "text": ".\\scripts\\ai\\codex\\run-codex.ps1 exec \"analyze the pipeline\""
         }
       ]
     },
@@ -1061,19 +1062,19 @@
         },
         {
           "path": "scripts/ai/codex/QUICKSTART_WSL.md",
-          "line": 88,
+          "line": 89,
           "source_group": "scripts",
           "text": "- **`run-codex.sh`** ⭐ → Main WSL/Bash entry point (loads env, checks setup, syncs MCP, launches Codex)"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 15,
+          "line": 16,
           "source_group": "scripts",
           "text": "├── run-codex.sh               ⭐ Canonical WSL/Bash entry point"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 59,
+          "line": 60,
           "source_group": "scripts",
           "text": "bash run-codex.sh check"
         }
@@ -3089,6 +3090,63 @@
       ]
     },
     {
+      "path": "scripts/ai/sync_windsurf_rules.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 11,
+      "references": [
+        {
+          "path": "Makefile",
+          "line": 204,
+          "source_group": "build",
+          "text": "$(RUN) python scripts/ai/sync_windsurf_rules.py"
+        },
+        {
+          "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
+          "line": 30,
+          "source_group": "docs",
+          "text": "| `docs/00-project/ai/rules/windsurf/**` | Windsurf/Cascade rules mirror | Derived from `cursor/` via sync script | Regenerate via `scripts/ai/sync_windsurf_rules.py` | `.md` rules + workflows for Cas"
+        },
+        {
+          "path": "docs/00-project/ai/rules/README.md",
+          "line": 75,
+          "source_group": "docs",
+          "text": "uv run python scripts/ai/sync_windsurf_rules.py"
+        },
+        {
+          "path": "docs/00-project/ai/rules/README.md",
+          "line": 78,
+          "source_group": "docs",
+          "text": "uv run python scripts/ai/sync_windsurf_rules.py --check"
+        },
+        {
+          "path": "docs/00-project/ai/rules/README.md",
+          "line": 160,
+          "source_group": "docs",
+          "text": "uv run python scripts/ai/sync_windsurf_rules.py"
+        },
+        {
+          "path": "docs/00-project/ai/rules/README.md",
+          "line": 166,
+          "source_group": "docs",
+          "text": "Индекс синхронизации: `07-qodo-enforcement.mdc`. После обновления cursor rules выполните `sync_windsurf_rules.py`."
+        },
+        {
+          "path": "docs/00-project/ai/rules/cursor/07-qodo-enforcement.mdc",
+          "line": 82,
+          "source_group": "docs",
+          "text": "uv run python scripts/ai/sync_windsurf_rules.py"
+        },
+        {
+          "path": "docs/00-project/ai/rules/windsurf/rules/07-qodo-enforcement.md",
+          "line": 81,
+          "source_group": "docs",
+          "text": "uv run python scripts/ai/sync_windsurf_rules.py"
+        }
+      ]
+    },
+    {
       "path": "scripts/ai/vibe/helper/check-env.ps1",
       "type": "ps1",
       "status": "active",
@@ -4514,7 +4572,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/agents/py-doc-bot.md",
-          "line": 193,
+          "line": 195,
           "source_group": "docs",
           "text": "1. `run_diagram_checks.sh` завершён без ошибок"
         },
@@ -6932,7 +6990,7 @@
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 53,
+          "line": 56,
           "source_group": "docs",
           "text": "- Transitional root launcher/setup shims such as `.wsl_proxy_env.sh`,"
         },
@@ -7888,7 +7946,7 @@
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 128,
+          "line": 133,
           "source_group": "docs",
           "text": "python3 scripts/engineering/diagnostics/audit_structure.py --path ."
         },
@@ -8044,7 +8102,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 244,
+      "reference_count": 245,
       "references": [
         {
           "path": ".github/workflows/contract-governance-fast-check.yml",
@@ -10531,7 +10589,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 55,
+      "reference_count": 56,
       "references": [
         {
           "path": ".github/workflows/compiled-artifacts-block.yml",
@@ -10604,13 +10662,13 @@
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 127,
+          "line": 132,
           "source_group": "docs",
           "text": "python3 scripts/engineering/repo/audit_root_cleanliness.py"
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
-          "line": 158,
+          "line": 163,
           "source_group": "docs",
           "text": "`scripts/engineering/repo/audit_root_cleanliness.py` MUST использовать этот"
         },
@@ -10646,7 +10704,7 @@
         },
         {
           "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
-          "line": 65,
+          "line": 67,
           "source_group": "docs",
           "text": "python3 scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked"
         }
@@ -10661,19 +10719,19 @@
       "references": [
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 22,
+          "line": 23,
           "source_group": "scripts",
           "text": "| `check-cleanup-governance` | `check_cleanup_governance.py` | Block unsafe broad cleanup guidance outside allowlisted examples       |"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 80,
+          "line": 83,
           "source_group": "scripts",
           "text": "| `check_cleanup_governance.py`  | Guard active docs/scripts against broad cleanup guidance  |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 49,
+          "line": 50,
           "source_group": "scripts",
           "text": "\"check-cleanup-governance\": \"check_cleanup_governance.py\","
         }
@@ -10712,7 +10770,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 47,
+          "line": 48,
           "source_group": "scripts",
           "text": "\"check-actions-runtime-policy\": \"check_github_actions_runtime_policy.py\","
         }
@@ -10727,7 +10785,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 50,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"check-reports-quality-ttl\": \"check_reports_quality_ttl.py\","
         }
@@ -10742,19 +10800,19 @@
       "references": [
         {
           "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
-          "line": 64,
+          "line": 66,
           "source_group": "docs",
           "text": "python3 scripts/engineering/repo/check_root_governance_docs.py"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 23,
+          "line": 24,
           "source_group": "scripts",
           "text": "| `check-root-governance-docs` | `check_root_governance_docs.py` | Validate prose root-governance docs against allowlist/catalog sources |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 51,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"check-root-governance-docs\": \"check_root_governance_docs.py\","
         }
@@ -10769,13 +10827,13 @@
       "references": [
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 24,
+          "line": 25,
           "source_group": "scripts",
           "text": "| `check-root-review-registry` | `check_root_hygiene_review_registry.py` | Validate review-required and blocked cleanup lanes              |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 52,
+          "line": 53,
           "source_group": "scripts",
           "text": "\"check-root-review-registry\": \"check_root_hygiene_review_registry.py\","
         }
@@ -10826,7 +10884,7 @@
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 19,
+          "line": 20,
           "source_group": "scripts",
           "text": "| `check-catalog`         | `check_scripts_catalog.py`       | Validate catalog governance policy                                    |"
         },
@@ -10904,13 +10962,13 @@
       "references": [
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 20,
+          "line": 21,
           "source_group": "scripts",
           "text": "| `check-versions`        | `check_version_consistency.py`   | Check version consistency across project files                        |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 46,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"check-versions\": \"check_version_consistency.py\","
         }
@@ -10925,37 +10983,37 @@
       "references": [
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 38,
+          "line": 40,
           "source_group": "scripts",
           "text": "bash scripts/engineering/repo/cleanup_branch_candidates.sh"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 39,
+          "line": 41,
           "source_group": "scripts",
           "text": "bash scripts/engineering/repo/cleanup_branch_candidates.sh --apply"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 40,
+          "line": 42,
           "source_group": "scripts",
           "text": "bash scripts/engineering/repo/cleanup_branch_candidates.sh --apply --with-remote"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 53,
+          "line": 55,
           "source_group": "scripts",
           "text": "`cleanup_branch_candidates.sh` when you want the same workflow through a"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 82,
+          "line": 85,
           "source_group": "scripts",
           "text": "| `cleanup_branch_candidates.sh` | Dry-run/apply cleanup for the curated branch deletion set |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 56,
+          "line": 58,
           "source_group": "scripts",
           "text": "\"cleanup-branch-candidates\": \"cleanup_branch_candidates.sh\","
         },
@@ -10974,6 +11032,33 @@
       ]
     },
     {
+      "path": "scripts/engineering/repo/cleanup_root_local_clutter.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/README.md",
+          "line": 26,
+          "source_group": "scripts",
+          "text": "| `cleanup-root-local-clutter` | `cleanup_root_local_clutter.py` | Preview/apply exact reviewed root-local clutter cleanup candidates |"
+        },
+        {
+          "path": "scripts/engineering/repo/__main__.py",
+          "line": 54,
+          "source_group": "scripts",
+          "text": "\"cleanup-root-local-clutter\": \"cleanup_root_local_clutter.py\","
+        },
+        {
+          "path": "tests/architecture/test_tech_debt_issues_5847_5852_closeout.py",
+          "line": 135,
+          "source_group": "tests",
+          "text": "ROOT / \"scripts\" / \"engineering\" / \"repo\" / \"cleanup_root_local_clutter.py\""
+        }
+      ]
+    },
+    {
       "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
       "type": "py",
       "status": "active",
@@ -10982,13 +11067,13 @@
       "references": [
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 18,
+          "line": 19,
           "source_group": "scripts",
           "text": "| `sync-wrapper-caller-matrix` | `generate_scripts_wrapper_caller_matrix.py` | Refresh the tracked wrapper caller matrix used for RF-008 cleanup evidence |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 44,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"sync-wrapper-caller-matrix\": \"generate_scripts_wrapper_caller_matrix.py\","
         }
@@ -11009,19 +11094,19 @@
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 25,
+          "line": 27,
           "source_group": "scripts",
           "text": "| `preflight-cleanup`     | `preflight_cleanup.sh`           | Preview/apply the bounded release-preflight cleanup set               |"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 81,
+          "line": 84,
           "source_group": "scripts",
           "text": "| `preflight_cleanup.sh`         | Bounded release-preflight cleanup helper                  |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 53,
+          "line": 55,
           "source_group": "scripts",
           "text": "\"preflight-cleanup\": \"preflight_cleanup.sh\","
         },
@@ -11034,6 +11119,14 @@
       ]
     },
     {
+      "path": "scripts/engineering/repo/publish_tdx_audit_issues.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/engineering/repo/split_testing_roadmap_issue.py",
       "type": "py",
       "status": "active",
@@ -11042,13 +11135,13 @@
       "references": [
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 26,
+          "line": 28,
           "source_group": "scripts",
           "text": "| `split-testing-roadmap` | `split_testing_roadmap_issue.py` | Preview or create child issues for testing roadmap issue `#2511`      |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 54,
+          "line": 56,
           "source_group": "scripts",
           "text": "\"split-testing-roadmap\": \"split_testing_roadmap_issue.py\","
         }
@@ -11063,13 +11156,13 @@
       "references": [
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 27,
+          "line": 29,
           "source_group": "scripts",
           "text": "| `sync-docs-issues`      | `sync_docs_issues.py`            | Preview or apply labels, milestone, and comments for docs-sync issues |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 55,
+          "line": 57,
           "source_group": "scripts",
           "text": "\"sync-docs-issues\": \"sync_docs_issues.py\","
         }
@@ -11084,7 +11177,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 43,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"sync-inventory\": \"sync_scripts_inventory.py\","
         }
@@ -11777,37 +11870,37 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 58,
+          "line": 62,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\docker-setup.ps1 -Mode basic"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 74,
+          "line": 78,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\docker-setup.ps1 -Mode monitoring"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 91,
+          "line": 95,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\docker-setup.ps1 -Mode mcp"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 255,
+          "line": 259,
           "source_group": "docs",
           "text": "- `.\\scripts\\ops\\docker-setup.ps1` - Canonical интерактивная настройка Docker для Windows; `.env` создается только с `-AllowEnvFileCreate` или `BIOETL_CREATE_LOCAL_ENV_FILES=1`"
         },
         {
           "path": "docs/DOCKER_SETUP.md",
-          "line": 83,
+          "line": 88,
           "source_group": "docs",
           "text": "Canonical helper scripts `scripts/ops/docker-setup.ps1` and"
         },
         {
           "path": "tests/architecture/test_docs_root_surface_governance_alignment.py",
-          "line": 275,
+          "line": 280,
           "source_group": "tests",
           "text": "powershell_helper = _read(\"scripts/ops/docker-setup.ps1\")"
         },
@@ -11819,7 +11912,7 @@
         },
         {
           "path": "tests/architecture/test_root_hygiene_review_registry.py",
-          "line": 467,
+          "line": 513,
           "source_group": "tests",
           "text": "by_path[\"docker-setup.ps1\"][\"canonical_path\"] == \"scripts/ops/docker-setup.ps1\""
         }
@@ -11834,19 +11927,19 @@
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 256,
+          "line": 260,
           "source_group": "docs",
           "text": "- `scripts/ops/docker-setup.sh` - Canonical Bash версия для WSL/Linux; `.env` создается только с `BIOETL_CREATE_LOCAL_ENV_FILES=1`"
         },
         {
           "path": "docs/DOCKER_SETUP.md",
-          "line": 84,
+          "line": 89,
           "source_group": "docs",
           "text": "`scripts/ops/docker-setup.sh` automatically ensure these shared external"
         },
         {
           "path": "tests/architecture/test_docs_root_surface_governance_alignment.py",
-          "line": 274,
+          "line": 279,
           "source_group": "tests",
           "text": "bash_helper = _read(\"scripts/ops/docker-setup.sh\")"
         },
@@ -11858,15 +11951,15 @@
         },
         {
           "path": "tests/architecture/test_root_hygiene_review_registry.py",
-          "line": 470,
+          "line": 515,
           "source_group": "tests",
-          "text": "by_path[\"docker-setup.sh\"][\"canonical_path\"] == \"scripts/ops/docker-setup.sh\""
+          "text": "assert by_path[\"docker-setup.sh\"][\"canonical_path\"] == \"scripts/ops/docker-setup.sh\""
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5834_5838_closeout.py",
-          "line": 253,
+          "line": 287,
           "source_group": "tests",
-          "text": "== \"scripts/ops/docker-setup.sh\""
+          "text": "candidates[\"docker-setup.sh\"][\"canonical_path\"] == \"scripts/ops/docker-setup.sh\""
         }
       ]
     },
@@ -11885,7 +11978,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 47,
+          "line": 48,
           "source_group": "scripts",
           "text": ".\\scripts\\ops\\install-codex-cmd.bat"
         }
@@ -12246,7 +12339,7 @@
       "references": [
         {
           "path": "Makefile",
-          "line": 203,
+          "line": 207,
           "source_group": "build",
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only"
         },
@@ -12264,7 +12357,7 @@
         },
         {
           "path": "makefile",
-          "line": 203,
+          "line": 207,
           "source_group": "build",
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only"
         },
@@ -13252,7 +13345,7 @@
         },
         {
           "path": "tests/architecture/test_root_hygiene_workflow.py",
-          "line": 52,
+          "line": 53,
           "source_group": "tests",
           "text": "assert \"cleanup_repository.py\" in workflow"
         }

@@ -5,12 +5,16 @@ Docker в BioETL остается optional local-only tooling surface. По
 compose файлы и helper-скрипты существуют только как добровольная локальная
 обвязка для отдельных стеков (`Neo4j`, monitoring, MCP).
 
-Reviewed extra compose files в корне (`docker-compose.alertmanager.yml`,
-`docker-compose.minio.yml`, `docker-compose.redis.yml`,
-`docker-compose.sonarqube.yml`) сохраняются только как optional adjunct helper
-stacks для локальной диагностики или точечных интеграционных экспериментов.
-Они не входят в canonical helper flow и не являются обязательной частью
-Local-Only runtime.
+Reviewed extra compose files moved out of the repository root and now live
+under `scripts/ops/runtime/docker/compose/`:
+`scripts/ops/runtime/docker/compose/alertmanager.yml`,
+`scripts/ops/runtime/docker/compose/minio.yml`,
+`scripts/ops/runtime/docker/compose/redis.yml`, and
+`scripts/ops/runtime/docker/compose/sonarqube.yml`. Legacy root filenames
+(`docker-compose.alertmanager.yml`, `docker-compose.minio.yml`,
+`docker-compose.redis.yml`, `docker-compose.sonarqube.yml`) remain only as
+historical compatibility labels in governance docs, not as tracked root
+entrypoints.
 
 <!-- BIOETL_DOCKER_HELPER_ADR010_ADJUNCT -->
 
@@ -27,8 +31,8 @@ helper compose files остаются optional local-only adjunct tooling и MUS
 - ✓ `docker-compose.monitoring.yml` - мониторинг (Prometheus, Grafana, Loki, Tempo)
 - ✓ `docker-compose.codex.yml` - MCP серверы для Codex
 - ✓ Dockerfile для BioETL (multi-stage build)
-- ✓ Dockerfile для Warp VPN клиента
-- ✓ Dockerfiles для MCP серверов (memory, filesystem, github, fetch)
+- ✓ Dockerfile для Warp VPN клиента under `scripts/ops/runtime/docker/images/warp/Dockerfile`
+- ✓ Dockerfiles для MCP серверов (memory, filesystem, github, fetch) under `scripts/ops/runtime/docker/images/**/Dockerfile`
 - ✓ `.dockerignore` оптимизирован
 
 ## 🚀 Как запустить
@@ -153,13 +157,13 @@ docker system prune -a
 | `docker-compose.yml` | Основной стек (Neo4j + BioETL) |
 | `docker-compose.monitoring.yml` | Мониторинг (Prometheus, Grafana, Loki, Tempo) |
 | `docker-compose.codex.yml` | MCP серверы для Codex |
-| `docker-compose.alertmanager.yml` | Optional adjunct Alertmanager helper stack; not part of baseline runtime |
-| `docker-compose.minio.yml` | Optional local MinIO helper stack; not part of ADR-010 runtime. Requires explicit `MINIO_ROOT_USER` and `MINIO_ROOT_PASSWORD`; binds to localhost only |
-| `docker-compose.redis.yml` | Optional local Redis helper stack; not part of ADR-010 runtime. Requires explicit `REDIS_PASSWORD`; binds to localhost only |
-| `docker-compose.sonarqube.yml` | Optional local SonarQube helper stack; not part of baseline runtime. Requires local-only `SONARQUBE_DB_PASSWORD` and `SONARQUBE_SYSTEM_PASSCODE`; binds to localhost only |
+| `scripts/ops/runtime/docker/compose/alertmanager.yml` | Optional adjunct Alertmanager helper stack; not part of baseline runtime; legacy root filename: `docker-compose.alertmanager.yml` |
+| `scripts/ops/runtime/docker/compose/minio.yml` | Optional local MinIO helper stack; not part of ADR-010 runtime. Requires explicit `MINIO_ROOT_USER` and `MINIO_ROOT_PASSWORD`; binds to localhost only; legacy root filename: `docker-compose.minio.yml` |
+| `scripts/ops/runtime/docker/compose/redis.yml` | Optional local Redis helper stack; not part of ADR-010 runtime. Requires explicit `REDIS_PASSWORD`; binds to localhost only; legacy root filename: `docker-compose.redis.yml` |
+| `scripts/ops/runtime/docker/compose/sonarqube.yml` | Optional local SonarQube helper stack; not part of baseline runtime. Requires local-only `SONARQUBE_DB_PASSWORD` and `SONARQUBE_SYSTEM_PASSCODE`; binds to localhost only; legacy root filename: `docker-compose.sonarqube.yml` |
 | `Dockerfile.bioetl` | Образ BioETL (multi-stage Python) |
-| `Dockerfile.warp` | Warp VPN клиент |
-| `Dockerfile.mcp-*` | MCP серверы (Node.js) |
+| `scripts/ops/runtime/docker/images/warp/Dockerfile` | Warp VPN клиент; legacy root filename: `Dockerfile.warp` |
+| `scripts/ops/runtime/docker/images/mcp-*/Dockerfile` | MCP серверы (Node.js); legacy root filenames: `Dockerfile.mcp-*` |
 | `.dockerignore` | Файлы исключены из образа |
 
 ## 🐛 Решение проблем
@@ -268,7 +272,7 @@ docker compose up --build -d
   Alertmanager have Prometheus scrape contracts; SonarQube is healthcheck-only
   in repo-default Prometheus because its native metrics endpoint requires a
   runtime passcode.
-- Before moving any reviewed root Docker helper surface, consult
+- Before restoring any reviewed root Docker helper surface, consult
   `docs/05-operations/verification/docker-helper-root-relocation-audit.md`.
 
 **Все готово к запуску!** 🚀

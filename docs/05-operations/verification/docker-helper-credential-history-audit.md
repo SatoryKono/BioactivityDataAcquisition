@@ -2,18 +2,19 @@
 
 Date: 2026-05-21
 Issue: #4442
-Scope: `docker-compose.redis.yml`, `docker-compose.minio.yml`,
-`docker-compose.sonarqube.yml`, `.env.example`,
+Scope: `scripts/ops/runtime/docker/compose/redis.yml`,
+`scripts/ops/runtime/docker/compose/minio.yml`,
+`scripts/ops/runtime/docker/compose/sonarqube.yml`, `.env.example`,
 `configs/quality/docker_helper_contracts.yaml`
 
 ## Evidence Commands
 
 ```bash
-git -c filter.lfs.process= -c filter.lfs.required=false log --all --format='%H %s' -S 'bioetl_redis_secure' -- docker-compose.redis.yml .env.example docker-compose.sonarqube.yml docker-compose.minio.yml
-git -c filter.lfs.process= -c filter.lfs.required=false log --all --format='%H %s' -S 'minioadmin_secure' -- docker-compose.redis.yml docker-compose.minio.yml docker-compose.sonarqube.yml .env.example
-git -c filter.lfs.process= -c filter.lfs.required=false log --all --format='%H %s' -S 'sonarqube_secure' -- docker-compose.redis.yml docker-compose.minio.yml docker-compose.sonarqube.yml .env.example
-git -c filter.lfs.process= -c filter.lfs.required=false log --all --format='%H %s' -S 'sonarqube_system' -- docker-compose.redis.yml docker-compose.minio.yml docker-compose.sonarqube.yml .env.example
-git -c filter.lfs.process= -c filter.lfs.required=false grep -n -E 'bioetl_redis_secure|minioadmin_secure|sonarqube_secure|sonarqube_system' HEAD -- docker-compose.redis.yml docker-compose.minio.yml docker-compose.sonarqube.yml .env.example
+git -c filter.lfs.process= -c filter.lfs.required=false log --all --format='%H %s' -S 'bioetl_redis_secure' -- scripts/ops/runtime/docker/compose/redis.yml .env.example scripts/ops/runtime/docker/compose/sonarqube.yml scripts/ops/runtime/docker/compose/minio.yml
+git -c filter.lfs.process= -c filter.lfs.required=false log --all --format='%H %s' -S 'minioadmin_secure' -- scripts/ops/runtime/docker/compose/redis.yml scripts/ops/runtime/docker/compose/minio.yml scripts/ops/runtime/docker/compose/sonarqube.yml .env.example
+git -c filter.lfs.process= -c filter.lfs.required=false log --all --format='%H %s' -S 'sonarqube_secure' -- scripts/ops/runtime/docker/compose/redis.yml scripts/ops/runtime/docker/compose/minio.yml scripts/ops/runtime/docker/compose/sonarqube.yml .env.example
+git -c filter.lfs.process= -c filter.lfs.required=false log --all --format='%H %s' -S 'sonarqube_system' -- scripts/ops/runtime/docker/compose/redis.yml scripts/ops/runtime/docker/compose/minio.yml scripts/ops/runtime/docker/compose/sonarqube.yml .env.example
+git -c filter.lfs.process= -c filter.lfs.required=false grep -n -E 'bioetl_redis_secure|minioadmin_secure|sonarqube_secure|sonarqube_system' HEAD -- scripts/ops/runtime/docker/compose/redis.yml scripts/ops/runtime/docker/compose/minio.yml scripts/ops/runtime/docker/compose/sonarqube.yml .env.example
 git -c filter.lfs.process= -c filter.lfs.required=false grep -n -E 'bioetl_redis_secure|minioadmin_secure|sonarqube_secure|sonarqube_system' 34e0512c9edbcb710c9a34b799994ea415346c0c -- docker-compose.redis.yml docker-compose.minio.yml docker-compose.sonarqube.yml .env.example
 ```
 
@@ -26,8 +27,9 @@ git -c filter.lfs.process= -c filter.lfs.required=false grep -n -E 'bioetl_redis
   introduced required environment expansion, and added
   `configs/quality/docker_helper_contracts.yaml`.
 - Current `HEAD` has no direct matches for the retired default tokens in
-  `docker-compose.redis.yml`, `docker-compose.minio.yml`,
-  `docker-compose.sonarqube.yml`, or `.env.example`.
+  `scripts/ops/runtime/docker/compose/redis.yml`,
+  `scripts/ops/runtime/docker/compose/minio.yml`,
+  `scripts/ops/runtime/docker/compose/sonarqube.yml`, or `.env.example`.
 - Current `configs/quality/docker_helper_contracts.yaml` intentionally lists
   the retired tokens under `forbidden_default_tokens`; those references are
   governance evidence, not live defaults.

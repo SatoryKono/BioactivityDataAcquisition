@@ -6,11 +6,16 @@ machine-local/secret-bearing файлом. Если файл нужен для �
 запуска, создайте его вручную из `.env.example` после явного решения или
 используйте opt-in флаг helper-скрипта.
 
-Reviewed extra compose files в корне (`docker-compose.alertmanager.yml`,
-`docker-compose.minio.yml`, `docker-compose.redis.yml`,
-`docker-compose.sonarqube.yml`) сохраняются только как optional adjunct helper
-stacks. Они не требуются для базового development/test runtime и не считаются
-canonical orchestration path under ADR-010.
+Reviewed extra compose files moved out of the repository root and now live
+under `scripts/ops/runtime/docker/compose/`:
+`scripts/ops/runtime/docker/compose/alertmanager.yml`,
+`scripts/ops/runtime/docker/compose/minio.yml`,
+`scripts/ops/runtime/docker/compose/redis.yml`, and
+`scripts/ops/runtime/docker/compose/sonarqube.yml`. Legacy root filenames
+(`docker-compose.alertmanager.yml`, `docker-compose.minio.yml`,
+`docker-compose.redis.yml`, `docker-compose.sonarqube.yml`) are retained only
+as historical compatibility labels in governance docs, not as tracked root
+entrypoints.
 
 <!-- BIOETL_DOCKER_HELPER_ADR010_ADJUNCT -->
 
@@ -266,10 +271,10 @@ docker ps | Select-String bioetl
 - `docker-compose.yml` — основной стек
 - `docker-compose.monitoring.yml` — мониторинг
 - `docker-compose.codex.yml` — MCP серверы
-- `docker-compose.alertmanager.yml` — optional local Alertmanager helper stack
-- `docker-compose.minio.yml` — optional local MinIO helper stack; requires explicit `MINIO_ROOT_USER` and `MINIO_ROOT_PASSWORD`; binds to localhost only
-- `docker-compose.redis.yml` — optional local Redis helper stack; requires explicit `REDIS_PASSWORD`; binds to localhost only
-- `docker-compose.sonarqube.yml` — optional local SonarQube helper stack; requires local-only `SONARQUBE_DB_PASSWORD` and `SONARQUBE_SYSTEM_PASSCODE`; binds to localhost only
+- `scripts/ops/runtime/docker/compose/alertmanager.yml` — optional local Alertmanager helper stack; legacy root filename: `docker-compose.alertmanager.yml`
+- `scripts/ops/runtime/docker/compose/minio.yml` — optional local MinIO helper stack; requires explicit `MINIO_ROOT_USER` and `MINIO_ROOT_PASSWORD`; binds to localhost only; legacy root filename: `docker-compose.minio.yml`
+- `scripts/ops/runtime/docker/compose/redis.yml` — optional local Redis helper stack; requires explicit `REDIS_PASSWORD`; binds to localhost only; legacy root filename: `docker-compose.redis.yml`
+- `scripts/ops/runtime/docker/compose/sonarqube.yml` — optional local SonarQube helper stack; requires local-only `SONARQUBE_DB_PASSWORD` and `SONARQUBE_SYSTEM_PASSCODE`; binds to localhost only; legacy root filename: `docker-compose.sonarqube.yml`
 - Reviewed adjunct helper compose files that attach to `bioetl-monitoring`
   require `docker network create bioetl-monitoring` before first manual start
 - Helper stack observability posture is governed by
@@ -278,4 +283,5 @@ docker ps | Select-String bioetl
   healthcheck-only in repo-default Prometheus because its native metrics
   endpoint requires runtime passcode authentication.
 - `.env` — переменные окружения
-- `Dockerfile.*` — определения образов
+- `Dockerfile.bioetl` — основной образ BioETL
+- `scripts/ops/runtime/docker/images/**/Dockerfile` — optional helper image definitions

@@ -22,20 +22,53 @@ This pack converts the `2026-07-01` full technical-debt audit on current
 
 ## Publish-Ready Set
 
-1. `TDX-AUDIT-001` Ratchet retained public entrypoints and lazy export facades to canonical imports
-2. `TDX-AUDIT-002` Collapse adapter fetch and resilience duplication under canonical template owners
-3. `TDX-AUDIT-003` Consolidate pipeline transformer contract duplication across provider families
-4. `TDX-AUDIT-004` Remove classified zero-import domain ports after importer proof
-5. `TDX-AUDIT-005` Extract shared composite config policy blocks into a canonical authority surface
-6. `TDX-AUDIT-006` Reopen hotspot tail coverage ratchet for replay-sensitive runtime seams
-7. `TDX-AUDIT-007` Turn zero-reference supporting scripts into explicit owner-or-removal governance
+### Wave 1 — residual structural debt (reopened owners)
 
-## Why Only These Seven
+1. `TDX-AUDIT-001` Ratchet retained public entrypoints and lazy export facades to canonical imports — [#5839](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5839)
+2. `TDX-AUDIT-002` Collapse adapter fetch and resilience duplication under canonical template owners — [#5840](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5840)
+3. `TDX-AUDIT-003` Consolidate pipeline transformer contract duplication across provider families — [#5841](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5841)
+4. `TDX-AUDIT-004` Remove classified zero-import domain ports after importer proof — [#5842](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5842)
+5. `TDX-AUDIT-005` Extract shared composite config policy blocks into a canonical authority surface — [#5843](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5843)
+6. `TDX-AUDIT-006` Reopen hotspot tail coverage ratchet for replay-sensitive runtime seams — [#5844](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5844)
+7. `TDX-AUDIT-007` Turn zero-reference supporting scripts into explicit owner-or-removal governance — [#5845](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5845)
+
+### Wave 2 — determinism and hotspot follow-up (new owners)
+
+8. `TDX-AUDIT-008` Strengthen DQ rule evaluator determinism with golden and property tests — [#5861](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5861)
+9. `TDX-AUDIT-009` Add domain contract registry and ledger invariant tests — [#5862](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5862)
+10. `TDX-AUDIT-010` Ratchet control-plane hotspot LOC and fan-in ceilings — [#5863](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5863)
+11. `TDX-AUDIT-011` Explicitize composition runtime builder registration and ratchet DI fan-in — [#5864](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5864)
+
+## Recommended Execution Order
+
+### Phase 1: determinism safety
+
+1. `TDX-AUDIT-008`
+2. `TDX-AUDIT-009`
+
+### Phase 2: hotspot ratchet
+
+3. `TDX-AUDIT-010`
+4. `TDX-AUDIT-011`
+
+### Phase 3: structural debt wave
+
+5. `TDX-AUDIT-002`
+6. `TDX-AUDIT-003`
+7. `TDX-AUDIT-001`
+8. `TDX-AUDIT-004`
+9. `TDX-AUDIT-005`
+10. `TDX-AUDIT-006`
+11. `TDX-AUDIT-007`
+
+## Why Only These Eleven
 
 The audit found that formal governance is mostly green on current `main`. The
 residual debt is concentrated in sanctioned compatibility seams, duplication
 families, sanctioned config repetition, classified dead code, partial-coverage
-tails, and long-lived supporting helper surfaces.
+tails, long-lived supporting helper surfaces, and determinism-sensitive domain
+invariants.
 
-This pack therefore publishes only the still-actionable residual work and does
-not reopen categories that are already governed to zero on the live tree.
+Wave 1 reopens the structural-debt owners that were prematurely closed while
+live artifacts still show residual work. Wave 2 adds focused owners for the
+highest-risk determinism and hotspot tails from the prioritized backlog.

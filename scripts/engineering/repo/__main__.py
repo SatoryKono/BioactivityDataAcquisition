@@ -17,6 +17,7 @@ Commands:
     check-reports-quality-ttl  Fail on expired reports/quality TTL artifacts
     check-root-governance-docs  Validate root-governance docs against allowlist/catalog
     check-root-review-registry  Validate root-hygiene review registry
+    cleanup-root-local-clutter  Preview/apply reviewed root-local clutter cleanup
     split-testing-roadmap  Create or preview #2511 child issues
     sync-docs-issues   Preview or apply docs-sync issue metadata
     cleanup-branch-candidates  Preview or apply curated branch cleanup plan
@@ -50,6 +51,7 @@ COMMANDS = {
     "check-reports-quality-ttl": "check_reports_quality_ttl.py",
     "check-root-governance-docs": "check_root_governance_docs.py",
     "check-root-review-registry": "check_root_hygiene_review_registry.py",
+    "cleanup-root-local-clutter": "cleanup_root_local_clutter.py",
     "preflight-cleanup": "preflight_cleanup.sh",
     "split-testing-roadmap": "split_testing_roadmap_issue.py",
     "sync-docs-issues": "sync_docs_issues.py",

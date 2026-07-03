@@ -20,9 +20,15 @@ ROOT_REVIEW_REPORT = ROOT / "reports" / "quality" / "root-hygiene-review-evidenc
 CLEANUP_REPORT = (
     ROOT / "reports" / "quality" / "root-hygiene-cleanup-classification.json"
 )
-REPORTS_WORKSPACE_REVIEW = ROOT / "reports" / "quality" / "reports-workspace-review.json"
+REPORTS_WORKSPACE_REVIEW = (
+    ROOT / "reports" / "quality" / "reports-workspace-review.json"
+)
 DOCKER_RELOCATION_AUDIT = (
-    ROOT / "docs" / "05-operations" / "verification" / "docker-helper-root-relocation-audit.md"
+    ROOT
+    / "docs"
+    / "05-operations"
+    / "verification"
+    / "docker-helper-root-relocation-audit.md"
 )
 
 EXPECTED_ISSUES = {5834, 5835, 5836, 5837, 5838}
@@ -57,6 +63,18 @@ DOCKER_ROOT_SURFACES = {
     "docker-setup.ps1",
     "docker-setup.sh",
     "Dockerfile.bioetl",
+    "Dockerfile.mcp-fetch",
+    "Dockerfile.mcp-filesystem",
+    "Dockerfile.mcp-github",
+    "Dockerfile.mcp-memory",
+    "Dockerfile.warp",
+    "grafana-datasource.yml",
+}
+REHOMED_DOCKER_SURFACES = {
+    "docker-compose.alertmanager.yml",
+    "docker-compose.minio.yml",
+    "docker-compose.redis.yml",
+    "docker-compose.sonarqube.yml",
     "Dockerfile.mcp-fetch",
     "Dockerfile.mcp-filesystem",
     "Dockerfile.mcp-github",
@@ -141,7 +159,10 @@ def test_issue_5834_live_baseline_cleanup_and_owner_review_artifacts_are_current
     assert len(committed_review["root_review_evidence"]) == outcome["root_review_rows"]
     assert len(committed_cleanup["cleanup_candidates"]) == outcome["cleanup_candidates"]
     assert REPORTS_WORKSPACE_REVIEW.exists()
-    assert outcome["reports_workspace_review"] == "reports/quality/reports-workspace-review.json"
+    assert (
+        outcome["reports_workspace_review"]
+        == "reports/quality/reports-workspace-review.json"
+    )
 
 
 def test_issue_5835_tolerated_local_only_root_clutter_is_reviewed_without_promoting_it() -> (
@@ -163,10 +184,21 @@ def test_issue_5835_tolerated_local_only_root_clutter_is_reviewed_without_promot
         assert path in evidence
         assert evidence[path]["classification"] == "REVIEW_REQUIRED"
 
-    assert candidates[".coverage"]["current_live_state"] == "present_local_only_root_surface"
-    assert candidates[".scannerwork"]["current_live_state"] == "absent_from_root_baseline"
-    assert candidates[".venv-docs"]["current_live_state"] == "present_local_only_root_surface"
-    assert candidates[".venv-win"]["current_live_state"] == "present_local_only_root_surface"
+    assert (
+        candidates[".coverage"]["current_live_state"]
+        == "present_local_only_root_surface"
+    )
+    assert (
+        candidates[".scannerwork"]["current_live_state"] == "absent_from_root_baseline"
+    )
+    assert (
+        candidates[".venv-docs"]["current_live_state"]
+        == "present_local_only_root_surface"
+    )
+    assert (
+        candidates[".venv-win"]["current_live_state"]
+        == "present_local_only_root_surface"
+    )
     assert (
         candidates[".venv-win-corrupt"]["current_live_state"]
         == "absent_from_root_baseline"
@@ -209,9 +241,7 @@ def test_issue_5837_root_codex_wsl_shims_stay_thin_and_owner_anchored() -> None:
         registry_row = candidates[path]
         evidence_row = evidence[path]
         assert registry_row["lane_id"] == "root_launcher_shims"
-        assert (
-            registry_row["lane_classification"] == "owner_decision_required"
-        )
+        assert registry_row["lane_classification"] == "owner_decision_required"
         assert evidence_row["classification"] == "REVIEW_REQUIRED"
 
     assert candidates["codex.ps1"]["canonical_path"] == "scripts/ai/codex/run-codex.ps1"
@@ -238,7 +268,12 @@ def test_issue_5838_root_docker_adjuncts_are_reviewed_and_evidence_backed() -> N
     for path in DOCKER_ROOT_SURFACES:
         registry_row = candidates[path]
         evidence_row = evidence[path]
-        assert path in allowlist_text
+        if path in REHOMED_DOCKER_SURFACES:
+            assert path not in allowlist_text
+            assert registry_row["current_live_state"] == "absent_from_root_baseline"
+        else:
+            assert path in allowlist_text
+            assert registry_row["current_live_state"] == "present_approved_root_surface"
         assert registry_row["lane_id"] == "root_docker_adjuncts"
         assert registry_row["lane_classification"] == "owner_decision_required"
         assert registry_row["owner"] == "Engineering / Runtime Platform"
@@ -249,11 +284,14 @@ def test_issue_5838_root_docker_adjuncts_are_reviewed_and_evidence_backed() -> N
         == "scripts/ops/docker-setup.ps1"
     )
     assert (
-        candidates["docker-setup.sh"]["canonical_path"]
-        == "scripts/ops/docker-setup.sh"
+        candidates["docker-setup.sh"]["canonical_path"] == "scripts/ops/docker-setup.sh"
     )
     assert candidates["Dockerfile.bioetl"]["canonical_path"] == "Dockerfile.bioetl"
     assert (
+        candidates["Dockerfile.warp"]["canonical_path"]
+        == "scripts/ops/runtime/docker/images/warp/Dockerfile"
+    )
+    assert (
         candidates["grafana-datasource.yml"]["canonical_path"]
-        == "docs/05-operations/verification/docker-helper-root-relocation-audit.md"
+        == "grafana/provisioning/datasources-local/grafana-datasource.yml"
     )

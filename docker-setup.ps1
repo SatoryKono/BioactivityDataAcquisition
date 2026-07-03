@@ -70,11 +70,11 @@ function Start-Services {
         Write-Success "Neo4j started"
         
         Write-Info "Starting Redis..."
-        docker compose -f docker-compose.redis.yml up -d
+        docker compose -f scripts/ops/runtime/docker/compose/redis.yml up -d
         Write-Success "Redis started"
         
         Write-Info "Starting MinIO..."
-        docker compose -f docker-compose.minio.yml up -d
+        docker compose -f scripts/ops/runtime/docker/compose/minio.yml up -d
         Write-Success "MinIO started"
         
         Write-Info "Starting monitoring stack..."
@@ -96,8 +96,8 @@ function Stop-Services {
     
     if ($Mode -eq "full" -or $Mode -eq "all") {
         docker compose -f docker-compose.neo4j.yml down 2>$null
-        docker compose -f docker-compose.redis.yml down 2>$null
-        docker compose -f docker-compose.minio.yml down 2>$null
+        docker compose -f scripts/ops/runtime/docker/compose/redis.yml down 2>$null
+        docker compose -f scripts/ops/runtime/docker/compose/minio.yml down 2>$null
         docker compose -f docker-compose.monitoring.yml down 2>$null
     }
     

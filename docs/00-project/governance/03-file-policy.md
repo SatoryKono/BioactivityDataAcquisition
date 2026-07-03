@@ -28,9 +28,11 @@ ______________________________________________________________________
 ## 0. Политика корня репозитория
 
 - Root-level tracked файлы MUST соответствовать `.github/root-allowlist.txt`.
-- Reviewed root-level `docker-compose*.yml` files MAY оставаться tracked только
-  как optional local-only helper stacks; они MUST NOT переопределять ADR-010 и
-  MUST NOT трактоваться как обязательный runtime bootstrap path.
+- Required root-level `docker-compose*.yml` files MAY оставаться tracked only
+  when operator flows require the exact root filename. Optional adjunct helper
+  stacks MUST live under owned paths such as
+  `scripts/ops/runtime/docker/compose/**`; they MUST NOT переопределять ADR-010
+  and MUST NOT трактоваться как обязательный runtime bootstrap path.
 - Stable helper governance anchor:
   `BIOETL_DOCKER_HELPER_ADR010_ADJUNCT`; machine-readable helper contracts live
   in `configs/quality/docker_helper_contracts.yaml`.
@@ -41,7 +43,8 @@ ______________________________________________________________________
 - Reconciled `2026-07` tracked root baseline uses three explicit dispositions:
   canonical project/tooling entrypoints retained at root, canonical
   runtime/governance entrypoints retained at root, and reviewed ADR-010
-  adjunct helper files retained pending bounded owner-led relocation review.
+  adjunct helper files rehomed under owned operational paths when exact root
+  filenames are no longer required.
 - Former root Codex / WSL setup notes were converged into canonical
   `docs/05-operations/**` runbooks and archived under
   `docs/99-archive/root-status-artifacts/ai-runtime-setup/`; they are no
@@ -51,10 +54,12 @@ ______________________________________________________________________
   reviewed example: `best_practices.md` for Qodo policy ingestion, with its
   retention rationale documented under `docs/00-project/governance/qodo/`.
 - Transitional root launcher/setup shims such as `.wsl_proxy_env.sh`,
-  `codex*.ps1`, `run-codex*.ps1`, and `setup-codex-wsl.*` MAY remain tracked
-  only as explicit compatibility entrypoints while their canonical maintained
-  owner surfaces converge under `scripts/ai/codex/**`. These retained root
-  shims MUST stay thin and MUST NOT regrow independent setup or launcher logic.
+  `codex.ps1`, `codex.bat`, and `setup-codex-wsl.*` MAY remain tracked only as
+  explicit compatibility entrypoints while their canonical maintained owner
+  surfaces converge under `scripts/ai/codex/**`. Retired aliases such as
+  `run-codex.ps1` and `run-codex-wsl.ps1` MUST NOT be restored without fresh
+  owner review. Retained root shims MUST stay thin and MUST NOT regrow
+  independent setup or launcher logic.
 - Root Docker helper relocation decisions MUST reference
   `docs/05-operations/verification/docker-helper-root-relocation-audit.md`
   before any helper/file move is approved.

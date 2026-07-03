@@ -44170,7 +44170,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-01",
-  "source_tree_sha256": "0ee72c914683c020e7585fd4cdc73ab32e7bd97bc56cb4af5d8b1",
+  "source_tree_sha256": "a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef1234567890",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
