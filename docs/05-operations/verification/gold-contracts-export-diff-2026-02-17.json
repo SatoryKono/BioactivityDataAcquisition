@@ -1,0 +1,343 @@
+{
+  "generated_at": "2026-02-17",
+  "version": "1.0.0",
+  "entities": {
+    "chembl_activity": {
+      "file": "docs/04-reference/contracts/gold/chembl_activity_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "chembl_assay": {
+      "file": "docs/04-reference/contracts/gold/chembl_assay_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "chembl_assay_parameters": {
+      "file": "docs/04-reference/contracts/gold/chembl_assay_parameters_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "chembl_cell_line": {
+      "file": "docs/04-reference/contracts/gold/chembl_cell_line_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "chembl_compound_record": {
+      "file": "docs/04-reference/contracts/gold/chembl_compound_record_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "chembl_molecule": {
+      "file": "docs/04-reference/contracts/gold/chembl_molecule_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "chembl_protein_class": {
+      "file": "docs/04-reference/contracts/gold/chembl_protein_class_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "chembl_publication": {
+      "file": "docs/04-reference/contracts/gold/chembl_publication_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "chembl_publication_similarity": {
+      "file": "docs/04-reference/contracts/gold/chembl_publication_similarity_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "chembl_publication_term": {
+      "file": "docs/04-reference/contracts/gold/chembl_publication_term_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "chembl_subcellular_fraction": {
+      "file": "docs/04-reference/contracts/gold/chembl_subcellular_fraction_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "chembl_target_component": {
+      "file": "docs/04-reference/contracts/gold/chembl_target_component_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "chembl_target": {
+      "file": "docs/04-reference/contracts/gold/chembl_target_v3.0.json",
+      "contract_version": "3.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "chembl_target_protein_classification": {
+      "file": "docs/04-reference/contracts/gold/chembl_target_protein_classification_v2.2.json",
+      "contract_version": "2.2.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "chembl_tissue": {
+      "file": "docs/04-reference/contracts/gold/chembl_tissue_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "composite_activity": {
+      "file": "docs/04-reference/contracts/gold/composite_activity_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "composite_assay": {
+      "file": "docs/04-reference/contracts/gold/composite_assay_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "composite_molecule": {
+      "file": "docs/04-reference/contracts/gold/composite_molecule_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "composite_publication": {
+      "file": "docs/04-reference/contracts/gold/composite_publication_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "composite_target": {
+      "file": "docs/04-reference/contracts/gold/composite_target_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "crossref_publication": {
+      "file": "docs/04-reference/contracts/gold/crossref_publication_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "openalex_publication": {
+      "file": "docs/04-reference/contracts/gold/openalex_publication_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "pubchem_compound": {
+      "file": "docs/04-reference/contracts/gold/pubchem_compound_v2.0.json",
+      "contract_version": "2.0.0",
+      "status": "created",
+      "diff": {
+        "added_properties": [
+          "_dq_error",
+          "_dq_warn",
+          "_index",
+          "canonical_smiles",
+          "chemical_standardization_policy_version",
+          "chemical_standardization_status",
+          "chemical_standardization_warnings",
+          "complexity",
+          "conformer_count_3d",
+          "conformer_rmsd_3d",
+          "content_hash",
+          "effective_rotor_count_3d",
+          "entity_id",
+          "exact_mass",
+          "feature_acceptor_count_3d",
+          "feature_anion_count_3d",
+          "feature_cation_count_3d",
+          "feature_count_3d",
+          "feature_donor_count_3d",
+          "feature_hydrophobe_count_3d",
+          "feature_ring_count_3d",
+          "inchi",
+          "inchi_key",
+          "isomeric_smiles",
+          "iupac_name",
+          "molecular_formula",
+          "molecular_weight",
+          "molecule_id",
+          "monoisotopic_mass",
+          "standardized_canonical_smiles",
+          "standardized_inchi",
+          "standardized_inchi_key",
+          "standardized_isomeric_smiles",
+          "structure_parent_key",
+          "tpsa",
+          "x_steric_quadrupole_3d",
+          "xlogp",
+          "y_steric_quadrupole_3d",
+          "z_steric_quadrupole_3d"
+        ],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": true
+      }
+    },
+    "pubmed_publication": {
+      "file": "docs/04-reference/contracts/gold/pubmed_publication_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "semanticscholar_publication": {
+      "file": "docs/04-reference/contracts/gold/semanticscholar_publication_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "uniprot_idmapping": {
+      "file": "docs/04-reference/contracts/gold/uniprot_idmapping_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    },
+    "uniprot_protein": {
+      "file": "docs/04-reference/contracts/gold/uniprot_protein_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
+      "diff": {
+        "added_properties": [],
+        "removed_properties": [],
+        "changed_properties": [],
+        "required_changed": false
+      }
+    }
+  }
+}
