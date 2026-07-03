@@ -235,17 +235,12 @@ class PubChemBioactivityRecord(BaseModel):
     target_name: str | None = Field(default=None, description="Target name")
 
     # Activity Values
-    activity_values: list[JsonDict] | None = (  # Any: untyped API JSON record
-        Field(  # Any: nested API JSON has heterogeneous values
-            default_factory=list, description="List of activity measurements"
-        )
-    )
+    activity_values: list[JsonDict] | None = Field(default_factory=list, description="List of activity measurements")
 
 
 # === Record Type Mapping ===
 
-# Mapping from entity type to record model
-# Note: Keys match PubChem entity types, not Ubiquitous Language
+# Mapping from entity type to record model (keys match PubChem entity types, not Ubiquitous Language)
 PUBCHEM_RECORD_MODELS: dict[str, type[BaseModel]] = {
     "compound": PubchemMoleculeApiRecord,  # ADR-024: Molecule is canonical
     "molecule": PubchemMoleculeApiRecord,  # Canonical alias

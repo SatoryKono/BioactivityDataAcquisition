@@ -216,22 +216,13 @@ class ProviderHealthMonitor:
     def get_adjusted_config(self, provider: str) -> HealthAdjustedConfig:
         """Get adjusted client configuration based on health status.
 
-        Per RULES.md §3.5:
-        - HEALTHY: Normal operation (timeout ×1, batch_size ÷1)
-        - DEGRADED: Timeout ×2, batch_size ÷2
-        - UNHEALTHY: Timeout ×4, batch_size ÷4 (aggressive throttling)
+        Per RULES.md §3.5: HEALTHY (timeout ×1, batch_size ÷1), DEGRADED (timeout ×2, batch_size ÷2), UNHEALTHY (timeout ×4, batch_size ÷4).
 
         Args:
             provider: Provider name.
 
         Returns:
             HealthAdjustedConfig with multipliers for timeout and batch_size.
-
-        Example:
-            >>> config = monitor.get_adjusted_config("chembl")
-            >>> effective_timeout = 30.0 * config.timeout_multiplier  # 60.0 if DEGRADED
-            >>> effective_batch_size = config.apply_batch_size(1000, minimum=100)
-
         """
         timeout_mult, batch_div = self.get_adaptive_params(provider)
         state = self.get_state(provider)
@@ -246,8 +237,6 @@ def __getattr__(name: str) -> object:
     """Resolve compatibility re-exports without eager tracker imports."""
     if name != "ProviderHealthTracker":
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
     from bioetl.infrastructure.adapters.http.health_tracker import ProviderHealthTracker
-
     globals()[name] = ProviderHealthTracker
     return ProviderHealthTracker

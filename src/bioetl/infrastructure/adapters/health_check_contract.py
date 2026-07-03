@@ -5,24 +5,11 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 
-from httpx import HTTPStatusError, RequestError
-
-from bioetl.domain.exceptions import BioETLError, NetworkError
-
-HEALTH_CHECK_ERRORS = (
-    BioETLError,
-    NetworkError,
-    RequestError,
-    HTTPStatusError,
-    ConnectionError,
-    TimeoutError,
-    OSError,
-    ValueError,
-    TypeError,
-    RuntimeError,
-    AttributeError,
-    Exception,
+from bioetl.infrastructure.adapters.common.error_bundles import (
+    COMMON_ADAPTER_HEALTH_ERRORS_WITH_KEYERROR,
 )
+
+HEALTH_CHECK_ERRORS = COMMON_ADAPTER_HEALTH_ERRORS_WITH_KEYERROR
 
 
 @dataclass

@@ -1,18 +1,8 @@
-"""OpenAlex data source adapter.
-
-Implements FilterableDataSourcePort for OpenAlex Works API.
-Rate limits and retry strategy configured via source YAML (``configs/sources/openalex.yaml``).
+"""OpenAlex data source adapter implementing FilterableDataSourcePort for OpenAlex Works API.
 
 Uses httpx via UnifiedHTTPClient for REST/JSON API access.
-
-Error Handling (RULES.md S3.1):
-- Critical errors: Fail immediately (401, 403)
-- Recoverable errors: Handled by UnifiedHTTPClient retry
-- Data quality errors: Log and skip record
-
-Authentication:
-- OpenAlex API-key access is the canonical production path.
-- Optional `mailto` is retained only as a legacy/contact attribution parameter.
+Error Handling (RULES.md S3.1): Critical errors (401, 403) fail immediately, recoverable errors handled by retry.
+Authentication: OpenAlex API-key access is canonical; optional `mailto` is legacy contact attribution.
 """
 
 from __future__ import annotations

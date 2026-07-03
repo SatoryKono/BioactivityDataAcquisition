@@ -1,10 +1,7 @@
 """Base fallback handler for title-based DOI resolution.
 
 Provides common utilities for fallback search across different providers.
-Supports three-phase fallback strategy:
-- Phase 1: Batch ID lookup (implemented by adapter)
-- Phase 2: Title fallback for unresolved IDs (process_missing_dois)
-- Phase 3: Title-only lookup for entries without IDs (process_title_only_entries)
+Supports three-phase fallback strategy: Phase 1 (Batch ID lookup), Phase 2 (Title fallback for unresolved IDs), Phase 3 (Title-only lookup).
 """
 
 from __future__ import annotations
@@ -39,27 +36,10 @@ def _event_property(name: str) -> property:
 
 
 class BaseTitleFallbackHandler(ABC):
-    """Base class for title-based fallback search handlers.
+    """Base class for title-based fallback search handlers with provider-specific search logic.
 
-    Provides common utilities for fallback title lookup when DOI resolution fails.
-    Subclasses implement provider-specific search logic.
-
-    Three-Phase Fallback Strategy:
-        Phase 1: Batch ID lookup - implemented by adapter
-        Phase 2: Title fallback - process_missing_dois() for unresolved IDs
-        Phase 3: Title-only - process_title_only_entries() for empty IDs
-
-    Event Naming Convention:
-        When provider_prefix is set, event names are auto-generated:
-        - {provider}_no_fallback_title
-        - {provider}_title_fallback_attempt
-        - {provider}_title_fallback_success
-        - {provider}_title_fallback_not_found
-        - {provider}_title_only_attempt
-        - {provider}_title_only_success
-        - {provider}_title_only_not_found
-
-        Subclasses can override individual event properties if needed.
+    Three-Phase Fallback Strategy: Phase 1 (Batch ID lookup by adapter), Phase 2 (Title fallback for unresolved IDs), Phase 3 (Title-only for empty IDs).
+    Event Naming: When provider_prefix is set, events are auto-generated as {provider}_title_fallback_attempt, {provider}_title_only_success, etc.
     """
 
     def __init__(
