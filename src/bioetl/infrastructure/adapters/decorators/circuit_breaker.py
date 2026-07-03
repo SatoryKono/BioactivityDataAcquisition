@@ -53,6 +53,9 @@ from bioetl.infrastructure.adapters.decorators._data_source_delegation import (
     exit_delegated_data_source,
     iter_delegated_fetch,
 )
+from bioetl.infrastructure.adapters.decorators._fetch_request_builder import (
+    build_data_source_fetch_request,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import (
@@ -165,7 +168,7 @@ class CircuitBreakerDataSourceDecorator:
 
         """
         self._check_circuit_state()
-        request = DataSourceFetchRequest(
+        request = build_data_source_fetch_request(
             entity_type=entity_type,
             limit=limit,
             query=query,

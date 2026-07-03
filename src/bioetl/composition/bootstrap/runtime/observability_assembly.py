@@ -6,7 +6,7 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from bioetl.composition.observability import ObservabilityBundle
-from bioetl.domain.ports import MetricsPort
+from bioetl.domain.ports import AuditPort, LoggerPort, MetricsPort, TracingPort
 from bioetl.domain.ports.noop import NoOpAudit, NoOpMetrics, NoOpTracing
 
 if TYPE_CHECKING:
@@ -14,6 +14,23 @@ if TYPE_CHECKING:
         _ObservabilityComponents,
     )
     from bioetl.infrastructure.config.settings_api import Settings
+
+
+def default_audit_bootstrapper(
+    settings: Settings,
+    logger: LoggerPort,
+    metrics: MetricsPort,
+    tracer: TracingPort,
+) -> AuditPort:
+    """Create the canonical runtime audit port for observability bootstrap."""
+    from bioetl.composition.factories.storage.audit import create_audit_port
+
+    return create_audit_port(
+        settings=settings,
+        logger=logger,
+        metrics=metrics,
+        tracing=tracer,
+    )
 
 
 def create_observability_bundle(

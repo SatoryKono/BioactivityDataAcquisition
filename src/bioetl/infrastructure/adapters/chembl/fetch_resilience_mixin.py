@@ -22,6 +22,7 @@ from bioetl.infrastructure.adapters.chembl._fetch_resilience_fallback import (
 )
 from bioetl.infrastructure.adapters.common import is_retry_exhausted_error
 from bioetl.infrastructure.adapters.common.fetch_resilience_template import (
+    bind_host_async_iterator,
     fetch_batch_with_reduction,
     retry_with_split_batches,
     yield_retry_exhausted_recovery,
@@ -104,53 +105,10 @@ class ChemblFetchResilienceMixin:
 
     # Keep legacy Chembl method names bound to the shared recovery template.
     _retry_with_split_batches = retry_with_split_batches
-
-    async def _yield_deduplicated_filtered_records(
-        self,
-        entity_type: str,
-        id_batch: list[str],
-        filter_field: str,
-        limit: int | None,
-        seen_ids: set[str],
-        pk_field: str,
-        pk_fields: tuple[str, ...] | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Yield filtered records while deduplicating by configured keys."""
-        async for record in yield_deduplicated_filtered_records(
-            cast(_ChemblFallbackHost, self),
-            entity_type,
-            id_batch,
-            filter_field,
-            limit,
-            seen_ids,
-            pk_field,
-            pk_fields,
-        ):
-            yield record
-
-    async def _yield_single_id_fallback(
-        self,
-        entity_type: str,
-        id_batch: list[str],
-        filter_field: str,
-        seen_ids: set[str],
-        pk_field: str,
-        error: Exception,
-        pk_fields: tuple[str, ...] | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Try direct endpoint fallback for a single failed filter ID."""
-        async for record in yield_single_id_fallback(
-            cast(_ChemblFallbackHost, self),
-            entity_type,
-            id_batch,
-            filter_field,
-            seen_ids,
-            pk_field,
-            error,
-            pk_fields,
-        ):
-            yield record
-
+    _yield_deduplicated_filtered_records = bind_host_async_iterator(
+        yield_deduplicated_filtered_records
+    )
+    _yield_single_id_fallback = bind_host_async_iterator(yield_single_id_fallback)
     _yield_retry_exhausted_recovery = yield_retry_exhausted_recovery
     _fetch_batch_with_reduction = fetch_batch_with_reduction
 

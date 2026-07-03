@@ -25,7 +25,10 @@ except ImportError:
 
 from bioetl.domain.workflow import WorkflowStepConfig
 from bioetl.infrastructure.config.composite_config_api import load_composite_config
-from bioetl.infrastructure.config.config_root import resolve_configs_root
+from bioetl.infrastructure.config.config_root import (
+    get_default_repo_root,
+    resolve_configs_root,
+)
 from bioetl.infrastructure.config.source_config_loader import (
     normalize_source_config_payload,
     validate_source_config_payload,
@@ -701,11 +704,74 @@ def _emit_validation_depth_summary(configs_root: Path) -> None:
 
 def _validate_registry_manifest_surface(configs_root: Path) -> list[str]:
     """Validate the canonical runtime registry manifest against tracked configs."""
+    from bioetl.composition.factories.pipeline.config_types import (
+        PipelineFactoryConfig,
+    )
     from bioetl.composition.factories.pipeline.registry_validation import (
         validate_registry_manifest,
     )
 
-    return validate_registry_manifest(configs_root=configs_root)
+    resolved_configs_root = resolve_configs_root(configs_root)
+    if resolved_configs_root.resolve() == (get_default_repo_root() / "configs").resolve():
+        from bioetl.composition.factories.pipeline.registry_manifest import (
+            PIPELINE_CONFIGS,
+        )
+
+        pipeline_configs = PIPELINE_CONFIGS
+    else:
+        pipeline_configs = _build_local_registry_manifest(
+            resolved_configs_root,
+            pipeline_config_cls=PipelineFactoryConfig,
+        )
+
+    return validate_registry_manifest(
+        configs_root=resolved_configs_root,
+        pipeline_configs=pipeline_configs,
+    )
+
+
+def _build_local_registry_manifest(
+    configs_root: Path,
+    *,
+    pipeline_config_cls: type[Any],
+) -> tuple[Any, ...]:
+    """Build isolated registry entries for non-canonical config-tree validation."""
+    entities_dir = configs_root / "entities"
+    entity_files = _find_entity_files(entities_dir) if entities_dir.exists() else []
+    entries: list[Any] = []
+    for entity_path in entity_files:
+        payload: dict[str, Any] = {}
+        try:
+            loaded_payload = _load_yaml_payload(entity_path)
+        except yaml.YAMLError:
+            loaded_payload = None
+        if loaded_payload is not None:
+            payload = loaded_payload
+
+        pipeline_payload = payload.get("pipeline")
+        pipeline = pipeline_payload if isinstance(pipeline_payload, dict) else {}
+        provider = str(
+            payload.get("provider") or pipeline.get("provider") or entity_path.parent.name
+        )
+        entity = str(
+            payload.get("entity") or pipeline.get("entity_type") or entity_path.stem
+        )
+        pipeline_name = str(
+            pipeline.get("pipeline_name")
+            or _pipeline_name_from_provider_entity(provider, entity)
+        )
+        entries.append(
+            pipeline_config_cls(
+                pipeline_name=pipeline_name,
+                provider=provider,
+                entity_type=entity,
+                transformer_class="synthetic_config_tree_validation",
+                silver_schema=None,
+                gold_schema=object(),
+                pandera_silver_schema=object(),
+            )
+        )
+    return tuple(entries)
 
 
 def validate_config_tree(

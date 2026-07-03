@@ -72,3 +72,6 @@ invariants.
 Wave 1 reopens the structural-debt owners that were prematurely closed while
 live artifacts still show residual work. Wave 2 adds focused owners for the
 highest-risk determinism and hotspot tails from the prioritized backlog.
+
+Wave 3 issue pack: `.github/ISSUES/TECH-DEBT-AUDIT-2026-07-03-ISSUE-PACK.md`
+(`TDX-AUDIT-012` through `TDX-AUDIT-018`).

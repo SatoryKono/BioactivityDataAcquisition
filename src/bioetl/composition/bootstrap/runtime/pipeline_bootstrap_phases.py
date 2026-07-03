@@ -86,27 +86,35 @@ def get_settings() -> object:
 
 
 def initialize_chembl_policy_registry(configs_root: Path) -> None:
-    from bioetl.composition.bootstrap.runtime import normalization_policy_init
+    from bioetl.composition.bootstrap.runtime.normalization_policy_init import (
+        initialize_chembl_policy_registry as _initialize,
+    )
 
-    normalization_policy_init.initialize_chembl_policy_registry(configs_root)
+    _initialize(configs_root)
 
 
 def initialize_publication_controlled_vocabulary(configs_root: Path) -> None:
-    from bioetl.composition.bootstrap.runtime import publication_vocab_init
+    from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
+        initialize_publication_controlled_vocabulary as _initialize,
+    )
 
-    publication_vocab_init.initialize_publication_controlled_vocabulary(configs_root)
+    _initialize(configs_root)
 
 
 def initialize_publication_type_classification(configs_root: Path) -> None:
-    from bioetl.composition.bootstrap.runtime import classification_init
+    from bioetl.composition.bootstrap.runtime.classification_init import (
+        initialize_publication_type_classification as _initialize,
+    )
 
-    classification_init.initialize_publication_type_classification(configs_root)
+    _initialize(configs_root)
 
 
 def initialize_protein_class_target_type_mapping(configs_root: Path) -> None:
-    from bioetl.composition.bootstrap.runtime import classification_init
+    from bioetl.composition.bootstrap.runtime.classification_init import (
+        initialize_protein_class_target_type_mapping as _initialize,
+    )
 
-    classification_init.initialize_protein_class_target_type_mapping(configs_root)
+    _initialize(configs_root)
 
 
 def register_all_pipelines(*args: object, **kwargs: object) -> object:

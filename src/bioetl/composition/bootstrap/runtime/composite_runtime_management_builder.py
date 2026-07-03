@@ -15,9 +15,6 @@ from bioetl.composition.bootstrap.assembly.checkpoint import (
 from bioetl.composition.bootstrap.composite_infrastructure_context import (
     CompositeInfrastructureContext,
 )
-from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
-    CompositeControlPlaneBundle,
-)
 from bioetl.composition.bootstrap.runtime.composite_runtime_management_bundle import (
     RuntimeManagementServicesBundle,
 )
@@ -42,6 +39,9 @@ if TYPE_CHECKING:
         CompositeCheckpointPort,
         LoggerPort,
         MetricsPort,
+    )
+    from bioetl.composition.bootstrap.runtime.composite_control_plane_bundle import (
+        CompositeControlPlaneBundle,
     )
     from bioetl.infrastructure.config.settings_api import Settings
 

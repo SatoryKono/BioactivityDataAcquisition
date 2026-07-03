@@ -4,6 +4,7 @@
 Usage:
     python scripts/engineering/repo/publish_tdx_audit_issues.py
     python scripts/engineering/repo/publish_tdx_audit_issues.py --apply
+    python scripts/engineering/repo/publish_tdx_audit_issues.py --apply --codes TDX-AUDIT-012,TDX-AUDIT-013 --update-pack
     python scripts/engineering/repo/publish_tdx_audit_issues.py --apply --reopen 5839,5840
 
 Requires a GitHub token in ``GITHUB_TOKEN`` or ``GITHUB_PERSONAL_ACCESS_TOKEN``.
@@ -34,7 +35,8 @@ DEFAULT_OWNER: Final[str] = "SatoryKono"
 DEFAULT_REPO: Final[str] = "BioactivityDataAcquisition"
 DEFAULT_TOKEN_ENV: Final[str] = "GITHUB_TOKEN"
 ISSUES_DIR: Final[Path] = Path(__file__).resolve().parents[3] / ".github" / "ISSUES"
-ISSUE_PACK: Final[Path] = ISSUES_DIR / "TECH-DEBT-AUDIT-2026-07-01-ISSUE-PACK.md"
+DEFAULT_ISSUE_PACK: Final[Path] = ISSUES_DIR / "TECH-DEBT-AUDIT-2026-07-03-ISSUE-PACK.md"
+LEGACY_ISSUE_PACK: Final[Path] = ISSUES_DIR / "TECH-DEBT-AUDIT-2026-07-01-ISSUE-PACK.md"
 REOPEN_COMMENT: Final[str] = (
     "Reopened after the refreshed `2026-07-03` technical-debt audit on current "
     "`main`.\n\n"
@@ -214,10 +216,10 @@ def _reopen_issue(*, token: str, number: int, comment: str) -> IssueRecord:
     )
 
 
-def _update_issue_pack(records: list[IssueRecord]) -> None:
-    if not records or not ISSUE_PACK.exists():
+def _update_issue_pack(*, issue_pack: Path, records: list[IssueRecord]) -> None:
+    if not records or not issue_pack.exists():
         return
-    content = ISSUE_PACK.read_text(encoding="utf-8")
+    content = issue_pack.read_text(encoding="utf-8")
     for record in records:
         code_match = re.search(r"\[(TDX-AUDIT-\d{3})\]", record.title)
         if not code_match:
@@ -229,7 +231,7 @@ def _update_issue_pack(records: list[IssueRecord]) -> None:
         content, count = re.subn(pattern, replacement, content, count=1, flags=re.MULTILINE)
         if count == 0:
             content += f"\n- {link} `{code}` {record.title}"
-    ISSUE_PACK.write_text(content, encoding="utf-8")
+    issue_pack.write_text(content, encoding="utf-8")
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -246,8 +248,8 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--reopen",
-        default="5839,5840,5841,5842,5843,5844,5845",
-        help="Comma-separated GitHub issue numbers to reopen (default: 5839-5845).",
+        default="",
+        help="Comma-separated GitHub issue numbers to reopen (default: none).",
     )
     parser.add_argument("--token-env", default=DEFAULT_TOKEN_ENV)
     parser.add_argument(
@@ -256,9 +258,14 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Only create missing issues; do not reopen closed wave.",
     )
     parser.add_argument(
+        "--pack",
+        default=str(DEFAULT_ISSUE_PACK.relative_to(_repo_root())),
+        help="Issue pack markdown to update with GitHub links when --update-pack is set.",
+    )
+    parser.add_argument(
         "--update-pack",
         action="store_true",
-        help="Write GitHub links back into TECH-DEBT-AUDIT-2026-07-01-ISSUE-PACK.md.",
+        help="Write GitHub links back into the selected TECH-DEBT-AUDIT issue pack.",
     )
     return parser.parse_args(argv)
 
@@ -314,7 +321,8 @@ def run(argv: list[str] | None = None) -> int:
         records.append(_create_issue(token=token, draft=draft))
 
     if args.update_pack:
-        _update_issue_pack(records)
+        issue_pack = _repo_root() / args.pack
+        _update_issue_pack(issue_pack=issue_pack, records=records)
 
     print("\nSummary:")
     for record in records:

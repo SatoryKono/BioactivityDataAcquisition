@@ -16,12 +16,14 @@ from typing import TYPE_CHECKING, cast
 from bioetl.application.core.base_transformer import (
     BaseTransformer,
     FilteredOutError,
-    TransformerDependencyContext,
 )
 from bioetl.application.core.pre_silver_adapter_mixin import (
     PreSilverAdapterMixin,
 )
 from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.pipelines.common.publication_transformer_context import (
+    build_runtime_transformer_init,
+)
 from bioetl.application.pipelines.pubchem._compound_business_data import (
     build_compound_business_data,
 )
@@ -29,10 +31,7 @@ from bioetl.domain.entities import PubchemMolecule
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
-    from bioetl.domain.behavior import EntityIdentityGenerator
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
-    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
@@ -45,40 +44,7 @@ class PubChemCompoundTransformer(PreSilverAdapterMixin, BaseTransformer):
     """
 
     entity_class = PubchemMolecule
-
-    def __init__(
-        self,
-        provider: str = "pubchem",
-        entity_type: str = "compound",
-        silver_filters: SilverFilterConfig | None = None,
-        gold_filters: GoldFilterConfig | None = None,
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
-        identity_service: EntityIdentityGenerator | None = None,
-        pii_hasher: PiiHasherPort | None = None,
-        dependencies: TransformerDependencyContext | None = None,
-    ) -> None:
-        """Initialize PubChem compound transformer.
-
-        Args:
-            provider: Data provider identifier. Defaults to 'pubchem'.
-            entity_type: Entity type for metrics labels. Defaults to 'compound'.
-            silver_filters: Optional filter configuration for Silver layer.
-            gold_filters: Optional filter configuration for Gold layer.
-            dependencies: Explicit collaborator bundle.
-
-        """
-        super().__init__(
-            provider,
-            entity_type=entity_type,
-            silver_filters=silver_filters,
-            gold_filters=gold_filters,
-            tracer=tracer,
-            metrics=metrics,
-            identity_service=identity_service,
-            pii_hasher=pii_hasher,
-            dependencies=dependencies,
-        )
+    __init__ = build_runtime_transformer_init("pubchem", "compound")
 
     async def _transform_impl(
         self,

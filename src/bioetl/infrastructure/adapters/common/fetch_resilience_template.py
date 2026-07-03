@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Callable, Protocol, cast
 
 from bioetl.domain.exceptions import ExternalServiceError, RetryExhaustedError
 from bioetl.domain.types import BronzeRecord
@@ -50,6 +50,14 @@ class FilteredBatchRecoveryHost(Protocol):
         pk_fields: tuple[str, ...] | None = None,
     ) -> AsyncIterator[BronzeRecord]: ...
 
+    def _batch_ids(
+        self, filter_ids: list[str], *, batch_size: int
+    ) -> object: ...
+
+    def _get_api_pk_field(self, entity_type: str) -> str: ...
+
+    def _get_api_dedup_fields(self, entity_type: str) -> tuple[str, ...]: ...
+
     def _yield_deduplicated_filtered_records(
         self,
         entity_type: str,
@@ -64,7 +72,9 @@ class FilteredBatchRecoveryHost(Protocol):
 
 __all__ = [
     "FilteredBatchRecoveryHost",
+    "bind_host_async_iterator",
     "fetch_batch_with_reduction",
+    "iter_deduplicated_filtered_id_batches",
     "log_batch_reduction_retry",
     "retry_with_split_batches",
     "yield_retry_exhausted_recovery",
@@ -221,3 +231,50 @@ async def fetch_batch_with_reduction(
         pk_fields,
     ):
         yield record
+
+
+def bind_host_async_iterator(
+    host_fn: Callable[..., AsyncIterator[BronzeRecord]],
+) -> Callable[..., AsyncIterator[BronzeRecord]]:
+    """Bind a host-first async iterator helper as an instance method."""
+
+    async def bound(
+        self: FilteredBatchRecoveryHost,
+        /,
+        *args: object,
+        **kwargs: object,
+    ) -> AsyncIterator[BronzeRecord]:
+        async for record in host_fn(self, *args, **kwargs):
+            yield record
+
+    return bound
+
+
+async def iter_deduplicated_filtered_id_batches(
+    host: FilteredBatchRecoveryHost,
+    *,
+    entity_type: str,
+    limit: int | None,
+    filter_ids: list[str],
+    filter_field: str,
+    batch_size: int,
+) -> AsyncIterator[BronzeRecord]:
+    """Yield deduplicated records across filtered ID batches."""
+    total_fetched = 0
+    seen_ids: set[str] = set()
+    pk_field = host._get_api_pk_field(entity_type)
+    pk_fields = host._get_api_dedup_fields(entity_type)
+    for id_batch in host._batch_ids(filter_ids, batch_size=batch_size):
+        async for record in host._fetch_batch_with_reduction(
+            entity_type,
+            id_batch,
+            filter_field,
+            limit,
+            seen_ids,
+            pk_field,
+            pk_fields,
+        ):
+            yield record
+            total_fetched += 1
+            if limit and total_fetched >= limit:
+                return

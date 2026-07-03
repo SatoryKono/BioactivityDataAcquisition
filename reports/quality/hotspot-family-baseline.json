@@ -43,11 +43,11 @@
       ],
       "duplication_clusters": 0,
       "files": 48,
-      "total_loc": 5900,
+      "total_loc": 5935,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.304,
+      "helper_function_ratio": 0.302,
       "max_internal_fan_in": 3,
-      "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.observability",
+      "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.tracing_bootstrap",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 3
@@ -68,11 +68,11 @@
       ],
       "duplication_clusters": 0,
       "files": 35,
-      "total_loc": 4657,
+      "total_loc": 4651,
       "files_ge_250_loc": 2,
       "helper_function_ratio": 0.417,
       "max_internal_fan_in": 3,
-      "max_internal_fan_in_module": "bioetl.composition.factories.pipeline.registry_manifest",
+      "max_internal_fan_in_module": "bioetl.composition.factories.pipeline.factory_method_helpers",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 3,
         "max_internal_fan_in": 3

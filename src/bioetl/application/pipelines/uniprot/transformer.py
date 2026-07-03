@@ -13,7 +13,9 @@ from typing import TYPE_CHECKING, cast
 from bioetl.application.core.base_transformer import (
     BaseTransformer,
     TransformationError,
-    TransformerDependencyContext,
+)
+from bioetl.application.pipelines.common.publication_transformer_context import (
+    build_runtime_transformer_init,
 )
 from bioetl.application.core.base_transformer.errors import FilteredOutError
 from bioetl.application.core.pre_silver_adapter_mixin import (
@@ -40,31 +42,7 @@ class UniProtProteinTransformer(
     """Transformer for UniProt protein records."""
 
     entity_class = UniprotTarget
-
-    def __init__(
-        self,
-        provider: str = "uniprot",
-        entity_type: str = "protein",
-        silver_filters: SilverFilterConfig | None = None,
-        gold_filters: GoldFilterConfig | None = None,
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
-        identity_service: EntityIdentityGenerator | None = None,
-        pii_hasher: PiiHasherPort | None = None,
-        dependencies: TransformerDependencyContext | None = None,
-    ) -> None:
-        """Initialize UniProt protein transformer with provider defaults."""
-        super().__init__(
-            provider,
-            entity_type=entity_type,
-            silver_filters=silver_filters,
-            gold_filters=gold_filters,
-            tracer=tracer,
-            metrics=metrics,
-            identity_service=identity_service,
-            pii_hasher=pii_hasher,
-            dependencies=dependencies,
-        )
+    __init__ = build_runtime_transformer_init("uniprot", "protein")
 
     async def _transform_impl(
         self,

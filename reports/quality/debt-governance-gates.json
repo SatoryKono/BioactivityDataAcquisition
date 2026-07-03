@@ -28,8 +28,8 @@
       "status": "pass"
     },
     {
-      "current": "da46cd6ceaaa11eb39bec0b811eb36e5311afa1041f80d7d079be7fbf2c211a2",
-      "limit": "da46cd6ceaaa11eb39bec0b811eb36e5311afa1041f80d7d079be7fbf2c211a2",
+      "current": "6f3db1664076eb32471b784f3f5808a12072a31d69e82d027ff7e31d3f99de61",
+      "limit": "6f3db1664076eb32471b784f3f5808a12072a31d69e82d027ff7e31d3f99de61",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -38,14 +38,14 @@
     },
     {
       "current": {
-        "source_module_count": 2211,
-        "source_tree_sha256": "da46cd6ceaaa11eb39bec0b811eb36e5311afa1041f80d7d079be7fbf2c211a2",
+        "source_module_count": 2213,
+        "source_tree_sha256": "6f3db1664076eb32471b784f3f5808a12072a31d69e82d027ff7e31d3f99de61",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
-        "source_module_count": 2211,
-        "source_tree_sha256": "da46cd6ceaaa11eb39bec0b811eb36e5311afa1041f80d7d079be7fbf2c211a2",
+        "source_module_count": 2213,
+        "source_tree_sha256": "6f3db1664076eb32471b784f3f5808a12072a31d69e82d027ff7e31d3f99de61",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -172,6 +172,69 @@
       "status": "pass"
     },
     {
+      "current": 44,
+      "limit": 44,
+      "metric": "duplication_clusters",
+      "name": "full_app_duplication_infrastructure_adapters",
+      "remediation": "Reduce duplicate clusters and regenerate the full-app duplication baseline without raising scorecard budgets.",
+      "source_artifact": "reports/quality/full-app-duplication-baseline.json",
+      "status": "pass"
+    },
+    {
+      "current": 5,
+      "limit": 5,
+      "metric": "duplication_clusters",
+      "name": "full_app_duplication_application_pipelines",
+      "remediation": "Reduce duplicate clusters and regenerate the full-app duplication baseline without raising scorecard budgets.",
+      "source_artifact": "reports/quality/full-app-duplication-baseline.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "duplication_clusters",
+      "name": "full_app_duplication_composition_bootstrap_full_app",
+      "remediation": "Reduce duplicate clusters and regenerate the full-app duplication baseline without raising scorecard budgets.",
+      "source_artifact": "reports/quality/full-app-duplication-baseline.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "duplication_clusters",
+      "name": "full_app_duplication_interfaces_cli_full_app",
+      "remediation": "Reduce duplicate clusters and regenerate the full-app duplication baseline without raising scorecard budgets.",
+      "source_artifact": "reports/quality/full-app-duplication-baseline.json",
+      "status": "pass"
+    },
+    {
+      "current": 49,
+      "limit": 49,
+      "metric": "total_duplicate_clusters",
+      "name": "full_app_duplication_total_clusters",
+      "remediation": "Burn down full-app duplicate clusters and refresh the reviewed baseline.",
+      "source_artifact": "reports/quality/full-app-duplication-baseline.json",
+      "status": "pass"
+    },
+    {
+      "current": 50,
+      "limit": 50,
+      "metric": "zero_reference_supporting_script_count",
+      "name": "supporting_scripts_zero_reference_count",
+      "remediation": "Triage or remove zero-reference supporting scripts; budgets must not grow.",
+      "source_artifact": "configs/quality/scripts_inventory_manifest.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "untriaged_zero_reference_supporting_script_count",
+      "name": "supporting_scripts_untriaged_zero_reference_count",
+      "remediation": "Add owner/removal metadata for every zero-reference supporting script.",
+      "source_artifact": "configs/quality/scripts_inventory_manifest.json",
+      "status": "pass"
+    },
+    {
       "current": 0,
       "limit": 0,
       "metric": "budget_violations",
@@ -280,7 +343,7 @@
       "status": "pass"
     },
     {
-      "current": "c8faba67f743e7c5e2fff500a9b537505b5a134d8ef843ec84d4fe66d7ded489",
+      "current": "d5a28015287cd3e7fc7c04e0182d7255db6cee9116057f11f1ba34dab893aedb",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -310,16 +373,16 @@
   },
   "status_counts": {
     "fail": 0,
-    "pass": 31,
+    "pass": 38,
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 8.54,
+    "architecture_quality_scorecard_integral_score": 8.56,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
     "fail_count": 0,
     "failing_gates": [],
-    "gate_count": 31,
-    "pass_count": 31,
+    "gate_count": 38,
+    "pass_count": 38,
     "release_gate_status": "passing",
     "warn_count": 0,
     "warning_gates": []

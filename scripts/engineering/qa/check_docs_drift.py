@@ -45,10 +45,19 @@ def main() -> int:
     readme_file = Path("README.md")
 
     all_violations = []
+    skipped_files = []
     for file_path in _markdown_files(docs_dir, readme_file):
-        if file_path.is_file():
-            violations = check_file_forbidden_patterns(file_path)
-            all_violations.extend(violations)
+        try:
+            if file_path.is_file():
+                violations = check_file_forbidden_patterns(file_path)
+                all_violations.extend(violations)
+        except OSError as e:
+            # Пропускаем файлы с слишком длинными путями (Windows limitation)
+            skipped_files.append(str(file_path))
+            print(f"Warning: Skipping file due to path error: {file_path}", file=sys.stderr)
+
+    if skipped_files:
+        print(f"Warning: Skipped {len(skipped_files)} files due to path errors", file=sys.stderr)
 
     if all_violations:
         print("Docs drift detected:", file=sys.stderr)

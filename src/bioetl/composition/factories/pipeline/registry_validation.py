@@ -204,18 +204,12 @@ def _validate_entity_contract_fields(
 def validate_registry_manifest(
     *,
     configs_root: Path,
-    pipeline_configs: Iterable[PipelineFactoryConfig] | None = None,
+    pipeline_configs: Iterable[PipelineFactoryConfig],
 ) -> list[str]:
     """Validate registry-manifest entries against tracked entity/provider configs."""
-    from bioetl.composition.factories.pipeline.registry_manifest import (
-        PIPELINE_CONFIGS,
-    )
-
     resolved_configs_root = resolve_configs_root(configs_root)
     repo_root = resolved_configs_root.parent
-    registry_entries = tuple(
-        PIPELINE_CONFIGS if pipeline_configs is None else pipeline_configs
-    )
+    registry_entries = tuple(pipeline_configs)
     errors: list[str] = []
 
     seen_pipeline_names: set[str] = set()
