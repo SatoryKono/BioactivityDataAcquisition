@@ -10,7 +10,7 @@ from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock
 
 from bioetl.application.services.control_plane.forensic import ForensicRunDiffService
-from bioetl.application.services.control_plane.forensic_diff_diagnostics_support import (
+from bioetl.application.services.control_plane.forensic.diagnostics_support import (
     _artifact_refs,
     _coerce_int,
     _dict_or_empty,
