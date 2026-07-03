@@ -436,7 +436,7 @@ review_lanes:
         action_if_reintroduced: keep_untracked_or_reclassify_through_explicit_owner_review
       - path: .windsurf
         current_live_state: present_local_only_root_surface
-        canonical_path: null
+        canonical_path: docs/00-project/ai/rules/windsurf/
         action_if_reintroduced: keep_untracked_or_move_curated_shared_content_to_an_approved_root_surface
 
   - lane_id: root_ad_hoc_docs_and_diagnostics

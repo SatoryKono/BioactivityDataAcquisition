@@ -18,7 +18,10 @@ docs/00-project/ai/rules/
 │   ├── 05-agent-workflow.mdc
 │   ├── 06-docs-standards.mdc
 │   └── 07-qodo-enforcement.mdc  # Индекс правил Qodo (синхронизация)
-└── [скопировать в .cursor/rules/]
+├── windsurf/                    # Windsurf/Cascade (производная от cursor/)
+│   ├── rules/*.md
+│   └── workflows/*.md
+└── [скопировать в .cursor/rules/ и .windsurf/]
 ```
 
 Источник канонических правил: `docs/00-project/RULES.md` (v6.1.4)
@@ -61,7 +64,23 @@ cp docs/00-project/ai/rules/cursor/*.mdc .cursor/rules/
 - Рефакторинге
 - Code review
 
-### B. Codex / Claude-style CLI workflows
+### B. Windsurf Cascade
+
+**SSOT:** `docs/00-project/ai/rules/cursor/*.mdc`  
+**Tracked mirror:** `docs/00-project/ai/rules/windsurf/`  
+**Local deploy:** `.windsurf/` (gitignored)
+
+```bash
+# Сгенерировать rules + deploy workflows в .windsurf/
+uv run python scripts/ai/sync_windsurf_rules.py
+
+# Только проверить синхронизацию
+uv run python scripts/ai/sync_windsurf_rules.py --check
+```
+
+**Workflows (slash commands):** `/review`, `/post-change`, `/pre-commit`, `/qodo-sync`
+
+### C. Codex / Claude-style CLI workflows
 
 **Настройка:**
 
@@ -73,7 +92,7 @@ cp docs/00-project/ai/rules/cursor/*.mdc .cursor/rules/
 **Ручное использование:** При новом чате упомяните:
 > "Следуй правилам из docs/00-project/RULES.md и orchestration guidance из .codex/agents/ORCHESTRATION.md"
 
-### C. Универсальные правила (любой AI)
+### D. Универсальные правила (любой AI)
 
 Используйте: `docs/00-project/ai/rules/bioetl-ai-rules.md`
 
@@ -136,11 +155,15 @@ interfaces/     → CLI
    ```bash
    cp docs/00-project/ai/rules/cursor/*.mdc .cursor/rules/
    ```
+4. Регенерировать Windsurf mirror:
+   ```bash
+   uv run python scripts/ai/sync_windsurf_rules.py
+   ```
 
 ### Синхронизация с Qodo platform
 
 Правила Qodo загружаются через skill `/qodo-get-rules` и интегрируются в тематические `.mdc` файлы.
-Индекс синхронизации: `07-qodo-enforcement.mdc`.
+Индекс синхронизации: `07-qodo-enforcement.mdc`. После обновления cursor rules выполните `sync_windsurf_rules.py`.
 
 ## Команды верификации
 

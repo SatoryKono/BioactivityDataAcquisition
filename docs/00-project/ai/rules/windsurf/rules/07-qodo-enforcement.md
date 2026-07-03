@@ -1,7 +1,6 @@
 ---
-description: Qodo platform enforcement rules synced into Cursor guidance
-globs: ["src/**/*.py", "tests/**/*.py", "configs/**/*.yaml", "docs/**/*.md"]
-alwaysApply: false
+trigger: model_decision
+description: "Qodo platform enforcement rules synced into Cursor guidance"
 ---
 
 # Qodo Enforcement Rules

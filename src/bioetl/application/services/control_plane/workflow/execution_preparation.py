@@ -3,10 +3,17 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from datetime import datetime
-from uuid import UUID
 
+from bioetl.application.services.control_plane.workflow._execution_resume_support import (
+    load_resume_manifest,
+    load_resume_state,
+    normalize_resume_state,
+    resolve_completed_transform_fingerprints,
+    resolve_skipped_step_ids,
+    validate_resume_state,
+)
 from bioetl.application.services.control_plane.workflow.execution_preparation_incremental import (
     _apply_incremental_offset,
 )
@@ -121,24 +128,24 @@ def _prepare_resumed_execution(
     workflow_state_port: WorkflowExecutionStatePort,
     now_factory: Callable[[], datetime],
 ) -> WorkflowExecutionPreparationResult:
-    latest_state = _load_resume_state(
+    latest_state = load_resume_state(
         workflow_state_port=workflow_state_port,
         workflow_name=config.name,
         resume_manifest_id=resume_manifest_id,
         resume_run_id=resume_run_id,
     )
-    _validate_resume_state(
+    validate_resume_state(
         latest_state=latest_state,
         workflow_name=config.name,
         current_fingerprint=current_fingerprint,
         force_steps=force_steps,
         repair_steps=repair_steps,
     )
-    manifest = _load_resume_manifest(
+    manifest = load_resume_manifest(
         manifest_service=manifest_service,
         latest_state=latest_state,
     )
-    normalized_state = _normalize_resume_state(
+    normalized_state = normalize_resume_state(
         latest_state,
         workflow_state_port=workflow_state_port,
         now_factory=now_factory,
@@ -147,140 +154,18 @@ def _prepare_resumed_execution(
         manifest=manifest,
         state=normalized_state,
         config=config,
-        completed_step_ids=_resolve_skipped_step_ids(
+        completed_step_ids=resolve_skipped_step_ids(
             state=normalized_state,
             force_steps=force_steps,
             repair_steps=repair_steps,
         ),
-        completed_transform_fingerprints=_resolve_completed_transform_fingerprints(
+        completed_transform_fingerprints=resolve_completed_transform_fingerprints(
             state=normalized_state,
             force_steps=force_steps,
             repair_steps=repair_steps,
         ),
         resumed=True,
     )
-
-
-def _load_resume_state(
-    *,
-    workflow_state_port: WorkflowExecutionStatePort,
-    workflow_name: str,
-    resume_manifest_id: str | None,
-    resume_run_id: RunID | str | None,
-) -> WorkflowExecutionState:
-    if resume_run_id is not None:
-        resolved_run_id = _coerce_resume_run_id(resume_run_id)
-        state = workflow_state_port.get_by_run_id(resolved_run_id)
-        if state is None:
-            raise RuntimeError(
-                f"Workflow '{workflow_name}' has no persisted execution state for "
-                f"--resume-run-id={resolved_run_id}"
-            )
-        return state
-    if resume_manifest_id is not None:
-        state = workflow_state_port.get_by_manifest_id(resume_manifest_id)
-        if state is None:
-            raise RuntimeError(
-                f"Workflow '{workflow_name}' has no persisted execution state for "
-                f"--resume-manifest-id={resume_manifest_id}"
-            )
-        return state
-    latest_state = workflow_state_port.get_latest(workflow_name)
-    if latest_state is None:
-        raise RuntimeError(
-            f"Workflow '{workflow_name}' has no persisted execution state for --resume-last"
-        )
-    return latest_state
-
-
-def _coerce_resume_run_id(resume_run_id: RunID | str) -> RunID:
-    """Normalize external resume selectors into the RunID domain type."""
-    if isinstance(resume_run_id, UUID):
-        return RunID(resume_run_id)
-    return RunID(UUID(str(resume_run_id)))
-
-
-def _validate_resume_state(
-    *,
-    latest_state: WorkflowExecutionState,
-    workflow_name: str,
-    current_fingerprint: str,
-    force_steps: tuple[str, ...],
-    repair_steps: tuple[str, ...],
-) -> None:
-    if latest_state.execution_fingerprint != current_fingerprint:
-        raise RuntimeError(
-            "Workflow configuration changed since the last execution; "
-            "--resume-last requires the same execution fingerprint"
-        )
-    if latest_state.status == "success":
-        raise RuntimeError(
-            f"Workflow '{workflow_name}' already completed successfully; nothing to resume"
-        )
-    if latest_state.repair_required and not (repair_steps or force_steps):
-        raise RuntimeError(
-            latest_state.repair_hint
-            or "Workflow resume requires explicit --repair-steps or --force-steps"
-        )
-
-
-def _load_resume_manifest(
-    *,
-    manifest_service: WorkflowManifestService,
-    latest_state: WorkflowExecutionState,
-) -> WorkflowManifest:
-    manifest = manifest_service.manifest_port.get(latest_state.manifest_id)
-    if manifest is None:
-        raise RuntimeError(
-            "Workflow resume failed because the persisted manifest could not be loaded"
-        )
-    return manifest
-
-
-def _normalize_resume_state(
-    latest_state: WorkflowExecutionState,
-    *,
-    workflow_state_port: WorkflowExecutionStatePort,
-    now_factory: Callable[[], datetime],
-) -> WorkflowExecutionState:
-    if latest_state.status != "running":
-        return latest_state
-    normalized_state = replace(
-        latest_state,
-        status="incomplete",
-        updated_at=now_factory(),
-    )
-    workflow_state_port.save(normalized_state)
-    return normalized_state
-
-
-def _resolve_skipped_step_ids(
-    *,
-    state: WorkflowExecutionState,
-    force_steps: tuple[str, ...],
-    repair_steps: tuple[str, ...],
-) -> frozenset[str]:
-    forced_or_repaired = {*force_steps, *repair_steps}
-    return frozenset(
-        step.step_id
-        for step in state.steps
-        if step.status == "success" and step.step_id not in forced_or_repaired
-    )
-
-
-def _resolve_completed_transform_fingerprints(
-    *,
-    state: WorkflowExecutionState,
-    force_steps: tuple[str, ...],
-    repair_steps: tuple[str, ...],
-) -> dict[str, str]:
-    forced_or_repaired = {*force_steps, *repair_steps}
-    return {
-        step_id: fingerprint
-        for step_id, fingerprint in state.completed_transform_fingerprints.items()
-        if step_id not in forced_or_repaired
-    }
-
 
 def _build_initial_state(manifest: WorkflowManifest) -> WorkflowExecutionState:
     now = manifest.created_at

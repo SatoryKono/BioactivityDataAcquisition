@@ -44,6 +44,7 @@ ______________________________________________________________________
 - Архитектура: Hexagonal + Medallion (Bronze→Silver→Gold) + DDD
 - Deployment: Local-Only (ADR-010)
 - Coverage threshold: ≥85% overall, ≥90% domain
+- Нормативные документы: `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`
 
 **Структура тестов:**
 

@@ -23,6 +23,7 @@ ______________________________________________________________________
 Перед изменениями/аудитом обязательно сверяться с:
 
 1. `docs/00-project/RULES.md` (источник требований RFC 2119),
+1. `docs/01-requirements/REQUIREMENTS.md` (формализованные требования),
 1. `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`,
 1. `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md` — для write-capable задач,
 1. `docs/00-project/ai/agents/guides/AGENT.md`,

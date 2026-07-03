@@ -110,7 +110,7 @@ The domain layer implements Domain-Driven Design patterns:
 | [Archive Index](docs/99-archive/README.md)                                  | Repository-path historical index; not published in MkDocs nav         |
 
 Start with [Project Map](docs/00-project/00-map.md), [RULES.md](docs/00-project/RULES.md),
-and [Tools Hub](docs/00-project/TOOLS.md) for current guidance. Materials under
+[REQUIREMENTS.md](docs/01-requirements/REQUIREMENTS.md), and [Tools Hub](docs/00-project/TOOLS.md) for current guidance. Materials under
 [`docs/99-archive/`](docs/99-archive/README.md) are preserved for traceability
 as repository-path historical context, but active docs in `docs/00-05` remain
 the source of truth.
@@ -735,7 +735,7 @@ Please review our **[Security Policy](.github/SECURITY.md)** for:
 
 ## Contributing
 
-Please read **[RULES.md](docs/00-project/RULES.md)** before contributing.
+Please read **[RULES.md](docs/00-project/RULES.md)** and **[REQUIREMENTS.md](docs/01-requirements/REQUIREMENTS.md)** before contributing.
 
 1. Ensure tests pass: `uv run python -m scripts.engineering.dev run-tests cov`
 1. Check types and linting: `uv run ruff check . && uv run ruff format --check . && uv run mypy src tests`

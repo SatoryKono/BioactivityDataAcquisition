@@ -23,7 +23,7 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2203,
+        "source_module_count": 2208,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
@@ -47,7 +47,7 @@
       "evidence_metrics": {
         "hotspot_budget_warning_count": 0,
         "hotspot_family_count": 5,
-        "source_module_count": 2203,
+        "source_module_count": 2208,
         "total_duplicate_clusters": 57
       },
       "id": "module_boundaries_coupling",
@@ -173,7 +173,7 @@
     "retained_public_export_facade_count": 4,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2203,
+    "source_module_count": 2208,
     "total_duplicate_clusters": 57,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
@@ -189,7 +189,7 @@
     },
     "compatibility_importer_census": {
       "path": "reports/quality/compatibility-importer-census.json",
-      "snapshot_date": "2026-07-02"
+      "snapshot_date": "2026-07-03"
     },
     "contract_registry_diagnostics": {
       "path": "reports/quality/contract-registry-diagnostics.json",
@@ -222,7 +222,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "fb15f6a63e251a6fa48645d07ddb739836aad21aa27f184eeda1ce3c84776e0c",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "52c69f1514492c567f6b7d051e781b490c3869e6b8ad4fb7ca1786d50e708807"
+      "source_tree_sha256": "735e090ed5049060c914683c020e7585fd4cdc73ab32e7bd97bc56cb4af5d8b1"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,
