@@ -77,11 +77,21 @@ ZERO_IMPORT_OWNER_TEST_EVIDENCE: dict[str, dict[str, object]] = {
         "evidence_lane": "canonical_owner_contract",
         "owner_tests": DOMAIN_PORT_OWNER_TESTS,
     },
+    "src/bioetl/domain/ports/workflow_row_reconciliation.py": {
+        "evidence_lane": "canonical_owner_contract",
+        "owner_tests": DOMAIN_PORT_OWNER_TESTS,
+    },
     "src/bioetl/infrastructure/adapters/_cached_bronze_support.py": {
         "evidence_lane": "retained_module_owner_suite",
         "owner_tests": (
             "tests/architecture/test_wave4_complexity_closeout.py",
             "tests/unit/infrastructure/adapters/test_cached_bronze_data_source.py",
+        ),
+    },
+    "src/bioetl/infrastructure/storage/workflow_row_reconciliation.py": {
+        "evidence_lane": "canonical_owner_contract",
+        "owner_tests": (
+            "tests/unit/infrastructure/storage/test_workflow_row_reconciliation.py",
         ),
     },
     "src/bioetl/infrastructure/adapters/_error_handling_support.py": {
