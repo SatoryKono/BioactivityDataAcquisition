@@ -1,0 +1,296 @@
+{
+  "_dq_error": {
+    "checks": [],
+    "coerce": false,
+    "description": "Flag for data quality errors.",
+    "dtype": "bool",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_dq_warn": {
+    "checks": [],
+    "coerce": false,
+    "description": "Flag for data quality warnings.",
+    "dtype": "bool",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_index": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Sequential index of the record in the pipeline run.",
+    "dtype": "int64",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_ingestion_ts": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?([+-]\\d{2}:\\d{2}|Z)?$"
+      }
+    ],
+    "coerce": false,
+    "description": "Timestamp when the record was ingested (UTC, ISO 8601 format).",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_run_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Correlation ID for the pipeline run.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_run_type": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Type of pipeline run.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_source_batch_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Batch context ID from the source.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "cell_description": {
+    "checks": [],
+    "coerce": false,
+    "description": "Cell line description.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "cell_id": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^CHEMBL\\d+$"
+      }
+    ],
+    "coerce": false,
+    "description": "ChEMBL ID for cell line (PK).",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": true
+  },
+  "cell_name": {
+    "checks": [],
+    "coerce": false,
+    "description": "Cell line name (e.g., HeLa, MCF7).",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "cell_source_organism": {
+    "checks": [],
+    "coerce": false,
+    "description": "Source organism (e.g., Homo sapiens).",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "cell_source_taxonomy_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "NCBI Taxonomy ID for source organism.",
+    "dtype": "Int64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "cell_source_tissue": {
+    "checks": [],
+    "coerce": false,
+    "description": "Source tissue (e.g., Cervix, Breast).",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "cell_type": {
+    "checks": [],
+    "coerce": false,
+    "description": "Cell type classification (e.g., Cancer cell line).",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "cellosaurus_id": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^CVCL_[A-Z0-9]+$"
+      }
+    ],
+    "coerce": false,
+    "description": "Cellosaurus ID (external reference).",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "cl_lincs_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "LINCS ID (Library of Integrated Network-Based Cellular Signatures).",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "clo_id": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^CLO[_:]\\d+$"
+      }
+    ],
+    "coerce": false,
+    "description": "Cell Line Ontology ID.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "clo_iri": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^https?://[^\\s]+$"
+      }
+    ],
+    "coerce": false,
+    "description": "Persistent IRI for the CLO identifier.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "clo_mapping_status": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "CLO IRI mapping status.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "clo_ontology_version": {
+    "checks": [],
+    "coerce": false,
+    "description": "CLO ontology release/version used for IRI mapping.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "content_hash": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^[a-f0-9]{64}$"
+      }
+    ],
+    "coerce": false,
+    "description": "SHA256 hash of canonical record representation (64 hex chars).",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "efo_id": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^EFO[_:]\\d+$"
+      }
+    ],
+    "coerce": false,
+    "description": "EFO ontology ID.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "efo_iri": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^https?://[^\\s]+$"
+      }
+    ],
+    "coerce": false,
+    "description": "Persistent IRI for the EFO identifier.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "efo_mapping_status": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "EFO IRI mapping status.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "efo_ontology_version": {
+    "checks": [],
+    "coerce": false,
+    "description": "EFO ontology release/version used for IRI mapping.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "entity_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Unique business identifier for the entity.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  }
+}

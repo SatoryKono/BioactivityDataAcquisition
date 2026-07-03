@@ -1,0 +1,142 @@
+"""Field-family rule declarations for the standard profile builder."""
+
+from __future__ import annotations
+
+from collections.abc import Callable
+
+from bioetl.domain.normalization.profiles.profile_normalizers import (
+    normalize_profile_abstract,
+    normalize_profile_binary_flag,
+    normalize_profile_boolean,
+    normalize_profile_date,
+    normalize_profile_doi,
+    normalize_profile_float,
+    normalize_profile_int,
+    normalize_profile_json_string,
+    normalize_profile_json_string_strict,
+    normalize_profile_ontology_id,
+    normalize_profile_operator,
+    normalize_profile_pmc_id,
+    normalize_profile_pmid,
+    normalize_profile_title,
+)
+
+FieldNormalizer = Callable[[object], object]
+RuleFamilySpec = tuple[frozenset[str], FieldNormalizer, str]
+RuleFamilyFieldSets = tuple[
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+    frozenset[str],
+]
+
+
+def _rule_family_specs(
+    *,
+    field_sets: RuleFamilyFieldSets,
+) -> tuple[RuleFamilySpec, ...]:
+    (
+        title_fields,
+        abstract_fields,
+        doi_fields,
+        pmid_fields,
+        pmc_id_fields,
+        date_fields,
+        int_fields,
+        float_fields,
+        set_like_fields,
+        json_string_fields,
+        strict_json_fields,
+        boolean_fields,
+        flag_fields,
+        operator_fields,
+        ontology_id_fields,
+    ) = field_sets
+    return (
+        (
+            title_fields,
+            normalize_profile_title,
+            "Normalize title text to canonical textual form.",
+        ),
+        (
+            abstract_fields,
+            normalize_profile_abstract,
+            "Normalize abstract text through canonical whitespace and entity cleanup.",
+        ),
+        (
+            doi_fields,
+            normalize_profile_doi,
+            "Normalize DOI to canonical registry form before hashing.",
+        ),
+        (
+            pmid_fields,
+            normalize_profile_pmid,
+            "Normalize PMID to digits-only canonical string.",
+        ),
+        (
+            pmc_id_fields,
+            normalize_profile_pmc_id,
+            "Normalize PMC identifier to canonical PMC-prefixed string.",
+        ),
+        (
+            date_fields,
+            normalize_profile_date,
+            "Canonicalize partial-date text to stable date semantics.",
+        ),
+        (
+            boolean_fields,
+            normalize_profile_boolean,
+            "Coerce boolean-like source values to canonical bool semantics.",
+        ),
+        (
+            flag_fields,
+            normalize_profile_binary_flag,
+            "Coerce boolean-like source values to canonical 0/1 flag semantics.",
+        ),
+        (
+            operator_fields,
+            normalize_profile_operator,
+            "Canonicalize operator-like values to ASCII comparison symbols.",
+        ),
+        (
+            ontology_id_fields,
+            normalize_profile_ontology_id,
+            "Normalize ontology ID to canonical prefix form before hashing.",
+        ),
+        (
+            int_fields,
+            normalize_profile_int,
+            "Coerce stable integer semantics for deterministic hashing.",
+        ),
+        (
+            float_fields,
+            normalize_profile_float,
+            "Coerce stable float semantics and remove NaN/Inf noise.",
+        ),
+        (
+            strict_json_fields,
+            normalize_profile_json_string_strict,
+            "Canonicalize JSON-bearing string payloads and collapse malformed JSON to None.",
+        ),
+        (
+            set_like_fields,
+            normalize_profile_json_string,
+            "Canonicalize JSON; when represented as an array, treat item order as set-like for content_hash.",
+        ),
+        (
+            json_string_fields,
+            normalize_profile_json_string,
+            "Canonicalize JSON-bearing string payloads after textual cleanup.",
+        ),
+    )
