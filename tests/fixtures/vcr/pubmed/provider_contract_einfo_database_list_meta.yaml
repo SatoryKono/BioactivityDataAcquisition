@@ -1,8 +1,0 @@
-schema_version: 1
-provider: pubmed
-cassette_rel_path: tests/fixtures/vcr/pubmed/provider_contract_einfo_database_list.yaml
-metadata_status: managed_inventory
-source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 312f7917a5eeaabf9a299ce624144fb37a84bec0a63f12e42022259f079111d6
-recorded_at: '2026-04-28'
-staleness_ready: true

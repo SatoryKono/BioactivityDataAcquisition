@@ -1,8 +1,0 @@
-schema_version: 1
-provider: pubchem
-cassette_rel_path: tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch_compound_by_name_water.yaml
-metadata_status: managed_inventory
-source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 1bfca4f64270885b98b2236448c962862bb41e805bb09b5cffeee647085efaae
-recorded_at: '2026-04-28'
-staleness_ready: true

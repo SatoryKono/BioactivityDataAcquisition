@@ -1,8 +1,0 @@
-schema_version: 1
-provider: chembl
-cassette_rel_path: tests/fixtures/vcr/chembl/test_pipeline_idempotency.yaml
-metadata_status: managed_inventory
-source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 96047c8136a791c717054f330c4ea7f4f61eee2500ade840f8017184d8c2a60c
-recorded_at: '2026-04-28'
-staleness_ready: true

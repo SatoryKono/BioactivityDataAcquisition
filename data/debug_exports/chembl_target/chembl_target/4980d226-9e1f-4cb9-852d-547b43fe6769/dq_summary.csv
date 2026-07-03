@@ -1,2 +1,0 @@
-"run_id","workflow_id","pipeline_id","stage","status","reason_code","action","record_count"
-"4980d226-9e1f-4cb9-852d-547b43fe6769","chembl_target","chembl_target","silver","quarantined","DQ_HARD_RULE_FAILED","quarantine","7"
