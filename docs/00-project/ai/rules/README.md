@@ -24,13 +24,15 @@ docs/00-project/ai/rules/
 └── [скопировать в .cursor/rules/ и .windsurf/]
 ```
 
-Источник канонических правил: `docs/00-project/RULES.md` (v6.1.4)
+Источник канонических правил: `docs/00-project/NORMATIVE_SOURCES.md` → `docs/00-project/RULES.md` (v6.1.4)
+Текущую canonical version всегда сверяйте по `Version:` header в `RULES.md`.
 
 Этот каталог является condensed AI guidance surface. Он **не заменяет**
 канонический governance stack и должен ссылаться на него, а не дублировать его
 без необходимости:
 
 - `AGENTS.md`
+- `docs/00-project/NORMATIVE_SOURCES.md`
 - `docs/00-project/RULES.md`
 - `docs/01-requirements/REQUIREMENTS.md`
 - `docs/02-architecture/decisions/`

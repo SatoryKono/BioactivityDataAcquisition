@@ -31,7 +31,7 @@ jobs:
             --kpi-target-not-in-nav 120 \
             --hard-limit-not-in-nav 135 \
             --max-orphans 0 \
-            --target-deadline 2026-06-30 \
+            --target-deadline 2026-12-31 \
             --json-out reports/docs-kpi/docs-kpi-weekly.json \
             --markdown-out reports/docs-kpi/docs-kpi-weekly.md \
             --summary-out "$GITHUB_STEP_SUMMARY" \

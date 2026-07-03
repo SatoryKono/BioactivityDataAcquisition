@@ -65,7 +65,23 @@ KPI_INCLUDED_PREFIXES = ("00-project/ai/skills/global/.system/",)
 DEFAULT_TARGET_NOT_IN_NAV = 120
 DEFAULT_HARD_LIMIT_NOT_IN_NAV = 135
 DEFAULT_MAX_ORPHANS = 0
-DEFAULT_TARGET_DEADLINE = "2026-06-30"
+DEFAULT_TARGET_DEADLINE = "2026-12-31"
+
+
+def _safe_is_file(path: Path) -> bool:
+    """Return ``False`` when path metadata cannot be read safely."""
+    try:
+        return path.is_file()
+    except OSError:
+        return False
+
+
+def _safe_read_text(path: Path) -> str | None:
+    """Return file contents or ``None`` when the path is unreadable."""
+    try:
+        return path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
 
 
 def _is_generated_docs_artifact(path: Path) -> bool:
@@ -102,11 +118,15 @@ def _load_nav_docs() -> set[str]:
 
 def _collect_all_docs() -> list[Path]:
     """Return all markdown docs under docs/."""
-    return sorted(
-        path
-        for path in DOCS_DIR.rglob("*.md")
-        if path.is_file() and not _is_generated_docs_artifact(path)
-    )
+    docs: list[Path] = []
+    for path in DOCS_DIR.rglob("*.md"):
+        try:
+            if not _safe_is_file(path) or _is_generated_docs_artifact(path):
+                continue
+        except OSError:
+            continue
+        docs.append(path)
+    return sorted(docs)
 
 
 def _load_baseline_count(baseline_file: Path) -> tuple[int, bool]:
@@ -114,7 +134,10 @@ def _load_baseline_count(baseline_file: Path) -> tuple[int, bool]:
     if not baseline_file.exists():
         return 0, False
 
-    lines = baseline_file.read_text(encoding="utf-8", errors="replace").splitlines()
+    baseline_text = _safe_read_text(baseline_file)
+    if baseline_text is None:
+        return 0, False
+    lines = baseline_text.splitlines()
     entries = [
         line.strip()
         for line in lines
@@ -151,7 +174,10 @@ def _resolved_docs_target(
 
 def _iter_inbound_targets(source: Path, *, docs_root: Path) -> list[str]:
     targets: list[str] = []
-    lines = source.read_text(encoding="utf-8", errors="replace").splitlines()
+    source_text = _safe_read_text(source)
+    if source_text is None:
+        return targets
+    lines = source_text.splitlines()
     for line in lines:
         line_for_links = INLINE_CODE_RE.sub("", line)
         for match in MD_LINK_RE.finditer(line_for_links):

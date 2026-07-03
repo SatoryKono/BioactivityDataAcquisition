@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-03T08:55:27.667335+00:00",
+  "generated_at": "2026-07-03T15:59:35.775400+00:00",
   "summary": {
     "total_scripts": 452,
     "status_counts": {
@@ -3109,25 +3109,25 @@
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
-          "line": 75,
+          "line": 77,
           "source_group": "docs",
           "text": "uv run python scripts/ai/sync_windsurf_rules.py"
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
-          "line": 78,
+          "line": 80,
           "source_group": "docs",
           "text": "uv run python scripts/ai/sync_windsurf_rules.py --check"
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
-          "line": 160,
+          "line": 162,
           "source_group": "docs",
           "text": "uv run python scripts/ai/sync_windsurf_rules.py"
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
-          "line": 166,
+          "line": 168,
           "source_group": "docs",
           "text": "Индекс синхронизации: `07-qodo-enforcement.mdc`. После обновления cursor rules выполните `sync_windsurf_rules.py`."
         },
@@ -4987,7 +4987,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 132,
+      "reference_count": 133,
       "references": [
         {
           "path": ".github/workflows/docs-kpi-weekly.yml",
@@ -5337,7 +5337,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
-          "line": 45,
+          "line": 55,
           "source_group": "docs",
           "text": "- run `python -m scripts.docs check-links --links --specs --configs`"
         },
@@ -7247,13 +7247,13 @@
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 31,
+          "line": 41,
           "source_group": "agents",
           "text": "- Mixed checkout в Windows PowerShell: `.\\scripts\\engineering\\dev\\run_pytest.ps1`, `.\\scripts\\engineering\\dev\\run_mypy.ps1`, `.\\.venv-win\\Scripts\\python.exe -m ...`"
         },
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 323,
+          "line": 333,
           "source_group": "agents",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         },
@@ -7306,13 +7306,13 @@
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 32,
+          "line": 42,
           "source_group": "agents",
           "text": "- Mixed checkout в WSL/Linux: `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`, `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`"
         },
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 323,
+          "line": 333,
           "source_group": "agents",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         },
@@ -7422,13 +7422,13 @@
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 31,
+          "line": 41,
           "source_group": "agents",
           "text": "- Mixed checkout в Windows PowerShell: `.\\scripts\\engineering\\dev\\run_pytest.ps1`, `.\\scripts\\engineering\\dev\\run_mypy.ps1`, `.\\.venv-win\\Scripts\\python.exe -m ...`"
         },
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 323,
+          "line": 333,
           "source_group": "agents",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         },
@@ -7481,13 +7481,13 @@
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 32,
+          "line": 42,
           "source_group": "agents",
           "text": "- Mixed checkout в WSL/Linux: `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`, `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`"
         },
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 323,
+          "line": 333,
           "source_group": "agents",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         },
@@ -9814,7 +9814,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md",
-          "line": 63,
+          "line": 73,
           "source_group": "docs",
           "text": "generator from `scripts/engineering/qa/report_module_coverage_inventory.py`"
         },
