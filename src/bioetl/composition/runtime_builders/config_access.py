@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from pathlib import Path
 
 from bioetl.composition.runtime_builders._config_access_loaders import (
-    create_dq_config_loader,
-    create_pipeline_config_loader,
-    create_source_config_loader,
+    create_dq_config_loader as _create_dq_config_loader,
+    create_pipeline_config_loader as _create_pipeline_config_loader,
+    create_source_config_loader as _create_source_config_loader,
 )
 from bioetl.infrastructure.config.config_root import resolve_configs_root
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
@@ -22,6 +23,23 @@ __all__ = [
     "load_source_config",
     "resolve_configs_root",
 ]
+
+
+def create_pipeline_config_loader(
+    configs_root: Path,
+) -> Callable[[str], PipelineYamlConfig]:
+    """Bind pipeline config loading through the owner runtime config seam."""
+    return _create_pipeline_config_loader(configs_root)
+
+
+def create_dq_config_loader(configs_root: Path) -> Callable[[str], object]:
+    """Bind DQ config loading through the owner runtime config seam."""
+    return _create_dq_config_loader(configs_root)
+
+
+def create_source_config_loader(configs_root: Path) -> Callable[[str], object]:
+    """Bind provider source config loading through the owner runtime config seam."""
+    return _create_source_config_loader(configs_root)
 
 
 def get_settings():

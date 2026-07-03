@@ -6,6 +6,9 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.core.base_transformer import FilteredOutError
 from bioetl.application.core.batch_metrics import BatchMetricsRecorderService
+from bioetl.application.core.batch_processing_runtime import (
+    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
+)
 from bioetl.application.core.batch_transformer_attempt_failures import (
     _build_filtered_out_handling_context_from_mapping,
     handle_filtered_out_error,
@@ -16,9 +19,6 @@ from bioetl.application.core.batch_transformer_attempt_success import (
 )
 from bioetl.application.core.batch_transformer_attempt_success import (
     build_transform_success_outcome,
-)
-from bioetl.application.core.batch_operation_errors import (
-    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
 )
 from bioetl.application.core.batch_transformer_state import RecordTransformOutcome
 from bioetl.domain.types import BronzeRecord

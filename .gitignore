@@ -102,6 +102,9 @@ log_test.txt
 /reports/quality/*
 !/reports/quality/hotspot-family-baseline.json
 !/reports/quality/hotspot-family-baseline.md
+!/reports/quality/hotspot-duplication-baseline.json
+!/reports/quality/hotspot-duplication-baseline.md
+!/reports/quality/hotspot-duplication-history.jsonl
 !/reports/quality/compatibility-importer-census.json
 !/reports/quality/compatibility-importer-census.md
 !/reports/quality/config-discrepancy-baseline.json
@@ -132,6 +135,7 @@ log_test.txt
 !/reports/quality/tech-debt-issues-5744-5751-closeout.json
 !/reports/quality/tech-debt-issues-5834-5838-closeout.json
 !/reports/quality/tech-debt-issues-5839-5845-closeout.json
+!/reports/quality/tech-debt-issues-5861-5864-closeout.json
 !/reports/quality/tech-debt-issue-5647-closeout.json
 !/reports/quality/issue-5272-application-core-coverage-closeout.json
 !/reports/quality/issue-5376-coverage-tail-closeout.json

@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from bioetl.domain.serialization import deserialize_from_json, serialize_to_json_canonical
+from bioetl.domain.serialization import (
+    deserialize_from_json,
+    serialize_to_json_canonical,
+)
 
 
 def _canonicalize_mapping(value: dict[str, object]) -> dict[str, object]:

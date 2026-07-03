@@ -6,7 +6,7 @@ import asyncio
 import time
 from typing import TYPE_CHECKING, Literal
 
-from bioetl.application.core.batch_operation_errors import (
+from bioetl.application.core.batch_runtime_failure_policy import (
     OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
 )
 from bioetl.application.core.preflight.health_aggregator_runtime import (

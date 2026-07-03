@@ -164,10 +164,10 @@
         "module_coverage_inventory": false,
         "remote_main_baseline": false
       },
-      "module_coverage_source_tree_sha256": "1b9e43c80618bd8e8d9c102b63ff77c85cb9ad4f52b3467621b78ce316e6100d",
+      "module_coverage_source_tree_sha256": "913ce19621084a256a703421467c096e673994da922eddf214246d95f09cc0cd",
       "architecture_quality_score": 8.54,
       "remote_main_baseline_fingerprint": "c8faba67f743e7c5e2fff500a9b537505b5a134d8ef843ec84d4fe66d7ded489",
-      "architecture_quality_scorecard_source_tree_sha256": "1b9e43c80618bd8e8d9c102b63ff77c85cb9ad4f52b3467621b78ce316e6100d"
+      "architecture_quality_scorecard_source_tree_sha256": "913ce19621084a256a703421467c096e673994da922eddf214246d95f09cc0cd"
     },
     "5708": {
       "shared_delegation_helper": "src/bioetl/infrastructure/adapters/decorators/_data_source_delegation.py",
@@ -207,7 +207,7 @@
       "unmeasured_module_count": 0,
       "uncovered_module_count": 0,
       "no_executable_line_modules": 20,
-      "source_tree_sha256": "1b9e43c80618bd8e8d9c102b63ff77c85cb9ad4f52b3467621b78ce316e6100d",
+      "source_tree_sha256": "913ce19621084a256a703421467c096e673994da922eddf214246d95f09cc0cd",
       "under70_module_count_before": 18,
       "under70_module_count_after": 9,
       "under85_module_count_after": 80

@@ -7,6 +7,9 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from bioetl.application.core.batch_runtime_failure_policy import (
+    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
+)
 from bioetl.application.core.postrun._phase_descriptions import (
     record_run_span_attributes,
 )
@@ -15,9 +18,6 @@ from bioetl.application.core.postrun._service_collaborators import (
 )
 from bioetl.application.core.postrun._service_support import (
     PostrunServiceSupportMixin,
-)
-from bioetl.application.core.batch_operation_errors import (
-    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
 )
 from bioetl.application.core.span_helpers import (
     build_pipeline_span_attributes,

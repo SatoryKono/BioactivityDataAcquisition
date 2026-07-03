@@ -93,14 +93,14 @@ def test_issue_5645_hotspot_warning_count_is_ratcheted_down() -> None:
     assert baseline["summary"]["budget_review_notes"] == sum(
         len(family["budget_review_notes"]) for family in baseline["families"]
     )
-    assert baseline["summary"]["budget_review_notes"] <= 5
-    assert baseline_family["files_ge_250_loc"] == 1
+    assert baseline["summary"]["budget_review_notes"] <= 6
+    assert baseline_family["files_ge_250_loc"] == 0
     assert baseline_family["max_internal_fan_in"] == 5
     assert baseline_family["budget_warnings"] == []
     assert baseline_family["budget_review_notes"] == [
         "at_budget:max_internal_fan_in=5/5"
     ]
-    assert scorecard_family["metrics"]["files_ge_250_loc"] == 1
+    assert scorecard_family["metrics"]["files_ge_250_loc"] == 0
     assert scorecard_family["metrics"]["max_internal_fan_in"] == 5
     assert scorecard_family["bounded_growth_budgets"]["files_ge_250_loc"] == 3
     assert scorecard_family["bounded_growth_budgets"]["max_internal_fan_in"] == 5

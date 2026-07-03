@@ -7,6 +7,7 @@ from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.batch_runtime_failure_policy import (
+    OPERATION_ERRORS,
     PIPELINE_EXECUTION_ERRORS,
     SOURCE_METADATA_ERRORS,
 )
@@ -154,6 +155,7 @@ def build_bronze_refs(
 
 
 __all__ = [
+    "OPERATION_ERRORS",
     "build_bronze_refs",
     "execute_transform_with_span",
     "execute_with_layer_span",
