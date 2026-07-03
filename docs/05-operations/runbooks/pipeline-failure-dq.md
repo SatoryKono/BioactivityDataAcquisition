@@ -42,7 +42,13 @@ ______________________________________________________________________
 ### Thresholds
 
 - **Soft Fail**: > 5% errors (Warning).
-- **Hard Fail**: > 20% errors (Pipeline Failure).
+- **Hard Fail**: > 25% errors (Pipeline Failure) for hierarchical configuration; > 20% for contract/runtime fallback.
+
+**Note:** DQ thresholds have dual defaults:
+- Hierarchical configuration (`configs/base/quality.yaml`): `soft_fail: 0.05` (5%), `hard_fail: 0.25` (25%)
+- Contract/runtime fallback (`src/bioetl/domain/ports/quality/silver_dq_request.py`): `soft_fail_threshold: 0.05` (5%), `hard_fail_threshold: 0.20` (20%)
+
+The hierarchical configuration takes precedence when available.
 
 ### Diagnosis Steps
 

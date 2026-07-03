@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-07-03'
 
 ______________________________________________________________________
 
@@ -80,10 +80,11 @@ class DQDisposition(StrEnum):
 class DQViolationKind(StrEnum):
     """Category of DQ violation"""
 
-    SCHEMA = "schema"  # Structural validation
-    CONTENT = "content"  # Data quality rules
-    CONSISTENCY = "consistency"  # Cross-source validation
-    PROVENANCE = "provenance"  # Lineage tracking
+    SCHEMA_VIOLATION = "schema_violation"  # Structural validation
+    THRESHOLD_BREACH = "threshold_breach"  # Quality threshold exceeded
+    BUSINESS_RULE_VIOLATION = "business_rule_violation"  # Business rule violations
+    CROSS_VALIDATION_MISMATCH = "cross_validation_mismatch"  # Cross-source validation
+    ANOMALY_SIGNAL = "anomaly_signal"  # Statistical anomaly detection
 
 
 class DQPolicyRef(NamedTuple):

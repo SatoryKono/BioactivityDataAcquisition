@@ -50,18 +50,38 @@ ______________________________________________________________________
 
 `src/bioetl/domain/ports/` содержит `Protocol`-контракты для Ports & Adapters:
 
-Сейчас пакет включает **82+ port interfaces** в `domain/ports` во вложенной структуре
+Сейчас пакет включает **~50+ port interfaces** в `domain/ports` во вложенной структуре
 (включая фасадный `__init__.py`):
 
 - config/ (3 порта)
 - control_plane/ (8 портов)
-- metadata/ (5 портов)
-- observability/ (8 портов)
-- quality/ (13 портов)
-- runtime/ (18 портов, плюс memory/ и runner/ подпакеты)
-- storage/ (7 портов)
+- metadata/ (2 порта)
+- observability/ (4 порта)
+- quality/ (8 портов)
+- runtime/ (9 портов, плюс подпакеты)
+- storage/ (5 портов)
+- workflow_foreign_key_reconciliation.py (1 порт)
+- workflow_row_reconciliation.py (1 порт)
+- storage_maintenance.py (1 порт)
 
 Это число синхронизируется архитектурным тестом `test_ports_count_matches_docs`.
+
+### 2.1.1. Дополнительные порты
+
+Помимо вложенной структуры портов, существуют дополнительные порты для специфических задач:
+
+- `workflow_foreign_key_reconciliation.py` - Port для reconciliation workflow foreign keys
+- `workflow_row_reconciliation.py` - Port для reconciliation workflow rows
+- `storage_maintenance.py` - Port для storage maintenance operations
+
+### 2.1.2. Domain подпакеты
+
+Помимо основных подпакетов (aggregates, value_objects, ports), domain слой включает дополнительные подпакеты:
+
+- `behavior/` - Domain behavior modules (validation, DQ policy resolution, cross-validation, composite validation)
+- `composite/` - Composite pipeline domain models and state
+- `control_plane/` - Control plane domain models (run manifest, run ledger, checkpoints)
+- `schemas/` - Pandera schemas for data validation (with subpackages by provider/entity)
 
 - источники, хранение и runtime-контроль (`DataSourcePort`,
   `BronzeStoragePort`, `SilverStoragePort`, `GoldStoragePort`,

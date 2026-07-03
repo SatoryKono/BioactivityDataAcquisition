@@ -21,47 +21,47 @@ Dashboard `1. Overview` is the primary entry point for incident triage. It uses 
 ### 3. Status
 - **Type:** Stat
 - **Purpose:** Current severity for the selected scope.
-- **Data sources:** `bioetl_current_status`
+- **Data sources:** `bioetl_l0_status` (recording rule with label_replace for workflow pipeline mapping)
 
 ### 4. First Action
 - **Type:** Table
 - **Purpose:** Guide operator to next triage action based on current state.
-- **Data sources:** `bioetl_first_action`
+- **Data sources:** `bioetl_l0_next_action_route` (recording rule with label_replace for workflow pipeline mapping)
 
 ### 5. Inputs
 - **Type:** Table
 - **Purpose:** Show input evidence for selected scope.
-- **Data sources:** `bioetl_inputs`
+- **Data sources:** `bioetl_l0_input_status_selected` (recording rule with label_replace for workflow pipeline mapping)
 
 ### 6. Runtime
 - **Type:** Table
 - **Purpose:** Show runtime status and blockers.
-- **Data sources:** `bioetl_runtime_status`, `bioetl_runtime_blockers`
+- **Data sources:** `bioetl_l1_runtime_blocker_status` (recording rule with label_replace for workflow pipeline mapping)
 
 ### 7. Data Quality
 - **Type:** Table
 - **Purpose:** Show DQ status and validation results.
-- **Data sources:** `bioetl_dq_status`, `bioetl_dq_validation_score`
+- **Data sources:** `bioetl_l1_dq_status` (recording rule with label_replace for workflow pipeline mapping)
 
 ### 8. Data Validation
 - **Type:** Table
 - **Purpose:** Show data validation outcomes.
-- **Data sources:** `bioetl_data_validation_outcomes`
+- **Data sources:** Aggregated from DQ recording rules
 
 ### 9. Control Plane
 - **Type:** Table
 - **Purpose:** Show control plane status and replay blockers.
-- **Data sources:** `bioetl_control_plane_status`, `bioetl_replay_blockers`
+- **Data sources:** `bioetl_l1_control_plane_current_status` (recording rule with label_replace for workflow pipeline mapping)
 
 ### 10. Provider
 - **Type:** Table
 - **Purpose:** Show provider health and status.
-- **Data sources:** `bioetl_provider_status`, `bioetl_provider_health`
+- **Data sources:** `bioetl_l1_provider_global_status` (recording rule)
 
 ### 11. Workflow
 - **Type:** Table
 - **Purpose:** Show workflow execution status.
-- **Data sources:** `bioetl_workflow_status`, `bioetl_workflow_outcomes`
+- **Data sources:** `bioetl_l1_workflow_global_status` (recording rule with label_replace for workflow pipeline mapping)
 
 ### 12. L1 Historical Trends
 - **Type:** Row
@@ -71,17 +71,17 @@ Dashboard `1. Overview` is the primary entry point for incident triage. It uses 
 ### 13. Runtime Blockers Trend
 - **Type:** Timeseries
 - **Purpose:** Show runtime blockers trend over time.
-- **Data sources:** `bioetl_runtime_blockers`
+- **Data sources:** `bioetl_l1_runtime_blocker_status` (recording rule with label_replace for workflow pipeline mapping)
 
 ### 14. DQ Status Trend
 - **Type:** Timeseries
 - **Purpose:** Show DQ status trend over time.
-- **Data sources:** `bioetl_dq_status`
+- **Data sources:** `bioetl_l1_dq_status` (recording rule with label_replace for workflow pipeline mapping)
 
 ### 15. Gold Lifecycle Trend
 - **Type:** Timeseries
 - **Purpose:** Show Gold lifecycle trend over time.
-- **Data sources:** `bioetl_gold_lifecycle`
+- **Data sources:** `bioetl_l1_gold_lifecycle_status` (recording rule with label_replace for workflow pipeline mapping)
 
 ### 16. Range Evidence (Historical / Recent History)
 - **Type:** Row
@@ -131,17 +131,49 @@ Dashboard `1. Overview` is the primary entry point for incident triage. It uses 
 ### 25. Triage Alert State
 - **Type:** Table
 - **Purpose:** Show alert state for triage.
-- **Data sources:** `bioetl_alerts_active`, `bioetl_alerts_firing`
+- **Data sources:** `ALERTS{alertstate="firing"}` (standard Prometheus metric)
 
 ### 26. SLO/SLA Alert Pressure
 - **Type:** Stat
 - **Purpose:** Show SLO/SLA alert pressure indicators.
-- **Data sources:** `bioetl_slo_alert_pressure`, `bioetl_sla_alert_pressure`
+- **Data sources:** `ALERTS{alertstate="firing"}` (standard Prometheus metric)
 
 ### 27. Firing Alert Details
 - **Type:** Table
 - **Purpose:** Show detailed information for currently firing alerts.
-- **Data sources:** `bioetl_alerts_firing_total`, `bioetl_alerts_firing_by_alert_name`
+- **Data sources:** `ALERTS{alertstate="firing"}` (standard Prometheus metric)
+
+## Recording Rules
+
+This dashboard uses Prometheus recording rules to aggregate and transform raw metrics into L0 (level 0) and L1 (level 1) aggregate status metrics. These recording rules enable complex label manipulation and workflow pipeline mapping.
+
+### L0 Recording Rules (Level 0 - Input/Status)
+- `bioetl_l0_status` - Aggregate system status with workflow pipeline mapping via label_replace
+- `bioetl_l0_next_action_route` - First action route with workflow pipeline mapping via label_replace
+- `bioetl_l0_input_status_selected` - Input status by input type (control_plane, runtime, provider, dq, gold) with workflow pipeline mapping via label_replace
+
+### L1 Recording Rules (Level 1 - Aggregate Status)
+- `bioetl_l1_runtime_blocker_status` - Runtime blocker status with workflow pipeline mapping via label_replace
+- `bioetl_l1_dq_status` - Data quality status with workflow pipeline mapping via label_replace
+- `bioetl_l1_gold_lifecycle_status` - Gold lifecycle status with workflow pipeline mapping via label_replace
+- `bioetl_l1_control_plane_current_status` - Control plane status with workflow pipeline mapping via label_replace
+- `bioetl_l1_provider_global_status` - Provider global status
+- `bioetl_l1_workflow_global_status` - Workflow global status with workflow pipeline mapping via label_replace
+
+### Label Replace Pattern
+The recording rules use complex `label_replace` expressions to map workflow pipeline names to their base pipeline names:
+```promql
+label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), "pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$")
+```
+This pattern strips the `workflow_` prefix from pipeline names to enable cross-workflow aggregation.
+
+### Raw Metric Starting Points
+Raw metric starting points for this dashboard are:
+- **System Status:** `bioetl_l0_status{pipeline=~"chembl_assay",run_type=~"incremental"}`
+- **First Action route:** `bioetl_l0_next_action_route{pipeline=~"chembl_assay",run_type=~"incremental"}`
+- **Input Status:** `bioetl_l0_input_status_selected{pipeline=~"chembl_assay",run_type=~"incremental"}`
+
+Exact blocker reasons live in the Control Plane, Runtime, Data Quality, Provider Health, and Workflow dashboards. Historical evidence stays in the row above.
 
 ## Variables
 

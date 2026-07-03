@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: Accepted (Implemented 2025-12-16)
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-07-03'
 
 ______________________________________________________________________
 
@@ -105,11 +105,11 @@ class RuntimeConfig:
     skip - gold: bool = False  # Skip Gold writes (composite sub-pipelines)
 ```
 
-#### PipelineServices (immutable dataclass with lifecycle)
+#### PipelineService (immutable dataclass with lifecycle)
 
 ```python
 @dataclass(frozen=True)
-class PipelineServices:
+class PipelineService:
     """I/O port dependencies with lifecycle management."""
     data-source: DataSourcePort
     storage: BronzeStoragePort | SilverStoragePort | GoldStoragePort | MergedStoragePort
@@ -145,7 +145,7 @@ class BasePipeline(ABC):
         self,
         config: PipelineConfig,
         runtime: RuntimeConfig,
-        services: PipelineServices,
+        services: PipelineService,
         run-id: RunID,
         transformer: BaseTransformer | None = None,
     ) -> None:
@@ -215,7 +215,7 @@ finally:
 1. **Улучшенная тестируемость**: Можно мокать только нужные части
 1. **Устранение циклических зависимостей**: Менеджеры не ссылаются на весь pipeline
 1. **Иммутабельность конфигурации**: Все dataclass frozen
-1. **Переиспользование**: `PipelineServices` можно шарить между пайплайнами
+1. **Переиспользование**: `PipelineService` можно шарить между пайплайнами
 1. **Lifecycle management**: Централизованное закрытие I/O ресурсов через `aclose()`
 
 ### Отрицательные
@@ -229,7 +229,7 @@ finally:
 | ------------------- | ------------------------------------- | ------ |
 | Пропуск зависимости | Dependency map + полный тест coverage | Закрыт |
 | Регрессии           | Baseline metrics + integration tests  | Закрыт |
-| Resource leaks      | `PipelineServices.aclose()` в finally | Закрыт |
+| Resource leaks      | `PipelineService.aclose()` в finally | Закрыт |
 
 ## Rollout
 
@@ -243,7 +243,7 @@ finally:
 
 - [x] `PipelineConfig` dataclass
 - [x] `RuntimeConfig` dataclass
-- [x] `PipelineServices` dataclass с `aclose()`
+- [x] `PipelineService` dataclass с `aclose()`
 
 ### Фаза 3: Рефакторинг BasePipeline
 
@@ -294,7 +294,7 @@ finally:
 ┌─────────────────────────────────────────────────────────────────────┐
 │                          BasePipeline                                │
 │  ┌────────────────┐  ┌──────────────────┐  ┌────────────────────┐  │
-│  │ PipelineConfig │  │ PipelineRuntime  │  │  PipelineServices  │  │
+│  │ PipelineConfig │  │ PipelineRuntime  │  │  PipelineService   │  │
 │  │   (frozen)     │  │    Config        │  │    (frozen)        │  │
 │  │                │  │   (frozen)       │  │                    │  │
 │  │ - pipeline-name│  │ - run-type       │  │ - data-source      │  │

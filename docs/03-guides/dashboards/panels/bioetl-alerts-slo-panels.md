@@ -21,27 +21,27 @@ Dashboard `6. Alerts & SLO` monitors active alert state, SLO pressure, alert sev
 ### 3. Active Alert Status
 - **Type:** Stat
 - **Purpose:** Show current active alert count and severity.
-- **Data sources:** `bioetl_alerts_active_total`, `bioetl_alerts_active_by_severity`
+- **Data sources:** `ALERTS{alertstate="firing"}` (standard Prometheus metric)
 
 ### 4. Firing Alerts / Range
 - **Type:** Stat
 - **Purpose:** Show firing alerts in selected range.
-- **Data sources:** `bioetl_alerts_firing_total`
+- **Data sources:** `ALERTS{alertstate="firing"}` (standard Prometheus metric)
 
 ### 5. Critical/Page Alerts
 - **Type:** Stat
 - **Purpose:** Show critical and page alert count.
-- **Data sources:** `bioetl_alerts_active_by_severity`
+- **Data sources:** `ALERTS{alertstate="firing",severity="critical"}` (standard Prometheus metric)
 
 ### 6. SLO/SLA Alert Pressure
 - **Type:** Stat
 - **Purpose:** Show SLO/SLA alert pressure indicators.
-- **Data sources:** `bioetl_slo_alert_pressure`, `bioetl_sla_alert_pressure`
+- **Data sources:** `ALERTS{alertstate="firing"}` (standard Prometheus metric)
 
 ### 7. Firing Alert Details
 - **Type:** Table
 - **Purpose:** Show detailed information for currently firing alerts.
-- **Data sources:** `bioetl_alerts_firing_total`, `bioetl_alerts_firing_by_alert_name`
+- **Data sources:** `ALERTS{alertstate="firing"}` (standard Prometheus metric)
 
 ## Variables
 

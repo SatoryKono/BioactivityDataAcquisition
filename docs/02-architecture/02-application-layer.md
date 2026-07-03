@@ -57,13 +57,14 @@ ______________________________________________________________________
 
 Содержит базовые классы и общие компоненты, используемые пайплайнами. Документ intentionally описывает family-level topology вместо жёстких file counts, потому что `application/core/` активно развивается и сейчас включает несколько устойчивых подпакетов:
 
-- `lifecycle/`
-- `postrun/`
-- `preflight/`
-- `base_transformer/`
-- `batch_execution/`
-- `field_transforms/`
-- `transformer_runtime/`
+- `lifecycle/` — Runtime lifecycle management (locks, checkpoints, cleanup, heartbeat)
+- `postrun/` — Post-run operations (DQ, VACUUM, cleanup, reporting)
+- `preflight/` — Pre-run health checks and validation
+- `base_transformer/` — Base transformer implementation and templates
+- `batch_execution/` — Batch execution coordination and flow
+- `data_sources/` — Data source management and adapters
+- `field_transforms/` — Field-level transformation utilities
+- `transformer_runtime/` — Transformer runtime coordination
 
 **Базовые классы:**
 
@@ -84,8 +85,8 @@ ______________________________________________________________________
 - **`LockRuntimeService`** (`lifecycle/lock_runtime_service.py`) — runtime-координация блокировок
 - **`PreflightService`** (`preflight/service.py`) — Pre-run health checks
 - **`PostrunService`** (`postrun/service.py`) — Post-run операции (DQ, VACUUM, cleanup)
-- **`CheckpointRuntimeService`** (`lifecycle/checkpoint_manager.py`) — runtime checkpoint I/O и resume policy
-- **`QuarantineRuntimeService`** (`quarantine_manager.py`) — runtime quarantine write-path handling
+- **`CheckpointRuntimeService`** (`lifecycle/checkpoint_runtime.py`) — runtime checkpoint I/O и resume policy
+- **`QuarantineRuntimeService`** — runtime quarantine write-path handling (implemented via support modules in lifecycle/)
 - **`CleanupService`** (`lifecycle/cleanup_service.py`) — Bronze cleanup
 
 **Observability:**

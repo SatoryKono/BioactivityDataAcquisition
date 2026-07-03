@@ -52,7 +52,9 @@ must use these `suite_name` values for comparable local and CI runs:
   lane that bypasses dev-wrapper pretest sync and fails if tracked governance
   surfaces mutate;
 - `e2e`: dedicated slow end-to-end lane;
-- `memory`: dedicated Neo4j project-memory and MCP lane, outside coverage;
+- `e2e-smoke`: minimal end-to-end smoke lane;
+- `e2e-nightly-full`: comprehensive nightly end-to-end lane;
+- `memory`: dedicated Neo4j project-memory and MCP lane, outside coverage (not a test directory, but a lane selector);
 - `performance`: benchmark-backed hotspot/performance-budget lane;
 - `coverage-verify`: the only lane that enforces the repo-wide coverage gate.
 
