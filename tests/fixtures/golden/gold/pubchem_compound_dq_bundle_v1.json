@@ -1,0 +1,40 @@
+{
+  "snapshot_name": "pubchem_compound_dq_bundle",
+  "entity": "pubchem_compound",
+  "row_count": 2,
+  "bundle_columns": [
+    "entity_id",
+    "molecule_id",
+    "canonical_smiles",
+    "molecular_formula",
+    "molecular_weight",
+    "chemical_standardization_status",
+    "_dq_warn",
+    "_dq_error",
+    "_index"
+  ],
+  "rows": [
+    {
+      "entity_id": "pubchem_compound:2244",
+      "molecule_id": "CID2244",
+      "canonical_smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
+      "molecular_formula": "C9H8O4",
+      "molecular_weight": 180.159,
+      "chemical_standardization_status": "standardized",
+      "_dq_warn": false,
+      "_dq_error": false,
+      "_index": 0
+    },
+    {
+      "entity_id": "pubchem_compound:999999",
+      "molecule_id": "CID999999",
+      "canonical_smiles": null,
+      "molecular_formula": null,
+      "molecular_weight": null,
+      "chemical_standardization_status": "warning",
+      "_dq_warn": true,
+      "_dq_error": false,
+      "_index": 1
+    }
+  ]
+}

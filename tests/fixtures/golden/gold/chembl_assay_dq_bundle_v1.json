@@ -1,0 +1,34 @@
+{
+  "snapshot_name": "chembl_assay_dq_bundle",
+  "entity": "chembl_assay",
+  "row_count": 2,
+  "bundle_columns": [
+    "entity_id",
+    "assay_id",
+    "assay_type",
+    "confidence_score",
+    "_dq_warn",
+    "_dq_error",
+    "_index"
+  ],
+  "rows": [
+    {
+      "entity_id": "chembl_assay:CHEMBL100001",
+      "assay_id": "CHEMBL100001",
+      "assay_type": "B",
+      "confidence_score": 9.0,
+      "_dq_warn": false,
+      "_dq_error": false,
+      "_index": 0
+    },
+    {
+      "entity_id": "chembl_assay:CHEMBL100002",
+      "assay_id": "CHEMBL100002",
+      "assay_type": null,
+      "confidence_score": null,
+      "_dq_warn": true,
+      "_dq_error": false,
+      "_index": 1
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "provider": "semanticscholar",
+  "version": 1,
+  "probes": {
+    "paper_search_endpoint": {
+      "paths": {
+        "data": "list",
+        "data[0]": "dict",
+        "data[0].paperId": "str",
+        "data[0].title": "str",
+        "offset": "int",
+        "next": "int",
+        "total": "int"
+      }
+    },
+    "paper_batch_lookup_by_doi": {
+      "paths": {
+        "[0]": "dict",
+        "[0].paperId": "str",
+        "[0].title": "str",
+        "[0].externalIds": "dict",
+        "[0].year": "int"
+      }
+    }
+  }
+}
