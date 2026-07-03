@@ -64,7 +64,7 @@
       "purpose": "Bounded PubChem compound output bundle for DQ- and chemical-standardization-sensitive Gold checks.",
       "required_columns": [
         "entity_id",
-        "pubchem_cid",
+        "molecule_id",
         "canonical_smiles",
         "molecular_formula",
         "molecular_weight",
@@ -95,7 +95,7 @@
   },
   "entities": {
     "chembl_activity": {
-      "contract_version": "1.0.0",
+      "contract_version": "2.0.0",
       "fields": {
         "_dq_error": {
           "description": "Hard data-quality error flag.",
@@ -3351,7 +3351,7 @@
       "strict": true
     },
     "pubchem_compound": {
-      "contract_version": "2.0.0",
+      "contract_version": "1.0.0",
       "fields": {
         "_dq_error": {
           "description": "Hard data-quality error flag.",
@@ -3488,7 +3488,7 @@
           "dtype": "float64",
           "nullable": true
         },
-        "pubchem_cid": {
+        "molecule_id": {
           "description": "",
           "dtype": "str",
           "nullable": false
