@@ -46,4 +46,8 @@ def test_run_long_lived_quarantine_backend_command_delegates_to_shared_backend()
     ) as mock_impl:
         run_long_lived_quarantine_backend_command(host="127.0.0.1", port=18081)
 
-    mock_impl.assert_called_once_with(host="127.0.0.1", port=18081)
+    mock_impl.assert_called_once_with(
+        host="127.0.0.1",
+        port=18081,
+        start_metrics=False,
+    )

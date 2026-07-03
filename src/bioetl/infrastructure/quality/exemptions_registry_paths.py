@@ -49,12 +49,12 @@ def build_module_path_key(
     if is_module_path_key(text):
         return text
 
-    src_root_path = (
-        project_root() / "src" if src_root is None else Path(src_root).resolve()
-    )
+    src_root_path = project_root() / "src" if src_root is None else Path(src_root)
+    if not src_root_path.is_absolute():
+        src_root_path = (project_root() / src_root_path).absolute()
     path_obj = Path(module_path)
     if not path_obj.is_absolute():
-        path_obj = path_obj.resolve()
+        path_obj = (Path.cwd() / path_obj).absolute()
 
     if path_obj.is_relative_to(src_root_path):
         rel = path_obj.relative_to(src_root_path).as_posix()

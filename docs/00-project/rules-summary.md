@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-06-25'
 
 ______________________________________________________________________
 
 # Rules Summary
 
-*Синхронизировано с RULES.md v6.1.3 (2026-04-29)*
+*Синхронизировано с RULES.md v6.1.4 (2026-06-25)*
 
 > **Note**: Этот документ — выжимка из `docs/00-project/RULES.md`. Канонический источник правил — `RULES.md`.
 

@@ -4,7 +4,7 @@
 
 Справочник для Claude Code при работе с репозиторием BioETL.
 
-*Синхронизировано с RULES.md v6.1.3 (2026-04-29) | Дедублирование: ссылки на RULES.md вместо копий | Версия: 6.7.0*
+*Синхронизировано с RULES.md v6.1.4 (2026-06-25) | Дедублирование: ссылки на RULES.md вместо копий | Версия: 6.7.0*
 
 > **Runtime-specific note:** orchestration guidance for Claude lives in
 > runtime-specific orchestration copy. Codex keeps its own runtime-specific

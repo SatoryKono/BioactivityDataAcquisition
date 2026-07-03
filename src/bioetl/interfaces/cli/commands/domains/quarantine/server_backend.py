@@ -16,4 +16,4 @@ def run_long_lived_quarantine_backend_command(*, host: str, port: int) -> None:
         run_long_lived_health_server_command,
     )
 
-    run_long_lived_health_server_command(host=host, port=port)
+    run_long_lived_health_server_command(host=host, port=port, start_metrics=False)

@@ -11,6 +11,7 @@ See:
 from __future__ import annotations
 
 import os
+from urllib.parse import quote
 
 import httpx
 import pytest
@@ -38,6 +39,36 @@ async def _request_or_skip(
     if response.status_code >= 500:
         pytest.skip(f"PubChem temporary server error: HTTP {response.status_code}")
     return response
+
+
+async def _request_pubchem_smiles_search(
+    client: httpx.AsyncClient,
+    smiles: str,
+) -> httpx.Response:
+    """Request the PubChem SMILES search surface with a stable fallback.
+
+    PubChem's path-style SMILES lookup occasionally drifts to `400 PUGREST.BadRequest`
+    for some clients even though the canonical PUG search remains healthy.
+    Keep the probe provider-facing by preferring the original GET form first, then
+    fall back to the equivalent canonical POST form only when the provider rejects
+    the path-style encoding.
+    """
+    encoded_smiles = quote(smiles, safe="")
+    response = await _request_or_skip(
+        client,
+        "GET",
+        f"{PUBCHEM_API_BASE}/compound/smiles/{encoded_smiles}/cids/JSON",
+    )
+    if response.status_code != 400:
+        return response
+
+    return await _request_or_skip(
+        client,
+        "POST",
+        f"{PUBCHEM_API_BASE}/compound/smiles/cids/JSON",
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        content=f"smiles={smiles}",
+    )
 
 
 @pytest.mark.pubchem
@@ -214,11 +245,7 @@ class TestPubChemContract:
         smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"  # Aspirin
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await _request_or_skip(
-                client,
-                "GET",
-                f"{PUBCHEM_API_BASE}/compound/smiles/{smiles}/cids/JSON",
-            )
+            response = await _request_pubchem_smiles_search(client, smiles)
 
         assert response.status_code == 200
         data = response.json()
@@ -234,11 +261,7 @@ class TestPubChemContract:
         smiles = "CC(=O)OC1=CC=CC=C1C(=O)O"
 
         async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await _request_or_skip(
-                client,
-                "GET",
-                f"{PUBCHEM_API_BASE}/compound/smiles/{smiles}/cids/JSON",
-            )
+            response = await _request_pubchem_smiles_search(client, smiles)
 
         assert response.status_code == 200
         assert_provider_probe_matches_snapshot(

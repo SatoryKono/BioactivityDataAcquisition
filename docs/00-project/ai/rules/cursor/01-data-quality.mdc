@@ -47,13 +47,42 @@ Silver/Gold JSON fields as **canonical JSON strings**:
 Series[str]  # NOT Series[object]
 ```
 
-- Stable key ordering, compact separators
-- Null: `None` (not `'[]'` or `'{}'`)
+- Stable key ordering, compact separators, valid JSON syntax (no manual string concatenation)
+- Null: `None` (not `'[]'`, `'{}'`, `'null'`, or empty string)
 - Empty collections → `NULL`
 
-## Determinism Rules
+## Pandera Validation (MUST before write)
 
-- ❌ NO `random` module in storage writers
-- ❌ NO `datetime.now()` in infrastructure layer
-- ✅ Timestamps ONLY from `PipelineContext.started_at`
-- ✅ Deterministic jitter when `RetryConfig(deterministic=True)`
+**Silver**: validate the **exact** DataFrame being written via `schema.validate(df)`, `schema(df)`, or Pandera decorator/context manager. No post-validation transforms without re-validation. The validated object MUST be what gets written.
+
+**Gold**: strict Pandera schema (`pa.DataFrameSchema`, `@pa.check_types`; `strict=True`, `coerce=True`). `SchemaError`/`SchemaErrors` MUST abort the write — catching and logging/continuing is forbidden. No `lazy=True` errors ignored.
+
+## Idempotent Merge
+
+- Merge/upsert match condition MUST use declared primary key (or documented business key) only
+- Rerunning the same batch MUST update existing rows, not insert duplicates
+- Red flags: MERGE on non-unique columns, INSERT without conflict handling into keyed tables
+
+## Determinism Rules (infrastructure)
+
+Forbidden in `infrastructure/` and storage writers:
+- `datetime.now()`, `datetime.utcnow()`, `date.today()`, `time.time()`
+- `random.*`, `numpy.random` without context-provided seed
+
+Required:
+- Timestamps from `PipelineContext.started_at` (UTC)
+- Randomness from context-provided seeded RNG derived from `PipelineContext`
+- Stable sorting, canonical serialization, deterministic dict/JSON key order
+- Deterministic jitter when `RetryConfig(deterministic=True)`
+
+Acceptable exceptions: local CLI utilities explicitly marked non-reproducible.
+
+## Atomic Artifact Writes
+
+```python
+tmp = path.with_suffix(".tmp")
+tmp.write_text(payload, encoding="utf-8")
+os.replace(tmp, path)
+```
+
+Direct writes to final artifact paths are violations.

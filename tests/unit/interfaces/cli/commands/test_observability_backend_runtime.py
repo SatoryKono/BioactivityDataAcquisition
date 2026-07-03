@@ -49,15 +49,13 @@ def test_build_observability_backend_probe_urls_prefers_liveness_first() -> None
     )
 
 
-def test_build_observability_backend_required_probe_paths_adds_catalog_and_pipelines() -> (
+def test_build_observability_backend_required_probe_paths_uses_lightweight_ready_probe() -> (
     None
 ):
     assert build_observability_backend_required_probe_paths(
         pipelines=("chembl_target", "chembl_activity", "chembl_target"),
     ) == (
-        "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list",
-        "/ops/control-plane/checkpoint-freshness?pipeline=chembl_activity",
-        "/ops/control-plane/checkpoint-freshness?pipeline=chembl_target",
+        "/ops/control-plane/ready",
     )
 
 

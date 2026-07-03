@@ -340,8 +340,7 @@ def test_run_command_with_cli_policy_wires_registry_and_cli_seams() -> None:
         enabled=True,
         port=8081,
         required_probe_paths=(
-            "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list",
-            "/ops/control-plane/checkpoint-freshness?pipeline=chembl_activity",
+            "/ops/control-plane/ready",
         ),
     )
     mock_disable_transient.assert_called_once()
@@ -424,8 +423,7 @@ def test_run_command_with_cli_policy_disables_transient_health_server_on_live_ba
         enabled=True,
         port=8081,
         required_probe_paths=(
-            "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list",
-            "/ops/control-plane/checkpoint-freshness?pipeline=chembl_activity",
+            "/ops/control-plane/ready",
         ),
     )
     mock_disable_transient.assert_called_once_with(
@@ -646,7 +644,7 @@ def test_run_all_callback_ensures_observability_backend_with_catalog_probe() -> 
         enabled=True,
         port=8081,
         required_probe_paths=(
-            "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list",
+            "/ops/control-plane/ready",
         ),
     )
     mock_disable_transient.assert_called_once_with(

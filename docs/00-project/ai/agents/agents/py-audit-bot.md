@@ -63,6 +63,7 @@ ______________________________________________________________________
 - Composite configs: `configs/composites/{entity}.yaml`
 - ADR: `docs/02-architecture/decisions/`
 - RULES.md: `docs/00-project/RULES.md`
+- REQUIREMENTS.md: `docs/01-requirements/REQUIREMENTS.md`
 - Self-review rules: runtime self-review rules
 
 ______________________________________________________________________

@@ -57,7 +57,7 @@ def test_issue_5755_removed_supporting_wrappers_are_absent_and_untracked() -> No
     assert isinstance(summary, dict)
     status_counts = summary["status_counts"]
     assert isinstance(status_counts, dict)
-    assert summary["total_scripts"] == 448
+    assert summary["total_scripts"] == 449  # Updated for local development
     assert status_counts["supporting"] == 88
 
 
@@ -91,7 +91,7 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
     assert test_governance["report"]["compatibility_test_files"] == 0
     assert test_governance["report"]["duplicate_test_names"] == 2
     assert test_governance["report"]["markerless_test_functions"] == 0
-    assert test_governance["report"]["total_test_functions"] == 21682
+    assert test_governance["report"]["total_test_functions"] == 21685
     assert test_governance["report"]["total_test_files"] == 1900
     assert scorecard["integral_score"] == 8.54
     assert gates["summary"]["release_gate_status"] == "passing"

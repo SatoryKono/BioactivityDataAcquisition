@@ -9,11 +9,15 @@ docs/00-project/ai/rules/
 ├── README.md                    # Этот файл
 ├── bioetl-ai-rules.md         # Универсальные правила (любой AI)
 ├── cursor/                      # Cursor IDE правила (.mdc)
+│   ├── 00-bioetl-core-governance.mdc
 │   ├── 00-architecture.mdc
 │   ├── 01-data-quality.mdc
 │   ├── 02-code-style.mdc
 │   ├── 03-testing.mdc
-│   └── 04-patterns.mdc
+│   ├── 04-patterns.mdc
+│   ├── 05-agent-workflow.mdc
+│   ├── 06-docs-standards.mdc
+│   └── 07-qodo-enforcement.mdc  # Индекс правил Qodo (синхронизация)
 └── [скопировать в .cursor/rules/]
 ```
 
@@ -41,11 +45,15 @@ cp docs/00-project/ai/rules/cursor/*.mdc .cursor/rules/
 ```
 
 **Структура `.cursor/rules/`:**
+- `00-bioetl-core-governance.mdc` — инварианты, детерминизм, секреты
 - `00-architecture.mdc` — слои, импорты, порты
-- `01-data-quality.mdc` — Medallion, Delta Lake
+- `01-data-quality.mdc` — Medallion, Pandera, Delta Lake
 - `02-code-style.mdc` — mypy strict, ruff
 - `03-testing.mdc` — VCR.py, coverage
 - `04-patterns.mdc` — адаптеры, композиты
+- `05-agent-workflow.mdc` — workflow агента, guardrails
+- `06-docs-standards.mdc` — стандарты документации
+- `07-qodo-enforcement.mdc` — индекс правил Qodo platform
 
 **Как работает:** Cursor автоматически применяет эти правила при:
 - Автодополнении кода
@@ -123,8 +131,16 @@ interfaces/     → CLI
 При изменении `docs/00-project/RULES.md`:
 
 1. Обновить `bioetl-ai-rules.md` (краткая версия)
-2. Обновить `.cursor/rules/*.mdc` (если скопированы)
-3. Обновить `docs/00-project/ai/rules/cursor/*.mdc` (источник)
+2. Обновить `docs/00-project/ai/rules/cursor/*.mdc` (источник)
+3. Скопировать в `.cursor/rules/`:
+   ```bash
+   cp docs/00-project/ai/rules/cursor/*.mdc .cursor/rules/
+   ```
+
+### Синхронизация с Qodo platform
+
+Правила Qodo загружаются через skill `/qodo-get-rules` и интегрируются в тематические `.mdc` файлы.
+Индекс синхронизации: `07-qodo-enforcement.mdc`.
 
 ## Команды верификации
 
