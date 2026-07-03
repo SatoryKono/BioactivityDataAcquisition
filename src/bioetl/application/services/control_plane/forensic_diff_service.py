@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass, field
 
-from bioetl.application.services.control_plane.forensic_diff_diagnostics_support import (
+from bioetl.application.services.control_plane.forensic.diagnostics_support import (
     _artifact_completeness,
     _artifact_refs,
     _checkpoint_compatibility_payload,

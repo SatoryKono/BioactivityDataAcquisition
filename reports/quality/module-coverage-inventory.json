@@ -413,7 +413,7 @@
       "missing_lines": 4,
       "module": "bioetl.application.composite.cross_validator_helpers",
       "path": "src/bioetl/application/composite/cross_validator_helpers.py",
-      "source_lines": 232
+      "source_lines": 231
     },
     {
       "coverage_percent": 93.33,
@@ -4591,8 +4591,8 @@
       "covered_lines": 0,
       "executable_lines": 0,
       "missing_lines": 0,
-      "module": "bioetl.application.services.control_plane.forensic_diff_diagnostics_support",
-      "path": "src/bioetl/application/services/control_plane/forensic_diff_diagnostics_support.py",
+      "module": "bioetl.application.services.control_plane.forensic.diagnostics_support",
+      "path": "src/bioetl/application/services/control_plane/forensic/diagnostics_support.py",
       "source_lines": 214
     },
     {
@@ -22525,7 +22525,7 @@
       "missing_lines": 4,
       "module": "bioetl.application.composite.cross_validator_helpers",
       "path": "src/bioetl/application/composite/cross_validator_helpers.py",
-      "source_lines": 232
+      "source_lines": 231
     },
     {
       "coverage_percent": 93.33,
@@ -26703,8 +26703,8 @@
       "covered_lines": 0,
       "executable_lines": 0,
       "missing_lines": 0,
-      "module": "bioetl.application.services.control_plane.forensic_diff_diagnostics_support",
-      "path": "src/bioetl/application/services/control_plane/forensic_diff_diagnostics_support.py",
+      "module": "bioetl.application.services.control_plane.forensic.diagnostics_support",
+      "path": "src/bioetl/application/services/control_plane/forensic/diagnostics_support.py",
       "source_lines": 214
     },
     {
@@ -44230,7 +44230,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-01",
-  "source_tree_sha256": "1b9e43c80618bd8e8d9c102b63ff77c85cb9ad4f52b3467621b78ce316e6100d",
+  "source_tree_sha256": "bbee7643d3f5544e950845ac258cca3d79455494516cdaa24224fe381c747205",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
