@@ -1,6 +1,6 @@
 # Contract Coverage Matrix
 
-- snapshot_date: 2026-07-01
+- snapshot_date: 2026-07-03
 - row_count: 27
 - gold_enabled_count: 27
 - covered_gold_enabled_count: 27
@@ -12,7 +12,7 @@
 | pipeline_name | layer | contract_ref | gold_enabled | parity_status | constraint_status | strict | properties | required | checks | pk_fields | tests | golden | missing_surfaces | missing_constraints |
 | --- | --- | --- | ---: | --- | --- | ---: | ---: | ---: | ---: | --- | ---: | ---: | --- | --- |
 | `chembl_activity` | `gold` | `chembl.activity` | True | `covered` | `covered` | True | 72 | 7 | 0 | `activity_id, entity_id` | 21 | 2 | - | - |
-| `chembl_assay` | `gold` | `chembl.assay` | True | `covered` | `covered` | True | 42 | 6 | 0 | `assay_id, entity_id` | 12 | 2 | - | - |
+| `chembl_assay` | `gold` | `chembl.assay` | True | `covered` | `covered` | True | 42 | 6 | 0 | `assay_id, entity_id` | 13 | 2 | - | - |
 | `chembl_assay_parameters` | `gold` | `chembl.assay_parameters` | True | `covered` | `covered` | True | 26 | 8 | 0 | `assay_param_id, entity_id` | 6 | 2 | - | - |
 | `chembl_cell_line` | `gold` | `chembl.cell_line` | True | `covered` | `covered` | True | 16 | 7 | 0 | `cell_id, entity_id` | 5 | 2 | - | - |
 | `chembl_compound_record` | `gold` | `chembl.compound_record` | True | `covered` | `covered` | True | 12 | 9 | 0 | `entity_id, record_id` | 5 | 2 | - | - |
@@ -27,7 +27,7 @@
 | `chembl_target_protein_classification` | `gold` | `chembl.target_protein_classification` | True | `covered` | `covered` | True | 45 | 7 | 0 | `entity_id` | 7 | 2 | - | - |
 | `chembl_tissue` | `gold` | `chembl.tissue` | True | `covered` | `covered` | True | 11 | 7 | 0 | `entity_id, tissue_id` | 6 | 2 | - | - |
 | `composite_activity` | `gold` | `composite.activity` | True | `covered` | `covered` | True | 21 | 6 | 0 | `entity_id` | 21 | 2 | - | - |
-| `composite_assay` | `gold` | `composite.assay` | True | `covered` | `covered` | True | 17 | 6 | 0 | `entity_id` | 12 | 2 | - | - |
+| `composite_assay` | `gold` | `composite.assay` | True | `covered` | `covered` | True | 17 | 6 | 0 | `entity_id` | 13 | 2 | - | - |
 | `composite_molecule` | `gold` | `composite.molecule` | True | `covered` | `covered` | True | 12 | 6 | 0 | `entity_id` | 6 | 2 | - | - |
 | `composite_publication` | `gold` | `composite.publication` | True | `covered` | `covered` | True | 15 | 7 | 0 | `entity_id` | 62 | 2 | - | - |
 | `composite_target` | `gold` | `composite.target` | True | `covered` | `covered` | True | 41 | 6 | 0 | `entity_id` | 15 | 2 | - | - |

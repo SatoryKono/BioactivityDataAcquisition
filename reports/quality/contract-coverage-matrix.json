@@ -120,6 +120,7 @@
         "tests/contract/test_gold_schema_strict_violations.py",
         "tests/e2e/test_chembl_assay_e2e.py",
         "tests/integration/chembl/test_assay_extraction_params.py",
+        "tests/integration/determinism/test_chembl_assay_reproducibility_determinism_gate.py",
         "tests/unit/application/pipelines/chembl/test_assay_transformer_required_fields.py",
         "tests/unit/application/pipelines/test_chembl_assay_parameters.py",
         "tests/unit/domain/entities/test_chembl_activity_assay_dtos.py",
@@ -1365,6 +1366,7 @@
         "tests/contract/test_gold_schema_strict_violations.py",
         "tests/e2e/test_chembl_assay_e2e.py",
         "tests/integration/chembl/test_assay_extraction_params.py",
+        "tests/integration/determinism/test_chembl_assay_reproducibility_determinism_gate.py",
         "tests/unit/application/pipelines/chembl/test_assay_transformer_required_fields.py",
         "tests/unit/application/pipelines/test_chembl_assay_parameters.py",
         "tests/unit/domain/entities/test_chembl_activity_assay_dtos.py",
@@ -2506,5 +2508,5 @@
       "uniqueness_constraint_source": "pipeline.business_primary_keys"
     }
   ],
-  "snapshot_date": "2026-07-01"
+  "snapshot_date": "2026-07-03"
 }
