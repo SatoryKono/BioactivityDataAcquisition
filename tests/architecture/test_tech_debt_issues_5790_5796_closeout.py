@@ -126,7 +126,7 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return payload
 
 
-def test_closeout_artifact_is_complete_and_budget_safe() -> None:
+def test_closeout_artifact_is_complete_and_budget_safe_for_issue_pack_5790_5796() -> None:
     closeout = _load_json(CLOSEOUT)
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}

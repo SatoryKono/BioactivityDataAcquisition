@@ -2285,11 +2285,12 @@
         "name": "test_mark_failed_emits_batch_failed_event"
       }
     ],
-    "total_test_files": 1890,
-    "total_test_functions": 21595,
+    "total_test_files": 1900,
+    "total_test_functions": 21682,
     "uuid4_call_sites": 0
   },
   "root": ".",
+  "source_tree_sha256": "6e5e36361c39b10cf0d1e9bb5ed7e407ad2fc898b719768b71c49532cfd2a552",
   "summary": {
     "assertless_total_candidates": 109,
     "compatibility_test_files": 0,
@@ -2319,7 +2320,7 @@
       "name": "test_mark_failed_emits_batch_failed_event"
     }
   ],
-  "total_test_files": 1890,
-  "total_test_functions": 21595,
+  "total_test_files": 1900,
+  "total_test_functions": 21682,
   "uuid4_call_sites": 0
 }

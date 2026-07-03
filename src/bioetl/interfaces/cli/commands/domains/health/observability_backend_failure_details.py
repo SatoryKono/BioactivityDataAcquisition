@@ -5,6 +5,8 @@ from __future__ import annotations
 from collections.abc import Callable
 from pathlib import Path
 from typing import Protocol
+
+from collections.abc import Sequence
 from urllib.error import HTTPError, URLError
 from urllib.request import build_opener
 
@@ -61,6 +63,32 @@ def _build_backend_base_url(health_url: str) -> str:
     return health_url.rstrip("/")
 
 
+def _append_backend_startup_diagnostic(
+    log_path: Path,
+    *,
+    parent_pid: int,
+    child_pid: int | None,
+    command: Sequence[str],
+    diagnostic_lines: Sequence[str],
+) -> None:
+    """Append parent/child/process diagnostics to one backend startup log."""
+    rendered_command = " ".join(command) if command else "<unknown>"
+    sections = [
+        "",
+        "=== BioETL detached backend diagnostics ===",
+        f"parent_pid={parent_pid}",
+        f"child_pid={child_pid if child_pid is not None else '<unknown>'}",
+        f"command={rendered_command}",
+    ]
+    sections.extend(line for line in diagnostic_lines if line.strip())
+    try:
+        with log_path.open("a", encoding="utf-8") as handle:
+            handle.write("\n".join(sections))
+            handle.write("\n")
+    except OSError:
+        return
+
+
 def _describe_required_probe_failure(
     health_url: str,
     *,
@@ -101,6 +129,7 @@ def _describe_required_probe_failure(
 
 
 __all__ = [
+    "_append_backend_startup_diagnostic",
     "_build_startup_failure_detail",
     "_describe_required_probe_failure",
     "_open_url",

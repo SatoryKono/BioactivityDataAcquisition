@@ -139,6 +139,56 @@ CRITICAL_BEHAVIOR_ENVELOPES = {
 }
 
 
+def _iter_fixture_asset_files(root: Path) -> list[Path]:
+    fixtures_root = root / FIXTURE_DUPLICATION_SCAN_ROOT
+    if not fixtures_root.exists():
+        return []
+    return [
+        path
+        for path in sorted(fixtures_root.rglob("*"))
+        if path.is_file() and path.suffix.lower() in FIXTURE_DUPLICATION_EXTENSIONS
+    ]
+
+
+@cache
+def _compute_test_governance_source_tree_sha256(root_str: str) -> str:
+    """Hash the report inputs so committed artifacts can be reused when fresh."""
+    root = Path(root_str).resolve()
+    digest = hashlib.sha256()
+    files = sorted(
+        [*_iter_test_files(root), *_iter_fixture_asset_files(root)],
+        key=lambda path: path.relative_to(root).as_posix().lower(),
+    )
+    for path in files:
+        relative = path.relative_to(root).as_posix()
+        digest.update(relative.encode("utf-8"))
+        digest.update(b"\0")
+        with path.open("rb") as handle:
+            while chunk := handle.read(1024 * 1024):
+                digest.update(chunk)
+        digest.update(b"\0")
+    return digest.hexdigest()
+
+
+def _load_current_artifact_if_fresh(root: Path) -> dict[str, Any] | None:
+    artifact_path = root / DEFAULT_JSON_ARTIFACT
+    if not artifact_path.exists():
+        return None
+    try:
+        payload = json.loads(artifact_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(payload, dict):
+        return None
+    expected_hash = str(payload.get("source_tree_sha256") or "")
+    if not expected_hash:
+        return None
+    current_hash = _compute_test_governance_source_tree_sha256(str(root))
+    if current_hash != expected_hash:
+        return None
+    return cast(dict[str, Any], payload)
+
+
 def _lane_from_test_path(relative_path: str) -> str:
     parts = relative_path.split("/")
     if len(parts) >= 2 and parts[0] == "tests":
@@ -226,12 +276,7 @@ def _collect_fixture_asset_duplication(root: Path) -> dict[str, Any]:
     total_bytes_by_hash: dict[str, int] = defaultdict(int)
 
     if fixtures_root.exists():
-        for path in sorted(fixtures_root.rglob("*")):
-            if not path.is_file():
-                continue
-            if path.suffix.lower() not in FIXTURE_DUPLICATION_EXTENSIONS:
-                continue
-
+        for path in _iter_fixture_asset_files(root):
             relative = path.relative_to(root).as_posix()
             scope_file_counts[_fixture_duplication_scope(relative)] += 1
             try:
@@ -456,6 +501,9 @@ def _classify_assertless_candidate(
 def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
     """Collect deterministic static counts used as remediation budgets."""
     root = Path(root_str).resolve()
+    fresh_artifact = _load_current_artifact_if_fresh(root)
+    if fresh_artifact is not None:
+        return fresh_artifact
     test_files = _iter_test_files(root)
     test_name_locations: dict[str, list[str]] = defaultdict(list)
     assertless_examples: list[str] = []
@@ -643,6 +691,7 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
 
     return {
         **report,
+        "source_tree_sha256": _compute_test_governance_source_tree_sha256(root_str),
         **summary,
         "assertless_families": assertless_families,
         "budget_violations": [],
