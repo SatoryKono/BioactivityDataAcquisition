@@ -128,6 +128,7 @@ def test_docker_helper_contract_schema_is_explicit_and_fail_closed() -> None:
         "credential_env",
         "forbidden_default_tokens",
         "forbidden_env_keys",
+        "legacy_root_filename",
         "monitoring",
         "required_env_keys",
         "required_port_binds",
@@ -187,9 +188,13 @@ def test_root_governance_ratifies_reviewed_docker_helpers() -> None:
         assert "configs/quality/docker_helper_contracts.yaml" in text
 
     for filename in contract["helpers"]:
-        assert filename in allowlist_text
+        assert filename not in allowlist_text
         assert filename in docker_quickstart_text
         assert filename in docker_setup_text
+        legacy_root_filename = contract["helpers"][filename]["legacy_root_filename"]
+        assert legacy_root_filename not in allowlist_text
+        assert legacy_root_filename in docker_quickstart_text
+        assert legacy_root_filename in docker_setup_text
 
     assert "docker network create bioetl-monitoring" in docker_quickstart_text
     assert "docker network create bioetl-monitoring" in docker_setup_text
@@ -226,8 +231,8 @@ def test_docker_helper_compose_files_fail_closed_for_credentials_and_ports() -> 
 
 def test_sonarqube_helper_uses_canonical_environment_names() -> None:
     contract = _docker_helper_contract()
-    helper = contract["helpers"]["docker-compose.sonarqube.yml"]
-    compose = _read_yaml("docker-compose.sonarqube.yml")
+    helper = contract["helpers"]["scripts/ops/runtime/docker/compose/sonarqube.yml"]
+    compose = _read_yaml("scripts/ops/runtime/docker/compose/sonarqube.yml")
     sonarqube_env = _environment_mapping(compose["services"]["sonarqube"])
     env_template_text = _read(".env.example")
 

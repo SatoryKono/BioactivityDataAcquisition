@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import ast
+from collections.abc import Iterator
 from functools import cache
 from pathlib import Path
 
 import pytest
 from scripts.engineering.qa.file_discovery import discover_files
+from tests.helpers.git_index_scan import git_grep_fixed
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src"
@@ -104,6 +106,38 @@ def _called_names(path: Path) -> set[str]:
     return called_names
 
 
+def _iter_scanned_trees(
+    *,
+    root: Path,
+    allowed_files: set[Path],
+    candidate_patterns: tuple[str, ...] = (),
+) -> Iterator[tuple[Path, ast.AST]]:
+    """Yield ASTs for guard scans without re-reading the whole source tree."""
+    for path in _candidate_python_files(root, patterns=candidate_patterns):
+        if path in allowed_files:
+            continue
+        yield path, _parsed_tree(str(path.resolve()))
+
+
+def _candidate_python_files(root: Path, *, patterns: tuple[str, ...]) -> list[Path]:
+    if not patterns:
+        return _iter_python_files(root)
+
+    try:
+        root_pathspec = root.relative_to(ROOT).as_posix()
+    except ValueError:
+        return _iter_python_files(root)
+
+    matches = git_grep_fixed(
+        root=ROOT,
+        patterns=patterns,
+        paths=(root_pathspec,),
+        suffixes=(".py",),
+        timeout=15.0,
+    )
+    return sorted({ROOT / match.path for match in matches})
+
+
 def _iter_python_files(root: Path) -> list[Path]:
     return [
         root / relative_path
@@ -111,8 +145,7 @@ def _iter_python_files(root: Path) -> list[Path]:
     ]
 
 
-def _call_line_numbers(path: Path, function_name: str) -> list[int]:
-    tree = _parsed_tree(str(path.resolve()))
+def _call_line_numbers_from_tree(tree: ast.AST, function_name: str) -> list[int]:
     return sorted(
         {
             node.lineno
@@ -136,10 +169,12 @@ def _iter_named_callsite_violations(
     allowed_files: set[Path],
 ) -> list[str]:
     violations: list[str] = []
-    for path in _iter_python_files(root):
-        if path in allowed_files:
-            continue
-        for line in _call_line_numbers(path, function_name):
+    for path, tree in _iter_scanned_trees(
+        root=root,
+        allowed_files=allowed_files,
+        candidate_patterns=(function_name,),
+    ):
+        for line in _call_line_numbers_from_tree(tree, function_name):
             violations.append(f"{path.relative_to(ROOT)}:{line}")
     return violations
 
@@ -151,10 +186,16 @@ def _iter_module_import_violations(
     allowed_files: set[Path],
 ) -> list[str]:
     violations: list[str] = []
-    for path in _iter_python_files(root):
-        if path in allowed_files:
-            continue
-        imported_modules = _import_from_modules(path)
+    for path, tree in _iter_scanned_trees(
+        root=root,
+        allowed_files=allowed_files,
+        candidate_patterns=(module_name,),
+    ):
+        imported_modules = {
+            node.module
+            for node in ast.walk(tree)
+            if isinstance(node, ast.ImportFrom) and node.module is not None
+        }
         if module_name in imported_modules:
             violations.append(f"{path.relative_to(ROOT)}")
     return violations

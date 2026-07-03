@@ -91,8 +91,8 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
     assert test_governance["report"]["compatibility_test_files"] == 0
     assert test_governance["report"]["duplicate_test_names"] == 2
     assert test_governance["report"]["markerless_test_functions"] == 0
-    assert test_governance["report"]["total_test_functions"] == 21685
-    assert test_governance["report"]["total_test_files"] == 1900
+    assert test_governance["report"]["total_test_functions"] == 21706
+    assert test_governance["report"]["total_test_files"] == 1906
     assert scorecard["integral_score"] == 8.54
     assert gates["summary"]["release_gate_status"] == "passing"
     assert gates["summary"]["pass_count"] == 31
@@ -102,7 +102,7 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
     assert "Retained entrypoints `12`" in debt_report
     assert "0 compatibility test files" in debt_report
     assert "88 supporting scripts" in debt_report
-    assert "21,682 test functions, 1,900 test files" in debt_report
+    assert "21,706 test functions, 1,906 test files" in debt_report
 
     assert "| Architecture quality score | `8.54` (`good_targeted_improvements`) |" in current_state
     assert "compatibility_test_files=0" in current_state

@@ -49,7 +49,7 @@ services:
   warp:
     build:
       context: .
-      dockerfile: Dockerfile.warp
+      dockerfile: scripts/ops/runtime/docker/images/warp/Dockerfile
     container_name: cloudflare-warp
     restart: unless-stopped
     cap_add:

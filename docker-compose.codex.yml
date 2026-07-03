@@ -5,7 +5,7 @@ services:
   mcp-memory:
     build:
       context: .
-      dockerfile: Dockerfile.mcp-memory
+      dockerfile: scripts/ops/runtime/docker/images/mcp-memory/Dockerfile
     image: bioetl-mcp-memory:latest
     container_name: bioetl-mcp-memory
     restart: unless-stopped
@@ -27,7 +27,7 @@ services:
   mcp-filesystem:
     build:
       context: .
-      dockerfile: Dockerfile.mcp-filesystem
+      dockerfile: scripts/ops/runtime/docker/images/mcp-filesystem/Dockerfile
     image: bioetl-mcp-filesystem:latest
     container_name: bioetl-mcp-filesystem
     restart: unless-stopped
@@ -47,7 +47,7 @@ services:
   mcp-github:
     build:
       context: .
-      dockerfile: Dockerfile.mcp-github
+      dockerfile: scripts/ops/runtime/docker/images/mcp-github/Dockerfile
     image: bioetl-mcp-github:latest
     container_name: bioetl-mcp-github
     restart: unless-stopped
@@ -67,7 +67,7 @@ services:
   mcp-fetch:
     build:
       context: .
-      dockerfile: Dockerfile.mcp-fetch
+      dockerfile: scripts/ops/runtime/docker/images/mcp-fetch/Dockerfile
     image: bioetl-mcp-fetch:latest
     container_name: bioetl-mcp-fetch
     restart: unless-stopped

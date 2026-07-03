@@ -215,10 +215,9 @@ def cli(ctx: Context) -> None:
 def main() -> None:
     """Main entry point.
 
-    Keep the top-level CLI startup cheap by avoiding eager pipeline-registry
-    construction for commands that do not require it, such as
-    ``quarantine serve`` and help/version surfaces. Commands that need an
-    explicit registry already resolve or build it at their own boundary.
+    Canonical process startup keeps the top-level Click entrypoint lightweight.
+    Commands that actually need a registry resolve or build it lazily through
+    the canonical CLI helper path.
     """
     cli(obj=None)
 

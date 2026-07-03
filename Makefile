@@ -118,8 +118,8 @@ docker-start: docker-check
 docker-start-full: docker-check docker-build
 	@echo "Starting full stack..."
 	docker compose -f docker-compose.neo4j.yml up -d
-	docker compose -f docker-compose.redis.yml up -d
-	docker compose -f docker-compose.minio.yml up -d
+	docker compose -f scripts/ops/runtime/docker/compose/redis.yml up -d
+	docker compose -f scripts/ops/runtime/docker/compose/minio.yml up -d
 	docker compose -f docker-compose.monitoring.yml up -d
 	docker compose up -d
 	@echo "Waiting for services to be ready..."
@@ -138,8 +138,8 @@ docker-stop-full: docker-check
 	@echo "Stopping full stack..."
 	docker compose down
 	docker compose -f docker-compose.neo4j.yml down 2>/dev/null || true
-	docker compose -f docker-compose.redis.yml down 2>/dev/null || true
-	docker compose -f docker-compose.minio.yml down 2>/dev/null || true
+	docker compose -f scripts/ops/runtime/docker/compose/redis.yml down 2>/dev/null || true
+	docker compose -f scripts/ops/runtime/docker/compose/minio.yml down 2>/dev/null || true
 	docker compose -f docker-compose.monitoring.yml down 2>/dev/null || true
 	@echo "✓ Full stack stopped"
 
@@ -169,8 +169,8 @@ docker-compose-check: docker-check
 	@echo ""
 	@echo "Validating other compose files..."
 	docker compose -f docker-compose.neo4j.yml config > /dev/null && echo "✓ neo4j valid" || true
-	docker compose -f docker-compose.redis.yml config > /dev/null && echo "✓ redis valid" || true
-	docker compose -f docker-compose.minio.yml config > /dev/null && echo "✓ minio valid" || true
+	docker compose -f scripts/ops/runtime/docker/compose/redis.yml config > /dev/null && echo "✓ redis valid" || true
+	docker compose -f scripts/ops/runtime/docker/compose/minio.yml config > /dev/null && echo "✓ minio valid" || true
 	docker compose -f docker-compose.monitoring.yml config > /dev/null && echo "✓ monitoring valid" || true
 
 # Shell access
@@ -185,8 +185,8 @@ docker-clean: docker-check
 	@echo "Removing Docker resources..."
 	docker compose down --volumes
 	docker compose -f docker-compose.neo4j.yml down --volumes 2>/dev/null || true
-	docker compose -f docker-compose.redis.yml down --volumes 2>/dev/null || true
-	docker compose -f docker-compose.minio.yml down --volumes 2>/dev/null || true
+	docker compose -f scripts/ops/runtime/docker/compose/redis.yml down --volumes 2>/dev/null || true
+	docker compose -f scripts/ops/runtime/docker/compose/minio.yml down --volumes 2>/dev/null || true
 	docker compose -f docker-compose.monitoring.yml down --volumes 2>/dev/null || true
 	docker rmi bioetl:latest 2>/dev/null || true
 	@echo "✓ Cleanup complete"

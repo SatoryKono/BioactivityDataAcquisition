@@ -41,29 +41,18 @@ best_practices.md
 .wsl_proxy_env.sh
 codex.bat
 codex.ps1
-run-codex-wsl.ps1
-run-codex.ps1
 setup-codex-wsl.bat
 setup-codex-wsl.ps1
 setup-codex-wsl.sh
 
-# Reviewed optional ADR-010 adjunct helper surfaces retained at root after
-# relocation audit; rehome only behind an owner-approved shim plan.
+# Reviewed optional ADR-010 root compose surfaces retained at root because
+# operator flows still require exact root entrypoints. Candidate adjuncts moved
+# under scripts/ops/runtime/docker/** after owner-approved shim-first review.
 docker-compose.monitoring.yml
-docker-compose.alertmanager.yml
 docker-compose.codex.yml
-docker-compose.minio.yml
 docker-compose.neo4j-audit.yml
 docker-compose.neo4j.yml
-docker-compose.redis.yml
-docker-compose.sonarqube.yml
 docker-compose.yml
 docker-setup.ps1
 docker-setup.sh
 Dockerfile.bioetl
-Dockerfile.mcp-fetch
-Dockerfile.mcp-filesystem
-Dockerfile.mcp-github
-Dockerfile.mcp-memory
-Dockerfile.warp
-grafana-datasource.yml

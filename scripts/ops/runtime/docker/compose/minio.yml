@@ -6,8 +6,8 @@ services:
       - "127.0.0.1:9000:9000"
       - "127.0.0.1:9001:9001"
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Set MINIO_ROOT_USER before starting docker-compose.minio.yml}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD before starting docker-compose.minio.yml}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Set MINIO_ROOT_USER before starting scripts/ops/runtime/docker/compose/minio.yml}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD before starting scripts/ops/runtime/docker/compose/minio.yml}
       MINIO_REGION_NAME: us-east-1
       MINIO_PROMETHEUS_AUTH_TYPE: public
     command: minio server /minio-data --console-address ":9001"

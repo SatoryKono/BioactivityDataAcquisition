@@ -74,6 +74,7 @@ jobs:
           tests/unit/scripts/repo/test_audit_structure.py
           tests/unit/scripts/repo/test_check_root_hygiene_review_registry.py
           tests/unit/scripts/repo/test_cleanup_repository.py
+          tests/unit/scripts/repo/test_cleanup_root_local_clutter.py
           tests/architecture/test_root_hygiene_workflow.py
           tests/architecture/test_root_hygiene_review_registry.py
           -q

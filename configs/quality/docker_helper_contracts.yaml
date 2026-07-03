@@ -7,9 +7,10 @@ policy:
   runtime_guardrail: Helpers MUST NOT be used for BioETL application storage,
     locking, or orchestration semantics.
 helpers:
-  docker-compose.redis.yml:
+  scripts/ops/runtime/docker/compose/redis.yml:
     service: redis
     status: optional_local_only_adjunct
+    legacy_root_filename: docker-compose.redis.yml
     credential_env:
       - REDIS_PASSWORD
     forbidden_default_tokens:
@@ -22,9 +23,10 @@ helpers:
       prometheus_jobs:
         - redis
       metrics_path: /metrics
-  docker-compose.minio.yml:
+  scripts/ops/runtime/docker/compose/minio.yml:
     service: minio
     status: optional_local_only_adjunct
+    legacy_root_filename: docker-compose.minio.yml
     credential_env:
       - MINIO_ROOT_USER
       - MINIO_ROOT_PASSWORD
@@ -42,9 +44,10 @@ helpers:
       metrics_path:
         - /minio/v2/metrics/cluster
         - /minio/v2/metrics/node
-  docker-compose.sonarqube.yml:
+  scripts/ops/runtime/docker/compose/sonarqube.yml:
     service: sonarqube
     status: optional_local_only_adjunct
+    legacy_root_filename: docker-compose.sonarqube.yml
     credential_env:
       - SONARQUBE_DB_PASSWORD
       - SONARQUBE_SYSTEM_PASSCODE
@@ -66,9 +69,10 @@ helpers:
       reason: SonarQube native Prometheus endpoint requires runtime passcode
         authentication, so repo-default Prometheus config does not carry this
         secret.
-  docker-compose.alertmanager.yml:
+  scripts/ops/runtime/docker/compose/alertmanager.yml:
     service: alertmanager
     status: optional_local_only_adjunct
+    legacy_root_filename: docker-compose.alertmanager.yml
     credential_env: []
     required_port_binds:
       - 127.0.0.1:9093:9093

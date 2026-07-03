@@ -195,12 +195,12 @@ class TestRegistryProtocol:
         self,
         src_dir: Path,
     ) -> None:
-        """Canonical CLI startup should pass an explicit registry through Click."""
+        """Canonical CLI startup should keep registry bootstrap lazy."""
         main_path = src_dir / "bioetl" / "interfaces" / "cli" / "main.py"
         content = main_path.read_text(encoding="utf-8")
 
         assert "def _build_main_registry()" in content
-        assert "cli(obj=_build_main_registry())" in content
+        assert "cli(obj=None)" in content
 
     def test_src_paths_avoid_raw_class_level_provider_registry_calls(
         self,
