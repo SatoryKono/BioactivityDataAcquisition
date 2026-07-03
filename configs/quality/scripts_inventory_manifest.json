@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-02T13:51:37.110527+00:00",
+  "generated_at": "2026-07-02T18:33:19.789105+00:00",
   "summary": {
     "total_scripts": 448,
     "status_counts": {
@@ -630,7 +630,7 @@
       "references": [
         {
           "path": "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py",
-          "line": 320,
+          "line": 336,
           "source_group": "tests",
           "text": "assert \"scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh\" in backlog_text"
         }
@@ -876,7 +876,7 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/ai/codex/helper/setup-wsl-complete.sh",
@@ -892,7 +892,13 @@
         },
         {
           "path": "tests/architecture/test_root_hygiene_review_registry.py",
-          "line": 405,
+          "line": 419,
+          "source_group": "tests",
+          "text": "== \"scripts/ai/codex/helper/wsl_proxy_env.sh\""
+        },
+        {
+          "path": "tests/architecture/test_tech_debt_issues_5834_5838_closeout.py",
+          "line": 224,
           "source_group": "tests",
           "text": "== \"scripts/ai/codex/helper/wsl_proxy_env.sh\""
         }
@@ -964,7 +970,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 118,
+      "reference_count": 120,
       "references": [
         {
           "path": "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
@@ -1078,7 +1084,7 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 17,
       "references": [
         {
           "path": "scripts/ai/codex/WSL_SETUP_INSTRUCTIONS.md",
@@ -6701,7 +6707,7 @@
         },
         {
           "path": "tests/architecture/test_architecture_quality_scorecard.py",
-          "line": 153,
+          "line": 154,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py::build_diagnostics_payload\""
         },
@@ -6922,7 +6928,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 38,
+      "reference_count": 40,
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
@@ -9346,7 +9352,7 @@
         },
         {
           "path": "tests/architecture/test_architecture_quality_scorecard.py",
-          "line": 144,
+          "line": 145,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload\""
         }
@@ -10139,7 +10145,7 @@
         },
         {
           "path": "tests/architecture/test_reproducibility_docs_contract_drift.py",
-          "line": 216,
+          "line": 252,
           "source_group": "tests",
           "text": "assert \"run_historical_replay_closure_campaign.py\" in runbook"
         }
@@ -10190,13 +10196,13 @@
         },
         {
           "path": "tests/architecture/test_reproducibility_docs_contract_drift.py",
-          "line": 130,
+          "line": 166,
           "source_group": "tests",
           "text": "assert \"run_historical_replay_universe_campaign.py\" in text"
         },
         {
           "path": "tests/architecture/test_reproducibility_docs_contract_drift.py",
-          "line": 265,
+          "line": 298,
           "source_group": "tests",
           "text": "assert \"run_historical_replay_universe_campaign.py\" in runbook"
         }
@@ -11752,7 +11758,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 9,
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
@@ -11795,6 +11801,12 @@
           "line": 35,
           "source_group": "tests",
           "text": "\"scripts/ops/docker-setup.ps1\","
+        },
+        {
+          "path": "tests/architecture/test_root_hygiene_review_registry.py",
+          "line": 467,
+          "source_group": "tests",
+          "text": "by_path[\"docker-setup.ps1\"][\"canonical_path\"] == \"scripts/ops/docker-setup.ps1\""
         }
       ]
     },
@@ -11803,7 +11815,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/DOCKER_QUICKSTART.md",
@@ -11828,6 +11840,18 @@
           "line": 34,
           "source_group": "tests",
           "text": "\"scripts/ops/docker-setup.sh\","
+        },
+        {
+          "path": "tests/architecture/test_root_hygiene_review_registry.py",
+          "line": 470,
+          "source_group": "tests",
+          "text": "by_path[\"docker-setup.sh\"][\"canonical_path\"] == \"scripts/ops/docker-setup.sh\""
+        },
+        {
+          "path": "tests/architecture/test_tech_debt_issues_5834_5838_closeout.py",
+          "line": 253,
+          "source_group": "tests",
+          "text": "== \"scripts/ops/docker-setup.sh\""
         }
       ]
     },

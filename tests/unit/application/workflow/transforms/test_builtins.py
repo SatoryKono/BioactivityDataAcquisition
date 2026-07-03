@@ -42,6 +42,24 @@ def test_register_builtin_workflow_transforms_with_fk_port() -> None:
     assert "reconcile_foreign_keys" in registry._executors
 
 
+def test_register_builtin_workflow_transforms_with_row_reconciliation_port() -> None:
+    """Test registering built-ins with row reconciliation."""
+    from bioetl.domain.ports import RowReconciliationPort
+
+    class MockRowPort(RowReconciliationPort):
+        pass
+
+    registry = WorkflowTransformRegistry()
+    result = register_builtin_workflow_transforms(
+        registry,
+        row_reconciliation_port=MockRowPort(),
+    )
+
+    assert result is registry
+    assert "summarize_upstream_outputs" in registry._executors
+    assert "reconcile_rows" in registry._executors
+
+
 def test_summarize_upstream_outputs() -> None:
     """Test the summarize_upstream_outputs transform."""
     spec = WorkflowTransformSpec(
