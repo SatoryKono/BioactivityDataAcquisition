@@ -1,0 +1,91 @@
+---
+trigger: glob
+description: "BioETL Data Quality — Medallion, Delta Lake, Quarantine"
+globs:
+  - "configs/**/*.yaml"
+  - "src/**/*.py"
+---
+
+# Medallion Architecture
+
+**Canonical references:** `AGENTS.md`, `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`, `docs/02-architecture/decisions/`.
+
+| Layer  | Format | Validation | Retention | Idempotency |
+|--------|--------|------------|-----------|-------------|
+| Bronze | JSONL+zstd | Minimal | 90 days | Append-only |
+| Silver | Delta Lake | Soft (drift) | Permanent | Merge/Upsert, ACID |
+| Gold   | Delta Lake | Strict | Permanent | SCD Type 2 or partition |
+
+## Write Modes
+
+**Silver** (`SilverWriteMode`):
+- `MERGE` — Upsert by PK (default incremental)
+- `APPEND` — No dedup
+- `DELETE` — Full rewrite (NOT `OVERWRITE`)
+
+**Gold** (`GoldWriteMode`):
+- `OVERWRITE` — Recomputed aggregates
+- `APPEND` — Fact streams
+- `SCD2` — History tracking
+
+**SCD2 REQUIRED for:** Reference dicts, slowly evolving records, publication metadata
+
+## Delta Lake Maintenance
+
+- Engine: `delta-rs` (Rust core)
+- **VACUUM MUST run weekly**, 7 days retention
+- Forensic: default 7 days, max 30 for critical tables
+
+## Quarantine (Unified Table)
+
+- Single table: `common.quarantine`
+- Retention: 30 days
+- Status flow: NEW → UNDER-REVIEW → IGNORED/REPROCESSED/EXPIRED
+- **Sentinel values (-1, "N/A", 9999) FORBIDDEN**
+
+## JSON Fields Policy
+
+Silver/Gold JSON fields as **canonical JSON strings**:
+```python
+Series[str]  # NOT Series[object]
+```
+
+- Stable key ordering, compact separators, valid JSON syntax (no manual string concatenation)
+- Null: `None` (not `'[]'`, `'{}'`, `'null'`, or empty string)
+- Empty collections → `NULL`
+
+## Pandera Validation (MUST before write)
+
+**Silver**: validate the **exact** DataFrame being written via `schema.validate(df)`, `schema(df)`, or Pandera decorator/context manager. No post-validation transforms without re-validation. The validated object MUST be what gets written.
+
+**Gold**: strict Pandera schema (`pa.DataFrameSchema`, `@pa.check_types`; `strict=True`, `coerce=True`). `SchemaError`/`SchemaErrors` MUST abort the write — catching and logging/continuing is forbidden. No `lazy=True` errors ignored.
+
+## Idempotent Merge
+
+- Merge/upsert match condition MUST use declared primary key (or documented business key) only
+- Rerunning the same batch MUST update existing rows, not insert duplicates
+- Red flags: MERGE on non-unique columns, INSERT without conflict handling into keyed tables
+
+## Determinism Rules (infrastructure)
+
+Forbidden in `infrastructure/` and storage writers:
+- `datetime.now()`, `datetime.utcnow()`, `date.today()`, `time.time()`
+- `random.*`, `numpy.random` without context-provided seed
+
+Required:
+- Timestamps from `PipelineContext.started_at` (UTC)
+- Randomness from context-provided seeded RNG derived from `PipelineContext`
+- Stable sorting, canonical serialization, deterministic dict/JSON key order
+- Deterministic jitter when `RetryConfig(deterministic=True)`
+
+Acceptable exceptions: local CLI utilities explicitly marked non-reproducible.
+
+## Atomic Artifact Writes
+
+```python
+tmp = path.with_suffix(".tmp")
+tmp.write_text(payload, encoding="utf-8")
+os.replace(tmp, path)
+```
+
+Direct writes to final artifact paths are violations.

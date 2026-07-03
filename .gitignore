@@ -1,0 +1,32 @@
+/.cache
+/.hypothesis
+/data/output
+/tmp
+/~
+*.pyc
+/src/memory/episodic
+<<<<<<< HEAD
+/tests/integration/chembl/__pycache__
+/tests/architecture/__pycache__
+/tests/unit/__pycache__
+/reports
+/node_modules
+/src/bioetl/infrastructure/adapters/chembl/__pycache__
+/docs/site
+/docs/reports/generated
+/docs/reports
+/docs/99-archive
+/artifacts
+/.venv-docs
+/.venv-new
+/.npm-cache
+/.idea
+/.ai
+/.cursor
+||||||| 941c1461a
+=======
+data/2026-07-03_20-21-59.gif
+>>>>>>> master_20260703-1
+scripts/ai/codex/.env.codex
+scripts/ai/gemini/.env.gemini
+.env

@@ -1,0 +1,206 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "BioETL: setup Windows env",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/engineering/dev/setup_env_windows.ps1"
+      ],
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "BioETL: ruff check",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv-win/Scripts/python.exe",
+      "args": ["-m", "ruff", "check", "src", "tests"],
+      "windows": {
+        "command": "${workspaceFolder}\\.venv-win\\Scripts\\python.exe"
+      },
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "BioETL: ruff format",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv-win/Scripts/python.exe",
+      "args": ["-m", "ruff", "format", "src", "tests"],
+      "windows": {
+        "command": "${workspaceFolder}\\.venv-win\\Scripts\\python.exe"
+      },
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "BioETL: mypy strict",
+      "type": "shell",
+      "command": "bash",
+      "args": ["scripts/engineering/dev/run_mypy.sh"],
+      "windows": {
+        "command": "powershell",
+        "args": [
+          "-ExecutionPolicy",
+          "Bypass",
+          "-File",
+          "scripts/engineering/dev/run_mypy.ps1"
+        ]
+      },
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "BioETL: pytest quick",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/engineering/dev/run_pytest.ps1",
+        "tests/unit",
+        "--narrow",
+        "--timeout=120"
+      ],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "BioETL: pytest current file",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/engineering/dev/run_pytest.ps1",
+        "${file}",
+        "--narrow",
+        "--timeout=120"
+      ],
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "BioETL: architecture tests",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/engineering/dev/run_pytest.ps1",
+        "tests/architecture",
+        "--narrow",
+        "--timeout=120"
+      ],
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "BioETL: Codex check (WSL)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/ai/codex/cursor-launch.ps1",
+        "-Mode",
+        "check"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "BioETL: Codex MCP setup (WSL)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/ai/codex/run-codex.ps1",
+        "mcp-setup"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "focus": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "BioETL: Codex interactive (WSL)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/ai/codex/cursor-launch.ps1",
+        "-Mode",
+        "interactive"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "BioETL: Codex exec full-auto (WSL)",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/ai/codex/cursor-launch.ps1",
+        "-Mode",
+        "exec",
+        "${input:codexExecPrompt}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true
+      },
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "codexExecPrompt",
+      "type": "promptString",
+      "description": "Prompt for codex exec --full-auto"
+    }
+  ]
+}
