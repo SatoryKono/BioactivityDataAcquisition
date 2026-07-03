@@ -1,0 +1,31 @@
+{
+  "snapshot_name": "composite_molecule_dq_bundle",
+  "entity": "composite_molecule",
+  "row_count": 2,
+  "bundle_columns": [
+    "entity_id",
+    "_dq_warn",
+    "_dq_error",
+    "_index",
+    "_source_providers",
+    "_enrichment_status"
+  ],
+  "rows": [
+    {
+      "entity_id": "composite_molecule:CHEMBL123",
+      "_dq_warn": false,
+      "_dq_error": false,
+      "_index": 0,
+      "_source_providers": "[\"chembl\",\"pubchem\"]",
+      "_enrichment_status": "completed"
+    },
+    {
+      "entity_id": "composite_molecule:CHEMBL124",
+      "_dq_warn": true,
+      "_dq_error": false,
+      "_index": 1,
+      "_source_providers": "[\"chembl\"]",
+      "_enrichment_status": "partial"
+    }
+  ]
+}

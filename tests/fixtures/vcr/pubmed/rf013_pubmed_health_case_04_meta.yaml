@@ -1,0 +1,8 @@
+schema_version: 1
+provider: pubmed
+cassette_rel_path: tests/fixtures/vcr/pubmed/rf013_pubmed_health_case_04.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: b04103ffac09a579b9f2926a51835ae22bda741c5ebb7b1af842466025b5797b
+recorded_at: '2026-04-28'
+staleness_ready: true

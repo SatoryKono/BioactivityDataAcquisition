@@ -1,0 +1,8 @@
+schema_version: 1
+provider: openalex
+cassette_rel_path: tests/fixtures/vcr/openalex/test_openalex_publication_metadata_fields.yaml
+metadata_status: managed_inventory
+source: backfill_vcr_metadata_sidecars.py
+cassette_sha256: 2a7d973600b5032212dbfe11d039f1c439763d6efdb7d4e007076e6c05d48253
+recorded_at: '2026-04-28'
+staleness_ready: true

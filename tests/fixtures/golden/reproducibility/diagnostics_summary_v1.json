@@ -1,0 +1,907 @@
+{
+  "alert_signals": {
+    "artifact_linkage_gap": false,
+    "composite_resume_reconstructability_gap": false,
+    "cross_validation_signal_present": false,
+    "dq_signal_present": false,
+    "forensic_grade_gap": true,
+    "immutable_input_snapshot_gap": false,
+    "lineage_closure_boundary_gap": false,
+    "lineage_gap": false,
+    "produced_artifact_trace_gap": true,
+    "replay_ready_gap": true,
+    "reproducible_semantic_output_mode_gap": false,
+    "required_persistence_profile_gap": true,
+    "run_failed": false,
+    "run_shutdown": false,
+    "strict_replay_boundary_gap": false
+  },
+  "append_mode_semantic_sinks": [],
+  "artifact_publication_closure": "disabled",
+  "artifact_refs": [],
+  "broader_historical_exact_replay_boundary": "historical_source_snapshot_certification",
+  "broader_historical_exact_replay_policy": "certified_historical_exact_replay_tranche_supported",
+  "broader_historical_exact_replay_reason": "retained_historical_source_runs_can_gain_certified_exact_replay_parent_evidence_via_backfilled_snapshot_certification",
+  "broader_historical_exact_replay_state": "within_launch_time_snapshot_boundary",
+  "code_provenance_state": {
+    "dependency_lock_state": "missing",
+    "git_commit": "abc1234",
+    "source_revision_state": "clean",
+    "strict_code_provenance_blockers": [
+      "dependency_lock_hash_missing"
+    ],
+    "strict_code_provenance_ready": false
+  },
+  "config_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "continuation_mode": "exact_replay",
+  "contract_ref": "chembl.activity",
+  "contract_version": "1.2.0",
+  "dependency_lock_state": "missing",
+  "dq_contract_compatibility_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "dq_policy_ref": "chembl_activity.gold",
+  "effective_config_artifact_id": "eca-golden-001",
+  "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "entity": "activity",
+  "exact_replay_anchors": {
+    "contract_ref": "chembl.activity",
+    "contract_version": "1.2.0",
+    "dependency_lock_state": "missing",
+    "dq_contract_compatibility_hash": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "effective_config_artifact_id": "eca-golden-001",
+    "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "execution_fingerprint": "fp-golden-001",
+    "git_commit": "abc1234",
+    "input_snapshot_content_hashes": [
+      "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    ],
+    "input_snapshot_identity_fingerprint": "2f847242c9547e889e852f7a4dc132293b43ba0e72d766fa2b7a91166decd6a9",
+    "input_snapshot_ids": [
+      "snapshot-golden-001"
+    ],
+    "lineage_fragment_ids": [],
+    "normalization_profile_hash": null,
+    "normalization_profile_ref": null,
+    "normalization_profile_version": null,
+    "pipeline_name": "chembl_activity",
+    "pipeline_version": "1.0.0",
+    "published_artifact_ids": [],
+    "published_artifact_paths": [],
+    "run_type": "incremental",
+    "semantic_identity_anchor": "execution_fingerprint"
+  },
+  "exact_replay_blockers": [
+    "dependency_lock_provenance_missing"
+  ],
+  "exact_replay_eligible": false,
+  "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+  "execution_fingerprint": "fp-golden-001",
+  "git_commit": "abc1234",
+  "historical_live_run_upgrade_boundary": "input_snapshot_published_ledger_evidence",
+  "historical_live_run_upgrade_policy": "input_snapshot_published_ledger_evidence_only",
+  "historical_live_run_upgrade_reason": "historical_live_runs_require_input_snapshot_published_ledger_evidence_before_parent_promotion",
+  "historical_live_run_upgrade_state": "not_needed_snapshot_backed_at_launch",
+  "identity_graph_complete": null,
+  "input_snapshot_content_hashes": [
+    "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  ],
+  "input_snapshot_count": 1,
+  "input_snapshot_identity_fingerprint": "2f847242c9547e889e852f7a4dc132293b43ba0e72d766fa2b7a91166decd6a9",
+  "input_snapshot_ids": [
+    "snapshot-golden-001"
+  ],
+  "input_snapshot_missing_source_refs": [],
+  "input_snapshots": [
+    {
+      "captured_at": "2025-01-01T11:55:00+00:00",
+      "content_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "entity": "activity",
+      "etag": "etag-001",
+      "immutable_uri": "s3://bioetl-bronze/chembl/activity/batch-001.jsonl.zst",
+      "last_modified": "2025-01-01T11:55:00Z",
+      "object_bucket": "bioetl-bronze",
+      "object_key": "chembl/activity/batch-001.jsonl.zst",
+      "object_version_id": "version-001",
+      "pipeline_name": "chembl_activity",
+      "provider": "chembl",
+      "query": "assay_type=B",
+      "query_fingerprint": "gggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg",
+      "snapshot_id": "snapshot-golden-001",
+      "storage_provider": "s3"
+    }
+  ],
+  "lineage_closure_boundary": {
+    "family": "chembl.activity",
+    "reason": "family_within_supported_boundary",
+    "support_scope": "operator_grade_trace_debug",
+    "supported": true,
+    "supported_families": [
+      "chembl.activity",
+      "chembl.assay",
+      "chembl.assay_parameters",
+      "chembl.cell_line",
+      "chembl.compound_record",
+      "chembl.molecule",
+      "chembl.protein_class",
+      "chembl.publication",
+      "chembl.publication_similarity",
+      "chembl.publication_term",
+      "chembl.subcellular_fraction",
+      "chembl.target",
+      "chembl.target_component",
+      "chembl.target_protein_classification",
+      "chembl.tissue",
+      "crossref.publication",
+      "openalex.publication",
+      "pubchem.compound",
+      "pubmed.publication",
+      "semanticscholar.publication",
+      "uniprot.idmapping",
+      "uniprot.protein"
+    ]
+  },
+  "lineage_fragment_ids": [],
+  "manifest_created_at": "2025-01-01T12:00:00+00:00",
+  "manifest_id": "manifest-golden-001",
+  "next_steps": [
+    "Resolve concrete produced artifacts from the run ledger before claiming replay-ready reproducibility.",
+    "Current persisted surfaces do not satisfy the declared required persistence profile for this run.",
+    "Review replay-ready persistence requirements before treating this run as exact-replay capable.",
+    "Review forensic-grade persistence requirements before using this run for full trace/debug reconstruction."
+  ],
+  "normalization_profile_hash": null,
+  "normalization_profile_ref": null,
+  "normalization_profile_version": null,
+  "occurrence_only_diagnostics": [],
+  "operator_replay_mode": "Exact Replay Blocked",
+  "persistence_profile": {
+    "attained_profile": "degraded_observable",
+    "claims": {
+      "degraded_observable": true,
+      "forensic_grade": false,
+      "replay_ready": false
+    },
+    "composite_resume_reconstructability": {
+      "does_not_reconstruct": [
+        "per_provider_result_maps",
+        "rich_checkpoint_payloads"
+      ],
+      "forensic_grade_supported": false,
+      "reconstructs": [
+        "state",
+        "seed_completed",
+        "merge_completed",
+        "last_event_id",
+        "last_event_occurred_at"
+      ],
+      "resume_model": "checkpoint_snapshot_plus_ledger_suffix",
+      "scope": "coarse_grained_composite_resume"
+    },
+    "forensic_grade_missing_requirements": [
+      "exact_replay_capability",
+      "dependency_lock_provenance",
+      "produced_artifact_trace",
+      "run_ledger_history"
+    ],
+    "lineage_closure_boundary": {
+      "family": "chembl.activity",
+      "reason": "family_within_supported_boundary",
+      "support_scope": "operator_grade_trace_debug",
+      "supported": true,
+      "supported_families": [
+        "chembl.activity",
+        "chembl.assay",
+        "chembl.assay_parameters",
+        "chembl.cell_line",
+        "chembl.compound_record",
+        "chembl.molecule",
+        "chembl.protein_class",
+        "chembl.publication",
+        "chembl.publication_similarity",
+        "chembl.publication_term",
+        "chembl.subcellular_fraction",
+        "chembl.target",
+        "chembl.target_component",
+        "chembl.target_protein_classification",
+        "chembl.tissue",
+        "crossref.publication",
+        "openalex.publication",
+        "pubchem.compound",
+        "pubmed.publication",
+        "semanticscholar.publication",
+        "uniprot.idmapping",
+        "uniprot.protein"
+      ]
+    },
+    "replay_ready_missing_requirements": [
+      "exact_replay_capability",
+      "dependency_lock_provenance",
+      "produced_artifact_trace"
+    ],
+    "required_profile": "replay_ready",
+    "required_profile_missing_requirements": [
+      "exact_replay_capability",
+      "dependency_lock_provenance",
+      "produced_artifact_trace"
+    ],
+    "required_profile_satisfied": false,
+    "surfaces": {
+      "artifact_lineage_links": true,
+      "control_plane_manifest": true,
+      "dependency_lock_provenance": false,
+      "effective_config_artifact": true,
+      "exact_replay_capability": false,
+      "immutable_input_snapshots": true,
+      "lineage_closure_boundary_support": true,
+      "produced_artifact_trace": false,
+      "reproducible_semantic_output_mode": true,
+      "run_ledger_history": false,
+      "strict_replay_execution_context_support": true
+    }
+  },
+  "pipeline_name": "chembl_activity",
+  "pipeline_version": "1.0.0",
+  "planned_artifacts": [
+    {
+      "layer": "silver",
+      "path": "silver/chembl/activity"
+    }
+  ],
+  "post_capture_replayable_parent_boundary": "ledger_materialized_live_capture_parent",
+  "post_capture_replayable_parent_supported": true,
+  "produced_artifact_trace": {
+    "artifact_count": 0,
+    "artifact_publication_closure": "disabled",
+    "artifacts": [],
+    "complete": false,
+    "lookup": "run_ledger_by_manifest_id",
+    "lookup_key": "manifest-golden-001",
+    "manifest_id": "manifest-golden-001",
+    "missing_requirements": [
+      "run_ledger_history",
+      "artifact_publication_event"
+    ]
+  },
+  "provider": "chembl",
+  "published_artifact_count": 0,
+  "replay_capability": "exact_replay_supported",
+  "replay_capability_assessment": {
+    "blocking_gaps": [],
+    "replay_capability": "exact_replay_supported",
+    "replay_readiness_verdict": "exact_replay_ready",
+    "required_persistence_profile": "replay_ready",
+    "required_profile_satisfied": true,
+    "snapshot_envelope": {
+      "any_input_snapshots": true,
+      "full_snapshot_envelope": true,
+      "missing_snapshot_source_refs": [],
+      "require_full_snapshot_envelope": false,
+      "source_count": 1,
+      "sources_with_snapshots": 1
+    },
+    "strict_exact_replay_supported": true,
+    "strict_requirement_requested": true
+  },
+  "replay_capability_reason": "full_immutable_input_snapshot_envelope_present",
+  "replay_control_plane_state": "exact_replay_supported",
+  "replay_family_contract": {
+    "broader_historical_exact_replay_boundary": "historical_source_snapshot_certification",
+    "broader_historical_exact_replay_policy": "certified_historical_exact_replay_tranche_supported",
+    "broader_historical_exact_replay_reason": "retained_historical_source_runs_can_gain_certified_exact_replay_parent_evidence_via_backfilled_snapshot_certification",
+    "contract": "snapshot_backed_exact_replay",
+    "default_required_persistence_profile": "replay_ready",
+    "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+    "execution_context": "source",
+    "family": "chembl.activity",
+    "historical_live_run_upgrade_boundary": "input_snapshot_published_ledger_evidence",
+    "historical_live_run_upgrade_policy": "input_snapshot_published_ledger_evidence_only",
+    "historical_live_run_upgrade_reason": "historical_live_runs_require_input_snapshot_published_ledger_evidence_before_parent_promotion",
+    "post_capture_replayable_parent_boundary": "ledger_materialized_live_capture_parent",
+    "post_capture_replayable_parent_reason": "family_can_promote_materialized_live_capture_into_replayable_parent_evidence",
+    "post_capture_replayable_parent_supported": true,
+    "reason": "family_within_supported_boundary",
+    "strict_exact_replay_supported": true,
+    "strict_replay_runtime_verdict": "allowed_with_snapshot_backed_source_refs",
+    "support_scope": "operator_grade_trace_debug",
+    "support_state": "exact_replay_supported",
+    "supported_families": [
+      "chembl.activity",
+      "chembl.assay",
+      "chembl.assay_parameters",
+      "chembl.cell_line",
+      "chembl.compound_record",
+      "chembl.molecule",
+      "chembl.protein_class",
+      "chembl.publication",
+      "chembl.publication_similarity",
+      "chembl.publication_term",
+      "chembl.subcellular_fraction",
+      "chembl.target",
+      "chembl.target_component",
+      "chembl.target_protein_classification",
+      "chembl.tissue",
+      "crossref.publication",
+      "openalex.publication",
+      "pubchem.compound",
+      "pubmed.publication",
+      "semanticscholar.publication",
+      "uniprot.idmapping",
+      "uniprot.protein"
+    ]
+  },
+  "replay_mode": "exact_replay",
+  "replay_next_action": "Do not replay; required control-plane evidence is missing or inconsistent.",
+  "replay_occurrence_kind": "launch_time_snapshot_backed_run",
+  "replay_of_manifest_id": null,
+  "replay_of_run_id": null,
+  "replay_parentage": {
+    "is_exact_replay": false,
+    "replay_of_manifest_id": null,
+    "replay_of_run_id": null
+  },
+  "replay_readiness_verdict": "exact_replay_blocked",
+  "replay_resume_rebuild_verdict": "non_replayable",
+  "replay_support_state": "exact_replay_supported",
+  "reproducibility_audit_score": {
+    "blockers": [
+      "dependency_lock_hash_missing",
+      "dependency_lock_provenance",
+      "dependency_lock_provenance_missing",
+      "exact_replay_capability",
+      "exact_replay_not_eligible",
+      "identity_graph_incomplete",
+      "artifact_publication_closure",
+      "produced_artifact_trace"
+    ],
+    "category_scores": {
+      "checkpoint_safety": {
+        "blockers": [],
+        "confidence": "high",
+        "evidence": [
+          "hard_fail_checkpoint_policy"
+        ],
+        "evidence_refs": [
+          "diagnostics.resume_contract"
+        ],
+        "score": 9
+      },
+      "determinism": {
+        "blockers": [
+          "dependency_lock_provenance_missing"
+        ],
+        "confidence": "high",
+        "evidence": [
+          "effective_config_hash_present",
+          "immutable_input_snapshots_present",
+          "exact_replay_blockers_present"
+        ],
+        "evidence_refs": [
+          "diagnostics.effective_config_hash",
+          "diagnostics.input_snapshot_ids",
+          "diagnostics.exact_replay_blockers"
+        ],
+        "score": 8
+      },
+      "idempotency": {
+        "blockers": [
+          "artifact_publication_closure"
+        ],
+        "confidence": "high",
+        "evidence": [
+          "no_published_artifacts_observed",
+          "artifact_publication_closure_not_closed"
+        ],
+        "evidence_refs": [
+          "diagnostics.exact_replay_eligible",
+          "diagnostics.artifact_refs"
+        ],
+        "score": 4
+      },
+      "layer_consistency": {
+        "blockers": [],
+        "confidence": "high",
+        "evidence": [
+          "resolved_config_hash_exposed",
+          "effective_config_hash_exposed",
+          "resolved_and_effective_hashes_exposed"
+        ],
+        "evidence_refs": [
+          "diagnostics.resolved_config_hash",
+          "diagnostics.effective_config_hash",
+          "diagnostics.reproducibility_diagnostics.effective_config.diff_policy",
+          "diagnostics.occurrence_only_diagnostics"
+        ],
+        "score": 9
+      },
+      "lineage_completeness": {
+        "blockers": [
+          "identity_graph_incomplete"
+        ],
+        "confidence": "high",
+        "evidence": [
+          "identity_graph_incomplete",
+          "no_lineage_fragments_observed"
+        ],
+        "evidence_refs": [
+          "diagnostics.identity_graph_complete",
+          "diagnostics.lineage_fragment_ids",
+          "diagnostics.lineage_closure_boundary"
+        ],
+        "score": 7
+      },
+      "replay_readiness": {
+        "blockers": [
+          "exact_replay_not_eligible",
+          "dependency_lock_provenance_missing",
+          "artifact_publication_closure"
+        ],
+        "confidence": "high",
+        "evidence": [
+          "exact_replay_not_eligible",
+          "exact_replay_blockers_present",
+          "artifact_publication_closure_not_closed"
+        ],
+        "evidence_refs": [
+          "diagnostics.exact_replay_eligible",
+          "diagnostics.exact_replay_blockers",
+          "diagnostics.replay_mode"
+        ],
+        "score": 4
+      },
+      "run_identity": {
+        "blockers": [
+          "dependency_lock_hash_missing"
+        ],
+        "confidence": "high",
+        "evidence": [
+          "manifest_id_present",
+          "execution_fingerprint_present",
+          "resolved_config_hash_present",
+          "effective_config_hash_present",
+          "effective_config_artifact_id_present",
+          "contract_ref_present",
+          "git_commit_present",
+          "source_revision_state_present",
+          "dependency_lock_hash_missing"
+        ],
+        "evidence_refs": [
+          "diagnostics.manifest_id",
+          "diagnostics.execution_fingerprint",
+          "diagnostics.resolved_config_hash",
+          "diagnostics.effective_config_hash",
+          "diagnostics.effective_config_artifact_id",
+          "diagnostics.contract_ref",
+          "diagnostics.git_commit",
+          "diagnostics.source_revision_state",
+          "diagnostics.dependency_lock_hash"
+        ],
+        "score": 9
+      }
+    },
+    "contract_version": "1.2.0",
+    "evidence_refs": [
+      "diagnostics.artifact_refs",
+      "diagnostics.contract_ref",
+      "diagnostics.dependency_lock_hash",
+      "diagnostics.effective_config_artifact_id",
+      "diagnostics.effective_config_hash",
+      "diagnostics.exact_replay_blockers",
+      "diagnostics.exact_replay_eligible",
+      "diagnostics.execution_fingerprint",
+      "diagnostics.git_commit",
+      "diagnostics.identity_graph_complete",
+      "diagnostics.input_snapshot_ids",
+      "diagnostics.lineage_closure_boundary",
+      "diagnostics.lineage_fragment_ids",
+      "diagnostics.manifest_id",
+      "diagnostics.occurrence_only_diagnostics",
+      "diagnostics.replay_mode",
+      "diagnostics.reproducibility_diagnostics.effective_config.diff_policy",
+      "diagnostics.resolved_config_hash",
+      "diagnostics.resume_contract",
+      "diagnostics.source_revision_state"
+    ],
+    "executable_run_contract_claim": {
+      "authoritative_truth_surface": "published_control_plane_contract",
+      "claim_source_artifact_path": "docs/04-reference/contracts/run-manifest-ledger.md",
+      "claimed": true,
+      "evidence_refs": [
+        "diagnostics.artifact_refs",
+        "diagnostics.contract_ref",
+        "diagnostics.dependency_lock_hash",
+        "diagnostics.effective_config_artifact_id",
+        "diagnostics.effective_config_hash",
+        "diagnostics.exact_replay_blockers",
+        "diagnostics.exact_replay_eligible",
+        "diagnostics.exact_replay_support_boundary",
+        "diagnostics.execution_fingerprint",
+        "diagnostics.git_commit",
+        "diagnostics.identity_graph_complete",
+        "diagnostics.input_snapshot_ids",
+        "diagnostics.lineage_closure_boundary",
+        "diagnostics.lineage_fragment_ids",
+        "diagnostics.manifest_id",
+        "diagnostics.occurrence_only_diagnostics",
+        "diagnostics.replay_family_contract",
+        "diagnostics.replay_mode",
+        "diagnostics.reproducibility_diagnostics.effective_config.diff_policy",
+        "diagnostics.resolved_config_hash",
+        "diagnostics.resume_contract",
+        "diagnostics.source_revision_state"
+      ],
+      "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+      "lineage_closure_boundary": {
+        "family": "chembl.activity",
+        "reason": "family_within_supported_boundary",
+        "support_scope": "operator_grade_trace_debug",
+        "supported": true,
+        "supported_families": [
+          "chembl.activity",
+          "chembl.assay",
+          "chembl.assay_parameters",
+          "chembl.cell_line",
+          "chembl.compound_record",
+          "chembl.molecule",
+          "chembl.protein_class",
+          "chembl.publication",
+          "chembl.publication_similarity",
+          "chembl.publication_term",
+          "chembl.subcellular_fraction",
+          "chembl.target",
+          "chembl.target_component",
+          "chembl.target_protein_classification",
+          "chembl.tissue",
+          "crossref.publication",
+          "openalex.publication",
+          "pubchem.compound",
+          "pubmed.publication",
+          "semanticscholar.publication",
+          "uniprot.idmapping",
+          "uniprot.protein"
+        ]
+      },
+      "reason": "supported_boundary_executable_runs_promote_or_fail_closed",
+      "scope": "prospective_executable_runs_within_supported_boundary",
+      "verdict": "prospective_executable_run_contract_claimed"
+    },
+    "historical_replay_universe_exact_replay_claim": {
+      "authoritative_truth_surface": "historical_replay_universe_closure_report",
+      "claim_source_artifact_path": null,
+      "claimed": false,
+      "evidence_refs": [
+        "diagnostics.artifact_refs",
+        "diagnostics.contract_ref",
+        "diagnostics.dependency_lock_hash",
+        "diagnostics.effective_config_artifact_id",
+        "diagnostics.effective_config_hash",
+        "diagnostics.exact_replay_blockers",
+        "diagnostics.exact_replay_eligible",
+        "diagnostics.exact_replay_support_boundary",
+        "diagnostics.execution_fingerprint",
+        "diagnostics.git_commit",
+        "diagnostics.identity_graph_complete",
+        "diagnostics.input_snapshot_ids",
+        "diagnostics.lineage_closure_boundary",
+        "diagnostics.lineage_fragment_ids",
+        "diagnostics.manifest_id",
+        "diagnostics.occurrence_only_diagnostics",
+        "diagnostics.replay_family_contract",
+        "diagnostics.replay_mode",
+        "diagnostics.reproducibility_diagnostics.effective_config.diff_policy",
+        "diagnostics.resolved_config_hash",
+        "diagnostics.resume_contract",
+        "diagnostics.source_revision_state"
+      ],
+      "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+      "governed_full_corpus_gate": {
+        "authoritative_truth_surface": "historical_replay_universe_closure_report",
+        "gate_kind": "universal_historical_exact_replay",
+        "reason": "authoritative_historical_replay_universe_artifact_unavailable",
+        "required_claims": {
+          "durable_evidence_coverage_claim": false,
+          "universal_claim": false
+        },
+        "satisfied": false,
+        "scope": "all_known_historical_runs",
+        "verdict": "gate_blocked"
+      },
+      "lineage_closure_boundary": {
+        "family": "chembl.activity",
+        "reason": "family_within_supported_boundary",
+        "support_scope": "operator_grade_trace_debug",
+        "supported": true,
+        "supported_families": [
+          "chembl.activity",
+          "chembl.assay",
+          "chembl.assay_parameters",
+          "chembl.cell_line",
+          "chembl.compound_record",
+          "chembl.molecule",
+          "chembl.protein_class",
+          "chembl.publication",
+          "chembl.publication_similarity",
+          "chembl.publication_term",
+          "chembl.subcellular_fraction",
+          "chembl.target",
+          "chembl.target_component",
+          "chembl.target_protein_classification",
+          "chembl.tissue",
+          "crossref.publication",
+          "openalex.publication",
+          "pubchem.compound",
+          "pubmed.publication",
+          "semanticscholar.publication",
+          "uniprot.idmapping",
+          "uniprot.protein"
+        ]
+      },
+      "reason": "authoritative_historical_replay_universe_artifact_unavailable",
+      "scope": "all_known_historical_runs",
+      "verdict": "historical_universe_exact_replay_not_claimed"
+    },
+    "overall_score": 7.1,
+    "required_profile": "replay_ready",
+    "scale": "0-10",
+    "schema_version": "2.0",
+    "score_scope": "supported_boundary_run",
+    "scored_at": "2025-01-01T12:00:00+00:00",
+    "source": "run_manifest_diagnostics",
+    "supported_boundary_verdict": {
+      "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+      "lineage_closure_supported": true,
+      "reason": "supported_boundary_requirements_not_met",
+      "replay_capability": "exact_replay_supported",
+      "required_profile": "replay_ready",
+      "scope": "supported_boundary_run",
+      "supported_boundary_satisfied": false,
+      "verdict": "supported_boundary_gaps_present"
+    },
+    "threshold_failures": [
+      {
+        "actual": 4,
+        "category": "replay_readiness",
+        "reason": "below_required_threshold",
+        "required": 7
+      }
+    ],
+    "thresholds": {
+      "checkpoint_safety": 7,
+      "determinism": 7,
+      "layer_consistency": 7,
+      "replay_readiness": 7,
+      "run_identity": 8
+    },
+    "thresholds_satisfied": false
+  },
+  "reproducibility_diagnostics": {
+    "checkpoint_anchors": {
+      "current_manifest_anchors": {
+        "contract_ref": "chembl.activity",
+        "contract_version": "1.2.0",
+        "effective_config_artifact_id": "eca-golden-001",
+        "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "execution_fingerprint": "fp-golden-001",
+        "input_snapshot_ids": [
+          "snapshot-golden-001"
+        ],
+        "manifest_id": "manifest-golden-001"
+      },
+      "resume_anchor_comparison": {
+        "checkpoint_identity_present": false,
+        "matching_fields": [],
+        "mismatched_fields": [],
+        "missing_checkpoint_fields": [],
+        "missing_current_fields": []
+      },
+      "resume_contract": {
+        "applied_checkpoint_compatibility_policy": "hard_fail",
+        "continuation_mode": "exact_replay",
+        "execution_context": "ordinary",
+        "ledger_suffix_replay": false,
+        "occurrence_identity_anchor": "run_id",
+        "requested_checkpoint_compatibility_policy": null,
+        "requested_exact_replay": true,
+        "resume_evidence_source": "manifest_input_snapshots_and_control_plane_anchors",
+        "resume_guarantee": "strict_evidence_boundary_exact_replay",
+        "resume_mode": "checkpoint_snapshot_only",
+        "resume_requested": false,
+        "semantic_identity_anchor": "execution_fingerprint",
+        "strict_replay_safe": false
+      },
+      "resume_diagnostics": null
+    },
+    "effective_config": {
+      "diff_policy": {
+        "config_hash_policy": "resolved_and_effective_hashes_only",
+        "occurrence_fields": [
+          "run_id",
+          "manifest_id",
+          "manifest_created_at"
+        ],
+        "semantic_anchor": "effective_config_hash"
+      },
+      "occurrence": {
+        "manifest_created_at": "2025-01-01T12:00:00+00:00",
+        "manifest_id": "manifest-golden-001",
+        "run_id": "00000000-0000-0000-0000-000000000901"
+      },
+      "semantic": {
+        "effective_config_artifact_id": "eca-golden-001",
+        "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "source_fingerprint": "1750d384e3efab89c50eff0b4808a22adc1f4023c3f023e011cc50d41a2431a9"
+      }
+    },
+    "lineage": {
+      "artifact_publication_closure": "disabled",
+      "lineage_closure_boundary": {
+        "family": "chembl.activity",
+        "reason": "family_within_supported_boundary",
+        "support_scope": "operator_grade_trace_debug",
+        "supported": true,
+        "supported_families": [
+          "chembl.activity",
+          "chembl.assay",
+          "chembl.assay_parameters",
+          "chembl.cell_line",
+          "chembl.compound_record",
+          "chembl.molecule",
+          "chembl.protein_class",
+          "chembl.publication",
+          "chembl.publication_similarity",
+          "chembl.publication_term",
+          "chembl.subcellular_fraction",
+          "chembl.target",
+          "chembl.target_component",
+          "chembl.target_protein_classification",
+          "chembl.tissue",
+          "crossref.publication",
+          "openalex.publication",
+          "pubchem.compound",
+          "pubmed.publication",
+          "semanticscholar.publication",
+          "uniprot.idmapping",
+          "uniprot.protein"
+        ]
+      },
+      "lineage_fragment_ids": [],
+      "planned_artifact_count": null,
+      "produced_artifact_trace_complete": false,
+      "published_artifact_count": 0
+    },
+    "occurrence_identity": {
+      "manifest_created_at": "2025-01-01T12:00:00+00:00",
+      "manifest_id": "manifest-golden-001",
+      "occurrence_only_diagnostics": [],
+      "run_id": "00000000-0000-0000-0000-000000000901"
+    },
+    "policy": {
+      "attained_profile": "degraded_observable",
+      "broader_historical_exact_replay_boundary": "historical_source_snapshot_certification",
+      "broader_historical_exact_replay_policy": "certified_historical_exact_replay_tranche_supported",
+      "broader_historical_exact_replay_reason": "retained_historical_source_runs_can_gain_certified_exact_replay_parent_evidence_via_backfilled_snapshot_certification",
+      "broader_historical_exact_replay_state": "within_launch_time_snapshot_boundary",
+      "capability_assessment": {
+        "blocking_gaps": [],
+        "replay_capability": "exact_replay_supported",
+        "replay_readiness_verdict": "exact_replay_ready",
+        "required_persistence_profile": "replay_ready",
+        "required_profile_satisfied": true,
+        "snapshot_envelope": {
+          "any_input_snapshots": true,
+          "full_snapshot_envelope": true,
+          "missing_snapshot_source_refs": [],
+          "require_full_snapshot_envelope": false,
+          "source_count": 1,
+          "sources_with_snapshots": 1
+        },
+        "strict_exact_replay_supported": true,
+        "strict_requirement_requested": true
+      },
+      "continuation_mode": "exact_replay",
+      "exact_replay_blockers": [
+        "dependency_lock_provenance_missing"
+      ],
+      "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+      "historical_live_run_upgrade_boundary": "input_snapshot_published_ledger_evidence",
+      "historical_live_run_upgrade_policy": "input_snapshot_published_ledger_evidence_only",
+      "historical_live_run_upgrade_reason": "historical_live_runs_require_input_snapshot_published_ledger_evidence_before_parent_promotion",
+      "historical_live_run_upgrade_state": "not_needed_snapshot_backed_at_launch",
+      "operator_replay_mode": "Exact Replay Blocked",
+      "post_capture_replayable_parent_boundary": "ledger_materialized_live_capture_parent",
+      "post_capture_replayable_parent_supported": true,
+      "replay_capability": "exact_replay_supported",
+      "replay_control_plane_state": "exact_replay_supported",
+      "replay_family_contract": {
+        "broader_historical_exact_replay_boundary": "historical_source_snapshot_certification",
+        "broader_historical_exact_replay_policy": "certified_historical_exact_replay_tranche_supported",
+        "broader_historical_exact_replay_reason": "retained_historical_source_runs_can_gain_certified_exact_replay_parent_evidence_via_backfilled_snapshot_certification",
+        "contract": "snapshot_backed_exact_replay",
+        "default_required_persistence_profile": "replay_ready",
+        "exact_replay_support_boundary": "snapshot_backed_source_runs_only",
+        "execution_context": "source",
+        "family": "chembl.activity",
+        "historical_live_run_upgrade_boundary": "input_snapshot_published_ledger_evidence",
+        "historical_live_run_upgrade_policy": "input_snapshot_published_ledger_evidence_only",
+        "historical_live_run_upgrade_reason": "historical_live_runs_require_input_snapshot_published_ledger_evidence_before_parent_promotion",
+        "post_capture_replayable_parent_boundary": "ledger_materialized_live_capture_parent",
+        "post_capture_replayable_parent_reason": "family_can_promote_materialized_live_capture_into_replayable_parent_evidence",
+        "post_capture_replayable_parent_supported": true,
+        "reason": "family_within_supported_boundary",
+        "strict_exact_replay_supported": true,
+        "strict_replay_runtime_verdict": "allowed_with_snapshot_backed_source_refs",
+        "support_scope": "operator_grade_trace_debug",
+        "support_state": "exact_replay_supported",
+        "supported_families": [
+          "chembl.activity",
+          "chembl.assay",
+          "chembl.assay_parameters",
+          "chembl.cell_line",
+          "chembl.compound_record",
+          "chembl.molecule",
+          "chembl.protein_class",
+          "chembl.publication",
+          "chembl.publication_similarity",
+          "chembl.publication_term",
+          "chembl.subcellular_fraction",
+          "chembl.target",
+          "chembl.target_component",
+          "chembl.target_protein_classification",
+          "chembl.tissue",
+          "crossref.publication",
+          "openalex.publication",
+          "pubchem.compound",
+          "pubmed.publication",
+          "semanticscholar.publication",
+          "uniprot.idmapping",
+          "uniprot.protein"
+        ]
+      },
+      "replay_mode": "exact_replay",
+      "replay_occurrence_kind": "launch_time_snapshot_backed_run",
+      "replay_readiness_verdict": "exact_replay_blocked",
+      "required_persistence_profile": "replay_ready",
+      "required_profile_missing_requirements": [
+        "exact_replay_capability",
+        "dependency_lock_provenance",
+        "produced_artifact_trace"
+      ],
+      "required_profile_satisfied": false
+    },
+    "semantic_identity": {
+      "effective_config_artifact_id": "eca-golden-001",
+      "effective_config_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "execution_fingerprint": "fp-golden-001",
+      "input_snapshot_identity_fingerprint": "2f847242c9547e889e852f7a4dc132293b43ba0e72d766fa2b7a91166decd6a9",
+      "input_snapshot_ids": [
+        "snapshot-golden-001"
+      ],
+      "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "snapshot_status": "full"
+    }
+  },
+  "requested_exact_replay": true,
+  "required_persistence_profile": "replay_ready",
+  "resolved_config_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "resume_contract": {
+    "applied_checkpoint_compatibility_policy": "hard_fail",
+    "continuation_mode": "exact_replay",
+    "execution_context": "ordinary",
+    "ledger_suffix_replay": false,
+    "occurrence_identity_anchor": "run_id",
+    "requested_checkpoint_compatibility_policy": null,
+    "requested_exact_replay": true,
+    "resume_evidence_source": "manifest_input_snapshots_and_control_plane_anchors",
+    "resume_guarantee": "strict_evidence_boundary_exact_replay",
+    "resume_mode": "checkpoint_snapshot_only",
+    "resume_requested": false,
+    "semantic_identity_anchor": "execution_fingerprint",
+    "strict_replay_safe": false
+  },
+  "resume_diagnostics": null,
+  "rule_bundle_version": "2026.03",
+  "run_id": "00000000-0000-0000-0000-000000000901",
+  "snapshot_status": "full",
+  "source_fingerprint": "1750d384e3efab89c50eff0b4808a22adc1f4023c3f023e011cc50d41a2431a9",
+  "source_posture": "immutable_snapshot_envelope",
+  "source_revision_state": "clean"
+}

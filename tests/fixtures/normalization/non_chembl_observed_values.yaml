@@ -1,0 +1,782 @@
+version: 2
+description: >
+  Observed-value inventory for non-ChEMBL normalization governance. Low-cardinality
+  fixture samples are evidence only; they must not be auto-promoted to strict enums
+  unless classification explicitly marks the field as a reviewed closed vocabulary.
+pipelines:
+  pubchem_compound:
+    primary_key: molecule_id
+    observed_values:
+      chemical_standardization_status:
+        - standardized
+        - partial
+        - invalid
+        - missing_structure
+      chemical_standardization_policy_version:
+        - pubchem-basic-v1
+    observed_raw_values:
+      molecule_id:
+        - CID:2244
+        - "2244"
+    expected_normalized_values:
+      molecule_id:
+        - "2244"
+    expected_controlled_values:
+      chemical_standardization_status:
+        - standardized
+        - partial
+        - invalid
+        - missing_structure
+      chemical_standardization_policy_version:
+        - pubchem-basic-v1
+    classification:
+      molecule_id:
+        category: identifier_namespace
+        identifier_family: pubchem_cid
+        collection_semantics: scalar
+        composite_usage: composite_molecule:upstream_inherited
+      chemical_standardization_status:
+        category: strict_enum
+        collection_semantics: scalar
+        composite_usage: composite_molecule:upstream_inherited
+      chemical_standardization_policy_version:
+        category: strict_enum
+        collection_semantics: scalar
+        composite_usage: composite_molecule:upstream_inherited
+      iupac_name:
+        category: provider_term_variant
+        collection_semantics: scalar
+        composite_usage: composite_molecule:upstream_inherited
+
+  uniprot_protein:
+    primary_key: accession
+    observed_values:
+      entry_type:
+        - UniProtKB reviewed (Swiss-Prot)
+        - UniProtKB unreviewed (TrEMBL)
+      flag:
+        - Fragment
+        - Precursor
+        - Fragments
+      protein_existence:
+        - Evidence at protein level
+        - Evidence at transcript level
+        - Inferred from homology
+      reviewed:
+        - true
+        - false
+    observed_raw_values:
+      accession:
+        - p12345
+        - P12345
+      secondary_accessions:
+        - q8n158
+        - Q8N158
+      chembl_ids:
+        - chembl25
+        - CHEMBL1
+      drugbank_ids:
+        - db00001
+        - DB00002
+      go_terms:
+        - go:0005634
+        - GO:0003677
+      interpro_xrefs:
+        - ipr000001
+        - IPR000719
+      pdb_xrefs:
+        - 1abc
+        - 2XYZ
+      pfam_xrefs:
+        - pf00069
+        - PF07714
+      reactome_xrefs:
+        - r-hsa-199420
+        - R-HSA-5674003
+      taxonomy_id:
+        - 9606
+        - 10090
+    expected_normalized_values:
+      accession:
+        - P12345
+      secondary_accessions:
+        - Q8N158
+      chembl_ids:
+        - CHEMBL1
+        - CHEMBL25
+      drugbank_ids:
+        - DB00001
+        - DB00002
+      go_terms:
+        - GO:0003677
+        - GO:0005634
+      interpro_xrefs:
+        - IPR000001
+        - IPR000719
+      pdb_xrefs:
+        - 1ABC
+        - 2XYZ
+      pfam_xrefs:
+        - PF00069
+        - PF07714
+      reactome_xrefs:
+        - R-HSA-199420
+        - R-HSA-5674003
+      taxonomy_id:
+        - "9606"
+        - "10090"
+    expected_controlled_values:
+      entry_type:
+        - UniProtKB reviewed (Swiss-Prot)
+        - UniProtKB unreviewed (TrEMBL)
+      flag:
+        - Fragment
+        - Fragments
+        - Precursor
+      protein_existence:
+        - Evidence at protein level
+        - Evidence at transcript level
+        - Inferred from homology
+    structured_json_shapes:
+      alternative_products:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
+        collection_semantics: ordered_sequence
+        raw_sidecar_field: alternative_products_raw_json
+        canonical_sidecar_field: alternative_products_canonical_json
+      biophysicochemical_properties:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
+        collection_semantics: ordered_sequence
+        raw_sidecar_field: biophysicochemical_properties_raw_json
+        canonical_sidecar_field: biophysicochemical_properties_canonical_json
+      cofactors:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
+        collection_semantics: unordered_set
+        raw_sidecar_field: cofactors_raw_json
+        canonical_sidecar_field: cofactors_canonical_json
+      features_json:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
+        collection_semantics: ordered_sequence
+        raw_sidecar_field: features_raw_json
+        canonical_sidecar_field: features_canonical_json
+      reactions:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
+        collection_semantics: ordered_sequence
+        raw_sidecar_field: reactions_raw_json
+        canonical_sidecar_field: reactions_canonical_json
+    classification:
+      accession:
+        category: identifier_namespace
+        identifier_family: uniprot_accession
+        collection_semantics: scalar
+        composite_usage: composite_target:bridge_anchor
+      entry_type:
+        category: strict_enum
+        collection_semantics: scalar
+        composite_usage: composite_target:upstream_inherited
+      flag:
+        category: strict_enum
+        collection_semantics: scalar
+        composite_usage: composite_target:upstream_inherited
+      protein_existence:
+        category: strict_enum
+        collection_semantics: scalar
+        composite_usage: composite_target:upstream_inherited
+      reviewed:
+        category: strict_boolean
+        collection_semantics: scalar
+        composite_usage: composite_target:upstream_inherited
+      secondary_accessions:
+        category: identifier_namespace
+        identifier_family: uniprot_accession
+        collection_semantics: unordered_set
+        composite_usage: composite_target:upstream_inherited
+      chembl_ids:
+        category: identifier_namespace
+        identifier_family: chembl_id
+        collection_semantics: unordered_set
+        composite_usage: composite_target:upstream_inherited
+      drugbank_ids:
+        category: identifier_namespace
+        identifier_family: drugbank_id
+        collection_semantics: unordered_set
+        composite_usage: composite_target:upstream_inherited
+      go_terms:
+        category: ontology_backed_id
+        identifier_family: go
+        collection_semantics: unordered_set
+        composite_usage: composite_target:upstream_inherited
+      interpro_xrefs:
+        category: ontology_backed_id
+        identifier_family: interpro
+        collection_semantics: unordered_set
+        composite_usage: composite_target:upstream_inherited
+      pdb_xrefs:
+        category: identifier_namespace
+        identifier_family: pdb
+        collection_semantics: unordered_set
+        composite_usage: composite_target:upstream_inherited
+      pfam_xrefs:
+        category: ontology_backed_id
+        identifier_family: pfam
+        collection_semantics: unordered_set
+        composite_usage: composite_target:upstream_inherited
+      reactome_xrefs:
+        category: ontology_backed_id
+        identifier_family: reactome
+        collection_semantics: unordered_set
+        composite_usage: composite_target:upstream_inherited
+      taxonomy_id:
+        category: ontology_backed_id
+        identifier_family: ncbi_taxonomy_id
+        collection_semantics: scalar
+        composite_usage: composite_target:upstream_inherited
+      features_json:
+        category: structured_json_sidecar
+        collection_semantics: ordered_sequence
+        raw_sidecar: features_raw_json
+        canonical_sidecar: features_canonical_json
+        composite_usage: composite_target:upstream_inherited
+      alternative_products:
+        category: structured_json_sidecar
+        collection_semantics: ordered_sequence
+        raw_sidecar: alternative_products_raw_json
+        canonical_sidecar: alternative_products_canonical_json
+        composite_usage: composite_target:upstream_inherited
+      biophysicochemical_properties:
+        category: structured_json_sidecar
+        collection_semantics: ordered_sequence
+        raw_sidecar: biophysicochemical_properties_raw_json
+        canonical_sidecar: biophysicochemical_properties_canonical_json
+        composite_usage: composite_target:upstream_inherited
+      cofactors:
+        category: structured_json_sidecar
+        collection_semantics: unordered_set
+        raw_sidecar: cofactors_raw_json
+        canonical_sidecar: cofactors_canonical_json
+        composite_usage: composite_target:upstream_inherited
+      reactions:
+        category: structured_json_sidecar
+        collection_semantics: ordered_sequence
+        raw_sidecar: reactions_raw_json
+        canonical_sidecar: reactions_canonical_json
+        composite_usage: composite_target:upstream_inherited
+
+  uniprot_idmapping:
+    primary_key: target_id
+    observed_values:
+      mapping_status:
+        - found
+        - not_found
+        - error
+        - multiple
+      reviewed:
+        - true
+        - false
+    observed_raw_values:
+      target_id:
+        - chembl203
+        - CHEMBL0203
+      uniprot_accession:
+        - p00742
+        - P00742
+      all_mappings:
+        - p00742
+        - CHEMBL203
+        - q9y6k9
+      taxonomy_id:
+        - 9606
+        - 10090
+    expected_normalized_values:
+      target_id:
+        - CHEMBL203
+      uniprot_accession:
+        - P00742
+      all_mappings:
+        - CHEMBL203
+        - P00742
+        - Q9Y6K9
+      taxonomy_id:
+        - "9606"
+        - "10090"
+    expected_controlled_values:
+      mapping_status:
+        - found
+        - not_found
+        - error
+        - multiple
+    classification:
+      target_id:
+        category: identifier_namespace
+        identifier_family: chembl_target_id
+        collection_semantics: scalar
+        composite_usage: composite_target:join_key
+      uniprot_accession:
+        category: identifier_namespace
+        identifier_family: uniprot_accession
+        collection_semantics: scalar
+        composite_usage: composite_target:join_key
+      all_mappings:
+        category: identifier_namespace
+        identifier_family: mixed_identifier_set
+        collection_semantics: unordered_set
+        composite_usage: composite_target:upstream_inherited
+      mapping_status:
+        category: strict_enum
+        collection_semantics: scalar
+        composite_usage: composite_target:upstream_inherited
+      reviewed:
+        category: strict_boolean
+        collection_semantics: scalar
+        composite_usage: composite_target:upstream_inherited
+      taxonomy_id:
+        category: ontology_backed_id
+        identifier_family: ncbi_taxonomy_id
+        collection_semantics: scalar
+        composite_usage: composite_target:upstream_inherited
+
+  pubmed_publication:
+    primary_key: pmid
+    observed_values:
+      publication_status:
+        - ppublish
+        - epublish
+        - aheadofprint
+      publication_type:
+        - Journal Article
+        - Review
+    observed_raw_values:
+      pmid:
+        - PMID:0012345
+        - "12345"
+      doi:
+        - https://doi.org/10.1000/ABC
+        - DOI:10.1000/abc
+      publication_type:
+        - Future PubMed Type
+        - Journal Article
+    expected_normalized_values:
+      pmid:
+        - "12345"
+      doi:
+        - 10.1000/abc
+      publication_types:
+        - Journal Article
+        - Review
+    expected_controlled_values:
+      publication_status:
+        - ppublish
+        - epublish
+        - aheadofprint
+      publication_type_unified:
+        - Journal Article
+        - Review
+      publication_subclass:
+        - Original Experimental Data
+        - Reviews & Syntheses
+      publication_class:
+        - EXP
+        - REV
+    structured_json_shapes:
+      authors_with_affiliations:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
+        collection_semantics: ordered_sequence
+        raw_sidecar_field: authors_with_affiliations_raw_json
+        canonical_sidecar_field: authors_with_affiliations_canonical_json
+      affiliation_structured:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
+        collection_semantics: unordered_set
+        raw_sidecar_field: affiliation_structured_raw_json
+        canonical_sidecar_field: affiliation_structured_canonical_json
+    classification:
+      pmid:
+        category: identifier_namespace
+        identifier_family: pmid
+        collection_semantics: scalar
+        composite_usage: composite_publication:join_key
+      doi:
+        category: identifier_namespace
+        identifier_family: doi
+        collection_semantics: scalar
+        composite_usage: composite_publication:join_key
+      publication_status:
+        category: strict_enum
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      publication_type:
+        category: raw_provider_value
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      publication_type_unified:
+        category: derived_vocabulary
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      publication_subclass:
+        category: derived_vocabulary
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      publication_class:
+        category: derived_vocabulary
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      authors_with_affiliations:
+        category: structured_json_sidecar
+        collection_semantics: ordered_sequence
+        raw_sidecar: authors_with_affiliations_raw_json
+        canonical_sidecar: authors_with_affiliations_canonical_json
+        composite_usage: composite_publication:upstream_inherited
+      affiliation_structured:
+        category: structured_json_sidecar
+        collection_semantics: unordered_set
+        raw_sidecar: affiliation_structured_raw_json
+        canonical_sidecar: affiliation_structured_canonical_json
+        composite_usage: composite_publication:upstream_inherited
+
+  crossref_publication:
+    primary_key: doi
+    observed_values:
+      publication_type:
+        - journal-article
+        - book-chapter
+        - posted-content
+    observed_raw_values:
+      doi:
+        - https://doi.org/10.1000/ABC
+        - DOI:10.1000/abc
+      publication_type:
+        - future-provider-type
+        - journal-article
+    expected_normalized_values:
+      doi:
+        - 10.1000/abc
+    expected_controlled_values:
+      publication_type_unified:
+        - Book Chapter
+        - Journal Article
+        - Preprint
+      publication_subclass:
+        - Books & Monographs
+        - Original Experimental Data
+      publication_class:
+        - EXP
+        - REV
+    structured_json_shapes:
+      author_details:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
+        collection_semantics: ordered_sequence
+        raw_sidecar_field: author_details_raw_json
+        canonical_sidecar_field: author_details_canonical_json
+      references:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
+        collection_semantics: ordered_sequence
+        raw_sidecar_field: references_raw_json
+        canonical_sidecar_field: references_canonical_json
+    classification:
+      doi:
+        category: identifier_namespace
+        identifier_family: doi
+        collection_semantics: scalar
+        composite_usage: composite_publication:join_key
+      publication_type:
+        category: raw_provider_value
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      publication_type_unified:
+        category: derived_vocabulary
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      publication_subclass:
+        category: derived_vocabulary
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      publication_class:
+        category: derived_vocabulary
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      author_details:
+        category: structured_json_sidecar
+        collection_semantics: ordered_sequence
+        raw_sidecar: author_details_raw_json
+        canonical_sidecar: author_details_canonical_json
+        composite_usage: composite_publication:upstream_inherited
+      references:
+        category: structured_json_sidecar
+        collection_semantics: ordered_sequence
+        raw_sidecar: references_raw_json
+        canonical_sidecar: references_canonical_json
+        composite_usage: composite_publication:upstream_inherited
+
+  openalex_publication:
+    primary_key: openalex_id
+    observed_values:
+      publication_type:
+        - article
+        - review
+        - book-chapter
+      oa_status:
+        - gold
+        - green
+        - hybrid
+        - bronze
+        - closed
+      is_oa:
+        - true
+        - false
+    observed_raw_values:
+      openalex_id:
+        - https://openalex.org/W12345
+        - w12345
+      doi:
+        - https://doi.org/10.1000/ABC
+        - DOI:10.1000/abc
+      type_crossref:
+        - future-crossref-type
+        - journal-article
+    expected_normalized_values:
+      openalex_id:
+        - W12345
+      doi:
+        - 10.1000/abc
+      type_crossref:
+        - future-crossref-type
+        - journal-article
+    expected_controlled_values:
+      oa_status:
+        - gold
+        - green
+        - hybrid
+        - bronze
+        - closed
+      publication_type_unified:
+        - Book Chapter
+        - Journal Article
+        - Review
+      publication_subclass:
+        - Books & Monographs
+        - Original Experimental Data
+        - Reviews & Syntheses
+      publication_class:
+        - EXP
+        - REV
+    structured_json_shapes:
+      grants:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
+        collection_semantics: unordered_set
+        raw_sidecar_field: grants_raw_json
+        canonical_sidecar_field: grants_canonical_json
+      primary_topic:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
+        collection_semantics: structured_object
+        raw_sidecar_field: primary_topic_raw_json
+        canonical_sidecar_field: primary_topic_canonical_json
+    classification:
+      openalex_id:
+        category: identifier_namespace
+        identifier_family: openalex_work_id
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      doi:
+        category: identifier_namespace
+        identifier_family: doi
+        collection_semantics: scalar
+        composite_usage: composite_publication:join_key
+      publication_type:
+        category: raw_provider_value
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      type_crossref:
+        category: raw_provider_value
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      oa_status:
+        category: strict_enum
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      is_oa:
+        category: strict_boolean
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      publication_type_unified:
+        category: derived_vocabulary
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      publication_subclass:
+        category: derived_vocabulary
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      publication_class:
+        category: derived_vocabulary
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      grants:
+        category: structured_json_sidecar
+        collection_semantics: unordered_set
+        raw_sidecar: grants_raw_json
+        canonical_sidecar: grants_canonical_json
+        composite_usage: composite_publication:upstream_inherited
+      primary_topic:
+        category: structured_json_sidecar
+        identifier_family: openalex_topic_id
+        collection_semantics: structured_object
+        raw_sidecar: primary_topic_raw_json
+        canonical_sidecar: primary_topic_canonical_json
+        composite_usage: composite_publication:upstream_inherited
+
+  semanticscholar_publication:
+    primary_key: paper_id
+    observed_values:
+      publication_type:
+        - JournalArticle
+        - Review
+      oa_status:
+        - gold
+        - green
+        - hybrid
+        - bronze
+        - closed
+      is_oa:
+        - true
+        - false
+    observed_raw_values:
+      paper_id:
+        - ABCDEFABCDEFABCDEFABCDEFABCDEFABCDEFABCD
+        - abcdefabcdefabcdefabcdefabcdefabcdefabcd
+      doi:
+        - https://doi.org/10.1000/ABC
+        - DOI:10.1000/abc
+      publication_type:
+        - FutureSemanticScholarType
+        - JournalArticle
+    expected_normalized_values:
+      paper_id:
+        - abcdefabcdefabcdefabcdefabcdefabcdefabcd
+      doi:
+        - 10.1000/abc
+      publication_types:
+        - JournalArticle
+        - Review
+    expected_controlled_values:
+      oa_status:
+        - gold
+        - green
+        - hybrid
+        - bronze
+        - closed
+      publication_type_unified:
+        - Journal Article
+        - Review
+      publication_subclass:
+        - Original Experimental Data
+        - Reviews & Syntheses
+      publication_class:
+        - EXP
+        - REV
+    structured_json_shapes:
+      author_h_indices:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
+        collection_semantics: ordered_sequence
+        raw_sidecar_field: author_h_indices_raw_json
+        canonical_sidecar_field: author_h_indices_canonical_json
+      citation_contexts:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
+        collection_semantics: ordered_sequence
+        raw_sidecar_field: citation_contexts_raw_json
+        canonical_sidecar_field: citation_contexts_canonical_json
+      publication_types:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
+        collection_semantics: unordered_set
+        raw_sidecar_field: publication_types_raw_json
+        canonical_sidecar_field: publication_types_canonical_json
+      subject_fields:
+        semantic_policy: raw_json_plus_canonical_json_before_semantic_transform
+        collection_semantics: unordered_set
+        raw_sidecar_field: subject_fields_raw_json
+        canonical_sidecar_field: subject_fields_canonical_json
+    classification:
+      paper_id:
+        category: identifier_namespace
+        identifier_family: semanticscholar_paper_id
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      doi:
+        category: identifier_namespace
+        identifier_family: doi
+        collection_semantics: scalar
+        composite_usage: composite_publication:join_key
+      publication_type:
+        category: raw_provider_value
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      publication_types:
+        category: structured_json_sidecar
+        collection_semantics: unordered_set
+        raw_sidecar: publication_types_raw_json
+        canonical_sidecar: publication_types_canonical_json
+        composite_usage: composite_publication:upstream_inherited
+      publication_type_unified:
+        category: derived_vocabulary
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      publication_subclass:
+        category: derived_vocabulary
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      publication_class:
+        category: derived_vocabulary
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      oa_status:
+        category: strict_enum
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      is_oa:
+        category: strict_boolean
+        collection_semantics: scalar
+        composite_usage: composite_publication:upstream_inherited
+      author_h_indices:
+        category: structured_json_sidecar
+        collection_semantics: ordered_sequence
+        raw_sidecar: author_h_indices_raw_json
+        canonical_sidecar: author_h_indices_canonical_json
+        composite_usage: composite_publication:upstream_inherited
+      citation_contexts:
+        category: structured_json_sidecar
+        collection_semantics: ordered_sequence
+        raw_sidecar: citation_contexts_raw_json
+        canonical_sidecar: citation_contexts_canonical_json
+        composite_usage: composite_publication:upstream_inherited
+      subject_fields:
+        category: structured_json_sidecar
+        collection_semantics: unordered_set
+        raw_sidecar: subject_fields_raw_json
+        canonical_sidecar: subject_fields_canonical_json
+        composite_usage: composite_publication:upstream_inherited
+
+composites:
+  composite_publication:
+    source_pipelines:
+      - crossref_publication
+      - openalex_publication
+      - pubmed_publication
+      - semanticscholar_publication
+    required_fields:
+      - entity_id
+      - doi
+      - pmid
+      - title
+  composite_molecule:
+    source_pipelines:
+      - chembl_molecule
+      - pubchem_compound
+    required_fields:
+      - molecule_id
+      - inchi_key
+      - canonical_smiles
+  composite_target:
+    source_pipelines:
+      - chembl_target
+      - uniprot_protein
+      - uniprot_idmapping
+    required_fields:
+      - target_id
+      - uniprot_accession
+      - taxonomy_id

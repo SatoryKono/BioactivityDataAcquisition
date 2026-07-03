@@ -1,0 +1,9 @@
+{
+  "compatibility_level": "minor",
+  "contract_ref": "gold.compound",
+  "contract_version": "1.2.3",
+  "dq_policy_ref": "dq.policy",
+  "lifecycle_status": "active",
+  "rule_bundle_version": "2026.03",
+  "schema_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}
