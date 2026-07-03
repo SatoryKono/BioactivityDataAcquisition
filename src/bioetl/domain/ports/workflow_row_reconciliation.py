@@ -106,7 +106,7 @@ def _normalize_workflow_name(value: str | None) -> str | None:
 
 
 def _normalized_row_reconciliation_fields(
-    config: "RowReconciliationConfig",
+    config: RowReconciliationConfig,
 ) -> tuple[
     RowReconciliationLayer,
     RowReconciliationTypePolicy,

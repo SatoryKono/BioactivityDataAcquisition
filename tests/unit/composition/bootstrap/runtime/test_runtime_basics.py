@@ -255,6 +255,7 @@ class TestBuildSupportServices:
         assert call_kwargs["config"] is config
 
 
+@pytest.mark.unit
 def test_build_runner_factories_wires_phase_builders_and_bronze_options() -> None:
     """build_runner_factories wires phase builders and bronze options."""
     from bioetl.composition.bootstrap.runtime.runtime_basics import build_runner_factories
