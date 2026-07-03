@@ -75,7 +75,7 @@ Pushgateway publication на завершении run. Это позволяет
 
 ## 2. Использование Дашбордов
 
-Все дашборды в BioETL v5.1+ поддерживают **динамическую фильтрацию**.
+Все актуальные shipped dashboards BioETL поддерживают **динамическую фильтрацию**.
 
 ### Policy header для operator dashboards
 

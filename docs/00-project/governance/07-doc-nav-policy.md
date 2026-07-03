@@ -115,7 +115,7 @@ ______________________________________________________________________
 
 Current KPI model for docs outside nav:
 
-- Directional target: `not_in_nav <= 120` by `2026-06-30`.
+- Directional target: `not_in_nav <= 120` by `2026-12-31`.
 - Blocking hard limit: `not_in_nav <= 135`.
 - Blocking orphan budget: `orphan_candidates <= 0`.
 

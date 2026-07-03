@@ -257,6 +257,55 @@ review_lanes:
         canonical_path: pr_compliance_checklist.yaml
         action_if_reintroduced: retain_as_exact_root_pr_review_contract_until_review_tooling_is_repointed
 
+  - lane_id: root_archived_debt_governance_docs
+    classification: review_required
+    scope: retired root technical-debt strategy, backlog, and issue-drafting artifacts archived outside the root baseline
+    owner: Engineering / Architecture Governance
+    retention_class: archived_root_debt_governance_artifact
+    retention_action: keep_historical_debt_governance_context_under_docs_99_archive_not_as_live_root_entrypoints
+    cleanup_policy: do_not_restore_as_tracked_root_docs_without_fresh_root_governance_review
+    verification:
+      - git ls-files enforcement_strategy.md github_issue_enforcement_strategy.md github_issues_P0.md github_issues_P1.md github_issues_P2.md github_issues_P3.md observability_debt_audit.md technical_debt_backlog.md technical_debt_dependency_map.md
+      - rg -n "enforcement_strategy\\.md|github_issue_enforcement_strategy\\.md|github_issues_P0\\.md|github_issues_P1\\.md|github_issues_P2\\.md|github_issues_P3\\.md|observability_debt_audit\\.md|technical_debt_backlog\\.md|technical_debt_dependency_map\\.md" .github docs reports scripts tests configs README.md
+    candidates:
+      - path: enforcement_strategy.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/99-archive/root-status-artifacts/technical-debt-governance/enforcement_strategy.md
+        action_if_reintroduced: preserve_as_archive_context_or_move_into_a_canonical_docs_or_reports_surface_instead_of_restoring_a_root_strategy_doc
+      - path: github_issue_enforcement_strategy.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/99-archive/root-status-artifacts/technical-debt-governance/github_issue_enforcement_strategy.md
+        action_if_reintroduced: keep_issue_drafting_context_archived_or_move_under_a_governed_issue_surface_instead_of_restoring_a_root_markdown_file
+      - path: github_issues_P0.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/99-archive/root-status-artifacts/technical-debt-governance/github_issues_P0.md
+        action_if_reintroduced: keep_priority_issue_drafts_archived_or_move_under_a_governed_issue_surface_instead_of_restoring_a_root_markdown_file
+      - path: github_issues_P1.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/99-archive/root-status-artifacts/technical-debt-governance/github_issues_P1.md
+        action_if_reintroduced: keep_priority_issue_drafts_archived_or_move_under_a_governed_issue_surface_instead_of_restoring_a_root_markdown_file
+      - path: github_issues_P2.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/99-archive/root-status-artifacts/technical-debt-governance/github_issues_P2.md
+        action_if_reintroduced: keep_priority_issue_drafts_archived_or_move_under_a_governed_issue_surface_instead_of_restoring_a_root_markdown_file
+      - path: github_issues_P3.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/99-archive/root-status-artifacts/technical-debt-governance/github_issues_P3.md
+        action_if_reintroduced: keep_priority_issue_drafts_archived_or_move_under_a_governed_issue_surface_instead_of_restoring_a_root_markdown_file
+      - path: observability_debt_audit.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/99-archive/root-status-artifacts/technical-debt-governance/observability_debt_audit.md
+        action_if_reintroduced: archive_one_off_audit_context_or_move_it_into_a_canonical_reports_or_docs_surface_instead_of_restoring_a_root_audit_doc
+      - path: technical_debt_backlog.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/99-archive/root-status-artifacts/technical-debt-governance/technical_debt_backlog.md
+        action_if_reintroduced: keep_generated_backlog_context_out_of_root_and_route_active_backlogs_into_governed_plan_or_evidence_surfaces
+      - path: technical_debt_dependency_map.md
+        current_live_state: absent_from_root_baseline
+        canonical_path: docs/99-archive/root-status-artifacts/technical-debt-governance/technical_debt_dependency_map.md
+        action_if_reintroduced: keep_generated_dependency_context_out_of_root_and_route_active_analysis_into_governed_docs_or_reports_surfaces
+
+
   - lane_id: root_archived_ai_runtime_docs
     classification: review_required
     scope: formerly tracked root Codex/WSL setup notes retired into canonical docs and archive surfaces
