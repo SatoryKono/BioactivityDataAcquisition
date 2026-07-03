@@ -14,14 +14,7 @@ from tests.helpers.metadata_fixtures import (
     GOLD_BASE_PATH,
     SILVER_BASE_PATH,
     SILVER_TABLE_PATH,
-    bronze_metadata,
-    environment_metadata,
-    gold_metadata,
-    metadata_writer,
-    pipeline_metadata,
-    runtime_metadata,
-    silver_metadata,
-)  # noqa: F401
+)
 
 from bioetl.domain.models.metadata import (
     BronzeMetadata,
