@@ -174,3 +174,8 @@ slow_governance_cache_probe:
     - tests.architecture.conftest._run_cached_subprocess
     note: Disk-backed subprocess reuse now backs repo-wide scanner calls for detect-secrets,
       ruff, and mypy-style architecture governance checks.
+    ci_persistence:
+      action: .github/actions/architecture-governance-cache
+      cache_path: .cache/bioetl-architecture-governance
+      cache_key: source_tree_sha256 from module-coverage-inventory.json
+      workflow_owner: .github/workflows/tests.yml#test-fast

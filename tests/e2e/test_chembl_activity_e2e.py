@@ -25,6 +25,7 @@ pytestmark = pytest.mark.usefixtures("relaxed_dq_env")
 
 
 @pytest.mark.e2e
+@pytest.mark.e2e_smoke
 @pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_chembl_activity_full_cycle(e2e_data_dir: Path):
