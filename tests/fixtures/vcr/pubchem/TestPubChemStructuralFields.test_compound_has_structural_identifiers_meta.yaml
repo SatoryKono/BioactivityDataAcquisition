@@ -1,8 +1,0 @@
-schema_version: 1
-provider: pubchem
-cassette_rel_path: tests/fixtures/vcr/pubchem/TestPubChemStructuralFields.test_compound_has_structural_identifiers.yaml
-metadata_status: managed_inventory
-source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 788d3b7b411ba0790978fa2422ab4343b6fd68fdd9f7c900bacb2a1e2f572fff
-recorded_at: '2026-04-28'
-staleness_ready: true
