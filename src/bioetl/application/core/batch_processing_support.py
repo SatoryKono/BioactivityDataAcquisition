@@ -22,12 +22,12 @@ from bioetl.application.core.batch_processing_runtime import (
     get_source_metadata,
 )
 from bioetl.application.core.batch_runtime_failure_policy import (
+    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
+)
+from bioetl.application.core.batch_runtime_failure_policy import (
     PIPELINE_EXECUTION_ERRORS as _RF005_SHARED_FAILURE_POLICY,
 )
 from bioetl.application.core.batch_transformer import TransformResult
-from bioetl.application.core.batch_operation_errors import (
-    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
-)
 from bioetl.application.core.quarantine_manager import QuarantineRuntimeService
 from bioetl.domain.aggregates.events import DomainEvent
 from bioetl.domain.models.metadata import SourceMetadata

@@ -10,7 +10,7 @@ from unittest.mock import Mock
 
 import orjson
 
-from bioetl.application.core.batch_operation_errors import (
+from bioetl.application.core.batch_processing_runtime import (
     OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
 )
 from bioetl.domain.exceptions import SchemaViolationError

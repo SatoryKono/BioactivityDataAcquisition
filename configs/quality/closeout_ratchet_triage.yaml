@@ -252,6 +252,11 @@ entries:
     classification: budget_closeout_ratchet
     live_guard: "debt issue batch #5839-#5845 remains aligned with live compatibility metadata, duplication reduction, zero-import governance, shared composite policy, coverage-tail ownership, and script lifecycle evidence without budget growth."
     rationale: Keeps the newest architecture-debt audit closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issues_5861_5864_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue batch #5861-#5864 remains aligned with live DQ determinism golden coverage, domain contract/ledger invariants, control-plane hotspot ratchet, and runtime-builder registry evidence without budget growth."
+    rationale: Keeps the determinism and hotspot follow-up closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
   - path: tests/architecture/test_tech_debt_issues_5847_5852_closeout.py
     disposition: retain_active
     classification: budget_closeout_ratchet

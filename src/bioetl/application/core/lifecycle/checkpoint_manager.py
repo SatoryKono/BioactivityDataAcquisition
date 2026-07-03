@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
+from bioetl.application.core.batch_runtime_failure_policy import (
+    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
+)
 from bioetl.application.core.lifecycle._checkpoint_types import (
     CheckpointCompatibilityService,
 )
 from bioetl.application.core.lifecycle.checkpoint_load_validation import (
     resolve_checkpoint_metadata,
     validate_loaded_checkpoint,
-)
-from bioetl.application.core.batch_operation_errors import (
-    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
 )
 from bioetl.application.core.lifecycle.checkpoint_runtime import (
     CheckpointCompatibilityPolicy,

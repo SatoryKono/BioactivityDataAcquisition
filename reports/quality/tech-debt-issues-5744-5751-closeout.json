@@ -171,7 +171,7 @@
     "5748": {
       "family": "application_core",
       "opening_total_loc": 22360,
-      "total_loc": 22281,
+      "total_loc": 22283,
       "opening_files_ge_250_loc": 7,
       "files_ge_250_loc": 5,
       "budget_warning_count": 0

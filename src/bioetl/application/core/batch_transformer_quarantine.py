@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.application.core.batch_processing_runtime import (
+    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
+)
 from bioetl.application.core.batch_transformer_state import (
     RecordTransformOutcome,
     TransformedRecord,
-)
-from bioetl.application.core.batch_operation_errors import (
-    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
 )
 from bioetl.application.core.quarantine_manager import (
     DQQuarantineEntry,

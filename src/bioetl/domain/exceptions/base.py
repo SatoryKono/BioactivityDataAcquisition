@@ -43,9 +43,24 @@ class BioETLError(Exception):
             "args",
             "error_type",
             "error_type_override",
+            "reason_code",
             "with_traceback",
         }
     )
+
+    def __init__(
+        self,
+        message: str = "",
+        *,
+        reason_code: str | None = None,
+        **context: object,
+    ) -> None:
+        """Initialize a BioETL error with optional semantic reason code."""
+        super().__init__(message)
+        if reason_code is not None:
+            self.reason_code = reason_code
+        for key, value in context.items():
+            setattr(self, key, value)
 
     @classmethod
     def get_error_type(cls) -> ErrorType:

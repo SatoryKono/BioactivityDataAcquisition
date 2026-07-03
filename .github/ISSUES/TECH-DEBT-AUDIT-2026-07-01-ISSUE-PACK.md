@@ -22,22 +22,22 @@ This pack converts the `2026-07-01` full technical-debt audit on current
 
 ## Publish-Ready Set
 
-### Wave 1 — residual structural debt (reopened owners)
+### Wave 1 — residual structural debt (closed)
 
-1. `TDX-AUDIT-001` Ratchet retained public entrypoints and lazy export facades to canonical imports — [#5839](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5839)
-2. `TDX-AUDIT-002` Collapse adapter fetch and resilience duplication under canonical template owners — [#5840](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5840)
-3. `TDX-AUDIT-003` Consolidate pipeline transformer contract duplication across provider families — [#5841](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5841)
-4. `TDX-AUDIT-004` Remove classified zero-import domain ports after importer proof — [#5842](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5842)
-5. `TDX-AUDIT-005` Extract shared composite config policy blocks into a canonical authority surface — [#5843](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5843)
-6. `TDX-AUDIT-006` Reopen hotspot tail coverage ratchet for replay-sensitive runtime seams — [#5844](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5844)
-7. `TDX-AUDIT-007` Turn zero-reference supporting scripts into explicit owner-or-removal governance — [#5845](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5845)
+1. `TDX-AUDIT-001` Ratchet retained public entrypoints and lazy export facades to canonical imports — [#5839](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5839) **closed**
+2. `TDX-AUDIT-002` Collapse adapter fetch and resilience duplication under canonical template owners — [#5840](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5840) **closed**
+3. `TDX-AUDIT-003` Consolidate pipeline transformer contract duplication across provider families — [#5841](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5841) **closed**
+4. `TDX-AUDIT-004` Remove classified zero-import domain ports after importer proof — [#5842](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5842) **closed**
+5. `TDX-AUDIT-005` Extract shared composite config policy blocks into a canonical authority surface — [#5843](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5843) **closed**
+6. `TDX-AUDIT-006` Reopen hotspot tail coverage ratchet for replay-sensitive runtime seams — [#5844](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5844) **closed**
+7. `TDX-AUDIT-007` Turn zero-reference supporting scripts into explicit owner-or-removal governance — [#5845](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5845) **closed**
 
-### Wave 2 — determinism and hotspot follow-up (new owners)
+### Wave 2 — determinism and hotspot follow-up (closed)
 
-8. `TDX-AUDIT-008` Strengthen DQ rule evaluator determinism with golden and property tests — [#5861](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5861)
-9. `TDX-AUDIT-009` Add domain contract registry and ledger invariant tests — [#5862](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5862)
-10. `TDX-AUDIT-010` Ratchet control-plane hotspot LOC and fan-in ceilings — [#5863](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5863)
-11. `TDX-AUDIT-011` Explicitize composition runtime builder registration and ratchet DI fan-in — [#5864](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5864)
+8. `TDX-AUDIT-008` Strengthen DQ rule evaluator determinism with golden and property tests — [#5861](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5861) **closed**
+9. `TDX-AUDIT-009` Add domain contract registry and ledger invariant tests — [#5862](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5862) **closed**
+10. `TDX-AUDIT-010` Ratchet control-plane hotspot LOC and fan-in ceilings — [#5863](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5863) **closed**
+11. `TDX-AUDIT-011` Explicitize composition runtime builder registration and ratchet DI fan-in — [#5864](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5864) **closed**
 
 ## Recommended Execution Order
 

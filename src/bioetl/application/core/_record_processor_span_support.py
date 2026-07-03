@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core.batch_operation_errors import (
+from bioetl.application.core.batch_processing_runtime import (
     OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
 )
 from bioetl.application.core.batch_processing_runtime import (
