@@ -572,6 +572,11 @@ jobs:
                     pytest-cache-prefix: "pytest-fast"
                     pytest-cache-fingerprint: ${{ hashFiles('tests/unit/**/*.py', 'tests/architecture/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
 
+            -   name: Restore architecture governance scan cache
+                uses: ./.github/actions/architecture-governance-cache
+                with:
+                    operation: restore
+
             -   name: Run Fast Unit Tests (no slow markers)
                 run: |
                     mkdir -p reports/test-telemetry
@@ -584,6 +589,12 @@ jobs:
                       -n auto --dist loadscope --max-worker-restart=0 \
                       -q --tb=short \
                       --junitxml=reports/test-telemetry/junit-fast.xml
+
+            -   name: Save architecture governance scan cache
+                if: always()
+                uses: ./.github/actions/architecture-governance-cache
+                with:
+                    operation: save
 
             -   name: Upload fast test telemetry
                 if: always()

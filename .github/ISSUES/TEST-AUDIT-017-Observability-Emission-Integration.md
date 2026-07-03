@@ -2,6 +2,7 @@
 title: "[TEST-AUDIT-017] Observability emission integration for composite and checkpoint paths"
 labels: test, observability, P1
 assignees: []
+github_issue: 5929
 ---
 
 ## Context

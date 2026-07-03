@@ -2,6 +2,7 @@
 title: "[TEST-AUDIT-015] Expand integration determinism matrix beyond single gate"
 labels: test, determinism, P1
 assignees: []
+github_issue: 5927
 ---
 
 ## Context

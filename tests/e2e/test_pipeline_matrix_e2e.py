@@ -439,6 +439,7 @@ def test_pipeline_matrix_declares_all_entity_pipelines() -> None:
 
 
 @pytest.mark.e2e
+@pytest.mark.e2e_smoke
 @pytest.mark.vcr
 @pytest.mark.asyncio
 async def test_pipeline_matrix_smoke(

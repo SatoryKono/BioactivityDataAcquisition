@@ -17,11 +17,6 @@ from datetime import UTC, datetime, timedelta
 import pytest
 
 import bioetl.domain.aggregates._batch_lifecycle as lifecycle
-from bioetl.domain.aggregates._batch_mixins import (
-    _BatchLifecycleMixin,
-    _BatchMutationMixin,
-    _BatchReadModelMixin,
-)
 from bioetl.domain.aggregates._batch_record import BatchRecord
 from bioetl.domain.aggregates._batch_status import BatchStatus
 from bioetl.domain.aggregates.batch import Batch
@@ -32,7 +27,6 @@ from bioetl.domain.aggregates.events import (
     BatchWritten,
     RecordQuarantined,
 )
-from bioetl.domain.deterministic_identity import deterministic_uuid
 from bioetl.domain.exceptions import InvalidStateError
 from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID
 from tests.helpers.deterministic_ids import (
@@ -208,7 +202,7 @@ class TestBatchLifecycleFunctions:
                 BatchStatus.FAILED, events, run_id, batch_id, 8, "silver", _ts(20)
             )
 
-    def test_mark_committed_emits_batch_written_event(self, run_id, batch_id):
+    def test_lifecycle_mark_committed_emits_batch_written_event(self, run_id, batch_id):
         """mark_committed should emit BatchWritten event."""
         events: list = []
         lifecycle.mark_committed(
@@ -293,7 +287,7 @@ class TestBatchLifecycleFunctions:
                 failed_at=_ts(20),
             )
 
-    def test_mark_failed_emits_batch_failed_event(self, run_id, batch_id):
+    def test_lifecycle_mark_failed_emits_batch_failed_event(self, run_id, batch_id):
         """mark_failed should emit BatchFailed event with error details."""
         events: list = []
         lifecycle.mark_failed(
@@ -406,7 +400,7 @@ class TestBatchReadModelMixin:
         """quarantined_records should return only quarantined records."""
         batch = Batch.create(run_id=run_id, created_at=_ts(0))
         record1 = batch.add_record({"id": "1"}, entity_id=EntityID("mol-1"))
-        record2 = batch.add_record({"id": "2"}, entity_id=EntityID("mol-2"))
+        batch.add_record({"id": "2"}, entity_id=EntityID("mol-2"))
         record3 = batch.add_record({"id": "3"}, entity_id=EntityID("mol-3"))
         batch.quarantine_record(record1, "Error1", "ERR1", quarantined_at=_ts(5))
         batch.quarantine_record(record3, "Error2", "ERR2", quarantined_at=_ts(6))

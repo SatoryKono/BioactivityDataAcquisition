@@ -350,3 +350,76 @@ def test_pipeline_observer_records_failure_span_and_error_metrics() -> None:
     assert span.attributes["bioetl.status"] == "failed"
     assert span.attributes["error"] is True
     assert tracer.flushed == 1
+
+
+@pytest.mark.integration
+def test_composite_pipeline_observer_emits_composite_provider_labels() -> None:
+    metrics = RecordingMetrics()
+    logger = RecordingLogger()
+    observer = PipelineObserver(
+        pipeline_name="composite_publication",
+        run_id=deterministic_uuid("observability.integration.composite.run"),
+        run_type=RunType.INCREMENTAL,
+        metrics=metrics,
+        logger=logger,  # type: ignore[arg-type]
+        clock=FixedClock(FIXED_TEST_TIME),
+        tracer=NoOpTracing(),
+        manifest_id="manifest-composite-observability",
+        contract_ref="composite/publication/gold",
+        contract_version="1.0.0",
+    )
+
+    with observer:
+        observer.emit_event(
+            PipelineEvent.PREFLIGHT_COMPLETED,
+            LifecyclePhase.PREFLIGHT,
+            stage="preflight",
+        )
+
+    assert any(
+        name == "bioetl_observability_events_total"
+        and labels["pipeline"] == "composite_publication"
+        and labels["provider"] == "composite"
+        for name, _value, labels in metrics.counters
+    )
+
+
+@pytest.mark.integration
+def test_pipeline_observer_emits_checkpoint_finalize_execution_span() -> None:
+    metrics = RecordingMetrics()
+    logger = RecordingLogger()
+    tracer = RecordingTracing()
+    observer = PipelineObserver(
+        pipeline_name="chembl_activity",
+        run_id=deterministic_uuid("observability.integration.checkpoint.run"),
+        run_type=RunType.INCREMENTAL,
+        metrics=metrics,
+        logger=logger,  # type: ignore[arg-type]
+        clock=FixedClock(FIXED_TEST_TIME),
+        tracer=tracer,  # type: ignore[arg-type]
+        manifest_id="manifest-checkpoint-observability",
+        contract_ref="chembl/activity/gold",
+        contract_version="1.0.0",
+    )
+
+    with observer:
+        started = observer.emit_phase_started(LifecyclePhase.EXECUTION)
+        observer.emit_event(
+            PipelineEvent.EXECUTION_STARTED,
+            LifecyclePhase.EXECUTION,
+            stage="checkpoint_finalize",
+        )
+        observer.emit_phase_completed(
+            LifecyclePhase.EXECUTION,
+            started,
+            success=True,
+            stage="checkpoint_finalize",
+        )
+
+    assert any(
+        name == "bioetl_observability_events_total"
+        and labels.get("event") == "execution_started"
+        for name, _value, labels in metrics.counters
+    )
+    assert any(span.name == "pipeline.chembl_activity" for span in tracer.spans)
+    assert tracer.flushed == 1

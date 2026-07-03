@@ -2,6 +2,7 @@
 title: "[TEST-AUDIT-019] Retire or archive stale closeout architecture tests (51-file pass)"
 labels: technical-debt, ci, P1
 assignees: []
+github_issue: 5931
 ---
 
 ## Context

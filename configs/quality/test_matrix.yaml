@@ -154,7 +154,10 @@ test_lanes:
 
     integration-determinism:
       suite_name: integration-determinism
-      description: "Determinism contract checks over deterministic replay envelopes."
+      description: >
+        Determinism contract checks over tracked fixture replay envelopes.
+        Matrix owners: chembl_activity gate, chembl_assay gate, composite_publication
+        rebuild/resume gate, and pubchem_compound idempotency gate.
       runner_backend: run_pytest
       runner: scripts/engineering/dev/run_pytest.sh
       paths:
@@ -347,6 +350,49 @@ test_lanes:
         - tests/e2e/
         - -m
         - e2e and not benchmark and not memory
+      replay_mode: mixed
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    e2e-smoke:
+      suite_name: e2e-smoke
+      description: >
+        PR-blocking E2E smoke subset (bootstrap + representative entity path).
+        Canonical CI owner: .github/workflows/e2e-matrix-health.yml matrix-smoke-blocking
+        and tests.yml control-plane-e2e.
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/e2e/test_chembl_activity_e2e.py
+        - tests/e2e/test_pipeline_matrix_e2e.py
+      marker_expression: "e2e_smoke and not benchmark and not memory"
+      pytest_args:
+        - tests/e2e/test_chembl_activity_e2e.py
+        - tests/e2e/test_pipeline_matrix_e2e.py
+        - -m
+        - e2e_smoke and not benchmark and not memory
+      replay_mode: vcr_none
+      coverage_gate: none
+      expected_artifacts:
+        junit_xml: true
+        json_summary: true
+
+    e2e-nightly-full:
+      suite_name: e2e-nightly-full
+      description: >
+        Nightly full E2E matrix per entity rows. Canonical CI owner:
+        .github/workflows/e2e-matrix-health.yml matrix-smoke-nightly-live and schedule.
+      runner_backend: run_pytest
+      runner: scripts/engineering/dev/run_pytest.sh
+      paths:
+        - tests/e2e/
+      marker_expression: "e2e and not e2e_smoke and not benchmark and not memory"
+      pytest_args:
+        - tests/e2e/
+        - -m
+        - e2e and not e2e_smoke and not benchmark and not memory
       replay_mode: mixed
       coverage_gate: none
       expected_artifacts:
