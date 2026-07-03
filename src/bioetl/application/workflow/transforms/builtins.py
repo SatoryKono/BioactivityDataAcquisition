@@ -8,7 +8,10 @@ from bioetl.application.workflow.transforms import WorkflowTransformRegistry
 from bioetl.application.workflow.transforms.reconcile_foreign_keys import (
     build_reconcile_foreign_keys_executor,
 )
-from bioetl.domain.ports import ForeignKeyReconciliationPort
+from bioetl.application.workflow.transforms.reconcile_rows import (
+    build_reconcile_rows_executor,
+)
+from bioetl.domain.ports import ForeignKeyReconciliationPort, RowReconciliationPort
 from bioetl.domain.workflow import WorkflowTransformSpec
 
 __all__ = ["register_builtin_workflow_transforms"]
@@ -18,6 +21,7 @@ def register_builtin_workflow_transforms(
     registry: WorkflowTransformRegistry,
     *,
     foreign_key_reconciliation_port: ForeignKeyReconciliationPort | None = None,
+    row_reconciliation_port: RowReconciliationPort | None = None,
 ) -> WorkflowTransformRegistry:
     """Register baseline built-in transforms on the provided registry."""
     registry.register("summarize_upstream_outputs", _summarize_upstream_outputs)
@@ -25,6 +29,11 @@ def register_builtin_workflow_transforms(
         registry.register(
             "reconcile_foreign_keys",
             build_reconcile_foreign_keys_executor(foreign_key_reconciliation_port),
+        )
+    if row_reconciliation_port is not None:
+        registry.register(
+            "reconcile_rows",
+            build_reconcile_rows_executor(row_reconciliation_port),
         )
     return registry
 

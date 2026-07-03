@@ -21,6 +21,7 @@ __all__ = [
     "WorkflowConfigSchema",
     "WorkflowDefaultsSchema",
     "WorkflowPipelineStepSchema",
+    "WorkflowReconcileRowsConfigSchema",
     "WorkflowRunOptionsSchema",
     "WorkflowTransformStepSchema",
     "validate_workflow_config_payload",
@@ -160,6 +161,51 @@ class WorkflowPipelineStepSchema(BaseModel):
         )
 
 
+class WorkflowReconcileRowsConfigSchema(BaseModel):
+    """Strict config schema for the deterministic reconcile_rows transform."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    layer: Literal["silver", "gold"]
+    left_table: str = Field(..., min_length=1)
+    right_table: str = Field(..., min_length=1)
+    left_columns: list[str] = Field(..., min_length=1)
+    right_columns: list[str] = Field(..., min_length=1)
+    left_primary_keys: list[str] = Field(..., min_length=1)
+    nulls_equal: bool = False
+    type_policy: Literal["strict"] = "strict"
+    report_only: bool = True
+    preserve_order: bool = True
+
+    @model_validator(mode="after")
+    def validate_reconciliation_invariants(self) -> Self:
+        """Validate deterministic row reconciliation invariants."""
+        self.left_table = _normalize_required_name(self.left_table, "left_table")
+        self.right_table = _normalize_required_name(self.right_table, "right_table")
+        self.left_columns = _normalize_required_names(
+            self.left_columns,
+            "left_columns",
+        )
+        self.right_columns = _normalize_required_names(
+            self.right_columns,
+            "right_columns",
+        )
+        self.left_primary_keys = _normalize_required_names(
+            self.left_primary_keys,
+            "left_primary_keys",
+        )
+        if len(self.left_columns) != len(self.right_columns):
+            raise ValueError(
+                "reconcile_rows left_columns and right_columns must have "
+                "the same length"
+            )
+        return self
+
+    def to_config_dict(self) -> JsonDict:
+        """Return normalized config with explicit defaults for fingerprinting."""
+        return dict(self.model_dump())
+
+
 class WorkflowTransformStepSchema(BaseModel):
     """Strict schema for transform workflow steps."""
 
@@ -170,6 +216,18 @@ class WorkflowTransformStepSchema(BaseModel):
     transform_name: str = Field(..., min_length=1)
     depends_on: list[str] = Field(default_factory=list)
     config: JsonDict | None = None
+
+    @model_validator(mode="after")
+    def validate_transform_config(self) -> Self:
+        """Validate transform-specific config contracts when available."""
+        if self.transform_name != "reconcile_rows":
+            return self
+        if self.config is None:
+            raise ValueError("reconcile_rows requires config")
+        self.config = WorkflowReconcileRowsConfigSchema.model_validate(
+            self.config
+        ).to_config_dict()
+        return self
 
     def to_domain(self) -> TransformStepConfig:
         """Convert transform step to immutable domain config."""
@@ -185,6 +243,20 @@ WorkflowStepSchema = Annotated[
     WorkflowPipelineStepSchema | WorkflowTransformStepSchema,
     Field(discriminator="kind"),
 ]
+
+
+def _normalize_required_name(value: str, field_name: str) -> str:
+    normalized = str(value).strip()
+    if not normalized:
+        raise ValueError(f"reconcile_rows {field_name} cannot be empty")
+    return normalized
+
+
+def _normalize_required_names(values: list[str], field_name: str) -> list[str]:
+    normalized = [_normalize_required_name(value, field_name) for value in values]
+    if len(set(normalized)) != len(normalized):
+        raise ValueError(f"reconcile_rows {field_name} cannot contain duplicates")
+    return normalized
 
 
 class WorkflowConfigSchema(BaseModel):

@@ -88,10 +88,18 @@ def get_workflow_runner_service(
     )
     from bioetl.composition.bootstrap.cli.noop import create_noop_logger
     from bioetl.composition.factories.services.port_factories import create_metrics
+    from bioetl.domain.ports.noop import NoOpAudit, NoOpMetadataWriter, NoOpTracing
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
+    from bioetl.infrastructure.storage.gold.runtime_helpers import (
+        GoldWriterRuntimeServices,
+    )
+    from bioetl.infrastructure.storage.gold_writer import GoldWriter
     from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
     from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation import (
         SilverForeignKeyReconciliationAdapter,
+    )
+    from bioetl.infrastructure.storage.workflow_row_reconciliation import (
+        StorageRowReconciliationAdapter,
     )
 
     settings = get_settings()
@@ -102,9 +110,27 @@ def get_workflow_runner_service(
         metrics=metrics,
         pipeline_name="workflow_transforms",
     )
+    transform_gold_storage = GoldWriter(
+        base_path=settings.gold_path,
+        logger=create_noop_logger(),
+        runtime_services=GoldWriterRuntimeServices(
+            csv_exporter=None,
+            tracing=NoOpTracing(),
+            metrics=metrics,
+            audit=NoOpAudit(),
+            metadata_writer=NoOpMetadataWriter(),
+            metadata_coordinator=None,
+            lineage_store=None,
+        ),
+    )
     reconciliation_logger = bootstrap_logger("workflow_reconciliation").bind(
         component="workflow_reconciliation",
+    )
+    foreign_key_reconciliation_logger = reconciliation_logger.bind(
         adapter="SilverForeignKeyReconciliationAdapter",
+    )
+    row_reconciliation_logger = reconciliation_logger.bind(
+        adapter="StorageRowReconciliationAdapter",
     )
     reconciliation_quarantine = UnifiedQuarantineAdapter(
         base_path=str(settings.quarantine_path),
@@ -113,10 +139,16 @@ def get_workflow_runner_service(
         WorkflowTransformRegistry(),
         foreign_key_reconciliation_port=SilverForeignKeyReconciliationAdapter(
             silver_writer=transform_storage,
-            logger=reconciliation_logger,
+            logger=foreign_key_reconciliation_logger,
             metrics=metrics,
             quarantine=reconciliation_quarantine,
             quarantine_pipeline_name="workflow_transforms",
+        ),
+        row_reconciliation_port=StorageRowReconciliationAdapter(
+            silver_reader=transform_storage,
+            gold_reader=transform_gold_storage,
+            logger=row_reconciliation_logger,
+            metrics=metrics,
         ),
     )
     pipeline_runner_factory = (

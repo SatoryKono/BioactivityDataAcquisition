@@ -104,16 +104,19 @@ def test_classify_ambiguity_group_marks_forbidden_alias_export_as_conflict() -> 
 def test_build_ambiguity_groups_is_deterministic() -> None:
     mod = _load_naming_audit_module()
     registry = mod.load_naming_registry()
+    module_trees = mod._build_python_module_tree_cache(REPO_ROOT / "src" / "bioetl")
 
     first = mod.build_ambiguity_groups(
         REPO_ROOT / "src" / "bioetl",
         REPO_ROOT / "configs",
         registry,
+        module_trees=module_trees,
     )
     second = mod.build_ambiguity_groups(
         REPO_ROOT / "src" / "bioetl",
         REPO_ROOT / "configs",
         registry,
+        module_trees=module_trees,
     )
 
     first_snapshot = [

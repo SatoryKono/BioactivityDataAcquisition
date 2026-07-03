@@ -1975,7 +1975,12 @@
     "vacuum_completed"
   ],
   "emitted_observability_events_without_contract": [],
-  "emitted_without_declaration": [],
+  "emitted_without_declaration": [
+    "bioetl_workflow_row_reconciliation_excluded_rows_total",
+    "bioetl_workflow_row_reconciliation_kept_rows_total",
+    "bioetl_workflow_row_reconciliation_left_rows_total",
+    "bioetl_workflow_row_reconciliation_right_rows_total"
+  ],
   "helper_backed_emitters": {
     "bioetl_circuit_breaker_failure_total": [
       "src/bioetl/infrastructure/adapters/http/_circuit_breaker_support.py"
@@ -3633,6 +3638,18 @@
     "bioetl_workflow_reconciliation_rows_scanned_total": [
       "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py"
     ],
+    "bioetl_workflow_row_reconciliation_excluded_rows_total": [
+      "src/bioetl/infrastructure/storage/workflow_row_reconciliation.py"
+    ],
+    "bioetl_workflow_row_reconciliation_kept_rows_total": [
+      "src/bioetl/infrastructure/storage/workflow_row_reconciliation.py"
+    ],
+    "bioetl_workflow_row_reconciliation_left_rows_total": [
+      "src/bioetl/infrastructure/storage/workflow_row_reconciliation.py"
+    ],
+    "bioetl_workflow_row_reconciliation_right_rows_total": [
+      "src/bioetl/infrastructure/storage/workflow_row_reconciliation.py"
+    ],
     "bioetl_workflow_runs_total": [
       "src/bioetl/application/services/workflow_runner_support.py"
     ],
@@ -3647,7 +3664,12 @@
   },
   "runtime_label_contract_unresolved": [],
   "runtime_label_contract_violations": [],
-  "runtime_without_registry": [],
+  "runtime_without_registry": [
+    "bioetl_workflow_row_reconciliation_excluded_rows_total",
+    "bioetl_workflow_row_reconciliation_kept_rows_total",
+    "bioetl_workflow_row_reconciliation_left_rows_total",
+    "bioetl_workflow_row_reconciliation_right_rows_total"
+  ],
   "unused_declared_metrics": [],
   "unused_declared_observability_events": []
 }
