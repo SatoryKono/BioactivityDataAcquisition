@@ -98,6 +98,8 @@ class TestCanonicalTestLanes:
         "architecture-slow-governance",
         "architecture-read-only-audit",
         "e2e",
+        "e2e-smoke",
+        "e2e-nightly-full",
         "memory",
         "performance",
         "integration-determinism",
@@ -140,6 +142,7 @@ class TestCanonicalTestLanes:
                 "mixed",
                 "not_applicable",
                 "replay_or_no_api",
+                "vcr_none",
                 "vcr_replay_only",
             }
             artifacts = lane.get("expected_artifacts", {})
@@ -272,6 +275,20 @@ class TestCanonicalTestLanes:
         assert lanes["architecture-read-only-audit"]["mutates_artifacts"] is False
         assert lanes["architecture-read-only-audit"]["runner"] == (
             "scripts/engineering/qa/run_architecture_audit_read_only.py"
+        )
+        assert lanes["e2e"]["marker_expression"] == "e2e and not benchmark and not memory"
+        assert lanes["e2e-smoke"]["paths"] == [
+            "tests/e2e/test_chembl_activity_e2e.py",
+            "tests/e2e/test_pipeline_matrix_e2e.py",
+        ]
+        assert (
+            lanes["e2e-smoke"]["marker_expression"]
+            == "e2e_smoke and not benchmark and not memory"
+        )
+        assert lanes["e2e-smoke"]["replay_mode"] == "vcr_none"
+        assert lanes["e2e-nightly-full"]["paths"] == ["tests/e2e/"]
+        assert lanes["e2e-nightly-full"]["marker_expression"] == (
+            "e2e and not e2e_smoke and not benchmark and not memory"
         )
         assert lanes["memory"]["marker_expression"] == "memory and not benchmark"
         assert lanes["memory"]["paths"] == [
