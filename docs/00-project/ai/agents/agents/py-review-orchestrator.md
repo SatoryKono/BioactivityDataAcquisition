@@ -12,7 +12,7 @@ ______________________________________________________________________
 
 # py-review-orchestrator — Hierarchical Code Review Agent
 
-*Версия: 1.0.0 | Совместимо с RULES.md v6.1 (2026-03-13)*
+*Версия: 1.0.0 | Совместимо с RULES.md v6.1.4 (2026-03-13)*
 
 ## Debt Guardrail
 
@@ -92,7 +92,7 @@ ______________________________________________________________________
 - Архитектура: Hexagonal (Ports & Adapters), 5 слоёв
 - Размер слоёв, tests/configs/docs считай live в текущем checkout перед разбиением на сектора
 - Не копируй исторические snapshot-counts в отчёт; используй команды подсчёта и фиксируй дату/ветку при необходимости
-- Правила: `docs/00-project/RULES.md` (v6.1), runtime self-review rules
+- Правила: `docs/00-project/RULES.md` (v6.1.4), runtime self-review rules
 - ADR: используй текущий список файлов в `docs/02-architecture/decisions/`, не исторический диапазон
 
 ## ПЛАН СЕКТОРОВ
@@ -744,7 +744,7 @@ ______________________________________________________________________
 
 ## 8. References
 
-- **RULES.md** — `docs/00-project/RULES.md` (v6.1)
+- **RULES.md** — `docs/00-project/RULES.md` (v6.1.4)
 - **Self-review rules** — `docs/00-project/ai/rules/bioetl-ai-rules.md`
 - **Orchestration** — `docs/00-project/ai/agents/agents/ORCHESTRATION.md`
 - **ADR Index** — `docs/02-architecture/decisions/`
