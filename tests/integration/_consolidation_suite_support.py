@@ -17,9 +17,8 @@ from tests.helpers.control_plane_replay import (
     run_cached_fixture_pipeline,
 )
 
-
-_PIPELINE_KEY = "chembl/activity"
-_PIPELINE_NAME = "chembl_activity"
+_DEFAULT_PIPELINE_KEY = "chembl/activity"
+_DEFAULT_PIPELINE_NAME = "chembl_activity"
 
 
 def patch_quarantine_adapter_for_cached_fixture_replay(
@@ -38,14 +37,21 @@ def patch_quarantine_adapter_for_cached_fixture_replay(
     )
 
 
+def _cached_bronze_root(tmp_path: Path, pipeline_key: str) -> Path:
+    provider, entity = pipeline_key.split("/", 1)
+    return tmp_path / "cached_bronze" / provider / entity
+
+
 async def run_tracked_fixture_replay_pair(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     *,
+    pipeline_key: str = _DEFAULT_PIPELINE_KEY,
+    pipeline_name: str = _DEFAULT_PIPELINE_NAME,
     date: str = "2026-03-25",
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict[str, Any], str, str]:
     """Run the same tracked fixture twice and return both control-plane payloads."""
-    fixture_entry = load_tracked_fixture_entry(pipeline_key=_PIPELINE_KEY)
+    fixture_entry = load_tracked_fixture_entry(pipeline_key=pipeline_key)
     assert fixture_entry.get("fixture_kind") == "tracked_ci_sample"
 
     fixture_path_raw = fixture_entry.get("fixture_path")
@@ -55,7 +61,7 @@ async def run_tracked_fixture_replay_pair(
         f"Missing tracked fixture: {tracked_fixture_path}"
     )
 
-    cached_root = tmp_path / "cached_bronze" / "chembl" / "activity"
+    cached_root = _cached_bronze_root(tmp_path, pipeline_key)
     materialize_cached_bronze_batch(
         tracked_fixture_path=tracked_fixture_path,
         cache_root=cached_root,
@@ -72,12 +78,12 @@ async def run_tracked_fixture_replay_pair(
     get_pipeline_config.cache_clear()
 
     run_id_first = await run_cached_fixture_pipeline(
-        pipeline_name=_PIPELINE_NAME,
+        pipeline_name=pipeline_name,
         cached_bronze_path=cached_root,
         date=date,
     )
     run_id_second = await run_cached_fixture_pipeline(
-        pipeline_name=_PIPELINE_NAME,
+        pipeline_name=pipeline_name,
         cached_bronze_path=cached_root,
         date=date,
     )

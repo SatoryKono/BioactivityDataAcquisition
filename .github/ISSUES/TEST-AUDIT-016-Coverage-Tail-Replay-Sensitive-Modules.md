@@ -2,6 +2,7 @@
 title: "[TEST-AUDIT-016] Coverage tail burn-down for replay-sensitive modules"
 labels: technical-debt, coverage, P0
 assignees: []
+github_issue: 5928
 ---
 
 ## Context

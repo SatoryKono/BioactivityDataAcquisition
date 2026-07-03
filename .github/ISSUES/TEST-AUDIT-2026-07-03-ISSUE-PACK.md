@@ -7,13 +7,13 @@ Source audit: `main` @ `84a42c127`, verdict `PASS_WITH_GAPS`.
 
 ## Issue Set
 
-1. `TEST-AUDIT-013` - persist architecture governance scan cache in CI
-2. `TEST-AUDIT-014` - consolidate duplicate Batch event unit tests
-3. `TEST-AUDIT-015` - expand integration determinism matrix beyond single gate
-4. `TEST-AUDIT-016` - coverage tail burn-down for replay-sensitive modules
-5. `TEST-AUDIT-017` - observability emission integration for composite/checkpoint
-6. `TEST-AUDIT-018` - E2E PR smoke vs nightly full matrix split
-7. `TEST-AUDIT-019` - retire or archive stale closeout architecture tests (51-file pass)
+1. `TEST-AUDIT-013` - persist architecture governance scan cache in CI [#5925](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5925)
+2. `TEST-AUDIT-014` - consolidate duplicate Batch event unit tests [#5926](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5926)
+3. `TEST-AUDIT-015` - expand integration determinism matrix beyond single gate [#5927](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5927)
+4. `TEST-AUDIT-016` - coverage tail burn-down for replay-sensitive modules [#5928](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5928)
+5. `TEST-AUDIT-017` - observability emission integration for composite/checkpoint [#5929](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5929)
+6. `TEST-AUDIT-018` - E2E PR smoke vs nightly full matrix split [#5930](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5930)
+7. `TEST-AUDIT-019` - retire or archive stale closeout architecture tests (51-file pass) [#5931](https://github.com/SatoryKono/BioactivityDataAcquisition/issues/5931)
 
 ## Recommended Execution Order
 
@@ -44,4 +44,10 @@ Source audit: `main` @ `84a42c127`, verdict `PASS_WITH_GAPS`.
 
 ```bash
 python scripts/engineering/repo/publish_test_audit_issues.py --apply --update-pack
+```
+
+## Closeout
+
+```bash
+python scripts/engineering/repo/close_test_audit_issues.py
 ```

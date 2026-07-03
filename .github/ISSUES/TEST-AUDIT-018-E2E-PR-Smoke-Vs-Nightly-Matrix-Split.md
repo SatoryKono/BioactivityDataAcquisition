@@ -2,6 +2,7 @@
 title: "[TEST-AUDIT-018] E2E PR smoke vs nightly full matrix split"
 labels: ci, e2e, P1
 assignees: []
+github_issue: 5930
 ---
 
 ## Context
