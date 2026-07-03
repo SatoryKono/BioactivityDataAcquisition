@@ -2,6 +2,7 @@
 title: "[TEST-AUDIT-014] Consolidate duplicate Batch event unit tests"
 labels: technical-debt, test, P1
 assignees: []
+github_issue: 5926
 ---
 
 ## Context

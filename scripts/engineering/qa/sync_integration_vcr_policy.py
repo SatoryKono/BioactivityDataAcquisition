@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from collections.abc import Iterable
 from pathlib import Path
@@ -12,6 +13,12 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[3]
 POLICY_PATH = ROOT / "configs" / "quality" / "integration_vcr_policy.yaml"
+
+
+def _atomic_write_text(path: Path, content: str) -> None:
+    tmp_path = path.with_name(f"{path.name}.tmp")
+    tmp_path.write_text(content, encoding="utf-8")
+    os.replace(tmp_path, path)
 
 
 def _iter_inventory_paths(node: object) -> list[str]:
@@ -353,7 +360,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if write_mode:
-        POLICY_PATH.write_text(rendered, encoding="utf-8")
+        _atomic_write_text(POLICY_PATH, rendered)
         print(
             "[sync-integration-vcr-policy] rewrote configs/quality/integration_vcr_policy.yaml"
         )

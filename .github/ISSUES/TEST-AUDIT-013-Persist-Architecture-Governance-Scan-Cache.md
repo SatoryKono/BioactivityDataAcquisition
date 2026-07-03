@@ -2,6 +2,7 @@
 title: "[TEST-AUDIT-013] Persist architecture governance scan cache in CI"
 labels: ci, technical-debt, P0
 assignees: []
+github_issue: 5925
 ---
 
 ## Context

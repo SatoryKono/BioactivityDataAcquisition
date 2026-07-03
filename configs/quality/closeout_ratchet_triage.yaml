@@ -1,7 +1,9 @@
 schema_version: 1
-linked_issue: "#5500"
-reviewed_on: "2026-06-22"
-review_by: "2026-09-20"
+linked_issue: "#5931"
+supplementary_linked_issues:
+  - "#5500"
+reviewed_on: "2026-07-03"
+review_by: "2026-10-03"
 owner: "@bioetl-architecture"
 policy:
   max_unclassified_closeout_ratchets: 0
