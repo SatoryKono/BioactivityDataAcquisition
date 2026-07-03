@@ -1,0 +1,265 @@
+{
+  "_dq_error": {
+    "checks": [],
+    "coerce": false,
+    "description": "Flag for data quality errors.",
+    "dtype": "bool",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_dq_warn": {
+    "checks": [],
+    "coerce": false,
+    "description": "Flag for data quality warnings.",
+    "dtype": "bool",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_index": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": false,
+    "description": "Sequential index of the record in the pipeline run.",
+    "dtype": "int64",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_ingestion_ts": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?([+-]\\d{2}:\\d{2}|Z)?$"
+      }
+    ],
+    "coerce": false,
+    "description": "Timestamp when the record was ingested (UTC, ISO 8601 format).",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_run_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Correlation ID for the pipeline run.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_run_type": {
+    "checks": [
+      {
+        "name": "isin",
+        "type": "isin"
+      }
+    ],
+    "coerce": false,
+    "description": "Type of pipeline run.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "_source_batch_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Batch context ID from the source.",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "all_mappings": {
+    "checks": [],
+    "coerce": false,
+    "description": "JSON array of all accessions when multiple mappings found",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "annotation_score": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      },
+      {
+        "name": "less_than_or_equal_to",
+        "type": "le"
+      }
+    ],
+    "coerce": true,
+    "description": "Quality score 1-5 (5 = best annotated)",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "content_hash": {
+    "checks": [
+      {
+        "name": "str_matches",
+        "regex": "^[a-f0-9]{64}$"
+      }
+    ],
+    "coerce": false,
+    "description": "SHA256 hash of canonical record representation (64 hex chars).",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "entity_id": {
+    "checks": [],
+    "coerce": false,
+    "description": "Unique business identifier for the entity.",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "gene_primary": {
+    "checks": [],
+    "coerce": false,
+    "description": "Primary gene name",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "mapping_status": {
+    "checks": [
+      {
+        "name": "mapping_status_values"
+      }
+    ],
+    "coerce": false,
+    "description": "Status of mapping: 'found', 'not_found', 'error', or 'multiple'",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "organism_common": {
+    "checks": [],
+    "coerce": false,
+    "description": "Common organism name (e.g., Human)",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "organism_scientific": {
+    "checks": [],
+    "coerce": false,
+    "description": "Scientific organism name (e.g., Homo sapiens)",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "protein_name": {
+    "checks": [],
+    "coerce": false,
+    "description": "Recommended protein name",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "reviewed": {
+    "checks": [],
+    "coerce": true,
+    "description": "True if Swiss-Prot (reviewed), False if TrEMBL",
+    "dtype": "bool",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "sequence_length": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": true,
+    "description": "Protein sequence length",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "sequence_mass": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": true,
+    "description": "Molecular weight in Daltons",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "target_id": {
+    "checks": [
+      {
+        "name": "target_id_format"
+      }
+    ],
+    "coerce": false,
+    "description": "Source ChEMBL target identifier (e.g., CHEMBL204)",
+    "dtype": "str",
+    "nullable": false,
+    "required": true,
+    "unique": false
+  },
+  "taxonomy_id": {
+    "checks": [
+      {
+        "name": "greater_than_or_equal_to",
+        "type": "ge"
+      }
+    ],
+    "coerce": true,
+    "description": "NCBI Taxonomy ID",
+    "dtype": "float64",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "uniprot_accession": {
+    "checks": [
+      {
+        "name": "uniprot_accession_format"
+      }
+    ],
+    "coerce": false,
+    "description": "Mapped UniProt accession (e.g., P00742), None if not found",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  },
+  "uniprot_entry_name": {
+    "checks": [],
+    "coerce": false,
+    "description": "UniProt entry name (e.g., FA10_HUMAN)",
+    "dtype": "str",
+    "nullable": true,
+    "required": false,
+    "unique": false
+  }
+}
