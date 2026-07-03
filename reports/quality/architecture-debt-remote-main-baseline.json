@@ -1,0 +1,98 @@
+{
+  "artifacts": [
+    {
+      "blob_sha256": "cdbc698183939723130911c6b2a8acfe8aeb88b59a8c0713404f3953717cb634",
+      "path": "reports/quality/architecture-quality-scorecard.json",
+      "required": true,
+      "source_revision": "local_worktree_fallback",
+      "summary": {
+        "available": true,
+        "integral_score": 8.56,
+        "schema_version": 1,
+        "weights_sum": 1.0
+      }
+    },
+    {
+      "blob_sha256": "4e27cf0514029b1dab70c6070313e8c34e8adee7d44e62f1db5d8f76f71a0b64",
+      "path": "reports/quality/module-coverage-inventory.json",
+      "required": true,
+      "source_revision": "local_worktree_fallback",
+      "summary": {
+        "available": true,
+        "coverage_xml_sha256": "fb15f6a63e251a6fa48645d07ddb739836aad21aa27f184eeda1ce3c84776e0c",
+        "schema_version": 1,
+        "snapshot_date": "2026-07-01",
+        "source_module_count": 2211,
+        "source_tree_sha256": "3add2f93c6335f0b1580e4d8ee8f091188972f40862f5ebc831a978991966cf9",
+        "unmeasured_module_count": 0
+      }
+    },
+    {
+      "blob_sha256": "045abeb8d316795a53911237c5af20809cd9685e0b55b6de9d16b5b39c8284bd",
+      "path": "reports/quality/compatibility-importer-census.json",
+      "required": true,
+      "source_revision": "local_worktree_fallback",
+      "summary": {
+        "available": true,
+        "retained_entrypoint_count": 12,
+        "snapshot_date": "2026-07-03"
+      }
+    },
+    {
+      "blob_sha256": "f1f21a95fa3f16d161f0bd757651033f0eba7ef697858b0a9e2f3d9950cd9a3a",
+      "path": "reports/quality/dead-code-inventory.json",
+      "required": true,
+      "source_revision": "local_worktree_fallback",
+      "summary": {
+        "available": true,
+        "repo_wide_untriaged_zero_import_candidate_count": 0,
+        "snapshot_date": "2026-06-16"
+      }
+    },
+    {
+      "blob_sha256": "691ae784ed4f90f7835fed4706fbb586e7d7184b8ddc965a7fd5cab6ef3a2dce",
+      "path": "reports/quality/contract-registry-diagnostics.json",
+      "required": true,
+      "source_revision": "local_worktree_fallback",
+      "summary": {
+        "available": true,
+        "blocking_issue_count": 0,
+        "valid": true
+      }
+    },
+    {
+      "blob_sha256": "81dd0562c96f040530985b5a19c66abebe6d1eaaff0eb2b66a15e4217095e1dd",
+      "path": "reports/observability/runtime_cardinality_inventory.json",
+      "required": false,
+      "source_revision": "local_worktree_fallback",
+      "summary": {
+        "available": true
+      }
+    }
+  ],
+  "baseline_artifact_fingerprint": "7694aae46f550461b73f6532fb93d87bb8b16a098a11e88006e350ac648339ce",
+  "branch": "main",
+  "dirty_closeout_guard": {
+    "command": "git status --porcelain --untracked-files=no",
+    "expected_output": "",
+    "policy": "closeout evidence must come from remote-main Git tree blobs, not unstaged local files"
+  },
+  "evidence_source": "remote_main_git_tree",
+  "generated_by": "scripts.engineering.qa.report_architecture_debt_remote_main_baseline",
+  "generator_commands": [
+    "python -m scripts.engineering.qa report-dep-map --check",
+    "python -m scripts.engineering.qa report-module-coverage --check",
+    "python -m scripts.engineering.qa report-compatibility-importer-census --check",
+    "python -m scripts.engineering.qa report-dead-code-inventory --check",
+    "python -m scripts.engineering.qa report-observability-metric-inventory --check --write-evidence reports/observability/runtime_cardinality_inventory.json",
+    "python -m scripts.engineering.qa report-adr-enforcement-matrix --check",
+    "python -m scripts.engineering.qa report-debt-governance-gates --check"
+  ],
+  "local_tracking_ref": "origin/main",
+  "local_tracking_ref_matches_remote": true,
+  "local_tracking_ref_sha": "494f25e549b4a2adef590b1c10238be87d661bbf",
+  "remote": "origin",
+  "remote_main_ref": "refs/heads/main",
+  "remote_main_sha": "494f25e549b4a2adef590b1c10238be87d661bbf",
+  "schema_version": 1
+}
