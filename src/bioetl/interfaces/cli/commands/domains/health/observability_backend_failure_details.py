@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Protocol
-
-from collections.abc import Sequence
 from urllib.error import HTTPError, URLError
 from urllib.request import build_opener
 

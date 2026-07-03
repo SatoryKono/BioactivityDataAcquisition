@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
 from pathlib import Path
@@ -9,6 +10,7 @@ from typing import Protocol
 from urllib.parse import quote
 
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details import (
+    _append_backend_startup_diagnostic,
     _build_startup_failure_detail,
     _describe_required_probe_failure,
 )
@@ -31,6 +33,7 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_process
     _build_detached_backend_popen_kwargs,
     build_detached_backend_log_path,
     drop_listening_backend_on_port,
+    find_listening_backend_pid_by_port,
     python_executable_to_tuple,
     start_detached_quarantine_backend,
 )
@@ -189,11 +192,30 @@ def _reuse_observability_backend_if_ready(
     required_probe_fn: Callable[..., bool],
     required_probe_timeout_seconds: float,
     drop_stale_backend_fn: Callable[[int], bool],
+    listener_pid_fn: Callable[[int], int | None],
     info_printer: Callable[[str], None],
     warning_printer: Callable[[str], None],
 ) -> ObservabilityBackendEnsureResult | None:
     if not probe_fn(health_url):
-        return None
+        existing_pid = listener_pid_fn(port)
+        if existing_pid is None:
+            return None
+        warning_printer(
+            "Observability backend: existing listener on port "
+            f"{port} (pid={existing_pid}) is bound but health probes timeout; "
+            "restarting detached Quarantine Explorer backend."
+        )
+        if drop_stale_backend_fn(port):
+            return None
+        return ObservabilityBackendEnsureResult(
+            status="failed",
+            health_url=health_url,
+            message=(
+                "Existing backend listener "
+                f"(pid={existing_pid}) is bound on port {port} but health probes "
+                "timeout and the stale process could not be restarted."
+            ),
+        )
     if required_probe_fn(
         health_url,
         required_probe_paths=required_probe_paths,
@@ -288,6 +310,17 @@ def _start_observability_backend_detached(
         required_probe_paths=required_probe_paths,
         timeout_seconds=required_probe_timeout_seconds,
     )
+    _append_backend_startup_diagnostic(
+        startup_log_path,
+        parent_pid=os.getpid(),
+        child_pid=getattr(process, "pid", None),
+        command=command,
+        diagnostic_lines=(
+            f"health_url={health_url}",
+            f"required_probe_paths={required_probe_paths!r}",
+            capability_failure_detail or "capability_failure=<unknown>",
+        ),
+    )
     startup_detail = _build_startup_failure_detail(
         startup_log_path,
         process=process,
@@ -329,6 +362,7 @@ def ensure_observability_backend_started(
         ..., bool
     ] = wait_for_observability_backend_required_paths_ready,
     drop_stale_backend_fn: Callable[[int], bool] = drop_listening_backend_on_port,
+    listener_pid_fn: Callable[[int], int | None] = find_listening_backend_pid_by_port,
     info_printer: Callable[[str], None] = echo_info,
     warning_printer: Callable[[str], None] = echo_warning,
 ) -> ObservabilityBackendEnsureResult:
@@ -350,6 +384,7 @@ def ensure_observability_backend_started(
         required_probe_fn=required_probe_fn,
         required_probe_timeout_seconds=required_probe_timeout_seconds,
         drop_stale_backend_fn=drop_stale_backend_fn,
+        listener_pid_fn=listener_pid_fn,
         info_printer=info_printer,
         warning_printer=warning_printer,
     )

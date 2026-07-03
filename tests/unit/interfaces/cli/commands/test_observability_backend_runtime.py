@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import signal
 from io import BytesIO
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 from urllib.error import HTTPError
@@ -222,6 +223,48 @@ def test_ensure_backend_starts_detached_process_when_probe_fails() -> None:
     info.assert_called_once()
 
 
+def test_ensure_backend_restarts_bound_but_unresponsive_listener() -> None:
+    probe = MagicMock(return_value=False)
+    listener_pid = MagicMock(return_value=4321)
+    drop = MagicMock(return_value=True)
+    process = MagicMock(pid=777, args=["python", "-m", "bioetl"])
+    start = MagicMock(return_value=process)
+    wait = MagicMock(return_value=True)
+    wait_required = MagicMock(return_value=True)
+    warning = MagicMock()
+
+    result = ensure_observability_backend_started(
+        enabled=True,
+        probe_fn=probe,
+        listener_pid_fn=listener_pid,
+        drop_stale_backend_fn=drop,
+        start_fn=start,
+        wait_fn=wait,
+        wait_required_paths_fn=wait_required,
+        warning_printer=warning,
+    )
+
+    assert result.status == "started"
+    listener_pid.assert_called_once_with(8081)
+    drop.assert_called_once_with(8081)
+    start.assert_called_once()
+    assert "health probes timeout" in warning.call_args.args[0]
+
+
+def test_ensure_backend_fails_when_unresponsive_listener_cannot_be_dropped() -> None:
+    result = ensure_observability_backend_started(
+        enabled=True,
+        probe_fn=MagicMock(return_value=False),
+        listener_pid_fn=MagicMock(return_value=4321),
+        drop_stale_backend_fn=MagicMock(return_value=False),
+        start_fn=MagicMock(),
+    )
+
+    assert result.status == "failed"
+    assert "pid=4321" in (result.message or "")
+    assert "health probes timeout" in (result.message or "")
+
+
 def test_ensure_backend_restarts_stale_backend_missing_required_paths() -> None:
     probe = MagicMock(return_value=True)
     required_probe = MagicMock(return_value=False)
@@ -389,6 +432,37 @@ def test_ensure_backend_fails_when_required_paths_never_become_ready() -> None:
     wait.assert_called_once()
     wait_required.assert_called_once()
     warning.assert_called_once()
+
+
+def test_ensure_backend_failed_startup_appends_process_diagnostics_to_log(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    log_path = tmp_path / "backend.log"
+    monkeypatch.setattr(runtime_subject, "build_detached_backend_log_path", lambda _port: log_path)
+    monkeypatch.setattr(
+        runtime_subject,
+        "_describe_required_probe_failure",
+        MagicMock(return_value="Capability probe failed: timeout."),
+    )
+    probe = MagicMock(return_value=False)
+    process = MagicMock(pid=654, args=["python", "-m", "bioetl", "quarantine", "serve"])
+    process.poll.return_value = None
+
+    result = ensure_observability_backend_started(
+        enabled=True,
+        probe_fn=probe,
+        start_fn=MagicMock(return_value=process),
+        wait_fn=MagicMock(return_value=True),
+        wait_required_paths_fn=MagicMock(return_value=False),
+        required_probe_paths=("/ops/control-plane/checkpoint-freshness?pipeline=x",),
+    )
+
+    assert result.status == "failed"
+    log_text = log_path.read_text(encoding="utf-8")
+    assert "BioETL detached backend diagnostics" in log_text
+    assert "child_pid=654" in log_text
+    assert "command=python -m bioetl quarantine serve" in log_text
+    assert "Capability probe failed: timeout." in log_text
 
 
 def test_ensure_backend_warns_when_start_raises_oserror() -> None:
