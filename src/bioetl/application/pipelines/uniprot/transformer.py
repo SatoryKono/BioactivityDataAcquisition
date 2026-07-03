@@ -6,22 +6,20 @@ the UniprotTarget domain entity for validation and invariant checking.
 
 from __future__ import annotations
 
-__all__ = ["UniProtProteinTransformer"]
-
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.base_transformer import (
     BaseTransformer,
     TransformationError,
 )
-from bioetl.application.pipelines.common.publication_transformer_context import (
-    build_runtime_transformer_init,
-)
 from bioetl.application.core.base_transformer.errors import FilteredOutError
 from bioetl.application.core.pre_silver_adapter_mixin import (
     PreSilverAdapterMixin,
 )
 from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.pipelines.common.publication_transformer_context import (
+    build_runtime_transformer_init,
+)
 from bioetl.application.pipelines.uniprot.transformer_business_data_mixin import (
     UniProtBusinessDataMixin,
 )
@@ -29,11 +27,10 @@ from bioetl.domain.entities import UniprotTarget
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
-    from bioetl.domain.behavior import EntityIdentityGenerator
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
-    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
     from bioetl.domain.types import BronzeRecord, SilverRecord
+
+__all__ = ["UniProtProteinTransformer"]
 
 
 class UniProtProteinTransformer(

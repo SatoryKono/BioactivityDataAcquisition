@@ -29,8 +29,6 @@ from bioetl.infrastructure.adapters.common.fetch_resilience_template import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
-
     from bioetl.domain.ports import ErrorHandlerPort, LoggerPort
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.chembl.entity_mapper import (

@@ -5,39 +5,11 @@ from __future__ import annotations
 import os
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol
+from typing import Protocol
 
-from bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details import (
-    _append_backend_startup_diagnostic,
-    _build_startup_failure_detail,
-    _describe_required_probe_failure,
-)
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_probes import (
-    DEFAULT_OBSERVABILITY_BACKEND_POLL_SECONDS,
-    DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS,
     DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PATHS_READY_TIMEOUT_SECONDS,
-    DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PROBE_TIMEOUT_SECONDS,
-    probe_observability_backend,
-    probe_observability_backend_required_paths,
-    wait_for_observability_backend_ready,
-    wait_for_observability_backend_required_paths_ready,
 )
-from bioetl.interfaces.cli.commands.domains.health.observability_backend_process import (
-    build_detached_backend_log_path,
-    drop_listening_backend_on_port,
-    find_listening_backend_pid_by_port,
-    python_executable_to_tuple,
-    start_detached_quarantine_backend,
-)
-from bioetl.interfaces.cli.commands.domains.health.server_integration import (
-    DEFAULT_HEALTH_SERVER_PORT,
-)
-from bioetl.interfaces.cli.formatters import echo_info, echo_warning
-
-if TYPE_CHECKING:
-    from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
-        ObservabilityBackendEnsureResult,
-    )
 
 DEFAULT_OBSERVABILITY_BACKEND_PROBE_HOST = "127.0.0.1"
 DEFAULT_OBSERVABILITY_BACKEND_BIND_HOST = "0.0.0.0"
@@ -62,8 +34,8 @@ def _reuse_observability_backend_if_ready(
     listener_pid_fn: Callable[[int], int | None],
     info_printer: Callable[[str], None],
     warning_printer: Callable[[str], None],
-    result_factory: Callable[..., ObservabilityBackendEnsureResult],
-) -> ObservabilityBackendEnsureResult | None:
+    result_factory: Callable[..., object],
+) -> object | None:
     if not probe_fn(health_url):
         existing_pid = listener_pid_fn(port)
         if existing_pid is None:
@@ -128,12 +100,12 @@ def _start_observability_backend_detached(
     wait_required_paths_fn: Callable[..., bool],
     info_printer: Callable[[str], None],
     warning_printer: Callable[[str], None],
-    result_factory: Callable[..., ObservabilityBackendEnsureResult],
+    result_factory: Callable[..., object],
     build_startup_failure_detail_fn: Callable[..., str],
     describe_required_probe_failure_fn: Callable[..., str | None],
     append_backend_startup_diagnostic_fn: Callable[..., None],
     python_executable_to_tuple_fn: Callable[[object], tuple[str, ...]],
-) -> ObservabilityBackendEnsureResult:
+) -> object:
     try:
         process = start_fn(bind_host=bind_host, port=port)
     except OSError as exc:
@@ -198,8 +170,8 @@ def _build_started_backend_result(
     process: _StartedBackendProcess,
     command: tuple[str, ...],
     info_printer: Callable[[str], None],
-    result_factory: Callable[..., ObservabilityBackendEnsureResult],
-) -> ObservabilityBackendEnsureResult:
+    result_factory: Callable[..., object],
+) -> object:
     info_printer(f"Observability backend: started {health_url}")
     return result_factory(
         status="started",
@@ -219,11 +191,11 @@ def _build_backend_capability_failure_result(
     required_probe_paths: tuple[str, ...],
     required_probe_timeout_seconds: float,
     warning_printer: Callable[[str], None],
-    result_factory: Callable[..., ObservabilityBackendEnsureResult],
+    result_factory: Callable[..., object],
     build_startup_failure_detail_fn: Callable[..., str],
     describe_required_probe_failure_fn: Callable[..., str | None],
     append_backend_startup_diagnostic_fn: Callable[..., None],
-) -> ObservabilityBackendEnsureResult:
+) -> object:
     capability_failure_detail = describe_required_probe_failure_fn(
         health_url,
         required_probe_paths=required_probe_paths,
@@ -280,12 +252,12 @@ def ensure_observability_backend_started_impl(
     listener_pid_fn: Callable[[int], int | None],
     info_printer: Callable[[str], None],
     warning_printer: Callable[[str], None],
-    result_factory: Callable[..., ObservabilityBackendEnsureResult],
+    result_factory: Callable[..., object],
     build_startup_failure_detail_fn: Callable[..., str],
     describe_required_probe_failure_fn: Callable[..., str | None],
     append_backend_startup_diagnostic_fn: Callable[..., None],
     python_executable_to_tuple_fn: Callable[[object], tuple[str, ...]],
-) -> ObservabilityBackendEnsureResult:
+) -> object:
     """Ensure the detached backend is running using runtime-injected patch points."""
     if not enabled:
         return result_factory(
@@ -332,66 +304,8 @@ def ensure_observability_backend_started_impl(
         append_backend_startup_diagnostic_fn=append_backend_startup_diagnostic_fn,
         python_executable_to_tuple_fn=python_executable_to_tuple_fn,
     )
-
-
-def ensure_observability_backend_started(
-    *,
-    enabled: bool,
-    port: int = DEFAULT_HEALTH_SERVER_PORT,
-    probe_host: str = DEFAULT_OBSERVABILITY_BACKEND_PROBE_HOST,
-    bind_host: str = DEFAULT_OBSERVABILITY_BACKEND_BIND_HOST,
-    ready_timeout_seconds: float = DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS,
-    required_probe_timeout_seconds: float = DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PROBE_TIMEOUT_SECONDS,
-    poll_seconds: float = DEFAULT_OBSERVABILITY_BACKEND_POLL_SECONDS,
-    required_probe_paths: tuple[str, ...] = (),
-    probe_fn: Callable[..., bool] = probe_observability_backend,
-    required_probe_fn: Callable[..., bool] = probe_observability_backend_required_paths,
-    start_fn: Callable[..., _StartedBackendProcess] = start_detached_quarantine_backend,
-    wait_fn: Callable[..., bool] = wait_for_observability_backend_ready,
-    wait_required_paths_fn: Callable[
-        ..., bool
-    ] = wait_for_observability_backend_required_paths_ready,
-    drop_stale_backend_fn: Callable[[int], bool] = drop_listening_backend_on_port,
-    listener_pid_fn: Callable[[int], int | None] = find_listening_backend_pid_by_port,
-    info_printer: Callable[[str], None] = echo_info,
-    warning_printer: Callable[[str], None] = echo_warning,
-) -> ObservabilityBackendEnsureResult:
-    """Ensure the detached observability backend is running for Grafana panels."""
-    from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
-        ObservabilityBackendEnsureResult,
-        build_observability_backend_health_url,
-    )
-
-    return ensure_observability_backend_started_impl(
-        enabled=enabled,
-        health_url=build_observability_backend_health_url(host=probe_host, port=port),
-        startup_log_path=build_detached_backend_log_path(port),
-        port=port,
-        bind_host=bind_host,
-        ready_timeout_seconds=ready_timeout_seconds,
-        required_probe_timeout_seconds=required_probe_timeout_seconds,
-        poll_seconds=poll_seconds,
-        required_probe_paths=required_probe_paths,
-        probe_fn=probe_fn,
-        required_probe_fn=required_probe_fn,
-        start_fn=start_fn,
-        wait_fn=wait_fn,
-        wait_required_paths_fn=wait_required_paths_fn,
-        drop_stale_backend_fn=drop_stale_backend_fn,
-        listener_pid_fn=listener_pid_fn,
-        info_printer=info_printer,
-        warning_printer=warning_printer,
-        result_factory=ObservabilityBackendEnsureResult,
-        build_startup_failure_detail_fn=_build_startup_failure_detail,
-        describe_required_probe_failure_fn=_describe_required_probe_failure,
-        append_backend_startup_diagnostic_fn=_append_backend_startup_diagnostic,
-        python_executable_to_tuple_fn=python_executable_to_tuple,
-    )
-
-
 __all__ = [
     "DEFAULT_OBSERVABILITY_BACKEND_BIND_HOST",
     "DEFAULT_OBSERVABILITY_BACKEND_PROBE_HOST",
-    "ensure_observability_backend_started",
     "ensure_observability_backend_started_impl",
 ]

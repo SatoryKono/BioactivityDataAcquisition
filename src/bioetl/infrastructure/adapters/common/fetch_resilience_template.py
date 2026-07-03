@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable, Protocol, cast
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.domain.exceptions import ExternalServiceError, RetryExhaustedError
 from bioetl.domain.types import BronzeRecord

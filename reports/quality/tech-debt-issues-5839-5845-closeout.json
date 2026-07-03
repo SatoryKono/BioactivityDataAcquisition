@@ -98,13 +98,13 @@
       "source": "reports/quality/compatibility-importer-census.json"
     },
     "adapter_duplicate_clusters": {
-      "current": 48,
+      "current": 44,
       "max": 53,
       "previous_audit_baseline": 54,
       "source": "reports/quality/full-app-duplication-baseline.json"
     },
     "pipeline_duplicate_clusters": {
-      "current": 9,
+      "current": 5,
       "max": 10,
       "previous_audit_baseline": 11,
       "source": "reports/quality/full-app-duplication-baseline.json"

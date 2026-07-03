@@ -54,12 +54,6 @@ BaseChemblTransformer:
   expiry: "2026-12-31"
   reason: "Provider transformer base remains shared until provider-specific parsing helpers are extracted."
 
-PubChemCompoundTransformer:
-  max_args: 9
-  owner: "@bioetl-application"
-  expiry: "2026-12-31"
-  reason: "Compound transformer still centralizes parsing and metadata helpers."
-
 PubMedPublicationTransformer:
   max_args: 11
   owner: "@bioetl-application"
@@ -71,12 +65,6 @@ IDMappingTransformer:
   owner: "@bioetl-application"
   expiry: "2026-12-31"
   reason: "IDMapping transformer still bundles normalization and enrichment collaborators."
-
-UniProtProteinTransformer:
-  max_args: 9
-  owner: "@bioetl-application"
-  expiry: "2026-12-31"
-  reason: "Protein transformer still centralizes normalization and metadata collaborators."
 
 GenericPipelineFactory:
   max_args: 9
