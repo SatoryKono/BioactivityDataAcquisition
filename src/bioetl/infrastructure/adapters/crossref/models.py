@@ -219,16 +219,10 @@ class CrossRefPublicationRecord(BaseModel):
     score: float | None = Field(default=None, description="Search relevance score")
 
     # Standards Bodies
-    standards_body: list[JsonDict] | None = Field(
-        default_factory=list,
-        alias="standards-body",
-        description="Standards bodies",
-    )  # Any: nested Crossref JSON with provider-specific schema
+    standards_body: list[JsonDict] | None = Field(default_factory=list, alias="standards-body", description="Standards bodies")  # Any: nested Crossref JSON
 
     # Update Policy
-    update_policy: str | None = Field(
-        default=None, alias="update-policy", description="Update policy DOI"
-    )
+    update_policy: str | None = Field(default=None, alias="update-policy", description="Update policy DOI")
 
 
 # === Record Type Mapping ===

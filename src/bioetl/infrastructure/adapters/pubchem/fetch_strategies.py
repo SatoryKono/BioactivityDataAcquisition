@@ -9,8 +9,10 @@ from typing import TYPE_CHECKING
 
 import pubchempy as pcp
 
-from bioetl.domain.exceptions import BioETLError, NetworkError
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.common.error_bundles import (
+    build_common_network_error_bundle,
+)
 from bioetl.infrastructure.adapters.pubchem._fetch_strategy_search import (
     _PubChemSearchFetchMixin,
 )
@@ -48,15 +50,7 @@ if TYPE_CHECKING:
 class PubChemFetchStrategies(_PubChemSearchFetchMixin):
     """Helper class for PubChem fetch operations."""
 
-    FETCH_STRATEGY_ERRORS = (
-        BioETLError,
-        NetworkError,
-        ConnectionError,
-        TimeoutError,
-        OSError,
-        ValueError,
-        TypeError,
-        RuntimeError,
+    FETCH_STRATEGY_ERRORS = build_common_network_error_bundle(
         KeyError,
     )
 

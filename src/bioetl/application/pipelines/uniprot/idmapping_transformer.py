@@ -9,25 +9,23 @@ from __future__ import annotations
 __all__ = ["IDMappingTransformer"]
 
 
-import dataclasses
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.base_transformer import (
     BaseTransformer,
-    TransformerDependencyContext,
 )
 from bioetl.application.core.pre_silver_adapter_mixin import (
     PreSilverAdapterMixin,
 )
 from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.pipelines.common.publication_transformer_context import (
+    build_runtime_transformer_init,
+)
 from bioetl.domain.entities.uniprot import IDMappingResult
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
-    from bioetl.domain.behavior import EntityIdentityGenerator
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.filtering import GoldFilterConfig, SilverFilterConfig
-    from bioetl.domain.ports import MetricsPort, PiiHasherPort, TracingPort
     from bioetl.domain.types import BronzeRecord, SilverRecord
 
 
@@ -45,65 +43,7 @@ class IDMappingTransformer(PreSilverAdapterMixin, BaseTransformer):
     """
 
     entity_class = IDMappingResult
-
-    def __init__(
-        self,
-        provider: str = "uniprot",
-        entity_type: str = "idmapping",
-        silver_filters: SilverFilterConfig | None = None,
-        gold_filters: GoldFilterConfig | None = None,
-        tracer: TracingPort | None = None,
-        metrics: MetricsPort | None = None,
-        identity_service: EntityIdentityGenerator | None = None,
-        pii_hasher: PiiHasherPort | None = None,
-        dependencies: TransformerDependencyContext | None = None,
-    ) -> None:
-        """Initialize ID Mapping transformer.
-
-        Args:
-            provider: Data provider identifier (default: 'uniprot').
-            entity_type: Entity type for metrics labels (default: 'idmapping').
-            silver_filters: Optional filter configuration for Silver layer.
-            gold_filters: Optional filter configuration for Gold layer.
-            tracer: Optional tracing collaborator when not using dependencies.
-            metrics: Optional metrics collaborator when not using dependencies.
-            identity_service: Optional identity collaborator when not using dependencies.
-            pii_hasher: Optional PII hasher collaborator when not using dependencies.
-            dependencies: Explicit collaborator bundle.
-        """
-        if dependencies is not None and any(
-            value is not None
-            for value in (tracer, metrics, identity_service, pii_hasher)
-        ):
-            dependencies = dataclasses.replace(
-                dependencies,
-                tracer=tracer if tracer is not None else dependencies.tracer,
-                metrics=metrics if metrics is not None else dependencies.metrics,
-                identity_service=(
-                    identity_service
-                    if identity_service is not None
-                    else dependencies.identity_service
-                ),
-                pii_hasher=(
-                    pii_hasher if pii_hasher is not None else dependencies.pii_hasher
-                ),
-            )
-            tracer = None
-            metrics = None
-            identity_service = None
-            pii_hasher = None
-
-        super().__init__(
-            provider,
-            entity_type=entity_type,
-            silver_filters=silver_filters,
-            gold_filters=gold_filters,
-            tracer=tracer,
-            metrics=metrics,
-            identity_service=identity_service,
-            pii_hasher=pii_hasher,
-            dependencies=dependencies,
-        )
+    __init__ = build_runtime_transformer_init("uniprot", "idmapping")
 
     async def _transform_impl(
         self,
