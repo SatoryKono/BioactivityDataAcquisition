@@ -9,12 +9,12 @@ import pytest
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 TARGET_FILES = (
-    Path(".codex/agents/py-config-bot.md"),
+    Path(".codex/skills/py-config-bot/SKILL.md"),
     Path("docs/00-project/ai/agents/agents/py-config-bot.md"),
     Path("docs/00-project/ai/memory/memory-py-config-bot.md"),
-    Path(".codex/agents/py-audit-bot.md"),
-    Path(".codex/agents/py-doc-bot.md"),
-    Path(".codex/agents/py-plan-bot.md"),
+    Path(".codex/skills/py-audit-bot/SKILL.md"),
+    Path(".codex/skills/py-doc-bot/SKILL.md"),
+    Path(".codex/skills/py-plan-bot/SKILL.md"),
     Path("docs/00-project/ai/memory/memory-py-plan-bot.md"),
     Path("docs/02-architecture/diagrams/views/46-yaml-config-resolution-full.mermaid"),
     Path("docs/02-architecture/diagrams/foundation/46-yaml-config-resolution.mmd"),
@@ -41,11 +41,11 @@ OBSOLETE_PATTERNS = (
 )
 
 RUNTIME_FACT_TARGET_FILES = (
-    Path(".codex/agents/ORCHESTRATION.md"),
-    Path(".codex/agents/py-audit-bot.md"),
-    Path(".codex/agents/py-config-bot.md"),
-    Path(".codex/agents/py-doc-bot.md"),
-    Path(".codex/agents/py-plan-bot.md"),
+    Path(".codex/skills/agent-orchestration/SKILL.md"),
+    Path(".codex/skills/py-audit-bot/SKILL.md"),
+    Path(".codex/skills/py-config-bot/SKILL.md"),
+    Path(".codex/skills/py-doc-bot/SKILL.md"),
+    Path(".codex/skills/py-plan-bot/SKILL.md"),
     Path("docs/00-project/ai/agents/agents/ORCHESTRATION.md"),
     Path("docs/00-project/ai/agents/agents/py-audit-bot.md"),
     Path("docs/00-project/ai/agents/agents/py-config-bot.md"),
