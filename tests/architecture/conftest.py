@@ -584,10 +584,16 @@ def _load_subprocess_disk_cache(
         return None
     if payload.get("command") != command:
         return None
+    returncode = int(payload.get("returncode", 1))
+    if returncode != 0:
+        # Do not reuse failing subprocess results across sessions. Drift/update
+        # tests can legitimately transition from fail->pass after regenerating
+        # artifacts, and a stale negative disk cache should not mask that.
+        return None
 
     return subprocess.CompletedProcess(
         args=command,
-        returncode=int(payload.get("returncode", 1)),
+        returncode=returncode,
         stdout=str(payload.get("stdout", "")),
         stderr=str(payload.get("stderr", "")),
     )
@@ -599,6 +605,9 @@ def _store_subprocess_disk_cache(
     command: list[str],
     result: subprocess.CompletedProcess[str],
 ) -> None:
+    if result.returncode != 0:
+        return
+
     temp_path = cache_path.with_name(
         f"{cache_path.name}.{os.getpid()}.{deterministic_uuid_from_callsite('architecture.conftest').hex}.tmp"
     )
