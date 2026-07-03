@@ -6,4 +6,4 @@ to this subtree without registering a suite-wide plugin from a non-top-level
 conftest.
 """
 
-from tests.helpers.metadata_fixtures import *  # noqa: F401,F403
+from tests.helpers.metadata_fixtures import *  # noqa: F403
