@@ -200,10 +200,10 @@ def _restore_runtime_bootstrap_pipeline_after_repo_backed_tests(
         path.write_text(original, encoding="utf-8")
 
 
-pytest_plugins = (
-    "tests.helpers.metadata_fixtures",
-    "tests.integration.chembl.extraction_params_support",
-)
+# Keep root conftest importable even when optional/shared fixture modules drift.
+# `metadata_fixtures` currently depends on storage modules that are absent in this
+# checkout, so loading it eagerly would break unrelated suites at startup.
+pytest_plugins = ("tests.integration.chembl.extraction_params_support",)
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
