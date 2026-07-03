@@ -88,8 +88,7 @@ def test_workflow_run_ensures_observability_backend_before_execution(
         enabled=True,
         port=8081,
         required_probe_paths=(
-            "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list",
-            "/ops/control-plane/checkpoint-freshness?pipeline=chembl_publication",
+            "/ops/control-plane/ready",
         ),
     )
     execute_workflow.assert_called_once()

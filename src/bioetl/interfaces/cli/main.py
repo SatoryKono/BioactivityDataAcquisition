@@ -213,8 +213,14 @@ def cli(ctx: Context) -> None:
 
 
 def main() -> None:
-    """Main entry point."""
-    cli(obj=_build_main_registry())
+    """Main entry point.
+
+    Keep the top-level CLI startup cheap by avoiding eager pipeline-registry
+    construction for commands that do not require it, such as
+    ``quarantine serve`` and help/version surfaces. Commands that need an
+    explicit registry already resolve or build it at their own boundary.
+    """
+    cli(obj=None)
 
 
 if __name__ == "__main__":

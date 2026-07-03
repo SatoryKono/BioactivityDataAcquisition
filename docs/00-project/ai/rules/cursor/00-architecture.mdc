@@ -14,7 +14,7 @@ globs: ["src/**/*.py", "tests/**/*.py"]
 - **application/**: Orchestration, use cases
 - **infrastructure/**: Adapters, concrete implementations
 - **composition/**: DI wiring — ONLY place knowing ALL layers
-- **interfaces/**: CLI, may import from all
+- **interfaces/**: CLI; routes concrete wiring through `composition/`, not `infrastructure/`
 
 ## Import Matrix (MUST follow)
 
@@ -24,15 +24,43 @@ globs: ["src/**/*.py", "tests/**/*.py"]
 | application   | ✅ | ✅ | ❌ | ❌ | ❌ |
 | infrastructure| ✅ | ❌ | ✅ | ❌ | ❌ |
 | composition   | ✅ | ✅ | ✅ | ✅ | ❌ |
-| interfaces    | ✅ | ✅ | ✅ | ✅ | ✅ |
+| interfaces    | ✅ | ✅ | ❌ | ✅ | ✅ |
 
 ## Ports & Protocols
 
-- Define in `domain/ports/` via `typing.Protocol`
-- Import: `from bioetl.domain.ports import ...` (facade, not internal modules)
+- Define external dependency abstractions as `typing.Protocol` in `bioetl.domain.ports`
+- Import port interfaces **only** via facade: `from bioetl.domain.ports import ...` (never `bioetl.domain.ports.*` submodules)
 - `*Port` suffix = cross-layer contract in `domain/ports/`
 - `*Protocol` suffix = layer-internal structural typing (allowed)
+- Domain/application code MUST depend on `*Port` Protocols, not concrete SDK/client classes
 - Critical ports MUST be `@runtime_checkable`: DataSourcePort, FilterableDataSourcePort, HealthCheckPort, StoragePort
+
+## Domain Layer Purity (NO I/O)
+
+Domain modules MUST NOT:
+- Import I/O libraries: `httpx`, `requests`, `aiohttp`, DB clients/ORMs, message brokers, `structlog`, `logging`
+- Import from `infrastructure/`, `adapters/`, or other infra packages
+- Call `open()`, network APIs, DB sessions, or logging directly
+
+Allowed: pure stdlib (`math`, `dataclasses`, `typing`, `datetime` arithmetic) and `*Port` abstractions.
+
+## Composition Wiring
+
+- All DI wiring, factories, and environment-specific service assembly MUST live in `src/bioetl/composition/`
+- Feature modules receive dependencies via constructor/parameters, not direct instantiation
+- Composition modules contain wiring only — no business logic
+- Violation: modules outside `composition/` constructing collaborating components or performing env-specific wiring
+
+## Import-Time Side Effects
+
+Domain and application modules MUST NOT perform side effects at import time:
+- No I/O, logging, env reads that trigger actions, or global state mutation
+- Bootstrap logic belongs in composition/CLI entry points only
+
+## Structured Logging
+
+- Application logging MUST go through `LoggerPort` (keyword arguments for context)
+- Forbidden in domain/application: `print()`, `logging.getLogger()`, `structlog.get_logger()`
 
 ## Required Methods
 

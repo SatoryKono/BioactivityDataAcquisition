@@ -413,7 +413,7 @@ class TestRunCompositeCommand:
             enabled=True,
             port=8081,
             required_probe_paths=(
-                "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list",
+                "/ops/control-plane/ready",
             ),
         )
 

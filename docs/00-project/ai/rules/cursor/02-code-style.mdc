@@ -29,9 +29,22 @@ Exception: Minimal `__init__.py` with only re-exports MAY omit.
 
 # Quality Tools
 
-- `mypy --strict` — type checking
+- `mypy --strict` — MUST exit 0 with no errors on changed files
 - `ruff` — lint/format
 - Coverage: **≥85%** (`--cov-fail-under=85`)
+
+# mypy --strict Compliance
+
+- All new/modified functions: explicit parameter and return type annotations
+- `# type: ignore` only on single lines with short justification; no file-wide ignores
+- New modules MUST be included in mypy config (not excluded via `ignore_errors`)
+- Avoid bare `Any` unless explicitly justified
+
+# Public API Type Hints
+
+All public functions/methods (no `_` prefix, externally consumed) MUST have:
+- Annotated parameters (including `*args`/`**kwargs` when present)
+- Explicit `-> ReturnType`
 
 # Content Hash Algorithm
 

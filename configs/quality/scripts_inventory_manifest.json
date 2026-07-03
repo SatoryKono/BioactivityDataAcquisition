@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-02T18:33:19.789105+00:00",
+  "generated_at": "2026-07-03T06:36:33.489580+00:00",
   "summary": {
-    "total_scripts": 448,
+    "total_scripts": 449,
     "status_counts": {
-      "active": 360,
+      "active": 361,
       "supporting": 88
     },
     "reference_group_coverage": {
@@ -12,7 +12,7 @@
       "build": 2,
       "ci": 62,
       "docs": 156,
-      "scripts": 346,
+      "scripts": 347,
       "skills": 11,
       "tests": 187
     }
@@ -10673,7 +10673,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 48,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"check-cleanup-governance\": \"check_cleanup_governance.py\","
         }
@@ -10712,9 +10712,24 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 46,
+          "line": 47,
           "source_group": "scripts",
           "text": "\"check-actions-runtime-policy\": \"check_github_actions_runtime_policy.py\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/repo/check_reports_quality_ttl.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/__main__.py",
+          "line": 50,
+          "source_group": "scripts",
+          "text": "\"check-reports-quality-ttl\": \"check_reports_quality_ttl.py\","
         }
       ]
     },
@@ -10739,7 +10754,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 49,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"check-root-governance-docs\": \"check_root_governance_docs.py\","
         }
@@ -10760,7 +10775,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 50,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"check-root-review-registry\": \"check_root_hygiene_review_registry.py\","
         }
@@ -10895,7 +10910,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 45,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"check-versions\": \"check_version_consistency.py\","
         }
@@ -10940,7 +10955,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 54,
+          "line": 56,
           "source_group": "scripts",
           "text": "\"cleanup-branch-candidates\": \"cleanup_branch_candidates.sh\","
         },
@@ -10973,7 +10988,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 43,
+          "line": 44,
           "source_group": "scripts",
           "text": "\"sync-wrapper-caller-matrix\": \"generate_scripts_wrapper_caller_matrix.py\","
         }
@@ -11006,7 +11021,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 51,
+          "line": 53,
           "source_group": "scripts",
           "text": "\"preflight-cleanup\": \"preflight_cleanup.sh\","
         },
@@ -11033,7 +11048,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 52,
+          "line": 54,
           "source_group": "scripts",
           "text": "\"split-testing-roadmap\": \"split_testing_roadmap_issue.py\","
         }
@@ -11054,7 +11069,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 53,
+          "line": 55,
           "source_group": "scripts",
           "text": "\"sync-docs-issues\": \"sync_docs_issues.py\","
         }
@@ -11069,7 +11084,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 42,
+          "line": 43,
           "source_group": "scripts",
           "text": "\"sync-inventory\": \"sync_scripts_inventory.py\","
         }

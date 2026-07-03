@@ -9,8 +9,7 @@ alwaysApply: true
 
 ## Precedence
 
-1. Runtime source: `.codex/agents/`; use `.gemini/agents/` only when a tracked
-   Gemini runtime tree exists in the current checkout
+1. Runtime source: `.codex/agents/`; use `.gemini/**` only when a tracked runtime tree is added and verified in the same change
 2. `docs/00-project/RULES.md`
 3. `docs/01-requirements/REQUIREMENTS.md`
 4. Accepted ADRs in `docs/02-architecture/decisions/`
@@ -31,11 +30,13 @@ Follow `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`:
 
 ## Hard Guardrails
 
-- **Never increase technical-debt budgets** — debt may only shrink or stay unchanged
-- **Never edit `.env` files** without explicit per-task user approval
-- **No secrets** in code, docs, configs, tests, or logs
+- **Never increase technical-debt budgets** — debt may only shrink or stay unchanged; no new/widened linter or Sonar exclusions
+- **Never edit `.env` files** without explicit per-task user approval documented in task/PR
+- **No secrets** in code, docs, configs, tests, or logs — scan for high-entropy strings, PEM blocks, credential URLs, token prefixes (`sk_live_`, `AKIA`, `ghp_`)
+- **Do not weaken `.env` protections** — keep `.gitignore` patterns, do not COPY `.env` into Docker/CI artifacts
 - **No silent breaking changes** to CLI/API/schema contracts
 - BioETL stays **local-only by default** (no Docker/Redis unless task requires it)
+- After `src/bioetl/**/*.py` changes: refresh `reports/quality/module-coverage-inventory.json` (`source_tree_sha256` MUST change)
 
 ## Response Language
 

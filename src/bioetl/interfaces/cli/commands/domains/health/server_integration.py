@@ -224,21 +224,31 @@ def _start_health_observability(logger: LoggerPort | None = None) -> None:
         )
 
 
-async def _run_health_server(host: str, port: int) -> None:
+async def _run_health_server(
+    host: str,
+    port: int,
+    *,
+    start_metrics: bool = True,
+) -> None:
     """Start and keep the health server alive until interrupted."""
     if sys.pycache_prefix is None:
         sys.pycache_prefix = str(build_health_server_pycache_prefix())
     deps = get_health_server_dependencies()
-    _start_health_observability()
-    quarantine_service = _get_optional_health_server_quarantine_service()
     server = build_health_server(
         host=host,
         port=port,
         deps=deps,
-        quarantine_service=quarantine_service,
+        quarantine_service=None,
     )
+    quarantine_service = None
     try:
         await server.start()
+        quarantine_service = await asyncio.to_thread(
+            _get_optional_health_server_quarantine_service
+        )
+        server._quarantine_service = quarantine_service
+        if start_metrics:
+            await asyncio.to_thread(_start_health_observability)
         while True:
             await asyncio.sleep(1)
     finally:
@@ -250,10 +260,15 @@ async def _run_health_server(host: str, port: int) -> None:
         click.echo("\nHealth server stopped.")
 
 
-def run_long_lived_health_server_command(host: str, port: int) -> None:
+def run_long_lived_health_server_command(
+    host: str,
+    port: int,
+    *,
+    start_metrics: bool = True,
+) -> None:
     """Start the long-lived health/quarantine explorer backend."""
     _echo_health_server_startup(host, port)
-    coro = _run_health_server(host=host, port=port)
+    coro = _run_health_server(host=host, port=port, start_metrics=start_metrics)
     try:
         asyncio.run(coro)
     except asyncio.CancelledError:

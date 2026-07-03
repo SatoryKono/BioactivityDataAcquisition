@@ -293,17 +293,17 @@ class TestMainFunction:
 
     @patch("bioetl.interfaces.cli.main._build_main_registry")
     @patch("bioetl.interfaces.cli.main.cli")
-    def test_main_calls_cli_with_explicit_registry(
+    def test_main_calls_cli_without_eager_registry(
         self,
         mock_cli,
         mock_build_registry,
     ):
-        """Main should pass an explicit registry object into the Click group."""
+        """Main should defer registry creation until a command truly needs it."""
 
         main()
 
-        mock_build_registry.assert_called_once_with()
-        mock_cli.assert_called_once_with(obj=mock_build_registry.return_value)
+        mock_build_registry.assert_not_called()
+        mock_cli.assert_called_once_with(obj=None)
 
 
 class TestCliVersion:

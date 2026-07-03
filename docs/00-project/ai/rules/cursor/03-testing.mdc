@@ -18,7 +18,9 @@ globs: ["tests/**/*.py"]
 # VCR.py Rules
 
 - Store in: `tests/fixtures/vcr/`
-- **MANDATORY sanitization**: Remove `Authorization`, `X-API-Key`, PII
+- **MANDATORY sanitization** before commit: redact `Authorization`, `X-Api-Key`, `X-Auth-Token`, `Set-Cookie`, `Cookie`, `access_token`, `refresh_token`, `password`, `secret`, `api_key`, `token`, `client_secret`, `private_key`
+- Values MUST be obvious placeholders (`DUMMY_TOKEN`, `FAKE_API_KEY`, `REDACTED`) — never production-like (`sk_live_`, JWT triplets, long hex/base64)
+- Configure `filter_sensitive_data` for each new sensitive header/field
 - CI: `--vcr-record=none` (fail if cassette missing)
 
 # E2E Tests
@@ -40,6 +42,8 @@ globs: ["tests/**/*.py"]
 # Coverage
 
 **Minimum 85%** — enforced in CI via `--cov-fail-under=85`
+- CI MUST fail when coverage drops below 85%
+- New/modified files MUST NOT be significantly below 85% even if global passes
 
 # Quick Verification
 

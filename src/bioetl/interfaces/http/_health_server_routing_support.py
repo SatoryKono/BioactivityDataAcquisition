@@ -111,6 +111,9 @@ async def dispatch_control_plane_request(
         return
 
     try:
+        if path == "/ops/control-plane/ready":
+            await handle_control_plane_ready(host, writer)
+            return
         if path == "/ops/control-plane/filter-options":
             await handle_control_plane_filter_options(host, writer, query)
             return
@@ -129,6 +132,20 @@ async def dispatch_control_plane_request(
         await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
     except ValueError as exc:
         await response_support._send_response(writer, 400, str(exc))
+
+
+async def handle_control_plane_ready(
+    host: _HealthRoutingHost,
+    writer: asyncio.StreamWriter,
+) -> None:
+    """Handle lightweight control-plane readiness probes without catalog scans."""
+    payload = {
+        "run_manifest_port": host._run_manifest_port is not None,
+        "run_ledger_port": host._run_ledger_port is not None,
+        "checkpoint_port": host._checkpoint_port is not None,
+    }
+    status_code = 200 if payload["run_manifest_port"] else 503
+    await host._send_payload_response(writer, status_code, payload)
 
 
 async def handle_control_plane_filter_options(
@@ -153,8 +170,10 @@ async def handle_control_plane_filter_options(
     exact_run_only = _read_truthy_query_param(query, "exact_run_only")
     fallback_value = host._read_optional_param(query, "fallback_value")
 
-    payload = build_selector_filter_options_payload(
-        manifests=host._run_manifest_port.list_all(),
+    manifests = await asyncio.to_thread(host._run_manifest_port.list_all)
+    payload = await asyncio.to_thread(
+        build_selector_filter_options_payload,
+        manifests=manifests,
         ledger_port=host._run_ledger_port,
         dimension=dimension,
         response_shape=response_shape,
@@ -188,8 +207,10 @@ async def handle_control_plane_selector_context(
 ) -> None:
     """Resolve a coherent selector tuple for dashboard selector shells."""
     assert host._run_manifest_port is not None
-    payload = build_selector_context_payload(
-        manifests=host._run_manifest_port.list_all(),
+    manifests = await asyncio.to_thread(host._run_manifest_port.list_all)
+    payload = await asyncio.to_thread(
+        build_selector_context_payload,
+        manifests=manifests,
         ledger_port=host._run_ledger_port,
         selected_workflows=host._read_scope_csv_param(query, "workflow"),
         selected_pipelines=host._read_scope_csv_param(query, "pipeline"),
@@ -207,7 +228,7 @@ async def handle_control_plane_identity_table(
 ) -> None:
     """Handle control-plane-backed identity rows for Overview v3."""
     assert host._run_manifest_port is not None
-    scope = resolve_control_plane_identity_scope(host, query)
+    scope = await asyncio.to_thread(resolve_control_plane_identity_scope, host, query)
     checkpoint_metadata = await _load_identity_checkpoint_metadata(host, scope)
 
     identity_evidence_summary = build_control_plane_identity_evidence_payload(
@@ -250,7 +271,7 @@ async def handle_control_plane_identity_evidence(
 ) -> None:
     """Handle dedicated Control Plane identity evidence rows."""
     assert host._run_manifest_port is not None
-    scope = resolve_control_plane_identity_scope(host, query)
+    scope = await asyncio.to_thread(resolve_control_plane_identity_scope, host, query)
     view = host._read_optional_param(query, "view") or "anchors"
     priority = host._read_optional_param(query, "priority")
     checkpoint_metadata = await _load_identity_checkpoint_metadata(host, scope)
@@ -327,7 +348,7 @@ async def handle_control_plane_checkpoint_freshness(
         )
         return
 
-    scope = resolve_control_plane_identity_scope(host, query)
+    scope = await asyncio.to_thread(resolve_control_plane_identity_scope, host, query)
     target_pipeline = _resolved_scope_pipeline(scope)
 
     (
