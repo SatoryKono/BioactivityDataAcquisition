@@ -458,11 +458,11 @@ hotspot_family_ratchets:
       --max-duplicate-clusters 0
     baseline_artifact: reports/quality/hotspot-duplication-baseline.json
     history_artifact: reports/quality/hotspot-duplication-history.jsonl
-    latest_reviewed_snapshot: '2026-06-01'
+    latest_reviewed_snapshot: '2026-07-03'
     confirming_clean_snapshots_required: 2
     expected_direction: downward
     ratchet_policy: Enforce a hotspot-level zero-duplication budget in CI after the
-      clean 2026-06-01 baseline; retain family-level non-growth budgets for file-growth
+      clean 2026-07-03 baseline; retain family-level non-growth budgets for file-growth
       and fan-in from the reviewed scorecard baselines.
   families:
   - name: application_core
@@ -567,19 +567,21 @@ hotspot_family_ratchets:
       max_internal_fan_in: 4
     metrics:
       duplication_clusters: 0
-      files: 115
-      total_loc: 14626
-      files_ge_250_loc: 15
-      helper_function_ratio: 0.472
-      max_internal_fan_in: 3
+      files: 120
+      total_loc: 14794
+      files_ge_250_loc: 13
+      helper_function_ratio: 0.457
+      max_internal_fan_in: 4
       max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_service
     trend:
-      status: ratcheted_2026-06-26_control_plane_live_budget_relief
-      next_action: 2026-06-26 reduced one control-plane owner file below the
-        250 LOC threshold, lowering the reviewed live snapshot to 115 files,
-        14626 LOC, and 15 files_ge_250_loc while holding max_internal_fan_in
-        at 4 under the fan-in architecture guard; bounded-growth budgets remain
-        flat at 16 files_ge_250_loc and max_internal_fan_in 4.
+      status: ratcheted_2026-07-03_control_plane_forensic_diff_split
+      next_action: 2026-07-03 split forensic diff diagnostics into
+        forensic_diff_diagnostics_support.py, retiring forensic_diff_service.py
+        below the 250 LOC threshold and lowering the reviewed live snapshot to
+        120 files, 14794 LOC, and 13 files_ge_250_loc while holding
+        max_internal_fan_in at 4 under the fan-in architecture guard;
+        bounded-growth budgets remain flat at 16 files_ge_250_loc and
+        max_internal_fan_in 4.
   - name: composition_runtime_builders
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -595,18 +597,19 @@ hotspot_family_ratchets:
       max_internal_fan_in: 5
     metrics:
       duplication_clusters: 0
-      files: 45
-      total_loc: 6367
-      files_ge_250_loc: 1
-      helper_function_ratio: 0.382
+      files: 51
+      total_loc: 6472
+      files_ge_250_loc: 0
+      helper_function_ratio: 0.364
       max_internal_fan_in: 5
-      max_internal_fan_in_module: bioetl.composition.runtime_builders.config_access
+      max_internal_fan_in_module: bioetl.composition.runtime_builders._snapshot_mapping_support
     trend:
-      status: ratcheted_2026-06-26_runtime_builders_large_file_burndown
-      next_action: 2026-06-26 split run-manifest helper seams and retired one
-        runtime-builder large-file warning, reducing the reviewed live baseline
-        to 45 files, 6367 LOC, and 1 file_ge_250_loc while holding
-        max_internal_fan_in at the bounded budget of 5 on config_access.
+      status: ratcheted_2026-07-03_runtime_builder_registry_manifest
+      next_action: 2026-07-03 added registry_manifest.py and moved config loader
+        factories into _config_access_loaders.py, lowering config_access fan-in
+        and retiring the last runtime-builder file_ge_250_loc warning while
+        holding max_internal_fan_in at the bounded budget of 5 on
+        _snapshot_mapping_support.
 oversized_source_module_inventory:
   linked_issue: '#4679'
   split_on_touch: true

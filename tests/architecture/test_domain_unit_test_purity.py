@@ -154,6 +154,38 @@ _ALLOWED_RUNTIME_SEAMS: dict[tuple[str, str], str] = {
         "tests/unit/domain/behavior/test_merged_metadata_explainability.py",
         "subprocess.run",
     ): "cross-process determinism contract validates stable fallback record IDs",
+    (
+        "tests/unit/domain/behavior/test_dq_rule_evaluator_golden.py",
+        "mkdir",
+    ): "DQ rule evaluator golden contract creates isolated fixture output directories",
+    (
+        "tests/unit/domain/behavior/test_dq_rule_evaluator_golden.py",
+        "write_text",
+    ): "DQ rule evaluator golden contract writes isolated tmp_path fixture snapshots",
+    (
+        "tests/unit/domain/behavior/test_dq_rule_evaluator_golden.py",
+        "read_text",
+    ): "DQ rule evaluator golden contract reads canonical checked-in JSON fixtures",
+    (
+        "tests/unit/domain/behavior/test_dq_rule_evaluator_golden.py",
+        "exists",
+    ): "DQ rule evaluator golden contract verifies canonical fixture presence",
+    (
+        "tests/unit/domain/control_plane/test_contract_registry_invariants.py",
+        "mkdir",
+    ): "contract registry golden contract creates isolated fixture output directories",
+    (
+        "tests/unit/domain/control_plane/test_contract_registry_invariants.py",
+        "write_text",
+    ): "contract registry golden contract writes isolated tmp_path JSON fixtures",
+    (
+        "tests/unit/domain/control_plane/test_contract_registry_invariants.py",
+        "exists",
+    ): "contract registry golden contract verifies canonical fixture presence",
+    (
+        "tests/unit/domain/control_plane/test_contract_registry_invariants.py",
+        "read_text",
+    ): "contract registry golden contract reads canonical checked-in JSON fixtures",
 }
 
 _SUBPROCESS_EXCEPTION_PATHS = {

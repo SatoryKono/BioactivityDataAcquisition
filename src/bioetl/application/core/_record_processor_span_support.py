@@ -5,11 +5,13 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, cast
 
+from bioetl.application.core.batch_operation_errors import (
+    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
+)
 from bioetl.application.core.batch_processing_runtime import (
     _run_transform_batch,
 )
 from bioetl.application.core.span_helpers import close_span
-from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
@@ -23,13 +25,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import TracingPort
     from bioetl.domain.types import BatchID
 
-_PROCESSING_SPAN_ERRORS = (
-    BioETLError,
-    OSError,
-    RuntimeError,
-    ValueError,
-    TypeError,
-)
+_PROCESSING_SPAN_ERRORS = SHARED_OPERATION_ERRORS
 
 
 class RecordProcessorSpanExecutor:

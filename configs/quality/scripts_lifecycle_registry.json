@@ -110,6 +110,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side companion for the canonical SonarQube MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
+    "scripts/ai/sync_windsurf_rules.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual mirror-sync utility for Windsurf/Cascade rule surfaces while docs and Makefile still expose the direct script path; promote it into a governed AI-rules workflow or retire it once tracked mirrors no longer need explicit sync execution."
+    },
     "scripts/engineering/qa/py_review_orchestrator.py": {
       "owner": "platform-architecture",
       "decision": "legacy_manual_utility",
@@ -385,6 +391,18 @@
       "decision": "shared_helper_module",
       "review_by": "2026-09-30",
       "next_step": "Retain as the bounded read-only architecture-audit coordinator; keep it non-active while it is a governance helper rather than a general developer bootstrap entrypoint."
+    },
+    "scripts/engineering/repo/cleanup_root_local_clutter.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded reviewed-maintenance cleanup utility for exact root-local clutter candidates from the hygiene registry; keep it non-active unless root cleanup becomes a broader governed operator workflow with a dedicated active surface budget."
+    },
+    "scripts/engineering/repo/publish_tdx_audit_issues.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual TDX-AUDIT issue publishing helper for local issue-template campaigns; keep it non-active unless it becomes a governed repo-operations workflow with a durable active-surface budget."
     },
     "scripts/docs/generate_pipeline_normalization_validation_table.py": {
       "owner": "@bioetl-docs",

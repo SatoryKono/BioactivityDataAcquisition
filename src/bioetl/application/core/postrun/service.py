@@ -16,13 +16,15 @@ from bioetl.application.core.postrun._service_collaborators import (
 from bioetl.application.core.postrun._service_support import (
     PostrunServiceSupportMixin,
 )
+from bioetl.application.core.batch_operation_errors import (
+    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
+)
 from bioetl.application.core.span_helpers import (
     build_pipeline_span_attributes,
     start_current_span,
 )
 from bioetl.application.services.data_quality_service import DataQualityService
 from bioetl.application.services.medallion_types import VacuumResult
-from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.ports import ExecutorMetricsPort
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 
@@ -83,13 +85,7 @@ class PostrunService(PostrunServiceSupportMixin):
     TRACER_NAME = "bioetl.postrun"
     METRIC_POSTRUN_PHASE_EVENTS_TOTAL = "bioetl_postrun_phase_events_total"
     METRIC_POSTRUN_PHASE_DURATION_SECONDS = "bioetl_postrun_phase_duration_seconds"
-    OPERATION_ERRORS = (
-        BioETLError,
-        OSError,
-        RuntimeError,
-        ValueError,
-        TypeError,
-    )
+    OPERATION_ERRORS = SHARED_OPERATION_ERRORS
 
     def __init__(
         self,

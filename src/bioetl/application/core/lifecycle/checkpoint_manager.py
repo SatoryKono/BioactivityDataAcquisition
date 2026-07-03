@@ -9,6 +9,9 @@ from bioetl.application.core.lifecycle.checkpoint_load_validation import (
     resolve_checkpoint_metadata,
     validate_loaded_checkpoint,
 )
+from bioetl.application.core.batch_operation_errors import (
+    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
+)
 from bioetl.application.core.lifecycle.checkpoint_runtime import (
     CheckpointCompatibilityPolicy,
     enrich_metadata_with_execution_identity,
@@ -18,19 +21,12 @@ from bioetl.application.core.lifecycle.checkpoint_saved_at import (
     metadata_with_checkpoint_saved_at,
     set_checkpoint_saved_at,
 )
-from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.medallion import LoadingStrategy
 from bioetl.domain.ports import CheckpointPort, ClockPort, LoggerPort, MetricsPort
 from bioetl.domain.types import JsonDict, RunID
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
-_OPERATION_ERRORS = (
-    BioETLError,
-    OSError,
-    RuntimeError,
-    ValueError,
-    TypeError,
-)
+_OPERATION_ERRORS = SHARED_OPERATION_ERRORS
 
 
 class CheckpointRuntimeService:

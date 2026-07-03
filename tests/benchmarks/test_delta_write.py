@@ -119,6 +119,11 @@ def _create_silver_writer(base_path: Path) -> SilverWriter:
         merge_resilience_policy=replace(
             build_default_silver_merge_policy(),
             execution_timeout_seconds=DELTA_WRITE_TIMEOUT_SECONDS,
+            # Match the reviewed Windows E2E safety path: plain Delta writes can
+            # hang inside the in-process Rust binding on Windows-backed local
+            # filesystems, so benchmarks should use the subprocess seam rather
+            # than measuring event-loop starvation.
+            plain_write_process_isolation=_WINDOWS_PLATFORM,
         ),
     )
 

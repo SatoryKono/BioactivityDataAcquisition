@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from pathlib import Path
 import re
+import subprocess
 
 import pytest
 import yaml
@@ -32,6 +33,32 @@ def _inventory() -> dict[str, object]:
     payload = yaml.safe_load(INVENTORY.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
     return payload
+
+
+def _iter_tracked_reports_quality_paths(pattern: str) -> list[Path]:
+    """Return tracked reports/quality files for one TTL-governed glob pattern."""
+    try:
+        result = subprocess.run(
+            [
+                "git",
+                "ls-files",
+                "--",
+                f"reports/quality/{pattern}",
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            cwd=ROOT,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return []
+
+    return [
+        ROOT / line.strip()
+        for line in result.stdout.splitlines()
+        if line.strip()
+    ]
 
 
 @pytest.mark.architecture
@@ -114,13 +141,13 @@ def test_reports_quality_working_diagnostics_publish_owner_and_ttl() -> None:
 
 @pytest.mark.architecture
 def test_reports_quality_ttl_artifacts_are_not_past_retention_window() -> None:
-    """Live repo state must not retain expired reports/quality TTL artifacts."""
+    """Tracked repo state must not retain expired reports/quality TTL artifacts."""
     now = datetime.now(tz=UTC)
     expired: list[str] = []
     ttl_by_pattern = {"_tmp_*": 7, "pretest_guardrails_*.json": 30}
 
     for pattern, ttl_days in ttl_by_pattern.items():
-        for path in QUALITY_REPORTS_ROOT.glob(pattern):
+        for path in _iter_tracked_reports_quality_paths(pattern):
             if not path.is_file():
                 continue
             timestamp = datetime.fromtimestamp(path.stat().st_mtime, tz=UTC)

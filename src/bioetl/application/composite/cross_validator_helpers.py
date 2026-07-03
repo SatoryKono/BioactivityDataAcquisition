@@ -103,23 +103,27 @@ def _build_enricher_detail(
     n = len(mismatch_count)
     if not field_mismatch_bools:
         return pl.Series("_detail", [None] * n, dtype=pl.String)
+    field_names = list(field_mismatch_bools)
+    field_rows = [field_mismatch_bools[name].to_list() for name in field_names]
+    details: list[str | None] = []
 
-    bool_df = pl.DataFrame(field_mismatch_bools)
-
-    def _row_to_json(row: dict[str, object]) -> str | None:
-        fields = [f for f, v in row.items() if v]
+    for row_values in zip(*field_rows, strict=False):
+        fields = [
+            field_name
+            for field_name, is_mismatch in zip(field_names, row_values, strict=False)
+            if is_mismatch
+        ]
         if not fields:
-            return None
-        return json.dumps(
-            {"enricher": enricher_pipeline, "field_mismatches": fields},
-            ensure_ascii=False,
+            details.append(None)
+            continue
+        details.append(
+            json.dumps(
+                {"enricher": enricher_pipeline, "field_mismatches": fields},
+                ensure_ascii=False,
+            )
         )
 
-    return bool_df.select(
-        pl.struct(bool_df.columns)
-        .map_elements(_row_to_json, return_dtype=pl.String)
-        .alias("_detail")
-    ).to_series()
+    return pl.Series("_detail", details, dtype=pl.String)
 
 
 def _combine_cv_details(
@@ -132,22 +136,17 @@ def _combine_cv_details(
 
     if not enricher_details:
         return pl.Series("_cv_details", [None] * total_records, dtype=pl.String)
+    detail_rows = [series.to_list() for series in enricher_details]
+    merged_details: list[str | None] = []
 
-    cols = {f"_d{i}": s for i, s in enumerate(enricher_details)}
-    detail_df = pl.DataFrame(cols)
-
-    def _merge_row(row: dict[str, object]) -> str | None:
-        parts = [v for v in row.values() if isinstance(v, str) and v]
+    for row_values in zip(*detail_rows, strict=False):
+        parts = [value for value in row_values if isinstance(value, str) and value]
         if not parts:
-            return None
-        items = [json.loads(p) for p in parts]
-        return json.dumps(items, ensure_ascii=False)
+            merged_details.append(None)
+            continue
+        merged_details.append(json.dumps([json.loads(part) for part in parts], ensure_ascii=False))
 
-    return detail_df.select(
-        pl.struct(detail_df.columns)
-        .map_elements(_merge_row, return_dtype=pl.String)
-        .alias("_cv_details")
-    ).to_series()
+    return pl.Series("_cv_details", merged_details, dtype=pl.String)
 
 
 def _both_non_empty_mask(

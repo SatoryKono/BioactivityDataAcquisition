@@ -1,7 +1,11 @@
 """Leaf runtime builders used by composition factories and bootstrap wrappers."""
 
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
+
+from bioetl.composition.lazy_exports import install_lazy_exports
+from bioetl.composition.runtime_builders.registry_manifest import PUBLIC_LAZY_EXPORTS
 
 if TYPE_CHECKING:
     from bioetl.composition.registry_api import PipelineRegistry
@@ -12,8 +16,6 @@ if TYPE_CHECKING:
         RunnerBuilderWiring,
     )
     from bioetl.domain.context import PipelineRunContext
-
-if TYPE_CHECKING:
 
     def build_pipeline_runner(
         ctx: PipelineRunContext,
@@ -27,26 +29,15 @@ if TYPE_CHECKING:
         store_name: str,
     ) -> object: ...
 
-else:
-
-    def build_pipeline_runner(*args: object, **kwargs: object) -> object:
-        """Lazily dispatch to the concrete runner builder without package import cycles."""
-        from bioetl.composition.runtime_builders.runner_builder import (
-            build_pipeline_runner as _build_pipeline_runner_impl,
-        )
-
-        return _build_pipeline_runner_impl(*args, **kwargs)
-
-    def control_plane_root(*args: object, **kwargs: object) -> object:
-        """Lazily dispatch to the concrete control-plane root builder without package import cycles."""
-        from bioetl.composition.runtime_builders._run_manifest_data_roots import (
-            control_plane_root as _control_plane_root_impl,
-        )
-
-        return _control_plane_root_impl(*args, **kwargs)
-
 
 __all__ = [
     "build_pipeline_runner",
     "control_plane_root",
 ]
+
+install_lazy_exports(
+    module_globals=globals(),
+    public_exports=PUBLIC_LAZY_EXPORTS,
+    module_name=__name__,
+    explicit_exports=__all__,
+)

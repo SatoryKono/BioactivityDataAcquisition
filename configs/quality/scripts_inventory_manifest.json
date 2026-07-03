@@ -1,19 +1,18 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-03T08:29:20.335862+00:00",
+  "generated_at": "2026-07-03T08:55:27.667335+00:00",
   "summary": {
     "total_scripts": 452,
     "status_counts": {
-      "active": 363,
-      "orphan": 1,
-      "supporting": 88
+      "active": 361,
+      "supporting": 91
     },
     "reference_group_coverage": {
       "agents": 4,
       "build": 3,
       "ci": 62,
       "docs": 157,
-      "scripts": 348,
+      "scripts": 349,
       "skills": 11,
       "tests": 188
     }
@@ -3092,7 +3091,7 @@
     {
       "path": "scripts/ai/sync_windsurf_rules.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 11,
       "references": [
@@ -3144,7 +3143,11 @@
           "source_group": "docs",
           "text": "uv run python scripts/ai/sync_windsurf_rules.py"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual mirror-sync utility for Windsurf/Cascade rule surfaces while docs and Makefile still expose the direct script path; promote it into a governed AI-rules workflow or retire it once tracked mirrors no longer need explicit sync execution."
     },
     {
       "path": "scripts/ai/vibe/helper/check-env.ps1",
@@ -10725,13 +10728,13 @@
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 83,
+          "line": 85,
           "source_group": "scripts",
           "text": "| `check_cleanup_governance.py`  | Guard active docs/scripts against broad cleanup guidance  |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 50,
+          "line": 51,
           "source_group": "scripts",
           "text": "\"check-cleanup-governance\": \"check_cleanup_governance.py\","
         }
@@ -10770,7 +10773,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 48,
+          "line": 49,
           "source_group": "scripts",
           "text": "\"check-actions-runtime-policy\": \"check_github_actions_runtime_policy.py\","
         }
@@ -10785,7 +10788,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 51,
+          "line": 52,
           "source_group": "scripts",
           "text": "\"check-reports-quality-ttl\": \"check_reports_quality_ttl.py\","
         }
@@ -10812,7 +10815,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 52,
+          "line": 53,
           "source_group": "scripts",
           "text": "\"check-root-governance-docs\": \"check_root_governance_docs.py\","
         }
@@ -10833,7 +10836,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 53,
+          "line": 54,
           "source_group": "scripts",
           "text": "\"check-root-review-registry\": \"check_root_hygiene_review_registry.py\","
         }
@@ -10968,7 +10971,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 47,
+          "line": 48,
           "source_group": "scripts",
           "text": "\"check-versions\": \"check_version_consistency.py\","
         }
@@ -10983,37 +10986,37 @@
       "references": [
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 40,
+          "line": 41,
           "source_group": "scripts",
           "text": "bash scripts/engineering/repo/cleanup_branch_candidates.sh"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 41,
+          "line": 42,
           "source_group": "scripts",
           "text": "bash scripts/engineering/repo/cleanup_branch_candidates.sh --apply"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 42,
+          "line": 43,
           "source_group": "scripts",
           "text": "bash scripts/engineering/repo/cleanup_branch_candidates.sh --apply --with-remote"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 55,
+          "line": 56,
           "source_group": "scripts",
           "text": "`cleanup_branch_candidates.sh` when you want the same workflow through a"
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 85,
+          "line": 87,
           "source_group": "scripts",
           "text": "| `cleanup_branch_candidates.sh` | Dry-run/apply cleanup for the curated branch deletion set |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 58,
+          "line": 60,
           "source_group": "scripts",
           "text": "\"cleanup-branch-candidates\": \"cleanup_branch_candidates.sh\","
         },
@@ -11034,7 +11037,7 @@
     {
       "path": "scripts/engineering/repo/cleanup_root_local_clutter.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 3,
       "references": [
@@ -11046,7 +11049,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 54,
+          "line": 55,
           "source_group": "scripts",
           "text": "\"cleanup-root-local-clutter\": \"cleanup_root_local_clutter.py\","
         },
@@ -11056,7 +11059,11 @@
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"repo\" / \"cleanup_root_local_clutter.py\""
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded reviewed-maintenance cleanup utility for exact root-local clutter candidates from the hygiene registry; keep it non-active unless root cleanup becomes a broader governed operator workflow with a dedicated active surface budget."
     },
     {
       "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
@@ -11073,7 +11080,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 45,
+          "line": 46,
           "source_group": "scripts",
           "text": "\"sync-wrapper-caller-matrix\": \"generate_scripts_wrapper_caller_matrix.py\","
         }
@@ -11100,13 +11107,13 @@
         },
         {
           "path": "scripts/engineering/repo/README.md",
-          "line": 84,
+          "line": 86,
           "source_group": "scripts",
           "text": "| `preflight_cleanup.sh`         | Bounded release-preflight cleanup helper                  |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 55,
+          "line": 56,
           "source_group": "scripts",
           "text": "\"preflight-cleanup\": \"preflight_cleanup.sh\","
         },
@@ -11121,10 +11128,27 @@
     {
       "path": "scripts/engineering/repo/publish_tdx_audit_issues.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/README.md",
+          "line": 30,
+          "source_group": "scripts",
+          "text": "| `publish-tdx-audit-issues` | `publish_tdx_audit_issues.py` | Publish or reopen TDX-AUDIT GitHub issues from local issue templates |"
+        },
+        {
+          "path": "scripts/engineering/repo/__main__.py",
+          "line": 59,
+          "source_group": "scripts",
+          "text": "\"publish-tdx-audit-issues\": \"publish_tdx_audit_issues.py\","
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual TDX-AUDIT issue publishing helper for local issue-template campaigns; keep it non-active unless it becomes a governed repo-operations workflow with a durable active-surface budget."
     },
     {
       "path": "scripts/engineering/repo/split_testing_roadmap_issue.py",
@@ -11141,7 +11165,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 56,
+          "line": 57,
           "source_group": "scripts",
           "text": "\"split-testing-roadmap\": \"split_testing_roadmap_issue.py\","
         }
@@ -11162,7 +11186,7 @@
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 57,
+          "line": 58,
           "source_group": "scripts",
           "text": "\"sync-docs-issues\": \"sync_docs_issues.py\","
         }
@@ -11177,7 +11201,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/__main__.py",
-          "line": 44,
+          "line": 45,
           "source_group": "scripts",
           "text": "\"sync-inventory\": \"sync_scripts_inventory.py\","
         }
