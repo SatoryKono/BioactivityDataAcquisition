@@ -1,0 +1,68 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+  
+    {
+      "name": "BioETL: Debug current test file",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": [
+        "${file}",
+        "-s",
+        "-v",
+        "-o",
+        "cache_dir=${env:TEMP}/bioetl-pytest-cache"
+      ],
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv-win/Scripts/python.exe",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "PYTHONPYCACHEPREFIX": "${env:TEMP}/bioetl-pycache"
+      },
+      "justMyCode": true
+    },
+    {
+      "name": "BioETL: Debug pytest (narrow)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": [
+        "${fileDirname}",
+        "-s",
+        "-v",
+        "--maxfail=1",
+        "-o",
+        "cache_dir=${env:TEMP}/bioetl-pytest-cache"
+      ],
+      "cwd": "${workspaceFolder}",
+      "python": "${workspaceFolder}/.venv-win/Scripts/python.exe",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "PYTHONPYCACHEPREFIX": "${env:TEMP}/bioetl-pycache"
+      },
+      "justMyCode": true
+    },
+    {
+      "name": "BioETL: Codex interactive (WSL)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ai/codex/cursor-launch.ps1 -Mode interactive",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "BioETL: Codex exec full-auto (WSL)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ai/codex/cursor-launch.ps1 -Mode exec \"${input:codexExecPrompt}\"",
+      "cwd": "${workspaceFolder}"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "codexExecPrompt",
+      "type": "promptString",
+      "description": "Prompt for codex exec --full-auto"
+    }
+  ]
+}

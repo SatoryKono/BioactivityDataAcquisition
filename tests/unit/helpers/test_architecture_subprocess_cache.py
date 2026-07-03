@@ -1,0 +1,69 @@
+from __future__ import annotations
+
+import pickle
+import subprocess
+from pathlib import Path
+
+from tests.architecture import conftest as architecture_conftest
+
+
+def _write_cache_payload(path: Path, payload: dict[str, object]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("wb") as handle:
+        pickle.dump(payload, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def test_load_subprocess_disk_cache_ignores_nonzero_returncodes(
+    tmp_path: Path,
+) -> None:
+    cache_path = tmp_path / "subprocess-cache.pkl"
+    command = ["python", "-m", "scripts.schema", "generate-config-matrix", "--check"]
+    _write_cache_payload(
+        cache_path,
+        {
+            "command": command,
+            "returncode": 1,
+            "stdout": "[drift] mismatch: docs\\04-reference\\config_comparison_matrix.csv",
+            "stderr": "",
+        },
+    )
+
+    assert architecture_conftest._load_subprocess_disk_cache(cache_path, command) is None
+
+
+def test_load_subprocess_disk_cache_returns_successful_result(tmp_path: Path) -> None:
+    cache_path = tmp_path / "subprocess-cache.pkl"
+    command = ["python", "-m", "scripts.schema", "generate-config-matrix", "--check"]
+    _write_cache_payload(
+        cache_path,
+        {
+            "command": command,
+            "returncode": 0,
+            "stdout": "[ok] config matrix artifacts are up to date",
+            "stderr": "",
+        },
+    )
+
+    result = architecture_conftest._load_subprocess_disk_cache(cache_path, command)
+
+    assert isinstance(result, subprocess.CompletedProcess)
+    assert result.args == command
+    assert result.returncode == 0
+    assert result.stdout == "[ok] config matrix artifacts are up to date"
+    assert result.stderr == ""
+
+
+def test_store_subprocess_disk_cache_skips_nonzero_returncodes(tmp_path: Path) -> None:
+    cache_path = tmp_path / "subprocess-cache.pkl"
+    architecture_conftest._store_subprocess_disk_cache(
+        cache_path,
+        command=["python", "-m", "scripts.schema", "generate-config-matrix", "--check"],
+        result=subprocess.CompletedProcess(
+            args=["python", "-m", "scripts.schema", "generate-config-matrix", "--check"],
+            returncode=1,
+            stdout="[drift] mismatch",
+            stderr="",
+        ),
+    )
+
+    assert not cache_path.exists()

@@ -17,7 +17,7 @@ from bioetl.interfaces.http.control_plane_identity.types import (
 @dataclass(frozen=True, slots=True)
 class ControlPlaneSourceModel:
     """Legacy-compatible source identity model for HTTP integration callers.
-    
+
     Legacy HTTP contract compatibility - sunset date: 2026-12-31
     """
 

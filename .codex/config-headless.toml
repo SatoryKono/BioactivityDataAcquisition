@@ -1,0 +1,15 @@
+model = "gpt-5.4"
+model_reasoning_effort = "high"
+
+[projects."/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2"]
+trust_level = "trusted"
+
+[projects."/mnt/e/g-drive/05_AI/github/PKPD-model-for-XC7"]
+trust_level = "trusted"
+
+[projects."/"]
+trust_level = "trusted"
+
+[notice.model_migrations]
+"gpt-5.3-codex" = "gpt-5.4"
+"gpt-5.2" = "gpt-5.4"
