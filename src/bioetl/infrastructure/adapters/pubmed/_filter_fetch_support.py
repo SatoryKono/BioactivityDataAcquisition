@@ -12,9 +12,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.infrastructure.adapters.common import ComposableFallbackDecorator
 
-
 _PUBLICATION_ONLY_ERROR = "PubMedAdapter only supports 'publication'"
-
 
 async def empty_async_iterator() -> AsyncIterator[BronzeRecord]:
     """Return an empty async iterator matching BronzeRecord stream contract."""
@@ -33,9 +31,7 @@ class PubMedAdapterFilterFetchHost(Protocol):
         self,
         pmids: list[str],
         limit: int | None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Yield normalized article records from PMID values."""
-        ...
+    ) -> AsyncIterator[BronzeRecord]: ...
 
     def fetch_filtered(
         self,
@@ -43,9 +39,7 @@ class PubMedAdapterFilterFetchHost(Protocol):
         filter_ids: list[str],
         filter_field: str,
         limit: int | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch records by filter IDs."""
-        ...
+    ) -> AsyncIterator[BronzeRecord]: ...
 
     def _fetch_from_filter_ids(
         self,
@@ -54,13 +48,10 @@ class PubMedAdapterFilterFetchHost(Protocol):
         filter_ids: list[str],
         filter_field: str | None,
         limit: int | None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Fetch from explicit filter IDs."""
-        ...
+    ) -> AsyncIterator[BronzeRecord]: ...
 
     @staticmethod
     def _validate_publication_entity(entity_type: str) -> None:
-        """Validate supported entity type."""
         ...
 
     def _resolve_resume_offset(
@@ -68,31 +59,23 @@ class PubMedAdapterFilterFetchHost(Protocol):
         *,
         limit: int | None,
         offset: int | None,
-    ) -> int | None:
-        """Resolve resume offset."""
-        ...
+    ) -> int | None: ...
 
     async def _resolve_pmids_for_fetch(
         self,
         *,
         query: str | None,
         limit: int | None,
-    ) -> list[str]:
-        """Resolve PMIDs for current fetch request."""
-        ...
+    ) -> list[str]: ...
 
     def _apply_resume_offset(
         self,
         *,
         pmids: list[str],
         resume_offset: int,
-    ) -> list[str]:
-        """Apply resume offset to PMID list."""
-        ...
+    ) -> list[str]: ...
 
-    async def _get_pmids(self, search_term: str, max_count: int) -> list[str]:
-        """Resolve PMIDs through Entrez search endpoint."""
-        ...
+    async def _get_pmids(self, search_term: str, max_count: int) -> list[str]: ...
 
 
 async def fetch_filtered_records(
@@ -131,8 +114,7 @@ async def fetch_filtered_with_fallback_records(
         raise ValueError(_PUBLICATION_ONLY_ERROR)
 
     def _primary_records(
-        primary_ids: list[str],
-        request_limit: int | None,
+        primary_ids: list[str], request_limit: int | None
     ) -> AsyncIterator[BronzeRecord]:
         if not primary_ids:
             return empty_async_iterator()

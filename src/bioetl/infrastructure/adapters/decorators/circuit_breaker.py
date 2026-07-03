@@ -15,8 +15,6 @@ Usage:
     from bioetl.infrastructure.adapters.http.circuit_breaker import CircuitBreakerGuard
 
 __all__ = ["CircuitBreakerDataSourceDecorator"]
-
-
     circuit_breaker = CircuitBreakerGuard(provider="chembl", failure_threshold=5)
     decorated = CircuitBreakerDataSourceDecorator(
         data_source=base_adapter,

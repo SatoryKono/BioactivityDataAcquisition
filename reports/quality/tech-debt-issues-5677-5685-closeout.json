@@ -22,17 +22,17 @@
     },
     "full_app_duplicate_clusters": {
       "previous": 75,
-      "current": 57,
+      "current": 49,
       "direction": "reduced"
     },
     "adapter_duplicate_clusters": {
       "previous": 58,
-      "current": 48,
+      "current": 44,
       "direction": "reduced"
     },
     "pipeline_duplicate_clusters": {
       "previous": 16,
-      "current": 9,
+      "current": 5,
       "direction": "reduced"
     },
     "cli_duplicate_clusters": {

@@ -511,11 +511,11 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 48
-      total_loc: 5900
+      total_loc: 5935
       files_ge_250_loc: 0
-      helper_function_ratio: 0.304
+      helper_function_ratio: 0.302
       max_internal_fan_in: 3
-      max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.observability
+      max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.tracing_bootstrap
     trend:
       status: ratcheted_2026-06-26_runtime_bootstrap_files_ge_250_below_budget
       next_action: 2026-06-26 extracts composite bootstrap facade helper bodies
@@ -540,11 +540,11 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 35
-      total_loc: 4657
+      total_loc: 4651
       files_ge_250_loc: 2
       helper_function_ratio: 0.417
       max_internal_fan_in: 3
-      max_internal_fan_in_module: bioetl.composition.factories.pipeline.registry_manifest
+      max_internal_fan_in_module: bioetl.composition.factories.pipeline.factory_method_helpers
     trend:
       status: reduced_2026-06-29_pipeline_factories_files_ge_250_loc_below_reviewed_budget
       next_action: 2026-06-29 refresh confirms the pipeline-factory family holds
