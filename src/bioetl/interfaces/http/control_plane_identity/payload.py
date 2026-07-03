@@ -1,4 +1,8 @@
-"""Control Plane identity evidence payload builder."""
+"""Control Plane identity evidence payload builder.
+
+Legacy HTTP contract compatibility layer - sunset date: 2026-12-31
+This module validates minimal legacy identity payload fields.
+"""
 
 from __future__ import annotations
 

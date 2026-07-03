@@ -46,6 +46,7 @@
       "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
         "docs/00-project/index.md",
         "docs/04-reference/contracts/gold-schemas.md",
@@ -92,6 +93,7 @@
       "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
         "docs/00-project/ai/memory/agent-memory.md",
         "docs/00-project/ai/memory/memory-py-audit-bot.md",
@@ -388,6 +390,7 @@
       "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
         "docs/00-project/ai/agents/agents/py-config-bot.md",
         "docs/00-project/ai/agents/agents/py-debug-bot.md",
@@ -507,6 +510,7 @@
       "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
         "docs/00-project/ai/skills/_references/local/documentation-audit/references/audit-checklist.md",
         "docs/00-project/ai/skills/_references/local/documentation-audit/references/report-template.md",
@@ -556,6 +560,7 @@
         "configs/field_registry/generic_field_ownership.yaml",
         "configs/field_registry/ontology_unit_semantic_roles.yaml",
         "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
         "docs/00-project/glossary.md",
         "docs/00-project/index.md",
@@ -587,6 +592,7 @@
       "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
         "docs/03-guides/metrics-monitoring.md",
         "tests/architecture/test_adr_enforcement_matrix.py"
@@ -698,6 +704,7 @@
       "implementation_owner_paths": [
         "configs/naming_exceptions.yaml",
         "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
         "docs/00-project/governance/02-naming-policy.md",
         "docs/03-guides/silver-schema-testing-guide.md",
@@ -790,6 +797,7 @@
         "configs/field_registry/generic_field_ownership.yaml",
         "configs/field_registry/ontology_unit_semantic_roles.yaml",
         "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
         "docs/00-project/ai/agents/agents/py-config-bot.md",
         "docs/00-project/ai/agents/agents/py-review-orchestrator.md",
@@ -864,6 +872,7 @@
         "configs/composites/publication.yaml",
         "configs/composites/target.yaml",
         "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
         "docs/00-project/ai/agents/agents/py-config-bot.md",
         "docs/00-project/ai/agents/agents/py-review-orchestrator.md",
@@ -1051,6 +1060,7 @@
       "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
         "docs/00-project/ai/agents/agents/py-review-orchestrator.md",
         "docs/04-reference/pipelines/chembl/05-activity-spec.md",
@@ -1327,6 +1337,7 @@
       "implementation_owner_paths": [
         "configs/quality/layered_suffix_policy.yaml",
         "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
         "docs/00-project/governance/02-naming-policy.md",
         "tests/architecture/test_layer_aware_suffix_policy.py"
@@ -1352,6 +1363,7 @@
         "configs/quality/scripts_inventory_manifest.json",
         "configs/quality/test_matrix.yaml",
         "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
         "docs/03-guides/testing.md",
         "tests/architecture/test_test_matrix_lane_policy.py",
@@ -1396,6 +1408,7 @@
       "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
         "docs/00-project/governance/01-documentation-governance-style-guide.md",
         "docs/00-project/governance/06-doc-publication-policy.md",
@@ -1435,6 +1448,7 @@
         "configs/field_registry/generic_field_ownership.yaml",
         "configs/field_registry/ontology_unit_semantic_roles.yaml",
         "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
         "docs/00-project/architecture-index.md",
         "docs/00-project/governance/01-documentation-governance-style-guide.md",
@@ -1467,6 +1481,7 @@
       "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
         "docs/03-guides/run-lifecycle.md",
         "docs/04-reference/domain/control-plane.md",
@@ -1492,6 +1507,7 @@
       "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
         "docs/00-project/ai/agents/agents/ORCHESTRATION.md",
         "docs/00-project/architecture-index.md",
@@ -1527,6 +1543,7 @@
       "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
+        "docs/00-project/NORMATIVE_SOURCES.md",
         "docs/00-project/RULES.md",
         "docs/00-project/glossary.md",
         "docs/00-project/governance/governance-sync-audit-2026-06-25.md",

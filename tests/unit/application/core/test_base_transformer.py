@@ -118,6 +118,24 @@ def test_base_transformer_rejects_partial_named_collaborators() -> None:
 
 
 @pytest.mark.unit
+def test_base_transformer_allows_named_override_with_dependencies() -> None:
+    """Explicit dependency bundles may be overridden without implicit assembly."""
+    from bioetl.domain.ports.noop import NoOpPiiHasher
+
+    pii_hasher = NoOpPiiHasher()
+    dependencies = build_test_transformer_dependencies()
+
+    transformer = ConcreteTransformer(
+        provider="test",
+        pii_hasher=pii_hasher,
+        dependencies=dependencies,
+    )
+
+    assert transformer._pii_hasher is pii_hasher
+    assert transformer._tracer is dependencies.tracer
+
+
+@pytest.mark.unit
 class TestTransformationError:
     """Tests for TransformationError exception."""
 

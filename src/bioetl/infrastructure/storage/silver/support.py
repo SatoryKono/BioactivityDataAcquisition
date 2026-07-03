@@ -15,6 +15,7 @@ from bioetl.infrastructure.storage.delta.schema_ops import (
     drop_nondeterministic_persisted_fields,
 )
 from bioetl.infrastructure.storage.delta.table_ops import (
+    normalize_delta_filesystem_path,
     resolve_delta_table_path,
 )
 
@@ -66,7 +67,7 @@ async def get_table_schema(base_path: str | Path, table_name: str) -> pa.Schema 
     def _sync_get_schema() -> pa.Schema | None:
         try:
             # Load the Delta table
-            dt = DeltaTable(table_path)
+            dt = DeltaTable(normalize_delta_filesystem_path(table_path))
             return delta_schema_to_pyarrow(dt.schema())
         except TableNotFoundError:
             return None

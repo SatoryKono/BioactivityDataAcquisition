@@ -346,7 +346,7 @@ class TestSilverWriterMetadataIntegration:
 
         assert len(mock_metadata_writer.silver_calls) == 1
         table_path, metadata = mock_metadata_writer.silver_calls[0]
-        assert str(table_path) == f"{tmp_path}/test/table"
+        assert Path(table_path) == tmp_path / "test" / "table"
         assert metadata.runtime.run_id == sample_records[0]["_run_id"]
         assert metadata.delta.rows_inserted == 2
         assert metadata.delta.operation == "merge"
@@ -422,7 +422,7 @@ class TestGoldWriterMetadataIntegration:
 
         assert len(mock_metadata_writer.gold_calls) == 1
         table_path, metadata = mock_metadata_writer.gold_calls[0]
-        assert str(table_path) == f"{tmp_path}/test/gold_table"
+        assert Path(table_path) == tmp_path / "test" / "gold_table"
         assert metadata.output.record_count == 2
         assert metadata.pipeline.provider == "test"
         assert metadata.pipeline.entity == "gold_table"

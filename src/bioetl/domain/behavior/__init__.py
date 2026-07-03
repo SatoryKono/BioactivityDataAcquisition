@@ -33,9 +33,7 @@ if TYPE_CHECKING:
         ClassificationStats,
         OrganismClassifier,
     )
-    from bioetl.domain.behavior.phased_migration_support import (
-        PhasedMigrationCoordinator,
-    )
+    # PhasedMigrationCoordinator removed - retired shim (2026-07-03)
     from bioetl.domain.behavior.preflight_governance import PreflightGovernor
     from bioetl.domain.behavior.text_similarity import (
         jaccard_similarity,
@@ -117,10 +115,7 @@ _PUBLIC_EXPORTS = {
         "bioetl.domain.behavior.organism_classification_service",
         "OrganismClassifier",
     ),
-    "PhasedMigrationCoordinator": (
-        "bioetl.domain.behavior.phased_migration_support",
-        "PhasedMigrationCoordinator",
-    ),
+    # PhasedMigrationCoordinator removed - retired shim (2026-07-03)
     "PreflightGovernor": (
         "bioetl.domain.behavior.preflight_governance",
         "PreflightGovernor",

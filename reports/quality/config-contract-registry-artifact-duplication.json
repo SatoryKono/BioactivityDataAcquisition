@@ -40,7 +40,7 @@
     "configs/**/*.json": 9,
     "configs/**/*.yaml": 194,
     "docs/04-reference/contracts/**/*.md": 9,
-    "reports/quality/*contract*.json": 5,
+    "reports/quality/*contract*.json": 6,
     "reports/quality/*contract*.md": 3,
     "reports/quality/*matrix*.json": 3,
     "reports/quality/*matrix*.md": 3,
@@ -49,7 +49,7 @@
     "reports/quality/*registry*.json": 3,
     "tests/fixtures/contracts/**/*.json": 7,
     "tests/fixtures/contracts/**/*.yaml": 1,
-    "tests/fixtures/golden/**/*.json": 23
+    "tests/fixtures/golden/**/*.json": 24
   },
   "policy_scope": "config_contract_registry_artifact_duplication",
   "scan_root": ".",
@@ -58,10 +58,10 @@
     "config": 160,
     "contract": 44,
     "golden": 22,
-    "quality_report": 8,
-    "registry": 22
+    "quality_report": 9,
+    "registry": 23
   },
-  "total_files": 256,
+  "total_files": 258,
   "tracked_extensions": [
     ".csv",
     ".json",

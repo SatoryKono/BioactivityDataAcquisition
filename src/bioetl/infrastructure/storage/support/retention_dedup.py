@@ -15,6 +15,11 @@ from bioetl.domain.normalization import (
 )
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.settings_api import get_settings
+from bioetl.infrastructure.storage.delta.schema_ops import delta_schema_to_pyarrow
+from bioetl.infrastructure.storage.delta_reader_helpers import (
+    FULL_READ_HEAD_LIMIT,
+    try_native_delta_row_count,
+)
 
 DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS = 60.0
 TEST_MODE_DEDUPLICATION_TIMEOUT_SECONDS = 10.0
@@ -74,12 +79,19 @@ def deduplicate_delta_rows(
     from deltalake import write_deltalake
 
     try:
-        table = runtime_delta_table(table_path).to_pyarrow_table()
+        table_handle = runtime_delta_table(table_path)
     except DeltaTableNotFoundError as exc:
         raise TableNotFoundError(table_path) from exc
+
+    dataset = table_handle.to_pyarrow_dataset()
+    scanner = dataset.scanner()
+    row_count = try_native_delta_row_count(table_handle)
+    table = scanner.head(row_count if row_count is not None else FULL_READ_HEAD_LIMIT)
     total_before = table.num_rows
     if total_before == 0:
         return 0
+
+    table_schema = delta_schema_to_pyarrow(table_handle.schema())
 
     ranked_rows = sorted(
         (
@@ -111,7 +123,7 @@ def deduplicate_delta_rows(
         try:
             write_deltalake(
                 table_or_uri=table_path,
-                data=pa.Table.from_pylist(deduped_rows, schema=table.schema),
+                data=pa.Table.from_pylist(deduped_rows, schema=table_schema),
                 mode="overwrite",
                 schema_mode="overwrite",
             )

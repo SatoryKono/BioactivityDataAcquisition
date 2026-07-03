@@ -216,7 +216,10 @@ class ProviderHealthMonitor:
     def get_adjusted_config(self, provider: str) -> HealthAdjustedConfig:
         """Get adjusted client configuration based on health status.
 
-        Per RULES.md §3.5: HEALTHY (timeout ×1, batch_size ÷1), DEGRADED (timeout ×2, batch_size ÷2), UNHEALTHY (timeout ×4, batch_size ÷4).
+        Per RULES.md §3.5:
+        HEALTHY (timeout ×1, batch_size ÷1),
+        DEGRADED (timeout ×2, batch_size ÷2),
+        UNHEALTHY (timeout ×4, batch_size ÷4).
 
         Args:
             provider: Provider name.

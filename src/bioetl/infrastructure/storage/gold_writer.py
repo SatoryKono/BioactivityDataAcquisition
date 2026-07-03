@@ -14,6 +14,9 @@ from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
     coerce_null_types_for_delta,  # noqa: F401
 )
+from bioetl.infrastructure.storage.delta.table_ops import (
+    normalize_delta_filesystem_path,
+)
 from bioetl.infrastructure.storage.gold.io_mixin import GoldWriterIOMixin
 from bioetl.infrastructure.storage.gold.metadata_mixin import (
     GoldWriterMetadataMixin,
@@ -62,14 +65,27 @@ def DeltaTable(*args: object, **kwargs: object) -> object:
     """Lazy compatibility seam for tests and Delta write helpers."""
     from deltalake import DeltaTable as _DeltaTable
 
-    return _DeltaTable(*args, **kwargs)
+    normalized_args = list(args)
+    if normalized_args and isinstance(normalized_args[0], str | Path):
+        normalized_args[0] = normalize_delta_filesystem_path(normalized_args[0])
+    return _DeltaTable(*normalized_args, **kwargs)
 
 
 def write_deltalake(*args: object, **kwargs: object) -> object:
     """Lazy compatibility seam for tests and Delta write helpers."""
     from deltalake import write_deltalake as _write_deltalake
 
-    return _write_deltalake(*args, **kwargs)
+    normalized_args = list(args)
+    normalized_kwargs = dict(kwargs)
+    if normalized_args and isinstance(normalized_args[0], str | Path):
+        normalized_args[0] = normalize_delta_filesystem_path(normalized_args[0])
+    if "table_or_uri" in normalized_kwargs and isinstance(
+        normalized_kwargs["table_or_uri"], str | Path
+    ):
+        normalized_kwargs["table_or_uri"] = normalize_delta_filesystem_path(
+            normalized_kwargs["table_or_uri"]
+        )
+    return _write_deltalake(*normalized_args, **normalized_kwargs)
 
 
 GOLD_WRITE_RETRY_ERRORS = (

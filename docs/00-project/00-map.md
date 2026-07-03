@@ -13,7 +13,7 @@ ______________________________________________________________________
 
 # BioETL Project Navigator
 
-*Synced with RULES.md v6.1.3 | Last updated: 2026-06-03*
+*Synced with RULES.md v6.1.4 | Last updated: 2026-07-03*
 
 > **Documentation Update:** 2026-06-03
 >
@@ -37,7 +37,7 @@ ______________________________________________________________________
 
 | Need to...                         | Go to                                                                                  |
 | ---------------------------------- | -------------------------------------------------------------------------------------- |
-| Understand the rules               | [RULES.md](RULES.md)                                                                   |
+| Understand the rules               | [NORMATIVE_SOURCES.md](NORMATIVE_SOURCES.md), [RULES.md](RULES.md)                   |
 | Look up terminology                | [glossary.md](glossary.md)                                                             |
 | Find tool commands                 | [TOOLS.md](TOOLS.md)                                                                   |
 | Verify docs quality gates          | [docs-verification.md](../03-guides/docs-verification.md)                              |
@@ -109,7 +109,8 @@ docs/
 ├── 00-project/                  # Project rules & governance
 │   ├── 00-map.md                # This file (Project Navigator)
 │   ├── index.md                 # Welcome page
-│   ├── RULES.md                 # Canonical rules document (v6.1.3)
+│   ├── RULES.md                 # Canonical rules document (see file header Version)
+│   ├── NORMATIVE_SOURCES.md     # Normative stack index for AI/contributors
 │   ├── glossary.md              # Ubiquitous Language terminology
 │   ├── TOOLS.md                 # Active tools hub & unified entry points
 │   ├── rules-summary.md         # TL;DR of RULES.md

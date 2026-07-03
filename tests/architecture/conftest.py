@@ -16,6 +16,7 @@ import os
 from pathlib import Path
 import pickle
 import subprocess
+import sys
 import tempfile
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
@@ -616,13 +617,24 @@ def _run_cached_subprocess(
     if cached is not None:
         return cached
 
+    effective_timeout = timeout
+    if (
+        effective_timeout is not None
+        and sys.platform.startswith("win")
+        and os.environ.get("PYCHARM_HOSTED") == "1"
+        and effective_timeout < 180
+    ):
+        # Repo-backed scanner subprocesses can stall unpredictably on mixed
+        # Windows cloud-synced checkouts when launched from the PyCharm runner.
+        effective_timeout = 180
+
     result = subprocess.run(
         command,
         capture_output=True,
         text=True,
         encoding="utf-8",
         errors="replace",
-        timeout=timeout,
+        timeout=effective_timeout,
         cwd=cwd,
         check=False,
     )

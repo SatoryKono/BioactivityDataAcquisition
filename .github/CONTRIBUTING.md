@@ -25,6 +25,7 @@ Before contributing, read these documents:
 
 || Document                                                           | Purpose                           |
 || ------------------------------------------------------------------ | --------------------------------- |
+|| [docs/00-project/NORMATIVE_SOURCES.md](../docs/00-project/NORMATIVE_SOURCES.md) | Normative stack index (start here) |
 || [docs/00-project/RULES.md](../docs/00-project/RULES.md)            | Project constitution (MUST read)  |
 || [docs/01-requirements/REQUIREMENTS.md](../docs/01-requirements/REQUIREMENTS.md) | Testable requirements (MUST read) |
 || [AGENTS.md](../AGENTS.md)                                          | Development workflow and patterns |

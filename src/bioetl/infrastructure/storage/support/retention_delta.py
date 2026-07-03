@@ -8,17 +8,25 @@ from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 from bioetl.domain.exceptions import TableNotFoundError
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.storage.delta.schema_ops import delta_schema_to_pyarrow
+from bioetl.infrastructure.storage.delta.table_ops import (
+    normalize_delta_filesystem_path,
+    resolve_delta_table_path,
+)
 
 
 def get_table_path(base_path: str, table_name: str) -> str:
     """Get the filesystem path for a table."""
-    return f"{base_path}/{table_name.replace('.', '/')}"
+    return resolve_delta_table_path(
+        base_path=base_path,
+        table_name=table_name,
+        flat_structure=False,
+    )
 
 
 def load_delta_table(table_path: str) -> DeltaTable:
     """Load a Delta table or translate the not-found error to the domain type."""
     try:
-        return DeltaTable(table_path)
+        return DeltaTable(normalize_delta_filesystem_path(table_path))
     except DeltaTableNotFoundError as exc:
         raise TableNotFoundError(table_path) from exc
 

@@ -13,6 +13,9 @@ from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 from bioetl.domain.exceptions import TableNotFoundError
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.config.settings_api import get_settings
+from bioetl.infrastructure.storage.delta.table_ops import (
+    normalize_delta_filesystem_path,
+)
 from bioetl.infrastructure.storage.support.retention_dedup import (
     DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS,
     content_identity,
@@ -54,7 +57,7 @@ def _resolve_deduplication_timeout_seconds() -> float:
 def _load_delta_table(table_path: str) -> DeltaTable:
     """Load a Delta table through the retention module patch seam."""
     try:
-        return DeltaTable(table_path)
+        return DeltaTable(normalize_delta_filesystem_path(table_path))
     except DeltaTableNotFoundError as exc:
         raise TableNotFoundError(table_path) from exc
 

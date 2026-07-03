@@ -12,6 +12,7 @@ For AI runtime behavior and workflow conflicts, use this priority:
    - a matching tracked `.gemini/**` runtime surface only when that tree exists
      in the current checkout and is verified in the same change
 1. runtime profiles and skills in the matching runtime tree
+1. `docs/00-project/NORMATIVE_SOURCES.md` (normative stack index)
 1. `docs/00-project/RULES.md`
 1. `docs/01-requirements/REQUIREMENTS.md`
 1. accepted ADRs in `docs/02-architecture/decisions/`
@@ -24,6 +25,7 @@ Docs mirrors MUST NOT redefine runtime behavior on their own.
 
 Before planning, auditing, or editing:
 
+1. Read `docs/00-project/NORMATIVE_SOURCES.md`.
 1. Read `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`.
 1. Read `docs/00-project/ai/memory/agent-memory.md`.
 1. Read the relevant `docs/00-project/ai/memory/memory-py-*.md` file when a
@@ -88,6 +90,7 @@ Minimum expectation:
 
 ## Related Files
 
+- `docs/00-project/NORMATIVE_SOURCES.md`
 - `docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md`
 - `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`

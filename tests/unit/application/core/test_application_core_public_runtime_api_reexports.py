@@ -62,9 +62,5 @@ def test_field_transforms_package_exposes_canonical_transform_primitives() -> No
         compat_module.FieldSpec
         is importlib.import_module("bioetl.application.core.field_specs").FieldSpec
     )
-    assert (
-        compat_module.LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE
-        == importlib.import_module(
-            "bioetl.application.core.publication_aliases"
-        ).LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE
-    )
+    # publication_aliases.py removed as sunset date (2026-03-29) passed
+    # LEGACY_PUBLICATION_ALIASES_CUTOFF_DATE check removed

@@ -43,6 +43,7 @@ ______________________________________________________________________
    `.gemini/skills/**` surfaces, it MUST update this ownership contract,
    `AGENTS.md`, and affected mirrors in the same change set.
 1. Canonical project rules still come from:
+   - `docs/00-project/NORMATIVE_SOURCES.md`
    - `docs/00-project/RULES.md`
    - `docs/01-requirements/REQUIREMENTS.md`
    - accepted ADRs in `docs/02-architecture/decisions/`

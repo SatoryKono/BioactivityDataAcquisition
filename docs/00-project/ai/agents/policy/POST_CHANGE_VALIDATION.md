@@ -7,6 +7,16 @@
 Define the minimum validation protocol after AI-assisted changes to code,
 configs, docs, contracts, prompts, diagrams, and runtime instruction surfaces.
 
+## Canonical Sources
+
+Verify changes against the current normative stack:
+
+- `docs/00-project/NORMATIVE_SOURCES.md`
+- `docs/00-project/RULES.md`
+- `docs/01-requirements/REQUIREMENTS.md`
+- accepted ADRs in `docs/02-architecture/decisions/`
+- `AGENTS.md`
+
 ## Applies To
 
 - production code

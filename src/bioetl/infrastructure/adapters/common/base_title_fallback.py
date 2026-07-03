@@ -1,13 +1,13 @@
 """Base fallback handler for title-based DOI resolution.
 
 Provides common utilities for fallback search across different providers.
-Supports three-phase fallback strategy: Phase 1 (Batch ID lookup), Phase 2 (Title fallback for unresolved IDs), Phase 3 (Title-only lookup).
+Supports a three-phase fallback strategy:
+- Phase 1: batch ID lookup
+- Phase 2: title fallback for unresolved IDs
+- Phase 3: title-only lookup
 """
 
 from __future__ import annotations
-
-__all__ = ["BaseTitleFallbackHandler"]
-
 
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
@@ -25,6 +25,8 @@ from bioetl.infrastructure.adapters.common._title_fallback_flow import (
     truncate_title,
 )
 
+__all__ = ["BaseTitleFallbackHandler"]
+
 
 def _event_property(name: str) -> property:
     """Build provider-scoped event-name property."""
@@ -36,10 +38,16 @@ def _event_property(name: str) -> property:
 
 
 class BaseTitleFallbackHandler(ABC):
-    """Base class for title-based fallback search handlers with provider-specific search logic.
+    """Base class for provider-specific title fallback search handlers.
 
-    Three-Phase Fallback Strategy: Phase 1 (Batch ID lookup by adapter), Phase 2 (Title fallback for unresolved IDs), Phase 3 (Title-only for empty IDs).
-    Event Naming: When provider_prefix is set, events are auto-generated as {provider}_title_fallback_attempt, {provider}_title_only_success, etc.
+    Fallback phases:
+    - batch ID lookup by adapter
+    - title fallback for unresolved IDs
+    - title-only lookup for empty IDs
+
+    When ``provider_prefix`` is set, event names are auto-generated as
+    ``{provider}_title_fallback_attempt``, ``{provider}_title_only_success``,
+    and similar variants.
     """
 
     def __init__(

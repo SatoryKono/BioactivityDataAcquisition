@@ -2,7 +2,7 @@
 
 *Статус: internal-published (Internal / Extended)*
 
-*Синхронизировано с RULES.md v6.1.1 (2026-04-06) | Дедублировано: ссылки на RULES.md*
+*Синхронизировано с RULES.md (read current `Version:` header) | Дедублировано: ссылки на RULES.md*
 
 > **Runtime-specific note:** если задача исполняется в Claude Code, считай
 > runtime-specific orchestration source outside the Codex SSOT.
@@ -123,7 +123,7 @@ ______________________________________________________________________
 
 **Перед любой задачей:**
 
-1. Прочти `docs/00-project/RULES.md` — это Конституция проекта.
+1. Прочти `docs/00-project/NORMATIVE_SOURCES.md` и `docs/00-project/RULES.md` — это Конституция проекта.
 1. Прочти `MEMORY_USAGE.md` — это policy для memory surfaces.
 1. Для write-capable work следуй `../policy/POST_CHANGE_VALIDATION.md`.
 1. Проверь `guides/CLAUDE.md` — справочник для Claude Code.

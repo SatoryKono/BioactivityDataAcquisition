@@ -257,6 +257,11 @@ entries:
     classification: budget_closeout_ratchet
     live_guard: "debt issue batch #5861-#5864 remains aligned with live DQ determinism golden coverage, domain contract/ledger invariants, control-plane hotspot ratchet, and runtime-builder registry evidence without budget growth."
     rationale: Keeps the determinism and hotspot follow-up closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issues_5866_5872_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue batch #5866-#5872 remains aligned with live full-app duplication ratchets, adapter/pipeline burn-down, replay-sensitive coverage floors, zero-reference script governance, canonical lazy-export owners, and composite bootstrap registry evidence without budget growth."
+    rationale: Keeps the TDX audit Wave 3 closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
   - path: tests/architecture/test_tech_debt_issues_5847_5852_closeout.py
     disposition: retain_active
     classification: budget_closeout_ratchet

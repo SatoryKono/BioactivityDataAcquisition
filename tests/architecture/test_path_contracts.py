@@ -67,7 +67,7 @@ def test_bronze_path_contract() -> None:
 
 
 def test_silver_path_contract() -> None:
-    """Silver Delta tables MUST resolve to provider/entity directories."""
+    """Silver Delta tables MUST expose stable provider/entity contract paths."""
     writer = SilverWriter(base_path="data/output/silver", logger=Mock())
     path = writer._resolve_table_path("chembl.activity")
     normalized = path.replace("\\", "/")
@@ -75,7 +75,7 @@ def test_silver_path_contract() -> None:
 
 
 def test_gold_path_contract() -> None:
-    """Gold Delta tables MUST resolve to provider/entity directories."""
+    """Gold Delta tables MUST expose stable provider/entity contract paths."""
     writer = GoldWriter(base_path="data/output/gold", logger=Mock())
     path = writer._resolve_table_path("chembl.activity")
     normalized = path.replace("\\", "/")

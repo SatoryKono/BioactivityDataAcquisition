@@ -95,8 +95,8 @@
     },
     "application_core_total_loc": {
       "opening": 22360,
-      "current": 22319,
-      "max": 22319
+      "current": 22283,
+      "max": 22283
     },
     "application_core_files_ge_250_loc": {
       "opening": 7,

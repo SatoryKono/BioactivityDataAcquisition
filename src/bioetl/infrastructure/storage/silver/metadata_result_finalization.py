@@ -9,6 +9,9 @@ from datetime import timedelta
 from deltalake import DeltaTable
 
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
+from bioetl.infrastructure.storage.delta.table_ops import (
+    normalize_delta_filesystem_path,
+)
 from bioetl.infrastructure.storage.silver.finalization_models import (
     _coerce_silver_write_finalization_preparation_request,
     _SilverWriteFinalizationPreparationRequest,
@@ -39,7 +42,7 @@ def _build_silver_write_result(
 
 def _read_delta_version(table_path: str) -> int:
     """Read the current Delta table version synchronously."""
-    return DeltaTable(table_path).version()
+    return DeltaTable(normalize_delta_filesystem_path(table_path)).version()
 
 
 async def _prepare_silver_write_finalization_context(

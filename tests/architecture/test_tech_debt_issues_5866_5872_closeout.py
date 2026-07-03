@@ -163,7 +163,10 @@ def test_issue_5871_canonical_import_owners_exist() -> None:
         encoding="utf-8"
     )
 
-    assert "runtime_builders._run_manifest_data_roots import control_plane_root" in control_plane_store
+    assert (
+        "bioetl.composition.runtime_builders import control_plane_root"
+        in control_plane_store
+    )
     assert "runtime_builders.runner_builder_wiring import" in pipeline
     assert (
         ROOT / "src/bioetl/composition/bootstrap/runtime/pipeline_bootstrap_phases.py"

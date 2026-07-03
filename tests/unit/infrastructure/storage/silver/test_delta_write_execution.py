@@ -9,6 +9,7 @@ import pyarrow as pa
 import pytest
 
 from bioetl.domain.medallion import SilverWriteMode
+from bioetl.infrastructure.storage.delta.table_ops import normalize_delta_filesystem_path
 from bioetl.infrastructure.storage.silver import delta_write_execution as subject
 from bioetl.infrastructure.storage.silver.delta_request_models import (
     _DeltaWriteRequest,
@@ -103,8 +104,9 @@ async def test_write_plain_delta_request_can_use_process_isolation(
 
     assert len(calls) == 1
     kwargs, arrow_data, timeout_seconds = calls[0]
-    assert kwargs["table_or_uri"] == request.table_path
+    assert kwargs["table_or_uri"] == normalize_delta_filesystem_path(request.table_path)
     assert kwargs["mode"] == "append"
+    assert "partition_by" not in kwargs
     assert arrow_data is request.arrow_data
     assert timeout_seconds == pytest.approx(3.0)
 

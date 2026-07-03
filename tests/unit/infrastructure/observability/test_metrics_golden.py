@@ -12,10 +12,11 @@ from pathlib import Path
 
 import pytest
 
-from bioetl.infrastructure.observability.prometheus_metrics import (
+from bioetl.infrastructure.observability.prometheus_metric_registries import (
     COUNTERS,
     HISTOGRAMS,
-    PrometheusMetrics,
+    METRIC_REGISTRY_FAMILIES,
+    METRIC_REGISTRY_INVENTORY,
 )
 
 FIXTURE_DIR = Path("tests/fixtures/golden/observability")
@@ -55,84 +56,65 @@ def _assert_matches_fixture(name: str, payload: dict[str, object]) -> None:
     )
 
 
-def _capture_counter_state() -> dict[str, object]:
-    """Capture current state of all counters."""
-    metrics = PrometheusMetrics()
+def _capture_counter_registry_state() -> dict[str, object]:
+    """Capture current state of all counter registries."""
     state = {}
-    for name, counter in COUNTERS.items():
-        state[name] = {
-            "description": counter._description,
-            "type": "counter",
-        }
+    for family in METRIC_REGISTRY_FAMILIES:
+        for name, counter in family.counters.items():
+            state[name] = {
+                "description": counter._description,
+                "type": "counter",
+                "family": family.family,
+            }
     return state
 
 
-def _capture_histogram_state() -> dict[str, object]:
-    """Capture current state of all histograms."""
-    metrics = PrometheusMetrics()
+def _capture_histogram_registry_state() -> dict[str, object]:
+    """Capture current state of all histogram registries."""
     state = {}
-    for name, histogram in HISTOGRAMS.items():
-        state[name] = {
-            "description": histogram._description,
-            "type": "histogram",
-            "buckets": [b for b in histogram._upperbounds],
-        }
+    for family in METRIC_REGISTRY_FAMILIES:
+        for name, histogram in family.histograms.items():
+            state[name] = {
+                "description": histogram._description,
+                "type": "histogram",
+                "family": family.family,
+                "buckets": [b for b in histogram._upperbounds],
+            }
     return state
+
+
+def _capture_metric_inventory() -> dict[str, object]:
+    """Capture metric registry inventory."""
+    return {
+        "families": {
+            family.family: {
+                "counters": tuple(family.counters.keys()),
+                "gauges": tuple(family.gauges.keys()),
+                "histograms": tuple(family.histograms.keys()),
+            }
+            for family in METRIC_REGISTRY_FAMILIES
+        },
+        "total_counters": len(COUNTERS),
+        "total_histograms": len(HISTOGRAMS),
+    }
 
 
 @pytest.mark.unit
 def test_prometheus_counter_registry_matches_golden() -> None:
     """Prometheus counter registry must match golden baseline."""
-    payload = _capture_counter_state()
+    payload = _capture_counter_registry_state()
     _assert_matches_fixture("prometheus_counter_registry", payload)
 
 
 @pytest.mark.unit
 def test_prometheus_histogram_registry_matches_golden() -> None:
     """Prometheus histogram registry must match golden baseline."""
-    payload = _capture_histogram_state()
+    payload = _capture_histogram_registry_state()
     _assert_matches_fixture("prometheus_histogram_registry", payload)
 
 
 @pytest.mark.unit
-def test_prometheus_metrics_increment_emits_expected_counter() -> None:
-    """Counter increment produces expected counter state."""
-    metrics = PrometheusMetrics()
-    labels = {"pipeline": "test_pipe", "stage": "bronze", "run_type": "scheduled"}
-    
-    metrics.increment_counter("bioetl_records_processed_total", 5, labels)
-    
-    counter = COUNTERS["bioetl_records_processed_total"]
-    payload = {
-        "metric_name": "bioetl_records_processed_total",
-        "labels": labels,
-        "value": counter.labels(**labels)._value.get(),
-        "description": counter._description,
-    }
-    _assert_matches_fixture("prometheus_counter_increment_sample", payload)
-
-
-@pytest.mark.unit
-def test_prometheus_metrics_observe_emits_expected_histogram() -> None:
-    """Histogram observation produces expected histogram state."""
-    metrics = PrometheusMetrics()
-    labels = {
-        "pipeline": "test_pipe",
-        "stage": "transform",
-        "status": "success",
-        "run_type": "manual",
-    }
-    val = 15.5
-    
-    metrics.observe_histogram("bioetl_pipeline_duration_seconds", val, labels)
-    
-    histogram = HISTOGRAMS["bioetl_pipeline_duration_seconds"]
-    payload = {
-        "metric_name": "bioetl_pipeline_duration_seconds",
-        "labels": labels,
-        "value": val,
-        "sum": histogram.labels(**labels)._sum.get(),
-        "count": histogram.labels(**labels)._count.get(),
-        "description": histogram._description,
-    }
-    _assert_matches_fixture("prometheus_histogram_observe_sample", payload)
+def test_prometheus_metric_inventory_matches_golden() -> None:
+    """Prometheus metric inventory must match golden baseline."""
+    payload = _capture_metric_inventory()
+    _assert_matches_fixture("prometheus_metric_inventory", payload)

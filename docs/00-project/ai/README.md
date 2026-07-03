@@ -49,6 +49,7 @@ See [AI Runtime Mirror Ownership](agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
 1. runtime source в `.codex/agents/`, `.codex/skills/` и related Codex runtime
    surfaces
 1. canonical governance docs:
+   - `docs/00-project/NORMATIVE_SOURCES.md`
    - `docs/00-project/RULES.md`
    - `docs/01-requirements/REQUIREMENTS.md`
    - accepted ADRs in `docs/02-architecture/decisions/`

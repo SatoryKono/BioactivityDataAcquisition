@@ -10,6 +10,7 @@ import pytest
 from deltalake import write_deltalake
 from deltalake.exceptions import CommitFailedError
 
+import bioetl.infrastructure.storage.support.retention_dedup as retention_module
 from bioetl.domain.exceptions import StorageError
 from bioetl.domain.normalization import (
     normalize_hash_identity_record,
@@ -279,6 +280,93 @@ async def test_deduplicate_prefers_content_hash_over_ingestion_timestamp(
     ]
 
 
+def test_deduplicate_full_read_uses_dataset_scanner_over_native_table_scan(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Dedup full reads should avoid native to_pyarrow_table scan paths."""
+    import deltalake
+
+    expected = pa.table(
+        {
+            "activity_id": ["1", "1", "2"],
+            "value": [10.0, 15.0, 20.0],
+            "_ingestion_ts": [
+                "2024-01-01T00:00:00Z",
+                "2024-01-02T00:00:00Z",
+                "2024-01-01T00:00:00Z",
+            ],
+        }
+    )
+    captured: dict[str, object] = {}
+
+    class _FakeScanner:
+        def head(self, limit: int) -> pa.Table:
+            captured["limit"] = limit
+            return expected
+
+    class _FakeDataset:
+        def scanner(self) -> _FakeScanner:
+            captured["scanner_used"] = True
+            return _FakeScanner()
+
+    class _FakeSchema:
+        def to_arrow(self) -> pa.Schema:
+            return expected.schema
+
+    class _FakeDeltaTable:
+        def __init__(self, table_uri: str) -> None:
+            captured["table_uri"] = table_uri
+
+        def count(self) -> int:
+            return expected.num_rows
+
+        def schema(self) -> _FakeSchema:
+            return _FakeSchema()
+
+        def to_pyarrow_dataset(self) -> _FakeDataset:
+            return _FakeDataset()
+
+        def to_pyarrow_table(self, columns: list[str] | None = None) -> pa.Table:
+            raise AssertionError(f"unexpected native full-table read: columns={columns}")
+
+    original_delta_table = deltalake.DeltaTable
+    original_write = deltalake.write_deltalake
+
+    def _capture_write(*args: object, **kwargs: object) -> None:
+        captured["write_kwargs"] = kwargs
+
+    monkeypatch.setattr(deltalake, "DeltaTable", _FakeDeltaTable)
+    monkeypatch.setattr(deltalake, "write_deltalake", _capture_write)
+    try:
+        removed = retention_module.deduplicate_delta_rows(
+            "/tmp/fake-table",
+            ["activity_id"],
+        )
+    finally:
+        monkeypatch.setattr(deltalake, "DeltaTable", original_delta_table)
+        monkeypatch.setattr(deltalake, "write_deltalake", original_write)
+
+    assert removed == 1
+    assert captured["scanner_used"] is True
+    assert captured["limit"] == expected.num_rows
+    written = captured["write_kwargs"]
+    assert isinstance(written, dict)
+    output_table = written["data"]
+    assert isinstance(output_table, pa.Table)
+    assert output_table.to_pylist() == [
+        {
+            "activity_id": "1",
+            "value": 10.0,
+            "_ingestion_ts": "2024-01-01T00:00:00Z",
+        },
+        {
+            "activity_id": "2",
+            "value": 20.0,
+            "_ingestion_ts": "2024-01-01T00:00:00Z",
+        },
+    ]
+
+
 def test_content_identity_fallback_uses_canonical_hash_identity_contract() -> None:
     """Retention fallback must reuse the canonical hash-identity seam."""
     row = {
@@ -340,11 +428,8 @@ async def test_deduplicate_times_out_for_stuck_executor(tmp_delta_dir: Path) -> 
     """Dedup must fail fast when background executor work stalls."""
     import deltalake
 
-    class _StuckDeltaTable:
-        def __init__(self, table_path: str) -> None:
-            self._table_path = table_path
-
-        def to_pyarrow_table(self) -> pa.Table:
+    class _StuckScanner:
+        def head(self, limit: int) -> pa.Table:
             time.sleep(0.1)
             return pa.table(
                 {
@@ -353,6 +438,33 @@ async def test_deduplicate_times_out_for_stuck_executor(tmp_delta_dir: Path) -> 
                     "_ingestion_ts": pa.array(["2024-01-01T00:00:00Z"]),
                 }
             )
+
+    class _StuckDataset:
+        def scanner(self) -> _StuckScanner:
+            return _StuckScanner()
+
+    class _StuckSchema:
+        def to_arrow(self) -> pa.Schema:
+            return pa.schema(
+                [
+                    pa.field("activity_id", pa.string()),
+                    pa.field("value", pa.float64()),
+                    pa.field("_ingestion_ts", pa.string()),
+                ]
+            )
+
+    class _StuckDeltaTable:
+        def __init__(self, table_path: str) -> None:
+            self._table_path = table_path
+
+        def count(self) -> int:
+            return 1
+
+        def schema(self) -> _StuckSchema:
+            return _StuckSchema()
+
+        def to_pyarrow_dataset(self) -> _StuckDataset:
+            return _StuckDataset()
 
     original_delta_table = deltalake.DeltaTable
     deltalake.DeltaTable = _StuckDeltaTable

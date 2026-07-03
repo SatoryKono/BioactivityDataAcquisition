@@ -47,7 +47,13 @@ def read_delta_records(
 
 def load_delta_table(table_path: str) -> DeltaTable:
     """Open a Delta table from its resolved filesystem path."""
-    return DeltaTable(table_path)
+    return DeltaTable(normalize_delta_filesystem_path(table_path))
+
+
+def normalize_delta_filesystem_path(path: str | Path) -> str:
+    """Return a canonical absolute POSIX-style path for Delta Lake filesystem I/O."""
+    normalized = str(path).replace("\\", "/")
+    return Path(normalized).expanduser().resolve().as_posix()
 
 
 def resolve_delta_table_path(
@@ -56,10 +62,12 @@ def resolve_delta_table_path(
     table_name: str,
     flat_structure: bool,
 ) -> str:
-    """Resolve the filesystem path for a Delta table."""
+    """Resolve the contract path for a Delta table."""
+    normalized_base = Path(base_path.replace("\\", "/")).expanduser()
     if flat_structure:
-        return base_path
-    return f"{base_path}/{table_name.replace('.', '/')}"
+        return normalized_base.as_posix()
+    relative_parts = [part for part in table_name.split(".") if part]
+    return normalized_base.joinpath(*relative_parts).as_posix()
 
 
 def get_delta_table_arrow_schema(table: DeltaTable) -> pa.Schema:

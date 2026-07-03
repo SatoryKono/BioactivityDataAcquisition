@@ -35,6 +35,8 @@ forbidden_output_roots:
   - .python-user/
   - .coverage-sharded/
   - htmlcov/
+  - caddy/
+  - silver/
 
 routes:
   - id: file-merger-working-reports

@@ -1,4 +1,8 @@
-"""Typed source and drilldown metadata for Control Plane identity anchors."""
+"""Typed source and drilldown metadata for Control Plane identity anchors.
+
+Legacy HTTP contract compatibility layer - sunset date: 2026-12-31
+This module provides legacy-compatible source identity model for HTTP integration.
+"""
 
 from __future__ import annotations
 
@@ -12,7 +16,10 @@ from bioetl.interfaces.http.control_plane_identity.types import (
 
 @dataclass(frozen=True, slots=True)
 class ControlPlaneSourceModel:
-    """Legacy-compatible source identity model for HTTP integration callers."""
+    """Legacy-compatible source identity model for HTTP integration callers.
+    
+    Legacy HTTP contract compatibility - sunset date: 2026-12-31
+    """
 
     run_id: str
     manifest_id: str
