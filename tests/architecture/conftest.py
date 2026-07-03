@@ -32,7 +32,7 @@ _MIN_PARALLEL_CACHE_FILES = 128
 _DEFAULT_CACHE_WORKERS = 8
 _MAX_CACHE_WORKERS = 16
 _MAX_CACHE_WORKERS_NETWORK = 4
-_ARCHITECTURE_CACHE_VERSION = "v2"
+_ARCHITECTURE_CACHE_VERSION = "v3"
 _ARCHITECTURE_CACHE_DIR = Path(
     os.environ.get(
         "BIOETL_ARCHITECTURE_CACHE_DIR",
@@ -492,7 +492,7 @@ def config_yaml_cache(
 
 
 def _subprocess_cache_dependency_paths(
-    _command: list[str],
+    command: list[str],
     cwd: Path | None,
 ) -> list[Path]:
     """Resolve conservative cache dependencies for repo-wide scanner subprocesses."""
@@ -506,6 +506,29 @@ def _subprocess_cache_dependency_paths(
         repo_root / "scripts" / "engineering" / "dev" / "run_mypy.ps1",
     ]
     dependency_paths.extend(path for path in static_files if path.exists())
+
+    command_text = " ".join(command)
+    if "scripts.schema" in command_text and "generate-config-matrix" in command_text:
+        dependency_paths.extend(_list_python_files(repo_root / "scripts" / "schema"))
+        dependency_paths.extend(
+            path
+            for path in (
+                repo_root / "docs" / "04-reference" / "config_comparison_matrix.csv",
+                repo_root / "docs" / "config-discrepancies-report.md",
+                repo_root
+                / "reports"
+                / "quality"
+                / "config-discrepancy-baseline.json",
+            )
+            if path.exists()
+        )
+        configs_root = repo_root / "configs"
+        if configs_root.exists():
+            dependency_paths.extend(
+                path
+                for path in configs_root.rglob("*.yaml")
+                if "__pycache__" not in path.parts
+            )
 
     if (
         cwd is not None
