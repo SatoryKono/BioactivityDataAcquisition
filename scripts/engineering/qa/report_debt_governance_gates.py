@@ -849,6 +849,160 @@ def build_payload(
         )
     )
 
+    scorecard = load_debt_scorecard()
+    full_app_policy = scorecard.get("full_app_duplication_ratchets", {})
+    if isinstance(full_app_policy, dict):
+        artifact_policy = full_app_policy.get("artifact_policy", {})
+        baseline_artifact = (
+            artifact_policy.get("baseline_artifact")
+            if isinstance(artifact_policy, dict)
+            else None
+        )
+        if isinstance(baseline_artifact, str):
+            full_app_baseline = _load_json(repo_root, baseline_artifact)
+            targets = {
+                str(row["target"]): int(row["duplicate_count"])
+                for row in full_app_baseline.get("targets", [])
+                if isinstance(row, dict) and isinstance(row.get("target"), str)
+            }
+            families = full_app_policy.get("families", [])
+            if isinstance(families, list):
+                for family in families:
+                    if not isinstance(family, dict):
+                        continue
+                    metrics = family.get("metrics", {})
+                    duplication = (
+                        metrics.get("duplication_clusters", {})
+                        if isinstance(metrics, dict)
+                        else {}
+                    )
+                    max_count = (
+                        duplication.get("max_count")
+                        if isinstance(duplication, dict)
+                        else None
+                    )
+                    path_prefix = family.get("path_prefix")
+                    if not isinstance(max_count, int) or not isinstance(path_prefix, str):
+                        continue
+                    current = max(
+                        count
+                        for target, count in targets.items()
+                        if target.startswith(path_prefix.rstrip("/"))
+                    )
+                    gates.append(
+                        _hard_limit_gate(
+                            name=f"full_app_duplication_{family.get('name')}",
+                            metric="duplication_clusters",
+                            current=current,
+                            limit=max_count,
+                            source_artifact=baseline_artifact,
+                            remediation=(
+                                "Reduce duplicate clusters and regenerate the full-app "
+                                "duplication baseline without raising scorecard budgets."
+                            ),
+                        )
+                    )
+            summary_metrics = full_app_policy.get("summary_metrics", {})
+            total_budget = (
+                summary_metrics.get("total_duplicate_clusters", {})
+                if isinstance(summary_metrics, dict)
+                else {}
+            )
+            if isinstance(total_budget, dict) and isinstance(
+                total_budget.get("max_count"), int
+            ):
+                summary = full_app_baseline.get("summary", {})
+                current_total = (
+                    int(summary["total_duplicate_clusters"])
+                    if isinstance(summary, dict)
+                    else -1
+                )
+                gates.append(
+                    _hard_limit_gate(
+                        name="full_app_duplication_total_clusters",
+                        metric="total_duplicate_clusters",
+                        current=current_total,
+                        limit=int(total_budget["max_count"]),
+                        source_artifact=baseline_artifact,
+                        remediation=(
+                            "Burn down full-app duplicate clusters and refresh the "
+                            "reviewed baseline."
+                        ),
+                    )
+                )
+
+    scripts_policy = scorecard.get("supporting_scripts_governance", {})
+    if isinstance(scripts_policy, dict):
+        scripts_metrics = scripts_policy.get("metrics", {})
+        if isinstance(scripts_metrics, dict):
+            scripts_manifest = _load_json(
+                repo_root, "configs/quality/scripts_inventory_manifest.json"
+            )
+            script_rows = scripts_manifest.get("scripts", [])
+            zero_ref_count = (
+                sum(
+                    1
+                    for row in script_rows
+                    if isinstance(row, dict) and row.get("reference_count") == 0
+                )
+                if isinstance(script_rows, list)
+                else 0
+            )
+            untriaged_count = (
+                sum(
+                    1
+                    for row in script_rows
+                    if isinstance(row, dict)
+                    and row.get("reference_count") == 0
+                    and (
+                        not row.get("owner")
+                        or not row.get("lifecycle_decision")
+                        or not row.get("review_by")
+                        or not row.get("next_step")
+                    )
+                )
+                if isinstance(script_rows, list)
+                else 0
+            )
+            zero_ref_budget = scripts_metrics.get(
+                "zero_reference_supporting_script_count", {}
+            )
+            untriaged_budget = scripts_metrics.get(
+                "untriaged_zero_reference_supporting_script_count", {}
+            )
+            if isinstance(zero_ref_budget, dict) and isinstance(
+                zero_ref_budget.get("max_count"), int
+            ):
+                gates.append(
+                    _hard_limit_gate(
+                        name="supporting_scripts_zero_reference_count",
+                        metric="zero_reference_supporting_script_count",
+                        current=zero_ref_count,
+                        limit=int(zero_ref_budget["max_count"]),
+                        source_artifact="configs/quality/scripts_inventory_manifest.json",
+                        remediation=(
+                            "Triage or remove zero-reference supporting scripts; "
+                            "budgets must not grow."
+                        ),
+                    )
+                )
+            if isinstance(untriaged_budget, dict) and isinstance(
+                untriaged_budget.get("max_count"), int
+            ):
+                gates.append(
+                    _hard_limit_gate(
+                        name="supporting_scripts_untriaged_zero_reference_count",
+                        metric="untriaged_zero_reference_supporting_script_count",
+                        current=untriaged_count,
+                        limit=int(untriaged_budget["max_count"]),
+                        source_artifact="configs/quality/scripts_inventory_manifest.json",
+                        remediation=(
+                            "Add owner/removal metadata for every zero-reference "
+                            "supporting script."
+                        ),
+                    )
+                )
+
     test_report = test_governance["report"]
     gates.append(
         _hard_limit_gate(

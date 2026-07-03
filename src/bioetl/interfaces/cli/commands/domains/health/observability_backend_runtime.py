@@ -173,6 +173,21 @@ def attach_observability_backend_to_cli_input(
     return cli_input
 
 
+def should_disable_transient_health_server(
+    *,
+    health_server_enabled: bool,
+    health_port: int,
+    observability_backend_port: int,
+    backend_result: ObservabilityBackendEnsureResult,
+) -> bool:
+    """Return True when the detached backend should replace the in-process server."""
+    return (
+        health_server_enabled
+        and backend_result.backend_available
+        and health_port == observability_backend_port
+    )
+
+
 def ensure_observability_backend_started(
     *,
     enabled: bool,
@@ -195,7 +210,7 @@ def ensure_observability_backend_started(
     info_printer: Callable[[str], None] = echo_info,
     warning_printer: Callable[[str], None] = echo_warning,
 ) -> ObservabilityBackendEnsureResult:
-    """Ensure the detached observability backend is running for Grafana panels."""
+    """Ensure the detached backend is running with runtime-local patch points."""
     return ensure_observability_backend_started_impl(
         enabled=enabled,
         health_url=build_observability_backend_health_url(host=probe_host, port=port),
@@ -220,21 +235,6 @@ def ensure_observability_backend_started(
         describe_required_probe_failure_fn=_describe_required_probe_failure,
         append_backend_startup_diagnostic_fn=_append_backend_startup_diagnostic,
         python_executable_to_tuple_fn=python_executable_to_tuple,
-    )
-
-
-def should_disable_transient_health_server(
-    *,
-    health_server_enabled: bool,
-    health_port: int,
-    observability_backend_port: int,
-    backend_result: ObservabilityBackendEnsureResult,
-) -> bool:
-    """Return True when the detached backend should replace the in-process server."""
-    return (
-        health_server_enabled
-        and backend_result.backend_available
-        and health_port == observability_backend_port
     )
 
 

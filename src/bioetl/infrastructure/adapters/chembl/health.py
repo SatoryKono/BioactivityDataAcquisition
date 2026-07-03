@@ -28,13 +28,13 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
     from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
 
-CHEMBL_HEALTH_ERRORS = (
+from bioetl.infrastructure.adapters.common.error_bundles import (
+    build_common_network_error_bundle,
+)
+
+CHEMBL_HEALTH_ERRORS = build_common_network_error_bundle(
     CriticalError,
     httpx.HTTPError,
-    OSError,
-    ValueError,
-    TypeError,
-    RuntimeError,
 )
 CHEMBL_HEALTH_PROBE_TIMEOUT_SECONDS = 5.0
 CHEMBL_TRANSIENT_HEALTH_ERRORS = (

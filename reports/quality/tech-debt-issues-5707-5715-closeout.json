@@ -106,15 +106,15 @@
       "max": 0
     },
     "full_app_duplicate_clusters": {
-      "current": 65,
+      "current": 49,
       "max": 68
     },
     "adapter_duplicate_clusters": {
-      "current": 54,
+      "current": 44,
       "max": 55
     },
     "pipeline_duplicate_clusters": {
-      "current": 11,
+      "current": 5,
       "max": 13
     },
     "compatibility_test_files": {
@@ -164,10 +164,10 @@
         "module_coverage_inventory": false,
         "remote_main_baseline": false
       },
-      "module_coverage_source_tree_sha256": "913ce19621084a256a703421467c096e673994da922eddf214246d95f09cc0cd",
-      "architecture_quality_score": 8.54,
+      "module_coverage_source_tree_sha256": "6f3db1664076eb32471b784f3f5808a12072a31d69e82d027ff7e31d3f99de61",
+      "architecture_quality_score": 8.56,
       "remote_main_baseline_fingerprint": "c8faba67f743e7c5e2fff500a9b537505b5a134d8ef843ec84d4fe66d7ded489",
-      "architecture_quality_scorecard_source_tree_sha256": "913ce19621084a256a703421467c096e673994da922eddf214246d95f09cc0cd"
+      "architecture_quality_scorecard_source_tree_sha256": "6f3db1664076eb32471b784f3f5808a12072a31d69e82d027ff7e31d3f99de61"
     },
     "5708": {
       "shared_delegation_helper": "src/bioetl/infrastructure/adapters/decorators/_data_source_delegation.py",
@@ -175,7 +175,7 @@
         "src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py",
         "src/bioetl/infrastructure/adapters/decorators/retry.py"
       ],
-      "adapter_duplicate_clusters": 48,
+      "adapter_duplicate_clusters": 44,
       "adapter_duplicate_clusters_no_growth_max": 55,
       "bounded_actionability_categories": [
         "adapter_resilience_or_contract_template",
@@ -184,7 +184,7 @@
     },
     "5709": {
       "opening_pipeline_duplicate_clusters": 15,
-      "pipeline_duplicate_clusters": 9,
+      "pipeline_duplicate_clusters": 5,
       "pipeline_duplicate_clusters_no_growth_max": 13,
       "dominant_actionability_category": "pipeline_transformer_contract_pattern",
       "decision": "reduced_shared_uniprot_comment_annotation_output_keys"
@@ -203,11 +203,11 @@
       }
     },
     "5711": {
-      "source_module_count": 2211,
+      "source_module_count": 2213,
       "unmeasured_module_count": 0,
       "uncovered_module_count": 0,
-      "no_executable_line_modules": 20,
-      "source_tree_sha256": "913ce19621084a256a703421467c096e673994da922eddf214246d95f09cc0cd",
+      "no_executable_line_modules": 22,
+      "source_tree_sha256": "6f3db1664076eb32471b784f3f5808a12072a31d69e82d027ff7e31d3f99de61",
       "under70_module_count_before": 18,
       "under70_module_count_after": 9,
       "under85_module_count_after": 80

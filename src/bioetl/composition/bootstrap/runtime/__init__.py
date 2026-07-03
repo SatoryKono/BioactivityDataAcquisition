@@ -17,6 +17,10 @@ from __future__ import annotations
 from importlib import import_module
 from typing import Any
 
+from bioetl.composition.bootstrap.runtime.composite_bootstrap_registry_manifest import (
+    COMPOSITE_BOOTSTRAP_BUILDER_MODULES,
+    COMPOSITE_BOOTSTRAP_BUILDER_PACKAGE_EXPORTS,
+)
 from bioetl.composition.bootstrap.runtime_public_exports import (
     RUNTIME_PACKAGE_EXPORT_NAMES,
     RUNTIME_PACKAGE_PUBLIC_EXPORTS,
@@ -34,11 +38,8 @@ from bioetl.composition.bootstrap.runtime_public_exports import (
 # - bootstrap_pipeline_runner_service
 # - bootstrap_composite_runner
 # - load_composite_config
-_RUNTIME_MODULE_EXPORTS: dict[str, str] = {
-    "composite_control_plane_builder": (
-        "bioetl.composition.bootstrap.runtime.composite_control_plane_builder"
-    ),
-}
+_RUNTIME_MODULE_EXPORTS: dict[str, str] = dict(COMPOSITE_BOOTSTRAP_BUILDER_PACKAGE_EXPORTS)
+_RUNTIME_MODULE_REGISTRY_ENTRY_COUNT = len(COMPOSITE_BOOTSTRAP_BUILDER_MODULES)
 
 __all__ = list(RUNTIME_PACKAGE_EXPORT_NAMES)
 

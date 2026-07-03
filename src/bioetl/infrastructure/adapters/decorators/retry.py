@@ -47,6 +47,9 @@ from bioetl.infrastructure.adapters.decorators._data_source_delegation import (
     exit_delegated_data_source,
     iter_delegated_fetch,
 )
+from bioetl.infrastructure.adapters.decorators._fetch_request_builder import (
+    build_data_source_fetch_request,
+)
 from bioetl.infrastructure.adapters.decorators._retry_support import (
     calculate_and_wait_retry_delay,
     log_retry_attempt,
@@ -145,7 +148,7 @@ class RetryingDataSourceDecorator:
         """Fetch records with retry logic."""
         last_error: Exception | None = None
         retries = 0
-        request = DataSourceFetchRequest(
+        request = build_data_source_fetch_request(
             entity_type=entity_type,
             limit=limit,
             query=query,

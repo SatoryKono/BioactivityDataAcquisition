@@ -10,9 +10,7 @@ from bioetl.composition.runtime_builders._runner_input_preparation import (
 from bioetl.composition.runtime_builders._runner_input_preparation import (
     resolve_runner_derived_inputs as _resolve_runner_derived_inputs,
 )
-from bioetl.composition.runtime_builders import (
-    inputs_runtime_assembly as _runtime_assembly,
-)
+import bioetl.composition.runtime_builders.inputs_runtime_assembly as _runtime_assembly
 from bioetl.composition.runtime_builders.config_access import (
     load_source_config as _load_source_config,
 )

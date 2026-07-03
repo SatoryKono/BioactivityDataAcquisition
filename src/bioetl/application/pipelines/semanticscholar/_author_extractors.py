@@ -7,16 +7,6 @@ Split from extractors.py per audit-package-structure-2026-02-07.
 
 from __future__ import annotations
 
-__all__ = [
-    "extract_affiliations",
-    "extract_author_h_indices",
-    "extract_author_ids",
-    "extract_author_orcids",
-    "extract_author_s2_ids",
-    "extract_authors",
-]
-
-
 from bioetl.domain.types import JsonDict
 
 

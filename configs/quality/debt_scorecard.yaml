@@ -610,6 +610,76 @@ hotspot_family_ratchets:
         and retiring the last runtime-builder file_ge_250_loc warning while
         holding max_internal_fan_in at the bounded budget of 5 on
         _snapshot_mapping_support.
+full_app_duplication_ratchets:
+  snapshot_date: '2026-07-03'
+  mode: fail-fast
+  artifact_policy:
+    generator_command: python -m scripts.engineering.qa report-duplication-baseline
+      --targets src/bioetl/infrastructure/adapters src/bioetl/application/pipelines
+      src/bioetl/composition/bootstrap src/bioetl/interfaces/cli --json-out
+      reports/quality/full-app-duplication-baseline.json --md-out
+      reports/quality/full-app-duplication-baseline.md
+    baseline_artifact: reports/quality/full-app-duplication-baseline.json
+    expected_direction: downward
+    ratchet_policy: Full-app duplication families must ratchet downward during
+      structural burn-down; budgets must not grow without an explicit scorecard
+      update.
+  families:
+  - name: infrastructure_adapters
+    owner: '@bioetl-infrastructure'
+    linked_issue: '#5840'
+    path_prefix: src/bioetl/infrastructure/adapters
+    metrics:
+      duplication_clusters:
+        current_count: 44
+        max_count: 44
+        ratchet_policy: Non-growth fail-fast; decreases require regenerated baseline.
+  - name: application_pipelines
+    owner: '@bioetl-application'
+    linked_issue: '#5841'
+    path_prefix: src/bioetl/application/pipelines
+    metrics:
+      duplication_clusters:
+        current_count: 5
+        max_count: 5
+        ratchet_policy: Non-growth fail-fast; decreases require regenerated baseline.
+  - name: composition_bootstrap_full_app
+    owner: '@bioetl-platform'
+    path_prefix: src/bioetl/composition/bootstrap
+    metrics:
+      duplication_clusters:
+        current_count: 0
+        max_count: 0
+        ratchet_policy: Zero-budget fail-fast.
+  - name: interfaces_cli_full_app
+    owner: '@bioetl-interfaces'
+    path_prefix: src/bioetl/interfaces/cli
+    metrics:
+      duplication_clusters:
+        current_count: 0
+        max_count: 0
+        ratchet_policy: Zero-budget fail-fast.
+  summary_metrics:
+    total_duplicate_clusters:
+      current_count: 49
+      max_count: 49
+      ratchet_policy: Non-growth fail-fast across full-app scan targets.
+supporting_scripts_governance:
+  inventory_source: configs/quality/scripts_inventory_manifest.json
+  metrics:
+    zero_reference_supporting_script_count:
+      current_count: 50
+      max_count: 50
+      owner: '@bioetl-platform'
+      linked_issue: '#5845'
+      ratchet_policy: Zero-reference supporting scripts must stay triaged with
+        owner metadata; count may only decrease after removal.
+    untriaged_zero_reference_supporting_script_count:
+      current_count: 0
+      max_count: 0
+      owner: '@bioetl-platform'
+      linked_issue: '#5845'
+      ratchet_policy: Zero-budget fail-fast for scripts missing owner/removal metadata.
 oversized_source_module_inventory:
   linked_issue: '#4679'
   split_on_touch: true

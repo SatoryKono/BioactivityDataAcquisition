@@ -361,6 +361,58 @@ class TestBootstrapObservabilityBundleImpl:
         assert bundle.metrics is metrics
         assert bundle.dq_monitor is dq_monitor
 
+    def test_supports_legacy_high_level_call_signature(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        from bioetl.composition.bootstrap.runtime import observability_bundle
+
+        monkeypatch.setattr(
+            observability_bundle,
+            "_build_observability_components",
+            MagicMock(
+                return_value=observability_bundle._ObservabilityComponents(
+                    logger=MagicMock(),
+                    tracer=MagicMock(),
+                    metrics=MagicMock(),
+                    audit=MagicMock(),
+                    dq_monitor=None,
+                )
+            ),
+        )
+        monkeypatch.setattr(
+            observability_bundle,
+            "_create_observability_bundle",
+            MagicMock(return_value=MagicMock(spec=ObservabilityBundle)),
+        )
+        monkeypatch.setattr(
+            observability_bundle,
+            "_run_observability_preflight",
+            MagicMock(),
+        )
+        monkeypatch.setattr(
+            observability_bundle,
+            "_log_observability_initialized",
+            MagicMock(),
+        )
+
+        bundle = observability_bundle.bootstrap_observability_bundle_impl(
+            pipeline="test_pipe",
+            run_id=_FIXED_UUID,
+            settings=_settings(),
+            log_level="INFO",
+        )
+
+        assert bundle is observability_bundle._create_observability_bundle.return_value
+        build_kwargs = (
+            observability_bundle._build_observability_components.call_args.kwargs
+        )
+        assert callable(build_kwargs["logger_bootstrapper"])
+        assert callable(build_kwargs["tracer_bootstrapper"])
+        assert callable(build_kwargs["metrics_bootstrapper"])
+        assert callable(build_kwargs["audit_bootstrapper"])
+        assert callable(build_kwargs["dq_monitor_bootstrapper"])
+
     def test_calls_preflight_validator_with_allow_flag(self) -> None:
         from bioetl.composition.bootstrap.runtime.observability_bundle import (
             bootstrap_observability_bundle_impl,

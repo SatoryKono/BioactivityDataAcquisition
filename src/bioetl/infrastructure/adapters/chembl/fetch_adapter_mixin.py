@@ -18,6 +18,9 @@ from bioetl.infrastructure.adapters.chembl.fetch_resilience_mixin import (
 from bioetl.infrastructure.adapters.common.deduplication import (
     iter_deduplicated_records,
 )
+from bioetl.infrastructure.adapters.common.fetch_resilience_template import (
+    iter_deduplicated_filtered_id_batches,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -48,25 +51,15 @@ class ChemblFetchAdapterMixin(
         Returns:
             Async iterator of deduplicated BronzeRecord dicts.
         """
-        total_fetched = 0
-        seen_ids: set[str] = set()
-        pk_field = self._get_api_pk_field(entity_type)
-        pk_fields = self._get_api_dedup_fields(entity_type)
-
-        for id_batch in self._batch_ids(filter_ids, batch_size=self._filter_batch_size):
-            async for record in self._fetch_batch_with_reduction(
-                entity_type,
-                id_batch,
-                filter_field,
-                limit,
-                seen_ids,
-                pk_field,
-                pk_fields,
-            ):
-                yield record
-                total_fetched += 1
-                if limit and total_fetched >= limit:
-                    return
+        async for record in iter_deduplicated_filtered_id_batches(
+            self,
+            entity_type=entity_type,
+            limit=limit,
+            filter_ids=filter_ids,
+            filter_field=filter_field,
+            batch_size=self._filter_batch_size,
+        ):
+            yield record
 
     async def _fetch_standard(
         self,

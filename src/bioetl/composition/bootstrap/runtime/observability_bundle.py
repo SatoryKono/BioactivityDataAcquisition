@@ -12,19 +12,12 @@ from bioetl.composition.bootstrap.runtime._observability_preflight_support impor
     validate_prod_noop_components,
 )
 from bioetl.composition.bootstrap.runtime.observability_assembly import (
-    create_observability_bundle as _create_observability_bundle,
-)
-from bioetl.composition.bootstrap.runtime.observability_assembly import (
-    log_observability_initialized as _log_observability_initialized,
-)
-from bioetl.composition.bootstrap.runtime.observability_assembly import (
-    run_observability_preflight as _run_observability_preflight,
-)
-from bioetl.composition.bootstrap.runtime.observability_assembly import (
-    settings_control_plane as _settings_control_plane,
-)
-from bioetl.composition.bootstrap.runtime.observability_assembly import (
     control_plane_settings as _control_plane_settings,
+    create_observability_bundle as _create_observability_bundle,
+    default_audit_bootstrapper as _default_audit_bootstrapper,
+    log_observability_initialized as _log_observability_initialized,
+    run_observability_preflight as _run_observability_preflight,
+    settings_control_plane as _settings_control_plane,
 )
 from bioetl.composition.observability import (
     ObservabilityBundle,
@@ -156,20 +149,22 @@ def bootstrap_observability_bundle_impl(
     run_id: UUID,
     settings: Settings,
     log_level: str,
-    logger_bootstrapper: Callable[[str, UUID, str], LoggerPort],
-    tracer_bootstrapper: Callable[[Settings], TracingPort],
-    metrics_bootstrapper: Callable[[Settings], MetricsPort],
+    logger_bootstrapper: Callable[[str, UUID, str], LoggerPort] | None = None,
+    tracer_bootstrapper: Callable[[Settings], TracingPort] | None = None,
+    metrics_bootstrapper: Callable[[Settings], MetricsPort] | None = None,
     audit_bootstrapper: Callable[
         [Settings, LoggerPort, MetricsPort, TracingPort], AuditPort
     ]
-    | None,
+    | None = None,
     dq_monitor_bootstrapper: Callable[
         [Settings, LoggerPort | None], DQMonitorPort | None
-    ],
+    ]
+    | None = None,
     preflight_validator: Callable[
         ...,
         None,
-    ],
+    ]
+    | None = None,
     yaml_config: object | None = None,
     skip_gold: bool = False,
 ) -> ObservabilityBundle:
@@ -195,6 +190,25 @@ def bootstrap_observability_bundle_impl(
     Returns:
         Validated ObservabilityBundle with logger, metrics, tracer, and DQ monitor.
     """
+    if logger_bootstrapper is None:
+        from bioetl.composition.bootstrap.runtime.logger_bootstrap import (
+            bootstrap_logger as logger_bootstrapper,
+        )
+    if tracer_bootstrapper is None:
+        from bioetl.composition.bootstrap.runtime.tracing_bootstrap import (
+            bootstrap_tracer as tracer_bootstrapper,
+        )
+    if metrics_bootstrapper is None:
+        from bioetl.composition.bootstrap.runtime.metrics_bootstrap import (
+            bootstrap_metrics as metrics_bootstrapper,
+        )
+    if dq_monitor_bootstrapper is None:
+        from bioetl.composition.bootstrap.runtime.dq_bootstrap import (
+            bootstrap_dq_monitor as dq_monitor_bootstrapper,
+        )
+    if preflight_validator is None:
+        preflight_validator = validate_observability_preflight_impl
+
     components = _build_observability_components(
         pipeline=pipeline,
         run_id=run_id,
@@ -203,7 +217,11 @@ def bootstrap_observability_bundle_impl(
         logger_bootstrapper=logger_bootstrapper,
         tracer_bootstrapper=tracer_bootstrapper,
         metrics_bootstrapper=metrics_bootstrapper,
-        audit_bootstrapper=audit_bootstrapper,
+        audit_bootstrapper=(
+            _default_audit_bootstrapper
+            if audit_bootstrapper is None
+            else audit_bootstrapper
+        ),
         dq_monitor_bootstrapper=dq_monitor_bootstrapper,
     )
 
