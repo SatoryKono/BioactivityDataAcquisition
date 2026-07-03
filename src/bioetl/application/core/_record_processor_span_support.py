@@ -1,4 +1,7 @@
-"""Span execution helpers for the legacy RecordProcessor."""
+"""Span execution helpers for RecordProcessor.
+
+RecordProcessor is actively used (80+ references) and is not legacy.
+"""
 
 from __future__ import annotations
 

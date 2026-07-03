@@ -1,4 +1,8 @@
-"""Ledger and artifact extraction helpers for Control Plane identity."""
+"""Ledger and artifact extraction helpers for Control Plane identity.
+
+Legacy HTTP contract compatibility layer - sunset date: 2026-12-31
+This module extracts legacy HTTP identity anchor values.
+"""
 
 from __future__ import annotations
 

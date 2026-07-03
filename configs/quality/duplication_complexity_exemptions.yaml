@@ -24,48 +24,21 @@ path_entries:
     expiry: "2026-12-31"
     removal_step: "Continue memory graph decomposition before removing the exemption."
     rationale: "Memory maintenance flows carry orchestration branches unrelated to BioETL runtime paths."
-  - path: src/bioetl/infrastructure/adapters/chembl/
-    scopes: [xenon, critical_check]
-    owner: "@bioetl-platform"
-    expiry: "2026-12-31"
-    removal_step: "Split fetch/reduction fallback branches into collaborator policies."
-    rationale: "ChEMBL adapter fallbacks still bundle batch reduction and retry branches."
-  - path: src/bioetl/infrastructure/adapters/openalex/
-    scopes: [xenon, critical_check]
-    owner: "@bioetl-platform"
-    expiry: "2026-12-31"
-    removal_step: "Isolate DOI/title fallback sequencing into adapter policy helpers."
-    rationale: "OpenAlex publication fallback logic still exceeds the baseline threshold."
-  - path: src/bioetl/infrastructure/adapters/semanticscholar/
-    scopes: [xenon, critical_check]
-    owner: "@bioetl-platform"
-    expiry: "2026-12-31"
-    removal_step: "Extract DOI/id fallback strategy objects from the adapter runtime."
-    rationale: "Semantic Scholar fallback routing remains too branch-heavy for the global ratchet."
-  - path: src/bioetl/infrastructure/adapters/crossref/
-    scopes: [xenon, critical_check]
-    owner: "@bioetl-platform"
-    expiry: "2026-12-31"
-    removal_step: "Break batch DOI resolution into bounded coordinator helpers."
-    rationale: "CrossRef fetch batching still mixes optimistic and fallback execution paths."
-  - path: src/bioetl/infrastructure/adapters/pubmed/
-    scopes: [xenon, critical_check]
-    owner: "@bioetl-platform"
-    expiry: "2026-12-31"
-    removal_step: "Separate PMID/title fallback and retry policies from adapter shells."
-    rationale: "PubMed adapters still contain multi-branch request fallback logic."
-  - path: src/bioetl/infrastructure/adapters/uniprot/
-    scopes: [xenon, critical_check]
-    owner: "@bioetl-platform"
-    expiry: "2026-12-31"
-    removal_step: "Decompose pagination/retry parsing into smaller result helpers."
-    rationale: "UniProt adapter complexity is concentrated in pagination and parsing paths."
-  - path: src/bioetl/infrastructure/adapters/pubchem/
-    scopes: [xenon, critical_check]
-    owner: "@bioetl-platform"
-    expiry: "2026-12-31"
-    removal_step: "Move InChIKey fallback resolution into explicit collaborator seams."
-    rationale: "PubChem adapters still combine multiple fallback request paths."
+  # All 7 adapters now use unified fallback helpers - exemptions removed
+  # ChEMBL: Uses fetch_resilience_template (retry_with_split_batches, fetch_batch_with_reduction)
+  # OpenAlex, CrossRef, PubMed: Use FallbackFetchOrchestrator, ComposableFallbackDecorator, BaseTitleFallbackHandler
+  # Semantic Scholar: Uses BaseTitleFallbackHandler from unified helpers
+  # UniProt: Uses FallbackPolicyMixin and FallbackFetchOrchestrator
+  # PubChem: Uses DelegatingFallbackMixin (delegates to fetch_filtered)
+  # Removed 2026-07-03 as part of P0-001 implementation
+  # Remaining complexity is due to provider API specifics (entity types, pagination, parsing)
+  # - path: src/bioetl/infrastructure/adapters/chembl/
+  # - path: src/bioetl/infrastructure/adapters/openalex/
+  # - path: src/bioetl/infrastructure/adapters/crossref/
+  # - path: src/bioetl/infrastructure/adapters/pubmed/
+  # - path: src/bioetl/infrastructure/adapters/semanticscholar/
+  # - path: src/bioetl/infrastructure/adapters/uniprot/
+  # - path: src/bioetl/infrastructure/adapters/pubchem/
   - path: src/bioetl/infrastructure/adapters/input/
     scopes: [xenon, critical_check]
     owner: "@bioetl-config"

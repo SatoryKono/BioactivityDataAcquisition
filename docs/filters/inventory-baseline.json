@@ -1884,7 +1884,7 @@
       "symbol": "should_write_silver",
       "path": "src/bioetl/application/core/base_transformer/base.py",
       "occurrence_count": 1,
-      "first_line": 123,
+      "first_line": 128,
       "role": "Legacy Silver write decision helper",
       "migration_relevance": "Any active semantic use of should_write_silver must be explicit in this inventory.",
       "notes": ""
@@ -1994,7 +1994,7 @@
       "symbol": "_silver_filters.should_include",
       "path": "src/bioetl/application/core/base_transformer/base.py",
       "occurrence_count": 1,
-      "first_line": 131,
+      "first_line": 136,
       "role": "Runtime Silver include predicate",
       "migration_relevance": "Predicate sites are migration-sensitive and must not add semantic Silver gating.",
       "notes": ""

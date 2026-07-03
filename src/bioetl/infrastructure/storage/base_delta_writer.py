@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
@@ -11,12 +12,13 @@ from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.storage.base_delta_writer_access import (
     BaseDeltaWriterTableAccessMixin,
 )
+from bioetl.infrastructure.storage.delta.table_ops import (
+    normalize_delta_filesystem_path,
+)
 
 __all__ = ["BaseDeltaWriter", "DeltaTableNotFoundError", "coerce_null_types_for_delta"]
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from bioetl.domain.ports import LoggerPort
 
 
@@ -24,7 +26,10 @@ def DeltaTable(*args: object, **kwargs: object) -> object:
     """Lazy compatibility seam for Delta table construction and tests."""
     from deltalake import DeltaTable as _DeltaTable
 
-    return _DeltaTable(*args, **kwargs)
+    normalized_args = list(args)
+    if normalized_args and isinstance(normalized_args[0], str | Path):
+        normalized_args[0] = normalize_delta_filesystem_path(normalized_args[0])
+    return _DeltaTable(*normalized_args, **kwargs)
 
 
 # Any: arbitrary Python value from heterogeneous record fields; returns same or JSON string
@@ -142,7 +147,8 @@ class BaseDeltaWriter(BaseDeltaWriterTableAccessMixin):
             from bioetl.infrastructure.storage.support.retention import RetentionPolicy
 
             retention_policy = RetentionPolicy(base_path)
-        self.base_path = str(base_path).rstrip("/")
+        normalized_base_path = str(base_path).replace("\\", "/")
+        self.base_path = Path(normalized_base_path).expanduser().as_posix()
         self.logger = logger
         self._flat_structure = flat_structure
         self._arrow_converter = arrow_converter

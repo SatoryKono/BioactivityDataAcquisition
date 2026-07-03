@@ -151,9 +151,17 @@ CODEX_PY_REVIEW_ORCHESTRATOR_DOC_PATH = ".codex/agents/py-review-orchestrator.md
 CODEX_RUNTIME_DOC_TOKEN = CODEX_RUNTIME_DOC_PATH
 GEMINI_RUNTIME_DOC_TOKEN = GEMINI_RUNTIME_DOC_PATH
 AGENTS_DOC_TOKEN = "AGENTS.md"
+NORMATIVE_SOURCES_DOC_TOKEN = "docs/00-project/NORMATIVE_SOURCES.md"
 RULES_DOC_TOKEN = "docs/00-project/RULES.md"
 REQUIREMENTS_DOC_TOKEN = "docs/01-requirements/REQUIREMENTS.md"
 ADR_DIR_DOC_TOKEN = "docs/02-architecture/decisions/"
+NORMATIVE_STACK_TOKENS: tuple[str, ...] = (
+    NORMATIVE_SOURCES_DOC_TOKEN,
+    RULES_DOC_TOKEN,
+    REQUIREMENTS_DOC_TOKEN,
+    ADR_DIR_DOC_TOKEN,
+    AGENTS_DOC_TOKEN,
+)
 MEMORY_USAGE_TOKEN = "MEMORY_USAGE.md"
 POST_CHANGE_TOKEN = "POST_CHANGE_VALIDATION.md"
 POST_CHANGE_DOC_TOKEN = "../policy/POST_CHANGE_VALIDATION.md"
@@ -175,12 +183,14 @@ CURSOR_RULE_EXCLUDED_FILENAMES = frozenset({"sonarqube_mcp_instructions.mdc"})
 AI_RULES_MIRROR_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
     AI_RULES_README_PATH: (
         AGENTS_DOC_TOKEN,
+        NORMATIVE_SOURCES_DOC_TOKEN,
         RULES_DOC_TOKEN,
         REQUIREMENTS_DOC_TOKEN,
         ADR_DIR_DOC_TOKEN,
     ),
     Path("docs/00-project/ai/rules/bioetl-ai-rules.md"): (
         AGENTS_DOC_TOKEN,
+        NORMATIVE_SOURCES_DOC_TOKEN,
         RULES_DOC_TOKEN,
         REQUIREMENTS_DOC_TOKEN,
         ADR_DIR_DOC_TOKEN,
@@ -314,6 +324,7 @@ REQUIRED_EVIDENCE_METADATA_FIELDS = frozenset(
 AI_SURFACE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
     Path("AGENTS.md"): (
         *RUNTIME_DOC_TOKENS_WITH_CANONICAL_RUNTIME,
+        NORMATIVE_SOURCES_DOC_TOKEN,
         RULES_DOC_TOKEN,
         REQUIREMENTS_DOC_TOKEN,
         ADR_DIR_DOC_TOKEN,
@@ -321,19 +332,27 @@ AI_SURFACE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
     Path("GEMINI.md"): (
         *RUNTIME_DOC_TOKENS,
         RUNTIME_AGENT_MEMORY_PATH,
-        AGENTS_DOC_TOKEN,
-        RULES_DOC_TOKEN,
-        REQUIREMENTS_DOC_TOKEN,
-        ADR_DIR_DOC_TOKEN,
+        *NORMATIVE_STACK_TOKENS,
     ),
     Path(".github/copilot-instructions.md"): (
         *RUNTIME_DOC_TOKENS,
-        AGENTS_DOC_TOKEN,
+        *NORMATIVE_STACK_TOKENS,
+    ),
+    Path(CODEX_RUNTIME_DOC_PATH): (
+        *RUNTIME_DOC_TOKENS,
+        NORMATIVE_SOURCES_DOC_TOKEN,
         RULES_DOC_TOKEN,
         REQUIREMENTS_DOC_TOKEN,
         ADR_DIR_DOC_TOKEN,
+        AGENTS_DOC_TOKEN,
     ),
-    Path(CODEX_RUNTIME_DOC_PATH): RUNTIME_DOC_TOKENS,
+    Path("docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md"): (
+        NORMATIVE_SOURCES_DOC_TOKEN,
+        RULES_DOC_TOKEN,
+        REQUIREMENTS_DOC_TOKEN,
+        ADR_DIR_DOC_TOKEN,
+        AGENTS_DOC_TOKEN,
+    ),
     Path(CODEX_RUNTIME_DOC_README_PATH): (
         AGENTS_DOC_TOKEN,
         CODEX_RUNTIME_DOC_PATH,
@@ -341,11 +360,15 @@ AI_SURFACE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
     ),
     Path("docs/00-project/ai/agents/guides/CODEX.md"): (
         *RUNTIME_DOC_TOKENS_WITH_MEMORY,
+        NORMATIVE_SOURCES_DOC_TOKEN,
+        RULES_DOC_TOKEN,
     ),
     Path("docs/00-project/ai/agents/guides/AGENT.md"): (
         MEMORY_USAGE_TOKEN,
         POST_CHANGE_DOC_TOKEN,
         MEMORY_DOC_TOKEN,
+        NORMATIVE_SOURCES_DOC_TOKEN,
+        RULES_DOC_TOKEN,
     ),
     WINDSURF_REVIEW_PATH: (
         AGENTS_DOC_TOKEN,
@@ -357,43 +380,57 @@ AI_SURFACE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
 AI_WRITE_CAPABLE_SKILL_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
     Path(skill_path): SKILL_REQUIRED_TOKENS for skill_path in WRITE_CAPABLE_SKILL_PATHS
 }
+AI_ROLE_PROFILE_NORMATIVE_TOKENS: tuple[str, ...] = (
+    NORMATIVE_SOURCES_DOC_TOKEN,
+    RULES_DOC_TOKEN,
+    REQUIREMENTS_DOC_TOKEN,
+)
 AI_ROLE_PROFILE_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
     Path(CODEX_PY_AUDIT_BOT_DOC_PATH): (
         *RUNTIME_DOC_TOKENS,
+        *AI_ROLE_PROFILE_NORMATIVE_TOKENS,
         RUNTIME_AGENT_MEMORY_PATH,
         "docs/00-project/ai/memory/memory-py-audit-bot.md",
     ),
     Path(".codex/agents/py-plan-bot.md"): (
         *RUNTIME_DOC_TOKENS,
+        *AI_ROLE_PROFILE_NORMATIVE_TOKENS,
         RUNTIME_AGENT_MEMORY_PATH,
         "docs/00-project/ai/memory/memory-py-plan-bot.md",
     ),
     Path(".codex/agents/py-config-bot.md"): (
         *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+        *AI_ROLE_PROFILE_NORMATIVE_TOKENS,
         "docs/00-project/ai/memory/memory-py-config-bot.md",
     ),
     Path(".codex/agents/py-debug-bot.md"): (
         *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+        *AI_ROLE_PROFILE_NORMATIVE_TOKENS,
         "docs/00-project/ai/memory/memory-py-debug-bot.md",
     ),
     Path(".codex/agents/py-doc-bot.md"): (
         *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+        *AI_ROLE_PROFILE_NORMATIVE_TOKENS,
         "docs/00-project/ai/memory/memory-py-doc-bot.md",
     ),
     Path(".codex/agents/py-test-bot.md"): (
         *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+        *AI_ROLE_PROFILE_NORMATIVE_TOKENS,
         "docs/00-project/ai/memory/memory-py-test-bot.md",
     ),
     Path(".codex/agents/py-architecture-debt-bot.md"): (
         *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+        *AI_ROLE_PROFILE_NORMATIVE_TOKENS,
         "docs/00-project/ai/memory/memory-py-architecture-debt-bot.md",
     ),
     Path(CODEX_PY_REVIEW_ORCHESTRATOR_DOC_PATH): (
         *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+        *AI_ROLE_PROFILE_NORMATIVE_TOKENS,
         "docs/00-project/ai/memory/memory-py-review-orchestrator.md",
     ),
     Path(".codex/agents/py-test-swarm.md"): (
         *ROLE_PROFILE_MEMO_DOC_WITH_POLICY_TOKENS,
+        *AI_ROLE_PROFILE_NORMATIVE_TOKENS,
         "docs/00-project/ai/memory/memory-py-test-swarm.md",
     ),
 }
@@ -439,6 +476,12 @@ AI_SURFACE_FORBIDDEN_PATTERNS: dict[Path, tuple[re.Pattern[str], ...]] = {
     Path(CODEX_PY_AUDIT_BOT_DOC_PATH): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
     Path(CODEX_PY_REVIEW_ORCHESTRATOR_DOC_PATH): (AI_SURFACE_CLAUDE_PATH_PATTERN,),
 }
+RULES_VERSION_LITERAL_PATTERN = re.compile(r"RULES\.md v(\d+(?:\.\d+)*)", re.IGNORECASE)
+AI_SURFACES_WITH_RULES_VERSION_LITERAL_GUARD: tuple[Path, ...] = (
+    Path(".codex/agents/py-review-orchestrator.md"),
+    Path("docs/00-project/ai/agents/guides/AGENT.md"),
+    Path("docs/00-project/00-map.md"),
+)
 
 
 def _collect_classes(directory: Path) -> set[str]:
@@ -1351,7 +1394,36 @@ def check_ai_surfaces(report: DriftReport, *, root: Path | None = None) -> None:
         _check_windsurf_rule_entrypoints(report, project_root=project_root)
         _check_ai_rules_mirrors(report, project_root=project_root)
         _check_unverified_gemini_runtime_claims(report, project_root=project_root)
+        _check_stale_rules_version_literals(report, project_root=project_root)
     _check_ai_docs_runtime_mirror_headers(report, project_root=project_root)
+
+
+def _check_stale_rules_version_literals(
+    report: DriftReport,
+    *,
+    project_root: Path,
+) -> None:
+    """Flag hardcoded RULES.md version literals that drift from the canonical header."""
+    rules_text = _read_doc(project_root / RULES_DOC_TOKEN)
+    current_rules_version = _extract_rules_version(rules_text)
+    if not current_rules_version:
+        return
+
+    for relative_path in AI_SURFACES_WITH_RULES_VERSION_LITERAL_GUARD:
+        path = project_root / relative_path
+        text = _read_doc(path)
+        if not text:
+            continue
+        for match in RULES_VERSION_LITERAL_PATTERN.finditer(text):
+            found_version = match.group(1)
+            if found_version != current_rules_version:
+                report.add(
+                    "ai-surfaces",
+                    "ERROR",
+                    _display_relative_path(relative_path),
+                    "Stale RULES.md version literal "
+                    f"(expected v{current_rules_version}, found v{found_version})",
+                )
 
 
 def _check_ai_surface_required_tokens(

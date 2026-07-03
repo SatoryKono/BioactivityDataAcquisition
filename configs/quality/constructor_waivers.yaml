@@ -60,12 +60,6 @@ PubMedPublicationTransformer:
   expiry: "2026-12-31"
   reason: "Publication transformer still bundles fallback parsing, identity, and metadata collaborators."
 
-IDMappingTransformer:
-  max_args: 9
-  owner: "@bioetl-application"
-  expiry: "2026-12-31"
-  reason: "IDMapping transformer still bundles normalization and enrichment collaborators."
-
 GenericPipelineFactory:
   max_args: 9
   owner: "@bioetl-composition"

@@ -4,6 +4,7 @@ Use this file as a strict operating profile for code suggestions in this reposit
 
 ## Canonical Sources
 
+- `docs/00-project/NORMATIVE_SOURCES.md` (normative stack index)
 - `docs/00-project/RULES.md` (project constitution, RFC2119 requirements)
 - `docs/01-requirements/REQUIREMENTS.md` (functional/non-functional requirements)
 - ADRs in `docs/02-architecture/decisions/`
@@ -15,6 +16,10 @@ If guidance conflicts, prioritize canonical sources over this file.
 For AI runtime behavior conflicts, follow the runtime-source-first precedence
 defined in `AGENTS.md`.
 
+Architecture, Medallion, DI, domain purity, testing, and API rules live in
+`docs/00-project/RULES.md` §1–§4. Read RULES instead of relying on summaries
+below.
+
 ## AI Runtime Notes
 
 - `.codex/**` is the tracked runtime source of truth on `main`.
@@ -24,31 +29,13 @@ defined in `AGENTS.md`.
 - `docs/00-project/ai/**` is a mirror/guidance layer, not the runtime behavior source.
 - Do not rely on `.claude/**` as a canonical behavior source for Codex/Gemini work.
 
-## Architecture Guardrails (MUST)
+## Copilot Session Guardrails
 
-### Hexagonal import boundaries
-
-- `domain` must not import `application` or `infrastructure`.
-- `application` must not import `infrastructure`.
-- `infrastructure` may import domain ports/types/exceptions.
-- Ports must be imported via `bioetl.domain.ports` facade.
-
-### Domain purity
-
-- No I/O in domain (`httpx`, `requests`, `open()`, DB clients, `structlog`).
-- No side effects at module import time in domain/application.
-
-### Dependency injection
-
-- Use constructor injection.
-- Do not instantiate concrete adapters in domain/application classes.
-- Keep wiring/factories in `src/bioetl/composition/`.
-
-### Medallion constraints
-
-- Bronze: raw immutable ingestion artifacts.
-- Silver: Delta Lake only (no raw parquet fallback).
-- Gold: curated business-level outputs.
+- Preserve hexagonal import boundaries and composition-root DI (see RULES §1).
+- Preserve Medallion invariants: Bronze append-only, Silver/Gold Delta Lake
+  (see RULES §2).
+- Never increase technical-debt budgets or hotspot thresholds.
+- Never hardcode secrets or weaken assertions to green tests.
 
 ## Anti-Patterns (MUST NOT Suggest)
 
@@ -69,7 +56,7 @@ defined in `AGENTS.md`.
 ## Suggestion Quality Checklist
 
 - Includes type annotations for public interfaces.
-- Preserves architecture constraints and naming conventions.
+- Preserves architecture constraints and naming conventions from RULES.
 - Adds/updates tests when behavior changes.
 - Uses memory plus repo search to identify related tests, docs, contracts, and
   configs before narrowing the validation scope.

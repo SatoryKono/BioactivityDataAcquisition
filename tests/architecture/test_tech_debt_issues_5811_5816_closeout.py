@@ -15,9 +15,7 @@ from scripts.engineering.qa import report_observability_metric_inventory as inve
 from scripts.engineering.qa.import_graph_inventory import (
     collect_exact_module_import_usage,
 )
-from bioetl.domain.behavior.phased_migration_support import (
-    PhasedMigrationCoordinator,
-)
+# PhasedMigrationCoordinator removed - retired shim (2026-07-03)
 from bioetl.domain.behavior.staged_enforcement import StagedEnforcementEngine
 from bioetl.infrastructure.config.staged_enforcement_policy_loader import (
     load_staged_enforcement_policies,
@@ -73,23 +71,15 @@ def test_issue_5811_closeout_artifact_covers_all_child_issues() -> None:
 
 
 def test_issue_5812_phased_migration_support_is_retired_compat_shim() -> None:
-    service = PhasedMigrationCoordinator()
-    status = service.get_current_migration_status()
-    doc_text = PHASED_MIGRATION_DOC.read_text(encoding="utf-8")
-
-    assert status.current_phase == "stable"
-    assert status.supported_phases == ["stable"]
-    assert service.check_backward_compatibility({}, "v1.0") == {
-        "phase_retired": (
-            "Legacy phased migration phase v1.0 is retired; use the governed "
-            "config compatibility registry instead"
+    # PhasedMigrationCoordinator removed - retired shim (2026-07-03)
+    # Verify module file is removed
+    assert not (ROOT / "src" / "bioetl" / "domain" / "behavior" / "phased_migration_support.py").exists()
+    
+    # Verify import fails
+    with pytest.raises(ImportError):
+        from bioetl.domain.behavior.phased_migration_support import (
+            PhasedMigrationCoordinator,
         )
-    }
-    assert _src_importers("bioetl.domain.behavior.phased_migration_support") == {
-        "src/bioetl/domain/behavior/__init__.py"
-    }
-    assert "retired-compat-shim" in doc_text
-    assert "config_compatibility_registry.yaml" in doc_text
 
 
 def test_issue_5813_staged_enforcement_registry_is_single_and_externalized() -> None:

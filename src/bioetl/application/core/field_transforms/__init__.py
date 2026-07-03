@@ -5,4 +5,3 @@ from __future__ import annotations
 from bioetl.application.core.dict_transformers import *  # noqa: F403
 from bioetl.application.core.entity_id import *  # noqa: F403
 from bioetl.application.core.field_specs import *  # noqa: F403
-from bioetl.application.core.publication_aliases import *  # noqa: F403

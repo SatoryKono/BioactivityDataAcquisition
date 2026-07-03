@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from dataclasses import replace
 from typing import TYPE_CHECKING, ClassVar
 
 from bioetl.application.core.base_transformer.types import (
@@ -43,9 +44,13 @@ def _resolve_transformer_dependencies(
             collaborator is not None
             for collaborator in (tracer, metrics, identity_service, pii_hasher)
         ):
-            raise TypeError(
-                "Pass either 'dependencies' or named collaborators "
-                "('tracer', 'metrics', 'identity_service', 'pii_hasher'), not both."
+            return replace(
+                dependencies,
+                tracer=tracer or dependencies.tracer,
+                metrics=metrics or dependencies.metrics,
+                identity_service=identity_service
+                or dependencies.identity_service,
+                pii_hasher=pii_hasher or dependencies.pii_hasher,
             )
         return dependencies
 

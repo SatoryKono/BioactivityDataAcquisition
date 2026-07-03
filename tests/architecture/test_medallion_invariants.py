@@ -214,7 +214,7 @@ class TestSilverLayerInvariants:
                 )
 
     def test_silver_path_is_delta_table_location(self) -> None:
-        """Silver paths MUST resolve to Delta table directories."""
+        """Silver paths MUST preserve canonical repo-relative Delta contracts."""
         from unittest.mock import Mock
 
         from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -229,7 +229,7 @@ class TestGoldLayerInvariants:
     """Tests ensuring Gold layer uses Delta table locations."""
 
     def test_gold_path_is_delta_table_location(self) -> None:
-        """Gold paths MUST resolve to Delta table directories."""
+        """Gold paths MUST preserve canonical repo-relative Delta contracts."""
         from unittest.mock import Mock
 
         from bioetl.infrastructure.storage.gold_writer import GoldWriter

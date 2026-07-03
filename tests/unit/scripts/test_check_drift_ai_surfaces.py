@@ -366,3 +366,22 @@ def test_check_ai_surfaces_reports_missing_specialized_role_memory_coverage(
         "Missing required AI policy/runtime token: memory-py-review-orchestrator.md",
         "Missing required AI policy/runtime token: memory-py-test-swarm.md",
     }
+
+
+def test_check_stale_rules_version_literals_flags_outdated_marker(
+    monkeypatch, tmp_path: Path
+) -> None:
+    rules = tmp_path / "docs" / "00-project" / "RULES.md"
+    rules.parent.mkdir(parents=True)
+    rules.write_text("Version: 6.1.4\n", encoding="utf-8")
+
+    target = tmp_path / "docs" / "00-project" / "00-map.md"
+    target.write_text("Synced with RULES.md v6.1.3\n", encoding="utf-8")
+
+    monkeypatch.setattr(check_drift, "PROJECT_ROOT", tmp_path)
+
+    report = check_drift.DriftReport()
+    check_drift._check_stale_rules_version_literals(report, project_root=tmp_path)
+
+    assert report.error_count == 1
+    assert "Stale RULES.md version literal" in report.issues[0].detail

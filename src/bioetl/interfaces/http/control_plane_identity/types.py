@@ -1,4 +1,8 @@
-"""Shared types for Control Plane identity evidence."""
+"""Shared types for Control Plane identity evidence.
+
+Legacy HTTP contract compatibility layer - sunset date: 2026-12-31
+This module accepts legacy HTTP contract names for backward compatibility.
+"""
 
 from __future__ import annotations
 
@@ -8,6 +12,10 @@ from typing import Protocol
 from bioetl.domain.control_plane import RunLedgerEntry
 
 IDENTITY_EVIDENCE_CONTRACT = "control_plane_identity_evidence_v1"
+
+# Legacy HTTP contract compatibility - sunset date: 2026-12-31
+# This module accepts legacy HTTP contract names for backward compatibility.
+# After sunset, only canonical HTTP contracts should be accepted.
 
 
 class LedgerEntryProvider(Protocol):

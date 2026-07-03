@@ -10,12 +10,16 @@ import threading
 from collections.abc import Callable
 from contextlib import suppress
 from dataclasses import replace
+from pathlib import Path
 from typing import Any, cast
 
 import pyarrow as pa
 from deltalake import DeltaTable as DeltaTableType
 
 from bioetl.domain.medallion import SilverWriteMode
+from bioetl.infrastructure.storage.delta.table_ops import (
+    normalize_delta_filesystem_path,
+)
 from bioetl.infrastructure.storage.silver.delta_request_models import (
     _DeltaWriteRequest,
 )
@@ -31,17 +35,20 @@ __all__ = [
 _PLAIN_DELTA_WRITE_SUBPROCESS_CODE = (
     "import json\n"
     "import sys\n"
+    "from pathlib import Path\n"
     "import pyarrow as pa\n"
     "import pyarrow.ipc as ipc\n"
     "from deltalake import write_deltalake\n"
     "metadata = json.loads(sys.argv[1])\n"
     "table = ipc.open_stream(pa.py_buffer(sys.stdin.buffer.read())).read_all()\n"
+    "table_path = Path(metadata['table_or_uri']).expanduser().resolve()\n"
+    "table_path.parent.mkdir(parents=True, exist_ok=True)\n"
     "kwargs = {\n"
-    "    'table_or_uri': metadata['table_or_uri'],\n"
+    "    'table_or_uri': table_path.as_posix(),\n"
     "    'data': table,\n"
     "    'mode': metadata['mode'],\n"
     "}\n"
-    "if metadata.get('partition_by') is not None:\n"
+    "if metadata.get('partition_by'):\n"
     "    kwargs['partition_by'] = metadata['partition_by']\n"
     "if metadata.get('schema_mode') is not None:\n"
     "    kwargs['schema_mode'] = metadata['schema_mode']\n"
@@ -108,14 +115,20 @@ def _build_plain_delta_write_kwargs(
 ) -> dict[str, Any]:  # Any: Delta Lake write kwargs are heterogeneous
     """Build keyword arguments for a non-merge Delta write."""
     kwargs: dict[str, Any] = {  # Any: heterogeneous kwargs dict
-        "table_or_uri": request.table_path,
+        "table_or_uri": normalize_delta_filesystem_path(request.table_path),
         "data": request.arrow_data,
         "mode": mode,
-        "partition_by": request.partition_cols,
     }
+    if request.partition_cols:
+        kwargs["partition_by"] = request.partition_cols
     if schema_mode is not None:
         kwargs["schema_mode"] = schema_mode
     return kwargs
+
+
+def _ensure_delta_table_parent_dir(table_path: str) -> None:
+    """Create the parent directory for a Delta table before first write."""
+    Path(table_path).parent.mkdir(parents=True, exist_ok=True)
 
 
 def _serialize_arrow_table_for_subprocess(table: pa.Table) -> bytes:
@@ -179,6 +192,9 @@ async def _write_plain_delta_request(
     process_isolation: bool = False,
 ) -> None:
     """Execute a non-merge Delta write for an already prepared request."""
+    canonical_path = normalize_delta_filesystem_path(request.table_path)
+    _ensure_delta_table_parent_dir(canonical_path)
+    request = replace(request, table_path=canonical_path)
     kwargs = _build_plain_delta_write_kwargs(
         request,
         mode=mode,

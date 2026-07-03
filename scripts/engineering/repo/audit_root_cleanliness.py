@@ -25,6 +25,7 @@ CANONICAL_ROOT_TEXT_FILES: frozenset[str] = frozenset(
     {
         "AGENTS.md",
         "CHANGELOG.md",
+        "CONTRIBUTING.md",
         "GEMINI.md",
         "README.md",
         # Qodo documents this exact root filename for repo-level guidance.
@@ -42,6 +43,8 @@ FORBIDDEN_TRACKED_PATH_PREFIXES: tuple[str, ...] = (
     "output/",
     "src/tools/reports/",
     "test-output/",
+    "caddy/",
+    "silver/",
 )
 FORBIDDEN_TRACKED_ROOT_FILES: frozenset[str] = frozenset(
     {
@@ -219,6 +222,9 @@ def _is_forbidden_tracked_artifact(path: str) -> bool:
         return True
     if "/" in path:
         return False
+    # SECRET-BEARING .env files are forbidden at root (RULES.md REQ-SECRET-004)
+    if path == ".env" or (path.startswith(".env.") and path != ".env.example"):
+        return True
     if path in FORBIDDEN_TRACKED_ROOT_FILES:
         return True
     if path.startswith(".coverage"):

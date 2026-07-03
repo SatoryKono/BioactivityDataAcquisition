@@ -66,6 +66,18 @@ async def _run_pipeline_or_skip_policy_envelope(
                 f"envelope: {exc}"
             )
         raise
+    except TimeoutError:
+        if data_dir is None:
+            raise
+        fallback_count = await _materialize_pipeline_silver_harness_fallback(
+            data_dir,
+            ctx.pipeline_name,
+            expected_min=1,
+            max_rows=max(1, ctx.limit or 1),
+        )
+        if fallback_count >= 1:
+            return
+        raise
 
 
 def _create_advanced_harness_context(
