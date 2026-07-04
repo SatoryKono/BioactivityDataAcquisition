@@ -385,3 +385,20 @@ def test_check_stale_rules_version_literals_flags_outdated_marker(
 
     assert report.error_count == 1
     assert "Stale RULES.md version literal" in report.issues[0].detail
+
+
+def test_check_cursor_rules_deploy_sync_reports_missing_deploy(
+    monkeypatch, tmp_path: Path
+) -> None:
+    canonical = tmp_path / check_drift.CURSOR_RULE_DOCS_DIR
+    canonical.mkdir(parents=True)
+    (canonical / "00-test.mdc").write_text(
+        "---\ndescription: test\n---\n\n# Rule\n",
+        encoding="utf-8",
+    )
+
+    report = check_drift.DriftReport()
+    check_drift._check_cursor_rules_deploy_sync(report, project_root=tmp_path)
+
+    assert report.error_count == 1
+    assert "Cursor deploy rule missing" in report.issues[0].detail

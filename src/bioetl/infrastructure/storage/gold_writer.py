@@ -126,7 +126,6 @@ class GoldWriter(
         transform_steps: tuple[str, ...] | None = None,
         runtime_services: GoldWriterRuntimeServices | None = None,
         flat_structure: bool = False,
-        **legacy_kwargs: object,
     ) -> None:
         """Initialize Gold writer with explicit runtime collaborators."""
         from bioetl.infrastructure.storage.gold.writer_support import (
@@ -136,7 +135,6 @@ class GoldWriter(
         super().__init__(base_path, logger, flat_structure=flat_structure)
         services = _resolve_runtime_services(
             runtime_services=runtime_services,
-            legacy_kwargs=legacy_kwargs,
         )
         self.csv_exporter = services.csv_exporter
         self._metrics = services.metrics

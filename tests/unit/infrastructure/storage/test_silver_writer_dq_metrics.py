@@ -12,6 +12,9 @@ from bioetl.domain.medallion import SilverWriteMode
 from bioetl.infrastructure.storage.silver.metadata_operations import (
     _SilverMetadataWriteRequest,
 )
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
 
 from .test_silver_writer import mock_metadata_coordinator, noop_logger, valid_records
 
@@ -302,8 +305,10 @@ class TestSilverWriterDQMetrics:
         writer = SilverWriter(
             base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
-            metadata_writer=mock_metadata_writer,
-            metadata_coordinator=mock_metadata_coordinator,
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                metadata_writer=mock_metadata_writer,
+                metadata_coordinator=mock_metadata_coordinator,
+            ),
         )
 
         await writer._write_silver_metadata(
@@ -372,8 +377,10 @@ class TestSilverWriterDQMetrics:
         writer = SilverWriter(
             base_path=str(SILVER_BASE_PATH),
             logger=noop_logger,
-            metadata_writer=mock_metadata_writer,
-            metadata_coordinator=mock_metadata_coordinator,
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                metadata_writer=mock_metadata_writer,
+                metadata_coordinator=mock_metadata_coordinator,
+            ),
         )
 
         await writer._write_silver_metadata(
@@ -451,8 +458,10 @@ class TestSilverWriterDQMetrics:
             writer = SilverWriter(
                 base_path=str(SILVER_BASE_PATH),
                 logger=noop_logger,
-                metadata_writer=mock_metadata_writer,
-                metadata_coordinator=mock_metadata_coordinator,
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    metadata_writer=mock_metadata_writer,
+                    metadata_coordinator=mock_metadata_coordinator,
+                ),
             )
 
             await writer.write_silver(

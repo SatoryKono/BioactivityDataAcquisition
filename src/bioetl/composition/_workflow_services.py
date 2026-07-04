@@ -90,6 +90,10 @@ def get_workflow_runner_service(
     from bioetl.composition.factories.services.port_factories import create_metrics
     from bioetl.domain.ports.noop import NoOpAudit, NoOpMetadataWriter, NoOpTracing
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
+    from bioetl.infrastructure.storage.silver.runtime_helpers import (
+        SilverWriterRuntimeServicesRequest,
+        build_silver_writer_runtime_services,
+    )
     from bioetl.infrastructure.storage.gold.runtime_helpers import (
         GoldWriterRuntimeServices,
     )
@@ -104,10 +108,28 @@ def get_workflow_runner_service(
 
     settings = get_settings()
     metrics = create_metrics(settings)
+    workflow_storage_logger = create_noop_logger()
     transform_storage = SilverWriter(
         base_path=settings.silver_path,
-        logger=create_noop_logger(),
-        metrics=metrics,
+        logger=workflow_storage_logger,
+        runtime_services=build_silver_writer_runtime_services(
+            SilverWriterRuntimeServicesRequest(
+                csv_exporter=None,
+                tracing=NoOpTracing(),
+                write_policy=None,
+                metrics=metrics,
+                audit=NoOpAudit(),
+                logger=workflow_storage_logger,
+                silver_validator=None,
+                metadata_writer=NoOpMetadataWriter(),
+                metadata_coordinator=None,
+                lineage_store=None,
+                dq_calculator=None,
+                merge_resilience_policy=None,
+                base_path=settings.silver_path,
+                pipeline_name="workflow_transforms",
+            )
+        ),
         pipeline_name="workflow_transforms",
     )
     transform_gold_storage = GoldWriter(

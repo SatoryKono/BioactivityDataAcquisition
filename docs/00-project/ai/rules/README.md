@@ -153,12 +153,11 @@ interfaces/     → CLI
 
 1. Обновить `bioetl-ai-rules.md` (краткая версия)
 2. Обновить `docs/00-project/ai/rules/cursor/*.mdc` (источник)
-3. Скопировать в `.cursor/rules/`:
+3. Обновить `docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md` при изменении покрытия
+4. Синхронизировать governance surfaces:
    ```bash
-   cp docs/00-project/ai/rules/cursor/*.mdc .cursor/rules/
-   ```
-4. Регенерировать Windsurf mirror:
-   ```bash
+   uv run python scripts/ai/sync_ai_governance.py
+   uv run python scripts/ai/sync_cursor_rules.py --deploy
    uv run python scripts/ai/sync_windsurf_rules.py
    ```
 

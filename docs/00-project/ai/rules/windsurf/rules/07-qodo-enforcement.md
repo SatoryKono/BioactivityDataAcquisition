@@ -8,11 +8,14 @@ description: "Qodo platform enforcement rules synced into Cursor guidance"
 **Source:** Qodo platform `/rules/search` for `SatoryKono/BioactivityDataAcquisition`
 **Synced:** 2026-07-03 (24 active rules)
 
-These rules are integrated into thematic `.mdc` files (`00`–`06`). This file is the traceability index.
+These rules are integrated into thematic `.mdc` files (`00`–`11`). This file is the traceability index.
+
+Coverage matrix: `docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md`
 
 ## Canonical Governance Links
 
 - `AGENTS.md`
+- `docs/00-project/NORMATIVE_SOURCES.md`
 - `docs/00-project/RULES.md`
 - `docs/01-requirements/REQUIREMENTS.md`
 - `docs/02-architecture/decisions/`

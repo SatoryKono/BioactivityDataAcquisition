@@ -8,67 +8,83 @@ globs:
 
 # Future Annotations (PEP 563)
 
-**Canonical references:** `AGENTS.md`, `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`, `docs/02-architecture/decisions/`.
+**Canonical references:** `AGENTS.md`, `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`, `docs/02-architecture/decisions/`.
 
 **EVERY Python file MUST start with:**
 ```python
 from __future__ import annotations
 ```
 
-Order:
-1. Shebang (if any)
-2. Encoding (if any)
-3. Module docstring
-4. **`from __future__ import annotations`**
-5. Other imports
+Order: shebang → encoding → module docstring → **`from __future__ import annotations`** → imports.
 
-Exception: Minimal `__init__.py` with only re-exports MAY omit.
+Exception: minimal re-export `__init__.py` without runtime logic (per architecture test).
 
 # Type Hints
 
 - ✅ `list[str]` NOT `List[str]`
 - ✅ `X | None` NOT `Optional[X]`
 - ✅ `X | Y` NOT `Union[X, Y]`
+- Public API fully typed; `mypy --strict` MUST exit 0
+- Avoid bare `Any` to hide boundary defects; `# type: ignore` single-line with justification only
 
-# Quality Tools
+# Naming Conventions
 
-- `mypy --strict` — MUST exit 0 with no errors on changed files
-- `ruff` — lint/format
-- Coverage: **≥85%** (`--cov-fail-under=85`)
+| Element | Style |
+| ------- | ----- |
+| modules, functions, variables | `snake_case` |
+| classes | `PascalCase` |
+| constants | `UPPER_SNAKE_CASE` |
 
-# mypy --strict Compliance
+Role suffixes when applicable: `*Factory`, `*Client`, `*Protocol`/`*ABC`, `*Config`, `*Error`, `*Impl`.
 
-- All new/modified functions: explicit parameter and return type annotations
-- `# type: ignore` only on single lines with short justification; no file-wide ignores
-- New modules MUST be included in mypy config (not excluded via `ignore_errors`)
-- Avoid bare `Any` unless explicitly justified
+Pipeline stage modules (when used): `extract.py`, `transform.py`, `validate.py`, `export.py`.
 
-# Public API Type Hints
+# Pipeline ID Governance
 
-All public functions/methods (no `_` prefix, externally consumed) MUST have:
-- Annotated parameters (including `*args`/`**kwargs` when present)
-- Explicit `-> ReturnType`
+- **Current runtime/config:** `<provider>_<entity>` (e.g. `chembl_activity`)
+- External `<entity>_<source>` profile is conflicting — **MUST NOT** introduce third variant or mass-rename without ADR + migration table (configs, CLI, metrics, locks, paths, docs)
+
+# Configuration
+
+- YAML/JSON loaded and validated in `infrastructure/`/`composition/` → immutable domain config objects
+- Domain **MUST NOT** read files or environment variables directly
+- Unified entity config: `configs/entities/{provider}/{entity}.yaml` (pipeline, schema, quality, filters, contracts, hash-policy)
+- Reuse existing DTO/Value Object/port; remove superseded implementations after migration window
+
+# Quality Tools & Gates
+
+| Tool | Requirement |
+| ---- | ----------- |
+| Ruff | Canonical linter/formatter |
+| mypy | `--strict`, exit 0 on changed files |
+| import-linter | Layer matrix enforced |
+| Coverage | **≥85%** overall (`--cov-fail-under=85`) — no separate 90% domain gate in current RULES |
+| pip-audit | CI blocks merge on CVE ≥ HIGH |
+| Bandit / detect-secrets | Security gates in CI |
 
 # Content Hash Algorithm
 
 ```python
-sha256(provider + canonical_json(normalized_record)).hexdigest()
+sha256(provider + canonical_json(normalized_record)).hexdigest()  # lowercase hex
 ```
 
 Normalization:
-- NaN/Inf → `null`
-- Floats → `round(val, 10)`
-- Dates → ISO `YYYY-MM-DD`
-- Strings → `strip()`
+- Stable key ordering, compact separators, ASCII-safe output
+- NaN/Inf → `null`; floats → `round(val, 10)`; dates → ISO `YYYY-MM-DD`; strings → `strip()`
+- Set-like collections: canonical order where semantically unordered
+- Exclude occurrence/meta fields from semantic hash
 
-Exclude `_` prefixed meta-fields from hash.
+Changing hash profile requires ADR, migration analysis, golden hash tests.
 
-# Makefile Commands
+# Makefile / Pre-PR Commands
 
 ```bash
 make install          # venv + deps
-make setup-plugins    # pytest/pre-commit
-make test             # stable suite, coverage
 make lint             # ruff + mypy
-make run-local        # sample pipeline
+make test             # stable suite + coverage
+uv run lint-imports --config .importlinter
+uv run python -m scripts.schema validate-configs
+uv run python -m pytest tests/architecture/ -m "not slow and not benchmark and not memory" -q
 ```
+
+Docker Compose: optional helper only; canonical runtime is Local-Only Python/venv.

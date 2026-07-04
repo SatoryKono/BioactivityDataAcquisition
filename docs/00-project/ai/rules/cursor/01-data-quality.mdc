@@ -5,84 +5,101 @@ globs: ["configs/**/*.yaml", "src/**/*.py"]
 
 # Medallion Architecture
 
-**Canonical references:** `AGENTS.md`, `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`, `docs/02-architecture/decisions/`.
+**Canonical references:** `AGENTS.md`, `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`, `docs/02-architecture/decisions/`.
 
-| Layer  | Format | Validation | Retention | Idempotency |
-|--------|--------|------------|-----------|-------------|
-| Bronze | JSONL+zstd | Minimal | 90 days | Append-only |
-| Silver | Delta Lake | Soft (drift) | Permanent | Merge/Upsert, ACID |
-| Gold   | Delta Lake | Strict | Permanent | SCD Type 2 or partition |
+| Layer  | Format | Path / Validation | Retention | Write semantics |
+|--------|--------|-------------------|-----------|-----------------|
+| Bronze | JSONL+zstd | `bronze/{provider}/{entity}/{date}/` (ingestion date) | 90 days hot → archive | Append-only, immutable payload |
+| Silver | Delta Lake (delta-rs) | ACID via `_delta_log/` | Permanent | MERGE / APPEND / DELETE |
+| Gold   | Delta Lake | strict Pandera (`strict=True`) | Permanent | OVERWRITE / APPEND / SCD2 |
 
-## Write Modes
+## Bronze (MUST)
 
-**Silver** (`SilverWriteMode`):
-- `MERGE` — Upsert by PK (default incremental)
-- `APPEND` — No dedup
-- `DELETE` — Full rewrite (NOT `OVERWRITE`)
+- Payload as received — no normalization, dedup, field repair, or business filtering
+- Atomic writes; breaking format change → new versioned path + migration (no in-place migration)
+- Replayable source of truth; manifest/ledger/checkpoint do not replace Bronze
 
-**Gold** (`GoldWriteMode`):
-- `OVERWRITE` — Recomputed aggregates
-- `APPEND` — Fact streams
-- `SCD2` — History tracking
+## Silver Write Modes
 
-**SCD2 REQUIRED for:** Reference dicts, slowly evolving records, publication metadata
+| Mode | Semantics |
+| ---- | --------- |
+| `MERGE` | Upsert by declared primary/business keys + deterministic content identity |
+| `APPEND` | **Only** with explicit machine-readable `idempotency_contract` — append without it is invalid config |
+| `DELETE` | Full rewrite semantics |
 
-## Delta Lake Maintenance
+**MUST NOT:** raw Parquet without `_delta_log/`; `OVERWRITE` as Silver enum.
 
-- Engine: `delta-rs` (Rust core)
-- **VACUUM MUST run weekly**, 7 days retention
-- Forensic: default 7 days, max 30 for critical tables
+**ADR-050:** `filters.silver_filters` is **structural admission only**. Semantic buckets (`columns`, `ranges`, `list_lengths`, `list_contains`) in active Silver config **MUST NOT**.
+
+Pandera validation **MUST** run on the exact DataFrame written — no post-validation transforms without re-validation.
+
+## Gold Write Modes
+
+| Mode | Use |
+| ---- | --- |
+| `OVERWRITE` | Recomputed aggregates |
+| `APPEND` | High-volume fact streams (when configured) |
+| `SCD2` | Reference dicts, slowly evolving records, publication metadata — requires full `scd_config` (valid-from, valid-to, current flag, version column) |
+
+Gold write after failed strict validation **MUST NOT**. `SchemaError` aborts write — catching and continuing forbidden.
+
+## Delta Maintenance
+
+- Engine: `delta-rs` (`deltalake`)
+- **VACUUM** weekly, 7-day retention
+- Forensic retention: default 7 days; up to 30 days for critical tables via config
+
+## NULL Policy (REQ-NULL-*)
+
+- Missing source value → `NULL` (not sentinel)
+- **MUST NOT:** -1, `"N/A"`, 9999, or other business-false substitutes
+- Nullable fields: explicit `nullable=True` in Pandera contract
+
+## JSON Fields (ADR-035)
+
+Silver/Gold JSON-like fields stored as **canonical JSON strings** (`Series[str]`, not `Series[object]`):
+- Canonical JSON helper only; stable key order, compact separators
+- Empty collection → `NULL` unless contract defines otherwise
+- **MUST NOT** mix native list/dict and JSON string for same field
+- Legacy native object/list only as temporary ADR-035 dual-read migration surface
+
+## Lineage (REQ-LINEAGE-*)
+
+- Persisted Silver/Gold rows **MUST NOT** contain occurrence-scoped `_run_id`, `_run_type`, `_source_batch_id`, `_ingestion_ts`
+- Lineage in control-plane artifacts: manifest/ledger/sidecar with batch_id → Bronze mapping
+- Full storage paths in every data row **MUST NOT**
+
+## Partition Guardrails
+
+- Bronze: partition by ingestion date (`YYYY-MM-DD`)
+- Warning: >10,000 partitions or >100 files/partition
+- Fail pipeline: >50,000 partitions
+- **MUST NOT** partition by UUID, hash, or free text; use Z-ORDER for high-cardinality Gold access
 
 ## Quarantine (Unified Table)
 
-- Single table: `common.quarantine`
-- Retention: 30 days
-- Status flow: NEW → UNDER-REVIEW → IGNORED/REPROCESSED/EXPIRED
-- **Sentinel values (-1, "N/A", 9999) FORBIDDEN**
+- Table: `common.quarantine`; retention 30 days
+- Payload max **64 KB** at ingress; immutable after creation (full raw in Bronze)
+- Status: NEW → UNDER_REVIEW → IGNORED | REPROCESSED; EXPIRED via retention
+- Resolution requires full `ResolutionInfo`; replay → new Silver candidate
+- CLI: `bioetl quarantine inspect|replay|purge`
+- Triage surface — not analytical source of truth
 
-## JSON Fields Policy
+## PII / Sensitive Data
 
-Silver/Gold JSON fields as **canonical JSON strings**:
-```python
-Series[str]  # NOT Series[object]
-```
+- Silver PII: salted hash `sha256(lowercase(value) + SALT)` — unsalted forbidden
+- Gold: PII excluded or aggregated
+- Secrets/Authorization/PII redacted from logs, traces, VCR
 
-- Stable key ordering, compact separators, valid JSON syntax (no manual string concatenation)
-- Null: `None` (not `'[]'`, `'{}'`, `'null'`, or empty string)
-- Empty collections → `NULL`
+## Idempotent Merge & Determinism
 
-## Pandera Validation (MUST before write)
-
-**Silver**: validate the **exact** DataFrame being written via `schema.validate(df)`, `schema(df)`, or Pandera decorator/context manager. No post-validation transforms without re-validation. The validated object MUST be what gets written.
-
-**Gold**: strict Pandera schema (`pa.DataFrameSchema`, `@pa.check_types`; `strict=True`, `coerce=True`). `SchemaError`/`SchemaErrors` MUST abort the write — catching and logging/continuing is forbidden. No `lazy=True` errors ignored.
-
-## Idempotent Merge
-
-- Merge/upsert match condition MUST use declared primary key (or documented business key) only
-- Rerunning the same batch MUST update existing rows, not insert duplicates
-- Red flags: MERGE on non-unique columns, INSERT without conflict handling into keyed tables
-
-## Determinism Rules (infrastructure)
-
-Forbidden in `infrastructure/` and storage writers:
-- `datetime.now()`, `datetime.utcnow()`, `date.today()`, `time.time()`
-- `random.*`, `numpy.random` without context-provided seed
-
-Required:
+- Merge on declared PK/business key only; rerun updates rows, no duplicate semantics
+- Forbidden in writers: `datetime.now()`, `random.*` without context seed
 - Timestamps from `PipelineContext.started_at` (UTC)
-- Randomness from context-provided seeded RNG derived from `PipelineContext`
-- Stable sorting, canonical serialization, deterministic dict/JSON key order
-- Deterministic jitter when `RetryConfig(deterministic=True)`
+- Atomic artifact writes: `tmp` → `os.replace`
 
-Acceptable exceptions: local CLI utilities explicitly marked non-reproducible.
+## Content Hash (see also `02-code-style.mdc`)
 
-## Atomic Artifact Writes
+`sha256(provider + canonical_json(normalized_record)).hexdigest()` — exclude occurrence/meta fields (`_ingestion_ts`, `_run_id`, `_run_type`, `_source_batch_id`, `_dq_*`, `_index`).
 
-```python
-tmp = path.with_suffix(".tmp")
-tmp.write_text(payload, encoding="utf-8")
-os.replace(tmp, path)
-```
-
-Direct writes to final artifact paths are violations.
+Hash collision with different `source_record_id` → log both records with evidence.

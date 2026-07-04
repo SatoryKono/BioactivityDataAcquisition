@@ -3,25 +3,15 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 from deltalake import DeltaTable, write_deltalake
 
-from bioetl.domain.behavior.dq_metrics_calculator import DQMetricsCalculator
-from bioetl.domain.medallion import SilverWriteMode, WriteModePolicy
+from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.ports import (
-    AuditPort,
-    LineageStorePort,
     LoggerPort,
-    MetadataCoordinatorPort,
-    MetadataWriterPort,
-    MetricsPort,
-    SilverValidatorPort,
     TracingPort,
 )
-from bioetl.infrastructure.export.csv_exporter_contract import CsvExporterProtocol
 from bioetl.infrastructure.storage.base_delta_writer import BaseDeltaWriter
-from bioetl.infrastructure.storage.delta.resilience import SilverMergeResiliencePolicy
 from bioetl.infrastructure.storage.silver.maintenance_mixin import (
     SilverWriterMaintenanceMixin,
 )
@@ -82,62 +72,13 @@ class SilverWriter(
         flat_structure: bool = False,
         pipeline_name: str | None = None,
         runtime_request: SilverWriterRuntimeServicesRequest | None = None,
-        csv_exporter: CsvExporterProtocol | None = None,
-        tracing: TracingPort | None = None,
-        write_policy: WriteModePolicy | None = None,
-        metrics: MetricsPort | None = None,
-        audit: AuditPort | None = None,
-        silver_validator: SilverValidatorPort | None = None,
-        metadata_writer: MetadataWriterPort | None = None,
-        metadata_coordinator: MetadataCoordinatorPort | None = None,
-        lineage_store: LineageStorePort | None = None,
-        dq_calculator: DQMetricsCalculator | None = None,
-        merge_resilience_policy: SilverMergeResiliencePolicy | None = None,
-        contract_rollout_policy: Any = None,  # Any: Dynamic policy object with .mode and .write_versions attributes
     ) -> None:
         """Initialize Silver writer."""
         self._pipeline_name = pipeline_name
 
-        explicit_runtime_dependencies = {
-            "csv_exporter": csv_exporter,
-            "tracing": tracing,
-            "write_policy": write_policy,
-            "metrics": metrics,
-            "audit": audit,
-            "silver_validator": silver_validator,
-            "metadata_writer": metadata_writer,
-            "metadata_coordinator": metadata_coordinator,
-            "lineage_store": lineage_store,
-            "dq_calculator": dq_calculator,
-            "merge_resilience_policy": merge_resilience_policy,
-            "contract_rollout_policy": contract_rollout_policy,
-        }
-        conflicting_dependencies = sorted(
-            name
-            for name, value in explicit_runtime_dependencies.items()
-            if value is not None
-        )
-        if runtime_request is not None and conflicting_dependencies:
-            raise TypeError(
-                "Cannot pass direct runtime dependency kwargs when "
-                f"'runtime_request' is provided: {', '.join(conflicting_dependencies)}"
-            )
-
         if runtime_request is None:
             runtime_request = SilverWriterRuntimeServicesRequest(
-                csv_exporter=csv_exporter,
-                tracing=tracing,
-                write_policy=write_policy,
-                metrics=metrics,
-                audit=audit,
                 logger=logger,
-                silver_validator=silver_validator,
-                metadata_writer=metadata_writer,
-                metadata_coordinator=metadata_coordinator,
-                lineage_store=lineage_store,
-                dq_calculator=dq_calculator,
-                merge_resilience_policy=merge_resilience_policy,
-                contract_rollout_policy=contract_rollout_policy,
             )
 
         super().__init__(base_path, logger, flat_structure=flat_structure)

@@ -206,7 +206,7 @@ def _run_command_with_cli_policy(
             required_probe_paths=build_observability_backend_required_probe_paths(
                 pipelines=(cli_input.pipeline,)
             ),
-            ensure_backend_started_fn=ensure_observability_backend_started,
+            ensure_backend_started_fn=_ensure_observability_backend_started_impl,
             disable_transient_health_server_fn=should_disable_transient_health_server,
         ),
     )
@@ -323,4 +323,3 @@ run = build_run_click_command(
 echo_health_server_info = _echo_health_server_info_impl
 ensure_metrics_server_started = _ensure_metrics_server_started_impl
 health_server_context = _health_server_context_impl
-ensure_observability_backend_started = _ensure_observability_backend_started_impl

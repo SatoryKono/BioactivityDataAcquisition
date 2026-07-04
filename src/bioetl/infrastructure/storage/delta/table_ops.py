@@ -53,6 +53,8 @@ def load_delta_table(table_path: str) -> DeltaTable:
 def normalize_delta_filesystem_path(path: str | Path) -> str:
     """Return a canonical absolute POSIX-style path for Delta Lake filesystem I/O."""
     normalized = str(path).replace("\\", "/")
+    if "://" in normalized:
+        return normalized.rstrip("/")
     return Path(normalized).expanduser().resolve().as_posix()
 
 
@@ -63,7 +65,17 @@ def resolve_delta_table_path(
     flat_structure: bool,
 ) -> str:
     """Resolve the contract path for a Delta table."""
-    normalized_base = Path(base_path.replace("\\", "/")).expanduser()
+    normalized_input = base_path.replace("\\", "/")
+    if "://" in normalized_input:
+        normalized_base = normalized_input.rstrip("/")
+        if flat_structure:
+            return normalized_base
+        relative_path = "/".join(part for part in table_name.split(".") if part)
+        return (
+            f"{normalized_base}/{relative_path}" if relative_path else normalized_base
+        )
+
+    normalized_base = Path(normalized_input).expanduser()
     if flat_structure:
         return normalized_base.as_posix()
     relative_parts = [part for part in table_name.split(".") if part]

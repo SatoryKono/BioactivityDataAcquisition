@@ -94,18 +94,18 @@ class SilverWriterRuntimeServices:
 class SilverWriterRuntimeServicesRequest:
     """Inputs required to build grouped Silver runtime collaborators."""
 
-    csv_exporter: CsvExporterProtocol | None
-    tracing: TracingPort | None
-    write_policy: WriteModePolicy | None
-    metrics: MetricsPort | None
-    audit: AuditPort | None
-    logger: LoggerPort | None
-    silver_validator: SilverValidatorPort | None
-    metadata_writer: MetadataWriterPort | None
-    metadata_coordinator: MetadataCoordinatorPort | None
-    lineage_store: LineageStorePort | None
-    dq_calculator: DQMetricsCalculator | None
-    merge_resilience_policy: SilverMergeResiliencePolicy | None
+    csv_exporter: CsvExporterProtocol | None = None
+    tracing: TracingPort | None = None
+    write_policy: WriteModePolicy | None = None
+    metrics: MetricsPort | None = None
+    audit: AuditPort | None = None
+    logger: LoggerPort | None = None
+    silver_validator: SilverValidatorPort | None = None
+    metadata_writer: MetadataWriterPort | None = None
+    metadata_coordinator: MetadataCoordinatorPort | None = None
+    lineage_store: LineageStorePort | None = None
+    dq_calculator: DQMetricsCalculator | None = None
+    merge_resilience_policy: SilverMergeResiliencePolicy | None = None
     contract_rollout_policy: ContractRolloutPolicy | None = None
     base_path: str | Path | None = None
     pipeline_name: str | None = None

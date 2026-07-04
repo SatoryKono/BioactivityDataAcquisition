@@ -5,16 +5,16 @@ globs: ["src/**/*.py", "tests/**/*.py"]
 
 # Layer Architecture (Clean / Ports & Adapters)
 
-**Canonical references:** `AGENTS.md`, `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`, `docs/02-architecture/decisions/`.
+**Canonical references:** `AGENTS.md`, `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`, `docs/02-architecture/decisions/`.
 
-**Philosophy**: "Pragmatic engineering" — avoid over-engineering, accelerate time-to-market.
+**Patterns:** Hexagonal Architecture, DDD, Medallion Architecture, Composite Pipeline Pattern.
 
 **Layers** (`src/bioetl/`):
-- **domain/**: Pure business logic, Protocols (typing.Protocol), NO I/O
-- **application/**: Orchestration, use cases
-- **infrastructure/**: Adapters, concrete implementations
-- **composition/**: DI wiring — ONLY place knowing ALL layers
-- **interfaces/**: CLI; routes concrete wiring through `composition/`, not `infrastructure/`
+- **domain/**: Value Objects, aggregates, events, enums, errors, ports, immutable configs, data contracts — NO I/O
+- **application/**: Use cases, lifecycle, BatchWriter, RecordProcessor, DQ orchestration via ports
+- **infrastructure/**: HTTP/storage/Delta/quarantine/observability adapters — NO business rules
+- **composition/**: **Only** Composition Root — DI, factories, bootstrap, pipeline assembly
+- **interfaces/**: CLI, health/metrics surfaces, request validation — NO business logic; NO direct `infrastructure/` import
 
 ## Import Matrix (MUST follow)
 
@@ -26,61 +26,73 @@ globs: ["src/**/*.py", "tests/**/*.py"]
 | composition   | ✅ | ✅ | ✅ | ✅ | ❌ |
 | interfaces    | ✅ | ✅ | ❌ | ✅ | ✅ |
 
+**Forbidden:** cyclic dependencies, service locator, hidden global mutable state, module-import side effects, concrete adapters in domain/application signatures.
+
 ## Ports & Protocols
 
-- Define external dependency abstractions as `typing.Protocol` in `bioetl.domain.ports`
-- Import port interfaces **only** via facade: `from bioetl.domain.ports import ...` (never `bioetl.domain.ports.*` submodules)
-- `*Port` suffix = cross-layer contract in `domain/ports/`
-- `*Protocol` suffix = layer-internal structural typing (allowed)
-- Domain/application code MUST depend on `*Port` Protocols, not concrete SDK/client classes
-- Critical ports MUST be `@runtime_checkable`: DataSourcePort, FilterableDataSourcePort, HealthCheckPort, StoragePort
+- Cross-layer ports: `typing.Protocol` in `bioetl.domain.ports`; import **only** via facade: `from bioetl.domain.ports import ...`
+- `*Port` = cross-layer contract; local `*Protocol` = layer-internal structural typing (not a cross-layer port)
+- Primary enforcement: `mypy --strict`; `@runtime_checkable` on composition boundary for critical ports per ADR
+- Critical ports SHOULD be `@runtime_checkable`: DataSourcePort, FilterableDataSourcePort, HealthCheckPort, StoragePort
 
-## Domain Layer Purity (NO I/O)
+## Domain Layer
 
-Domain modules MUST NOT:
-- Import I/O libraries: `httpx`, `requests`, `aiohttp`, DB clients/ORMs, message brokers, `structlog`, `logging`
-- Import from `infrastructure/`, `adapters/`, or other infra packages
-- Call `open()`, network APIs, DB sessions, or logging directly
+**MUST NOT:** I/O libraries (`httpx`, `requests`, DB clients, `structlog`, `logging`), infra imports, `open()`, network/DB calls, concrete logging.
 
-Allowed: pure stdlib (`math`, `dataclasses`, `typing`, `datetime` arithmetic) and `*Port` abstractions.
+**ADR-048 exception:** Pandera/Pandas allowed **only** as schema-contract representation in:
+- `src/bioetl/domain/schemas/`
+- `src/bioetl/domain/contracts/`
 
-## Composition Wiring
+Runtime DataFrame processing, compatibility bootstrap, and infrastructure mapping in domain **MUST NOT**.
 
-- All DI wiring, factories, and environment-specific service assembly MUST live in `src/bioetl/composition/`
-- Feature modules receive dependencies via constructor/parameters, not direct instantiation
-- Composition modules contain wiring only — no business logic
-- Violation: modules outside `composition/` constructing collaborating components or performing env-specific wiring
+**Value Objects / immutable configs:** frozen dataclasses unless approved alternative.
 
-## Import-Time Side Effects
+Runtime Pandera compat: **only** via `bioetl.composition.bootstrap.runtime.pipeline.apply_runtime_compatibility_patches` → `infrastructure.compat.pandera_compat`. Import-time `__init__` patching **MUST NOT**.
 
-Domain and application modules MUST NOT perform side effects at import time:
-- No I/O, logging, env reads that trigger actions, or global state mutation
-- Bootstrap logic belongs in composition/CLI entry points only
+## Application Layer
+
+- Orchestrates via ports; **MUST NOT** know URLs, paths, storage drivers, HTTP libs, or concrete `*Impl`
+- **MUST NOT** create writers, clients, locks, clocks, metrics/loggers internally
+
+## Composition & Interfaces
+
+- All concrete creation, constructor DI, provider registration, bootstrap live in `composition/`
+- Reuse existing port/DTO/Value Object; parallel abstraction of same meaning requires ADR
+- `interfaces/` delegates to application/composition only
+
+## Domain Aggregates (invariants)
+
+**Batch:** OPEN → SEALED → WRITING → COMMITTED | FAILED. Records only in OPEN; indices sequential; content hash after seal excludes occurrence/meta fields.
+
+**PipelineRun:** PENDING → RUNNING → COMPLETED | FAILED | SHUTDOWN. First mandatory stage failure → FAILED; terminal state immutable.
+
+**QuarantineEntry:** entry_id, payload, hash, Bronze linkage immutable after creation; resolution creates new Silver candidate, not mutation.
+
+## Pipeline Lifecycle (ordinary)
+
+preflight → adapter health → lock → extract → Bronze → transform → DQ/schema → Silver → Gold prep → Gold strict validation → Gold write → checkpoint/postrun → terminal event → cleanup (idempotent finally).
+
+- Checkpoint **only after** durable commit
+- Mandatory stage failure stops subsequent business stages; cleanup/lock release in finally
+- `PipelineService` is async context manager; all adapters/services: idempotent `async def aclose()` (no exceptions)
+
+## Adapter Health Contract (ALL adapters)
+
+```python
+async def health_check(self) -> HealthStatus:
+    # Lightweight probe, bounded timeout, MUST NOT raise — return UNHEALTHY on error
+```
+
+Provider probes: ChEMBL `/status.json`, PubChem lightweight compound query, others dedicated endpoint or generic 5s timeout.
 
 ## Structured Logging
 
-- Application logging MUST go through `LoggerPort` (keyword arguments for context)
-- Forbidden in domain/application: `print()`, `logging.getLogger()`, `structlog.get_logger()`
-
-## Required Methods
-
-**Health Check** (ALL adapters):
-```python
-async def health_check(self) -> HealthStatus:
-    # Returns: HEALTHY, DEGRADED, or UNHEALTHY
-    # MUST be async, MUST NOT raise exceptions
-```
-
-**Resource Cleanup** (ALL services/adapters):
-```python
-async def aclose(self) -> None:
-    # Idempotent, MUST NOT raise, SHOULD: self._client = None
-```
+Application logging via `LoggerPort` (keyword context). Forbidden in domain/application/interfaces: `print()`, `logging.getLogger()`, `structlog.get_logger()`.
 
 ## Architecture Verification
 
 ```bash
+uv run lint-imports --config .importlinter
+uv run python -m pytest tests/architecture/ -m "not slow and not benchmark and not memory" -q
 uv run python -m scripts.engineering.qa check-exemptions
-uv run python -m pytest tests/architecture/test_quality_debt_scorecard.py -q
-uv run python -m pytest tests/architecture/test_regression_metrics.py -q
 ```

@@ -25,8 +25,13 @@ from bioetl.infrastructure.control_plane import FileLineageStore
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
 from bioetl.infrastructure.storage.delta.resilience import SilverMergeResiliencePolicy
+from bioetl.infrastructure.storage.gold.runtime_helpers import GoldWriterRuntimeServices
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.metadata_writer import MetadataWriter
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+    build_silver_writer_runtime_services,
+)
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 if TYPE_CHECKING:
@@ -149,20 +154,35 @@ def bootstrap_storage_adapter(
         silver_writer=SilverWriter(
             base_path=output_dir / "silver",  # data/output/silver
             logger=logger,
-            tracing=tracing,
-            csv_exporter=silver_csv_exporter,
-            metadata_writer=metadata_writer,
-            metadata_coordinator=metadata_coordinator,
-            lineage_store=lineage_store,
-            merge_resilience_policy=merge_resilience_policy,
+            runtime_services=build_silver_writer_runtime_services(
+                SilverWriterRuntimeServicesRequest(
+                    csv_exporter=silver_csv_exporter,
+                    tracing=tracing,
+                    write_policy=None,
+                    metrics=metrics,
+                    audit=None,
+                    logger=logger,
+                    silver_validator=None,
+                    metadata_writer=metadata_writer,
+                    metadata_coordinator=metadata_coordinator,
+                    lineage_store=lineage_store,
+                    dq_calculator=None,
+                    merge_resilience_policy=merge_resilience_policy,
+                    base_path=output_dir / "silver",
+                )
+            ),
         ),
         gold_writer=GoldWriter(
             base_path=output_dir / "gold",  # data/output/gold
             logger=logger,
-            tracing=tracing,
-            csv_exporter=gold_csv_exporter,
-            metadata_writer=metadata_writer,
-            metadata_coordinator=metadata_coordinator,
-            lineage_store=lineage_store,
+            runtime_services=GoldWriterRuntimeServices(
+                csv_exporter=gold_csv_exporter,
+                tracing=tracing,
+                metrics=metrics,
+                audit=None,
+                metadata_writer=metadata_writer,
+                metadata_coordinator=metadata_coordinator,
+                lineage_store=lineage_store,
+            ),
         ),
     )

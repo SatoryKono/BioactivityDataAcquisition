@@ -148,7 +148,10 @@ class BaseDeltaWriter(BaseDeltaWriterTableAccessMixin):
 
             retention_policy = RetentionPolicy(base_path)
         normalized_base_path = str(base_path).replace("\\", "/")
-        self.base_path = Path(normalized_base_path).expanduser().as_posix()
+        if "://" in normalized_base_path:
+            self.base_path = normalized_base_path.rstrip("/")
+        else:
+            self.base_path = Path(normalized_base_path).expanduser().as_posix()
         self.logger = logger
         self._flat_structure = flat_structure
         self._arrow_converter = arrow_converter
