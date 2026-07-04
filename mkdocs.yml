@@ -265,6 +265,7 @@ nav:
             -   "Registry Pattern": 03-guides/registry-pattern.md
             -   Development:
                     -   "Config Schema Guidelines": 03-guides/development/config-schema-guidelines.md
+                    -   "Codex Launcher Paths": 03-guides/development/codex-paths.md
                     -   "Codex WSL2 Setup": 03-guides/development/codex-wsl2-setup.md
                     -   "PyCharm Setup": 03-guides/development/pycharm-setup.md
             -   Dashboards:
