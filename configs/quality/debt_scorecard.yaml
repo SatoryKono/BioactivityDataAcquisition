@@ -601,14 +601,13 @@ hotspot_family_ratchets:
       files_ge_250_loc: 0
       helper_function_ratio: 0.359
       max_internal_fan_in: 5
-      max_internal_fan_in_module: bioetl.composition.runtime_builders._run_manifest_refs
+      max_internal_fan_in_module: bioetl.composition.runtime_builders._run_manifest_snapshot_support
     trend:
-      status: ratcheted_2026-07-04_runtime_builder_serialization_reexport_removed
-      next_action: 2026-07-04 removes the private run-manifest serialization
-        re-export and keeps callers on the canonical snapshot mapping helper,
-        lowering the reviewed live snapshot to 50 files, 6472 LOC, and 0
-        files_ge_250_loc while holding max_internal_fan_in at the bounded
-        budget of 5 on _run_manifest_refs.
+      status: ratcheted_2026-07-04_runtime_builder_snapshot_import_consolidation
+      next_action: 2026-07-04 routes runtime-builder callers through
+        _run_manifest_snapshot_support instead of direct _snapshot_mapping_support
+        imports, holding max_internal_fan_in at the bounded budget of 5 on
+        _run_manifest_snapshot_support.
 full_app_duplication_ratchets:
   snapshot_date: '2026-07-03'
   mode: fail-fast
@@ -630,8 +629,8 @@ full_app_duplication_ratchets:
     path_prefix: src/bioetl/infrastructure/adapters
     metrics:
       duplication_clusters:
-        current_count: 42
-        max_count: 42
+        current_count: 41
+        max_count: 41
         ratchet_policy: Non-growth fail-fast; decreases require regenerated baseline.
   - name: application_pipelines
     owner: '@bioetl-application'
@@ -660,8 +659,8 @@ full_app_duplication_ratchets:
         ratchet_policy: Zero-budget fail-fast.
   summary_metrics:
     total_duplicate_clusters:
-      current_count: 45
-      max_count: 45
+      current_count: 44
+      max_count: 44
       ratchet_policy: Non-growth fail-fast across full-app scan targets.
 supporting_scripts_governance:
   inventory_source: configs/quality/scripts_inventory_manifest.json

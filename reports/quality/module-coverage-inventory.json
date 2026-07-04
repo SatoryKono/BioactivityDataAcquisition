@@ -15533,7 +15533,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.adapters.crossref.client",
       "path": "src/bioetl/infrastructure/adapters/crossref/client.py",
-      "source_lines": 261
+      "source_lines": 253
     },
     {
       "coverage_percent": 100.0,
@@ -15733,7 +15733,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.adapters.filterable_mixin",
       "path": "src/bioetl/infrastructure/adapters/filterable_mixin.py",
-      "source_lines": 203
+      "source_lines": 226
     },
     {
       "coverage_percent": 100.0,
@@ -16123,7 +16123,7 @@
       "missing_lines": 3,
       "module": "bioetl.infrastructure.adapters.openalex.filter_fetch_adapter_mixin",
       "path": "src/bioetl/infrastructure/adapters/openalex/filter_fetch_adapter_mixin.py",
-      "source_lines": 194
+      "source_lines": 184
     },
     {
       "coverage_percent": 90.48,
@@ -16373,7 +16373,7 @@
       "missing_lines": 11,
       "module": "bioetl.infrastructure.adapters.pubmed._filter_fetch_support",
       "path": "src/bioetl/infrastructure/adapters/pubmed/_filter_fetch_support.py",
-      "source_lines": 242
+      "source_lines": 246
     },
     {
       "coverage_percent": 98.08,
@@ -16553,7 +16553,7 @@
       "missing_lines": 2,
       "module": "bioetl.infrastructure.adapters.semanticscholar.fetch_adapter_mixin",
       "path": "src/bioetl/infrastructure/adapters/semanticscholar/fetch_adapter_mixin.py",
-      "source_lines": 231
+      "source_lines": 218
     },
     {
       "coverage_percent": 92.59,
@@ -37635,7 +37635,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.adapters.crossref.client",
       "path": "src/bioetl/infrastructure/adapters/crossref/client.py",
-      "source_lines": 261
+      "source_lines": 253
     },
     {
       "coverage_percent": 100.0,
@@ -37835,7 +37835,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.adapters.filterable_mixin",
       "path": "src/bioetl/infrastructure/adapters/filterable_mixin.py",
-      "source_lines": 203
+      "source_lines": 226
     },
     {
       "coverage_percent": 100.0,
@@ -38225,7 +38225,7 @@
       "missing_lines": 3,
       "module": "bioetl.infrastructure.adapters.openalex.filter_fetch_adapter_mixin",
       "path": "src/bioetl/infrastructure/adapters/openalex/filter_fetch_adapter_mixin.py",
-      "source_lines": 194
+      "source_lines": 184
     },
     {
       "coverage_percent": 90.48,
@@ -38475,7 +38475,7 @@
       "missing_lines": 11,
       "module": "bioetl.infrastructure.adapters.pubmed._filter_fetch_support",
       "path": "src/bioetl/infrastructure/adapters/pubmed/_filter_fetch_support.py",
-      "source_lines": 242
+      "source_lines": 246
     },
     {
       "coverage_percent": 98.08,
@@ -38655,7 +38655,7 @@
       "missing_lines": 2,
       "module": "bioetl.infrastructure.adapters.semanticscholar.fetch_adapter_mixin",
       "path": "src/bioetl/infrastructure/adapters/semanticscholar/fetch_adapter_mixin.py",
-      "source_lines": 231
+      "source_lines": 218
     },
     {
       "coverage_percent": 92.59,
@@ -44210,7 +44210,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-01",
-  "source_tree_sha256": "5827c583dc4a381e375c80846df28924efc7a8dbf2d99579eb506075b2f0e544",
+  "source_tree_sha256": "4a37752ad21865db081a6d5a2668392e3baf82ee49df4a792fffc57cb0297784",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
