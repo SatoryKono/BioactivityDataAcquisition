@@ -62,7 +62,7 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
         self,
         init: BasePublicationTransformerContext | str | None = None,
         /,
-        **kwargs: Any,
+        **kwargs: Any,  # Any: flexible kwargs forwarding for DI
     ) -> None:
         """Initialize publication transformer with explicit DI seams.
 

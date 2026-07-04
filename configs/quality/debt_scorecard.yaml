@@ -568,7 +568,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 120
-      total_loc: 14785
+      total_loc: 14787
       files_ge_250_loc: 13
       helper_function_ratio: 0.457
       max_internal_fan_in: 4
@@ -577,7 +577,7 @@ hotspot_family_ratchets:
       status: ratcheted_2026-07-04_control_plane_type_only_import_cleanup
       next_action: 2026-07-04 removes runtime imports from workflow execution
         helpers that only needed WorkflowManifestService annotations, lowering
-        the reviewed live snapshot to 120 files, 14785 LOC, and 13
+        the reviewed live snapshot to 120 files, 14787 LOC, and 13
         files_ge_250_loc while holding max_internal_fan_in at 4 under the
         fan-in architecture guard; bounded-growth budgets remain flat at 16
         files_ge_250_loc and max_internal_fan_in 4.

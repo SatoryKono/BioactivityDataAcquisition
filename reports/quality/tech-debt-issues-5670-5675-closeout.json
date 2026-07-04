@@ -24,7 +24,10 @@
         ".github/workflows/contract-governance-fast-check.yml",
         "configs/quality/generated_artifact_routing.yaml",
         "tests/architecture/test_tech_debt_issues_5670_5675_closeout.py"
-      ]
+      ],
+      "release_gate_status": "passing",
+      "fail_count": 0,
+      "warn_count": 0
     },
     "5672": {
       "status": "closeable",

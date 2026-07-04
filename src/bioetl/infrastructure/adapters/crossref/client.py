@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import BronzeRecord, HealthStatus
@@ -41,7 +41,7 @@ from bioetl.infrastructure.adapters.crossref.types import (
     CrossRefBatchFetcher,
     CrossRefSearchPaginator,
 )
-from bioetl.infrastructure.adapters.filterable_mixin import raising_async_iterator
+from bioetl.infrastructure.adapters.filterable_mixin import NotSupportedMultiFilterMixin
 
 __all__ = [
     "CROSSREF_API_BASE",
@@ -71,7 +71,10 @@ CROSSREF_HEALTH_ERRORS = COMMON_ADAPTER_HEALTH_ERRORS
 
 @dataclass
 class CrossRefAdapter(
-    _CrossRefFallbackPolicyMixin, FallbackPolicyMixin, BaseHttpAdapter
+    _CrossRefFallbackPolicyMixin,
+    FallbackPolicyMixin,
+    NotSupportedMultiFilterMixin,
+    BaseHttpAdapter,
 ):
     """CrossRef adapter with thin-facade delegation to flow components."""
 
@@ -94,6 +97,10 @@ class CrossRefAdapter(
     fetch_flow: CrossRefFetchFlow | None = None
 
     provider_name: str = field(init=False, default="crossref")  # DataSourcePort ID
+    unsupported_multi_filter_message: ClassVar[str] = (
+        "CrossRef API does not support multi-field filtering. "
+        "Use fetch_filtered() with a single filter_field instead."
+    )
     _fallback_fetch_service: FallbackFetchOrchestrator = field(init=False, repr=False)
     _fallback_decorator: ComposableFallbackDecorator = field(init=False, repr=False)
     _query_builder: CrossRefQueryPlanner = field(init=False, repr=False)
@@ -152,21 +159,6 @@ class CrossRefAdapter(
             limit=limit,
         ):
             yield publication
-
-    def fetch_multi_filtered(
-        self,
-        entity_type: str,
-        filters: dict[str, list[str]],
-        limit: int | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Multi-field filtering is not supported by CrossRef API."""
-        del entity_type, filters, limit
-        return raising_async_iterator(
-            NotImplementedError(
-                "CrossRef API does not support multi-field filtering. "
-                "Use fetch_filtered() with a single filter_field instead."
-            )
-        )
 
     async def fetch_filtered_with_fallback(
         self,

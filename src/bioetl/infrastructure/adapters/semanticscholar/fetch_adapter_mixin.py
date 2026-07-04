@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.types import BronzeRecord
-from bioetl.infrastructure.adapters.filterable_mixin import raising_async_iterator
+from bioetl.infrastructure.adapters.filterable_mixin import NotSupportedMultiFilterMixin
 from bioetl.infrastructure.adapters.semanticscholar._search_fetch_flow import (
     _SemanticScholarSearchFetchMixin,
 )
@@ -18,8 +18,15 @@ if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
 
-class SemanticScholarFetchAdapterMixin(_SemanticScholarSearchFetchMixin):
+class SemanticScholarFetchAdapterMixin(
+    NotSupportedMultiFilterMixin, _SemanticScholarSearchFetchMixin
+):
     """Public fetch/filter/fallback paths extracted from adapter facade."""
+
+    unsupported_multi_filter_message = (
+        "Semantic Scholar adapter supports only DOI filtering. "
+        "Use fetch_filtered() or fetch_filtered_with_fallback()."
+    )
 
     async def fetch(
         self,
@@ -205,27 +212,3 @@ class SemanticScholarFetchAdapterMixin(_SemanticScholarSearchFetchMixin):
             extract_record_id=_extract_record_doi,
         ):
             yield record
-
-    def fetch_multi_filtered(
-        self,
-        entity_type: str,
-        filters: dict[str, list[str]],
-        limit: int | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Semantic Scholar does not support multi-field filtering.
-
-        Args:
-            entity_type: Entity type identifier (unused).
-            filters: Multi-field filter mapping (unused; raises NotImplementedError).
-            limit: Optional maximum record limit (unused; raises NotImplementedError).
-
-        Raises:
-            NotImplementedError: Always; Semantic Scholar supports only DOI filtering.
-        """
-        del entity_type, filters, limit
-        return raising_async_iterator(
-            NotImplementedError(
-                "Semantic Scholar adapter supports only DOI filtering. "
-                "Use fetch_filtered() or fetch_filtered_with_fallback()."
-            )
-        )

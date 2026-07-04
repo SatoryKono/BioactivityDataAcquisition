@@ -93,11 +93,11 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
 
     assert compatibility["summary"]["retained_entrypoint_count"] == 12
     assert test_governance["report"]["compatibility_test_files"] == 0
-    assert test_governance["report"]["duplicate_test_names"] == 2
+    assert test_governance["report"]["duplicate_test_names"] == 1
     assert test_governance["report"]["markerless_test_functions"] == 0
     assert test_governance["report"]["total_test_functions"] == 21706
     assert test_governance["report"]["total_test_files"] == 1906
-    assert scorecard["integral_score"] == 8.56
+    assert scorecard["integral_score"] == 8.57
     assert gates["summary"]["release_gate_status"] == "passing"
     assert gates["summary"]["pass_count"] == 38
     assert gates["summary"]["fail_count"] == 0

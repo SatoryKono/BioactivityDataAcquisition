@@ -133,6 +133,8 @@ def _baseline_semantic_signature(payload: dict[str, object]) -> dict[str, object
                 "path": row.get("path"),
                 "blob_sha256": row.get("blob_sha256"),
                 "required": row.get("required"),
+                "required_on_remote": row.get("required_on_remote"),
+                "introduced_after_remote_main": row.get("introduced_after_remote_main"),
                 "summary": row.get("summary"),
             }
         )
@@ -182,6 +184,9 @@ def build_payload(
     artifact_rows: list[dict[str, object]] = []
     for path in _BASELINE_ARTIFACTS:
         blob = _git_blob(repo_root, remote_sha, path)
+        local_head_blob = _git_blob(repo_root, "HEAD", path)
+        required = path in REQUIRED_BASELINE_ARTIFACTS
+        introduced_after_remote_main = blob is None and local_head_blob is not None
         artifact_rows.append(
             {
                 "path": path,
@@ -189,7 +194,9 @@ def build_payload(
                 "blob_sha256": (
                     hashlib.sha256(blob).hexdigest() if blob is not None else None
                 ),
-                "required": path in REQUIRED_BASELINE_ARTIFACTS,
+                "required": required,
+                "required_on_remote": required and not introduced_after_remote_main,
+                "introduced_after_remote_main": introduced_after_remote_main,
                 "summary": _json_blob_summary(blob),
             }
         )
@@ -231,18 +238,20 @@ def render_markdown(payload: dict[str, object]) -> str:
         f"`{payload.get('baseline_artifact_fingerprint') or baseline_artifact_fingerprint(payload)}`",
         f"- local_tracking_ref_matches_remote: `{payload['local_tracking_ref_matches_remote']}`",
         "",
-        "| artifact | blob_sha256 | available |",
-        "| --- | --- | --- |",
+        "| artifact | blob_sha256 | available | required_on_remote | introduced_after_remote_main |",
+        "| --- | --- | --- | --- | --- |",
     ]
     for row in artifacts:
         assert isinstance(row, dict)
         summary = row["summary"]
         assert isinstance(summary, dict)
         lines.append(
-            "| `{path}` | `{blob}` | `{available}` |".format(
+            "| `{path}` | `{blob}` | `{available}` | `{required_on_remote}` | `{introduced}` |".format(
                 path=row["path"],
                 blob=row["blob_sha256"] or "",
                 available=summary.get("available"),
+                required_on_remote=row.get("required_on_remote", row.get("required")),
+                introduced=row.get("introduced_after_remote_main", False),
             )
         )
     lines.append("")
@@ -294,7 +303,8 @@ def _check_artifacts(
         assert isinstance(row, dict)
         summary = row["summary"]
         assert isinstance(summary, dict)
-        if row.get("required") and not summary.get("available"):
+        required_on_remote = row.get("required_on_remote", row.get("required"))
+        if required_on_remote and not summary.get("available"):
             errors.append(f"Remote-main baseline artifact unavailable: {row['path']}")
     return errors
 

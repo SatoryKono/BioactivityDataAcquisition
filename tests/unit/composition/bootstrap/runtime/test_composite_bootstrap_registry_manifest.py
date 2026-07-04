@@ -16,9 +16,11 @@ pytestmark = pytest.mark.unit
 
 @pytest.mark.parametrize("module_path", COMPOSITE_BOOTSTRAP_BUILDER_MODULES.values())
 def test_composite_bootstrap_builder_modules_are_importable(module_path: str) -> None:
-    importlib.import_module(module_path)
+    module = importlib.import_module(module_path)
+    assert module.__name__ == module_path
 
 
 @pytest.mark.parametrize("module_path", COMPOSITE_BOOTSTRAP_BUNDLE_MODULES.values())
 def test_composite_bootstrap_bundle_modules_are_importable(module_path: str) -> None:
-    importlib.import_module(module_path)
+    module = importlib.import_module(module_path)
+    assert module.__name__ == module_path

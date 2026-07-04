@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-04T14:17:00.300729+00:00",
+  "generated_at": "2026-07-04T14:32:33.043511+00:00",
   "summary": {
-    "total_scripts": 454,
+    "total_scripts": 453,
     "status_counts": {
       "active": 360,
-      "supporting": 94
+      "supporting": 93
     },
     "reference_group_coverage": {
       "agents": 5,
@@ -5535,18 +5535,6 @@
       ]
     },
     {
-      "path": "scripts/docs/fixers/add_required_links_to_skills.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-docs",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded manual migration helper for required SKILL.md policy-link backfills; promote it into the documented docs fixer catalog or retire it once runtime and docs-mirror skill surfaces no longer need this backfill."
-    },
-    {
       "path": "scripts/docs/fixers/fix_links_auto.py",
       "type": "py",
       "status": "active",
@@ -6755,7 +6743,7 @@
         },
         {
           "path": "scripts/engineering/qa/report_debt_governance_gates.py",
-          "line": 824,
+          "line": 842,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py::\""
         },
@@ -12052,14 +12040,8 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 9,
+      "reference_count": 8,
       "references": [
-        {
-          "path": "docs/03-guides/development/codex-paths.md",
-          "line": 1,
-          "source_group": "docs",
-          "text": "scripts\\codex-exec.bat"
-        },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
           "line": 163,
@@ -12101,6 +12083,12 @@
           "line": 2,
           "source_group": "scripts",
           "text": "REM Compatibility facade: scripts/ops/codex-exec.bat -> scripts/ops/launchers/codex/codex-exec.bat"
+        },
+        {
+          "path": "tests/architecture/test_scripts_inventory_discovery.py",
+          "line": 69,
+          "source_group": "tests",
+          "text": "r\"scripts\\codex-exec.bat\","
         }
       ]
     },
@@ -12260,14 +12248,8 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 11,
       "references": [
-        {
-          "path": "docs/03-guides/development/codex-paths.md",
-          "line": 2,
-          "source_group": "docs",
-          "text": "scripts\\codex.bat"
-        },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
           "line": 162,
@@ -12309,6 +12291,12 @@
           "line": 11,
           "source_group": "scripts",
           "text": "║  1. scripts\\ops\\launchers\\codex\\codex.bat                                 ║"
+        },
+        {
+          "path": "scripts/ops/launchers/codex/SETUP_GUIDE.sh",
+          "line": 35,
+          "source_group": "scripts",
+          "text": "scripts\\ops\\launchers\\codex\\codex.bat"
         }
       ]
     },
@@ -13230,14 +13218,8 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 21,
       "references": [
-        {
-          "path": "docs/03-guides/development/codex-paths.md",
-          "line": 3,
-          "source_group": "docs",
-          "text": "scripts\\start-wsl-proxy.bat"
-        },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
           "line": 65,
@@ -13279,6 +13261,12 @@
           "line": 221,
           "source_group": "docs",
           "text": "| `start-wsl-proxy.bat`              | Proxy launcher               | Windows PowerShell |"
+        },
+        {
+          "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md",
+          "line": 293,
+          "source_group": "docs",
+          "text": "# PowerShell: .\\scripts\\ops\\start-wsl-proxy.bat"
         }
       ]
     },
