@@ -194,12 +194,10 @@ Results inform:
 1. **Enable fallbacks** - Never block workflow due to missing capabilities
 
 ## Source Of Truth
-
 - Normative index: `../../../../NORMATIVE_SOURCES.md`
 - Root runtime contract: `../../../../../../AGENTS.md`
 - Project rules: `../../../../RULES.md`
 - Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs in `../../../../../02-architecture/decisions/`
+- Accepted ADRs: `../../../../../02-architecture/decisions`
 - Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
 - Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
-

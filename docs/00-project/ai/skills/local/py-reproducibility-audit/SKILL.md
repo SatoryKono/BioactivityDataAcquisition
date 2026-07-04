@@ -34,20 +34,15 @@ When the user does not override these values, audit the `chembl_assay`
 pipeline via two fresh bounded runs.
 
 ## Source Of Truth
-
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
 - Root runtime contract: `../../../../../../AGENTS.md`
 - Project rules: `../../../../RULES.md`
 - Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs in `../../../../../02-architecture/decisions/`
-- Normative index: `../../../../NORMATIVE_SOURCES.md`
-- Root runtime contract: `AGENTS.md`
+- Accepted ADRs: `../../../../../02-architecture/decisions`
 - Runtime map: `../../agents/CODEX-RUNTIME.md`
 - Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - Shared project memory: `../../../docs/00-project/ai/memory/agent-memory.md`
 - Daily loop: `../../../src/memory/DAILY_WORKFLOW.md`
-- Project rules: `../../../docs/00-project/RULES.md`
-- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
-- Accepted ADRs in `../../../docs/02-architecture/decisions/`
 
 ## Workflow
 

@@ -16,12 +16,11 @@ ______________________________________________________________________
 Historical compatibility entry retained only to interpret older references to `py-code-bot`.
 
 ## Source Of Truth
-
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
 - Root runtime contract: `../../../../../../AGENTS.md`
 - Project rules: `../../../../RULES.md`
 - Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs in `../../../../../02-architecture/decisions/`
-- Normative index: `../../../../NORMATIVE_SOURCES.md`
+- Accepted ADRs: `../../../../../02-architecture/decisions`
 - Current orchestration: `../../agents/ORCHESTRATION.md`
 - Historical mirror context: `../../../docs/00-project/ai/skills/global/py-code-bot/SKILL.md`
 - Shared project context: `../../../docs/00-project/ai/memory/agent-memory.md`

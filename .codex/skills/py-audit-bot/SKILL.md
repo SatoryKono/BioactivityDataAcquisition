@@ -10,12 +10,11 @@ description: "Execute BioETL py-audit-bot profile for role-specific workflow and
 Run the role-specific workflow as defined in the py-audit-bot profile.
 
 ## Source Of Truth
-
-- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
-- Accepted ADRs in `../../../docs/02-architecture/decisions`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 - Primary profile: `../../agents/py-audit-bot.md`
 - Team orchestration: `../../agents/ORCHESTRATION.md`
 - Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`

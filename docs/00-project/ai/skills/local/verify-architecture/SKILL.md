@@ -14,12 +14,11 @@ ______________________________________________________________________
 Execute architecture validation checks and report blocking/non-blocking issues.
 
 ## Source Of Truth
-
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
 - Root runtime contract: `../../../../../../AGENTS.md`
 - Project rules: `../../../../RULES.md`
 - Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs in `../../../../../02-architecture/decisions/`
-- Normative index: `../../../../NORMATIVE_SOURCES.md`
+- Accepted ADRs: `../../../../../02-architecture/decisions`
 - Primary instructions: `../../../.codex/skills/verify-architecture/SKILL.md`
 
 ## Workflow

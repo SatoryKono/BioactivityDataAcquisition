@@ -6,12 +6,10 @@ description: Orchestrate hierarchical BioETL test swarms (L1/L2/L3) for full_aud
 # py-test-swarm
 
 ## Source Of Truth
-
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
-- Accepted ADRs in `../../../docs/02-architecture/decisions`
-
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
 
 ## Core Role
 

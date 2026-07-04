@@ -10,11 +10,10 @@ description: Scaffold a new BioETL provider/entity pipeline with configs, transf
 Create a new ETL pipeline for a provider/entity pair in BioETL.
 
 ## Source Of Truth
-
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
-- Accepted ADRs in `../../../docs/02-architecture/decisions`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Canonical runtime entrypoint: this `SKILL.md`
 - Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`

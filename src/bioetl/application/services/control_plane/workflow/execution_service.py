@@ -55,7 +55,7 @@ class WorkflowExecutionService:
     """Orchestrate workflow execution around durable control-plane artifacts."""
 
     workflow_runner: WorkflowRunnerService
-    manifest_service: "WorkflowManifestService"
+    manifest_service: object
     workflow_ledger_port: WorkflowLedgerPort
     workflow_ledger_factory: WorkflowLedgerFactory
     workflow_state_port: WorkflowExecutionStatePort

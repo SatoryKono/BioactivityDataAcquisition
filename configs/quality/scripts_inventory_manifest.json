@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-04T14:12:23.245417+00:00",
+  "generated_at": "2026-07-04T14:17:00.300729+00:00",
   "summary": {
-    "total_scripts": 453,
+    "total_scripts": 454,
     "status_counts": {
       "active": 360,
-      "supporting": 93
+      "supporting": 94
     },
     "reference_group_coverage": {
       "agents": 5,
@@ -3780,7 +3780,7 @@
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
-          "line": 123,
+          "line": 121,
           "source_group": "skills",
           "text": "- `python scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`"
         },
@@ -4362,7 +4362,7 @@
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
-          "line": 119,
+          "line": 117,
           "source_group": "skills",
           "text": "- `python scripts/diagrams/lint_diagrams.py docs`"
         },
@@ -4867,7 +4867,7 @@
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
-          "line": 120,
+          "line": 118,
           "source_group": "skills",
           "text": "- `bash scripts/diagrams/validate_mermaid_syntax.sh`"
         },
@@ -5533,6 +5533,18 @@
           "text": "\"scripts/docs/fix_link_warnings.py\","
         }
       ]
+    },
+    {
+      "path": "scripts/docs/fixers/add_required_links_to_skills.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": [],
+      "owner": "@bioetl-docs",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual migration helper for required SKILL.md policy-link backfills; promote it into the documented docs fixer catalog or retire it once runtime and docs-mirror skill surfaces no longer need this backfill."
     },
     {
       "path": "scripts/docs/fixers/fix_links_auto.py",
@@ -7183,13 +7195,13 @@
         },
         {
           "path": ".codex/skills/py-test-swarm/SKILL.md",
-          "line": 51,
+          "line": 49,
           "source_group": "skills",
           "text": "- Windows PowerShell in a mixed checkout: `.\\scripts\\dev\\run_pytest.ps1`, `.\\scripts\\dev\\run_mypy.ps1`, or `.\\.venv-win\\Scripts\\python.exe -m ...`"
         },
         {
           "path": ".codex/skills/py-test-swarm/SKILL.md",
-          "line": 128,
+          "line": 126,
           "source_group": "skills",
           "text": "- Use the OS-appropriate command path: `uv run python -m ...` in CI/single-OS, `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1` in PowerShell, and `bash scripts/en"
         },
@@ -7242,13 +7254,13 @@
         },
         {
           "path": ".codex/skills/py-test-swarm/SKILL.md",
-          "line": 52,
+          "line": 50,
           "source_group": "skills",
           "text": "- WSL/Linux in a mixed checkout: `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`, or `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`"
         },
         {
           "path": ".codex/skills/py-test-swarm/SKILL.md",
-          "line": 128,
+          "line": 126,
           "source_group": "skills",
           "text": "- Use the OS-appropriate command path: `uv run python -m ...` in CI/single-OS, `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1` in PowerShell, and `bash scripts/en"
         },
@@ -7358,13 +7370,13 @@
         },
         {
           "path": ".codex/skills/py-test-swarm/SKILL.md",
-          "line": 51,
+          "line": 49,
           "source_group": "skills",
           "text": "- Windows PowerShell in a mixed checkout: `.\\scripts\\dev\\run_pytest.ps1`, `.\\scripts\\dev\\run_mypy.ps1`, or `.\\.venv-win\\Scripts\\python.exe -m ...`"
         },
         {
           "path": ".codex/skills/py-test-swarm/SKILL.md",
-          "line": 128,
+          "line": 126,
           "source_group": "skills",
           "text": "- Use the OS-appropriate command path: `uv run python -m ...` in CI/single-OS, `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1` in PowerShell, and `bash scripts/en"
         },
@@ -7417,13 +7429,13 @@
         },
         {
           "path": ".codex/skills/py-test-swarm/SKILL.md",
-          "line": 52,
+          "line": 50,
           "source_group": "skills",
           "text": "- WSL/Linux in a mixed checkout: `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`, or `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`"
         },
         {
           "path": ".codex/skills/py-test-swarm/SKILL.md",
-          "line": 128,
+          "line": 126,
           "source_group": "skills",
           "text": "- Use the OS-appropriate command path: `uv run python -m ...` in CI/single-OS, `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1` in PowerShell, and `bash scripts/en"
         },
@@ -9533,13 +9545,13 @@
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
-          "line": 59,
+          "line": 57,
           "source_group": "skills",
           "text": "uv run python scripts/engineering/qa/report_dashboard_inventory.py --json"
         },
         {
           "path": "docs/00-project/ai/skills/local/grafana-dashboard-render/SKILL.md",
-          "line": 65,
+          "line": 63,
           "source_group": "docs",
           "text": "uv run python scripts/engineering/qa/report_dashboard_inventory.py --json"
         },
@@ -11549,49 +11561,49 @@
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
-          "line": 40,
+          "line": 39,
           "source_group": "skills",
           "text": "- `python -m scripts.ops rerender-grafana`"
         },
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
-          "line": 41,
+          "line": 40,
           "source_group": "skills",
           "text": "- `python -m scripts.ops check-grafana-audit-preflight`"
         },
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
-          "line": 42,
+          "line": 41,
           "source_group": "skills",
           "text": "- `python -m scripts.ops audit-live-grafana`"
         },
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
-          "line": 67,
+          "line": 65,
           "source_group": "skills",
           "text": "uv run python -m scripts.ops check-grafana-audit-preflight --json --skip-screenshot-check"
         },
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
-          "line": 87,
+          "line": 85,
           "source_group": "skills",
           "text": "uv run python -m scripts.ops rerender-grafana --timeout-seconds 90 --output-dir <dir>"
         },
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
-          "line": 93,
+          "line": 91,
           "source_group": "skills",
           "text": "uv run python -m scripts.ops rerender-grafana --uids bioetl-control-plane-v1 --fallback none --output-dir <dir>"
         },
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
-          "line": 94,
+          "line": 92,
           "source_group": "skills",
           "text": "uv run python -m scripts.ops rerender-grafana --uids bioetl-overview-v2 bioetl-runtime --output-dir <dir>"
         },
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
-          "line": 112,
+          "line": 110,
           "source_group": "skills",
           "text": "uv run python -m scripts.ops audit-live-grafana \\"
         }
@@ -13338,13 +13350,13 @@
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
-          "line": 149,
+          "line": 147,
           "source_group": "skills",
           "text": "- Repo env bootstrap: `scripts/ops/support/load_repo_env.sh`"
         },
         {
           "path": "docs/00-project/ai/skills/local/grafana-dashboard-render/SKILL.md",
-          "line": 155,
+          "line": 153,
           "source_group": "docs",
           "text": "- Repo env bootstrap: `scripts/ops/support/load_repo_env.sh`"
         },
