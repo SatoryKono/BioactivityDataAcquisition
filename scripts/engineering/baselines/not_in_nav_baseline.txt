@@ -136,6 +136,7 @@
 03-data-model/reference-identifier-families.md
 03-guides/dashboards/dashboard-audit-checklist.md
 03-guides/dashboards/dashboard-checklist-per-dashboard.md
+03-guides/development/codex-paths.md
 03-guides/dashboards/dashboard-requirements-comprehensive.md
 03-guides/dashboards/dashboard-test-proposals.md
 03-guides/dashboards/design-system.md
