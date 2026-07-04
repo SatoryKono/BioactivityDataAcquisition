@@ -8,14 +8,11 @@ agent: "general-purpose"
 # Create Pull Request
 
 ## Source Of Truth
-
-- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
-- Accepted ADRs in `../../../docs/02-architecture/decisions`
-
-
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 Creates GitHub PRs with Conventional Commits titles adapted for BioETL project.
 
 ## BioETL Runtime Policy

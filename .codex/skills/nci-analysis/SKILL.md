@@ -8,18 +8,13 @@ agent: "general-purpose"
 # NCI Manipulation Analysis
 
 ## Source Of Truth
-
-- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
-- Accepted ADRs in `../../../docs/02-architecture/decisions`
-
-
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 This skill uses pattern-based manipulation detection that identifies **how** content tries to influence the reader, not whether claims are factually true. Manipulation techniques leave fingerprints regardless of underlying accuracy.
-
 Use TodoWrite to track these mandatory steps:
-
 <required>
 1. Input Processing (text or URL)
 2. Score all 20 categories (1-5 scale each)

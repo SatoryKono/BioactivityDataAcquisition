@@ -28,11 +28,10 @@ When the user does not override these values, audit the `chembl_assay`
 pipeline via two fresh bounded runs.
 
 ## Source Of Truth
-
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
-- Accepted ADRs in `../../../docs/02-architecture/decisions`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Runtime map: `../../agents/CODEX-RUNTIME.md`
 - Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - Shared project memory: `../../../docs/00-project/ai/memory/agent-memory.md`

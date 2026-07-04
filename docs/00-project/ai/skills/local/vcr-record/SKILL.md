@@ -14,12 +14,11 @@ ______________________________________________________________________
 Manage VCR cassette lifecycle for provider integration tests.
 
 ## Source Of Truth
-
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
 - Root runtime contract: `../../../../../../AGENTS.md`
 - Project rules: `../../../../RULES.md`
 - Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs in `../../../../../02-architecture/decisions/`
-- Normative index: `../../../../NORMATIVE_SOURCES.md`
+- Accepted ADRs: `../../../../../02-architecture/decisions`
 - Primary instructions: `../../../.codex/skills/vcr-record/SKILL.md`
 - Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`

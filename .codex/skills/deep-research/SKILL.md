@@ -8,18 +8,13 @@ agent: "general-purpose"
 # Conducting Deep Research
 
 ## Source Of Truth
-
-- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
-- Accepted ADRs in `../../../docs/02-architecture/decisions`
-
-
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 This skill uses an iterative methodology treating research as a diffusion process: start with noise (rough draft), apply guidance (research brief), denoise through cycles of critique → research → refine until quality converges.
-
 Use TodoWrite to track these mandatory steps:
-
 <required>
 1. Clarify scope (if ambiguous)
 2. Write research brief (guidance signal)
@@ -31,19 +26,13 @@ Use TodoWrite to track these mandatory steps:
 8. Evaluate quality (score < 7? repeat 4-7, max 3 cycles)
 9. Finalize
 </required>
-
 ### Step 1: Clarify Scope
-
 Ask me clarifying questions only if:
-
 - Topic has multiple interpretations
 - Key constraints missing (timeframe, geography, industry)
 - Success criteria unclear
-
 Skip for well-defined requests.
-
 ### Step 2: Research Brief (Guidance Signal)
-
 ```
 RESEARCH BRIEF
 Topic: [Specific question]
@@ -55,37 +44,24 @@ Key Questions:
 Constraints: [Limits]
 Language: [Match user's language]
 ```
-
 ### Step 3: Initial Draft (Noisy Starting Point)
-
 Write from existing knowledge only, marking gaps:
-
 - `[NEEDS VERIFICATION]` - uncertain claims
 - `[RESEARCH NEEDED]` - missing information
 - `[CONFIDENCE: LOW/MED/HIGH]` - flag uncertainty levels
-
 This draft intentionally contains "noise" - the refinement loop will denoise it.
-
 ### Step 4: Red Team Critique
-
 Attack the draft for:
-
 - **Logic**: Circular reasoning, false dichotomies, unsupported claims
 - **Gaps**: Missing perspectives, incomplete coverage
 - **Sources**: Unsourced claims, single-source reliance
-
 Rate each issue 1-10 severity. See [references/critique-framework.md](references/critique-framework.md).
-
 ### Step 5: Targeted Research with Reflection
-
 **Search budget by complexity:**
-
 - Simple verification: 1-2 searches
 - Moderate topics: 3-5 searches
 - Complex research: 5-10 searches
-
 **CRITICAL: Think after EVERY search.** After each `web_search`, pause and reflect:
-
 ```
 REFLECTION:
 - What key facts did I find?
@@ -93,19 +69,13 @@ REFLECTION:
 - Do sources agree or conflict?
 - Is another search needed, or do I have enough?
 ```
-
 **Parallel research triggers** - pursue multiple threads when:
-
 - Comparing alternatives (search each separately)
 - Multiple independent sub-questions exist
 - Different source types needed (academic vs news vs official)
-
 See [references/search-patterns.md](references/search-patterns.md) for query techniques.
-
 ### Step 6: Source Scoring and Contradiction Handling
-
 **Score each source (1-100 confidence):**
-
 | Source Type                           | Base Score |
 | ------------------------------------- | ---------- |
 | Official documentation, peer-reviewed | 85-100     |
@@ -113,61 +83,43 @@ See [references/search-patterns.md](references/search-patterns.md) for query tec
 | Established news outlets              | 60-80      |
 | Industry publications                 | 50-75      |
 | Blogs, forums                         | 20-50      |
-
 Adjust based on: recency, author credentials, citation quality.
-
 **Track facts with attribution:**
-
 ```
 FACT: [Statement]
 SOURCE: [URL]
 CONFIDENCE: [1-100]
 DISPUTED: [Yes/No - conflicts with other sources?]
 ```
-
 **When sources contradict:**
-
 1. Note the contradiction explicitly
 1. Check publication dates (prefer recent)
 1. Evaluate source authority
 1. Search for additional sources to break tie
 1. If unresolved, present both views with confidence levels
-
 See [references/source-evaluation.md](references/source-evaluation.md) for detailed guidance.
-
 ### Step 7: Refine Draft (Denoise)
-
 Refine by:
-
 1. Replacing `[NEEDS VERIFICATION]` with sourced facts
 1. Adding inline citations with confidence: "According to [Source] (high confidence), ..."
 1. Qualifying or removing unsupported claims
 1. Addressing contradictions explicitly
 1. Adding counterarguments
-
 **Context management:** If accumulating too much research, compress raw notes into key findings before continuing. Discard redundant/low-value information.
-
 ### Step 8: Evaluate Quality
-
 Score 1-10 on:
-
 - **Comprehensiveness**: All key questions addressed?
 - **Accuracy**: Claims well-sourced with appropriate confidence?
-
 **Track across iterations:**
-
 ```
 QUALITY LOG:
 Iteration 1: Comprehensiveness 5, Accuracy 4, Avg 4.5
 Iteration 2: Comprehensiveness 7, Accuracy 6, Avg 6.5
 Iteration 3: Comprehensiveness 8, Accuracy 8, Avg 8.0 ✓
 ```
-
 If average < 7: Return to Step 4 (max 3 cycles).
 If score drops between iterations: Focus critique on what regressed.
-
 ### Step 9: Finalize
-
 ```markdown
 # [Title]
 

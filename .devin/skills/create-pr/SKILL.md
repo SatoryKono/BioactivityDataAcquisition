@@ -6,13 +6,10 @@ description: "Creates GitHub PRs with Conventional Commits titles adapted for Bi
 # Create Pull Request
 
 ## Source Of Truth
-
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
-- Accepted ADRs in `../../../docs/02-architecture/decisions`
-
-
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
 Creates GitHub PRs with Conventional Commits titles adapted for BioETL project.
 
 ## BioETL Runtime Policy

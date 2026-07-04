@@ -10,11 +10,10 @@ description: Execute BioETL py-debug-bot profile for role-specific workflow and 
 Run the role-specific workflow as defined in the py-debug-bot profile.
 
 ## Source Of Truth
-
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
-- Accepted ADRs in `../../../docs/02-architecture/decisions`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Primary profile: `../../agents/py-debug-bot.md`
 - Team orchestration: `../../agents/ORCHESTRATION.md`
 - Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`

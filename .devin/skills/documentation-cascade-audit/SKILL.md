@@ -6,12 +6,10 @@ description: Run a hierarchical documentation audit for BioETL using cascade dec
 # Documentation Cascade Audit
 
 ## Source Of Truth
-
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
-- Accepted ADRs in `../../../docs/02-architecture/decisions`
-
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
 
 ## Overview
 

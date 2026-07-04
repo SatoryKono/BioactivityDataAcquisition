@@ -56,52 +56,38 @@ Before editing:
 ## BioETL Rules
 
 ### Source of Truth
-
-- Treat `grafana/dashboards/*.json` as the primary source of truth.
-- Do not infer dashboard structure from screenshots, memory, or stale docs.
-- If docs and JSON disagree, trust the JSON and then reconcile docs.
-
-### Current Navigation Model
-
-Preserve the current shipped model unless the task explicitly changes it:
-
-- `1. Overview`
-- `2. Runtime`
-- `3. Provider Health`
-- `4. Data Quality`
-
-If this model changes, update the affected docs in the same change set.
-
-### Query and Panel Safety
-
-- Do not invent metric names.
-- Avoid unnecessary high-cardinality label filters in summary panels.
-- Be explicit about `0` versus `No data`.
-- Do not silently turn dashboard hints into real alerting behavior.
-- Keep drilldown links readable, stable, and operator-friendly.
-
-### Datasource Conventions
-
-#### Prometheus
-
-- Use `or vector(0)` only when missing series really means zero events.
-- Preserve absence when missing data is diagnostic.
-
-#### Loki
-
-- Prefer safe baselines such as `{job="bioetl"}` when narrowing queries.
-- Use `| json` and `__error__` deliberately when extracting structured logs.
-- Do not rely on brittle encoded interpolation as a hidden source of truth.
-
-#### Tempo
-
-- Keep trace search behavior explicit.
-- Prefer minimal, stable search expressions before introducing richer filters.
 - Normative index: `../../../../NORMATIVE_SOURCES.md`
 - Root runtime contract: `../../../../../../AGENTS.md`
 - Project rules: `../../../../RULES.md`
 - Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../../../02-architecture/decisions`
+- Treat `grafana/dashboards/*.json` as the primary source of truth.
+- Do not infer dashboard structure from screenshots, memory, or stale docs.
+- If docs and JSON disagree, trust the JSON and then reconcile docs.
+### Current Navigation Model
+Preserve the current shipped model unless the task explicitly changes it:
+- `1. Overview`
+- `2. Runtime`
+- `3. Provider Health`
+- `4. Data Quality`
+If this model changes, update the affected docs in the same change set.
+### Query and Panel Safety
+- Do not invent metric names.
+- Avoid unnecessary high-cardinality label filters in summary panels.
+- Be explicit about `0` versus `No data`.
+- Do not silently turn dashboard hints into real alerting behavior.
+- Keep drilldown links readable, stable, and operator-friendly.
+### Datasource Conventions
+#### Prometheus
+- Use `or vector(0)` only when missing series really means zero events.
+- Preserve absence when missing data is diagnostic.
+#### Loki
+- Prefer safe baselines such as `{job="bioetl"}` when narrowing queries.
+- Use `| json` and `__error__` deliberately when extracting structured logs.
+- Do not rely on brittle encoded interpolation as a hidden source of truth.
+#### Tempo
+- Keep trace search behavior explicit.
+- Prefer minimal, stable search expressions before introducing richer filters.
 
 ## Source Of Truth
 
