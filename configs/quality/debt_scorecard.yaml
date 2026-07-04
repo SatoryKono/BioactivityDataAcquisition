@@ -458,11 +458,11 @@ hotspot_family_ratchets:
       --max-duplicate-clusters 0
     baseline_artifact: reports/quality/hotspot-duplication-baseline.json
     history_artifact: reports/quality/hotspot-duplication-history.jsonl
-    latest_reviewed_snapshot: '2026-07-03'
+    latest_reviewed_snapshot: '2026-07-04'
     confirming_clean_snapshots_required: 2
     expected_direction: downward
     ratchet_policy: Enforce a hotspot-level zero-duplication budget in CI after the
-      clean 2026-07-03 baseline; retain family-level non-growth budgets for file-growth
+      clean 2026-07-04 baseline; retain family-level non-growth budgets for file-growth
       and fan-in from the reviewed scorecard baselines.
   families:
   - name: application_core

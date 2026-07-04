@@ -1619,11 +1619,12 @@ def _required_runtime_skill_tokens(
     project_root: Path, relative_path: Path
 ) -> tuple[str, ...]:
     skill_file = relative_path
+    skill_dir = skill_file.parent
     return (
-        _relative_token(skill_file, project_root / AGENTS_DOC_TOKEN),
-        _relative_token(skill_file, project_root / RULES_DOC_TOKEN),
-        _relative_token(skill_file, project_root / REQUIREMENTS_DOC_TOKEN),
-        _relative_token(skill_file, project_root / ADR_DIR_DOC_TOKEN),
+        _relative_token(skill_dir, project_root / AGENTS_DOC_TOKEN),
+        _relative_token(skill_dir, project_root / RULES_DOC_TOKEN),
+        _relative_token(skill_dir, project_root / REQUIREMENTS_DOC_TOKEN),
+        _relative_token(skill_dir, project_root / ADR_DIR_DOC_TOKEN),
     )
 
 
@@ -1631,12 +1632,12 @@ def _required_docs_mirror_skill_tokens(
     project_root: Path, relative_path: Path
 ) -> tuple[str, ...]:
     skill_file = relative_path
+    skill_dir = skill_file.parent
     return (
-        _relative_token(skill_file, project_root / NORMATIVE_SOURCES_DOC_TOKEN),
-        _relative_token(skill_file, project_root / AGENTS_DOC_TOKEN),
-        _relative_token(skill_file, project_root / RULES_DOC_TOKEN),
-        _relative_token(skill_file, project_root / REQUIREMENTS_DOC_TOKEN),
-        _relative_token(skill_file, project_root / ADR_DIR_DOC_TOKEN),
+        _relative_token(skill_dir, project_root / NORMATIVE_SOURCES_DOC_TOKEN),
+        _relative_token(skill_dir, project_root / AGENTS_DOC_TOKEN),
+        _relative_token(skill_dir, project_root / RULES_DOC_TOKEN),
+        _relative_token(skill_dir, project_root / REQUIREMENTS_DOC_TOKEN),
     )
 
 
