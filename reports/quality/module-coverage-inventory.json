@@ -7793,7 +7793,7 @@
       "missing_lines": 1,
       "module": "bioetl.composition.factories.pipeline.assembler",
       "path": "src/bioetl/composition/factories/pipeline/assembler.py",
-      "source_lines": 169
+      "source_lines": 165
     },
     {
       "coverage_percent": 100.0,
@@ -29895,7 +29895,7 @@
       "missing_lines": 1,
       "module": "bioetl.composition.factories.pipeline.assembler",
       "path": "src/bioetl/composition/factories/pipeline/assembler.py",
-      "source_lines": 169
+      "source_lines": 165
     },
     {
       "coverage_percent": 100.0,
