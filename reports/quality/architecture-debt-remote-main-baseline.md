@@ -4,14 +4,14 @@
 
 - evidence_source: `remote_main_git_tree`
 - remote_main_ref: `refs/heads/main`
-- baseline_artifact_fingerprint: `0ebcab4c8a5def090c4ca996388a1b035044e2e9fb0f3b45183a0e93479065d7`
+- baseline_artifact_fingerprint: `f9b53cc270430bbddf27b6606b10619d84c5179f94dfebe77e6a5fbadaa48e2e`
 - local_tracking_ref_matches_remote: `True`
 
 | artifact | blob_sha256 | available | required_on_remote | introduced_after_remote_main |
 | --- | --- | --- | --- | --- |
-| `reports/quality/architecture-quality-scorecard.json` | `a86a94bff317a2284d97d7714046390a72d1a2d7d4561b242036710934417916` | `True` | `True` | `False` |
-| `reports/quality/module-coverage-inventory.json` | `c087a08cff51b0bacec25f59362e11ecedc2bdad5e778ecc68698d4f8967fc44` | `True` | `True` | `False` |
-| `reports/quality/compatibility-importer-census.json` | `` | `False` | `False` | `True` |
-| `reports/quality/dead-code-inventory.json` | `` | `False` | `False` | `True` |
-| `reports/quality/contract-registry-diagnostics.json` | `` | `False` | `False` | `True` |
-| `reports/observability/runtime_cardinality_inventory.json` | `` | `False` | `False` | `True` |
+| `reports/quality/architecture-quality-scorecard.json` | `6aba65cd7028f346f8285752b7d705a5986e4c7338935d10ba83c141d37553b3` | `True` | `True` | `False` |
+| `reports/quality/module-coverage-inventory.json` | `fdf384c390b1dffa151779ded61ff0ce6d9ca56ac20ca59bc2beac35f205d9ab` | `True` | `True` | `False` |
+| `reports/quality/compatibility-importer-census.json` | `045abeb8d316795a53911237c5af20809cd9685e0b55b6de9d16b5b39c8284bd` | `True` | `True` | `False` |
+| `reports/quality/dead-code-inventory.json` | `b74ecc8a0fd0ce0e5e4c3d8164705adfa3c0f7157ca22f7ce04b820185ebf0c0` | `True` | `True` | `False` |
+| `reports/quality/contract-registry-diagnostics.json` | `691ae784ed4f90f7835fed4706fbb586e7d7184b8ddc965a7fd5cab6ef3a2dce` | `True` | `True` | `False` |
+| `reports/observability/runtime_cardinality_inventory.json` | `3554c3ea10f38a60d7c5017898e527cbcfb61adc48a72ad296b884ece641bc52` | `True` | `False` | `False` |
