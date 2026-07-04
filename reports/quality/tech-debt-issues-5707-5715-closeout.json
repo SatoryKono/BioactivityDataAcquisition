@@ -106,11 +106,11 @@
       "max": 0
     },
     "full_app_duplicate_clusters": {
-      "current": 45,
+      "current": 44,
       "max": 68
     },
     "adapter_duplicate_clusters": {
-      "current": 42,
+      "current": 41,
       "max": 55
     },
     "pipeline_duplicate_clusters": {
@@ -164,10 +164,10 @@
         "module_coverage_inventory": false,
         "remote_main_baseline": false
       },
-      "module_coverage_source_tree_sha256": "5827c583dc4a381e375c80846df28924efc7a8dbf2d99579eb506075b2f0e544",
+      "module_coverage_source_tree_sha256": "ec24d27c2bff798ca9b7aa64584bb26f849580a180a482f56d849013aa739341",
       "architecture_quality_score": 8.57,
       "remote_main_baseline_fingerprint": "0ebcab4c8a5def090c4ca996388a1b035044e2e9fb0f3b45183a0e93479065d7",
-      "architecture_quality_scorecard_source_tree_sha256": "5827c583dc4a381e375c80846df28924efc7a8dbf2d99579eb506075b2f0e544"
+      "architecture_quality_scorecard_source_tree_sha256": "ec24d27c2bff798ca9b7aa64584bb26f849580a180a482f56d849013aa739341"
     },
     "5708": {
       "shared_delegation_helper": "src/bioetl/infrastructure/adapters/decorators/_data_source_delegation.py",
@@ -175,7 +175,7 @@
         "src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py",
         "src/bioetl/infrastructure/adapters/decorators/retry.py"
       ],
-      "adapter_duplicate_clusters": 42,
+      "adapter_duplicate_clusters": 41,
       "adapter_duplicate_clusters_no_growth_max": 55,
       "bounded_actionability_categories": [
         "export_facade_or_package_barrel"

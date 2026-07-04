@@ -6933,7 +6933,7 @@
       "missing_lines": 3,
       "module": "bioetl.composition.bootstrap.runtime._composite_control_plane_support",
       "path": "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py",
-      "source_lines": 143
+      "source_lines": 141
     },
     {
       "coverage_percent": 91.38,
@@ -9193,7 +9193,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.runtime_builders.run_manifest_support",
       "path": "src/bioetl/composition/runtime_builders/run_manifest_support.py",
-      "source_lines": 166
+      "source_lines": 168
     },
     {
       "coverage_percent": 100.0,
@@ -21613,7 +21613,7 @@
       "missing_lines": 7,
       "module": "bioetl.interfaces.cli.commands.run",
       "path": "src/bioetl/interfaces/cli/commands/run.py",
-      "source_lines": 325
+      "source_lines": 323
     },
     {
       "coverage_percent": 100.0,
@@ -29035,7 +29035,7 @@
       "missing_lines": 3,
       "module": "bioetl.composition.bootstrap.runtime._composite_control_plane_support",
       "path": "src/bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py",
-      "source_lines": 143
+      "source_lines": 141
     },
     {
       "coverage_percent": 91.38,
@@ -31295,7 +31295,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.runtime_builders.run_manifest_support",
       "path": "src/bioetl/composition/runtime_builders/run_manifest_support.py",
-      "source_lines": 166
+      "source_lines": 168
     },
     {
       "coverage_percent": 100.0,
@@ -43715,7 +43715,7 @@
       "missing_lines": 7,
       "module": "bioetl.interfaces.cli.commands.run",
       "path": "src/bioetl/interfaces/cli/commands/run.py",
-      "source_lines": 325
+      "source_lines": 323
     },
     {
       "coverage_percent": 100.0,
@@ -44210,7 +44210,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-01",
-  "source_tree_sha256": "4a37752ad21865db081a6d5a2668392e3baf82ee49df4a792fffc57cb0297784",
+  "source_tree_sha256": "79afa49ac165b40dcd2c9cf615fc46f078726b31ceb6496fe0f95a6b194e046a",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

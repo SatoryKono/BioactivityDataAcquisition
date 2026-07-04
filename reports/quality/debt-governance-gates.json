@@ -28,8 +28,8 @@
       "status": "pass"
     },
     {
-      "current": "034ac9f4dba6f0bce80ccafcd2e2a70e753fadc63b7e09540acd3609cc42cec7",
-      "limit": "034ac9f4dba6f0bce80ccafcd2e2a70e753fadc63b7e09540acd3609cc42cec7",
+      "current": "ec24d27c2bff798ca9b7aa64584bb26f849580a180a482f56d849013aa739341",
+      "limit": "ec24d27c2bff798ca9b7aa64584bb26f849580a180a482f56d849013aa739341",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -39,13 +39,13 @@
     {
       "current": {
         "source_module_count": 2210,
-        "source_tree_sha256": "034ac9f4dba6f0bce80ccafcd2e2a70e753fadc63b7e09540acd3609cc42cec7",
+        "source_tree_sha256": "ec24d27c2bff798ca9b7aa64584bb26f849580a180a482f56d849013aa739341",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2210,
-        "source_tree_sha256": "034ac9f4dba6f0bce80ccafcd2e2a70e753fadc63b7e09540acd3609cc42cec7",
+        "source_tree_sha256": "ec24d27c2bff798ca9b7aa64584bb26f849580a180a482f56d849013aa739341",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -172,8 +172,8 @@
       "status": "pass"
     },
     {
-      "current": 42,
-      "limit": 42,
+      "current": 41,
+      "limit": 41,
       "metric": "duplication_clusters",
       "name": "full_app_duplication_infrastructure_adapters",
       "remediation": "Reduce duplicate clusters and regenerate the full-app duplication baseline without raising scorecard budgets.",
@@ -208,8 +208,8 @@
       "status": "pass"
     },
     {
-      "current": 45,
-      "limit": 45,
+      "current": 44,
+      "limit": 44,
       "metric": "total_duplicate_clusters",
       "name": "full_app_duplication_total_clusters",
       "remediation": "Burn down full-app duplicate clusters and refresh the reviewed baseline.",

@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 
 _PUBLICATION_ONLY_ERROR = "PubMedAdapter only supports 'publication'"
 
+
 async def empty_async_iterator() -> AsyncIterator[BronzeRecord]:
     """Return an empty async iterator matching BronzeRecord stream contract."""
     for record in cast(tuple[BronzeRecord, ...], ()):
@@ -54,8 +55,7 @@ class PubMedAdapterFilterFetchHost(Protocol):
     ) -> AsyncIterator[BronzeRecord]: ...
 
     @staticmethod
-    def _validate_publication_entity(entity_type: str) -> None:
-        ...
+    def _validate_publication_entity(entity_type: str) -> None: ...
 
     def _resolve_resume_offset(
         self,
