@@ -11,6 +11,7 @@ from bioetl.infrastructure.adapters.filterable_mixin import (
     DelegatingFallbackMixin,
     FetchFilteredProtocol,
     NotSupportedMultiFilterMixin,
+    iter_filtered_records_with_default_field,
 )
 
 
@@ -28,6 +29,29 @@ class _DummyDelegatingAdapter(DelegatingFallbackMixin):
     ) -> AsyncIterator[dict[str, str]]:
         await asyncio.sleep(0)
         del entity_type, filter_field, limit
+        for item in filter_ids:
+            yield {"id": item}
+
+
+class _DummyDefaultFieldAdapter:
+    def __init__(self) -> None:
+        self.calls: list[dict[str, object]] = []
+
+    async def fetch_filtered(
+        self,
+        entity_type: str,
+        filter_ids: list[str],
+        filter_field: str,
+        limit: int | None = None,
+    ) -> AsyncIterator[dict[str, str]]:
+        self.calls.append(
+            {
+                "entity_type": entity_type,
+                "filter_ids": filter_ids,
+                "filter_field": filter_field,
+                "limit": limit,
+            }
+        )
         for item in filter_ids:
             yield {"id": item}
 
@@ -78,3 +102,31 @@ def test_has_fetch_filtered_protocol_stub_callable() -> None:
         )
         is None
     )
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_iter_filtered_records_with_default_field_resolves_missing_field() -> None:
+    adapter = _DummyDefaultFieldAdapter()
+
+    result = [
+        record
+        async for record in iter_filtered_records_with_default_field(
+            adapter,
+            entity_type="publication",
+            filter_ids=["A", "B"],
+            filter_field=None,
+            default_filter_field="doi",
+            limit=2,
+        )
+    ]
+
+    assert result == [{"id": "A"}, {"id": "B"}]
+    assert adapter.calls == [
+        {
+            "entity_type": "publication",
+            "filter_ids": ["A", "B"],
+            "filter_field": "doi",
+            "limit": 2,
+        }
+    ]

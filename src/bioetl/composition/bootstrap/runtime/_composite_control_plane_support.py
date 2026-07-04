@@ -13,7 +13,7 @@ from bioetl.composition.occurrence_identity import create_runtime_occurrence_id
 from bioetl.composition.runtime_builders.run_manifest_support import (
     control_plane_root as _shared_control_plane_root,
 )
-from bioetl.composition.runtime_builders.run_manifest_support import (
+from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
     to_serializable_mapping as _shared_to_serializable_mapping,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunSourceRef

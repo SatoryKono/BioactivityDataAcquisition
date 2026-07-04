@@ -18,6 +18,7 @@ __all__ = [
     "FetchFilteredProtocol",
     "FilterableStubMixin",
     "NotSupportedMultiFilterMixin",
+    "iter_filtered_records_with_default_field",
     "raising_async_iterator",
 ]
 
@@ -126,6 +127,26 @@ class NotSupportedMultiFilterMixin:
             "Use fetch_filtered() with a single filter_field instead."
         )
         return raising_async_iterator(NotImplementedError(message))
+
+
+async def iter_filtered_records_with_default_field(
+    adapter: FetchFilteredProtocol,
+    *,
+    entity_type: str,
+    filter_ids: list[str],
+    filter_field: str | None,
+    default_filter_field: str,
+    limit: int | None,
+) -> AsyncIterator[JsonDict]:
+    """Delegate filtered fetch after resolving a provider default field."""
+    effective_filter_field = filter_field or default_filter_field
+    async for record in adapter.fetch_filtered(
+        entity_type=entity_type,
+        filter_ids=filter_ids,
+        filter_field=effective_filter_field,
+        limit=limit,
+    ):
+        yield record
 
 
 class DelegatingFallbackMixin:

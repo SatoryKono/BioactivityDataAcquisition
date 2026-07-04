@@ -9,7 +9,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
 from bioetl.domain.types import BronzeRecord
-from bioetl.infrastructure.adapters.filterable_mixin import NotSupportedMultiFilterMixin
+from bioetl.infrastructure.adapters.filterable_mixin import (
+    NotSupportedMultiFilterMixin,
+    iter_filtered_records_with_default_field,
+)
 from bioetl.infrastructure.adapters.semanticscholar._search_fetch_flow import (
     _SemanticScholarSearchFetchMixin,
 )
@@ -87,11 +90,12 @@ class SemanticScholarFetchAdapterMixin(
         Yields:
             BronzeRecord entries resolved from the filter IDs.
         """
-        effective_filter_field = filter_field or "doi"
-        async for record in self.fetch_filtered(
+        async for record in iter_filtered_records_with_default_field(
+            self,
             entity_type=entity_type,
             filter_ids=filter_ids,
-            filter_field=effective_filter_field,
+            filter_field=filter_field,
+            default_filter_field="doi",
             limit=limit,
         ):
             yield record

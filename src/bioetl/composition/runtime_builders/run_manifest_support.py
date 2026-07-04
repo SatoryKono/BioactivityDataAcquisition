@@ -28,6 +28,7 @@ from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
     build_launch_context_snapshot,
     resolve_provider_entity,
     resolve_replay_parentage,
+    to_serializable_mapping,
 )
 from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
     RunManifestContractIdentity,
@@ -68,6 +69,7 @@ __all__ = [
     "resolve_replay_capability",
     "resolve_replay_parentage",
     "resolve_run_context_values",
+    "to_serializable_mapping",
     "validate_reproducible_sink_modes",
 ]
 

@@ -5,6 +5,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.adapters.filterable_mixin import (
+    iter_filtered_records_with_default_field,
+)
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -180,11 +183,12 @@ async def fetch_from_filter_ids(
     limit: int | None,
 ) -> AsyncIterator[BronzeRecord]:
     """Fetch records from explicit PMID filters."""
-    effective_filter_field = filter_field or "pmid"
-    async for record in host.fetch_filtered(
+    async for record in iter_filtered_records_with_default_field(
+        host,
         entity_type=entity_type,
         filter_ids=filter_ids,
-        filter_field=effective_filter_field,
+        filter_field=filter_field,
+        default_filter_field="pmid",
         limit=limit,
     ):
         yield record

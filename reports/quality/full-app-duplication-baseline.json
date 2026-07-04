@@ -2,8 +2,8 @@
   "summary": {
     "snapshot_date": "2026-07-04",
     "targets": 4,
-    "total_duplicate_clusters": 45,
-    "total_raw_duplicate_clusters": 45,
+    "total_duplicate_clusters": 44,
+    "total_raw_duplicate_clusters": 44,
     "total_excluded_duplicate_clusters": 0
   },
   "normalization": {
@@ -16,10 +16,10 @@
   "reduction_leverage_ranking": [
     {
       "target": "src/bioetl/infrastructure/adapters",
-      "duplicate_clusters": 42,
+      "duplicate_clusters": 41,
       "dominant_actionability_category": "export_facade_or_package_barrel",
-      "dominant_actionability_cluster_count": 42,
-      "low_risk_cluster_count": 42,
+      "dominant_actionability_cluster_count": 41,
+      "low_risk_cluster_count": 41,
       "low_risk_cluster_share": 1.0,
       "recommended_first_wave": false
     },
@@ -54,7 +54,7 @@
   "first_wave": {
     "status": "selected",
     "target": "src/bioetl/infrastructure/adapters",
-    "duplicate_clusters": 42,
+    "duplicate_clusters": 41,
     "dominant_actionability_category": "export_facade_or_package_barrel",
     "selection_rule": "prefer low-risk actionability families with bounded cluster counts, then maximize duplicate reduction leverage"
   },
@@ -62,13 +62,13 @@
     {
       "target": "src/bioetl/infrastructure/adapters",
       "returncode": 8,
-      "duplicate_count": 42,
-      "raw_duplicate_count": 42,
+      "duplicate_count": 41,
+      "raw_duplicate_count": 41,
       "excluded_duplicate_count": 0,
       "actionability": [
         {
           "category": "export_facade_or_package_barrel",
-          "duplicate_clusters": 42
+          "duplicate_clusters": 41
         }
       ],
       "top_pairs": [
@@ -88,13 +88,6 @@
         },
         {
           "modules": [
-            "bioetl.infrastructure.adapters.pubmed._filter_fetch_support",
-            "bioetl.infrastructure.adapters.semanticscholar.fetch_adapter_mixin"
-          ],
-          "duplicate_clusters": 2
-        },
-        {
-          "modules": [
             "bioetl.infrastructure.adapters.chembl.client",
             "bioetl.infrastructure.adapters.crossref.client"
           ],
@@ -104,6 +97,13 @@
           "modules": [
             "bioetl.infrastructure.adapters.chembl.client",
             "bioetl.infrastructure.adapters.decorators.circuit_breaker"
+          ],
+          "duplicate_clusters": 1
+        },
+        {
+          "modules": [
+            "bioetl.infrastructure.adapters.chembl.client",
+            "bioetl.infrastructure.adapters.pubchem.client_model_mixin"
           ],
           "duplicate_clusters": 1
         }
@@ -201,8 +201,8 @@
           "modules": [
             {
               "module": "bioetl.infrastructure.adapters.filterable_mixin",
-              "start_line": 173,
-              "end_line": 182
+              "start_line": 196,
+              "end_line": 205
             },
             {
               "module": "bioetl.infrastructure.adapters.uniprot.client",
@@ -235,8 +235,8 @@
           "modules": [
             {
               "module": "bioetl.infrastructure.adapters.crossref.client",
-              "start_line": 81,
-              "end_line": 88
+              "start_line": 84,
+              "end_line": 91
             },
             {
               "module": "bioetl.infrastructure.adapters.pubmed.adapter",
@@ -354,13 +354,13 @@
           "modules": [
             {
               "module": "bioetl.infrastructure.adapters.pubmed._filter_fetch_support",
-              "start_line": 150,
-              "end_line": 158
+              "start_line": 153,
+              "end_line": 161
             },
             {
               "module": "bioetl.infrastructure.adapters.semanticscholar.fetch_adapter_mixin",
-              "start_line": 51,
-              "end_line": 59
+              "start_line": 61,
+              "end_line": 69
             }
           ]
         },
@@ -371,8 +371,8 @@
           "modules": [
             {
               "module": "bioetl.infrastructure.adapters.filterable_mixin",
-              "start_line": 174,
-              "end_line": 182
+              "start_line": 197,
+              "end_line": 205
             },
             {
               "module": "bioetl.infrastructure.adapters.pubmed.adapter_filter_fetch_mixin",
@@ -388,8 +388,8 @@
           "modules": [
             {
               "module": "bioetl.infrastructure.adapters.filterable_mixin",
-              "start_line": 173,
-              "end_line": 179
+              "start_line": 196,
+              "end_line": 202
             },
             {
               "module": "bioetl.infrastructure.adapters.uniprot.filtering_adapter_mixin",
@@ -410,8 +410,8 @@
             },
             {
               "module": "bioetl.infrastructure.adapters.crossref.client",
-              "start_line": 200,
-              "end_line": 206
+              "start_line": 192,
+              "end_line": 198
             }
           ]
         },
@@ -422,8 +422,8 @@
           "modules": [
             {
               "module": "bioetl.infrastructure.adapters.crossref.client",
-              "start_line": 82,
-              "end_line": 88
+              "start_line": 85,
+              "end_line": 91
             },
             {
               "module": "bioetl.infrastructure.adapters.openalex.client",
@@ -439,8 +439,8 @@
           "modules": [
             {
               "module": "bioetl.infrastructure.adapters.crossref.client",
-              "start_line": 180,
-              "end_line": 186
+              "start_line": 172,
+              "end_line": 178
             },
             {
               "module": "bioetl.infrastructure.adapters.pubmed.adapter_filter_fetch_mixin",
@@ -461,8 +461,8 @@
             },
             {
               "module": "bioetl.infrastructure.adapters.pubmed._filter_fetch_support",
-              "start_line": 128,
-              "end_line": 134
+              "start_line": 131,
+              "end_line": 137
             }
           ]
         },
@@ -495,8 +495,8 @@
             },
             {
               "module": "bioetl.infrastructure.adapters.openalex.filter_fetch_adapter_mixin",
-              "start_line": 136,
-              "end_line": 142
+              "start_line": 126,
+              "end_line": 132
             }
           ]
         },
@@ -512,8 +512,8 @@
             },
             {
               "module": "bioetl.infrastructure.adapters.openalex.filter_fetch_adapter_mixin",
-              "start_line": 157,
-              "end_line": 163
+              "start_line": 147,
+              "end_line": 153
             }
           ]
         },
@@ -524,8 +524,8 @@
           "modules": [
             {
               "module": "bioetl.infrastructure.adapters.openalex.filter_fetch_adapter_mixin",
-              "start_line": 135,
-              "end_line": 141
+              "start_line": 125,
+              "end_line": 131
             },
             {
               "module": "bioetl.infrastructure.adapters.pubmed.adapter_filter_fetch_mixin",
@@ -575,30 +575,13 @@
           "modules": [
             {
               "module": "bioetl.infrastructure.adapters.pubmed._filter_fetch_support",
-              "start_line": 150,
-              "end_line": 156
+              "start_line": 153,
+              "end_line": 159
             },
             {
               "module": "bioetl.infrastructure.adapters.pubmed.adapter_filter_fetch_mixin",
               "start_line": 149,
               "end_line": 166
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
-          "line": 1,
-          "actionability_category": "export_facade_or_package_barrel",
-          "modules": [
-            {
-              "module": "bioetl.infrastructure.adapters.pubmed._filter_fetch_support",
-              "start_line": 184,
-              "end_line": 194
-            },
-            {
-              "module": "bioetl.infrastructure.adapters.semanticscholar.fetch_adapter_mixin",
-              "start_line": 84,
-              "end_line": 109
             }
           ]
         },
@@ -677,8 +660,8 @@
           "modules": [
             {
               "module": "bioetl.infrastructure.adapters.crossref.client",
-              "start_line": 200,
-              "end_line": 205
+              "start_line": 192,
+              "end_line": 197
             },
             {
               "module": "bioetl.infrastructure.adapters.decorators.retry",
@@ -694,13 +677,13 @@
           "modules": [
             {
               "module": "bioetl.infrastructure.adapters.crossref.client",
-              "start_line": 180,
-              "end_line": 185
+              "start_line": 172,
+              "end_line": 177
             },
             {
               "module": "bioetl.infrastructure.adapters.openalex.filter_fetch_adapter_mixin",
-              "start_line": 136,
-              "end_line": 141
+              "start_line": 126,
+              "end_line": 131
             }
           ]
         },
@@ -716,8 +699,8 @@
             },
             {
               "module": "bioetl.infrastructure.adapters.semanticscholar.fetch_adapter_mixin",
-              "start_line": 199,
-              "end_line": 204
+              "start_line": 210,
+              "end_line": 215
             }
           ]
         },
@@ -750,8 +733,8 @@
             },
             {
               "module": "bioetl.infrastructure.adapters.openalex.filter_fetch_adapter_mixin",
-              "start_line": 157,
-              "end_line": 162
+              "start_line": 147,
+              "end_line": 152
             }
           ]
         },
@@ -762,8 +745,8 @@
           "modules": [
             {
               "module": "bioetl.infrastructure.adapters.openalex.filter_fetch_adapter_mixin",
-              "start_line": 69,
-              "end_line": 74
+              "start_line": 74,
+              "end_line": 79
             },
             {
               "module": "bioetl.infrastructure.adapters.pubmed.adapter_filter_fetch_mixin",
