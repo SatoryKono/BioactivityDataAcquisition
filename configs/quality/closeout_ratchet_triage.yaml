@@ -264,6 +264,11 @@ entries:
     classification: budget_closeout_ratchet
     live_guard: "debt issue batch #5866-#5872 remains aligned with live full-app duplication ratchets, adapter/pipeline burn-down, replay-sensitive coverage floors, zero-reference script governance, canonical lazy-export owners, and composite bootstrap registry evidence without budget growth."
     rationale: Keeps the TDX audit Wave 3 closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issues_5933_5944_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue batch #5933, #5937, #5938, and #5942-#5944 remains aligned with live governance artifact rebaselining, debt-gate freshness, duplication ratchets, runtime-cardinality review, config compatibility, and quarantine alias contracts without budget growth."
+    rationale: Keeps the governance-quality closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
   - path: tests/architecture/test_tech_debt_issues_5847_5852_closeout.py
     disposition: retain_active
     classification: budget_closeout_ratchet

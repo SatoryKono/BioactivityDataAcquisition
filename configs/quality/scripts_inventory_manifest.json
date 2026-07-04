@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-04T14:32:33.043511+00:00",
+  "generated_at": "2026-07-04T15:29:46.881412+00:00",
   "summary": {
     "total_scripts": 453,
     "status_counts": {
@@ -15,7 +15,7 @@
       "other": 23,
       "scripts": 348,
       "skills": 11,
-      "tests": 188
+      "tests": 190
     }
   },
   "scripts": [
@@ -631,7 +631,7 @@
       "references": [
         {
           "path": "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py",
-          "line": 336,
+          "line": 335,
           "source_group": "tests",
           "text": "assert \"scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh\" in backlog_text"
         }
@@ -9371,7 +9371,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
@@ -9384,6 +9384,12 @@
           "line": 131,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_architecture_debt_remote_main_baseline\""
+        },
+        {
+          "path": "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py",
+          "line": 196,
+          "source_group": "tests",
+          "text": "ROOT / \"scripts/engineering/qa/report_architecture_debt_remote_main_baseline.py\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -9619,7 +9625,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -9644,6 +9650,12 @@
           "line": 133,
           "source_group": "scripts",
           "text": "\"report-debt-governance-gates\": \"scripts.engineering.qa.report_debt_governance_gates\","
+        },
+        {
+          "path": "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py",
+          "line": 199,
+          "source_group": "tests",
+          "text": "ROOT / \"scripts/engineering/qa/report_debt_governance_gates.py\""
         }
       ]
     },
@@ -12040,8 +12052,14 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 9,
       "references": [
+        {
+          "path": "docs/03-guides/development/codex-paths.md",
+          "line": 1,
+          "source_group": "docs",
+          "text": "scripts\\codex-exec.bat"
+        },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
           "line": 163,
@@ -12083,12 +12101,6 @@
           "line": 2,
           "source_group": "scripts",
           "text": "REM Compatibility facade: scripts/ops/codex-exec.bat -> scripts/ops/launchers/codex/codex-exec.bat"
-        },
-        {
-          "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 69,
-          "source_group": "tests",
-          "text": "r\"scripts\\codex-exec.bat\","
         }
       ]
     },
@@ -12248,8 +12260,14 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 12,
       "references": [
+        {
+          "path": "docs/03-guides/development/codex-paths.md",
+          "line": 2,
+          "source_group": "docs",
+          "text": "scripts\\codex.bat"
+        },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
           "line": 162,
@@ -12291,12 +12309,6 @@
           "line": 11,
           "source_group": "scripts",
           "text": "║  1. scripts\\ops\\launchers\\codex\\codex.bat                                 ║"
-        },
-        {
-          "path": "scripts/ops/launchers/codex/SETUP_GUIDE.sh",
-          "line": 35,
-          "source_group": "scripts",
-          "text": "scripts\\ops\\launchers\\codex\\codex.bat"
         }
       ]
     },
@@ -13218,8 +13230,14 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 22,
       "references": [
+        {
+          "path": "docs/03-guides/development/codex-paths.md",
+          "line": 3,
+          "source_group": "docs",
+          "text": "scripts\\start-wsl-proxy.bat"
+        },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
           "line": 65,
@@ -13261,12 +13279,6 @@
           "line": 221,
           "source_group": "docs",
           "text": "| `start-wsl-proxy.bat`              | Proxy launcher               | Windows PowerShell |"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md",
-          "line": 293,
-          "source_group": "docs",
-          "text": "# PowerShell: .\\scripts\\ops\\start-wsl-proxy.bat"
         }
       ]
     },
