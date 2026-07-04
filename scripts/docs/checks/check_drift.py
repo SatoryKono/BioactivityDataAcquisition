@@ -180,6 +180,13 @@ WINDSURF_RULE_DOCS_DIR = Path("docs/00-project/ai/rules/windsurf/rules")
 WINDSURF_WORKFLOW_DOCS_DIR = Path("docs/00-project/ai/rules/windsurf/workflows")
 WINDSURF_REVIEW_PATH = Path("docs/00-project/ai/rules/windsurf/workflows/review.md")
 CURSOR_RULE_EXCLUDED_FILENAMES = frozenset({"sonarqube_mcp_instructions.mdc"})
+DOCS_MIRROR_SKILLS_DIR = Path("docs/00-project/ai/skills/local")
+DOCS_MIRROR_SKILL_REQUIRED_TOKENS: tuple[str, ...] = (
+    NORMATIVE_SOURCES_DOC_TOKEN,
+    AGENTS_DOC_TOKEN,
+    RULES_DOC_TOKEN,
+    REQUIREMENTS_DOC_TOKEN,
+)
 AI_RULES_MIRROR_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
     AI_RULES_README_PATH: (
         AGENTS_DOC_TOKEN,
@@ -1391,6 +1398,7 @@ def check_ai_surfaces(report: DriftReport, *, root: Path | None = None) -> None:
     if run_repo_global_surface_checks:
         _check_runtime_skill_entrypoints(report, project_root=project_root)
         _check_cursor_rule_entrypoints(report, project_root=project_root)
+        _check_docs_mirror_skill_entrypoints(report, project_root=project_root)
         _check_windsurf_rule_entrypoints(report, project_root=project_root)
         _check_ai_rules_mirrors(report, project_root=project_root)
         _check_unverified_gemini_runtime_claims(report, project_root=project_root)
@@ -1659,6 +1667,7 @@ def _check_cursor_rule_entrypoints(
 ) -> None:
     required_tokens = (
         AGENTS_DOC_TOKEN,
+        NORMATIVE_SOURCES_DOC_TOKEN,
         RULES_DOC_TOKEN,
         REQUIREMENTS_DOC_TOKEN,
         ADR_DIR_DOC_TOKEN,
@@ -1689,7 +1698,31 @@ def _iter_windsurf_workflow_entrypoints(project_root: Path) -> tuple[Path, ...]:
     return tuple(
         path.relative_to(project_root)
         for path in sorted(root.glob("*.md"))
+                )
+
+
+def _iter_docs_mirror_skill_entrypoints(project_root: Path) -> tuple[Path, ...]:
+    root = project_root / DOCS_MIRROR_SKILLS_DIR
+    if not root.exists():
+        return ()
+    return tuple(
+        path.relative_to(project_root)
+        for path in sorted(root.glob("*/SKILL.md"))
     )
+
+
+def _check_docs_mirror_skill_entrypoints(
+    report: DriftReport,
+    *,
+    project_root: Path,
+) -> None:
+    for relative_path in _iter_docs_mirror_skill_entrypoints(project_root):
+        _check_ai_surface_required_tokens(
+            report,
+            project_root=project_root,
+            relative_path=relative_path,
+            required_tokens=DOCS_MIRROR_SKILL_REQUIRED_TOKENS,
+        )
 
 
 def _check_windsurf_rule_entrypoints(

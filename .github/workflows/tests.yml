@@ -246,6 +246,9 @@ jobs:
                       --json-out reports/quality/test-governance-current.json \
                       --duplicate-name-inventory-out reports/quality/test-duplicate-name-inventory.json
 
+            -   name: Validate config/contract/registry artifact duplication audit
+                run: uv run python -m scripts.engineering.qa report-artifact-duplication-audit --check
+
             -   name: Validate deterministic Neo4j memory ontology invariants
                 run: uv run python -m scripts.engineering.ci neo4j-memory
 

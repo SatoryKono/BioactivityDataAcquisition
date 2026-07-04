@@ -85,7 +85,5 @@ def create_gold_writer(
             lineage_store=lineage_store,
             contract_rollout_policy=contract_rollout_policy,
         ),
-        # Keep legacy kwarg for constructor-call compatibility in tests and shims.
-        csv_exporter=csv_exporter,
         flat_structure=flat_structure,
     )

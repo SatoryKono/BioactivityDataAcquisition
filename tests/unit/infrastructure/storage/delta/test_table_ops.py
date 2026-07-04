@@ -61,7 +61,9 @@ def test_read_delta_records_uses_dataset_scanner_off_windows(
         def to_pyarrow_dataset(self) -> _FakeDataset:
             return dataset
 
-        def to_pyarrow_table(self, *, columns: list[str] | None = None) -> _FakeArrowTable:
+        def to_pyarrow_table(
+            self, *, columns: list[str] | None = None
+        ) -> _FakeArrowTable:
             raise AssertionError("fallback path should not be used")
 
     assert table_ops.read_delta_records(_FakeTable(), columns=["entity_id"]) == rows
@@ -83,7 +85,9 @@ def test_read_delta_records_skips_dataset_scanner_on_windows(
         def to_pyarrow_dataset(self) -> _FakeDataset:
             raise AssertionError("Windows path must not import dataset scanner")
 
-        def to_pyarrow_table(self, *, columns: list[str] | None = None) -> _FakeArrowTable:
+        def to_pyarrow_table(
+            self, *, columns: list[str] | None = None
+        ) -> _FakeArrowTable:
             observed["columns"] = columns
             return _FakeArrowTable(rows)
 
@@ -98,6 +102,24 @@ def test_resolve_delta_table_path_uses_pathlib_join() -> None:
         flat_structure=False,
     )
     assert resolved == (Path("/tmp/output/silver") / "chembl" / "target").as_posix()
+
+
+def test_resolve_delta_table_path_preserves_uri_scheme() -> None:
+    resolved = table_ops.resolve_delta_table_path(
+        base_path="s3://bucket/output/silver/",
+        table_name="chembl.target",
+        flat_structure=False,
+    )
+
+    assert resolved == "s3://bucket/output/silver/chembl/target"
+
+
+def test_normalize_delta_filesystem_path_preserves_uri_scheme() -> None:
+    normalized = table_ops.normalize_delta_filesystem_path(
+        "s3://bucket/output/silver/chembl/target/"
+    )
+
+    assert normalized == "s3://bucket/output/silver/chembl/target"
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific path semantics")

@@ -31,14 +31,7 @@ if TYPE_CHECKING:
         metrics_retry_count: int
         metrics_retry_delay: float
 
-    class RuntimeSettingsProtocol(Protocol):
-        observability: ObservabilitySettingsProtocol
-        metrics_port: int
-        metrics_addr: str
-
     def get_health_server_dependencies() -> HealthServerDependenciesProtocol: ...
-
-    def get_runtime_settings() -> RuntimeSettingsProtocol: ...
 
     def get_quarantine_runtime_service(
         pipeline: str,
@@ -89,10 +82,3 @@ install_cached_public_exports(
     public_exports=_PUBLIC_EXPORTS,
     module_name=__name__,
 )
-
-
-def get_runtime_settings() -> object:
-    """Load runtime settings through the composition boundary."""
-    from bioetl.composition.runtime_builders.config_access import get_settings
-
-    return get_settings()

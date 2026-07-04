@@ -7,56 +7,74 @@ globs:
 
 # Testing Levels
 
-**Canonical references:** `AGENTS.md`, `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`, `docs/02-architecture/decisions/`.
+**Canonical references:** `AGENTS.md`, `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`, `docs/02-architecture/decisions/`.
 
 | Level | Scope | Key Requirements |
 |-------|-------|------------------|
-| Unit | Domain logic | In-memory fakes, NO MagicMock |
-| Integration | API adapters | VCR.py cassettes, sanitize secrets |
+| Unit | Domain/application pure logic | In-memory fakes/ports; **NO** mocking external libraries |
+| Integration | Adapters, Delta, checkpoint/quarantine | VCR.py; durable boundaries |
+| Architecture | Layer boundaries, purity, ports | Block cross-layer imports, I/O in domain, factories outside composition |
+| Contract/Golden | Columns, order, types, serialization | Generated artifact parity |
 | E2E | Full pipeline | `@pytest.mark.e2e`, local-only |
-| Architecture | Layer boundaries | NO random/datetime violations |
-| Contract | Live APIs | Monthly, separate CI |
+| Composite | Stage order, join keys, merge | ADR-026 coverage |
+| Reliability | Retry, idempotency, checkpoint, lock loss | Failure at each durable boundary |
+| Determinism | Golden hash, repeated-run equality | Byte-identical artifacts where applicable |
+| Contract (live) | Real APIs | Monthly scheduled workflow |
+
+Tests: `test_*.py`; mirror production concerns.
+
+# Unit Test Rules
+
+- Pure domain/application via in-memory fakes — **MUST NOT** mock external libs (`httpx`, `requests`, etc.)
+- `MagicMock` only for own seam objects when fake impractical
+- Cover: aggregate state machines, invalid transitions, Value Objects, hash normalization, DQ boundaries, negative cases
 
 # VCR.py Rules
 
-- Store in: `tests/fixtures/vcr/`
-- **MANDATORY sanitization** before commit: redact `Authorization`, `X-Api-Key`, `X-Auth-Token`, `Set-Cookie`, `Cookie`, `access_token`, `refresh_token`, `password`, `secret`, `api_key`, `token`, `client_secret`, `private_key`
-- Values MUST be obvious placeholders (`DUMMY_TOKEN`, `FAKE_API_KEY`, `REDACTED`) — never production-like (`sk_live_`, JWT triplets, long hex/base64)
-- Configure `filter_sensitive_data` for each new sensitive header/field
-- CI: `--vcr-record=none` (fail if cassette missing)
+- Store: `tests/fixtures/vcr/`
+- **MANDATORY sanitization:** redact `Authorization`, `X-Api-Key`, `X-Auth-Token`, `Set-Cookie`, `Cookie`, tokens, passwords, secrets, PII
+- Placeholders: `DUMMY_TOKEN`, `FAKE_API_KEY`, `REDACTED` — never production-like (`sk_live_`, JWT triplets)
+- CI: `--vcr-record=none` — fail if cassette missing; live network in normal CI **MUST NOT**
 
 # E2E Tests
 
 - Runtime: local-only (filesystem, MemoryLock, LocalCheckpoint)
-- Helpers: `create-test-context()`, `assert-bronze-files-exist()`
 - Run: `pytest tests/e2e/ -v -m e2e`
 
 # Critical Architecture Tests
 
-| Test | Validates |
-|------|-----------|
-| `test_no_random_in_writers.py` | No `random` in storage writers |
-| `test_no_datetime_now_in_infrastructure.py` | No `datetime.now()` in infra |
-| `test_no_structlog_in_application_interfaces.py` | No direct `structlog` import |
-| `test_future_annotations_policy.py` | `__future__` annotations present |
+| Test area | Validates |
+|-----------|-----------|
+| `test_no_random_in_writers.py` | No uncontrolled random in storage writers |
+| `test_no_datetime_now_in_infrastructure.py` | No wall-clock in infra |
+| `test_no_structlog_in_application_interfaces.py` | LoggerPort only |
+| `test_future_annotations_policy.py` | `__future__` annotations |
 | `test_quality_debt_scorecard.py` | Debt compliance |
+| import-linter | Layer matrix |
+| `test_force_full_scan_publication.py` | Publication full_scan_only configs |
 
 # Coverage
 
-**Minimum 85%** — enforced in CI via `--cov-fail-under=85`
-- CI MUST fail when coverage drops below 85%
-- New/modified files MUST NOT be significantly below 85% even if global passes
+**Minimum 85% overall** — `--cov-fail-under=85` in CI. No separate mandatory 90% domain gate in current RULES.
+New/modified files **SHOULD NOT** be significantly below 85% even if global passes.
+
+# Blocking CI Gates
+
+Ruff/format, mypy `--strict`, pytest, import-linter, architecture suite, config/schema validators, generated-artifact parity, Bandit, pip-audit (CVE ≥ HIGH), detect-secrets, docs checks, coverage, Conventional Commit header.
+
+# Pre-PR Minimum
+
+```bash
+make lint
+make test
+uv run lint-imports --config .importlinter
+uv run python -m scripts.schema validate-configs
+uv run python -m pytest tests/architecture/ -m "not slow and not benchmark and not memory" -q
+```
 
 # Quick Verification
 
 ```bash
-# File stats
-wc -l <file>
-grep -c "def \|async def " <file>
-
-# Delegation pattern
-grep -o "self\.[a-z_]*\." <file> | sort -u
-
-# Find tests
 find tests -name "*.py" -exec grep -l "ClassName" {} \;
+grep -o "self\.[a-z_]*\." <file> | sort -u
 ```

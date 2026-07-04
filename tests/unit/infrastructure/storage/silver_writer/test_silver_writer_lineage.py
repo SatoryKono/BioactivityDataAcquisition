@@ -13,6 +13,9 @@ from bioetl.domain.medallion import SilverWriteMode
 from bioetl.infrastructure.storage.silver.metadata_operations import (
     _SilverMetadataWriteRequest,
 )
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
 from tests.unit.infrastructure.storage._lineage_fragment_helpers import (
     make_produced_artifact_fragment,
 )
@@ -108,7 +111,7 @@ class TestSilverWriterAudit:
         mock_audit = MagicMock()
         writer = make_silver_writer(
             logger=noop_logger,
-            audit=mock_audit,
+            runtime_request=SilverWriterRuntimeServicesRequest(audit=mock_audit),
         )
 
         with pytest.raises(ValueError, match="run_id is required"):
@@ -137,7 +140,10 @@ class TestSilverWriterAudit:
         mock_audit = MagicMock()
         mock_audit.log_write = AsyncMock()
 
-        writer = make_silver_writer(logger=noop_logger, audit=mock_audit)
+        writer = make_silver_writer(
+            logger=noop_logger,
+            runtime_request=SilverWriterRuntimeServicesRequest(audit=mock_audit),
+        )
 
         valid_uuid = deterministic_uuid_from_callsite("replay-sensitive")
         await writer._log_silver_audit(
@@ -165,7 +171,10 @@ class TestSilverWriterAudit:
         mock_audit = MagicMock()
         mock_audit.log_write = AsyncMock()
 
-        writer = make_silver_writer(logger=noop_logger, audit=mock_audit)
+        writer = make_silver_writer(
+            logger=noop_logger,
+            runtime_request=SilverWriterRuntimeServicesRequest(audit=mock_audit),
+        )
 
         valid_uuid = deterministic_uuid_from_callsite("replay-sensitive")
         ingestion_dt = datetime(2025, 1, 1, 12, 0, 0, tzinfo=UTC)
@@ -194,7 +203,10 @@ class TestSilverWriterAudit:
         mock_audit = MagicMock()
         mock_audit.log_write = AsyncMock()
 
-        writer = make_silver_writer(logger=noop_logger, audit=mock_audit)
+        writer = make_silver_writer(
+            logger=noop_logger,
+            runtime_request=SilverWriterRuntimeServicesRequest(audit=mock_audit),
+        )
 
         valid_uuid = deterministic_uuid_from_callsite("replay-sensitive")
         with pytest.raises(ValueError, match="ingestion_ts is required"):
@@ -227,7 +239,9 @@ class TestSilverWriterCsvExport:
         with patch_new_silver_write(patch_base_delta_table=True):
             writer = make_silver_writer(
                 logger=noop_logger,
-                csv_exporter=mock_exporter,
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    csv_exporter=mock_exporter,
+                ),
             )
 
             await writer.write_silver(
@@ -258,7 +272,9 @@ class TestSilverWriterCsvExport:
             writer = make_silver_writer(
                 logger=noop_logger,
                 base_path=tmp_path / "silver",
-                csv_exporter=mock_exporter,
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    csv_exporter=mock_exporter,
+                ),
             )
 
             await writer.write_silver(
@@ -365,8 +381,10 @@ class TestSilverWriterLineage:
 
         writer = make_silver_writer(
             logger=noop_logger,
-            metadata_writer=mock_metadata_writer,
-            metadata_coordinator=mock_metadata_coordinator,
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                metadata_writer=mock_metadata_writer,
+                metadata_coordinator=mock_metadata_coordinator,
+            ),
         )
 
         await writer._write_silver_metadata(
@@ -403,8 +421,10 @@ class TestSilverWriterLineage:
 
         writer = make_silver_writer(
             logger=noop_logger,
-            metadata_writer=mock_metadata_writer,
-            metadata_coordinator=mock_metadata_coordinator,
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                metadata_writer=mock_metadata_writer,
+                metadata_coordinator=mock_metadata_coordinator,
+            ),
         )
 
         await writer._write_silver_metadata(
@@ -454,8 +474,10 @@ class TestSilverWriterLineage:
 
         writer = make_silver_writer(
             logger=noop_logger,
-            metadata_writer=mock_metadata_writer,
-            metadata_coordinator=mock_metadata_coordinator,
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                metadata_writer=mock_metadata_writer,
+                metadata_coordinator=mock_metadata_coordinator,
+            ),
         )
 
         await writer._write_silver_metadata(
@@ -508,8 +530,10 @@ class TestSilverWriterLineage:
         )
         writer = make_silver_writer(
             logger=noop_logger,
-            metadata_writer=MagicMock(),
-            metadata_coordinator=mock_metadata_coordinator,
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                metadata_writer=MagicMock(),
+                metadata_coordinator=mock_metadata_coordinator,
+            ),
         )
         writer._write_silver_metadata_file = AsyncMock()  # type: ignore[method-assign]
 
@@ -566,9 +590,11 @@ class TestSilverWriterLineage:
         lineage_store = MagicMock()
         writer = make_silver_writer(
             logger=noop_logger,
-            metadata_writer=MagicMock(),
-            metadata_coordinator=_Coordinator(),
-            lineage_store=lineage_store,
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                metadata_writer=MagicMock(),
+                metadata_coordinator=_Coordinator(),
+                lineage_store=lineage_store,
+            ),
         )
         writer._write_silver_metadata_file = AsyncMock()  # type: ignore[method-assign]
 
@@ -617,8 +643,10 @@ class TestSilverWriterLineage:
 
         writer = make_silver_writer(
             logger=noop_logger,
-            metadata_writer=mock_metadata_writer,
-            metadata_coordinator=_Coordinator(),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                metadata_writer=mock_metadata_writer,
+                metadata_coordinator=_Coordinator(),
+            ),
         )
         writer._get_delta_version = AsyncMock(return_value=11)  # type: ignore[method-assign]
         await writer._write_silver_merged_metadata(
@@ -671,8 +699,10 @@ class TestSilverWriterLineage:
 
         writer = make_silver_writer(
             logger=noop_logger,
-            metadata_writer=MagicMock(),
-            metadata_coordinator=_Coordinator(),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                metadata_writer=MagicMock(),
+                metadata_coordinator=_Coordinator(),
+            ),
         )
         writer._get_delta_version = AsyncMock(return_value=11)  # type: ignore[method-assign]
         writer._write_silver_metadata_file = AsyncMock()  # type: ignore[method-assign]
@@ -729,9 +759,11 @@ class TestSilverWriterLineage:
         lineage_store = MagicMock()
         writer = make_silver_writer(
             logger=noop_logger,
-            metadata_writer=MagicMock(),
-            metadata_coordinator=_Coordinator(),
-            lineage_store=lineage_store,
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                metadata_writer=MagicMock(),
+                metadata_coordinator=_Coordinator(),
+                lineage_store=lineage_store,
+            ),
         )
         writer._get_delta_version = AsyncMock(return_value=11)  # type: ignore[method-assign]
         writer._write_silver_metadata_file = AsyncMock()  # type: ignore[method-assign]
@@ -769,10 +801,7 @@ class TestSilverWriterLineage:
         from bioetl.domain.medallion import SilverWriteMode
 
         logger = MagicMock()
-        writer = make_silver_writer(
-            logger=logger,
-            metadata_coordinator=None,
-        )
+        writer = make_silver_writer(logger=logger)
 
         with pytest.raises(
             RuntimeError,

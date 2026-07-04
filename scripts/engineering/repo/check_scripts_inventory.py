@@ -43,17 +43,19 @@ SCRIPT_EXTENSIONS: Final[tuple[str, ...]] = (
 SCRIPT_ROOTS: Final[tuple[str, ...]] = ("scripts", "src/tools")
 SEARCH_ROOTS: Final[tuple[str, ...]] = (
     "AGENTS.md",
-    ".pre-commit-config.yaml",
+    ".github/ISSUES",
+    ".github/workflows",
     ".codex/agents",
     ".codex/skills",
-    ".github/workflows",
+    ".pre-commit-config.yaml",
+    "grafana",
     "pyproject.toml",
     "Makefile",
     "makefile",
     "docs",
-    "tests",
     "scripts",
     "src/tools",
+    "tests",
 )
 SKIP_DIR_NAMES: Final[set[str]] = {
     ".cache",
