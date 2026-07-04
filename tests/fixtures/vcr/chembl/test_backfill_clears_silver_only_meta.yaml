@@ -3,6 +3,6 @@ provider: chembl
 cassette_rel_path: tests/fixtures/vcr/chembl/test_backfill_clears_silver_only.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: ea6fdf97fcb85d0a18720153ba9bfaa5207fa90fd97d5368206d736112883671
-recorded_at: '2026-04-28'
+cassette_sha256: 225ccfdb73abac9e2f8d59b943600a1cf7302c6d8a7b4db8c1233caa730efac6
+recorded_at: '2026-07-03'
 staleness_ready: true

@@ -4,5 +4,5 @@ cassette_rel_path: tests/fixtures/vcr/crossref/rf013_crossref_health_case_12.yam
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: 3882082fd9b7d5fa55fefa039093b97bff11c9dd4e1e359b87ca0bcb01ed97d6
-recorded_at: '2026-04-28'
+recorded_at: '2026-07-03'
 staleness_ready: true

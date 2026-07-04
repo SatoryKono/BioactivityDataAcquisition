@@ -4,5 +4,5 @@ cassette_rel_path: tests/fixtures/vcr/chembl/test_pipeline_matrix__chembl_protei
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: bbe4ee8695a662e2ace4438fca8129e2dc19a57def4ecd7081f876eaac014672
-recorded_at: '2026-04-28'
+recorded_at: '2026-07-03'
 staleness_ready: true

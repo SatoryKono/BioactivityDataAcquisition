@@ -4,5 +4,5 @@ cassette_rel_path: tests/fixtures/vcr/uniprot/TestUniProtIDMappingIntegration.te
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: 74a4e60d8fea0aaa35134a6e6bd5c843707d5e7627f323c7823f424ec76213f7
-recorded_at: '2026-04-28'
+recorded_at: '2026-07-03'
 staleness_ready: true
