@@ -323,3 +323,14 @@ Based on scoring, **@{user1}** is the recommended {reviewer/assignee} because:
 1. **Allow override** - Always provide "Someone else" option
 1. **Cache results** - Don't re-fetch data within same session
 1. **Handle failures gracefully** - API errors shouldn't block workflow
+
+## Source Of Truth
+
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
+- Root runtime contract: `../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../../../02-architecture/decisions/`
+- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
+

@@ -27,6 +27,44 @@ STORAGE_ASSEMBLY = (
     ROOT / "src" / "bioetl" / "composition" / "bootstrap" / "assembly" / "storage.py"
 )
 WORKFLOW_SERVICES = ROOT / "src" / "bioetl" / "composition" / "_workflow_services.py"
+SILVER_FINALIZATION_MODELS = (
+    ROOT
+    / "src"
+    / "bioetl"
+    / "infrastructure"
+    / "storage"
+    / "silver"
+    / "finalization_models.py"
+)
+SILVER_METADATA_WRITE_MODELS = (
+    ROOT
+    / "src"
+    / "bioetl"
+    / "infrastructure"
+    / "storage"
+    / "silver"
+    / "metadata_write_models.py"
+)
+SILVER_METADATA_WRITE_SUPPORT = (
+    ROOT
+    / "src"
+    / "bioetl"
+    / "infrastructure"
+    / "storage"
+    / "silver"
+    / "operations"
+    / "metadata_write_support.py"
+)
+SILVER_POSTWRITE_EXECUTION = (
+    ROOT
+    / "src"
+    / "bioetl"
+    / "infrastructure"
+    / "storage"
+    / "silver"
+    / "operations"
+    / "postwrite_execution.py"
+)
 
 LEGACY_GOLD_COLLABORATORS = {
     "audit",
@@ -156,3 +194,26 @@ def test_silver_composition_wiring_passes_grouped_runtime_services() -> None:
         keyword_names = _keyword_names(call)
         assert "runtime_services" in keyword_names
         assert not (keyword_names & LEGACY_SILVER_COLLABORATORS)
+
+
+def test_silver_internal_metadata_helpers_do_not_restore_legacy_coercers() -> None:
+    """Internal Silver metadata/finalization helpers must stay request-object based."""
+    source_by_path = {
+        SILVER_METADATA_WRITE_MODELS: "_coerce_silver_metadata_write_request",
+        SILVER_METADATA_WRITE_SUPPORT: "_coerce_silver_metadata_audit_request",
+        SILVER_FINALIZATION_MODELS: "_coerce_silver_write_finalization",
+    }
+
+    for path, retired_symbol in source_by_path.items():
+        text = path.read_text(encoding="utf-8")
+        assert retired_symbol not in text
+        assert "_coerce_request_fields" not in text
+
+
+def test_silver_postwrite_finalization_builds_request_payload() -> None:
+    """Postwrite finalization must not reintroduce kwargs packing."""
+    text = SILVER_POSTWRITE_EXECUTION.read_text(encoding="utf-8")
+
+    assert "_SilverWriteResultFinalizationRequest(" in text
+    assert "finalize_kwargs" not in text
+    assert "**finalize" not in text

@@ -14,8 +14,11 @@ from bioetl.composition.factories.pipeline.factory_method_helpers import (
     _CreateFactoryRunnerRequest,
     _CreatePipelineWithServicesRequest,
     _PipelineFactoryContext,
+    build_factory_services,
     build_pipeline_factory_context,
     create_factory_runner,
+    create_pipeline_instance_with_services,
+    extract_entity_type,
 )
 
 

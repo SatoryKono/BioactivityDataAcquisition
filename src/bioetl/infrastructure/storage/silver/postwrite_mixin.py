@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING, Protocol
 
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.types import BronzeRecord
+from bioetl.infrastructure.storage.silver.finalization_models import (
+    _SilverWriteResultFinalizationRequest,
+)
 from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
     _build_postwrite_audit_hook_request,
     _build_postwrite_export_hook_request,
@@ -26,7 +28,6 @@ if TYPE_CHECKING:
     import pyarrow as pa
 
     from bioetl.domain.types import BatchID, RunID, RunType
-    from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
 
 
@@ -57,19 +58,7 @@ class _SilverWriterPostwriteSelf(_SilverPostwriteHostProtocol, Protocol):
 
     async def _finalize_silver_write_result(
         self,
-        *,
-        table_name: str,
-        records: list[BronzeRecord],
-        table_path: str,
-        primary_keys: list[str],
-        validated_mode: SilverWriteMode,
-        bronze_refs: list[BronzeWriteResult] | None,
-        partition_cols: list[str] | None,
-        source_batch_id: BatchID | None,
-        quarantined_count: int | None = None,
-        validation_errors: Sequence[str] | None = None,
-        started_at: datetime,
-        start_perf: float,
+        request: _SilverWriteResultFinalizationRequest,
     ) -> SilverWriteResult | None: ...
 
     async def _run_postwrite_export(
@@ -103,7 +92,7 @@ class SilverWriterPostwriteMixin:
         ctx: _SilverWritePostwriteContext,
         payload: _PreparedSilverWritePayload,
     ) -> None:
-        """Run the legacy mixin export branch via the compatibility hook."""
+        """Run the postwrite export branch through the host hook request."""
         await _run_postwrite_export_via_host_hook(
             self,
             request=_build_postwrite_export_hook_request(
@@ -118,7 +107,7 @@ class SilverWriterPostwriteMixin:
         ctx: _SilverWritePostwriteContext,
         payload: _PreparedSilverWritePayload,
     ) -> None:
-        """Run the legacy mixin audit branch via the compatibility hook."""
+        """Run the postwrite audit branch through the host hook request."""
         await _run_postwrite_audit_via_host_hook(
             self,
             request=_build_postwrite_audit_hook_request(
@@ -133,7 +122,7 @@ class SilverWriterPostwriteMixin:
         ctx: _SilverWritePostwriteContext,
         payload: _PreparedSilverWritePayload,
     ) -> SilverWriteResult | None:
-        """Finalize the legacy mixin postwrite flow."""
+        """Finalize the postwrite flow."""
         return await _finalize_silver_postwrite_result(
             self._finalize_silver_write_result,
             ctx=ctx,

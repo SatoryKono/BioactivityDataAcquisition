@@ -145,44 +145,33 @@ class _SilverMetadataWriteFacade:
 
     async def _log_silver_audit(
         self,
-        request: _SilverMetadataAuditSupportRequest | None = None,
-        *args: object,
-        **kwargs: object,
+        request: _SilverMetadataAuditSupportRequest,
     ) -> None:
-        """Backward compatibility alias for log_silver_audit."""
+        """Log Silver audit through the canonical request payload."""
         await log_internal_silver_audit_operation(
             self,
             request,
-            args=args,
-            kwargs=kwargs,
         )
 
     async def _prepare_silver_write_finalization_context(
         self,
-        request: _SilverWriteFinalizationPreparationRequest | None = None,
-        *args: object,
+        request: _SilverWriteFinalizationPreparationRequest,
+        *,
         perf_counter: Callable[[], float] | None = None,
-        **kwargs: object,
     ) -> _PreparedSilverWriteFinalizationContext:
         """Prepare DQ/version/timing context before Silver metadata persistence."""
         return await prepare_silver_write_finalization_context_operation(
             self,
             request,
-            args=args,
             perf_counter=perf_counter,
-            kwargs=kwargs,
         )
 
     async def _finalize_silver_write_result(
         self,
-        request: _SilverWriteResultFinalizationRequest | None = None,
-        *args: object,
-        **kwargs: object,
+        request: _SilverWriteResultFinalizationRequest,
     ) -> SilverWriteResult | None:
         """Compute DQ metrics, write metadata, and build final result."""
         return await finalize_silver_write_result_operation(
             self,
             request,
-            args=args,
-            kwargs=kwargs,
         )

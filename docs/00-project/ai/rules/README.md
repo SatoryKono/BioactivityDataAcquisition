@@ -17,7 +17,11 @@ docs/00-project/ai/rules/
 │   ├── 04-patterns.mdc
 │   ├── 05-agent-workflow.mdc
 │   ├── 06-docs-standards.mdc
-│   └── 07-qodo-enforcement.mdc  # Индекс правил Qodo (синхронизация)
+│   ├── 07-qodo-enforcement.mdc  # Индекс правил Qodo (синхронизация)
+│   ├── 08-operations.mdc        # Secrets, locks, backfill, DR
+│   ├── 09-observability.mdc     # Logs, metrics, anomaly, control plane
+│   ├── 10-error-resilience.mdc  # Retry, CB, DQ thresholds
+│   └── 11-schema-evolution.mdc  # Drift SLA, contracts, rollback
 ├── windsurf/                    # Windsurf/Cascade (производная от cursor/)
 │   ├── rules/*.md
 │   └── workflows/*.md
@@ -59,6 +63,10 @@ cp docs/00-project/ai/rules/cursor/*.mdc .cursor/rules/
 - `05-agent-workflow.mdc` — workflow агента, guardrails
 - `06-docs-standards.mdc` — стандарты документации
 - `07-qodo-enforcement.mdc` — индекс правил Qodo platform
+- `08-operations.mdc` — secrets, locks, backfill, checkpoint, DR
+- `09-observability.mdc` — structured logs, Prometheus, anomaly detection
+- `10-error-resilience.mdc` — retry, circuit breaker, DQ policy
+- `11-schema-evolution.mdc` — schema drift, contracts, deprecation
 
 **Как работает:** Cursor автоматически применяет эти правила при:
 - Автодополнении кода

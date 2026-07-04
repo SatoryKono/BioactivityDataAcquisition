@@ -17,16 +17,12 @@ extract_journal_info = _extractors.extract_journal_info
 extract_open_access_info = _extractors.extract_open_access_info
 extract_tldr = _extractors.extract_tldr
 
-__all__ = ["SemanticScholarPublicationTransformer"]
-__all__.extend(
+_PACKAGE_EXTRACTOR_EXPORTS = tuple(
     name
     for name in _extractors.__all__
-    if name
-    in {
-        "extract_external_ids",
-        "extract_fields_of_study",
-        "extract_journal_info",
-        "extract_open_access_info",
-        "extract_tldr",
-    }
+    if name.startswith("extract_")
+    and not name.startswith("extract_author")
+    and name not in {"extract_affiliations", "extract_citation_contexts"}
 )
+
+__all__ = ["SemanticScholarPublicationTransformer", *_PACKAGE_EXTRACTOR_EXPORTS]

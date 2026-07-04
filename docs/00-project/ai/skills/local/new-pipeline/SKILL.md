@@ -15,6 +15,11 @@ Create a new ETL pipeline for a provider/entity pair in BioETL.
 
 ## Source Of Truth
 
+- Root runtime contract: `../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../../../02-architecture/decisions/`
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
 - Primary instructions: `../../../.codex/skills/new-pipeline/SKILL.md`
 
 ## Workflow

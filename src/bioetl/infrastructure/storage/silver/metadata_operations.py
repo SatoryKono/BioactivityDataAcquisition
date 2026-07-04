@@ -19,7 +19,6 @@ from bioetl.infrastructure.storage.silver.metadata_write_execution import (
     _execute_silver_metadata_write,
 )
 from bioetl.infrastructure.storage.silver.metadata_write_models import (
-    _coerce_silver_metadata_write_request,
     _SilverMetadataWriteRequest,
 )
 from bioetl.infrastructure.storage.silver.metadata_write_preparation import (
@@ -47,7 +46,6 @@ __all__ = [
     "_SilverWriteFinalizationHostProtocol",
     "_SilverWriteFinalizationPreparationRequest",
     "_build_silver_write_result",
-    "_coerce_silver_metadata_write_request",
     "_emit_prepared_silver_metadata_metrics",
     "_execute_prepared_silver_metadata_write_operation",
     "_execute_silver_metadata_write",

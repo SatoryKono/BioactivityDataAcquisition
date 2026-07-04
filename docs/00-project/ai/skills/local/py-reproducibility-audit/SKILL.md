@@ -35,6 +35,11 @@ pipeline via two fresh bounded runs.
 
 ## Source Of Truth
 
+- Root runtime contract: `../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../../../02-architecture/decisions/`
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
 - Root runtime contract: `AGENTS.md`
 - Runtime map: `../../agents/CODEX-RUNTIME.md`
 - Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`

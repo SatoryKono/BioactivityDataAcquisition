@@ -14,6 +14,9 @@ from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.types import RunType
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.run_context import RunContext
+from bioetl.infrastructure.storage.silver.finalization_models import (
+    _SilverWriteFinalizationPreparationRequest,
+)
 from bioetl.infrastructure.storage.silver.metadata_operations import (
     _SilverMetadataWriteRequest,
 )
@@ -300,15 +303,17 @@ async def test_prepare_finalization_context_passes_explicit_validation_context(
         ),
     ):
         context = await ops._prepare_silver_write_finalization_context(
-            table_name="chembl.activity",
-            records=[{"activity_id": "A1"}, {"activity_id": "A2"}],
-            table_path=str(tmp_path / "chembl" / "activity"),
-            primary_keys=["activity_id"],
-            validated_mode=SilverWriteMode.MERGE,
-            quarantined_count=1,
-            validation_errors=("missing required activity_id",),
-            started_at=started_at,
-            start_perf=0.0,
+            _SilverWriteFinalizationPreparationRequest(
+                table_name="chembl.activity",
+                records=[{"activity_id": "A1"}, {"activity_id": "A2"}],
+                table_path=str(tmp_path / "chembl" / "activity"),
+                primary_keys=["activity_id"],
+                validated_mode=SilverWriteMode.MERGE,
+                quarantined_count=1,
+                validation_errors=("missing required activity_id",),
+                started_at=started_at,
+                start_perf=0.0,
+            )
         )
 
     resolve_finalization_dq_metrics.assert_awaited_once_with(

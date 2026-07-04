@@ -62,7 +62,7 @@ def _build_merged_silver_write_request(
     preserve_column_order: bool = False,
     schema: object | None = None,
 ) -> _MergedSilverWriteRequest:
-    """Build the canonical merged-write request from legacy keyword arguments."""
+    """Build the canonical merged-write request from keyword arguments."""
     return _build_merged_write_request_from_mapping(
         _MergedSilverWriteRequest,
         locals(),
@@ -81,7 +81,7 @@ class _PreparedMergedSilverWrite:
 
 
 class _MergedSilverMetadataWriterProtocol(Protocol):
-    """Keyword-friendly contract for merged-write metadata finalization."""
+    """Keyword-oriented contract for merged-write metadata finalization."""
 
     def __call__(
         self,

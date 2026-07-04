@@ -7,6 +7,8 @@ import pytest
 
 pytestmark = pytest.mark.unit
 
+from bioetl.application.pipelines import semanticscholar
+from bioetl.application.pipelines.semanticscholar import extractors
 from bioetl.application.pipelines.semanticscholar.extractors import (
     extract_affiliations,
     extract_author_h_indices,
@@ -23,6 +25,23 @@ from bioetl.application.pipelines.semanticscholar.extractors import (
     parse_page_range,
     parse_volume_issue,
 )
+
+
+def test_package_exports_stable_public_extractor_subset() -> None:
+    """Package exports keep the reviewed public extractor subset stable."""
+    expected_names = {
+        "extract_external_ids",
+        "extract_fields_of_study",
+        "extract_journal_info",
+        "extract_open_access_info",
+        "extract_tldr",
+    }
+
+    package_exports = {name for name in semanticscholar.__all__ if name.startswith("extract_")}
+
+    assert package_exports == expected_names
+    for name in expected_names:
+        assert getattr(semanticscholar, name) is getattr(extractors, name)
 
 
 class TestExtractExternalIds:

@@ -7,6 +7,7 @@ description: "Discover real Prometheus metrics, labels, label values, and metric
 
 ## Source Of Truth
 
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`

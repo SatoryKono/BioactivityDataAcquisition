@@ -13,6 +13,9 @@ from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
+from bioetl.infrastructure.storage.silver.finalization_models import (
+    _SilverWriteResultFinalizationRequest,
+)
 from bioetl.infrastructure.storage.silver.validation_operations import (
     _PreparedSilverWritePayload,
 )
@@ -128,40 +131,16 @@ class _SilverPostwriteHostProtocol(Protocol):
 
     async def _finalize_silver_write_result(
         self,
-        *,
-        table_name: str,
-        records: list[BronzeRecord],
-        table_path: str,
-        primary_keys: list[str],
-        validated_mode: SilverWriteMode,
-        bronze_refs: list[BronzeWriteResult] | None,
-        partition_cols: list[str] | None,
-        source_batch_id: BatchID | None,
-        quarantined_count: int | None = None,
-        validation_errors: Sequence[str] | None = None,
-        started_at: datetime,
-        start_perf: float,
+        request: _SilverWriteResultFinalizationRequest,
     ) -> SilverWriteResult | None: ...
 
 
 class _SilverPostwriteFinalizerProtocol(Protocol):
-    """Keyword-friendly finalization callable shared by mixin and service paths."""
+    """Finalization callable shared by mixin and service paths."""
 
     async def __call__(
         self,
-        *,
-        table_name: str,
-        records: list[BronzeRecord],
-        table_path: str,
-        primary_keys: list[str],
-        validated_mode: SilverWriteMode,
-        bronze_refs: list[BronzeWriteResult] | None,
-        partition_cols: list[str] | None,
-        source_batch_id: BatchID | None,
-        quarantined_count: int | None = None,
-        validation_errors: Sequence[str] | None = None,
-        started_at: datetime,
-        start_perf: float,
+        request: _SilverWriteResultFinalizationRequest,
     ) -> SilverWriteResult | None: ...
 
 

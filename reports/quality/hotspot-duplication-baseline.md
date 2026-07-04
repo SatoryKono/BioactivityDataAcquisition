@@ -3,7 +3,7 @@
 - mode: report-only
 - targets: 5
 - total_duplicate_clusters: 0
-- previous_snapshot_date: 2026-06-01
+- previous_snapshot_date: 2026-07-03
 - total_duplicate_cluster_delta_vs_previous: +0
 
 > Interpretation note: this is a visibility baseline. `R0801` can over-report
@@ -45,15 +45,15 @@
 
 ## Trend vs Previous Snapshot
 
-- previous snapshot: `2026-06-01`
+- previous snapshot: `2026-07-03`
 - total duplicate cluster delta: +0
 
 | Target | Current | Previous | Delta |
 | --- | ---: | ---: | ---: |
-| `src/bioetl/application/core` | 0 | n/a | n/a |
+| `src/bioetl/application/core` | 0 | 0 | +0 |
+| `src/bioetl/composition/bootstrap/runtime` | 0 | 0 | +0 |
+| `src/bioetl/composition/factories/pipeline` | 0 | 0 | +0 |
 | `src/bioetl/application/services/control_plane` | 0 | 0 | +0 |
-| `src/bioetl/composition/bootstrap/runtime` | 0 | n/a | n/a |
-| `src/bioetl/composition/factories/pipeline` | 0 | n/a | n/a |
 | `src/bioetl/composition/runtime_builders` | 0 | 0 | +0 |
 
 ## Reduction Leverage Ranking

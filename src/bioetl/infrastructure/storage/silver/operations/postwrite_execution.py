@@ -10,6 +10,9 @@ import pyarrow as pa
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
+from bioetl.infrastructure.storage.silver.finalization_models import (
+    _SilverWriteResultFinalizationRequest,
+)
 from bioetl.infrastructure.storage.silver.operations.postwrite_protocols import (
     _SilverPostwriteExecutorProtocol,
     _SilverPostwriteFinalizerProtocol,
@@ -93,7 +96,7 @@ async def _run_postwrite_export_via_host_hook(
     *,
     request: _SilverPostwriteExportHookRequest,
 ) -> None:
-    """Delegate postwrite export through the compatibility host hook."""
+    """Delegate postwrite export through the host hook."""
     await host._maybe_export_csv(
         table_name=request.table_name,
         arrow_data=request.arrow_data,
@@ -108,7 +111,7 @@ async def _run_postwrite_audit_via_host_hook(
     *,
     request: _SilverPostwriteAuditHookRequest,
 ) -> None:
-    """Delegate postwrite audit through the compatibility host hook."""
+    """Delegate postwrite audit through the host hook."""
     await host._maybe_log_silver_audit(
         table_name=request.table_name,
         records=request.records,
@@ -148,24 +151,22 @@ async def _finalize_silver_postwrite_result(
     payload: _PreparedSilverWritePayload,
 ) -> SilverWriteResult | None:
     """Finalize a postwrite payload using the shared ctx/payload contract."""
-    finalize_kwargs: dict[str, object] = {
-        "table_name": ctx.table_name,
-        "records": payload.records,
-        "table_path": payload.table_path,
-        "primary_keys": ctx.primary_keys,
-        "validated_mode": payload.validated_mode,
-        "bronze_refs": ctx.bronze_refs,
-        "partition_cols": ctx.partition_cols,
-        "source_batch_id": ctx.source_batch_id,
-        "started_at": ctx.started_at,
-        "start_perf": ctx.start_perf,
-    }
-    quarantined_count = getattr(ctx, "quarantined_count", None)
-    if quarantined_count is not None:
-        finalize_kwargs["quarantined_count"] = quarantined_count
     validation_errors = getattr(ctx, "validation_errors", None)
-    if validation_errors is not None:
-        finalize_kwargs["validation_errors"] = validation_errors
     return await finalizer(
-        **finalize_kwargs,  # type: ignore[arg-type]
+        _SilverWriteResultFinalizationRequest(
+            table_name=ctx.table_name,
+            records=payload.records,
+            table_path=payload.table_path,
+            primary_keys=ctx.primary_keys,
+            validated_mode=payload.validated_mode,
+            bronze_refs=ctx.bronze_refs,
+            partition_cols=ctx.partition_cols,
+            source_batch_id=ctx.source_batch_id,
+            started_at=ctx.started_at,
+            start_perf=ctx.start_perf,
+            quarantined_count=getattr(ctx, "quarantined_count", None),
+            validation_errors=(
+                tuple(validation_errors) if validation_errors is not None else None
+            ),
+        )
     )

@@ -17,6 +17,11 @@ Historical compatibility entry retained only to interpret older references to `p
 
 ## Source Of Truth
 
+- Root runtime contract: `../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../../../02-architecture/decisions/`
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
 - Current orchestration: `../../agents/ORCHESTRATION.md`
 - Historical mirror context: `../../../docs/00-project/ai/skills/global/py-code-bot/SKILL.md`
 - Shared project context: `../../../docs/00-project/ai/memory/agent-memory.md`

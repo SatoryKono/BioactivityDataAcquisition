@@ -154,3 +154,14 @@ Treat task as done only when:
 - L2/L3 task briefs and prompt templates: [l2-l3-task-brief.md](references/l2-l3-task-brief.md)
 - Report and metrics templates: [report-templates.md](references/report-templates.md)
 - Telemetry schema and flaky DB contract: [telemetry-and-flaky-db.md](references/telemetry-and-flaky-db.md)
+
+## Source Of Truth
+
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
+- Root runtime contract: `../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../../../02-architecture/decisions/`
+- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
+

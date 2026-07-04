@@ -15,7 +15,6 @@ from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
-from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import (
     BatchDQMetrics,
     ColumnStats,
@@ -23,6 +22,10 @@ from bioetl.domain.value_objects.dq_metrics import (
 )
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.base_delta_writer import BaseDeltaWriter
+from bioetl.infrastructure.storage.silver.finalization_models import (
+    _SilverWriteFinalizationPreparationRequest,
+    _SilverWriteResultFinalizationRequest,
+)
 from bioetl.infrastructure.storage.silver.metadata_operations import (
     _execute_silver_metadata_write,
     _prepare_silver_metadata_write,
@@ -31,6 +34,9 @@ from bioetl.infrastructure.storage.silver.metadata_operations import (
 )
 from bioetl.infrastructure.storage.silver.metadata_write_models import (
     _SilverMetadataWriteRequest,
+)
+from bioetl.infrastructure.storage.silver.operations.metadata_write_support import (
+    _SilverMetadataAuditSupportRequest,
 )
 from bioetl.infrastructure.storage.silver.prepared_operation_models import (
     _PreparedSilverWriteFinalizationContext,
@@ -204,80 +210,71 @@ class SilverWriterMetadataFacade:
             mode if isinstance(mode, SilverWriteMode) else SilverWriteMode(mode)
         )
         await self._metadata._log_silver_audit(
-            table_name=table_name,
-            records=records,
-            mode=validated_mode,
-            run_id=run_id,
-            run_type=run_type,
-            source_batch_id=source_batch_id,
-            ingestion_ts=ingestion_ts,
+            _SilverMetadataAuditSupportRequest(
+                table_name=table_name,
+                records=records,
+                mode=validated_mode,
+                run_id=run_id,
+                run_type=run_type,
+                source_batch_id=source_batch_id,
+                ingestion_ts=ingestion_ts,
+            )
         )
 
     async def _prepare_silver_write_finalization_context(
         self,
-        *,
-        table_name: str,
-        records: list[BronzeRecord],
-        table_path: str,
-        quarantined_count: int | None = None,
-        validation_errors: Sequence[str] | None = None,
-        started_at: datetime,
-        start_perf: float,
+        request: _SilverWriteFinalizationPreparationRequest,
     ) -> _PreparedSilverWriteFinalizationContext:
         """Prepare DQ/version/timing context before metadata persistence."""
         dq_metrics = await self._compute_dq_metrics(
-            table_name,
-            records,
-            quarantined_count=quarantined_count or 0,
-            validation_errors=validation_errors,
+            request.table_name,
+            request.records,
+            quarantined_count=request.quarantined_count or 0,
+            validation_errors=request.validation_errors,
         )
         from bioetl.infrastructure.storage.silver import metadata_mixin
 
         return _PreparedSilverWriteFinalizationContext(
             dq_metrics=dq_metrics,
-            version_after=await self._get_delta_version(table_path),
-            completed_at=started_at
-            + timedelta(seconds=metadata_mixin.time.perf_counter() - start_perf),
+            version_after=await self._get_delta_version(request.table_path),
+            completed_at=request.started_at
+            + timedelta(
+                seconds=metadata_mixin.time.perf_counter() - request.start_perf
+            ),
         )
 
     async def _finalize_silver_write_result(
         self,
-        *,
-        table_name: str,
-        records: list[BronzeRecord],
-        table_path: str,
-        primary_keys: list[str],
-        validated_mode: SilverWriteMode,
-        bronze_refs: list[BronzeWriteResult] | None,
-        partition_cols: list[str] | None,
-        source_batch_id: BatchID | None,
-        quarantined_count: int | None = None,
-        validation_errors: Sequence[str] | None = None,
-        started_at: datetime,
-        start_perf: float,
+        request: _SilverWriteResultFinalizationRequest,
     ) -> SilverWriteResult | None:
         """Finalize Silver write metadata/result through canonical helper methods."""
         context = await self._prepare_silver_write_finalization_context(
-            table_name=table_name,
-            records=records,
-            table_path=table_path,
-            quarantined_count=quarantined_count,
-            validation_errors=validation_errors,
-            started_at=started_at,
-            start_perf=start_perf,
+            _SilverWriteFinalizationPreparationRequest(
+                table_name=request.table_name,
+                records=request.records,
+                table_path=request.table_path,
+                quarantined_count=request.quarantined_count,
+                validation_errors=request.validation_errors,
+                primary_keys=request.primary_keys,
+                validated_mode=request.validated_mode,
+                started_at=request.started_at,
+                start_perf=request.start_perf,
+            )
         )
         await self._write_silver_metadata(
             _SilverMetadataWriteRequest(
-                table_path=table_path,
-                table_name=table_name,
-                records=records,
-                primary_keys=primary_keys,
-                mode=validated_mode,
-                bronze_refs=bronze_refs,
+                table_path=request.table_path,
+                table_name=request.table_name,
+                records=request.records,
+                primary_keys=request.primary_keys,
+                mode=request.validated_mode,
+                bronze_refs=request.bronze_refs,
                 dq_metrics=context.dq_metrics,
-                partition_by=partition_cols,
-                source_batch_ids=([str(source_batch_id)] if source_batch_id else None),
-                started_at=started_at,
+                partition_by=request.partition_cols,
+                source_batch_ids=(
+                    [str(request.source_batch_id)] if request.source_batch_id else None
+                ),
+                started_at=request.started_at,
                 completed_at=context.completed_at,
                 version_after=context.version_after,
             )
@@ -286,9 +283,9 @@ class SilverWriterMetadataFacade:
             None
             if context.version_after is None
             else SilverWriteResult(
-                table_name=table_name,
-                table_path=table_path,
+                table_name=request.table_name,
+                table_path=request.table_path,
                 delta_version=context.version_after,
-                record_count=len(records),
+                record_count=len(request.records),
             )
         )

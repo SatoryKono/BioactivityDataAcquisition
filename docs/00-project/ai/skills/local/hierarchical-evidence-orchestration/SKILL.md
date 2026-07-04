@@ -225,3 +225,14 @@ Treat the hierarchical wave as complete only when:
 
 - Orchestration artifact and gate contract: [references/orchestration-contract.md](references/orchestration-contract.md)
 - Collector and synthesizer shard briefs: [references/shard-task-briefs.md](references/shard-task-briefs.md)
+
+## Source Of Truth
+
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
+- Root runtime contract: `../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../../../02-architecture/decisions/`
+- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
+

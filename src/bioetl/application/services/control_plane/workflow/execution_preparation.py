@@ -20,9 +20,6 @@ from bioetl.application.services.control_plane.workflow.execution_preparation_in
 from bioetl.application.services.control_plane.workflow.manifest_models import (
     WorkflowManifestCreateSpec,
 )
-from bioetl.application.services.control_plane.workflow.manifest_service import (
-    WorkflowManifestService,
-)
 from bioetl.domain.control_plane import (
     WorkflowExecutionState,
     WorkflowManifest,
@@ -58,7 +55,7 @@ def prepare_workflow_execution(
     resume_run_id: RunID | str | None,
     force_steps: tuple[str, ...],
     repair_steps: tuple[str, ...],
-    manifest_service: WorkflowManifestService,
+    manifest_service: "WorkflowManifestService",
     workflow_state_port: WorkflowExecutionStatePort,
     now_factory: Callable[[], datetime],
     run_id_factory: Callable[[], RunID],
@@ -99,7 +96,7 @@ def prepare_workflow_execution(
 
 def _prepare_new_execution(
     *,
-    manifest_service: WorkflowManifestService,
+    manifest_service: "WorkflowManifestService",
     workflow_state_port: WorkflowExecutionStatePort,
     request: WorkflowManifestCreateSpec,
 ) -> WorkflowExecutionPreparationResult:
@@ -124,7 +121,7 @@ def _prepare_resumed_execution(
     resume_run_id: RunID | str | None,
     force_steps: tuple[str, ...],
     repair_steps: tuple[str, ...],
-    manifest_service: WorkflowManifestService,
+    manifest_service: "WorkflowManifestService",
     workflow_state_port: WorkflowExecutionStatePort,
     now_factory: Callable[[], datetime],
 ) -> WorkflowExecutionPreparationResult:

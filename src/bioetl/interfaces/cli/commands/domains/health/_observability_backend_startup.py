@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from pathlib import Path
-from typing import Protocol
+from typing import Protocol, cast
 
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_probes import (
     DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PATHS_READY_TIMEOUT_SECONDS,
@@ -13,6 +13,25 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_probes 
 
 DEFAULT_OBSERVABILITY_BACKEND_PROBE_HOST = "127.0.0.1"
 DEFAULT_OBSERVABILITY_BACKEND_BIND_HOST = "0.0.0.0"
+_STARTUP_DETACHED_KEYS = (
+    "health_url",
+    "startup_log_path",
+    "port",
+    "bind_host",
+    "ready_timeout_seconds",
+    "required_probe_timeout_seconds",
+    "poll_seconds",
+    "required_probe_paths",
+)
+_STARTUP_DETACHED_HOOK_KEYS = (
+    "probe_fn",
+    "required_probe_fn",
+    "start_fn",
+    "wait_fn",
+    "wait_required_paths_fn",
+    "info_printer",
+    "warning_printer",
+)
 
 
 class _StartedBackendProcess(Protocol):
@@ -234,31 +253,14 @@ def _build_backend_capability_failure_result(
 
 def ensure_observability_backend_started_impl(
     *,
-    enabled: bool,
-    health_url: str,
-    startup_log_path: Path,
-    port: int,
-    bind_host: str,
-    ready_timeout_seconds: float,
-    required_probe_timeout_seconds: float,
-    poll_seconds: float,
-    required_probe_paths: tuple[str, ...],
-    probe_fn: Callable[..., bool],
-    required_probe_fn: Callable[..., bool],
-    start_fn: Callable[..., _StartedBackendProcess],
-    wait_fn: Callable[..., bool],
-    wait_required_paths_fn: Callable[..., bool],
-    drop_stale_backend_fn: Callable[[int], bool],
-    listener_pid_fn: Callable[[int], int | None],
-    info_printer: Callable[[str], None],
-    warning_printer: Callable[[str], None],
+    startup_kwargs: Mapping[str, object],
+    runtime_hooks: Mapping[str, Callable[..., object]],
+    failure_handlers: Mapping[str, Callable[..., object]],
     result_factory: Callable[..., object],
-    build_startup_failure_detail_fn: Callable[..., str],
-    describe_required_probe_failure_fn: Callable[..., str | None],
-    append_backend_startup_diagnostic_fn: Callable[..., None],
-    python_executable_to_tuple_fn: Callable[[object], tuple[str, ...]],
 ) -> object:
     """Ensure the detached backend is running using runtime-injected patch points."""
+    enabled = cast("bool", startup_kwargs["enabled"])
+    health_url = cast("str", startup_kwargs["health_url"])
     if not enabled:
         return result_factory(
             status="disabled",
@@ -268,41 +270,40 @@ def ensure_observability_backend_started_impl(
 
     reuse_result = _reuse_observability_backend_if_ready(
         health_url=health_url,
-        port=port,
-        required_probe_paths=required_probe_paths,
-        probe_fn=probe_fn,
-        required_probe_fn=required_probe_fn,
-        required_probe_timeout_seconds=required_probe_timeout_seconds,
-        drop_stale_backend_fn=drop_stale_backend_fn,
-        listener_pid_fn=listener_pid_fn,
-        info_printer=info_printer,
-        warning_printer=warning_printer,
+        port=cast("int", startup_kwargs["port"]),
+        required_probe_paths=cast(
+            "tuple[str, ...]",
+            startup_kwargs["required_probe_paths"],
+        ),
+        probe_fn=cast("Callable[..., bool]", runtime_hooks["probe_fn"]),
+        required_probe_fn=cast(
+            "Callable[..., bool]",
+            runtime_hooks["required_probe_fn"],
+        ),
+        required_probe_timeout_seconds=cast(
+            "float",
+            startup_kwargs["required_probe_timeout_seconds"],
+        ),
+        drop_stale_backend_fn=cast(
+            "Callable[[int], bool]",
+            runtime_hooks["drop_stale_backend_fn"],
+        ),
+        listener_pid_fn=cast(
+            "Callable[[int], int | None]",
+            runtime_hooks["listener_pid_fn"],
+        ),
+        info_printer=cast("Callable[[str], None]", runtime_hooks["info_printer"]),
+        warning_printer=cast("Callable[[str], None]", runtime_hooks["warning_printer"]),
         result_factory=result_factory,
     )
     if reuse_result is not None:
         return reuse_result
 
     return _start_observability_backend_detached(
-        health_url=health_url,
-        startup_log_path=startup_log_path,
-        port=port,
-        bind_host=bind_host,
-        ready_timeout_seconds=ready_timeout_seconds,
-        required_probe_timeout_seconds=required_probe_timeout_seconds,
-        poll_seconds=poll_seconds,
-        required_probe_paths=required_probe_paths,
-        probe_fn=probe_fn,
-        required_probe_fn=required_probe_fn,
-        start_fn=start_fn,
-        wait_fn=wait_fn,
-        wait_required_paths_fn=wait_required_paths_fn,
-        info_printer=info_printer,
-        warning_printer=warning_printer,
         result_factory=result_factory,
-        build_startup_failure_detail_fn=build_startup_failure_detail_fn,
-        describe_required_probe_failure_fn=describe_required_probe_failure_fn,
-        append_backend_startup_diagnostic_fn=append_backend_startup_diagnostic_fn,
-        python_executable_to_tuple_fn=python_executable_to_tuple_fn,
+        **{key: startup_kwargs[key] for key in _STARTUP_DETACHED_KEYS},
+        **{key: runtime_hooks[key] for key in _STARTUP_DETACHED_HOOK_KEYS},
+        **failure_handlers,
     )
 __all__ = [
     "DEFAULT_OBSERVABILITY_BACKEND_BIND_HOST",

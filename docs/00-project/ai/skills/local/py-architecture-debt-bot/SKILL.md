@@ -15,6 +15,11 @@ Run the role-specific workflow as defined in the py-architecture-debt-bot profil
 
 ## Source Of Truth
 
+- Root runtime contract: `../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../../../02-architecture/decisions/`
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
 - Primary profile: `../../../.codex/agents/py-architecture-debt-bot.md`
 - Team orchestration: `../../../.codex/agents/ORCHESTRATION.md`
 - Shared project context: `../../../docs/00-project/ai/memory/agent-memory.md`

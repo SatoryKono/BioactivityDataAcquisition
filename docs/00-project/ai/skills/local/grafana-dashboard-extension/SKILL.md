@@ -98,6 +98,16 @@ If this model changes, update the affected docs in the same change set.
 - Keep trace search behavior explicit.
 - Prefer minimal, stable search expressions before introducing richer filters.
 
+## Source Of Truth
+
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
+- Root runtime contract: `../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../../../02-architecture/decisions/`
+- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
+
 ## Workflow
 
 ### 1. Triage the Request
