@@ -8,7 +8,6 @@ from __future__ import annotations
 __all__ = ["PUBMED_HEALTH_ERRORS", "PubMedHealthMixin"]
 
 import time
-from typing import TYPE_CHECKING
 
 from bioetl.domain.models.metadata import SourceMetadata
 from bioetl.domain.types import HealthStatus
@@ -26,31 +25,13 @@ from bioetl.infrastructure.adapters.health_status_policy import (
 from bioetl.infrastructure.adapters.pubmed._errors import (
     PUBMED_COMMON_ERRORS as PUBMED_HEALTH_ERRORS,
 )
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import ErrorHandlerPort, LoggerPort
-    from bioetl.infrastructure.adapters.base_metrics import AdapterMetricsRecorder
-    from bioetl.infrastructure.adapters.common.api_request_collector import (
-        APIRequestCollector,
-    )
-    from bioetl.infrastructure.adapters.http.client import UnifiedHTTPClient
+from bioetl.infrastructure.adapters.pubmed._state import PubMedAdapterStateMixin
 
 from .constants import ENTREZ_API_BASE
 
 
-class PubMedHealthMixin:
+class PubMedHealthMixin(PubMedAdapterStateMixin):
     """Mixin providing health checks and metadata for PubMed."""
-
-    http_client: UnifiedHTTPClient
-    logger: LoggerPort
-    email: str
-    api_key: str | None
-    _http_client: UnifiedHTTPClient
-    _logger: LoggerPort
-    _adapter_metrics: AdapterMetricsRecorder
-    _request_collector: APIRequestCollector
-    provider_name: str
-    _error_handler: ErrorHandlerPort
 
     async def _probe_health(self) -> HealthStatus:
         """Perform PubMed-specific health probe.
