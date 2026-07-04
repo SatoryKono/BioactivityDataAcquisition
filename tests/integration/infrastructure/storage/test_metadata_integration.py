@@ -25,7 +25,11 @@ from bioetl.domain.models.metadata import (
     RunTypeEnum,
     SilverMetadata,
 )
+from bioetl.infrastructure.storage.gold.runtime_helpers import GoldWriterRuntimeServices
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 from tests.unit.infrastructure.storage._lineage_fragment_helpers import (
     make_produced_artifact_fragment,
@@ -332,8 +336,10 @@ class TestSilverWriterMetadataIntegration:
         writer = SilverWriter(
             base_path=tmp_path,
             logger=mock_logger,
-            metadata_writer=mock_metadata_writer,
-            metadata_coordinator=mock_metadata_coordinator_with_records,
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                metadata_writer=mock_metadata_writer,
+                metadata_coordinator=mock_metadata_coordinator_with_records,
+            ),
         )
 
         await writer.write_silver(
@@ -401,8 +407,15 @@ class TestGoldWriterMetadataIntegration:
         writer = GoldWriter(
             base_path=tmp_path,
             logger=mock_logger,
-            metadata_writer=mock_metadata_writer,
-            metadata_coordinator=mock_metadata_coordinator,
+            runtime_services=GoldWriterRuntimeServices(
+                csv_exporter=None,
+                tracing=MagicMock(),
+                metrics=None,
+                audit=None,
+                metadata_writer=mock_metadata_writer,
+                metadata_coordinator=mock_metadata_coordinator,
+                lineage_store=None,
+            ),
         )
 
         records = [

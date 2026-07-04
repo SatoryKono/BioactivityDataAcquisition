@@ -1,133 +1,101 @@
-> **BioETL Guardrail Banner (Runtime-Source-First)**
-> This catalog is subordinate to BioETL runtime policy and must not override it.
-> Read first: `AGENTS.md`, `.codex/agents/CODEX-RUNTIME.md`,
-> `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`,
-> `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`.
-> For project context, use `docs/00-project/ai/memory/agent-memory.md`.
+## Canonical Sources
 
-# Research & Analysis Subagents
+Read before planning or editing:
 
-Research & Analysis subagents are your investigative powerhouses, specializing in finding, analyzing, and synthesizing information from diverse sources. These experts excel at deep research, competitive intelligence, market analysis, and trend identification. They transform raw information into actionable insights, helping you make informed decisions based on comprehensive analysis and data-driven research.
+- `docs/00-project/NORMATIVE_SOURCES.md`
+- `docs/00-project/RULES.md`
+- `docs/01-requirements/REQUIREMENTS.md`
+- `docs/02-architecture/decisions/`
+- `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+- `AGENTS.md`
 
-## When to Use Research & Analysis Subagents
+## Canonical Runtime Links
 
-Use these subagents when you need to:
+- `AGENTS.md`
+- `.codex/agents/CODEX-RUNTIME.md`
+- `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 
-- **Conduct comprehensive research** on any topic
-- **Find specific information** across multiple sources
-- **Analyze market dynamics** and opportunities
-- **Track competitive intelligence** systematically
-- **Identify emerging trends** before others
-- **Gather and analyze data** for insights
-- **Synthesize complex information** into clear findings
-- **Make data-driven decisions** with confidence
+______________________________________________________________________
 
-## Available Subagents
+Version: 1.0.0
+Status: active
+Class: internal-published
+Owner: BioETL Team
+Reviewers:
 
-### [**research-analyst**](research-analyst.md) - Comprehensive research specialist
+- BioETL Team
+  Last verified: '2026-03-31'
 
-Research expert conducting thorough investigations across domains. Masters research methodologies, source validation, and insight synthesis. Delivers comprehensive research reports on any topic.
+______________________________________________________________________
 
-**Use when:** Conducting deep research, investigating complex topics, validating information, creating research reports, or synthesizing multiple sources.
+# Agent Catalog — BioETL
 
-### [**search-specialist**](search-specialist.md) - Advanced information retrieval expert
+*Статус: internal-published | Runtime-facing mirror index (2026-03-23)*
 
-Search optimization expert finding needles in information haystacks. Masters advanced search techniques, query optimization, and source discovery. Locates hard-to-find information efficiently.
+Consolidated agent registry for published docs navigation.
 
-**Use when:** Finding specific information, optimizing search queries, discovering new sources, conducting systematic searches, or retrieving obscure data.
+## Surface Note
 
-### [**trend-analyst**](trend-analyst.md) - Emerging trends and forecasting expert
+- This page is a **published mirror index**, not a canonical runtime registry.
+- Claude runtime source of truth remains in its runtime-specific agent registry.
+- Codex keeps its own runtime-specific orchestration and related agent context
+  under `.codex/agents/`.
+- Use this catalog for discoverability; verify live runtime behavior in the
+  relevant runtime tree before treating any profile note as authoritative.
 
-Trend identification specialist spotting patterns before they become obvious. Expert in trend analysis, future forecasting, and weak signal detection. Helps organizations stay ahead of change.
+## Non-Canonical Mirror Notice
 
-**Use when:** Identifying emerging trends, forecasting future developments, analyzing pattern changes, monitoring industry evolution, or planning strategic responses.
+`docs/00-project/ai/agents/agents/**` is a published/internal mirror surface.
+It must not define runtime behavior independently from tracked runtime trees
+such as `.codex/agents/**`. Edit the active runtime profile first, then refresh this
+mirror when behavior or contributor guidance changes.
 
-### [**competitive-analyst**](competitive-analyst.md) - Competitive intelligence specialist
+## BioETL Core (8 active agents)
 
-Competitive intelligence expert analyzing competitor strategies and market positioning. Masters competitive benchmarking, SWOT analysis, and strategic recommendations. Provides actionable competitive insights.
+| Agent                    | Model  | Role                                         |
+| ------------------------ | ------ | -------------------------------------------- |
+| `py-audit-bot`           | opus   | Code/architecture audit, RULES.md compliance |
+| `py-plan-bot`            | opus   | Task planning, RF-\* decomposition           |
+| `py-test-bot`            | sonnet | Tests (baseline/final/retest), coverage      |
+| `py-config-bot`          | sonnet | YAML configs (pipeline/DQ/filter)            |
+| `py-debug-bot`           | opus   | RCA, bug fixes, regression debugging         |
+| `py-doc-bot`             | sonnet | Docs, ADR, CHANGELOG, Mermaid diagrams       |
+| `py-test-swarm`          | opus   | Hierarchical testing (L1->L2->L3)            |
+| `py-review-orchestrator` | opus   | Code review (S1-S8 stages)                   |
 
-**Use when:** Analyzing competitors, benchmarking performance, identifying competitive advantages, monitoring competitor moves, or developing competitive strategies.
+Repo-wide documentation audits are no longer routed through a dedicated
+documentation-only agent entry in active orchestration docs; use the
+`documentation-audit` / `documentation-cascade-audit` skill surfaces for that
+workflow.
 
-### [**market-researcher**](market-researcher.md) - Market analysis and consumer insights
+## Generic Utilities (12 agents)
 
-Market analysis specialist understanding market dynamics and consumer behavior. Expert in market sizing, segmentation, and opportunity identification. Reveals market opportunities and risks.
+| Agent                                 | Model  | Role                               |
+| ------------------------------------- | ------ | ---------------------------------- |
+| `sp-code-reviewer`                    | sonnet | General-purpose code review        |
+| `sp-debugger`                         | sonnet | Bug diagnosis, root cause analysis |
+| `sp-refactoring-specialist`           | sonnet | Code refactoring                   |
+| `sp-architect-reviewer`               | sonnet | Architecture evaluation            |
+| `sp-test-automator`                   | sonnet | Test framework automation          |
+| `sp-api-designer`                     | sonnet | API design, OpenAPI specs          |
+| `sp-data-engineer`                    | sonnet | Data pipelines, ETL patterns       |
+| `sp-database-optimizer`               | sonnet | Query optimization, indexing       |
+| `sp-dependency-manager`               | sonnet | CVE audit, version conflicts       |
+| `sp-git-workflow-manager`             | sonnet | Git branching strategies           |
+| `sp-prompt-engineer`                  | sonnet | LLM prompt design and testing      |
+| `sp-scientific-literature-researcher` | sonnet | Scientific paper search (BGPT MCP) |
 
-**Use when:** Analyzing market opportunities, understanding consumer behavior, sizing markets, identifying segments, or evaluating market entry strategies.
+## Orchestration Workflow
 
-### [**data-researcher**](data-researcher.md) - Data discovery and analysis expert
+See [ORCHESTRATION.md](ORCHESTRATION.md) for the published mirror of the
+standard workflow, then confirm runtime-specific behavior in the active runtime
+registry when exact execution semantics matter.
 
-Data investigation specialist extracting insights from complex datasets. Masters data mining, statistical analysis, and pattern recognition. Transforms raw data into meaningful findings.
-
-**Use when:** Analyzing datasets, discovering data patterns, performing statistical analysis, mining for insights, or investigating data anomalies.
-
-### [**scientific-literature-researcher**](scientific-literature-researcher.md) - Scientific paper search and evidence synthesis
-
-Scientific literature specialist using [BGPT MCP](https://github.com/connerlambden/bgpt-mcp) to search a database of papers with structured experimental data extracted from full-text studies. Retrieves methods, results, sample sizes, and quality scores to deliver evidence-grounded analysis.
-
-**Use when:** Searching scientific literature, conducting systematic reviews, synthesizing experimental evidence, fact-checking claims against published data, or building evidence-grounded research reports.
-
-## Quick Selection Guide
-
-| If you need to...         | Use this subagent                    |
-| ------------------------- | ------------------------------------ |
-| Deep topic research       | **research-analyst**                 |
-| Find specific information | **search-specialist**                |
-| Identify future trends    | **trend-analyst**                    |
-| Analyze competitors       | **competitive-analyst**              |
-| Understand markets        | **market-researcher**                |
-| Analyze data patterns     | **data-researcher**                  |
-| Search scientific papers  | **scientific-literature-researcher** |
-
-## Common Research Patterns
-
-**Market Intelligence:**
-
-- **market-researcher** for market analysis
-- **competitive-analyst** for competitor insights
-- **trend-analyst** for future directions
-- **data-researcher** for data validation
-
-**Strategic Research:**
-
-- **research-analyst** for comprehensive analysis
-- **search-specialist** for information gathering
-- **trend-analyst** for future planning
-- **competitive-analyst** for positioning
-
-**Data-Driven Insights:**
-
-- **data-researcher** for data analysis
-- **market-researcher** for market data
-- **trend-analyst** for pattern identification
-- **research-analyst** for synthesis
-
-**Competitive Intelligence:**
-
-- **competitive-analyst** for competitor analysis
-- **market-researcher** for market context
-- **search-specialist** for information discovery
-- **trend-analyst** for industry evolution
-
-## Getting Started
-
-1. **Define research objectives** clearly
-1. **Choose appropriate specialists** for your needs
-1. **Provide context and constraints** for focused research
-1. **Validate findings** through multiple sources
-1. **Apply insights** to decision-making
-
-## Best Practices
-
-- **Start with clear questions:** Focus drives better research
-- **Use multiple sources:** Single sources can mislead
-- **Validate information:** Trust but verify
-- **Document methodology:** Research should be reproducible
-- **Consider biases:** All sources have perspectives
-- **Synthesize findings:** Raw data needs interpretation
-- **Update regularly:** Research has expiration dates
-- **Share insights:** Knowledge multiplies when shared
-
-Choose your research & analysis specialist and make better decisions today!
+Detailed profile mirrors remain repo-only under `docs/00-project/ai/agents/agents/`.
+When exact runtime behavior matters, prefer `.codex/agents/*.md` or the active
+runtime registry over the published catalog.
 
 ## Env File Guardrail
 

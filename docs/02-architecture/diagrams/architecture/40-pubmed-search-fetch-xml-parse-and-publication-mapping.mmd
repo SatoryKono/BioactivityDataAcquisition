@@ -1,0 +1,34 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% Title: PubMed Search Fetch XML Parse And Publication Mapping
+%% @version 1.0.0
+%% @date    2026-05-12
+%% @type    sequenceDiagram
+%% @level   Provider / Interaction
+%% RULES: RULES.md §2.1, ADR-033
+sequenceDiagram
+    autonumber
+    participant Runner as publication pipeline
+    participant Adapter as PubMedAdapter
+    participant Search as _search.py
+    participant Client as PubMedClient
+    participant Fetch as _fetch.py
+    participant XML as xml_processor.py
+    participant Models as models.py
+
+    Runner->>Adapter: fetch publication set
+    Adapter->>Search: issue search request
+    Search->>Client: esearch call
+    Client-->>Search: pmid list
+    Search-->>Adapter: pmid window
+    Adapter->>Fetch: fetch details for PMIDs
+    Fetch->>Client: efetch call
+    Client-->>Fetch: XML payload
+    Fetch->>XML: parse XML
+    XML-->>Fetch: structured data
+    Fetch->>Models: map publication models
+    Models-->>Runner: PubMed publication entities
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget

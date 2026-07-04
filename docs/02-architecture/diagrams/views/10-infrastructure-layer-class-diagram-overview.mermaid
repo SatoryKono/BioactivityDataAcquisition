@@ -1,0 +1,63 @@
+%% View: Overview | Parent: 10-infrastructure-layer-class-diagram-full.mermaid
+%% @uniform width=232 height=56 max_title_len=24 max_desc_lines=0
+flowchart TB
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N8["RetryPolicy"]
+        N9["DataSourcePort"]
+        N11["Bronze/Silver/GoldStoragePorts"]
+        N13["FilterableDataSourcePort"]
+        N15["CsvExporter"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N1["ChemblAdapter"]
+        N3["PubchemAdapter"]
+        N4["UniprotAdapter"]
+        N5["PubmedAdapter"]
+        N6["CircuitBreaker"]
+        N10["SilverWriter"]
+        N12["GoldWriter"]
+        N14["BronzeWriter"]
+        N7["TokenBucket"]
+    end
+
+    subgraph Interfaces["Interfaces Layer"]
+        direction TB
+        N2["UnifiedHTTPClient"]
+    end
+
+    N1 --> N9
+    N1 --> N13
+    N3 --> N9
+    N4 --> N9
+    N5 --> N9
+    N14 --> N11
+    N10 --> N11
+    N12 --> N11
+    N1 --> N2
+    N3 --> N2
+    N4 --> N2
+    N5 --> N2
+    N2 --> N6
+    N2 --> N7
+    N2 --> N8
+    N10 --> N15
+    N12 --> N15
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style Interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+
+    %% linkStyle: primary=15 edge(s) | secondary=2 edge(s)
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14 stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    linkStyle 15,16 stroke:#16a34a,stroke-width:2px

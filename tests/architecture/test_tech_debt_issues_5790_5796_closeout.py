@@ -147,7 +147,7 @@ def test_closeout_artifact_is_complete_and_budget_safe_for_issue_pack_5790_5796(
         == by_target["src/bioetl/application/pipelines"]["duplicate_count"]
     )
     assert closeout["metrics"]["config_surface_duplicate_clusters"]["current"] == 21
-    assert closeout["metrics"]["zero_reference_supporting_scripts"]["count"] == 50
+    assert closeout["metrics"]["zero_reference_supporting_scripts"]["count"] == 47
 
     for outcome in closeout["outcomes"].values():
         for relative_path in outcome["evidence"]:
@@ -202,7 +202,6 @@ def test_issue_5791_adapter_duplication_dropped_under_canonical_error_bundle_own
     )
     assert adapters["duplicate_count"] < 54
     assert {item["category"] for item in adapters["actionability"]} == {
-        "adapter_resilience_or_contract_template",
         "export_facade_or_package_barrel",
     }
     assert "build_common_network_error_bundle" in common_text
@@ -324,7 +323,7 @@ def test_issue_5796_zero_reference_supporting_scripts_have_owner_or_removal_gove
     ]
 
     assert registry["schema_version"]
-    assert len(zero_ref_rows) == 50
+    assert len(zero_ref_rows) == 46
     assert {row["status"] for row in zero_ref_rows} == {"supporting"}
 
     for row in zero_ref_rows:

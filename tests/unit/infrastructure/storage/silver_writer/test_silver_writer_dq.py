@@ -6,11 +6,21 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
 from tests.unit.infrastructure.storage.silver_writer._test_support import (
     assert_standard_silver_write_succeeds,
     make_silver_writer,
     write_standard_silver,
 )
+from tests.unit.infrastructure.storage.test_silver_writer import (
+    noop_logger,
+    valid_records,
+)
+
+# Re-export shared fixtures for pytest discovery in this module.
+_FIXTURE_IMPORTS = (noop_logger, valid_records)
 
 pytestmark = pytest.mark.unit
 
@@ -32,7 +42,9 @@ class TestSilverWriterWriteModePolicy:
         custom_policy = WriteModePolicy()
         writer = make_silver_writer(
             logger=noop_logger,
-            write_policy=custom_policy,
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                write_policy=custom_policy,
+            ),
         )
         assert writer._write_policy is custom_policy
 
@@ -41,7 +53,7 @@ class TestSilverWriterWriteModePolicy:
         mock_metrics = MagicMock()
         writer = make_silver_writer(
             logger=noop_logger,
-            metrics=mock_metrics,
+            runtime_request=SilverWriterRuntimeServicesRequest(metrics=mock_metrics),
         )
         assert writer._metrics is mock_metrics
 
@@ -94,7 +106,7 @@ class TestSilverWriterWriteModePolicy:
         mock_metrics = MagicMock()
         writer = make_silver_writer(
             logger=noop_logger,
-            metrics=mock_metrics,
+            runtime_request=SilverWriterRuntimeServicesRequest(metrics=mock_metrics),
         )
 
         with pytest.raises(PolicyViolationError):
@@ -179,7 +191,7 @@ class TestSilverWriterWriteModePolicy:
         mock_metrics = MagicMock()
         writer = make_silver_writer(
             logger=noop_logger,
-            metrics=mock_metrics,
+            runtime_request=SilverWriterRuntimeServicesRequest(metrics=mock_metrics),
         )
 
         with pytest.raises(PolicyViolationError):

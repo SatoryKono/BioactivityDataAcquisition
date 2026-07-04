@@ -2,11 +2,7 @@ schema_version: 1
 provider: chembl
 cassette_rel_path: tests/fixtures/vcr/chembl/TestChEMBLIntegration.test_chembl_extract_transform_load.yaml
 metadata_status: managed_inventory
-reachability_review_status: reviewed_unreferenced
-reachability_review_ref: '#5378'
-reachability_review_rationale: Managed cassette retained for VCR inventory coverage;
-  no direct test literal reference is required for this legacy scenario.
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: a31aa1aeb357147ff636664bb0ace085f70f1163d1fb5c2c529d4e68bf4f4e27
-recorded_at: '2026-04-28'
+recorded_at: '2026-07-03'
 staleness_ready: true

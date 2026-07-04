@@ -1,0 +1,87 @@
+%% View: Full | Parent: (root)
+%% Parent source: docs/02-architecture/diagrams/foundation/33-cli-run-interaction.mmd
+%% Full reference diagram retained after decomposition.
+%% Title: CLI Run Command → PipelineRunner Full Interaction
+%% Covers: RULES.md §1.1 (Interfaces → Composition → Application)
+%% Rank: 8 (Score 8.50) — "What happens when I run bioetl run?"
+%% Updated: 2026-02-17
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    sequenceDiagram
+%% @level   Mixed (System / Component / Class)
+
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% @uniform sequence width=208 max_title_len=21
+sequenceDiagram
+    autonumber
+
+    box Interfaces Layer
+    participant User as User
+    participant CLI as CLI (Click)<br/>interfaces/cli/
+    end
+
+    box Composition Layer
+    participant Boot as bootstrap_pipeline()<br/>composition/bootstrap/
+    participant RF as RunnerFactory<br/>composition/factories/
+    participant SB as ServicesBuilder<br/>composition/factories/
+    end
+
+    box Application Layer
+    participant PRS as PipelineRunnerService<br/>application/services/
+    participant Runner as PipelineRunner<br/>application/core/
+    participant PF as PreflightService<br/>application/core/
+    participant LM as LockRuntimeService<br/>application/core/
+    participant HB as HeartbeatTask<br/>application/core/
+    participant BE as BatchExecutor<br/>application/core/
+    participant Post as PostrunService<br/>application/core/
+    participant Obs as PipelineObserver<br/>application/observability/
+    end
+
+    User->>CLI: bioetl run --pipeline chembl_activity<br/>--run-type incremental
+    CLI->>CLI: parse args, resolve pipeline_name
+    CLI->>PRS: PipelineRunnerService.run(name, options)
+    PRS->>Boot: bootstrap_pipeline(name, config)
+
+    Note over Boot: Assembly Phase
+    Boot->>Boot: create StructlogLogger
+    Boot->>Boot: create StorageFactory → writers
+    Boot->>Boot: create HttpClientFactory → client
+    Boot->>Boot: create DataSourceFactory → adapter
+    Boot->>SB: ServicesBuilder.build()
+    SB-->>Boot: PipelineService (frozen)
+    Boot->>RF: RunnerFactory.create_runner()
+    RF-->>Boot: PipelineRunner (assembled)
+    Boot-->>PRS: runner
+
+    Note over Runner: Execution Phase
+    PRS->>Obs: PipelineObserver.__enter__()
+    Obs->>Obs: log "pipeline started"<br/>increment bioetl_pipeline_runs_total
+
+    PRS->>Runner: runner.run()
+    Runner->>LM: acquire(key, owner_id, ttl=90s)
+    LM-->>Runner: lock acquired
+    Runner->>HB: HeartbeatTask.start(interval=30s)
+
+    Runner->>PF: PreflightService.run()
+    PF->>PF: check config, storage, health
+    PF-->>Runner: PreflightReport (all passed)
+
+    loop For each batch
+        Runner->>BE: BatchExecutor.execute_batch()
+        BE->>BE: fetch → transform → validate → write
+        BE-->>Runner: BatchResult(records, errors)
+    end
+
+    Runner->>Post: PostrunService.run()
+    Post->>Post: vacuum, DQ report, metrics
+
+    Runner->>HB: HeartbeatTask.stop()
+    Runner->>LM: release(key, owner_id)
+    Runner-->>PRS: success
+
+    PRS->>Obs: PipelineObserver.__exit__()
+    Obs->>Obs: observe duration<br/>log "pipeline completed"
+
+    PRS-->>CLI: RunResult(status=SUCCESS)
+    CLI-->>User: ExitCode.SUCCESS (0)

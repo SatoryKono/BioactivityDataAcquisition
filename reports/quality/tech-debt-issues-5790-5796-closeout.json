@@ -1,0 +1,155 @@
+{
+  "schema_version": "tech-debt-issues-5790-5796-closeout-v1",
+  "reviewed_on": "2026-07-01",
+  "issues": [
+    5790,
+    5791,
+    5792,
+    5793,
+    5794,
+    5795,
+    5796
+  ],
+  "debt_budget_policy": "flat_or_decreasing_only",
+  "metrics": {
+    "retained_entrypoint_count": 12,
+    "retained_public_export_facade_count": 4,
+    "adapter_duplicate_clusters": {
+      "opening_baseline": 54,
+      "current": 41
+    },
+    "pipeline_duplicate_clusters": {
+      "opening_baseline": 11,
+      "current": 3
+    },
+    "repo_wide_zero_import_candidates": {
+      "count": 9,
+      "classified": 9,
+      "owner_test_anchored": 9
+    },
+    "config_surface_duplicate_clusters": {
+      "opening_baseline": 24,
+      "current": 21
+    },
+    "runtime_basics_targeted_coverage_percent": {
+      "current_canonical_inventory": 76.32,
+      "targeted_closeout_proof": 100.0
+    },
+    "zero_reference_supporting_scripts": {
+      "count": 47,
+      "missing_governance_metadata": 0
+    }
+  },
+  "outcomes": {
+    "5790": {
+      "status": "closeable",
+      "debt_type": "compatibility_entrypoint_governance",
+      "outcome": "improved",
+      "evidence": [
+        "configs/quality/compatibility_facade_inventory.yaml",
+        "reports/quality/compatibility-importer-census.json",
+        "docs/02-architecture/07-compatibility-facade-snapshot.md",
+        "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py"
+      ],
+      "closeout_reason": "Retained public entrypoints and lazy export facades now carry explicit consumer_class and sunset_status governance metadata in both the SSOT registry and live importer census while remaining conflict-free and bounded."
+    },
+    "5791": {
+      "status": "closeable",
+      "debt_type": "adapter_duplication",
+      "outcome": "improved",
+      "opening_baseline": 54,
+      "current_value": 41,
+      "evidence": [
+        "src/bioetl/infrastructure/adapters/common/error_bundles.py",
+        "src/bioetl/infrastructure/adapters/pubmed/_errors.py",
+        "reports/quality/full-app-duplication-baseline.json",
+        "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py"
+      ],
+      "closeout_reason": "Shared adapter network/resilience bundles now flow through the canonical common helper and the committed duplication baseline remains at 41 clusters, below the opening 54-cluster tranche."
+    },
+    "5792": {
+      "status": "closeable",
+      "debt_type": "pipeline_transformer_duplication",
+      "outcome": "improved",
+      "opening_baseline": 11,
+      "current_value": 3,
+      "evidence": [
+        "src/bioetl/application/pipelines/common/base_publication_transformer.py",
+        "src/bioetl/application/pipelines/common/publication_transformer_context.py",
+        "src/bioetl/application/pipelines/crossref/transformer.py",
+        "src/bioetl/application/pipelines/openalex/transformer.py",
+        "src/bioetl/application/pipelines/semanticscholar/transformer.py",
+        "reports/quality/full-app-duplication-baseline.json",
+        "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py"
+      ],
+      "closeout_reason": "Provider publication transformers now consume shared default-provider/default-entity-type initialization through the canonical base transformer context, and the committed pipeline duplication baseline remains at 3 clusters, below the opening 11-cluster tranche."
+    },
+    "5793": {
+      "status": "closeable",
+      "debt_type": "zero_import_governance",
+      "outcome": "improved",
+      "evidence": [
+        "configs/quality/retirement_candidate_triage.yaml",
+        "reports/quality/dead-code-inventory.json",
+        "reports/quality/dead-code-inventory.md",
+        "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py"
+      ],
+      "closeout_reason": "Repo-wide zero-import candidates remain fully classified and now carry explicit owner governance with owner-test proof for every live candidate."
+    },
+    "5794": {
+      "status": "closeable",
+      "debt_type": "composite_config_duplication",
+      "outcome": "improved",
+      "opening_baseline": 24,
+      "current_value": 21,
+      "evidence": [
+        "configs/composites/field_groups/shared_policy.yaml",
+        "configs/composites/activity.yaml",
+        "configs/composites/assay.yaml",
+        "configs/composites/molecule.yaml",
+        "configs/composites/publication.yaml",
+        "configs/composites/target.yaml",
+        "src/bioetl/infrastructure/config/_composite_shared_policy_externalization.py",
+        "tests/helpers/composite_configs.py",
+        "reports/quality/config-surface-backlog.json",
+        "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py"
+      ],
+      "closeout_reason": "Shared composite merge and lineage policy blocks now live in a canonical authority surface and composite config duplicate clusters dropped from 24 to 21."
+    },
+    "5795": {
+      "status": "closeable",
+      "debt_type": "hotspot_tail_coverage",
+      "outcome": "improved_targeted_proof",
+      "evidence": [
+        "src/bioetl/composition/bootstrap/runtime/runtime_basics.py",
+        "tests/unit/composition/bootstrap/runtime/test_runtime_basics.py",
+        "reports/coverage/runtime-basics-targeted-5795.xml",
+        "reports/quality/module-coverage-inventory.json",
+        "reports/quality/hotspot-coverage-tail-owner-map.json",
+        "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py"
+      ],
+      "closeout_reason": "The canonical inventory still records the pre-lane 76.32% tail for runtime_basics, but the committed targeted coverage proof now exercises build_runner_factories end-to-end and shows 100% targeted line coverage for the replay-sensitive runtime seam."
+    },
+    "5796": {
+      "status": "closeable",
+      "debt_type": "supporting_script_governance",
+      "outcome": "improved",
+      "evidence": [
+        "configs/quality/scripts_inventory_manifest.json",
+        "configs/quality/scripts_lifecycle_registry.json",
+        "reports/quality/scripts_deprecation_backlog.md",
+        "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py"
+      ],
+      "closeout_reason": "All zero-reference supporting scripts are now explicitly owner-classified with lifecycle_decision, review_by, and next_step governance in the manifest and generated backlog."
+    }
+  },
+  "required_closeout_checks": [
+    "./.venv/bin/python -m scripts.engineering.qa report-duplication-baseline --targets src/bioetl/infrastructure/adapters src/bioetl/application/pipelines src/bioetl/composition/bootstrap src/bioetl/interfaces/cli --json-out reports/quality/full-app-duplication-baseline.json --md-out reports/quality/full-app-duplication-baseline.md --snapshot-date 2026-07-01",
+    "./.venv/bin/python scripts/engineering/qa/report_architecture_quality_scorecard.py",
+    "./.venv/bin/python -m scripts.engineering.qa report-module-coverage",
+    "./.venv/bin/python -m scripts.engineering.qa report-debt-governance-gates --update",
+    "./.venv/bin/python -m scripts.engineering.qa report-architecture-debt-remote-main-baseline --update",
+    "./.venv/bin/python -m pytest tests/architecture/test_tech_debt_issues_5790_5796_closeout.py -q",
+    "./.venv/bin/python -m pytest tests/unit/config/test_non_chembl_composite_boundary_policy.py tests/unit/composition/bootstrap/runtime/test_composite_config_loader.py tests/unit/composition/bootstrap/runtime/test_runtime_basics.py tests/unit/application/pipelines/common/test_base_publication_transformer.py tests/unit/application/pipelines/openalex/test_transformer.py tests/unit/application/pipelines/semanticscholar/test_transformer.py tests/unit/application/pipelines/crossref/test_crossref_transformer.py tests/unit/scripts/qa/test_import_graph_inventory_reports.py -q"
+  ]
+}

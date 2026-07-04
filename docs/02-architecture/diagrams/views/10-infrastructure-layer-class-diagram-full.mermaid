@@ -1,0 +1,407 @@
+%% View: Full | Parent: (root)
+%% Parent source: docs/02-architecture/diagrams/foundation/10-infrastructure-layer-class-diagram.mmd
+%% Full reference diagram retained after decomposition.
+%% Title: Infrastructure Layer Class Diagram
+%% Covers: RULES.md §1.1 (Infrastructure Layer), §3.6 (Resilience)
+%% Updated: 2026-02-17
+%% Components: UnifiedHTTPClient, CircuitBreaker, TokenBucket, ChemblAdapter, PubChemAdapter, BronzeWriter, SilverWriter, GoldWriter, MemoryLock
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    classDiagram
+%% @level   Mixed (System / Component / Class)
+
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% @uniform class width=208 height=240 max_title_len=21 max_desc_lines=16
+classDiagram
+    direction TB
+
+    namespace HTTP_Infrastructure {
+        class UnifiedHTTPClient {
+            -_client: httpx.AsyncClient
+            -_rate_limiter: RateLimiterPort
+            -_circuit_breaker: CircuitBreakerPort
+            -_retry_policy: RetryPolicy
+            -_timeout: float = 30.0
+            -_provider: str
+            -_logger: LoggerPort
+            -_metrics: MetricsPort
+            +request(method, url, **kwargs) Response
+            +get(url, **kwargs) Response
+            +post(url, data, **kwargs) Response
+            -_handle_retry(error, attempt) None
+            -_should_retry(status_code) bool
+
+
+
+        }
+
+        class CircuitBreaker {
+            -_state: CircuitState = CLOSED
+            -_failure_count: int = 0
+            -_last_failure_time: datetime
+            -_last_state_change: datetime
+            -_failure_threshold: int = 5
+            -_recovery_timeout: int = 300
+            -_provider: str
+            -_metrics: MetricsPort
+            +get_state() CircuitState
+            +get_failure_count() int
+            +call(func, *args) T
+            +reset() None
+            -_record_success() None
+            -_record_failure() None
+            -_should_trip() bool
+            -_emit_state_metric() None
+        }
+
+        class TokenBucket {
+            -_rate: float
+            -_capacity: int
+            -_tokens: float
+            -_last_refill: float
+            -_provider: str
+            -_metrics: MetricsPort
+            +acquire() None
+            +try_acquire() bool
+            +available_tokens() int
+            -_refill() None
+
+
+
+
+
+
+        }
+
+        class RetryPolicy {
+            +max_retries: int = 3
+            +backoff_factor: float = 2.0
+            +jitter_range: tuple
+            +retriable_status_codes: set
+            +calculate_delay(attempt) float
+
+
+
+
+
+
+
+
+
+
+
+        }
+    }
+
+    namespace DataSource_Adapters {
+        class ChemblAdapter {
+            -_http_client: UnifiedHTTPClient
+            -_logger: LoggerPort
+            -_batch_size: int = 1000
+            -_thread_pool: ThreadPoolExecutor
+            -_metrics: MetricsPort
+            +fetch(query) AsyncIterator~BronzeRecord~
+            +fetch_filtered(filters) AsyncIterator~BronzeRecord~
+            +health_check() HealthStatus
+            +aclose() None
+            -_adapt_batch_size(health) int
+
+
+
+
+
+
+        }
+
+        class PubchemAdapter {
+            -_http_client: UnifiedHTTPClient
+            -_logger: LoggerPort
+            -_thread_pool: ThreadPoolExecutor
+            +fetch(query) AsyncIterator~BronzeRecord~
+            +health_check() HealthStatus
+            +aclose() None
+            -_run_in_executor(func) T
+
+
+
+
+
+
+
+
+
+        }
+
+        class UniprotAdapter {
+            -_http_client: UnifiedHTTPClient
+            -_logger: LoggerPort
+            +fetch(query) AsyncIterator~BronzeRecord~
+            +health_check() HealthStatus
+            +aclose() None
+
+
+
+
+
+
+
+
+
+
+
+        }
+
+        class PubmedAdapter {
+            -_http_client: UnifiedHTTPClient
+            -_logger: LoggerPort
+            -_api_key: str
+            +fetch(query) AsyncIterator~BronzeRecord~
+            +health_check() HealthStatus
+            +aclose() None
+
+
+
+
+
+
+
+
+
+
+        }
+    }
+
+    namespace Storage_Writers {
+        class BronzeWriter {
+            -_base_path: str
+            -_logger: LoggerPort
+            -_metrics: MetricsPort
+            -_audit: AuditPort
+            -_lock: LockPort
+            -_require_lock: bool = True
+            -_compression_level: int = 3
+            +write_batch(records, provider, entity) BronzeWriteResult
+            +write(record, provider, entity) BronzeWriteResult
+            -_compress(data) bytes
+            -_build_path(provider, entity, date) str
+
+
+
+
+
+        }
+
+        class SilverWriter {
+            -_base_path: str
+            -_logger: LoggerPort
+            -_metrics: MetricsPort
+            -_csv_exporter: CsvExporter
+            -_write_policy: WriteModePolicy
+            -_lock: LockPort
+            -_require_lock: bool = True
+            +merge(records, table, primary_key) WriteResult
+            +append(records, table) WriteResult
+            +clear_data(table) int
+            +vacuum(table, retention_days) None
+            -_validate_lock() bool
+            -_to_arrow_table(records) pa.Table
+
+
+
+        }
+
+        class GoldWriter {
+            -_base_path: str
+            -_logger: LoggerPort
+            -_csv_exporter: CsvExporter
+            -_audit: AuditPort
+            -_lock: LockPort
+            -_require_lock: bool = True
+            +write_gold(records, table, schema) WriteResult
+            +clear_data(table) int
+            -_validate_schema(df, schema) ValidationResult
+
+
+
+
+
+
+
+        }
+
+        class CsvExporter {
+            -_base_path: str
+            -_logger: LoggerPort
+            +export(df, path) str
+
+
+
+
+
+
+
+
+
+
+
+
+
+        }
+    }
+
+    namespace Locking {
+        class MemoryLock {
+            -_locks: dict
+            -_ttl_check_interval: float = 1.0
+            -_ttl_task: asyncio.Task
+            +acquire(key, owner_id, ttl, wait, timeout, exclusive) bool
+            +release(key, owner_id, exclusive) bool
+            +heartbeat(key, owner_id, exclusive) bool
+            +validate_owner(key, owner_id) bool
+            +aclose() None
+            -_ttl_checker_loop() None
+            -_is_expired(lock_entry) bool
+
+
+
+
+
+
+        }
+    }
+
+    namespace Quarantine {
+        class QuarantineWriter {
+            -_base_path: str
+            -_logger: LoggerPort
+            -_max_payload_size: int = 65536
+            +write(record: QuarantineRecord) None
+            +inspect(pipeline, limit) list~QuarantineRecord~
+            +get_stats(pipeline) QuarantineStats
+            +aclose() None
+            -_truncate_payload(payload) str
+
+
+
+
+
+
+
+
+        }
+    }
+
+    namespace Checkpoint {
+        class FileCheckpointManager {
+            -_base_path: str
+            -_logger: LoggerPort
+            +save(key, state) None
+            +load(key) CheckpointState?
+            +list_all() list~str~
+            +delete(key) None
+            -_get_path(key) Path
+
+
+
+
+
+
+
+
+
+        }
+    }
+
+    namespace Observability {
+        class StructlogAdapter {
+            -_logger: structlog.BoundLogger
+            +bind(**context) LoggerPort
+            +info(msg, **kwargs) None
+            +warning(msg, **kwargs) None
+            +error(msg, **kwargs) None
+            +debug(msg, **kwargs) None
+            +exception(msg, **kwargs) None
+
+
+
+
+
+
+
+
+
+        }
+
+        class PrometheusMetrics {
+            -_registry: CollectorRegistry
+            -_histograms: dict
+            -_counters: dict
+            -_gauges: dict
+            +observe_histogram(name, value, labels) None
+            +increment_counter(name, labels, value) None
+            +set_gauge(name, value, labels) None
+            +close() None
+
+
+
+
+
+
+
+
+        }
+
+        class NoOpMetrics {
+            +observe_histogram(name, value, labels) None
+            +increment_counter(name, labels, value) None
+            +set_gauge(name, value, labels) None
+            +close() None
+
+
+
+
+
+
+
+
+
+
+
+
+        }
+    }
+
+    %% Port implementations (dotted lines)
+    ChemblAdapter ..|> DataSourcePort : implements
+    ChemblAdapter ..|> FilterableDataSourcePort : implements
+    PubchemAdapter ..|> DataSourcePort : implements
+    UniprotAdapter ..|> DataSourcePort : implements
+    PubmedAdapter ..|> DataSourcePort : implements
+
+    BronzeWriter ..|> BronzeStoragePort : implements
+    SilverWriter ..|> SilverStoragePort : implements
+    GoldWriter ..|> GoldStoragePort : implements
+
+    MemoryLock ..|> LockPort : implements
+    FileCheckpointManager ..|> CheckpointPort : implements
+    QuarantineWriter ..|> QuarantinePort : implements
+
+    CircuitBreaker ..|> CircuitBreakerPort : implements
+    TokenBucket ..|> RateLimiterPort : implements
+    StructlogAdapter ..|> LoggerPort : implements
+    PrometheusMetrics ..|> MetricsPort : implements
+    NoOpMetrics ..|> MetricsPort : implements
+
+    %% Dependencies
+    ChemblAdapter --> UnifiedHTTPClient
+    PubchemAdapter --> UnifiedHTTPClient
+    UniprotAdapter --> UnifiedHTTPClient
+    PubmedAdapter --> UnifiedHTTPClient
+
+    UnifiedHTTPClient --> CircuitBreaker
+    UnifiedHTTPClient --> TokenBucket
+    UnifiedHTTPClient --> RetryPolicy
+
+    SilverWriter --> CsvExporter
+    GoldWriter --> CsvExporter

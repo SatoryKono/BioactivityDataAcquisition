@@ -1,0 +1,73 @@
+version: "1.0.0"
+provider: composite
+entity: assay
+
+dq_overrides:
+  soft_fail_threshold: 0.10
+  hard_fail_threshold: 0.30
+  required_fields:
+    - assay_id
+    - assay_description
+  field_validations:
+    - field: assay_id
+      type: required
+      nullable: false
+      error_message: composite_assay requires the seed assay identifier
+    - field: target_id
+      type: pattern
+      pattern: '^CHEMBL\d+$'
+      nullable: true
+      error_message: target_id must preserve canonical ChEMBL identifier format
+    - field: publication_id
+      type: pattern
+      pattern: '^[1-9]\d*$'
+      nullable: true
+      error_message: publication_id must remain a canonical positive integer string
+    - field: assay_type
+      type: enum
+      allowed:
+        - B
+        - F
+        - A
+        - T
+        - P
+        - U
+      nullable: true
+      error_message: assay_type must remain in the governed ChEMBL assay vocabulary
+    - field: confidence_score
+      type: range
+      min: 0
+      max: 9
+      nullable: true
+      error_message: confidence_score must remain in the declared ChEMBL range
+    - field: relationship_type
+      type: enum
+      allowed:
+        - D
+        - H
+        - M
+        - N
+        - S
+        - U
+      nullable: true
+      error_message: relationship_type must remain in the governed assay relationship set
+    - field: bao_format
+      type: pattern
+      pattern: '^BAO_[0-9]{7}$'
+      nullable: true
+      error_message: bao_format must remain a canonical BAO identifier
+  cross_field_validations:
+    - name: assay_identifiable
+      fields:
+        - assay_id
+        - assay_description
+      condition: all_present
+      error_message: composite_assay must retain both assay_id and assay_description
+    - name: variant_accession_requires_mutation
+      fields:
+        - variant_accession
+        - variant_mutation
+      condition: conditional_required
+      trigger_field: variant_accession
+      required_field: variant_mutation
+      error_message: variant_mutation is required when variant_accession is populated

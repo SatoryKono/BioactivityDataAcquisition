@@ -4,5 +4,5 @@ cassette_rel_path: tests/fixtures/vcr/chembl/TestPublicationExtractionParams.tes
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: 1a1115a77f7699ecf17eef24687a4cb15274e5c50dd51fc6dfc4a67eb58edad2
-recorded_at: '2026-04-28'
+recorded_at: '2026-07-03'
 staleness_ready: true

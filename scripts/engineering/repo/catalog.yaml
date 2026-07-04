@@ -1,0 +1,109 @@
+schema_version: '1.0'
+canonical_roots:
+- scripts/ai
+- scripts/ai/codex
+- scripts/ai/gemini
+- scripts/ai/vibe
+- scripts/engineering/ci
+- scripts/engineering/dev
+- scripts/engineering/qa
+- scripts/engineering/repo
+- scripts/engineering/diagnostics
+- scripts/engineering/baselines
+- scripts/engineering/common
+- scripts/docs
+- scripts/schema
+- scripts/ops
+- scripts/ops/migrations/active
+- scripts/ops/migrations/oneoff
+- scripts/diagrams
+policies:
+  canonical_invocation_required_for_new_integrations: true
+  no_scripts_in_root: true
+  root_allowlist:
+  - docs_parity_check.py
+  - documentation_governance_check.py
+  - docker-setup.ps1
+  - docker-setup.sh
+  - generate_adr_registry.py
+  - generate_test_github_issues.py
+  - optimized_test_runner.py
+  - test_selection_strategy.py
+entrypoints:
+  package_console_scripts:
+    bioetl: src/bioetl/interfaces/cli/main.py
+  script_routers:
+    scripts.engineering.qa: scripts/engineering/qa/__main__.py
+    scripts.engineering.repo: scripts/engineering/repo/__main__.py
+    scripts.schema: scripts/schema/__main__.py
+  workflow_surfaces:
+    - .github/workflows/tests.yml
+    - .github/workflows/contract-tests.yml
+lifecycle:
+  manifest_path: configs/quality/scripts_inventory_manifest.json
+  registry_path: configs/quality/scripts_lifecycle_registry.json
+  non_active_statuses:
+  - unknown
+  - orphan
+  - legacy
+  required_registry_fields:
+  - owner
+  - decision
+  - next_step
+  - review_by
+  deprecated_decisions:
+  - deprecate
+  deprecated_required_fields:
+  - replacement
+  - sunset_date
+  enforce_known_registry_paths: true
+  active_script_count_max: 360
+  active_script_count_policy: fail-fast-no-growth
+  active_script_count_owner: '@bioetl-platform'
+  active_script_count_review_by: '2026-09-30'
+groups:
+  ai:
+    path: scripts/ai
+    purpose: Canonical AI-facing setup, launcher, and runtime-adjacent tooling
+  ci:
+    path: scripts/engineering/ci
+    purpose: CI orchestration, resiliency runners, periodic quality reports
+  dev:
+    path: scripts/engineering/dev
+    purpose: Local developer setup and test utilities
+  qa:
+    path: scripts/engineering/qa
+    purpose: Architecture and quality-gate checks, debt telemetry
+  repo:
+    path: scripts/engineering/repo
+    purpose: Repository hygiene and inventory governance tooling
+  diagnostics:
+    path: scripts/engineering/diagnostics
+    purpose: Manual diagnostics and investigation helpers
+  baselines:
+    path: scripts/engineering/baselines
+    purpose: Baseline artifacts consumed by engineering quality gates
+  common:
+    path: scripts/engineering/common
+    purpose: Shared helpers used by engineering and adjacent script domains
+  docs:
+    path: scripts/docs
+    purpose: Documentation lint/build/drift/maintenance
+  schema:
+    path: scripts/schema
+    purpose: Schema generation and validation contracts
+  data:
+    path: scripts/ops/data
+    purpose: Data integrity and storage-level operational checks
+  ops:
+    path: scripts/ops
+    purpose: Active platform/ops automation, launchers, runtime, and maintenance tooling
+  migrations_active:
+    path: scripts/ops/migrations/active
+    purpose: Active repeatable migration scripts
+  migrations_oneoff:
+    path: scripts/ops/migrations/oneoff
+    purpose: One-time migration scripts with explicit sunset
+  diagrams:
+    path: scripts/diagrams
+    purpose: Diagram lint/render/quality pipeline

@@ -4,5 +4,5 @@ cassette_rel_path: tests/fixtures/vcr/pubchem/TestPubChemHealthCheck.test_health
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: 248453c4bf2ebf202b3da524942680905923c51b2cb5f8adcd57fc3de9ef6363
-recorded_at: '2026-04-28'
+recorded_at: '2026-07-03'
 staleness_ready: true

@@ -1,0 +1,12 @@
+field,doc_spec,cfg_pipeline,cfg_schema,code_transformer,code_entity,code_silver_schema,code_gold_schema,json_type,nullable,primary_key,notes
+cell_id,S2.1,YES,EMPTY,cell_line_transformer.py:81,chembl.py:591,cell_line.py:29,chembl.py:245,string,false,true,RENAME:cell_chembl_id->cell_id
+cell_name,S2.2,YES,EMPTY,cell_line_transformer.py:83,chembl.py:594,cell_line.py:37,chembl.py:248,string,false,false,OK
+cell_description,S2.2,YES,EMPTY,cell_line_transformer.py:84,chembl.py:597,cell_line.py:41,chembl.py:249,string,true,false,OK
+cell_source_tissue,S2.3,YES,EMPTY,cell_line_transformer.py:86,chembl.py:602,cell_line.py:47,chembl.py:252,string,true,false,OK
+cell_source_organism,S2.3,YES,EMPTY,cell_line_transformer.py:87,chembl.py:603,cell_line.py:51,chembl.py:253,string,true,false,OK
+cell_source_taxonomy_id,S2.3,YES,EMPTY,cell_line_transformer.py:89,chembl.py:606,cell_line.py:55,chembl.py:254,number,true,false,RENAME:cell_source_tax_id->cell_source_taxonomy_id
+cellosaurus_id,S2.4,YES,EMPTY,cell_line_transformer.py:93,chembl.py:611,cell_line.py:67,chembl.py:259,string,true,false,OK
+cl_lincs_id,S2.4,YES,EMPTY,cell_line_transformer.py:97,chembl.py:612,cell_line.py:77,chembl.py:260,string,true,false,OK
+efo_id,S2.4,YES,EMPTY,cell_line_transformer.py:98,chembl.py:613,cell_line.py:81,chembl.py:261,string,true,false,OK
+cell_type,S2.2,YES,EMPTY,cell_line_transformer.py:91,chembl.py:608,cell_line.py:61,chembl.py:259,string,true,false,OK
+clo_id,S2.4,YES,EMPTY,cell_line_transformer.py:96,chembl.py:614,cell_line.py:73,chembl.py:262,string,true,false,OK

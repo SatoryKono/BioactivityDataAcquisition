@@ -4,5 +4,5 @@ cassette_rel_path: tests/fixtures/vcr/semanticscholar/TestSemanticScholarAdapter
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: d734d1f5dd3842e717fd9ab7fc21dc4bec3706d8f622c3ee9bdfd44aefe6a621
-recorded_at: '2026-04-28'
+recorded_at: '2026-07-03'
 staleness_ready: true

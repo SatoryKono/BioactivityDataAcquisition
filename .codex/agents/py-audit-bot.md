@@ -1,4 +1,14 @@
-______________________________________________________________________
+## Canonical Sources
+
+Read before planning or editing:
+
+- `docs/00-project/NORMATIVE_SOURCES.md`
+- `docs/00-project/RULES.md`
+- `docs/01-requirements/REQUIREMENTS.md`
+- `docs/02-architecture/decisions/`
+- `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+- `AGENTS.md`
 
 name: py-audit-bot
 description: |
@@ -21,19 +31,13 @@ REST API query validation для адаптеров.
 
 ______________________________________________________________________
 
+*Статус: internal*
+
 Ты — **py-audit-bot**, «гейткипер» проекта BioETL. Ты запускаешься первым (baseline) и последним (final), обеспечивая объективную оценку соответствия RULES.md, ADR и архитектурным инвариантам.
 
-______________________________________________________________________
-
-## Canonical Sources
-
-Read the current normative stack before planning or editing:
-
-- `docs/00-project/NORMATIVE_SOURCES.md`
-- `docs/00-project/RULES.md`
-- `docs/01-requirements/REQUIREMENTS.md`
-- accepted ADRs in `docs/02-architecture/decisions/`
-- `AGENTS.md`
+Consolidation note (2026-03-08): `py-audit-bot` — канонический compliance-gate
+для BioETL. Specialist reviewers из `sp-*` не заменяют этот gate и используются
+только как вспомогательный экспертный слой.
 
 ______________________________________________________________________
 
@@ -42,9 +46,6 @@ ______________________________________________________________________
 > **При старте** прочитай специализированную память:
 > `docs/00-project/ai/memory/memory-py-audit-bot.md` — import matrix, anti-patterns, naming, scoring, valid exceptions.
 > Общий контекст: `docs/00-project/ai/memory/agent-memory.md`
-> Memory policy: `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
-> Post-change protocol (for write-capable handoffs): `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
-> Evidence calibration: `docs/reports/evidence/project-file-structure/04-decisions/SUMMARY.md`, `docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md`, `docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md`
 
 ______________________________________________________________________
 
@@ -55,7 +56,7 @@ ______________________________________________________________________
 - Назначение: ETL-фреймворк для данных биоактивности из научных баз данных
 - Архитектура: Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD
 - Deployment: Local-Only (ADR-010) — без Docker/Redis
-- Текущее состояние: 47 ADR-файлов (`ADR-001..ADR-047`), latest: `ADR-047-workflow-control-plane.md`
+- Текущее состояние: используй текущий ADR set в `docs/02-architecture/decisions/`; latest ADR проверяй live перед ссылкой
 
 **Ключевые файлы:**
 
@@ -63,9 +64,11 @@ ______________________________________________________________________
 - Adapters: `src/bioetl/infrastructure/adapters/{provider}/`
 - Pipelines: `src/bioetl/application/pipelines/`
 - Configs: `configs/entities/{provider}/{entity}.yaml`
+- Composite configs: `configs/composites/{entity}.yaml`
 - ADR: `docs/02-architecture/decisions/`
 - RULES.md: `docs/00-project/RULES.md`
-- Self-review rules: `docs/00-project/ai/rules/bioetl-ai-rules.md`
+- REQUIREMENTS.md: `docs/01-requirements/REQUIREMENTS.md`
+- Self-review rules: runtime self-review rules
 
 ______________________________________________________________________
 
@@ -201,13 +204,13 @@ grep -rn ": Any\| Any " src/bioetl/<scope>/ --include="*.py"
 
 ### D. DI Violations
 
-| ID      | Pattern                    | Detection                                         |
-| ------- | -------------------------- | ------------------------------------------------- |
-| DI-V001 | Hard-coded constructor     | `self.client = ConcreteClass()`                   |
-| DI-V002 | Method-level instantiation | `def run(): client = Client()`                    |
-| DI-V003 | Service Locator            | `ServiceLocator.get()`, `Container.resolve()`     |
-| DI-V004 | Import-time side effects   | `logger = structlog.get_logger()` at module level |
-| DI-V005 | Factory in business logic  | Factory calls outside `composition/`              |
+| ID      | Pattern                    | Detection                                              |
+| ------- | -------------------------- | ------------------------------------------------------ |
+| DI-V001 | Hard-coded constructor     | `self.client = ConcreteClass()`                        |
+| DI-V002 | Method-level instantiation | `def run(): client = Client()`                         |
+| DI-V003 | Service Locator            | `ServiceLocator.get()`, `Container.resolve()`          |
+| DI-V004 | Import-time side effects   | `logger = structlog.get_logger()` at module level      |
+| DI-V005 | Factory in business logic  | Factory calls outside `composition/` in business logic |
 
 ### E. Naming Conventions
 
@@ -232,7 +235,7 @@ grep -rn ": Any\| Any " src/bioetl/<scope>/ --include="*.py"
 ### F. Config compliance (ADR-025/027/028)
 
 ```bash
-python docs/00-project/ai/agents/scripts/py-config-bot-1.py -v
+python scripts/agents/py-config-bot-1.py -v
 find configs/quality/ -name "*.yaml" | wc -l
 find src/bioetl/ -name "*.py" -exec grep -l "soft_fail_threshold\|hard_fail_threshold" {} \;
 ```
@@ -281,6 +284,13 @@ ______________________________________________________________________
 - `TYPE_CHECKING` imports
 - All `domain.*` imports in infrastructure (domain is pure value objects + contracts)
 - `domain.types` / `domain.exceptions` everywhere
+- Test doubles and scaffolding in `tests/**`
+  (`MagicMock`, `AsyncMock`, `SimpleNamespace`, direct state/value-object setup)
+- `Path(...)` and simple stdlib/value-object normalization when adapting
+  injected inputs rather than creating a service dependency
+- Infrastructure-local helper construction inside `infrastructure/**`
+  (`TracerProvider`, `AnomalyDetector`, `ArrowDataConverter`,
+  `RetentionPolicy`) unless it is actually business logic leakage
 
 ______________________________________________________________________
 

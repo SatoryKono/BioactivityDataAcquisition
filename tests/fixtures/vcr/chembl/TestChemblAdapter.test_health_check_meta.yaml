@@ -4,5 +4,5 @@ cassette_rel_path: tests/fixtures/vcr/chembl/TestChemblAdapter.test_health_check
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: 30677452fc77f55494eedb7e550dfe193e52fb9c72e845e5abbad476f41240ba
-recorded_at: '2026-04-28'
+recorded_at: '2026-07-03'
 staleness_ready: true

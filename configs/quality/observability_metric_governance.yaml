@@ -1,0 +1,232 @@
+version: 1
+policy_scope: observability_metric_governance
+owner: "@bioetl-observability"
+report_script: scripts/engineering/qa/report_observability_metric_inventory.py
+inventory_allowlist: configs/quality/observability_metric_inventory_allowlist.yaml
+derived_metric_declarations: configs/quality/observability_metric_declarations.yaml
+governance_views:
+  declared_metrics_field: declared_metrics
+  emitted_metrics_field: emitted_metrics
+  dashboarded_metrics_field: dashboarded_metrics
+  alerted_metrics_field: alerted_metrics
+  unused_declared_metrics_field: unused_declared_metrics
+  emitted_without_declaration_field: emitted_without_declaration
+  dashboarded_without_declaration_field: dashboarded_without_declaration
+  alerted_without_declaration_field: alerted_without_declaration
+  dashboarded_without_emission_field: dashboarded_without_emission
+  alerted_without_emission_field: alerted_without_emission
+  runtime_cardinality_review_required_field: runtime_cardinality_review_required
+  runtime_cardinality_threshold_violations_field: runtime_cardinality_threshold_violations
+runtime_cardinality_review:
+  heuristic: runtime_evidence_with_static_hotspot_seed
+  min_distinct_emitters: 3
+  rationale: >
+    Static multi-emitter inventory seeds the review set, and the replayable
+    evidence artifact records current-process observed Prometheus series counts
+    plus approved thresholds for governed metric families.
+  exception_allowlist_field: runtime_cardinality_review_required
+  exception_metadata_fields:
+  - metric
+  - owner
+  - reason
+  - review_date
+  - approved_max_series
+  evidence_collection:
+    mode: replayable_inventory_evidence_workflow
+    artifact: reports/observability/runtime_cardinality_inventory.json
+    command: python -m scripts.engineering.qa.report_observability_metric_inventory --check --json --write-evidence reports/observability/runtime_cardinality_inventory.json
+    rationale: >
+      Cardinality exceptions are reviewed through repo-local inventory plus a
+      replayable evidence artifact that is generated during governance checks.
+  live_evidence:
+    workflow: .github/workflows/tests.yml::quality-metrics-gate
+    artifact: reports/observability/runtime_cardinality_review.json
+    summary_output: $GITHUB_STEP_SUMMARY
+    status_when_unavailable: degraded
+    fail_on_threshold_violation: true
+    fail_on_degraded_release_review: true
+    prometheus_url_env_var: BIOETL_OBSERVABILITY_PROMETHEUS_URL
+    prometheus_token_env_var: BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN
+    command: >
+      python -m scripts.engineering.qa.report_observability_metric_inventory
+      --check
+      --write-evidence reports/observability/runtime_cardinality_inventory.json
+      --review-json-out reports/observability/runtime_cardinality_review.json
+      --summary-out "$GITHUB_STEP_SUMMARY"
+      --fail-on-degraded-live-review
+    rationale: >
+      Pre-release quality CI must emit an explicit passed, failed, or degraded
+      runtime-cardinality review artifact, and release gates fail on degraded
+      live evidence so unavailable Prometheus review cannot silently pass.
+    touched_metric_change_gate:
+      mode: changed_paths_require_fresh_release_review
+      changed_from_ref: refs/remotes/origin/main
+      changed_path_trigger_fields:
+      - runtime_emitters
+      - helper_backed_emitters
+      - alias_emitters
+      - docs_mentions
+      - rules_mentions
+      changed_path_trigger_static_paths:
+      - configs/quality/observability_metric_inventory_allowlist.yaml
+      - configs/quality/observability_metric_declarations.yaml
+      changed_path_trigger_prefixes:
+      - grafana/dashboards/
+      - grafana/prometheus-rules/
+      rationale: >
+        Metric emitter, declaration, dashboard, and alert rule changes must not
+        merge behind stale inventory or degraded live cardinality evidence.
+        Governance-only policy text may evolve separately, but touched metric
+        surfaces must see fresh static inventory and a passed release-grade
+        review artifact in CI.
+  local_fallback_evidence:
+    workflow: .github/workflows/tests.yml::governance-preflight
+    artifact: reports/observability/runtime_cardinality_review_pr.json
+    command: >
+      python -m scripts.engineering.qa.report_observability_metric_inventory
+      --check
+      --json
+      --review-json-out reports/observability/runtime_cardinality_review_pr.json
+      --allow-local-cardinality-fallback
+    release_gate_allowed: false
+    rationale: >
+      Pull-request and local governance gates can use deterministic repo-local
+      observed-series evidence when Prometheus is unavailable. Release gates must
+      keep fail-on-degraded live review enabled without the fallback flag.
+unused_signal_policy:
+  rationale: >
+    Registered metrics without runtime emission are treated as unused declared
+    signals until an explicit allowlist or reactivation path says otherwise.
+event_signal_governance:
+  canonical_contract_module: src/bioetl/domain/runtime_observability_publication_contract.py
+  domain_mapping_module: src/bioetl/domain/observability_event_mapping.py
+  declared_events_field: declared_observability_events
+  emitted_events_field: emitted_observability_events
+  unused_declared_events_field: unused_declared_observability_events
+  retired_declared_events_field: retired_declared_observability_events
+  retired_declared_events_emitted_field: retired_declared_observability_events_emitted
+  emitted_without_contract_field: emitted_observability_events_without_contract
+  event_emitters_field: observability_event_emitters
+  domain_event_emitters_field: domain_event_emitters
+  canonical_emitters_field: canonical_runtime_observability_emitters
+  retired_event_lifecycle: retired_declared_contract
+  retired_event_reactivation_requires: &retired_event_reactivation_requires
+  - remove the event from event_signal_governance.retired_declared_events
+  - restore a canonical domain mapping or runtime emitter with owner approval
+  - refresh reports/observability/runtime_cardinality_inventory.json
+  retired_declared_events:
+  - event_name: artifact_published
+    action: retire
+    linked_issue: "#5569"
+    lifecycle: retired_declared_contract
+    disposition: retain_declared_retired_block_emission
+    reactivation_requires: *retired_event_reactivation_requires
+    owner: "@bioetl-observability"
+    reason: No canonical runtime emitter or dashboard/runbook consumer remains.
+    review_date: "2026-06-23"
+  - event_name: batch_completed
+    action: retire
+    linked_issue: "#5569"
+    lifecycle: retired_declared_contract
+    disposition: retain_declared_retired_block_emission
+    reactivation_requires: *retired_event_reactivation_requires
+    owner: "@bioetl-observability"
+    reason: Replaced by typed batch domain-event observability projections.
+    review_date: "2026-06-23"
+  - event_name: batch_started
+    action: retire
+    linked_issue: "#5569"
+    lifecycle: retired_declared_contract
+    disposition: retain_declared_retired_block_emission
+    reactivation_requires: *retired_event_reactivation_requires
+    owner: "@bioetl-observability"
+    reason: Replaced by typed batch domain-event observability projections.
+    review_date: "2026-06-23"
+  - event_name: cleanup_completed
+    action: retire
+    linked_issue: "#5569"
+    lifecycle: retired_declared_contract
+    disposition: retain_declared_retired_block_emission
+    reactivation_requires: *retired_event_reactivation_requires
+    owner: "@bioetl-observability"
+    reason: Superseded by ordinary lifecycle phase events and final pipeline outcomes.
+    review_date: "2026-06-23"
+  - event_name: cleanup_started
+    action: retire
+    linked_issue: "#5569"
+    lifecycle: retired_declared_contract
+    disposition: retain_declared_retired_block_emission
+    reactivation_requires: *retired_event_reactivation_requires
+    owner: "@bioetl-observability"
+    reason: Superseded by ordinary lifecycle phase events and final pipeline outcomes.
+    review_date: "2026-06-23"
+  - event_name: execution_completed
+    action: retire
+    linked_issue: "#5569"
+    lifecycle: retired_declared_contract
+    disposition: retain_declared_retired_block_emission
+    reactivation_requires: *retired_event_reactivation_requires
+    owner: "@bioetl-observability"
+    reason: Superseded by execute_pipeline phase events and domain outcomes.
+    review_date: "2026-06-23"
+  - event_name: execution_started
+    action: retire
+    linked_issue: "#5569"
+    lifecycle: retired_declared_contract
+    disposition: retain_declared_retired_block_emission
+    reactivation_requires: *retired_event_reactivation_requires
+    owner: "@bioetl-observability"
+    reason: Superseded by execute_pipeline phase events and domain outcomes.
+    review_date: "2026-06-23"
+  - event_name: lifecycle_clear_completed
+    action: retire
+    linked_issue: "#5569"
+    lifecycle: retired_declared_contract
+    disposition: retain_declared_retired_block_emission
+    reactivation_requires: *retired_event_reactivation_requires
+    owner: "@bioetl-observability"
+    reason: Superseded by prepare_medallion_layers phase events.
+    review_date: "2026-06-23"
+  - event_name: lifecycle_clear_started
+    action: retire
+    linked_issue: "#5569"
+    lifecycle: retired_declared_contract
+    disposition: retain_declared_retired_block_emission
+    reactivation_requires: *retired_event_reactivation_requires
+    owner: "@bioetl-observability"
+    reason: Superseded by prepare_medallion_layers phase events.
+    review_date: "2026-06-23"
+  - event_name: pipeline_started
+    action: retire
+    linked_issue: "#5569"
+    lifecycle: retired_declared_contract
+    disposition: retain_declared_retired_block_emission
+    reactivation_requires: *retired_event_reactivation_requires
+    owner: "@bioetl-observability"
+    reason: Run start is represented by manifest/ledger lifecycle records.
+    review_date: "2026-06-23"
+  - event_name: startup_completed
+    action: retire
+    linked_issue: "#5569"
+    lifecycle: retired_declared_contract
+    disposition: retain_declared_retired_block_emission
+    reactivation_requires: *retired_event_reactivation_requires
+    owner: "@bioetl-observability"
+    reason: Superseded by preflight and run manifest lifecycle records.
+    review_date: "2026-06-23"
+  - event_name: startup_started
+    action: retire
+    linked_issue: "#5569"
+    lifecycle: retired_declared_contract
+    disposition: retain_declared_retired_block_emission
+    reactivation_requires: *retired_event_reactivation_requires
+    owner: "@bioetl-observability"
+    reason: Superseded by preflight and run manifest lifecycle records.
+    review_date: "2026-06-23"
+  rationale: >
+    Runtime observability governance extends beyond Prometheus metric families:
+    lifecycle/domain-event publication must keep one canonical emitter contract,
+    a declared event vocabulary, and an explicit inventory of unused or
+    non-contracted event signals. Retired declarations remain visible in
+    governance but are removed from the active declaration set and must not be
+    emitted again without explicit reactivation.

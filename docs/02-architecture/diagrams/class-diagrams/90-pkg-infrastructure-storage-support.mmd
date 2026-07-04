@@ -1,0 +1,23 @@
+%% Title: Package Family: infrastructure/storage/support
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/storage/support; modules: atomic_ops, checkpoint_writer, retention.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-03-27
+%% @level   Package Family / Inventory Slice
+%% @nodes   4
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace atomic_ops {
+        class AtomicWriteError
+        class AtomicWriteGroup
+    }
+
+    namespace checkpoint_writer {
+        class FileCompositeCheckpointWriter
+    }
+
+    namespace retention {
+        class RetentionPolicy
+    }

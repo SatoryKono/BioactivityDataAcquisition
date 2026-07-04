@@ -1,0 +1,211 @@
+version: 1.0.0
+provider: chembl
+entity: publication_term
+pipeline:
+  pipeline_name: chembl_publication_term
+  provider: chembl
+  entity_type: publication_term
+  version: 2.1.0
+  description: Extract publication terms (MeSH, keywords) from ChEMBL Publication records
+  loading_strategy: full_scan_only
+  field_policy: {}
+  business_primary_keys:
+  - publication_id
+  - term_type
+  - term
+
+  sink:
+    silver:
+      partition_by:
+      - term_type
+    gold:
+      mode: overwrite
+      idempotency_contract: overwrite_rebuild
+  batch_size: 1000
+  checkpoint_interval: 1000
+schema:
+  content_hash:
+    include: []
+    exclude: []
+  column_groups:
+  - name: system
+    fields:
+    - entity_id
+    - content_hash
+    - _run_id
+    - _run_type
+    - _source_batch_id
+    - _ingestion_ts
+    - _index
+  - name: business
+    fields:
+    - publication_id
+    - term
+    - term_type
+    - mesh_id
+    - qualifier
+  - name: dq
+    pattern: ^_dq_
+  silver:
+    include_groups:
+    - system
+    - business
+    - dq
+    exclude_fields: []
+  gold:
+    include_groups:
+    - system
+    - business
+    exclude_fields:
+    - _dq_*
+    - _source_batch_id
+    - _index
+quality:
+  version: 1.0.0
+  provider: chembl
+  entity: publication_term
+  entity_field_validations:
+  - field: entity_id
+    type: pattern
+    pattern: ^[a-f0-9]{16}$
+    nullable: false
+    error_message: entity_id must be a 16-char SHA256 hash prefix
+  - field: publication_id
+    type: pattern
+    pattern: ^CHEMBL\d+$
+    nullable: false
+    error_message: publication_id must match CHEMBL format
+  - field: term_type
+    type: enum
+    allowed:
+    - MESH_HEADING
+    - MESH_QUALIFIER
+    - KEYWORD
+    nullable: false
+    error_message: term_type is required and must be valid
+  - field: term
+    type: pattern
+    pattern: ^.{1,500}$
+    nullable: false
+    error_message: term is required and must not exceed 500 chars
+  entity_cross_field_validations:
+  - name: term_completeness
+    fields:
+    - publication_id
+    - term
+    - term_type
+    condition: all_present
+    error_message: All term fields are required
+  entity_conditional_validations: []
+  key_nullability:
+  - field: publication_id
+    key_type: merge
+    nullable: false
+  - field: term_type
+    key_type: merge
+    nullable: false
+  - field: term
+    key_type: merge
+    nullable: false
+filters:
+  version: 1.0.0
+  provider: chembl
+  entity: publication_term
+  input_filter:
+    enabled: true
+    source_path: data/input/publication.csv
+    column_name: publication_id
+    filter_field: publication_id
+    batch_size: 20
+    checkpoint_interval: 1000
+    fallback_column: title
+  extraction_params:
+    doc_type: PUBLICATION
+    year__gte: 1950
+    year__lte: 2050
+  source_profile:
+    profile_id: chembl.publication_term.curated
+    version: 1.0.0
+    status: baseline
+    extraction_params_sha256: d9dec3600fd2f00e1c7b639e53ca8e8a80c6f8af6eb6a7ab957399196dba3975
+    description: Baseline curated ChEMBL publication-term extraction profile; no widening in ADR-050 cleanup.
+  silver_filters:
+    exclude_if_present: []
+    required_fields:
+    - publication_id
+    - term
+    - term_type
+  gold_filters:
+    list_contains: {}
+    list_lengths: {}
+    ranges:
+      publication_year:
+        min: 1950
+        max: 2050
+    columns:
+      term_type:
+      - MESH_HEADING
+      - MESH_QUALIFIER
+      - KEYWORD
+    required_fields:
+    - publication_id
+    - term
+    - term_type
+    exclude_if_present: []
+contracts:
+  primary_key:
+  - publication_id
+  - term_type
+  - term
+  merge_keys:
+  - publication_id
+  - term_type
+  - term
+  hash_include: []
+  hash_exclude: []
+  hash_datetime_policy: v2_datetime_utc
+  contract_ref: chembl.publication_term
+  active_version: 1.0.0
+  rollout:
+    mode: single
+    read_order:
+    - 1.0.0
+    write_versions:
+    - 1.0.0
+    affects_hash: false
+hash_policy:
+  provider: chembl
+  entity: publication_term
+  contract:
+    version: 1.0.0
+    migration_note: 'Explicit config-level hash contract for the normalized ChEMBL publication_term Silver surface.'
+  hash_policy:
+    algorithm: sha256
+    canonicalization: provider + canonical_json_dumps(normalized_record)
+    include_fields:
+    - publication_id
+    - term
+    - term_type
+    - mesh_id
+    - qualifier
+    exclude_fields:
+    - _ingestion_ts
+    - _run_id
+    - _run_type
+    - _dq_warn
+    - _dq_error
+    - _source_batch_id
+    - _index
+    exclude_patterns:
+    - ^_dq_
+    normalization:
+      trim_strings: true
+      round_floats:
+        enabled: true
+        precision: 10
+      dates:
+        enabled: true
+        format: YYYY-MM-DD
+      null_handling:
+        nan_to_null: true
+        inf_to_null: true

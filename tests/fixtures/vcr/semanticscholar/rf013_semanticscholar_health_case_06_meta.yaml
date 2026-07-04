@@ -4,5 +4,5 @@ cassette_rel_path: tests/fixtures/vcr/semanticscholar/rf013_semanticscholar_heal
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: c9953843ee4857275eb3cb325b384e595cc2ff590cd358f98ad9d538218aad3f
-recorded_at: '2026-04-28'
+recorded_at: '2026-07-03'
 staleness_ready: true

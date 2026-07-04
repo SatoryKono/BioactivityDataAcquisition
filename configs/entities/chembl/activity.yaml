@@ -1,0 +1,594 @@
+version: 1.0.0
+provider: chembl
+entity: activity
+pipeline:
+  pipeline_name: chembl_activity
+  provider: chembl
+  entity_type: activity
+  description: Extract biological activity records from ChEMBL API
+  field_policy: {}
+  business_primary_keys:
+  - activity_id
+  batch_size: 1000
+  checkpoint_interval: 1000
+
+  sink:
+    silver:
+      mode: merge
+      idempotency_contract: merge_upsert
+      partition_by: []
+    gold:
+      enabled: true
+schema:
+  content_hash:
+    include: []
+    exclude: []
+  column_groups:
+  - name: system
+    fields:
+    - entity_id
+    - content_hash
+    - _run_id
+    - _run_type
+    - _source_batch_id
+    - _ingestion_ts
+    - _index
+    - _state
+  - name: business
+    fields:
+    - activity_id
+    - assay_id
+    - molecule_id
+    - target_id
+    - publication_id
+    - standard_relation
+    - standard_value
+    - standard_units
+    - standard_type
+    - standard_flag
+    - pchembl_value
+    - data_validity_comment
+    - activity_comment
+    - potential_duplicate
+    - bao_endpoint
+    - bao_endpoint_iri
+    - bao_endpoint_mapping_status
+    - uo_units
+    - uo_unit_iri
+    - uo_unit_mapping_status
+    - uo_ontology_version
+    - qudt_units
+    - qudt_unit_iri
+    - qudt_unit_mapping_status
+    - qudt_ontology_version
+    - src_id
+    - record_id
+    - activity_type
+    - activity_relation
+    - activity_value
+    - units
+    - text_value
+    - standard_text_value
+    - upper_value
+    - standard_upper_value
+    - toid
+    - manual_curation_flag
+    - original_activity_id
+    - data_validity_description
+    - ligand_efficiency_bei
+    - ligand_efficiency_le
+    - ligand_efficiency_lle
+    - ligand_efficiency_sei
+    - action_type
+    - action_type_description
+    - action_type_parent_type
+    - activity_properties
+    - canonical_smiles
+    - molecule_pref_name
+    - parent_molecule_id
+    - target_pref_name
+    - target_organism
+    - target_taxonomy_id
+    - assay_type
+    - assay_description
+    - assay_variant_accession
+    - assay_variant_mutation
+    - bao_format
+    - bao_format_iri
+    - bao_format_mapping_status
+    - bao_label
+    - bao_ontology_version
+    - journal
+    - publication_doi
+    - publication_pmid
+    - publication_pmc_id
+    - publication_year
+  - name: dq
+    pattern: ^_dq_
+  silver:
+    include_groups:
+    - system
+    - business
+    - dq
+    exclude_fields: []
+  gold:
+    include_groups:
+    - system
+    - business
+    exclude_fields:
+    - _dq_*
+    - _source_batch_id
+    - _index
+quality:
+  version: 1.1.0
+  provider: chembl
+  entity: activity
+  entity_field_validations:
+  - field: activity_id
+    type: required
+    nullable: false
+    error_message: Activity ID is required
+  - field: canonical_smiles
+    type: custom
+    validator: smiles_validator
+    nullable: true
+    error_message: canonical_smiles must be a valid canonical SMILES value when present
+  - field: standard_value
+    type: range
+    min: 0
+    max: 1000000000
+    nullable: true
+    error_message: standard_value must be non-negative and below 1B
+  - field: standard_flag
+    type: range
+    min: 0
+    max: 1
+    nullable: false
+    error_message: standard_flag must be 0 or 1
+  - field: potential_duplicate
+    type: range
+    min: 0
+    max: 1
+    nullable: false
+    error_message: potential_duplicate must be 0 or 1
+  - field: manual_curation_flag
+    type: range
+    min: 0
+    max: 1
+    nullable: true
+    error_message: manual_curation_flag must be 0 or 1 when present
+  - field: pchembl_value
+    type: range
+    min: 0
+    max: 15
+    nullable: true
+    error_message: pChEMBL value must be between 0 and 15
+  - field: standard_type
+    type: enum
+    allowed:
+    - IC50
+    - EC50
+    - Ki
+    - Kd
+    - AC50
+    - GI50
+    - Potency
+    - Inhibition
+    - '% Inhibition'
+    - Activity
+    - Ratio
+    - ED50
+    - ID50
+    nullable: true
+    error_message: Invalid standard_type value
+  - field: standard_relation
+    type: enum
+    allowed:
+    - '='
+    - <
+    - <=
+    - '>'
+    - '>='
+    - '~'
+    nullable: false
+    error_message: Invalid standard_relation value
+  - field: assay_type
+    type: enum
+    allowed:
+    - B
+    - F
+    - A
+    - T
+    - P
+    - U
+    nullable: false
+    error_message: Invalid assay_type value
+  - field: data_validity_comment
+    type: enum
+    allowed:
+    - Potential missing data
+    - Potential author error
+    - Manually validated
+    - Potential transcription error
+    - Outside typical range
+    - Non standard unit for type
+    - Author confirmed error
+    nullable: true
+    error_message: Invalid data_validity_comment value
+  - field: standard_units
+    type: enum
+    allowed:
+    - nM
+    - µM
+    - mM
+    - pM
+    - M
+    - '%'
+    - ug.mL-1
+    - mg.kg-1
+    nullable: true
+    error_message: Invalid standard_units value
+  - field: units
+    type: pattern
+    pattern: '^(?:[A-Za-zµ%][A-Za-z0-9µ%._-]*|[A-Za-z][A-Za-z0-9]*_[0-9]{7})$'
+    nullable: true
+    error_message: units must be a canonical unit token when present
+  - field: qudt_units
+    type: pattern
+    pattern: '^(?:https?://[^\s]+|[A-Za-zµ%][A-Za-z0-9µ%._/-]*|[A-Za-z][A-Za-z0-9]*_[0-9]{7})$'
+    nullable: true
+    error_message: qudt_units must be a raw QUDT URI or canonical unit token when present
+  - field: uo_units
+    type: pattern
+    pattern: '^(?:UO_[0-9]{7}|[A-Za-zµ%][A-Za-z0-9µ%._-]*)$'
+    nullable: true
+    error_message: uo_units must be a canonical ontology/unit token when present
+  - field: bao_endpoint_iri
+    type: pattern
+    pattern: '^https?://[^\s]+$'
+    nullable: true
+    error_message: bao_endpoint_iri must be an HTTP(S) IRI when present
+  - field: bao_format_iri
+    type: pattern
+    pattern: '^https?://[^\s]+$'
+    nullable: true
+    error_message: bao_format_iri must be an HTTP(S) IRI when present
+  - field: uo_unit_iri
+    type: pattern
+    pattern: '^https?://[^\s]+$'
+    nullable: true
+    error_message: uo_unit_iri must be an HTTP(S) IRI when present
+  - field: qudt_unit_iri
+    type: pattern
+    pattern: '^https?://[^\s]+$'
+    nullable: true
+    error_message: qudt_unit_iri must be an HTTP(S) IRI when present
+  - field: bao_endpoint_mapping_status
+    type: enum
+    allowed:
+    - mapped
+    - unmapped
+    - missing
+    nullable: true
+    error_message: Invalid BAO endpoint mapping status
+  - field: bao_format_mapping_status
+    type: enum
+    allowed:
+    - mapped
+    - unmapped
+    - missing
+    nullable: true
+    error_message: Invalid BAO format mapping status
+  - field: uo_unit_mapping_status
+    type: enum
+    allowed:
+    - mapped
+    - unmapped
+    - missing
+    nullable: true
+    error_message: Invalid UO unit mapping status
+  - field: qudt_unit_mapping_status
+    type: enum
+    allowed:
+    - mapped
+    - unmapped
+    - missing
+    nullable: true
+    error_message: Invalid QUDT unit mapping status
+  entity_cross_field_validations:
+  - name: value_requires_units
+    fields:
+    - standard_value
+    - standard_units
+    condition: conditional_required
+    trigger_field: standard_value
+    required_field: standard_units
+    error_message: standard_units required when standard_value is present
+  - name: activity_completeness
+    fields:
+    - standard_value
+    - standard_units
+    - standard_type
+    condition: all_present
+    error_message: Complete activity data requires value, units, and type
+  - name: bao_endpoint_requires_mapping_status
+    fields:
+    - bao_endpoint
+    - bao_endpoint_mapping_status
+    condition: conditional_required
+    trigger_field: bao_endpoint
+    required_field: bao_endpoint_mapping_status
+    error_message: BAO endpoint mappings must publish a companion mapping status
+  - name: bao_format_requires_mapping_status
+    fields:
+    - bao_format
+    - bao_format_mapping_status
+    condition: conditional_required
+    trigger_field: bao_format
+    required_field: bao_format_mapping_status
+    error_message: BAO format mappings must publish a companion mapping status
+  - name: uo_unit_requires_mapping_status
+    fields:
+    - uo_units
+    - uo_unit_mapping_status
+    condition: conditional_required
+    trigger_field: uo_units
+    required_field: uo_unit_mapping_status
+    error_message: UO unit mappings must publish a companion mapping status
+  - name: qudt_unit_requires_mapping_status
+    fields:
+    - qudt_units
+    - qudt_unit_mapping_status
+    condition: conditional_required
+    trigger_field: qudt_units
+    required_field: qudt_unit_mapping_status
+    error_message: QUDT unit mappings must publish a companion mapping status
+  entity_conditional_validations:
+  - name: mapped_bao_endpoint_requires_bundle
+    condition_field: bao_endpoint_mapping_status
+    condition_value: mapped
+    condition_operator: eq
+    then_validations:
+    - field: bao_endpoint_iri
+      type: required
+      nullable: false
+      error_message: Mapped BAO endpoint identifiers must publish a canonical IRI
+    - field: bao_ontology_version
+      type: required
+      nullable: false
+      error_message: Mapped BAO endpoint identifiers must publish an ontology version
+  - name: mapped_bao_format_requires_bundle
+    condition_field: bao_format_mapping_status
+    condition_value: mapped
+    condition_operator: eq
+    then_validations:
+    - field: bao_format_iri
+      type: required
+      nullable: false
+      error_message: Mapped BAO format identifiers must publish a canonical IRI
+    - field: bao_ontology_version
+      type: required
+      nullable: false
+      error_message: Mapped BAO format identifiers must publish an ontology version
+  - name: mapped_uo_unit_requires_bundle
+    condition_field: uo_unit_mapping_status
+    condition_value: mapped
+    condition_operator: eq
+    then_validations:
+    - field: uo_unit_iri
+      type: required
+      nullable: false
+      error_message: Mapped UO unit identifiers must publish a canonical IRI
+    - field: uo_ontology_version
+      type: required
+      nullable: false
+      error_message: Mapped UO unit identifiers must publish an ontology version
+  - name: mapped_qudt_unit_requires_bundle
+    condition_field: qudt_unit_mapping_status
+    condition_value: mapped
+    condition_operator: eq
+    then_validations:
+    - field: qudt_unit_iri
+      type: required
+      nullable: false
+      error_message: Mapped QUDT unit identifiers must publish a canonical IRI
+    - field: qudt_ontology_version
+      type: required
+      nullable: false
+      error_message: Mapped QUDT unit identifiers must publish an ontology version
+  - name: binding_requires_target
+    condition_field: assay_type
+    condition_value: B
+    condition_operator: eq
+    then_validations:
+    - field: target_id
+      type: required
+      nullable: false
+      error_message: Binding assays must have a target
+  - name: ic50_range_check
+    condition_field: standard_type
+    condition_value: IC50
+    condition_operator: eq
+    then_validations:
+    - field: standard_value
+      type: range
+      min: 0.001
+      max: 100000
+      nullable: false
+  key_nullability:
+  - field: activity_id
+    key_type: merge
+    nullable: false
+filters:
+  version: 1.0.0
+  provider: chembl
+  entity: activity
+  input_filter:
+    enabled: false
+    source_path: data/input/activity.csv
+    column_name: activity_id
+    filter_field: activity_id
+    batch_size: 1000
+    checkpoint_interval: 1000
+    fallback_column: title
+  extraction_params:
+    standard_type__in: IC50,Ki
+    standard_units: nM
+    standard_relation: '='
+    assay_type__in: B,F
+    potential_duplicate: 0
+    data_validity_comment__isnull: true
+    pchembl_value__isnull: false
+    standard_flag: 1
+    target_tax_id__isnull: false
+  source_profile:
+    profile_id: chembl.activity.curated
+    version: 1.0.0
+    status: baseline
+    extraction_params_sha256: d4c7fc76dfcd88aa075762c96795ebd6de8af735540cf28a551a6d75149e4078
+    description: Baseline curated ChEMBL activity extraction profile; no widening in ADR-050 cleanup.
+  silver_filters:
+    required_fields:
+            # Final Silver policy: unit-less activity records are quarantined
+
+
+
+
+            # instead of relaxing canonical chemistry/unit fields to nullable.
+
+
+
+
+            # target_taxonomy_id removed from required_fields because validate_taxonomy_id
+
+
+
+
+            # returns None for invalid values, causing high error rates
+
+
+
+
+    - activity_id
+    - molecule_id
+    - assay_id
+    - target_id
+    - publication_id
+    - record_id
+    - src_id
+    - canonical_smiles
+    - target_organism
+    - assay_description
+    - bao_endpoint
+    - bao_format
+    - bao_label
+    - activity_relation
+    - activity_value
+    - units
+    - standard_value
+    - standard_units
+    - standard_type
+    - standard_flag
+    - pchembl_value
+    - uo_units
+    - journal
+    - publication_year
+    - _state
+    - assay_type
+    - potential_duplicate
+    - standard_relation
+    exclude_if_present:
+    - data_validity_comment
+  gold_filters:
+    columns:
+      standard_type:
+      - IC50
+      - Ki
+      standard_units:
+      - nM
+      standard_relation:
+      - '='
+      assay_type:
+      - B
+      - F
+      potential_duplicate:
+      - 0
+    ranges:
+      activity_id:
+        min: 1
+        max: 10000000000
+      standard_value:
+        min: 0
+        include_min: false
+      pchembl_value:
+        min: 3
+        max: 10
+      publication_year:
+        min: 1950
+        max: 2050
+    exclude_if_present: []
+    required_fields:
+    - standard_type
+    - standard_value
+    - standard_units
+    - target_id
+    list_contains: {}
+    list_lengths: {}
+contracts:
+  primary_key:
+  - activity_id
+  merge_keys:
+  - activity_id
+  hash_include: []
+  hash_exclude: []
+  hash_datetime_policy: v2_datetime_utc
+  contract_ref: chembl.activity
+  active_version: 1.0.0
+  rollout:
+    mode: single
+    read_order:
+    - 1.0.0
+    write_versions:
+    - 1.0.0
+    affects_hash: false
+hash_policy:
+  provider: chembl
+  entity: activity
+  contract:
+    version: 1.0.0
+    migration_note: 'Documentation-aligned: Align config with runtime normalized business schema.'
+  hash_policy:
+    algorithm: sha256
+    canonicalization: provider + canonical_json_dumps(normalized_record)
+    include_fields:
+    - activity_id
+    - assay_id
+    - molecule_id
+    - standard_type
+    - standard_relation
+    - standard_value
+    - standard_units
+    - pchembl_value
+    - publication_id
+    - publication_year
+    exclude_fields:
+    - _ingestion_ts
+    - _run_id
+    - _run_type
+    - _dq_warn
+    - _dq_error
+    - _source_batch_id
+    - _index
+    exclude_patterns:
+    - ^_dq_
+    normalization:
+      trim_strings: true
+      round_floats:
+        enabled: true
+        precision: 10
+      dates:
+        enabled: true
+        format: YYYY-MM-DD
+      null_handling:
+        nan_to_null: true
+        inf_to_null: true

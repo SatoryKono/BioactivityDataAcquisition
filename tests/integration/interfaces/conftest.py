@@ -191,13 +191,11 @@ def create_local_storage_context(
         silver_writer=SilverWriter(
             base_path=str(storage_paths["silver"]),
             logger=logger,
-            csv_exporter=None,
             # Lock validation at Application layer
         ),
         gold_writer=GoldWriter(
             base_path=str(storage_paths["gold"]),
             logger=logger,
-            csv_exporter=None,
             # Lock validation at Application layer
         ),
     )

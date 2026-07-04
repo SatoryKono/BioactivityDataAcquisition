@@ -1,0 +1,70 @@
+{
+  "description": "Known Silver↔Gold field differences. Only NEW mismatches not in this baseline trigger blocking failures. Update with: python src/tools/verify_schema_parity.py --update-baseline",
+  "chembl_activity": {
+    "silver_only": ["_dq_error", "_dq_warn", "manual_curation_flag", "original_activity_id"]
+  },
+  "chembl_assay": {
+    "silver_only": ["_dq_error", "_dq_warn"]
+  },
+  "chembl_assay_parameters": {
+    "silver_only": ["_dq_error", "_dq_warn"]
+  },
+  "chembl_cell_line": {
+    "silver_only": ["_dq_error", "_dq_warn"]
+  },
+  "chembl_compound_record": {
+    "silver_only": ["_dq_error", "_dq_warn"]
+  },
+  "chembl_document": {
+    "silver_only": ["affiliation_list", "author_keys", "author_orcids", "doi", "is_oa", "language", "pmc_id", "pmid", "publication_class", "publication_date", "publication_subclass", "publication_type_unified"],
+    "gold_only": ["publication_doi", "publication_pmc_id", "publication_pmid"]
+  },
+  "chembl_document_similarity": {
+    "silver_only": ["_dq_error", "_dq_warn"]
+  },
+  "chembl_document_term": {
+    "silver_only": ["_dq_error", "_dq_warn"]
+  },
+  "chembl_molecule": {
+    "silver_only": ["_dq_error", "_dq_warn"]
+  },
+  "chembl_protein_class": {
+    "silver_only": ["_dq_error", "_dq_warn"]
+  },
+  "chembl_target": {
+    "silver_only": ["_dq_error", "_dq_warn", "component_descriptions"]
+  },
+  "chembl_target_component": {
+    "silver_only": ["_dq_error", "_dq_warn"]
+  },
+  "chembl_tissue": {
+    "silver_only": ["_dq_error", "_dq_warn", "content_hash", "entity_id"]
+  },
+  "chembl_subcellular_fraction": {
+    "silver_only": ["_dq_error", "_dq_warn", "example_assay_id"],
+    "gold_only": ["example_assay_chembl_id"]
+  },
+  "pubchem_compound": {
+    "silver_only": ["_dq_error", "_dq_warn", "complexity", "conformer_count_3d", "conformer_rmsd_3d", "effective_rotor_count_3d", "exact_mass", "feature_acceptor_count_3d", "feature_anion_count_3d", "feature_cation_count_3d", "feature_count_3d", "feature_donor_count_3d", "feature_hydrophobe_count_3d", "feature_ring_count_3d", "monoisotopic_mass", "x_steric_quadrupole_3d", "y_steric_quadrupole_3d", "z_steric_quadrupole_3d"]
+  },
+  "pubmed_publication": {
+    "silver_only": ["pub_date", "publication_class", "publication_subclass", "publication_type_unified"],
+    "gold_only": ["mid", "pii", "publisher_id"]
+  },
+  "crossref_publication": {
+    "silver_only": ["abstract", "affiliation_list", "pmc_id", "pmid", "publication_class", "publication_subclass", "publication_type_unified"]
+  },
+  "openalex_publication": {
+    "silver_only": ["pmc_id", "publication_class", "publication_subclass", "publication_type_unified"]
+  },
+  "semanticscholar_publication": {
+    "silver_only": ["pmc_id", "publication_class", "publication_subclass", "publication_type_unified"],
+    "gold_only": ["authors"]
+  },
+  "uniprot_protein": {
+    "silver_only": ["_dq_error", "_dq_warn", "acetylation", "cellular_component", "disulfide_bond", "genus", "glycosylation", "intramembrane", "isoform_ids", "isoform_names", "isoform_synonyms", "lipidation", "modified_residue", "molecular_function", "phosphorylation", "phylum", "propeptide", "reaction_ec_numbers", "reactions", "signal_peptide", "superkingdom", "topology", "transmembrane", "ubiquitination"]
+  },
+  "uniprot_idmapping": {
+    "silver_only": ["_dq_error"]
+  }
+}

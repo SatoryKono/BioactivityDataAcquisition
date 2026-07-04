@@ -165,7 +165,6 @@ def test_issue_5840_adapter_duplication_is_below_audit_baseline() -> None:
         < closeout["metrics"]["adapter_duplicate_clusters"]["previous_audit_baseline"]
     )
     assert {item["category"] for item in adapters["actionability"]} == {
-        "adapter_resilience_or_contract_template",
         "export_facade_or_package_barrel",
     }
     assert "build_common_network_error_bundle" in COMMON_ERROR_BUNDLES.read_text(

@@ -1,0 +1,80 @@
+%% Title: Delta Lake Write Sequence (Silver Layer)
+%% Covers: RULES.md §2.1 (Silver Layer), §2.5 (ACID via Delta Lake), silver writer orchestration
+%% Updated: 2026-03-24
+%% Components: BatchProcessingService, SilverWriter, validation/Arrow prep, Delta dispatch, merge resilience, metadata finalization
+
+%% @version 1.1.0
+%% @date    2026-03-24
+%% @type    sequenceDiagram
+%% @level   Mixed (System / Component / Class)
+%% @nodes   7
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @uniform sequence width=184 max_title_len=18
+sequenceDiagram
+    autonumber
+    participant Processing as BatchProcessingService
+    participant Writer as SilverWriter
+    participant Validate as Validation + Arrow prep
+    participant Dispatch as Delta dispatch policy
+    participant Delta as DeltaTable / write_deltalake
+    participant Storage as Delta log + parquet files
+    participant Metadata as Silver metadata finalization
+
+    Note over Processing,Writer: Phase 1: Silver stage entry
+
+    Processing->>Writer: write_silver(table_name, records, primary_keys, schema, mode)
+    activate Writer
+    Writer->>Writer: execute_silver_write_with_tracing(...)
+
+    Note over Writer,Validate: Phase 2: Validate and prepare payload
+
+    Writer->>Validate: _prepare_silver_write_payload(...)
+    activate Validate
+    Note right of Validate: Validate write mode and keys<br/>Deduplicate primary keys<br/>Run Pandera + schema drift policy<br/>Build Arrow table
+    Validate-->>Writer: Prepared payload
+    deactivate Validate
+
+    Note over Writer,Delta: Phase 3: Dispatch by mode
+
+    Writer->>Dispatch: _dispatch_write_with_domain_errors(table_name, request)
+    activate Dispatch
+
+    alt mode == merge
+        Dispatch->>Delta: load DeltaTable(table_path)
+        activate Delta
+        Delta->>Storage: read _delta_log
+        Storage-->>Delta: current table snapshot
+        Delta->>Delta: merge(source, predicate by primary keys)
+        Delta->>Storage: write parquet files
+        Delta->>Storage: append new _delta_log version
+        Storage-->>Delta: commit complete
+        Delta-->>Dispatch: merge applied
+        deactivate Delta
+    else mode == append / delete
+        Dispatch->>Delta: write_deltalake(mode=append/overwrite)
+        activate Delta
+        Delta->>Storage: write parquet + delta log updates
+        Storage-->>Delta: commit complete
+        Delta-->>Dispatch: write applied
+        deactivate Delta
+    end
+
+    Dispatch-->>Writer: write dispatched
+    deactivate Dispatch
+
+    Note over Writer,Metadata: Phase 4: Metadata and result assembly
+
+    Writer->>Metadata: _complete_silver_write_pipeline(ctx, payload)
+    activate Metadata
+    Metadata->>Storage: read current Delta version
+    Metadata->>Storage: write Silver metadata sidecar
+    Metadata-->>Writer: SilverWriteResult
+    deactivate Metadata
+
+    Writer-->>Processing: SilverWriteResult
+    deactivate Writer
+
+    rect rgb(255, 250, 205)
+        Note over Writer,Delta: Resilience semantics
+        Note right of Delta: Merge path uses timeout + retry helpers.<br/>Schema/Delta errors are translated to domain write errors.<br/>No separate lock-validation step is modeled here.
+    end

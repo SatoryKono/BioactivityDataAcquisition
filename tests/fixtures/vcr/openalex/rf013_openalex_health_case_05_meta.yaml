@@ -4,5 +4,5 @@ cassette_rel_path: tests/fixtures/vcr/openalex/rf013_openalex_health_case_05.yam
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: a834dbeb0cb18f563f8aa61b6c43cd0a8b42fef23152c86d50d546287464934e
-recorded_at: '2026-04-28'
+recorded_at: '2026-07-03'
 staleness_ready: true

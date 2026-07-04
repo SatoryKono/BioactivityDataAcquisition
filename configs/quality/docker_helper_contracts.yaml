@@ -1,0 +1,83 @@
+schema_version: 1
+policy:
+  stable_anchor: BIOETL_DOCKER_HELPER_ADR010_ADJUNCT
+  adr: ADR-010
+  status: optional_local_only_adjunct
+  canonical_runtime: false
+  runtime_guardrail: Helpers MUST NOT be used for BioETL application storage,
+    locking, or orchestration semantics.
+helpers:
+  scripts/ops/runtime/docker/compose/redis.yml:
+    service: redis
+    status: optional_local_only_adjunct
+    legacy_root_filename: docker-compose.redis.yml
+    credential_env:
+      - REDIS_PASSWORD
+    forbidden_default_tokens:
+      - bioetl_redis_secure
+    required_port_binds:
+      - 127.0.0.1:6379:6379
+      - 127.0.0.1:9121:9121
+    monitoring:
+      posture: prometheus_scrape
+      prometheus_jobs:
+        - redis
+      metrics_path: /metrics
+  scripts/ops/runtime/docker/compose/minio.yml:
+    service: minio
+    status: optional_local_only_adjunct
+    legacy_root_filename: docker-compose.minio.yml
+    credential_env:
+      - MINIO_ROOT_USER
+      - MINIO_ROOT_PASSWORD
+    forbidden_default_tokens:
+      - minioadmin
+      - minioadmin_secure
+    required_port_binds:
+      - 127.0.0.1:9000:9000
+      - 127.0.0.1:9001:9001
+    monitoring:
+      posture: prometheus_scrape
+      prometheus_jobs:
+        - minio-cluster
+        - minio-node
+      metrics_path:
+        - /minio/v2/metrics/cluster
+        - /minio/v2/metrics/node
+  scripts/ops/runtime/docker/compose/sonarqube.yml:
+    service: sonarqube
+    status: optional_local_only_adjunct
+    legacy_root_filename: docker-compose.sonarqube.yml
+    credential_env:
+      - SONARQUBE_DB_PASSWORD
+      - SONARQUBE_SYSTEM_PASSCODE
+    required_env_keys:
+      - SONAR_WEB_JAVAOPTS
+      - SONAR_CE_JAVAOPTS
+      - SONAR_WEB_SYSTEMPASSCODE
+    forbidden_env_keys:
+      - SONAR_WEB_JAVASKOPTS
+      - SONAR_CE_JAVASKOPTS
+      - SONARQUBE_SYSTEM_PASSWORD
+    forbidden_default_tokens:
+      - sonarqube_secure
+      - sonarqube_system
+    required_port_binds:
+      - 127.0.0.1:9010:9000
+    monitoring:
+      posture: healthcheck_only
+      reason: SonarQube native Prometheus endpoint requires runtime passcode
+        authentication, so repo-default Prometheus config does not carry this
+        secret.
+  scripts/ops/runtime/docker/compose/alertmanager.yml:
+    service: alertmanager
+    status: optional_local_only_adjunct
+    legacy_root_filename: docker-compose.alertmanager.yml
+    credential_env: []
+    required_port_binds:
+      - 127.0.0.1:9093:9093
+    monitoring:
+      posture: prometheus_scrape
+      prometheus_jobs:
+        - alertmanager
+      metrics_path: /metrics

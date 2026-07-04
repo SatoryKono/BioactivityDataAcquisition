@@ -1,0 +1,52 @@
+%% Title: CLI Run Command → Current Execution Flow
+%% Covers: RULES.md §1.1 (Interfaces → Composition → Application), RF-011
+%% Rank: 8 (Score 8.50) — Current run-command routing via accessor + narrow APIs
+%% Updated: 2026-03-19
+
+%% @version 1.1.0
+%% @date    2026-03-19
+%% @type    sequenceDiagram
+%% @level   Mixed (System / Component / Module)
+%% @nodes   10
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @uniform sequence width=224 max_title_len=24
+sequenceDiagram
+    autonumber
+    participant User as User
+    participant CLI as run.py<br/>CLI command
+    participant Access as run_service_access
+    participant Policy as run_command_flow
+    participant Orch as CliRunOrchestrationService
+    participant Runtime as run_runtime_helpers
+    participant Health as health_server_context
+    participant CtrlAPI as control_plane_api
+    participant PRS as PipelineRunnerService
+    participant ExecAPI as execution_api
+
+    User->>CLI: bioetl run --pipeline chembl_activity
+    CLI->>Access: get_cli_run_orchestration_service()
+    Access-->>CLI: cached orchestration service
+    CLI->>Policy: normalized CLI input
+
+    Policy->>Orch: prepare_execution_request(...)
+    Orch-->>Policy: RunExecutionRequest
+    Policy->>CLI: destructive confirmation / preview
+    Policy->>CLI: present health-server info
+
+    Policy->>Orch: execute_pipeline(request, ...)
+    Orch->>Runtime: run_coroutine(run_prepared_request_async)
+    Runtime->>Runtime: ensure_metrics_server_started()
+    Runtime->>Health: enter async health context
+    Runtime->>CtrlAPI: get_pipeline_runner_service(registry)
+    CtrlAPI-->>Runtime: PipelineRunnerService
+    Runtime->>PRS: run(pipeline, options)
+    PRS-->>Runtime: RunResult
+    Runtime->>Health: exit async health context
+    Orch->>ExecAPI: push_metrics_to_gateway()
+    Orch-->>Policy: RunResult
+
+    Policy->>CLI: finalize result + map exit code
+    CLI-->>User: ExitCode
+
+    Note over CtrlAPI,ExecAPI: Narrow composition APIs are the primary internal route.
+    Note over Access,Orch: module-level singleton state is replaced by accessor seam.

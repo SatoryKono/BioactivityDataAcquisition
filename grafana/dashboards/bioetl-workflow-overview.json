@@ -1,0 +1,1881 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Prometheus-first selected-range workflow evidence for declarative workflow runs and step outcomes. Use this dashboard to answer whether a bounded workflow emitted failed or skipped run/step outcomes in the selected window, then hand off to Runtime, Data Quality, Provider Health, or Control Plane for deeper diagnostics. Single-pipeline workflows emit hidden pipeline/run_type/provider handoff context; multi-pipeline workflows fail-close to pipeline=unknown, run_type=All, provider=unknown. Explore Logs and Explore Traces remain optional-profile adjuncts and can legitimately be empty when Loki ingestion is absent or the runtime uses NoOpTracing. This dashboard does not provide current run state, run_id, stage, dependency, enricher, manifest, or exact trace-level evidence.",
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1000,
+      "options": {
+        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context_exact&amp;var-run_type=$run_type_context_exact&amp;${__url_time_range}&amp;var-workflow=$workflow_context&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context_exact&amp;var-run_type=$run_type_context_exact&amp;${__url_time_range}&amp;var-workflow=$workflow_context&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context_exact&amp;var-run_type=$run_type_context_exact&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow_context&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$provider_context_exact&amp;var-pipeline_context=$pipeline_context_exact&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow_context&amp;var-pipeline=$pipeline_context_exact&amp;var-run_type=$run_type_context_exact&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context_exact&amp;var-run_type=$run_type_context_exact&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow_context&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><span aria-current=\"page\" style=\"padding:5px 10px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">5. Workflow</span><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline_context_exact&amp;var-run_type=$run_type_context_exact&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/explore?actionView=search&amp;from=now-150m&amp;to=now&amp;var-ds=tempo&amp;var-groupBy=resource.service.name&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline_context_exact:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D%20%22${run_type_context_exact}%22%20%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
+        "mode": "html"
+      },
+      "title": "Review Dashboard Navigation",
+      "description": "Top navigation bus for the dashboard suite. Uses same-tab handoffs, preserves the current time range for dashboard-to-dashboard links, resets unsupported dashboard-specific scope where needed, and exposes Explore Logs plus an Explore Traces adjunct that is available only for traced runs with a safe bounded 150m Tempo handoff.",
+      "type": "text",
+      "links": [
+        {
+          "title": "0. Control Plane",
+          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context_exact&var-run_type=$run_type_context_exact&${__url_time_range}&var-workflow=$workflow_context&var-run_id=$run_id",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "1. Overview",
+          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context_exact&var-run_type=$run_type_context_exact&${__url_time_range}&var-workflow=$workflow_context&var-run_id=$run_id",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "2. Runtime",
+          "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context_exact&var-run_type=$run_type_context_exact&var-stage=unknown&${__url_time_range}&var-workflow=$workflow_context&var-run_id=$run_id",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "3. Provider Health",
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$provider_context_exact&var-pipeline_context=$pipeline_context_exact&var-adapter=unknown&${__url_time_range}&var-workflow=$workflow_context&var-pipeline=$pipeline_context_exact&var-run_type=$run_type_context_exact&var-run_id=$run_id",
+          "targetBlank": false,
+          "includeVars": false,
+          "tooltip": "Context mapping: provider=$provider_context_exact, pipeline_context=$pipeline_context_exact, run_type=$run_type_context_exact, adapter=unknown. Exact run_id narrows these hidden handoff vars when available; otherwise workflow evidence fallbacks remain in effect."
+        },
+        {
+          "title": "4. Data Quality",
+          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context_exact&var-run_type=$run_type_context_exact&var-stage=unknown&${__url_time_range}&var-workflow=$workflow_context&var-run_id=$run_id",
+          "targetBlank": false,
+          "includeVars": false,
+          "tooltip": "Context mapping: pipeline=$pipeline_context_exact, run_type=$run_type_context_exact. Exact run_id narrows these hidden handoff vars when available; otherwise workflow evidence fallbacks remain in effect."
+        },
+        {
+          "title": "Silver Reject Explorer",
+          "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline_context_exact&var-run_type=$run_type_context_exact&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false,
+          "tooltip": "Context mapping: pipeline=$pipeline_context_exact, run_type=$run_type_context_exact. Exact run_id narrows these hidden handoff vars when available; otherwise workflow evidence fallbacks remain in effect."
+        },
+        {
+          "title": "Explore Logs",
+          "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D",
+          "targetBlank": false,
+          "includeVars": false,
+          "tooltip": "Tracing profile note: logs drilldown still uses a safe {job=\"bioetl\"} baseline because Loki label coverage can be broader than workflow evidence labels. Zero lines can legitimately mean Loki shipping is disabled, the workflow emitted no shipped BioETL streams, or workflow/entity labels must be refined in Explore. Preserve the selected time range and refine in Explore when pipeline-scoped labels are available."
+        },
+        {
+          "title": "Explore Traces",
+          "url": "/a/grafana-exploretraces-app/explore?actionView=search&from=now-150m&to=now&var-ds=tempo&var-groupBy=resource.service.name&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline_context_exact:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D%20%22${run_type_context_exact}%22%20%7D",
+          "targetBlank": false,
+          "includeVars": false,
+          "tooltip": "Available only for traced runs. Enable tracing with --tracing or BIOETL_OBSERVABILITY__TRACING_ENABLED=true. Context mapping: pipeline=$pipeline_context_exact, run_type=$run_type_context_exact. NoOpTracing, tracing-off, or multi-pipeline workflows can legitimately be empty, so treat this as adjunct evidence rather than first-screen proof."
+        }
+      ]
+    },
+    {
+      "id": 9400,
+      "type": "text",
+      "title": "Provenance",
+      "gridPos": {
+        "h": 4,
+        "w": 16,
+        "x": 0,
+        "y": 3
+      },
+      "description": "Unified context/provenance banner for 5. Workflow. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only. This shell must make the exact-run vs selected-range split visible before any Prometheus evidence is interpreted.",
+      "options": {
+        "mode": "html",
+        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.45;\"><div style=\"font-size:18px;font-weight:700;\">Did the selected workflow emit failed or skipped evidence in this range?</div><div style=\"display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;\"><span style=\"padding:2px 8px;border-radius:999px;background:rgba(59,130,246,0.18);border:1px solid rgba(59,130,246,0.5);font-size:11px;font-weight:700;letter-spacing:0.02em;\">Exact run: ID card only</span><span style=\"padding:2px 8px;border-radius:999px;background:rgba(245,158,11,0.18);border:1px solid rgba(245,158,11,0.5);font-size:11px;font-weight:700;letter-spacing:0.02em;\">Evidence below: selected-range workflow scope</span></div><div style=\"margin-top:8px;font-size:12px;opacity:0.92;\">Run ID only fills the local ID card; Status and all Prometheus evidence below remain selected-range workflow scope and are never exact-run proof on this dashboard.</div></div>"
+      }
+    },
+    {
+      "id": 9401,
+      "type": "stat",
+      "title": "Status",
+      "gridPos": {
+        "h": 4,
+        "w": 8,
+        "x": 16,
+        "y": 3
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Range Workflow Status. Selected-range workflow evidence status, not current live run state, not exact-run evidence, and not an L0/L2 current verdict. Status mapping: 0=OK for no failed/non-success evidence in the selected range, 1=WARN for non-success evidence, >=2=CRIT for failed workflow evidence, null=UNKNOWN. Pipeline/run_type remain handoff context and run_id remains local ID-only identity context for this dashboard. CRIT is driven only by the same failed workflow-run evidence shown in Failed Workflow Runs / Range; WARN is driven by skipped step events or non-success/non-failed workflow outcomes. If those visible counters are zero, Status must remain OK/UNKNOWN rather than unexplained CRIT.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "OK",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "WARN",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "CRIT",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "noValue": "UNKNOWN",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "targets": [
+        {
+          "expr": "max(((round(sum(max_over_time(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range]))) > bool 0) * 2) or ((round(sum(max_over_time(bioetl_workflow_step_events_total{workflow=~\"$workflow\",status=\"skipped\"}[$__range]))) > bool 0) * 1) or ((round(sum(max_over_time(bioetl_workflow_runs_total{workflow=~\"$workflow\",status!~\"success|failed\"}[$__range]))) > bool 0) * 1))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 9404,
+      "type": "stat",
+      "title": "Pipeline Status",
+      "gridPos": {
+        "h": 5,
+        "w": 4,
+        "x": 20,
+        "y": 17
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Fail-closed entity pipeline verdict for the hidden pipeline/run_type handoff context. Backed by bioetl_workflow_pipeline_verdict_status: 2=CRIT when any failed pipeline run increased in the 15m rule window, 1=WARN for non-success/non-failed run outcomes, 0=OK only when a success/completed run increased and no failure/non-success evidence exists, null=UNKNOWN when no pipeline telemetry exists. This panel intentionally avoids run_id Prometheus labels and links to Runtime / Control Plane for detailed evidence.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 0,
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "OK",
+                  "color": "green"
+                },
+                "1": {
+                  "text": "WARN",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "CRIT",
+                  "color": "red"
+                },
+                "3": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "noValue": "UNKNOWN",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value",
+        "dataLinks": [
+          {
+            "targetBlank": false,
+            "title": "Open 2. Runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context_exact&var-run_type=$run_type_context_exact&var-stage=unknown&${__url_time_range}&var-workflow=$workflow_context&var-run_id=$run_id",
+            "includeVars": false
+          },
+          {
+            "targetBlank": false,
+            "title": "Open 0. Control Plane",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context_exact&var-run_type=$run_type_context_exact&${__url_time_range}&var-workflow=$workflow_context&var-run_id=$run_id",
+            "includeVars": false
+          }
+        ]
+      },
+      "targets": [
+        {
+          "expr": "max(bioetl_workflow_pipeline_verdict_status{pipeline=~\"$pipeline_context\",run_type=~\"$run_type_context\"}) or max(bioetl_runtime_current_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 9402,
+      "type": "table",
+      "title": "ID",
+      "gridPos": {
+        "h": 10,
+        "w": 10,
+        "x": 0,
+        "y": 7
+      },
+      "datasource": "Quarantine Explorer",
+      "description": "Compact two-column local control-plane identity table. Shows Run ID, Manifest ID, Provider.Entity [Version], Contract [Schema], Execution, execution flags, Replay [Capability.Mode], Checkpoint [Anchors], optional Composite Run, and Identity Health. This is the only above-the-fold exact-run identity panel on Workflow. Exact selected run_id wins; aggregate pipeline scope without exact run_id must not guess one manifest identity; values come from HTTP, not Prometheus labels. No data/datasource errors on this HTTP-backed card mean the Quarantine Explorer/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "unit": "none",
+          "noValue": "No identity rows. Check Quarantine Explorer/control-plane backend health (/health/live) and selected pipeline/run_id before treating this as no selected run.",
+          "links": [
+            {
+              "title": "Check Quarantine Explorer health",
+              "url": "http://localhost:8081/health/live",
+              "targetBlank": true
+            },
+            {
+              "title": "Open monitoring backend setup docs",
+              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
+              "targetBlank": true
+            }
+          ]
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": false,
+        "footer": {
+          "show": false
+        }
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "rows",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/control-plane/identity-table?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "Value": true
+            },
+            "indexByName": {
+              "parameter": 0,
+              "value": 1
+            },
+            "renameByName": {
+              "parameter": "parameter",
+              "value": "value"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 9403,
+      "type": "table",
+      "title": "Processed Records",
+      "gridPos": {
+        "h": 10,
+        "w": 6,
+        "x": 10,
+        "y": 7
+      },
+      "datasource": "Quarantine Explorer",
+      "description": "Current stage/outcome accounting evidence for the shared pipeline/run_type identity context. Workflow status remains selected-range workflow evidence; this table is bounded pipeline/run_type record accounting. Missing accounting series render UNKNOWN/no data, not OK. Summary status, accounted subtotal, and delta rows are intentionally not displayed in this compact table; use Status and detailed recording rules for verdict/delta triage. No data/datasource errors on this HTTP-backed card mean the Quarantine Explorer/control-plane backend may be unavailable; verify /health/live before interpreting the card as expected empty.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "decimals": 0,
+          "unit": "none",
+          "noValue": "No processed-record rows. Check Quarantine Explorer backend health and selector scope; backend unavailable is not a valid zero-record state.",
+          "links": [
+            {
+              "title": "Check Quarantine Explorer health",
+              "url": "http://localhost:8081/health/live",
+              "targetBlank": true
+            },
+            {
+              "title": "Open monitoring backend setup docs",
+              "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/03-guides/dashboards/dashboard-v2-usage.md",
+              "targetBlank": true
+            }
+          ]
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "parameter"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "01 bronze_records": {
+                        "text": "bronze [total]",
+                        "color": "#cd7f32"
+                      },
+                      "02 silver_valid_records": {
+                        "text": "silver [valid]",
+                        "color": "#c0c0c0"
+                      },
+                      "03 silver_filtered_out_records": {
+                        "text": "silver [filtered out]"
+                      },
+                      "04 silver_quarantined_records": {
+                        "text": "silver [quarantined]"
+                      },
+                      "05 silver_skipped_records": {
+                        "text": "silver [skipped]"
+                      },
+                      "06 silver_deduplicated_records": {
+                        "text": "silver [deduplicated]"
+                      },
+                      "07 gold_written_records": {
+                        "text": "gold [valid]",
+                        "color": "#d4af37"
+                      },
+                      "08 gold_excluded_by_contract_records": {
+                        "text": "gold [excluded]"
+                      },
+                      "09 gold_quarantined_records": {
+                        "text": "gold [quarantined]"
+                      },
+                      "10 gold_skipped_records": {
+                        "text": "gold [skipped]"
+                      },
+                      "11 gold_deduplicated_records": {
+                        "text": "gold [deduplicated]"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 70
+              },
+              {
+                "id": "custom.align",
+                "value": "right"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^01 bronze_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#cd7f32"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^02 silver_valid_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#c0c0c0"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^03 silver_filtered_out_records\\|(.*)$",
+                      "result": {
+                        "text": "$1"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^04 silver_quarantined_records\\|(.*)$",
+                      "result": {
+                        "text": "$1"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^05 silver_skipped_records\\|(.*)$",
+                      "result": {
+                        "text": "$1"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^06 silver_deduplicated_records\\|(.*)$",
+                      "result": {
+                        "text": "$1"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^07 gold_written_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#d4af37"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^08 gold_excluded_by_contract_records\\|(.*)$",
+                      "result": {
+                        "text": "$1"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^09 gold_quarantined_records\\|(.*)$",
+                      "result": {
+                        "text": "$1"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^10 gold_skipped_records\\|(.*)$",
+                      "result": {
+                        "text": "$1"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^11 gold_deduplicated_records\\|(.*)$",
+                      "result": {
+                        "text": "$1"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "percintage"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^01 bronze_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#cd7f32"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^02 silver_valid_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#c0c0c0"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^03 silver_filtered_out_records\\|(.*)$",
+                      "result": {
+                        "text": "$1"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^04 silver_quarantined_records\\|(.*)$",
+                      "result": {
+                        "text": "$1"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^05 silver_skipped_records\\|(.*)$",
+                      "result": {
+                        "text": "$1"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^06 silver_deduplicated_records\\|(.*)$",
+                      "result": {
+                        "text": "$1"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^07 gold_written_records\\|(.*)$",
+                      "result": {
+                        "text": "$1",
+                        "color": "#d4af37"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^08 gold_excluded_by_contract_records\\|(.*)$",
+                      "result": {
+                        "text": "$1"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^09 gold_quarantined_records\\|(.*)$",
+                      "result": {
+                        "text": "$1"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^10 gold_skipped_records\\|(.*)$",
+                      "result": {
+                        "text": "$1"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^11 gold_deduplicated_records\\|(.*)$",
+                      "result": {
+                        "text": "$1"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "row_status"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": ""
+              },
+              {
+                "id": "custom.width",
+                "value": 1
+              },
+              {
+                "id": "custom.align",
+                "value": "center"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "applyToRow": true
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "silver_deficit": {
+                        "text": "",
+                        "color": "red"
+                      },
+                      "gold_deficit": {
+                        "text": "",
+                        "color": "red"
+                      },
+                      "": {
+                        "text": "",
+                        "color": "rgba(0,0,0,0)"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": false,
+        "sortBy": [
+          {
+            "desc": false,
+            "displayName": "parameter"
+          }
+        ],
+        "footer": {
+          "show": false
+        },
+        "cellHeight": "sm"
+      },
+      "targets": [
+        {
+          "format": "table",
+          "parser": "backend",
+          "refId": "A",
+          "root_selector": "rows",
+          "source": "url",
+          "type": "json",
+          "url": "/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}",
+          "url_options": {
+            "data": "",
+            "method": "GET"
+          },
+          "expr": ""
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "indexByName": {
+              "parameter": 0,
+              "value": 1,
+              "percintage": 2,
+              "row_status": 3
+            },
+            "renameByName": {
+              "parameter": "parameter",
+              "value": "value",
+              "percintage": "percintage",
+              "row_status": ""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 0,
+        "y": 17
+      },
+      "id": 2,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(max_over_time(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range]))) or vector(0)",
+          "refId": "A"
+        }
+      ],
+      "title": "Failed Workflow Runs / Range",
+      "type": "stat",
+      "description": "Counts failed workflow runs in the selected time range. `0` means no failed workflow runs were observed in the selected window; it does not prove a workflow is currently healthy or running. This panel intentionally uses selected-range evidence, not a current-state gauge. If this count is non-zero, inspect `Workflow Run Outcomes / Range`, then continue in `2. Runtime` for execution blockers or `0. Control Plane` for terminal run and replay evidence."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 5,
+        "y": 17
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(max_over_time(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"pipeline\",status=\"failed\"}[$__range]))) or vector(0)",
+          "refId": "A"
+        }
+      ],
+      "title": "Failed Pipeline Steps / Range",
+      "type": "stat",
+      "description": "Counts failed declarative workflow steps whose `step_kind=pipeline` in the selected time range. `0` means no failed pipeline step events were observed in the selected window; it does not prove stage-level success because the metric has no stage label. Use `2. Runtime` when this panel is non-zero to locate the blocking pipeline stage or runtime error path."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 39
+      },
+      "id": 9410,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "dataLinks": [
+          {
+            "targetBlank": false,
+            "title": "Open 2. Runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context_exact&var-run_type=$run_type_context_exact&var-stage=unknown&${__url_time_range}&var-workflow=$workflow_context&var-run_id=$run_id",
+            "includeVars": false
+          },
+          {
+            "targetBlank": false,
+            "title": "Open 0. Control Plane",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context_exact&var-run_type=$run_type_context_exact&${__url_time_range}&var-workflow=$workflow_context&var-run_id=$run_id",
+            "includeVars": false
+          }
+        ]
+      },
+      "targets": [
+        {
+          "expr": "round(sum(max_over_time(bioetl_pipeline_runs_total{pipeline=~\"$pipeline_context\",run_type=~\"$run_type_context\",status=\"failed\"}[$__range]))) or vector(0)",
+          "refId": "A"
+        }
+      ],
+      "title": "Failed Entity Pipeline Runs / Range",
+      "type": "stat",
+      "description": "Selected-range terminal pipeline-run failures for the hidden single-pipeline handoff context. This aligns workflow evidence with entity pipeline runs and avoids inferring COMPLETED from the last successful stage alone. Non-zero counts require Runtime stage blockers or Control Plane terminal-run/replay evidence before retry."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 3
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 10,
+        "y": 17
+      },
+      "id": 6,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(max_over_time(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"transform\",status=\"failed\"}[$__range]))) or vector(0)",
+          "refId": "A"
+        }
+      ],
+      "title": "Failed Transform Steps / Range",
+      "type": "stat",
+      "description": "Counts failed declarative workflow transform steps in the selected time range. `0` means no failed transform-step events were observed in the selected window. If this panel is non-zero, inspect `Step Outcomes by Kind / Step Status / Range`; if the transform failure originated from data validation or filtered outputs, continue in `4. Data Quality`."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "noValue": "0",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 5
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 15,
+        "y": 17
+      },
+      "id": 7,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "round(sum(max_over_time(bioetl_workflow_step_events_total{workflow=~\"$workflow\",status=\"skipped\"}[$__range]))) or vector(0)",
+          "refId": "A"
+        }
+      ],
+      "title": "Skipped Step Events / Range",
+      "type": "stat",
+      "description": "Counts skipped workflow step events in the selected time range. `0` means no skipped step events were observed in the selected window. This panel is useful when orchestration completed without hard failure but optional or resumable steps were skipped. If skips are unexpected, continue in `2. Runtime`; if the skip reflects transform filtering or DQ gates, continue in `4. Data Quality`."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "id": 4,
+      "options": {
+        "displayMode": "gradient",
+        "minVizHeight": 10,
+        "minVizWidth": 0,
+        "namePlacement": "left",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
+      },
+      "targets": [
+        {
+          "expr": "sum by (status) (max_over_time(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=~\"$status\"}[$__range]))",
+          "legendFormat": "{{status}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Workflow Run Outcomes / Range",
+      "type": "bargauge",
+      "description": "Shows selected-range workflow run counts split by workflow run status. Use this panel to see whether the chosen window contains `success`, `failed`, or other bounded run outcomes for the selected workflow. `No data` means no matching workflow runs were observed for the selected filters or telemetry is absent; it is not equivalent to workflow success. If failures dominate, continue in `2. Runtime` or `0. Control Plane` depending on whether you need execution or replay/ledger evidence."
+    },
+    {
+      "gridPos": {
+        "h": 10,
+        "w": 8,
+        "x": 16,
+        "y": 7
+      },
+      "id": 9,
+      "options": {
+        "content": "<h3>First Action</h3><ul><li><strong>Scope:</strong> selected-range workflow evidence only, not current live run state.</li><li><strong>2. Runtime</strong>: locate blocking stage, backlog, error-code, or logs/traces when pipeline-step failures appear.</li><li><strong>4. Data Quality</strong>: investigate validation failures, quarantine, filtered-out paths, or transform-side rejects.</li><li><strong>3. Provider Health</strong>: use when workflow failure correlates with upstream provider degradation.</li><li><strong>0. Control Plane</strong>: inspect manifest, ledger, replay/resume, checkpoint, and terminal run evidence.</li><li><strong>1. Overview</strong>: return to L0 when workflow evidence must be prioritized against other incident domains.</li></ul>",
+        "dataLinks": [
+          {
+            "title": "Open 2. Runtime",
+            "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context_exact&var-run_type=$run_type_context_exact&var-stage=unknown&${__url_time_range}&var-workflow=$workflow_context&var-run_id=$run_id",
+            "targetBlank": false,
+            "includeVars": false
+          },
+          {
+            "title": "Open 4. Data Quality",
+            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context_exact&var-run_type=$run_type_context_exact&var-stage=unknown&${__url_time_range}&var-workflow=$workflow_context&var-run_id=$run_id",
+            "targetBlank": false,
+            "includeVars": false
+          },
+          {
+            "title": "Open 3. Provider Health",
+            "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$provider_context_exact&var-pipeline_context=$pipeline_context_exact&var-adapter=unknown&${__url_time_range}&var-workflow=$workflow_context&var-pipeline=$pipeline_context_exact&var-run_type=$run_type_context_exact&var-run_id=$run_id",
+            "targetBlank": false,
+            "includeVars": false
+          },
+          {
+            "title": "Open 0. Control Plane",
+            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context_exact&var-run_type=$run_type_context_exact&${__url_time_range}&var-workflow=$workflow_context&var-run_id=$run_id",
+            "targetBlank": false,
+            "includeVars": false
+          },
+          {
+            "title": "Open 1. Overview",
+            "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context_exact&var-run_type=$run_type_context_exact&${__url_time_range}&var-workflow=$workflow_context&var-run_id=$run_id",
+            "targetBlank": false,
+            "includeVars": false
+          }
+        ],
+        "mode": "html"
+      },
+      "links": [
+        {
+          "title": "Open 2. Runtime",
+          "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context_exact&var-run_type=$run_type_context_exact&var-stage=unknown&${__url_time_range}&var-workflow=$workflow_context&var-run_id=$run_id",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Open 4. Data Quality",
+          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context_exact&var-run_type=$run_type_context_exact&var-stage=unknown&${__url_time_range}&var-workflow=$workflow_context&var-run_id=$run_id",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Open 3. Provider Health",
+          "url": "/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$provider_context_exact&var-pipeline_context=$pipeline_context_exact&var-adapter=unknown&${__url_time_range}&var-workflow=$workflow_context&var-pipeline=$pipeline_context_exact&var-run_type=$run_type_context_exact&var-run_id=$run_id",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Open 0. Control Plane",
+          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context_exact&var-run_type=$run_type_context_exact&${__url_time_range}&var-workflow=$workflow_context&var-run_id=$run_id",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Open 1. Overview",
+          "url": "/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context_exact&var-run_type=$run_type_context_exact&${__url_time_range}&var-workflow=$workflow_context&var-run_id=$run_id",
+          "targetBlank": false,
+          "includeVars": false
+        }
+      ],
+      "title": "First Action",
+      "type": "text",
+      "description": "First operator handoff for selected-range workflow evidence on this dashboard. It explicitly preserves the selected-range-only interpretation that used to live in Workflow Scope: this surface does not provide current live run state. Continue in `2. Runtime` for stage/runtime blockers, `4. Data Quality` for validation, quarantine, dependency, filtered-out, or transform-side rejects, `3. Provider Health` for upstream provider incidents, `0. Control Plane` for replay/resume and ledger evidence, or `1. Overview` for L0 prioritization. This panel intentionally does not claim stage, run_id, dependency, enricher, merge, cross-validation, or gold-write proof from `bioetl_workflow_*` metrics; those dimensions require downstream surfaces. It occupies the shared-shell CTA slot beside `ID` and `Processed Records` and remains the one justified panel-level CTA exception on this dashboard."
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
+      "id": 10,
+      "title": "Step Diagnostics",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "showPoints": "never"
+          },
+          "mappings": [],
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 31
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum by (step_kind, status) (max_over_time(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=~\"$step_kind\",status=~\"$step_status\"}[$__range]))",
+          "legendFormat": "{{step_kind}} / {{status}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Step Outcomes by Kind / Step Status / Range",
+      "type": "timeseries",
+      "description": "Shows selected-range step-event evidence split by `step_kind` and step `status`. Variables `Step Kind` and `Step Status` apply here. This panel does not identify the exact pipeline stage or transform step ID because the metric schema only exposes bounded `workflow`, `step_kind`, and `status` labels. If `pipeline / failed` dominates, continue in `2. Runtime`; if `transform / failed` or `skipped` dominates, inspect `4. Data Quality` when validation or filtering is suspected."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "showPoints": "never"
+          },
+          "mappings": [],
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 31
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, step_kind, status) (max_over_time(bioetl_workflow_step_duration_seconds_bucket{workflow=~\"$workflow\",step_kind=~\"$step_kind\",status=~\"$step_status\"}[$__range])))",
+          "legendFormat": "p95 {{step_kind}} / {{status}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Step Duration p95 by Kind / Step Status / Range",
+      "type": "timeseries",
+      "description": "Shows p95 step duration in seconds for the selected time range, filtered by `Workflow`, `Step Kind`, and `Step Status`. This is historical range evidence, not a current in-flight duration gauge. `No data` means no matching step events were observed for the selected filters or the histogram series is absent. Use this panel to spot which bounded step kind slowed down before handing off to `2. Runtime` for stage-level latency diagnostics."
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": [
+    "bioetl",
+    "workflow",
+    "observability"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "Prometheus",
+        "definition": "label_values(bioetl_workflow_runs_total, workflow)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Workflow",
+        "multi": false,
+        "name": "workflow",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_workflow_runs_total, workflow)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query",
+        "description": "Workflow scope: bounded workflow selector for workflow dashboards; fallback: All workflows."
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": false,
+          "text": "unknown",
+          "value": "unknown"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(bioetl_records_processed_total, pipeline)",
+        "description": "Shared operator context: pipeline selector for identity and processed-record evidence. Dashboard-specific primary selectors remain authoritative where documented.",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Pipeline",
+        "multi": false,
+        "name": "pipeline",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_records_processed_total, pipeline)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
+        "description": "Shared operator context: run_type selector bounded by pipeline; fallback is All rather than unknown.",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Run Type",
+        "multi": true,
+        "name": "run_type",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "-",
+          "value": "-"
+        },
+        "datasource": "Quarantine Explorer",
+        "definition": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}",
+        "description": "Shared operator identity context sourced from the local control-plane run-manifest catalog. The selector defaults to - and affects only local HTTP identity panels; it MUST NOT be used in Prometheus labels or cross-dashboard handoffs.",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Run ID",
+        "multi": false,
+        "name": "run_id",
+        "options": [
+          {
+            "selected": true,
+            "text": "-",
+            "value": "-"
+          }
+        ],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$.items",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=run_id&response_shape=list&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}"
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "Prometheus",
+        "definition": "label_values(bioetl_workflow_runs_total, status)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Run Status",
+        "multi": true,
+        "name": "status",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_workflow_runs_total, status)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query",
+        "description": "Workflow scope: workflow-run status selector for run-outcome panels; fallback: All run statuses."
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": "Quarantine Explorer",
+        "definition": "/ops/control-plane/filter-options?dimension=workflow&response_shape=list&run_id=${run_id}&exact_run_only=1&fallback_value=${workflow:text}",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Workflow Context",
+        "multi": false,
+        "name": "workflow_context",
+        "options": [],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$.items",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=workflow&response_shape=list&run_id=${run_id}&exact_run_only=1&fallback_value=${workflow:text}"
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query",
+        "description": "Hidden handoff scope: resolves exact workflow identity when a concrete run_id is selected; otherwise it preserves the visible workflow selector text."
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "unknown",
+          "value": "unknown"
+        },
+        "datasource": "Prometheus",
+        "definition": "label_values(bioetl_workflow_runs_total{workflow=~\"$workflow\"}, pipeline_context)",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Pipeline Context",
+        "multi": false,
+        "name": "pipeline_context",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_workflow_runs_total{workflow=~\"$workflow\"}, pipeline_context)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query",
+        "description": "Hidden handoff scope: preserves the single-pipeline workflow target for downstream pipeline-scoped dashboards; fail-closed value is `unknown`."
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "unknown",
+          "value": "unknown"
+        },
+        "datasource": "Quarantine Explorer",
+        "definition": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list&run_id=${run_id}&exact_run_only=1&fallback_value=${pipeline_context}",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Pipeline Context Exact",
+        "multi": false,
+        "name": "pipeline_context_exact",
+        "options": [],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$.items",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=pipeline&response_shape=list&run_id=${run_id}&exact_run_only=1&fallback_value=${pipeline_context}"
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query",
+        "description": "Hidden exact-run handoff scope: resolves exact pipeline identity for the selected run_id, otherwise falls back to the workflow-derived pipeline_context."
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": "Prometheus",
+        "definition": "label_values(bioetl_workflow_runs_total{workflow=~\"$workflow\"}, run_type_context)",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Run Type Context",
+        "multi": false,
+        "name": "run_type_context",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_workflow_runs_total{workflow=~\"$workflow\"}, run_type_context)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query",
+        "description": "Hidden handoff scope: preserves the effective run_type for single-pipeline workflows; fail-closed value is `All`."
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": "Quarantine Explorer",
+        "definition": "/ops/control-plane/filter-options?dimension=run_type&response_shape=list&run_id=${run_id}&exact_run_only=1&fallback_value=${run_type_context}",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Run Type Context Exact",
+        "multi": false,
+        "name": "run_type_context_exact",
+        "options": [],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$.items",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=run_type&response_shape=list&run_id=${run_id}&exact_run_only=1&fallback_value=${run_type_context}"
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query",
+        "description": "Hidden exact-run handoff scope: resolves exact run_type identity for the selected run_id, otherwise falls back to the workflow-derived run_type_context."
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "unknown",
+          "value": "unknown"
+        },
+        "datasource": "Prometheus",
+        "definition": "label_values(bioetl_workflow_runs_total{workflow=~\"$workflow\"}, provider_context)",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Provider Context",
+        "multi": false,
+        "name": "provider_context",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_workflow_runs_total{workflow=~\"$workflow\"}, provider_context)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query",
+        "description": "Hidden handoff scope: preserves the inferred provider for single-pipeline workflows; fail-closed value is `unknown`."
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "unknown",
+          "value": "unknown"
+        },
+        "datasource": "Quarantine Explorer",
+        "definition": "/ops/control-plane/filter-options?dimension=provider&response_shape=list&run_id=${run_id}&exact_run_only=1&fallback_value=${provider_context}",
+        "hide": 2,
+        "includeAll": false,
+        "label": "Provider Context Exact",
+        "multi": false,
+        "name": "provider_context_exact",
+        "options": [],
+        "query": {
+          "queryType": "infinity",
+          "refId": "variable",
+          "infinityQuery": {
+            "format": "table",
+            "parser": "backend",
+            "root_selector": "$.items",
+            "type": "json",
+            "source": "url",
+            "url_options": {
+              "method": "GET",
+              "data": ""
+            },
+            "url": "/ops/control-plane/filter-options?dimension=provider&response_shape=list&run_id=${run_id}&exact_run_only=1&fallback_value=${provider_context}"
+          }
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query",
+        "description": "Hidden exact-run handoff scope: resolves exact provider identity for the selected run_id, otherwise falls back to the workflow-derived provider_context."
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "Prometheus",
+        "definition": "label_values(bioetl_workflow_step_events_total, status)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Step Status",
+        "multi": true,
+        "name": "step_status",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_workflow_step_events_total, status)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query",
+        "description": "Workflow scope: workflow-step status selector for step-event and step-duration panels; fallback: All step statuses."
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": "Prometheus",
+        "definition": "label_values(bioetl_workflow_step_events_total, step_kind)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Step Kind",
+        "multi": true,
+        "name": "step_kind",
+        "options": [],
+        "query": {
+          "query": "label_values(bioetl_workflow_step_events_total, step_kind)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 1,
+        "type": "query",
+        "description": "Workflow scope: bounded `step_kind` selector (`pipeline`, `transform`, or future bounded kinds) for step-event evidence panels; fallback: All step kinds."
+      }
+    ]
+  },
+  "time": {
+    "from": "now-12h",
+    "to": "now"
+  },
+  "timezone": "browser",
+  "title": "5. Workflow",
+  "uid": "bioetl-workflow-overview",
+  "version": 2
+}

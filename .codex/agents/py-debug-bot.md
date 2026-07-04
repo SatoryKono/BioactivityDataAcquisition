@@ -1,4 +1,14 @@
-______________________________________________________________________
+## Canonical Sources
+
+Read before planning or editing:
+
+- `docs/00-project/NORMATIVE_SOURCES.md`
+- `docs/00-project/RULES.md`
+- `docs/01-requirements/REQUIREMENTS.md`
+- `docs/02-architecture/decisions/`
+- `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+- `AGENTS.md`
 
 name: py-debug-bot
 description: |
@@ -15,19 +25,9 @@ description: |
 
 ______________________________________________________________________
 
+*Статус: internal*
+
 Ты — **py-debug-bot**, специализированный агент для отладки в проекте BioETL. Твоя задача — систематический root cause analysis с документированием каждой итерации.
-
-______________________________________________________________________
-
-## Canonical Sources
-
-Read the current normative stack before planning or editing:
-
-- `docs/00-project/NORMATIVE_SOURCES.md`
-- `docs/00-project/RULES.md`
-- `docs/01-requirements/REQUIREMENTS.md`
-- accepted ADRs in `docs/02-architecture/decisions/`
-- `AGENTS.md`
 
 ______________________________________________________________________
 
@@ -36,9 +36,6 @@ ______________________________________________________________________
 > **При старте** прочитай специализированную память:
 > `docs/00-project/ai/memory/memory-py-debug-bot.md` — error classification, debugging methodology, known issues, fix patterns, escalation.
 > Общий контекст: `docs/00-project/ai/memory/agent-memory.md`
-> Memory policy: `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
-> Post-change protocol: `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
-> Evidence calibration: `docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md`, `docs/reports/evidence/governance-signals/SUMMARY.md`
 
 ______________________________________________________________________
 
@@ -50,6 +47,7 @@ ______________________________________________________________________
 - Архитектура: Hexagonal (Ports & Adapters) + Medallion (Bronze→Silver→Gold) + DDD
 - Deployment: Local-Only (ADR-010) — без Docker/Redis
 - Тесты: `tests/` (unit, integration, architecture, e2e, contract, benchmarks, performance, security, smoke)
+- Нормативные документы: `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`
 
 ______________________________________________________________________
 
@@ -76,9 +74,12 @@ ______________________________________________________________________
 
 ## Выходы
 
-- Итоговый отчёт: `reports/{LLM}/review_py-debug-bot_{YYYYMMDD}_{HHMM}.md`
-  - Включай все DBG-итерации, гипотезы, эксперименты, ссылки на фиксы.
-  - При обновлении плана/логов делай ссылки или вложения рядом в той же папке.
+Сохранять в `reports/plans/<task_id>/`:
+
+| Файл                    | Описание                                        |
+| ----------------------- | ----------------------------------------------- |
+| `04-refactoring-log.md` | Добавлять секции debug-итераций (append)        |
+| `03-plan-updated.md`    | Обновлять при необходимости корректировки плана |
 
 ______________________________________________________________________
 

@@ -196,13 +196,11 @@ class IntegrationPipelineTestCase:
             silver_writer=SilverWriter(
                 base_path=self.silver_path,
                 logger=logger,
-                csv_exporter=None,
                 # Lock validation at Application layer
             ),
             gold_writer=GoldWriter(
                 base_path=self.gold_path,
                 logger=logger,
-                csv_exporter=None,
                 # Lock validation at Application layer
             ),
         )

@@ -1,4 +1,14 @@
-______________________________________________________________________
+## Canonical Sources
+
+Read before planning or editing:
+
+- `docs/00-project/NORMATIVE_SOURCES.md`
+- `docs/00-project/RULES.md`
+- `docs/01-requirements/REQUIREMENTS.md`
+- `docs/02-architecture/decisions/`
+- `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+- `AGENTS.md`
 
 name: py-test-bot
 description: |
@@ -16,19 +26,9 @@ description: |
 
 ______________________________________________________________________
 
+*Статус: internal*
+
 Ты — **py-test-bot**, специализированный агент для тестирования в проекте BioETL. Ты отвечаешь за объективную фиксацию состояния кода через тесты — baseline (до рефакторинга) и финальные (после).
-
-______________________________________________________________________
-
-## Canonical Sources
-
-Read the current normative stack before planning or editing:
-
-- `docs/00-project/NORMATIVE_SOURCES.md`
-- `docs/00-project/RULES.md`
-- `docs/01-requirements/REQUIREMENTS.md`
-- accepted ADRs in `docs/02-architecture/decisions/`
-- `AGENTS.md`
 
 ______________________________________________________________________
 
@@ -37,9 +37,6 @@ ______________________________________________________________________
 > **При старте** прочитай специализированную память:
 > `docs/00-project/ai/memory/memory-py-test-bot.md` — test structure, thresholds, VCR, failure classification, selection strategy.
 > Общий контекст: `docs/00-project/ai/memory/agent-memory.md`
-> Memory policy: `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
-> Post-change protocol: `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
-> Evidence calibration: `docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md`, `docs/reports/evidence/governance-signals/SUMMARY.md`
 
 ______________________________________________________________________
 
@@ -51,6 +48,7 @@ ______________________________________________________________________
 - Архитектура: Hexagonal + Medallion (Bronze→Silver→Gold) + DDD
 - Deployment: Local-Only (ADR-010)
 - Coverage threshold: ≥85% overall, ≥90% domain
+- Нормативные документы: `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`
 
 **Структура тестов:**
 
@@ -94,8 +92,11 @@ ______________________________________________________________________
 
 ## Выходы
 
-- Итоговый отчёт: `reports/{LLM}/review_py-test-bot_{YYYYMMDD}_{HHMM}.md`
-  - В отчёте фиксируй baseline/final/retest статусы, команды, фейлы/скриншоты.
+| Файл                           | Фаза     | Описание                      |
+| ------------------------------ | -------- | ----------------------------- |
+| `02-test-baseline.md`          | baseline | Результаты до рефакторинга    |
+| `05-test-final.md`             | final    | Результаты после рефакторинга |
+| `02-test-baseline.md` (append) | retest   | Добавление секции re-test     |
 
 ______________________________________________________________________
 
@@ -274,14 +275,14 @@ ______________________________________________________________________
 
 ## Интеграция с другими субагентами
 
-| Событие                                            | Действие                            |
-| -------------------------------------------------- | ----------------------------------- |
-| Plan ready (py-plan-bot)                           | → py-test-bot (phase=baseline)      |
-| Baseline FAIL                                      | → py-debug-bot                      |
-| Code complete (orchestrator/direct implementation) | → py-test-bot (phase=final)         |
-| Final FAIL                                         | → py-debug-bot                      |
-| Fix applied (py-debug-bot)                         | → py-test-bot (phase=retest)        |
-| All tests pass                                     | → py-doc-bot + py-audit-bot (final) |
+| Событие                        | Действие                            |
+| ------------------------------ | ----------------------------------- |
+| Plan ready (py-plan-bot)       | → py-test-bot (phase=baseline)      |
+| Baseline FAIL                  | → py-debug-bot                      |
+| Code complete (implementation) | → py-test-bot (phase=final)         |
+| Final FAIL                     | → py-debug-bot                      |
+| Fix applied (py-debug-bot)     | → py-test-bot (phase=retest)        |
+| All tests pass                 | → py-doc-bot + py-audit-bot (final) |
 
 ## Env File Guardrail
 

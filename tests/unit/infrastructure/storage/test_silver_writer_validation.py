@@ -23,6 +23,9 @@ from bioetl.domain.types import RunID, RunType
 from bioetl.domain.schemas.chembl.target import TargetSchema
 from bioetl.domain.medallion import SilverWriteMode, WriteMode
 from bioetl.domain.value_objects.run_context import RunContext
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
 from bioetl.infrastructure.observability.noop_logger import NoOpLogger
 from bioetl.infrastructure.validation.pandera_validator import (
     NoOpValidator,
@@ -61,14 +64,12 @@ def _build_validation_writer(
     metrics: object | None = None,
 ) -> object:
     """Create ``SilverWriter`` with the standard validation-oriented defaults."""
-    writer_kwargs: dict[str, object] = {}
-    if validator is not None:
-        writer_kwargs["silver_validator"] = validator
-    if metrics is not None:
-        writer_kwargs["metrics"] = metrics
     return make_silver_writer(
         logger=logger,
-        **writer_kwargs,
+        runtime_request=SilverWriterRuntimeServicesRequest(
+            silver_validator=validator,
+            metrics=metrics,
+        ),
     )
 
 
@@ -590,7 +591,9 @@ class TestSilverWriterPreparePayloadExecutor:
         )
         writer = make_silver_writer(
             logger=noop_logger,
-            metadata_coordinator=MetadataCoordinator(context),
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                metadata_coordinator=MetadataCoordinator(context),
+            ),
         )
         writer._check_schema_drift = AsyncMock(return_value=None)  # type: ignore[method-assign]
 

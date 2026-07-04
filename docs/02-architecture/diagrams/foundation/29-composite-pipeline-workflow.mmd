@@ -1,0 +1,136 @@
+%% Title: Composite Pipeline Full Workflow — Seed to Gold (ADR-026)
+%% Covers: application/composite runner, checkpoint snapshot + ledger replay, runtime bootstrap
+%% Rank: 4 (Score 8.88) — Most complex architectural feature
+%% Updated: 2026-04-02
+
+%% @version 1.2.0
+%% @date    2026-04-02
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+%% @nodes   19
+%% Legend: docs/02-architecture/diagrams/views/00-legend.mermaid
+%% @uniform-group init   nodes=CFG,PFV,BOOT
+%% @uniform-group seed   nodes=SP,SB
+%% @uniform-group deps   nodes=DC,DOUT
+%% @uniform-group keys   nodes=KE,KEYS
+%% @uniform-group enrich nodes=EC,ER,ES
+%% @uniform-group merge  nodes=MS,SHAPE
+%% @uniform-group gold   nodes=GW,GT
+%% @uniform-group ckp    nodes=LOAD,SAVE,LEDGER
+%% @uniform-width group
+
+%% @uniform width=280 groups=8 width_strategy=group
+%% @uniform-stats init         width=280 height=112 max_desc_lines=4
+%% @uniform-stats seed         width=184 height=96 max_desc_lines=3
+%% @uniform-stats deps         width=216 height=96 max_desc_lines=3
+%% @uniform-stats keys         width=192 height=112 max_desc_lines=4
+%% @uniform-stats enrich       width=240 height=112 max_desc_lines=4
+%% @uniform-stats merge        width=240 height=112 max_desc_lines=4
+%% @uniform-stats gold         width=240 height=112 max_desc_lines=4
+%% @uniform-stats ckp          width=264 height=112 max_desc_lines=4
+%%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
+flowchart TB
+    subgraph Init["Phase 1: Initialization"]
+        CFG["[S] Load CompositeConfig<br/>from YAML<br/><br/>"]
+        PFV["[S] CompositePreflightValidationService<br/>• validate seed<br/>• validate enrichers<br/>• check silver tables"]
+        BOOT["[S] bootstrap_composite_runner()<br/>runtime assembly composes runner factories<br/>+ support services + manifest/ledger"]
+    end
+
+    subgraph Seed["Phase 2: Seed Pipeline"]
+        SP["[S] Run seed PipelineRunner<br/>(e.g., chembl_publication)<br/>"]
+        SB[("[D] Seed Silver Table<br/>silver/chembl/publication/"<br/>)]
+    end
+
+    subgraph Deps["Phase 3: Dependencies"]
+        DC["[S] DependencyCoordinatorService<br/>• run_dependencies()<br/>"]
+        DOUT[("[D] Dependency silver outputs<br/>(optional)")]
+    end
+
+    subgraph Keys["Phase 3.5: Key Extraction"]
+        KE["[S] KeyExtractorService<br/>• extract_keys(seed_silver,<br/>join_keys=[doi, pmid])<br/>"]
+        KEYS["[D] Filter Keys<br/>(DOIs, PMIDs)<br/><br/>"]
+    end
+
+    subgraph Enrich["Phase 4: Fan-Out Enrichment"]
+        direction LR
+        EC["[S] EnrichmentCoordinator<br/>• asyncio.gather(*enrichers,<br/>return_exceptions=True)<br/>"]
+        ER["[S] Enricher runners<br/>CrossRef + PubMed + OpenAlex +<br/>SemanticScholar"]:::size-md
+        ES[("[D] Enriched silver outputs<br/>crossref/pubmed/openalex/<br/>semanticscholar publication tables")]:::size-md
+    end
+
+    subgraph Merge["Phase 5: Merge"]
+        direction LR
+        MS["[S] MergeService<br/>• deduplicate + LEFT OUTER JOIN<br/>• conflict resolution"]:::size-md
+        SHAPE["[S] Output shaping<br/>column ordering + qualified renames"]:::size-md
+    end
+
+    subgraph Gold["Phase 6: Gold Write"]
+        direction LR
+        GW["[S] Gold validation + version-aware write<br/>contract/schema aware routing<br/>GoldWriter.write_gold()"]:::size-md
+        GT[("[D] Gold Table<br/>gold/composite/publication/"<br/>)]
+    end
+
+    subgraph CKP["Checkpointing (each phase)"]
+        LOAD["[S] Resume gate<br/>load checkpoint + validate anchors +<br/>replay ledger suffix after last_event_id"]:::size-md
+        SAVE["[S] Checkpoint snapshot save<br/>state + phase results + anchors +<br/>last_event_id watermark"]:::size-md
+        LEDGER["[S] Control-plane ledger<br/>run_* + stage_started /<br/>stage_completed events"]:::size-md
+    end
+
+    %% Flow
+    CFG ==> PFV ==> BOOT
+    BOOT ==> LOAD ==> SP ==> SB
+
+    SB -.-> DC ==> DOUT
+
+    SB ==> KE
+    KE ==> KEYS
+
+    KEYS ==> EC
+    EC ==> ER ==> ES
+
+    ES ==> MS
+    SB -.->|"seeds"| MS
+    MS ==> SHAPE
+
+    SHAPE ==> GW ==> GT
+
+    SAVE -.->|"persist phase snapshot"| SP
+    SAVE -.-> DC
+    SAVE -.-> EC
+    SAVE -.-> MS
+    SAVE -.-> GW
+    LEDGER -.->|"emit lifecycle + phase events"| SP
+    LEDGER -.-> DC
+    LEDGER -.-> EC
+    LEDGER -.-> MS
+    LEDGER -.-> GW
+    LOAD -.->|"resume branch"| DC
+    LOAD -.-> EC
+    LOAD -.-> MS
+    LOAD -.-> GW
+
+    %% Layout constraints
+    Init ~~~ Seed ~~~ Deps ~~~ Keys ~~~ Enrich ~~~ Merge ~~~ Gold ~~~ CKP
+
+    %% Styling
+    style Seed fill:#fff7ed,stroke:#f59e0b
+    style Enrich fill:#f1f5f9,stroke:#475569
+    style Gold fill:#fefce8,stroke:#ca8a04
+    style Merge fill:#eff6ff,stroke:#2563eb
+
+    %% Layer palette (semantic)
+    classDef layer_domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:1.8px;
+    classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
+    classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
+    classDef layer_composition fill:#fff7ed,stroke:#f59e0b,stroke-width:1.8px;
+
+    class CFG,PFV,SP,DC,KE,KEYS,EC,ER,MS,SHAPE,LOAD,SAVE,LEDGER layer_application;
+    class BOOT layer_composition;
+    class SB,DOUT,ES,GW,GT layer_infrastructure;
+
+    %% Click tooltips
+    click LOAD ../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md "Checkpoint compatibility + ledger replay gate"
+    click SAVE ../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md "Snapshot checkpoint persisted between phases"
+    click LEDGER ../../02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md "Control-plane events recorded alongside phases"
+    click MS ../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md "Merges seed + enricher outputs"
+    click KE ../../02-architecture/decisions/ADR-026-composite-pipeline-pattern.md "Extracts join keys for fan-out"

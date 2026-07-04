@@ -1,0 +1,24 @@
+%% View: Domain-Focus | Parent: 32-single-record-journey-full.mermaid
+%% @uniform width=168 height=56 max_title_len=18 max_desc_lines=0
+flowchart LR
+    subgraph Runtime["Runtime artifacts"]
+        BronzeRecord["BronzeRecord"]
+        Metadata["run metadata"]
+        Hash["_content_hash"]
+        Result["TransformResult"]
+    end
+
+    subgraph DomainOutputs["Domain outputs"]
+        Silver["SilverRecord"]
+        Gold["GoldRecord"]
+        DQ["dq / filtered records"]
+        Quarantine["QuarantineEntry"]
+    end
+
+    BronzeRecord --> Metadata --> Hash --> Result
+    Result --> Silver
+    Result --> Gold
+    Result --> DQ --> Quarantine
+
+    style Runtime fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style DomainOutputs fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px

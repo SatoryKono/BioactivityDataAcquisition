@@ -1,0 +1,32 @@
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: bioetl-minio
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?Set MINIO_ROOT_USER before starting scripts/ops/runtime/docker/compose/minio.yml}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?Set MINIO_ROOT_PASSWORD before starting scripts/ops/runtime/docker/compose/minio.yml}
+      MINIO_REGION_NAME: us-east-1
+      MINIO_PROMETHEUS_AUTH_TYPE: public
+    command: minio server /minio-data --console-address ":9001"
+    volumes:
+      - minio-data:/minio-data
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:9000/minio/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  minio-data:
+
+networks:
+  monitoring:
+    external: true
+    name: bioetl-monitoring

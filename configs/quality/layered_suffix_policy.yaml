@@ -1,0 +1,348 @@
+version: 1
+policy_scope: adr_041_layer_aware_naming
+
+layer_suffix_matrix:
+  - layer: domain
+    allowed_suffixes: [Port, Protocol, ABC, Schema, ValueObject]
+    forbidden_suffixes: [Service, Manager, Handler, Adapter, Factory, Runner]
+  - layer: application
+    allowed_suffixes: [Service, RuntimeService, Runner, Coordinator, Handler, Assembler]
+    forbidden_suffixes: [Adapter, Client]
+  - layer: infrastructure
+    allowed_suffixes: [Adapter, Client, Factory, Writer, Reader]
+    forbidden_suffixes: [Service, Manager, Runner]
+  - layer: composition
+    allowed_suffixes: [Factory, Builder, Module, Registry]
+    forbidden_suffixes: [Adapter, Client]
+  - layer: interfaces
+    allowed_suffixes: [Command, Handler, Adapter, Registry]
+    forbidden_suffixes: [Service, Manager, Runner]
+
+canonical_family_registry:
+  - family_id: pipeline_execution
+    canonical_symbols:
+      - symbol: PipelineRunner
+        path: src/bioetl/application/core/runner.py
+      - symbol: PipelineService
+        path: src/bioetl/application/core/pipeline_services.py
+      - symbol: PipelineRunnerService
+        path: src/bioetl/application/services/execution/pipeline_runner_service.py
+    compatibility_symbols:
+      - symbol: lock_manager
+        path: src/bioetl/application/core/_runner_dependency_support.py
+        reason: Legacy dependency kwarg/property retained during staged migration.
+  - family_id: composite_execution
+    canonical_symbols:
+      - symbol: CompositePipelineRunner
+        path: src/bioetl/application/composite/runner_pkg/runner.py
+      - symbol: MergeService
+        path: src/bioetl/application/composite/merger.py
+    compatibility_symbols: []
+  - family_id: lock_runtime_admin
+    canonical_symbols:
+      - symbol: LockRuntimeService
+        path: src/bioetl/application/core/lifecycle/lock_runtime_service.py
+      - symbol: LockService
+        path: src/bioetl/application/services/lock_service.py
+    compatibility_symbols:
+      - symbol: lock_manager
+        path: src/bioetl/composition/factories/pipeline/runner_assembly.py
+        reason: Compatibility helper retained while tests migrate to runtime naming.
+  - family_id: storage_boundary
+    canonical_symbols:
+      - symbol: BronzeStoragePort
+        path: src/bioetl/domain/ports/storage/bronze_port.py
+      - symbol: SilverStoragePort
+        path: src/bioetl/domain/ports/storage/silver_port.py
+      - symbol: GoldStoragePort
+        path: src/bioetl/domain/ports/storage/gold_port.py
+      - symbol: MergedStoragePort
+        path: src/bioetl/domain/ports/storage/merged_port.py
+    compatibility_symbols: []
+
+function_suffix_rules:
+  - rule_id: composition_bootstrap_port_factories
+    description: >
+      Composition bootstrap functions must not expose new `*_port` names.
+      Port-suffixed bootstrap factories were retired in favor of role-specific
+      adapter, writer, logger, metrics, tracer, and DQ monitor bootstrap names.
+    suffixes:
+      - _port
+    include_path_prefixes:
+      - src/bioetl/composition/bootstrap/
+    exclude_path_prefixes: []
+    allowed_symbols: []
+
+suffix_boundary_rules:
+  - rule_id: non_domain_port_protocols
+    description: >
+      Outside src/bioetl/domain/ports, protocol-like contracts must use *Protocol.
+      *Port is reserved for domain boundary ports or explicit compatibility shims.
+    suffixes:
+      - Port
+    include_path_prefixes:
+      - src/bioetl/
+    exclude_path_prefixes:
+      - src/bioetl/domain/ports/
+    allowed_symbol_exceptions:
+
+  - rule_id: non_infrastructure_adapter_aliases
+    description: >
+      Outside infrastructure, *Adapter names are allowed only as reviewed
+      compatibility aliases. New composition/application/interface adapter
+      aliases must not appear without explicit registry coverage.
+    suffixes:
+      - Adapter
+    include_path_prefixes:
+      - src/bioetl/
+    exclude_path_prefixes:
+      - src/bioetl/infrastructure/
+    allowed_symbol_exceptions:
+
+  - rule_id: non_composition_builder_suffix
+    description: >
+      Public *Builder symbols are reserved for composition-owned construction
+      surfaces. Other layers may keep private helper builders, but public
+      Builder vocabulary must not leak outside composition.
+    suffixes:
+      - Builder
+    include_path_prefixes:
+      - src/bioetl/
+    exclude_path_prefixes:
+      - src/bioetl/composition/
+    allowed_symbol_exceptions: []
+    allowed_module_exceptions:
+      - path: src/bioetl/application/composite/dependency_join_context_builders.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when dependency-join helper API can move behind composition-owned construction vocabulary.
+        reason: Existing application helper module with no public *Builder symbol; retained as reviewed naming debt.
+      - path: src/bioetl/application/services/dq/dq_report_builders.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when DQ report assembly helpers are consolidated behind role-neutral service naming.
+        reason: Existing DQ helper module with no public *Builder symbol; retained as reviewed naming debt.
+      - path: src/bioetl/application/services/lineage/metadata_lineage_node_builders.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when lineage metadata node assembly helpers are consolidated behind role-neutral service naming.
+        reason: Existing lineage helper module with no public *Builder symbol; retained as reviewed naming debt.
+      - path: src/bioetl/domain/value_objects/dq_report_builder.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when DQ report value-object construction helpers are migrated to role-neutral naming.
+        reason: Existing domain helper module with no public *Builder symbol; retained as reviewed naming debt.
+      - path: src/bioetl/infrastructure/adapters/crossref/client_builders.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when CrossRef client component helpers move behind adapter-owned role-neutral naming.
+        reason: Existing adapter helper module with no public *Builder symbol; retained as reviewed naming debt.
+      - path: src/bioetl/infrastructure/adapters/crossref/query_builder.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when CrossRef query planning helpers move behind adapter-owned role-neutral naming.
+        reason: Existing adapter query helper module with no public *Builder symbol; retained as reviewed naming debt.
+      - path: src/bioetl/infrastructure/adapters/openalex/query_builder.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when OpenAlex query planning helpers move behind adapter-owned role-neutral naming.
+        reason: Existing adapter query helper module with no public *Builder symbol; retained as reviewed naming debt.
+      - path: src/bioetl/infrastructure/adapters/pubchem/client_builders.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when PubChem client component helpers move behind adapter-owned role-neutral naming.
+        reason: Existing adapter helper module with no public *Builder symbol; retained as reviewed naming debt.
+      - path: src/bioetl/infrastructure/adapters/pubchem/query_builder.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when PubChem query planning helpers move behind adapter-owned role-neutral naming.
+        reason: Existing adapter query helper module with no public *Builder symbol; retained as reviewed naming debt.
+      - path: src/bioetl/infrastructure/adapters/uniprot/query_builder.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when UniProt query planning helpers move behind adapter-owned role-neutral naming.
+        reason: Existing adapter query helper module with no public *Builder symbol; retained as reviewed naming debt.
+      - path: src/bioetl/infrastructure/storage/bronze/metadata_builders.py
+        issue: "#3722"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Rename module when Bronze metadata payload helpers move behind storage-owned role-neutral naming.
+        reason: Existing storage metadata helper module with no public *Builder symbol; retained as reviewed naming debt.
+  - rule_id: composition_infrastructure_service_suffix
+    description: >
+      Composition and infrastructure layers must not expose new first-party
+      *Service classes. The reviewed baseline is currently clean and must stay
+      exception-free unless ADR-041 governance is updated deliberately.
+    suffixes:
+      - Service
+    include_path_prefixes:
+      - src/bioetl/composition/
+      - src/bioetl/infrastructure/
+    allowed_symbol_exceptions: []
+
+  - rule_id: domain_service_suffix_conflict
+    description: >
+      Domain-layer pure behavior surfaces must not expose first-party *Service
+      classes. The reviewed baseline is now clean and should remain exception-free.
+    suffixes:
+      - Service
+    include_path_prefixes:
+      - src/bioetl/domain/behavior/
+    allowed_symbol_exceptions:
+
+family_freeze_rules:
+  - rule_id: runtime_admin_lock_family
+    description: >
+      Lock lifecycle naming is role-driven: runtime collaborators use
+      *RuntimeService and operator/admin services use *Service. Legacy
+      LockCoordinator names remain matched here only so they fail if
+      reintroduced.
+    include_path_prefixes:
+      - src/bioetl/application/core/
+      - src/bioetl/application/services/
+      - src/bioetl/composition/
+    match_regex: ^(?:LockRuntimeService|LockRuntimeServiceCreateContext|LockService|LockCoordinator|LockCoordinatorCreateContext)$
+    allowed_symbols:
+      - symbol: LockRuntimeService
+        path: src/bioetl/application/core/lifecycle/lock_runtime_service.py
+        issue: "#3552"
+        owner: "@bioetl-platform"
+        expires_on: "2026-12-31"
+        removal_step: Remove family exception once lock runtime/admin naming freeze is retired by ADR-041 follow-up.
+        reason: Canonical runtime lock lifecycle collaborator.
+      - symbol: LockRuntimeServiceCreateContext
+        path: src/bioetl/application/core/lifecycle/lock_runtime_service.py
+        issue: "#3552"
+        owner: "@bioetl-platform"
+        expires_on: "2026-12-31"
+        removal_step: Remove family exception once lock runtime/admin naming freeze is retired by ADR-041 follow-up.
+        reason: Canonical runtime lock collaborator creation seam.
+      - symbol: LockService
+        path: src/bioetl/application/services/lock_service.py
+        issue: "#3552"
+        owner: "@bioetl-platform"
+        expires_on: "2026-12-31"
+        removal_step: Remove family exception once lock runtime/admin naming freeze is retired by ADR-041 follow-up.
+        reason: Canonical operator/admin lock service.
+
+  - rule_id: runtime_admin_checkpoint_quarantine_family
+    description: >
+      Checkpoint/quarantine runtime-admin naming is role-driven: runtime write
+      collaborators use *RuntimeService and operator/admin services use
+      *Service. Manager-style names are retired from first-party code.
+    include_path_prefixes:
+      - src/bioetl/application/core/
+      - src/bioetl/application/services/
+      - src/bioetl/composition/
+    match_regex: ^(CheckpointRuntimeService|QuarantineRuntimeService|CheckpointService|QuarantineService)$
+    allowed_symbols:
+      - symbol: CheckpointRuntimeService
+        path: src/bioetl/application/core/lifecycle/checkpoint_manager.py
+        issue: "#3398"
+        owner: "@bioetl-platform"
+        expires_on: "2026-12-31"
+        removal_step: Remove family exception once runtime/admin naming freeze is retired by ADR-041 follow-up.
+        reason: Canonical runtime checkpoint collaborator.
+      - symbol: QuarantineRuntimeService
+        path: src/bioetl/application/core/quarantine_manager.py
+        issue: "#3398"
+        owner: "@bioetl-platform"
+        expires_on: "2026-12-31"
+        removal_step: Remove family exception once runtime/admin naming freeze is retired by ADR-041 follow-up.
+        reason: Canonical runtime quarantine write-path collaborator.
+      - symbol: CheckpointService
+        path: src/bioetl/application/services/checkpoint_service.py
+        issue: "#3398"
+        owner: "@bioetl-platform"
+        expires_on: "2026-12-31"
+        removal_step: Remove family exception once runtime/admin naming freeze is retired by ADR-041 follow-up.
+        reason: Canonical operator/admin checkpoint service.
+      - symbol: QuarantineService
+        path: src/bioetl/application/services/quarantine_service.py
+        issue: "#3398"
+        owner: "@bioetl-platform"
+        expires_on: "2026-12-31"
+        removal_step: Remove family exception once runtime/admin naming freeze is retired by ADR-041 follow-up.
+        reason: Canonical operator/admin quarantine service.
+
+  - rule_id: column_ordering_family
+    description: >
+      Column ordering naming remains frozen while ambiguity collapses toward
+      ColumnOrderService as the canonical surface.
+    include_path_prefixes:
+      - src/bioetl/application/composite/
+    match_regex: ^Column(?:Priority)?Order(?:er|Service)$
+    allowed_symbols:
+      - symbol: ColumnOrderService
+        path: src/bioetl/application/composite/column_service.py
+        issue: "#3402"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Remove freeze exception once column-ordering family policy is retired with zero ambiguity aliases.
+        reason: Canonical unified column ordering surface.
+
+  - rule_id: composite_canonical_alias_family
+    description: >
+      Application composite naming is canonicalized to
+      CompositeCheckpointService, CompositePipelineRunner, and
+      CompositePreflightValidationService.
+    include_path_prefixes:
+      - src/bioetl/application/composite/
+    match_regex: ^(?:CompositeCheckpointService|CompositePipelineRunner|CompositePreflightValidationService)$
+    allowed_symbols:
+      - symbol: CompositeCheckpointService
+        path: src/bioetl/application/composite/checkpoint/service.py
+        issue: "#3443"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Remove freeze exception once composite canonical alias family rule is retired.
+        reason: Canonical composite checkpoint facade.
+      - symbol: CompositePipelineRunner
+        path: src/bioetl/application/composite/runner_pkg/runner.py
+        issue: "#3443"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Remove freeze exception once composite canonical alias family rule is retired.
+        reason: Canonical composite runner facade.
+      - symbol: CompositePreflightValidationService
+        path: src/bioetl/application/composite/preflight_validator.py
+        issue: "#3443"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Remove freeze exception once composite canonical alias family rule is retired.
+        reason: Canonical composite preflight validation facade.
+
+  - rule_id: provider_connector_adapter_module_family
+    description: >
+      Provider connector adapter classes must be canonically owned by
+      `adapter.py` modules. Provider-level `client.py` modules are compatibility
+      shims and must not become adapter owners.
+    include_path_prefixes:
+      - src/bioetl/infrastructure/adapters/pubmed/
+      - src/bioetl/infrastructure/adapters/semanticscholar/
+    match_regex: ^(?:PubMedAdapter|SemanticScholarAdapter)$
+    allowed_symbols:
+      - symbol: PubMedAdapter
+        path: src/bioetl/infrastructure/adapters/pubmed/adapter.py
+        issue: "#3553"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Remove freeze exception once provider connector module naming ambiguity is retired.
+        reason: Canonical PubMed provider adapter owner module.
+      - symbol: SemanticScholarAdapter
+        path: src/bioetl/infrastructure/adapters/semanticscholar/adapter.py
+        issue: "#3553"
+        owner: "@bioetl-architecture"
+        expires_on: "2026-12-31"
+        removal_step: Remove freeze exception once provider connector module naming ambiguity is retired.
+        reason: Canonical Semantic Scholar provider adapter owner module.

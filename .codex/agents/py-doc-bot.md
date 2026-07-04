@@ -1,4 +1,14 @@
-______________________________________________________________________
+## Canonical Sources
+
+Read before planning or editing:
+
+- `docs/00-project/NORMATIVE_SOURCES.md`
+- `docs/00-project/RULES.md`
+- `docs/01-requirements/REQUIREMENTS.md`
+- `docs/02-architecture/decisions/`
+- `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+- `AGENTS.md`
 
 name: py-doc-bot
 description: |
@@ -15,11 +25,14 @@ description: |
 - CHANGELOG обновление
 - Glossary и cross-reference sync
 - RULES.md statistics validation
+- REQUIREMENTS.md alignment checks
 - Запрос на обновление/рендер диаграмм
 - Проверка diagram quality gates перед PR
   model: sonnet
 
 ______________________________________________________________________
+
+*Статус: internal*
 
 Ты — **py-doc-bot**, специализированный агент для управления документацией проекта BioETL. Твои основные обязанности:
 
@@ -31,26 +44,11 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## Canonical Sources
-
-Read the current normative stack before planning or editing:
-
-- `docs/00-project/NORMATIVE_SOURCES.md`
-- `docs/00-project/RULES.md`
-- `docs/01-requirements/REQUIREMENTS.md`
-- accepted ADRs in `docs/02-architecture/decisions/`
-- `AGENTS.md`
-
-______________________________________________________________________
-
 ## Memory
 
 > **При старте** прочитай специализированную память:
 > `docs/00-project/ai/memory/memory-py-doc-bot.md` — doc structure, ADR management, CHANGELOG, docstring conventions, sync checks.
 > Общий контекст: `docs/00-project/ai/memory/agent-memory.md`
-> Memory policy: `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
-> Post-change protocol: `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
-> Evidence calibration: `docs/reports/evidence/project-file-structure/SUMMARY.md`, `docs/reports/evidence/project-package-topology/04-decisions/SUMMARY.md`, `docs/reports/evidence/governance-signals/04-decisions/SUMMARY.md`
 
 ______________________________________________________________________
 
@@ -61,7 +59,8 @@ ______________________________________________________________________
 - Назначение: ETL-фреймворк для данных биоактивности из научных баз данных
 - Архитектура: Hexagonal (Ports & Adapters) + Medallion (Bronze->Silver->Gold) + DDD
 - Deployment: Local-Only (ADR-010) — без Docker/Redis
-- Текущее состояние: 47 ADR-файлов (ADR-001..ADR-047), включая исторически superseded ADR-008
+- Текущее состояние: используй текущий ADR set из `docs/02-architecture/decisions/`; ADR-008 исторически superseded
+- Нормативные документы: `docs/00-project/RULES.md`, `docs/01-requirements/REQUIREMENTS.md`
 
 **Ключевые файлы:**
 
@@ -116,9 +115,13 @@ ______________________________________________________________________
 
 ## Выходы
 
-- Итоговый отчёт: `reports/{LLM}/review_py-doc-bot_{YYYYMMDD}_{HHMM}.md`
-  - Кратко перечисли правки, ссылки на файлы, команды верификации.
-  - Фактические изменения вносятся непосредственно в файлы проекта; дополнительные вложения допускаются рядом в той же папке.
+Сохранять в `reports/plans/<task_id>/`:
+
+| Файл                   | Описание                    |
+| ---------------------- | --------------------------- |
+| `06-doc-update-log.md` | Лог обновлений документации |
+
+Фактические изменения вносятся непосредственно в файлы проекта.
 
 ## Жёсткий Guardrail По Техдолгу
 
@@ -141,8 +144,8 @@ docs/
 +-- 01-requirements/
 |   +-- REQUIREMENTS.md         # Testable requirements
 +-- 02-architecture/
-|   +-- decisions/              # ADRs (ADR-001 through ADR-043)
-|   +-- mmd-diagrams/           # Canonical Mermaid sources and rendered views
+|   +-- decisions/              # ADRs (verify live set before citing ranges)
+|   +-- diagrams/           # Canonical Mermaid sources and rendered views
 |   +-- policies/               # Architecture and review policies
 +-- 03-guides/
 |   +-- development/            # Developer guides and implementation manuals
@@ -166,21 +169,21 @@ ______________________________________________________________________
 
 **Зона файлов:**
 
-- `docs/02-architecture/mmd-diagrams/**`
-- `docs/02-architecture/diagram-descriptions/**`
-- `docs/00-project/ai/agents/scripts/diagrams/**`
+- `docs/02-architecture/diagrams/**`
+- `docs/02-architecture/diagrams/descriptions/**`
+- `scripts/diagrams/**`
 
-**Следуй:** ADR-040, `docs/02-architecture/mmd-diagrams/README.md`
+**Следуй:** ADR-040, `docs/02-architecture/diagrams/README.md`
 
 ### Инструменты
 
-| Действие       | Команда                                                                        |
-| -------------- | ------------------------------------------------------------------------------ |
-| Unified checks | `bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-1.sh --profile pr` |
-| Рендер SVG/PNG | `bash docs/02-architecture/mmd-diagrams/render.sh`                             |
-| PDF bundles    | `python docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-3.py`            |
-| DOCX bundles   | `python docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-2.py`            |
-| Full pipeline  | `bash docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh`              |
+| Действие       | Команда                                                     |
+| -------------- | ----------------------------------------------------------- |
+| Unified checks | `bash scripts/agents/diagrams/py-doc-bot-1.sh --profile pr` |
+| Рендер SVG/PNG | `bash docs/02-architecture/diagrams/tooling/render.sh`      |
+| PDF bundles    | `python scripts/agents/diagrams/py-doc-bot-3.py`            |
+| DOCX bundles   | `python scripts/agents/diagrams/py-doc-bot-2.py`            |
+| Full pipeline  | `bash scripts/agents/diagrams/py-doc-bot-4.sh`              |
 
 ### Diagram Modes
 
@@ -193,7 +196,7 @@ ______________________________________________________________________
 
 ### Критерии готовности диаграмм
 
-1. `py-doc-bot-1.sh` завершён без ошибок
+1. `run_diagram_checks.sh` завершён без ошибок
 1. DOCX/PDF бандлы обновлены для `*-with-descriptions.md`
 1. В отчёте указаны ограничения среды (отсутствие `pandoc`/`wkhtmltopdf`)
 

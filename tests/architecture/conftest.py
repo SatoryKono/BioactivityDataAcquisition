@@ -18,10 +18,15 @@ import pickle
 import subprocess
 import sys
 import tempfile
-from uuid import NAMESPACE_URL, UUID, uuid5
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 import yaml
+
+# Import governance report function for caching
+from scripts.engineering.qa.report_test_governance_audit import (
+    collect_test_governance_report,
+)
 
 _MIN_PARALLEL_CACHE_FILES = 128
 _DEFAULT_CACHE_WORKERS = 8
@@ -43,11 +48,6 @@ _TEXT_CACHE_NAMES_WITHOUT_DISK = frozenset(
         "test-content",
     }
 )
-
-
-def deterministic_uuid_from_callsite(seed: str) -> UUID:
-    """Provide a stable UUID without relying on an absent shared test helper."""
-    return uuid5(NAMESPACE_URL, f"bioetl:{seed}")
 
 
 def _list_python_files(root: Path) -> list[Path]:
@@ -712,10 +712,6 @@ def cached_governance_report() -> Callable[[], dict]:
     def _get_report() -> dict:
         nonlocal cached_report
         if cached_report is None:
-            from scripts.engineering.qa.report_test_governance_audit import (
-                collect_test_governance_report,
-            )
-
             # Use the ROOT from the test file location
             root = Path(__file__).resolve().parents[2]
             cached_report = collect_test_governance_report(root)

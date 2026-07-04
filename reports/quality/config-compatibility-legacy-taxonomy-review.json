@@ -1,0 +1,149 @@
+{
+  "snapshot_date": "2026-06-23",
+  "source_artifact": "reports/quality/config-discrepancy-baseline.json",
+  "status": "reviewed_burned_down",
+  "budget_policy": "no_growth_ratchet_only",
+  "families": {
+    "composite_runtime": {
+      "compatibility_legacy_count": 0,
+      "compatibility_legacy_keys": [],
+      "alias_families": [],
+      "retired_alias_families": [
+        {
+          "family_name": "hba_count",
+          "owner": "config-governance",
+          "usage_classification": "retired_canonical_registry_owned_cross_provider_alias",
+          "state": "removed",
+          "compatibility_legacy_keys": [
+            "composite.field_aliases.hba_count",
+            "composite.field_aliases.hba_count.pubchem"
+          ],
+          "canonical_ownership": [
+            "configs/field_registry/canonical_registry.json#molecule_hba_count",
+            "bioetl.domain.registry.field_aliases.MOLECULE_FIELD_ALIASES[hba_count]"
+          ],
+          "removal_preconditions_satisfied": [
+            "Shared HBA mapping is owned by the canonical field registry and domain alias registry.",
+            "Composite runtime alias resolution reads bioetl.domain.registry.field_aliases through resolve_field_aliases_from_registry."
+          ]
+        },
+        {
+          "family_name": "hbd_count",
+          "owner": "config-governance",
+          "usage_classification": "retired_canonical_registry_owned_cross_provider_alias",
+          "state": "removed",
+          "compatibility_legacy_keys": [
+            "composite.field_aliases.hbd_count",
+            "composite.field_aliases.hbd_count.pubchem"
+          ],
+          "canonical_ownership": [
+            "configs/field_registry/canonical_registry.json#molecule_hbd_count",
+            "bioetl.domain.registry.field_aliases.MOLECULE_FIELD_ALIASES[hbd_count]"
+          ],
+          "removal_preconditions_satisfied": [
+            "Shared HBD mapping is owned by the canonical field registry and domain alias registry.",
+            "Composite runtime alias resolution reads bioetl.domain.registry.field_aliases through resolve_field_aliases_from_registry."
+          ]
+        },
+        {
+          "family_name": "logp",
+          "owner": "config-governance",
+          "usage_classification": "retired_canonical_registry_owned_cross_provider_alias",
+          "state": "removed",
+          "compatibility_legacy_keys": [
+            "composite.field_aliases.logp",
+            "composite.field_aliases.logp.pubchem"
+          ],
+          "canonical_ownership": [
+            "configs/field_registry/canonical_registry.json#molecule_logp",
+            "bioetl.domain.registry.field_aliases.MOLECULE_FIELD_ALIASES[logp]"
+          ],
+          "removal_preconditions_satisfied": [
+            "Shared logp mapping is owned by the canonical field registry and domain alias registry.",
+            "Composite runtime alias resolution reads bioetl.domain.registry.field_aliases through resolve_field_aliases_from_registry."
+          ]
+        },
+        {
+          "family_name": "polar_surface_area",
+          "owner": "config-governance",
+          "usage_classification": "retired_canonical_registry_owned_cross_provider_alias",
+          "state": "removed",
+          "compatibility_legacy_keys": [
+            "composite.field_aliases.polar_surface_area",
+            "composite.field_aliases.polar_surface_area.pubchem"
+          ],
+          "canonical_ownership": [
+            "configs/field_registry/canonical_registry.json#molecule_polar_surface_area",
+            "bioetl.domain.registry.field_aliases.MOLECULE_FIELD_ALIASES[polar_surface_area]"
+          ],
+          "removal_preconditions_satisfied": [
+            "Shared polar-surface-area mapping is owned by the canonical field registry and domain alias registry.",
+            "Composite runtime alias resolution reads bioetl.domain.registry.field_aliases through resolve_field_aliases_from_registry."
+          ]
+        }
+      ],
+      "first_safe_removal_wave": {
+        "family_name": "standard_inchi",
+        "owner": "config-governance",
+        "usage_classification": "confirmed_unused_config_duplicate",
+        "state": "removed",
+        "compatibility_legacy_keys_removed": [
+          "composite.field_aliases.standard_inchi",
+          "composite.field_aliases.standard_inchi.pubchem"
+        ],
+        "removal_preconditions_satisfied": [
+          "Runtime field-alias resolution already maps PubChem inchi through bioetl.domain.registry.field_aliases.MOLECULE_FIELD_ALIASES.",
+          "Composite YAML no longer owns a duplicate compatibility_legacy field_aliases entry for standard_inchi."
+        ],
+        "remediation": "Keep standard_inchi canonical-only and block reintroduction of provider-specific alias leaves."
+      },
+      "final_removal_wave": {
+        "issue": "#5550",
+        "state": "removed",
+        "compatibility_legacy_keys_removed": [
+          "composite.field_aliases",
+          "composite.field_aliases.hba_count",
+          "composite.field_aliases.hba_count.pubchem",
+          "composite.field_aliases.hbd_count",
+          "composite.field_aliases.hbd_count.pubchem",
+          "composite.field_aliases.logp",
+          "composite.field_aliases.logp.pubchem",
+          "composite.field_aliases.polar_surface_area",
+          "composite.field_aliases.polar_surface_area.pubchem"
+        ],
+        "canonical_ownership": [
+          "configs/field_registry/canonical_registry.json#molecule_hba_count",
+          "configs/field_registry/canonical_registry.json#molecule_hbd_count",
+          "configs/field_registry/canonical_registry.json#molecule_logp",
+          "configs/field_registry/canonical_registry.json#molecule_polar_surface_area",
+          "bioetl.domain.registry.field_aliases.MOLECULE_FIELD_ALIASES",
+          "bioetl.application.composite.join_planner_helpers.resolve_field_aliases_from_registry"
+        ],
+        "removal_preconditions_satisfied": [
+          "Canonical registry owns HBA, HBD, logp, and polar-surface-area raw-provider bindings outside composite YAML.",
+          "Composite merger wiring resolves provider aliases through the domain alias registry instead of composite config compatibility leaves.",
+          "The generated config-discrepancy baseline has no composite_runtime compatibility_legacy group."
+        ],
+        "remediation": "Keep composite field aliases out of configs/composites/*.yaml and let the config taxonomy scorecard fail on any reintroduction."
+      },
+      "owner": "config-governance",
+      "review_date": "2026-09-30",
+      "rationale": "Composite compatibility_legacy field_aliases paths were retired from configs/composites/*.yaml after HBA, HBD, logp, and polar_surface_area ownership moved to the canonical field registry and domain alias registry.",
+      "action": "Keep composite compatibility_legacy keys at zero and reject reintroduction of composite.field_aliases in config surfaces.",
+      "risk": "low"
+    },
+    "entity_effective": {
+      "compatibility_legacy_count": 0,
+      "compatibility_legacy_keys": [],
+      "owner": "config-governance",
+      "review_date": "2026-09-30",
+      "rationale": "Entity schema.field_aliases compatibility_legacy paths were retired from effective entity configs; provider normalization now remains under canonical domain profile and contract ownership.",
+      "action": "Keep entity compatibility_legacy keys at zero and reject reintroduction of schema.field_aliases in entity configs without architecture review.",
+      "risk": "low"
+    }
+  },
+  "guards": [
+    "tests/architecture/test_config_taxonomy_review.py",
+    "tests/architecture/test_config_discrepancy_metrics_ratchets.py"
+  ]
+}

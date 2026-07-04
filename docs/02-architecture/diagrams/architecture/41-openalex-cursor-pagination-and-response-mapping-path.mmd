@@ -1,0 +1,34 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% Title: OpenAlex Cursor Pagination And Response Mapping Path
+%% @version 1.0.0
+%% @date    2026-05-12
+%% @type    sequenceDiagram
+%% @level   Provider / Interaction
+%% RULES: RULES.md §2.1, ADR-031
+sequenceDiagram
+    autonumber
+    participant Runner as publication pipeline
+    participant Adapter as OpenAlexAdapter
+    participant Query as query_builder.py
+    participant Cursor as cursor_flow.py
+    participant Exec as query_execution.py
+    participant Fallback as fallback_orchestrator.py
+    participant Map as response_mapping.py
+
+    Runner->>Adapter: filtered publication fetch
+    Adapter->>Query: build OpenAlex filters
+    Query-->>Adapter: cursor-ready query
+    Adapter->>Cursor: initialize cursor
+    loop while next cursor exists
+        Cursor->>Exec: execute cursor request
+        alt normal response
+            Exec-->>Cursor: page payload
+        else transient degradation
+            Exec->>Fallback: consult fallback orchestrator
+            Fallback-->>Exec: adjusted request path
+            Exec-->>Cursor: recovered page payload
+        end
+        Cursor->>Map: map page records
+        Map-->>Runner: publication entities
+    end
+%% padding line for readability and stable render budget

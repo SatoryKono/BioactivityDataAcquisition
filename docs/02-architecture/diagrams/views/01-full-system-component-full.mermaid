@@ -1,0 +1,131 @@
+%% View: Full | Parent: (root)
+%% Parent source: docs/02-architecture/diagrams/foundation/01-full-system-component.mmd
+%% Full reference diagram retained after decomposition.
+%% Synced: 2026-03-24
+
+%% Title: Full System Component Diagram
+%% Covers: RULES.md §1.1 (Five-Layer Architecture), §1.2 (Ports & Adapters), composition/runtime_builders, application/core
+%% Updated: 2026-03-24
+%% Components: CLI, build_pipeline_runner, PipelineRunnerService, PipelineRunner, BatchExecutor, BatchProcessingService, PipelineService, provider adapters, medallion storage
+
+%% @version 1.2.0
+%% @date    2026-03-24
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+%% @png-scale 6
+%% @png-dpi   600
+%% @adr     ADR-040
+%% @uniform width=252 height=72 max_title_len=30 max_desc_lines=1
+%%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
+flowchart TB
+    subgraph External["External Systems"]
+        direction LR
+        BioactivityAPIs["Bioactivity APIs"]
+        PublicationAPIs["Publication APIs"]
+    end
+
+    subgraph Interfaces["Interfaces Layer"]
+        direction TB
+        CLI["CLI run / health / debug"]
+        Signals["Signal orchestration"]
+    end
+
+    subgraph Composition["Composition Layer"]
+        direction TB
+        BuildRunner["build_pipeline_runner"]
+        Registry["PipelineRegistry"]
+        PipelineFactory["GenericPipelineFactory"]
+        StorageFactory["StorageFactory"]
+        Assembly["service + runner assembly"]
+    end
+
+    subgraph Application["Application Layer"]
+        direction TB
+        RunnerService["PipelineRunnerService"]
+        PipelineRunner["PipelineRunner"]
+        RunnerDeps["PipelineRunnerDependencies"]
+        BatchExecutor["BatchExecutor"]
+        BatchProcessing["BatchProcessingService"]
+        TransformWrite["BatchTransformer / BatchWriter"]
+        PipelineServices["PipelineService"]
+        Lifecycle["Preflight / Postrun / MedallionLifecycle"]
+        CompositeRuntime["Composite runtime"]
+    end
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        Ports["Port facades"]
+        Models["Entities / value objects"]
+        RuntimeConfig["Pipeline + runtime config"]
+        Errors["Errors / events"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        ProviderAdapters["Provider adapters"]
+        HTTPStack["Unified HTTP stack"]
+        StorageRuntime["Bronze / Delta / Gold storage"]
+        StateAdapters["Lock / checkpoint adapters"]
+        Observability["Metrics / tracing adapters"]
+    end
+
+    subgraph DataLake["Data Lake / State"]
+        direction LR
+        Bronze[("Bronze")]
+        Silver[("Silver Delta")]
+        Gold[("Gold Delta")]
+        ControlPlane[("Quarantine / checkpoints")]
+    end
+
+    BioactivityAPIs --> ProviderAdapters
+    PublicationAPIs --> ProviderAdapters
+
+    CLI ==> BuildRunner
+    Signals --> RunnerService
+
+    BuildRunner --> Registry --> PipelineFactory
+    PipelineFactory --> Assembly
+    Assembly --> StorageFactory
+    Assembly --> RunnerService
+    Assembly --> PipelineRunner
+
+    RunnerService ==> PipelineRunner
+    PipelineRunner --> RunnerDeps
+    RunnerDeps ==> BatchExecutor
+    PipelineRunner --> PipelineServices
+    PipelineRunner --> Lifecycle
+    BatchExecutor ==> BatchProcessing
+    BatchProcessing --> TransformWrite
+    BatchProcessing --> PipelineServices
+    CompositeRuntime -.->|"delegates"| PipelineRunner
+
+    PipelineRunner -.-> Ports
+    PipelineServices -.-> Ports
+    Lifecycle -.-> Ports
+    BatchProcessing --> Models
+    PipelineRunner --> RuntimeConfig
+    PipelineRunner --> Errors
+
+    ProviderAdapters -.->|"implement"| Ports
+    StorageRuntime -.->|"implement"| Ports
+    StateAdapters -.->|"implement"| Ports
+    Observability -.->|"implement"| Ports
+
+    ProviderAdapters --> HTTPStack
+    StorageFactory --> StorageRuntime
+    BuildRunner --> StateAdapters
+    BuildRunner --> Observability
+
+    StorageRuntime ==> Bronze
+    StorageRuntime ==> Silver
+    StorageRuntime ==> Gold
+    StateAdapters --> ControlPlane
+    StorageRuntime -.-> ControlPlane
+
+    style External fill:#f1f5f9,stroke:#64748b,stroke-width:2px
+    style Interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+    style Composition fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    style Application fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style DataLake fill:#fefce8,stroke:#ca8a04,stroke-width:2px

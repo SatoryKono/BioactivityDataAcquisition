@@ -1,0 +1,60 @@
+schema_version: 1
+policy_scope: internal_compatibility_shim_inventory
+linked_issue: "#5573"
+reviewed_on: "2026-06-26"
+review_by: "2026-09-30"
+owner: "@bioetl-architecture"
+new_src_import_policy: fail_fast_review_required
+rationale: >-
+  Internal storage/config compatibility shims may remain only while importer
+  proof shows they are still part of a reviewed migration path. Zero-import
+  private helpers must be removed instead of retained as latent aliases.
+shims:
+  - id: silver-metadata-mixin-build-result-helper
+    module: bioetl.infrastructure.storage.silver.metadata_mixin
+    path: src/bioetl/infrastructure/storage/silver/metadata_mixin.py
+    symbol: _build_silver_write_result
+    lifecycle: removed_internal_private_shim
+    owner: "@bioetl-storage"
+    disposition: removed_in_5573
+    canonical_target: bioetl.infrastructure.storage.silver.metadata_result_finalization._build_silver_write_result
+    max_src_importer_count: 0
+    allowed_src_importers: []
+    owner_tests:
+      - tests/unit/infrastructure/storage/test_silver_writer_dq_metrics.py
+      - tests/unit/infrastructure/storage/test_silver_metadata_mixin_boost.py
+    exit_criteria: >-
+      The private helper must remain absent from metadata_mixin.py; tests and
+      storage code use metadata_result_finalization as the canonical owner.
+  - id: silver-filter-migration-runtime-identity
+    module: bioetl.infrastructure.config.silver_filter_migration
+    path: src/bioetl/infrastructure/config/silver_filter_migration.py
+    lifecycle: retained_external_identity_facade
+    owner: "@bioetl-config"
+    disposition: retain_external_public_api_zero_first_party_src
+    canonical_target: bioetl.domain.filtering.silver_filter_identity
+    max_src_importer_count: 0
+    allowed_src_importers: []
+    owner_tests:
+      - tests/architecture/test_silver_filter_identity_surface.py
+      - tests/unit/infrastructure/config/test_silver_filter_migration.py
+    exit_criteria: >-
+      Composition/runtime code must import Silver filter runtime identity helpers
+      from bioetl.domain.filtering.silver_filter_identity. This infrastructure
+      facade remains only for external compatibility and must have zero
+      first-party src importers until public deprecation/removal.
+  - id: infrastructure-config-package-root
+    module: bioetl.infrastructure.config
+    path: src/bioetl/infrastructure/config/__init__.py
+    lifecycle: retained_external_package_root_facade
+    owner: "@bioetl-config"
+    disposition: retain_external_public_api_zero_first_party_src
+    canonical_target: split infrastructure config owner modules
+    max_src_importer_count: 0
+    allowed_src_importers: []
+    owner_tests:
+      - tests/unit/infrastructure/config/test_config_package_root_contract.py
+      - tests/unit/infrastructure/config/test_public_config_surfaces.py
+    exit_criteria: >-
+      Package-root convenience exports remain for external imports only; any
+      first-party src importer requires architecture review before merge.

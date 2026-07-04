@@ -10,6 +10,9 @@ import pyarrow as pa
 import pytest
 
 from bioetl.domain.medallion import SilverWriteMode
+from bioetl.infrastructure.storage.silver.finalization_models import (
+    _SilverWriteResultFinalizationRequest,
+)
 from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
     SilverPostwriteOperations,
 )
@@ -89,18 +92,19 @@ async def test_postwrite_mixin_routes_through_compatibility_hooks() -> None:
         source_batch_id="batch-456",
         ingestion_ts=ctx.ingestion_ts,
     )
-    harness._finalize_silver_write_result.assert_awaited_once_with(
-        table_name="test.table",
-        records=payload.records,
-        table_path=SILVER_TABLE_PATH,
-        primary_keys=["entity_id"],
-        validated_mode=SilverWriteMode.MERGE,
-        bronze_refs=None,
-        partition_cols=["entity_id"],
-        source_batch_id="batch-456",
-        started_at=ctx.started_at,
-        start_perf=1.5,
-    )
+    harness._finalize_silver_write_result.assert_awaited_once()
+    finalize_request = harness._finalize_silver_write_result.await_args.args[0]
+    assert isinstance(finalize_request, _SilverWriteResultFinalizationRequest)
+    assert finalize_request.table_name == "test.table"
+    assert finalize_request.records == payload.records
+    assert finalize_request.table_path == SILVER_TABLE_PATH
+    assert finalize_request.primary_keys == ["entity_id"]
+    assert finalize_request.validated_mode is SilverWriteMode.MERGE
+    assert finalize_request.bronze_refs is None
+    assert finalize_request.partition_cols == ["entity_id"]
+    assert finalize_request.source_batch_id == "batch-456"
+    assert finalize_request.started_at == ctx.started_at
+    assert finalize_request.start_perf == 1.5
 
 
 @pytest.mark.asyncio
@@ -153,15 +157,16 @@ async def test_postwrite_operations_preserve_service_specific_export_and_audit()
         source_batch_id="batch-456",
         ingestion_ts=ctx.ingestion_ts,
     )
-    host._finalize_silver_write_result.assert_awaited_once_with(
-        table_name="test.table",
-        records=payload.records,
-        table_path=SILVER_TABLE_PATH,
-        primary_keys=["entity_id"],
-        validated_mode=SilverWriteMode.MERGE,
-        bronze_refs=None,
-        partition_cols=["entity_id"],
-        source_batch_id="batch-456",
-        started_at=ctx.started_at,
-        start_perf=1.5,
-    )
+    host._finalize_silver_write_result.assert_awaited_once()
+    finalize_request = host._finalize_silver_write_result.await_args.args[0]
+    assert isinstance(finalize_request, _SilverWriteResultFinalizationRequest)
+    assert finalize_request.table_name == "test.table"
+    assert finalize_request.records == payload.records
+    assert finalize_request.table_path == SILVER_TABLE_PATH
+    assert finalize_request.primary_keys == ["entity_id"]
+    assert finalize_request.validated_mode is SilverWriteMode.MERGE
+    assert finalize_request.bronze_refs is None
+    assert finalize_request.partition_cols == ["entity_id"]
+    assert finalize_request.source_batch_id == "batch-456"
+    assert finalize_request.started_at == ctx.started_at
+    assert finalize_request.start_perf == 1.5

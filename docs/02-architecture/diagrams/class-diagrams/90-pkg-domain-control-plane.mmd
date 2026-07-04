@@ -1,0 +1,53 @@
+%% Title: Package Family: domain/control_plane
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/control_plane; modules: effective_config_artifact, contract_registry_types, gold_contract, run_manifest, contract_registry_service, run_ledger.
+%% Components: top-level classes grouped by source module.
+%% @version 1.1.0
+%% @type    classDiagram
+%% @date    2026-04-02
+%% @level   Package Family / Inventory Slice
+%% @nodes   25
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace effective_config_artifact {
+        class ConfigResolutionPolicy
+        class ConfigSourceRef
+        class DQPolicySnapshot
+        class EffectiveConfigArtifact
+        class EffectiveConfigHashes
+        class EffectiveExecutionConfig
+        class ResolvedConfigSnapshot
+        class RuntimeOverrideSnapshot
+    }
+
+    namespace contract_registry_types {
+        class ContractRegistryEntry
+        class RegistryValidationError
+        class RegistryValidationIssue
+        class RegistryValidationResult
+        class RegistryValidationSeverity
+    }
+
+    namespace gold_contract {
+        class CompatibilityCheckResult
+        class CompatibilityVerdict
+        class GoldContract
+        class GoldContractRegistry
+    }
+
+    namespace run_manifest {
+        class RunArtifactRef
+        class RunCodeProvenance
+        class RunManifest
+        class RunSourceRef
+    }
+
+    namespace contract_registry_service {
+        class ContractRegistry
+        class RegistryLoadError
+    }
+
+    namespace run_ledger {
+        class RunLedgerEntry
+        class RunLedgerReplayProjection
+    }

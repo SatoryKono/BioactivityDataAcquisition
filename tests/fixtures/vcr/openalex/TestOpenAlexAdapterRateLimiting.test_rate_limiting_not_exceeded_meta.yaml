@@ -4,5 +4,5 @@ cassette_rel_path: tests/fixtures/vcr/openalex/TestOpenAlexAdapterRateLimiting.t
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: ab2d8dc8b8ed5b6e645ade5ec0b731d18adaeb0720701bf4b7df4af81a81d546
-recorded_at: '2026-04-28'
+recorded_at: '2026-07-03'
 staleness_ready: true

@@ -1,0 +1,29 @@
+%% View: Data-Flow | Parent: 02-medallion-full.mermaid
+%% @uniform width=140 height=56 max_title_len=10 max_desc_lines=0
+flowchart TB
+%% keep-orphan: N10, N11, N12, N3, N6, N7, N8, N9
+
+    N1["Bronze"]
+    N2["Silver"]
+    N4["normalize"]
+    N5["flatten"]
+    N6["B1"]
+    N7["B2"]
+    N8["B3"]
+    N9["B4"]
+    N10["S1"]
+    N11["S2"]
+    N12["S3"]
+    N3["Quarantine"]
+
+    N1 --> N4
+    N2 --> N5
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0 stroke:#1E293B,stroke-width:4px
+    linkStyle 1 stroke:#1E293B,stroke-width:4px
