@@ -145,7 +145,7 @@ class StorageRowReconciliationAdapter(RowReconciliationPort):
             labels,
         )
 
-    def _log(self, level: str, message: str, **context: Any) -> None:
+    def _log(self, level: str, message: str, **context: Any) -> None:  # Any: flexible logging context
         log_method = getattr(self.logger, level, None)
         if callable(log_method):
             log_method(message, **context)

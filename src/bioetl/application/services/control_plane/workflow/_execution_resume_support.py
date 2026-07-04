@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import replace
 from datetime import datetime
-from typing import Protocol
+from typing import Any
 from uuid import UUID
 
 from bioetl.domain.control_plane import WorkflowExecutionState, WorkflowManifest
@@ -21,14 +21,6 @@ __all__ = [
     "resolve_skipped_step_ids",
     "validate_resume_state",
 ]
-
-
-class _WorkflowManifestPort(Protocol):
-    def get(self, manifest_id: str) -> WorkflowManifest | None: ...
-
-
-class _WorkflowManifestService(Protocol):
-    manifest_port: _WorkflowManifestPort
 
 
 def load_resume_state(
@@ -98,7 +90,7 @@ def validate_resume_state(
 
 def load_resume_manifest(
     *,
-    manifest_service: _WorkflowManifestService,
+    manifest_service: Any,  # Any: dynamic service to avoid circular import
     latest_state: WorkflowExecutionState,
 ) -> WorkflowManifest:
     """Load the manifest referenced by one persisted execution state."""

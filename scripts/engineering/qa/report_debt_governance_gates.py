@@ -200,6 +200,24 @@ def _remote_main_baseline_artifact_matches_builder(*, repo_root: Path) -> bool:
     )
 
 
+def _unavailable_required_remote_baseline_artifacts(
+    remote_baseline: dict[str, Any],
+) -> list[dict[str, Any]]:
+    remote_artifacts = remote_baseline["artifacts"]
+    required_remote_baseline_paths = set(
+        report_architecture_debt_remote_main_baseline.REQUIRED_BASELINE_ARTIFACTS
+    )
+    return [
+        row
+        for row in remote_artifacts
+        if isinstance(row, dict)
+        and row.get("path") in required_remote_baseline_paths
+        and row.get("required_on_remote", row.get("required", True))
+        and isinstance(row.get("summary"), dict)
+        and not row["summary"].get("available")
+    ]
+
+
 def _parse_generated_at(value: object) -> datetime | None:
     if not isinstance(value, str) or not value.strip():
         return None
@@ -882,7 +900,9 @@ def build_payload(
                         else None
                     )
                     path_prefix = family.get("path_prefix")
-                    if not isinstance(max_count, int) or not isinstance(path_prefix, str):
+                    if not isinstance(max_count, int) or not isinstance(
+                        path_prefix, str
+                    ):
                         continue
                     current = max(
                         count
@@ -1131,18 +1151,9 @@ def build_payload(
         )
     )
 
-    remote_artifacts = remote_baseline["artifacts"]
-    required_remote_baseline_paths = set(
-        report_architecture_debt_remote_main_baseline.REQUIRED_BASELINE_ARTIFACTS
+    unavailable_remote_artifacts = _unavailable_required_remote_baseline_artifacts(
+        remote_baseline
     )
-    unavailable_remote_artifacts = [
-        row
-        for row in remote_artifacts
-        if isinstance(row, dict)
-        and row.get("path") in required_remote_baseline_paths
-        and isinstance(row.get("summary"), dict)
-        and not row["summary"].get("available")
-    ]
     gates.append(
         Gate(
             name="remote_main_architecture_debt_baseline",

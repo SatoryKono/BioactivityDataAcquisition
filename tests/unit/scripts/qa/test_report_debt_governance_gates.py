@@ -190,6 +190,47 @@ def test_compatibility_scorecard_coherence_gate_fails_for_metric_drift() -> None
     assert gate.status == "fail"
 
 
+def test_remote_baseline_allows_branch_introduced_missing_artifacts() -> None:
+    remote_baseline = {
+        "artifacts": [
+            {
+                "path": "reports/quality/compatibility-importer-census.json",
+                "required": True,
+                "required_on_remote": False,
+                "introduced_after_remote_main": True,
+                "summary": {"available": False},
+            },
+            {
+                "path": "reports/quality/module-coverage-inventory.json",
+                "required": True,
+                "required_on_remote": True,
+                "introduced_after_remote_main": False,
+                "summary": {"available": True},
+            },
+        ]
+    }
+
+    assert gates._unavailable_required_remote_baseline_artifacts(remote_baseline) == []
+
+
+def test_remote_baseline_fails_for_missing_artifact_required_on_remote() -> None:
+    remote_baseline = {
+        "artifacts": [
+            {
+                "path": "reports/quality/module-coverage-inventory.json",
+                "required": True,
+                "required_on_remote": True,
+                "introduced_after_remote_main": False,
+                "summary": {"available": False},
+            }
+        ]
+    }
+
+    assert gates._unavailable_required_remote_baseline_artifacts(remote_baseline) == [
+        remote_baseline["artifacts"][0]
+    ]
+
+
 def test_module_coverage_aggregate_residual_limits_returns_none_without_ratchets() -> (
     None
 ):

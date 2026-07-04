@@ -5,6 +5,9 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+import pytest
+
+pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 GOLD_WRITER = ROOT / "src" / "bioetl" / "infrastructure" / "storage" / "gold_writer.py"

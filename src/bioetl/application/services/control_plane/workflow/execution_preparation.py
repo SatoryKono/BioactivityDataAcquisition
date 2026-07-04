@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Protocol
+from typing import Any
 
 from bioetl.application.services.control_plane.workflow._execution_resume_support import (
     load_resume_manifest,
@@ -35,18 +35,6 @@ from bioetl.domain.workflow import (
 __all__ = ["WorkflowExecutionPreparationResult", "prepare_workflow_execution"]
 
 
-class _WorkflowManifestService(Protocol):
-    def compute_execution_fingerprint(
-        self,
-        request: WorkflowManifestCreateSpec,
-    ) -> str: ...
-
-    def create_manifest(
-        self,
-        request: WorkflowManifestCreateSpec,
-    ) -> WorkflowManifest: ...
-
-
 @dataclass(frozen=True, slots=True)
 class WorkflowExecutionPreparationResult:
     """Prepared manifest/state pair and resume cursor for one workflow run."""
@@ -68,7 +56,7 @@ def prepare_workflow_execution(
     resume_run_id: RunID | str | None,
     force_steps: tuple[str, ...],
     repair_steps: tuple[str, ...],
-    manifest_service: _WorkflowManifestService,
+    manifest_service: Any,  # Any: dynamic service to avoid circular import
     workflow_state_port: WorkflowExecutionStatePort,
     now_factory: Callable[[], datetime],
     run_id_factory: Callable[[], RunID],
@@ -109,7 +97,7 @@ def prepare_workflow_execution(
 
 def _prepare_new_execution(
     *,
-    manifest_service: _WorkflowManifestService,
+    manifest_service: Any,  # Any: dynamic service to avoid circular import
     workflow_state_port: WorkflowExecutionStatePort,
     request: WorkflowManifestCreateSpec,
 ) -> WorkflowExecutionPreparationResult:
@@ -134,7 +122,7 @@ def _prepare_resumed_execution(
     resume_run_id: RunID | str | None,
     force_steps: tuple[str, ...],
     repair_steps: tuple[str, ...],
-    manifest_service: _WorkflowManifestService,
+    manifest_service: Any,  # Any: dynamic service to avoid circular import
     workflow_state_port: WorkflowExecutionStatePort,
     now_factory: Callable[[], datetime],
 ) -> WorkflowExecutionPreparationResult:

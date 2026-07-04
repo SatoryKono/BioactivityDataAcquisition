@@ -4,34 +4,21 @@
       "classification": "cross_file",
       "count": 2,
       "lane_counts": {
-        "unit": 2
+        "architecture": 2
       },
       "locations": [
-        "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py:299",
-        "tests/unit/domain/aggregates/test_batch_internal_modules.py:211"
+        "tests/architecture/test_tech_debt_issues_5839_5845_closeout.py:96",
+        "tests/architecture/test_tech_debt_issues_5861_5864_closeout.py:61"
       ],
-      "name": "test_mark_committed_emits_batch_written_event",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "unit": 2
-      },
-      "locations": [
-        "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py:317",
-        "tests/unit/domain/aggregates/test_batch_internal_modules.py:296"
-      ],
-      "name": "test_mark_failed_emits_batch_failed_event",
+      "name": "test_tdx_audit_closeout_artifact_is_complete_and_budget_safe",
       "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
     }
   ],
   "summary": {
-    "cross_file_groups": 2,
-    "duplicate_occurrences": 4,
+    "cross_file_groups": 1,
+    "duplicate_occurrences": 2,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 2
+    "total_duplicate_names": 1
   }
 }

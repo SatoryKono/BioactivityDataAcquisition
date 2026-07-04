@@ -2,8 +2,10 @@
   "artifacts": [
     {
       "blob_sha256": "a86a94bff317a2284d97d7714046390a72d1a2d7d4561b242036710934417916",
+      "introduced_after_remote_main": false,
       "path": "reports/quality/architecture-quality-scorecard.json",
       "required": true,
+      "required_on_remote": true,
       "source_revision": "443f4bcb4369dc69d8793767cf2585946337b6e7",
       "summary": {
         "available": true,
@@ -14,8 +16,10 @@
     },
     {
       "blob_sha256": "c087a08cff51b0bacec25f59362e11ecedc2bdad5e778ecc68698d4f8967fc44",
+      "introduced_after_remote_main": false,
       "path": "reports/quality/module-coverage-inventory.json",
       "required": true,
+      "required_on_remote": true,
       "source_revision": "443f4bcb4369dc69d8793767cf2585946337b6e7",
       "summary": {
         "available": true,
@@ -29,8 +33,10 @@
     },
     {
       "blob_sha256": null,
+      "introduced_after_remote_main": true,
       "path": "reports/quality/compatibility-importer-census.json",
       "required": true,
+      "required_on_remote": false,
       "source_revision": "443f4bcb4369dc69d8793767cf2585946337b6e7",
       "summary": {
         "available": false
@@ -38,8 +44,10 @@
     },
     {
       "blob_sha256": null,
+      "introduced_after_remote_main": true,
       "path": "reports/quality/dead-code-inventory.json",
       "required": true,
+      "required_on_remote": false,
       "source_revision": "443f4bcb4369dc69d8793767cf2585946337b6e7",
       "summary": {
         "available": false
@@ -47,8 +55,10 @@
     },
     {
       "blob_sha256": null,
+      "introduced_after_remote_main": true,
       "path": "reports/quality/contract-registry-diagnostics.json",
       "required": true,
+      "required_on_remote": false,
       "source_revision": "443f4bcb4369dc69d8793767cf2585946337b6e7",
       "summary": {
         "available": false
@@ -56,15 +66,17 @@
     },
     {
       "blob_sha256": null,
+      "introduced_after_remote_main": true,
       "path": "reports/observability/runtime_cardinality_inventory.json",
       "required": false,
+      "required_on_remote": false,
       "source_revision": "443f4bcb4369dc69d8793767cf2585946337b6e7",
       "summary": {
         "available": false
       }
     }
   ],
-  "baseline_artifact_fingerprint": "033d7283319c808882474259e7b1a4b24f0e503bc9899ce3ea3d4aafc9104179",
+  "baseline_artifact_fingerprint": "0ebcab4c8a5def090c4ca996388a1b035044e2e9fb0f3b45183a0e93479065d7",
   "branch": "main",
   "dirty_closeout_guard": {
     "command": "git status --porcelain --untracked-files=no",

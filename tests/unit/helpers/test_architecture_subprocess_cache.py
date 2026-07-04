@@ -4,8 +4,11 @@ import pickle
 import subprocess
 from pathlib import Path
 
+import pytest
+
 from tests.architecture import conftest as architecture_conftest
 
+pytestmark = pytest.mark.unit
 
 def _write_cache_payload(path: Path, payload: dict[str, object]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)

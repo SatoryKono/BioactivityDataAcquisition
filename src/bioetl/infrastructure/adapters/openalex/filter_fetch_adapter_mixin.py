@@ -6,7 +6,7 @@ from collections.abc import AsyncIterator
 from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BronzeRecord, JsonDict
-from bioetl.infrastructure.adapters.filterable_mixin import raising_async_iterator
+from bioetl.infrastructure.adapters.filterable_mixin import NotSupportedMultiFilterMixin
 from bioetl.infrastructure.adapters.openalex._filter_fetch_flow import (
     iterate_fallback_request,
     iterate_fetch_request,
@@ -31,8 +31,13 @@ if TYPE_CHECKING:
     )
 
 
-class OpenAlexAdapterFilterFetchMixin:
+class OpenAlexAdapterFilterFetchMixin(NotSupportedMultiFilterMixin):
     """OpenAlex fetch/filter orchestration for FilterableDataSourcePort behavior."""
+
+    unsupported_multi_filter_message = (
+        "OpenAlex adapter does not support multi-field filtering. "
+        "Use fetch_filtered() with filter_field='doi' instead."
+    )
 
     logger: LoggerPort
     _logger: LoggerPort
@@ -93,21 +98,6 @@ class OpenAlexAdapterFilterFetchMixin:
         """Fetch works by title."""
         async for work in self._cursor_flow.iter_filtered_by_title(titles, limit):
             yield work
-
-    def fetch_multi_filtered(
-        self,
-        entity_type: str,
-        filters: dict[str, list[str]],
-        limit: int | None = None,
-    ) -> AsyncIterator[BronzeRecord]:
-        """Multi-field filtering is not supported by OpenAlex."""
-        del entity_type, filters, limit
-        return raising_async_iterator(
-            NotImplementedError(
-                "OpenAlex adapter does not support multi-field filtering. "
-                "Use fetch_filtered() with filter_field='doi' instead."
-            )
-        )
 
     async def _batch_doi_lookup(
         self,

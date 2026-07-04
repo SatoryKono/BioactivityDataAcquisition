@@ -534,7 +534,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1476",
+      "line": "1484",
       "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_gold_merged_empty_records_returns"
@@ -569,14 +569,14 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "91",
+      "line": "89",
       "path": "tests/unit/infrastructure/storage/test_metadata_writer.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_writer_metadata_writer__aclose_is_idempotent__fcefbe68"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "195",
+      "line": "193",
       "path": "tests/unit/infrastructure/storage/test_metadata_writer.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_noop_aclose_is_idempotent"
@@ -597,21 +597,21 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "173",
+      "line": "174",
       "path": "tests/unit/infrastructure/storage/test_silver_writer_validation.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_silver_pandera_with_noop_validator"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "183",
+      "line": "184",
       "path": "tests/unit/infrastructure/storage/test_silver_writer_validation.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_silver_pandera_with_valid_records"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "197",
+      "line": "198",
       "path": "tests/unit/infrastructure/storage/test_silver_writer_validation.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_validate_silver_pandera_accepts_target_records_without_removed_fields"
@@ -653,21 +653,21 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "72",
+      "line": "84",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_dq.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_enforce_write_policy_allows_mode"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "78",
+      "line": "81",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_lineage.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_log_silver_audit_skips_when_no_audit"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "281",
+      "line": "297",
       "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_lineage.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_silver_without_bronze_refs"
@@ -1233,38 +1233,25 @@
       "classification": "cross_file",
       "count": 2,
       "lane_counts": {
-        "unit": 2
+        "architecture": 2
       },
       "locations": [
-        "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py:299",
-        "tests/unit/domain/aggregates/test_batch_internal_modules.py:211"
+        "tests/architecture/test_tech_debt_issues_5839_5845_closeout.py:96",
+        "tests/architecture/test_tech_debt_issues_5861_5864_closeout.py:61"
       ],
-      "name": "test_mark_committed_emits_batch_written_event",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    },
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "unit": 2
-      },
-      "locations": [
-        "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py:317",
-        "tests/unit/domain/aggregates/test_batch_internal_modules.py:296"
-      ],
-      "name": "test_mark_failed_emits_batch_failed_event",
+      "name": "test_tdx_audit_closeout_artifact_is_complete_and_budget_safe",
       "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
     }
   ],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 2,
-    "duplicate_occurrences": 4,
+    "cross_file_groups": 1,
+    "duplicate_occurrences": 2,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 2
+    "total_duplicate_names": 1
   },
-  "duplicate_test_name_occurrences": 4,
-  "duplicate_test_names": 2,
+  "duplicate_test_name_occurrences": 2,
+  "duplicate_test_names": 1,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1273,10 +1260,10 @@
     "scan_root": "tests/fixtures",
     "scope_file_counts": {
       "fixture": 21,
-      "golden": 21,
+      "golden": 24,
       "vcr": 396
     },
-    "total_files": 438,
+    "total_files": 441,
     "tracked_extensions": [
       ".json",
       ".yaml",
@@ -1823,7 +1810,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1476",
+        "line": "1484",
         "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_gold_merged_empty_records_returns"
@@ -1858,14 +1845,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "91",
+        "line": "89",
         "path": "tests/unit/infrastructure/storage/test_metadata_writer.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_writer_metadata_writer__aclose_is_idempotent__fcefbe68"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "195",
+        "line": "193",
         "path": "tests/unit/infrastructure/storage/test_metadata_writer.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_noop_aclose_is_idempotent"
@@ -1886,21 +1873,21 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "173",
+        "line": "174",
         "path": "tests/unit/infrastructure/storage/test_silver_writer_validation.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_silver_pandera_with_noop_validator"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "183",
+        "line": "184",
         "path": "tests/unit/infrastructure/storage/test_silver_writer_validation.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_silver_pandera_with_valid_records"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "197",
+        "line": "198",
         "path": "tests/unit/infrastructure/storage/test_silver_writer_validation.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_validate_silver_pandera_accepts_target_records_without_removed_fields"
@@ -1942,21 +1929,21 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "72",
+        "line": "84",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_dq.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_enforce_write_policy_allows_mode"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "78",
+        "line": "81",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_lineage.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_log_silver_audit_skips_when_no_audit"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "281",
+        "line": "297",
         "path": "tests/unit/infrastructure/storage/silver_writer/test_silver_writer_lineage.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_silver_without_bronze_refs"
@@ -2213,38 +2200,25 @@
         "classification": "cross_file",
         "count": 2,
         "lane_counts": {
-          "unit": 2
+          "architecture": 2
         },
         "locations": [
-          "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py:299",
-          "tests/unit/domain/aggregates/test_batch_internal_modules.py:211"
+          "tests/architecture/test_tech_debt_issues_5839_5845_closeout.py:96",
+          "tests/architecture/test_tech_debt_issues_5861_5864_closeout.py:61"
         ],
-        "name": "test_mark_committed_emits_batch_written_event",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      },
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "unit": 2
-        },
-        "locations": [
-          "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py:317",
-          "tests/unit/domain/aggregates/test_batch_internal_modules.py:296"
-        ],
-        "name": "test_mark_failed_emits_batch_failed_event",
+        "name": "test_tdx_audit_closeout_artifact_is_complete_and_budget_safe",
         "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
       }
     ],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 2,
-      "duplicate_occurrences": 4,
+      "cross_file_groups": 1,
+      "duplicate_occurrences": 2,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 2
+      "total_duplicate_names": 1
     },
-    "duplicate_test_name_occurrences": 4,
-    "duplicate_test_names": 2,
+    "duplicate_test_name_occurrences": 2,
+    "duplicate_test_names": 1,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -2253,10 +2227,10 @@
       "scan_root": "tests/fixtures",
       "scope_file_counts": {
         "fixture": 21,
-        "golden": 21,
+        "golden": 24,
         "vcr": 396
       },
-      "total_files": 438,
+      "total_files": 441,
       "tracked_extensions": [
         ".json",
         ".yaml",
@@ -2271,32 +2245,24 @@
       {
         "count": 2,
         "examples": [
-          "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py:299",
-          "tests/unit/domain/aggregates/test_batch_internal_modules.py:211"
+          "tests/architecture/test_tech_debt_issues_5839_5845_closeout.py:96",
+          "tests/architecture/test_tech_debt_issues_5861_5864_closeout.py:61"
         ],
-        "name": "test_mark_committed_emits_batch_written_event"
-      },
-      {
-        "count": 2,
-        "examples": [
-          "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py:317",
-          "tests/unit/domain/aggregates/test_batch_internal_modules.py:296"
-        ],
-        "name": "test_mark_failed_emits_batch_failed_event"
+        "name": "test_tdx_audit_closeout_artifact_is_complete_and_budget_safe"
       }
     ],
-    "total_test_files": 1906,
-    "total_test_functions": 21706,
+    "total_test_files": 1930,
+    "total_test_functions": 21784,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "b835b0bbdd4e8acbaae006f1e6edeb5d29c6ed54ca1f19f2c126d282839bb79d",
+  "source_tree_sha256": "78e0b9b48c74ffa8c5360bc8b42aa4193f920c6963445e85badfddc226271c9b",
   "summary": {
     "assertless_total_candidates": 109,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 4,
-    "duplicate_test_names": 2,
+    "duplicate_test_name_occurrences": 2,
+    "duplicate_test_names": 1,
     "intentional_no_exception_contract": 94,
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
@@ -2306,21 +2272,13 @@
     {
       "count": 2,
       "examples": [
-        "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py:299",
-        "tests/unit/domain/aggregates/test_batch_internal_modules.py:211"
+        "tests/architecture/test_tech_debt_issues_5839_5845_closeout.py:96",
+        "tests/architecture/test_tech_debt_issues_5861_5864_closeout.py:61"
       ],
-      "name": "test_mark_committed_emits_batch_written_event"
-    },
-    {
-      "count": 2,
-      "examples": [
-        "tests/unit/domain/aggregates/test_batch_fsm_exhaustive.py:317",
-        "tests/unit/domain/aggregates/test_batch_internal_modules.py:296"
-      ],
-      "name": "test_mark_failed_emits_batch_failed_event"
+      "name": "test_tdx_audit_closeout_artifact_is_complete_and_budget_safe"
     }
   ],
-  "total_test_files": 1906,
-  "total_test_functions": 21706,
+  "total_test_files": 1930,
+  "total_test_functions": 21784,
   "uuid4_call_sites": 0
 }

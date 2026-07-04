@@ -84,6 +84,8 @@ class NotSupportedMultiFilterMixin:
 
     Requirements:
         - Class must have a `provider_name` attribute (str)
+        - Class may define `unsupported_multi_filter_message` to preserve a
+          provider-specific error message.
 
     Example:
         >>> class PubChemAdapter(NotSupportedMultiFilterMixin, BaseHttpAdapter):
@@ -92,6 +94,7 @@ class NotSupportedMultiFilterMixin:
     """
 
     provider_name: str  # Must be defined by the adapter class
+    unsupported_multi_filter_message: str | None = None
 
     def fetch_multi_filtered(
         self,
@@ -118,12 +121,11 @@ class NotSupportedMultiFilterMixin:
         # Mark unused parameters
         del entity_type, filters, limit
 
-        return raising_async_iterator(
-            NotImplementedError(
-                f"{self.provider_name} does not support multi-field filtering. "
-                "Use fetch_filtered() with a single filter_field instead."
-            )
+        message = self.unsupported_multi_filter_message or (
+            f"{self.provider_name} does not support multi-field filtering. "
+            "Use fetch_filtered() with a single filter_field instead."
         )
+        return raising_async_iterator(NotImplementedError(message))
 
 
 class DelegatingFallbackMixin:

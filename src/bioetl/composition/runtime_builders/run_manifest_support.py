@@ -29,10 +29,6 @@ from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
     resolve_provider_entity,
     resolve_replay_parentage,
 )
-from bioetl.composition.runtime_builders._snapshot_mapping_support import (
-    normalize_snapshot,
-    to_serializable_mapping,
-)
 from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
     RunManifestContractIdentity,
     build_contract_identity_field_values,  # noqa: F401
@@ -67,13 +63,11 @@ __all__ = [
     "extract_optional_updates_from_refs",
     "iter_optional_control_plane_updates",
     "iter_optional_control_plane_updates_from_mapping",
-    "normalize_snapshot",
     "resolve_contract_identity",
     "resolve_provider_entity",
     "resolve_replay_capability",
     "resolve_replay_parentage",
     "resolve_run_context_values",
-    "to_serializable_mapping",
     "validate_reproducible_sink_modes",
 ]
 

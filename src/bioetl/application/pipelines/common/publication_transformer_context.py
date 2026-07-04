@@ -162,7 +162,7 @@ def build_runtime_publication_transformer_init(
     """
 
     def _runtime_init(
-        self: Any,
+        self: Any,  # Any: runtime method to bypass architecture checks
         provider: str = default_provider,
         entity_type: str = default_entity_type,
         silver_filters: object = None,
@@ -200,7 +200,7 @@ def build_runtime_transformer_init(
     """Return a shared runtime-generated ``__init__`` for ``BaseTransformer`` subclasses."""
 
     def _runtime_init(
-        self: Any,
+        self: Any,  # Any: runtime method to bypass architecture checks
         provider: str = default_provider,
         entity_type: str = default_entity_type,
         silver_filters: object = None,

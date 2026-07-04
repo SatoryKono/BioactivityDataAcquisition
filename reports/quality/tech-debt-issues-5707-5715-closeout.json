@@ -106,15 +106,15 @@
       "max": 0
     },
     "full_app_duplicate_clusters": {
-      "current": 49,
+      "current": 45,
       "max": 68
     },
     "adapter_duplicate_clusters": {
-      "current": 44,
+      "current": 42,
       "max": 55
     },
     "pipeline_duplicate_clusters": {
-      "current": 5,
+      "current": 3,
       "max": 13
     },
     "compatibility_test_files": {
@@ -122,11 +122,11 @@
       "max": 0
     },
     "duplicate_test_names": {
-      "current": 2,
+      "current": 1,
       "max": 2
     },
     "duplicate_test_name_occurrences": {
-      "current": 4,
+      "current": 2,
       "max": 4
     },
     "markerless_test_functions": {
@@ -164,10 +164,10 @@
         "module_coverage_inventory": false,
         "remote_main_baseline": false
       },
-      "module_coverage_source_tree_sha256": "f3c3ead1eb3b704685f7ff623f7c48202d825ff8acacc062e0110a010b01ae22",
-      "architecture_quality_score": 8.56,
-      "remote_main_baseline_fingerprint": "c8faba67f743e7c5e2fff500a9b537505b5a134d8ef843ec84d4fe66d7ded489",
-      "architecture_quality_scorecard_source_tree_sha256": "f3c3ead1eb3b704685f7ff623f7c48202d825ff8acacc062e0110a010b01ae22"
+      "module_coverage_source_tree_sha256": "5827c583dc4a381e375c80846df28924efc7a8dbf2d99579eb506075b2f0e544",
+      "architecture_quality_score": 8.57,
+      "remote_main_baseline_fingerprint": "0ebcab4c8a5def090c4ca996388a1b035044e2e9fb0f3b45183a0e93479065d7",
+      "architecture_quality_scorecard_source_tree_sha256": "5827c583dc4a381e375c80846df28924efc7a8dbf2d99579eb506075b2f0e544"
     },
     "5708": {
       "shared_delegation_helper": "src/bioetl/infrastructure/adapters/decorators/_data_source_delegation.py",
@@ -175,16 +175,15 @@
         "src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py",
         "src/bioetl/infrastructure/adapters/decorators/retry.py"
       ],
-      "adapter_duplicate_clusters": 44,
+      "adapter_duplicate_clusters": 42,
       "adapter_duplicate_clusters_no_growth_max": 55,
       "bounded_actionability_categories": [
-        "adapter_resilience_or_contract_template",
         "export_facade_or_package_barrel"
       ]
     },
     "5709": {
       "opening_pipeline_duplicate_clusters": 15,
-      "pipeline_duplicate_clusters": 5,
+      "pipeline_duplicate_clusters": 3,
       "pipeline_duplicate_clusters_no_growth_max": 13,
       "dominant_actionability_category": "pipeline_transformer_contract_pattern",
       "decision": "reduced_shared_uniprot_comment_annotation_output_keys"
@@ -203,10 +202,10 @@
       }
     },
     "5711": {
-      "source_module_count": 2211,
+      "source_module_count": 2210,
       "unmeasured_module_count": 0,
       "uncovered_module_count": 0,
-      "no_executable_line_modules": 22,
+      "no_executable_line_modules": 21,
       "source_tree_sha256": "f3c3ead1eb3b704685f7ff623f7c48202d825ff8acacc062e0110a010b01ae22",
       "under70_module_count_before": 18,
       "under70_module_count_after": 9,
@@ -223,8 +222,8 @@
     "5713": {
       "compatibility_test_files": 0,
       "compatibility_test_file_max": 0,
-      "duplicate_test_names": 2,
-      "duplicate_test_name_occurrences": 4,
+      "duplicate_test_names": 1,
+      "duplicate_test_name_occurrences": 2,
       "refined_assertless_tests": 0,
       "markerless_test_functions": 0,
       "uuid4_call_sites": 0

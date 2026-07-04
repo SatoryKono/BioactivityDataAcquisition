@@ -85,12 +85,12 @@
   "ratchets": {
     "adapter_duplicate_clusters": {
       "opening": 55,
-      "current": 44,
+      "current": 42,
       "max": 44
     },
     "pipeline_duplicate_clusters": {
       "opening": 13,
-      "current": 5,
+      "current": 3,
       "max": 5
     },
     "application_core_total_loc": {
@@ -144,19 +144,19 @@
       "release_gate_status": "passing",
       "fail_count": 0,
       "warn_count": 0,
-      "architecture_quality_score": 8.56,
-      "module_coverage_source_tree_sha256": "6f3db1664076eb32471b784f3f5808a12072a31d69e82d027ff7e31d3f99de61",
-      "remote_main_baseline_fingerprint": "d5a28015287cd3e7fc7c04e0182d7255db6cee9116057f11f1ba34dab893aedb",
-      "architecture_quality_scorecard_source_tree_sha256": "6f3db1664076eb32471b784f3f5808a12072a31d69e82d027ff7e31d3f99de61"
+      "architecture_quality_score": 8.57,
+      "module_coverage_source_tree_sha256": "5827c583dc4a381e375c80846df28924efc7a8dbf2d99579eb506075b2f0e544",
+      "remote_main_baseline_fingerprint": "0ebcab4c8a5def090c4ca996388a1b035044e2e9fb0f3b45183a0e93479065d7",
+      "architecture_quality_scorecard_source_tree_sha256": "5827c583dc4a381e375c80846df28924efc7a8dbf2d99579eb506075b2f0e544"
     },
     "5745": {
       "opening_adapter_duplicate_clusters": 55,
-      "adapter_duplicate_clusters": 44,
+      "adapter_duplicate_clusters": 42,
       "shared_error_bundle": "COMMON_ADAPTER_FETCH_RESILIENCE_ERRORS"
     },
     "5746": {
       "opening_pipeline_duplicate_clusters": 13,
-      "pipeline_duplicate_clusters": 5,
+      "pipeline_duplicate_clusters": 3,
       "openalex_facade_export_strategy": "owner_module_all_exports"
     },
     "5747": {
