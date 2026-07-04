@@ -108,12 +108,6 @@ BronzeWriter:
   expiry: "2026-12-31"
   reason: "Bronze writer still aggregates IO, metrics, manifest, and checkpoint collaborators."
 
-SilverWriter:
-  max_args: 20
-  owner: "@bioetl-storage"
-  expiry: "2026-12-31"
-  reason: "Silver writer remains the largest storage constructor and needs a dedicated decomposition wave."
-
 AnchorSpec:
   max_args: 19
   owner: "@bioetl-http"
