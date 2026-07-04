@@ -164,10 +164,10 @@
         "module_coverage_inventory": false,
         "remote_main_baseline": false
       },
-      "module_coverage_source_tree_sha256": "ec24d27c2bff798ca9b7aa64584bb26f849580a180a482f56d849013aa739341",
+      "module_coverage_source_tree_sha256": "bdc18d07ca1a26d66f13c5b0a556627ee93dcd9300fd4697a6e7a6570ab03b7f",
       "architecture_quality_score": 8.57,
       "remote_main_baseline_fingerprint": "0ebcab4c8a5def090c4ca996388a1b035044e2e9fb0f3b45183a0e93479065d7",
-      "architecture_quality_scorecard_source_tree_sha256": "ec24d27c2bff798ca9b7aa64584bb26f849580a180a482f56d849013aa739341"
+      "architecture_quality_scorecard_source_tree_sha256": "bdc18d07ca1a26d66f13c5b0a556627ee93dcd9300fd4697a6e7a6570ab03b7f"
     },
     "5708": {
       "shared_delegation_helper": "src/bioetl/infrastructure/adapters/decorators/_data_source_delegation.py",
