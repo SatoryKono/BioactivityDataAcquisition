@@ -4,5 +4,5 @@ cassette_rel_path: tests/fixtures/vcr/crossref/test_crossref_search_by_title.yam
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: 131b1ff1eb7aca25cc86e801a467d9d745cf3ca0294ed08edaf25f42d0c56623
-recorded_at: '2026-04-28'
+recorded_at: '2026-07-03'
 staleness_ready: true

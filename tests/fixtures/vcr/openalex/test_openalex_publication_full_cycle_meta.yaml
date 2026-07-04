@@ -4,5 +4,5 @@ cassette_rel_path: tests/fixtures/vcr/openalex/test_openalex_publication_full_cy
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: 823064f209ae629b5c06fc7d6ba9366111a69b2740e574e4c89d3ce7b2f1c945
-recorded_at: '2026-04-28'
+recorded_at: '2026-07-03'
 staleness_ready: true

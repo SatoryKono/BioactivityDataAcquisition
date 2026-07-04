@@ -4,5 +4,5 @@ cassette_rel_path: tests/fixtures/vcr/chembl/test_pipeline_resume_after_failure.
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: dd074e2892f72643bb438df211c6fa341cf590730a52a7a82dc86e8beaab36e3
-recorded_at: '2026-04-28'
+recorded_at: '2026-07-03'
 staleness_ready: true

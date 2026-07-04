@@ -4,5 +4,5 @@ cassette_rel_path: tests/fixtures/vcr/chembl/TestChemblCompoundRecordPipeline.te
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: c622a59624b6d57a16b3d1ff7a96fbd273cd5f60c451993e46c142e88a299ff2
-recorded_at: '2026-04-28'
+recorded_at: '2026-07-03'
 staleness_ready: true
