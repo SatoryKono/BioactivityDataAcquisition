@@ -180,10 +180,11 @@ def test_issue_5933_governance_artifacts_are_rebaselined() -> None:
     )
 
     assert remote["local_tracking_ref_matches_remote"] is True
+    assert all("introduced_after_remote_main" in row for row in remote["artifacts"])
+    assert all("required_on_remote" in row for row in remote["artifacts"])
     missing_rows = [
         row for row in remote["artifacts"] if not row["summary"].get("available")
     ]
-    assert missing_rows
     assert all(row["introduced_after_remote_main"] is True for row in missing_rows)
     assert all(row["required_on_remote"] is False for row in missing_rows)
     assert not [
