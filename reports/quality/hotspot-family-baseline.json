@@ -72,7 +72,7 @@
       "files_ge_250_loc": 2,
       "helper_function_ratio": 0.417,
       "max_internal_fan_in": 3,
-      "max_internal_fan_in_module": "bioetl.composition.factories.pipeline.factory_method_helpers",
+      "max_internal_fan_in_module": "bioetl.composition.factories.pipeline.construction_types",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 3,
         "max_internal_fan_in": 3

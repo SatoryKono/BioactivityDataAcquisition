@@ -882,7 +882,7 @@ nav:
                     -   "Report Template": 00-project/ai/skills/local/documentation-audit/references/report-template.md
                     -   "Skill": 00-project/ai/skills/local/documentation-cascade-audit/SKILL.md
                     -   "Skill": 00-project/ai/skills/local/new-pipeline/SKILL.md
-                    -   "Skill": 00-project/ai/skills/global/public/architecture-guardian/SKILL.md
+                    -   "Skill": 00-project/ai/skills/local/public/architecture-guardian/SKILL.md
                     -   "Architecture Debt Bot": 00-project/ai/skills/local/py-architecture-debt-bot/SKILL.md
                     -   "Skill": 00-project/ai/skills/local/py-audit-bot/SKILL.md
                     -   "Legacy Skill py-code-bot": 00-project/ai/skills/local/py-code-bot/SKILL.md
