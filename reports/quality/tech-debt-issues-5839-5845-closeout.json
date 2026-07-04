@@ -1,6 +1,6 @@
 {
   "schema_version": "tech-debt-issues-5839-5845-closeout-v1",
-  "generated_on": "2026-07-02",
+  "generated_on": "2026-07-04",
   "debt_budget_policy": "flat_or_decreasing_only",
   "parent_theme": "tdx-audit-2026-07-01",
   "issues": [
@@ -98,13 +98,13 @@
       "source": "reports/quality/compatibility-importer-census.json"
     },
     "adapter_duplicate_clusters": {
-      "current": 44,
+      "current": 42,
       "max": 53,
       "previous_audit_baseline": 54,
       "source": "reports/quality/full-app-duplication-baseline.json"
     },
     "pipeline_duplicate_clusters": {
-      "current": 5,
+      "current": 3,
       "max": 10,
       "previous_audit_baseline": 11,
       "source": "reports/quality/full-app-duplication-baseline.json"
@@ -127,7 +127,7 @@
       "source": "reports/quality/module-coverage-inventory.json"
     },
     "zero_reference_supporting_scripts": {
-      "current": 50,
+      "current": 47,
       "entries_without_owner_metadata": 0,
       "source": "configs/quality/scripts_inventory_manifest.json"
     }
