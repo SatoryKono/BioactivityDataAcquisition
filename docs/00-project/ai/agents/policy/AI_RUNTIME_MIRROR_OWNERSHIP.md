@@ -22,7 +22,7 @@ ______________________________________________________________________
 
 | Surface | Primary role | Source-of-truth status | Editable for behavior | Expected content |
 | ----------------------- | --------------------------------- | ---------------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `.codex/**` | Codex runtime surface | Canonical for tracked runtime behavior on `main` | Yes | live agent registry, skills, Codex-specific orchestration, runtime settings |
+| `.codex/**` | Codex runtime surface | Canonical for tracked runtime behavior on `main` | Yes | live agent registry (`.codex/agents/*.md` tracked), skills, Codex-specific orchestration, runtime settings |
 | `.gemini/settings.json` | Gemini local config surface | Local-only runtime config; not a tracked behavior tree on `main` | Yes, for machine-local settings only | optional local checkout settings with machine-specific paths |
 | `.gemini/agents/**`, `.gemini/skills/**` | Gemini runtime behavior tree | Not present in the current `main` checkout | No tracked source on `main` today | if a future task adds them, they must be verified and documented in the same change |
 | `docs/00-project/ai/**` | Published/internal mirror surface | Not canonical for runtime behavior | Only for mirror/index/guidance updates | curated mirrors, navigation, contributor guidance, memory entrypoints, prompt and skill indexes |
@@ -92,6 +92,10 @@ This means:
 1. Run surface-specific validation from `POST_CHANGE_VALIDATION.md`.
 1. Report any intentional divergence explicitly, including why it exists and
    who owns the follow-up.
+
+For broad mechanical normalization of Codex runtime source links and docs mirror
+governance anchors, use `scripts/ai/sync_ai_governance.py --check` before
+applying changes with the same script.
 
 ## Allowed Divergence
 

@@ -7,8 +7,6 @@ from typing import Protocol
 
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.silver.finalization_models import (
-    _coerce_silver_write_finalization_preparation_request,
-    _coerce_silver_write_result_finalization_request,
     _SilverWriteFinalizationPreparationRequest,
     _SilverWriteResultFinalizationRequest,
 )
@@ -29,10 +27,9 @@ class _SilverMetadataFinalizationOps(Protocol):
 
     async def _prepare_silver_write_finalization_context(
         self,
-        request: _SilverWriteFinalizationPreparationRequest | None = None,
-        *args: object,
+        request: _SilverWriteFinalizationPreparationRequest,
+        *,
         perf_counter: Callable[[], float] | None = None,
-        **kwargs: object,
     ) -> _PreparedSilverWriteFinalizationContext: ...
 
     async def _write_silver_metadata(
@@ -62,21 +59,14 @@ async def prepare_silver_write_finalization_context_with_default_perf_counter(
 
 async def prepare_silver_write_finalization_context_operation(
     metadata_ops: _SilverMetadataFinalizationOps,
-    request: _SilverWriteFinalizationPreparationRequest | None = None,
+    request: _SilverWriteFinalizationPreparationRequest,
     *,
-    args: tuple[object, ...] = (),
     perf_counter: Callable[[], float] | None = None,
-    kwargs: dict[str, object] | None = None,
 ) -> _PreparedSilverWriteFinalizationContext:
     """Prepare DQ/version/timing context before Silver metadata persistence."""
-    resolved_request = _coerce_silver_write_finalization_preparation_request(
-        request,
-        args=args,
-        kwargs=kwargs or {},
-    )
     return await prepare_silver_write_finalization_context_with_default_perf_counter(
         metadata_ops,
-        resolved_request,
+        request,
         perf_counter=perf_counter,
     )
 
@@ -87,13 +77,15 @@ async def finalize_silver_write_result_from_request(
 ) -> SilverWriteResult | None:
     """Compute DQ metrics, write metadata, and build one final Silver result."""
     context = await metadata_ops._prepare_silver_write_finalization_context(
-        table_name=request.table_name,
-        records=request.records,
-        table_path=request.table_path,
-        quarantined_count=request.quarantined_count,
-        validation_errors=request.validation_errors,
-        started_at=request.started_at,
-        start_perf=request.start_perf,
+        _SilverWriteFinalizationPreparationRequest(
+            table_name=request.table_name,
+            records=request.records,
+            table_path=request.table_path,
+            quarantined_count=request.quarantined_count,
+            validation_errors=request.validation_errors,
+            started_at=request.started_at,
+            start_perf=request.start_perf,
+        )
     )
 
     await metadata_ops._write_silver_metadata(
@@ -126,18 +118,10 @@ async def finalize_silver_write_result_from_request(
 
 async def finalize_silver_write_result_operation(
     metadata_ops: _SilverMetadataFinalizationOps,
-    request: _SilverWriteResultFinalizationRequest | None = None,
-    *,
-    args: tuple[object, ...] = (),
-    kwargs: dict[str, object] | None = None,
+    request: _SilverWriteResultFinalizationRequest,
 ) -> SilverWriteResult | None:
     """Compute DQ metrics, write metadata, and build final result."""
-    resolved_request = _coerce_silver_write_result_finalization_request(
-        request,
-        args=args,
-        kwargs=kwargs or {},
-    )
     return await finalize_silver_write_result_from_request(
         metadata_ops,
-        resolved_request,
+        request,
     )

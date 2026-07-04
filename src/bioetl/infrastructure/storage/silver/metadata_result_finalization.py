@@ -13,7 +13,6 @@ from bioetl.infrastructure.storage.delta.table_ops import (
     normalize_delta_filesystem_path,
 )
 from bioetl.infrastructure.storage.silver.finalization_models import (
-    _coerce_silver_write_finalization_preparation_request,
     _SilverWriteFinalizationPreparationRequest,
 )
 from bioetl.infrastructure.storage.silver.metadata_operation_protocols import (
@@ -47,26 +46,20 @@ def _read_delta_version(table_path: str) -> int:
 
 async def _prepare_silver_write_finalization_context(
     host: _SilverWriteFinalizationHostProtocol,
-    request: _SilverWriteFinalizationPreparationRequest | None = None,
-    *args: object,
+    request: _SilverWriteFinalizationPreparationRequest,
+    *,
     perf_counter: Callable[[], float] = time.perf_counter,
-    **kwargs: object,
 ) -> _PreparedSilverWriteFinalizationContext:
     """Prepare DQ/version/timing context before Silver metadata persistence."""
-    resolved_request = _coerce_silver_write_finalization_preparation_request(
-        request,
-        args=args,
-        kwargs=kwargs,
-    )
     dq_metrics = await host._compute_dq_metrics(
-        resolved_request.table_name,
-        resolved_request.records,
-        quarantined_count=resolved_request.quarantined_count or 0,
-        validation_errors=resolved_request.validation_errors,
+        request.table_name,
+        request.records,
+        quarantined_count=request.quarantined_count or 0,
+        validation_errors=request.validation_errors,
     )
-    version_after = await host._get_delta_version(resolved_request.table_path)
-    completed_at = resolved_request.started_at + timedelta(
-        seconds=perf_counter() - resolved_request.start_perf
+    version_after = await host._get_delta_version(request.table_path)
+    completed_at = request.started_at + timedelta(
+        seconds=perf_counter() - request.start_perf
     )
     return _PreparedSilverWriteFinalizationContext(
         dq_metrics=dq_metrics,

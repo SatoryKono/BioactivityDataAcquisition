@@ -14,9 +14,6 @@ from bioetl.application.core.base_transformer import BaseTransformer
 from bioetl.composition.factories.datasource.data_source_factory import (
     DataSourceCreatorProtocol,
 )
-from bioetl.composition.factories.pipeline.control_plane_artifacts import (
-    ControlPlaneArtifacts,
-)
 from bioetl.composition.factories.pipeline.creation_support import (
     _PipelineCreationRequest,
 )
@@ -30,6 +27,7 @@ from bioetl.domain.ports import (
     DQMonitorPort,
     LoggerPort,
     MetricsPort,
+    PipelineControlPlaneArtifacts,
     PipelineCreateRunnerRequest,
     TracingPort,
 )
@@ -60,11 +58,11 @@ class _BuildFactoryServicesRequest:
 
 
 _CreatePipelineWithServicesRequest = _PipelineCreationRequest
-_ControlPlaneArtifacts = ControlPlaneArtifacts
+_ControlPlaneArtifacts = PipelineControlPlaneArtifacts
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)
-class _CreateFactoryRunnerRequest(ControlPlaneArtifacts):
+class _CreateFactoryRunnerRequest(PipelineControlPlaneArtifacts):
     pipeline_name: str
     silver_schema: pa.Schema | None
     gold_schema: GoldSchemaType

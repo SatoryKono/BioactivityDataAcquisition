@@ -16,6 +16,16 @@ This skill creates a complete Context Ledger workspace from a project brief.
 - User must provide a project brief (text description of what they're building)
 - Optionally: custom path for ledger workspace (default: `./ledger/`)
 
+## Source Of Truth
+
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
+- Root runtime contract: `../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../../../02-architecture/decisions/`
+- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
+
 ## Workflow
 
 Use TodoWrite to track these mandatory steps:

@@ -33,6 +33,16 @@ Trigger this skill when the user asks to:
 - find the right metric or label set for a dashboard
 - verify whether a metric, label, or series really exists
 
+## Source Of Truth
+
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
+- Root runtime contract: `../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../../../02-architecture/decisions/`
+- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
+
 ## Workflow
 
 ### 1. Discover Candidate Metrics

@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 *Статус: internal-published (Internal / Extended)*
 
-*Версия: 1.0.14 | Дата: 2026-06-03 | Синхронизировано с Codex ORCHESTRATION.md v4.2, RULES.md v6.1.3*
+*Версия: 1.0.14 | Дата: 2026-06-03 | Синхронизировано с Codex ORCHESTRATION.md v4.2, RULES.md v6.1.4*
 
 > **Runtime note:** для Codex source-of-truth orchestration живёт в `.codex/agents/ORCHESTRATION.md`; другие runtimes могут сохранять отдельные runtime-specific copies и не обязаны совпадать побайтно с Codex surface.
 
@@ -25,8 +25,9 @@ ______________________________________________________________________
 >
 > **Governance note:** version markers в memory — это navigation hints.
 > Решения и проверки MUST подтверждаться по актуальным canonical surfaces:
-> `docs/00-project/RULES.md`, `docs/00-project/REQUIREMENTS.md`,
-> `AGENTS.md`, active ADRs и runtime source files.
+> `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/RULES.md`,
+> `docs/01-requirements/REQUIREMENTS.md`, accepted ADRs в
+> `docs/02-architecture/decisions/`, `AGENTS.md`, active runtime source files.
 
 > **Назначение**: Полный контекст для быстрого онбординга новой AI-сессии в BioETL.
 > При старте новой сессии — попроси агент прочитать этот файл:
@@ -61,7 +62,7 @@ ______________________________________________________________________
 | Провайдеры      | ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar (7 шт.)     |
 | ADR             | Текущий набор в `docs/02-architecture/decisions/`; ADR-008 исторически superseded |
 | Coverage target | ≥85% overall, ≥90% domain                                                         |
-| RULES.md        | v6.1.3 (2026-04-29)                                                               |
+| RULES.md        | v6.1.4 (read `Version:` header in file)                                         |
 
 ### Ключевые файлы
 

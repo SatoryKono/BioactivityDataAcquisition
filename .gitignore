@@ -192,6 +192,8 @@ log_test.txt
 .aiassistant/
 !.codex/
 .codex/*
+!.codex/agents/
+!.codex/agents/*.md
 !.codex/skills/
 .codex/skills/*
 !.codex/skills/SKILLS-CATALOG.md

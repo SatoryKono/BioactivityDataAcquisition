@@ -64,21 +64,11 @@ def _default_pipeline_runner_service_factory(
     return bootstrap_pipeline_runner_service(registry=registry)
 
 
-def get_workflow_runner_service(
-    registry: PipelineRegistry | None = None,
-    *,
-    pipeline_runner_service_factory: Callable[
-        [PipelineRegistry | None], PipelineRunnerService
-    ]
-    | None = None,
-) -> WorkflowRunnerService:
-    """Build the baseline declarative workflow runner through composition seams."""
-    from bioetl.application.services.workflow_runner_service import (
-        WorkflowRunnerService,
-    )
-    from bioetl.application.services.workflow_transform_service import (
-        WorkflowTransformService,
-    )
+def _build_workflow_transform_registry(
+    settings: object,
+    metrics: object,
+):
+    """Assemble workflow transform storage and builtin transform registry."""
     from bioetl.application.workflow.transforms import WorkflowTransformRegistry
     from bioetl.application.workflow.transforms.builtins import (
         register_builtin_workflow_transforms,
@@ -87,18 +77,17 @@ def get_workflow_runner_service(
         bootstrap_logger,
     )
     from bioetl.composition.bootstrap.cli.noop import create_noop_logger
-    from bioetl.composition.factories.services.port_factories import create_metrics
     from bioetl.domain.ports.noop import NoOpAudit, NoOpMetadataWriter, NoOpTracing
-    from bioetl.infrastructure.storage.silver_writer import SilverWriter
-    from bioetl.infrastructure.storage.silver.runtime_helpers import (
-        SilverWriterRuntimeServicesRequest,
-        build_silver_writer_runtime_services,
-    )
+    from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
     from bioetl.infrastructure.storage.gold.runtime_helpers import (
         GoldWriterRuntimeServices,
     )
     from bioetl.infrastructure.storage.gold_writer import GoldWriter
-    from bioetl.infrastructure.quarantine import UnifiedQuarantineAdapter
+    from bioetl.infrastructure.storage.silver.runtime_helpers import (
+        SilverWriterRuntimeServicesRequest,
+        build_silver_writer_runtime_services,
+    )
+    from bioetl.infrastructure.storage.silver_writer import SilverWriter
     from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation import (
         SilverForeignKeyReconciliationAdapter,
     )
@@ -106,8 +95,6 @@ def get_workflow_runner_service(
         StorageRowReconciliationAdapter,
     )
 
-    settings = get_settings()
-    metrics = create_metrics(settings)
     workflow_storage_logger = create_noop_logger()
     transform_storage = SilverWriter(
         base_path=settings.silver_path,
@@ -157,7 +144,7 @@ def get_workflow_runner_service(
     reconciliation_quarantine = UnifiedQuarantineAdapter(
         base_path=str(settings.quarantine_path),
     )
-    transform_registry = register_builtin_workflow_transforms(
+    return register_builtin_workflow_transforms(
         WorkflowTransformRegistry(),
         foreign_key_reconciliation_port=SilverForeignKeyReconciliationAdapter(
             silver_writer=transform_storage,
@@ -173,6 +160,28 @@ def get_workflow_runner_service(
             metrics=metrics,
         ),
     )
+
+
+def get_workflow_runner_service(
+    registry: PipelineRegistry | None = None,
+    *,
+    pipeline_runner_service_factory: Callable[
+        [PipelineRegistry | None], PipelineRunnerService
+    ]
+    | None = None,
+) -> WorkflowRunnerService:
+    """Build the baseline declarative workflow runner through composition seams."""
+    from bioetl.application.services.workflow_runner_service import (
+        WorkflowRunnerService,
+    )
+    from bioetl.application.services.workflow_transform_service import (
+        WorkflowTransformService,
+    )
+    from bioetl.composition.factories.services.port_factories import create_metrics
+
+    settings = get_settings()
+    metrics = create_metrics(settings)
+    transform_registry = _build_workflow_transform_registry(settings, metrics)
     pipeline_runner_factory = (
         _default_pipeline_runner_service_factory
         if pipeline_runner_service_factory is None

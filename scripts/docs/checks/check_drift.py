@@ -181,12 +181,6 @@ WINDSURF_WORKFLOW_DOCS_DIR = Path("docs/00-project/ai/rules/windsurf/workflows")
 WINDSURF_REVIEW_PATH = Path("docs/00-project/ai/rules/windsurf/workflows/review.md")
 CURSOR_RULE_EXCLUDED_FILENAMES = frozenset({"sonarqube_mcp_instructions.mdc"})
 DOCS_MIRROR_SKILLS_DIR = Path("docs/00-project/ai/skills/local")
-DOCS_MIRROR_SKILL_REQUIRED_TOKENS: tuple[str, ...] = (
-    NORMATIVE_SOURCES_DOC_TOKEN,
-    AGENTS_DOC_TOKEN,
-    RULES_DOC_TOKEN,
-    REQUIREMENTS_DOC_TOKEN,
-)
 AI_RULES_MIRROR_REQUIRED_TOKENS: dict[Path, tuple[str, ...]] = {
     AI_RULES_README_PATH: (
         AGENTS_DOC_TOKEN,
@@ -1624,12 +1618,25 @@ def _iter_runtime_skill_entrypoints(project_root: Path) -> tuple[Path, ...]:
 def _required_runtime_skill_tokens(
     project_root: Path, relative_path: Path
 ) -> tuple[str, ...]:
-    skill_dir = relative_path.parent
+    skill_file = relative_path
     return (
-        _relative_token(skill_dir, project_root / AGENTS_DOC_TOKEN),
-        _relative_token(skill_dir, project_root / RULES_DOC_TOKEN),
-        _relative_token(skill_dir, project_root / REQUIREMENTS_DOC_TOKEN),
-        _relative_token(skill_dir, project_root / ADR_DIR_DOC_TOKEN),
+        _relative_token(skill_file, project_root / AGENTS_DOC_TOKEN),
+        _relative_token(skill_file, project_root / RULES_DOC_TOKEN),
+        _relative_token(skill_file, project_root / REQUIREMENTS_DOC_TOKEN),
+        _relative_token(skill_file, project_root / ADR_DIR_DOC_TOKEN),
+    )
+
+
+def _required_docs_mirror_skill_tokens(
+    project_root: Path, relative_path: Path
+) -> tuple[str, ...]:
+    skill_file = relative_path
+    return (
+        _relative_token(skill_file, project_root / NORMATIVE_SOURCES_DOC_TOKEN),
+        _relative_token(skill_file, project_root / AGENTS_DOC_TOKEN),
+        _relative_token(skill_file, project_root / RULES_DOC_TOKEN),
+        _relative_token(skill_file, project_root / REQUIREMENTS_DOC_TOKEN),
+        _relative_token(skill_file, project_root / ADR_DIR_DOC_TOKEN),
     )
 
 
@@ -1721,7 +1728,10 @@ def _check_docs_mirror_skill_entrypoints(
             report,
             project_root=project_root,
             relative_path=relative_path,
-            required_tokens=DOCS_MIRROR_SKILL_REQUIRED_TOKENS,
+            required_tokens=_required_docs_mirror_skill_tokens(
+                project_root,
+                relative_path,
+            ),
         )
 
 

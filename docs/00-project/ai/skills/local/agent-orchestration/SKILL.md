@@ -15,6 +15,11 @@ Coordinate complex tasks across agent profiles (`py-*`) with clear handoffs and 
 
 ## Source Of Truth
 
+- Root runtime contract: `../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../../../02-architecture/decisions/`
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
 - Orchestration map: ../../agents/ORCHESTRATION.md
 - Agent profiles: ../../agents/py-\*.md
 

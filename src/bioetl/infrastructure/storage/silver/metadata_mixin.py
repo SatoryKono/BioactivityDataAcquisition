@@ -219,29 +219,21 @@ class SilverWriterMetadataMixin:
 
     async def _finalize_silver_write_result(
         self: _SilverWriterMetadataRuntimeProtocol,
-        request: _SilverWriteResultFinalizationRequest | None = None,
-        *args: object,
-        **kwargs: object,
+        request: _SilverWriteResultFinalizationRequest,
     ) -> SilverWriteResult | None:
         """Compute DQ metrics, write metadata, and build final result."""
         return await finalize_silver_write_result_operation(
             self,
             request,
-            args=args,
-            kwargs=kwargs,
         )
 
     async def _prepare_silver_write_finalization_context(
         self: _SilverWriterMetadataRuntimeProtocol,
-        request: _SilverWriteFinalizationPreparationRequest | None = None,
-        *args: object,
-        **kwargs: object,
+        request: _SilverWriteFinalizationPreparationRequest,
     ) -> _PreparedSilverWriteFinalizationContext:
         """Prepare DQ/version/timing context before Silver metadata persistence."""
         return await prepare_silver_write_finalization_context_operation(
             self,
             request,
-            args=args,
             perf_counter=time.perf_counter,
-            kwargs=kwargs,
         )

@@ -25,9 +25,6 @@ from bioetl.application.services.control_plane.workflow.execution_recording impo
 from bioetl.application.services.control_plane.workflow.ledger_service import (
     WorkflowLedgerService,
 )
-from bioetl.application.services.control_plane.workflow.manifest_service import (
-    WorkflowManifestService,
-)
 from bioetl.application.services.workflow_runner_service import (
     WorkflowRunExecutionResult,
     WorkflowRunnerService,
@@ -58,7 +55,7 @@ class WorkflowExecutionService:
     """Orchestrate workflow execution around durable control-plane artifacts."""
 
     workflow_runner: WorkflowRunnerService
-    manifest_service: WorkflowManifestService
+    manifest_service: "WorkflowManifestService"
     workflow_ledger_port: WorkflowLedgerPort
     workflow_ledger_factory: WorkflowLedgerFactory
     workflow_state_port: WorkflowExecutionStatePort

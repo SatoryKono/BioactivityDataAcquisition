@@ -6,11 +6,17 @@ import tempfile
 from collections.abc import Iterator
 from contextlib import ExitStack, contextmanager
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
 
 import pyarrow as pa
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
+
+if TYPE_CHECKING:
+    from bioetl.infrastructure.storage.silver.runtime_helpers import (
+        SilverWriterRuntimeServices,
+        SilverWriterRuntimeServicesRequest,
+    )
 
 TEST_ROOT = Path(tempfile.mkdtemp(prefix="bioetl-silver-writer-tests-"))
 SILVER_BASE_PATH = TEST_ROOT / "silver"
@@ -20,7 +26,10 @@ def make_silver_writer(
     *,
     logger: object,
     base_path: str | Path | None = None,
-    **kwargs: Any,
+    runtime_services: SilverWriterRuntimeServices | None = None,
+    runtime_request: SilverWriterRuntimeServicesRequest | None = None,
+    flat_structure: bool = False,
+    pipeline_name: str | None = None,
 ) -> object:
     """Build a ``SilverWriter`` with the standard test base path."""
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
@@ -28,7 +37,10 @@ def make_silver_writer(
     return SilverWriter(
         base_path=str(SILVER_BASE_PATH if base_path is None else base_path),
         logger=logger,
-        **kwargs,
+        runtime_services=runtime_services,
+        runtime_request=runtime_request,
+        flat_structure=flat_structure,
+        pipeline_name=pipeline_name,
     )
 
 

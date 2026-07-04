@@ -387,8 +387,8 @@ def test_check_stale_rules_version_literals_flags_outdated_marker(
     assert "Stale RULES.md version literal" in report.issues[0].detail
 
 
-def test_check_cursor_rules_deploy_sync_reports_missing_deploy(
-    monkeypatch, tmp_path: Path
+def test_check_cursor_rule_entrypoints_reports_missing_normative_tokens(
+    tmp_path: Path,
 ) -> None:
     canonical = tmp_path / check_drift.CURSOR_RULE_DOCS_DIR
     canonical.mkdir(parents=True)
@@ -398,7 +398,13 @@ def test_check_cursor_rules_deploy_sync_reports_missing_deploy(
     )
 
     report = check_drift.DriftReport()
-    check_drift._check_cursor_rules_deploy_sync(report, project_root=tmp_path)
+    check_drift._check_cursor_rule_entrypoints(report, project_root=tmp_path)
 
-    assert report.error_count == 1
-    assert "Cursor deploy rule missing" in report.issues[0].detail
+    assert report.error_count == 5
+    assert {issue.detail for issue in report.issues} == {
+        "Missing required AI policy/runtime token: AGENTS.md",
+        "Missing required AI policy/runtime token: docs/00-project/NORMATIVE_SOURCES.md",
+        "Missing required AI policy/runtime token: docs/00-project/RULES.md",
+        "Missing required AI policy/runtime token: docs/01-requirements/REQUIREMENTS.md",
+        "Missing required AI policy/runtime token: docs/02-architecture/decisions/",
+    }

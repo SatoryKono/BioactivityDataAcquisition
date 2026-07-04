@@ -24,14 +24,14 @@ from bioetl.composition.runtime_builders._run_manifest_context_updates import (
 from bioetl.composition.runtime_builders._run_manifest_sink_policy import (
     validate_reproducible_sink_modes,
 )
-from bioetl.composition.runtime_builders._run_manifest_serialization_support import (
-    normalize_snapshot,
-    to_serializable_mapping,
-)
 from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
     build_launch_context_snapshot,
     resolve_provider_entity,
     resolve_replay_parentage,
+)
+from bioetl.composition.runtime_builders._snapshot_mapping_support import (
+    normalize_snapshot,
+    to_serializable_mapping,
 )
 from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
     RunManifestContractIdentity,

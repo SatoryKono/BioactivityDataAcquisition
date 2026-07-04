@@ -5,6 +5,19 @@
 > Edit the runtime source first, then refresh this mirror.
 ______________________________________________________________________
 
+
+## Canonical Sources
+
+Read before planning or editing:
+
+- `docs/00-project/NORMATIVE_SOURCES.md`
+- `docs/00-project/RULES.md`
+- `docs/01-requirements/REQUIREMENTS.md`
+- `docs/02-architecture/decisions/`
+- `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+- `AGENTS.md`
+
 ## name: sp-api-designer description: "Use this agent when designing new APIs, creating API specifications, or refactoring existing API architecture for scalability and developer experience. Invoke when you need REST/GraphQL endpoint design, OpenAPI documentation, authentication patterns, or API versioning strategies." tools: Read, Write, Edit, Bash, Glob, Grep model: sonnet
 
 *Статус: internal-only (generated subagent spec)*

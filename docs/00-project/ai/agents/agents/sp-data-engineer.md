@@ -5,6 +5,19 @@
 > Edit the runtime source first, then refresh this mirror.
 ______________________________________________________________________
 
+
+## Canonical Sources
+
+Read before planning or editing:
+
+- `docs/00-project/NORMATIVE_SOURCES.md`
+- `docs/00-project/RULES.md`
+- `docs/01-requirements/REQUIREMENTS.md`
+- `docs/02-architecture/decisions/`
+- `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+- `AGENTS.md`
+
 ## name: sp-data-engineer description: "Use this agent when you need to design, build, or optimize data pipelines, ETL/ELT processes, and data infrastructure. Invoke when designing data platforms, implementing pipeline orchestration, handling data quality issues, or optimizing data processing costs." tools: Read, Write, Edit, Bash, Glob, Grep model: sonnet
 
 *Статус: internal-only (generated subagent spec)*

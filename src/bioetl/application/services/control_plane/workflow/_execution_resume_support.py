@@ -7,9 +7,6 @@ from dataclasses import replace
 from datetime import datetime
 from uuid import UUID
 
-from bioetl.application.services.control_plane.workflow.manifest_service import (
-    WorkflowManifestService,
-)
 from bioetl.domain.control_plane import WorkflowExecutionState, WorkflowManifest
 from bioetl.domain.ports import WorkflowExecutionStatePort
 from bioetl.domain.types import RunID
@@ -92,7 +89,7 @@ def validate_resume_state(
 
 def load_resume_manifest(
     *,
-    manifest_service: WorkflowManifestService,
+    manifest_service: "WorkflowManifestService",
     latest_state: WorkflowExecutionState,
 ) -> WorkflowManifest:
     """Load the manifest referenced by one persisted execution state."""

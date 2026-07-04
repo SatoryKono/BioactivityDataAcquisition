@@ -1,17 +1,17 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-04T13:18:13.681284+00:00",
+  "generated_at": "2026-07-04T14:05:19.040053+00:00",
   "summary": {
-    "total_scripts": 453,
+    "total_scripts": 454,
     "status_counts": {
       "active": 360,
-      "supporting": 93
+      "supporting": 94
     },
     "reference_group_coverage": {
       "agents": 5,
       "build": 3,
       "ci": 62,
-      "docs": 157,
+      "docs": 158,
       "other": 23,
       "scripts": 348,
       "skills": 11,
@@ -2998,8 +2998,21 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
+          "line": 97,
+          "source_group": "docs",
+          "text": "governance anchors, use `scripts/ai/sync_ai_governance.py --check` before"
+        },
+        {
+          "path": "docs/00-project/ai/rules/README.md",
+          "line": 167,
+          "source_group": "docs",
+          "text": "uv run python scripts/ai/sync_ai_governance.py"
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-07-15",
@@ -3010,17 +3023,23 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
+          "path": "docs/00-project/ai/rules/README.md",
+          "line": 168,
+          "source_group": "docs",
+          "text": "uv run python scripts/ai/sync_cursor_rules.py --deploy"
+        },
+        {
           "path": "docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md",
-          "line": 74,
+          "line": 76,
           "source_group": "docs",
           "text": "| Cursor IDE | `.cursor/rules/*.mdc` | `scripts/ai/sync_cursor_rules.py --deploy` |"
         },
         {
           "path": "docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md",
-          "line": 80,
+          "line": 82,
           "source_group": "docs",
           "text": "uv run python scripts/ai/sync_cursor_rules.py --check"
         }
@@ -3051,37 +3070,37 @@
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
-          "line": 77,
+          "line": 85,
           "source_group": "docs",
           "text": "uv run python scripts/ai/sync_windsurf_rules.py"
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
-          "line": 80,
+          "line": 88,
           "source_group": "docs",
           "text": "uv run python scripts/ai/sync_windsurf_rules.py --check"
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
-          "line": 162,
+          "line": 169,
           "source_group": "docs",
           "text": "uv run python scripts/ai/sync_windsurf_rules.py"
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
-          "line": 168,
+          "line": 175,
           "source_group": "docs",
           "text": "Индекс синхронизации: `07-qodo-enforcement.mdc`. После обновления cursor rules выполните `sync_windsurf_rules.py`."
         },
         {
           "path": "docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md",
-          "line": 75,
+          "line": 77,
           "source_group": "docs",
           "text": "| Windsurf | `docs/00-project/ai/rules/windsurf/rules/*.md` | `scripts/ai/sync_windsurf_rules.py` |"
         },
         {
           "path": "docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md",
-          "line": 81,
+          "line": 83,
           "source_group": "docs",
           "text": "uv run python scripts/ai/sync_windsurf_rules.py --check"
         }
@@ -3461,7 +3480,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 284,
+          "line": 287,
           "source_group": "ci",
           "text": "run: uv run python scripts/data_quality/run_silver_gold_filter_parity.py --check"
         }
@@ -4959,13 +4978,13 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 415,
+          "line": 418,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs export-matrix-structural-contract --check"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 424,
+          "line": 427,
           "source_group": "ci",
           "text": "uv run python -m scripts.docs sync-matrix-structural-policy --check --input \"$workbook\" --output \"$workbook\""
         },
@@ -5514,6 +5533,18 @@
           "text": "\"scripts/docs/fix_link_warnings.py\","
         }
       ]
+    },
+    {
+      "path": "scripts/docs/fixers/add_agents_link_to_skills.py",
+      "type": "py",
+      "status": "supporting",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": [],
+      "owner": "@bioetl-docs",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual migration helper for historical local skill AGENTS.md references; promote it into the documented docs fixer catalog or retire it once local skill mirrors no longer require this backfill."
     },
     {
       "path": "scripts/docs/fixers/fix_links_auto.py",
@@ -6223,13 +6254,13 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 250,
+          "line": 253,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.ci neo4j-memory"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 381,
+          "line": 384,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.ci neo4j-memory-live"
         },
@@ -6571,7 +6602,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 834,
+          "line": 837,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -7152,13 +7183,13 @@
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 38,
+          "line": 40,
           "source_group": "agents",
           "text": "- Mixed checkout в Windows PowerShell: `.\\scripts\\engineering\\dev\\run_pytest.ps1`, `.\\scripts\\engineering\\dev\\run_mypy.ps1`, `.\\.venv-win\\Scripts\\python.exe -m ...`"
         },
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 371,
+          "line": 373,
           "source_group": "agents",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         },
@@ -7211,13 +7242,13 @@
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 39,
+          "line": 41,
           "source_group": "agents",
           "text": "- Mixed checkout в WSL/Linux: `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`, `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`"
         },
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 371,
+          "line": 373,
           "source_group": "agents",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         },
@@ -7327,13 +7358,13 @@
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 38,
+          "line": 40,
           "source_group": "agents",
           "text": "- Mixed checkout в Windows PowerShell: `.\\scripts\\engineering\\dev\\run_pytest.ps1`, `.\\scripts\\engineering\\dev\\run_mypy.ps1`, `.\\.venv-win\\Scripts\\python.exe -m ...`"
         },
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 371,
+          "line": 373,
           "source_group": "agents",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         },
@@ -7386,13 +7417,13 @@
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 39,
+          "line": 41,
           "source_group": "agents",
           "text": "- Mixed checkout в WSL/Linux: `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`, `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`"
         },
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 371,
+          "line": 373,
           "source_group": "agents",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         },
@@ -8022,7 +8053,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 251,
+      "reference_count": 252,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -8400,7 +8431,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 290,
+          "line": 293,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.qa check-naming-pkg --check"
         },
@@ -8949,7 +8980,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 430,
+          "line": 433,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -9045,7 +9076,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 754,
+          "line": 757,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/generate_hotspot_degradation_report.py \\"
         },
@@ -13498,7 +13529,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 73,
+      "reference_count": 77,
       "references": [
         {
           "path": ".github/workflows/chembl-baseline-smoke.yml",
@@ -13520,31 +13551,31 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 281,
+          "line": 284,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema generate-config-matrix --check"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 403,
+          "line": 406,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema validate-configs"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 406,
+          "line": 409,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema check-invariants"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 409,
+          "line": 412,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema check-required-fields --verbose"
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 412,
+          "line": 415,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema audit-optionality --check"
         }

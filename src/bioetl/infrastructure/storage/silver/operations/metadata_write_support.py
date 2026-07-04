@@ -103,26 +103,6 @@ class _SilverMetadataAuditSupportRequest:
     ingestion_ts: datetime | None = None
 
 
-_AUDIT_SUPPORT_FIELDS = (
-    "table_name",
-    "records",
-    "mode",
-    "run_id",
-    "run_type",
-    "source_batch_id",
-    "ingestion_ts",
-)
-_AUDIT_SUPPORT_REQUIRED_FIELDS = (
-    "table_name",
-    "records",
-    "mode",
-)
-_AUDIT_SUPPORT_DEFAULTS: dict[str, object] = {
-    "run_id": None,
-    "run_type": None,
-    "source_batch_id": None,
-    "ingestion_ts": None,
-}
 _METRIC_LABEL_SANITIZER = re.compile(r"[^a-z0-9_]+")
 
 
@@ -178,66 +158,6 @@ def _source_batch_ids(source_batch_id: BatchID | None) -> list[str] | None:
     if source_batch_id is None:
         return None
     return [str(source_batch_id)]
-
-
-def _coerce_silver_metadata_audit_request(
-    request: _SilverMetadataAuditSupportRequest | None = None,
-    *,
-    args: tuple[object, ...] = (),
-    kwargs: dict[str, object] | None = None,
-) -> _SilverMetadataAuditSupportRequest:
-    """Normalize legacy or request-style Silver audit arguments."""
-    if isinstance(request, _SilverMetadataAuditSupportRequest):
-        if args or kwargs:
-            raise TypeError(
-                "_SilverMetadataAuditSupportRequest cannot be combined with "
-                "legacy args/kwargs"
-            )
-        return request
-
-    resolved_kwargs = dict(kwargs or {})
-    legacy_values = list(args) if request is None else [request, *args]
-    if len(legacy_values) > len(_AUDIT_SUPPORT_FIELDS):
-        raise TypeError("_log_silver_audit() received too many positional arguments")
-
-    for field_name, value in zip(_AUDIT_SUPPORT_FIELDS, legacy_values, strict=False):
-        if field_name in resolved_kwargs:
-            raise TypeError(
-                f"_log_silver_audit() got multiple values for argument '{field_name}'"
-            )
-        resolved_kwargs[field_name] = value
-
-    unexpected_fields = sorted(
-        set(resolved_kwargs)
-        - frozenset({*_AUDIT_SUPPORT_FIELDS, *tuple(_AUDIT_SUPPORT_DEFAULTS)})
-    )
-    if unexpected_fields:
-        unexpected = ", ".join(unexpected_fields)
-        raise TypeError(
-            f"_log_silver_audit() got unexpected keyword arguments: {unexpected}"
-        )
-
-    missing_fields = [
-        field_name
-        for field_name in _AUDIT_SUPPORT_REQUIRED_FIELDS
-        if field_name not in resolved_kwargs
-    ]
-    if missing_fields:
-        missing = ", ".join(missing_fields)
-        raise TypeError(f"_log_silver_audit() missing required arguments: {missing}")
-
-    for field_name, default in _AUDIT_SUPPORT_DEFAULTS.items():
-        resolved_kwargs.setdefault(field_name, default)
-
-    return _SilverMetadataAuditSupportRequest(
-        table_name=resolved_kwargs["table_name"],  # type: ignore[arg-type]
-        records=resolved_kwargs["records"],  # type: ignore[arg-type]
-        mode=resolved_kwargs["mode"],  # type: ignore[arg-type]
-        run_id=resolved_kwargs["run_id"],  # type: ignore[arg-type]
-        run_type=resolved_kwargs["run_type"],  # type: ignore[arg-type]
-        source_batch_id=resolved_kwargs["source_batch_id"],  # type: ignore[arg-type]
-        ingestion_ts=resolved_kwargs["ingestion_ts"],  # type: ignore[arg-type]
-    )
 
 
 async def _write_silver_metadata(

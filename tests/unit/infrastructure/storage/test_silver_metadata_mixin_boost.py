@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from types import SimpleNamespace
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import ANY, AsyncMock, MagicMock, patch
 
 import pytest
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
@@ -12,6 +12,10 @@ from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
+from bioetl.infrastructure.storage.silver.finalization_models import (
+    _SilverWriteFinalizationPreparationRequest,
+    _SilverWriteResultFinalizationRequest,
+)
 from bioetl.infrastructure.storage.silver.metadata_mixin import (
     SilverWriterMetadataMixin,
 )
@@ -35,7 +39,7 @@ class _Host(SilverWriterMetadataMixin):
 
 @pytest.mark.unit
 class TestSilverWriterMetadataMixinBoost:
-    """Focused tests for the mixin-owned compatibility helpers."""
+    """Focused tests for the mixin-owned metadata helpers."""
 
     @pytest.mark.asyncio
     async def test_compute_dq_metrics_passes_existing_schema_and_validation_errors(
@@ -144,14 +148,17 @@ class TestSilverWriterMetadataMixinBoost:
         host = _Host()
         request = SimpleNamespace(records=[{"entity_id": "CHEMBL1"}], table_path="/tmp")
 
-        with patch.object(
-            host,
-            "_should_skip_silver_metadata_write",
-            return_value=False,
-        ) as should_skip, patch(
-            "bioetl.infrastructure.storage.silver.metadata_mixin._execute_silver_metadata_write",
-            new=AsyncMock(),
-        ) as execute_write:
+        with (
+            patch.object(
+                host,
+                "_should_skip_silver_metadata_write",
+                return_value=False,
+            ) as should_skip,
+            patch(
+                "bioetl.infrastructure.storage.silver.metadata_mixin._execute_silver_metadata_write",
+                new=AsyncMock(),
+            ) as execute_write,
+        ):
             await host._write_silver_metadata(request)
 
         should_skip.assert_called_once()
@@ -159,21 +166,27 @@ class TestSilverWriterMetadataMixinBoost:
         assert execute_write.await_args.kwargs["request"] is request
 
     @pytest.mark.asyncio
-    async def test_write_silver_merged_metadata_builds_request_and_delegates(self) -> None:
+    async def test_write_silver_merged_metadata_builds_request_and_delegates(
+        self,
+    ) -> None:
         host = _Host()
         merged_request = SimpleNamespace(records=[{"entity_id": "CHEMBL1"}])
 
-        with patch.object(
-            host,
-            "_should_skip_silver_metadata_write",
-            return_value=False,
-        ), patch(
-            "bioetl.infrastructure.storage.silver.metadata_mixin._build_silver_merged_metadata_write_request",
-            return_value=merged_request,
-        ) as build_request, patch(
-            "bioetl.infrastructure.storage.silver.metadata_mixin._execute_silver_metadata_write",
-            new=AsyncMock(),
-        ) as execute_write:
+        with (
+            patch.object(
+                host,
+                "_should_skip_silver_metadata_write",
+                return_value=False,
+            ),
+            patch(
+                "bioetl.infrastructure.storage.silver.metadata_mixin._build_silver_merged_metadata_write_request",
+                return_value=merged_request,
+            ) as build_request,
+            patch(
+                "bioetl.infrastructure.storage.silver.metadata_mixin._execute_silver_metadata_write",
+                new=AsyncMock(),
+            ) as execute_write,
+        ):
             await host._write_silver_merged_metadata(
                 table_path="/tmp/silver/chembl/activity",
                 table_name="chembl.activity",
@@ -188,7 +201,9 @@ class TestSilverWriterMetadataMixinBoost:
         assert execute_write.await_args.kwargs["request"] is merged_request
 
     @pytest.mark.asyncio
-    async def test_write_silver_metadata_file_uses_flat_structure_and_identity(self) -> None:
+    async def test_write_silver_metadata_file_uses_flat_structure_and_identity(
+        self,
+    ) -> None:
         host = _Host()
         metadata = MagicMock()
 
@@ -243,24 +258,52 @@ class TestSilverWriterMetadataMixinBoost:
         host = _Host()
         final_result = MagicMock()
         prep_context = MagicMock()
+        started_at = datetime(2026, 1, 1, tzinfo=UTC)
+        finalize_request = _SilverWriteResultFinalizationRequest(
+            table_name="chembl.activity",
+            records=[{"entity_id": "CHEMBL1"}],
+            table_path="/tmp/silver/chembl/activity",
+            primary_keys=["entity_id"],
+            validated_mode=SilverWriteMode.MERGE,
+            bronze_refs=None,
+            partition_cols=None,
+            source_batch_id=None,
+            started_at=started_at,
+            start_perf=0.0,
+        )
+        prepare_request = _SilverWriteFinalizationPreparationRequest(
+            table_name="chembl.activity",
+            records=[{"entity_id": "CHEMBL1"}],
+            table_path="/tmp/silver/chembl/activity",
+            started_at=started_at,
+            start_perf=0.0,
+        )
 
-        with patch(
-            "bioetl.infrastructure.storage.silver.metadata_mixin.finalize_silver_write_result_operation",
-            new=AsyncMock(return_value=final_result),
-        ) as finalize_op, patch(
-            "bioetl.infrastructure.storage.silver.metadata_mixin.prepare_silver_write_finalization_context_operation",
-            new=AsyncMock(return_value=prep_context),
-        ) as prepare_op:
-            assert await host._finalize_silver_write_result(table_name="chembl.activity") is final_result
+        with (
+            patch(
+                "bioetl.infrastructure.storage.silver.metadata_mixin.finalize_silver_write_result_operation",
+                new=AsyncMock(return_value=final_result),
+            ) as finalize_op,
+            patch(
+                "bioetl.infrastructure.storage.silver.metadata_mixin.prepare_silver_write_finalization_context_operation",
+                new=AsyncMock(return_value=prep_context),
+            ) as prepare_op,
+        ):
             assert (
-                await host._prepare_silver_write_finalization_context(
-                    table_name="chembl.activity"
-                )
+                await host._finalize_silver_write_result(finalize_request)
+                is final_result
+            )
+            assert (
+                await host._prepare_silver_write_finalization_context(prepare_request)
                 is prep_context
             )
 
-        finalize_op.assert_awaited_once()
-        prepare_op.assert_awaited_once()
+        finalize_op.assert_awaited_once_with(host, finalize_request)
+        prepare_op.assert_awaited_once_with(
+            host,
+            prepare_request,
+            perf_counter=ANY,
+        )
 
     def test_build_silver_write_result_returns_result_only_with_version(self) -> None:
         assert (

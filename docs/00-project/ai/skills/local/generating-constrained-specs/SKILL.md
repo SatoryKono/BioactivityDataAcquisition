@@ -30,6 +30,16 @@ Every requirement, every architecture choice, must trace back to an explicit dec
 - `04-decisions/DECISIONS.yaml` exists
 - `05-risks/RISKS.yaml` exists
 
+## Source Of Truth
+
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
+- Root runtime contract: `../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../../../02-architecture/decisions/`
+- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
+
 ## Workflow
 
 Use TodoWrite to track these mandatory steps:

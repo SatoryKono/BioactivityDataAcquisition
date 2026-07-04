@@ -9,6 +9,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from bioetl.domain.medallion import SilverWriteMode
+from bioetl.infrastructure.storage.silver.finalization_models import (
+    _SilverWriteFinalizationPreparationRequest,
+    _SilverWriteResultFinalizationRequest,
+)
 from bioetl.infrastructure.storage.silver.metadata_operations import (
     _SilverMetadataWriteRequest,
 )
@@ -510,16 +514,18 @@ class TestSilverWriterDQMetrics:
         writer._write_silver_metadata = AsyncMock()
 
         result = await writer._finalize_silver_write_result(
-            table_name="test.table",
-            records=valid_records,
-            table_path=_silver_table_path("test.table"),
-            primary_keys=["entity_id"],
-            validated_mode=SilverWriteMode.MERGE,
-            bronze_refs=None,
-            partition_cols=None,
-            source_batch_id=None,
-            started_at=datetime(2026, 3, 11, 12, 0, tzinfo=UTC),
-            start_perf=0.0,
+            _SilverWriteResultFinalizationRequest(
+                table_name="test.table",
+                records=valid_records,
+                table_path=_silver_table_path("test.table"),
+                primary_keys=["entity_id"],
+                validated_mode=SilverWriteMode.MERGE,
+                bronze_refs=None,
+                partition_cols=None,
+                source_batch_id=None,
+                started_at=datetime(2026, 3, 11, 12, 0, tzinfo=UTC),
+                start_perf=0.0,
+            )
         )
 
         assert result is not None
@@ -555,11 +561,13 @@ class TestSilverWriterDQMetrics:
             return_value=5.5,
         ):
             context = await writer._prepare_silver_write_finalization_context(
-                table_name="test.table",
-                records=valid_records,
-                table_path=_silver_table_path("test.table"),
-                started_at=started_at,
-                start_perf=4.0,
+                _SilverWriteFinalizationPreparationRequest(
+                    table_name="test.table",
+                    records=valid_records,
+                    table_path=_silver_table_path("test.table"),
+                    started_at=started_at,
+                    start_perf=4.0,
+                )
             )
 
         assert context.dq_metrics is dq_metrics
@@ -587,13 +595,15 @@ class TestSilverWriterDQMetrics:
         writer._get_delta_version = AsyncMock(return_value=11)
 
         await writer._prepare_silver_write_finalization_context(
-            table_name="test.table",
-            records=valid_records,
-            table_path=_silver_table_path("test.table"),
-            quarantined_count=1,
-            validation_errors=("missing required activity_id",),
-            started_at=datetime(2026, 3, 11, 12, 0, tzinfo=UTC),
-            start_perf=0.0,
+            _SilverWriteFinalizationPreparationRequest(
+                table_name="test.table",
+                records=valid_records,
+                table_path=_silver_table_path("test.table"),
+                quarantined_count=1,
+                validation_errors=("missing required activity_id",),
+                started_at=datetime(2026, 3, 11, 12, 0, tzinfo=UTC),
+                start_perf=0.0,
+            )
         )
 
         writer._compute_dq_metrics.assert_awaited_once_with(

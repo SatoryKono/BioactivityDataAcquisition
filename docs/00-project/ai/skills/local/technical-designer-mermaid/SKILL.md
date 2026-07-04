@@ -154,3 +154,14 @@ Read only the relevant section for the selected diagram type.
 - Treat `merimd` as `Mermaid`.
 - If the user asks in Russian, keep explanations in Russian and code in valid Mermaid syntax.
 - If rendering target is unknown, prefer broadly compatible Mermaid constructs.
+
+## Source Of Truth
+
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
+- Root runtime contract: `../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../../../02-architecture/decisions/`
+- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
+

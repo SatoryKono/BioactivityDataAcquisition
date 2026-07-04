@@ -13,7 +13,6 @@ from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.infrastructure.storage.silver.operations.metadata_write_support import (
     _SilverMetadataAuditSupportRequest,
     _SilverMetadataWriteSupportRequest,
-    _coerce_silver_metadata_audit_request,
     _emit_silver_metadata_write_success,
     _fallback_table_path,
     _log_silver_audit_event,
@@ -75,56 +74,14 @@ class TestSilverMetadataWriteSupport:
         assert _source_batch_ids(None) is None
         assert _source_batch_ids("batch-1") == ["batch-1"]
 
-    def test_coerce_audit_request_covers_legacy_and_error_paths(self) -> None:
+    def test_audit_support_request_defaults_optional_identity_fields(self) -> None:
         request = _SilverMetadataAuditSupportRequest(
             table_name="chembl.activity",
             records=[{"entity_id": "CHEMBL1"}],
             mode=SilverWriteMode.MERGE,
         )
-        assert _coerce_silver_metadata_audit_request(request) is request
-
-        with pytest.raises(TypeError, match="cannot be combined with legacy args/kwargs"):
-            _coerce_silver_metadata_audit_request(request, args=("extra",))
-
-        with pytest.raises(TypeError, match="too many positional arguments"):
-            _coerce_silver_metadata_audit_request(
-                None,
-                args=("a", "b", "c", "d", "e", "f", "g", "h"),
-            )
-
-        with pytest.raises(TypeError, match="multiple values for argument 'table_name'"):
-            _coerce_silver_metadata_audit_request(
-                None,
-                args=("chembl.activity", [{"entity_id": "CHEMBL1"}], SilverWriteMode.MERGE),
-                kwargs={"table_name": "duplicate"},
-            )
-
-        with pytest.raises(TypeError, match="unexpected keyword arguments: extra"):
-            _coerce_silver_metadata_audit_request(
-                None,
-                kwargs={
-                    "table_name": "chembl.activity",
-                    "records": [{"entity_id": "CHEMBL1"}],
-                    "mode": SilverWriteMode.MERGE,
-                    "extra": 1,
-                },
-            )
-
-        with pytest.raises(TypeError, match="missing required arguments: mode"):
-            _coerce_silver_metadata_audit_request(
-                None,
-                kwargs={
-                    "table_name": "chembl.activity",
-                    "records": [{"entity_id": "CHEMBL1"}],
-                },
-            )
-
-        coerced = _coerce_silver_metadata_audit_request(
-            None,
-            args=("chembl.activity", [{"entity_id": "CHEMBL1"}], SilverWriteMode.MERGE),
-        )
-        assert coerced.run_id is None
-        assert coerced.source_batch_id is None
+        assert request.run_id is None
+        assert request.source_batch_id is None
 
     @pytest.mark.asyncio
     async def test_write_silver_metadata_builds_payload_and_emits_metrics(self) -> None:
