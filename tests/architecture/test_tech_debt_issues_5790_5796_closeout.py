@@ -202,7 +202,6 @@ def test_issue_5791_adapter_duplication_dropped_under_canonical_error_bundle_own
     )
     assert adapters["duplicate_count"] < 54
     assert {item["category"] for item in adapters["actionability"]} == {
-        "adapter_resilience_or_contract_template",
         "export_facade_or_package_barrel",
     }
     assert "build_common_network_error_bundle" in common_text

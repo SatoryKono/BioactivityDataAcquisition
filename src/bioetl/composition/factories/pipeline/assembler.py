@@ -23,10 +23,6 @@ from bioetl.composition.factories.pipeline.assembler_helpers import (
     create_pipeline_instance_with_services as _rf014_create_pipeline_instance_with_services,
     extract_entity_type as _rf014_extract_entity_type,
 )
-from bioetl.composition.factories.pipeline.factory_method_helpers import (
-    build_factory_services as _rf014_factory_method_helpers_anchor,
-)
-
 from bioetl.composition.factories.pipeline.runner_assembly import (
     assemble_runner_impl as _rf014_assemble_runner_impl,
 )

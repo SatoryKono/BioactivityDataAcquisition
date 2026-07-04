@@ -627,7 +627,7 @@ duplicate_name_triage:
   total_duplicate_names: 1
   duplicate_occurrences: 2
   top_generic_names:
-    - name: test_issue_5671_governance_artifact_references_are_backed_by_live_evidence
+    - name: test_tdx_audit_closeout_artifact_is_complete_and_budget_safe
       count: 2
   zero_enforcement:
     issue_set:
