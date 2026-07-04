@@ -95,7 +95,7 @@
   },
   "entities": {
     "chembl_activity": {
-      "contract_version": "2.0.0",
+      "contract_version": "1.0.0",
       "fields": {
         "_dq_error": {
           "description": "Hard data-quality error flag.",
@@ -3549,7 +3549,7 @@
           "nullable": true
         }
       },
-      "published_contract_path": "docs/04-reference/contracts/gold/pubchem_compound_v2.0.json",
+      "published_contract_path": "docs/04-reference/contracts/gold/pubchem_compound_v1.0.json",
       "schema_class": "PubChemCompoundGoldSchema",
       "strict": true
     },

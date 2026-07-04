@@ -1,0 +1,14 @@
+{
+  "entities": [
+    {
+      "name": "dashboard-extension-llm-guide",
+      "entityType": "document",
+      "observations": [
+        "Path: docs/03-guides/dashboards/dashboard-extension-llm.md",
+        "Purpose: canonical LLM playbook for extending shipped Grafana dashboards in BioETL",
+        "Use when task touches grafana/dashboards JSON, dashboard navigation, Loki/Tempo drilldown, or dashboard-related docs cascade"
+      ]
+    }
+  ],
+  "relations": []
+}

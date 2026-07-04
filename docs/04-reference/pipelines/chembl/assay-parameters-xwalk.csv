@@ -1,0 +1,14 @@
+field,doc_spec,cfg_pipeline,cfg_schema,code_transformer,code_entity,code_silver_schema,code_gold_schema,json_type,nullable,primary_key,notes
+assay_param_id,S2.1,YES,EMPTY,assay_parameters_transformer.py:136,chembl_assay_parameters.py:43,assay_parameters.py:26,chembl.py:200,integer,false,true,OK
+assay_id,S2.2,YES,EMPTY,assay_parameters_transformer.py:138,chembl_assay_parameters.py:46,assay_parameters.py:34,chembl.py:205,string,false,false,OK
+type,S2.3,YES,EMPTY,assay_parameters_transformer.py:140,chembl_assay_parameters.py:49,assay_parameters.py:42,chembl.py:208,string,false,false,OK
+relation,S2.4,YES,EMPTY,assay_parameters_transformer.py:56,chembl_assay_parameters.py:52,assay_parameters.py:49,chembl.py:211,string,true,false,OK
+value,S2.4,YES,EMPTY,assay_parameters_transformer.py:57,chembl_assay_parameters.py:53,assay_parameters.py:54,chembl.py:212,number,true,false,OK
+units,S2.4,YES,EMPTY,assay_parameters_transformer.py:56,chembl_assay_parameters.py:54,assay_parameters.py:59,chembl.py:213,string,true,false,OK
+text_value,S2.4,YES,EMPTY,assay_parameters_transformer.py:56,chembl_assay_parameters.py:55,assay_parameters.py:64,chembl.py:214,string,true,false,OK
+comments,S2.4,YES,EMPTY,assay_parameters_transformer.py:56,chembl_assay_parameters.py:56,assay_parameters.py:69,chembl.py:215,string,true,false,OK
+standard_type,S2.5,YES,EMPTY,assay_parameters_transformer.py:64,chembl_assay_parameters.py:59,assay_parameters.py:76,chembl.py:218,string,true,false,OK
+standard_relation,S2.5,YES,EMPTY,assay_parameters_transformer.py:65,chembl_assay_parameters.py:60,assay_parameters.py:83,chembl.py:219,string,true,false,OK
+standard_value,S2.5,YES,EMPTY,assay_parameters_transformer.py:70,chembl_assay_parameters.py:61,assay_parameters.py:88,chembl.py:220,number,true,false,OK
+standard_units,S2.5,YES,EMPTY,assay_parameters_transformer.py:66,chembl_assay_parameters.py:62,assay_parameters.py:93,chembl.py:221,string,true,false,OK
+standard_text_value,S2.5,YES,EMPTY,assay_parameters_transformer.py:67,chembl_assay_parameters.py:63,assay_parameters.py:98,chembl.py:222,string,true,false,OK

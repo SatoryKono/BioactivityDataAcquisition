@@ -1,0 +1,115 @@
+%% View: Full | Parent: (root)
+%% Parent source: docs/02-architecture/diagrams/foundation/35-bootstrap-sequence.mmd
+%% Full reference diagram retained after decomposition.
+%% Synced: 2026-03-24
+%% Title: Composition Layer Bootstrap Sequence
+%% Covers: RULES.md §1.1 (Composition Root), composition/bootstrap/runtime/
+%% Rank: 10 (Score 8.44) — Step-by-step system assembly
+%% Updated: 2026-03-24
+
+%% @version 1.1.0
+%% @date    2026-03-24
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+%% @uniform width=328 height=56 max_title_len=36 max_desc_lines=1
+flowchart TB
+    subgraph Step1["Step 1: Logger"]
+        S1A["BootstrapLogger.configure()<br/>"]
+        S1B["StructlogLogger<br/>(JSON, ISO timestamps, run_id binding)"]
+    end
+
+    subgraph Step2["Step 2: Configuration"]
+        S2A["ConfigLoader.load(pipeline_name)<br/>"]
+        S2B["PipelineYamlConfig<br/>(base defaults merged with entity.yaml)"]
+        S2C["DQ + Filter config loaders<br/>"]
+    end
+
+    subgraph Step3["Step 3: Observability Bundle"]
+        S3A["ObservabilityBundle<br/>"]
+        S3B["MetricsPort + TracingPort<br/>"]
+    end
+
+    subgraph Step4["Step 4: Storage"]
+        S4A["StorageFactory.create(config)<br/>"]
+        S4B["BronzeWriter<br/>(JSONL + zstd)"]
+        S4C["SilverWriter<br/>(Delta Lake)"]
+        S4D["GoldWriter<br/>(Delta / Parquet)"]
+    end
+
+    subgraph Step5["Step 5: HTTP Client"]
+        S5A["HttpClientFactory.create(provider)<br/>"]
+        S5B["UnifiedHTTPClient<br/>"]
+        S5C["TokenBucket + CircuitBreaker<br/>"]
+    end
+
+    subgraph Step6["Step 6: Data Source"]
+        S6A["DataSourceFactory.create(provider)<br/>"]
+        S6B["ProviderRegistry.get(provider)<br/>"]
+        S6C["Provider Adapter<br/>(e.g., ChemblAdapter)"]
+    end
+
+    subgraph Step7["Step 7: Coordination"]
+        S7A["MemoryLock<br/>(LockPort, TTL=90s)"]
+        S7B["LocalCheckpoint<br/>(CheckpointPort)"]
+        S7C["UnifiedQuarantine<br/>(QuarantinePort)"]
+    end
+
+    subgraph Step8["Step 8: Factory Context & Services"]
+        S8A["_build_factory_context()<br/>"]
+        S8B["_PipelineFactoryContext<br/>"]
+        S8C["build_factory_services()<br/>"]
+        S8D["PipelineService (frozen)<br/>"]
+    end
+
+    subgraph Step9["Step 9: Pipeline Creation & Runner"]
+        S9A["create_factory_runner()<br/>"]
+        S9B["create_pipeline_with_services()<br/>"]
+        S9C["creation_support / _creation_wiring<br/>"]
+        S9D["assemble_runner() → PipelineRunner<br/>"]
+    end
+
+    %% Flow
+    S1A --> S1B
+    S1B --> S2A
+    S2A --> S2B & S2C
+    S2B --> S3A
+    S3A --> S3B
+    S2B --> S4A
+    S4A --> S4B & S4C & S4D
+    S4B & S4C & S4D --> S5A
+    S5A --> S5B
+    S5B --> S5C
+    S5B --> S6A
+    S6A --> S6B --> S6C
+    S6C --> S7A & S7B & S7C
+    S2B --> S8A
+    S8A --> S8B --> S8C --> S8D
+    S8B -.-> S6A
+    S8B -.-> S4A
+    S3A -.-> S9A
+    S8D --> S9A --> S9B --> S9C --> S9D
+
+    %% Styling
+    style Step1 fill:#f5f3ff,stroke:#7c3aed
+    style Step8 fill:#ffe4e6,stroke:#dc2626
+    style Step9 fill:#f0fdf4,stroke:#16a34a
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle default stroke:#475569,stroke-width:2px,stroke-dasharray:5

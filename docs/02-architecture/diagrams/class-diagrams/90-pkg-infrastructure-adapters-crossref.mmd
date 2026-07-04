@@ -1,0 +1,80 @@
+%% Title: Package Family: infrastructure/adapters/crossref
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/adapters/crossref; modules: models_shared, _batch_support, _response_models, response_mapper, _client_fallback_policy, _doi_batch_processor.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-03-27
+%% @level   Package Family / Inventory Slice
+%% @nodes   26
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace models_shared {
+        class CrossRefAssertion
+        class CrossRefAuthor
+        class CrossRefClinicalTrial
+        class CrossRefDateParts
+        class CrossRefFunder
+        class CrossRefLicense
+        class CrossRefLink
+        class CrossRefReference
+    }
+
+    namespace batch_support {
+        class BaseMetrics
+        class HeadersBuilder
+        class HttpTransport
+    }
+
+    namespace response_models {
+        class CrossRefMessage
+        class CrossRefPublicationResponse
+        class CrossRefPublicationsResponse
+    }
+
+    namespace response_mapper {
+        class CrossRefHealthProbeMapping
+        class CrossRefResponseMapper
+    }
+
+    namespace client_fallback_policy {
+        class _CrossRefFallbackPolicyMixin
+    }
+
+    namespace doi_batch_processor {
+        class DoiBatchProcessor
+    }
+
+    namespace search_paginator {
+        class SearchPaginator
+    }
+
+    namespace client {
+        class CrossRefAdapter
+    }
+
+    namespace client_runtime_helpers {
+        class CrossRefRuntimeServices
+    }
+
+    namespace exceptions {
+        class CrossRefApiError
+    }
+
+    namespace fallback {
+        class CrossRefTitleFallbackHandler
+    }
+
+    namespace fetch_flow {
+        class CrossRefFetchFlow
+    }
+
+    namespace models {
+        class CrossRefPublicationRecord
+    }
+
+    namespace query_builder {
+        class CrossRefQueryBuilder
+    }
+
+    _CrossRefFallbackPolicyMixin <|-- CrossRefAdapter

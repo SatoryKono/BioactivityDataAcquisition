@@ -1,0 +1,340 @@
+name: Docs & Diagrams
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'AGENTS.md'
+      - 'GEMINI.md'
+      - 'README.md'
+      - '.cursor/**'
+      - '.windsurf/**'
+      - '.codex/skills/**'
+      - '.devin/skills/**'
+      - '.github/copilot-instructions.md'
+      - 'grafana/README.md'
+      - 'configs/quality/xwalk_missing_backlog.yaml'
+      - 'docs/**'
+      - 'scripts/docs/**'
+      - 'scripts/engineering/qa/check_xwalk_missing_backlog.py'
+      - '.github/actions/setup-python-uv/**'
+      - 'tests/architecture/test_ai_runtime_governance_links.py'
+      - 'tests/architecture/test_check_doc_links_guardrails.py'
+      - 'tests/unit/scripts/qa/test_check_xwalk_missing_backlog.py'
+      - 'mkdocs.yml'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'AGENTS.md'
+      - 'GEMINI.md'
+      - 'README.md'
+      - '.cursor/**'
+      - '.windsurf/**'
+      - '.codex/skills/**'
+      - '.devin/skills/**'
+      - '.github/copilot-instructions.md'
+      - 'grafana/README.md'
+      - 'configs/quality/xwalk_missing_backlog.yaml'
+      - 'docs/**'
+      - 'scripts/docs/**'
+      - 'scripts/engineering/qa/check_xwalk_missing_backlog.py'
+      - '.github/actions/setup-python-uv/**'
+      - 'tests/architecture/test_ai_runtime_governance_links.py'
+      - 'tests/architecture/test_check_doc_links_guardrails.py'
+      - 'tests/unit/scripts/qa/test_check_xwalk_missing_backlog.py'
+      - 'mkdocs.yml'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/docs.yml'
+
+jobs:
+  docs-governance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          python-version: "3.13"
+
+      - name: Run docs-governance architecture tests
+        run: |
+          uv run pytest \
+            tests/architecture/test_architecture_dependency_docs_drift.py::test_dependency_map_drift_check_passes_current_repo \
+            tests/architecture/test_config_topology_docs_drift.py \
+            tests/architecture/test_control_plane_runtime_docs_alignment.py \
+            tests/architecture/test_diagram_narrative_docs_sync.py \
+            tests/architecture/test_documentation_audit_remediation.py \
+            tests/architecture/test_docs_governance_workflow.py \
+            tests/architecture/test_docs_version_sync.py::TestDocsVersionSync::test_rules_version_extractable \
+            tests/architecture/test_docs_version_sync.py::TestDocsVersionSync::test_claude_md_synced \
+            tests/architecture/test_docs_version_sync.py::TestDocsVersionSync::test_required_docs_synced \
+            tests/architecture/test_docs_version_sync.py::TestVersionFormat::test_rules_version_format \
+            tests/architecture/test_docs_version_sync.py::TestVersionFormat::test_rules_header_format \
+            tests/architecture/test_observability_docs_drift.py \
+            tests/architecture/test_observability_docs_sync.py \
+            tests/architecture/test_documentation_sync.py::test_ports_count_matches_docs \
+            tests/architecture/test_documentation_sync.py::test_pipeline_count_matches_docs \
+            tests/architecture/test_documentation_sync.py::test_pipeline_ids_match_reference_index \
+            tests/architecture/test_documentation_sync.py::test_adr_numbers_are_unique \
+            tests/architecture/test_documentation_sync.py::test_adr_index_links_match_decision_files \
+            tests/architecture/test_documentation_sync.py::test_adr_h1_number_matches_filename \
+            tests/architecture/test_documentation_sync.py::test_adr_status_is_from_allowed_set \
+            tests/architecture/test_documentation_sync.py::test_mkdocs_nav_references_existing_markdown_files \
+            tests/architecture/test_internal_orchestration_docs.py \
+            tests/architecture/test_reproducibility_docs_contract_drift.py \
+            tests/architecture/test_ai_runtime_governance_links.py \
+            tests/architecture/test_runtime_agent_docs_drift.py \
+            tests/architecture/test_workflow_cli_running_boundaries.py \
+            -q --tb=short
+
+      - name: Validate xwalk missing backlog
+        run: |
+          uv run python -m scripts.engineering.qa check-xwalk-missing-backlog \
+            --json-out reports/quality/xwalk-missing-backlog.json \
+            --markdown-out reports/quality/xwalk-missing-backlog.md
+
+      - name: Check dashboard inventory parity
+        run: uv run python -m scripts.engineering.qa report-dashboard-inventory --check --json
+
+      - name: Check dashboard panel audit matrix parity
+        run: uv run python -m scripts.engineering.qa report-dashboard-panel-audit-matrix --check
+
+  validate-mkdocs:
+    needs: docs-governance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+        with:
+          uv-extras: "docs"
+
+      - name: Validate version consistency
+        run: uv run python -m scripts.engineering.repo check-versions
+
+      - name: Run documentation integrity guardrails
+        run: uv run python -m scripts.docs check-links --links --specs --configs --report-json docs/reports/docs-link-check-report.json
+
+      - name: Upload docs link-check report artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: docs-link-check-report
+          path: docs/reports/docs-link-check-report.json
+
+      - name: Run docs-config parity gate
+        run: uv run python scripts/check_entity_config_parity.py
+
+      - name: Run canonical docs verification chain
+        run: uv run python -m scripts.docs verify
+
+      - name: Check architecture dependency docs drift
+        run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --check
+
+      - name: Regenerate architecture dependency docs (PR preflight)
+        if: github.event_name == 'pull_request'
+        run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --update
+
+      - name: Assert regenerated dependency docs are committed
+        if: github.event_name == 'pull_request'
+        run: |
+          git diff --exit-code -- \
+            docs/02-architecture/generated/module-dependency-map.md \
+            docs/02-architecture/generated/module-dependency-map.json || \
+            (echo "::error::Dependency map docs were regenerated. Commit updated generated files before merge." && exit 1)
+
+  # Detect whether mermaid/diagram sources changed so the expensive
+  # Puppeteer-based validate-mermaid and render-diagrams jobs can be skipped
+  # when only non-diagram docs or mkdocs.yml are modified.
+  detect-diagram-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      diagrams_changed: ${{ steps.filter.outputs.diagrams_changed }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+
+      - name: Check for diagram file changes
+        id: filter
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            base="origin/${{ github.base_ref }}"
+            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}" 2>/dev/null || true
+          else
+            base="HEAD~1"
+          fi
+          changed=$(git diff --name-only "$base"...HEAD -- \
+            '*.mmd' '*.mermaid' \
+            'scripts/diagrams/**' \
+            '.github/actions/setup-mermaid/**' \
+            'docs/02-architecture/diagrams/theme/**' \
+            'docs/02-architecture/diagrams/tooling/**' \
+            'docs/02-architecture/diagrams/manifests/**' || true)
+          if [[ -n "$changed" ]]; then
+            echo "diagrams_changed=true" >> "$GITHUB_OUTPUT"
+            echo "Diagram-related files changed:"
+            echo "$changed"
+          else
+            echo "diagrams_changed=false" >> "$GITHUB_OUTPUT"
+            echo "No diagram-related files changed — mermaid jobs will be skipped."
+          fi
+
+  validate-mermaid:
+    needs: detect-diagram-changes
+    if: needs.detect-diagram-changes.outputs.diagrams_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Mermaid CLI
+        uses: ./.github/actions/setup-mermaid
+
+      - name: Validate Mermaid diagrams (.mermaid + .mmd)
+        run: |
+          bash scripts/diagrams/validate_mermaid_syntax.sh \
+            --puppeteer /tmp/puppeteer-config.json
+
+      - name: Diagram policy lint report (non-blocking)
+        run: |
+          python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json || true
+          python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json
+
+      - name: Upload diagram lint report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: diagram-lint-report
+          path: /tmp/diagram-lint.json
+
+  render-diagrams:
+    needs: [detect-diagram-changes, validate-mermaid]
+    if: |
+      always() &&
+      needs.detect-diagram-changes.outputs.diagrams_changed == 'true' &&
+      (needs.validate-mermaid.result == 'success' || needs.validate-mermaid.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Mermaid CLI
+        uses: ./.github/actions/setup-mermaid
+        with:
+          install-librsvg: "true"
+
+      - name: Render diagrams with unified script
+        run: |
+          bash docs/02-architecture/diagrams/tooling/render.sh \
+            --puppeteer /tmp/puppeteer-config.json
+
+      - name: Validate required rendered artifacts (SVG primary)
+        run: |
+          python3 scripts/diagrams/check_diagram_artifacts.py \
+            --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
+
+      - name: Validate SVG text visibility (edge labels and node text)
+        run: |
+          python3 scripts/diagrams/check_svg_text_visibility.py \
+            --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
+
+      - name: Visual smoke regression (selected SVG baselines)
+        run: |
+          python3 scripts/diagrams/check_diagram_visual_smoke.py \
+            --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
+
+      - name: Validate link harmonization post-processor
+        run: |
+          python3 src/tools/harmonize_link_styles.py --dry-run --fail-on-errors
+
+      - name: Diagram regression quality gates (DIAG-T018..T023)
+        run: |
+          mkdir -p reports/diagrams
+          python3 scripts/diagrams/check_diagram_quality_gates.py \
+            --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt \
+            --json-out reports/diagrams/diagram-quality-report.json \
+            --markdown-out reports/diagrams/diagram-quality-report.md
+
+      - name: Upload SVG artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: diagrams-svg
+          path: |
+            docs/**/svg/*.svg
+
+      - name: Upload PNG artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: diagrams-png
+          path: |
+            docs/**/png/*.png
+
+      - name: Upload diagram quality report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: diagrams-quality-report
+          path: |
+            reports/diagrams/diagram-quality-report.json
+            reports/diagrams/diagram-quality-report.md
+
+      - name: Publish diagram quality summary
+        if: always()
+        run: |
+          if [ -f reports/diagrams/diagram-quality-report.md ]; then
+            cat reports/diagrams/diagram-quality-report.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Diagram quality report was not generated." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  check-diagram-drift:
+    needs: [detect-diagram-changes, validate-mermaid]
+    if: |
+      always() &&
+      github.event_name == 'pull_request' &&
+      needs.detect-diagram-changes.outputs.diagrams_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Check for source-vs-rendered drift
+        run: |
+          echo "Checking if diagram sources changed without updating rendered outputs..."
+          # Get list of changed diagram source files in PR
+          changed_diagrams=$(
+            git diff --name-only origin/main...HEAD -- \
+              ':(glob)docs/**/*.mmd' \
+              ':(glob)docs/**/*.mermaid' \
+              ':(exclude)docs/99-archive/**' || true
+          )
+          if [ -z "$changed_diagrams" ]; then
+            echo "No diagram source files changed — skipping drift check."
+            exit 0
+          fi
+
+          echo "Changed diagram sources:"
+          echo "$changed_diagrams"
+
+          # Check if corresponding SVG/PNG outputs changed too
+          changed_rendered=$(
+            git diff --name-only origin/main...HEAD -- \
+              ':(glob)docs/**/svg/*.svg' \
+              ':(glob)docs/**/png/*.png' || true
+          )
+          if [ -z "$changed_rendered" ]; then
+            echo "::warning::Diagram sources changed but no rendered outputs updated."
+            echo "Run 'make render-diagrams-all' and commit rendered SVG/PNG files."
+          else
+            echo "Rendered outputs also updated — OK."
+          fi

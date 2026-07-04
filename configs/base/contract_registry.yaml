@@ -365,7 +365,7 @@ entries:
 
   pubchem.compound:
     identity:
-      contract_version: "2.0.0"
+      contract_version: "1.0.0"
       compatibility_level: "major"
       schema_hash: "caa17be6e466eaae2eb97f9fffda050897bdf5e7169ab5ed7e92a73320ba79f5"
       dq_policy_ref: "pubchem.dq.v1"
@@ -376,10 +376,10 @@ entries:
     status: "active"
     source_path: "../../src/bioetl/domain/contracts/gold/pubchem.py"
     published_artifacts:
-      - "../../docs/04-reference/contracts/gold/pubchem_compound_v2.0.json"
-    supported_versions: ["1.0.0", "2.0.0"]
+      - "../../docs/04-reference/contracts/gold/pubchem_compound_v1.0.json"
+    supported_versions: ["1.0.0"]
     migration_guides: {}
-    last_updated: "2026-07-03T00:00:00Z"
+    last_updated: "2026-03-25T00:00:00Z"
     owners: ["pubchem-team"]
     dq_policy_ref: "pubchem.dq.v1"
     rule_bundle_version: "dq-rules.v1.0"

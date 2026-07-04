@@ -1,0 +1,73 @@
+%% BioETL — Configuration: Domain & Application Config
+%% Domain config objects, composite config, application config, and infrastructure settings.
+
+%% @version 1.0.0
+%% @date    2026-02-27
+%% @type    flowchart
+%% @level   System / Component
+%% @view    config-domain
+%% @parent  11-configuration-system.mmd
+%% @nodes   16
+%%{init: {
+  'flowchart': {
+    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
+  },
+  'layout': 'elk',
+  'elk': {
+    'mergeEdges': true,
+    'nodePlacementStrategy': 'BRANDES_KOEPF',
+    'edgeRouting': 'ORTHOGONAL'
+  }
+}}%%
+graph TB
+%% keep-orphan: APC, CBC, CCFG, OBS_SET, PCP, PIPE_SET, SETTINGS, SRC
+    subgraph InfraSchemas["Infrastructure Schemas"]
+        APC["ApiConfig"]:::size-sm
+        SRC["SourceConfig"]:::size-sm
+        CBC["CircuitBreakerConfig"]:::size-sm
+        PCP["PipelineContractPolicy"]:::size-sm
+    end
+
+    subgraph DomainConfig["Domain Configuration"]
+        PIPE["PipelineConfig"]:::size-sm
+        TC["TableConfig"]:::size-sm
+        DQC["DQConfig"]:::size-sm
+        SFC["SilverFilterConfig"]:::size-sm
+        GFC["GoldFilterConfig"]:::size-sm
+        RPC["RecordProcessorConfig"]:::size-sm
+    end
+
+    subgraph CompositeConfig["Composite Domain Config"]
+        CCFG["CompositeConfig"]:::size-sm
+    end
+
+    subgraph AppConfig["Application Config"]
+        RT["RuntimeConfig"]:::size-sm
+        LC["LockConfig"]:::size-sm
+    end
+
+    subgraph InfraSettings["Infrastructure Settings"]
+        SETTINGS["Settings"]:::size-sm
+        OBS_SET["ObservabilitySettings"]:::size-sm
+        PIPE_SET["PipelineSettings"]:::size-sm
+    end
+
+    %% Domain Config composition
+    PIPE --> TC
+    PIPE --> DQC
+    PIPE --> SFC
+    PIPE --> GFC
+    PIPE --> RPC
+
+    %% Application config
+    RT --> LC
+
+    classDef schema fill:#ffe4e6,stroke:#dc2626
+    classDef domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef app fill:#f0fdf4,stroke:#16a34a
+    classDef settings fill:#f1f5f9,stroke:#64748b
+
+    class APC,SRC,CBC,PCP schema
+    class PIPE,TC,DQC,SFC,GFC,RPC,CCFG domain
+    class RT,LC app
+    class SETTINGS,OBS_SET,PIPE_SET settings

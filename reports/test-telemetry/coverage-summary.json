@@ -1,0 +1,13 @@
+{
+  "source_branch": "main",
+  "source_commit": "51979de96630ce1eff88b6a2b82df04a5c9be157",
+  "source_run_id": "local-issues-5710-5711-20260630",
+  "refreshed_at_utc": "2026-06-30T13:06:54.324571+00:00",
+  "refresh_status": "captured",
+  "coverage_percent": 95.61,
+  "coverage": {
+    "threshold_percent": 85.0,
+    "actual_percent": 95.61,
+    "threshold_satisfied": true
+  }
+}

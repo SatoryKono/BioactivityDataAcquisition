@@ -1,0 +1,141 @@
+______________________________________________________________________
+
+Version: 1.0.0
+Status: Active canonical policy
+Class: published
+Owner: Architecture / Domain
+Reviewers:
+
+- BioETL Team
+  Last verified: '2026-04-09'
+
+______________________________________________________________________
+
+# Content Hash Identity Policy (Canonical)
+
+**Last updated:** 2026-02-18
+
+## Scope
+
+This document is the single canonical policy for determining which fields affect
+`content_hash` and identity in BioETL.
+
+Cross-reference:
+
+- RULES.md §2.8.1, §6.1
+- `docs/05-engineering/normalization_plan_P0_P6.md`
+- ADR-014 (determinism context)
+- `src/bioetl/domain/constants.py` (`META_FIELDS`)
+- `src/bioetl/domain/transformations/hashing.py` (`_should_include_field`)
+
+This policy remains the canonical contract for `content_hash` field inclusion.
+The broader normalization rollout across RunManifest, RunLedger, runtime
+anchors, and ChemBL Activity is coordinated by
+`docs/05-engineering/normalization_plan_P0_P6.md`.
+
+## Canonical Rule
+
+`content_hash` is computed as:
+
+`sha256(provider + canonical_json(normalized_record)).hexdigest()`
+
+The resulting lexical form is plain lowercase 64-character hex without a
+`sha256:` prefix.
+
+Before hashing:
+
+1. Normalize values (`NaN/Inf -> null`, float rounding, date ISO, string strip).
+1. Exclude all technical metadata fields from identity.
+1. Serialize only through the canonical JSON helper in
+   `src/bioetl/domain/serialization.py` /
+   `src/bioetl/domain/normalization/json.py`.
+
+## Ordered vs Set-Like Fields
+
+All list-like fields are **ordered identity fields by default**. Changing item
+order changes `content_hash` unless the caller explicitly classifies a field as
+set-like through `set_like_fields`.
+
+Field-order classes:
+
+1. Ordered list fields: default policy; used when order is semantically material.
+1. Set-like list fields: caller must pass the field path/name through
+   `set_like_fields`; hashing sorts canonicalized elements before serialization.
+1. canonical JSON string fields: strings that contain JSON are decoded,
+   normalized, and serialized canonically before hashing.
+1. Excluded metadata fields: any field whose name starts with `_` is ignored
+   regardless of value or ordering.
+
+The set-like override is implemented in
+`src/bioetl/domain/transformations/hashing.py` and is part of the public hash
+contract: new unordered business fields must be added deliberately, with tests,
+rather than relying on accidental list ordering.
+
+### Metadata exclusion policy (MUST)
+
+A field **MUST NOT** affect identity/hash if its name starts with `_`.
+
+This includes (non-exhaustive):
+
+- `_ingestion_ts`
+- `_run_id`
+- `_run_type`
+- `_dq_warn`, `_dq_error`, `_dq_*`
+- `_source_batch_id`
+- `_index`
+- `_lookup_method`
+- `_original_id`
+- `_source`
+- Future technical fields like `_new_field`
+
+## Rationale
+
+1. Prevents identity churn from operational metadata.
+1. Preserves deterministic identity under schema drift when new technical fields
+   are introduced.
+1. Keeps dedup/version semantics tied to business content only.
+
+## 2026-04 Evaluation Outcome
+
+The repository intentionally keeps `content_hash` datetime semantics separate
+from the broader canonical control-plane datetime normalization.
+
+Decision:
+
+1. Keep the current hash-identity split.
+1. Use `v2_datetime_utc` as the active default for timestamp-sensitive hashes.
+   This policy normalizes datetimes to UTC ISO-8601 `Z` material with
+   microsecond precision.
+1. Retain `v1_date` only as an explicit date-only compatibility policy for
+   reviewed source fields whose business identity has no sub-day semantics.
+1. Do not silently migrate existing `content_hash` surfaces to
+   `v2_datetime_utc` as part of routine cleanup work.
+1. Treat any future convergence as an explicit breaking-change migration with
+   versioning, golden-hash validation, and replay/dedup impact analysis.
+
+The machine-readable policy surface is
+`configs/quality/determinism_identity_policy.yaml`. Runtime callers that need
+timestamp-sensitive identity must use the active `v2_datetime_utc` policy.
+Historical `v1_date` compatibility is valid only when the entity appears in the
+date-only inventory and declares `contracts.hash_datetime_policy: v1_date`.
+
+Affected canonical consumers of the current hash-identity contract include:
+
+- `src/bioetl/domain/transformations/hashing.py`
+- `src/bioetl/infrastructure/storage/support/retention.py`
+- `src/bioetl/infrastructure/storage/silver/validation_operations.py`
+- `tests/unit/contracts/test_content_hash_contract.py`
+
+Reasoning:
+
+1. The current contract is already explicit, deterministic, and test-covered.
+1. A silent datetime-semantics change would alter `content_hash` material for
+   existing records and content-aware dedup paths.
+1. The split is acceptable as long as it remains documented as a distinct
+   hash-identity plane rather than being mistaken for a control-plane datetime
+   rule.
+
+## Contract tests
+
+- Property-based determinism: metadata-only changes keep hash stable.
+- Schema drift contract: adding new `_` fields keeps hash stable.

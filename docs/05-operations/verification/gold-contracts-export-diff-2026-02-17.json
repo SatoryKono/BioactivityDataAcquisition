@@ -183,7 +183,10 @@
       "contract_version": "1.0.0",
       "status": "updated",
       "diff": {
-        "added_properties": [],
+        "added_properties": [
+          "cell_type",
+          "clo_id"
+        ],
         "removed_properties": [],
         "changed_properties": [],
         "required_changed": false
@@ -245,54 +248,14 @@
       }
     },
     "pubchem_compound": {
-      "file": "docs/04-reference/contracts/gold/pubchem_compound_v2.0.json",
-      "contract_version": "2.0.0",
-      "status": "created",
+      "file": "docs/04-reference/contracts/gold/pubchem_compound_v1.0.json",
+      "contract_version": "1.0.0",
+      "status": "updated",
       "diff": {
-        "added_properties": [
-          "_dq_error",
-          "_dq_warn",
-          "_index",
-          "canonical_smiles",
-          "chemical_standardization_policy_version",
-          "chemical_standardization_status",
-          "chemical_standardization_warnings",
-          "complexity",
-          "conformer_count_3d",
-          "conformer_rmsd_3d",
-          "content_hash",
-          "effective_rotor_count_3d",
-          "entity_id",
-          "exact_mass",
-          "feature_acceptor_count_3d",
-          "feature_anion_count_3d",
-          "feature_cation_count_3d",
-          "feature_count_3d",
-          "feature_donor_count_3d",
-          "feature_hydrophobe_count_3d",
-          "feature_ring_count_3d",
-          "inchi",
-          "inchi_key",
-          "isomeric_smiles",
-          "iupac_name",
-          "molecular_formula",
-          "molecular_weight",
-          "molecule_id",
-          "monoisotopic_mass",
-          "standardized_canonical_smiles",
-          "standardized_inchi",
-          "standardized_inchi_key",
-          "standardized_isomeric_smiles",
-          "structure_parent_key",
-          "tpsa",
-          "x_steric_quadrupole_3d",
-          "xlogp",
-          "y_steric_quadrupole_3d",
-          "z_steric_quadrupole_3d"
-        ],
+        "added_properties": [],
         "removed_properties": [],
         "changed_properties": [],
-        "required_changed": true
+        "required_changed": false
       }
     },
     "pubmed_publication": {

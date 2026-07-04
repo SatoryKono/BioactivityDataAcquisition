@@ -1,0 +1,23 @@
+version: 1.0.0
+provider: composite
+entity: molecule
+pipeline:
+    pipeline_name: composite_molecule
+    provider: composite
+    entity_type: molecule
+    description: Composite molecule entity merging data from multiple providers
+    business_primary_keys:
+        - entity_id
+    sink:
+        silver:
+            mode: merge
+            idempotency_contract: merge_upsert
+        gold:
+            enabled: true
+quality:
+    version: 1.0.0
+    provider: composite
+    entity: molecule
+    entity_field_validations: []
+    cross_field_validations: []
+status: active

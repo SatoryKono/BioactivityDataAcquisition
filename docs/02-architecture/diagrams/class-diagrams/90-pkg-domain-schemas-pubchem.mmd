@@ -1,0 +1,35 @@
+%% Title: Package Family: domain/schemas/pubchem
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/schemas/pubchem; modules: _identifiers, _physchem, _stereo, _three_d, compound.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-03-27
+%% @level   Package Family / Inventory Slice
+%% @nodes   5
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace identifiers {
+        class PubchemIdentitySchema
+    }
+
+    namespace physchem {
+        class PubchemPhysChemSchema
+    }
+
+    namespace stereo {
+        class PubchemStereoSchema
+    }
+
+    namespace three_d {
+        class PubchemThreeDSchema
+    }
+
+    namespace compound {
+        class PubchemMoleculeSchema
+    }
+
+    PubchemIdentitySchema <|-- PubchemMoleculeSchema
+    PubchemPhysChemSchema <|-- PubchemMoleculeSchema
+    PubchemStereoSchema <|-- PubchemMoleculeSchema
+    PubchemThreeDSchema <|-- PubchemMoleculeSchema

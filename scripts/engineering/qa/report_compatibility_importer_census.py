@@ -1,0 +1,1167 @@
+#!/usr/bin/env python3
+"""Generate a deterministic importer census for retained seams and twin modules."""
+
+from __future__ import annotations
+
+import argparse
+import ast
+import json
+import sys
+from collections import Counter
+from datetime import date
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+SRC_ROOT = PROJECT_ROOT / "src"
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
+DEFAULT_JSON_OUTPUT = (
+    PROJECT_ROOT / "reports" / "quality" / "compatibility-importer-census.json"
+)
+DEFAULT_MD_OUTPUT = (
+    PROJECT_ROOT / "reports" / "quality" / "compatibility-importer-census.md"
+)
+DEFAULT_TWIN_RATCHET = (
+    PROJECT_ROOT / "configs" / "quality" / "compatibility_twin_module_ratchet.yaml"
+)
+DEFAULT_CONFIG_FACADE_RATCHET = (
+    PROJECT_ROOT
+    / "configs"
+    / "quality"
+    / "infrastructure_config_root_facade_inventory.yaml"
+)
+DEFAULT_CONTROL_PLANE_ROOT_FACADE = (
+    PROJECT_ROOT
+    / "configs"
+    / "quality"
+    / "application_control_plane_root_facade_inventory.yaml"
+)
+REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
+    {
+        "issue_id": "4541",
+        "surface_id": "historical_replay_certification_service",
+        "path": "src/bioetl/application/services/control_plane/historical_replay_certification_service.py",
+        "module_name": "bioetl.application.services.control_plane.historical_replay_certification_service",
+        "canonical_target": "bioetl.application.services.control_plane.replay.historical_certification_service",
+        "owner": "bioetl.application.services.control_plane.replay",
+    },
+    {
+        "issue_id": "4541",
+        "surface_id": "historical_replay_closure_models",
+        "path": "src/bioetl/application/services/control_plane/historical_replay_closure_models.py",
+        "module_name": "bioetl.application.services.control_plane.historical_replay_closure_models",
+        "canonical_target": "bioetl.application.services.control_plane.replay.historical_closure_models",
+        "owner": "bioetl.application.services.control_plane.replay",
+    },
+    {
+        "issue_id": "4541",
+        "surface_id": "historical_replay_closure_policy",
+        "path": "src/bioetl/application/services/control_plane/historical_replay_closure_policy.py",
+        "module_name": "bioetl.application.services.control_plane.historical_replay_closure_policy",
+        "canonical_target": "bioetl.application.services.control_plane.replay.historical_closure_policy",
+        "owner": "bioetl.application.services.control_plane.replay",
+    },
+    {
+        "issue_id": "4541",
+        "surface_id": "historical_replay_closure_service",
+        "path": "src/bioetl/application/services/control_plane/historical_replay_closure_service.py",
+        "module_name": "bioetl.application.services.control_plane.historical_replay_closure_service",
+        "canonical_target": "bioetl.application.services.control_plane.replay.historical_closure_service",
+        "owner": "bioetl.application.services.control_plane.replay",
+    },
+    {
+        "issue_id": "4541",
+        "surface_id": "historical_replay_corpus_models",
+        "path": "src/bioetl/application/services/control_plane/historical_replay_corpus_models.py",
+        "module_name": "bioetl.application.services.control_plane.historical_replay_corpus_models",
+        "canonical_target": "bioetl.application.services.control_plane.replay.historical_corpus_models",
+        "owner": "bioetl.application.services.control_plane.replay",
+    },
+    {
+        "issue_id": "4541",
+        "surface_id": "historical_replay_corpus_policy",
+        "path": "src/bioetl/application/services/control_plane/historical_replay_corpus_policy.py",
+        "module_name": "bioetl.application.services.control_plane.historical_replay_corpus_policy",
+        "canonical_target": "bioetl.application.services.control_plane.replay.historical_corpus_policy",
+        "owner": "bioetl.application.services.control_plane.replay",
+    },
+    {
+        "issue_id": "4541",
+        "surface_id": "historical_replay_corpus_service",
+        "path": "src/bioetl/application/services/control_plane/historical_replay_corpus_service.py",
+        "module_name": "bioetl.application.services.control_plane.historical_replay_corpus_service",
+        "canonical_target": "bioetl.application.services.control_plane.replay.historical_corpus_service",
+        "owner": "bioetl.application.services.control_plane.replay",
+    },
+    {
+        "issue_id": "4541",
+        "surface_id": "historical_replay_universe_policy",
+        "path": "src/bioetl/application/services/control_plane/historical_replay_universe_policy.py",
+        "module_name": "bioetl.application.services.control_plane.historical_replay_universe_policy",
+        "canonical_target": "bioetl.application.services.control_plane.replay.historical_universe_policy",
+        "owner": "bioetl.application.services.control_plane.replay",
+    },
+    {
+        "issue_id": "4541",
+        "surface_id": "historical_replay_universe_service",
+        "path": "src/bioetl/application/services/control_plane/historical_replay_universe_service.py",
+        "module_name": "bioetl.application.services.control_plane.historical_replay_universe_service",
+        "canonical_target": "bioetl.application.services.control_plane.replay.historical_universe_service",
+        "owner": "bioetl.application.services.control_plane.replay",
+    },
+    {
+        "issue_id": "4541",
+        "surface_id": "replay_bundle_descriptor_service",
+        "path": "src/bioetl/application/services/control_plane/replay_bundle_descriptor_service.py",
+        "module_name": "bioetl.application.services.control_plane.replay_bundle_descriptor_service",
+        "canonical_target": "bioetl.application.services.control_plane.replay.bundle_descriptor_service",
+        "owner": "bioetl.application.services.control_plane.replay",
+    },
+    {
+        "issue_id": "4541",
+        "surface_id": "run_manifest_diagnostics",
+        "path": "src/bioetl/application/services/control_plane/run_manifest_diagnostics.py",
+        "module_name": "bioetl.application.services.control_plane.run_manifest_diagnostics",
+        "canonical_target": "bioetl.application.services.control_plane.manifest.diagnostics",
+        "owner": "bioetl.application.services.control_plane.manifest",
+    },
+    {
+        "issue_id": "4541",
+        "surface_id": "run_manifest_inspection_service",
+        "path": "src/bioetl/application/services/control_plane/run_manifest_inspection_service.py",
+        "module_name": "bioetl.application.services.control_plane.run_manifest_inspection_service",
+        "canonical_target": "bioetl.application.services.control_plane.manifest.inspection_service",
+        "owner": "bioetl.application.services.control_plane.manifest",
+    },
+    {
+        "issue_id": "4700",
+        "surface_id": "run_manifest_replay_taxonomy",
+        "path": "src/bioetl/application/services/control_plane/run_manifest_replay_taxonomy.py",
+        "module_name": "bioetl.application.services.control_plane.run_manifest_replay_taxonomy",
+        "canonical_target": "bioetl.application.services.control_plane.manifest.replay_taxonomy",
+        "owner": "bioetl.application.services.control_plane.manifest",
+    },
+    {
+        "issue_id": "4541",
+        "surface_id": "workflow_execution_preparation",
+        "path": "src/bioetl/application/services/control_plane/workflow_execution_preparation.py",
+        "module_name": "bioetl.application.services.control_plane.workflow_execution_preparation",
+        "canonical_target": "bioetl.application.services.control_plane.workflow.execution_preparation",
+        "owner": "bioetl.application.services.control_plane.workflow",
+    },
+    {
+        "issue_id": "4541",
+        "surface_id": "workflow_execution_recording",
+        "path": "src/bioetl/application/services/control_plane/workflow_execution_recording.py",
+        "module_name": "bioetl.application.services.control_plane.workflow_execution_recording",
+        "canonical_target": "bioetl.application.services.control_plane.workflow.execution_recording",
+        "owner": "bioetl.application.services.control_plane.workflow",
+    },
+    {
+        "issue_id": "4541",
+        "surface_id": "workflow_execution_service",
+        "path": "src/bioetl/application/services/control_plane/workflow_execution_service.py",
+        "module_name": "bioetl.application.services.control_plane.workflow_execution_service",
+        "canonical_target": "bioetl.application.services.control_plane.workflow.execution_service",
+        "owner": "bioetl.application.services.control_plane.workflow",
+    },
+    {
+        "issue_id": "4541",
+        "surface_id": "workflow_inspection_service",
+        "path": "src/bioetl/application/services/control_plane/workflow_inspection_service.py",
+        "module_name": "bioetl.application.services.control_plane.workflow_inspection_service",
+        "canonical_target": "bioetl.application.services.control_plane.workflow.inspection_service",
+        "owner": "bioetl.application.services.control_plane.workflow",
+    },
+    {
+        "issue_id": "4541",
+        "surface_id": "workflow_ledger_service",
+        "path": "src/bioetl/application/services/control_plane/workflow_ledger_service.py",
+        "module_name": "bioetl.application.services.control_plane.workflow_ledger_service",
+        "canonical_target": "bioetl.application.services.control_plane.workflow.ledger_service",
+        "owner": "bioetl.application.services.control_plane.workflow",
+    },
+    {
+        "issue_id": "4541",
+        "surface_id": "workflow_manifest_models",
+        "path": "src/bioetl/application/services/control_plane/workflow_manifest_models.py",
+        "module_name": "bioetl.application.services.control_plane.workflow_manifest_models",
+        "canonical_target": "bioetl.application.services.control_plane.workflow.manifest_models",
+        "owner": "bioetl.application.services.control_plane.workflow",
+    },
+    {
+        "issue_id": "4541",
+        "surface_id": "workflow_manifest_service",
+        "path": "src/bioetl/application/services/control_plane/workflow_manifest_service.py",
+        "module_name": "bioetl.application.services.control_plane.workflow_manifest_service",
+        "canonical_target": "bioetl.application.services.control_plane.workflow.manifest_service",
+        "owner": "bioetl.application.services.control_plane.workflow",
+    },
+    {
+        "issue_id": "4390",
+        "surface_id": "metadata_sidecar_adapter",
+        "path": "src/bioetl/infrastructure/storage/silver/operations/metadata_sidecar_adapter.py",
+        "module_name": "bioetl.infrastructure.storage.silver.operations.metadata_sidecar_adapter",
+        "canonical_target": "bioetl.domain.ports.storage.metadata.MetadataCoordinatorPort",
+        "owner": "bioetl.infrastructure.storage.silver.operations",
+    },
+    {
+        "issue_id": "4388",
+        "surface_id": "checkpoint_compatibility_service_v2",
+        "path": "src/bioetl/application/services/checkpoint_compatibility_service_v2.py",
+        "module_name": "bioetl.application.services.checkpoint_compatibility_service_v2",
+        "canonical_target": "bioetl.application.services.checkpoint_compatibility_service",
+        "owner": "bioetl.application.services",
+    },
+    {
+        "issue_id": "4388",
+        "surface_id": "legacy_fingerprints",
+        "path": "src/bioetl/domain/normalization/legacy_fingerprints.py",
+        "module_name": "bioetl.domain.normalization.legacy_fingerprints",
+        "canonical_target": "bioetl.domain.normalization.fingerprints",
+        "owner": "bioetl.domain.normalization",
+    },
+)
+
+
+def _repo_relative_posix(path: Path, repo_root: Path) -> str:
+    """Return repo-relative path serialized with stable POSIX separators."""
+    try:
+        return path.relative_to(repo_root).as_posix()
+    except ValueError:
+        try:
+            return path.relative_to(PROJECT_ROOT).as_posix()
+        except ValueError:
+            return path.as_posix()
+
+
+def _resolve_inventory_path(repo_root: Path, default_path: Path) -> Path:
+    """Prefer repo-local inventory files, but allow project defaults in tests."""
+    repo_candidate = repo_root / "configs" / "quality" / default_path.name
+    if repo_candidate.exists():
+        return repo_candidate
+    return default_path
+
+
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repo-root", default=str(PROJECT_ROOT))
+    parser.add_argument("--json-out", default=str(DEFAULT_JSON_OUTPUT))
+    parser.add_argument("--md-out", default=str(DEFAULT_MD_OUTPUT))
+    parser.add_argument("--snapshot-date", default=None)
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Fail when committed compatibility census artifacts drift.",
+    )
+    return parser.parse_args()
+
+
+def _existing_snapshot_date(path: Path) -> str | None:
+    if not path.exists():
+        return None
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        return None
+    snapshot_date = payload.get("snapshot_date")
+    return snapshot_date if isinstance(snapshot_date, str) else None
+
+
+def _load_retained_entrypoints(path: Path) -> list[dict[str, Any]]:
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    rows = payload.get("retained_entrypoints", [])
+    assert isinstance(rows, list)
+    return [row for row in rows if isinstance(row, dict)]
+
+
+def _load_first_safe_removal_wave(path: Path) -> dict[str, Any]:
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    first_wave = payload.get("first_safe_removal_wave", {})
+    assert isinstance(first_wave, dict)
+    rows = first_wave.get("rows", [])
+    assert isinstance(rows, list)
+    return {
+        "linked_issue": first_wave.get("linked_issue"),
+        "review_date": first_wave.get("review_date"),
+        "rows": [row for row in rows if isinstance(row, dict)],
+    }
+
+
+def _load_tracked_twin_families(path: Path) -> list[dict[str, Any]]:
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    rows = payload.get("families", [])
+    assert isinstance(rows, list)
+    return [row for row in rows if isinstance(row, dict)]
+
+
+def _load_config_root_facade_inventory(path: Path) -> dict[str, Any]:
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    return payload
+
+
+def _load_root_facade_inventory(path: Path) -> dict[str, Any]:
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    return payload
+
+
+def _usage_classification(row: dict[str, Any]) -> str:
+    external_breaking_change_required = bool(
+        row.get("external_breaking_change_required")
+    )
+    internal_callers_zero = bool(row.get("internal_callers_zero"))
+    if external_breaking_change_required and internal_callers_zero:
+        return "stable_public_api_zero_first_party_src"
+    if external_breaking_change_required:
+        return "stable_public_api_with_reviewed_first_party_usage"
+    return "compatibility_surface_under_active_migration"
+
+
+def _surface_classification(
+    row: dict[str, Any],
+    *,
+    src_importer_count: int,
+) -> str:
+    if str(row.get("status")) != "public-entrypoint":
+        return "transitional"
+    if src_importer_count > 0:
+        return "first-party-active"
+    if bool(row.get("external_breaking_change_required")):
+        return "external-facing"
+    return "confirmed-unused"
+
+
+def _module_name_from_repo_path(repo_path: str) -> str:
+    normalized = repo_path.removeprefix("src/").removesuffix(".py")
+    if normalized.endswith("/__init__"):
+        normalized = normalized[: -len("/__init__")]
+    return normalized.replace("/", ".")
+
+
+def _parse_module(path: Path) -> ast.Module:
+    return ast.parse(path.read_text(encoding="utf-8"), filename=path.as_posix())
+
+
+def _string_literals_from_sequence(node: ast.AST) -> list[str]:
+    if not isinstance(node, ast.List | ast.Tuple):
+        return []
+    values: list[str] = []
+    for element in node.elts:
+        if isinstance(element, ast.Constant) and isinstance(element.value, str):
+            values.append(element.value)
+    return values
+
+
+def _top_level_string_sequence_assignment(
+    tree: ast.Module, target_name: str
+) -> list[str]:
+    for node in tree.body:
+        if not isinstance(node, ast.Assign):
+            continue
+        if not any(
+            isinstance(target, ast.Name) and target.id == target_name
+            for target in node.targets
+        ):
+            continue
+        values = _string_literals_from_sequence(node.value)
+        if values:
+            return values
+    return []
+
+
+def _top_level_dict_string_keys(tree: ast.Module, target_name: str) -> list[str]:
+    for node in tree.body:
+        if not isinstance(node, ast.Assign):
+            if not (
+                isinstance(node, ast.AnnAssign)
+                and isinstance(node.target, ast.Name)
+                and node.target.id == target_name
+                and isinstance(node.value, ast.Dict)
+            ):
+                continue
+            dict_node = node.value
+        else:
+            if not any(
+                isinstance(target, ast.Name) and target.id == target_name
+                for target in node.targets
+            ):
+                continue
+            if not isinstance(node.value, ast.Dict):
+                continue
+            dict_node = node.value
+        keys: list[str] = []
+        for key in dict_node.keys:
+            if isinstance(key, ast.Constant) and isinstance(key.value, str):
+                keys.append(key.value)
+        return keys
+    return []
+
+
+def _collect_runtime_binding_names(tree: ast.Module) -> set[str]:
+    bindings: set[str] = set()
+    for node in tree.body:
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
+            bindings.add(node.name)
+            continue
+        if isinstance(node, ast.ImportFrom):
+            for alias in node.names:
+                bindings.add(alias.asname or alias.name)
+            continue
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    bindings.add(target.id)
+            continue
+        if (
+            isinstance(node, ast.AnnAssign)
+            and node.value is not None
+            and isinstance(node.target, ast.Name)
+        ):
+            bindings.add(node.target.id)
+    return bindings
+
+
+def _collect_public_top_level_function_names(tree: ast.Module) -> list[str]:
+    names: list[str] = []
+    for node in tree.body:
+        if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+            continue
+        if node.name.startswith("_"):
+            continue
+        names.append(node.name)
+    return names
+
+
+def _collect_getattr_branch_names(tree: ast.Module) -> set[str]:
+    def _visit_if(node: ast.If, names: set[str]) -> None:
+        test = node.test
+        if (
+            isinstance(test, ast.Compare)
+            and isinstance(test.left, ast.Name)
+            and test.left.id == "name"
+            and len(test.ops) == 1
+            and isinstance(test.ops[0], ast.Eq)
+            and len(test.comparators) == 1
+            and isinstance(test.comparators[0], ast.Constant)
+            and isinstance(test.comparators[0].value, str)
+        ):
+            names.add(test.comparators[0].value)
+        for child in node.orelse:
+            if isinstance(child, ast.If):
+                _visit_if(child, names)
+
+    for node in tree.body:
+        if isinstance(node, ast.FunctionDef) and node.name == "__getattr__":
+            names: set[str] = set()
+            for child in node.body:
+                if isinstance(child, ast.If):
+                    _visit_if(child, names)
+            return names
+    return set()
+
+
+def _duplicates(values: list[str]) -> list[str]:
+    counts = Counter(values)
+    return sorted(name for name, count in counts.items() if count > 1)
+
+
+def _build_public_export_contract_row(
+    module_path: Path,
+    inventory_row: dict[str, Any],
+) -> dict[str, object]:
+    tree = _parse_module(module_path)
+    export_contract = inventory_row["public_export_contract"]
+    assert isinstance(export_contract, dict)
+    public_exports = _top_level_string_sequence_assignment(tree, "__all__")
+    lazy_export_table_name = export_contract.get("lazy_export_table")
+    lazy_export_keys = (
+        _top_level_dict_string_keys(tree, str(lazy_export_table_name))
+        if isinstance(lazy_export_table_name, str)
+        else []
+    )
+    getattr_branch_names = (
+        sorted(_collect_getattr_branch_names(tree))
+        if bool(export_contract.get("parse_dunder_getattr_string_branches"))
+        else []
+    )
+    retained_wrapper_contract = sorted(
+        str(name) for name in export_contract.get("retained_wrappers_outside_all", [])
+    )
+    runtime_bindings = _collect_runtime_binding_names(tree)
+    public_function_bindings = set(_collect_public_top_level_function_names(tree))
+    resolution_conflicts: dict[str, list[str]] = {}
+    for export_name in public_exports:
+        providers: list[str] = []
+        if export_name in runtime_bindings:
+            providers.append("runtime_binding")
+        if export_name in lazy_export_keys:
+            providers.append("lazy_export_table")
+        if export_name in getattr_branch_names:
+            providers.append("dunder_getattr_branch")
+        if len(providers) != 1:
+            resolution_conflicts[export_name] = providers
+
+    public_export_set = set(public_exports)
+    lazy_resolution_exports = set(lazy_export_keys) | set(getattr_branch_names)
+    retained_wrappers_outside_all = sorted(
+        public_function_bindings - lazy_resolution_exports
+    )
+    return {
+        "path": inventory_row["path"],
+        "module_name": _module_name_from_repo_path(str(inventory_row["path"])),
+        "canonical_target": inventory_row["canonical_target"],
+        "max_public_exports": int(export_contract["max_public_exports"]),
+        "public_exports": public_exports,
+        "public_export_count": len(public_exports),
+        "duplicate_public_exports": _duplicates(public_exports),
+        "lazy_export_table": lazy_export_table_name,
+        "lazy_export_keys": lazy_export_keys,
+        "duplicate_lazy_export_keys": _duplicates(lazy_export_keys),
+        "orphan_lazy_export_keys": sorted(set(lazy_export_keys) - public_export_set),
+        "dunder_getattr_exports": getattr_branch_names,
+        "orphan_dunder_getattr_exports": sorted(
+            set(getattr_branch_names) - public_export_set
+        ),
+        "retained_wrapper_contract": retained_wrapper_contract,
+        "retained_wrappers_outside_all": retained_wrappers_outside_all,
+        "missing_retained_wrappers_outside_all": sorted(
+            set(retained_wrapper_contract) - set(retained_wrappers_outside_all)
+        ),
+        "unexpected_retained_wrappers_outside_all": sorted(
+            set(retained_wrappers_outside_all) - set(retained_wrapper_contract)
+        ),
+        "resolution_conflicts": resolution_conflicts,
+    }
+
+
+def build_compatibility_importer_census(
+    repo_root: Path, *, snapshot_date: str | None = None
+) -> dict[str, object]:
+    from scripts.engineering.qa.import_graph_inventory import (
+        collect_bioetl_importers,
+        collect_exact_module_import_usage,
+        find_public_private_twin_modules,
+    )
+
+    importer_map = collect_bioetl_importers(repo_root)
+    retained_entrypoints = _load_retained_entrypoints(
+        repo_root / "configs" / "quality" / "compatibility_facade_inventory.yaml"
+    )
+    first_safe_removal_wave = _load_first_safe_removal_wave(
+        repo_root / "configs" / "quality" / "compatibility_facade_inventory.yaml"
+    )
+    twin_pairs = find_public_private_twin_modules(repo_root)
+    twin_ratchet_path = _resolve_inventory_path(repo_root, DEFAULT_TWIN_RATCHET)
+    tracked_twin_families = _load_tracked_twin_families(twin_ratchet_path)
+    config_root_facade_path = _resolve_inventory_path(
+        repo_root, DEFAULT_CONFIG_FACADE_RATCHET
+    )
+    config_root_facade_inventory = _load_config_root_facade_inventory(
+        config_root_facade_path
+    )
+    control_plane_root_facade_path = _resolve_inventory_path(
+        repo_root, DEFAULT_CONTROL_PLANE_ROOT_FACADE
+    )
+    control_plane_root_facade_inventory = _load_root_facade_inventory(
+        control_plane_root_facade_path
+    )
+    config_root_usage = collect_exact_module_import_usage(
+        repo_root,
+        str(config_root_facade_inventory["target_module"]),
+    )
+    control_plane_root_usage = collect_exact_module_import_usage(
+        repo_root,
+        str(control_plane_root_facade_inventory["target_module"]),
+    )
+    removed_surface_rows: list[dict[str, object]] = []
+    for row in REMOVED_COMPATIBILITY_SURFACES:
+        usage = collect_exact_module_import_usage(repo_root, row["module_name"])
+        src_importers = sorted(usage["src"])
+        test_importers = sorted(usage["tests"])
+        removed_surface_rows.append(
+            {
+                **row,
+                "path_exists": (repo_root / row["path"]).exists(),
+                "src_importers": src_importers,
+                "test_importers": test_importers,
+                "src_importer_count": len(src_importers),
+                "test_importer_count": len(test_importers),
+            }
+        )
+
+    retained_rows: list[dict[str, object]] = []
+    retained_public_export_rows: list[dict[str, object]] = []
+    for row in retained_entrypoints:
+        repo_path = str(row["path"])
+        module_name = _module_name_from_repo_path(repo_path)
+        importers = importer_map.get(module_name, {"src": (), "tests": ()})
+        retained_row = {
+            "path": repo_path,
+            "module_name": module_name,
+            "status": row.get("status"),
+            "canonical_target": row.get("canonical_target"),
+            "owner": row.get("owner"),
+            "external_breaking_change_required": bool(
+                row.get("external_breaking_change_required")
+            ),
+            "internal_callers_zero": bool(row.get("internal_callers_zero")),
+            "usage_classification": _usage_classification(row),
+            "src_importers": list(importers.get("src", ())),
+            "test_importers": list(importers.get("tests", ())),
+            "src_importer_count": len(importers.get("src", ())),
+            "test_importer_count": len(importers.get("tests", ())),
+        }
+        retained_row["surface_classification"] = _surface_classification(
+            row,
+            src_importer_count=int(retained_row["src_importer_count"]),
+        )
+        retained_row["consumer_class"] = retained_row["usage_classification"]
+        retained_row["sunset_status"] = retained_row["surface_classification"]
+        export_contract = row.get("public_export_contract")
+        if isinstance(export_contract, dict):
+            export_row = _build_public_export_contract_row(repo_root / repo_path, row)
+            retained_row.update(
+                {
+                    key: value
+                    for key, value in export_row.items()
+                    if key not in {"path", "module_name", "canonical_target"}
+                }
+            )
+        retained_rows.append(retained_row)
+        if isinstance(export_contract, dict):
+            retained_public_export_rows.append(
+                {
+                    **{
+                        key: value
+                        for key, value in retained_row.items()
+                        if key
+                        in {
+                            "path",
+                            "module_name",
+                            "canonical_target",
+                            "max_public_exports",
+                            "public_exports",
+                            "public_export_count",
+                            "duplicate_public_exports",
+                            "lazy_export_table",
+                            "lazy_export_keys",
+                            "duplicate_lazy_export_keys",
+                            "orphan_lazy_export_keys",
+                            "dunder_getattr_exports",
+                            "orphan_dunder_getattr_exports",
+                            "retained_wrapper_contract",
+                            "retained_wrappers_outside_all",
+                            "missing_retained_wrappers_outside_all",
+                            "unexpected_retained_wrappers_outside_all",
+                            "resolution_conflicts",
+                        }
+                    },
+                    "owner": retained_row["owner"],
+                    "status": retained_row["status"],
+                    "external_breaking_change_required": retained_row[
+                        "external_breaking_change_required"
+                    ],
+                    "internal_callers_zero": retained_row["internal_callers_zero"],
+                    "usage_classification": retained_row["usage_classification"],
+                    "surface_classification": retained_row["surface_classification"],
+                    "consumer_class": retained_row["consumer_class"],
+                    "sunset_status": retained_row["sunset_status"],
+                    "src_importer_count": retained_row["src_importer_count"],
+                    "test_importer_count": retained_row["test_importer_count"],
+                }
+            )
+
+    first_safe_removal_wave_rows: list[dict[str, object]] = []
+    for row in first_safe_removal_wave["rows"]:
+        repo_path = str(row["path"])
+        module_name = _module_name_from_repo_path(repo_path)
+        importers = importer_map.get(module_name, {"src": (), "tests": ()})
+        first_safe_removal_wave_rows.append(
+            {
+                "path": repo_path,
+                "module_name": module_name,
+                "owner": row.get("owner"),
+                "previous_status": row.get("previous_status"),
+                "surface_classification": row.get(
+                    "surface_classification",
+                    "confirmed-unused",
+                ),
+                "action": row.get("action"),
+                "rationale": row.get("rationale"),
+                "migration_prerequisites": list(row.get("migration_prerequisites", [])),
+                "src_importers": list(importers.get("src", ())),
+                "test_importers": list(importers.get("tests", ())),
+                "src_importer_count": len(importers.get("src", ())),
+                "test_importer_count": len(importers.get("tests", ())),
+            }
+        )
+
+    twin_rows: list[dict[str, object]] = []
+    for pair in twin_pairs:
+        public_importers = importer_map.get(
+            pair["public_module"], {"src": (), "tests": ()}
+        )
+        private_importers = importer_map.get(
+            pair["private_module"], {"src": (), "tests": ()}
+        )
+        twin_rows.append(
+            {
+                **pair,
+                "public_src_importer_count": len(public_importers.get("src", ())),
+                "public_test_importer_count": len(public_importers.get("tests", ())),
+                "private_src_importer_count": len(private_importers.get("src", ())),
+                "private_test_importer_count": len(private_importers.get("tests", ())),
+                "public_src_importers": list(public_importers.get("src", ())),
+                "private_src_importers": list(private_importers.get("src", ())),
+            }
+        )
+
+    twin_rows_by_public_module = {
+        str(row["public_module"]): row for row in twin_rows if isinstance(row, dict)
+    }
+    tracked_twin_rows: list[dict[str, object]] = []
+    for family in tracked_twin_families:
+        public_module = str(family["public_module"])
+        live_row = twin_rows_by_public_module.get(public_module)
+        if live_row is None:
+            continue
+        tracked_twin_rows.append(
+            {
+                **family,
+                "current_public_src_importer_count": live_row[
+                    "public_src_importer_count"
+                ],
+                "current_private_src_importer_count": live_row[
+                    "private_src_importer_count"
+                ],
+                "current_public_src_importers": live_row["public_src_importers"],
+                "current_private_src_importers": live_row["private_src_importers"],
+            }
+        )
+
+    configured_symbols = config_root_facade_inventory["symbols"]
+    assert isinstance(configured_symbols, list)
+    configured_symbols_by_name = {
+        str(row["symbol"]): row for row in configured_symbols if isinstance(row, dict)
+    }
+    config_src_usage = config_root_usage["src"]
+    config_symbol_paths: dict[str, list[str]] = {}
+    for importer_path, imported_names in config_src_usage.items():
+        for imported_name in imported_names:
+            config_symbol_paths.setdefault(imported_name, []).append(importer_path)
+
+    config_symbol_rows: list[dict[str, object]] = []
+    for symbol_name, row in configured_symbols_by_name.items():
+        current_paths = sorted(config_symbol_paths.get(symbol_name, []))
+        config_symbol_rows.append(
+            {
+                **row,
+                "current_src_importer_count": len(current_paths),
+                "current_src_importers": current_paths,
+            }
+        )
+
+    return {
+        "snapshot_date": snapshot_date or date.today().isoformat(),
+        "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
+        "twin_ratchet_source": _repo_relative_posix(twin_ratchet_path, repo_root),
+        "config_root_facade_source": _repo_relative_posix(
+            config_root_facade_path,
+            repo_root,
+        ),
+        "control_plane_root_facade_source": _repo_relative_posix(
+            control_plane_root_facade_path,
+            repo_root,
+        ),
+        "summary": {
+            "retained_entrypoint_count": len(retained_rows),
+            "retained_public_entrypoint_burden": sum(
+                int(row["src_importer_count"]) for row in retained_rows
+            ),
+            "removed_compatibility_surface_count": len(removed_surface_rows),
+            "removed_compatibility_surfaces_with_src_importers": sum(
+                1 for row in removed_surface_rows if row["src_importer_count"] > 0
+            ),
+            "removed_compatibility_surfaces_with_test_importers": sum(
+                1 for row in removed_surface_rows if row["test_importer_count"] > 0
+            ),
+            "removed_compatibility_surfaces_still_present": sum(
+                1 for row in removed_surface_rows if row["path_exists"]
+            ),
+            "twin_pair_count": len(twin_rows),
+            "twin_pairs_with_private_src_importers": sum(
+                1 for row in twin_rows if row["private_src_importer_count"] > 0
+            ),
+            "twin_pairs_without_public_src_importers": sum(
+                1 for row in twin_rows if row["public_src_importer_count"] == 0
+            ),
+            "tracked_twin_family_count": len(tracked_twin_rows),
+            "config_root_symbol_count": len(config_symbol_rows),
+            "config_root_src_importer_count": len(config_src_usage),
+            "control_plane_root_src_importer_count": len(control_plane_root_usage["src"]),
+            "retained_public_export_facade_count": len(retained_public_export_rows),
+            "retained_public_export_facades_with_duplicate_exports": sum(
+                1
+                for row in retained_public_export_rows
+                if row["duplicate_public_exports"] or row["duplicate_lazy_export_keys"]
+            ),
+            "retained_public_export_facades_with_resolution_conflicts": sum(
+                1 for row in retained_public_export_rows if row["resolution_conflicts"]
+            ),
+            "retained_public_export_facades_with_wrapper_contract_drift": sum(
+                1
+                for row in retained_public_export_rows
+                if row["missing_retained_wrappers_outside_all"]
+                or row["unexpected_retained_wrappers_outside_all"]
+            ),
+        },
+        "retained_entrypoints": retained_rows,
+        "retained_entrypoint_owner_usage_map": retained_rows,
+        "retained_public_export_facades": retained_public_export_rows,
+        "retained_public_export_owner_usage_map": retained_public_export_rows,
+        "first_safe_removal_wave": {
+            "linked_issue": first_safe_removal_wave["linked_issue"],
+            "review_date": first_safe_removal_wave["review_date"],
+            "rows": first_safe_removal_wave_rows,
+        },
+        "removed_compatibility_surfaces": removed_surface_rows,
+        "twin_pairs": twin_rows,
+        "tracked_twin_families": tracked_twin_rows,
+        "config_root_facade": {
+            "target_module": config_root_facade_inventory["target_module"],
+            "new_src_import_policy": config_root_facade_inventory[
+                "new_src_import_policy"
+            ],
+            "symbols": config_symbol_rows,
+        },
+        "control_plane_root_facade": {
+            "target_module": control_plane_root_facade_inventory["target_module"],
+            "new_src_import_policy": control_plane_root_facade_inventory[
+                "new_src_import_policy"
+            ],
+            "owner": control_plane_root_facade_inventory.get("owner"),
+            "src_importers": sorted(control_plane_root_usage["src"]),
+            "src_importer_count": len(control_plane_root_usage["src"]),
+        },
+    }
+
+
+def _render_markdown(payload: dict[str, object]) -> str:
+    summary = payload["summary"]
+    retained_rows = payload["retained_entrypoints"]
+    retained_owner_usage_rows = payload["retained_entrypoint_owner_usage_map"]
+    public_export_rows = payload["retained_public_export_facades"]
+    public_export_owner_usage_rows = payload["retained_public_export_owner_usage_map"]
+    first_safe_removal_wave = payload["first_safe_removal_wave"]
+    removed_rows = payload["removed_compatibility_surfaces"]
+    twin_rows = payload["twin_pairs"]
+    assert isinstance(summary, dict)
+    assert isinstance(retained_rows, list)
+    assert isinstance(retained_owner_usage_rows, list)
+    assert isinstance(public_export_rows, list)
+    assert isinstance(public_export_owner_usage_rows, list)
+    assert isinstance(first_safe_removal_wave, dict)
+    assert isinstance(removed_rows, list)
+    assert isinstance(twin_rows, list)
+
+    lines = [
+        "# Compatibility Importer Census",
+        "",
+        f"- snapshot_date: {payload['snapshot_date']}",
+        f"- retained_entrypoint_count: {summary['retained_entrypoint_count']}",
+        "- retained_public_entrypoint_burden: "
+        f"{summary['retained_public_entrypoint_burden']}",
+        f"- removed_compatibility_surface_count: {summary['removed_compatibility_surface_count']}",
+        "- removed_compatibility_surfaces_with_src_importers: "
+        f"{summary['removed_compatibility_surfaces_with_src_importers']}",
+        "- removed_compatibility_surfaces_with_test_importers: "
+        f"{summary['removed_compatibility_surfaces_with_test_importers']}",
+        f"- removed_compatibility_surfaces_still_present: {summary['removed_compatibility_surfaces_still_present']}",
+        f"- twin_pair_count: {summary['twin_pair_count']}",
+        f"- tracked_twin_family_count: {summary['tracked_twin_family_count']}",
+        f"- config_root_symbol_count: {summary['config_root_symbol_count']}",
+        f"- config_root_src_importer_count: {summary['config_root_src_importer_count']}",
+        "- control_plane_root_src_importer_count: "
+        f"{summary['control_plane_root_src_importer_count']}",
+        f"- retained_public_export_facade_count: {summary['retained_public_export_facade_count']}",
+        "- retained_public_export_facades_with_duplicate_exports: "
+        f"{summary['retained_public_export_facades_with_duplicate_exports']}",
+        "- retained_public_export_facades_with_resolution_conflicts: "
+        f"{summary['retained_public_export_facades_with_resolution_conflicts']}",
+        "- retained_public_export_facades_with_wrapper_contract_drift: "
+        f"{summary['retained_public_export_facades_with_wrapper_contract_drift']}",
+        "- purpose: measure sanctioned public seams and underscore/public twin usage",
+        "",
+        "## Retained Entrypoints",
+        "",
+        "| Path | src importers | test importers |",
+        "| --- | ---: | ---: |",
+    ]
+    for row in retained_rows:
+        assert isinstance(row, dict)
+        lines.append(
+            f"| `{row['path']}` | {row['src_importer_count']} | {row['test_importer_count']} |"
+        )
+
+    lines.extend(
+        [
+            "",
+            "## Retained Entrypoint Owner/Usage Map",
+            "",
+            "| Path | Owner | Usage classification | Surface classification | Internal callers zero | "
+            "External breaking change required | src importers | test importers |",
+            "| --- | --- | --- | --- | --- | --- | ---: | ---: |",
+        ]
+    )
+    for row in retained_owner_usage_rows:
+        assert isinstance(row, dict)
+        lines.append(
+            f"| `{row['path']}` | `{row['owner']}` | `{row['usage_classification']}` | "
+            f"`{row['surface_classification']}` | "
+            f"{'yes' if row['internal_callers_zero'] else 'no'} | "
+            f"{'yes' if row['external_breaking_change_required'] else 'no'} | "
+            f"{row['src_importer_count']} | {row['test_importer_count']} |"
+        )
+
+    lines.extend(
+        [
+            "",
+            "## Retained Public Export Facades",
+            "",
+            "| Path | Public exports | Lazy exports | Retained wrappers outside `__all__` | Duplicate exports | Resolution conflicts |",
+            "| --- | ---: | ---: | --- | --- | --- |",
+        ]
+    )
+    for row in public_export_rows:
+        assert isinstance(row, dict)
+        duplicate_exports = sorted(
+            set(row["duplicate_public_exports"])
+            | set(row["duplicate_lazy_export_keys"])
+        )
+        conflicts = sorted(row["resolution_conflicts"])
+        wrapper_names = row["retained_wrappers_outside_all"]
+        wrapper_drift = sorted(
+            set(row["missing_retained_wrappers_outside_all"])
+            | set(row["unexpected_retained_wrappers_outside_all"])
+        )
+        wrapper_cell = ", ".join(wrapper_names) if wrapper_names else "none"
+        if wrapper_drift:
+            wrapper_cell = f"{wrapper_cell} (drift: {', '.join(wrapper_drift)})"
+        lines.append(
+            f"| `{row['path']}` | {row['public_export_count']} | "
+            f"{len(row['lazy_export_keys']) + len(row['dunder_getattr_exports'])} | "
+            f"{wrapper_cell} | "
+            f"{', '.join(duplicate_exports) if duplicate_exports else 'none'} | "
+            f"{', '.join(conflicts) if conflicts else 'none'} |"
+        )
+
+    lines.extend(
+        [
+            "",
+            "## Retained Public Export Facade Owner/Usage Map",
+            "",
+            "| Path | Owner | Usage classification | Surface classification | "
+            "src importers | test importers | Public exports |",
+            "| --- | --- | --- | --- | ---: | ---: | ---: |",
+        ]
+    )
+    for row in public_export_owner_usage_rows:
+        assert isinstance(row, dict)
+        lines.append(
+            f"| `{row['path']}` | `{row['owner']}` | `{row['usage_classification']}` | "
+            f"`{row['surface_classification']}` | "
+            f"{row['src_importer_count']} | {row['test_importer_count']} | "
+            f"{row['public_export_count']} |"
+        )
+
+    lines.extend(
+        [
+            "",
+            "## First Safe Removal Wave",
+            "",
+            f"- linked_issue: {first_safe_removal_wave['linked_issue']}",
+            f"- review_date: {first_safe_removal_wave['review_date']}",
+            "",
+            "| Path | Owner | Previous status | Surface classification | src importers | test importers | Action |",
+            "| --- | --- | --- | --- | ---: | ---: | --- |",
+        ]
+    )
+    removal_rows = first_safe_removal_wave["rows"]
+    assert isinstance(removal_rows, list)
+    for row in removal_rows:
+        assert isinstance(row, dict)
+        lines.append(
+            f"| `{row['path']}` | `{row['owner']}` | `{row['previous_status']}` | "
+            f"`{row['surface_classification']}` | {row['src_importer_count']} | "
+            f"{row['test_importer_count']} | `{row['action']}` |"
+        )
+        prerequisites = row.get("migration_prerequisites", [])
+        assert isinstance(prerequisites, list)
+        if prerequisites:
+            lines.append(
+                f"Migration prerequisites for `{row['path']}`: "
+                + "; ".join(str(item) for item in prerequisites)
+            )
+
+    lines.extend(
+        [
+            "",
+            "## Removed Compatibility Surfaces",
+            "",
+            "| Module | Path exists | src importers | test importers | Canonical target |",
+            "| --- | --- | ---: | ---: | --- |",
+        ]
+    )
+    for row in removed_rows:
+        assert isinstance(row, dict)
+        lines.append(
+            f"| `{row['module_name']}` | "
+            f"{'yes' if row['path_exists'] else 'no'} | "
+            f"{row['src_importer_count']} | "
+            f"{row['test_importer_count']} | "
+            f"`{row['canonical_target']}` |"
+        )
+
+    lines.extend(
+        [
+            "",
+            "## Twin Modules",
+            "",
+            "| Public module | Public src | Private src |",
+            "| --- | ---: | ---: |",
+        ]
+    )
+    for row in twin_rows:
+        assert isinstance(row, dict)
+        lines.append(
+            f"| `{row['public_module']}` | {row['public_src_importer_count']} | {row['private_src_importer_count']} |"
+        )
+
+    tracked_twin_rows = payload["tracked_twin_families"]
+    assert isinstance(tracked_twin_rows, list)
+    lines.extend(
+        [
+            "",
+            "## Tracked Twin Family Ratchet",
+            "",
+            f"- inventory_source: `{payload['twin_ratchet_source']}`",
+            "",
+            "| Family | Canonical first-party module | Current public src | "
+            "Current private src | Max public src | Max private src |",
+            "| --- | --- | ---: | ---: | ---: | ---: |",
+        ]
+    )
+    for row in tracked_twin_rows:
+        assert isinstance(row, dict)
+        lines.append(
+            f"| `{row['family_id']}` | `{row['canonical_first_party_module']}` | "
+            f"{row['current_public_src_importer_count']} | "
+            f"{row['current_private_src_importer_count']} | "
+            f"{row['max_public_src_importers']} | "
+            f"{row['max_private_src_importers']} |"
+        )
+
+    config_root_facade = payload["config_root_facade"]
+    assert isinstance(config_root_facade, dict)
+    symbol_rows = config_root_facade["symbols"]
+    assert isinstance(symbol_rows, list)
+    lines.extend(
+        [
+            "",
+            "## Infrastructure Config Root Facade",
+            "",
+            f"- inventory_source: `{payload['config_root_facade_source']}`",
+            f"- target_module: `{config_root_facade['target_module']}`",
+            f"- new_src_import_policy: `{config_root_facade['new_src_import_policy']}`",
+            "",
+            "| Symbol | Current src importers | Max src importers | Canonical target |",
+            "| --- | ---: | ---: | --- |",
+        ]
+    )
+    for row in symbol_rows:
+        assert isinstance(row, dict)
+        lines.append(
+            f"| `{row['symbol']}` | {row['current_src_importer_count']} | "
+            f"{row['max_src_importers']} | `{row['canonical_target']}` |"
+        )
+    control_plane_root_facade = payload["control_plane_root_facade"]
+    assert isinstance(control_plane_root_facade, dict)
+    lines.extend(
+        [
+            "",
+            "## Application Control-Plane Root Facade",
+            "",
+            f"- inventory_source: `{payload['control_plane_root_facade_source']}`",
+            f"- target_module: `{control_plane_root_facade['target_module']}`",
+            "- new_src_import_policy: "
+            f"`{control_plane_root_facade['new_src_import_policy']}`",
+            f"- src_importer_count: {control_plane_root_facade['src_importer_count']}",
+        ]
+    )
+    lines.append("")
+    return "\n".join(lines)
+
+
+def main() -> int:
+    args = _parse_args()
+    repo_root = Path(args.repo_root).resolve()
+    snapshot_date = args.snapshot_date
+    payload = build_compatibility_importer_census(
+        repo_root,
+        snapshot_date=snapshot_date
+        or (_existing_snapshot_date(Path(args.json_out)) if args.check else None)
+        or date.today().isoformat(),
+    )
+    json_out = Path(args.json_out)
+    md_out = Path(args.md_out)
+    rendered_json = json.dumps(payload, indent=2) + "\n"
+    rendered_markdown = _render_markdown(payload)
+    if args.check:
+        if not json_out.exists():
+            print(f"[compatibility-importer-census] missing JSON artifact: {json_out}")
+            return 1
+        if not md_out.exists():
+            print(
+                "[compatibility-importer-census] missing Markdown artifact: "
+                f"{md_out}"
+            )
+            return 1
+        if json_out.read_text(encoding="utf-8") != rendered_json:
+            print(
+                "[compatibility-importer-census] FAIL: JSON artifact drifted: "
+                f"{json_out}"
+            )
+            return 1
+        if md_out.read_text(encoding="utf-8") != rendered_markdown:
+            print(
+                "[compatibility-importer-census] FAIL: Markdown artifact drifted: "
+                f"{md_out}"
+            )
+            return 1
+        print("[compatibility-importer-census] PASS: artifacts are up to date")
+        return 0
+
+    json_out.parent.mkdir(parents=True, exist_ok=True)
+    md_out.parent.mkdir(parents=True, exist_ok=True)
+    json_out.write_text(rendered_json, encoding="utf-8")
+    md_out.write_text(rendered_markdown, encoding="utf-8")
+    print(
+        "[compatibility-importer-census] "
+        f"retained_entrypoints={payload['summary']['retained_entrypoint_count']}; "
+        f"twin_pairs={payload['summary']['twin_pair_count']}; "
+        f"json={json_out}; markdown={md_out}"
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

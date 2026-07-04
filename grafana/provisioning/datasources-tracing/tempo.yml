@@ -1,0 +1,19 @@
+apiVersion: 1
+
+datasources:
+  - name: Tempo
+    type: tempo
+    uid: tempo
+    access: proxy
+    url: http://tempo:3200
+    editable: true
+    jsonData:
+      tracesToLogsV2:
+        datasourceUid: loki
+        tags:
+          - key: trace_id
+            value: trace_id
+          - key: span_id
+            value: span_id
+        filterByTraceID: true
+        filterBySpanID: true

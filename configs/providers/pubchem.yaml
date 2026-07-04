@@ -1,0 +1,50 @@
+version: 1.0.0
+provider: pubchem
+source:
+  provider_config:
+    provider: pubchem
+    base_url: https://pubchem.ncbi.nlm.nih.gov/rest/pug
+    auth_type: public
+    client:
+      timeout_sec: 30.0
+      max_retries: 3
+    pagination:
+      page_size: 50
+      id_batch_size: 50
+      strategy: offset
+  circuit_breaker:
+    failure_threshold: 5
+    recovery_timeout: 300
+  rate_limit:
+    requests_per_second: 5.0
+    burst: 10
+  health_check:
+    method: Lightweight compound query
+    timeout: 10
+  retry:
+    use_retry_after: true
+entities:
+- compound
+entity_notes:
+  compound:
+    description: Chemical compounds with computed properties
+    typical_volume: Depends on input filter (SMILES-based)
+    input_mode: SMILES-based search
+    batch_size: 1
+quality:
+  version: 1.0.0
+  provider: pubchem
+  thresholds:
+    soft_fail: 0.08
+    hard_fail: 0.25
+  provider_field_validations:
+  - field: molecule_id
+    type: range
+    min: 1
+    nullable: true
+    error_message: CID must be a positive integer
+filters:
+  version: 1.0.0
+  provider: pubchem
+  input_filter:
+    batch_size: 1

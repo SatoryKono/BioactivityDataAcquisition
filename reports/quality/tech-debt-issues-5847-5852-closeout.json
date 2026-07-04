@@ -1,0 +1,149 @@
+{
+  "schema_version": "tech-debt-issues-5847-5852-closeout-v1",
+  "debt_budget_outcome": "reduced_or_unchanged",
+  "issues": [
+    {
+      "number": 5847,
+      "status": "closed-ready",
+      "title": "Root hygiene residual tranche: execute post-2026-07 shim-first root reduction",
+      "evidence": [
+        ".github/root-allowlist.txt",
+        "configs/quality/root_hygiene_review_registry.yaml",
+        "reports/quality/root-hygiene-review-evidence.json"
+      ]
+    },
+    {
+      "number": 5848,
+      "status": "closed-ready",
+      "title": "root-hygiene/local-clutter: turn reviewed SAFE root-local clutter into an operator cleanup command",
+      "evidence": [
+        "scripts/engineering/repo/cleanup_root_local_clutter.py",
+        "tests/unit/scripts/repo/test_cleanup_root_local_clutter.py",
+        ".github/workflows/root-hygiene.yml"
+      ]
+    },
+    {
+      "number": 5849,
+      "status": "closed-ready",
+      "title": "root-hygiene/codex-shims: collapse legacy root Codex launcher aliases under the primary shim surface",
+      "evidence": [
+        "codex.ps1",
+        "codex.bat",
+        "scripts/ai/codex/README.md",
+        "scripts/ai/codex/QUICKSTART_WSL.md"
+      ]
+    },
+    {
+      "number": 5850,
+      "status": "closed-ready",
+      "title": "root-hygiene/docker-compose-helpers: rehome candidate root compose adjuncts behind reviewed shims",
+      "evidence": [
+        "scripts/ops/runtime/docker/compose/alertmanager.yml",
+        "scripts/ops/runtime/docker/compose/minio.yml",
+        "scripts/ops/runtime/docker/compose/redis.yml",
+        "scripts/ops/runtime/docker/compose/sonarqube.yml",
+        "configs/quality/docker_helper_contracts.yaml"
+      ]
+    },
+    {
+      "number": 5851,
+      "status": "closed-ready",
+      "title": "root-hygiene/docker-images: rehome candidate helper Dockerfiles and Grafana provisioning behind reviewed path updates",
+      "evidence": [
+        "scripts/ops/runtime/docker/images/mcp-fetch/Dockerfile",
+        "scripts/ops/runtime/docker/images/mcp-filesystem/Dockerfile",
+        "scripts/ops/runtime/docker/images/mcp-github/Dockerfile",
+        "scripts/ops/runtime/docker/images/mcp-memory/Dockerfile",
+        "scripts/ops/runtime/docker/images/warp/Dockerfile",
+        "grafana/provisioning/datasources-local/grafana-datasource.yml"
+      ]
+    },
+    {
+      "number": 5852,
+      "status": "closed-ready",
+      "title": "root-hygiene/review-contracts: verify exact-filename retention contracts for remaining review-class root files",
+      "evidence": [
+        "configs/quality/root_hygiene_review_registry.yaml",
+        "tests/architecture/test_root_hygiene_review_registry.py",
+        "docs/00-project/governance/03-file-policy.md"
+      ]
+    }
+  ],
+  "outcomes": {
+    "5847": {
+      "tracked_root_files_after": 45,
+      "tracked_root_dirs_after": 12,
+      "allowlist_entries_after": 45,
+      "retired_root_entries": [
+        "Dockerfile.mcp-fetch",
+        "Dockerfile.mcp-filesystem",
+        "Dockerfile.mcp-github",
+        "Dockerfile.mcp-memory",
+        "Dockerfile.warp",
+        "docker-compose.alertmanager.yml",
+        "docker-compose.minio.yml",
+        "docker-compose.redis.yml",
+        "docker-compose.sonarqube.yml",
+        "grafana-datasource.yml",
+        "run-codex.ps1",
+        "run-codex-wsl.ps1"
+      ]
+    },
+    "5848": {
+      "operator_command": "python -m scripts.engineering.repo cleanup-root-local-clutter",
+      "dry_run_default": true,
+      "blocked_paths": [
+        ".env",
+        ".env.local",
+        "new.env",
+        "data",
+        "reports",
+        "docs/99-archive",
+        "tests/fixtures"
+      ],
+      "opt_in_families": [
+        "local_virtualenv",
+        "local_dependency_tree",
+        "local_logs"
+      ]
+    },
+    "5849": {
+      "primary_root_shims": [
+        "codex.ps1",
+        "codex.bat"
+      ],
+      "retired_legacy_aliases": [
+        "run-codex.ps1",
+        "run-codex-wsl.ps1"
+      ],
+      "canonical_owner": "scripts/ai/codex/run-codex.ps1"
+    },
+    "5850": {
+      "compose_rehome_map": {
+        "docker-compose.alertmanager.yml": "scripts/ops/runtime/docker/compose/alertmanager.yml",
+        "docker-compose.minio.yml": "scripts/ops/runtime/docker/compose/minio.yml",
+        "docker-compose.redis.yml": "scripts/ops/runtime/docker/compose/redis.yml",
+        "docker-compose.sonarqube.yml": "scripts/ops/runtime/docker/compose/sonarqube.yml"
+      }
+    },
+    "5851": {
+      "image_rehome_map": {
+        "Dockerfile.mcp-fetch": "scripts/ops/runtime/docker/images/mcp-fetch/Dockerfile",
+        "Dockerfile.mcp-filesystem": "scripts/ops/runtime/docker/images/mcp-filesystem/Dockerfile",
+        "Dockerfile.mcp-github": "scripts/ops/runtime/docker/images/mcp-github/Dockerfile",
+        "Dockerfile.mcp-memory": "scripts/ops/runtime/docker/images/mcp-memory/Dockerfile",
+        "Dockerfile.warp": "scripts/ops/runtime/docker/images/warp/Dockerfile",
+        "grafana-datasource.yml": "grafana/provisioning/datasources-local/grafana-datasource.yml"
+      }
+    },
+    "5852": {
+      "exact_filename_contracts": [
+        "best_practices.md",
+        "commitlint.config.mjs",
+        "mint.json",
+        "pr_compliance_checklist.yaml"
+      ],
+      "owner_lane_id": "root_review_contract_entrypoints"
+    }
+  }
+}

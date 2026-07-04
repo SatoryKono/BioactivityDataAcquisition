@@ -1,0 +1,11 @@
+schema_version: 2
+asset: publication_type_classification
+asset_version: v1
+source:
+  path: configs/enums/publication_type_classification.csv
+  sha256: 039561f4112e7e3cbca158c8603e06628961b1dc4b418867fc63022069e4e0ea
+  row_count: 214
+artifact:
+  path: configs/enums/publication_type_classification.asset.v1.json
+  sha256: da2a216046a2b64c7aeb2604c5e39459f745d0b4677560a0a3043b856d0a6a33
+  row_count: 214

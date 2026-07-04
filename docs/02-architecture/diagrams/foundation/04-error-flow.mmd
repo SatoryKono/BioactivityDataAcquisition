@@ -1,0 +1,54 @@
+%% Title: Error Handling and Quarantine Flow
+%% Covers: RULES.md §3.1 (Error Classification), §2.3 (Quarantine)
+%% Updated: 2026-02-17
+%% Components: ErrorClassifier, QuarantineManager, RecordProcessor, BatchTransformer
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+%% @nodes   35
+%% Legend: docs/02-architecture/diagrams/views/00-legend.mermaid
+%%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
+flowchart TD
+    subgraph Pipeline["Pipeline Execution"]
+        B -->|Pass| C[BatchTransformer<br/>normalize & enrich]
+        B -->|Fail| Classify
+
+        C --> D{Silver DQ<br/>Validation}
+        D -->|Pass| E[SilverWriter<br/>Delta merge]
+        D ==>|Fail| Classify
+
+        E --> F{Gold DQ<br/>Validation}
+        F -->|Pass| G[GoldWriter<br/>SCD2 write]
+        F -->|Fail| Classify
+
+        G --> H[Record committed]
+    end
+
+    subgraph Classification["Error Classification (§3.1)"]
+        Classify{ErrorClassifier} -->|"critical"| Critical
+        Classify -->|"recoverable"| Retry
+        Classify -->|"data quality"| DQ
+    end
+
+    subgraph ErrorHandling["Error Handling"]
+        RetryCheck -->|No| A
+        RetryCheck -->|Yes| DQ
+    end
+
+    subgraph Quarantine["Quarantine (§2.3)"]
+        QMeta --> QLog[Log WARNING<br/>+ DQ metrics]
+        QLog --> Continue[Continue<br/>pipeline]
+    end
+
+    %% Styling
+    classDef success fill:#f0fdf4,stroke:#16a34a,color:#212121
+    classDef error fill:#ffe4e6,stroke:#dc2626,color:#212121
+    classDef quarantine fill:#fff7ed,stroke:#f59e0b,color:#212121
+    classDef classify fill:#eff6ff,stroke:#2563eb,color:#212121
+
+    class H,G success
+    class Critical,LogCritical error
+    class QWrite,QMeta,QLog,DQ quarantine
+    class Classify classify

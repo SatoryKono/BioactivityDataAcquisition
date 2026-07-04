@@ -1,0 +1,26 @@
+%% Title: Package Family: infrastructure/validation
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/validation; modules: pandera_validator, contract_validator.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-03-27
+%% @level   Package Family / Inventory Slice
+%% @nodes   6
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace pandera_validator {
+        class BasePanderaValidator
+        class NoOpValidator
+        class PanderaGoldValidator
+        class PanderaSilverValidator
+    }
+
+    namespace contract_validator {
+        class ContractAwareGoldValidator
+        class ContractAwareSilverValidator
+    }
+
+    BasePanderaValidator <|-- PanderaGoldValidator
+    BasePanderaValidator <|-- PanderaSilverValidator
+    PanderaGoldValidator <|-- ContractAwareGoldValidator

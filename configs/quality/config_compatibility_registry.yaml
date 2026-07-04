@@ -1,0 +1,182 @@
+version: 1
+policy_scope: config_compatibility_shapes
+review_owner: config-governance
+last_reviewed: "2026-06-25"
+default_remove_after: "2026-09-30"
+
+policy:
+  summary: >
+    Config compatibility shapes must be explicit, bounded, and covered by tests.
+    New legacy-shape normalizers are not allowed unless they are registered here
+    with a removal date or a permanent canonical-alias rationale.
+  burn_down:
+    linked_issue: "#4516"
+    mode: fail-fast-no-growth
+    accepted_shape_max: 2
+    migration_supported_shape_max: 0
+    retired_rejected_shape_min: 6
+    expired_shape_policy: "fail-ci"
+  accepted_shape_exit_strategy:
+    linked_issue: "#4516"
+    review_date: "2026-09-30"
+    allowed_strategies:
+      - retain-permanent-canonical-alias
+  constraints:
+    - "Domain must not import infrastructure or perform I/O."
+    - "Config normalization remains an infrastructure boundary before schema validation."
+    - "DQ validation before Silver/Gold must not be bypassed by compatibility paths."
+    - "Gold strict validation must remain enabled by default."
+    - "No new compatibility shape may be added without remove_after or permanent_rationale."
+
+# Windows path aliases kept in comments for raw-text registry guards that run on
+# Windows and compare `Path.relative_to()` output verbatim:
+# tests\unit\infrastructure\config\test_source_normalizers.py
+# tests\architecture\test_pipeline_source_override_policy.py
+# tests\unit\infrastructure\test_config_dynamic.py
+
+accepted_shapes:
+  - id: source.timeout_timeout_sec_alias
+    status: canonical-alias
+    canonical_target: source.*.timeout
+    aliases:
+      - timeout_sec
+    source_files:
+      - src/bioetl/infrastructure/config/source_normalizers/source.py
+    test_files:
+      - tests/unit/infrastructure/config/test_source_normalizers.py
+    permanent_rationale: >
+      Provider source configs historically expose timeout and timeout_sec on
+      nested transport sections. The normalizer keeps them synchronized before
+      pydantic validation and does not affect domain identity or persisted data.
+    review_decision: retain-permanent
+    decision_recorded_on: "2026-05-12"
+    exit_strategy: retain-permanent-canonical-alias
+    risk: low
+
+  - id: source.rate_limit_with_api_key_alias
+    status: canonical-alias
+    canonical_target: source.rate_limit.authenticated
+    aliases:
+      - source.rate_limit.with_api_key
+    source_files:
+      - src/bioetl/infrastructure/config/source_normalizers/source.py
+    test_files:
+      - tests/unit/infrastructure/config/test_source_normalizers.py
+    permanent_rationale: >
+      with_api_key and authenticated describe the same bounded rate-limit bucket.
+      Keeping both synchronized preserves provider config readability without
+      widening runtime behavior or metric labels.
+    review_decision: retain-permanent
+    decision_recorded_on: "2026-05-12"
+    exit_strategy: retain-permanent-canonical-alias
+    risk: low
+
+retired_rejected_shapes:
+  - id: source.retired_transport_alias_sections
+    status: rejected
+    canonical_target: source.provider_config.{base_url,api_version,auth_type,api_key,client,pagination}
+    aliases:
+      - source.api
+      - source.client
+      - source.batch
+    source_files:
+      - src/bioetl/infrastructure/config/source_normalizers/source.py
+    test_files:
+      - tests/unit/infrastructure/config/test_source_normalizers.py
+      - tests/unit/infrastructure/test_config_dynamic.py
+    risk: low
+
+  - id: source.retired_provider_pagination_aliases
+    status: rejected
+    canonical_target: source.provider_config.pagination.*
+    aliases:
+      - source.provider_config.batch_size
+      - source.provider_config.page_size
+      - source.provider_config.max_url_length
+      - source.provider_config.cursor_pagination
+    source_files:
+      - src/bioetl/infrastructure/config/source_normalizers/source.py
+      - configs/_schema/source.json
+    test_files:
+      - tests/architecture/test_config_schema_migration_status.py
+      - tests/unit/infrastructure/config/test_source_normalizers.py
+      - tests/unit/infrastructure/config/source_normalizers/test_source.py
+    risk: low
+
+  - id: source.retired_root_batch_size_alias
+    status: rejected
+    canonical_target: source.provider_config.pagination.id_batch_size
+    aliases:
+      - source.batch_size
+    source_files:
+      - src/bioetl/infrastructure/config/source_normalizers/source.py
+      - configs/_schema/source.json
+    test_files:
+      - tests/architecture/test_config_schema_migration_status.py
+      - tests/unit/infrastructure/config/source_normalizers/test_source.py
+    risk: low
+
+  - id: pipeline.inline_source_pagination_overrides_rejected
+    status: rejected
+    canonical_target: pipeline.page_size_override
+    aliases:
+      - pipeline.source.batch_size
+      - pipeline.source.batch
+      - pipeline.source.provider_config.pagination
+      - pipeline.source.provider_config.batch_size
+      - pipeline.source.provider_config.page_size
+      - pipeline.source.provider_config.max_url_length
+      - pipeline.source.provider_config.cursor_pagination
+    source_files:
+      - src/bioetl/infrastructure/config/pipeline_payload_normalization.py
+    test_files:
+      - tests/architecture/test_pipeline_source_override_policy.py
+      - tests/unit/infrastructure/test_config_dynamic.py
+    risk: low
+
+  - id: pipeline.retired_schema_file_references
+    status: rejected
+    canonical_target: configs/entities/{provider}/{entity}.yaml:schema
+    aliases:
+      - pipeline.schema_file
+      - pipeline.data_schema_file
+      - pipeline.column_groups_file
+      - pipeline.primary_keys
+    source_files:
+      - configs/_schema/pipeline.json
+      - src/bioetl/infrastructure/config/pipeline_normalizers.py
+    test_files:
+      - tests/architecture/test_config_schema_migration_status.py
+      - tests/unit/infrastructure/config/test_pipeline_normalizers.py
+    risk: low
+
+  - id: composite.retired_merge_column_groups_file
+    status: rejected
+    canonical_target: configs/composite/*.yaml:merge.column_groups
+    aliases:
+      - composite.merge.column_groups_file
+    source_files:
+      - configs/_schema/composite.json
+    test_files:
+      - tests/architecture/test_config_schema_migration_status.py
+    risk: low
+
+  - id: runtime_config.retired_top_level_checkpoint_compatibility_policy
+    status: rejected
+    canonical_target: runtime_config.pipeline.control_plane.checkpoint_compatibility_policy
+    aliases:
+      - runtime_config.checkpoint_compatibility_policy
+    source_files:
+      - src/bioetl/application/services/control_plane/manifest/diagnostics/replay_invariants/persistence_policy.py
+      - src/bioetl/infrastructure/config/_pipeline_settings.py
+    test_files:
+      - tests/unit/application/services/control_plane/manifest/diagnostics/test_replay_invariant_persistence_profile.py
+      - tests/unit/application/services/test_run_manifest_diagnostics.py
+      - tests/architecture/test_checkpoint_policy_retired_modes_surface.py
+    retired_on: "2026-06-25"
+    migration_evidence: >
+      Current config settings own checkpoint compatibility under
+      pipeline.control_plane.checkpoint_compatibility_policy. Manifest
+      diagnostics now ignore the retired top-level runtime_config alias while
+      preserving launch_context and canonical nested runtime_config paths.
+    risk: low

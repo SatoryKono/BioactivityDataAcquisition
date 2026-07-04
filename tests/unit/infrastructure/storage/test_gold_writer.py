@@ -155,7 +155,15 @@ class TestGoldWriterInit:
         writer = _build_gold_writer(
             base_path=GOLD_ROOT,
             logger=noop_logger,
-            csv_exporter=mock_exporter,
+            runtime_services=GoldWriterRuntimeServices(
+                csv_exporter=mock_exporter,
+                tracing=MagicMock(),
+                metrics=None,
+                audit=None,
+                metadata_writer=MagicMock(),
+                metadata_coordinator=None,
+                lineage_store=None,
+            ),
         )
         assert writer.csv_exporter is mock_exporter
 

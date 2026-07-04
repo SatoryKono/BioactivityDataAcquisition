@@ -1,0 +1,153 @@
+%% BioETL — Class Diagram: Exception Hierarchy
+%% Domain exception tree.
+
+%% @version 1.0.0
+%% @date    2026-02-24
+%% @type    classDiagram
+%% @level   Class / Interface
+%% @nodes   19
+%% @uniform class width=240 height=90 max_title_len=25 max_desc_lines=3
+
+classDiagram
+    direction LR
+    class BioETLError {
+        <<Base Exception>>
+        +context: dict
+        +with_context(**extra): Self
+    }
+
+    class CriticalError {
+        Unrecoverable system errors
+
+
+    }
+
+    class RecoverableError {
+        Transient errors that can be retried
+
+
+    }
+
+    class DataQualityError {
+        Data validation failures
+
+
+    }
+
+    class ValidationError {
+        Schema or field validation failures
+
+
+    }
+
+    class SchemaViolationError {
+        +table: str
+        +errors: list
+
+    }
+
+    class DataQualityThresholdError {
+        +error_rate: float
+        +threshold: float
+
+    }
+
+    class LockNotHeldError {
+        Lock was lost during operation
+
+
+    }
+
+    class PipelineConfigError {
+        Invalid pipeline configuration
+
+
+    }
+
+    class AdapterError {
+        External API adapter errors
+
+
+    }
+
+    class StorageError {
+        Storage I/O errors
+
+
+    }
+
+    class AtomicWriteError {
+        Atomic write failure
+
+
+    }
+
+    class CheckpointError {
+        Checkpoint save/load failure
+
+
+    }
+
+    class CircuitBreakerOpenError {
+        Circuit breaker is OPEN
+
+
+    }
+
+    class RateLimitExceededError {
+        Rate limit exhausted
+
+
+    }
+
+    class NetworkError {
+        Network connectivity errors
+
+
+    }
+
+    class TimeoutError {
+        Operation timed out
+
+
+    }
+
+    BioETLError <|-- CriticalError
+    BioETLError <|-- RecoverableError
+    BioETLError <|-- DataQualityError
+    BioETLError <|-- PipelineConfigError
+
+    CriticalError <|-- LockNotHeldError
+
+    RecoverableError <|-- AdapterError
+    RecoverableError <|-- NetworkError
+    RecoverableError <|-- TimeoutError
+    RecoverableError <|-- RateLimitExceededError
+    RecoverableError <|-- CircuitBreakerOpenError
+
+    DataQualityError <|-- ValidationError
+    DataQualityError <|-- DataQualityThresholdError
+
+    ValidationError <|-- SchemaViolationError
+
+    AdapterError <|-- StorageError
+    StorageError <|-- AtomicWriteError
+    StorageError <|-- CheckpointError
+
+    style BioETLError fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style CriticalError fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style RecoverableError fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style DataQualityError fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style ValidationError fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style SchemaViolationError fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style DataQualityThresholdError fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style LockNotHeldError fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style PipelineConfigError fill:#fefce8,stroke:#ca8a04,stroke-width:2px
+    style AdapterError fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style StorageError fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style AtomicWriteError fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style CheckpointError fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    style CircuitBreakerOpenError fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style RateLimitExceededError fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style NetworkError fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    style TimeoutError fill:#f0fdf4,stroke:#16a34a,stroke-width:2px

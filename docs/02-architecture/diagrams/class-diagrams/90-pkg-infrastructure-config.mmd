@@ -1,0 +1,75 @@
+%% Title: Package Family: infrastructure/config
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/config; modules: domain_config_resolver, _base, contract_policy_validation, _yaml_settings_source, base_config_loader, composite_config_api.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-03-27
+%% @level   Package Family / Inventory Slice
+%% @nodes   21
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace domain_config_resolver {
+        class DomainConfigMapper
+        class DomainConfigResolver
+        class PipelineConfigDQResolver
+        class PipelineConfigDQResolverBuilder
+    }
+
+    namespace base {
+        class ObservabilitySettings
+        class PipelineSettings
+        class Settings
+    }
+
+    namespace contract_policy_validation {
+        class _ArrowSchemaLike
+        class _ResolvedSchema
+        class _SchemaBuilder
+    }
+
+    namespace yaml_settings_source {
+        class YamlSettingsSource
+    }
+
+    namespace base_config_loader {
+        class BaseConfigLoader
+    }
+
+    namespace composite_config_api {
+        class _CompositeSchema
+    }
+
+    namespace dq_config_loader {
+        class DQConfigLoader
+    }
+
+    namespace dq_contract_config_loader {
+        class DQContractConfigLoader
+    }
+
+    namespace field_group_loader {
+        class FieldGroupLoadError
+    }
+
+    namespace filter_config_loader {
+        class FilterConfigLoader
+    }
+
+    namespace pipeline_config_loader {
+        class PipelineConfigLoader
+    }
+
+    namespace pipeline_dq_resolution {
+        class DQConfigResolver
+    }
+
+    namespace pipeline_payload_normalization {
+        class PipelineConfigReadPayload
+    }
+
+    namespace publication_type_classification_loader {
+        class PublicationTypeClassificationLoader
+    }
+
+    BaseConfigLoader <|-- FilterConfigLoader

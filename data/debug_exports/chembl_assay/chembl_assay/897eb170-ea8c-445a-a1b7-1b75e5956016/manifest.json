@@ -1,0 +1,103 @@
+{
+  "created_at": "2026-06-02T11:07:38.728590+00:00",
+  "debug_export_hash": "0b28a0b307e9a38adde608509c517fd50cbc735b501d53cee089ef15b888d449",
+  "files": [
+    {
+      "path": "bronze_index.csv",
+      "sha256": "228c1a8299cd6d9f61ab92de48f1e82d55ffa66adde1ea9f3b295b81ac0658f3",
+      "size_bytes": 3960669
+    },
+    {
+      "path": "bronze_index.schema.json",
+      "sha256": "53c05f2cb0e16307b69f104647d2db43711f1a1f3575aee61cbdab59438c8d87",
+      "size_bytes": 2217
+    },
+    {
+      "path": "silver_full.csv",
+      "sha256": "f1295202d12e37e48342967bb2fd87fb09c9ff5cd140b0784321b7ebbad62d98",
+      "size_bytes": 3295666
+    },
+    {
+      "path": "silver_full.schema.json",
+      "sha256": "344a357507395908d30c02e84bb9945115be15adf1a02787678d849f757b1341",
+      "size_bytes": 2042
+    },
+    {
+      "path": "silver_rejected.csv",
+      "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+      "size_bytes": 2
+    },
+    {
+      "path": "silver_rejected.schema.json",
+      "sha256": "acdb0893b9571fc68dbf0237994860a4dc70ff8ec2a7905a7178bd68b1b5495e",
+      "size_bytes": 23
+    },
+    {
+      "path": "silver_quarantine.csv",
+      "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+      "size_bytes": 2
+    },
+    {
+      "path": "silver_quarantine.schema.json",
+      "sha256": "acdb0893b9571fc68dbf0237994860a4dc70ff8ec2a7905a7178bd68b1b5495e",
+      "size_bytes": 23
+    },
+    {
+      "path": "gold_full.csv",
+      "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+      "size_bytes": 2
+    },
+    {
+      "path": "gold_full.schema.json",
+      "sha256": "acdb0893b9571fc68dbf0237994860a4dc70ff8ec2a7905a7178bd68b1b5495e",
+      "size_bytes": 23
+    },
+    {
+      "path": "gold_rejected.csv",
+      "sha256": "8407be654a7bcda32843e6af72446390a7e2a3b82bd4d88e46aa418c5b17794b",
+      "size_bytes": 3361666
+    },
+    {
+      "path": "gold_rejected.schema.json",
+      "sha256": "344a357507395908d30c02e84bb9945115be15adf1a02787678d849f757b1341",
+      "size_bytes": 2042
+    },
+    {
+      "path": "dq_summary.csv",
+      "sha256": "4dfece3221fd0cd07ca47c24c6b7a4fb0907af354f6fb52a6ca816a9faf1215b",
+      "size_bytes": 224
+    },
+    {
+      "path": "dq_summary.schema.json",
+      "sha256": "12baa832e0827f553ba3ca90c9bfb8201a74fe26fbb0ed007d0405ea61277f75",
+      "size_bytes": 702
+    },
+    {
+      "path": "lineage.csv",
+      "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+      "size_bytes": 2
+    },
+    {
+      "path": "lineage.schema.json",
+      "sha256": "acdb0893b9571fc68dbf0237994860a4dc70ff8ec2a7905a7178bd68b1b5495e",
+      "size_bytes": 23
+    },
+    {
+      "path": "reason_dictionary.csv",
+      "sha256": "45595570e954402eb14a69d1891156811b1663cb7b80bd5f50f5403cb182e5d0",
+      "size_bytes": 935
+    },
+    {
+      "path": "reason_dictionary.schema.json",
+      "sha256": "27559a25ec76225ab097671fb16fdff80c4752e871e45ca0f0eef61a8aa8d8d0",
+      "size_bytes": 371
+    }
+  ],
+  "manifest_id": null,
+  "pipeline_id": "chembl_assay",
+  "provider_id": "chembl",
+  "run_id": "897eb170-ea8c-445a-a1b7-1b75e5956016",
+  "status": "success",
+  "workflow_id": "chembl_assay",
+  "xlsx_skip_reason": "openpyxl is not installed; CSV artifacts remain the source of truth"
+}

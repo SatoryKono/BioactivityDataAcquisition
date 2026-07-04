@@ -16,8 +16,6 @@ from tests.helpers.metadata_fixtures import (
     SILVER_TABLE_PATH,
 )
 
-pytest_plugins = ("tests.helpers.metadata_fixtures",)
-
 from bioetl.domain.models.metadata import (
     BronzeMetadata,
     DQSummary,

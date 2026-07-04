@@ -4,5 +4,5 @@ cassette_rel_path: tests/fixtures/vcr/chembl/test_chembl_molecule_full_cycle.yam
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: faf479cada7599ecd15eec3bd53d7e16edd6da8e831c4a55d3b955d1ab57172f
-recorded_at: '2026-04-28'
+recorded_at: '2026-07-03'
 staleness_ready: true

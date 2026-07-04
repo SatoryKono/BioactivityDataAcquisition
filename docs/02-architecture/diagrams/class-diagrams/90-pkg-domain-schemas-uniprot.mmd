@@ -1,0 +1,39 @@
+%% Title: Package Family: domain/schemas/uniprot
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/domain/schemas/uniprot; modules: _annotations, _core, _features, _xrefs, idmapping, protein.
+%% Components: top-level classes grouped by source module.
+%% @version 1.0.0
+%% @type    classDiagram
+%% @date    2026-03-27
+%% @level   Package Family / Inventory Slice
+%% @nodes   6
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace annotations {
+        class UniprotAnnotationSchema
+    }
+
+    namespace core {
+        class UniprotCoreSchema
+    }
+
+    namespace features {
+        class UniprotFeatureSchema
+    }
+
+    namespace xrefs {
+        class UniprotXrefSchema
+    }
+
+    namespace idmapping {
+        class IDMappingSchema
+    }
+
+    namespace protein {
+        class UniprotTargetSchema
+    }
+
+    UniprotAnnotationSchema <|-- UniprotTargetSchema
+    UniprotCoreSchema <|-- UniprotTargetSchema
+    UniprotFeatureSchema <|-- UniprotTargetSchema
+    UniprotXrefSchema <|-- UniprotTargetSchema

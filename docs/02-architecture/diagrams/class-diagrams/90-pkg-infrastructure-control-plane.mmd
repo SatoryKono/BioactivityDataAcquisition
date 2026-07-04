@@ -1,0 +1,31 @@
+%% Title: Package Family: infrastructure/control_plane
+%% Covers: AST-derived supplemental package-family inventory for src/bioetl/infrastructure/control_plane; modules: file_effective_config_artifact_store, file_lineage_store, file_run_ledger_store, file_run_manifest_store.
+%% Components: top-level classes grouped by source module.
+%% @version 1.1.0
+%% @type    classDiagram
+%% @date    2026-04-02
+%% @level   Package Family / Inventory Slice
+%% @nodes   4
+%% @reference Generated supplemental package-family diagram. Curated class-summary remains narrative-only.
+classDiagram
+
+    namespace file_effective_config_artifact_store {
+        class FileEffectiveConfigArtifactStore
+    }
+
+    namespace file_lineage_store {
+        class FileLineageStore
+    }
+
+    namespace file_run_ledger_store {
+        class FileRunLedgerStore {
+            +append(entry)
+            +list_entries(manifest_id)
+            +list_entries_by_run_id(run_id)
+            +list_entries_after(manifest_id, after_entry_id)
+        }
+    }
+
+    namespace file_run_manifest_store {
+        class FileRunManifestStore
+    }

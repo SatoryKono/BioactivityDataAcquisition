@@ -1,0 +1,495 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="my-svg" width="100%" class="statediagram" style="max-width: 1441.1px; background-color: white;" viewBox="0 0 1441.1015625 3213" role="graphics-document document" aria-roledescription="stateDiagram"><style>#my-svg{font-size:16px;fill:#212121;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#my-svg .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#my-svg .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#my-svg .error-icon{fill:#552222;}#my-svg .error-text{fill:#552222;stroke:#552222;}#my-svg .edge-thickness-normal{stroke-width:1px;}#my-svg .edge-thickness-thick{stroke-width:3.5px;}#my-svg .edge-pattern-solid{stroke-dasharray:0;}#my-svg .edge-thickness-invisible{stroke-width:0;fill:none;}#my-svg .edge-pattern-dashed{stroke-dasharray:3;}#my-svg .edge-pattern-dotted{stroke-dasharray:2;}#my-svg .marker{fill:#475569;stroke:#475569;}#my-svg .marker.cross{stroke:#475569;}#my-svg svg{font-size:16px;}#my-svg p{margin:0;}#my-svg defs [id$="-barbEnd"]{fill:#000;stroke:#000;}#my-svg g.stateGroup text{fill:#2563eb;stroke:none;font-size:10px;}#my-svg g.stateGroup text{fill:#212121;stroke:none;font-size:10px;}#my-svg g.stateGroup .state-title{font-weight:bolder;fill:#212121;}#my-svg g.stateGroup rect{fill:#eff6ff;stroke:#2563eb;}#my-svg g.stateGroup line{stroke:#475569;stroke-width:1;}#my-svg .transition{stroke:#000;stroke-width:1;fill:none;}#my-svg .stateGroup .composit{fill:#ffffff;border-bottom:1px;}#my-svg .stateGroup .alt-composit{fill:#e0e0e0;border-bottom:1px;}#my-svg .state-note{stroke:#ca8a04;fill:#fefce8;}#my-svg .state-note text{fill:#212121;stroke:none;font-size:10px;}#my-svg .stateLabel .box{stroke:none;stroke-width:0;fill:#eff6ff;opacity:0.5;}#my-svg .edgeLabel .label rect{fill:#eff6ff;opacity:0.5;}#my-svg .edgeLabel{background-color:#ffffff;text-align:center;}#my-svg .edgeLabel p{background-color:#ffffff;}#my-svg .edgeLabel rect{opacity:0.5;background-color:#ffffff;fill:#ffffff;}#my-svg .edgeLabel .label text{fill:#212121;}#my-svg .label div .edgeLabel{color:#212121;}#my-svg .stateLabel text{fill:#212121;font-size:10px;font-weight:bold;}#my-svg .node circle.state-start{fill:#222;stroke:#222;}#my-svg .node .fork-join{fill:#222;stroke:#222;}#my-svg .node circle.state-end{fill:#7c3aed;stroke:#ffffff;stroke-width:1.5;}#my-svg .end-state-inner{fill:#ffffff;stroke-width:1.5;}#my-svg .node rect{fill:#eff6ff;stroke:#000;stroke-width:1px;}#my-svg .node polygon{fill:#eff6ff;stroke:#000;stroke-width:1px;}#my-svg [id$="-barbEnd"]{fill:#475569;}#my-svg .statediagram-cluster rect{fill:#eff6ff;stroke:#000;stroke-width:1px;}#my-svg .cluster-label,#my-svg .nodeLabel{color:#212121;}#my-svg .statediagram-cluster rect.outer{rx:5px;ry:5px;}#my-svg .statediagram-state .divider{stroke:#000;}#my-svg .statediagram-state .title-state{rx:5px;ry:5px;}#my-svg .statediagram-cluster.statediagram-cluster .inner{fill:#ffffff;}#my-svg .statediagram-cluster.statediagram-cluster-alt .inner{fill:#f4f4f4;}#my-svg .statediagram-cluster .inner{rx:0;ry:0;}#my-svg .statediagram-state rect.basic{rx:5px;ry:5px;}#my-svg .statediagram-state rect.divider{stroke-dasharray:10,10;fill:#f4f4f4;}#my-svg .note-edge{stroke-dasharray:5;}#my-svg .statediagram-note rect{fill:#fefce8;stroke:#ca8a04;stroke-width:1px;rx:0;ry:0;}#my-svg .statediagram-note rect{fill:#fefce8;stroke:#ca8a04;stroke-width:1px;rx:0;ry:0;}#my-svg .statediagram-note text{fill:#212121;}#my-svg .statediagram-note .nodeLabel{color:#212121;}#my-svg .statediagram .edgeLabel{color:red;}#my-svg [id$="-dependencyStart"],#my-svg [id$="-dependencyEnd"]{fill:#475569;stroke:#475569;stroke-width:1;}#my-svg .statediagramTitleText{text-anchor:middle;font-size:18px;fill:#212121;}#my-svg [data-look="neo"].statediagram-cluster rect{fill:#eff6ff;stroke:url(#my-svg-gradient);stroke-width:1;}#my-svg [data-look="neo"].statediagram-cluster rect.outer{rx:5px;ry:5px;filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg .node .neo-node{stroke:#2563eb;}#my-svg [data-look="neo"].node rect,#my-svg [data-look="neo"].cluster rect,#my-svg [data-look="neo"].node polygon{stroke:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].node path{stroke:url(#my-svg-gradient);stroke-width:1px;}#my-svg [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].node .neo-line path{stroke:#2563eb;filter:none;}#my-svg [data-look="neo"].node circle{stroke:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].node circle .state-start{fill:#000000;}#my-svg [data-look="neo"].icon-shape .icon{fill:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg [data-look="neo"].icon-shape .icon-neo path{stroke:url(#my-svg-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#my-svg :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}/* bioetl-inject */#my-svg .edgeLabel rect{opacity:1!important;fill:#ffffff!important}#my-svg .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel .labelBkg{background-color:#ffffff!important;opacity:1!important}#my-svg .edgeLabel{font-size:12px;line-height:1.1;padding:1px 3px}#my-svg .edgeLabel span{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg .edgeLabel p{color:#111827!important;fill:#111827!important;opacity:1!important;line-height:1.1;margin:0;padding:0}#my-svg text.fo-fallback{color:#111827!important;fill:#111827!important;opacity:1!important}</style><g><defs><marker id="my-svg_stateDiagram-barbEnd" refX="19" refY="7" markerWidth="20" markerHeight="14" markerUnits="userSpaceOnUse" orient="auto"><path d="M 19,7 L9,13 L14,7 L9,1 Z" /></marker></defs><g class="root"><g class="clusters"><g class="note-cluster" id="my-svg-state-SEED_COMPLETED----parent-25"><rect x="1005.1328125" y="1003" width="358" height="312" fill="none" /></g><g class="note-cluster" id="my-svg-state-FAILED----parent-26"><rect x="829.328125" y="2992" width="410.703125" height="213" fill="none" /></g></g><g class="edgePaths"><path d="M1124.313,22L1124.313,22L1124.313,44.5L1124.313,44.5L1124.313,67L1124.313,67" id="my-svg-edge0" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge0" data-points="W3sieCI6MTEyNC4zMTI1LCJ5IjoyMn0seyJ4IjoxMTI0LjMxMjUsInkiOjQ0LjV9LHsieCI6MTEyNC4zMTI1LCJ5Ijo2N31d" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /><path d="M1124.313,310L1124.313,310L1124.313,344.5L1124.313,344.5L1124.313,379L1124.313,379" id="my-svg-edge1" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge1" data-points="W3sieCI6MTEyNC4zMTI1LCJ5IjozMTB9LHsieCI6MTEyNC4zMTI1LCJ5IjozNDQuNX0seyJ4IjoxMTI0LjMxMjUsInkiOjM3OX1d" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /><path d="M969.322,622L947.317,622L947.317,656.5L925.313,656.5L925.313,691L925.313,691" id="my-svg-edge2" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge2" data-points="W3sieCI6OTY5LjMyMjExNTM4NDYxNTQsInkiOjYyMn0seyJ4Ijo5MjUuMzEyNSwieSI6NjU2LjV9LHsieCI6OTI1LjMxMjUsInkiOjY5MX1d" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /><path d="M1317.586,613.091L1354.844,613.091L1354.844,656.5L1392.102,656.5L1392.102,812.5L1392.102,812.5L1392.102,968.5L1392.102,968.5L1392.102,1003L1392.102,1003L1392.102,1159L1392.102,1159L1392.102,1315L1392.102,1315L1392.102,1361.5L1392.102,1361.5L1392.102,1517.5L1392.102,1517.5L1392.102,1661.5L1392.102,1661.5L1392.102,1829.5L1392.102,1829.5L1392.102,2021.5L1392.102,2021.5L1392.102,2201.5L1392.102,2201.5L1392.102,2357.5L1392.102,2357.5L1392.102,2513.5L1392.102,2513.5L1392.102,2669.5L1234.105,2669.5L1234.105,2754.087L1076.109,2754.087" id="my-svg-edge3" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge3" data-points="W3sieCI6MTMxNy41ODU5Mzc1LCJ5Ijo2MTMuMDkxMDY2ODk2MTY5NH0seyJ4IjoxMzkyLjEwMTU2MjUsInkiOjY1Ni41fSx7IngiOjEzOTIuMTAxNTYyNSwieSI6ODEyLjV9LHsieCI6MTM5Mi4xMDE1NjI1LCJ5Ijo5NjguNX0seyJ4IjoxMzkyLjEwMTU2MjUsInkiOjEwMDN9LHsieCI6MTM5Mi4xMDE1NjI1LCJ5IjoxMTU5fSx7IngiOjEzOTIuMTAxNTYyNSwieSI6MTMxNX0seyJ4IjoxMzkyLjEwMTU2MjUsInkiOjEzNjEuNX0seyJ4IjoxMzkyLjEwMTU2MjUsInkiOjE1MTcuNX0seyJ4IjoxMzkyLjEwMTU2MjUsInkiOjE2NjEuNX0seyJ4IjoxMzkyLjEwMTU2MjUsInkiOjE4MjkuNX0seyJ4IjoxMzkyLjEwMTU2MjUsInkiOjIwMjEuNX0seyJ4IjoxMzkyLjEwMTU2MjUsInkiOjIyMDEuNX0seyJ4IjoxMzkyLjEwMTU2MjUsInkiOjIzNTcuNX0seyJ4IjoxMzkyLjEwMTU2MjUsInkiOjI1MTMuNX0seyJ4IjoxMzkyLjEwMTU2MjUsInkiOjI2NjkuNX0seyJ4IjoxMDc2LjEwOTM3NSwieSI6Mjc1NC4wODY1MjcyNDcxMzQ3fV0=" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /><path d="M743.375,868.051L578.881,868.051L578.881,968.5L414.387,968.5L414.387,1003L414.387,1003L414.387,1025.5L414.387,1025.5" id="my-svg-edge4" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge4" data-points="W3sieCI6NzQzLjM3NSwieSI6ODY4LjA1MDYzMTg5NTIyN30seyJ4Ijo0MTQuMzg2NzE4NzUsInkiOjk2OC41fSx7IngiOjQxNC4zODY3MTg3NSwieSI6MTAwM30seyJ4Ijo0MTQuMzg2NzE4NzUsInkiOjEwMjUuNX1d" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /><path d="M971.903,934L978.518,934L978.518,968.5L985.133,968.5L985.133,1003L985.133,1003L985.133,1159L985.133,1159L985.133,1315L985.133,1315L985.133,1361.5L985.133,1361.5L985.133,1517.5L985.133,1517.5L985.133,1661.5L739.586,1661.5L739.586,1781.756L494.039,1781.756" id="my-svg-edge5" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge5" data-points="W3sieCI6OTcxLjkwMzMyMDMxMjUsInkiOjkzNH0seyJ4Ijo5ODUuMTMyODEyNSwieSI6OTY4LjV9LHsieCI6OTg1LjEzMjgxMjUsInkiOjEwMDN9LHsieCI6OTg1LjEzMjgxMjUsInkiOjExNTl9LHsieCI6OTg1LjEzMjgxMjUsInkiOjEzMTV9LHsieCI6OTg1LjEzMjgxMjUsInkiOjEzNjEuNX0seyJ4Ijo5ODUuMTMyODEyNSwieSI6MTUxNy41fSx7IngiOjk4NS4xMzI4MTI1LCJ5IjoxNjYxLjV9LHsieCI6NDk0LjAzOTA2MjUsInkiOjE3ODEuNzU1NTMxMzg5MTM4N31d" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /><path d="M315.696,1292.5L307.379,1292.5L307.379,1315L299.063,1315L299.063,1361.5L299.063,1361.5L299.063,1408L299.063,1408" id="my-svg-edge6" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge6" data-points="W3sieCI6MzE1LjY5NTgwMDc4MTI1LCJ5IjoxMjkyLjV9LHsieCI6Mjk5LjA2MjUsInkiOjEzMTV9LHsieCI6Mjk5LjA2MjUsInkiOjEzNjEuNX0seyJ4IjoyOTkuMDYyNSwieSI6MTQwOH1d" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /><path d="M638.059,1247.113L724.223,1247.113L724.223,1315L810.387,1315L810.387,1361.5L810.387,1361.5L810.387,1517.5L810.387,1517.5L810.387,1661.5L810.387,1661.5L810.387,1829.5L810.387,1829.5L810.387,2021.5L810.387,2021.5L810.387,2201.5L810.387,2201.5L810.387,2357.5L810.387,2357.5L810.387,2513.5L810.387,2513.5L810.387,2669.5L810.127,2669.5L810.127,2746L809.868,2746" id="my-svg-edge7" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge7" data-points="W3sieCI6NjM4LjA1ODU5Mzc1LCJ5IjoxMjQ3LjExMzE2Mjg3ODc4OH0seyJ4Ijo4MTAuMzg2NzE4NzUsInkiOjEzMTV9LHsieCI6ODEwLjM4NjcxODc1LCJ5IjoxMzYxLjV9LHsieCI6ODEwLjM4NjcxODc1LCJ5IjoxNTE3LjV9LHsieCI6ODEwLjM4NjcxODc1LCJ5IjoxNjYxLjV9LHsieCI6ODEwLjM4NjcxODc1LCJ5IjoxODI5LjV9LHsieCI6ODEwLjM4NjcxODc1LCJ5IjoyMDIxLjV9LHsieCI6ODEwLjM4NjcxODc1LCJ5IjoyMjAxLjV9LHsieCI6ODEwLjM4NjcxODc1LCJ5IjoyMzU3LjV9LHsieCI6ODEwLjM4NjcxODc1LCJ5IjoyNTEzLjV9LHsieCI6ODEwLjM4NjcxODc1LCJ5IjoyNjY5LjV9LHsieCI6ODA5Ljg2NzYwMDY2MTA1NzcsInkiOjI3NDZ9XQ==" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /><path d="M299.063,1627L299.063,1627L299.063,1661.5L299.063,1661.5L299.063,1696L299.063,1696" id="my-svg-edge8" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge8" data-points="W3sieCI6Mjk5LjA2MjUsInkiOjE2Mjd9LHsieCI6Mjk5LjA2MjUsInkiOjE2NjEuNX0seyJ4IjoyOTkuMDYyNSwieSI6MTY5Nn1d" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /><path d="M275.789,1963L270.689,1963L270.689,2021.5L265.59,2021.5L265.59,2080L265.59,2080" id="my-svg-edge9" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge9" data-points="W3sieCI6Mjc1Ljc4ODU0MzcwMTE3MTksInkiOjE5NjN9LHsieCI6MjY1LjU4OTg0Mzc1LCJ5IjoyMDIxLjV9LHsieCI6MjY1LjU4OTg0Mzc1LCJ5IjoyMDgwfV0=" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /><path d="M494.039,1936.758L571.063,1936.758L571.063,2021.5L648.086,2021.5L648.086,2201.5L648.086,2201.5L648.086,2357.5L648.086,2357.5L648.086,2513.5L648.086,2513.5L648.086,2669.5L687.621,2669.5L687.621,2746L727.157,2746" id="my-svg-edge10" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge10" data-points="W3sieCI6NDk0LjAzOTA2MjUsInkiOjE5MzYuNzU3ODM5OTU1MjMyMn0seyJ4Ijo2NDguMDg1OTM3NSwieSI6MjAyMS41fSx7IngiOjY0OC4wODU5Mzc1LCJ5IjoyMjAxLjV9LHsieCI6NjQ4LjA4NTkzNzUsInkiOjIzNTcuNX0seyJ4Ijo2NDguMDg1OTM3NSwieSI6MjUxMy41fSx7IngiOjY0OC4wODU5Mzc1LCJ5IjoyNjY5LjV9LHsieCI6NzI3LjE1NjYyNTYwMDk2MTUsInkiOjI3NDZ9XQ==" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /><path d="M265.59,2323L265.59,2323L265.59,2357.5L265.59,2357.5L265.59,2392L265.59,2392" id="my-svg-edge11" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge11" data-points="W3sieCI6MjY1LjU4OTg0Mzc1LCJ5IjoyMzIzfSx7IngiOjI2NS41ODk4NDM3NSwieSI6MjM1Ny41fSx7IngiOjI2NS41ODk4NDM3NSwieSI6MjM5Mn1d" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /><path d="M215.948,2635L208.9,2635L208.9,2669.5L201.852,2669.5L201.852,2704L201.852,2704" id="my-svg-edge12" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge12" data-points="W3sieCI6MjE1Ljk0NzUyODU0NTY3MzEsInkiOjI2MzV9LHsieCI6MjAxLjg1MTU2MjUsInkiOjI2NjkuNX0seyJ4IjoyMDEuODUxNTYyNSwieSI6MjcwNH1d" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /><path d="M438.05,2635L462.535,2635L462.535,2669.5L566.047,2669.5L566.047,2746L645.075,2746" id="my-svg-edge13" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge13" data-points="W3sieCI6NDM4LjA0OTUwNDIwNjczMDgsInkiOjI2MzV9LHsieCI6NDg3LjAxOTUzMTI1LCJ5IjoyNjY5LjV9LHsieCI6NjQ1LjA3NDcwNzAzMTI1LCJ5IjoyNzQ2fV0=" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /><path d="M201.852,2947L201.852,2947L201.852,2969.5L201.852,2969.5L201.852,2992L206.523,2992L206.523,3091.5L211.194,3091.5" id="my-svg-edge14" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge14" data-points="W3sieCI6MjAxLjg1MTU2MjUsInkiOjI5NDd9LHsieCI6MjAxLjg1MTU2MjUsInkiOjI5NjkuNX0seyJ4IjoyMDEuODUxNTYyNSwieSI6Mjk5Mn0seyJ4IjoyMTEuMTk0Mjg1NTA0Njk0ODUsInkiOjMwOTEuNX1d" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /><path d="M620.427,2905L543.798,2905L543.798,2969.5L467.168,2969.5L467.168,2992L343.013,2992L343.013,3095.577L218.858,3095.577" id="my-svg-edge15" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge15" data-points="W3sieCI6NjIwLjQyNzIwNTQwMzY0NTksInkiOjI5MDV9LHsieCI6NDY3LjE2Nzk2ODc1LCJ5IjoyOTY5LjV9LHsieCI6NDY3LjE2Nzk2ODc1LCJ5IjoyOTkyfSx7IngiOjIxOC44NTgyMDkxMzMxNDgyLCJ5IjozMDk1LjU3NzMyMTEyNzE4MzV9XQ==" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /><path d="M1107.25,922.16L1145.691,922.16L1145.691,968.5L1184.133,968.5L1184.133,1003L1184.133,1003L1184.133,1063L1184.133,1063" id="my-svg-SEED_COMPLETED-SEED_COMPLETED----note-25" class="edge-thickness-normal edge-pattern-solid transition note-edge" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="SEED_COMPLETED-SEED_COMPLETED----note-25" data-points="W3sieCI6MTEwNy4yNSwieSI6OTIyLjE2MDA1NjE0NDE2Mzd9LHsieCI6MTE4NC4xMzI4MTI1LCJ5Ijo5NjguNX0seyJ4IjoxMTg0LjEzMjgxMjUsInkiOjEwMDN9LHsieCI6MTE4NC4xMzI4MTI1LCJ5IjoxMDYzfV0=" data-look="classic" /><path d="M933.741,2905L984.21,2905L984.21,2969.5L1034.68,2969.5L1034.68,2992L1034.68,2992L1034.68,3014.5L1034.68,3014.5" id="my-svg-FAILED-FAILED----note-26" class="edge-thickness-normal edge-pattern-solid transition note-edge" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="FAILED-FAILED----note-26" data-points="W3sieCI6OTMzLjc0MDk2Njc5Njg3NSwieSI6MjkwNX0seyJ4IjoxMDM0LjY3OTY4NzUsInkiOjI5NjkuNX0seyJ4IjoxMDM0LjY3OTY4NzUsInkiOjI5OTJ9LHsieCI6MTAzNC42Nzk2ODc1LCJ5IjozMDE0LjV9XQ==" data-look="classic" /></g><g class="edgeLabels"><g class="edgeLabel" transform="translate(1124.3125, 344.5)"><g class="label" data-id="edge1" transform="translate(-24.875, -12)"><text x="24.875" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="24.875">start ()</tspan></text></g></g><g class="edgeLabel" transform="translate(925.3125, 656.5)"><g class="label" data-id="edge2" transform="translate(-52.9296875, -12)"><text x="52.93" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="52.93">seed success</tspan></text></g></g><g class="edgeLabel" transform="translate(1392.1015625, 1661.5)"><g class="label" data-id="edge3" transform="translate(-41, -12)"><text x="41" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="41">seed error</tspan></text></g></g><g class="edgeLabel" transform="translate(414.38671875, 968.5)"><g class="label" data-id="edge4" transform="translate(-72.5390625, -12)"><text x="72.539" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="72.539">has dependencies</tspan></text></g></g><g class="edgeLabel" transform="translate(985.1328125, 1361.5)"><g class="label" data-id="edge5" transform="translate(-70.8203125, -24)"><text x="70.82" y="15.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="70.82">no dependencies</tspan><tspan x="70.82" dy="16.8">(skip deps phase)</tspan></text></g></g><g class="edgeLabel" transform="translate(299.0625, 1361.5)"><g class="label" data-id="edge6" transform="translate(-53.6484375, -12)"><text x="53.648" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="53.648">all deps done</tspan></text></g></g><g class="edgeLabel" transform="translate(810.38671875, 2021.5)"><g class="label" data-id="edge7" transform="translate(-66.328125, -12)"><text x="66.328" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="66.328">dep critical error</tspan></text></g></g><g class="edgeLabel" transform="translate(299.0625, 1661.5)"><g class="label" data-id="edge8" transform="translate(-58.53125, -12)"><text x="58.531" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="58.531">start enrichers</tspan></text></g></g><g class="edgeLabel" transform="translate(265.58984375, 2021.5)"><g class="label" data-id="edge9" transform="translate(-100, -36)"><text x="100" y="27.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="100">all enrichers done</tspan><tspan x="100" dy="16.8">(COMPLETED or PARTIAL)</tspan></text></g></g><g class="edgeLabel" transform="translate(648.0859375, 2357.5)"><g class="label" data-id="edge10" transform="translate(-73.953125, -12)"><text x="73.953" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="73.953">all enrichers</tspan><tspan x="73.953" dy="16.8">failed</tspan></text></g></g><g class="edgeLabel" transform="translate(265.58984375, 2357.5)"><g class="label" data-id="edge11" transform="translate(-47.0390625, -12)"><text x="47.039" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="47.039">start merge</tspan></text></g></g><g class="edgeLabel" transform="translate(201.8515625, 2669.5)"><g class="label" data-id="edge12" transform="translate(-59.703125, -12)"><text x="59.703" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="59.703">merge success</tspan></text></g></g><g class="edgeLabel" transform="translate(487.01953125, 2669.5)"><g class="label" data-id="edge13" transform="translate(-47.7734375, -12)"><text x="47.773" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="47.773">merge error</tspan></text></g></g></g><g class="nodes"><g class="node default" id="my-svg-state-root_start-0" data-look="classic" transform="translate(1124.3125, 15)"><circle class="state-start" r="7" width="14" height="14" /></g><g class="root" transform="translate(922.5234375, 59)"><g class="clusters"><g class="statediagram-state statediagram-cluster" id="my-svg-state-NOT_STARTED-16" data-id="NOT_STARTED" data-look="classic"><g><rect class="outer" x="8" y="8" width="387.578125" height="243" data-look="classic" /></g><g class="cluster-label" transform="translate(144.7265625, 9)"><text x="57.062" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="57.062">NOT_STARTED</tspan></text></g><rect class="inner" x="8" y="34" width="387.578125" height="213" /></g></g><g class="edgePaths"><path d="M201.789,57L201.789,57L201.789,92L201.789,92L201.789,127L201.789,127" id="my-svg-edge16" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge16" data-points="W3sieCI6MjAxLjc4OTA2MjUsInkiOjU3fSx7IngiOjIwMS43ODkwNjI1LCJ5Ijo5Mn0seyJ4IjoyMDEuNzg5MDYyNSwieSI6MTI3fV0=" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /></g><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-state-NOT_STARTED_start-16" data-look="classic" transform="translate(201.7890625, 50)"><circle class="state-start" r="7" width="14" height="14" /></g><g class="node  statediagram-state" id="my-svg-state-idle-17" data-look="classic" transform="translate(201.7890625, 171.5)"><g><rect class="outer title-state" style="" x="-158.7890625" y="-44.5" width="317.578125" height="89" /><line class="divider" x1="-158.7890625" x2="158.7890625" y1="-16.5" y2="-16.5" /></g><g class="label" style="" transform="translate(-154.7890625, -41.5)"><text x="154.789" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback" transform="translate( 0, 0)"><tspan x="154.789">CompositePipelineState.NOT_STARTED</tspan></text><text x="84.453" y="-1.2" text-anchor="middle" xml:space="preserve" class="fo-fallback" transform="translate( 70.3359375, 33)"><tspan x="84.453">is_terminal =</tspan><tspan x="84.453" dy="16.8">False</tspan><tspan x="84.453" dy="16.8">is_resumable =</tspan><tspan x="84.453" dy="16.8">False</tspan></text></g></g></g></g><g class="root" transform="translate(923.0390625, 371)"><g class="clusters"><g class="statediagram-state statediagram-cluster" id="my-svg-state-SEED_RUNNING-17" data-id="SEED_RUNNING" data-look="classic"><g><rect class="outer" x="8" y="8" width="386.546875" height="243" data-look="classic" /></g><g class="cluster-label" transform="translate(138, 9)"><text x="63.273" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="63.273">SEED_RUNNING</tspan></text></g><rect class="inner" x="8" y="34" width="386.546875" height="213" /></g></g><g class="edgePaths"><path d="M201.273,57L201.273,57L201.273,92L201.273,92L201.273,127L201.273,127" id="my-svg-edge17" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge17" data-points="W3sieCI6MjAxLjI3MzQzNzUsInkiOjU3fSx7IngiOjIwMS4yNzM0Mzc1LCJ5Ijo5Mn0seyJ4IjoyMDEuMjczNDM3NSwieSI6MTI3fV0=" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /></g><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-state-SEED_RUNNING_start-17" data-look="classic" transform="translate(201.2734375, 50)"><circle class="state-start" r="7" width="14" height="14" /></g><g class="node  statediagram-state" id="my-svg-state-extracting_seed-18" data-look="classic" transform="translate(201.2734375, 171.5)"><g><rect class="outer title-state" style="" x="-158.2734375" y="-44.5" width="316.546875" height="89" /><line class="divider" x1="-158.2734375" x2="158.2734375" y1="-16.5" y2="-16.5" /></g><g class="label" style="" transform="translate(-154.2734375, -41.5)"><text x="154.273" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback" transform="translate( 0, 0)"><tspan x="154.273">Pipeline Runner executes seed</tspan><tspan x="154.273" dy="16.8">pipeline</tspan></text><text x="122.891" y="7.2" text-anchor="middle" xml:space="preserve" class="fo-fallback" transform="translate( 31.3828125, 33)"><tspan x="122.891">Bronze → Silver for seed</tspan><tspan x="122.891" dy="16.8">entity</tspan><tspan x="122.891" dy="16.8">is_active = True</tspan></text></g></g></g></g><g class="root" transform="translate(735.375, 683)"><g class="clusters"><g class="statediagram-state statediagram-cluster" id="my-svg-state-SEED_COMPLETED-25" data-id="SEED_COMPLETED" data-look="classic"><g><rect class="outer" x="8" y="8" width="363.875" height="243" data-look="classic" /></g><g class="cluster-label" transform="translate(115.3671875, 9)"><text x="74.57" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="74.57">SEED_COMPLETED</tspan></text></g><rect class="inner" x="8" y="34" width="363.875" height="213" /></g></g><g class="edgePaths"><path d="M189.938,57L189.938,57L189.938,92L189.938,92L189.938,127L189.938,127" id="my-svg-edge18" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge18" data-points="W3sieCI6MTg5LjkzNzUsInkiOjU3fSx7IngiOjE4OS45Mzc1LCJ5Ijo5Mn0seyJ4IjoxODkuOTM3NSwieSI6MTI3fV0=" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /></g><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-state-SEED_COMPLETED_start-18" data-look="classic" transform="translate(189.9375, 50)"><circle class="state-start" r="7" width="14" height="14" /></g><g class="node  statediagram-state" id="my-svg-state-keys_extracted-19" data-look="classic" transform="translate(189.9375, 171.5)"><g><rect class="outer title-state" style="" x="-146.9375" y="-44.5" width="293.875" height="89" /><line class="divider" x1="-146.9375" x2="146.9375" y1="-16.5" y2="-16.5" /></g><g class="label" style="" transform="translate(-142.9375, -41.5)"><text x="140.242" y="-4.8" text-anchor="middle" xml:space="preserve" class="fo-fallback" transform="translate( 2.6953125, 0)"><tspan x="140.242">KeyExtractorService.extract_key</tspan><tspan x="140.242" dy="16.8">s</tspan><tspan x="140.242" dy="16.8">()</tspan></text><text x="142.938" y="7.2" text-anchor="middle" xml:space="preserve" class="fo-fallback" transform="translate( 0, 33)"><tspan x="142.938">Join keys (DOI, PMID, etc.)</tspan><tspan x="142.938" dy="16.8">available</tspan><tspan x="142.938" dy="16.8">is_resumable = True</tspan></text></g></g></g></g><g class="root" transform="translate(534.546875, 2738)"><g class="clusters"><g class="statediagram-state statediagram-cluster" id="my-svg-state-FAILED-26" data-id="FAILED" data-look="classic"><g><rect class="outer" x="8" y="8" width="533.5625" height="159" data-look="classic" /></g><g class="cluster-label" transform="translate(247.40625, 9)"><text x="27.375" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="27.375">FAILED</tspan></text></g><rect class="inner" x="8" y="34" width="533.5625" height="129" /></g></g><g class="edgePaths" /><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-state-FAILED_start-25" data-look="classic" transform="translate(50, 87.5)"><circle class="state-start" r="7" width="14" height="14" /></g><g class="node  statediagram-state" id="my-svg-state-==&gt;-25" data-look="classic" transform="translate(135.109375, 87.5)"><rect class="basic label-container" style="" rx="5" ry="5" x="-28.109375" y="-20" width="56.21875" height="40" /><g class="label" style="" transform="translate(-20.109375, -12)"><rect /><text x="20.109" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="20.109">==&gt;</tspan></text></g></g><g class="node  statediagram-state" id="my-svg-state-error-25" data-look="classic" transform="translate(359.890625, 87.5)"><g><rect class="outer title-state" style="" x="-146.671875" y="-44.5" width="293.34375" height="89" /><line class="divider" x1="-146.671875" x2="146.671875" y1="-16.5" y2="-16.5" /></g><g class="label" style="" transform="translate(-142.671875, -41.5)"><text x="72.594" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback" transform="translate( 70.078125, 0)"><tspan x="72.594">is_terminal = True</tspan></text><text x="142.672" y="7.2" text-anchor="middle" xml:space="preserve" class="fo-fallback" transform="translate( 0, 33)"><tspan x="142.672">is_resumable = True (retry</tspan><tspan x="142.672" dy="16.8">allowed)</tspan><tspan x="142.672" dy="16.8">to_metric_value () = 9</tspan></text></g></g></g></g><g class="root" transform="translate(182.71484375, 1017.5)"><g class="clusters"><g class="statediagram-state statediagram-cluster" id="my-svg-state-DEPENDENCIES_RUNNING-19" data-id="DEPENDENCIES_RUNNING" data-look="classic"><g><rect class="outer" x="8" y="8" width="447.34375" height="267" data-look="classic" /></g><g class="cluster-label" transform="translate(127.390625, 9)"><text x="104.281" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="104.281">DEPENDENCIES_RUNNING</tspan></text></g><rect class="inner" x="8" y="34" width="447.34375" height="237" /></g></g><g class="edgePaths"><path d="M231.672,57L231.672,57L231.672,92L231.672,92L231.672,127L231.672,127" id="my-svg-edge19" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge19" data-points="W3sieCI6MjMxLjY3MTg3NSwieSI6NTd9LHsieCI6MjMxLjY3MTg3NSwieSI6OTJ9LHsieCI6MjMxLjY3MTg3NSwieSI6MTI3fV0=" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /></g><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-state-DEPENDENCIES_RUNNING_start-19" data-look="classic" transform="translate(231.671875, 50)"><circle class="state-start" r="7" width="14" height="14" /></g><g class="node  statediagram-state" id="my-svg-state-running_deps-20" data-look="classic" transform="translate(231.671875, 183.5)"><g><rect class="outer title-state" style="" x="-188.671875" y="-56.5" width="377.34375" height="113" /><line class="divider" x1="-188.671875" x2="188.671875" y1="-28.5" y2="-28.5" /></g><g class="label" style="" transform="translate(-184.671875, -53.5)"><text x="118.953" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback" transform="translate( 65.71875, 0)"><tspan x="118.953">Dependency Coordinator.run</tspan><tspan x="118.953" dy="16.8">()</tspan></text><text x="184.672" y="10.8" text-anchor="middle" xml:space="preserve" class="fo-fallback" transform="translate( 0, 33)"><tspan x="184.672">Sequential execution of dependency</tspan><tspan x="184.672" dy="16.8">pipelines</tspan><tspan x="184.672" dy="16.8">is_active = True</tspan><tspan x="184.672" dy="16.8">is_resumable = True</tspan></text></g></g></g></g><g class="root" transform="translate(96.0859375, 1688)"><g class="clusters"><g class="statediagram-state statediagram-cluster" id="my-svg-state-ENRICHING-21" data-id="ENRICHING" data-look="classic"><g><rect class="outer" x="8" y="8" width="389.953125" height="267" data-look="classic" /></g><g class="cluster-label" transform="translate(157.875, 9)"><text x="45.102" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="45.102">ENRICHING</tspan></text></g><rect class="inner" x="8" y="34" width="389.953125" height="237" /></g></g><g class="edgePaths"><path d="M202.977,57L202.977,57L202.977,92L202.977,92L202.977,127L202.977,127" id="my-svg-edge21" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge21" data-points="W3sieCI6MjAyLjk3NjU2MjUsInkiOjU3fSx7IngiOjIwMi45NzY1NjI1LCJ5Ijo5Mn0seyJ4IjoyMDIuOTc2NTYyNSwieSI6MTI3fV0=" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /></g><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-state-ENRICHING_start-21" data-look="classic" transform="translate(202.9765625, 50)"><circle class="state-start" r="7" width="14" height="14" /></g><g class="node  statediagram-state" id="my-svg-state-fan_out-22" data-look="classic" transform="translate(202.9765625, 183.5)"><g><rect class="outer title-state" style="" x="-159.9765625" y="-56.5" width="319.953125" height="113" /><line class="divider" x1="-159.9765625" x2="159.9765625" y1="-28.5" y2="-28.5" /></g><g class="label" style="" transform="translate(-155.9765625, -53.5)"><text x="155.977" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback" transform="translate( 0, 0)"><tspan x="155.977">Enrichment</tspan><tspan x="155.977" dy="16.8">Coordinator.run_enrichers ()</tspan></text><text x="139.266" y="10.8" text-anchor="middle" xml:space="preserve" class="fo-fallback" transform="translate( 16.7109375, 33)"><tspan x="139.266">asyncio.gather () parallel</tspan><tspan x="139.266" dy="16.8">execution</tspan><tspan x="139.266" dy="16.8">is_active = True</tspan><tspan x="139.266" dy="16.8">is_resumable = True</tspan></text></g></g></g></g><g class="root" transform="translate(95.4140625, 1400)"><g class="clusters"><g class="statediagram-state statediagram-cluster" id="my-svg-state-DEPENDENCIES_COMPLETED-20" data-id="DEPENDENCIES_COMPLETED" data-look="classic"><g><rect class="outer" x="8" y="8" width="391.296875" height="219" data-look="classic" /></g><g class="cluster-label" transform="translate(88.0703125, 9)"><text x="115.578" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="115.578">DEPENDENCIES_COMPLETED</tspan></text></g><rect class="inner" x="8" y="34" width="391.296875" height="189" /></g></g><g class="edgePaths"><path d="M203.648,57L203.648,57L203.648,92L203.648,92L203.648,127L203.648,127" id="my-svg-edge20" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge20" data-points="W3sieCI6MjAzLjY0ODQzNzUsInkiOjU3fSx7IngiOjIwMy42NDg0Mzc1LCJ5Ijo5Mn0seyJ4IjoyMDMuNjQ4NDM3NSwieSI6MTI3fV0=" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /></g><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-state-DEPENDENCIES_COMPLETED_start-20" data-look="classic" transform="translate(203.6484375, 50)"><circle class="state-start" r="7" width="14" height="14" /></g><g class="node  statediagram-state" id="my-svg-state-deps_done-21" data-look="classic" transform="translate(203.6484375, 159.5)"><g><rect class="outer title-state" style="" x="-160.6484375" y="-32.5" width="321.296875" height="65" /><line class="divider" x1="-160.6484375" x2="160.6484375" y1="-4.5" y2="-4.5" /></g><g class="label" style="" transform="translate(-156.6484375, -29.5)"><text x="156.648" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback" transform="translate( 0, 0)"><tspan x="156.648">All dependency Silver tables</tspan><tspan x="156.648" dy="16.8">populated</tspan></text><text x="81.367" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback" transform="translate( 75.28125, 33)"><tspan x="81.367">is_resumable =</tspan><tspan x="81.367" dy="16.8">True</tspan></text></g></g></g></g><g class="root" transform="translate(53.16796875, 2072)"><g class="clusters"><g class="statediagram-state statediagram-cluster" id="my-svg-state-ENRICHMENT_COMPLETED-22" data-id="ENRICHMENT_COMPLETED" data-look="classic"><g><rect class="outer" x="8" y="8" width="408.84375" height="243" data-look="classic" /></g><g class="cluster-label" transform="translate(105.8125, 9)"><text x="106.609" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="106.609">ENRICHMENT_COMPLETED</tspan></text></g><rect class="inner" x="8" y="34" width="408.84375" height="213" /></g></g><g class="edgePaths"><path d="M212.422,57L212.422,57L212.422,92L212.422,92L212.422,127L212.422,127" id="my-svg-edge22" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge22" data-points="W3sieCI6MjEyLjQyMTg3NSwieSI6NTd9LHsieCI6MjEyLjQyMTg3NSwieSI6OTJ9LHsieCI6MjEyLjQyMTg3NSwieSI6MTI3fV0=" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /></g><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-state-ENRICHMENT_COMPLETED_start-22" data-look="classic" transform="translate(212.421875, 50)"><circle class="state-start" r="7" width="14" height="14" /></g><g class="node  statediagram-state" id="my-svg-state-enrichers_done-23" data-look="classic" transform="translate(212.421875, 171.5)"><g><rect class="outer title-state" style="" x="-169.421875" y="-44.5" width="338.84375" height="89" /><line class="divider" x1="-169.421875" x2="169.421875" y1="-16.5" y2="-16.5" /></g><g class="label" style="" transform="translate(-165.421875, -41.5)"><text x="123.078" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback" transform="translate( 42.34375, 0)"><tspan x="123.078">EnrichmentStatus per</tspan><tspan x="123.078" dy="16.8">enricher</tspan></text><text x="165.422" y="7.2" text-anchor="middle" xml:space="preserve" class="fo-fallback" transform="translate( 0, 33)"><tspan x="165.422">COMPLETED / PARTIAL / FAILED /</tspan><tspan x="165.422" dy="16.8">SKIPPED</tspan><tspan x="165.422" dy="16.8">is_resumable = True</tspan></text></g></g></g></g><g class="root" transform="translate(38.23046875, 2384)"><g class="clusters"><g class="statediagram-state statediagram-cluster" id="my-svg-state-MERGING-23" data-id="MERGING" data-look="classic"><g><rect class="outer" x="8" y="8" width="438.71875" height="243" data-look="classic" /></g><g class="cluster-label" transform="translate(189.1015625, 9)"><text x="38.258" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="38.258">MERGING</tspan></text></g><rect class="inner" x="8" y="34" width="438.71875" height="213" /></g></g><g class="edgePaths"><path d="M227.359,57L227.359,57L227.359,92L227.359,92L227.359,127L227.359,127" id="my-svg-edge23" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge23" data-points="W3sieCI6MjI3LjM1OTM3NSwieSI6NTd9LHsieCI6MjI3LjM1OTM3NSwieSI6OTJ9LHsieCI6MjI3LjM1OTM3NSwieSI6MTI3fV0=" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /></g><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-state-MERGING_start-23" data-look="classic" transform="translate(227.359375, 50)"><circle class="state-start" r="7" width="14" height="14" /></g><g class="node  statediagram-state" id="my-svg-state-merge_active-24" data-look="classic" transform="translate(227.359375, 171.5)"><g><rect class="outer title-state" style="" x="-184.359375" y="-44.5" width="368.71875" height="89" /><line class="divider" x1="-184.359375" x2="184.359375" y1="-16.5" y2="-16.5" /></g><g class="label" style="" transform="translate(-180.359375, -41.5)"><text x="89.188" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback" transform="translate( 91.171875, 0)"><tspan x="89.188">MergeService.merge</tspan><tspan x="89.188" dy="16.8">()</tspan></text><text x="180.359" y="7.2" text-anchor="middle" xml:space="preserve" class="fo-fallback" transform="translate( 0, 33)"><tspan x="180.359">Read Silver → Join → Resolve conflicts →</tspan><tspan x="180.359" dy="16.8">Gold</tspan><tspan x="180.359" dy="16.8">is_active = True</tspan></text></g></g></g></g><g class="root" transform="translate(0, 2696)"><g class="clusters"><g class="statediagram-state statediagram-cluster" id="my-svg-state-COMPLETED-24" data-id="COMPLETED" data-look="classic"><g><rect class="outer" x="8" y="8" width="387.703125" height="243" data-look="classic" /></g><g class="cluster-label" transform="translate(152.625, 9)"><text x="49.227" y="12" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="49.227">COMPLETED</tspan></text></g><rect class="inner" x="8" y="34" width="387.703125" height="213" /></g></g><g class="edgePaths"><path d="M201.852,57L201.852,57L201.852,92L201.852,92L201.852,127L201.852,127" id="my-svg-edge24" class="edge-thickness-normal edge-pattern-solid transition" style="fill:none;;;fill:none" data-edge="true" data-et="edge" data-id="edge24" data-points="W3sieCI6MjAxLjg1MTU2MjUsInkiOjU3fSx7IngiOjIwMS44NTE1NjI1LCJ5Ijo5Mn0seyJ4IjoyMDEuODUxNTYyNSwieSI6MTI3fV0=" data-look="classic" marker-end="url(#my-svg_stateDiagram-barbEnd)" /></g><g class="edgeLabels" /><g class="nodes"><g class="node default" id="my-svg-state-COMPLETED_start-24" data-look="classic" transform="translate(201.8515625, 50)"><circle class="state-start" r="7" width="14" height="14" /></g><g class="node  statediagram-state" id="my-svg-state-success-25" data-look="classic" transform="translate(201.8515625, 171.5)"><g><rect class="outer title-state" style="" x="-158.8515625" y="-44.5" width="317.703125" height="89" /><line class="divider" x1="-158.8515625" x2="158.8515625" y1="-16.5" y2="-16.5" /></g><g class="label" style="" transform="translate(-154.8515625, -41.5)"><text x="154.852" y="3.6" text-anchor="middle" xml:space="preserve" class="fo-fallback" transform="translate( 0, 0)"><tspan x="154.852">CompositeResult with all phase</tspan><tspan x="154.852" dy="16.8">results</tspan></text><text x="86.766" y="7.2" text-anchor="middle" xml:space="preserve" class="fo-fallback" transform="translate( 68.0859375, 33)"><tspan x="86.766">is_terminal = True</tspan><tspan x="86.766" dy="16.8">to_metric_value ()</tspan><tspan x="86.766" dy="16.8">= 8</tspan></text></g></g></g></g><g class="node default" id="my-svg-state-root_end-15" data-look="classic" transform="translate(211.8515625, 3098.5)"><g class="outer-path"><path d="M7 0 C7 0.40517908122283747, 6.964012880168563 0.816513743121899, 6.893654271085456 1.2155372436685123 C6.823295662002349 1.6145607442151257, 6.716427752933756 2.013397210557766, 6.5778483455013586 2.394141003279681 C6.439268938068961 2.7748847960015954, 6.26476736710249 3.149104622578984, 6.062177826491071 3.4999999999999996 C5.859588285879653 3.8508953774210153, 5.622755194947063 4.189128084166967, 5.362311101832846 4.499513267805774 C5.10186700871863 4.809898451444582, 4.809898451444583 5.10186700871863, 4.499513267805775 5.362311101832846 C4.189128084166968 5.622755194947063, 3.8508953774210166 5.859588285879652, 3.500000000000001 6.06217782649107 C3.149104622578985 6.264767367102489, 2.7748847960015963 6.439268938068961, 2.3941410032796817 6.5778483455013586 C2.013397210557767 6.716427752933756, 1.6145607442151264 6.823295662002349, 1.2155372436685128 6.893654271085456 C0.8165137431218992 6.964012880168563, 0.4051790812228379 7, 4.286263797015736e-16 7 C-0.405179081222837 7, -0.8165137431218985 6.964012880168563, -1.2155372436685121 6.893654271085456 C-1.6145607442151257 6.823295662002349, -2.0133972105577667 6.716427752933756, -2.394141003279681 6.5778483455013586 C-2.774884796001595 6.439268938068961, -3.149104622578983 6.26476736710249, -3.4999999999999982 6.062177826491071 C-3.8508953774210135 5.859588285879653, -4.189128084166966 5.6227551949470636, -4.499513267805773 5.362311101832848 C-4.809898451444581 5.101867008718632, -5.101867008718628 4.809898451444586, -5.3623111018328435 4.499513267805779 C-5.622755194947059 4.189128084166971, -5.859588285879649 3.8508953774210206, -6.062177826491068 3.5000000000000053 C-6.264767367102486 3.14910462257899, -6.439268938068958 2.774884796001602, -6.577848345501356 2.394141003279688 C-6.716427752933754 2.0133972105577738, -6.823295662002347 1.614560744215134, -6.893654271085454 1.215537243668521 C-6.9640128801685615 0.816513743121908, -6.999999999999999 0.4051790812228472, -7 1.0183126166254463e-14 C-7.000000000000001 -0.40517908122282686, -6.964012880168565 -0.8165137431218878, -6.893654271085459 -1.215537243668501 C-6.823295662002352 -1.6145607442151142, -6.716427752933759 -2.0133972105577542, -6.577848345501363 -2.394141003279669 C-6.439268938068967 -2.7748847960015834, -6.264767367102496 -3.149104622578972, -6.062177826491078 -3.4999999999999876 C-5.859588285879661 -3.8508953774210033, -5.6227551949470715 -4.1891280841669545, -5.362311101832856 -4.499513267805763 C-5.10186700871864 -4.809898451444571, -4.809898451444594 -5.10186700871862, -4.499513267805787 -5.362311101832836 C-4.189128084166979 -5.622755194947053, -3.850895377421028 -5.859588285879643, -3.5000000000000133 -6.062177826491062 C-3.1491046225789985 -6.264767367102482, -2.774884796001611 -6.439268938068954, -2.3941410032796973 -6.577848345501353 C-2.0133972105577835 -6.716427752933752, -1.6145607442151435 -6.823295662002345, -1.2155372436685306 -6.893654271085453 C-0.8165137431219176 -6.9640128801685615, -0.40517908122285695 -6.999999999999999, -1.9937625952807352e-14 -7 C0.4051790812228171 -7.000000000000001, 0.8165137431218781 -6.964012880168565, 1.2155372436684913 -6.89365427108546 C1.6145607442151044 -6.823295662002354, 2.013397210557745 -6.716427752933763, 2.3941410032796595 -6.5778483455013665 C2.774884796001574 -6.43926893806897, 3.149104622578963 -6.2647673671025, 3.499999999999979 -6.062177826491083 C3.8508953774209953 -5.859588285879665, 4.189128084166947 -5.622755194947077, 4.499513267805756 -5.362311101832862 C4.809898451444564 -5.1018670087186475, 5.101867008718613 -4.809898451444602, 5.362311101832829 -4.499513267805796 C5.622755194947046 -4.189128084166989, 5.859588285879637 -3.8508953774210393, 6.062177826491056 -3.500000000000025 C6.2647673671024755 -3.1491046225790105, 6.439268938068949 -2.774884796001623, 6.577848345501348 -2.3941410032797092 C6.716427752933747 -2.0133972105577955, 6.823295662002342 -1.6145607442151562, 6.893654271085451 -1.2155372436685434 C6.96401288016856 -0.8165137431219307, 6.982275711847575 -0.2025895406114567, 7 -3.2800750208310675e-14 C7.017724288152425 0.2025895406113911, 7.017724288152424 -0.2025895406114242, 7 0" stroke="none" stroke-width="0" fill="#eff6ff" style="" /><path d="M7 0 C7 0.40517908122283747, 6.964012880168563 0.816513743121899, 6.893654271085456 1.2155372436685123 C6.823295662002349 1.6145607442151257, 6.716427752933756 2.013397210557766, 6.5778483455013586 2.394141003279681 C6.439268938068961 2.7748847960015954, 6.26476736710249 3.149104622578984, 6.062177826491071 3.4999999999999996 C5.859588285879653 3.8508953774210153, 5.622755194947063 4.189128084166967, 5.362311101832846 4.499513267805774 C5.10186700871863 4.809898451444582, 4.809898451444583 5.10186700871863, 4.499513267805775 5.362311101832846 C4.189128084166968 5.622755194947063, 3.8508953774210166 5.859588285879652, 3.500000000000001 6.06217782649107 C3.149104622578985 6.264767367102489, 2.7748847960015963 6.439268938068961, 2.3941410032796817 6.5778483455013586 C2.013397210557767 6.716427752933756, 1.6145607442151264 6.823295662002349, 1.2155372436685128 6.893654271085456 C0.8165137431218992 6.964012880168563, 0.4051790812228379 7, 4.286263797015736e-16 7 C-0.405179081222837 7, -0.8165137431218985 6.964012880168563, -1.2155372436685121 6.893654271085456 C-1.6145607442151257 6.823295662002349, -2.0133972105577667 6.716427752933756, -2.394141003279681 6.5778483455013586 C-2.774884796001595 6.439268938068961, -3.149104622578983 6.26476736710249, -3.4999999999999982 6.062177826491071 C-3.8508953774210135 5.859588285879653, -4.189128084166966 5.6227551949470636, -4.499513267805773 5.362311101832848 C-4.809898451444581 5.101867008718632, -5.101867008718628 4.809898451444586, -5.3623111018328435 4.499513267805779 C-5.622755194947059 4.189128084166971, -5.859588285879649 3.8508953774210206, -6.062177826491068 3.5000000000000053 C-6.264767367102486 3.14910462257899, -6.439268938068958 2.774884796001602, -6.577848345501356 2.394141003279688 C-6.716427752933754 2.0133972105577738, -6.823295662002347 1.614560744215134, -6.893654271085454 1.215537243668521 C-6.9640128801685615 0.816513743121908, -6.999999999999999 0.4051790812228472, -7 1.0183126166254463e-14 C-7.000000000000001 -0.40517908122282686, -6.964012880168565 -0.8165137431218878, -6.893654271085459 -1.215537243668501 C-6.823295662002352 -1.6145607442151142, -6.716427752933759 -2.0133972105577542, -6.577848345501363 -2.394141003279669 C-6.439268938068967 -2.7748847960015834, -6.264767367102496 -3.149104622578972, -6.062177826491078 -3.4999999999999876 C-5.859588285879661 -3.8508953774210033, -5.6227551949470715 -4.1891280841669545, -5.362311101832856 -4.499513267805763 C-5.10186700871864 -4.809898451444571, -4.809898451444594 -5.10186700871862, -4.499513267805787 -5.362311101832836 C-4.189128084166979 -5.622755194947053, -3.850895377421028 -5.859588285879643, -3.5000000000000133 -6.062177826491062 C-3.1491046225789985 -6.264767367102482, -2.774884796001611 -6.439268938068954, -2.3941410032796973 -6.577848345501353 C-2.0133972105577835 -6.716427752933752, -1.6145607442151435 -6.823295662002345, -1.2155372436685306 -6.893654271085453 C-0.8165137431219176 -6.9640128801685615, -0.40517908122285695 -6.999999999999999, -1.9937625952807352e-14 -7 C0.4051790812228171 -7.000000000000001, 0.8165137431218781 -6.964012880168565, 1.2155372436684913 -6.89365427108546 C1.6145607442151044 -6.823295662002354, 2.013397210557745 -6.716427752933763, 2.3941410032796595 -6.5778483455013665 C2.774884796001574 -6.43926893806897, 3.149104622578963 -6.2647673671025, 3.499999999999979 -6.062177826491083 C3.8508953774209953 -5.859588285879665, 4.189128084166947 -5.622755194947077, 4.499513267805756 -5.362311101832862 C4.809898451444564 -5.1018670087186475, 5.101867008718613 -4.809898451444602, 5.362311101832829 -4.499513267805796 C5.622755194947046 -4.189128084166989, 5.859588285879637 -3.8508953774210393, 6.062177826491056 -3.500000000000025 C6.2647673671024755 -3.1491046225790105, 6.439268938068949 -2.774884796001623, 6.577848345501348 -2.3941410032797092 C6.716427752933747 -2.0133972105577955, 6.823295662002342 -1.6145607442151562, 6.893654271085451 -1.2155372436685434 C6.96401288016856 -0.8165137431219307, 6.982275711847575 -0.2025895406114567, 7 -3.2800750208310675e-14 C7.017724288152425 0.2025895406113911, 7.017724288152424 -0.2025895406114242, 7 0" stroke="#475569" stroke-width="2" fill="none" stroke-dasharray="0 0" style="" /><g><path d="M2.5 0 C2.5 0.14470681472244193, 2.487147457203058 0.29161205111496386, 2.46201938253052 0.4341204441673258 C2.436891307857982 0.5766288372196877, 2.3987241974763416 0.7190704323420595, 2.3492315519647713 0.8550503583141718 C2.299738906453201 0.991030284286284, 2.2374169168223177 1.124680222349637, 2.165063509461097 1.2499999999999998 C2.092710102099876 1.3753197776503625, 2.0081268553382365 1.496117172916774, 1.915111107797445 1.6069690242163481 C1.8220953602566536 1.7178208755159223, 1.7178208755159226 1.8220953602566536, 1.6069690242163484 1.915111107797445 C1.4961171729167742 2.0081268553382365, 1.375319777650363 2.0927101020998755, 1.2500000000000002 2.1650635094610964 C1.1246802223496375 2.2374169168223172, 0.9910302842862845 2.2997389064532, 0.8550503583141721 2.349231551964771 C0.7190704323420597 2.3987241974763416, 0.576628837219688 2.436891307857982, 0.43412044416732604 2.46201938253052 C0.291612051114964 2.487147457203058, 0.14470681472244212 2.5, 1.5308084989341916e-16 2.5 C-0.1447068147224418 2.5, -0.2916120511149638 2.487147457203058, -0.43412044416732576 2.46201938253052 C-0.5766288372196877 2.436891307857982, -0.7190704323420595 2.3987241974763416, -0.8550503583141718 2.3492315519647713 C-0.991030284286284 2.299738906453201, -1.124680222349637 2.2374169168223177, -1.2499999999999996 2.165063509461097 C-1.375319777650362 2.092710102099876, -1.4961171729167733 2.008126855338237, -1.6069690242163475 1.9151111077974459 C-1.7178208755159217 1.8220953602566548, -1.822095360256653 1.7178208755159234, -1.9151111077974443 1.6069690242163495 C-2.0081268553382357 1.4961171729167755, -2.0927101020998746 1.3753197776503645, -2.1650635094610955 1.250000000000002 C-2.2374169168223164 1.1246802223496395, -2.2997389064531992 0.9910302842862865, -2.34923155196477 0.8550503583141743 C-2.3987241974763407 0.7190704323420621, -2.436891307857981 0.5766288372196907, -2.4620193825305194 0.434120444167329 C-2.487147457203058 0.29161205111496724, -2.5 0.14470681472244545, -2.5 3.636830773662308e-15 C-2.5 -0.14470681472243818, -2.4871474572030587 -0.2916120511149599, -2.4620193825305208 -0.4341204441673218 C-2.436891307857983 -0.5766288372196837, -2.398724197476343 -0.7190704323420553, -2.3492315519647726 -0.8550503583141675 C-2.2997389064532023 -0.9910302842862798, -2.23741691682232 -1.1246802223496328, -2.165063509461099 -1.2499999999999956 C-2.092710102099878 -1.3753197776503583, -2.00812685533824 -1.4961171729167695, -1.9151111077974488 -1.606969024216344 C-1.8220953602566576 -1.7178208755159183, -1.7178208755159263 -1.82209536025665, -1.6069690242163523 -1.9151111077974416 C-1.4961171729167784 -2.0081268553382334, -1.3753197776503672 -2.0927101020998724, -1.2500000000000047 -2.1650635094610937 C-1.1246802223496422 -2.237416916822315, -0.9910302842862897 -2.299738906453198, -0.8550503583141776 -2.3492315519647686 C-0.7190704323420656 -2.3987241974763394, -0.5766288372196942 -2.4368913078579806, -0.43412044416733236 -2.462019382530519 C-0.29161205111497057 -2.4871474572030574, -0.1447068147224489 -2.4999999999999996, -7.120580697431198e-15 -2.5 C0.14470681472243463 -2.5000000000000004, 0.29161205111495647 -2.487147457203059, 0.4341204441673183 -2.4620193825305217 C0.5766288372196802 -2.436891307857984, 0.7190704323420518 -2.3987241974763442, 0.8550503583141642 -2.349231551964774 C0.9910302842862766 -2.2997389064532037, 1.1246802223496295 -2.2374169168223212, 1.2499999999999925 -2.165063509461101 C1.3753197776503554 -2.0927101020998804, 1.4961171729167668 -2.008126855338242, 1.6069690242163412 -1.915111107797451 C1.7178208755159157 -1.82209536025666, 1.8220953602566472 -1.7178208755159294, 1.915111107797439 -1.6069690242163557 C2.0081268553382308 -1.496117172916782, 2.09271010209987 -1.3753197776503712, 2.1650635094610915 -1.2500000000000089 C2.237416916822313 -1.1246802223496466, 2.299738906453196 -0.9910302842862939, 2.3492315519647673 -0.855050358314182 C2.3987241974763385 -0.71907043234207, 2.4368913078579792 -0.5766288372196986, 2.462019382530518 -0.4341204441673369 C2.487147457203057 -0.29161205111497523, 2.4936698970884197 -0.07235340736123454, 2.5 -1.1714553645825241e-14 C2.5063301029115803 0.07235340736121111, 2.50633010291158 -0.07235340736122292, 2.5 0" stroke="none" stroke-width="0" fill="#000" style="" /><path d="M2.5 0 C2.5 0.14470681472244193, 2.487147457203058 0.29161205111496386, 2.46201938253052 0.4341204441673258 C2.436891307857982 0.5766288372196877, 2.3987241974763416 0.7190704323420595, 2.3492315519647713 0.8550503583141718 C2.299738906453201 0.991030284286284, 2.2374169168223177 1.124680222349637, 2.165063509461097 1.2499999999999998 C2.092710102099876 1.3753197776503625, 2.0081268553382365 1.496117172916774, 1.915111107797445 1.6069690242163481 C1.8220953602566536 1.7178208755159223, 1.7178208755159226 1.8220953602566536, 1.6069690242163484 1.915111107797445 C1.4961171729167742 2.0081268553382365, 1.375319777650363 2.0927101020998755, 1.2500000000000002 2.1650635094610964 C1.1246802223496375 2.2374169168223172, 0.9910302842862845 2.2997389064532, 0.8550503583141721 2.349231551964771 C0.7190704323420597 2.3987241974763416, 0.576628837219688 2.436891307857982, 0.43412044416732604 2.46201938253052 C0.291612051114964 2.487147457203058, 0.14470681472244212 2.5, 1.5308084989341916e-16 2.5 C-0.1447068147224418 2.5, -0.2916120511149638 2.487147457203058, -0.43412044416732576 2.46201938253052 C-0.5766288372196877 2.436891307857982, -0.7190704323420595 2.3987241974763416, -0.8550503583141718 2.3492315519647713 C-0.991030284286284 2.299738906453201, -1.124680222349637 2.2374169168223177, -1.2499999999999996 2.165063509461097 C-1.375319777650362 2.092710102099876, -1.4961171729167733 2.008126855338237, -1.6069690242163475 1.9151111077974459 C-1.7178208755159217 1.8220953602566548, -1.822095360256653 1.7178208755159234, -1.9151111077974443 1.6069690242163495 C-2.0081268553382357 1.4961171729167755, -2.0927101020998746 1.3753197776503645, -2.1650635094610955 1.250000000000002 C-2.2374169168223164 1.1246802223496395, -2.2997389064531992 0.9910302842862865, -2.34923155196477 0.8550503583141743 C-2.3987241974763407 0.7190704323420621, -2.436891307857981 0.5766288372196907, -2.4620193825305194 0.434120444167329 C-2.487147457203058 0.29161205111496724, -2.5 0.14470681472244545, -2.5 3.636830773662308e-15 C-2.5 -0.14470681472243818, -2.4871474572030587 -0.2916120511149599, -2.4620193825305208 -0.4341204441673218 C-2.436891307857983 -0.5766288372196837, -2.398724197476343 -0.7190704323420553, -2.3492315519647726 -0.8550503583141675 C-2.2997389064532023 -0.9910302842862798, -2.23741691682232 -1.1246802223496328, -2.165063509461099 -1.2499999999999956 C-2.092710102099878 -1.3753197776503583, -2.00812685533824 -1.4961171729167695, -1.9151111077974488 -1.606969024216344 C-1.8220953602566576 -1.7178208755159183, -1.7178208755159263 -1.82209536025665, -1.6069690242163523 -1.9151111077974416 C-1.4961171729167784 -2.0081268553382334, -1.3753197776503672 -2.0927101020998724, -1.2500000000000047 -2.1650635094610937 C-1.1246802223496422 -2.237416916822315, -0.9910302842862897 -2.299738906453198, -0.8550503583141776 -2.3492315519647686 C-0.7190704323420656 -2.3987241974763394, -0.5766288372196942 -2.4368913078579806, -0.43412044416733236 -2.462019382530519 C-0.29161205111497057 -2.4871474572030574, -0.1447068147224489 -2.4999999999999996, -7.120580697431198e-15 -2.5 C0.14470681472243463 -2.5000000000000004, 0.29161205111495647 -2.487147457203059, 0.4341204441673183 -2.4620193825305217 C0.5766288372196802 -2.436891307857984, 0.7190704323420518 -2.3987241974763442, 0.8550503583141642 -2.349231551964774 C0.9910302842862766 -2.2997389064532037, 1.1246802223496295 -2.2374169168223212, 1.2499999999999925 -2.165063509461101 C1.3753197776503554 -2.0927101020998804, 1.4961171729167668 -2.008126855338242, 1.6069690242163412 -1.915111107797451 C1.7178208755159157 -1.82209536025666, 1.8220953602566472 -1.7178208755159294, 1.915111107797439 -1.6069690242163557 C2.0081268553382308 -1.496117172916782, 2.09271010209987 -1.3753197776503712, 2.1650635094610915 -1.2500000000000089 C2.237416916822313 -1.1246802223496466, 2.299738906453196 -0.9910302842862939, 2.3492315519647673 -0.855050358314182 C2.3987241974763385 -0.71907043234207, 2.4368913078579792 -0.5766288372196986, 2.462019382530518 -0.4341204441673369 C2.487147457203057 -0.29161205111497523, 2.4936698970884197 -0.07235340736123454, 2.5 -1.1714553645825241e-14 C2.5063301029115803 0.07235340736121111, 2.50633010291158 -0.07235340736122292, 2.5 0" stroke="#000" stroke-width="2" fill="none" stroke-dasharray="0 0" style="" /></g></g></g><g class="node statediagram-note" id="my-svg-state-SEED_COMPLETED----note-25" data-look="classic" transform="translate(1184.1328125, 1159)"><g class="basic label-container outer-path"><path d="M-144 -96 L144 -96 L144 96 L-144 96" stroke="none" stroke-width="0" fill="#fefce8" style="" /><path d="M-144 -96 C-37.658916756560984 -96, 68.68216648687803 -96, 144 -96 M-144 -96 C-70.26184380925356 -96, 3.4763123814928747 -96, 144 -96 M144 -96 C144 -34.83513197524044, 144 26.329736049519127, 144 96 M144 -96 C144 -54.94835383875587, 144 -13.896707677511742, 144 96 M144 96 C65.73549175863982 96, -12.529016482720351 96, -144 96 M144 96 C83.27245240673159 96, 22.54490481346319 96, -144 96 M-144 96 C-144 32.58493404726488, -144 -30.83013190547024, -144 -96 M-144 96 C-144 26.68135144579466, -144 -42.63729710841068, -144 -96" stroke="#ca8a04" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="label noteLabel" style="" transform="translate(-120, -72)"><rect /><text x="120" y="30" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="120">Resume checkpoint saves</tspan><tspan x="120" dy="16.8">state here.</tspan><tspan x="120" dy="16.8">On resume, seed is skipped</tspan><tspan x="120" dy="16.8">and</tspan><tspan x="120" dy="16.8">keys are re-extracted from</tspan><tspan x="120" dy="16.8">Silver.</tspan></text></g></g><g class="node statediagram-note" id="my-svg-state-FAILED----note-26" data-look="classic" transform="translate(1034.6796875, 3098.5)"><g class="basic label-container outer-path"><path d="M-170.3515625 -84 L170.3515625 -84 L170.3515625 84 L-170.3515625 84" stroke="none" stroke-width="0" fill="#fefce8" style="" /><path d="M-170.3515625 -84 C-66.05750518143452 -84, 38.23655213713096 -84, 170.3515625 -84 M-170.3515625 -84 C-79.01011404500295 -84, 12.3313344099941 -84, 170.3515625 -84 M170.3515625 -84 C170.3515625 -49.62842214061271, 170.3515625 -15.256844281225426, 170.3515625 84 M170.3515625 -84 C170.3515625 -17.10148397356771, 170.3515625 49.79703205286458, 170.3515625 84 M170.3515625 84 C45.313810685840195 84, -79.72394112831961 84, -170.3515625 84 M170.3515625 84 C87.4389896689352 84, 4.526416837870414 84, -170.3515625 84 M-170.3515625 84 C-170.3515625 23.24617516573779, -170.3515625 -37.50764966852442, -170.3515625 -84 M-170.3515625 84 C-170.3515625 43.20109593419909, -170.3515625 2.4021918683981767, -170.3515625 -84" stroke="#ca8a04" stroke-width="1.3" fill="none" stroke-dasharray="0 0" style="" /></g><g class="label noteLabel" style="" transform="translate(-146.3515625, -60)"><rect /><text x="146.352" y="9.6" text-anchor="middle" xml:space="preserve" class="fo-fallback"><tspan x="146.352">FAILED is resumable: seed /</tspan><tspan x="146.352" dy="16.8">enrichment</tspan><tspan x="146.352" dy="16.8">results preserved in checkpoint.</tspan><tspan x="146.352" dy="16.8">FSMStateHelper.validate_transiti</tspan><tspan x="146.352" dy="16.8">on</tspan><tspan x="146.352" dy="16.8">()</tspan><tspan x="146.352" dy="16.8">enforces valid transitions.</tspan></text></g></g></g></g></g><defs><filter id="my-svg-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000" /></filter></defs><defs><filter id="my-svg-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000" /></filter></defs><linearGradient id="my-svg-gradient" gradientUnits="objectBoundingBox" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="hsl(0, 0%, 83.3333333333%)" stop-opacity="1" /><stop offset="100%" stop-color="hsl(0, 0%, 88.9215686275%)" stop-opacity="1" /></linearGradient><style>/*
+ * Пользовательские стили диаграмм BioETL (структурированная копия)
+ * Источник: custom.css
+ * Цель: сгруппировать правила по типам элементов и документировать назначение каждого CSS-параметра.
+ */
+
+/* =========================================================
+ * 1) Глобальная типографика и базовое поведение текста
+ * ========================================================= */
+svg {
+    /* Задаёт основной стек шрифтов для всего текста в SVG. */
+    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Oxygen, Ubuntu, sans-serif;
+}
+
+
+
+/* =========================================================
+ * 2) Общая геометрия узлов (для нескольких типов диаграмм)
+ * ========================================================= */
+.node rect,
+.node circle,
+.node ellipse,
+.node polygon,
+.node path {
+    /* Единая толщина контура для фигур узлов. */
+    stroke-width: 1.5px !important;
+    /* Скругляет углы по горизонтали для более мягкого вида. */
+    rx: 8;
+    /* Скругляет углы по вертикали в паре с rx. */
+    ry: 8;
+    /* Добавляет лёгкую тень и отделяет узлы от фона. */
+    filter:  none; /*  drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.05));*/
+}
+
+/* =========================================================
+ * 3) Контейнеры subgraph / cluster
+ * ========================================================= */
+.cluster rect,
+.cluster path {
+    /* Увеличивает радиус углов у контейнеров-групп. */
+    rx: 10;
+    /* Поддерживает симметрию скругления по вертикали. */
+    ry: 10;
+    /* Нейтральная заливка контейнера для снижения визуального шума. */
+    fill: #f8fafc;
+    /* Приглушённая обводка, чтобы границы были заметны, но не доминировали. */
+    stroke: #94a3b8;
+    /* Толщина границы контейнера в тон большинству узлов. */
+    stroke-width: 1.5px;
+    /* Убирает пунктир у рамок контейнеров. */
+    stroke-dasharray: none;
+    /* Делает фон контейнера полностью непрозрачным. */
+    fill-opacity: 1;
+    /* Отключает тень контейнера, чтобы акцент оставался на узлах. */
+    filter: none;
+}
+
+.cluster text {
+    /* Нормальный вес шрифта для заголовков групп. */
+    font-weight: 400;
+    /* Увеличенный размер заголовка относительно текста узлов. */
+    font-size: 16px;
+}
+
+/* =========================================================
+ * 4) Стили линий связей (edges/links)
+ * ========================================================= */
+.edgePath .path {
+    /* Делает основные ребра более заметными в плотных графах. */
+    stroke-width: 2.5px;
+    /* Скругляет соединения сегментов линий. */
+    stroke-linejoin: round;
+    /* Скругляет окончания линий. */
+    stroke-linecap: round;
+}
+
+.edgePath path,
+.flowchart-link,
+.relation,
+.messageLine0,
+.messageLine1,
+.transition path {
+    /* Унифицированные скруглённые соединения для всех типов линий. */
+    stroke-linejoin: round;
+    /* Унифицированные скруглённые окончания для всех типов линий. */
+    stroke-linecap: round;
+}
+
+.transition path {
+    /* Выравнивает толщину переходов state diagram с основными ребрами. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 5) Подписи ребер и fallback-текст
+ * ========================================================= */
+.edgeLabel {
+    /* Компактный размер шрифта для подписей на связях. */
+    font-size: 12px;
+    /* Плотная межстрочность для экономии места. */
+    line-height: 1.1;
+    /* Базовый непрозрачный фон под подписью. */
+    background-color: #ffffff;
+    /* Небольшие внутренние отступы вокруг текста. */
+    padding: 1px 3px;
+    /* Мягкое скругление фона подписи. */
+    border-radius: 2px;
+}
+
+.edgeLabel span,
+.edgeLabel p,
+text.fo-fallback {
+    /* Принудительный тёмный fill для контраста в SVG-рендерах. */
+    fill: #111827 !important;
+    /* Принудительный тёмный цвет для HTML-подписей. */
+    color: #111827 !important;
+    /* Полная непрозрачность текста. */
+    opacity: 1 !important;
+    /* Компактная межстрочность для многострочных подписей. */
+    line-height: 1.1;
+    /* Убирает стандартные внешние отступы HTML-параграфов. */
+    margin: 0;
+    /* Убирает стандартные внутренние отступы HTML-параграфов. */
+    padding: 0;
+}
+
+.edgeLabel .labelBkg,
+.labelBkg {
+    /* Жёстко задаёт белый фон под текстом подписей. */
+    background-color: #ffffff !important;
+    /* Делает фон полностью непрозрачным во всех просмотрщиках. */
+    opacity: 1 !important;
+}
+
+.edgeLabel rect {
+    /* Переопределяет полупрозрачный фон по умолчанию у Mermaid. */
+    opacity: 1 !important;
+    /* Жёстко фиксирует белую заливку прямоугольника под подписью. */
+    fill: #ffffff !important;
+}
+
+/* =========================================================
+ * 6) Элементы sequence diagram
+ * ========================================================= */
+.actor {
+    /* Толщина границы actor-блоков. */
+    stroke-width: 1.5px;
+    /* Скругление углов actor-блоков по горизонтали. */
+    rx: 4;
+    /* Скругление углов actor-блоков по вертикали. */
+    ry: 4;
+}
+
+.messageLine0,
+.messageLine1 {
+    /* Толщина линий сообщений в sequence diagram. */
+    stroke-width: 1.6px;
+}
+
+.messageText {
+    /* Базовый размер текста сообщений. */
+    font-size: 13px;
+}
+
+.activation0 {
+    /* Более тонкая линия activation bar, чтобы не перегружать схему. */
+    stroke-width: 1px;
+}
+
+.note {
+    /* Скругление углов заметки по горизонтали. */
+    rx: 4;
+    /* Скругление углов заметки по вертикали. */
+    ry: 4;
+    /* Тонкая граница для вторичных блоков. */
+    stroke-width: 1px;
+    /* Лёгкая тень для визуального отделения заметок. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+/* =========================================================
+ * 7) Базовые элементы class diagram
+ * ========================================================= */
+g.classGroup rect {
+    /* Скругление углов class box по горизонтали. */
+    rx: 10;
+    /* Скругление углов class box по вертикали. */
+    ry: 10;
+    /* Толщина границы class box. */
+    stroke-width: 1.5px;
+    /* Мягкая тень у class box без агрессивного контраста. */
+    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.06));
+}
+
+g.classGroup text {
+    /* Базовый размер текста внутри class diagram. */
+    font-size: 14px;
+    padding: 10px 10px;
+}
+
+g.classGroup line {
+    /* Толщина внутренних разделителей класса. */
+    stroke-width: 1px;
+}
+
+.relation {
+    /* Толщина связей между классами на уровне основных ребер. */
+    stroke-width: 2.5px;
+}
+
+/* =========================================================
+ * 8) Типографика HTML-лейблов class diagram
+ * ========================================================= */
+g.label-group .nodeLabel {
+    /* Увеличенный размер названия класса для иерархии. */
+    font-size: 16px !important;
+    /* Полужирный акцент на имени класса. */
+    font-weight: 200 !important;
+    /* Лёгкое межбуквенное расстояние для читаемости заголовка. */
+    letter-spacing: 0.01em;
+}
+
+g.annotation-group .nodeLabel {
+    /* Уменьшенный размер для стереотипов/аннотаций. */
+    font-size: 11px !important;
+    /* Курсив для визуального отделения аннотаций. */
+    font-style: italic !important;
+    /* Небольшое ослабление контраста вторичного текста. */
+    opacity: 0.8;
+}
+
+g.members-group .nodeLabel,
+g.methods-group .nodeLabel {
+    /* Компактный размер для атрибутов и методов. */
+    font-size: 12px !important;
+    /* Нормальный вес шрифта для плотного структурного текста. */
+    font-weight: 400 !important;
+}
+
+/* =========================================================
+ * 9) Помощники размеров foreignObject (class/flowchart)
+ * ========================================================= */
+g.members-group foreignObject,
+g.methods-group foreignObject {
+    /* Минимальная высота областей members/methods. */
+    min-height: 40px;
+}
+
+.node foreignObject &gt; div,
+g.classGroup foreignObject &gt; div {
+    /* Стабилизирует вычисление размеров с учётом отступов/границ. */
+    box-sizing: border-box;
+}
+
+.node.size-sm foreignObject &gt; div {
+    /* Минимальная высота для малого размерного уровня узла. */
+    min-height: 80px;
+    /* Минимальная ширина для малого размерного уровня узла. */
+    min-width: 180px;
+}
+
+.node.size-md foreignObject &gt; div {
+    /* Минимальная высота для среднего размерного уровня узла. */
+    min-height: 140px;
+    /* Минимальная ширина для среднего размерного уровня узла. */
+    min-width: 260px;
+}
+
+.node.size-lg foreignObject &gt; div {
+    /* Минимальная высота для большого размерного уровня узла. */
+    min-height: 200px;
+    /* Минимальная ширина для большого размерного уровня узла. */
+    min-width: 340px;
+}
+
+/* =========================================================
+ * 10) Элементы state diagram
+ * ========================================================= */
+g.stateGroup rect {
+    /* Скругление углов контейнеров состояний по горизонтали. */
+    rx: 8;
+    /* Скругление углов контейнеров состояний по вертикали. */
+    ry: 8;
+}
+
+.statediagram-state rect {
+    /* Скругление углов узлов состояния по горизонтали. */
+    rx: 8;
+    /* Скругление углов узлов состояния по вертикали. */
+    ry: 8;
+    /* Толщина границы узла состояния. */
+    stroke-width: 1.5px;
+    /* Лёгкая тень для визуального отделения state box. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 11) Элементы ER diagram
+ * ========================================================= */
+.er.entityBox {
+    /* Толщина границы сущности ER-диаграммы. */
+    stroke-width: 1.5px;
+    /* Скругление углов сущности по горизонтали. */
+    rx: 4;
+    /* Скругление углов сущности по вертикали. */
+    ry: 4;
+    /* Лёгкая тень для отделения блоков сущностей. */
+    filter: drop-shadow(1px 2px 3px rgba(0, 0, 0, 0.08));
+}
+
+/* =========================================================
+ * 12) Узлы mindmap
+ * ========================================================= */
+.mindmap-node rect,
+.mindmap-node circle {
+    /* Толщина контура узлов mindmap. */
+    stroke-width: 1.5px;
+    /* Чуть более выраженная тень для плотных радиальных веток. */
+    filter: drop-shadow(1px 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* =========================================================
+ * 13) Маркеры стрелок
+ * ========================================================= */
+marker path {
+    /* Единый нейтральный цвет наконечников стрелок. */
+    fill: #475569;
+}
+
+/* =========================================================
+ * 14) Цветовая карта архитектурных слоёв (fallback-селекторы)
+ * ========================================================= */
+[id*="Domain"] &gt; rect,
+[id*="Domain"] &gt; path {
+    /* Цвет фона для доменного слоя. */
+    fill: #f5f3ff !important;
+    /* Цвет границы для доменного слоя. */
+    stroke: #7c3aed !important;
+}
+
+.cluster[id*="Domain"] &gt; rect,
+.cluster[id*="Domain"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Application"] &gt; rect,
+[id*="Application"] &gt; path {
+    /* Цвет фона для application-слоя. */
+    fill: #f0fdf4 !important;
+    /* Цвет границы для application-слоя. */
+    stroke: #16a34a !important;
+}
+
+.cluster[id*="Application"] &gt; rect,
+.cluster[id*="Application"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Infrastructure"] &gt; rect,
+[id*="Infrastructure"] &gt; path {
+    /* Цвет фона для infrastructure-слоя. */
+    fill: #fff1f2 !important;
+    /* Цвет границы для infrastructure-слоя. */
+    stroke: #dc2626 !important;
+}
+
+.cluster[id*="Infrastructure"] &gt; rect,
+.cluster[id*="Infrastructure"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Composition"] &gt; rect,
+[id*="Composition"] &gt; path {
+    /* Цвет фона для composition-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы для composition-слоя. */
+    stroke: #f59e0b !important;
+}
+
+.cluster[id*="Composition"] &gt; rect,
+.cluster[id*="Composition"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="Interfaces"] &gt; rect,
+[id*="Interfaces"] &gt; path {
+    /* Цвет фона для слоя интерфейсов. */
+    fill: #eff6ff !important;
+    /* Цвет границы для слоя интерфейсов. */
+    stroke: #2563eb !important;
+}
+
+.cluster[id*="Interfaces"] &gt; rect,
+.cluster[id*="Interfaces"] &gt; path {
+    fill: #ffffff !important;
+}
+
+[id*="External"] &gt; rect,
+[id*="External"] &gt; path {
+    /* Цвет фона для внешних систем. */
+    fill: #f1f5f9 !important;
+    /* Цвет границы для внешних систем. */
+    stroke: #64748b !important;
+}
+
+.cluster[id*="External"] &gt; rect,
+.cluster[id*="External"] &gt; path {
+    fill: #ffffff !important;
+}
+
+/* Белая подложка под подписи всех архитектурных/medallion слоёв */
+g.cluster[id*="Domain"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Application"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Infrastructure"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Composition"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Interfaces"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="External"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Bronze"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Silver"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Gold"] .cluster-label foreignObject &gt; div,
+g.cluster[id*="Quarantine"] .cluster-label foreignObject &gt; div {
+    background: #ffffff !important;
+    padding: 0 6px !important;
+    border-radius: 4px;
+}
+
+/* Fallback для рендеров без foreignObject: не рисуем толстую обводку */
+g.cluster[id*="Domain"] .cluster-label text.fo-fallback,
+g.cluster[id*="Application"] .cluster-label text.fo-fallback,
+g.cluster[id*="Infrastructure"] .cluster-label text.fo-fallback,
+g.cluster[id*="Composition"] .cluster-label text.fo-fallback,
+g.cluster[id*="Interfaces"] .cluster-label text.fo-fallback,
+g.cluster[id*="External"] .cluster-label text.fo-fallback,
+g.cluster[id*="Bronze"] .cluster-label text.fo-fallback,
+g.cluster[id*="Silver"] .cluster-label text.fo-fallback,
+g.cluster[id*="Gold"] .cluster-label text.fo-fallback,
+g.cluster[id*="Quarantine"] .cluster-label text.fo-fallback {
+    fill: #111827 !important;
+    stroke: none !important;
+}
+
+/* =========================================================
+ * 15) Цветовая карта слоёв Medallion
+ * ========================================================= */
+[id*="Bronze"] &gt; rect,
+[id*="Bronze"] &gt; path {
+    /* Цвет фона Bronze-слоя. */
+    fill: #fff7ed !important;
+    /* Цвет границы Bronze-слоя. */
+    stroke: #f59e0b !important;
+}
+
+[id*="Silver"] &gt; rect,
+[id*="Silver"] &gt; path {
+    /* Цвет фона Silver-слоя. */
+    fill: #f8fafc !important;
+    /* Цвет границы Silver-слоя. */
+    stroke: #475569 !important;
+}
+
+[id*="Gold"] &gt; rect,
+[id*="Gold"] &gt; path {
+    /* Цвет фона Gold-слоя. */
+    fill: #fefce8 !important;
+    /* Цвет границы Gold-слоя. */
+    stroke: #ca8a04 !important;
+}
+
+[id*="Quarantine"] &gt; rect,
+[id*="Quarantine"] &gt; path {
+    /* Цвет фона для карантинных/проблемных потоков данных. */
+    fill: #ffe4e6 !important;
+    /* Цвет границы для карантинных/проблемных потоков данных. */
+    stroke: #e11d48 !important;
+}
+/* Нормализует вес текста в узлах и заголовках слоёв (без полужирного акцента). */
+.node .label text,
+.node .label tspan,
+.node .label .nodeLabel,
+text.fo-fallback {
+    stroke: none !important;
+    stroke-width: 0 !important;
+    fill: #111827 !important;
+    font-weight: 400 !important;
+}
+/* Single text layer (fallback-only) */
+text.fo-fallback {
+    display: inline !important;
+}
+
+foreignObject {
+    display: none !important;
+}
+</style></svg>

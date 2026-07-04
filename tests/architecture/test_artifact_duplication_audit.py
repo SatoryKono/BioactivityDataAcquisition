@@ -21,6 +21,10 @@ MATRIX_PATH = ROOT / "configs" / "quality" / "test_matrix.yaml"
 ROUTING_PATH = ROOT / "configs" / "quality" / "generated_artifact_routing.yaml"
 JSCPD_PATH = ROOT / ".jscpd.json"
 REPORT_PATH = ROOT / DEFAULT_JSON_ARTIFACT
+TESTS_WORKFLOW_PATH = ROOT / ".github" / "workflows" / "tests.yml"
+CHECK_COMMAND = (
+    "python -m scripts.engineering.qa report-artifact-duplication-audit --check"
+)
 
 pytestmark = pytest.mark.architecture
 
@@ -35,9 +39,7 @@ def test_artifact_duplication_audit_report_matches_live_collector() -> None:
 
     assert payload == report
     assert payload["policy_scope"] == "config_contract_registry_artifact_duplication"
-    assert {"config", "contract", "registry"}.issubset(
-        payload["scope_file_counts"]
-    )
+    assert {"config", "contract", "registry"}.issubset(payload["scope_file_counts"])
     assert payload["duplicate_groups"] == len(payload["groups"])
 
 
@@ -57,9 +59,7 @@ def test_artifact_duplication_audit_is_registered_for_jscpd_blind_spot() -> None
     assert policy["generator"] == (
         "scripts/engineering/qa/report_artifact_duplication_audit.py"
     )
-    assert policy["command"] == (
-        "python -m scripts.engineering.qa report-artifact-duplication-audit"
-    )
+    assert policy["command"] == CHECK_COMMAND
     assert policy["inventory_location"] == DEFAULT_JSON_ARTIFACT.as_posix()
     assert policy["jscpd_blind_spot_source"] == ".jscpd.json"
     assert set(policy["required_scopes"]) == {"config", "contract", "registry"}
@@ -78,3 +78,20 @@ def test_qa_router_exposes_artifact_duplication_audit_command() -> None:
     assert qa_router.COMMAND_MODULES["report-artifact-duplication-audit"] == (
         "scripts.engineering.qa.report_artifact_duplication_audit"
     )
+
+
+def test_governance_preflight_runs_artifact_duplication_audit_gate() -> None:
+    workflow = _load_yaml(TESTS_WORKFLOW_PATH)
+    jobs = cast(dict[str, Any], workflow["jobs"])
+    governance_preflight = cast(dict[str, Any], jobs["governance-preflight"])
+    steps = cast(list[dict[str, Any]], governance_preflight["steps"])
+
+    matching_steps = [
+        step
+        for step in steps
+        if step.get("name")
+        == "Validate config/contract/registry artifact duplication audit"
+    ]
+
+    assert len(matching_steps) == 1
+    assert matching_steps[0]["run"] == f"uv run {CHECK_COMMAND}"

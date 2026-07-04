@@ -9,6 +9,9 @@ import pytest
 import pyarrow as pa
 
 from bioetl.domain.exceptions import SchemaViolationError
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -631,7 +634,9 @@ class TestSilverWriterErrorHandling:
             writer = SilverWriter(
                 base_path="s3://bucket/silver",
                 logger=logger,
-                merge_resilience_policy=policy,
+                runtime_request=SilverWriterRuntimeServicesRequest(
+                    merge_resilience_policy=policy,
+                ),
             )
 
             with pytest.raises(DeltaTransactionError):

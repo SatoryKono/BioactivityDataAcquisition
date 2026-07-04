@@ -1,0 +1,84 @@
+{
+  "schema_version": "tech-debt-issues-5670-5675-closeout-v1",
+  "parent_issue": 5670,
+  "closed_on": "2026-06-29",
+  "debt_budget_policy": "flat_or_decreasing_only",
+  "issues": [
+    5671,
+    5672,
+    5673,
+    5674,
+    5675
+  ],
+  "outcomes": {
+    "5671": {
+      "status": "closeable",
+      "theme": "governance_artifact_reference_reconciliation",
+      "outcome": "committed governance artifact references are backed by existing artifacts or live fail-fast checks",
+      "evidence": [
+        "reports/quality/debt-governance-gates.json",
+        "scripts/engineering/ci/validate_registry_dq_refs.py",
+        "reports/observability/runtime_cardinality_inventory.json",
+        "reports/quality/architecture-debt-remote-main-baseline.json",
+        ".github/workflows/tests.yml",
+        ".github/workflows/contract-governance-fast-check.yml",
+        "configs/quality/generated_artifact_routing.yaml",
+        "tests/architecture/test_tech_debt_issues_5670_5675_closeout.py"
+      ],
+      "release_gate_status": "passing",
+      "fail_count": 0,
+      "warn_count": 0
+    },
+    "5672": {
+      "status": "closeable",
+      "theme": "retained_public_compatibility_surface_review",
+      "outcome": "the retained 12 entrypoints and 4 public export facades remain explicitly owned, reviewed, and bounded",
+      "evidence": [
+        "configs/quality/compatibility_facade_inventory.yaml",
+        "reports/quality/compatibility-importer-census.json",
+        
+        "tests/architecture/test_tech_debt_issues_5670_5675_closeout.py"
+      ]
+    },
+    "5673": {
+      "status": "closeable",
+      "theme": "duplication_second_wave_burn_down",
+      "outcome": "full-app duplication baseline is below the 101-cluster roadmap baseline across app, adapter, pipeline, and CLI scopes",
+      "evidence": [
+        "reports/quality/full-app-duplication-baseline.json",
+        "reports/quality/architecture-quality-scorecard.json",
+        "tests/architecture/test_duplication_report_governance.py",
+        "tests/architecture/test_tech_debt_issues_5670_5675_closeout.py"
+      ]
+    },
+    "5674": {
+      "status": "closeable",
+      "theme": "internal_compatibility_shim_sunset_policy",
+      "outcome": "retained internal shims have current review windows, owners, exit criteria, and zero first-party src importer enforcement",
+      "evidence": [
+        "configs/quality/internal_compatibility_shim_inventory.yaml",
+        "src/bioetl/infrastructure/compat/pandera_compat.py",
+        "tests/architecture/test_pandera_schema_boundary_policy.py",
+        "tests/architecture/test_tech_debt_issues_5670_5675_closeout.py"
+      ]
+    },
+    "5675": {
+      "status": "closeable",
+      "theme": "compatibility_test_inventory_and_platform_sensitive_lane",
+      "outcome": "compatibility test inventory is reduced to 0 and platform-sensitive Neo4j memory snapshots remain isolated in the memory lane",
+      "evidence": [
+        "configs/quality/test_governance_audit.yaml",
+        "reports/quality/test-governance-current.json",
+        "tests/testing_support/neo4j_memory_sync_support/snapshot_invariants.py",
+        "tests/testing_support/neo4j_memory_sync_support/common.py",
+        "tests/unit/scripts/ops/neo4j_memory_sync/test_snapshot_invariants.py",
+        "tests/architecture/test_tech_debt_issues_5670_5675_closeout.py"
+      ]
+    }
+  },
+  "roadmap_closeout": {
+    "issue": 5670,
+    "status": "closeable",
+    "condition": "all child outcomes are closeable and debt budgets remain flat or decreasing"
+  }
+}

@@ -1,0 +1,54 @@
+%% View: Data-Flow | Parent: 14-provider-health-states-full.mermaid
+%% @uniform width=176 height=56 max_title_len=17 max_desc_lines=0
+flowchart TB
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        N2["WatchingErrors"]
+        N7["ErrorAccumulating"]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        N1["*"]
+        N3["ProcessingRequest"]
+        N4["HEALTHY"]
+        N5["DEGRADED"]
+        N6["RequestSuccess"]
+        N8["RecoveryProgress"]
+        N9["UNHEALTHY"]
+        N10["WaitingForProbe"]
+        N11["SendProbe"]
+        N12["NormalOperation"]
+    end
+
+    N1 --> N4
+    N1 --> N12
+    N1 --> N3
+    N3 --> N6
+    N6 --> N3
+    N4 --> N5
+    N1 --> N2
+    N2 --> N7
+    N2 --> N8
+    N7 --> N2
+    N8 --> N2
+    N5 --> N4
+    N5 --> N9
+    N1 --> N10
+    N10 --> N11
+    N9 --> N5
+
+    style Domain fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    style Infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+
+    %% linkStyle: primary=14 edge(s) | secondary=2 edge(s)
+
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
+    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
+    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
+
+    linkStyle 0,1,2,3,4,5,6,7,8,9,10,11,12,13 stroke:#1E293B,stroke-width:4px
+    linkStyle 14,15 stroke:#7c3aed,stroke-width:3px,stroke-dasharray:5

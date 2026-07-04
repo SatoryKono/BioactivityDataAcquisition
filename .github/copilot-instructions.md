@@ -1,0 +1,64 @@
+# BioETL Instructions for GitHub Copilot
+
+Use this file as a strict operating profile for code suggestions in this repository.
+
+## Canonical Sources
+
+- `docs/00-project/NORMATIVE_SOURCES.md` (normative stack index)
+- `docs/00-project/RULES.md` (project constitution, RFC2119 requirements)
+- `docs/01-requirements/REQUIREMENTS.md` (functional/non-functional requirements)
+- ADRs in `docs/02-architecture/decisions/`
+- `AGENTS.md` (assistant workflow constraints)
+- `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
+- `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+
+If guidance conflicts, prioritize canonical sources over this file.
+For AI runtime behavior conflicts, follow the runtime-source-first precedence
+defined in `AGENTS.md`.
+
+Architecture, Medallion, DI, domain purity, testing, and API rules live in
+`docs/00-project/RULES.md` §1–§4. Read RULES instead of relying on summaries
+below.
+
+## AI Runtime Notes
+
+- `.codex/**` is the tracked runtime source of truth on `main`.
+- `.gemini/settings.json` may exist as a machine-local config surface, but a
+  tracked `.gemini/agents/**` or `.gemini/skills/**` tree is not part of the
+  current `main` checkout unless added and verified in the same change.
+- `docs/00-project/ai/**` is a mirror/guidance layer, not the runtime behavior source.
+- Do not rely on `.claude/**` as a canonical behavior source for Codex/Gemini work.
+
+## Copilot Session Guardrails
+
+- Preserve hexagonal import boundaries and composition-root DI (see RULES §1).
+- Preserve Medallion invariants: Bronze append-only, Silver/Gold Delta Lake
+  (see RULES §2).
+- Never increase technical-debt budgets or hotspot thresholds.
+- Never hardcode secrets or weaken assertions to green tests.
+
+## Anti-Patterns (MUST NOT Suggest)
+
+- Layer boundary violations for quick fixes.
+- Service locator pattern.
+- Hardcoded secrets, tokens, or credentials.
+- `print()` for runtime logging (use logger ports/structlog adapters).
+- Blocking I/O inside async code.
+- Replacing strict typing with broad `Any` to silence type errors.
+
+## Hallucination Prevention (MUST)
+
+- Do not invent files, modules, classes, commands, or Make targets.
+- Before referencing a path/command/API, verify it exists in the repo context.
+- If uncertain, state uncertainty and suggest verification steps.
+- Keep code changes minimal and evidence-based; avoid speculative refactors.
+
+## Suggestion Quality Checklist
+
+- Includes type annotations for public interfaces.
+- Preserves architecture constraints and naming conventions from RULES.
+- Adds/updates tests when behavior changes.
+- Uses memory plus repo search to identify related tests, docs, contracts, and
+  configs before narrowing the validation scope.
+- Mentions required verification commands (`make lint`, `make test`, architecture tests).
+- Includes migration notes when introducing breaking changes.

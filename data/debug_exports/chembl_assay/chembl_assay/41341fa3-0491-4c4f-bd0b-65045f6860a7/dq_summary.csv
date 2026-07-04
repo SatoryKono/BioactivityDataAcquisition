@@ -1,0 +1,2 @@
+"run_id","workflow_id","pipeline_id","stage","status","reason_code","action","record_count"
+"41341fa3-0491-4c4f-bd0b-65045f6860a7","chembl_assay","chembl_assay","gold","rejected","SEMANTIC_FILTER_EXCLUDED","filter","12"

@@ -33,7 +33,6 @@ if TYPE_CHECKING:
         ClassificationStats,
         OrganismClassifier,
     )
-    # PhasedMigrationCoordinator removed - retired shim (2026-07-03)
     from bioetl.domain.behavior.preflight_governance import PreflightGovernor
     from bioetl.domain.behavior.text_similarity import (
         jaccard_similarity,

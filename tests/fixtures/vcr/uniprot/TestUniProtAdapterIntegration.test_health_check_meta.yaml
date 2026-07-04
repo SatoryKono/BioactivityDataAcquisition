@@ -2,11 +2,7 @@ schema_version: 1
 provider: uniprot
 cassette_rel_path: tests/fixtures/vcr/uniprot/TestUniProtAdapterIntegration.test_health_check.yaml
 metadata_status: managed_inventory
-reachability_review_status: reviewed_unreferenced
-reachability_review_ref: '#5378'
-reachability_review_rationale: Managed cassette retained for VCR inventory coverage;
-  no direct test literal reference is required for this legacy scenario.
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: 0f965c39dcb1005b540a34af11723a1cd4650f5444fcb90701a4b34d0c0c4b7e
-recorded_at: '2026-04-28'
+recorded_at: '2026-07-03'
 staleness_ready: true

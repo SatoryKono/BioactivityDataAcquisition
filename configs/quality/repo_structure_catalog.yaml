@@ -1,0 +1,249 @@
+version: 1.0.0
+status: active
+
+docs_drafts:
+  path_glob: docs/D-*.md
+  policy: repo_only_sync_notes
+  allowed_files:
+    - path: docs/D-01 Governance & Style Guide.md
+      disposition: retained_repo_only_sync_note
+      canonical_successor: docs/00-project/governance/01-documentation-governance-style-guide.md
+    - path: docs/D-02 Provider Integration Handbook.md
+      disposition: retained_repo_only_sync_note
+      canonical_successor: docs/03-guides/add-new-source.md
+    - path: docs/D-03 Data Contracts & Schema Specification.md
+      disposition: retained_repo_only_sync_note
+      canonical_successor: docs/04-reference/contracts/README.md
+    - path: docs/D-04 Data Model, IDs & Lineage Specification.md
+      disposition: retained_repo_only_sync_note
+      canonical_successor: docs/03-guides/hash-policy.md
+    - path: docs/D-05 Pipelines & Config Specification.md
+      disposition: retained_repo_only_sync_note
+      canonical_successor: docs/03-guides/pipeline-configuration.md
+    - path: docs/D-06 Data Quality и Quarantine Handbook.md
+      disposition: retained_repo_only_sync_note
+      canonical_successor: docs/03-guides/dq-configuration.md
+    - path: docs/D-07 Observability Specification.md
+      disposition: retained_repo_only_sync_note
+      canonical_successor: docs/02-architecture/observability-layers.md
+    - path: docs/D-08 Security & Compliance dossier.md
+      disposition: retained_repo_only_sync_note
+      canonical_successor: docs/03-guides/development/security/compliance-audit-guidelines.md
+    - path: docs/D-09 Requirements Traceability.md
+      disposition: retained_repo_only_sync_note
+      canonical_successor: docs/01-requirements/REQUIREMENTS.md
+
+plans:
+  path_prefix: docs/plans/
+  max_active_backlog: 1
+  readme: docs/plans/README.md
+  allowed_files:
+    - path: docs/plans/consolidated-open-tasks-plan-2026-03-21.md
+      lifecycle: active_backlog
+    - path: docs/plans/architecture-review-and-refactor-plan-2026-03-21.md
+      lifecycle: supporting_context
+    - path: docs/plans/curated-memory-density-governance-plan-2026-04-21.md
+      lifecycle: supporting_context
+    - path: docs/plans/monitoring-observability-expansion-plan-2026-03-26.md
+      lifecycle: supporting_context
+    - path: docs/plans/project-memory-layer-implementation-plan-2026-04-20.md
+      lifecycle: supporting_context
+    - path: docs/plans/project-memory-layer-issue-pack-2026-04-20.md
+      lifecycle: supporting_context
+    - path: docs/plans/repository-file-structure-cleanup-plan-2026-04-20.md
+      lifecycle: supporting_context
+    - path: docs/plans/repository-file-structure-remediation-plan-2026-04-28.md
+      lifecycle: supporting_context
+    - path: docs/plans/scripts-cli-wrapper-caller-matrix-2026-04-28.md
+      lifecycle: supporting_context
+    - path: docs/plans/codex-launcher-parity-refresh-2026-04-29.md
+      lifecycle: supporting_context
+    - path: docs/plans/mcp-wrapper-contract-audit-2026-04-28.md
+      lifecycle: supporting_context
+    - path: docs/plans/mcp-wrapper-deep-audit-2026-04-29.md
+      lifecycle: supporting_context
+    - path: docs/plans/mcp-wrapper-redesign-prerequisites-2026-04-29.md
+      lifecycle: supporting_context
+    - path: docs/plans/temporary-diagnostic-ttl-review-plan-2026-04-29.md
+      lifecycle: supporting_context
+    - path: docs/plans/repo-governance-wrapper-closeout-2026-04-29.md
+      lifecycle: supporting_context
+    - path: docs/plans/root-hygiene-cleanup-hardening-2026-04-29.md
+      lifecycle: supporting_context
+    - path: docs/plans/root-hygiene-review-lane-automation-2026-04-29.md
+      lifecycle: supporting_context
+    - path: docs/plans/scripts-supporting-retained-set-closeout-2026-04-29.md
+      lifecycle: supporting_context
+    - path: docs/plans/scripts-supporting-taxonomy-2026-04-29.md
+      lifecycle: supporting_context
+    - path: docs/plans/scripts-normalization-program-closeout-2026-04-29.md
+      lifecycle: supporting_context
+    - path: docs/plans/silver-filter-rejects-observability-plan.md
+      lifecycle: supporting_context
+    - path: docs/plans/test-health-observability-plan-2026-04-22.md
+      lifecycle: supporting_context
+    - path: docs/plans/наблюдаемость.md
+      lifecycle: supporting_context
+    - path: docs/plans/claude-to-ai-runtime-migration-plan-2026-04-25.md
+      lifecycle: supporting_context
+    - path: docs/plans/control-plane-dashboard-issue-pack-2026-05-07.md
+      lifecycle: supporting_context
+    - path: docs/plans/control-plane-id-panel-issue-pack-2026-05-15.md
+      lifecycle: supporting_context
+    - path: docs/plans/dashboard-datasource-uid-refactoring-plan.md
+      lifecycle: supporting_context
+    - path: docs/plans/memory-shim-removal-migration-plan.md
+      lifecycle: supporting_context
+    - path: docs/plans/provider-health-dashboard-audit-and-refactoring-plan.md
+      lifecycle: supporting_context
+    - path: docs/plans/testing-support-migration-plan-2026-04-25.md
+      lifecycle: supporting_context
+    - path: docs/plans/sonar-closeout-plan-2026-05-04.md
+      lifecycle: supporting_context
+    - path: docs/plans/chembl-baseline-refactor-plan-2026-06-01.md
+      lifecycle: supporting_context
+    - path: docs/plans/tech-debt-eradication-blueprint-v4-2026-05-31.md
+      lifecycle: supporting_context
+    - path: docs/plans/dashboard-observability-baseline-audit.md
+      lifecycle: supporting_context
+
+src_sidecars:
+  path_prefix: src/
+  approved_roots:
+    - path: src/bioetl
+      role: canonical_runtime_tree
+    - path: src/tools
+      role: approved_sidecar_tooling
+    - path: src/memory
+      role: approved_sidecar_memory_subsystem
+
+docs_code_zones:
+  approved_roots:
+    - path: docs/00-project/ai/agents/policy
+      role: approved_repo_only_agent_policy_automation
+    - path: docs/00-project/ai/agents/scripts
+      role: approved_repo_only_agent_script_mirror
+    - path: docs/plugins/link_checker
+      role: approved_docs_plugin_source_tree
+
+root_tooling_roots:
+  approved_roots:
+    - path: .codex
+      role: curated_shared_agent_runtime_surface
+    - path: .cursor
+      role: curated_shared_editor_rules_surface
+    - path: .devin
+      role: curated_project_wiki_surface
+    - path: .gemini
+      role: curated_shared_agent_runtime_surface
+    - path: .idea
+      role: curated_shared_ide_metadata_surface
+    - path: .vibe
+      role: curated_shared_vendor_runtime_surface
+    - path: .vscode
+      role: curated_shared_editor_metadata_surface
+
+root_runtime_artifact_roots:
+  approved_roots:
+    - path: artifacts
+      role: curated_debug_export_evidence_surface
+
+local_tolerated_root_dirs:
+  approved_roots:
+    - path: .ai
+      role: local_ai_runtime_state_untracked
+    - path: .agent-work
+      role: local_agent_runtime_state_untracked
+    - path: .agentbridge
+      role: local_agent_bridge_state_untracked
+    - path: .agents
+      role: local_agent_workspace_surface_untracked
+    - path: .benchmarks
+      role: local_benchmark_workspace_untracked
+    - path: .cache
+      role: local_cache_surface_untracked
+    - path: .codex_tmp
+      role: local_codex_scratch_untracked
+    - path: caddy
+      role: local_compose_runtime_state_untracked
+    - path: .coverage-sharded
+      role: local_coverage_shards_untracked
+    - path: .coverage-sharded-current-main
+      role: local_coverage_merge_workspace_untracked
+    - path: .hypothesis
+      role: local_property_test_cache_untracked
+    - path: .import_linter_cache
+      role: local_import_linter_cache_untracked
+    - path: .jules
+      role: local_vendor_workspace_state_untracked
+    - path: .junie
+      role: local_vendor_editor_state_untracked
+    - path: logs
+      role: local_runtime_log_workspace_untracked
+    - path: node_modules
+      role: local_node_dependency_tree_untracked
+    - path: .npm-cache
+      role: local_npm_cache_surface_untracked
+    - path: .pytest_cache
+      role: local_pytest_cache_untracked
+    - path: .qodo
+      role: local_vendor_tooling_workspace_untracked
+    - path: .ruff_cache
+      role: local_ruff_cache_untracked
+    - path: .scannerwork
+      role: local_sonar_workspace_untracked
+    - path: .sonarlint
+      role: local_sonarlint_state_untracked
+    - path: test-output
+      role: local_test_output_surface_untracked
+    - path: tmp
+      role: local_temp_workspace_untracked
+    - path: script-codex
+      role: local_legacy_codex_compatibility_root_untracked
+    - path: "~"
+      role: local_external_tool_mirror_untracked
+    - path: .venv
+      role: local_primary_virtualenv_untracked
+    - path: .venv-docs
+      role: local_docs_virtualenv_untracked
+    - path: .venv-win
+      role: local_windows_virtualenv_untracked
+    - path: .venv-win-corrupt
+      role: local_windows_virtualenv_recovery_untracked
+    - path: .windsurf
+      role: local_vendor_editor_state_untracked
+
+docs_generated_helper_surfaces:
+  approved_roots:
+    - path: docs/site
+      role: generated_local_publication_helper_surface
+      lifecycle: non_normative_local_build_output
+    - path: docs/exports
+      role: generated_docs_export_surface
+      lifecycle: non_normative_helper_export_surface
+
+blocked_cleanup_zones:
+  - path: docs/99-archive
+    class: archive_history
+    cleanup_policy: retain_for_traceability
+    cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+  - path: tests/fixtures
+    class: test_fixture_surface
+    cleanup_policy: retain_under_fixture_governance
+    cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+  - path: tests/fixtures/vcr
+    class: recorded_http_fixture_surface
+    cleanup_policy: retain_under_vcr_governance
+    cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+  - path: docs/reports
+    class: curated_repo_only_reports
+    cleanup_policy: curated_cleanup_only
+    cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+  - path: reports
+    class: generated_working_outputs
+    cleanup_policy: bounded_cleanup_only
+    cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md
+  - path: data
+    class: runtime_and_local_data_surface
+    cleanup_policy: separate_runtime_retention_procedure
+    cleanup_runbook: docs/05-operations/runbooks/retention-sensitive-cleanup.md

@@ -1,0 +1,34 @@
+%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% Title: Provider Registry Loading To Data Source Creation
+%% @version 1.0.0
+%% @date    2026-05-12
+%% @type    sequenceDiagram
+%% @level   System / Interaction
+%% RULES: RULES.md §2.2, §2.7, ADR-005, ADR-025
+sequenceDiagram
+    autonumber
+    participant CLI as CLI / composition entrypoint
+    participant Registry as ProviderRegistry
+    participant Store as provider store
+    participant Config as provider config
+    participant HTTP as create_adapter(...)
+    participant DS as create_data_source(...)
+    participant Result as provider-specific data source
+
+    CLI->>Registry: ensure_loaded()
+    Registry->>Store: load default registrations
+    Store-->>Registry: provider configs
+    CLI->>Registry: create_data_source(name,...)
+    Registry->>Registry: resolve_provider_registry(...)
+    Registry->>Config: get(name)
+    Config-->>Registry: ProviderConfig
+    Registry->>HTTP: create_adapter(name, http_client, logger, settings)
+    HTTP-->>Registry: adapter instance
+    Registry->>DS: build_data_source_creator(name)
+    DS-->>Registry: creator callable
+    Registry->>Result: creator(settings, pipeline_config,...)
+    Result-->>CLI: DataSourcePort
+
+    Note over Registry,Result: registry readiness and creation are separate seams, which keeps extension localized to composition.
+%% padding line for readability and stable render budget
+%% padding line for readability and stable render budget

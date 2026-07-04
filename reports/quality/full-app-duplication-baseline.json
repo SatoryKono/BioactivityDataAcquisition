@@ -1,0 +1,926 @@
+{
+  "summary": {
+    "snapshot_date": "2026-07-04",
+    "targets": 4,
+    "total_duplicate_clusters": 44,
+    "total_raw_duplicate_clusters": 44,
+    "total_excluded_duplicate_clusters": 0
+  },
+  "normalization": {
+    "exclude_module_patterns": []
+  },
+  "trend": {
+    "status": "no_prior_snapshot",
+    "snapshot_date": "2026-07-04"
+  },
+  "reduction_leverage_ranking": [
+    {
+      "target": "src/bioetl/infrastructure/adapters",
+      "duplicate_clusters": 41,
+      "dominant_actionability_category": "export_facade_or_package_barrel",
+      "dominant_actionability_cluster_count": 41,
+      "low_risk_cluster_count": 41,
+      "low_risk_cluster_share": 1.0,
+      "recommended_first_wave": false
+    },
+    {
+      "target": "src/bioetl/application/pipelines",
+      "duplicate_clusters": 3,
+      "dominant_actionability_category": "pipeline_transformer_contract_pattern",
+      "dominant_actionability_cluster_count": 3,
+      "low_risk_cluster_count": 0,
+      "low_risk_cluster_share": 0.0,
+      "recommended_first_wave": false
+    },
+    {
+      "target": "src/bioetl/composition/bootstrap",
+      "duplicate_clusters": 0,
+      "dominant_actionability_category": null,
+      "dominant_actionability_cluster_count": 0,
+      "low_risk_cluster_count": 0,
+      "low_risk_cluster_share": 0.0,
+      "recommended_first_wave": false
+    },
+    {
+      "target": "src/bioetl/interfaces/cli",
+      "duplicate_clusters": 0,
+      "dominant_actionability_category": "cli_command_contract_shell",
+      "dominant_actionability_cluster_count": 0,
+      "low_risk_cluster_count": 0,
+      "low_risk_cluster_share": 0.0,
+      "recommended_first_wave": false
+    }
+  ],
+  "first_wave": {
+    "status": "selected",
+    "target": "src/bioetl/infrastructure/adapters",
+    "duplicate_clusters": 41,
+    "dominant_actionability_category": "export_facade_or_package_barrel",
+    "selection_rule": "prefer low-risk actionability families with bounded cluster counts, then maximize duplicate reduction leverage"
+  },
+  "targets": [
+    {
+      "target": "src/bioetl/infrastructure/adapters",
+      "returncode": 8,
+      "duplicate_count": 41,
+      "raw_duplicate_count": 41,
+      "excluded_duplicate_count": 0,
+      "actionability": [
+        {
+          "category": "export_facade_or_package_barrel",
+          "duplicate_clusters": 41
+        }
+      ],
+      "top_pairs": [
+        {
+          "modules": [
+            "bioetl.infrastructure.adapters.openalex._filter_fetch_requests",
+            "bioetl.infrastructure.adapters.openalex.filter_fetch_adapter_mixin"
+          ],
+          "duplicate_clusters": 2
+        },
+        {
+          "modules": [
+            "bioetl.infrastructure.adapters.openalex.filter_fetch_adapter_mixin",
+            "bioetl.infrastructure.adapters.pubmed.adapter_filter_fetch_mixin"
+          ],
+          "duplicate_clusters": 2
+        },
+        {
+          "modules": [
+            "bioetl.infrastructure.adapters.chembl.client",
+            "bioetl.infrastructure.adapters.crossref.client"
+          ],
+          "duplicate_clusters": 1
+        },
+        {
+          "modules": [
+            "bioetl.infrastructure.adapters.chembl.client",
+            "bioetl.infrastructure.adapters.decorators.circuit_breaker"
+          ],
+          "duplicate_clusters": 1
+        },
+        {
+          "modules": [
+            "bioetl.infrastructure.adapters.chembl.client",
+            "bioetl.infrastructure.adapters.pubchem.client_model_mixin"
+          ],
+          "duplicate_clusters": 1
+        }
+      ],
+      "clusters": [
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.chembl.models_common",
+              "start_line": 112,
+              "end_line": 123
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.chembl.models_compound",
+              "start_line": 100,
+              "end_line": 109
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.chembl.client",
+              "start_line": 245,
+              "end_line": 254
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.pubchem.client_model_mixin",
+              "start_line": 88,
+              "end_line": 97
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.decorators.circuit_breaker",
+              "start_line": 168,
+              "end_line": 176
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.decorators.retry",
+              "start_line": 150,
+              "end_line": 159
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.pubmed._health",
+              "start_line": 43,
+              "end_line": 51
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.pubmed._state",
+              "start_line": 18,
+              "end_line": 26
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.uniprot._uniprot_model_annotations",
+              "start_line": 11,
+              "end_line": 19
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.uniprot.models",
+              "start_line": 46,
+              "end_line": 54
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.filterable_mixin",
+              "start_line": 196,
+              "end_line": 205
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.uniprot.client",
+              "start_line": 194,
+              "end_line": 201
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.chembl.client",
+              "start_line": 247,
+              "end_line": 254
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.pubmed.adapter",
+              "start_line": 156,
+              "end_line": 163
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.crossref.client",
+              "start_line": 84,
+              "end_line": 91
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.pubmed.adapter",
+              "start_line": 101,
+              "end_line": 108
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.crossref.client_builders",
+              "start_line": 170,
+              "end_line": 179
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.crossref.client_runtime_helpers",
+              "start_line": 104,
+              "end_line": 111
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.crossref.models",
+              "start_line": 35,
+              "end_line": 42
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.crossref.models_shared",
+              "start_line": 148,
+              "end_line": 155
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.crossref._doi_batch_processor",
+              "start_line": 42,
+              "end_line": 52
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.crossref._search_paginator",
+              "start_line": 38,
+              "end_line": 50
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.decorators._fetch_request_builder",
+              "start_line": 22,
+              "end_line": 29
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.decorators.circuit_breaker",
+              "start_line": 169,
+              "end_line": 176
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.openalex.client",
+              "start_line": 233,
+              "end_line": 240
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.pubmed.adapter",
+              "start_line": 228,
+              "end_line": 237
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.pubmed.adapter",
+              "start_line": 111,
+              "end_line": 122
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.semanticscholar.adapter",
+              "start_line": 118,
+              "end_line": 128
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.pubmed._filter_fetch_support",
+              "start_line": 153,
+              "end_line": 161
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.semanticscholar.fetch_adapter_mixin",
+              "start_line": 61,
+              "end_line": 69
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.filterable_mixin",
+              "start_line": 197,
+              "end_line": 205
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.pubmed.adapter_filter_fetch_mixin",
+              "start_line": 52,
+              "end_line": 82
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.filterable_mixin",
+              "start_line": 196,
+              "end_line": 202
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.uniprot.filtering_adapter_mixin",
+              "start_line": 159,
+              "end_line": 165
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.chembl.client",
+              "start_line": 248,
+              "end_line": 254
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.crossref.client",
+              "start_line": 192,
+              "end_line": 198
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.crossref.client",
+              "start_line": 85,
+              "end_line": 91
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.openalex.client",
+              "start_line": 102,
+              "end_line": 108
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.crossref.client",
+              "start_line": 172,
+              "end_line": 178
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.pubmed.adapter_filter_fetch_mixin",
+              "start_line": 84,
+              "end_line": 90
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.crossref.fetch_flow",
+              "start_line": 114,
+              "end_line": 120
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.pubmed._filter_fetch_support",
+              "start_line": 131,
+              "end_line": 137
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.decorators.circuit_breaker",
+              "start_line": 169,
+              "end_line": 175
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.pubmed.adapter_filter_fetch_mixin",
+              "start_line": 119,
+              "end_line": 125
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.openalex._filter_fetch_requests",
+              "start_line": 82,
+              "end_line": 99
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.openalex.filter_fetch_adapter_mixin",
+              "start_line": 126,
+              "end_line": 132
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.openalex._filter_fetch_requests",
+              "start_line": 100,
+              "end_line": 106
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.openalex.filter_fetch_adapter_mixin",
+              "start_line": 147,
+              "end_line": 153
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.openalex.filter_fetch_adapter_mixin",
+              "start_line": 125,
+              "end_line": 131
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.pubmed.adapter_filter_fetch_mixin",
+              "start_line": 83,
+              "end_line": 89
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.pubchem.client",
+              "start_line": 210,
+              "end_line": 223
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.pubmed._health",
+              "start_line": 93,
+              "end_line": 106
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.pubchem.client",
+              "start_line": 60,
+              "end_line": 68
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.semanticscholar.health_metadata_mixin",
+              "start_line": 105,
+              "end_line": 113
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.pubmed._filter_fetch_support",
+              "start_line": 153,
+              "end_line": 159
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.pubmed.adapter_filter_fetch_mixin",
+              "start_line": 149,
+              "end_line": 166
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.uniprot.client",
+              "start_line": 186,
+              "end_line": 193
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.uniprot.filtering_adapter_mixin",
+              "start_line": 80,
+              "end_line": 87
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.chembl.client",
+              "start_line": 248,
+              "end_line": 253
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.decorators.circuit_breaker",
+              "start_line": 169,
+              "end_line": 174
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.chembl.deduplication",
+              "start_line": 90,
+              "end_line": 95
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.chembl.fetch_multi_filter_mixin",
+              "start_line": 75,
+              "end_line": 80
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.chembl.models",
+              "start_line": 66,
+              "end_line": 71
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.chembl.models_common",
+              "start_line": 17,
+              "end_line": 22
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.crossref.client",
+              "start_line": 192,
+              "end_line": 197
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.decorators.retry",
+              "start_line": 151,
+              "end_line": 156
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.crossref.client",
+              "start_line": 172,
+              "end_line": 177
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.openalex.filter_fetch_adapter_mixin",
+              "start_line": 126,
+              "end_line": 131
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.crossref.fetch_flow",
+              "start_line": 114,
+              "end_line": 119
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.semanticscholar.fetch_adapter_mixin",
+              "start_line": 210,
+              "end_line": 215
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.decorators._data_source_delegation",
+              "start_line": 19,
+              "end_line": 24
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.openalex._filter_fetch_requests",
+              "start_line": 42,
+              "end_line": 58
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.decorators._fetch_request_builder",
+              "start_line": 22,
+              "end_line": 27
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.openalex.filter_fetch_adapter_mixin",
+              "start_line": 147,
+              "end_line": 152
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.openalex.filter_fetch_adapter_mixin",
+              "start_line": 74,
+              "end_line": 79
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.pubmed.adapter_filter_fetch_mixin",
+              "start_line": 51,
+              "end_line": 56
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.openalex._filter_fetch_requests",
+              "start_line": 100,
+              "end_line": 105
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.pubchem.client_model_mixin",
+              "start_line": 91,
+              "end_line": 96
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.openalex._filter_fetch_requests",
+              "start_line": 82,
+              "end_line": 87
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.pubmed.adapter_filter_fetch_mixin",
+              "start_line": 84,
+              "end_line": 89
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/infrastructure/adapters/uniprot/__init__.py",
+          "line": 1,
+          "actionability_category": "export_facade_or_package_barrel",
+          "modules": [
+            {
+              "module": "bioetl.infrastructure.adapters.pubmed.adapter",
+              "start_line": 157,
+              "end_line": 162
+            },
+            {
+              "module": "bioetl.infrastructure.adapters.pubmed.adapter_filter_fetch_mixin",
+              "start_line": 119,
+              "end_line": 124
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target": "src/bioetl/application/pipelines",
+      "returncode": 8,
+      "duplicate_count": 3,
+      "raw_duplicate_count": 3,
+      "excluded_duplicate_count": 0,
+      "actionability": [
+        {
+          "category": "pipeline_transformer_contract_pattern",
+          "duplicate_clusters": 3
+        }
+      ],
+      "top_pairs": [
+        {
+          "modules": [
+            "bioetl.application.pipelines.chembl._activity_transformer_maps",
+            "bioetl.application.pipelines.chembl.assay_parameters_transformer"
+          ],
+          "duplicate_clusters": 1
+        },
+        {
+          "modules": [
+            "bioetl.application.pipelines.chembl.base_chembl_transformer",
+            "bioetl.application.pipelines.common.publication_transformer_context"
+          ],
+          "duplicate_clusters": 1
+        },
+        {
+          "modules": [
+            "bioetl.application.pipelines.pubmed._block_definitions_analytics",
+            "bioetl.application.pipelines.pubmed.transformer"
+          ],
+          "duplicate_clusters": 1
+        }
+      ],
+      "clusters": [
+        {
+          "path": "src/bioetl/application/pipelines/uniprot/extractors/__init__.py",
+          "line": 1,
+          "actionability_category": "pipeline_transformer_contract_pattern",
+          "modules": [
+            {
+              "module": "bioetl.application.pipelines.chembl.base_chembl_transformer",
+              "start_line": 109,
+              "end_line": 120
+            },
+            {
+              "module": "bioetl.application.pipelines.common.publication_transformer_context",
+              "start_line": 178,
+              "end_line": 187
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/application/pipelines/uniprot/extractors/__init__.py",
+          "line": 1,
+          "actionability_category": "pipeline_transformer_contract_pattern",
+          "modules": [
+            {
+              "module": "bioetl.application.pipelines.chembl._activity_transformer_maps",
+              "start_line": 87,
+              "end_line": 95
+            },
+            {
+              "module": "bioetl.application.pipelines.chembl.assay_parameters_transformer",
+              "start_line": 35,
+              "end_line": 43
+            }
+          ]
+        },
+        {
+          "path": "src/bioetl/application/pipelines/uniprot/extractors/__init__.py",
+          "line": 1,
+          "actionability_category": "pipeline_transformer_contract_pattern",
+          "modules": [
+            {
+              "module": "bioetl.application.pipelines.pubmed._block_definitions_analytics",
+              "start_line": 48,
+              "end_line": 55
+            },
+            {
+              "module": "bioetl.application.pipelines.pubmed.transformer",
+              "start_line": 254,
+              "end_line": 261
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "target": "src/bioetl/composition/bootstrap",
+      "returncode": 0,
+      "duplicate_count": 0,
+      "raw_duplicate_count": 0,
+      "excluded_duplicate_count": 0,
+      "actionability": [],
+      "top_pairs": [],
+      "clusters": []
+    },
+    {
+      "target": "src/bioetl/interfaces/cli",
+      "returncode": 0,
+      "duplicate_count": 0,
+      "raw_duplicate_count": 0,
+      "excluded_duplicate_count": 0,
+      "actionability": [
+        {
+          "category": "cli_command_contract_shell",
+          "duplicate_clusters": 0
+        }
+      ],
+      "top_pairs": [],
+      "clusters": []
+    }
+  ]
+}

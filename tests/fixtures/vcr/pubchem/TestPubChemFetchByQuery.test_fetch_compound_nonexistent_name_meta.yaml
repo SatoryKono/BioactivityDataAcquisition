@@ -4,5 +4,5 @@ cassette_rel_path: tests/fixtures/vcr/pubchem/TestPubChemFetchByQuery.test_fetch
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
 cassette_sha256: ec1db0ea064e816e8a7778e96c4c2dc38796abd7e31cbcfa1826649feddfbb50
-recorded_at: '2026-04-28'
+recorded_at: '2026-07-03'
 staleness_ready: true

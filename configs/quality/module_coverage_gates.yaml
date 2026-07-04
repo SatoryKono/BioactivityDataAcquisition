@@ -1,0 +1,122 @@
+schema_version: 1
+linked_issue: '#5161'
+enforcement:
+  # Phase B (current): block coverage regressions vs committed inventory; tier gaps warn only.
+  default_mode: block-regression
+  tier_violation_mode: block
+  ranked_target_tier_violation_mode: block
+branch_coverage:
+  # Branch measurement is enabled in pyproject.toml, but hard enforcement stays
+  # advisory until the low-tail branches are burned down enough to avoid
+  # converting known technical debt into a broad CI blocker.
+  measurement: enabled
+  policy: advisory
+  decision_date: '2026-06-17'
+  source: reports/coverage/coverage.xml#branch-rate
+  promotion_criteria:
+    - branch-rate remains at or above 85% for three consecutive coverage-verify runs
+    - no module is unmeasured or uncovered in module-coverage-inventory
+    - top-ranked low-tail modules have focused branch/error-path owner tests
+coverage_tail:
+  ranked_targets:
+    - rank: 1
+      path: src/bioetl/application/core/wiring/__init__.py
+      risk: composition_wiring_lazy_export_facade
+      target_test_type: focused_unit_lazy_facade_owner_paths
+      owner_tests:
+        - tests/unit/application/core/test_wiring_api_facades.py
+      status: focused_owner_tests_added
+    - rank: 2
+      path: src/bioetl/application/services/control_plane/workflow/execution_preparation_incremental.py
+      risk: incremental_workflow_replay_offset_determinism
+      target_test_type: focused_unit_control_plane_replay_paths
+      owner_tests:
+        - tests/unit/application/services/control_plane/workflow/test_execution_preparation_incremental.py
+      status: focused_owner_tests_added
+    - rank: 3
+      path: src/bioetl/composition/factories/pipeline/_factory_method_control_plane.py
+      risk: pipeline_factory_control_plane_replay_references
+      target_test_type: focused_unit_control_plane_kwarg_paths
+      owner_tests:
+        - tests/unit/composition/factories/pipeline/test_factory_method_helpers.py
+      status: focused_owner_tests_added
+    - rank: 4
+      path: src/bioetl/composition/factories/services/__init__.py
+      risk: services_factory_lazy_export_facade
+      target_test_type: focused_unit_lazy_facade_owner_paths
+      owner_tests:
+        - tests/unit/composition/factories/services/test_services_package_facade.py
+      status: focused_owner_tests_added
+    - rank: 5
+      path: src/bioetl/domain/__init__.py
+      risk: domain_lazy_public_api_facade
+      target_test_type: focused_unit_lazy_facade_owner_paths
+      owner_tests:
+        - tests/unit/domain/test_public_api_facade.py
+      status: focused_owner_tests_added
+    - rank: 6
+      path: src/bioetl/infrastructure/observability/tracing.py
+      risk: tracing_exporter_selection_and_env_priority
+      target_test_type: focused_unit_tracing_branch_paths
+      owner_tests:
+        - tests/unit/infrastructure/observability/test_tracing.py
+      status: focused_owner_tests_added
+aggregate_residual_ratchets:
+  linked_issue: '#5559'
+  mode: fail-fast-current-inventory
+  live_source: reports/quality/module-coverage-inventory.json#summary
+  historical_baseline:
+    linked_issue: '#5553'
+    unmeasured_module_count: 36
+    uncovered_module_count: 1611
+  unmeasured_module_count:
+    max_count: 0
+  uncovered_module_count:
+    max_count: 0
+replay_sensitive_coverage_floors:
+  linked_issue: '#5844'
+  mode: fail-fast
+  authoritative_artifact: reports/quality/module-coverage-inventory.json
+  modules:
+    - module: bioetl.application.services.control_plane.workflow.execution_preparation_incremental
+      path: src/bioetl/application/services/control_plane/workflow/execution_preparation_incremental.py
+      min_coverage_percent: 99.0
+      owner_tests:
+        - tests/unit/application/services/control_plane/workflow/test_execution_preparation_incremental.py
+    - module: bioetl.composition.bootstrap.runtime.runtime_basics
+      path: src/bioetl/composition/bootstrap/runtime/runtime_basics.py
+      min_coverage_percent: 75.0
+      owner_tests:
+        - tests/unit/composition/bootstrap/runtime/test_runtime_basics.py
+    - module: bioetl.infrastructure.observability.tracing
+      path: src/bioetl/infrastructure/observability/tracing.py
+      min_coverage_percent: 94.0
+      owner_tests:
+        - tests/unit/infrastructure/observability/test_tracing.py
+regression:
+  fail_on_decrease: true
+  # Ignore sub-point noise from coverage XML rounding across platforms.
+  min_delta_points: 0.01
+tiers:
+  global:
+    line_min_percent: 85
+    path_prefixes: []
+  default_module:
+    line_min_percent: 85
+    path_prefixes:
+      - src/bioetl/
+  domain:
+    line_min_percent: 90
+    path_prefixes:
+      - src/bioetl/domain/
+  aggregates_and_contracts:
+    line_min_percent: 95
+    path_prefixes:
+      - src/bioetl/domain/aggregates/
+      - src/bioetl/domain/schemas/
+      - src/bioetl/domain/contracts/
+tier_resolution_order:
+  - aggregates_and_contracts
+  - domain
+  - default_module
+exemptions: []

@@ -1,0 +1,70 @@
+name: Qodo Merge
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+  pull_request_review_comment:
+    types: [created]
+  issue_comment:
+    types: [created]
+  push:
+    branches:
+      - main
+      - master
+      - develop
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  pr_agent_job:
+    name: Qodo Merge PR Agent
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.draft == false) ||
+      github.event_name == 'pull_request_review_comment' ||
+      github.event_name == 'issue_comment' ||
+      github.event_name == 'push'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Qodo Merge (PR Agent)
+        uses: docker://codiumai/pr-agent:latest
+        env:
+          # GitHub token — provided automatically, no secrets needed
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          # AI provider — set one of the following in repo Secrets:
+          #   OPENAI.KEY       → for OpenAI (gpt-4o, gpt-4-turbo, etc.)
+          #   ANTHROPIC.API_KEY → for Claude
+          #   GEMINI.API_KEY    → for Gemini
+          OPENAI__KEY: ${{ secrets.OPENAI_API_KEY }}
+          # ANTHROPIC__API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # GEMINI__API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+          # Use Qodo Merge Cloud (free tier) — comment out OPENAI__KEY above
+          # and uncomment this to use Qodo's hosted model without your own API key:
+          # CONFIG__QODO_TOKEN: ${{ secrets.QODO_TOKEN }}
+
+          # Trigger commands based on event type
+          CONFIG__GIT_PROVIDER: github
+        with:
+          entrypoint: /bin/bash
+          args: >
+            -c "
+            if [ '${{ github.event_name }}' = 'push' ]; then
+              python -m pr_agent.cli --pr_url='https://github.com/${{ github.repository }}/commit/${{ github.sha }}' push_trigger
+            elif [ '${{ github.event_name }}' = 'pull_request' ]; then
+              python -m pr_agent.cli --pr_url='https://github.com/${{ github.repository }}/pull/${{ github.event.number }}' run
+            elif [ '${{ github.event_name }}' = 'issue_comment' ] || [ '${{ github.event_name }}' = 'pull_request_review_comment' ]; then
+              python -m pr_agent.cli --issue_url='${{ github.event.comment.html_url }}' run
+            fi
+            "

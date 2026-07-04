@@ -1,0 +1,120 @@
+%% Title: YAML Configuration and Contract Rollout Resolution Chain
+%% Covers: unified config path, contract rollout policy, and planner/runtime version routing
+%% Rank: 21 (Score 7.38) — Hierarchical config merge underpins every pipeline
+%% Updated: 2026-04-02
+
+%% @version 1.2.0
+%% @date    2026-04-02
+%% @type    flowchart
+%% @level   Mixed (System / Component / Class)
+%% @nodes   23
+%% @png-scale 6
+%% @png-dpi   600
+
+%%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%% @uniform width=496 height=128 max_title_len=49 max_desc_lines=5
+flowchart TD
+%% keep-orphan: SOURCE_YAML_CFG, LEGACY_NORMALIZE
+    subgraph YAML_FILES["YAML File Hierarchy"]
+        direction TB
+        BASE["configs/base/pipeline.yaml<br/>(global defaults)"]
+        PROVIDER_BASE["configs/providers/{provider}.yaml<br/>(provider defaults)"]
+        PIPELINE["configs/entities/{provider}/{entity}.yaml<br/>(unified entity config)"]
+        SOURCE["configs/providers/{provider}.yaml<br/>(source config + legacy-flat fallback)"]
+    end
+
+    DQ_HIER["DQ hierarchy<br/>base + provider + entity + inline"]:::size-md
+    FILTER_HIER["Filter hierarchy<br/>base + provider + entity + inline"]:::size-md
+
+    subgraph LOADERS["Infrastructure Config Loaders"]
+        direction TB
+        CONFIG_LOADER["config package<br/>load_pipeline_config()"]
+        BASE_CONFIG_LOADER["BaseConfigLoader<br/>shared merge helpers"]:::size-md
+        DQ_CONFIG_LOADER["DQConfigLoader<br/>hierarchical DQ merge"]:::size-md
+        FILTER_CONFIG_LOADER["FilterConfigLoader<br/>hierarchical filter merge"]:::size-md
+        YAML_LOADER["pipeline_config_api.py<br/>base + provider + entity + source merge"]:::size-md
+        LEGACY_NORMALIZE["normalize_pipeline_config_payload()<br/>compat new + legacy shapes"]
+    end
+
+    subgraph DOMAIN_CONFIG["Domain Config Objects (Frozen)"]
+        direction TB
+        PIPELINE_CONFIG["PipelineConfig<br/>provider/entity/table/dq/filter + batch"]
+        TABLE_CONFIG["TableConfig<br/>primary_keys + silver/gold tables"]
+        DQ_CONFIG["DQConfig"]:::size-sm
+        FILTER_CONFIG["Input/Silver/Gold filters"]:::size-sm
+    end
+
+    subgraph CONTRACTS["Contract / rollout policy"]
+        direction TB
+        CONTRACT_BLOCK["contracts block<br/>contract_ref + active_version + rollout"]:::size-md
+        CONTRACT_MODEL["PipelineContractPolicy<br/>typed Pydantic model"]:::size-md
+        ROLLOUT_VO["ContractRolloutPolicy<br/>pure runtime value object"]:::size-md
+        ROUTING["Version-aware routing<br/>read_order + write_versions +<br/>shadow_versions + affects_hash"]:::size-md
+        PLANNER["ContractMigrationService +<br/>maintenance plan CLI<br/>transitions + required_actions"]:::size-md
+    end
+
+    subgraph VALIDATION["Pydantic Validation Layer"]
+        direction TB
+        PIPELINE_YAML_CFG["PipelineYamlConfig<br/>Pydantic model"]
+        SOURCE_YAML_CFG["SourceYamlConfig<br/>Pydantic model"]
+        AUX_FILES["DQConfigFile + FilterConfigFile<br/>Pydantic models"]:::size-md
+    end
+
+    %% Pipeline config resolution
+    BASE ==>|"layer 1"| YAML_LOADER
+    PROVIDER_BASE ==>|"layer 2"| YAML_LOADER
+    PIPELINE ==>|"layer 3"| YAML_LOADER
+    SOURCE -->|"source merge"| YAML_LOADER
+    YAML_LOADER ==>|"merge layers"| LEGACY_NORMALIZE
+    LEGACY_NORMALIZE ==>|"validate normalized payload"| PIPELINE_YAML_CFG
+    PIPELINE_YAML_CFG ==>|"to_domain()"| PIPELINE_CONFIG
+    PIPELINE_CONFIG -->|"contains"| TABLE_CONFIG
+    PIPELINE_YAML_CFG -->|"contracts section"| CONTRACT_BLOCK
+    CONTRACT_BLOCK --> CONTRACT_MODEL -->|"to_contract_rollout_policy()"| ROLLOUT_VO
+    CONTRACT_MODEL --> ROUTING
+    ROLLOUT_VO --> ROUTING
+    ROUTING -->|"version-aware schema/table resolvers"| TABLE_CONFIG
+    ROLLOUT_VO --> PLANNER
+    PIPELINE_CONFIG --> PLANNER
+
+    %% DQ resolution
+    DQ_HIER ==>|"layers 1-4"| DQ_CONFIG_LOADER
+    DQ_CONFIG_LOADER -->|"validate"| AUX_FILES
+    AUX_FILES -->|"to_domain()"| DQ_CONFIG
+
+    %% Filter resolution
+    FILTER_HIER ==>|"layers 1-4"| FILTER_CONFIG_LOADER
+    FILTER_CONFIG_LOADER -->|"validate"| AUX_FILES
+    AUX_FILES -->|"to_domain()"| FILTER_CONFIG
+
+    %% Inheritance
+    BASE_CONFIG_LOADER -.->|"base class"| DQ_CONFIG_LOADER
+    BASE_CONFIG_LOADER -.->|"base class"| FILTER_CONFIG_LOADER
+    CONFIG_LOADER -->|"delegates"| YAML_LOADER
+    CONFIG_LOADER -->|"resolve DQ"| DQ_CONFIG_LOADER
+
+    %% Convention-based auto-resolution (ADR-029)
+    PIPELINE -.->|"auto-resolve source"| SOURCE
+    PIPELINE -.->|"merge hierarchy"| PIPELINE_CONFIG
+    SOURCE -.->|"legacy-flat provider payload still accepted"| SOURCE_YAML_CFG
+
+    %% Merge rules
+    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:2px
+    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:2px
+    classDef service fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
+    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:2px
+    classDef process fill:#eff6ff,stroke:#2563eb,stroke-width:2px
+
+    class BASE,PROVIDER_BASE,PIPELINE,SOURCE,DQ_HIER,FILTER_HIER storage
+    class CONFIG_LOADER,BASE_CONFIG_LOADER,DQ_CONFIG_LOADER,FILTER_CONFIG_LOADER,YAML_LOADER adapter
+    class PIPELINE_CONFIG,TABLE_CONFIG,DQ_CONFIG,FILTER_CONFIG,ROLLOUT_VO port
+    class PIPELINE_YAML_CFG,SOURCE_YAML_CFG,AUX_FILES,LEGACY_NORMALIZE,CONTRACT_BLOCK,CONTRACT_MODEL,ROUTING,PLANNER process
+    class DQ_CONFIG_LOADER,FILTER_CONFIG_LOADER,CONFIG_LOADER service
+
+    style YAML_FILES fill:#f1f5f9,stroke:#64748b
+    style DQ_HIER fill:#f0fdf4,stroke:#16a34a
+    style FILTER_HIER fill:#eff6ff,stroke:#2563eb
+    style LOADERS fill:#fff7ed,stroke:#f59e0b
+    style DOMAIN_CONFIG fill:#fefce8,stroke:#ca8a04
+    style CONTRACTS fill:#eff6ff,stroke:#2563eb
+    style VALIDATION fill:#f5f3ff,stroke:#7c3aed

@@ -18,6 +18,9 @@ from bioetl.domain.medallion import SilverWriteMode
 from bioetl.infrastructure.storage.delta.resilience import (
     build_default_silver_merge_policy,
 )
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 from tests.benchmarks.conftest import calculate_payload_size_mb
 from tests.helpers.deterministic_ids import (
@@ -116,14 +119,16 @@ def _create_silver_writer(base_path: Path) -> SilverWriter:
     return SilverWriter(
         base_path=base_path,
         logger=FakeLogger(),
-        merge_resilience_policy=replace(
-            build_default_silver_merge_policy(),
-            execution_timeout_seconds=DELTA_WRITE_TIMEOUT_SECONDS,
-            # Match the reviewed Windows E2E safety path: plain Delta writes can
-            # hang inside the in-process Rust binding on Windows-backed local
-            # filesystems, so benchmarks should use the subprocess seam rather
-            # than measuring event-loop starvation.
-            plain_write_process_isolation=_WINDOWS_PLATFORM,
+        runtime_request=SilverWriterRuntimeServicesRequest(
+            merge_resilience_policy=replace(
+                build_default_silver_merge_policy(),
+                execution_timeout_seconds=DELTA_WRITE_TIMEOUT_SECONDS,
+                # Match the reviewed Windows E2E safety path: plain Delta writes can
+                # hang inside the in-process Rust binding on Windows-backed local
+                # filesystems, so benchmarks should use the subprocess seam rather
+                # than measuring event-loop starvation.
+                plain_write_process_isolation=_WINDOWS_PLATFORM,
+            ),
         ),
     )
 

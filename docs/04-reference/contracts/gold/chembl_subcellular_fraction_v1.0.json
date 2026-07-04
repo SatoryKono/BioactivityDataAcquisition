@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$version": "1.0.0",
+  "title": "ChEMBLSubcellularFractionGoldSchema Contract",
+  "description": "Gold layer data contract for chembl_subcellular_fraction. Auto-generated from Pandera schema ChEMBLSubcellularFractionGoldSchema.",
+  "type": "object",
+  "properties": {
+    "_dq_warn": {
+      "type": "boolean",
+      "nullable": false,
+      "description": "Soft data-quality warning flag."
+    },
+    "_dq_error": {
+      "type": "boolean",
+      "nullable": false,
+      "description": "Hard data-quality error flag."
+    },
+    "_index": {
+      "type": "integer",
+      "nullable": false,
+      "description": ""
+    },
+    "entity_id": {
+      "type": "string",
+      "nullable": false,
+      "description": ""
+    },
+    "content_hash": {
+      "type": "string",
+      "nullable": false,
+      "description": ""
+    },
+    "subcellular_fraction": {
+      "type": "string",
+      "nullable": false,
+      "description": "Subcellular fraction name"
+    },
+    "assay_count": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Number of assays using this fraction"
+    },
+    "example_assay_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "nullable": true,
+      "description": "Example assay ChEMBL ID"
+    }
+  },
+  "required": [
+    "_dq_error",
+    "_dq_warn",
+    "_index",
+    "content_hash",
+    "entity_id",
+    "subcellular_fraction"
+  ],
+  "normalization_profile": {
+    "ref": "chembl.subcellular_fraction",
+    "version": "1.0.0",
+    "hash": "1174393c1b8922198ba3b82ead03853ef4d220d00f287a8e559106a4568563f8"
+  }
+}

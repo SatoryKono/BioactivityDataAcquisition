@@ -1,0 +1,17 @@
+apiVersion: 1
+
+providers:
+  - name: 'BioETL'
+    orgId: 1
+    folder: 'BioETL'
+    folderUid: 'bioetl'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: false
+    options:
+      # Абсолютный путь к папке с JSON-дашбордами.
+      # Замените на актуальный путь к grafana/dashboards/ в вашей системе.
+      # Пример Windows: C:/Users/<user>/projects/BioactivityDataAcquisition/grafana/dashboards
+      # Пример Linux:   /home/<user>/projects/BioactivityDataAcquisition/grafana/dashboards
+      path: /var/lib/grafana/dashboards

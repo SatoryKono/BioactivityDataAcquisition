@@ -1,0 +1,1449 @@
+{
+  "build_scope": "workflow",
+  "chunk_count": 1539,
+  "focus_query": "Audit project file structure and cleanup plan",
+  "generator_version": 1,
+  "source_count": 160,
+  "sources": [
+    {
+      "content_hash": "87f05962c8d4578931a1805790478dee316e01e4a6c1763f9c673c16218ac68b",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 5,
+      "source_path": "src/bioetl/infrastructure/audit/_file_audit_readers.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "9f318c07bd175f3bf3566148bb6da944a36bdb917ad5f47ebb8b17e73ab7fa01",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 5,
+      "source_path": "src/bioetl/infrastructure/audit/file_audit.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "e02f85589db70565a195b912e4d05b276ed11cdcfb21d3b8b56c208496b0e0d6",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 16,
+      "source_path": "src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_payloads.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "d2e064f747665b04c3e0d23f837ce135186e62ef18e58c3e16654027ad4c52da",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 19,
+      "source_path": "src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_planning.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "3fcf18634d8f70d682db00de243ba480e715c4e2da5c5bef96f185b6072fb8b4",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 8,
+      "source_path": "src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_reasons.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "82672a05086592a13686cfe1035b93ac8d9526cd6e5d0866f8f7dde1a8e9ff5e",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 2,
+      "source_path": "src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_store.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "ae8d5b16c6296d246378558508b6f3f59757d11b5cc4261e959810641a0e8273",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 2,
+      "source_path": "src/bioetl/infrastructure/control_plane/file_artifact_lifecycle_types.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "df341ff3face0c3f7faef00b3bfc972acf8d3a1adbf4b978a707f1adb5f1e881",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 6,
+      "source_path": "src/bioetl/infrastructure/control_plane/file_contract_registry_store.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "c1ac7dd8b42817d6b402219aff356c63d31037797abe823b9a3d97dc750eba94",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 9,
+      "source_path": "src/bioetl/infrastructure/control_plane/file_effective_config_artifact_store.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "cf027ee0edaf51905269d75508524104c0aa5d4cbe32070ac951e5f2b538d0ef",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 3,
+      "source_path": "src/bioetl/infrastructure/control_plane/file_historical_replay_closure_store.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "60ce19cab618dccf119f4c03f1ad4315405eecff17b78a19b043f598e4393a7a",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 3,
+      "source_path": "src/bioetl/infrastructure/control_plane/file_historical_replay_universe_store.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "3bf657fc0ea7e3ab96865ce10f1ca20700bc779fd5ddddb40033dc09e590f5d9",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 8,
+      "source_path": "src/bioetl/infrastructure/control_plane/file_lineage_store.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "c5bc3873fc46699d3f585e9ab121ea672a159d5784cf7c22b1818351e4deab5a",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 12,
+      "source_path": "src/bioetl/infrastructure/control_plane/file_run_ledger_store.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "8ca52e95ff599de5aa1563c962d400eb81bf002f3256708e6a798d38634a3814",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 5,
+      "source_path": "src/bioetl/infrastructure/control_plane/file_run_manifest_store.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "677174a6f4849d3a07ebe6a2b67ab0061d5c4d46256dee28714215476b3ff308",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 2,
+      "source_path": "src/bioetl/infrastructure/control_plane/file_workflow_execution_state_store.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "379b195b555d4bb6204db7e62266c69060e6db0022eb9170b77504631280aef2",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 3,
+      "source_path": "src/bioetl/infrastructure/control_plane/file_workflow_ledger_store.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "2a759e6d221e8dc821b973d05c617392430a95986af483b0bfa86627af518267",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 2,
+      "source_path": "src/bioetl/infrastructure/control_plane/file_workflow_manifest_store.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "ff309d9c4320fdebf7a72ea6cb79ac0684b7b5ae78bf8d50019f0f8225c7f110",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 1,
+      "source_path": "src/bioetl/infrastructure/audit/__init__.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "1058351eea2f58d9b0fcaeff2a58c312adca70f6c7471d282b3763ee30d75182",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 3,
+      "source_path": "src/bioetl/infrastructure/storage/audit_normalization.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "125555bbe7f7797a98c30f752f50bbd495b3e843409f9afdf33ceef00d9b21fd",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 4,
+      "source_path": "src/bioetl/infrastructure/storage/silver/audit_operations.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "3fccb7a6ac7f40d588e47d7ef7f492872a84827fc4f20bd313db96072e30a1c0",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 6,
+      "source_path": "src/bioetl/interfaces/cli/commands/cleanup.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "df94af078abf2adda4711658c154c82262a88fb17170c86cc156a09edacc2abe",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 11,
+      "source_path": "src/bioetl/interfaces/cli/commands/domains/maintenance/plan.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "187cd9ea1d268eb7d0be5da4b339b71776964de1cd82ad64418c4615842b2321",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 17,
+      "source_path": "docs/00-project/ai/agents/policy/AGENT_NAMING_POLICY_AND_RENAME_PLAN_2026-03-08.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "3e845bcc9027735b312d65907aa2d7fe46fae59688297402771affcb4351daad",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 2,
+      "source_path": "docs/00-project/ai/prompts/docs_ai_audit_planning_codex_prompt.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "62bdd695760f317740300346ea605c2de50e3ff2b8102614361e4753e582f8d9",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 12,
+      "source_path": "docs/00-project/ai/skills/_references/local/documentation-audit/references/audit-checklist.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "b97838d743bc787f959a36dfdc9d3dcc5aa142183b514ed5ef2ba05881634e65",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 12,
+      "source_path": "docs/00-project/ai/skills/global/documentation-audit/references/audit-checklist.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "62bdd695760f317740300346ea605c2de50e3ff2b8102614361e4753e582f8d9",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 12,
+      "source_path": "docs/00-project/ai/skills/local/documentation-audit/references/audit-checklist.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "c0168d42c1cd1a9677d44f57fa5e96dddf09c8f8faa0ff5c6cfb4f299c875888",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 42,
+      "source_path": "docs/03-guides/file-path-audit-report.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "71b68b1d8fd6566a81ebdde1c73af199f82fa3167036e641d88658aa3d8ed64d",
+      "domain": "operations",
+      "owner": "BioETL Team",
+      "repo_zone": "unclassified",
+      "section_count": 22,
+      "source_path": "scripts/engineering/diagnostics/audit_structure.py",
+      "source_type": "script"
+    },
+    {
+      "content_hash": "ab779537f55fb45908186d6baf0dffb6d8d4ad6e787a38bf0d1ddda50e38b822",
+      "domain": "operations",
+      "owner": "BioETL Team",
+      "repo_zone": "unclassified",
+      "section_count": 37,
+      "source_path": "scripts/engineering/diagnostics/cleanup_project.py",
+      "source_type": "script"
+    },
+    {
+      "content_hash": "dc0bc092c032dd67d391d122cdff20a9682e26bbb53162279e86e1a29eab7fe6",
+      "domain": "operations",
+      "owner": "BioETL Team",
+      "repo_zone": "unclassified",
+      "section_count": 1,
+      "source_path": "scripts/engineering/repo/cleanup_branch_candidates.sh",
+      "source_type": "script"
+    },
+    {
+      "content_hash": "510295e444521dc7f5e91933ee8b018b096c7569b84caf3da7bb0846a287b91e",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 6,
+      "source_path": "src/bioetl/application/core/lifecycle/cleanup_service.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "1974ee846a06140969c8eada7dcdbbe52e5269f924bcb7de5c42f0f7d24ce3a5",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 2,
+      "source_path": "src/bioetl/application/core/postrun/cleanup_orchestrator.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "d4b27f70fec7aa13d95f9f6679bad2b35c2f1cf5eab3c506e0015525a4182786",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 3,
+      "source_path": "src/bioetl/application/services/audit_inspection_service.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "6da08bfbbc4e206d4bb86c7fd9a31d96b8af80ab22a0d8b087d0e6bccc4ec1d1",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 4,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_projection.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "d2fea8098aa4a8ec4808a54616770ba6a238b09404a5e4a967aec60de4c12cea",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 1,
+      "source_path": "src/bioetl/composition/factories/storage/audit.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "55ddc89215ffef9d88a0dbedfd689991f34990068f78f864a5510fcc364df266",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 6,
+      "source_path": "src/bioetl/domain/control_plane/_reproducibility_policy_profiles.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "ddfea38c41e495fcac07d8c5cece720b752cb8c139b62f6c0861c873754c25d3",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 16,
+      "source_path": "src/bioetl/domain/control_plane/_reproducibility_profile_builders.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "3449d6a0a2eb0a80d27b66d02353179e5f85f08713f873ca9ad64082da95249c",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 2,
+      "source_path": "src/bioetl/domain/control_plane/_reproducibility_profile_types.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "985c71725470a1167765460dd607364939669143bb95977cf93cfa555f3b031b",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 10,
+      "source_path": "src/bioetl/domain/control_plane/reproducibility_profiles.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "8f5ff5112cf7e41f6d823fd600e295c8114874fc865493bf79d9e82aa8eba751",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 6,
+      "source_path": "src/bioetl/domain/normalization/profiles/_standard_profile_builder.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "3d32c284ffefc19b1152b14d7af9287acff0bcfd2f792137e38b2494711cf7a9",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 18,
+      "source_path": "src/bioetl/domain/normalization/profiles/_standard_profile_rule_components.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "39afe8323d6c58f0b527f547d32124fde52a4336a87c8410d2351a147cac8190",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 2,
+      "source_path": "src/bioetl/domain/normalization/profiles/_standard_profile_rule_families.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "db93bb6dd6cf369267a84e10ceb015a58c7eb1053ab2398a9f9fa3ab5d410d7b",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 6,
+      "source_path": "src/bioetl/domain/normalization/profiles/_standard_profile_spec.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "a9150e7729540dde8e3ac7da744f75cdd9577f7fac2897ec4039d70f24c8a186",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 7,
+      "source_path": "src/bioetl/domain/normalization/structured_payload_policies.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "1ce87636bcb3ff37a7e8b2577e66a0b26261b212cdbb62de27fba86c56b3358f",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 5,
+      "source_path": "src/bioetl/domain/ports/audit.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "cf694a99c3edad80bea4336198b5425ed2aa0e934caabc266a647eec8388b354",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 6,
+      "source_path": "src/bioetl/infrastructure/adapters/_error_handling_support.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "f38d3390edbce4afb2af3a312749e8faf54a8a964c7f19fd7498077182dadefe",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 2,
+      "source_path": "src/bioetl/infrastructure/adapters/error_handling.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "07120efb2d2c93885b2f08c3e69392be8314682a0b5019fefe2736cea4f52973",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 7,
+      "source_path": "src/bioetl/infrastructure/compat/pandera_compat.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "2a1f8420650c3857d8b0b89045dd855110d46feaac87c06a4ebbf02688e5b82f",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 6,
+      "source_path": "src/bioetl/infrastructure/config/enum_file_loader.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "41445d2a58c3adf5dc053aecfe3b6c73ccac8432cb506d606785ec6aeedc38af",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 1,
+      "source_path": "src/bioetl/infrastructure/control_plane/__init__.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "ee2ed591fb2b7dbd0c7c0dfcbc134f0d41006474268a3c3e333df8b8e8a5f86a",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 2,
+      "source_path": "src/bioetl/infrastructure/control_plane/_read_metrics.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "35e0dd41a859d84e20c5f2eab3f7065f75c3195041db6c08cacd57d92c899d8a",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 4,
+      "source_path": "src/bioetl/infrastructure/control_plane/artifact_byte_comparison.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "29c670956ef502d9a6d12247fb61e93aa41b281c5158b6722a354915ea82184f",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 1,
+      "source_path": "src/bioetl/infrastructure/storage/_audit_normalization.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "1006cf7d505e25e62a0e8e816d993f6033bb3153a9afb4e74a293fd19df47659",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 2,
+      "source_path": "src/bioetl/infrastructure/storage/bronze/read_cleanup_mixin.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "673b4252444c71849f414bc5c73ee051acb9b1333a38062caa2e4cdf4b383eaa",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 4,
+      "source_path": "src/bioetl/infrastructure/storage/gold/metadata_audit.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "3e52a4b19258c6c0f773910587a5c8b69348231cbc46cf2cddc8d081c934a3a2",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 4,
+      "source_path": "src/bioetl/infrastructure/storage/gold/read_cleanup_mixin.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "5bd648fff83e46e4cd5b686ba14fd1389e8eec404569baa0128f5ec4e1696bc1",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 5,
+      "source_path": "src/bioetl/infrastructure/storage/silver/operations/metadata_audit_operations.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "ed87b7e493692c8323ea0299a121a90b49d9161521b1efdcd0c18b51e09c6ec5",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 5,
+      "source_path": "src/bioetl/infrastructure/validation/pandera_validator.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "76cf9c32245c6d2c9310995dc5b1246f4ff2ab8cf782a0af353c16dcfe10e5ff",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 4,
+      "source_path": "src/bioetl/interfaces/cli/commands/domains/maintenance/control_plane_lifecycle.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "71033f0cc3cdaf85eedb1a2f294bbe0f59fef30f26bdfb90fed027e897bb5a1e",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 45,
+      "source_path": "docs/00-project/ai/agents/agents/py-audit-bot.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "a5fbf28f5abcb6368781c181b7e72e9451c55b0ad65ff5409fe25eb2869e666e",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 29,
+      "source_path": "docs/00-project/ai/agents/agents/py-plan-bot.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "6a56a85e3fae284b6947be7ec0c384ec278567e6da302e64f23a6c71630883b6",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 5,
+      "source_path": "docs/00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "47ab3fb3219e38439a713ddaf5caf05a2d32d8b9dfcd1a3a6cc41802cf5c7f3e",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 31,
+      "source_path": "docs/00-project/ai/memory/memory-py-audit-bot.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "c5a6136afff8d4ad6d74c1f399dfcf41463dad91ec32eced74bfb675b1accb30",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 34,
+      "source_path": "docs/00-project/ai/memory/memory-py-plan-bot.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "c5d09e611c7bc8d8feb90c3a33bb293f442b5ea3cb468270d4b3abc75683702f",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 3,
+      "source_path": "docs/00-project/ai/prompts/architecture_review_and_refactoring_assessment.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "529c3d69095d6ca1ecd631ed00f0bcee299397100acabb23a762de2c602ce2ab",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 1,
+      "source_path": "docs/00-project/ai/prompts/dashbold_audit_4_workflow.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "f41e04d853d3075a4a2ff7982782336397aa1fe22ca31c951f7147a008adac9d",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 46,
+      "source_path": "docs/00-project/ai/prompts/documentation_diagrams_audit.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "6a0d518bc26f3cbafbb90fcab19db66dadf52634730099ca780349e484f40204",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 1,
+      "source_path": "docs/00-project/ai/prompts/scripts_inventory_consolidation_cleanup_prompt.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "439d42f96cdef587a499ee40f0c809168cad7eee3cec2e0ce780146c6ab8b0b8",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 13,
+      "source_path": "docs/00-project/ai/skills/_references/local/documentation-audit/references/report-template.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "df373656d26258b05bd6fc4a14a09ae256b39a9020f41bb627547999ddcbd9bc",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 6,
+      "source_path": "docs/00-project/ai/skills/_references/local/py-test-swarm/references/telemetry-and-flaky-db.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "fea61c0a6238c01c231ec381a183cb622aac34fb257341c7d627e5ab2bcf7941",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 21,
+      "source_path": "docs/00-project/ai/skills/global/documentation-audit/SKILL.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "109351693e4e0b9c769a8634c5b915c43877a9abec7d15cc08bb71768dbcea1c",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 13,
+      "source_path": "docs/00-project/ai/skills/global/documentation-audit/references/report-template.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "45b05e29786a8dddc643849b0ac6f3fbcb2acd191499b22124ef8889625438f5",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 6,
+      "source_path": "docs/00-project/ai/skills/global/py-audit-bot/SKILL.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "844965b9a3471e5431392f6d63a2e3b080ef51690b5b5bae1ad4770713234788",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 6,
+      "source_path": "docs/00-project/ai/skills/global/py-plan-bot/SKILL.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "108359583bf40268660b658655727634b9e6fa54f50070015e41f8f2eaa802fc",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 22,
+      "source_path": "docs/00-project/ai/skills/local/documentation-audit/SKILL.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "439d42f96cdef587a499ee40f0c809168cad7eee3cec2e0ce780146c6ab8b0b8",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 13,
+      "source_path": "docs/00-project/ai/skills/local/documentation-audit/references/report-template.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "a80d604591ca698250b1f005f2c00e6a0c79f65a90629df9421730c81f5b9fb2",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 10,
+      "source_path": "docs/00-project/ai/skills/local/documentation-cascade-audit/SKILL.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "7bc5230af6afa310f6bd89d0b2e7f26b3286ef654654c614c2bad34fe2534833",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 6,
+      "source_path": "docs/00-project/ai/skills/local/py-audit-bot/SKILL.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "cc9468de81e865a6698614c010d8230a941adcd51c759f9dec4f2da0fe6577bc",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 6,
+      "source_path": "docs/00-project/ai/skills/local/py-plan-bot/SKILL.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "df373656d26258b05bd6fc4a14a09ae256b39a9020f41bb627547999ddcbd9bc",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 6,
+      "source_path": "docs/00-project/ai/skills/local/py-test-swarm/references/telemetry-and-flaky-db.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "64f5aa5b6dc0c61dabf155432218d2c59ebaf3bd8f2977444f7345a7d06f4aa7",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 37,
+      "source_path": "docs/00-project/governance/03-file-policy.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "bde973b83a6bfb819b500446139070b9f797bffc2bc5beab87f17b82cc193384",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 62,
+      "source_path": "docs/03-guides/cleanup-policy.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "7267c9b41073d4c992c4bd10dd3293d3515b5d42255a425296999a5373cb9132",
+      "domain": "project",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_project_docs",
+      "section_count": 32,
+      "source_path": "docs/03-guides/cleanup.md",
+      "source_type": "doc"
+    },
+    {
+      "content_hash": "fd4165643c0e649ca8d1feb13bfaa86544b9a89f279a6fdeee5cc503badaf2ec",
+      "domain": "operations",
+      "owner": "BioETL Team",
+      "repo_zone": "unclassified",
+      "section_count": 27,
+      "source_path": "scripts/engineering/diagnostics/cleanup_consolidate.py",
+      "source_type": "script"
+    },
+    {
+      "content_hash": "3ff6130a6a5920efbe4b3105d68acebb227afbec9149923c1a42cf69f61d4cff",
+      "domain": "operations",
+      "owner": "BioETL Team",
+      "repo_zone": "unclassified",
+      "section_count": 45,
+      "source_path": "scripts/engineering/qa/audit_pipeline_semantics.py",
+      "source_type": "script"
+    },
+    {
+      "content_hash": "aac3e76cd6d1ab2f1b966ac05f6dad4b1f1c191458cbdf52a671c970fc951ec0",
+      "domain": "operations",
+      "owner": "BioETL Team",
+      "repo_zone": "unclassified",
+      "section_count": 39,
+      "source_path": "scripts/engineering/repo/audit_root_cleanliness.py",
+      "source_type": "script"
+    },
+    {
+      "content_hash": "41aafce9bbe83daea1b586622926009cc5835fb1e426d009e6051c0b05974023",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 7,
+      "source_path": "src/bioetl/application/composite/coordinator_planning.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "2c0d92b7613065724bfe52440901bc8bee5859d8c4b69b901cd331645cdea04e",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 3,
+      "source_path": "src/bioetl/application/composite/join_planner.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "ffb574a1d349b804ddd362e6173089a68468e6ba2ba7a380d62a24e13c8116c7",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 2,
+      "source_path": "src/bioetl/application/composite/join_planner_delegation_mixin.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "188364a9de4d7129948caca91c55b5877031ade168be0f91be39319bd3916779",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 18,
+      "source_path": "src/bioetl/application/composite/join_planner_helpers.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "b5a2b6129600228c6c7d00e1f56a389f87d6a0f8f39c685e0c3474d0b417e8ed",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 13,
+      "source_path": "src/bioetl/application/composite/runner_pkg/runner_control_plane_lifecycle.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "ba7fe3fed3c5561d19ab5384e8f95d4e06afdaf2af5457a1bff04430395dd346",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 4,
+      "source_path": "src/bioetl/application/composite/runner_pkg/runner_control_plane_mixin.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "2f26b4c0fbe5a3c1652730bbeda4030458e272c19ce276da25a61889457baa8a",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 5,
+      "source_path": "src/bioetl/application/composite/runner_pkg/runner_control_plane_phase_completion.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "3e0ce474713a074573208fe1f37e7d8df7018d1ec50a2da729632465529ddef0",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 4,
+      "source_path": "src/bioetl/application/composite/runner_pkg/runner_control_plane_phase_followup.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "bb0bb9096b53f3528dd970992166c16601a41bf64153098b0b93c4e09ed180c2",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 1,
+      "source_path": "src/bioetl/application/composite/runner_pkg/runner_control_plane_support.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "9ed621e7bd161e1d13a7e3fa4ca8c80aac229a8f84fea1a60b4fc7fd87f6d468",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 3,
+      "source_path": "src/bioetl/application/core/lifecycle/_cleanup_support.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "9198be73e691430166c0ee46fd3d44de474456c056fe494dab9e225a1bb2738a",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 8,
+      "source_path": "src/bioetl/application/pipelines/uniprot/extractors/_comment_structured_facets.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "5963d28b58da3224f2bed4d238c8610bed9d05384ae088671fa9775f1ce0ac94",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 7,
+      "source_path": "src/bioetl/application/pipelines/uniprot/extractors/_crossref_structured.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "9615362a14fdda4c9b37776345a519ed3cfd95a9e010f9957f2dd4429d0690c9",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 3,
+      "source_path": "src/bioetl/application/services/bronze_cleanup_service.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "de30248099bd4c92c300b28536c66ec34c997b42344f2b9de1c5132372eac55f",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 3,
+      "source_path": "src/bioetl/application/services/control_plane/__init__.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "8c48143514538acbb3918adcd7a6aa2f3c6b5a79c2b4b4561395f79aaf00a81d",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 27,
+      "source_path": "src/bioetl/application/services/control_plane/_effective_config_support.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "63e36c35ea1c3c9dec09ee9630c6ec82fa68c95f250a8ce1600a2c60484e4159",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 1,
+      "source_path": "src/bioetl/application/services/control_plane/_historical_replay_certification.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "0464da12d2eab596a3a8406c8620f1c83f6db29f493703ffdf781163174b514e",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 7,
+      "source_path": "src/bioetl/application/services/control_plane/_historical_replay_certification_support.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "5fee6f0b53aa9a29808597dc7716e91f5e2e0d377b0c6701bfeddc54bfa136d2",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 8,
+      "source_path": "src/bioetl/application/services/control_plane/_run_ledger_diagnostic_support.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "cb56fa1b291cee7dc4b260d0785b09ce7c5c2a5b33661c471b743ef70e32f97e",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 8,
+      "source_path": "src/bioetl/application/services/control_plane/_run_ledger_entry_support.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "9c5c8d47722007ee1bd5aaf9429c7af43ea90e8416e576fcecbd7de04b137a76",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 7,
+      "source_path": "src/bioetl/application/services/control_plane/_run_ledger_rich_events.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "1804c9801c88b36c4bb218b464cd9e6bd48a67d3732fef37e256bce23022765c",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 2,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_artifact_payloads.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "997fe9b8ae96b7731de09b95a126e3e43e9b9831eb97bdc77bf029ae44b38b47",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 7,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_artifact_support.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "8424bd7b3678b7f2f4d34142ad1613c53deb1998ac1dcacc032bf38bd3caafdc",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 16,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_base.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "0208ede5d33ad8fff30f60d3a2589e9042b70633dd8688b5a28fd9f2de33be0d",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 6,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_base_helpers.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "43a79ab841e4dd3630557893053dc933775aff5afd2473a760ca86e49fc35ec2",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 3,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_composite.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "d09b9b370f41d1e2f5de78190f74166ee1cb68c8d62cd1236023d5e8455c47a6",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 8,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_finalization.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "538c6d2c94720f7b6e9e2bb64ca9bb5e4f0ba90bc7ded23ff33279039e7d00bf",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 10,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_helpers.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "3489c3c7671e7257313e7575e125e7016524735ecd96731577e6d8206f8449c6",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 4,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_identity.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "777abf689d9bdd651ed015cd3f9b8ebf8a320bae1dd515aebb2ab43d9662445c",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 12,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_ledger.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "048e5d9733f6ba6eb1901c32654b21d30d952f7c4b2b0fd94a54a68514c21fd5",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 9,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_main_helpers.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "dcd3a384745a71c0653588b9b94914aa52c920d412a702e9629b9a2f90bd19e0",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 13,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_persistence.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "45268bdf3e5884ab518e2b8263554a3445dc5aecd0e54d3e9f995a706496b638",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 4,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "211ea8b61e57cc32d6597a0a910bd1a3b5c00f9c814cec2507f507bcbe20d687",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 27,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_helpers.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "aae4e4eee508e8890d9f75e584fb05f8455e9efda3351299785994e23e274591",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 9,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_replay_state.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "b26ab3105f2d00f9dac04905ef3aaca677dc5df48a79a9e4a0ceda97a0ea708c",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 10,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_snapshot_support.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "d4bd3c9c9ec3c62520f2ddc1ad25c28e04994540194dfc761e0545dbf7dcedb6",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 8,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_source_refs.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "068d418300a0d6d2c7275c35b309d26eae21ec104596eca48e7b63202f1b2188",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 9,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_diagnostics_summary.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "fd44dfe9c6408f325f604394b965531c40f8892dd4ef87c2374e993743457923",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 5,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_identity_graph_builder.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "ffcfe456d6ce75014e5c3d92886ec398d7cbc1bdc768b21e91bccb9edbdc026c",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 3,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_inspection_mixins.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "2d528a00c02ced831c513e88add6e498bd23fcd3da62184a341042043719ddeb",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 10,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_replay_taxonomy.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "87a3b8c934366da42e983cb4c3c926e51ba3b907dc5044b5f93b2c1fa1e374f1",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 6,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_service_mixins.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "f72f4d86e43fd964ce3469c000cd31730231648903be8b6183371d8a6ef0118c",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 6,
+      "source_path": "src/bioetl/application/services/control_plane/_run_manifest_snapshot_payloads.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "206e339b0e9ab2fe39a6e3232a0b1a686d9ebd694faa2350eff1f5669b0aa070",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 4,
+      "source_path": "src/bioetl/application/services/control_plane/effective_config_service.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "0a5a478f81ce9c2df71238fe6920576339e19b2c699046368b2fb98ede48ef87",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 20,
+      "source_path": "src/bioetl/application/services/control_plane/forensic_diff_service.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "febdcd0a28cad9a7dfb0ab87afc1dd79b8bb1d9133198ae18702406e5440a2f2",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 3,
+      "source_path": "src/bioetl/application/services/control_plane/historical_replay_certification_service.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "2549e121a79790e7d4da1e1b2b30e46e15b7dc3f827f65651d131555bdd7907e",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 8,
+      "source_path": "src/bioetl/application/services/control_plane/historical_replay_closure_claims.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "62c3b907193507d17244e3c4d2876410c7a1d204321ef55e34ef9d4ef7064cba",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 3,
+      "source_path": "src/bioetl/application/services/control_plane/historical_replay_closure_models.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "cea1a14279f98ba4c07e65cf095caec30089d4e4500aea8a114f8772de217f1c",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 9,
+      "source_path": "src/bioetl/application/services/control_plane/historical_replay_closure_policy.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "e265553ff546deaf61c82642b43e37cf1c9f96dbcc188ec6fa10758b5dda76ef",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 2,
+      "source_path": "src/bioetl/application/services/control_plane/historical_replay_closure_service.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "324af77747f28822977dd724632eb3294d8f6c700b20b1620ea7f41dfe76fb5e",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 6,
+      "source_path": "src/bioetl/application/services/control_plane/historical_replay_corpus_models.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "cd17e9f4c3f6b69b97fe235f59935b19009711218f0e28c0c3b3c8ed496e88aa",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 5,
+      "source_path": "src/bioetl/application/services/control_plane/historical_replay_corpus_policy.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "e776fef79a493c943f98c114255d92176a329010408c896be6f942975038d7e5",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 2,
+      "source_path": "src/bioetl/application/services/control_plane/historical_replay_corpus_service.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "006d6e8046d25c02442f39b2393247135f85e84a11986f3997f7f5947cdd64e4",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 5,
+      "source_path": "src/bioetl/application/services/control_plane/historical_replay_universe_policy.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "be3bb0cbd5ffeec85f36a102194fc5a8caee4e1cf986cdacbaccd740da3aeab6",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 6,
+      "source_path": "src/bioetl/application/services/control_plane/historical_replay_universe_service.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "44261c58a77b42793ff2b10e9229b802056fc9b442fedda04074ed8cb1cff8c0",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 14,
+      "source_path": "src/bioetl/application/services/control_plane/replay_bundle_descriptor_service.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "833ce61bc7bf8aad3e9eb76657a11afdd332b6f81638a9064e967117ea0fa1cf",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 2,
+      "source_path": "src/bioetl/application/services/control_plane/run_ledger_service.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "3ea46cbe2076545c9cb596db66ce266c358f26bf8c5e44b4dbe5a6501ab3c3f6",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 11,
+      "source_path": "src/bioetl/application/services/control_plane/run_manifest_diagnostics.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "5001be6d55815de133d2b83595af2abd02d732fcbd31388a540a49c6e6d62e62",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 9,
+      "source_path": "src/bioetl/application/services/control_plane/run_manifest_inspection_helpers.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "6c295461ff364563f5d68bc2bf2b86f2c11a981b960deabb90daab92510c1bf3",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 6,
+      "source_path": "src/bioetl/application/services/control_plane/run_manifest_inspection_models.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "1d613b270341cda8add470547c91082c8f1fd91527ba10345fde1c3d9e48dd06",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 2,
+      "source_path": "src/bioetl/application/services/control_plane/run_manifest_inspection_service.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "5075d40d7c9a70d5c3f326c063629a7d1d983de6691e5042edb2fe21c6259d75",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 11,
+      "source_path": "src/bioetl/application/services/control_plane/run_manifest_inspection_verification.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "d1e90e0203365519455de8cb1029968d3e3f264b0aab3f6cce8467c3fd171a45",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 2,
+      "source_path": "src/bioetl/application/services/control_plane/run_manifest_models.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "528c0f7d09b5127d8529652a28d30697e03275f0c87f685fda1fc46a8bed77dc",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 1,
+      "source_path": "src/bioetl/application/services/control_plane/run_manifest_replay_taxonomy.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "e210f90e4966164074b538e88e5a3333301814364d5044d9bb87f93c11ad8e08",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 14,
+      "source_path": "src/bioetl/application/services/control_plane/run_manifest_reproducibility_score_cards.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "7472632e7312e1a6bb8bfc198f11161a41770f09c153e096ed707f5fdde991dd",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 2,
+      "source_path": "src/bioetl/application/services/control_plane/run_manifest_reproducibility_scoring.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "31a78e585385b74d0ebc705d7cd1c57d097fe562033f432935ba905d29f3dbc6",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 4,
+      "source_path": "src/bioetl/application/services/control_plane/run_manifest_reproducibility_scoring_support.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "0b7ba621ca448602a7a425685f6655c116d26152155d7012ed5540e97b254130",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 7,
+      "source_path": "src/bioetl/application/services/control_plane/run_manifest_service.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "adbb044cada5f9d323ec26b38fee8b94d5e628ff52b314e6122bcdde6f066215",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 16,
+      "source_path": "src/bioetl/application/services/control_plane/workflow_execution_preparation.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "7c0c10dcccc2c1c5306d8fd16f72169710ded9d63c9bf4f639f5dcb69b04f324",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 20,
+      "source_path": "src/bioetl/application/services/control_plane/workflow_execution_recording.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "0433b8c9ccab2e2a7298bfc312c6ad23441530e8e73e1c9b72397a0b413b8747",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 7,
+      "source_path": "src/bioetl/application/services/control_plane/workflow_execution_service.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "6ec7df59c9ebc1e9438862446a4c8af02e8172f2cdd10c47822e62e2f87dcb2c",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 3,
+      "source_path": "src/bioetl/application/services/control_plane/workflow_inspection_service.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "94365d5a9ba48f264cffff4008b7dd781bc3bb3f3020cccee35a5f7ec1ff3c72",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 3,
+      "source_path": "src/bioetl/application/services/control_plane/workflow_ledger_service.py",
+      "source_type": "code"
+    },
+    {
+      "content_hash": "194c1c73af7245acd68bd0dd2004cd79edf990c502b11cb3c90dfc5e40f6b6e1",
+      "domain": "runtime",
+      "owner": "BioETL Team",
+      "repo_zone": "canonical_runtime",
+      "section_count": 2,
+      "source_path": "src/bioetl/application/services/control_plane/workflow_manifest_models.py",
+      "source_type": "code"
+    }
+  ]
+}

@@ -12,6 +12,10 @@ from tests.helpers.deterministic_ids import (
 
 import pytest
 
+from bioetl.infrastructure.storage.silver.runtime_helpers import (
+    SilverWriterRuntimeServicesRequest,
+)
+
 pytestmark = pytest.mark.unit
 
 TEST_ROOT = synthetic_test_root("bioetl-silver-writer-core")
@@ -39,7 +43,9 @@ class TestSilverWriterInit:
         writer = SilverWriter(
             base_path=SILVER_ROOT,
             logger=noop_logger,
-            csv_exporter=mock_exporter,
+            runtime_request=SilverWriterRuntimeServicesRequest(
+                csv_exporter=mock_exporter,
+            ),
         )
         assert writer.csv_exporter is mock_exporter
 

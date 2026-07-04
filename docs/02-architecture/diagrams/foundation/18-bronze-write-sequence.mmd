@@ -1,0 +1,82 @@
+%% Title: Bronze Write Sequence (JSONL + zstd)
+%% Covers: RULES.md §2.1 (Bronze Layer), §2.2 (Append-Only), application/core batch processing
+%% Updated: 2026-03-24
+%% Components: BatchProcessingService, BronzeWriter, prepare_bronze_write, zstd stream write, metadata/audit side effects
+
+%% @version 1.1.0
+%% @date    2026-03-24
+%% @type    sequenceDiagram
+%% @level   Mixed (System / Component / Class)
+%% @nodes   7
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
+%% @uniform sequence width=176 max_title_len=18
+sequenceDiagram
+    autonumber
+    participant Processing as BatchProcessingService
+    participant Writer as BronzeWriter
+    participant Prepare as prepare_bronze_write()
+    participant Compressor as zstd + atomic file write
+    participant Storage as Local FS
+    participant Metadata as Metadata/Audit side effects
+    participant Obs as Tracing + Metrics
+
+    Note over Processing,Writer: Phase 1: Bronze stage entry
+
+    Processing->>Writer: write_bronze(records, batch_id, ingestion_ts, source_metadata)
+    activate Writer
+    Writer->>Obs: start span "write_bronze"<br/>increment bronze_write_attempts_total
+
+    Note over Writer,Prepare: Phase 2: Normalize request
+
+    Writer->>Prepare: _prepare_bronze_write(request)
+    activate Prepare
+    Note right of Prepare: Validate names and UTC timestamps<br/>Optionally validate JSON records<br/>Build relative path + metadata
+    Prepare-->>Writer: BronzeWritePrepared
+    deactivate Prepare
+
+    Note over Writer,Storage: Phase 3: Stream-compress and persist
+
+    Writer->>Compressor: _write_bronze_data_and_sidecar(prepared)
+    activate Compressor
+    Compressor->>Storage: write temp .jsonl.zst
+    Storage-->>Compressor: temp file path
+    Compressor->>Compressor: stream zstd chunks
+    Compressor->>Storage: atomic rename to final batch path
+    Storage-->>Compressor: file persisted
+
+    opt save_json=True
+        Compressor->>Storage: write JSONL debug copy
+        Storage-->>Compressor: JSON copy persisted
+    end
+
+    Compressor-->>Writer: record_count + sizes
+    deactivate Compressor
+
+    Note over Writer,Metadata: Phase 4: Post-write side effects
+
+    Writer->>Metadata: _run_bronze_post_write_actions(...)
+    activate Metadata
+    Metadata->>Storage: checksum / stat / metadata path resolution
+    Metadata->>Metadata: build BronzeWriteResult
+
+    opt audit enabled
+        Metadata->>Metadata: log bronze audit entry
+    end
+
+    opt metadata enabled
+        Metadata->>Storage: write bronze metadata sidecar
+    end
+
+    Metadata-->>Writer: BronzeWriteResult
+    deactivate Metadata
+
+    Note over Writer,Obs: Phase 5: Final telemetry
+
+    Writer->>Obs: observe bronze_write_total_duration_seconds
+    Writer-->>Processing: BronzeWriteResult
+    deactivate Writer
+
+    rect rgb(255, 240, 245)
+        Note over Writer,Storage: Failure semantics
+        Note right of Writer: Temp file is removed on write failure.<br/>No lock validation happens inside BronzeWriter.<br/>Atomic rename prevents partial final files.
+    end
