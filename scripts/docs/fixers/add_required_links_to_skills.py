@@ -101,17 +101,22 @@ def add_links_to_skill_file(skill_file: Path, required_links: list[tuple[str, st
 
             rel_path = calculate_relative_path(skill_dir, target)
 
-            # Check if link already exists (by exact path or by link name)
+            # Check if link already exists (by exact path)
             link_exists = False
             for line in section_content.split('\n'):
-                if rel_path in line or link_name in line:
+                if rel_path in line:
                     link_exists = True
-                    # If link exists but path is wrong, replace it
-                    if rel_path not in line:
+                    break
+
+            # If link doesn't exist with correct path, check if it exists with wrong path
+            if not link_exists:
+                for line in section_content.split('\n'):
+                    if link_name in line:
                         # Replace the line with correct path
                         new_line = f"- {description}: `{rel_path}`"
                         content = content.replace(line, new_line)
-                    break
+                        link_exists = True
+                        break
 
             if not link_exists:
                 # Add the link
