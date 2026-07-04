@@ -36,7 +36,7 @@ dashboard JSON, queries, navigation, or operator-facing UX.
 
 ## Source Of Truth
 
-- Root runtime contract: `../../../../../AGENTS.md`
+- Root runtime contract: `../../../../../../AGENTS.md`
 - Project rules: `../../../../RULES.md`
 - Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
 - Accepted ADRs in `../../../../../02-architecture/decisions/`

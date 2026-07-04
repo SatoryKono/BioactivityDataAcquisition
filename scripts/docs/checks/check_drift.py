@@ -1638,6 +1638,7 @@ def _required_docs_mirror_skill_tokens(
         _relative_token(skill_dir, project_root / AGENTS_DOC_TOKEN),
         _relative_token(skill_dir, project_root / RULES_DOC_TOKEN),
         _relative_token(skill_dir, project_root / REQUIREMENTS_DOC_TOKEN),
+        _relative_token(skill_dir, project_root / ADR_DIR_DOC_TOKEN),
     )
 
 
