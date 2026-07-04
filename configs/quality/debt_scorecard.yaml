@@ -511,7 +511,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 49
-      total_loc: 5989
+      total_loc: 5987
       files_ge_250_loc: 0
       helper_function_ratio: 0.302
       max_internal_fan_in: 3
@@ -666,7 +666,7 @@ supporting_scripts_governance:
   inventory_source: configs/quality/scripts_inventory_manifest.json
   metrics:
     zero_reference_supporting_script_count:
-      current_count: 47
+      current_count: 46
       max_count: 47
       owner: '@bioetl-platform'
       linked_issue: '#5845'

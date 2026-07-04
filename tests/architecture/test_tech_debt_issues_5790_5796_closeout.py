@@ -147,7 +147,7 @@ def test_closeout_artifact_is_complete_and_budget_safe_for_issue_pack_5790_5796(
         == by_target["src/bioetl/application/pipelines"]["duplicate_count"]
     )
     assert closeout["metrics"]["config_surface_duplicate_clusters"]["current"] == 21
-    assert closeout["metrics"]["zero_reference_supporting_scripts"]["count"] == 50
+    assert closeout["metrics"]["zero_reference_supporting_scripts"]["count"] == 47
 
     for outcome in closeout["outcomes"].values():
         for relative_path in outcome["evidence"]:

@@ -436,8 +436,8 @@ rf_009_closeout:
   - tracing_emission_observability
   live_metrics:
     refined_assertless_tests: 0
-    duplicate_test_names: 2
-    duplicate_test_name_occurrences: 4
+    duplicate_test_names: 1
+    duplicate_test_name_occurrences: 2
     compatibility_test_files: 0
     markerless_test_functions: 0
     uuid4_call_sites: 0
@@ -624,12 +624,10 @@ assertless_triage:
     - tests/unit/application/core/
     - tests/unit/infrastructure/control_plane/
 duplicate_name_triage:
-  total_duplicate_names: 2
-  duplicate_occurrences: 4
+  total_duplicate_names: 1
+  duplicate_occurrences: 2
   top_generic_names:
-    - name: test_mark_committed_emits_batch_written_event
-      count: 2
-    - name: test_mark_failed_emits_batch_failed_event
+    - name: test_issue_5671_governance_artifact_references_are_backed_by_live_evidence
       count: 2
   zero_enforcement:
     issue_set:

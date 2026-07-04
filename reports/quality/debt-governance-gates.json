@@ -28,13 +28,13 @@
       "status": "pass"
     },
     {
-      "current": "79afa49ac165b40dcd2c9cf615fc46f078726b31ceb6496fe0f95a6b194e046a",
+      "current": "93fa7356c5415c4e1c428d6e4628261fb9989c2a175ae209fb401199c2c15c99",
       "limit": "79afa49ac165b40dcd2c9cf615fc46f078726b31ceb6496fe0f95a6b194e046a",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
       "source_artifact": "reports/quality/module-coverage-inventory.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": {
@@ -352,13 +352,13 @@
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": 2,
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
       "remediation": "Regenerate stale quality artifacts with their canonical QA commands.",
       "source_artifact": "reports/quality/*.json",
-      "status": "pass"
+      "status": "fail"
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
@@ -368,22 +368,25 @@
     "architecture_quality_scorecard": false,
     "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
-    "module_coverage_inventory": false,
-    "remote_main_baseline": false
+    "module_coverage_inventory": true,
+    "remote_main_baseline": true
   },
   "status_counts": {
-    "fail": 0,
-    "pass": 38,
+    "fail": 2,
+    "pass": 36,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 8.57,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 0,
-    "failing_gates": [],
+    "fail_count": 2,
+    "failing_gates": [
+      "module_coverage_source_tree_hash_current",
+      "generated_artifact_drift"
+    ],
     "gate_count": 38,
-    "pass_count": 38,
-    "release_gate_status": "passing",
+    "pass_count": 36,
+    "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []
   }

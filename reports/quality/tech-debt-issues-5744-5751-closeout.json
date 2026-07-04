@@ -85,7 +85,7 @@
   "ratchets": {
     "adapter_duplicate_clusters": {
       "opening": 55,
-      "current": 42,
+      "current": 41,
       "max": 44
     },
     "pipeline_duplicate_clusters": {
@@ -151,7 +151,7 @@
     },
     "5745": {
       "opening_adapter_duplicate_clusters": 55,
-      "adapter_duplicate_clusters": 42,
+      "adapter_duplicate_clusters": 41,
       "shared_error_bundle": "COMMON_ADAPTER_FETCH_RESILIENCE_ERRORS"
     },
     "5746": {
