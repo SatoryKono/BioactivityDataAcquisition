@@ -32,12 +32,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as a shared markdown parsing helper imported by docs checks and docs KPI reporting; keep it non-active unless it is promoted to a standalone docs command surface."
     },
-    "scripts/docs/fixers/add_agents_link_to_skills.py": {
-      "owner": "@bioetl-docs",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded manual migration helper for historical local skill AGENTS.md references; promote it into the documented docs fixer catalog or retire it once local skill mirrors no longer require this backfill."
-    },
     "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",

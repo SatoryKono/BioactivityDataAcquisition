@@ -331,7 +331,7 @@ Research complete, ready for final report
 ## Source Of Truth
 
 - Normative index: `../../../../NORMATIVE_SOURCES.md`
-- Root runtime contract: `../../../../../AGENTS.md`
+- Root runtime contract: `../../../../../../AGENTS.md`
 - Project rules: `../../../../RULES.md`
 - Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
 - Accepted ADRs in `../../../../../02-architecture/decisions/`

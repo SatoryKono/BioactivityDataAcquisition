@@ -97,6 +97,11 @@ If this model changes, update the affected docs in the same change set.
 
 - Keep trace search behavior explicit.
 - Prefer minimal, stable search expressions before introducing richer filters.
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
+- Root runtime contract: `../../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs: `../../../../../02-architecture/decisions`
 
 ## Source Of Truth
 

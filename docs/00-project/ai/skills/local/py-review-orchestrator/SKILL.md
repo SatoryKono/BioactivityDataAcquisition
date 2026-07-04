@@ -15,7 +15,7 @@ Run the role-specific workflow as defined in the py-review-orchestrator profile.
 
 ## Source Of Truth
 
-- Root runtime contract: `../../../../../AGENTS.md`
+- Root runtime contract: `../../../../../../AGENTS.md`
 - Project rules: `../../../../RULES.md`
 - Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
 - Accepted ADRs in `../../../../../02-architecture/decisions/`

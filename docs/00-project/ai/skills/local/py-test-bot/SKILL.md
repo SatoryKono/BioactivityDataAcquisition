@@ -15,7 +15,7 @@ Run the role-specific workflow as defined in the py-test-bot profile.
 
 ## Source Of Truth
 
-- Root runtime contract: `../../../../../AGENTS.md`
+- Root runtime contract: `../../../../../../AGENTS.md`
 - Project rules: `../../../../RULES.md`
 - Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
 - Accepted ADRs in `../../../../../02-architecture/decisions/`

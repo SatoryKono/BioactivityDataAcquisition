@@ -19,7 +19,7 @@ This skill creates a complete Context Ledger workspace from a project brief.
 ## Source Of Truth
 
 - Normative index: `../../../../NORMATIVE_SOURCES.md`
-- Root runtime contract: `../../../../../AGENTS.md`
+- Root runtime contract: `../../../../../../AGENTS.md`
 - Project rules: `../../../../RULES.md`
 - Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
 - Accepted ADRs in `../../../../../02-architecture/decisions/`

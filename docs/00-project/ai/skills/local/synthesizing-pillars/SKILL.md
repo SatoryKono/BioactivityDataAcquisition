@@ -19,7 +19,7 @@ This skill transforms raw evidence objects into structured insights for a single
 ## Source Of Truth
 
 - Normative index: `../../../../NORMATIVE_SOURCES.md`
-- Root runtime contract: `../../../../../AGENTS.md`
+- Root runtime contract: `../../../../../../AGENTS.md`
 - Project rules: `../../../../RULES.md`
 - Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
 - Accepted ADRs in `../../../../../02-architecture/decisions/`
