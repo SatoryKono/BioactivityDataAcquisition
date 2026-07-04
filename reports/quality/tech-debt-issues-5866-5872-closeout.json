@@ -89,13 +89,13 @@
   ],
   "metrics": {
     "full_app_total_duplicate_clusters": {
-      "current": 45,
+      "current": 44,
       "max": 45,
       "opening": 57,
       "source": "reports/quality/full-app-duplication-baseline.json"
     },
     "adapter_duplicate_clusters": {
-      "current": 42,
+      "current": 41,
       "max": 42,
       "opening": 48,
       "source": "reports/quality/full-app-duplication-baseline.json"
@@ -128,7 +128,7 @@
       "source": "reports/quality/module-coverage-inventory.json"
     },
     "zero_reference_supporting_scripts": {
-      "current": 47,
+      "current": 46,
       "max": 47,
       "entries_without_owner_metadata": 0,
       "source": "configs/quality/scripts_inventory_manifest.json"
@@ -146,12 +146,12 @@
     },
     "5867": {
       "status": "closeable",
-      "outcome": "Adapter duplicate clusters decreased from 48 to 44 via canonical fetch/resilience template delegation and decorator request builders.",
+      "outcome": "Adapter duplicate clusters decreased from 48 to 41 via canonical fetch/resilience template delegation and decorator request builders.",
       "debt_outcome": "improved"
     },
     "5868": {
       "status": "closeable",
-      "outcome": "Pipeline duplicate clusters decreased from 9 to 5 via shared transformer init builders and narrowed lazy export surfaces.",
+      "outcome": "Pipeline duplicate clusters decreased from 9 to 3 via shared transformer init builders and narrowed lazy export surfaces.",
       "debt_outcome": "improved"
     },
     "5869": {

@@ -167,7 +167,7 @@ def test_issue_5815_complexity_and_constructor_gates_are_blocking_and_reviewable
         ROOT / "src" / "bioetl",
         loaded_waivers,
         today,
-        182,
+        183,
     )
 
     assert registry["linked_issue"] == "#5815"

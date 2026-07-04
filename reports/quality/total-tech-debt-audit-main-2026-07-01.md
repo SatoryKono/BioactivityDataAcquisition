@@ -23,7 +23,7 @@ Refresh reason: #5752 - Correct stale claims and align with current governance b
 
 || Area | Finding | Evidence |
 || --- | --- | --- |
-|| Architecture scorecard | Integral score is `8.56`; budget growth is disallowed. | `reports/quality/architecture-quality-scorecard.json` |
+|| Architecture scorecard | Integral score is `8.57`; budget growth is disallowed. | `reports/quality/architecture-quality-scorecard.json` |
 || Layering | Reported layer violations are `0`. | `reports/quality/architecture-quality-scorecard.json` |
 || Compatibility burden | Retained entrypoints `12`, public export facades `4`, twin pairs `0`. | `reports/quality/compatibility-importer-census.json` |
 || Compatibility transition debt | `transition_debt` is empty; scorecard transition count is zero. | `configs/quality/compatibility_facade_inventory.yaml` |
@@ -35,7 +35,7 @@ Refresh reason: #5752 - Correct stale claims and align with current governance b
 || Contract coverage | Gold-enabled coverage is 27/27; missing count `0`. | `reports/quality/contract-coverage-matrix.json` |
 || Silver/Gold parity | Overall status `pass`; failing scenarios `[]`. | `reports/quality/silver-gold-filter-parity-report.json` |
 || VCR inventory | 198 VCR cassettes, 198 metadata sidecars, 0 review-required cassettes, and 0 unowned cassettes. | `reports/quality/vcr-metadata-catalog.json` |
-|| Test governance | 21,706 test functions, 1,906 test files, 2 duplicate test names, 0 markerless test functions, 0 compatibility test files. | `reports/quality/test-governance-current.json` |
+|| Test governance | 21,784 test functions, 1,930 test files, 1 duplicate test name, 0 markerless test functions, 0 compatibility test files. | `reports/quality/test-governance-current.json` |
 || Observability governance | 45 recording-rule metrics and 48 declared label-contract metrics; runtime cardinality and unused signal policies exist; all dashboarded metrics are now declared. | `configs/quality/observability_metric_declarations.yaml`, `configs/quality/observability_metric_governance.yaml` |
 
 ## Corrections from Previous Audit
@@ -97,7 +97,7 @@ ADR-048 explicitly forbids Pandera import-time compatibility patching and allows
 || P1 | Config compatibility debt | `configs/quality/config_compatibility_registry.yaml`, `reports/quality/config-discrepancy-baseline.json` | Keep accepted shapes at 2; reduce `compatibility_legacy` parameter taxonomy only through schema/config migration, never by relabeling. | Medium | M |
 || P1 | Observability gap | `configs/quality/observability_metric_governance.yaml` | Ensure CI publishes `reports/observability/runtime_cardinality_review*.json`; fail release on degraded live review and threshold violation. | Medium | M |
 || P2 | Dead code | `src/bioetl/__main__.py`, `src/bioetl/composition/registry.py` | Keep classified unless runtime/public evidence disappears; add explicit measured coverage or retained-entrypoint exemption tests. | Low | S |
-|| P2 | Test governance debt | `reports/quality/test-governance-current.json` | Keep compatibility test files at 0 and duplicate test names at 2; any reintroduction requires explicit compatibility-surface rationale and follow-up cleanup. | Low | M |
+|| P2 | Test governance debt | `reports/quality/test-governance-current.json` | Keep compatibility test files at 0 and duplicate test names at 1; any reintroduction requires explicit compatibility-surface rationale and follow-up cleanup. | Low | M |
 || P2 | Infrastructure test debt | `src/bioetl/infrastructure/observability/*.py`, `src/bioetl/infrastructure/config/*.py` | Add contract tests for logging/tracing adapters, config loaders, and control-plane stores; avoid domain imports. | Medium | M |
 || P3 | Documentation/governance debt | `docs/02-architecture/07-compatibility-facade-inventory.md`, scorecard | Convert review dates into CI-enforced expiry checks where feasible; keep docs synchronized with machine inventory. | Low | S |
 
@@ -107,7 +107,7 @@ This refreshed audit removes stale claims from the 2026-06-16 audit and aligns a
 
 1. **Root hygiene**: `new.env` and similar surfaces are now correctly classified as governed local-only surfaces, not stale debt.
 2. **Supporting scripts**: The 91 supporting scripts count is now aligned with `scripts_inventory_manifest.json`; the retired zero-reference supporting wrappers remain absent while newly reviewed helper surfaces stay in the supporting inventory.
-3. **Compatibility test burden**: Duplicate test names are now at 2 (current actual state) instead of 0, matching the live governance baseline.
+3. **Compatibility test burden**: Duplicate test names are now at 1 (current actual state) instead of 0, matching the live governance baseline.
 4. **Public entrypoints**: Retained compatibility seams are explicitly distinguished from true transition debt and sanctioned as public API.
 
 All evidence references point to current committed artifacts, making this audit safe for prioritization without contradictory numbers.

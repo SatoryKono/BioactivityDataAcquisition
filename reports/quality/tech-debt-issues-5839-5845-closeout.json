@@ -98,7 +98,7 @@
       "source": "reports/quality/compatibility-importer-census.json"
     },
     "adapter_duplicate_clusters": {
-      "current": 42,
+      "current": 41,
       "max": 53,
       "previous_audit_baseline": 54,
       "source": "reports/quality/full-app-duplication-baseline.json"
@@ -127,7 +127,7 @@
       "source": "reports/quality/module-coverage-inventory.json"
     },
     "zero_reference_supporting_scripts": {
-      "current": 47,
+      "current": 46,
       "entries_without_owner_metadata": 0,
       "source": "configs/quality/scripts_inventory_manifest.json"
     }
