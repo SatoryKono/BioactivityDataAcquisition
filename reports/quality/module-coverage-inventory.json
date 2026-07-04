@@ -21623,7 +21623,7 @@
       "missing_lines": 7,
       "module": "bioetl.interfaces.cli.commands.run",
       "path": "src/bioetl/interfaces/cli/commands/run.py",
-      "source_lines": 326
+      "source_lines": 325
     },
     {
       "coverage_percent": 100.0,
@@ -43735,7 +43735,7 @@
       "missing_lines": 7,
       "module": "bioetl.interfaces.cli.commands.run",
       "path": "src/bioetl/interfaces/cli/commands/run.py",
-      "source_lines": 326
+      "source_lines": 325
     },
     {
       "coverage_percent": 100.0,
@@ -44230,7 +44230,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-01",
-  "source_tree_sha256": "f8da30f68a5612041c5ecc05ef956b7ddaffa031a3dab436e571c4452f8c22f3",
+  "source_tree_sha256": "de1f39a77acf311f1d9b2fa6ecd2e2b0e4937e8722ba37f8436b2a3ee3c5455d",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
