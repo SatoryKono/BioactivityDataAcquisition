@@ -106,7 +106,9 @@ def test_has_fetch_filtered_protocol_stub_callable() -> None:
 
 @pytest.mark.unit
 @pytest.mark.asyncio
-async def test_iter_filtered_records_with_default_field_resolves_missing_field() -> None:
+async def test_iter_filtered_records_with_default_field_resolves_missing_field() -> (
+    None
+):
     adapter = _DummyDefaultFieldAdapter()
 
     result = [

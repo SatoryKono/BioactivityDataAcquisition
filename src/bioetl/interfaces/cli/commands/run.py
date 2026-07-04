@@ -20,10 +20,8 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime
     attach_observability_backend_to_cli_input,
     build_observability_backend_cli_kwargs_from_options,
     build_observability_backend_required_probe_paths,
-    should_disable_transient_health_server,
-)
-from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
     ensure_observability_backend_started,
+    should_disable_transient_health_server,
 )
 from bioetl.interfaces.cli.commands.domains.health.server_integration import (
     DEFAULT_HEALTH_SERVER_PORT,
