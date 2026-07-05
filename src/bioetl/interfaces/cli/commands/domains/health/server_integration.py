@@ -43,6 +43,7 @@ _HEALTH_REASON_SUFFIXES = (
     "SIGINT",
 )
 
+
 def get_health_server_dependencies() -> HealthServerDependenciesProtocol:
     """Load health-listener dependencies from the canonical composition seam."""
     from bioetl.composition.health_service_access import (

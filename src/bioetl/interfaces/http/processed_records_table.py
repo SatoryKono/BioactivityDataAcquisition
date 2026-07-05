@@ -154,9 +154,7 @@ def build_processed_records_table_payload_from_ledger(
 
     artifact_counts = _support.published_layer_artifact_counts(ledger_entries)
     silver_snapshot_count = (
-        latest_snapshot.get("records_silver")
-        if latest_snapshot is not None
-        else None
+        latest_snapshot.get("records_silver") if latest_snapshot is not None else None
     )
     silver_artifact_count = artifact_counts.get("silver")
     silver_deduplicated_count = 0

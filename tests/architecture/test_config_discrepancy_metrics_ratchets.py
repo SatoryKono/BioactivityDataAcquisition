@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from functools import cache
 import json
 from pathlib import Path
 
@@ -21,15 +22,23 @@ SCORECARD_PATH = PROJECT_ROOT / "configs/quality/debt_scorecard.yaml"
 BASELINE_PATH = PROJECT_ROOT / "reports/quality/config-discrepancy-baseline.json"
 
 
+@cache
 def _load_scorecard() -> dict[str, object]:
     payload = yaml.safe_load(SCORECARD_PATH.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
     return payload
 
 
-def _load_baseline_metrics() -> dict[str, int]:
+@cache
+def _load_baseline_payload() -> dict[str, object]:
     payload = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
+    return payload
+
+
+@cache
+def _load_baseline_metrics() -> dict[str, int]:
+    payload = _load_baseline_payload()
     metrics = payload.get("metrics")
     assert isinstance(metrics, dict)
     normalized: dict[str, int] = {}
@@ -40,9 +49,9 @@ def _load_baseline_metrics() -> dict[str, int]:
     return normalized
 
 
+@cache
 def _load_baseline_families() -> dict[str, dict[str, int]]:
-    payload = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
-    assert isinstance(payload, dict)
+    payload = _load_baseline_payload()
     families = payload.get("families")
     assert isinstance(families, dict)
     normalized: dict[str, dict[str, int]] = {}
@@ -57,14 +66,15 @@ def _load_baseline_families() -> dict[str, dict[str, int]]:
     return normalized
 
 
+@cache
 def _load_baseline_taxonomy() -> dict[str, object]:
-    payload = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
-    assert isinstance(payload, dict)
+    payload = _load_baseline_payload()
     taxonomy = payload.get("parameter_taxonomy")
     assert isinstance(taxonomy, dict)
     return taxonomy
 
 
+@cache
 def _live_metrics() -> dict[str, int]:
     _, _, unique_parameter_count, config_count, raw_partial_count, _, _ = (
         _build_artifact_contents()
@@ -76,11 +86,17 @@ def _live_metrics() -> dict[str, int]:
     )
 
 
+@cache
 def _live_family_metrics() -> dict[str, dict[str, int]]:
     return {
         family_name: _family_metrics(family_configs)
         for family_name, family_configs in _collect_family_configs().items()
     }
+
+
+@cache
+def _live_parameter_taxonomy() -> dict[str, object]:
+    return build_config_parameter_taxonomy_payload()
 
 
 @pytest.mark.architecture
@@ -92,7 +108,7 @@ def test_config_discrepancy_baseline_matches_live_generator() -> None:
     )
     assert _load_baseline_metrics() == _live_metrics()
     assert _load_baseline_families() == _live_family_metrics()
-    assert _load_baseline_taxonomy() == build_config_parameter_taxonomy_payload()
+    assert _load_baseline_taxonomy() == _live_parameter_taxonomy()
 
 
 @pytest.mark.architecture
@@ -160,7 +176,7 @@ def test_config_discrepancy_family_metrics_within_scorecard_budget() -> None:
 @pytest.mark.architecture
 def test_config_parameter_taxonomy_has_owner_and_no_unclassified_parameters() -> None:
     """Config parameters must remain classified by a family-scoped taxonomy."""
-    taxonomy = build_config_parameter_taxonomy_payload()
+    taxonomy = _live_parameter_taxonomy()
 
     assert taxonomy["owner"] == "BioETL Team"
     assert (

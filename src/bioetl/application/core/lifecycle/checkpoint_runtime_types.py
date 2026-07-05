@@ -11,9 +11,7 @@ CheckpointCompatibilityDisposition = Literal[
     "soft_fail_blocked",
     "hard_fail_raised",
 ]
-CheckpointMissingContextDisposition = Literal[
-    "missing_context_hard_fail_raised",
-]
+CheckpointMissingContextDisposition = Literal["missing_context_hard_fail_raised",]
 
 __all__ = [
     "CheckpointCompatibilityDisposition",

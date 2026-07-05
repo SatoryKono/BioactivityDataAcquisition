@@ -260,13 +260,12 @@ budget_ratchet:
       ratcheted from 37 to 36.
   - issue: '#5102'
     owner: test-governance
-    status: compatibility_test_file_max_ratcheted_to_35
-    note: Renamed test_pandera_compat.py to test_pandera_python314_support.py to follow
-      canonical naming convention (removed "compat" suffix to avoid compatibility
-      test classification). Pandera is actively used in the project (139 files) and
-      the compatibility layer is critical for Python 3.14+ runtime bootstrap. The
-      test remains but is no longer classified as a compatibility test in the inventory.
-      compatibility_test_file_max ratcheted from 36 to 35.
+    status: pandera_compatibility_test_retired_after_shim_removal
+    note: >
+      Issue #5917 removed the obsolete Pandera runtime compatibility shim and
+      its shim-specific Python 3.14 support tests after the supported Pandera
+      dependency declared Python 3.14 support. The retained runtime bootstrap seam
+      is now a no-op, and the compatibility test file budget remains ratcheted.
   - issue: '#5103'
     owner: test-governance
     status: memory_legacy_aliases_retained_with_rationale

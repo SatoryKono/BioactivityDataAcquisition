@@ -182,9 +182,12 @@ class PublicationTransformer(BaseChemblTransformer):
         data["publication_type_unified"] = None
         data["publication_subclass"] = None
         data["publication_class"] = None
-        data["publication_pmid"] = data.get("publication_pmid") or record.get(
-            "pmid"
-        ) or record.get("pubmed_id") or record.get("document_pubmed_id")
+        data["publication_pmid"] = (
+            data.get("publication_pmid")
+            or record.get("pmid")
+            or record.get("pubmed_id")
+            or record.get("document_pubmed_id")
+        )
         data["publication_pmc_id"] = data.get("publication_pmc_id") or record.get(
             "document_pmc_id"
         )

@@ -422,14 +422,14 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "161",
+      "line": "165",
       "path": "tests/unit/infrastructure/observability/test_tracing.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_close_is_idempotent__test_open_telemetry_tracer_close_infrastructure_observability_test_tracing_158"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "318",
+      "line": "347",
       "path": "tests/unit/infrastructure/observability/test_tracing.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_flush_swallows_provider_errors"
@@ -1698,14 +1698,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "161",
+        "line": "165",
         "path": "tests/unit/infrastructure/observability/test_tracing.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_close_is_idempotent__test_open_telemetry_tracer_close_infrastructure_observability_test_tracing_158"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "318",
+        "line": "347",
         "path": "tests/unit/infrastructure/observability/test_tracing.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_flush_swallows_provider_errors"
@@ -2251,12 +2251,12 @@
         "name": "test_tdx_audit_closeout_artifact_is_complete_and_budget_safe"
       }
     ],
-    "total_test_files": 1936,
-    "total_test_functions": 21817,
+    "total_test_files": 1935,
+    "total_test_functions": 21786,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "468953b1a5058288f0df957f865594c0e0d16558a9e1724af4397deb7fc401c4",
+  "source_tree_sha256": "de9115662bd9b95673419f4dfe46250f863f111cd4f942481da33214847f5908",
   "summary": {
     "assertless_total_candidates": 109,
     "compatibility_test_files": 0,
@@ -2278,7 +2278,7 @@
       "name": "test_tdx_audit_closeout_artifact_is_complete_and_budget_safe"
     }
   ],
-  "total_test_files": 1936,
-  "total_test_functions": 21817,
+  "total_test_files": 1935,
+  "total_test_functions": 21786,
   "uuid4_call_sites": 0
 }

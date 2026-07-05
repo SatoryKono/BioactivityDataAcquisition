@@ -235,7 +235,9 @@ class PubChemBioactivityRecord(BaseModel):
     target_name: str | None = Field(default=None, description="Target name")
 
     # Activity Values
-    activity_values: list[JsonDict] | None = Field(default_factory=list, description="List of activity measurements")
+    activity_values: list[JsonDict] | None = Field(
+        default_factory=list, description="List of activity measurements"
+    )
 
 
 # === Record Type Mapping ===

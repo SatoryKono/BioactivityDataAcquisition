@@ -9,7 +9,9 @@ from bioetl.domain.mapping.classification_data import ClassificationData
 
 
 @cache
-def _load_publication_type_classification_data(configs_root_key: str) -> ClassificationData:
+def _load_publication_type_classification_data(
+    configs_root_key: str,
+) -> ClassificationData:
     """Load classification data once per configs root key."""
     import bioetl.infrastructure.config.publication_type_classification_loader as publication_type_classification_loader
 

@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-07-03",
+  "snapshot_date": "2026-07-05",
   "inventory_source": "configs/quality/compatibility_facade_inventory.yaml",
   "twin_ratchet_source": "configs/quality/compatibility_twin_module_ratchet.yaml",
   "config_root_facade_source": "configs/quality/infrastructure_config_root_facade_inventory.yaml",
@@ -133,9 +133,11 @@
       "internal_callers_zero": false,
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
       "src_importers": [],
-      "test_importers": [],
+      "test_importers": [
+        "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py"
+      ],
       "src_importer_count": 0,
-      "test_importer_count": 0,
+      "test_importer_count": 1,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing"
@@ -153,11 +155,10 @@
       "test_importers": [
         "tests/architecture/test_interfaces_no_infrastructure.py",
         "tests/smoke/test_smoke.py",
-        "tests/unit/composition/test_canonical_module_paths.py",
         "tests/unit/composition/test_entrypoints.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 4,
+      "test_importer_count": 3,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
@@ -574,9 +575,11 @@
       "internal_callers_zero": false,
       "usage_classification": "stable_public_api_with_reviewed_first_party_usage",
       "src_importers": [],
-      "test_importers": [],
+      "test_importers": [
+        "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py"
+      ],
       "src_importer_count": 0,
-      "test_importer_count": 0,
+      "test_importer_count": 1,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_with_reviewed_first_party_usage",
       "sunset_status": "external-facing"
@@ -594,11 +597,10 @@
       "test_importers": [
         "tests/architecture/test_interfaces_no_infrastructure.py",
         "tests/smoke/test_smoke.py",
-        "tests/unit/composition/test_canonical_module_paths.py",
         "tests/unit/composition/test_entrypoints.py"
       ],
       "src_importer_count": 0,
-      "test_importer_count": 4,
+      "test_importer_count": 3,
       "surface_classification": "external-facing",
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
@@ -968,7 +970,7 @@
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 4
+      "test_importer_count": 3
     },
     {
       "path": "src/bioetl/composition/health_api.py",
@@ -1188,7 +1190,7 @@
       "consumer_class": "stable_public_api_zero_first_party_src",
       "sunset_status": "external-facing",
       "src_importer_count": 0,
-      "test_importer_count": 4
+      "test_importer_count": 3
     },
     {
       "path": "src/bioetl/composition/health_api.py",

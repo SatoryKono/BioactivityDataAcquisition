@@ -144,7 +144,9 @@ def _combine_cv_details(
         if not parts:
             merged_details.append(None)
             continue
-        merged_details.append(json.dumps([json.loads(part) for part in parts], ensure_ascii=False))
+        merged_details.append(
+            json.dumps([json.loads(part) for part in parts], ensure_ascii=False)
+        )
 
     return pl.Series("_cv_details", merged_details, dtype=pl.String)
 

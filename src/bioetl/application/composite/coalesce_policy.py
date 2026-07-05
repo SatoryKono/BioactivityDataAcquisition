@@ -29,6 +29,7 @@ if TYPE_CHECKING:
 
 __all__ = ["CoalescePolicyService"]
 
+
 class CoalescePolicyService:
     """Implements seed/enricher/explicit coalesce behaviors."""
 

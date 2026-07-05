@@ -109,18 +109,11 @@ def test_issue_5496_control_plane_root_routes_through_explicit_seams() -> None:
 
 def test_issue_5497_pandera_runtime_monkeypatching_stays_retired() -> None:
     import bioetl.infrastructure.compat as compat_package
-    import bioetl.infrastructure.compat.pandera_compat as pandera_compat
 
-    assert "apply_pandera_typing_compat_if_needed" not in pandera_compat.__all__
-    assert compat_package.__all__ == [
-        "PANDERA_RUNTIME_SUPPORT_POLICY",
-        "UnsupportedPanderaRuntimeError",
-        "validate_supported_pandera_runtime",
-    ]
-    assert (
-        pandera_compat.PANDERA_RUNTIME_SUPPORT_POLICY["failure_policy"]
-        == "fail_fast_no_runtime_monkeypatch"
-    )
+    assert compat_package.__all__ == []
+    assert not (
+        ROOT / "src" / "bioetl" / "infrastructure" / "compat" / "pandera_compat.py"
+    ).exists()
 
 
 def test_issue_5499_first_party_config_facade_imports_stay_collapsed() -> None:

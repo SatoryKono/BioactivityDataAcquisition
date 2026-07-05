@@ -4,7 +4,6 @@ from __future__ import annotations
 
 __all__ = ["SilverWriterMetadataMixin", "time"]
 
-import asyncio
 import time
 from collections.abc import Sequence
 from datetime import datetime
@@ -102,7 +101,7 @@ class SilverWriterMetadataMixin:
     ) -> int | None:
         """Get current Delta table version, if table exists."""
         try:
-            version = await asyncio.to_thread(_read_delta_version, table_path)
+            version = _read_delta_version(table_path)
             return version
         except DeltaTableNotFoundError:
             return None

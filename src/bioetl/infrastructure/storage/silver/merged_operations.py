@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Awaitable
 from dataclasses import dataclass
 from datetime import datetime
@@ -161,8 +160,7 @@ def _prepare_merged_silver_write(
 
 async def _write_silver_merged_delta(*, table_path: str, arrow_table: pa.Table) -> None:
     """Write merged Arrow table into Delta Lake."""
-    await asyncio.to_thread(
-        write_deltalake,
+    write_deltalake(
         table_path,
         arrow_table,
         mode="overwrite",

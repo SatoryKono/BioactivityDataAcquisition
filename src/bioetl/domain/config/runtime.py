@@ -160,7 +160,10 @@ class RuntimeConfig:
 
     def _validate_silver_filter_compatibility_mode(self) -> None:
         """Validate the Silver-filter migration compatibility mode."""
-        if self.silver_filter_compatibility_mode not in SILVER_FILTER_COMPATIBILITY_MODES:
+        if (
+            self.silver_filter_compatibility_mode
+            not in SILVER_FILTER_COMPATIBILITY_MODES
+        ):
             raise ValueError(
                 "silver_filter_compatibility_mode must be one of "
                 f"{sorted(SILVER_FILTER_COMPATIBILITY_MODES)!r}, "

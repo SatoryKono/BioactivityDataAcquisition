@@ -68,20 +68,17 @@ The retained runtime activation seam is:
 
 - `bioetl.composition.bootstrap.runtime.pipeline.apply_runtime_compatibility_patches`
 
-That function now delegates to the infrastructure-owned validation surface:
-
-- `bioetl.infrastructure.compat.pandera_compat.validate_supported_pandera_runtime`
-
-Composition bootstrap may call the sanctioned seam before building runtime
-pipelines. Infrastructure owns the third-party runtime support validation
-because it is library/runtime compatibility, not domain semantics.
+That function is retained as a no-op public bootstrap hook. Composition
+bootstrap may call the sanctioned seam before building runtime pipelines, but
+the seam MUST NOT reintroduce Pandera-specific infrastructure compatibility
+code without a new compatibility decision.
 
 BioETL no longer applies runtime monkeypatches for Python 3.14+ Pandera typing
-breakage. The Python 3.14 support shim carries explicit review metadata in
-`bioetl.infrastructure.compat.pandera_compat.PANDERA_RUNTIME_SUPPORT_POLICY`.
-If the supported Python/Pandera matrix still needs fallback monkeypatching, the
-validator must fail fast with an explicit runtime error instead of mutating
-third-party behavior at bootstrap time.
+breakage. The Pandera-specific compatibility shim has been removed after the
+supported Pandera dependency declared Python 3.14 support. If a future
+Python/Pandera matrix needs fallback behavior, it must fail fast under a new
+explicit compatibility policy instead of mutating third-party behavior at
+bootstrap time.
 
 ## Consequences
 
@@ -96,7 +93,7 @@ third-party behavior at bootstrap time.
 
 1. Domain schema packages remain coupled to Pandera as a contract representation.
 1. Tests must distinguish schema-contract imports from forbidden runtime imports.
-1. Python-version compatibility validation remains present until upstream Pandera no longer needs it.
+1. Runtime compatibility policy now depends on upstream Pandera support metadata and fast import/schema smoke checks rather than a local shim.
 
 ## Compliance
 
@@ -107,5 +104,7 @@ third-party behavior at bootstrap time.
 - Architecture tests must fail if package import initialization applies
   Pandera runtime validation directly.
 - Runtime bootstrap tests must preserve the explicit
-  `apply_runtime_compatibility_patches` activation seam and its delegation to
-  `validate_supported_pandera_runtime`.
+  `apply_runtime_compatibility_patches` activation seam as a no-op.
+- Architecture tests must fail if
+  `bioetl.infrastructure.compat.pandera_compat` returns without a new accepted
+  compatibility decision.

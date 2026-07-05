@@ -2683,8 +2683,7 @@ def _git_chunk_commit_ages(
     except subprocess.TimeoutExpired:
         if len(chunk) <= 1:
             return {
-                path: _git_last_commit_age_days(root, path, today, {})
-                for path in chunk
+                path: _git_last_commit_age_days(root, path, today, {}) for path in chunk
             }
         middle = len(chunk) // 2
         first_half = _git_chunk_commit_ages(

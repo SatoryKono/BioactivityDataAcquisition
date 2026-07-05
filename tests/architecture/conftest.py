@@ -19,6 +19,7 @@ import subprocess
 import sys
 import tempfile
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
+from tests.helpers.compat_shim_guards import ImportRecord, build_import_records
 
 import pytest
 import yaml
@@ -395,6 +396,14 @@ def source_ast_cache(
     return _build_ast_cache("source-ast", source_content_cache)
 
 
+@pytest.fixture(scope="session")
+def source_import_records(
+    source_ast_cache: dict[Path, ast.Module],
+) -> tuple[ImportRecord, ...]:
+    """Normalized import statements from src/bioetl ASTs, built once per session."""
+    return build_import_records(source_ast_cache)
+
+
 # ---------------------------------------------------------------------------
 # Test file caches (tests/**)
 # ---------------------------------------------------------------------------
@@ -421,6 +430,14 @@ def test_ast_cache(
 ) -> dict[Path, ast.Module]:
     """Parsed AST of every test file."""
     return _build_ast_cache("test-ast", test_content_cache)
+
+
+@pytest.fixture(scope="session")
+def test_import_records(
+    test_ast_cache: dict[Path, ast.Module],
+) -> tuple[ImportRecord, ...]:
+    """Normalized import statements from tests ASTs, built once per session."""
+    return build_import_records(test_ast_cache)
 
 
 # ---------------------------------------------------------------------------

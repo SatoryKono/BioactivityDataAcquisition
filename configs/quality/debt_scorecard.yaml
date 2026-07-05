@@ -258,10 +258,7 @@ config_surface_ratchet:
     report_artifact: docs/config-discrepancies-report.md
     matrix_artifact: docs/04-reference/config_comparison_matrix.csv
     expected_direction: downward
-    ratchet_policy: Config-surface metrics must not grow without an explicit scorecard
-      budget update; inconsistent-parameter count ratchets downward during Stream
-      B burn-down. Entity rows use effective pipeline config merged from configs/base/pipeline.yaml
-      and configs/base/quality.yaml.
+    ratchet_policy: Config-surface metrics must not grow without an explicit scorecard budget update; inconsistent-parameter count ratchets downward during Stream B burn-down. Entity rows use effective pipeline config merged from configs/base/pipeline.yaml and configs/base/quality.yaml.
   metrics:
     config_count:
       current_count: 27
@@ -714,7 +711,7 @@ oversized_source_module_inventory:
     owner: '@bioetl-reproducibility'
     target_split: separate score-card policy rules from manifest projection helpers
   - path: src/bioetl/interfaces/cli/commands/domains/health/server_integration.py
-    lines: 384
+    lines: 385
     owner: '@bioetl-interfaces'
     target_split: split health server integration, metrics server wiring, and quarantine
       service helpers

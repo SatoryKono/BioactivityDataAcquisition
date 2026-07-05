@@ -77,6 +77,13 @@ class HealthServerDependenciesProtocol(Protocol):
     run_ledger_port: RunLedgerPort
 
 
+def get_runtime_settings() -> object:
+    """Retained health wrapper outside ``__all__``."""
+    from bioetl.composition.runtime_builders.config_access import get_settings as _impl
+
+    return _impl()
+
+
 install_cached_public_exports(
     module_globals=globals(),
     public_exports=_PUBLIC_EXPORTS,

@@ -48,8 +48,7 @@ def _resolve_transformer_dependencies(
                 dependencies,
                 tracer=tracer or dependencies.tracer,
                 metrics=metrics or dependencies.metrics,
-                identity_service=identity_service
-                or dependencies.identity_service,
+                identity_service=identity_service or dependencies.identity_service,
                 pii_hasher=pii_hasher or dependencies.pii_hasher,
             )
         return dependencies

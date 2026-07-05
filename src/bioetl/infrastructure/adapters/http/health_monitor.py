@@ -241,5 +241,6 @@ def __getattr__(name: str) -> object:
     if name != "ProviderHealthTracker":
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
     from bioetl.infrastructure.adapters.http.health_tracker import ProviderHealthTracker
+
     globals()[name] = ProviderHealthTracker
     return ProviderHealthTracker

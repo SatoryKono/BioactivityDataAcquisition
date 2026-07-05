@@ -42,9 +42,8 @@ class _GoldWriterExecutorArrowMixin:
         func: Callable[..., T],
         *args: object,
     ) -> T:
-        """Run a function in the default thread pool executor."""
-        loop = asyncio.get_running_loop()
-        return await loop.run_in_executor(None, func, *args)
+        """Run a local blocking helper behind the async writer facade."""
+        return func(*args)
 
     def _to_arrow_table(
         self, records: list[GoldRecord], column_order: list[str] | None = None

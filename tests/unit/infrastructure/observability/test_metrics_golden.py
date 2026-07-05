@@ -62,7 +62,11 @@ def _capture_counter_registry_state() -> dict[str, object]:
     for family in METRIC_REGISTRY_FAMILIES:
         for name, counter in family.counters.items():
             state[name] = {
-                "description": counter._description,
+                "description": getattr(
+                    counter,
+                    "_documentation",
+                    getattr(counter, "_description", ""),
+                ),
                 "type": "counter",
                 "family": family.family,
             }
@@ -75,10 +79,21 @@ def _capture_histogram_registry_state() -> dict[str, object]:
     for family in METRIC_REGISTRY_FAMILIES:
         for name, histogram in family.histograms.items():
             state[name] = {
-                "description": histogram._description,
+                "description": getattr(
+                    histogram,
+                    "_documentation",
+                    getattr(histogram, "_description", ""),
+                ),
                 "type": "histogram",
                 "family": family.family,
-                "buckets": [b for b in histogram._upperbounds],
+                "buckets": [
+                    b
+                    for b in getattr(
+                        histogram,
+                        "_upper_bounds",
+                        getattr(histogram, "_upperbounds", ()),
+                    )
+                ],
             }
     return state
 
@@ -88,9 +103,9 @@ def _capture_metric_inventory() -> dict[str, object]:
     return {
         "families": {
             family.family: {
-                "counters": tuple(family.counters.keys()),
-                "gauges": tuple(family.gauges.keys()),
-                "histograms": tuple(family.histograms.keys()),
+                "counters": list(family.counters.keys()),
+                "gauges": list(family.gauges.keys()),
+                "histograms": list(family.histograms.keys()),
             }
             for family in METRIC_REGISTRY_FAMILIES
         },

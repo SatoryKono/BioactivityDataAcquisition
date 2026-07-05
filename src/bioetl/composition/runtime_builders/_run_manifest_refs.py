@@ -44,6 +44,7 @@ class ManifestControlPlaneRefs:
     normalization_profile_hash: str | None = None
     required_persistence_profile: str | None = None
 
+
 def create_control_plane_refs(
     manifest_id: str,
     execution_fingerprint: str,

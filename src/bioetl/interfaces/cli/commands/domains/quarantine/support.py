@@ -53,15 +53,13 @@ class _QuarantineRuntimeService(Protocol):
         limit: int,
         error_code: str | None = None,
         run_id: str | None = None,
-    ) -> list[JsonDict]:
-        ...
+    ) -> list[JsonDict]: ...
 
     async def get_stats(
         self,
         error_code: str | None = None,
         run_id: str | None = None,
-    ) -> JsonDict:
-        ...
+    ) -> JsonDict: ...
 
 
 class _QuarantineService(Protocol):
@@ -71,20 +69,17 @@ class _QuarantineService(Protocol):
         pipeline: str,
         error_code: str | None,
         max_age_days: int,
-    ) -> list[JsonDict]:
-        ...
+    ) -> list[JsonDict]: ...
 
-    def mark_as_reprocessed(self, records: list[JsonDict]) -> int:
-        ...
+    def mark_as_reprocessed(self, records: list[JsonDict]) -> int: ...
 
-    async def get_stats(self, pipeline: str) -> JsonDict:
-        ...
+    async def get_stats(self, pipeline: str) -> JsonDict: ...
 
-    def purge(self, *, pipeline: str, older_than_days: int) -> int:
-        ...
+    def purge(self, *, pipeline: str, older_than_days: int) -> int: ...
 
-    def update_status(self, payload_hash: str, status: QuarantineRecordStatus) -> bool:
-        ...
+    def update_status(
+        self, payload_hash: str, status: QuarantineRecordStatus
+    ) -> bool: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -348,6 +343,7 @@ def _purge_quarantine(
     """Purge old quarantine records or preview the purge."""
     context = _QuarantineCommandContext(pipeline=pipeline)
     if dry_run:
+
         async def _get_stats() -> JsonDict:
             return await service.get_stats(pipeline)
 

@@ -19,6 +19,8 @@ SUNSET_TEST = (
     ROOT / "tests" / "architecture" / "test_behavior_retirement_ledger_governance.py"
 )
 TEST_GOVERNANCE_CONFIG = ROOT / "configs" / "quality" / "test_governance_audit.yaml"
+TEST_MATRIX = ROOT / "configs" / "quality" / "test_matrix.yaml"
+SLOWEST_TESTS = ROOT / "reports" / "test-telemetry" / "slowest-tests.json"
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -60,13 +62,30 @@ def test_issue_5974_time_seam_guards_are_extended() -> None:
 
 
 @pytest.mark.architecture
-def test_issue_5975_slow_governance_scan_deferred() -> None:
-    """Slow governance scan hotspot reduction is deferred with documented optimization plan."""
+def test_issue_5975_slow_governance_hotspots_are_budgeted() -> None:
+    """Slow governance scan hotspots must have shared caches and a no-growth budget."""
     closeout = _load_json(CLOSEOUT)
     outcome = closeout["outcomes"]["5975"]
 
-    assert outcome["status"] == "deferred_with_optimization_plan"
-    assert "optimization plan" in outcome["rationale"].lower()
+    assert outcome["status"] == "closeable"
+    assert len(outcome["actions_taken"]) > 0
+
+    budget = outcome["duration_budget"]
+    assert budget["source"] == "reports/test-telemetry/slowest-tests.json"
+    assert budget["max_total_duration_s"] <= budget["baseline_total_duration_s"]
+    assert "session-scoped" in budget["hard_reason"]
+    assert SLOWEST_TESTS.exists(), "Duration telemetry artifact must stay committed"
+
+    test_matrix = _load_yaml(TEST_MATRIX)
+    lanes = test_matrix["test_lanes"]["lanes"]
+    architecture_lane = lanes["architecture"]
+    fast_lane = lanes["architecture-fast-boundary"]
+    slow_lane = lanes["architecture-slow-governance"]
+
+    assert "S7-architecture-fast-boundary" in architecture_lane["runner_options"]
+    assert "S7-architecture-slow-governance" in architecture_lane["runner_options"]
+    assert fast_lane["suite_name"] == "architecture-fast-boundary"
+    assert slow_lane["suite_name"] == "architecture-slow-governance"
 
 
 @pytest.mark.architecture
@@ -139,11 +158,11 @@ def test_closeout_governance_gates_are_passing() -> None:
 
 
 @pytest.mark.architecture
-def test_closeout_status_is_partial_complete() -> None:
-    """Closeout status must reflect partial completion with deferred issues."""
+def test_closeout_status_is_complete() -> None:
+    """Closeout status must reflect all four issues as closeable."""
     closeout = _load_json(CLOSEOUT)
     closeout_status = closeout["closeout"]
 
-    assert closeout_status["status"] == "partial_complete"
-    assert set(closeout_status["closeable_issues"]) == {5974, 5976, 5977}
-    assert set(closeout_status["deferred_issues"]) == {5975}
+    assert closeout_status["status"] == "complete"
+    assert set(closeout_status["closeable_issues"]) == {5974, 5975, 5976, 5977}
+    assert closeout_status["deferred_issues"] == []

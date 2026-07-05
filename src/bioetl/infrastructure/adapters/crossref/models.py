@@ -226,7 +226,9 @@ class CrossRefPublicationRecord(BaseModel):
     )  # Any: nested Crossref JSON
 
     # Update Policy
-    update_policy: str | None = Field(default=None, alias="update-policy", description="Update policy DOI")
+    update_policy: str | None = Field(
+        default=None, alias="update-policy", description="Update policy DOI"
+    )
 
 
 # === Record Type Mapping ===

@@ -7,8 +7,11 @@ from typing import Any, cast
 import pytest
 
 from bioetl.domain.normalization.identifiers import (
+    get_ontology_prefix,
+    is_valid_ontology_id,
     normalize_doi,
     normalize_ontology_id,
+    normalize_ontology_id_strict,
     normalize_pmc_id,
     normalize_pmid,
     strip_doi_prefix,
@@ -39,6 +42,11 @@ class TestStripDOIPrefix:
         """Test prefix stripping with whitespace."""
         assert strip_doi_prefix("  https://doi.org/10.1234/test  ") == "10.1234/test"
         assert strip_doi_prefix(f"\t{LEGACY_HTTP_DOI}\t") == "10.1234/test"
+
+    def test_strip_doi_prefix_handles_dx_doi_prefixes(self) -> None:
+        """Test legacy dx.doi.org URL prefix stripping."""
+        assert strip_doi_prefix("https://dx.doi.org/10.1234/test") == "10.1234/test"
+        assert strip_doi_prefix("HTTP://DX.DOI.ORG/10.1234/test") == "10.1234/test"
 
 
 class TestNormalizeDOI:
@@ -107,6 +115,15 @@ class TestNormalizePMID:
         """Test boolean handling."""
         assert normalize_pmid(True) is None
         assert normalize_pmid(False) is None
+
+    def test_normalize_pmid_boundaries_and_non_string_values(self) -> None:
+        """Test PMID integer bounds and unsupported value types."""
+        assert normalize_pmid(0) is None
+        assert normalize_pmid(-1) is None
+        assert normalize_pmid(9_999_999_999) == "9999999999"
+        assert normalize_pmid(10_000_000_000) is None
+        assert normalize_pmid(cast(Any, 12.5)) is None
+        assert normalize_pmid("http://pubmed.ncbi.nlm.nih.gov/00042/") == "42"
 
 
 class TestNormalizePMCID:
@@ -181,6 +198,7 @@ class TestNormalizeOntologyID:
         assert normalize_ontology_id("TS-1234") == "TS-1234"
         assert normalize_ontology_id("ts-1234") == "TS-1234"
         assert normalize_ontology_id("CALOHA:1234") == "TS-1234"
+        assert normalize_ontology_id("CALOHA:TS-1234") == "TS-1234"
         assert normalize_ontology_id("caloha_ts-1234") == "TS-1234"
 
     def test_normalize_ontology_id_obo_uri(self) -> None:
@@ -192,6 +210,10 @@ class TestNormalizeOntologyID:
         assert (
             normalize_ontology_id("https://purl.obolibrary.org/obo/BAO_0000190")
             == "BAO_0000190"
+        )
+        assert (
+            normalize_ontology_id("http://purl.obolibrary.org/obo/PR_000000001")
+            == "PR_000000001"
         )
 
     def test_normalize_ontology_id_zero_padding(self) -> None:
@@ -217,3 +239,36 @@ class TestNormalizeOntologyID:
         """Test invalid ontology ID handling."""
         assert normalize_ontology_id("invalid") == "invalid"  # Unknown format preserved
         assert normalize_ontology_id("ABC123") == "ABC123"  # Unknown format preserved
+
+    def test_normalize_ontology_id_additional_branch_formats(self) -> None:
+        """Test less common ontology format branches."""
+        assert normalize_ontology_id(cast(Any, 123)) is None
+        assert normalize_ontology_id("UNKNOWN:123") == "UNKNOWN:123"
+        assert normalize_ontology_id("BAO_0000190") == "BAO_0000190"
+        assert normalize_ontology_id("bao_0000190") == "BAO_0000190"
+        assert normalize_ontology_id("CALOHA_1234") == "TS-1234"
+        assert normalize_ontology_id("GO 8150 extra") == "GO 8150 extra"
+        assert normalize_ontology_id("UNKNOWN 1") == "UNKNOWN 1"
+
+
+class TestOntologyHelpers:
+    """Test ontology helper APIs."""
+
+    def test_normalize_ontology_id_strict_rejects_unknown_ids(self) -> None:
+        assert normalize_ontology_id_strict("GO:0008150") == "GO_0008150"
+        assert normalize_ontology_id_strict("UNKNOWN:123") is None
+        assert normalize_ontology_id_strict("   ") is None
+
+    def test_get_ontology_prefix_handles_canonical_colon_and_missing(self) -> None:
+        assert get_ontology_prefix("GO_0008150") == "GO"
+        assert get_ontology_prefix("go:0008150") == "GO"
+        assert get_ontology_prefix("UNKNOWN:123") is None
+        assert get_ontology_prefix("not-an-id") is None
+        assert get_ontology_prefix(cast(Any, None)) is None
+
+    def test_is_valid_ontology_id_rejects_non_string_and_unknown_values(self) -> None:
+        assert is_valid_ontology_id("GO_0008150") is True
+        assert is_valid_ontology_id("go:0008150") is True
+        assert is_valid_ontology_id("UNKNOWN:123") is False
+        assert is_valid_ontology_id(cast(Any, None)) is False
+        assert is_valid_ontology_id(cast(Any, 123)) is False

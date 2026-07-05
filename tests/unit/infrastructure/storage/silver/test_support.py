@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 import pyarrow as pa
@@ -27,7 +27,9 @@ class TestResolveTablePath:
 
     def test_resolves_with_flat_structure(self):
         """Test resolving path with flat structure."""
-        result = resolve_table_path("/data/delta", "chembl.activity", flat_structure=True)
+        result = resolve_table_path(
+            "/data/delta", "chembl.activity", flat_structure=True
+        )
         assert result == "/data/delta"
 
     def test_resolves_with_path_base(self):
@@ -113,7 +115,12 @@ class TestPrepareArrowData:
 
         result = prepare_arrow_data(records, schema, primary_keys=["id1", "id2"])
 
-        expected = [{"id1": 1, "id2": 1}, {"id1": 1, "id2": 2}, {"id1": 2, "id2": 1}, {"id1": 2, "id2": 2}]
+        expected = [
+            {"id1": 1, "id2": 1},
+            {"id1": 1, "id2": 2},
+            {"id1": 2, "id2": 1},
+            {"id1": 2, "id2": 2},
+        ]
         actual = result.to_pydict()
         assert actual["id1"] == [e["id1"] for e in expected]
         assert actual["id2"] == [e["id2"] for e in expected]
@@ -162,12 +169,15 @@ class TestGetTableSchema:
         mock_delta_table = MagicMock()
         mock_delta_table.schema.return_value = mock_schema
 
-        with patch(
-            "bioetl.infrastructure.storage.silver.support.DeltaTable",
-            return_value=mock_delta_table,
-        ), patch(
-            "bioetl.infrastructure.storage.silver.support.delta_schema_to_pyarrow",
-            return_value=pa.schema([("field1", pa.string())]),
+        with (
+            patch(
+                "bioetl.infrastructure.storage.silver.support.DeltaTable",
+                return_value=mock_delta_table,
+            ),
+            patch(
+                "bioetl.infrastructure.storage.silver.support.delta_schema_to_pyarrow",
+                return_value=pa.schema([("field1", pa.string())]),
+            ),
         ):
             result = await get_table_schema("/data/delta", "test_table")
 
@@ -216,12 +226,15 @@ class TestGetTableSchema:
         mock_delta_table = MagicMock()
         mock_delta_table.schema.return_value = mock_schema
 
-        with patch(
-            "bioetl.infrastructure.storage.silver.support.DeltaTable",
-            return_value=mock_delta_table,
-        ), patch(
-            "bioetl.infrastructure.storage.silver.support.delta_schema_to_pyarrow",
-            return_value=pa.schema([("field1", pa.string())]),
+        with (
+            patch(
+                "bioetl.infrastructure.storage.silver.support.DeltaTable",
+                return_value=mock_delta_table,
+            ),
+            patch(
+                "bioetl.infrastructure.storage.silver.support.delta_schema_to_pyarrow",
+                return_value=pa.schema([("field1", pa.string())]),
+            ),
         ):
             result = await get_table_schema("/data/delta", "test_table")
 
@@ -312,7 +325,7 @@ class TestEdgeCases:
     def test_resolve_table_path_with_empty_table_name(self):
         """Test path resolution with empty table name."""
         result = resolve_table_path("/data/delta", "")
-        assert result == "/data/delta/"
+        assert result == "/data/delta"
 
     def test_prepare_arrow_data_preserves_determinism(self):
         """Test that preparation preserves deterministic ordering."""

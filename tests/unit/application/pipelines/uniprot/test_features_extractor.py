@@ -34,15 +34,30 @@ class TestFeatureExtractor:
         """Test extraction with empty features list."""
         assert FeatureExtractor.extract_features([]) is None
         assert FeatureExtractor.extract_features(None) is None
+        assert FeatureExtractor.extract_features("not-a-list") is None
 
     def test_extract_features_invalid_structure(self):
         """Test extraction with invalid feature objects."""
-        features = ["not-a-dict", {"type": "Domain"}]
+        features = [
+            "not-a-dict",
+            {},
+            {
+                "type": "Domain",
+                "featureId": "FT-1",
+                "location": {"start": {"value": 10}, "end": "not-a-dict"},
+            },
+            {"location": {"start": "not-a-dict", "end": {"value": 20}}},
+        ]
         result = FeatureExtractor.extract_features(features)
         assert result is not None
         parsed = json.loads(result)
-        assert len(parsed) == 1
+        assert len(parsed) == 2
         assert parsed[0]["type"] == "Domain"
+        assert parsed[0]["feature_id"] == "FT-1"
+        assert parsed[0]["start"] == 10
+        assert "end" not in parsed[0]
+        assert parsed[1]["end"] == 20
+        assert "start" not in parsed[1]
 
     def test_feature_extractor__extract_keywords__75228603(self):
         """Test keyword extraction."""
@@ -62,6 +77,16 @@ class TestFeatureExtractor:
         """Test keyword extraction with empty list."""
         assert FeatureExtractor.extract_keywords([]) is None
         assert FeatureExtractor.extract_keywords(None) is None
+        assert FeatureExtractor.extract_keywords("not-a-list") is None
+
+    def test_extract_keywords_skips_invalid_and_empty_keyword_objects(self):
+        """Test invalid keyword entries are ignored."""
+        keywords = ["not-a-dict", {}, {"category": "Technical term"}]
+
+        result = FeatureExtractor.extract_keywords(keywords)
+
+        assert result is not None
+        assert json.loads(result) == [{"category": "Technical term"}]
 
     def test_extract_features_by_type(self):
         """Test extraction by specific feature type."""
@@ -74,6 +99,18 @@ class TestFeatureExtractor:
         parsed = json.loads(result)
         assert len(parsed) == 1
         assert parsed[0]["description"] == "Keep me"
+
+    def test_extract_features_by_type_handles_invalid_inputs_and_empty_matches(self):
+        """Test type filtering returns None for invalid or unmatched features."""
+        assert FeatureExtractor.extract_features_by_type(None, "Domain") is None
+        assert FeatureExtractor.extract_features_by_type("not-a-list", "Domain") is None
+        assert (
+            FeatureExtractor.extract_features_by_type(
+                ["not-a-dict", {"type": "Domainless"}],
+                "Domain",
+            )
+            is None
+        )
 
     def test_extract_domains(self):
         """Test domain extraction helper."""
@@ -200,6 +237,25 @@ class TestFeatureExtractor:
         assert parsed[0]["description"] == "Acetyllysine"
 
         assert FeatureExtractor.extract_ptm_by_pattern(features, ()) is None
+
+    def test_extract_ptm_by_pattern_skips_invalid_descriptions(self):
+        """Test PTM matching skips invalid entries before matching."""
+        features = [
+            "not-a-dict",
+            {"type": "Other", "description": "phospho"},
+            {"type": "Modified residue"},
+            {"type": "Modified residue", "description": 123},
+            {"type": "Modified residue", "description": "N-acetyllysine"},
+        ]
+
+        result = FeatureExtractor.extract_ptm_by_pattern(features, ("ACETYL",))
+
+        assert result is not None
+        parsed = json.loads(result)
+        assert parsed == [{"type": "Modified residue", "description": "N-acetyllysine"}]
+        assert (
+            FeatureExtractor.extract_ptm_by_pattern("not-a-list", ("acetyl",)) is None
+        )
 
     def test_feature_location_parsing(self):
         """Test parsing of different location formats."""

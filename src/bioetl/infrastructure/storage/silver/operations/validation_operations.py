@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Literal, Protocol, cast
@@ -131,10 +130,7 @@ async def _prepare_silver_write_payload_impl(
         key_nullability_rules=key_nullability_rules,
     )
 
-    validated = await asyncio.to_thread(
-        host._sync_validate_and_build_arrow,
-        request,
-    )
+    validated = host._sync_validate_and_build_arrow(request)
     schema_request = _SilverSchemaPolicyRequest(
         table_name=table_name,
         records=validated.records,

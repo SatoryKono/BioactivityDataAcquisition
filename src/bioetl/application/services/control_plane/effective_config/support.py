@@ -256,14 +256,17 @@ def normalize_runtime_overrides_for_semantic_identity(
     if isinstance(runtime_overrides_payload, dict):
         settings_snapshot = runtime_overrides_payload.get("settings_snapshot")
         if isinstance(settings_snapshot, dict):
-            normalized_settings_hash = _normalize_settings_snapshot_for_semantic_identity(
-                settings_snapshot
+            normalized_settings_hash = (
+                _normalize_settings_snapshot_for_semantic_identity(settings_snapshot)
             )
 
     env_overrides = normalized.get("env")
     if isinstance(env_overrides, dict):
         execution_environment = env_overrides.get("execution_environment")
-        if isinstance(execution_environment, dict) and normalized_settings_hash is not None:
+        if (
+            isinstance(execution_environment, dict)
+            and normalized_settings_hash is not None
+        ):
             execution_environment["settings_snapshot_hash"] = normalized_settings_hash
 
     return normalized

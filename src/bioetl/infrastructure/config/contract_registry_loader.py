@@ -46,7 +46,9 @@ def _is_likely_network_drive(path: Path) -> bool:
         return False
 
 
-def _load_yaml_with_timeout(path: Path, timeout: float = _YAML_LOAD_TIMEOUT_SECONDS) -> JsonDict:
+def _load_yaml_with_timeout(
+    path: Path, timeout: float = _YAML_LOAD_TIMEOUT_SECONDS
+) -> JsonDict:
     """Load YAML file with timeout protection for network drives."""
     if not _is_likely_network_drive(path):
         # Direct read for local drives
@@ -68,7 +70,9 @@ def _load_yaml_with_timeout(path: Path, timeout: float = _YAML_LOAD_TIMEOUT_SECO
     thread.join(timeout=timeout)
 
     if thread.is_alive():
-        raise TimeoutError(f"YAML load did not complete within {timeout} seconds: {path}")
+        raise TimeoutError(
+            f"YAML load did not complete within {timeout} seconds: {path}"
+        )
 
     if exception is not None:
         raise exception
@@ -77,6 +81,7 @@ def _load_yaml_with_timeout(path: Path, timeout: float = _YAML_LOAD_TIMEOUT_SECO
         raise ValueError(f"YAML load returned None: {path}")
 
     return result
+
 
 __all__ = [
     "DEFAULT_CONTRACT_REGISTRY_PATH",

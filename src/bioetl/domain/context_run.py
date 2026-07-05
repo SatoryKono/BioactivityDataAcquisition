@@ -42,9 +42,7 @@ def _resolve_cached_bronze_context(
 ) -> CachedBronzeContext:
     """Return explicit cached-Bronze context or the disabled default."""
     return (
-        cached_bronze
-        if cached_bronze is not None
-        else CachedBronzeContext.disabled()
+        cached_bronze if cached_bronze is not None else CachedBronzeContext.disabled()
     )
 
 
@@ -80,7 +78,9 @@ class PipelineRunContext:
     resume: bool = False
     dry_run: bool = False
     vacuum: VacuumSettings = field(default_factory=VacuumSettings)
-    input_filter: InputFilterContext = field(default_factory=InputFilterContext.disabled)
+    input_filter: InputFilterContext = field(
+        default_factory=InputFilterContext.disabled
+    )
     cached_bronze: CachedBronzeContext = field(
         default_factory=CachedBronzeContext.disabled
     )

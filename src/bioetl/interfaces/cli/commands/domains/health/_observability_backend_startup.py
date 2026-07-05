@@ -305,6 +305,8 @@ def ensure_observability_backend_started_impl(
         **{key: runtime_hooks[key] for key in _STARTUP_DETACHED_HOOK_KEYS},
         **failure_handlers,
     )
+
+
 __all__ = [
     "DEFAULT_OBSERVABILITY_BACKEND_BIND_HOST",
     "DEFAULT_OBSERVABILITY_BACKEND_PROBE_HOST",

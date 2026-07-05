@@ -435,20 +435,24 @@ class TestTracingProtocolAndSpanBranchPaths:
         from bioetl.infrastructure.observability import tracing
 
         assert tracing._SpanProtocol.set_attribute(object(), "k", "v") is None
-        assert tracing._SpanProtocol.record_exception(
-            object(),
-            RuntimeError("boom"),
-        ) is None
-        assert tracing._SpanContextManagerProtocol.__enter__(object()) is None
-        assert tracing._SpanContextManagerProtocol.__exit__(
-            object(),
-            None,
-            None,
-            None,
-        ) is None
         assert (
-            tracing._TracerProtocol.start_as_current_span(object(), "demo") is None
+            tracing._SpanProtocol.record_exception(
+                object(),
+                RuntimeError("boom"),
+            )
+            is None
         )
+        assert tracing._SpanContextManagerProtocol.__enter__(object()) is None
+        assert (
+            tracing._SpanContextManagerProtocol.__exit__(
+                object(),
+                None,
+                None,
+                None,
+            )
+            is None
+        )
+        assert tracing._TracerProtocol.start_as_current_span(object(), "demo") is None
 
 
 class TestTracingImportFallbackBranches:
@@ -479,7 +483,10 @@ class TestTracingImportFallbackBranches:
             fromlist: tuple[str, ...] = (),
             level: int = 0,
         ) -> object:
-            if any(name == prefix or name.startswith(f"{prefix}.") for prefix in blocked_prefixes):
+            if any(
+                name == prefix or name.startswith(f"{prefix}.")
+                for prefix in blocked_prefixes
+            ):
                 raise ImportError(name)
             return real_import(name, globals_, locals_, fromlist, level)
 

@@ -332,6 +332,9 @@ def test_flaky_untriaged_entries_require_triage_status() -> None:
 def test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    import sys
+    monkeypatch.delitem(sys.modules, "pytest", raising=False)
+    monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
     monkeypatch.setattr(
         gates,
         "_refresh_existing_inventory_source_tree",

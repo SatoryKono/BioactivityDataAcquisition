@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from typing import Protocol
 
 import orjson
@@ -165,7 +164,7 @@ async def write_bronze_data_and_sidecar(
             atomic_write_bytes(prepared.meta_path, meta_bytes)
         return count, size
 
-    record_count, uncompressed_size = await asyncio.to_thread(_write_task)
+    record_count, uncompressed_size = _write_task()
     return build_bronze_write_artifacts(
         full_path=prepared.full_path,
         record_count=record_count,

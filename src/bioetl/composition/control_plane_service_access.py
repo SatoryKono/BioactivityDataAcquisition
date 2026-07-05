@@ -34,7 +34,9 @@ from bioetl.composition._workflow_services import (
 from bioetl.composition._workflow_services import (
     get_workflow_runner_service as get_workflow_runner_service,
 )
-from bioetl.composition._workflow_services import load_workflow_config as load_workflow_config
+from bioetl.composition._workflow_services import (
+    load_workflow_config as load_workflow_config,
+)
 from bioetl.composition.bootstrap.cli import (
     bootstrap_control_plane_lifecycle_store as bootstrap_control_plane_lifecycle_store,
 )

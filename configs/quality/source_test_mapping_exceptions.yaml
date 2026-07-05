@@ -14,14 +14,6 @@ exemptions:
     owner_tests:
       - tests/unit/interfaces/cli/test_cli_helpers.py
       - tests/unit/interfaces/cli/test_cli_commands_basic.py
-  - source: src/bioetl/infrastructure/compat/pandera_compat.py
-    policy: aggregate_owner
-    reason: >
-      Pandera compat seam is exercised through the infrastructure owner test
-      module rather than a mirrored thin-package sibling test file.
-    owner_tests:
-      - tests/unit/infrastructure/test_pandera_python314_support.py
-      - tests/unit/composition/bootstrap/test_runtime_patch.py
   - source: src/bioetl/application/composite/helpers/resolver_helper.py
     policy: aggregate_owner
     reason: >

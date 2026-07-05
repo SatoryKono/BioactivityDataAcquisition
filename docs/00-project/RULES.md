@@ -66,7 +66,7 @@ ______________________________________________________________________
 
 - **Infrastructure (Инфраструктура/Адаптеры)**: Реализация взаимодействия с внешним миром (HTTP, БД, файловая система).
 - **Application (Приложение/Пайплайны)**: Оркестрация потоков данных. Определяет *когда* и *в каком порядке* вызываются порты.
-- **Domain (Домен/Чистая логика)**: Чистые функции и контракты (Protocols). Никакого ввода-вывода (I/O). Pandera/Pandas imports are allowed only as schema-contract representation under `src/bioetl/domain/schemas/` and `src/bioetl/domain/contracts/`; runtime Pandera support validation belongs to explicit composition bootstrap (`apply_runtime_compatibility_patches` delegating to `validate_supported_pandera_runtime`), not package import side effects. См. [ADR-048](../02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md).
+- **Domain (Домен/Чистая логика)**: Чистые функции и контракты (Protocols). Никакого ввода-вывода (I/O). Pandera/Pandas imports are allowed only as schema-contract representation under `src/bioetl/domain/schemas/` and `src/bioetl/domain/contracts/`; runtime Pandera support MUST NOT use package import side effects, and the retained `apply_runtime_compatibility_patches` seam is a no-op after removal of the Pandera-specific compatibility shim. См. [ADR-048](../02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md).
 
 ### 1.1.1. Обеспечение Контрактов (Enforcement)
 

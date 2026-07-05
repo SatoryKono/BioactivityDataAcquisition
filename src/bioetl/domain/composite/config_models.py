@@ -195,6 +195,7 @@ class EnricherConfig:
         """Return True if this enricher has many-to-one cardinality (requires aggregation)."""
         return self.cardinality == EnricherCardinality.MANY_TO_ONE
 
+
 @dataclass(frozen=True, slots=True)
 class CompositeConfig:
     """Complete composite pipeline configuration root."""
