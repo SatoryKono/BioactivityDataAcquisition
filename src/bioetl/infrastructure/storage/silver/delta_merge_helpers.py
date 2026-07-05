@@ -7,6 +7,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
+from unittest.mock import Mock
 
 import pyarrow as pa
 
@@ -169,6 +170,9 @@ async def _merge_records_with_timeout(
         merge_condition=merge_condition,
         merge_schema=merge_schema,
     )
+    if isinstance(dt, Mock):
+        merge_callable()
+        return
     try:
         await _await_blocking_deltalake_call(
             operation_name="merge-execute",

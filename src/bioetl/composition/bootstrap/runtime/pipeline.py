@@ -15,9 +15,6 @@ from bioetl.composition.runtime_builders.config_access import resolve_configs_ro
 from bioetl.composition.runtime_builders.runner_builder import (
     build_pipeline_runner as _build_pipeline_runner,
 )
-from bioetl.infrastructure.compat.pandera_compat import (
-    validate_supported_pandera_runtime,
-)
 
 if TYPE_CHECKING:
     from bioetl.application.composite.runtime_wiring_api import PipelineRunner
@@ -33,8 +30,8 @@ __all__ = [
 
 
 def apply_runtime_compatibility_patches() -> bool:
-    """Run the retained bootstrap seam as a validation-only runtime gate."""
-    return validate_supported_pandera_runtime()
+    """Retained public bootstrap hook; no runtime compatibility patch is needed."""
+    return False
 
 
 def build_runtime_bootstrap_phases(

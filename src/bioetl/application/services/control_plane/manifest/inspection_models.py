@@ -107,6 +107,7 @@ class RunManifestVerifyResult:
             ),
         }
 
+
 _RUN_MANIFEST_INSPECTION_MODEL_EXPORTS = (
     "RunManifestDiffEntry",
     "RunManifestDiffResult",

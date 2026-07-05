@@ -36,6 +36,7 @@ def build_common_network_error_bundle(
         RuntimeError,
     )
 
+
 COMMON_ADAPTER_FETCH_RESILIENCE_ERRORS = (
     BioETLError,
     ExternalServiceError,

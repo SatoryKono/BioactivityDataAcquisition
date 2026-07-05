@@ -140,7 +140,6 @@ def test_issue_5671_governance_artifact_references_are_backed_by_live_evidence()
     runtime_inventory = _load_json(
         ROOT / "reports" / "observability" / "runtime_cardinality_inventory.json"
     )
-    remote_main = _load_json(REMOTE_MAIN_BASELINE)
     tests_workflow = TESTS_WORKFLOW.read_text(encoding="utf-8")
     contract_workflow = CONTRACT_WORKFLOW.read_text(encoding="utf-8")
 
@@ -216,10 +215,6 @@ def test_issue_5674_internal_compatibility_shims_have_current_expiry_guards() ->
     inventory = _load_yaml(INTERNAL_SHIMS)
     today = datetime.now(UTC).date()
     review_by = date.fromisoformat(str(inventory["review_by"]))
-    pandera_compat = importlib.import_module(
-        "bioetl.infrastructure.compat.pandera_compat"
-    )
-    pandera_policy = pandera_compat.PANDERA_RUNTIME_SUPPORT_POLICY
 
     assert review_by >= today
     assert inventory["new_src_import_policy"] == "fail_fast_review_required"
@@ -235,10 +230,8 @@ def test_issue_5674_internal_compatibility_shims_have_current_expiry_guards() ->
             assert int(shim["max_src_importer_count"]) == 0
             assert _src_importers(module_name) == set(shim["allowed_src_importers"])
 
-    assert pandera_policy["failure_policy"] == "fail_fast_no_runtime_monkeypatch"
-    assert date.fromisoformat(str(pandera_policy["review_date"])) >= today
-    assert "upstream_exit_condition" in pandera_policy
-    assert "apply_pandera_typing_compat_if_needed" not in pandera_compat.__all__
+    with pytest.raises(ModuleNotFoundError):
+        importlib.import_module("bioetl.infrastructure.compat.pandera_compat")
 
 
 def test_issue_5675_compatibility_tests_and_snapshot_lane_are_bounded() -> None:

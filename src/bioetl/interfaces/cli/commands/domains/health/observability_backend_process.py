@@ -122,7 +122,9 @@ def drop_listening_backend_on_port(
 
 
 def _drop_listener_pids(port: int, pids: tuple[int, ...]) -> bool:
-    drop_pid = _drop_windows_listener_pid if os.name == "nt" else _drop_posix_listener_pid
+    drop_pid = (
+        _drop_windows_listener_pid if os.name == "nt" else _drop_posix_listener_pid
+    )
     return all(drop_pid(port, pid) for pid in pids)
 
 

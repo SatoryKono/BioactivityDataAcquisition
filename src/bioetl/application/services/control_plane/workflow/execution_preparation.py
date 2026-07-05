@@ -165,6 +165,7 @@ def _prepare_resumed_execution(
         resumed=True,
     )
 
+
 def _build_initial_state(manifest: WorkflowManifest) -> WorkflowExecutionState:
     now = manifest.created_at
     steps = tuple(

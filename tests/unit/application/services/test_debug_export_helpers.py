@@ -37,7 +37,15 @@ class _NoPayloadState:
     __slots__ = ()
 
 
-def test_record_payload_and_json_helpers_cover_mapping_model_and_object_payloads() -> None:
+def test_utc_now_is_timezone_aware() -> None:
+    now = helpers._utc_now()
+
+    assert now.tzinfo is UTC
+
+
+def test_record_payload_and_json_helpers_cover_mapping_model_and_object_payloads() -> (
+    None
+):
     assert helpers._record_payload(None) == {}
     assert helpers._record_payload({"value": "ok"}) == {"value": "ok"}
     assert helpers._record_payload(_ModelDumpPayload("dumped")) == {"value": "dumped"}
@@ -57,6 +65,10 @@ def test_record_payload_and_json_helpers_cover_mapping_model_and_object_payloads
     assert helpers._json_default(PureWindowsPath(r"\tmp\debug")) == "/tmp/debug"
     assert helpers._jsonable_value({"a": 1}) == '{"a": 1}'
     assert helpers._json_default(date(2026, 1, 2)) == "2026-01-02"
+    assert helpers._json_default(UUID("00000000-0000-0000-0000-000000000456")) == (
+        "00000000-0000-0000-0000-000000000456"
+    )
+    assert helpers._jsonable_value(None) == "null"
     assert helpers._json_default(object()).startswith("<object object at ")
 
 
@@ -66,7 +78,12 @@ def test_identity_helpers_cover_primary_key_source_id_and_normalization() -> Non
     assert helpers._normalize_optional_text("  value  ") == "value"
     assert helpers._normalize_optional_text("   ") is None
     assert helpers._primary_key(payload) == "entity-1"
+    assert helpers._primary_key({"activity_id": "ACT-1"}) == "ACT-1"
+    assert helpers._primary_key({"missing": True}) == ""
     assert helpers._source_record_id({"activity_id": "ACT-1"}) == "ACT-1"
+    assert helpers._source_record_id({"activity_id": " ", "id": "fallback-id"}) == (
+        "fallback-id"
+    )
     assert helpers._source_record_id({"missing": True}) == ""
 
 
@@ -75,6 +92,7 @@ def test_rule_and_rejection_diagnostics_helpers_cover_mapping_and_fallbacks() ->
     assert helpers._infer_failed_field(record, "missing target_chembl_id value") == (
         "target_chembl_id"
     )
+    assert helpers._infer_failed_field(record, "missing assay value") == ""
     assert helpers._extract_rule_id("validation rules=[rule.alpha] failed") == (
         "rule.alpha"
     )
@@ -104,20 +122,26 @@ def test_rule_and_rejection_diagnostics_helpers_cover_mapping_and_fallbacks() ->
     )
     assert inferred == ("target_chembl_id", "", "")
 
-    model_dump_details = helpers._extract_rejection_details_mapping(_ModelDumpPayload("x"))
+    model_dump_details = helpers._extract_rejection_details_mapping(
+        _ModelDumpPayload("x")
+    )
     assert model_dump_details == {"value": "x"}
     assert helpers._extract_rejection_details_mapping(_NonMappingModelDump()) == {}
     assert helpers._extract_rejection_details_mapping(_DictPayload("attr")) == {
         "value": "attr"
     }
+    assert helpers._extract_rejection_details_mapping(_NoPayloadState()) is None
 
     assert (
-        helpers._extract_expected_constraint_from_details({"expected": None})
-        == "None"
+        helpers._extract_expected_constraint_from_details({"expected": None}) == "None"
     )
     assert (
-        helpers._extract_expected_constraint_from_details({"expected": 7}) == "7"
+        helpers._extract_expected_constraint_from_details(
+            {"operator": ">", "expected": True}
+        )
+        == "> True"
     )
+    assert helpers._extract_expected_constraint_from_details({"expected": 7}) == "7"
     assert (
         helpers._extract_expected_constraint_from_details({"constraint": ">= 0"})
         == ">= 0"
@@ -141,6 +165,13 @@ def test_rule_and_rejection_diagnostics_helpers_cover_mapping_and_fallbacks() ->
     )
     assert inferred_from_record == ("target_chembl_id", "None", "")
 
+    scalar_from_record = helpers._extract_rejection_diagnostics(
+        record={"target_chembl_id": "CHEMBL1"},
+        details={"field": "target_chembl_id"},
+        message="record scalar fallback",
+    )
+    assert scalar_from_record == ("target_chembl_id", "CHEMBL1", "")
+
     inferred_complex_from_record = helpers._extract_rejection_diagnostics(
         record={"target_chembl_id": {"nested": True}},
         details={"field": "target_chembl_id"},
@@ -154,16 +185,25 @@ def test_rule_and_rejection_diagnostics_helpers_cover_mapping_and_fallbacks() ->
 
 
 def test_reason_hash_and_sort_helpers_cover_branch_variants() -> None:
-    assert helpers._infer_reason_code(
-        error_type=ErrorType.SCHEMA_VIOLATION,
-        details="schema failed",
-    ) == "SCHEMA_TYPE_MISMATCH"
-    assert helpers._infer_reason_code(
-        details="runtime dq validation failed on hard rule",
-    ) == "DQ_HARD_RULE_FAILED"
-    assert helpers._infer_reason_code(
-        details="field target_id missing",
-    ) == "SCHEMA_REQUIRED_FIELD_MISSING"
+    assert (
+        helpers._infer_reason_code(
+            error_type=ErrorType.SCHEMA_VIOLATION,
+            details="schema failed",
+        )
+        == "SCHEMA_TYPE_MISMATCH"
+    )
+    assert (
+        helpers._infer_reason_code(
+            details="runtime dq validation failed on hard rule",
+        )
+        == "DQ_HARD_RULE_FAILED"
+    )
+    assert (
+        helpers._infer_reason_code(
+            details="field target_id missing",
+        )
+        == "SCHEMA_REQUIRED_FIELD_MISSING"
+    )
     assert helpers._infer_reason_code(policy="quarantine") == "QUARANTINE_POLICY"
     assert helpers._infer_reason_code(details="soft failure") == "DQ_SOFT_RULE_FAILED"
 
@@ -177,6 +217,12 @@ def test_reason_hash_and_sort_helpers_cover_branch_variants() -> None:
         record={"activity_id": "ACT-1", "value": "x"},
     )
     assert computed_hash
+    blank_existing_hash = helpers._payload_hash(
+        provider_id="chembl",
+        record={"activity_id": "ACT-1", "content_hash": " "},
+    )
+    assert blank_existing_hash
+    assert blank_existing_hash != " "
     assert helpers._payload_hash(provider_id="chembl", record=None) == ""
     assert helpers._row_sort_key(
         {"record_index": "5", "primary_key": "B", "payload_hash": "H"}
@@ -184,9 +230,13 @@ def test_reason_hash_and_sort_helpers_cover_branch_variants() -> None:
     assert helpers._row_sort_key(
         {"record_index": "bad", "primary_key": "B", "payload_hash": "H"}
     ) == (None, "B", "H")
+    assert helpers._row_sort_key(
+        {"record_index": object(), "primary_key": None, "payload_hash": None}
+    ) == (None, "", "")
     assert helpers._lineage_sort_key(
         {"fragment_id": "f", "edge_type": "e", "node_id": "n"}
     ) == ("f", "e", "n")
+    assert helpers._lineage_sort_key({}) == ("", "", "")
 
 
 def test_base_row_contains_json_payloads_and_hashes() -> None:

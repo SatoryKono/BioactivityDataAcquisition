@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -20,9 +19,8 @@ class BaseDeltaWriterTableAccessMixin:
         from bioetl.infrastructure.storage import base_delta_writer as _base
 
         table_path = self._resolve_table_path(table_name)
-        loop = asyncio.get_running_loop()
         try:
-            return await loop.run_in_executor(None, _base._load_delta_table, table_path)
+            return _base._load_delta_table(table_path)
         except _base.DeltaTableNotFoundError:
             return None
 
@@ -33,8 +31,7 @@ class BaseDeltaWriterTableAccessMixin:
         dt = await self._open_delta_table(table_name)
         if dt is None:
             return None
-        loop = asyncio.get_running_loop()
-        return await loop.run_in_executor(None, _base._get_delta_table_arrow_schema, dt)
+        return _base._get_delta_table_arrow_schema(dt)
 
     def get_table_path(self, table_name: str):
         """Return the filesystem path for a Delta table."""
@@ -54,8 +51,7 @@ class BaseDeltaWriterTableAccessMixin:
         if dt is None:
             raise FileNotFoundError(f"Table not found: {table_name}")
 
-        loop = asyncio.get_running_loop()
-        return await loop.run_in_executor(None, _base._read_delta_records, dt, columns)
+        return _base._read_delta_records(dt, columns)
 
     def clear(self, table_name: str | None = None, dry_run: bool = False) -> int:
         """Clear one Delta table or every Delta table under ``base_path``."""

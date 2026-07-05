@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-import ast
 from importlib import import_module
 from pathlib import Path
 
 import pytest
 from tests.helpers.compat_shim_guards import (
+    ImportRecord,
     find_lingering_files,
-    iter_compat_import_violations,
+    iter_compat_import_violations_from_records,
 )
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -50,11 +50,11 @@ def test_checkpoint_compatibility_runtime_facade_import_fails() -> None:
 
 @pytest.mark.architecture
 def test_checkpoint_compatibility_runtime_facade_is_not_used_in_src(
-    source_ast_cache: dict[Path, ast.Module],
+    source_import_records: tuple[ImportRecord, ...],
 ) -> None:
     """First-party src must import checkpoint compatibility owners directly."""
-    violations = iter_compat_import_violations(
-        ast_cache=source_ast_cache,
+    violations = iter_compat_import_violations_from_records(
+        import_records=source_import_records,
         root=ROOT,
         compat_modules=REMOVED_COMPAT_MODULES,
         compat_parent_imports=REMOVED_COMPAT_PARENT_IMPORTS,
@@ -67,11 +67,11 @@ def test_checkpoint_compatibility_runtime_facade_is_not_used_in_src(
 
 @pytest.mark.architecture
 def test_checkpoint_compatibility_runtime_facade_is_not_used_in_tests(
-    test_ast_cache: dict[Path, ast.Module],
+    test_import_records: tuple[ImportRecord, ...],
 ) -> None:
     """Tests must not reintroduce the checkpoint compatibility runtime facade."""
-    violations = iter_compat_import_violations(
-        ast_cache=test_ast_cache,
+    violations = iter_compat_import_violations_from_records(
+        import_records=test_import_records,
         root=ROOT,
         compat_modules=REMOVED_COMPAT_MODULES,
         compat_parent_imports=REMOVED_COMPAT_PARENT_IMPORTS,

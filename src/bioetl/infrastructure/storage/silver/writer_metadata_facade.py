@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Sequence
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Literal, cast
@@ -79,7 +78,7 @@ class SilverWriterMetadataFacade:
     async def _get_delta_version(self, table_path: str) -> int | None:
         """Resolve current Delta version for one Silver table."""
         try:
-            return await asyncio.to_thread(_read_delta_version, table_path)
+            return _read_delta_version(table_path)
         except DeltaTableNotFoundError:
             return None
 

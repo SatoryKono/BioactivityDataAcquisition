@@ -50,7 +50,7 @@ Runtime DataFrame processing, compatibility bootstrap, and infrastructure mappin
 
 **Value Objects / immutable configs:** frozen dataclasses unless approved alternative.
 
-Runtime Pandera compat: **only** via `bioetl.composition.bootstrap.runtime.pipeline.apply_runtime_compatibility_patches` → `infrastructure.compat.pandera_compat`. Import-time `__init__` patching **MUST NOT**.
+Runtime Pandera compat is retired: `bioetl.composition.bootstrap.runtime.pipeline.apply_runtime_compatibility_patches` remains a no-op public hook. `infrastructure.compat.pandera_compat` **MUST NOT** be restored without a new compatibility decision. Import-time `__init__` patching **MUST NOT**.
 
 ## Application Layer
 

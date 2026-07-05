@@ -365,11 +365,10 @@ class TestStorageFactoryLocal:
             assert silver_exporter.base_path == Path("data/export/silver.csv")
             assert silver_exporter.delimiter == ","
 
-            # Verify GoldWriter was called with csv_exporter
+            # Verify GoldWriter receives csv_exporter through runtime services.
             mock_gold.assert_called_once()
             gold_call_kwargs = mock_gold.call_args[1]
-            assert "csv_exporter" in gold_call_kwargs
-            gold_exporter = gold_call_kwargs["csv_exporter"]
+            gold_exporter = gold_call_kwargs["runtime_services"].csv_exporter
             assert isinstance(gold_exporter, CsvExporter)
             assert gold_exporter.base_path == Path("data/export/gold.csv")
             assert gold_exporter.delimiter == ";"

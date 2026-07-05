@@ -25,7 +25,9 @@ class _ColumnPriorityProvider(Protocol):
     def collect_field_columns(
         self,
         field: str,
-        enrichers: Sequence[Any],  # Any: Enrichers can be of any type implementing the enrichment protocol
+        enrichers: Sequence[
+            Any
+        ],  # Any: Enrichers can be of any type implementing the enrichment protocol
         available_columns: set[str],
         seed_pipeline: str | None,
     ) -> list[str]: ...
@@ -43,7 +45,9 @@ class _ColumnPriorityProvider(Protocol):
         df: Any,  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
         field: str,
         ordered_cols: list[str],
-        _can_coalesce_fn: Callable[[Any, str, str], bool],  # Any: DataFrame can be of any type
+        _can_coalesce_fn: Callable[
+            [Any, str, str], bool
+        ],  # Any: DataFrame can be of any type
     ) -> tuple[list[str], list[str]]: ...
 
 
@@ -122,7 +126,9 @@ def compatible_columns(
 def coalesce_and_drop(
     df: Any,  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
     compatible_cols: list[str],
-) -> Any:  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
+) -> (
+    Any
+):  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
     """Coalesce compatible columns into first and drop the rest."""
     import polars as pl
 
@@ -168,11 +174,17 @@ def apply_field_priority(
     provider: _ColumnPriorityProvider,
     field: str,
     priorities: tuple[str, ...],
-    enrichers: Sequence[Any],  # Any: Enrichers can be of any type implementing the enrichment protocol
+    enrichers: Sequence[
+        Any
+    ],  # Any: Enrichers can be of any type implementing the enrichment protocol
     available_columns: set[str],
     seed_pipeline: str | None,
-    can_coalesce_fn: Callable[[Any, str, str], bool],  # Any: DataFrame can be of any type
-) -> Any:  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
+    can_coalesce_fn: Callable[
+        [Any, str, str], bool
+    ],  # Any: DataFrame can be of any type
+) -> (
+    Any
+):  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
     """Apply one explicit field-priority rule and return updated DataFrame."""
     columns = provider.collect_field_columns(
         field,
@@ -350,7 +362,9 @@ def build_latest_timestamp_row_fields(
 def drop_coalesced_columns(
     df: Any,  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
     compatible_cols: list[str],
-) -> Any:  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
+) -> (
+    Any
+):  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
     """Drop redundant compatible columns after coalescing into the target."""
     cols_to_drop = [column for column in compatible_cols[1:] if column in df.columns]
     return df.drop(cols_to_drop) if cols_to_drop else df
@@ -360,7 +374,9 @@ def coalesce_by_latest_timestamp(
     df: Any,  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
     *,
     ordered_cols: list[str],
-) -> Any:  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
+) -> (
+    Any
+):  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
     """Coalesce compatible columns using companion timestamps when present."""
     import polars as pl
 
@@ -380,7 +396,8 @@ def coalesce_by_latest_timestamp(
     priority_rank = {column: index for index, column in enumerate(compatible_cols)}
 
     result = df.with_columns(
-        pl.struct(row_fields).map_elements(
+        pl.struct(row_fields)
+        .map_elements(
             lambda row: pick_latest_timestamp_value(
                 row=row,
                 compatible_cols=compatible_cols,
@@ -388,6 +405,7 @@ def coalesce_by_latest_timestamp(
                 priority_rank=priority_rank,
             ),
             return_dtype=df.schema[target_col],
-        ).alias(target_col)
+        )
+        .alias(target_col)
     )
     return drop_coalesced_columns(result, compatible_cols)

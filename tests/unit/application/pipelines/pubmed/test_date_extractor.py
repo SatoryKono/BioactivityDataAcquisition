@@ -64,6 +64,51 @@ class TestDateExtractorSingleton:
         assert date_str == "2024-02-29"
 
 
+@pytest.mark.unit
+class TestMedlineDateParser:
+    """Tests for MedlineDate free-text parsing branches."""
+
+    def test_parse_returns_none_for_empty_or_unparseable_values(self) -> None:
+        parser = MedlineDateParser()
+
+        assert parser.parse("") is None
+        assert parser.parse("   ") is None
+        assert parser.parse("undated spring") is None
+
+    def test_parse_prefers_latest_year_in_cross_year_ranges(self) -> None:
+        parser = MedlineDateParser()
+
+        assert parser.parse("2022 Dec-2023 Jan") == {
+            "year": "2023",
+            "month": "Jan",
+            "day": None,
+        }
+
+    @pytest.mark.parametrize(
+        ("medline_date", "expected_month"),
+        [
+            ("2023 1st Quart", "03"),
+            ("2023 Q4", "12"),
+            ("2023 Spring", "05"),
+            ("2023 aut", "11"),
+            ("2023 early Feb later Mar", "Mar"),
+            ("2023 99th meeting", None),
+        ],
+    )
+    def test_parse_month_quarter_season_and_missing_month_branches(
+        self,
+        medline_date: str,
+        expected_month: str | None,
+    ) -> None:
+        parser = MedlineDateParser()
+
+        assert parser.parse(medline_date) == {
+            "year": "2023",
+            "month": expected_month,
+            "day": None,
+        }
+
+
 # ---------------------------------------------------------------------------
 # Tests merged from orphan tests/unit/pipelines/pubmed/extractors/test_date_extractor.py
 # ---------------------------------------------------------------------------
@@ -148,6 +193,14 @@ class TestFormatDate:
             result = DateExtractor.format_date("2023", month, "01")
             assert result == f"2023-{exp}-01"
 
+    def test_unknown_month_falls_back_to_year_end(self) -> None:
+        """Test unknown month names are treated as year-only dates."""
+        assert DateExtractor.format_date("2023", "unknown", None) == "2023-12-31"
+
+    def test_invalid_year_or_month_uses_last_day_fallback(self) -> None:
+        """Test invalid calendar inputs use the conservative day fallback."""
+        assert DateExtractor.format_date("20x3", "13", None) == "20x3-13-30"
+
 
 @pytest.mark.unit
 class TestExtractDate:
@@ -190,6 +243,28 @@ class TestExtractDate:
         date_str, year_int = DateExtractor.extract_date(node)
         assert date_str is None
         assert year_int is None
+
+    def test_extract_structured_partial_components(self) -> None:
+        """Test structured dates with month-only and day-only components."""
+        month_only = ET.fromstring("<PubDate><Month>03</Month></PubDate>")
+        assert DateExtractor().extract(month_only) == {
+            "year": None,
+            "month": "03",
+            "day": None,
+        }
+
+        day_only = ET.fromstring("<PubDate><Day>15</Day></PubDate>")
+        assert DateExtractor().extract(day_only) == {
+            "year": None,
+            "month": None,
+            "day": "15",
+        }
+
+    def test_normalize_non_digit_year_keeps_date_without_year_int(self) -> None:
+        """Test normalize keeps formatted date but rejects non-digit year_int."""
+        result = DateExtractor().normalize({"year": "20x3", "month": "03", "day": "15"})
+
+        assert result == {"date_str": "20x3-03-15", "year_int": None}
 
 
 @pytest.mark.unit

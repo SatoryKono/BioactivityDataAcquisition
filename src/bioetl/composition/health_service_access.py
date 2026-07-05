@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from bioetl.composition._resource_management import (
         QuarantineRuntimeServiceProtocol as _QuarantineRuntimeServiceProtocol,
     )
+
     HealthServerDependencies = _HealthServerDependencies
     HealthServerDependenciesProtocol = _HealthServerDependencies
     QuarantineRuntimeServiceProtocol = _QuarantineRuntimeServiceProtocol

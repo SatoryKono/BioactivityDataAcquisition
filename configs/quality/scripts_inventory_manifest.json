@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-05T14:41:11.889716+00:00",
+  "generated_at": "2026-07-05T16:23:51.921653+00:00",
   "summary": {
     "total_scripts": 452,
     "status_counts": {
@@ -9,7 +9,7 @@
     },
     "reference_group_coverage": {
       "agents": 5,
-      "build": 3,
+      "build": 4,
       "ci": 62,
       "docs": 161,
       "other": 23,
@@ -6602,7 +6602,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 837,
+          "line": 825,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -7470,8 +7470,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 19,
+      "reference_count": 21,
       "references": [
+        {
+          "path": "Makefile",
+          "line": 210,
+          "source_group": "build",
+          "text": "BIOETL_PYTEST_SHARDED_TEST_HEALTH_SUITE=architecture-fast-boundary bash scripts/engineering/dev/run_pytest_sharded.sh --shard S7-architecture-fast-boundary --stream -- tests/architecture/ -m \"architec"
+        },
         {
           "path": "docs/03-guides/testing.md",
           "line": 119,
@@ -7513,12 +7519,6 @@
           "line": 875,
           "source_group": "docs",
           "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded"
-        },
-        {
-          "path": "scripts/engineering/dev/README.md",
-          "line": 51,
-          "source_group": "scripts",
-          "text": "bash scripts/engineering/dev/run_pytest_sharded.sh"
         }
       ]
     },
@@ -8737,7 +8737,7 @@
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
-          "line": 295,
+          "line": 292,
           "source_group": "tests",
           "text": "command = \"scripts/engineering/qa/check_test_audit_preflight.py --strict\""
         }
@@ -9064,7 +9064,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 757,
+          "line": 745,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/generate_hotspot_degradation_report.py \\"
         },

@@ -43,7 +43,7 @@ Skipping steps is a contract governance violation.
 ## Pandera Runtime Boundary (ADR-048)
 
 - Domain schemas/contracts in `domain/schemas/`, `domain/contracts/`
-- Runtime compat bootstrap: `composition.bootstrap.runtime.pipeline.apply_runtime_compatibility_patches` only
+- Runtime compat bootstrap: `composition.bootstrap.runtime.pipeline.apply_runtime_compatibility_patches` is retained as a no-op; removed Pandera-specific shims stay absent unless a new ADR permits them
 - Import-time package `__init__` patching **MUST NOT**
 
 ## Rollback

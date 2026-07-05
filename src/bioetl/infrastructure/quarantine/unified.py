@@ -122,7 +122,7 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
         if not records:
             return
         normalized_records = [self._normalize_record(record) for record in records]
-        await asyncio.to_thread(self._write_to_delta, normalized_records)
+        self._write_to_delta(normalized_records)
 
     def _normalize_record(
         self,
@@ -206,7 +206,6 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
         Returns:
             List of quarantine record dicts with payload, error, and status fields.
         """
-        await asyncio.sleep(0)
         return inspect_records(
             self.base_path, None, pipeline, limit, error_code, run_id, dq_status
         )

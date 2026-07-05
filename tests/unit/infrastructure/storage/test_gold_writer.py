@@ -214,7 +214,15 @@ class TestGoldWriterPipelineHelpers:
         writer = _build_gold_writer(
             base_path=GOLD_ROOT,
             logger=noop_logger,
-            tracing=tracing,
+            runtime_services=GoldWriterRuntimeServices(
+                csv_exporter=None,
+                tracing=tracing,
+                metrics=None,
+                audit=None,
+                metadata_writer=None,
+                metadata_coordinator=None,
+                lineage_store=None,
+            ),
         )
         writer._prepare_write_gold = AsyncMock(  # type: ignore[method-assign]
             return_value=MagicMock()

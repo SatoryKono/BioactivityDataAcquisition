@@ -128,7 +128,8 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
                     h.update(block)
             return h.hexdigest()
 
-        return await asyncio.to_thread(_compute)
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, _compute)
 
     async def _write_json_copy(
         self,
@@ -155,11 +156,7 @@ class BronzeWriterIOMixin(BronzeWriterReadCleanupMixin):
                 f"Bronze JSON copy already exists with different payload: {json_full_path}"
             )
 
-        loop = asyncio.get_running_loop()
-        await loop.run_in_executor(
-            None,
-            lambda: atomic_write_bytes(json_full_path, jsonl_content),
-        )
+        atomic_write_bytes(json_full_path, jsonl_content)
 
 
 __all__ = ["BronzeWriterIOMixin"]

@@ -60,6 +60,8 @@ def list_composite_config_names(
             raw_payload = yaml.safe_load(path.read_text(encoding="utf-8"))
         except OSError:
             continue
-        if isinstance(raw_payload, dict) and isinstance(raw_payload.get("composite"), dict):
+        if isinstance(raw_payload, dict) and isinstance(
+            raw_payload.get("composite"), dict
+        ):
             names.append(path.stem)
     return tuple(names)

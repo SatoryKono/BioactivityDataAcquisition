@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from pathlib import Path
 
 import pyarrow as pa
@@ -75,9 +74,7 @@ async def get_table_schema(base_path: str | Path, table_name: str) -> pa.Schema 
             # Handle other potential errors (permission issues, corrupt tables, etc.)
             return None
 
-    # Run the synchronous DeltaTable loading in an executor to avoid blocking
-    loop = asyncio.get_running_loop()
-    return await loop.run_in_executor(None, _sync_get_schema)
+    return _sync_get_schema()
 
 
 def prepare_arrow_data(

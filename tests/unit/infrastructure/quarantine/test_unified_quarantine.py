@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-import asyncio
 import json
 from datetime import UTC, datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 from uuid import UUID
 
 import pytest
@@ -300,22 +299,12 @@ class TestUnifiedQuarantineWrite:
         assert len(records) == 2
 
     @pytest.mark.asyncio
-    async def test_write_many_uses_to_thread(self, quarantine, batch_id):
-        """Bulk writes should be offloaded from the event loop."""
+    async def test_write_many_delegates_to_delta_write_path(self, quarantine, batch_id):
+        """Bulk writes should delegate through the Delta write path once."""
         write_mock = MagicMock()
 
-        async def run_inline(func, *args):
-            await asyncio.sleep(0)
-            return func(*args)
-
-        with (
-            patch(
-                "bioetl.infrastructure.quarantine.unified.write_deltalake", write_mock
-            ),
-            patch(
-                "bioetl.infrastructure.quarantine.unified.asyncio.to_thread",
-                AsyncMock(side_effect=run_inline),
-            ) as to_thread_mock,
+        with patch(
+            "bioetl.infrastructure.quarantine.unified.write_deltalake", write_mock
         ):
             await quarantine.write_many(
                 [
@@ -329,7 +318,6 @@ class TestUnifiedQuarantineWrite:
                 ]
             )
 
-        to_thread_mock.assert_awaited_once()
         write_mock.assert_called_once()
 
 

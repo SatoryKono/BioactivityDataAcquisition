@@ -131,6 +131,7 @@ class OpenAlexPublicationTransformer(BasePublicationTransformer):
             "_dq_warn": False,
             "_dq_error": False,
         }
+
     def _extract_author_bundle(self, rec: BronzeRecord) -> GoldRecord:
         """Extract and normalize author/affiliation related fields."""
         normalizer = self._data_normalizer

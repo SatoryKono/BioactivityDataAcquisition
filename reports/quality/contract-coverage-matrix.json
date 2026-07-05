@@ -967,6 +967,7 @@
         "tests/integration/pipelines/test_chembl_target_component.py",
         "tests/unit/application/composite/test_target_protein_classification_summary.py",
         "tests/unit/application/pipelines/chembl/test_target_protein_classification_transformer.py",
+        "tests/unit/application/test_chembl_target_helpers.py",
         "tests/unit/composition/providers/test_chembl_target_protein_classification_data_source.py",
         "tests/unit/composition/providers/test_chembl_target_protein_classification_helpers.py",
         "tests/unit/domain/test_protein_class_target_type.py",
@@ -1659,6 +1660,7 @@
         "tests/integration/pipelines/test_chembl_target_component.py",
         "tests/unit/application/composite/test_target_protein_classification_summary.py",
         "tests/unit/application/pipelines/chembl/test_target_protein_classification_transformer.py",
+        "tests/unit/application/test_chembl_target_helpers.py",
         "tests/unit/composition/providers/test_chembl_target_protein_classification_data_source.py",
         "tests/unit/composition/providers/test_chembl_target_protein_classification_helpers.py",
         "tests/unit/domain/test_protein_class_target_type.py",
@@ -2508,5 +2510,5 @@
       "uniqueness_constraint_source": "pipeline.business_primary_keys"
     }
   ],
-  "snapshot_date": "2026-07-03"
+  "snapshot_date": "2026-07-05"
 }

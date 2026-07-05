@@ -27,8 +27,8 @@ Completed in this cycle:
   `src/bioetl/domain/schemas/` and `src/bioetl/domain/contracts/`.
 - Locked runtime compatibility ownership to the explicit composition seam
   `bioetl.composition.bootstrap.runtime.pipeline.apply_runtime_compatibility_patches`,
-  with validation delegated to
-  `bioetl.infrastructure.compat.pandera_compat.validate_supported_pandera_runtime`.
+  which is retained as a no-op after the Pandera-specific compatibility shim
+  was removed in #5917.
 - Reworded requirements/glossary surfaces to remove ambiguity between domain
   contracts and infrastructure mapping responsibilities.
 

@@ -61,7 +61,9 @@ class RecordProcessor:
         """
         _ = config
         self._context = context
-        self._span_executor = RecordProcessorSpanExecutor(tracer)  # EXC-002: lightweight wrapper
+        self._span_executor = RecordProcessorSpanExecutor(
+            tracer
+        )  # EXC-002: lightweight wrapper
         self._batch_metrics = batch_metrics
         self._transformer = transformer
         self._writer = writer

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import inspect
 from collections.abc import Awaitable, Callable, Sequence
 from typing import TYPE_CHECKING, Any, Protocol, cast
@@ -222,7 +221,7 @@ async def compute_dq_metrics_from_arrow_data(
             list(validation_errors) if validation_errors is not None else None
         ),
     )
-    return await asyncio.to_thread(metadata_ops._dq_calculator.calculate, dq_input)
+    return metadata_ops._dq_calculator.calculate(dq_input)
 
 
 def should_skip_silver_metadata_write(

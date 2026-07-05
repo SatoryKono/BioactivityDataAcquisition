@@ -52,7 +52,11 @@ if TYPE_CHECKING:
     )
     from bioetl.infrastructure.config.settings_api import Settings
 
-__all__ = ["bootstrap_runtime_basics", "build_runner_factories", "build_support_services"]
+__all__ = [
+    "bootstrap_runtime_basics",
+    "build_runner_factories",
+    "build_support_services",
+]
 
 
 def bootstrap_runtime_basics(
@@ -93,7 +97,9 @@ def bootstrap_runtime_basics(
     logger = logger_bootstrapper(config.name, UUID(effective_run_id), "INFO")
 
     # Initialize domain layer enum fields with proper dependency injection
-    from bioetl.composition.bootstrap.runtime.enum_loader_wiring import initialize_domain_enum_fields
+    from bioetl.composition.bootstrap.runtime.enum_loader_wiring import (
+        initialize_domain_enum_fields,
+    )
 
     initialize_domain_enum_fields()
 
@@ -169,7 +175,9 @@ def build_runner_factories(
         normalization_policies=JOIN_KEY_NORMALIZATION_POLICIES,
     )
     run_options_factory: Callable[..., RunOptions] = RunOptions
-    build_context_fn: Callable[[str, RunOptions], PipelineRunContext] = build_pipeline_context
+    build_context_fn: Callable[[str, RunOptions], PipelineRunContext] = (
+        build_pipeline_context
+    )
     runner_factory_builder = cast(
         "Callable[..., RunnerFactoryBuilder[RunOptions]]",
         runner_factory_builder_cls,

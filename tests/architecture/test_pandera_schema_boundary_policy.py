@@ -211,9 +211,13 @@ def test_runtime_pandera_validation_is_not_package_import_side_effect() -> (
     assert "validate_supported_pandera_runtime()" not in top_level_init
     assert "validate_supported_pandera_runtime()" not in runtime_init
     assert "apply_runtime_compatibility_patches" in runtime_init
-    assert "validate_supported_pandera_runtime" in runtime_patch
+    assert "validate_supported_pandera_runtime" not in runtime_patch
+    assert "pandera_compat" not in runtime_patch
     assert not retired_runtime_compat.exists()
     assert not retired_pandera_runtime.exists()
+    assert not (
+        ROOT / "src" / "bioetl" / "infrastructure" / "compat" / "pandera_compat.py"
+    ).exists()
 
 
 def test_adr_048_records_schema_boundary_and_runtime_patch_decisions() -> None:
@@ -229,6 +233,7 @@ def test_adr_048_records_schema_boundary_and_runtime_patch_decisions() -> None:
         "not adapter implementations",
         "No import-time runtime validation",
         "apply_runtime_compatibility_patches",
-        "validate_supported_pandera_runtime",
+        "retained as a no-op",
+        "Pandera-specific compatibility shim has been removed",
     ):
         assert expected in normalized_text

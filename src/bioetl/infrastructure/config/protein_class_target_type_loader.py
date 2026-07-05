@@ -46,9 +46,7 @@ def _entry_from_row(row: object) -> ProteinClassTopLevelMappingEntry:
     )
 
 
-def _required_text(
-    raw: Mapping[str, object], key: str
-) -> str:
+def _required_text(raw: Mapping[str, object], key: str) -> str:
     value = raw.get(key)
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"protein class mapping asset missing {key}")

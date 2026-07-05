@@ -25,7 +25,9 @@ from bioetl.domain.ports import DomainConfigMapperPort, SettingsLoaderPort
 from bioetl.infrastructure.config.converters import yaml_config_to_domain
 
 
-def create_registered_pipeline_registry(registry: PipelineRegistry | None = None) -> PipelineRegistry:
+def create_registered_pipeline_registry(
+    registry: PipelineRegistry | None = None,
+) -> PipelineRegistry:
     effective_registry = create_registry() if registry is None else registry
     register_all_pipelines(registry=effective_registry)
     return effective_registry

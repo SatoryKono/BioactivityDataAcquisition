@@ -28,6 +28,7 @@ __all__ = [
 PROTEIN_CLASS_TARGET_TYPE_RULE_VERSION: Final = "target_type_rule_v1"
 MAJOR_FAMILY_RULE_VERSION: Final = "major_family_rule_v1"
 
+
 @dataclass(frozen=True, slots=True)
 class ProteinClassTopLevelMappingEntry:
     """One raw L1 label mapping to a canonical target-type class."""
@@ -160,7 +161,9 @@ def normalized_top_level_from_row(
     row: Mapping[str, object],
     mapping_data: ProteinClassTargetTypeMappingData,
     *,
-    normalized_top_level_cls: type[Any],  # Any: Polymorphic class type for normalized top-level objects
+    normalized_top_level_cls: type[
+        Any
+    ],  # Any: Polymorphic class type for normalized top-level objects
     normalize_top_level: Callable[
         [object, ProteinClassTargetTypeMappingData | None],
         Any,  # Any: Return type matches polymorphic normalized object type
