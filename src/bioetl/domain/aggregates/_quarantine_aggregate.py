@@ -47,7 +47,8 @@ class QuarantineEntry(QuarantineEntryTransitionsMixin, QuarantineEntryProperties
 
     Invariants:
         1. payload_hash is computed from payload and immutable
-        2. Status can only transition: NEW -> UNDER_REVIEW -> (IGNORED|REPROCESSED)
+        2. Status can only transition: NEW -> UNDER_REVIEW -> (IGNORED|REPROCESSED|EXPIRED),
+           with direct NEW -> EXPIRED expiry allowed.
         3. Resolution requires resolution_info
         4. payload and error_code are immutable
 
