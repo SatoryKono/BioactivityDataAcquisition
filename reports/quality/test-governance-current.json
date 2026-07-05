@@ -1107,7 +1107,14 @@
     }
   },
   "assertless_total_candidates": 109,
-  "budget_violations": [],
+  "budget_violations": [
+    {
+      "actual": 5,
+      "budget": "duplicate_test_name_occurrences_max",
+      "expected_max": 4,
+      "metric": "duplicate_test_name_occurrences"
+    }
+  ],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1123,8 +1130,8 @@
         "tests/architecture/test_determinism_identity_policy.py:385",
         "tests/architecture/test_determinism_identity_policy.py:435",
         "tests/architecture/test_determinism_identity_policy.py:456",
-        "tests/architecture/test_replay_time_seam_inventory.py:125",
-        "tests/architecture/test_replay_time_seam_inventory.py:135",
+        "tests/architecture/test_replay_time_seam_inventory.py:139",
+        "tests/architecture/test_replay_time_seam_inventory.py:149",
         "tests/unit/application/services/test_checkpoint_execution_identity_alignment.py:96",
         "tests/unit/application/services/test_checkpoint_execution_identity_alignment.py:135"
       ],
@@ -1231,6 +1238,20 @@
   "duplicate_test_name_inventory": [
     {
       "classification": "cross_file",
+      "count": 3,
+      "lane_counts": {
+        "architecture": 3
+      },
+      "locations": [
+        "tests/architecture/test_tech_debt_issues_5657_5661_closeout.py:83",
+        "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py:81",
+        "tests/architecture/test_tech_debt_issues_5956_5961_closeout.py:63"
+      ],
+      "name": "test_closeout_artifact_is_complete_and_budget_safe",
+      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+    },
+    {
+      "classification": "cross_file",
       "count": 2,
       "lane_counts": {
         "architecture": 2
@@ -1244,14 +1265,14 @@
     }
   ],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 1,
-    "duplicate_occurrences": 2,
+    "cross_file_groups": 2,
+    "duplicate_occurrences": 5,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 1
+    "total_duplicate_names": 2
   },
-  "duplicate_test_name_occurrences": 2,
-  "duplicate_test_names": 1,
+  "duplicate_test_name_occurrences": 5,
+  "duplicate_test_names": 2,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -2090,8 +2111,8 @@
           "tests/architecture/test_determinism_identity_policy.py:385",
           "tests/architecture/test_determinism_identity_policy.py:435",
           "tests/architecture/test_determinism_identity_policy.py:456",
-          "tests/architecture/test_replay_time_seam_inventory.py:125",
-          "tests/architecture/test_replay_time_seam_inventory.py:135",
+          "tests/architecture/test_replay_time_seam_inventory.py:139",
+          "tests/architecture/test_replay_time_seam_inventory.py:149",
           "tests/unit/application/services/test_checkpoint_execution_identity_alignment.py:96",
           "tests/unit/application/services/test_checkpoint_execution_identity_alignment.py:135"
         ],
@@ -2198,6 +2219,20 @@
     "duplicate_test_name_inventory": [
       {
         "classification": "cross_file",
+        "count": 3,
+        "lane_counts": {
+          "architecture": 3
+        },
+        "locations": [
+          "tests/architecture/test_tech_debt_issues_5657_5661_closeout.py:83",
+          "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py:81",
+          "tests/architecture/test_tech_debt_issues_5956_5961_closeout.py:63"
+        ],
+        "name": "test_closeout_artifact_is_complete_and_budget_safe",
+        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
+      },
+      {
+        "classification": "cross_file",
         "count": 2,
         "lane_counts": {
           "architecture": 2
@@ -2211,14 +2246,14 @@
       }
     ],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 1,
-      "duplicate_occurrences": 2,
+      "cross_file_groups": 2,
+      "duplicate_occurrences": 5,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 1
+      "total_duplicate_names": 2
     },
-    "duplicate_test_name_occurrences": 2,
-    "duplicate_test_names": 1,
+    "duplicate_test_name_occurrences": 5,
+    "duplicate_test_names": 2,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -2243,6 +2278,15 @@
     "root": ".",
     "top_duplicate_test_names": [
       {
+        "count": 3,
+        "examples": [
+          "tests/architecture/test_tech_debt_issues_5657_5661_closeout.py:83",
+          "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py:81",
+          "tests/architecture/test_tech_debt_issues_5956_5961_closeout.py:63"
+        ],
+        "name": "test_closeout_artifact_is_complete_and_budget_safe"
+      },
+      {
         "count": 2,
         "examples": [
           "tests/architecture/test_tech_debt_issues_5839_5845_closeout.py:96",
@@ -2251,24 +2295,33 @@
         "name": "test_tdx_audit_closeout_artifact_is_complete_and_budget_safe"
       }
     ],
-    "total_test_files": 1930,
-    "total_test_functions": 21784,
+    "total_test_files": 1933,
+    "total_test_functions": 21806,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "78e0b9b48c74ffa8c5360bc8b42aa4193f920c6963445e85badfddc226271c9b",
+  "source_tree_sha256": "2fd1b35e65bd95ed658077e5897377f2aa0bf5c023d2a9bf251f2e6e4eb33924",
   "summary": {
     "assertless_total_candidates": 109,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 2,
-    "duplicate_test_names": 1,
+    "duplicate_test_name_occurrences": 5,
+    "duplicate_test_names": 2,
     "intentional_no_exception_contract": 94,
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "uuid4_call_sites": 0
   },
   "top_duplicate_test_names": [
+    {
+      "count": 3,
+      "examples": [
+        "tests/architecture/test_tech_debt_issues_5657_5661_closeout.py:83",
+        "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py:81",
+        "tests/architecture/test_tech_debt_issues_5956_5961_closeout.py:63"
+      ],
+      "name": "test_closeout_artifact_is_complete_and_budget_safe"
+    },
     {
       "count": 2,
       "examples": [
@@ -2278,7 +2331,7 @@
       "name": "test_tdx_audit_closeout_artifact_is_complete_and_budget_safe"
     }
   ],
-  "total_test_files": 1930,
-  "total_test_functions": 21784,
+  "total_test_files": 1933,
+  "total_test_functions": 21806,
   "uuid4_call_sites": 0
 }

@@ -38,11 +38,25 @@ def _forbidden_wall_clock_calls(path: Path) -> list[tuple[str, int]]:
             calls.append(("time.time", node.lineno))
         if (
             isinstance(func, ast.Attribute)
+            and func.attr == "time_ns"
+            and isinstance(func.value, ast.Name)
+            and func.value.id == "time"
+        ):
+            calls.append(("time.time_ns", node.lineno))
+        if (
+            isinstance(func, ast.Attribute)
             and func.attr == "now"
             and isinstance(func.value, ast.Name)
             and func.value.id == "datetime"
         ):
             calls.append(("datetime.now", node.lineno))
+        if (
+            isinstance(func, ast.Attribute)
+            and func.attr == "utcnow"
+            and isinstance(func.value, ast.Name)
+            and func.value.id == "datetime"
+        ):
+            calls.append(("datetime.utcnow", node.lineno))
     return calls
 
 
@@ -79,12 +93,12 @@ class _WallClockSeamVisitor(ast.NodeVisitor):
             self.calls.append(f"{owner}:{node.lineno}:datetime.{func.attr}")
         if (
             isinstance(func, ast.Attribute)
-            and func.attr == "time"
+            and func.attr in {"time", "time_ns"}
             and isinstance(func.value, ast.Name)
             and func.value.id == "time"
         ):
             owner = ".".join(self._scope) or "<module>"
-            self.calls.append(f"{owner}:{node.lineno}:time.time")
+            self.calls.append(f"{owner}:{node.lineno}:time.{func.attr}")
         self.generic_visit(node)
 
 
@@ -112,7 +126,7 @@ def _load_application_wall_clock_allowlist() -> dict[str, set[str]]:
         if not (
             isinstance(path, str)
             and path.startswith("src/bioetl/application/")
-            and call in {"datetime.now", "datetime.utcnow", "time.time"}
+            and call in {"datetime.now", "datetime.utcnow", "time.time", "time.time_ns"}
         ):
             continue
         assert isinstance(scope, str) and scope

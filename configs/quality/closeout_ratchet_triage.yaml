@@ -277,5 +277,15 @@ entries:
   - path: tests/architecture/test_tech_debt_issues_5954_5955_5962_5963_closeout.py
     disposition: retain_active
     classification: budget_closeout_ratchet
-    live_guard: "debt issue batch #5954-#5955, #5962-#5963 remains aligned with live governance, compatibility, duplication, and observability evidence without budget growth."
+    live_guard: "debt issue batch #5954, #5955, #5962, and #5963 remains aligned with live script-lifecycle governance, closeout ratchet triage, root-hygiene review contracts, and documentation evidence without budget growth."
+    rationale: Keeps the script-lifecycle and closeout-triage closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issues_5956_5961_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue batch #5956-#5961 remains aligned with live governance, compatibility, duplication, and observability evidence without budget growth."
     rationale: Keeps the newest architecture-debt closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issues_5974_5977_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue batch #5974-#5977 remains aligned with live time-seam governance, duplicate-name consolidation, and compatibility sunset ledger evidence without budget growth."
+    rationale: Keeps the newest Test Audit closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.

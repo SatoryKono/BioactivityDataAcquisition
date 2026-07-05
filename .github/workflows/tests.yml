@@ -243,8 +243,7 @@ jobs:
                 run: |
                     uv run python -m scripts.engineering.qa.report_test_governance_audit \
                       --check \
-                      --json-out reports/quality/test-governance-current.json \
-                      --duplicate-name-inventory-out reports/quality/test-duplicate-name-inventory.json
+                      --json-out reports/quality/test-governance-current.json
 
             -   name: Validate config/contract/registry artifact duplication audit
                 run: uv run python -m scripts.engineering.qa report-artifact-duplication-audit --check

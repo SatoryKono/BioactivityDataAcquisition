@@ -230,6 +230,7 @@ def test_sharded_runner_dry_run_expands_architecture_alias_from_inventory() -> N
         line for line in result.stdout.splitlines() if line.startswith("[dry-run]")
     ]
     assert len(dry_run_lines) == 6
+    assert all("run_pytest.sh --narrow" in line for line in dry_run_lines)
     assert any(r"test_\[c-z\]\*.py" in line for line in dry_run_lines)
     assert any(r"test_\[a-b\]\*.py" in line for line in dry_run_lines)
     assert any(r"test_\[d-z\]\*.py" in line for line in dry_run_lines)

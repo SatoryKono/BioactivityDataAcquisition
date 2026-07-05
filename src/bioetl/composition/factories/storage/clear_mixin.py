@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -10,6 +12,17 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.storage.silver_writer import SilverWriter
 
 __all__ = ["StorageBundleClearMixin"]
+
+_ClearResultT = int | list[str]
+
+
+async def _run_blocking_clear(call: Callable[[], _ClearResultT]) -> _ClearResultT:
+    loop = asyncio.get_running_loop()
+    with ThreadPoolExecutor(
+        max_workers=1,
+        thread_name_prefix="bioetl-storage-clear",
+    ) as executor:
+        return await loop.run_in_executor(executor, call)
 
 
 class StorageBundleClearMixin:
@@ -55,15 +68,12 @@ class StorageBundleClearMixin:
         dry_run: bool,
     ) -> int:
         """Execute clear operation for a writer."""
-        loop = asyncio.get_running_loop()
-        cleared = await loop.run_in_executor(
-            None, lambda: writer.clear(table_name, dry_run=dry_run)
+        cleared = await _run_blocking_clear(
+            lambda: writer.clear(table_name, dry_run=dry_run)
         )
         if writer.csv_exporter and not dry_run:
             exporter = writer.csv_exporter
-            deleted = await loop.run_in_executor(
-                None, lambda: exporter.clear(table_name)
-            )
+            deleted = await _run_blocking_clear(lambda: exporter.clear(table_name))
             cleared += len(deleted)
         return int(cleared)
 
@@ -79,20 +89,15 @@ class StorageBundleClearMixin:
             Computed integer value.
         """
         count = 0
-        loop = asyncio.get_running_loop()
 
         if self.silver.csv_exporter:
             exporter = self.silver.csv_exporter
-            deleted = await loop.run_in_executor(
-                None, lambda: exporter.clear(table_name)
-            )
+            deleted = await _run_blocking_clear(lambda: exporter.clear(table_name))
             count += len(deleted) if isinstance(deleted, list) else deleted
 
         if self.gold.csv_exporter:
             exporter = self.gold.csv_exporter
-            deleted = await loop.run_in_executor(
-                None, lambda: exporter.clear(table_name)
-            )
+            deleted = await _run_blocking_clear(lambda: exporter.clear(table_name))
             count += len(deleted) if isinstance(deleted, list) else deleted
 
         return count
@@ -109,15 +114,12 @@ class StorageBundleClearMixin:
         Returns:
             Number of tables cleared.
         """
-        loop = asyncio.get_running_loop()
         cleared_count = 0
 
         if table_name:
-            cleared_count += await loop.run_in_executor(
-                None, lambda: self.silver.clear(table_name)
+            cleared_count += await _run_blocking_clear(
+                lambda: self.silver.clear(table_name)
             )
-            cleared_count += await loop.run_in_executor(
-                None, lambda: self.gold.clear(table_name)
-            )
+            cleared_count += await _run_blocking_clear(lambda: self.gold.clear(table_name))
 
         return cleared_count
