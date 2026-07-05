@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Awaitable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.composition.factories.storage._blocking import run_storage_blocking
 from bioetl.domain.types import HealthStatus, JsonDict
 
 if TYPE_CHECKING:
@@ -48,8 +48,7 @@ class StorageBundleHealthMixin:
             - DEGRADED: Partial access (1-2 layers have issues)
             - UNHEALTHY: Critical storage failure (all layers unavailable)
         """
-        loop = asyncio.get_running_loop()
-        return await loop.run_in_executor(None, self._check_storage_health_sync)
+        return await run_storage_blocking(self._check_storage_health_sync)
 
     def _check_storage_health_sync(self) -> HealthStatus:
         """Synchronous storage health check implementation.

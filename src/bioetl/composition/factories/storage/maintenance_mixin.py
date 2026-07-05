@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-import asyncio
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 from bioetl.application.runtime_clock import current_utc_time
+from bioetl.composition.factories.storage._blocking import run_storage_blocking
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.storage.bronze_writer import BronzeWriter
@@ -126,14 +126,11 @@ class StorageBundleMaintenanceMixin:
         if _is_delta_table_dir(gold_table_path):
             from deltalake import DeltaTable
 
-            loop = asyncio.get_running_loop()
             try:
-                dt = await loop.run_in_executor(
-                    None,
+                dt = await run_storage_blocking(
                     lambda: DeltaTable(str(gold_table_path)),
                 )
-                removed = await loop.run_in_executor(
-                    None,
+                removed = await run_storage_blocking(
                     lambda: dt.vacuum(retention_hours=retention_hours, dry_run=dry_run),
                 )
                 total_removed += len(removed)
@@ -158,17 +155,14 @@ class StorageBundleMaintenanceMixin:
         if silver_table_path.exists():
             silver_target = Path(target_path) / "silver" / table_name.replace(".", "/")
             silver_target.parent.mkdir(parents=True, exist_ok=True)
-            loop = asyncio.get_running_loop()
-            await loop.run_in_executor(
-                None,
+            await run_storage_blocking(
                 lambda: shutil.copytree(silver_table_path, silver_target),
             )
             total_archived += sum(
                 1 for f in silver_table_path.rglob("*") if f.is_file()
             )
             if remove_source:
-                await loop.run_in_executor(
-                    None,
+                await run_storage_blocking(
                     lambda: shutil.rmtree(silver_table_path),
                 )
 
@@ -177,15 +171,12 @@ class StorageBundleMaintenanceMixin:
         if gold_table_path.exists():
             gold_target = Path(target_path) / "gold" / table_name.replace(".", "/")
             gold_target.parent.mkdir(parents=True, exist_ok=True)
-            loop = asyncio.get_running_loop()
-            await loop.run_in_executor(
-                None,
+            await run_storage_blocking(
                 lambda: shutil.copytree(gold_table_path, gold_target),
             )
             total_archived += sum(1 for f in gold_table_path.rglob("*") if f.is_file())
             if remove_source:
-                await loop.run_in_executor(
-                    None,
+                await run_storage_blocking(
                     lambda: shutil.rmtree(gold_table_path),
                 )
 

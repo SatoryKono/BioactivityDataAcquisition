@@ -478,11 +478,11 @@ hotspot_family_ratchets:
     - src/bioetl/application/core/
     bounded_growth_budgets:
       files_ge_250_loc: 7
-      max_internal_fan_in: 11
+      max_internal_fan_in: 10
     metrics:
       duplication_clusters: 0
       files: 180
-      total_loc: 22274
+      total_loc: 22303
       files_ge_250_loc: 5
       helper_function_ratio: 0.356
       max_internal_fan_in: 10
@@ -490,10 +490,10 @@ hotspot_family_ratchets:
     trend:
       status: reviewed_2026-07-01_application_core_live_metric_refresh
       next_action: 2026-07-01 refreshes measured application_core metrics against
-        the committed hotspot-family baseline at 180 files, 22274 LOC, 5
+        the committed hotspot-family baseline at 180 files, 22303 LOC, 5
         files_ge_250_loc, helper_function_ratio 0.356, and max_internal_fan_in
         10. Bounded-growth budgets remain flat at 7 files_ge_250_loc and
-        max_internal_fan_in 11; no technical-debt budget is increased.
+        max_internal_fan_in 10; no technical-debt budget is increased.
   - name: composition_bootstrap_runtime
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -540,11 +540,11 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 35
-      total_loc: 4648
+      total_loc: 4651
       files_ge_250_loc: 2
       helper_function_ratio: 0.417
       max_internal_fan_in: 3
-      max_internal_fan_in_module: bioetl.composition.factories.pipeline.construction_types
+      max_internal_fan_in_module: bioetl.composition.factories.pipeline.factory_method_helpers
     trend:
       status: reduced_2026-06-29_pipeline_factories_files_ge_250_loc_below_reviewed_budget
       next_action: 2026-06-29 refresh confirms the pipeline-factory family holds
