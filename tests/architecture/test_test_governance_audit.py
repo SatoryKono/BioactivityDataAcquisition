@@ -20,9 +20,6 @@ from scripts.engineering.qa.check_test_audit_preflight import (
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG_PATH = ROOT / "configs" / "quality" / "test_governance_audit.yaml"
 TEST_MATRIX_PATH = ROOT / "configs" / "quality" / "test_matrix.yaml"
-DUPLICATE_NAME_INVENTORY_PATH = (
-    ROOT / "reports" / "quality" / "test-duplicate-name-inventory.json"
-)
 FIXTURE_DUPLICATION_INVENTORY_PATH = (
     ROOT / "reports" / "quality" / "test-fixture-asset-duplication.json"
 )
@@ -305,13 +302,10 @@ def test_test_governance_artifacts_match_live_collector() -> None:
     """Committed governance snapshots must fail fast on collector drift."""
     # Just verify artifacts exist and are valid JSON - live collection hangs
     governance_payload = _load_json(TEST_GOVERNANCE_ARTIFACT_PATH)
-    duplicate_inventory_payload = _load_json(DUPLICATE_NAME_INVENTORY_PATH)
     fixture_duplication_payload = _load_json(FIXTURE_DUPLICATION_INVENTORY_PATH)
 
     # Verify basic structure
     assert "report" in governance_payload
-    assert "inventory" in duplicate_inventory_payload
-    assert "summary" in duplicate_inventory_payload
     assert fixture_duplication_payload["scan_root"] == "tests/fixtures"
     assert "groups" in fixture_duplication_payload
 
@@ -475,15 +469,6 @@ def test_duplicate_name_triage_tracks_top_generic_names() -> None:
     }
     assert configured_top == report_top
     assert cast(YamlMap, triage["fixture_builder_policy"])["consolidate_when"]
-
-
-@pytest.mark.architecture
-def test_duplicate_name_inventory_artifact_matches_static_report() -> None:
-    payload = json.loads(DUPLICATE_NAME_INVENTORY_PATH.read_text(encoding="utf-8"))
-    report = json.loads(TEST_GOVERNANCE_ARTIFACT_PATH.read_text(encoding="utf-8"))
-
-    assert payload["summary"] == report["duplicate_test_name_inventory_summary"]
-    assert payload["inventory"] == report["duplicate_test_name_inventory"]
 
 
 @pytest.mark.architecture

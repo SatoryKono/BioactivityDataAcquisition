@@ -154,7 +154,6 @@ log_test.txt
 !/reports/quality/total-tech-debt-audit-main-2026-06-16.md
 !/reports/quality/total-tech-debt-audit-main-2026-07-01.md
 !/reports/quality/test-governance-current.json
-!/reports/quality/test-duplicate-name-inventory.json
 !/reports/quality/test-fixture-asset-duplication.json
 !/reports/quality/config-contract-registry-artifact-duplication.json
 !/reports/quality/config-surface-backlog.json

@@ -206,9 +206,8 @@ routes:
     commit_policy: tracked_quality_baseline
     outputs:
       - reports/quality/test-governance-current.json
-      - reports/quality/test-duplicate-name-inventory.json
       - reports/quality/test-fixture-asset-duplication.json
-    notes: Test-governance tracked artifacts include duplicate-name and fixture-asset visibility inventories.
+    notes: Test-governance tracked artifacts include fixture-asset visibility inventory.
 
   - id: config-contract-registry-artifact-duplication-quality-report
     generator: scripts/engineering/qa/report_artifact_duplication_audit.py

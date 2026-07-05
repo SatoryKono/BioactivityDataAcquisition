@@ -23,7 +23,6 @@ from scripts.engineering.qa.file_discovery import discover_files  # noqa: E402
 
 DEFAULT_CONFIG = Path("configs/quality/test_governance_audit.yaml")
 DEFAULT_JSON_ARTIFACT = Path("reports/quality/test-governance-current.json")
-DEFAULT_DUPLICATE_NAME_ARTIFACT = Path("reports/quality/test-duplicate-name-inventory.json")
 DEFAULT_FIXTURE_DUPLICATION_ARTIFACT = Path(
     "reports/quality/test-fixture-asset-duplication.json"
 )
@@ -757,14 +756,6 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--config", type=Path, default=ROOT / DEFAULT_CONFIG)
     parser.add_argument("--json-out", type=Path)
     parser.add_argument(
-        "--duplicate-name-inventory-out",
-        type=Path,
-        help=(
-            "Write the full duplicate-test-name inventory as a deterministic "
-            "standalone JSON artifact."
-        ),
-    )
-    parser.add_argument(
         "--fixture-duplication-out",
         type=Path,
         help=(
@@ -777,16 +768,11 @@ def main(argv: list[str] | None = None) -> int:
 
     payload = collect_test_governance_report(args.root)
     json_out = args.json_out
-    duplicate_name_inventory_out = args.duplicate_name_inventory_out
     fixture_duplication_out = args.fixture_duplication_out
     if args.check and json_out is None:
         candidate = args.root / DEFAULT_JSON_ARTIFACT
         if candidate.exists():
             json_out = candidate
-    if args.check and duplicate_name_inventory_out is None:
-        candidate = args.root / DEFAULT_DUPLICATE_NAME_ARTIFACT
-        if candidate.exists():
-            duplicate_name_inventory_out = candidate
     if args.check and fixture_duplication_out is None:
         candidate = args.root / DEFAULT_FIXTURE_DUPLICATION_ARTIFACT
         if candidate.exists():
@@ -800,19 +786,10 @@ def main(argv: list[str] | None = None) -> int:
         if args.check and violations:
             exit_code = 1
 
-    duplicate_inventory_payload = {
-        "summary": payload["report"]["duplicate_test_name_inventory_summary"],
-        "inventory": payload["report"]["duplicate_test_name_inventory"],
-    }
     fixture_duplication_payload = payload["report"]["fixture_asset_duplication"]
     output = _canonical_json(payload)
     if args.check:
         if json_out is not None and not _check_json_artifact(json_out, payload):
-            exit_code = 1
-        if duplicate_name_inventory_out is not None and not _check_json_artifact(
-            duplicate_name_inventory_out,
-            duplicate_inventory_payload,
-        ):
             exit_code = 1
         if fixture_duplication_out is not None and not _check_json_artifact(
             fixture_duplication_out,
@@ -824,12 +801,6 @@ def main(argv: list[str] | None = None) -> int:
         json_out.write_text(output, encoding="utf-8")
     else:
         print(output)
-    if duplicate_name_inventory_out and not args.check:
-        duplicate_name_inventory_out.parent.mkdir(parents=True, exist_ok=True)
-        duplicate_name_inventory_out.write_text(
-            _canonical_json(duplicate_inventory_payload),
-            encoding="utf-8",
-        )
     if fixture_duplication_out and not args.check:
         fixture_duplication_out.parent.mkdir(parents=True, exist_ok=True)
         fixture_duplication_out.write_text(

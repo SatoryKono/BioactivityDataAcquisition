@@ -689,7 +689,7 @@ run_wave() {
         local paths_string="${SHARD_PATHS[$shard]}"
         local coverage_file="$COVERAGE_DIR/.coverage.$shard"
         local log_file="$COVERAGE_DIR/logs/$shard.log"
-        local -a cmd=(bash "$RUNNER")
+        local -a cmd=(bash "$RUNNER" --narrow)
         local shard_extra_args_string="${SHARD_EXTRA_PYTEST_ARGS[$shard]:-}"
         local shard_workers
 
