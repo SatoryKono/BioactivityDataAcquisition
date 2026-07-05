@@ -71,7 +71,9 @@ def test_gold_strict_governance_docs_publish_current_runtime_contract() -> None:
 
     assert "strict_gold_validation: bool = True" in content
     assert "production assembly принудительно включает strictness" in content
-    assert "Миграционный feature flag остаётся только историческим контекстом" in content
+    assert (
+        "Миграционный feature flag остаётся только историческим контекстом" in content
+    )
     assert "strict - gold - validation: bool = False" not in content
     assert "strict-gold-validation=False без схемы" not in content
     assert "Feature Flag минимизирует риск" not in content

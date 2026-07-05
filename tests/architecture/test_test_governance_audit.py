@@ -251,8 +251,12 @@ def test_rf_009_test_governance_closeout_tracks_live_zero_debt_metrics() -> None
     }
 
     # Verify non-zero duplicate names are now expected
-    assert int(report["duplicate_test_names"]) == int(closeout["live_metrics"]["duplicate_test_names"])
-    assert int(report["duplicate_test_name_occurrences"]) == int(closeout["live_metrics"]["duplicate_test_name_occurrences"])
+    assert int(report["duplicate_test_names"]) == int(
+        closeout["live_metrics"]["duplicate_test_names"]
+    )
+    assert int(report["duplicate_test_name_occurrences"]) == int(
+        closeout["live_metrics"]["duplicate_test_name_occurrences"]
+    )
 
     # All other metrics should still be zero
     for metric_name, expected_value in cast(YamlMap, closeout["live_metrics"]).items():
@@ -473,9 +477,7 @@ def test_duplicate_name_triage_tracks_top_generic_names() -> None:
 
 @pytest.mark.architecture
 def test_fixture_asset_duplication_inventory_artifact_matches_static_report() -> None:
-    payload = json.loads(
-        FIXTURE_DUPLICATION_INVENTORY_PATH.read_text(encoding="utf-8")
-    )
+    payload = json.loads(FIXTURE_DUPLICATION_INVENTORY_PATH.read_text(encoding="utf-8"))
     report = json.loads(TEST_GOVERNANCE_ARTIFACT_PATH.read_text(encoding="utf-8"))
 
     assert payload == report["fixture_asset_duplication"]

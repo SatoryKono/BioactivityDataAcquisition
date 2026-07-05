@@ -146,8 +146,12 @@ class TestObservabilityBundle:
 class TestBootstrapObservability:
     """Tests for bootstrap_observability_bundle() function."""
 
-    @patch("bioetl.composition.bootstrap.runtime.metrics_bootstrap._default_metrics_factory")
-    @patch("bioetl.composition.bootstrap.runtime.logger_bootstrap._default_logger_factory")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.metrics_bootstrap._default_metrics_factory"
+    )
+    @patch(
+        "bioetl.composition.bootstrap.runtime.logger_bootstrap._default_logger_factory"
+    )
     def test_bootstrap_returns_valid_bundle(
         self,
         mock_logger_factory: MagicMock,
@@ -190,7 +194,9 @@ class TestBootstrapObservability:
         assert bundle.tracer is not None  # NoOpTracing
         assert bundle.dq_monitor is None
 
-    @patch("bioetl.composition.bootstrap.runtime.logger_bootstrap._default_logger_factory")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.logger_bootstrap._default_logger_factory"
+    )
     def test_bootstrap_uses_noop_metrics_when_disabled(
         self,
         mock_logger_factory: MagicMock,
@@ -224,7 +230,9 @@ class TestBootstrapObservability:
 
         assert isinstance(bundle.metrics, NoOpMetrics)
 
-    @patch("bioetl.composition.bootstrap.runtime.logger_bootstrap._default_logger_factory")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.logger_bootstrap._default_logger_factory"
+    )
     def test_bootstrap_logs_initialization_status(
         self,
         mock_logger_factory: MagicMock,
@@ -333,7 +341,9 @@ class TestBootstrapMetrics:
             # No warning should be raised
             assert len(w) == 0
 
-    @patch("bioetl.composition.bootstrap.runtime.metrics_bootstrap._default_metrics_factory")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.metrics_bootstrap._default_metrics_factory"
+    )
     def test_enabled_metrics_returns_prometheus_metrics(
         self,
         mock_metrics_factory: MagicMock,
@@ -564,7 +574,9 @@ class TestObservabilityPreflightValidation:
         # No warnings for real implementations
         mock_logger.warning.assert_not_called()
 
-    @patch("bioetl.composition.bootstrap.runtime.logger_bootstrap._default_logger_factory")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.logger_bootstrap._default_logger_factory"
+    )
     def test_bootstrap_observability_bundle_calls_preflight_validation(
         self,
         mock_logger_factory: MagicMock,

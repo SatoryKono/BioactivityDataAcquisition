@@ -169,11 +169,14 @@ def test_normalize_resume_state_persists_incomplete_state_for_running_resume() -
 def test_resolve_resume_outputs_filter_forced_and_repaired_steps() -> None:
     state = _state()
 
-    assert support.resolve_skipped_step_ids(
-        state=state,
-        force_steps=("seed",),
-        repair_steps=(),
-    ) == frozenset()
+    assert (
+        support.resolve_skipped_step_ids(
+            state=state,
+            force_steps=("seed",),
+            repair_steps=(),
+        )
+        == frozenset()
+    )
     assert support.resolve_completed_transform_fingerprints(
         state=state,
         force_steps=(),

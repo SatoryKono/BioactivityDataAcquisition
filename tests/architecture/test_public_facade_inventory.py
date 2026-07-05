@@ -173,9 +173,7 @@ def _first_party_src_importers_of_exact_module(module_name: str) -> tuple[str, .
     ):
         relative_path = path.resolve().relative_to(ROOT).as_posix()
         current_module = (
-            relative_path.removeprefix("src/")
-            .removesuffix(".py")
-            .replace("/", ".")
+            relative_path.removeprefix("src/").removesuffix(".py").replace("/", ".")
         )
         if current_module == module_name:
             continue

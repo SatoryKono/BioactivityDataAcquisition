@@ -17,9 +17,6 @@ def test_value_objects_facade_resolves_exports_lazily() -> None:
     assert "ValueObject" in facade.__dict__
 
 
-
-
-
 @pytest.mark.unit
 def test_removed_publication_field_groups_facade_stays_absent() -> None:
     """Removed publication field-group facade must stay absent."""

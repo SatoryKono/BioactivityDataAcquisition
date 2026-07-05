@@ -143,9 +143,7 @@ def _iter_python_file_mentions_fallback(
             for lineno, line in enumerate(handle, start=1):
                 for module_path in module_paths:
                     if module_path in line:
-                        violations.append(
-                            f"{rel_path}:{lineno} mentions {module_path}"
-                        )
+                        violations.append(f"{rel_path}:{lineno} mentions {module_path}")
     return violations
 
 

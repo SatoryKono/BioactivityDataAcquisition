@@ -69,7 +69,9 @@ def test_record_composite_dependency_completed_normalizes_payload() -> None:
     }
 
 
-def test_record_input_snapshot_published_mixin_omits_missing_query_fingerprint() -> None:
+def test_record_input_snapshot_published_mixin_omits_missing_query_fingerprint() -> (
+    None
+):
     appender = _FakeAppender()
 
     entry = appender.record_input_snapshot_published(

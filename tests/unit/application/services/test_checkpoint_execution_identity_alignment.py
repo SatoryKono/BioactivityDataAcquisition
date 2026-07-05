@@ -203,24 +203,27 @@ def test_checkpoint_execution_identity_payload_helper_filters_none_fields() -> N
 
 
 def test_checkpoint_execution_identity_payload_helper_can_fail_closed_empty() -> None:
-    assert build_checkpoint_execution_identity_payload(
-        pipeline_name=None,
-        run_type=None,
-        pipeline_version=None,
-        git_commit=None,
-        dependency_lock_hash=None,
-        effective_config_hash=None,
-        dq_contract_compatibility_hash=None,
-        contract_ref=None,
-        contract_version=None,
-        normalization_profile_ref=None,
-        normalization_profile_version=None,
-        normalization_profile_hash=None,
-        effective_config_artifact_id=None,
-        exact_replay=None,
-        input_snapshot_fingerprint=None,
-        silver_filter_compatibility_mode=None,
-    ) == {}
+    assert (
+        build_checkpoint_execution_identity_payload(
+            pipeline_name=None,
+            run_type=None,
+            pipeline_version=None,
+            git_commit=None,
+            dependency_lock_hash=None,
+            effective_config_hash=None,
+            dq_contract_compatibility_hash=None,
+            contract_ref=None,
+            contract_version=None,
+            normalization_profile_ref=None,
+            normalization_profile_version=None,
+            normalization_profile_hash=None,
+            effective_config_artifact_id=None,
+            exact_replay=None,
+            input_snapshot_fingerprint=None,
+            silver_filter_compatibility_mode=None,
+        )
+        == {}
+    )
 
 
 def test_has_canonical_checkpoint_execution_identity_fields_detects_resume_fields() -> (

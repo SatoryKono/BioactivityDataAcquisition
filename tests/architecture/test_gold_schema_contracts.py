@@ -206,8 +206,7 @@ class TestGoldSchemaContracts:
             name
             for name in schema_files.keys()
             if not any(
-                f"_v{v}" in name
-                for v in ["1.0", "1.1", "2.0", "2.1", "2.2", "3.0"]
+                f"_v{v}" in name for v in ["1.0", "1.1", "2.0", "2.1", "2.2", "3.0"]
             )
         ]
 

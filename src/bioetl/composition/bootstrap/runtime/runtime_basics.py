@@ -73,24 +73,8 @@ def bootstrap_runtime_basics(
 ) -> CompositeInfrastructureContext:
     """Build base runtime dependencies shared across composite bootstrap.
 
-    Args:
-        config: CompositeConfig used to derive the pipeline name for logging.
-        run_id: Optional UUID string; a new UUID is generated from uuid_factory
-            when None.
-        settings_provider: Zero-argument callable that returns global Settings.
-        logger_bootstrapper: Callable accepting (pipeline_name, run_uuid, log_level)
-            and returning a LoggerPort.
-        storage_bootstrapper: Callable returning the composite runtime storage port; called with
-            explicit ``RunContext`` and ports so storage assembly does not
-            generate runtime identity.
-        lock_factory: Zero-argument callable returning a LockPort.
-        uuid_factory: Zero-argument callable returning a new UUID; injectable
-            for deterministic testing.
-        clock_factory: Zero-argument callable returning the runtime clock; injectable
-            so tests and deterministic runners do not rely on wall-clock reads.
-
-    Returns:
-        CompositeInfrastructureContext with the typed runtime resource bundle for the composite run.
+    Storage receives an explicit ``RunContext`` so assembly does not generate a
+    second runtime identity.
     """
     effective_run_id = run_id or str(uuid_factory())
     settings = settings_provider()

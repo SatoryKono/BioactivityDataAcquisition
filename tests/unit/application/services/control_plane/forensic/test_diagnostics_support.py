@@ -115,9 +115,7 @@ def test_replay_capability_payload_compares_left_and_right_snapshots() -> None:
     assert payload["left"]["manifest_id"] == "manifest-left"
     assert payload["left"]["replay_capability"] == "exact_replay_ready"
     assert payload["right"]["manifest_id"] == "manifest-right"
-    assert payload["right"]["exact_replay_blockers"] == [
-        "artifact_links_incomplete"
-    ]
+    assert payload["right"]["exact_replay_blockers"] == ["artifact_links_incomplete"]
     assert payload["capability_match"] is False
 
 

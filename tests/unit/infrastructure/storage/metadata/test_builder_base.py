@@ -49,7 +49,10 @@ def test_resolve_metadata_timestamp_prefers_explicit_and_normalizes_utc() -> Non
 
 def test_resolve_metadata_timestamp_uses_earliest_record_anchor() -> None:
     records = [
-        {"_lineage_created_at": "not-a-date", "_ingestion_ts": "2026-06-17T12:00:00+00:00"},
+        {
+            "_lineage_created_at": "not-a-date",
+            "_ingestion_ts": "2026-06-17T12:00:00+00:00",
+        },
         {"_lineage_created_at": datetime(2026, 6, 17, 11, 0, tzinfo=UTC)},
     ]
 
@@ -98,7 +101,9 @@ def test_get_git_commit_cached_handles_success_failure_and_exceptions(
     assert _get_git_commit_cached() is None
 
 
-def test_metadata_builder_base_composite_helpers(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_metadata_builder_base_composite_helpers(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     monkeypatch.setattr(builder_base, "_get_git_commit_cached", lambda: "abc123")
     builder = _MetadataBuilderBase(
         transform_version="2.0.0",

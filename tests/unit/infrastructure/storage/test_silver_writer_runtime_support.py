@@ -108,7 +108,9 @@ def _request() -> SilverWriterRuntimeServicesRequest:
 class TestSilverWriterRuntimeSupport:
     """Coverage tests for runtime support construction and dual-write behavior."""
 
-    def test_resolve_runtime_services_returns_existing_or_builds_from_request(self) -> None:
+    def test_resolve_runtime_services_returns_existing_or_builds_from_request(
+        self,
+    ) -> None:
         writer = _Writer()
         services = _services()
         request = _request()
@@ -156,7 +158,10 @@ class TestSilverWriterRuntimeSupport:
         assert writer._postwrite is None
 
         _rewire_runtime_services(writer)
-        assert writer._merged._write_silver_merged_metadata == writer._write_silver_merged_metadata
+        assert (
+            writer._merged._write_silver_merged_metadata
+            == writer._write_silver_merged_metadata
+        )
         assert writer._validation._get_table_schema == writer._get_table_schema
         assert writer._metadata._host is writer
         assert writer._postwrite is not None
@@ -176,7 +181,9 @@ class TestSilverWriterRuntimeSupport:
         assert projected == [{"entity_id": "CHEMBL1", "content_hash": "legacy"}]
 
     @pytest.mark.asyncio
-    async def test_write_dual_targets_returns_active_result_and_logs_failures(self) -> None:
+    async def test_write_dual_targets_returns_active_result_and_logs_failures(
+        self,
+    ) -> None:
         writer = _Writer()
         writer._contract_rollout_policy = SimpleNamespace(
             active_version="v2",
@@ -184,20 +191,29 @@ class TestSilverWriterRuntimeSupport:
         )
         writer._write_single_target = AsyncMock(side_effect=["legacy", "active"])
 
-        with patch(
-            "bioetl.infrastructure.storage.silver.writer_runtime_support.validate_write_versions"
-        ), patch(
-            "bioetl.infrastructure.storage.silver.writer_runtime_support.get_write_targets",
-            return_value={"v1": "chembl.activity__v1", "v2": "chembl.activity"},
-        ), patch(
-            "bioetl.infrastructure.storage.silver.writer_runtime_support.iterate_write_targets",
-            return_value=(("v1", "chembl.activity__v1"), ("v2", "chembl.activity")),
+        with (
+            patch(
+                "bioetl.infrastructure.storage.silver.writer_runtime_support.validate_write_versions"
+            ),
+            patch(
+                "bioetl.infrastructure.storage.silver.writer_runtime_support.get_write_targets",
+                return_value={"v1": "chembl.activity__v1", "v2": "chembl.activity"},
+            ),
+            patch(
+                "bioetl.infrastructure.storage.silver.writer_runtime_support.iterate_write_targets",
+                return_value=(("v1", "chembl.activity__v1"), ("v2", "chembl.activity")),
+            ),
         ):
             result = await _write_dual_targets(
                 writer,
                 invocation=_Invocation(
                     table_name="chembl.activity",
-                    records=[{"entity_id": "CHEMBL1", "_content_hashes_by_version": {"v2": "new"}}],
+                    records=[
+                        {
+                            "entity_id": "CHEMBL1",
+                            "_content_hashes_by_version": {"v2": "new"},
+                        }
+                    ],
                 ),
             )
 
@@ -205,15 +221,20 @@ class TestSilverWriterRuntimeSupport:
         assert writer._write_single_target.await_count == 2
 
         writer._write_single_target = AsyncMock(side_effect=RuntimeError("boom"))
-        with patch(
-            "bioetl.infrastructure.storage.silver.writer_runtime_support.validate_write_versions"
-        ), patch(
-            "bioetl.infrastructure.storage.silver.writer_runtime_support.get_write_targets",
-            return_value={"v1": "chembl.activity__v1"},
-        ), patch(
-            "bioetl.infrastructure.storage.silver.writer_runtime_support.iterate_write_targets",
-            return_value=(("v1", "chembl.activity__v1"),),
-        ), pytest.raises(RuntimeError, match="boom"):
+        with (
+            patch(
+                "bioetl.infrastructure.storage.silver.writer_runtime_support.validate_write_versions"
+            ),
+            patch(
+                "bioetl.infrastructure.storage.silver.writer_runtime_support.get_write_targets",
+                return_value={"v1": "chembl.activity__v1"},
+            ),
+            patch(
+                "bioetl.infrastructure.storage.silver.writer_runtime_support.iterate_write_targets",
+                return_value=(("v1", "chembl.activity__v1"),),
+            ),
+            pytest.raises(RuntimeError, match="boom"),
+        ):
             await _write_dual_targets(
                 writer,
                 invocation=_Invocation(

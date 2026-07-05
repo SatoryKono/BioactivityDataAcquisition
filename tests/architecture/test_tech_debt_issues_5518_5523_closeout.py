@@ -14,19 +14,29 @@ pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 CLOSEOUT = ROOT / "reports" / "quality" / "tech-debt-issues-5518-5523-closeout.json"
-COMPATIBILITY_CENSUS = ROOT / "reports" / "quality" / "compatibility-importer-census.json"
+COMPATIBILITY_CENSUS = (
+    ROOT / "reports" / "quality" / "compatibility-importer-census.json"
+)
 CONFIG_SURFACE_BACKLOG = ROOT / "reports" / "quality" / "config-surface-backlog.json"
 ENTITY_METADATA_REGISTRY = (
     ROOT / "configs" / "quality" / "entity_contract_metadata_registry.yaml"
 )
 DEBT_GATES = ROOT / "reports" / "quality" / "debt-governance-gates.json"
-CLI_BOOTSTRAP_CONFIG = ROOT / "src" / "bioetl" / "composition" / "bootstrap" / "cli" / "config.py"
+CLI_BOOTSTRAP_CONFIG = (
+    ROOT / "src" / "bioetl" / "composition" / "bootstrap" / "cli" / "config.py"
+)
 RUNTIME_CONFIG_ACCESS = (
     ROOT / "src" / "bioetl" / "composition" / "runtime_builders" / "config_access.py"
 )
 DOMAIN_COMPOSITE_INIT = ROOT / "src" / "bioetl" / "domain" / "composite" / "__init__.py"
 PRIVATE_RUN_MANIFEST_HELPER = (
-    ROOT / "src" / "bioetl" / "interfaces" / "cli" / "commands" / "_run_manifest_output_support.py"
+    ROOT
+    / "src"
+    / "bioetl"
+    / "interfaces"
+    / "cli"
+    / "commands"
+    / "_run_manifest_output_support.py"
 )
 
 
@@ -85,7 +95,9 @@ def test_issue_5519_health_api_has_zero_src_importers() -> None:
     assert row["src_importers"] == []
 
 
-def test_issue_5520_domain_composite_config_root_facade_stays_zero_src_importers() -> None:
+def test_issue_5520_domain_composite_config_root_facade_stays_zero_src_importers() -> (
+    None
+):
     payload = _load_json(COMPATIBILITY_CENSUS)
     row = _retained_entrypoint(payload, "src/bioetl/domain/composite/config.py")
     tree = ast.parse(DOMAIN_COMPOSITE_INIT.read_text(encoding="utf-8"))
@@ -106,7 +118,9 @@ def test_issue_5521_run_manifest_output_twin_pair_removed() -> None:
     assert payload["summary"]["twin_pair_count"] == 0
 
 
-def test_issue_5522_entity_quality_metadata_registry_replaces_inline_duplicates() -> None:
+def test_issue_5522_entity_quality_metadata_registry_replaces_inline_duplicates() -> (
+    None
+):
     registry = _load_yaml(ENTITY_METADATA_REGISTRY)
     backlog = _load_json(CONFIG_SURFACE_BACKLOG)
     profiles = registry["profiles"]
@@ -131,9 +145,7 @@ def test_issue_5522_entity_quality_metadata_registry_replaces_inline_duplicates(
 
 def test_issue_5523_observability_freshness_limit_is_tightened_and_passing() -> None:
     payload = _load_json(DEBT_GATES)
-    gates = {
-        row["name"]: row for row in payload["gates"] if isinstance(row, dict)
-    }
+    gates = {row["name"]: row for row in payload["gates"] if isinstance(row, dict)}
     freshness = gates["observability_release_review_freshness"]
 
     assert freshness["limit"] == 21

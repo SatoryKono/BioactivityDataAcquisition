@@ -527,11 +527,9 @@ async def test_request_with_retry_honors_retry_after_in_full_flow(
         1,
         {"provider": "chembl", "method": "GET"},
     )
-    attributes = (
-        tracing.get_tracer.return_value.start_as_current_span.call_args.kwargs[
-            "attributes"
-        ]
-    )
+    attributes = tracing.get_tracer.return_value.start_as_current_span.call_args.kwargs[
+        "attributes"
+    ]
     assert attributes["bioetl.provider"] == "chembl"
     assert attributes["bioetl.run_id"] == "test-run-001"
     span.__enter__.assert_called_once()

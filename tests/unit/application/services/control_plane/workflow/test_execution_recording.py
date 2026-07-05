@@ -209,7 +209,9 @@ def test_record_step_started_uses_transform_kind_and_fingerprint_details() -> No
     assert saved[-1].steps[0].fingerprint == "fp-transform"
 
 
-def test_record_step_completed_handles_resume_shortcut_without_replacing_state() -> None:
+def test_record_step_completed_handles_resume_shortcut_without_replacing_state() -> (
+    None
+):
     context, saved = _make_context()
 
     execution_recording.record_step_completed(

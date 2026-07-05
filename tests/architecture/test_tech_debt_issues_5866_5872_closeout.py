@@ -17,7 +17,13 @@ INVENTORY = ROOT / "reports" / "quality" / "module-coverage-inventory.json"
 GATES = ROOT / "reports" / "quality" / "debt-governance-gates.json"
 MANIFEST = ROOT / "configs" / "quality" / "scripts_inventory_manifest.json"
 REGISTRY_MANIFEST = (
-    ROOT / "src" / "bioetl" / "composition" / "bootstrap" / "runtime" / "composite_bootstrap_registry_manifest.py"
+    ROOT
+    / "src"
+    / "bioetl"
+    / "composition"
+    / "bootstrap"
+    / "runtime"
+    / "composite_bootstrap_registry_manifest.py"
 )
 EXPECTED_ISSUES = {5866, 5867, 5868, 5869, 5870, 5871, 5872}
 
@@ -76,9 +82,10 @@ def test_issue_5866_full_app_duplication_ratchet_is_enforced() -> None:
     baseline = _load_json(BASELINE)
     gates = _load_json(GATES)
 
-    assert baseline["summary"]["total_duplicate_clusters"] == closeout["metrics"][
-        "full_app_total_duplicate_clusters"
-    ]["current"]
+    assert (
+        baseline["summary"]["total_duplicate_clusters"]
+        == closeout["metrics"]["full_app_total_duplicate_clusters"]["current"]
+    )
     assert (ROOT / "tests/architecture/test_full_app_duplication_ratchet.py").exists()
     gate_names = {gate["name"] for gate in gates["gates"]}
     assert "full_app_duplication_total_clusters" in gate_names
@@ -98,7 +105,9 @@ def test_issue_5867_adapter_duplication_burned_down() -> None:
     )
     assert adapter_count == closeout["metrics"]["adapter_duplicate_clusters"]["current"]
     assert adapter_count < closeout["metrics"]["adapter_duplicate_clusters"]["opening"]
-    assert (ROOT / "src/bioetl/infrastructure/adapters/common/fetch_resilience_template.py").exists()
+    assert (
+        ROOT / "src/bioetl/infrastructure/adapters/common/fetch_resilience_template.py"
+    ).exists()
 
 
 def test_issue_5868_pipeline_duplication_burned_down() -> None:
@@ -108,10 +117,15 @@ def test_issue_5868_pipeline_duplication_burned_down() -> None:
     pipeline_count = _target_duplicate_count(
         baseline, "src/bioetl/application/pipelines"
     )
-    assert pipeline_count == closeout["metrics"]["pipeline_duplicate_clusters"]["current"]
-    assert pipeline_count < closeout["metrics"]["pipeline_duplicate_clusters"]["opening"]
     assert (
-        ROOT / "src/bioetl/application/pipelines/common/publication_transformer_context.py"
+        pipeline_count == closeout["metrics"]["pipeline_duplicate_clusters"]["current"]
+    )
+    assert (
+        pipeline_count < closeout["metrics"]["pipeline_duplicate_clusters"]["opening"]
+    )
+    assert (
+        ROOT
+        / "src/bioetl/application/pipelines/common/publication_transformer_context.py"
     ).exists()
 
 
@@ -123,18 +137,25 @@ def test_issue_5869_replay_sensitive_coverage_floors_hold() -> None:
         inventory,
         "bioetl.application.services.control_plane.workflow.execution_preparation_incremental",
     )
-    runtime_row = _module_row(inventory, "bioetl.composition.bootstrap.runtime.runtime_basics")
+    runtime_row = _module_row(
+        inventory, "bioetl.composition.bootstrap.runtime.runtime_basics"
+    )
     tracing_row = _module_row(inventory, "bioetl.infrastructure.observability.tracing")
 
-    assert execution_row["coverage_percent"] == closeout["metrics"][
-        "execution_preparation_incremental_coverage_percent"
-    ]["current"]
-    assert runtime_row["coverage_percent"] == closeout["metrics"][
-        "runtime_basics_coverage_percent"
-    ]["current"]
-    assert tracing_row["coverage_percent"] == closeout["metrics"][
-        "infrastructure_tracing_coverage_percent"
-    ]["current"]
+    assert (
+        execution_row["coverage_percent"]
+        == closeout["metrics"]["execution_preparation_incremental_coverage_percent"][
+            "current"
+        ]
+    )
+    assert (
+        runtime_row["coverage_percent"]
+        == closeout["metrics"]["runtime_basics_coverage_percent"]["current"]
+    )
+    assert (
+        tracing_row["coverage_percent"]
+        == closeout["metrics"]["infrastructure_tracing_coverage_percent"]["current"]
+    )
     assert (
         ROOT / "tests/architecture/test_replay_sensitive_coverage_floor_ratchet.py"
     ).exists()
@@ -146,10 +167,16 @@ def test_issue_5870_zero_reference_scripts_are_governed() -> None:
     scripts = manifest["scripts"]
     zero_ref_rows = [row for row in scripts if row.get("reference_count") == 0]
 
-    assert len(zero_ref_rows) == closeout["metrics"]["zero_reference_supporting_scripts"]["current"]
-    assert closeout["metrics"]["zero_reference_supporting_scripts"][
-        "entries_without_owner_metadata"
-    ] == 0
+    assert (
+        len(zero_ref_rows)
+        == closeout["metrics"]["zero_reference_supporting_scripts"]["current"]
+    )
+    assert (
+        closeout["metrics"]["zero_reference_supporting_scripts"][
+            "entries_without_owner_metadata"
+        ]
+        == 0
+    )
     assert (
         ROOT / "tests/architecture/test_scripts_inventory_zero_reference_ratchet.py"
     ).exists()
@@ -159,9 +186,9 @@ def test_issue_5871_canonical_import_owners_exist() -> None:
     control_plane_store = (
         ROOT / "src/bioetl/composition/bootstrap/control_plane_store_builders.py"
     ).read_text(encoding="utf-8")
-    pipeline = (ROOT / "src/bioetl/composition/bootstrap/runtime/pipeline.py").read_text(
-        encoding="utf-8"
-    )
+    pipeline = (
+        ROOT / "src/bioetl/composition/bootstrap/runtime/pipeline.py"
+    ).read_text(encoding="utf-8")
 
     assert (
         "bioetl.composition.runtime_builders import control_plane_root"
@@ -175,9 +202,9 @@ def test_issue_5871_canonical_import_owners_exist() -> None:
 
 def test_issue_5872_composite_bootstrap_registry_manifest_is_wired() -> None:
     closeout = _load_json(CLOSEOUT)
-    runtime_init = (ROOT / "src/bioetl/composition/bootstrap/runtime/__init__.py").read_text(
-        encoding="utf-8"
-    )
+    runtime_init = (
+        ROOT / "src/bioetl/composition/bootstrap/runtime/__init__.py"
+    ).read_text(encoding="utf-8")
 
     assert REGISTRY_MANIFEST.exists()
     assert "COMPOSITE_BOOTSTRAP_BUILDER_MODULES" in runtime_init
@@ -185,4 +212,7 @@ def test_issue_5872_composite_bootstrap_registry_manifest_is_wired() -> None:
         ROOT
         / "tests/unit/composition/bootstrap/runtime/test_composite_bootstrap_registry_manifest.py"
     ).exists()
-    assert closeout["metrics"]["composite_bootstrap_builder_registry_entries"]["current"] == 5
+    assert (
+        closeout["metrics"]["composite_bootstrap_builder_registry_entries"]["current"]
+        == 5
+    )

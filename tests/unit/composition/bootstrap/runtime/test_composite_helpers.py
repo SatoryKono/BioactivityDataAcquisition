@@ -276,7 +276,10 @@ def test_composite_lazy_exports_and_bootstrap_wrappers_delegate(
 ) -> None:
     from bioetl.composition.bootstrap.runtime import composite
 
-    assert composite.__getattr__("CompositeRuntimeConfig").__name__ == "CompositeRuntimeConfig"
+    assert (
+        composite.__getattr__("CompositeRuntimeConfig").__name__
+        == "CompositeRuntimeConfig"
+    )
     assert callable(composite.__getattr__("create_composite_runner_service"))
     assert callable(composite.__getattr__("_create_dq_report_service"))
     with pytest.raises(AttributeError):
@@ -288,7 +291,9 @@ def test_composite_lazy_exports_and_bootstrap_wrappers_delegate(
         "_bootstrap_runtime_basics_impl",
         lambda **kwargs: captures.setdefault("basics", kwargs),
     )
-    basics = composite._bootstrap_runtime_basics(config=mock.sentinel.config, run_id="run-1")
+    basics = composite._bootstrap_runtime_basics(
+        config=mock.sentinel.config, run_id="run-1"
+    )
     assert basics["config"] is mock.sentinel.config
     assert basics["run_id"] == "run-1"
     assert callable(basics["settings_provider"])
@@ -358,7 +363,10 @@ def test_composite_bootstrap_plan_and_runner_entrypoint_delegate(
         run_id="run-1",
     )
     assert plan is mock.sentinel.plan
-    assert captured["plan_kwargs"]["bootstrap_runtime_basics_fn"] is composite._bootstrap_runtime_basics
+    assert (
+        captured["plan_kwargs"]["bootstrap_runtime_basics_fn"]
+        is composite._bootstrap_runtime_basics
+    )
 
     patch_calls: list[str] = []
     monkeypatch.setattr(

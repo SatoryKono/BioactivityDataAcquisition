@@ -250,9 +250,7 @@ def _patch_workflow_service(monkeypatch: Any, service: object) -> None:
 
 
 @pytest.mark.unit
-def test_get_checkpoint_runtime_service_delegates_to_control_plane_owner_seam() -> (
-    None
-):
+def test_get_checkpoint_runtime_service_delegates_to_control_plane_owner_seam() -> None:
     """Checkpoint command module should lazily delegate runtime resolution."""
     import bioetl.interfaces.cli.commands.checkpoint as checkpoint_module
 

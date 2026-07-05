@@ -157,10 +157,11 @@ def test_git_last_commit_age_days_bulk_splits_timed_out_lookup(monkeypatch) -> N
         calls.append(cmd)
         if "ls-files" in cmd:
             return Result("src/a.py\nsrc/b.py\nsrc/c.py\n")
-        timed_out_bulk_lookup = (
-            "--name-only" in cmd
-            and cmd[-3:] == [PATH_SRC_A, PATH_SRC_B, PATH_SRC_C]
-        )
+        timed_out_bulk_lookup = "--name-only" in cmd and cmd[-3:] == [
+            PATH_SRC_A,
+            PATH_SRC_B,
+            PATH_SRC_C,
+        ]
         if timed_out_bulk_lookup:
             raise subprocess.TimeoutExpired(cmd, kwargs.get("timeout"))
         path_start = cmd.index("--") + 1

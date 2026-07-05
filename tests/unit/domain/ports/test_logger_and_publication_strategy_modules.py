@@ -66,7 +66,9 @@ class _PublicationStrategy:
     def should_log_fallback_lookup(self) -> bool:
         return True
 
-    def post_process_silver_record(self, silver_record: dict[str, Any]) -> dict[str, Any]:
+    def post_process_silver_record(
+        self, silver_record: dict[str, Any]
+    ) -> dict[str, Any]:
         return {**silver_record, "post_processed": True}
 
 

@@ -18,15 +18,11 @@ def test_service_access_delegates_sync_accessors(
     calls: list[str] = []
 
     fake_access = ModuleType("bioetl.composition.maintenance_service_access")
-    fake_access.get_lifecycle_service = (
-        lambda: calls.append("lifecycle") or "lifecycle"
-    )
+    fake_access.get_lifecycle_service = lambda: calls.append("lifecycle") or "lifecycle"
     fake_access.get_vacuum_service = lambda: calls.append("vacuum") or "vacuum"
-    fake_access.get_bronze_cleanup_service = (
-        lambda: calls.append("bronze") or "bronze"
-    )
-    fake_access.get_contract_migration_service = (
-        lambda: calls.append("contract") or "contract"
+    fake_access.get_bronze_cleanup_service = lambda: calls.append("bronze") or "bronze"
+    fake_access.get_contract_migration_service = lambda: (
+        calls.append("contract") or "contract"
     )
     monkeypatch.setitem(__import__("sys").modules, fake_access.__name__, fake_access)
 

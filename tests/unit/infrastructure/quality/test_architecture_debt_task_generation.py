@@ -186,9 +186,7 @@ def test_generate_tasks_payload_adds_artifact_backlog_tasks(tmp_path: Path) -> N
             {
                 "sanctioned_public_entrypoint_governance": {
                     "metrics": {
-                        "public_entrypoint_count": {
-                            "owner": "@bioetl-architecture"
-                        }
+                        "public_entrypoint_count": {"owner": "@bioetl-architecture"}
                     }
                 }
             },
@@ -210,7 +208,13 @@ def test_generate_tasks_payload_adds_artifact_backlog_tasks(tmp_path: Path) -> N
 
     task_ids = {task["id"] for task in payload["tasks"]}
     task_families = {task.get("task_family") for task in payload["tasks"]}
-    assert {"ARD-COMPAT-001", "ARD-COMPAT-002", "ARD-DUP-001", "ARD-HOT-001", "ARD-DEAD-001"} <= task_ids
+    assert {
+        "ARD-COMPAT-001",
+        "ARD-COMPAT-002",
+        "ARD-DUP-001",
+        "ARD-HOT-001",
+        "ARD-DEAD-001",
+    } <= task_ids
     assert {
         "compatibility_surface",
         "duplication_cluster",

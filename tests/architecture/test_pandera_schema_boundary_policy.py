@@ -164,9 +164,7 @@ def test_domain_schema_contract_hotspot_ownership_is_documented() -> None:
             assert marker in text
 
 
-def test_runtime_pandera_validation_is_not_package_import_side_effect() -> (
-    None
-):
+def test_runtime_pandera_validation_is_not_package_import_side_effect() -> None:
     """Pandera runtime validation must remain an explicit bootstrap call."""
     top_level_init = (ROOT / "src" / "bioetl" / "__init__.py").read_text(
         encoding="utf-8"

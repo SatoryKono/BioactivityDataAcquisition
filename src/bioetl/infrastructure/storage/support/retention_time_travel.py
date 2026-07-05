@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Callable
 from datetime import datetime
 
@@ -26,22 +25,15 @@ async def load_time_travel_table(
         raise ValueError("Specify either version or timestamp, not both")
 
     table_path = get_table_path(base_path, table_name)
-    loop = asyncio.get_running_loop()
 
     try:
         if version is not None:
-            return await loop.run_in_executor(
-                None,
-                lambda: delta_table_factory(table_path, version=version),
-            )
+            return delta_table_factory(table_path, version=version)
         if timestamp is not None:
             timestamp_str = timestamp.isoformat()
-            return await loop.run_in_executor(
-                None,
-                lambda: delta_table_factory(
-                    table_path,
-                    storage_options={"time_travel": timestamp_str},
-                ),
+            return delta_table_factory(
+                table_path,
+                storage_options={"time_travel": timestamp_str},
             )
         raise ValueError("Must specify either version or timestamp")
     except DeltaTableNotFoundError as exc:

@@ -340,10 +340,12 @@ def test_creation_helper_assemble_manifest_create_spec_populates_contract_and_de
     assert request.effective_config_artifact_id == "artifact-123"
     assert request.replay_capability is ReplayCapability.EXACT_REPLAY_SUPPORTED
     debug_export = next(
-        artifact for artifact in request.planned_artifacts if artifact.layer == "debug_export"
+        artifact
+        for artifact in request.planned_artifacts
+        if artifact.layer == "debug_export"
     )
     assert debug_export.path.endswith(
-        "artifacts/debug_exports/wf-123/chembl_activity/" f"{ctx.run_id}"
+        f"artifacts/debug_exports/wf-123/chembl_activity/{ctx.run_id}"
     )
 
 

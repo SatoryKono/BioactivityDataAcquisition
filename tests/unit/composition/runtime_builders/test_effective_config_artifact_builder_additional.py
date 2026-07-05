@@ -103,7 +103,9 @@ def test_effective_config_payload_logs_successful_persist(
             return '{"artifact_id": "artifact-2"}'
 
     class _FakeStore:
-        def save(self, *, artifact_id: str, run_id: RunID, payload: dict[str, object]) -> None:
+        def save(
+            self, *, artifact_id: str, run_id: RunID, payload: dict[str, object]
+        ) -> None:
             saved.update(artifact_id=artifact_id, run_id=run_id, payload=payload)
 
     monkeypatch.setattr(
@@ -127,21 +129,23 @@ def test_effective_config_payload_logs_successful_persist(
             "test_effective_config_payload_logs_successful_persist"
         )
     )
-    result = effective_config_builder._create_and_persist_effective_config_artifact_payload(
-        pipeline_name="chembl_activity",
-        pipeline_kind="standard",
-        resolved_config={"pipeline": {"name": "chembl_activity"}},
-        runtime_overrides={"start_offset": 10},
-        provider="chembl",
-        entity="activity",
-        required_persistence_profile="replay_ready",
-        resolution_policy=None,
-        normalization_profile_ref=None,
-        normalization_profile_version=None,
-        normalization_profile_hash=None,
-        settings=Settings(data_dir=Path("data")),
-        logger=logger,
-        run_id=run_id,
+    result = (
+        effective_config_builder._create_and_persist_effective_config_artifact_payload(
+            pipeline_name="chembl_activity",
+            pipeline_kind="standard",
+            resolved_config={"pipeline": {"name": "chembl_activity"}},
+            runtime_overrides={"start_offset": 10},
+            provider="chembl",
+            entity="activity",
+            required_persistence_profile="replay_ready",
+            resolution_policy=None,
+            normalization_profile_ref=None,
+            normalization_profile_version=None,
+            normalization_profile_hash=None,
+            settings=Settings(data_dir=Path("data")),
+            logger=logger,
+            run_id=run_id,
+        )
     )
 
     assert result == (
@@ -174,7 +178,13 @@ def test_composite_effective_config_artifact_uses_strict_validation_fallback(
 
     def _fake_payload(**kwargs: object) -> tuple[str, str, str, str, str]:
         captured.update(kwargs)
-        return ("artifact-3", "resolved-hash", "effective-hash", "source-hash", "dq-hash")
+        return (
+            "artifact-3",
+            "resolved-hash",
+            "effective-hash",
+            "source-hash",
+            "dq-hash",
+        )
 
     monkeypatch.setattr(
         "bioetl.composition.runtime_builders.effective_config_artifact_builder._create_and_persist_effective_config_artifact_payload",

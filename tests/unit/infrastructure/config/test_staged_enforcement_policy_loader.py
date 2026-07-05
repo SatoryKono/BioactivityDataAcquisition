@@ -16,9 +16,7 @@ from bioetl.infrastructure.config.staged_enforcement_policy_loader import (
 
 
 ROOT = Path(__file__).resolve().parents[4]
-REGISTRY_PATH = (
-    ROOT / "configs" / "quality" / "staged_enforcement_policy_registry.yaml"
-)
+REGISTRY_PATH = ROOT / "configs" / "quality" / "staged_enforcement_policy_registry.yaml"
 
 pytestmark = pytest.mark.unit
 

@@ -37,7 +37,9 @@ def test_dual_rollout_policy_marks_only_active_version() -> None:
         affects_hash=True,
     )
 
-    assert [target.contract_version for target in policy.read_targets("publication")] == [
+    assert [
+        target.contract_version for target in policy.read_targets("publication")
+    ] == [
         "2.0.0",
         "1.0.0",
     ]

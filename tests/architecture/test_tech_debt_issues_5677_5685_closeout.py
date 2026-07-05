@@ -124,9 +124,14 @@ def test_issues_5679_5680_5685_duplication_ratchets_are_lower() -> None:
         duplication["summary"]["total_duplicate_clusters"]
         == ratchets["full_app_duplicate_clusters"]["current"]
     )
-    assert adapters["duplicate_count"] == ratchets["adapter_duplicate_clusters"]["current"]
+    assert (
+        adapters["duplicate_count"] == ratchets["adapter_duplicate_clusters"]["current"]
+    )
     assert adapters["duplicate_count"] < 58
-    assert pipelines["duplicate_count"] == ratchets["pipeline_duplicate_clusters"]["current"]
+    assert (
+        pipelines["duplicate_count"]
+        == ratchets["pipeline_duplicate_clusters"]["current"]
+    )
     assert pipelines["duplicate_count"] < 16
     assert cli["duplicate_count"] == ratchets["cli_duplicate_clusters"]["current"]
     assert all(row["duplicate_clusters"] == 0 for row in cli["actionability"])

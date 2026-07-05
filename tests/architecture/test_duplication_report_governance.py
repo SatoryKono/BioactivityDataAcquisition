@@ -247,8 +247,7 @@ def test_issue_5486_cli_first_wave_reduces_reviewed_duplication_leverage() -> No
     cli_ranking_row = next(
         row
         for row in ranking
-        if isinstance(row, dict)
-        and row.get("target") == "src/bioetl/interfaces/cli"
+        if isinstance(row, dict) and row.get("target") == "src/bioetl/interfaces/cli"
     )
     assert cli_ranking_row == {
         "target": "src/bioetl/interfaces/cli",

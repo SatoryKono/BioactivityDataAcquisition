@@ -406,8 +406,7 @@ def test_runtime_timestamps_and_durations_are_excluded_from_identity() -> None:
     for anchor in semantic_anchors:
         assert isinstance(anchor, dict)
         forbidden_fields = {
-            str(field)
-            for field in anchor.get("forbidden_runtime_timestamp_fields", [])
+            str(field) for field in anchor.get("forbidden_runtime_timestamp_fields", [])
         }
         missing = sorted(forbidden_runtime_fields - forbidden_fields)
         if missing:

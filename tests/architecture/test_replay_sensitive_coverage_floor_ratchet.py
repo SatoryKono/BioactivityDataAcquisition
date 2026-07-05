@@ -40,7 +40,9 @@ def test_replay_sensitive_module_coverage_floors_hold() -> None:
     rows = inventory.get("modules", [])
     assert isinstance(rows, list)
     by_module = {
-        str(row["module"]): row for row in rows if isinstance(row, dict) and row.get("module")
+        str(row["module"]): row
+        for row in rows
+        if isinstance(row, dict) and row.get("module")
     }
 
     for entry in modules:

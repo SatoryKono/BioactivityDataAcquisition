@@ -26,7 +26,9 @@ from bioetl.infrastructure.config.contract_registry_loader import (
 pytestmark = pytest.mark.unit
 
 
-def _install_mock_kernel32(monkeypatch: pytest.MonkeyPatch, kernel32: MagicMock) -> None:
+def _install_mock_kernel32(
+    monkeypatch: pytest.MonkeyPatch, kernel32: MagicMock
+) -> None:
     """Install a mock ``ctypes.windll.kernel32`` surface for Windows-drive probes."""
     windll = type("MockWindll", (), {"kernel32": kernel32})()
     monkeypatch.setattr(ctypes, "windll", windll, raising=False)
@@ -175,6 +177,7 @@ class TestLoadYamlWithTimeout:
         """Test timeout exception for slow loading."""
         # Skip this test on Windows due to threading issues
         import sys
+
         if sys.platform == "win32":
             pytest.skip("Threading timeout test skipped on Windows")
 
@@ -295,7 +298,9 @@ class TestLoadContractRegistryPayload:
                 "bioetl.infrastructure.config.contract_registry_loader._load_yaml_with_timeout",
                 side_effect=TimeoutError("Timeout"),
             ):
-                with pytest.raises(TimeoutError, match="Contract registry load timeout"):
+                with pytest.raises(
+                    TimeoutError, match="Contract registry load timeout"
+                ):
                     load_contract_registry_payload(registry_path=test_file)
 
     def test_wraps_os_error(self):
@@ -321,7 +326,9 @@ class TestLoadContractRegistryPayload:
                 "bioetl.infrastructure.config.contract_registry_loader._load_yaml_with_timeout",
                 side_effect=yaml.YAMLError("Invalid YAML"),
             ):
-                with pytest.raises(ValueError, match="Malformed contract registry YAML"):
+                with pytest.raises(
+                    ValueError, match="Malformed contract registry YAML"
+                ):
                     load_contract_registry_payload(registry_path=test_file)
 
     def test_raises_value_error_for_non_dict_root(self):
@@ -348,7 +355,9 @@ class TestTryLoadContractRegistryPayload:
 
     def test_returns_none_on_file_not_found(self):
         """Test returning None for missing file."""
-        result = try_load_contract_registry_payload(registry_path=Path("/nonexistent.yaml"))
+        result = try_load_contract_registry_payload(
+            registry_path=Path("/nonexistent.yaml")
+        )
         assert result is None
 
     def test_returns_none_on_os_error(self):
@@ -357,7 +366,9 @@ class TestTryLoadContractRegistryPayload:
             "bioetl.infrastructure.config.contract_registry_loader.load_contract_registry_payload",
             side_effect=OSError("Permission denied"),
         ):
-            result = try_load_contract_registry_payload(registry_path=Path("/test.yaml"))
+            result = try_load_contract_registry_payload(
+                registry_path=Path("/test.yaml")
+            )
             assert result is None
 
     def test_returns_none_on_value_error_for_invalid_payload(self):
@@ -366,7 +377,9 @@ class TestTryLoadContractRegistryPayload:
             "bioetl.infrastructure.config.contract_registry_loader.load_contract_registry_payload",
             side_effect=ValueError("Invalid format"),
         ):
-            result = try_load_contract_registry_payload(registry_path=Path("/test.yaml"))
+            result = try_load_contract_registry_payload(
+                registry_path=Path("/test.yaml")
+            )
             assert result is None
 
 
@@ -444,7 +457,9 @@ class TestTryLoadContractRegistryEntries:
 
     def test_returns_empty_dict_on_file_not_found(self):
         """Test returning empty dict for missing file."""
-        result = try_load_contract_registry_entries(registry_path=Path("/nonexistent.yaml"))
+        result = try_load_contract_registry_entries(
+            registry_path=Path("/nonexistent.yaml")
+        )
         assert result == {}
 
     def test_returns_empty_dict_on_os_error(self):
@@ -453,7 +468,9 @@ class TestTryLoadContractRegistryEntries:
             "bioetl.infrastructure.config.contract_registry_loader.load_contract_registry_entries",
             side_effect=OSError("Permission denied"),
         ):
-            result = try_load_contract_registry_entries(registry_path=Path("/test.yaml"))
+            result = try_load_contract_registry_entries(
+                registry_path=Path("/test.yaml")
+            )
             assert result == {}
 
     def test_returns_empty_dict_on_value_error(self):
@@ -462,7 +479,9 @@ class TestTryLoadContractRegistryEntries:
             "bioetl.infrastructure.config.contract_registry_loader.load_contract_registry_entries",
             side_effect=ValueError("Invalid format"),
         ):
-            result = try_load_contract_registry_entries(registry_path=Path("/test.yaml"))
+            result = try_load_contract_registry_entries(
+                registry_path=Path("/test.yaml")
+            )
             assert result == {}
 
 
@@ -478,18 +497,16 @@ class TestLoadContractRegistryEntry:
                 encoding="utf-8",
             )
 
-            result = load_contract_registry_entry(
-                "contract1", registry_path=test_file
-            )
+            result = load_contract_registry_entry("contract1", registry_path=test_file)
             assert result == {"version": 1.0}
 
     def test_raises_key_error_for_missing_entry(self):
         """Test KeyError when contract_ref is not found."""
         with TemporaryDirectory() as temp_dir:
             test_file = Path(temp_dir) / "contract_registry.yaml"
-            test_file.write_text("entries:\n  contract1:\n    version: 1.0", encoding="utf-8")
+            test_file.write_text(
+                "entries:\n  contract1:\n    version: 1.0", encoding="utf-8"
+            )
 
             with pytest.raises(KeyError, match="Contract registry entry not found"):
-                load_contract_registry_entry(
-                    "nonexistent", registry_path=test_file
-                )
+                load_contract_registry_entry("nonexistent", registry_path=test_file)

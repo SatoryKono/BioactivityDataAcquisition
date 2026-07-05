@@ -28,7 +28,9 @@ FIXTURE_DIR = Path("tests/fixtures/golden/control_plane")
 UPDATE_SNAPSHOTS = os.environ.get("UPDATE_SNAPSHOTS", "0") == "1"
 
 
-def _issue_key(issue: RegistryValidationIssue) -> tuple[str, str, str | None, str | None]:
+def _issue_key(
+    issue: RegistryValidationIssue,
+) -> tuple[str, str, str | None, str | None]:
     return (
         issue.contract_ref or "",
         issue.field or "",
@@ -184,8 +186,12 @@ def test_registry_hash_is_stable_for_insertion_order_invariant_payload() -> None
     entry_a = _make_entry(contract_ref="alpha.contract")
     entry_b = _make_entry(contract_ref="beta.contract")
 
-    registry_one = ContractRegistry(entries={"alpha.contract": entry_a, "beta.contract": entry_b})
-    registry_two = ContractRegistry(entries={"beta.contract": entry_b, "alpha.contract": entry_a})
+    registry_one = ContractRegistry(
+        entries={"alpha.contract": entry_a, "beta.contract": entry_b}
+    )
+    registry_two = ContractRegistry(
+        entries={"beta.contract": entry_b, "alpha.contract": entry_a}
+    )
 
     assert registry_one.registry_hash == registry_two.registry_hash
     assert registry_one.registry_hash_v1 == registry_two.registry_hash_v1

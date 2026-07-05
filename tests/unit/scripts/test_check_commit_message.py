@@ -15,12 +15,19 @@ pytestmark = pytest.mark.unit
 
 
 def test_validate_commit_message_header_accepts_conventional_commit() -> None:
-    assert validate_commit_message_header("feat(hooks): install commit-msg hook") is None
+    assert (
+        validate_commit_message_header("feat(hooks): install commit-msg hook") is None
+    )
 
 
 def test_validate_commit_message_header_accepts_merge_and_revert_headers() -> None:
-    assert validate_commit_message_header("Merge branch 'main' into feature/hooks") is None
-    assert validate_commit_message_header("Revert \"feat(hooks): install commit-msg hook\"") is None
+    assert (
+        validate_commit_message_header("Merge branch 'main' into feature/hooks") is None
+    )
+    assert (
+        validate_commit_message_header('Revert "feat(hooks): install commit-msg hook"')
+        is None
+    )
 
 
 def test_validate_commit_message_header_rejects_invalid_header() -> None:
@@ -39,9 +46,13 @@ def test_validate_commit_message_header_rejects_overlong_conventional_header() -
     assert "exceeds 100 characters" in error
 
 
-def test_main_validates_commit_message_file(tmp_path, capsys: pytest.CaptureFixture[str]) -> None:
+def test_main_validates_commit_message_file(
+    tmp_path, capsys: pytest.CaptureFixture[str]
+) -> None:
     commit_msg = tmp_path / "COMMIT_EDITMSG"
-    commit_msg.write_text("feat(hooks): install commit-msg hook\n\nbody\n", encoding="utf-8")
+    commit_msg.write_text(
+        "feat(hooks): install commit-msg hook\n\nbody\n", encoding="utf-8"
+    )
 
     exit_code = main([str(commit_msg)])
 

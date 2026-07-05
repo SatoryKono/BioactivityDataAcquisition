@@ -37,24 +37,24 @@
       "status": "pass"
     },
     {
-      "current": "a942d7fe1a319b4d7a8f49f8371c1df356be284622c636cb0228d1de0add6f56",
-      "limit": "a942d7fe1a319b4d7a8f49f8371c1df356be284622c636cb0228d1de0add6f56",
+      "current": "94ab87aa6cc1ce48f8f0943b1aef9f7265e13a6d925b2b58963f852434fdcffd",
+      "limit": "63dafe3f7d66c1aece4bc87352ad97f847adeb92d0c89e79d29d4b785f73a1c4",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
       "source_artifact": "reports/quality/module-coverage-inventory.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": {
         "source_module_count": 2210,
-        "source_tree_sha256": "3bbae22bd8c16d7542fcf9e85be59029895bf18c6e08e0ae2affb1de57722e90",
+        "source_tree_sha256": "63dafe3f7d66c1aece4bc87352ad97f847adeb92d0c89e79d29d4b785f73a1c4",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2210,
-        "source_tree_sha256": "a942d7fe1a319b4d7a8f49f8371c1df356be284622c636cb0228d1de0add6f56",
+        "source_tree_sha256": "63dafe3f7d66c1aece4bc87352ad97f847adeb92d0c89e79d29d4b785f73a1c4",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -62,7 +62,7 @@
       "name": "module_coverage_scorecard_coherence",
       "remediation": "Refresh architecture-quality scorecard and module coverage inventory until counts and source-tree hash match.",
       "source_artifact": "reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": 0,
@@ -406,7 +406,7 @@
       "status": "pass"
     },
     {
-      "current": 2,
+      "current": 1,
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
@@ -419,11 +419,11 @@
   "schema_version": 1,
   "stale_artifacts": {
     "adr_enforcement_matrix": false,
-    "architecture_quality_scorecard": true,
+    "architecture_quality_scorecard": false,
     "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
-    "module_coverage_inventory": false,
-    "remote_main_baseline": true
+    "module_coverage_inventory": true,
+    "remote_main_baseline": false
   },
   "status_counts": {
     "fail": 2,
@@ -435,7 +435,7 @@
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
     "fail_count": 2,
     "failing_gates": [
-      "module_coverage_scorecard_coherence",
+      "module_coverage_source_tree_hash_current",
       "generated_artifact_drift"
     ],
     "gate_count": 44,

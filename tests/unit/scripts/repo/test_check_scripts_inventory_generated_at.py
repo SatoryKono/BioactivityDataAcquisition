@@ -33,7 +33,9 @@ def _manifest_payload(*, generated_at: str, total_scripts: int) -> dict[str, obj
 
 
 def _write_manifest(path: Path, payload: dict[str, object]) -> None:
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
 
 
 def test_prepare_manifest_write_skips_timestamp_only_rewrites(tmp_path: Path) -> None:
@@ -54,7 +56,9 @@ def test_prepare_manifest_write_skips_timestamp_only_rewrites(tmp_path: Path) ->
     assert prepared["generated_at"] == existing["generated_at"]
 
 
-def test_prepare_manifest_write_updates_when_inventory_body_changes(tmp_path: Path) -> None:
+def test_prepare_manifest_write_updates_when_inventory_body_changes(
+    tmp_path: Path,
+) -> None:
     manifest_path = tmp_path / "scripts_inventory_manifest.json"
     existing = _manifest_payload(
         generated_at="2026-06-29T17:03:11.139176+00:00",

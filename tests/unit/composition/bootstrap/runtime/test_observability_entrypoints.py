@@ -44,7 +44,9 @@ def test_runtime_observability_import_does_not_load_heavy_adapters() -> None:
 class TestBootstrapLoggerPort:
     """Tests for bootstrap_logger runtime entrypoint."""
 
-    @patch("bioetl.composition.bootstrap.runtime.logger_bootstrap._default_logger_factory")
+    @patch(
+        "bioetl.composition.bootstrap.runtime.logger_bootstrap._default_logger_factory"
+    )
     def test_bootstrap_logger_delegates_to_unified_logger(
         self,
         mock_logger_factory: MagicMock,

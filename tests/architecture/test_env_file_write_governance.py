@@ -56,9 +56,7 @@ def _env_file_variable_names(text: str, *, suffix: str) -> set[str]:
 def _line_references_env_file(line: str, env_var_names: set[str]) -> bool:
     if ENV_FILE_TOKEN_PATTERN.search(line):
         return True
-    return any(
-        f"${name}" in line or f"${{{name}}}" in line for name in env_var_names
-    )
+    return any(f"${name}" in line or f"${{{name}}}" in line for name in env_var_names)
 
 
 def _script_can_write_env_file(path: Path, text: str) -> bool:

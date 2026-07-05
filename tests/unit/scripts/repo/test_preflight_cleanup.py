@@ -14,7 +14,9 @@ ROOT = Path(__file__).resolve().parents[4]
 SCRIPT = ROOT / "scripts" / "engineering" / "repo" / "preflight_cleanup.sh"
 
 
-def _run_cleanup(tmp_path: Path, *, allow_slow_delete: bool = False) -> subprocess.CompletedProcess[str]:
+def _run_cleanup(
+    tmp_path: Path, *, allow_slow_delete: bool = False
+) -> subprocess.CompletedProcess[str]:
     env = os.environ.copy()
     env.update(
         {
@@ -36,7 +38,9 @@ def _run_cleanup(tmp_path: Path, *, allow_slow_delete: bool = False) -> subproce
     )
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="bash script not available on Windows")
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="bash script not available on Windows"
+)
 def test_preflight_cleanup_skips_large_delete_on_slow_filesystem(
     tmp_path: Path,
 ) -> None:
@@ -51,7 +55,9 @@ def test_preflight_cleanup_skips_large_delete_on_slow_filesystem(
     assert (tmp_path / "pkg_1" / "__pycache__").is_dir()
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="bash script not available on Windows")
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="bash script not available on Windows"
+)
 def test_preflight_cleanup_allows_large_delete_when_explicitly_overridden(
     tmp_path: Path,
 ) -> None:

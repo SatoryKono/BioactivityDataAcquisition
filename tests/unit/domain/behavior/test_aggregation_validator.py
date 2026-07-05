@@ -42,7 +42,9 @@ def test_validate_aggregation_config_reports_missing_and_unsupported_fields() ->
     assert result.has_blockers()
 
 
-def test_validate_aggregation_config_reports_missing_group_unsupported_and_shadowing() -> None:
+def test_validate_aggregation_config_reports_missing_group_unsupported_and_shadowing() -> (
+    None
+):
     result = AggregationValidator().validate_aggregation_config(
         AggregationConfig(
             group_by=["target_id", "missing"],

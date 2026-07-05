@@ -827,9 +827,7 @@ def _assert_makefile_architecture_target(content: str) -> None:
         "--shard S7-architecture-fast-boundary" in content
         and 'tests/architecture/ -m "architecture and not slow and not benchmark and not memory"'
         in content
-    ), (
-        "qa-arch-fast must delegate to the canonical architecture-fast-boundary lane"
-    )
+    ), "qa-arch-fast must delegate to the canonical architecture-fast-boundary lane"
 
 
 def test_architecture_test_p95_duration_tracked() -> None:

@@ -7,7 +7,9 @@ from pathlib import Path
 import pytest
 import yaml
 
-from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config_from_root
+from bioetl.infrastructure.config.pipeline_config_api import (
+    load_pipeline_config_from_root,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 ENTITIES_DIR = PROJECT_ROOT / "configs" / "entities"

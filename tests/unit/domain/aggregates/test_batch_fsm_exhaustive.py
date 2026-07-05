@@ -218,6 +218,7 @@ def test_invalid_state_transitions_raise_error(
 # State Invariant Tests
 # ──────────────────────────────────────────────────────────────────────────────
 
+
 def test_open_state_invariants(open_batch: Batch) -> None:
     """Test invariants for OPEN state."""
     assert open_batch.status == BatchStatus.OPEN
@@ -286,6 +287,7 @@ def test_failed_state_invariants(run_id: RunID) -> None:
 # Domain Event Emission Tests
 # ──────────────────────────────────────────────────────────────────────────────
 
+
 def test_seal_emits_batch_sealed_event(sealed_batch: Batch) -> None:
     """Test that seal() emits BatchSealed event."""
     events = sealed_batch.collect_events()
@@ -336,6 +338,7 @@ def test_mark_failed_emits_batch_failed_event(run_id: RunID) -> None:
 # ──────────────────────────────────────────────────────────────────────────────
 # Edge Case Tests
 # ──────────────────────────────────────────────────────────────────────────────
+
 
 def test_cannot_seal_already_sealed_batch(sealed_batch: Batch) -> None:
     """Test that sealing an already sealed batch raises error."""
@@ -420,6 +423,7 @@ def test_cannot_transition_from_failed_to_committed(run_id: RunID) -> None:
 # Property Coverage Tests (for 100% coverage)
 # ──────────────────────────────────────────────────────────────────────────────
 
+
 def test_batch_properties_coverage(open_batch: Batch) -> None:
     """Test all Batch properties for coverage."""
     # Test all properties that are in _BatchReadModelMixin
@@ -460,14 +464,14 @@ def test_quarantine_record_coverage(run_id: RunID) -> None:
     """Test quarantine_record method for coverage."""
     batch = Batch.create(run_id=run_id, created_at=_ts(0))
     record = batch.add_record({"test": "data"}, entity_id="test-entity")
-    
+
     quarantined = batch.quarantine_record(
         record=record,
         error="Test error",
         error_code="TEST_ERROR",
         quarantined_at=_ts(1),
     )
-    
+
     assert not quarantined.is_valid
     assert batch.quarantined_count == 1
 
@@ -476,10 +480,10 @@ def test_collect_events_coverage(run_id: RunID) -> None:
     """Test collect_events method for coverage."""
     batch = Batch.create(run_id=run_id, created_at=_ts(0))
     batch.seal(sealed_at=_ts(1))
-    
+
     events = batch.collect_events()
     assert len(events) == 2  # BatchCreated + BatchSealed
-    
+
     # Events should be cleared after collection
     events2 = batch.collect_events()
     assert len(events2) == 0

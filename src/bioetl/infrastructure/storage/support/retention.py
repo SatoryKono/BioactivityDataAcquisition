@@ -90,12 +90,8 @@ class RetentionPolicy:
     ) -> list[str]:
         """Remove old files that are no longer referenced by the Delta log."""
         table_path = get_table_path(self.base_path, table_name)
-        loop = asyncio.get_running_loop()
-        dt = await loop.run_in_executor(None, lambda: _load_delta_table(table_path))
-        return await loop.run_in_executor(
-            None,
-            lambda: dt.vacuum(retention_hours=retention_hours, dry_run=dry_run),
-        )
+        dt = _load_delta_table(table_path)
+        return dt.vacuum(retention_hours=retention_hours, dry_run=dry_run)
 
     async def optimize(
         self,
@@ -129,12 +125,9 @@ class RetentionPolicy:
         # Note: target_size reserved for future delta-rs API support
         _ = target_size  # Suppress unused variable warning
         table_path = get_table_path(self.base_path, table_name)
-        loop = asyncio.get_running_loop()
         filters = partition_filters  # Capture for lambda closure
-        dt = await loop.run_in_executor(None, lambda: _load_delta_table(table_path))
-        return await loop.run_in_executor(
-            None, lambda: dt.optimize.compact(partition_filters=filters)
-        )
+        dt = _load_delta_table(table_path)
+        return dt.optimize.compact(partition_filters=filters)
 
     async def get_table_info(
         self, table_name: str
@@ -155,8 +148,7 @@ class RetentionPolicy:
             TableNotFoundError: If table does not exist.
         """
         table_path = get_table_path(self.base_path, table_name)
-        loop = asyncio.get_running_loop()
-        dt = await loop.run_in_executor(None, lambda: _load_delta_table(table_path))
+        dt = _load_delta_table(table_path)
         return build_table_info(dt)
 
     async def deduplicate_silver(

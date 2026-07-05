@@ -9,7 +9,9 @@ import pyarrow as pa
 import pytest
 
 from bioetl.domain.medallion import SilverWriteMode
-from bioetl.infrastructure.storage.delta.table_ops import normalize_delta_filesystem_path
+from bioetl.infrastructure.storage.delta.table_ops import (
+    normalize_delta_filesystem_path,
+)
 from bioetl.infrastructure.storage.silver import delta_write_execution as subject
 from bioetl.infrastructure.storage.silver.delta_request_models import (
     _DeltaWriteRequest,

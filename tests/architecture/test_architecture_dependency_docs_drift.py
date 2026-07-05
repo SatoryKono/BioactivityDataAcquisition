@@ -84,6 +84,7 @@ def test_dependency_map_drift_check_passes_current_repo(
 ) -> None:
     # Skip on WSL and Windows due to filesystem performance causing dependency map generation timeout
     import sys
+
     if sys.platform.startswith("win"):
         pytest.skip("Skipped on Windows due to filesystem performance")
     try:

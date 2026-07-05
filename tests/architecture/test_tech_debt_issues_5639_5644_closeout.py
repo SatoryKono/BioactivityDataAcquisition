@@ -29,7 +29,9 @@ COMPATIBILITY_CENSUS = (
 COMPATIBILITY_REGISTRY = (
     ROOT / "configs" / "quality" / "compatibility_facade_inventory.yaml"
 )
-SERVICES_FACTORY = ROOT / "src" / "bioetl" / "composition" / "factories" / "services" / "factory.py"
+SERVICES_FACTORY = (
+    ROOT / "src" / "bioetl" / "composition" / "factories" / "services" / "factory.py"
+)
 COMPOSITE_RUNTIME = (
     ROOT / "src" / "bioetl" / "composition" / "bootstrap" / "runtime" / "composite.py"
 )
@@ -71,10 +73,16 @@ def test_closeout_artifact_covers_requested_issues__5639_5644() -> None:
 
 def test_issue_5639_architecture_debt_planner_tracks_live_artifact_backlog() -> None:
     tasks = _load_json(
-        ROOT / "reports" / "quality" / "tasks_architecture_metric_exemptions_2026-06-26-15-51.json"
+        ROOT
+        / "reports"
+        / "quality"
+        / "tasks_architecture_metric_exemptions_2026-06-26-15-51.json"
     )
     plan = _load_json(
-        ROOT / "reports" / "quality" / "architecture_debt_execution_plan_2026-06-26-15-51.json"
+        ROOT
+        / "reports"
+        / "quality"
+        / "architecture_debt_execution_plan_2026-06-26-15-51.json"
     )
 
     assert tasks["registry_summary"]["total_tasks"] > 0
@@ -93,7 +101,9 @@ def test_issue_5639_architecture_debt_planner_tracks_live_artifact_backlog() -> 
     ]
 
 
-def test_issue_5640_stable_public_seams_are_governed_outside_compatibility_debt() -> None:
+def test_issue_5640_stable_public_seams_are_governed_outside_compatibility_debt() -> (
+    None
+):
     scorecard = _load_yaml(DEBT_SCORECARD)
     census = _load_json(COMPATIBILITY_CENSUS)
     registry = _load_yaml(COMPATIBILITY_REGISTRY)
@@ -113,8 +123,7 @@ def test_issue_5640_stable_public_seams_are_governed_outside_compatibility_debt(
         census["summary"]["retained_public_export_facade_count"]
     )
     assert (
-        governance_metrics["public_export_facade_conflict_count"]["current_count"]
-        == 0
+        governance_metrics["public_export_facade_conflict_count"]["current_count"] == 0
     )
 
 

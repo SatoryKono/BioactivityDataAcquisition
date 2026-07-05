@@ -39,7 +39,9 @@ class _Ops:
 class TestSilverMetadataWriteSupport:
     """Coverage-oriented tests for support-layer pure helpers."""
 
-    def test_resolve_metadata_logger_prefers_private_then_public_and_errors(self) -> None:
+    def test_resolve_metadata_logger_prefers_private_then_public_and_errors(
+        self,
+    ) -> None:
         logger = MagicMock()
         assert _resolve_metadata_logger(_Ops(_logger=logger)) is logger
         assert _resolve_metadata_logger(_Ops(logger=logger, _logger=None)) is logger
@@ -50,8 +52,14 @@ class TestSilverMetadataWriteSupport:
             _resolve_metadata_logger(_Ops())
 
     def test_metadata_path_and_metric_label_helpers(self) -> None:
-        assert _fallback_table_path("chembl.activity") == "data/output/silver/chembl/activity"
-        assert _normalize_metric_label("ChEMBL Activity!", fallback="x") == "chembl_activity"
+        assert (
+            _fallback_table_path("chembl.activity")
+            == "data/output/silver/chembl/activity"
+        )
+        assert (
+            _normalize_metric_label("ChEMBL Activity!", fallback="x")
+            == "chembl_activity"
+        )
         assert _normalize_metric_label("", fallback="x") == "x"
         assert _silver_metadata_write_success_labels("chembl.activity") == {
             "layer": "silver",
@@ -60,11 +68,16 @@ class TestSilverMetadataWriteSupport:
             "status": "success",
             "final_reason": "completed",
         }
-        assert _silver_metadata_write_success_labels("tableonly")["provider"] == "storage"
+        assert (
+            _silver_metadata_write_success_labels("tableonly")["provider"] == "storage"
+        )
 
     def test_require_coordinator_and_source_batch_ids(self) -> None:
         coordinator = object()
-        assert _require_metadata_coordinator(_Ops(_metadata_coordinator=coordinator)) is coordinator
+        assert (
+            _require_metadata_coordinator(_Ops(_metadata_coordinator=coordinator))
+            is coordinator
+        )
         with pytest.raises(
             RuntimeError,
             match="MetadataCoordinatorPort is required for Silver metadata publication",

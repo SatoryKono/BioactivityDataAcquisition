@@ -133,7 +133,9 @@ def test_push_metrics_to_gateway_does_not_bootstrap_fallback_logger() -> None:
     assert metrics_service.logger is mock.sentinel.logger
 
 
-def test_push_metrics_to_gateway_applies_extra_grouping_metric_names_and_logger() -> None:
+def test_push_metrics_to_gateway_applies_extra_grouping_metric_names_and_logger() -> (
+    None
+):
     metrics_service = mock.Mock()
     metrics_service.push_to_gateway.return_value = mock.Mock(success=True)
     settings = SimpleNamespace(pushgateway_url="pushgateway:9091")
@@ -219,7 +221,9 @@ def test_delete_metrics_from_gateway_does_not_bootstrap_fallback_logger() -> Non
     assert metrics_service.logger is mock.sentinel.logger
 
 
-def test_delete_metrics_from_gateway_overrides_logger_and_uses_configured_gateway() -> None:
+def test_delete_metrics_from_gateway_overrides_logger_and_uses_configured_gateway() -> (
+    None
+):
     metrics_service = mock.Mock()
     metrics_service.delete_from_gateway.return_value = mock.Mock(success=False)
     logger = mock.Mock()

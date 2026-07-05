@@ -70,18 +70,12 @@ def test_issue_5265_closeout_matches_live_module_coverage_inventory() -> None:
     }
 
     assert (
-        sum(
-            1
-            for row in tracked_rows.values()
-            if row["coverage_status"] == "uncovered"
-        )
+        sum(1 for row in tracked_rows.values() if row["coverage_status"] == "uncovered")
         == closeout["current_metrics"]["tracked_uncovered_module_count"]
     )
     assert (
         sum(
-            1
-            for row in tracked_rows.values()
-            if row["coverage_status"] == "unmeasured"
+            1 for row in tracked_rows.values() if row["coverage_status"] == "unmeasured"
         )
         == closeout["current_metrics"]["tracked_unmeasured_module_count"]
     )

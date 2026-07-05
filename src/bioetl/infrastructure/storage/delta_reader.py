@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -99,7 +98,6 @@ class DeltaReader:
             FileNotFoundError: If table does not exist.
         """
         resolved_path = self._resolve_path(table_path)
-        loop = asyncio.get_running_loop()
 
         def _read() -> pa.Table:
             try:
@@ -125,7 +123,7 @@ class DeltaReader:
             limit=limit,
         )
 
-        return await loop.run_in_executor(None, _read)
+        return _read()
 
     async def read_versioned_table(
         self,
@@ -172,7 +170,6 @@ class DeltaReader:
             FileNotFoundError: If table does not exist.
         """
         resolved_path = self._resolve_path(table_path)
-        loop = asyncio.get_running_loop()
 
         def _get_schema() -> pa.Schema:
             try:
@@ -183,7 +180,7 @@ class DeltaReader:
                 ) from e
             return delta_schema_to_pyarrow(dt.schema())
 
-        return await loop.run_in_executor(None, _get_schema)
+        return _get_schema()
 
     async def get_row_count(self, table_path: str) -> int:
         """Get the number of rows in a Delta Lake table.
@@ -200,7 +197,6 @@ class DeltaReader:
             FileNotFoundError: If table does not exist.
         """
         resolved_path = self._resolve_path(table_path)
-        loop = asyncio.get_running_loop()
 
         def _count_rows() -> int:
             try:
@@ -212,7 +208,7 @@ class DeltaReader:
 
             return _count_delta_rows(dt, resolved_path)
 
-        return await loop.run_in_executor(None, _count_rows)
+        return _count_rows()
 
     async def table_exists(self, table_path: str) -> bool:
         """Check if a Delta Lake table exists at the given path.
@@ -224,7 +220,6 @@ class DeltaReader:
             True if a valid Delta table exists, False otherwise.
         """
         resolved_path = self._resolve_path(table_path)
-        loop = asyncio.get_running_loop()
 
         def _check_exists() -> bool:
             delta_log = resolved_path / "_delta_log"
@@ -237,7 +232,7 @@ class DeltaReader:
             except DeltaTableNotFoundError:
                 return False
 
-        return await loop.run_in_executor(None, _check_exists)
+        return _check_exists()
 
     async def aclose(self) -> None:
         """Gracefully close the reader (no-op, no persistent resources)."""

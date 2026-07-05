@@ -8,6 +8,7 @@ from scripts.docs.checks import report_docs_kpi
 
 pytestmark = pytest.mark.unit
 
+
 class _BrokenStatPath:
     def is_file(self) -> bool:
         raise OSError(22, "Invalid argument")

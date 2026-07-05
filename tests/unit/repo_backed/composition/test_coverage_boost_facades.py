@@ -82,8 +82,8 @@ def _install_workflow_runner_service_dependencies(
     )
 
     observability_module = ModuleType("observability")
-    observability_module.bootstrap_logger = (
-        lambda name: SimpleNamespace(bind=lambda **kwargs: ("logger", name, kwargs))
+    observability_module.bootstrap_logger = lambda name: SimpleNamespace(
+        bind=lambda **kwargs: ("logger", name, kwargs)
     )
     monkeypatch.setitem(
         sys.modules,
@@ -129,8 +129,9 @@ def _install_workflow_runner_service_dependencies(
     )
 
     reconciliation_module = ModuleType("reconciliation")
-    reconciliation_module.SilverForeignKeyReconciliationAdapter = (
-        lambda **kwargs: ("reconciliation", kwargs)
+    reconciliation_module.SilverForeignKeyReconciliationAdapter = lambda **kwargs: (
+        "reconciliation",
+        kwargs,
     )
     monkeypatch.setitem(
         sys.modules,
@@ -232,9 +233,15 @@ def test_factories_package_lazy_exports_and_unknown_attributes(
         }
         return mapping[name]
 
-    monkeypatch.setattr("bioetl.composition.factories.import_module", _fake_import_module)
+    monkeypatch.setattr(
+        "bioetl.composition.factories.import_module", _fake_import_module
+    )
     monkeypatch.setattr(factories_pkg, "pipeline", fake_pipeline, raising=False)
-    monkeypatch.setitem(__import__("sys").modules, "bioetl.composition.factories.pipeline", fake_pipeline)
+    monkeypatch.setitem(
+        __import__("sys").modules,
+        "bioetl.composition.factories.pipeline",
+        fake_pipeline,
+    )
     monkeypatch.setitem(
         __import__("sys").modules,
         "bioetl.composition.factories.pipeline.assembler",
@@ -247,8 +254,12 @@ def test_factories_package_lazy_exports_and_unknown_attributes(
     )
 
     assert factories_getattr("BaseServicesFactory") is fake_module.BaseServicesFactory
-    assert factories_getattr("create_pipeline_factory") is mock.sentinel.pipeline_factory
-    assert factories_getattr("pubchem_compound_factory") is mock.sentinel.pubchem_factory
+    assert (
+        factories_getattr("create_pipeline_factory") is mock.sentinel.pipeline_factory
+    )
+    assert (
+        factories_getattr("pubchem_compound_factory") is mock.sentinel.pubchem_factory
+    )
     with pytest.raises(AttributeError):
         factories_getattr("missing_export")
 
@@ -286,12 +297,17 @@ def test_cli_bootstrap_lazy_exports_and_unknown_attribute(
     monkeypatch.setattr(
         cli_bootstrap,
         "import_module",
-        lambda name: fake_health
-        if name == "bioetl.composition.bootstrap.cli.health"
-        else (_ for _ in ()).throw(KeyError(name)),
+        lambda name: (
+            fake_health
+            if name == "bioetl.composition.bootstrap.cli.health"
+            else (_ for _ in ()).throw(KeyError(name))
+        ),
     )
 
-    assert cli_bootstrap.__getattr__("bootstrap_health_service") is mock.sentinel.health_service
+    assert (
+        cli_bootstrap.__getattr__("bootstrap_health_service")
+        is mock.sentinel.health_service
+    )
     with pytest.raises(AttributeError):
         cli_bootstrap.__getattr__("missing")
 
@@ -316,8 +332,14 @@ def test_services_facade_helpers_cover_lazy_resolution_and_workflow_delegation(
     fake_module.bootstrap_checkpoint_service = lambda: mock.sentinel.checkpoint
     monkeypatch.setattr(_services, "import_module", lambda _: fake_module)
 
-    assert _services.resolve_bootstrap_attr("bootstrap_metrics_service") is fake_module.bootstrap_metrics_service
-    assert _services._invoke_bootstrap("bootstrap_checkpoint_service") is mock.sentinel.checkpoint
+    assert (
+        _services.resolve_bootstrap_attr("bootstrap_metrics_service")
+        is fake_module.bootstrap_metrics_service
+    )
+    assert (
+        _services._invoke_bootstrap("bootstrap_checkpoint_service")
+        is mock.sentinel.checkpoint
+    )
     with pytest.raises(AttributeError):
         _services.resolve_bootstrap_attr("missing_export")
 
@@ -367,14 +389,17 @@ def test_services_facade_wrappers_cover_provider_and_pipeline_entrypoints(
     monkeypatch.setattr(
         _services,
         "_invoke_bootstrap",
-        lambda name, *args, **kwargs: bootstrap_calls.append((name, args, kwargs))
-        or (name, args, kwargs),
+        lambda name, *args, **kwargs: (
+            bootstrap_calls.append((name, args, kwargs)) or (name, args, kwargs)
+        ),
     )
 
     assert _services.get_checkpoint_service()[0] == "bootstrap_checkpoint_service"
     assert _services.get_audit_service()[0] == "bootstrap_audit_inspection_service"
     assert _services.get_quarantine_service()[0] == "bootstrap_quarantine_service"
-    assert _services.get_bronze_cleanup_service()[0] == "bootstrap_bronze_cleanup_service"
+    assert (
+        _services.get_bronze_cleanup_service()[0] == "bootstrap_bronze_cleanup_service"
+    )
     assert _services.get_vacuum_service()[0] == "bootstrap_vacuum_service"
     assert _services.get_export_service()[0] == "bootstrap_export_service"
     assert _services.get_lock_service()[0] == "bootstrap_lock_service"
@@ -421,11 +446,15 @@ def test_services_facade_wrappers_cover_provider_and_pipeline_entrypoints(
     assert any(name == "bootstrap_metrics_service" for name, _, _ in bootstrap_calls)
 
 
-def test_cleanup_bronze_awaits_protocol_service(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_cleanup_bronze_awaits_protocol_service(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     calls: list[tuple[int, bool]] = []
 
     class _CleanupService:
-        async def cleanup(self, *, retention_days: int, dry_run: bool) -> dict[str, int]:
+        async def cleanup(
+            self, *, retention_days: int, dry_run: bool
+        ) -> dict[str, int]:
             calls.append((retention_days, dry_run))
             return {"removed": 3}
 
@@ -474,15 +503,18 @@ def test_workflow_services_cover_default_factory_and_runner_service_paths(
     tmp_path: Path,
 ) -> None:
     fake_runtime_runner = ModuleType("fake_runtime_runner")
-    fake_runtime_runner.bootstrap_pipeline_runner_service = (
-        lambda registry=None: ("pipeline_runner", registry)
+    fake_runtime_runner.bootstrap_pipeline_runner_service = lambda registry=None: (
+        "pipeline_runner",
+        registry,
     )
     monkeypatch.setitem(
         sys.modules,
         "bioetl.composition.bootstrap.runtime.runner",
         fake_runtime_runner,
     )
-    assert _workflow_services._default_pipeline_runner_service_factory("registry-x") == (
+    assert _workflow_services._default_pipeline_runner_service_factory(
+        "registry-x"
+    ) == (
         "pipeline_runner",
         "registry-x",
     )
@@ -542,9 +574,18 @@ def test_workflow_inspection_service_uses_control_plane_roots(
 
     service = _workflow_services.get_workflow_inspection_service()
 
-    assert service.manifest_port.base_path == tmp_path / "output" / "control" / "workflow_manifest"
-    assert service.ledger_port.base_path == tmp_path / "output" / "control" / "workflow_ledger"
-    assert service.state_port.base_path == tmp_path / "output" / "control" / "workflow_state"
+    assert (
+        service.manifest_port.base_path
+        == tmp_path / "output" / "control" / "workflow_manifest"
+    )
+    assert (
+        service.ledger_port.base_path
+        == tmp_path / "output" / "control" / "workflow_ledger"
+    )
+    assert (
+        service.state_port.base_path
+        == tmp_path / "output" / "control" / "workflow_state"
+    )
 
 
 def test_run_manifest_data_root_helpers_cover_explicit_and_fallback_modes(
@@ -553,16 +594,28 @@ def test_run_manifest_data_root_helpers_cover_explicit_and_fallback_modes(
     assert data_roots.is_explicit_data_root_configured(
         SimpleNamespace(data_dir="/var/bioetl")
     )
-    assert data_roots.resolve_data_root_mode(SimpleNamespace(data_dir="/var/bioetl")) == "explicit"
+    assert (
+        data_roots.resolve_data_root_mode(SimpleNamespace(data_dir="/var/bioetl"))
+        == "explicit"
+    )
 
-    monkeypatch.setattr(data_roots.Path, "mkdir", lambda self, parents=True, exist_ok=True: None)
+    monkeypatch.setattr(
+        data_roots.Path, "mkdir", lambda self, parents=True, exist_ok=True: None
+    )
     monkeypatch.setattr(data_roots.os, "access", lambda path, mode: True)
-    assert data_roots.resolve_data_root_mode(SimpleNamespace(data_dir=None)) == "repo_default"
+    assert (
+        data_roots.resolve_data_root_mode(SimpleNamespace(data_dir=None))
+        == "repo_default"
+    )
 
     monkeypatch.setattr(
         data_roots,
         "_prepare_private_runtime_dir",
-        lambda path: (_ for _ in ()).throw(OSError("no-cache")) if "bioetl-data" in str(path) else path,
+        lambda path: (
+            (_ for _ in ()).throw(OSError("no-cache"))
+            if "bioetl-data" in str(path)
+            else path
+        ),
     )
     assert data_roots._private_fallback_data_root_mode() == "tmp"
     assert data_roots._artifact_path_string(PureWindowsPath(r"a\b")) == "a/b"
@@ -570,12 +623,21 @@ def test_run_manifest_data_root_helpers_cover_explicit_and_fallback_modes(
     monkeypatch.setattr(
         data_roots.Path,
         "mkdir",
-        lambda self, parents=True, exist_ok=True: (_ for _ in ()).throw(OSError("readonly")),
+        lambda self, parents=True, exist_ok=True: (_ for _ in ()).throw(
+            OSError("readonly")
+        ),
     )
-    monkeypatch.setattr(data_roots, "_private_fallback_data_root_mode", lambda: "private_cache")
-    assert data_roots.resolve_data_root_mode(SimpleNamespace(data_dir=None)) == "private_cache"
+    monkeypatch.setattr(
+        data_roots, "_private_fallback_data_root_mode", lambda: "private_cache"
+    )
+    assert (
+        data_roots.resolve_data_root_mode(SimpleNamespace(data_dir=None))
+        == "private_cache"
+    )
 
-    monkeypatch.setattr(data_roots.Path, "mkdir", lambda self, parents=True, exist_ok=True: None)
+    monkeypatch.setattr(
+        data_roots.Path, "mkdir", lambda self, parents=True, exist_ok=True: None
+    )
     monkeypatch.setattr(data_roots.os, "access", lambda path, mode: False)
     monkeypatch.setattr(data_roots, "_private_fallback_data_root_mode", lambda: "tmp")
     assert data_roots.resolve_data_root_mode(SimpleNamespace(data_dir=None)) == "tmp"
@@ -605,9 +667,9 @@ def test_run_manifest_data_root_helpers_cover_planned_artifacts_and_private_root
         debug_export_root="exports/debug",
     )
     assert any(artifact.layer == "debug_export" for artifact in artifacts)
-    assert data_roots.control_plane_root(SimpleNamespace(data_dir=tmp_path), "run_manifest") == (
-        tmp_path / "output" / "control" / "run_manifest"
-    )
+    assert data_roots.control_plane_root(
+        SimpleNamespace(data_dir=tmp_path), "run_manifest"
+    ) == (tmp_path / "output" / "control" / "run_manifest")
     relative_artifacts = data_roots.build_planned_artifacts(
         settings=SimpleNamespace(data_dir=None),
         provider="chembl",
@@ -631,16 +693,28 @@ def test_run_manifest_data_root_helpers_cover_resolve_and_private_fallbacks(
     monkeypatch.setattr(
         data_roots.Path,
         "mkdir",
-        lambda self, parents=True, exist_ok=True: (_ for _ in ()).throw(OSError("readonly")),
+        lambda self, parents=True, exist_ok=True: (_ for _ in ()).throw(
+            OSError("readonly")
+        ),
     )
-    monkeypatch.setattr(data_roots, "_private_fallback_data_root", lambda: Path("/tmp/private"))
-    assert data_roots._resolve_data_root(SimpleNamespace(data_dir=None)) == Path("/tmp/private")
+    monkeypatch.setattr(
+        data_roots, "_private_fallback_data_root", lambda: Path("/tmp/private")
+    )
+    assert data_roots._resolve_data_root(SimpleNamespace(data_dir=None)) == Path(
+        "/tmp/private"
+    )
 
-    monkeypatch.setattr(data_roots.Path, "mkdir", lambda self, parents=True, exist_ok=True: None)
+    monkeypatch.setattr(
+        data_roots.Path, "mkdir", lambda self, parents=True, exist_ok=True: None
+    )
     monkeypatch.setattr(data_roots.os, "access", lambda path, mode: False)
-    assert data_roots._resolve_data_root(SimpleNamespace(data_dir=None)) == Path("/tmp/private")
+    assert data_roots._resolve_data_root(SimpleNamespace(data_dir=None)) == Path(
+        "/tmp/private"
+    )
 
-    monkeypatch.setattr(data_roots, "_private_fallback_data_root", original_private_fallback)
+    monkeypatch.setattr(
+        data_roots, "_private_fallback_data_root", original_private_fallback
+    )
     prepared: list[Path] = []
     monkeypatch.setattr(
         data_roots,
@@ -654,9 +728,11 @@ def test_run_manifest_data_root_helpers_cover_resolve_and_private_fallbacks(
     monkeypatch.setattr(
         data_roots,
         "_prepare_private_runtime_dir",
-        lambda path: (_ for _ in ()).throw(OSError("fallback"))
-        if ".cache" in str(path)
-        else path,
+        lambda path: (
+            (_ for _ in ()).throw(OSError("fallback"))
+            if ".cache" in str(path)
+            else path
+        ),
     )
     tmp_fallback = data_roots._private_fallback_data_root()
     assert "bioetl-data-" in str(tmp_fallback)
@@ -667,7 +743,11 @@ def test_run_manifest_data_root_helpers_cover_resolve_and_private_fallbacks(
         "_prepare_private_runtime_dir",
         original_prepare_private_runtime_dir,
     )
-    monkeypatch.setattr(data_roots.Path, "mkdir", lambda self, parents=True, exist_ok=True, mode=0o700: None)
+    monkeypatch.setattr(
+        data_roots.Path,
+        "mkdir",
+        lambda self, parents=True, exist_ok=True, mode=0o700: None,
+    )
     monkeypatch.setattr(
         data_roots.Path,
         "chmod",
@@ -695,14 +775,19 @@ def test_exact_replay_helper_functions_cover_binding_and_uri_validation() -> Non
 
     assert replay_context._optional_text("  value  ") == "value"
     assert replay_context._optional_text("   ") is None
-    assert replay_context._extract_bronze_date("bronze://2026-01-01/batch.json") == "2026-01-01"
+    assert (
+        replay_context._extract_bronze_date("bronze://2026-01-01/batch.json")
+        == "2026-01-01"
+    )
     with pytest.raises(RuntimeError, match="must use bronze://"):
         replay_context._extract_bronze_date("file:///tmp/batch.json")
     with pytest.raises(RuntimeError, match="missing Bronze date"):
         replay_context._extract_bronze_date("bronze://")
 
 
-def test_exact_replay_collect_ledger_bronze_dates_covers_mismatch_and_source_refs() -> None:
+def test_exact_replay_collect_ledger_bronze_dates_covers_mismatch_and_source_refs() -> (
+    None
+):
     manifest = SimpleNamespace(
         provider="chembl",
         entity="activity",
@@ -830,7 +915,9 @@ def test_exact_replay_resolution_helpers_cover_parent_lookup_and_date_errors(
             get_by_run_id=lambda run_id: None,
         ),
     )
-    monkeypatch.setattr(replay_context, "control_plane_root", lambda settings, leaf: Path("/tmp") / leaf)
+    monkeypatch.setattr(
+        replay_context, "control_plane_root", lambda settings, leaf: Path("/tmp") / leaf
+    )
     with pytest.raises(RuntimeError, match="manifest_id 'manifest-404'"):
         original_resolve_parent_manifest(
             ctx=SimpleNamespace(
@@ -855,7 +942,9 @@ def test_exact_replay_resolution_helpers_cover_parent_lookup_and_date_errors(
             ),
             settings=settings,
         )
-    with pytest.raises(RuntimeError, match="run_id '00000000-0000-0000-0000-000000000001'"):
+    with pytest.raises(
+        RuntimeError, match="run_id '00000000-0000-0000-0000-000000000001'"
+    ):
         original_resolve_parent_manifest(
             ctx=SimpleNamespace(
                 replay_of_manifest_id=None,

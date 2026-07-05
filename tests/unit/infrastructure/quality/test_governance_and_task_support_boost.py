@@ -97,7 +97,9 @@ def test_validate_baseline_policy_and_hotspot_budget_errors_are_reported() -> No
     assert any("missing coverage for burn_down_priorities" in error for error in errors)
 
 
-def test_validate_governance_section_reports_missing_mapping_and_invalid_review_policy() -> None:
+def test_validate_governance_section_reports_missing_mapping_and_invalid_review_policy() -> (
+    None
+):
     errors: list[str] = []
     assert (
         _validate_governance_section(
@@ -130,8 +132,12 @@ def test_validate_governance_section_reports_missing_mapping_and_invalid_review_
         )
         is False
     )
-    assert any("governance.baseline_policy.enforceable_section" in error for error in errors)
-    assert any("new_exemption_requires: expected non-empty list" in error for error in errors)
+    assert any(
+        "governance.baseline_policy.enforceable_section" in error for error in errors
+    )
+    assert any(
+        "new_exemption_requires: expected non-empty list" in error for error in errors
+    )
     assert any("expected at least 3 subsystems" in error for error in errors)
 
 
@@ -161,7 +167,9 @@ def test_governance_validation_covers_mapping_and_section_key_errors() -> None:
                 "owner_registry_q3_subsystems": {1: "bad", "sub_a": {}},
                 "growth_gate_default_mode": "block",
                 "allow_grace_windows_only_for_rf": False,
-                "growth_section_gate_rollout": {"warn_until_by_section": {None: "2026-01-01"}},
+                "growth_section_gate_rollout": {
+                    "warn_until_by_section": {None: "2026-01-01"}
+                },
                 "burn_down_priorities": {"registries": []},
             },
         },
@@ -169,8 +177,12 @@ def test_governance_validation_covers_mapping_and_section_key_errors() -> None:
         group_names={"size_shape"},
         errors=errors,
     )
-    assert any("governance.baseline_policy: expected mapping" in error for error in errors)
-    assert any("governance.review_policy: expected mapping" in error for error in errors)
+    assert any(
+        "governance.baseline_policy: expected mapping" in error for error in errors
+    )
+    assert any(
+        "governance.review_policy: expected mapping" in error for error in errors
+    )
     assert any("subsystem key must be non-empty string" in error for error in errors)
     assert any("expected non-empty string" in error for error in errors)
 
@@ -243,30 +255,42 @@ def test_task_support_helpers_cover_path_and_symbol_resolution(tmp_path: Path) -
         symbol_index=symbol_index,
     ) == (None, "Runner", None, None)
 
-    assert task_status(
-        registry_name="function_length",
-        current_value=15,
-        limit_value=10,
-        target_file=target_file,
-    ) == "needs_refactor"
-    assert task_status(
-        registry_name="god_object",
-        current_value=15,
-        limit_value=10,
-        target_file=target_file,
-    ) == "not_measurable"
-    assert task_status(
-        registry_name="function_length",
-        current_value=5,
-        limit_value=10,
-        target_file=None,
-    ) == "target_not_found"
-    assert task_status(
-        registry_name="function_length",
-        current_value=None,
-        limit_value="warn",
-        target_file="src/bioetl/application/worker.py",
-    ) == "not_measurable"
+    assert (
+        task_status(
+            registry_name="function_length",
+            current_value=15,
+            limit_value=10,
+            target_file=target_file,
+        )
+        == "needs_refactor"
+    )
+    assert (
+        task_status(
+            registry_name="god_object",
+            current_value=15,
+            limit_value=10,
+            target_file=target_file,
+        )
+        == "not_measurable"
+    )
+    assert (
+        task_status(
+            registry_name="function_length",
+            current_value=5,
+            limit_value=10,
+            target_file=None,
+        )
+        == "target_not_found"
+    )
+    assert (
+        task_status(
+            registry_name="function_length",
+            current_value=None,
+            limit_value="warn",
+            target_file="src/bioetl/application/worker.py",
+        )
+        == "not_measurable"
+    )
 
 
 def test_task_support_helpers_cover_safe_text_parse_and_fallback_paths(
@@ -283,7 +307,9 @@ def test_task_support_helpers_cover_safe_text_parse_and_fallback_paths(
     assert parse_limit_value({"value": ""}) is None
     assert safe_text(file_path) is not None
 
-    with patch.object(Path, "read_text", side_effect=UnicodeDecodeError("utf-8", b"x", 0, 1, "boom")):
+    with patch.object(
+        Path, "read_text", side_effect=UnicodeDecodeError("utf-8", b"x", 0, 1, "boom")
+    ):
         assert safe_text(file_path) is None
 
     complexity = fallback_complexity(
@@ -304,10 +330,7 @@ def test_task_support_helpers_cover_safe_text_parse_and_fallback_paths(
     monkeypatch.setattr(builtins, "__import__", _fake_import)
     try:
         complexities = support_module.function_complexities(
-            "def alpha(value):\n"
-            "    if value:\n"
-            "        return 1\n"
-            "    return 0\n"
+            "def alpha(value):\n    if value:\n        return 1\n    return 0\n"
         )
     finally:
         monkeypatch.setattr(builtins, "__import__", real_import)
@@ -337,12 +360,24 @@ def test_architecture_debt_reduction_helpers_cover_default_paths_and_loading(
 
     assert _layer_for_target("src/bioetl/domain/module.py") == "domain"
     assert _layer_for_target("docs/readme.md") is None
-    assert _default_limit(
-        {"registry": "file_size_limits", "target_file": "src/bioetl/domain/module.py"}
-    ) == 305
-    assert _default_limit(
-        {"registry": "function_complexity", "target_file": "src/bioetl/application/service.py"}
-    ) == 10
+    assert (
+        _default_limit(
+            {
+                "registry": "file_size_limits",
+                "target_file": "src/bioetl/domain/module.py",
+            }
+        )
+        == 305
+    )
+    assert (
+        _default_limit(
+            {
+                "registry": "function_complexity",
+                "target_file": "src/bioetl/application/service.py",
+            }
+        )
+        == 10
+    )
     assert _default_limit({"registry": "mystery", "target_file": None}) is None
 
     output_path = _default_plan_output_path(
@@ -361,9 +396,7 @@ def test_select_symbol_location_reports_ambiguous_candidates(tmp_path: Path) -> 
     infra_path.parent.mkdir(parents=True, exist_ok=True)
     app_path.write_text("def duplicate():\n    return 1\n", encoding="utf-8")
     infra_path.write_text(
-        "def duplicate():\n"
-        "    value = 1\n"
-        "    return value\n",
+        "def duplicate():\n    value = 1\n    return value\n",
         encoding="utf-8",
     )
 
@@ -450,7 +483,9 @@ def test_task_support_helpers_cover_missing_symbol_and_file_measurement_paths(
     ) == (None, None, "unknown_symbol", None)
 
 
-def test_budget_and_scorecard_helper_branches_cover_hotspots_and_technical_debt() -> None:
+def test_budget_and_scorecard_helper_branches_cover_hotspots_and_technical_debt() -> (
+    None
+):
     assert _get_typed_prefixes("bad") is None
     assert _get_typed_budgets("bad") is None
     assert _iter_hotspot_budget_entries("bad") == []

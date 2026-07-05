@@ -37,7 +37,9 @@ def test_package_exports_stable_public_extractor_subset() -> None:
         "extract_tldr",
     }
 
-    package_exports = {name for name in semanticscholar.__all__ if name.startswith("extract_")}
+    package_exports = {
+        name for name in semanticscholar.__all__ if name.startswith("extract_")
+    }
 
     assert package_exports == expected_names
     for name in expected_names:

@@ -36,13 +36,23 @@ TEST_GOVERNANCE_CONFIG = ROOT / "configs" / "quality" / "test_governance_audit.y
 TEST_GOVERNANCE_REPORT = ROOT / "reports" / "quality" / "test-governance-current.json"
 WORKFLOW = ROOT / ".github" / "workflows" / "tests.yml"
 SNAPSHOT_INVARIANTS = (
-    ROOT / "tests" / "testing_support" / "neo4j_memory_sync_support" / "snapshot_invariants.py"
+    ROOT
+    / "tests"
+    / "testing_support"
+    / "neo4j_memory_sync_support"
+    / "snapshot_invariants.py"
 )
 SNAPSHOT_COMMON = (
     ROOT / "tests" / "testing_support" / "neo4j_memory_sync_support" / "common.py"
 )
 SNAPSHOT_UNIT_TEST = (
-    ROOT / "tests" / "unit" / "scripts" / "ops" / "neo4j_memory_sync" / "test_snapshot_invariants.py"
+    ROOT
+    / "tests"
+    / "unit"
+    / "scripts"
+    / "ops"
+    / "neo4j_memory_sync"
+    / "test_snapshot_invariants.py"
 )
 EXPECTED_ISSUES = {5646, 5656, 5660, 5662, 5663}
 
@@ -113,7 +123,9 @@ def test_issue_5660_hotspot_family_warnings_are_zero_without_budget_growth() -> 
     )
     assert hotspot["summary"]["budget_review_notes"] <= 6
     assert scorecard["metrics"]["hotspot_budget_warning_count"] == 0
-    assert scorecard["source_artifacts"]["hotspot_family_baseline"]["budget_warnings"] == 0
+    assert (
+        scorecard["source_artifacts"]["hotspot_family_baseline"]["budget_warnings"] == 0
+    )
     assert _gate(gates, "hotspot_family_baseline_budget_warnings")["status"] == "pass"
     assert _gate(gates, "hotspot_family_baseline_budget_warnings")["current"] == 0
 
@@ -130,7 +142,9 @@ def test_issue_5660_hotspot_family_warnings_are_zero_without_budget_growth() -> 
         )
 
 
-def test_issue_5662_config_contract_dq_and_observability_evidence_is_release_grade() -> None:
+def test_issue_5662_config_contract_dq_and_observability_evidence_is_release_grade() -> (
+    None
+):
     contract = _load_json(CONTRACT_DIAGNOSTICS)
     dq = build_diagnostics_payload(ROOT)
     config = _load_json(CONFIG_DISCREPANCY)
@@ -208,7 +222,7 @@ def test_issue_5663_test_inventory_and_snapshot_policy_are_bounded() -> None:
     common_text = SNAPSHOT_COMMON.read_text(encoding="utf-8")
     assert "pytest.mark.memory" in unit_text
     assert "pytest.mark.timeout(180)" in unit_text
-    assert "sys.platform.startswith(\"win\")" in support_text
+    assert 'sys.platform.startswith("win")' in support_text
     assert "pytest.skip(" in support_text
     assert "@lru_cache(maxsize=1)" in common_text
     assert "def _snapshot_base()" in common_text

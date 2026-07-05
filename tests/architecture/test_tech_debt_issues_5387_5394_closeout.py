@@ -112,7 +112,9 @@ def test_issue_5388_compatibility_facade_counts_stay_within_ratchets() -> None:
 
 
 def test_issue_5389_control_plane_use_case_seams_remain_explicit() -> None:
-    control_plane_root = ROOT / "src" / "bioetl" / "application" / "services" / "control_plane"
+    control_plane_root = (
+        ROOT / "src" / "bioetl" / "application" / "services" / "control_plane"
+    )
     for package in (
         "manifest",
         "ledger",
@@ -204,10 +206,22 @@ def test_issue_5392_coverage_tail_reduction_matches_live_inventory() -> None:
     )
     assert historical_delta["below_85_module_count_delta"] < 0
     assert len(below_85) == current_live["below_85_module_count"]
-    assert improved_row["coverage_percent"] == current_live["improved_module_current_coverage_percent"]
-    assert improved_row["coverage_status"] == current_live["improved_module_current_status"]
-    assert inventory["summary"]["uncovered_module_count"] == current_live["uncovered_module_count"]
-    assert inventory["summary"]["unmeasured_module_count"] == current_live["unmeasured_module_count"]
+    assert (
+        improved_row["coverage_percent"]
+        == current_live["improved_module_current_coverage_percent"]
+    )
+    assert (
+        improved_row["coverage_status"]
+        == current_live["improved_module_current_status"]
+    )
+    assert (
+        inventory["summary"]["uncovered_module_count"]
+        == current_live["uncovered_module_count"]
+    )
+    assert (
+        inventory["summary"]["unmeasured_module_count"]
+        == current_live["unmeasured_module_count"]
+    )
 
 
 def test_issue_5393_full_app_duplication_baseline_covers_required_scope() -> None:
@@ -252,7 +266,12 @@ def test_issue_5394_legacy_checkpoint_hydration_is_confined_to_load_seam() -> No
         / "validation.py"
     ).read_text(encoding="utf-8")
     assert "resolved_config_hash as a canonical config " in manifest_validation
-    assert "identity anchor; legacy config_hash is compatibility-only" in manifest_validation
+    assert (
+        "identity anchor; legacy config_hash is compatibility-only"
+        in manifest_validation
+    )
     assert "effective_config_hash as the replay identity " in manifest_validation
-    assert "config anchor; legacy config_hash is compatibility-only" in manifest_validation
+    assert (
+        "config anchor; legacy config_hash is compatibility-only" in manifest_validation
+    )
     assert "legacy config_hash is compatibility-only" in manifest_validation

@@ -110,7 +110,9 @@ def _build_coercion_vocab_cross_record() -> dict[str, object]:
     }
 
 
-def _project_outcomes(record: dict[str, object], config: DQConfig) -> list[dict[str, object]]:
+def _project_outcomes(
+    record: dict[str, object], config: DQConfig
+) -> list[dict[str, object]]:
     outcomes = evaluate_dq_rules_for_record(record, dq_config=config)
     return [
         {

@@ -162,8 +162,8 @@ def normalized_top_level_from_row(
     mapping_data: ProteinClassTargetTypeMappingData,
     *,
     normalized_top_level_cls: type[
-        Any
-    ],  # Any: Polymorphic class type for normalized top-level objects
+        Any  # Any: Polymorphic class type for normalized top-level objects.
+    ],
     normalize_top_level: Callable[
         [object, ProteinClassTargetTypeMappingData | None],
         Any,  # Any: Return type matches polymorphic normalized object type

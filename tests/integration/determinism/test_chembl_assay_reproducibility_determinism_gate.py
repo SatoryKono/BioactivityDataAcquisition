@@ -26,7 +26,9 @@ def test_chembl_assay_tracked_fixture_is_registered_for_determinism_lane() -> No
     assert entry["records"] > 0
 
 
-def test_chembl_assay_cached_bronze_root_is_provider_entity_scoped(tmp_path: Path) -> None:
+def test_chembl_assay_cached_bronze_root_is_provider_entity_scoped(
+    tmp_path: Path,
+) -> None:
     """Replay cache roots for assay must stay provider/entity scoped."""
     provider, entity = "chembl/assay".split("/", 1)
     root = tmp_path / "cached_bronze" / provider / entity

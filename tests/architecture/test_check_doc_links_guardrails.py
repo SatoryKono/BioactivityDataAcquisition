@@ -433,14 +433,15 @@ def test_github_actions_workflow_inventory_matches_live_repo() -> None:
     assert extra_in_doc == []
 
 
-def test_workflow_inventory_keeps_scheduled_only_workflows_out_of_pr_push_section(
-) -> None:
+def test_workflow_inventory_keeps_scheduled_only_workflows_out_of_pr_push_section() -> (
+    None
+):
     inventory_doc = Path("docs/04-reference/github-actions-workflows.md").read_text(
         encoding="utf-8"
     )
-    pr_section = inventory_doc.split("### PR / push verification workflows", maxsplit=1)[
-        1
-    ].split("### Scheduled / periodic workflows", maxsplit=1)[0]
+    pr_section = inventory_doc.split(
+        "### PR / push verification workflows", maxsplit=1
+    )[1].split("### Scheduled / periodic workflows", maxsplit=1)[0]
     scheduled_section = inventory_doc.split(
         "### Scheduled / periodic workflows", maxsplit=1
     )[1].split("### Release, packaging, and repository automation", maxsplit=1)[0]

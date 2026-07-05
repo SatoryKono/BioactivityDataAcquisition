@@ -48,7 +48,9 @@ def test_validate_pairs_reports_invalid_comparison_sources() -> None:
 
 
 def test_validate_pairs_accepts_self_and_known_comparison_sources() -> None:
-    assert _validate_pairs([{"chembl": ["chembl", "pubmed"]}], ["chembl", "pubmed"]) == []
+    assert (
+        _validate_pairs([{"chembl": ["chembl", "pubmed"]}], ["chembl", "pubmed"]) == []
+    )
 
 
 def test_validate_rules_reports_empty_non_string_and_unsupported_types() -> None:
@@ -66,14 +68,18 @@ def test_threshold_and_coverage_helpers_report_uncovered_sources() -> None:
     assert not _is_valid_threshold(1.1)
     assert not _is_valid_threshold("0.5")
 
-    issues = _validate_coverage([{"chembl": "pubmed"}], ["chembl", "pubmed", "openalex"])
+    issues = _validate_coverage(
+        [{"chembl": "pubmed"}], ["chembl", "pubmed", "openalex"]
+    )
     assert issues[0].code == IssueCode.CMP_PF_CV_013
     assert issues[0].details is not None
     assert issues[0].details["uncovered_sources"] == ["openalex"]
     assert _validate_coverage([], []) == []
 
 
-def test_collect_covered_sources_and_comparison_source_list_ignore_invalid_shapes() -> None:
+def test_collect_covered_sources_and_comparison_source_list_ignore_invalid_shapes() -> (
+    None
+):
     assert _comparison_source_list("pubmed") == ["pubmed"]
     assert _comparison_source_list(["pubmed", 1, "openalex"]) == ["pubmed", "openalex"]
     assert _comparison_source_list({"bad": "shape"}) == []

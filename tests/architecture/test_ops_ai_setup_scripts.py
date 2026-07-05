@@ -114,6 +114,4 @@ def test_make_precommit_install_reuses_setup_plugins_helper() -> None:
     root = repo_root()
     makefile = (root / "Makefile").read_text(encoding="utf-8")
 
-    assert (
-        "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only" in makefile
-    )
+    assert "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only" in makefile

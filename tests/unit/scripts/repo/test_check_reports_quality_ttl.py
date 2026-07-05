@@ -83,7 +83,9 @@ def test_main_returns_zero_when_no_expired_rows(
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    monkeypatch.setattr(module, "collect_expired_reports_quality_ttl", lambda repo_root: [])
+    monkeypatch.setattr(
+        module, "collect_expired_reports_quality_ttl", lambda repo_root: []
+    )
 
     rc = module.main(["--repo-root", str(tmp_path)])
 

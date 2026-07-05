@@ -14,6 +14,7 @@ from bioetl.domain.types import JsonDict
 __all__ = ["RecordProcessor"]
 
 
+from collections.abc import Callable
 from datetime import datetime
 from typing import TYPE_CHECKING, cast
 
@@ -48,6 +49,9 @@ class RecordProcessor:
         writer: BatchWriter,
         config: RecordProcessorConfig,
         tracer: TracingPort,
+        span_executor_factory: Callable[
+            [TracingPort], RecordProcessorSpanExecutor
+        ] = RecordProcessorSpanExecutor,
     ) -> None:
         """Initialize RecordProcessor.
 
@@ -58,12 +62,12 @@ class RecordProcessor:
             writer: Batch writer orchestrating Bronze/Silver/Gold writes.
             config: Record processor configuration.
             tracer: Tracing port for distributed tracing.
+            span_executor_factory: Factory for the tracing span executor.
         """
         _ = config
         self._context = context
-        self._span_executor = RecordProcessorSpanExecutor(
-            tracer
-        )  # EXC-002: lightweight wrapper
+        span_executor = span_executor_factory(tracer)
+        self._span_executor = span_executor
         self._batch_metrics = batch_metrics
         self._transformer = transformer
         self._writer = writer

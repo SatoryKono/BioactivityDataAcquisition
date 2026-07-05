@@ -30,7 +30,9 @@ def test_architecture_audit_checks_are_check_only() -> None:
     for command in commands.values():
         assert "--update" not in command
         assert "--write" not in command
-        assert "--check" in command or "pytest" in command or "lint-imports" in command[0]
+        assert (
+            "--check" in command or "pytest" in command or "lint-imports" in command[0]
+        )
 
 
 def test_runtime_scc_check_disables_pytest_cacheprovider() -> None:

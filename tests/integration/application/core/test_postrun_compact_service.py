@@ -87,9 +87,7 @@ async def test_postrun_compact_service_runs_dedup_and_optimize_for_append_mode()
     result = await service.run_if_needed()
 
     assert result == CompactionResult(status="success", duplicates_removed=7)
-    assert storage.deduplicate_calls == [
-        ("chembl_activity_silver", ("activity_id",))
-    ]
+    assert storage.deduplicate_calls == [("chembl_activity_silver", ("activity_id",))]
     assert storage.optimize_calls == ["chembl_activity_silver"]
     assert [event for event, _payload in logger.info_events] == [
         "silver_compact_starting",
@@ -119,9 +117,7 @@ async def test_postrun_compact_service_keeps_success_when_optimize_is_allowliste
     result = await service.run_if_needed()
 
     assert result == CompactionResult(status="success", duplicates_removed=3)
-    assert storage.deduplicate_calls == [
-        ("chembl_activity_silver", ("activity_id",))
-    ]
+    assert storage.deduplicate_calls == [("chembl_activity_silver", ("activity_id",))]
     assert storage.optimize_calls == ["chembl_activity_silver"]
     assert logger.warning_events == [
         ("silver_optimize_failed", {"error": "optimize busy"})

@@ -246,8 +246,8 @@ def _build_architecture_quality_metrics(
 
 
 def _build_debt_budget_policy(
-    scorecard: dict[str, Any],
-) -> dict[str, object]:  # Any: dynamic scorecard structure
+    scorecard: dict[str, Any],  # Any: dynamic scorecard artifact payload.
+) -> dict[str, object]:
     debt_budgets = scorecard.get("compatibility_debt_metrics", {})
     return {
         "budget_growth_allowed": False,

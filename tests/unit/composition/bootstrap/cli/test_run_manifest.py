@@ -22,7 +22,9 @@ class _CaptureService:
 def _patch_control_plane_stores(monkeypatch: pytest.MonkeyPatch) -> tuple[object, ...]:
     stores = tuple(object() for _ in range(4))
     monkeypatch.setattr(run_manifest, "get_settings", lambda: mock.sentinel.settings)
-    monkeypatch.setattr(run_manifest, "create_metrics", lambda settings: mock.sentinel.metrics)
+    monkeypatch.setattr(
+        run_manifest, "create_metrics", lambda settings: mock.sentinel.metrics
+    )
     monkeypatch.setattr(
         run_manifest,
         "create_run_manifest_store",
@@ -77,7 +79,10 @@ def test_run_manifest_bootstrap_wires_manifest_and_diff_services(
     diff_service = run_manifest.bootstrap_forensic_run_diff_service()
     assert diff_service.kwargs["manifest_port"] is stores[0]
     assert diff_service.kwargs["ledger_port"] is stores[1]
-    assert diff_service.kwargs["artifact_byte_comparison_port"] is mock.sentinel.byte_comparator
+    assert (
+        diff_service.kwargs["artifact_byte_comparison_port"]
+        is mock.sentinel.byte_comparator
+    )
     nested = diff_service.kwargs["inspection_service_factory"]()
     assert nested.kwargs["manifest_port"] is stores[0]
     assert nested.kwargs["historical_replay_universe_report_loader"] is stores[3]
@@ -87,10 +92,14 @@ def test_historical_replay_bootstrap_wires_shared_corpus_services(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     stores = _patch_control_plane_stores(monkeypatch)
-    monkeypatch.setattr(run_manifest, "HistoricalReplayCertificationService", _CaptureService)
+    monkeypatch.setattr(
+        run_manifest, "HistoricalReplayCertificationService", _CaptureService
+    )
     monkeypatch.setattr(run_manifest, "HistoricalReplayCorpusService", _CaptureService)
     monkeypatch.setattr(run_manifest, "HistoricalReplayClosureService", _CaptureService)
-    monkeypatch.setattr(run_manifest, "HistoricalReplayUniverseService", _CaptureService)
+    monkeypatch.setattr(
+        run_manifest, "HistoricalReplayUniverseService", _CaptureService
+    )
     monkeypatch.setattr(
         run_manifest,
         "create_runtime_occurrence_id",
@@ -131,7 +140,10 @@ def test_historical_replay_report_persistence_uses_composition_stores(
         lambda *, settings: universe_store,
     )
 
-    assert run_manifest.persist_historical_replay_closure_report(mock.sentinel.report) == closure_path
+    assert (
+        run_manifest.persist_historical_replay_closure_report(mock.sentinel.report)
+        == closure_path
+    )
     assert (
         run_manifest.persist_historical_replay_universe_report(mock.sentinel.report)
         == universe_path

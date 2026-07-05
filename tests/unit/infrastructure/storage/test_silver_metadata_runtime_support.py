@@ -66,7 +66,9 @@ class TestSilverMetadataRuntimeSupport:
 
         logger.debug.assert_called_once_with("hello")
 
-    def test_resolve_manifest_id_prefers_record_then_host_then_coordinator(self) -> None:
+    def test_resolve_manifest_id_prefers_record_then_host_then_coordinator(
+        self,
+    ) -> None:
         ops = _MetadataRuntimeOps()
 
         assert (
@@ -109,7 +111,9 @@ class TestSilverMetadataRuntimeSupport:
         )
 
     @pytest.mark.asyncio
-    async def test_resolve_finalization_dq_metrics_normalizes_structured_values(self) -> None:
+    async def test_resolve_finalization_dq_metrics_normalizes_structured_values(
+        self,
+    ) -> None:
         ops = _MetadataRuntimeOps()
 
         await resolve_finalization_dq_metrics(
@@ -128,12 +132,16 @@ class TestSilverMetadataRuntimeSupport:
         )
 
     @pytest.mark.asyncio
-    async def test_resolve_version_after_uses_host_getter_or_defaults_zero(self) -> None:
+    async def test_resolve_version_after_uses_host_getter_or_defaults_zero(
+        self,
+    ) -> None:
         ops = _MetadataRuntimeOps()
         ops._host = SimpleNamespace(_get_delta_version=AsyncMock(return_value=9))
 
         assert await resolve_version_after(ops, "/tmp/silver/path") == 9
-        assert await resolve_version_after(_MetadataRuntimeOps(), "/tmp/silver/path") == 0
+        assert (
+            await resolve_version_after(_MetadataRuntimeOps(), "/tmp/silver/path") == 0
+        )
 
     @pytest.mark.asyncio
     async def test_compute_dq_metrics_from_arrow_data_handles_missing_and_present_calculator(
@@ -202,7 +210,9 @@ class TestSilverMetadataRuntimeSupport:
         )
 
     @pytest.mark.asyncio
-    async def test_write_silver_metadata_file_handles_multiple_writer_signatures(self) -> None:
+    async def test_write_silver_metadata_file_handles_multiple_writer_signatures(
+        self,
+    ) -> None:
         ops = _MetadataRuntimeOps()
         metadata = MagicMock()
 
@@ -276,7 +286,9 @@ class TestSilverMetadataRuntimeSupport:
         assert args == ("/tmp/silver/chembl/activity", metadata)
         assert kwargs["provider"] == "chembl"
 
-    def test_normalize_records_for_dq_metrics_keeps_scalars_and_serializes_nested(self) -> None:
+    def test_normalize_records_for_dq_metrics_keeps_scalars_and_serializes_nested(
+        self,
+    ) -> None:
         normalized = _normalize_records_for_dq_metrics(
             [{"entity_id": "CHEMBL1", "payload": {"b": 2, "a": 1}}]
         )

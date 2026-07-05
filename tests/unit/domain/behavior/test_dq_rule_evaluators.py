@@ -289,7 +289,9 @@ def test_target_organism_custom_rule_rejects_malformed_labels_without_supported_
         assert _field_rule_violated(record, rule) is True
 
 
-def test_field_rule_dispatch_covers_required_null_range_pattern_and_enum_rules() -> None:
+def test_field_rule_dispatch_covers_required_null_range_pattern_and_enum_rules() -> (
+    None
+):
     assert _field_rule_violated(
         {},
         FieldValidation(field="pmid", validation_type="required"),
@@ -376,7 +378,9 @@ def test_field_rule_dispatch_covers_max_length_list_custom_and_unknown_rules() -
     )
 
 
-def test_field_rule_dispatch_covers_malformed_rule_inputs_and_unknown_dispatcher() -> None:
+def test_field_rule_dispatch_covers_malformed_rule_inputs_and_unknown_dispatcher() -> (
+    None
+):
     unknown_rule = SimpleNamespace(field="field", validation_type="unknown")
     assert not _field_rule_violated({"field": "value"}, unknown_rule)  # type: ignore[arg-type]
 
@@ -429,7 +433,9 @@ def test_field_rule_dispatch_ignores_optional_missing_values() -> None:
     )
     assert not _field_rule_violated(
         {"optional": None},
-        FieldValidation(field="optional", validation_type="custom", validator="unknown"),
+        FieldValidation(
+            field="optional", validation_type="custom", validator="unknown"
+        ),
     )
 
 
@@ -534,7 +540,9 @@ class _UnknownConditionalRule:
     condition_value = "target"
 
 
-def test_conditional_matches_uses_registered_matchers_and_unknown_operator_is_false() -> None:
+def test_conditional_matches_uses_registered_matchers_and_unknown_operator_is_false() -> (
+    None
+):
     assert _conditional_matches({"kind": "target"}, _ConditionalRule()) is True  # type: ignore[arg-type]
     assert _conditional_matches({"kind": "other"}, _ConditionalRule()) is False  # type: ignore[arg-type]
     assert _conditional_matches({"kind": "target"}, _UnknownConditionalRule()) is False  # type: ignore[arg-type]
@@ -564,7 +572,9 @@ def test_vocabulary_strategy_resolution_and_target_json_coercion() -> None:
         "validate_target_component_types_json_vocab"
     )
     assert strategy is not None
-    assert strategy('["PROTEIN"]', "validate_target_component_types_json_vocab") is False
+    assert (
+        strategy('["PROTEIN"]', "validate_target_component_types_json_vocab") is False
+    )
     assert strategy('["UNKNOWN"]', "validate_target_component_types_json_vocab") is True
     assert _resolve_custom_validation_strategy("missing") is None
 
@@ -613,7 +623,9 @@ def test_xref_and_publication_taxonomy_vocabulary_strategies() -> None:
     )
     assert taxonomy_strategy is not None
     assert (
-        taxonomy_strategy("not-in-taxonomy", "validate_publication_type_unified_taxonomy")
+        taxonomy_strategy(
+            "not-in-taxonomy", "validate_publication_type_unified_taxonomy"
+        )
         is True
     )
     assert not _publication_taxonomy_rule_violated(

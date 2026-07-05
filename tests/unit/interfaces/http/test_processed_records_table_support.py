@@ -157,18 +157,27 @@ def test_query_prometheus_scalar_parses_success_and_missing_values(
         )
         == 42.0
     )
-    assert support._query_prometheus_scalar(
-        prometheus_base_url="http://prometheus.example",
-        query="empty",
-    ) is None
-    assert support._query_prometheus_scalar(
-        prometheus_base_url="http://prometheus.example",
-        query="malformed",
-    ) is None
-    assert support._query_prometheus_scalar(
-        prometheus_base_url="http://prometheus.example",
-        query="nan",
-    ) is None
+    assert (
+        support._query_prometheus_scalar(
+            prometheus_base_url="http://prometheus.example",
+            query="empty",
+        )
+        is None
+    )
+    assert (
+        support._query_prometheus_scalar(
+            prometheus_base_url="http://prometheus.example",
+            query="malformed",
+        )
+        is None
+    )
+    assert (
+        support._query_prometheus_scalar(
+            prometheus_base_url="http://prometheus.example",
+            query="nan",
+        )
+        is None
+    )
     with pytest.raises(RuntimeError, match="bad query"):
         support._query_prometheus_scalar(
             prometheus_base_url="http://prometheus.example",
@@ -193,10 +202,13 @@ def test_query_prometheus_scalar_with_fallbacks_reports_all_errors(
 
     monkeypatch.setattr(support, "_query_prometheus_scalar", flaky_query)
 
-    assert support._query_prometheus_scalar_with_fallbacks(
-        prometheus_base_urls=("http://one", "http://two"),
-        query="up",
-    ) == 7.0
+    assert (
+        support._query_prometheus_scalar_with_fallbacks(
+            prometheus_base_urls=("http://one", "http://two"),
+            query="up",
+        )
+        == 7.0
+    )
     assert calls == ["http://one:up", "http://two:up"]
 
     def always_fails(*, prometheus_base_url: str, query: str) -> float:

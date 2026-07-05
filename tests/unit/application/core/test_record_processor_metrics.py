@@ -77,6 +77,7 @@ def _create_record_processor(
     gold_filter_callback,
     gold_transform_callback,
     gold_validator,
+    span_executor_factory=None,
 ) -> RecordProcessor:
     """Build RecordProcessor with composition-level dependency wiring."""
     tracer = NoOpTracing()
@@ -91,6 +92,16 @@ def _create_record_processor(
         gold_validator=gold_validator,
         tracer=tracer,
     )
+    if span_executor_factory is not None:
+        return RecordProcessor(
+            context=context,
+            batch_metrics=components.batch_metrics,
+            transformer=components.transformer,
+            writer=components.writer,
+            config=config,
+            tracer=tracer,
+            span_executor_factory=span_executor_factory,
+        )
     return RecordProcessor(
         context=context,
         batch_metrics=components.batch_metrics,
@@ -131,6 +142,39 @@ def record_processor(
 @pytest.mark.unit
 class TestRecordProcessorMetrics:
     """Tests for RecordProcessor metrics logic."""
+
+    def test_record_processor_uses_injected_span_executor_factory(
+        self,
+        mock_services,
+        mock_error_classifier,
+        mock_context,
+        mock_gold_validator,
+    ) -> None:
+        """RecordProcessor receives span executor creation through DI."""
+        config = RecordProcessorConfig(
+            pipeline_name="test_pipeline",
+            provider="test",
+            entity_type="entity",
+            silver_schema=MagicMock(),
+            gold_schema=MagicMock(),
+        )
+        span_executor = MagicMock()
+        span_executor_factory = MagicMock(return_value=span_executor)
+
+        processor = _create_record_processor(
+            services=mock_services,
+            context=mock_context,
+            config=config,
+            error_classifier=mock_error_classifier,
+            transform_callback=AsyncMock(return_value={"id": 1}),
+            gold_filter_callback=MagicMock(return_value=True),
+            gold_transform_callback=MagicMock(side_effect=lambda c, r: r),
+            gold_validator=mock_gold_validator,
+            span_executor_factory=span_executor_factory,
+        )
+
+        span_executor_factory.assert_called_once()
+        assert processor._span_executor is span_executor
 
     async def test_process_batch_records_batch_size_and_counts(
         self, record_processor, mock_metrics, mock_context

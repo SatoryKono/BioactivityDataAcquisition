@@ -49,7 +49,7 @@ def test_json_list_like_profile_fields_are_explicitly_classified() -> None:
         "chembl.target_protein_classification.path_names",
         "chembl.target_protein_classification.path_labels",
     }
-    
+
     for (provider, entity), profile in NORMALIZATION_PROFILE_REGISTRY.items():
         for field_name, rule in profile.field_rules.items():
             if field_name in profile.meta_fields:

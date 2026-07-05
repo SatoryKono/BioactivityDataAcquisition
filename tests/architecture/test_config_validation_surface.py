@@ -179,7 +179,8 @@ def test_py_config_bot_gap_analysis_uses_canonical_composite_runtime_configs(
     )
 
     config_paths = {
-        path.as_posix() for path in module._iter_config_files()  # type: ignore[attr-defined]
+        path.as_posix()
+        for path in module._iter_config_files()  # type: ignore[attr-defined]
     }
 
     assert "configs/composites/molecule.yaml" in config_paths

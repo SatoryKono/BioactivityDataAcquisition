@@ -54,11 +54,7 @@ def _iter_tracked_reports_quality_paths(pattern: str) -> list[Path]:
     except (OSError, subprocess.CalledProcessError):
         return []
 
-    return [
-        ROOT / line.strip()
-        for line in result.stdout.splitlines()
-        if line.strip()
-    ]
+    return [ROOT / line.strip() for line in result.stdout.splitlines() if line.strip()]
 
 
 @pytest.mark.architecture

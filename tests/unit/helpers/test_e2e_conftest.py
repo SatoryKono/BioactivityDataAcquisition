@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from tests.e2e import conftest as e2e_conftest
+
 pytestmark = pytest.mark.unit
 
 
@@ -131,7 +132,9 @@ def test_read_delta_records_timeout_surfaces_harness_context(
             def __init__(self) -> None:
                 self._calls = 0
 
-            def run_in_executor(self, _executor: object, func: object) -> asyncio.Future[object]:
+            def run_in_executor(
+                self, _executor: object, func: object
+            ) -> asyncio.Future[object]:
                 self._calls += 1
                 future = loop.create_future()
                 if self._calls == 1:
@@ -185,7 +188,9 @@ def test_read_delta_records_uses_delta_log_fallback_after_timeout(
             def __init__(self) -> None:
                 self._calls = 0
 
-            def run_in_executor(self, _executor: object, func: object) -> asyncio.Future[object]:
+            def run_in_executor(
+                self, _executor: object, func: object
+            ) -> asyncio.Future[object]:
                 self._calls += 1
                 future = loop.create_future()
                 if self._calls == 1:
@@ -236,7 +241,9 @@ def test_read_delta_records_corrupt_delta_log_is_not_timeout_recovered(
             def __init__(self) -> None:
                 self._calls = 0
 
-            def run_in_executor(self, _executor: object, func: object) -> asyncio.Future[object]:
+            def run_in_executor(
+                self, _executor: object, func: object
+            ) -> asyncio.Future[object]:
                 self._calls += 1
                 future = loop.create_future()
                 if self._calls == 1:

@@ -66,9 +66,7 @@ def test_replay_claims_merge_diagnostics_identity_graph_and_manifest_defaults() 
     assert claims.replay_readiness_verdict == "exact_replay_ready"
     assert claims.exact_replay_eligible is True
     assert claims.exact_replay_support_boundary == "snapshot_backed_source_runs_only"
-    assert claims.replay_family_contract == {
-        "contract": "snapshot_backed_exact_replay"
-    }
+    assert claims.replay_family_contract == {"contract": "snapshot_backed_exact_replay"}
     assert claims.required_profile == "diagnostic-profile"
 
 

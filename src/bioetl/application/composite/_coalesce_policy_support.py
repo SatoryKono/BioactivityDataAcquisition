@@ -26,8 +26,8 @@ class _ColumnPriorityProvider(Protocol):
         self,
         field: str,
         enrichers: Sequence[
-            Any
-        ],  # Any: Enrichers can be of any type implementing the enrichment protocol
+            Any  # Any: Enrichers implement provider-specific enrichment protocols.
+        ],
         available_columns: set[str],
         seed_pipeline: str | None,
     ) -> list[str]: ...
@@ -46,8 +46,8 @@ class _ColumnPriorityProvider(Protocol):
         field: str,
         ordered_cols: list[str],
         _can_coalesce_fn: Callable[
-            [Any, str, str], bool
-        ],  # Any: DataFrame can be of any type
+            [Any, str, str], bool  # Any: DataFrame may be Polars/Pandas-like.
+        ],
     ) -> tuple[list[str], list[str]]: ...
 
 
@@ -127,8 +127,8 @@ def coalesce_and_drop(
     df: Any,  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
     compatible_cols: list[str],
 ) -> (
-    Any
-):  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
+    Any  # Any: Return type matches the incoming DataFrame implementation.
+):
     """Coalesce compatible columns into first and drop the rest."""
     import polars as pl
 
@@ -175,16 +175,16 @@ def apply_field_priority(
     field: str,
     priorities: tuple[str, ...],
     enrichers: Sequence[
-        Any
-    ],  # Any: Enrichers can be of any type implementing the enrichment protocol
+        Any  # Any: Enrichers implement provider-specific enrichment protocols.
+    ],
     available_columns: set[str],
     seed_pipeline: str | None,
     can_coalesce_fn: Callable[
-        [Any, str, str], bool
-    ],  # Any: DataFrame can be of any type
+        [Any, str, str], bool  # Any: DataFrame may be Polars/Pandas-like.
+    ],
 ) -> (
-    Any
-):  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
+    Any  # Any: Return type matches the incoming DataFrame implementation.
+):
     """Apply one explicit field-priority rule and return updated DataFrame."""
     columns = provider.collect_field_columns(
         field,
@@ -363,8 +363,8 @@ def drop_coalesced_columns(
     df: Any,  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
     compatible_cols: list[str],
 ) -> (
-    Any
-):  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
+    Any  # Any: Return type matches the incoming DataFrame implementation.
+):
     """Drop redundant compatible columns after coalescing into the target."""
     cols_to_drop = [column for column in compatible_cols[1:] if column in df.columns]
     return df.drop(cols_to_drop) if cols_to_drop else df
@@ -375,8 +375,8 @@ def coalesce_by_latest_timestamp(
     *,
     ordered_cols: list[str],
 ) -> (
-    Any
-):  # Any: DataFrame can be of any type (polars.DataFrame, pandas.DataFrame, etc.)
+    Any  # Any: Return type matches the incoming DataFrame implementation.
+):
     """Coalesce compatible columns using companion timestamps when present."""
     import polars as pl
 

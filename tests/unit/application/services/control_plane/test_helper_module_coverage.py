@@ -117,9 +117,7 @@ def test_replay_invariant_nested_mapping_facade_delegates_lookup() -> None:
 
 def test_manifest_inspection_result_model_serializes_payload() -> None:
     manifest = make_run_manifest(manifest_id="manifest-helper-coverage")
-    entry = _ledger_entry(
-        details={"_diagnostic": {"contract_ref": "chembl.activity"}}
-    )
+    entry = _ledger_entry(details={"_diagnostic": {"contract_ref": "chembl.activity"}})
     result = RunManifestInspectionResult(
         manifest=manifest,
         ledger_entries=(entry,),
@@ -131,9 +129,7 @@ def test_manifest_inspection_result_model_serializes_payload() -> None:
 
     assert payload["manifest"]["manifest_id"] == "manifest-helper-coverage"
     assert payload["ledger_entries"][0]["entry_id"] == "entry-1"
-    assert payload["diagnostics"] == {
-        "replay_readiness_verdict": "exact_replay_ready"
-    }
+    assert payload["diagnostics"] == {"replay_readiness_verdict": "exact_replay_ready"}
     assert payload["identity_graph"] == {"manifest_id": manifest.manifest_id}
 
 

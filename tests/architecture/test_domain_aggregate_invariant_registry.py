@@ -11,7 +11,9 @@ import pytest
 pytestmark = pytest.mark.architecture
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-REGISTRY_PATH = PROJECT_ROOT / "reports/quality/domain-aggregate-invariant-registry.json"
+REGISTRY_PATH = (
+    PROJECT_ROOT / "reports/quality/domain-aggregate-invariant-registry.json"
+)
 PUBLIC_AGGREGATE_ROOTS = frozenset({"Batch", "PipelineRun", "QuarantineEntry"})
 
 

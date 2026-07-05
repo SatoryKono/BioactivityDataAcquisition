@@ -339,9 +339,7 @@ def test_run_command_with_cli_policy_wires_registry_and_cli_seams() -> None:
     mock_ensure_backend.assert_called_once_with(
         enabled=True,
         port=8081,
-        required_probe_paths=(
-            "/ops/control-plane/ready",
-        ),
+        required_probe_paths=("/ops/control-plane/ready",),
     )
     mock_disable_transient.assert_called_once()
     assert mock_run_command_flow.call_count == 1
@@ -422,9 +420,7 @@ def test_run_command_with_cli_policy_disables_transient_health_server_on_live_ba
     mock_ensure_backend.assert_called_once_with(
         enabled=True,
         port=8081,
-        required_probe_paths=(
-            "/ops/control-plane/ready",
-        ),
+        required_probe_paths=("/ops/control-plane/ready",),
     )
     mock_disable_transient.assert_called_once_with(
         health_server_enabled=True,
@@ -643,9 +639,7 @@ def test_run_all_callback_ensures_observability_backend_with_catalog_probe() -> 
     mock_ensure_backend.assert_called_once_with(
         enabled=True,
         port=8081,
-        required_probe_paths=(
-            "/ops/control-plane/ready",
-        ),
+        required_probe_paths=("/ops/control-plane/ready",),
     )
     mock_disable_transient.assert_called_once_with(
         health_server_enabled=True,

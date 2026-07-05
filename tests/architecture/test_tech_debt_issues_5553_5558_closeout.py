@@ -17,7 +17,9 @@ pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 CLOSEOUT = ROOT / "reports" / "quality" / "tech-debt-issues-5553-5558-closeout.json"
-COMPATIBILITY_CENSUS = ROOT / "reports" / "quality" / "compatibility-importer-census.json"
+COMPATIBILITY_CENSUS = (
+    ROOT / "reports" / "quality" / "compatibility-importer-census.json"
+)
 DEBT_GATES = ROOT / "reports" / "quality" / "debt-governance-gates.json"
 HOTSPOT_BASELINE = ROOT / "reports" / "quality" / "hotspot-family-baseline.json"
 MODULE_COVERAGE_GATES = ROOT / "configs" / "quality" / "module_coverage_gates.yaml"
@@ -74,7 +76,9 @@ def test_issue_5553_governance_artifacts_are_aligned_to_committed_inventory() ->
     gates_policy = _load_yaml(MODULE_COVERAGE_GATES)
     debt_gates = _load_json(DEBT_GATES)
     aggregate_ratchets = gates_policy["aggregate_residual_ratchets"]
-    gate_rows = {row["name"]: row for row in debt_gates["gates"] if isinstance(row, dict)}
+    gate_rows = {
+        row["name"]: row for row in debt_gates["gates"] if isinstance(row, dict)
+    }
     closeout_metrics = _load_json(CLOSEOUT)["metrics"]
 
     assert aggregate_ratchets["historical_baseline"]["linked_issue"] == "#5553"
@@ -126,21 +130,26 @@ def test_issue_5555_hotspot_reviewed_baselines_capture_current_reductions() -> N
     assert runtime_row["max_internal_fan_in"] == 5
     assert (
         application_row["files_ge_250_loc"]
-        == scorecard_by_name["application_services_control_plane"]["metrics"]["files_ge_250_loc"]
+        == scorecard_by_name["application_services_control_plane"]["metrics"][
+            "files_ge_250_loc"
+        ]
     )
-    assert runtime_row["files"] == scorecard_by_name["composition_runtime_builders"]["metrics"]["files"]
+    assert (
+        runtime_row["files"]
+        == scorecard_by_name["composition_runtime_builders"]["metrics"]["files"]
+    )
     assert (
         runtime_row["max_internal_fan_in"]
-        == scorecard_by_name["composition_runtime_builders"]["metrics"]["max_internal_fan_in"]
+        == scorecard_by_name["composition_runtime_builders"]["metrics"][
+            "max_internal_fan_in"
+        ]
     )
 
 
 def test_issue_5556_missing_checkpoint_compatibility_context_fails_closed() -> None:
     assert resolve_missing_compatibility_context_disposition(
         compatibility_policy="soft_fail"
-    ) == (
-        "missing_context_hard_fail_raised"
-    )
+    ) == ("missing_context_hard_fail_raised")
 
 
 def test_issue_5557_pr_hygiene_policy_and_workflow_stay_narrow() -> None:

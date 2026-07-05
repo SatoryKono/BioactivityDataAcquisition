@@ -17,10 +17,7 @@ def _owner_module(module_suffix: str) -> object:
 def test_control_plane_service_access_reexports_services_owner_seams() -> None:
     owner_module = _owner_module("._services")
 
-    assert (
-        control_plane_service_access.get_adr_service
-        is owner_module.get_adr_service
-    )
+    assert control_plane_service_access.get_adr_service is owner_module.get_adr_service
     assert (
         control_plane_service_access.get_config_service
         is owner_module.get_config_service
@@ -50,8 +47,7 @@ def test_control_plane_service_access_reexports_services_owner_seams() -> None:
         is owner_module.get_lineage_service
     )
     assert (
-        control_plane_service_access.get_lock_service
-        is owner_module.get_lock_service
+        control_plane_service_access.get_lock_service is owner_module.get_lock_service
     )
     assert (
         control_plane_service_access.get_run_manifest_service

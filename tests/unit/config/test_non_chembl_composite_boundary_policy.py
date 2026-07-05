@@ -20,7 +20,10 @@ def _load_yaml(path: str) -> dict[str, object]:
     config_path = Path(path)
     payload = yaml.safe_load(config_path.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
-    if path.startswith("configs/composites/") and config_path.name != "shared_policy.yaml":
+    if (
+        path.startswith("configs/composites/")
+        and config_path.name != "shared_policy.yaml"
+    ):
         merge_external_shared_policy(payload, config_path)
     return payload
 

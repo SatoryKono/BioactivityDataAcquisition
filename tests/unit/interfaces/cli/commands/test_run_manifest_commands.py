@@ -1023,7 +1023,10 @@ class TestRunManifestCommands:
             "effective_config_semantic_anchor: effective_config_hash" in result.output
         )
         assert "effective_config_occurrence_fields" in result.output
-        assert '"config_hash_policy": "resolved_and_effective_hashes_only"' in result.output
+        assert (
+            '"config_hash_policy": "resolved_and_effective_hashes_only"'
+            in result.output
+        )
         assert "checkpoint_identity_present: true" in result.output
         assert "checkpoint_matching_fields" in result.output
         assert "checkpoint_missing_checkpoint_fields" in result.output

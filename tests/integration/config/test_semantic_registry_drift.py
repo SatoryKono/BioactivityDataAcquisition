@@ -23,9 +23,7 @@ def test_semantic_registry_drift_gate_passes_current_repo() -> None:
     )
 
 
-def test_generated_exact_candidates_cover_mapping_and_domain_alias_surfaces() -> (
-    None
-):
+def test_generated_exact_candidates_cover_mapping_and_domain_alias_surfaces() -> None:
     candidates = discover_exact_registry_candidates(Path("."))
     candidate_keys = {
         (candidate.source, candidate.raw_name, candidate.canonical_name)

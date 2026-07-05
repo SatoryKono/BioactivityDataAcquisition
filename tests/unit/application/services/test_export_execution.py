@@ -255,9 +255,9 @@ async def test_export_existing_table_redacts_writes_and_logs_manifest_paths(
         limit=None,
     )
     writer.write_export.assert_called_once()
-    assert tuple(field.name for field in writer.write_export.call_args.kwargs["table"].schema) == (
-        "id",
-    )
+    assert tuple(
+        field.name for field in writer.write_export.call_args.kwargs["table"].schema
+    ) == ("id",)
     assert result.success is True
     assert result.row_count == 2
     assert result.manifest_paths == manifest_paths

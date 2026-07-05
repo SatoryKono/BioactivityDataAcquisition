@@ -276,7 +276,9 @@ class TestCanonicalTestLanes:
         assert lanes["architecture-read-only-audit"]["runner"] == (
             "scripts/engineering/qa/run_architecture_audit_read_only.py"
         )
-        assert lanes["e2e"]["marker_expression"] == "e2e and not benchmark and not memory"
+        assert (
+            lanes["e2e"]["marker_expression"] == "e2e and not benchmark and not memory"
+        )
         assert lanes["e2e-smoke"]["paths"] == [
             "tests/e2e/test_chembl_activity_e2e.py",
             "tests/e2e/test_pipeline_matrix_e2e.py",

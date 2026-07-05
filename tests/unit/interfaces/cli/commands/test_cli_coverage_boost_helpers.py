@@ -70,7 +70,9 @@ def test_load_metric_allowlist_supports_allowed_key_and_invalid_payloads(
     tmp_path: Path,
 ) -> None:
     allowlist = tmp_path / "allowlist.yaml"
-    allowlist.write_text("allowed:\n  registry: [metric_a, metric_b]\n", encoding="utf-8")
+    allowlist.write_text(
+        "allowed:\n  registry: [metric_a, metric_b]\n", encoding="utf-8"
+    )
 
     result = contract_checks._load_metric_allowlist(allowlist)
 
@@ -114,7 +116,9 @@ def test_check_tracing_coverage_contract_reports_missing_and_forbidden_terms(
     target_file = repo_root / "src" / "tracked.py"
     target_file.parent.mkdir(parents=True)
     target_file.write_text("emit_event('started')\nlegacy_term\n", encoding="utf-8")
-    contract_path = repo_root / "configs" / "quality" / "mandatory_tracing_coverage.yaml"
+    contract_path = (
+        repo_root / "configs" / "quality" / "mandatory_tracing_coverage.yaml"
+    )
     contract_path.write_text(
         """
 surfaces:
@@ -158,9 +162,9 @@ def test_observability_contract_checks_cover_metric_and_alert_paths(
     )
     allowlist_path = tmp_path / "configs" / "quality"
     allowlist_path.mkdir(parents=True)
-    (
-        allowlist_path / "observability_metric_inventory_allowlist.yaml"
-    ).write_text("allowed: {}\n", encoding="utf-8")
+    (allowlist_path / "observability_metric_inventory_allowlist.yaml").write_text(
+        "allowed: {}\n", encoding="utf-8"
+    )
 
     metric_check = contract_checks._check_metric_inventory(tmp_path)
     assert metric_check.passed is False
@@ -211,7 +215,10 @@ slo_contracts:
     assert "AlertMissingMetric:severity" in alert_check.details["mismatches"]
     assert "AlertMissingMetric:for" in alert_check.details["mismatches"]
     assert "AlertMissingMetric:runbook" in alert_check.details["mismatches"]
-    assert "AlertMissingMetric:replay:metric_reference" in alert_check.details["mismatches"]
+    assert (
+        "AlertMissingMetric:replay:metric_reference"
+        in alert_check.details["mismatches"]
+    )
     assert "OrphanAlert:orphan" in alert_check.details["mismatches"]
 
 
@@ -368,7 +375,9 @@ def test_apply_cli_overrides_and_status_render_helpers_cover_branchy_paths() -> 
         inspection=None,
     )
     assert no_history["execution_history_available"] is False
-    assert workflow_support._render_history_lines(no_history) == ["history: unavailable"]
+    assert workflow_support._render_history_lines(no_history) == [
+        "history: unavailable"
+    ]
     assert workflow_support._render_status_steps("invalid") == []
     rendered_step = workflow_support._render_status_step(
         {
@@ -378,7 +387,10 @@ def test_apply_cli_overrides_and_status_render_helpers_cover_branchy_paths() -> 
             "depends_on": ["publish"],
         }
     )
-    assert "- reconcile [transform] transform=reconcile_foreign_keys depends_on=publish" in rendered_step
+    assert (
+        "- reconcile [transform] transform=reconcile_foreign_keys depends_on=publish"
+        in rendered_step
+    )
 
 
 def test_build_status_payload_with_history_uses_inspection_snapshot() -> None:
@@ -476,9 +488,7 @@ def test_render_status_payload_and_run_result_cover_error_and_dry_run_lines(
                 step_id="reconcile",
                 step_kind="transform",
                 status="completed",
-                payload=SimpleNamespace(
-                    output={"dry_run": True, "would_mutate": True}
-                ),
+                payload=SimpleNamespace(output={"dry_run": True, "would_mutate": True}),
             ),
         ),
     )
@@ -620,7 +630,9 @@ def test_run_manifest_output_renderers_cover_verify_forensic_and_score_paths() -
     assert "authoritative_replay_dossier:" in score
 
 
-def test_lineage_text_renderers_cover_non_dict_nodes_and_identifier_resolution() -> None:
+def test_lineage_text_renderers_cover_non_dict_nodes_and_identifier_resolution() -> (
+    None
+):
     assert lineage_cmd._render_node_lines(["node-a"]) == ["  - node-a"]
     assert lineage_cmd._render_relation_lines(["relation-a"]) == ["  - relation-a"]
     assert (
@@ -643,7 +655,9 @@ def test_lineage_text_renderers_cover_structured_payloads_and_command_errors(
                 "run_id": "run-1",
                 "manifest_id": "manifest-1",
                 "created_at": "2026-01-01T00:00:00Z",
-                "nodes": [{"node_type": "dataset", "node_id": "silver:chembl.activity"}],
+                "nodes": [
+                    {"node_type": "dataset", "node_id": "silver:chembl.activity"}
+                ],
                 "edges": [],
             }
         }
@@ -668,7 +682,10 @@ def test_lineage_text_renderers_cover_structured_payloads_and_command_errors(
         }
     )
     assert "Lineage Trace" in rendered_trace
-    assert "derived_from via fragment-1 occurrence=occurrence-1: bronze:batch-1 label=bronze" in rendered_trace
+    assert (
+        "derived_from via fragment-1 occurrence=occurrence-1: bronze:batch-1 label=bronze"
+        in rendered_trace
+    )
 
     rendered_explain = lineage_cmd._render_explain_payload(
         {
@@ -677,7 +694,9 @@ def test_lineage_text_renderers_cover_structured_payloads_and_command_errors(
             "manifest_id": "manifest-1",
             "fragment_ids": ["fragment-1"],
             "stored_fragment_ids": ["occurrence-1"],
-            "produced_datasets": [{"node_type": "dataset", "node_id": "silver:chembl.activity"}],
+            "produced_datasets": [
+                {"node_type": "dataset", "node_id": "silver:chembl.activity"}
+            ],
             "produced_bronze_batches": [],
             "transforms": [],
             "source_systems": [],
@@ -689,14 +708,22 @@ def test_lineage_text_renderers_cover_structured_payloads_and_command_errors(
     assert lineage_cmd._render_text_payload({"other": True}).startswith("{")
 
     errors: list[tuple[str, str]] = []
-    monkeypatch.setattr(lineage_cmd, "echo_error", lambda title, detail: errors.append((title, detail)))
+    monkeypatch.setattr(
+        lineage_cmd, "echo_error", lambda title, detail: errors.append((title, detail))
+    )
     monkeypatch.setattr(
         lineage_cmd,
         "get_lineage_service",
         lambda: SimpleNamespace(
-            show_fragment=lambda fragment_id, semantic=False: (_ for _ in ()).throw(ValueError("missing fragment")),
-            trace=lambda dataset_ref: (_ for _ in ()).throw(ValueError("missing trace")),
-            explain_run=lambda identifier: (_ for _ in ()).throw(ValueError("missing run")),
+            show_fragment=lambda fragment_id, semantic=False: (_ for _ in ()).throw(
+                ValueError("missing fragment")
+            ),
+            trace=lambda dataset_ref: (_ for _ in ()).throw(
+                ValueError("missing trace")
+            ),
+            explain_run=lambda identifier: (_ for _ in ()).throw(
+                ValueError("missing run")
+            ),
         ),
     )
 
@@ -711,7 +738,9 @@ def test_lineage_text_renderers_cover_structured_payloads_and_command_errors(
     assert ("Lineage run explanation not found", "missing run") in errors
 
 
-@pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific backend process test")
+@pytest.mark.skipif(
+    sys.platform != "win32", reason="Windows-specific backend process test"
+)
 def test_backend_process_helpers_cover_env_kwargs_and_argument_normalization(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -762,7 +791,9 @@ def test_backend_process_helpers_cover_env_kwargs_and_argument_normalization(
     assert backend_process.python_executable_to_tuple("python") == ("python",)
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="PosixPath not available on Windows")
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="PosixPath not available on Windows"
+)
 def test_backend_process_helpers_cover_listener_parsing_and_detached_start(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
@@ -771,8 +802,8 @@ def test_backend_process_helpers_cover_listener_parsing_and_detached_start(
     fake_result = SimpleNamespace(
         stdout="\n".join(
             [
-                "LISTEN 0 128 127.0.0.1:9090 users:((\"python\",pid=123,fd=4))",
-                "LISTEN 0 128 127.0.0.1:9090 users:((\"python\",pid=bad,fd=4))",
+                'LISTEN 0 128 127.0.0.1:9090 users:(("python",pid=123,fd=4))',
+                'LISTEN 0 128 127.0.0.1:9090 users:(("python",pid=bad,fd=4))',
             ]
         )
     )
@@ -794,10 +825,13 @@ def test_backend_process_helpers_cover_listener_parsing_and_detached_start(
         STARTUPINFO=lambda: startupinfo,
         STARTF_USESHOWWINDOW=0x0,
     )
-    assert backend_process._build_detached_backend_popen_kwargs(
-        os_name="posix",
-        subprocess_module=fake_subprocess,
-    )["start_new_session"] is True
+    assert (
+        backend_process._build_detached_backend_popen_kwargs(
+            os_name="posix",
+            subprocess_module=fake_subprocess,
+        )["start_new_session"]
+        is True
+    )
     assert (
         backend_process._build_detached_backend_popen_kwargs(
             os_name="nt",
@@ -817,11 +851,16 @@ def test_backend_process_helpers_cover_listener_parsing_and_detached_start(
         "kill",
         lambda pid, sig: (_ for _ in ()).throw(OSError("busy")),
     )
-    assert backend_process.drop_listening_backend_on_port(8080, sleep_fn=lambda _: None) is False
+    assert (
+        backend_process.drop_listening_backend_on_port(8080, sleep_fn=lambda _: None)
+        is False
+    )
 
     captured: dict[str, object] = {}
     log_path = tmp_path / "backend.log"
-    monkeypatch.setattr(backend_process, "build_detached_backend_log_path", lambda port: log_path)
+    monkeypatch.setattr(
+        backend_process, "build_detached_backend_log_path", lambda port: log_path
+    )
     monkeypatch.setattr(
         backend_process,
         "_build_detached_backend_popen_kwargs",
@@ -870,9 +909,14 @@ def test_backend_process_helpers_cover_listener_parsing_and_detached_start(
     )
     import os as os_module
     import subprocess as subprocess_module
-    monkeypatch.setattr(subprocess_module, "run", lambda *args, **kwargs: windows_result)
+
+    monkeypatch.setattr(
+        subprocess_module, "run", lambda *args, **kwargs: windows_result
+    )
     monkeypatch.setattr(os_module, "name", "nt")
-    monkeypatch.setattr(backend_process, "_resolve_system_executable", lambda x: "netstat")
+    monkeypatch.setattr(
+        backend_process, "_resolve_system_executable", lambda x: "netstat"
+    )
     assert backend_process._find_listening_backend_pids_by_port(8080) == (321,)
 
 
@@ -881,16 +925,24 @@ def test_config_dq_command_helpers_cover_error_and_compatibility_paths(
     tmp_path: Path,
 ) -> None:
     messages: list[tuple[str, tuple[object, ...]]] = []
-    monkeypatch.setattr(config_dq, "echo_info", lambda *args: messages.append(("info", args)))
-    monkeypatch.setattr(config_dq, "echo_error", lambda *args: messages.append(("error", args)))
+    monkeypatch.setattr(
+        config_dq, "echo_info", lambda *args: messages.append(("info", args))
+    )
+    monkeypatch.setattr(
+        config_dq, "echo_error", lambda *args: messages.append(("error", args))
+    )
 
     invalid_config = tmp_path / "invalid.yaml"
     invalid_config.write_text("- not-a-mapping\n", encoding="utf-8")
     service = MagicMock()
     monkeypatch.setattr(config_dq, "get_config_service", lambda: service)
 
-    config_dq.validate_dq_config_command.callback("chembl_activity", str(invalid_config))
-    assert any("Config file must contain a mapping" in str(args[-1]) for _, args in messages)
+    config_dq.validate_dq_config_command.callback(
+        "chembl_activity", str(invalid_config)
+    )
+    assert any(
+        "Config file must contain a mapping" in str(args[-1]) for _, args in messages
+    )
 
     messages.clear()
     artifact1 = tmp_path / "artifact1.json"
@@ -898,7 +950,9 @@ def test_config_dq_command_helpers_cover_error_and_compatibility_paths(
     artifact1.write_text('["invalid"]', encoding="utf-8")
     artifact2.write_text("{}", encoding="utf-8")
     config_dq.check_compatibility_command.callback(str(artifact1), str(artifact2))
-    assert any("Artifacts must be JSON objects" in str(args[-1]) for _, args in messages)
+    assert any(
+        "Artifacts must be JSON objects" in str(args[-1]) for _, args in messages
+    )
 
     messages.clear()
     artifact1.write_text(
@@ -925,7 +979,9 @@ def test_config_dq_command_helpers_cover_error_and_compatibility_paths(
 
     config_dq.check_compatibility_command.callback(str(artifact1), str(artifact2))
 
-    assert any("[OK] Configurations are compatible" in str(args[0]) for _, args in messages)
+    assert any(
+        "[OK] Configurations are compatible" in str(args[0]) for _, args in messages
+    )
 
 
 def test_config_dq_helpers_cover_lazy_import_and_error_branches(
@@ -933,8 +989,12 @@ def test_config_dq_helpers_cover_lazy_import_and_error_branches(
     tmp_path: Path,
 ) -> None:
     messages: list[tuple[str, tuple[object, ...]]] = []
-    monkeypatch.setattr(config_dq, "echo_info", lambda *args: messages.append(("info", args)))
-    monkeypatch.setattr(config_dq, "echo_error", lambda *args: messages.append(("error", args)))
+    monkeypatch.setattr(
+        config_dq, "echo_info", lambda *args: messages.append(("info", args))
+    )
+    monkeypatch.setattr(
+        config_dq, "echo_error", lambda *args: messages.append(("error", args))
+    )
 
     api_module = SimpleNamespace(get_config_service=lambda: "config-service")
     monkeypatch.setitem(
@@ -948,32 +1008,51 @@ def test_config_dq_helpers_cover_lazy_import_and_error_branches(
     monkeypatch.setattr(config_dq, "get_config_service", lambda: service)
     service.get_dq_config.side_effect = FileNotFoundError("missing dq")
     config_dq.show_dq_config_command.callback("chembl_activity", "yaml")
-    assert any(kind == "error" and args[0] == "DQ Config file not found" for kind, args in messages)
+    assert any(
+        kind == "error" and args[0] == "DQ Config file not found"
+        for kind, args in messages
+    )
 
     messages.clear()
     bad_yaml = tmp_path / "bad.yaml"
     bad_yaml.write_text(":\n", encoding="utf-8")
     config_dq.validate_dq_config_command.callback("chembl_activity", str(bad_yaml))
-    assert any(kind == "error" and args[0] == "DQ Configuration validation failed" for kind, args in messages)
+    assert any(
+        kind == "error" and args[0] == "DQ Configuration validation failed"
+        for kind, args in messages
+    )
 
     messages.clear()
     service.get_dq_config.side_effect = ValueError("invalid dq")
     config_dq.validate_dq_config_command.callback("chembl_activity", None)
-    assert any(kind == "error" and args[0] == "DQ Configuration invalid" for kind, args in messages)
+    assert any(
+        kind == "error" and args[0] == "DQ Configuration invalid"
+        for kind, args in messages
+    )
 
     messages.clear()
     service.get_effective_config_artifact.side_effect = ValueError("bad effective")
-    config_dq.show_effective_config_command.callback("chembl_activity", "json", ("bad",))
-    assert any(kind == "error" and args[0] == "Effective config error" for kind, args in messages)
+    config_dq.show_effective_config_command.callback(
+        "chembl_activity", "json", ("bad",)
+    )
+    assert any(
+        kind == "error" and args[0] == "Effective config error"
+        for kind, args in messages
+    )
 
     messages.clear()
     service.get_effective_config_artifact.side_effect = FileNotFoundError("missing cfg")
     config_dq.show_effective_config_command.callback("chembl_activity", "yaml", ())
-    assert any(kind == "error" and args[0] == "Config file not found" for kind, args in messages)
+    assert any(
+        kind == "error" and args[0] == "Config file not found"
+        for kind, args in messages
+    )
 
     messages.clear()
     service.get_effective_config_artifact.side_effect = TypeError("artifact failed")
-    config_dq.show_effective_config_command.callback("chembl_activity", "yaml", ("k=v",))
+    config_dq.show_effective_config_command.callback(
+        "chembl_activity", "yaml", ("k=v",)
+    )
     assert any(
         kind == "error" and args[0] == "Failed to create effective config artifact"
         for kind, args in messages
@@ -982,20 +1061,29 @@ def test_config_dq_helpers_cover_lazy_import_and_error_branches(
     messages.clear()
     missing_file = tmp_path / "missing.json"
     config_dq.check_compatibility_command.callback(str(missing_file), str(missing_file))
-    assert any(kind == "error" and args[0] == "Artifact file not found" for kind, args in messages)
+    assert any(
+        kind == "error" and args[0] == "Artifact file not found"
+        for kind, args in messages
+    )
 
     messages.clear()
     invalid_json = tmp_path / "invalid.json"
     invalid_json.write_text("{bad", encoding="utf-8")
     config_dq.check_compatibility_command.callback(str(invalid_json), str(invalid_json))
-    assert any(kind == "error" and args[0] == "Invalid JSON in artifact file" for kind, args in messages)
+    assert any(
+        kind == "error" and args[0] == "Invalid JSON in artifact file"
+        for kind, args in messages
+    )
 
     messages.clear()
     artifact = tmp_path / "artifact.json"
     artifact.write_text("{}", encoding="utf-8")
     service.check_config_compatibility.side_effect = ValueError("compat failure")
     config_dq.check_compatibility_command.callback(str(artifact), str(artifact))
-    assert any(kind == "error" and args[0] == "Compatibility check failed" for kind, args in messages)
+    assert any(
+        kind == "error" and args[0] == "Compatibility check failed"
+        for kind, args in messages
+    )
 
 
 def test_config_dq_helpers_cover_success_and_incompatible_branches(
@@ -1003,8 +1091,12 @@ def test_config_dq_helpers_cover_success_and_incompatible_branches(
     tmp_path: Path,
 ) -> None:
     messages: list[tuple[str, tuple[object, ...]]] = []
-    monkeypatch.setattr(config_dq, "echo_info", lambda *args: messages.append(("info", args)))
-    monkeypatch.setattr(config_dq, "echo_error", lambda *args: messages.append(("error", args)))
+    monkeypatch.setattr(
+        config_dq, "echo_info", lambda *args: messages.append(("info", args))
+    )
+    monkeypatch.setattr(
+        config_dq, "echo_error", lambda *args: messages.append(("error", args))
+    )
     service = MagicMock()
     monkeypatch.setattr(config_dq, "get_config_service", lambda: service)
 
@@ -1017,8 +1109,12 @@ def test_config_dq_helpers_cover_success_and_incompatible_branches(
     }
     config_dq.show_dq_config_command.callback("chembl_activity", "json")
     config_dq.validate_dq_config_command.callback("chembl_activity", None)
-    assert any('"contract_ref": "chembl_activity_dq"' in str(args[0]) for _, args in messages)
-    assert any("Contract Ref: chembl_activity_dq" in str(args[0]) for _, args in messages)
+    assert any(
+        '"contract_ref": "chembl_activity_dq"' in str(args[0]) for _, args in messages
+    )
+    assert any(
+        "Contract Ref: chembl_activity_dq" in str(args[0]) for _, args in messages
+    )
 
     messages.clear()
     config_file = tmp_path / "dq.yaml"
@@ -1030,7 +1126,9 @@ def test_config_dq_helpers_cover_success_and_incompatible_branches(
     messages.clear()
     service.validate_dq_config.return_value = False
     config_dq.validate_dq_config_command.callback("chembl_activity", str(config_file))
-    assert any("[ERROR] DQ configuration is invalid" in str(args[0]) for _, args in messages)
+    assert any(
+        "[ERROR] DQ configuration is invalid" in str(args[0]) for _, args in messages
+    )
 
     messages.clear()
     artifact1 = tmp_path / "artifact1.json"
@@ -1048,8 +1146,16 @@ def test_run_manifest_commands_cover_error_and_persisted_artifact_paths(
 ) -> None:
     emitted: list[tuple[dict[str, object], str]] = []
     errors: list[tuple[str, str]] = []
-    monkeypatch.setattr(run_manifest_cmd, "_emit_payload", lambda payload, fmt: emitted.append((payload, fmt)))
-    monkeypatch.setattr(run_manifest_cmd, "echo_error", lambda title, detail: errors.append((title, detail)))
+    monkeypatch.setattr(
+        run_manifest_cmd,
+        "_emit_payload",
+        lambda payload, fmt: emitted.append((payload, fmt)),
+    )
+    monkeypatch.setattr(
+        run_manifest_cmd,
+        "echo_error",
+        lambda title, detail: errors.append((title, detail)),
+    )
 
     manifest_result = SimpleNamespace(
         manifest=SimpleNamespace(manifest_id="manifest-1", run_id="run-1"),
@@ -1069,7 +1175,9 @@ def test_run_manifest_commands_cover_error_and_persisted_artifact_paths(
     monkeypatch.setattr(
         run_manifest_cmd,
         "build_run_replay_bundle_descriptor",
-        lambda result: SimpleNamespace(to_dict=lambda: {"bundle": result.manifest.manifest_id}),
+        lambda result: SimpleNamespace(
+            to_dict=lambda: {"bundle": result.manifest.manifest_id}
+        ),
     )
     monkeypatch.setattr(
         run_manifest_cmd,
@@ -1080,8 +1188,12 @@ def test_run_manifest_commands_cover_error_and_persisted_artifact_paths(
         run_manifest_cmd,
         "get_historical_replay_corpus_service",
         lambda: SimpleNamespace(
-            build_certifiability_inventory=lambda: SimpleNamespace(to_dict=lambda: {"inventory": True}),
-            certify_retained_corpus=lambda specs: SimpleNamespace(to_dict=lambda: {"certified": specs}),
+            build_certifiability_inventory=lambda: SimpleNamespace(
+                to_dict=lambda: {"inventory": True}
+            ),
+            certify_retained_corpus=lambda specs: SimpleNamespace(
+                to_dict=lambda: {"certified": specs}
+            ),
         ),
     )
     monkeypatch.setattr(
@@ -1121,8 +1233,12 @@ def test_run_manifest_commands_cover_error_and_persisted_artifact_paths(
     )
 
     api_module = SimpleNamespace(
-        persist_historical_replay_closure_report=lambda report: tmp_path / "closure.json",
-        persist_historical_replay_universe_report=lambda report: tmp_path / "universe.json",
+        persist_historical_replay_closure_report=lambda report: (
+            tmp_path / "closure.json"
+        ),
+        persist_historical_replay_universe_report=lambda report: (
+            tmp_path / "universe.json"
+        ),
     )
     monkeypatch.setitem(
         __import__("sys").modules,
@@ -1141,11 +1257,17 @@ def test_run_manifest_commands_cover_error_and_persisted_artifact_paths(
     run_manifest_cmd.inventory_command.callback("json")
     run_manifest_cmd.certify_historical_bulk_command.callback(plan_path, "json")
     run_manifest_cmd.closure_report_command.callback(plan_path, True, "json")
-    run_manifest_cmd.universe_report_command.callback((plan_path,), True, True, True, "json")
+    run_manifest_cmd.universe_report_command.callback(
+        (plan_path,), True, True, True, "json"
+    )
 
     assert emitted[0][0]["identifier"] == "manifest-1"
     assert any(payload.get("bundle") == "manifest-1" for payload, _ in emitted)
-    assert any("artifact_path" in payload for payload, _ in emitted if "closure" in payload or "universe" in payload)
+    assert any(
+        "artifact_path" in payload
+        for payload, _ in emitted
+        if "closure" in payload or "universe" in payload
+    )
     assert not errors
 
 
@@ -1155,8 +1277,16 @@ def test_run_manifest_commands_cover_failure_paths(
 ) -> None:
     emitted: list[tuple[dict[str, object], str]] = []
     errors: list[tuple[str, str]] = []
-    monkeypatch.setattr(run_manifest_cmd, "_emit_payload", lambda payload, fmt: emitted.append((payload, fmt)))
-    monkeypatch.setattr(run_manifest_cmd, "echo_error", lambda title, detail: errors.append((title, detail)))
+    monkeypatch.setattr(
+        run_manifest_cmd,
+        "_emit_payload",
+        lambda payload, fmt: emitted.append((payload, fmt)),
+    )
+    monkeypatch.setattr(
+        run_manifest_cmd,
+        "echo_error",
+        lambda title, detail: errors.append((title, detail)),
+    )
 
     corrupt = RunManifestInspectionCorruptionError("manifest-1", "corrupt")
     monkeypatch.setattr(
@@ -1171,7 +1301,11 @@ def test_run_manifest_commands_cover_failure_paths(
     monkeypatch.setattr(
         run_manifest_cmd,
         "get_forensic_run_diff_service",
-        lambda: SimpleNamespace(compare=lambda left, right: (_ for _ in ()).throw(ValueError("bad forensic"))),
+        lambda: SimpleNamespace(
+            compare=lambda left, right: (_ for _ in ()).throw(
+                ValueError("bad forensic")
+            )
+        ),
     )
     monkeypatch.setattr(
         run_manifest_cmd,
@@ -1200,9 +1334,15 @@ def test_run_manifest_commands_cover_failure_paths(
             ).throw(ValueError("bad universe"))
         ),
     )
-    monkeypatch.setattr(run_manifest_cmd, "_coerce_bulk_certification_specs", lambda payload: payload)
-    monkeypatch.setattr(run_manifest_cmd, "_load_residual_dispositions", lambda path: {})
-    monkeypatch.setattr(run_manifest_cmd, "_load_universe_external_records", lambda paths: [])
+    monkeypatch.setattr(
+        run_manifest_cmd, "_coerce_bulk_certification_specs", lambda payload: payload
+    )
+    monkeypatch.setattr(
+        run_manifest_cmd, "_load_residual_dispositions", lambda path: {}
+    )
+    monkeypatch.setattr(
+        run_manifest_cmd, "_load_universe_external_records", lambda paths: []
+    )
 
     invalid_json = tmp_path / "invalid.json"
     invalid_json.write_text("{bad", encoding="utf-8")
@@ -1224,6 +1364,12 @@ def test_run_manifest_commands_cover_failure_paths(
     assert ("Run manifest diff failed", "bad diff") in errors
     assert ("Run manifest verification failed", "bad verify") in errors
     assert ("Forensic run diff failed", "bad forensic") in errors
-    assert any(title == "Historical replay bulk certification failed" for title, _ in errors)
-    assert any(title == "Historical replay closure report failed" for title, _ in errors)
-    assert any(title == "Historical replay universe report failed" for title, _ in errors)
+    assert any(
+        title == "Historical replay bulk certification failed" for title, _ in errors
+    )
+    assert any(
+        title == "Historical replay closure report failed" for title, _ in errors
+    )
+    assert any(
+        title == "Historical replay universe report failed" for title, _ in errors
+    )

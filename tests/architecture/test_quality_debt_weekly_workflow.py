@@ -47,6 +47,9 @@ def test_pr_tests_workflow_runs_debt_freeze_fail_fast_checks() -> None:
 
     assert "Validate technical-debt freeze ratchets" in workflow
     assert "tests/architecture/test_removed_surface_freeze_guards.py" in workflow
-    assert "tests/architecture/test_public_surface_importer_census_governance.py" in workflow
+    assert (
+        "tests/architecture/test_public_surface_importer_census_governance.py"
+        in workflow
+    )
     assert "tests/architecture/test_runtime_uuid_seam_inventory.py" in workflow
     assert "tests/architecture/test_quality_debt_scorecard.py" in workflow

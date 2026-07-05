@@ -168,8 +168,7 @@ def test_manifest_diagnostics_replay_helpers_facade_stays_removed() -> None:
 def test_run_manifest_diagnostics_transition_shims_stay_removed() -> None:
     """run_manifest_diagnostics_* transition facades must not return at root."""
     offenders = sorted(
-        path.name
-        for path in CONTROL_PLANE_ROOT.glob("run_manifest_diagnostics*.py")
+        path.name for path in CONTROL_PLANE_ROOT.glob("run_manifest_diagnostics*.py")
     )
 
     assert offenders == [], (

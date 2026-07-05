@@ -1,12 +1,15 @@
 """Minimal working conftest for running tests without hanging."""
 
-import pytest
 from pathlib import Path
+
+import pytest
+
 
 @pytest.fixture(scope="session")
 def project_root() -> Path:
     """Return repository root for path-based architecture checks."""
     return Path(__file__).resolve().parents[1]
+
 
 @pytest.fixture(scope="session")
 def src_dir(project_root: Path) -> Path:

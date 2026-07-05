@@ -22,7 +22,9 @@ def test_schema_change_breaking_classification_by_type() -> None:
     assert SchemaChange(SchemaChangeType.REQUIRED_FIELD_ADDED, "doi").is_breaking()
     assert SchemaChange(SchemaChangeType.FIELD_TYPE_CHANGED, "year").is_breaking()
     assert not SchemaChange(SchemaChangeType.FIELD_ADDED, "abstract").is_breaking()
-    assert not SchemaChange(SchemaChangeType.REQUIRED_FIELD_REMOVED, "legacy").is_breaking()
+    assert not SchemaChange(
+        SchemaChangeType.REQUIRED_FIELD_REMOVED, "legacy"
+    ).is_breaking()
 
 
 def test_schema_diff_detects_changes_field_changes_and_renames() -> None:
@@ -42,9 +44,15 @@ def test_schema_diff_detects_changes_field_changes_and_renames() -> None:
 
 
 def test_schema_change_classification_factories_set_review_flags() -> None:
-    assert SchemaChangeClassification.patch().classification == ChangeClassification.PATCH
-    assert SchemaChangeClassification.minor().classification == ChangeClassification.MINOR
-    assert SchemaChangeClassification.major().classification == ChangeClassification.MAJOR
+    assert (
+        SchemaChangeClassification.patch().classification == ChangeClassification.PATCH
+    )
+    assert (
+        SchemaChangeClassification.minor().classification == ChangeClassification.MINOR
+    )
+    assert (
+        SchemaChangeClassification.major().classification == ChangeClassification.MAJOR
+    )
 
     review = SchemaChangeClassification.manual_review("ambiguous rename")
     assert review.classification == ChangeClassification.MANUAL_REVIEW
@@ -58,7 +66,9 @@ def test_default_and_lenient_policies_capture_semver_defaults() -> None:
 
     assert default.strict_field_renames is True
     assert default.enum_changes_as_breaking is True
-    assert default.default_classification_for_unknown == ChangeClassification.MANUAL_REVIEW
+    assert (
+        default.default_classification_for_unknown == ChangeClassification.MANUAL_REVIEW
+    )
     assert lenient.strict_field_renames is False
     assert lenient.enum_changes_as_breaking is False
     assert lenient.default_classification_for_unknown == ChangeClassification.MINOR

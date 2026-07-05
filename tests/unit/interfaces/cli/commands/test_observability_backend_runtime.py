@@ -54,9 +54,7 @@ def test_build_observability_backend_required_probe_paths_uses_lightweight_ready
 ):
     assert build_observability_backend_required_probe_paths(
         pipelines=("chembl_target", "chembl_activity", "chembl_target"),
-    ) == (
-        "/ops/control-plane/ready",
-    )
+    ) == ("/ops/control-plane/ready",)
 
 
 def test_probe_observability_backend_uses_liveness_then_fallback() -> None:
@@ -445,7 +443,9 @@ def test_ensure_backend_failed_startup_appends_process_diagnostics_to_log(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     log_path = tmp_path / "backend.log"
-    monkeypatch.setattr(runtime_subject, "build_detached_backend_log_path", lambda _port: log_path)
+    monkeypatch.setattr(
+        runtime_subject, "build_detached_backend_log_path", lambda _port: log_path
+    )
     monkeypatch.setattr(
         runtime_subject,
         "_describe_required_probe_failure",
@@ -552,7 +552,9 @@ def test_drop_listening_backend_on_port_terminates_all_windows_listeners(
         return SimpleNamespace(returncode=0)
 
     monkeypatch.setattr(process_subject.os, "name", "nt")
-    monkeypatch.setattr(process_subject, "_resolve_system_executable", lambda _name: _name)
+    monkeypatch.setattr(
+        process_subject, "_resolve_system_executable", lambda _name: _name
+    )
     monkeypatch.setattr(
         process_subject,
         "_find_listening_backend_pids_by_port",
@@ -589,7 +591,9 @@ def test_drop_listening_backend_on_port_falls_back_when_taskkill_fails(
         state["pids"] = ()
 
     monkeypatch.setattr(process_subject.os, "name", "nt")
-    monkeypatch.setattr(process_subject, "_resolve_system_executable", lambda _name: _name)
+    monkeypatch.setattr(
+        process_subject, "_resolve_system_executable", lambda _name: _name
+    )
     monkeypatch.setattr(
         process_subject,
         "_find_listening_backend_pids_by_port",
@@ -610,7 +614,9 @@ def test_find_listening_backend_pids_by_port_returns_empty_when_command_missing(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(process_subject.os, "name", "posix")
-    monkeypatch.setattr(process_subject, "_resolve_system_executable", lambda _name: None)
+    monkeypatch.setattr(
+        process_subject, "_resolve_system_executable", lambda _name: None
+    )
 
     assert process_subject._find_listening_backend_pids_by_port(8081) == ()
 
