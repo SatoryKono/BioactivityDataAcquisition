@@ -18,7 +18,9 @@ TELEMETRY_COVERAGE = ROOT / "reports" / "test-telemetry" / "coverage-summary.jso
 TELEMETRY_SLOWEST = ROOT / "reports" / "test-telemetry" / "slowest-tests.json"
 TEST_GOVERNANCE = ROOT / "configs" / "quality" / "test_governance_audit.yaml"
 TEST_MATRIX = ROOT / "configs" / "quality" / "test_matrix.yaml"
-TOPOLOGY_GUARD = ROOT / "tests" / "architecture" / "test_test_topology_canonical_paths.py"
+TOPOLOGY_GUARD = (
+    ROOT / "tests" / "architecture" / "test_test_topology_canonical_paths.py"
+)
 HELPER_OWNER = ROOT / "tests" / "unit" / "helpers" / "test_e2e_conftest.py"
 VCR_CATALOG = ROOT / "reports" / "quality" / "vcr-metadata-catalog.json"
 MODULE_COVERAGE = ROOT / "reports" / "quality" / "module-coverage-inventory.json"
@@ -115,8 +117,13 @@ def test_issue_5701_telemetry_surfaces_share_current_head_metadata() -> None:
     assert coverage["refreshed_at_utc"] == expected_refreshed_at
     assert slowest["refreshed_at_utc"] == expected_refreshed_at
     assert baseline["coverage"]["actual_percent"] == payload["coverage_actual_percent"]
-    assert baseline["duration_telemetry"]["total_cases"] == payload["slowest_total_cases"]
-    assert baseline["duration_telemetry"]["top_slowest_zones"][0] == payload["top_slow_zone"]
+    assert (
+        baseline["duration_telemetry"]["total_cases"] == payload["slowest_total_cases"]
+    )
+    assert (
+        baseline["duration_telemetry"]["top_slowest_zones"][0]
+        == payload["top_slow_zone"]
+    )
 
 
 def test_issues_5702_and_5704_legacy_test_topology_surfaces_stay_retired() -> None:
@@ -129,8 +136,9 @@ def test_issues_5702_and_5704_legacy_test_topology_surfaces_stay_retired() -> No
     assert issue_5702["helper_owner_path"] == "tests/unit/helpers/test_e2e_conftest.py"
     assert issue_5702["helper_owner_contains_timeout_contracts"] is True
     assert HELPER_OWNER.exists()
-    assert "test_windows_e2e_timeout_exceeds_inner_merge_budget" in HELPER_OWNER.read_text(
-        encoding="utf-8"
+    assert (
+        "test_windows_e2e_timeout_exceeds_inner_merge_budget"
+        in HELPER_OWNER.read_text(encoding="utf-8")
     )
 
     assert issue_5704["legacy_tests_infrastructure_files"] == []
@@ -173,15 +181,16 @@ def test_issue_5705_vcr_catalog_has_no_metadata_reviewed_backlog() -> None:
     assert payload["metadata_review_required_cassette_count"] == 0
     assert payload["unowned_cassette_count"] == 0
     assert not any(
-        cassette["reachability_status"] == "metadata_reviewed"
-        for cassette in cassettes
+        cassette["reachability_status"] == "metadata_reviewed" for cassette in cassettes
     )
-    assert catalog["totals"]["generated_reachable_cassette_count"] == payload[
-        "generated_reachable_cassette_count"
-    ]
-    assert catalog["totals"]["direct_reachable_cassette_count"] == payload[
-        "direct_reachable_cassette_count"
-    ]
+    assert (
+        catalog["totals"]["generated_reachable_cassette_count"]
+        == payload["generated_reachable_cassette_count"]
+    )
+    assert (
+        catalog["totals"]["direct_reachable_cassette_count"]
+        == payload["direct_reachable_cassette_count"]
+    )
 
 
 def test_issue_5706_coverage_tail_head_is_explicit_and_matches_inventory() -> None:
@@ -192,8 +201,13 @@ def test_issue_5706_coverage_tail_head_is_explicit_and_matches_inventory() -> No
 
     assert payload["under_85_count"] == len(under_85)
     assert payload["under_70_count"] == len(under_70)
-    assert payload["zero_coverage_count"] == inventory["summary"]["status_counts"]["uncovered"]
-    assert payload["unmeasured_count"] == inventory["summary"]["unmeasured_module_count"]
+    assert (
+        payload["zero_coverage_count"]
+        == inventory["summary"]["status_counts"]["uncovered"]
+    )
+    assert (
+        payload["unmeasured_count"] == inventory["summary"]["unmeasured_module_count"]
+    )
     assert payload["top_under_70_modules"] == [
         {
             "path": row["path"],

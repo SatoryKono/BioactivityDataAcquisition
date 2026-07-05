@@ -13,7 +13,9 @@ pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 CLOSEOUT = ROOT / "reports" / "quality" / "tech-debt-issues-5524-5528-closeout.json"
-COMPATIBILITY_CENSUS = ROOT / "reports" / "quality" / "compatibility-importer-census.json"
+COMPATIBILITY_CENSUS = (
+    ROOT / "reports" / "quality" / "compatibility-importer-census.json"
+)
 CONFIG_SURFACE_BACKLOG = ROOT / "reports" / "quality" / "config-surface-backlog.json"
 FILTER_METADATA_REGISTRY = (
     ROOT / "configs" / "quality" / "entity_filter_metadata_registry.yaml"
@@ -154,7 +156,9 @@ def test_issue_5526_module_coverage_warning_debt_is_replaced_with_reviewed_ratch
 ):
     gates_policy = _load_yaml(MODULE_COVERAGE_GATES)
     debt_gates = _load_json(DEBT_GATES)
-    gate_rows = {row["name"]: row for row in debt_gates["gates"] if isinstance(row, dict)}
+    gate_rows = {
+        row["name"]: row for row in debt_gates["gates"] if isinstance(row, dict)
+    }
     aggregate_ratchets = gates_policy["aggregate_residual_ratchets"]
 
     assert aggregate_ratchets["mode"] == "fail-fast-current-inventory"
@@ -195,6 +199,4 @@ def test_issue_5528_entrypoints_public_export_budget_is_ratchet_down() -> None:
 
     assert row["public_export_count"] == 13
     assert row["internal_callers_zero"] is True
-    assert (
-        inventory_row["public_export_contract"]["max_public_exports"] == 13
-    )
+    assert inventory_row["public_export_contract"]["max_public_exports"] == 13

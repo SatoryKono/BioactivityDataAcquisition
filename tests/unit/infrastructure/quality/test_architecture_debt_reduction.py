@@ -66,7 +66,9 @@ def test_build_execution_plan_classifies_and_orders_batches() -> None:
     assert "py-config-bot" in plan["tasks"][1]["supporting_agents"]
 
 
-def test_build_execution_plan_classifies_artifact_tasks_before_exemption_tasks() -> None:
+def test_build_execution_plan_classifies_artifact_tasks_before_exemption_tasks() -> (
+    None
+):
     payload = {
         "source_tasks_file": "tasks_architecture_metric_exemptions_2026-04-04-09-30.json",
         "tasks": [

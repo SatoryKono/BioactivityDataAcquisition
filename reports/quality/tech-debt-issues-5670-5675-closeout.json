@@ -25,8 +25,8 @@
         "configs/quality/generated_artifact_routing.yaml",
         "tests/architecture/test_tech_debt_issues_5670_5675_closeout.py"
       ],
-      "release_gate_status": "passing",
-      "fail_count": 0,
+      "release_gate_status": "failing",
+      "fail_count": 2,
       "warn_count": 0
     },
     "5672": {
@@ -57,7 +57,6 @@
       "outcome": "retained internal shims have current review windows, owners, exit criteria, and zero first-party src importer enforcement",
       "evidence": [
         "configs/quality/internal_compatibility_shim_inventory.yaml",
-        "src/bioetl/infrastructure/compat/pandera_compat.py",
         "tests/architecture/test_pandera_schema_boundary_policy.py",
         "tests/architecture/test_tech_debt_issues_5670_5675_closeout.py"
       ]

@@ -48,11 +48,15 @@ def _build_legacy_kwargs() -> dict[str, object]:
 def test_coerce_openalex_runtime_services_request_rejects_kwargs_with_request() -> None:
     request = OpenAlexRuntimeServicesRequest(**_build_legacy_kwargs())
 
-    with pytest.raises(TypeError, match="unexpected keyword arguments with request object"):
+    with pytest.raises(
+        TypeError, match="unexpected keyword arguments with request object"
+    ):
         _coerce_openalex_runtime_services_request(request, unexpected=True)
 
 
-def test_coerce_openalex_runtime_services_request_rejects_unexpected_legacy_kwargs() -> None:
+def test_coerce_openalex_runtime_services_request_rejects_unexpected_legacy_kwargs() -> (
+    None
+):
     kwargs = _build_legacy_kwargs()
     kwargs["unexpected"] = True
 
@@ -60,7 +64,9 @@ def test_coerce_openalex_runtime_services_request_rejects_unexpected_legacy_kwar
         _coerce_openalex_runtime_services_request(None, **kwargs)
 
 
-def test_coerce_openalex_runtime_services_request_builds_request_from_legacy_kwargs() -> None:
+def test_coerce_openalex_runtime_services_request_builds_request_from_legacy_kwargs() -> (
+    None
+):
     kwargs = _build_legacy_kwargs()
 
     request = _coerce_openalex_runtime_services_request(None, **kwargs)
@@ -73,7 +79,9 @@ def test_coerce_openalex_runtime_services_request_builds_request_from_legacy_kwa
     assert request.search_by_title is not None
 
 
-def test_build_openalex_runtime_services_from_request_alias_matches_primary_builder() -> None:
+def test_build_openalex_runtime_services_from_request_alias_matches_primary_builder() -> (
+    None
+):
     request = OpenAlexRuntimeServicesRequest(**_build_legacy_kwargs())
 
     via_primary = build_openalex_runtime_services(request)
@@ -89,4 +97,6 @@ def test_build_openalex_runtime_services_from_request_alias_matches_primary_buil
     assert via_alias.fallback_fetch_service is request.fallback_fetch_service
     assert via_alias.cursor_flow.query_executor is via_alias.query_executor
     assert via_alias.cursor_flow.response_mapper is via_alias.response_mapper
-    assert via_alias.fallback_orchestrator.fallback_handler is via_alias.fallback_handler
+    assert (
+        via_alias.fallback_orchestrator.fallback_handler is via_alias.fallback_handler
+    )

@@ -356,7 +356,9 @@ class TestFetchBySmiles:
     ):
         """The async chunk iterator can yield more records than the requested limit."""
 
-        async def fake_iter_chunk_records(chunk: list[str]) -> AsyncIterator[dict[str, int]]:
+        async def fake_iter_chunk_records(
+            chunk: list[str],
+        ) -> AsyncIterator[dict[str, int]]:
             assert chunk == ["CC", "CCC"]
             for molecule_id in (1, 2, 3):
                 yield {"molecule_id": molecule_id}
@@ -551,7 +553,9 @@ class TestFetchByInchiKey:
     ):
         """The InChIKey iterator enforces limits after records are yielded."""
 
-        async def fake_iter_chunk_records(chunk: list[str]) -> AsyncIterator[dict[str, int]]:
+        async def fake_iter_chunk_records(
+            chunk: list[str],
+        ) -> AsyncIterator[dict[str, int]]:
             assert chunk == [
                 "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
                 "LFQSCWFLJHTTHZ-UHFFFAOYSA-N",

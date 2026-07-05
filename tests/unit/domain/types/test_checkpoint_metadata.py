@@ -481,10 +481,7 @@ class TestCheckpointMetadata:
 
         payload = metadata.checkpoint_execution_identity_payload()
 
-        assert (
-            payload["silver_filter_compatibility_mode"]
-            == "structural_only_compat"
-        )
+        assert payload["silver_filter_compatibility_mode"] == "structural_only_compat"
         assert (
             metadata.checkpoint_execution_identity_fingerprint()
             != drifted.checkpoint_execution_identity_fingerprint()

@@ -15,7 +15,9 @@ from bioetl.domain.normalization._reference_id_openalex import (
 pytestmark = pytest.mark.unit
 
 
-def test_normalize_openalex_reference_id_preserves_non_text_and_missing_values() -> None:
+def test_normalize_openalex_reference_id_preserves_non_text_and_missing_values() -> (
+    None
+):
     sentinel = object()
 
     assert normalize_openalex_reference_id(None, prefix="W") is None

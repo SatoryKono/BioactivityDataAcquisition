@@ -24,11 +24,15 @@ def test_normalize_activity_converts_to_default_unit_and_computes_pchembl() -> N
     assert result.is_potent is True
 
 
-def test_normalize_activity_returns_invalid_result_for_validation_or_conversion_error() -> None:
+def test_normalize_activity_returns_invalid_result_for_validation_or_conversion_error() -> (
+    None
+):
     normalizer = BioactivityNormalizer()
 
     invalid_value = normalizer.normalize_activity(0.0, "nM", "IC50")
-    invalid_unit = normalizer.normalize_activity(10.0, "bad-unit", "IC50", validate=False)
+    invalid_unit = normalizer.normalize_activity(
+        10.0, "bad-unit", "IC50", validate=False
+    )
 
     assert invalid_value.is_valid is False
     assert invalid_value.validation_message == "Concentration cannot be zero"

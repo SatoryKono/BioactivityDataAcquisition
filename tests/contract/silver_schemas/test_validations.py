@@ -209,7 +209,8 @@ class TestEnumValidations:
             matching_fields = [
                 field
                 for field in fields.keys()
-                if field_pattern in field.lower() and not field.lower().endswith("_version")
+                if field_pattern in field.lower()
+                and not field.lower().endswith("_version")
             ]
 
             for field in matching_fields:

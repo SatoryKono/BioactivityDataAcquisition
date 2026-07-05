@@ -509,7 +509,9 @@ class TestHelperFunctions:
 
     def test_trace_missing_requirements_with_non_list(self):
         """Test _trace_missing_requirements with non-list."""
-        diagnostics = {"produced_artifact_trace": {"missing_requirements": "not_a_list"}}
+        diagnostics = {
+            "produced_artifact_trace": {"missing_requirements": "not_a_list"}
+        }
         result = _trace_missing_requirements(diagnostics)
         assert result == ()
 
@@ -564,9 +566,7 @@ class TestHelperFunctions:
         """Test _lineage_closure_payload with supported boundary."""
         mock_result = MagicMock()
         mock_result.manifest.manifest_id = "test-manifest"
-        mock_result.diagnostics = {
-            "lineage_closure_boundary": {"supported": True}
-        }
+        mock_result.diagnostics = {"lineage_closure_boundary": {"supported": True}}
 
         result = _lineage_closure_payload(mock_result)
         assert result["status"] == "supported"
@@ -576,9 +576,7 @@ class TestHelperFunctions:
         """Test _lineage_closure_payload with unsupported boundary."""
         mock_result = MagicMock()
         mock_result.manifest.manifest_id = "test-manifest"
-        mock_result.diagnostics = {
-            "lineage_closure_boundary": {"supported": False}
-        }
+        mock_result.diagnostics = {"lineage_closure_boundary": {"supported": False}}
 
         result = _lineage_closure_payload(mock_result)
         assert result["status"] == "unsupported"
@@ -743,7 +741,9 @@ class TestHelperFunctions:
 
         assert payload["verdict"] == "occurrence_only_replay"
 
-    def test_artifact_byte_equivalence_reports_missing_refs_when_port_cannot_compare(self):
+    def test_artifact_byte_equivalence_reports_missing_refs_when_port_cannot_compare(
+        self,
+    ):
         """Comparison should stay unavailable when either side lacks artifact refs."""
         mock_port = MagicMock()
         mock_result = MagicMock()

@@ -54,9 +54,9 @@ def test_issue_5974_time_seam_guards_are_extended() -> None:
 
     # Check for datetime.now in memory tooling
     memory_now_seams = [
-        s for s in seams
-        if s.get("call") == "datetime.now"
-        and "memory" in s.get("path", "")
+        s
+        for s in seams
+        if s.get("call") == "datetime.now" and "memory" in s.get("path", "")
     ]
     assert len(memory_now_seams) > 0, "Memory tooling datetime.now must be classified"
 
@@ -98,8 +98,12 @@ def test_issue_5976_duplicate_name_inventory_consolidated() -> None:
     assert len(outcome["actions_taken"]) > 0
 
     # Verify separate duplicate-name artifact does not exist
-    duplicate_name_artifact = ROOT / "reports" / "quality" / "test-duplicate-name-inventory.json"
-    assert not duplicate_name_artifact.exists(), "Separate duplicate-name artifact must be removed"
+    duplicate_name_artifact = (
+        ROOT / "reports" / "quality" / "test-duplicate-name-inventory.json"
+    )
+    assert not duplicate_name_artifact.exists(), (
+        "Separate duplicate-name artifact must be removed"
+    )
 
     # Verify main governance artifact exists
     main_artifact = ROOT / "reports" / "quality" / "test-governance-current.json"
@@ -107,7 +111,9 @@ def test_issue_5976_duplicate_name_inventory_consolidated() -> None:
 
     # Verify config references consolidated artifact
     test_governance_config = _load_yaml(TEST_GOVERNANCE_CONFIG)
-    evidence_paths = test_governance_config.get("issue_4172", {}).get("evidence_paths", [])
+    evidence_paths = test_governance_config.get("issue_4172", {}).get(
+        "evidence_paths", []
+    )
     assert "reports/quality/test-duplicate-name-inventory.json" not in evidence_paths
     # Note: test-governance-current.json is referenced in the main evidence section, not issue_4172
 

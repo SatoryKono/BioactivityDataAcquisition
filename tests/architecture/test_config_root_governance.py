@@ -11,9 +11,7 @@ pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = ROOT / "src" / "bioetl"
-CANONICAL_CONFIG_ROOT_HELPER = (
-    SRC_ROOT / "infrastructure" / "config" / "config_root.py"
-)
+CANONICAL_CONFIG_ROOT_HELPER = SRC_ROOT / "infrastructure" / "config" / "config_root.py"
 EFFECTIVE_CONFIG_SOURCE_REF_BUILDER = (
     ROOT
     / "src"
@@ -49,9 +47,7 @@ def _iter_assigned_names(target: ast.AST) -> tuple[str, ...]:
         return (target.id,)
     if isinstance(target, (ast.Tuple, ast.List)):
         return tuple(
-            name
-            for element in target.elts
-            for name in _iter_assigned_names(element)
+            name for element in target.elts for name in _iter_assigned_names(element)
         )
     return ()
 

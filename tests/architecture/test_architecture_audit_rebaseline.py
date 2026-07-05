@@ -10,13 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 CURRENT_RUNTIME_SURFACES = (
     ROOT / "src" / "bioetl" / "application" / "composite" / "merger.py",
-    ROOT
-    / "src"
-    / "bioetl"
-    / "application"
-    / "composite"
-    / "runner_pkg"
-    / "runner.py",
+    ROOT / "src" / "bioetl" / "application" / "composite" / "runner_pkg" / "runner.py",
     ROOT / "src" / "bioetl" / "domain" / "composite" / "state.py",
     ROOT
     / "src"
@@ -25,12 +19,7 @@ CURRENT_RUNTIME_SURFACES = (
     / "services"
     / "checkpoint_compatibility_service.py",
     ROOT / "src" / "bioetl" / "domain" / "transformations" / "hashing.py",
-    ROOT
-    / "src"
-    / "bioetl"
-    / "domain"
-    / "aggregates"
-    / "_pipeline_run_mixins.py",
+    ROOT / "src" / "bioetl" / "domain" / "aggregates" / "_pipeline_run_mixins.py",
     ROOT / "src" / "bioetl" / "domain" / "aggregates" / "_batch_lifecycle.py",
 )
 
@@ -57,9 +46,7 @@ def test_current_architecture_runtime_surfaces_exist() -> None:
 @pytest.mark.architecture
 def test_stale_audit_greenfield_and_legacy_paths_stay_absent() -> None:
     lingering = [
-        str(path.relative_to(ROOT))
-        for path in STALE_ASSUMPTION_PATHS
-        if path.exists()
+        str(path.relative_to(ROOT)) for path in STALE_ASSUMPTION_PATHS if path.exists()
     ]
     assert not lingering, (
         "Stale audit-only paths should stay absent so architecture checks remain "

@@ -420,9 +420,7 @@ def test_create_manifest_requires_dependency_lock_for_explicit_exact_replay() ->
     assert store.get("manifest-missing-lock") is None
 
 
-def test_create_manifest_requires_contract_identity_for_explicit_exact_replay() -> (
-    None
-):
+def test_create_manifest_requires_contract_identity_for_explicit_exact_replay() -> None:
     store = _InMemoryRunManifestStore()
     service = RunManifestService(
         manifest_port=store,

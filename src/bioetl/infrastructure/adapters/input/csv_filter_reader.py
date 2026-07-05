@@ -1,14 +1,13 @@
 """CSV Filter Reader adapter.
 
 Implements InputFilterPort for reading filter IDs from CSV files.
-Uses Polars for efficient CSV parsing with asyncio.to_thread for non-blocking I/O.
+Uses Polars for efficient CSV parsing.
 """
 
 from __future__ import annotations
 
 __all__ = ["CsvFilterReader"]
 
-import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -66,7 +65,7 @@ class CsvFilterReader:
         Returns:
             Loaded FilterLoadResult.
         """
-        df = await asyncio.to_thread(self._read_csv_dataframe, source_path)
+        df = self._read_csv_dataframe(source_path)
         all_ids = self._processor.extract_column_ids(df, column_name)
         unique_ids, unique_count, duplicate_count, duplicates = (
             self._processor.compute_duplicate_stats(all_ids)
@@ -110,7 +109,7 @@ class CsvFilterReader:
         Returns:
             Tuple of (FilterLoadResult, fallback_mapping).
         """
-        df = await asyncio.to_thread(self._read_csv_dataframe, source_path)
+        df = self._read_csv_dataframe(source_path)
 
         # Build fallback mapping and collect IDs (including empty placeholders)
         fallback_mapping: dict[str, str] = {}
@@ -198,7 +197,7 @@ class CsvFilterReader:
         Returns:
             FilterLoadResult with column_ids and valid_combinations.
         """
-        df = await asyncio.to_thread(self._read_csv_dataframe, source_path)
+        df = self._read_csv_dataframe(source_path)
         column_ids = self._processor.extract_column_ids_map(df, columns)
 
         column_names = [col.column_name for col in columns]

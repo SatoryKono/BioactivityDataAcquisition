@@ -18,7 +18,9 @@ MODULE_COVERAGE = ROOT / "reports" / "quality" / "module-coverage-inventory.json
 SCORECARD = ROOT / "reports" / "quality" / "architecture-quality-scorecard.json"
 DUPLICATION = ROOT / "reports" / "quality" / "full-app-duplication-baseline.json"
 COMPATIBILITY = ROOT / "reports" / "quality" / "compatibility-importer-census.json"
-COMPATIBILITY_REGISTRY = ROOT / "configs" / "quality" / "compatibility_facade_inventory.yaml"
+COMPATIBILITY_REGISTRY = (
+    ROOT / "configs" / "quality" / "compatibility_facade_inventory.yaml"
+)
 HOTSPOT_BASELINE = ROOT / "reports" / "quality" / "hotspot-family-baseline.json"
 TEST_GOVERNANCE_REPORT = ROOT / "reports" / "quality" / "test-governance-current.json"
 DEBT_SCORECARD = ROOT / "configs" / "quality" / "debt_scorecard.yaml"
@@ -110,7 +112,13 @@ def test_issue_5745_adapter_duplication_is_reduced() -> None:
     assert adapters["duplicate_count"] == outcome["adapter_duplicate_clusters"]
     assert adapters["duplicate_count"] < outcome["opening_adapter_duplicate_clusters"]
     assert (
-        ROOT / "src" / "bioetl" / "infrastructure" / "adapters" / "common" / "error_bundles.py"
+        ROOT
+        / "src"
+        / "bioetl"
+        / "infrastructure"
+        / "adapters"
+        / "common"
+        / "error_bundles.py"
     ).exists()
     assert (
         ROOT
@@ -141,7 +149,13 @@ def test_issue_5746_pipeline_duplication_is_reduced() -> None:
     assert pipelines["duplicate_count"] == outcome["pipeline_duplicate_clusters"]
     assert pipelines["duplicate_count"] < outcome["opening_pipeline_duplicate_clusters"]
     assert (
-        ROOT / "src" / "bioetl" / "application" / "pipelines" / "openalex" / "extractors.py"
+        ROOT
+        / "src"
+        / "bioetl"
+        / "application"
+        / "pipelines"
+        / "openalex"
+        / "extractors.py"
     ).exists()
 
 
@@ -153,18 +167,22 @@ def test_issue_5747_compatibility_surfaces_are_reviewed() -> None:
     summary = census["summary"]
 
     assert summary["retained_entrypoint_count"] == outcome["retained_entrypoint_count"]
-    assert summary["retained_public_entrypoint_burden"] == outcome[
-        "retained_public_entrypoint_burden"
-    ]
-    assert summary["retained_public_export_facade_count"] == outcome[
-        "retained_public_export_facade_count"
-    ]
-    assert summary["retained_public_export_facades_with_duplicate_exports"] == outcome[
-        "retained_public_export_facades_with_duplicate_exports"
-    ]
-    assert summary["retained_public_export_facades_with_resolution_conflicts"] == outcome[
-        "retained_public_export_facades_with_resolution_conflicts"
-    ]
+    assert (
+        summary["retained_public_entrypoint_burden"]
+        == outcome["retained_public_entrypoint_burden"]
+    )
+    assert (
+        summary["retained_public_export_facade_count"]
+        == outcome["retained_public_export_facade_count"]
+    )
+    assert (
+        summary["retained_public_export_facades_with_duplicate_exports"]
+        == outcome["retained_public_export_facades_with_duplicate_exports"]
+    )
+    assert (
+        summary["retained_public_export_facades_with_resolution_conflicts"]
+        == outcome["retained_public_export_facades_with_resolution_conflicts"]
+    )
     assert summary["twin_pair_count"] == outcome["twin_pair_count"]
 
     for row in registry["retained_entrypoints"]:
@@ -205,13 +223,23 @@ def test_issue_5749_test_debt_is_reduced() -> None:
     outcome = payload["outcomes"]["5749"]
     report = _load_json(TEST_GOVERNANCE_REPORT)["report"]
 
-    assert report["assertless_total_candidates"] == outcome["assertless_total_candidates"]
-    assert report["assertless_total_candidates"] <= outcome["opening_assertless_total_candidates"]
+    assert (
+        report["assertless_total_candidates"] == outcome["assertless_total_candidates"]
+    )
+    assert (
+        report["assertless_total_candidates"]
+        <= outcome["opening_assertless_total_candidates"]
+    )
     assert report["refined_assertless_tests"] == outcome["refined_assertless_tests"]
     assert report["compatibility_test_files"] == outcome["compatibility_test_files"]
     assert report["markerless_test_functions"] == outcome["markerless_test_functions"]
     assert (
-        ROOT / "tests" / "unit" / "infrastructure" / "observability" / "test_noop_logger.py"
+        ROOT
+        / "tests"
+        / "unit"
+        / "infrastructure"
+        / "observability"
+        / "test_noop_logger.py"
     ).exists()
 
 

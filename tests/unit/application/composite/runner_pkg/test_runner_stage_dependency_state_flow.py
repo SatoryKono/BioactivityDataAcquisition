@@ -27,14 +27,18 @@ class TestStartDependenciesPhase:
         assert result.state == CompositePipelineState.DEPENDENCIES_RUNNING
 
     @pytest.mark.asyncio
-    async def test_calls_host_record_dependencies_stage_started(self, mock_host, mock_state):
+    async def test_calls_host_record_dependencies_stage_started(
+        self, mock_host, mock_state
+    ):
         """Should call host._record_dependencies_stage_started with pipeline names."""
         await start_dependencies_phase(
             mock_host,
             mock_state,
             dependency_pipeline_names=["dep1", "dep2"],
         )
-        mock_host._record_dependencies_stage_started.assert_called_once_with(["dep1", "dep2"])
+        mock_host._record_dependencies_stage_started.assert_called_once_with(
+            ["dep1", "dep2"]
+        )
 
 
 class TestCompleteDependenciesPhase:

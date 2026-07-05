@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-import asyncio
+from collections.abc import AsyncIterator
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any
-from collections.abc import AsyncIterator
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -88,13 +87,11 @@ def fetch_strategies(
     mock_logger,
     rate_limiter,
     circuit_breaker,
-    thread_pool,
     request_collector,
     entity_mapper,
 ) -> PubChemFetchStrategies:
     async def run_in_executor(func, *args):
-        loop = asyncio.get_running_loop()
-        return await loop.run_in_executor(thread_pool, func, *args)
+        return func(*args)
 
     return PubChemFetchStrategies(
         logger=mock_logger,
@@ -129,6 +126,7 @@ def pubchem_adapter(
         entity_mapper=entity_mapper,
         fetch_strategies=fetch_strategies,
     )
+    adapter._run_in_executor = fetch_strategies._run_in_executor
     yield adapter
     # Thread pool cleanup is handled by thread_pool fixture
 

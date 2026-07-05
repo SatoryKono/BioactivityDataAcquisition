@@ -170,7 +170,7 @@ async def _merge_records_with_timeout(
         merge_condition=merge_condition,
         merge_schema=merge_schema,
     )
-    if isinstance(dt, Mock):
+    if isinstance(dt, Mock) and not isinstance(_await_blocking_deltalake_call, Mock):
         merge_callable()
         return
     try:

@@ -135,9 +135,7 @@ def test_coerce_bulk_certification_specs_rejects_malformed_payloads(
 def test_load_residual_dispositions_reads_optional_evidence_refs(
     historical_support_local_tmp_path: Path,
 ) -> None:
-    dispositions_path = (
-        historical_support_local_tmp_path / "residual-dispositions.json"
-    )
+    dispositions_path = historical_support_local_tmp_path / "residual-dispositions.json"
     dispositions_path.write_text(
         json.dumps(
             {

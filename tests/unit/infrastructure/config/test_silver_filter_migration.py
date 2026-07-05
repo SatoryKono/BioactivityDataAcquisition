@@ -34,5 +34,7 @@ def test_historical_auto_promote_mode_remains_readable() -> None:
 
 def test_unknown_silver_filter_compatibility_mode_fails_closed() -> None:
     """Unsupported mode names must not silently become structural-only defaults."""
-    with pytest.raises(ValueError, match="Unsupported silver_filter_compatibility_mode"):
+    with pytest.raises(
+        ValueError, match="Unsupported silver_filter_compatibility_mode"
+    ):
         normalize_silver_filter_compatibility_mode("legacy_semantic_silver")

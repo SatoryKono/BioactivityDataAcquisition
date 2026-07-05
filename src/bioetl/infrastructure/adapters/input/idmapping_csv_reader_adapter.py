@@ -28,15 +28,15 @@ class IDMappingCsvReaderAdapter:
         Returns:
             List of non-empty stripped ID strings from the specified column.
         """
-        return await asyncio.to_thread(self._read_ids_sync, source_path, id_column)
+        return self._read_ids_sync(source_path, id_column)
 
     async def source_exists(self, source_path: str) -> bool:
-        """Check source file existence in a worker thread.
+        """Check source file existence.
 
         Returns:
             True if the source file exists, False otherwise.
         """
-        return await asyncio.to_thread(Path(source_path).exists)
+        return Path(source_path).exists()
 
     async def health_check(self) -> HealthStatus:
         """Return health status for local CSV reader adapter.

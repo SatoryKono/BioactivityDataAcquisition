@@ -14,7 +14,9 @@ pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 CLOSEOUT = ROOT / "reports" / "quality" / "tech-debt-issues-5507-5509-closeout.json"
-CLI_CONFIG_BOOTSTRAP = ROOT / "src" / "bioetl" / "composition" / "bootstrap" / "cli" / "config.py"
+CLI_CONFIG_BOOTSTRAP = (
+    ROOT / "src" / "bioetl" / "composition" / "bootstrap" / "cli" / "config.py"
+)
 MAINTENANCE_SERVICE_ACCESS = (
     ROOT
     / "src"
@@ -88,7 +90,9 @@ def test_issue_5508_maintenance_cli_chain_no_longer_imports_retained_facade() ->
     assert _collect_exact_importers("bioetl.composition.maintenance_api") == set()
 
 
-def test_issue_5509_contract_policy_loader_no_longer_contains_compat_backfills() -> None:
+def test_issue_5509_contract_policy_loader_no_longer_contains_compat_backfills() -> (
+    None
+):
     source = CONTRACT_POLICY_LOADER.read_text(encoding="utf-8")
     assert "_apply_root_hash_policy_contract_overrides" not in source
     assert "_apply_rollout_defaults" not in source

@@ -12,7 +12,9 @@ pytestmark = pytest.mark.architecture
 
 def test_workflow_catalog_declares_inventory_boundary() -> None:
     """Workflow catalog must explicitly state it is inventory-only, not lifecycle/CLI guide."""
-    workflow_catalog = Path("docs/04-reference/workflow-catalog.md").read_text(encoding="utf-8")
+    workflow_catalog = Path("docs/04-reference/workflow-catalog.md").read_text(
+        encoding="utf-8"
+    )
 
     assert "Boundary:" in workflow_catalog
     assert "inventory" in workflow_catalog.lower()
@@ -32,7 +34,9 @@ def test_cli_reference_declares_command_boundary() -> None:
 
 def test_running_pipelines_declares_execution_boundary() -> None:
     """Running pipelines guide must explicitly state it owns execution flow, not CLI/inventory."""
-    running_pipelines = Path("docs/03-guides/running-pipelines.md").read_text(encoding="utf-8")
+    running_pipelines = Path("docs/03-guides/running-pipelines.md").read_text(
+        encoding="utf-8"
+    )
 
     assert "Boundary:" in running_pipelines
     assert "execution" in running_pipelines.lower()
@@ -42,7 +46,9 @@ def test_running_pipelines_declares_execution_boundary() -> None:
 
 def test_workflow_catalog_lacks_cli_examples() -> None:
     """Workflow catalog should not contain CLI command examples."""
-    workflow_catalog = Path("docs/04-reference/workflow-catalog.md").read_text(encoding="utf-8")
+    workflow_catalog = Path("docs/04-reference/workflow-catalog.md").read_text(
+        encoding="utf-8"
+    )
 
     # Should not have CLI command blocks
     assert "```bash" not in workflow_catalog
@@ -60,10 +66,15 @@ def test_cli_reference_lacks_workflow_inventory() -> None:
 
 def test_running_pipelines_lacks_workflow_inventory() -> None:
     """Running pipelines guide should not duplicate workflow inventory."""
-    running_pipelines = Path("docs/03-guides/running-pipelines.md").read_text(encoding="utf-8")
+    running_pipelines = Path("docs/03-guides/running-pipelines.md").read_text(
+        encoding="utf-8"
+    )
 
     # Should not duplicate workflow YAML contract
-    assert "schema_version" not in running_pipelines or "workflow:" not in running_pipelines
+    assert (
+        "schema_version" not in running_pipelines
+        or "workflow:" not in running_pipelines
+    )
 
 
 def test_quick_start_uses_correct_cli_description() -> None:

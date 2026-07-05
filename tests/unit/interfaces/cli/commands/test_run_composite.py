@@ -412,9 +412,7 @@ class TestRunCompositeCommand:
         mock_ensure_backend.assert_called_once_with(
             enabled=True,
             port=8081,
-            required_probe_paths=(
-                "/ops/control-plane/ready",
-            ),
+            required_probe_paths=("/ops/control-plane/ready",),
         )
 
     def test_run_composite_command__successful_execution__9a97129e(

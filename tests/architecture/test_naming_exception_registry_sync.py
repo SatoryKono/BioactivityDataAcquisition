@@ -103,12 +103,16 @@ def _extract_all_exports(path: Path) -> set[str]:
             for child_node in tree.body:
                 if isinstance(child_node, ast.Assign):
                     for target in child_node.targets:
-                        if isinstance(target, ast.Name) and target.id == "_ENTITY_IMPORTS":
+                        if (
+                            isinstance(target, ast.Name)
+                            and target.id == "_ENTITY_IMPORTS"
+                        ):
                             if isinstance(child_node.value, ast.Dict):
                                 return {
                                     key.value
                                     for key in child_node.value.keys
-                                    if isinstance(key, ast.Constant) and isinstance(key.value, str)
+                                    if isinstance(key, ast.Constant)
+                                    and isinstance(key.value, str)
                                 }
     return set()
 

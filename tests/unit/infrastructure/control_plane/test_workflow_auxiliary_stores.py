@@ -81,7 +81,9 @@ def _state(
     )
 
 
-def test_workflow_manifest_store_round_trip_and_conflicting_run_id(tmp_path: Path) -> None:
+def test_workflow_manifest_store_round_trip_and_conflicting_run_id(
+    tmp_path: Path,
+) -> None:
     store = FileWorkflowManifestStore(base_path=tmp_path / "workflow_manifest")
     workflow_run_id = _run_id("00000000-0000-0000-0000-000000000101")
     manifest = _manifest(
@@ -124,7 +126,9 @@ def test_workflow_manifest_store_rolls_back_manifest_file_when_run_index_write_f
             raise OSError("boom")
         original(path, payload)
 
-    monkeypatch.setattr(manifest_store_module, "atomic_write_text", _failing_atomic_write)
+    monkeypatch.setattr(
+        manifest_store_module, "atomic_write_text", _failing_atomic_write
+    )
 
     with pytest.raises(Exception) as exc_info:
         store.save(manifest)
@@ -324,7 +328,7 @@ def test_artifact_lifecycle_payload_helpers_cover_identity_and_fallback_branches
     tmp_path: Path,
 ) -> None:
     jsonl_path = tmp_path / "artifact.jsonl"
-    jsonl_path.write_text("\n{\"manifest_id\": \"m-1\"}\n", encoding="utf-8")
+    jsonl_path.write_text('\n{"manifest_id": "m-1"}\n', encoding="utf-8")
 
     assert (
         lifecycle_payloads_module._read_json_object_or_empty(tmp_path / "artifact.txt")
@@ -357,26 +361,38 @@ def test_artifact_lifecycle_payload_helpers_cover_identity_and_fallback_branches
     index_path.parent.mkdir(parents=True, exist_ok=True)
     index_path.write_text("index", encoding="utf-8")
 
-    assert lifecycle_payloads_module._artifact_id(
-        surface=ControlPlaneArtifactSurface.RUN_MANIFEST,
-        path=tmp_path / "manifest.json",
-        payload=payload,
-    ) == "manifest-1"
-    assert lifecycle_payloads_module._artifact_id(
-        surface=ControlPlaneArtifactSurface.EFFECTIVE_CONFIG,
-        path=tmp_path / "effective.json",
-        payload=payload,
-    ) == "effective-1"
-    assert lifecycle_payloads_module._artifact_id(
-        surface=ControlPlaneArtifactSurface.LINEAGE,
-        path=tmp_path / "fragment.json",
-        payload=payload,
-    ) == "fragment-stored"
-    assert lifecycle_payloads_module._artifact_id(
-        surface=ControlPlaneArtifactSurface.CHECKPOINT,
-        path=tmp_path / "checkpoint.json",
-        payload={"metadata": {"run_id": "run-meta"}},
-    ) == "run-meta"
+    assert (
+        lifecycle_payloads_module._artifact_id(
+            surface=ControlPlaneArtifactSurface.RUN_MANIFEST,
+            path=tmp_path / "manifest.json",
+            payload=payload,
+        )
+        == "manifest-1"
+    )
+    assert (
+        lifecycle_payloads_module._artifact_id(
+            surface=ControlPlaneArtifactSurface.EFFECTIVE_CONFIG,
+            path=tmp_path / "effective.json",
+            payload=payload,
+        )
+        == "effective-1"
+    )
+    assert (
+        lifecycle_payloads_module._artifact_id(
+            surface=ControlPlaneArtifactSurface.LINEAGE,
+            path=tmp_path / "fragment.json",
+            payload=payload,
+        )
+        == "fragment-stored"
+    )
+    assert (
+        lifecycle_payloads_module._artifact_id(
+            surface=ControlPlaneArtifactSurface.CHECKPOINT,
+            path=tmp_path / "checkpoint.json",
+            payload={"metadata": {"run_id": "run-meta"}},
+        )
+        == "run-meta"
+    )
     assert lifecycle_payloads_module._effective_config_artifact_id(payload) == "cfg-123"
     assert lifecycle_payloads_module._input_snapshot_ids(payload) == ("snap-a",)
     assert lifecycle_payloads_module._payload_text(payload, "run_id") == "run-meta"

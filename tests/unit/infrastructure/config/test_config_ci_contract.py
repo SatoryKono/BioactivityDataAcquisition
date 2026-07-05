@@ -38,16 +38,19 @@ def test_provider_and_filter_contracts_expose_required_policy_fields() -> None:
 
 def test_extraction_param_allowlist_is_narrowed_by_entity_surface() -> None:
     """Entity-scoped extraction allowlist should retain explicit chembl-only keys."""
-    activity_allowlist = config_ci_contract.EXTRACTION_PARAM_ALLOWLIST["chembl/activity"]
+    activity_allowlist = config_ci_contract.EXTRACTION_PARAM_ALLOWLIST[
+        "chembl/activity"
+    ]
     assay_allowlist = config_ci_contract.EXTRACTION_PARAM_ALLOWLIST["chembl/assay"]
 
     assert "standard_type__in" in activity_allowlist
     assert "standard_units" in activity_allowlist
     assert "confidence_score__gte" in assay_allowlist
     assert "target_chembl_id__isnull" in assay_allowlist
-    assert "tax_id__isnull" in config_ci_contract.EXTRACTION_PARAM_ALLOWLIST[
-        "chembl/target"
-    ]
+    assert (
+        "tax_id__isnull"
+        in config_ci_contract.EXTRACTION_PARAM_ALLOWLIST["chembl/target"]
+    )
 
 
 def test_module_exports_cover_public_config_ci_contract_surface() -> None:

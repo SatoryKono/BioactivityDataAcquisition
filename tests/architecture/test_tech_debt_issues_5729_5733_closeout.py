@@ -141,6 +141,5 @@ def test_issue_5733_heavy_runtime_mode_bootstrap_tests_are_removed_from_hotspot_
     for removed_test_name in outcome["removed_full_bootstrap_tests"]:
         assert removed_test_name not in text
     assert not any(
-        row["test"] == outcome["retired_hotspot_test"]
-        for row in slowest["top_slowest"]
+        row["test"] == outcome["retired_hotspot_test"] for row in slowest["top_slowest"]
     )

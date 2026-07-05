@@ -316,7 +316,9 @@ def test_retained_zero_import_rows_have_owner_test_evidence() -> None:
         )
         assert int(row["owner_test_count"]) == int(
             row["owner_test_paths_exist_count"]
-        ), f"Owner-test paths drifted for repo-wide zero-import candidate: {row['path']}"
+        ), (
+            f"Owner-test paths drifted for repo-wide zero-import candidate: {row['path']}"
+        )
 
     triaged_rows = inventory["triaged_entries"]
     assert isinstance(triaged_rows, list)
@@ -339,7 +341,9 @@ def test_retained_zero_import_rows_have_owner_test_evidence() -> None:
     retained_triage_count = sum(
         1 for row in triaged_rows if row.get("disposition") == "retain_active"
     )
-    assert summary["triaged_retained_owner_test_anchored_count"] == retained_triage_count
+    assert (
+        summary["triaged_retained_owner_test_anchored_count"] == retained_triage_count
+    )
 
 
 def test_dead_code_inventory_artifacts_are_committed_and_current() -> None:

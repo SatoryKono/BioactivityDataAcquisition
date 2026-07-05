@@ -21,9 +21,9 @@ def resolve_scripts_inventory_json_timeout_seconds(
 ) -> float:
     """Return subprocess timeout for ``check_scripts_inventory.py --json`` smoke tests.
 
-    The JSON stdout path skips repository-wide reference discovery, but Windows
-  runs on slow repo mounts still need more headroom than the default 60s helper
-    budget for Python startup and script enumeration.
+      The JSON stdout path skips repository-wide reference discovery, but Windows
+    runs on slow repo mounts still need more headroom than the default 60s helper
+      budget for Python startup and script enumeration.
     """
     if platform == "win32":
         return 180.0

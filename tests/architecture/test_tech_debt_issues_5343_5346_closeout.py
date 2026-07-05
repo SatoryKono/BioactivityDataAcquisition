@@ -79,9 +79,9 @@ def test_date_only_inventory_burn_down_is_bounded_to_remaining_reviewed_surfaces
     None
 ):
     policy = yaml.safe_load(
-        (
-            ROOT / "configs" / "quality" / "determinism_identity_policy.yaml"
-        ).read_text(encoding="utf-8")
+        (ROOT / "configs" / "quality" / "determinism_identity_policy.yaml").read_text(
+            encoding="utf-8"
+        )
     )
     hash_policy = cast(dict[str, Any], policy["content_hash_datetime_policy"])
     inventory = cast(list[dict[str, Any]], hash_policy["date_only_entity_inventory"])

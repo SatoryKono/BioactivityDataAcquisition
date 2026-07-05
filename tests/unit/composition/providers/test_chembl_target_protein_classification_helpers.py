@@ -19,16 +19,13 @@ pytestmark = pytest.mark.unit
 
 def test_target_and_component_helpers_normalize_mixed_payloads() -> None:
     assert helpers.target_id_from_record({"target_id": " CHEMBL1 "}) == "CHEMBL1"
-    assert (
-        helpers.target_id_from_record({"target_chembl_id": " CHEMBL2 "})
-        == "CHEMBL2"
-    )
+    assert helpers.target_id_from_record({"target_chembl_id": " CHEMBL2 "}) == "CHEMBL2"
     assert helpers.target_id_from_record({"target_id": " "}) is None
 
     component_ids = helpers.component_ids_from_target_record(
         {
             "target_components": '[{"component_id": "10"}, {"component_id": 11}]',
-            "component_ids": "[11, 12.0, 0, false, \"bad\"]",
+            "component_ids": '[11, 12.0, 0, false, "bad"]',
             "primary_component_id": "13",
         }
     )
@@ -48,7 +45,7 @@ def test_target_and_component_helpers_normalize_mixed_payloads() -> None:
 
 
 def test_leaf_id_helpers_accept_json_objects_and_reject_bad_json() -> None:
-    assert helpers.leaf_ids_from_value("[1, \"2\", 2, 3.0, 3.5, 0, false]") == (
+    assert helpers.leaf_ids_from_value('[1, "2", 2, 3.0, 3.5, 0, false]') == (
         1,
         2,
         3,

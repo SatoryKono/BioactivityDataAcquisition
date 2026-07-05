@@ -115,8 +115,7 @@ def test_silver_gold_filter_parity_bounds_silver_widening_to_semantic_rejects() 
 
     assert report["verdict"] == "fail"
     assert (
-        report["checks"]["silver_widening_bounded_to_legacy_semantic_rejects"]
-        is False
+        report["checks"]["silver_widening_bounded_to_legacy_semantic_rejects"] is False
     )
     assert report["silver_widening"]["unbounded_added_pks"] == [["activity", "A99"]]
 
@@ -133,7 +132,10 @@ def test_silver_gold_filter_parity_rejects_source_profile_drift() -> None:
 
 
 def test_silver_gold_filter_parity_public_builder_uses_default_fixture() -> None:
-    assert build_parity_report(SILVER_GOLD_PARITY_FIXTURE) == load_silver_gold_parity_report()
+    assert (
+        build_parity_report(SILVER_GOLD_PARITY_FIXTURE)
+        == load_silver_gold_parity_report()
+    )
     assert SILVER_GOLD_PARITY_REPORT.name == "silver-gold-filter-parity-report.json"
 
 

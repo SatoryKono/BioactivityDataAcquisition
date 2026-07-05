@@ -45,8 +45,7 @@ def _imported_modules_by_path(
             continue
         modules_by_path.setdefault(record.path, set()).add(record.module)
     return {
-        path: frozenset(module_names)
-        for path, module_names in modules_by_path.items()
+        path: frozenset(module_names) for path, module_names in modules_by_path.items()
     }
 
 

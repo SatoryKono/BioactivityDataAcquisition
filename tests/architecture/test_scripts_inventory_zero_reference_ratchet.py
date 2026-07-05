@@ -36,7 +36,9 @@ def test_zero_reference_supporting_scripts_are_triaged_and_ratcheted() -> None:
     assert isinstance(metrics, dict)
 
     zero_ref_budget = metrics.get("zero_reference_supporting_script_count", {})
-    untriaged_budget = metrics.get("untriaged_zero_reference_supporting_script_count", {})
+    untriaged_budget = metrics.get(
+        "untriaged_zero_reference_supporting_script_count", {}
+    )
     assert isinstance(zero_ref_budget, dict)
     assert isinstance(untriaged_budget, dict)
 

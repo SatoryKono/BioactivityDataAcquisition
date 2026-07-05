@@ -38,7 +38,5 @@ def test_python_reference_scan_prefers_longest_overlapping_token(
         ],
     )
 
-    assert owners[long_token] == {
-        "scan/openalex_owner.py"
-    }
+    assert owners[long_token] == {"scan/openalex_owner.py"}
     assert owners[short_token] == {"scan/pubmed_owner.py"}

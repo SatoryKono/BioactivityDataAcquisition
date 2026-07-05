@@ -10,6 +10,7 @@ from tests.architecture import conftest as architecture_conftest
 
 pytestmark = pytest.mark.unit
 
+
 def _write_cache_payload(path: Path, payload: dict[str, object]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("wb") as handle:
@@ -31,7 +32,9 @@ def test_load_subprocess_disk_cache_ignores_nonzero_returncodes(
         },
     )
 
-    assert architecture_conftest._load_subprocess_disk_cache(cache_path, command) is None
+    assert (
+        architecture_conftest._load_subprocess_disk_cache(cache_path, command) is None
+    )
 
 
 def test_load_subprocess_disk_cache_returns_successful_result(tmp_path: Path) -> None:
@@ -62,7 +65,13 @@ def test_store_subprocess_disk_cache_skips_nonzero_returncodes(tmp_path: Path) -
         cache_path,
         command=["python", "-m", "scripts.schema", "generate-config-matrix", "--check"],
         result=subprocess.CompletedProcess(
-            args=["python", "-m", "scripts.schema", "generate-config-matrix", "--check"],
+            args=[
+                "python",
+                "-m",
+                "scripts.schema",
+                "generate-config-matrix",
+                "--check",
+            ],
             returncode=1,
             stdout="[drift] mismatch",
             stderr="",

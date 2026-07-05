@@ -72,7 +72,9 @@ def _ledger_entry(
 
 def test_collect_ledger_input_snapshot_refs_filters_invalid_and_dedupes() -> None:
     valid = _ledger_entry("entry-b", snapshot_id="snap-b")
-    replacement = _ledger_entry("entry-a", snapshot_id="snap-b", content_hash="sha256:new")
+    replacement = _ledger_entry(
+        "entry-a", snapshot_id="snap-b", content_hash="sha256:new"
+    )
     missing_required = _ledger_entry("entry-c", immutable_uri=" ")
     unrelated = RunLedgerEntry(
         entry_id="entry-d",

@@ -110,9 +110,10 @@ def test_join_key_policy_registry_exposes_known_keys() -> None:
 
 
 def test_join_key_policy_registry_keeps_runtime_alias_keys() -> None:
-    assert JOIN_KEY_NORMALIZATION_POLICIES["pmcid"] == JOIN_KEY_NORMALIZATION_POLICIES[
-        "pmc_id"
-    ]
+    assert (
+        JOIN_KEY_NORMALIZATION_POLICIES["pmcid"]
+        == JOIN_KEY_NORMALIZATION_POLICIES["pmc_id"]
+    )
     assert (
         JOIN_KEY_NORMALIZATION_POLICIES["uniprot_id"]
         == JOIN_KEY_NORMALIZATION_POLICIES["uniprot_accession"]

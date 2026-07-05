@@ -30,7 +30,9 @@ def test_domain_io_taint_inventory_has_no_unreviewed_violations() -> None:
     assert payload["violations"] == []
 
 
-def test_domain_io_taint_inventory_records_explicit_schema_boundary_exceptions() -> None:
+def test_domain_io_taint_inventory_records_explicit_schema_boundary_exceptions() -> (
+    None
+):
     payload = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
     exception_kinds = {
         exception["kind"] for exception in payload.get("allowed_exceptions", [])

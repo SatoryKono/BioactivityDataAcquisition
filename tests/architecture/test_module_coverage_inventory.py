@@ -103,18 +103,18 @@ def _write_minimal_coverage_xml(
     path.parent.mkdir(parents=True, exist_ok=True)
     source_root = repo_root.as_posix()
     path.write_text(
-        "<?xml version=\"1.0\" ?>\n"
+        '<?xml version="1.0" ?>\n'
         "<coverage>\n"
         "  <sources>\n"
         f"    <source>{source_root}</source>\n"
         "  </sources>\n"
         "  <packages>\n"
-        "    <package name=\"bioetl\">\n"
+        '    <package name="bioetl">\n'
         "      <classes>\n"
-        "        <class name=\"bioetl.example\" filename=\"src/bioetl/example.py\">\n"
+        '        <class name="bioetl.example" filename="src/bioetl/example.py">\n'
         "          <lines>\n"
-        f"            <line number=\"1\" hits=\"{hits}\" />\n"
-        f"            <line number=\"2\" hits=\"{hits}\" />\n"
+        f'            <line number="1" hits="{hits}" />\n'
+        f'            <line number="2" hits="{hits}" />\n'
         "          </lines>\n"
         "        </class>\n"
         "      </classes>\n"
@@ -248,8 +248,7 @@ def test_module_coverage_inventory_check_fails_for_stale_source_tree_hash(
 
     module_path = source_root / "example.py"
     module_path.write_text(
-        "def example() -> int:\n"
-        "    return 1\n",
+        "def example() -> int:\n    return 1\n",
         encoding="utf-8",
     )
     json_out = repo_root / "reports" / "quality" / "module-coverage-inventory.json"
@@ -271,9 +270,7 @@ def test_module_coverage_inventory_check_fails_for_stale_source_tree_hash(
     assert create_exit == 0
 
     module_path.write_text(
-        "def example() -> int:\n"
-        "    value = 2\n"
-        "    return value\n",
+        "def example() -> int:\n    value = 2\n    return value\n",
         encoding="utf-8",
     )
 
@@ -307,8 +304,7 @@ def test_allow_missing_coverage_xml_preserves_existing_inventory_rows(
     shutil.copy2(GATES_PATH, quality_root / GATES_PATH.name)
 
     (source_root / "example.py").write_text(
-        "def example() -> int:\n"
-        "    return 1\n",
+        "def example() -> int:\n    return 1\n",
         encoding="utf-8",
     )
     json_out = repo_root / "reports" / "quality" / "module-coverage-inventory.json"
@@ -368,8 +364,7 @@ def test_existing_inventory_refresh_preserves_rows_unless_xml_refresh_is_explici
     shutil.copy2(GATES_PATH, quality_root / GATES_PATH.name)
 
     (source_root / "example.py").write_text(
-        "def example() -> int:\n"
-        "    return 1\n",
+        "def example() -> int:\n    return 1\n",
         encoding="utf-8",
     )
     json_out = repo_root / "reports" / "quality" / "module-coverage-inventory.json"
@@ -440,8 +435,7 @@ def test_existing_inventory_refresh_reconciles_source_module_paths(
     shutil.copy2(GATES_PATH, quality_root / GATES_PATH.name)
 
     (source_root / "example.py").write_text(
-        "def example() -> int:\n"
-        "    return 1\n",
+        "def example() -> int:\n    return 1\n",
         encoding="utf-8",
     )
     example_path = source_root / "example.py"
@@ -468,8 +462,7 @@ def test_existing_inventory_refresh_reconciles_source_module_paths(
     assert create_exit == 0
 
     (source_root / "added.py").write_text(
-        "def added() -> int:\n"
-        "    return 2\n",
+        "def added() -> int:\n    return 2\n",
         encoding="utf-8",
     )
     added_path = source_root / "added.py"
@@ -521,9 +514,8 @@ def test_module_coverage_inventory_reports_measured_hotspot_family_evidence() ->
             + family_row["allowlisted_unmeasured_module_count"]
             == family_row["module_count"]
         ), family_name
-        assert (
-            family_row["threshold_status"]
-            == _expected_hotspot_threshold_status(family_row)
+        assert family_row["threshold_status"] == _expected_hotspot_threshold_status(
+            family_row
         ), family_name
 
 
@@ -577,9 +569,8 @@ def test_hotspot_refactor_targets_have_authoritative_module_coverage_gates() -> 
     for family_name, thresholds in gated_families.items():
         family_row = hotspot_family_coverage[family_name]
         assert family_row["thresholds"] == thresholds
-        assert (
-            family_row["threshold_status"]
-            == _expected_hotspot_threshold_status(family_row)
+        assert family_row["threshold_status"] == _expected_hotspot_threshold_status(
+            family_row
         ), family_name
 
 
@@ -602,16 +593,27 @@ def test_issue_5376_coverage_tail_closeout_matches_live_inventory() -> None:
         historical_delta["before_below_85_module_count"]
     )
     tracked_path = closeout["removed_low_tail_module"]["path"]
-    tracked_row = next(row for row in committed["modules"] if row["path"] == tracked_path)
+    tracked_row = next(
+        row for row in committed["modules"] if row["path"] == tracked_path
+    )
 
     assert closeout["issue"]["number"] == 5376
     assert historical_delta["after_below_85_module_count"] == 104
     assert historical_delta["below_85_module_count_delta"] == delta
     assert delta < 0
     assert current_live["below_85_module_count"] == len(below_85)
-    assert current_live["uncovered_module_count"] == committed["summary"]["uncovered_module_count"]
-    assert current_live["unmeasured_module_count"] == committed["summary"]["unmeasured_module_count"]
-    assert tracked_row["coverage_percent"] == current_live["tracked_module_coverage_percent"]
+    assert (
+        current_live["uncovered_module_count"]
+        == committed["summary"]["uncovered_module_count"]
+    )
+    assert (
+        current_live["unmeasured_module_count"]
+        == committed["summary"]["unmeasured_module_count"]
+    )
+    assert (
+        tracked_row["coverage_percent"]
+        == current_live["tracked_module_coverage_percent"]
+    )
     assert tracked_row["coverage_status"] == current_live["tracked_module_status"]
     assert closeout["closeout"]["status"] == "regressed_after_closeout"
     assert tracked_path not in below_85_paths

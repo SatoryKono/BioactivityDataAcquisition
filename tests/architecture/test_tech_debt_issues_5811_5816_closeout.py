@@ -15,6 +15,7 @@ from scripts.engineering.qa import report_observability_metric_inventory as inve
 from scripts.engineering.qa.import_graph_inventory import (
     collect_exact_module_import_usage,
 )
+
 # PhasedMigrationCoordinator removed - retired shim (2026-07-03)
 from bioetl.domain.behavior.staged_enforcement import StagedEnforcementEngine
 from bioetl.infrastructure.config.staged_enforcement_policy_loader import (
@@ -25,7 +26,9 @@ pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 CLOSEOUT = ROOT / "reports" / "quality" / "tech-debt-issues-5811-5816-closeout.json"
-PHASED_MIGRATION_DOC = ROOT / "docs" / "04-reference" / "components" / "phased-migration.md"
+PHASED_MIGRATION_DOC = (
+    ROOT / "docs" / "04-reference" / "components" / "phased-migration.md"
+)
 STAGED_ENFORCEMENT_REGISTRY = (
     ROOT / "configs" / "quality" / "staged_enforcement_policy_registry.yaml"
 )
@@ -73,8 +76,10 @@ def test_issue_5811_closeout_artifact_covers_all_child_issues() -> None:
 def test_issue_5812_phased_migration_support_is_retired_compat_shim() -> None:
     # PhasedMigrationCoordinator removed - retired shim (2026-07-03)
     # Verify module file is removed
-    assert not (ROOT / "src" / "bioetl" / "domain" / "behavior" / "phased_migration_support.py").exists()
-    
+    assert not (
+        ROOT / "src" / "bioetl" / "domain" / "behavior" / "phased_migration_support.py"
+    ).exists()
+
     # Verify import fails
     with pytest.raises(ImportError):
         from bioetl.domain.behavior.phased_migration_support import (

@@ -6,7 +6,9 @@ from datetime import UTC, datetime
 
 import pytest
 
-from bioetl.application.services.lineage import metadata_lineage_fragment_ids as fragment_ids
+from bioetl.application.services.lineage import (
+    metadata_lineage_fragment_ids as fragment_ids,
+)
 
 pytestmark = pytest.mark.unit
 

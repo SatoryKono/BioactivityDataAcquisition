@@ -110,7 +110,9 @@ def test_config_helpers_use_source_config_backed_defaults(
     assert helpers._get_batch_size_from_config("chembl") == 321
     assert helpers._get_rate_limit_from_config("chembl").rate == 2.5
     assert helpers._get_rate_limit_from_config("chembl").capacity == 9
-    assert helpers._get_rate_limits_from_config("chembl", "pubchem")["pubchem"].rate == 2.5
+    assert (
+        helpers._get_rate_limits_from_config("chembl", "pubchem")["pubchem"].rate == 2.5
+    )
     assert helpers._get_circuit_breaker_from_config("chembl").failure_threshold == 4
     assert helpers._get_circuit_breaker_from_config("chembl").recovery_timeout == 45
     assert helpers._get_adapter_config("chembl", default_page_size=777) == (
@@ -142,7 +144,9 @@ def test_config_helpers_fall_back_when_source_config_missing(
     assert helpers._get_rate_limit_from_config("missing").rate == 5.0
     assert helpers._get_rate_limit_from_config("missing").capacity == 10
     assert helpers._get_circuit_breaker_from_config("missing").failure_threshold == 5
-    assert helpers._get_adapter_config("missing", default_page_size=123).page_size == 123
+    assert (
+        helpers._get_adapter_config("missing", default_page_size=123).page_size == 123
+    )
 
     no_provider = SimpleNamespace(provider_name=" ")
     helpers._wire_composable_fallback(no_provider)

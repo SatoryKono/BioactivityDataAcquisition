@@ -35,7 +35,7 @@ Refresh reason: #5752 - Correct stale claims and align with current governance b
 || Contract coverage | Gold-enabled coverage is 27/27; missing count `0`. | `reports/quality/contract-coverage-matrix.json` |
 || Silver/Gold parity | Overall status `pass`; failing scenarios `[]`. | `reports/quality/silver-gold-filter-parity-report.json` |
 || VCR inventory | 198 VCR cassettes, 198 metadata sidecars, 0 review-required cassettes, and 0 unowned cassettes. | `reports/quality/vcr-metadata-catalog.json` |
-|| Test governance | 21,784 test functions, 1,930 test files, 1 duplicate test name, 0 markerless test functions, 0 compatibility test files. | `reports/quality/test-governance-current.json` |
+|| Test governance | 21,786 test functions, 1,935 test files, 1 duplicate test name, 0 markerless test functions, 0 compatibility test files. | `reports/quality/test-governance-current.json` |
 || Observability governance | 45 recording-rule metrics and 48 declared label-contract metrics; runtime cardinality and unused signal policies exist; all dashboarded metrics are now declared. | `configs/quality/observability_metric_declarations.yaml`, `configs/quality/observability_metric_governance.yaml` |
 
 ## Corrections from Previous Audit

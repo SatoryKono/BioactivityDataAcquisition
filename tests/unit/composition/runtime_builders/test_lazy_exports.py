@@ -24,7 +24,9 @@ def test_build_pipeline_runner_lazy_export_delegates(monkeypatch) -> None:
         fake_build_pipeline_runner,
     )
 
-    assert runtime_builders.build_pipeline_runner("ctx", registry="registry") == "runner"
+    assert (
+        runtime_builders.build_pipeline_runner("ctx", registry="registry") == "runner"
+    )
     assert calls == [(("ctx",), {"registry": "registry"})]
 
 

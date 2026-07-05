@@ -15,7 +15,9 @@ MODULE_COVERAGE_ARTIFACT = (
 DUPLICATION_BASELINE_ARTIFACT = (
     ROOT / "reports" / "quality" / "full-app-duplication-baseline.json"
 )
-HOTSPOT_BASELINE_ARTIFACT = ROOT / "reports" / "quality" / "hotspot-family-baseline.json"
+HOTSPOT_BASELINE_ARTIFACT = (
+    ROOT / "reports" / "quality" / "hotspot-family-baseline.json"
+)
 TEST_GOVERNANCE_ARTIFACT = ROOT / "reports" / "quality" / "test-governance-current.json"
 SCORECARD_REFRESH_HINT = (
     "Refresh architecture artifacts with: "
@@ -189,9 +191,9 @@ def test_architecture_quality_scorecard_includes_duplication_hotspot_and_test_go
 
     hotspot_artifact = committed["source_artifacts"]["hotspot_family_baseline"]
     assert hotspot_artifact["path"] == "reports/quality/hotspot-family-baseline.json"
-    assert (
-        hotspot_artifact["snapshot_date"] == hotspot["summary"]["snapshot_date"]
-    ), SCORECARD_REFRESH_HINT
+    assert hotspot_artifact["snapshot_date"] == hotspot["summary"]["snapshot_date"], (
+        SCORECARD_REFRESH_HINT
+    )
     assert (
         hotspot_artifact["budget_warnings"] == hotspot["summary"]["budget_warnings"]
     ), SCORECARD_REFRESH_HINT

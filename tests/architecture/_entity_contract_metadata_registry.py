@@ -9,9 +9,7 @@ from typing import Any
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
-REGISTRY_PATH = (
-    ROOT / "configs" / "quality" / "entity_contract_metadata_registry.yaml"
-)
+REGISTRY_PATH = ROOT / "configs" / "quality" / "entity_contract_metadata_registry.yaml"
 
 
 def load_shared_quality_metadata(config_path: str) -> dict[str, Any]:

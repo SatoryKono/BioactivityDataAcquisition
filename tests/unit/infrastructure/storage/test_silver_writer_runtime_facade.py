@@ -35,7 +35,9 @@ class _Facade(SilverWriterRuntimeFacade):
         self._should_dual_write = MagicMock(return_value=False)
         self._write_single_target = AsyncMock(return_value="single")
         self._write_dual_targets = AsyncMock(return_value="dual")
-        self._prepare_silver_write_payload = AsyncMock(return_value=_Payload(records=[]))
+        self._prepare_silver_write_payload = AsyncMock(
+            return_value=_Payload(records=[])
+        )
 
 
 @pytest.mark.unit
@@ -55,7 +57,9 @@ class TestSilverWriterRuntimeFacade:
     async def test_complete_pipeline_requires_postwrite_operations(self) -> None:
         facade = _Facade()
         ctx = MagicMock(spec=_SilverWriteExecutionContext)
-        with pytest.raises(RuntimeError, match="Silver postwrite operations are required"):
+        with pytest.raises(
+            RuntimeError, match="Silver postwrite operations are required"
+        ):
             await facade._complete_silver_write_pipeline(
                 ctx=ctx,
                 payload=_Payload(records=[]),
@@ -97,13 +101,16 @@ class TestSilverWriterRuntimeFacade:
         invocation = MagicMock()
         ctx = MagicMock(spec=_SilverWriteExecutionContext)
 
-        with patch(
-            "bioetl.infrastructure.storage.silver.writer_runtime_facade._write_merged_metadata_via_operations",
-            new=AsyncMock(),
-        ) as write_merged, patch(
-            "bioetl.infrastructure.storage.silver.writer_runtime_facade.execute_silver_write_pipeline",
-            new=AsyncMock(return_value="done"),
-        ) as execute_pipeline:
+        with (
+            patch(
+                "bioetl.infrastructure.storage.silver.writer_runtime_facade._write_merged_metadata_via_operations",
+                new=AsyncMock(),
+            ) as write_merged,
+            patch(
+                "bioetl.infrastructure.storage.silver.writer_runtime_facade.execute_silver_write_pipeline",
+                new=AsyncMock(return_value="done"),
+            ) as execute_pipeline,
+        ):
             await facade._write_silver_merged_metadata(
                 table_path="/tmp/silver/chembl/activity",
                 table_name="chembl.activity",

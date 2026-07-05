@@ -333,6 +333,7 @@ def test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stal
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     import sys
+
     monkeypatch.delitem(sys.modules, "pytest", raising=False)
     monkeypatch.delenv("PYTEST_CURRENT_TEST", raising=False)
     monkeypatch.setattr(

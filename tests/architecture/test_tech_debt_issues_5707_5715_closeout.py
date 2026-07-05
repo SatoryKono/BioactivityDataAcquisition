@@ -27,16 +27,25 @@ TELEMETRY_BASELINE = ROOT / "configs" / "quality" / "test_telemetry_baseline.yam
 TELEMETRY_COVERAGE = ROOT / "reports" / "test-telemetry" / "coverage-summary.json"
 TELEMETRY_SLOWEST = ROOT / "reports" / "test-telemetry" / "slowest-tests.json"
 DELEGATION_HELPER = (
-    ROOT / "src" / "bioetl" / "infrastructure" / "adapters" / "decorators"
+    ROOT
+    / "src"
+    / "bioetl"
+    / "infrastructure"
+    / "adapters"
+    / "decorators"
     / "_data_source_delegation.py"
 )
 CIRCUIT_BREAKER = (
-    ROOT / "src" / "bioetl" / "infrastructure" / "adapters" / "decorators"
+    ROOT
+    / "src"
+    / "bioetl"
+    / "infrastructure"
+    / "adapters"
+    / "decorators"
     / "circuit_breaker.py"
 )
 RETRY = (
-    ROOT / "src" / "bioetl" / "infrastructure" / "adapters" / "decorators"
-    / "retry.py"
+    ROOT / "src" / "bioetl" / "infrastructure" / "adapters" / "decorators" / "retry.py"
 )
 
 EXPECTED_ISSUES = {5707, 5708, 5709, 5710, 5711, 5712, 5713, 5714, 5715}
@@ -169,9 +178,9 @@ def test_issue_5708_adapter_delegation_duplication_is_bounded() -> None:
         adapters["duplicate_count"]
         <= outcome["adapter_duplicate_clusters_no_growth_max"]
     )
-    assert {
-        row["category"] for row in adapters["actionability"]
-    } == set(outcome["bounded_actionability_categories"])
+    assert {row["category"] for row in adapters["actionability"]} == set(
+        outcome["bounded_actionability_categories"]
+    )
 
 
 def test_issue_5709_pipeline_transformer_duplication_is_reduced() -> None:
@@ -193,8 +202,7 @@ def test_issue_5709_pipeline_transformer_duplication_is_reduced() -> None:
         }
     ]
     assert (
-        outcome["decision"]
-        == "reduced_shared_uniprot_comment_annotation_output_keys"
+        outcome["decision"] == "reduced_shared_uniprot_comment_annotation_output_keys"
     )
 
 
@@ -239,15 +247,18 @@ def test_issue_5711_coverage_tail_is_zero_unmeasured_and_owner_anchored() -> Non
     assert summary["source_module_count"] == outcome["source_module_count"]
     assert summary["unmeasured_module_count"] == outcome["unmeasured_module_count"]
     assert summary["uncovered_module_count"] == outcome["uncovered_module_count"]
-    assert summary["status_counts"]["no_executable_lines"] == outcome[
-        "no_executable_line_modules"
-    ]
+    assert (
+        summary["status_counts"]["no_executable_lines"]
+        == outcome["no_executable_line_modules"]
+    )
     # Skip source tree hash check for local development
     # assert coverage["source_tree_sha256"] == outcome["source_tree_sha256"]
     under_70 = _under_coverage_floor(coverage, threshold=70.0)
     assert outcome["under70_module_count_before"] == 18
     assert outcome["under70_module_count_after"] == len(under_70)
-    assert outcome["under70_module_count_after"] < outcome["under70_module_count_before"]
+    assert (
+        outcome["under70_module_count_after"] < outcome["under70_module_count_before"]
+    )
     assert (
         scorecard["metrics"]["unmeasured_module_count"]
         == outcome["unmeasured_module_count"]
@@ -287,12 +298,14 @@ def test_issue_5713_compatibility_test_debt_is_ratcheted() -> None:
     policy = _load_yaml(TEST_GOVERNANCE_POLICY)
 
     assert report["compatibility_test_files"] == outcome["compatibility_test_files"]
-    assert policy["budgets"]["compatibility_test_file_max"] == outcome[
-        "compatibility_test_file_max"
-    ]
-    assert report["compatibility_test_files"] <= policy["budgets"][
-        "compatibility_test_file_max"
-    ]
+    assert (
+        policy["budgets"]["compatibility_test_file_max"]
+        == outcome["compatibility_test_file_max"]
+    )
+    assert (
+        report["compatibility_test_files"]
+        <= policy["budgets"]["compatibility_test_file_max"]
+    )
     for key in (
         "duplicate_test_names",
         "duplicate_test_name_occurrences",
@@ -314,9 +327,10 @@ def test_issue_5714_dead_code_governance_has_no_untriaged_candidates() -> None:
             continue
         assert summary[key] == expected
 
-    assert dead_code["review_window"]["next_review_by"] == outcome[
-        "review_window_next_review_by"
-    ]
+    assert (
+        dead_code["review_window"]["next_review_by"]
+        == outcome["review_window_next_review_by"]
+    )
     assert summary["repo_wide_untriaged_zero_import_candidate_count"] == 0
     assert summary["repo_wide_candidates_without_owner_tests_count"] == 0
 
@@ -328,12 +342,14 @@ def test_issue_5715_no_growth_enforcement_gates_are_active() -> None:
     module_policy = _load_yaml(MODULE_COVERAGE_POLICY)
     test_policy = _load_yaml(TEST_GOVERNANCE_POLICY)
 
-    assert _gate(gates, "debt_budget_growth_policy")["current"] is outcome[
-        "debt_budget_growth_allowed"
-    ]
-    assert _gate(gates, "debt_scorecard_budget_violations")["current"] == outcome[
-        "debt_scorecard_budget_violations"
-    ]
+    assert (
+        _gate(gates, "debt_budget_growth_policy")["current"]
+        is outcome["debt_budget_growth_allowed"]
+    )
+    assert (
+        _gate(gates, "debt_scorecard_budget_violations")["current"]
+        == outcome["debt_scorecard_budget_violations"]
+    )
     assert (
         module_policy["aggregate_residual_ratchets"]["unmeasured_module_count"][
             "max_count"
@@ -346,11 +362,13 @@ def test_issue_5715_no_growth_enforcement_gates_are_active() -> None:
         ]
         == outcome["module_coverage_uncovered_limit"]
     )
-    assert test_policy["budgets"]["compatibility_test_file_max"] == outcome[
-        "compatibility_test_file_max"
-    ]
-    assert _gate(gates, "production_uuid4_budget")["current"] == outcome[
-        "production_uuid4_budget"
-    ]
+    assert (
+        test_policy["budgets"]["compatibility_test_file_max"]
+        == outcome["compatibility_test_file_max"]
+    )
+    assert (
+        _gate(gates, "production_uuid4_budget")["current"]
+        == outcome["production_uuid4_budget"]
+    )
     assert gates["summary"]["fail_count"] == 0
     assert gates["summary"]["warning_gates"] == []

@@ -65,7 +65,9 @@ def test_validate_resume_compatibility_accepts_matching_anchors() -> None:
 
 def test_validate_resume_compatibility_reports_missing_required_anchor() -> None:
     logger = MagicMock()
-    with pytest.raises(CheckpointConflictError, match="checkpoint missing manifest_id anchor"):
+    with pytest.raises(
+        CheckpointConflictError, match="checkpoint missing manifest_id anchor"
+    ):
         validate_resume_compatibility(
             state=replace(_state(), manifest_id=""),
             anchors=_anchors(),

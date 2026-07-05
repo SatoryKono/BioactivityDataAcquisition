@@ -16,6 +16,7 @@ def _skip_snapshot_topology_on_windows() -> None:
             "Snapshot topology tests require full repo walk which is prohibitively slow on Windows"
         )
 
+
 RelationKey = tuple[str, str, str, str, str]
 
 EXPECTED_RELATION_KEYS: tuple[RelationKey, ...] = (

@@ -68,7 +68,9 @@ def _find_dataclass_definitions(file_path: Path) -> list[dict[str, object]]:
     return dataclasses
 
 
-def _find_class_method(tree: ast.AST, class_name: str, method_name: str) -> ast.FunctionDef:
+def _find_class_method(
+    tree: ast.AST, class_name: str, method_name: str
+) -> ast.FunctionDef:
     for node in ast.walk(tree):
         if isinstance(node, ast.ClassDef) and node.name == class_name:
             for child in node.body:
@@ -122,7 +124,9 @@ def test_quarantine_payload_dataclasses_are_frozen() -> None:
         )
 
 
-def test_quarantine_entry_defensively_copies_constructor_and_accessor_payloads() -> None:
+def test_quarantine_entry_defensively_copies_constructor_and_accessor_payloads() -> (
+    None
+):
     """Constructor and accessors must preserve payload immutability via defensive copies."""
     aggregate_path = Path("src/bioetl/domain/aggregates/_quarantine_aggregate.py")
     aggregate_tree = ast.parse(aggregate_path.read_text(encoding="utf-8"))

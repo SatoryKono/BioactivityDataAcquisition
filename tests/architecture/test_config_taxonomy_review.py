@@ -51,7 +51,9 @@ def test_config_compatibility_legacy_taxonomy_review_matches_live_baseline() -> 
 
     assert review["status"] == "reviewed_burned_down"
     assert review["budget_policy"] == "no_growth_ratchet_only"
-    assert review["source_artifact"] == "reports/quality/config-discrepancy-baseline.json"
+    assert (
+        review["source_artifact"] == "reports/quality/config-discrepancy-baseline.json"
+    )
 
     baseline_families = cast(
         dict[str, Any],

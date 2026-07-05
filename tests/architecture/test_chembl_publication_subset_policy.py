@@ -336,9 +336,9 @@ class TestFilterSubsetGovernance:
         self,
     ) -> None:
         """Shared filter policy registry must document source-specific scope."""
-        policy = load_shared_filter_metadata("configs/entities/chembl/publication.yaml")[
-            "publication_filter_policy"
-        ]
+        policy = load_shared_filter_metadata(
+            "configs/entities/chembl/publication.yaml"
+        )["publication_filter_policy"]
         description = str(policy.get("description", ""))
 
         assert "source-specific" in description.lower(), (

@@ -19,7 +19,9 @@ from bioetl.infrastructure.storage.gold.writer_schema_helpers import (
 class TestGoldWriterSchemaHelpers:
     """Coverage boost for pure Gold schema projection helpers."""
 
-    def test_schema_column_names_prefers_to_schema_and_falls_back_to_columns(self) -> None:
+    def test_schema_column_names_prefers_to_schema_and_falls_back_to_columns(
+        self,
+    ) -> None:
         schema_builder = SimpleNamespace(
             to_schema=lambda: SimpleNamespace(
                 columns=OrderedDict((("entity_id", object()), ("value", object())))
@@ -34,7 +36,9 @@ class TestGoldWriterSchemaHelpers:
         assert _schema_column_names(broken_builder) == ("fallback",)
         assert _schema_column_names(SimpleNamespace(columns="bad")) == ()
 
-    def test_project_records_for_gold_schema_adds_dq_defaults_when_present(self) -> None:
+    def test_project_records_for_gold_schema_adds_dq_defaults_when_present(
+        self,
+    ) -> None:
         schema = SimpleNamespace(
             columns=OrderedDict(
                 (

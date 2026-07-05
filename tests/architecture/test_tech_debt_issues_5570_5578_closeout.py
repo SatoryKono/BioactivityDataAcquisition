@@ -36,10 +36,15 @@ OBS_INVENTORY = (
     ROOT / "reports" / "observability" / "runtime_cardinality_inventory.json"
 )
 OBS_ALLOWLIST_REVIEW = (
-    ROOT / "reports" / "observability" / "runtime_cardinality_allowlist_review_5574.json"
+    ROOT
+    / "reports"
+    / "observability"
+    / "runtime_cardinality_allowlist_review_5574.json"
 )
 MODULE_COVERAGE = ROOT / "reports" / "quality" / "module-coverage-inventory.json"
-COVERAGE_TAIL_MAP = ROOT / "reports" / "quality" / "hotspot-coverage-tail-owner-map.json"
+COVERAGE_TAIL_MAP = (
+    ROOT / "reports" / "quality" / "hotspot-coverage-tail-owner-map.json"
+)
 DEAD_CODE_INVENTORY = ROOT / "reports" / "quality" / "dead-code-inventory.json"
 CONTRACT_OWNERSHIP = (
     ROOT / "reports" / "quality" / "pipeline-config-contract-ownership-map.json"
@@ -118,7 +123,9 @@ def test_issue_5570_retained_entrypoints_are_external_breaking_change_only() -> 
     census = _load_json(COMPATIBILITY_CENSUS)
     registry = _load_yaml(COMPATIBILITY_REGISTRY)
     registry_rows = {
-        row["path"]: row for row in registry["retained_entrypoints"] if isinstance(row, dict)
+        row["path"]: row
+        for row in registry["retained_entrypoints"]
+        if isinstance(row, dict)
     }
 
     assert census["summary"]["retained_entrypoint_count"] == 12
@@ -143,7 +150,9 @@ def test_issue_5571_public_export_facades_have_symbol_budgets_and_zero_growth() 
     census = _load_json(COMPATIBILITY_CENSUS)
     registry = _load_yaml(COMPATIBILITY_REGISTRY)
     registry_rows = {
-        row["path"]: row for row in registry["retained_entrypoints"] if isinstance(row, dict)
+        row["path"]: row
+        for row in registry["retained_entrypoints"]
+        if isinstance(row, dict)
     }
     facades = {
         row["path"]: row
@@ -154,8 +163,7 @@ def test_issue_5571_public_export_facades_have_symbol_budgets_and_zero_growth() 
     assert set(facades) == PUBLIC_EXPORT_FACADES
     assert census["summary"]["retained_public_export_facade_count"] == 4
     assert (
-        census["summary"]["retained_public_export_facades_with_duplicate_exports"]
-        == 0
+        census["summary"]["retained_public_export_facades_with_duplicate_exports"] == 0
     )
     assert (
         census["summary"]["retained_public_export_facades_with_resolution_conflicts"]
@@ -310,7 +318,9 @@ def test_issue_5576_zero_import_deadcode_candidates_have_owner_test_proof() -> N
         assert candidate["classification_status"] == "classified"
         assert candidate["src_importer_count"] == 0
         assert candidate["owner_test_count"] > 0
-        assert candidate["owner_test_paths_exist_count"] == candidate["owner_test_count"]
+        assert (
+            candidate["owner_test_paths_exist_count"] == candidate["owner_test_count"]
+        )
         assert date.fromisoformat(candidate["review_by"]) >= REVIEW_FLOOR
         for owner_test in candidate["owner_tests"]:
             assert _test_path_exists(owner_test), owner_test

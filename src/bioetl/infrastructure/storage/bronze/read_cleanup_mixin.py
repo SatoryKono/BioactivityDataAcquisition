@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -40,8 +39,7 @@ class BronzeWriterReadCleanupMixin:
                 data: bytes = reader.read()
                 return data
 
-        loop = asyncio.get_event_loop()
-        decompressed_data = await loop.run_in_executor(None, _read_and_decompress)
+        decompressed_data = _read_and_decompress()
         for line in decompressed_data.decode("utf-8").splitlines():
             if line.strip():
                 yield orjson.loads(line)

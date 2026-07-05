@@ -146,8 +146,11 @@ class StorageRowReconciliationAdapter(RowReconciliationPort):
         )
 
     def _log(
-        self, level: str, message: str, **context: Any
-    ) -> None:  # Any: flexible logging context
+        self,
+        level: str,
+        message: str,
+        **context: Any,  # Any: structured logger context accepts arbitrary scalars.
+    ) -> None:
         log_method = getattr(self.logger, level, None)
         if callable(log_method):
             log_method(message, **context)

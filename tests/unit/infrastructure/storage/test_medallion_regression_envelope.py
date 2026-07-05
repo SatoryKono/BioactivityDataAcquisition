@@ -177,8 +177,7 @@ async def test_bronze_same_batch_retry_with_same_payload_is_noop(
     assert (tmp_path / first.relative_path).read_bytes() == first_data_bytes
     assert _meta_path(tmp_path, first.relative_path).read_bytes() == first_meta_bytes
     assert (
-        _json_copy_path(tmp_path, first.relative_path).read_bytes()
-        == first_json_bytes
+        _json_copy_path(tmp_path, first.relative_path).read_bytes() == first_json_bytes
     )
     assert await _read_bronze_payloads(writer, first.relative_path) == [
         {"id": 1, "name": "stable"},
@@ -232,8 +231,7 @@ async def test_bronze_same_batch_retry_with_different_payload_is_rejected(
     assert (tmp_path / first.relative_path).read_bytes() == first_data_bytes
     assert _meta_path(tmp_path, first.relative_path).read_bytes() == first_meta_bytes
     assert (
-        _json_copy_path(tmp_path, first.relative_path).read_bytes()
-        == first_json_bytes
+        _json_copy_path(tmp_path, first.relative_path).read_bytes() == first_json_bytes
     )
     assert await _read_bronze_payloads(writer, first.relative_path) == [
         {"id": 1, "name": "original"},

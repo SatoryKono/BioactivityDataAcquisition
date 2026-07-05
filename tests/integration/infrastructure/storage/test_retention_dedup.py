@@ -327,7 +327,9 @@ def test_deduplicate_full_read_uses_dataset_scanner_over_native_table_scan(
             return _FakeDataset()
 
         def to_pyarrow_table(self, columns: list[str] | None = None) -> pa.Table:
-            raise AssertionError(f"unexpected native full-table read: columns={columns}")
+            raise AssertionError(
+                f"unexpected native full-table read: columns={columns}"
+            )
 
     original_delta_table = deltalake.DeltaTable
     original_write = deltalake.write_deltalake

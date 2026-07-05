@@ -30,7 +30,9 @@ class _StubClient:
 
 @pytest.mark.asyncio
 async def test_request_or_skip__http_500__skips_transient_provider_error() -> None:
-    request = httpx.Request("GET", "https://api.semanticscholar.org/graph/v1/paper/search")
+    request = httpx.Request(
+        "GET", "https://api.semanticscholar.org/graph/v1/paper/search"
+    )
     response = httpx.Response(
         500,
         request=request,
@@ -47,7 +49,9 @@ async def test_request_or_skip__http_500__skips_transient_provider_error() -> No
 
 @pytest.mark.asyncio
 async def test_request_or_skip__connect_timeout__skips_endpoint_unreachable() -> None:
-    request = httpx.Request("GET", "https://api.semanticscholar.org/graph/v1/paper/search")
+    request = httpx.Request(
+        "GET", "https://api.semanticscholar.org/graph/v1/paper/search"
+    )
     exc = httpx.ConnectTimeout("timed out", request=request)
 
     with pytest.raises(pytest.skip.Exception, match="not reachable"):

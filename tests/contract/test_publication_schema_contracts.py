@@ -480,7 +480,7 @@ class TestSchemaVersioning:
     def test_machine_readable_inventory_exists_and_is_valid(self) -> None:
         """Machine-readable semantic compatibility inventory must exist and be valid."""
         inventory = _load_semantic_compatibility_inventory()
-        
+
         # Verify structure
         assert inventory["version"] == 1
         assert inventory["policy_scope"] == "semantic_compatibility_residue"
@@ -492,7 +492,7 @@ class TestSchemaVersioning:
         """Each inventory entry must have owner, rationale, sunset_policy, review_policy, review_date."""
         inventory = _load_semantic_compatibility_inventory()
         retained_fields = inventory["retained_fields"]
-        
+
         for entry in retained_fields:
             assert "field_name" in entry
             assert "owner" in entry
@@ -508,7 +508,10 @@ class TestSchemaVersioning:
         """Publication baseline must reference the machine-readable inventory."""
         compatibility = _load_compatibility_baseline()
         assert "inventory_ref" in compatibility
-        assert compatibility["inventory_ref"] == "configs/quality/semantic_compatibility_residue_inventory.yaml"
+        assert (
+            compatibility["inventory_ref"]
+            == "configs/quality/semantic_compatibility_residue_inventory.yaml"
+        )
 
     @pytest.mark.parametrize(
         "section_name",

@@ -26,7 +26,9 @@ def find_lingering_files(*, root: Path, removed_files: Iterable[Path]) -> list[s
     )
 
 
-def build_import_records(ast_cache: Mapping[Path, ast.Module]) -> tuple[ImportRecord, ...]:
+def build_import_records(
+    ast_cache: Mapping[Path, ast.Module],
+) -> tuple[ImportRecord, ...]:
     """Build a reusable import index from an already parsed AST cache."""
     records: list[ImportRecord] = []
     for py_file, tree in sorted(ast_cache.items()):

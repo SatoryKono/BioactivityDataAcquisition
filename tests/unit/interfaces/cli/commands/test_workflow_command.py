@@ -87,8 +87,6 @@ def test_workflow_run_ensures_observability_backend_before_execution(
     ensure_backend.assert_called_once_with(
         enabled=True,
         port=8081,
-        required_probe_paths=(
-            "/ops/control-plane/ready",
-        ),
+        required_probe_paths=("/ops/control-plane/ready",),
     )
     execute_workflow.assert_called_once()

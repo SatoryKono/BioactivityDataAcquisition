@@ -85,9 +85,7 @@ def test_call_returns_present_yaml_values_only(
 ) -> None:
     monkeypatch.chdir(tmp_path)
     (tmp_path / "config.yaml").write_text(
-        "api_url: https://config.example\n"
-        "timeout_seconds: 45\n"
-        "optional_name:\n",
+        "api_url: https://config.example\ntimeout_seconds: 45\noptional_name:\n",
         encoding="utf-8",
     )
 

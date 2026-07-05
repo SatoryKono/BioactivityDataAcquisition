@@ -62,7 +62,9 @@ def test_read_stable_source_module_snapshots_retries_until_digest_stabilizes(
     assert digest == "digest-b"
 
 
-def test_module_is_declaration_only_treats_private_attrs_surface_as_non_runtime() -> None:
+def test_module_is_declaration_only_treats_private_attrs_surface_as_non_runtime() -> (
+    None
+):
     source = (
         '"""Typed attrs."""\n'
         "from __future__ import annotations\n"
@@ -79,9 +81,6 @@ def test_module_is_declaration_only_treats_private_attrs_surface_as_non_runtime(
 
 
 def test_module_is_declaration_only_rejects_runtime_behavior() -> None:
-    source = (
-        "def build() -> int:\n"
-        "    return 1\n"
-    )
+    source = "def build() -> int:\n    return 1\n"
 
     assert _module_is_declaration_only(source) is False

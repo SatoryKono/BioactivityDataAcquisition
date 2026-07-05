@@ -383,10 +383,13 @@ def test_workflow_preparation_incremental_offset_rewrites_defaults_and_steps() -
         workflow_state_port=state_port,
     )
 
-    assert _next_incremental_start_offset(
-        workflow_state_port=state_port,
-        workflow_name="chembl_core",
-    ) == 250
+    assert (
+        _next_incremental_start_offset(
+            workflow_state_port=state_port,
+            workflow_name="chembl_core",
+        )
+        == 250
+    )
     assert updated.defaults.start_offset == 250
     assert updated.steps[0].run_options.start_offset == 250
     assert updated.steps[1].run_options.start_offset == 250

@@ -29,7 +29,9 @@ def test_missing_root_dir_mentions_flags_omitted_catalog_entry() -> None:
     assert issues == [".devin"]
 
 
-def test_plans_readme_issues_require_catalog_reference_and_active_backlog_link() -> None:
+def test_plans_readme_issues_require_catalog_reference_and_active_backlog_link() -> (
+    None
+):
     issues = module._plans_readme_issues(
         catalog={
             "plans": {
@@ -45,9 +47,7 @@ def test_plans_readme_issues_require_catalog_reference_and_active_backlog_link()
         readme_text="Only one tracked plan file may hold lifecycle `active_backlog`.",
     )
 
-    assert (
-        "docs/plans/README.md must reference repo_structure_catalog.yaml" in issues
-    )
+    assert "docs/plans/README.md must reference repo_structure_catalog.yaml" in issues
     assert (
         "docs/plans/README.md must link the active backlog consolidated-open-tasks-plan-2026-03-21.md"
         in issues
@@ -55,9 +55,9 @@ def test_plans_readme_issues_require_catalog_reference_and_active_backlog_link()
 
 
 def test_ops_index_issues_reject_root_script_codex_reference() -> None:
-    issues = module._ops_index_issues(
-        "- `script-codex/helper/ensure-codex-cli.sh`\n"
-    )
+    issues = module._ops_index_issues("- `script-codex/helper/ensure-codex-cli.sh`\n")
 
     assert any("script-codex" in issue for issue in issues)
-    assert any("scripts/ai/codex/helper/ensure-codex-cli.sh" in issue for issue in issues)
+    assert any(
+        "scripts/ai/codex/helper/ensure-codex-cli.sh" in issue for issue in issues
+    )

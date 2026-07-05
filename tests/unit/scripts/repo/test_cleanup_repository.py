@@ -622,7 +622,9 @@ def test_collect_reports_workspace_evidence_marks_local_only_candidates_for_prun
         quality_dir / "architecture_debt_execution_plan_2026-06-01-00-00.json",
         days=31,
     )
-    (quality_dir / "tasks_architecture_metric_exemptions_2026-06-01-00-00.json").write_text(
+    (
+        quality_dir / "tasks_architecture_metric_exemptions_2026-06-01-00-00.json"
+    ).write_text(
         "{}\n",
         encoding="utf-8",
     )

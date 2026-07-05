@@ -11,7 +11,9 @@ from pathlib import Path
 import pytest
 import yaml
 
-from bioetl.infrastructure.config.pipeline_config_api import load_pipeline_config_from_root
+from bioetl.infrastructure.config.pipeline_config_api import (
+    load_pipeline_config_from_root,
+)
 
 pytestmark = pytest.mark.architecture
 

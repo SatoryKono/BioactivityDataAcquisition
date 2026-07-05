@@ -66,7 +66,9 @@ def _build_property_config() -> DQConfig:
     )
 
 
-def _project_outcomes(record: dict[str, object], config: DQConfig) -> list[tuple[str, str, tuple[str, ...], str | None]]:
+def _project_outcomes(
+    record: dict[str, object], config: DQConfig
+) -> list[tuple[str, str, tuple[str, ...], str | None]]:
     outcomes = evaluate_dq_rules_for_record(record, dq_config=config)
     return [
         (
@@ -160,7 +162,9 @@ if HAS_HYPOTHESIS:
 
 
 @pytest.mark.parametrize("record", _FUZZ_RECORDS)
-def test_evaluate_dq_rules_idempotent_without_hypothesis(record: dict[str, object]) -> None:
+def test_evaluate_dq_rules_idempotent_without_hypothesis(
+    record: dict[str, object],
+) -> None:
     if HAS_HYPOTHESIS:
         pytest.skip("Hypothesis-backed property tests cover this path")
     config = _build_property_config()

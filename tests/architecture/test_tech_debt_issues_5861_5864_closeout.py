@@ -14,10 +14,20 @@ ROOT = Path(__file__).resolve().parents[2]
 CLOSEOUT = ROOT / "reports" / "quality" / "tech-debt-issues-5861-5864-closeout.json"
 MODULE_COVERAGE = ROOT / "reports" / "quality" / "module-coverage-inventory.json"
 HOTSPOT_FAMILY = ROOT / "reports" / "quality" / "hotspot-family-baseline.json"
-DQ_GOLDEN = ROOT / "tests/fixtures/golden/dq_rule_evaluator/coercion_vocab_cross_ordering.json"
-GOLD_CONTRACT_GOLDEN = ROOT / "tests/fixtures/golden/control_plane/gold_contract_identity.json"
+DQ_GOLDEN = (
+    ROOT / "tests/fixtures/golden/dq_rule_evaluator/coercion_vocab_cross_ordering.json"
+)
+GOLD_CONTRACT_GOLDEN = (
+    ROOT / "tests/fixtures/golden/control_plane/gold_contract_identity.json"
+)
 FORENSIC_SERVICE = (
-    ROOT / "src" / "bioetl" / "application" / "services" / "control_plane" / "forensic_diff_service.py"
+    ROOT
+    / "src"
+    / "bioetl"
+    / "application"
+    / "services"
+    / "control_plane"
+    / "forensic_diff_service.py"
 )
 FORENSIC_SUPPORT = (
     ROOT
@@ -30,10 +40,20 @@ FORENSIC_SUPPORT = (
     / "diagnostics_support.py"
 )
 REGISTRY_MANIFEST = (
-    ROOT / "src" / "bioetl" / "composition" / "runtime_builders" / "registry_manifest.py"
+    ROOT
+    / "src"
+    / "bioetl"
+    / "composition"
+    / "runtime_builders"
+    / "registry_manifest.py"
 )
 CONFIG_ACCESS_LOADERS = (
-    ROOT / "src" / "bioetl" / "composition" / "runtime_builders" / "_config_access_loaders.py"
+    ROOT
+    / "src"
+    / "bioetl"
+    / "composition"
+    / "runtime_builders"
+    / "_config_access_loaders.py"
 )
 EXPECTED_ISSUES = {5861, 5862, 5863, 5864}
 
@@ -96,18 +116,30 @@ def test_issue_5861_dq_evaluator_has_golden_and_property_evidence() -> None:
         dq_row["coverage_percent"]
         == closeout["metrics"]["dq_rule_evaluator_coverage_percent"]["current"]
     )
-    assert (ROOT / "tests/unit/domain/behavior/test_dq_rule_evaluator_golden.py").exists()
+    assert (
+        ROOT / "tests/unit/domain/behavior/test_dq_rule_evaluator_golden.py"
+    ).exists()
     assert (
         ROOT / "tests/unit/domain/behavior/test_dq_rule_evaluator_properties.py"
     ).exists()
 
 
-def test_issue_5862_contract_registry_and_ledger_have_domain_invariant_evidence() -> None:
+def test_issue_5862_contract_registry_and_ledger_have_domain_invariant_evidence() -> (
+    None
+):
     closeout = _load_json(CLOSEOUT)
     inventory = _load_json(MODULE_COVERAGE)
-    ledger_row = _module_row(inventory, "bioetl.domain.control_plane.ledger.core_events")
+    ledger_row = _module_row(
+        inventory, "bioetl.domain.control_plane.ledger.core_events"
+    )
     ledger_source = (
-        ROOT / "src" / "bioetl" / "domain" / "control_plane" / "ledger" / "core_events.py"
+        ROOT
+        / "src"
+        / "bioetl"
+        / "domain"
+        / "control_plane"
+        / "ledger"
+        / "core_events.py"
     ).read_text(encoding="utf-8")
 
     assert GOLD_CONTRACT_GOLDEN.exists()
@@ -159,7 +191,8 @@ def test_issue_5864_runtime_builder_registration_is_explicit_and_helper_ratio_im
     assert CONFIG_ACCESS_LOADERS.exists()
     assert "registry_manifest import PUBLIC_LAZY_EXPORTS" in init_source
     assert (
-        ROOT / "tests/unit/composition/runtime_builders/test_runtime_builder_registry_manifest.py"
+        ROOT
+        / "tests/unit/composition/runtime_builders/test_runtime_builder_registry_manifest.py"
     ).exists()
     assert (
         family["helper_function_ratio"]

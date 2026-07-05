@@ -171,11 +171,15 @@ def test_offset_from_successful_state_requires_success_and_limit() -> None:
     assert _offset_from_successful_state(None) is None
     assert _offset_from_successful_state(_workflow_state(status="failed")) is None
     assert (
-        _offset_from_successful_state(_workflow_state(last_start_offset=25, last_limit=None))
+        _offset_from_successful_state(
+            _workflow_state(last_start_offset=25, last_limit=None)
+        )
         is None
     )
     assert (
-        _offset_from_successful_state(_workflow_state(last_start_offset=25, last_limit=50))
+        _offset_from_successful_state(
+            _workflow_state(last_start_offset=25, last_limit=50)
+        )
         == 75
     )
 

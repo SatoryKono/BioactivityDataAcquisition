@@ -51,6 +51,7 @@ if TYPE_CHECKING:
     from bioetl.domain.resilience import RetryConfig
     from bioetl.domain.types import RunID, RunType
 
+
 def _resolve_e2e_default_timeout(*, platform: str = sys.platform) -> int:
     """Return the platform-aware pytest timeout budget for one E2E test.
 
@@ -133,8 +134,8 @@ def _resolve_e2e_sequential_pipeline_timeout_seconds(
 # timeout so storage failures raise deterministic domain errors before the test
 # watchdog interrupts the event loop.
 E2E_DEFAULT_TIMEOUT = _resolve_e2e_default_timeout()
-E2E_TWO_SEQUENTIAL_PIPELINE_TIMEOUT = (
-    _resolve_e2e_sequential_pipeline_timeout_seconds(pipeline_count=2)
+E2E_TWO_SEQUENTIAL_PIPELINE_TIMEOUT = _resolve_e2e_sequential_pipeline_timeout_seconds(
+    pipeline_count=2
 )
 E2E_THREE_SEQUENTIAL_PIPELINE_TIMEOUT = (
     _resolve_e2e_sequential_pipeline_timeout_seconds(pipeline_count=3)

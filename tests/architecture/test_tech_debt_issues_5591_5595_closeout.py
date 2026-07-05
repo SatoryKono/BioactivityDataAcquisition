@@ -128,8 +128,8 @@ def test_issue_5593_slow_architecture_generators_stay_isolated_from_fast_boundar
         if str(entry["zone"]).startswith("tests.architecture.")
     }
     expected_zones = {
-        path.removesuffix(".py").replace("/", ".") 
-        for path in SLOW_GOVERNANCE_PATHS 
+        path.removesuffix(".py").replace("/", ".")
+        for path in SLOW_GOVERNANCE_PATHS
         if (ROOT / path).exists()
     }
     assert expected_zones <= slow_zones

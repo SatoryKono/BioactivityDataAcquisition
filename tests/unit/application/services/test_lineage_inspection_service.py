@@ -259,7 +259,9 @@ def test_explain_run_resolves_manifest_and_aggregates_outputs() -> None:
     assert result.source_systems[0].node_id == source_node.node_id
 
 
-def test_explain_run_falls_back_to_run_index_when_manifest_has_no_manifest_fragments() -> None:
+def test_explain_run_falls_back_to_run_index_when_manifest_has_no_manifest_fragments() -> (
+    None
+):
     store = _InMemoryLineageStore()
     manifest_store = _InMemoryRunManifestStore()
     run_id = deterministic_run_uuid_from_callsite("lineage-manifest-run-fallback")
@@ -304,7 +306,9 @@ def test_explain_run_resolves_direct_manifest_index_without_manifest_store() -> 
     )
     store.save(fragment)
 
-    result = LineageInspectionService(lineage_store=store).explain_run("manifest-direct")
+    result = LineageInspectionService(lineage_store=store).explain_run(
+        "manifest-direct"
+    )
 
     assert result.manifest_id == "manifest-direct"
     assert result.run_id is None
@@ -371,7 +375,9 @@ def test_explain_run_resolves_via_manifest_lookup_by_run_id() -> None:
     assert result.fragment_ids == ("silver:fragment-run-lookup",)
 
 
-def test_resolve_via_manifest_returns_none_when_manifest_lookup_by_run_id_has_no_fragments() -> None:
+def test_resolve_via_manifest_returns_none_when_manifest_lookup_by_run_id_has_no_fragments() -> (
+    None
+):
     manifest_store = _InMemoryRunManifestStore()
     run_id = deterministic_run_uuid_from_callsite("lineage-empty-manifest-run-id")
     manifest_store.save(_make_manifest(manifest_id="manifest-empty", run_id=run_id))

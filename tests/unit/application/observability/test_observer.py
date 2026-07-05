@@ -374,7 +374,9 @@ def test_observer_derives_provider_and_entity_names(metrics_mock, logger_mock, r
     assert observer.entity == "activity"
 
 
-def test_observer_event_mixin_normalizes_unknown_severity(metrics_mock, logger_mock, run_id):
+def test_observer_event_mixin_normalizes_unknown_severity(
+    metrics_mock, logger_mock, run_id
+):
     observer = PipelineObserver(
         pipeline_name="chembl_activity",
         run_id=run_id,

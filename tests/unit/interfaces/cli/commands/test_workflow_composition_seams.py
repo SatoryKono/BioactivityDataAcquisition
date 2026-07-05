@@ -24,8 +24,9 @@ def test_workflow_composition_seams_delegate_to_control_plane_service_access(
     monkeypatch.setattr(
         control_plane_service_access,
         "get_workflow_execution_service",
-        lambda *, registry=None: calls.append(("execute", registry))
-        or "execution-service",
+        lambda *, registry=None: (
+            calls.append(("execute", registry)) or "execution-service"
+        ),
     )
     monkeypatch.setattr(
         control_plane_service_access,

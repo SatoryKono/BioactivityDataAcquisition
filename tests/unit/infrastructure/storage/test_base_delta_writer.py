@@ -337,13 +337,16 @@ class TestBaseDeltaWriterAsync:
         mock_delta_table = MagicMock()
         mock_delta_table.to_pyarrow_dataset.return_value = mock_dataset
 
-        with patch(
-            "bioetl.infrastructure.storage.delta.table_ops."
-            "_can_use_pyarrow_dataset_scanner",
-            return_value=True,
-        ), patch(
-            "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
-            return_value=mock_delta_table,
+        with (
+            patch(
+                "bioetl.infrastructure.storage.delta.table_ops."
+                "_can_use_pyarrow_dataset_scanner",
+                return_value=True,
+            ),
+            patch(
+                "bioetl.infrastructure.storage.base_delta_writer.DeltaTable",
+                return_value=mock_delta_table,
+            ),
         ):
             result = await writer.read_table("existing_table", columns=["id", "name"])
 
