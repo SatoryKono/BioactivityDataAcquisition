@@ -35,6 +35,24 @@ seams:
     category: operator_time_allowed
     replay_critical: false
     rationale: Non-deterministic export manifest fallback requires explicit operator opt-in.
+  - path: src/bioetl/infrastructure/checkpoint/_local_checkpoint_io.py
+    scope: build_history_entry_path
+    call: time.time_ns
+    category: operator_time_allowed
+    replay_critical: false
+    rationale: Checkpoint history filename uniqueness is local storage metadata, not replay identity.
+  - path: src/memory/tooling/prune.py
+    scope: find_prunable_episodic_notes
+    call: datetime.now
+    category: operator_time_allowed
+    replay_critical: false
+    rationale: Memory pruning uses injectable current time and defaults only for operator maintenance.
+  - path: src/memory/tooling/review_curated.py
+    scope: review_curated_notes
+    call: datetime.now
+    category: operator_time_allowed
+    replay_critical: false
+    rationale: Curated memory review uses injectable current time and defaults only for operator maintenance.
   - path: src/bioetl/infrastructure/quality/debt_scorecard.py
     scope: validate_scorecard_registry_sync
     call: date.today
@@ -71,33 +89,3 @@ seams:
     category: operator_time_allowed
     replay_critical: false
     rationale: Quality-governance report formatting date; callers can inject today.
-  - path: src/bioetl/infrastructure/checkpoint/_local_checkpoint_io.py
-    scope: build_history_entry_path
-    call: time.time_ns
-    category: operator_time_allowed
-    replay_critical: false
-    rationale: Checkpoint history entry naming uses nanosecond timestamp for uniqueness; not a replay identity anchor.
-  - path: src/memory/tooling/review_curated.py
-    scope: _build_review_report
-    call: datetime.now
-    category: operator_time_allowed
-    replay_critical: false
-    rationale: Memory tooling review report timestamp; not a replay identity anchor.
-  - path: src/memory/tooling/prune.py
-    scope: _find_expired_notes
-    call: datetime.now
-    category: operator_time_allowed
-    replay_critical: false
-    rationale: Memory pruning TTL check timestamp; not a replay identity anchor.
-  - path: src/memory/notes.py
-    scope: utc_now_iso
-    call: datetime.now
-    category: operator_time_allowed
-    replay_critical: false
-    rationale: Memory note ISO timestamp utility; not a replay identity anchor.
-  - path: src/memory/graph/sync_pkg_core.py
-    scope: _sync_run_id
-    call: datetime.now
-    category: operator_time_allowed
-    replay_critical: false
-    rationale: Memory graph sync run ID generation; not a replay identity anchor.

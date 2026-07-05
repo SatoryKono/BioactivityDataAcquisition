@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -91,8 +90,7 @@ class _MetadataWriterOperations:
             provider=provider,
             entity=entity,
         )
-        existing_metadata = await asyncio.to_thread(
-            _load_existing_metadata_model,
+        existing_metadata = _load_existing_metadata_model(
             metadata_path,
             layer=layer,
         )

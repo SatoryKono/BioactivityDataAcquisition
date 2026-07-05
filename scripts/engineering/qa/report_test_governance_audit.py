@@ -26,6 +26,9 @@ DEFAULT_JSON_ARTIFACT = Path("reports/quality/test-governance-current.json")
 DEFAULT_FIXTURE_DUPLICATION_ARTIFACT = Path(
     "reports/quality/test-fixture-asset-duplication.json"
 )
+DEFAULT_DUPLICATE_NAME_ARTIFACT = Path(
+    "reports/quality/test-duplicate-name-inventory.json"
+)
 TEST_FUNCTION_PREFIX = "test_"
 FIXTURE_DUPLICATION_SCAN_ROOT = Path("tests/fixtures")
 FIXTURE_DUPLICATION_EXTENSIONS = frozenset({".json", ".yaml", ".yml"})
@@ -763,12 +766,18 @@ def main(argv: list[str] | None = None) -> int:
             "tests/fixtures/**/*.{json,yaml,yml}."
         ),
     )
+    parser.add_argument(
+        "--duplicate-name-inventory-out",
+        type=Path,
+        help="Write the tracked duplicate test-function name inventory.",
+    )
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
 
     payload = collect_test_governance_report(args.root)
     json_out = args.json_out
     fixture_duplication_out = args.fixture_duplication_out
+    duplicate_name_inventory_out = args.duplicate_name_inventory_out
     if args.check and json_out is None:
         candidate = args.root / DEFAULT_JSON_ARTIFACT
         if candidate.exists():
@@ -777,6 +786,10 @@ def main(argv: list[str] | None = None) -> int:
         candidate = args.root / DEFAULT_FIXTURE_DUPLICATION_ARTIFACT
         if candidate.exists():
             fixture_duplication_out = candidate
+    if args.check and duplicate_name_inventory_out is None:
+        candidate = args.root / DEFAULT_DUPLICATE_NAME_ARTIFACT
+        if candidate.exists():
+            duplicate_name_inventory_out = candidate
     exit_code = 0
 
     if args.config.exists():
@@ -787,6 +800,13 @@ def main(argv: list[str] | None = None) -> int:
             exit_code = 1
 
     fixture_duplication_payload = payload["report"]["fixture_asset_duplication"]
+    duplicate_name_payload = {
+        "schema_version": 1,
+        "generated_by": "scripts.engineering.qa.report_test_governance_audit",
+        "source_artifact": DEFAULT_JSON_ARTIFACT.as_posix(),
+        "summary": payload["report"]["duplicate_test_name_inventory_summary"],
+        "duplicate_names": payload["report"]["duplicate_test_name_inventory"],
+    }
     output = _canonical_json(payload)
     if args.check:
         if json_out is not None and not _check_json_artifact(json_out, payload):
@@ -794,6 +814,11 @@ def main(argv: list[str] | None = None) -> int:
         if fixture_duplication_out is not None and not _check_json_artifact(
             fixture_duplication_out,
             fixture_duplication_payload,
+        ):
+            exit_code = 1
+        if duplicate_name_inventory_out is not None and not _check_json_artifact(
+            duplicate_name_inventory_out,
+            duplicate_name_payload,
         ):
             exit_code = 1
     elif json_out:
@@ -805,6 +830,12 @@ def main(argv: list[str] | None = None) -> int:
         fixture_duplication_out.parent.mkdir(parents=True, exist_ok=True)
         fixture_duplication_out.write_text(
             _canonical_json(fixture_duplication_payload),
+            encoding="utf-8",
+        )
+    if duplicate_name_inventory_out and not args.check:
+        duplicate_name_inventory_out.parent.mkdir(parents=True, exist_ok=True)
+        duplicate_name_inventory_out.write_text(
+            _canonical_json(duplicate_name_payload),
             encoding="utf-8",
         )
     return exit_code

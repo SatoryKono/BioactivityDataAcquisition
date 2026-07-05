@@ -37,24 +37,24 @@
       "status": "pass"
     },
     {
-      "current": "4b73b0f64f40315522f1cff404610992e745aadaebf1a6e2a893fb37b35912cd",
-      "limit": "4b73b0f64f40315522f1cff404610992e745aadaebf1a6e2a893fb37b35912cd",
+      "current": "8b3ec1f169cb16bed1cf1e430dd781f44770179f6dbd392ac494e54099078e60",
+      "limit": "a2906f42e84b027826eca500616653400db3e2d401a71f97987e1a3813174666",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
       "source_artifact": "reports/quality/module-coverage-inventory.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": {
-        "source_module_count": 2210,
-        "source_tree_sha256": "4b73b0f64f40315522f1cff404610992e745aadaebf1a6e2a893fb37b35912cd",
+        "source_module_count": 2211,
+        "source_tree_sha256": "176668bb7b306d6ad7b9f7f6b966519a9e49e395303a89f702a1b3b7c3949a58",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
-        "source_module_count": 2210,
-        "source_tree_sha256": "4b73b0f64f40315522f1cff404610992e745aadaebf1a6e2a893fb37b35912cd",
+        "source_module_count": 2211,
+        "source_tree_sha256": "a2906f42e84b027826eca500616653400db3e2d401a71f97987e1a3813174666",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -62,7 +62,7 @@
       "name": "module_coverage_scorecard_coherence",
       "remediation": "Refresh architecture-quality scorecard and module coverage inventory until counts and source-tree hash match.",
       "source_artifact": "reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": 0,
@@ -244,13 +244,13 @@
       "status": "pass"
     },
     {
-      "current": 1,
+      "current": 0,
       "limit": 0,
       "metric": "budget_violations",
       "name": "test_governance_budget_violations",
       "remediation": "Fix test governance budget violations before closeout.",
       "source_artifact": "reports/quality/test-governance-current.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": 0,
@@ -397,7 +397,7 @@
       "status": "pass"
     },
     {
-      "current": "fdcb0d409d81267179b18f694b11497e4903525f4eb56a879cc12b2b61e8ade1",
+      "current": "5653b8082cb97a618d8329552fe027d4f486eaad197bdee78609d66f395a0775",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -420,26 +420,27 @@
   "stale_artifacts": {
     "adr_enforcement_matrix": false,
     "architecture_quality_scorecard": false,
-    "config_surface_backlog": true,
+    "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
-    "module_coverage_inventory": false,
+    "module_coverage_inventory": true,
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 2,
-    "pass": 42,
+    "fail": 3,
+    "pass": 41,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 8.58,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 2,
+    "fail_count": 3,
     "failing_gates": [
-      "test_governance_budget_violations",
+      "module_coverage_source_tree_hash_current",
+      "module_coverage_scorecard_coherence",
       "generated_artifact_drift"
     ],
     "gate_count": 44,
-    "pass_count": 42,
+    "pass_count": 41,
     "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []
