@@ -695,7 +695,7 @@ ______________________________________________________________________
 
 ```python
 # 1. Проверить реальные значения
-df = pd.read - parquet("bronze/crossref/publication.parquet")
+df = pd.read_parquet("data/output/bronze/crossref/publication.parquet")
 print(df["doi"].value_counts())
 
 

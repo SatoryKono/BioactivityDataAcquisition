@@ -110,10 +110,10 @@ data/output/bronze/pubchem/compound/2025-01-15/batch-2025-01-15-e5f6g7h8.jsonl.z
 import polars as pl
 
 # Current version
-df = pl.read - delta("data/output/silver/chembl/activity")
+df = pl.read_delta("data/output/silver/chembl/activity")
 
 # Historical version (time travel)
-df = pl.read - delta("data/output/silver/chembl/activity", version=5)
+df = pl.read_delta("data/output/silver/chembl/activity", version=5)
 ```
 
 ### Gold Layer

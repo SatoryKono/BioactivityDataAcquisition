@@ -274,3 +274,8 @@ entries:
     classification: budget_closeout_ratchet
     live_guard: "debt issue batch #5847-#5852 remains aligned with live root-hygiene baseline reduction, bounded local-clutter cleanup, retired launcher aliases, Docker adjunct rehoming, and exact-filename review contracts without budget growth."
     rationale: Keeps the newest root-hygiene closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issues_5954_5955_5962_5963_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue batch #5954-#5955, #5962-#5963 remains aligned with live governance, compatibility, duplication, and observability evidence without budget growth."
+    rationale: Keeps the newest architecture-debt closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.

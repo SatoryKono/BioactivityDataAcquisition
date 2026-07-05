@@ -1063,7 +1063,7 @@ class LegacyAdapter(BaseSyncAdapter):
 - `pytest>=8.0`, `pytest-cov>=4.0`, `pytest-asyncio>=0.23`, `pytest-xdist>=3.5` — основа тестирования
 - `respx>=0.21` — HTTP-мокирование для тестов адаптеров
 - `hypothesis>=6.100` — property-based тестирование
-- `vcrpy>=6.0`, `pytest-vcr>=1.0` — VCR-кассеты для integration-тестов
+- `vcrpy>=6.0`, `pytest-recording>=0.13` — VCR-кассеты для integration-тестов
 - `syrupy>=4.0` — snapshot-тестирование
 
 **Рекомендуемый способ установки:**

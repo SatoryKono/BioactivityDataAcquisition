@@ -50,21 +50,26 @@ ______________________________________________________________________
 
 `src/bioetl/domain/ports/` содержит `Protocol`-контракты для Ports & Adapters:
 
-Сейчас пакет включает **~50+ port interfaces** в `domain/ports` во вложенной структуре
-(включая фасадный `__init__.py`):
+Сейчас пакет включает **74 Python modules** (65 port modules + 9 package `__init__.py`
+facades) во вложенной структуре. На корневом уровне пакета — **19** flat modules
+(включая фасадный `__init__.py`). Полный module catalog:
+[Domain Ports](../04-reference/domain/ports.md).
 
-- config/ (3 порта)
-- control_plane/ (8 портов)
-- metadata/ (2 порта)
-- observability/ (4 порта)
-- quality/ (8 портов)
-- runtime/ (9 портов, плюс подпакеты)
-- storage/ (5 портов)
-- workflow_foreign_key_reconciliation.py (1 порт)
-- workflow_row_reconciliation.py (1 порт)
-- storage_maintenance.py (1 порт)
+- config/ (3 port modules)
+- control_plane/ (8 port modules)
+- metadata/ (2 port modules)
+- observability/ (4 port modules)
+- quality/ (9 port modules)
+- runtime/ (10 port modules)
+- storage/ (5 port modules)
+- noop/ (6 NoOp fallback modules)
+- flat root modules: `adr.py`, `audit.py`, `data_normalization.py`, `data_source.py`,
+  `delta_reader.py`, `export.py`, `filtering.py`, `health_check.py`, `idmapping.py`,
+  `logger_port.py`, `pii.py`, `protein_classification.py`, `publication_strategy.py`,
+  `resilience.py`, `serialization.py`, `storage_maintenance.py`,
+  `workflow_foreign_key_reconciliation.py`, `workflow_row_reconciliation.py`
 
-Это число синхронизируется архитектурным тестом `test_ports_count_matches_docs`.
+Корневое число **19** синхронизируется архитектурным тестом `test_ports_count_matches_docs`.
 
 ### 2.1.1. Дополнительные порты
 

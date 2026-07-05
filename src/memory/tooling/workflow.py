@@ -7,12 +7,14 @@ import json
 import subprocess
 import sys
 import tempfile
+from contextlib import ExitStack
 from pathlib import Path
 from typing import Any
 
 WORKFLOW_PRUNE_PREVIEW_LIMIT = 10
 DEFAULT_PROFILE = "general"
 DEFAULT_POST_TASK_VALIDATION_TIMEOUT_SECONDS = 15.0
+DEFAULT_POST_TASK_REFRESH_TIMEOUT_SECONDS = 15.0
 
 
 def _discover_memory_root() -> Path:
@@ -132,6 +134,116 @@ def _run_post_task_validation(
         "stderr": stderr,
         "returncode": result.returncode,
     }
+
+
+def _run_post_task_refresh(
+    *,
+    timeout_seconds: float | None,
+    repo_root: Path,
+    output_root: Path,
+    focus_query: str,
+) -> dict[str, Any]:
+    if timeout_seconds is None or timeout_seconds <= 0:
+        try:
+            return refresh_all(
+                repo_root.resolve(),
+                output_root.resolve(),
+                include_rag=True,
+                include_timeline=True,
+                include_graph_export=False,
+                rag_build_scope="workflow",
+                rag_focus_query=focus_query,
+                rag_max_sources=_rag_max_sources(),
+                allow_partial=True,
+            )
+        except Exception as exc:
+            return {
+                "ok": False,
+                "status": "runtime_error",
+                "artifacts": [],
+                "error": f"{exc.__class__.__name__}: {exc}",
+            }
+
+    command = [
+        sys.executable,
+        "-m",
+        "memory.tooling.refresh_all",
+        "--root",
+        str(repo_root.resolve()),
+        "--output-root",
+        str(output_root.resolve()),
+        "--rag-build-scope",
+        "workflow",
+        "--rag-focus-query",
+        focus_query,
+        "--rag-max-sources",
+        str(_rag_max_sources()),
+        "--allow-partial",
+        "--json",
+    ]
+    try:
+        result = subprocess.run(
+            command,
+            cwd=repo_root,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds,
+        )
+    except subprocess.TimeoutExpired as exc:
+        return {
+            "ok": False,
+            "status": "timed_out",
+            "timeout_seconds": timeout_seconds,
+            "artifacts": [],
+            "stderr": (exc.stderr or "").strip(),
+        }
+    except OSError as exc:
+        return {
+            "ok": False,
+            "status": "runtime_error",
+            "timeout_seconds": timeout_seconds,
+            "artifacts": [],
+            "error": str(exc),
+        }
+
+    stdout = result.stdout.strip()
+    stderr = result.stderr.strip()
+    try:
+        payload = json.loads(stdout) if stdout else {}
+    except json.JSONDecodeError:
+        return {
+            "ok": False,
+            "status": "runtime_error",
+            "timeout_seconds": timeout_seconds,
+            "artifacts": [],
+            "error": "refresh subprocess returned non-JSON output",
+            "stdout": stdout,
+            "stderr": stderr,
+            "returncode": result.returncode,
+        }
+
+    if not isinstance(payload, dict):
+        return {
+            "ok": False,
+            "status": "runtime_error",
+            "timeout_seconds": timeout_seconds,
+            "artifacts": [],
+            "error": "refresh subprocess returned non-object JSON output",
+            "stdout": stdout,
+            "stderr": stderr,
+            "returncode": result.returncode,
+        }
+    if result.returncode != 0:
+        payload = {
+            **payload,
+            "ok": False,
+            "status": payload.get("status", "runtime_error"),
+            "timeout_seconds": timeout_seconds,
+            "stderr": stderr,
+            "returncode": result.returncode,
+        }
+    return payload
 
 
 def prune_episodic_notes(*, apply: bool = False) -> dict[str, Any]:
@@ -516,7 +628,9 @@ def post_task_workflow(
     promote_to: str | None = None,
     move_on_promote: bool = False,
     summary_note_path: Path | None = None,
-    validation_timeout_seconds: float | None = DEFAULT_POST_TASK_VALIDATION_TIMEOUT_SECONDS,
+    validation_timeout_seconds: float
+    | None = DEFAULT_POST_TASK_VALIDATION_TIMEOUT_SECONDS,
+    refresh_timeout_seconds: float | None = None,
 ) -> dict[str, Any]:
     """Run the standard post-task memory flow."""
     summary_path = summary_note_path or _default_note_path(task_id, kind="summary")
@@ -554,12 +668,10 @@ def post_task_workflow(
             "validation_issues": validation_issues,
         }
         if "timeout_seconds" in validation_result:
-            payload["validation_timeout_seconds"] = validation_result[
-                "timeout_seconds"
-            ]
+            payload["validation_timeout_seconds"] = validation_result["timeout_seconds"]
         for key in ("error", "stderr", "stdout", "returncode"):
-            if key in validation_result and validation_result[key]:
-                payload[f"validation_{key}"] = validation_result[key]
+            if value := validation_result.get(key):
+                payload[f"validation_{key}"] = value
         return payload
 
     if validation_issues:
@@ -570,7 +682,18 @@ def post_task_workflow(
             "summary_note": str(summary_path),
             "ok": False,
             "validation_issues": [
-                {"path": issue.path, "message": issue.message}
+                {
+                    "path": (
+                        issue.get("path", "<unknown>")
+                        if isinstance(issue, dict)
+                        else issue.path
+                    ),
+                    "message": (
+                        issue.get("message", str(issue))
+                        if isinstance(issue, dict)
+                        else issue.message
+                    ),
+                }
                 for issue in validation_issues
             ],
         }
@@ -581,16 +704,11 @@ def post_task_workflow(
         if output_root is None:
             output_root = Path(tempfile.mkdtemp(prefix="memory-post-task-"))
         repo_root = refresh_repo_root or repo_root
-        refresh_report = refresh_all(
-            repo_root.resolve(),
-            output_root.resolve(),
-            include_rag=True,
-            include_timeline=True,
-            include_graph_export=False,
-            rag_build_scope="workflow",
-            rag_focus_query=title,
-            rag_max_sources=_rag_max_sources(),
-            allow_partial=True,
+        refresh_report = _run_post_task_refresh(
+            timeout_seconds=refresh_timeout_seconds,
+            repo_root=repo_root.resolve(),
+            output_root=output_root.resolve(),
+            focus_query=title,
         )
 
     prune_report = prune_episodic_notes(apply=False) if run_prune else None
@@ -616,6 +734,101 @@ def post_task_workflow(
         "degraded": bool(refresh_report and not refresh_report.get("ok", True)),
         "ok": True,
     }
+
+
+def _write_smoke_inputs(root: Path) -> tuple[Path, Path]:
+    chunks_path = root / "chunks.jsonl"
+    chunks_path.write_text(
+        json.dumps(
+            {
+                "id": "memory-workflow-smoke-chunk",
+                "title": "Memory workflow smoke",
+                "content": "memory workflow pre post smoke",
+                "source_path": "src/memory/DAILY_WORKFLOW.md",
+                "source_type": "doc",
+                "domain": "memory",
+                "repo_zone": "canonical_runtime",
+                "symbol_kind": "markdown_section",
+            },
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    events_dir = root / "events"
+    events_dir.mkdir(parents=True, exist_ok=True)
+    (events_dir / "workflow.jsonl").write_text(
+        json.dumps(
+            {
+                "id": "memory-workflow-smoke-event",
+                "event_type": "memory.workflow.smoke",
+                "event_family": "memory",
+                "severity": "info",
+                "occurred_at": "2026-07-05T00:00:00Z",
+                "source_refs": ["src/memory/DAILY_WORKFLOW.md"],
+                "payload": {"surface": "memory.tooling.workflow"},
+            },
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    return chunks_path, events_dir
+
+
+def smoke_workflow(
+    *,
+    validation_timeout_seconds: float
+    | None = DEFAULT_POST_TASK_VALIDATION_TIMEOUT_SECONDS,
+) -> dict[str, Any]:
+    """Run a lightweight pre/post workflow smoke without committing artifacts."""
+    repo_root = _discover_repo_root() or Path(__file__).resolve().parents[3]
+    with ExitStack() as stack:
+        temp_root = Path(stack.enter_context(tempfile.TemporaryDirectory()))
+        chunks_path, events_dir = _write_smoke_inputs(temp_root)
+        session_note_path = temp_root / "session.md"
+        summary_note_path = temp_root / "summary.md"
+        pre_payload = pre_task_workflow(
+            task_id="memory-workflow-smoke",
+            title="Memory workflow smoke",
+            query="memory workflow",
+            source_refs=["src/memory/DAILY_WORKFLOW.md"],
+            create_session_note=True,
+            session_note_path=session_note_path,
+            chunks_path=chunks_path,
+            events_dir=events_dir,
+            run_refresh_if_missing=False,
+            limit=3,
+            profile=DEFAULT_PROFILE,
+        )
+        post_payload = post_task_workflow(
+            task_id="memory-workflow-smoke",
+            title="Memory workflow smoke",
+            summary="Validated lightweight memory workflow pre/post smoke.",
+            source_refs=["src/memory/DAILY_WORKFLOW.md"],
+            run_refresh=False,
+            summary_note_path=summary_note_path,
+            validation_timeout_seconds=validation_timeout_seconds,
+        )
+        ok = bool(
+            pre_payload.get("ok")
+            and post_payload.get("ok")
+            and session_note_path.exists()
+            and summary_note_path.exists()
+        )
+        return {
+            "kind": "smoke",
+            "ok": ok,
+            "python_executable": sys.executable,
+            "repo_root": str(repo_root),
+            "pre_task_ok": bool(pre_payload.get("ok")),
+            "post_task_ok": bool(post_payload.get("ok")),
+            "post_task_degraded": bool(post_payload.get("degraded", False)),
+            "post_task_validation_status": post_payload.get(
+                "validation_status", "completed"
+            ),
+            "generated_artifacts": "temporary_directory_removed",
+        }
 
 
 def review_curated_workflow(
@@ -686,6 +899,15 @@ def _build_parser() -> argparse.ArgumentParser:
         ),
     )
     post_parser.add_argument(
+        "--refresh-timeout-seconds",
+        type=float,
+        default=DEFAULT_POST_TASK_REFRESH_TIMEOUT_SECONDS,
+        help=(
+            "Timeout for post-task refresh before returning a degraded payload; "
+            "set to 0 to run refresh in-process without the subprocess timeout."
+        ),
+    )
+    post_parser.add_argument(
         "--promote-to",
         choices=("decision", "incident", "lesson", "domain_knowledge"),
         default=None,
@@ -699,6 +921,17 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     review_parser.add_argument("--root", type=Path, default=None)
     review_parser.add_argument("--json", action="store_true")
+
+    smoke_parser = subparsers.add_parser(
+        "smoke",
+        help="Run a lightweight deterministic pre/post workflow smoke.",
+    )
+    smoke_parser.add_argument(
+        "--validation-timeout-seconds",
+        type=float,
+        default=DEFAULT_POST_TASK_VALIDATION_TIMEOUT_SECONDS,
+    )
+    smoke_parser.add_argument("--json", action="store_true")
 
     return parser
 
@@ -732,10 +965,7 @@ def _emit(payload: dict[str, Any], *, as_json: bool) -> int:
         if payload.get("degraded"):
             validation_status = payload.get("validation_status")
             if validation_status:
-                print(
-                    "- degraded: validation did not complete "
-                    f"({validation_status})"
-                )
+                print(f"- degraded: validation did not complete ({validation_status})")
             else:
                 print("- degraded: refresh completed with partial artifact failures")
     return _payload_exit_code(payload)
@@ -773,8 +1003,28 @@ def main(argv: list[str] | None = None) -> int:
             promote_to=args.promote_to,
             move_on_promote=args.move_on_promote,
             validation_timeout_seconds=args.validation_timeout_seconds,
+            refresh_timeout_seconds=args.refresh_timeout_seconds,
         )
         return _emit(payload, as_json=args.json)
+
+    if args.command == "smoke":
+        payload = smoke_workflow(
+            validation_timeout_seconds=args.validation_timeout_seconds,
+        )
+        if args.json:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+            return 0 if payload.get("ok", True) else 1
+
+        print("Memory workflow smoke:")
+        print(f"- python: {payload['python_executable']}")
+        print(f"- pre-task: {'ok' if payload['pre_task_ok'] else 'failed'}")
+        print(f"- post-task: {'ok' if payload['post_task_ok'] else 'failed'}")
+        if payload.get("post_task_degraded"):
+            print(
+                "- post-task degraded: "
+                f"{payload.get('post_task_validation_status', 'unknown')}"
+            )
+        return 0 if payload.get("ok", True) else 1
 
     if args.command == "review-curated":
         payload = review_curated_workflow(curated_root=args.root)

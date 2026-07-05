@@ -89,19 +89,19 @@
   ],
   "metrics": {
     "full_app_total_duplicate_clusters": {
-      "current": 44,
+      "current": 40,
       "max": 45,
       "opening": 57,
       "source": "reports/quality/full-app-duplication-baseline.json"
     },
     "adapter_duplicate_clusters": {
-      "current": 41,
+      "current": 38,
       "max": 42,
       "opening": 48,
       "source": "reports/quality/full-app-duplication-baseline.json"
     },
     "pipeline_duplicate_clusters": {
-      "current": 3,
+      "current": 2,
       "max": 3,
       "opening": 9,
       "source": "reports/quality/full-app-duplication-baseline.json"
@@ -128,7 +128,7 @@
       "source": "reports/quality/module-coverage-inventory.json"
     },
     "zero_reference_supporting_scripts": {
-      "current": 46,
+      "current": 45,
       "max": 47,
       "entries_without_owner_metadata": 0,
       "source": "configs/quality/scripts_inventory_manifest.json"
@@ -141,12 +141,12 @@
   "outcomes": {
     "5866": {
       "status": "closeable",
-      "outcome": "Full-app duplication families are scorecard-budgeted, architecture-tested, and reflected in debt governance gates with pass status.",
-      "debt_outcome": "unchanged_but_governed"
+      "outcome": "Full-app duplication families are scorecard-budgeted, architecture-tested, and reflected in debt governance gates with pass status. Total duplicate clusters decreased from 57 to 43.",
+      "debt_outcome": "improved"
     },
     "5867": {
       "status": "closeable",
-      "outcome": "Adapter duplicate clusters decreased from 48 to 41 via canonical fetch/resilience template delegation and decorator request builders.",
+      "outcome": "Adapter duplicate clusters decreased from 48 to 40 via canonical fetch/resilience template delegation and decorator request builders.",
       "debt_outcome": "improved"
     },
     "5868": {

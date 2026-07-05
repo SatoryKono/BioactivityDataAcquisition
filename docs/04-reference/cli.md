@@ -1051,7 +1051,7 @@ bioetl quarantine stats --pipeline <NAME> [--json]
 | `--group-by`           | str  | None         | Фокусная Silver-группировка (`reason-code`, `field`, `rule-type`, `operator`, `reason-code-field`, `reason-signature`) |
 | `--top`                | int  | 10           | Лимит элементов в группировках                                                                                         |
 
-Показывает: общее количество, распределение по кодам ошибок, статусы (`NEW`, `IGNORED`, `REPROCESSED`).
+Показывает: общее количество, распределение по кодам ошибок, статусы (`NEW`, `UNDER_REVIEW`, `IGNORED`, `REPROCESSED`, `EXPIRED`).
 
 #### `quarantine replay` — Повторная обработка
 

@@ -27,22 +27,28 @@ DUPLICATION_BASELINE = (
     ROOT / "reports" / "quality" / "full-app-duplication-baseline.json"
 )
 DEAD_CODE_INVENTORY = ROOT / "reports" / "quality" / "dead-code-inventory.json"
-RETIREMENT_TRIAGE = (
-    ROOT / "configs" / "quality" / "retirement_candidate_triage.yaml"
-)
+RETIREMENT_TRIAGE = ROOT / "configs" / "quality" / "retirement_candidate_triage.yaml"
 CONFIG_BACKLOG = ROOT / "reports" / "quality" / "config-surface-backlog.json"
-SHARED_POLICY = (
-    ROOT / "configs" / "composites" / "field_groups" / "shared_policy.yaml"
-)
+SHARED_POLICY = ROOT / "configs" / "composites" / "field_groups" / "shared_policy.yaml"
 COMPOSITE_CONFIGS = {
     name: ROOT / "configs" / "composites" / f"{name}.yaml"
     for name in ("activity", "assay", "molecule", "publication", "target")
 }
 MODULE_COVERAGE = ROOT / "reports" / "quality" / "module-coverage-inventory.json"
-COVERAGE_TAIL_MAP = ROOT / "reports" / "quality" / "hotspot-coverage-tail-owner-map.json"
-TARGETED_COVERAGE_XML = ROOT / "reports" / "coverage" / "runtime-basics-targeted-5795.xml"
+COVERAGE_TAIL_MAP = (
+    ROOT / "reports" / "quality" / "hotspot-coverage-tail-owner-map.json"
+)
+TARGETED_COVERAGE_XML = (
+    ROOT / "reports" / "coverage" / "runtime-basics-targeted-5795.xml"
+)
 RUNTIME_BASICS = (
-    ROOT / "src" / "bioetl" / "composition" / "bootstrap" / "runtime" / "runtime_basics.py"
+    ROOT
+    / "src"
+    / "bioetl"
+    / "composition"
+    / "bootstrap"
+    / "runtime"
+    / "runtime_basics.py"
 )
 RUNTIME_BASICS_TEST = (
     ROOT
@@ -72,8 +78,20 @@ PUBLICATION_TRANSFORMER_CONTEXT = (
     / "publication_transformer_context.py"
 )
 PROVIDER_TRANSFORMERS = (
-    ROOT / "src" / "bioetl" / "application" / "pipelines" / "crossref" / "transformer.py",
-    ROOT / "src" / "bioetl" / "application" / "pipelines" / "openalex" / "transformer.py",
+    ROOT
+    / "src"
+    / "bioetl"
+    / "application"
+    / "pipelines"
+    / "crossref"
+    / "transformer.py",
+    ROOT
+    / "src"
+    / "bioetl"
+    / "application"
+    / "pipelines"
+    / "openalex"
+    / "transformer.py",
     ROOT
     / "src"
     / "bioetl"
@@ -92,13 +110,7 @@ COMMON_ERROR_BUNDLES = (
     / "error_bundles.py"
 )
 PUBMED_ERRORS = (
-    ROOT
-    / "src"
-    / "bioetl"
-    / "infrastructure"
-    / "adapters"
-    / "pubmed"
-    / "_errors.py"
+    ROOT / "src" / "bioetl" / "infrastructure" / "adapters" / "pubmed" / "_errors.py"
 )
 SCRIPTS_MANIFEST = ROOT / "configs" / "quality" / "scripts_inventory_manifest.json"
 SCRIPTS_LIFECYCLE_REGISTRY = (
@@ -126,7 +138,9 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return payload
 
 
-def test_closeout_artifact_is_complete_and_budget_safe_for_issue_pack_5790_5796() -> None:
+def test_closeout_artifact_is_complete_and_budget_safe_for_issue_pack_5790_5796() -> (
+    None
+):
     closeout = _load_json(CLOSEOUT)
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
@@ -147,7 +161,7 @@ def test_closeout_artifact_is_complete_and_budget_safe_for_issue_pack_5790_5796(
         == by_target["src/bioetl/application/pipelines"]["duplicate_count"]
     )
     assert closeout["metrics"]["config_surface_duplicate_clusters"]["current"] == 21
-    assert closeout["metrics"]["zero_reference_supporting_scripts"]["count"] == 47
+    assert closeout["metrics"]["zero_reference_supporting_scripts"]["count"] == 45
 
     for outcome in closeout["outcomes"].values():
         for relative_path in outcome["evidence"]:
@@ -162,7 +176,9 @@ def test_issue_5790_compatibility_metadata_is_present_and_conflict_free() -> Non
     assert census["summary"]["retained_entrypoint_count"] == 12
     assert census["summary"]["retained_public_export_facade_count"] == 4
     assert census["summary"]["retained_public_entrypoint_burden"] == 0
-    assert census["summary"]["retained_public_export_facades_with_duplicate_exports"] == 0
+    assert (
+        census["summary"]["retained_public_export_facades_with_duplicate_exports"] == 0
+    )
     assert (
         census["summary"]["retained_public_export_facades_with_resolution_conflicts"]
         == 0
@@ -188,7 +204,9 @@ def test_issue_5790_compatibility_metadata_is_present_and_conflict_free() -> Non
     assert "sunset status:" in snapshot_text
 
 
-def test_issue_5791_adapter_duplication_dropped_under_canonical_error_bundle_owner() -> None:
+def test_issue_5791_adapter_duplication_dropped_under_canonical_error_bundle_owner() -> (
+    None
+):
     closeout = _load_json(CLOSEOUT)
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
@@ -208,7 +226,9 @@ def test_issue_5791_adapter_duplication_dropped_under_canonical_error_bundle_own
     assert "build_common_network_error_bundle" in pubmed_text
 
 
-def test_issue_5792_pipeline_duplication_dropped_under_base_transformer_defaults() -> None:
+def test_issue_5792_pipeline_duplication_dropped_under_base_transformer_defaults() -> (
+    None
+):
     closeout = _load_json(CLOSEOUT)
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
@@ -285,7 +305,9 @@ def test_issue_5795_runtime_basics_has_committed_targeted_coverage_proof() -> No
     inventory = _load_json(MODULE_COVERAGE)
     tail_map = _load_json(COVERAGE_TAIL_MAP)
     runtime_row = next(
-        row for row in inventory["modules"] if row["module"] == "bioetl.composition.bootstrap.runtime.runtime_basics"
+        row
+        for row in inventory["modules"]
+        if row["module"] == "bioetl.composition.bootstrap.runtime.runtime_basics"
     )
     family_row = next(
         row
@@ -314,7 +336,9 @@ def test_issue_5795_runtime_basics_has_committed_targeted_coverage_proof() -> No
     )
 
 
-def test_issue_5796_zero_reference_supporting_scripts_have_owner_or_removal_governance() -> None:
+def test_issue_5796_zero_reference_supporting_scripts_have_owner_or_removal_governance() -> (
+    None
+):
     manifest = _load_json(SCRIPTS_MANIFEST)
     registry = _load_json(SCRIPTS_LIFECYCLE_REGISTRY)
     backlog_text = SCRIPTS_BACKLOG.read_text(encoding="utf-8")
@@ -323,7 +347,7 @@ def test_issue_5796_zero_reference_supporting_scripts_have_owner_or_removal_gove
     ]
 
     assert registry["schema_version"]
-    assert len(zero_ref_rows) == 46
+    assert len(zero_ref_rows) == 45
     assert {row["status"] for row in zero_ref_rows} == {"supporting"}
 
     for row in zero_ref_rows:

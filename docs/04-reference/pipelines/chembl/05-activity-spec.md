@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-28'
+  Last verified: '2026-07-05'
 
 ______________________________________________________________________
 
@@ -32,14 +32,15 @@ ______________________________________________________________________
 
 ## 2. Current Runtime Behavior
 
-`chembl_activity` is an active Bronze + Silver pipeline. The current config
-does **not** emit Gold output.
+`chembl_activity` is an active Bronze + Silver + Gold pipeline. Gold output is
+enabled in the live entity config and participates in the active contract
+registry surface.
 
 | Layer      | Status   | Source of truth                         |
 | ---------- | -------- | --------------------------------------- |
 | **Bronze** | Enabled  | Provider fetch + raw persistence        |
 | **Silver** | Enabled  | `configs/entities/chembl/activity.yaml` |
-| **Gold**   | Disabled | `pipeline.sink.gold.enabled: false`     |
+| **Gold**   | Enabled  | `pipeline.sink.gold.enabled: true`      |
 
 Key active config:
 
@@ -58,7 +59,7 @@ pipeline:
     silver:
       mode: merge
     gold:
-      enabled: false
+      enabled: true
 ```
 
 ## 3. Data Model Summary
@@ -118,8 +119,9 @@ Current examples:
 - `pchembl_value` must be between `0` and `15`
 - `standard_type` and `standard_units` are restricted by configured enums
 
-Silver output keeps business, system, and DQ fields. Gold-only filtering is not
-part of the current runtime for this pipeline because Gold is disabled.
+Silver output keeps business, system, and DQ fields. Gold output is published
+for the active `chembl_activity` runtime and follows the exported Gold contract
+surface documented below.
 
 ## 5. Storage Behavior
 
@@ -143,11 +145,13 @@ Primary key semantics: activity_id
 ### Gold
 
 ```text
-Disabled for the active chembl_activity pipeline
+Path: data/output/gold/chembl/activity/
+Format: Delta Lake (contract-backed)
+Mode: enabled via pipeline.sink.gold.enabled
 ```
 
-If Gold is re-enabled in the future, the reference docs must be updated from
-the live entity config and contract sources before describing Gold behavior.
+Gold behavior is active in the current runtime. Generated contract exports
+describe the published schema surface; they do not imply Gold is reference-only.
 
 ## 6. Source Files
 
@@ -189,8 +193,8 @@ bioetl run --pipeline chembl_activity \
 ## 8. Notes
 
 - ChEMBL remains a public provider with configured throttling; do not document it as unbounded.
-- Gold reference artifacts may exist in generated docs, but they do not imply that
-  `chembl_activity` currently writes Gold output.
+- Gold contract exports describe the active published schema surface for the
+  enabled `chembl_activity` Gold runtime.
 - For architectural rationale, see ADR-010, ADR-014, ADR-032, ADR-037, and ADR-039.
 
 ## Contract References

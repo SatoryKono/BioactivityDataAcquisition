@@ -466,6 +466,11 @@ run_memory_checks() {
     run_step memory-validate \
         "$PYTHON_BIN" -m memory.tooling.validate
 
+    run_step memory-workflow-smoke \
+        "$PYTHON_BIN" -m memory.tooling.workflow smoke \
+        --validation-timeout-seconds 15 \
+        --json
+
     if [[ "$DRY_RUN" == "1" ]]; then
         MEMORY_TMP_OUTPUT="/tmp/bioetl-memory-refresh-dry-run"
     else

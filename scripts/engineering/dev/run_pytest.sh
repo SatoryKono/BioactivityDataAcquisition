@@ -23,7 +23,7 @@ esac
 PYTEST_RUNTIME_ENV_FILE="$REPO_ROOT/.pytest_cache/setup_plugins_runtime.sh"
 
 DEFAULT_FLAGS=(-q --maxfail=1)
-DEFAULT_IGNORES=(--ignore=.cache --ignore=.pytest_cache --ignore=.hypothesis)
+DEFAULT_IGNORES=(--ignore=.cache --ignore=.pytest_cache --ignore=.hypothesis --ignore=caddy)
 PYTEST_ARGS=("$@")
 PYTEST_PLUGIN_ARGS=()
 PYTEST_NARROW="${BIOETL_PYTEST_NARROW:-0}"
@@ -59,7 +59,7 @@ fi
 
 for arg in "${PYTEST_ARGS[@]}"; do
     case "$arg" in
-        --ignore=.cache|--ignore=.pytest_cache|--ignore=.hypothesis)
+        --ignore=.cache|--ignore=.pytest_cache|--ignore=.hypothesis|--ignore=caddy)
             DEFAULT_IGNORES=("${DEFAULT_IGNORES[@]/$arg}")
             ;;
         *)
@@ -347,7 +347,7 @@ required = (
     "pytest_cov",
     "xdist",
     "pytest_timeout",
-    "pytest_vcr",
+    "pytest_recording",
     "syrupy",
     "_hypothesis_pytestplugin",
     "pydantic",
@@ -479,7 +479,7 @@ if [[ "$PYTEST_NARROW" == "1" ]]; then
         _hypothesis_pytestplugin
         pytest_timeout
         syrupy
-        pytest_vcr
+        pytest_recording.plugin
     )
     for plugin in "${_narrow_pytest_plugins[@]}"; do
         PYTEST_PLUGIN_ARGS+=(-p "$plugin")
@@ -500,7 +500,7 @@ elif [[ "${BIOETL_PYTEST_AUTOLOAD:-0}" != "1" ]]; then
         _core_pytest_plugins+=(syrupy)
     fi
     if _needs_vcr_plugin; then
-        _core_pytest_plugins+=(pytest_vcr)
+        _core_pytest_plugins+=(pytest_recording.plugin)
     fi
     if _needs_hypothesis_plugin_for_selection; then
         _core_pytest_plugins+=(_hypothesis_pytestplugin)

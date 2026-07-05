@@ -50,6 +50,22 @@ DEFAULT_JSON_OUTPUT = (
 )
 DEFAULT_MD_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "debt-governance-gates.md"
 RELEASE_REVIEW_MAX_AGE_DAYS = 21
+DEBT_SCORECARD_PATH = "configs/quality/debt_scorecard.yaml"
+FLAKY_TEST_REVIEW_PATH = "reports/quality/flaky-test-burndown-review.json"
+BUDGET_KEY_NAMES = frozenset(
+    {
+        "budget",
+        "max",
+        "max_count",
+        "max_loc",
+        "max_lines",
+        "max_value",
+        "limit",
+        "threshold",
+        "cap",
+    }
+)
+UNTRIAGED_FLAKY_STATUSES = frozenset({"", "needs-triage", "unknown", "untriaged"})
 
 
 @dataclass(frozen=True)
@@ -96,6 +112,25 @@ def _load_yaml(repo_root: Path, rel_path: str) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
+def _load_yaml_from_git_ref(
+    repo_root: Path,
+    ref: str,
+    rel_path: str,
+) -> dict[str, Any] | None:
+    result = subprocess.run(
+        ["git", "-C", repo_root.as_posix(), "show", f"{ref}:{rel_path}"],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    payload = yaml.safe_load(result.stdout)
+    return payload if isinstance(payload, dict) else {}
+
+
 def _count(value: object) -> int:
     if isinstance(value, int):
         return value
@@ -106,6 +141,131 @@ def _count(value: object) -> int:
     if value is None:
         return 0
     return int(value)
+
+
+def _is_budget_key(key: str) -> bool:
+    lowered = key.lower()
+    return (
+        lowered in BUDGET_KEY_NAMES
+        or lowered.startswith("max_")
+        or lowered.endswith("_budget")
+        or lowered.endswith("_cap")
+        or lowered.endswith("_limit")
+        or lowered.endswith("_threshold")
+    )
+
+
+def _collect_budget_numbers(
+    payload: object,
+    *,
+    prefix: tuple[str, ...] = (),
+) -> dict[str, int | float]:
+    numbers: dict[str, int | float] = {}
+    if isinstance(payload, dict):
+        for key, value in payload.items():
+            key_text = str(key)
+            next_prefix = (*prefix, key_text)
+            if (
+                _is_budget_key(key_text)
+                and isinstance(value, int | float)
+                and not isinstance(value, bool)
+            ):
+                numbers[".".join(next_prefix)] = value
+            elif isinstance(value, dict | list):
+                numbers.update(_collect_budget_numbers(value, prefix=next_prefix))
+    elif isinstance(payload, list):
+        for index, value in enumerate(payload):
+            if isinstance(value, dict | list):
+                numbers.update(
+                    _collect_budget_numbers(value, prefix=(*prefix, str(index)))
+                )
+    return numbers
+
+
+def _budget_growth_increases(
+    *,
+    baseline_payload: dict[str, Any],
+    current_payload: dict[str, Any],
+) -> dict[str, dict[str, int | float | None]]:
+    baseline = _collect_budget_numbers(baseline_payload)
+    current = _collect_budget_numbers(current_payload)
+    increases: dict[str, dict[str, int | float | None]] = {}
+    for path, current_value in sorted(current.items()):
+        baseline_value = baseline.get(path)
+        if baseline_value is None:
+            if current_value > 0:
+                increases[path] = {"from": None, "to": current_value}
+            continue
+        if current_value > baseline_value:
+            increases[path] = {"from": baseline_value, "to": current_value}
+    return increases
+
+
+def _debt_scorecard_budget_no_growth_gate(
+    *,
+    repo_root: Path,
+    changed_from_ref: str | None,
+) -> Gate:
+    if not changed_from_ref:
+        return Gate(
+            name="debt_scorecard_budget_no_growth",
+            status="pass",
+            metric="budget_increase_count",
+            current="not_evaluated_without_changed_from_ref",
+            limit=0,
+            source_artifact=DEBT_SCORECARD_PATH,
+            remediation=(
+                "Run with --changed-from-ref in CI so scorecard budgets cannot grow."
+            ),
+        )
+
+    baseline_payload = _load_yaml_from_git_ref(
+        repo_root,
+        changed_from_ref,
+        DEBT_SCORECARD_PATH,
+    )
+    if baseline_payload is None:
+        return Gate(
+            name="debt_scorecard_budget_no_growth",
+            status="fail",
+            metric="budget_increase_count",
+            current="baseline_unavailable",
+            limit=0,
+            source_artifact=DEBT_SCORECARD_PATH,
+            remediation=("Fetch the changed-from ref and rerun debt-governance gates."),
+        )
+
+    increases = _budget_growth_increases(
+        baseline_payload=baseline_payload,
+        current_payload=_load_yaml(repo_root, DEBT_SCORECARD_PATH),
+    )
+    return Gate(
+        name="debt_scorecard_budget_no_growth",
+        status="pass" if not increases else "fail",
+        metric="budget_increase_count",
+        current=increases if increases else 0,
+        limit=0,
+        source_artifact=DEBT_SCORECARD_PATH,
+        remediation=(
+            "Lower or revert increased scorecard budgets; debt budgets must be "
+            "flat or decreasing."
+        ),
+    )
+
+
+def _flaky_untriaged_entries(review: dict[str, Any]) -> list[object]:
+    entries = review.get("reviewed_flaky_tests", [])
+    if not isinstance(entries, list):
+        return [{"error": "reviewed_flaky_tests_not_a_list"}]
+    untriaged: list[object] = []
+    for entry in entries:
+        if not isinstance(entry, dict):
+            untriaged.append(entry)
+            continue
+        status = str(entry.get("triage_status", "")).strip().lower()
+        if status in UNTRIAGED_FLAKY_STATUSES:
+            untriaged.append(entry)
+    return untriaged
 
 
 def _hard_limit_gate(
@@ -183,7 +343,7 @@ def _artifact_matches_builder(
     )
 
 
-def _remote_main_baseline_artifact_matches_builder(*, repo_root: Path) -> bool:
+def _remote_main_baseline_artifact_matches_builder(*, repo_root: Path) -> bool | None:
     try:
         live_payload = report_architecture_debt_remote_main_baseline.build_payload(
             repo_root=repo_root
@@ -191,6 +351,12 @@ def _remote_main_baseline_artifact_matches_builder(*, repo_root: Path) -> bool:
         committed = _load_json(
             repo_root, "reports/quality/architecture-debt-remote-main-baseline.json"
         )
+    except subprocess.CalledProcessError:
+        return None
+    except RuntimeError as exc:
+        if "Could not resolve" in str(exc):
+            return None
+        return False
     except Exception:
         return False
     return (
@@ -670,6 +836,7 @@ def build_payload(
     test_governance = _load_json(
         repo_root, "reports/quality/test-governance-current.json"
     )
+    flaky_review = _load_json(repo_root, FLAKY_TEST_REVIEW_PATH)
     runtime_cardinality = _load_json(
         repo_root,
         "reports/observability/runtime_cardinality_inventory.json",
@@ -694,6 +861,12 @@ def build_payload(
     )
 
     gates.extend(_debt_scorecard_gates())
+    gates.append(
+        _debt_scorecard_budget_no_growth_gate(
+            repo_root=repo_root,
+            changed_from_ref=changed_from_ref,
+        )
+    )
 
     coverage_summary = module_coverage["summary"]
     status_counts = coverage_summary["status_counts"]
@@ -1044,6 +1217,38 @@ def build_payload(
             remediation="Replace uuid4 tests with deterministic factories or explicit IDs.",
         )
     )
+    flaky_summary = flaky_review.get("summary", {})
+    total_flaky = (
+        int(flaky_summary.get("total_flaky", 0))
+        if isinstance(flaky_summary, dict)
+        else 0
+    )
+    gates.append(
+        _hard_limit_gate(
+            name="flaky_test_total_count",
+            metric="total_flaky",
+            current=total_flaky,
+            limit=0,
+            source_artifact=FLAKY_TEST_REVIEW_PATH,
+            remediation=(
+                "Stabilize or explicitly quarantine flaky tests; default test "
+                "paths must remain deterministic."
+            ),
+        )
+    )
+    gates.append(
+        _hard_limit_gate(
+            name="flaky_test_untriaged_count",
+            metric="untriaged_flaky_tests",
+            current=len(_flaky_untriaged_entries(flaky_review)),
+            limit=0,
+            source_artifact=FLAKY_TEST_REVIEW_PATH,
+            remediation=(
+                "Every flaky candidate must have owner, triage status, and "
+                "deterministic remediation metadata."
+            ),
+        )
+    )
 
     runtime_uuid_policy = runtime_uuid.get("policy", {})
     runtime_uuid_seams = runtime_uuid.get("seams", [])
@@ -1072,12 +1277,42 @@ def build_payload(
 
     gates.append(
         _hard_limit_gate(
+            name="observability_dashboarded_without_declaration",
+            metric="dashboarded_without_declaration",
+            current=len(runtime_cardinality["dashboarded_without_declaration"]),
+            limit=0,
+            source_artifact="reports/observability/runtime_cardinality_inventory.json",
+            remediation="Declare dashboarded metrics or remove stale dashboard references.",
+        )
+    )
+    gates.append(
+        _hard_limit_gate(
             name="observability_dashboarded_without_emission",
             metric="dashboarded_without_emission",
             current=len(runtime_cardinality["dashboarded_without_emission"]),
             limit=0,
             source_artifact="reports/observability/runtime_cardinality_inventory.json",
             remediation="Add runtime emission for dashboarded metrics or remove dashboard references.",
+        )
+    )
+    gates.append(
+        _hard_limit_gate(
+            name="observability_alerted_without_emission",
+            metric="alerted_without_emission",
+            current=len(runtime_cardinality["alerted_without_emission"]),
+            limit=0,
+            source_artifact="reports/observability/runtime_cardinality_inventory.json",
+            remediation="Add runtime emission for alerted metrics or retire stale alert rules.",
+        )
+    )
+    gates.append(
+        _hard_limit_gate(
+            name="observability_unused_declared_metrics",
+            metric="unused_declared_metrics",
+            current=len(runtime_cardinality["unused_declared_metrics"]),
+            limit=0,
+            source_artifact="reports/observability/runtime_cardinality_inventory.json",
+            remediation="Emit, retire, or explicitly allowlist unused declared metrics.",
         )
     )
     gates.append(
@@ -1154,26 +1389,25 @@ def build_payload(
     unavailable_remote_artifacts = _unavailable_required_remote_baseline_artifacts(
         remote_baseline
     )
-    gates.append(
-        Gate(
-            name="remote_main_architecture_debt_baseline",
-            status=(
-                "pass"
-                if remote_baseline["evidence_source"] == "remote_main_git_tree"
-                and remote_baseline["local_tracking_ref_matches_remote"]
-                and not unavailable_remote_artifacts
-                else "fail"
-            ),
-            metric="baseline_artifact_fingerprint",
-            current=remote_baseline.get("baseline_artifact_fingerprint")
-            or report_architecture_debt_remote_main_baseline.baseline_artifact_fingerprint(
-                remote_baseline
-            ),
-            limit="clean remote-main artifact blobs",
-            source_artifact="reports/quality/architecture-debt-remote-main-baseline.json",
-            remediation="Fetch origin/main and regenerate the remote-main architecture debt baseline.",
-        )
+    remote_main_baseline_gate = Gate(
+        name="remote_main_architecture_debt_baseline",
+        status=(
+            "pass"
+            if remote_baseline["evidence_source"] == "remote_main_git_tree"
+            and remote_baseline["local_tracking_ref_matches_remote"]
+            and not unavailable_remote_artifacts
+            else "fail"
+        ),
+        metric="baseline_artifact_fingerprint",
+        current=remote_baseline.get("baseline_artifact_fingerprint")
+        or report_architecture_debt_remote_main_baseline.baseline_artifact_fingerprint(
+            remote_baseline
+        ),
+        limit="clean remote-main artifact blobs",
+        source_artifact="reports/quality/architecture-debt-remote-main-baseline.json",
+        remediation="Fetch origin/main and regenerate the remote-main architecture debt baseline.",
     )
+    gates.append(remote_main_baseline_gate)
 
     # Check if we're in test mode by looking for pytest in sys.modules
     in_test_mode = "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST")
@@ -1192,6 +1426,14 @@ def build_payload(
             "dq_contract_registry_diagnostics": False,
         }
     else:
+        remote_main_builder_match = _remote_main_baseline_artifact_matches_builder(
+            repo_root=repo_root
+        )
+        remote_main_baseline_stale = (
+            remote_main_builder_match is not True
+            if remote_main_builder_match is not None
+            else remote_main_baseline_gate.status != "pass"
+        )
         stale_artifacts = {
             "module_coverage_inventory": module_coverage_hash_gate.status != "pass",
             "architecture_quality_scorecard": not _artifact_matches_builder(
@@ -1213,9 +1455,7 @@ def build_payload(
                     repo_root=repo_root
                 ),
             ),
-            "remote_main_baseline": not _remote_main_baseline_artifact_matches_builder(
-                repo_root=repo_root
-            ),
+            "remote_main_baseline": remote_main_baseline_stale,
             "dq_contract_registry_diagnostics": False,
         }
     stale_count = sum(1 for stale in stale_artifacts.values() if stale)

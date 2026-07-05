@@ -23,7 +23,7 @@ ______________________________________________________________________
 ## Текущее состояние
 
 Проект уже имеет развитую GitHub инфраструктуру:
-- ✅ 33+ GitHub Actions workflow
+- ✅ 38 GitHub Actions workflows (see [canonical inventory](../04-reference/github-actions-workflows.md))
 - ✅ CODEOWNERS и branch protection policy
 - ✅ Dependabot для автоматических обновлений
 - ✅ Шаблоны для issues и pull requests

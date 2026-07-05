@@ -16,11 +16,11 @@
     "retained_public_export_facade_count": 4,
     "adapter_duplicate_clusters": {
       "opening_baseline": 54,
-      "current": 41
+      "current": 38
     },
     "pipeline_duplicate_clusters": {
       "opening_baseline": 11,
-      "current": 3
+      "current": 2
     },
     "repo_wide_zero_import_candidates": {
       "count": 9,
@@ -36,7 +36,7 @@
       "targeted_closeout_proof": 100.0
     },
     "zero_reference_supporting_scripts": {
-      "count": 47,
+      "count": 45,
       "missing_governance_metadata": 0
     }
   },
@@ -58,21 +58,21 @@
       "debt_type": "adapter_duplication",
       "outcome": "improved",
       "opening_baseline": 54,
-      "current_value": 41,
+      "current_value": 38,
       "evidence": [
         "src/bioetl/infrastructure/adapters/common/error_bundles.py",
         "src/bioetl/infrastructure/adapters/pubmed/_errors.py",
         "reports/quality/full-app-duplication-baseline.json",
         "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py"
       ],
-      "closeout_reason": "Shared adapter network/resilience bundles now flow through the canonical common helper and the committed duplication baseline remains at 41 clusters, below the opening 54-cluster tranche."
+      "closeout_reason": "Shared adapter network/resilience bundles now flow through the canonical common helper and the committed duplication baseline remains at 38 clusters, below the opening 54-cluster tranche."
     },
     "5792": {
       "status": "closeable",
       "debt_type": "pipeline_transformer_duplication",
       "outcome": "improved",
       "opening_baseline": 11,
-      "current_value": 3,
+      "current_value": 2,
       "evidence": [
         "src/bioetl/application/pipelines/common/base_publication_transformer.py",
         "src/bioetl/application/pipelines/common/publication_transformer_context.py",
@@ -82,7 +82,7 @@
         "reports/quality/full-app-duplication-baseline.json",
         "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py"
       ],
-      "closeout_reason": "Provider publication transformers now consume shared default-provider/default-entity-type initialization through the canonical base transformer context, and the committed pipeline duplication baseline remains at 3 clusters, below the opening 11-cluster tranche."
+      "closeout_reason": "Provider publication transformers now consume shared default-provider/default-entity-type initialization through the canonical base transformer context, and the committed pipeline duplication baseline remains at 2 clusters, below the opening 11-cluster tranche."
     },
     "5793": {
       "status": "closeable",

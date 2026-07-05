@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -439,6 +440,60 @@ def test_post_task_workflow_timeout_payload_returns_nonzero_exit_code() -> None:
     }
 
     assert workflow._emit(payload, as_json=False) == 1
+
+
+def test_post_task_workflow_returns_degraded_payload_when_refresh_times_out(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    def _fake_validation_runner(
+        *,
+        timeout_seconds: float | None,
+        repo_root: Path,
+    ) -> dict[str, object]:
+        return {"status": "completed", "issues": []}
+
+    def _fake_subprocess_run(*args: object, **kwargs: object) -> object:
+        raise subprocess.TimeoutExpired(
+            cmd=kwargs.get("args", ["memory.tooling.refresh_all"]),
+            timeout=kwargs.get("timeout", 0.01),
+        )
+
+    monkeypatch.setattr(workflow, "_run_post_task_validation", _fake_validation_runner)
+    monkeypatch.setattr(workflow.subprocess, "run", _fake_subprocess_run)
+
+    summary_note_path = tmp_path / "summary-refresh-timeout.md"
+    payload = workflow.post_task_workflow(
+        task_id="task-refresh-timeout",
+        title="Bounded post-task refresh",
+        summary="Summary note should still be written.",
+        source_refs=["src/memory/README.md"],
+        refresh_output_root=tmp_path / "refresh",
+        summary_note_path=summary_note_path,
+        validation_timeout_seconds=15.0,
+        refresh_timeout_seconds=0.01,
+    )
+
+    assert payload["ok"] is True
+    assert payload["degraded"] is True
+    assert payload["refresh_report"]["status"] == "timed_out"
+    assert payload["refresh_report"]["timeout_seconds"] == 0.01
+    assert summary_note_path.exists()
+
+
+def test_smoke_workflow_exercises_pre_and_post_without_persistent_refresh(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(workflow, "validate_memory_scaffold", lambda: [])
+
+    payload = workflow.smoke_workflow(validation_timeout_seconds=0)
+
+    assert payload["kind"] == "smoke"
+    assert payload["ok"] is True
+    assert payload["pre_task_ok"] is True
+    assert payload["post_task_ok"] is True
+    assert payload["post_task_validation_status"] == "completed"
+    assert payload["generated_artifacts"] == "temporary_directory_removed"
 
 
 def test_compact_prune_report_accepts_minimal_stub_payload() -> None:

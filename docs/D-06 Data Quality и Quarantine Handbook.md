@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last synchronized: '2026-05-08'
+  Last synchronized: '2026-07-05'
 
 ______________________________________________________________________
 
@@ -29,9 +29,14 @@ D-06 фиксирует структуру будущего consolidated handboo
 
 ## Текущая validated модель (summary)
 
-- DQ defaults: `soft_fail=0.05`, `hard_fail=0.20`, `invalid_record_policy=quarantine`.
+Non-normative snapshot only. Canonical details live in the linked guides/runbooks.
+
+- DQ defaults:
+  - hierarchical config (`configs/base/quality.yaml`): `soft_fail=0.05`, `hard_fail=0.25`;
+  - contract/runtime fallback (`silver_dq_request`): `soft_fail=0.05`, `hard_fail=0.20`.
+- Composite pipelines may define explicit per-surface overrides in `configs/composites/*.yaml`.
 - Quarantine CLI surface: `inspect`, `stats`, `replay`, `purge`, `resolve`.
-- Persisted operator statuses: `NEW`, `IGNORED`, `REPROCESSED`.
+- Persisted operator-facing lifecycle statuses: `NEW`, `UNDER_REVIEW`, `IGNORED`, `REPROCESSED`, `EXPIRED` (see [aggregate state machines](04-reference/domain/aggregate-state-machines.md)).
 - `quarantine replay` подготавливает/маркирует записи для reprocessing; не выполняет полный pipeline rerun.
 
 ## Текущие зоны дрейфа

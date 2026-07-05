@@ -4,7 +4,7 @@ Aggregate Root for isolated failed records pending analysis.
 
 Invariants:
     1. payload_hash is unique within a pipeline (enforced by storage)
-    2. Status transitions: NEW -> IGNORED or NEW -> REPROCESSED
+    2. Status transitions: NEW -> UNDER_REVIEW -> (IGNORED|REPROCESSED|EXPIRED)
     3. Resolution metadata is required when marking as resolved
     4. payload cannot be modified after creation
     5. error_code is required and immutable

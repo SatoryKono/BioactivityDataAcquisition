@@ -63,6 +63,9 @@ def test_discover_refs_normalizes_windows_path_separators() -> None:
     original_iter_search_files = module._iter_search_files
     docs_dir = root / "docs" / "03-guides" / "development"
     docs_file = docs_dir / "codex-paths.md"
+    original_docs_text = (
+        docs_file.read_text(encoding="utf-8") if docs_file.exists() else None
+    )
     docs_file.write_text(
         "\n".join(
             (
@@ -83,7 +86,10 @@ def test_discover_refs_normalizes_windows_path_separators() -> None:
         refs = module._discover_refs(root, targets)
     finally:
         module._iter_search_files = original_iter_search_files
-        docs_file.unlink(missing_ok=True)
+        if original_docs_text is None:
+            docs_file.unlink(missing_ok=True)
+        else:
+            docs_file.write_text(original_docs_text, encoding="utf-8")
 
     codex_exec_key = "/".join(["scripts", "codex-exec.bat"])
     codex_key = "/".join(["scripts", "codex.bat"])

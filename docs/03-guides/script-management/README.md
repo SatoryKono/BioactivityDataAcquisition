@@ -40,7 +40,7 @@ The script management guides provide:
 - **Script Catalog**: `scripts/engineering/repo/catalog.yaml` - Canonical script locations
 - **Inventory Manifest**: `configs/quality/scripts_inventory_manifest.json` - Current inventory
 - **Lifecycle Registry**: `configs/quality/scripts_lifecycle_registry.json` - Script lifecycle decisions
-- **Governance Rules**: [`AGENTS.md`](../../../../AGENTS.md) — AI runtime entry and governance links; normative stack index in [`docs/00-project/NORMATIVE_SOURCES.md`](../../../../00-project/NORMATIVE_SOURCES.md)
+- **Governance Rules**: [`AGENTS.md`](../../../AGENTS.md) — AI runtime entry and governance links; normative stack index in [`docs/00-project/NORMATIVE_SOURCES.md`](../../00-project/NORMATIVE_SOURCES.md)
 
 ## Maintenance
 

@@ -126,7 +126,7 @@ Extracts dates from PubMed XML:
 
 ```python
 # Priority chain for publication-date
-publication - date = epub - date or pub - date or f"{year}-12-31"
+publication_date = epub_date or pub_date or f"{year}-12-31"
 ```
 
 ### CrossRef
@@ -140,11 +140,11 @@ Uses `format-date-parts()` for date normalization:
 
 ```python
 # Date normalization in extractor
-published - print = (
-    format - date - parts(record.get("published-print", {}).get("date-parts"))
+published_print = (
+    format_date_parts(record.get("published-print", {}).get("date-parts"))
 )
-published - online = (
-    format - date - parts(record.get("published-online", {}).get("date-parts"))
+published_online = (
+    format_date_parts(record.get("published-online", {}).get("date-parts"))
 )
 ```
 
@@ -179,7 +179,7 @@ ChEMBL only provides year information. Uses start-of-year convention:
 
 ```python
 # Year only → YYYY-01-01 (differs from other pipelines)
-publication - date = f"{year}-01-01"
+publication_date = f"{year}-01-01"
 ```
 
 **Note**: This differs from the end-of-period strategy used by other pipelines.

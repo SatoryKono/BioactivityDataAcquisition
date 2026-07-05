@@ -133,6 +133,9 @@ What it does:
   blocking summary-note creation
 - optionally runs episodic prune in dry-run mode, using the policy-backed
   density threshold from `src/memory/policy/retention.yaml`
+- bounds both validation and the default post-task refresh when run through the
+  CLI, returning an explicit degraded JSON payload instead of hanging on slow
+  validation or timeline/RAG refresh work.
 
 Use `python -m memory.tooling.prune --json` for the policy-default density
 report or `python -m memory.tooling.prune --max-active <N> --json` for an
@@ -145,6 +148,15 @@ preserve `PYTHONDONTWRITEBYTECODE=1`.
 
 Set `--validation-timeout-seconds 0` only when you intentionally want the
 workflow to wait for a full in-process validation scan regardless of duration.
+Set `--refresh-timeout-seconds 0` only when you intentionally want post-task
+refresh to run in-process without the CLI subprocess timeout.
+
+For a lightweight health check that exercises pre-task and post-task without
+committing rebuild-only artifacts:
+
+```bash
+python -m memory.tooling.workflow smoke --json
+```
 
 If the outcome is durable, promote the summary:
 

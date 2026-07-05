@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 ## Purpose
 
-This page is the canonical published inventory of the live GitHub Actions
+This page is the canonical published inventory of the **38** live GitHub Actions
 workflows shipped under `.github/workflows/`.
 
 Use it when you need to answer:

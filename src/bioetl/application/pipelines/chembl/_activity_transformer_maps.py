@@ -8,6 +8,7 @@ from bioetl.application.core.field_specs import (
     float_fields,
     int_fields,
     simple_fields,
+    standard_value_fields,
 )
 from bioetl.domain.transformations import safe_float
 from bioetl.domain.types import JsonDict
@@ -90,15 +91,10 @@ _RAW_VALUES = FieldGroup(
 
 _STANDARD_VALUES = FieldGroup(
     name="standard_values",
-    fields=(
-        *simple_fields(
-            "standard_type",
-            "standard_units",
-            "standard_relation",
-            "standard_text_value",
-        ),
-        *float_fields("standard_value", "standard_upper_value", "pchembl_value"),
-        *int_fields("standard_flag"),
+    fields=standard_value_fields(
+        include_standard_upper_value=True,
+        include_pchembl_value=True,
+        include_standard_flag=True,
     ),
 )
 

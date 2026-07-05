@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-20'
+  Last verified: '2026-07-05'
 
 ______________________________________________________________________
 
@@ -33,13 +33,13 @@ surface under `docs/04-reference/pipelines/`.
 | Provider | `chembl` |
 | Entity | `activity` |
 | Silver output | Enabled |
-| Gold output | Disabled |
+| Gold output | Enabled |
 | Source of truth | `configs/entities/chembl/activity.yaml` |
 
 ## Why This Page Is Compact
 
 Earlier versions of this document duplicated runtime details that drifted from
-the live config, including stale Gold-layer claims. The numbered spec and the
-provider reference are now the maintained surfaces for current behavior.
+the live config. The numbered spec and the provider reference are now the
+maintained surfaces for current behavior.
 
 Use this page only as a stable redirect target for old links.
