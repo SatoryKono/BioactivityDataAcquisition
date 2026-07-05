@@ -243,12 +243,10 @@ async def _run_health_server(
     quarantine_service = None
     try:
         await server.start()
-        quarantine_service = await asyncio.to_thread(
-            _get_optional_health_server_quarantine_service
-        )
+        quarantine_service = _get_optional_health_server_quarantine_service()
         server._quarantine_service = quarantine_service
         if start_metrics:
-            await asyncio.to_thread(_start_health_observability)
+            _start_health_observability()
         while True:
             await asyncio.sleep(1)
     finally:

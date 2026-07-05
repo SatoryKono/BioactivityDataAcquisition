@@ -289,3 +289,13 @@ entries:
     classification: budget_closeout_ratchet
     live_guard: "debt issue batch #5974-#5977 remains aligned with live time-seam governance, duplicate-name consolidation, and compatibility sunset ledger evidence without budget growth."
     rationale: Keeps the newest Test Audit closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issues_5978_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue #5978 branch coverage readiness remains deferred for dedicated branch coverage instrumentation and analysis without budget growth."
+    rationale: Keeps the branch coverage readiness closeout tied to documented deferral rationale and current line coverage state evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issues_5975_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue #5975 slow governance scan hotspot reduction remains deferred with documented optimization plan and performance analysis without budget growth."
+    rationale: Keeps the slow governance scan closeout tied to documented performance analysis, bottleneck identification, and optimization recommendations instead of stale historical signoff.

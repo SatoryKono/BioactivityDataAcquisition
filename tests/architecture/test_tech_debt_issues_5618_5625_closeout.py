@@ -36,7 +36,7 @@ EXPECTED_ISSUES = {5618, 5619, 5620, 5621, 5622, 5623, 5624, 5625}
 ISSUE_5622_TOTAL_DUPLICATION_CEILING = 88
 ISSUE_5622_CLI_DUPLICATION_CEILING = 3
 EXPECTED_HOTSPOT_BUDGETS = {
-    "application_core": {"files_ge_250_loc": 7, "max_internal_fan_in": 11},
+    "application_core": {"files_ge_250_loc": 7, "max_internal_fan_in": 10},
     "composition_bootstrap_runtime": {"files_ge_250_loc": 0, "max_internal_fan_in": 3},
     "composition_factories_pipeline": {"files_ge_250_loc": 3, "max_internal_fan_in": 3},
     "application_services_control_plane": {

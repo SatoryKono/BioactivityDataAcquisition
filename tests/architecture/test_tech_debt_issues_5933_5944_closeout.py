@@ -78,7 +78,7 @@ def _duplication_target(payload: dict[str, Any], target: str) -> dict[str, Any]:
     raise AssertionError(f"missing duplication target: {target}")
 
 
-def test_closeout_artifact_is_complete_and_budget_safe() -> None:
+def test_issues_5933_5944_closeout_artifact_is_complete_and_budget_safe() -> None:
     closeout = _load_json(CLOSEOUT)
 
     assert closeout["schema_version"] == "tech-debt-issues-5933-5944-closeout-v1"

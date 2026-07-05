@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from datetime import datetime
 from pathlib import Path
 
@@ -155,16 +154,12 @@ async def _execute_atomic_metadata_write(
         retry_state=retry_state,
     )
 
-    loop = asyncio.get_running_loop()
     try:
-        await loop.run_in_executor(
-            None,
-            lambda: atomic_write_text(
-                prepared_write.metadata_path,
-                prepared_write.yaml_content,
-                retry_policy=retry_policy,
-                on_retry=on_retry,
-            ),
+        atomic_write_text(
+            prepared_write.metadata_path,
+            prepared_write.yaml_content,
+            retry_policy=retry_policy,
+            on_retry=on_retry,
         )
     except AtomicWriteError as exc:
         _emit_atomic_write_final_telemetry(

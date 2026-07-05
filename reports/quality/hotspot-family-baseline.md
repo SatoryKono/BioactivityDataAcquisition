@@ -8,7 +8,7 @@
 
 | Family | Files | Total LOC | Files >=250 LOC | Helper ratio | Duplication | Max fan-in | Max fan-in module | Budgets | Budget warnings | Budget review notes |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- | --- |
-| `application_core` | 180 | 22303 | 5 | 0.356 | 0 | 10 | `bioetl.application.core.batch_runtime_failure_policy` | `files_ge_250_loc=7, max_internal_fan_in=11` | `-` | `near_budget:max_internal_fan_in=10/11` |
+| `application_core` | 180 | 22303 | 5 | 0.356 | 0 | 10 | `bioetl.application.core.batch_runtime_failure_policy` | `files_ge_250_loc=7, max_internal_fan_in=10` | `-` | `at_budget:max_internal_fan_in=10/10` |
 | `composition_bootstrap_runtime` | 49 | 5987 | 0 | 0.302 | 0 | 3 | `bioetl.composition.bootstrap.runtime.tracing_bootstrap` | `files_ge_250_loc=0, max_internal_fan_in=3` | `-` | `at_budget:max_internal_fan_in=3/3` |
 | `composition_factories_pipeline` | 35 | 4651 | 2 | 0.417 | 0 | 3 | `bioetl.composition.factories.pipeline.factory_method_helpers` | `files_ge_250_loc=3, max_internal_fan_in=3` | `-` | `at_budget:max_internal_fan_in=3/3` |
 | `application_services_control_plane` | 120 | 14787 | 13 | 0.457 | 0 | 4 | `bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy` | `files_ge_250_loc=16, max_internal_fan_in=4` | `-` | `near_budget:files_ge_250_loc=13/16, at_budget:max_internal_fan_in=4/4` |
