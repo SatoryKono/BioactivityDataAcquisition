@@ -173,6 +173,7 @@ Run the canonical daily agent/engineering workflow:
 ```bash
 python -m memory.tooling.workflow pre-task --task-id task-123 --title "Investigate chembl memory" --profile audit
 python -m memory.tooling.workflow post-task --task-id task-123 --title "Investigate chembl memory" --summary "Validated and refreshed memory surfaces."
+python -m memory.tooling.workflow smoke --json
 ```
 
 Detailed daily playbook:

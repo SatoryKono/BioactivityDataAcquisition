@@ -320,6 +320,7 @@ def test_ensure_backend_warns_when_detached_process_does_not_become_ready() -> N
     result = ensure_observability_backend_started(
         enabled=True,
         probe_fn=probe,
+        listener_pid_fn=MagicMock(return_value=None),
         start_fn=start,
         wait_fn=wait,
         warning_printer=warning,
@@ -407,7 +408,14 @@ def test_ensure_backend_reuse_uses_required_probe_timeout() -> None:
     )
 
 
-def test_ensure_backend_fails_when_required_paths_never_become_ready() -> None:
+def test_ensure_backend_fails_when_required_paths_never_become_ready(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        runtime_subject,
+        "_describe_required_probe_failure",
+        MagicMock(return_value="Capability probe failed: timeout."),
+    )
     probe = MagicMock(return_value=False)
     process = MagicMock(pid=654, args=["python", "-m", "bioetl"])
     start = MagicMock(return_value=process)
@@ -418,6 +426,7 @@ def test_ensure_backend_fails_when_required_paths_never_become_ready() -> None:
     result = ensure_observability_backend_started(
         enabled=True,
         probe_fn=probe,
+        listener_pid_fn=MagicMock(return_value=None),
         required_probe_paths=("/ops/control-plane/checkpoint-freshness?pipeline=x",),
         start_fn=start,
         wait_fn=wait,

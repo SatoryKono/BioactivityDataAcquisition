@@ -1,6 +1,6 @@
 {
   "schema_version": "tech-debt-issues-5707-5715-closeout-v1",
-  "generated_on": "2026-07-02",
+  "generated_on": "2026-07-05",
   "generated_by": "codex",
   "debt_budget_outcome": "reduced_or_unchanged",
   "issues": [
@@ -106,15 +106,15 @@
       "max": 0
     },
     "full_app_duplicate_clusters": {
-      "current": 44,
+      "current": 40,
       "max": 68
     },
     "adapter_duplicate_clusters": {
-      "current": 41,
+      "current": 38,
       "max": 55
     },
     "pipeline_duplicate_clusters": {
-      "current": 3,
+      "current": 2,
       "max": 13
     },
     "compatibility_test_files": {
@@ -164,10 +164,10 @@
         "module_coverage_inventory": false,
         "remote_main_baseline": false
       },
-      "module_coverage_source_tree_sha256": "bdc18d07ca1a26d66f13c5b0a556627ee93dcd9300fd4697a6e7a6570ab03b7f",
-      "architecture_quality_score": 8.57,
-      "remote_main_baseline_fingerprint": "0ebcab4c8a5def090c4ca996388a1b035044e2e9fb0f3b45183a0e93479065d7",
-      "architecture_quality_scorecard_source_tree_sha256": "bdc18d07ca1a26d66f13c5b0a556627ee93dcd9300fd4697a6e7a6570ab03b7f"
+      "module_coverage_source_tree_sha256": "1ab9625a9baa3d3cfc8ac4c2924df5cc9178635aca43ce0d7681570f99d808f6",
+      "architecture_quality_score": 8.58,
+      "remote_main_baseline_fingerprint": "fdcb0d409d81267179b18f694b11497e4903525f4eb56a879cc12b2b61e8ade1",
+      "architecture_quality_scorecard_source_tree_sha256": "1ab9625a9baa3d3cfc8ac4c2924df5cc9178635aca43ce0d7681570f99d808f6"
     },
     "5708": {
       "shared_delegation_helper": "src/bioetl/infrastructure/adapters/decorators/_data_source_delegation.py",
@@ -175,7 +175,7 @@
         "src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py",
         "src/bioetl/infrastructure/adapters/decorators/retry.py"
       ],
-      "adapter_duplicate_clusters": 41,
+      "adapter_duplicate_clusters": 38,
       "adapter_duplicate_clusters_no_growth_max": 55,
       "bounded_actionability_categories": [
         "export_facade_or_package_barrel"
@@ -183,7 +183,7 @@
     },
     "5709": {
       "opening_pipeline_duplicate_clusters": 15,
-      "pipeline_duplicate_clusters": 3,
+      "pipeline_duplicate_clusters": 2,
       "pipeline_duplicate_clusters_no_growth_max": 13,
       "dominant_actionability_category": "pipeline_transformer_contract_pattern",
       "decision": "reduced_shared_uniprot_comment_annotation_output_keys"

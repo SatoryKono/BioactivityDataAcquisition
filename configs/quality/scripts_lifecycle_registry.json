@@ -224,12 +224,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded manual observability audit report utility while dashboard PromQL scope reviews remain episodic; promote it into the canonical dashboard-audit workflow or retire it after those checks are fully absorbed by governed reports/tests."
     },
-    "scripts/engineering/qa/close_github_issue.py": {
-      "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded manual GitHub closeout helper for reviewed maintenance operations; do not re-expose it as an active workflow while it depends on local .env token loading and a hard-coded repository target."
-    },
     "scripts/engineering/qa/create_github_issues.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",

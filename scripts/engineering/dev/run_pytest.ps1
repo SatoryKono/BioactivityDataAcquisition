@@ -310,7 +310,7 @@ if ($PytestNarrow) {
         "_hypothesis_pytestplugin",
         "pytest_timeout",
         "syrupy",
-        "pytest_vcr"
+        "pytest_recording.plugin"
     )
     foreach ($Plugin in $PluginModules) {
         $PytestPluginArgs += @("-p", $Plugin)
@@ -324,7 +324,7 @@ if ($PytestNarrow) {
         "pytest_asyncio.plugin",
         "pytest_timeout",
         "syrupy",
-        "pytest_vcr",
+        "pytest_recording.plugin",
         "_hypothesis_pytestplugin"
     )
     if (Test-CoveragePluginNeeded -Args $PytestArgs) {

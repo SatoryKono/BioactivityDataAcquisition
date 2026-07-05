@@ -25,6 +25,12 @@ def test_scripts_deprecation_report_generation(tmp_path: Path) -> None:
 
     content = report_rel.read_text(encoding="utf-8")
     assert "# Scripts Deprecation Backlog" in content
+    assert (
+        "| Script Path | Type | Reference Count | Owner | Lifecycle Decision | Suggested Next Step |"
+        in content
+    )
+    assert "@bioetl-platform" in content
+    assert "`internal_helper_orphan`" in content
     assert "## unknown" in content
     assert "## orphan" in content
     assert "## legacy" in content

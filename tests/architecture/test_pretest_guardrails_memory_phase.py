@@ -20,6 +20,8 @@ def test_pretest_guardrails_script_runs_memory_phase() -> None:
     assert "run_memory_checks()" in script
     assert "memory-validate" in script
     assert '"$PYTHON_BIN" -m memory.tooling.validate' in script
+    assert "memory-workflow-smoke" in script
+    assert '"$PYTHON_BIN" -m memory.tooling.workflow smoke' in script
     assert "memory-refresh-smoke" in script
     assert '"$PYTHON_BIN" -m memory.tooling.refresh_all' in script
     assert "TMP_DIR" not in script

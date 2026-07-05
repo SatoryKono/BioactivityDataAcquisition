@@ -57,7 +57,7 @@ Shared evidence sources:
 | `chembl_cell_line` | [Spec](chembl/02-cell-line-spec.md) | Shared | Direct | Direct | Direct / Shared | Shared | Shared | `configs/entities/chembl/cell_line.yaml` |
 | `chembl_molecule` | [Spec](chembl/03-molecule-spec.md) | Shared | Direct | Direct | Shared | Shared | Shared | `configs/entities/chembl/molecule.yaml` |
 | `chembl_target` | [Spec](chembl/04-target-spec.md) | Shared | Direct | Direct | Shared | Shared | Shared | `configs/entities/chembl/target.yaml` |
-| `chembl_activity` | [Spec](chembl/05-activity-spec.md) | Direct | Direct | Disabled | Direct / Shared | Direct | Shared | `configs/entities/chembl/activity.yaml` |
+| `chembl_activity` | [Spec](chembl/05-activity-spec.md) | Direct | Direct | Enabled | Direct / Shared | Direct | Shared | `configs/entities/chembl/activity.yaml` |
 | `chembl_assay` | [Spec](chembl/06-assay-spec.md) | Shared | Direct | Direct | Direct / Shared | Shared | Shared | `configs/entities/chembl/assay.yaml` |
 | `chembl_publication` | [Spec](chembl/07-publication-spec.md) | Shared | Direct | Direct | Shared | Shared | Shared | `configs/entities/chembl/publication.yaml` |
 | `chembl_assay_parameters` | [Spec](chembl/08-assay-parameters-spec.md) | Shared | Direct | Direct | Shared | Shared | Shared | `configs/entities/chembl/assay_parameters.yaml` |

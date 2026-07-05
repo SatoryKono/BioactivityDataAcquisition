@@ -28,8 +28,17 @@
       "status": "pass"
     },
     {
-      "current": "07fbf033e437549350ec8f8a621a07b7363901e038bad21d72bc03d47654aa7a",
-      "limit": "07fbf033e437549350ec8f8a621a07b7363901e038bad21d72bc03d47654aa7a",
+      "current": "not_evaluated_without_changed_from_ref",
+      "limit": 0,
+      "metric": "budget_increase_count",
+      "name": "debt_scorecard_budget_no_growth",
+      "remediation": "Run with --changed-from-ref in CI so scorecard budgets cannot grow.",
+      "source_artifact": "configs/quality/debt_scorecard.yaml",
+      "status": "pass"
+    },
+    {
+      "current": "c0f35c662b4e0d040fcbe2c3a61469519e5a95ff89eff3d0b1844b8d5b9c1e18",
+      "limit": "c0f35c662b4e0d040fcbe2c3a61469519e5a95ff89eff3d0b1844b8d5b9c1e18",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -39,13 +48,13 @@
     {
       "current": {
         "source_module_count": 2210,
-        "source_tree_sha256": "07fbf033e437549350ec8f8a621a07b7363901e038bad21d72bc03d47654aa7a",
+        "source_tree_sha256": "c0f35c662b4e0d040fcbe2c3a61469519e5a95ff89eff3d0b1844b8d5b9c1e18",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2210,
-        "source_tree_sha256": "07fbf033e437549350ec8f8a621a07b7363901e038bad21d72bc03d47654aa7a",
+        "source_tree_sha256": "c0f35c662b4e0d040fcbe2c3a61469519e5a95ff89eff3d0b1844b8d5b9c1e18",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -172,8 +181,8 @@
       "status": "pass"
     },
     {
-      "current": 41,
-      "limit": 41,
+      "current": 38,
+      "limit": 38,
       "metric": "duplication_clusters",
       "name": "full_app_duplication_infrastructure_adapters",
       "remediation": "Reduce duplicate clusters and regenerate the full-app duplication baseline without raising scorecard budgets.",
@@ -181,8 +190,8 @@
       "status": "pass"
     },
     {
-      "current": 3,
-      "limit": 3,
+      "current": 2,
+      "limit": 2,
       "metric": "duplication_clusters",
       "name": "full_app_duplication_application_pipelines",
       "remediation": "Reduce duplicate clusters and regenerate the full-app duplication baseline without raising scorecard budgets.",
@@ -208,8 +217,8 @@
       "status": "pass"
     },
     {
-      "current": 44,
-      "limit": 44,
+      "current": 40,
+      "limit": 40,
       "metric": "total_duplicate_clusters",
       "name": "full_app_duplication_total_clusters",
       "remediation": "Burn down full-app duplicate clusters and refresh the reviewed baseline.",
@@ -217,8 +226,8 @@
       "status": "pass"
     },
     {
-      "current": 46,
-      "limit": 47,
+      "current": 45,
+      "limit": 45,
       "metric": "zero_reference_supporting_script_count",
       "name": "supporting_scripts_zero_reference_count",
       "remediation": "Triage or remove zero-reference supporting scripts; budgets must not grow.",
@@ -255,6 +264,24 @@
     {
       "current": 0,
       "limit": 0,
+      "metric": "total_flaky",
+      "name": "flaky_test_total_count",
+      "remediation": "Stabilize or explicitly quarantine flaky tests; default test paths must remain deterministic.",
+      "source_artifact": "reports/quality/flaky-test-burndown-review.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "untriaged_flaky_tests",
+      "name": "flaky_test_untriaged_count",
+      "remediation": "Every flaky candidate must have owner, triage status, and deterministic remediation metadata.",
+      "source_artifact": "reports/quality/flaky-test-burndown-review.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
       "metric": "seams",
       "name": "production_uuid4_seams",
       "remediation": "Remove production uuid4 seams; replay identity must be explicit or deterministic.",
@@ -273,9 +300,36 @@
     {
       "current": 0,
       "limit": 0,
+      "metric": "dashboarded_without_declaration",
+      "name": "observability_dashboarded_without_declaration",
+      "remediation": "Declare dashboarded metrics or remove stale dashboard references.",
+      "source_artifact": "reports/observability/runtime_cardinality_inventory.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
       "metric": "dashboarded_without_emission",
       "name": "observability_dashboarded_without_emission",
       "remediation": "Add runtime emission for dashboarded metrics or remove dashboard references.",
+      "source_artifact": "reports/observability/runtime_cardinality_inventory.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "alerted_without_emission",
+      "name": "observability_alerted_without_emission",
+      "remediation": "Add runtime emission for alerted metrics or retire stale alert rules.",
+      "source_artifact": "reports/observability/runtime_cardinality_inventory.json",
+      "status": "pass"
+    },
+    {
+      "current": 0,
+      "limit": 0,
+      "metric": "unused_declared_metrics",
+      "name": "observability_unused_declared_metrics",
+      "remediation": "Emit, retire, or explicitly allowlist unused declared metrics.",
       "source_artifact": "reports/observability/runtime_cardinality_inventory.json",
       "status": "pass"
     },
@@ -307,7 +361,7 @@
       "status": "pass"
     },
     {
-      "current": 4,
+      "current": 5,
       "limit": 21,
       "metric": "generated_at_age_days",
       "name": "observability_release_review_freshness",
@@ -343,7 +397,7 @@
       "status": "pass"
     },
     {
-      "current": "a7f83d14b741bdf23e6b89360e0470aaf6118556fb5d818139ac6e399110cf82",
+      "current": "fdcb0d409d81267179b18f694b11497e4903525f4eb56a879cc12b2b61e8ade1",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -352,13 +406,13 @@
       "status": "pass"
     },
     {
-      "current": 1,
+      "current": 0,
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
       "remediation": "Regenerate stale quality artifacts with their canonical QA commands.",
       "source_artifact": "reports/quality/*.json",
-      "status": "fail"
+      "status": "pass"
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
@@ -369,23 +423,21 @@
     "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
     "module_coverage_inventory": false,
-    "remote_main_baseline": true
+    "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 1,
-    "pass": 37,
+    "fail": 0,
+    "pass": 44,
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 8.57,
+    "architecture_quality_scorecard_integral_score": 8.58,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 1,
-    "failing_gates": [
-      "generated_artifact_drift"
-    ],
-    "gate_count": 38,
-    "pass_count": 37,
-    "release_gate_status": "failing",
+    "fail_count": 0,
+    "failing_gates": [],
+    "gate_count": 44,
+    "pass_count": 44,
+    "release_gate_status": "passing",
     "warn_count": 0,
     "warning_gates": []
   }

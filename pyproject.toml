@@ -173,6 +173,7 @@ norecursedirs = [
     ".hypothesis",
     ".python-user",
     ".worktrees",
+    "caddy",
 ]
 pythonpath = ["src", "."]
 python_files = ["test_*.py"]

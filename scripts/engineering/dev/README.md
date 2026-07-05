@@ -105,7 +105,8 @@ fail-fast architecture slice for the recurring doc/governance regressions.
 The same preflight also checks the committed RF-06 hotspot-family baseline
 artifact via `python -m scripts.engineering.qa report-family-baseline --check`.
 It now also validates the `src/memory/` subsystem, runs a refresh smoke on a
-temporary output root, and performs a dry-run episodic prune check.
+temporary output root, exercises the lightweight pre/post workflow smoke, and
+performs a dry-run episodic prune check.
 
 The canonical shard membership and ignore/deselect rules for
 `run_pytest_sharded.sh` are now externalized in

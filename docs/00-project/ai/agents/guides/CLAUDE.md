@@ -4,7 +4,7 @@
 
 Справочник для Claude Code при работе с репозиторием BioETL.
 
-**Normative stack (read first):** [`docs/00-project/NORMATIVE_SOURCES.md`](../../NORMATIVE_SOURCES.md) → [`RULES.md`](../../RULES.md) → [`REQUIREMENTS.md`](../../../01-requirements/REQUIREMENTS.md) → [`docs/02-architecture/decisions/`](../../../02-architecture/decisions/).
+**Normative stack (read first):** [`docs/00-project/NORMATIVE_SOURCES.md`](../../../NORMATIVE_SOURCES.md) → [`RULES.md`](../../../RULES.md) → [`REQUIREMENTS.md`](../../../../01-requirements/REQUIREMENTS.md) → [`docs/02-architecture/decisions/`](../../../../02-architecture/decisions/).
 
 *Синхронизировано с RULES.md v6.1.4 (2026-06-25) | Дедублирование: ссылки на RULES.md вместо копий | Версия: 6.7.0*
 

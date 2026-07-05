@@ -58,7 +58,7 @@ fi
 # Setup environment
 export NPM_CONFIG_PREFIX="${CODEX_PREFIX}"
 export npm_config_prefix="${CODEX_PREFIX}"
-export PATH="${CODEX_PREFIX}/bin:/usr/local/bin:${PATH}"
+export PATH="${CODEX_PREFIX}/bin:${HOME}/.local/bin:/usr/local/bin:${PATH}"
 
 # Load proxy if available
 if [[ -f "${REPO_ROOT}/.wsl_proxy_env.sh" ]]; then

@@ -1116,15 +1116,19 @@ def _render_deprecation_section(
     lines = [
         f"## {status} ({len(entries)})",
         "",
-        "| Script Path | Type | Reference Count | Suggested Next Step |",
-        "|---|---|---:|---|",
+        "| Script Path | Type | Reference Count | Owner | Lifecycle Decision | Suggested Next Step |",
+        "|---|---|---:|---|---|---|",
     ]
-    next_step = _deprecation_next_step(status)
+    default_next_step = _deprecation_next_step(status)
     for item in entries:
         path_value = str(item["path"])
         type_value = str(item["type"])
+        owner = str(item.get("owner") or "")
+        lifecycle_decision = str(item.get("lifecycle_decision") or "")
+        next_step = str(item.get("next_step") or default_next_step)
         lines.append(
-            f"| `{path_value}` | `{type_value}` | {_reference_count(item)} | {next_step} |"
+            f"| `{path_value}` | `{type_value}` | {_reference_count(item)} | "
+            f"{owner} | `{lifecycle_decision}` | {next_step} |"
         )
     lines.append("")
     return lines
@@ -1405,12 +1409,16 @@ def main(argv: list[str] | None = None) -> int:
     payload = _build_inventory(root)
 
     if args.update:
-        prepared_payload, wrote_manifest = _prepare_manifest_write(manifest_path, payload)
+        prepared_payload, wrote_manifest = _prepare_manifest_write(
+            manifest_path, payload
+        )
         if wrote_manifest:
             _write_manifest(manifest_path, prepared_payload)
             print(f"[OK] Updated scripts inventory manifest: {manifest_path}")
         else:
-            print(f"[OK] Scripts inventory manifest is already synchronized: {manifest_path}")
+            print(
+                f"[OK] Scripts inventory manifest is already synchronized: {manifest_path}"
+            )
 
     check_result = _run_requested_checks(
         root=root, args=args, payload=payload, manifest_path=manifest_path

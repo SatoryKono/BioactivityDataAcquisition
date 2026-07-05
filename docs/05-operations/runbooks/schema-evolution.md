@@ -40,7 +40,7 @@ ______________________________________________________________________
   ```python
   class MyEntity(BaseEntity):
       ...
-      new - field: str | None = None  # Must be optional initially
+      new_field: str | None = None  # Must be optional initially
   ```
 
 2. **Update Pandera Schema**:
@@ -49,7 +49,7 @@ ______________________________________________________________________
   ```python
   class MySchema(pa.DataFrameModel):
       ...
-      new - field: Series[str] = pa.Field(nullable=True)
+      new_field: Series[str] = pa.Field(nullable=True)
   ```
 
 3. **Deploy**:

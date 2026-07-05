@@ -110,7 +110,7 @@ Silver layer merge handles duplicates via:
 
 ```python
 # Silver write uses MERGE with content-hash
-write - mode = SilverWriteMode.MERGE  # Upsert by primary key
+write_mode = SilverWriteMode.MERGE  # Upsert by primary key
 ```
 
 Records with identical `content-hash` are deduplicated during merge.

@@ -327,7 +327,7 @@ ______________________________________________________________________
 # Проверить типы данных
 python -c "
 import pandas as pd
-df = pd.read-parquet('data/bronze/chembl/publication.parquet')
+df = pd.read-parquet('data/output/bronze/chembl/publication.parquet')
 print('Data types:')
 print(df.dtypes)
 print('\nPublicationYear non-integer values:')
@@ -563,7 +563,7 @@ cat reports/logs/bioetl.log | \
 python -c "
 import pandas as pd
 from datetime import date
-df = pd.read-parquet('data/silver/pubmed/publication.parquet')
+df = pd.read-parquet('data/output/silver/pubmed/publication.parquet')
 current-year = date.today().year
 invalid-years = df[
     df['publication-year'].notna() &
@@ -583,7 +583,7 @@ print(invalid-years[['pmid', 'publication-year', '-dq-warn']].head(10))
 python -c "
 import pandas as pd
 from datetime import date
-df = pd.read-parquet('data/silver/openalex/publication.parquet')
+df = pd.read-parquet('data/output/silver/openalex/publication.parquet')
 current-year = date.today().year
 future-years = df[df['publication-year'] > current-year + 1]
 print(f'Records with future year: {len(future-years)}')
@@ -610,7 +610,7 @@ ______________________________________________________________________
 # Найти записи с отрицательными citations
 python -c "
 import pandas as pd
-df = pd.read-parquet('data/silver/semanticscholar/publication.parquet')
+df = pd.read-parquet('data/output/silver/semanticscholar/publication.parquet')
 negative-cit = df[
     df['citations-received'].notna() &
     (df['citations-received'] < 0)
@@ -650,7 +650,7 @@ cat reports/logs/bioetl.log | \
 # 2. Примеры записей с low-title-abstract-similarity
 python -c "
 import pandas as pd
-df = pd.read-parquet('data/silver/pubmed/publication.parquet')
+df = pd.read-parquet('data/output/silver/pubmed/publication.parquet')
 low-sim = df[
     df['-dq-warn'] == True &
     df['-dq-warn-reasons'].str.contains('low-title-abstract-similarity', na=False)
@@ -700,7 +700,7 @@ ______________________________________________________________________
 # Примеры language mismatch
 python -c "
 import pandas as pd
-df = pd.read-parquet('data/silver/pubmed/publication.parquet')
+df = pd.read-parquet('data/output/silver/pubmed/publication.parquet')
 lang-mismatch = df[
     df['-dq-warn'] == True &
     df['-dq-warn-reasons'].str.contains('language-mismatch', na=False)
@@ -769,7 +769,7 @@ ______________________________________________________________________
 # Количество записей в карантине
 python -c "
 import pandas as pd
-df = pd.read-parquet('data/silver/crossref/publication.parquet')
+df = pd.read-parquet('data/output/silver/crossref/publication.parquet')
 total = len(df)
 quarantine = len(df[df['-dq-warn'] == True])
 print(f'Total: {total}, Quarantine: {quarantine}, Percentage: {100 * quarantine / total:.2f}%')
@@ -778,7 +778,7 @@ print(f'Total: {total}, Quarantine: {quarantine}, Percentage: {100 * quarantine 
 # Топ причин попадания в карантин
 python -c "
 import pandas as pd
-df = pd.read-parquet('data/silver/crossref/publication.parquet')
+df = pd.read-parquet('data/output/silver/crossref/publication.parquet')
 quarantine = df[df['-dq-warn'] == True]
 # Assuming -dq-warn-reasons is a JSON string
 import json
@@ -802,13 +802,13 @@ print(reasons.value-counts().head(10))
 
    ```python
    # Автоматически промотировать записи с только одной WARN причиной
-   df = pd.read - parquet("data/silver/pubmed/publication.parquet")
-   single - warn = df[
+   df = pd.read_parquet("data/output/silver/pubmed/publication.parquet")
+   single_warn = df[
        (df["-dq-warn"] == True)
        & (df["-dq-warn-reasons"].str.count(",") == 0)  # Single reason
    ]
-   single - warn["-dq-warn"] = False
-   single - warn.to - parquet("data/silver/pubmed/publication.parquet", mode="append")
+   single_warn["-dq-warn"] = False
+   single_warn.to_parquet("data/output/silver/pubmed/publication.parquet", mode="append")
    ```
 
 ______________________________________________________________________

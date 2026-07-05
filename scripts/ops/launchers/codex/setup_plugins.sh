@@ -197,7 +197,7 @@ required = (
     "pytest_cov",
     "xdist",
     "pytest_timeout",
-    "pytest_vcr",
+    "pytest_recording",
     "syrupy",
     "_hypothesis_pytestplugin",
     "pydantic",
@@ -273,7 +273,7 @@ required = (
     "pytest_cov",
     "xdist",
     "pytest_timeout",
-    "pytest_vcr",
+    "pytest_recording",
     "syrupy",
     "_hypothesis_pytestplugin",
     "pydantic",
@@ -399,7 +399,7 @@ install_dev_dependencies() {
         pytest-cov
         pytest-xdist
         pytest-timeout
-        pytest-vcr
+        pytest-recording
         syrupy
         hypothesis
     )
@@ -437,7 +437,7 @@ required = {
     "pytest_cov": "pytest-cov",
     "xdist": "pytest-xdist",
     "pytest_timeout": "pytest-timeout",
-    "pytest_vcr": "pytest-vcr",
+    "pytest_recording": "pytest-recording",
     "syrupy": "syrupy",
     "_hypothesis_pytestplugin": "hypothesis",
     "pydantic": "pydantic",

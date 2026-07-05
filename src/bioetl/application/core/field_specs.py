@@ -147,6 +147,34 @@ def float_fields(*field_names: str) -> tuple[FieldSpec, ...]:
     return tuple(FieldSpec(name, converter=FLOAT) for name in field_names)
 
 
+def standard_value_fields(
+    *,
+    relation_before_units: bool = False,
+    include_standard_upper_value: bool = False,
+    include_pchembl_value: bool = False,
+    include_standard_flag: bool = False,
+) -> tuple[FieldSpec, ...]:
+    """Create shared ChEMBL standard value field specs in caller-owned order."""
+    relation_unit_fields = (
+        ("standard_relation", "standard_units")
+        if relation_before_units
+        else ("standard_units", "standard_relation")
+    )
+    float_field_names = ["standard_value"]
+    if include_standard_upper_value:
+        float_field_names.append("standard_upper_value")
+    if include_pchembl_value:
+        float_field_names.append("pchembl_value")
+
+    fields = (
+        *simple_fields("standard_type", *relation_unit_fields, "standard_text_value"),
+        *float_fields(*float_field_names),
+    )
+    if include_standard_flag:
+        return (*fields, *int_fields("standard_flag"))
+    return fields
+
+
 def pmid_fields(*field_names: str) -> tuple[FieldSpec, ...]:
     """Create field specs that normalize values with `PMID`."""
     return tuple(FieldSpec(name, converter=PMID) for name in field_names)
@@ -168,4 +196,5 @@ __all__ = [
     "normalize_pmid",
     "pmid_fields",
     "simple_fields",
+    "standard_value_fields",
 ]

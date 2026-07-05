@@ -28,6 +28,17 @@ git_out.txt
 /memory/
 /check_cfg.py
 /debug_*.py
+_agent_*.bat
+_agent_*.py
+_agent_*.txt
+_agent_*.done.txt
+_kill_*.bat
+_kill_*.vbs
+_temp_*.bat
+_temp_*.py
+_temp_*.ps1
+_temp_*.sh
+temp_*
 /TODO.md
 
 # Prevent root-level test scripts

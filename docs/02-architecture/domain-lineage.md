@@ -287,7 +287,7 @@ dataset_ref = DatasetRef(
     version=1,
     provider="pubchem",
     entity="bioactivity",
-    path="/data/bronze/pubchem_bioactivity",
+    path="data/output/bronze/pubchem/bioactivity",
     manifest_id="manifest-001",
     run_id="run-001",
 )

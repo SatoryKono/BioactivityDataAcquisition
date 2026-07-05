@@ -13,15 +13,24 @@ pytestmark = pytest.mark.architecture
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPTS_MANIFEST = ROOT / "configs" / "quality" / "scripts_inventory_manifest.json"
 SCRIPTS_REGISTRY = ROOT / "configs" / "quality" / "scripts_lifecycle_registry.json"
-COMPATIBILITY_CENSUS = ROOT / "reports" / "quality" / "compatibility-importer-census.json"
+COMPATIBILITY_CENSUS = (
+    ROOT / "reports" / "quality" / "compatibility-importer-census.json"
+)
 TEST_GOVERNANCE = ROOT / "reports" / "quality" / "test-governance-current.json"
 SCORECARD = ROOT / "reports" / "quality" / "architecture-quality-scorecard.json"
 DEBT_GATES = ROOT / "reports" / "quality" / "debt-governance-gates.json"
 DEBT_REPORT = ROOT / "reports" / "quality" / "total-tech-debt-audit-main-2026-07-01.md"
 CURRENT_STATE = ROOT / "docs" / "02-architecture" / "current-state-inventory.md"
-REPRO_SUITE = ROOT / "tests" / "integration" / "ci" / "test_reproducibility_contract_suite.py"
+REPRO_SUITE = (
+    ROOT / "tests" / "integration" / "ci" / "test_reproducibility_contract_suite.py"
+)
 FORENSIC_UNIT_TEST = (
-    ROOT / "tests" / "unit" / "application" / "services" / "test_forensic_diff_service.py"
+    ROOT
+    / "tests"
+    / "unit"
+    / "application"
+    / "services"
+    / "test_forensic_diff_service.py"
 )
 
 REMOVED_WRAPPERS = (
@@ -97,16 +106,19 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
     assert test_governance["report"]["markerless_test_functions"] == 0
     assert test_governance["report"]["total_test_functions"] == 21784
     assert test_governance["report"]["total_test_files"] == 1930
-    assert scorecard["integral_score"] == 8.57
+    assert scorecard["integral_score"] == 8.58
     assert gates["summary"]["release_gate_status"] == "passing"
-    assert gates["summary"]["pass_count"] == 38
+    assert gates["summary"]["pass_count"] == gates["summary"]["gate_count"]
     assert gates["summary"]["fail_count"] == 0
 
-    assert "Integral score is `8.57`" in debt_report
+    assert "Integral score is `8.58`" in debt_report
     assert "Retained entrypoints `12`" in debt_report
     assert "0 compatibility test files" in debt_report
     assert "91 supporting scripts" in debt_report
     assert "21,784 test functions, 1,930 test files" in debt_report
 
-    assert "| Architecture quality score | `8.57` (`good_targeted_improvements`) |" in current_state
+    assert (
+        "| Architecture quality score | `8.58` (`good_targeted_improvements`) |"
+        in current_state
+    )
     assert "compatibility_test_files=0" in current_state

@@ -629,8 +629,8 @@ full_app_duplication_ratchets:
     path_prefix: src/bioetl/infrastructure/adapters
     metrics:
       duplication_clusters:
-        current_count: 41
-        max_count: 41
+        current_count: 38
+        max_count: 38
         ratchet_policy: Non-growth fail-fast; decreases require regenerated baseline.
   - name: application_pipelines
     owner: '@bioetl-application'
@@ -638,8 +638,8 @@ full_app_duplication_ratchets:
     path_prefix: src/bioetl/application/pipelines
     metrics:
       duplication_clusters:
-        current_count: 3
-        max_count: 3
+        current_count: 2
+        max_count: 2
         ratchet_policy: Non-growth fail-fast; decreases require regenerated baseline.
   - name: composition_bootstrap_full_app
     owner: '@bioetl-platform'
@@ -659,15 +659,15 @@ full_app_duplication_ratchets:
         ratchet_policy: Zero-budget fail-fast.
   summary_metrics:
     total_duplicate_clusters:
-      current_count: 44
-      max_count: 44
+      current_count: 40
+      max_count: 40
       ratchet_policy: Non-growth fail-fast across full-app scan targets.
 supporting_scripts_governance:
   inventory_source: configs/quality/scripts_inventory_manifest.json
   metrics:
     zero_reference_supporting_script_count:
-      current_count: 46
-      max_count: 47
+      current_count: 45
+      max_count: 45
       owner: '@bioetl-platform'
       linked_issue: '#5845'
       ratchet_policy: Zero-reference supporting scripts must stay triaged with

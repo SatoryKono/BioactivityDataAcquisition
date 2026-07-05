@@ -1,17 +1,17 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-04T15:33:00.488949+00:00",
+  "generated_at": "2026-07-05T14:15:53.435597+00:00",
   "summary": {
-    "total_scripts": 453,
+    "total_scripts": 452,
     "status_counts": {
       "active": 360,
-      "supporting": 93
+      "supporting": 92
     },
     "reference_group_coverage": {
       "agents": 5,
       "build": 3,
       "ci": 62,
-      "docs": 158,
+      "docs": 161,
       "other": 23,
       "scripts": 348,
       "skills": 11,
@@ -525,8 +525,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
+        {
+          "path": "docs/03-guides/development/codex-paths.md",
+          "line": 38,
+          "source_group": "docs",
+          "text": "| MCP sync helper | `scripts/ai/codex/helper/ensure-mcp.sh` | Synchronizes workspace and user-level Codex MCP config before launch. |"
+        },
         {
           "path": "scripts/ai/codex/helper/check-env.sh",
           "line": 11,
@@ -570,8 +576,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 17,
       "references": [
+        {
+          "path": "docs/03-guides/development/codex-paths.md",
+          "line": 36,
+          "source_group": "docs",
+          "text": "| Implementation helper | `scripts/ai/codex/helper/run-codex-impl.sh` | Final shell executor used by the compatibility launcher flow. |"
+        },
         {
           "path": "scripts/ai/codex/QUICKSTART_WSL.md",
           "line": 94,
@@ -613,12 +625,6 @@
           "line": 82,
           "source_group": "scripts",
           "text": "1. **Launch** - helper/run-codex-impl.sh starts Codex"
-        },
-        {
-          "path": "scripts/ai/codex/md/CONSOLIDATION_COMPLETE.md",
-          "line": 119,
-          "source_group": "scripts",
-          "text": "Launch helper/run-codex-impl.sh"
         }
       ]
     },
@@ -627,8 +633,14 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "docs/03-guides/development/codex-paths.md",
+          "line": 37,
+          "source_group": "docs",
+          "text": "| Non-interactive helper | `scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh` | Non-interactive WSL wrapper for scripted Codex runs. |"
+        },
         {
           "path": "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py",
           "line": 335,
@@ -971,13 +983,19 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 111,
+      "reference_count": 112,
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
           "line": 60,
           "source_group": "docs",
           "text": "`run-codex.ps1` and `run-codex-wsl.ps1` MUST NOT be restored without fresh"
+        },
+        {
+          "path": "docs/03-guides/development/codex-paths.md",
+          "line": 35,
+          "source_group": "docs",
+          "text": "| AI Codex PowerShell entrypoint | `scripts/ai/codex/run-codex.ps1` | PowerShell transport for the older AI Codex launcher flow. |"
         },
         {
           "path": "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
@@ -1014,12 +1032,6 @@
           "line": 27,
           "source_group": "scripts",
           "text": "launcher = _DIR / \"codex\" / \"run-codex.ps1\""
-        },
-        {
-          "path": "scripts/ai/codex/QUICKSTART_WSL.md",
-          "line": 20,
-          "source_group": "scripts",
-          "text": ".\\scripts\\ai\\codex\\run-codex.ps1"
         }
       ]
     },
@@ -1028,8 +1040,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 47,
+      "reference_count": 48,
       "references": [
+        {
+          "path": "docs/03-guides/development/codex-paths.md",
+          "line": 34,
+          "source_group": "docs",
+          "text": "| AI Codex shell entrypoint | `scripts/ai/codex/run-codex.sh` | Older WSL launcher entrypoint retained for compatibility and setup checks. |"
+        },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
           "line": 246,
@@ -1071,12 +1089,6 @@
           "line": 16,
           "source_group": "scripts",
           "text": "├── run-codex.sh               ⭐ Canonical WSL/Bash entry point"
-        },
-        {
-          "path": "scripts/ai/codex/README.md",
-          "line": 60,
-          "source_group": "scripts",
-          "text": "bash run-codex.sh check"
         }
       ]
     },
@@ -1200,13 +1212,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 9,
       "references": [
         {
           "path": "docs/00-project/governance/qodo/README.md",
           "line": 37,
           "source_group": "docs",
           "text": "`python scripts\\ai\\codex\\setup_mcp.py --qodo-only` when only the local Qodo"
+        },
+        {
+          "path": "docs/03-guides/development/codex-paths.md",
+          "line": 39,
+          "source_group": "docs",
+          "text": "| MCP setup backend | `scripts/ai/codex/setup_mcp.py` | Canonical Python backend for generated MCP runtime config files. |"
         },
         {
           "path": "scripts/ai/codex/helper/ensure-mcp.sh",
@@ -1243,12 +1261,6 @@
           "line": 21,
           "source_group": "scripts",
           "text": "SETUP_MCP=\"${REPO_ROOT}/scripts/ai/codex/setup_mcp.py\""
-        },
-        {
-          "path": "scripts/engineering/dev/__main__.py",
-          "line": 49,
-          "source_group": "scripts",
-          "text": "COMMAND_SPECS[\"setup-mcp\"] = module_command(\"scripts.ai.codex.setup_mcp\")"
         }
       ]
     },
@@ -6743,7 +6755,7 @@
         },
         {
           "path": "scripts/engineering/qa/report_debt_governance_gates.py",
-          "line": 842,
+          "line": 1011,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py::\""
         },
@@ -6845,7 +6857,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 226,
+          "line": 227,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/.wsl-vpn-fix.ps1`                   | Recover Windows-side VPN proxy settings for WSL interoperability                          |"
         }
@@ -6856,7 +6868,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 55,
+      "reference_count": 56,
       "references": [
         {
           "path": "docs/00-project/RULES.md",
@@ -6889,6 +6901,12 @@
           "text": "python -m scripts.engineering.dev test-changed             # Tests for changed files only"
         },
         {
+          "path": "docs/03-guides/development/codex-paths.md",
+          "line": 53,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.dev setup-mcp"
+        },
+        {
           "path": "docs/03-guides/getting-started.md",
           "line": 70,
           "source_group": "docs",
@@ -6899,12 +6917,6 @@
           "line": 73,
           "source_group": "docs",
           "text": "If you activated `.venv` instead of using `uv`, `python -m scripts.engineering.dev setup-mcp`"
-        },
-        {
-          "path": "docs/03-guides/getting-started.md",
-          "line": 168,
-          "source_group": "docs",
-          "text": "uv run python -m scripts.engineering.dev run-tests smoke"
         }
       ]
     },
@@ -6986,7 +6998,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 184,
+          "line": 185,
           "source_group": "scripts",
           "text": "| `install-deps`       | `scripts/engineering/dev/install_deps.py`                    | Auxiliary helper script, not a full project bootstrap            |"
         },
@@ -7007,7 +7019,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 189,
+          "line": 190,
           "source_group": "scripts",
           "text": "| `mock-metrics`       | `scripts/engineering/dev/metrics_mock_server.py`             | Start mock metrics server                                        |"
         },
@@ -7039,7 +7051,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 15,
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
@@ -7061,13 +7073,13 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 186,
+          "line": 187,
           "source_group": "scripts",
           "text": "| `pretest-guardrails` | `scripts/engineering/dev/pretest_guardrails.sh`              | Run cleanup + repo/docs/memory/architecture preflight            |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 218,
+          "line": 219,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/pretest_guardrails.sh`              | Run cleanup + repo/docs/memory/architecture preflight before broad bash pytest runs       |"
         },
@@ -7115,13 +7127,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 185,
+          "line": 186,
           "source_group": "scripts",
           "text": "| `probe-quality`      | `scripts/engineering/dev/quality_gate_probe.py`              | Measure narrow pytest/mypy startup latency and timeout behavior  |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 222,
+          "line": 223,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/quality_gate_probe.py`              | Diagnose narrow pytest/mypy startup latency and timeout behavior                          |"
         },
@@ -7142,13 +7154,13 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 190,
+          "line": 191,
           "source_group": "scripts",
           "text": "| `mock-quarantine`    | `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock quarantine explorer API server                        |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 223,
+          "line": 224,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/quarantine_explorer_mock_server.py` | Start mock `/ops/quarantine/*` endpoints for Silver Reject Explorer smoke checks          |"
         },
@@ -7519,7 +7531,7 @@
       "references": [
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 215,
+          "line": 216,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/run_tests.ps1`                      | Run tests (PowerShell variant)                                                            |"
         },
@@ -7570,13 +7582,13 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 187,
+          "line": 188,
           "source_group": "scripts",
           "text": "| `run-tests`          | `scripts/engineering/dev/run_tests.py`                       | Run tests                                                        |"
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 191,
+          "line": 192,
           "source_group": "scripts",
           "text": "| `test-changed`       | `scripts/engineering/dev/run_tests.py changed`               | Run tests for changed files only                                 |"
         },
@@ -7615,7 +7627,7 @@
         },
         {
           "path": "scripts/engineering/dev/README.md",
-          "line": 214,
+          "line": 215,
           "source_group": "scripts",
           "text": "| `scripts/engineering/dev/run_tests.sh`                       | Run tests (shell variant)                                                                 |"
         },
@@ -8313,13 +8325,13 @@
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 145,
+          "line": 151,
           "source_group": "tests",
           "text": "target = root / \"scripts\" / \"engineering\" / \"qa\" / \"check_docs_drift.py\""
         },
         {
           "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 161,
+          "line": 167,
           "source_group": "tests",
           "text": "for item in refs[\"scripts/engineering/qa/check_docs_drift.py\"]"
         }
@@ -8767,18 +8779,6 @@
           "text": "\"check-xwalk-missing-backlog\": \"scripts.engineering.qa.check_xwalk_missing_backlog\","
         }
       ]
-    },
-    {
-      "path": "scripts/engineering/qa/close_github_issue.py",
-      "type": "py",
-      "status": "supporting",
-      "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
-      "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded manual GitHub closeout helper for reviewed maintenance operations; do not re-expose it as an active workflow while it depends on local .env token loading and a hard-coded repository target."
     },
     {
       "path": "scripts/engineering/qa/config_surface_governance.py",
@@ -9387,7 +9387,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py",
-          "line": 196,
+          "line": 197,
           "source_group": "tests",
           "text": "ROOT / \"scripts/engineering/qa/report_architecture_debt_remote_main_baseline.py\""
         }
@@ -9653,7 +9653,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py",
-          "line": 199,
+          "line": 200,
           "source_group": "tests",
           "text": "ROOT / \"scripts/engineering/qa/report_debt_governance_gates.py\""
         }
@@ -11448,7 +11448,7 @@
         },
         {
           "path": "tests/integration/memory/test_workflow_tooling.py",
-          "line": 232,
+          "line": 233,
           "source_group": "tests",
           "text": "\"source_path\": \"src/memory/query.py\","
         },
@@ -12052,8 +12052,14 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 9,
       "references": [
+        {
+          "path": "docs/03-guides/development/codex-paths.md",
+          "line": 27,
+          "source_group": "docs",
+          "text": "| Windows shell exec | `scripts/ops/launchers/codex/codex-exec.bat` | Windows full-auto launcher that routes into the WSL Codex flow. |"
+        },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
           "line": 163,
@@ -12095,12 +12101,6 @@
           "line": 2,
           "source_group": "scripts",
           "text": "REM Compatibility facade: scripts/ops/codex-exec.bat -> scripts/ops/launchers/codex/codex-exec.bat"
-        },
-        {
-          "path": "tests/architecture/test_scripts_inventory_discovery.py",
-          "line": 69,
-          "source_group": "tests",
-          "text": "r\"scripts\\codex-exec.bat\","
         }
       ]
     },
@@ -12109,8 +12109,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 43,
+      "reference_count": 44,
       "references": [
+        {
+          "path": "docs/03-guides/development/codex-paths.md",
+          "line": 25,
+          "source_group": "docs",
+          "text": "| WSL shell exec | `scripts/ops/launchers/codex/codex-exec.sh` | Canonical full-auto launcher for WSL/Linux shells. |"
+        },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
           "line": 248,
@@ -12152,12 +12158,6 @@
           "line": 259,
           "source_group": "docs",
           "text": "├─ codex-exec.sh ──────├─ npm/Node.js"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_QUICK_REF.md",
-          "line": 45,
-          "source_group": "docs",
-          "text": "./scripts/ops/launchers/codex/codex-exec.sh \"fix all TODOs\""
         }
       ]
     },
@@ -12203,8 +12203,14 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 25,
+      "reference_count": 26,
       "references": [
+        {
+          "path": "docs/03-guides/development/codex-paths.md",
+          "line": 28,
+          "source_group": "docs",
+          "text": "| Windows WSL helper | `scripts/ops/launchers/codex/codex-wsl.bat` | Compatibility WSL launcher retained during launcher consolidation. |"
+        },
         {
           "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
           "line": 28,
@@ -12246,12 +12252,6 @@
           "line": 21,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\codex-wsl.bat"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_QUICK_REF.md",
-          "line": 24,
-          "source_group": "docs",
-          "text": ".\\scripts\\ops\\codex-wsl.bat \"analyze the pipeline\""
         }
       ]
     },
@@ -12260,8 +12260,14 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 12,
       "references": [
+        {
+          "path": "docs/03-guides/development/codex-paths.md",
+          "line": 26,
+          "source_group": "docs",
+          "text": "| Windows shell | `scripts/ops/launchers/codex/codex.bat` | Windows launcher that routes into the WSL Codex flow. |"
+        },
         {
           "path": "docs/05-operations/tooling/scripts-ops/CODEX_SETUP.md",
           "line": 162,
@@ -12303,12 +12309,6 @@
           "line": 11,
           "source_group": "scripts",
           "text": "║  1. scripts\\ops\\launchers\\codex\\codex.bat                                 ║"
-        },
-        {
-          "path": "scripts/ops/launchers/codex/SETUP_GUIDE.sh",
-          "line": 35,
-          "source_group": "scripts",
-          "text": "scripts\\ops\\launchers\\codex\\codex.bat"
         }
       ]
     },
@@ -12317,8 +12317,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 117,
+      "reference_count": 118,
       "references": [
+        {
+          "path": "docs/03-guides/development/codex-paths.md",
+          "line": 24,
+          "source_group": "docs",
+          "text": "| WSL shell | `scripts/ops/launchers/codex/codex.sh` | Canonical interactive launcher for WSL/Linux shells. |"
+        },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
           "line": 247,
@@ -12360,12 +12366,6 @@
           "line": 215,
           "source_group": "docs",
           "text": "./scripts/ops/launchers/codex/codex.sh \"explain the ChemBL data extraction pipeline\""
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/00_START_HERE.md",
-          "line": 216,
-          "source_group": "docs",
-          "text": "./scripts/ops/launchers/codex/codex.sh \"identify performance bottlenecks in ETL\""
         }
       ]
     },
@@ -13230,8 +13230,14 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 22,
       "references": [
+        {
+          "path": "docs/03-guides/development/codex-paths.md",
+          "line": 45,
+          "source_group": "docs",
+          "text": "| WSL proxy launcher | `scripts/ops/runtime/wsl/start-wsl-proxy.bat` | Starts the Windows-side proxy for WSL network access when needed. |"
+        },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
           "line": 65,
@@ -13273,12 +13279,6 @@
           "line": 221,
           "source_group": "docs",
           "text": "| `start-wsl-proxy.bat`              | Proxy launcher               | Windows PowerShell |"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md",
-          "line": 293,
-          "source_group": "docs",
-          "text": "# PowerShell: .\\scripts\\ops\\start-wsl-proxy.bat"
         }
       ]
     },
@@ -13287,8 +13287,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 14,
       "references": [
+        {
+          "path": "docs/03-guides/development/codex-paths.md",
+          "line": 46,
+          "source_group": "docs",
+          "text": "| WSL proxy server | `scripts/ops/runtime/wsl/wsl_proxy.py` | Minimal proxy implementation used by the WSL launcher flow. |"
+        },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
           "line": 40,
@@ -13330,12 +13336,6 @@
           "line": 220,
           "source_group": "docs",
           "text": "| `wsl_proxy.py`                     | HTTP proxy bridge            | Windows (Python)   |"
-        },
-        {
-          "path": "docs/05-operations/tooling/scripts-ops/CODEX_WSL_SETUP.md",
-          "line": 416,
-          "source_group": "docs",
-          "text": "- `scripts/ops/runtime/wsl/wsl_proxy.py` - HTTP proxy bridge"
         }
       ]
     },

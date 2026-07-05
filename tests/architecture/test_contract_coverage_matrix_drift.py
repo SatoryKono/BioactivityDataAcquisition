@@ -33,5 +33,6 @@ def test_contract_coverage_matrix_is_current() -> None:
         capture_output=True,
         text=True,
         check=False,
+        timeout=120,  # 2 minutes timeout
     )
     assert result.returncode == 0, result.stderr or result.stdout

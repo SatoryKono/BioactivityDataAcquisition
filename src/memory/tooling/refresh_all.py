@@ -66,6 +66,27 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Emit the refresh summary as JSON.",
     )
+    parser.add_argument(
+        "--rag-build-scope",
+        default=DEFAULT_BUILD_SCOPE,
+        help="RAG build scope to use when RAG generation is enabled.",
+    )
+    parser.add_argument(
+        "--rag-focus-query",
+        default=None,
+        help="Optional focused query for workflow-scoped RAG generation.",
+    )
+    parser.add_argument(
+        "--rag-max-sources",
+        type=int,
+        default=None,
+        help="Optional maximum source count for focused RAG generation.",
+    )
+    parser.add_argument(
+        "--allow-partial",
+        action="store_true",
+        help="Return a degraded JSON payload instead of raising on one artifact failure.",
+    )
     return parser
 
 
@@ -205,6 +226,10 @@ def main(argv: list[str] | None = None) -> int:
         include_graph_export=args.include_graph_export,
         include_graph_relations=args.include_graph_relations,
         expanded_graph_path=args.expanded_graph_path,
+        rag_build_scope=args.rag_build_scope,
+        rag_focus_query=args.rag_focus_query,
+        rag_max_sources=args.rag_max_sources,
+        allow_partial=args.allow_partial,
     )
 
     if args.json:

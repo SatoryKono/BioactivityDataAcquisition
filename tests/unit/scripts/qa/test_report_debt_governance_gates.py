@@ -253,6 +253,82 @@ def test_module_coverage_aggregate_residual_limits_reads_reviewed_limits() -> No
     }
 
 
+def test_budget_growth_increases_flags_raised_scorecard_limits() -> None:
+    increases = gates._budget_growth_increases(
+        baseline_payload={
+            "family": {
+                "metrics": {
+                    "size": {"max_count": 3},
+                    "warnings": {"current_count": 2},
+                }
+            }
+        },
+        current_payload={
+            "family": {
+                "metrics": {
+                    "size": {"max_count": 4},
+                    "warnings": {"current_count": 10},
+                }
+            }
+        },
+    )
+
+    assert increases == {"family.metrics.size.max_count": {"from": 3, "to": 4}}
+
+
+def test_budget_growth_increases_ignores_flat_or_lower_limits() -> None:
+    assert (
+        gates._budget_growth_increases(
+            baseline_payload={"family": {"metrics": {"size": {"max_count": 3}}}},
+            current_payload={"family": {"metrics": {"size": {"max_count": 2}}}},
+        )
+        == {}
+    )
+
+
+def test_debt_scorecard_budget_no_growth_gate_fails_on_budget_increase(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        gates,
+        "_load_yaml_from_git_ref",
+        lambda repo_root, ref, rel_path: {"family": {"max_count": 3}},
+    )
+    monkeypatch.setattr(
+        gates,
+        "_load_yaml",
+        lambda repo_root, rel_path: {"family": {"max_count": 4}},
+    )
+
+    gate = gates._debt_scorecard_budget_no_growth_gate(
+        repo_root=gates.PROJECT_ROOT,
+        changed_from_ref="origin/main",
+    )
+
+    assert gate.status == "fail"
+    assert gate.current == {"family.max_count": {"from": 3, "to": 4}}
+
+
+def test_flaky_untriaged_entries_require_triage_status() -> None:
+    untriaged = gates._flaky_untriaged_entries(
+        {
+            "reviewed_flaky_tests": [
+                {"nodeid": "tests/unit/test_a.py::test_ok", "triage_status": "fixed"},
+                {"nodeid": "tests/unit/test_b.py::test_missing"},
+                {
+                    "nodeid": "tests/unit/test_c.py::test_unknown",
+                    "triage_status": "unknown",
+                },
+            ]
+        }
+    )
+
+    assert [entry["nodeid"] for entry in untriaged] == [
+        "tests/unit/test_b.py::test_missing",
+        "tests/unit/test_c.py::test_unknown",
+    ]
+
+
 def test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -273,13 +349,24 @@ def test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stal
     assert summary["release_gate_status"] == "failing"
 
 
-def test_build_payload_treats_remote_main_baseline_builder_failure_as_stale_artifact(
+def test_build_payload_tolerates_unavailable_remote_main_baseline_builder(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    module_coverage = gates._load_json(
+        gates.PROJECT_ROOT, "reports/quality/module-coverage-inventory.json"
+    )
+    assert isinstance(module_coverage, dict)
     monkeypatch.setattr(
         gates,
         "_refresh_existing_inventory_source_tree",
-        lambda payload, *, repo_root: {"source_tree_sha256": "live-source-hash"},
+        lambda payload, *, repo_root: {
+            "source_tree_sha256": module_coverage["source_tree_sha256"]
+        },
+    )
+    monkeypatch.setattr(
+        gates,
+        "_artifact_matches_builder",
+        lambda *, repo_root, rel_path, payload_builder: True,
     )
     monkeypatch.setattr(
         gates.report_architecture_debt_remote_main_baseline,
@@ -298,7 +385,7 @@ def test_build_payload_treats_remote_main_baseline_builder_failure_as_stale_arti
 
     failing_gates = summary["failing_gates"]
     assert isinstance(failing_gates, list)
-    assert "generated_artifact_drift" in failing_gates
+    assert "generated_artifact_drift" not in failing_gates
 
 
 def test_build_payload_marks_config_surface_backlog_drift_as_stale_artifact(

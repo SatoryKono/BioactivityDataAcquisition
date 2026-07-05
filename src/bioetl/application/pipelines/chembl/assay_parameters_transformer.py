@@ -13,6 +13,7 @@ from bioetl.application.core.field_specs import (
     float_fields,
     map_field_groups,
     simple_fields,
+    standard_value_fields,
 )
 from bioetl.application.pipelines.chembl.base_chembl_transformer import (
     BaseChemblTransformer,
@@ -38,15 +39,7 @@ _RAW_VALUES = FieldGroup(
 
 _STANDARD_VALUES = FieldGroup(
     name="standard_values",
-    fields=(
-        *simple_fields(
-            "standard_type",
-            "standard_relation",
-            "standard_units",
-            "standard_text_value",
-        ),
-        *float_fields("standard_value"),
-    ),
+    fields=standard_value_fields(relation_before_units=True),
 )
 
 _ASSAY_PARAMS_GROUPS: tuple[FieldGroup, ...] = (
