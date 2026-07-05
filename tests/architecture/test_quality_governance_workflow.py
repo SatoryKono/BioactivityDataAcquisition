@@ -65,7 +65,9 @@ def test_tests_workflow_runs_debt_governance_closeout_gates() -> None:
     assert "Validate ADR enforcement matrix artifacts" in workflow
     assert "report-adr-enforcement-matrix --check" in workflow
     assert "Validate remote-main architecture debt baseline" in workflow
-    assert "git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main" in workflow
+    assert (
+        "git fetch --no-tags --depth=1 origin main:refs/remotes/origin/main" in workflow
+    )
     assert "report-architecture-debt-remote-main-baseline --check" in workflow
     assert "Validate debt-governance fail-fast gates" in workflow
     assert "report-debt-governance-gates --check" in workflow
@@ -104,7 +106,10 @@ def test_tests_workflow_enforces_dead_code_inventory_drift_gate() -> None:
     """Merge pipeline must fail fast when dead-code evidence artifacts drift."""
     workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
     assert "Validate dead-code inventory artifacts" in workflow
-    assert "python -m scripts.engineering.qa report-dead-code-inventory --check" in workflow
+    assert (
+        "python -m scripts.engineering.qa report-dead-code-inventory --check"
+        in workflow
+    )
 
 
 def test_tests_workflow_enforces_test_governance_snapshot_gate() -> None:
@@ -113,7 +118,7 @@ def test_tests_workflow_enforces_test_governance_snapshot_gate() -> None:
     assert "Validate committed test-governance snapshots" in workflow
     assert "python -m scripts.engineering.qa.report_test_governance_audit" in workflow
     assert "reports/quality/test-governance-current.json" in workflow
-    assert "reports/quality/test-duplicate-name-inventory.json" in workflow
+    assert "reports/quality/test-duplicate-name-inventory.json" not in workflow
 
 
 def test_tests_workflow_runs_observability_cardinality_review_gate() -> None:

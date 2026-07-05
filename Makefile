@@ -207,7 +207,7 @@ precommit-install:
 	bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only
 
 qa-arch-fast:
-	$(RUN) pytest tests/architecture/ -m "not slow and not serial and not memory"
+	BIOETL_PYTEST_SHARDED_TEST_HEALTH_SUITE=architecture-fast-boundary bash scripts/engineering/dev/run_pytest_sharded.sh --shard S7-architecture-fast-boundary --stream -- tests/architecture/ -m "architecture and not slow and not benchmark and not memory"
 
 quarantine-inspect:
 	$(RUN) bioetl quarantine inspect --pipeline $(PIPELINE)

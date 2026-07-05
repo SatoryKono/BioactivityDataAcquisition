@@ -43,8 +43,8 @@ jobs:
 
             -   name: Run canonical fast architecture gate
                 run: |
-                    # Manual fast profile. PR/push fast architecture coverage now
-                    # lives in tests.yml test-fast to avoid duplicate pytest work.
+                    # Manual fast profile backed by the canonical
+                    # architecture-fast-boundary lane from test_matrix.yaml.
                     make qa-arch-fast
 
     architecture-heavy-nightly:

@@ -79,17 +79,22 @@ def _wall_clock_call_name(node: ast.Call) -> str | None:
     ):
         return "date.today"
     if (
-        func.attr == "time"
+        func.attr in {"time", "time_ns"}
         and isinstance(func.value, ast.Name)
         and func.value.id == "time"
     ):
-        return "time.time"
+        return f"time.{func.attr}"
     return None
 
 
 def _observed_calls() -> list[WallClockCall]:
     calls: list[WallClockCall] = []
-    for path in sorted((ROOT / "src" / "bioetl").rglob("*.py")):
+    source_paths = [
+        *sorted((ROOT / "src" / "bioetl").rglob("*.py")),
+        ROOT / "src" / "memory" / "tooling" / "prune.py",
+        ROOT / "src" / "memory" / "tooling" / "review_curated.py",
+    ]
+    for path in source_paths:
         visitor = _WallClockVisitor(path)
         visitor.visit(ast.parse(path.read_text(encoding="utf-8")))
         calls.extend(visitor.calls)

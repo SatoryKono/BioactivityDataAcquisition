@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
-from pathlib import Path
+from tests.architecture._test_matrix_policy_support import load_matrix
 
 
 pytestmark = pytest.mark.architecture
@@ -13,6 +15,20 @@ pytestmark = pytest.mark.architecture
 def _read_workflow(path: str) -> str:
     """Read workflow content as UTF-8 text."""
     return Path(path).read_text(encoding="utf-8")
+
+
+def _workflow_job_block(workflow: str, job_name: str) -> str:
+    """Return one top-level workflow job block by name."""
+    marker = f"    {job_name}:\n"
+    start = workflow.index(marker)
+    next_job = workflow.find("\n    ", start + len(marker))
+    while next_job != -1:
+        candidate_line_end = workflow.find("\n", next_job + 1)
+        candidate_line = workflow[next_job + 1 : candidate_line_end]
+        if candidate_line.endswith(":") and not candidate_line.startswith("        "):
+            return workflow[start:next_job]
+        next_job = workflow.find("\n    ", next_job + 1)
+    return workflow[start:]
 
 
 def test_coverage_job_combines_shard_coverage_and_runs_serial_pass() -> None:
@@ -39,8 +55,16 @@ def test_coverage_job_combines_shard_coverage_and_runs_serial_pass() -> None:
 def test_parallel_ci_jobs_exclude_serial_marker() -> None:
     """Parallel CI jobs should not execute serial-only tests."""
     workflow = _read_workflow(".github/workflows/tests.yml")
-    assert '-m "not slow and not serial and not memory"' in workflow, (
-        "test-fast job must exclude serial and memory markers in parallel mode"
+    test_fast = _workflow_job_block(workflow, "test-fast")
+    unit_fast = load_matrix()["test_lanes"]["lanes"]["unit-fast"]
+    assert "uv run pytest tests/unit/ \\" in test_fast, (
+        "test-fast job must run only the canonical unit-fast test path"
+    )
+    assert "tests/architecture/" not in test_fast, (
+        "test-fast must not absorb the architecture-fast-boundary lane"
+    )
+    assert f'-m "{unit_fast["marker_expression"]}"' in test_fast, (
+        "test-fast marker must match configs/quality/test_matrix.yaml unit-fast"
     )
     assert '-m "not serial and not memory"' in workflow, (
         "test-matrix job must exclude serial and memory markers in parallel mode"

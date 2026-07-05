@@ -6,7 +6,6 @@ Implements DQReportWriterPort from domain/ports.
 
 from __future__ import annotations
 
-import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -258,12 +257,8 @@ class DQReportWriter:
         content = self._serializer.serialize(report, report_format)
         content_bytes = content.encode("utf-8")
 
-        # Write atomically in executor
-        loop = asyncio.get_running_loop()
-        await loop.run_in_executor(
-            None,
-            lambda: atomic_write_bytes(output_path, content_bytes),
-        )
+        # Write atomically.
+        atomic_write_bytes(output_path, content_bytes)
 
         self._logger.info(
             "dq_report_written",

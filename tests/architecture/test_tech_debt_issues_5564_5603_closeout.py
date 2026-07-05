@@ -154,7 +154,7 @@ def test_issue_5603_wall_clock_seams_are_canonical_registry_owned() -> None:
     registry = _load_yaml(TIME_SEAM_REGISTRY)
     seams = registry["seams"]
 
-    assert len(seams) == 10
+    assert len(seams) == 13
     assert {
         row["path"]
         for row in seams
