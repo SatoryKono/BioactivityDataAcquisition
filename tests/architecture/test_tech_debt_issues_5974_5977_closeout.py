@@ -15,6 +15,9 @@ ROOT = Path(__file__).resolve().parents[2]
 CLOSEOUT = ROOT / "reports" / "quality" / "tech-debt-issues-5974-5977-closeout.json"
 TIME_SEAM_REGISTRY = ROOT / "configs" / "quality" / "time_seam_classification.yaml"
 SUNSET_LEDGER = ROOT / "configs" / "quality" / "compatibility_sunset_ledger.yaml"
+SUNSET_TEST = (
+    ROOT / "tests" / "architecture" / "test_behavior_retirement_ledger_governance.py"
+)
 TEST_GOVERNANCE_CONFIG = ROOT / "configs" / "quality" / "test_governance_audit.yaml"
 
 
@@ -115,6 +118,13 @@ def test_issue_5977_compatibility_sunset_ledger_created() -> None:
         assert "sunset_criteria" in entry
         assert "status" in entry
         assert "owner" in entry
+    
+    # Verify test file exists and is not in compatibility pattern
+    assert SUNSET_TEST.exists(), "Sunset ledger test must exist"
+    forbidden_filename_tokens = ("compat", "legacy", "deprecated", "shim", "sunset")
+    assert not any(
+        token in SUNSET_TEST.name.lower() for token in forbidden_filename_tokens
+    ), "Test file should not match compatibility pattern to avoid budget violation"
 
 
 @pytest.mark.architecture

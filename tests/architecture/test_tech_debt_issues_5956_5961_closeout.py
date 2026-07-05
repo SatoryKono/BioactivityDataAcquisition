@@ -60,27 +60,45 @@ def _gate(payload: dict[str, Any], name: str) -> dict[str, Any]:
     raise AssertionError(f"missing debt-governance gate: {name}")
 
 
-def test_closeout_artifact_is_complete_and_budget_safe() -> None:
+def test_issue_pack_5956_5961_closeout_artifact_is_complete_and_budget_safe() -> None:
     closeout = _load_json(CLOSEOUT)
 
-    assert closeout["schema_version"] == "tech-debt-issues-5956-5961-closeout-v1"
-    assert closeout["debt_budget_policy"] == "flat_or_decreasing_only"
-    assert closeout["debt_budget_outcome"] == "reduced_or_unchanged"
-    assert {issue["number"] for issue in closeout["issues"]} == EXPECTED_ISSUES
-    assert all(issue["status"] == "closed-ready" for issue in closeout["issues"])
-    assert set(closeout["outcomes"]) == {str(issue) for issue in EXPECTED_ISSUES}
-    assert all(
-        outcome["status"] == "closeable" for outcome in closeout["outcomes"].values()
-    )
+    assert {
+        "schema_version": closeout["schema_version"],
+        "debt_budget_policy": closeout["debt_budget_policy"],
+        "debt_budget_outcome": closeout["debt_budget_outcome"],
+    } == {
+        "schema_version": "tech-debt-issues-5956-5961-closeout-v1",
+        "debt_budget_policy": "flat_or_decreasing_only",
+        "debt_budget_outcome": "reduced_or_unchanged",
+    }
 
-    for issue in closeout["issues"]:
-        for relative_path in issue["evidence"]:
-            assert (ROOT / relative_path).exists(), relative_path
+    issue_status_by_number = {
+        issue["number"]: issue["status"] for issue in closeout["issues"]
+    }
+    assert issue_status_by_number == dict.fromkeys(EXPECTED_ISSUES, "closed-ready")
 
-    for metric_name, ratchet in closeout["ratchets"].items():
-        assert ratchet["current"] <= ratchet["max"], metric_name
-        assert ratchet["current"] <= ratchet["opening"], metric_name
-        assert (ROOT / ratchet["source"]).exists(), metric_name
+    outcome_status_by_number = {
+        int(issue): outcome["status"] for issue, outcome in closeout["outcomes"].items()
+    }
+    assert outcome_status_by_number == dict.fromkeys(EXPECTED_ISSUES, "closeable")
+
+    missing_evidence = [
+        relative_path
+        for issue in closeout["issues"]
+        for relative_path in issue["evidence"]
+        if not (ROOT / relative_path).exists()
+    ]
+    assert missing_evidence == []
+
+    ratchet_violations = {
+        metric_name: ratchet
+        for metric_name, ratchet in closeout["ratchets"].items()
+        if ratchet["current"] > ratchet["max"]
+        or ratchet["current"] > ratchet["opening"]
+        or not (ROOT / ratchet["source"]).exists()
+    }
+    assert ratchet_violations == {}
 
 
 def test_duplication_burndown_ratchets_are_lowered_for_5956_and_5961() -> None:
