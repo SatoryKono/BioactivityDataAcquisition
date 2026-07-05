@@ -812,7 +812,7 @@ def _assert_architecture_workflow_shape(content: str) -> None:
         "Architecture workflow must keep scheduled heavy profile execution"
     )
     assert "pull_request:" not in content and "push:" not in content, (
-        "Fast architecture pytest on PR/push should live only in tests.yml to avoid duplication"
+        "Fast architecture pytest must stay out of PR/push workflow triggers"
     )
     assert "make qa-arch-fast" in content, (
         "Fast baseline must delegate to the canonical qa-arch-fast target"
@@ -824,9 +824,11 @@ def _assert_makefile_architecture_target(content: str) -> None:
         "Makefile must keep the qa-arch-fast target for architecture CI"
     )
     assert (
-        'tests/architecture/ -m "not slow and not serial and not memory"' in content
+        "--shard S7-architecture-fast-boundary" in content
+        and 'tests/architecture/ -m "architecture and not slow and not benchmark and not memory"'
+        in content
     ), (
-        "qa-arch-fast must exclude @pytest.mark.slow, @pytest.mark.serial, and memory tests"
+        "qa-arch-fast must delegate to the canonical architecture-fast-boundary lane"
     )
 
 

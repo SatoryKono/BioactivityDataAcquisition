@@ -15,7 +15,6 @@ from __future__ import annotations
 __all__ = ["CsvExporter"]
 
 
-import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -193,28 +192,18 @@ class CsvExporter:
         csv_full_path = self.base_path / f"{table_name}.csv"
         csv_full_path.parent.mkdir(parents=True, exist_ok=True)
         csv_data = self._flatten_for_csv(data)
-        loop = asyncio.get_running_loop()
 
         # Fast path: true file-append (no read, no sort, no dedup).
         if append and csv_full_path.exists():
-            await loop.run_in_executor(
-                None,
-                lambda: self._append_to_csv(csv_data, csv_full_path),
-            )
+            self._append_to_csv(csv_data, csv_full_path)
             return csv_full_path
 
-        # First write or overwrite: sort in executor to avoid blocking event loop.
+        # First write or overwrite.
         sort_columns = sort_by if sort_by is not None else self.sort_by
         if sort_columns:
-            csv_data = await loop.run_in_executor(
-                None,
-                lambda: self._sort_table(csv_data, sort_columns),
-            )
+            csv_data = self._sort_table(csv_data, sort_columns)
         write_options = self._build_write_options()
-        await loop.run_in_executor(
-            None,
-            lambda: self._atomic_csv_write(csv_data, csv_full_path, write_options),
-        )
+        self._atomic_csv_write(csv_data, csv_full_path, write_options)
         return csv_full_path
 
     async def finalize_csv(
@@ -225,8 +214,7 @@ class CsvExporter:
     ) -> Path | None:
         """Post-run one-shot: read CSV, deduplicate, sort, rewrite.
 
-        Should be called once after all batches complete.  All heavy work
-        runs in ``run_in_executor`` to avoid blocking the event loop.
+        Should be called once after all batches complete.
 
         Args:
             table_name: Logical table name (maps to ``{table_name}.csv``).
@@ -241,32 +229,19 @@ class CsvExporter:
         if not csv_full_path.exists():
             return None
 
-        loop = asyncio.get_running_loop()
         parse_options = pv.ParseOptions(delimiter=self.delimiter)
 
-        table: pa.Table = await loop.run_in_executor(
-            None,
-            lambda: pv.read_csv(csv_full_path, parse_options=parse_options),
-        )
+        table = pv.read_csv(csv_full_path, parse_options=parse_options)
 
         if primary_keys:
-            table = await loop.run_in_executor(
-                None,
-                lambda: self._deduplicate(table, primary_keys),
-            )
+            table = self._deduplicate(table, primary_keys)
 
         sort_columns = sort_by if sort_by is not None else self.sort_by
         if sort_columns:
-            table = await loop.run_in_executor(
-                None,
-                lambda: self._sort_table(table, sort_columns),
-            )
+            table = self._sort_table(table, sort_columns)
 
         write_options = self._build_write_options()
-        await loop.run_in_executor(
-            None,
-            lambda: self._atomic_csv_write(table, csv_full_path, write_options),
-        )
+        self._atomic_csv_write(table, csv_full_path, write_options)
 
         self._logger.info(
             "csv_export_finalized",

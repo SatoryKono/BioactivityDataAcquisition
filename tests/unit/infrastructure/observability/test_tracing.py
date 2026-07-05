@@ -5,7 +5,11 @@ These tests verify the OpenTelemetry tracing implementation.
 
 from __future__ import annotations
 
+import builtins
+import importlib.util
 from collections.abc import Generator
+from pathlib import Path
+from types import ModuleType
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -183,6 +187,7 @@ class TestTelemetryExporterSelection:
         assert tracing._extract_endpoint_host("http://localhost:4317") == "localhost"
         assert tracing._extract_endpoint_host("[::1]:4317") == "::1"
         assert tracing._extract_endpoint_host("tempo:4317") == "tempo"
+        assert tracing._extract_endpoint_host("collector") == "collector"
 
     def test_otlp_endpoint_prefers_trace_specific_env(
         self,
@@ -311,6 +316,30 @@ class TestTelemetryExporterSelection:
 
         exporter_factory.assert_called_once_with(insecure=True)
 
+    def test_remote_otlp_endpoint_does_not_default_to_insecure(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Remote OTLP endpoints should not receive the local insecure default."""
+        from bioetl.infrastructure.observability import tracing
+
+        exporter_factory = MagicMock(return_value=object())
+        monkeypatch.setattr(tracing, "OTLP_AVAILABLE", True)
+        monkeypatch.setattr(tracing, "_OtlpExporterClass", exporter_factory)
+        monkeypatch.setenv(
+            "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT",
+            "https://collector.example:4317",
+        )
+        monkeypatch.delenv("OTEL_EXPORTER_OTLP_ENDPOINT", raising=False)
+        monkeypatch.delenv("OTEL_EXPORTER_OTLP_INSECURE", raising=False)
+        monkeypatch.delenv("OTEL_EXPORTER_OTLP_TRACES_INSECURE", raising=False)
+
+        tracing._build_telemetry_exporter()
+
+        exporter_factory.assert_called_once_with(
+            endpoint="https://collector.example:4317",
+        )
+
 
 class TestOpenTelemetryTracerErrorPaths:
     """Tests for best-effort tracing cleanup/error swallowing paths."""
@@ -359,6 +388,131 @@ class TestOpenTelemetryTracerErrorPaths:
         tracing._build_telemetry_exporter()
 
         exporter_factory.assert_called_once_with(insecure=True)
+
+    def test_flush_returns_without_provider_call_after_close(self) -> None:
+        """flush() should be a no-op after the tracer has been closed."""
+        from bioetl.infrastructure.observability import tracing
+
+        tracer = object.__new__(tracing.OpenTelemetryTracer)
+        tracer._closed = True
+        tracer._provider = MagicMock()
+
+        tracer.flush()
+
+        tracer._provider.force_flush.assert_not_called()
+
+
+class TestTracingProtocolAndSpanBranchPaths:
+    """Focused branch tests for protocol and span-handle compatibility helpers."""
+
+    def test_span_handle_methods_are_noops_before_enter(self) -> None:
+        """Span helper methods should be safe before context entry."""
+        from bioetl.infrastructure.observability import tracing
+
+        context_manager = MagicMock()
+        handle = tracing._SpanHandle(context_manager)
+
+        handle.set_attribute("bioetl.status", "pending")
+        handle.record_exception(RuntimeError("not-entered"))
+
+        context_manager.__enter__.assert_not_called()
+
+    def test_tracer_adapter_defaults_attributes_to_empty_dict(self) -> None:
+        """Adapter should pass an empty attributes mapping when none is supplied."""
+        from bioetl.infrastructure.observability import tracing
+
+        otel_tracer = MagicMock()
+
+        tracing._TracerAdapter(otel_tracer).start_as_current_span("demo")
+
+        otel_tracer.start_as_current_span.assert_called_once_with(
+            "demo",
+            attributes={},
+        )
+
+    def test_protocol_method_bodies_are_runtime_safe(self) -> None:
+        """Protocol ellipsis bodies remain harmless when introspection calls them."""
+        from bioetl.infrastructure.observability import tracing
+
+        assert tracing._SpanProtocol.set_attribute(object(), "k", "v") is None
+        assert tracing._SpanProtocol.record_exception(
+            object(),
+            RuntimeError("boom"),
+        ) is None
+        assert tracing._SpanContextManagerProtocol.__enter__(object()) is None
+        assert tracing._SpanContextManagerProtocol.__exit__(
+            object(),
+            None,
+            None,
+            None,
+        ) is None
+        assert (
+            tracing._TracerProtocol.start_as_current_span(object(), "demo") is None
+        )
+
+
+class TestTracingImportFallbackBranches:
+    """Import the tracing module under mocked OTel availability states."""
+
+    def _load_tracing_copy(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        *,
+        blocked_prefixes: tuple[str, ...],
+    ) -> ModuleType:
+        from bioetl.infrastructure.observability import tracing
+
+        module_path = Path(tracing.__file__)
+        spec = importlib.util.spec_from_file_location(
+            f"_bioetl_tracing_fallback_{'_'.join(blocked_prefixes)}",
+            module_path,
+        )
+        assert spec is not None
+        assert spec.loader is not None
+
+        real_import = builtins.__import__
+
+        def guarded_import(
+            name: str,
+            globals_: dict[str, object] | None = None,
+            locals_: dict[str, object] | None = None,
+            fromlist: tuple[str, ...] = (),
+            level: int = 0,
+        ) -> object:
+            if any(name == prefix or name.startswith(f"{prefix}.") for prefix in blocked_prefixes):
+                raise ImportError(name)
+            return real_import(name, globals_, locals_, fromlist, level)
+
+        monkeypatch.setattr(builtins, "__import__", guarded_import)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+    def test_module_marks_otlp_unavailable_when_exporter_import_fails(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """OTEL can remain enabled while the optional OTLP exporter is absent."""
+        module = self._load_tracing_copy(
+            monkeypatch,
+            blocked_prefixes=("opentelemetry.exporter.otlp",),
+        )
+
+        assert module.OTEL_AVAILABLE is True
+        assert module.OTLP_AVAILABLE is False
+
+    def test_module_marks_otel_unavailable_when_base_import_fails(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """Base OpenTelemetry import failure should disable both OTel and OTLP."""
+        module = self._load_tracing_copy(
+            monkeypatch,
+            blocked_prefixes=("opentelemetry",),
+        )
+
+        assert module.OTEL_AVAILABLE is False
+        assert module.OTLP_AVAILABLE is False
 
 
 class TestOpenTelemetryTracerSpanAdapter:

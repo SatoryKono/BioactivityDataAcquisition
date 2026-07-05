@@ -91,14 +91,14 @@ def test_issue_5619_governance_gates_are_fresh_and_passing() -> None:
     allowed_failures = {"generated_artifact_drift"}
     actual_failures = {gate["name"] for gate in failing_gates} - allowed_failures
 
-    assert actual_failures == set(), f"Unexpected failing gates: {actual_failures}"
+    assert not actual_failures, f"Unexpected failing gates: {actual_failures}"
 
     # Check that critical artifacts are fresh
     stale_artifacts = gates["stale_artifacts"]
-    assert stale_artifacts.get("module_coverage_inventory") == False
-    assert stale_artifacts.get("architecture_quality_scorecard") == False
-    assert stale_artifacts.get("adr_enforcement_matrix") == False
-    assert stale_artifacts.get("dq_contract_registry_diagnostics") == False
+    assert not stale_artifacts.get("module_coverage_inventory")
+    assert not stale_artifacts.get("architecture_quality_scorecard")
+    assert not stale_artifacts.get("adr_enforcement_matrix")
+    assert not stale_artifacts.get("dq_contract_registry_diagnostics")
 
 
 def test_issue_5620_lazy_export_facades_have_no_orphan_or_conflict_exports() -> None:

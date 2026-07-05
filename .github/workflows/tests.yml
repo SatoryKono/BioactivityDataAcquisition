@@ -244,8 +244,7 @@ jobs:
                     uv run python -m scripts.engineering.qa.report_test_governance_audit \
                       --check \
                       --json-out reports/quality/test-governance-current.json \
-                      --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json \
-                      --duplicate-name-inventory-out reports/quality/test-duplicate-name-inventory.json
+                      --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json
 
             -   name: Validate config/contract/registry artifact duplication audit
                 run: uv run python -m scripts.engineering.qa report-artifact-duplication-audit --check
@@ -574,31 +573,19 @@ jobs:
                 with:
                     enable-pytest-cache: "true"
                     pytest-cache-prefix: "pytest-fast"
-                    pytest-cache-fingerprint: ${{ hashFiles('tests/unit/**/*.py', 'tests/architecture/**/*.py', 'tests/conftest.py', 'pyproject.toml') }}
+                    pytest-cache-fingerprint: ${{ hashFiles('tests/unit/**/*.py', 'tests/conftest.py', 'pyproject.toml', 'configs/quality/test_matrix.yaml') }}
 
-            -   name: Restore architecture governance scan cache
-                uses: ./.github/actions/architecture-governance-cache
-                with:
-                    operation: restore
-
-            -   name: Run Fast Unit Tests (no slow markers)
+            -   name: Run canonical unit-fast lane
                 run: |
                     mkdir -p reports/test-telemetry
-                    # Quick feedback: run unit tests without slow markers
+                    # Quick feedback: run the canonical unit-fast lane from test_matrix.yaml.
                     # Uses HYPOTHESIS_PROFILE=fast for minimal property-based examples
                     HYPOTHESIS_PROFILE=fast \
-                    uv run pytest tests/unit/ tests/architecture/ \
-                      -m "not slow and not serial and not memory" \
-                      --deselect tests/architecture/test_module_coverage_inventory.py::test_module_coverage_inventory_source_tree_hash_is_current \
+                    uv run pytest tests/unit/ \
+                      -m "not repo_backed and not slow and not benchmark and not memory" \
                       -n auto --dist loadscope --max-worker-restart=0 \
                       -q --tb=short \
                       --junitxml=reports/test-telemetry/junit-fast.xml
-
-            -   name: Save architecture governance scan cache
-                if: always()
-                uses: ./.github/actions/architecture-governance-cache
-                with:
-                    operation: save
 
             -   name: Upload fast test telemetry
                 if: always()

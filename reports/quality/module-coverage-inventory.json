@@ -16923,7 +16923,7 @@
       "missing_lines": 18,
       "module": "bioetl.infrastructure.audit.file_audit",
       "path": "src/bioetl/infrastructure/audit/file_audit.py",
-      "source_lines": 220
+      "source_lines": 219
     },
     {
       "coverage_percent": 100.0,
@@ -16963,7 +16963,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.checkpoint.local_checkpoint",
       "path": "src/bioetl/infrastructure/checkpoint/local_checkpoint.py",
-      "source_lines": 101
+      "source_lines": 80
     },
     {
       "coverage_percent": 100.0,
@@ -17833,7 +17833,7 @@
       "missing_lines": 24,
       "module": "bioetl.infrastructure.export.csv_exporter",
       "path": "src/bioetl/infrastructure/export/csv_exporter.py",
-      "source_lines": 319
+      "source_lines": 294
     },
     {
       "coverage_percent": 100.0,
@@ -39035,7 +39035,7 @@
       "missing_lines": 18,
       "module": "bioetl.infrastructure.audit.file_audit",
       "path": "src/bioetl/infrastructure/audit/file_audit.py",
-      "source_lines": 220
+      "source_lines": 219
     },
     {
       "coverage_percent": 100.0,
@@ -39075,7 +39075,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.checkpoint.local_checkpoint",
       "path": "src/bioetl/infrastructure/checkpoint/local_checkpoint.py",
-      "source_lines": 101
+      "source_lines": 80
     },
     {
       "coverage_percent": 100.0,
@@ -39945,7 +39945,7 @@
       "missing_lines": 24,
       "module": "bioetl.infrastructure.export.csv_exporter",
       "path": "src/bioetl/infrastructure/export/csv_exporter.py",
-      "source_lines": 319
+      "source_lines": 294
     },
     {
       "coverage_percent": 100.0,
@@ -44230,7 +44230,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-01",
-  "source_tree_sha256": "8b3ec1f169cb16bed1cf1e430dd781f44770179f6dbd392ac494e54099078e60",
+  "source_tree_sha256": "5a883521e22f3207d254c405e7218aea577f1d705712c601c6825991a42ada09",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
