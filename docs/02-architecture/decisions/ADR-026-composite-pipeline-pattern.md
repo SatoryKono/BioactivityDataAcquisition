@@ -46,14 +46,14 @@ A common use case requires combining data from multiple sources:
 | MemoryLock                 | ADR-003       | Single-process execution only                   |
 | Medallion Architecture     | ADR-002       | Must preserve Bronze/Silver/Gold semantics      |
 | Content Hash Deduplication | RULES.md §3.1 | Silver merge must use content-hash              |
-| DQ Thresholds              | RULES.md §4.1 | Hierarchical defaults `0.05/0.25`; contract/runtime fallback `0.05/0.20`; composite overrides in `configs/composites/*.yaml` (see [DQ configuration](../../../03-guides/dq-configuration.md)) |
+| DQ Thresholds              | RULES.md §4.1 | Hierarchical defaults `0.05/0.25`; contract/runtime fallback `0.05/0.20`; composite overrides in `configs/composites/*.yaml` (see [DQ configuration](../../03-guides/dq-configuration.md)) |
 
 **Operationalization note (2026-07-05):** Composite DQ thresholds are not a single
 global `Hard >20%` rule. Hierarchical quality defaults in `configs/base/quality.yaml`
 use `soft_fail: 0.05` and `hard_fail: 0.25`. Contract/runtime fallback defaults in
 `SilverDQRequest` use `0.05/0.20`. Composite configs may override per enricher or
 merge surface in `configs/composites/*.yaml`. See
-[DQ configuration](../../../03-guides/dq-configuration.md) for precedence.
+[DQ configuration](../../03-guides/dq-configuration.md) for precedence.
 
 ## Decision
 

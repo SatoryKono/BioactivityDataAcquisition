@@ -38,5 +38,6 @@ content described obsolete storage paths, checkpoint layout, and CLI syntax.
 | Output roots | `data/output/{bronze,silver,gold,checkpoints,quarantine}/` |
 
 Use the maintained publication spec and provider reference for current behavior.
-Do not use legacy examples such as `python -m bioetl run pubmed` or
-`python -m bioetl replay --run-id <id>`.
+Historical top-level run and replay examples from the retired specification are
+obsolete; use only the canonical `bioetl run --pipeline pubmed_publication`
+entrypoint documented above.
