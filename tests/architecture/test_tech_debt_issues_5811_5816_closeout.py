@@ -23,6 +23,7 @@ from bioetl.infrastructure.config.staged_enforcement_policy_loader import (
 )
 
 pytestmark = pytest.mark.architecture
+REFERENCE_TODAY = datetime(2026, 7, 6, tzinfo=UTC).date()
 
 ROOT = Path(__file__).resolve().parents[2]
 CLOSEOUT = ROOT / "reports" / "quality" / "tech-debt-issues-5811-5816-closeout.json"
@@ -82,8 +83,9 @@ def test_issue_5812_phased_migration_support_is_retired_compat_shim() -> None:
 
     # Verify import fails
     with pytest.raises(ImportError):
-        from bioetl.domain.behavior.phased_migration_support import (
-            PhasedMigrationCoordinator,
+        __import__(
+            "bioetl.domain.behavior.phased_migration_support",
+            fromlist=["PhasedMigrationCoordinator"],
         )
 
 
@@ -166,7 +168,7 @@ def test_issue_5815_complexity_and_constructor_gates_are_blocking_and_reviewable
     workflow_text = WORKFLOW.read_text(encoding="utf-8")
     registry = _load_yaml(COMPLEXITY_REGISTRY)
     waivers = _load_yaml(CONSTRUCTOR_WAIVERS)
-    today = datetime.now(UTC).date()
+    today = REFERENCE_TODAY
     loaded_waivers = check_constructor_args._load_waivers(CONSTRUCTOR_WAIVERS)
     violations, waived = check_constructor_args._collect_violations_and_waivers(
         ROOT / "src" / "bioetl",

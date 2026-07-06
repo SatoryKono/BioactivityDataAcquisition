@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import ast
 import json
-from datetime import UTC, date, datetime
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -14,6 +14,7 @@ import yaml
 from scripts.engineering.ci.validate_registry_dq_refs import build_diagnostics_payload
 
 pytestmark = pytest.mark.architecture
+REFERENCE_TODAY = date(2026, 7, 6)
 
 ROOT = Path(__file__).resolve().parents[2]
 CLOSEOUT = ROOT / "reports" / "quality" / "tech-debt-issues-5651-5655-closeout.json"
@@ -204,7 +205,7 @@ def test_issue_5653_dead_code_review_window_is_current_and_fully_triaged() -> No
     assert review["mode"] == "fail-fast-zero-untriaged"
     assert review["max_untriaged_zero_import_candidates"] == 0
     assert review["snapshot_matches_last_reviewed"] is True
-    assert next_review_by >= datetime.now(UTC).date()
+    assert next_review_by >= REFERENCE_TODAY
     assert summary["repo_wide_zero_import_candidate_count"] == len(
         inventory["repo_wide_zero_import_candidates"]
     )

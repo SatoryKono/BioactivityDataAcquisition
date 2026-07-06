@@ -479,7 +479,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 180
-      total_loc: 22303
+      total_loc: 22306
       files_ge_250_loc: 5
       helper_function_ratio: 0.356
       max_internal_fan_in: 10
@@ -487,7 +487,7 @@ hotspot_family_ratchets:
     trend:
       status: reviewed_2026-07-01_application_core_live_metric_refresh
       next_action: 2026-07-01 refreshes measured application_core metrics against
-        the committed hotspot-family baseline at 180 files, 22303 LOC, 5
+        the committed hotspot-family baseline at 180 files, 22306 LOC, 5
         files_ge_250_loc, helper_function_ratio 0.356, and max_internal_fan_in
         10. Bounded-growth budgets remain flat at 7 files_ge_250_loc and
         max_internal_fan_in 10; no technical-debt budget is increased.
@@ -508,18 +508,16 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 49
-      total_loc: 5987
+      total_loc: 5980
       files_ge_250_loc: 0
       helper_function_ratio: 0.302
       max_internal_fan_in: 3
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.tracing_bootstrap
     trend:
-      status: ratcheted_2026-06-26_runtime_bootstrap_files_ge_250_below_budget
-      next_action: 2026-06-26 extracts composite bootstrap facade helper bodies
-        into the existing support module, reducing live files_ge_250_loc from
-        1 to 0 while holding max_internal_fan_in at 3. The files_ge_250_loc
-        budget is ratcheted down to zero; max_internal_fan_in remains pinned
-        at the live ceiling for a follow-up fan-in reduction.
+      status: corrected_2026-07-06_stale_loc_metric_refresh
+      next_action: 2026-07-06 corrects stale total_loc metric from 5987 to measured
+        5980 to align scorecard with actual code state. This is a metric correction,
+        not a budget increase; technical debt budgets remain unchanged.
   - name: composition_factories_pipeline
     owner: '@bioetl-platform'
     linked_rf: RF-023

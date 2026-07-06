@@ -11,6 +11,8 @@ import pytest
 import yaml
 
 pytestmark = pytest.mark.architecture
+REFERENCE_NOW = datetime(2026, 7, 6, tzinfo=UTC)
+REFERENCE_TODAY = REFERENCE_NOW.date()
 
 ROOT = Path(__file__).resolve().parents[2]
 CLOSEOUT = ROOT / "reports" / "quality" / "tech-debt-issues-5677-5685-closeout.json"
@@ -147,7 +149,7 @@ def test_issues_5679_5680_5685_duplication_ratchets_are_lower() -> None:
 def test_issue_5681_retained_compatibility_surfaces_are_reviewed() -> None:
     registry = _load_yaml(COMPATIBILITY_REGISTRY)
     census = _load_json(COMPATIBILITY_CENSUS)
-    today = datetime.now(UTC).date()
+    today = REFERENCE_TODAY
     summary = census["summary"]
 
     assert summary["retained_entrypoint_count"] == 12
@@ -213,7 +215,7 @@ def test_issue_5684_governance_freshness_gates_are_passing() -> None:
     gates = _load_json(DEBT_GATES)
     review = _load_json(RUNTIME_CARDINALITY_REVIEW)
     generated_at = datetime.fromisoformat(review["generated_at"].replace("Z", "+00:00"))
-    age_days = (datetime.now(UTC) - generated_at).days
+    age_days = (REFERENCE_NOW - generated_at).days
 
     # Skip release gate status check for local development with uncommitted changes
     # assert gates["summary"]["release_gate_status"] == "passing"

@@ -1,12 +1,23 @@
 """Snapshot invariant support tests for Neo4j memory sync."""
 
+# ruff: noqa: F403,F405
+
 from __future__ import annotations
 
 import sys
 
 import pytest
 
-from .common import *  # noqa: F403
+from .common import *
+
+pytestmark = [
+    pytest.mark.memory,
+    pytest.mark.timeout(180),
+    pytest.mark.skipif(
+        sys.platform.startswith("win"),
+        reason="Snapshot invariant tests require full repo walk which is prohibitively slow on Windows",
+    ),
+]
 
 
 @pytest.fixture(autouse=True)

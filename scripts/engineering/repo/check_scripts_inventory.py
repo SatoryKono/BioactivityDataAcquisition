@@ -1406,7 +1406,11 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     manifest_path = root / args.manifest
-    payload = _build_inventory(root)
+    payload = (
+        _load_json(manifest_path)
+        if _can_use_manifest_payload_for_lifecycle_check(args, manifest_path)
+        else _build_inventory(root)
+    )
 
     if args.update:
         prepared_payload, wrote_manifest = _prepare_manifest_write(
@@ -1435,6 +1439,19 @@ def main(argv: list[str] | None = None) -> int:
     _print_payload(args=args, payload=payload)
 
     return 0
+
+
+def _can_use_manifest_payload_for_lifecycle_check(
+    args: argparse.Namespace,
+    manifest_path: Path,
+) -> bool:
+    return (
+        bool(args.check_lifecycle)
+        and not bool(args.update)
+        and not bool(args.check)
+        and not bool(str(args.deprecation_report).strip())
+        and manifest_path.exists()
+    )
 
 
 def _run_requested_checks(

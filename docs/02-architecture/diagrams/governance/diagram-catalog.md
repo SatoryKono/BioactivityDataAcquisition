@@ -497,8 +497,8 @@ ______________________________________________________________________
 001. **PipelineRun Transitions** - State - All state transitions
 001. **Batch States** - State - OPEN → SEALED → WRITING → COMMITTED
 001. **Batch Lifecycle** - Sequence - Creation → Sealing → Commit
-001. **QuarantineEntry States** - State - NEW → UNDER-REVIEW → RESOLVED
-001. **QuarantineEntry Lifecycle** - Sequence - Creation → Resolution
+001. **QuarantineEntry States** - State - NEW → UNDER_REVIEW → IGNORED/REPROCESSED/EXPIRED
+001. **QuarantineEntry Lifecycle** - Sequence - Creation → Review → Terminal disposition
 001. **StageResult States** - State - SUCCESS/FAILED/SKIPPED
 001. **Event Collection** - Sequence - collect-events() flow
 001. **Aggregate Immutability** - Activity - State protection

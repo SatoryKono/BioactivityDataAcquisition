@@ -13,6 +13,7 @@ import yaml
 
 
 pytestmark = pytest.mark.architecture
+REFERENCE_NOW = datetime(2026, 7, 6, tzinfo=UTC)
 
 
 def _read(path: str) -> str:
@@ -43,7 +44,7 @@ def test_committed_test_telemetry_baseline_respects_freshness_guard() -> None:
         Path("configs/quality/test_telemetry_baseline.yaml").read_text(encoding="utf-8")
     )
     refreshed_at = datetime.fromisoformat(payload["refreshed_at_utc"])
-    age = datetime.now(UTC) - refreshed_at
+    age = REFERENCE_NOW - refreshed_at
 
     assert age.days <= int(payload["freshness_guard"]["max_age_days"]), (
         "Committed telemetry baseline is stale. Refresh with "

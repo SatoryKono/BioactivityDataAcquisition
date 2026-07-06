@@ -669,6 +669,7 @@ def test_coverage_verify_workflow_generates_module_coverage_inventory() -> None:
     workflow = WORKFLOW_PATH.read_text(encoding="utf-8")
 
     assert "coverage xml -o reports/coverage/coverage.xml" in workflow
+    assert "check-branch-coverage" in workflow
     assert "report-module-coverage" in workflow
     assert "reports/quality/module-coverage-inventory.json" in workflow
     assert "--refresh-from-coverage-xml" in workflow
@@ -681,7 +682,9 @@ def test_module_coverage_gates_policy_is_committed() -> None:
     assert gates["schema_version"] == 1
     assert gates["enforcement"]["default_mode"] == "block-regression"
     assert gates["branch_coverage"]["measurement"] == "enabled"
-    assert gates["branch_coverage"]["policy"] == "advisory"
+    assert gates["branch_coverage"]["policy"] == "blocking"
+    assert gates["branch_coverage"]["hard_gate_threshold_percent"] == 85
+    assert "check-branch-coverage" in gates["branch_coverage"]["enforcement_command"]
     assert (
         gates["branch_coverage"]["source"]
         == "reports/coverage/coverage.xml#branch-rate"

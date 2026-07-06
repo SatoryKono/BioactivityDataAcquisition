@@ -585,7 +585,7 @@ ShutdownPort, SerializationPort, DQConfigLoaderPort, FilterConfigLoaderPort
 | --------------- | ---------------------------------------------- | ------------------------------------------------------------- |
 | PipelineRun     | PENDING → RUNNING → COMPLETED/FAILED/CANCELLED | start(), complete-stage(), fail(), cancel()                   |
 | Batch           | OPEN → SEALED → WRITING → COMMITTED/FAILED     | add-record(), seal(), mark-writing(), commit(), mark-failed() |
-| QuarantineEntry | NEW → UNDER-REVIEW → RESOLVED/DISCARDED        | start-review(), resolve(), discard()                          |
+| QuarantineEntry | NEW → UNDER_REVIEW → IGNORED/REPROCESSED/EXPIRED | start_review(), mark_ignored(), mark_reprocessed(), mark_expired() |
 
 ### Ключевые параметры
 

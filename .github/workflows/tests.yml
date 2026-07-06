@@ -834,6 +834,9 @@ jobs:
                     uv run python -m coverage combine reports/coverage --keep
                     uv run python -m coverage report --show-missing --fail-under=85
                     uv run python -m coverage xml -o reports/coverage/coverage.xml
+                    uv run python -m scripts.engineering.qa check-branch-coverage \
+                      --coverage-xml reports/coverage/coverage.xml \
+                      --min-percent 85
                     uv run python -m scripts.engineering.qa report-module-coverage \
                       --coverage-xml reports/coverage/coverage.xml \
                       --json-out reports/quality/module-coverage-inventory.json \

@@ -610,7 +610,9 @@ def test_repo_backed_unit_test_exceptions_are_explicitly_classified() -> None:
         repo_root_match = REPO_BACKED_UNIT_MARKERS[1].search(text) and any(
             token in text for token in REPO_BACKED_ROOT_USE_TOKENS
         )
-        if repo_relative_match or repo_root_match:
+        # Also detect by pytest.mark.repo_backed marker
+        repo_backed_marker = "pytest.mark.repo_backed" in text
+        if repo_relative_match or repo_root_match or repo_backed_marker:
             detected_paths.add(path.relative_to(ROOT).as_posix())
 
     assert policy["decision"] == "dedicated_repo_backed_subtree_contract_exception"

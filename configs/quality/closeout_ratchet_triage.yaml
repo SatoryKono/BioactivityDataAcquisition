@@ -292,5 +292,5 @@ entries:
   - path: tests/architecture/test_tech_debt_issues_5978_closeout.py
     disposition: retain_active
     classification: budget_closeout_ratchet
-    live_guard: "debt issue #5978 branch coverage readiness remains deferred with documented promotion criteria until branch coverage stabilizes above 85% without budget growth."
-    rationale: Keeps the branch coverage readiness closeout tied to documented promotion criteria, current branch coverage state (82.99%), and module coverage gates policy alignment instead of stale historical signoff.
+    live_guard: "debt issue #5978 branch coverage readiness remains at the 85% threshold with a promoted coverage-verify branch gate and without budget growth."
+    rationale: Keeps the branch coverage readiness closeout tied to the blocking branch gate command, current branch coverage state (85.002% with zero branch-outcome margin), and module coverage gates policy alignment instead of stale historical signoff.

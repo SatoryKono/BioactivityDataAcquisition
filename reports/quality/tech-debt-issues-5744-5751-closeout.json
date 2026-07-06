@@ -95,7 +95,7 @@
     },
     "application_core_total_loc": {
       "opening": 22360,
-      "current": 22274,
+      "current": 22306,
       "max": 22319
     },
     "application_core_files_ge_250_loc": {
@@ -105,7 +105,7 @@
     },
     "intentional_no_exception_contract": {
       "opening": 99,
-      "current": 94,
+      "current": 89,
       "max": 94
     },
     "refined_assertless_tests": {
@@ -115,7 +115,7 @@
     },
     "assertless_total_candidates": {
       "opening": 113,
-      "current": 109,
+      "current": 105,
       "max": 113
     },
     "compatibility_test_files": {
@@ -171,17 +171,17 @@
     "5748": {
       "family": "application_core",
       "opening_total_loc": 22360,
-      "total_loc": 22303,
+      "total_loc": 22306,
       "opening_files_ge_250_loc": 7,
       "files_ge_250_loc": 5,
       "budget_warning_count": 0
     },
     "5749": {
       "opening_assertless_total_candidates": 113,
-      "assertless_total_candidates": 109,
+      "assertless_total_candidates": 105,
       "refined_assertless_tests": 0,
       "opening_intentional_no_exception_contract": 99,
-      "intentional_no_exception_contract": 94,
+      "intentional_no_exception_contract": 89,
       "compatibility_test_files": 0,
       "markerless_test_functions": 0
     },

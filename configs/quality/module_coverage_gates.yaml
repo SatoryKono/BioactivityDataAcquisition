@@ -6,13 +6,15 @@ enforcement:
   tier_violation_mode: block
   ranked_target_tier_violation_mode: block
 branch_coverage:
-  # Branch measurement is enabled in pyproject.toml, but hard enforcement stays
-  # advisory until the low-tail branches are burned down enough to avoid
-  # converting known technical debt into a broad CI blocker.
+  # Branch measurement is enabled in pyproject.toml and enforced in the
+  # canonical coverage-verify lane through scripts.engineering.qa
+  # check-branch-coverage.
   measurement: enabled
-  policy: advisory
-  decision_date: '2026-06-17'
+  policy: blocking
+  decision_date: '2026-07-06'
   source: reports/coverage/coverage.xml#branch-rate
+  hard_gate_threshold_percent: 85
+  enforcement_command: python -m scripts.engineering.qa check-branch-coverage --coverage-xml reports/coverage/coverage.xml --min-percent 85
   promotion_criteria:
     - branch-rate remains at or above 85% for three consecutive coverage-verify runs
     - no module is unmeasured or uncovered in module-coverage-inventory

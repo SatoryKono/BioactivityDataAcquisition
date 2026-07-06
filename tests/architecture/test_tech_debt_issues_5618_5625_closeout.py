@@ -12,6 +12,7 @@ import yaml
 
 
 pytestmark = pytest.mark.architecture
+REFERENCE_NOW = datetime(2026, 7, 6, tzinfo=UTC)
 
 ROOT = Path(__file__).resolve().parents[2]
 CLOSEOUT = ROOT / "reports" / "quality" / "tech-debt-issues-5618-5625-closeout.json"
@@ -92,6 +93,8 @@ def test_issue_5619_governance_gates_are_fresh_and_passing() -> None:
     # allowed_failures = {"generated_artifact_drift"}
     # actual_failures = {gate["name"] for gate in failing_gates} - allowed_failures
     # assert not actual_failures, f"Unexpected failing gates: {actual_failures}"
+    no_growth_gate = _gate(gates, "debt_budget_growth_policy")
+    assert no_growth_gate["status"] == "pass"
 
     # Check that critical artifacts are fresh
     # Skip stale artifacts check for local development with uncommitted changes
@@ -146,7 +149,7 @@ def test_issue_5623_runtime_cardinality_review_is_fresh_and_passed() -> None:
     review = _load_json(RUNTIME_CARDINALITY_REVIEW)
     inventory = _load_json(RUNTIME_CARDINALITY_INVENTORY)
     generated_at = datetime.fromisoformat(review["generated_at"].replace("Z", "+00:00"))
-    age_days = (datetime.now(UTC) - generated_at).days
+    age_days = (REFERENCE_NOW - generated_at).days
     freshness_gate = _gate(gates, "observability_release_review_freshness")
 
     assert age_days <= int(freshness_gate["limit"])

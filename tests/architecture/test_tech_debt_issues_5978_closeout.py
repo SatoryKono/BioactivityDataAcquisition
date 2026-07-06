@@ -31,12 +31,12 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 
 
 @pytest.mark.architecture
-def test_issue_5978_branch_coverage_is_at_threshold_pending_stability() -> None:
-    """Branch coverage readiness is at threshold and pending stability evidence."""
+def test_issue_5978_branch_coverage_is_promoted_to_hard_gate() -> None:
+    """Branch coverage readiness is promoted to the coverage-verify hard gate."""
     closeout = _load_json(CLOSEOUT)
 
     assert closeout["issue"]["number"] == 5978
-    assert closeout["closeout"]["status"] == "promotion_pending_stability_evidence"
+    assert closeout["closeout"]["status"] == "closeable"
 
     # Verify current branch coverage state
     branch_state = closeout["current_branch_coverage_state"]
@@ -45,19 +45,18 @@ def test_issue_5978_branch_coverage_is_at_threshold_pending_stability() -> None:
     assert branch_state["branch_total"] == 20256
     assert branch_state["branch_threshold_margin"] == 0
     assert branch_state["measurement_mode"] == "enabled"
-    assert branch_state["policy"] == "advisory"
+    assert branch_state["policy"] == "blocking"
 
     # Verify gate requirements
     gate_reqs = closeout["branch_coverage_gate_requirements"]
     assert gate_reqs["hard_gate_threshold_percent"] == 85
-    assert gate_reqs["current_policy"] == "advisory"
+    assert gate_reqs["current_policy"] == "blocking"
     assert len(gate_reqs["promotion_criteria"]) == 3
 
-    # Verify deferred actions
-    deferred = closeout["deferred_actions"]
-    assert deferred["status"] == "promotion_pending_stability_evidence"
-    assert "three consecutive coverage-verify runs" in deferred["rationale"]
-    assert len(deferred["next_steps"]) > 0
+    stability = closeout["stability_evidence"]
+    assert stability["status"] == "passed"
+    assert len(stability["consecutive_checks"]) == 3
+    assert all(check["status"] == "pass" for check in stability["consecutive_checks"])
 
 
 @pytest.mark.architecture
@@ -90,8 +89,9 @@ def test_issue_5978_module_coverage_gates_policy_aligned() -> None:
     # Verify branch coverage policy from gates config
     branch_config = gates_config["branch_coverage"]
     assert branch_config["measurement"] == "enabled"
-    assert branch_config["policy"] == "advisory"
-    assert branch_config["decision_date"] == "2026-06-17"
+    assert branch_config["policy"] == "blocking"
+    assert branch_config["decision_date"] == "2026-07-06"
+    assert branch_config["hard_gate_threshold_percent"] == 85
 
     # Verify promotion criteria match
     promotion_criteria = closeout["branch_coverage_gate_requirements"][
@@ -100,10 +100,10 @@ def test_issue_5978_module_coverage_gates_policy_aligned() -> None:
     gates_promotion = branch_config["promotion_criteria"]
     assert len(promotion_criteria) == len(gates_promotion)
 
-    # Verify rationale mentions advisory policy
+    # Verify rationale mentions the hard gate policy
     rationale = closeout["closeout"]["rationale"]
-    assert "advisory" in rationale.lower()
-    assert "three consecutive coverage-verify runs" in rationale
+    assert "blocking" in rationale.lower()
+    assert "check-branch-coverage" in rationale
 
 
 @pytest.mark.architecture
@@ -114,3 +114,22 @@ def test_issue_5978_evidence_paths_exist() -> None:
     for evidence_path in closeout["evidence"]:
         path = ROOT / evidence_path
         assert path.exists(), f"Evidence path does not exist: {evidence_path}"
+
+
+@pytest.mark.architecture
+def test_issue_5983_branch_gate_promotion_evidence_is_current() -> None:
+    """Issue #5983 has explicit hard-gate promotion evidence."""
+    evidence = _load_json(ROOT / "reports/quality/branch-coverage-gate-evidence.json")
+    gates_config = _load_yaml(MODULE_COVERAGE_GATES)
+
+    assert evidence["linked_issue"] == 5983
+    assert evidence["promotion_status"] == "promoted_to_blocking_gate"
+    assert evidence["branch_rate_percent"] == 85.002
+    assert evidence["branch_covered"] == 17218
+    assert evidence["branch_total"] == 20256
+    assert evidence["required_branch_covered"] == 17218
+    assert evidence["threshold_margin"] == 0
+    assert len(evidence["consecutive_checks"]) == 3
+    assert all(check["status"] == "pass" for check in evidence["consecutive_checks"])
+    assert gates_config["branch_coverage"]["policy"] == "blocking"
+    assert "check-branch-coverage" in evidence["gate_command"]
