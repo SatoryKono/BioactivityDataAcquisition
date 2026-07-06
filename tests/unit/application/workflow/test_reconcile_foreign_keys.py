@@ -175,7 +175,7 @@ def test_build_request_requires_non_empty_primary_keys() -> None:
         )
     )
 
-    with pytest.raises(ValueError, match="requires config.primary_keys"):
+    with pytest.raises(ValueError, match=r"requires config.primary_keys"):
         _build_request(spec)
 
 

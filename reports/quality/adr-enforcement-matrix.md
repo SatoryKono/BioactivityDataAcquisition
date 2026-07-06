@@ -56,6 +56,6 @@
 | `ADR-045` | `enforced` | 22 | 3 | - |
 | `ADR-046` | `enforced` | 10 | 1 | - |
 | `ADR-047` | `enforced` | 17 | 1 | - |
-| `ADR-048` | `enforced` | 15 | 3 | - |
+| `ADR-048` | `enforced` | 16 | 3 | - |
 | `ADR-049` | `enforced` | 3 | 1 | - |
 | `ADR-050` | `enforced` | 22 | 9 | - |

@@ -47,19 +47,19 @@ class TestBuildReadProjection:
         """No projection should be applied when caller wants full records."""
         assert _build_read_projection(columns=None, current_only=True) is None
 
-    def test_appends_is_current_when_needed(self) -> None:
-        """Current-only reads keep filtering support in projected reads."""
+    def test_returns_none_when_current_only(self) -> None:
+        """Current-only reads read full rows first for filtering, then project."""
         assert _build_read_projection(
             columns=["entity_id"],
             current_only=True,
-        ) == ["entity_id", "is_current"]
+        ) is None
 
-    def test_keeps_existing_is_current_once(self) -> None:
-        """Projection should not duplicate filter columns."""
+    def test_returns_none_when_current_only_with_is_current(self) -> None:
+        """Current-only reads read full rows first even when is_current is requested."""
         assert _build_read_projection(
             columns=["entity_id", "is_current"],
             current_only=True,
-        ) == ["entity_id", "is_current"]
+        ) is None
 
 
 class TestPreviewCleanup:
@@ -160,7 +160,41 @@ class TestReadGold:
         assert len(result) == 1
         assert "entity_id" in result[0]
         assert "extra" not in result[0]
-        mock_dt.to_pyarrow_table.assert_called_once_with(["entity_id", "is_current"])
+        # When current_only=True (default), projection is None to allow filtering
+        mock_dt.to_pyarrow_table.assert_called_once_with()
+
+    @pytest.mark.asyncio
+    async def test_read_gold_with_columns_filter_current_only_false(
+        self, tmp_path: Path
+    ) -> None:
+        """Should apply projection when current_only=False."""
+        reader = ConcreteGoldReaderForTest(str(tmp_path))
+
+        mock_arrow_table = MagicMock()
+        mock_arrow_table.column_names = ["entity_id", "value", "extra"]
+        mock_arrow_table.to_pylist.return_value = [
+            {"entity_id": "E1", "value": 1.0, "extra": "x"},
+        ]
+
+        mock_dt = MagicMock()
+        mock_dt.to_pyarrow_table.return_value = mock_arrow_table
+
+        mock_module = MagicMock()
+        mock_module.DeltaTable.return_value = mock_dt
+
+        with patch(
+            "bioetl.infrastructure.storage.gold.read_cleanup_mixin._load_gold_writer_module",
+            return_value=mock_module,
+        ):
+            result = await reader.read_gold(
+                "test_table", columns=["entity_id"], current_only=False
+            )
+
+        assert len(result) == 1
+        assert "entity_id" in result[0]
+        assert "extra" not in result[0]
+        # When current_only=False, projection is applied directly
+        mock_dt.to_pyarrow_table.assert_called_once_with(["entity_id"])
 
     @pytest.mark.asyncio
     async def test_read_gold_filters_is_current(self, tmp_path: Path) -> None:

@@ -394,6 +394,7 @@ def test_build_payload_includes_actionability_classification() -> None:
         [report],
         snapshot_date="2026-06-19",
         exclude_module_patterns=[],
+        exclude_actionability_categories=[],
         trend_summary={"status": "no_prior_snapshot"},
     )
 
@@ -423,6 +424,7 @@ def test_build_payload_keeps_reviewed_cli_zero_actionability_category() -> None:
         [report],
         snapshot_date="2026-06-30",
         exclude_module_patterns=[],
+        exclude_actionability_categories=[],
         trend_summary={"status": "no_prior_snapshot"},
     )
 
@@ -520,6 +522,7 @@ def test_build_payload_includes_top_pairs() -> None:
         [report],
         snapshot_date="2026-03-24",
         exclude_module_patterns=[],
+        exclude_actionability_categories=[],
         trend_summary={"status": "no_prior_snapshot"},
     )
 

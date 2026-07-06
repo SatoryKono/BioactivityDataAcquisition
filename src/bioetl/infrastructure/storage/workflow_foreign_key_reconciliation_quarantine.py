@@ -13,8 +13,8 @@ import pyarrow as pa
 from bioetl.domain.deterministic_identity import deterministic_uuid
 from bioetl.domain.ports import ForeignKeyReconciliationRequest, QuarantinePort
 from bioetl.domain.types import BatchID
-from bioetl.infrastructure.time.system_clock import current_utc_time
 from bioetl.infrastructure.storage.gold.io_helpers import load_gold_writer_module
+from bioetl.infrastructure.time.system_clock import current_utc_time
 
 FOREIGN_KEY_ORPHAN_ERROR_CODE = "FILTERED_OUT_SILVER"
 FOREIGN_KEY_ORPHAN_GOLD_ERROR_CODE = "FILTERED_OUT_GOLD"
