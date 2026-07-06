@@ -13,7 +13,6 @@ EXPECTED_CODE_INTERPRETER_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_code_int
 EXPECTED_PROMETHEUS_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_prometheus_wrapper.sh"
 EXPECTED_GRAFANA_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_grafana_wrapper.sh"
 EXPECTED_BRAVE_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_brave_search_wrapper.sh"
-EXPECTED_SONARQUBE_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_sonarqube_wrapper.sh"
 EXPECTED_NEO4J_CYPHER_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh"
 EXPECTED_NEO4J_MEMORY_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh"
 EXPECTED_FILESYSTEM_SCOPE="${REPO_ROOT}"
@@ -43,7 +42,6 @@ keys = [
     ("EXPECTED_PROMETHEUS_WRAPPER_PATH", ("prometheus", "args", 0)),
     ("EXPECTED_GRAFANA_WRAPPER_PATH", ("grafana", "args", 0)),
     ("EXPECTED_BRAVE_WRAPPER_PATH", ("brave-search", "args", 0)),
-    ("EXPECTED_SONARQUBE_WRAPPER_PATH", ("sonarqube", "args", 0)),
     ("EXPECTED_NEO4J_CYPHER_WRAPPER_PATH", ("neo4j-cypher", "args", 0)),
     ("EXPECTED_NEO4J_MEMORY_WRAPPER_PATH", ("neo4j-memory", "args", 0)),
     ("EXPECTED_FILESYSTEM_SCOPE", ("filesystem", "args", 2)),
@@ -118,7 +116,7 @@ fi
 
 printf "=== MCP server list ===\n%s\n\n" "$list_out"
 
-for server in memory filesystem fetch github docker context7 ast-grep mcp-code-interpreter prometheus grafana brave-search sonarqube neo4j-cypher neo4j-memory chembl pubchem pubmed mermaid biomoltechDocs mintlify deepwiki; do
+for server in memory filesystem fetch github docker context7 ast-grep mcp-code-interpreter prometheus grafana brave-search neo4j-cypher neo4j-memory mermaid biomoltechDocs mintlify deepwiki; do
   if grep -Eq "^${server}[[:space:]]" <<<"$list_out"; then
     ok "Server '${server}' is registered"
   else
@@ -138,7 +136,6 @@ code_interpreter_out="$(codex mcp get mcp-code-interpreter 2>&1 || true)"
 prometheus_out="$(codex mcp get prometheus 2>&1 || true)"
 grafana_out="$(codex mcp get grafana 2>&1 || true)"
 brave_out="$(codex mcp get brave-search 2>&1 || true)"
-sonarqube_out="$(codex mcp get sonarqube 2>&1 || true)"
 neo4j_cypher_out="$(codex mcp get neo4j-cypher 2>&1 || true)"
 neo4j_memory_out="$(codex mcp get neo4j-memory 2>&1 || true)"
 deepwiki_out="$(codex mcp get deepwiki 2>&1 || true)"
@@ -154,7 +151,6 @@ require_wrapper_path "$code_interpreter_out" "$EXPECTED_CODE_INTERPRETER_WRAPPER
 require_wrapper_path "$prometheus_out" "$EXPECTED_PROMETHEUS_WRAPPER_PATH" "prometheus is routed through the project wrapper" || status=1
 require_wrapper_path "$grafana_out" "$EXPECTED_GRAFANA_WRAPPER_PATH" "grafana is routed through the project wrapper" || status=1
 require_wrapper_path "$brave_out" "$EXPECTED_BRAVE_WRAPPER_PATH" "brave-search is routed through the project wrapper" || status=1
-require_wrapper_path "$sonarqube_out" "$EXPECTED_SONARQUBE_WRAPPER_PATH" "sonarqube is routed through the project wrapper" || status=1
 require_wrapper_path "$neo4j_cypher_out" "$EXPECTED_NEO4J_CYPHER_WRAPPER_PATH" "neo4j-cypher is routed through the project wrapper" || status=1
 require_wrapper_path "$neo4j_memory_out" "$EXPECTED_NEO4J_MEMORY_WRAPPER_PATH" "neo4j-memory is routed through the project wrapper" || status=1
 biomoltech_out="$(codex mcp get biomoltechDocs 2>&1 || true)"

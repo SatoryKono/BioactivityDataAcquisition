@@ -28,13 +28,9 @@ EXPECTED_MCP_SERVERS = {
     "prometheus",
     "grafana",
     "brave-search",
-    "sonarqube",
     "neo4j-cypher",
     "neo4j-memory",
     "needle",
-    "chembl",
-    "pubchem",
-    "pubmed",
     "mermaid",
     "biomoltechDocs",
     "mintlify",
@@ -56,13 +52,9 @@ WRAPPER_SCRIPT_STEMS = {
     "prometheus": "mcp_prometheus_wrapper",
     "grafana": "mcp_grafana_wrapper",
     "brave-search": "mcp_brave_search_wrapper",
-    "sonarqube": "mcp_sonarqube_wrapper",
     "neo4j-cypher": "mcp_neo4j_cypher_wrapper",
     "neo4j-memory": "mcp_neo4j_memory_wrapper",
     "needle": "mcp_needle_wrapper",
-    "chembl": "mcp_chembl_wrapper",
-    "pubchem": "mcp_pubchem_wrapper",
-    "pubmed": "mcp_pubmed_wrapper",
     "mermaid": "mcp_mermaid_wrapper",
 }
 
@@ -73,8 +65,24 @@ def _posix(path_str: str) -> str:
 
 def _load_workspace_mcp_config(
     root: Path, tmp_path: Path
-) -> tuple[dict[str, object], dict[str, object], dict[str, object], Path]:
+) -> tuple[dict[str, object], dict[str, object], dict[str, object], dict[str, object], Path]:
     """Load generated config when backend works, else fall back to committed artifact."""
+    gemini_settings_path = tmp_path / ".gemini" / "settings.json"
+    gemini_settings_path.parent.mkdir(parents=True)
+    gemini_settings_path.write_text(
+        json.dumps(
+            {
+                "mcpServers": {
+                    "sonarqube": {"command": "old"},
+                    "chembl": {"command": "old"},
+                    "pubchem": {"command": "old"},
+                    "pubmed": {"command": "old"},
+                    "local-extra": {"command": "kept"},
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
     result = run_repo_python(
         "-m",
         "scripts.engineering.dev",
@@ -91,17 +99,21 @@ def _load_workspace_mcp_config(
         assert vscode_path.exists()
         assert qodo_path.exists()
         assert codex_settings_path.exists()
+        assert gemini_settings_path.exists()
         return (
             json.loads(vscode_path.read_text(encoding="utf-8")),
             json.loads(qodo_path.read_text(encoding="utf-8")),
             json.loads(codex_settings_path.read_text(encoding="utf-8")),
+            json.loads(gemini_settings_path.read_text(encoding="utf-8")),
             tmp_path,
         )
 
     committed_vscode_path = root / ".vscode" / "mcp.json"
     committed_codex_settings_path = root / ".codex" / "settings.json"
+    committed_gemini_settings_path = root / ".gemini" / "settings.json"
     assert committed_vscode_path.exists(), result.stderr
     assert committed_codex_settings_path.exists(), result.stderr
+    assert committed_gemini_settings_path.exists(), result.stderr
     committed_qodo_payload = json.loads(
         (root / ".mcp.json").read_text(encoding="utf-8")
     )
@@ -109,6 +121,7 @@ def _load_workspace_mcp_config(
         json.loads(committed_vscode_path.read_text(encoding="utf-8")),
         committed_qodo_payload,
         json.loads(committed_codex_settings_path.read_text(encoding="utf-8")),
+        json.loads(committed_gemini_settings_path.read_text(encoding="utf-8")),
         root,
     )
 
@@ -137,12 +150,19 @@ def _assert_platform_wrappers(servers: dict[str, object]) -> None:
 def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None:
     """Workspace MCP config should match the canonical server layout."""
     root = repo_root()
-    payload, qodo_payload, codex_settings, _config_root = _load_workspace_mcp_config(
-        root, tmp_path
+    payload, qodo_payload, codex_settings, gemini_settings, _config_root = (
+        _load_workspace_mcp_config(root, tmp_path)
     )
     servers = payload["servers"]
     assert codex_settings["mcpServers"] == servers
     assert qodo_payload["mcpServers"] == servers
+    assert "local-extra" in gemini_settings["mcpServers"]
+    assert not {
+        "sonarqube",
+        "chembl",
+        "pubchem",
+        "pubmed",
+    } & set(gemini_settings["mcpServers"])
     assert set(servers) == EXPECTED_MCP_SERVERS
     assert servers["memory"]["command"] == "npx"
     assert _posix(servers["memory"]["env"]["MEMORY_FILE_PATH"]).endswith(

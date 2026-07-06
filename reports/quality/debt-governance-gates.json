@@ -226,8 +226,8 @@
       "status": "pass"
     },
     {
-      "current": 45,
-      "limit": 45,
+      "current": 41,
+      "limit": 41,
       "metric": "zero_reference_supporting_script_count",
       "name": "supporting_scripts_zero_reference_count",
       "remediation": "Triage or remove zero-reference supporting scripts; budgets must not grow.",

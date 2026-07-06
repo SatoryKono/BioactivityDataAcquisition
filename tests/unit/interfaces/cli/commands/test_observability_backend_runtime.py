@@ -479,6 +479,7 @@ def test_ensure_backend_warns_when_start_raises_oserror() -> None:
         enabled=True,
         probe_fn=MagicMock(return_value=False),
         start_fn=MagicMock(side_effect=OSError("bind failed")),
+        listener_pid_fn=MagicMock(return_value=None),
         warning_printer=warning,
     )
 

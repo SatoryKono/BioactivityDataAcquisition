@@ -292,34 +292,52 @@ def get_quarantine_port() -> QuarantinePort:
     return cast("QuarantinePort", _invoke_bootstrap("bootstrap_quarantine_adapter"))
 
 
-if TYPE_CHECKING:
-    from bioetl.composition.control_plane_service_access import (
-        get_adr_service as get_adr_service,
-    )
-    from bioetl.composition.control_plane_service_access import (
-        get_config_service as get_config_service,
-    )
-    from bioetl.composition.control_plane_service_access import (
-        get_export_service as get_export_service,
-    )
-    from bioetl.composition.control_plane_service_access import (
-        get_forensic_run_diff_service as get_forensic_run_diff_service,
-    )
-    from bioetl.composition.control_plane_service_access import (
-        get_historical_replay_closure_service as get_historical_replay_closure_service,
-    )
-    from bioetl.composition.control_plane_service_access import (
-        get_historical_replay_corpus_service as get_historical_replay_corpus_service,
-    )
-    from bioetl.composition.control_plane_service_access import (
-        get_historical_replay_universe_service as get_historical_replay_universe_service,
-    )
-    from bioetl.composition.control_plane_service_access import (
-        get_lineage_service as get_lineage_service,
-    )
-    from bioetl.composition.control_plane_service_access import (
-        get_lock_service as get_lock_service,
-    )
-    from bioetl.composition.control_plane_service_access import (
-        get_run_manifest_service as get_run_manifest_service,
-    )
+def get_adr_service() -> object:
+    """Get ADR management port."""
+    _ensure_provider_registrations()
+    return _invoke_bootstrap("bootstrap_adr_service")
+
+def get_config_service() -> object:
+    """Get application configuration service."""
+    _ensure_provider_registrations()
+    return _invoke_bootstrap("bootstrap_config_service")
+
+def get_export_service() -> object:
+    """Get Delta export service."""
+    _ensure_provider_registrations()
+    return _invoke_bootstrap("bootstrap_export_service")
+
+def get_forensic_run_diff_service() -> object:
+    """Get forensic run diff service."""
+    _ensure_provider_registrations()
+    return _invoke_bootstrap("bootstrap_forensic_run_diff_service")
+
+def get_historical_replay_closure_service() -> object:
+    """Get historical replay closure service."""
+    _ensure_provider_registrations()
+    return _invoke_bootstrap("bootstrap_historical_replay_closure_service")
+
+def get_historical_replay_corpus_service() -> object:
+    """Get historical replay corpus service."""
+    _ensure_provider_registrations()
+    return _invoke_bootstrap("bootstrap_historical_replay_corpus_service")
+
+def get_historical_replay_universe_service() -> object:
+    """Get historical replay universe service."""
+    _ensure_provider_registrations()
+    return _invoke_bootstrap("bootstrap_historical_replay_universe_service")
+
+def get_lineage_service() -> object:
+    """Get lineage service."""
+    _ensure_provider_registrations()
+    return _invoke_bootstrap("bootstrap_lineage_service")
+
+def get_lock_service() -> object:
+    """Get administrative lock service."""
+    _ensure_provider_registrations()
+    return _invoke_bootstrap("bootstrap_lock_service")
+
+def get_run_manifest_service() -> object:
+    """Get run-manifest service without full pipeline registration."""
+    _ensure_provider_registrations()
+    return _invoke_bootstrap("bootstrap_run_manifest_service")

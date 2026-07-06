@@ -348,7 +348,7 @@ def test_issue_5796_zero_reference_supporting_scripts_have_owner_or_removal_gove
     ]
 
     assert registry["schema_version"]
-    assert len(zero_ref_rows) == 45
+    assert len(zero_ref_rows) == 41
     assert {row["status"] for row in zero_ref_rows} == {"supporting"}
 
     for row in zero_ref_rows:

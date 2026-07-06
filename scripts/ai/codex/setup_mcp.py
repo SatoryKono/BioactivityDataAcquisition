@@ -20,6 +20,9 @@ FETCH_SPEC = ["--from", "mcp-server-fetch==2025.4.7", "mcp-server-fetch"]
 MANAGED_BLOCK_BEGIN = "# === BEGIN MANAGED MCP SERVERS ==="
 MANAGED_BLOCK_END = "# === END MANAGED MCP SERVERS ==="
 CACHE_DIR_NAME = ".cache"
+REMOVED_MCP_SERVER_NAMES = frozenset(
+    {"sonarqube", "chembl", "pubchem", "pubmed"}
+)
 
 
 def _wrapper_command(script_name: str, workspace_root: Path) -> dict[str, Any]:
@@ -92,13 +95,9 @@ def _canonical_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
         "prometheus": _wrapper_command("mcp_prometheus_wrapper", workspace_root),
         "grafana": _wrapper_command("mcp_grafana_wrapper", workspace_root),
         "brave-search": _wrapper_command("mcp_brave_search_wrapper", workspace_root),
-        "sonarqube": _wrapper_command("mcp_sonarqube_wrapper", workspace_root),
         "neo4j-cypher": _wrapper_command("mcp_neo4j_cypher_wrapper", workspace_root),
         "neo4j-memory": _wrapper_command("mcp_neo4j_memory_wrapper", workspace_root),
         "needle": _wrapper_command("mcp_needle_wrapper", workspace_root),
-        "chembl": _wrapper_command("mcp_chembl_wrapper", workspace_root),
-        "pubchem": _wrapper_command("mcp_pubchem_wrapper", workspace_root),
-        "pubmed": _wrapper_command("mcp_pubmed_wrapper", workspace_root),
         "mermaid": _wrapper_command("mcp_mermaid_wrapper", workspace_root),
         "biomoltechDocs": _http_server("https://biomoltech.mintlify.app/mcp"),
         "mintlify": _http_server("https://mcp.mintlify.com"),
@@ -204,7 +203,11 @@ def _write_gemini_settings(output_root: Path, workspace_root: Path) -> Path:
     if existing_servers and not isinstance(existing_servers, dict):
         raise ValueError(f"Gemini mcpServers must be a JSON object: {settings_path}")
 
-    merged_servers = dict(existing_servers)
+    merged_servers = {
+        name: server
+        for name, server in existing_servers.items()
+        if name not in REMOVED_MCP_SERVER_NAMES
+    }
     for name, server in _canonical_servers(workspace_root).items():
         merged_servers[name] = _gemini_server_config(server)
 
