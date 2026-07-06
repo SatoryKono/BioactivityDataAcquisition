@@ -6,10 +6,10 @@
   "scan_root": "tests/fixtures",
   "scope_file_counts": {
     "fixture": 21,
-    "golden": 24,
+    "golden": 26,
     "vcr": 396
   },
-  "total_files": 441,
+  "total_files": 443,
   "tracked_extensions": [
     ".json",
     ".yaml",

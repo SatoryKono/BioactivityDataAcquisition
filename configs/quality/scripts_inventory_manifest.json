@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-06T06:11:08.096333+00:00",
+  "generated_at": "2026-07-06T07:13:35.969884+00:00",
   "summary": {
-    "total_scripts": 452,
+    "total_scripts": 453,
     "status_counts": {
-      "active": 360,
+      "active": 361,
       "supporting": 92
     },
     "reference_group_coverage": {
@@ -13,7 +13,7 @@
       "ci": 62,
       "docs": 161,
       "other": 23,
-      "scripts": 348,
+      "scripts": 349,
       "skills": 11,
       "tests": 190
     }
@@ -643,7 +643,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py",
-          "line": 359,
+          "line": 360,
           "source_group": "tests",
           "text": "assert \"scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh\" in backlog_text"
         }
@@ -6659,7 +6659,7 @@
         },
         {
           "path": "tests/architecture/test_test_telemetry_governance.py",
-          "line": 50,
+          "line": 51,
           "source_group": "tests",
           "text": "\"python scripts/engineering/ci/update_test_telemetry_baseline.py\""
         }
@@ -6707,7 +6707,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5651_5655_closeout.py",
-          "line": 142,
+          "line": 143,
           "source_group": "tests",
           "text": "assert \"validate_contract_registry.py\" in contract_workflow"
         }
@@ -6773,13 +6773,13 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5651_5655_closeout.py",
-          "line": 130,
+          "line": 131,
           "source_group": "tests",
           "text": "== \"scripts/engineering/ci/validate_registry_dq_refs.py::build_diagnostics_payload\""
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5651_5655_closeout.py",
-          "line": 143,
+          "line": 144,
           "source_group": "tests",
           "text": "assert \"validate_registry_dq_refs.py\" in contract_workflow"
         }
@@ -8053,7 +8053,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 252,
+      "reference_count": 253,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -8120,7 +8120,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 137,
+          "line": 139,
           "source_group": "scripts",
           "text": "\"analyze-duplicate-functions\": \"scripts.engineering.qa.analyze_duplicate_functions\","
         }
@@ -8169,7 +8169,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 138,
+          "line": 140,
           "source_group": "scripts",
           "text": "\"calibrate-hotspots\": \"scripts.engineering.qa.calibrate_hotspot_budgets\","
         }
@@ -8190,7 +8190,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 76,
+          "line": 77,
           "source_group": "scripts",
           "text": "\"check-app-deps\": \"scripts.engineering.qa.check_application_deps\","
         }
@@ -8211,9 +8211,24 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 75,
+          "line": 76,
           "source_group": "scripts",
           "text": "\"check-architecture\": \"scripts.engineering.qa.check_architecture\","
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/qa/check_branch_coverage.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 113,
+          "source_group": "scripts",
+          "text": "\"check-branch-coverage\": \"scripts.engineering.qa.check_branch_coverage\","
         }
       ]
     },
@@ -8289,7 +8304,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 77,
+          "line": 78,
           "source_group": "scripts",
           "text": "\"check-constructor-args\": \"scripts.engineering.qa.check_constructor_args\","
         }
@@ -8304,7 +8319,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 139,
+          "line": 141,
           "source_group": "scripts",
           "text": "\"check-dashboard-visual-semantics\": \"scripts.engineering.qa.check_dashboard_visual_semantics\","
         }
@@ -8319,7 +8334,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 84,
+          "line": 85,
           "source_group": "scripts",
           "text": "\"check-docs-drift\": \"scripts.engineering.qa.check_docs_drift\","
         },
@@ -8352,7 +8367,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 79,
+          "line": 80,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.check_duplication_complexity_exemptions\""
         }
@@ -8395,7 +8410,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 94,
+          "line": 95,
           "source_group": "scripts",
           "text": "\"check-generic-field-ownership\": \"scripts.engineering.qa.check_generic_field_ownership\","
         }
@@ -8416,7 +8431,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 93,
+          "line": 94,
           "source_group": "scripts",
           "text": "\"check-gold-nullable-numeric\": \"scripts.engineering.qa.check_gold_nullable_numeric_compatibility\","
         }
@@ -8455,7 +8470,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 82,
+          "line": 83,
           "source_group": "scripts",
           "text": "\"check-naming-pkg\": \"scripts.engineering.qa.check_naming_package_consistency\","
         },
@@ -8512,7 +8527,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 95,
+          "line": 96,
           "source_group": "scripts",
           "text": "\"check-ontology-unit-semantics\": \"scripts.engineering.qa.check_ontology_unit_semantics\","
         }
@@ -8545,7 +8560,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 83,
+          "line": 84,
           "source_group": "scripts",
           "text": "\"check-exemptions\": \"scripts.engineering.qa.check_quality_exemptions\","
         }
@@ -8584,7 +8599,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 92,
+          "line": 93,
           "source_group": "scripts",
           "text": "\"check-semantic-anchor-parity\": \"scripts.engineering.qa.check_semantic_anchor_parity\","
         }
@@ -8605,7 +8620,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 87,
+          "line": 88,
           "source_group": "scripts",
           "text": "\"check-semantic-field-registry\": \"scripts.engineering.qa.check_semantic_field_registry\","
         }
@@ -8632,7 +8647,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 91,
+          "line": 92,
           "source_group": "scripts",
           "text": "\"check-semantic-governance-policy\": \"scripts.engineering.qa.check_semantic_governance_policy\","
         }
@@ -8671,7 +8686,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 89,
+          "line": 90,
           "source_group": "scripts",
           "text": "\"check-semantic-pair-budget\": \"scripts.engineering.qa.check_semantic_pair_matrix_budget\","
         }
@@ -8710,7 +8725,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 88,
+          "line": 89,
           "source_group": "scripts",
           "text": "\"check-semantic-registry-drift\": \"scripts.engineering.qa.check_semantic_registry_drift\","
         }
@@ -8774,7 +8789,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 85,
+          "line": 86,
           "source_group": "scripts",
           "text": "\"check-xwalk-missing-backlog\": \"scripts.engineering.qa.check_xwalk_missing_backlog\","
         }
@@ -8851,7 +8866,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 113,
+          "line": 115,
           "source_group": "scripts",
           "text": "\"report-pubchem-property-vocab\": \"scripts.engineering.qa.extract_pubchem_property_vocab\","
         }
@@ -8872,7 +8887,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 114,
+          "line": 116,
           "source_group": "scripts",
           "text": "\"report-publication-nested-vocab\": \"scripts.engineering.qa.extract_publication_nested_vocab\","
         }
@@ -8923,7 +8938,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 96,
+          "line": 97,
           "source_group": "scripts",
           "text": "\"generate-debt-tasks\": \"scripts.engineering.qa.generate_architecture_debt_tasks\","
         },
@@ -9082,7 +9097,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 117,
+          "line": 119,
           "source_group": "scripts",
           "text": "\"report-hotspots\": \"scripts.engineering.qa.generate_hotspot_degradation_report\","
         }
@@ -9128,7 +9143,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 90,
+          "line": 91,
           "source_group": "scripts",
           "text": "\"report-semantic-pipeline-audit\": \"scripts.engineering.qa.generate_semantic_pipeline_audit\","
         }
@@ -9248,7 +9263,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 74,
+          "line": 75,
           "source_group": "scripts",
           "text": "\"check-naming\": \"scripts.engineering.qa.naming_audit\","
         },
@@ -9305,7 +9320,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 97,
+          "line": 98,
           "source_group": "scripts",
           "text": "\"reduce-architecture-debt\": \"scripts.engineering.qa.reduce_architecture_debt\","
         },
@@ -9350,7 +9365,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 126,
+          "line": 128,
           "source_group": "scripts",
           "text": "\"report-adr-enforcement-matrix\": \"scripts.engineering.qa.report_adr_enforcement_matrix\","
         },
@@ -9381,7 +9396,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 131,
+          "line": 133,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_architecture_debt_remote_main_baseline\""
         },
@@ -9431,7 +9446,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 120,
+          "line": 122,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_artifact_duplication_audit\""
         },
@@ -9456,7 +9471,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 124,
+          "line": 126,
           "source_group": "scripts",
           "text": "\"report-chembl-observed-value-inventory\": \"scripts.engineering.qa.report_chembl_observed_value_inventory\","
         }
@@ -9483,7 +9498,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 102,
+          "line": 103,
           "source_group": "scripts",
           "text": "\"report-compatibility-importer-census\": \"scripts.engineering.qa.report_compatibility_importer_census\","
         }
@@ -9522,7 +9537,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 104,
+          "line": 105,
           "source_group": "scripts",
           "text": "\"report-contract-coverage-matrix\": \"scripts.engineering.qa.report_contract_coverage_matrix\","
         }
@@ -9557,7 +9572,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 140,
+          "line": 142,
           "source_group": "scripts",
           "text": "\"report-dashboard-inventory\": \"scripts.engineering.qa.report_dashboard_inventory\","
         }
@@ -9572,7 +9587,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 143,
+          "line": 145,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_dashboard_panel_audit_matrix\""
         }
@@ -9599,7 +9614,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 141,
+          "line": 143,
           "source_group": "scripts",
           "text": "\"report-dashboard-query-duplicates\": \"scripts.engineering.qa.report_dashboard_query_duplicates\","
         }
@@ -9614,7 +9629,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 112,
+          "line": 114,
           "source_group": "scripts",
           "text": "\"report-dead-code-inventory\": \"scripts.engineering.qa.report_dead_code_inventory\","
         }
@@ -9647,7 +9662,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 133,
+          "line": 135,
           "source_group": "scripts",
           "text": "\"report-debt-governance-gates\": \"scripts.engineering.qa.report_debt_governance_gates\","
         },
@@ -9668,7 +9683,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 106,
+          "line": 107,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_domain_io_taint_inventory\""
         },
@@ -9723,7 +9738,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 118,
+          "line": 120,
           "source_group": "scripts",
           "text": "\"report-duplication-baseline\": \"scripts.engineering.qa.report_duplication_baseline\","
         }
@@ -9738,7 +9753,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 122,
+          "line": 124,
           "source_group": "scripts",
           "text": "\"report-function-length-inventory\": \"scripts.engineering.qa.report_function_length_inventory\","
         }
@@ -9759,7 +9774,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 116,
+          "line": 118,
           "source_group": "scripts",
           "text": "\"report-family-baseline\": \"scripts.engineering.qa.report_hotspot_family_baseline\","
         }
@@ -9780,7 +9795,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 128,
+          "line": 130,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_invariant_audit_rebaseline\""
         }
@@ -9817,7 +9832,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 111,
+          "line": 112,
           "source_group": "scripts",
           "text": "\"report-module-coverage\": \"scripts.engineering.qa.report_module_coverage_inventory\","
         },
@@ -9829,7 +9844,7 @@
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 718,
+          "line": 721,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_module_coverage_inventory.py\""
         }
@@ -9868,7 +9883,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 123,
+          "line": 125,
           "source_group": "scripts",
           "text": "\"report-normalization-fallback-inventory\": \"scripts.engineering.qa.report_normalization_fallback_inventory\","
         },
@@ -9913,7 +9928,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 125,
+          "line": 127,
           "source_group": "scripts",
           "text": "\"report-observability-metric-inventory\": \"scripts.engineering.qa.report_observability_metric_inventory\","
         },
@@ -9946,7 +9961,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 103,
+          "line": 104,
           "source_group": "scripts",
           "text": "\"report-pipeline-config-contract-ownership-map\": \"scripts.engineering.qa.report_pipeline_config_contract_ownership\","
         }
@@ -9961,7 +9976,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 109,
+          "line": 110,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_port_adapter_factory_coverage\""
         }
@@ -10004,7 +10019,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 101,
+          "line": 102,
           "source_group": "scripts",
           "text": "\"report-provider-contract-drift\": \"scripts.engineering.qa.report_provider_contract_drift\","
         }
@@ -10067,7 +10082,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 100,
+          "line": 101,
           "source_group": "scripts",
           "text": "\"report-vcr-metadata\": \"scripts.engineering.qa.report_vcr_metadata_catalog\","
         },
@@ -10142,7 +10157,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 135,
+          "line": 137,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.run_architecture_audit_read_only\""
         },
@@ -10299,7 +10314,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 115,
+          "line": 117,
           "source_group": "scripts",
           "text": "\"sync-integration-vcr-policy\": \"scripts.engineering.qa.sync_integration_vcr_policy\","
         }
@@ -10332,7 +10347,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 151,
+          "line": 153,
           "source_group": "scripts",
           "text": "\"run-tests\": module_command(\"scripts.engineering.qa.test_health\", \"run-tests\"),"
         }
@@ -10347,7 +10362,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 86,
+          "line": 87,
           "source_group": "scripts",
           "text": "\"validate-dq-consistency\": \"scripts.engineering.qa.validate_dq_consistency\","
         }

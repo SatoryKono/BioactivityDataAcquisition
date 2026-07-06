@@ -38,6 +38,7 @@ Commands:
     report-domain-io-taint-inventory Generate/check semantic Domain I/O taint inventory
     report-port-adapter-factory-coverage Generate/check core port-adapter-factory coverage matrix
     report-module-coverage Generate/check module-level coverage inventory
+    check-branch-coverage Enforce branch coverage from reports/coverage/coverage.xml
     report-dead-code-inventory Generate repo-local static dead-code review inventory
     report-pubchem-property-vocab Extract observed PubChem property-URN vocabulary
     report-publication-nested-vocab Extract nested publication-sidecar vocabularies
@@ -109,6 +110,7 @@ COMMAND_MODULES: dict[str, str] = {
         "scripts.engineering.qa.report_port_adapter_factory_coverage"
     ),
     "report-module-coverage": "scripts.engineering.qa.report_module_coverage_inventory",
+    "check-branch-coverage": "scripts.engineering.qa.check_branch_coverage",
     "report-dead-code-inventory": "scripts.engineering.qa.report_dead_code_inventory",
     "report-pubchem-property-vocab": "scripts.engineering.qa.extract_pubchem_property_vocab",
     "report-publication-nested-vocab": "scripts.engineering.qa.extract_publication_nested_vocab",

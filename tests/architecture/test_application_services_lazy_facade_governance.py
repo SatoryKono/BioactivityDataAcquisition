@@ -50,7 +50,11 @@ _WINDOWS_GIT_CANDIDATES = (
     Path("C:/Program Files (x86)/Git/bin/git.exe"),
 )
 
-EXPECTED_TEST_IMPORTS: dict[str, frozenset[str]] = {}
+EXPECTED_TEST_IMPORTS: dict[str, frozenset[str]] = {
+    "tests/unit/application/services/test_quarantine_service_filtered_helpers.py": frozenset(
+        {"_quarantine_service_filtered_helpers"}
+    ),
+}
 
 
 @lru_cache(maxsize=2)
@@ -357,15 +361,22 @@ def _source_has_package_root_import_marker(source: str) -> bool:
 
 def _read_candidate_source(path: Path) -> str | None:
     try:
+        source = _read_candidate_source_direct(path)
+    except OSError:
         source = _read_text_with_subprocess_timeout(path)
     except TimeoutError:  # pragma: no cover - architecture scan safety
         raise AssertionError(f"Timeout reading {path}") from None
-    except UnicodeDecodeError as exc:  # pragma: no cover - architecture scan safety
+    except UnicodeError as exc:  # pragma: no cover - architecture scan safety
         raise AssertionError(f"Unable to decode {path}: {exc}") from exc
 
     if not _source_has_package_root_import_marker(source):
         return None
     return source
+
+
+def _read_candidate_source_direct(path: Path) -> str:
+    """Read already-prefiltered candidate files without spawning child Python."""
+    return path.read_text(encoding="utf-8", errors="replace")
 
 
 def _read_text_with_subprocess_timeout(path: Path) -> str:
@@ -470,6 +481,32 @@ def test_temp_output_cleanup_does_not_mask_windows_file_lock(
     _unlink_output_path(Path("locked.txt"), retry_seconds=0.0)
 
     assert calls == _TEMPFILE_UNLINK_ATTEMPTS
+
+
+def test_candidate_source_read_does_not_spawn_subprocess_for_prefiltered_file(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    candidate = tmp_path / "candidate.py"
+    candidate.write_text(
+        "from bioetl.application.services import "
+        "_quarantine_service_filtered_helpers as helpers\n",
+        encoding="utf-8",
+    )
+
+    def fail_subprocess_read(*_args: object, **_kwargs: object) -> object:
+        raise AssertionError("candidate source read should not spawn subprocess")
+
+    monkeypatch.setattr(
+        sys.modules[__name__],
+        "_run_command_with_stdout_file",
+        fail_subprocess_read,
+    )
+
+    source = _read_candidate_source(candidate)
+
+    assert source is not None
+    assert "_quarantine_service_filtered_helpers" in source
 
 
 def test_windows_subprocess_kwargs_hide_command_windows() -> None:

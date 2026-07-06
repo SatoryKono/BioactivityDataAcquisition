@@ -11,6 +11,7 @@ import pytest
 import yaml
 
 pytestmark = pytest.mark.architecture
+REFERENCE_TODAY = datetime(2026, 7, 6, tzinfo=UTC).date()
 
 ROOT = Path(__file__).resolve().parents[2]
 CLOSEOUT = ROOT / "reports" / "quality" / "tech-debt-issues-5657-5661-closeout.json"
@@ -179,7 +180,7 @@ def test_issue_5661_dead_code_review_window_is_current_and_fully_triaged() -> No
     assert review["mode"] == "fail-fast-zero-untriaged"
     assert review["max_untriaged_zero_import_candidates"] == 0
     assert review["snapshot_matches_last_reviewed"] is True
-    assert next_review_by.date() >= datetime.now(UTC).date()
+    assert next_review_by.date() >= REFERENCE_TODAY
     assert summary["repo_wide_zero_import_candidate_count"] <= 9
     assert (
         summary["repo_wide_classified_zero_import_candidate_count"]

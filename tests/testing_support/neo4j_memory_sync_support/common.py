@@ -1,5 +1,7 @@
 """Support helpers for invariant-focused Neo4j memory sync test suites."""
 
+# ruff: noqa: F403,F405
+
 from __future__ import annotations
 
 import tempfile
@@ -8,7 +10,9 @@ from functools import lru_cache
 from pathlib import Path
 
 import pytest
-from scripts.memory.sync import *  # noqa: F403
+from scripts.memory.sync import *
+
+from memory.graph.sync_pkg import _core as _sync_core
 
 pytestmark = [pytest.mark.memory, pytest.mark.timeout(180)]
 LEGACY_REPORT_PATH = str(Path(tempfile.gettempdir()) / "neo4j-memory-audit.json")
@@ -129,7 +133,26 @@ def _repo_root() -> Path:
 
 @lru_cache(maxsize=1)
 def _snapshot_base() -> object:
-    return build_snapshot(_repo_root(), verified_at="2026-04-09")
+    original_lookup = _sync_core._git_last_commit_age_days_bulk
+    _sync_core._git_last_commit_age_days_bulk = _deterministic_git_age_lookup
+    try:
+        return build_snapshot(_repo_root(), verified_at="2026-04-09")
+    finally:
+        _sync_core._git_last_commit_age_days_bulk = original_lookup
+
+
+def _deterministic_git_age_lookup(
+    _root: Path,
+    relative_paths: list[str],
+    _today: date,
+    cache: dict[str, int | None],
+    *,
+    chunk_size: int = 1024,
+) -> dict[str, int | None]:
+    del chunk_size
+    result = {path: 0 for path in dict.fromkeys(relative_paths) if path}
+    cache.update(result)
+    return result
 
 
 def _clone_snapshot(snapshot: GraphSnapshot) -> GraphSnapshot:

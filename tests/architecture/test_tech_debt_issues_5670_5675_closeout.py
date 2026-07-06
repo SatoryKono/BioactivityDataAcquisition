@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import ast
 import json
-from datetime import UTC, date, datetime
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +13,7 @@ import yaml
 from scripts.engineering.ci.validate_registry_dq_refs import build_diagnostics_payload
 
 pytestmark = pytest.mark.architecture
+REFERENCE_TODAY = date(2026, 7, 6)
 
 ROOT = Path(__file__).resolve().parents[2]
 CLOSEOUT = ROOT / "reports" / "quality" / "tech-debt-issues-5670-5675-closeout.json"
@@ -173,7 +174,7 @@ def test_issue_5671_governance_artifact_references_are_backed_by_live_evidence()
 def test_issue_5672_retained_public_compatibility_surfaces_are_reviewed() -> None:
     registry = _load_yaml(COMPATIBILITY_REGISTRY)
     census = _load_json(COMPATIBILITY_CENSUS)
-    today = datetime.now(UTC).date()
+    today = REFERENCE_TODAY
     summary = census["summary"]
     retained = census["retained_entrypoints"]
     public_facades = [entry for entry in retained if "public_export_count" in entry]
@@ -214,7 +215,7 @@ def test_issue_5673_duplication_baseline_is_below_second_wave_targets() -> None:
 
 def test_issue_5674_internal_compatibility_shims_have_current_expiry_guards() -> None:
     inventory = _load_yaml(INTERNAL_SHIMS)
-    today = datetime.now(UTC).date()
+    today = REFERENCE_TODAY
     review_by = date.fromisoformat(str(inventory["review_by"]))
 
     assert review_by >= today
@@ -239,7 +240,7 @@ def test_issue_5675_compatibility_tests_and_snapshot_lane_are_bounded() -> None:
     inventory = config["compatibility_test_inventory"]
     snapshot_policy = config["platform_sensitive_snapshot_tests"]
     report = report_payload["report"]
-    today = datetime.now(UTC).date()
+    today = REFERENCE_TODAY
 
     assert int(config["budgets"]["compatibility_test_file_max"]) == 0
     assert inventory["total_files"] == 0

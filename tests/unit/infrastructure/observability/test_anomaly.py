@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import statistics
 from datetime import UTC, datetime
 from typing import get_type_hints
 from unittest.mock import MagicMock
@@ -169,11 +168,21 @@ class TestAnomalyDetector:
 
     def test_detect_severity_levels(self, detector):
         """Test that severity is determined by z-score."""
-        # Create baseline with known mean=100, stddev~10
+        # Create baseline with known mean=100 and non-zero stddev.
         detector.update_baseline("metric", [90.0, 95.0, 100.0, 105.0, 110.0])
 
-        # Test different severity thresholds
-        # Values should trigger different severities based on z-score
+        severity_by_value = {
+            120.0: AnomalySeverity.LOW,
+            125.0: AnomalySeverity.MEDIUM,
+            135.0: AnomalySeverity.HIGH,
+            150.0: AnomalySeverity.CRITICAL,
+        }
+
+        for value, expected_severity in severity_by_value.items():
+            result = detector.detect("metric", value, timestamp=_FIXED_TIME)
+
+            assert result is not None
+            assert result.severity == expected_severity
 
     def test_detect_with_zero_stddev(self, detector):
         """Test detection when standard deviation is zero."""
@@ -256,21 +265,19 @@ class TestAnomalyDetectorEdgeCases:
     def test_empty_values_list(self):
         """Test handling of empty values list."""
         detector = AnomalyDetector()
-        # Empty list should be handled gracefully
-        try:
-            detector.update_baseline("metric", [])
-        except (ValueError, statistics.StatisticsError):
-            pass  # Expected behavior
+        detector.update_baseline("metric", [])
+
+        assert detector.get_baseline_stats("metric") is None
 
     def test_detector_edge_cases__single_value__f9d640bf(self):
         """Test handling of single value."""
         detector = AnomalyDetector()
-        try:
-            detector.update_baseline("metric", [100])
-            # Stddev of single value is 0
-            detector.detect("metric", 110, timestamp=_FIXED_TIME)
-        except (ValueError, statistics.StatisticsError):
-            pass  # Expected behavior
+        detector.update_baseline("metric", [100])
+
+        result = detector.detect("metric", 110, timestamp=_FIXED_TIME)
+
+        assert result is None
+        assert detector.get_baseline_stats("metric") == (100, 0.0, 1)
 
     def test_detector_edge_cases__negative_values__dbbcaee0(self):
         """Test handling of negative values."""
@@ -359,7 +366,9 @@ class TestAnomalyDetectorBaselineManagement:
     def test_clear_nonexistent_baseline(self):
         """Test clearing baseline for nonexistent metric doesn't raise."""
         detector = AnomalyDetector()
-        detector.clear_baseline("nonexistent")  # Should not raise
+        detector.clear_baseline("nonexistent")
+
+        assert detector._baselines == {}
 
     def test_get_baseline_stats(self):
         """Test getting baseline statistics."""

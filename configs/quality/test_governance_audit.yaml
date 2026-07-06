@@ -583,7 +583,7 @@ tracing:
 assertless_triage:
   categories:
     architecture_helper_guard:
-      count: 15
+      count: 16
       decision: retained
       rationale: Architecture policy tests delegate assertions to shared guard helpers
         or pytest.fail paths.
@@ -601,7 +601,7 @@ assertless_triage:
         calls.
       next_review: '2026-09-30'
     intentional_no_exception_contract:
-      count: 94
+      count: 89
       decision: retained-with-rationale
       rationale: No-op, close/aclose, smoke, or does-not-raise behavior is the contract
         under test.
@@ -876,6 +876,10 @@ repo_backed_unit_test_exceptions:
   - path: tests/unit/repo_backed/application/pipelines/chembl/test_assay_transformer_required_fields.py
     target_lane: repo-backed-unit
     protected_surface: configs/entities/chembl/assay.yaml structural required fields
+  - path: tests/unit/repo_backed/application/composite/test_non_chembl_join_key_normalization.py
+    target_lane: repo-backed-unit
+    protected_surface: tests/fixtures/normalization/non_chembl_identifier_cases.yaml
+      + configs/composites/{molecule,target}.yaml
   - path: tests/unit/repo_backed/application/services/test_config_dq_service.py
     target_lane: repo-backed-unit
     protected_surface: src/bioetl/application/services/config_dq_service.py

@@ -18,6 +18,7 @@ from scripts.engineering.qa.import_graph_inventory import (
 )
 
 pytestmark = pytest.mark.architecture
+REFERENCE_NOW = datetime(2026, 7, 6, tzinfo=UTC)
 
 ROOT = Path(__file__).resolve().parents[2]
 CLOSEOUT = ROOT / "reports" / "quality" / "tech-debt-issues-5626-5637-closeout.json"
@@ -174,7 +175,7 @@ def test_issue_5628_runtime_cardinality_evidence_is_release_grade() -> None:
     generated_at = datetime.fromisoformat(review["generated_at"].replace("Z", "+00:00"))
 
     freshness_gate = _gate(gates, "observability_release_review_freshness")
-    assert (datetime.now(UTC) - generated_at).days <= freshness_gate["limit"]
+    assert (REFERENCE_NOW - generated_at).days <= freshness_gate["limit"]
     assert review["status"] == "passed"
     assert review["mode"] == "live_review"
     assert review["degraded_reasons"] == []

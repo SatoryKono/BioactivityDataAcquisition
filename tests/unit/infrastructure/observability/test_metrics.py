@@ -106,5 +106,9 @@ class TestNoOpMetrics:
     def test_methods_do_nothing(self):
         """Ensure methods run without error."""
         metrics = NoOpMetrics(warn_on_use=False)
-        metrics.observe_histogram("foo", 1.0, {})
-        metrics.increment_counter("bar", 1, {})
+        histogram_result = metrics.observe_histogram("foo", 1.0, {})
+        counter_result = metrics.increment_counter("bar", 1, {})
+
+        assert histogram_result is None
+        assert counter_result is None
+        assert NoOpMetrics._warned is False

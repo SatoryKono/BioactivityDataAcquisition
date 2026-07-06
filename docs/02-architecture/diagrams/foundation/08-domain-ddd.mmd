@@ -32,7 +32,7 @@ flowchart TB
 
             PipelineRun["PipelineRun Aggregate<br/>start + record_stage_success<br/>complete + fail"]
 
-            QuarantineEntry["QuarantineEntry Aggregate<br/>mark_retrying + mark_recovered<br/>mark_dead_letter"]
+            QuarantineEntry["QuarantineEntry Aggregate<br/>start_review + mark_ignored<br/>mark_reprocessed + mark_expired"]
         end
 
         subgraph events["Domain Events"]

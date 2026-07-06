@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 import subprocess
 import sys
@@ -14,6 +15,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 INVENTORY_PATH = ROOT / "configs/quality/pytest_shards.yaml"
 RUNNER_PATH = ROOT / "scripts/engineering/dev/run_pytest_sharded.sh"
+SLOWEST_TELEMETRY_PATH = ROOT / "reports/test-telemetry/slowest-tests.json"
 
 _BASH_RUNNER_UNSUPPORTED_ON_WINDOWS = pytest.mark.skipif(
     sys.platform.startswith("win"),
@@ -62,6 +64,40 @@ def _is_ignored_by_args(path: str, args: list[object]) -> bool:
         if text.startswith("--ignore-glob=") and fnmatch(path, text.split("=", 1)[1]):
             return True
     return False
+
+
+def _architecture_path_from_test_id(test_id: str) -> str | None:
+    dotted_module = test_id.split("::", maxsplit=1)[0]
+    if not dotted_module.startswith("tests.architecture."):
+        return None
+
+    parts = dotted_module.split(".")
+    while len(parts) >= 3:
+        candidate = Path(*parts).with_suffix(".py")
+        if (ROOT / candidate).exists():
+            return candidate.as_posix()
+        parts.pop()
+    return None
+
+
+def _telemetry_hotspot_paths(
+    *,
+    telemetry: dict[str, object],
+    min_duration_s: float,
+) -> list[str]:
+    rows = telemetry["top_slowest"]
+    assert isinstance(rows, list)
+    paths: list[str] = []
+    for row in rows:
+        assert isinstance(row, dict)
+        duration_s = float(row["duration_s"])
+        if duration_s < min_duration_s:
+            continue
+        path = _architecture_path_from_test_id(str(row["test"]))
+        if path is None or path in paths:
+            continue
+        paths.append(path)
+    return paths
 
 
 @pytest.mark.architecture
@@ -143,6 +179,8 @@ def test_subprocess_heavy_architecture_tests_stay_in_slow_governance_shard() -> 
     """Repo-wide scanner/generator tests must not leak into fast boundary shards."""
     inventory = _load_inventory()
     shards = _shard_map(inventory)
+    rebalance = inventory["telemetry_rebalance"]
+    assert isinstance(rebalance, dict)
     fast_shards = _alias_members(inventory, "S7-architecture-fast-boundary")
     slow_shards = _alias_members(inventory, "S7-architecture-slow-governance")
     slow_paths = {
@@ -165,6 +203,7 @@ def test_subprocess_heavy_architecture_tests_stay_in_slow_governance_shard() -> 
         "tests/architecture/test_scripts_lifecycle_registry.py",
         "tests/architecture/test_test_structural_debt.py",
     }
+    slow_paths.update(str(path) for path in rebalance["generated_architecture_hotspot_paths"])
 
     declared_slow_paths: set[str] = set()
     for shard_name in slow_shards:
@@ -186,6 +225,29 @@ def test_subprocess_heavy_architecture_tests_stay_in_slow_governance_shard() -> 
             f"{shard_name} must ignore subprocess-heavy slow governance tests: "
             f"{missing_ignores}"
         )
+
+
+@pytest.mark.architecture
+def test_architecture_shard_rebalance_manifest_matches_slow_test_telemetry() -> None:
+    inventory = _load_inventory()
+    rebalance = inventory["telemetry_rebalance"]
+    assert isinstance(rebalance, dict)
+    telemetry = json.loads(SLOWEST_TELEMETRY_PATH.read_text(encoding="utf-8"))
+    generated_paths = _telemetry_hotspot_paths(
+        telemetry=telemetry,
+        min_duration_s=float(rebalance["min_architecture_duration_s"]),
+    )
+
+    assert rebalance["source_report"] == "reports/test-telemetry/slowest-tests.json"
+    assert telemetry["source_commit"] == rebalance["source_commit"]
+    assert telemetry["source_run_id"] == rebalance["source_run_id"]
+    assert telemetry["refreshed_at_utc"] == rebalance["refreshed_at_utc"]
+    assert generated_paths == rebalance["generated_architecture_hotspot_paths"]
+
+    shards = _shard_map(inventory)
+    slow_shard = shards[str(rebalance["slow_governance_shard"])]
+    slow_paths = {str(path) for path in slow_shard["paths"]}
+    assert set(generated_paths) <= slow_paths
 
 
 @pytest.mark.architecture
