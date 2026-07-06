@@ -52,18 +52,78 @@ def test_fetch_processed_record_values_queries_every_visible_row(
 def test_processed_record_selector_and_formatting_edges() -> None:
     """Dashboard selector helpers should normalize placeholders and bad values."""
     assert support.read_processed_records_run_id(None) is None
+    assert support.read_processed_records_run_id("-") is None
     assert support.read_processed_records_run_id("{one,two}") is None
     assert support.read_processed_records_run_id("not-a-uuid") is None
 
     assert support.selector_tokens(" $__all ") == ()
     assert support.selector_tokens("{a,b,a}") == ("a", "b")
     assert support.selector_tokens("a,*,b") == ()
+    assert support.selector_tokens(" , ") == ()
     assert support.is_unknown_scope(" unknown ") is True
 
+    assert support.as_float(None) is None
     assert support.as_float(float("inf")) is None
     assert support.sum_metric_values({"a": 1, "b": None}, ("a", "b")) is None
+    assert support.sum_metric_values({"a": 1, "b": 2.5}, ("a", "b")) == 3.5
+    assert support.is_deficit(total=None, minimum=1) is False
+    assert support.is_deficit(total=1, minimum=2) is True
     assert support.count_text(1.25) == "1.25"
+    assert support.count_text(1200.0) == "1 200"
     assert support.padded_count_text(None, 8) == "No data"
+    assert support.padded_count_text(7, 3) == "  7"
+    assert (
+        support.row_status(
+            parameter="02 silver_valid_records",
+            silver_deficit=True,
+            gold_deficit=False,
+        )
+        == "silver_deficit"
+    )
+    assert (
+        support.row_status(
+            parameter="07 gold_written_records",
+            silver_deficit=False,
+            gold_deficit=True,
+        )
+        == "gold_deficit"
+    )
+    assert (
+        support.format_percentage(
+            value=None,
+            bronze_value=10,
+            denominator="constant_100",
+            percent_format="constant_100",
+        )
+        == "No data"
+    )
+    assert (
+        support.format_percentage(
+            value=5,
+            bronze_value=0,
+            denominator="bronze",
+            percent_format="fixed_1",
+        )
+        == "No data"
+    )
+    assert (
+        support.format_percentage(
+            value=1,
+            bronze_value=3,
+            denominator="bronze",
+            percent_format="fixed_1",
+        )
+        == "33.3%"
+    )
+    assert (
+        support.format_percentage(
+            value=1,
+            bronze_value=8,
+            denominator="bronze",
+            percent_format="trimmed_3",
+        )
+        == "12.5%"
+    )
     assert (
         support.format_percentage(
             value=5,
@@ -72,6 +132,29 @@ def test_processed_record_selector_and_formatting_edges() -> None:
             percent_format="constant_100",
         )
         == "100%"
+    )
+
+
+def test_processed_record_prometheus_selector_query_edges() -> None:
+    """PromQL selector helpers should cover literal, wildcard, and fallback edges."""
+    assert support._processed_record_value_query(
+        metric="bioetl_processed_records_bronze_current",
+        pipeline='chembl"activity',
+        run_type=None,
+    ) == (
+        "round(sum(bioetl_processed_records_bronze_current{"
+        'pipeline=~"chembl\\"activity",run_type=~".*"}))'
+    )
+    assert support._processed_record_value_query(
+        metric="bioetl_processed_records_bronze_current",
+        pipeline="chembl\\activity",
+        run_type="backfill",
+    ) == (
+        "round(sum(bioetl_processed_records_bronze_current{"
+        r'pipeline=~"chembl\\\\activity",run_type=~"backfill"}))'
+    )
+    assert support._candidate_prometheus_base_urls("http://custom:9090/") == (
+        "http://custom:9090",
     )
 
 
@@ -112,6 +195,59 @@ def test_processed_record_ledger_helpers_ignore_non_authoritative_entries() -> N
 
     assert support.latest_metrics_snapshot(entries) is None
     assert support.published_layer_artifact_counts(entries) == {}
+
+
+def test_processed_record_ledger_helpers_use_authoritative_entries() -> None:
+    """Ledger helpers should use the latest metrics snapshot and valid stage artifacts."""
+    run_id = deterministic_run_uuid_from_callsite(
+        "processed_records_support_authoritative"
+    )
+    occurred_at = datetime(2026, 6, 16, 10, 0, tzinfo=UTC)
+    entries = (
+        RunLedgerEntry(
+            entry_id="older",
+            manifest_id="manifest-a",
+            run_id=run_id,
+            event_type="run_finished",
+            occurred_at=occurred_at,
+            status="success",
+            metrics_snapshot={"records_bronze": 1},
+        ),
+        RunLedgerEntry(
+            entry_id="newer",
+            manifest_id="manifest-a",
+            run_id=run_id,
+            event_type="run_finished",
+            occurred_at=occurred_at,
+            status="success",
+            metrics_snapshot={"records_bronze": 2},
+        ),
+        RunLedgerEntry(
+            entry_id="bronze-artifact",
+            manifest_id="manifest-a",
+            run_id=run_id,
+            event_type=ARTIFACT_PUBLISHED_EVENT,
+            occurred_at=occurred_at,
+            status="published",
+            details={"stage": "bronze", "record_count": "2"},
+        ),
+        RunLedgerEntry(
+            entry_id="gold-artifact",
+            manifest_id="manifest-a",
+            run_id=run_id,
+            event_type=ARTIFACT_PUBLISHED_EVENT,
+            occurred_at=occurred_at,
+            status="published",
+            stage="gold",
+            details={"record_count": 1},
+        ),
+    )
+
+    assert support.latest_metrics_snapshot(entries) == {"records_bronze": 2}
+    assert support.published_layer_artifact_counts(entries) == {
+        "bronze": 2,
+        "gold": 1,
+    }
 
 
 class _FakeResponse:

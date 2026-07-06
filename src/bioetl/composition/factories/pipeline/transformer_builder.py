@@ -7,9 +7,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.wiring.transformer import build_structural_policy
-from bioetl.composition.factories.pipeline.construction_types import (
-    ContractPolicyLoader,
-)
 from bioetl.composition.factories.transformer_dependencies import (
     build_transformer_dependencies,
 )
@@ -32,7 +29,10 @@ class TransformerBuilder:
     provider: str
     pipeline_name: str
     entity_type_extractor: Callable[[str], str | None]
-    contract_policy_loader: ContractPolicyLoader = load_pipeline_contract_policy
+    contract_policy_loader: Callable[
+        [str, str],
+        ContractPolicyProtocol,
+    ] = load_pipeline_contract_policy
 
     def build(
         self,

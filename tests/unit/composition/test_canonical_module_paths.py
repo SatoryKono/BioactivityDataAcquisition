@@ -45,11 +45,15 @@ def test_pipeline_runner_service_bootstrap_reexports_legacy_entrypoint() -> None
     assert canonical_bootstrap is bootstrap_pipeline_runner_service
 
 
-def test_pipeline_configs_import_warns_and_reexports_registry_manifest() -> None:
-    """Canonical registry manifest import remains the supported pipeline config path."""
+def test_pipeline_configs_imports_use_canonical_manifest_and_config_type_paths() -> (
+    None
+):
+    """Registry data and config types should stay on their canonical seams."""
+    from bioetl.composition.factories.pipeline.config_types import (
+        PipelineFactoryConfig,
+    )
     from bioetl.composition.factories.pipeline.registry_manifest import (
         PIPELINE_CONFIGS,
-        PipelineFactoryConfig,
     )
 
     assert PIPELINE_CONFIGS is not None

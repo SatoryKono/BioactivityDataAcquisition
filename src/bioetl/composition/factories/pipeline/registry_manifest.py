@@ -8,11 +8,10 @@ from bioetl.composition.factories.pipeline._registry_manifest_chembl import (
 from bioetl.composition.factories.pipeline._registry_manifest_non_chembl import (
     NON_CHEMBL_PIPELINE_CONFIGS,
 )
-from bioetl.composition.factories.pipeline.config_types import PipelineFactoryConfig
 
-PIPELINE_CONFIGS: tuple[PipelineFactoryConfig, ...] = (
+PIPELINE_CONFIGS: tuple[object, ...] = (
     *CHEMBL_PIPELINE_CONFIGS,
     *NON_CHEMBL_PIPELINE_CONFIGS,
 )
 
-__all__ = ["PIPELINE_CONFIGS", "PipelineFactoryConfig"]
+__all__ = ["PIPELINE_CONFIGS"]

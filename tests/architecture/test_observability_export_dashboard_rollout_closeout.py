@@ -26,7 +26,7 @@ CLOSEOUT = (
     / "quality"
     / "observability-export-dashboard-rollout-closeout.json"
 )
-ERROR_CATALOG = ROOT / "configs" / "contracts" / "errors" / "error-catalog.yaml"
+ERROR_CATALOG = ROOT / "configs" / "contracts" / "errors" / "error_catalog.yaml"
 BASELINE_AUDIT = ROOT / "docs" / "plans" / "dashboard-observability-baseline-audit.md"
 ROLLOUT_CONTRACT = (
     ROOT / "docs" / "04-reference" / "contracts" / "observability-rollout-contracts.md"

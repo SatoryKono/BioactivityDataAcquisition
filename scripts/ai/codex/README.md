@@ -8,6 +8,26 @@ Legacy aliases `run-codex.ps1` and `run-codex-wsl.ps1` are retired from the
 repository root; use `codex.ps1` or the maintained launcher under
 `scripts/ai/codex/**`.
 
+## Root Shim Verification
+
+Last verified: 2026-07-06 for root hygiene issue #5994.
+
+The repository root keeps only thin compatibility entrypoints:
+
+| Root shim | Canonical owner | Retention decision |
+| --- | --- | --- |
+| `codex.ps1` | `scripts/ai/codex/run-codex.ps1` | Keep as the primary root PowerShell transport while Windows/WSL operator flows need a root entrypoint. |
+| `codex.bat` | `codex.ps1` -> `scripts/ai/codex/run-codex.ps1` | Keep as a CMD transport only. |
+| `setup-codex-wsl.bat` | `scripts/ai/codex/setup-codex-wsl.bat` | Keep as a Windows setup transport only. |
+| `setup-codex-wsl.ps1` | `scripts/ai/codex/setup-codex-wsl.bat` | Keep as a PowerShell setup transport only. |
+| `setup-codex-wsl.sh` | `scripts/ai/codex/helper/setup-wsl-complete.sh` | Keep as a Bash setup transport only. |
+| `.wsl_proxy_env.sh` | `scripts/ai/codex/helper/wsl_proxy_env.sh` | Keep as a source-compatible proxy helper shim only. |
+
+Any future removal must update `.github/root-allowlist.txt`,
+`configs/quality/root_hygiene_review_registry.yaml`, operator docs, and wrapper
+surface tests in the same change. Retired root aliases `run-codex.ps1` and
+`run-codex-wsl.ps1` must not be restored without a fresh owner decision.
+
 ## 📁 Структура
 
 ```

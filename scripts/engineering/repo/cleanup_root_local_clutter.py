@@ -273,9 +273,19 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     deleted: list[str] = []
+    deletion_errors: list[dict[str, str]] = []
     if args.apply:
         for candidate in candidates:
-            _delete_candidate(repo_root, candidate)
+            try:
+                _delete_candidate(repo_root, candidate)
+            except OSError as exc:
+                deletion_errors.append(
+                    {
+                        "path": candidate.rel_path,
+                        "error": f"{type(exc).__name__}: {exc}",
+                    }
+                )
+                continue
             deleted.append(candidate.rel_path)
 
     payload = {
@@ -284,11 +294,12 @@ def main(argv: list[str] | None = None) -> int:
         "repository_root": repo_root.as_posix(),
         "candidate_count": len(candidates),
         "deleted": deleted,
+        "deletion_errors": deletion_errors,
         "candidates": _report_rows(candidates),
     }
     if args.json:
         print(json.dumps(payload, indent=2, sort_keys=True))
-        return 0
+        return 1 if deletion_errors else 0
 
     print(f"Root-local cleanup mode: {payload['mode']}")
     if not candidates:
@@ -296,6 +307,11 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     for row in payload["candidates"]:
         print(f"- {row['path']} ({row['category']}, {row['lane_id']})")
+    if deletion_errors:
+        print("Deletion errors:")
+        for row in deletion_errors:
+            print(f"- {row['path']}: {row['error']}")
+        return 1
     if not args.apply:
         print("Dry-run only. Re-run with --apply to delete these exact paths.")
     return 0

@@ -32,7 +32,7 @@ surfaces.
 | Baseline discovery | Existing | this file | Recorded real source paths and narrowed rollout assumptions. |
 | Event taxonomy | Partial | `docs/04-reference/contracts/observability.md`, `src/bioetl/domain/observability_contract.py` | Added `docs/04-reference/contracts/observability-rollout-contracts.md`. |
 | Projection state machines | Partial | RunLedger and HTTP processed-records support | Added rollout projection invariants in `observability-rollout-contracts.md`. |
-| Error catalog | Missing | `src/bioetl/domain/error_classifier.py`, `src/bioetl/infrastructure/errors/exception_mapper.py` | Added `configs/contracts/errors/error-catalog.yaml`. |
+| Error catalog | Missing | `src/bioetl/domain/error_classifier.py`, `src/bioetl/infrastructure/errors/exception_mapper.py` | Added `configs/contracts/errors/error_catalog.yaml`. |
 | Projection strategy | Existing | RunLedger domain/application/infrastructure files | Explicitly selected existing run ledger; no SQL migrations. |
 | Metrics | Existing | metric governance configs, dashboards, Prometheus rules | Reused existing low-cardinality governance/tests. |
 | Gold/read-model contracts | Existing | Gold schema docs/contracts/tests | Linked dashboard/export use cases to governed sources. |
@@ -51,7 +51,7 @@ surfaces.
 - `src/bioetl/interfaces/cli/commands/export.py`
 - `src/bioetl/interfaces/cli/commands/export_support.py`
 - `src/bioetl/interfaces/cli/formatters.py`
-- `configs/contracts/errors/error-catalog.yaml`
+- `configs/contracts/errors/error_catalog.yaml`
 - `docs/04-reference/contracts/observability-rollout-contracts.md`
 - `docs/security/rbac-matrix.md`
 - `docs/security/export-policy.md`

@@ -83,7 +83,7 @@ Operational rule:
 
 - поле: `source_tree_sha256`
 - команда (только hash, без нового `coverage.xml`):
-  `python _refresh_module_coverage_inventory.py`
+  `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml`
 - проверка:
   `pytest tests/architecture/test_module_coverage_inventory.py::test_module_coverage_inventory_source_tree_hash_is_current`
 - полная перегенерация inventory (когда изменились coverage-метрики) — через

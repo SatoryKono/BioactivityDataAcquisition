@@ -969,10 +969,14 @@ validated = ChEMBLActivityGoldSchema.validate(df.to_pandas())
 
 ### Data Quality пороги
 
-| Порог    | Значение       | Действие        |
-| -------- | -------------- | --------------- |
-| **Soft** | >5% DQ errors  | Warning в логах |
-| **Hard** | >20% DQ errors | Fail batch      |
+Gold-schema validation participates in the same DQ threshold model documented in
+[DQ Contracts](dq-contracts.md#threshold-semantics). BioETL does not maintain one
+universal hard-fail default for every DQ surface:
+
+| Surface | Default | Action |
+| --- | --- | --- |
+| Hierarchical `quality:` config | `soft_fail=0.05`, `hard_fail=0.25` | warn above soft; reject/quarantine above hard according to active disposition policy |
+| Contract-backed DQ fallback, inline DQ override normalization, Silver DQ request | `soft_fail=0.05`, `hard_fail=0.20` | warn above soft; reject/quarantine above hard according to active disposition policy |
 
 ______________________________________________________________________
 

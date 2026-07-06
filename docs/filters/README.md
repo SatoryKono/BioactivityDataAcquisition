@@ -14,8 +14,8 @@ Working folder for the silver_filters -> gold_filters migration program
 (variant D, hybrid).
 
 This folder is **not** a canonical ADR source. The file
-`ADR-048-silver-filters-structural-scope.md` is a retired draft that reused the
-ADR-048 number before the accepted canonical
+`retired-silver-filters-structural-scope.md` is a retired draft that previously
+used an ADR-like filename before the accepted canonical
 `docs/02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md`
 was created. The accepted filter-boundary decision is
 `docs/02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md`.
@@ -39,7 +39,7 @@ Narrow `silver_filters` scope to structural integrity only
 `gold_filters`.
 
 Historical design draft:
-`ADR-048-silver-filters-structural-scope.md`. It must not be cited as accepted
+`retired-silver-filters-structural-scope.md`. It must not be cited as accepted
 ADR-048; use ADR-050 for normative filter-boundary governance.
 
 ## Artifacts
@@ -48,7 +48,7 @@ ADR-048; use ADR-050 for normative filter-boundary governance.
 | ----------------------------------------------------- | ---------------- | ------ |
 | `../02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md` | Accepted ADR | Canonical Silver structural / Gold semantic boundary |
 | `migration-plan.md`                                   | Plan/status note | Partially implemented; remaining YAML/observability cleanup |
-| `ADR-048-silver-filters-structural-scope.md`          | Retired ADR draft | Historical, non-canonical; number conflict with accepted ADR-048 |
+| `retired-silver-filters-structural-scope.md`          | Retired design draft | Historical, non-canonical; former number conflict with accepted ADR-048 |
 | `inventory-baseline.md`                               | Inventory report | Generated 2026-06-15; includes entity rules plus runtime/ops/source-profile surfaces |
 | `inventory-baseline.csv`                              | Inventory data   | Generated 2026-06-15; schema includes `entity_rule` and `surface` rows |
 | `inventory-baseline.json`                             | Inventory data   | Generated 2026-06-15; schema version 2.0.0 |

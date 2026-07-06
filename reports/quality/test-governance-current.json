@@ -2189,12 +2189,12 @@
         "name": "test_tdx_audit_closeout_artifact_is_complete_and_budget_safe"
       }
     ],
-    "total_test_files": 1947,
-    "total_test_functions": 21877,
+    "total_test_files": 1950,
+    "total_test_functions": 21901,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "6d5a939e9005fbd84fc4f2b72569bf5a6d1f4cefd4e23fd64886cd855ae7ff65",
+  "source_tree_sha256": "51ee69e51a474810136b5ca2b2f57e760c7e6bcd81ddcbf7cff3b8aa52efdc56",
   "summary": {
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
@@ -2216,7 +2216,7 @@
       "name": "test_tdx_audit_closeout_artifact_is_complete_and_budget_safe"
     }
   ],
-  "total_test_files": 1947,
-  "total_test_functions": 21877,
+  "total_test_files": 1950,
+  "total_test_functions": 21901,
   "uuid4_call_sites": 0
 }

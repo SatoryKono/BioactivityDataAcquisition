@@ -29,6 +29,11 @@ from tests.unit.application.services.run_manifest_test_support import (
 
 
 pytestmark = pytest.mark.unit
+_FIXED_UNIVERSE_TIME = datetime(2026, 1, 4, 12, 30, tzinfo=UTC)
+
+
+def _fixed_universe_time() -> datetime:
+    return _FIXED_UNIVERSE_TIME
 
 
 def _universe_entry_id_factory(prefix: str = "entry-historical") -> Callable[[], str]:
@@ -60,7 +65,8 @@ def test_universe_report_blocks_claim_when_external_archived_record_is_unresolve
                 ledger_port=ledger_store,
                 entry_id_factory=_universe_entry_id_factory("entry-universe-gap"),
             ),
-        )
+        ),
+        now_factory=_fixed_universe_time,
     )
 
     report = service.build_universe_closure_report(
@@ -108,7 +114,8 @@ def test_universe_report_supports_claim_when_local_and_external_records_are_clos
                 ledger_port=ledger_store,
                 entry_id_factory=_universe_entry_id_factory("entry-universe-closed"),
             ),
-        )
+        ),
+        now_factory=_fixed_universe_time,
     )
 
     report = service.build_universe_closure_report(

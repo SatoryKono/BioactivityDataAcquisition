@@ -160,3 +160,51 @@ def test_main_apply_deletes_only_exact_reviewed_path(
 
     assert not (tmp_path / ".pytest_cache").exists()
     assert (tmp_path / ".env").exists()
+
+
+def test_main_apply_continues_after_delete_error(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    repo_root = tmp_path
+    monkeypatch.chdir(repo_root)
+    candidates = [
+        module.RootLocalCleanupCandidate(
+            path=Path(".hypothesis"),
+            lane_id="local_runtime_root_dirs",
+            category="local_cache",
+            reason="local property test cache",
+        ),
+        module.RootLocalCleanupCandidate(
+            path=Path(".pytest_cache"),
+            lane_id="local_runtime_root_dirs",
+            category="local_cache",
+            reason="local pytest cache",
+        ),
+    ]
+    deleted: list[str] = []
+
+    monkeypatch.setattr(module, "_project_root", lambda: repo_root)
+    monkeypatch.setattr(
+        module,
+        "collect_root_local_cleanup_candidates",
+        lambda *_args, **_kwargs: candidates,
+    )
+
+    def fake_delete(
+        _repo_root: Path,
+        candidate: module.RootLocalCleanupCandidate,
+    ) -> None:
+        if candidate.rel_path == ".hypothesis":
+            raise OSError("invalid argument")
+        deleted.append(candidate.rel_path)
+
+    monkeypatch.setattr(module, "_delete_candidate", fake_delete)
+
+    assert module.main(["--apply", "--json"]) == 1
+
+    output = capsys.readouterr().out
+    assert '"path": ".hypothesis"' in output
+    assert '"deleted": [' in output
+    assert deleted == [".pytest_cache"]

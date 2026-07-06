@@ -148,6 +148,7 @@ log_test.txt
 !/reports/quality/tech-debt-issues-5839-5845-closeout.json
 !/reports/quality/tech-debt-issues-5861-5864-closeout.json
 !/reports/quality/tech-debt-issues-5866-5872-closeout.json
+!/reports/quality/tech-debt-issues-6011-6020-closeout.json
 !/reports/quality/tech-debt-issue-5647-closeout.json
 !/reports/quality/issue-5272-application-core-coverage-closeout.json
 !/reports/quality/issue-5376-coverage-tail-closeout.json
@@ -362,6 +363,8 @@ data/.idea/
 
 !scripts/docs/build/
 !scripts/docs/build/**
+scripts/docs/build/**/__pycache__/
+scripts/docs/build/**/*.pyc
 !/docs/99-archive/
 /docs/99-archive/*
 !/docs/99-archive/legacy-05-architecture/

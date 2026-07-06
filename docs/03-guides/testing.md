@@ -337,7 +337,8 @@ Supported policy slice for issue `#2598`:
   Artifact должен перечислять каждый `src/bioetl/**/*.py`
   module и явно фиксировать coverage status. Поле `source_tree_sha256` MUST
   обновляться после любых изменений под `src/bioetl/**/*.py` через
-  `python _refresh_module_coverage_inventory.py` (см.
+  `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml`
+  (см.
   `tests/architecture/test_module_coverage_inventory.py`).
 - Architecture quality scorecard теперь является committed trend artifact:
   `reports/quality/architecture-quality-scorecard.json` агрегирует dependency
@@ -704,7 +705,8 @@ pytest tests/contract/test_gold_dq_golden_snapshots.py --update-golden
   падать при снижении line % относительно committed inventory; tier gaps
   (85/90/95) пока только warn до Phase C.
   После изменений в `src/bioetl/**/*.py` обновляй `source_tree_sha256`:
-  `python _refresh_module_coverage_inventory.py`, затем
+  `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml`,
+  затем
   `pytest tests/architecture/test_module_coverage_inventory.py::test_module_coverage_inventory_source_tree_hash_is_current`.
 - **Architecture Quality Scorecard**:
   `reports/quality/architecture-quality-scorecard.json` фиксирует

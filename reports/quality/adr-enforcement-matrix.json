@@ -1547,8 +1547,7 @@
       "enforcement_owner_paths": [
         "scripts/data_quality/inventory_silver_filters_migration.py",
         "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/architecture/test_pandera_schema_boundary_policy.py",
-        "tests/architecture/test_silver_filter_identity_surface.py"
+        "tests/architecture/test_pandera_schema_boundary_policy.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
@@ -1566,8 +1565,7 @@
         "scripts/data_quality/inventory_silver_filters_migration.py",
         "src/bioetl/domain/README.md",
         "tests/architecture/test_adr_registry_governance_sync.py",
-        "tests/architecture/test_pandera_schema_boundary_policy.py",
-        "tests/architecture/test_silver_filter_identity_surface.py"
+        "tests/architecture/test_pandera_schema_boundary_policy.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",

@@ -60,3 +60,19 @@ verification in Qodo Portal or GitHub UI:
 - `pr_compliance_checklist.yaml` is a documented supported file name in Qodo
   Review Standards docs, and the local schema mirrors the vendor template from
   `The-PR-Agent/pr-agent`.
+
+## Root Retention Revalidation
+
+Last verified: 2026-07-06 for root hygiene issue #5999.
+
+| Root surface | Owner contract | Current decision |
+| --- | --- | --- |
+| `.pr_agent.toml` | Qodo / PR-Agent repository-level configuration | Retain at root until review tooling is explicitly repointed. |
+| `best_practices.md` | Qodo rule-enforcement guidance filename | Retain at root while vendor ingestion expects the documented filename. |
+| `pr_compliance_checklist.yaml` | Qodo Review Standards `pr_compliances` schema | Retain at root until the checklist path is repointed and validated. |
+| `commitlint.config.mjs` | Commitlint workflow configuration | Retain at root while `.github/workflows/commit-lint.yml` uses this exact config path. |
+| `mint.json` | Mintlify docs configuration | Retain at root while docs tooling expects the standard root filename. |
+
+No root review/tooling file should move based only on naming preference. A move
+requires tool-specific validation, updated workflows or external settings,
+`.github/root-allowlist.txt` changes, and synchronized root-governance docs.

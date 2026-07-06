@@ -6,7 +6,6 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
-from bioetl.application.runtime_clock import RuntimeClockService
 from bioetl.application.services.control_plane.replay._historical_record_payload import (
     build_historical_certified_identity_payload_from_record,
 )
@@ -152,7 +151,7 @@ class HistoricalReplayUniverseService:
     """Build full-universe replay inventories beyond the local retained corpus."""
 
     corpus_service: HistoricalReplayCorpusService
-    now_factory: Callable[[], datetime] = RuntimeClockService().now
+    now_factory: Callable[[], datetime]
 
     def build_universe_inventory(
         self,

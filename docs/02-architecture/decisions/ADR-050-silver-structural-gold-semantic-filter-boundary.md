@@ -45,7 +45,7 @@ config boundary: active YAML is structural-only at Silver, and semantic Silver
 payloads fail closed before domain conversion.
 
 The retired working draft
-`docs/filters/ADR-048-silver-filters-structural-scope.md` captured the original
+`docs/filters/retired-silver-filters-structural-scope.md` captured the original
 rationale, but it is not an accepted ADR and must not be cited as ADR-048.
 Accepted ADR-048 covers the domain schema boundary and Pandera runtime
 compatibility.
@@ -247,5 +247,5 @@ Implementation and follow-up work must verify:
 - [ADR-045: Data Quality Contract System](ADR-045-dq-contract-system.md)
 - [ADR-046: Checkpoint Versus Ledger-Based Resume](ADR-046-checkpoint-vs-ledger-resume.md)
 - [ADR-047: Workflow Control Plane for Declarative Workflows](ADR-047-workflow-control-plane.md)
-- [Retired Silver-filter draft](../../filters/ADR-048-silver-filters-structural-scope.md)
+- [Retired Silver-filter draft](../../filters/retired-silver-filters-structural-scope.md)
 - [Silver-to-Gold migration plan](../../filters/migration-plan.md)

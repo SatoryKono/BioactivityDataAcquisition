@@ -27,7 +27,7 @@ truth; existing documentation is evidence only when it matches those sources.
 | Data contracts | 27 | `configs/contracts/**/*.yaml` | One contract per configured entity pipeline surface. |
 | Provider configs | 7 | `configs/providers/*.yaml` | ChEMBL, CrossRef, OpenAlex, PubChem, PubMed, Semantic Scholar, UniProt. |
 | Grafana dashboards | 8 | `grafana/dashboards/*.json` | Overview, runtime, provider health, DQ, workflow, control-plane, alerts/SLO, silver reject explorer. |
-| Domain port files | 73 | `src/bioetl/domain/ports/**/*.py` | 18 top-level files plus nested config, control-plane, metadata, observability, quality, runtime, and storage packages. |
+| Domain port files | 74 | `src/bioetl/domain/ports/**/*.py` | 18 top-level files plus nested config, control-plane, metadata, observability, quality, runtime, and storage packages. |
 
 ## Architecture Quality Evidence
 
@@ -37,7 +37,7 @@ Current committed quality artifacts agree on the following architecture evidence
 | --- | ---: | --- |
 | Architecture quality score | `8.58` (`good_targeted_improvements`) | `reports/quality/debt-governance-gates.json`, `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2213` | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2210` | `reports/quality/module-coverage-inventory.json` |
 | Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
 | Debt-governance gates | `38` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
@@ -274,7 +274,7 @@ by storage technology. Current owner boundaries:
 | Domain storage port wording mixed application aggregate protocol into domain ports | `docs/02-architecture/01-domain-layer.md` listed `PipelineStorageProtocol` with domain storage ports. | `src/bioetl/application/core/pipeline_runtime_service_protocols.py`. | Described it as application-owned aggregate protocol. |
 | Docs guardrail command used obsolete module wording | `docs/00-project/governance/07-doc-nav-policy.md` and `docs/00-project/RULES.md` used the historical `check_doc_links` name. | `python -m scripts.docs check-links`; dispatch in `scripts/docs/__main__.py`. | Updated active policy wording to the current command/module. |
 | README architecture sketch used outdated single-bootstrap wording | `README.md` architecture sketch referenced `bootstrap_pipeline_runner() -> Factories`. | Composition public APIs and runtime bootstrap files under `src/bioetl/composition/`. | Updated README sketch to current composition APIs. |
-| Filter migration folder reused the ADR-048 number after canonical ADR-048 was accepted for another decision | `docs/filters/ADR-048-silver-filters-structural-scope.md` was a draft; canonical accepted ADR-048 is `docs/02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md`. | Filter compatibility is implemented in `src/bioetl/infrastructure/config/silver_filter_migration.py`; future filter decisions need a new ADR number. | Marked the filter draft as retired/non-canonical and updated the filter migration docs to describe current code reality. |
+| Filter migration folder reused the ADR-048 number after canonical ADR-048 was accepted for another decision | A retired filter draft previously used an ADR-like filename; canonical accepted ADR-048 is `docs/02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md`. | Filter compatibility is implemented in `src/bioetl/infrastructure/config/silver_filter_migration.py`; future filter decisions need a new ADR number. | Renamed the filter draft to `docs/filters/retired-silver-filters-structural-scope.md` and kept ADR-050 as the normative filter-boundary decision. |
 | Generated artifact drift gate did not include module coverage source-tree hash freshness | `report-module-coverage --check` could fail stale source-tree evidence while `report-debt-governance-gates --check` still passed. | `scripts/engineering/qa/report_debt_governance_gates.py`; `reports/quality/debt-governance-gates.json`. | Added `module_coverage_source_tree_hash_current` as a fail-fast debt-governance gate. |
 | Compatibility retained entrypoint inventory still tracked a zero-import maintenance CLI seam | `reports/quality/compatibility-importer-census.json` now reports `retained_entrypoint_count=12` and no retained row for `src/bioetl/interfaces/cli/commands/maintenance.py`. | `configs/quality/compatibility_facade_inventory.yaml`, `configs/quality/debt_scorecard.yaml`. | Removed the zero-import maintenance CLI command from retained-entrypoint debt tracking while leaving normal CLI lazy discovery intact. |
 | Composite config compatibility taxonomy retained cross-provider alias leaves | `reports/quality/config-compatibility-legacy-taxonomy-review.json` now reports `composite_runtime.compatibility_legacy_count=0`. | `configs/field_registry/canonical_registry.json`; `bioetl.domain.registry.field_aliases`; `reports/quality/config-discrepancy-baseline.json`. | Removed residual composite `field_aliases` leaves from configs; HBA/HBD/logp/polar_surface_area ownership now remains in canonical registry and domain alias registry. |
@@ -282,7 +282,7 @@ by storage technology. Current owner boundaries:
 | Runtime Gold Pandera strictness had no production-path non-strict guard | `tests/architecture/test_gold_validator_strict_runtime_paths.py` scans `src/bioetl` for `PanderaGoldValidator(..., strict=False)` and `ContractAwareGoldValidator(..., strict=False)`. | `src/bioetl/infrastructure/storage/silver/merged_operations.py`; `src/bioetl/infrastructure/validation/pandera_validator.py`. | Replaced the Silver merged-write non-strict Gold validator with `PanderaSilverValidator(strict=False)` and added the runtime guard. |
 | Quarantine payload immutability evidence stopped at aggregate/mock level | `tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineUpdateStatus::test_update_status_preserves_persisted_payload_and_hash` writes a real Delta table, updates status, and checks persisted `payload`, `payload_hash`, and `metadata`. | `src/bioetl/infrastructure/quarantine/unified.py`. | Added persisted immutability coverage and a read fallback for Delta string-view filter failures after status updates. |
 | Test governance refined assertless residuals are now fully eliminated while compatibility coverage stays bounded | `reports/quality/test-governance-current.json` now reports `assertless_total_candidates=109`, `refined_assertless_tests=0`, `compatibility_test_files=0`, and zero budget violations. | Contract schema tests under `tests/contract/**` plus governance inventory under `tests/architecture/**`. | Tightened observable assertions and governance classification so the refined assertless residual count is zero without regrowing compatibility-test scope. |
-| Current-state architecture evidence table lagged live quality reports | `reports/quality/debt-governance-gates.json` reports score `8.58`, `38` passing gates, and no warnings; `reports/quality/module-coverage-inventory.json` reports `2213` source modules with zero unmeasured/uncovered modules; `reports/quality/full-app-duplication-baseline.json` reports `43` clusters. | Current committed `reports/quality/*.json` artifacts. | Refreshed the current-state table and verification date from live report artifacts. |
+| Current-state architecture evidence table lagged live quality reports | `reports/quality/debt-governance-gates.json` reports score `8.58`, `38` passing gates, and no warnings; `reports/quality/module-coverage-inventory.json` reports `2210` source modules with zero unmeasured/uncovered modules; `reports/quality/full-app-duplication-baseline.json` reports `43` clusters. | Current committed `reports/quality/*.json` artifacts. | Refreshed the current-state table and verification date from live report artifacts. |
 
 ## Open Questions
 
@@ -290,7 +290,7 @@ by storage technology. Current owner boundaries:
   `reports/quality/module-coverage-inventory.json`; keep this as a regression
   gate through `report-module-coverage --check` and
   `report-debt-governance-gates --check`.
-- Existing historical diagram bundles still contain legacy `PipelineStorageProtocol`
-  references. They are retained as historical/generated diagram material until a
-  dedicated diagram regeneration pass refreshes rendered `.mmd`, SVG, and PNG
-  artifacts.
+- Diagram bundles and rendered artifacts have been refreshed for the known
+  `QuarantineEntry` transition wording drift. `PipelineStorageProtocol` remains
+  valid only as an application-owned aggregate protocol and must not be listed as
+  a domain storage port.
