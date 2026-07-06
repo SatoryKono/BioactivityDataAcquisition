@@ -53,6 +53,11 @@ class _FakeWorkflowRunnerService:
                     status="success",
                 ),
                 WorkflowStepExecutionResult(
+                    step_id="chembl_target_ingest",
+                    step_kind="pipeline",
+                    status="success",
+                ),
+                WorkflowStepExecutionResult(
                     step_id="summarize_core_extracts",
                     step_kind="transform",
                     status="success",

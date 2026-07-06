@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import inspect
+from dataclasses import dataclass
 
 from bioetl.domain.ports import (
     ForeignKeyReconciliationPort,

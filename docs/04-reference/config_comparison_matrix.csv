@@ -281,6 +281,7 @@ filters.gold_filters.columns.component_type,—,—,—,—,—,—,—,—,—,
 filters.gold_filters.columns.confidence_score,—,—,—,—,—,—,"[8, 9]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.columns.inorganic_flag,—,—,—,—,—,—,—,—,—,—,[0],—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.columns.molecule_type,—,—,—,—,—,—,—,—,—,—,"[""Small molecule""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+filters.gold_filters.columns.organism_class,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,(dict),—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.columns.potential_duplicate,—,—,—,—,—,[0],—,—,—,—,[0],—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.columns.relationship_type,—,—,—,—,—,—,"[""D""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.columns.reviewed,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,[true]
@@ -380,6 +381,8 @@ filters.gold_filters.columns.assay_test_type.operator,—,—,—,—,—,—,no
 filters.gold_filters.columns.assay_test_type.values,—,—,—,—,—,—,"[""In vivo"", ""Ex vivo""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.columns.bao_format.operator,—,—,—,—,—,—,not_in,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.columns.bao_format.values,—,—,—,—,—,—,"[""BAO_0000218""]",—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—
+filters.gold_filters.columns.organism_class.operator,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,not_in,—,—,—,—,—,—,—,—,—,—
+filters.gold_filters.columns.organism_class.values,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,"[""unicellular"", ""acellular""]",—,—,—,—,—,—,—,—,—,—
 filters.gold_filters.list_contains.component_types.mode,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,all,all,—,—,—,—,—,—,—,—,—
 filters.gold_filters.list_contains.component_types.values,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,"[""PROTEIN""]","[""PROTEIN""]",—,—,—,—,—,—,—,—,—
 filters.gold_filters.list_lengths.component_accessions.max,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,—,1,1,—,—,—,—,—,—,—,—,—

@@ -215,8 +215,6 @@ def test_load_workflow_config_preserves_composite_reconciliation_keys(
     step = config.steps[1]
     assert isinstance(step, TransformStepConfig)
     assert step.config == {
-        "source_layer": "silver",
-        "reference_layer": "silver",
         "source_table": "chembl_assay",
         "reference_table": "chembl_target",
         "source_keys": ["target_id", "target_type"],

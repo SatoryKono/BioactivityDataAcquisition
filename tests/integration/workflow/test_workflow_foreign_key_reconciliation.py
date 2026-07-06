@@ -131,7 +131,7 @@ class _RecordingQuarantine:
 def _gold_schema(columns: list[str]) -> DataFrameSchema:
     return DataFrameSchema(
         {column: Column(str, nullable=True) for column in columns},
-        strict=False,
+        strict=True,
     )
 
 

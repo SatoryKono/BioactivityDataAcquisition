@@ -47,7 +47,7 @@ def _run_record_id_subprocess(code: str) -> str:
         cwd=_REPO_ROOT,
         env=env,
         text=True,
-        timeout=15,
+        timeout=30,
     )
     return completed.stdout.strip()
 

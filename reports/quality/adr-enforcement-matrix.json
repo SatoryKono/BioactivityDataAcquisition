@@ -1560,6 +1560,7 @@
         "docs/00-project/glossary.md",
         "docs/00-project/governance/governance-sync-audit-2026-06-25.md",
         "docs/01-requirements/REQUIREMENTS.md",
+        "docs/04-reference/domain/entities.md",
         "docs/04-reference/domain/invariants.md",
         "docs/04-reference/domain/value-objects.md",
         "scripts/data_quality/inventory_silver_filters_migration.py",
