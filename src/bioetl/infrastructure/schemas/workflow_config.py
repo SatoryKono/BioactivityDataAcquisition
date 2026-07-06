@@ -21,6 +21,7 @@ __all__ = [
     "WorkflowConfigSchema",
     "WorkflowDefaultsSchema",
     "WorkflowPipelineStepSchema",
+    "WorkflowReconcileForeignKeysConfigSchema",
     "WorkflowReconcileRowsConfigSchema",
     "WorkflowRunOptionsSchema",
     "WorkflowTransformStepSchema",
@@ -206,6 +207,98 @@ class WorkflowReconcileRowsConfigSchema(BaseModel):
         return dict(self.model_dump())
 
 
+class WorkflowReconcileForeignKeysConfigSchema(BaseModel):
+    """Strict config schema for the destructive reconcile_foreign_keys transform."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    source_layer: Literal["silver", "gold"] = "silver"
+    reference_layer: Literal["silver", "gold"] = "silver"
+    mutation_layer: Literal["silver", "gold"] | None = None
+    source_table: str = Field(..., min_length=1)
+    reference_table: str = Field(..., min_length=1)
+    source_key: str | None = None
+    reference_key: str | None = None
+    source_keys: list[str] | None = None
+    reference_keys: list[str] | None = None
+    primary_keys: list[str] = Field(..., min_length=1)
+    action: Literal["delete_orphans"]
+    nulls_equal: bool = False
+
+    @model_validator(mode="after")
+    def validate_foreign_key_invariants(self) -> Self:
+        """Validate destructive foreign-key reconciliation invariants."""
+        self.source_table = _normalize_fk_required_name(
+            self.source_table,
+            "source_table",
+        )
+        self.reference_table = _normalize_fk_required_name(
+            self.reference_table,
+            "reference_table",
+        )
+        self.primary_keys = _normalize_fk_required_names(
+            self.primary_keys,
+            "primary_keys",
+        )
+        if self.mutation_layer is not None and self.mutation_layer != self.source_layer:
+            raise ValueError("reconcile_foreign_keys mutation_layer must match source_layer")
+        self._validate_key_contract()
+        return self
+
+    def _validate_key_contract(self) -> None:
+        source_key = _normalize_fk_optional_name(self.source_key, "source_key")
+        reference_key = _normalize_fk_optional_name(
+            self.reference_key,
+            "reference_key",
+        )
+        source_keys = _normalize_fk_optional_names(self.source_keys, "source_keys")
+        reference_keys = _normalize_fk_optional_names(
+            self.reference_keys,
+            "reference_keys",
+        )
+        single_pair_present = source_key is not None or reference_key is not None
+        composite_pair_present = source_keys is not None or reference_keys is not None
+        if not single_pair_present and not composite_pair_present:
+            raise ValueError(
+                "reconcile_foreign_keys requires source_key/reference_key or "
+                "source_keys/reference_keys"
+            )
+        if (source_key is None) != (reference_key is None):
+            raise ValueError(
+                "reconcile_foreign_keys requires source_key and reference_key together"
+            )
+        if (source_keys is None) != (reference_keys is None):
+            raise ValueError(
+                "reconcile_foreign_keys requires source_keys and reference_keys together"
+            )
+        if source_keys is not None and reference_keys is not None:
+            if len(source_keys) != len(reference_keys):
+                raise ValueError(
+                    "reconcile_foreign_keys source_keys and reference_keys must have "
+                    "the same length"
+                )
+            if source_key is not None and source_keys[0] != source_key:
+                raise ValueError(
+                    "reconcile_foreign_keys source_key must match first source_keys"
+                )
+            if reference_key is not None and reference_keys[0] != reference_key:
+                raise ValueError(
+                    "reconcile_foreign_keys reference_key must match first reference_keys"
+                )
+        self.source_key = source_key
+        self.reference_key = reference_key
+        self.source_keys = source_keys
+        self.reference_keys = reference_keys
+
+    def to_config_dict(self) -> JsonDict:
+        """Return normalized config with explicit layer defaults for fingerprinting."""
+        return {
+            key: value
+            for key, value in self.model_dump().items()
+            if value is not None
+        }
+
+
 class WorkflowTransformStepSchema(BaseModel):
     """Strict schema for transform workflow steps."""
 
@@ -220,13 +313,18 @@ class WorkflowTransformStepSchema(BaseModel):
     @model_validator(mode="after")
     def validate_transform_config(self) -> Self:
         """Validate transform-specific config contracts when available."""
-        if self.transform_name != "reconcile_rows":
-            return self
-        if self.config is None:
-            raise ValueError("reconcile_rows requires config")
-        self.config = WorkflowReconcileRowsConfigSchema.model_validate(
-            self.config
-        ).to_config_dict()
+        if self.transform_name == "reconcile_rows":
+            if self.config is None:
+                raise ValueError("reconcile_rows requires config")
+            self.config = WorkflowReconcileRowsConfigSchema.model_validate(
+                self.config
+            ).to_config_dict()
+        elif self.transform_name == "reconcile_foreign_keys":
+            if self.config is None:
+                raise ValueError("reconcile_foreign_keys requires config")
+            self.config = WorkflowReconcileForeignKeysConfigSchema.model_validate(
+                self.config
+            ).to_config_dict()
         return self
 
     def to_domain(self) -> TransformStepConfig:
@@ -257,6 +355,35 @@ def _normalize_required_names(values: list[str], field_name: str) -> list[str]:
     if len(set(normalized)) != len(normalized):
         raise ValueError(f"reconcile_rows {field_name} cannot contain duplicates")
     return normalized
+
+
+def _normalize_fk_required_name(value: str, field_name: str) -> str:
+    normalized = str(value).strip()
+    if not normalized:
+        raise ValueError(f"reconcile_foreign_keys {field_name} cannot be empty")
+    return normalized
+
+
+def _normalize_fk_optional_name(value: str | None, field_name: str) -> str | None:
+    if value is None:
+        return None
+    return _normalize_fk_required_name(value, field_name)
+
+
+def _normalize_fk_required_names(values: list[str], field_name: str) -> list[str]:
+    normalized = [_normalize_fk_required_name(value, field_name) for value in values]
+    if len(set(normalized)) != len(normalized):
+        raise ValueError(f"reconcile_foreign_keys {field_name} cannot contain duplicates")
+    return normalized
+
+
+def _normalize_fk_optional_names(
+    values: list[str] | None,
+    field_name: str,
+) -> list[str] | None:
+    if values is None:
+        return None
+    return _normalize_fk_required_names(values, field_name)
 
 
 class WorkflowConfigSchema(BaseModel):

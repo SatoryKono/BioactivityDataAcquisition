@@ -6593,7 +6593,7 @@
       "missing_lines": 4,
       "module": "bioetl.application.workflow.transforms.reconcile_foreign_keys",
       "path": "src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py",
-      "source_lines": 180
+      "source_lines": 203
     },
     {
       "coverage_percent": 90.62,
@@ -6683,7 +6683,7 @@
       "missing_lines": 2,
       "module": "bioetl.composition._workflow_services",
       "path": "src/bioetl/composition/_workflow_services.py",
-      "source_lines": 307
+      "source_lines": 308
     },
     {
       "coverage_percent": 73.33,
@@ -7153,7 +7153,7 @@
       "missing_lines": 1,
       "module": "bioetl.composition.bootstrap.runtime.composite_support_helpers",
       "path": "src/bioetl/composition/bootstrap/runtime/composite_support_helpers.py",
-      "source_lines": 231
+      "source_lines": 233
     },
     {
       "coverage_percent": 95.83,
@@ -8833,7 +8833,7 @@
       "missing_lines": 3,
       "module": "bioetl.composition.runtime_builders._exact_replay_cached_bronze_context",
       "path": "src/bioetl/composition/runtime_builders/_exact_replay_cached_bronze_context.py",
-      "source_lines": 206
+      "source_lines": 208
     },
     {
       "coverage_percent": 92.73,
@@ -9093,7 +9093,7 @@
       "missing_lines": 7,
       "module": "bioetl.composition.runtime_builders.input_snapshot_resolution",
       "path": "src/bioetl/composition/runtime_builders/input_snapshot_resolution.py",
-      "source_lines": 131
+      "source_lines": 133
     },
     {
       "coverage_percent": 100.0,
@@ -13543,7 +13543,7 @@
       "missing_lines": 9,
       "module": "bioetl.domain.ports.workflow_foreign_key_reconciliation",
       "path": "src/bioetl/domain/ports/workflow_foreign_key_reconciliation.py",
-      "source_lines": 166
+      "source_lines": 204
     },
     {
       "coverage_percent": 96.19,
@@ -19203,7 +19203,7 @@
       "missing_lines": 4,
       "module": "bioetl.infrastructure.schemas.workflow_config",
       "path": "src/bioetl/infrastructure/schemas/workflow_config.py",
-      "source_lines": 314
+      "source_lines": 441
     },
     {
       "coverage_percent": 100.0,
@@ -19703,7 +19703,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.gold.read_cleanup_mixin",
       "path": "src/bioetl/infrastructure/storage/gold/read_cleanup_mixin.py",
-      "source_lines": 149
+      "source_lines": 163
     },
     {
       "coverage_percent": 100.0,
@@ -20633,7 +20633,7 @@
       "missing_lines": 12,
       "module": "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation",
       "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py",
-      "source_lines": 214
+      "source_lines": 269
     },
     {
       "coverage_percent": 94.12,
@@ -20643,7 +20643,7 @@
       "missing_lines": 3,
       "module": "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_quarantine",
       "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py",
-      "source_lines": 141
+      "source_lines": 258
     },
     {
       "coverage_percent": 87.27,
@@ -20653,7 +20653,7 @@
       "missing_lines": 7,
       "module": "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support",
       "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py",
-      "source_lines": 194
+      "source_lines": 197
     },
     {
       "coverage_percent": 92.06,
@@ -28695,7 +28695,7 @@
       "missing_lines": 4,
       "module": "bioetl.application.workflow.transforms.reconcile_foreign_keys",
       "path": "src/bioetl/application/workflow/transforms/reconcile_foreign_keys.py",
-      "source_lines": 180
+      "source_lines": 203
     },
     {
       "coverage_percent": 90.62,
@@ -28785,7 +28785,7 @@
       "missing_lines": 2,
       "module": "bioetl.composition._workflow_services",
       "path": "src/bioetl/composition/_workflow_services.py",
-      "source_lines": 307
+      "source_lines": 308
     },
     {
       "coverage_percent": 73.33,
@@ -29255,7 +29255,7 @@
       "missing_lines": 1,
       "module": "bioetl.composition.bootstrap.runtime.composite_support_helpers",
       "path": "src/bioetl/composition/bootstrap/runtime/composite_support_helpers.py",
-      "source_lines": 231
+      "source_lines": 233
     },
     {
       "coverage_percent": 95.83,
@@ -30935,7 +30935,7 @@
       "missing_lines": 3,
       "module": "bioetl.composition.runtime_builders._exact_replay_cached_bronze_context",
       "path": "src/bioetl/composition/runtime_builders/_exact_replay_cached_bronze_context.py",
-      "source_lines": 206
+      "source_lines": 208
     },
     {
       "coverage_percent": 92.73,
@@ -31195,7 +31195,7 @@
       "missing_lines": 7,
       "module": "bioetl.composition.runtime_builders.input_snapshot_resolution",
       "path": "src/bioetl/composition/runtime_builders/input_snapshot_resolution.py",
-      "source_lines": 131
+      "source_lines": 133
     },
     {
       "coverage_percent": 100.0,
@@ -35645,7 +35645,7 @@
       "missing_lines": 9,
       "module": "bioetl.domain.ports.workflow_foreign_key_reconciliation",
       "path": "src/bioetl/domain/ports/workflow_foreign_key_reconciliation.py",
-      "source_lines": 166
+      "source_lines": 204
     },
     {
       "coverage_percent": 96.19,
@@ -41305,7 +41305,7 @@
       "missing_lines": 4,
       "module": "bioetl.infrastructure.schemas.workflow_config",
       "path": "src/bioetl/infrastructure/schemas/workflow_config.py",
-      "source_lines": 314
+      "source_lines": 441
     },
     {
       "coverage_percent": 100.0,
@@ -41805,7 +41805,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.gold.read_cleanup_mixin",
       "path": "src/bioetl/infrastructure/storage/gold/read_cleanup_mixin.py",
-      "source_lines": 149
+      "source_lines": 163
     },
     {
       "coverage_percent": 100.0,
@@ -42735,7 +42735,7 @@
       "missing_lines": 12,
       "module": "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation",
       "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation.py",
-      "source_lines": 214
+      "source_lines": 269
     },
     {
       "coverage_percent": 94.12,
@@ -42745,7 +42745,7 @@
       "missing_lines": 3,
       "module": "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_quarantine",
       "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py",
-      "source_lines": 141
+      "source_lines": 258
     },
     {
       "coverage_percent": 87.27,
@@ -42755,7 +42755,7 @@
       "missing_lines": 7,
       "module": "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support",
       "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_support.py",
-      "source_lines": 194
+      "source_lines": 197
     },
     {
       "coverage_percent": 92.06,
@@ -44210,7 +44210,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-06",
-  "source_tree_sha256": "b015ec2042c6baccde9d84f41a69bda6f70e2647212155de5954f5c1dd23063d",
+  "source_tree_sha256": "67c6ce02bc467f29b70c2d60e484115af65f5eb531a52666b15fadbf291fd752",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

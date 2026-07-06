@@ -44,8 +44,10 @@ def bootstrap_runtime_basics_facade(
     from bioetl.composition.bootstrap.runtime.composite_bootstrap_builders import (
         bootstrap_runtime_basics as _bootstrap_runtime_basics_builder_impl,
     )
-    from bioetl.composition.bootstrap.runtime.observability import bootstrap_logger
-    from bioetl.composition.bootstrap.runtime.tracing_bootstrap import bootstrap_tracer
+    from bioetl.composition.bootstrap.runtime.observability import (
+        bootstrap_logger,
+        bootstrap_tracer,
+    )
     from bioetl.composition.occurrence_identity import create_runtime_occurrence_uuid
     from bioetl.composition.runtime_builders.config_access import get_settings
     from bioetl.infrastructure.locking.memory_lock import MemoryLock

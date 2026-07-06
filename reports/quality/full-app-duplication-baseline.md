@@ -2,7 +2,11 @@
 
 - mode: report-only
 - targets: 4
-- total_duplicate_clusters: 40
+- total_duplicate_clusters: 2
+- total_raw_duplicate_clusters: 40
+- excluded_duplicate_clusters: 38
+- normalized_view: enabled
+- exclude_actionability_categories: `export_facade_or_package_barrel`
 
 > Interpretation note: this is a visibility baseline. `R0801` can over-report
 > around facades, export barrels, and compatibility shims, so use it as
@@ -10,43 +14,17 @@
 
 | Target | Duplicate clusters |
 | --- | ---: |
-| `src/bioetl/infrastructure/adapters` | 38 |
+| `src/bioetl/infrastructure/adapters` | 0 |
 | `src/bioetl/application/pipelines` | 2 |
 | `src/bioetl/composition/bootstrap` | 0 |
 | `src/bioetl/interfaces/cli` | 0 |
 
 ## src/bioetl/infrastructure/adapters
 
-- duplicate clusters: 38
-
-| Actionability category | Duplicate clusters |
-| --- | ---: |
-| `export_facade_or_package_barrel` | 38 |
-
-| Top recurring module pairs | Duplicate clusters |
-| --- | ---: |
-| `bioetl.infrastructure.adapters.openalex._filter_fetch_requests` <-> `bioetl.infrastructure.adapters.openalex.filter_fetch_adapter_mixin` | 2 |
-| `bioetl.infrastructure.adapters.openalex.filter_fetch_adapter_mixin` <-> `bioetl.infrastructure.adapters.pubmed.adapter_filter_fetch_mixin` | 2 |
-| `bioetl.infrastructure.adapters.chembl.client` <-> `bioetl.infrastructure.adapters.crossref.client` | 1 |
-| `bioetl.infrastructure.adapters.chembl.client` <-> `bioetl.infrastructure.adapters.decorators.circuit_breaker` | 1 |
-| `bioetl.infrastructure.adapters.chembl.client` <-> `bioetl.infrastructure.adapters.pubchem.client_model_mixin` | 1 |
-
-| Cluster path | Compared modules |
-| --- | --- |
-| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.chembl.models_common`[112:123], `bioetl.infrastructure.adapters.chembl.models_compound`[100:109] |
-| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.chembl.client`[245:254], `bioetl.infrastructure.adapters.pubchem.client_model_mixin`[88:97] |
-| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.uniprot._uniprot_model_annotations`[11:19], `bioetl.infrastructure.adapters.uniprot.models`[46:54] |
-| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.filterable_mixin`[196:205], `bioetl.infrastructure.adapters.uniprot.client`[194:201] |
-| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.chembl.client`[247:254], `bioetl.infrastructure.adapters.pubmed.adapter`[156:163] |
-| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.crossref.client`[84:91], `bioetl.infrastructure.adapters.pubmed.adapter`[101:108] |
-| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.crossref.client_builders`[170:179], `bioetl.infrastructure.adapters.crossref.client_runtime_helpers`[104:111] |
-| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.crossref.models`[35:42], `bioetl.infrastructure.adapters.crossref.models_shared`[148:155] |
-| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.crossref._doi_batch_processor`[42:52], `bioetl.infrastructure.adapters.crossref._search_paginator`[38:50] |
-| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.decorators._fetch_request_builder`[22:29], `bioetl.infrastructure.adapters.decorators.circuit_breaker`[169:176] |
-| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.openalex.client`[233:240], `bioetl.infrastructure.adapters.pubmed.adapter`[228:237] |
-| `src/bioetl/infrastructure/adapters/uniprot/__init__.py:1` | `bioetl.infrastructure.adapters.pubmed.adapter`[111:122], `bioetl.infrastructure.adapters.semanticscholar.adapter`[118:128] |
-
-- … truncated 26 additional clusters for brevity
+- duplicate clusters: 0
+- raw duplicate clusters: 38
+- excluded duplicate clusters: 38
+- no `R0801` findings
 
 ## src/bioetl/application/pipelines
 
@@ -84,14 +62,14 @@
 
 | Target | Duplicate clusters | Dominant actionability | Low-risk share | Recommended first wave |
 | --- | ---: | --- | ---: | --- |
-| `src/bioetl/infrastructure/adapters` | 38 | `export_facade_or_package_barrel` | 1.00 | no |
 | `src/bioetl/application/pipelines` | 2 | `pipeline_transformer_contract_pattern` | 0.00 | no |
 | `src/bioetl/composition/bootstrap` | 0 | `n/a` | 0.00 | no |
+| `src/bioetl/infrastructure/adapters` | 0 | `n/a` | 0.00 | no |
 | `src/bioetl/interfaces/cli` | 0 | `cli_command_contract_shell` | 0.00 | no |
 
 ## First Wave Selection
 
-- target: `src/bioetl/infrastructure/adapters`
-- duplicate_clusters: 38
-- dominant_actionability_category: `export_facade_or_package_barrel`
+- target: `src/bioetl/application/pipelines`
+- duplicate_clusters: 2
+- dominant_actionability_category: `pipeline_transformer_contract_pattern`
 - selection_rule: prefer low-risk actionability families with bounded cluster counts, then maximize duplicate reduction leverage

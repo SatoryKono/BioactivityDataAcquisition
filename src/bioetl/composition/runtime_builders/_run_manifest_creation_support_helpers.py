@@ -17,7 +17,7 @@ from bioetl.composition.runtime_builders._run_manifest_attr_support import (
 from bioetl.composition.runtime_builders._run_manifest_data_roots import (
     build_planned_artifacts,
 )
-from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
+from bioetl.composition.runtime_builders._snapshot_mapping_support import (
     to_serializable_mapping,
 )
 from bioetl.domain.filtering.silver_filter_identity import (

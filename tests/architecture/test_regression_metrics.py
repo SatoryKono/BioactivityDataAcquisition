@@ -644,8 +644,8 @@ def test_probe_mode_fallback_counter_exists() -> None:
 # Metric 9: dependency_map_violations (target: 0)
 # ---------------------------------------------------------------------------
 
-GROUP_EDGE_LIMIT = 60
-GROUP_EDGE_TOTAL_BUDGET = 344  # current generated dependency-map baseline
+GROUP_EDGE_LIMIT = 55
+GROUP_EDGE_TOTAL_BUDGET = 330  # runtime dependency-map budget
 
 _dep_map_module = None
 _dep_map_snapshot = None

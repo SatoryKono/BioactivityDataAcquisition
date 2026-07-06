@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import inspect
 
 from bioetl.domain.ports import (
     ForeignKeyReconciliationPort,
@@ -24,7 +25,10 @@ from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_support i
     reference_value_set,
 )
 
-__all__ = ["SilverForeignKeyReconciliationAdapter"]
+__all__ = [
+    "SilverForeignKeyReconciliationAdapter",
+    "StorageForeignKeyReconciliationAdapter",
+]
 
 _RECONCILIATION_ROWS_SCANNED_TOTAL = "bioetl_workflow_reconciliation_rows_scanned_total"
 _RECONCILIATION_ROWS_RETAINED_TOTAL = (
@@ -35,13 +39,14 @@ _RECONCILIATION_ROWS_DELETED_TOTAL = "bioetl_workflow_reconciliation_rows_delete
 
 @dataclass(slots=True)
 class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
-    """Reconcile Silver foreign keys through the existing Delta storage seam."""
+    """Reconcile Silver/Gold foreign keys through existing storage seams."""
 
     silver_writer: SilverWriter
     logger: LoggerPort
     metrics: MetricsPort | None = None
     quarantine: QuarantinePort | None = None
     quarantine_pipeline_name: str | None = None
+    gold_writer: object | None = None
 
     async def reconcile_foreign_keys(
         self,
@@ -57,6 +62,9 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             "workflow foreign-key reconciliation started",
             source_table=request.source_table,
             reference_table=request.reference_table,
+            source_layer=request.source_layer,
+            reference_layer=request.reference_layer,
+            mutation_layer=request.effective_mutation_layer,
             source_keys=list(request.effective_source_keys),
             reference_keys=list(request.effective_reference_keys),
             nulls_equal=request.nulls_equal,
@@ -80,6 +88,9 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
                 "workflow foreign-key reconciliation no-op on empty source",
                 source_table=request.source_table,
                 reference_table=request.reference_table,
+                source_layer=request.source_layer,
+                reference_layer=request.reference_layer,
+                mutation_layer=request.effective_mutation_layer,
             )
             return build_reconciliation_result(
                 request,
@@ -126,7 +137,12 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
         request: ForeignKeyReconciliationRequest,
     ) -> list[dict[str, object]] | None:
         try:
-            return await self.silver_writer.read_silver(request.source_table)
+            return await self._read_rows(
+                layer=request.source_layer,
+                table_name=request.source_table,
+                columns=None,
+                current_only=True,
+            )
         except FileNotFoundError:
             self._record_metrics(scanned=0, retained=0, deleted=0)
             self._log(
@@ -134,6 +150,9 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
                 "workflow foreign-key reconciliation skipped missing source table",
                 source_table=request.source_table,
                 reference_table=request.reference_table,
+                source_layer=request.source_layer,
+                reference_layer=request.reference_layer,
+                mutation_layer=request.effective_mutation_layer,
             )
             return None
 
@@ -142,12 +161,42 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
         request: ForeignKeyReconciliationRequest,
     ) -> list[dict[str, object]]:
         try:
-            return await self.silver_writer.read_silver(
-                request.reference_table,
+            return await self._read_rows(
+                layer=request.reference_layer,
+                table_name=request.reference_table,
                 columns=list(request.effective_reference_keys),
+                current_only=True,
             )
-        except FileNotFoundError:
+        except FileNotFoundError as exc:
+            if request.reference_layer == "gold":
+                raise ValueError(
+                    "Gold foreign-key reconciliation reference table not found: "
+                    f"{request.reference_table}"
+                ) from exc
             return []
+
+    async def _read_rows(
+        self,
+        *,
+        layer: str,
+        table_name: str,
+        columns: list[str] | None,
+        current_only: bool,
+    ) -> list[dict[str, object]]:
+        if layer == "silver":
+            return await self.silver_writer.read_silver(table_name, columns=columns)
+
+        if self.gold_writer is None:
+            raise ValueError(
+                "Gold foreign-key reconciliation requires a configured gold_writer"
+            )
+        read_gold = getattr(self.gold_writer, "read_gold", None)
+        if not callable(read_gold):
+            raise ValueError("Configured gold_writer does not expose read_gold()")
+        value = read_gold(table_name, columns=columns, current_only=current_only)
+        if inspect.isawaitable(value):
+            value = await value
+        return [dict(row) for row in value]
 
     async def _reconcile_loaded_rows(
         self,
@@ -200,6 +249,9 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             "workflow foreign-key reconciliation completed with mutation",
             source_table=request.source_table,
             reference_table=request.reference_table,
+            source_layer=request.source_layer,
+            reference_layer=request.reference_layer,
+            mutation_layer=request.effective_mutation_layer,
             scanned_rows=scanned_rows,
             retained_rows=retained_rows_count,
             orphan_rows_deleted=orphan_rows_deleted,
@@ -212,3 +264,6 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             mutated=True,
             would_mutate=False,
         )
+
+
+StorageForeignKeyReconciliationAdapter = SilverForeignKeyReconciliationAdapter

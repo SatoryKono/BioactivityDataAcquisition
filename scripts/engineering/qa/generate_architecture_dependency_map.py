@@ -47,7 +47,8 @@ LAYER_IMPORT_MATRIX: dict[str, frozenset[str]] = {
 }
 
 LAYER_ORDER = tuple(LAYER_IMPORT_MATRIX.keys())
-GROUP_EDGE_LIMIT = 60
+GROUP_EDGE_LIMIT = 55
+TYPE_CHECKING_NAME = "TYPE_CHECKING"
 _FRONTMATTER_DELIMITER = "---"
 MAX_SOURCE_TREE_STABILIZATION_ATTEMPTS = 8
 SOURCE_TREE_STABILIZATION_SLEEP_SECONDS = 0.1
@@ -274,23 +275,50 @@ def _import_targets_from_relative_import_from(
     ]
 
 
-def _extract_import_targets(tree: ast.AST, source_module: str) -> list[str]:
-    targets: list[str] = []
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            targets.extend(_import_targets_from_import(node))
-            continue
+def _is_type_checking_guard(test: ast.AST) -> bool:
+    """Return True when an ``if`` branch is guarded by ``TYPE_CHECKING``."""
+    if isinstance(test, ast.Name):
+        return test.id == TYPE_CHECKING_NAME
+    if isinstance(test, ast.Attribute):
+        return test.attr == TYPE_CHECKING_NAME
+    if isinstance(test, ast.BoolOp):
+        if isinstance(test.op, ast.And):
+            return any(_is_type_checking_guard(value) for value in test.values)
+        if isinstance(test.op, ast.Or):
+            return all(_is_type_checking_guard(value) for value in test.values)
+    return False
 
-        if not isinstance(node, ast.ImportFrom):
-            continue
 
+class _RuntimeImportTargetVisitor(ast.NodeVisitor):
+    """Collect imports that affect runtime dependency topology."""
+
+    def __init__(self, source_module: str) -> None:
+        self._source_module = source_module
+        self.targets: list[str] = []
+
+    def visit_If(self, node: ast.If) -> None:  # noqa: N802 - ast visitor API
+        if _is_type_checking_guard(node.test):
+            for child in node.orelse:
+                self.visit(child)
+            return
+        self.generic_visit(node)
+
+    def visit_Import(self, node: ast.Import) -> None:  # noqa: N802 - ast visitor API
+        self.targets.extend(_import_targets_from_import(node))
+
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:  # noqa: N802
         if node.level == 0:
-            targets.extend(_import_targets_from_absolute_import_from(node))
-            continue
+            self.targets.extend(_import_targets_from_absolute_import_from(node))
+            return
+        self.targets.extend(
+            _import_targets_from_relative_import_from(node, self._source_module)
+        )
 
-        targets.extend(_import_targets_from_relative_import_from(node, source_module))
 
-    return targets
+def _extract_import_targets(tree: ast.AST, source_module: str) -> list[str]:
+    visitor = _RuntimeImportTargetVisitor(source_module)
+    visitor.visit(tree)
+    return visitor.targets
 
 
 def _allowed_edge(source_layer: str, target_layer: str) -> bool:
@@ -333,7 +361,7 @@ def _record_import_target(
 
 
 def collect_dependency_snapshot(src_root: Path) -> DependencySnapshot:
-    """Parse project imports and return aggregated dependency snapshot."""
+    """Parse runtime project imports and return aggregated dependency snapshot."""
     layer_counter: Counter[tuple[str, str]] = Counter()
     group_counter: Counter[tuple[str, str]] = Counter()
     snapshots, source_digest = _read_stable_source_module_snapshots(src_root)
