@@ -30,7 +30,7 @@ from bioetl.domain.entities.base import BaseEntity
 from bioetl.domain.types import RunType
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
 if TYPE_CHECKING:
     from bioetl.domain.types import BronzeRecord

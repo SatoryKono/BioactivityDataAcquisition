@@ -566,7 +566,7 @@ entity_test_ownership:
   composite.molecule:
     - tests/integration/composite/test_molecule_pipeline.py
   composite.publication:
-    - tests/unit/application/composite/test_publication_schema_columns.py
+    - tests/unit/repo_backed/application/composite/test_publication_schema_columns.py
   composite.target:
     - tests/unit/composition/bootstrap/runtime/test_composite_helpers.py
   chembl.activity:
@@ -926,7 +926,7 @@ fixture_governance:
       chembl_activity_publication_identifiers:
         evidence:
           - docs/04-reference/pipelines/chembl/activity-xwalk.csv
-          - tests/unit/application/pipelines/chembl/test_activity_transformer.py
+          - tests/unit/repo_backed/application/pipelines/chembl/test_activity_transformer.py
         expectations:
           - publication_doi
           - publication_pmid

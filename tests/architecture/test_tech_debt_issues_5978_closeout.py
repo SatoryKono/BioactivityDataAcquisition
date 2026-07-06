@@ -31,16 +31,19 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 
 
 @pytest.mark.architecture
-def test_issue_5978_branch_coverage_deferred_with_promotion_criteria() -> None:
-    """Branch coverage readiness is deferred with documented promotion criteria."""
+def test_issue_5978_branch_coverage_is_at_threshold_pending_stability() -> None:
+    """Branch coverage readiness is at threshold and pending stability evidence."""
     closeout = _load_json(CLOSEOUT)
 
     assert closeout["issue"]["number"] == 5978
-    assert closeout["closeout"]["status"] == "deferred_with_promotion_criteria"
+    assert closeout["closeout"]["status"] == "promotion_pending_stability_evidence"
 
     # Verify current branch coverage state
     branch_state = closeout["current_branch_coverage_state"]
-    assert branch_state["branch_rate_percent"] == 82.99
+    assert branch_state["branch_rate_percent"] == 85.002
+    assert branch_state["branch_covered"] == 17218
+    assert branch_state["branch_total"] == 20256
+    assert branch_state["branch_threshold_margin"] == 0
     assert branch_state["measurement_mode"] == "enabled"
     assert branch_state["policy"] == "advisory"
 
@@ -52,8 +55,8 @@ def test_issue_5978_branch_coverage_deferred_with_promotion_criteria() -> None:
 
     # Verify deferred actions
     deferred = closeout["deferred_actions"]
-    assert deferred["status"] == "deferred_until_stable_above_85"
-    assert "85%" in deferred["rationale"]
+    assert deferred["status"] == "promotion_pending_stability_evidence"
+    assert "three consecutive coverage-verify runs" in deferred["rationale"]
     assert len(deferred["next_steps"]) > 0
 
 
@@ -67,7 +70,8 @@ def test_issue_5978_coverage_tail_status_documented() -> None:
     tail_status = closeout["coverage_tail_status"]
     assert tail_status["unmeasured_module_count"] == 0
     assert tail_status["uncovered_module_count"] == 0
-    assert tail_status["below_85_module_count"] == 80
+    assert tail_status["below_85_module_count"] == 82
+    assert tail_status["below_85_branch_file_count"] == 552
     assert tail_status["ranked_low_tail_modules"] == 6
     assert tail_status["owner_tests_status"] == "focused_owner_tests_added"
 
@@ -99,7 +103,7 @@ def test_issue_5978_module_coverage_gates_policy_aligned() -> None:
     # Verify rationale mentions advisory policy
     rationale = closeout["closeout"]["rationale"]
     assert "advisory" in rationale.lower()
-    assert "85%" in rationale
+    assert "three consecutive coverage-verify runs" in rationale
 
 
 @pytest.mark.architecture

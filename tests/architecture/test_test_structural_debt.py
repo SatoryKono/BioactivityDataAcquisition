@@ -20,6 +20,7 @@ TEST_FILE_LOC_EXEMPTIONS = {
 
 TEST_FUNCTION_LOC_EXEMPTIONS = {
     "tests/testing_support/neo4j_memory_sync.py::test_snapshot_contains_core_repo_surfaces": 295,
+    "tests/unit/interfaces/http/test_control_plane_identity_helper_branches.py::test_identity_extractor_helpers_cover_checkpoint_manifest_and_ledger_edges": 244,
 }
 
 

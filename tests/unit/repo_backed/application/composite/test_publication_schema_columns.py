@@ -16,7 +16,7 @@ from bioetl.application.composite.column_service import ColumnOrderService
 from bioetl.domain.composite.config import ColumnGroupConfig
 
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
 
 @pytest.fixture

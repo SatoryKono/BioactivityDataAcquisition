@@ -858,6 +858,24 @@ repo_backed_unit_test_exceptions:
     target_lane: repo-backed-unit
     protected_surface: configs/** publication-type bootstrap inputs used by snapshot
       transformer initialization
+  - path: tests/unit/repo_backed/application/composite/test_join_key_normalization.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/composites/*.yaml join-key normalization policy
+  - path: tests/unit/repo_backed/application/composite/test_merger_golden_snapshots.py
+    target_lane: repo-backed-unit
+    protected_surface: tests/fixtures/golden/composite/*.json
+  - path: tests/unit/repo_backed/application/composite/test_publication_schema_columns.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/composites/publication.yaml column groups
+  - path: tests/unit/repo_backed/application/pipelines/common/test_base_publication_transformer.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/** publication controlled vocabulary bootstrap inputs
+  - path: tests/unit/repo_backed/application/pipelines/chembl/test_activity_transformer.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/entities/chembl/activity.yaml structural required fields
+  - path: tests/unit/repo_backed/application/pipelines/chembl/test_assay_transformer_required_fields.py
+    target_lane: repo-backed-unit
+    protected_surface: configs/entities/chembl/assay.yaml structural required fields
   - path: tests/unit/repo_backed/application/services/test_config_dq_service.py
     target_lane: repo-backed-unit
     protected_surface: src/bioetl/application/services/config_dq_service.py
@@ -898,6 +916,12 @@ repo_backed_unit_test_exceptions:
   - path: tests/unit/repo_backed/tools/test_differentiate_linkstyle_security.py
     target_lane: repo-backed-unit
     protected_surface: src/tools/differentiate_linkstyle.py
+  - path: tests/unit/repo_backed/application/pipelines/chembl/test_chembl_target_helpers.py
+    target_lane: repo-backed-unit
+    protected_surface: src/bioetl/application/pipelines/chembl/target_helpers.py
+  - path: tests/unit/repo_backed/infrastructure/quarantine/test_filtered_read_support.py
+    target_lane: repo-backed-unit
+    protected_surface: src/bioetl/infrastructure/quarantine/unified.py
 mixed_scope_unit_path_policy:
   issue_ref: '#4665'
   decision: logical_unit_ownership_with_dedicated_repo_backed_subtree

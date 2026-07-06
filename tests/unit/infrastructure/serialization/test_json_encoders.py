@@ -210,11 +210,12 @@ class TestOrjsonEncoder:
         self, encoder: OrjsonEncoder
     ) -> None:
         """Should escape non-ASCII when ensure_ascii=True."""
-        data = {"name": "тест"}
+        data = {"emoji": "😀", "name": "тест"}
         result = encoder.dumps(data, ensure_ascii=True)
         # Russian text should be escaped
         assert "тест" not in result
         assert result.isascii()
+        assert json.loads(result) == data
 
     def test_orjson_encoder__dumps_list__be2ec085(self, encoder: OrjsonEncoder) -> None:
         """Should serialize lists correctly."""
@@ -242,7 +243,7 @@ class TestOrjsonEncoder:
         self, encoder: OrjsonEncoder
     ) -> None:
         """Canonical output should be ASCII-only."""
-        data = {"z": "тест", "a": 1}
+        data = {"z": "тест", "emoji": "😀", "a": 1}
         result = encoder.dumps_canonical(data)
 
         # ASCII-only
@@ -251,7 +252,8 @@ class TestOrjsonEncoder:
         # Valid JSON
         parsed = json.loads(result)
         # Keys should match
-        assert set(parsed.keys()) == {"a", "z"}
+        assert set(parsed.keys()) == {"a", "emoji", "z"}
+        assert parsed == data
 
     def test_orjson_encoder__loads_string__fd8d9802(
         self, encoder: OrjsonEncoder
@@ -308,6 +310,13 @@ class TestGetJsonEncoder:
         with mock.patch.dict(os.environ, {"BIOETL_JSON_ENCODER": "stdlib"}):
             reset_encoder_cache()
             encoder = get_json_encoder()
+            assert isinstance(encoder, StdLibJsonEncoder)
+
+    def test_explicit_encoder_type_takes_priority_over_environment(self) -> None:
+        """Explicit encoder selection should ignore the environment fallback."""
+        with mock.patch.dict(os.environ, {"BIOETL_JSON_ENCODER": "invalid"}):
+            reset_encoder_cache()
+            encoder = get_json_encoder(" stdlib ")
             assert isinstance(encoder, StdLibJsonEncoder)
 
     @pytest.mark.skipif(not ORJSON_AVAILABLE, reason="orjson not installed")

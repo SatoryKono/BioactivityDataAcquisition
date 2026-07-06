@@ -19,6 +19,9 @@ from bioetl.application.composite.join_key_normalization import (
 from bioetl.composition.bootstrap.runtime.composite import load_composite_config
 
 
+pytestmark = pytest.mark.repo_backed
+
+
 @pytest.mark.unit
 def test_normalize_join_key_text_applies_trim_and_lowercase_for_doi() -> None:
     assert normalize_join_key_text(" 10.1000/ABC ", key="doi") == "10.1000/abc"

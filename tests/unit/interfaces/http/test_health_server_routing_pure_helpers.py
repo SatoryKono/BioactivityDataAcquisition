@@ -9,6 +9,9 @@ from types import SimpleNamespace
 import pytest
 
 from bioetl.domain.types import HealthStatus
+from bioetl.interfaces.http import (
+    _health_server_quarantine_routing as quarantine_routing,
+)
 from bioetl.interfaces.http import _health_server_routing_support as routing_support
 from bioetl.interfaces.http import health_server_routing_mixin as routing_mixin_module
 from bioetl.interfaces.http.health_server_http_mixin import HealthServerHTTPMixin
@@ -154,6 +157,39 @@ class _HTTPHost(HealthServerHTTPMixin):
         self.sent.append((status_code, message))
 
 
+class _QuarantineService:
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, dict[str, object]]] = []
+        self.detail_payload: dict[str, object] | None = {"payload_hash": "hash-1"}
+
+    async def list_filtered_records(self, **kwargs: object) -> dict[str, object]:
+        self.calls.append(("list", kwargs))
+        return {"items": [], "kwargs": kwargs}
+
+    async def get_filtered_stats(self, **kwargs: object) -> dict[str, object]:
+        self.calls.append(("stats", kwargs))
+        return {"total": 0, "kwargs": kwargs}
+
+    async def get_filtered_timeseries(self, **kwargs: object) -> dict[str, object]:
+        self.calls.append(("timeseries", kwargs))
+        return {"rows": [], "kwargs": kwargs}
+
+    async def get_filtered_filter_options(self, **kwargs: object) -> dict[str, object]:
+        self.calls.append(("options", kwargs))
+        return {"pipelines": [], "kwargs": kwargs}
+
+    async def get_filtered_record(self, **kwargs: object) -> dict[str, object] | None:
+        self.calls.append(("detail", kwargs))
+        return self.detail_payload
+
+
+async def _inline_to_thread(
+    function: object, /, *args: object, **kwargs: object
+) -> object:
+    assert callable(function)
+    return function(*args, **kwargs)
+
+
 @pytest.mark.asyncio
 async def test_routing_mixin_parses_queries_and_routes_without_sockets(
     monkeypatch: pytest.MonkeyPatch,
@@ -246,7 +282,9 @@ async def test_routing_mixin_health_handlers_cover_monitor_states() -> None:
     assert ready_without_monitor.status == "healthy"
     assert ready_without_monitor.checks == {"message": "No health monitor configured"}
     providers_without_monitor = await host._handle_providers()
-    assert providers_without_monitor.checks == {"message": "No health monitor configured"}
+    assert providers_without_monitor.checks == {
+        "message": "No health monitor configured"
+    }
 
     host._health_monitor = object()
     host.provider_statuses = {
@@ -360,6 +398,7 @@ async def test_routing_support_filter_options_and_selector_context(
 ) -> None:
     host = _RoutingHost()
     writer = _Writer()
+    monkeypatch.setattr(routing_support.asyncio, "to_thread", _inline_to_thread)
 
     def fake_filter_payload(**kwargs: object) -> dict[str, object]:
         return {"items": ["-", "run-2"], "kwargs": kwargs}
@@ -434,6 +473,7 @@ async def test_routing_support_checkpoint_freshness_branches(
 ) -> None:
     host = _RoutingHost()
     writer = _Writer()
+    monkeypatch.setattr(routing_support.asyncio, "to_thread", _inline_to_thread)
     host._checkpoint_port = None
 
     await routing_support.handle_control_plane_checkpoint_freshness(
@@ -459,7 +499,10 @@ async def test_routing_support_checkpoint_freshness_branches(
     for evidence, expected_source in (
         ((None, "scope", None, True), "aggregate_scope_requires_exact_pipeline"),
         ((None, "missing", "manifest-1", False), "missing"),
-        ((("run-1", {"manifest_id": "manifest-2"}), "metadata", None, False), "metadata"),
+        (
+            (("run-1", {"manifest_id": "manifest-2"}), "metadata", None, False),
+            "metadata",
+        ),
         (
             (
                 ("run-1", {"checkpoint_saved_at_epoch_seconds": 1_786_000_000}),
@@ -470,10 +513,18 @@ async def test_routing_support_checkpoint_freshness_branches(
             "checkpoint",
         ),
     ):
+
+        async def fake_load_checkpoint_freshness_evidence(
+            *_args: object,
+            _evidence: object = evidence,
+            **_kwargs: object,
+        ) -> object:
+            return _evidence
+
         monkeypatch.setattr(
             routing_support,
             "load_checkpoint_freshness_evidence",
-            lambda *_args, _evidence=evidence, **_kwargs: _evidence,
+            fake_load_checkpoint_freshness_evidence,
         )
         await routing_support.handle_control_plane_checkpoint_freshness(
             host,
@@ -489,7 +540,130 @@ async def test_routing_support_checkpoint_freshness_branches(
         resolved_via="latest_manifest",
     )
     assert routing_support._resolved_scope_pipeline(scope) == "chembl_activity"
-    assert routing_support._resolved_scope_pipeline(resolved_scope) == "pubchem_compound"
+    assert (
+        routing_support._resolved_scope_pipeline(resolved_scope) == "pubchem_compound"
+    )
+
+
+@pytest.mark.asyncio
+async def test_quarantine_routing_dispatches_filtered_explorer_branches() -> None:
+    host = _RoutingHost()
+    writer = _Writer()
+
+    host._quarantine_service = None
+    await quarantine_routing.dispatch_quarantine_request(
+        host,
+        writer=writer,
+        path="/ops/quarantine/filtered-records",
+        query={"pipeline": "chembl_activity"},
+    )
+    assert host.sent[-1] == ("text", 503, "Quarantine explorer unavailable")
+
+    service = _QuarantineService()
+    host._quarantine_service = service
+    common_query = {
+        "pipeline": "chembl_activity",
+        "run_type": "incremental",
+        "reason_code": "missing",
+        "field": "canonical_smiles",
+        "run_id": "run-1",
+        "payload_hash": "hash-1",
+        "from": "2026-07-06T00:00:00Z",
+        "to": "2026-07-06T01:00:00Z",
+    }
+    await quarantine_routing.dispatch_quarantine_request(
+        host,
+        writer=writer,
+        path="/ops/quarantine/filtered-records",
+        query={**common_query, "limit": "5", "offset": "2", "sort": "ingestion_ts_asc"},
+    )
+    assert service.calls[-1] == (
+        "list",
+        {
+            "pipeline": "chembl_activity",
+            "run_type": "incremental",
+            "reason_code": "missing",
+            "field": "canonical_smiles",
+            "run_id": "run-1",
+            "payload_hash": "hash-1",
+            "from_ts": "2026-07-06T00:00:00Z",
+            "to_ts": "2026-07-06T01:00:00Z",
+            "limit": 5,
+            "offset": 2,
+            "sort": "ingestion_ts_asc",
+        },
+    )
+
+    for path, expected_call in (
+        ("/ops/quarantine/filtered-stats", "stats"),
+        ("/ops/quarantine/filtered-timeseries", "timeseries"),
+        ("/ops/quarantine/filter-options", "options"),
+    ):
+        await quarantine_routing.dispatch_quarantine_request(
+            host,
+            writer=writer,
+            path=path,
+            query=common_query,
+        )
+        assert service.calls[-1][0] == expected_call
+        assert host.sent[-1][0] == "payload"
+        assert host.sent[-1][1] == 200
+
+    assert service.calls[-2][1]["bucket"] == "1h"
+    await quarantine_routing.dispatch_quarantine_request(
+        host,
+        writer=writer,
+        path="/ops/quarantine/filtered-timeseries",
+        query={**common_query, "bucket": "1d"},
+    )
+    assert service.calls[-1][1]["bucket"] == "1d"
+
+    await quarantine_routing.dispatch_quarantine_request(
+        host,
+        writer=writer,
+        path="/ops/quarantine/filtered-record/hash%201",
+        query={"pipeline": "chembl_activity"},
+    )
+    assert service.calls[-1] == (
+        "detail",
+        {"payload_hash": "hash 1", "pipeline": "chembl_activity"},
+    )
+    assert host.sent[-1] == ("payload", 200, {"payload_hash": "hash-1"})
+
+    service.detail_payload = None
+    await quarantine_routing.dispatch_quarantine_request(
+        host,
+        writer=writer,
+        path="/ops/quarantine/filtered-record/hash-2",
+        query={"pipeline": "chembl_activity"},
+    )
+    assert host.sent[-1] == ("text", 404, "Not Found")
+
+    await quarantine_routing.dispatch_quarantine_request(
+        host,
+        writer=writer,
+        path="/ops/quarantine/filtered-record/",
+        query={"pipeline": "chembl_activity"},
+    )
+    assert host.sent[-1] == ("text", 400, "Missing payload_hash in path")
+    await quarantine_routing.dispatch_quarantine_request(
+        host,
+        writer=writer,
+        path="/ops/quarantine/missing",
+        query={"pipeline": "chembl_activity"},
+    )
+    assert host.sent[-1] == ("text", 404, "Not Found")
+    await quarantine_routing.dispatch_quarantine_request(
+        host,
+        writer=writer,
+        path="/ops/quarantine/filtered-stats",
+        query={},
+    )
+    assert host.sent[-1] == (
+        "text",
+        400,
+        "Missing required query parameter: pipeline",
+    )
 
 
 @pytest.mark.asyncio
@@ -502,7 +676,9 @@ async def test_http_mixin_processes_requests_responses_and_close_errors() -> Non
 
     await host._process_request(_Reader([]), writer)
     await host._process_request(_Reader([b"BAD\r\n"]), writer)
-    await host._process_request(_Reader([b"POST /health HTTP/1.1\r\n", b"\r\n"]), writer)
+    await host._process_request(
+        _Reader([b"POST /health HTTP/1.1\r\n", b"\r\n"]), writer
+    )
     await host._process_request(_Reader([b"GET /health HTTP/1.1\r\n", b"\r\n"]), writer)
     assert host.sent == [(400, "Bad Request"), (405, "Method Not Allowed")]
     assert host.routes == ["/health"]

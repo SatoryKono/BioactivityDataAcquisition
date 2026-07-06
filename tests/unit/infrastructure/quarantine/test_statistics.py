@@ -110,9 +110,7 @@ def test_filtered_manifest_lookup_handles_missing_invalid_and_cached_manifests(
 
     assert filtered_manifest_support._parse_run_type_from_manifest_payload([]) is None
     assert (
-        filtered_manifest_support._parse_run_type_from_manifest_payload(
-            {"run_type": 1}
-        )
+        filtered_manifest_support._parse_run_type_from_manifest_payload({"run_type": 1})
         is None
     )
     assert (
@@ -150,10 +148,13 @@ def test_filtered_manifest_lookup_handles_missing_invalid_and_cached_manifests(
         [{"run_id": "run-6"}],
         base_path=str(fallback_base),
     ) == {"run-6": "backfill"}
-    assert filtered_manifest_support._build_run_type_lookup(
-        [{"run_id": "run-7"}],
-        base_path=str(tmp_path / "missing-quarantine"),
-    ) == {}
+    assert (
+        filtered_manifest_support._build_run_type_lookup(
+            [{"run_id": "run-7"}],
+            base_path=str(tmp_path / "missing-quarantine"),
+        )
+        == {}
+    )
 
 
 def test_statistics_support_processes_filtered_reason_dimensions() -> None:
@@ -229,7 +230,9 @@ def test_statistics_support_counts_bronze_scope_and_builds_response() -> None:
 
     def load_pipeline_stats(pipeline: str, run_id: str | None) -> dict[str, object]:
         calls.append((pipeline, run_id))
-        return {"total_count": {"chembl_activity": 7, "pubchem_compound": 11}.get(pipeline)}
+        return {
+            "total_count": {"chembl_activity": 7, "pubchem_compound": 11}.get(pipeline)
+        }
 
     rows = [
         {"pipeline": " chembl_activity "},
@@ -244,31 +247,40 @@ def test_statistics_support_counts_bronze_scope_and_builds_response() -> None:
     assert statistics_support._scoped_pipeline_names(rows, {"chembl_activity"}) == {
         "chembl_activity"
     }
-    assert statistics_support._count_bronze_records(
-        rows,
-        pipeline_filter=None,
-        pipeline_stats_loader=load_pipeline_stats,
-        run_id_single="run-1",
-    ) == 18
+    assert (
+        statistics_support._count_bronze_records(
+            rows,
+            pipeline_filter=None,
+            pipeline_stats_loader=load_pipeline_stats,
+            run_id_single="run-1",
+        )
+        == 18
+    )
     assert calls == [("chembl_activity", "run-1"), ("pubchem_compound", "run-1")]
-    assert statistics_support._count_bronze_records(
-        rows,
-        pipeline_filter={"unknown"},
-        pipeline_stats_loader=load_pipeline_stats,
-        run_id_single=None,
-    ) == 0
+    assert (
+        statistics_support._count_bronze_records(
+            rows,
+            pipeline_filter={"unknown"},
+            pipeline_stats_loader=load_pipeline_stats,
+            run_id_single=None,
+        )
+        == 0
+    )
     assert statistics_support._sorted_counter_items({"b": 1, "a": 2}) == [
         {"key": "a", "count": 2},
         {"key": "b", "count": 1},
     ]
-    assert statistics_support._build_reason_signature_from_row(
-        {
-            "reason_code": " missing ",
-            "rule_type": "required",
-            "field": "canonical_smiles",
-            "operator": "",
-        }
-    ) == "missing | required | canonical_smiles"
+    assert (
+        statistics_support._build_reason_signature_from_row(
+            {
+                "reason_code": " missing ",
+                "rule_type": "required",
+                "field": "canonical_smiles",
+                "operator": "",
+            }
+        )
+        == "missing | required | canonical_smiles"
+    )
     assert statistics_support._build_reason_signature_from_row({"operator": 1}) == ""
     assert statistics_support._get_time_statistics(
         _FakePandasArrowTable(["2026-01-01", "2026-01-02"])

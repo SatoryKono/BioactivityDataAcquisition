@@ -44,7 +44,7 @@
     },
     {
       "family": "composition_bootstrap_runtime",
-      "current_min_coverage_percent": 76.32,
+      "current_min_coverage_percent": 86.96,
       "tail_module": "bioetl.composition.bootstrap.runtime.runtime_basics",
       "tail_path": "src/bioetl/composition/bootstrap/runtime/runtime_basics.py",
       "current_missing_lines": 9,

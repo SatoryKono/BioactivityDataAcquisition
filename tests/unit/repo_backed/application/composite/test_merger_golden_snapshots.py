@@ -16,7 +16,7 @@ from tests.helpers.golden_files import load_json_fixture
 from tests.unit.application.composite.merge_test_support import build_merge_service
 
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
 FIXTURES_DIR = Path("tests/fixtures/golden/composite")
 
