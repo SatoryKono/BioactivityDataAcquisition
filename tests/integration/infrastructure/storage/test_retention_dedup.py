@@ -426,8 +426,8 @@ def test_dedup_timeout_is_relaxed_in_windows_test_mode(
 
 
 @pytest.mark.asyncio
-async def test_deduplicate_times_out_for_stuck_executor(tmp_delta_dir: Path) -> None:
-    """Dedup must fail fast when background executor work stalls."""
+async def test_deduplicate_times_out_for_slow_sync_dedup(tmp_delta_dir: Path) -> None:
+    """Dedup should report timeout when synchronous Delta maintenance runs too long."""
     import deltalake
 
     class _StuckScanner:

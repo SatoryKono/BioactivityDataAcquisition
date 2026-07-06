@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import json
 from collections.abc import Callable, Iterator
 from datetime import UTC, datetime
@@ -619,9 +618,7 @@ class TestBronzeWriterWriteLocal:
         assert meta_path.exists()
 
         # Verify metadata content
-        metadata = json.loads(
-            await asyncio.to_thread(meta_path.read_text, encoding="utf-8")
-        )
+        metadata = json.loads(meta_path.read_text(encoding="utf-8"))
         assert metadata["run_id"] == str(run_id)
         assert metadata["run_type"] == run_type.value
         assert metadata["provider"] == "chembl"
@@ -629,7 +626,7 @@ class TestBronzeWriterWriteLocal:
         assert metadata["batch_id"] == str(batch_id)
 
         # Verify content (use streaming decompression for robustness)
-        compressed_data = await asyncio.to_thread(full_path.read_bytes)
+        compressed_data = full_path.read_bytes()
 
         decompressor = zstd.ZstdDecompressor()
         with decompressor.stream_reader(compressed_data) as reader:
@@ -645,7 +642,7 @@ class TestBronzeWriterWriteLocal:
         assert result.checksum_blake2 == h.hexdigest()
 
     @pytest.mark.asyncio
-    async def test_write_bronze_local_async(
+    async def test_write_bronze_local_direct_io(
         self,
         tmp_path: Path,
         noop_logger: NoOpLogger,
@@ -655,7 +652,7 @@ class TestBronzeWriterWriteLocal:
         run_type: RunType,
         ingestion_ts: datetime,
     ) -> None:
-        """Test that local write is performed asynchronously."""
+        """Test that local writes complete without default-executor offload."""
         writer = BronzeWriter(
             base_path=tmp_path,
             logger=noop_logger,
@@ -663,30 +660,20 @@ class TestBronzeWriterWriteLocal:
         )
         date = datetime(2023, 1, 1, tzinfo=UTC)
 
-        # We patch run_in_executor to verify it's called for file I/O
-        with patch.object(
-            asyncio.get_running_loop(),
-            "run_in_executor",
-            wraps=asyncio.get_running_loop().run_in_executor,
-        ) as mock_executor:
-            result = await writer.write_bronze(
-                records=iter(sample_records),
-                provider="test_provider",
-                entity="test_entity",
-                date=date,
-                batch_id=batch_id,
-                run_id=run_id,
-                run_type=run_type,
-                ingestion_ts=ingestion_ts,
-            )
+        result = await writer.write_bronze(
+            records=iter(sample_records),
+            provider="test_provider",
+            entity="test_entity",
+            date=date,
+            batch_id=batch_id,
+            run_id=run_id,
+            run_type=run_type,
+            ingestion_ts=ingestion_ts,
+        )
 
-            # Verify run_in_executor was called at least once (for write_task)
-            assert mock_executor.call_count >= 1
-
-            # Verify file existence and content
-            full_path = tmp_path / result.relative_path
-            assert full_path.exists()
-            assert full_path.with_suffix(META_SUFFIX).exists()
+        full_path = tmp_path / result.relative_path
+        assert full_path.exists()
+        assert full_path.with_suffix(META_SUFFIX).exists()
 
     @pytest.mark.asyncio
     async def test_write_bronze_with_json_copy(
@@ -726,7 +713,7 @@ class TestBronzeWriterWriteLocal:
         assert len(json_files) == 1
 
         # Verify JSON content
-        content = await asyncio.to_thread(json_files[0].read_bytes)
+        content = json_files[0].read_bytes()
         expected = b"".join(sample_records)
         assert content == expected
 
@@ -1296,8 +1283,8 @@ class TestBronzeWriterMetadataDeterminism:
         meta_path_1 = (tmp_path / result_1.relative_path).with_suffix(META_SUFFIX)
         meta_path_2 = (tmp_path / result_2.relative_path).with_suffix(META_SUFFIX)
 
-        meta_bytes_1 = await asyncio.to_thread(meta_path_1.read_bytes)
-        meta_bytes_2 = await asyncio.to_thread(meta_path_2.read_bytes)
+        meta_bytes_1 = meta_path_1.read_bytes()
+        meta_bytes_2 = meta_path_2.read_bytes()
 
         # Parse to compare structure (batch_id will differ)
         meta_1 = json.loads(meta_bytes_1)

@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import contextlib
 import time
 from typing import TYPE_CHECKING, cast
@@ -115,8 +114,7 @@ class UniProtFeatureSequenceAdapterMixin:
         """Parse FASTA into sequence records."""
         fasta_text = await self._get_sequence_fasta(query)
         if fasta_text:
-            loop = asyncio.get_running_loop()
-            records = await loop.run_in_executor(None, FastaParser.parse, fasta_text)
+            records = FastaParser.parse(fasta_text)
             for record in records:
                 yield record
 

@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 import pytest
 
 from bioetl.infrastructure.quarantine import _statistics as subject
+from bioetl.infrastructure.quarantine import filtered_manifest_support
+from bioetl.infrastructure.quarantine import statistics_support
 
 pytestmark = pytest.mark.unit
 
@@ -53,6 +56,253 @@ class _FakeDeltaTable:
         self.partitions = partitions
         self.filters = filters
         return self.table
+
+
+class _FakeSeries:
+    def __init__(self, values: list[object]) -> None:
+        self._values = values
+
+    def min(self) -> object:
+        return self._values[0]
+
+    def max(self) -> object:
+        return self._values[-1]
+
+
+class _FakePandasFrame:
+    def __init__(self, values: list[object]) -> None:
+        self._values = values
+
+    def __getitem__(self, column: str) -> _FakeSeries:
+        assert column == "ingestion_ts"
+        return _FakeSeries(self._values)
+
+
+class _FakePandasArrowTable:
+    def __init__(self, values: list[object]) -> None:
+        self._values = values
+
+    def to_pandas(self) -> _FakePandasFrame:
+        return _FakePandasFrame(self._values)
+
+
+def test_filtered_manifest_lookup_handles_missing_invalid_and_cached_manifests(
+    tmp_path: Path,
+) -> None:
+    """Run type lookup should tolerate partial control-plane manifest indexes."""
+    root = tmp_path / "control" / "run_manifest"
+    index = root / "_by_run_id"
+    index.mkdir(parents=True)
+    base_path = tmp_path / "quarantine"
+    base_path.mkdir()
+
+    (index / "run-1.txt").write_text("manifest-a\n", encoding="utf-8")
+    (index / "run-2.txt").write_text("manifest-a\n", encoding="utf-8")
+    (index / "run-3.txt").write_text("manifest-missing\n", encoding="utf-8")
+    (index / "run-4.txt").write_text("manifest-invalid\n", encoding="utf-8")
+    (index / "run-5.txt").write_text("manifest-empty\n", encoding="utf-8")
+    (root / "manifest-a.json").write_text(
+        '{"run_type": " incremental "}',
+        encoding="utf-8",
+    )
+    (root / "manifest-invalid.json").write_text("{", encoding="utf-8")
+    (root / "manifest-empty.json").write_text('{"run_type": " "}', encoding="utf-8")
+
+    assert filtered_manifest_support._parse_run_type_from_manifest_payload([]) is None
+    assert (
+        filtered_manifest_support._parse_run_type_from_manifest_payload(
+            {"run_type": 1}
+        )
+        is None
+    )
+    assert (
+        filtered_manifest_support._parse_run_type_from_manifest_payload(
+            {"run_type": " "}
+        )
+        is None
+    )
+    assert filtered_manifest_support._build_run_type_lookup(
+        [
+            {"run_id": None},
+            {"run_id": " "},
+            {"run_id": "run-1"},
+            {"run_id": "run-2"},
+            {"run_id": "run-1"},
+            {"run_id": "run-3"},
+            {"run_id": "run-4"},
+            {"run_id": "run-5"},
+            {"run_id": "run-missing-index"},
+        ],
+        base_path=str(base_path),
+    ) == {"run-1": "incremental", "run-2": "incremental"}
+
+    fallback_base = tmp_path / "fallback" / "quarantine"
+    fallback_root = tmp_path / "fallback" / "control_plane" / "run_manifest"
+    fallback_index = fallback_root / "_by_run_id"
+    fallback_base.mkdir(parents=True)
+    fallback_index.mkdir(parents=True)
+    (fallback_index / "run-6.txt").write_text("manifest-b\n", encoding="utf-8")
+    (fallback_root / "manifest-b.json").write_text(
+        '{"run_type": "backfill"}',
+        encoding="utf-8",
+    )
+    assert filtered_manifest_support._build_run_type_lookup(
+        [{"run_id": "run-6"}],
+        base_path=str(fallback_base),
+    ) == {"run-6": "backfill"}
+    assert filtered_manifest_support._build_run_type_lookup(
+        [{"run_id": "run-7"}],
+        base_path=str(tmp_path / "missing-quarantine"),
+    ) == {}
+
+
+def test_statistics_support_processes_filtered_reason_dimensions() -> None:
+    """Support aggregation should count only structured Silver-filter dimensions."""
+    rows = [
+        {
+            "error_code": "SCHEMA_ERROR",
+            "dq_status": "FAILED",
+            "error_details": {"reason_code": "ignored"},
+        },
+        {
+            "error_code": "FILTERED_OUT_SILVER",
+            "dq_status": "FILTERED",
+            "error_details": {
+                "reason_code": "missing_required_field",
+                "field": "canonical_smiles",
+                "rule_type": "required_fields",
+                "operator": "required",
+            },
+        },
+        {
+            "error_code": "FILTERED_OUT_SILVER",
+            "dq_status": "FILTERED",
+            "error_details": (
+                '{"reason_code": "invalid_type", "field": "molecule_weight", '
+                '"rule_type": "type", "operator": "float"}'
+            ),
+        },
+        {
+            "error_code": "FILTERED_OUT_SILVER",
+            "dq_status": "FILTERED",
+            "error_details": "[]",
+        },
+        {
+            "error_code": "FILTERED_OUT_SILVER",
+            "dq_status": "FILTERED",
+            "error_details": None,
+        },
+    ]
+
+    (
+        by_error_code,
+        by_status,
+        by_reason_code,
+        by_field,
+        by_rule_type,
+        by_operator,
+        by_reason_code_field,
+        by_reason_signature,
+        silver_filter_total,
+    ) = statistics_support._process_quarantine_records(rows)
+
+    assert by_error_code == {"SCHEMA_ERROR": 1, "FILTERED_OUT_SILVER": 4}
+    assert by_status == {"FAILED": 1, "FILTERED": 4}
+    assert by_reason_code == {"missing_required_field": 1, "invalid_type": 1}
+    assert by_field == {"canonical_smiles": 1, "molecule_weight": 1}
+    assert by_rule_type == {"required_fields": 1, "type": 1}
+    assert by_operator == {"required": 1, "float": 1}
+    assert by_reason_code_field == {
+        "missing_required_field | canonical_smiles": 1,
+        "invalid_type | molecule_weight": 1,
+    }
+    assert by_reason_signature == {
+        "missing_required_field | required_fields | canonical_smiles | required": 1,
+        "invalid_type | type | molecule_weight | float": 1,
+    }
+    assert silver_filter_total == 4
+
+
+def test_statistics_support_counts_bronze_scope_and_builds_response() -> None:
+    """Pure statistics helpers should sort counters and preserve scoped totals."""
+    calls: list[tuple[str, str | None]] = []
+
+    def load_pipeline_stats(pipeline: str, run_id: str | None) -> dict[str, object]:
+        calls.append((pipeline, run_id))
+        return {"total_count": {"chembl_activity": 7, "pubchem_compound": 11}.get(pipeline)}
+
+    rows = [
+        {"pipeline": " chembl_activity "},
+        {"pipeline": ""},
+        {"pipeline": "pubchem_compound"},
+        {"pipeline": 42},
+    ]
+    assert statistics_support._scoped_pipeline_names(rows, None) == {
+        "chembl_activity",
+        "pubchem_compound",
+    }
+    assert statistics_support._scoped_pipeline_names(rows, {"chembl_activity"}) == {
+        "chembl_activity"
+    }
+    assert statistics_support._count_bronze_records(
+        rows,
+        pipeline_filter=None,
+        pipeline_stats_loader=load_pipeline_stats,
+        run_id_single="run-1",
+    ) == 18
+    assert calls == [("chembl_activity", "run-1"), ("pubchem_compound", "run-1")]
+    assert statistics_support._count_bronze_records(
+        rows,
+        pipeline_filter={"unknown"},
+        pipeline_stats_loader=load_pipeline_stats,
+        run_id_single=None,
+    ) == 0
+    assert statistics_support._sorted_counter_items({"b": 1, "a": 2}) == [
+        {"key": "a", "count": 2},
+        {"key": "b", "count": 1},
+    ]
+    assert statistics_support._build_reason_signature_from_row(
+        {
+            "reason_code": " missing ",
+            "rule_type": "required",
+            "field": "canonical_smiles",
+            "operator": "",
+        }
+    ) == "missing | required | canonical_smiles"
+    assert statistics_support._build_reason_signature_from_row({"operator": 1}) == ""
+    assert statistics_support._get_time_statistics(
+        _FakePandasArrowTable(["2026-01-01", "2026-01-02"])
+    ) == ("2026-01-01", "2026-01-02")
+    assert statistics_support._build_statistics_response(
+        3,
+        {"FILTERED_OUT_SILVER": 3},
+        {"FILTERED": 3},
+        "oldest",
+        "newest",
+        3,
+        {"missing": 2},
+        {"field": 2},
+        {"rule": 2},
+        {"op": 2},
+        {"missing | field": 2},
+        {"missing | rule | field | op": 2},
+    ) == {
+        "total_count": 3,
+        "total_records": 3,
+        "by_error_code": {"FILTERED_OUT_SILVER": 3},
+        "by_status": {"FILTERED": 3},
+        "oldest_record": "oldest",
+        "newest_record": "newest",
+        "silver_filter_rejects": {
+            "total_count": 3,
+            "by_reason_code": {"missing": 2},
+            "by_field": {"field": 2},
+            "by_rule_type": {"rule": 2},
+            "by_operator": {"op": 2},
+            "by_reason_code_field": {"missing | field": 2},
+            "by_reason_signature": {"missing | rule | field | op": 2},
+        },
+    }
 
 
 def test_get_filtered_stats_aggregates_reason_and_run_scope(

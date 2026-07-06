@@ -128,7 +128,7 @@ class TestSilverWriterExceptions:
 
     @pytest.mark.asyncio
     async def test_write_silver_raises_schema_error_on_create(
-        self, valid_record, noop_logger
+        self, valid_record, noop_logger, tmp_path
     ):
         """Test SchemaViolationError on table creation."""
         import pyarrow as pa
@@ -158,7 +158,7 @@ class TestSilverWriterExceptions:
                 side_effect=ArrowTypeError("Arrow type error"),
             ),
         ):
-            writer = SilverWriter(base_path="/fake/path", logger=noop_logger)
+            writer = SilverWriter(base_path=str(tmp_path), logger=noop_logger)
             with pytest.raises(SchemaViolationError):
                 await writer.write_silver(
                     "test.table", [valid_record], ["id"], schema=schema

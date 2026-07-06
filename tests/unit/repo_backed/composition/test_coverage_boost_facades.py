@@ -69,10 +69,11 @@ def _install_workflow_runner_service_dependencies(
 
     builtins_module = ModuleType("workflow_transforms_builtins")
     builtins_module.register_builtin_workflow_transforms = (
-        lambda registry, foreign_key_reconciliation_port: (
+        lambda registry, foreign_key_reconciliation_port, row_reconciliation_port: (
             "registered_registry",
             registry,
             foreign_key_reconciliation_port,
+            row_reconciliation_port,
         )
     )
     monkeypatch.setitem(
@@ -81,10 +82,16 @@ def _install_workflow_runner_service_dependencies(
         builtins_module,
     )
 
+    class _FakeLogger:
+        def __init__(self, name: str, context: dict[str, object] | None = None) -> None:
+            self.name = name
+            self.context = context or {}
+
+        def bind(self, **kwargs: object) -> _FakeLogger:
+            return _FakeLogger(self.name, {**self.context, **kwargs})
+
     observability_module = ModuleType("observability")
-    observability_module.bootstrap_logger = lambda name: SimpleNamespace(
-        bind=lambda **kwargs: ("logger", name, kwargs)
-    )
+    observability_module.bootstrap_logger = lambda name: _FakeLogger(name)
     monkeypatch.setitem(
         sys.modules,
         "bioetl.composition.bootstrap.runtime.observability",
@@ -144,6 +151,7 @@ def _install_workflow_runner_service_dependencies(
         "get_settings",
         lambda: SimpleNamespace(
             silver_path=tmp_path / "silver",
+            gold_path=tmp_path / "gold",
             quarantine_path=tmp_path / "quarantine",
             data_dir=tmp_path,
         ),

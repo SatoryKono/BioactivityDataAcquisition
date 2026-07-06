@@ -4,8 +4,6 @@ Targets uncovered lines: 48-50, 71-78, 117, 154-181, 287-301, 317, 369, 380-388.
 """
 
 from __future__ import annotations
-
-import asyncio
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from typing import Any
@@ -86,8 +84,7 @@ class _ConcreteGoldMixin(GoldWriterMetadataMixin):
         return self._gold_module
 
     async def _run_in_executor(self, fn: Any, *args: Any, **kwargs: Any) -> Any:
-        loop = asyncio.get_running_loop()
-        return await loop.run_in_executor(None, fn)
+        return fn(*args, **kwargs)
 
 
 @pytest.mark.unit

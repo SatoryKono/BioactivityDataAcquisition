@@ -2,15 +2,34 @@
 
 from __future__ import annotations
 
+import importlib.util
+import sys
 from datetime import UTC, datetime
+from pathlib import Path
+from types import ModuleType
 from typing import Any, cast
 
 import pytest
 
-from bioetl.infrastructure.quarantine import filtered_read_support as support
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
 
 
-pytestmark = pytest.mark.unit
+def _load_filtered_read_support() -> ModuleType:
+    module_path = (
+        Path(__file__).resolve().parents[5]
+        / "src/bioetl/infrastructure/quarantine/filtered_read_support.py"
+    )
+    module_name = "bioetl.infrastructure.quarantine.filtered_read_support"
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+support = _load_filtered_read_support()
 
 
 def test_error_details_normalization_accepts_json_mapping_only() -> None:

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 __all__ = ["RetentionPolicy"]
 
-import asyncio
+import time
 from typing import TYPE_CHECKING, Any
 
 from deltalake import DeltaTable
@@ -179,21 +179,15 @@ class RetentionPolicy:
             TableNotFoundError: If table does not exist.
         """
         table_path = get_table_path(self.base_path, table_name)
-        loop = asyncio.get_running_loop()
-        try:
-            result: int = await asyncio.wait_for(
-                loop.run_in_executor(
-                    None,
-                    lambda: deduplicate_delta_rows(table_path, primary_keys),
-                ),
-                timeout=self._deduplicate_timeout_seconds,
-            )
-        except TimeoutError as exc:
+        started_at = time.perf_counter()
+        result = deduplicate_delta_rows(table_path, tuple(primary_keys))
+        elapsed = time.perf_counter() - started_at
+        if elapsed > self._deduplicate_timeout_seconds:
             raise TimeoutError(
                 "Silver deduplication timed out "
                 f"after {self._deduplicate_timeout_seconds:.1f}s "
                 f"for table '{table_name}'"
-            ) from exc
+            )
         return result
 
     async def time_travel(

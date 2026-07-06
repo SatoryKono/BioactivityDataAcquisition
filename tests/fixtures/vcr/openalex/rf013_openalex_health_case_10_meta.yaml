@@ -3,6 +3,6 @@ provider: openalex
 cassette_rel_path: tests/fixtures/vcr/openalex/rf013_openalex_health_case_10.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 34f939e38e2e92d8bca22f0184e2e7c454261c08c5f98f556bfaa253302cb95f
+cassette_sha256: 1bbfcf91bdd8f409d1184163b0b9221f4bd834882e2281fecb864177ef648cf6
 recorded_at: '2026-07-03'
 staleness_ready: true

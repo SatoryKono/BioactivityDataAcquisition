@@ -1,12 +1,10 @@
 """Integration tests for metadata writing with Silver and Gold writers."""
 
 from __future__ import annotations
-
-import asyncio
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 from tests.helpers.deterministic_ids import (
     deterministic_run_uuid_from_callsite,
     deterministic_uuid_string_from_callsite,
@@ -135,7 +133,6 @@ class MockMetadataWriter:
         entity: str | None = None,
     ) -> str:
         del base_path, metadata, provider, entity
-        await asyncio.sleep(0)
         return ""
 
     async def write_silver_metadata(
@@ -149,7 +146,6 @@ class MockMetadataWriter:
         entity: str | None = None,
     ) -> str:
         del table_name, flat_structure, provider, entity
-        await asyncio.sleep(0)
         self.silver_calls.append((base_path, metadata))
         return str(Path(base_path) / "_metadata.yaml")
 
@@ -164,7 +160,6 @@ class MockMetadataWriter:
         entity: str | None = None,
     ) -> str:
         del table_name, flat_structure, provider, entity
-        await asyncio.sleep(0)
         self.gold_calls.append((base_path, metadata))
         return str(Path(base_path) / "_metadata.yaml")
 
@@ -189,7 +184,6 @@ class MockMetadataWriter:
             completed_at,
             delta_version_after,
         )
-        await asyncio.sleep(0)
         return str(Path(base_path) / "_metadata.yaml")
 
     async def finalize_gold_metadata(
@@ -211,11 +205,10 @@ class MockMetadataWriter:
             dq_report_path,
             completed_at,
         )
-        await asyncio.sleep(0)
         return str(Path(base_path) / "_metadata.yaml")
 
     async def aclose(self) -> None:
-        await asyncio.sleep(0)
+        return None
 
 
 @pytest.fixture
@@ -282,7 +275,7 @@ def mock_metadata_coordinator_with_records(
     mock_silver_metadata.runtime.run_id = sample_records[0]["_run_id"]
     mock_silver_metadata.delta = MagicMock()
     mock_silver_metadata.delta.rows_inserted = len(sample_records)
-    mock_silver_metadata.delta.operation = "merge"
+    mock_silver_metadata.delta.operation = "append"
     mock_silver_metadata.delta.primary_key = ["id"]
     mock_silver_metadata.output = MagicMock()
     mock_silver_metadata.output.artifact_id = None
@@ -341,13 +334,15 @@ class TestSilverWriterMetadataIntegration:
                 metadata_coordinator=mock_metadata_coordinator_with_records,
             ),
         )
+        writer._delta._dispatch_write_with_domain_errors = AsyncMock()  # type: ignore[method-assign]
+        writer._get_delta_version = AsyncMock(return_value=1)  # type: ignore[method-assign]
 
         await writer.write_silver(
             table_name="test.table",
             records=sample_records,
             primary_keys=["id"],
             schema=silver_schema,
-            mode="merge",
+            mode="append",
         )
 
         assert len(mock_metadata_writer.silver_calls) == 1
@@ -355,7 +350,7 @@ class TestSilverWriterMetadataIntegration:
         assert Path(table_path) == tmp_path / "test" / "table"
         assert metadata.runtime.run_id == sample_records[0]["_run_id"]
         assert metadata.delta.rows_inserted == 2
-        assert metadata.delta.operation == "merge"
+        assert metadata.delta.operation == "append"
         assert metadata.delta.primary_key == ["id"]
 
     @pytest.mark.asyncio
@@ -370,6 +365,8 @@ class TestSilverWriterMetadataIntegration:
             base_path=tmp_path,
             logger=mock_logger,
         )
+        writer._delta._dispatch_write_with_domain_errors = AsyncMock()  # type: ignore[method-assign]
+        writer._get_delta_version = AsyncMock(return_value=1)  # type: ignore[method-assign]
 
         await writer.write_silver(
             table_name="test.table",

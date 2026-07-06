@@ -2,20 +2,39 @@
 
 from __future__ import annotations
 
+import importlib.util
+import sys
 from collections.abc import Callable
+from pathlib import Path
+from types import ModuleType
 from typing import Any
 
 import pytest
 
-from bioetl.application.pipelines.chembl.target_helpers import (
-    ComponentHelper,
-    SynonymHelper,
-    XrefHelper,
-)
-from bioetl.domain.types import JsonDict
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
+
+JsonDict = dict[str, Any]
 
 
-pytestmark = pytest.mark.unit
+def _load_target_helpers() -> ModuleType:
+    module_path = (
+        Path(__file__).resolve().parents[6]
+        / "src/bioetl/application/pipelines/chembl/target_helpers.py"
+    )
+    module_name = "bioetl.application.pipelines.chembl.target_helpers"
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+target_helpers = _load_target_helpers()
+ComponentHelper = target_helpers.ComponentHelper
+SynonymHelper = target_helpers.SynonymHelper
+XrefHelper = target_helpers.XrefHelper
 
 
 def test_xref_source_and_value_normalization_branches() -> None:

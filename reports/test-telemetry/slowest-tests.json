@@ -27,6 +27,11 @@
       "duration_s": 23.018
     },
     {
+      "source": "S7-crosscutting-architecture-guardrails.xml",
+      "test": "tests.architecture.test_checkpoint_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_tests",
+      "duration_s": 16.691
+    },
+    {
       "source": "S7-crosscutting-architecture-a2.xml",
       "test": "tests.architecture.test_cli_command_import_guards::test_non_cli_source_keeps_retained_public_cli_seams_outside_runtime_code",
       "duration_s": 16.084
@@ -60,6 +65,11 @@
       "source": "S7-crosscutting-architecture-a2.xml",
       "test": "tests.architecture.test_config_discrepancy_metrics_ratchets::test_config_discrepancy_metrics_within_scorecard_budget",
       "duration_s": 11.328
+    },
+    {
+      "source": "S7-crosscutting-architecture-guardrails.xml",
+      "test": "tests.architecture.test_checkpoint_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_src",
+      "duration_s": 10.423
     },
     {
       "source": "S7-crosscutting-architecture-a.xml",
@@ -120,11 +130,6 @@
       "source": "S2-comp-iface.xml",
       "test": "tests.unit.composition.bootstrap.test_bootstrap_entrypoints.TestBootstrapPipeline::test_bootstrap_pipeline_creates_runner_without_starting_server",
       "duration_s": 4.272
-    },
-    {
-      "source": "S2-comp-iface.xml",
-      "test": "tests.unit.composition.factories.pipeline.test_registry_consistency.TestRegistryConfigConsistency::test_all_registered_pipelines_have_config_files",
-      "duration_s": 3.464
     }
   ],
   "top_slowest_tests": [
@@ -149,6 +154,11 @@
       "duration_s": 23.018
     },
     {
+      "source": "S7-crosscutting-architecture-guardrails.xml",
+      "test": "tests.architecture.test_checkpoint_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_tests",
+      "duration_s": 16.691
+    },
+    {
       "source": "S7-crosscutting-architecture-a2.xml",
       "test": "tests.architecture.test_cli_command_import_guards::test_non_cli_source_keeps_retained_public_cli_seams_outside_runtime_code",
       "duration_s": 16.084
@@ -182,6 +192,11 @@
       "source": "S7-crosscutting-architecture-a2.xml",
       "test": "tests.architecture.test_config_discrepancy_metrics_ratchets::test_config_discrepancy_metrics_within_scorecard_budget",
       "duration_s": 11.328
+    },
+    {
+      "source": "S7-crosscutting-architecture-guardrails.xml",
+      "test": "tests.architecture.test_checkpoint_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_src",
+      "duration_s": 10.423
     },
     {
       "source": "S7-crosscutting-architecture-a.xml",
@@ -242,11 +257,6 @@
       "source": "S2-comp-iface.xml",
       "test": "tests.unit.composition.bootstrap.test_bootstrap_entrypoints.TestBootstrapPipeline::test_bootstrap_pipeline_creates_runner_without_starting_server",
       "duration_s": 4.272
-    },
-    {
-      "source": "S2-comp-iface.xml",
-      "test": "tests.unit.composition.factories.pipeline.test_registry_consistency.TestRegistryConfigConsistency::test_all_registered_pipelines_have_config_files",
-      "duration_s": 3.464
     }
   ],
   "top_slowest_zones": [
@@ -267,6 +277,12 @@
       "test_count": 2,
       "total_duration_s": 30.582,
       "max_duration_s": 16.084
+    },
+    {
+      "zone": "tests.architecture.test_checkpoint_runtime_facade_usage",
+      "test_count": 2,
+      "total_duration_s": 27.114,
+      "max_duration_s": 16.691
     },
     {
       "zone": "tests.architecture.test_config_discrepancy_report_drift",
@@ -309,6 +325,60 @@
       "test_count": 1,
       "total_duration_s": 8.951,
       "max_duration_s": 8.951
+    },
+    {
+      "zone": "tests.architecture.test_contract_registry_loader_boundary",
+      "test_count": 1,
+      "total_duration_s": 8.577,
+      "max_duration_s": 8.577
+    },
+    {
+      "zone": "tests.architecture.test_adapter_contracts.TestAdapterHealthCheck",
+      "test_count": 1,
+      "total_duration_s": 8.48,
+      "max_duration_s": 8.48
+    },
+    {
+      "zone": "tests.architecture.test_config_ci_invariants.TestEffectiveOptionalityResolution",
+      "test_count": 1,
+      "total_duration_s": 8.158,
+      "max_duration_s": 8.158
+    },
+    {
+      "zone": "tests.architecture.test_config_ci_invariants.TestConfigFilesExist",
+      "test_count": 1,
+      "total_duration_s": 7.149,
+      "max_duration_s": 7.149
+    },
+    {
+      "zone": "tests.unit.domain.schemas.openalex.test_openalex_publication_validation.TestPmcIdBaseValidation",
+      "test_count": 1,
+      "total_duration_s": 6.109,
+      "max_duration_s": 6.109
+    },
+    {
+      "zone": "tests.unit.composition.test_canonical_module_paths",
+      "test_count": 1,
+      "total_duration_s": 5.742,
+      "max_duration_s": 5.742
+    },
+    {
+      "zone": "tests.architecture.test_adapter_contracts.TestAdapterPortCompliance",
+      "test_count": 1,
+      "total_duration_s": 5.141,
+      "max_duration_s": 5.141
+    },
+    {
+      "zone": "tests.unit.interfaces.cli.commands.test_observability_backend_runtime",
+      "test_count": 1,
+      "total_duration_s": 5.019,
+      "max_duration_s": 5.019
+    },
+    {
+      "zone": "tests.unit.composition.bootstrap.test_bootstrap_entrypoints.TestBootstrapPipeline",
+      "test_count": 1,
+      "total_duration_s": 4.272,
+      "max_duration_s": 4.272
     }
   ]
 }
