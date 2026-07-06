@@ -24,8 +24,8 @@ This policy applies to:
 | Surface | Tracked on `main` | Runtime class | Notes |
 | --- | --- | --- | --- |
 | `.mcp.json` | yes | tracked active local runtime config | checked-in config contains absolute local paths by design |
-| `.codex/settings.json` | yes | tracked active local runtime config | mirrors `.mcp.json` strategy for Codex runtime |
-| `.codex/config.toml` | yes | tracked local runtime config | syntax/behavior should be validated locally |
+| `.codex/settings.json` | no | local-only/untracked runtime config | may exist in local checkouts; ignored by `.gitignore` unless a future task introduces tracked templates |
+| `.codex/config.toml` | no | local-only/untracked runtime config | may exist in local checkouts; ignored by `.gitignore` unless a future task introduces tracked templates |
 | `.gemini/settings.json` | no | local-only/untracked runtime config | may exist in local checkouts; not a tracked runtime source on `main` |
 | `.codex/config-headless.toml` | no | local-only/untracked runtime config | headless variant; not currently tracked on `main` |
 | `.gemini/config.toml` | no | local-only/untracked runtime config | may exist in local checkouts; not a tracked runtime source on `main` |
@@ -34,7 +34,9 @@ This policy applies to:
 
 ## Strategy
 
-1. Treat these files as local runtime templates, not portable universal config.
+1. Treat tracked files as local runtime templates, not portable universal
+   config; treat untracked `.codex/*` variants as machine-local runtime
+   surfaces.
 1. Contributor docs MUST say when a config depends on machine-local absolute
    paths.
 1. Do not silently rewrite checked-in paths during unrelated work.

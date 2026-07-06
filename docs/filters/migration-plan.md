@@ -16,7 +16,7 @@ ______________________________________________________________________
 > `src/bioetl/infrastructure/schemas/filter_config.py`,
 > `src/bioetl/infrastructure/schemas/pipeline_config.py`, and
 > `src/bioetl/infrastructure/schemas/pipeline_config_common_schemas.py`.
-> The local draft `docs/filters/ADR-048-silver-filters-structural-scope.md`
+> The local draft `docs/filters/retired-silver-filters-structural-scope.md`
 > is retired as a canonical ADR candidate because accepted ADR-048 now refers to
 > `docs/02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md`.
 > The accepted filter-boundary decision is
@@ -36,7 +36,7 @@ ______________________________________________________________________
 
 **Связанные документы:**
 
-- `docs/filters/ADR-048-silver-filters-structural-scope.md` — retired
+- `docs/filters/retired-silver-filters-structural-scope.md` — retired
   historical draft; not the accepted ADR-048
 - `scripts/data_quality/inventory_silver_filters_migration.py` — анализатор конфигов
 - `docs/filters/inventory-baseline.md` — baseline отчёт
@@ -88,7 +88,7 @@ gold_filters:   { required_fields, columns, ranges,           <- business filter
 
 #### 0.1. Filter ADR draft
 
-`docs/filters/ADR-048-silver-filters-structural-scope.md` captured the
+`docs/filters/retired-silver-filters-structural-scope.md` captured the
 original rationale for narrowing `silver_filters`. It must not be promoted as
 ADR-048 because the accepted ADR-048 number now belongs to the domain
 schema/Pandera compatibility decision.

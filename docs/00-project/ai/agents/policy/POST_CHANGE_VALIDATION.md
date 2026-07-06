@@ -68,7 +68,7 @@ Verify changes against the current normative stack:
   - field: `source_tree_sha256` (SHA-256 over all `src/bioetl/**/*.py` paths and
     contents)
   - hash-only refresh (no new `coverage.xml` required):
-    `python _refresh_module_coverage_inventory.py`
+    `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml`
   - full inventory regen (coverage rows changed): run the `coverage-verify`
     generator from `scripts/engineering/qa/report_module_coverage_inventory.py`
     against `reports/coverage/coverage.xml`

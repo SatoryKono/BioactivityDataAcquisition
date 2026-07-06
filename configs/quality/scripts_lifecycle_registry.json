@@ -536,6 +536,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a backward-compatible Gemini launcher while the canonical interactive entrypoint delegates through scripts/ai/gemini/run-gemini.sh; remove it once callers migrate to the canonical launcher surface."
     },
+    "scripts/ai/gemini/gemini-interactive.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as the Windows compatibility launcher that delegates through scripts/ai/gemini/gemini-interactive.sh; remove it once callers migrate to the canonical scripts/ai/gemini/run-gemini.ps1 or run-gemini.sh launcher surface."
+    },
     "src/tools/apply_elk_layout.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",

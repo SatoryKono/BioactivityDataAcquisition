@@ -118,6 +118,8 @@ def test_historical_replay_bootstrap_wires_shared_corpus_services(
     universe_service = run_manifest.bootstrap_historical_replay_universe_service()
     assert isinstance(closure_service.kwargs["corpus_service"], _CaptureService)
     assert isinstance(universe_service.kwargs["corpus_service"], _CaptureService)
+    assert closure_service.kwargs["now_factory"] is run_manifest.current_utc_time
+    assert universe_service.kwargs["now_factory"] is run_manifest.current_utc_time
 
 
 def test_historical_replay_report_persistence_uses_composition_stores(

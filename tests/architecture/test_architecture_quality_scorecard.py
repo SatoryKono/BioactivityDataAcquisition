@@ -21,7 +21,7 @@ HOTSPOT_BASELINE_ARTIFACT = (
 TEST_GOVERNANCE_ARTIFACT = ROOT / "reports" / "quality" / "test-governance-current.json"
 SCORECARD_REFRESH_HINT = (
     "Refresh architecture artifacts with: "
-    "`python _refresh_module_coverage_inventory.py`, "
+    "`python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml`, "
     "`python scripts/engineering/qa/report_architecture_quality_scorecard.py`, "
     "and `python -m scripts.engineering.qa report-debt-governance-gates --update`."
 )

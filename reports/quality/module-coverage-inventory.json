@@ -5413,7 +5413,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.replay.historical_closure_service",
       "path": "src/bioetl/application/services/control_plane/replay/historical_closure_service.py",
-      "source_lines": 120
+      "source_lines": 119
     },
     {
       "coverage_percent": 97.14,
@@ -5473,7 +5473,7 @@
       "missing_lines": 2,
       "module": "bioetl.application.services.control_plane.replay.historical_universe_service",
       "path": "src/bioetl/application/services/control_plane/replay/historical_universe_service.py",
-      "source_lines": 261
+      "source_lines": 260
     },
     {
       "coverage_percent": 96.3,
@@ -6673,7 +6673,7 @@
       "missing_lines": 7,
       "module": "bioetl.composition._services",
       "path": "src/bioetl/composition/_services.py",
-      "source_lines": 339
+      "source_lines": 324
     },
     {
       "coverage_percent": 97.33,
@@ -6853,7 +6853,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.bootstrap.cli.run_manifest",
       "path": "src/bioetl/composition/bootstrap/cli/run_manifest.py",
-      "source_lines": 193
+      "source_lines": 196
     },
     {
       "coverage_percent": 100.0,
@@ -7463,7 +7463,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.control_plane_service_access",
       "path": "src/bioetl/composition/control_plane_service_access.py",
-      "source_lines": 73
+      "source_lines": 165
     },
     {
       "coverage_percent": 71.43,
@@ -7793,7 +7793,7 @@
       "missing_lines": 1,
       "module": "bioetl.composition.factories.pipeline.assembler",
       "path": "src/bioetl/composition/factories/pipeline/assembler.py",
-      "source_lines": 168
+      "source_lines": 165
     },
     {
       "coverage_percent": 100.0,
@@ -7953,7 +7953,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.factories.pipeline.registry_manifest",
       "path": "src/bioetl/composition/factories/pipeline/registry_manifest.py",
-      "source_lines": 18
+      "source_lines": 17
     },
     {
       "coverage_percent": 85.71,
@@ -27515,7 +27515,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.replay.historical_closure_service",
       "path": "src/bioetl/application/services/control_plane/replay/historical_closure_service.py",
-      "source_lines": 120
+      "source_lines": 119
     },
     {
       "coverage_percent": 97.14,
@@ -27575,7 +27575,7 @@
       "missing_lines": 2,
       "module": "bioetl.application.services.control_plane.replay.historical_universe_service",
       "path": "src/bioetl/application/services/control_plane/replay/historical_universe_service.py",
-      "source_lines": 261
+      "source_lines": 260
     },
     {
       "coverage_percent": 96.3,
@@ -28775,7 +28775,7 @@
       "missing_lines": 7,
       "module": "bioetl.composition._services",
       "path": "src/bioetl/composition/_services.py",
-      "source_lines": 339
+      "source_lines": 324
     },
     {
       "coverage_percent": 97.33,
@@ -28955,7 +28955,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.bootstrap.cli.run_manifest",
       "path": "src/bioetl/composition/bootstrap/cli/run_manifest.py",
-      "source_lines": 193
+      "source_lines": 196
     },
     {
       "coverage_percent": 100.0,
@@ -29565,7 +29565,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.control_plane_service_access",
       "path": "src/bioetl/composition/control_plane_service_access.py",
-      "source_lines": 73
+      "source_lines": 165
     },
     {
       "coverage_percent": 71.43,
@@ -29895,7 +29895,7 @@
       "missing_lines": 1,
       "module": "bioetl.composition.factories.pipeline.assembler",
       "path": "src/bioetl/composition/factories/pipeline/assembler.py",
-      "source_lines": 168
+      "source_lines": 165
     },
     {
       "coverage_percent": 100.0,
@@ -30055,7 +30055,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.factories.pipeline.registry_manifest",
       "path": "src/bioetl/composition/factories/pipeline/registry_manifest.py",
-      "source_lines": 18
+      "source_lines": 17
     },
     {
       "coverage_percent": 85.71,
@@ -44210,7 +44210,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-06",
-  "source_tree_sha256": "fbbba070d15f5c24b9648c5af184816c09c3b50bb8b67b62f94414d293933a5b",
+  "source_tree_sha256": "3db400ccbf17301b432e893e57729c7673e002c704803ad58821a9f4fc03fcb3",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

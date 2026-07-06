@@ -7,7 +7,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from bioetl.application.services import _quarantine_service_filtered_helpers as helpers
+import bioetl.application.services._quarantine_service_filtered_helpers as helpers
 from bioetl.domain.control_plane.run_ledger import RUN_FINISHED_EVENT
 
 

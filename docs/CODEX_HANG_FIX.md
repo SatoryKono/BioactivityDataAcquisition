@@ -92,7 +92,7 @@ docker compose -f docker-compose.codex.yml down
 
 ```bash
 # В WSL (Ubuntu)
-cd /mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2
+cd /path/to/bioetl-checkout
 # Используйте claude CLI или другие инструменты вместо Codex CLI
 ```
 

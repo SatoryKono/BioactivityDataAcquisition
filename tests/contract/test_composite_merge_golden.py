@@ -52,6 +52,8 @@ def test_composite_merge_golden_seed_priority_is_stable() -> None:
         enricher,
         join_keys={"entity_id"},
     )
+    assert seed_df.height == 1
+    assert enricher_df.height == 1
     seed_row = seed_df.row(0, named=True)
     enricher_row = {
         column: value
