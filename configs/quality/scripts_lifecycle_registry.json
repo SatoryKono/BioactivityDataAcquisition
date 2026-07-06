@@ -44,12 +44,6 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side companion for the canonical Brave Search MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
-    "scripts/ai/mcp/mcp_chembl_wrapper.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "windows_compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as the Windows-side companion for the canonical ChEMBL MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
-    },
     "scripts/ai/mcp/mcp_code_interpreter_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",
@@ -97,24 +91,6 @@
       "decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side companion for the canonical Prometheus MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
-    },
-    "scripts/ai/mcp/mcp_pubchem_wrapper.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "windows_compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as the Windows-side companion for the canonical PubChem MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
-    },
-    "scripts/ai/mcp/mcp_pubmed_wrapper.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "windows_compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as the Windows-side companion for the canonical PubMed MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
-    },
-    "scripts/ai/mcp/mcp_sonarqube_wrapper.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "windows_compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as the Windows-side companion for the canonical SonarQube MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
     "scripts/ai/sync_cursor_rules.py": {
       "owner": "@bioetl-platform",

@@ -124,12 +124,6 @@
         "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_brave_search_wrapper.sh"
       ]
     },
-    "sonarqube": {
-      "command": "bash",
-      "args": [
-        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_sonarqube_wrapper.sh"
-      ]
-    },
     "neo4j-cypher": {
       "command": "bash",
       "args": [
@@ -146,24 +140,6 @@
       "command": "bash",
       "args": [
         "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_needle_wrapper.sh"
-      ]
-    },
-    "chembl": {
-      "command": "bash",
-      "args": [
-        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_chembl_wrapper.sh"
-      ]
-    },
-    "pubchem": {
-      "command": "bash",
-      "args": [
-        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_pubchem_wrapper.sh"
-      ]
-    },
-    "pubmed": {
-      "command": "bash",
-      "args": [
-        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_pubmed_wrapper.sh"
       ]
     },
     "mermaid": {

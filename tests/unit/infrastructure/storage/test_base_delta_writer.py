@@ -131,7 +131,7 @@ class TestBaseDeltaWriter:
         self, writer: BaseDeltaWriter, tmp_path: Path
     ) -> None:
         """Test writer initialization."""
-        assert writer.base_path == str(tmp_path)
+        assert writer.base_path == tmp_path.as_posix()
         assert writer.logger is not None
         assert writer._retention_manager is not None
 

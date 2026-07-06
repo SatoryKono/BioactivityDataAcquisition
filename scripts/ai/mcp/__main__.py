@@ -6,7 +6,6 @@ Usage:
     python -m scripts.ai.mcp --help
 
 Commands:
-    smoke-sonarqube     Run the readiness-aware SonarQube MCP smoke test
     smoke-neo4j-memory  Run the framed stdio Neo4j memory MCP smoke test
     check               Run the general MCP registration and wrapper audit
     check-neo4j-memory  Run the Neo4j memory MCP + backend verification
@@ -24,7 +23,6 @@ from scripts.engineering.common.cli_dispatch import (
 )
 
 COMMAND_SPECS = {
-    "smoke-sonarqube": python_command("sonarqube_mcp_smoke.py"),
     "smoke-neo4j-memory": python_command("neo4j_memory_mcp_smoke.py"),
     "check": shell_command("check.sh"),
     "check-neo4j-memory": shell_command("check_neo4j_memory.sh"),

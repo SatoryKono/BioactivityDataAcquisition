@@ -11,12 +11,16 @@ MCP используются как tooling-layer для AI-ассистенто
 
 ## Активные MCP
 memory, filesystem, fetch, github, context7, ast-grep, mcp-code-interpreter,
-prometheus, grafana, sonarqube, mermaid,
-brave-search, chembl, pubchem, pubmed,
+prometheus, grafana, mermaid,
+brave-search,
 docker, neo4j-cypher, neo4j-memory,
 biomoltechDocs, mintlify, deepwiki
 
 ## Удалённые MCP
+sonarqube  
+chembl  
+pubchem  
+pubmed  
 sequential-thinking  
 openaiDeveloperDocs  
 needle  
