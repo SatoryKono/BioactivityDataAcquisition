@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
-import ast
 from pathlib import Path
 
 import pytest
+from tests.helpers.compat_shim_guards import (
+    ImportRecord,
+    find_lingering_files,
+    iter_compat_import_violations_from_records,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 COMPAT_PARENT_IMPORTS: dict[str, frozenset[str]] = {}
@@ -53,106 +57,40 @@ REMOVED_COMPAT_FILES = frozenset(
 )
 
 
-def _iter_import_records(
-    ast_cache: dict[Path, ast.Module],
-) -> list[tuple[Path, int, str]]:
-    records: list[tuple[Path, int, str]] = []
-    for py_file, tree in sorted(ast_cache.items()):
-        for node in ast.walk(tree):
-            records.extend(_iter_node_import_records(py_file, node))
-    return records
-
-
-def _format_violations(
-    records: list[tuple[Path, int, str]],
+def _active_compat_import_violations(
+    import_records: tuple[ImportRecord, ...],
     *,
     allowed_imports: dict[str, frozenset[Path]],
 ) -> list[str]:
     violations: list[str] = []
-    for py_file, lineno, module_name in records:
-        if py_file in allowed_imports[module_name]:
-            continue
-        rel_path = py_file.relative_to(ROOT).as_posix()
-        violations.append(f"{rel_path}:{lineno} imports {module_name}")
+    for record in import_records:
+        for module_name in _record_compat_module_names(record):
+            if record.path in allowed_imports[module_name]:
+                continue
+            rel_path = record.path.relative_to(ROOT).as_posix()
+            violations.append(f"{rel_path}:{record.line_number} imports {module_name}")
     return violations
 
 
-def _iter_removed_import_records(
-    ast_cache: dict[Path, ast.Module],
-) -> list[tuple[Path, int, str]]:
-    records: list[tuple[Path, int, str]] = []
-    for py_file, tree in sorted(ast_cache.items()):
-        for node in ast.walk(tree):
-            records.extend(_iter_removed_node_import_records(py_file, node))
-    return records
-
-
-def _iter_node_import_records(
-    py_file: Path,
-    node: ast.AST,
-) -> list[tuple[Path, int, str]]:
-    if isinstance(node, ast.ImportFrom):
-        return _iter_import_from_records(
-            py_file,
-            node,
-            direct_modules=ALLOWED_SRC_IMPORTS,
-            parent_imports=COMPAT_PARENT_IMPORTS,
-        )
-    if isinstance(node, ast.Import):
-        return [
-            (py_file, node.lineno, alias.name)
-            for alias in node.names
-            if alias.name in ALLOWED_SRC_IMPORTS
-        ]
-    return []
-
-
-def _iter_removed_node_import_records(
-    py_file: Path,
-    node: ast.AST,
-) -> list[tuple[Path, int, str]]:
-    if isinstance(node, ast.ImportFrom):
-        return _iter_import_from_records(
-            py_file,
-            node,
-            direct_modules=REMOVED_COMPAT_MODULES,
-            parent_imports=REMOVED_COMPAT_PARENT_IMPORTS,
-        )
-    if isinstance(node, ast.Import):
-        return [
-            (py_file, node.lineno, alias.name)
-            for alias in node.names
-            if alias.name in REMOVED_COMPAT_MODULES
-        ]
-    return []
-
-
-def _iter_import_from_records(
-    py_file: Path,
-    node: ast.ImportFrom,
-    *,
-    direct_modules: set[str] | frozenset[str] | dict[str, frozenset[Path]],
-    parent_imports: dict[str, frozenset[str]],
-) -> list[tuple[Path, int, str]]:
-    if node.module in direct_modules:
-        return [(py_file, node.lineno, node.module)]
-    if node.module not in parent_imports:
+def _record_compat_module_names(record: ImportRecord) -> list[str]:
+    if record.imported_name is None:
+        return [record.module] if record.module in ALLOWED_SRC_IMPORTS else []
+    if record.module in ALLOWED_SRC_IMPORTS:
+        return [record.module]
+    if record.module not in COMPAT_PARENT_IMPORTS:
         return []
-    compat_children = parent_imports[node.module]
-    return [
-        (py_file, node.lineno, f"{node.module}.{alias.name}")
-        for alias in node.names
-        if alias.name in compat_children
-    ]
+    if record.imported_name not in COMPAT_PARENT_IMPORTS[record.module]:
+        return []
+    return [f"{record.module}.{record.imported_name}"]
 
 
 @pytest.mark.architecture
 def test_application_composite_compat_surfaces_are_confined_in_src(
-    source_ast_cache: dict[Path, ast.Module],
+    source_import_records: tuple[ImportRecord, ...],
 ) -> None:
     """First-party src must not grow new imports of active composite compat modules."""
-    violations = _format_violations(
-        _iter_import_records(source_ast_cache),
+    violations = _active_compat_import_violations(
+        source_import_records,
         allowed_imports=ALLOWED_SRC_IMPORTS,
     )
     assert not violations, (
@@ -163,11 +101,11 @@ def test_application_composite_compat_surfaces_are_confined_in_src(
 
 @pytest.mark.architecture
 def test_application_composite_compat_surfaces_are_confined_in_tests(
-    test_ast_cache: dict[Path, ast.Module],
+    test_import_records: tuple[ImportRecord, ...],
 ) -> None:
     """Ordinary tests must not accumulate new imports of active composite compat modules."""
-    violations = _format_violations(
-        _iter_import_records(test_ast_cache),
+    violations = _active_compat_import_violations(
+        test_import_records,
         allowed_imports=ALLOWED_TEST_IMPORTS,
     )
     assert not violations, (
@@ -179,11 +117,7 @@ def test_application_composite_compat_surfaces_are_confined_in_tests(
 @pytest.mark.architecture
 def test_removed_application_composite_compat_shim_files_stay_absent() -> None:
     """Removed application.composite compat shims should stay absent."""
-    lingering = sorted(
-        path.relative_to(ROOT).as_posix()
-        for path in REMOVED_COMPAT_FILES
-        if path.exists()
-    )
+    lingering = find_lingering_files(root=ROOT, removed_files=REMOVED_COMPAT_FILES)
     assert not lingering, (
         "Removed application.composite compat shims must stay absent:\n"
         + "\n".join(lingering)
@@ -192,15 +126,23 @@ def test_removed_application_composite_compat_shim_files_stay_absent() -> None:
 
 @pytest.mark.architecture
 def test_removed_application_composite_compat_shims_are_not_imported(
-    source_ast_cache: dict[Path, ast.Module],
-    test_ast_cache: dict[Path, ast.Module],
+    source_import_records: tuple[ImportRecord, ...],
+    test_import_records: tuple[ImportRecord, ...],
 ) -> None:
     """Removed application.composite compat shims must not be imported."""
-    records = _iter_removed_import_records(source_ast_cache)
-    records.extend(_iter_removed_import_records(test_ast_cache))
     violations = [
-        f"{py_file.relative_to(ROOT).as_posix()}:{lineno} imports {module_name}"
-        for py_file, lineno, module_name in records
+        *iter_compat_import_violations_from_records(
+            import_records=source_import_records,
+            root=ROOT,
+            compat_modules=REMOVED_COMPAT_MODULES,
+            compat_parent_imports=REMOVED_COMPAT_PARENT_IMPORTS,
+        ),
+        *iter_compat_import_violations_from_records(
+            import_records=test_import_records,
+            root=ROOT,
+            compat_modules=REMOVED_COMPAT_MODULES,
+            compat_parent_imports=REMOVED_COMPAT_PARENT_IMPORTS,
+        ),
     ]
     assert not violations, (
         "Removed application.composite compat shims must stay absent from imports:\n"

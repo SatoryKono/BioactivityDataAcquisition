@@ -89,7 +89,7 @@ into explicit normalization-drift safeguards.
   - `configs/composites/target.yaml`
 - Extend contract coverage for downstream Gold boundary fields:
   - `tests/contract/test_non_chembl_cross_layer_contract_matrix.py`
-  - `tests/unit/application/composite/test_publication_schema_columns.py`
+  - `tests/unit/repo_backed/application/composite/test_publication_schema_columns.py`
 - Re-run or add composite-facing golden/DQ bundle checks where available:
   - `tests/fixtures/golden/gold/composite_publication_dq_bundle_v1.json`
   - `tests/fixtures/golden/gold/composite_molecule_dq_bundle_v1.json`

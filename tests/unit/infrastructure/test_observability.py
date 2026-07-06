@@ -2,13 +2,34 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 
 from bioetl.infrastructure.observability import metrics as metrics_module
+from bioetl.infrastructure.observability import metrics_collector as collector_module
 from bioetl.infrastructure.observability.metrics import MetricsCollector
 
 
 pytestmark = pytest.mark.unit
+
+
+class _FakeCounter:
+    def __init__(self) -> None:
+        self.increments: list[int | None] = []
+
+    def inc(self, amount: int | None = None) -> None:
+        self.increments.append(amount)
+
+
+class _FakeMetric:
+    def __init__(self) -> None:
+        self.label_calls: list[dict[str, Any]] = []
+        self.counter = _FakeCounter()
+
+    def labels(self, **labels: Any) -> _FakeCounter:
+        self.label_calls.append(labels)
+        return self.counter
 
 
 def test_metrics_module_reexports_collector() -> None:
@@ -54,3 +75,34 @@ def test_record_error_increments_error_counter_with_public_labels() -> None:
     collector.record_error(error_code="VALIDATION_ERROR")
 
     assert counter._value.get() == before + 1
+
+
+def test_record_processed_uses_only_public_low_cardinality_labels(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    metric = _FakeMetric()
+    monkeypatch.setattr(collector_module, "RECORDS_PROCESSED_TOTAL", metric)
+    collector = MetricsCollector(pipeline_name="pipeline-a", registry=object())
+
+    collector.record_processed(layer="silver", count=7, run_type="full")
+
+    assert metric.label_calls == [
+        {"pipeline": "pipeline-a", "stage": "silver", "run_type": "full"}
+    ]
+    assert metric.counter.increments == [7]
+    assert collector.registry is not None
+
+
+def test_record_error_uses_error_taxonomy_and_stage_labels(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    metric = _FakeMetric()
+    monkeypatch.setattr(collector_module, "ERRORS_TOTAL", metric)
+    collector = MetricsCollector(pipeline_name="pipeline-b")
+
+    collector.record_error(error_code="SCHEMA_DRIFT", stage="gold")
+
+    assert metric.label_calls == [
+        {"pipeline": "pipeline-b", "stage": "gold", "error_code": "SCHEMA_DRIFT"}
+    ]
+    assert metric.counter.increments == [None]

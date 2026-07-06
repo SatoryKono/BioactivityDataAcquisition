@@ -68,7 +68,7 @@ issues:
     priority: P1
     evidence_paths:
       - tests/architecture/test_medallion_invariants.py
-      - tests/unit/application/composite/test_merger_golden_snapshots.py
+      - tests/unit/repo_backed/application/composite/test_merger_golden_snapshots.py
       - tests/unit/application/composite/test_join_key_resolution_property.py
       - tests/contract/test_gold_dq_golden_snapshots.py
 helper_contracts:
@@ -138,7 +138,7 @@ helper_contracts:
       required_import: tests.helpers.golden_files
       forbidden_tokens:
         - "json.loads("
-    - path: tests/unit/application/composite/test_merger_golden_snapshots.py
+    - path: tests/unit/repo_backed/application/composite/test_merger_golden_snapshots.py
       required_import: tests.helpers.golden_files
       forbidden_tokens:
         - "json.loads("

@@ -9,6 +9,11 @@ source_artifacts:
   - configs/base/bronze_fixture_manifest.yaml
   - configs/base/bronze_fixture_gaps.yaml
   - docs/reports/evidence/project-package-topology/04-decisions/DECISIONS.yaml
+allowed_test_overages:
+  - path: tests/unit/interfaces/http/test_control_plane_identity_helper_branches.py
+    function: test_identity_extractor_helpers_cover_checkpoint_manifest_and_ledger_edges
+    loc: 213
+    rationale: Comprehensive identity extractor helper coverage for checkpoint manifest and ledger edges requires extensive fixture setup
 ranking_rule: >-
   Rank by shared blast radius first, then by governance maturity gap, then by how
   directly the weak confidence surface overlaps a family-level structural watchlist.

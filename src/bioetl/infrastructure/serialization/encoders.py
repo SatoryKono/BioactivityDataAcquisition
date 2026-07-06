@@ -41,6 +41,16 @@ except ImportError:
     ORJSON_AVAILABLE = False
 
 
+def _to_ascii_json(json_text: str, *, sort_keys: bool) -> str:
+    """Re-emit JSON text as compact ASCII JSON using valid JSON escapes."""
+    return json.dumps(
+        json.loads(json_text),
+        sort_keys=sort_keys,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    )
+
+
 class StdLibJsonEncoder:
     """Standard library json encoder implementation.
 
@@ -157,9 +167,8 @@ class OrjsonEncoder:
         result: str = _orjson.dumps(obj, option=options).decode("utf-8")
 
         # orjson doesn't have ensure_ascii option
-        # For ASCII-only output, we need to escape non-ASCII chars
         if ensure_ascii:
-            return result.encode("unicode_escape").decode("ascii")
+            return _to_ascii_json(result, sort_keys=sort_keys)
 
         return result
 
@@ -180,8 +189,7 @@ class OrjsonEncoder:
         # For canonical output, we need ensure_ascii=True for hashing consistency
         assert _orjson is not None
         result: str = _orjson.dumps(obj, option=_orjson.OPT_SORT_KEYS).decode("utf-8")
-        # Escape non-ASCII for canonical form
-        return result.encode("unicode_escape").decode("ascii")
+        return _to_ascii_json(result, sort_keys=True)
 
     def loads(self, data: str | bytes) -> JsonDict | list[object]:
         """Deserialize JSON string to Python object using orjson.

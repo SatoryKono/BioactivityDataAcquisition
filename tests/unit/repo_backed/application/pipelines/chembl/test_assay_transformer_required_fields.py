@@ -24,6 +24,9 @@ from bioetl.infrastructure.config.pipeline_config_loader import PipelineConfigLo
 from tests.helpers.transformer_dependencies import build_test_transformer_dependencies
 
 
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
+
+
 @pytest.fixture
 def mock_context() -> PipelineContext:
     """Create a mock pipeline context."""

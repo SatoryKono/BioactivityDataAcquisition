@@ -38,6 +38,8 @@ EXPECTED_BAO_FORMAT_IRI = "https://purl.obolibrary.org/obo/BAO_0000218"
 EXPECTED_UO_UNIT_IRI = "https://purl.obolibrary.org/obo/UO_0000065"
 EXPECTED_QUDT_UNIT_IRI = "https://qudt.org/vocab/unit/NanoMOL-PER-L"
 
+pytestmark = [pytest.mark.unit, pytest.mark.repo_backed]
+
 
 @pytest.mark.unit
 class TestActivityTransformerTransform(SharedActivityTransformerTransformTests):

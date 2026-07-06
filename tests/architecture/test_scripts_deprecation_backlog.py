@@ -19,6 +19,7 @@ def test_scripts_deprecation_report_generation(tmp_path: Path) -> None:
         "--deprecation-report",
         str(report_rel),
         cwd=root,
+        timeout=180.0,
     )
     assert result.returncode == 0, result.stderr
     assert report_rel.exists()
