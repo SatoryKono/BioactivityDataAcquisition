@@ -344,7 +344,9 @@ class TestSilverWriter:
     def test_silver_writer_initialization(self, noop_logger):
         """Test SilverWriter can be initialized."""
         writer = SilverWriter(base_path=SILVER_DELTA_ROOT, logger=noop_logger)
-        assert writer.base_path == SILVER_DELTA_ROOT
+        # Normalize paths for cross-platform comparison (Windows uses backslashes)
+        import os.path
+        assert os.path.normpath(writer.base_path) == os.path.normpath(SILVER_DELTA_ROOT)
 
     @pytest.mark.asyncio
     async def test_write_silver_creates_new_table(
