@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-07-06'
 
 ______________________________________________________________________
 
@@ -40,7 +40,9 @@ ______________________________________________________________________
 
 Ключевые характеристики:
 
-- Чистота: без I/O и без инфраструктурных зависимостей.
+- Чистота: без I/O и без инфраструктурных зависимостей. Исключение для
+  schema-contract representation в `domain/schemas/` и `domain/contracts/`
+  зафиксировано в [ADR-048](../decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md).
 - Консистентность: инварианты удерживаются внутри aggregate boundaries.
 - Типобезопасность: значения и идентификаторы выражены через отдельные типы и value objects.
 
@@ -256,6 +258,8 @@ stateDiagram-v2
 - Quarantine: `QuarantineEntryCreated`, `QuarantineEntryResolved`
 
 ### 2.3. Сущности и Bounded Contexts (`entities/`)
+
+Canonical published catalog: [Domain Entities](../04-reference/domain/entities.md).
 
 В текущей реализации можно выделить следующие bounded contexts (тактический уровень):
 

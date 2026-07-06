@@ -6,10 +6,24 @@ from dataclasses import dataclass
 from typing import Literal, Protocol, runtime_checkable
 
 __all__ = [
+    "ForeignKeyReconciliationLayer",
     "ForeignKeyReconciliationPort",
     "ForeignKeyReconciliationRequest",
     "ForeignKeyReconciliationResult",
 ]
+
+ForeignKeyReconciliationLayer = Literal["silver", "gold"]
+
+
+def _normalize_layer(
+    value: ForeignKeyReconciliationLayer | str,
+    field_name: str,
+) -> ForeignKeyReconciliationLayer:
+    """Normalize a reconciliation storage layer."""
+    normalized = str(value).strip().lower()
+    if normalized not in {"silver", "gold"}:
+        raise ValueError(f"{field_name} must be 'silver' or 'gold'")
+    return normalized  # type: ignore[return-value]
 
 
 def _require_non_empty_str(value: str, field_name: str) -> None:
@@ -101,6 +115,9 @@ class ForeignKeyReconciliationRequest:
     reference_key: str
     primary_keys: tuple[str, ...]
     action: Literal["delete_orphans"] = "delete_orphans"
+    source_layer: ForeignKeyReconciliationLayer = "silver"
+    reference_layer: ForeignKeyReconciliationLayer = "silver"
+    mutation_layer: ForeignKeyReconciliationLayer | None = None
     source_keys: tuple[str, ...] | None = None
     reference_keys: tuple[str, ...] | None = None
     nulls_equal: bool = False
@@ -113,6 +130,19 @@ class ForeignKeyReconciliationRequest:
         _require_non_empty_str(self.source_key, "source_key")
         _require_non_empty_str(self.reference_key, "reference_key")
         _require_non_empty_primary_keys(self.primary_keys)
+
+        source_layer = _normalize_layer(self.source_layer, "source_layer")
+        reference_layer = _normalize_layer(self.reference_layer, "reference_layer")
+        mutation_layer = (
+            _normalize_layer(self.mutation_layer, "mutation_layer")
+            if self.mutation_layer is not None
+            else None
+        )
+        if mutation_layer is not None and mutation_layer != source_layer:
+            raise ValueError("mutation_layer must match source_layer")
+        object.__setattr__(self, "source_layer", source_layer)
+        object.__setattr__(self, "reference_layer", reference_layer)
+        object.__setattr__(self, "mutation_layer", mutation_layer)
 
         _validate_optional_source_reference_keys_pair(
             source_keys=self.source_keys,
@@ -136,6 +166,11 @@ class ForeignKeyReconciliationRequest:
             else (self.reference_key,)
         )
 
+    @property
+    def effective_mutation_layer(self) -> ForeignKeyReconciliationLayer:
+        """Return the layer mutated by this reconciliation request."""
+        return self.mutation_layer if self.mutation_layer is not None else self.source_layer
+
 
 @dataclass(frozen=True, slots=True)
 class ForeignKeyReconciliationResult:
@@ -150,6 +185,9 @@ class ForeignKeyReconciliationResult:
     retained_rows: int
     orphan_rows_deleted: int
     mutated: bool
+    source_layer: ForeignKeyReconciliationLayer = "silver"
+    reference_layer: ForeignKeyReconciliationLayer = "silver"
+    mutation_layer: ForeignKeyReconciliationLayer = "silver"
     dry_run: bool = False
     would_mutate: bool = False
 

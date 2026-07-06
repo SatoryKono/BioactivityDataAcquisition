@@ -261,6 +261,11 @@ filters:
     columns:
       target_type:
       - SINGLE PROTEIN
+      organism_class:
+        operator: not_in
+        values:
+        - unicellular
+        - acellular
     list_lengths:
       component_accessions:
         min: 1

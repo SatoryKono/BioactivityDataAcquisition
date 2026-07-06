@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-07-06'
 
 ______________________________________________________________________
 
@@ -127,20 +127,42 @@ PENDING → RUNNING → COMPLETED
 
 #### QuarantineEntry Aggregate (`domain/aggregates/quarantine_entry.py`)
 
+> **Implementation note (2026-07-06):** canonical transition-level reference is
+> [Aggregate State Machines](../../04-reference/domain/aggregate-state-machines.md#quarantineentry).
+> The historical `mark_retrying` / `mark_recovered` / `mark_dead_letter` sketch
+> below is obsolete and must not be used for operator or integration guidance.
+
 ```python
 class QuarantineEntry:
-    """Aggregate для записи в карантине.
+    """Aggregate for one quarantined record payload.
 
-    Инварианты:
-        1. entry_id неизменяем
-        2. Статус переходит только в указанном порядке
-        3. Повторные попытки (retries) инкрементируются атомарно
+    Invariants:
+        1. entry_id, pipeline_name, error_code, payload, payload_hash are mandatory
+        2. Status transitions follow the published FSM only
+        3. Payload remains immutable after creation
     """
 
-    def mark_retrying(self, retried_at: datetime) -> None: ...
-    def mark_recovered(self, recovered_at: datetime) -> None: ...
-    def mark_dead_letter(self, reason: str, dead_lettered_at: datetime) -> None: ...
+    def start_review(self) -> None: ...
+    def mark_ignored(self, *, ignored_at: datetime, reason: str | None = None) -> None: ...
+    def mark_reprocessed(
+        self,
+        *,
+        reprocessed_at: datetime,
+        new_record_id: str,
+        reason: str | None = None,
+    ) -> None: ...
+    def mark_expired(self, *, expired_at: datetime) -> None: ...
 ```
+
+**State Machine:**
+
+```
+NEW → UNDER_REVIEW → IGNORED
+  ↘               ↘→ REPROCESSED
+  ↘→ EXPIRED      ↘→ EXPIRED
+```
+
+Source: `src/bioetl/domain/aggregates/_quarantine_entry_transitions_mixin.py`
 
 ### 2. Добавлены Value Objects
 

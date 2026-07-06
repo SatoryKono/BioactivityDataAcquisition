@@ -5,7 +5,7 @@
 [![Code Style: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
 [![Coverage](https://img.shields.io/badge/coverage-%E2%89%A585%25-brightgreen)](https://github.com/SatoryKono/BioactivityDataAcquisition/actions/workflows/tests.yml)
-[![Version](https://img.shields.io/badge/version-6.1.0-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-6.1.4-blue)](CHANGELOG.md)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](.github/SECURITY.md)
 
 > **Canonical repository:** [SatoryKono/BioactivityDataAcquisition](https://github.com/SatoryKono/BioactivityDataAcquisition)
@@ -19,7 +19,7 @@ ______________________________________________________________________
 
 - **Medallion Architecture**: Structured data flow (Bronze -> Silver -> Gold) ensuring data quality and traceability.
 - **Delta Lake Core**: ACID transactions, schema enforcement, and time travel capabilities.
-- **Resilience**: Built-in circuit breakers, exponential backoff retries, and dead-letter queues (Quarantine).
+- **Resilience**: Built-in circuit breakers, exponential backoff retries, and immutable Quarantine for rejected records.
 - **Local-First Design**: In-memory locking, local file storage -- no external services required ([ADR-010](docs/02-architecture/decisions/ADR-010-local-only-deployment.md)).
 - **Deterministic Writes**: Reproducible outputs and deterministic retries ([ADR-014](docs/02-architecture/decisions/ADR-014-deterministic-writes.md)).
 - **Run Control Plane**: Immutable run manifests and append-only ledgers for provenance, replay analysis, and artifact linkage ([ADR-044](docs/02-architecture/decisions/ADR-044-run-manifest-ledger-control-plane.md)).

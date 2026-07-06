@@ -8,7 +8,9 @@ from uuid import UUID
 from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
     build_cached_bronze_input_snapshot_refs,
 )
-from bioetl.composition.runtime_builders._run_manifest_refs import control_plane_root
+from bioetl.composition.runtime_builders._run_manifest_data_roots import (
+    control_plane_root,
+)
 from bioetl.domain.control_plane import RunInputSnapshotRef, RunManifest
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.control_plane import FileRunManifestStore

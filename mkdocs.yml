@@ -305,6 +305,7 @@ nav:
             -   Domain:
                     -   "Overview": 04-reference/domain/README.md
                     -   "Aggregates": 04-reference/domain/aggregates.md
+                    -   "Entities": 04-reference/domain/entities.md
                     -   "Value Objects": 04-reference/domain/value-objects.md
                     -   "Events": 04-reference/domain/events.md
                     -   "Control Plane": 04-reference/domain/control-plane.md

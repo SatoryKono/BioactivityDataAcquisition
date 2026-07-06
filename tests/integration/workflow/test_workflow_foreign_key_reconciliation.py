@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 
 import pyarrow as pa
 import pytest
+from pandera.pandas import Column, DataFrameSchema
 
 from bioetl.application.services.workflow_transform_service import (
     WorkflowTransformService,
@@ -15,6 +17,10 @@ from bioetl.application.workflow.transforms.builtins import (
     register_builtin_workflow_transforms,
 )
 from bioetl.domain.workflow import TransformStepConfig
+from bioetl.infrastructure.storage.gold.runtime_helpers import (
+    build_gold_writer_runtime_services,
+)
+from bioetl.infrastructure.storage.gold_writer import GoldWriter
 from bioetl.infrastructure.storage.silver_writer import SilverWriter
 from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation import (
     SilverForeignKeyReconciliationAdapter,
@@ -120,6 +126,39 @@ class _RecordingQuarantine:
                 metadata=record.get("metadata"),
                 ingestion_ts=record["ingestion_ts"],
             )
+
+
+def _gold_schema(columns: list[str]) -> DataFrameSchema:
+    return DataFrameSchema(
+        {column: Column(str, nullable=True) for column in columns},
+        strict=False,
+    )
+
+
+def _gold_writer(tmp_path, logger, metrics) -> GoldWriter:
+    return GoldWriter(
+        base_path=tmp_path / "gold",
+        logger=logger,
+        runtime_services=build_gold_writer_runtime_services(
+            csv_exporter=None,
+            tracing=None,
+            metrics=metrics,
+            audit=None,
+            metadata_writer=None,
+            metadata_coordinator=None,
+            lineage_store=None,
+        ),
+    )
+
+
+def _scd_config(primary_key: str) -> dict[str, object]:
+    return {
+        "business_key": primary_key,
+        "valid_from_col": "_valid_from",
+        "valid_to_col": "_valid_to",
+        "current_flag_col": "_is_current",
+        "version_col": "_version",
+    }
 
 
 @pytest.mark.asyncio
@@ -516,3 +555,94 @@ async def test_reconcile_foreign_keys_dry_run_previews_without_mutation(
         event == "workflow foreign-key reconciliation dry-run blocked mutation"
         for _level, event, _kwargs in logger.events
     )
+
+
+@pytest.mark.asyncio
+async def test_reconcile_foreign_keys_expires_gold_orphans_without_dropping_history(
+    tmp_path,
+) -> None:
+    logger = _RecordingLogger()
+    metrics = _RecordingMetrics()
+    silver_writer = SilverWriter(base_path=tmp_path / "silver", logger=logger)
+    gold_writer = _gold_writer(tmp_path, logger, metrics)
+    quarantine = _RecordingQuarantine()
+    ingestion_ts = datetime(2026, 7, 6, 12, 0, 0, tzinfo=UTC)
+
+    await gold_writer.write_gold(
+        table_name="chembl.target",
+        records=[{"target_id": "CHEMBL_T1", "target_name": "target-1"}],
+        schema=_gold_schema(["target_id", "target_name"]),
+        primary_keys=["target_id"],
+        mode="scd2",
+        scd_config=_scd_config("target_id"),
+        ingestion_ts=ingestion_ts,
+    )
+    await gold_writer.write_gold(
+        table_name="chembl.assay",
+        records=[
+            {
+                "assay_id": "CHEMBL_A1",
+                "target_id": "CHEMBL_T1",
+                "assay_name": "keep",
+            },
+            {
+                "assay_id": "CHEMBL_A2",
+                "target_id": "CHEMBL_T999",
+                "assay_name": "orphan",
+            },
+        ],
+        schema=_gold_schema(["assay_id", "target_id", "assay_name"]),
+        primary_keys=["assay_id"],
+        mode="scd2",
+        scd_config=_scd_config("assay_id"),
+        ingestion_ts=ingestion_ts,
+    )
+
+    registry = register_builtin_workflow_transforms(
+        WorkflowTransformRegistry(),
+        foreign_key_reconciliation_port=SilverForeignKeyReconciliationAdapter(
+            silver_writer=silver_writer,
+            gold_writer=gold_writer,
+            logger=logger,
+            metrics=metrics,
+            quarantine=quarantine,
+            quarantine_pipeline_name="workflow_transforms",
+        ),
+    )
+    service = WorkflowTransformService(registry=registry, metrics=metrics)
+    step = TransformStepConfig(
+        step_id="reconcile_assay_target_orphans",
+        transform_name="reconcile_foreign_keys",
+        config={
+            "source_layer": "gold",
+            "reference_layer": "gold",
+            "mutation_layer": "gold",
+            "source_table": "chembl.assay",
+            "reference_table": "chembl.target",
+            "source_key": "target_id",
+            "reference_key": "target_id",
+            "primary_keys": ["assay_id"],
+            "action": "delete_orphans",
+        },
+    )
+
+    result = await service.run_step(
+        workflow_name="chembl_baseline",
+        step=step,
+    )
+
+    current_rows = await gold_writer.read_gold("chembl.assay", current_only=True)
+    all_rows = await gold_writer.read_gold("chembl.assay", current_only=False)
+    expired = [row for row in all_rows if row["assay_id"] == "CHEMBL_A2"]
+
+    assert result.status == "success"
+    assert result.output is not None
+    assert result.output["source_layer"] == "gold"
+    assert result.output["mutation_layer"] == "gold"
+    assert result.output["orphan_rows_deleted"] == 1
+    assert {row["assay_id"] for row in current_rows} == {"CHEMBL_A1"}
+    assert len(expired) == 1
+    assert expired[0]["_is_current"] is False
+    assert expired[0]["_valid_to"] is not None
+    assert len(quarantine.writes) == 1
+    assert quarantine.writes[0]["error_code"] == "FILTERED_OUT_GOLD"

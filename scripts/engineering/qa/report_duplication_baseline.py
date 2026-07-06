@@ -306,6 +306,21 @@ def _filter_clusters_by_module_patterns(
     return filtered
 
 
+def _filter_clusters_by_actionability_categories(
+    clusters: list[DuplicateCluster],
+    *,
+    exclude_actionability_categories: frozenset[str],
+) -> list[DuplicateCluster]:
+    """Drop clusters whose reviewed actionability category is normalized away."""
+    if not exclude_actionability_categories:
+        return clusters
+    return [
+        cluster
+        for cluster in clusters
+        if _cluster_actionability_category(cluster) not in exclude_actionability_categories
+    ]
+
+
 def _load_history_records(path: Path) -> list[dict[str, object]]:
     """Load prior JSONL history records when present."""
     if not path.exists():
@@ -433,6 +448,7 @@ def _scan_target(
     *,
     timeout_seconds: int,
     exclude_module_patterns: tuple[re.Pattern[str], ...] = (),
+    exclude_actionability_categories: frozenset[str] = frozenset(),
 ) -> TargetDuplicationReport:
     """Run pylint duplicate-code scan for one target and parse findings."""
     cmd = [
@@ -463,6 +479,10 @@ def _scan_target(
         raw_clusters,
         exclude_module_patterns=exclude_module_patterns,
     )
+    clusters = _filter_clusters_by_actionability_categories(
+        clusters,
+        exclude_actionability_categories=exclude_actionability_categories,
+    )
     return TargetDuplicationReport(
         target=target,
         returncode=result.returncode,
@@ -477,6 +497,7 @@ def _build_payload(
     *,
     snapshot_date: str,
     exclude_module_patterns: list[str],
+    exclude_actionability_categories: list[str],
     trend_summary: dict[str, object] | None = None,
 ) -> dict[str, object]:
     """Build machine-readable payload for JSON output."""
@@ -500,6 +521,7 @@ def _build_payload(
         "summary": summary,
         "normalization": {
             "exclude_module_patterns": exclude_module_patterns,
+            "exclude_actionability_categories": exclude_actionability_categories,
         },
         "trend": trend_summary or {"status": "no_prior_snapshot"},
         "reduction_leverage_ranking": reduction_ranking,
@@ -548,6 +570,7 @@ def _render_markdown(
     reports: list[TargetDuplicationReport],
     *,
     exclude_module_patterns: tuple[str, ...] = (),
+    exclude_actionability_categories: tuple[str, ...] = (),
     trend_summary: dict[str, object] | None = None,
     max_duplicate_clusters: int | None = None,
 ) -> str:
@@ -564,6 +587,7 @@ def _render_markdown(
         total=total,
         raw_total=raw_total,
         exclude_module_patterns=exclude_module_patterns,
+        exclude_actionability_categories=exclude_actionability_categories,
         trend_summary=trend_summary,
         max_duplicate_clusters=max_duplicate_clusters,
     )
@@ -586,6 +610,7 @@ def _markdown_summary_lines(
     total: int,
     raw_total: int,
     exclude_module_patterns: tuple[str, ...],
+    exclude_actionability_categories: tuple[str, ...],
     trend_summary: dict[str, object] | None,
     max_duplicate_clusters: int | None,
 ) -> list[str]:
@@ -600,16 +625,26 @@ def _markdown_summary_lines(
     ]
     if max_duplicate_clusters is not None:
         lines.append(f"- max_duplicate_clusters: {max_duplicate_clusters}")
-    if exclude_module_patterns:
+    if exclude_module_patterns or exclude_actionability_categories:
         lines.extend(
             [
                 f"- total_raw_duplicate_clusters: {raw_total}",
                 f"- excluded_duplicate_clusters: {raw_total - total}",
                 "- normalized_view: enabled",
-                "- exclude_module_patterns: "
-                + ", ".join(f"`{pattern}`" for pattern in exclude_module_patterns),
             ]
         )
+        if exclude_module_patterns:
+            lines.append(
+                "- exclude_module_patterns: "
+                + ", ".join(f"`{pattern}`" for pattern in exclude_module_patterns)
+            )
+        if exclude_actionability_categories:
+            lines.append(
+                "- exclude_actionability_categories: "
+                + ", ".join(
+                    f"`{category}`" for category in exclude_actionability_categories
+                )
+            )
     if trend_summary and trend_summary.get("status") == "compared_to_previous":
         raw_delta = trend_summary.get("total_duplicate_cluster_delta")
         delta_text = f"{raw_delta:+d}" if isinstance(raw_delta, int) else "n/a"
@@ -857,6 +892,15 @@ def _parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--exclude-actionability-category",
+        action="append",
+        default=[],
+        help=(
+            "Reviewed actionability category to exclude from normalized counts. "
+            "Raw counts remain in the JSON payload."
+        ),
+    )
+    parser.add_argument(
         "--history-jsonl",
         default=None,
         help="Optional append-only JSONL history file for trend snapshots.",
@@ -887,6 +931,9 @@ def main() -> int:
             target,
             timeout_seconds=args.timeout_seconds,
             exclude_module_patterns=exclude_module_patterns,
+            exclude_actionability_categories=frozenset(
+                str(category) for category in args.exclude_actionability_category
+            ),
         )
         for target in args.targets
     ]
@@ -924,6 +971,7 @@ def main() -> int:
         reports,
         snapshot_date=snapshot_date,
         exclude_module_patterns=args.exclude_module_pattern,
+        exclude_actionability_categories=args.exclude_actionability_category,
         trend_summary=trend_summary,
     )
     json_path = Path(args.json_out)
@@ -934,6 +982,9 @@ def main() -> int:
         _render_markdown(
             reports,
             exclude_module_patterns=tuple(args.exclude_module_pattern),
+            exclude_actionability_categories=tuple(
+                args.exclude_actionability_category
+            ),
             trend_summary=trend_summary,
             max_duplicate_clusters=args.max_duplicate_clusters,
         ),

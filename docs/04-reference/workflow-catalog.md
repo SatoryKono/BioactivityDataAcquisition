@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-03'
+  Last verified: '2026-07-06'
 
 ______________________________________________________________________
 
@@ -32,6 +32,21 @@ Runtime model evidence:
 
 For current workflow lifecycle semantics, statuses, and repair/force behavior,
 use [Workflow State Machine](domain/workflow-state-machine.md).
+
+## Composite execution boundary
+
+Composite pipelines (`composite_activity`, `composite_assay`, `composite_molecule`,
+`composite_publication`, `composite_target`) are **not** declared in
+`configs/workflows/*.yaml`.
+
+| Surface | Source of truth | CLI entry |
+| --- | --- | --- |
+| Composite merge policy | `configs/composites/*.yaml` | `bioetl run-composite --composite <entity>` |
+| Composite entity contract | `configs/entities/composite/*.yaml` | same command |
+| Declarative workflow DAG | `configs/workflows/*.yaml` | `bioetl workflow run <name>` |
+
+Use [Running Pipelines](../03-guides/running-pipelines.md) for composite run
+examples and [Pipeline Catalog](pipeline-catalog.md) for composite inventory.
 
 ## Contract
 

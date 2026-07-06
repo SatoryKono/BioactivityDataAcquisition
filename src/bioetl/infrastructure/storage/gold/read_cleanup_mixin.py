@@ -10,6 +10,8 @@ from bioetl.infrastructure.storage.gold.io_helpers import (
     load_gold_writer_module as _load_gold_writer_module,
 )
 
+_CURRENT_FLAG_COLUMNS = ("_is_current", "is_current")
+
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
 
@@ -23,17 +25,24 @@ def _build_read_projection(
 ) -> list[str] | None:
     """Build a minimal projection for Gold reads when callers request columns.
 
-    When a caller requests specific columns we can avoid materializing the full
-    table by projecting only the requested fields plus ``is_current`` when it is
-    needed for post-read filtering.
+    When current filtering is requested, read the full row first so tables using
+    either ``_is_current`` or ``is_current`` can be filtered before projection.
     """
     if columns is None:
         return None
+    if current_only:
+        return None
 
     projection = list(columns)
-    if current_only and "is_current" not in projection:
-        projection.append("is_current")
     return projection
+
+
+def _current_flag_column(column_names: list[str]) -> str | None:
+    """Return the SCD current flag column present in a Gold table."""
+    for candidate in _CURRENT_FLAG_COLUMNS:
+        if candidate in column_names:
+            return candidate
+    return None
 
 
 class GoldWriterReadCleanupMixin:
@@ -75,10 +84,15 @@ class GoldWriterReadCleanupMixin:
                 Any,  # Any: pyarrow.Table returned via executor is untyped to mypy
                 await self._run_in_executor(dt.to_pyarrow_table, projection),
             )
-        if current_only and "is_current" in arrow_table.column_names:
+        current_flag = (
+            _current_flag_column(list(arrow_table.column_names))
+            if current_only
+            else None
+        )
+        if current_flag is not None:
             import pyarrow.compute as pc
 
-            arrow_table = arrow_table.filter(pc.equal(arrow_table["is_current"], True))
+            arrow_table = arrow_table.filter(pc.equal(arrow_table[current_flag], True))
         result: list[GoldRecord] = arrow_table.to_pylist()
         if columns:
             return [{key: record.get(key) for key in columns} for record in result]

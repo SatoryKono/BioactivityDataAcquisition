@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-19'
+  Last verified: '2026-07-06'
 
 ______________________________________________________________________
 
@@ -150,7 +150,7 @@ bioetl run-composite --composite publication --seed-limit 1000
 
 ## Текущая версия
 
-**v6.1.0** (2026-03-11) — подробности см. в [CHANGELOG](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/CHANGELOG.md) и [Release Notes](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/CHANGELOG.md#610---2026-03-11).
+**v6.1.4** (базовая governance-версия по [RULES.md](RULES.md)) — история релизов в [CHANGELOG](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/CHANGELOG.md).
 
 ## Начало работы
 

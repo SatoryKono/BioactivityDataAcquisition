@@ -48,6 +48,9 @@ def build_reconcile_foreign_keys_executor(
             "reference_table": result.reference_table,
             "source_key": result.source_key,
             "reference_key": result.reference_key,
+            "source_layer": result.source_layer,
+            "reference_layer": result.reference_layer,
+            "mutation_layer": result.mutation_layer,
             "source_keys": list(request.source_keys or (request.source_key,)),
             "reference_keys": list(request.reference_keys or (request.reference_key,)),
             "action": result.action,
@@ -99,6 +102,9 @@ def _build_request(
         reference_key=reference_key,
         primary_keys=primary_keys,
         action="delete_orphans",
+        source_layer=_optional_layer(config, "source_layer", default="silver"),
+        reference_layer=_optional_layer(config, "reference_layer", default="silver"),
+        mutation_layer=_optional_layer(config, "mutation_layer", default=None),
         source_keys=source_keys,
         reference_keys=reference_keys,
         nulls_equal=bool(config.get("nulls_equal", False)),
@@ -158,6 +164,23 @@ def _required_str(config: Mapping[str, object], key: str) -> str:
     if value is None or not str(value).strip():
         raise ValueError(f"reconcile_foreign_keys requires config.{key}")
     return str(value).strip()
+
+
+def _optional_layer(
+    config: Mapping[str, object],
+    key: str,
+    *,
+    default: str | None,
+) -> str | None:
+    value = config.get(key, default)
+    if value is None:
+        return None
+    rendered = str(value).strip().lower()
+    if rendered not in {"silver", "gold"}:
+        raise ValueError(
+            f"reconcile_foreign_keys requires config.{key} as 'silver' or 'gold'"
+        )
+    return rendered
 
 
 def _optional_key_tuple(

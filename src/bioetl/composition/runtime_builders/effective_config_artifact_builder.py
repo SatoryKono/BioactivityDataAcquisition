@@ -22,7 +22,7 @@ from bioetl.composition.runtime_builders._effective_config_artifact_builder_supp
     build_runtime_overrides_snapshot,
     resolve_effective_config_entity,
 )
-from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
+from bioetl.composition.runtime_builders._snapshot_mapping_support import (
     to_serializable_mapping as _to_serializable_mapping,
 )
 from bioetl.domain.control_plane.effective_config_artifact import (

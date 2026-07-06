@@ -39,6 +39,9 @@ def build_reconciliation_result(
         retained_rows=retained_rows,
         orphan_rows_deleted=orphan_rows_deleted,
         mutated=mutated,
+        source_layer=request.source_layer,
+        reference_layer=request.reference_layer,
+        mutation_layer=request.effective_mutation_layer,
         dry_run=request.dry_run,
         would_mutate=would_mutate,
     )

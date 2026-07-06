@@ -39,6 +39,9 @@ class _RecordingPort:
             retained_rows=2,
             orphan_rows_deleted=1,
             mutated=True,
+            source_layer=request.source_layer,
+            reference_layer=request.reference_layer,
+            mutation_layer=request.effective_mutation_layer,
             dry_run=request.dry_run,
             would_mutate=False,
         )
@@ -72,6 +75,9 @@ class _WouldMutatePort:
             retained_rows=5,
             orphan_rows_deleted=0,
             mutated=False,
+            source_layer=request.source_layer,
+            reference_layer=request.reference_layer,
+            mutation_layer=request.effective_mutation_layer,
             dry_run=True,
             would_mutate=True,
         )
@@ -102,6 +108,35 @@ def test_build_request_supports_composite_keys_and_null_policy() -> None:
     assert request.effective_reference_keys == ("target_id", "target_type")
     assert request.nulls_equal is True
     assert request.dry_run is False
+    assert request.source_layer == "silver"
+    assert request.reference_layer == "silver"
+    assert request.effective_mutation_layer == "silver"
+
+
+def test_build_request_parses_gold_layers() -> None:
+    spec = WorkflowTransformSpec.from_step(
+        TransformStepConfig(
+            step_id="reconcile_assay_target_orphans",
+            transform_name="reconcile_foreign_keys",
+            config={
+                "source_layer": "gold",
+                "reference_layer": "gold",
+                "mutation_layer": "gold",
+                "source_table": "chembl.assay",
+                "reference_table": "chembl.target",
+                "source_key": "target_id",
+                "reference_key": "target_id",
+                "primary_keys": ["assay_id"],
+                "action": "delete_orphans",
+            },
+        )
+    )
+
+    request = _build_request(spec)
+
+    assert request.source_layer == "gold"
+    assert request.reference_layer == "gold"
+    assert request.effective_mutation_layer == "gold"
 
 
 def test_build_request_requires_delete_orphans_action() -> None:
@@ -212,6 +247,9 @@ async def test_executor_returns_serializable_metadata_only() -> None:
         "reference_table": "chembl_target",
         "source_key": "target_id",
         "reference_key": "target_id",
+        "source_layer": "silver",
+        "reference_layer": "silver",
+        "mutation_layer": "silver",
         "source_keys": ["target_id"],
         "reference_keys": ["target_id"],
         "action": "delete_orphans",

@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 6.1.0
+Version: 6.1.4
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-08'
+  Last verified: '2026-07-06'
 
 ______________________________________________________________________
 
@@ -16,8 +16,8 @@ ______________________________________________________________________
 BioETL command-line interface (CLI) - основной способ взаимодействия с системой.
 Построен на фреймворке **Click** для стабильности и расширяемости.
 
-**Версия:** 6.1.0
-**Дата обновления:** 2026-05-08
+**Версия:** 6.1.4
+**Дата обновления:** 2026-07-06
 **Статус покрытия:** published command and operator surface
 
 > **Boundary:** this page is the CLI command reference (what commands exist and their options).

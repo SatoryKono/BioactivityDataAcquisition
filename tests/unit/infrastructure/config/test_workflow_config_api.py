@@ -215,6 +215,8 @@ def test_load_workflow_config_preserves_composite_reconciliation_keys(
     step = config.steps[1]
     assert isinstance(step, TransformStepConfig)
     assert step.config == {
+        "source_layer": "silver",
+        "reference_layer": "silver",
         "source_table": "chembl_assay",
         "reference_table": "chembl_target",
         "source_keys": ["target_id", "target_type"],
@@ -244,8 +246,11 @@ def test_chembl_baseline_workflow_config_declares_dependency_minimal_reconciliat
     assert isinstance(reconcile_target, TransformStepConfig)
     assert reconcile_target.depends_on == ("run_chembl_assay", "run_chembl_target")
     assert reconcile_target.config == {
-        "source_table": "chembl_assay",
-        "reference_table": "chembl_target",
+        "source_layer": "gold",
+        "reference_layer": "gold",
+        "mutation_layer": "gold",
+        "source_table": "chembl.assay",
+        "reference_table": "chembl.target",
         "source_key": "target_id",
         "reference_key": "target_id",
         "primary_keys": ["assay_id"],
@@ -260,8 +265,11 @@ def test_chembl_baseline_workflow_config_declares_dependency_minimal_reconciliat
         "run_chembl_publication",
     )
     assert reconcile_publication.config == {
-        "source_table": "chembl_assay",
-        "reference_table": "chembl_publication",
+        "source_layer": "gold",
+        "reference_layer": "gold",
+        "mutation_layer": "gold",
+        "source_table": "chembl.assay",
+        "reference_table": "chembl.publication",
         "source_key": "publication_id",
         "reference_key": "publication_id",
         "primary_keys": ["assay_id"],

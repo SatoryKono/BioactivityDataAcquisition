@@ -217,6 +217,7 @@ def test_workflow_run_dry_run_smoke_uses_canonical_example_without_network(
     assert step_ids == (
         "chembl_activity_ingest",
         "chembl_assay_ingest",
+        "chembl_target_ingest",
         "summarize_core_extracts",
     )
     pipeline_steps = [
