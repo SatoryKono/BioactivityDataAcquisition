@@ -104,7 +104,7 @@ def test_grafana_uses_remote_renderer_sidecar() -> None:
         "/bin/sh",
         "/usr/local/bin/bioetl-bootstrap-grafana.sh",
     ]
-    assert renderer["image"] == "grafana/grafana-image-renderer:5.0.0"
+    assert renderer["image"] == "grafana/grafana-image-renderer:latest"
     assert renderer["shm_size"] == "1gb"
     assert (
         "AUTH_TOKEN=${GF_RENDERING_RENDERER_TOKEN:-bioetl-local-renderer-token}"
