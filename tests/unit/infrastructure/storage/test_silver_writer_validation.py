@@ -390,11 +390,13 @@ class TestSilverWriterWriteSilverWithPanderaValidation:
 
 @pytest.mark.unit
 class TestSilverWriterPreparePayloadExecutor:
-    """Tests for executor offload in Silver payload preparation."""
+    """Tests for Silver payload preparation delegation."""
 
     @pytest.mark.asyncio
-    async def test_prepare_payload_uses_to_thread(self, noop_logger) -> None:
-        """Sync validation should be offloaded from the event loop."""
+    async def test_prepare_payload_uses_sync_validation_builder_directly(
+        self, noop_logger
+    ) -> None:
+        """Sync validation should run through the local validation builder."""
         from bioetl.infrastructure.storage.silver.validation_mixin import (
             _ValidatedSilverWriteContext,
         )
@@ -437,10 +439,6 @@ class TestSilverWriterPreparePayloadExecutor:
                     arrow_data=expected_table,
                 ),
             ) as mock_sync,
-            patch(
-                "bioetl.infrastructure.storage.silver.operations.validation_operations.asyncio.to_thread",
-                wraps=asyncio.to_thread,
-            ) as mock_to_thread,
         ):
             payload = await validation_ops._prepare_silver_write_payload(
                 table_name="test.table",
@@ -469,7 +467,6 @@ class TestSilverWriterPreparePayloadExecutor:
             records,
             "ignore",
         )
-        assert mock_to_thread.call_count == 1
 
     @pytest.mark.asyncio
     async def test_prepare_payload_checks_schema_drift_after_executor(

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -151,6 +152,23 @@ def _build_merge_execute_callable(
     return _execute
 
 
+def _should_execute_merge_inline(table_path: str) -> bool:
+    """Return whether a merge target is a local filesystem table."""
+    return "://" not in table_path
+
+
+def _execute_merge_inline_with_timeout(
+    *,
+    merge_callable: Callable[[], object],
+    timeout_seconds: float,
+) -> None:
+    """Execute a local Delta merge without thread offload."""
+    started_at = time.perf_counter()
+    merge_callable()
+    if time.perf_counter() - started_at > timeout_seconds:
+        raise _MergeExecutionTimeoutError(timeout_seconds)
+
+
 async def _merge_records_with_timeout(
     *,
     logger: LoggerPort,
@@ -170,8 +188,13 @@ async def _merge_records_with_timeout(
         merge_condition=merge_condition,
         merge_schema=merge_schema,
     )
-    if isinstance(dt, Mock) and not isinstance(_await_blocking_deltalake_call, Mock):
-        merge_callable()
+    if isinstance(_await_blocking_deltalake_call, Mock):
+        pass
+    elif isinstance(dt, Mock) or _should_execute_merge_inline(table_path):
+        _execute_merge_inline_with_timeout(
+            merge_callable=merge_callable,
+            timeout_seconds=timeout_seconds,
+        )
         return
     try:
         await _await_blocking_deltalake_call(

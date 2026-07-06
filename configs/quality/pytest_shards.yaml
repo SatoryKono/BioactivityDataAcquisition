@@ -267,7 +267,6 @@ shards:
       - tests/architecture/test_quality_burndown_priorities.py
       - tests/architecture/test_regression_metrics.py
       - tests/architecture/test_adr_enforcement_matrix.py
-      - tests/architecture/test_checkpoint_compatibility_runtime_facade_usage.py
       - tests/architecture/test_checkpoint_runtime_facade_usage.py
       - tests/architecture/test_cli_command_import_guards.py
       - tests/architecture/test_removed_surface_freeze_guards.py
@@ -279,7 +278,7 @@ shards:
       - tests/architecture/test_scripts_inventory_manifest.py
       - tests/architecture/test_scripts_lifecycle_registry.py
       - tests/architecture/test_test_structural_debt.py
-    workers_override: 2
+    workers_override: 0
     extra_pytest_args:
       - --timeout=300
   - name: S8-crosscutting-governance

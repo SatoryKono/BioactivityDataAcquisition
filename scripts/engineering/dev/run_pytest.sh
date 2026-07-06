@@ -33,6 +33,20 @@ FILTERED_PYTEST_ARGS=()
 SKIP_PREFLIGHT="${BIOETL_SKIP_PREFLIGHT:-0}"
 PREFLIGHT_SCOPE="${BIOETL_PREFLIGHT_SCOPE:-}"
 
+_has_cov_report_arg() {
+    local arg
+    for arg in "$@"; do
+        case "$arg" in
+            --cov-report|--cov-report=*)
+                return 0
+                ;;
+            *)
+                ;;
+        esac
+    done
+    return 1
+}
+
 for arg in "${PYTEST_ARGS[@]}"; do
     if [[ "$arg" == "--narrow" ]]; then
         PYTEST_NARROW=1
@@ -54,7 +68,11 @@ for arg in "${PYTEST_ARGS[@]}"; do
 done
 
 if [[ "$PYTEST_WITH_COVERAGE" == "1" && "$PYTEST_NO_COV" != "1" && "${#DEFAULT_FLAGS[@]}" -gt 0 ]]; then
-    DEFAULT_FLAGS=(--cov=src/bioetl --cov-report=term "${DEFAULT_FLAGS[@]}")
+    _default_coverage_flags=(--cov=src/bioetl)
+    if ! _has_cov_report_arg "${FILTERED_PYTEST_ARGS[@]}"; then
+        _default_coverage_flags+=(--cov-report=term)
+    fi
+    DEFAULT_FLAGS=("${_default_coverage_flags[@]}" "${DEFAULT_FLAGS[@]}")
 fi
 
 for arg in "${PYTEST_ARGS[@]}"; do
@@ -139,7 +157,7 @@ _should_enable_benchmark_plugin() {
                 ;;
         esac
 
-        if [[ "$previous" == "-m" && "$arg" == *benchmark* ]]; then
+        if [[ "$previous" == "-m" && "$arg" == *benchmark* && "$arg" != *"not benchmark"* ]]; then
             return 0
         fi
         previous="$arg"
@@ -473,6 +491,13 @@ fi
 if [[ "$PYTEST_NARROW" == "1" ]]; then
     export PYTEST_DISABLE_PLUGIN_AUTOLOAD=1
     DEFAULT_FLAGS=(-q --maxfail=1)
+    if [[ "$PYTEST_WITH_COVERAGE" == "1" && "$PYTEST_NO_COV" != "1" ]]; then
+        _default_coverage_flags=(--cov=src/bioetl)
+        if ! _has_cov_report_arg "${PYTEST_ARGS[@]}"; then
+            _default_coverage_flags+=(--cov-report=term)
+        fi
+        DEFAULT_FLAGS=("${_default_coverage_flags[@]}" "${DEFAULT_FLAGS[@]}")
+    fi
     _narrow_pytest_plugins=(
         anyio.pytest_plugin
         pytest_asyncio.plugin
@@ -484,6 +509,12 @@ if [[ "$PYTEST_NARROW" == "1" ]]; then
     for plugin in "${_narrow_pytest_plugins[@]}"; do
         PYTEST_PLUGIN_ARGS+=(-p "$plugin")
     done
+    if _needs_cov_plugin "${DEFAULT_FLAGS[@]}" "${PYTEST_ARGS[@]}"; then
+        PYTEST_PLUGIN_ARGS+=(-p pytest_cov.plugin)
+    fi
+    if _needs_xdist_plugin "${PYTEST_ARGS[@]}"; then
+        PYTEST_PLUGIN_ARGS+=(-p xdist.plugin)
+    fi
     if _should_enable_benchmark_plugin "${PYTEST_ARGS[@]}"; then
         PYTEST_PLUGIN_ARGS+=(-p pytest_benchmark.plugin)
     fi

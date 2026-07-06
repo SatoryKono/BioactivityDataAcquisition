@@ -182,6 +182,41 @@ def _run_plain_delta_write_subprocess(
         )
 
 
+def _should_execute_plain_write_inline(
+    *,
+    table_path: str,
+    module: object,
+) -> bool:
+    """Return whether a plain Delta write should use the local inline path."""
+    return (
+        "://" not in table_path
+        and getattr(module, "__name__", "")
+        == "bioetl.infrastructure.storage.silver_writer"
+    )
+
+
+def _should_execute_delta_table_load_inline(
+    *,
+    table_path: str,
+    module: object,
+) -> bool:
+    """Return whether a DeltaTable load should use the local inline path."""
+    return _should_execute_plain_write_inline(table_path=table_path, module=module)
+
+
+def _run_plain_delta_write_inline(
+    *,
+    module: object,
+    kwargs: dict[str, Any],  # Any: Delta Lake write kwargs are heterogeneous
+    timeout_seconds: float,
+) -> None:
+    """Execute a local plain Delta write without thread offload."""
+    started_at = asyncio.get_running_loop().time()
+    module.write_deltalake(**kwargs)
+    if asyncio.get_running_loop().time() - started_at > timeout_seconds:
+        raise TimeoutError
+
+
 async def _write_plain_delta_request(
     *,
     load_module: Callable[[], Any],  # Any: lazy-loaded deltalake module
@@ -212,9 +247,17 @@ async def _write_plain_delta_request(
                 timeout_seconds=timeout_seconds + 5.0,
             )
             return
+        module = load_module()
+        if _should_execute_plain_write_inline(table_path=canonical_path, module=module):
+            _run_plain_delta_write_inline(
+                module=module,
+                kwargs=kwargs,
+                timeout_seconds=timeout_seconds,
+            )
+            return
         await _await_blocking_deltalake_call(
             operation_name="plain-write",
-            call=lambda: load_module().write_deltalake(**kwargs),
+            call=lambda: module.write_deltalake(**kwargs),
             timeout_seconds=timeout_seconds,
         )
     except TimeoutError as exc:
@@ -266,7 +309,10 @@ async def _load_delta_table(
     table_path: str,
 ) -> DeltaTableType:
     """Load a Delta table asynchronously for merge execution."""
+    module = load_module()
+    if _should_execute_delta_table_load_inline(table_path=table_path, module=module):
+        return module.DeltaTable(table_path)
     return await _await_blocking_deltalake_call(
         operation_name="load-table",
-        call=lambda: load_module().DeltaTable(table_path),
+        call=lambda: module.DeltaTable(table_path),
     )

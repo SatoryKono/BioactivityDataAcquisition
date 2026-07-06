@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-30'
+  Last verified: '2026-07-05'
 
 ______________________________________________________________________
 
@@ -52,12 +52,12 @@ trend evidence only.
 | 2 | `28.12` | `tests.architecture.test_checkpoint_compatibility_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_src` | `S7-crosscutting-architecture-a2.xml` |
 | 3 | `24.051` | `tests.architecture.test_config_discrepancy_metrics_ratchets::test_config_discrepancy_baseline_matches_live_generator` | `S7-crosscutting-architecture-a2.xml` |
 | 4 | `23.018` | `tests.architecture.test_config_discrepancy_report_drift::test_config_discrepancy_report_matches_deterministic_generator` | `S7-crosscutting-architecture-a2.xml` |
-| 5 | `16.084` | `tests.architecture.test_cli_command_import_guards::test_non_cli_source_keeps_retained_public_cli_seams_outside_runtime_code` | `S7-crosscutting-architecture-a2.xml` |
-| 6 | `15.28` | `tests.architecture.test_config_root_governance::test_runtime_config_discovery_does_not_use_source_parent_arithmetic` | `S7-crosscutting-architecture-a2.xml` |
-| 7 | `14.498` | `tests.architecture.test_cli_command_import_guards::test_non_cli_source_avoids_interfaces_package_root_convenience_imports` | `S7-crosscutting-architecture-a2.xml` |
-| 8 | `14.129` | `tests.architecture.test_adr_enforcement_matrix::test_adr_enforcement_matrix_artifact_matches_live_generator` | `S7-crosscutting-architecture-a.xml` |
-| 9 | `13.15` | `tests.architecture.test_add_svg_text_fallback::test_build_fallback_text_emits_multiline_tspans` | `S7-crosscutting-architecture-a.xml` |
-| 10 | `12.274` | `tests.architecture.test_compatibility_freeze_guards::test_cli_run_orchestration_singleton_stays_private_compat_owner` | `S7-crosscutting-architecture-a2.xml` |
+| 5 | `16.691` | `tests.architecture.test_checkpoint_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_tests` | `S7-crosscutting-architecture-guardrails.xml` |
+| 6 | `16.084` | `tests.architecture.test_cli_command_import_guards::test_non_cli_source_keeps_retained_public_cli_seams_outside_runtime_code` | `S7-crosscutting-architecture-a2.xml` |
+| 7 | `15.28` | `tests.architecture.test_config_root_governance::test_runtime_config_discovery_does_not_use_source_parent_arithmetic` | `S7-crosscutting-architecture-a2.xml` |
+| 8 | `14.498` | `tests.architecture.test_cli_command_import_guards::test_non_cli_source_avoids_interfaces_package_root_convenience_imports` | `S7-crosscutting-architecture-a2.xml` |
+| 9 | `14.129` | `tests.architecture.test_adr_enforcement_matrix::test_adr_enforcement_matrix_artifact_matches_live_generator` | `S7-crosscutting-architecture-a.xml` |
+| 10 | `13.15` | `tests.architecture.test_add_svg_text_fallback::test_build_fallback_text_emits_multiline_tspans` | `S7-crosscutting-architecture-a.xml` |
 
 ### Top Slow Zones
 
@@ -66,13 +66,13 @@ trend evidence only.
 | 1 | `tests.architecture.test_checkpoint_compatibility_runtime_facade_usage` | 2 | 70.905 | 42.785 |
 | 2 | `tests.architecture.test_config_discrepancy_metrics_ratchets` | 2 | 35.379 | 24.051 |
 | 3 | `tests.architecture.test_cli_command_import_guards` | 2 | 30.582 | 16.084 |
-| 4 | `tests.architecture.test_config_discrepancy_report_drift` | 1 | 23.018 | 23.018 |
-| 5 | `tests.architecture.test_config_root_governance` | 1 | 15.28 | 15.28 |
-| 6 | `tests.architecture.test_adr_enforcement_matrix` | 1 | 14.129 | 14.129 |
-| 7 | `tests.architecture.test_add_svg_text_fallback` | 1 | 13.15 | 13.15 |
-| 8 | `tests.architecture.test_compatibility_freeze_guards` | 1 | 12.274 | 12.274 |
-| 9 | `tests.architecture.test_config_surface_entity_residual_plateau` | 2 | 11.72 | 7.029 |
-| 10 | `tests.architecture.test_adapter_contracts.TestAdapterMixinPolicy` | 1 | 8.951 | 8.951 |
+| 4 | `tests.architecture.test_checkpoint_runtime_facade_usage` | 2 | 27.114 | 16.691 |
+| 5 | `tests.architecture.test_config_discrepancy_report_drift` | 1 | 23.018 | 23.018 |
+| 6 | `tests.architecture.test_config_root_governance` | 1 | 15.28 | 15.28 |
+| 7 | `tests.architecture.test_adr_enforcement_matrix` | 1 | 14.129 | 14.129 |
+| 8 | `tests.architecture.test_add_svg_text_fallback` | 1 | 13.15 | 13.15 |
+| 9 | `tests.architecture.test_compatibility_freeze_guards` | 1 | 12.274 | 12.274 |
+| 10 | `tests.architecture.test_config_surface_entity_residual_plateau` | 2 | 11.72 | 7.029 |
 
 ## Refresh Procedure
 

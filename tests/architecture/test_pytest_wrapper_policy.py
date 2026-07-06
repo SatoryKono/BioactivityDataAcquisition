@@ -20,10 +20,10 @@ def test_shell_wrapper_keeps_local_coverage_opt_in() -> None:
     assert 'PYTEST_WITH_COVERAGE="${BIOETL_PYTEST_WITH_COVERAGE:-0}"' in content
     assert 'if [[ "$arg" == "--with-coverage" ]]; then' in content
     assert "DEFAULT_FLAGS=(-q --maxfail=1)" in content
-    assert (
-        'DEFAULT_FLAGS=(--cov=src/bioetl --cov-report=term "${DEFAULT_FLAGS[@]}")'
-        in content
-    )
+    assert "_has_cov_report_arg()" in content
+    assert "_default_coverage_flags=(--cov=src/bioetl)" in content
+    assert "_default_coverage_flags+=(--cov-report=term)" in content
+    assert 'if ! _has_cov_report_arg "${PYTEST_ARGS[@]}"; then' in content
 
 
 def test_powershell_wrapper_keeps_local_coverage_opt_in() -> None:

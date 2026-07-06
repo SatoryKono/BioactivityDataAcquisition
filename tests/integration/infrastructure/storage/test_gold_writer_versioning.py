@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -30,13 +29,6 @@ from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     GoldWriteDispatchContext,
 )
 from bioetl.infrastructure.storage.gold_writer import GoldWriter
-
-
-@pytest.fixture(scope="module")
-def event_loop_policy() -> asyncio.AbstractEventLoopPolicy:
-    if sys.platform == "win32":
-        return asyncio.WindowsSelectorEventLoopPolicy()
-    return asyncio.get_event_loop_policy()
 
 
 @pytest.fixture

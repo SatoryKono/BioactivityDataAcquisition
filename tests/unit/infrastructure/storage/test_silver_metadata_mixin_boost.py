@@ -92,12 +92,13 @@ class TestSilverWriterMetadataMixinBoost:
         host = _Host()
 
         with patch(
-            "bioetl.infrastructure.storage.silver.metadata_mixin.asyncio.to_thread",
-            new=AsyncMock(side_effect=DeltaTableNotFoundError("missing")),
-        ):
+            "bioetl.infrastructure.storage.silver.metadata_mixin._read_delta_version",
+            side_effect=DeltaTableNotFoundError("missing"),
+        ) as read_delta_version:
             result = await host._get_delta_version("/tmp/silver/table")
 
         assert result is None
+        read_delta_version.assert_called_once_with("/tmp/silver/table")
 
     def test_should_skip_silver_metadata_write_covers_guard_paths(self) -> None:
         host = _Host()

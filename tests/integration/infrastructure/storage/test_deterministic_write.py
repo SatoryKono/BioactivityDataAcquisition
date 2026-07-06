@@ -1,8 +1,6 @@
 """Integration tests for deterministic file-backed export and filter reads."""
 
 from __future__ import annotations
-
-import asyncio
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -53,9 +51,7 @@ class TestDeterministicCsvExport:
         """CSV export should sort records by configured columns."""
         csv_path = await csv_exporter.export("test_table", sample_table, append=False)
 
-        lines = (
-            await asyncio.to_thread(Path(csv_path).read_text, encoding="utf-8")
-        ).splitlines(keepends=True)
+        lines = Path(csv_path).read_text(encoding="utf-8").splitlines(keepends=True)
         ids = [line.split(",")[0].strip().replace('"', "") for line in lines[1:]]
 
         assert ids == ["A", "B", "C"]
@@ -75,9 +71,7 @@ class TestDeterministicCsvExport:
             )
             table = pa.Table.from_pylist(_reorder_records(sample_records, i))
             csv_path = await exporter.export("test", table, append=False)
-            outputs.append(
-                await asyncio.to_thread(Path(csv_path).read_text, encoding="utf-8")
-            )
+            outputs.append(Path(csv_path).read_text(encoding="utf-8"))
 
         assert outputs[0] == outputs[1] == outputs[2]
 
@@ -93,7 +87,7 @@ class TestDeterministicCsvExport:
         )
 
         csv_path = await csv_exporter.export("complex_test", table, append=False)
-        content = await asyncio.to_thread(Path(csv_path).read_text, encoding="utf-8")
+        content = Path(csv_path).read_text(encoding="utf-8")
 
         assert "A" in content.strip().split("\n")[1]
 

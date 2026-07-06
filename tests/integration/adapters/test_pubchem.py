@@ -14,7 +14,6 @@ Rate Limits:
 
 from __future__ import annotations
 
-import asyncio
 from collections.abc import Generator
 import os
 from concurrent.futures import ThreadPoolExecutor
@@ -94,10 +93,9 @@ def pubchem_adapter(
     entity_mapper = PubChemEntityMapper()
 
     async def run_in_executor(func, *args):
-        loop = asyncio.get_running_loop()
-        return await loop.run_in_executor(thread_pool, func, *args)
+        return func(*args)
 
-    return PubChemAdapter(
+    adapter = PubChemAdapter(
         logger=mock_logger,
         rate_limiter=rate_limiter,
         circuit_breaker=circuit_breaker,
@@ -115,6 +113,8 @@ def pubchem_adapter(
             request_collector=request_collector,
         ),
     )
+    adapter._run_in_executor = run_in_executor  # type: ignore[method-assign]
+    return adapter
 
 
 async def _consume_async_iter(async_iter) -> list[object]:

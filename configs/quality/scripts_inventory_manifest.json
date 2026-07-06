@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-05T16:23:51.921653+00:00",
+  "generated_at": "2026-07-05T18:15:50.993895+00:00",
   "summary": {
     "total_scripts": 452,
     "status_counts": {
@@ -6761,7 +6761,7 @@
         },
         {
           "path": "tests/architecture/test_architecture_quality_scorecard.py",
-          "line": 154,
+          "line": 156,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py::build_diagnostics_payload\""
         },
@@ -8731,13 +8731,13 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5700_5706_closeout.py",
-          "line": 92,
+          "line": 94,
           "source_group": "tests",
           "text": "assert \"scripts/engineering/qa/check_test_audit_preflight.py --strict\" in workflow"
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
-          "line": 292,
+          "line": 296,
           "source_group": "tests",
           "text": "command = \"scripts/engineering/qa/check_test_audit_preflight.py --strict\""
         }
@@ -9356,7 +9356,7 @@
         },
         {
           "path": "tests/architecture/test_architecture_quality_scorecard.py",
-          "line": 145,
+          "line": 147,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_adr_enforcement_matrix.py::build_payload\""
         }
@@ -9387,7 +9387,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py",
-          "line": 197,
+          "line": 200,
           "source_group": "tests",
           "text": "ROOT / \"scripts/engineering/qa/report_architecture_debt_remote_main_baseline.py\""
         }
@@ -9406,7 +9406,7 @@
       "references": [
         {
           "path": "tests/architecture/test_architecture_quality_scorecard.py",
-          "line": 23,
+          "line": 25,
           "source_group": "tests",
           "text": "\"`python scripts/engineering/qa/report_architecture_quality_scorecard.py`, \""
         }
@@ -9653,7 +9653,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py",
-          "line": 200,
+          "line": 203,
           "source_group": "tests",
           "text": "ROOT / \"scripts/engineering/qa/report_debt_governance_gates.py\""
         }
@@ -9829,7 +9829,7 @@
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 716,
+          "line": 718,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_module_coverage_inventory.py\""
         }

@@ -362,6 +362,8 @@ RESERVED_API_PARAMS = {
     "overrides",
     "config_path",
     "watermark",
+    "store_name",
+    "from_phase",
     "allows_retry",
     "compensation_required",
     "degraded_mode_allowed",

@@ -25,9 +25,25 @@ def _canonical_script() -> Path:
     )
 
 
-if __name__ == "__main__":
+def main(argv: list[str] | None = None) -> int:
+    """Run the canonical quality-exemptions checker with forwarded arguments."""
     script = _canonical_script()
     if not script.exists():
         sys.stderr.write(f"ERROR: canonical script not found: {script}\n")
-        raise SystemExit(2)
-    runpy.run_path(str(script), run_name="__main__")
+        return 2
+
+    original_argv = sys.argv
+    sys.argv = [str(script), *(argv or [])]
+    try:
+        runpy.run_path(str(script), run_name="__main__")
+    except SystemExit as exc:
+        if isinstance(exc.code, int):
+            return exc.code
+        return 0 if exc.code is None else 1
+    finally:
+        sys.argv = original_argv
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))
