@@ -37,24 +37,24 @@
       "status": "pass"
     },
     {
-      "current": "1f5ff86e7366e562d7aa31b595a4cd58f964c99caf7d7fa64e09aac6858fa2d5",
-      "limit": "67c6ce02bc467f29b70c2d60e484115af65f5eb531a52666b15fadbf291fd752",
+      "current": "f67b036eea4e490102516f1e94682a2b94af15d39b611f021b80209489e49ec4",
+      "limit": "f67b036eea4e490102516f1e94682a2b94af15d39b611f021b80209489e49ec4",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
       "source_artifact": "reports/quality/module-coverage-inventory.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": {
         "source_module_count": 2210,
-        "source_tree_sha256": "67c6ce02bc467f29b70c2d60e484115af65f5eb531a52666b15fadbf291fd752",
+        "source_tree_sha256": "f67b036eea4e490102516f1e94682a2b94af15d39b611f021b80209489e49ec4",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
         "source_module_count": 2210,
-        "source_tree_sha256": "67c6ce02bc467f29b70c2d60e484115af65f5eb531a52666b15fadbf291fd752",
+        "source_tree_sha256": "f67b036eea4e490102516f1e94682a2b94af15d39b611f021b80209489e49ec4",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -422,24 +422,23 @@
     "architecture_quality_scorecard": false,
     "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
-    "module_coverage_inventory": true,
-    "remote_main_baseline": false
+    "module_coverage_inventory": false,
+    "remote_main_baseline": true
   },
   "status_counts": {
-    "fail": 2,
-    "pass": 42,
+    "fail": 1,
+    "pass": 43,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 8.66,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 2,
+    "fail_count": 1,
     "failing_gates": [
-      "module_coverage_source_tree_hash_current",
       "generated_artifact_drift"
     ],
     "gate_count": 44,
-    "pass_count": 42,
+    "pass_count": 43,
     "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []

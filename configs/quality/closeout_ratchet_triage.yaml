@@ -309,3 +309,8 @@ entries:
     classification: budget_closeout_ratchet
     live_guard: "debt issue batch #6011-#6020 remains aligned with live hotspot family fan-in margin, duplication triage baselines, and coverage attempt evidence without budget growth."
     rationale: Keeps the newest architecture-debt closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issues_6022_6028_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue batch #6022-#6028 remains aligned with live governance, compatibility, duplication, and observability evidence without budget growth."
+    rationale: Keeps the newest architecture-debt closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.

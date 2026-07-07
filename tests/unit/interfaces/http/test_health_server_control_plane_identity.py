@@ -19,6 +19,8 @@ from bioetl.domain.control_plane import (
     RunLedgerEntry,
     RunManifest,
     RunSourceRef,
+    WorkflowManifest,
+    WorkflowManifestStep,
 )
 from bioetl.domain.control_plane.run_ledger import (
     COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
@@ -53,7 +55,11 @@ from bioetl.interfaces.http.control_plane_identity.specs import (
 )
 from bioetl.interfaces.http.control_plane_identity.types import AnchorSpec
 from bioetl.interfaces.http.health_server import HealthServer
-from tests.helpers.control_plane import InMemoryRunLedgerStore, InMemoryRunManifestStore
+from tests.helpers.control_plane import (
+    InMemoryRunLedgerStore,
+    InMemoryRunManifestStore,
+    InMemoryWorkflowManifestStore,
+)
 from tests.helpers.clock import fixed_test_clock
 
 
@@ -330,7 +336,7 @@ def test_control_plane_filter_options_narrows_manifest_catalog_before_ledger_rea
     )
 
     assert payload == {"items": ["-", str(run_id_1)]}
-    assert ledger_store.lookup_run_ids == [str(run_id_1)]
+    assert ledger_store.lookup_run_ids == []
 
 
 def test_control_plane_filter_options_fail_close_when_scope_has_no_matching_manifests() -> (
@@ -392,6 +398,77 @@ def test_control_plane_filter_options_fail_close_when_scope_has_no_matching_mani
     )
 
     assert payload == {"items": ["-"]}
+    assert ledger_store.lookup_run_ids == []
+
+
+def test_control_plane_filter_options_uses_workflow_manifest_child_pipeline_alias() -> (
+    None
+):
+    """Workflow selector scope should expose child pipeline runs from workflow manifests."""
+    manifest_store = InMemoryRunManifestStore()
+    workflow_manifest_store = InMemoryWorkflowManifestStore()
+    ledger_store = _CountingRunLedgerStore()
+    created_at = datetime(2026, 7, 6, 18, 9, tzinfo=UTC)
+    child_run_id = deterministic_run_uuid_from_callsite(
+        "test_health_server_control_plane_identity"
+    )
+    workflow_run_id = deterministic_run_uuid_from_callsite(
+        "test_health_server_control_plane_identity"
+    )
+
+    manifest_store.save(
+        RunManifest(
+            manifest_id="manifest-child-assay",
+            execution_fingerprint="fingerprint-child-assay",
+            schema_version="1.0",
+            created_at=created_at,
+            run_id=child_run_id,
+            run_type=RunType.BACKFILL,
+            pipeline_name="chembl_assay",
+            provider="chembl",
+            entity="assay",
+            launch_context={},
+            runtime_config={"run_type": "backfill"},
+            resolved_config={"pipeline_name": "chembl_assay"},
+            code_provenance=RunCodeProvenance(),
+        )
+    )
+    workflow_manifest_store.save(
+        WorkflowManifest(
+            manifest_id="workflow-manifest-chembl-baseline",
+            workflow_run_id=workflow_run_id,
+            execution_fingerprint="workflow-fingerprint",
+            schema_version="1.0",
+            created_at=created_at + timedelta(minutes=1),
+            workflow_name="chembl_baseline",
+            workflow_version="1.1.0",
+            launch_context={},
+            defaults={"run_type": "backfill"},
+            selected_step_ids=("run_chembl_assay",),
+            steps=(
+                WorkflowManifestStep(
+                    step_id="run_chembl_assay",
+                    kind="pipeline",
+                    pipeline_name="chembl_assay",
+                    run_options={"run_type": "backfill"},
+                ),
+            ),
+        )
+    )
+
+    payload = build_selector_filter_options_payload(
+        manifests=manifest_store.list_all(),
+        ledger_port=ledger_store,
+        workflow_manifests=workflow_manifest_store.list_all(),
+        dimension="run_id",
+        response_shape="list",
+        requested_pipeline="chembl_assay",
+        selected_workflows=("chembl_baseline",),
+        selected_pipelines=("chembl_assay",),
+        selected_run_types=("backfill",),
+    )
+
+    assert payload == {"items": ["-", str(child_run_id)]}
     assert ledger_store.lookup_run_ids == []
 
 
@@ -520,6 +597,7 @@ class TestHealthServerControlPlaneSelector:
     ) -> AsyncGenerator[tuple[HealthServer, InMemoryRunManifestStore], None]:
         """Start server with an in-memory control-plane run catalog."""
         manifest_store = InMemoryRunManifestStore()
+        workflow_manifest_store = InMemoryWorkflowManifestStore()
         ledger_store = InMemoryRunLedgerStore()
         checkpoint_port = LocalCheckpointAdapter(
             base_path=tmp_path_factory.mktemp("control-plane-checkpoints")
@@ -535,6 +613,9 @@ class TestHealthServerControlPlaneSelector:
             "test_health_server_control_plane_identity"
         )
         run_id_4 = deterministic_run_uuid_from_callsite(
+            "test_health_server_control_plane_identity"
+        )
+        workflow_run_id = deterministic_run_uuid_from_callsite(
             "test_health_server_control_plane_identity"
         )
         input_snapshot = RunInputSnapshotRef(
@@ -705,6 +786,28 @@ class TestHealthServerControlPlaneSelector:
                 ),
             )
         )
+        workflow_manifest_store.save(
+            WorkflowManifest(
+                manifest_id="workflow-manifest-chembl-baseline",
+                workflow_run_id=workflow_run_id,
+                execution_fingerprint="workflow-fingerprint-chembl-baseline",
+                schema_version="1.0",
+                created_at=created_at + timedelta(minutes=5),
+                workflow_name="chembl_baseline",
+                workflow_version="1.1.0",
+                launch_context={},
+                defaults={"run_type": "backfill"},
+                selected_step_ids=("run_chembl_activity",),
+                steps=(
+                    WorkflowManifestStep(
+                        step_id="run_chembl_activity",
+                        kind="pipeline",
+                        pipeline_name="chembl_activity",
+                        run_options={"run_type": "backfill"},
+                    ),
+                ),
+            )
+        )
         ledger_store.append(
             RunLedgerEntry(
                 entry_id="ledger-1",
@@ -781,6 +884,7 @@ class TestHealthServerControlPlaneSelector:
                 checkpoint_port=checkpoint_port,
                 run_manifest_port=manifest_store,
                 run_ledger_port=ledger_store,
+                workflow_manifest_port=workflow_manifest_store,
             )
             await server.start()
             yield server, manifest_store
@@ -964,6 +1068,35 @@ class TestHealthServerControlPlaneSelector:
             "GET",
             "/ops/control-plane/filter-options?"
             "dimension=run_id&response_shape=list&pipeline=chembl_activity&run_type=$__all",
+        )
+
+        assert status_code == 200
+        data = json.loads(body)
+        assert data == {"items": ["-", *expected_run_ids]}
+
+    @pytest.mark.asyncio(loop_scope="module")
+    async def test_control_plane_endpoint_resolves_workflow_child_pipeline_run_ids(
+        self,
+        running_server_with_run_catalog: tuple[HealthServer, InMemoryRunManifestStore],
+    ) -> None:
+        """Workflow manifest aliases should expose child pipeline run IDs."""
+        server, manifest_store = running_server_with_run_catalog
+        port = self._get_server_port(server)
+        expected_run_ids = [
+            str(manifest.run_id)
+            for manifest in manifest_store.list_all()
+            if manifest.pipeline_name == "chembl_activity"
+            and manifest.run_type == RunType.BACKFILL
+        ]
+
+        status_code, _, body = await self._send_request(
+            port,
+            "GET",
+            "/ops/control-plane/filter-options?"
+            "dimension=run_id&response_shape=list"
+            "&workflow=chembl_baseline"
+            "&pipeline=chembl_activity"
+            "&run_type=backfill",
         )
 
         assert status_code == 200

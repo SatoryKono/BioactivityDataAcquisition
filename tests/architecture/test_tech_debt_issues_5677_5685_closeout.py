@@ -113,7 +113,7 @@ def test_issue_5678_contract_exclusions_are_burned_down_to_zero() -> None:
 
 def test_issues_5679_5680_5685_duplication_ratchets_are_lower() -> None:
     duplication = _load_json(DUPLICATION_BASELINE)
-    cli = _target(duplication, "src/bioetl/interfaces/cli")
+    # CLI target was removed from duplication baseline
     adapters = _target(duplication, "src/bioetl/infrastructure/adapters")
     pipelines = _target(duplication, "src/bioetl/application/pipelines")
     bootstrap = _target(duplication, "src/bioetl/composition/bootstrap")
@@ -129,18 +129,17 @@ def test_issues_5679_5680_5685_duplication_ratchets_are_lower() -> None:
     assert (
         adapters["duplicate_count"] == ratchets["adapter_duplicate_clusters"]["current"]
     )
-    assert adapters["duplicate_count"] < 58
+    assert adapters["duplicate_count"] == 0
     assert (
         pipelines["duplicate_count"]
         == ratchets["pipeline_duplicate_clusters"]["current"]
     )
-    assert pipelines["duplicate_count"] < 16
-    assert cli["duplicate_count"] == ratchets["cli_duplicate_clusters"]["current"]
-    assert all(row["duplicate_clusters"] == 0 for row in cli["actionability"])
+    assert pipelines["duplicate_count"] == 2
     assert bootstrap["duplicate_count"] == 0
 
     assert ratchets["full_app_duplicate_clusters"]["current"] <= 60
-    assert ratchets["adapter_duplicate_clusters"]["current"] < 58
+    assert ratchets["adapter_duplicate_clusters"]["current"] == 0
+    assert ratchets["pipeline_duplicate_clusters"]["current"] == 2
     assert ratchets["pipeline_duplicate_clusters"]["current"] < 16
     assert ratchets["cli_duplicate_clusters"]["current"] == 0
     assert {row["direction"] for row in ratchets.values()} == {"reduced"}

@@ -1173,9 +1173,9 @@ detached backend unless `--no-ensure-observability-backend` is passed, so one
 operator run command is normally enough for `ID` and detail panels to populate.
 The default Docker-backed Grafana datasource URL is
 `http://quarantine-explorer:8081`, which resolves to the long-lived
-`quarantine-explorer` service on the monitoring network. Local host-backed
-overrides may still set `BIOETL_QUARANTINE_EXPLORER_URL` to
-`http://host.docker.internal:8081`.
+`quarantine-explorer` network alias on the monitoring network, even when the
+container name is `bioetl-quarantine-explorer`. Local host-backed overrides may
+still set `BIOETL_QUARANTINE_EXPLORER_URL` to `http://host.docker.internal:8081`.
 The shipped Grafana bootstrap entrypoint also removes a stale local
 `grafana-image-renderer` plugin from `/var/lib/grafana/plugins/` when remote
 renderer mode is active, preventing restart loops caused by old persistent
@@ -1609,9 +1609,11 @@ docker compose -f docker-compose.monitoring.yml restart grafana
 ```
 
 Grafana из Docker по умолчанию обращается к `http://quarantine-explorer:8081`
-(см. `BIOETL_QUARANTINE_EXPLORER_URL`). Если backend запускается вручную на
-host, переопредели переменную на `http://host.docker.internal:8081`; такой
-backend должен слушать `0.0.0.0:8081`, не только `127.0.0.1`.
+(см. `BIOETL_QUARANTINE_EXPLORER_URL`); compose surfaces должны держать этот
+network alias на monitoring network даже при container name
+`bioetl-quarantine-explorer`. Если backend запускается вручную на host,
+переопредели переменную на `http://host.docker.internal:8081`; такой backend
+должен слушать `0.0.0.0:8081`, не только `127.0.0.1`.
 
 ### 15.2 Prometheus Target DOWN
 

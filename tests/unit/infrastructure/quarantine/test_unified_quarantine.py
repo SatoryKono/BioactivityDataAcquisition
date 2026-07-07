@@ -928,6 +928,34 @@ class TestUnifiedQuarantineFilteredExplorer:
         assert result["run_ids"] == ["run-1"]
 
     @pytest.mark.asyncio
+    async def test_filtered_stats_reads_legacy_non_partitioned_delta_table(
+        self,
+        quarantine,
+        mock_delta_table,
+    ):
+        """Filtered stats should support legacy Delta tables not partitioned by pipeline."""
+        mock_table = MagicMock()
+        mock_metadata = MagicMock()
+        mock_metadata.partition_columns = []
+        mock_table.metadata.return_value = mock_metadata
+        mock_arrow_table = MagicMock()
+        mock_arrow_table.to_pylist.return_value = []
+        mock_table.to_pyarrow_table.return_value = mock_arrow_table
+        mock_delta_table.return_value = mock_table
+
+        result = await quarantine.get_filtered_stats(
+            pipeline="chembl_assay",
+            run_type="backfill",
+            run_id="run-1",
+        )
+
+        assert result["total"] == 0
+        assert result["run_ids"] == ["run-1"]
+        read_kwargs = mock_table.to_pyarrow_table.call_args.kwargs
+        assert read_kwargs["partitions"] is None
+        assert ("pipeline", "=", "chembl_assay") in read_kwargs["filters"]
+
+    @pytest.mark.asyncio
     async def test_get_filtered_filter_options_resolves_run_type_from_manifest(
         self,
         quarantine,

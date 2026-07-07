@@ -15,6 +15,7 @@ from bioetl.domain.ports import (
     LoggerPort,
     RunLedgerPort,
     RunManifestPort,
+    WorkflowManifestPort,
 )
 from bioetl.interfaces.http.health_server_http_mixin import HealthServerHTTPMixin
 from bioetl.interfaces.http.health_server_routing_mixin import (
@@ -45,6 +46,7 @@ class HealthServer(
         checkpoint_port: CheckpointPort | None = None,
         run_manifest_port: RunManifestPort | None = None,
         run_ledger_port: RunLedgerPort | None = None,
+        workflow_manifest_port: WorkflowManifestPort | None = None,
         prometheus_base_url: str | None = None,
         logger: LoggerPort | None = None,
     ) -> None:
@@ -64,6 +66,8 @@ class HealthServer(
                 used by /ops/control-plane/* selector endpoints.
             run_ledger_port: Optional read-only control-plane run ledger used
                 to resolve latest terminal run completion for selector endpoints.
+            workflow_manifest_port: Optional read-only workflow manifest catalog used
+                to relate workflow selectors to child pipeline run manifests.
             prometheus_base_url: Optional Prometheus HTTP API base URL for local
                 dashboard helper endpoints such as
                 /ops/observability/processed-records.
@@ -78,6 +82,7 @@ class HealthServer(
         self._checkpoint_port = checkpoint_port
         self._run_manifest_port = run_manifest_port
         self._run_ledger_port = run_ledger_port
+        self._workflow_manifest_port = workflow_manifest_port
         self._prometheus_base_url = (
             prometheus_base_url or DEFAULT_PROMETHEUS_BASE_URL
         ).rstrip("/")
@@ -166,6 +171,7 @@ async def run_health_server(
     checkpoint_port: CheckpointPort | None = None,
     run_manifest_port: RunManifestPort | None = None,
     run_ledger_port: RunLedgerPort | None = None,
+    workflow_manifest_port: WorkflowManifestPort | None = None,
     prometheus_base_url: str | None = None,
     logger: LoggerPort | None = None,
 ) -> None:
@@ -183,6 +189,7 @@ async def run_health_server(
         checkpoint_port: Optional read-only checkpoint storage.
         run_manifest_port: Optional read-only control-plane manifest catalog.
         run_ledger_port: Optional read-only control-plane run ledger.
+        workflow_manifest_port: Optional read-only workflow manifest catalog.
         prometheus_base_url: Optional Prometheus HTTP API base URL.
         logger: Optional LoggerPort for structured server event logging.
     """
@@ -194,6 +201,7 @@ async def run_health_server(
         checkpoint_port=checkpoint_port,
         run_manifest_port=run_manifest_port,
         run_ledger_port=run_ledger_port,
+        workflow_manifest_port=workflow_manifest_port,
         prometheus_base_url=prometheus_base_url,
         logger=logger,
     )

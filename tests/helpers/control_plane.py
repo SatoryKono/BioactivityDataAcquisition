@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
-from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
-from bioetl.domain.ports import RunLedgerPort, RunManifestPort
+from bioetl.domain.control_plane import RunLedgerEntry, RunManifest, WorkflowManifest
+from bioetl.domain.ports import RunLedgerPort, RunManifestPort, WorkflowManifestPort
 from bioetl.domain.types import RunID
 
-__all__ = ["InMemoryRunLedgerStore", "InMemoryRunManifestStore"]
+__all__ = [
+    "InMemoryRunLedgerStore",
+    "InMemoryRunManifestStore",
+    "InMemoryWorkflowManifestStore",
+]
 
 
 class InMemoryRunManifestStore(RunManifestPort):
@@ -30,6 +34,31 @@ class InMemoryRunManifestStore(RunManifestPort):
         return None if manifest_id is None else self._items.get(manifest_id)
 
     def list_all(self) -> tuple[RunManifest, ...]:
+        return tuple(
+            sorted(
+                self._items.values(),
+                key=lambda manifest: (manifest.created_at, manifest.manifest_id),
+            )
+        )
+
+
+class InMemoryWorkflowManifestStore(WorkflowManifestPort):
+    def __init__(self) -> None:
+        self._items: dict[str, WorkflowManifest] = {}
+        self._by_run_id: dict[str, str] = {}
+
+    def save(self, manifest: WorkflowManifest) -> None:
+        self._items[manifest.manifest_id] = manifest
+        self._by_run_id[str(manifest.workflow_run_id)] = manifest.manifest_id
+
+    def get(self, manifest_id: str) -> WorkflowManifest | None:
+        return self._items.get(manifest_id)
+
+    def get_by_run_id(self, workflow_run_id: RunID) -> WorkflowManifest | None:
+        manifest_id = self._by_run_id.get(str(workflow_run_id))
+        return None if manifest_id is None else self._items.get(manifest_id)
+
+    def list_all(self) -> tuple[WorkflowManifest, ...]:
         return tuple(
             sorted(
                 self._items.values(),

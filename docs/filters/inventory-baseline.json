@@ -1631,7 +1631,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "src/bioetl/infrastructure/quarantine/filtered_reads.py",
       "occurrence_count": 2,
-      "first_line": 64,
+      "first_line": 91,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1653,7 +1653,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py",
       "occurrence_count": 1,
-      "first_line": 18,
+      "first_line": 19,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""

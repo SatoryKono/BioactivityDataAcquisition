@@ -114,6 +114,34 @@ class FileWorkflowManifestStore(WorkflowManifestPort):
                 duration_seconds=perf_counter() - started_at,
             )
 
+    def list_all(self) -> tuple[WorkflowManifest, ...]:
+        """List all workflow manifests in deterministic creation order."""
+        started_at = perf_counter()
+        status = "success"
+        try:
+            manifests = tuple(
+                manifest
+                for path in sorted(self.base_path.glob("*.json"))
+                if (manifest := self._load_manifest(path.stem)) is not None
+            )
+            return tuple(
+                sorted(
+                    manifests,
+                    key=lambda manifest: (manifest.created_at, manifest.manifest_id),
+                )
+            )
+        except (OSError, TypeError, ValueError):
+            status = "failed"
+            raise
+        finally:
+            emit_control_plane_read_metrics(
+                self.metrics,
+                store="workflow_manifest",
+                operation="list_all",
+                status=status,
+                duration_seconds=perf_counter() - started_at,
+            )
+
     def _load_manifest(self, manifest_id: str) -> WorkflowManifest | None:
         manifest_path = self.base_path / f"{manifest_id}.json"
         if not manifest_path.exists():

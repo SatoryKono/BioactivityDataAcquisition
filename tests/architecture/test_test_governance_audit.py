@@ -222,7 +222,7 @@ def test_test_audit_closeout_2026_06_19_tracks_issue_pack_evidence() -> None:
 
 @pytest.mark.architecture
 def test_rf_009_test_governance_closeout_tracks_live_zero_debt_metrics() -> None:
-    """RF-009 closeout now tracks duplicate names (non-zero after #5763 baseline refresh)."""
+    """RF-009 closeout now tracks duplicate names (reduced to 0 after cleanup)."""
     payload = _load_yaml(CONFIG_PATH)
     closeout = cast(YamlMap, payload["rf_009_closeout"])
     report = json.loads(TEST_GOVERNANCE_ARTIFACT_PATH.read_text(encoding="utf-8"))
@@ -238,8 +238,7 @@ def test_rf_009_test_governance_closeout_tracks_live_zero_debt_metrics() -> None
             f"RF-009 closeout references missing evidence: {relative_path}"
         )
 
-    # After #5763, duplicate_name_zero changed to duplicate_name_tracking
-    # and we now have 2 duplicate names with 4 occurrences
+    # After cleanup, duplicate_test_names reduced to 0
     assert set(cast(list[str], closeout["coverage_surfaces"])) == {
         "assertless_zero_ratchet",
         "compatibility_inventory_rationale",
@@ -250,18 +249,14 @@ def test_rf_009_test_governance_closeout_tracks_live_zero_debt_metrics() -> None
         "tracing_emission_observability",
     }
 
-    # Verify non-zero duplicate names are now expected
-    assert int(report["duplicate_test_names"]) == int(
-        closeout["live_metrics"]["duplicate_test_names"]
-    )
-    assert int(report["duplicate_test_name_occurrences"]) == int(
-        closeout["live_metrics"]["duplicate_test_name_occurrences"]
-    )
+    # Verify duplicate names are now at 0 after cleanup
+    assert int(report["duplicate_test_names"]) == 0
+    assert int(report["duplicate_test_name_occurrences"]) == 0
 
     # All other metrics should still be zero
     for metric_name, expected_value in cast(YamlMap, closeout["live_metrics"]).items():
         if metric_name in ("duplicate_test_names", "duplicate_test_name_occurrences"):
-            continue  # Skip duplicate name metrics (now non-zero)
+            continue  # Skip duplicate name metrics (now zero)
         assert int(report[metric_name]) == int(expected_value)
 
 
@@ -461,17 +456,10 @@ def test_duplicate_name_triage_tracks_top_generic_names() -> None:
     report = json.loads(TEST_GOVERNANCE_ARTIFACT_PATH.read_text(encoding="utf-8"))
     triage = cast(YamlMap, payload["duplicate_name_triage"])
 
-    assert triage["total_duplicate_names"] == report["duplicate_test_names"]
-    assert triage["duplicate_occurrences"] == report["duplicate_test_name_occurrences"]
-    configured_top = {
-        cast(str, entry["name"]): int(cast(int, entry["count"]))
-        for entry in cast(list[YamlMap], triage["top_generic_names"])
-    }
-    report_top = {
-        cast(str, entry["name"]): int(cast(int, entry["count"]))
-        for entry in report["top_duplicate_test_names"][: len(configured_top)]
-    }
-    assert configured_top == report_top
+    # After cleanup, duplicate names are at 0
+    assert triage["total_duplicate_names"] == 0
+    assert triage["duplicate_occurrences"] == 0
+    assert cast(list[YamlMap], triage["top_generic_names"]) == []
     assert cast(YamlMap, triage["fixture_builder_policy"])["consolidate_when"]
 
 

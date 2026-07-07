@@ -194,3 +194,17 @@ def test_config_parameter_taxonomy_has_owner_and_no_unclassified_parameters() ->
         assert family_taxonomy["unclassified_parameters"] == []
         groups = family_taxonomy["groups"]
         assert isinstance(groups, dict) and groups
+
+
+@pytest.mark.architecture
+def test_profile_derived_organism_class_filter_is_outside_ratchet_vocabulary() -> None:
+    """Derived target organism_class filtering must not grow config-surface debt."""
+    entity_keys = {
+        key
+        for config in _collect_family_configs()["entity_effective"].values()
+        for key in config
+    }
+
+    assert "filters.gold_filters.columns.organism_class" not in entity_keys
+    assert "filters.gold_filters.columns.organism_class.operator" not in entity_keys
+    assert "filters.gold_filters.columns.organism_class.values" not in entity_keys

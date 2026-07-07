@@ -6,6 +6,7 @@ import asyncio
 from typing import Protocol, cast
 
 from bioetl.application.runtime_clock import current_utc_time
+from bioetl.domain.control_plane import WorkflowManifest
 from bioetl.interfaces.http._health_server_checkpoint_freshness_payloads import (
     build_checkpoint_freshness_ok_payload,
     build_checkpoint_freshness_unknown_payload,
@@ -64,6 +65,7 @@ class _HealthRoutingHost(_HealthResponseSupport, Protocol):
     _checkpoint_port: object | None
     _run_manifest_port: object | None
     _run_ledger_port: object | None
+    _workflow_manifest_port: object | None
 
     def _read_required_param(self, query: dict[str, str], name: str) -> str: ...
 
@@ -139,6 +141,8 @@ async def handle_control_plane_ready(
     payload = {
         "run_manifest_port": host._run_manifest_port is not None,
         "run_ledger_port": host._run_ledger_port is not None,
+        "workflow_manifest_port": getattr(host, "_workflow_manifest_port", None)
+        is not None,
         "checkpoint_port": host._checkpoint_port is not None,
     }
     status_code = 200 if payload["run_manifest_port"] else 503
@@ -168,10 +172,12 @@ async def handle_control_plane_filter_options(
     fallback_value = host._read_optional_param(query, "fallback_value")
 
     manifests = await asyncio.to_thread(host._run_manifest_port.list_all)
+    workflow_manifests = await _list_workflow_manifests(host)
     payload = await asyncio.to_thread(
         build_selector_filter_options_payload,
         manifests=manifests,
         ledger_port=host._run_ledger_port,
+        workflow_manifests=workflow_manifests,
         dimension=dimension,
         response_shape=response_shape,
         requested_pipeline=requested_pipeline,
@@ -205,10 +211,12 @@ async def handle_control_plane_selector_context(
     """Resolve a coherent selector tuple for dashboard selector shells."""
     assert host._run_manifest_port is not None
     manifests = await asyncio.to_thread(host._run_manifest_port.list_all)
+    workflow_manifests = await _list_workflow_manifests(host)
     payload = await asyncio.to_thread(
         build_selector_context_payload,
         manifests=manifests,
         ledger_port=host._run_ledger_port,
+        workflow_manifests=workflow_manifests,
         selected_workflows=host._read_scope_csv_param(query, "workflow"),
         selected_pipelines=host._read_scope_csv_param(query, "pipeline"),
         selected_run_types=host._read_scope_csv_param(query, "run_type"),
@@ -216,6 +224,18 @@ async def handle_control_plane_selector_context(
         selected_run_id=read_selected_run_id(host, query),
     )
     await host._send_payload_response(writer, 200, payload)
+
+
+async def _list_workflow_manifests(
+    host: _HealthRoutingHost,
+) -> tuple[WorkflowManifest, ...]:
+    workflow_manifest_port = getattr(host, "_workflow_manifest_port", None)
+    if workflow_manifest_port is None or not hasattr(workflow_manifest_port, "list_all"):
+        return ()
+    return cast(
+        tuple[WorkflowManifest, ...],
+        await asyncio.to_thread(workflow_manifest_port.list_all),
+    )
 
 
 def _resolved_scope_pipeline(scope: object) -> str:

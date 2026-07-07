@@ -222,9 +222,7 @@ def _build_first_wave_selection(
         "status": "selected",
         "target": selected["target"],
         "duplicate_clusters": selected["duplicate_clusters"],
-        "dominant_actionability_category": selected[
-            "dominant_actionability_category"
-        ],
+        "dominant_actionability_category": selected["dominant_actionability_category"],
         "selection_rule": (
             "prefer low-risk actionability families with bounded cluster counts, "
             "then maximize duplicate reduction leverage"
@@ -317,7 +315,8 @@ def _filter_clusters_by_actionability_categories(
     return [
         cluster
         for cluster in clusters
-        if _cluster_actionability_category(cluster) not in exclude_actionability_categories
+        if _cluster_actionability_category(cluster)
+        not in exclude_actionability_categories
     ]
 
 
@@ -982,9 +981,7 @@ def main() -> int:
         _render_markdown(
             reports,
             exclude_module_patterns=tuple(args.exclude_module_pattern),
-            exclude_actionability_categories=tuple(
-                args.exclude_actionability_category
-            ),
+            exclude_actionability_categories=tuple(args.exclude_actionability_category),
             trend_summary=trend_summary,
             max_duplicate_clusters=args.max_duplicate_clusters,
         ),

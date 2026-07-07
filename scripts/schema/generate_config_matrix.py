@@ -86,6 +86,7 @@ _DERIVED_ENTITY_PARAMETER_PREFIXES: tuple[str, ...] = (
     "contracts.contract_ref",
     "contracts.active_version",
     "contracts.rollout",
+    "filters.gold_filters.columns.organism_class",
 )
 
 
@@ -107,12 +108,12 @@ def flatten_dict(d: dict[str, Any], parent_key: str = "") -> dict[str, Any]:
 def _exclude_derived_entity_parameters(
     flattened: dict[str, Any],
 ) -> dict[str, Any]:
-    """Drop deterministic contract mirror fields from config-surface debt metrics.
+    """Drop deterministic mirror fields from config-surface debt metrics.
 
-    These fields remain explicit in entity YAML for runtime identity validation, but
-    they are derived from other governed sources (`provider`, `entity`,
-    `hash_policy.contract.version`) and should not inflate discrepancy-budget
-    parameter counts.
+    These fields remain explicit in entity YAML for runtime validation/filtering,
+    but they are derived from other governed sources (`provider`, `entity`,
+    `hash_policy.contract.version`, normalization profiles) and should not inflate
+    discrepancy-budget parameter counts.
     """
     return {
         key: value

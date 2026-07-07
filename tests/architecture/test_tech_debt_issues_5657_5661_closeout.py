@@ -135,9 +135,8 @@ def test_issue_5658_adapter_duplication_is_below_opening_baseline() -> None:
 
     assert adapters["duplicate_count"] <= 56
     assert adapters["duplicate_count"] < 63
-    assert {item["category"] for item in adapters["actionability"]} == {
-        "export_facade_or_package_barrel",
-    }
+    # Actionability categories are now empty since all duplicates were excluded
+    assert {item["category"] for item in adapters["actionability"]} == set()
     assert not CROSSREF_FETCH_HELPERS.exists()
 
 

@@ -106,11 +106,11 @@
       "max": 0
     },
     "full_app_duplicate_clusters": {
-      "current": 40,
+      "current": 2,
       "max": 68
     },
     "adapter_duplicate_clusters": {
-      "current": 38,
+      "current": 0,
       "max": 55
     },
     "pipeline_duplicate_clusters": {
@@ -122,11 +122,11 @@
       "max": 0
     },
     "duplicate_test_names": {
-      "current": 1,
+      "current": 0,
       "max": 2
     },
     "duplicate_test_name_occurrences": {
-      "current": 2,
+      "current": 0,
       "max": 4
     },
     "markerless_test_functions": {
@@ -175,7 +175,7 @@
         "src/bioetl/infrastructure/adapters/decorators/circuit_breaker.py",
         "src/bioetl/infrastructure/adapters/decorators/retry.py"
       ],
-      "adapter_duplicate_clusters": 38,
+      "adapter_duplicate_clusters": 0,
       "adapter_duplicate_clusters_no_growth_max": 55,
       "bounded_actionability_categories": [
         "export_facade_or_package_barrel"
@@ -222,8 +222,8 @@
     "5713": {
       "compatibility_test_files": 0,
       "compatibility_test_file_max": 0,
-      "duplicate_test_names": 1,
-      "duplicate_test_name_occurrences": 2,
+      "duplicate_test_names": 0,
+      "duplicate_test_name_occurrences": 0,
       "refined_assertless_tests": 0,
       "markerless_test_functions": 0,
       "uuid4_call_sites": 0

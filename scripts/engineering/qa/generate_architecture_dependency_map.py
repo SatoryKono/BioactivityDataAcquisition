@@ -296,17 +296,17 @@ class _RuntimeImportTargetVisitor(ast.NodeVisitor):
         self._source_module = source_module
         self.targets: list[str] = []
 
-    def visit_If(self, node: ast.If) -> None:  # noqa: N802 - ast visitor API
+    def visit_If(self, node: ast.If) -> None:
         if _is_type_checking_guard(node.test):
             for child in node.orelse:
                 self.visit(child)
             return
         self.generic_visit(node)
 
-    def visit_Import(self, node: ast.Import) -> None:  # noqa: N802 - ast visitor API
+    def visit_Import(self, node: ast.Import) -> None:
         self.targets.extend(_import_targets_from_import(node))
 
-    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:  # noqa: N802
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
         if node.level == 0:
             self.targets.extend(_import_targets_from_absolute_import_from(node))
             return
