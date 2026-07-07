@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
 
-from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
+from bioetl.domain.control_plane import RunLedgerEntry, RunManifest, WorkflowManifest
 from bioetl.domain.control_plane.run_ledger import (
     RUN_FAILED_EVENT,
     RUN_FINISHED_EVENT,
@@ -19,6 +19,7 @@ _ALL_SCOPE_TOKENS = frozenset({ALL_SCOPE, "$__all", "__all", "*"})
 _TERMINAL_EVENT_TYPES = frozenset(
     {RUN_FINISHED_EVENT, RUN_FAILED_EVENT, RUN_SHUTDOWN_EVENT}
 )
+WorkflowAliasMap = dict[tuple[str, str | None], tuple[str, ...]]
 
 
 class RunLedgerLookup(Protocol):
@@ -45,9 +46,11 @@ class SelectorRecord:
 def build_selector_records(
     manifests: tuple[RunManifest, ...],
     ledger_port: RunLedgerLookup | None,
+    workflow_aliases: WorkflowAliasMap | None = None,
 ) -> tuple[SelectorRecord, ...]:
     return tuple(
-        _build_selector_record(manifest, ledger_port) for manifest in manifests
+        _build_selector_record(manifest, ledger_port, workflow_aliases)
+        for manifest in manifests
     )
 
 
@@ -69,6 +72,7 @@ def narrow_manifest_catalog(
     selected_pipelines: tuple[str, ...],
     selected_run_types: tuple[str, ...],
     selected_run_id: str | None,
+    workflow_aliases: WorkflowAliasMap | None = None,
     fail_open_when_empty: bool = True,
 ) -> tuple[RunManifest, ...]:
     """Prune manifest candidates before ledger lookups for selector endpoints."""
@@ -81,6 +85,7 @@ def narrow_manifest_catalog(
             selected_pipelines=selected_pipelines,
             selected_run_types=selected_run_types,
             selected_run_id=selected_run_id,
+            workflow_aliases=workflow_aliases,
         )
     )
     if narrowed or not fail_open_when_empty:
@@ -95,6 +100,7 @@ def _manifest_matches_scope(
     selected_pipelines: tuple[str, ...],
     selected_run_types: tuple[str, ...],
     selected_run_id: str | None,
+    workflow_aliases: WorkflowAliasMap | None,
 ) -> bool:
     if selected_run_id is not None:
         return str(manifest.run_id) == selected_run_id
@@ -104,15 +110,41 @@ def _manifest_matches_scope(
         return False
     if not selected_workflows:
         return True
-    return bool(set(selected_workflows) & set(_workflow_candidates(manifest)))
+    return bool(
+        set(selected_workflows) & set(_workflow_candidates(manifest, workflow_aliases))
+    )
+
+
+def build_workflow_aliases(
+    workflow_manifests: tuple[WorkflowManifest, ...],
+) -> WorkflowAliasMap:
+    """Map pipeline/run_type tuples to workflow names from workflow manifests."""
+    aliases: dict[tuple[str, str | None], list[str]] = {}
+    for workflow_manifest in workflow_manifests:
+        selected_step_ids = set(workflow_manifest.selected_step_ids)
+        for step in workflow_manifest.steps:
+            if selected_step_ids and step.step_id not in selected_step_ids:
+                continue
+            pipeline_name = _optional_text(step.pipeline_name)
+            if pipeline_name is None:
+                continue
+            run_type = _workflow_step_run_type(
+                step.run_options,
+                workflow_manifest.defaults,
+            )
+            bucket = aliases.setdefault((pipeline_name, run_type), [])
+            if workflow_manifest.workflow_name not in bucket:
+                bucket.append(workflow_manifest.workflow_name)
+    return {key: tuple(values) for key, values in aliases.items()}
 
 
 def _build_selector_record(
     manifest: RunManifest,
     ledger_port: RunLedgerLookup | None,
+    workflow_aliases: WorkflowAliasMap | None,
 ) -> SelectorRecord:
     terminal_entry = _latest_terminal_entry(manifest.run_id, ledger_port)
-    workflow_candidates = _workflow_candidates(manifest)
+    workflow_candidates = _workflow_candidates(manifest, workflow_aliases)
     completed_at = terminal_entry.occurred_at if terminal_entry else manifest.created_at
     return SelectorRecord(
         manifest=manifest,
@@ -153,7 +185,10 @@ def _latest_terminal_entry(
     return max(terminal_entries, key=lambda entry: (entry.occurred_at, entry.entry_id))
 
 
-def _workflow_candidates(manifest: RunManifest) -> tuple[str, ...]:
+def _workflow_candidates(
+    manifest: RunManifest,
+    workflow_aliases: WorkflowAliasMap | None = None,
+) -> tuple[str, ...]:
     candidates: list[str] = []
     for payload in (
         manifest.launch_context,
@@ -162,9 +197,39 @@ def _workflow_candidates(manifest: RunManifest) -> tuple[str, ...]:
     ):
         _append_optional_candidate(candidates, payload.get("workflow_name"))
         _append_optional_candidate(candidates, payload.get("workflow"))
+    for alias in _workflow_alias_candidates(manifest, workflow_aliases):
+        _append_optional_candidate(candidates, alias)
     _append_optional_candidate(candidates, manifest.pipeline_name)
     _append_optional_candidate(candidates, f"workflow_{manifest.pipeline_name}")
     return tuple(candidates)
+
+
+def _workflow_alias_candidates(
+    manifest: RunManifest,
+    workflow_aliases: WorkflowAliasMap | None,
+) -> tuple[str, ...]:
+    if not workflow_aliases:
+        return ()
+    return (
+        *workflow_aliases.get((manifest.pipeline_name, manifest.run_type.value), ()),
+        *workflow_aliases.get((manifest.pipeline_name, None), ()),
+    )
+
+
+def _workflow_step_run_type(
+    run_options: dict[str, object] | None,
+    defaults: dict[str, object],
+) -> str | None:
+    return _optional_text((run_options or {}).get("run_type")) or _optional_text(
+        defaults.get("run_type")
+    )
+
+
+def _optional_text(value: object) -> str | None:
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
 
 
 def _append_optional_candidate(candidates: list[str], value: object) -> None:

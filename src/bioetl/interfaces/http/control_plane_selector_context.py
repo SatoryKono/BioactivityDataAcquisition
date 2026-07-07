@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.domain.control_plane import RunManifest
+from bioetl.domain.control_plane import RunManifest, WorkflowManifest
 from bioetl.interfaces.http._control_plane_selector_filters import (
     filter_records,
     latest_record,
@@ -19,6 +19,7 @@ from bioetl.interfaces.http._control_plane_selector_payloads import (
 from bioetl.interfaces.http._control_plane_selector_records import (
     RunLedgerLookup,
     build_selector_records,
+    build_workflow_aliases,
     narrow_manifest_catalog,
     selected_pipeline_scope,
 )
@@ -41,8 +42,10 @@ def build_selector_context_payload(
     selected_run_types: tuple[str, ...] = (),
     selected_run_statuses: tuple[str, ...] = (),
     selected_run_id: str | None = None,
+    workflow_manifests: tuple[WorkflowManifest, ...] = (),
 ) -> dict[str, object]:
     """Resolve a coherent dashboard selector tuple from local control-plane data."""
+    workflow_aliases = build_workflow_aliases(workflow_manifests)
     records = build_selector_records(
         narrow_manifest_catalog(
             manifests,
@@ -50,8 +53,10 @@ def build_selector_context_payload(
             selected_pipelines=selected_pipelines,
             selected_run_types=selected_run_types,
             selected_run_id=selected_run_id,
+            workflow_aliases=workflow_aliases,
         ),
         ledger_port,
+        workflow_aliases=workflow_aliases,
     )
     candidates = filter_records(
         records,
@@ -84,8 +89,13 @@ def build_selector_filter_options_payload(
     selected_run_id: str | None = None,
     exact_run_only: bool = False,
     fallback_value: str | None = None,
+    workflow_manifests: tuple[WorkflowManifest, ...] = (),
 ) -> dict[str, object]:
     """Build Grafana variable option responses from the selector catalog."""
+    workflow_aliases = build_workflow_aliases(workflow_manifests)
+    selector_ledger_port = (
+        None if dimension == "run_id" and not selected_run_statuses else ledger_port
+    )
     records = build_selector_records(
         narrow_manifest_catalog(
             manifests,
@@ -95,9 +105,11 @@ def build_selector_filter_options_payload(
             ),
             selected_run_types=selected_run_types,
             selected_run_id=selected_run_id,
+            workflow_aliases=workflow_aliases,
             fail_open_when_empty=False,
         ),
-        ledger_port,
+        selector_ledger_port,
+        workflow_aliases=workflow_aliases,
     )
     candidates = filter_records(
         records,

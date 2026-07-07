@@ -622,11 +622,9 @@ assertless_triage:
     - tests/unit/application/core/
     - tests/unit/infrastructure/control_plane/
 duplicate_name_triage:
-  total_duplicate_names: 1
-  duplicate_occurrences: 2
-  top_generic_names:
-    - name: test_tdx_audit_closeout_artifact_is_complete_and_budget_safe
-      count: 2
+  total_duplicate_names: 0
+  duplicate_occurrences: 0
+  top_generic_names: []
   zero_enforcement:
     issue_set:
       - '#4894'

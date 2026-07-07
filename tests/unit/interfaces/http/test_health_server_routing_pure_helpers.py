@@ -333,12 +333,13 @@ async def test_routing_support_dispatches_control_plane_branches(
     assert host.sent[-1] == (
         "payload",
         200,
-        {
-            "run_manifest_port": True,
-            "run_ledger_port": True,
-            "checkpoint_port": True,
-        },
-    )
+            {
+                "run_manifest_port": True,
+                "run_ledger_port": True,
+                "workflow_manifest_port": False,
+                "checkpoint_port": True,
+            },
+        )
 
     async def fake_identity_table(*_args: object, **_kwargs: object) -> None:
         host.sent.append(("identity_table", None, None))

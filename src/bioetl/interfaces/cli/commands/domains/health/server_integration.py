@@ -179,6 +179,7 @@ def build_health_server(
         checkpoint_port=deps.checkpoint_port,
         run_manifest_port=deps.run_manifest_port,
         run_ledger_port=deps.run_ledger_port,
+        workflow_manifest_port=deps.workflow_manifest_port,
     )
 
 

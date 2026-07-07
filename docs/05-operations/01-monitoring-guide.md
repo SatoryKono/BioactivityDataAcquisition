@@ -605,9 +605,10 @@ python -m scripts.ops check-observability-ports --json
   1. Для Grafana 12+ используйте `GF_PLUGINS_PREINSTALL=yesoreyeram-infinity-datasource`
      (legacy `GF_INSTALL_PLUGINS` оставляем только для обратной совместимости).
   1. Убедитесь, что Grafana datasource `Quarantine Explorer` указывает на
-     `http://host.docker.internal:8081` через host-gateway mapping Grafana
-     container (или ваш override `BIOETL_QUARANTINE_EXPLORER_URL`).
-  1. Проверьте, что host-side backend запущен как
+     Docker-default `http://quarantine-explorer:8081` через monitoring-network
+     alias или на ваш explicit override `BIOETL_QUARANTINE_EXPLORER_URL`.
+  1. Если используется host-side override `http://host.docker.internal:8081`,
+     проверьте, что backend запущен как
      `bioetl quarantine serve --host 0.0.0.0 --port 8081`.
   1. Если Grafana уходит в restart loop, проверьте `docker logs bioetl-grafana`:
      shipped bootstrap entrypoint удаляет stale local `grafana-image-renderer`

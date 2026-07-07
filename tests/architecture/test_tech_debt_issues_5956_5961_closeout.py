@@ -136,8 +136,7 @@ def test_duplication_burndown_ratchets_are_lowered_for_5956_and_5961() -> None:
     infra_family = _scorecard_family(scorecard, "infrastructure_adapters")
     app_family = _scorecard_family(scorecard, "application_pipelines")
     assert (
-        infra_family["metrics"]["duplication_clusters"]["current_count"]
-        == infra_count
+        infra_family["metrics"]["duplication_clusters"]["current_count"] == infra_count
     )
     assert infra_family["metrics"]["duplication_clusters"]["max_count"] == infra_count
     assert app_family["metrics"]["duplication_clusters"]["current_count"] == 2

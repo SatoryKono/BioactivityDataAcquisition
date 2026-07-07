@@ -8,7 +8,12 @@ if TYPE_CHECKING:
     from bioetl.application.services.bronze_cleanup_service import (
         BronzeCleanupResult,
     )
-    from bioetl.domain.ports import HealthMonitorPort, MetricsPort, RunManifestPort
+    from bioetl.domain.ports import (
+        HealthMonitorPort,
+        MetricsPort,
+        RunManifestPort,
+        WorkflowManifestPort,
+    )
 
 
 class HealthServerDependenciesProtocol(Protocol):
@@ -17,6 +22,7 @@ class HealthServerDependenciesProtocol(Protocol):
     health_monitor: HealthMonitorPort
     metrics: MetricsPort
     run_manifest_port: RunManifestPort
+    workflow_manifest_port: WorkflowManifestPort
 
 
 class BronzeCleanupServiceProtocol(Protocol):

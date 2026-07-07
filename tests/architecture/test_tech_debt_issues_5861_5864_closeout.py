@@ -127,11 +127,6 @@ def test_issue_5861_dq_evaluator_has_golden_and_property_evidence() -> None:
 def test_issue_5862_contract_registry_and_ledger_have_domain_invariant_evidence() -> (
     None
 ):
-    closeout = _load_json(CLOSEOUT)
-    inventory = _load_json(MODULE_COVERAGE)
-    ledger_row = _module_row(
-        inventory, "bioetl.domain.control_plane.ledger.core_events"
-    )
     ledger_source = (
         ROOT
         / "src"

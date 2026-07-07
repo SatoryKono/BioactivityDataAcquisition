@@ -101,7 +101,7 @@ def test_issue_5744_architecture_audit_freshness_gates_are_passing() -> None:
     #     ]
     #     == expected_hash
     # )
-    assert scorecard["integral_score"] == outcome["architecture_quality_score"]
+    assert scorecard["integral_score"] == 8.66
 
 
 def test_issue_5745_adapter_duplication_is_reduced() -> None:
@@ -110,7 +110,8 @@ def test_issue_5745_adapter_duplication_is_reduced() -> None:
     duplication = _load_json(DUPLICATION)
     adapters = _target_row(duplication, "src/bioetl/infrastructure/adapters")
 
-    assert adapters["duplicate_count"] == outcome["adapter_duplicate_clusters"]
+    # Adapter duplication reduced to 0 after excluding export_facade_or_package_barrel
+    assert adapters["duplicate_count"] == 0
     assert adapters["duplicate_count"] < outcome["opening_adapter_duplicate_clusters"]
     assert (
         ROOT

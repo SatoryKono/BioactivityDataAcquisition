@@ -25,3 +25,7 @@ class WorkflowManifestPort(Protocol):
     def get_by_run_id(self, workflow_run_id: RunID) -> WorkflowManifest | None:
         """Load the manifest linked to a workflow run identifier."""
         ...
+
+    def list_all(self) -> tuple[WorkflowManifest, ...]:
+        """List all persisted workflow manifests ordered by creation time."""
+        ...

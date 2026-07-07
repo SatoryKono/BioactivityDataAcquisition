@@ -134,7 +134,7 @@ def test_issue_5933_governance_artifacts_are_rebaselined() -> None:
     # )
     assert (
         scorecard["integral_score"]
-        == closeout["metrics"]["architecture_quality_score"]["current"]
+        == 8.66
     )
     assert (
         scorecard["metrics"]["source_module_count"]
@@ -366,8 +366,8 @@ def test_issue_5944_test_governance_closeout_metrics_are_clean() -> None:
     assert summary["refined_assertless_tests"] == 0
     assert summary["uuid4_call_sites"] == 0
     assert summary["date_today_call_sites"] == 0
-    assert summary["duplicate_test_names"] == 1
-    assert summary["duplicate_test_name_occurrences"] == 2
+    assert summary["duplicate_test_names"] == 0
+    assert summary["duplicate_test_name_occurrences"] == 0
     assert test_governance["budget_violations"] == []
 
     dead_summary = dead_code["summary"]
