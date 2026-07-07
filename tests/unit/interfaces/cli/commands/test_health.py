@@ -743,6 +743,7 @@ class TestHealthServerAsyncExecution:
             checkpoint_port=mock_deps.checkpoint_port,
             run_manifest_port=mock_deps.run_manifest_port,
             run_ledger_port=mock_deps.run_ledger_port,
+            workflow_manifest_port=mock_deps.workflow_manifest_port,
         )
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
@@ -793,6 +794,7 @@ class TestHealthServerAsyncExecution:
             checkpoint_port=mock_deps.checkpoint_port,
             run_manifest_port=mock_deps.run_manifest_port,
             run_ledger_port=mock_deps.run_ledger_port,
+            workflow_manifest_port=mock_deps.workflow_manifest_port,
         )
 
 

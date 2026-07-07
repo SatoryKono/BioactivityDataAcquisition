@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from datetime import date, datetime
 from math import isnan
-from typing import Any, Protocol
+from typing import Any, Protocol, cast
 from uuid import UUID
 
 import pyarrow as pa
@@ -13,6 +13,12 @@ import pyarrow as pa
 from bioetl.domain.deterministic_identity import deterministic_uuid
 from bioetl.domain.ports import ForeignKeyReconciliationRequest, QuarantinePort
 from bioetl.domain.types import BatchID
+from bioetl.infrastructure.storage.gold.io_delta_protocols import (
+    GoldWriteRetryModuleProtocol,
+)
+from bioetl.infrastructure.storage.gold.io_delta_runtime import (
+    _run_gold_write_with_retry,
+)
 from bioetl.infrastructure.storage.gold.io_helpers import load_gold_writer_module
 from bioetl.infrastructure.time.system_clock import current_utc_time
 
@@ -122,30 +128,27 @@ async def expire_gold_orphan_rows(
 
     module = load_gold_writer_module()
     table_path = gold_writer._resolve_table_path(request.source_table)
-    dt = await gold_writer._run_in_executor(lambda: module.DeltaTable(table_path))
-    source = pa.Table.from_pylist(key_rows)
-    source_reader = pa.RecordBatchReader.from_batches(source.schema, source.to_batches())
     merge_condition = " AND ".join(
         f"target.{key} = source.{key}" for key in request.primary_keys
     )
     merge_condition += f" AND target.{current_flag_col} = true"
     ts_iso = current_utc_time().isoformat()
-    await gold_writer._run_in_executor(
-        lambda: (
-            dt.merge(
-                source=source_reader,
-                predicate=merge_condition,
-                source_alias="source",
-                target_alias="target",
-            )
-            .when_matched_update(
-                updates={
-                    valid_to_col: f"'{ts_iso}'",
-                    current_flag_col: "false",
-                }
-            )
-            .execute()
+
+    async def _execute_expiry_attempt() -> object:
+        return await gold_writer._run_in_executor(
+            _expire_gold_orphan_rows_once,
+            module,
+            table_path,
+            key_rows,
+            merge_condition,
+            valid_to_col,
+            current_flag_col,
+            ts_iso,
         )
+
+    await _run_gold_write_with_retry(
+        cast(GoldWriteRetryModuleProtocol, module),
+        _execute_expiry_attempt,
     )
 
 
@@ -162,6 +165,36 @@ def _require_gold_writer(host: ReconciliationMutationHost) -> Any:
                 f"{method_name}() required for SCD2 expiry"
             )
     return gold_writer
+
+
+def _expire_gold_orphan_rows_once(
+    module: Any,
+    table_path: str,
+    key_rows: list[dict[str, object]],
+    merge_condition: str,
+    valid_to_col: str,
+    current_flag_col: str,
+    ts_iso: str,
+) -> object:
+    """Execute one retryable Gold SCD2 orphan-expiry merge attempt."""
+    dt = module.DeltaTable(table_path)
+    source = pa.Table.from_pylist(key_rows)
+    source_reader = pa.RecordBatchReader.from_batches(source.schema, source.to_batches())
+    return (
+        dt.merge(
+            source=source_reader,
+            predicate=merge_condition,
+            source_alias="source",
+            target_alias="target",
+        )
+        .when_matched_update(
+            updates={
+                valid_to_col: f"'{ts_iso}'",
+                current_flag_col: "false",
+            }
+        )
+        .execute()
+    )
 
 
 def _resolve_present_column(

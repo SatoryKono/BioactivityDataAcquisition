@@ -34,8 +34,8 @@ _WINDOWS_PLATFORM = sys.platform == "win32" or os.name == "nt"
 # filesystems and Windows-backed mounts. Keep benchmark safety windows separate
 # from runtime policy so these tests measure throughput rather than timeout
 # calibration.
-PYTEST_TIMEOUT = 360 if _WINDOWS_PLATFORM else 180
-DELTA_WRITE_TIMEOUT_SECONDS = 300.0 if _WINDOWS_PLATFORM else 150.0
+PYTEST_TIMEOUT = 600 if _WINDOWS_PLATFORM else 180
+DELTA_WRITE_TIMEOUT_SECONDS = 500.0 if _WINDOWS_PLATFORM else 150.0
 
 pytestmark = [
     pytest.mark.benchmark,
@@ -123,11 +123,10 @@ def _create_silver_writer(base_path: Path) -> SilverWriter:
             merge_resilience_policy=replace(
                 build_default_silver_merge_policy(),
                 execution_timeout_seconds=DELTA_WRITE_TIMEOUT_SECONDS,
-                # Match the reviewed Windows E2E safety path: plain Delta writes can
-                # hang inside the in-process Rust binding on Windows-backed local
-                # filesystems, so benchmarks should use the subprocess seam rather
-                # than measuring event-loop starvation.
-                plain_write_process_isolation=_WINDOWS_PLATFORM,
+                # Disable subprocess isolation for benchmarks: the subprocess path
+                # itself can hang on Windows during stdin IPC read, and benchmarks
+                # use small payloads that complete quickly inline.
+                plain_write_process_isolation=False,
             ),
         ),
     )

@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from deltalake.exceptions import TableNotFoundError  # noqa: F401
+from deltalake.exceptions import CommitFailedError, TableNotFoundError  # noqa: F401
 
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.infrastructure.storage.base_delta_writer import (
@@ -89,6 +89,7 @@ def write_deltalake(*args: object, **kwargs: object) -> object:
 
 
 GOLD_WRITE_RETRY_ERRORS = (
+    CommitFailedError,
     OSError,
     RuntimeError,
     ValueError,
