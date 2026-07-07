@@ -178,6 +178,7 @@ class TestPipelineRunnerSpan:
         )
 
         postrun = MagicMock(spec=PostrunService)
+        postrun.OPERATION_ERRORS = PostrunService.OPERATION_ERRORS
         from bioetl.application.core.postrun.service import PostrunResult
 
         postrun.run = AsyncMock(
