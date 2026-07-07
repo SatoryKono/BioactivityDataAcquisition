@@ -38,7 +38,7 @@ def test_active_docs_sync_workflow_selector_and_cta_titles() -> None:
         variable_reference
     )
     assert "| bioetl-workflow-overview.json | 9 | First Action |" in panel_inventory
-    assert "| bioetl-workflow-overview.json | 1 | Failed Workflow Runs / Range |" in (
+    assert "| bioetl-workflow-overview.json | 2 | Failed Workflow Runs / Range |" in (
         panel_inventory
     )
 

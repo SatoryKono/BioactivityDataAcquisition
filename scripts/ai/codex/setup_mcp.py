@@ -25,13 +25,36 @@ REMOVED_MCP_SERVER_NAMES = frozenset(
 )
 
 
-def _wrapper_command(script_name: str, workspace_root: Path) -> dict[str, Any]:
+def _config_path(
+    path: Path,
+    workspace_root: Path,
+    *,
+    portable_workspace_paths: bool,
+) -> str:
+    resolved_workspace = workspace_root.resolve()
+    resolved_path = path.resolve()
+    if not portable_workspace_paths:
+        return str(resolved_path)
+    if resolved_path == resolved_workspace:
+        return "."
+    return resolved_path.relative_to(resolved_workspace).as_posix()
+
+
+def _wrapper_command(
+    script_name: str,
+    workspace_root: Path,
+    *,
+    portable_workspace_paths: bool,
+) -> dict[str, Any]:
     is_windows = os.name == "nt"
     shell = "powershell" if is_windows else "bash"
     suffix = ".ps1" if is_windows else ".sh"
     wrapper = (workspace_root / "scripts/ai/mcp" / script_name).with_suffix(suffix)
-    resolved_wrapper = wrapper.resolve()
-    wrapper_arg = str(resolved_wrapper)
+    wrapper_arg = _config_path(
+        wrapper,
+        workspace_root,
+        portable_workspace_paths=portable_workspace_paths,
+    )
 
     return {"command": shell, "args": [wrapper_arg]}
 
@@ -48,16 +71,38 @@ def _npx_server(*args: str, npm_cache_dir: str) -> dict[str, Any]:
     }
 
 
-def _canonical_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
-    workspace_root_str = str(workspace_root)
-    memory_file_path = str(
-        (workspace_root / "docs/00-project/ai/memory/mcp-memory.json").resolve()
+def _canonical_servers(
+    workspace_root: Path,
+    *,
+    portable_workspace_paths: bool = False,
+) -> dict[str, dict[str, Any]]:
+    workspace_root_str = _config_path(
+        workspace_root,
+        workspace_root,
+        portable_workspace_paths=portable_workspace_paths,
     )
-    cache_root = (workspace_root / CACHE_DIR_NAME).resolve()
+    memory_file_path = _config_path(
+        workspace_root / "docs/00-project/ai/memory/mcp-memory.json",
+        workspace_root,
+        portable_workspace_paths=portable_workspace_paths,
+    )
+    cache_root = workspace_root / CACHE_DIR_NAME
 
-    npm_cache_dir = str((cache_root / "npm-cache").resolve())
-    uv_cache_dir = str((cache_root / "uv-cache").resolve())
-    uv_tool_dir = str((cache_root / "uv-tools").resolve())
+    npm_cache_dir = _config_path(
+        cache_root / "npm-cache",
+        workspace_root,
+        portable_workspace_paths=portable_workspace_paths,
+    )
+    uv_cache_dir = _config_path(
+        cache_root / "uv-cache",
+        workspace_root,
+        portable_workspace_paths=portable_workspace_paths,
+    )
+    uv_tool_dir = _config_path(
+        cache_root / "uv-tools",
+        workspace_root,
+        portable_workspace_paths=portable_workspace_paths,
+    )
     servers: dict[str, dict[str, Any]] = {
         "memory": _npx_server(
             "@modelcontextprotocol/server-memory@2026.1.26",
@@ -82,23 +127,81 @@ def _canonical_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
             "--stdio",
             npm_cache_dir=npm_cache_dir,
         ),
-        "github": _wrapper_command("github-mcp-wrapper", workspace_root),
-        "docker": _wrapper_command("mcp_docker_wrapper", workspace_root),
-        "docker-docs": _wrapper_command("mcp_docker_docs_wrapper", workspace_root),
-        "context7": _wrapper_command("mcp_context7_wrapper", workspace_root),
-        "paper-search": _wrapper_command("mcp_paper_search_wrapper", workspace_root),
-        "dockerhub": _wrapper_command("mcp_dockerhub_wrapper", workspace_root),
-        "ast-grep": _wrapper_command("mcp_ast_grep_wrapper", workspace_root),
-        "mcp-code-interpreter": _wrapper_command(
-            "mcp_code_interpreter_wrapper", workspace_root
+        "github": _wrapper_command(
+            "github-mcp-wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
         ),
-        "prometheus": _wrapper_command("mcp_prometheus_wrapper", workspace_root),
-        "grafana": _wrapper_command("mcp_grafana_wrapper", workspace_root),
-        "brave-search": _wrapper_command("mcp_brave_search_wrapper", workspace_root),
-        "neo4j-cypher": _wrapper_command("mcp_neo4j_cypher_wrapper", workspace_root),
-        "neo4j-memory": _wrapper_command("mcp_neo4j_memory_wrapper", workspace_root),
-        "needle": _wrapper_command("mcp_needle_wrapper", workspace_root),
-        "mermaid": _wrapper_command("mcp_mermaid_wrapper", workspace_root),
+        "docker": _wrapper_command(
+            "mcp_docker_wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
+        ),
+        "docker-docs": _wrapper_command(
+            "mcp_docker_docs_wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
+        ),
+        "context7": _wrapper_command(
+            "mcp_context7_wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
+        ),
+        "paper-search": _wrapper_command(
+            "mcp_paper_search_wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
+        ),
+        "dockerhub": _wrapper_command(
+            "mcp_dockerhub_wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
+        ),
+        "ast-grep": _wrapper_command(
+            "mcp_ast_grep_wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
+        ),
+        "mcp-code-interpreter": _wrapper_command(
+            "mcp_code_interpreter_wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
+        ),
+        "prometheus": _wrapper_command(
+            "mcp_prometheus_wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
+        ),
+        "grafana": _wrapper_command(
+            "mcp_grafana_wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
+        ),
+        "brave-search": _wrapper_command(
+            "mcp_brave_search_wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
+        ),
+        "neo4j-cypher": _wrapper_command(
+            "mcp_neo4j_cypher_wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
+        ),
+        "neo4j-memory": _wrapper_command(
+            "mcp_neo4j_memory_wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
+        ),
+        "needle": _wrapper_command(
+            "mcp_needle_wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
+        ),
+        "mermaid": _wrapper_command(
+            "mcp_mermaid_wrapper",
+            workspace_root,
+            portable_workspace_paths=portable_workspace_paths,
+        ),
         "biomoltechDocs": _http_server("https://biomoltech.mintlify.app/mcp"),
         "mintlify": _http_server("https://mcp.mintlify.com"),
         "deepwiki": _http_server("https://mcp.deepwiki.com/mcp"),
@@ -158,12 +261,16 @@ def _write_devin_config(output_root: Path, workspace_root: Path) -> Path:
 def _write_configs(
     output_root: Path, workspace_root: Path, *, qodo_only: bool = False
 ) -> tuple[Path | None, Path | None, Path | None, Path, Path | None, Path | None]:
-    servers = _canonical_servers(workspace_root)
-    codex_payload = {"mcpServers": deepcopy(servers)}
-    vscode_payload = {"servers": deepcopy(servers)}
-    qodo_payload = {"mcpServers": deepcopy(servers)}
+    workspace_servers = _canonical_servers(
+        workspace_root,
+        portable_workspace_paths=True,
+    )
+    codex_payload = {"mcpServers": deepcopy(workspace_servers)}
+    vscode_payload = {"servers": deepcopy(workspace_servers)}
+    qodo_payload = {"mcpServers": deepcopy(workspace_servers)}
 
     mcp_path = output_root / ".mcp.json"
+    scripts_ai_mcp_path = output_root / "scripts" / "ai" / ".mcp.json"
     vscode_path = output_root / ".vscode" / "mcp.json"
     cursor_path = output_root / ".cursor" / "mcp.json"
     qodo_path = output_root / ".qodo" / "mcp.json"
@@ -173,6 +280,8 @@ def _write_configs(
         codex_settings_path = _write_workspace_codex_settings(output_root, workspace_root)
         devin_config_path = _write_devin_config(output_root, workspace_root)
         _write_json(mcp_path, codex_payload)
+        if output_root.resolve() == workspace_root.resolve():
+            _write_json(scripts_ai_mcp_path, codex_payload)
         _write_json(vscode_path, vscode_payload)
         _write_json(cursor_path, codex_payload)
     _write_json(qodo_path, qodo_payload)

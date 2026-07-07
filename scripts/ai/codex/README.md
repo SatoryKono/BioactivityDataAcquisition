@@ -172,12 +172,18 @@ delegates to that same flow, and the retained transport launchers
 `scripts/ops/launchers/codex/codex-exec.sh` now do the same. This writes:
 
 - `.mcp.json` - workspace MCP config used by compatible tools
+- `scripts/ai/.mcp.json` - tracked portable mirror of the root workspace MCP config
 - `.vscode/mcp.json` - VS Code MCP config
 - `.cursor/mcp.json` - Cursor MCP config mirror
 - `.qodo/mcp.json` - Qodo Desktop MCP config mirror
-- `.codex/settings.json` - tracked Codex workspace MCP settings mirror
-- `.devin/config.json` - tracked Devin workspace MCP settings mirror
+- `.codex/settings.json` - local-only generated Codex workspace MCP settings mirror
+- `.devin/config.json` - tracked generated Devin runtime settings mirror
 - `~/.codex/config.toml` - Codex-native MCP config used by `codex`
+
+The tracked workspace manifests `.mcp.json` and `scripts/ai/.mcp.json` are
+repo-relative and portable. Local runtime outputs such as
+`~/.codex/config.toml`, `.codex/settings.json`, and `.devin/config.json` may
+contain machine-local absolute paths for tools that require them.
 
 Set `CODEX_SKIP_MCP_SETUP=1` only when you intentionally want to launch Codex without synchronizing MCP. Set `CODEX_VALIDATE_MCP_LIST=1` to additionally run `codex mcp list --json`; this validation is off by default because some local MCP/server environments can make the CLI list operation hang.
 

@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-15'
+  Last verified: '2026-07-07'
 
 ______________________________________________________________________
 
 # BioETL Dashboards v2: Usage
 
-Дата сверки: **2026-05-15**
+Дата сверки: **2026-07-07**
 Источник истины: `grafana/dashboards/*.json`
 
 Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navigation-links.yaml` (docs/tests должны соответствовать ему).

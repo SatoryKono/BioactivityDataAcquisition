@@ -36,6 +36,14 @@ ______________________________________________________________________
 - Stable helper governance anchor:
   `BIOETL_DOCKER_HELPER_ADR010_ADJUNCT`; machine-readable helper contracts live
   in `configs/quality/docker_helper_contracts.yaml`.
+- Root `.mcp.json` is an exact-root workspace MCP entrypoint for compatible
+  tools and MUST remain tracked at the repository root. It MUST be generated
+  from `scripts/ai/codex/setup_mcp.py`, stay repo-relative/portable, and stay
+  synchronized with `scripts/ai/.mcp.json`. Machine-local absolute MCP paths are
+  allowed only in documented generated local runtime surfaces such as
+  `~/.codex/config.toml`, local ignored editor/runtime mirrors, or the reviewed
+  `.devin/config.json` runtime surface; see
+  `docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md`.
 - Root-level tracked markdown и txt артефакты MUST быть ограничены canonical
   root entrypoints. Операционные quick-reference материалы SHOULD жить в
   `docs/05-operations/`, а одноразовые status/recovery/final-summary артефакты
@@ -58,8 +66,9 @@ ______________________________________________________________________
   explicit compatibility entrypoints while their canonical maintained owner
   surfaces converge under `scripts/ai/codex/**`. Retired aliases such as
   `run-codex.ps1` and `run-codex-wsl.ps1` MUST NOT be restored without fresh
-  owner review. Retained root shims MUST stay thin and MUST NOT regrow
-  independent setup or launcher logic.
+  owner review. Retained root shims MUST stay thin, delegate to
+  `scripts/ai/codex/**`, and MUST NOT regrow independent setup or launcher
+  logic.
 - Root Docker helper relocation decisions MUST reference
   `docs/05-operations/verification/docker-helper-root-relocation-audit.md`
   before any helper/file move is approved.

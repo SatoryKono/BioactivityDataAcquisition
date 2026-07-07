@@ -52,10 +52,15 @@ def _collect_rows() -> list[str]:
         payload = json.loads(path.read_text(encoding="utf-8"))
         for panel in _iter_panels(list(payload.get("panels", []))):
             panel_id = panel.get("id")
-            title = panel.get("title")
-            if panel_id is None or not title:
+            if panel_id is None:
                 continue
-            rows.append(f"| {path.name} | {panel_id} | {title} |")
+            title = panel.get("title")
+            if title:
+                display_title = str(title)
+            else:
+                panel_type = panel.get("type", "panel")
+                display_title = f"({panel_type})"
+            rows.append(f"| {path.name} | {panel_id} | {display_title} |")
     return rows
 
 

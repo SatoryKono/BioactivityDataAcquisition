@@ -183,7 +183,9 @@ def test_issue_6027_pandera_and_topology_docs_match_current_runtime() -> None:
     assert "делегирует validation-only guard" not in requirements
     assert "no-op compatibility seam" in requirements
     coverage_summary = coverage["summary"]
-    assert f"`source_module_count={coverage_summary['source_module_count']}`" in topology
+    assert (
+        f"`source_module_count={coverage_summary['source_module_count']}`" in topology
+    )
     assert coverage["source_tree_sha256"] in topology
 
 

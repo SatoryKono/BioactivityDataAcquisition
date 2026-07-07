@@ -154,8 +154,9 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         _load_workspace_mcp_config(root, tmp_path)
     )
     servers = payload["servers"]
-    assert codex_settings["mcpServers"] == servers
+    codex_servers = codex_settings["mcpServers"]
     assert qodo_payload["mcpServers"] == servers
+    assert codex_servers["filesystem"]["args"][-1] != servers["filesystem"]["args"][-1]
     assert "local-extra" in gemini_settings["mcpServers"]
     assert not {
         "sonarqube",
@@ -165,12 +166,20 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
     } & set(gemini_settings["mcpServers"])
     assert set(servers) == EXPECTED_MCP_SERVERS
     assert servers["memory"]["command"] == "npx"
-    assert _posix(servers["memory"]["env"]["MEMORY_FILE_PATH"]).endswith(
+    assert (
+        servers["memory"]["env"]["MEMORY_FILE_PATH"]
+        == "docs/00-project/ai/memory/mcp-memory.json"
+    )
+    assert _posix(codex_servers["memory"]["env"]["MEMORY_FILE_PATH"]).endswith(
         "/docs/00-project/ai/memory/mcp-memory.json"
     )
-    filesystem_scope = Path(str(servers["filesystem"]["args"][-1]))
+    assert servers["filesystem"]["args"][-1] == "."
+    filesystem_scope = root / str(servers["filesystem"]["args"][-1])
     assert filesystem_scope.exists()
     assert filesystem_scope.resolve().samefile(root.resolve())
+    codex_filesystem_scope = Path(str(codex_servers["filesystem"]["args"][-1]))
+    assert codex_filesystem_scope.exists()
+    assert codex_filesystem_scope.resolve().samefile(root.resolve())
     assert servers["fetch"]["command"] == "uvx"
     assert servers["fetch"]["args"] == [
         "--from",
