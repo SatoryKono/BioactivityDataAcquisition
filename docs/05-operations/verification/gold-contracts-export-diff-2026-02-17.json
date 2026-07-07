@@ -183,10 +183,7 @@
       "contract_version": "1.0.0",
       "status": "updated",
       "diff": {
-        "added_properties": [
-          "cell_type",
-          "clo_id"
-        ],
+        "added_properties": [],
         "removed_properties": [],
         "changed_properties": [],
         "required_changed": false
