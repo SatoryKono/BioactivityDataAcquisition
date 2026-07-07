@@ -64,6 +64,8 @@ Commands:
     check-dashboard-visual-semantics Validate Grafana status-panel visual semantic invariants
     report-dashboard-inventory Generate/check dashboard inventory parity plus
         provisioning/deployed drift and health summary
+    report-dashboard-panel-audit-matrix Generate/check dashboard panel audit matrix
+    report-panel-title-inventory Generate/check generated dashboard panel-title inventory mirror
     report-dashboard-query-duplicates Generate report-only exact/near-duplicate Grafana PromQL inventory
 """
 
