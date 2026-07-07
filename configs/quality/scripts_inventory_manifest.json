@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-07T10:33:54.501488+00:00",
+  "generated_at": "2026-07-07T13:01:07.621042+00:00",
   "summary": {
     "total_scripts": 445,
     "status_counts": {
@@ -5197,7 +5197,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1307,
+          "line": 1309,
           "source_group": "docs",
           "text": "автоматические docs-проверки (`python -m scripts.docs check-links` и"
         },
@@ -6757,7 +6757,7 @@
       "references": [
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1651,
+          "line": 1653,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.dev run-tests cov"
         },
@@ -8880,7 +8880,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1521,
+          "line": 1523,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/generate_architecture_dependency_map.py --update`"
         },
@@ -9535,7 +9535,7 @@
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 278,
+          "line": 279,
           "source_group": "docs",
           "text": "| Generated artifact drift gate did not include module coverage source-tree hash freshness | `report-module-coverage --check` could fail stale source-tree evidence while `report-debt-governance-gates "
         },

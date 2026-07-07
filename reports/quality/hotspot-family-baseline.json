@@ -21,8 +21,8 @@
       "total_loc": 22302,
       "files_ge_250_loc": 4,
       "helper_function_ratio": 0.356,
-      "max_internal_fan_in": 10,
-      "max_internal_fan_in_module": "bioetl.application.core.batch_runtime_failure_policy",
+      "max_internal_fan_in": 7,
+      "max_internal_fan_in_module": "bioetl.application.core.span_helpers",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 7,
         "max_internal_fan_in": 10
