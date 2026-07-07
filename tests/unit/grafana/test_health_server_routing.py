@@ -6,6 +6,8 @@ from bioetl.interfaces.http.health_server_routing_mixin import (
     HealthServerRoutingMixin,
 )
 
+pytestmark = pytest.mark.unit
+
 
 class TestGrafanaScopeHandling:
     """Test Grafana scope token handling in health server routing."""
