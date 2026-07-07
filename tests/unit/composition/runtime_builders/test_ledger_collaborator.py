@@ -11,6 +11,8 @@ import pytest
 
 from bioetl.application.services.control_plane import RunLedgerService
 from bioetl.composition.runtime_builders.ledger_collaborator import (
+    _attach_artifact_recorder,
+    _collect_metadata_writer_candidates,
     attach_control_plane_collaborators,
 )
 from bioetl.domain.models.metadata import InputSnapshotRef
@@ -228,3 +230,56 @@ def test_attached_artifact_recorder_records_only_valid_bronze_snapshots() -> Non
             "details": {"query_fingerprint": None, "extra": "kept"},
         }
     ]
+
+
+@pytest.mark.unit
+def test_artifact_recorder_ignores_bronze_snapshot_payloads_that_are_not_lists() -> (
+    None
+):
+    target = _RecorderTarget()
+    ledger_service = _FakeRunLedgerService()
+    runner = SimpleNamespace(
+        services=SimpleNamespace(metadata_writer=target),
+        attach_run_ledger_service=lambda service: None,
+    )
+
+    attach_control_plane_collaborators(
+        runner,  # type: ignore[arg-type]
+        ledger_service,  # type: ignore[arg-type]
+    )
+    assert callable(target.recorder)
+    target.recorder(  # type: ignore[operator]
+        "bronze",
+        "bronze/path",
+        {
+            "provider": "chembl",
+            "entity": "activity",
+            "pipeline_name": "chembl_activity",
+            "input_snapshots": object(),
+        },
+    )
+
+    assert len(ledger_service.artifacts) == 1
+    assert ledger_service.input_snapshots == []
+
+
+@pytest.mark.unit
+def test_attach_artifact_recorder_returns_false_without_attach_method() -> None:
+    assert _attach_artifact_recorder(
+        object(),
+        _FakeRunLedgerService(),  # type: ignore[arg-type]
+    ) is False
+
+
+@pytest.mark.unit
+def test_collect_metadata_writer_candidates_handles_storage_only_slots() -> None:
+    storage_writer = _RecorderTarget()
+    services = SimpleNamespace(
+        storage=SimpleNamespace(
+            bronze=None,
+            silver=SimpleNamespace(),
+            gold=SimpleNamespace(_metadata_writer=storage_writer),
+        )
+    )
+
+    assert _collect_metadata_writer_candidates(services) == [storage_writer]

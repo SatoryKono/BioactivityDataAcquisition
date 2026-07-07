@@ -12,6 +12,8 @@ from bioetl.application.composite._coalesce_policy_support import (
     apply_field_priority,
     build_field_groups,
     build_latest_timestamp_row_fields,
+    compatible_columns,
+    coalesce_and_drop,
     coalesce_by_latest_timestamp,
     count_timestamp_companions,
     drop_coalesced_columns,
@@ -19,6 +21,7 @@ from bioetl.application.composite._coalesce_policy_support import (
     resolve_priority_provider,
     resolve_row_timestamp_key,
     resolve_timestamp_companion,
+    seed_prefix,
     should_replace_latest_candidate,
     sort_columns,
     timestamp_sort_key,
@@ -246,7 +249,11 @@ def test_apply_explicit_rules_skips_when_ordered_columns_are_empty(
 def test_compatible_columns_and_coalesce_drop_helpers_cover_edge_cases() -> None:
     df = pl.DataFrame({"a": [1], "b": [2]})
 
+    assert compatible_columns(df, []) == []
     assert CoalescePolicyService._compatible_columns(df, []) == []
+
+    unchanged_direct = coalesce_and_drop(df, ["a"])
+    assert unchanged_direct.equals(df)
 
     unchanged = CoalescePolicyService._coalesce_and_drop(df, ["a"])
     assert unchanged.equals(df)
@@ -254,6 +261,7 @@ def test_compatible_columns_and_coalesce_drop_helpers_cover_edge_cases() -> None
 
 @pytest.mark.unit
 def test_seed_prefix_returns_none_for_invalid_pipeline_name() -> None:
+    assert seed_prefix(None) is None
     assert CoalescePolicyService._seed_prefix("invalidname") is None
 
 
@@ -417,6 +425,39 @@ def test_latest_timestamp_row_helpers_pick_fallback_and_drop_redundant_columns()
     df = pl.DataFrame({"seed.title": [None], "alt.title": ["alt"], "keep": [1]})
     dropped = drop_coalesced_columns(df, compatible_cols)
     assert dropped.columns == ["seed.title", "keep"]
+
+
+@pytest.mark.unit
+def test_compatible_columns_and_latest_timestamp_skip_lower_ranked_branches() -> None:
+    df = pl.DataFrame(
+        {
+            "seed.title": ["seed"],
+            "list.title": [["list"]],
+            "empty.title": [None],
+        }
+    )
+
+    assert compatible_columns(
+        df,
+        ["seed.title", "list.title", "empty.title"],
+    ) == ["seed.title", "empty.title"]
+    assert (
+        pick_latest_timestamp_value(
+            row={
+                "seed.title": "newest",
+                "seed.updated_at": datetime(2026, 1, 3, tzinfo=UTC),
+                "alt.title": "older",
+                "alt.updated_at": datetime(2026, 1, 2, tzinfo=UTC),
+            },
+            compatible_cols=["seed.title", "alt.title"],
+            timestamp_columns={
+                "seed.title": "seed.updated_at",
+                "alt.title": "alt.updated_at",
+            },
+            priority_rank={"seed.title": 0, "alt.title": 1},
+        )
+        == "newest"
+    )
 
 
 @pytest.mark.unit
