@@ -7,9 +7,67 @@ from bioetl.application.services.workflow_runner_service import (
     WorkflowStepExecutionResult,
 )
 
+_TRANSFORM_RESULT_SUMMARY_KEYS = (
+    "transform_name",
+    "workflow_name",
+    "workflow_run_id",
+    "manifest_id",
+    "step_id",
+    "source_table",
+    "reference_table",
+    "source_key",
+    "reference_key",
+    "source_layer",
+    "reference_layer",
+    "mutation_layer",
+    "source_keys",
+    "reference_keys",
+    "action",
+    "nulls_equal",
+    "scanned_rows",
+    "retained_rows",
+    "orphan_rows_deleted",
+    "mutated",
+    "dry_run",
+    "would_mutate",
+    "mutation_mode",
+    "quarantine_batch_id",
+    "quarantine_rows_written",
+    "quarantine_error_code",
+    "mutation_blocked_reason",
+)
+
 
 def _fingerprint_details(fingerprint: str | None) -> dict[str, str] | None:
     return {"fingerprint": fingerprint} if fingerprint is not None else None
+
+
+def build_step_completion_details(
+    result: WorkflowStepExecutionResult,
+) -> dict[str, object] | None:
+    """Build compact workflow-step completion details for ledger persistence."""
+    fingerprint = _resolve_result_fingerprint(result)
+    if result.step_kind != "transform" or result.status != "success":
+        return _fingerprint_details(fingerprint)
+    output = getattr(result.payload, "output", None)
+    if not isinstance(output, dict):
+        return _fingerprint_details(fingerprint)
+    details: dict[str, object] = {}
+    if fingerprint is not None:
+        details["fingerprint"] = fingerprint
+    summary = {
+        key: output[key]
+        for key in _TRANSFORM_RESULT_SUMMARY_KEYS
+        if key in output and output[key] is not None
+    }
+    if summary:
+        details["transform_result_summary"] = summary
+    artifact_refs = output.get("artifact_refs")
+    if isinstance(artifact_refs, list):
+        details["artifacts"] = [
+            dict(item) for item in artifact_refs if isinstance(item, dict)
+        ]
+    return details or None
 
 
 def _resolve_result_fingerprint(result: WorkflowStepExecutionResult) -> str | None:
@@ -55,4 +113,5 @@ __all__ = [
     "_fingerprint_details",
     "_resolve_result_fingerprint",
     "_workflow_failure_message",
+    "build_step_completion_details",
 ]

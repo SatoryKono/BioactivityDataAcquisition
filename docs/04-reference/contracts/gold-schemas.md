@@ -103,6 +103,15 @@ Bounded DQ golden bundles обновляются вместе с изменен�
 должны оставаться перечисленными в
 `configs/quality/test_matrix.yaml -> fixture_governance.gold_snapshot_registry`.
 
+DQ bundle coverage policy is intentionally bounded. The registry field
+`dq_bundle_policy.scope` is `dq_sensitive_outputs`; bundle snapshots are
+required for outputs listed in `dq_sensitive_outputs`, not for every Gold
+entity in `entities`. An output belongs in this bounded subset when it carries
+DQ flags or DQ-sensitive provenance consumed by downstream checks, represents a
+high-value provider or composite contract surface, and has snapshot rows that
+exercise at least one warning or error DQ state. Contract tests enforce that
+required subset and do not imply entity-wide DQ bundle generation.
+
 ### Nullable Numeric Compatibility
 
 Gold JSON contracts intentionally publish selected nullable numeric fields as

@@ -27,6 +27,10 @@ def build_reconciliation_result(
     orphan_rows_deleted: int,
     mutated: bool,
     would_mutate: bool,
+    mutation_mode: str = "unknown",
+    quarantine_batch_id: str | None = None,
+    quarantine_rows_written: int = 0,
+    quarantine_error_code: str | None = None,
 ) -> ForeignKeyReconciliationResult:
     """Build the public reconciliation result payload."""
     return ForeignKeyReconciliationResult(
@@ -44,6 +48,10 @@ def build_reconciliation_result(
         mutation_layer=request.effective_mutation_layer,
         dry_run=request.dry_run,
         would_mutate=would_mutate,
+        mutation_mode=mutation_mode,
+        quarantine_batch_id=quarantine_batch_id,
+        quarantine_rows_written=quarantine_rows_written,
+        quarantine_error_code=quarantine_error_code,
     )
 
 
@@ -113,6 +121,7 @@ def complete_without_mutation(
         orphan_rows_deleted=orphan_rows_deleted,
         mutated=False,
         would_mutate=False,
+        mutation_mode="no_op",
     )
 
 
@@ -148,6 +157,12 @@ def complete_dry_run(
         orphan_rows_deleted=orphan_rows_deleted,
         mutated=False,
         would_mutate=True,
+        mutation_mode="dry_run_preview",
+        quarantine_error_code=(
+            "FILTERED_OUT_GOLD"
+            if request.effective_mutation_layer == "gold"
+            else "FILTERED_OUT_SILVER"
+        ),
     )
 
 

@@ -47,6 +47,7 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
     quarantine: QuarantinePort | None = None
     quarantine_pipeline_name: str | None = None
     gold_writer: object | None = None
+    artifact_sink: object | None = None
 
     async def reconcile_foreign_keys(
         self,
@@ -79,6 +80,7 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
                 orphan_rows_deleted=0,
                 mutated=False,
                 would_mutate=False,
+                mutation_mode="missing_source",
             )
 
         if not source_rows:
@@ -99,6 +101,7 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
                 orphan_rows_deleted=0,
                 mutated=False,
                 would_mutate=False,
+                mutation_mode="no_op",
             )
 
         reference_rows = await self._read_reference_rows(request)
@@ -221,24 +224,38 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
         )
 
         if orphan_rows_deleted == 0:
-            return complete_without_mutation(
+            result = complete_without_mutation(
                 self,
                 request,
                 scanned_rows=scanned_rows,
                 retained_rows=retained_rows_count,
                 orphan_rows_deleted=0,
             )
+            self._write_debug_artifacts(
+                request,
+                result,
+                retained_rows=retained_rows,
+                orphan_rows=orphan_rows,
+            )
+            return result
 
         if request.dry_run:
-            return complete_dry_run(
+            result = complete_dry_run(
                 self,
                 request,
                 scanned_rows=scanned_rows,
                 retained_rows=retained_rows_count,
                 orphan_rows_deleted=orphan_rows_deleted,
             )
+            self._write_debug_artifacts(
+                request,
+                result,
+                retained_rows=retained_rows,
+                orphan_rows=orphan_rows,
+            )
+            return result
 
-        await apply_reconciliation_mutation(
+        mutation_summary = await apply_reconciliation_mutation(
             self,
             request,
             retained_rows=retained_rows,
@@ -256,13 +273,51 @@ class SilverForeignKeyReconciliationAdapter(ForeignKeyReconciliationPort):
             retained_rows=retained_rows_count,
             orphan_rows_deleted=orphan_rows_deleted,
         )
-        return build_reconciliation_result(
+        result = build_reconciliation_result(
             request,
             scanned_rows=scanned_rows,
             retained_rows=retained_rows_count,
             orphan_rows_deleted=orphan_rows_deleted,
             mutated=True,
             would_mutate=False,
+            mutation_mode=mutation_summary.mutation_mode,
+            quarantine_batch_id=mutation_summary.quarantine_batch_id,
+            quarantine_rows_written=mutation_summary.quarantine_rows_written,
+            quarantine_error_code=mutation_summary.quarantine_error_code,
+        )
+        self._write_debug_artifacts(
+            request,
+            result,
+            retained_rows=retained_rows,
+            orphan_rows=orphan_rows,
+        )
+        return result
+
+    def _write_debug_artifacts(
+        self,
+        request: ForeignKeyReconciliationRequest,
+        result: ForeignKeyReconciliationResult,
+        *,
+        retained_rows: list[dict[str, object]],
+        orphan_rows: list[dict[str, object]],
+    ) -> None:
+        if self.artifact_sink is None:
+            return
+        if (
+            not request.debug_export_enabled
+            or request.workflow_run_id is None
+            or request.step_id is None
+        ):
+            return
+        writer = getattr(self.artifact_sink, "write_reconcile_debug_artifacts", None)
+        if not callable(writer):
+            return
+        writer(
+            context=request,
+            request=request,
+            result=result,
+            retained_rows=tuple(retained_rows),
+            orphan_rows=tuple(orphan_rows),
         )
 
 
