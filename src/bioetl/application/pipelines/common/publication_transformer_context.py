@@ -4,7 +4,12 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
+
+from bioetl.application.pipelines.common.transformer_initialization import (
+    build_runtime_transformer_init,
+    transformer_init_kwargs,
+)
 
 if TYPE_CHECKING:
     from bioetl.application.core.base_transformer import TransformerDependencyContext
@@ -42,23 +47,11 @@ class BasePublicationTransformerContext:
     record_normalizer: RecordNormalizationProcessor | None = None
 
 
-_PUBLICATION_TRANSFORMER_KWARGS = (
-    "entity_type",
-    "silver_filters",
-    "gold_filters",
-    "tracer",
-    "metrics",
-    "identity_service",
-    "pii_hasher",
-    "dependencies",
-)
-
-
 def publication_transformer_kwargs(
     init_locals: Mapping[str, object],
 ) -> dict[str, object]:
     """Extract common BasePublicationTransformer kwargs from subclass locals."""
-    return {key: init_locals[key] for key in _PUBLICATION_TRANSFORMER_KWARGS}
+    return transformer_init_kwargs(init_locals)
 
 
 def coerce_publication_transformer_init(
@@ -160,72 +153,12 @@ def build_runtime_publication_transformer_init(
     The returned method preserves an explicit DI signature for architecture
     checks while avoiding duplicated constructor bodies in provider modules.
     """
-
-    def _runtime_init(
-        self: Any,  # Any: runtime method to bypass architecture checks
-        provider: str = default_provider,
-        entity_type: str = default_entity_type,
-        silver_filters: object = None,
-        gold_filters: object = None,
-        tracer: object = None,
-        metrics: object = None,
-        identity_service: object = None,
-        pii_hasher: object = None,
-        dependencies: object = None,
-    ) -> None:
-        super(type(self), self).__init__(
-            provider,
-            entity_type=entity_type,
-            silver_filters=silver_filters,
-            gold_filters=gold_filters,
-            tracer=tracer,
-            metrics=metrics,
-            identity_service=identity_service,
-            pii_hasher=pii_hasher,
-            dependencies=dependencies,
-        )
-
-    _runtime_init.__name__ = "__init__"
-    _runtime_init.__qualname__ = "__init__"
+    _runtime_init = build_runtime_transformer_init(
+        default_provider, default_entity_type
+    )
     _runtime_init.__doc__ = (
         "Shared runtime-generated publication transformer constructor."
     )
-    return _runtime_init
-
-
-def build_runtime_transformer_init(
-    default_provider: str,
-    default_entity_type: str,
-) -> object:
-    """Return a shared runtime-generated ``__init__`` for ``BaseTransformer`` subclasses."""
-
-    def _runtime_init(
-        self: Any,  # Any: runtime method to bypass architecture checks
-        provider: str = default_provider,
-        entity_type: str = default_entity_type,
-        silver_filters: object = None,
-        gold_filters: object = None,
-        tracer: object = None,
-        metrics: object = None,
-        identity_service: object = None,
-        pii_hasher: object = None,
-        dependencies: object = None,
-    ) -> None:
-        super(type(self), self).__init__(
-            provider,
-            entity_type=entity_type,
-            silver_filters=silver_filters,
-            gold_filters=gold_filters,
-            tracer=tracer,
-            metrics=metrics,
-            identity_service=identity_service,
-            pii_hasher=pii_hasher,
-            dependencies=dependencies,
-        )
-
-    _runtime_init.__name__ = "__init__"
-    _runtime_init.__qualname__ = "__init__"
-    _runtime_init.__doc__ = "Shared runtime-generated transformer constructor."
     return _runtime_init
 
 

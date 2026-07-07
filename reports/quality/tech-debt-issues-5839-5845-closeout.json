@@ -104,7 +104,7 @@
       "source": "reports/quality/full-app-duplication-baseline.json"
     },
     "pipeline_duplicate_clusters": {
-      "current": 2,
+      "current": 0,
       "max": 10,
       "previous_audit_baseline": 11,
       "source": "reports/quality/full-app-duplication-baseline.json"

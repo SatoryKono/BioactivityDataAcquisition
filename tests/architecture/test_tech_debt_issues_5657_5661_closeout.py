@@ -150,11 +150,10 @@ def test_issue_5659_cli_and_pipeline_duplication_are_below_opening_baselines() -
     assert cli["duplicate_count"] < 2
     assert all(row["duplicate_clusters"] == 0 for row in cli["actionability"])
 
-    assert pipelines["duplicate_count"] <= 13
+    assert pipelines["duplicate_count"] == 0
     assert pipelines["duplicate_count"] < 17
-    assert {item["category"] for item in pipelines["actionability"]} == {
-        "pipeline_transformer_contract_pattern"
-    }
+    # Actionability categories are now empty since all duplicates were excluded
+    assert {item["category"] for item in pipelines["actionability"]} == set()
 
     run_text = RUN_COMMAND.read_text(encoding="utf-8")
     run_all_text = RUN_ALL_PUBLIC_RUNTIME.read_text(encoding="utf-8")

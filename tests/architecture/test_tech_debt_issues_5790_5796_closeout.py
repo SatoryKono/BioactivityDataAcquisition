@@ -231,10 +231,10 @@ def test_issue_5792_pipeline_duplication_dropped_under_base_transformer_defaults
         pipelines["duplicate_count"]
         == closeout["metrics"]["pipeline_duplicate_clusters"]["current"]
     )
+    assert pipelines["duplicate_count"] == 0
     assert pipelines["duplicate_count"] < 11
-    assert {item["category"] for item in pipelines["actionability"]} == {
-        "pipeline_transformer_contract_pattern"
-    }
+    # Actionability categories are now empty since all duplicates were excluded
+    assert {item["category"] for item in pipelines["actionability"]} == set()
     assert "DEFAULT_PROVIDER" in base_text
     assert "DEFAULT_ENTITY_TYPE" in base_text
     assert "default_provider" in context_text

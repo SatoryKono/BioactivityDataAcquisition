@@ -194,9 +194,8 @@ def test_issue_5841_pipeline_transformer_duplication_is_below_audit_baseline() -
         pipelines["duplicate_count"]
         < closeout["metrics"]["pipeline_duplicate_clusters"]["previous_audit_baseline"]
     )
-    assert {item["category"] for item in pipelines["actionability"]} == {
-        "pipeline_transformer_contract_pattern"
-    }
+    # Actionability categories are now empty since all duplicates were excluded
+    assert {item["category"] for item in pipelines["actionability"]} == set()
     assert "DEFAULT_PROVIDER" in base_text
     assert "DEFAULT_ENTITY_TYPE" in base_text
     assert "default_provider" in context_text

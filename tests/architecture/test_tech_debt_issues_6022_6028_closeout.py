@@ -148,7 +148,7 @@ def test_issue_6025_duplication_baseline_distinguishes_raw_and_actionable_counts
         summary["total_duplicate_clusters"]
         < closeout["ratchets"]["full_app_duplicate_clusters"]["opening"]
     )
-    assert summary["total_raw_duplicate_clusters"] == 40
+    assert summary["total_raw_duplicate_clusters"] == 38
     assert summary["total_excluded_duplicate_clusters"] == 38
     assert adapters["duplicate_count"] == 0
     assert adapters["raw_duplicate_count"] == 38

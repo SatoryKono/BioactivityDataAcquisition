@@ -1,9 +1,9 @@
 {
   "summary": {
-    "snapshot_date": "2026-07-06",
+    "snapshot_date": "2026-07-07",
     "targets": 4,
-    "total_duplicate_clusters": 2,
-    "total_raw_duplicate_clusters": 40,
+    "total_duplicate_clusters": 0,
+    "total_raw_duplicate_clusters": 38,
     "total_excluded_duplicate_clusters": 38
   },
   "normalization": {
@@ -14,14 +14,14 @@
   },
   "trend": {
     "status": "no_prior_snapshot",
-    "snapshot_date": "2026-07-06"
+    "snapshot_date": "2026-07-07"
   },
   "reduction_leverage_ranking": [
     {
       "target": "src/bioetl/application/pipelines",
-      "duplicate_clusters": 2,
-      "dominant_actionability_category": "pipeline_transformer_contract_pattern",
-      "dominant_actionability_cluster_count": 2,
+      "duplicate_clusters": 0,
+      "dominant_actionability_category": null,
+      "dominant_actionability_cluster_count": 0,
       "low_risk_cluster_count": 0,
       "low_risk_cluster_share": 0.0,
       "recommended_first_wave": false
@@ -57,8 +57,8 @@
   "first_wave": {
     "status": "selected",
     "target": "src/bioetl/application/pipelines",
-    "duplicate_clusters": 2,
-    "dominant_actionability_category": "pipeline_transformer_contract_pattern",
+    "duplicate_clusters": 0,
+    "dominant_actionability_category": null,
     "selection_rule": "prefer low-risk actionability families with bounded cluster counts, then maximize duplicate reduction leverage"
   },
   "targets": [
@@ -74,68 +74,13 @@
     },
     {
       "target": "src/bioetl/application/pipelines",
-      "returncode": 8,
-      "duplicate_count": 2,
-      "raw_duplicate_count": 2,
+      "returncode": 0,
+      "duplicate_count": 0,
+      "raw_duplicate_count": 0,
       "excluded_duplicate_count": 0,
-      "actionability": [
-        {
-          "category": "pipeline_transformer_contract_pattern",
-          "duplicate_clusters": 2
-        }
-      ],
-      "top_pairs": [
-        {
-          "modules": [
-            "bioetl.application.pipelines.chembl.base_chembl_transformer",
-            "bioetl.application.pipelines.common.publication_transformer_context"
-          ],
-          "duplicate_clusters": 1
-        },
-        {
-          "modules": [
-            "bioetl.application.pipelines.pubmed._block_definitions_analytics",
-            "bioetl.application.pipelines.pubmed.transformer"
-          ],
-          "duplicate_clusters": 1
-        }
-      ],
-      "clusters": [
-        {
-          "path": "src/bioetl/application/pipelines/uniprot/extractors/__init__.py",
-          "line": 1,
-          "actionability_category": "pipeline_transformer_contract_pattern",
-          "modules": [
-            {
-              "module": "bioetl.application.pipelines.chembl.base_chembl_transformer",
-              "start_line": 109,
-              "end_line": 120
-            },
-            {
-              "module": "bioetl.application.pipelines.common.publication_transformer_context",
-              "start_line": 178,
-              "end_line": 187
-            }
-          ]
-        },
-        {
-          "path": "src/bioetl/application/pipelines/uniprot/extractors/__init__.py",
-          "line": 1,
-          "actionability_category": "pipeline_transformer_contract_pattern",
-          "modules": [
-            {
-              "module": "bioetl.application.pipelines.pubmed._block_definitions_analytics",
-              "start_line": 48,
-              "end_line": 55
-            },
-            {
-              "module": "bioetl.application.pipelines.pubmed.transformer",
-              "start_line": 254,
-              "end_line": 261
-            }
-          ]
-        }
-      ]
+      "actionability": [],
+      "top_pairs": [],
+      "clusters": []
     },
     {
       "target": "src/bioetl/composition/bootstrap",

@@ -16,8 +16,8 @@
 | `retained_public_entrypoint_burden` | `pass` | `current_count` | `0` | `0` | `configs/quality/debt_scorecard.yaml#compatibility_debt_metrics` |
 | `debt_budget_growth_policy` | `pass` | `budget_growth_allowed` | `False` | `False` | `configs/quality/debt_scorecard.yaml` |
 | `debt_scorecard_budget_no_growth` | `pass` | `budget_increase_count` | `not_evaluated_without_changed_from_ref` | `0` | `configs/quality/debt_scorecard.yaml` |
-| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `e86b1e7e6bfcd6e765ac543e2d01a6c63747aa6a6f347320196d3cf5c9b1374e` | `e86b1e7e6bfcd6e765ac543e2d01a6c63747aa6a6f347320196d3cf5c9b1374e` | `reports/quality/module-coverage-inventory.json` |
-| `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2213, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': 'e86b1e7e6bfcd6e765ac543e2d01a6c63747aa6a6f347320196d3cf5c9b1374e'}` | `{'source_module_count': 2213, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': 'e86b1e7e6bfcd6e765ac543e2d01a6c63747aa6a6f347320196d3cf5c9b1374e'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
+| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `4b33f909056e2d46f7323b21dc497e126be39349c0addfffe3d207b3a404b3df` | `4b33f909056e2d46f7323b21dc497e126be39349c0addfffe3d207b3a404b3df` | `reports/quality/module-coverage-inventory.json` |
+| `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2214, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '4b33f909056e2d46f7323b21dc497e126be39349c0addfffe3d207b3a404b3df'}` | `{'source_module_count': 2214, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '4b33f909056e2d46f7323b21dc497e126be39349c0addfffe3d207b3a404b3df'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
 | `module_coverage_unmeasured_modules` | `pass` | `unmeasured_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `module_coverage_uncovered_modules` | `pass` | `uncovered_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `hotspot_family_baseline_budget_warnings` | `pass` | `budget_warnings` | `0` | `0` | `reports/quality/hotspot-family-baseline.json` |
@@ -31,10 +31,10 @@
 | `config_discrepancy_inconsistent_parameters` | `pass` | `inconsistent_parameter_count` | `0` | `0` | `reports/quality/config-discrepancy-baseline.json` |
 | `config_discrepancy_raw_inconsistent_parameters` | `pass` | `raw_inconsistent_parameter_count` | `0` | `0` | `reports/quality/config-discrepancy-baseline.json` |
 | `full_app_duplication_infrastructure_adapters` | `pass` | `duplication_clusters` | `0` | `0` | `reports/quality/full-app-duplication-baseline.json` |
-| `full_app_duplication_application_pipelines` | `pass` | `duplication_clusters` | `2` | `2` | `reports/quality/full-app-duplication-baseline.json` |
+| `full_app_duplication_application_pipelines` | `pass` | `duplication_clusters` | `0` | `0` | `reports/quality/full-app-duplication-baseline.json` |
 | `full_app_duplication_composition_bootstrap_full_app` | `pass` | `duplication_clusters` | `0` | `0` | `reports/quality/full-app-duplication-baseline.json` |
 | `full_app_duplication_interfaces_cli_full_app` | `pass` | `duplication_clusters` | `0` | `0` | `reports/quality/full-app-duplication-baseline.json` |
-| `full_app_duplication_total_clusters` | `pass` | `total_duplicate_clusters` | `2` | `2` | `reports/quality/full-app-duplication-baseline.json` |
+| `full_app_duplication_total_clusters` | `pass` | `total_duplicate_clusters` | `0` | `0` | `reports/quality/full-app-duplication-baseline.json` |
 | `supporting_scripts_zero_reference_count` | `pass` | `zero_reference_supporting_script_count` | `41` | `45` | `configs/quality/scripts_inventory_manifest.json` |
 | `supporting_scripts_untriaged_zero_reference_count` | `pass` | `untriaged_zero_reference_supporting_script_count` | `0` | `0` | `configs/quality/scripts_inventory_manifest.json` |
 | `test_governance_budget_violations` | `pass` | `budget_violations` | `0` | `0` | `reports/quality/test-governance-current.json` |

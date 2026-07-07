@@ -55,7 +55,7 @@ _RAW_CANONICAL_SCHEMA_REGISTRY: tuple[tuple[str, str, str, tuple[str, ...]], ...
             "year",
             "pagination",
             "doc_type",
-            "citations",
+            "open_access",
             "provider_ids",
             "dq",
         ),

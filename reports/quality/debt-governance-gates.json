@@ -37,8 +37,8 @@
       "status": "pass"
     },
     {
-      "current": "e86b1e7e6bfcd6e765ac543e2d01a6c63747aa6a6f347320196d3cf5c9b1374e",
-      "limit": "e86b1e7e6bfcd6e765ac543e2d01a6c63747aa6a6f347320196d3cf5c9b1374e",
+      "current": "4b33f909056e2d46f7323b21dc497e126be39349c0addfffe3d207b3a404b3df",
+      "limit": "4b33f909056e2d46f7323b21dc497e126be39349c0addfffe3d207b3a404b3df",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -47,14 +47,14 @@
     },
     {
       "current": {
-        "source_module_count": 2213,
-        "source_tree_sha256": "e86b1e7e6bfcd6e765ac543e2d01a6c63747aa6a6f347320196d3cf5c9b1374e",
+        "source_module_count": 2214,
+        "source_tree_sha256": "4b33f909056e2d46f7323b21dc497e126be39349c0addfffe3d207b3a404b3df",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
-        "source_module_count": 2213,
-        "source_tree_sha256": "e86b1e7e6bfcd6e765ac543e2d01a6c63747aa6a6f347320196d3cf5c9b1374e",
+        "source_module_count": 2214,
+        "source_tree_sha256": "4b33f909056e2d46f7323b21dc497e126be39349c0addfffe3d207b3a404b3df",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -190,8 +190,8 @@
       "status": "pass"
     },
     {
-      "current": 2,
-      "limit": 2,
+      "current": 0,
+      "limit": 0,
       "metric": "duplication_clusters",
       "name": "full_app_duplication_application_pipelines",
       "remediation": "Reduce duplicate clusters and regenerate the full-app duplication baseline without raising scorecard budgets.",
@@ -217,8 +217,8 @@
       "status": "pass"
     },
     {
-      "current": 2,
-      "limit": 2,
+      "current": 0,
+      "limit": 0,
       "metric": "total_duplicate_clusters",
       "name": "full_app_duplication_total_clusters",
       "remediation": "Burn down full-app duplicate clusters and refresh the reviewed baseline.",

@@ -479,15 +479,15 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 180
-      total_loc: 22306
-      files_ge_250_loc: 5
+      total_loc: 22302
+      files_ge_250_loc: 4
       helper_function_ratio: 0.356
       max_internal_fan_in: 10
       max_internal_fan_in_module: bioetl.application.core.batch_runtime_failure_policy
     trend:
-      status: reviewed_2026-07-01_application_core_live_metric_refresh
-      next_action: 2026-07-01 refreshes measured application_core metrics against
-        the committed hotspot-family baseline at 180 files, 22306 LOC, 5
+      status: reviewed_2026-07-07_application_core_live_metric_refresh
+      next_action: 2026-07-07 refreshes measured application_core metrics against
+        the committed hotspot-family baseline at 180 files, 22302 LOC, 4
         files_ge_250_loc, helper_function_ratio 0.356, and max_internal_fan_in
         10. Bounded-growth budgets remain flat at 7 files_ge_250_loc and
         max_internal_fan_in 10; no technical-debt budget is increased.
@@ -508,18 +508,18 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 49
-      total_loc: 5982
+      total_loc: 5984
       files_ge_250_loc: 0
       helper_function_ratio: 0.302
-      max_internal_fan_in: 3
-      max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.observability
+      max_internal_fan_in: 2
+      max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.tracing_bootstrap
     trend:
-      status: refreshed_2026-07-06_observability_facade_import_consolidation
-      next_action: 2026-07-06 routes tracing bootstrap callers through the
-        observability facade where they do not need the tracing implementation
-        module directly. Measured total_loc is 5982 and max_internal_fan_in
-        remains within the flat budget at 3/3; no technical-debt budget is
-        increased.
+      status: reduced_2026-07-07_tracing_bootstrap_headroom_restored
+      next_action: 2026-07-07 refresh aligns the scorecard with the committed
+        hotspot-family baseline at 49 files, 5984 LOC, 0 files_ge_250_loc,
+        helper_function_ratio 0.302, and max_internal_fan_in 2. Bounded-growth
+        budgets remain flat at 0 files_ge_250_loc and max_internal_fan_in 3;
+        no technical-debt budget is increased.
   - name: composition_factories_pipeline
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -606,7 +606,7 @@ hotspot_family_ratchets:
         max_internal_fan_in from 5 to 4 while preserving the existing bounded
         budget of 5. No technical-debt budget is increased.
 full_app_duplication_ratchets:
-  snapshot_date: '2026-07-06'
+  snapshot_date: '2026-07-07'
   mode: fail-fast
   artifact_policy:
     generator_command: python -m scripts.engineering.qa report-duplication-baseline
@@ -632,12 +632,12 @@ full_app_duplication_ratchets:
         ratchet_policy: Non-growth fail-fast; decreases require regenerated baseline.
   - name: application_pipelines
     owner: '@bioetl-application'
-    linked_issue: '#5841'
+    linked_issue: '#6035'
     path_prefix: src/bioetl/application/pipelines
     metrics:
       duplication_clusters:
-        current_count: 2
-        max_count: 2
+        current_count: 0
+        max_count: 0
         ratchet_policy: Non-growth fail-fast; decreases require regenerated baseline.
   - name: composition_bootstrap_full_app
     owner: '@bioetl-platform'
@@ -657,8 +657,8 @@ full_app_duplication_ratchets:
         ratchet_policy: Zero-budget fail-fast.
   summary_metrics:
     total_duplicate_clusters:
-      current_count: 2
-      max_count: 2
+      current_count: 0
+      max_count: 0
       ratchet_policy: Non-growth fail-fast across full-app scan targets.
 supporting_scripts_governance:
   inventory_source: configs/quality/scripts_inventory_manifest.json
@@ -682,7 +682,7 @@ oversized_source_module_inventory:
   max_tracked_lines: 500
   top_modules:
   - path: src/bioetl/application/pipelines/common/base_publication_transformer.py
-    lines: 318
+    lines: 316
     owner: '@bioetl-application'
     target_split: separate publication normalization, persistence shaping, and provenance
       helpers

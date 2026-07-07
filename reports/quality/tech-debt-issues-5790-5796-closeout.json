@@ -20,7 +20,7 @@
     },
     "pipeline_duplicate_clusters": {
       "opening_baseline": 11,
-      "current": 2
+      "current": 0
     },
     "repo_wide_zero_import_candidates": {
       "count": 9,
@@ -72,7 +72,7 @@
       "debt_type": "pipeline_transformer_duplication",
       "outcome": "improved",
       "opening_baseline": 11,
-      "current_value": 2,
+      "current_value": 0,
       "evidence": [
         "src/bioetl/application/pipelines/common/base_publication_transformer.py",
         "src/bioetl/application/pipelines/common/publication_transformer_context.py",
@@ -82,7 +82,7 @@
         "reports/quality/full-app-duplication-baseline.json",
         "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py"
       ],
-      "closeout_reason": "Provider publication transformers now consume shared default-provider/default-entity-type initialization through the canonical base transformer context, and the committed pipeline duplication baseline remains at 2 clusters, below the opening 11-cluster tranche."
+      "closeout_reason": "Provider publication transformers now consume shared default-provider/default-entity-type initialization through the canonical base transformer context, and the committed pipeline duplication baseline remains at 0 clusters, below the opening 11-cluster tranche."
     },
     "5793": {
       "status": "closeable",

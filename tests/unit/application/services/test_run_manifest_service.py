@@ -40,6 +40,21 @@ class _MissingLookupRunManifestStore(_InMemoryRunManifestStore):
         return None
 
 
+class _FastAssertionRunManifestStore(_InMemoryRunManifestStore):
+    def __init__(self) -> None:
+        super().__init__()
+        self.asserted_manifest: RunManifest | None = None
+
+    def assert_saved(self, manifest: RunManifest) -> None:
+        self.asserted_manifest = manifest
+
+    def get(self, manifest_id: str) -> RunManifest | None:
+        raise AssertionError("fallback manifest_id lookup should not run")
+
+    def get_by_run_id(self, run_id: RunID) -> RunManifest | None:
+        raise AssertionError("fallback run_id lookup should not run")
+
+
 def _make_request() -> RunManifestCreateRequest:
     return RunManifestCreateRequest(
         run_id=RunID(UUID("11111111-1111-1111-1111-111111111111")),
@@ -596,6 +611,18 @@ def test_create_manifest_fails_closed_when_persisted_manifest_is_not_resolvable(
         match="manifest is not resolvable by manifest_id",
     ):
         service.create_manifest(_make_request())
+
+
+def test_create_manifest_uses_store_specific_post_save_assertion() -> None:
+    store = _FastAssertionRunManifestStore()
+    service = RunManifestService(
+        manifest_port=store,
+        _manifest_id_factory=lambda: "manifest-fast-assertion",
+    )
+
+    manifest = service.create_manifest(_make_request())
+
+    assert store.asserted_manifest == manifest
 
 
 def test_create_manifest_aborts_when_atomic_persistence_fails(

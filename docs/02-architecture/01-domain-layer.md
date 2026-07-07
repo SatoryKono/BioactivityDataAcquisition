@@ -42,7 +42,7 @@ ______________________________________________________________________
 
 - Чистота: без I/O и без инфраструктурных зависимостей. Исключение для
   schema-contract representation в `domain/schemas/` и `domain/contracts/`
-  зафиксировано в [ADR-048](../decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md).
+  зафиксировано в [ADR-048](decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md).
 - Консистентность: инварианты удерживаются внутри aggregate boundaries.
 - Типобезопасность: значения и идентификаторы выражены через отдельные типы и value objects.
 

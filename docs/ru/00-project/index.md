@@ -150,7 +150,7 @@ bioetl run-composite --composite publication --seed-limit 1000
 
 ## Текущая версия
 
-**v6.1.4** (базовая governance-версия по [RULES.md](RULES.md)) — история релизов в [CHANGELOG](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/CHANGELOG.md).
+**v6.1.4** (базовая governance-версия по [RULES.md](../../00-project/RULES.md)) — история релизов в [CHANGELOG](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/CHANGELOG.md).
 
 ## Начало работы
 

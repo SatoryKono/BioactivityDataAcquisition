@@ -43,8 +43,9 @@ thresholds. Operators must treat both as active surfaces.
 | Composite overrides | `configs/composites/*.yaml` | per surface | per surface | Explicit per-composite DQ policy |
 
 Composite pipelines may define additional per-surface overrides. Contract-level
-DQ flags in `configs/contracts/**/*.yaml` remain DQ-only and do not control Gold
-strict validation ([gold-schemas.md](../04-reference/contracts/gold-schemas.md)).
+DQ flags in entity contract YAML under `configs/contracts/{provider}/{entity}.yaml`
+remain DQ-only and do not control Gold strict validation
+([gold-schemas.md](../04-reference/contracts/gold-schemas.md)).
 
 ## Hierarchical DQ Config Structure
 
