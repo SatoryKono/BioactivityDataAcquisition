@@ -46,7 +46,7 @@ def test_parse_frames_rejects_unframed_stdout_preamble() -> None:
 def test_run_smoke_command_succeeds_against_stub_mcp_server(tmp_path: Path) -> None:
     server = tmp_path / "stub_mcp_server.py"
     server.write_text(
-        """
+        r"""
 from __future__ import annotations
 
 import json
@@ -59,7 +59,7 @@ def read_frame():
         line = sys.stdin.buffer.readline()
         if not line:
             return None
-        if line == b"\\r\\n":
+        if line == b"\r\n":
             break
         name, _, value = line.decode("ascii").partition(":")
         headers[name.strip().lower()] = value.strip()
@@ -71,7 +71,7 @@ def read_frame():
 def send_frame(payload):
     body = json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8")
     sys.stdout.buffer.write(
-        f"Content-Length: {len(body)}\\r\\n\\r\\n".encode("ascii") + body
+        f"Content-Length: {len(body)}\r\n\r\n".encode("ascii") + body
     )
     sys.stdout.buffer.flush()
 
@@ -122,7 +122,7 @@ def test_run_smoke_command_succeeds_when_server_stays_alive_after_handshake(
 ) -> None:
     server = tmp_path / "long_lived_mcp_server.py"
     server.write_text(
-        """
+        r"""
 from __future__ import annotations
 
 import json
@@ -135,7 +135,7 @@ def read_frame():
         line = sys.stdin.buffer.readline()
         if not line:
             return None
-        if line == b"\\r\\n":
+        if line == b"\r\n":
             break
         name, _, value = line.decode("ascii").partition(":")
         headers[name.strip().lower()] = value.strip()
@@ -147,7 +147,7 @@ def read_frame():
 def send_frame(payload):
     body = json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8")
     sys.stdout.buffer.write(
-        f"Content-Length: {len(body)}\\r\\n\\r\\n".encode("ascii") + body
+        f"Content-Length: {len(body)}\r\n\r\n".encode("ascii") + body
     )
     sys.stdout.buffer.flush()
 
@@ -195,12 +195,12 @@ while True:
 def test_run_smoke_command_reports_invalid_stdout_from_wrapper(tmp_path: Path) -> None:
     server = tmp_path / "bad_mcp_server.py"
     server.write_text(
-        """
+        r"""
 from __future__ import annotations
 
 import sys
 
-sys.stdout.write("oops\\n")
+sys.stdout.write("oops\n")
 sys.stdout.flush()
 """.strip()
         + "\n",

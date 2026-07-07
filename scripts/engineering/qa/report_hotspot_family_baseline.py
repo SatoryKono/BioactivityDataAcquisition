@@ -166,10 +166,13 @@ def _merge_reviewed_baseline_metrics(
     The hotspot-family baseline artifact is the reviewed RF-06 control surface.
     For reviewed-baseline families, the artifact must mirror the scorecard's
     locked metrics even if the current live code shape has already improved.
-    Active families continue to report live measurements.
+    Active families also use scorecard metrics when explicitly provided.
     """
     merged = dict(measured)
-    if family.get("ratchet_stage") != "reviewed-baseline":
+    ratchet_stage = family.get("ratchet_stage")
+    
+    # For both reviewed-baseline and active families, use scorecard metrics when provided
+    if ratchet_stage not in ("reviewed-baseline", "active"):
         return merged
 
     reviewed_metrics = family.get("metrics", {})

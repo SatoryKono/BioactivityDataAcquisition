@@ -4,14 +4,16 @@ from __future__ import annotations
 
 import io
 import json
-from tests.helpers.synthetic_paths import synthetic_test_root
 from datetime import UTC, datetime
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID
 
 import pyarrow as pa
 import pytest
 import zstandard as zstd
+
+from tests.helpers.synthetic_paths import synthetic_test_root
 
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.ports.noop import NoOpMetrics
@@ -428,6 +430,9 @@ class TestSilverWriter:
         mock_table_instance.version.return_value = 1
 
         writer = SilverWriter(base_path=SILVER_DELTA_ROOT, logger=noop_logger)
+        table_path = Path(SILVER_DELTA_ROOT) / "test_table"
+        table_path.mkdir(parents=True, exist_ok=True)
+        (table_path / "part-00000.parquet").write_bytes(b"parquet-marker")
 
         records = [
             {

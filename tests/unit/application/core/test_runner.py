@@ -191,6 +191,7 @@ def mock_postrun_service():
     )
 
     service = MagicMock(spec=PostrunService)
+    service.OPERATION_ERRORS = PostrunService.OPERATION_ERRORS
     service.run = AsyncMock(
         return_value=PostrunResult(
             dq=DQResult(
