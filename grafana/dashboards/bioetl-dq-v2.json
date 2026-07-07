@@ -1716,7 +1716,7 @@
       },
       "targets": [
         {
-          "expr": "max(clamp_min(time() - bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}, 0))",
+          "expr": "max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}[$__range]), 0))",
           "legendFormat": "Worst Freshness",
           "refId": "A"
         }
@@ -1889,7 +1889,7 @@
       },
       "targets": [
         {
-          "expr": "max(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}) * 1000",
+          "expr": "max(max_over_time(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}[$__range])) * 1000",
           "legendFormat": "Latest Data",
           "refId": "A"
         }

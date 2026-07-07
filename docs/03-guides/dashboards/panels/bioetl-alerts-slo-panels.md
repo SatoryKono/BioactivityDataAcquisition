@@ -45,10 +45,15 @@ Dashboard `6. Alerts & SLO` monitors active alert state, SLO pressure, alert sev
 
 ## Variables
 
-- `severity` narrows by alert severity level.
-- `provider` narrows by provider.
-- `pipeline` narrows by pipeline.
-- `alert_name` narrows by specific alert name.
+Shared context selectors (aligned with primary dashboards):
+
+- `$workflow` narrows by declarative workflow name.
+- `$pipeline` narrows by pipeline name.
+- `$run_type` narrows by run type (`incremental`, `backfill`, `rebuild`, …).
+
+Alert panels query the standard Prometheus `ALERTS` metric; severity and alert
+name are surfaced in panel queries and the `Firing Alert Details` table, not as
+separate template variables in the shipped JSON.
 
 ## Notes
 

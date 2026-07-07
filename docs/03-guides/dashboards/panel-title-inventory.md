@@ -187,6 +187,13 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-silver-reject-explorer.json | 7 | Inspect Top Reason Signatures |
 | bioetl-silver-reject-explorer.json | 8 | Inspect Filtered Records Table |
 | bioetl-silver-reject-explorer.json | 9 | Inspect Selected Record Details |
+| bioetl-alerts-slo.json | 1000 | Navigation |
+| bioetl-alerts-slo.json | 1001 | Scope |
+| bioetl-alerts-slo.json | 1 | Active Alert Status |
+| bioetl-alerts-slo.json | 2 | Firing Alerts / Range |
+| bioetl-alerts-slo.json | 3 | Critical/Page Alerts |
+| bioetl-alerts-slo.json | 4 | SLO/SLA Alert Pressure |
+| bioetl-alerts-slo.json | 5 | Firing Alert Details |
 | bioetl-workflow-overview.json | 1 | Failed Workflow Runs / Range |
 | bioetl-workflow-overview.json | 2 | Failed Workflow Runs / Range |
 | bioetl-workflow-overview.json | 3 | Failed Pipeline Steps / Range |

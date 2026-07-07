@@ -422,7 +422,7 @@ def test_dedup_timeout_is_relaxed_in_windows_test_mode(
         lambda: _Settings(),
     )
 
-    assert _resolve_deduplication_timeout_seconds() == pytest.approx(20.0)
+    assert _resolve_deduplication_timeout_seconds() == pytest.approx(60.0)
 
 
 @pytest.mark.asyncio

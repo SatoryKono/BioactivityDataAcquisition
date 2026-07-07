@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-06'
+  Last verified: '2026-07-07'
 
 ______________________________________________________________________
 
@@ -143,13 +143,19 @@ class QuarantineEntry:
     """
 
     def start_review(self) -> None: ...
-    def mark_ignored(self, *, ignored_at: datetime, reason: str | None = None) -> None: ...
+    def mark_ignored(
+        self,
+        reason: str | None = None,
+        resolved_by: str | None = None,
+        *,
+        resolved_at: datetime,
+    ) -> None: ...
     def mark_reprocessed(
         self,
-        *,
-        reprocessed_at: datetime,
         new_record_id: str,
-        reason: str | None = None,
+        resolved_by: str | None = None,
+        *,
+        resolved_at: datetime,
     ) -> None: ...
     def mark_expired(self, *, expired_at: datetime) -> None: ...
 ```

@@ -19813,7 +19813,7 @@
       "missing_lines": 1,
       "module": "bioetl.infrastructure.storage.gold_writer",
       "path": "src/bioetl/infrastructure/storage/gold_writer.py",
-      "source_lines": 303
+      "source_lines": 304
     },
     {
       "coverage_percent": 91.03,
@@ -20643,7 +20643,7 @@
       "missing_lines": 3,
       "module": "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_quarantine",
       "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py",
-      "source_lines": 258
+      "source_lines": 291
     },
     {
       "coverage_percent": 87.27,
@@ -22043,7 +22043,7 @@
       "missing_lines": 18,
       "module": "bioetl.interfaces.http.control_plane_selector_context",
       "path": "src/bioetl/interfaces/http/control_plane_selector_context.py",
-      "source_lines": 136
+      "source_lines": 139
     },
     {
       "coverage_percent": 32.81,
@@ -41915,7 +41915,7 @@
       "missing_lines": 1,
       "module": "bioetl.infrastructure.storage.gold_writer",
       "path": "src/bioetl/infrastructure/storage/gold_writer.py",
-      "source_lines": 303
+      "source_lines": 304
     },
     {
       "coverage_percent": 91.03,
@@ -42745,7 +42745,7 @@
       "missing_lines": 3,
       "module": "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_quarantine",
       "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py",
-      "source_lines": 258
+      "source_lines": 291
     },
     {
       "coverage_percent": 87.27,
@@ -44145,7 +44145,7 @@
       "missing_lines": 18,
       "module": "bioetl.interfaces.http.control_plane_selector_context",
       "path": "src/bioetl/interfaces/http/control_plane_selector_context.py",
-      "source_lines": 136
+      "source_lines": 139
     },
     {
       "coverage_percent": 32.81,
@@ -44210,7 +44210,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-06",
-  "source_tree_sha256": "f67b036eea4e490102516f1e94682a2b94af15d39b611f021b80209489e49ec4",
+  "source_tree_sha256": "525a2f93c6b706ffbebc93f1e1e86738fd5ac2612d68dc77a9c6be44885bd020",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

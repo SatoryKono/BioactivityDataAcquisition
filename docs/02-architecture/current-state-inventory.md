@@ -7,14 +7,14 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-01'
+  Last verified: '2026-07-07'
 
 ______________________________________________________________________
 
 # Current State Inventory
 
 This inventory is synchronized against the current `main` worktree on
-2026-07-01. Code, configs, domain contracts, ADRs, and tests are the source of
+2026-07-07. Code, configs, domain contracts, ADRs, and tests are the source of
 truth; existing documentation is evidence only when it matches those sources.
 
 ## Scope
@@ -27,7 +27,7 @@ truth; existing documentation is evidence only when it matches those sources.
 | Data contracts | 27 | `configs/contracts/**/*.yaml` | One contract per configured entity pipeline surface. |
 | Provider configs | 7 | `configs/providers/*.yaml` | ChEMBL, CrossRef, OpenAlex, PubChem, PubMed, Semantic Scholar, UniProt. |
 | Grafana dashboards | 8 | `grafana/dashboards/*.json` | Overview, runtime, provider health, DQ, workflow, control-plane, alerts/SLO, silver reject explorer. |
-| Domain port files | 74 | `src/bioetl/domain/ports/**/*.py` | 18 top-level files plus nested config, control-plane, metadata, observability, quality, runtime, and storage packages. |
+| Domain port files | 74 | `src/bioetl/domain/ports/**/*.py` | 19 top-level files plus nested config, control-plane, metadata, observability, quality, runtime, and storage packages. |
 
 ## Architecture Quality Evidence
 

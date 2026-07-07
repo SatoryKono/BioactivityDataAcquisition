@@ -85,8 +85,8 @@
   "ratchets": {
     "adapter_duplicate_clusters": {
       "opening": 55,
-      "current": 38,
-      "max": 44
+      "current": 0,
+      "max": 0
     },
     "pipeline_duplicate_clusters": {
       "opening": 13,
@@ -144,14 +144,14 @@
       "release_gate_status": "passing",
       "fail_count": 0,
       "warn_count": 0,
-      "architecture_quality_score": 8.58,
+      "architecture_quality_score": 8.66,
       "module_coverage_source_tree_sha256": "bdc18d07ca1a26d66f13c5b0a556627ee93dcd9300fd4697a6e7a6570ab03b7f",
       "remote_main_baseline_fingerprint": "0ebcab4c8a5def090c4ca996388a1b035044e2e9fb0f3b45183a0e93479065d7",
       "architecture_quality_scorecard_source_tree_sha256": "bdc18d07ca1a26d66f13c5b0a556627ee93dcd9300fd4697a6e7a6570ab03b7f"
     },
     "5745": {
       "opening_adapter_duplicate_clusters": 55,
-      "adapter_duplicate_clusters": 38,
+      "adapter_duplicate_clusters": 0,
       "shared_error_bundle": "COMMON_ADAPTER_FETCH_RESILIENCE_ERRORS"
     },
     "5746": {
