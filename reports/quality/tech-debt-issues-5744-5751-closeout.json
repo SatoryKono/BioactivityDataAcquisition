@@ -90,18 +90,18 @@
     },
     "pipeline_duplicate_clusters": {
       "opening": 13,
-      "current": 2,
-      "max": 5
+      "current": 0,
+      "max": 0
     },
     "application_core_total_loc": {
       "opening": 22360,
-      "current": 22306,
+      "current": 22302,
       "max": 22319
     },
     "application_core_files_ge_250_loc": {
       "opening": 7,
-      "current": 5,
-      "max": 5
+      "current": 4,
+      "max": 4
     },
     "intentional_no_exception_contract": {
       "opening": 99,
@@ -156,7 +156,7 @@
     },
     "5746": {
       "opening_pipeline_duplicate_clusters": 13,
-      "pipeline_duplicate_clusters": 2,
+      "pipeline_duplicate_clusters": 0,
       "openalex_facade_export_strategy": "owner_module_all_exports"
     },
     "5747": {

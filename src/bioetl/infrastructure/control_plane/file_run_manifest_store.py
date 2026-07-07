@@ -79,6 +79,25 @@ class FileRunManifestStore(RunManifestPort):
     base_path: Path
     metrics: MetricsPort | None = None
 
+    def assert_saved(self, manifest: RunManifest) -> None:
+        """Fail closed if a just-saved manifest did not materialize on disk.
+
+        Full reconstruction still lives in ``get``/``get_by_run_id``. This
+        post-save hook avoids immediate JSON rehydration on Windows-backed
+        temp directories, where read-after-atomic-replace can stall under IDE
+        test runners and filesystem sync tools.
+        """
+        manifest_path = self.base_path / f"{manifest.manifest_id}.json"
+        if not manifest_path.is_file():
+            raise RuntimeError(
+                "Run manifest persistence failed: manifest file is not materialized"
+            )
+        run_index_path = self.base_path / "_by_run_id" / f"{manifest.run_id}.txt"
+        if not run_index_path.is_file():
+            raise RuntimeError(
+                "Run manifest persistence failed: run_id index is not materialized"
+            )
+
     def save(self, manifest: RunManifest) -> None:
         """Persist manifest JSON and run-id index."""
         started_at = perf_counter()

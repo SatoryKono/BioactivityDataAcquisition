@@ -45,12 +45,10 @@ seams:
       callers must be reviewed because the seam participates in manifest
       determinism, effective-config artifacts, and control-plane payloads.
     caller_guard:
-      max_src_importer_count: 7
+      max_src_importer_count: 5
       allowed_src_importers:
         - src/bioetl/composition/bootstrap/runtime/_composite_control_plane_payloads.py
-        - src/bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py
         - src/bioetl/composition/factories/pipeline/run_context_contract_identity.py
-        - src/bioetl/composition/runtime_builders/_effective_config_artifact_builder_support.py
         - src/bioetl/composition/runtime_builders/_run_manifest_creation_support.py
         - src/bioetl/composition/runtime_builders/control_plane.py
         - src/bioetl/composition/runtime_builders/run_manifest_builder.py

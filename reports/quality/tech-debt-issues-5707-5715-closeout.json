@@ -106,16 +106,16 @@
       "max": 0
     },
     "full_app_duplicate_clusters": {
-      "current": 2,
-      "max": 2
+      "current": 0,
+      "max": 0
     },
     "adapter_duplicate_clusters": {
       "current": 0,
       "max": 0
     },
     "pipeline_duplicate_clusters": {
-      "current": 2,
-      "max": 2
+      "current": 0,
+      "max": 0
     },
     "compatibility_test_files": {
       "current": 0,
@@ -181,9 +181,9 @@
     },
     "5709": {
       "opening_pipeline_duplicate_clusters": 15,
-      "pipeline_duplicate_clusters": 2,
-      "pipeline_duplicate_clusters_no_growth_max": 13,
-      "dominant_actionability_category": "pipeline_transformer_contract_pattern",
+      "pipeline_duplicate_clusters": 0,
+      "pipeline_duplicate_clusters_no_growth_max": 0,
+      "dominant_actionability_category": null,
       "decision": "reduced_shared_uniprot_comment_annotation_output_keys"
     },
     "5710": {
@@ -200,11 +200,11 @@
       }
     },
     "5711": {
-      "source_module_count": 2212,
+      "source_module_count": 2214,
       "unmeasured_module_count": 0,
       "uncovered_module_count": 0,
       "no_executable_line_modules": 2,
-      "source_tree_sha256": "bfca32cf9ee7032511947029fe1bc12bd6fb2a19d6c421d8351ca971c32d67f3",
+      "source_tree_sha256": "4b33f909056e2d46f7323b21dc497e126be39349c0addfffe3d207b3a404b3df",
       "under70_module_count_before": 18,
       "under70_module_count_after": 9,
       "under85_module_count_after": 80

@@ -74,7 +74,7 @@ Gold-слой содержит **бизнес-готовые данные** с:
 
 Отдельно фиксируем policy boundary для `#4768`:
 
-- `strict_dq_validation` в `configs/contracts/**/*.yaml` остаётся DQ-only флагом и не управляет Gold runtime strictness;
+- `strict_dq_validation` в entity contract YAML под `configs/contracts/{provider}/{entity}.yaml` остаётся DQ-only флагом и не управляет Gold runtime strictness;
 - canonical Gold strictness для composite outputs обеспечивается registered Pandera Gold schema и merged Gold write path;
 - любые composite-специфические исключения по этой границе должны быть явно заведены в `configs/quality/composite_gold_strictness_waivers.yaml` с owner, rationale, linked issue, approved_on и expires_on.
 

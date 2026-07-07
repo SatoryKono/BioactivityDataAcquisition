@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Protocol, runtime_checkable
 
 from bioetl.application.services.control_plane.manifest._service_support import (
     RunManifestHydrationMixin,
@@ -29,6 +30,15 @@ __all__ = [
     "RunManifestCreateSpec",
     "RunManifestService",
 ]
+
+
+@runtime_checkable
+class _RunManifestSaveAssertionPort(Protocol):
+    """Optional fast post-save persistence assertion for concrete stores."""
+
+    def assert_saved(self, manifest: RunManifest) -> None:
+        """Raise if the just-saved manifest is not durably materialized."""
+        ...
 
 
 @dataclass(slots=True, kw_only=True)
@@ -103,6 +113,9 @@ class RunManifestService(
 
     def _assert_manifest_persisted(self, manifest: RunManifest) -> None:
         """Fail closed when a persisted manifest cannot be reconstructed."""
+        if isinstance(self.manifest_port, _RunManifestSaveAssertionPort):
+            self.manifest_port.assert_saved(manifest)
+            return
         persisted_by_manifest_id = self.manifest_port.get(manifest.manifest_id)
         if persisted_by_manifest_id is None:
             raise RuntimeError(

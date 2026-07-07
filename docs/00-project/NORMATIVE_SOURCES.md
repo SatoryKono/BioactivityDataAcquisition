@@ -36,13 +36,12 @@ BioETL не использует один монолитный файл «все
 
 ## Precedence для AI runtime
 
-При конфликте инструкций используй порядок из [AGENTS.md](../../AGENTS.md):
-
-1. active runtime source (`.codex/**`, tracked `.gemini/**` when present)
-1. [RULES.md](RULES.md)
-1. [REQUIREMENTS.md](../01-requirements/REQUIREMENTS.md)
-1. accepted ADRs in [decisions/](../02-architecture/decisions/)
-1. docs mirrors in `docs/00-project/ai/**` (navigation only)
+Канонический порядок разрешения конфликтов для AI runtime живет в
+[AGENTS.md](../../AGENTS.md), секция `Canonical Precedence`. Этот индекс не
+ведет параллельный нумерованный список precedence. Важно: active runtime source
+и matching runtime profiles/skills стоят выше этого normative index; docs
+mirrors в `docs/00-project/ai/**` остаются navigation/guidance surfaces и не
+переопределяют runtime behavior самостоятельно.
 
 ## Что читать по теме
 

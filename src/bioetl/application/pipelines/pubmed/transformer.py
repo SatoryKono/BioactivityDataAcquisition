@@ -156,11 +156,7 @@ class PubMedPublicationTransformer(BasePublicationTransformer):
                 root_resolver=resolve_cached_root,
             ),
             _PubMedDateBlock(
-                date_extractor=self._date_extractor,
-                data_normalizer=self._data_normalizer,
-                validate_publication_year=self._validate_publication_year,
-                valid_date_patterns=self._VALID_DATE_PATTERNS,
-                month_map=self._MONTH_MAP,
+                extract_date_data=self._extract_date_data,
                 root_resolver=resolve_cached_root,
             ),
             _PubMedClassificationBlock(

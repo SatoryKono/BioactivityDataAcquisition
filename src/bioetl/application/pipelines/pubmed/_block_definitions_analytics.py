@@ -2,24 +2,17 @@
 
 from __future__ import annotations
 
-import re
 import xml.etree.ElementTree as ET  # nosec B405
 from collections.abc import Callable, Sequence
-from typing import TYPE_CHECKING
 
 from bioetl.application.pipelines.pubmed._block_definitions_base import _PubMedXmlBlock
-from bioetl.application.pipelines.pubmed._block_helpers import extract_date_data
 from bioetl.application.pipelines.pubmed.extractors.classification import (
     ClassificationExtractor,
 )
-from bioetl.application.pipelines.pubmed.extractors.date import DateExtractor
 from bioetl.domain.mapping.pubmed_publication import (
     build_pubmed_publication_type_fields,
 )
-from bioetl.domain.types import BronzeRecord, JsonDict
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import DataNormalizationPort
+from bioetl.domain.types import BronzeRecord, JsonDict  # type: ignore[misc]
 
 
 class _PubMedDateBlock(_PubMedXmlBlock):
@@ -28,34 +21,20 @@ class _PubMedDateBlock(_PubMedXmlBlock):
     def __init__(
         self,
         *,
-        date_extractor: DateExtractor,
-        data_normalizer: DataNormalizationPort,
-        validate_publication_year: Callable[[object], int | None],
-        valid_date_patterns: Sequence[re.Pattern[str]],
-        month_map: dict[str, int],
+        extract_date_data: Callable[
+            [ET.Element, ET.Element | None, ET.Element | None],
+            dict[str, object],
+        ],
         root_resolver: Callable[[], ET.Element | None],
     ) -> None:
         super().__init__(root_resolver)
-        self._date_extractor = date_extractor
-        self._data_normalizer = data_normalizer
-        self._validate_publication_year = validate_publication_year
-        self._valid_date_patterns = tuple(valid_date_patterns)
-        self._month_map = month_map
+        self._extract_date_data = extract_date_data
 
     def extract(self, _record: BronzeRecord) -> JsonDict:
         article, medline, pubmed_data = self._resolve_article_context()
         if article is None:
             return {}
-        return extract_date_data(
-            article=article,
-            pubmed_data=pubmed_data,
-            medline=medline,
-            date_extractor=self._date_extractor,
-            data_normalizer=self._data_normalizer,
-            validate_publication_year=self._validate_publication_year,
-            valid_date_patterns=self._valid_date_patterns,
-            month_map=self._month_map,
-        )
+        return self._extract_date_data(article, pubmed_data, medline)
 
 
 class _PubMedClassificationBlock(_PubMedXmlBlock):

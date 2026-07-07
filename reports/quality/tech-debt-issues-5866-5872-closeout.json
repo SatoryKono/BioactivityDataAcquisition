@@ -89,7 +89,7 @@
   ],
   "metrics": {
     "full_app_total_duplicate_clusters": {
-      "current": 2,
+      "current": 0,
       "max": 2,
       "opening": 57,
       "source": "reports/quality/full-app-duplication-baseline.json"
@@ -101,7 +101,7 @@
       "source": "reports/quality/full-app-duplication-baseline.json"
     },
     "pipeline_duplicate_clusters": {
-      "current": 2,
+      "current": 0,
       "max": 2,
       "opening": 9,
       "source": "reports/quality/full-app-duplication-baseline.json"

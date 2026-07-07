@@ -28,7 +28,10 @@ The BioETL DQ Contract System defines four primary contract types that govern da
 **Canonical Sources**:
 
 - Domain schemas: `src/bioetl/domain/schemas/` (Pandera DataFrameModel contracts)
-- Contract YAML: `configs/contracts/**/*.yaml` (current DQ/data-contract routing inventory)
+- Entity contract YAML:
+  `configs/contracts/{chembl,composite,crossref,openalex,pubchem,pubmed,semanticscholar,uniprot}/*.yaml`
+  (current DQ/data-contract routing inventory)
+- Error catalog YAML: `configs/contracts/errors/error_catalog.yaml` (error-code taxonomy, not an entity data contract)
 - Entity configs: `configs/entities/{provider}/{entity}.yaml` (field definitions)
 - Composite configs: `configs/composites/{entity}.yaml` (field definitions)
 - Exported JSON: `docs/04-reference/contracts/gold/*.json` (for external consumers)
@@ -36,7 +39,8 @@ The BioETL DQ Contract System defines four primary contract types that govern da
 **Source-of-truth routing**:
 
 - `src/bioetl/domain/schemas/` owns executable Pandera structural contracts.
-- `configs/contracts/**` owns the current provider/entity contract YAML inventory used by DQ/data-contract routing and policy documentation.
+- Provider and composite folders under `configs/contracts/` own the current entity contract YAML inventory used by DQ/data-contract routing and policy documentation.
+- `configs/contracts/errors/error_catalog.yaml` owns error-code taxonomy and is governed separately from entity data contracts.
 - `configs/entities/**` and `configs/composites/**` provide pipeline and composite field metadata; they do not replace the contract YAML inventory.
 - `docs/04-reference/contracts/gold/*.json` is generated from contract/schema sources for publication and review.
 
@@ -376,7 +380,7 @@ graph TD
 
 **CI/CD Enforcement**:
 
-- `python -m scripts.schema check-invariants`: validates YAML parse safety and config invariants, including `configs/contracts/**/*.yaml`
+- `python -m scripts.schema check-invariants`: validates YAML parse safety and config invariants for `configs/contracts/`, including entity contract YAML and the separate error catalog YAML
 - `python -m scripts.schema generate-contracts`: regenerates JSON contract exports from schema sources
 - `python -m scripts.check_dq_dsl_parity`: validates DQ DSL parity
 - `tests/architecture/test_dq_contract_patterns.py` and `tests/architecture/test_config_contract_yaml_parse_gate.py`: architecture tests for DQ pattern and contract YAML compliance

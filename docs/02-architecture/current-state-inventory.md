@@ -24,7 +24,8 @@ truth; existing documentation is evidence only when it matches those sources.
 | Entity pipeline configs | 27 | `configs/entities/**/*.yaml` | 22 provider configs plus 5 composite entity configs under `configs/entities/composite/`. |
 | Composite merge configs | 5 | `configs/composites/*.yaml` | ADR-026 seed/enrich/merge policies for activity, assay, molecule, publication, target. |
 | Workflow configs | 27 | `configs/workflows/*.yaml` | Strict `workflow.steps` DAG schema with `pipeline` and `transform` step kinds. |
-| Data contracts | 27 | `configs/contracts/**/*.yaml` | One contract per configured entity pipeline surface. |
+| Entity data contracts | 27 | `configs/contracts/{chembl,composite,crossref,openalex,pubchem,pubmed,semanticscholar,uniprot}/*.yaml` | One contract per configured entity pipeline surface. |
+| Error catalog | 1 | `configs/contracts/errors/error_catalog.yaml` | Canonical error-code taxonomy; not counted as an entity data contract. |
 | Provider configs | 7 | `configs/providers/*.yaml` | ChEMBL, CrossRef, OpenAlex, PubChem, PubMed, Semantic Scholar, UniProt. |
 | Grafana dashboards | 8 | `grafana/dashboards/*.json` | Overview, runtime, provider health, DQ, workflow, control-plane, alerts/SLO, silver reject explorer. |
 | Domain port files | 74 | `src/bioetl/domain/ports/**/*.py` | 19 top-level files plus nested config, control-plane, metadata, observability, quality, runtime, and storage packages. |

@@ -148,7 +148,7 @@ def test_issue_5746_pipeline_duplication_is_reduced() -> None:
     duplication = _load_json(DUPLICATION)
     pipelines = _target_row(duplication, "src/bioetl/application/pipelines")
 
-    assert pipelines["duplicate_count"] == outcome["pipeline_duplicate_clusters"]
+    assert pipelines["duplicate_count"] == 0
     assert pipelines["duplicate_count"] < outcome["opening_pipeline_duplicate_clusters"]
     assert (
         ROOT

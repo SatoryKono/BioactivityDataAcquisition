@@ -1,8 +1,8 @@
 ______________________________________________________________________
 
 Version: 1.0.0
-Status: internal (repo-only entrypoint; excluded from MkDocs)
-Class: published
+Status: internal (repo-only entrypoint; excluded from MkDocs nav/publication)
+Class: internal
 Owner: BioETL Team
 Reviewers:
 
