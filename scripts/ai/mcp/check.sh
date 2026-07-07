@@ -32,6 +32,12 @@ config_path = Path(sys.argv[1])
 data = json.loads(config_path.read_text(encoding="utf-8"))
 servers = data.get("mcpServers", {})
 
+def resolve_project_path(value: object) -> str:
+    path = Path(str(value))
+    if path.is_absolute():
+        return str(path)
+    return str((config_path.parent / path).resolve())
+
 keys = [
     ("EXPECTED_MEMORY_PATH", ("memory", "env", "MEMORY_FILE_PATH")),
     ("EXPECTED_GITHUB_WRAPPER_PATH", ("github", "args", 0)),
@@ -51,7 +57,7 @@ for env_name, path in keys:
     value = servers
     for segment in path:
         value = value[segment]
-    print(f"{env_name}={value}")
+    print(f"{env_name}={resolve_project_path(value)}")
 PY
   )"
 

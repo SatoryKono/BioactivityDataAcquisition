@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import tomllib
+
 import pytest
 
 from tests.architecture._test_matrix_policy_support import (
@@ -208,6 +210,51 @@ class TestCanonicalTestLanes:
         )
         assert "local_test_health_rollups" in authority.get("advisory_telemetry", [])
         assert "clean src/bioetl tree" in authority.get("dirty_tree_policy", "")
+
+    def test_parallel_execution_policy_keeps_local_pytest_default_serial(self) -> None:
+        matrix = load_matrix()
+        policy = matrix["test_lanes"].get("parallel_execution_policy", {})
+        pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+        pytest_config = pyproject["tool"]["pytest"]["ini_options"]
+        addopts = [str(option) for option in pytest_config["addopts"]]
+        optional_deps = pyproject["project"]["optional-dependencies"]
+
+        assert policy["local_pytest_default"] == "serial"
+        assert policy["forbid_global_xdist_addopts"] is True
+        assert "-n" not in addopts
+        assert "--numprocesses" not in addopts
+        assert any(
+            str(requirement).startswith("pytest-xdist")
+            for requirement in optional_deps["tests"]
+        )
+        assert any(
+            str(requirement).startswith("pytest-xdist")
+            for requirement in optional_deps["dev"]
+        )
+
+    def test_parallel_execution_policy_is_limited_to_sharded_lanes(self) -> None:
+        matrix = load_matrix()
+        test_lanes = matrix["test_lanes"]
+        lanes = test_lanes["lanes"]
+        policy = test_lanes["parallel_execution_policy"]
+        explicit_parallel = set(policy["explicit_parallel_lanes"])
+        serial_or_bounded = set(policy["serial_or_bounded_lanes"])
+
+        assert explicit_parallel.isdisjoint(serial_or_bounded)
+        assert explicit_parallel | serial_or_bounded == set(lanes)
+        for lane_name in explicit_parallel:
+            lane = lanes[lane_name]
+            assert lane["runner_backend"] == "run_pytest_sharded"
+            assert lane["runner"] == "scripts/engineering/dev/run_pytest_sharded.sh"
+
+        assert lanes["integration-replay"]["replay_mode"] == "vcr_replay_only"
+        assert "integration-replay" in serial_or_bounded
+        assert "VCR-backed replay lanes stay serial" in policy["vcr_parallel_policy"]
+        assert "no:xdist" in lanes["performance"]["pytest_args"]
+        assert (
+            "Benchmark lanes explicitly disable xdist"
+            in policy["benchmark_parallel_policy"]
+        )
 
     def test_lane_marker_boundaries_match_current_policy(self) -> None:
         matrix = load_matrix()

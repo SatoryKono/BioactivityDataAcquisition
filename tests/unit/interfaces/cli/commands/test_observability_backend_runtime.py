@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import os
 import signal
-from collections.abc import Sequence
 from io import BytesIO
 from pathlib import Path
 from types import SimpleNamespace
@@ -13,7 +12,6 @@ from urllib.error import HTTPError
 
 import bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details as failure_details_subject
 import bioetl.interfaces.cli.commands.domains.health.observability_backend_process as process_subject
-import bioetl.interfaces.cli.commands.domains.health.observability_backend_probes as probes_subject
 import bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime as runtime_subject
 import pytest
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (

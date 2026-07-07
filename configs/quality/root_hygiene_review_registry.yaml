@@ -45,6 +45,30 @@ review_lanes:
         canonical_path: .env.example
         action_if_reintroduced: security_review_then_untrack_or_replace_with_example
 
+  - lane_id: root_mcp_workspace_config
+    classification: owner_decision_required
+    scope: exact-root MCP workspace config and tracked scripts/ai mirror
+    owner: Engineering / AI Runtime
+    retention_class: portable_workspace_mcp_entrypoint
+    retention_action: retain_root_mcp_json_as_exact_root_workspace_entrypoint_with_repo_relative_paths
+    cleanup_policy: keep_tracked_portable_manifests_generated_from_scripts_ai_codex_setup_mcp_py
+    issue_refs:
+      - "#6050"
+    verification:
+      - git ls-files .mcp.json scripts/ai/.mcp.json scripts/ai/codex/setup_mcp.py scripts/ai/mcp/check.sh scripts/ai/codex/helper/ensure-mcp.sh
+      - rg -n "\\.mcp\\.json|scripts/ai/\\.mcp\\.json|MCP_LOCAL_RUNTIME_CONFIG|MEMORY_FILE_PATH" .github docs scripts tests configs README.md AGENTS.md
+      - rg -n "/mnt/|[A-Za-z]:[\\\\/]" .mcp.json scripts/ai/.mcp.json
+      - .venv/bin/python scripts/ai/codex/setup_mcp.py --root . --workspace-root . --skip-codex --skip-codex-config --skip-gemini-settings
+    candidates:
+      - path: .mcp.json
+        current_live_state: present_approved_root_surface
+        canonical_path: .mcp.json
+        action_if_reintroduced: retain_at_exact_root_only_as_a_generated_repo_relative_workspace_mcp_config
+      - path: scripts/ai/.mcp.json
+        current_live_state: present_approved_root_surface
+        canonical_path: .mcp.json
+        action_if_reintroduced: regenerate_from_scripts_ai_codex_setup_mcp_py_and_keep_synchronized_with_root_mcp_json
+
   - lane_id: root_docker_adjuncts
     classification: owner_decision_required
     scope: reviewed root Docker helper adjuncts and provisioning-sidecar entrypoints
@@ -264,9 +288,11 @@ review_lanes:
     retention_class: reviewed_root_launcher_compatibility_entrypoint
     retention_action: retain_minimal_root_shims_only_while_their_owned_logic_stays_under_scripts_ai_codex
     cleanup_policy: thin_wrapper_only_rehome_or_remove_when_docs_and_operator_flows_no_longer_need_the_root_entrypoint
+    issue_refs:
+      - "#6048"
     verification:
       - git ls-files .wsl_proxy_env.sh codex.bat codex.ps1 run-codex.ps1 run-codex-wsl.ps1 setup-codex-wsl.bat setup-codex-wsl.ps1 setup-codex-wsl.sh
-      - rg -n "codex\\.bat|codex\\.ps1|run-codex|setup-codex-wsl|wsl_proxy_env" docs scripts .github README.md
+      - rg -n "codex\\.bat|codex\\.ps1|run-codex|setup-codex-wsl|wsl_proxy_env" docs scripts .github README.md configs/quality/root_hygiene_review_registry.yaml
     candidates:
       - path: .wsl_proxy_env.sh
         current_live_state: present_approved_root_surface

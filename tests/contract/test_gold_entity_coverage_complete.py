@@ -60,7 +60,7 @@ def test_gold_dq_bundle_policy_is_bounded_to_sensitive_outputs() -> None:
     assert policy["scope"] == "dq_sensitive_outputs"
     assert policy["coverage_model"] == "bounded_subset"
     assert policy["all_gold_entities_required"] is False
-    assert set(meta["entity"] for meta in dq_outputs.values()) < set(entities)
+    assert {meta["entity"] for meta in dq_outputs.values()} < set(entities)
 
 
 def test_gold_contract_exports_are_schema_classes() -> None:

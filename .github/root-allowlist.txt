@@ -10,6 +10,8 @@
 .gitleaks.toml
 .importlinter
 .jscpd.json
+# Exact-root workspace MCP entrypoint; must remain repo-relative and generated
+# from scripts/ai/codex/setup_mcp.py together with scripts/ai/.mcp.json.
 .mcp.json
 .npmrc
 .pr_agent.toml

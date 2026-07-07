@@ -2152,12 +2152,12 @@
     "refined_assertless_tests": 0,
     "root": ".",
     "top_duplicate_test_names": [],
-    "total_test_files": 1954,
-    "total_test_functions": 21937,
+    "total_test_files": 1958,
+    "total_test_functions": 21954,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "5544ce81ef038fe8c6df00de9947b65008aecf6f49a5b0c38f35a339fa16a7d1",
+  "source_tree_sha256": "b19237077b2cb8f3786d868d3bc9d62d8ec32243fefabc80d2f6e32a78b556b5",
   "summary": {
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
@@ -2170,7 +2170,7 @@
     "uuid4_call_sites": 0
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 1954,
-  "total_test_functions": 21937,
+  "total_test_files": 1958,
+  "total_test_functions": 21954,
   "uuid4_call_sites": 0
 }

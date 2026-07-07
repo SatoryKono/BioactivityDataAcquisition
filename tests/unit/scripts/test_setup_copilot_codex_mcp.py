@@ -49,10 +49,13 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
     servers = payload["mcpServers"]
     wrapper_suffix = ".ps1" if os.name == "nt" else ".sh"
 
-    assert codex_settings["mcpServers"] == servers
-    assert devin_config["mcpServers"] == servers
+    runtime_servers = codex_settings["mcpServers"]
+    assert devin_config["mcpServers"] == runtime_servers
     assert qodo_payload["mcpServers"] == servers
-    assert servers["filesystem"]["args"][-1] == str(workspace_root.resolve())
+    assert servers["filesystem"]["args"][-1] == "."
+    assert runtime_servers["filesystem"]["args"][-1] == str(
+        workspace_root.resolve()
+    )
     assert servers["sequential-thinking"]["args"] == [
         "-y",
         "@modelcontextprotocol/server-sequential-thinking@2025.12.18",
@@ -62,37 +65,39 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
         "@modelcontextprotocol/server-pdf@1.3.1",
         "--stdio",
     ]
-    assert servers["memory"]["env"]["MEMORY_FILE_PATH"] == str(
+    assert (
+        servers["memory"]["env"]["MEMORY_FILE_PATH"]
+        == "docs/00-project/ai/memory/mcp-memory.json"
+    )
+    assert runtime_servers["memory"]["env"]["MEMORY_FILE_PATH"] == str(
         (workspace_root / "docs/00-project/ai/memory/mcp-memory.json").resolve()
     )
-    assert servers["github"]["args"][0] == str(
+    assert servers["github"]["args"][0] == (
+        f"scripts/ai/mcp/github-mcp-wrapper{wrapper_suffix}"
+    )
+    assert runtime_servers["github"]["args"][0] == str(
         (
             workspace_root / f"scripts/ai/mcp/github-mcp-wrapper{wrapper_suffix}"
         ).resolve()
     )
-    assert servers["mermaid"]["args"][0] == str(
+    assert servers["mermaid"]["args"][0] == (
+        f"scripts/ai/mcp/mcp_mermaid_wrapper{wrapper_suffix}"
+    )
+    assert servers["docker-docs"]["args"][0] == (
+        f"scripts/ai/mcp/mcp_docker_docs_wrapper{wrapper_suffix}"
+    )
+    assert servers["paper-search"]["args"][0] == (
+        f"scripts/ai/mcp/mcp_paper_search_wrapper{wrapper_suffix}"
+    )
+    assert servers["dockerhub"]["args"][0] == (
+        f"scripts/ai/mcp/mcp_dockerhub_wrapper{wrapper_suffix}"
+    )
+    assert servers["needle"]["args"][0] == (
+        f"scripts/ai/mcp/mcp_needle_wrapper{wrapper_suffix}"
+    )
+    assert runtime_servers["mermaid"]["args"][0] == str(
         (
             workspace_root / f"scripts/ai/mcp/mcp_mermaid_wrapper{wrapper_suffix}"
-        ).resolve()
-    )
-    assert servers["docker-docs"]["args"][0] == str(
-        (
-            workspace_root / f"scripts/ai/mcp/mcp_docker_docs_wrapper{wrapper_suffix}"
-        ).resolve()
-    )
-    assert servers["paper-search"]["args"][0] == str(
-        (
-            workspace_root / f"scripts/ai/mcp/mcp_paper_search_wrapper{wrapper_suffix}"
-        ).resolve()
-    )
-    assert servers["dockerhub"]["args"][0] == str(
-        (
-            workspace_root / f"scripts/ai/mcp/mcp_dockerhub_wrapper{wrapper_suffix}"
-        ).resolve()
-    )
-    assert servers["needle"]["args"][0] == str(
-        (
-            workspace_root / f"scripts/ai/mcp/mcp_needle_wrapper{wrapper_suffix}"
         ).resolve()
     )
     assert servers["biomoltechDocs"]["type"] == "http"
