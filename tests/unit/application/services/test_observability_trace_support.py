@@ -8,6 +8,8 @@ from types import SimpleNamespace
 import pytest
 
 from bioetl.application.services._observability_trace_support import (
+    _explicit_trace_ids,
+    _generated_trace_ids,
     build_trace_ids,
     build_trace_time_window,
     build_trace_urls,
@@ -66,6 +68,27 @@ def test_build_trace_ids_falls_back_to_available_generated_ids() -> None:
     )
 
 
+def test_trace_id_helpers_handle_empty_inputs_and_dedupe_generated_ids() -> None:
+    assert (
+        _explicit_trace_ids(diagnostics={"trace_ids": object()}, composite_run_id=None)
+        == []
+    )
+    assert _explicit_trace_ids(
+        diagnostics={"trace_ids": [" run-a ", "run-a"]},
+        composite_run_id=None,
+    ) == ["run-a"]
+    assert _generated_trace_ids(
+        run_id="",
+        composite_run_id="composite-only",
+        trace_links_available=True,
+    ) == ["composite-only"]
+    assert _generated_trace_ids(
+        run_id="same",
+        composite_run_id="same",
+        trace_links_available=True,
+    ) == ["same"]
+
+
 @pytest.mark.parametrize(
     ("diagnostics", "expected"),
     [
@@ -103,6 +126,12 @@ def test_manifest_provider_and_run_type_normalize_optional_manifest_values() -> 
         )
         == "123"
     )
+    assert (
+        resolve_manifest_provider(
+            SimpleNamespace(manifest=SimpleNamespace(provider=None))
+        )
+        is None
+    )
 
     assert resolve_manifest_run_type(None) is None
     assert (
@@ -119,6 +148,9 @@ def test_manifest_provider_and_run_type_normalize_optional_manifest_values() -> 
         )
         is None
     )
+    assert resolve_manifest_run_type(
+        SimpleNamespace(manifest=SimpleNamespace(run_type=SimpleNamespace(value=7)))
+    ).startswith("namespace(")
 
 
 def test_build_traceql_query_uses_only_available_filters() -> None:
@@ -145,6 +177,16 @@ def test_build_traceql_query_uses_only_available_filters() -> None:
             composite_run_id=None,
         )
         is None
+    )
+    assert (
+        build_traceql_query(
+            run_id="run-only",
+            pipeline_name=None,
+            provider=None,
+            run_type=None,
+            composite_run_id=None,
+        )
+        == '{ span."bioetl.run_id" = "run-only" }'
     )
 
 
@@ -190,6 +232,22 @@ def test_build_trace_time_window_uses_defaults_without_timestamps() -> None:
         run_manifest=SimpleNamespace(manifest=SimpleNamespace(created_at="invalid")),
         audit=SimpleNamespace(entries=[SimpleNamespace(timestamp=None)]),
     ) == ("now-24h", "now")
+
+
+def test_build_trace_time_window_uses_audit_entries_without_manifest() -> None:
+    audit_time = datetime(2026, 7, 7, 10, 0)
+
+    from_value, to_value = build_trace_time_window(
+        run_manifest=None,
+        audit=SimpleNamespace(entries=[SimpleNamespace(timestamp=audit_time)]),
+    )
+
+    assert from_value == str(
+        int((audit_time.replace(tzinfo=UTC) - timedelta(minutes=5)).timestamp() * 1000)
+    )
+    assert to_value == str(
+        int((audit_time.replace(tzinfo=UTC) + timedelta(minutes=5)).timestamp() * 1000)
+    )
 
 
 def test_normalize_datetime_handles_naive_aware_and_invalid_values() -> None:

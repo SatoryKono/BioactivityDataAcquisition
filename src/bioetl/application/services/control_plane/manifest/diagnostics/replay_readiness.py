@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy import (
-    _resolve_reproducibility_profile,
-)
+from typing import TYPE_CHECKING
+
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
 from bioetl.domain.control_plane.execution_context import (
     is_composite_execution_context as _is_composite_execution_context,
@@ -15,6 +14,11 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     resolve_replay_readiness_verdict,
 )
 
+if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context import (
+        ReplayFamilyContext,
+    )
+
 
 def _resolve_manifest_replay_readiness_verdict(
     *,
@@ -23,6 +27,7 @@ def _resolve_manifest_replay_readiness_verdict(
     resume_requested: bool,
     continuation_mode: str,
     policy_assessment: ReproducibilityPolicyAssessment,
+    replay_family_context: ReplayFamilyContext,
 ) -> ReplayReadinessVerdict:
     """Return the runtime diagnostics verdict without conflating run modes."""
     lifecycle_projection_only = (
@@ -30,7 +35,7 @@ def _resolve_manifest_replay_readiness_verdict(
         and "ledger_suffix" in continuation_mode
         and manifest.replay_capability != ReplayCapability.EXACT_REPLAY_SUPPORTED
     )
-    profile = _resolve_reproducibility_profile(manifest)
+    profile = replay_family_context.profile
     runtime_blocking_gaps = list(policy_assessment.blocking_gaps)
     if (
         profile.strict_exact_replay_supported

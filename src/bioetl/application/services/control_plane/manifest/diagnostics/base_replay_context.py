@@ -4,9 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.application.services.control_plane.manifest.diagnostics.replay import (
-    _resolve_replay_family_contract,
-)
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection import (
     _build_replay_projection_bundle,
 )
@@ -15,6 +12,10 @@ from bioetl.application.services.control_plane.manifest.diagnostics.reproducibil
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.resume_contract import (
     _build_resume_contract,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context import (
+    ReplayFamilyContext,
+    build_replay_family_context,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
     collect_input_snapshot_refs as _collect_input_snapshot_refs,
@@ -44,6 +45,7 @@ class _BaseSummaryReplayContext:
     exact_replay_support_boundary: str
     exact_replay_blockers: list[str]
     resume_contract: dict[str, object]
+    replay_family_context: ReplayFamilyContext
     replay_family_contract: dict[str, object]
     policy_assessment: ReproducibilityPolicyAssessment
     operator_replay_projection: dict[str, object]
@@ -55,12 +57,13 @@ def _resolve_base_summary_replay_context(
     requested_exact_replay = bool(manifest.launch_context.get("exact_replay"))
     resume_requested = bool(manifest.launch_context.get("resume"))
     input_snapshots = _collect_input_snapshot_refs(manifest)
-    replay_family_contract = _resolve_replay_family_contract(manifest)
+    replay_family_context = build_replay_family_context(manifest)
+    replay_family_contract = replay_family_context.replay_family_contract
     policy_assessment = _assess_manifest_reproducibility_policy(
         manifest=manifest,
         requested_exact_replay=requested_exact_replay,
         resume_requested=resume_requested,
-        replay_family_contract=replay_family_contract,
+        replay_family_context=replay_family_context,
     )
     replay_projection_bundle = _build_replay_projection_bundle(
         manifest=manifest,
@@ -68,6 +71,8 @@ def _resolve_base_summary_replay_context(
         requested_exact_replay=requested_exact_replay,
         resume_requested=resume_requested,
         policy_assessment=policy_assessment,
+        replay_family_context=replay_family_context,
+        replay_family_contract=replay_family_contract,
         replay_family_contract_payload=_build_replay_family_contract_payload(
             replay_family_contract
         ),
@@ -98,7 +103,9 @@ def _resolve_base_summary_replay_context(
             requested_exact_replay=requested_exact_replay,
             resume_requested=resume_requested,
             policy_assessment=policy_assessment,
+            replay_family_context=replay_family_context,
         ),
+        replay_family_context=replay_family_context,
         replay_family_contract=replay_family_contract,
         policy_assessment=policy_assessment,
         operator_replay_projection=operator_replay_projection,

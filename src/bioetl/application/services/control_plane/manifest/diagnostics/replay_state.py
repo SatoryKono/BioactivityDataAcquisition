@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_blockers import (
     _collect_append_mode_semantic_sinks,
     _requires_resume_without_snapshot_reason,
     _resolve_exact_replay_blockers,
-    _resolve_reproducibility_profile,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_parentage import (
     _build_replay_parentage,
@@ -30,15 +31,21 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     ReproducibilityPolicyAssessment,
 )
 
+if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context import (
+        ReplayFamilyContext,
+    )
+
 
 def _resolve_replay_mode(
     *,
     manifest: RunManifest,
     requested_exact_replay: bool,
     resume_requested: bool,
+    replay_family_context: ReplayFamilyContext,
 ) -> str:
     """Resolve operator-facing replay mode from manifest intent and capability."""
-    profile = _resolve_reproducibility_profile(manifest)
+    profile = replay_family_context.profile
     if (
         requested_exact_replay
         and manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
@@ -57,9 +64,10 @@ def _resolve_continuation_mode(
     manifest: RunManifest,
     requested_exact_replay: bool,
     resume_requested: bool,
+    replay_family_context: ReplayFamilyContext,
 ) -> str:
     """Resolve the bounded continuation/replay/rebuild classification."""
-    profile = _resolve_reproducibility_profile(manifest)
+    profile = replay_family_context.profile
     if (
         requested_exact_replay
         and manifest.replay_capability == ReplayCapability.EXACT_REPLAY_SUPPORTED
@@ -81,9 +89,10 @@ def _resolve_replay_capability_reason(
     input_snapshots: list[dict[str, object]],
     resume_requested: bool,
     policy_assessment: ReproducibilityPolicyAssessment,
+    replay_family_context: ReplayFamilyContext,
 ) -> str:
     """Return one operator-facing explanation for replay capability."""
-    profile = _resolve_reproducibility_profile(manifest)
+    profile = replay_family_context.profile
     snapshot_envelope = policy_assessment.snapshot_envelope
     if not profile.strict_exact_replay_supported:
         return "family_outside_supported_exact_replay_boundary"
@@ -144,9 +153,10 @@ def _resolve_historical_live_run_upgrade_state(
     manifest: RunManifest,
     input_snapshots: list[dict[str, object]],
     policy_assessment: ReproducibilityPolicyAssessment,
+    replay_family_context: ReplayFamilyContext,
 ) -> str:
     """Return the bounded upgrade path for live runs lacking launch-time snapshots."""
-    profile = _resolve_reproducibility_profile(manifest)
+    profile = replay_family_context.profile
     replay_parentage = _build_replay_parentage(manifest)
     if _is_composite_execution_context(manifest) or bool(
         replay_parentage["is_exact_replay"]
@@ -199,6 +209,7 @@ def _build_replay_state_projection(
     manifest: RunManifest,
     input_snapshots: list[dict[str, object]],
     policy_assessment: ReproducibilityPolicyAssessment,
+    replay_family_context: ReplayFamilyContext,
 ) -> dict[str, str]:
     """Return canonical replay-state fields shared by base and refreshed views."""
     return {
@@ -212,6 +223,7 @@ def _build_replay_state_projection(
                 manifest=manifest,
                 input_snapshots=input_snapshots,
                 policy_assessment=policy_assessment,
+                replay_family_context=replay_family_context,
             )
         ),
         "broader_historical_exact_replay_state": (
