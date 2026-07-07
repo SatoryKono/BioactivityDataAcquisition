@@ -156,7 +156,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "556",
+      "line": "557",
       "path": "tests/unit/application/core/test_otel_spans.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_postrun_run_explicit_noop_tracer"
@@ -766,7 +766,7 @@
     "tests/unit/application/core/test_batch_writer_tracing_mixin.py:79",
     "tests/unit/application/core/test_batch_writer_tracing_mixin.py:255",
     "tests/unit/application/core/test_dq_metrics.py:33",
-    "tests/unit/application/core/test_otel_spans.py:556",
+    "tests/unit/application/core/test_otel_spans.py:557",
     "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:102",
     "tests/unit/application/observability/test_pipeline_metrics.py:270"
   ],
@@ -1081,7 +1081,7 @@
   "critical_behavior_envelope_count": 5,
   "critical_behavior_envelopes": {
     "control_plane_replay": {
-      "assertion_backed_tests": 55,
+      "assertion_backed_tests": 56,
       "assertion_examples": [
         "tests/architecture/test_determinism_identity_policy.py:166",
         "tests/architecture/test_determinism_identity_policy.py:320",
@@ -1102,7 +1102,7 @@
         "tests/architecture/test_determinism_identity_policy.py",
         "tests/architecture/test_replay_time_seam_inventory.py"
       ],
-      "test_count": 55
+      "test_count": 56
     },
     "gold_strict_contracts": {
       "assertion_backed_tests": 13,
@@ -1384,7 +1384,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "556",
+        "line": "557",
         "path": "tests/unit/application/core/test_otel_spans.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_postrun_run_explicit_noop_tracer"
@@ -1994,7 +1994,7 @@
       "tests/unit/application/core/test_batch_writer_tracing_mixin.py:79",
       "tests/unit/application/core/test_batch_writer_tracing_mixin.py:255",
       "tests/unit/application/core/test_dq_metrics.py:33",
-      "tests/unit/application/core/test_otel_spans.py:556",
+      "tests/unit/application/core/test_otel_spans.py:557",
       "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:102",
       "tests/unit/application/observability/test_pipeline_metrics.py:270"
     ],
@@ -2006,7 +2006,7 @@
     "critical_behavior_envelope_count": 5,
     "critical_behavior_envelopes": {
       "control_plane_replay": {
-        "assertion_backed_tests": 55,
+        "assertion_backed_tests": 56,
         "assertion_examples": [
           "tests/architecture/test_determinism_identity_policy.py:166",
           "tests/architecture/test_determinism_identity_policy.py:320",
@@ -2027,7 +2027,7 @@
           "tests/architecture/test_determinism_identity_policy.py",
           "tests/architecture/test_replay_time_seam_inventory.py"
         ],
-        "test_count": 55
+        "test_count": 56
       },
       "gold_strict_contracts": {
         "assertion_backed_tests": 13,
@@ -2152,12 +2152,12 @@
     "refined_assertless_tests": 0,
     "root": ".",
     "top_duplicate_test_names": [],
-    "total_test_files": 1959,
-    "total_test_functions": 21961,
+    "total_test_files": 1962,
+    "total_test_functions": 22024,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "62f821220dc90b7a0c465e3c3786d95f135c6a0dad7ea6b76f7f3f568d123d63",
+  "source_tree_sha256": "0acf939cbf9412b4afc78eb44192863d7aa015eb264c7bc680e0d553a7c2fbb8",
   "summary": {
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
@@ -2170,7 +2170,7 @@
     "uuid4_call_sites": 0
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 1959,
-  "total_test_functions": 21961,
+  "total_test_files": 1962,
+  "total_test_functions": 22024,
   "uuid4_call_sites": 0
 }
