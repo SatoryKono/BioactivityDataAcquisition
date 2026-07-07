@@ -15,6 +15,8 @@ from bioetl.domain.control_plane.reproducibility_profiles import (
     resolve_reproducibility_family_profile,
 )
 
+is_composite_execution_context = _is_composite_execution_context
+
 
 @dataclass(frozen=True, slots=True)
 class ReplayFamilyContext:
@@ -62,4 +64,5 @@ def build_replay_family_context(manifest: RunManifest) -> ReplayFamilyContext:
 __all__ = [
     "ReplayFamilyContext",
     "build_replay_family_context",
+    "is_composite_execution_context",
 ]

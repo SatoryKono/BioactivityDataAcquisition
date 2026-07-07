@@ -17,8 +17,8 @@ from bioetl.application.services.control_plane.manifest.inspection_service impor
 )
 from bioetl.domain.types import RunID
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
+from tests.helpers.control_plane import InMemoryRunManifestStore
 from tests.integration.ci.test_reproducibility_contract_suite import (
-    _InMemoryRunManifestStore,
     _make_manifest,
 )
 
@@ -26,7 +26,7 @@ pytestmark = pytest.mark.integration
 
 
 def test_reproducibility_contract_manifest_diff_classifies_occurrence_only() -> None:
-    store = _InMemoryRunManifestStore()
+    store = InMemoryRunManifestStore()
     left = _make_manifest(
         manifest_id="manifest-left",
         run_id=RunID(UUID("00000000-0000-0000-0000-000000000301")),
@@ -54,7 +54,7 @@ def test_reproducibility_contract_manifest_diff_classifies_occurrence_only() -> 
 def test_reproducibility_contract_manifest_diff_treats_created_at_as_occurrence_only() -> (
     None
 ):
-    store = _InMemoryRunManifestStore()
+    store = InMemoryRunManifestStore()
     left = _make_manifest(
         manifest_id="manifest-left-created-at",
         run_id=RunID(UUID("00000000-0000-0000-0000-000000000316")),
@@ -85,7 +85,7 @@ def test_reproducibility_contract_manifest_diff_treats_created_at_as_occurrence_
 
 
 def test_reproducibility_contract_manifest_diff_classifies_semantic_drift() -> None:
-    store = _InMemoryRunManifestStore()
+    store = InMemoryRunManifestStore()
     left = _make_manifest(
         manifest_id="manifest-left",
         run_id=RunID(UUID("00000000-0000-0000-0000-000000000303")),
@@ -161,7 +161,7 @@ def test_reproducibility_contract_strict_resume_rejects_incomplete_legacy_checkp
 def test_reproducibility_contract_manifest_diff_exposes_exact_replay_parentage() -> (
     None
 ):
-    store = _InMemoryRunManifestStore()
+    store = InMemoryRunManifestStore()
     parent_run_id = RunID(UUID("00000000-0000-0000-0000-000000000305"))
     child_run_id = RunID(UUID("00000000-0000-0000-0000-000000000306"))
     parent = _make_manifest(

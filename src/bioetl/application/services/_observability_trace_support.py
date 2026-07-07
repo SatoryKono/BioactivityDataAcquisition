@@ -80,7 +80,9 @@ def resolve_manifest_provider(
     if run_manifest is None:
         return None
     provider = getattr(run_manifest.manifest, "provider", None)
-    return str(provider) if provider not in {None, ""} else None
+    if provider is None or provider == "":
+        return None
+    return str(provider)
 
 
 def resolve_manifest_run_type(
@@ -92,7 +94,9 @@ def resolve_manifest_run_type(
     run_type_value = getattr(run_type, "value", None)
     if isinstance(run_type_value, str):
         run_type = run_type_value
-    return str(run_type) if run_type not in {None, ""} else None
+    if not isinstance(run_type, str):
+        return None
+    return run_type if run_type not in {None, ""} else None
 
 
 def build_trace_urls(

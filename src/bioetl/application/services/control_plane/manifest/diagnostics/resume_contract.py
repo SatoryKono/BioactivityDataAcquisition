@@ -8,9 +8,6 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_invar
     _resolve_applied_checkpoint_compatibility_policy,
     _resolve_requested_checkpoint_compatibility_policy,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family import (
-    _resolve_reproducibility_profile,
-)
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_state import (
     _resolve_continuation_mode,
 )
