@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from datetime import date, datetime
 from math import isnan
 from typing import Any, Protocol, cast
@@ -28,6 +29,16 @@ FOREIGN_KEY_ORPHAN_QUARANTINE_CATEGORY = "foreign_key_reconciliation"
 FOREIGN_KEY_ORPHAN_PIPELINE_DEFAULT = "workflow_transforms"
 _CURRENT_FLAG_COLUMNS = ("_is_current", "is_current")
 _VALID_TO_COLUMNS = ("_valid_to", "valid_to")
+
+
+@dataclass(frozen=True, slots=True)
+class ReconciliationMutationSummary:
+    """Compact mutation/quarantine summary for one FK reconciliation pass."""
+
+    mutation_mode: str
+    quarantine_batch_id: str | None = None
+    quarantine_rows_written: int = 0
+    quarantine_error_code: str | None = None
 
 
 class ReconciliationMutationHost(Protocol):
@@ -87,26 +98,44 @@ async def apply_reconciliation_mutation(
     *,
     retained_rows: list[dict[str, object]],
     orphan_rows: list[dict[str, object]],
-) -> None:
+) -> ReconciliationMutationSummary:
     """Quarantine orphan rows and mutate only the requested storage layer."""
+    quarantine_summary = ReconciliationMutationSummary(
+        mutation_mode="quarantine_skipped",
+        quarantine_error_code=_orphan_error_code(request) if orphan_rows else None,
+    )
     if orphan_rows:
-        await quarantine_orphan_rows(host, request, orphan_rows=orphan_rows)
+        quarantine_summary = await quarantine_orphan_rows(
+            host,
+            request,
+            orphan_rows=orphan_rows,
+        )
 
     if request.effective_mutation_layer == "gold":
         await expire_gold_orphan_rows(host, request, orphan_rows=orphan_rows)
-        return
+        return ReconciliationMutationSummary(
+            mutation_mode="gold_scd2_expiry",
+            quarantine_batch_id=quarantine_summary.quarantine_batch_id,
+            quarantine_rows_written=quarantine_summary.quarantine_rows_written,
+            quarantine_error_code=quarantine_summary.quarantine_error_code,
+        )
 
     host.silver_writer.clear(request.source_table, dry_run=False)
-    if not retained_rows:
-        return
+    if retained_rows:
+        source_schema = pa.Table.from_pylist(retained_rows).schema
+        await host.silver_writer.write_silver(
+            table_name=request.source_table,
+            records=retained_rows,
+            primary_keys=list(request.primary_keys),
+            schema=source_schema,
+            mode="merge",
+        )
 
-    source_schema = pa.Table.from_pylist(retained_rows).schema
-    await host.silver_writer.write_silver(
-        table_name=request.source_table,
-        records=retained_rows,
-        primary_keys=list(request.primary_keys),
-        schema=source_schema,
-        mode="merge",
+    return ReconciliationMutationSummary(
+        mutation_mode="silver_rewrite",
+        quarantine_batch_id=quarantine_summary.quarantine_batch_id,
+        quarantine_rows_written=quarantine_summary.quarantine_rows_written,
+        quarantine_error_code=quarantine_summary.quarantine_error_code,
     )
 
 
@@ -179,7 +208,9 @@ def _expire_gold_orphan_rows_once(
     """Execute one retryable Gold SCD2 orphan-expiry merge attempt."""
     dt = module.DeltaTable(table_path)
     source = pa.Table.from_pylist(key_rows)
-    source_reader = pa.RecordBatchReader.from_batches(source.schema, source.to_batches())
+    source_reader = pa.RecordBatchReader.from_batches(
+        source.schema, source.to_batches()
+    )
     return (
         dt.merge(
             source=source_reader,
@@ -238,10 +269,14 @@ async def quarantine_orphan_rows(
     request: ForeignKeyReconciliationRequest,
     *,
     orphan_rows: list[dict[str, object]],
-) -> None:
+) -> ReconciliationMutationSummary:
     """Write orphaned rows to quarantine when the quarantine port is configured."""
+    error_code = _orphan_error_code(request)
     if host.quarantine is None or not orphan_rows:
-        return
+        return ReconciliationMutationSummary(
+            mutation_mode="quarantine_skipped",
+            quarantine_error_code=error_code if orphan_rows else None,
+        )
 
     batch_id = build_quarantine_batch_id(request, orphan_rows=orphan_rows)
     source_table = request.source_table
@@ -261,7 +296,7 @@ async def quarantine_orphan_rows(
         quarantine_rows.append(
             {
                 "pipeline": pipeline_name,
-                "error_code": _orphan_error_code(request),
+                "error_code": error_code,
                 "payload": row,
                 "bronze_batch_id": batch_id,
                 "run_id": None,
@@ -280,6 +315,12 @@ async def quarantine_orphan_rows(
         )
 
     await host.quarantine.write_many(quarantine_rows)
+    return ReconciliationMutationSummary(
+        mutation_mode="quarantine_written",
+        quarantine_batch_id=str(batch_id),
+        quarantine_rows_written=len(quarantine_rows),
+        quarantine_error_code=error_code,
+    )
 
 
 def _orphan_error_code(request: ForeignKeyReconciliationRequest) -> str:
@@ -288,4 +329,4 @@ def _orphan_error_code(request: ForeignKeyReconciliationRequest) -> str:
     return FOREIGN_KEY_ORPHAN_ERROR_CODE
 
 
-__all__ = ["apply_reconciliation_mutation"]
+__all__ = ["ReconciliationMutationSummary", "apply_reconciliation_mutation"]

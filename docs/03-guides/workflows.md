@@ -622,6 +622,16 @@ that transform's input contract. The inverse target/publication cleanup runs
 after assay cleanup so unused Gold target/publication rows are expired only
 against the final current `chembl.assay` reference set.
 
+Each executed `reconcile_foreign_keys` transform publishes a compact normal-mode
+result artifact under
+`data/output/control/workflow_transform_results/<workflow_run_id>/<step_id>/result.json`.
+For `chembl_baseline`, this applies to all four `reconcile_*_orphans` steps
+listed above. When debug export is enabled, row-level reconcile evidence is also
+written under
+`artifacts/debug_exports/<workflow_name>/workflow_transforms/<workflow_run_id>/<step_id>/`.
+Pipeline `gold_full.csv` files remain pipeline-stage debug exports and are not
+the source of truth for post-reconcile current Gold state.
+
 Workflow-level `--dry-run` now applies to both step families:
 
 - pipeline steps inherit dry-run through workflow defaults and CLI overrides;

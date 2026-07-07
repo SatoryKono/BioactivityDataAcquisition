@@ -123,6 +123,12 @@ class ForeignKeyReconciliationRequest:
     nulls_equal: bool = False
     dry_run: bool = False
     workflow_name: str | None = None
+    workflow_run_id: str | None = None
+    manifest_id: str | None = None
+    step_id: str | None = None
+    transform_name: str | None = None
+    debug_export_enabled: bool = False
+    debug_export_dir: str | None = None
 
     def __post_init__(self) -> None:
         _require_non_empty_str(self.source_table, "source_table")
@@ -151,6 +157,11 @@ class ForeignKeyReconciliationRequest:
             reference_key=self.reference_key,
         )
         _require_optional_str(self.workflow_name, "workflow_name")
+        _require_optional_str(self.workflow_run_id, "workflow_run_id")
+        _require_optional_str(self.manifest_id, "manifest_id")
+        _require_optional_str(self.step_id, "step_id")
+        _require_optional_str(self.transform_name, "transform_name")
+        _require_optional_str(self.debug_export_dir, "debug_export_dir")
 
     @property
     def effective_source_keys(self) -> tuple[str, ...]:
@@ -169,7 +180,11 @@ class ForeignKeyReconciliationRequest:
     @property
     def effective_mutation_layer(self) -> ForeignKeyReconciliationLayer:
         """Return the layer mutated by this reconciliation request."""
-        return self.mutation_layer if self.mutation_layer is not None else self.source_layer
+        return (
+            self.mutation_layer
+            if self.mutation_layer is not None
+            else self.source_layer
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -190,6 +205,10 @@ class ForeignKeyReconciliationResult:
     mutation_layer: ForeignKeyReconciliationLayer = "silver"
     dry_run: bool = False
     would_mutate: bool = False
+    mutation_mode: str = "unknown"
+    quarantine_batch_id: str | None = None
+    quarantine_rows_written: int = 0
+    quarantine_error_code: str | None = None
 
 
 @runtime_checkable

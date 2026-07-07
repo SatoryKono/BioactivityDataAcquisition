@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import os
 import signal
-import time
 from collections.abc import Sequence
 from io import BytesIO
 from pathlib import Path
@@ -442,7 +441,6 @@ def test_ensure_backend_fails_when_required_paths_never_become_ready(
     warning.assert_called_once()
 
 
-@pytest.mark.xfail(reason="Test hangs due to time.monotonic not being properly mocked in wait functions")
 def test_ensure_backend_failed_startup_appends_process_diagnostics_to_log(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -453,12 +451,10 @@ def test_ensure_backend_failed_startup_appends_process_diagnostics_to_log(
         runtime_subject, "build_detached_backend_log_path", lambda _port: log_path
     )
     monkeypatch.setattr(
-        failure_details_subject,
+        runtime_subject,
         "_describe_required_probe_failure",
         MagicMock(return_value="Capability probe failed: timeout."),
     )
-    # Mock time.monotonic to avoid long delays in wait functions
-    monkeypatch.setattr(time, "monotonic", lambda: 0.0)
     probe = MagicMock(return_value=False)
     process = MagicMock(pid=654, args=["python", "-m", "bioetl", "quarantine", "serve"])
     process.poll.return_value = None

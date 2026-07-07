@@ -243,6 +243,10 @@ async def test_executor_returns_serializable_metadata_only() -> None:
     assert payload == {
         "transform_name": "reconcile_foreign_keys",
         "fingerprint": spec.fingerprint,
+        "workflow_name": None,
+        "workflow_run_id": None,
+        "manifest_id": None,
+        "step_id": "reconcile_assay_target_orphans",
         "source_table": "chembl_assay",
         "reference_table": "chembl_target",
         "source_key": "target_id",
@@ -260,6 +264,10 @@ async def test_executor_returns_serializable_metadata_only() -> None:
         "mutated": True,
         "dry_run": False,
         "would_mutate": False,
+        "mutation_mode": "unknown",
+        "quarantine_batch_id": None,
+        "quarantine_rows_written": 0,
+        "quarantine_error_code": None,
     }
 
 
@@ -328,6 +336,8 @@ async def test_executor_passes_workflow_name_to_request() -> None:
 
     assert port.request is not None
     assert port.request.workflow_name == "chembl_baseline"
+    assert port.request.step_id == "reconcile_assay_target_orphans"
+    assert port.request.transform_name == "reconcile_foreign_keys"
 
 
 @pytest.mark.asyncio

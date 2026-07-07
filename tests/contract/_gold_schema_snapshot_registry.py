@@ -20,6 +20,16 @@ ENTITY_CONTRACT_VERSIONS: dict[str, str] = {
     "chembl_target_protein_classification": "2.2.0",
 }
 _ALLOWED_TYPE_NAMES = frozenset({"bool", "float64", "int64", "str"})
+_DQ_BUNDLE_POLICY: dict[str, Any] = {
+    "scope": "dq_sensitive_outputs",
+    "coverage_model": "bounded_subset",
+    "all_gold_entities_required": False,
+    "selection_criteria": [
+        "output carries DQ flags or DQ-sensitive provenance consumed by downstream checks",
+        "output represents a high-value provider or composite contract surface",
+        "snapshot rows exercise at least one warning or error DQ state",
+    ],
+}
 
 _DQ_SENSITIVE_OUTPUTS: dict[str, dict[str, Any]] = {
     "chembl_activity_dq_bundle": {
@@ -224,6 +234,7 @@ def build_gold_schema_snapshot_registry() -> dict[str, Any]:
         "surface": "gold_schema_snapshots",
         "version": 1,
         "contract_version": DEFAULT_CONTRACT_VERSION,
+        "dq_bundle_policy": _DQ_BUNDLE_POLICY,
         "entities": entities,
         "dq_sensitive_outputs": _DQ_SENSITIVE_OUTPUTS,
     }
@@ -249,6 +260,16 @@ def assert_gold_schema_snapshot_registry_shape(snapshot: Mapping[str, Any]) -> N
     assert snapshot.get("surface") == "gold_schema_snapshots"
     assert snapshot.get("version") == 1
     assert snapshot.get("contract_version") == DEFAULT_CONTRACT_VERSION
+    dq_bundle_policy = snapshot.get("dq_bundle_policy")
+    assert isinstance(dq_bundle_policy, dict)
+    assert dq_bundle_policy.get("scope") == "dq_sensitive_outputs"
+    assert dq_bundle_policy.get("coverage_model") == "bounded_subset"
+    assert dq_bundle_policy.get("all_gold_entities_required") is False
+    selection_criteria = dq_bundle_policy.get("selection_criteria")
+    assert isinstance(selection_criteria, list) and selection_criteria
+    assert all(
+        isinstance(criterion, str) and criterion for criterion in selection_criteria
+    )
 
     entities = snapshot.get("entities")
     assert isinstance(entities, dict) and entities

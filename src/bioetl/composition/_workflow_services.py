@@ -67,6 +67,7 @@ def _default_pipeline_runner_service_factory(
 def _build_workflow_transform_registry(
     settings: object,
     metrics: object,
+    artifact_sink: object | None = None,
 ):
     """Assemble workflow transform storage and builtin transform registry."""
     from bioetl.application.workflow.transforms import WorkflowTransformRegistry
@@ -153,6 +154,7 @@ def _build_workflow_transform_registry(
             quarantine=reconciliation_quarantine,
             quarantine_pipeline_name="workflow_transforms",
             gold_writer=transform_gold_storage,
+            artifact_sink=artifact_sink,
         ),
         row_reconciliation_port=StorageRowReconciliationAdapter(
             silver_reader=transform_storage,
@@ -179,10 +181,21 @@ def get_workflow_runner_service(
         WorkflowTransformService,
     )
     from bioetl.composition.factories.services.port_factories import create_metrics
+    from bioetl.infrastructure.control_plane import FileWorkflowTransformArtifactStore
+    from bioetl.infrastructure.time import SystemClock
 
     settings = get_settings()
     metrics = create_metrics(settings)
-    transform_registry = _build_workflow_transform_registry(settings, metrics)
+    output_root = Path(settings.data_dir) / "output" / "control"
+    artifact_sink = FileWorkflowTransformArtifactStore(
+        base_path=output_root / "workflow_transform_results",
+        clock=SystemClock(),
+    )
+    transform_registry = _build_workflow_transform_registry(
+        settings,
+        metrics,
+        artifact_sink=artifact_sink,
+    )
     pipeline_runner_factory = (
         _default_pipeline_runner_service_factory
         if pipeline_runner_service_factory is None
@@ -195,6 +208,7 @@ def get_workflow_runner_service(
             metrics=metrics,
         ),
         metrics=metrics,
+        workflow_transform_artifact_sink=artifact_sink,
     )
 
 

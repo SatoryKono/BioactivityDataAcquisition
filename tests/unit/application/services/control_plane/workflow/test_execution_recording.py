@@ -19,8 +19,9 @@ from bioetl.application.services.workflow_runner_models import (
 )
 from bioetl.application.services.workflow_transform_service import (
     WorkflowTransformDestructiveCommit,
+    WorkflowTransformExecutionResult,
 )
-from bioetl.domain.control_plane import WorkflowExecutionState, WorkflowStepState
+from bioetl.domain.control_plane import WorkflowExecutionState
 from bioetl.domain.types import RunID
 from bioetl.domain.workflow import TransformStepConfig, WorkflowStepConfig
 
@@ -388,3 +389,51 @@ def test_internal_recording_helpers_cover_none_and_fallback_paths() -> None:
     assert execution_recording._workflow_failure_message(None) == (
         "Workflow execution failed"
     )
+
+
+def test_step_completion_details_include_transform_summary_and_artifact_refs() -> None:
+    details = execution_recording.build_step_completion_details(
+        WorkflowStepExecutionResult(
+            step_id="reconcile",
+            step_kind="transform",
+            status="success",
+            payload=WorkflowTransformExecutionResult(
+                step_id="reconcile",
+                transform_name="reconcile_foreign_keys",
+                status="success",
+                fingerprint="fp",
+                output={
+                    "fingerprint": "fp",
+                    "transform_name": "reconcile_foreign_keys",
+                    "source_table": "chembl.assay",
+                    "reference_table": "chembl.target",
+                    "scanned_rows": 3,
+                    "retained_rows": 2,
+                    "orphan_rows_deleted": 1,
+                    "artifact_refs": [
+                        {
+                            "type": "workflow_transform_result",
+                            "path": "result.json",
+                            "sha256": "abc",
+                            "size_bytes": 10,
+                        }
+                    ],
+                },
+            ),
+        )
+    )
+
+    assert details is not None
+    assert details["fingerprint"] == "fp"
+    summary = details["transform_result_summary"]
+    assert isinstance(summary, dict)
+    assert summary["source_table"] == "chembl.assay"
+    assert summary["orphan_rows_deleted"] == 1
+    assert details["artifacts"] == [
+        {
+            "type": "workflow_transform_result",
+            "path": "result.json",
+            "sha256": "abc",
+            "size_bytes": 10,
+        }
+    ]

@@ -52,7 +52,6 @@ def _duplication_target(payload: dict[str, Any], target: str) -> dict[str, Any]:
     raise AssertionError(f"missing duplication target: {target}")
 
 
-@pytest.mark.skip(reason="Closeout artifact not yet created for issues 6022-6028")
 def test_issue_pack_6022_6028_closeout_artifact_is_complete_and_budget_safe() -> None:
     closeout = _load_json(CLOSEOUT)
 
@@ -77,7 +76,6 @@ def test_issue_pack_6022_6028_closeout_artifact_is_complete_and_budget_safe() ->
         assert (ROOT / ratchet["source"]).exists()
 
 
-@pytest.mark.skip(reason="Closeout artifact not yet created for issues 6022-6028")
 def test_issue_6022_generated_artifact_coherence_gates_pass() -> None:
     coverage = _load_json(MODULE_COVERAGE)
     scorecard = _load_json(SCORECARD)
@@ -95,7 +93,6 @@ def test_issue_6022_generated_artifact_coherence_gates_pass() -> None:
     )
 
 
-@pytest.mark.skip(reason="Closeout artifact not yet created for issues 6022-6028")
 def test_issue_6023_dependency_map_has_runtime_headroom() -> None:
     closeout = _load_json(CLOSEOUT)
     dependency_map = _load_json(DEPENDENCY_MAP)
@@ -116,7 +113,6 @@ def test_issue_6023_dependency_map_has_runtime_headroom() -> None:
     )
 
 
-@pytest.mark.skip(reason="Closeout artifact not yet created for issues 6022-6028")
 def test_issue_6024_runtime_builder_hotspot_fan_in_has_headroom() -> None:
     closeout = _load_json(CLOSEOUT)
     hotspot = _load_json(HOTSPOT)
@@ -136,7 +132,6 @@ def test_issue_6024_runtime_builder_hotspot_fan_in_has_headroom() -> None:
     )
 
 
-@pytest.mark.skip(reason="Closeout artifact not yet created for issues 6022-6028")
 def test_issue_6025_duplication_baseline_distinguishes_raw_and_actionable_counts() -> (
     None
 ):
@@ -160,7 +155,6 @@ def test_issue_6025_duplication_baseline_distinguishes_raw_and_actionable_counts
     assert adapters["excluded_duplicate_count"] == 38
 
 
-@pytest.mark.skip(reason="Closeout artifact not yet created for issues 6022-6028")
 def test_issue_6026_tracked_mcp_config_is_current_and_pruned() -> None:
     root_mcp = _load_json(ROOT / ".mcp.json")
     script_mcp = _load_json(ROOT / "scripts" / "ai" / ".mcp.json")
@@ -171,7 +165,6 @@ def test_issue_6026_tracked_mcp_config_is_current_and_pruned() -> None:
     assert "/mnt/wsl/docker-desktop-bind-mounts" not in json.dumps(script_mcp)
 
 
-@pytest.mark.skip(reason="Closeout artifact not yet created for issues 6022-6028")
 def test_issue_6027_pandera_and_topology_docs_match_current_runtime() -> None:
     requirements = (ROOT / "docs" / "01-requirements" / "REQUIREMENTS.md").read_text(
         encoding="utf-8"
@@ -189,11 +182,11 @@ def test_issue_6027_pandera_and_topology_docs_match_current_runtime() -> None:
     assert "validate_supported_pandera_runtime" not in requirements
     assert "делегирует validation-only guard" not in requirements
     assert "no-op compatibility seam" in requirements
-    assert "`source_module_count=2210`" in topology
+    coverage_summary = coverage["summary"]
+    assert f"`source_module_count={coverage_summary['source_module_count']}`" in topology
     assert coverage["source_tree_sha256"] in topology
 
 
-@pytest.mark.skip(reason="Closeout artifact not yet created for issues 6022-6028")
 def test_issue_6028_test_governance_duplicate_names_are_zero() -> None:
     closeout = _load_json(CLOSEOUT)
     test_governance = _load_json(TEST_GOVERNANCE)

@@ -1,5 +1,15 @@
 {
   "contract_version": "1.0.0",
+  "dq_bundle_policy": {
+    "all_gold_entities_required": false,
+    "coverage_model": "bounded_subset",
+    "scope": "dq_sensitive_outputs",
+    "selection_criteria": [
+      "output carries DQ flags or DQ-sensitive provenance consumed by downstream checks",
+      "output represents a high-value provider or composite contract surface",
+      "snapshot rows exercise at least one warning or error DQ state"
+    ]
+  },
   "dq_sensitive_outputs": {
     "chembl_activity_dq_bundle": {
       "entity": "chembl_activity",

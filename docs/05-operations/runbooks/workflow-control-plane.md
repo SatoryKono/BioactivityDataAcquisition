@@ -165,6 +165,15 @@ that transform's input contract. The inverse target/publication cleanup remains
 after `reconcile_assay_publication_orphans`, because its reference side is the
 final current `chembl.assay` Gold table.
 
+For each executed `reconcile_foreign_keys` step, inspect
+`data/output/control/workflow_transform_results/<workflow_run_id>/<step_id>/result.json`
+for the persisted operation result. The artifact records scanned, retained,
+orphan, mutation, dry-run, and quarantine summary fields. When debug export is
+enabled, row-level reconcile CSVs are written under
+`artifacts/debug_exports/<workflow_name>/workflow_transforms/<workflow_run_id>/<step_id>/`.
+Do not use pipeline `gold_full.csv` as evidence of the final reconcile result;
+it is captured before workflow-level reconcile transforms run.
+
 When reviewing this workflow, keep the reconciliation config on logical table
 names only:
 

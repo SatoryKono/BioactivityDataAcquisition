@@ -93,7 +93,6 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return payload
 
 
-@pytest.mark.skip(reason="Closeout artifact not yet created for issues 5839-5845")
 def test_tdx_audit_closeout_artifact_is_complete_and_budget_safe() -> None:
     closeout = _load_json(CLOSEOUT)
 
@@ -117,7 +116,6 @@ def test_tdx_audit_closeout_artifact_is_complete_and_budget_safe() -> None:
             assert current <= maximum
 
 
-@pytest.mark.skip(reason="Closeout artifact not yet created for issues 5839-5845")
 def test_issue_5839_retained_public_seams_are_metadata_backed_and_zero_burden() -> None:
     closeout = _load_json(CLOSEOUT)
     registry = _load_yaml(COMPATIBILITY_REGISTRY)
@@ -152,7 +150,6 @@ def test_issue_5839_retained_public_seams_are_metadata_backed_and_zero_burden() 
         assert facade["resolution_conflicts"] == {}
 
 
-@pytest.mark.skip(reason="Closeout artifact not yet created for issues 5839-5845")
 def test_issue_5840_adapter_duplication_is_below_audit_baseline() -> None:
     closeout = _load_json(CLOSEOUT)
     duplication = _load_json(DUPLICATION_BASELINE)
@@ -167,9 +164,12 @@ def test_issue_5840_adapter_duplication_is_below_audit_baseline() -> None:
         adapters["duplicate_count"]
         < closeout["metrics"]["adapter_duplicate_clusters"]["previous_audit_baseline"]
     )
-    assert {item["category"] for item in adapters["actionability"]} == {
-        "export_facade_or_package_barrel",
-    }
+    if adapters["duplicate_count"] == 0:
+        assert adapters["actionability"] == []
+    else:
+        assert {item["category"] for item in adapters["actionability"]} == {
+            "export_facade_or_package_barrel",
+        }
     assert "build_common_network_error_bundle" in COMMON_ERROR_BUNDLES.read_text(
         encoding="utf-8"
     )
@@ -178,7 +178,6 @@ def test_issue_5840_adapter_duplication_is_below_audit_baseline() -> None:
     )
 
 
-@pytest.mark.skip(reason="Closeout artifact not yet created for issues 5839-5845")
 def test_issue_5841_pipeline_transformer_duplication_is_below_audit_baseline() -> None:
     closeout = _load_json(CLOSEOUT)
     duplication = _load_json(DUPLICATION_BASELINE)
@@ -204,7 +203,6 @@ def test_issue_5841_pipeline_transformer_duplication_is_below_audit_baseline() -
     assert "default_entity_type" in context_text
 
 
-@pytest.mark.skip(reason="Closeout artifact not yet created for issues 5839-5845")
 def test_issue_5842_zero_import_candidates_are_fully_governed() -> None:
     closeout = _load_json(CLOSEOUT)
     inventory = _load_json(DEAD_CODE_INVENTORY)
@@ -230,7 +228,6 @@ def test_issue_5842_zero_import_candidates_are_fully_governed() -> None:
         assert row["owner_test_count"] == row["owner_test_paths_exist_count"]
 
 
-@pytest.mark.skip(reason="Closeout artifact not yet created for issues 5839-5845")
 def test_issue_5843_composite_shared_policy_has_single_authority_surface() -> None:
     closeout = _load_json(CLOSEOUT)
     backlog = _load_json(CONFIG_BACKLOG)
@@ -265,7 +262,6 @@ def test_issue_5843_composite_shared_policy_has_single_authority_surface() -> No
         assert raw.get("lineage", {}) == {}
 
 
-@pytest.mark.skip(reason="Closeout artifact not yet created for issues 5839-5845")
 def test_issue_5844_runtime_tail_has_targeted_behavioral_coverage_evidence() -> None:
     closeout = _load_json(CLOSEOUT)
     inventory = _load_json(MODULE_COVERAGE)
@@ -304,7 +300,6 @@ def test_issue_5844_runtime_tail_has_targeted_behavioral_coverage_evidence() -> 
     )
 
 
-@pytest.mark.skip(reason="Closeout artifact not yet created for issues 5839-5845")
 def test_issue_5845_zero_reference_supporting_scripts_have_owner_or_removal_metadata() -> (
     None
 ):

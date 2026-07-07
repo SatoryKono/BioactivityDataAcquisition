@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
+from datetime import datetime
 from time import perf_counter
 from typing import TYPE_CHECKING
 
@@ -43,6 +44,9 @@ if TYPE_CHECKING:
     from bioetl.application.services.execution.pipeline_runner_service import (
         PipelineRunnerService,
     )
+    from bioetl.application.services.workflow_transform_artifacts import (
+        WorkflowTransformArtifactSink,
+    )
     from bioetl.domain.ports import MetricsPort
 
 __all__ = [
@@ -69,11 +73,14 @@ class WorkflowRunnerService:
     transform_service: WorkflowTransformService
     metrics: MetricsPort
     monotonic: Callable[[], float] = perf_counter
+    workflow_transform_artifact_sink: WorkflowTransformArtifactSink | None = None
 
     async def run_workflow(
         self,
         config: WorkflowConfig,
         *,
+        workflow_run_id: str | None = None,
+        manifest_id: str | None = None,
         completed_step_ids: frozenset[str] | None = None,
         completed_transform_fingerprints: dict[str, str] | None = None,
         step_started_callback: Callable[..., None] | None = None,
@@ -82,11 +89,14 @@ class WorkflowRunnerService:
         transform_commit_callback: (
             Callable[[WorkflowTransformDestructiveCommit], None] | None
         ) = None,
+        created_at_factory: Callable[[], datetime] | None = None,
     ) -> WorkflowRunExecutionResult:
         """Run a workflow config and stop on first failed step."""
         state = WorkflowExecutionState(step_results=[], step_outputs={})
         workflow_context_labels = config.workflow_context_labels
         effective_dry_run = bool(config.defaults.dry_run)
+        debug_export_enabled = bool(config.defaults.debug_export_enabled)
+        debug_export_dir = config.defaults.debug_export_dir
 
         for step_id in config.topological_step_ids:
             step = config.get_step(step_id)
@@ -102,6 +112,11 @@ class WorkflowRunnerService:
                 step_started_callback=step_started_callback,
                 transform_commit_callback=transform_commit_callback,
                 dry_run=effective_dry_run,
+                workflow_run_id=workflow_run_id,
+                manifest_id=manifest_id,
+                debug_export_enabled=debug_export_enabled,
+                debug_export_dir=debug_export_dir,
+                created_at_factory=created_at_factory,
             )
             self._apply_step_transition(
                 state=state,
@@ -132,6 +147,11 @@ class WorkflowRunnerService:
             Callable[[WorkflowTransformDestructiveCommit], None] | None
         ),
         dry_run: bool,
+        workflow_run_id: str | None,
+        manifest_id: str | None,
+        debug_export_enabled: bool,
+        debug_export_dir: str | None,
+        created_at_factory: Callable[[], datetime] | None,
     ) -> ResolvedWorkflowStepTransitionRecord:
         """Resolve whether a step should run, resume-skip, or failure-skip."""
         policy = resolve_step_transition_policy(
@@ -171,6 +191,11 @@ class WorkflowRunnerService:
                 step_started_callback=step_started_callback,
                 transform_commit_callback=transform_commit_callback,
                 dry_run=dry_run,
+                workflow_run_id=workflow_run_id,
+                manifest_id=manifest_id,
+                debug_export_enabled=debug_export_enabled,
+                debug_export_dir=debug_export_dir,
+                created_at_factory=created_at_factory,
             ),
         )
 
@@ -209,6 +234,11 @@ class WorkflowRunnerService:
             Callable[[WorkflowTransformDestructiveCommit], None] | None
         ),
         dry_run: bool,
+        workflow_run_id: str | None,
+        manifest_id: str | None,
+        debug_export_enabled: bool,
+        debug_export_dir: str | None,
+        created_at_factory: Callable[[], datetime] | None,
     ) -> WorkflowStepExecutionResult:
         if isinstance(step, WorkflowStepConfig):
             return await self._run_pipeline_step(
@@ -226,6 +256,11 @@ class WorkflowRunnerService:
             step_started_callback=step_started_callback,
             transform_commit_callback=transform_commit_callback,
             dry_run=dry_run,
+            workflow_run_id=workflow_run_id,
+            manifest_id=manifest_id,
+            debug_export_enabled=debug_export_enabled,
+            debug_export_dir=debug_export_dir,
+            created_at_factory=created_at_factory,
         )
 
     async def _run_pipeline_step(
@@ -295,6 +330,11 @@ class WorkflowRunnerService:
             Callable[[WorkflowTransformDestructiveCommit], None] | None
         ),
         dry_run: bool,
+        workflow_run_id: str | None,
+        manifest_id: str | None,
+        debug_export_enabled: bool,
+        debug_export_dir: str | None,
+        created_at_factory: Callable[[], datetime] | None,
     ) -> WorkflowStepExecutionResult:
         spec = WorkflowTransformSpec.from_step(step)
         if step_started_callback is not None:
@@ -311,6 +351,12 @@ class WorkflowRunnerService:
             context_labels=workflow_context_labels,
             completed_fingerprints=completed_transform_fingerprints,
             dry_run=dry_run,
+            workflow_run_id=workflow_run_id,
+            manifest_id=manifest_id,
+            debug_export_enabled=debug_export_enabled,
+            debug_export_dir=debug_export_dir,
+            artifact_sink=self.workflow_transform_artifact_sink,
+            created_at=created_at_factory() if created_at_factory is not None else None,
             destructive_commit_callback=transform_commit_callback,
         )
         return step_result_from_transform_result(result)
