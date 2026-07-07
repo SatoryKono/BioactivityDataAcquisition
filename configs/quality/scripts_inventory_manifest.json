@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-07T15:19:49.679202+00:00",
+  "generated_at": "2026-07-07T16:03:21.462789+00:00",
   "summary": {
     "total_scripts": 445,
     "status_counts": {
@@ -7180,7 +7180,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 29,
+      "reference_count": 30,
       "references": [
         {
           "path": ".pre-commit-config.yaml",
