@@ -148,9 +148,12 @@ def test_manifest_provider_and_run_type_normalize_optional_manifest_values() -> 
         )
         is None
     )
-    assert resolve_manifest_run_type(
-        SimpleNamespace(manifest=SimpleNamespace(run_type=SimpleNamespace(value=7)))
-    ).startswith("namespace(")
+    assert (
+        resolve_manifest_run_type(
+            SimpleNamespace(manifest=SimpleNamespace(run_type=SimpleNamespace(value=7)))
+        )
+        is None
+    )
 
 
 def test_build_traceql_query_uses_only_available_filters() -> None:

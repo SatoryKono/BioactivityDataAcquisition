@@ -20,9 +20,8 @@ from bioetl.domain.control_plane.reproducibility_profiles import (
     published_reproducibility_family_inventory,
 )
 from bioetl.domain.types import RunID
+from tests.helpers.control_plane import InMemoryRunLedgerStore, InMemoryRunManifestStore
 from tests.integration.ci.test_reproducibility_contract_suite import (
-    _InMemoryRunLedgerStore,
-    _InMemoryRunManifestStore,
     _PUBLISHED_PRODUCTION_FAMILIES,
     _make_manifest,
     _make_merge_metrics_mixin,
@@ -135,8 +134,8 @@ def test_reproducibility_contract_composite_rows_exclude_runtime_anchors() -> No
 def test_reproducibility_contract_composite_quarantine_is_explicitly_occurrence_only() -> (
     None
 ):
-    manifest_store = _InMemoryRunManifestStore()
-    ledger_store = _InMemoryRunLedgerStore()
+    manifest_store = InMemoryRunManifestStore()
+    ledger_store = InMemoryRunLedgerStore()
     run_id = RunID(UUID("00000000-0000-0000-0000-000000000402"))
     manifest = _make_manifest(
         manifest_id="manifest-composite-quarantine",

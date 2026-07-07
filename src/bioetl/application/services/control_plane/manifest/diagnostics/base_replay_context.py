@@ -4,6 +4,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context import (
+    ReplayFamilyContext,
+    build_replay_family_context,
+)
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection import (
     _build_replay_projection_bundle,
 )
@@ -12,10 +16,6 @@ from bioetl.application.services.control_plane.manifest.diagnostics.reproducibil
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.resume_contract import (
     _build_resume_contract,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context import (
-    ReplayFamilyContext,
-    build_replay_family_context,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.snapshot_support import (
     collect_input_snapshot_refs as _collect_input_snapshot_refs,

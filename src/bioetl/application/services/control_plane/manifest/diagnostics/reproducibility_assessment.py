@@ -4,13 +4,17 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.required_persistence_profile import (
-    _resolve_required_persistence_profile,
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants import (
+    required_persistence_profile,
 )
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
     ReproducibilityPolicyAssessment,
     assess_reproducibility_policy,
+)
+
+_resolve_required_persistence_profile = (
+    required_persistence_profile._resolve_required_persistence_profile
 )
 
 if TYPE_CHECKING:
