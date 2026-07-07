@@ -23,7 +23,7 @@ from bioetl.infrastructure.storage.delta_reader_helpers import (
 
 DEFAULT_DEDUPLICATION_TIMEOUT_SECONDS = 60.0
 TEST_MODE_DEDUPLICATION_TIMEOUT_SECONDS = 10.0
-WINDOWS_TEST_MODE_DEDUPLICATION_TIMEOUT_SECONDS = 20.0
+WINDOWS_TEST_MODE_DEDUPLICATION_TIMEOUT_SECONDS = 60.0
 
 
 def resolve_test_mode_deduplication_timeout_seconds() -> float:

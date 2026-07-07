@@ -2,15 +2,21 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 
 import pytest
+from deltalake.exceptions import CommitFailedError
 
 from bioetl.domain.ports.workflow_foreign_key_reconciliation import (
     ForeignKeyReconciliationRequest,
 )
+from bioetl.infrastructure.storage import gold_writer
 from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation import (
     SilverForeignKeyReconciliationAdapter,
+)
+from bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_quarantine import (
+    expire_gold_orphan_rows,
 )
 
 pytestmark = pytest.mark.unit
@@ -68,6 +74,73 @@ class _Quarantine:
         self.writes.extend(records)
 
 
+@dataclass
+class _GoldMutationWriter:
+    execute_errors: list[BaseException] = field(default_factory=list)
+    merge_attempts: int = 0
+
+    def _resolve_table_path(self, table_name: str) -> str:
+        return f"/tmp/{table_name.replace('.', '/')}"
+
+    async def _run_in_executor(
+        self,
+        func: Callable[..., object],
+        *args: object,
+    ) -> object:
+        return func(*args)
+
+
+@dataclass
+class _MutationHost:
+    gold_writer: _GoldMutationWriter
+    silver_writer: object = field(default_factory=object)
+    quarantine: object | None = None
+    quarantine_pipeline_name: str | None = None
+
+
+class _FakeAsyncio:
+    def __init__(self) -> None:
+        self.sleep_calls: list[float] = []
+
+    async def sleep(self, delay: float) -> None:
+        self.sleep_calls.append(delay)
+
+
+class _FakeMergeBuilder:
+    def __init__(self, writer: _GoldMutationWriter) -> None:
+        self._writer = writer
+
+    def when_matched_update(self, **_: object) -> _FakeMergeBuilder:
+        return self
+
+    def execute(self) -> dict[str, int]:
+        self._writer.merge_attempts += 1
+        if self._writer.execute_errors:
+            raise self._writer.execute_errors.pop(0)
+        return {"num_updated_rows": 1}
+
+
+class _FakeDeltaTable:
+    def __init__(self, writer: _GoldMutationWriter) -> None:
+        self._writer = writer
+
+    def merge(self, **_: object) -> _FakeMergeBuilder:
+        return _FakeMergeBuilder(self._writer)
+
+
+class _FakeGoldModule:
+    GOLD_WRITE_RETRY_ERRORS = (CommitFailedError,)
+
+    def __init__(self, writer: _GoldMutationWriter) -> None:
+        self.writer = writer
+        self.asyncio = _FakeAsyncio()
+        self.table_paths: list[str] = []
+
+    def DeltaTable(self, table_path: str) -> _FakeDeltaTable:
+        self.table_paths.append(table_path)
+        return _FakeDeltaTable(self.writer)
+
+
 @pytest.mark.asyncio
 async def test_gold_dry_run_does_not_mutate_or_quarantine() -> None:
     quarantine = _Quarantine()
@@ -108,6 +181,49 @@ async def test_gold_dry_run_does_not_mutate_or_quarantine() -> None:
     assert result.mutated is False
     assert result.orphan_rows_deleted == 1
     assert quarantine.writes == []
+
+
+def test_gold_writer_retries_delta_commit_failures() -> None:
+    assert CommitFailedError in gold_writer.GOLD_WRITE_RETRY_ERRORS
+
+
+@pytest.mark.asyncio
+async def test_gold_expiry_retries_commit_conflict(monkeypatch: pytest.MonkeyPatch) -> None:
+    writer = _GoldMutationWriter(execute_errors=[CommitFailedError("conflict")])
+    fake_module = _FakeGoldModule(writer)
+    monkeypatch.setattr(
+        "bioetl.infrastructure.storage.workflow_foreign_key_reconciliation_quarantine.load_gold_writer_module",
+        lambda: fake_module,
+    )
+
+    await expire_gold_orphan_rows(
+        _MutationHost(gold_writer=writer),  # type: ignore[arg-type]
+        ForeignKeyReconciliationRequest(
+            source_layer="gold",
+            reference_layer="gold",
+            mutation_layer="gold",
+            source_table="chembl.assay",
+            reference_table="chembl.target",
+            source_key="target_id",
+            reference_key="target_id",
+            primary_keys=("assay_id",),
+        ),
+        orphan_rows=[
+            {
+                "assay_id": "CHEMBL_A1",
+                "target_id": "CHEMBL_T999",
+                "_is_current": True,
+                "_valid_to": None,
+            }
+        ],
+    )
+
+    assert writer.merge_attempts == 2
+    assert fake_module.table_paths == [
+        "/tmp/chembl/assay",
+        "/tmp/chembl/assay",
+    ]
+    assert fake_module.asyncio.sleep_calls == [0.55]
 
 
 @pytest.mark.asyncio
