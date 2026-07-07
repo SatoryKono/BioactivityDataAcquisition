@@ -14,6 +14,7 @@ pytestmark = pytest.mark.architecture
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY_PATH = ROOT / "configs" / "quality" / "root_hygiene_review_registry.yaml"
 STRUCTURE_CATALOG_PATH = ROOT / "configs" / "quality" / "repo_structure_catalog.yaml"
+ROOT_POLICY_DOC_PATH = ROOT / "docs" / "00-project" / "governance" / "03-file-policy.md"
 REMEDIATION_PLAN_PATH = (
     ROOT / "docs" / "plans" / "repository-file-structure-remediation-plan-2026-04-28.md"
 )
@@ -22,6 +23,7 @@ ALLOWED_CLASSIFICATIONS = {
     "blocked_cleanup_zone",
     "cleanup_completed",
     "owner_decision_required",
+    "owner_decision_resolved",
     "review_required",
     "security_review_required",
 }
@@ -139,6 +141,14 @@ def test_root_hygiene_review_registry_tracks_observed_transient_root_families() 
     assert by_path["artifacts"]["canonical_path"] == "artifacts/debug_exports"
     assert (
         by_path[".coverage"]["current_live_state"] == "present_local_only_root_surface"
+    )
+    assert (
+        by_path["_tmp_panel_inventory.mjs"]["current_live_state"]
+        == "absent_from_root_baseline"
+    )
+    assert (
+        by_path["_tmp_panel_inventory.ps1"]["current_live_state"]
+        == "absent_from_root_baseline"
     )
     assert (
         by_path["temp_analyze_conflicting.py"]["current_live_state"]
@@ -462,6 +472,10 @@ def test_root_docker_adjunct_lane_tracks_reviewed_root_docker_surfaces() -> None
         for lane in lanes
         if isinstance(lane, dict) and lane.get("lane_id") == "root_docker_adjuncts"
     )
+    assert docker_lane["classification"] == "owner_decision_resolved"
+    assert docker_lane["cleanup_policy"].startswith(
+        "resolved_docker_helper_disposition"
+    )
     candidates = docker_lane["candidates"]
     assert isinstance(candidates, list)
     by_path = {
@@ -509,6 +523,21 @@ def test_root_docker_adjunct_lane_tracks_reviewed_root_docker_surfaces() -> None
     for path in rehomed_surfaces:
         assert by_path[path]["current_live_state"] == "absent_from_root_baseline"
 
+    expected_dispositions = {
+        "docker-compose.monitoring.yml": "must_stay_root",
+        "docker-compose.codex.yml": "must_stay_root",
+        "docker-compose.neo4j-audit.yml": "must_stay_root",
+        "docker-compose.neo4j.yml": "must_stay_root",
+        "docker-compose.yml": "must_stay_root",
+        "docker-setup.ps1": "temporary_shim",
+        "docker-setup.sh": "temporary_shim",
+        "Dockerfile.bioetl": "must_stay_root",
+    }
+    for path, disposition in expected_dispositions.items():
+        assert by_path[path]["disposition"] == disposition
+    for path in rehomed_surfaces:
+        assert by_path[path]["disposition"] == "moved_to_owned_path"
+
     assert (
         by_path["docker-setup.ps1"]["canonical_path"] == "scripts/ops/docker-setup.ps1"
     )
@@ -522,6 +551,26 @@ def test_root_docker_adjunct_lane_tracks_reviewed_root_docker_surfaces() -> None
         by_path["grafana-datasource.yml"]["canonical_path"]
         == "grafana/provisioning/datasources-local/grafana-datasource.yml"
     )
+
+
+def test_root_policy_declares_target_root_model_and_docker_dispositions() -> None:
+    text = ROOT_POLICY_DOC_PATH.read_text(encoding="utf-8")
+
+    for required_phrase in (
+        "Target root model",
+        "Mandatory root minimum",
+        "Tool-required root files",
+        "Human-facing root docs",
+        "Allowed root directories",
+        "Forbidden root files/directories",
+        "Temporary compatibility surfaces",
+        "MUST stay root",
+        "temporary shim",
+        "moved to owned path",
+        "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
+        "configs/quality/generated_artifact_routing.yaml",
+    ):
+        assert required_phrase in text
 
 
 def test_remediation_plan_links_github_issue_set_and_required_sources() -> None:

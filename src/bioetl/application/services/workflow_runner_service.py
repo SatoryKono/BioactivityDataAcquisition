@@ -45,7 +45,7 @@ if TYPE_CHECKING:
         PipelineRunnerService,
     )
     from bioetl.application.services.workflow_transform_artifacts import (
-        WorkflowTransformArtifactSink,
+        WorkflowTransformArtifactSinkProtocol,
     )
     from bioetl.domain.ports import MetricsPort
 
@@ -73,7 +73,7 @@ class WorkflowRunnerService:
     transform_service: WorkflowTransformService
     metrics: MetricsPort
     monotonic: Callable[[], float] = perf_counter
-    workflow_transform_artifact_sink: WorkflowTransformArtifactSink | None = None
+    workflow_transform_artifact_sink: WorkflowTransformArtifactSinkProtocol | None = None
 
     async def run_workflow(
         self,

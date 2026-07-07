@@ -21,6 +21,9 @@ from bioetl.composition.runtime_builders._run_manifest_context_updates import (
     iter_optional_control_plane_updates,
     iter_optional_control_plane_updates_from_mapping,
 )
+from bioetl.composition.runtime_builders._run_context_values import (
+    resolve_run_context_values,
+)
 from bioetl.composition.runtime_builders._run_manifest_sink_policy import (
     validate_reproducible_sink_modes,
 )
@@ -154,15 +157,3 @@ def resolve_replay_capability(
         resume_requested=resume_requested,
     )
 
-
-def resolve_run_context_values(
-    ctx: PipelineRunContext,
-) -> tuple[str, str]:
-    """Resolve run type and execution context values from context."""
-    raw_run_type = getattr(ctx, "run_type", "incremental")
-    run_type_value = str(getattr(raw_run_type, "value", raw_run_type))
-    raw_execution_context = getattr(ctx, "execution_context", "isolated")
-    execution_context_value = str(
-        getattr(raw_execution_context, "value", raw_execution_context)
-    )
-    return run_type_value, execution_context_value

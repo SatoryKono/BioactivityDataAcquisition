@@ -186,7 +186,13 @@ def test_issue_6027_pandera_and_topology_docs_match_current_runtime() -> None:
     assert (
         f"`source_module_count={coverage_summary['source_module_count']}`" in topology
     )
-    assert coverage["source_tree_sha256"] in topology
+    # The topology SUMMARY.md should reference the current source_tree_sha256
+    # If this assertion fails, the topology evidence needs to be regenerated
+    current_hash = coverage["source_tree_sha256"]
+    assert current_hash in topology, (
+        f"Topology SUMMARY.md does not contain current source_tree_sha256={current_hash}. "
+        "Regenerate the project-package-topology evidence pack."
+    )
 
 
 def test_issue_6028_test_governance_duplicate_names_are_zero() -> None:

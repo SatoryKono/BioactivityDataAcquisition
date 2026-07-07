@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from bioetl.application.services.workflow_transform_artifacts import (
-    WorkflowTransformArtifactSink,
+    WorkflowTransformArtifactSinkProtocol,
 )
 
 type WorkflowTransformOutput = object
@@ -39,7 +39,7 @@ class WorkflowTransformRuntimeContext:
     manifest_id: str | None = None
     debug_export_enabled: bool = False
     debug_export_dir: str | None = None
-    artifact_sink: WorkflowTransformArtifactSink | None = None
+    artifact_sink: WorkflowTransformArtifactSinkProtocol | None = None
     created_at: datetime | None = None
     destructive_commit_callback: (
         Callable[[WorkflowTransformDestructiveCommit], None] | None

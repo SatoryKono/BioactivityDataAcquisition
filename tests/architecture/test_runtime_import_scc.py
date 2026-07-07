@@ -6,6 +6,7 @@ import ast
 from collections import defaultdict
 from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor
+from datetime import date
 from functools import cache
 import os
 from pathlib import Path
@@ -17,6 +18,7 @@ _MIN_PARALLEL_READ_FILES = 64
 _DEFAULT_READ_WORKERS = 8
 _MAX_READ_WORKERS = 16
 REVIEWED_RUNTIME_SCC_BUDGET_MAX = 4
+REVIEWED_RUNTIME_SCC_MIN_REVIEW_DATE = date(2026, 7, 1)
 ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
     frozenset(
         {
@@ -44,14 +46,15 @@ ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
         }
     ): {
         "owner": "interfaces.http.control_plane_identity",
-        "review_date": "2026-06-03",
-        "linked_issue": "#5057",
+        "review_date": "2026-07-07",
+        "linked_issue": "#6037",
         "rationale": (
             "Control plane identity extractors form a cohesive functional group "
             "that share common formatting utilities and domain model imports. "
             "The cycle enables shared extraction logic across manifest, ledger, "
             "checkpoint, and replay surfaces without code duplication. "
-            "This pattern is consistent with control plane service organization."
+            "The #6037 refresh keeps this acceptance explicitly reviewed while "
+            "the extractor family remains under the accepted SCC inventory budget."
         ),
     },
     frozenset(
@@ -333,5 +336,6 @@ def test_runtime_import_scc_review_inventory_is_ratcheted_for_5427() -> None:
         }
         assert metadata["owner"].strip()
         assert metadata["linked_issue"].startswith("#")
-        assert metadata["review_date"].strip()
+        review_date = date.fromisoformat(metadata["review_date"])
+        assert review_date >= REVIEWED_RUNTIME_SCC_MIN_REVIEW_DATE
         assert metadata["rationale"].strip()

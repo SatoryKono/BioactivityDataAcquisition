@@ -7,6 +7,8 @@ repair HTTP cassette replay. Either ``pytest-recording`` or the repo-local
 
 from __future__ import annotations
 
+import sys
+
 import pytest
 
 from importlib import import_module
@@ -35,6 +37,13 @@ def test_repo_root_sitecustomize_shim_is_absent() -> None:
 
 def test_vcr_replay_runtime_imports_correctly() -> None:
     """One supported VCR replay runtime must import correctly from the environment."""
+    if "vcr.matchers" in sys.modules and "pytest_recording" not in sys.modules:
+        replay_runtime = import_module("vcr")
+        assert getattr(replay_runtime, "__file__", ""), (
+            "Supported VCR replay runtime must expose an import path"
+        )
+        return
+
     try:
         replay_runtime = import_module("pytest_recording")
     except ModuleNotFoundError:

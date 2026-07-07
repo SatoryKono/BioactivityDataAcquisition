@@ -958,6 +958,7 @@
       ],
       "contract_ref": "chembl.target",
       "contract_test_paths": [
+        "tests/architecture/test_low_coverage_targeted_tests_6045.py",
         "tests/architecture/test_protein_class_target_type_codegen_contract.py",
         "tests/contract/test_gold_entity_coverage_complete.py",
         "tests/contract/test_gold_pk_consistency.py",
@@ -1651,6 +1652,7 @@
       ],
       "contract_ref": "composite.target",
       "contract_test_paths": [
+        "tests/architecture/test_low_coverage_targeted_tests_6045.py",
         "tests/architecture/test_protein_class_target_type_codegen_contract.py",
         "tests/contract/test_gold_entity_coverage_complete.py",
         "tests/contract/test_gold_pk_consistency.py",
@@ -2510,5 +2512,5 @@
       "uniqueness_constraint_source": "pipeline.business_primary_keys"
     }
   ],
-  "snapshot_date": "2026-07-06"
+  "snapshot_date": "2026-07-07"
 }

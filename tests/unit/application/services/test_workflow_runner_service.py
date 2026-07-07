@@ -140,10 +140,18 @@ class _RecordingTransformService:
         context_labels: dict[str, str] | None = None,
         completed_fingerprints: dict[str, str] | None = None,
         dry_run: bool = False,
+        workflow_run_id: str | None = None,
+        manifest_id: str | None = None,
+        debug_export_enabled: bool = False,
+        debug_export_dir: str | None = None,
+        artifact_sink: object | None = None,
+        created_at: object | None = None,
         destructive_commit_callback: object | None = None,
     ) -> WorkflowTransformExecutionResult:
         del workflow_name, context_labels, completed_fingerprints
         del destructive_commit_callback
+        del workflow_run_id, manifest_id, debug_export_enabled
+        del debug_export_dir, artifact_sink, created_at
         upstream_outputs = upstream_outputs or {}
         self.calls.append((step.step_id, tuple(sorted(upstream_outputs)), dry_run))
         return WorkflowTransformExecutionResult(

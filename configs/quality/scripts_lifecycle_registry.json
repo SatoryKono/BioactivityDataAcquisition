@@ -386,6 +386,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain only as a bounded manual TDX-AUDIT issue publishing helper for local issue-template campaigns; keep it non-active unless it becomes a governed repo-operations workflow with a durable active-surface budget."
     },
+    "scripts/engineering/repo/sync_scripts_inventory.py": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the router implementation for the canonical scripts.engineering.repo sync-inventory command while inventory refresh remains exposed through the module entrypoint; keep this file non-active unless direct script execution becomes a governed public surface."
+    },
     "scripts/docs/generate_pipeline_normalization_validation_table.py": {
       "owner": "@bioetl-docs",
       "decision": "legacy_manual_utility",
@@ -517,6 +523,12 @@
       "decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain only as the Windows compatibility launcher that delegates through scripts/ai/gemini/gemini-interactive.sh; remove it once callers migrate to the canonical scripts/ai/gemini/run-gemini.ps1 or run-gemini.sh launcher surface."
+    },
+    "scripts/ai/mcp/check.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the shell backend for the canonical scripts.ai.mcp check router command; prefer the router in new docs and promote back to an active public script only if direct shell invocation remains a reviewed public surface."
     },
     "src/tools/apply_elk_layout.py": {
       "owner": "@bioetl-platform",

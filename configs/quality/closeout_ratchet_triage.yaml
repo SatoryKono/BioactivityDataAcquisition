@@ -304,6 +304,11 @@ entries:
     classification: budget_closeout_ratchet
     live_guard: "test audit issue batch #5996-#6003 remains aligned with live test-audit preflight, telemetry baseline, topology retirement, VCR reachability, and coverage-tail evidence without budget growth."
     rationale: Keeps the test-audit closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_test_infrastructure_refactor_closeout_6042_6044.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "test infrastructure issue batch #6042 and #6044 remains aligned with live fixture-scope and helper-ownership evidence without budget growth."
+    rationale: Keeps the test-infrastructure refactor closeout tied to executable live invariants for bootstrap fixture scope and support-helper ownership instead of stale historical signoff.
   - path: tests/architecture/test_tech_debt_issues_6011_6020_closeout.py
     disposition: retain_active
     classification: budget_closeout_ratchet
@@ -314,3 +319,8 @@ entries:
     classification: budget_closeout_ratchet
     live_guard: "debt issue batch #6022-#6028 remains aligned with live governance, compatibility, duplication, and observability evidence without budget growth."
     rationale: Keeps the newest architecture-debt closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issues_6032_6034_6037_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue batch #6032, #6034, and #6037 remains aligned with live hotspot fan-in and runtime SCC acceptance evidence without budget growth."
+    rationale: Keeps the newest architecture-debt closeout batch tied to executable live invariants for hotspot family headroom and runtime import-cycle acceptances instead of stale historical signoff.

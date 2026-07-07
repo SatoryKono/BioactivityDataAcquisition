@@ -434,6 +434,45 @@ def test_collect_root_review_evidence_marks_directory_with_tracked_descendant(
     assert evidence[0].review_status == "present_owner_decision_required"
 
 
+def test_collect_root_review_evidence_marks_resolved_owner_decision(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    _write_governance_files(tmp_path)
+    _write_review_registry(
+        tmp_path,
+        [
+            {
+                "lane_id": "root_launcher_shims",
+                "classification": "owner_decision_resolved",
+                "verification": ["git ls-files codex.ps1"],
+                "candidates": [
+                    {
+                        "path": "codex.ps1",
+                        "current_live_state": "present_approved_root_surface",
+                        "canonical_path": "scripts/ai/codex/run-codex.ps1",
+                        "action_if_reintroduced": "retain_thin_root_launcher",
+                    }
+                ],
+            }
+        ],
+    )
+    (tmp_path / "codex.ps1").write_text("pwsh", encoding="utf-8")
+    canonical = tmp_path / "scripts" / "ai" / "codex" / "run-codex.ps1"
+    canonical.parent.mkdir(parents=True)
+    canonical.write_text("pwsh", encoding="utf-8")
+
+    monkeypatch.setattr(module, "_tracked_paths", lambda repo_root: ["codex.ps1"])
+    monkeypatch.setattr(module, "_git_path_has_history", lambda repo_root, path: True)
+    monkeypatch.setattr(module, "_count_reference_hits", lambda repo_root, path: 1)
+
+    evidence = module.collect_root_review_evidence(tmp_path)
+
+    assert len(evidence) == 1
+    assert evidence[0].tracked is True
+    assert evidence[0].review_status == "present_owner_decision_resolved"
+
+
 def test_collect_root_review_evidence_skips_expensive_probes_for_local_only_surface(
     tmp_path: Path,
     monkeypatch,
