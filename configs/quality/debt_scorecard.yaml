@@ -482,14 +482,14 @@ hotspot_family_ratchets:
       total_loc: 22306
       files_ge_250_loc: 4
       helper_function_ratio: 0.356
-      max_internal_fan_in: 10
-      max_internal_fan_in_module: bioetl.application.core.batch_runtime_failure_policy
+      max_internal_fan_in: 7
+      max_internal_fan_in_module: bioetl.application.core.span_helpers
     trend:
       status: reviewed_2026-07-07_application_core_live_metric_refresh
       next_action: 2026-07-07 refreshes measured application_core metrics against
         the committed hotspot-family baseline at 180 files, 22306 LOC, 4
         files_ge_250_loc, helper_function_ratio 0.356, and max_internal_fan_in
-        10. Bounded-growth budgets remain flat at 7 files_ge_250_loc and
+        7. Bounded-growth budgets remain flat at 7 files_ge_250_loc and
         max_internal_fan_in 10; no technical-debt budget is increased.
   - name: composition_bootstrap_runtime
     owner: '@bioetl-platform'

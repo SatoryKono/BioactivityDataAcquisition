@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy import (
+from typing import TYPE_CHECKING
+
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.checkpoint_policy import (
     _resolve_applied_checkpoint_compatibility_policy,
-    _resolve_reproducibility_profile,
     _resolve_requested_checkpoint_compatibility_policy,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family import (
+    _resolve_reproducibility_profile,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_state import (
     _resolve_continuation_mode,
@@ -18,6 +22,11 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
     ReproducibilityPolicyAssessment,
 )
+
+if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context import (
+        ReplayFamilyContext,
+    )
 
 
 def _resolve_resume_guarantee(
@@ -58,9 +67,10 @@ def _build_resume_contract(
     requested_exact_replay: bool,
     resume_requested: bool,
     policy_assessment: ReproducibilityPolicyAssessment,
+    replay_family_context: ReplayFamilyContext,
 ) -> dict[str, object]:
     """Return the published checkpoint/resume contract for one manifested run."""
-    profile = _resolve_reproducibility_profile(manifest)
+    profile = replay_family_context.profile
     requested_policy = _resolve_requested_checkpoint_compatibility_policy(manifest)
     required_persistence_profile = policy_assessment.required_persistence_profile
     applied_policy = _resolve_applied_checkpoint_compatibility_policy(
@@ -78,6 +88,7 @@ def _build_resume_contract(
         manifest=manifest,
         requested_exact_replay=requested_exact_replay,
         resume_requested=resume_requested,
+        replay_family_context=replay_family_context,
     )
     guarantee, evidence_source, ledger_suffix_replay = _resolve_resume_guarantee(
         continuation_mode=continuation_mode,

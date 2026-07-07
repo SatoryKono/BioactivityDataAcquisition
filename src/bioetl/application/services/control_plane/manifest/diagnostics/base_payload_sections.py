@@ -63,6 +63,8 @@ def _build_base_summary_replay_payload(
         requested_exact_replay=replay_context.requested_exact_replay,
         resume_requested=replay_context.resume_requested,
         policy_assessment=replay_context.policy_assessment,
+        replay_family_context=replay_context.replay_family_context,
+        replay_family_contract=replay_context.replay_family_contract,
         replay_family_contract_payload=replay_family_contract_payload,
     )
     operator_replay_projection = replay_projection_bundle.operator_projection
