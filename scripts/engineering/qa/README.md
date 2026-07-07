@@ -29,6 +29,8 @@ python -m scripts.engineering.qa <command> [args...]
 | `report-vcr-metadata`            | `report_vcr_metadata_catalog.py`                      | Generate/check canonical VCR metadata catalog                                                     |
 | `report-provider-contract-drift` | `report_provider_contract_drift.py`                   | Generate provider contract drift diagnostics from replay cassettes                                |
 | `report-dashboard-inventory`     | `report_dashboard_inventory.py`                       | Generate/check dashboard inventory parity, provisioning drift, deployed drift, and local health   |
+| `report-dashboard-panel-audit-matrix` | `report_dashboard_panel_audit_matrix.py`         | Generate/check the dashboard panel audit matrix mirror                                            |
+| `report-panel-title-inventory`   | `report_panel_title_inventory.py`                     | Generate/check the dashboard panel-title inventory mirror from shipped JSON                       |
 | `report-family-baseline`         | `report_hotspot_family_baseline.py`                   | Generate/check RF-06 hotspot-family baseline artifacts                                            |
 | `report-adr-enforcement-matrix`  | `report_adr_enforcement_matrix.py`                    | Generate/check accepted ADR enforcement coverage matrix                                           |
 | `report-invariant-audit-rebaseline` | `report_invariant_audit_rebaseline.py`              | Generate/check stale invariant-audit evidence matrix and duplicate-issue gates                    |
@@ -64,6 +66,8 @@ python -m scripts.engineering.qa <command> [args...]
 | `report-vcr-metadata`            | When updating VCR fixture governance rollout or sidecar inventory; use `--check` for drift detection, `--update` to regenerate                   | Architecture / test-governance maintenance |
 | `report-provider-contract-drift` | When reviewing provider-facing API drift in PR/CI; writes a machine-readable replay report and can fail on warnings/breaking drift               | Provider contract replay CI gate           |
 | `report-dashboard-inventory`     | When validating shipped Grafana dashboards against docs, provisioning, or exported/deployed snapshots; use `--health-summary` for a local rollup | Dashboard governance / drift check         |
+| `report-dashboard-panel-audit-matrix` | When shipped dashboard panel audit metadata must match the generated docs mirror                                                        | Docs CI dashboard governance gate          |
+| `report-panel-title-inventory`   | After changing shipped Grafana dashboard panel titles or layout rows; use `--check` to catch generated mirror drift                              | Docs CI dashboard governance gate          |
 | `report-family-baseline`         | When reviewing RF-06 hotspot-family budgets or checking that the committed family baseline artifacts still match the code                        | Manual, preflight / CI drift check         |
 | `report-adr-enforcement-matrix`  | When accepted ADR coverage must be mapped to implementation owners and enforcement owners                                                        | Architecture governance / CI drift check   |
 | `report-invariant-audit-rebaseline` | When converting architecture/invariant audits into GitHub issues; validates stale paths, current anchors, and duplicate issue evidence        | Audit governance / issue triage gate       |
@@ -126,6 +130,8 @@ python -m scripts.engineering.qa test-health --last 30 --markdown-out reports/qu
 python -m scripts.engineering.qa test-health --suite coverage-verify --run-id coverage-verify-local --junit-glob 'reports/quality/test-runs/junit/*.xml' --last 30 --markdown-out reports/quality/test-runs/rollup.md
 python -m scripts.engineering.qa report-dashboard-inventory --health-summary --json
 python -m scripts.engineering.qa report-dashboard-inventory --deployed-dir /path/to/grafana-exports --check --json
+python -m scripts.engineering.qa report-dashboard-panel-audit-matrix --check
+python -m scripts.engineering.qa report-panel-title-inventory --check
 python scripts/engineering/qa/report_duplication_baseline.py
 python -m scripts.engineering.qa report-artifact-duplication-audit --check
 python -m scripts.engineering.qa check-architecture

@@ -108,6 +108,9 @@ jobs:
       - name: Check dashboard panel audit matrix parity
         run: uv run python -m scripts.engineering.qa report-dashboard-panel-audit-matrix --check
 
+      - name: Check dashboard panel title inventory parity
+        run: uv run python -m scripts.engineering.qa report-panel-title-inventory --check
+
   validate-mkdocs:
     needs: docs-governance
     runs-on: ubuntu-latest
