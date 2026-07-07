@@ -139,6 +139,21 @@ def test_unexpected_local_root_python_files_reject_untracked_root_python(
     assert violations == ["test_print.py"]
 
 
+def test_unexpected_local_root_temp_files_reject_panel_inventory_artifacts(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "_tmp_panel_inventory.mjs").write_text("{}", encoding="utf-8")
+    (tmp_path / "_tmp_panel_inventory.ps1").write_text("{}", encoding="utf-8")
+    (tmp_path / "README.md").write_text("ok\n", encoding="utf-8")
+
+    violations = module._unexpected_local_root_temp_files(
+        tmp_path,
+        tracked_root_files={"README.md"},
+    )
+
+    assert violations == ["_tmp_panel_inventory.mjs", "_tmp_panel_inventory.ps1"]
+
+
 def test_collect_tracked_policy_violations_allows_current_canonical_root_files() -> (
     None
 ):

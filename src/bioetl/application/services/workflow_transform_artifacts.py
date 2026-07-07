@@ -9,7 +9,7 @@ from typing import Protocol
 
 __all__ = [
     "WorkflowTransformArtifactContext",
-    "WorkflowTransformArtifactSink",
+    "WorkflowTransformArtifactSinkProtocol",
     "artifact_refs_as_dicts",
 ]
 
@@ -28,7 +28,7 @@ class WorkflowTransformArtifactContext:
     created_at: datetime | None = None
 
 
-class WorkflowTransformArtifactSink(Protocol):
+class WorkflowTransformArtifactSinkProtocol(Protocol):
     """Persist workflow transform result and optional debug artifacts."""
 
     def write_reconcile_result_artifact(

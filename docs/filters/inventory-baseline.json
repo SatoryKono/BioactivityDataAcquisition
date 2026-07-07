@@ -1653,7 +1653,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "src/bioetl/infrastructure/storage/workflow_foreign_key_reconciliation_quarantine.py",
       "occurrence_count": 1,
-      "first_line": 25,
+      "first_line": 26,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""

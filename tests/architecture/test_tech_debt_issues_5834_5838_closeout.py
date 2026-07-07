@@ -82,6 +82,10 @@ REHOMED_DOCKER_SURFACES = {
     "Dockerfile.warp",
     "grafana-datasource.yml",
 }
+OWNER_DECISION_CLASSIFICATIONS = {
+    "owner_decision_required",
+    "owner_decision_resolved",
+}
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -241,7 +245,7 @@ def test_issue_5837_root_codex_wsl_shims_stay_thin_and_owner_anchored() -> None:
         registry_row = candidates[path]
         evidence_row = evidence[path]
         assert registry_row["lane_id"] == "root_launcher_shims"
-        assert registry_row["lane_classification"] == "owner_decision_required"
+        assert registry_row["lane_classification"] in OWNER_DECISION_CLASSIFICATIONS
         assert evidence_row["classification"] == "REVIEW_REQUIRED"
 
     assert candidates["codex.ps1"]["canonical_path"] == "scripts/ai/codex/run-codex.ps1"
@@ -275,8 +279,17 @@ def test_issue_5838_root_docker_adjuncts_are_reviewed_and_evidence_backed() -> N
             assert path in allowlist_text
             assert registry_row["current_live_state"] == "present_approved_root_surface"
         assert registry_row["lane_id"] == "root_docker_adjuncts"
-        assert registry_row["lane_classification"] == "owner_decision_required"
+        # Lane classification changed from owner_decision_required to owner_decision_resolved
+        assert registry_row["lane_classification"] in {
+            "owner_decision_required",
+            "owner_decision_resolved",
+        }
         assert registry_row["owner"] == "Engineering / Runtime Platform"
+        assert registry_row["disposition"] in {
+            "moved_to_owned_path",
+            "must_stay_root",
+            "temporary_shim",
+        }
         assert evidence_row["classification"] == "REVIEW_REQUIRED"
 
     assert (

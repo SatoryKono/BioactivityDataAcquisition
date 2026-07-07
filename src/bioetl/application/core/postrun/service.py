@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from bioetl.application.core.batch_runtime_failure_policy import (
+from bioetl.application.core.batch_operation_errors import (
     OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
 )
 from bioetl.application.core.postrun._phase_descriptions import (

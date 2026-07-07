@@ -17,6 +17,7 @@ ALLOWED_CLASSIFICATIONS: Final[frozenset[str]] = frozenset(
     {
         "blocked_cleanup_zone",
         "owner_decision_required",
+        "owner_decision_resolved",
         "review_required",
         "security_review_required",
     }

@@ -20,7 +20,7 @@ from bioetl.domain.workflow import TransformStepConfig, WorkflowTransformSpec
 
 if TYPE_CHECKING:
     from bioetl.application.services.workflow_transform_artifacts import (
-        WorkflowTransformArtifactSink,
+        WorkflowTransformArtifactSinkProtocol,
     )
     from bioetl.domain.ports import MetricsPort
 
@@ -77,7 +77,7 @@ class WorkflowTransformService:
         manifest_id: str | None = None,
         debug_export_enabled: bool = False,
         debug_export_dir: str | None = None,
-        artifact_sink: WorkflowTransformArtifactSink | None = None,
+        artifact_sink: WorkflowTransformArtifactSinkProtocol | None = None,
         created_at: datetime | None = None,
         destructive_commit_callback: (
             Callable[[WorkflowTransformDestructiveCommit], None] | None

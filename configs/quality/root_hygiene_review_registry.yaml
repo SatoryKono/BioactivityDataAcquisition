@@ -70,12 +70,14 @@ review_lanes:
         action_if_reintroduced: regenerate_from_scripts_ai_codex_setup_mcp_py_and_keep_synchronized_with_root_mcp_json
 
   - lane_id: root_docker_adjuncts
-    classification: owner_decision_required
+    classification: owner_decision_resolved
     scope: reviewed root Docker helper adjuncts and provisioning-sidecar entrypoints
     owner: Engineering / Runtime Platform
     retention_class: reviewed_root_docker_compatibility_surface
     retention_action: retain_reviewed_root_docker_adjuncts_only_while_docs_compose_and_build_flows_require_the_exact_root_entrypoint
-    cleanup_policy: owner_decision_required_before_rehome_or_delete
+    cleanup_policy: resolved_docker_helper_disposition_rehome_or_delete_only_after_docs_ci_scripts_and_operator_flows_are_repointed
+    issue_refs:
+      - "#6046"
     verification:
       - git ls-files docker-compose.monitoring.yml docker-compose.codex.yml docker-compose.neo4j-audit.yml docker-compose.neo4j.yml docker-compose.yml docker-setup.ps1 docker-setup.sh Dockerfile.bioetl scripts/ops/runtime/docker/compose scripts/ops/runtime/docker/images grafana/provisioning/datasources-local/grafana-datasource.yml
       - rg -n "docker-compose(\\.monitoring|\\.codex|\\.neo4j-audit|\\.neo4j)?\\.yml|scripts/ops/runtime/docker/compose/(alertmanager|minio|redis|sonarqube)\\.yml|scripts/ops/runtime/docker/images/(mcp-fetch|mcp-filesystem|mcp-github|mcp-memory|warp)/Dockerfile|docker-setup\\.ps1|docker-setup\\.sh|Dockerfile\\.bioetl|grafana/provisioning/datasources-local/grafana-datasource\\.yml" .github docs scripts README.md Makefile pyproject.toml
@@ -84,74 +86,92 @@ review_lanes:
       - path: docker-compose.monitoring.yml
         current_live_state: present_approved_root_surface
         canonical_path: docs/05-operations/verification/docker-helper-root-relocation-audit.md
+        disposition: must_stay_root
         action_if_reintroduced: retain_only_while_root_compose_entrypoints_and_operator_docs_still_require_the_exact_root_filename
       - path: docker-compose.alertmanager.yml
         current_live_state: absent_from_root_baseline
         canonical_path: scripts/ops/runtime/docker/compose/alertmanager.yml
+        disposition: moved_to_owned_path
         action_if_reintroduced: keep_rehomed_under_scripts_ops_runtime_docker_compose_and_do_not_restore_the_root_adjunct_without_new_owner_review
       - path: docker-compose.codex.yml
         current_live_state: present_approved_root_surface
         canonical_path: docs/05-operations/verification/docker-helper-root-relocation-audit.md
+        disposition: must_stay_root
         action_if_reintroduced: retain_only_while_root_compose_entrypoints_and_operator_docs_still_require_the_exact_root_filename
       - path: docker-compose.minio.yml
         current_live_state: absent_from_root_baseline
         canonical_path: scripts/ops/runtime/docker/compose/minio.yml
+        disposition: moved_to_owned_path
         action_if_reintroduced: keep_rehomed_under_scripts_ops_runtime_docker_compose_and_do_not_restore_the_root_adjunct_without_new_owner_review
       - path: docker-compose.neo4j-audit.yml
         current_live_state: present_approved_root_surface
         canonical_path: docs/05-operations/verification/docker-helper-root-relocation-audit.md
+        disposition: must_stay_root
         action_if_reintroduced: retain_only_while_root_compose_entrypoints_and_operator_docs_still_require_the_exact_root_filename
       - path: docker-compose.neo4j.yml
         current_live_state: present_approved_root_surface
         canonical_path: docs/05-operations/verification/docker-helper-root-relocation-audit.md
+        disposition: must_stay_root
         action_if_reintroduced: retain_only_while_root_compose_entrypoints_and_operator_docs_still_require_the_exact_root_filename
       - path: docker-compose.redis.yml
         current_live_state: absent_from_root_baseline
         canonical_path: scripts/ops/runtime/docker/compose/redis.yml
+        disposition: moved_to_owned_path
         action_if_reintroduced: keep_rehomed_under_scripts_ops_runtime_docker_compose_and_do_not_restore_the_root_adjunct_without_new_owner_review
       - path: docker-compose.sonarqube.yml
         current_live_state: absent_from_root_baseline
         canonical_path: scripts/ops/runtime/docker/compose/sonarqube.yml
+        disposition: moved_to_owned_path
         action_if_reintroduced: keep_rehomed_under_scripts_ops_runtime_docker_compose_and_do_not_restore_the_root_adjunct_without_new_owner_review
       - path: docker-compose.yml
         current_live_state: present_approved_root_surface
         canonical_path: docs/05-operations/verification/docker-helper-root-relocation-audit.md
+        disposition: must_stay_root
         action_if_reintroduced: retain_only_while_root_compose_entrypoints_and_operator_docs_still_require_the_exact_root_filename
       - path: docker-setup.ps1
         current_live_state: present_approved_root_surface
         canonical_path: scripts/ops/docker-setup.ps1
+        disposition: temporary_shim
         action_if_reintroduced: retain_only_as_a_reviewed_root_setup_entrypoint_while_canonical_logic_lives_under_scripts_ops
       - path: docker-setup.sh
         current_live_state: present_approved_root_surface
         canonical_path: scripts/ops/docker-setup.sh
+        disposition: temporary_shim
         action_if_reintroduced: retain_only_as_a_reviewed_root_setup_entrypoint_while_canonical_logic_lives_under_scripts_ops
       - path: Dockerfile.bioetl
         current_live_state: present_approved_root_surface
         canonical_path: Dockerfile.bioetl
+        disposition: must_stay_root
         action_if_reintroduced: retain_only_while_compose_and_manual_build_flows_still_require_the_root_image_definition
       - path: Dockerfile.mcp-fetch
         current_live_state: absent_from_root_baseline
         canonical_path: scripts/ops/runtime/docker/images/mcp-fetch/Dockerfile
+        disposition: moved_to_owned_path
         action_if_reintroduced: keep_rehomed_under_scripts_ops_runtime_docker_images_and_do_not_restore_the_root_helper_dockerfile_without_new_owner_review
       - path: Dockerfile.mcp-filesystem
         current_live_state: absent_from_root_baseline
         canonical_path: scripts/ops/runtime/docker/images/mcp-filesystem/Dockerfile
+        disposition: moved_to_owned_path
         action_if_reintroduced: keep_rehomed_under_scripts_ops_runtime_docker_images_and_do_not_restore_the_root_helper_dockerfile_without_new_owner_review
       - path: Dockerfile.mcp-github
         current_live_state: absent_from_root_baseline
         canonical_path: scripts/ops/runtime/docker/images/mcp-github/Dockerfile
+        disposition: moved_to_owned_path
         action_if_reintroduced: keep_rehomed_under_scripts_ops_runtime_docker_images_and_do_not_restore_the_root_helper_dockerfile_without_new_owner_review
       - path: Dockerfile.mcp-memory
         current_live_state: absent_from_root_baseline
         canonical_path: scripts/ops/runtime/docker/images/mcp-memory/Dockerfile
+        disposition: moved_to_owned_path
         action_if_reintroduced: keep_rehomed_under_scripts_ops_runtime_docker_images_and_do_not_restore_the_root_helper_dockerfile_without_new_owner_review
       - path: Dockerfile.warp
         current_live_state: absent_from_root_baseline
         canonical_path: scripts/ops/runtime/docker/images/warp/Dockerfile
+        disposition: moved_to_owned_path
         action_if_reintroduced: keep_rehomed_under_scripts_ops_runtime_docker_images_and_do_not_restore_the_root_helper_dockerfile_without_new_owner_review
       - path: grafana-datasource.yml
         current_live_state: absent_from_root_baseline
         canonical_path: grafana/provisioning/datasources-local/grafana-datasource.yml
+        disposition: moved_to_owned_path
         action_if_reintroduced: keep_rehomed_under_grafana_provisioning_datasources_local_and_do_not_restore_the_root_provisioning_file_without_new_owner_review
 
   - lane_id: root_helper_duplicates
@@ -171,8 +191,8 @@ review_lanes:
     classification: review_required
     scope: observed transient root helpers, raw test dumps, and reviewed root artifact routing
     verification:
-      - git ls-files .coverage temp_analyze_conflicting.py temp_get_hash.py test_output.txt tests.txt logs artifacts
-      - rg -n "\\.coverage$|temp_analyze_conflicting\\.py|temp_get_hash\\.py|test_output\\.txt|tests\\.txt|logs/|reports/logs/|artifacts/debug_exports/" .github docs scripts tests configs README.md Makefile pyproject.toml .gitignore
+      - git ls-files .coverage _tmp_panel_inventory.mjs _tmp_panel_inventory.ps1 temp_analyze_conflicting.py temp_get_hash.py test_output.txt tests.txt logs artifacts
+      - rg -n "\\.coverage$|_tmp_panel_inventory\\.(mjs|ps1)|temp_analyze_conflicting\\.py|temp_get_hash\\.py|test_output\\.txt|tests\\.txt|logs/|reports/logs/|artifacts/debug_exports/" .github docs scripts tests configs README.md Makefile pyproject.toml .gitignore
       - .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
     candidates:
       - path: artifacts
@@ -183,6 +203,14 @@ review_lanes:
         current_live_state: present_local_only_root_surface
         canonical_path: null
         action_if_reintroduced: keep_untracked_as_local_coverage_database_or_prune_after_generating_the_reviewed_coverage_artifacts
+      - path: _tmp_panel_inventory.mjs
+        current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: delete_transient_root_panel_inventory_helper_or_route_retained_evidence_to_reports_quality
+      - path: _tmp_panel_inventory.ps1
+        current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: delete_transient_root_panel_inventory_helper_or_route_retained_evidence_to_reports_quality
       - path: temp_analyze_conflicting.py
         current_live_state: absent_from_root_baseline
         canonical_path: null

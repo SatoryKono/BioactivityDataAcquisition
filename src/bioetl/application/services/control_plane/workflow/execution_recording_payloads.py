@@ -55,19 +55,28 @@ def build_step_completion_details(
     details: dict[str, object] = {}
     if fingerprint is not None:
         details["fingerprint"] = fingerprint
-    summary = {
+    summary = _transform_result_summary(output)
+    if summary:
+        details["transform_result_summary"] = summary
+    artifact_refs = _artifact_refs(output)
+    if artifact_refs is not None:
+        details["artifacts"] = artifact_refs
+    return details or None
+
+
+def _transform_result_summary(output: dict[str, object]) -> dict[str, object]:
+    return {
         key: output[key]
         for key in _TRANSFORM_RESULT_SUMMARY_KEYS
         if key in output and output[key] is not None
     }
-    if summary:
-        details["transform_result_summary"] = summary
+
+
+def _artifact_refs(output: dict[str, object]) -> list[dict[str, object]] | None:
     artifact_refs = output.get("artifact_refs")
-    if isinstance(artifact_refs, list):
-        details["artifacts"] = [
-            dict(item) for item in artifact_refs if isinstance(item, dict)
-        ]
-    return details or None
+    if not isinstance(artifact_refs, list):
+        return None
+    return [dict(item) for item in artifact_refs if isinstance(item, dict)]
 
 
 def _resolve_result_fingerprint(result: WorkflowStepExecutionResult) -> str | None:
