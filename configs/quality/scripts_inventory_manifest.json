@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-06T15:20:09.274688+00:00",
+  "generated_at": "2026-07-07T05:11:35.285925+00:00",
   "summary": {
     "total_scripts": 444,
     "status_counts": {
@@ -643,7 +643,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py",
-          "line": 360,
+          "line": 343,
           "source_group": "tests",
           "text": "assert \"scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh\" in backlog_text"
         }
@@ -2180,7 +2180,7 @@
           "path": "scripts/ai/.mcp.json",
           "line": 61,
           "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/github-mcp-wrapper.sh\""
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/github-mcp-wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
@@ -2213,8 +2213,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 100,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_ast_grep_wrapper.sh\""
+        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 11,
@@ -2244,9 +2250,9 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 112,
+          "line": 124,
           "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
@@ -2273,8 +2279,14 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 106,
+          "source_group": "scripts",
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_code_interpreter_wrapper.sh\""
+        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 12,
@@ -2306,7 +2318,7 @@
           "path": "scripts/ai/.mcp.json",
           "line": 82,
           "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_context7_wrapper.sh\""
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_context7_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
@@ -2327,7 +2339,7 @@
           "path": "scripts/ai/.mcp.json",
           "line": 76,
           "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
         }
       ]
     },
@@ -2354,7 +2366,7 @@
           "path": "scripts/ai/.mcp.json",
           "line": 70,
           "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_docker_wrapper.sh\""
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_docker_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
@@ -2375,7 +2387,7 @@
           "path": "scripts/ai/.mcp.json",
           "line": 94,
           "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
         }
       ]
     },
@@ -2400,9 +2412,9 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 106,
+          "line": 118,
           "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_grafana_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
@@ -2433,9 +2445,9 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 160,
+          "line": 148,
           "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
         }
       ]
     },
@@ -2448,9 +2460,9 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 136,
+          "line": 142,
           "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_needle_wrapper.sh\""
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_needle_wrapper.sh\""
         }
       ]
     },
@@ -2475,9 +2487,9 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 124,
+          "line": 130,
           "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
@@ -2567,7 +2579,7 @@
           "path": "scripts/ai/.mcp.json",
           "line": 88,
           "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
         }
       ]
     },
@@ -2592,9 +2604,9 @@
       "references": [
         {
           "path": "scripts/ai/.mcp.json",
-          "line": 100,
+          "line": 112,
           "source_group": "scripts",
-          "text": "\"/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
+          "text": "\"/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
         },
         {
           "path": "scripts/ai/mcp/check.sh",
@@ -6315,13 +6327,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 589,
+          "line": 590,
           "source_group": "tests",
           "text": "skip_rate = Path(\"scripts/engineering/ci/check_e2e_matrix_skip_rate.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 613,
+          "line": 614,
           "source_group": "tests",
           "text": "assert \"check_e2e_matrix_skip_rate.py\" in content"
         }
@@ -6354,13 +6366,13 @@
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 590,
+          "line": 591,
           "source_group": "tests",
           "text": "rerun = Path(\"scripts/engineering/ci/check_e2e_rerun_stability.py\")"
         },
         {
           "path": "tests/architecture/test_regression_metrics.py",
-          "line": 614,
+          "line": 615,
           "source_group": "tests",
           "text": "assert \"check_e2e_rerun_stability.py\" in content"
         }
@@ -8621,7 +8633,7 @@
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
-          "line": 296,
+          "line": 291,
           "source_group": "tests",
           "text": "command = \"scripts/engineering/qa/check_test_audit_preflight.py --strict\""
         }

@@ -379,10 +379,11 @@ tracing-backed log hygiene живёт в expanded row
   (без UI-side ratio math).
 - **Anomalies / DQ p95 / Data Freshness**: детальные DQ-сигналы. `Worst Data
   Freshness Lag (seconds)` теперь показывает самый stale entity в выбранном
-  scope через `max(time() - bioetl_data_freshness_seconds)`, а
-  `Review: Latest Successful Data Timestamp` остаётся отдельным latest-success anchor
-  на первом экране. Это intentionally разные сигналы: latest success не должен
-  маскировать worst freshness lag.
+  scope через selected-range `max(time() - max_over_time(bioetl_data_freshness_seconds[$__range]))`,
+  а `Review: Latest Successful Data Timestamp` остаётся отдельным latest-success
+  anchor на первом экране, также основанным на `max_over_time(...)` внутри
+  выбранного range. Это intentionally разные сигналы: latest success не должен
+  маскировать worst freshness lag, а отсутствие samples в range остаётся UNKNOWN.
 - **Reject / Pareto / Fields** и
   **Validation Failures / Runtime Diagnostics / Trends** breakdown-панели
   сохраняют honest empty-state semantics: если в выбранном окне нет reject,

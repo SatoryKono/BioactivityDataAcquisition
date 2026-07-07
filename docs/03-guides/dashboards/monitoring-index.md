@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-06'
+  Last verified: '2026-07-07'
 
 ______________________________________________________________________
 
@@ -26,7 +26,7 @@ For the authoritative shipped dashboard mapping
 | ------------------ | ---------- | -------- | --------- |
 | What is currently broken or degraded? | `bioetl-overview-v2` | `Status`, `First Action`, then `0. Control Plane`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow` | [Dashboard v2 Usage](dashboard-v2-usage.md) |
 | Is a Prometheus alert actually firing or pending? | `bioetl-overview-v2` | expanded `Alert/SLO Triage` -> `Triage Alert State` | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
-| Need a dashboard dedicated to active alert state or SLO pressure? | `bioetl-alerts-slo` | `Active Alert Status`, `Alert Severity Breakdown`, `Active Alerts Detail` | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
+| Need a dashboard dedicated to active alert state or SLO pressure? | `bioetl-alerts-slo` | `Active Alert Status`, `Firing Alerts / Range`, `Firing Alert Details` | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
 | Runtime latency, logs, memory, or alert-condition concern? | `bioetl-runtime` | `bioetl diagnostics guide`; [Observability Checklist](../../05-operations/runbooks/observability-checklist.md) | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
 | Provider retries, slowness, or failures? | `bioetl-provider-health-v2` | `bioetl diagnostics health --json`; provider incident runbook | [Incident Response](../../05-operations/runbooks/incident-response.md) |
 | DQ/freshness/quarantine signal concern? | `bioetl-dq-v2` | `bioetl diagnostics quarantine --pipeline <pipeline>` | [DQ Failure Investigation](../../05-operations/runbooks/dq-failure-investigation.md) |

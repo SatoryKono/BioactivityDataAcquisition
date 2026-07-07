@@ -1092,7 +1092,7 @@ not use it as a Prometheus label.
 | 122 | Inspect: Top Silver Reject Fields            | Bar gauge  | `topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{...}[$__range])))`                                            | Bounded top-10 summary по `field`; each bar opens `Silver Reject Explorer` already scoped by `pipeline`/`run_type`/`field`. No data remains empty-state instead of a synthetic `field=none` bucket. |
 | 152 | Monitor: Silver Filter Reject Accounting Mismatch | Stat  | `round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{...}[$__range])))`                                              | Reconciliation guard между stage-total `filtered_out` surface и bounded breakdown metric. `0` = healthy, non-zero = расследовать drift, `No data` = recording rule не публикуется. |
 | 9   | Inspect: Quarantine by Error Type            | Bar gauge  | `sum by (error_type) (max_over_time(bioetl_dq_records_quarantined_total{...}[$__range]))`                                              | Horizontal category-comparison surface for quarantine triage. Shipped as `bargauge`, not `piechart`, because operator comparison of error families matters more than slice composition. No data remains an honest empty-state instead of synthetic `error_type=none`. |
-| 101 | Review: Latest Successful Data Timestamp     | Stat       | `max(bioetl_data_freshness_seconds{pipeline=~"$pipeline"})`                                                                            | Последний observed ingestion timestamp внутри выбранного pipeline scope; остаётся в first-screen current-context band после переноса CTA из answer row.                  |
+| 101 | Review: Latest Successful Data Timestamp     | Stat       | `max(max_over_time(bioetl_data_freshness_seconds{pipeline=~"$pipeline"}[$__range]))`                                                    | Последний observed ingestion timestamp внутри выбранного pipeline scope за выбранный Grafana range; остаётся в first-screen supporting band и сохраняет UNKNOWN, если freshness samples в range отсутствуют. |
 
 **Используемые метрики:** `records_processed_total`, `data_freshness_seconds`.
 
@@ -1566,8 +1566,10 @@ docker compose -f docker-compose.monitoring.yml up -d --force-recreate renderer 
 bioetl-grafana-renderer` и target `grafana-image-renderer` в Prometheus. Для
 полного UX-аудита допускается Playwright fallback, но server-side Render API
 остаётся отдельным smoke gate. Для полного набора shipped dashboards используйте
-не менее `--timeout-seconds 90`: тяжелые dashboard pages могут превышать
-короткие smoke-test таймауты при полностью рабочем renderer sidecar.
+не менее `--timeout-seconds 90`: эта опция передается и в локальный HTTP client,
+и в параметр Grafana render API `timeout`, поэтому тяжелые dashboard pages не
+обрываются на коротком renderer-side smoke-test таймауте при полностью рабочем
+renderer sidecar.
 
 **Причина 4: Метрики отключены в приложении.**
 

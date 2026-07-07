@@ -249,8 +249,9 @@ Explorer health probe and monitoring setup docs for that reason.
    `Monitor: Worst-Entity DQ Score`, `Monitor: Worst Data Freshness Lag (seconds)`,
    `Track: Records Quarantined in Range`, `Track: Soft Threshold Exceeded in Range`
    и `Track: Silver Filter Rejects in Range`. `Review: Latest Successful Data Timestamp`
-   остаётся отдельным supporting freshness anchor на первом экране и не должен
-   визуально читаться как verdict card. Полноширинный
+   остаётся отдельным supporting freshness anchor на первом экране, берёт latest
+   sample из выбранного Grafana range и не должен визуально читаться как verdict
+   card. Полноширинный
    `Track Range Evidence: Bronze -> Silver -> Gold` идёт ниже как
    `Review: First Action` stays the canonical DQ CTA: review current status,
    inspect current reasons, or open `Silver Reject Explorer` without leaking

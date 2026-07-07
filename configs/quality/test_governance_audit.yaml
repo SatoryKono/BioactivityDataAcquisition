@@ -61,8 +61,8 @@ issues:
   - configs/quality/compatibility_sunset_ledger.yaml
 budgets:
   refined_assertless_max: 0
-  duplicate_test_names_max: 1
-  duplicate_test_name_occurrences_max: 2
+  duplicate_test_names_max: 0
+  duplicate_test_name_occurrences_max: 0
   compatibility_test_file_max: 0
   markerless_test_functions_max: 0
   uuid4_call_sites_max: 0
@@ -75,12 +75,12 @@ budget_ratchet:
   stream_g_owner_notes:
   - issue: '#5763'
     owner: test-governance
-    status: telemetry_governance_baseline_refresh_then_duplicate_name_burndown
+    status: telemetry_governance_baseline_refresh_then_duplicate_names_zeroed
     note: >-
       Refreshed telemetry governance baseline and separated expensive report
-      collection from test execution. The residual duplicate-name inventory is
-      ratcheted to one reviewed duplicate name and two occurrences; new generic
-      duplicate test names are not allowed.
+      collection from test execution. The residual duplicate-name inventory is now
+      zero names and zero occurrences; new generic duplicate test names are not
+      allowed.
   - issue: '#5752'
     owner: test-governance
     status: compatibility_test_file_max_ratcheted_to_0
@@ -434,8 +434,8 @@ rf_009_closeout:
   - tracing_emission_observability
   live_metrics:
     refined_assertless_tests: 0
-    duplicate_test_names: 1
-    duplicate_test_name_occurrences: 2
+    duplicate_test_names: 0
+    duplicate_test_name_occurrences: 0
     compatibility_test_files: 0
     markerless_test_functions: 0
     uuid4_call_sites: 0
