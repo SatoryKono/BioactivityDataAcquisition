@@ -596,6 +596,8 @@ workflow that runs:
 - `run_chembl_publication`
 - `reconcile_assay_target_orphans`
 - `reconcile_assay_publication_orphans`
+- `reconcile_target_assay_orphans`
+- `reconcile_publication_assay_orphans`
 
 It keeps the destructive reconciliation phase after the core pipeline phase and
 uses logical table names only.
@@ -607,12 +609,18 @@ transform inputs rather than incidental linear ordering:
   `run_chembl_target`;
 - `reconcile_assay_publication_orphans` depends on
   `reconcile_assay_target_orphans` and `run_chembl_publication`.
+- `reconcile_target_assay_orphans` depends on
+  `reconcile_assay_publication_orphans`;
+- `reconcile_publication_assay_orphans` depends on
+  `reconcile_target_assay_orphans`.
 
 This means the workflow no longer encodes a false dependency from target orphan
 cleanup to publication ingestion. In execution terms,
 `reconcile_assay_target_orphans` may run as soon as assay and target inputs are
 ready, before `run_chembl_publication`, because publication data is not part of
-that transform's input contract.
+that transform's input contract. The inverse target/publication cleanup runs
+after assay cleanup so unused Gold target/publication rows are expired only
+against the final current `chembl.assay` reference set.
 
 Workflow-level `--dry-run` now applies to both step families:
 

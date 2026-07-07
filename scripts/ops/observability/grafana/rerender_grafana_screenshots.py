@@ -333,6 +333,7 @@ def _render_dashboard(record: DashboardRecord, config: RenderConfig) -> Path:
             "width": config.width,
             "height": config.height,
             "tz": "UTC",
+            "timeout": max(int(config.timeout_seconds), 1),
             **_scope_query_params(config),
         }
     )

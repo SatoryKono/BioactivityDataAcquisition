@@ -141,6 +141,8 @@ pipelines before the reconciliation phase:
 - `run_chembl_publication`
 - `reconcile_assay_target_orphans`
 - `reconcile_assay_publication_orphans`
+- `reconcile_target_assay_orphans`
+- `reconcile_publication_assay_orphans`
 
 Its reconciliation edges are intentionally input-driven:
 
@@ -148,21 +150,38 @@ Its reconciliation edges are intentionally input-driven:
   `run_chembl_target`;
 - `reconcile_assay_publication_orphans` depends on
   `reconcile_assay_target_orphans` and `run_chembl_publication`.
+- `reconcile_target_assay_orphans` depends on
+  `reconcile_assay_publication_orphans`, because it prunes unused Gold target
+  rows only after the assay source has been cleaned against target and
+  publication references.
+- `reconcile_publication_assay_orphans` depends on
+  `reconcile_target_assay_orphans`, giving the inverse cleanup phase a stable
+  operator-facing order.
 
 This removes a false dependency from target orphan cleanup to publication
 ingestion. In practice `reconcile_assay_target_orphans` can run as soon as
 assay and target inputs are complete, because publication data is not part of
-that transform's input contract.
+that transform's input contract. The inverse target/publication cleanup remains
+after `reconcile_assay_publication_orphans`, because its reference side is the
+final current `chembl.assay` Gold table.
 
 When reviewing this workflow, keep the reconciliation config on logical table
 names only:
 
-- `source_table=chembl_assay`
-- `reference_table=chembl_target`
+- `source_table=chembl.assay`
+- `reference_table=chembl.target`
 - `source_key=target_id`
 - `reference_key=target_id`
-- `source_table=chembl_assay`
-- `reference_table=chembl_publication`
+- `source_table=chembl.assay`
+- `reference_table=chembl.publication`
+- `source_key=publication_id`
+- `reference_key=publication_id`
+- `source_table=chembl.target`
+- `reference_table=chembl.assay`
+- `source_key=target_id`
+- `reference_key=target_id`
+- `source_table=chembl.publication`
+- `reference_table=chembl.assay`
 - `source_key=publication_id`
 - `reference_key=publication_id`
 

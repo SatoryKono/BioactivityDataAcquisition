@@ -646,3 +646,146 @@ async def test_reconcile_foreign_keys_expires_gold_orphans_without_dropping_hist
     assert expired[0]["_valid_to"] is not None
     assert len(quarantine.writes) == 1
     assert quarantine.writes[0]["error_code"] == "FILTERED_OUT_GOLD"
+
+
+@pytest.mark.parametrize(
+    (
+        "step_id",
+        "source_table",
+        "source_primary_key",
+        "source_key",
+        "reference_key",
+        "source_rows",
+        "reference_assay_row",
+        "expected_current_key",
+        "expected_expired_key",
+    ),
+    [
+        (
+            "reconcile_target_assay_orphans",
+            "chembl.target",
+            "target_id",
+            "target_id",
+            "target_id",
+            [
+                {"target_id": "CHEMBL_T1", "target_name": "target-1"},
+                {"target_id": "CHEMBL_T999", "target_name": "orphan-target"},
+            ],
+            {
+                "assay_id": "CHEMBL_A1",
+                "target_id": "CHEMBL_T1",
+                "publication_id": "CHEMBL_P1",
+            },
+            "CHEMBL_T1",
+            "CHEMBL_T999",
+        ),
+        (
+            "reconcile_publication_assay_orphans",
+            "chembl.publication",
+            "publication_id",
+            "publication_id",
+            "publication_id",
+            [
+                {"publication_id": "CHEMBL_P1", "title": "publication-1"},
+                {"publication_id": "CHEMBL_P999", "title": "orphan-publication"},
+            ],
+            {
+                "assay_id": "CHEMBL_A1",
+                "target_id": "CHEMBL_T1",
+                "publication_id": "CHEMBL_P1",
+            },
+            "CHEMBL_P1",
+            "CHEMBL_P999",
+        ),
+    ],
+)
+@pytest.mark.asyncio
+async def test_inverse_reconcile_foreign_keys_expires_unused_gold_dimensions(
+    tmp_path,
+    step_id: str,
+    source_table: str,
+    source_primary_key: str,
+    source_key: str,
+    reference_key: str,
+    source_rows: list[dict[str, object]],
+    reference_assay_row: dict[str, object],
+    expected_current_key: str,
+    expected_expired_key: str,
+) -> None:
+    logger = _RecordingLogger()
+    metrics = _RecordingMetrics()
+    silver_writer = SilverWriter(base_path=tmp_path / "silver", logger=logger)
+    gold_writer = _gold_writer(tmp_path, logger, metrics)
+    quarantine = _RecordingQuarantine()
+    ingestion_ts = datetime(2026, 7, 6, 12, 0, 0, tzinfo=UTC)
+
+    await gold_writer.write_gold(
+        table_name="chembl.assay",
+        records=[reference_assay_row],
+        schema=_gold_schema(["assay_id", "target_id", "publication_id"]),
+        primary_keys=["assay_id"],
+        mode="scd2",
+        scd_config=_scd_config("assay_id"),
+        ingestion_ts=ingestion_ts,
+    )
+    await gold_writer.write_gold(
+        table_name=source_table,
+        records=source_rows,
+        schema=_gold_schema(list(source_rows[0])),
+        primary_keys=[source_primary_key],
+        mode="scd2",
+        scd_config=_scd_config(source_primary_key),
+        ingestion_ts=ingestion_ts,
+    )
+
+    registry = register_builtin_workflow_transforms(
+        WorkflowTransformRegistry(),
+        foreign_key_reconciliation_port=SilverForeignKeyReconciliationAdapter(
+            silver_writer=silver_writer,
+            gold_writer=gold_writer,
+            logger=logger,
+            metrics=metrics,
+            quarantine=quarantine,
+            quarantine_pipeline_name="workflow_transforms",
+        ),
+    )
+    service = WorkflowTransformService(registry=registry, metrics=metrics)
+    step = TransformStepConfig(
+        step_id=step_id,
+        transform_name="reconcile_foreign_keys",
+        config={
+            "source_layer": "gold",
+            "reference_layer": "gold",
+            "mutation_layer": "gold",
+            "source_table": source_table,
+            "reference_table": "chembl.assay",
+            "source_key": source_key,
+            "reference_key": reference_key,
+            "primary_keys": [source_primary_key],
+            "action": "delete_orphans",
+        },
+    )
+
+    result = await service.run_step(
+        workflow_name="chembl_baseline",
+        step=step,
+    )
+
+    current_rows = await gold_writer.read_gold(source_table, current_only=True)
+    all_rows = await gold_writer.read_gold(source_table, current_only=False)
+    expired = [
+        row
+        for row in all_rows
+        if row[source_primary_key] == expected_expired_key
+    ]
+
+    assert result.status == "success"
+    assert result.output is not None
+    assert result.output["orphan_rows_deleted"] == 1
+    assert {row[source_primary_key] for row in current_rows} == {expected_current_key}
+    assert len(expired) == 1
+    assert expired[0]["_is_current"] is False
+    assert expired[0]["_valid_to"] is not None
+    assert len(quarantine.writes) == 1
+    assert quarantine.writes[0]["error_code"] == "FILTERED_OUT_GOLD"
+    assert quarantine.writes[0]["payload"][source_primary_key] == expected_expired_key

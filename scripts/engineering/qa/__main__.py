@@ -144,6 +144,9 @@ COMMAND_MODULES: dict[str, str] = {
     "report-dashboard-panel-audit-matrix": (
         "scripts.engineering.qa.report_dashboard_panel_audit_matrix"
     ),
+    "report-panel-title-inventory": (
+        "scripts.engineering.qa.report_panel_title_inventory"
+    ),
 }
 COMMAND_SPECS = {
     name: module_command(module) for name, module in COMMAND_MODULES.items()

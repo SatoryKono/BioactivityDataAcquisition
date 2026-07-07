@@ -5,6 +5,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 from urllib.error import HTTPError, URLError
+from urllib.parse import parse_qs, urlparse
 
 import pytest
 
@@ -115,6 +116,56 @@ def test_rerender_scope_maps_run_id_to_silver_reject_explorer_run_filter(
 
     assert params["var-run_id"] == "run-123"
     assert params["var-quarantine_run_id"] == "run-123"
+
+
+def test_rerender_api_forwards_timeout_to_grafana_render_endpoint(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_download(
+        url: str, *, headers: dict[str, str], timeout_seconds: float
+    ) -> bytes:
+        captured["url"] = url
+        captured["headers"] = headers
+        captured["timeout_seconds"] = timeout_seconds
+        return b"png"
+
+    monkeypatch.setattr(rerender_subject, "_download_binary", fake_download)
+    config = rerender_subject.RenderConfig(
+        base_url="http://localhost:3000",
+        username="admin",
+        password="changeme",
+        service_account_token="",
+        output_dir=tmp_path,
+        width=1600,
+        height=2200,
+        timeout_seconds=123.0,
+        selected_uids=(),
+        fallback="none",
+        workflow="chembl_baseline",
+        pipeline="chembl_assay",
+        run_type="backfill",
+        run_id="run-123",
+        range_hours=12,
+    )
+
+    target = rerender_subject._render_dashboard(
+        rerender_subject.DashboardRecord(
+            uid="bioetl-workflow-overview",
+            url="/d/bioetl-workflow-overview/5-workflow",
+            title="5. Workflow",
+        ),
+        config,
+    )
+
+    query = parse_qs(urlparse(str(captured["url"])).query)
+    assert target == tmp_path / "bioetl-workflow-overview.png"
+    assert target.read_bytes() == b"png"
+    assert captured["timeout_seconds"] == 123.0
+    assert query["timeout"] == ["123"]
+    assert query["var-run_id"] == ["run-123"]
+    assert query["var-quarantine_run_id"] == ["run-123"]
 
 
 def test_rerender_failure_hint_includes_frontend_renderer_state(

@@ -113,6 +113,13 @@
       "test_name": "test_pipeline_configs_schema"
     },
     {
+      "category": "architecture_helper_guard",
+      "line": "142",
+      "path": "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py",
+      "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
+      "test_name": "test_closeout_artifact_is_complete_and_budget_safe_for_issue_pack_5790_5796"
+    },
+    {
       "category": "intentional_no_exception_contract",
       "line": "74",
       "path": "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py",
@@ -478,7 +485,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1175",
+      "line": "1203",
       "path": "tests/unit/infrastructure/quarantine/test_unified_quarantine.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_aclose_does_nothing"
@@ -506,7 +513,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1492",
+      "line": "1520",
       "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_gold_merged_empty_records_returns"
@@ -737,7 +744,7 @@
     }
   ],
   "assertless_category_counts": {
-    "architecture_helper_guard": 16,
+    "architecture_helper_guard": 17,
     "benchmark_or_performance": 0,
     "helper_asserted": 0,
     "intentional_no_exception_contract": 89,
@@ -760,6 +767,7 @@
     "tests/architecture/test_port_contracts_resilience_concurrency.py:183",
     "tests/architecture/test_quality_debt_scorecard.py:1110",
     "tests/architecture/test_strict_architecture_contracts.py:918",
+    "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py:142",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:74",
     "tests/integration/infrastructure/storage/test_delta_reader.py:576",
     "tests/unit/application/core/test_batch_tracing.py:110",
@@ -767,8 +775,7 @@
     "tests/unit/application/core/test_batch_writer_tracing_mixin.py:255",
     "tests/unit/application/core/test_dq_metrics.py:33",
     "tests/unit/application/core/test_otel_spans.py:556",
-    "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:102",
-    "tests/unit/application/observability/test_pipeline_metrics.py:270"
+    "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:102"
   ],
   "assertless_families": {
     "tests/architecture/test_antipatterns.py": {
@@ -808,6 +815,12 @@
       }
     },
     "tests/architecture/test_strict_architecture_contracts.py": {
+      "assertless_tests": 1,
+      "categories": {
+        "architecture_helper_guard": 1
+      }
+    },
+    "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py": {
       "assertless_tests": 1,
       "categories": {
         "architecture_helper_guard": 1
@@ -1072,7 +1085,7 @@
       }
     }
   },
-  "assertless_total_candidates": 105,
+  "assertless_total_candidates": 106,
   "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
@@ -1179,11 +1192,11 @@
         "tests/architecture/test_test_governance_audit.py:120",
         "tests/architecture/test_test_governance_audit.py:161",
         "tests/architecture/test_test_governance_audit.py:224",
-        "tests/architecture/test_test_governance_audit.py:269",
-        "tests/architecture/test_test_governance_audit.py:290",
-        "tests/architecture/test_test_governance_audit.py:305",
-        "tests/architecture/test_test_governance_audit.py:318",
-        "tests/architecture/test_test_governance_audit.py:350"
+        "tests/architecture/test_test_governance_audit.py:264",
+        "tests/architecture/test_test_governance_audit.py:285",
+        "tests/architecture/test_test_governance_audit.py:300",
+        "tests/architecture/test_test_governance_audit.py:313",
+        "tests/architecture/test_test_governance_audit.py:345"
       ],
       "assertless_tests": [],
       "intentional_no_exception_tests": 0,
@@ -1339,6 +1352,13 @@
         "path": "tests/architecture/test_strict_architecture_contracts.py",
         "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
         "test_name": "test_pipeline_configs_schema"
+      },
+      {
+        "category": "architecture_helper_guard",
+        "line": "142",
+        "path": "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py",
+        "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
+        "test_name": "test_closeout_artifact_is_complete_and_budget_safe_for_issue_pack_5790_5796"
       },
       {
         "category": "intentional_no_exception_contract",
@@ -1706,7 +1726,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1175",
+        "line": "1203",
         "path": "tests/unit/infrastructure/quarantine/test_unified_quarantine.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_does_nothing"
@@ -1734,7 +1754,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1492",
+        "line": "1520",
         "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_gold_merged_empty_records_returns"
@@ -1965,7 +1985,7 @@
       }
     ],
     "assertless_category_counts": {
-      "architecture_helper_guard": 16,
+      "architecture_helper_guard": 17,
       "benchmark_or_performance": 0,
       "helper_asserted": 0,
       "intentional_no_exception_contract": 89,
@@ -1988,6 +2008,7 @@
       "tests/architecture/test_port_contracts_resilience_concurrency.py:183",
       "tests/architecture/test_quality_debt_scorecard.py:1110",
       "tests/architecture/test_strict_architecture_contracts.py:918",
+      "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py:142",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:74",
       "tests/integration/infrastructure/storage/test_delta_reader.py:576",
       "tests/unit/application/core/test_batch_tracing.py:110",
@@ -1995,10 +2016,9 @@
       "tests/unit/application/core/test_batch_writer_tracing_mixin.py:255",
       "tests/unit/application/core/test_dq_metrics.py:33",
       "tests/unit/application/core/test_otel_spans.py:556",
-      "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:102",
-      "tests/unit/application/observability/test_pipeline_metrics.py:270"
+      "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:102"
     ],
-    "assertless_total_candidates": 105,
+    "assertless_total_candidates": 106,
     "compatibility_examples": [],
     "compatibility_files": [],
     "compatibility_test_files": 0,
@@ -2104,11 +2124,11 @@
           "tests/architecture/test_test_governance_audit.py:120",
           "tests/architecture/test_test_governance_audit.py:161",
           "tests/architecture/test_test_governance_audit.py:224",
-          "tests/architecture/test_test_governance_audit.py:269",
-          "tests/architecture/test_test_governance_audit.py:290",
-          "tests/architecture/test_test_governance_audit.py:305",
-          "tests/architecture/test_test_governance_audit.py:318",
-          "tests/architecture/test_test_governance_audit.py:350"
+          "tests/architecture/test_test_governance_audit.py:264",
+          "tests/architecture/test_test_governance_audit.py:285",
+          "tests/architecture/test_test_governance_audit.py:300",
+          "tests/architecture/test_test_governance_audit.py:313",
+          "tests/architecture/test_test_governance_audit.py:345"
         ],
         "assertless_tests": [],
         "intentional_no_exception_tests": 0,
@@ -2152,14 +2172,14 @@
     "refined_assertless_tests": 0,
     "root": ".",
     "top_duplicate_test_names": [],
-    "total_test_files": 1950,
-    "total_test_functions": 21905,
+    "total_test_files": 1953,
+    "total_test_functions": 21932,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "2000be2b3df925aecd4f2be1e7231b1ceb1272192e25741120455040b9b2da2c",
+  "source_tree_sha256": "eaeca5b1bdf808fe94060cbe0aedce6aaed7b7e35b2b5cc32c81a619473382e3",
   "summary": {
-    "assertless_total_candidates": 105,
+    "assertless_total_candidates": 106,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
     "duplicate_test_name_occurrences": 0,
@@ -2170,7 +2190,7 @@
     "uuid4_call_sites": 0
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 1950,
-  "total_test_functions": 21905,
+  "total_test_files": 1953,
+  "total_test_functions": 21932,
   "uuid4_call_sites": 0
 }
