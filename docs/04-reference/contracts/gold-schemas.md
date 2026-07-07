@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-06'
+  Last verified: '2026-07-07'
 
 ______________________________________________________________________
 
@@ -22,7 +22,7 @@ ______________________________________________________________________
 > Ниже применяется snake_case нотация полей, синхронизированная с автогенерацией контрактов.
 
 > **Версия**: 1.1.0
-> **Последнее обновление**: 2026-07-06
+> **Последнее обновление**: 2026-07-07
 > **Связанные ADR**: [ADR-018](../../02-architecture/decisions/ADR-018-gold-strict-validation.md), [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md), [ADR-045](../../02-architecture/decisions/ADR-045-dq-contract-system.md)
 
 ______________________________________________________________________
@@ -1016,8 +1016,6 @@ JSON exports для Gold-схем хранятся в `docs/04-reference/contrac
 - `chembl_subcellular_fraction_v1.0.json`
 - `chembl_target_component_v1.0.json`
 - `chembl_target_protein_classification_v2.2.json`
-- `chembl_target_protein_classification_v2.1.json`
-- `chembl_target_protein_classification_v2.0.json`
 - `chembl_target_v3.0.json`
 - `chembl_tissue_v1.0.json`
 - `composite_activity_v1.0.json`
