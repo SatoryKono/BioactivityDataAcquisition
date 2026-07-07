@@ -64,6 +64,8 @@ Commands:
     check-dashboard-visual-semantics Validate Grafana status-panel visual semantic invariants
     report-dashboard-inventory Generate/check dashboard inventory parity plus
         provisioning/deployed drift and health summary
+    report-dashboard-panel-audit-matrix Generate/check dashboard panel audit matrix
+    report-panel-title-inventory Generate/check generated dashboard panel-title inventory mirror
     report-dashboard-query-duplicates Generate report-only exact/near-duplicate Grafana PromQL inventory
 """
 
@@ -143,6 +145,9 @@ COMMAND_MODULES: dict[str, str] = {
     "report-dashboard-query-duplicates": "scripts.engineering.qa.report_dashboard_query_duplicates",
     "report-dashboard-panel-audit-matrix": (
         "scripts.engineering.qa.report_dashboard_panel_audit_matrix"
+    ),
+    "report-panel-title-inventory": (
+        "scripts.engineering.qa.report_panel_title_inventory"
     ),
 }
 COMMAND_SPECS = {
