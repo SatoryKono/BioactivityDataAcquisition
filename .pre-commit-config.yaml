@@ -335,6 +335,16 @@ repos:
         files: ^(src/bioetl/.*\.py|docs/02-architecture/generated/module-dependency-map\.(md|json)|scripts/engineering/qa/generate_architecture_dependency_map\.py)$
         stages: [manual]
 
+      - id: check-dashboard-panel-title-inventory
+        name: Check dashboard panel title inventory parity
+        entry: >
+          python scripts/engineering/dev/run_project_python.py -m
+          scripts.engineering.qa report-panel-title-inventory --check
+        language: python
+        pass_filenames: false
+        files: ^(grafana/dashboards/.*\.json|docs/03-guides/dashboards/panel-title-inventory\.md|scripts/engineering/qa/report_panel_title_inventory\.py)$
+        stages: [manual]
+
       - id: ruff-scripts-advisory
         name: Ruff advisory scan for scripts backlog
         entry: python scripts/engineering/dev/run_project_python.py -m ruff check scripts --exit-zero
