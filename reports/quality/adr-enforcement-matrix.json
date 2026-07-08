@@ -1306,6 +1306,7 @@
         "scripts/diagrams/prune_orphan_nodes.py",
         "scripts/docs/checks/check_drift.py",
         "tests/architecture/test_config_topology_docs_drift.py",
+        "tests/architecture/test_diagram_corpus_regression_guards.py",
         "tests/architecture/test_diagram_lint_policy_rules.py"
       ],
       "gap_reasons": [],
@@ -1326,6 +1327,7 @@
         "scripts/diagrams/prune_orphan_nodes.py",
         "scripts/docs/checks/check_drift.py",
         "tests/architecture/test_config_topology_docs_drift.py",
+        "tests/architecture/test_diagram_corpus_regression_guards.py",
         "tests/architecture/test_diagram_lint_policy_rules.py"
       ],
       "manual_exception": null,

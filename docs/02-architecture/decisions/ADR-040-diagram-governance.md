@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-07-08'
 
 ______________________________________________________________________
 
@@ -19,22 +19,23 @@ ______________________________________________________________________
 
 BioETL содержит два согласованных diagram subtrees с разными форматами и
 назначением. Текущий measured baseline ниже отражает состояние репозитория на
-`2026-03-19`:
+`2026-07-08`:
 
 **Canonical sources** (`docs/02-architecture/diagrams/`):
 
-- `architecture/` — 52 `.mmd` файла
-- `class-diagrams/` — 19 `.mmd` файлов
+- `architecture/` — 83 `.mmd` файла
+- `class-diagrams/` — 94 `.mmd` файла: 19 curated families, 1 frontmatter sandbox, 74 supplemental package slices
 - `foundation/` — 55 `.mmd` файлов
 - `_template.mmd` — 1 reusable template
-- Итого: **127 `.mmd` артефактов**
+- Итого: **233 `.mmd` артефакта**
 
 **Decomposed views** (`docs/02-architecture/diagrams/views/`):
 
 - 31 foundation families × 5 views
 - 3 architecture-derived families × 2 views (`03-medallion-data-flow`, `13-port-protocol-contracts`, `16-transformer-hierarchy`)
-- - `00-legend.mermaid`
-- Итого: **162 `.mermaid` файла**
+- 3 singleton architecture-derived views (`21-idempotent-processing-guards`, `23-reproducible-run-contract`, `24-control-plane-artifact-publication-pipeline`)
+- `00-legend.mermaid`
+- Итого: **165 `.mermaid` файлов**
 
 ### Проблемы до ADR-040
 
@@ -295,7 +296,7 @@ ______________________________________________________________________
 
 - **linkStyle fragility**: изменение порядка связей ломает индексацию. Митигация: комментарий `%% linkStyle: ...` как проверочная документация
 - **Эвристика `@nodes`**: подсчёт узлов ±20% от реального (subgraph границы). Митигация: lint проверяет только >35 threshold
-- **Расхождение `-full.mermaid` с источником**: `foundation/*.mmd` и `diagrams/views/*-full.mermaid` могут разойтись. Митигация: CI drift check (планируется)
+- **Расхождение `-full.mermaid` с источником**: `foundation/*.mmd` и `diagrams/views/*-full.mermaid` могут разойтись. Митигация: blocking CI source-render drift gate и corpus regression guards.
 
 ______________________________________________________________________
 
@@ -335,7 +336,7 @@ ______________________________________________________________________
 
 ## Acceptance Criteria
 
-- [ ] The decision is documented with current status, date, and owner metadata.
-- [ ] The implementation path or adoption boundary is testable and linked from the ADR.
-- [ ] Supersession or migration impact is documented when the decision changes an earlier posture.
-- [ ] Related docs, contracts, and operational guidance are aligned with this ADR.
+- [x] The decision is documented with current status, date, and owner metadata.
+- [x] The implementation path or adoption boundary is testable and linked from the ADR.
+- [x] Supersession or migration impact is documented when the decision changes an earlier posture.
+- [x] Related docs, contracts, and operational guidance are aligned with this ADR.

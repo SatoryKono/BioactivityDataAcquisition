@@ -16,8 +16,8 @@
 | `retained_public_entrypoint_burden` | `pass` | `current_count` | `0` | `0` | `configs/quality/debt_scorecard.yaml#compatibility_debt_metrics` |
 | `debt_budget_growth_policy` | `pass` | `budget_growth_allowed` | `False` | `False` | `configs/quality/debt_scorecard.yaml` |
 | `debt_scorecard_budget_no_growth` | `pass` | `budget_increase_count` | `not_evaluated_without_changed_from_ref` | `0` | `configs/quality/debt_scorecard.yaml` |
-| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `40686145d1bbcec8b8c767968bc8958a047ebed9b2860e9e78742e99c488a173` | `40686145d1bbcec8b8c767968bc8958a047ebed9b2860e9e78742e99c488a173` | `reports/quality/module-coverage-inventory.json` |
-| `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2217, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '40686145d1bbcec8b8c767968bc8958a047ebed9b2860e9e78742e99c488a173'}` | `{'source_module_count': 2217, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '40686145d1bbcec8b8c767968bc8958a047ebed9b2860e9e78742e99c488a173'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
+| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `820c8a949c85dc4bd77c008ac67cc421ca3c44d0e7a24ebd156f345c74af5a99` | `820c8a949c85dc4bd77c008ac67cc421ca3c44d0e7a24ebd156f345c74af5a99` | `reports/quality/module-coverage-inventory.json` |
+| `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2217, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '820c8a949c85dc4bd77c008ac67cc421ca3c44d0e7a24ebd156f345c74af5a99'}` | `{'source_module_count': 2217, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '820c8a949c85dc4bd77c008ac67cc421ca3c44d0e7a24ebd156f345c74af5a99'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
 | `module_coverage_unmeasured_modules` | `pass` | `unmeasured_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `module_coverage_uncovered_modules` | `pass` | `uncovered_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `hotspot_family_baseline_budget_warnings` | `pass` | `budget_warnings` | `0` | `0` | `reports/quality/hotspot-family-baseline.json` |
@@ -35,7 +35,7 @@
 | `full_app_duplication_composition_bootstrap_full_app` | `pass` | `duplication_clusters` | `0` | `0` | `reports/quality/full-app-duplication-baseline.json` |
 | `full_app_duplication_interfaces_cli_full_app` | `pass` | `duplication_clusters` | `0` | `0` | `reports/quality/full-app-duplication-baseline.json` |
 | `full_app_duplication_total_clusters` | `pass` | `total_duplicate_clusters` | `0` | `0` | `reports/quality/full-app-duplication-baseline.json` |
-| `supporting_scripts_zero_reference_count` | `pass` | `zero_reference_supporting_script_count` | `41` | `45` | `configs/quality/scripts_inventory_manifest.json` |
+| `supporting_scripts_zero_reference_count` | `pass` | `zero_reference_supporting_script_count` | `40` | `45` | `configs/quality/scripts_inventory_manifest.json` |
 | `supporting_scripts_untriaged_zero_reference_count` | `pass` | `untriaged_zero_reference_supporting_script_count` | `0` | `0` | `configs/quality/scripts_inventory_manifest.json` |
 | `test_governance_budget_violations` | `pass` | `budget_violations` | `0` | `0` | `reports/quality/test-governance-current.json` |
 | `test_governance_uuid4_call_sites` | `pass` | `uuid4_call_sites` | `0` | `0` | `reports/quality/test-governance-current.json` |

@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-07-08'
 
 ______________________________________________________________________
 
@@ -17,10 +17,10 @@ ______________________________________________________________________
 
 ## 1. Обзор системы диаграмм
 
-Проект BioETL поддерживает **289 tracked diagram files**:
-**127** `.mmd`-артефактов в canonical tree (`architecture/`, `class-diagrams/`,
-`foundation/`, `_template.mmd`) и **162** `.mermaid` view-файла в `views/`
-(34 parent families, 161 derived views и `00-legend.mermaid`). Вся система
+Проект BioETL поддерживает **398 tracked diagram source files**:
+**233** `.mmd`-артефакта в canonical tree (`architecture/`, `class-diagrams/`,
+`foundation/`, `_template.mmd`) и **165** `.mermaid` view-файлов в `views/`
+(38 tracked view families/singletons, 164 derived views и `00-legend.mermaid`). Вся система
 подчинена ADR-040 — решению об управлении диаграммами, которое определяет
 цветовую палитру, метаданные, правила lint-проверки и стратегии компоновки.
 
@@ -30,11 +30,11 @@ ______________________________________________________________________
 
 | Каталог           | Файлов | Назначение                                             |
 | ----------------- | ------ | ------------------------------------------------------ |
-| `architecture/`   | 52     | Системные и компонентные диаграммы уровня архитектуры  |
-| `class-diagrams/` | 19     | UML-классы: порты, сущности, агрегаты, конфиги         |
+| `architecture/`   | 83     | Системные и компонентные диаграммы уровня архитектуры  |
+| `class-diagrams/` | 94     | 19 curated UML families, sandbox, supplemental package slices |
 | `foundation/`     | 55     | Исторические эталонные диаграммы, TOP-25 архитектурных |
 
-**Декомпозированные представления** — `docs/02-architecture/diagrams/views/` (162 файла):
+**Декомпозированные представления** — `docs/02-architecture/diagrams/views/` (165 файлов):
 
 Большинство foundation families разворачиваются в стандартный набор из
 **5 представлений (views)**:
@@ -47,7 +47,9 @@ ______________________________________________________________________
 
 Дополнительно есть узкие architecture-derived families с сокращённым набором
 views (`03-medallion-data-flow`, `13-port-protocol-contracts`,
-`16-transformer-hierarchy`) и служебный `00-legend.mermaid`.
+`16-transformer-hierarchy`), singleton architecture-derived views
+(`21-idempotent-processing-guards`, `23-reproducible-run-contract`,
+`24-control-plane-artifact-publication-pipeline`) и служебный `00-legend.mermaid`.
 Количество views следует текущему tracked decomposition baseline и
 обновляется вместе с добавлением новых parent-диаграмм и derived slices.
 
