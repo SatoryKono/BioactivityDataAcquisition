@@ -19836,16 +19836,6 @@
       "source_lines": 135
     },
     {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 11,
-      "executable_lines": 11,
-      "missing_lines": 0,
-      "module": "bioetl.infrastructure.storage.gold.writer_facade_runtime",
-      "path": "src/bioetl/infrastructure/storage/gold/writer_facade_runtime.py",
-      "source_lines": 49
-    },
-    {
       "coverage_percent": 97.87,
       "coverage_status": "partially_covered",
       "covered_lines": 46,
@@ -19853,7 +19843,7 @@
       "missing_lines": 1,
       "module": "bioetl.infrastructure.storage.gold.writer_implementation",
       "path": "src/bioetl/infrastructure/storage/gold/writer_implementation.py",
-      "source_lines": 159
+      "source_lines": 155
     },
     {
       "coverage_percent": 90.91,
@@ -19883,7 +19873,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.gold.writer_request",
       "path": "src/bioetl/infrastructure/storage/gold/writer_request.py",
-      "source_lines": 46
+      "source_lines": 43
     },
     {
       "coverage_percent": 100.0,
@@ -19906,16 +19896,6 @@
       "source_lines": 61
     },
     {
-      "coverage_percent": 90.0,
-      "coverage_status": "partially_covered",
-      "covered_lines": 18,
-      "executable_lines": 20,
-      "missing_lines": 2,
-      "module": "bioetl.infrastructure.storage.gold.writer_support",
-      "path": "src/bioetl/infrastructure/storage/gold/writer_support.py",
-      "source_lines": 70
-    },
-    {
       "coverage_percent": 98.82,
       "coverage_status": "partially_covered",
       "covered_lines": 84,
@@ -19923,7 +19903,7 @@
       "missing_lines": 1,
       "module": "bioetl.infrastructure.storage.gold_writer",
       "path": "src/bioetl/infrastructure/storage/gold_writer.py",
-      "source_lines": 313
+      "source_lines": 303
     },
     {
       "coverage_percent": 91.03,
@@ -42048,16 +42028,6 @@
       "source_lines": 135
     },
     {
-      "coverage_percent": 100.0,
-      "coverage_status": "fully_covered",
-      "covered_lines": 11,
-      "executable_lines": 11,
-      "missing_lines": 0,
-      "module": "bioetl.infrastructure.storage.gold.writer_facade_runtime",
-      "path": "src/bioetl/infrastructure/storage/gold/writer_facade_runtime.py",
-      "source_lines": 49
-    },
-    {
       "coverage_percent": 97.87,
       "coverage_status": "partially_covered",
       "covered_lines": 46,
@@ -42065,7 +42035,7 @@
       "missing_lines": 1,
       "module": "bioetl.infrastructure.storage.gold.writer_implementation",
       "path": "src/bioetl/infrastructure/storage/gold/writer_implementation.py",
-      "source_lines": 159
+      "source_lines": 155
     },
     {
       "coverage_percent": 90.91,
@@ -42095,7 +42065,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.storage.gold.writer_request",
       "path": "src/bioetl/infrastructure/storage/gold/writer_request.py",
-      "source_lines": 46
+      "source_lines": 43
     },
     {
       "coverage_percent": 100.0,
@@ -42118,16 +42088,6 @@
       "source_lines": 61
     },
     {
-      "coverage_percent": 90.0,
-      "coverage_status": "partially_covered",
-      "covered_lines": 18,
-      "executable_lines": 20,
-      "missing_lines": 2,
-      "module": "bioetl.infrastructure.storage.gold.writer_support",
-      "path": "src/bioetl/infrastructure/storage/gold/writer_support.py",
-      "source_lines": 70
-    },
-    {
       "coverage_percent": 98.82,
       "coverage_status": "partially_covered",
       "covered_lines": 84,
@@ -42135,7 +42095,7 @@
       "missing_lines": 1,
       "module": "bioetl.infrastructure.storage.gold_writer",
       "path": "src/bioetl/infrastructure/storage/gold_writer.py",
-      "source_lines": 313
+      "source_lines": 303
     },
     {
       "coverage_percent": 91.03,
@@ -44430,7 +44390,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-06",
-  "source_tree_sha256": "114f1b71a617249b1f8286f3d0d6a9cf05585ca1e38a6d17b878f6b9804d84fb",
+  "source_tree_sha256": "4eca34aebe5a0f8a9e147b5ec59aa4aae70fec6ee9a4431f28a7e6977d179824",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -44681,12 +44641,12 @@
         "unmeasured_module_count": 0
       }
     },
-    "source_module_count": 2221,
+    "source_module_count": 2219,
     "status_counts": {
       "coverage_xml_missing": 0,
-      "fully_covered": 1361,
+      "fully_covered": 1360,
       "no_executable_lines": 11,
-      "partially_covered": 849,
+      "partially_covered": 848,
       "uncovered": 0,
       "unmeasured": 0
     },

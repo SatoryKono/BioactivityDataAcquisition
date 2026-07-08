@@ -151,7 +151,7 @@ def test_governance_docs_match_active_diagram_counts() -> None:
         ("views", ".mermaid"),
     ],
 )
-def test_source_diagrams_have_sibling_svg_and_png_artifacts(
+def test_source_diagrams_have_sibling_svg_artifacts(
     collection: str, suffix: str
 ) -> None:
     source_dir = (
@@ -160,13 +160,25 @@ def test_source_diagrams_have_sibling_svg_and_png_artifacts(
     source_stems = _active_source_stems(source_dir, suffix)
 
     missing_svg = sorted(source_stems - _rendered_stems(source_dir, "svg", ".svg"))
-    missing_png = sorted(source_stems - _rendered_stems(source_dir, "png", ".png"))
 
     assert not missing_svg, (
         f"{collection} is missing rendered SVG artifacts: {missing_svg}"
     )
-    assert not missing_png, (
-        f"{collection} is missing rendered PNG artifacts: {missing_png}"
+
+
+def test_legacy_mmd_diagrams_tree_has_no_canonical_sources() -> None:
+    legacy_root = REPO_ROOT / "docs" / "02-architecture" / "mmd-diagrams"
+    if not legacy_root.exists():
+        return
+
+    legacy_sources = sorted(
+        path
+        for path in legacy_root.rglob("*")
+        if path.is_file() and path.suffix in {".mmd", ".mermaid"}
+    )
+    assert not legacy_sources, (
+        "Legacy mmd-diagrams/ must not contain canonical diagram sources: "
+        f"{[str(path.relative_to(REPO_ROOT)) for path in legacy_sources]}"
     )
 
 

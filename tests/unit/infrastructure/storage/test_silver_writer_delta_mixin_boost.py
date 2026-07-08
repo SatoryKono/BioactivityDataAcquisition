@@ -6,6 +6,8 @@ Targets uncovered lines: 69-70, 130, 142-158, 195, 275, 297, 333.
 from __future__ import annotations
 
 import asyncio
+import tempfile
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pyarrow as pa
@@ -33,6 +35,8 @@ from bioetl.infrastructure.storage.delta.resilience import (
     AdaptiveRetryPolicy,
     SilverMergeResiliencePolicy,
 )
+
+_TABLE_PATH = str(Path(tempfile.gettempdir()) / "bioetl-silver-delta-mixin" / "table")
 
 
 def _make_policy(
@@ -99,7 +103,7 @@ class TestWriteDeleteLines:
         data = _make_arrow_table()
         request = _DeltaWriteRequest(
             validated_mode=SilverWriteMode.DELETE,
-            table_path="path/to/table",
+            table_path=_TABLE_PATH,
             arrow_data=data,
             primary_keys=[],
             partition_cols=None,
@@ -146,7 +150,7 @@ def test_build_merge_update_predicate_ignores_run_type_precedence() -> None:
         data = _make_arrow_table()
         request = _DeltaWriteRequest(
             validated_mode=SilverWriteMode.DELETE,
-            table_path="path/table",
+            table_path=_TABLE_PATH,
             arrow_data=data,
             primary_keys=[],
             partition_cols=["date"],
@@ -174,7 +178,7 @@ def test_build_merge_update_predicate_ignores_run_type_precedence() -> None:
         data = _make_arrow_table()
         request = _DeltaWriteRequest(
             validated_mode=SilverWriteMode.APPEND,
-            table_path="path/table",
+            table_path=_TABLE_PATH,
             arrow_data=data,
             primary_keys=[],
             partition_cols=["date"],
@@ -205,7 +209,7 @@ def test_build_merge_update_predicate_ignores_run_type_precedence() -> None:
         data = _make_arrow_table()
         request = _DeltaWriteRequest(
             validated_mode=SilverWriteMode.APPEND,
-            table_path="path/table",
+            table_path=_TABLE_PATH,
             arrow_data=data,
             primary_keys=[],
             partition_cols=None,
@@ -251,7 +255,7 @@ class TestWriteMergeRetrySuccess:
             dt,
             data,
             ["id", "value"],
-            "path/table",
+            _TABLE_PATH,
             timeout_seconds=5.0,
         )
 
@@ -283,7 +287,7 @@ class TestWriteMergeRetrySuccess:
             dt,
             data,
             ["id"],
-            "path/table",
+            _TABLE_PATH,
             timeout_seconds=5.0,
             merge_schema=True,
         )
@@ -306,7 +310,7 @@ class TestWriteMergeRetrySuccess:
         data = _make_arrow_table()
         request = _DeltaWriteRequest(
             validated_mode=SilverWriteMode.MERGE,
-            table_path="path/table",
+            table_path=_TABLE_PATH,
             arrow_data=data,
             primary_keys=["id"],
             partition_cols=None,
@@ -360,7 +364,7 @@ class TestWriteMergeRetrySuccess:
         data = _make_arrow_table()
         request = _DeltaWriteRequest(
             validated_mode=SilverWriteMode.MERGE,
-            table_path="path/table",
+            table_path=_TABLE_PATH,
             arrow_data=data,
             primary_keys=["id"],
             partition_cols=None,
@@ -399,7 +403,7 @@ class TestWriteMergeRetrySuccess:
         data = _make_arrow_table()
         request = _DeltaWriteRequest(
             validated_mode=SilverWriteMode.MERGE,
-            table_path="path/table",
+            table_path=_TABLE_PATH,
             arrow_data=data,
             primary_keys=["id"],
             partition_cols=None,
@@ -439,7 +443,7 @@ class TestWriteMergeRetrySuccess:
         data = _make_arrow_table()
         request = _DeltaWriteRequest(
             validated_mode=SilverWriteMode.MERGE,
-            table_path="path/table",
+            table_path=_TABLE_PATH,
             arrow_data=data,
             primary_keys=["id"],
             partition_cols=None,
@@ -480,7 +484,7 @@ class TestDispatchWriteMode:
         data = _make_arrow_table()
         request = _DeltaWriteRequest(
             validated_mode=SilverWriteMode.DELETE,
-            table_path="path",
+            table_path=_TABLE_PATH,
             arrow_data=data,
             primary_keys=[],
             partition_cols=None,
@@ -497,7 +501,7 @@ class TestDispatchWriteMode:
         data = _make_arrow_table()
         request = _DeltaWriteRequest(
             validated_mode=SilverWriteMode.APPEND,
-            table_path="path",
+            table_path=_TABLE_PATH,
             arrow_data=data,
             primary_keys=[],
             partition_cols=None,
@@ -514,7 +518,7 @@ class TestDispatchWriteMode:
         data = _make_arrow_table()
         request = _DeltaWriteRequest(
             validated_mode=SilverWriteMode.MERGE,
-            table_path="path",
+            table_path=_TABLE_PATH,
             arrow_data=data,
             primary_keys=["id"],
             partition_cols=None,
@@ -534,7 +538,7 @@ class TestDispatchRequestByMode:
         """Append requests should route to the append handler."""
         request = _DeltaWriteRequest(
             validated_mode=SilverWriteMode.APPEND,
-            table_path="path",
+            table_path=_TABLE_PATH,
             arrow_data=_make_arrow_table(),
             primary_keys=[],
             partition_cols=None,
@@ -586,7 +590,7 @@ class TestEmitMergeRetryTelemetry:
         mixin = _ConcreteDeltaMixin(metrics=metrics)
 
         mixin._emit_merge_retry_telemetry(
-            table_path="path/table",
+            table_path=_TABLE_PATH,
             retry_type="commit_conflict",
             attempt=1,
             max_retries=3,
@@ -606,7 +610,7 @@ class TestEmitMergeRetryTelemetry:
 
         # Should not raise
         mixin._emit_merge_retry_telemetry(
-            table_path="path/table",
+            table_path=_TABLE_PATH,
             retry_type="timeout",
             attempt=1,
             max_retries=1,
@@ -627,7 +631,7 @@ class TestEmitMergeFinalTelemetry:
         mixin = _ConcreteDeltaMixin(metrics=metrics)
 
         mixin._emit_merge_final_telemetry(
-            table_path="path/table",
+            table_path=_TABLE_PATH,
             final_reason="commit_conflict_retries_exhausted",
         )
 
@@ -645,7 +649,7 @@ class TestEmitMergeFinalTelemetry:
         mixin = _ConcreteDeltaMixin(metrics=None)
 
         mixin._emit_merge_final_telemetry(
-            table_path="path/table",
+            table_path=_TABLE_PATH,
             final_reason="timeout_retries_exhausted",
         )
 
@@ -665,7 +669,7 @@ class TestDispatchWriteWithDomainErrors:
         data = _make_arrow_table()
         request = _DeltaWriteRequest(
             validated_mode=SilverWriteMode.MERGE,
-            table_path="path/table",
+            table_path=_TABLE_PATH,
             arrow_data=data,
             primary_keys=["id"],
             partition_cols=None,
@@ -714,7 +718,7 @@ class TestRaiseDomainWriteError:
         data = _make_arrow_table()
         request = _DeltaWriteRequest(
             validated_mode=SilverWriteMode.MERGE,
-            table_path="path/table",
+            table_path=_TABLE_PATH,
             arrow_data=data,
             primary_keys=["id"],
             partition_cols=None,
@@ -742,7 +746,7 @@ class TestRaiseDomainWriteError:
         data = _make_arrow_table()
         request = _DeltaWriteRequest(
             validated_mode=SilverWriteMode.MERGE,
-            table_path="path/table",
+            table_path=_TABLE_PATH,
             arrow_data=data,
             primary_keys=["id"],
             partition_cols=None,
@@ -768,7 +772,7 @@ class TestRaiseDomainWriteError:
         data = _make_arrow_table()
         request = _DeltaWriteRequest(
             validated_mode=SilverWriteMode.MERGE,
-            table_path="path/table",
+            table_path=_TABLE_PATH,
             arrow_data=data,
             primary_keys=["id"],
             partition_cols=None,

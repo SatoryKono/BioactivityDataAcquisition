@@ -752,7 +752,7 @@ ______________________________________________________________________
 
 ### Рендеринг
 
-Скрипт рендеринга: [`render.sh`](../tooling/render.sh) или `make render-diagrams`.
+Скрипт рендеринга: [`render.sh`](../tooling/render.sh) или `python -m scripts.diagrams render` (см. `make render-diagrams`).
 
 ______________________________________________________________________
 

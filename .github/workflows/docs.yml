@@ -352,19 +352,15 @@ jobs:
             source_file="${source_path##*/}"
             stem="${source_file%.*}"
             expected_svg="${source_dir}/svg/${stem}.svg"
-            expected_png="${source_dir}/png/${stem}.png"
             if ! grep -Fxq "$expected_svg" <<< "$changed_rendered"; then
               missing="${missing}${expected_svg}\n"
-            fi
-            if ! grep -Fxq "$expected_png" <<< "$changed_rendered"; then
-              missing="${missing}${expected_png}\n"
             fi
           done <<< "$changed_diagrams"
 
           if [ -n "$missing" ]; then
-            echo "::error::Diagram sources changed without corresponding rendered SVG/PNG outputs."
+            echo "::error::Diagram sources changed without corresponding rendered SVG outputs."
             printf "%b" "$missing"
-            echo "Run 'bash docs/02-architecture/diagrams/tooling/render.sh --dir <changed-source-dir>' and commit sibling svg/png outputs."
+            echo "Run 'bash docs/02-architecture/diagrams/tooling/render.sh --dir <changed-source-dir>' and commit sibling svg/ outputs."
             exit 1
           fi
-          echo "All changed diagram sources have corresponding rendered SVG/PNG updates."
+          echo "All changed diagram sources have corresponding rendered SVG updates."
