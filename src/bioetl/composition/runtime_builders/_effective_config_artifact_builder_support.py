@@ -124,6 +124,11 @@ def build_composite_runtime_overrides_snapshot(
     }
 
 
+def build_resolved_config_snapshot(resolved_config: object) -> dict[str, object]:
+    """Convert resolved config into the effective-config artifact mapping shape."""
+    return _to_serializable_mapping(resolved_config)
+
+
 def build_effective_config_source_refs(
     *,
     provider: str,

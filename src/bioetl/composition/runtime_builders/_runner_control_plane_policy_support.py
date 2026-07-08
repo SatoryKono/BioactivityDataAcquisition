@@ -4,9 +4,14 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from bioetl.composition.runtime_builders._run_manifest_refs import (
-    is_explicit_data_root_configured,
-    resolve_data_root_mode,
+from bioetl.composition.runtime_builders._runner_control_plane_artifact_policy import (
+    requires_artifact_publication_closure as _requires_artifact_publication_closure,
+)
+from bioetl.composition.runtime_builders._runner_control_plane_artifact_policy import (
+    validate_artifact_recorder_attachment as _validate_artifact_recorder_attachment,
+)
+from bioetl.composition.runtime_builders._runner_control_plane_data_root_policy import (
+    validate_strict_data_root_policy as _validate_strict_data_root_policy,
 )
 from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
@@ -125,25 +130,16 @@ def validate_strict_data_root_policy(
     exact_replay: bool = False,
 ) -> None:
     """Fail closed when strict reproducibility relies on fallback data roots."""
-    profile = _normalize_required_persistence_profile(required_profile)
-    if not (exact_replay or profile in STRICT_PERSISTENCE_PROFILES):
-        return
-    if is_explicit_data_root_configured(settings):
-        return
-    mode = resolve_data_root_mode(settings)
-    raise RuntimeError(
-        "Strict reproducibility contexts require an explicit settings.data_dir; "
-        f"resolved fallback data root mode '{mode}' is not allowed for required "
-        f"persistence profile '{profile}'"
+    _validate_strict_data_root_policy(
+        settings=settings,
+        required_profile=required_profile,
+        exact_replay=exact_replay,
     )
 
 
 def requires_artifact_publication_closure(required_profile: object) -> bool:
     """Return ``True`` when artifact publication must be fully wired."""
-    return (
-        _normalize_required_persistence_profile(required_profile)
-        in STRICT_PERSISTENCE_PROFILES
-    )
+    return _requires_artifact_publication_closure(required_profile)
 
 
 def validate_artifact_recorder_attachment(
@@ -155,26 +151,13 @@ def validate_artifact_recorder_attachment(
     failed_count: int,
 ) -> None:
     """Fail closed when strict profiles cannot guarantee artifact publication."""
-    if not requires_artifact_publication_closure(required_profile):
-        return
-    profile = _normalize_required_persistence_profile(required_profile)
-    if candidate_count == 0:
-        raise RuntimeError(
-            f"Required persistence profile '{profile}' requires artifact publication "
-            "closure, but no metadata-writer candidates were discovered for recorder attachment"
-        )
-    if (
-        attached_count < candidate_count
-        or missing_attach_method_count > 0
-        or failed_count > 0
-    ):
-        raise RuntimeError(
-            f"Required persistence profile '{profile}' requires artifact publication "
-            "closure, but recorder attachment was incomplete "
-            f"(candidates={candidate_count}, attached={attached_count}, "
-            f"missing_attach_method_count={missing_attach_method_count}, "
-            f"failed_count={failed_count})"
-        )
+    _validate_artifact_recorder_attachment(
+        required_profile=required_profile,
+        candidate_count=candidate_count,
+        attached_count=attached_count,
+        missing_attach_method_count=missing_attach_method_count,
+        failed_count=failed_count,
+    )
 
 
 def validate_manifest_persistence_requirements(

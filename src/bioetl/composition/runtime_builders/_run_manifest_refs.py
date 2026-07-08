@@ -3,20 +3,36 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from importlib import import_module
 
 from bioetl.composition.runtime_builders._run_manifest_data_roots import (
     DataRootMode as DataRootMode,
-    build_planned_artifacts as build_planned_artifacts,
-    control_plane_root as control_plane_root,
     is_explicit_data_root_configured as is_explicit_data_root_configured,
     resolve_data_root_mode as resolve_data_root_mode,
 )
 from bioetl.composition.runtime_builders._run_manifest_identity_ref_values import (
+    build_contract_identity_field_values_from_mapping,
     build_control_plane_identity_ref_values,
 )
-from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
-    build_contract_identity_field_values_from_mapping,
-)
+
+
+def __getattr__(name: str) -> object:
+    """Lazily expose legacy path helpers without raising their static fan-in."""
+    if name == "control_plane_root":
+        return getattr(
+            import_module(
+                "bioetl.composition.runtime_builders._run_manifest_control_plane_paths"
+            ),
+            name,
+        )
+    if name == "build_planned_artifacts":
+        return getattr(
+            import_module(
+                "bioetl.composition.runtime_builders._run_manifest_planned_artifacts"
+            ),
+            name,
+        )
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 @dataclass(frozen=True, slots=True)

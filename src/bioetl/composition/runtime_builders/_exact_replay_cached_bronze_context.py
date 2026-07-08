@@ -9,7 +9,7 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING
 from uuid import UUID
 
-from bioetl.composition.runtime_builders._run_manifest_data_roots import (
+from bioetl.composition.runtime_builders._run_manifest_control_plane_paths import (
     control_plane_root,
 )
 from bioetl.domain.context import CachedBronzeContext
