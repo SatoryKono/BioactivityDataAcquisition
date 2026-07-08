@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import os
+import tempfile
+from contextlib import suppress
 from importlib import import_module
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
@@ -80,11 +82,51 @@ def resolve_data_root_mode(settings: Settings) -> DataRootMode:
     return "repo_default"
 
 
+def _resolve_data_root(settings: Settings) -> Path:
+    """Resolve a writable data root for legacy run-manifest facade callers."""
+    configured_root = getattr(settings, "data_dir", None)
+    if configured_root:
+        return Path(configured_root)
+
+    candidate = Path("data")
+    try:
+        candidate.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        return _private_fallback_data_root()
+    if not os.access(candidate, os.W_OK):
+        return _private_fallback_data_root()
+    return candidate
+
+
 def _private_fallback_data_root_mode() -> DataRootMode:
     """Classify which private fallback would be used when checkout is read-only."""
     preferred = Path.home() / ".cache" / "bioetl-data"
     try:
-        preferred.mkdir(parents=True, exist_ok=True, mode=0o700)
+        _prepare_private_runtime_dir(preferred)
     except OSError:
         return "tmp"
     return "private_cache"
+
+
+def _private_fallback_data_root() -> Path:
+    """Return a user-private fallback data root for legacy facade callers."""
+    preferred = Path.home() / ".cache" / "bioetl-data"
+    try:
+        return _prepare_private_runtime_dir(preferred)
+    except OSError:
+        runtime_user = getattr(os, "getuid", lambda: "user")()
+        fallback = Path(tempfile.gettempdir()) / f"bioetl-data-{runtime_user}"
+        return _prepare_private_runtime_dir(fallback)
+
+
+def _prepare_private_runtime_dir(path: Path) -> Path:
+    """Create a private runtime directory and normalize its permissions."""
+    path.mkdir(parents=True, exist_ok=True, mode=0o700)
+    with suppress(OSError):
+        path.chmod(0o700)
+    return path
+
+
+def _artifact_path_string(path: PurePath) -> str:
+    """Return portable artifact paths with normalized separators."""
+    return path.as_posix()
