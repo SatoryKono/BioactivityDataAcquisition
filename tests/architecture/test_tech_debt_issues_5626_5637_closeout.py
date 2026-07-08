@@ -99,11 +99,14 @@ def _src_python_files() -> list[Path]:
         capture_output=True,
         text=True,
     )
-    return [
-        ROOT / relative_path
-        for relative_path in result.stdout.splitlines()
-        if relative_path.endswith(".py")
-    ]
+    paths: list[Path] = []
+    for relative_path in result.stdout.splitlines():
+        if not relative_path.endswith(".py"):
+            continue
+        path = ROOT / relative_path
+        if path.exists():
+            paths.append(path)
+    return paths
 
 
 def _src_importers(module_name: str) -> set[str]:

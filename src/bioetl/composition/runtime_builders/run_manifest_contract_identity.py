@@ -8,11 +8,19 @@ from pathlib import Path
 
 from bioetl.composition.runtime_builders._run_manifest_identity_ref_values import (
     CONTRACT_IDENTITY_FIELD_NAMES,
+    build_contract_identity_field_values,
 )
 from bioetl.infrastructure.config.contract_registry_loader import (
     DEFAULT_CONTRACT_REGISTRY_PATH,
     load_contract_registry_entries,
 )
+
+__all__ = [
+    "RunManifestContractIdentity",
+    "build_contract_identity_field_values",
+    "ensure_complete_contract_identity",
+    "resolve_contract_identity",
+]
 
 
 @dataclass(frozen=True, slots=True)

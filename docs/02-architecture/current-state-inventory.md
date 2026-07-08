@@ -13,8 +13,8 @@ ______________________________________________________________________
 
 # Current State Inventory
 
-This inventory is synchronized against the current `main` worktree on
-2026-07-07. Code, configs, domain contracts, ADRs, and tests are the source of
+This inventory is synchronized against the current worktree on 2026-07-08.
+Code, configs, domain contracts, ADRs, and tests are the source of
 truth; existing documentation is evidence only when it matches those sources.
 
 ## Scope
@@ -38,10 +38,11 @@ Current committed quality artifacts agree on the following architecture evidence
 | --- | ---: | --- |
 | Architecture quality score | `8.66` (`good_targeted_improvements`) | `reports/quality/debt-governance-gates.json`, `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2210` | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2219` | `reports/quality/module-coverage-inventory.json` |
 | Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json` |
+| Coverage inventory status counts | `1360` fully covered, `848` partially covered, `11` with no executable lines | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
-| Debt-governance gates | `38` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
+| Debt-governance gates | `44` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
 | Full-app duplication hotspot baseline | `43` clusters | `reports/quality/full-app-duplication-baseline.json` |
 
 Generated artifact drift is currently clear (`stale_artifacts` are all false in
@@ -49,11 +50,17 @@ Generated artifact drift is currently clear (`stale_artifacts` are all false in
 `module_coverage_source_tree_hash_current`, so stale
 `reports/quality/module-coverage-inventory.json` source-tree hashes are fail-fast
 release-gate failures rather than hidden warning-only coverage drift. Module
-coverage currently reports no unmeasured or uncovered source modules. Read-only
+coverage currently reports no unmeasured or uncovered source modules. That is a
+module-inventory fact, not a line/branch coverage guarantee: `848` modules
+remain partially covered and line/branch coverage must be read from the
+`coverage-verify` artifacts. Read-only
 audit evidence should use
 `python -m scripts.engineering.qa run-architecture-audit-read-only`, which runs
 check-only architecture diagnostics and fails if tracked governance surfaces
 mutate.
+Baseline refreshes must preserve or lower scorecard budgets, hotspot family
+caps, SCC budgets, and exemption limits; if refreshed evidence hits a budget,
+reduce scope or debt instead of increasing the budget.
 
 ## Workflow Inventory
 
@@ -283,14 +290,16 @@ by storage technology. Current owner boundaries:
 | Runtime Gold Pandera strictness had no production-path non-strict guard | `tests/architecture/test_gold_validator_strict_runtime_paths.py` scans `src/bioetl` for `PanderaGoldValidator(..., strict=False)` and `ContractAwareGoldValidator(..., strict=False)`. | `src/bioetl/infrastructure/storage/silver/merged_operations.py`; `src/bioetl/infrastructure/validation/pandera_validator.py`. | Replaced the Silver merged-write non-strict Gold validator with `PanderaSilverValidator(strict=False)` and added the runtime guard. |
 | Quarantine payload immutability evidence stopped at aggregate/mock level | `tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineUpdateStatus::test_update_status_preserves_persisted_payload_and_hash` writes a real Delta table, updates status, and checks persisted `payload`, `payload_hash`, and `metadata`. | `src/bioetl/infrastructure/quarantine/unified.py`. | Added persisted immutability coverage and a read fallback for Delta string-view filter failures after status updates. |
 | Test governance refined assertless residuals are now fully eliminated while compatibility coverage stays bounded | `reports/quality/test-governance-current.json` now reports `assertless_total_candidates=109`, `refined_assertless_tests=0`, `compatibility_test_files=0`, and zero budget violations. | Contract schema tests under `tests/contract/**` plus governance inventory under `tests/architecture/**`. | Tightened observable assertions and governance classification so the refined assertless residual count is zero without regrowing compatibility-test scope. |
-| Current-state architecture evidence table lagged live quality reports | `reports/quality/debt-governance-gates.json` reports score `8.66`, `38` passing gates, and no warnings; `reports/quality/module-coverage-inventory.json` reports `2210` source modules with zero unmeasured/uncovered modules; `reports/quality/full-app-duplication-baseline.json` reports `43` clusters. | Current committed `reports/quality/*.json` artifacts. | Refreshed the current-state table and verification date from live report artifacts. |
+| Current-state architecture evidence table lagged live quality reports | `reports/quality/debt-governance-gates.json` reports score `8.66`, `44` passing gates, and no warnings; `reports/quality/module-coverage-inventory.json` reports `2219` source modules with zero unmeasured/uncovered modules plus `848` partially covered modules; `reports/quality/full-app-duplication-baseline.json` reports `43` clusters. | Current committed `reports/quality/*.json` artifacts. | Refreshed the current-state table and verification date from live report artifacts, while keeping module inventory distinct from full line/branch coverage. |
 
 ## Open Questions
 
 - Module coverage currently has no unmeasured or uncovered source modules in
-  `reports/quality/module-coverage-inventory.json`; keep this as a regression
-  gate through `report-module-coverage --check` and
-  `report-debt-governance-gates --check`.
+  `reports/quality/module-coverage-inventory.json`, while `848` modules remain
+  partially covered. Keep the `0` unmeasured / `0` uncovered module inventory as
+  a regression gate through `report-module-coverage --check` and
+  `report-debt-governance-gates --check`; do not describe it as complete
+  line/branch coverage.
 - Diagram bundles and rendered artifacts have been refreshed for the known
   `QuarantineEntry` transition wording drift. `PipelineStorageProtocol` remains
   valid only as an application-owned aggregate protocol and must not be listed as
