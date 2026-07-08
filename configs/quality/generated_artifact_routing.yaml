@@ -84,6 +84,16 @@ routes:
     notes: Deterministic per-file documentation cleanup matrix for lifecycle,
       generated-artifact, duplicate, inbound-link, and recommended-action review.
 
+  - id: ai-skill-reference-mirror
+    generator: scripts/ai/codex/check_skills_mirror.sh
+    output_kind: curated_generated_docs
+    commit_policy: tracked_mirror_surface
+    outputs:
+      - docs/00-project/ai/skills/_references/
+    notes: Skill reference bundle copies are intentional mirrors used by
+      skills-consistency checks; exact duplicates with local skill references
+      are expected and must be refreshed from runtime skill sources.
+
   - id: matrix-dictionaries-curated-docs
     generator: scripts/docs/matrix/build_matrix_dicts.py
     output_kind: curated_generated_docs

@@ -37,6 +37,28 @@ When diagram drift is detected, the first remediation target should usually be t
 
 ______________________________________________________________________
 
+## Cleanup Classification Matrix
+
+Use this matrix before moving or deleting diagram files.
+
+| Path / artifact family | Cleanup class | Source of truth | Rule |
+| --- | --- | --- | --- |
+| `architecture/*.mmd`, `class-diagrams/*.mmd`, `foundation/*.mmd` | canonical source | Mermaid source file | Keep unless source drift is proven and reviewed under ADR-040. |
+| `class-diagrams/90-pkg-*.mmd` | generated source | `scripts/diagrams/generate_package_family_class_diagrams.py` | Regenerate from source tree; do not hand-edit for cleanup. |
+| `views/*.mermaid` | decomposed review view | focused view source | Keep as presentation-oriented slices; do not treat as replacement for canonical `.mmd`. |
+| `**/svg/**`, `**/png/**` | rendered artifact | diagram renderer | Regenerate; do not edit or delete without render/check evidence. |
+| `bundles/*.bundle.md` | generated bundle | diagram bundle generator | Regenerate from source families. |
+| `descriptions/**` | derived/published description cards | diagram description governance | Fix missing/stale description cards before deleting source or render files. |
+| `governance/**`, `manifests/**`, `tooling/**` | governance/tooling | ADR-040 + local policies | Keep with docs verification and diagram checks. |
+
+Required checks for diagram cleanup:
+
+- `python -m scripts.diagrams lint`
+- `python -m scripts.diagrams check-artifacts`
+- `python -m scripts.docs check-links --links --specs --configs`
+
+______________________________________________________________________
+
 ## Supplementary Non-Nav Indexes
 
 These artifacts are intentionally outside primary nav but linked here for discoverability.
