@@ -24,6 +24,60 @@ DEFAULT_BASELINE_JSON = Path("reports/quality/config-discrepancy-baseline.json")
 SANCTIONED_DEFAULT_SCALAR = "<sanctioned-default>"
 CONFIG_PARAMETER_TAXONOMY_OWNER = "BioETL Team"
 _DEFAULT_TAXONOMY_GROUP = "domain_entity_contract"
+_CONFIG_PARAMETER_FAMILY_OWNERS: dict[str, dict[str, str]] = {
+    "compatibility_legacy": {
+        "owner": "config-governance",
+        "change_policy": "explicit_registry_entry_required",
+        "rationale": (
+            "Compatibility-preserving config aliases and migrations must be "
+            "registered before they are accepted."
+        ),
+    },
+    "domain_entity_contract": {
+        "owner": "contract-governance",
+        "change_policy": "contract_registry_or_schema_review_required",
+        "rationale": (
+            "Entity and composite contract parameters define runtime data shape "
+            "and must evolve through contract ownership."
+        ),
+    },
+    "dq_validation": {
+        "owner": "data-quality-governance",
+        "change_policy": "dq_contract_review_required",
+        "rationale": "DQ and schema validation parameters own acceptance criteria.",
+    },
+    "medallion_write_policy": {
+        "owner": "storage-platform",
+        "change_policy": "storage_contract_review_required",
+        "rationale": "Bronze/Silver/Gold write settings affect persisted layout.",
+    },
+    "observability": {
+        "owner": "observability-governance",
+        "change_policy": "telemetry_contract_review_required",
+        "rationale": "Metric, logging, tracing, and health knobs affect telemetry contracts.",
+    },
+    "provider_source_access": {
+        "owner": "provider-adapter-governance",
+        "change_policy": "provider_contract_review_required",
+        "rationale": "Provider request, pagination, and rate-limit settings own API access.",
+    },
+    "replay_provenance": {
+        "owner": "control-plane-replay-governance",
+        "change_policy": "replay_contract_review_required",
+        "rationale": "Manifest, ledger, lineage, and snapshot parameters affect replay evidence.",
+    },
+    "runtime_control_plane": {
+        "owner": "runtime-orchestration",
+        "change_policy": "runtime_control_plane_review_required",
+        "rationale": "Execution, checkpoint, lock, and scheduling knobs govern runtime behavior.",
+    },
+}
+_CONFIG_EVOLUTION_POLICY = {
+    "compatibility_preserving_changes": "registered_alias_or_migration_entry_required",
+    "alias_registry": "configs/quality/config_compatibility_registry.yaml",
+    "contract_registry_diagnostics": "reports/quality/contract-registry-diagnostics.json",
+    "blocking_issue_budget": 0,
+}
 _TAXONOMY_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
     (
         "compatibility_legacy",
@@ -283,6 +337,10 @@ def _family_parameter_taxonomy(configs: dict[str, dict[str, Any]]) -> dict[str, 
         "owner": CONFIG_PARAMETER_TAXONOMY_OWNER,
         "parameter_count": len(all_keys),
         "groups": dict(sorted(groups.items())),
+        "group_owner_map": {
+            group_name: _CONFIG_PARAMETER_FAMILY_OWNERS[group_name]
+            for group_name in sorted(groups)
+        },
         "examples": {key: examples[key] for key in sorted(examples)},
         "unclassified_parameter_count": 0,
         "unclassified_parameters": [],
@@ -298,6 +356,16 @@ def build_config_parameter_taxonomy_payload(
         "owner": CONFIG_PARAMETER_TAXONOMY_OWNER,
         "classification_mode": "derived_from_flattened_config_parameter_paths",
         "default_group": _DEFAULT_TAXONOMY_GROUP,
+        "evolution_policy": _CONFIG_EVOLUTION_POLICY,
+        "group_owner_map": {
+            group_name: _CONFIG_PARAMETER_FAMILY_OWNERS[group_name]
+            for group_name, _needles in _TAXONOMY_RULES
+        }
+        | {
+            _DEFAULT_TAXONOMY_GROUP: _CONFIG_PARAMETER_FAMILY_OWNERS[
+                _DEFAULT_TAXONOMY_GROUP
+            ]
+        },
         "families": {
             family_name: _family_parameter_taxonomy(family_configs)
             for family_name, family_configs in active_families.items()

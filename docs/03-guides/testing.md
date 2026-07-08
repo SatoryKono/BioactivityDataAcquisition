@@ -193,6 +193,7 @@ reproducibility preflight and static governance budget report:
 
 ```bash
 python -m scripts.engineering.qa.check_test_audit_preflight --strict
+python -m scripts.engineering.qa check-vcr-replay-preflight --strict
 python -m scripts.engineering.qa.report_test_governance_audit --check
 ```
 
@@ -206,6 +207,11 @@ the primary blocker remains the actionable `missing_git_lfs` diagnosis instead
 of an opaque `git-lfs filter-process` failure or a timeout in a partially
 hydrated checkout. Normal project Git commands still require `git-lfs` to be
 installed in the active shell.
+`check-vcr-replay-preflight --strict` is the faster replay-lane gate for long
+VCR-backed integration/e2e runs. It reports exact unresolved cassette paths,
+flags replay-critical Git LFS pointers before pytest setup, performs cheap VCR
+metadata-catalog and sanitizer checks, and uses `git lfs pull` as the local
+remediation path.
 `report_test_governance_audit --check` enforces the current ratcheting
 budgets for assert-less candidates, duplicate test names, compatibility/legacy
 surface, marker/path drift, and deterministic-time/UUID call sites tracked in

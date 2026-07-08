@@ -183,6 +183,21 @@ def test_config_parameter_taxonomy_has_owner_and_no_unclassified_parameters() ->
         taxonomy["classification_mode"]
         == "derived_from_flattened_config_parameter_paths"
     )
+    evolution_policy = taxonomy["evolution_policy"]
+    assert isinstance(evolution_policy, dict)
+    assert (
+        evolution_policy["compatibility_preserving_changes"]
+        == "registered_alias_or_migration_entry_required"
+    )
+    assert (
+        evolution_policy["alias_registry"]
+        == "configs/quality/config_compatibility_registry.yaml"
+    )
+    assert evolution_policy["blocking_issue_budget"] == 0
+    group_owner_map = taxonomy["group_owner_map"]
+    assert isinstance(group_owner_map, dict)
+    assert group_owner_map["compatibility_legacy"]["owner"] == "config-governance"
+    assert group_owner_map["domain_entity_contract"]["owner"] == "contract-governance"
     families = taxonomy["families"]
     assert isinstance(families, dict)
     assert set(families) == {"composite_runtime", "entity_effective"}
@@ -194,6 +209,14 @@ def test_config_parameter_taxonomy_has_owner_and_no_unclassified_parameters() ->
         assert family_taxonomy["unclassified_parameters"] == []
         groups = family_taxonomy["groups"]
         assert isinstance(groups, dict) and groups
+        family_group_owner_map = family_taxonomy["group_owner_map"]
+        assert isinstance(family_group_owner_map, dict)
+        assert set(family_group_owner_map) == set(groups)
+        for group_name, owner_row in family_group_owner_map.items():
+            assert owner_row == group_owner_map[group_name]
+            assert owner_row["owner"].strip()
+            assert owner_row["change_policy"].endswith("_required")
+            assert owner_row["rationale"].strip()
 
 
 @pytest.mark.architecture

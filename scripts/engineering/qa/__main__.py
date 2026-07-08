@@ -31,6 +31,7 @@ Commands:
     check-terminology    Terminology linting
     report-dep-map       Generate/check architecture dependency map
     report-vcr-metadata  Generate/check canonical VCR metadata catalog
+    check-vcr-replay-preflight  Fail fast on unresolved replay VCR pointers
     report-provider-contract-drift  Generate provider contract drift diagnostics from replay cassettes
     report-compatibility-importer-census Generate deterministic importer census for sanctioned seams and twin modules
     report-pipeline-config-contract-ownership-map Generate/check pipeline-config-contract ownership traces
@@ -101,6 +102,9 @@ COMMAND_MODULES: dict[str, str] = {
     "check-terminology": "scripts.engineering.qa.lint_terminology",
     "report-dep-map": "scripts.engineering.qa.generate_architecture_dependency_map",
     "report-vcr-metadata": "scripts.engineering.qa.report_vcr_metadata_catalog",
+    "check-vcr-replay-preflight": (
+        "scripts.engineering.qa.vcr.check_replay_preflight"
+    ),
     "report-provider-contract-drift": "scripts.engineering.qa.report_provider_contract_drift",
     "report-compatibility-importer-census": "scripts.engineering.qa.report_compatibility_importer_census",
     "report-pipeline-config-contract-ownership-map": "scripts.engineering.qa.report_pipeline_config_contract_ownership",

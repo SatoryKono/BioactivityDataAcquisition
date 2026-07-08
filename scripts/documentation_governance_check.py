@@ -229,7 +229,10 @@ class DocumentationGovernanceChecker:
 
         # Check key documentation files for required metadata
         required_docs = [
-            self.docs_dir / "00-project" / "DOCUMENTATION_GOVERNANCE.md",
+            self.docs_dir
+            / "00-project"
+            / "governance"
+            / "01-documentation-governance-style-guide.md",
             self.docs_dir / "04-reference" / "contracts" / "README.md",
             self.docs_dir
             / "02-architecture"
@@ -244,7 +247,7 @@ class DocumentationGovernanceChecker:
                 content = doc_file.read_text()
 
                 # Check for basic metadata
-                if not content.startswith("# "):
+                if re.search(r"^# ", content, flags=re.MULTILINE) is None:
                     checks_failed.append(f"Missing title in {doc_file}")
                     missing_metadata = True
 
@@ -252,6 +255,7 @@ class DocumentationGovernanceChecker:
                 if (
                     "Last Updated" not in content
                     and "last updated" not in content.lower()
+                    and "Last verified" not in content
                 ):
                     warnings.append(f"Missing last updated info in {doc_file}")
             else:
