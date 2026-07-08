@@ -1,0 +1,193 @@
+from __future__ import annotations
+
+import importlib.util
+import re
+import sys
+from pathlib import Path
+from types import ModuleType
+
+import pytest
+
+pytestmark = pytest.mark.architecture
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+DIAGRAM_ROOT = REPO_ROOT / "docs" / "02-architecture" / "diagrams"
+VIEW_COLLECTION = DIAGRAM_ROOT / "views"
+MMD_COLLECTIONS: dict[str, Path] = {
+    "architecture": DIAGRAM_ROOT / "architecture",
+    "class-diagrams": DIAGRAM_ROOT / "class-diagrams",
+    "foundation": DIAGRAM_ROOT / "foundation",
+}
+
+_DECL_LINE_RE = re.compile(
+    r"^(flowchart|graph|stateDiagram|classDiagram|sequenceDiagram|erDiagram|mindmap|gantt|pie|xychart)\b",
+    flags=re.IGNORECASE,
+)
+
+
+def _load_apply_elk_layout() -> ModuleType:
+    module_path = REPO_ROOT / "src" / "tools" / "apply_elk_layout.py"
+    spec = importlib.util.spec_from_file_location(
+        "apply_elk_layout_module", module_path
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def _active_source_stems(directory: Path, suffix: str) -> set[str]:
+    if not directory.exists():
+        return set()
+    return {
+        p.stem
+        for p in sorted(directory.glob(f"*{suffix}"))
+        if p.is_file() and not p.name.startswith("_")
+    }
+
+
+def _rendered_stems(source_dir: Path, rendered_dir_name: str, suffix: str) -> set[str]:
+    rendered_dir = source_dir / rendered_dir_name
+    if not rendered_dir.exists():
+        return set()
+    return {p.stem for p in rendered_dir.glob(f"*{suffix}") if p.is_file()}
+
+
+def test_architecture_svg_coverage_for_all_mmd() -> None:
+    """F001: architecture .mmd MUST have sibling rendered SVG artifacts."""
+    source_dir = MMD_COLLECTIONS["architecture"]
+    source_stems = _active_source_stems(source_dir, ".mmd")
+    rendered_stems = _rendered_stems(source_dir, "svg", ".svg")
+    missing_svg = sorted(source_stems - rendered_stems)
+    assert not missing_svg, f"architecture missing rendered SVG: {missing_svg}"
+
+
+def test_full_mermaid_matches_foundation_mmd() -> None:
+    """F006: foundation .mmd body MUST match views/*-full.mermaid body."""
+
+    def extract_body(path: Path) -> str:
+        lines = path.read_text(encoding="utf-8").splitlines()
+        for i, ln in enumerate(lines):
+            s = ln.strip()
+            if not s or s.startswith("%%"):
+                continue
+            if _DECL_LINE_RE.match(s):
+                # Ignore metadata + ELK init blocks; compare only the diagram body.
+                body_lines = [x.strip() for x in lines[i:]]
+                while body_lines and body_lines[-1] == "":
+                    body_lines.pop()
+                return "\n".join(body_lines)
+        raise AssertionError(f"Diagram declaration not found: {path}")
+
+    foundation_dir = MMD_COLLECTIONS["foundation"]
+    for mmd_path in sorted(foundation_dir.glob("*.mmd")):
+        if not mmd_path.is_file() or mmd_path.name.startswith("_"):
+            continue
+        stem = mmd_path.stem
+        view_path = VIEW_COLLECTION / f"{stem}-full.mermaid"
+        assert view_path.exists(), f"Missing full view: {view_path}"
+        mmd_body = extract_body(mmd_path)
+        view_body = extract_body(view_path)
+        assert (
+            mmd_body == view_body
+        ), f"Drift in diagram body for foundation/{stem}.mmd ↔ {view_path}"
+
+
+def test_no_orphan_svg_without_source() -> None:
+    """F012: canonical rendered SVG artifacts MUST NOT be orphans."""
+    for collection, source_dir in (
+        ("architecture", MMD_COLLECTIONS["architecture"]),
+        ("class-diagrams", MMD_COLLECTIONS["class-diagrams"]),
+        ("foundation", MMD_COLLECTIONS["foundation"]),
+        ("views", VIEW_COLLECTION),
+    ):
+        suffix = ".mmd" if collection != "views" else ".mermaid"
+        source_stems = _active_source_stems(source_dir, suffix)
+        rendered_stems = _rendered_stems(source_dir, "svg", ".svg")
+        orphan_svg = sorted(rendered_stems - source_stems)
+        assert (
+            not orphan_svg
+        ), f"{collection} has orphan SVG artifacts without source: {orphan_svg}"
+
+
+def test_apply_elk_default_dir_is_canonical() -> None:
+    """F004: apply_elk_layout.py default dir MUST be canonical architecture tree."""
+    module = _load_apply_elk_layout()
+    assert (
+        module.ARCH_DIR == DIAGRAM_ROOT / "architecture"
+    ), f"ARCH_DIR mismatch: {module.ARCH_DIR}"
+
+
+def test_embedded_mermaid_in_active_docs_valid() -> None:
+    """F014: fenced ```mermaid blocks in active docs must look like real Mermaid."""
+
+    placeholder_re = re.compile(r"\b(placeholder|TODO|FIXME|stub)\b", re.IGNORECASE)
+    init_re = re.compile(r"%%\s*\{\s*init\s*:", re.IGNORECASE)
+    metadata_directive_re = re.compile(r"^%%\s*@", re.IGNORECASE)
+
+    def iter_fenced_mermaid_blocks(md_lines: list[str]) -> list[tuple[list[str], int]]:
+        blocks: list[tuple[list[str], int]] = []
+        in_block = False
+        current: list[str] = []
+        block_start_line = 0
+
+        for idx, raw in enumerate(md_lines, start=1):
+            line = raw.rstrip("\n")
+            if not in_block:
+                if re.match(r"^```\s*mermaid\s*$", line.strip()):
+                    in_block = True
+                    current = []
+                    block_start_line = idx
+                continue
+
+            # closing fence
+            if line.strip().startswith("```"):
+                blocks.append((current, block_start_line))
+                in_block = False
+                current = []
+                continue
+
+            current.append(line)
+
+        if in_block:
+            raise AssertionError("Unclosed ```mermaid fenced block in Markdown file.")
+
+        return blocks
+
+    md_root = DIAGRAM_ROOT
+    md_paths = sorted(
+        p
+        for p in md_root.rglob("*.md")
+        if p.is_file() and "99-archive" not in p.parts
+    )
+
+    issues: list[str] = []
+    for md_path in md_paths:
+        lines = md_path.read_text(encoding="utf-8").splitlines()
+        blocks = iter_fenced_mermaid_blocks(lines)
+        for block_lines, start_ln in blocks:
+            block_text = "\n".join(block_lines).strip()
+            if not block_text:
+                issues.append(f"{md_path} at L{start_ln}: empty ```mermaid block")
+                continue
+            if placeholder_re.search(block_text):
+                issues.append(
+                    f"{md_path} at L{start_ln}: placeholder markers in ```mermaid block"
+                )
+                continue
+
+            has_decl = any(_DECL_LINE_RE.match(ln.strip()) for ln in block_lines)
+            has_init = any(init_re.search(ln) for ln in block_lines)
+            has_metadata_directive = any(
+                metadata_directive_re.match(ln.strip()) for ln in block_lines
+            )
+            if not has_decl and not has_init and not has_metadata_directive:
+                issues.append(
+                    f"{md_path} at L{start_ln}: ```mermaid block lacks diagram declaration, init directive, or metadata directive"
+                )
+
+    assert not issues, "Invalid/unsupported embedded mermaid blocks:\n" + "\n".join(
+        issues
+    )
+
