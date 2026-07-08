@@ -1,6 +1,6 @@
 # BioETL Diagrams — PNG Index
 
-_Generated: 2026-07-08T11:14:31+03:00_
+_Generated: 2026-07-08T18:57:01+03:00_
 
 ## High Level Hexagonal Simple
 
@@ -14,25 +14,25 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
-## 01a Hexagonal Overview
+## 01ahexagonal Overview
 
 ![01a-hexagonal-overview](./01a-hexagonal-overview.png)
 
 ---
 
-## 01b Hexagonal Domain App
+## 01bhexagonal Domain App
 
 ![01b-hexagonal-domain-app](./01b-hexagonal-domain-app.png)
 
 ---
 
-## 01c Hexagonal Infra Comp
+## 01chexagonal Infra Comp
 
 ![01c-hexagonal-infra-comp](./01c-hexagonal-infra-comp.png)
 
 ---
 
-## 01d Hexagonal Overview Rounded
+## 01dhexagonal Overview Rounded
 
 ![01d-hexagonal-overview-rounded](./01d-hexagonal-overview-rounded.png)
 
@@ -50,7 +50,7 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
-## 03a Medallion Layers Overview
+## 03amedallion Layers Overview
 
 ![03a-medallion-layers-overview](./03a-medallion-layers-overview.png)
 
@@ -68,13 +68,13 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
-## 05a Adapter Hierarchy Base
+## 05aadapter Hierarchy Base
 
 ![05a-adapter-hierarchy-base](./05a-adapter-hierarchy-base.png)
 
 ---
 
-## 05b Adapter Hierarchy Providers
+## 05badapter Hierarchy Providers
 
 ![05b-adapter-hierarchy-providers](./05b-adapter-hierarchy-providers.png)
 
@@ -86,13 +86,13 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
-## 06a Storage Writers
+## 06astorage Writers
 
 ![06a-storage-writers](./06a-storage-writers.png)
 
 ---
 
-## 06b Storage Support
+## 06bstorage Support
 
 ![06b-storage-support](./06b-storage-support.png)
 
@@ -104,13 +104,13 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
-## 07a Dq Analysis
+## 07adq Analysis
 
 ![07a-dq-analysis](./07a-dq-analysis.png)
 
 ---
 
-## 07b Dq Pipeline
+## 07bdq Pipeline
 
 ![07b-dq-pipeline](./07b-dq-pipeline.png)
 
@@ -122,13 +122,13 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
-## 08a Composite Config
+## 08acomposite Config
 
 ![08a-composite-config](./08a-composite-config.png)
 
 ---
 
-## 08b Composite Execution
+## 08bcomposite Execution
 
 ![08b-composite-execution](./08b-composite-execution.png)
 
@@ -140,13 +140,13 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
-## 09a Observability App
+## 09aobservability App
 
 ![09a-observability-app](./09a-observability-app.png)
 
 ---
 
-## 09b Observability Infra
+## 09bobservability Infra
 
 ![09b-observability-infra](./09b-observability-infra.png)
 
@@ -164,13 +164,13 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
-## 11a Config Loading
+## 11aconfig Loading
 
 ![11a-config-loading](./11a-config-loading.png)
 
 ---
 
-## 11b Config Domain
+## 11bconfig Domain
 
 ![11b-config-domain](./11b-config-domain.png)
 
@@ -182,13 +182,13 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
-## 12a Bootstrap Factories
+## 12abootstrap Factories
 
 ![12a-bootstrap-factories](./12a-bootstrap-factories.png)
 
 ---
 
-## 12b Bootstrap Wiring
+## 12bbootstrap Wiring
 
 ![12b-bootstrap-wiring](./12b-bootstrap-wiring.png)
 
@@ -200,55 +200,55 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
-## 13a Data Storage Ports
+## 13adata Storage Ports
 
 ![13a-data-storage-ports](./13a-data-storage-ports.png)
 
 ---
 
-## 13a Port Contracts Data Sources
+## 13aport Contracts Data Sources
 
 ![13a-port-contracts-data-sources](./13a-port-contracts-data-sources.png)
 
 ---
 
-## 13b Operational Ports
+## 13boperational Ports
 
 ![13b-operational-ports](./13b-operational-ports.png)
 
 ---
 
-## 13b Port Contracts Storage
+## 13bport Contracts Storage
 
 ![13b-port-contracts-storage](./13b-port-contracts-storage.png)
 
 ---
 
-## 13c Port Contracts Observability
+## 13cport Contracts Observability
 
 ![13c-port-contracts-observability](./13c-port-contracts-observability.png)
 
 ---
 
-## 13c Validation Dq Ports
+## 13cvalidation Dq Ports
 
 ![13c-validation-dq-ports](./13c-validation-dq-ports.png)
 
 ---
 
-## 13d Port Contracts Services
+## 13dport Contracts Services
 
 ![13d-port-contracts-services](./13d-port-contracts-services.png)
 
 ---
 
-## 13e Operational Ports Domain
+## 13eoperational Ports Domain
 
 ![13e-operational-ports-domain](./13e-operational-ports-domain.png)
 
 ---
 
-## 13f Operational Ports Infra
+## 13foperational Ports Infra
 
 ![13f-operational-ports-infra](./13f-operational-ports-infra.png)
 
@@ -260,13 +260,13 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
-## 14a Cli Commands
+## 14acli Commands
 
 ![14a-cli-commands](./14a-cli-commands.png)
 
 ---
 
-## 14b Cli Routing
+## 14bcli Routing
 
 ![14b-cli-routing](./14b-cli-routing.png)
 
@@ -284,13 +284,13 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
-## 16a Transformer Base
+## 16atransformer Base
 
 ![16a-transformer-base](./16a-transformer-base.png)
 
 ---
 
-## 16b Transformer Pub Other
+## 16btransformer Pub Other
 
 ![16b-transformer-pub-other](./16b-transformer-pub-other.png)
 
@@ -308,13 +308,13 @@ _Generated: 2026-07-08T11:14:31+03:00_
 
 ---
 
-## 18a Lock System
+## 18alock System
 
 ![18a-lock-system](./18a-lock-system.png)
 
 ---
 
-## 18b Checkpoint Shutdown
+## 18bcheckpoint Shutdown
 
 ![18b-checkpoint-shutdown](./18b-checkpoint-shutdown.png)
 
@@ -499,3 +499,4 @@ _Generated: 2026-07-08T11:14:31+03:00_
 ![48-effective-config-artifact-domain-model](./48-effective-config-artifact-domain-model.png)
 
 ---
+
