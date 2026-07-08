@@ -27,7 +27,9 @@ VIEW_COLLECTION = DIAGRAM_ROOT / "views"
 
 def _load_apply_elk_layout() -> ModuleType:
     module_path = REPO_ROOT / "src" / "tools" / "apply_elk_layout.py"
-    spec = importlib.util.spec_from_file_location("apply_elk_layout_module", module_path)
+    spec = importlib.util.spec_from_file_location(
+        "apply_elk_layout_module", module_path
+    )
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
@@ -57,9 +59,15 @@ def _active_source_stems(directory: Path, suffix: str) -> set[str]:
 def test_precommit_diagram_paths_cover_canonical_tree() -> None:
     content = (REPO_ROOT / ".pre-commit-config.yaml").read_text(encoding="utf-8")
 
-    assert "docs/02-architecture/diagrams/(architecture|foundation|class-diagrams)" in content
+    assert (
+        "docs/02-architecture/diagrams/(architecture|foundation|class-diagrams)"
+        in content
+    )
     assert "docs/02-architecture/diagrams/views" in content
-    assert "mmd-diagrams/.*\\.mmd|diagrams/mermaid" not in content
+    assert "lint-diagrams-views" in content
+    assert "prune-orphan-diagram-view-nodes" in content
+    assert "mmd-diagrams" not in content
+    assert "diagrams/mermaid" not in content
 
 
 def test_mmdc_docker_fallback_is_version_pinned() -> None:
@@ -85,7 +93,13 @@ def test_governance_docs_match_active_diagram_counts() -> None:
     mmd_total = architecture_count + class_count + foundation_count + template_count
     view_count = len(_source_files(VIEW_COLLECTION, ".mermaid"))
 
-    assert (architecture_count, class_count, foundation_count, mmd_total, view_count) == (
+    assert (
+        architecture_count,
+        class_count,
+        foundation_count,
+        mmd_total,
+        view_count,
+    ) == (
         83,
         94,
         55,
@@ -122,7 +136,9 @@ def test_governance_docs_match_active_diagram_counts() -> None:
 
     for doc, expected_fragments in docs_to_check.items():
         content = doc.read_text(encoding="utf-8")
-        missing = [fragment for fragment in expected_fragments if fragment not in content]
+        missing = [
+            fragment for fragment in expected_fragments if fragment not in content
+        ]
         assert not missing, f"{doc} is missing current baseline fragments: {missing}"
 
 
@@ -138,14 +154,20 @@ def test_governance_docs_match_active_diagram_counts() -> None:
 def test_source_diagrams_have_sibling_svg_and_png_artifacts(
     collection: str, suffix: str
 ) -> None:
-    source_dir = VIEW_COLLECTION if collection == "views" else MMD_COLLECTIONS[collection]
+    source_dir = (
+        VIEW_COLLECTION if collection == "views" else MMD_COLLECTIONS[collection]
+    )
     source_stems = _active_source_stems(source_dir, suffix)
 
     missing_svg = sorted(source_stems - _rendered_stems(source_dir, "svg", ".svg"))
     missing_png = sorted(source_stems - _rendered_stems(source_dir, "png", ".png"))
 
-    assert not missing_svg, f"{collection} is missing rendered SVG artifacts: {missing_svg}"
-    assert not missing_png, f"{collection} is missing rendered PNG artifacts: {missing_png}"
+    assert not missing_svg, (
+        f"{collection} is missing rendered SVG artifacts: {missing_svg}"
+    )
+    assert not missing_png, (
+        f"{collection} is missing rendered PNG artifacts: {missing_png}"
+    )
 
 
 @pytest.mark.parametrize(
@@ -160,7 +182,9 @@ def test_source_diagrams_have_sibling_svg_and_png_artifacts(
 def test_no_orphan_sibling_rendered_diagram_artifacts(
     collection: str, suffix: str
 ) -> None:
-    source_dir = VIEW_COLLECTION if collection == "views" else MMD_COLLECTIONS[collection]
+    source_dir = (
+        VIEW_COLLECTION if collection == "views" else MMD_COLLECTIONS[collection]
+    )
     source_stems = _active_source_stems(source_dir, suffix)
 
     orphan_svg = sorted(_rendered_stems(source_dir, "svg", ".svg") - source_stems)
@@ -185,17 +209,25 @@ def test_required_description_cards_cover_policy_backed_sources() -> None:
     views_missing = _missing_description_cards("views", ".mermaid")
     class_missing = _missing_primary_class_description_cards()
 
-    assert not architecture_missing, f"architecture descriptions missing: {architecture_missing}"
-    assert not foundation_missing, f"foundation descriptions missing: {foundation_missing}"
+    assert not architecture_missing, (
+        f"architecture descriptions missing: {architecture_missing}"
+    )
+    assert not foundation_missing, (
+        f"foundation descriptions missing: {foundation_missing}"
+    )
     assert not views_missing, f"views descriptions missing: {views_missing}"
     assert not class_missing, f"class primary descriptions missing: {class_missing}"
 
 
 def _missing_description_cards(collection: str, suffix: str) -> list[str]:
-    source_dir = VIEW_COLLECTION if collection == "views" else MMD_COLLECTIONS[collection]
+    source_dir = (
+        VIEW_COLLECTION if collection == "views" else MMD_COLLECTIONS[collection]
+    )
     desc_dir = DESCRIPTION_ROOT / ("views" if collection == "views" else collection)
     source_stems = _active_source_stems(source_dir, suffix)
-    description_stems = {path.stem for path in desc_dir.glob("*.md") if path.name != "INDEX.md"}
+    description_stems = {
+        path.stem for path in desc_dir.glob("*.md") if path.name != "INDEX.md"
+    }
     return sorted(source_stems - description_stems)
 
 
