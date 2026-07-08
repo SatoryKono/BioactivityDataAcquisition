@@ -14,7 +14,7 @@ from bioetl.application.services.control_plane.manifest.service import (
 from bioetl.composition.runtime_builders._run_manifest_attr_support import (
     read_attr as _read_attr,
 )
-from bioetl.composition.runtime_builders._run_manifest_data_roots import (
+from bioetl.composition.runtime_builders._run_manifest_planned_artifacts import (
     build_planned_artifacts,
 )
 from bioetl.composition.runtime_builders._snapshot_mapping_support import (

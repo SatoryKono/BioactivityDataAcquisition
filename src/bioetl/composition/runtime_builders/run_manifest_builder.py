@@ -24,7 +24,7 @@ from bioetl.composition.runtime_builders._run_manifest_publication_support impor
     create_manifest_record,
     create_manifest_store,
 )
-from bioetl.composition.runtime_builders._runner_control_plane_policy import (
+from bioetl.composition.runtime_builders._runner_control_plane_policy_support import (
     validate_manifest_persistence_requirements,
 )
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint

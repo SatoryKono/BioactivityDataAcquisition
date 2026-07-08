@@ -592,17 +592,18 @@ hotspot_family_ratchets:
       max_internal_fan_in: 5
     metrics:
       duplication_clusters: 0
-      files: 50
-      total_loc: 6479
+      files: 55
+      total_loc: 6668
       files_ge_250_loc: 0
-      helper_function_ratio: 0.359
-      max_internal_fan_in: 4
+      helper_function_ratio: 0.35
+      max_internal_fan_in: 3
       max_internal_fan_in_module: bioetl.composition.runtime_builders.run_manifest_support
     trend:
-      status: reduced_2026-07-06_runtime_builder_ref_import_consolidation
-      next_action: 2026-07-06 routes serializer-only and control-plane-root callers
-        away from broad manifest reference helpers, lowering measured
-        max_internal_fan_in from 5 to 4 while preserving the existing bounded
+      status: reduced_2026-07-08_issue_6060_runtime_builder_fan_in_headroom
+      next_action: 2026-07-08 issue 6060 splits contract-identity shape helpers,
+        runtime-input type-only imports, effective-config serialization, and
+        data-root / runner policy seams across narrower owners, lowering measured
+        max_internal_fan_in from 4 to 3 while preserving the existing bounded
         budget of 5. No technical-debt budget is increased.
 full_app_duplication_ratchets:
   snapshot_date: '2026-07-07'
