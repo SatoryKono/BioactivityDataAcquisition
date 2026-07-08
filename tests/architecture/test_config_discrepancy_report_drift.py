@@ -7,7 +7,7 @@ import pytest
 from pathlib import Path
 import sys
 
-pytestmark = pytest.mark.architecture
+pytestmark = [pytest.mark.architecture, pytest.mark.timeout(240)]
 
 ROOT = Path(__file__).resolve().parents[2]
 

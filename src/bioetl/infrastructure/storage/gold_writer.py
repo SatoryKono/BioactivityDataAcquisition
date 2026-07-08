@@ -10,8 +10,15 @@ from typing import TYPE_CHECKING, Any
 from deltalake.exceptions import CommitFailedError, TableNotFoundError  # noqa: F401
 
 from bioetl.domain.medallion import GoldWriteMode
+from bioetl.domain.ports.noop import _NoOpSpan
+from bioetl.domain.types import (
+    GoldSchemaPolicyByVersion,
+    ScdConfig,
+    resolve_gold_contract_version,
+)
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
+    _clear_delta_tables,
     coerce_null_types_for_delta,  # noqa: F401
 )
 from bioetl.infrastructure.storage.delta.table_ops import (
@@ -30,8 +37,33 @@ from bioetl.infrastructure.storage.gold.pipeline_helpers import (
 from bioetl.infrastructure.storage.gold.pipeline_helpers import (
     PreparedGoldWriteContext as _PreparedGoldWriteContext,
 )
+from bioetl.infrastructure.storage.gold.pipeline_helpers import (
+    normalize_scd_config as _normalize_scd_config_impl,
+)
+from bioetl.infrastructure.storage.gold.pipeline_helpers import (
+    post_write_gold as _post_write_gold_impl,
+)
+from bioetl.infrastructure.storage.gold.pipeline_helpers import (
+    prepare_gold_write as _prepare_write_gold_impl,
+)
+from bioetl.infrastructure.storage.gold.pipeline_helpers import (
+    set_gold_write_span_attributes as _set_write_span_attributes_impl,
+)
 from bioetl.infrastructure.storage.gold.validation_mixin import (
     GoldWriterValidationMixin,
+)
+from bioetl.infrastructure.storage.gold.writer_implementation import (
+    _write_dual_targets_impl,
+    _write_single_target_impl,
+)
+from bioetl.infrastructure.storage.gold.writer_request import (
+    _build_gold_write_request,
+)
+from bioetl.infrastructure.storage.gold.writer_runtime import (
+    _resolve_runtime_services,
+)
+from bioetl.infrastructure.storage.gold.writer_schema_helpers import (
+    _resolve_active_gold_schema,
 )
 
 if TYPE_CHECKING:
@@ -40,9 +72,7 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
     from bioetl.domain.types import (
         GoldRecord,
-        GoldSchemaPolicyByVersion,
         RunID,
-        ScdConfig,
     )
     from bioetl.domain.value_objects.silver_result import SilverWriteResult
     from bioetl.infrastructure.storage.gold.runtime_helpers import (
@@ -53,12 +83,8 @@ __all__ = ["GoldWriteMode", "GoldWriter", "_normalize_scd_config"]
 
 
 def _normalize_scd_config(scd_config: object, primary_keys: list[str] | None) -> object:
-    """Lazy compatibility wrapper preserving the public helper import path."""
-    from bioetl.infrastructure.storage.gold.writer_facade_runtime import (
-        normalize_scd_config,
-    )
-
-    return normalize_scd_config(scd_config, primary_keys)
+    """Compatibility wrapper preserving the public helper import path."""
+    return _normalize_scd_config_impl(scd_config, primary_keys)
 
 
 def DeltaTable(*args: object, **kwargs: object) -> object:
@@ -129,10 +155,6 @@ class GoldWriter(
         flat_structure: bool = False,
     ) -> None:
         """Initialize Gold writer with explicit runtime collaborators."""
-        from bioetl.infrastructure.storage.gold.writer_support import (
-            _resolve_runtime_services,
-        )
-
         super().__init__(base_path, logger, flat_structure=flat_structure)
         services = _resolve_runtime_services(
             runtime_services=runtime_services,
@@ -164,17 +186,6 @@ class GoldWriter(
         silver_refs: list[SilverWriteResult] | None = None,
     ) -> None:
         """Validate and write Gold records, including SCD2 and dual-write flows."""
-        from bioetl.domain.ports.noop import _NoOpSpan
-        from bioetl.domain.types import (
-            GoldSchemaPolicyByVersion,
-            ScdConfig,
-            resolve_gold_contract_version,
-        )
-        from bioetl.infrastructure.storage.gold.writer_support import (
-            _build_gold_write_request,
-            _resolve_active_gold_schema,
-        )
-
         span_context = (
             self._tracing.get_tracer(__name__).start_as_current_span("write_gold")
             if self._tracing is not None
@@ -227,11 +238,7 @@ class GoldWriter(
         schema_policy: GoldSchemaPolicyByVersion,
     ) -> None:
         """Compatibility seam for direct test patching and dual-write orchestration."""
-        from bioetl.infrastructure.storage.gold.writer_facade_runtime import (
-            write_dual_targets as _write_dual_targets,
-        )
-
-        await _write_dual_targets(
+        await _write_dual_targets_impl(
             self,
             request=request,
             schema_policy=schema_policy,
@@ -243,13 +250,17 @@ class GoldWriter(
         request: _GoldWriteRequest,
     ) -> None:
         """Compatibility seam for direct test patching and dual-write orchestration."""
-        from bioetl.infrastructure.storage.gold.writer_facade_runtime import (
-            write_single_target as _write_single_target,
-        )
-
-        await _write_single_target(
+        await _write_single_target_impl(
             self,
             request=request,
+        )
+
+    async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
+        """Implement ``GoldStoragePort`` clear for rebuild/backfill paths."""
+        return _clear_delta_tables(
+            base_path=Path(str(self.base_path)),
+            table_path=Path(self._resolve_table_path(table_name)),
+            dry_run=dry_run,
         )
 
     async def _prepare_write_gold(
@@ -264,10 +275,6 @@ class GoldWriter(
         contract_version: str | None = None,
     ) -> _PreparedGoldWriteContext:
         """Run validation and path resolution before a Gold write."""
-        from bioetl.infrastructure.storage.gold.pipeline_helpers import (
-            prepare_gold_write as _prepare_write_gold_impl,
-        )
-
         return await _prepare_write_gold_impl(
             self,
             table_name=table_name,
@@ -283,10 +290,6 @@ class GoldWriter(
         self,
         context: _GoldWritePostwriteContext,
     ) -> None:
-        from bioetl.infrastructure.storage.gold.pipeline_helpers import (
-            post_write_gold as _post_write_gold_impl,
-        )
-
         await _post_write_gold_impl(self, context)
 
     @staticmethod
@@ -297,8 +300,4 @@ class GoldWriter(
         record_count: int,
     ) -> None:
         """Set standard tracing attributes for a Gold write span."""
-        from bioetl.infrastructure.storage.gold.pipeline_helpers import (
-            set_gold_write_span_attributes as _set_write_span_attributes_impl,
-        )
-
         _set_write_span_attributes_impl(span, table_name, mode, record_count)

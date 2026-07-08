@@ -345,6 +345,9 @@ Supported policy slice for issue `#2598`:
   в lane `coverage-verify`. Локальные drift-проверки без fresh coverage XML
   должны использовать hash-only режим
   `python -m scripts.engineering.qa report-module-coverage --check --allow-missing-coverage-xml`.
+  `unmeasured_module_count=0` и `uncovered_module_count=0` означают, что все
+  source modules измерены и имеют хотя бы одну covered executable line; это не
+  утверждение о полном line/branch coverage.
   Artifact должен перечислять каждый `src/bioetl/**/*.py`
   module и явно фиксировать coverage status. Поле `source_tree_sha256` MUST
   обновляться после любых изменений под `src/bioetl/**/*.py` через
@@ -356,6 +359,8 @@ Supported policy slice for issue `#2598`:
   map, module coverage inventory, compatibility census, dead-code inventory,
   duplication baseline, hotspot-family baseline, test-governance inventory и
   contract diagnostics в 10-категорийную модель с суммой весов `1.00`.
+  Integral score is a governance scorecard snapshot, not a manual architecture
+  review or broad architecture-health guarantee.
   Category scores вычисляются из live metrics, а не остаются fixed constants,
   поэтому substantial duplication/hotspot/test-governance reductions должны
   менять integral score после регенерации committed artifact.
@@ -727,7 +732,8 @@ pytest tests/contract/test_gold_dq_golden_snapshots.py --update-golden
 - **Architecture Quality Scorecard**:
   `reports/quality/architecture-quality-scorecard.json` фиксирует
   evidence-backed quality trend по слоям, DI, module boundaries, tests,
-  contracts, determinism и debt burden. Локальная drift-проверка:
+  contracts, determinism и debt burden. Это governance scorecard snapshot, а не
+  полный manual architecture review. Локальная drift-проверка:
   `pytest tests/architecture/test_architecture_quality_scorecard.py`.
 - **Regression**: Все исправления багов обязаны сопровождаться регрессионным тестом.
 - **Coverage Configuration**: Подробная информация о настройке покрытия, исключаемых паттернах и troubleshooting — см. [Coverage Configuration Guide](./coverage-configuration.md)

@@ -324,3 +324,13 @@ entries:
     classification: budget_closeout_ratchet
     live_guard: "debt issue batch #6032, #6034, and #6037 remains aligned with live hotspot fan-in and runtime SCC acceptance evidence without budget growth."
     rationale: Keeps the newest architecture-debt closeout batch tied to executable live invariants for hotspot family headroom and runtime import-cycle acceptances instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issue_6060_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue #6060 remains aligned with live composition runtime-builder hotspot fan-in headroom without budget growth."
+    rationale: Keeps the architecture-debt closeout tied to executable live hotspot-family fan-in metrics and no-growth budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issue_6062_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue #6062 remains aligned with live Gold writer function-scoped import inventory without budget growth."
+    rationale: Keeps the architecture-debt closeout tied to executable Gold writer lazy-import and hidden-coupling evidence instead of stale historical signoff.

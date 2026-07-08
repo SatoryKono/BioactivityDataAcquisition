@@ -23,7 +23,7 @@
     },
     {
       "evidence_metrics": {
-        "source_module_count": 2221,
+        "source_module_count": 2219,
         "uncovered_module_count": 0
       },
       "id": "ddd_invariants",
@@ -47,7 +47,7 @@
       "evidence_metrics": {
         "hotspot_budget_warning_count": 0,
         "hotspot_family_count": 5,
-        "source_module_count": 2221,
+        "source_module_count": 2219,
         "total_duplicate_clusters": 0
       },
       "id": "module_boundaries_coupling",
@@ -173,7 +173,7 @@
     "retained_public_export_facade_count": 4,
     "runtime_cardinality_review_required_count": 0,
     "runtime_cardinality_threshold_violation_count": 0,
-    "source_module_count": 2221,
+    "source_module_count": 2219,
     "total_duplicate_clusters": 0,
     "twin_pair_count": 0,
     "uncovered_module_count": 0,
@@ -207,7 +207,7 @@
     },
     "dependency_map": {
       "path": "docs/02-architecture/generated/module-dependency-map.json",
-      "source_fingerprint": "61c7377291f7491093e4799711a5e357c09e3c7beccd5cdffc639d530a269ade"
+      "source_fingerprint": "f90df99ca28bb720b2a6f25004e8cae45b547161e534d5175e54964b2882424e"
     },
     "duplication_baseline": {
       "path": "reports/quality/full-app-duplication-baseline.json",
@@ -222,7 +222,7 @@
     "module_coverage_inventory": {
       "coverage_xml_sha256": "9a58b23b7c9cc7bb4c2ce0753dbd8999782d201d6cd1e0fd44214833bcdf3791",
       "path": "reports/quality/module-coverage-inventory.json",
-      "source_tree_sha256": "5f3c31efd0d8362e8b520d4194bd7d1d452000edf7573393647de48659118ece"
+      "source_tree_sha256": "4eca34aebe5a0f8a9e147b5ec59aa4aae70fec6ee9a4431f28a7e6977d179824"
     },
     "observability_runtime_cardinality_inventory": {
       "dashboarded_without_declaration_count": 0,

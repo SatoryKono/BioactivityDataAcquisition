@@ -48,6 +48,13 @@ help:
 	@echo "  make quarantine-purge       Purge quarantine state for PIPELINE=$(PIPELINE)"
 	@echo "  make release-lock           Release lock for PIPELINE=$(PIPELINE) RUN_ID=$(RUN_ID)"
 	@echo ""
+	@echo "Diagram tooling:"
+	@echo "  make render-diagrams        Render SVG/PNG for all diagram sources"
+	@echo "  make render-diagrams-svg    Render SVG only (faster local loop)"
+	@echo "  make render-diagrams-checks Run PR-profile diagram validation"
+	@echo "  make render-diagrams-bundles Regenerate Markdown diagram bundles"
+	@echo "  make render-diagrams-all    Render artifacts and refresh bundles"
+	@echo ""
 	@echo "Optional Docker helper commands:"
 	@echo "  make docker-check           Check Docker installation"
 	@echo "  make docker-build           Build BioETL image"
@@ -256,5 +263,21 @@ quarantine-purge:
 
 release-lock:
 	$(RUN) bioetl lock release --pipeline $(PIPELINE) --run-id $(RUN_ID)
+
+.PHONY: render-diagrams render-diagrams-svg render-diagrams-checks render-diagrams-bundles render-diagrams-all
+
+render-diagrams:
+	bash docs/02-architecture/diagrams/tooling/render.sh
+
+render-diagrams-svg:
+	bash docs/02-architecture/diagrams/tooling/render.sh --svg-only
+
+render-diagrams-checks:
+	bash scripts/diagrams/run_diagram_checks.sh --profile pr
+
+render-diagrams-bundles:
+	$(RUN) python scripts/diagrams/generate_all_bundles.py
+
+render-diagrams-all: render-diagrams render-diagrams-bundles
 
 .PHONY: docker-dev
