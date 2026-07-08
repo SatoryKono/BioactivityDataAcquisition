@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.nested_mapping import (
+from bioetl.application.services.control_plane.manifest.diagnostics.nested_mapping import (
     lookup_mapping_path,
 )
 from bioetl.domain.control_plane import RunManifest
