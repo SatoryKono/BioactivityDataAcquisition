@@ -222,13 +222,13 @@ cd BioactivityDataAcquisition
 
 # Preferred manual path
 uv sync --extra dev --extra tests --extra tracing
-   # Add --extra docs if you need MkDocs/site builds
-   uv sync --extra dev --extra tests --extra tracing --extra docs
+# Add --extra docs if you need MkDocs/site builds
+uv sync --extra dev --extra tests --extra tracing --extra docs
 
-   # Fallback without uv
-   python3.12 -m venv .venv
-   . .venv/bin/activate
-   pip install -e ".[dev,tests,tracing,docs]"
+# Fallback without uv: use an installed Python 3.12+ interpreter.
+python3 -m venv .venv
+. .venv/bin/activate
+pip install -e ".[dev,tests,tracing,docs]"
 ```
 
 1. **Configure Environment** *(optional)*:

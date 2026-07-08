@@ -1,6 +1,8 @@
 %% View: Full | Parent: (root)
 %% Parent source: docs/02-architecture/diagrams/foundation/14-provider-health-states.mmd
 %% Full reference diagram retained after decomposition.
+%% Synced: 2026-07-08
+
 %% Title: Provider Health State Machine
 %% Covers: RULES.md §3.6 (Resilience), §4 (Provider Specifications)
 %% Updated: 2026-02-17
@@ -10,8 +12,8 @@
 %% @date    2026-02-24
 %% @type    stateDiagram
 %% @level   Mixed (System / Component / Class)
-
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% @nodes   4
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 stateDiagram-v2
     [*] --> HEALTHY: Initial state
 
@@ -99,12 +101,12 @@ stateDiagram-v2
 
     %% Provider-specific configurations
     note right of ProviderSpecificBehavior
-        ChEMBL: No rate limit, /status.json, 1000 records
+        ChEMBL: No rate limit, /status, 1000 records
         PubChem: 5 req/sec, compound probe, 100 compounds
-        UniProt: 100 req/sec, search probe, 500 proteins
-        PubMed: 3 req/sec, efetch probe, 200 articles
+        UniProt: 100 req/sec, search probe, 1 protein (size=1)
+        PubMed: 3 req/sec, einfo probe, no articles fetched
     end note
 
     state ProviderSpecificBehavior {
-        [*] ==> ConfiguredProviders
+        [*] --> ConfiguredProviders
     }
