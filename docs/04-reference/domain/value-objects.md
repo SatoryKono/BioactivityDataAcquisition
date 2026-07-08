@@ -18,6 +18,10 @@ ______________________________________________________________________
 `src/bioetl/domain/value_objects/` contains immutable domain primitives and
 typed semantic helpers that keep validation close to the domain boundary.
 
+This page is the semantic family and module catalog. Use
+[API Reference](../api/index.md) for symbol-level lookup when an audit needs
+every dataclass, enum, or helper class name.
+
 ## Family Catalog
 
 | Family | Representative modules | Semantic role |

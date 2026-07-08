@@ -1,17 +1,19 @@
 %% View: Full | Parent: (root)
 %% Parent source: docs/02-architecture/diagrams/foundation/01-full-system-component.mmd
 %% Full reference diagram retained after decomposition.
-%% Synced: 2026-03-24
+%% Synced: 2026-07-08
 
 %% Title: Full System Component Diagram
 %% Covers: RULES.md §1.1 (Five-Layer Architecture), §1.2 (Ports & Adapters), composition/runtime_builders, application/core
-%% Updated: 2026-03-24
-%% Components: CLI, build_pipeline_runner, PipelineRunnerService, PipelineRunner, BatchExecutor, BatchProcessingService, PipelineService, provider adapters, medallion storage
+%% Updated: 2026-03-28
+%% Components: CLI command families, execution/control-plane/health/maintenance/resources APIs, control-plane builders, PipelineRunnerService, PipelineRunner, BatchExecutor, BatchProcessingService, inspection/control-plane services, provider adapters, medallion + control-plane storage
 
-%% @version 1.2.0
-%% @date    2026-03-24
+%% @version 1.3.0
+%% @date    2026-03-28
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
+%% @nodes   35
+%% Legend: docs/02-architecture/diagrams/views/00-legend.mermaid
 %% @png-scale 6
 %% @png-dpi   600
 %% @adr     ADR-040
@@ -26,17 +28,24 @@ flowchart TB
 
     subgraph Interfaces["Interfaces Layer"]
         direction TB
-        CLI["CLI run / health / debug"]
+        CLI["CLI run / run-all / run-composite"]
+        InspectCLI["CLI run-manifest / lineage / checkpoint"]
         Signals["Signal orchestration"]
     end
 
     subgraph Composition["Composition Layer"]
         direction TB
+        ExecAPI["execution_api"]
+        ControlPlaneAPI["control_plane_api"]
+        HealthAPI["health_api"]
+        MaintenanceAPI["maintenance_api"]
+        ResourcesAPI["resources_api"]
         BuildRunner["build_pipeline_runner"]
         Registry["PipelineRegistry"]
         PipelineFactory["GenericPipelineFactory"]
         StorageFactory["StorageFactory"]
         Assembly["service + runner assembly"]
+        ControlPlaneBuild["prepare_runner_inputs +<br/>create_run_manifest_with_effective_config +<br/>attach_control_plane_collaborators"]
     end
 
     subgraph Application["Application Layer"]
@@ -50,6 +59,8 @@ flowchart TB
         PipelineServices["PipelineService"]
         Lifecycle["Preflight / Postrun / MedallionLifecycle"]
         CompositeRuntime["Composite runtime"]
+        ControlPlaneServices["RunManifestService / RunLedgerService /<br/>EffectiveConfigService"]
+        InspectionServices["RunManifestInspectionService /<br/>LineageInspectionService"]
     end
 
     subgraph Domain["Domain Layer"]
@@ -66,6 +77,7 @@ flowchart TB
         HTTPStack["Unified HTTP stack"]
         StorageRuntime["Bronze / Delta / Gold storage"]
         StateAdapters["Lock / checkpoint adapters"]
+        ControlPlaneStores["FileRunManifestStore / FileRunLedgerStore /<br/>FileLineageStore"]
         Observability["Metrics / tracing adapters"]
     end
 
@@ -74,26 +86,38 @@ flowchart TB
         Bronze[("Bronze")]
         Silver[("Silver Delta")]
         Gold[("Gold Delta")]
-        ControlPlane[("Quarantine / checkpoints")]
+        ControlPlane[("Quarantine / checkpoints /<br/>run_manifest / run_ledger / lineage")]
+        ConfigArtifacts[("Effective-config artifacts")]
     end
 
     BioactivityAPIs --> ProviderAdapters
     PublicationAPIs --> ProviderAdapters
 
-    CLI ==> BuildRunner
+    CLI ==> ExecAPI
+    InspectCLI ==> ControlPlaneAPI
+    InspectCLI ==> HealthAPI
+    InspectCLI ==> MaintenanceAPI
+    InspectCLI ==> ResourcesAPI
     Signals --> RunnerService
 
+    ExecAPI --> BuildRunner
     BuildRunner --> Registry --> PipelineFactory
     PipelineFactory --> Assembly
     Assembly --> StorageFactory
     Assembly --> RunnerService
     Assembly --> PipelineRunner
+    Assembly --> ControlPlaneBuild
+    ControlPlaneAPI --> InspectionServices
+    HealthAPI --> Lifecycle
+    MaintenanceAPI --> Lifecycle
+    ResourcesAPI --> Lifecycle
 
     RunnerService ==> PipelineRunner
     PipelineRunner --> RunnerDeps
     RunnerDeps ==> BatchExecutor
     PipelineRunner --> PipelineServices
     PipelineRunner --> Lifecycle
+    PipelineRunner --> ControlPlaneServices
     BatchExecutor ==> BatchProcessing
     BatchProcessing --> TransformWrite
     BatchProcessing --> PipelineServices
@@ -109,11 +133,13 @@ flowchart TB
     ProviderAdapters -.->|"implement"| Ports
     StorageRuntime -.->|"implement"| Ports
     StateAdapters -.->|"implement"| Ports
+    ControlPlaneStores -.->|"implement"| Ports
     Observability -.->|"implement"| Ports
 
     ProviderAdapters --> HTTPStack
     StorageFactory --> StorageRuntime
     BuildRunner --> StateAdapters
+    ControlPlaneBuild --> ControlPlaneStores
     BuildRunner --> Observability
 
     StorageRuntime ==> Bronze
@@ -121,6 +147,8 @@ flowchart TB
     StorageRuntime ==> Gold
     StateAdapters --> ControlPlane
     StorageRuntime -.-> ControlPlane
+    ControlPlaneStores --> ControlPlane
+    ControlPlaneServices --> ConfigArtifacts
 
     style External fill:#f1f5f9,stroke:#64748b,stroke-width:2px
     style Interfaces fill:#eff6ff,stroke:#2563eb,stroke-width:2px

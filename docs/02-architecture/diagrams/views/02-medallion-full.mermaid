@@ -25,56 +25,67 @@
 }}%%
 %% @uniform width=224 height=56 max_title_len=23 max_desc_lines=1
 flowchart LR
-    subgraph Bronze["Bronze Layer"]
-        direction TB
-        B1["Raw Data<br/>JSONL + zstd"]
-        B2["Append-Only writes<br/>"]
-        B3["Retention: 90 days<br/>"]
-        B4["content_hash tracking<br/>"]
+    subgraph Sources["External Sources"]
+        ChEMBL["ChEMBL API"]
+        PubChem["PubChem API"]
+        UniProt["UniProt API"]
+        PubMed["PubMed API"]
+        CrossRef["CrossRef API"]
+        OpenAlex["OpenAlex API"]
+        S2["Semantic Scholar API"]
     end
 
-    subgraph Silver["Silver Layer"]
+    subgraph Bronze_Layer["Bronze Layer"]
         direction TB
-        S1["Normalized Data<br/>Delta Lake (ACID)"]
-        S2["Merge by content_hash<br/>"]
-        S3["Schema enforcement<br/>"]
-        S4["Deduplication<br/>"]
+        BronzeWriter["BronzeWriter"]
+        Bronze[("Bronze Storage<br/>JSONL + zstd<br/>retention: 90d<br/>path: bronze/v1/{provider}/{entity}/{date}")]
     end
 
-    subgraph Gold["Gold Layer"]
+    subgraph Silver_Layer["Silver Layer"]
         direction TB
-        G1["Business-Ready Data<br/>Delta Lake"]
-        G2["Strict validation<br/>(Pandera schemas)"]
-        G3["SCD Type 2 /<br/>Overwrite modes"]
-        G4["Flattened for analytics<br/>"]
+        SilverWriter["SilverWriter"]
+        Silver[("Silver Storage<br/>Delta Lake<br/>validation: Pandera soft<br/>merge/upsert by content_hash")]
     end
 
-    subgraph Quarantine["Quarantine"]
+    subgraph Gold_Layer["Gold Layer"]
         direction TB
-        Q1["Failed records<br/>(DQ errors)"]
-        Q2["Error metadata +<br/>stack trace"]
-        Q3["Replay support<br/>"]
+        GoldWriter["GoldWriter"]
+        Gold[("Gold Storage<br/>Delta/Parquet<br/>validation: Pandera strict<br/>strategy: SCD2/append")]
     end
 
-    Bronze -->|K01| Silver
-    Silver -->|K02| Gold
-    Bronze -.->|"DQ failure"| Quarantine
-    Silver -.->|"DQ failure"| Quarantine
-    Quarantine -.->|"Replay"| Bronze
+    subgraph DQ_Branch["Data Quality Branch"]
+        DQValidator["DQ Validator<br/>━━━━━━━━━━━━━━━<br/>⚠️ Soft: >5% errors<br/>❌ Hard: >20% errors"]
+    end
 
-    %% Styling — Medallion colors per policy §4.3
-    classDef bronze fill:#fff7ed,stroke:#f59e0b,color:#212121
-    classDef silver fill:#f8fafc,stroke:#475569,color:#212121
-    classDef gold fill:#fefce8,stroke:#ca8a04,color:#212121
-    classDef quarantine fill:#ffe4e6,stroke:#e11d48,color:#dc2626
+    subgraph Lineage["Lineage Tracking"]
+    end
 
-    class B1,B2,B3,B4 bronze
-    class S1,S2,S3,S4 silver
-    class G1,G2,G3,G4 gold
-    class Q1,Q2,Q3 quarantine
+    %% Main flow
+    ChEMBL --> BronzeWriter
+    PubChem --> BronzeWriter
+    UniProt --> BronzeWriter
+    PubMed --> BronzeWriter
+    CrossRef --> BronzeWriter
+    OpenAlex --> BronzeWriter
+    S2 --> BronzeWriter
 
-    linkStyle 0 stroke:#1E293B,stroke-width:4px
-    linkStyle 1 stroke:#1E293B,stroke-width:4px
-    linkStyle 2 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
-    linkStyle 3 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
-    linkStyle 4 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
+    BronzeWriter --> Bronze
+    Bronze --> SilverWriter
+
+    SilverWriter --> DQValidator
+    DQValidator -->|"✅ Pass"| Silver
+    DQValidator -->|"❌ Fail"| Quarantine
+
+    Silver --> GoldWriter
+    GoldWriter --> Gold
+
+    %% Lineage tracking
+    Bronze -.->|"batch_id"| LineageLog
+    Silver -.->|"version"| LineageLog
+
+    %% Styling
+    style Bronze fill:#fff7ed,stroke:#f59e0b,color:#212121
+    style Silver fill:#f1f5f9,stroke:#475569,color:#212121
+    style Gold fill:#fefce8,stroke:#ca8a04,color:#212121
+    style Quarantine fill:#ffe4e6,stroke:#dc2626,color:#212121
+    style LineageLog fill:#eff6ff,stroke:#2563eb,color:#212121

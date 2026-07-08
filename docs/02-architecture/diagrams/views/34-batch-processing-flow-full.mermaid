@@ -1,6 +1,8 @@
 %% View: Full | Parent: (root)
 %% Parent source: docs/02-architecture/diagrams/foundation/34-batch-processing-flow.mmd
 %% Full reference diagram retained after decomposition.
+%% Synced: 2026-07-08
+
 %% Title: Batch Processing Flow — BatchProcessingService choreography
 %% Covers: RULES.md §2.1 (Data Flow), application/core/{batch_executor,batch_processing_service,batch_processing_support}.py
 %% Rank: 9 (Score 8.44) — Core data processing choreography for every batch
@@ -10,31 +12,25 @@
 %% @date    2026-03-24
 %% @type    sequenceDiagram
 %% @level   Component / Class
-
-%%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
+%% @nodes   14
+%%{init: {'theme': 'base', 'themeVariables': {'lineWidth': '2'}}}%%
 %% @uniform sequence width=200 max_title_len=20
 sequenceDiagram
     autonumber
-
-    box Application Layer
     participant Runner as PipelineRunner
     participant BE as BatchExecutor
     participant BPS as BatchProcessingService
+    participant DS as DataSourcePort
     participant BTM as BatchTracingManagerService
     participant SUP as BatchProcessingSupportService
     participant BT as BatchTransformer
     participant BW as BatchWriter
-    participant QM as QuarantineRuntimeService
-    participant BMR as BatchMetricsRecorderService
-    participant State as BatchExecutionStateService
-    end
-
-    box Infrastructure Layer
-    participant DS as DataSourcePort
     participant Bronze as BronzeWriter
     participant Silver as SilverWriter
     participant Gold as GoldWriter
-    end
+    participant QM as QuarantineRuntimeService
+    participant BMR as BatchMetricsRecorderService
+    participant State as BatchExecutionStateService
 
     Runner->>BE: execute(limit, query, offset)
 

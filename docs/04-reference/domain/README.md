@@ -18,20 +18,20 @@ ______________________________________________________________________
 This section is the canonical published reference catalog for the BioETL domain
 model.
 
-Use these pages when you need the current catalog of aggregates, entities, value objects,
-domain events, control-plane artifacts, ports, invariants, and workflow
-state-machine semantics.
+Use these pages when you need the current semantic catalog of aggregates,
+entities, value-object families, domain events, control-plane artifacts, port
+families, invariants, and workflow state-machine semantics.
 
 ## Boundary
 
 - Use [Domain Layer](../../02-architecture/01-domain-layer.md) for architecture
   rationale, layer boundaries, and DDD positioning.
-- Use this reference section for the current published catalog of live domain
-  surfaces.
+- Use this reference section for the current published semantic catalog of live
+  domain surfaces.
 - Use `src/bioetl/domain/README.md` as a code-navigation package map only. It
   is not the canonical published operator/reference surface.
-- Use [API Reference](../api/index.md) when you need module-level API lookup
-  instead of a semantic catalog.
+- Use [API Reference](../api/index.md) when you need module-level or
+  symbol-level API lookup instead of a semantic catalog.
 
 ## Source Of Truth
 

@@ -9,6 +9,9 @@
 
 - Зайдите в **Settings** > **Project: BioactivityDataAcquisition** > **Python Interpreter**.
 - Выберите интерпретатор из вашего `.venv` (созданного через `uv sync`).
+- Pre-commit hooks use the project Python wrapper or the active hook
+  interpreter; do not require a separate hard-coded `python3.12` installation
+  when the supported environment already runs on Python 3.13.
 
 ## 2. Общие конфигурации запуска (Shared Run Configurations)
 

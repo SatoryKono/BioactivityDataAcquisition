@@ -1,7 +1,7 @@
 %% View: Full | Parent: (root)
 %% Parent source: docs/02-architecture/diagrams/foundation/41-error-classification-tree.mmd
 %% Full reference diagram retained after decomposition.
-%% Synced: 2026-02-27
+%% Synced: 2026-07-08
 
 %% Title: Error Classification Decision Tree — Full Logic
 %% Covers: RULES.md §3.1 (Error Handling), domain/exceptions/
@@ -12,6 +12,7 @@
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
+%% @nodes   22
 %% @png-scale 6
 %% @png-dpi   600
 %% @uniform-group root    nodes=ERROR,HTTP,DOMAIN,INFRA
@@ -24,28 +25,18 @@
 %% @uniform width=168 groups=2 width_strategy=group
 %% @uniform-stats root         width=144 height=112 max_desc_lines=4
 %% @uniform-stats actions      width=168 height=112 max_desc_lines=4
-%%{init: {
-  'flowchart': {
-    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
-  },
-  'layout': 'elk',
-  'elk': {
-    'mergeEdges': true,
-    'nodePlacementStrategy': 'BRANDES_KOEPF',
-    'edgeRouting': 'ORTHOGONAL'
-  }
-}}%%
+%%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
 flowchart TB
-    ERROR["Error Occurred<br/><br/><br/>"]
+    ERROR["Error Occurred"]
 
     ERROR --> HTTP{{"HTTP Status Code?"}}
     ERROR --> DOMAIN{{"Domain Error?"}}
     ERROR --> INFRA{{"Infrastructure Error?"}}
 
     %% HTTP errors
-    HTTP -->|"auth"| AUTH["[E] ServiceAuthenticationError\n(CriticalError)\n→ FAIL FAST\n→ Verify API key"]
+    HTTP -->|"auth"| AUTH["[E] ServiceAuthenticationError\n(CriticalError)\n→ fail fast\n→ check API key"]
     HTTP -->|"404"| NOTFOUND["[E] ApiError\n(RecoverableError)\n→ Log warning\n→ Skip entity"]
-    HTTP -->|"429"| RATE["[E] RateLimitExceededError\n(RecoverableError)\n→ Honor Retry-After\n→ Backoff"]
+    HTTP -->|"429"| RATE["[E] RateLimitExceededError\n(RecoverableError)\n→ use Retry-After\n→ exponential backoff"]
     HTTP -->|"5xx"| SERVER["[E] ServiceUnavailableError\n(RecoverableError)\n→ Retry with backoff\n→ Max 3 attempts"]
     HTTP -.->|"other"| UNKNOWN_HTTP["[E] ExternalServiceError\n→ Log, classify, retry"]
 
@@ -59,7 +50,7 @@ flowchart TB
     INFRA -->|"lock-lost"| LOCK["[E] LockLostError\n(CriticalError)\n→ ABORT immediately\n→ No partial write"]
     INFRA -->|"lock-timeout"| LOCKACQ["[E] LockAcquisitionError\n(CriticalError)\n→ FAIL, another instance running"]
     INFRA -->|"storage"| STORE["[E] StorageError\n(RecoverableError)\n→ Retry Delta write"]
-    INFRA -->|"cb-open"| CB["[E] CircuitBreakerOpenError\n(RecoverableError)\n→ Wait recovery timeout\n→ HALF_OPEN"]
+    INFRA -->|"cb-open"| CB["[E] CircuitBreakerOpenError\n(RecoverableError)\n→ wait timeout\n→ HALF_OPEN probe"]
 
     %% Branch groups
     subgraph HTTPBranch["HTTP Branch Outcomes"]
@@ -128,15 +119,10 @@ flowchart TB
     classDef layer_application fill:#f0fdf4,stroke:#16a34a,stroke-width:1.8px;
     classDef layer_infrastructure fill:#fff1f2,stroke:#dc2626,stroke-width:1.8px;
     classDef layer_external fill:#eff6ff,stroke:#2563eb,stroke-width:1.8px;
-    classDef service fill:#f0fdf4,stroke:#16a34a,stroke-width:1.6px;
-    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1.4px,stroke-dasharray:3 2;
 
     class DOMAIN,SCHEMA,MISSING,FORMAT,DQTHRESH layer_domain;
     class INFRA,LOCK,LOCKACQ,STORE,CB layer_infrastructure;
     class HTTP,AUTH,NOTFOUND,RATE,SERVER,UNKNOWN_HTTP layer_external;
     class ERROR,ACT_RETRY,ACT_QUARANTINE,FAIL_FAST,BATCH_FAIL,EXHAUST layer_application;
 
-    %% Click tooltips
-    click HTTP "../../00-project/RULES.md" "HTTP status routing: auth, 404, 429, 5xx, other"
-    click DOMAIN "../../00-project/RULES.md" "Domain validation routing: schema, missing, format, dq"
-    click INFRA "../../00-project/RULES.md" "Infrastructure routing: lock, storage, circuit-breaker failures"
+    %% Click tooltips    click HTTP ../../00-project/RULES.md "Routes auth/404/429/5xx/other HTTP"    click DOMAIN ../../00-project/RULES.md "Routes schema/missing/format/dq"    click INFRA ../../00-project/RULES.md "Routes lock/storage/cb failures"

@@ -23,6 +23,7 @@ _DECL_LINE_RE = re.compile(
     r"^(flowchart|graph|stateDiagram|classDiagram|sequenceDiagram|erDiagram|mindmap|gantt|pie|xychart)\b",
     flags=re.IGNORECASE,
 )
+_PARENT_SOURCE_RE = re.compile(r"^%%\s*Parent source:\s*(.+?)\s*$")
 
 
 def _load_apply_elk_layout() -> ModuleType:
@@ -64,7 +65,7 @@ def test_architecture_svg_coverage_for_all_mmd() -> None:
 
 
 def test_full_mermaid_matches_foundation_mmd() -> None:
-    """F006: foundation .mmd body MUST match views/*-full.mermaid body."""
+    """F006: views/*-full.mermaid body MUST match declared parent source."""
 
     def extract_body(path: Path) -> str:
         lines = path.read_text(encoding="utf-8").splitlines()
@@ -80,18 +81,28 @@ def test_full_mermaid_matches_foundation_mmd() -> None:
                 return "\n".join(body_lines)
         raise AssertionError(f"Diagram declaration not found: {path}")
 
-    foundation_dir = MMD_COLLECTIONS["foundation"]
-    for mmd_path in sorted(foundation_dir.glob("*.mmd")):
-        if not mmd_path.is_file() or mmd_path.name.startswith("_"):
+    def extract_parent_source(path: Path) -> Path:
+        lines = path.read_text(encoding="utf-8").splitlines()
+        for ln in lines:
+            match = _PARENT_SOURCE_RE.match(ln.strip())
+            if match:
+                return REPO_ROOT / match.group(1)
+        raise AssertionError(f"Full view missing Parent source metadata: {path}")
+
+    source_dirs = frozenset(MMD_COLLECTIONS.values())
+    for view_path in sorted(VIEW_COLLECTION.glob("*-full.mermaid")):
+        if not view_path.is_file() or view_path.name.startswith("_"):
             continue
-        stem = mmd_path.stem
-        view_path = VIEW_COLLECTION / f"{stem}-full.mermaid"
-        assert view_path.exists(), f"Missing full view: {view_path}"
+        mmd_path = extract_parent_source(view_path)
+        assert (
+            mmd_path.parent in source_dirs
+        ), f"Full view parent must be a canonical source: {view_path} -> {mmd_path}"
+        assert mmd_path.exists(), f"Missing parent source for full view: {view_path}"
         mmd_body = extract_body(mmd_path)
         view_body = extract_body(view_path)
         assert (
             mmd_body == view_body
-        ), f"Drift in diagram body for foundation/{stem}.mmd ↔ {view_path}"
+        ), f"Drift in diagram body for {mmd_path.relative_to(DIAGRAM_ROOT)} ↔ {view_path}"
 
 
 def test_no_orphan_svg_without_source() -> None:
@@ -184,7 +195,8 @@ def test_embedded_mermaid_in_active_docs_valid() -> None:
             )
             if not has_decl and not has_init and not has_metadata_directive:
                 issues.append(
-                    f"{md_path} at L{start_ln}: ```mermaid block lacks diagram declaration, init directive, or metadata directive"
+                    f"{md_path} at L{start_ln}: ```mermaid block lacks diagram "
+                    "declaration, init directive, or metadata directive"
                 )
 
     assert not issues, "Invalid/unsupported embedded mermaid blocks:\n" + "\n".join(

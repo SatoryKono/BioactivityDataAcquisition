@@ -1,35 +1,24 @@
 %% View: Full | Parent: (root)
 %% Parent source: docs/02-architecture/diagrams/foundation/50-exception-hierarchy.mmd
 %% Full reference diagram retained after decomposition.
+%% Synced: 2026-07-08
+
 %% Title: Exception Hierarchy — Full Tree
 %% Covers: domain/exceptions/ (base, network, validation, internal, infrastructure, data_quality)
 %% Rank: 25 (Score 7.25) — Complete error taxonomy for retry/abort/quarantine decisions
 %% Updated: 2026-02-17
-%% Legend: see 00-legend.mermaid
 
 %% @version 1.0.0
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
+%% @nodes   35
+%% Legend: docs/02-architecture/diagrams/views/00-legend.mermaid
 %% @png-scale 6
 %% @png-dpi   600
 
-%%{init: {
-  'flowchart': {
-    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
-  },
-  'layout': 'elk',
-  'elk': {
-    'direction': 'DOWN',
-    'mergeEdges': true,
-    'nodePlacementStrategy': 'BRANDES_KOEPF',
-    'edgeRouting': 'ORTHOGONAL',
-    'spacing.nodeNode': 32,
-    'spacing.edgeNode': 22,
-    'spacing.edgeEdge': 12
-  }
-}}%%
-%% @uniform width=192 height=90 max_title_len=19 max_desc_lines=3
+%%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
+%% @uniform width=200 height=112 max_title_len=19 max_desc_lines=4
 flowchart TD
     ROOT["Exception<br/>(Python built-in)<br/><br/>"]
 
@@ -38,7 +27,7 @@ flowchart TD
     ROOT --> BIOETL
 
     %% Three main branches
-    BIOETL ==> CRITICAL["CriticalError<br/>error_type = CRITICAL<br/>Action: ABORT pipeline"]
+    BIOETL --> CRITICAL["CriticalError<br/>error_type = CRITICAL<br/>Action: ABORT pipeline"]
     BIOETL --> RECOVERABLE["RecoverableError<br/>error_type = RECOVERABLE<br/>Action: RETRY with backoff"]
     BIOETL --> DQ_ERROR["DataQualityError<br/>error_type = DATA_QUALITY<br/>Action: QUARANTINE record"]
 
@@ -92,8 +81,8 @@ flowchart TD
     %% ── ErrorClassifier ──
     CLASSIFIER["ErrorClassifier<br/>domain/error_classifier.py<br/>.classify(error) → ErrorType<br/>"]
     CLASSIFIER -.->|"CRITICAL"| CRITICAL
-    CLASSIFIER -.->|K38| RECOVERABLE
-    CLASSIFIER -.->|K39| DQ_ERROR
+    CLASSIFIER -.->|"RECOVERABLE"| RECOVERABLE
+    CLASSIFIER -.->|"DATA_QUALITY"| DQ_ERROR
     CLASSIFIER -.->|"UNKNOWN"| ROOT
 
     %% ── ErrorType enum ──
@@ -101,11 +90,8 @@ flowchart TD
     CLASSIFIER --> ERROR_TYPE
 
     %% ── Action outcomes ──
-    ACTION_ABORT["Action: ABORT<br/>Pipeline stops immediately<br/>PipelineRunState → FAILED<br/>"]
-    ACTION_RETRY["Action: RETRY<br/>Exponential backoff<br/>Max retries from AdapterConfig<br/>"]
-    ACTION_QUARANTINE["Action: QUARANTINE<br/>Record → QuarantineEntry<br/>Pipeline continues<br/>"]
 
-    CRITICAL ==>|"triggers"| ACTION_ABORT
+    CRITICAL -.->|"triggers"| ACTION_ABORT
     RECOVERABLE -.->|"triggers"| ACTION_RETRY
     DQ_ERROR -.->|"triggers"| ACTION_QUARANTINE
 
@@ -120,11 +106,3 @@ flowchart TD
     style ACTION_ABORT fill:#ffe4e6,stroke:#dc2626
     style ACTION_RETRY fill:#fff7ed,stroke:#f59e0b
     style ACTION_QUARANTINE fill:#ffe4e6,stroke:#e11d48
-
-    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
-    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
-    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
-    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
-    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
-
-    linkStyle default stroke:#334155,stroke-width:2px
