@@ -16,7 +16,6 @@ from bioetl.infrastructure.observability.prometheus_metric_registries import (
     COUNTERS,
     HISTOGRAMS,
     METRIC_REGISTRY_FAMILIES,
-    METRIC_REGISTRY_INVENTORY,
 )
 
 FIXTURE_DIR = Path("tests/fixtures/golden/observability")

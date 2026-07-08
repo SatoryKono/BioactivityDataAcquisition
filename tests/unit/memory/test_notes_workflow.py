@@ -207,7 +207,7 @@ def test_parse_markdown_note_metadata_can_force_timeout_protection_on_local_path
     read_should_complete = threading.Event()
 
     class _BlockingHandle:
-        def __enter__(self) -> "_BlockingHandle":
+        def __enter__(self) -> _BlockingHandle:
             return self
 
         def __exit__(self, exc_type, exc, tb) -> None:

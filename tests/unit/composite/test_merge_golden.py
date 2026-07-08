@@ -5,8 +5,6 @@ Tests composite merge workflow with expected snapshot outputs.
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import Any
 
 import polars as pl
 import pytest

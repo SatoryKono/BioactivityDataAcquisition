@@ -120,7 +120,7 @@ class TestControlPlaneFileStores:
                 f.write(content)
 
         async def read_file(file_path: Path) -> str:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 return f.read()
 
         async def test_concurrent_writes() -> None:
@@ -136,7 +136,6 @@ class TestControlPlaneFileStores:
 
     def test_file_permission_handling(self, tmp_path: Path) -> None:
         """Test file permissions are set correctly for control-plane artifacts."""
-        import stat
 
         test_file = tmp_path / "test_permissions.json"
         test_file.write_text("test content", encoding="utf-8")
@@ -202,7 +201,7 @@ class TestControlPlaneFileStores:
         assert sidecar_file.exists()
 
         # Verify metadata can be read back
-        with open(sidecar_file, "r", encoding="utf-8") as f:
+        with open(sidecar_file, encoding="utf-8") as f:
             loaded_metadata = yaml.safe_load(f)
 
         assert loaded_metadata["runtime"]["run_id"] == "test-run-123"
@@ -227,7 +226,6 @@ class TestControlPlaneStorageContracts:
 
     def test_manifest_storage_contract(self) -> None:
         """Test manifest storage contract is defined."""
-        from bioetl.domain.control_plane.run_manifest import RunManifest
 
         # Verify RunManifest can be instantiated
         manifest = TestControlPlaneFileStores._build_manifest()

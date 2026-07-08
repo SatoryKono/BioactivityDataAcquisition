@@ -20,7 +20,7 @@ from bioetl.application.services.workflow_runner_models import (
 from bioetl.application.services.workflow_transform_service import (
     WorkflowTransformDestructiveCommit,
 )
-from bioetl.domain.control_plane import WorkflowExecutionState, WorkflowStepState
+from bioetl.domain.control_plane import WorkflowExecutionState
 from bioetl.domain.types import RunID
 from bioetl.domain.workflow import TransformStepConfig, WorkflowStepConfig
 

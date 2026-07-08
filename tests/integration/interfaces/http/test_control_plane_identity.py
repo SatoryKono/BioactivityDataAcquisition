@@ -5,7 +5,6 @@ Tests control-plane identity anchor specifications and HTTP contract compliance.
 
 from __future__ import annotations
 
-from typing import Any
 
 import pytest
 
