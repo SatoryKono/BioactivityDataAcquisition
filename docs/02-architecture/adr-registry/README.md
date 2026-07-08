@@ -103,4 +103,4 @@ The ADR registry integrates with:
 
 - [ADR Decisions Directory](../decisions/)
 - [Architecture Overview](../00-overview.md)
-- [Documentation Governance](../../00-project/DOCUMENTATION_GOVERNANCE.md)
+- [D-01 Documentation Governance](../../00-project/governance/01-documentation-governance-style-guide.md)
