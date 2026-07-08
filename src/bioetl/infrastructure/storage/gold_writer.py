@@ -12,6 +12,7 @@ from deltalake.exceptions import CommitFailedError, TableNotFoundError  # noqa: 
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
+    _clear_delta_tables,
     coerce_null_types_for_delta,  # noqa: F401
 )
 from bioetl.infrastructure.storage.delta.table_ops import (
@@ -250,6 +251,14 @@ class GoldWriter(
         await _write_single_target(
             self,
             request=request,
+        )
+
+    async def clear_gold(self, table_name: str, dry_run: bool = False) -> int:
+        """Implement ``GoldStoragePort`` clear for rebuild/backfill paths."""
+        return _clear_delta_tables(
+            base_path=Path(str(self.base_path)),
+            table_path=Path(self._resolve_table_path(table_name)),
+            dry_run=dry_run,
         )
 
     async def _prepare_write_gold(

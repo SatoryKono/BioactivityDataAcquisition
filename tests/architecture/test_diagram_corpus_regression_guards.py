@@ -234,10 +234,7 @@ def _missing_description_cards(collection: str, suffix: str) -> list[str]:
 def _missing_primary_class_description_cards() -> list[str]:
     source_stems = _active_source_stems(MMD_COLLECTIONS["class-diagrams"], ".mmd")
     required_stems = {
-        stem
-        for stem in source_stems
-        if re.match(r"^\d{2}-", stem)
-        and stem != "07-application-core-services-frontmatter-sandbox"
+        stem for stem in source_stems if _is_primary_class_description_stem(stem)
     }
     description_stems = {
         path.stem
@@ -245,3 +242,12 @@ def _missing_primary_class_description_cards() -> list[str]:
         if path.name != "INDEX.md"
     }
     return sorted(required_stems - description_stems)
+
+
+def _is_primary_class_description_stem(stem: str) -> bool:
+    """Return whether a class diagram requires an individual narrative card."""
+    if stem == "07-application-core-services-frontmatter-sandbox":
+        return False
+    if stem.startswith("90-pkg-"):
+        return False
+    return re.match(r"^(0[1-9]|1[0-6])-", stem) is not None

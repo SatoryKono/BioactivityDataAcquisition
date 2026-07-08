@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
 from importlib import import_module
 from typing import TYPE_CHECKING, cast
 
@@ -51,76 +50,37 @@ _BOOTSTRAP_STORAGE_EXPORT_MODULE = "bioetl.composition.bootstrap.cli.storage"
 _BOOTSTRAP_CLI_MODULE = "bioetl.composition.bootstrap.cli"
 
 
-@dataclass(frozen=True, slots=True)
-class BootstrapExport:
-    """Typed owner descriptor for one lazy bootstrap export."""
-
-    module_name: str
-
-
-def _bootstrap_export(module_name: str) -> BootstrapExport:
-    return BootstrapExport(module_name=module_name)
-
-
-_BOOTSTRAP_EXPORTS: dict[str, BootstrapExport] = {
-    "bootstrap_adr_service": _bootstrap_export(_BOOTSTRAP_CLI_MODULE),
-    "bootstrap_audit_inspection_service": _bootstrap_export(
-        _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE
-    ),
-    "bootstrap_bronze_cleanup_service": _bootstrap_export(
-        _BOOTSTRAP_STORAGE_EXPORT_MODULE
-    ),
-    "bootstrap_checkpoint_service": _bootstrap_export(
-        _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE
-    ),
-    "bootstrap_config_service": _bootstrap_export(
-        "bioetl.composition.bootstrap.cli.config"
-    ),
-    "bootstrap_contract_migration_service": _bootstrap_export(
-        _BOOTSTRAP_STORAGE_EXPORT_MODULE
-    ),
-    "bootstrap_export_service": _bootstrap_export(_BOOTSTRAP_STORAGE_EXPORT_MODULE),
-    "bootstrap_forensic_run_diff_service": _bootstrap_export(
+_BOOTSTRAP_EXPORTS: dict[str, str] = {
+    "bootstrap_adr_service": _BOOTSTRAP_CLI_MODULE,
+    "bootstrap_audit_inspection_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,
+    "bootstrap_bronze_cleanup_service": _BOOTSTRAP_STORAGE_EXPORT_MODULE,
+    "bootstrap_checkpoint_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,
+    "bootstrap_config_service": "bioetl.composition.bootstrap.cli.config",
+    "bootstrap_contract_migration_service": _BOOTSTRAP_STORAGE_EXPORT_MODULE,
+    "bootstrap_export_service": _BOOTSTRAP_STORAGE_EXPORT_MODULE,
+    "bootstrap_forensic_run_diff_service": _BOOTSTRAP_RUN_MANIFEST_EXPORT_MODULE,
+    "bootstrap_historical_replay_corpus_service": _BOOTSTRAP_RUN_MANIFEST_EXPORT_MODULE,
+    "bootstrap_historical_replay_closure_service": (
         _BOOTSTRAP_RUN_MANIFEST_EXPORT_MODULE
     ),
-    "bootstrap_historical_replay_corpus_service": _bootstrap_export(
+    "bootstrap_historical_replay_universe_service": (
         _BOOTSTRAP_RUN_MANIFEST_EXPORT_MODULE
     ),
-    "bootstrap_historical_replay_closure_service": _bootstrap_export(
-        _BOOTSTRAP_RUN_MANIFEST_EXPORT_MODULE
-    ),
-    "bootstrap_historical_replay_universe_service": _bootstrap_export(
-        _BOOTSTRAP_RUN_MANIFEST_EXPORT_MODULE
-    ),
-    "bootstrap_health_server_dependencies": _bootstrap_export(
-        "bioetl.composition.bootstrap.cli.health"
-    ),
-    "bootstrap_health_service": _bootstrap_export(
-        "bioetl.composition.bootstrap.cli.health"
-    ),
-    "bootstrap_lineage_service": _bootstrap_export(_BOOTSTRAP_CHECKPOINT_EXPORT_MODULE),
-    "bootstrap_lock_service": _bootstrap_export(
-        "bioetl.composition.bootstrap.cli.lock"
-    ),
-    "bootstrap_metrics_service": _bootstrap_export(
-        "bioetl.composition.bootstrap.cli.metrics"
-    ),
-    "bootstrap_observability_workflow_service": _bootstrap_export(
+    "bootstrap_health_server_dependencies": "bioetl.composition.bootstrap.cli.health",
+    "bootstrap_health_service": "bioetl.composition.bootstrap.cli.health",
+    "bootstrap_lineage_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,
+    "bootstrap_lock_service": "bioetl.composition.bootstrap.cli.lock",
+    "bootstrap_metrics_service": "bioetl.composition.bootstrap.cli.metrics",
+    "bootstrap_observability_workflow_service": (
         "bioetl.composition.bootstrap.cli.checkpoint"
     ),
-    "bootstrap_pipeline_runner_service": _bootstrap_export(
-        "bioetl.composition.bootstrap.runtime.runner"
-    ),
-    "bootstrap_quarantine_adapter": _bootstrap_export(
+    "bootstrap_pipeline_runner_service": "bioetl.composition.bootstrap.runtime.runner",
+    "bootstrap_quarantine_adapter": (
         "bioetl.composition.bootstrap.assembly.checkpoint"
     ),
-    "bootstrap_quarantine_service": _bootstrap_export(
-        _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE
-    ),
-    "bootstrap_run_manifest_service": _bootstrap_export(
-        _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE
-    ),
-    "bootstrap_vacuum_service": _bootstrap_export(_BOOTSTRAP_STORAGE_EXPORT_MODULE),
+    "bootstrap_quarantine_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,
+    "bootstrap_run_manifest_service": _BOOTSTRAP_CHECKPOINT_EXPORT_MODULE,
+    "bootstrap_vacuum_service": _BOOTSTRAP_STORAGE_EXPORT_MODULE,
 }
 
 
@@ -129,7 +89,7 @@ def resolve_bootstrap_attr(name: str) -> object:
     export = _BOOTSTRAP_EXPORTS.get(name)
     if export is None:
         raise AttributeError(f"Unknown bootstrap export: {name!r}")
-    return getattr(import_module(export.module_name), name)
+    return getattr(import_module(export), name)
 
 
 def _invoke_bootstrap(name: str, *args: object, **kwargs: object) -> object:
@@ -164,6 +124,7 @@ def get_checkpoint_service() -> CheckpointService:
     _ensure_provider_registrations()
     return cast("CheckpointService", _invoke_bootstrap("bootstrap_checkpoint_service"))
 
+
 def get_audit_service() -> AuditInspectionService:
     """Get an audit inspection service for operator diagnostics operations."""
     _ensure_provider_registrations()
@@ -176,6 +137,8 @@ def get_audit_service() -> AuditInspectionService:
 def get_quarantine_service() -> QuarantineService:
     """Get quarantine administration service without pipeline registration."""
     return cast("QuarantineService", _invoke_bootstrap("bootstrap_quarantine_service"))
+
+
 def get_bronze_cleanup_service() -> BronzeCleanupService:
     """Get Bronze cleanup service."""
     _ensure_provider_registrations()

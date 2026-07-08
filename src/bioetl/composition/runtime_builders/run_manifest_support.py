@@ -35,7 +35,6 @@ from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
 )
 from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
     RunManifestContractIdentity,
-    build_contract_identity_field_values,  # noqa: F401
     resolve_contract_identity,
 )
 from bioetl.domain.control_plane import ReplayCapability, RunSourceRef
