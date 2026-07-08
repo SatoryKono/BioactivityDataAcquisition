@@ -104,6 +104,59 @@ JSON is the source of truth.
 | 9409 | Inspect: P2 Forensic Anchors | table | Quarantine Explorer | Secondary forensic anchors for deeper analysis. | shared shell | Incident handoff table. |
 | 139 | Review: Remaining Replay-Safety Signals | text | Static | Static reminder of residual replay-safety signals to inspect after core blockers. | shared shell | No thresholds; review checklist only. |
 
+## PromQL Formula Anchors
+
+The shipped dashboard JSON remains the byte-level source of truth. The formulas
+below document the current Prometheus query families for all Prometheus-backed
+panels; HTTP-backed identity panels are documented in the inventory above.
+
+- `Status`: `max((bioetl_replay_safety_blockers_15m{run_type=~"$run_type"}) and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), "pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))`
+- `Monitor: Replay Safety State`: `max((bioetl_replay_safety_blockers_15m{run_type=~"$run_type"}) and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), "pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))`
+- `Monitor: Manifest / Ledger Integrity`: `max((bioetl_manifest_ledger_failures_15m{run_type=~"$run_type"}) and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), "pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))`
+- `Inspect: Telemetry Missing`: `max((bioetl_control_plane_telemetry_missing_5m{run_type=~"$run_type"}) and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), "pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))`
+- `Track: Replay / Resume Blockers in Range`: `round((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~"$pipeline", run_type=~"$run_type", status="failed"}[$__range])) or vector(0)) + (sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~"$pipeline", status="failed"}[$__range])) or vector(0)) + (sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~"$pipeline", disposition=~".*_incompatible"}[$__range])) or vector(0)) + (sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~"$pipeline", status="not_reconstructable"}[$__range])) or vector(0)) + (sum(increase(bioetl_replay_drift_events_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__range])) or vector(0)) + (sum(increase(bioetl_lineage_refs_missing_total{pipeline=~"$pipeline"}[$__range])) or vector(0)))`
+- `Monitor: Checkpoint Incompatibilities`: `round(sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~"$pipeline", disposition=~".*_incompatible"}[$__range])) or vector(0))`
+- `Monitor: Replay Not Reconstructable`: `round(sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~"$pipeline", status="not_reconstructable"}[$__range])) or vector(0))`
+- `Monitor: Replay Drift`: `round(sum(increase(bioetl_replay_drift_events_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__range])) or vector(0))`
+- `Monitor: Checkpoint Load Failures`: `round(sum(increase(bioetl_checkpoint_load_events_total{pipeline=~"$pipeline", status="failed"}[$__range])) or vector(0))`
+- `Monitor: Checkpoint Save Failures`: `round(sum(increase(bioetl_checkpoint_save_events_total{pipeline=~"$pipeline", status="failed"}[$__range])) or vector(0))`
+- `Monitor: GLOBAL Checkpoint Operator Failures`: `round(sum(increase(bioetl_checkpoint_operator_operations_total{status="failed"}[$__range])) or vector(0))`
+- `Track: Replay Lag Seconds`: `max(max_over_time(bioetl_replay_lag_seconds{pipeline=~"$pipeline", run_type=~"$run_type"}[$__range]))`
+- `Track: Checkpoint Compatibility Outcomes`: `sum by (disposition) (increase(bioetl_checkpoint_compatibility_events_total{pipeline=~"$pipeline"}[$__interval])) or label_replace(vector(0), "disposition", "no_events", "", "")`
+- `Track: Replay Drift by Type`: `sum by (replay_capability, drift_type, status) (increase(bioetl_replay_drift_events_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))`
+- `Track: Replay Lag Trend`: `max by (replay_capability, status) (bioetl_replay_lag_seconds{pipeline=~"$pipeline", run_type=~"$run_type"})`
+- `Track: Checkpoint Save Latency p50`: `histogram_quantile(0.50, sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~"$pipeline"}[$__range])))`
+- `Track: Checkpoint Save Latency p95`: `histogram_quantile(0.95, sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~"$pipeline"}[$__range])))`
+- `Track: Checkpoint Save Latency p99`: `histogram_quantile(0.99, sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~"$pipeline"}[$__range])))`
+- `Track: GLOBAL Checkpoint Operator Latency p50`: `histogram_quantile(0.50, sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])))`
+- `Track: GLOBAL Checkpoint Operator Latency p95`: `histogram_quantile(0.95, sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])))`
+- `Track: GLOBAL Checkpoint Operator Latency p99`: `histogram_quantile(0.99, sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])))`
+- `Inspect: Terminal Run Events by Status in Range`: `sum by (terminal_status) (increase(bioetl_control_plane_terminal_events_total{pipeline=~"$pipeline"}[$__range]))`
+- `Monitor: Manifest Write Failures`: `round(sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~"$pipeline", run_type=~"$run_type", status="failed"}[$__range])) or vector(0))`
+- `Monitor: Ledger Append Failures`: `round(sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~"$pipeline", status="failed"}[$__range])) or vector(0))`
+- `Track: Manifest Writes by Status`: `sum by (status, run_type) (increase(bioetl_control_plane_manifest_writes_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))`
+- `Track: Ledger Appends by Event Type / Status`: `sum by (event_type, status) (increase(bioetl_control_plane_ledger_appends_total{pipeline=~"$pipeline"}[$__interval]))`
+- `Monitor: Manifest Write Failure Ratio`: `((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~"$pipeline", run_type=~"$run_type", status="failed"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~"$pipeline", run_type=~"$run_type"}[30m])) or vector(0)), 1))` mapped to WARN/CRIT bands.
+- `Monitor: Ledger Append Failure Ratio`: `((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~"$pipeline", status="failed"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~"$pipeline"}[30m])) or vector(0)), 1))` mapped to WARN/CRIT bands.
+- `Monitor: GLOBAL Control-Plane Read Failures`: `round(sum(increase(bioetl_control_plane_reads_total{status="failed"}[$__range])) or vector(0))`
+- `Monitor: GLOBAL Control-Plane Read Failure Ratio Severity`: `((sum(increase(bioetl_control_plane_reads_total{status="failed"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m])) or vector(0)), 1))` mapped to WARN/CRIT bands.
+- `Track: GLOBAL Control-Plane Reads by Store / Operation / Status`: `sum by (store, operation, status) (increase(bioetl_control_plane_reads_total[$__interval]))`
+- `Track: GLOBAL Control-Plane Read Latency p50`: `histogram_quantile(0.50, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!="failed"}[$__range])))`
+- `Track: GLOBAL Control-Plane Read Latency p95`: `histogram_quantile(0.95, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!="failed"}[$__range])))`
+- `Track: GLOBAL Control-Plane Read Latency p99`: `histogram_quantile(0.99, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!="failed"}[$__range])))`
+- `Monitor: Lineage Refs Missing`: `round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~"$pipeline"}[$__range])) or vector(0))`
+- `Monitor: Lineage Fragment Persistence Failures`: `round(sum(increase(bioetl_lineage_fragments_emitted_total{pipeline=~"$pipeline", status="failed"}[$__range])) or vector(0))`
+- `Inspect: Missing Lineage Refs by Layer / Type`: `sum by (layer, ref_type) (increase(bioetl_lineage_refs_missing_total{pipeline=~"$pipeline"}[$__range]))`
+- `Track: GLOBAL Audit Write Outcomes`: `round(sum by (layer, operation, status) (increase(bioetl_audit_write_events_total[$__interval])) or vector(0))`
+- `Track: GLOBAL Audit Query Outcomes`: `round(sum by (layer_filter, status) (increase(bioetl_audit_query_events_total[$__interval])) or vector(0))`
+- `Track: GLOBAL Audit Write Latency p50`: `histogram_quantile(0.50, sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])))`
+- `Track: GLOBAL Audit Write Latency p95`: `histogram_quantile(0.95, sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])))`
+- `Track: GLOBAL Audit Write Latency p99`: `histogram_quantile(0.99, sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])))`
+- `Track: GLOBAL Audit Query Latency p50`: `histogram_quantile(0.50, sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])))`
+- `Track: GLOBAL Audit Query Latency p95`: `histogram_quantile(0.95, sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])))`
+- `Track: GLOBAL Audit Query Latency p99`: `histogram_quantile(0.99, sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])))`
+- `Track: Lineage Fragment Outcomes`: `sum by (layer, status) (increase(bioetl_lineage_fragments_emitted_total{pipeline=~"$pipeline"}[$__interval]))`
+
 ## Notes
 
 - `Status` and `Monitor: Replay Safety State` intentionally share the same
@@ -114,4 +167,4 @@ JSON is the source of truth.
   Prometheus metric panels.
 - Thresholds and value mappings not spelled out above should be taken from the
   shipped panel JSON; this page documents the panel inventory, datasource
-  family, and operator purpose 1:1.
+  family, primary PromQL formulas, and operator purpose 1:1.

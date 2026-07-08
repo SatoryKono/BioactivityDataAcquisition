@@ -206,6 +206,52 @@ PY
   echo "$out_cfg"
 }
 
+configure_browser_library_path() {
+  local default_lib_dir="${HOME:-}/.local/share/bioetl/browser-libs/usr/lib/x86_64-linux-gnu"
+  local lib_dir="${BIOETL_BROWSER_LIB_DIR:-$default_lib_dir}"
+
+  if [[ -d "$lib_dir" && -f "$lib_dir/libnss3.so" ]]; then
+    export LD_LIBRARY_PATH="$lib_dir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    log_info "Using browser shared libraries: $lib_dir"
+  fi
+}
+
+chrome_headless_shell_works() {
+  local exec_path="$1"
+
+  bash -c 'exec "$1" "${@:2}"' _ "$exec_path" \
+    --headless \
+    --no-sandbox \
+    --disable-setuid-sandbox \
+    --disable-dev-shm-usage \
+    --disable-gpu \
+    --dump-dom about:blank >/dev/null 2>&1
+}
+
+maybe_enable_docker_fallback_for_broken_browser() {
+  local exec_path
+
+  [[ "${MMDC_FORCE_DOCKER:-0}" == "1" ]] && return 0
+
+  if ! exec_path="$(resolve_chrome_headless_shell 2>/dev/null)"; then
+    return 0
+  fi
+
+  if chrome_headless_shell_works "$exec_path"; then
+    return 0
+  fi
+
+  if command -v docker >/dev/null 2>&1; then
+    export MMDC_FORCE_DOCKER=1
+    PUPPETEER_CFG=""
+    log_warn "chrome-headless-shell failed its smoke test; retrying renders via Docker mmdc fallback."
+    return 0
+  fi
+
+  log_warn "chrome-headless-shell failed its smoke test and Docker is unavailable; local mmdc may fail."
+  return 0
+}
+
 # ── Parse args ──────────────────────────────────────────────
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -309,6 +355,9 @@ if command -v node &>/dev/null; then
   NODE_BIN="node"
 fi
 
+configure_browser_library_path
+maybe_enable_docker_fallback_for_broken_browser
+
 HAS_RSVG=0
 if command -v rsvg-convert &>/dev/null; then
   HAS_RSVG=1
@@ -340,7 +389,10 @@ fi
 
 echo ""
 
-if [[ -n "$PUPPETEER_CFG" ]] || [[ -n "${PUPPETEER_EXECUTABLE_PATH:-}" ]] || [[ "$(id -u)" -eq 0 ]]; then
+if [[ "${MMDC_FORCE_DOCKER:-0}" == "1" ]]; then
+  PUPPETEER_CFG=""
+  log_info "MMDC_FORCE_DOCKER=1; using the container Puppeteer config"
+elif [[ -n "$PUPPETEER_CFG" ]] || [[ -n "${PUPPETEER_EXECUTABLE_PATH:-}" ]] || [[ "$(id -u)" -eq 0 ]]; then
   effective_cfg="$(prepare_puppeteer_cfg "$PUPPETEER_CFG")"
   if [[ -n "$effective_cfg" ]]; then
     PUPPETEER_CFG="$effective_cfg"
