@@ -1,6 +1,6 @@
 # BioETL Diagrams — PNG Index
 
-_Generated: 2026-05-12T12:48:33+03:00_
+_Generated: 2026-07-08T11:14:31+03:00_
 
 ## Domain Ports
 
@@ -8,7 +8,7 @@ _Generated: 2026-05-12T12:48:33+03:00_
 
 ---
 
-## 01adomain Ports Method Catalog
+## 01a Domain Ports Method Catalog
 
 ![01a-domain-ports-method-catalog](./01a-domain-ports-method-catalog.png)
 
@@ -62,7 +62,7 @@ _Generated: 2026-05-12T12:48:33+03:00_
 
 ---
 
-## 08aapplication Services Operation Catalog
+## 08a Application Services Operation Catalog
 
 ![08a-application-services-operation-catalog](./08a-application-services-operation-catalog.png)
 
@@ -104,7 +104,7 @@ _Generated: 2026-05-12T12:48:33+03:00_
 
 ---
 
-## 14aobservability Method Catalog
+## 14a Observability Method Catalog
 
 ![14a-observability-method-catalog](./14a-observability-method-catalog.png)
 
@@ -140,39 +140,15 @@ _Generated: 2026-05-12T12:48:33+03:00_
 
 ---
 
-## Pkg Application Composite Runner_pkg Part1
-
-![90-pkg-application-composite-runner_pkg-part1](./90-pkg-application-composite-runner_pkg-part1.png)
-
----
-
-## Pkg Application Composite Runner_pkg Part2
-
-![90-pkg-application-composite-runner_pkg-part2](./90-pkg-application-composite-runner_pkg-part2.png)
-
----
-
 ## Pkg Application Core Base Transformer
 
 ![90-pkg-application-core-base-transformer](./90-pkg-application-core-base-transformer.png)
 
 ---
 
-## Pkg Application Core Base_transformer
-
-![90-pkg-application-core-base_transformer](./90-pkg-application-core-base_transformer.png)
-
----
-
 ## Pkg Application Core Batch Execution
 
 ![90-pkg-application-core-batch-execution](./90-pkg-application-core-batch-execution.png)
-
----
-
-## Pkg Application Core Batch_execution
-
-![90-pkg-application-core-batch_execution](./90-pkg-application-core-batch_execution.png)
 
 ---
 
@@ -269,12 +245,6 @@ _Generated: 2026-05-12T12:48:33+03:00_
 ## Pkg Composition Runtime Builders
 
 ![90-pkg-composition-runtime-builders](./90-pkg-composition-runtime-builders.png)
-
----
-
-## Pkg Composition Runtime_builders
-
-![90-pkg-composition-runtime_builders](./90-pkg-composition-runtime_builders.png)
 
 ---
 
@@ -590,15 +560,8 @@ _Generated: 2026-05-12T12:48:33+03:00_
 
 ---
 
-## Pkg Interfaces Cli Commands Domains Run_all
-
-![90-pkg-interfaces-cli-commands-domains-run_all](./90-pkg-interfaces-cli-commands-domains-run_all.png)
-
----
-
 ## Pkg Interfaces Http
 
 ![90-pkg-interfaces-http](./90-pkg-interfaces-http.png)
 
 ---
-

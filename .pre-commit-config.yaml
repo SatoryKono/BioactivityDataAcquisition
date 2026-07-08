@@ -239,14 +239,29 @@ repos:
         name: Lint architecture diagrams (.mmd/.mermaid)
         entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams lint
         language: python
-        files: ^docs/02-architecture/(mmd-diagrams/.*\.mmd|diagrams/mermaid/.*\.mermaid)$
+        files: ^docs/02-architecture/diagrams/(architecture|foundation|class-diagrams)/.*\.mmd$
+        stages: [pre-commit]
+
+      - id: lint-diagrams-views
+        name: Lint architecture diagram views (.mermaid)
+        entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams lint
+        language: python
+        files: ^docs/02-architecture/diagrams/views/.*\.mermaid$
         stages: [pre-commit]
 
       - id: prune-orphan-diagram-nodes
         name: Check for orphan nodes in Mermaid diagrams (GRAPH-001)
         entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams fix-orphans --check
         language: python
-        files: ^docs/02-architecture/(mmd-diagrams/.*\.mmd|diagrams/mermaid/.*\.mermaid)$
+        files: ^docs/02-architecture/diagrams/(architecture|foundation|class-diagrams)/.*\.mmd$
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: prune-orphan-diagram-view-nodes
+        name: Check for orphan nodes in Mermaid view diagrams (GRAPH-001)
+        entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams fix-orphans --check
+        language: python
+        files: ^docs/02-architecture/diagrams/views/.*\.mermaid$
         pass_filenames: false
         stages: [pre-commit]
 

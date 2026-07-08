@@ -29,7 +29,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 # ── Paths ─────────────────────────────────────────────────────────────────────
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-ARCH_DIR = REPO_ROOT / "docs/02-architecture/mmd-diagrams/architecture"
+ARCH_DIR = REPO_ROOT / "docs/02-architecture/diagrams/architecture"
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 
