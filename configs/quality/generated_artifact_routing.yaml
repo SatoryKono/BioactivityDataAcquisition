@@ -74,6 +74,16 @@ routes:
       - docs/reports/generated/pipeline_normalization_field_matrix/
     notes: Deterministic normalization matrix for pipeline governance.
 
+  - id: documentation-cleanup-inventory
+    generator: scripts/docs/checks/documentation_cleanup_inventory.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/reports/documentation-cleanup-inventory.json
+      - docs/reports/documentation-cleanup-inventory.md
+    notes: Deterministic per-file documentation cleanup matrix for lifecycle,
+      generated-artifact, duplicate, inbound-link, and recommended-action review.
+
   - id: matrix-dictionaries-curated-docs
     generator: scripts/docs/matrix/build_matrix_dicts.py
     output_kind: curated_generated_docs
@@ -329,6 +339,46 @@ routes:
       - docs/02-architecture/generated/module-dependency-map.md
       - docs/02-architecture/generated/module-dependency-map.json
     notes: Architecture dependency maps are deterministic generated docs.
+
+  - id: adr-registry-generated-docs
+    generator: scripts/generate_adr_registry.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/02-architecture/adr-registry.md
+      - docs/02-architecture/adr-registry/
+    notes: ADR registry markdown and JSON artifacts are generated from accepted
+      ADR files and must not be hand-edited.
+
+  - id: config-comparison-matrix-generated-doc
+    generator: scripts/schema/generate_config_matrix.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/04-reference/config_comparison_matrix.csv
+    notes: Config comparison matrix is refreshed through
+      `python -m scripts.schema generate-config-matrix --update`.
+
+  - id: silver-filter-inventory-baseline
+    generator: scripts/data_quality/inventory_silver_filters_migration.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/filters/inventory-baseline.csv
+      - docs/filters/inventory-baseline.json
+      - docs/filters/inventory-baseline.md
+    notes: Silver filter migration inventory baseline is a committed generated
+      docs/control artifact guarded by architecture tests.
+
+  - id: debt-governance-gates-quality-baseline
+    generator: scripts/engineering/qa/report_debt_governance_gates.py
+    output_kind: working_report
+    commit_policy: tracked_quality_baseline
+    outputs:
+      - reports/quality/debt-governance-gates.json
+      - reports/quality/debt-governance-gates.md
+    notes: Debt governance gate rollup is a generated tracked baseline; do not
+      change budgets or thresholds to satisfy drift.
 
   - id: grafana-dashboard-screenshot-report
     generator: scripts/ops/observability/grafana/rerender_grafana_screenshots.py

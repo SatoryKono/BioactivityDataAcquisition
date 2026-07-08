@@ -8,7 +8,7 @@ This page is a generated governance mirror and MUST be regenerated via
 `python3 scripts/generate_adr_registry.py` after ADR additions or metadata changes.
 
 **Total ADRs**: 50
-**Last Updated**: 2026-06-16
+**Last Updated**: 2026-07-08
 
 ## 📊 Status Summary
 
