@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-08T06:39:24.441203+00:00",
+  "generated_at": "2026-07-08T11:18:08.570657+00:00",
   "summary": {
     "total_scripts": 445,
     "status_counts": {
@@ -15,7 +15,7 @@
       "other": 23,
       "scripts": 346,
       "skills": 11,
-      "tests": 191
+      "tests": 193
     }
   },
   "scripts": [
@@ -3398,7 +3398,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 41,
+      "reference_count": 46,
       "references": [
         {
           "path": ".pre-commit-config.yaml",
@@ -3409,6 +3409,18 @@
         {
           "path": ".pre-commit-config.yaml",
           "line": 247,
+          "source_group": "ci",
+          "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams lint"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 254,
+          "source_group": "ci",
+          "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams fix-orphans --check"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "line": 262,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams fix-orphans --check"
         },
@@ -3435,18 +3447,6 @@
           "line": 204,
           "source_group": "docs",
           "text": "uv run python -m scripts.diagrams check-quality-gates"
-        },
-        {
-          "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 205,
-          "source_group": "docs",
-          "text": "uv run python -m scripts.diagrams render-pdf"
-        },
-        {
-          "path": "docs/00-project/ai/memory/memory-py-audit-bot.md",
-          "line": 304,
-          "source_group": "docs",
-          "text": "python -m scripts.diagrams check quality-gates"
         }
       ]
     },
@@ -3516,13 +3516,13 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 304,
+          "line": 306,
           "source_group": "docs",
           "text": "python scripts/diagrams/check_class_method_render_integrity.py \\"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 426,
+          "line": 428,
           "source_group": "docs",
           "text": "1. Выполнен `python scripts/diagrams/check_class_method_render_integrity.py --source-dir docs/02-architecture/diagrams/class-diagrams --svg-dir docs/02-architecture/diagrams/class-diagrams/svg`."
         },
@@ -3573,25 +3573,25 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 247,
+          "line": 255,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_artifacts.py \\"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 411,
+          "line": 413,
           "source_group": "docs",
           "text": "1. **Проверить обязательные SVG-артефакты:** `python scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 412,
+          "line": 414,
           "source_group": "docs",
           "text": "Для дополнительной compatibility-проверки PNG используйте curated manifest: `python scripts/diagrams/check_diagram_artifacts.py --manifest docs/02-architecture/diagrams/manifests/png-compatibility.txt"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 441,
+          "line": 443,
           "source_group": "docs",
           "text": "| check_diagram_artifacts.py     | `scripts/diagrams/` | DIAG-T010/T012 для обязательных SVG и DIAG-T011/T012 для optional PNG compatibility |"
         },
@@ -3630,19 +3630,19 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 267,
+          "line": 275,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_quality_gates.py \\"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 414,
+          "line": 416,
           "source_group": "docs",
           "text": "1. **Прогнать quality-gates:** `python scripts/diagrams/check_diagram_quality_gates.py --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt`"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 443,
+          "line": 445,
           "source_group": "docs",
           "text": "| check_diagram_quality_gates.py | `scripts/diagrams/` | DIAG-T018..T023 (style/classDef/decomposition/legend/labels)                        |"
         },
@@ -3695,7 +3695,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 257,
+          "line": 265,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py \\"
         },
@@ -3740,7 +3740,7 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 339,
+          "line": 337,
           "source_group": "docs",
           "text": "- post-check: `scripts/diagrams/check_pdf_image_bounds.py`"
         },
@@ -3785,37 +3785,37 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 252,
+          "line": 260,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_svg_text_visibility.py \\"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 337,
+          "line": 339,
           "source_group": "docs",
           "text": "Скрипт `scripts/diagrams/check_svg_text_visibility.py` валидирует smoke-набор SVG на предмет"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 347,
+          "line": 349,
           "source_group": "docs",
           "text": "python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 348,
+          "line": 350,
           "source_group": "docs",
           "text": "python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt --json"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 413,
+          "line": 415,
           "source_group": "docs",
           "text": "1. **Проверить видимость текста в SVG:** `python scripts/diagrams/check_svg_text_visibility.py --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt`"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 442,
+          "line": 444,
           "source_group": "docs",
           "text": "| check_svg_text_visibility.py   | `scripts/diagrams/` | Smoke-проверка видимости текста в SVG                                               |"
         }
@@ -3888,7 +3888,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 423,
+          "line": 427,
           "source_group": "docs",
           "text": "`scripts/diagrams/enforce_diagram_quality_budget.py`."
         },
@@ -4134,7 +4134,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 336,
+          "line": 334,
           "source_group": "docs",
           "text": "- `scripts/diagrams/generate_with_descriptions_docx.py`"
         },
@@ -4185,7 +4185,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 335,
+          "line": 333,
           "source_group": "docs",
           "text": "- `scripts/diagrams/generate_with_descriptions_pdf.py`"
         },
@@ -4277,9 +4277,9 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 215,
+          "line": 216,
           "source_group": "ci",
-          "text": "python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json || true"
+          "text": "python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json"
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
@@ -4289,25 +4289,25 @@
         },
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
-          "line": 60,
+          "line": 61,
           "source_group": "docs",
           "text": "- Lint: `scripts/diagrams/lint_diagrams.py`"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
-          "line": 176,
+          "line": 177,
           "source_group": "docs",
           "text": "`scripts/diagrams/lint_diagrams.py` проверяет оба каталога:"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
-          "line": 249,
+          "line": 250,
           "source_group": "docs",
           "text": "**CI Rules (lint_diagrams.py):**"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 444,
+          "line": 448,
           "source_group": "docs",
           "text": "uv run python scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json \\"
         }
@@ -4318,7 +4318,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
@@ -4349,6 +4349,12 @@
           "line": 15,
           "source_group": "scripts",
           "text": "MMDC_BIN=\"${MMDC_BIN:-$REPO_ROOT/scripts/diagrams/mmdc_wrapper.sh}\""
+        },
+        {
+          "path": "tests/architecture/test_diagram_corpus_regression_guards.py",
+          "line": 74,
+          "source_group": "tests",
+          "text": "wrapper = (REPO_ROOT / \"scripts\" / \"diagrams\" / \"mmdc_wrapper.sh\").read_text("
         }
       ]
     },
@@ -4361,49 +4367,49 @@
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
-          "line": 204,
+          "line": 205,
           "source_group": "docs",
           "text": "Реализован в `scripts/diagrams/prune_orphan_nodes.py`. Нода считается orphan, если:"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
-          "line": 219,
+          "line": 220,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --check      # аудит"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
-          "line": 220,
+          "line": 221,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --fix         # удалить garbage orphans"
         },
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
-          "line": 221,
+          "line": 222,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --grandfather # exemption для всех текущих"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 511,
+          "line": 515,
           "source_group": "docs",
           "text": "`scripts/diagrams/prune_orphan_nodes.py` detects nodes defined in a diagram but not"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 519,
+          "line": 523,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --check"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 522,
+          "line": 526,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --check --json"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 525,
+          "line": 529,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --fix"
         }
@@ -4459,31 +4465,31 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 459,
+          "line": 463,
           "source_group": "docs",
           "text": "bash scripts/diagrams/run_diagram_checks.sh --profile pr --enforce-budget"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 460,
+          "line": 464,
           "source_group": "docs",
           "text": "bash scripts/diagrams/run_diagram_checks.sh --profile nightly --enforce-budget"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 436,
+          "line": 438,
           "source_group": "docs",
           "text": "| run_diagram_checks.sh          | `scripts/diagrams/` | Единый запуск профилей проверок (`pr`/`nightly`/`quick`)                            |"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 454,
+          "line": 456,
           "source_group": "docs",
           "text": "scripts/diagrams/run_diagram_checks.sh --profile pr"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 473,
+          "line": 475,
           "source_group": "docs",
           "text": "scripts/diagrams/run_diagram_checks.sh --profile pr \\"
         }
@@ -4494,7 +4500,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": "docs/00-project/ai/agents/scripts/diagrams/py-doc-bot-4.sh",
@@ -4504,7 +4510,13 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 337,
+          "line": 328,
+          "source_group": "docs",
+          "text": "bash scripts/diagrams/run_diagram_docs_agent.sh"
+        },
+        {
+          "path": "docs/02-architecture/diagrams/README.md",
+          "line": 335,
           "source_group": "docs",
           "text": "- unified orchestrator: `scripts/diagrams/run_diagram_docs_agent.sh`"
         },
@@ -4549,13 +4561,13 @@
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 444,
+          "line": 446,
           "source_group": "docs",
           "text": "| run_diagram_nightly_suite.py   | `scripts/diagrams/` | DIAG-T024..T029 nightly heuristics (interactivity/chaos/growth/theme)               |"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 460,
+          "line": 462,
           "source_group": "docs",
           "text": "1. `nightly` — `pr` + DIAG-T024..T029 (`run_diagram_nightly_suite.py`)."
         },
@@ -4645,7 +4657,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 216,
+          "line": 219,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -4711,25 +4723,25 @@
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
-          "line": 194,
+          "line": 195,
           "source_group": "docs",
           "text": "Примечание по size-normalization (`scripts/diagrams/uniform_diagram_sizes.py`):"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 467,
+          "line": 471,
           "source_group": "docs",
           "text": "Use `scripts/diagrams/uniform_diagram_sizes.py` to normalize class/flowchart object sizes:"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 471,
+          "line": 475,
           "source_group": "docs",
           "text": "python3 scripts/diagrams/uniform_diagram_sizes.py --check"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 474,
+          "line": 478,
           "source_group": "docs",
           "text": "python3 scripts/diagrams/uniform_diagram_sizes.py --fix -f docs/02-architecture/diagrams/class-diagrams/07-application-core-services.mmd"
         },
@@ -4800,7 +4812,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 374,
+          "line": 378,
           "source_group": "docs",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh --puppeteer /tmp/puppeteer-config.json"
         },
@@ -4893,13 +4905,13 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 256,
+          "line": 271,
           "source_group": "ci",
           "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.docs sync-repo-identity --check"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 286,
+          "line": 301,
           "source_group": "ci",
           "text": "python scripts/engineering/dev/run_project_python.py -m scripts.docs"
         }
@@ -5185,7 +5197,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 283,
+          "line": 298,
           "source_group": "ci",
           "text": "- id: docs-check-links"
         },
@@ -7186,7 +7198,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 30,
+      "reference_count": 32,
       "references": [
         {
           "path": ".pre-commit-config.yaml",
@@ -8887,7 +8899,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 332,
+          "line": 347,
           "source_group": "ci",
           "text": "scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -10320,13 +10332,13 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 313,
+          "line": 328,
           "source_group": "ci",
           "text": "python scripts/engineering/dev/run_project_python.py -m scripts.engineering.qa.vcr"
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 322,
+          "line": 337,
           "source_group": "ci",
           "text": "python scripts/engineering/dev/run_project_python.py -m scripts.engineering.qa.vcr"
         },
@@ -10365,7 +10377,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 314,
+          "line": 329,
           "source_group": "ci",
           "text": "check-placement"
         },
@@ -10422,7 +10434,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 323,
+          "line": 338,
           "source_group": "ci",
           "text": "check-naming"
         },
@@ -10812,7 +10824,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 278,
+          "line": 293,
           "source_group": "ci",
           "text": "check-catalog --catalog scripts/engineering/repo/catalog.yaml"
         },
@@ -10869,7 +10881,7 @@
         },
         {
           "path": ".pre-commit-config.yaml",
-          "line": 265,
+          "line": 280,
           "source_group": "ci",
           "text": "check-inventory --check"
         },
@@ -13988,7 +14000,7 @@
         },
         {
           "path": "pyproject.toml",
-          "line": 130,
+          "line": 136,
           "source_group": "build",
           "text": "# JSON Schema validation (scripts/validate_pipeline_configs.py)"
         },
@@ -14137,53 +14149,53 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 15,
       "references": [
         {
           "path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
-          "line": 256,
+          "line": 257,
           "source_group": "docs",
           "text": "**Инструмент:** `src/tools/apply_elk_layout.py --dry-run` для аудита, без `--dry-run` для применения."
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 205,
+          "line": 207,
           "source_group": "docs",
           "text": "### 4.5. Автоматизация: apply_elk_layout.py"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 207,
+          "line": 209,
           "source_group": "docs",
           "text": "Утилита `src/tools/apply_elk_layout.py` автоматически добавляет ELK init к диаграммам, превышающим порог нод:"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 211,
+          "line": 213,
           "source_group": "docs",
           "text": "python src/tools/apply_elk_layout.py --dry-run"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 214,
+          "line": 216,
           "source_group": "docs",
           "text": "python src/tools/apply_elk_layout.py"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 217,
+          "line": 219,
           "source_group": "docs",
           "text": "python src/tools/apply_elk_layout.py --dir docs/02-architecture/diagrams/foundation"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 220,
+          "line": 222,
           "source_group": "docs",
           "text": "python src/tools/apply_elk_layout.py --threshold 15"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 223,
+          "line": 225,
           "source_group": "docs",
           "text": "python src/tools/apply_elk_layout.py --enforce-routing ORTHOGONAL"
         }
@@ -14280,31 +14292,31 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 240,
+          "line": 242,
           "source_group": "docs",
           "text": "Инструмент `src/tools/differentiate_linkstyle.py` классифицирует связи по 6 семантическим типам:"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 265,
+          "line": 267,
           "source_group": "docs",
           "text": "python src/tools/differentiate_linkstyle.py --dry-run   # Предпросмотр"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 266,
+          "line": 268,
           "source_group": "docs",
           "text": "python src/tools/differentiate_linkstyle.py              # Применить"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 407,
+          "line": 409,
           "source_group": "docs",
           "text": "1. **Применить linkStyle** (если flowchart с 5+ связями): `python src/tools/differentiate_linkstyle.py`"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/DIAGRAM-WORKFLOW-GUIDE.md",
-          "line": 438,
+          "line": 440,
           "source_group": "docs",
           "text": "| differentiate_linkstyle.py     | `src/tools/`        | Семантическая стилизация рёбер                                                      |"
         },
@@ -14470,7 +14482,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 262,
+          "line": 270,
           "source_group": "ci",
           "text": "python3 src/tools/harmonize_link_styles.py --dry-run --fail-on-errors"
         }

@@ -152,6 +152,7 @@ log_test.txt
 !/reports/quality/tech-debt-issue-5647-closeout.json
 !/reports/quality/issue-5272-application-core-coverage-closeout.json
 !/reports/quality/issue-5376-coverage-tail-closeout.json
+!/reports/quality/low-coverage-targeted-tests-6045.json
 !/reports/quality/total-tech-debt-audit-main-2026-06-16.md
 !/reports/quality/total-tech-debt-audit-main-2026-07-01.md
 !/reports/quality/test-governance-current.json

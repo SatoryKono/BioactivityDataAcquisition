@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import time
+import tempfile
+from pathlib import Path
 from types import SimpleNamespace
 
 import pyarrow as pa
@@ -23,8 +25,16 @@ from bioetl.infrastructure.storage.silver.delta_write_execution import (
 
 pytestmark = pytest.mark.unit
 
+_DEFAULT_TABLE_PATH = str(
+    Path(tempfile.gettempdir())
+    / "bioetl-delta-write-execution"
+    / "silver"
+    / "test"
+    / "table"
+)
 
-def _make_request(table_path: str = "silver/test/table") -> _DeltaWriteRequest:
+
+def _make_request(table_path: str = _DEFAULT_TABLE_PATH) -> _DeltaWriteRequest:
     """Build a minimal Delta write request for timeout-path tests."""
     return _DeltaWriteRequest(
         validated_mode=SilverWriteMode.APPEND,

@@ -107,10 +107,11 @@ uv run python -m scripts.engineering.dev run-tests arch
 python3 scripts/engineering/dev/run_project_python.py -m pre_commit run smoke-lane --hook-stage manual --all-files
 ```
 
-Do not add full coverage, full architecture governance, documentation link
-crawls, observability metric inventory, Silver/Gold parity, Docker/promtool, or
-VCR/LFS audit checks to default `pre-commit`; those surfaces are too slow or
-environment-sensitive for the daily edit loop and remain manual/CI gates.
+Do not add repo-wide coverage verification, architecture governance,
+documentation link crawls, observability metric inventory, Silver/Gold parity,
+Docker/promtool, or VCR/LFS audit checks to default `pre-commit`; those surfaces
+are too slow or environment-sensitive for the daily edit loop and remain
+manual/CI gates.
 
 ## Recommended local Git defaults
 
