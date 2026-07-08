@@ -27,8 +27,10 @@ except ImportError:  # pragma: no cover - PyYAML is present in project envs.
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_JSON = PROJECT_ROOT / "docs/reports/documentation-cleanup-inventory.json"
-DEFAULT_MD = PROJECT_ROOT / "docs/reports/documentation-cleanup-inventory.md"
+DEFAULT_JSON = (
+    PROJECT_ROOT / "docs/reports/generated/documentation-cleanup-inventory.json"
+)
+DEFAULT_MD = PROJECT_ROOT / "docs/reports/generated/documentation-cleanup-inventory.md"
 ROUTING_CONFIG = PROJECT_ROOT / "configs/quality/generated_artifact_routing.yaml"
 
 DOC_ROOTS = (
@@ -134,7 +136,9 @@ def _run_git_ls_files() -> list[str]:
 
 def _is_doc_like(path: str) -> bool:
     suffix = Path(path).suffix.lower()
-    return path in ROOT_DOCS or (path.startswith(DOC_ROOTS) and suffix in DOC_EXTENSIONS)
+    return path in ROOT_DOCS or (
+        path.startswith(DOC_ROOTS) and suffix in DOC_EXTENSIONS
+    )
 
 
 def _read_text(path: str) -> str:
@@ -203,11 +207,13 @@ def _route_for(path: str, routes: list[Route]) -> Route | None:
     return None
 
 
-def _outgoing_links(path: str, text: str) -> list[str]:
+def _outgoing_links(text: str) -> list[str]:
     links: list[str] = []
     for match in LINK_RE.finditer(text):
         raw = match.group(2).strip()
-        if not raw or raw.startswith(("#", "http://", "https://", "mailto:", "tel:", "app://")):
+        if not raw or raw.startswith(
+            ("#", "http://", "https://", "mailto:", "tel:", "app://")
+        ):
             continue
         if re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*:", raw):
             continue
@@ -240,7 +246,9 @@ def _duplicate_groups(texts: dict[str, str]) -> dict[str, int]:
     for path, text in texts.items():
         if not text:
             continue
-        normalized = "\n".join(line.rstrip() for line in text.replace("\r\n", "\n").split("\n")).strip()
+        normalized = "\n".join(
+            line.rstrip() for line in text.replace("\r\n", "\n").split("\n")
+        ).strip()
         if not normalized:
             continue
         by_hash[sha256(normalized.encode("utf-8")).hexdigest()].append(path)
@@ -262,7 +270,11 @@ def _diagram_kind(path: str) -> str | None:
     if path.endswith(".mmd"):
         if "/class-diagrams/90-pkg-" in path:
             return "diagram_generated_source"
-        if "/architecture/" in path or "/class-diagrams/" in path or "/foundation/" in path:
+        if (
+            "/architecture/" in path
+            or "/class-diagrams/" in path
+            or "/foundation/" in path
+        ):
             return "diagram_canonical_source"
     if path.endswith(".mermaid") and "/views/" in path:
         return "diagram_decomposed_view"
@@ -297,12 +309,22 @@ def _classify(
         return "Duplicate", "migration-required", "replace-with-link"
     if "obsolete duplicate" in text[:1000].lower() or declared == "retired":
         return "Deprecated", "migration-required", "replace-with-link"
-    if duplicate_group and not path.startswith(("docs/99-archive/", "reports/quality/")):
+    if duplicate_group and not path.startswith(
+        ("docs/99-archive/", "reports/quality/")
+    ):
         return "Duplicate", "migration-required", "merge"
-    if route or generated_marker or any(marker in path for marker in GENERATED_PATH_MARKERS):
+    if (
+        route
+        or generated_marker
+        or any(marker in path for marker in GENERATED_PATH_MARKERS)
+    ):
         return "Generated", "regenerate", "generate-automatically"
     if diagram_kind and diagram_kind.startswith("diagram_"):
-        if diagram_kind in {"diagram_canonical_source", "diagram_governance", "diagram_tooling"}:
+        if diagram_kind in {
+            "diagram_canonical_source",
+            "diagram_governance",
+            "diagram_tooling",
+        }:
             return "Active", "current", "keep"
         return "Generated", "regenerate", "generate-automatically"
     if path.startswith(WORKING_PATH_PREFIXES) or WORKING_NAME_RE.search(path):
@@ -314,14 +336,18 @@ def _classify(
 
 def _build_inventory() -> dict[str, Any]:
     tracked = [path for path in _run_git_ls_files() if _is_doc_like(path)]
-    texts = {path: _read_text(path) for path in tracked if Path(path).suffix.lower() in TEXT_EXTENSIONS}
+    texts = {
+        path: _read_text(path)
+        for path in tracked
+        if Path(path).suffix.lower() in TEXT_EXTENSIONS
+    }
     duplicate_groups = _duplicate_groups(texts)
     routes = _load_routes()
     incoming: Counter[str] = Counter()
     outgoing_counts: Counter[str] = Counter()
 
     for path, text in texts.items():
-        outgoing = _outgoing_links(path, text)
+        outgoing = _outgoing_links(text)
         outgoing_counts[path] = len(outgoing)
         for target in outgoing:
             resolved = _resolve_link(path, target)
@@ -341,7 +367,11 @@ def _build_inventory() -> dict[str, Any]:
         status, freshness, action = _classify(path, text, duplicate_group, route)
         status_counts[status] += 1
         action_counts[action] += 1
-        section = path.split("/")[1] if path.startswith("docs/") and "/" in path else path.split("/")[0]
+        section = (
+            path.split("/")[1]
+            if path.startswith("docs/") and "/" in path
+            else path.split("/")[0]
+        )
         section_counts[section] += 1
         records.append(
             {
@@ -471,7 +501,8 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     generated_examples = [
         row
         for row in files
-        if row["status"] == "Generated" and (row["generated_route"] or row["diagram_kind"])
+        if row["status"] == "Generated"
+        and (row["generated_route"] or row["diagram_kind"])
     ][:80]
     lines.extend(["", "## Generated Artifact Examples", ""])
     lines.extend(
@@ -527,8 +558,12 @@ def _write_if_changed(path: Path, content: str) -> bool:
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group()
-    mode.add_argument("--update", action="store_true", help="Regenerate inventory files.")
-    mode.add_argument("--check", action="store_true", help="Check generated inventory drift.")
+    mode.add_argument(
+        "--update", action="store_true", help="Regenerate inventory files."
+    )
+    mode.add_argument(
+        "--check", action="store_true", help="Check generated inventory drift."
+    )
     parser.add_argument("--json-output", type=Path, default=DEFAULT_JSON)
     parser.add_argument("--markdown-output", type=Path, default=DEFAULT_MD)
     parser.add_argument("--print-summary", action="store_true")
@@ -538,11 +573,15 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
     payload = _build_inventory()
-    json_content = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    json_content = (
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    )
     md_content = _render_markdown(payload)
 
     if args.print_summary:
-        print(json.dumps(payload["summary"], ensure_ascii=False, indent=2, sort_keys=True))
+        print(
+            json.dumps(payload["summary"], ensure_ascii=False, indent=2, sort_keys=True)
+        )
 
     if args.check:
         mismatches = []
@@ -555,7 +594,9 @@ def main(argv: list[str] | None = None) -> int:
         if mismatches:
             for mismatch in mismatches:
                 print(f"[drift] mismatch: {mismatch}")
-            print("[hint] run: python -m scripts.docs generate-cleanup-inventory --update")
+            print(
+                "[hint] run: python -m scripts.docs generate-cleanup-inventory --update"
+            )
             return 1
         print("[documentation-cleanup-inventory] inventory is synchronized")
         return 0

@@ -12,6 +12,10 @@ from bioetl.infrastructure.storage.delta.resilience import (
     DEFAULT_ATOMIC_GROUP_REPLACE_RETRY_POLICY,
     AdaptiveRetryPolicy,
 )
+from bioetl.infrastructure.storage.support._atomic_replace import (
+    AtomicWriteError,
+    _replace_with_retry,
+)
 
 
 class AtomicWriteGroup:
@@ -46,11 +50,6 @@ class AtomicWriteGroup:
 
     def commit(self) -> None:
         """Commit all pending writes atomically."""
-        from bioetl.infrastructure.storage.support.atomic_ops import (
-            AtomicWriteError,
-            _replace_with_retry,
-        )
-
         committed: list[tuple[Path, Path]] = []
         try:
             for target, temp_path, _ in self._pending:

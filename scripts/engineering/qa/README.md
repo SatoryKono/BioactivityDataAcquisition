@@ -27,6 +27,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `check-terminology`              | `lint_terminology.py`                                 | Terminology linting against glossary                                                              |
 | `report-dep-map`                 | `generate_architecture_dependency_map.py`             | Generate/check architecture dependency map                                                        |
 | `report-vcr-metadata`            | `report_vcr_metadata_catalog.py`                      | Generate/check canonical VCR metadata catalog                                                     |
+| `check-vcr-replay-preflight`     | `vcr/check_replay_preflight.py`                       | Fail fast on unresolved replay VCR pointers and cheap catalog drift                                |
 | `report-provider-contract-drift` | `report_provider_contract_drift.py`                   | Generate provider contract drift diagnostics from replay cassettes                                |
 | `report-dashboard-inventory`     | `report_dashboard_inventory.py`                       | Generate/check dashboard inventory parity, provisioning drift, deployed drift, and local health   |
 | `report-dashboard-panel-audit-matrix` | `report_dashboard_panel_audit_matrix.py`         | Generate/check the dashboard panel audit matrix mirror                                            |
@@ -111,6 +112,7 @@ python scripts/engineering/qa/generate_architecture_dependency_map.py --check
 python scripts/engineering/qa/generate_architecture_dependency_map.py --update
 python scripts/engineering/qa/report_vcr_metadata_catalog.py --check
 python scripts/engineering/qa/report_vcr_metadata_catalog.py --update
+python -m scripts.engineering.qa check-vcr-replay-preflight --strict
 python scripts/engineering/qa/report_provider_contract_drift.py --output reports/quality/provider-contract-drift-report.json --fail-on breaking
 python -m scripts.engineering.qa report-family-baseline --check
 python -m scripts.engineering.qa report-family-baseline --update

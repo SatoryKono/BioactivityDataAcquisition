@@ -17,7 +17,7 @@ SRC_ROOT = Path("src/bioetl")
 _MIN_PARALLEL_READ_FILES = 64
 _DEFAULT_READ_WORKERS = 8
 _MAX_READ_WORKERS = 16
-REVIEWED_RUNTIME_SCC_BUDGET_MAX = 3
+REVIEWED_RUNTIME_SCC_BUDGET_MAX = 2
 REVIEWED_RUNTIME_SCC_MIN_REVIEW_DATE = date(2026, 7, 1)
 ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
     frozenset(
@@ -55,22 +55,6 @@ ACCEPTED_RUNTIME_SCCS: dict[frozenset[str], dict[str, str]] = {
             "checkpoint, and replay surfaces without code duplication. "
             "The #6037 refresh keeps this acceptance explicitly reviewed while "
             "the extractor family remains under the accepted SCC inventory budget."
-        ),
-    },
-    frozenset(
-        {
-            "bioetl.infrastructure.storage.support.atomic_group",
-            "bioetl.infrastructure.storage.support.atomic_ops",
-        }
-    ): {
-        "owner": "infrastructure.storage.support",
-        "review_date": "2026-12-31",
-        "linked_issue": "#4820",
-        "rationale": (
-            "atomic_ops lazily re-exports AtomicWriteGroup from atomic_group via __getattr__ "
-            "for backward compatibility, while atomic_group imports low-level atomic write "
-            "utilities from atomic_ops. This is a reviewed same-family cycle supporting "
-            "the compatibility facade pattern for atomic write utilities."
         ),
     },
 }

@@ -477,7 +477,7 @@ test_audit_closeout_2026_06_19:
     compatibility_test_files_less_than: 1
     repo_backed_unit_lane: repo-backed-unit
     repo_backed_unit_subtree: tests/unit/repo_backed/
-    runtime_import_reviewed_scc_max: 3
+    runtime_import_reviewed_scc_max: 2
     telemetry_reports:
     - reports/test-telemetry/coverage-summary.json
     - reports/test-telemetry/slowest-tests.json

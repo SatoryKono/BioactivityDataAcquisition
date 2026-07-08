@@ -79,8 +79,8 @@ routes:
     output_kind: curated_generated_docs
     commit_policy: tracked_curated_generated_doc
     outputs:
-      - docs/reports/documentation-cleanup-inventory.json
-      - docs/reports/documentation-cleanup-inventory.md
+      - docs/reports/generated/documentation-cleanup-inventory.json
+      - docs/reports/generated/documentation-cleanup-inventory.md
     notes: Deterministic per-file documentation cleanup matrix for lifecycle,
       generated-artifact, duplicate, inbound-link, and recommended-action review.
 

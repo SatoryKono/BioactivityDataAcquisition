@@ -23,95 +23,36 @@ __all__ = [
     "atomic_write_text",
 ]
 
-import os
 import tempfile
-import time
-from collections.abc import Callable, Iterator
+from collections.abc import Iterator
 from contextlib import contextmanager
+from importlib import import_module
 from pathlib import Path
 from typing import IO, TYPE_CHECKING, Any
 
-from bioetl.domain.exceptions.infrastructure import InfrastructureError as _InfraBase
 from bioetl.infrastructure.storage.delta.resilience import (
     DEFAULT_ATOMIC_REPLACE_RETRY_POLICY,
     AdaptiveRetryPolicy,
+)
+from bioetl.infrastructure.storage.support._atomic_replace import (
+    ATOMIC_WRITE_EXCEPTIONS,
+    AtomicWriteError,
+    ReplaceRetryHook,
+    _replace_with_retry,
 )
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.storage.support.atomic_group import AtomicWriteGroup
 
 
-class AtomicWriteError(_InfraBase):
-    """Raised when atomic write fails."""
-
-    def __init__(self, target: Path, reason: str) -> None:
-        self.target = target
-        self.reason = reason
-        super().__init__(f"Atomic write failed for '{target}': {reason}")
-
-
-ATOMIC_WRITE_EXCEPTIONS = (
-    AtomicWriteError,
-    OSError,
-    ValueError,
-    TypeError,
-    RuntimeError,
-)
-
-_REPLACE_RETRYABLE_WINERRORS = {5, 32, 33}
-_REPLACE_RETRYABLE_ERRNOS_WINDOWS = {13, 16}
-_REPLACE_RETRYABLE_ERRNOS_NON_WINDOWS = {16}
-_IS_WINDOWS = os.name == "nt"
-ReplaceRetryHook = Callable[[int, float, OSError], None]
-
-
 def __getattr__(name: str) -> object:
     """Lazily expose compatibility re-exports without creating import cycles."""
     if name == "AtomicWriteGroup":
-        from bioetl.infrastructure.storage.support.atomic_group import AtomicWriteGroup
-
-        return AtomicWriteGroup
+        return getattr(
+            import_module("bioetl.infrastructure.storage.support.atomic_group"),
+            name,
+        )
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-
-def _is_retryable_replace_error(error: OSError) -> bool:
-    """Return True when Path.replace failure is transient on Windows-like FS."""
-    winerror = getattr(error, "winerror", None)
-    if isinstance(winerror, int):
-        return bool(_IS_WINDOWS and winerror in _REPLACE_RETRYABLE_WINERRORS)
-    errno_value = getattr(error, "errno", None)
-    retryable_errnos = (
-        _REPLACE_RETRYABLE_ERRNOS_WINDOWS
-        if _IS_WINDOWS
-        else _REPLACE_RETRYABLE_ERRNOS_NON_WINDOWS
-    )
-    return bool(isinstance(errno_value, int) and errno_value in retryable_errnos)
-
-
-def _replace_with_retry(
-    temp_path: Path,
-    target: Path,
-    *,
-    retry_policy: AdaptiveRetryPolicy,
-    on_retry: ReplaceRetryHook | None = None,
-) -> None:
-    """Replace target path with bounded retry for transient file-lock errors."""
-    retry_count = 0
-    while True:
-        try:
-            temp_path.replace(target)
-            return
-        except OSError as error:
-            if not _is_retryable_replace_error(error):
-                raise
-            if not retry_policy.should_retry(retry_count):
-                raise
-            delay_seconds = retry_policy.calculate_delay(retry_count)
-            if on_retry is not None:
-                on_retry(retry_count + 1, delay_seconds, error)
-            if delay_seconds > 0.0:
-                time.sleep(delay_seconds)
-            retry_count += 1
 
 
 @contextmanager
