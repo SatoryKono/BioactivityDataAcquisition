@@ -72,6 +72,8 @@ jobs:
             tests/architecture/test_config_topology_docs_drift.py \
             tests/architecture/test_control_plane_runtime_docs_alignment.py \
             tests/architecture/test_diagram_narrative_docs_sync.py \
+            tests/architecture/test_diagram_drift_and_embed_guards.py \
+            tests/architecture/test_diagram_corpus_regression_guards.py \
             tests/architecture/test_documentation_audit_remediation.py \
             tests/architecture/test_docs_governance_workflow.py \
             tests/architecture/test_docs_version_sync.py::TestDocsVersionSync::test_rules_version_extractable \
