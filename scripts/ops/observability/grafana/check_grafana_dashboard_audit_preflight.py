@@ -157,12 +157,17 @@ def _check_expanded_row_capture(playwright_check: PreflightCheck) -> PreflightCh
             status="error",
             detail=f"Playwright renderer script is not readable: {exc}",
         )
-    if "expandCollapsedRows" not in script or "collapsedRowTitles" not in script:
+    if (
+        "expandCollapsedRows" not in script
+        or "collapsedRowTitles" not in script
+        or "materializeLazyPanels" not in script
+    ):
         return PreflightCheck(
             name="expanded-row-capture",
             status="error",
             detail=(
-                "Playwright renderer does not advertise collapsed-row expansion; "
+                "Playwright renderer does not advertise collapsed-row expansion "
+                "and lazy-panel materialization; "
                 "Render API-only evidence is not full-surface UX evidence."
             ),
         )
@@ -171,7 +176,7 @@ def _check_expanded_row_capture(playwright_check: PreflightCheck) -> PreflightCh
         status="ok",
         detail=(
             "Playwright renderer can expand collapsed dashboard rows before "
-            "full-page screenshot capture."
+            "full-page screenshot capture and materialize lazy-rendered panels."
         ),
     )
 

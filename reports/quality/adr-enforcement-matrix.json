@@ -17,7 +17,6 @@
       "gap_reasons": [],
       "implementation_owner_paths": [
         "docs/00-project/00-map.md",
-        "docs/00-project/DOCUMENTATION_GOVERNANCE.md",
         "docs/00-project/RULES.md",
         "docs/00-project/ai/agents/agents/ORCHESTRATION.md",
         "docs/00-project/ai/rules/windsurf/rules/00-bioetl-core-governance.md",

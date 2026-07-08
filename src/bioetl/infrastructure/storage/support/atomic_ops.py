@@ -23,6 +23,7 @@ __all__ = [
     "atomic_write_text",
 ]
 
+import os
 import tempfile
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -38,6 +39,7 @@ from bioetl.infrastructure.storage.support._atomic_replace import (
     ATOMIC_WRITE_EXCEPTIONS,
     AtomicWriteError,
     ReplaceRetryHook,
+    _is_retryable_replace_error,
     _replace_with_retry,
 )
 
