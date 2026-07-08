@@ -631,6 +631,59 @@ class TestLoggerPortProperties:
 
 
 # ============================================================================
+# TracingPort Property-Based Tests
+# ============================================================================
+
+
+class TestTracingPortProperties:
+    """Property-based tests for TracingPort contract invariants."""
+
+    tracing_attribute_value = st.one_of(
+        st.booleans(),
+        st.integers(min_value=-10000, max_value=10000),
+        st.floats(allow_nan=False, allow_infinity=False, min_value=-1e6, max_value=1e6),
+        st.text(max_size=80),
+    )
+
+    @given(
+        tracer_name=st.text(min_size=1, max_size=80).filter(
+            lambda value: value.strip() != ""
+        ),
+        span_name=st.text(min_size=1, max_size=80).filter(
+            lambda value: value.strip() != ""
+        ),
+        attributes=st.dictionaries(
+            keys=st.text(min_size=1, max_size=40).filter(
+                lambda value: value.strip() != ""
+            ),
+            values=tracing_attribute_value,
+            max_size=5,
+        ),
+    )
+    @settings(deadline=None)
+    def test_noop_tracing_accepts_valid_span_inputs(
+        self,
+        tracer_name: str,
+        span_name: str,
+        attributes: dict[str, object],
+    ) -> None:
+        """Property: NoOpTracing MUST preserve the OTel-like tracing surface."""
+        from bioetl.domain.ports.noop import NoOpTracing
+
+        tracing = NoOpTracing()
+        tracer = tracing.get_tracer(tracer_name)
+
+        with tracer.start_as_current_span(span_name, attributes=attributes) as span:
+            for key, value in attributes.items():
+                assert span.set_attribute(key, value) is None
+            assert span.record_exception(RuntimeError("tracing-property")) is None
+
+        assert isinstance(tracing, ports.TracingPort)
+        assert tracing.flush() is None
+        assert tracing.close() is None
+
+
+# ============================================================================
 # JsonEncoderPort Property-Based Tests
 # ============================================================================
 

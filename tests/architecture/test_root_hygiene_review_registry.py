@@ -197,6 +197,10 @@ def test_root_hygiene_review_registry_classifies_live_local_runtime_root_surface
         == "present_local_only_root_surface"
     )
     assert (
+        by_path[".mypy_cache"]["current_live_state"]
+        == "present_local_only_root_surface"
+    )
+    assert (
         by_path[".coverage-sharded-current-main"]["current_live_state"]
         == "present_local_only_root_surface"
     )

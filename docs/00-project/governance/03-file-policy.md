@@ -134,7 +134,7 @@ Docker helper dispositions are resolved as follows and MUST stay aligned with
 - Editor/vendor/tooling roots such as `.ai/`, `.aiassistant/`, `ai/`,
   `.jules/`, `.junie/`, `.sonarlint/`, `.windsurf/`, `.agent-work/`,
   `.agentbridge/`, `.agents/`, `.benchmarks/`, `.cache/`, `.qodo/`,
-  `.pytest_cache/`, `.ruff_cache/`, `.hypothesis/`,
+  `.mypy_cache/`, `.pytest_cache/`, `.ruff_cache/`, `.hypothesis/`,
   `.import_linter_cache/`, `.venv/`, `node_modules/`, and `test-output/`
   MAY существовать в рабочем дереве, но MUST оставаться untracked и
   игнорироваться `.gitignore`, если не были явно promoted через structure

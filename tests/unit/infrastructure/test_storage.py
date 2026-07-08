@@ -348,6 +348,7 @@ class TestSilverWriter:
         writer = SilverWriter(base_path=SILVER_DELTA_ROOT, logger=noop_logger)
         # Normalize paths for cross-platform comparison (Windows uses backslashes)
         import os.path
+
         assert os.path.normpath(writer.base_path) == os.path.normpath(SILVER_DELTA_ROOT)
 
     @pytest.mark.asyncio

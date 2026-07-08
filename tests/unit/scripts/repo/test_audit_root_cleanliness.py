@@ -107,11 +107,23 @@ def test_collect_forbidden_local_output_roots_allows_routed_reports_logs() -> No
     assert violations == []
 
 
+def test_collect_forbidden_local_output_roots_rejects_root_silver_output() -> None:
+    violations = module._collect_forbidden_local_output_roots(
+        ["silver/test/part-0001.parquet", "data/output/silver/chembl/activity"],
+        forbidden_roots=("silver",),
+        blocked_cleanup_paths=frozenset({"data"}),
+        tolerated_local_root_dirs=frozenset(),
+    )
+
+    assert violations == ["silver"]
+
+
 def test_unexpected_local_root_dirs_on_disk_reject_uncataloged_root_dirs(
     tmp_path: Path,
 ) -> None:
     (tmp_path / "configs").mkdir()
     (tmp_path / ".benchmarks").mkdir()
+    (tmp_path / ".mypy_cache").mkdir()
     (tmp_path / ".qodo").mkdir()
     (tmp_path / "logs").mkdir()
 
@@ -119,7 +131,7 @@ def test_unexpected_local_root_dirs_on_disk_reject_uncataloged_root_dirs(
         tmp_path,
         tracked_root_dirs={"configs"},
         allowed_root_dirs=frozenset({"configs"}),
-        tolerated_local_root_dirs=frozenset({".benchmarks", ".qodo"}),
+        tolerated_local_root_dirs=frozenset({".benchmarks", ".mypy_cache", ".qodo"}),
     )
 
     assert violations == ["logs"]

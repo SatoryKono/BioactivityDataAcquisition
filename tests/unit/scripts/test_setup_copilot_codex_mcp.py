@@ -53,9 +53,7 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
     assert devin_config["mcpServers"] == runtime_servers
     assert qodo_payload["mcpServers"] == servers
     assert servers["filesystem"]["args"][-1] == "."
-    assert runtime_servers["filesystem"]["args"][-1] == str(
-        workspace_root.resolve()
-    )
+    assert runtime_servers["filesystem"]["args"][-1] == str(workspace_root.resolve())
     assert servers["sequential-thinking"]["args"] == [
         "-y",
         "@modelcontextprotocol/server-sequential-thinking@2025.12.18",

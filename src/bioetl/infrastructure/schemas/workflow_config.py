@@ -241,7 +241,9 @@ class WorkflowReconcileForeignKeysConfigSchema(BaseModel):
             "primary_keys",
         )
         if self.mutation_layer is not None and self.mutation_layer != self.source_layer:
-            raise ValueError("reconcile_foreign_keys mutation_layer must match source_layer")
+            raise ValueError(
+                "reconcile_foreign_keys mutation_layer must match source_layer"
+            )
         self._validate_key_contract()
         return self
 
@@ -293,9 +295,7 @@ class WorkflowReconcileForeignKeysConfigSchema(BaseModel):
     def to_config_dict(self) -> JsonDict:
         """Return normalized config with explicit layer defaults for fingerprinting."""
         return {
-            key: value
-            for key, value in self.model_dump().items()
-            if value is not None
+            key: value for key, value in self.model_dump().items() if value is not None
         }
 
 
@@ -373,7 +373,9 @@ def _normalize_fk_optional_name(value: str | None, field_name: str) -> str | Non
 def _normalize_fk_required_names(values: list[str], field_name: str) -> list[str]:
     normalized = [_normalize_fk_required_name(value, field_name) for value in values]
     if len(set(normalized)) != len(normalized):
-        raise ValueError(f"reconcile_foreign_keys {field_name} cannot contain duplicates")
+        raise ValueError(
+            f"reconcile_foreign_keys {field_name} cannot contain duplicates"
+        )
     return normalized
 
 

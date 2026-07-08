@@ -94,7 +94,10 @@ def test_reconcile_foreign_keys_config_preserves_silver_defaults() -> None:
         ({"source_key": None}, "source_key and reference_key together"),
         ({"reference_key": None}, "source_key and reference_key together"),
         (
-            {"source_keys": ["target_id", "target_type"], "reference_keys": ["target_id"]},
+            {
+                "source_keys": ["target_id", "target_type"],
+                "reference_keys": ["target_id"],
+            },
             "same length",
         ),
         ({"unexpected": True}, "Extra inputs"),

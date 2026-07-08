@@ -362,6 +362,34 @@ Hypothesis profile: default
 
 Without this metadata, timing comparisons are easy to misread.
 
+## 2026-07-08 TST Corrections
+
+The current test-performance plan is measurement-first. Claims such as
+"40-60% faster" are not accepted from structure alone; they require a dated
+before/after baseline in `reports/test-telemetry/` using the same lane, marker
+expression, coverage mode, worker count, platform, Python version, and Hypothesis
+profile.
+
+The latest committed slow-test evidence points first at architecture governance
+scans, so optimization work should start with cached scans, shard boundaries,
+and artifact freshness checks before changing E2E or VCR execution. `xdist`
+remains limited to the explicit parallel-safe lanes in
+`configs/quality/test_matrix.yaml`; local pytest defaults stay serial, and VCR,
+memory, benchmark, and stateful integration lanes remain serial or bounded until
+their lane definitions prove otherwise.
+
+Storage test optimization must use named test seams such as
+`tests/fakes/storage_fake.py` or `tmp_path`-backed storage instances. Do not
+replace the plan with a generic "in-memory Delta" item unless the measured
+backend is actually Delta-compatible and the filesystem-specific integration
+coverage remains intact.
+
+VCR maintenance is freshness/pruning governance, not mass consolidation. The
+blocking surfaces are metadata sidecars, stale-age checks, catalog drift, and
+replay safety. Golden-test expansion is likewise bounded: Gold DQ bundle
+snapshots cover the explicit DQ-sensitive registry, not every Gold entity by
+default.
+
 ## Updated Optimization Plan
 
 ### Phase 1: Keep the Current Flow Accurate

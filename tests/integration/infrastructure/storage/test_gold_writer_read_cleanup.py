@@ -49,17 +49,23 @@ class TestBuildReadProjection:
 
     def test_returns_none_when_current_only(self) -> None:
         """Current-only reads read full rows first for filtering, then project."""
-        assert _build_read_projection(
-            columns=["entity_id"],
-            current_only=True,
-        ) is None
+        assert (
+            _build_read_projection(
+                columns=["entity_id"],
+                current_only=True,
+            )
+            is None
+        )
 
     def test_returns_none_when_current_only_with_is_current(self) -> None:
         """Current-only reads read full rows first even when is_current is requested."""
-        assert _build_read_projection(
-            columns=["entity_id", "is_current"],
-            current_only=True,
-        ) is None
+        assert (
+            _build_read_projection(
+                columns=["entity_id", "is_current"],
+                current_only=True,
+            )
+            is None
+        )
 
 
 class TestPreviewCleanup:

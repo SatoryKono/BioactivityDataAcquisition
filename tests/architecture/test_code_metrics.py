@@ -88,10 +88,10 @@ class TestFileSizeLimits:
     # Layer-specific limits (in lines of code)
     LAYER_LIMITS = {
         "domain": 305,  # Domain should be small and focused
-        "application": 500,  # Application can be larger
+        "application": 411,  # Application can be larger
         "composition": 350,  # Composition is wiring only (buffer below hard cap)
-        "infrastructure": 650,  # Infrastructure adapters may be complex (bumped from 600)
-        "interfaces": 420,  # CLI and entry points (bumped: registry DI params)
+        "infrastructure": 443,  # Infrastructure adapters may be complex
+        "interfaces": 418,  # CLI and entry points
     }
 
     # Exemptions are managed in configs/quality/architecture_metric_exemptions.yaml

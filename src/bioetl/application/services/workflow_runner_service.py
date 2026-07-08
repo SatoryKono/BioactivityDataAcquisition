@@ -73,7 +73,9 @@ class WorkflowRunnerService:
     transform_service: WorkflowTransformService
     metrics: MetricsPort
     monotonic: Callable[[], float] = perf_counter
-    workflow_transform_artifact_sink: WorkflowTransformArtifactSinkProtocol | None = None
+    workflow_transform_artifact_sink: WorkflowTransformArtifactSinkProtocol | None = (
+        None
+    )
 
     async def run_workflow(
         self,

@@ -818,9 +818,7 @@ filter_defaults:
         _, _, gold_filters, _ = loader.load("chembl", "target")
 
         organism_class_filter = next(
-            flt
-            for flt in gold_filters.column_filters
-            if flt.column == "organism_class"
+            flt for flt in gold_filters.column_filters if flt.column == "organism_class"
         )
         assert organism_class_filter.operator.value == "not_in"
         assert organism_class_filter.values == frozenset({"unicellular", "acellular"})

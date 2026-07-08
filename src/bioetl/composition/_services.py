@@ -164,7 +164,6 @@ def get_checkpoint_service() -> CheckpointService:
     _ensure_provider_registrations()
     return cast("CheckpointService", _invoke_bootstrap("bootstrap_checkpoint_service"))
 
-
 def get_audit_service() -> AuditInspectionService:
     """Get an audit inspection service for operator diagnostics operations."""
     _ensure_provider_registrations()
@@ -177,8 +176,6 @@ def get_audit_service() -> AuditInspectionService:
 def get_quarantine_service() -> QuarantineService:
     """Get quarantine administration service without pipeline registration."""
     return cast("QuarantineService", _invoke_bootstrap("bootstrap_quarantine_service"))
-
-
 def get_bronze_cleanup_service() -> BronzeCleanupService:
     """Get Bronze cleanup service."""
     _ensure_provider_registrations()
@@ -297,45 +294,54 @@ def get_adr_service() -> object:
     _ensure_provider_registrations()
     return _invoke_bootstrap("bootstrap_adr_service")
 
+
 def get_config_service() -> object:
     """Get application configuration service."""
     _ensure_provider_registrations()
     return _invoke_bootstrap("bootstrap_config_service")
+
 
 def get_export_service() -> object:
     """Get Delta export service."""
     _ensure_provider_registrations()
     return _invoke_bootstrap("bootstrap_export_service")
 
+
 def get_forensic_run_diff_service() -> object:
     """Get forensic run diff service."""
     _ensure_provider_registrations()
     return _invoke_bootstrap("bootstrap_forensic_run_diff_service")
+
 
 def get_historical_replay_closure_service() -> object:
     """Get historical replay closure service."""
     _ensure_provider_registrations()
     return _invoke_bootstrap("bootstrap_historical_replay_closure_service")
 
+
 def get_historical_replay_corpus_service() -> object:
     """Get historical replay corpus service."""
     _ensure_provider_registrations()
     return _invoke_bootstrap("bootstrap_historical_replay_corpus_service")
+
 
 def get_historical_replay_universe_service() -> object:
     """Get historical replay universe service."""
     _ensure_provider_registrations()
     return _invoke_bootstrap("bootstrap_historical_replay_universe_service")
 
+
 def get_lineage_service() -> object:
     """Get lineage service."""
     _ensure_provider_registrations()
     return _invoke_bootstrap("bootstrap_lineage_service")
 
+
 def get_lock_service() -> object:
     """Get administrative lock service."""
     _ensure_provider_registrations()
     return _invoke_bootstrap("bootstrap_lock_service")
+
 
 def get_run_manifest_service() -> object:
     """Get run-manifest service without full pipeline registration."""

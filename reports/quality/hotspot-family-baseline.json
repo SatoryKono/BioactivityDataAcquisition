@@ -4,7 +4,7 @@
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
     "budget_warnings": 0,
-    "budget_review_notes": 3
+    "budget_review_notes": 2
   },
   "families": [
     {
@@ -86,20 +86,19 @@
         "src/bioetl/application/services/control_plane/"
       ],
       "duplication_clusters": 0,
-      "files": 120,
-      "total_loc": 14787,
+      "files": 123,
+      "total_loc": 15051,
       "files_ge_250_loc": 13,
       "helper_function_ratio": 0.457,
-      "max_internal_fan_in": 4,
-      "max_internal_fan_in_module": "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy",
+      "max_internal_fan_in": 3,
+      "max_internal_fan_in_module": "bioetl.application.services.control_plane.workflow.manifest_models",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 16,
         "max_internal_fan_in": 4
       },
       "budget_warnings": [],
       "budget_review_notes": [
-        "near_budget:files_ge_250_loc=13/16",
-        "at_budget:max_internal_fan_in=4/4"
+        "near_budget:files_ge_250_loc=13/16"
       ]
     },
     {

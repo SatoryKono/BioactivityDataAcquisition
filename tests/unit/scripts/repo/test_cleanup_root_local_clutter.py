@@ -61,6 +61,12 @@ def _write_governance(tmp_path: Path) -> None:
                                 "action_if_reintroduced": "safe local pytest cache",
                             },
                             {
+                                "path": ".mypy_cache",
+                                "current_live_state": "present_local_only_root_surface",
+                                "canonical_path": None,
+                                "action_if_reintroduced": "safe local mypy cache",
+                            },
+                            {
                                 "path": ".venv",
                                 "current_live_state": "present_local_only_root_surface",
                                 "canonical_path": "pyproject.toml",
@@ -115,13 +121,16 @@ def test_collect_root_local_cleanup_candidates_excludes_env_and_opt_in_families(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _write_governance(tmp_path)
-    for path in (".pytest_cache", ".venv", "node_modules", ".env"):
+    for path in (".mypy_cache", ".pytest_cache", ".venv", "node_modules", ".env"):
         (tmp_path / path).mkdir()
     monkeypatch.setattr(module, "_tracked_paths", lambda _repo_root: frozenset())
 
     candidates = module.collect_root_local_cleanup_candidates(tmp_path)
 
-    assert [candidate.rel_path for candidate in candidates] == [".pytest_cache"]
+    assert [candidate.rel_path for candidate in candidates] == [
+        ".mypy_cache",
+        ".pytest_cache",
+    ]
 
 
 def test_collect_root_local_cleanup_candidates_includes_opt_in_families(
@@ -129,7 +138,7 @@ def test_collect_root_local_cleanup_candidates_includes_opt_in_families(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _write_governance(tmp_path)
-    for path in (".pytest_cache", ".venv", "node_modules"):
+    for path in (".mypy_cache", ".pytest_cache", ".venv", "node_modules"):
         (tmp_path / path).mkdir()
     monkeypatch.setattr(module, "_tracked_paths", lambda _repo_root: frozenset())
 
@@ -140,6 +149,7 @@ def test_collect_root_local_cleanup_candidates_includes_opt_in_families(
     )
 
     assert [candidate.rel_path for candidate in candidates] == [
+        ".mypy_cache",
         ".pytest_cache",
         ".venv",
         "node_modules",
