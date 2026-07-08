@@ -1,0 +1,74 @@
+{
+  "issue": 6061,
+  "title": "RF-005: Add explicit port conformance checks for storage and observability adapters",
+  "debt_outcome": "improved",
+  "changes": [
+    {
+      "path": "tests/architecture/test_adapter_port_conformance.py",
+      "summary": "Added real adapter conformance checks for BronzeStoragePort, SilverStoragePort, GoldStoragePort, LoggerPort, and CircuitBreakerPort implementations."
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/bronze_writer.py",
+      "summary": "Added BronzeWriter.cleanup_bronze() as the BronzeStoragePort cleanup entrypoint, delegating to retained cleanup_old_files()."
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/silver_writer.py",
+      "summary": "Added SilverWriter.clear_silver() as the SilverStoragePort clear entrypoint, delegating to the shared Delta table clear helper."
+    },
+    {
+      "path": "src/bioetl/infrastructure/storage/gold_writer.py",
+      "summary": "Added GoldWriter.clear_gold() as the GoldStoragePort clear entrypoint, delegating to the shared Delta table clear helper."
+    }
+  ],
+  "not_committed_artifacts": [
+    {
+      "path": "reports/quality/module-coverage-inventory.json",
+      "reason": "Clean temporary-worktree refresh/check was performed for the RF-005 source changes, but the generated JSON was not included in the final commit because concurrent module-coverage refreshes in the dirty checkout were repeatedly mixing unrelated runtime-builders drift into the artifact."
+    }
+  ],
+  "conformance_scope": {
+    "storage": [
+      "BronzeWriter -> BronzeStoragePort",
+      "SilverWriter -> SilverStoragePort",
+      "GoldWriter -> GoldStoragePort"
+    ],
+    "observability": [
+      "NoOpLogger -> LoggerPort",
+      "UnifiedLogger -> LoggerPort",
+      "StructlogLogger -> LoggerPort"
+    ],
+    "resilience": [
+      "CircuitBreakerGuard -> CircuitBreakerPort"
+    ]
+  },
+  "guardrails": [
+    "No domain port signatures were weakened.",
+    "No explicit inheritance was added before conformance was proven.",
+    "No technical-debt budget, hotspot cap, scorecard threshold, ratchet, or exemption limit was increased.",
+    "No infrastructure logic was moved into domain ports."
+  ],
+  "validation": {
+    "passed": [
+      "./.venv/bin/ruff format src/bioetl/infrastructure/storage/bronze_writer.py src/bioetl/infrastructure/storage/silver_writer.py src/bioetl/infrastructure/storage/gold_writer.py tests/architecture/test_adapter_port_conformance.py",
+      "./.venv/bin/ruff check src/bioetl/infrastructure/storage/bronze_writer.py src/bioetl/infrastructure/storage/silver_writer.py src/bioetl/infrastructure/storage/gold_writer.py tests/architecture/test_adapter_port_conformance.py",
+      "./.venv/bin/python -m pytest tests/architecture/test_adapter_port_conformance.py -o addopts='' -q",
+      "./.venv/bin/python -m pytest tests/architecture/test_adapter_port_conformance.py tests/architecture/test_port_contracts.py tests/architecture/test_port_contracts_resilience_concurrency.py -o addopts='' -q",
+      "./.venv/bin/python -m pytest tests/architecture/test_runtime_import_scc.py -o addopts='' -q",
+      "./.venv/bin/lint-imports --config .importlinter",
+      "./.venv/bin/python -m pytest tests/unit/domain/ports/test_port_runtime_checkable.py tests/unit/domain/ports/test_protocol_stubs.py -o addopts='' -q",
+      "./.venv/bin/python -m pytest tests/unit/infrastructure/observability/test_logger_port_contract.py tests/unit/infrastructure/test_circuit_breaker.py -o addopts='' -q",
+      "./.venv/bin/python -m pytest tests/unit/infrastructure/storage/bronze_writer tests/unit/infrastructure/storage/silver_writer tests/unit/storage/gold/test_strict_validation.py -o addopts='' -q",
+      "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.venv/bin/python -m scripts.engineering.qa.report_module_coverage_inventory --allow-missing-coverage-xml --check (in /tmp/bioetl-rf005-inventory)"
+    ],
+    "not_completed": [
+      {
+        "command": "./.venv/bin/mypy src/bioetl/infrastructure/storage/bronze_writer.py src/bioetl/infrastructure/storage/silver_writer.py src/bioetl/infrastructure/storage/gold_writer.py",
+        "reason": "Interrupted after more than two minutes without output on the mounted checkout; explicit inheritance was not added, and architecture/import/conformance checks passed."
+      },
+      {
+        "command": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.venv/bin/python -m scripts.engineering.qa.report_debt_governance_gates --check (in /tmp/bioetl-rf005-inventory)",
+        "reason": "Temporary worktree checkout lacked generated reports/quality/flaky-test-burndown-review.json, so the aggregate report could not build."
+      }
+    ]
+  }
+}
