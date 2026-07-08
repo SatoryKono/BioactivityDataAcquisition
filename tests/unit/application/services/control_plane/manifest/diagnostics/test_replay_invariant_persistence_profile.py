@@ -37,7 +37,7 @@ def test_resolve_reproducibility_profile_uses_source_execution_context(
     profile = SimpleNamespace(exact_replay_support_boundary="source-boundary")
 
     monkeypatch.setattr(
-        "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context.build_replay_family_context",
+        "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family.build_replay_family_context",
         lambda manifest: SimpleNamespace(
             profile=profile,
             exact_replay_support_boundary="source-boundary",
@@ -54,7 +54,7 @@ def test_resolve_replay_family_contract_uses_composite_execution_context(
     contract = {"contract": "composite_family"}
 
     monkeypatch.setattr(
-        "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context.build_replay_family_context",
+        "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family.build_replay_family_context",
         lambda manifest: SimpleNamespace(
             profile=SimpleNamespace(),
             exact_replay_support_boundary="composite-boundary",
@@ -69,7 +69,7 @@ def test_exact_replay_support_boundary_delegates_to_resolved_profile(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
-        "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy.replay_family_context.build_replay_family_context",
+        "bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family.build_replay_family_context",
         lambda manifest: SimpleNamespace(
             exact_replay_support_boundary="strict",
             profile=SimpleNamespace(),
