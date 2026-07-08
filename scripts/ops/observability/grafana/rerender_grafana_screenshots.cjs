@@ -72,6 +72,17 @@ function parseArgs(argv) {
 }
 
 const CONFIG = parseArgs(process.argv.slice(2));
+const PANEL_READY_SELECTORS = [
+  '[data-testid^="data-testid Panel header"]',
+  '[data-testid*="Panel header"]',
+  '[data-testid="data-testid Panel header"]',
+  '[data-testid="Panel header"]',
+  '[data-testid$="Panel header"]',
+  '[aria-label="Panel header"]',
+  '[data-viz-panel-key^="panel-"]',
+  '[data-panelid]',
+  ".panel-title",
+];
 
 async function ensureOutputDir() {
   await fs.promises.mkdir(CONFIG.outputDir, { recursive: true });
@@ -242,24 +253,68 @@ async function expandCollapsedRows(page, dashboard, index, total) {
 }
 
 async function countRenderedPanels(page) {
-  const selectors = [
-    '[data-testid^="data-testid Panel header"]',
-    '[data-testid*="Panel header"]',
-    '[data-testid="data-testid Panel header"]',
-    '[data-testid="Panel header"]',
-    '[data-testid$="Panel header"]',
-    '[aria-label="Panel header"]',
-    '[data-viz-panel-key^="panel-"]',
-    '[data-panelid]',
-    '.panel-title',
-  ];
-  for (const selector of selectors) {
+  for (const selector of PANEL_READY_SELECTORS) {
     const count = await page.locator(selector).count().catch(() => 0);
     if (count > 0) {
       return { selector, count };
     }
   }
   return { selector: "", count: 0 };
+}
+
+async function waitForDashboardContent(page, dashboard, index, total) {
+  console.log(`[${index}/${total}] waiting for dashboard content ${dashboard.uid} ...`);
+  const selectors = PANEL_READY_SELECTORS;
+  await page
+    .waitForFunction(
+      (readySelectors) => {
+        const panelCount = readySelectors.reduce(
+          (total, selector) => total + document.querySelectorAll(selector).length,
+          0,
+        );
+        if (panelCount > 0) {
+          return true;
+        }
+        const text = document.body ? document.body.innerText || "" : "";
+        return text.includes("Review Dashboard Navigation") || text.includes("Navigation");
+      },
+      selectors,
+      { timeout: CONFIG.timeoutMs },
+    )
+    .catch(() => {
+      console.warn(
+        `[${index}/${total}] dashboard content readiness timeout for ${dashboard.uid}; continuing with screenshot capture`,
+      );
+    });
+}
+
+async function materializeLazyPanels(page, dashboard, index, total) {
+  const scrollDelayMs = Math.max(250, Math.min(1000, Math.floor(CONFIG.settleMs / 3)));
+  const step = Math.max(500, Math.floor(CONFIG.viewport.height * 0.75));
+  let previousScrollHeight = 0;
+  console.log(`[${index}/${total}] materializing lazy panels for ${dashboard.uid} ...`);
+
+  for (let pass = 1; pass <= 2; pass += 1) {
+    const scrollHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+    if (scrollHeight <= CONFIG.viewport.height && pass > 1) {
+      break;
+    }
+    for (let y = 0; y <= scrollHeight; y += step) {
+      await page.evaluate((position) => window.scrollTo(0, position), y);
+      await page.waitForTimeout(scrollDelayMs);
+    }
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await page.waitForTimeout(scrollDelayMs);
+
+    const nextScrollHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+    if (nextScrollHeight === previousScrollHeight || nextScrollHeight === scrollHeight) {
+      break;
+    }
+    previousScrollHeight = nextScrollHeight;
+  }
+
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(scrollDelayMs);
 }
 
 function dashboardRenderUrl(dashboard) {
@@ -302,6 +357,8 @@ async function renderDashboard(page, dashboard, index, total) {
   );
   await page.waitForTimeout(CONFIG.settleMs);
   await expandCollapsedRows(page, dashboard, index, total);
+  await waitForDashboardContent(page, dashboard, index, total);
+  await materializeLazyPanels(page, dashboard, index, total);
 
   const renderedPanelEvidence = await countRenderedPanels(page);
   dashboard.renderedPanelCount = renderedPanelEvidence.count;

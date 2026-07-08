@@ -578,6 +578,9 @@ def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() 
     assert "[data-panelid]" in script
     assert "renderedPanelCount" in script
     assert "renderedPanelSelector" in script
+    assert "waitForDashboardContent" in script
+    assert "materializeLazyPanels" in script
+    assert "window.scrollTo" in script
 
 
 def test_rerender_playwright_fallback_streams_output_from_repo_root(

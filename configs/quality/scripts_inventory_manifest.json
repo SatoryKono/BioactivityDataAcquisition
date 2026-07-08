@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-08T17:33:02.170016+00:00",
+  "generated_at": "2026-07-08T17:50:45.292045+00:00",
   "summary": {
-    "total_scripts": 446,
+    "total_scripts": 447,
     "status_counts": {
-      "active": 355,
+      "active": 356,
       "supporting": 91
     },
     "reference_group_coverage": {
@@ -13,7 +13,7 @@
       "ci": 62,
       "docs": 164,
       "other": 23,
-      "scripts": 347,
+      "scripts": 348,
       "skills": 11,
       "tests": 193
     }
@@ -10380,6 +10380,33 @@
           "line": 208,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.qa.vcr check-placement"
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/qa/vcr/check_replay_preflight.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/README.md",
+          "line": 30,
+          "source_group": "scripts",
+          "text": "| `check-vcr-replay-preflight`     | `vcr/check_replay_preflight.py`                       | Fail fast on unresolved replay VCR pointers and cheap catalog drift                                |"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 106,
+          "source_group": "scripts",
+          "text": "\"scripts.engineering.qa.vcr.check_replay_preflight\""
+        },
+        {
+          "path": "scripts/engineering/qa/vcr/__main__.py",
+          "line": 27,
+          "source_group": "scripts",
+          "text": "\"check-replay-preflight\": \"check_replay_preflight.py\","
         }
       ]
     },
