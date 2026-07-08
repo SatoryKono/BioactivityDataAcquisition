@@ -20,9 +20,7 @@ FETCH_SPEC = ["--from", "mcp-server-fetch==2025.4.7", "mcp-server-fetch"]
 MANAGED_BLOCK_BEGIN = "# === BEGIN MANAGED MCP SERVERS ==="
 MANAGED_BLOCK_END = "# === END MANAGED MCP SERVERS ==="
 CACHE_DIR_NAME = ".cache"
-REMOVED_MCP_SERVER_NAMES = frozenset(
-    {"sonarqube", "chembl", "pubchem", "pubmed"}
-)
+REMOVED_MCP_SERVER_NAMES = frozenset({"sonarqube", "chembl", "pubchem", "pubmed"})
 
 
 def _config_path(
@@ -250,9 +248,7 @@ def _write_devin_config(output_root: Path, workspace_root: Path) -> Path:
     settings_path = output_root / ".devin" / "config.json"
     settings_path.parent.mkdir(parents=True, exist_ok=True)
 
-    existing = _load_existing_json_object(
-        settings_path, label="Devin workspace config"
-    )
+    existing = _load_existing_json_object(settings_path, label="Devin workspace config")
     existing["mcpServers"] = deepcopy(_canonical_servers(workspace_root))
     _write_json(settings_path, existing)
     return settings_path
@@ -277,7 +273,9 @@ def _write_configs(
     codex_settings_path: Path | None = None
     devin_config_path: Path | None = None
     if not qodo_only:
-        codex_settings_path = _write_workspace_codex_settings(output_root, workspace_root)
+        codex_settings_path = _write_workspace_codex_settings(
+            output_root, workspace_root
+        )
         devin_config_path = _write_devin_config(output_root, workspace_root)
         _write_json(mcp_path, codex_payload)
         if output_root.resolve() == workspace_root.resolve():
@@ -467,7 +465,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--skip-codex",
         action="store_true",
-        help="Skip post-write Codex CLI validation.",
+        help=(
+            "Skip Codex user-home config updates and post-write CLI validation; "
+            "workspace .codex/settings.json is still written."
+        ),
     )
     parser.add_argument(
         "--skip-codex-config",
@@ -492,6 +493,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         args.skip_codex = True
         args.skip_codex_config = True
         args.skip_gemini_settings = True
+    if args.skip_codex:
+        args.skip_codex_config = True
 
     (
         mcp_path,

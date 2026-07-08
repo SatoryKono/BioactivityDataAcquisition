@@ -363,9 +363,9 @@ review_lanes:
     retention_action: keep_untracked_or_prune_only_when_rebuildable_and_outside_blocked_zones
     cleanup_policy: exact_candidate_review_only_no_root_allowlist_promotion
     verification:
-      - git ls-files .agent-work .agentbridge .agents .benchmarks .cache .codex_tmp .coverage-sharded-current-main .hypothesis .import_linter_cache node_modules .npm-cache .pytest_cache .ruff_cache .scannerwork test-output tmp .venv .venv-docs .venv-win .venv-win-corrupt caddy '~'
-      - git check-ignore -v .agent-work .agentbridge .agents .benchmarks .cache .codex_tmp .coverage-sharded-current-main .hypothesis .import_linter_cache node_modules .npm-cache .pytest_cache .ruff_cache .scannerwork test-output tmp .venv .venv-docs .venv-win .venv-win-corrupt caddy '~'
-      - rg -n "\\.agent-work/|\\.agentbridge/|\\.agents/|\\.benchmarks/|\\.cache/|\\.codex_tmp/|\\.coverage-sharded-current-main/|\\.hypothesis/|\\.import_linter_cache/|node_modules/|\\.npm-cache/|\\.pytest_cache/|\\.ruff_cache/|\\.scannerwork/|test-output/|tmp/|\\.venv/|\\.venv-docs/|\\.venv-win/|\\.venv-win-corrupt/|caddy/|~/" .gitignore docs scripts .github tests configs README.md
+      - git ls-files .agent-work .agentbridge .agents .benchmarks .cache .codex_tmp .coverage-sharded-current-main .hypothesis .import_linter_cache .mypy_cache node_modules .npm-cache .pytest_cache .ruff_cache .scannerwork test-output tmp .venv .venv-docs .venv-win .venv-win-corrupt caddy '~'
+      - git check-ignore -v .agent-work .agentbridge .agents .benchmarks .cache .codex_tmp .coverage-sharded-current-main .hypothesis .import_linter_cache .mypy_cache node_modules .npm-cache .pytest_cache .ruff_cache .scannerwork test-output tmp .venv .venv-docs .venv-win .venv-win-corrupt caddy '~'
+      - rg -n "\\.agent-work/|\\.agentbridge/|\\.agents/|\\.benchmarks/|\\.cache/|\\.codex_tmp/|\\.coverage-sharded-current-main/|\\.hypothesis/|\\.import_linter_cache/|\\.mypy_cache/|node_modules/|\\.npm-cache/|\\.pytest_cache/|\\.ruff_cache/|\\.scannerwork/|test-output/|tmp/|\\.venv/|\\.venv-docs/|\\.venv-win/|\\.venv-win-corrupt/|caddy/|~/" .gitignore docs scripts .github tests configs README.md
     candidates:
       - path: .agent-work
         current_live_state: present_local_only_root_surface
@@ -403,6 +403,10 @@ review_lanes:
         current_live_state: present_local_only_root_surface
         canonical_path: null
         action_if_reintroduced: keep_untracked_as_local_import_linter_cache_or_scope_to_a_documented_cache_surface
+      - path: .mypy_cache
+        current_live_state: present_local_only_root_surface
+        canonical_path: null
+        action_if_reintroduced: keep_untracked_as_local_mypy_cache_or_prune_with_reviewed_root_local_cleanup_tooling
       - path: node_modules
         current_live_state: present_local_only_root_surface
         canonical_path: package-lock.json

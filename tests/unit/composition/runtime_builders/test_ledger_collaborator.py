@@ -265,10 +265,13 @@ def test_artifact_recorder_ignores_bronze_snapshot_payloads_that_are_not_lists()
 
 @pytest.mark.unit
 def test_attach_artifact_recorder_returns_false_without_attach_method() -> None:
-    assert _attach_artifact_recorder(
-        object(),
-        _FakeRunLedgerService(),  # type: ignore[arg-type]
-    ) is False
+    assert (
+        _attach_artifact_recorder(
+            object(),
+            _FakeRunLedgerService(),  # type: ignore[arg-type]
+        )
+        is False
+    )
 
 
 @pytest.mark.unit

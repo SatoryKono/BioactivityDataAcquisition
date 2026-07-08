@@ -203,7 +203,9 @@ def test_subprocess_heavy_architecture_tests_stay_in_slow_governance_shard() -> 
         "tests/architecture/test_scripts_lifecycle_registry.py",
         "tests/architecture/test_test_structural_debt.py",
     }
-    slow_paths.update(str(path) for path in rebalance["generated_architecture_hotspot_paths"])
+    slow_paths.update(
+        str(path) for path in rebalance["generated_architecture_hotspot_paths"]
+    )
 
     declared_slow_paths: set[str] = set()
     for shard_name in slow_shards:

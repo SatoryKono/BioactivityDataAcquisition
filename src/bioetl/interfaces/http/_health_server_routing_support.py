@@ -230,7 +230,9 @@ async def _list_workflow_manifests(
     host: _HealthRoutingHost,
 ) -> tuple[WorkflowManifest, ...]:
     workflow_manifest_port = getattr(host, "_workflow_manifest_port", None)
-    if workflow_manifest_port is None or not hasattr(workflow_manifest_port, "list_all"):
+    if workflow_manifest_port is None or not hasattr(
+        workflow_manifest_port, "list_all"
+    ):
         return ()
     return cast(
         tuple[WorkflowManifest, ...],

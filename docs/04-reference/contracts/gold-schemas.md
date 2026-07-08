@@ -110,7 +110,9 @@ entity in `entities`. An output belongs in this bounded subset when it carries
 DQ flags or DQ-sensitive provenance consumed by downstream checks, represents a
 high-value provider or composite contract surface, and has snapshot rows that
 exercise at least one warning or error DQ state. Contract tests enforce that
-required subset and do not imply entity-wide DQ bundle generation.
+required subset and do not imply entity-wide DQ bundle generation. This is not a
+blanket snapshot-expansion policy: adding a new Gold bundle requires registry
+membership and DQ-sensitive rationale, not only the existence of a Gold entity.
 
 ### Nullable Numeric Compatibility
 

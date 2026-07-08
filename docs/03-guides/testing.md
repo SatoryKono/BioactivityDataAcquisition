@@ -219,13 +219,24 @@ searchable without opening the file. Avoid generic names such as
 `test_default_values`, `test_immutability`, `test_hash_consistency`,
 `test_valid_creation`, and `test_none_input` unless the name is already globally
 unique and retained only as historical compatibility during a rename batch.
-`report_test_governance_audit --duplicate-name-inventory-out <path>` writes the
-full duplicate-name inventory used to ratchet
-`duplicate_test_names_max` and `duplicate_test_name_occurrences_max` toward zero.
-The same collector also publishes the exact-byte fixture duplication inventory at
-`reports/quality/test-fixture-asset-duplication.json` so VCR cassettes, golden
-JSON, and other tracked fixture payloads stay visible even though `jscpd` does
-not scan those artifact classes directly.
+`reports/quality/test-governance-current.json` is the canonical test-audit
+baseline. Its `total_test_files` value means `tests/**/test_*.py` files matching
+`pyproject.toml -> tool.pytest.ini_options.python_files`; the broader
+`test_file_inventory.test_python_file_count` field tracks all Python files under
+`tests/`. The repo-backed unit lane is intentionally non-zero and is reported in
+`repo_backed_unit_inventory`; those tests live under `tests/unit/repo_backed/`
+and run through `repo-backed-unit`, not `unit-fast`.
+
+Duplicate test-name inventory is embedded in
+`reports/quality/test-governance-current.json`. The optional
+`--duplicate-name-inventory-out <path>` diagnostic may write a throwaway local
+inventory, but the repository does not commit a separate
+`test-duplicate-name-inventory.json` baseline. The same collector publishes the
+canonical exact-byte fixture duplication inventory at
+`reports/quality/test-fixture-asset-duplication.json`; similarly named historical
+fixture-duplication reports are not current merge-blocking gates. This keeps VCR
+cassettes, golden JSON, and other tracked fixture payloads visible even though
+`jscpd` does not scan those artifact classes directly.
 
 Failure classifications are informational and come from
 `configs/quality/test_health_classifiers.yaml`; pytest exit codes and quality
@@ -509,6 +520,11 @@ bash scripts/engineering/dev/run_pytest.sh tests/architecture/test_domain_unit_t
 
 - **Адаптеры**: Тестирование HTTP-клиентов (ChEMBL, PubChem, UniProt) с использованием VCR-кассет.
 - **Storage**: Проверка записи в Delta Lake и Bronze хранилище (используются локальные временные пути).
+  Unit-like storage checks should use explicit test seams such as
+  `tests/fakes/storage_fake.py` or `tmp_path`-backed storage instances before
+  claiming a storage optimization. Do not describe this as "in-memory Delta"
+  unless the actual Delta backend is part of that measured seam; real Delta I/O
+  remains in integration/e2e/contract lanes.
 - **VCR Policy**: canonical machine-readable policy живёт в `configs/quality/integration_vcr_policy.yaml`. Кассеты хранятся в `tests/fixtures/vcr/`, а стандартный CI path использует `--vcr-record=none`.
 - **Compatibility Policy**: `pytest-vcr` должен импортироваться против locked `wrapt` dependency из активного окружения. Repo-root workaround'ы вроде `wrapt/` или `sitecustomize.py` не считаются поддерживаемым fix path; если импорт ломается, нужно чинить environment/lock, а не shadowing dependency.
 - **Fixture Governance**: `_meta.yaml` sidecars и stale-age policy находятся в `enforced` rollout. Managed VCR inventory покрывается repo-wide sidecars, canonical catalog, и CI stale-age checks.

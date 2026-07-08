@@ -19,6 +19,7 @@ def _resolve_replay_family_contract(manifest: RunManifest) -> dict[str, object]:
 def _resolve_exact_replay_support_boundary(manifest: RunManifest) -> str:
     return build_replay_family_context(manifest).exact_replay_support_boundary
 
+
 __all__ = [
     "_resolve_exact_replay_support_boundary",
     "_resolve_replay_family_contract",

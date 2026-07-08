@@ -134,9 +134,7 @@ class TestQueryParameterParsing:
 
     def test_read_optional_param_empty_string(self):
         """Test optional param parsing returns None for empty string."""
-        result = HealthServerRoutingMixin._read_optional_param(
-            {"value": ""}, "value"
-        )
+        result = HealthServerRoutingMixin._read_optional_param({"value": ""}, "value")
         assert result is None
 
     def test_read_optional_param_whitespace_only(self):

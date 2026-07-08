@@ -110,9 +110,12 @@ def test_issue_6034_composition_runtime_seams_keep_headroom() -> None:
 
     assert runtime_builders["max_internal_fan_in"] <= 4
     assert runtime_builder_budget["max_internal_fan_in"] == 5
-    assert _runtime_builder_importer_count(
-        "bioetl.composition.runtime_builders.run_manifest_support"
-    ) == 3
+    assert (
+        _runtime_builder_importer_count(
+            "bioetl.composition.runtime_builders.run_manifest_support"
+        )
+        == 3
+    )
 
 
 def test_issue_6037_runtime_scc_acceptances_are_fresh_and_not_growing() -> None:

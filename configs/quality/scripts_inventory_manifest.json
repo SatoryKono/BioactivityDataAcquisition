@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-07T16:03:21.462789+00:00",
+  "generated_at": "2026-07-08T06:39:24.441203+00:00",
   "summary": {
     "total_scripts": 445,
     "status_counts": {
@@ -11,9 +11,9 @@
       "agents": 5,
       "build": 7,
       "ci": 62,
-      "docs": 161,
+      "docs": 164,
       "other": 23,
-      "scripts": 345,
+      "scripts": 346,
       "skills": 11,
       "tests": 191
     }
@@ -895,8 +895,14 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
+        {
+          "path": "docs/05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md",
+          "line": 70,
+          "source_group": "docs",
+          "text": "| `.wsl_proxy_env.sh` | `scripts/ai/codex/helper/wsl_proxy_env.sh` | Remove only after shell setup docs and launchers source the canonical helper directly. |"
+        },
         {
           "path": "scripts/ai/codex/README.md",
           "line": 24,
@@ -923,7 +929,7 @@
         },
         {
           "path": "tests/architecture/test_root_hygiene_review_registry.py",
-          "line": 461,
+          "line": 465,
           "source_group": "tests",
           "text": "== \"scripts/ai/codex/helper/wsl_proxy_env.sh\""
         },
@@ -1001,7 +1007,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 119,
+      "reference_count": 121,
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
@@ -1028,6 +1034,18 @@
           "text": ".\\scripts\\ai\\codex\\run-codex.ps1 check"
         },
         {
+          "path": "docs/05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md",
+          "line": 71,
+          "source_group": "docs",
+          "text": "| `codex.bat` | `scripts/ai/codex/run-codex.ps1` | Remove only after Windows CMD users have a documented replacement and CI/docs no longer reference the root transport. |"
+        },
+        {
+          "path": "docs/05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md",
+          "line": 72,
+          "source_group": "docs",
+          "text": "| `codex.ps1` | `scripts/ai/codex/run-codex.ps1` | Remove only after the canonical script is the documented root-compatible entrypoint or a replacement shim exists. |"
+        },
+        {
           "path": "docs/DOCKER_QUICKSTART.md",
           "line": 253,
           "source_group": "docs",
@@ -1038,18 +1056,6 @@
           "line": 256,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\codex\\run-codex.ps1 mcp-setup"
-        },
-        {
-          "path": "docs/DOCKER_SETUP.md",
-          "line": 257,
-          "source_group": "docs",
-          "text": ".\\scripts\\ai\\codex\\run-codex.ps1"
-        },
-        {
-          "path": "scripts/ai/__main__.py",
-          "line": 27,
-          "source_group": "scripts",
-          "text": "launcher = _DIR / \"codex\" / \"run-codex.ps1\""
         }
       ]
     },
@@ -1115,8 +1121,20 @@
       "type": "bat",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 23,
       "references": [
+        {
+          "path": "docs/05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md",
+          "line": 73,
+          "source_group": "docs",
+          "text": "| `setup-codex-wsl.bat` | `scripts/ai/codex/setup-codex-wsl.bat` | Remove only after Windows setup docs no longer advertise the root batch file. |"
+        },
+        {
+          "path": "docs/05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md",
+          "line": 74,
+          "source_group": "docs",
+          "text": "| `setup-codex-wsl.ps1` | `scripts/ai/codex/setup-codex-wsl.bat` | Remove only after PowerShell setup docs no longer advertise the root transport. |"
+        },
         {
           "path": "scripts/ai/codex/README.md",
           "line": 21,
@@ -1150,18 +1168,6 @@
         {
           "path": "scripts/ai/codex/md/POWERSHELL_QUICK_START.md",
           "line": 18,
-          "source_group": "scripts",
-          "text": ".\\setup-codex-wsl.bat"
-        },
-        {
-          "path": "scripts/ai/codex/md/POWERSHELL_QUICK_START.md",
-          "line": 77,
-          "source_group": "scripts",
-          "text": ".\\setup-codex-wsl.bat"
-        },
-        {
-          "path": "scripts/ai/codex/md/POWERSHELL_QUICK_START.md",
-          "line": 137,
           "source_group": "scripts",
           "text": ".\\setup-codex-wsl.bat"
         }
@@ -2167,7 +2173,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 238,
+          "line": 240,
           "source_group": "tests",
           "text": "ps_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.ps1\").read_text("
         }
@@ -2194,7 +2200,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 235,
+          "line": 237,
           "source_group": "tests",
           "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
         }
@@ -6810,7 +6816,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 42,
+      "reference_count": 43,
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
@@ -7377,31 +7383,31 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 729,
+          "line": 745,
           "source_group": "docs",
           "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 748,
+          "line": 764,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/run_pytest_sharded.sh \\"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 839,
+          "line": 855,
           "source_group": "docs",
           "text": "| 5   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream` | Выполнить ускоренный coverage/sharded прогон |"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 840,
+          "line": 856,
           "source_group": "docs",
           "text": "| 6   | `BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded -- -vv --cov-report=term-missing` | В"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 877,
+          "line": 893,
           "source_group": "docs",
           "text": "BIOETL_PYTEST_SHARDED_FORCE_COVERAGE=1 bash scripts/engineering/dev/run_pytest_sharded.sh --stream --keep-coverage-files --coverage-dir .coverage-sharded"
         }
@@ -7676,7 +7682,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 19,
       "references": [
         {
           "path": ".github/workflows/root-hygiene.yml",
@@ -8310,7 +8316,7 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/gold-schemas.md",
-          "line": 125,
+          "line": 127,
           "source_group": "docs",
           "text": "`python3 scripts/engineering/qa/check_gold_nullable_numeric_compatibility.py --check`."
         },
@@ -8637,7 +8643,7 @@
         },
         {
           "path": "tests/architecture/test_test_governance_audit.py",
-          "line": 291,
+          "line": 411,
           "source_group": "tests",
           "text": "command = \"scripts/engineering/qa/check_test_audit_preflight.py --strict\""
         }
@@ -8795,8 +8801,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/report_test_governance_audit.py",
+          "line": 33,
+          "source_group": "scripts",
+          "text": "Path(\"scripts/engineering/qa/file_discovery.py\"),"
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "shared_helper_module",
       "review_by": "2026-07-15",
@@ -9287,7 +9300,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py",
-          "line": 200,
+          "line": 197,
           "source_group": "tests",
           "text": "ROOT / \"scripts/engineering/qa/report_architecture_debt_remote_main_baseline.py\""
         }
@@ -9559,7 +9572,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5933_5944_closeout.py",
-          "line": 203,
+          "line": 200,
           "source_group": "tests",
           "text": "ROOT / \"scripts/engineering/qa/report_debt_governance_gates.py\""
         }
@@ -9964,7 +9977,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 310,
+          "line": 321,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },
@@ -10376,7 +10389,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 781,
+          "line": 797,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
         },
@@ -10439,7 +10452,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 782,
+          "line": 798,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-naming`"
         },
@@ -10466,13 +10479,13 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 308,
+          "line": 319,
           "source_group": "docs",
           "text": "- `vcr_cassette_max_age_days: 90` является blocking stale-age threshold: CI теперь валидирует managed metadata inventory через `scripts/engineering/qa/vcr/check_vcr_metadata_age.py --max-age-days 90`"
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 787,
+          "line": 803,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90`"
         },
@@ -10528,7 +10541,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 63,
+      "reference_count": 68,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -10597,7 +10610,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 37,
+      "reference_count": 39,
       "references": [
         {
           "path": ".github/ISSUES/RH-014-Rehome-Observability-Cardinality-Evidence-Out-Of-Forbidden-Root-Artifacts.md",
@@ -10981,8 +10994,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
+        {
+          "path": "docs/05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md",
+          "line": 59,
+          "source_group": "docs",
+          "text": "./.venv/bin/python scripts/engineering/repo/cleanup_root_local_clutter.py --json"
+        },
         {
           "path": "scripts/engineering/repo/README.md",
           "line": 26,
@@ -11836,7 +11855,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 12,
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
@@ -11849,6 +11868,12 @@
           "line": 60,
           "source_group": "docs",
           "text": "| `docker-setup.ps1` | root compatibility entrypoint over `scripts/ops/docker-setup.ps1` | Remove only when operator docs no longer advertise the root entrypoint. |"
+        },
+        {
+          "path": "docs/05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md",
+          "line": 105,
+          "source_group": "docs",
+          "text": "1. All operator docs and scripts point to `scripts/ops/docker-setup.ps1` or"
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
@@ -11879,12 +11904,6 @@
           "line": 88,
           "source_group": "docs",
           "text": "Canonical helper scripts `scripts/ops/docker-setup.ps1` and"
-        },
-        {
-          "path": "tests/architecture/test_docs_root_surface_governance_alignment.py",
-          "line": 280,
-          "source_group": "tests",
-          "text": "powershell_helper = _read(\"scripts/ops/docker-setup.ps1\")"
         }
       ]
     },
@@ -11893,7 +11912,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 9,
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
@@ -11906,6 +11925,12 @@
           "line": 61,
           "source_group": "docs",
           "text": "| `docker-setup.sh` | root compatibility entrypoint over `scripts/ops/docker-setup.sh` | Remove only when operator docs no longer advertise the root entrypoint. |"
+        },
+        {
+          "path": "docs/05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md",
+          "line": 106,
+          "source_group": "docs",
+          "text": "`scripts/ops/docker-setup.sh`."
         },
         {
           "path": "docs/DOCKER_QUICKSTART.md",
@@ -11933,15 +11958,9 @@
         },
         {
           "path": "tests/architecture/test_root_hygiene_review_registry.py",
-          "line": 544,
+          "line": 548,
           "source_group": "tests",
           "text": "assert by_path[\"docker-setup.sh\"][\"canonical_path\"] == \"scripts/ops/docker-setup.sh\""
-        },
-        {
-          "path": "tests/architecture/test_tech_debt_issues_5834_5838_closeout.py",
-          "line": 300,
-          "source_group": "tests",
-          "text": "candidates[\"docker-setup.sh\"][\"canonical_path\"] == \"scripts/ops/docker-setup.sh\""
         }
       ]
     },
@@ -12333,7 +12352,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 265,
+          "line": 276,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
         },
@@ -12553,7 +12572,7 @@
         },
         {
           "path": "docs/03-guides/testing.md",
-          "line": 310,
+          "line": 321,
           "source_group": "docs",
           "text": "- canonical tooling paths активированы для enforced rollout: `scripts/engineering/qa/report_vcr_metadata_catalog.py` генерирует/проверяет catalog, а `scripts/ops/migrations/active/backfill_vcr_metadat"
         },

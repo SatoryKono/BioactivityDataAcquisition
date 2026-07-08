@@ -636,9 +636,9 @@ def test_generated_export_report_names_are_timestamped(
 
 
 def test_quarantine_states_match_docs() -> None:
-    code = Path(
-        "src/bioetl/domain/aggregates/_quarantine_value_objects.py"
-    ).read_text(encoding="utf-8")
+    code = Path("src/bioetl/domain/aggregates/_quarantine_value_objects.py").read_text(
+        encoding="utf-8"
+    )
     states = re.findall(r'^\s+([A-Z_]+)\s*=\s*"[a-z_]+"', code, flags=re.M)
     doc = Path("docs/02-architecture/01-domain-layer.md").read_text(encoding="utf-8")
     missing = [s for s in states if s not in doc]

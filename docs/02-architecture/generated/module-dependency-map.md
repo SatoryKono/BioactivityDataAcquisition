@@ -5,8 +5,8 @@
 
 ## Summary
 
-- Scanned modules: `2208`
-- Internal import edges (raw): `6865`
+- Scanned modules: `2215`
+- Internal import edges (raw): `6881`
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `303`
@@ -21,18 +21,18 @@ flowchart LR
     infrastructure[infrastructure]
     composition[composition]
     interfaces[interfaces]
-    application -->|1327 OK| application
-    application -->|848 OK| domain
+    application -->|1329 OK| application
+    application -->|853 OK| domain
     composition -->|151 OK| application
-    composition -->|678 OK| composition
+    composition -->|680 OK| composition
     composition -->|270 OK| domain
-    composition -->|224 OK| infrastructure
+    composition -->|227 OK| infrastructure
     domain -->|1129 OK| domain
     infrastructure -->|699 OK| domain
-    infrastructure -->|1088 OK| infrastructure
+    infrastructure -->|1091 OK| infrastructure
     interfaces -->|35 OK| application
     interfaces -->|53 OK| composition
-    interfaces -->|55 OK| domain
+    interfaces -->|56 OK| domain
     interfaces -->|308 OK| interfaces
 ```
 
@@ -40,26 +40,26 @@ flowchart LR
 
 | From             | To               | Imports | Policy  |
 | ---------------- | ---------------- | ------: | ------- |
-| `application`    | `application`    |    1327 | allowed |
-| `application`    | `domain`         |     848 | allowed |
+| `application`    | `application`    |    1329 | allowed |
+| `application`    | `domain`         |     853 | allowed |
 | `composition`    | `application`    |     151 | allowed |
-| `composition`    | `composition`    |     678 | allowed |
+| `composition`    | `composition`    |     680 | allowed |
 | `composition`    | `domain`         |     270 | allowed |
-| `composition`    | `infrastructure` |     224 | allowed |
+| `composition`    | `infrastructure` |     227 | allowed |
 | `domain`         | `domain`         |    1129 | allowed |
 | `infrastructure` | `domain`         |     699 | allowed |
-| `infrastructure` | `infrastructure` |    1088 | allowed |
+| `infrastructure` | `infrastructure` |    1091 | allowed |
 | `interfaces`     | `application`    |      35 | allowed |
 | `interfaces`     | `composition`    |      53 | allowed |
-| `interfaces`     | `domain`         |      55 | allowed |
+| `interfaces`     | `domain`         |      56 | allowed |
 | `interfaces`     | `interfaces`     |     308 | allowed |
 
 ## Cross-Layer Module-Group Edges (Compact)
 
 | From Group                     | To Group                                   | Imports |
 | ------------------------------ | ------------------------------------------ | ------: |
+| `application.services`         | `domain.control_plane`                     |     104 |
 | `infrastructure.adapters`      | `domain.types`                             |     104 |
-| `application.services`         | `domain.control_plane`                     |      99 |
 | `application.composite`        | `domain.composite`                         |      92 |
 | `application.core`             | `domain.types`                             |      80 |
 | `application.services`         | `domain.types`                             |      73 |
@@ -91,8 +91,8 @@ flowchart LR
 | `composition.bootstrap`        | `application.composite`                    |      21 |
 | `composition.factories`        | `domain.types`                             |      21 |
 | `interfaces.cli`               | `composition.control_plane_service_access` |      21 |
+| `interfaces.http`              | `domain.control_plane`                     |      20 |
 | `infrastructure.adapters`      | `domain.exceptions`                        |      19 |
-| `interfaces.http`              | `domain.control_plane`                     |      19 |
 | `application.services`         | `domain.exceptions`                        |      18 |
 | `composition.factories`        | `application.services`                     |      18 |
 | `application.pipelines`        | `domain.value_objects`                     |      17 |

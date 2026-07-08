@@ -65,7 +65,9 @@ def _posix(path_str: str) -> str:
 
 def _load_workspace_mcp_config(
     root: Path, tmp_path: Path
-) -> tuple[dict[str, object], dict[str, object], dict[str, object], dict[str, object], Path]:
+) -> tuple[
+    dict[str, object], dict[str, object], dict[str, object], dict[str, object], Path
+]:
     """Load generated config when backend works, else fall back to committed artifact."""
     gemini_settings_path = tmp_path / ".gemini" / "settings.json"
     gemini_settings_path.parent.mkdir(parents=True)

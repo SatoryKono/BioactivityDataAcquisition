@@ -39,8 +39,7 @@ class _GoldReader:
         if columns is None:
             return [dict(row) for row in rows]
         return [
-            {column: row[column] for column in columns if column in row}
-            for row in rows
+            {column: row[column] for column in columns if column in row} for row in rows
         ]
 
 
@@ -188,7 +187,9 @@ def test_gold_writer_retries_delta_commit_failures() -> None:
 
 
 @pytest.mark.asyncio
-async def test_gold_expiry_retries_commit_conflict(monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_gold_expiry_retries_commit_conflict(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     writer = _GoldMutationWriter(execute_errors=[CommitFailedError("conflict")])
     fake_module = _FakeGoldModule(writer)
     monkeypatch.setattr(

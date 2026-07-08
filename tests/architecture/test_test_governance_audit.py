@@ -221,6 +221,126 @@ def test_test_audit_closeout_2026_06_19_tracks_issue_pack_evidence() -> None:
 
 
 @pytest.mark.architecture
+def test_test_audit_closeout_2026_07_08_tracks_corrected_tst_plan() -> None:
+    """#6065-#6073 closeout must stay tied to corrected, evidence-backed policy."""
+    payload = _load_yaml(CONFIG_PATH)
+    closeout = cast(YamlMap, payload["test_audit_closeout_2026_07_08"])
+    invariants = cast(YamlMap, closeout["invariants"])
+    report = _load_json(TEST_GOVERNANCE_ARTIFACT_PATH)
+    matrix = _load_yaml(TEST_MATRIX_PATH)
+    lanes = cast(YamlMap, cast(YamlMap, matrix["test_lanes"])["lanes"])
+    parallel_policy = cast(
+        YamlMap,
+        cast(YamlMap, matrix["test_lanes"])["parallel_execution_policy"],
+    )
+    expected_issue_set = {
+        "#6065",
+        "#6066",
+        "#6067",
+        "#6068",
+        "#6069",
+        "#6070",
+        "#6071",
+        "#6072",
+        "#6073",
+    }
+
+    assert closeout["decision"] == "closeable"
+    assert closeout["closed_on"] == "2026-07-08"
+    assert set(cast(list[str], closeout["issue_set"])) == expected_issue_set
+
+    dispositions = cast(list[YamlMap], closeout["issue_dispositions"])
+    assert {cast(str, item["issue"]) for item in dispositions} == expected_issue_set
+
+    evidence_paths = set(cast(list[str], closeout["evidence"]))
+    for disposition in dispositions:
+        assert cast(str, disposition["status"]).strip()
+        evidence_paths.update(cast(list[str], disposition["evidence"]))
+
+    for relative_path in sorted(evidence_paths):
+        assert (ROOT / relative_path).exists(), (
+            f"2026-07-08 TST closeout references missing evidence: {relative_path}"
+        )
+
+    assert (
+        invariants["canonical_test_governance_report"]
+        == "reports/quality/test-governance-current.json"
+    )
+    assert (
+        invariants["canonical_fixture_duplication_inventory"]
+        == "reports/quality/test-fixture-asset-duplication.json"
+    )
+    assert (
+        invariants["duplicate_name_inventory_policy"]
+        == "embedded_in_test_governance_current_json"
+    )
+    assert "duplicate_test_name_inventory" in report
+    assert "test_file_inventory" in report
+    assert "repo_backed_unit_inventory" in report
+
+    repo_backed_inventory = cast(YamlMap, report["repo_backed_unit_inventory"])
+    repo_lane = cast(YamlMap, lanes[invariants["repo_backed_unit_lane"]])
+    assert repo_lane["paths"] == [invariants["repo_backed_unit_subtree"]]
+    assert repo_backed_inventory["lane"] == invariants["repo_backed_unit_lane"]
+    assert repo_backed_inventory["subtree"] == invariants["repo_backed_unit_subtree"]
+    assert int(repo_backed_inventory["test_files"]) == int(
+        invariants["repo_backed_unit_test_files"]
+    )
+    assert repo_backed_inventory["unmarked_test_files"] == []
+
+    assert parallel_policy["local_pytest_default"] == invariants["local_pytest_default"]
+    assert (
+        parallel_policy["forbid_global_xdist_addopts"]
+        is invariants["forbid_global_xdist_addopts"]
+    )
+    assert set(cast(list[str], parallel_policy["explicit_parallel_lanes"])) == set(
+        cast(list[str], invariants["explicit_parallel_lanes"])
+    )
+
+    assert (
+        invariants["storage_test_seam_decision"]
+        == "use_fakes_or_tmp_path_storage_before_delta_replacement_claims"
+    )
+    assert (
+        invariants["vcr_decision"]
+        == "freshness_metadata_pruning_not_mass_consolidation"
+    )
+    assert invariants["observability_property_gap"] == ("tracing_port_runtime_adapters")
+    gold_registry = cast(YamlMap, matrix["fixture_governance"])[
+        "gold_snapshot_registry"
+    ]
+    assert cast(YamlMap, gold_registry)["scope"] == invariants["gold_snapshot_scope"]
+
+
+@pytest.mark.architecture
+def test_test_governance_report_defines_test_file_and_repo_backed_counts() -> None:
+    """Audit counts must distinguish pytest test files from all test Python files."""
+    report = _load_json(TEST_GOVERNANCE_ARTIFACT_PATH)
+    inventory = cast(YamlMap, report["test_file_inventory"])
+    repo_backed_inventory = cast(YamlMap, report["repo_backed_unit_inventory"])
+
+    assert inventory["pytest_python_files"] == ["test_*.py"]
+    assert inventory["test_file_count_definition"] == (
+        "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files"
+    )
+    assert int(inventory["test_glob_file_count"]) == int(report["total_test_files"])
+    assert int(inventory["test_python_file_count"]) >= int(report["total_test_files"])
+    assert "tests/unit/" in inventory["top_level_directories"]
+    assert "tests/__pycache__/" not in inventory["top_level_directories"]
+
+    assert repo_backed_inventory["decision"] == (
+        "dedicated_repo_backed_unit_lane_not_zero_inventory"
+    )
+    assert repo_backed_inventory["lane"] == "repo-backed-unit"
+    assert repo_backed_inventory["subtree"] == "tests/unit/repo_backed/"
+    assert int(repo_backed_inventory["test_files"]) > 0
+    assert int(repo_backed_inventory["marked_test_files"]) == int(
+        repo_backed_inventory["test_files"]
+    )
+    assert repo_backed_inventory["unmarked_test_files"] == []
+
+
+@pytest.mark.architecture
 def test_rf_009_test_governance_closeout_tracks_live_zero_debt_metrics() -> None:
     """RF-009 closeout now tracks duplicate names (reduced to 0 after cleanup)."""
     payload = _load_yaml(CONFIG_PATH)
@@ -453,7 +573,6 @@ def test_no_weak_no_value_candidates_remain_in_integration_or_e2e() -> None:
 @pytest.mark.architecture
 def test_duplicate_name_triage_tracks_top_generic_names() -> None:
     payload = _load_yaml(CONFIG_PATH)
-    report = json.loads(TEST_GOVERNANCE_ARTIFACT_PATH.read_text(encoding="utf-8"))
     triage = cast(YamlMap, payload["duplicate_name_triage"])
 
     # After cleanup, duplicate names are at 0

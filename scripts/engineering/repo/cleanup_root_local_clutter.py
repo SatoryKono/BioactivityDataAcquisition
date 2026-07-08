@@ -36,6 +36,7 @@ SAFE_ROOT_LOCAL_PATHS: frozenset[str] = frozenset(
         ".coverage-sharded-current-main",
         ".hypothesis",
         ".import_linter_cache",
+        ".mypy_cache",
         ".pytest_cache",
         ".ruff_cache",
         "test-output",

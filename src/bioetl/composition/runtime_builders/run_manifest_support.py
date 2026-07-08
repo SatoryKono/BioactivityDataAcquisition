@@ -156,4 +156,3 @@ def resolve_replay_capability(
         source_refs=source_refs,
         resume_requested=resume_requested,
     )
-
