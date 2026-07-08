@@ -66,10 +66,10 @@ docker network create bioetl-monitoring
 docker compose up -d
 ```
 
-**Что запустится:**
+**Что запустится в optional helper stack:**
 - Neo4j База данных на порту 7687 (bolt)
 - Neo4j Browser на порту 7474
-- BioETL приложение на порту 8081
+- BioETL quarantine/health helper surface на порту 8081
 
 ### 3. (Опционально) Запустите мониторинг
 
