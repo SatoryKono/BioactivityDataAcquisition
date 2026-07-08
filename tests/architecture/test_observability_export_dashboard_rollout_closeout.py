@@ -101,8 +101,6 @@ def _iter_dashboard_promql() -> list[tuple[str, str, str]]:
 def _iter_rule_promql() -> list[tuple[str, str, str]]:
     expressions: list[tuple[str, str, str]] = []
     for rules_path in sorted(PROM_RULES_DIR.glob("*.yml")):
-        if rules_path.name.endswith(".bak"):
-            continue
         payload = _load_yaml(rules_path)
         for group in payload.get("groups", []):
             if not isinstance(group, dict):
@@ -116,6 +114,22 @@ def _iter_rule_promql() -> list[tuple[str, str, str]]:
                     rule_name = str(rule.get("alert") or rule.get("record") or "<rule>")
                     expressions.append((group_name, rule_name, expr))
     return expressions
+
+
+def test_prometheus_rules_directory_contains_no_active_backups() -> None:
+    """Prometheus rule directories must not carry tracked backup copies."""
+    forbidden = sorted(
+        path.name
+        for path in PROM_RULES_DIR.iterdir()
+        if path.is_file()
+        and (
+            path.suffix == ".bak"
+            or path.name.endswith(".yml.bak")
+            or "fixed" in path.name.lower()
+            or "scratch" in path.name.lower()
+        )
+    )
+    assert forbidden == []
 
 
 def _forbidden_selector_labels(expr: str) -> set[str]:

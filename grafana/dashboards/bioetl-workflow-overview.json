@@ -197,7 +197,7 @@
       },
       "targets": [
         {
-          "expr": "max(((round(sum(max_over_time(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range]))) > bool 0) * 2) or ((round(sum(max_over_time(bioetl_workflow_step_events_total{workflow=~\"$workflow\",status=\"skipped\"}[$__range]))) > bool 0) * 1) or ((round(sum(max_over_time(bioetl_workflow_runs_total{workflow=~\"$workflow\",status!~\"success|failed\"}[$__range]))) > bool 0) * 1))",
+          "expr": "max(((round(sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range]))) > bool 0) * 2) or ((round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",status=\"skipped\"}[$__range]))) > bool 0) * 1) or ((round(sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status!~\"success|failed\"}[$__range]))) > bool 0) * 1))",
           "refId": "A"
         }
       ]
@@ -907,7 +907,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(max_over_time(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range]))) or vector(0)",
+          "expr": "round(sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=\"failed\"}[$__range]))) or vector(0)",
           "refId": "A"
         }
       ],
@@ -971,7 +971,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(max_over_time(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"pipeline\",status=\"failed\"}[$__range]))) or vector(0)",
+          "expr": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"pipeline\",status=\"failed\"}[$__range]))) or vector(0)",
           "refId": "A"
         }
       ],
@@ -1049,7 +1049,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(max_over_time(bioetl_pipeline_runs_total{pipeline=~\"$pipeline_context\",run_type=~\"$run_type_context\",status=\"failed\"}[$__range]))) or vector(0)",
+          "expr": "round(sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline_context\",run_type=~\"$run_type_context\",status=\"failed\"}[$__range]))) or vector(0)",
           "refId": "A"
         }
       ],
@@ -1113,7 +1113,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(max_over_time(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"transform\",status=\"failed\"}[$__range]))) or vector(0)",
+          "expr": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=\"transform\",status=\"failed\"}[$__range]))) or vector(0)",
           "refId": "A"
         }
       ],
@@ -1177,7 +1177,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(max_over_time(bioetl_workflow_step_events_total{workflow=~\"$workflow\",status=\"skipped\"}[$__range]))) or vector(0)",
+          "expr": "round(sum(increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",status=\"skipped\"}[$__range]))) or vector(0)",
           "refId": "A"
         }
       ],
@@ -1226,7 +1226,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (status) (max_over_time(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=~\"$status\"}[$__range]))",
+          "expr": "sum by (status) (increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=~\"$status\"}[$__range]))",
           "legendFormat": "{{status}}",
           "refId": "A"
         }
@@ -1370,7 +1370,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (step_kind, status) (max_over_time(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=~\"$step_kind\",status=~\"$step_status\"}[$__range]))",
+          "expr": "sum by (step_kind, status) (increase(bioetl_workflow_step_events_total{workflow=~\"$workflow\",step_kind=~\"$step_kind\",status=~\"$step_status\"}[$__range]))",
           "legendFormat": "{{step_kind}} / {{status}}",
           "refId": "A"
         }

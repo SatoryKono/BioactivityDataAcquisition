@@ -272,9 +272,11 @@ def test_workflow_selected_range_counters_use_zero_valid_empty_state() -> None:
         ]
         assert expressions
         assert any(
-            ("increase(" in expr or "max_over_time(" in expr) and "[$__range]" in expr
-            for expr in expressions
-        ), f"{panel_title} must stay selected-range evidence"
+            "increase(" in expr and "[$__range]" in expr for expr in expressions
+        ), f"{panel_title} must stay selected-range event-delta evidence"
+        assert all("max_over_time(" not in expr for expr in expressions), (
+            f"{panel_title} counts counter events and must not use max_over_time()"
+        )
         assert any("or vector(0)" in expr for expr in expressions), (
             f"{panel_title} must keep zero-valid fallback for empty selected ranges"
         )
@@ -688,26 +690,33 @@ def test_latency_p95_panels_preserve_no_data_state() -> None:
         (
             "bioetl-control-plane-v1.json",
             "Track: GLOBAL Checkpoint Operator Latency p50/p95/p99",
-            "Expected Empty classification: No data is valid when no checkpoint operator/admin duration samples were emitted",
-            "No GLOBAL checkpoint operator latency samples in range. This is optional admin/operator telemetry, not pipeline success evidence.",
+            "Expected Empty classification: No data is valid when no checkpoint "
+            "operator/admin duration samples were emitted",
+            "No GLOBAL checkpoint operator latency samples in range. This is optional "
+            "admin/operator telemetry, not pipeline success evidence.",
         ),
         (
             "bioetl-control-plane-v1.json",
             "Inspect: Missing Lineage Refs by Layer / Type",
-            "Use as lineage risk triage only; it does not prove complete artifact identity graph or exact artifact refs.",
-            "No missing-lineage reference samples in range. Empty means no sampled lineage-missing events or absent telemetry, not proof of full lineage closure.",
+            "Use as lineage risk triage only; it does not prove complete artifact "
+            "identity graph or exact artifact refs.",
+            "No missing-lineage reference samples in range. Empty means no sampled "
+            "lineage-missing events or absent telemetry, not proof of full lineage "
+            "closure.",
         ),
         (
             "bioetl-control-plane-v1.json",
             "Track: GLOBAL Audit Write Latency p50/p95/p99",
             "No data means no latency samples, not zero latency.",
-            "No GLOBAL audit write latency samples in range. Empty means no audit writes were timed or audit telemetry is absent, not zero latency.",
+            "No GLOBAL audit write latency samples in range. Empty means no audit "
+            "writes were timed or audit telemetry is absent, not zero latency.",
         ),
         (
             "bioetl-control-plane-v1.json",
             "Track: GLOBAL Audit Query Latency p50/p95/p99",
             "No data means no latency samples, not zero latency.",
-            "No GLOBAL audit query latency samples in range. Empty means no audit queries were timed or audit telemetry is absent, not zero latency.",
+            "No GLOBAL audit query latency samples in range. Empty means no audit "
+            "queries were timed or audit telemetry is absent, not zero latency.",
         ),
         (
             "bioetl-dq-v2.json",
@@ -1628,52 +1637,107 @@ def test_dashboards_do_not_use_prometheus_created_timestamps() -> None:
         )
 
 
-def test_selected_range_kpis_do_not_use_raw_counters() -> None:
-    """Selected-range KPI panels must use windowed counter semantics."""
-    allowed_panel_snippets = {
+def test_selected_range_kpis_follow_declared_counter_window_intent() -> None:
+    """Selected-range KPI panels must match their declared counter-window intent."""
+    panel_expectations = {
         "bioetl-overview-v2.json": {
-            "Historical Failures": ("increase(", "max_over_time("),
-            "Recent Terminal Runs": ("increase(", "max_over_time("),
+            "Historical Failures": {
+                "intent": "event_delta",
+                "required": ("increase(",),
+                "forbidden": ("max_over_time(", "last_over_time("),
+            },
+            "Recent Terminal Runs": {
+                "intent": "event_delta",
+                "required": ("increase(",),
+                "forbidden": ("max_over_time(", "last_over_time("),
+            },
         },
         "bioetl-dq-v2.json": {
-            "Track Range Evidence: Bronze -> Silver -> Gold": (
-                "increase(",
-                "max_over_time(",
-                "last_over_time(",
-            ),
-            "Track: Source Records in Range (Bronze)": (
-                "increase(",
-                "max_over_time(",
-                "last_over_time(",
-            ),
-            "Track: Clean Records in Range (Gold)": (
-                "increase(",
-                "max_over_time(",
-                "last_over_time(",
-            ),
+            "Track Range Evidence: Bronze -> Silver -> Gold": {
+                "intent": "pushed_snapshot_evidence",
+                "required": ("max_over_time(",),
+                "forbidden": ("last_over_time(",),
+            },
+            "Track: Source Records in Range (Bronze)": {
+                "intent": "pushed_snapshot_evidence",
+                "required": ("max_over_time(",),
+                "forbidden": ("last_over_time(",),
+            },
+            "Track: Clean Records in Range (Gold)": {
+                "intent": "pushed_snapshot_evidence",
+                "required": ("max_over_time(",),
+                "forbidden": ("last_over_time(",),
+            },
         },
         "bioetl-runtime.json": {
-            "Inspect Errors by Stage / Error Code / Range": (
-                "increase(",
-                "max_over_time(",
-            ),
-            "Track Records by Stage / Run Type / Range": (
-                "increase(",
-                "max_over_time(",
-            ),
-            "Track GLOBAL Shutdown Initiated by Reason / Interval": ("increase(",),
-            "Track GLOBAL Shutdown Completed by Reason / Interval": ("increase(",),
+            "Inspect Errors by Stage / Error Code / Range": {
+                "intent": "event_delta",
+                "required": ("increase(",),
+                "forbidden": ("max_over_time(", "last_over_time("),
+            },
+            "Track Records by Stage / Run Type / Range": {
+                "intent": "event_delta",
+                "required": ("increase(",),
+                "forbidden": ("max_over_time(", "last_over_time("),
+            },
+            "Track GLOBAL Shutdown Initiated by Reason / Interval": {
+                "intent": "event_delta",
+                "required": ("increase(",),
+                "forbidden": ("max_over_time(", "last_over_time("),
+            },
+            "Track GLOBAL Shutdown Completed by Reason / Interval": {
+                "intent": "event_delta",
+                "required": ("increase(",),
+                "forbidden": ("max_over_time(", "last_over_time("),
+            },
+        },
+        "bioetl-workflow-overview.json": {
+            "Failed Workflow Runs / Range": {
+                "intent": "event_delta",
+                "required": ("increase(",),
+                "forbidden": ("max_over_time(", "last_over_time("),
+            },
+            "Failed Pipeline Steps / Range": {
+                "intent": "event_delta",
+                "required": ("increase(",),
+                "forbidden": ("max_over_time(", "last_over_time("),
+            },
+            "Failed Transform Steps / Range": {
+                "intent": "event_delta",
+                "required": ("increase(",),
+                "forbidden": ("max_over_time(", "last_over_time("),
+            },
+            "Failed Entity Pipeline Runs / Range": {
+                "intent": "event_delta",
+                "required": ("increase(",),
+                "forbidden": ("max_over_time(", "last_over_time("),
+            },
+            "Skipped Step Events / Range": {
+                "intent": "event_delta",
+                "required": ("increase(",),
+                "forbidden": ("max_over_time(", "last_over_time("),
+            },
+            "Workflow Run Outcomes / Range": {
+                "intent": "event_delta",
+                "required": ("increase(",),
+                "forbidden": ("max_over_time(", "last_over_time("),
+            },
+            "Step Outcomes by Kind / Step Status / Range": {
+                "intent": "event_delta",
+                "required": ("increase(",),
+                "forbidden": ("max_over_time(", "last_over_time("),
+            },
         },
     }
 
-    for dashboard_name, panel_expectations in allowed_panel_snippets.items():
+    for dashboard_name, dashboard_expectations in panel_expectations.items():
         dashboard = load_dashboard(Path("grafana/dashboards") / dashboard_name)
         panels = {
             panel.get("title"): panel
             for panel in get_dashboard_panels(dashboard)
             if panel.get("title")
         }
-        for panel_title, allowed_snippets in panel_expectations.items():
+        for panel_title, expectation in dashboard_expectations.items():
             panel = panels.get(panel_title)
             assert panel is not None, (
                 f"Dashboard {dashboard_name} missing panel {panel_title!r}"
@@ -1683,17 +1747,20 @@ def test_selected_range_kpis_do_not_use_raw_counters() -> None:
                 for target in panel.get("targets", [])
                 if isinstance(target.get("expr"), str)
             ]
+            assert expressions
             assert any(
-                any(snippet in expr for snippet in allowed_snippets)
+                any(snippet in expr for snippet in expectation["required"])
                 for expr in expressions
             ), (
                 f"Panel {panel_title!r} in {dashboard_name} must use "
-                f"one of {allowed_snippets!r} rather than raw counter values"
+                f"{expectation['required']!r} for {expectation['intent']} "
+                "rather than raw counter values"
             )
-            assert all("last_over_time(" not in expr for expr in expressions), (
-                f"Panel {panel_title!r} in {dashboard_name} must not use "
-                "last_over_time() for counter-range KPIs"
-            )
+            for forbidden in expectation["forbidden"]:
+                assert all(forbidden not in expr for expr in expressions), (
+                    f"Panel {panel_title!r} in {dashboard_name} has intent "
+                    f"{expectation['intent']} and must not use {forbidden}"
+                )
 
 
 @pytest.mark.parametrize("dashboard_name", _PROCESSED_RECORDS_DASHBOARDS)

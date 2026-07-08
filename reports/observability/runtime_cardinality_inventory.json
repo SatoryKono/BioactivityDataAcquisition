@@ -298,6 +298,10 @@
     "bioetl_silver_validation_failures_total",
     "bioetl_vacuum_files_removed_total",
     "bioetl_workflow_current_status",
+    "bioetl_workflow_row_reconciliation_excluded_rows_total",
+    "bioetl_workflow_row_reconciliation_kept_rows_total",
+    "bioetl_workflow_row_reconciliation_left_rows_total",
+    "bioetl_workflow_row_reconciliation_right_rows_total",
     "bioetl_workflow_runs_total",
     "bioetl_workflow_step_duration_seconds",
     "bioetl_workflow_step_events_total"
@@ -496,6 +500,10 @@
     "bioetl_workflow_reconciliation_rows_deleted_total",
     "bioetl_workflow_reconciliation_rows_retained_total",
     "bioetl_workflow_reconciliation_rows_scanned_total",
+    "bioetl_workflow_row_reconciliation_excluded_rows_total",
+    "bioetl_workflow_row_reconciliation_kept_rows_total",
+    "bioetl_workflow_row_reconciliation_left_rows_total",
+    "bioetl_workflow_row_reconciliation_right_rows_total",
     "bioetl_workflow_runs_total",
     "bioetl_workflow_status",
     "bioetl_workflow_step_duration_seconds",
@@ -735,6 +743,10 @@
     "bioetl_workflow_reconciliation_rows_deleted_total",
     "bioetl_workflow_reconciliation_rows_retained_total",
     "bioetl_workflow_reconciliation_rows_scanned_total",
+    "bioetl_workflow_row_reconciliation_excluded_rows_total",
+    "bioetl_workflow_row_reconciliation_kept_rows_total",
+    "bioetl_workflow_row_reconciliation_left_rows_total",
+    "bioetl_workflow_row_reconciliation_right_rows_total",
     "bioetl_workflow_runs_total",
     "bioetl_workflow_step_duration_seconds",
     "bioetl_workflow_step_events_total"
@@ -1917,6 +1929,10 @@
     "bioetl_workflow_reconciliation_rows_deleted_total",
     "bioetl_workflow_reconciliation_rows_retained_total",
     "bioetl_workflow_reconciliation_rows_scanned_total",
+    "bioetl_workflow_row_reconciliation_excluded_rows_total",
+    "bioetl_workflow_row_reconciliation_kept_rows_total",
+    "bioetl_workflow_row_reconciliation_left_rows_total",
+    "bioetl_workflow_row_reconciliation_right_rows_total",
     "bioetl_workflow_runs_total",
     "bioetl_workflow_step_duration_seconds",
     "bioetl_workflow_step_events_total"
@@ -1948,12 +1964,7 @@
     "vacuum_completed"
   ],
   "emitted_observability_events_without_contract": [],
-  "emitted_without_declaration": [
-    "bioetl_workflow_row_reconciliation_excluded_rows_total",
-    "bioetl_workflow_row_reconciliation_kept_rows_total",
-    "bioetl_workflow_row_reconciliation_left_rows_total",
-    "bioetl_workflow_row_reconciliation_right_rows_total"
-  ],
+  "emitted_without_declaration": [],
   "helper_backed_emitters": {
     "bioetl_circuit_breaker_failure_total": [
       "src/bioetl/infrastructure/adapters/http/_circuit_breaker_support.py"
@@ -2194,6 +2205,10 @@
     "bioetl_workflow_reconciliation_rows_deleted_total",
     "bioetl_workflow_reconciliation_rows_retained_total",
     "bioetl_workflow_reconciliation_rows_scanned_total",
+    "bioetl_workflow_row_reconciliation_excluded_rows_total",
+    "bioetl_workflow_row_reconciliation_kept_rows_total",
+    "bioetl_workflow_row_reconciliation_left_rows_total",
+    "bioetl_workflow_row_reconciliation_right_rows_total",
     "bioetl_workflow_runs_total",
     "bioetl_workflow_step_duration_seconds",
     "bioetl_workflow_step_events_total"
@@ -2466,6 +2481,10 @@
     "bioetl_workflow_reconciliation_rows_deleted_total",
     "bioetl_workflow_reconciliation_rows_retained_total",
     "bioetl_workflow_reconciliation_rows_scanned_total",
+    "bioetl_workflow_row_reconciliation_excluded_rows_total",
+    "bioetl_workflow_row_reconciliation_kept_rows_total",
+    "bioetl_workflow_row_reconciliation_left_rows_total",
+    "bioetl_workflow_row_reconciliation_right_rows_total",
     "bioetl_workflow_runs_total",
     "bioetl_workflow_status",
     "bioetl_workflow_step_duration_seconds",
@@ -3637,12 +3656,7 @@
   },
   "runtime_label_contract_unresolved": [],
   "runtime_label_contract_violations": [],
-  "runtime_without_registry": [
-    "bioetl_workflow_row_reconciliation_excluded_rows_total",
-    "bioetl_workflow_row_reconciliation_kept_rows_total",
-    "bioetl_workflow_row_reconciliation_left_rows_total",
-    "bioetl_workflow_row_reconciliation_right_rows_total"
-  ],
+  "runtime_without_registry": [],
   "unused_declared_metrics": [],
   "unused_declared_observability_events": []
 }

@@ -2213,7 +2213,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (pipeline, run_type) (max_over_time(bioetl_pipeline_runs_total{status=\"failed\",pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"}[$__range]))",
+          "expr": "sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status=\"failed\",pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\"}[$__range]))",
           "refId": "A",
           "format": "table",
           "instant": true
@@ -2288,7 +2288,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (pipeline, status) (max_over_time(bioetl_pipeline_runs_total{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",status!=\"success\"}[$__range]))",
+          "expr": "sum by (pipeline, status) (increase(bioetl_pipeline_runs_total{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\",run_type=~\"$run_type\",status!=\"success\"}[$__range]))",
           "refId": "A",
           "format": "table",
           "instant": true
