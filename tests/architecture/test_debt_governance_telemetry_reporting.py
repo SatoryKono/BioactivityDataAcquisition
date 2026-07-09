@@ -18,6 +18,8 @@ from scripts.engineering.qa.report_test_governance_audit import (
 ROOT = Path(__file__).resolve().parents[2]
 RUNTIME_UUID_YAML = ROOT / "configs" / "quality" / "runtime_uuid_seams.yaml"
 
+pytestmark = pytest.mark.timeout(240)
+
 
 def _load_module(path: Path, module_name: str) -> ModuleType:
     spec = importlib.util.spec_from_file_location(module_name, str(path.resolve()))
