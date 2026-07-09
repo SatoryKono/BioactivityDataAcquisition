@@ -119,7 +119,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     rows = _collect_rows()
-    expected_panel_count = 224  # includes collapsed row headers in shipped JSON
+    expected_panel_count = 228  # includes collapsed row headers in shipped JSON
     if args.check and len(rows) != expected_panel_count:
         print(
             f"panel count mismatch: expected {expected_panel_count}, got {len(rows)}",

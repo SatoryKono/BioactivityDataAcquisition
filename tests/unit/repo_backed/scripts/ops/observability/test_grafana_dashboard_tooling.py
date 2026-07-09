@@ -117,7 +117,7 @@ def test_rerender_scope_maps_run_id_to_silver_reject_explorer_run_filter(
         width=1600,
         height=2200,
         timeout_seconds=30.0,
-        selected_uids=(),
+        selected_uids=("bioetl-dq-v2",),
         fallback="auto",
         workflow="chembl_target",
         pipeline="chembl_target",
@@ -469,7 +469,7 @@ def test_rerender_builds_playwright_env_with_sidecar_node_modules(
         width=1600,
         height=2200,
         timeout_seconds=45.0,
-        selected_uids=(),
+        selected_uids=("bioetl-dq-v2",),
         fallback="auto",
     )
 
@@ -596,7 +596,8 @@ def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() 
     assert "waitForDashboardContent" in script
     assert "materializeLazyPanels" in script
     assert "window.scrollTo" in script
-    assert "const page = await context.newPage();" in script
+    assert "const browser = await chromium.launch({ headless: true });" in script
+    assert "page = await context.newPage();" in script
     assert "await page.close();" in script
     assert "GRAFANA_SCREENSHOT_EXPAND_COLLAPSED_ROWS" in script
     assert "--expand-collapsed-rows" in script
@@ -636,7 +637,7 @@ def test_rerender_playwright_fallback_streams_output_from_repo_root(
         width=1600,
         height=2200,
         timeout_seconds=45.0,
-        selected_uids=(),
+        selected_uids=("bioetl-dq-v2",),
         fallback="auto",
     )
 
@@ -653,6 +654,88 @@ def test_rerender_playwright_fallback_streams_output_from_repo_root(
     assert captured["kwargs"]["cwd"] == str(tmp_path)
     assert "capture_output" not in captured["kwargs"]
     assert captured["kwargs"]["env"]["GRAFANA_BASE_URL"] == "http://localhost:3000"
+    assert captured["kwargs"]["env"]["GRAFANA_SCREENSHOT_UIDS"] == "bioetl-dq-v2"
+
+
+def test_rerender_playwright_fallback_splits_and_merges_multi_dashboard_runs(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    script_path = tmp_path / "rerender_grafana_screenshots.cjs"
+    script_path.write_text("// noop\n", encoding="utf-8")
+    calls: list[str] = []
+
+    class _Result:
+        returncode = 0
+
+    monkeypatch.setattr(
+        rerender_subject, "_playwright_script_path", lambda: script_path
+    )
+    monkeypatch.setattr(
+        rerender_subject, "_resolve_node_executable", lambda: "/usr/bin/node"
+    )
+    monkeypatch.setattr(rerender_subject, "_repo_root", lambda: tmp_path)
+    monkeypatch.setattr(
+        rerender_subject,
+        "_load_dashboards",
+        lambda _config: [
+            rerender_subject.DashboardRecord(
+                uid="bioetl-provider-health-v2",
+                url="/d/bioetl-provider-health-v2/3-provider-health",
+                title="3. Provider Health",
+            ),
+            rerender_subject.DashboardRecord(
+                uid="bioetl-runtime",
+                url="/d/bioetl-runtime/2-runtime",
+                title="2. Runtime",
+            ),
+        ],
+    )
+
+    def fake_run(command: list[str], **kwargs: object) -> _Result:
+        env = kwargs["env"]
+        assert isinstance(env, dict)
+        uid = str(env["GRAFANA_SCREENSHOT_UIDS"])
+        calls.append(uid)
+        (tmp_path / "render-manifest.json").write_text(
+            json.dumps(
+                {
+                    "engine": "playwright",
+                    "dashboards": [
+                        {
+                            "uid": uid,
+                            "title": uid,
+                            "file": f"{uid}.png",
+                            "renderedPanelCount": 1,
+                        }
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+        return _Result()
+
+    monkeypatch.setattr(rerender_subject.subprocess, "run", fake_run)
+
+    config = rerender_subject.RenderConfig(
+        base_url="http://localhost:3000",
+        username="admin",
+        password="changeme",
+        service_account_token="",
+        output_dir=tmp_path,
+        width=1600,
+        height=2200,
+        timeout_seconds=45.0,
+        selected_uids=(),
+        fallback="auto",
+    )
+
+    result = rerender_subject._run_playwright_fallback(config)
+
+    assert result == 0
+    assert calls == ["bioetl-provider-health-v2", "bioetl-runtime"]
+    merged = json.loads((tmp_path / "render-manifest.json").read_text())
+    assert merged["engine"] == "playwright"
+    assert [item["uid"] for item in merged["dashboards"]] == calls
 
 
 def test_rerender_resolves_node_from_repo_local_bin(

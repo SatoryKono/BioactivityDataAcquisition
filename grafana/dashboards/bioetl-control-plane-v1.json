@@ -208,7 +208,7 @@
       "type": "table",
       "title": "ID",
       "gridPos": {
-        "h": 10,
+        "h": 6,
         "w": 10,
         "x": 0,
         "y": 7
@@ -333,7 +333,7 @@
       "type": "table",
       "title": "Processed Records",
       "gridPos": {
-        "h": 10,
+        "h": 6,
         "w": 6,
         "x": 10,
         "y": 7
@@ -788,6 +788,64 @@
           }
         }
       ]
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [],
+      "type": "text",
+      "description": "Visible neutral fallback for the Control Plane identity table when the selected scope returns no rows.",
+      "gridPos": {
+        "h": 4,
+        "w": 10,
+        "x": 0,
+        "y": 13
+      },
+      "id": 9410,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"font-size:13px;line-height:1.45;color:#c9d1d9\"><b>Identity table guardrail.</b><br/>If no rows are visible, check <code>/health/live</code>, selector scope, and a concrete <code>pipeline/run_id</code> before treating the empty state as expected.</div>",
+        "mode": "html"
+      },
+      "title": "ID Empty State",
+      "transparent": true
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [],
+      "type": "text",
+      "description": "Visible neutral fallback for processed-record accounting when the selected Control Plane scope returns no rows.",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 10,
+        "y": 13
+      },
+      "id": 9411,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"font-size:13px;line-height:1.45;color:#c9d1d9\"><b>Accounting table guardrail.</b><br/>Visible rows are backend accounting evidence; if this table becomes empty, verify backend health and scope before reading it as zero records.</div>",
+        "mode": "html"
+      },
+      "title": "Processed Records Empty State",
+      "transparent": true
     },
     {
       "datasource": {
@@ -3782,7 +3840,7 @@
     },
     {
       "datasource": "Quarantine Explorer",
-      "description": "HTTP-backed Control Plane identity overview from /ops/control-plane/identity-evidence. Long UUID/hash values are shortened in value_short and remain full in value_full. The overview contains the P0 identity anchors plus the P1 replay_capability card required for replay triage. Status uses OK/WARN/CRIT/UNKNOWN; no run_id, manifest_id, hashes, snapshot IDs, or artifact refs are Prometheus labels.",
+      "description": "Compact HTTP-backed Control Plane identity overview from /ops/control-plane/identity-evidence. Replay/resume decision summary stays above in the first-screen ID, Replay Safety State, Checkpoint Freshness, Manifest/Ledger, and Telemetry cards; this section is the compact forensic drilldown. Long UUID/hash values are shortened in value_short and remain full in value_full. Status uses OK/WARN/CRIT/UNKNOWN; no run_id, manifest_id, hashes, snapshot IDs, or artifact refs are Prometheus labels.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -3793,7 +3851,7 @@
             "inspect": false
           },
           "unit": "none",
-          "noValue": "No identity evidence rows returned. Verify Quarantine Explorer/control-plane backend health and selected run scope before treating this as expected empty."
+          "noValue": "No overview identity rows. Use the replay/resume summary above first; then verify backend health (/health/live) and selected run_id before treating this forensic view as empty."
         },
         "overrides": [
           {
@@ -3826,7 +3884,7 @@
         ]
       },
       "gridPos": {
-        "h": 6,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 127
@@ -3900,7 +3958,7 @@
     },
     {
       "datasource": "Quarantine Explorer",
-      "description": "HTTP-backed identity gap table. Missing run_id or terminal manifest_id is CRIT; missing effective config, contract, input snapshot, replay parent, composite identity, or checkpoint anchors is explicit WARN/CRIT evidence instead of a green health signal.",
+      "description": "Compact HTTP-backed identity gap table. Missing run_id or terminal manifest_id is CRIT; missing effective config, contract, input snapshot, replay parent, composite identity, or checkpoint anchors is explicit WARN/CRIT evidence instead of a green health signal.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -3911,7 +3969,7 @@
             "inspect": false
           },
           "unit": "none",
-          "noValue": "No identity evidence rows returned. Verify Quarantine Explorer/control-plane backend health and selected run scope before treating this as expected empty."
+          "noValue": "No identity gap rows for this forensic view. Use the summary cards above, then verify backend health and selected run scope before treating this as expected empty."
         },
         "overrides": [
           {
@@ -3944,10 +4002,10 @@
         ]
       },
       "gridPos": {
-        "h": 6,
+        "h": 3,
         "w": 12,
         "x": 0,
-        "y": 133
+        "y": 131
       },
       "id": 9405,
       "options": {
@@ -3989,7 +4047,7 @@
             "inspect": false
           },
           "unit": "none",
-          "noValue": "No identity evidence rows returned. Verify Quarantine Explorer/control-plane backend health and selected run scope before treating this as expected empty."
+          "noValue": "No checkpoint anchor comparison rows. Use checkpoint freshness above, then verify backend health and selected run scope before treating this as expected empty."
         },
         "overrides": [
           {
@@ -4022,10 +4080,10 @@
         ]
       },
       "gridPos": {
-        "h": 6,
+        "h": 3,
         "w": 12,
         "x": 12,
-        "y": 133
+        "y": 131
       },
       "id": 9406,
       "options": {
@@ -4075,7 +4133,7 @@
             }
           ],
           "unit": "none",
-          "noValue": "No identity evidence rows returned. Verify Quarantine Explorer/control-plane backend health and selected run scope before treating this as expected empty."
+          "noValue": "No copyable identity handoffs for this scope. Use the summary cards above, then select an exact run_id or verify backend health before treating this as expected empty."
         },
         "overrides": [
           {
@@ -4108,10 +4166,10 @@
         ]
       },
       "gridPos": {
-        "h": 6,
+        "h": 3,
         "w": 24,
         "x": 0,
-        "y": 139
+        "y": 134
       },
       "id": 9407,
       "options": {
@@ -4153,7 +4211,7 @@
             "inspect": false
           },
           "unit": "none",
-          "noValue": "No identity evidence rows returned. Verify Quarantine Explorer/control-plane backend health and selected run scope before treating this as expected empty."
+          "noValue": "No P1 replay/evidence anchors for this forensic view. Use the replay/resume summary above, then verify backend health and selected run scope before treating this as expected empty."
         },
         "overrides": [
           {
@@ -4186,10 +4244,10 @@
         ]
       },
       "gridPos": {
-        "h": 6,
+        "h": 3,
         "w": 12,
         "x": 0,
-        "y": 145
+        "y": 137
       },
       "id": 9408,
       "options": {
@@ -4231,7 +4289,7 @@
             "inspect": false
           },
           "unit": "none",
-          "noValue": "No identity evidence rows returned. Verify Quarantine Explorer/control-plane backend health and selected run scope before treating this as expected empty."
+          "noValue": "No P2 forensic anchors for this scope. Use the summary cards above, then select an exact run_id or verify backend health before treating this as expected empty."
         },
         "overrides": [
           {
@@ -4264,10 +4322,10 @@
         ]
       },
       "gridPos": {
-        "h": 6,
+        "h": 3,
         "w": 12,
         "x": 12,
-        "y": 145
+        "y": 137
       },
       "id": 9409,
       "options": {
@@ -4298,10 +4356,10 @@
     },
     {
       "gridPos": {
-        "h": 4,
+        "h": 3,
         "w": 24,
         "x": 0,
-        "y": 151
+        "y": 140
       },
       "id": 139,
       "options": {

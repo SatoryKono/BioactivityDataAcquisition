@@ -451,6 +451,25 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Pipeline"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 220
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
           }
         ]
       },
@@ -499,7 +518,7 @@
             "includeVars": false
           }
         ],
-        "cellHeight": "md"
+        "cellHeight": "lg"
       },
       "transformations": [
         {

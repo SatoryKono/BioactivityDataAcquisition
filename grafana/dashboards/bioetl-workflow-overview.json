@@ -132,7 +132,7 @@
               "options": {
                 "0": {
                   "text": "OK",
-                  "color": "green"
+                  "color": "gray"
                 },
                 "1": {
                   "text": "WARN",
@@ -164,7 +164,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "gray",
                 "value": null
               },
               {
@@ -229,7 +229,7 @@
               "options": {
                 "0": {
                   "text": "OK",
-                  "color": "green"
+                  "color": "gray"
                 },
                 "1": {
                   "text": "WARN",
@@ -261,7 +261,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "gray",
                 "value": null
               },
               {
@@ -279,7 +279,7 @@
         "overrides": []
       },
       "options": {
-        "colorMode": "value",
+        "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",

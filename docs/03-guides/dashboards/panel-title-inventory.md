@@ -26,6 +26,8 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-control-plane-v1.json | 9401 | Status |
 | bioetl-control-plane-v1.json | 9402 | ID |
 | bioetl-control-plane-v1.json | 9403 | Processed Records |
+| bioetl-control-plane-v1.json | 9410 | ID Empty State |
+| bioetl-control-plane-v1.json | 9411 | Processed Records Empty State |
 | bioetl-control-plane-v1.json | 891 | Monitor: Replay Safety State |
 | bioetl-control-plane-v1.json | 892 | Monitor: Checkpoint Freshness Lag (seconds) |
 | bioetl-control-plane-v1.json | 893 | Monitor: Manifest / Ledger Integrity |
@@ -217,9 +219,11 @@ Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yam
 | bioetl-silver-reject-explorer.json | 4 | Inspect Run Scope Summary |
 | bioetl-silver-reject-explorer.json | 11 | Track Filtered Rejects Over Time |
 | bioetl-silver-reject-explorer.json | 12 | Track Reject Ratio vs Bronze Over Time |
+| bioetl-silver-reject-explorer.json | 16 | Review: Trend Empty State |
 | bioetl-silver-reject-explorer.json | 5 | Inspect Top Reject Reasons |
 | bioetl-silver-reject-explorer.json | 6 | Inspect Top Reject Fields |
 | bioetl-silver-reject-explorer.json | 7 | Inspect Top Reason Signatures |
+| bioetl-silver-reject-explorer.json | 15 | Review: Record Selection Empty State |
 | bioetl-silver-reject-explorer.json | 8 | Inspect Filtered Records Table |
 | bioetl-silver-reject-explorer.json | 9 | Inspect Selected Record Details |
 | bioetl-workflow-overview.json | 1000 | Review Dashboard Navigation |

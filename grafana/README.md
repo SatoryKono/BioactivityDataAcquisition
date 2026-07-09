@@ -822,6 +822,8 @@ Common context panels on primary dashboards outside Overview:
 | `Status` | `9401` | Role-specific compact status; no Prometheus `$run_id` filtering. |
 | `ID` | `9402` | Quarantine Explorer HTTP identity table for `pipeline/run_type/run_id`. |
 | `Processed Records` | `9403` | Current Bronze -> Silver -> Gold accounting table from `/ops/observability/processed-records`; exact `$run_id` scopes resolve from RunLedger evidence, while aggregate scopes use `bioetl_processed_records_*` recording rules; zero-valued outcome rows remain visible and missing accounting series are UNKNOWN/no-data, not OK. |
+| `ID Empty State` | `9410` | Control Plane-only neutral fallback text shown below the identity table when the selected scope returns no visible rows. |
+| `Processed Records Empty State` | `9411` | Control Plane-only neutral fallback text shown below the accounting table when the selected scope returns no visible rows. |
 
 `0. Control Plane` adds Control Plane-only identity evidence panels outside the
 shared shell. Panels `9404..9409` call
@@ -1009,7 +1011,7 @@ ______________________________________________________________________
 | --- | ------------------------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 99  | Provenance                     | Text       | n/a                                                                                                                          | Primary question, scope, provenance, known limitations.                                                                                                                         |
 | 214 | Status                         | Stat       | `max(bioetl_l0_status{pipeline=~"$pipeline",run_type=~"$run_type"})`                                                         | `UNKNOWN`/`OK`/`WARN`/`CRIT`; null/no-series remain `UNKNOWN` via explicit null mapping. Panel-level links duplicate the canonical Runtime / Control Plane / Data Quality / Provider Health / Workflow handoff. |
-| 215 | First Action                  | Table      | `topk(1, bioetl_l0_next_action_route{pipeline=~"$pipeline",run_type=~"$run_type"} or label_replace(... vector(0) ...))`     | Shows `action_target`, `action_reason`, and `action_dashboard_uid`; invalid/missing selected scope falls back to `NO_ROUTE`. Routing priority remains Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor. Runtime / Control Plane / DQ preserve scope; Provider Health fail-closes to `provider=unknown`; Workflow link explicitly resets scope. |
+| 215 | First Action                  | Table      | `topk(1, bioetl_l0_next_action_route{pipeline=~"$pipeline",run_type=~"$run_type"} or label_replace(... vector(0) ...))`     | Shows `pipeline`, `action_target`, `action_reason`, and `action_dashboard_uid`; the Pipeline display column wraps so scoped names stay readable in the first-screen table. Invalid/missing selected scope falls back to `NO_ROUTE`. Routing priority remains Runtime > Control Plane > Gold Lifecycle > DQ > Provider > Workflow > Monitor. Runtime / Control Plane / DQ preserve scope; Provider Health fail-closes to `provider=unknown`; Workflow link explicitly resets scope. |
 | 9300 | ID                            | Table      | HTTP `/ops/control-plane/identity-table?...&run_id=${run_id}`                                                                | Compact two-column identity summary: run/manifest IDs, Provider.Entity version, contract schema, execution flags, replay capability/mode, checkpoint anchors, optional composite run, and identity health. Exact selected `run_id` wins; no Prometheus `run_id`. |
 | 9301 | Processed Records             | Table      | HTTP `/ops/observability/processed-records?pipeline=${pipeline}&run_type=${run_type:csv}&run_id=${run_id}`                                  | Current compact Bronze/Silver/Gold accounting evidence. Exact `run_id` scopes read RunLedger artifact/metrics evidence; aggregate scopes use recording rules. Shows all configured rows, including zero values, with space-grouped, left-padded, right-aligned `value` plus formatted `percintage`; Silver/Gold accounting deficits set red row backgrounds; reconciliation status, subtotal, and delta rows stay out of the compact table; no `$__range` and no Prometheus `run_id`. |
 | 9002 | Inputs                        | Table      | `max by (input) (bioetl_l0_input_status_selected{pipeline=~"$pipeline",run_type=~"$run_type"})`                              | Compact L0 input summary: one worst-status row per operator input so the first screen fits without scroll while preserving selected-scope UNKNOWN rows.                       |
@@ -1160,8 +1162,9 @@ surfaces.
 | Track Filtered Rejects Over Time                  | Timeseries | `/ops/quarantine/filtered-timeseries`                  |
 | Track Reject Ratio vs Bronze Over Time            | Timeseries | `/ops/quarantine/filtered-timeseries`                  |
 | Inspect Top Reject Reasons / Fields / Signatures  | Table | `/ops/quarantine/filtered-stats`                           |
-| Inspect Filtered Records Table                    | Table | `/ops/quarantine/filtered-records`                         |
-| Inspect Selected Record Details                   | Table | `/ops/quarantine/filtered-records?...&payload_hash=<hash>` |
+| Review: Record Selection Empty State              | Text  | Visible guidance for selecting `payload_hash`, widening filters, and confirming backend/scope before interpreting zero matching rows. |
+| Inspect Filtered Records Table                    | Table | Compact latest-record list from `/ops/quarantine/filtered-records`; empty state asks the operator to confirm backend/scope and widen filters before treating it as zero rows. |
+| Inspect Selected Record Details                   | Table | Compact one-record projection from `/ops/quarantine/filtered-records?...&payload_hash=<hash>`; no-selection state tells the operator to select `payload_hash`, widen filters, or check backend health. |
 
 **Datasource:** `Quarantine Explorer` (`yesoreyeram-infinity-datasource`, provisioning: `grafana/provisioning/datasources-core/quarantine-explorer.yml`).
 
@@ -1229,6 +1232,13 @@ ______________________________________________________________________
 и какое действие открыть дальше. Range counters/trends остаются evidence ниже
 first screen.
 
+**Порядок чтения:** `Monitor GLOBAL Provider Severity Matrix` владеет fleet
+verdict, `Monitor Provider Telemetry Freshness` объясняет `UNKNOWN`/no-data,
+`Inspect Critical Providers` и `Inspect Provider Top Causes` дают причины, а
+shared-shell `Status` — compact selected-provider supporting verdict. `Status`
+может расходиться с GLOBAL scope by design и не должен визуально переопределять
+GLOBAL severity.
+
 ### Панели
 
 | ID  | Название                                        | Тип            | PromQL                                                                                                               | Описание                                                  |
@@ -1237,7 +1247,7 @@ first screen.
 | 9102 | Inspect Critical Providers                     | Table          | `bioetl_provider_current_status >= 1`                                                                                | Только providers с current `DEGRADED`/`FAILING`; missing current-status telemetry остаётся в `Monitor GLOBAL Provider Severity Matrix` как `UNKNOWN`. Panel exposes direct provider incident runbook handoff. |
 | 9103 | Inspect Provider Top Causes                    | Table          | `topk(5, bioetl_provider_current_cause > 0)`                                                                         | Current cause chips: raw health status, failure rate, retry exhaustion, latency, HTTP errors, rate-limit pressure. This panel can stay non-empty while `Monitor GLOBAL Provider Severity Matrix` still reads `0 (OK)` because cause projection includes early-warning provider signals independent of current-status projection. Empty table means no active provider causes are currently above zero; if severity is still non-OK, treat that as an explainability gap. Panel exposes direct provider incident runbook handoff. |
 | 9104 | Monitor Provider Telemetry Freshness           | Stat           | `((count(count_over_time(bioetl_provider_current_status[15m])) > bool 0) or (count(count_over_time(bioetl_provider_range_operational_ok[15m])) > bool 0)) * 0 or absent(...) * 1` | First-screen 12h operational-evidence trust marker: `0=OK`, `1=WARN`, `null=UNKNOWN`. Missing both `bioetl_provider_current_status` and `bioetl_provider_range_operational_ok` samples in the active Grafana range means telemetry gap, not proof that providers are healthy; treat `Status=UNKNOWN` as missing provider telemetry until raw enum or selected-range evidence proves otherwise. |
-| 9002 | First Action                                   | Text           | n/a                                                                                                                  | CTA block sits on the same first-screen row as `ID` and `Processed Records`, using the rightmost shared-shell slot (`w=8`, `h=6`). Review the GLOBAL severity matrix, inspect critical providers, or inspect provider top causes before leaving the dashboard. Shared `ID` and `Processed Records` stay bounded pipeline-context evidence and do not prove current provider health. |
+| 9002 | First Action                                   | Text           | n/a                                                                                                                  | CTA block sits on the same first-screen row as `ID` and `Processed Records`, using the rightmost shared-shell slot (`w=8`, `h=6`). It lists the operator read order: GLOBAL severity, telemetry freshness, critical providers/top causes, then selected-provider supporting evidence. Shared `ID` and `Processed Records` stay bounded pipeline-context evidence and do not prove current provider health. |
 | 1   | Track Health Check Latency by Provider (p95)    | Timeseries     | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__interval])))`                                       | Selected-range evidence: p95 latency trend по выбранным providers; `No data` сохраняется как diagnostic gap, не маскируется в `0s`. |
 | 114 | Review Raw Provider Health Enum                | Table          | `max by (provider) (bioetl_provider_health_status{provider=~"$provider"}) or ((bioetl_provider_health_check_provider_universe_15m{provider=~"$provider"} * 0) / (bioetl_provider_health_check_provider_universe_15m{provider=~"$provider"} * 0))` | Текущий raw status по provider с mapping `0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`; если provider universe существует без raw status sample, panel остаётся `UNKNOWN`. Use it as supporting evidence when `Status=UNKNOWN` or when first-screen severity and top causes disagree. |
 | 2   | Monitor Healthy Checks (Selected Range)         | Stat           | `round(sum(increase(bioetl_health_check_success_total{provider=~"$provider"}[$__range])) or vector(0))`              | Selected-range evidence: completed probes со статусом `HEALTHY` в выбранном окне.  |
@@ -1248,7 +1258,7 @@ first screen.
 | 107 | Track Provider Failure Share (Selected Range)   | Bar gauge      | `100 * failures_by_provider / clamp_min(total_failures, 1)`                                                          | Selected-range evidence: ранжирование providers по доле failed probes. |
 | 108 | Retries Exhausted by Provider / Operation       | Table          | `round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[$__range])) or vector(0))`    | Где retries чаще всего исчерпываются.                     |
 | 109 | Retries Exhausted Trend by Provider / Operation | Timeseries     | `round(sum by (provider, operation) (increase(bioetl_data_source_retry_exhausted_total[$__interval])) or vector(0))` | Тренд retry exhaustion incidents во времени.              |
-| 102 | Inspect Provider Health Check Latency (p95) - $provider | Gauge          | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__range])))`                                          | Current p95 by selected provider для выбранного range; отсутствие samples остаётся `No data`. |
+| 102 | Inspect Provider Health Check Latency (p95) - $provider | Gauge          | `histogram_quantile(0.95, sum by (le, provider) (increase(...[$__range])))`                                          | Compact optional selected-provider telemetry; отсутствие samples остаётся diagnostic no-data and not a provider verdict. |
 
 **Используемые метрики:** `health_check_latency_seconds`, `provider_health_status`, `health_check_success_total`, `health_check_degraded_total`, `health_check_failures_total`.
 
@@ -2010,13 +2020,18 @@ sum(rate(bioetl_circuit_breaker_success_total{adapter="chembl"}[5m]))
 - `Monitor Provider Telemetry Freshness` — first-screen trust marker for
   `bioetl_provider_current_status`; missing samples in the active Grafana range
   mean telemetry gap, not healthy provider state.
+- `Status` is the compact selected-provider supporting verdict. It is rendered
+  as value-only scoped evidence so `UNKNOWN`, `OK`, `0`, and `No data` states do
+  not visually compete with the GLOBAL severity hierarchy.
 - `Review Raw Provider Health Enum` stays below the first screen as supporting
   raw-source evidence. Use it when `Status=UNKNOWN` or when top causes and
   first-screen severity disagree.
-- Ниже первого экрана идут только selected-range evidence panels:
-  health-check counters, failure/degraded trends, retry exhaustion, repeated
-  per-provider p95 gauge, adapter endpoint latency, HTTP error volume,
-  rate-limiter wait/tokens, circuit-breaker state/trips.
+- Ниже первого экрана идут selected-range evidence panels: health-check
+  counters, failure/degraded trends, retry exhaustion, and compact optional
+  telemetry for per-provider p95 latency, adapter endpoint latency, HTTP error
+  volume, rate-limiter wait/tokens, and circuit-breaker state/trips. Optional
+  panels stay expanded by dashboard contract but use a compact two-row layout so
+  empty samples do not look like a large empty tail.
 
 Ключевые operator semantics:
 

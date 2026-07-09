@@ -73,10 +73,7 @@ suffix = ".ps1" if os.name == "nt" else ".sh"
 wrapper_stems = {
     "github": "github-mcp-wrapper",
     "docker": "mcp_docker_wrapper",
-    "docker-docs": "mcp_docker_docs_wrapper",
     "context7": "mcp_context7_wrapper",
-    "paper-search": "mcp_paper_search_wrapper",
-    "dockerhub": "mcp_dockerhub_wrapper",
     "ast-grep": "mcp_ast_grep_wrapper",
     "mcp-code-interpreter": "mcp_code_interpreter_wrapper",
     "prometheus": "mcp_prometheus_wrapper",
@@ -84,9 +81,26 @@ wrapper_stems = {
     "brave-search": "mcp_brave_search_wrapper",
     "neo4j-cypher": "mcp_neo4j_cypher_wrapper",
     "neo4j-memory": "mcp_neo4j_memory_wrapper",
-    "needle": "mcp_needle_wrapper",
     "mermaid": "mcp_mermaid_wrapper",
 }
+removed_server_names = {
+    "sonarqube",
+    "chembl",
+    "pubchem",
+    "pubmed",
+    "sequential-thinking",
+    "openaiDeveloperDocs",
+    "needle",
+    "docker-docs",
+    "dockerhub",
+    "pdf",
+    "paper-search",
+}
+retired_present = sorted(removed_server_names.intersection(servers))
+if retired_present:
+    joined_retired = ", ".join(retired_present)
+    errors.append(f"retired MCP servers must not be registered: {joined_retired}")
+
 for server_name, stem in wrapper_stems.items():
     args = servers.get(server_name, {}).get("args", [])
     expected = f"scripts/ai/mcp/{stem}{suffix}"
@@ -160,7 +174,7 @@ case "${MODE}" in
         timeout 15 python3 "${SETUP_MCP}" \
             --root "${REPO_ROOT}" \
             --workspace-root "${REPO_ROOT}" \
-            --skip-codex \
+            --skip-codex-validation \
             --skip-gemini-settings >/dev/null 2>&1 || \
         warn "MCP setup timed out or failed; config may be incomplete"
         ;;

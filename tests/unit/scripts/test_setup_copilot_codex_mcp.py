@@ -151,3 +151,40 @@ def test_main_recreates_empty_workspace_json_configs(tmp_path: Path) -> None:
     assert json.loads(
         (output_root / ".gemini" / "settings.json").read_text(encoding="utf-8")
     )["mcpServers"]["filesystem"]["args"][-1] == str(workspace_root.resolve())
+
+
+def test_skip_codex_validation_still_updates_codex_config(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Launcher setup should update Codex config without running slow CLI validation."""
+    workspace_root = tmp_path / "workspace-root"
+    output_root = tmp_path / "output-root"
+    fake_home = tmp_path / "home"
+    workspace_root.mkdir()
+    fake_home.mkdir()
+
+    def fail_validation(_workspace_root: Path) -> None:
+        raise AssertionError("Codex CLI validation should have been skipped")
+
+    monkeypatch.setattr(setup_mcp.Path, "home", lambda: fake_home)
+    monkeypatch.setattr(setup_mcp, "_run_codex_validation", fail_validation)
+
+    exit_code = setup_mcp.main(
+        [
+            "--root",
+            str(output_root),
+            "--workspace-root",
+            str(workspace_root),
+            "--skip-codex-validation",
+            "--skip-gemini-settings",
+        ]
+    )
+
+    assert exit_code == 0
+    codex_config = fake_home / ".codex" / "config.toml"
+    rendered = codex_config.read_text(encoding="utf-8")
+    assert "[mcp_servers.filesystem]" in rendered
+    assert "[mcp_servers.memory]" in rendered
+    # The workspace root appears in the filesystem server args, either as "." (portable)
+    # or as an absolute path depending on the portable_workspace_paths flag
+    assert "filesystem" in rendered

@@ -547,26 +547,30 @@ async function writeManifest(dashboards) {
 async function main() {
   await ensureOutputDir();
   const dashboards = listDashboardsFromRepo();
-  const browser = await chromium.launch({ headless: true });
-  const contextBundle = await createBrowserContext(browser);
-  const context = contextBundle.context || contextBundle;
-  try {
-    for (const [index, dashboard] of dashboards.entries()) {
+  for (const [index, dashboard] of dashboards.entries()) {
+    const browser = await chromium.launch({ headless: true });
+    let contextBundle = null;
+    let context = null;
+    try {
+      contextBundle = await createBrowserContext(browser);
+      context = contextBundle.context || contextBundle;
       const page = await context.newPage();
       try {
         await renderDashboard(page, dashboard, index + 1, dashboards.length);
       } finally {
         await page.close();
       }
+    } finally {
+      if (contextBundle && contextBundle.api) {
+        await contextBundle.api.dispose();
+      }
+      if (context) {
+        await context.close();
+      }
+      await browser.close();
     }
-    await writeManifest(dashboards);
-  } finally {
-    if (contextBundle.api) {
-      await contextBundle.api.dispose();
-    }
-    await context.close();
-    await browser.close();
   }
+  await writeManifest(dashboards);
 }
 
 main().catch((error) => {
