@@ -293,21 +293,25 @@ review_lanes:
     retention_action: retain_only_when_the_exact_root_filename_is_required_by_a_tool_contract_or_public_entrypoint
     cleanup_policy: move_to_docs_or_config_subtree_only_after_the_external_contract_is_retired_or_repointed
     verification:
-      - git ls-files commitlint.config.mjs mint.json pr_compliance_checklist.yaml
-      - rg -n "commitlint\\.config\\.mjs|mint\\.json|pr_compliance_checklist\\.yaml" .github docs scripts tests configs README.md package.json
+      - git ls-files commitlint.config.mjs mint.json pr_compliance_checklist.yaml sonar-project.properties
+      - rg -n "commitlint\\.config\\.mjs|mint\\.json|pr_compliance_checklist\\.yaml|sonar-project\\.properties" .github docs scripts tests configs README.md package.json
     candidates:
       - path: commitlint.config.mjs
         current_live_state: present_approved_root_surface
         canonical_path: commitlint.config.mjs
         action_if_reintroduced: retain_as_exact_root_commitlint_entrypoint_while_commit_tooling_requires_the_standard_filename
       - path: mint.json
-        current_live_state: absent_from_root_baseline
-        canonical_path: null
+        current_live_state: present_approved_root_surface
+        canonical_path: mint.json
         action_if_reintroduced: retain_as_exact_root_docs_tooling_entrypoint_while_mintlify_requires_the_standard_filename
       - path: pr_compliance_checklist.yaml
         current_live_state: present_approved_root_surface
         canonical_path: pr_compliance_checklist.yaml
         action_if_reintroduced: retain_as_exact_root_pr_review_contract_until_review_tooling_is_repointed
+      - path: sonar-project.properties
+        current_live_state: present_approved_root_surface
+        canonical_path: sonar-project.properties
+        action_if_reintroduced: retain_as_exact_root_sonar_contract_while_sonarcloud_requires_the_standard_filename
 
   - lane_id: root_launcher_shims
     classification: owner_decision_required

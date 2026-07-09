@@ -76,8 +76,9 @@ uv run python -m scripts.docs verify
 ```
 
 Use this as the default end-to-end verification path for doc-sync changes. It
-runs link/spec/config checks, docs drift, docstring inventory, and a strict
-MkDocs build through the in-repo helper chain.
+runs link/spec/config checks, docs drift, docstring inventory, documentation
+cleanup inventory drift, and a strict MkDocs build through the in-repo helper
+chain.
 
 ### 1. Link and reference checks
 
@@ -122,7 +123,30 @@ Current drift coverage also includes bounded narrative guards for:
 - `docs/03-guides/workflows.md` phrases that would present backlog wording as
   the primary framing for the shipped workflow control plane.
 
-### 3. Docstring inventory check
+### 3. Documentation cleanup inventory
+
+```bash
+uv run python -m scripts.docs generate-cleanup-inventory --update
+uv run python -m scripts.docs generate-cleanup-inventory --check
+```
+
+Use this when you change documentation surfaces, generated artifact routing,
+or need a deterministic per-file classification matrix for cleanup work.
+
+Outputs:
+
+- `docs/reports/generated/documentation-cleanup-inventory.json`
+- `docs/reports/generated/documentation-cleanup-inventory.md`
+
+The inventory classifies tracked doc-like files by status, surface family,
+inbound/outbound links, generated route, and recommended action. It is
+repo-only evidence and does not replace publication policy in `docs/00-05`.
+
+`python -m scripts.docs verify` includes the `--check` drift guard by default.
+Skip it with `python -m scripts.docs verify --skip-cleanup-inventory` when you
+only need the lighter link/drift/docstring chain.
+
+### 4. Docstring inventory check
 
 ```bash
 uv run python -m scripts.docs check-docstrings --summary
@@ -131,7 +155,7 @@ uv run python -m scripts.docs check-docstrings --summary
 Use this when API/reference-facing code or generated reference expectations
 changed.
 
-### 4. Strict site build
+### 5. Strict site build
 
 ```bash
 uv run python -m scripts.docs verify --skip-links --skip-drift --skip-docstrings
