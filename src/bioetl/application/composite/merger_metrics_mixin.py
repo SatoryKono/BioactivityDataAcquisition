@@ -147,7 +147,7 @@ class MergeMetricsRecorderMixin:
             [pl.col(col).is_not_null() for col in enricher_cols]
         )
         # OPTIMIZATION: Avoid materializing filtered DataFrame
-        return df.select(any_enriched.sum()).item()
+        return int(df.select(any_enriched.sum()).item())
 
     def _count_fully_enriched(
         self,
