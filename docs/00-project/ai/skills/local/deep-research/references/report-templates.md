@@ -1,17 +1,17 @@
-# Report Templates
+# Report Templates Reference Redirect
 
-## Short Report
+Status: active compatibility reference
+Class: published-redirect
+Owner: BioETL Team
+Last verified: '2026-07-09'
 
-- Question
-- Key findings
-- Evidence table
-- Risks / unknowns
-- Recommendation
+This page keeps the legacy local reference URL stable.
 
-## Full Report
+The maintained mirror is
+[report-templates.md](../../../_references/local/deep-research/references/report-templates.md).
 
-- Scope and assumptions
-- Search strategy
-- Source scoring
-- Contradictions and resolution
-- Decision options and tradeoffs
+Runtime source:
+
+- `.codex/skills/deep-research/references/report-templates.md`
+
+Do not copy the reference body back into this page.

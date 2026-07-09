@@ -28,12 +28,20 @@ def _skip_snapshot_invariants_on_windows() -> None:
         )
 
 
+@pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="Snapshot invariant tests require full repo walk which is prohibitively slow on Windows",
+)
 def test_snapshot_invariants_are_clean() -> None:
     _, snapshot = _snapshot()
 
     assert snapshot_invariant_issues(snapshot) == []
 
 
+@pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="Snapshot invariant tests require full repo walk which is prohibitively slow on Windows",
+)
 def test_snapshot_invariants_require_docs_to_code_drift_edges() -> None:
     _, snapshot = _snapshot()
     keys_to_delete = [
@@ -51,6 +59,10 @@ def test_snapshot_invariants_require_docs_to_code_drift_edges() -> None:
     assert "missing docs-to-code drift edges" in issues
 
 
+@pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="Snapshot invariant tests require full repo walk which is prohibitively slow on Windows",
+)
 def test_snapshot_invariants_require_workflow_job_parent_links() -> None:
     _, snapshot = _snapshot()
     keys_to_delete = [
@@ -74,6 +86,10 @@ def test_snapshot_invariants_require_workflow_job_parent_links() -> None:
     )
 
 
+@pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="Snapshot invariant tests require full repo walk which is prohibitively slow on Windows",
+)
 def test_snapshot_invariants_require_runtime_evidence_support_links() -> None:
     _, snapshot = _snapshot()
     keys_to_delete = [
@@ -97,6 +113,10 @@ def test_snapshot_invariants_require_runtime_evidence_support_links() -> None:
     )
 
 
+@pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="Snapshot invariant tests require full repo walk which is prohibitively slow on Windows",
+)
 def test_snapshot_invariants_require_control_plane_artifact_links() -> None:
     _, snapshot = _snapshot()
     keys_to_delete = [
@@ -120,6 +140,10 @@ def test_snapshot_invariants_require_control_plane_artifact_links() -> None:
     )
 
 
+@pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="Snapshot invariant tests require full repo walk which is prohibitively slow on Windows",
+)
 def test_snapshot_invariants_require_run_instance_artifact_links() -> None:
     _, snapshot = _snapshot()
     keys_to_delete = [
@@ -143,6 +167,10 @@ def test_snapshot_invariants_require_run_instance_artifact_links() -> None:
     )
 
 
+@pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="Snapshot invariant tests require full repo walk which is prohibitively slow on Windows",
+)
 def test_snapshot_invariants_require_runtime_state_links() -> None:
     _, snapshot = _snapshot()
     keys_to_delete = [
@@ -165,6 +193,10 @@ def test_snapshot_invariants_require_runtime_state_links() -> None:
     )
 
 
+@pytest.mark.skipif(
+    sys.platform.startswith("win"),
+    reason="Snapshot invariant tests require full repo walk which is prohibitively slow on Windows",
+)
 def test_snapshot_invariants_require_schema_field_links() -> None:
     _, snapshot = _snapshot()
     keys_to_delete = [

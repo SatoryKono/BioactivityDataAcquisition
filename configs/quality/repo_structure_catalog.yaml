@@ -142,6 +142,8 @@ root_tooling_roots:
       role: curated_shared_vendor_runtime_surface
     - path: .vscode
       role: curated_shared_editor_metadata_surface
+    - path: .zed
+      role: curated_shared_editor_metadata_surface
 
 root_runtime_artifact_roots:
   approved_roots:

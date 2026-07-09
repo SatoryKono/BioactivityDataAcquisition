@@ -240,8 +240,8 @@ review_lanes:
     retention_action: retain_curated_runtime_roots_and_keep_local_generated_state_untracked
     cleanup_policy: owner_decision_required_before_rehome_or_delete
     verification:
-      - git ls-files .claude .vibe .ai .gemini .jules
-      - rg -n "\\.claude/|\\.vibe|\\.ai/|\\.gemini/|\\.jules/" .github docs scripts tests configs README.md pyproject.toml
+      - git ls-files .claude .vibe .ai .gemini .jules .zed
+      - rg -n "\\.claude/|\\.vibe|\\.ai/|\\.gemini/|\\.jules/|\\.zed/" .github docs scripts tests configs README.md pyproject.toml
       - .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
     candidates:
       - path: .ai
@@ -264,6 +264,10 @@ review_lanes:
         current_live_state: present_curated_root_surface
         canonical_path: .vibe
         action_if_reintroduced: keep_only_with_documented_owner_and_transition_note
+      - path: .zed
+        current_live_state: present_curated_root_surface
+        canonical_path: .zed
+        action_if_reintroduced: keep_only_as_curated_shared_project_editor_configuration_without_credentials_or_local_runtime_state
       - path: script-codex
         current_live_state: present_local_only_root_surface
         canonical_path: scripts/ai/codex

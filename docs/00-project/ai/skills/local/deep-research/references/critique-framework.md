@@ -1,16 +1,17 @@
-# Critique Framework
+# Critique Framework Reference Redirect
 
-## Review Axes
+Status: active compatibility reference
+Class: published-redirect
+Owner: BioETL Team
+Last verified: '2026-07-09'
 
-- Logic integrity
-- Evidence sufficiency
-- Contradiction handling
-- Scope completeness
-- Decision relevance
+This page keeps the legacy local reference URL stable.
 
-## Severity Scale
+The maintained mirror is
+[critique-framework.md](../../../_references/local/deep-research/references/critique-framework.md).
 
-- 1-3: minor wording or clarity issue
-- 4-6: material gap, requires follow-up
-- 7-8: major flaw, affects recommendation
-- 9-10: critical flaw, invalidates conclusion
+Runtime source:
+
+- `.codex/skills/deep-research/references/critique-framework.md`
+
+Do not copy the reference body back into this page.

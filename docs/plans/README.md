@@ -61,6 +61,32 @@ Issue packs and closeout notes are not canonical requirements. They should be
 retained only while they support active work or evidence links; otherwise they
 belong in the archive lane.
 
+## DOC-CLEANUP-004 Triage Snapshot 2026-07-09
+
+This snapshot closes the current plan-surface triage without moving files whose
+future archive/delete action still needs exact-path verification in the same
+change that moves them.
+
+Current decisions:
+
+- `docs/plans/consolidated-open-tasks-plan-2026-03-21.md` remains the only
+  active backlog.
+- Retained operational context stays listed under "Active Plan Links" because
+  it still has repository inbound references or active implementation context.
+- Zero-inbound dated issue packs, dashboard plans, wrapper closeouts,
+  root-hygiene notes, and Sonar/tech-debt closeouts remain
+  `archive-after-migration` candidates, not deletion candidates.
+- Archive moves must be exact-path moves into `docs/99-archive/plans/**` with a
+  matching update to `docs/99-archive/plans/README.md`.
+- Deletion is allowed only for exact byproducts after durable guidance has been
+  migrated and `python -m scripts.docs check-links --links --specs --configs`
+  still passes.
+
+The generated matrix in
+`docs/reports/generated/documentation-cleanup-inventory.json` is the baseline
+for inbound-link counts and recommended actions. Do not treat age alone as
+evidence for removal.
+
 ## Freshness Triggers
 
 Refresh this index, or add a short freshness note to linked dated reports, when:

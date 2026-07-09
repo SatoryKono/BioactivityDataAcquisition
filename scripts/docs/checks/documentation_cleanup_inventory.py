@@ -107,6 +107,13 @@ GENERATED_MARKER_RE = re.compile(
     re.IGNORECASE,
 )
 LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\(([^)]+)\)")
+SKIP_TEXT_SCAN_PATHS = {
+    "reports/configs_merged.md",
+    "reports/documentation_merged.md",
+    "reports/merged_output.txt",
+    "reports/project_structure.md",
+}
+SKIP_TEXT_SCAN_SUFFIXES = {".csv", ".json"}
 
 
 @dataclass(frozen=True)
@@ -142,13 +149,23 @@ def _is_doc_like(path: str) -> bool:
 
 
 def _read_text(path: str) -> str:
-    full = PROJECT_ROOT / path
-    if not full.exists() or full.stat().st_size > 3_000_000:
+    suffix = Path(path).suffix.lower()
+    if path in SKIP_TEXT_SCAN_PATHS:
         return ""
+    if path.startswith("reports/") and path != "reports/README.md":
+        return ""
+    if path.startswith("docs/reports/generated/") and suffix in SKIP_TEXT_SCAN_SUFFIXES:
+        return ""
+
+    full = PROJECT_ROOT / path
     try:
-        return full.read_text(encoding="utf-8", errors="ignore")
+        with full.open("rb") as handle:
+            data = handle.read(3_000_001)
     except OSError:
         return ""
+    if len(data) > 3_000_000:
+        return ""
+    return data.decode("utf-8", errors="ignore")
 
 
 def _extract_owner(text: str) -> str | None:
@@ -374,6 +391,7 @@ def _classify(
     route: Route | None,
 ) -> tuple[str, str, str]:
     declared = (_extract_declared_status(text) or "").lower()
+    declared_class = (_extract_declared_class(text) or "").lower()
     diagram_kind = _diagram_kind(path)
     generated_marker = GENERATED_MARKER_RE.search(text[:2500] or "") is not None
 
@@ -388,6 +406,8 @@ def _classify(
         return "Deprecated", "migration-required", "replace-with-link"
     if "obsolete duplicate" in text[:1000].lower():
         return "Deprecated", "migration-required", "replace-with-link"
+    if declared_class == "published-redirect":
+        return "Active", "current", "keep"
     if (
         route
         or generated_marker

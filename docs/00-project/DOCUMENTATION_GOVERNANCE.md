@@ -32,3 +32,13 @@ The former broad governance framework duplicated the current D-01,
 publication-policy, and navigation-policy stack. Any durable guidance from that
 legacy framework now belongs in the canonical sources above. This redirect keeps
 historical inbound links resolvable while preventing a second source of truth.
+
+## Cleanup Decision 2026-07-09
+
+`docs/reports/generated/documentation-cleanup-inventory.json` classifies this
+page as `Deprecated` with `0` repository inbound links and action
+`replace-with-link`.
+
+Retain this file as a minimal compatibility redirect in the current cleanup
+wave. It may be removed only after a later migration review confirms no active
+repository or publication entrypoint still depends on this exact path.
