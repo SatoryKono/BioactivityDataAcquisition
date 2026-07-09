@@ -461,6 +461,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         ),
     )
     parser.add_argument(
+        "--skip-codex-validation",
+        action="store_true",
+        help=(
+            "Skip post-write Codex CLI validation while still updating "
+            "~/.codex/config.toml unless --skip-codex-config is also passed."
+        ),
+    )
+    parser.add_argument(
         "--skip-codex-config",
         action="store_true",
         help="Do not update ~/.codex/config.toml with the generated MCP servers.",
@@ -515,7 +523,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         gemini_settings_path = _write_gemini_settings(output_root, workspace_root)
         print(f"Wrote {gemini_settings_path}")
 
-    if not args.skip_codex:
+    if not args.skip_codex and not args.skip_codex_validation:
         _run_codex_validation(workspace_root)
 
     return 0

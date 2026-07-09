@@ -222,12 +222,16 @@ Explorer health probe and monitoring setup docs for that reason.
   without claiming that the selected pipeline run succeeded. Provider Health
   remains provider-first; `$workflow/$pipeline/$run_type/$run_id` are shared
   shell context for HTTP identity/accounting cards, and `$run_id` must not be
-  introduced into Provider Health PromQL. `Status` is selected-provider scope;
-  `Monitor GLOBAL Provider Severity Matrix`, `Inspect Critical Providers`, and
-  `Inspect Provider Top Causes` are GLOBAL fleet posture and may disagree by
-  design. Shared `ID` и `Processed Records` cards на том же first screen
-  остаются bounded pipeline-context evidence и не доказывают current provider
-  health. `Inspect Provider Top Causes` может оставаться
+  introduced into Provider Health PromQL. `Status` is selected-provider scope
+  and renders as supporting scoped evidence rather than the visual owner of the
+  fleet answer; `Monitor GLOBAL Provider Severity Matrix`,
+  `Inspect Critical Providers`, and `Inspect Provider Top Causes` are GLOBAL
+  fleet posture and may disagree by design. Shared `ID` и `Processed Records`
+  cards на том же first screen остаются bounded pipeline-context evidence и не
+  доказывают current provider health. `First Action` spells out this read order:
+  GLOBAL severity, telemetry freshness, critical providers/top causes, then
+  selected-provider supporting evidence. `Inspect Provider Top Causes` может
+  оставаться
    непустой даже при `GLOBAL severity = OK`, потому что canonical cause
    projection включает early-warning provider signals независимо от
    current-status projection; это diagnostic lead, а не самостоятельное
@@ -236,6 +240,10 @@ Explorer health probe and monitoring setup docs for that reason.
    empty table; это explainability gap, а не healthy state. В таком случае
    расследование нужно продолжать по severity matrix и optional provider
    diagnostics, а не трактовать пустую таблицу как отсутствие инцидента.
+   Optional latency, adapter, rate-limit, and circuit-breaker panels remain
+   expanded by dashboard contract but are compact two-row diagnostics; no-data
+   in those panels does not refute current provider severity and should not
+   dominate the first-screen verdict path.
    `First Action` is the bounded CTA surface for this dashboard: review the
    severity matrix, inspect critical providers, or inspect provider top causes
    before leaving the page.

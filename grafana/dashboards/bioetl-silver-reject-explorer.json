@@ -457,7 +457,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 5,
         "w": 12,
         "x": 0,
         "y": 22
@@ -465,6 +465,7 @@
       "id": 11,
       "options": {
         "legend": {
+          "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
@@ -550,7 +551,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 5,
         "w": 12,
         "x": 12,
         "y": 22
@@ -558,6 +559,7 @@
       "id": 12,
       "options": {
         "legend": {
+          "calcs": [],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
@@ -601,6 +603,35 @@
       "type": "timeseries"
     },
     {
+      "datasource": null,
+      "description": "Visible neutral empty-state guidance for trend panels when active filters return no reject samples.",
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 27
+      },
+      "id": 16,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"font-size:13px;line-height:1.45;color:#c9d1d9\"><b>Trend empty state:</b> active filters returned no matching reject samples. Broaden <code>reason_code</code>, <code>field</code>, or <code>payload_hash</code>; use backend health above to distinguish an intentional empty scope from datasource failure.</div>",
+        "mode": "html"
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [],
+      "title": "Review: Trend Empty State",
+      "transparent": true,
+      "type": "text"
+    },
+    {
       "datasource": "Quarantine Explorer",
       "fieldConfig": {
         "defaults": {
@@ -612,7 +643,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 5,
         "w": 8,
         "x": 0,
         "y": 30
@@ -660,7 +691,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 5,
         "w": 8,
         "x": 8,
         "y": 30
@@ -708,7 +739,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 5,
         "w": 8,
         "x": 16,
         "y": 30
@@ -745,6 +776,23 @@
       "description": "Selected-range reason signature breakdown built from reason_code, rule_type, field, and operator where available. This is the closest shipped proxy for rule-level root cause; it is not a confirmed rule_id signal. Repeated signatures suggest systemic remediation, while new signatures should be checked against the DQ rule taxonomy. Empty means no signature evidence for current filters only after Quarantine Explorer and pipeline scope are confirmed."
     },
     {
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 35
+      },
+      "id": 15,
+      "options": {
+        "content": "<div style=\"font-size:13px;line-height:1.45;color:#c9d1d9\"><b>Record selection empty state:</b> no row is selected yet. Use reason/field/signature summaries to widen filters, then open a row by <code>payload_hash</code>. If the table remains empty, verify Quarantine Explorer health and active filters.</div>",
+        "mode": "html"
+      },
+      "title": "Review: Record Selection Empty State",
+      "type": "text",
+      "description": "Visible guidance for the lower record table/details area. This panel carries the empty-state instruction because empty HTTP table frames can render without field-level noValue text in Grafana.",
+      "transparent": true
+    },
+    {
       "datasource": "Quarantine Explorer",
       "fieldConfig": {
         "defaults": {
@@ -769,12 +817,12 @@
               "url": "data:text/plain,bioetl%20quarantine%20resolve%20--pipeline%20${__data.fields.pipeline}%20--payload-hash%20${__data.fields.payload_hash}%20--status%20IGNORED"
             }
           ],
-          "noValue": "No rejected records for current filters. Backend and scope must be confirmed before treating this as zero rows."
+          "noValue": "No rejected records for current filters. Use the reason/field summaries above to widen filters or select a payload_hash when rows exist; backend and scope must be confirmed before treating this as zero rows."
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 10,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 38
@@ -806,7 +854,7 @@
           "expr": ""
         }
       ],
-      "description": "Shows latest 100 Silver structural FILTERED_OUT_SILVER records for the selected pipeline/run_type/reason_code/field/quarantine_run_id scope, sorted by ingestion_ts descending. FILTERED_OUT_SILVER is a legacy alias for Silver structural rejects only; Gold contract and semantic rejects are not included in this explorer. Columns include payload_hash, run_id, run_type, reason_code, rule_type, field, operator, expected/actual, dq_status, and reason when the backend provides them; raw payload is intentionally not shown in this list. Empty-state copy: No rejected records for current filters means zero matching rows only after the pipeline/filter scope is confirmed. Backend/query failure copy: If data source query fails, treat this as an error state and inspect Grafana query error details. Use payload_hash self-drilldown for one-record focus and CLI handoff for inspect/resolve actions; verify Bronze/run/batch lineage before replay decisions.",
+      "description": "Compact latest 100 record list for Silver structural FILTERED_OUT_SILVER records in the selected pipeline/run_type/reason_code/field/quarantine_run_id scope, sorted by ingestion_ts descending. FILTERED_OUT_SILVER is a legacy alias for Silver structural rejects only; Gold contract and semantic rejects are not included in this explorer. Columns include payload_hash, run_id, run_type, reason_code, rule_type, field, operator, expected/actual, dq_status, and reason when the backend provides them; raw payload is intentionally not shown in this list. Empty-state copy: No rejected records for current filters means zero matching rows only after the pipeline/filter scope is confirmed. Backend/query failure copy: If data source query fails, treat this as an error state and inspect Grafana query error details. Use payload_hash self-drilldown for one-record focus and CLI handoff for inspect/resolve actions; verify Bronze/run/batch lineage before replay decisions.",
       "title": "Inspect Filtered Records Table",
       "type": "table"
     },
@@ -817,15 +865,15 @@
           "color": {
             "mode": "palette-classic"
           },
-          "noValue": "Select a payload_hash from the table or clear filters that exclude the selected record."
+          "noValue": "No record selected. Select a payload_hash from the table above; if the table is empty, widen reason/field/run filters or verify Quarantine Explorer health before treating this as zero matching rows."
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 4,
         "w": 24,
         "x": 0,
-        "y": 48
+        "y": 42
       },
       "id": 9,
       "options": {

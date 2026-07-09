@@ -223,23 +223,33 @@ multi_agent = true
 
 ### MCP Servers
 
-All MCP servers use `startup_timeout_sec = 30` to accommodate VPN latency:
+The generated workspace config from `python -m scripts.engineering.dev setup-mcp`
+registers the active BioETL MCP server set:
 
-| Server              | Package                                            | Purpose                                                    |
-| ------------------- | -------------------------------------------------- | ---------------------------------------------------------- |
-| memory              | `@modelcontextprotocol/server-memory`              | Persistent memory                                          |
-| sequential-thinking | `@modelcontextprotocol/server-sequential-thinking` | Reasoning                                                  |
-| github              | `@modelcontextprotocol/server-github`              | GitHub API                                                 |
-| filesystem          | `@modelcontextprotocol/server-filesystem`          | File access                                                |
-| pdf                 | `@modelcontextprotocol/server-pdf`                 | PDF reading                                                |
-| prometheus          | `prometheus-mcp`                                   | Prometheus queries and target discovery                    |
-| grafana             | `mcp-grafana-npx`                                  | Grafana dashboards, datasources, and observability context |
+| Server | Transport | Purpose |
+| --- | --- | --- |
+| `memory` | `npx @modelcontextprotocol/server-memory` | Persistent assistant memory file |
+| `filesystem` | `npx @modelcontextprotocol/server-filesystem` | Repo-scoped file access |
+| `fetch` | `uvx mcp-server-fetch` | HTTP fetch tooling |
+| `github` | Project wrapper | GitHub API access |
+| `docker` | Project wrapper | Docker MCP gateway access |
+| `context7` | Project wrapper | Documentation/context lookup |
+| `ast-grep` | Project wrapper | Structural code search |
+| `mcp-code-interpreter` | Project wrapper | Sandboxed code interpreter |
+| `prometheus` | Project wrapper | Prometheus queries and target discovery |
+| `grafana` | Project wrapper | Grafana dashboards, datasources, and observability context |
+| `brave-search` | Project wrapper | Web search when credentials are available |
+| `neo4j-cypher` | Project wrapper | Neo4j Cypher access |
+| `neo4j-memory` | Project wrapper | Neo4j-backed project memory access |
+| `mermaid` | Project wrapper | Mermaid rendering/diagram tooling |
+| `biomoltechDocs` | Remote HTTP MCP | BioETL documentation lookup |
+| `mintlify` | Remote HTTP MCP | Mintlify documentation lookup |
+| `deepwiki` | Remote HTTP MCP | DeepWiki repository documentation lookup |
 
-The generated workspace config from `python -m scripts.ai.codex.setup_mcp`
-also registers BioETL-specific wrapper and HTTP servers used in this repo:
-`docker`, `context7`, `ast-grep`, `mcp-code-interpreter`, `brave-search`,
-`neo4j-cypher`, `neo4j-memory`, `mermaid`, `biomoltechDocs`, `mintlify`, and
-`deepwiki`.
+Retired MCP servers such as `sequential-thinking`, `pdf`, `needle`,
+`docker-docs`, `dockerhub`, and `paper-search` are intentionally not registered
+in generated configs. See `docs/00-project/ai/mcp-governance.md` for the
+active/retired inventory.
 
 After the initial setup, manual MCP re-registration should not be necessary on
 every new Codex session: `bash scripts/ai/codex/run-codex.sh`,
