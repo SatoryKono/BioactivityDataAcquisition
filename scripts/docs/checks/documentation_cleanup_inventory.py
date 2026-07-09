@@ -243,13 +243,58 @@ def _outgoing_links(text: str) -> list[str]:
             ("#", "http://", "https://", "mailto:", "tel:", "app://")
         ):
             continue
-        if re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*:", raw):
+        if re.match(r"^[a-zA-Z][a-zA-Z0-9+.-]*:", raw) and not re.match(
+            r"^[A-Za-z]:[\\/]", raw
+        ):
             continue
         target = raw.split()[0].split("#", 1)[0]
         if not target:
             continue
         links.append(urllib.parse.unquote(target))
     return links
+
+
+def _project_root_aliases() -> tuple[str, ...]:
+    root = PROJECT_ROOT.resolve().as_posix().rstrip("/")
+    aliases = {root}
+
+    windows_drive_match = re.match(r"^([A-Za-z]):/(.+)$", root)
+    if windows_drive_match:
+        drive, rest = windows_drive_match.groups()
+        aliases.add(f"/mnt/{drive.lower()}/{rest}")
+        aliases.add(f"/mnt/{drive.upper()}/{rest}")
+
+    wsl_mount_match = re.match(r"^/mnt/([A-Za-z])/(.+)$", root)
+    if wsl_mount_match:
+        drive, rest = wsl_mount_match.groups()
+        aliases.add(f"{drive.lower()}:/{rest}")
+        aliases.add(f"{drive.upper()}:/{rest}")
+
+    return tuple(sorted(aliases, key=len, reverse=True))
+
+
+def _repo_relative_absolute_link(target: str) -> str | None:
+    normalized = target.replace("\\", "/")
+    for root in _project_root_aliases():
+        if normalized == root:
+            return ""
+        if normalized.startswith(f"{root}/"):
+            return normalized[len(root) + 1 :]
+    return None
+
+
+def _collapse_posix_path(path: str) -> str | None:
+    parts: list[str] = []
+    for part in path.replace("\\", "/").split("/"):
+        if not part or part == ".":
+            continue
+        if part == "..":
+            if not parts:
+                return None
+            parts.pop()
+            continue
+        parts.append(part)
+    return "/".join(parts)
 
 
 def _resolve_link(path: str, target: str) -> str | None:
@@ -259,14 +304,17 @@ def _resolve_link(path: str, target: str) -> str | None:
     )
     if line_ref_match:
         target = line_ref_match.group(1)
-    candidate = Path(target)
-    if not candidate.is_absolute():
-        candidate = (PROJECT_ROOT / path).parent / candidate
-    try:
-        resolved = candidate.resolve().relative_to(PROJECT_ROOT)
-    except ValueError:
+    repo_relative_absolute = _repo_relative_absolute_link(target)
+    if repo_relative_absolute is not None:
+        return repo_relative_absolute
+
+    normalized = target.replace("\\", "/")
+    if Path(normalized).is_absolute() or re.match(r"^[A-Za-z]:/", normalized):
         return None
-    return resolved.as_posix()
+
+    base = Path(path).parent.as_posix()
+    joined = normalized if base in {"", "."} else f"{base}/{normalized}"
+    return _collapse_posix_path(joined)
 
 
 def _duplicate_groups(texts: dict[str, str]) -> dict[str, int]:

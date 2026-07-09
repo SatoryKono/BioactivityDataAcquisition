@@ -13,6 +13,7 @@ import pytest
 
 from bioetl.composition.runtime_builders import inputs_runtime_assembly
 from bioetl.composition.runtime_builders import inputs_resolver
+from bioetl.composition.runtime_builders import registry_manifest
 from bioetl.composition.runtime_builders import runner_builder
 from bioetl.composition.runtime_builders import runner_control_plane_assembly
 from bioetl.composition.runtime_builders import runner_input_assembly
@@ -68,6 +69,41 @@ def test_runner_builder_uses_dedicated_control_plane_assembler() -> None:
     assert hasattr(runner_control_plane_assembly, "assemble_runner_control_plane")
     assert not hasattr(runner_builder, "_ControlPlaneSetupResult")
     assert not hasattr(runner_builder, "_handle_control_plane_setup")
+
+
+def test_runner_builder_leaf_keeps_runtime_builder_stages_split() -> None:
+    """The public builder stays a leaf orchestration surface."""
+    source = Path(
+        "src/bioetl/composition/runtime_builders/runner_builder.py"
+    ).read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    imported_modules = {
+        node.module
+        for node in tree.body
+        if isinstance(node, ast.ImportFrom) and node.module is not None
+    }
+
+    assert len(source.splitlines()) <= 120
+    assert {
+        "bioetl.composition.runtime_builders._runner_builder_orchestration",
+        "bioetl.composition.runtime_builders.runner_input_assembly",
+        "bioetl.composition.runtime_builders.runner_control_plane_assembly",
+    }.issubset(imported_modules)
+    assert (
+        "bioetl.composition.runtime_builders._run_manifest_data_roots"
+        not in imported_modules
+    )
+    assert (
+        "bioetl.composition.runtime_builders._run_manifest_planned_artifacts"
+        not in imported_modules
+    )
+    assert (
+        "bioetl.composition.runtime_builders._exact_replay_cached_bronze_context"
+        not in imported_modules
+    )
+    assert "FileRunManifestStore" not in source
+    assert "FileRunLedgerStore" not in source
+    assert "build_planned_artifacts" not in source
 
 
 def test_inputs_resolver_uses_explicit_resolved_vacuumsettings_name() -> None:
@@ -131,6 +167,23 @@ def test_runner_builder_exposes_typed_wiring_bundles() -> None:
     assert wiring.create_registry is create_registry
     assert callable(wiring.ensure_providers_loaded)
     assert callable(wiring.register_all_pipelines)
+
+
+def test_runtime_builder_public_exports_stay_narrow() -> None:
+    """RF-002 split must not add new public runtime-builder exports."""
+    assert set(registry_manifest.PUBLIC_LAZY_EXPORTS) == {
+        "build_pipeline_runner",
+        "control_plane_root",
+    }
+    assert set(runner_builder.__all__) == {
+        "PipelineRunnerProtocol",
+        "RunnerBuilderWiring",
+        "RunnerFactoryWiring",
+        "RunnerInputWiring",
+        "build_pipeline_runner",
+        "ensure_providers_loaded",
+        "load_source_config",
+    }
 
 
 def test_runner_builder_wiring_applies_legacy_overrides_without_mutating_base() -> None:

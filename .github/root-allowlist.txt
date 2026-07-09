@@ -2,6 +2,7 @@
 # Any new root-level tracked file must be explicitly reviewed and added here.
 # See docs/00-project/governance/03-file-policy.md §0 for root policy.
 # Canonical project / packaging / security / docs tooling entrypoints retained at root.
+.aiignore
 .dockerignore
 .editorconfig
 .env.example

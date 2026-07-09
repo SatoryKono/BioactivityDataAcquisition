@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 ## Purpose
 
-Reduce single-owner risk in architecture debt exemptions and keep ownership aligned with Q2 scorecard decomposition targets.
+Reduce single-owner risk in architecture debt exemptions and keep ownership aligned with Q3 scorecard decomposition targets.
 
 ## Subsystem Ownership Model
 
@@ -23,7 +23,7 @@ Reduce single-owner risk in architecture debt exemptions and keep ownership alig
 - Platform subsystem owner: `@bioetl-platform`
 - Data-model subsystem owner: `@bioetl-data-model`
 
-Subsystem mapping source of truth: `configs/quality/debt_scorecard.yaml` (`governance.owner_registry_q2_subsystems`).
+Subsystem mapping source of truth: `configs/quality/debt_scorecard.yaml` (`governance.owner_registry_q3_subsystems`).
 
 ## Review Policy For New Exemptions
 
@@ -44,7 +44,7 @@ Mandatory enforcement points:
 1. `owner` is mapped to the correct subsystem in scorecard governance.
 1. `removal_step` references concrete follow-up action (refactor/task/RF).
 1. `scripts/engineering/qa/check_quality_exemptions.py --mode warn` passes.
-1. If active `technical_debt` remains in the registry after the change, active owner count stays >= 2 once Q2 diversification policy is in force.
+1. If active `technical_debt` remains in the registry after the change, active owner count stays >= 2 once Q3 diversification policy is in force.
 
 ## Dashboard
 

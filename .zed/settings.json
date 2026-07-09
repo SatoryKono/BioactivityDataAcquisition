@@ -1,0 +1,103 @@
+{
+  "format_on_save": "on",
+  "tab_size": 4,
+  "preferred_line_length": 88,
+  "soft_wrap": "preferred_line_length",
+  "languages": {
+    "Python": {
+      "format_on_save": "on",
+      "formatter": {
+        "language_server": {
+          "name": "ruff"
+        }
+      },
+      "code_actions_on_format": {
+        "source.organizeImports.ruff": true,
+        "source.fixAll.ruff": true
+      },
+      "language_servers": ["basedpyright", "ruff", "!pylsp"]
+    }
+  },
+  "lsp": {
+    "ruff": {
+      "initialization_options": {
+        "settings": {
+          "lineLength": 88,
+          "targetVersion": "py312"
+        }
+      }
+    }
+  },
+  "terminal": {
+    "env": {
+      "PYTHONPATH": "src;."
+    }
+  },
+  "tasks": [
+    {
+      "label": "Format code",
+      "command": "ruff",
+      "args": ["format", "."],
+      "reveal": "always"
+    },
+    {
+      "label": "Lint code",
+      "command": "ruff",
+      "args": ["check", "."],
+      "reveal": "always"
+    },
+    {
+      "label": "Type check",
+      "command": "mypy",
+      "args": ["src/"],
+      "reveal": "always"
+    },
+    {
+      "label": "Run unit tests",
+      "command": "pytest",
+      "args": ["tests/unit/", "-v"],
+      "tags": ["python-test"],
+      "reveal": "always"
+    },
+    {
+      "label": "Run integration tests",
+      "command": "pytest",
+      "args": ["tests/integration/", "-v"],
+      "tags": ["python-test"],
+      "reveal": "always"
+    },
+    {
+      "label": "Run architecture tests",
+      "command": "pytest",
+      "args": ["tests/architecture/", "-v"],
+      "tags": ["python-test"],
+      "reveal": "always"
+    },
+    {
+      "label": "Run E2E smoke tests",
+      "command": "pytest",
+      "args": ["-m", "e2e_smoke", "-v"],
+      "tags": ["python-test"],
+      "reveal": "always"
+    },
+    {
+      "label": "Security scan",
+      "command": "bandit",
+      "args": ["-r", "src/"],
+      "reveal": "always"
+    },
+    {
+      "label": "Coverage report",
+      "command": "pytest",
+      "args": ["--cov=src/bioetl", "--cov-report=html"],
+      "tags": ["python-test"],
+      "reveal": "always"
+    },
+    {
+      "label": "Architecture compliance",
+      "command": "import-linter",
+      "args": ["--config", ".importlinter"],
+      "reveal": "always"
+    }
+  ]
+}
