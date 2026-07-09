@@ -606,7 +606,8 @@ def test_analysis_source_text_timeout_degrades_to_empty_marker_context(
 
 
 def test_neo4j_http_client_distinguishes_query_runtime_http_errors(monkeypatch) -> None:
-    def _raise_http_error(_req: object, _timeout: int = 60) -> object:
+    def _raise_http_error(_req: object, *, timeout: int = 60) -> object:
+        assert timeout == 60
         raise error.HTTPError(
             f"{LOCALHOST_HTTP_URI}/db/neo4j/tx/commit",
             400,
@@ -636,7 +637,8 @@ def test_neo4j_http_client_reports_all_transport_attempts(monkeypatch) -> None:
         error.URLError(ConnectionRefusedError(111, "Connection refused")),
     ]
 
-    def _raise_transport_error(_req: object, _timeout: int = 60) -> object:
+    def _raise_transport_error(_req: object, *, timeout: int = 60) -> object:
+        assert timeout == 60
         raise responses.pop(0)
 
     monkeypatch.setattr(

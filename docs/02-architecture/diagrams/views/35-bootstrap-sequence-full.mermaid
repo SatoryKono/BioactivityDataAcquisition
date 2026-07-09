@@ -1,16 +1,19 @@
 %% View: Full | Parent: (root)
 %% Parent source: docs/02-architecture/diagrams/foundation/35-bootstrap-sequence.mmd
 %% Full reference diagram retained after decomposition.
-%% Synced: 2026-03-24
+%% Synced: 2026-07-08
+
 %% Title: Composition Layer Bootstrap Sequence
 %% Covers: RULES.md §1.1 (Composition Root), composition/bootstrap/runtime/
 %% Rank: 10 (Score 8.44) — Step-by-step system assembly
 %% Updated: 2026-03-24
+%% Decomposed views: views/35-bootstrap-sequence-{overview,domain,infra,dataflow,full}.mermaid
 
 %% @version 1.1.0
 %% @date    2026-03-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
+%% @nodes   28
 
 %%{init: {
   'flowchart': {
@@ -23,40 +26,39 @@
     'edgeRouting': 'ORTHOGONAL'
   }
 }}%%
-%% @uniform width=328 height=56 max_title_len=36 max_desc_lines=1
 flowchart TB
     subgraph Step1["Step 1: Logger"]
-        S1A["BootstrapLogger.configure()<br/>"]
+        S1A["BootstrapLogger.configure()"]
         S1B["StructlogLogger<br/>(JSON, ISO timestamps, run_id binding)"]
     end
 
     subgraph Step2["Step 2: Configuration"]
-        S2A["ConfigLoader.load(pipeline_name)<br/>"]
+        S2A["ConfigLoader.load(pipeline_name)"]
         S2B["PipelineYamlConfig<br/>(base defaults merged with entity.yaml)"]
-        S2C["DQ + Filter config loaders<br/>"]
+        S2C["DQ + Filter config loaders"]
     end
 
     subgraph Step3["Step 3: Observability Bundle"]
-        S3A["ObservabilityBundle<br/>"]
-        S3B["MetricsPort + TracingPort<br/>"]
+        S3A["ObservabilityBundle"]
+        S3B["MetricsPort + TracingPort"]
     end
 
     subgraph Step4["Step 4: Storage"]
-        S4A["StorageFactory.create(config)<br/>"]
+        S4A["StorageFactory.create(config)"]
         S4B["BronzeWriter<br/>(JSONL + zstd)"]
         S4C["SilverWriter<br/>(Delta Lake)"]
         S4D["GoldWriter<br/>(Delta / Parquet)"]
     end
 
     subgraph Step5["Step 5: HTTP Client"]
-        S5A["HttpClientFactory.create(provider)<br/>"]
-        S5B["UnifiedHTTPClient<br/>"]
-        S5C["TokenBucket + CircuitBreaker<br/>"]
+        S5A["HttpClientFactory.create(provider)"]
+        S5B["UnifiedHTTPClient"]
+        S5C["TokenBucket + CircuitBreaker"]
     end
 
     subgraph Step6["Step 6: Data Source"]
-        S6A["DataSourceFactory.create(provider)<br/>"]
-        S6B["ProviderRegistry.get(provider)<br/>"]
+        S6A["DataSourceFactory.create(provider)"]
+        S6B["ProviderRegistry.get(provider)"]
         S6C["Provider Adapter<br/>(e.g., ChemblAdapter)"]
     end
 
@@ -67,17 +69,17 @@ flowchart TB
     end
 
     subgraph Step8["Step 8: Factory Context & Services"]
-        S8A["_build_factory_context()<br/>"]
-        S8B["_PipelineFactoryContext<br/>"]
-        S8C["build_factory_services()<br/>"]
-        S8D["PipelineService (frozen)<br/>"]
+        S8A["_build_factory_context()"]
+        S8B["_PipelineFactoryContext"]
+        S8C["build_factory_services()"]
+        S8D["PipelineService (frozen)"]
     end
 
     subgraph Step9["Step 9: Pipeline Creation & Runner"]
-        S9A["create_factory_runner()<br/>"]
-        S9B["create_pipeline_with_services()<br/>"]
-        S9C["creation_support / _creation_wiring<br/>"]
-        S9D["assemble_runner() → PipelineRunner<br/>"]
+        S9A["GenericPipelineFactory.create_runner()"]
+        S9B["GenericPipelineFactory.create_with_services()"]
+        S9C["creation_support / _creation_wiring"]
+        S9D["assemble_runner() → PipelineRunner"]
     end
 
     %% Flow
@@ -100,6 +102,8 @@ flowchart TB
     S8B -.-> S4A
     S3A -.-> S9A
     S8D --> S9A --> S9B --> S9C --> S9D
+    S9C -.-> S8D
+    S9C -.-> S6C
 
     %% Styling
     style Step1 fill:#f5f3ff,stroke:#7c3aed
@@ -111,5 +115,3 @@ flowchart TB
     classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
     classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
     classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
-
-    linkStyle default stroke:#475569,stroke-width:2px,stroke-dasharray:5

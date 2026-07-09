@@ -443,6 +443,8 @@ def test_ensure_backend_failed_startup_appends_process_diagnostics_to_log(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     log_path = tmp_path / "backend.log"
+    # Create the log file first to ensure it exists for appending
+    log_path.write_text("", encoding="utf-8")
     monkeypatch.setattr(
         runtime_subject, "build_detached_backend_log_path", lambda _port: log_path
     )
@@ -462,6 +464,7 @@ def test_ensure_backend_failed_startup_appends_process_diagnostics_to_log(
         wait_fn=MagicMock(return_value=True),
         wait_required_paths_fn=MagicMock(return_value=False),
         required_probe_paths=("/ops/control-plane/checkpoint-freshness?pipeline=x",),
+        listener_pid_fn=MagicMock(return_value=None),
     )
 
     assert result.status == "failed"
@@ -479,6 +482,7 @@ def test_ensure_backend_warns_when_start_raises_oserror() -> None:
         enabled=True,
         probe_fn=MagicMock(return_value=False),
         start_fn=MagicMock(side_effect=OSError("bind failed")),
+        listener_pid_fn=MagicMock(return_value=None),
         warning_printer=warning,
     )
 

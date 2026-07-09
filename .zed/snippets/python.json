@@ -1,0 +1,268 @@
+{
+  "BioETL Pipeline Import": {
+    "prefix": "bioetl-pipeline",
+    "description": "Import BioETL pipeline components",
+    "body": [
+      "from bioetl.pipelines.${1:pipeline_name} import ${2:PipelineName}",
+      "from bioetl.domain.schemas import ${3:SchemaName}",
+      "from bioetl.infrastructure.config import load_config"
+    ]
+  },
+  "BioETL Schema Import": {
+    "prefix": "bioetl-schema",
+    "description": "Import BioETL domain schema",
+    "body": [
+      "from bioetl.domain.schemas.${1:module} import ${2:SchemaName}"
+    ]
+  },
+  "BioETL Logger": {
+    "prefix": "bioetl-logger",
+    "description": "Import and setup BioETL structured logger",
+    "body": [
+      "from bioetl.infrastructure.logging import get_logger",
+      "from bioetl.infrastructure.logging.events import LogEvents",
+      "",
+      "logger = get_logger(__name__)"
+    ]
+  },
+  "BioETL Pipeline Context": {
+    "prefix": "bioetl-context",
+    "description": "Bind pipeline context for structured logging",
+    "body": [
+      "from bioetl.infrastructure.logging import bind_pipeline_context, pipeline_stage",
+      "",
+      "# Bind pipeline context",
+      "bind_pipeline_context(",
+      "  pipeline_code=\"${1:pipeline_code}\",",
+      "  run_id=\"${2:run_id}\",",
+      "  provider=\"${3:provider}\"",
+      ")"
+    ]
+  },
+  "BioETL Pandera Schema": {
+    "prefix": "bioetl-pandera",
+    "description": "Create a Pandera DataFrameModel schema",
+    "body": [
+      "import pandera as pa",
+      "from pandera.typing import Series, DataFrame",
+      "",
+      "class ${1:SchemaName}(pa.DataFrameModel):",
+      "    \"\"\"${2:Schema description}.\"\"\"",
+      "    ",
+      "    ${3:column_name}: Series[${4:type}] = pa.Field(description=\"${5:description}\")",
+      "    ",
+      "    class Config:",
+      "        strict = True",
+      "        coerce = True"
+    ]
+  },
+  "BioETL Test Fixture": {
+    "prefix": "bioetl-test-fixture",
+    "description": "Create a BioETL test fixture",
+    "body": [
+      "import pytest",
+      "from bioetl.domain.schemas import ${1:SchemaName}",
+      "",
+      "@pytest.fixture",
+      "def ${2:fixture_name}() -> ${1:SchemaName}:",
+      "    \"\"\"${3:Fixture description}.\"\"\"",
+      "    return ${1:SchemaName}("
+      "        ${4:field}=${5:value}",
+      "    )"
+    ]
+  },
+  "BioETL Unit Test": {
+    "prefix": "bioetl-test",
+    "description": "Create a BioETL unit test",
+    "body": [
+      "import pytest",
+      "from bioetl.${1:module} import ${2:ClassName}",
+      "",
+      "",
+      "class Test${2:ClassName}:",
+      "    \"\"\"Tests for ${2:ClassName}.\"\"\"",
+      "    ",
+      "    def test_${3:behavior}(self):",
+      "        \"\"\"Test that ${4:description}.\"\"\"",
+      "        # Arrange",
+      "        ${5:setup}",
+      "        ",
+      "        # Act",
+      "        result = ${6:action}",
+      "        ",
+      "        # Assert",
+      "        assert ${7:assertion}"
+    ]
+  },
+  "BioETL Integration Test": {
+    "prefix": "bioetl-integration-test",
+    "description": "Create a BioETL integration test",
+    "body": [
+      "import pytest",
+      "from bioetl.${1:module} import ${2:ClassName}",
+      "",
+      "",
+      "@pytest.mark.integration",
+      "class Test${2:ClassName}Integration:",
+      "    \"\"\"Integration tests for ${2:ClassName}.\"\"\"",
+      "    ",
+      "    def test_${3:behavior}(self):",
+      "        \"\"\"Test that ${4:description}.\"\"\"",
+      "        # Arrange",
+      "        ${5:setup}",
+      "        ",
+      "        # Act",
+      "        result = ${6:action}",
+      "        ",
+      "        # Assert",
+      "        assert ${7:assertion}"
+    ]
+  },
+  "BioETL Architecture Test": {
+    "prefix": "bioetl-arch-test",
+    "description": "Create a BioETL architecture compliance test",
+    "body": [
+      "import pytest",
+      "from importlinter import contracts",
+      "",
+      "",
+      "@pytest.mark.architecture",
+      "def test_${1:layer}_boundaries():",
+      "    \"\"\"Test that ${2:description}.\"\"\"",
+      "    # Architecture test implementation",
+      "    assert ${3:assertion}"
+    ]
+  },
+  "BioETL Pydantic Model": {
+    "prefix": "bioetl-pydantic",
+    "description": "Create a BioETL Pydantic model",
+    "body": [
+      "from pydantic import BaseModel, Field",
+      "from typing import ${1:Optional}",
+      "",
+      "",
+      "class ${2:ModelName}(BaseModel):",
+      "    \"\"\"${3:Model description}.\"\"\"",
+      "    ",
+      "    ${4:field_name}: ${5:field_type} = Field(description=\"${6:description}\")",
+      "    ",
+      "    class Config:",
+      "        frozen = True"
+    ]
+  },
+  "BioETL Settings": {
+    "prefix": "bioetl-settings",
+    "description": "Create BioETL settings with Pydantic Settings",
+    "body": [
+      "from pydantic_settings import BaseSettings",
+      "from pydantic import Field",
+      "",
+      "",
+      "class ${1:SettingsName}(BaseSettings):",
+      "    \"\"\"${2:Settings description}.\"\"\"",
+      "    ",
+      "    ${3:setting_name}: str = Field(description=\"${4:description}\")",
+      "    ",
+      "    class Config:",
+      "        env_prefix = \"${5:ENV_PREFIX}_\""
+    ]
+  },
+  "BioETL Error Handler": {
+    "prefix": "bioetl-error",
+    "description": "Create BioETL error handling with structured logging",
+    "body": [
+      "from bioetl.infrastructure.logging import get_logger",
+      "from bioetl.infrastructure.logging.events import LogEvents",
+      "",
+      "logger = get_logger(__name__)",
+      "",
+      "",
+      "def handle_${1:error_type}_error(error: Exception, context: dict):",
+      "    \"\"\"Handle ${2:description}.\"\"\"",
+      "    logger.error(",
+      "        LogEvents.${3:event_name},",
+      "        error=str(error),",
+      "        error_type=type(error).__name__,",
+      "        **context",
+      "    )",
+      "    raise"
+    ]
+  },
+  "BioETL Pipeline Stage": {
+    "prefix": "bioetl-stage",
+    "description": "Create a BioETL pipeline stage with logging",
+    "body": [
+      "from bioetl.infrastructure.logging import get_logger, pipeline_stage",
+      "from bioetl.infrastructure.logging.events import LogEvents",
+      "",
+      "logger = get_logger(__name__)",
+      "",
+      "",
+      "def ${1:stage_name}(input_data):",
+      "    \"\"\"${2:Stage description}.\"\"\"",
+      "    with pipeline_stage(\"${1:stage_name}\"):",
+      "        logger.info(",
+      "            LogEvents.${3:event_name},",
+      "            input_records=len(input_data) if hasattr(input_data, '__len__') else 1",
+      "        )",
+      "        ",
+      "        # Stage implementation",
+      "        result = ${4:implementation}",
+      "        ",
+      "        logger.info(",
+      "            LogEvents.${5:success_event},",
+      "            output_records=len(result) if hasattr(result, '__len__') else 1",
+      "        )",
+      "        ",
+      "        return result"
+    ]
+  },
+  "BioETL Data Contract": {
+    "prefix": "bioetl-contract",
+    "description": "Create a BioETL data contract validation",
+    "body": [
+      "from bioetl.domain.contracts import ${1:ContractName}",
+      "from bioetl.domain.schemas import ${2:SchemaName}",
+      "",
+      "",
+      "def validate_${3:entity}_contract(data) -> bool:",
+      "    \"\"\"Validate ${4:description}.\"\"\"",
+      "    contract = ${1:ContractName}()",
+      "    schema = ${2:SchemaName}",
+      "    ",
+      "    # Validate against schema",
+      "    validated_data = schema.validate(data)",
+      "    ",
+      "    # Validate against contract",
+      "    return contract.validate(validated_data)"
+    ]
+  },
+  "BioETL Medallion Layer": {
+    "prefix": "bioetl-medallion",
+    "description": "Create a BioETL medallion layer transformation",
+    "body": [
+      "from bioetl.domain.medallion import ${1:LayerName}Layer",
+      "from bioetl.domain.schemas import ${2:InputSchema}, ${3:OutputSchema}",
+      "",
+      "",
+      "class ${4:TransformerName}:",
+      "    \"\"\"${5:Transformer description}.\"\"\"",
+      "    ",
+      "    def __init__(self, config: dict):",
+      "        self.layer = ${1:LayerName}Layer(config)",
+      "        self.input_schema = ${2:InputSchema}",
+      "        self.output_schema = ${3:OutputSchema}",
+      "    ",
+      "    def transform(self, data):",
+      "        \"\"\"Transform ${6:description}.\"\"\"",
+      "        # Validate input",
+      "        validated_input = self.input_schema.validate(data)",
+      "        ",
+      "        # Apply transformation",
+      "        transformed = self.layer.apply(validated_input)",
+      "        ",
+      "        # Validate output",
+      "        return self.output_schema.validate(transformed)"
+    ]
+  }
+}

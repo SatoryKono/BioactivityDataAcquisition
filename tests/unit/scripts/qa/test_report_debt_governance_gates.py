@@ -341,6 +341,11 @@ def test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stal
         "_refresh_existing_inventory_source_tree",
         lambda payload, *, repo_root: {"source_tree_sha256": "stale-source-hash"},
     )
+    monkeypatch.setattr(
+        gates,
+        "_artifact_matches_builder",
+        lambda *, repo_root, rel_path, payload_builder: True,
+    )
 
     payload = gates.build_payload(repo_root=gates.PROJECT_ROOT)
     summary = payload["summary"]

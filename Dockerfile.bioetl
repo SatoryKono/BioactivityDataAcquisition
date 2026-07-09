@@ -38,9 +38,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy virtual environment from builder
 COPY --from=builder /app/.venv /app/.venv
 
-# Copy application source code read-only to avoid writable runtime assets.
-COPY --chown=bioetl:bioetl --chmod=0444 src/ ./src/
-COPY --chown=bioetl:bioetl --chmod=0444 configs/ ./configs/
+# Copy application source code as root-owned runtime assets. Default directory
+# and file modes keep them readable/traversable while the non-root user cannot
+# mutate them.
+COPY --chown=root:root src/ ./src/
+COPY --chown=root:root configs/ ./configs/
 
 # Create logs directory
 RUN mkdir -p /app/logs && chown bioetl:bioetl /app/logs

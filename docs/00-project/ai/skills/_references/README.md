@@ -15,6 +15,18 @@ Treat this directory as a **reference mirror**, not as a canonical editing
 surface. If reference content and runtime skills diverge, the runtime source
 still wins and the mirror must be re-synced.
 
+## Cleanup Classification
+
+Files under `_references/local/**` intentionally duplicate selected
+`references/**` files from the local skill mirror. They are classified as a
+tracked mirror/generated surface, not as standalone documentation.
+
+- Ownership route: `ai-skill-reference-mirror` in
+  `configs/quality/generated_artifact_routing.yaml`.
+- Check command: `bash scripts/ai/codex/check_skills_mirror.sh`.
+- Cleanup rule: do not delete individual duplicate reference files to reduce
+  duplication counts; re-sync the mirror from the runtime skill source instead.
+
 ## Consumers
 
 | Script                                    | What it checks                                                         |

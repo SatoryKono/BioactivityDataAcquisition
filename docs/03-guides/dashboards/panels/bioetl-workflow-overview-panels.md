@@ -47,6 +47,33 @@ is the source of truth.
 | 5 | Step Outcomes by Kind / Step Status / Range | timeseries | Prometheus | Workflow step-event outcomes by `step_kind` and `status`. | shared shell + `step_kind` + `step_status` | Series legend is the key mapping. |
 | 8 | Step Duration p95 by Kind / Step Status / Range | timeseries | Prometheus | Histogram-quantile `p95` workflow step duration by `step_kind` and `status`. | shared shell + `step_kind` + `step_status` | Quantile family and legend are the key mapping. |
 
+## PromQL Formula Anchors
+
+The shipped dashboard JSON remains the byte-level source of truth. The formulas
+below document the current Prometheus query families so this page is auditable
+without opening Grafana JSON for every panel.
+
+- `Status`:
+  `max(((round(sum(increase(bioetl_workflow_runs_total{workflow=~"$workflow",status="failed"}[$__range]))) > bool 0) * 2) or ((round(sum(increase(bioetl_workflow_step_events_total{workflow=~"$workflow",status="skipped"}[$__range]))) > bool 0) * 1) or ((round(sum(increase(bioetl_workflow_runs_total{workflow=~"$workflow",status!~"success|failed"}[$__range]))) > bool 0) * 1))`
+- `Pipeline Status`:
+  `max(bioetl_workflow_pipeline_verdict_status{pipeline=~"$pipeline_context",run_type=~"$run_type_context"}) or max(bioetl_runtime_current_status{pipeline=~"$pipeline",run_type=~"$run_type"})`
+- `Failed Workflow Runs / Range`:
+  `round(sum(increase(bioetl_workflow_runs_total{workflow=~"$workflow",status="failed"}[$__range]))) or vector(0)`
+- `Failed Pipeline Steps / Range`:
+  `round(sum(increase(bioetl_workflow_step_events_total{workflow=~"$workflow",step_kind="pipeline",status="failed"}[$__range]))) or vector(0)`
+- `Failed Entity Pipeline Runs / Range`:
+  `round(sum(increase(bioetl_pipeline_runs_total{pipeline=~"$pipeline_context",run_type=~"$run_type_context",status="failed"}[$__range]))) or vector(0)`
+- `Failed Transform Steps / Range`:
+  `round(sum(increase(bioetl_workflow_step_events_total{workflow=~"$workflow",step_kind="transform",status="failed"}[$__range]))) or vector(0)`
+- `Skipped Step Events / Range`:
+  `round(sum(increase(bioetl_workflow_step_events_total{workflow=~"$workflow",status="skipped"}[$__range]))) or vector(0)`
+- `Workflow Run Outcomes / Range`:
+  `sum by (status) (increase(bioetl_workflow_runs_total{workflow=~"$workflow",status=~"$status"}[$__range]))`
+- `Step Outcomes by Kind / Step Status / Range`:
+  `sum by (step_kind, status) (increase(bioetl_workflow_step_events_total{workflow=~"$workflow",step_kind=~"$step_kind",status=~"$step_status"}[$__range]))`
+- `Step Duration p95 by Kind / Step Status / Range`:
+  `histogram_quantile(0.95, sum by (le, step_kind, status) (max_over_time(bioetl_workflow_step_duration_seconds_bucket{workflow=~"$workflow",step_kind=~"$step_kind",status=~"$step_status"}[$__range])))`
+
 ## Notes
 
 - `Pipeline Status` intentionally merges workflow verdict status with runtime
@@ -55,4 +82,4 @@ is the source of truth.
   Prometheus metric panels.
 - Thresholds and value mappings not spelled out above should be taken from the
   shipped panel JSON; this page documents the panel inventory, datasource
-  family, and operator purpose 1:1.
+  family, primary PromQL formulas, and operator purpose 1:1.

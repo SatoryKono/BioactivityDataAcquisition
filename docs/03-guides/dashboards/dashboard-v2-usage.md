@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-15'
+  Last verified: '2026-07-07'
 
 ______________________________________________________________________
 
 # BioETL Dashboards v2: Usage
 
-Дата сверки: **2026-05-15**
+Дата сверки: **2026-07-07**
 Источник истины: `grafana/dashboards/*.json`
 
 Machine-readable navigation contract: `docs/03-guides/dashboards/contracts/navigation-links.yaml` (docs/tests должны соответствовать ему).
@@ -183,10 +183,12 @@ Explorer health probe and monitoring setup docs for that reason.
    `Inspect: Telemetry Missing`, while `Silver Reject Explorer` relies on
    explicit no-data/backend-failure copy instead of a generic datasource-health
    stat tile.
-1. `bioetl-runtime`, expanded row-группы по сценарию:
-   `Detect`, `Localize`, `Escalate`, `Tracing-only Log Hygiene`. Открывайте
-   ровно одну нужную группу после чтения answer row и selected-range KPI,
-   чтобы сократить шум первого экрана.
+1. `bioetl-runtime`, row-группы по сценарию:
+   `Detect`, `Localize`, `Escalate`. Optional `Tracing-only Log Hygiene`
+   collapsed by default because Loki/Tempo datasources are tracing-profile
+   evidence, not first-pass runtime health. Открывайте ровно одну нужную
+   группу после чтения answer row и selected-range KPI, чтобы сократить шум
+   первого экрана.
 1. `bioetl-control-plane-v1`, answer row:
    `Provenance`, `Status`, `ID`, `Processed Records`, then
    `Monitor: Replay Safety State`, `Inspect: Checkpoint Freshness Gap`,
@@ -220,12 +222,16 @@ Explorer health probe and monitoring setup docs for that reason.
   without claiming that the selected pipeline run succeeded. Provider Health
   remains provider-first; `$workflow/$pipeline/$run_type/$run_id` are shared
   shell context for HTTP identity/accounting cards, and `$run_id` must not be
-  introduced into Provider Health PromQL. `Status` is selected-provider scope;
-  `Monitor GLOBAL Provider Severity Matrix`, `Inspect Critical Providers`, and
-  `Inspect Provider Top Causes` are GLOBAL fleet posture and may disagree by
-  design. Shared `ID` и `Processed Records` cards на том же first screen
-  остаются bounded pipeline-context evidence и не доказывают current provider
-  health. `Inspect Provider Top Causes` может оставаться
+  introduced into Provider Health PromQL. `Status` is selected-provider scope
+  and renders as supporting scoped evidence rather than the visual owner of the
+  fleet answer; `Monitor GLOBAL Provider Severity Matrix`,
+  `Inspect Critical Providers`, and `Inspect Provider Top Causes` are GLOBAL
+  fleet posture and may disagree by design. Shared `ID` и `Processed Records`
+  cards на том же first screen остаются bounded pipeline-context evidence и не
+  доказывают current provider health. `First Action` spells out this read order:
+  GLOBAL severity, telemetry freshness, critical providers/top causes, then
+  selected-provider supporting evidence. `Inspect Provider Top Causes` может
+  оставаться
    непустой даже при `GLOBAL severity = OK`, потому что canonical cause
    projection включает early-warning provider signals независимо от
    current-status projection; это diagnostic lead, а не самостоятельное
@@ -234,6 +240,10 @@ Explorer health probe and monitoring setup docs for that reason.
    empty table; это explainability gap, а не healthy state. В таком случае
    расследование нужно продолжать по severity matrix и optional provider
    diagnostics, а не трактовать пустую таблицу как отсутствие инцидента.
+   Optional latency, adapter, rate-limit, and circuit-breaker panels remain
+   expanded by dashboard contract but are compact two-row diagnostics; no-data
+   in those panels does not refute current provider severity and should not
+   dominate the first-screen verdict path.
    `First Action` is the bounded CTA surface for this dashboard: review the
    severity matrix, inspect critical providers, or inspect provider top causes
    before leaving the page.
@@ -249,8 +259,9 @@ Explorer health probe and monitoring setup docs for that reason.
    `Monitor: Worst-Entity DQ Score`, `Monitor: Worst Data Freshness Lag (seconds)`,
    `Track: Records Quarantined in Range`, `Track: Soft Threshold Exceeded in Range`
    и `Track: Silver Filter Rejects in Range`. `Review: Latest Successful Data Timestamp`
-   остаётся отдельным supporting freshness anchor на первом экране и не должен
-   визуально читаться как verdict card. Полноширинный
+   остаётся отдельным supporting freshness anchor на первом экране, берёт latest
+   sample из выбранного Grafana range и не должен визуально читаться как verdict
+   card. Полноширинный
    `Track Range Evidence: Bronze -> Silver -> Gold` идёт ниже как
    `Review: First Action` stays the canonical DQ CTA: review current status,
    inspect current reasons, or open `Silver Reject Explorer` without leaking
@@ -584,7 +595,9 @@ Variable handoff policy for dashboard links remains strict and bounded:
   `Inspect Warning Logs`, `Inspect GLOBAL Unstructured Logs`,
   `Inspect Top Warning Events by Event / Logger / Range` и
   `Track GLOBAL Log Hygiene Trend`. Это optional tracing-profile evidence, а
-  не first-screen status. Log panels используют активный Grafana time range;
+  не first-screen status; row collapsed by default in the canonical dashboard
+  to avoid datasource warning noise when the optional tracing profile is not
+  enabled. Log panels используют активный Grafana time range;
   unstructured parser-error panel intentionally renders parsed `.__error__`;
   Prometheus condition-summary panels в runtime используют shipped fixed-window
   recording rules и не зависят от `$__range`; freshness handoff is explicitly

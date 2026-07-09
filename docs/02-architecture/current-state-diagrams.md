@@ -33,7 +33,8 @@ Evidence anchors:
   `configs/workflows/*.yaml`.
 - Pipeline/config model:
   `configs/entities/**/*.yaml`, `configs/composites/*.yaml`,
-  `configs/contracts/**/*.yaml`.
+  entity data contracts under `configs/contracts/{provider}/*.yaml`, and the
+  separate error catalog at `configs/contracts/errors/error_catalog.yaml`.
 - Observability:
   `src/bioetl/infrastructure/observability/`, `grafana/dashboards/*.json`,
   `grafana/prometheus-rules/*.yml`.

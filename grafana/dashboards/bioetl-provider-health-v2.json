@@ -28,7 +28,7 @@
       },
       "id": 1000,
       "options": {
-        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><span aria-current=\"page\" style=\"padding:5px 10px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">3. Provider Health</span><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/explore?actionView=search&amp;from=now-150m&amp;to=now&amp;var-ds=tempo&amp;var-groupBy=resource.service.name&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.provider%22%20%3D~%20%22${provider:regex}%22%20%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
+        "content": "<div style=\"display:flex;gap:6px;flex-wrap:nowrap;align-items:center;padding:4px 6px;overflow:hidden;white-space:nowrap;font-size:12px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><span aria-current=\"page\" style=\"padding:3px 7px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">3. Provider Health</span><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/explore?actionView=search&amp;from=now-150m&amp;to=now&amp;var-ds=tempo&amp;var-groupBy=resource.service.name&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.provider%22%20%3D~%20%22${provider:regex}%22%20%7D\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
@@ -103,7 +103,7 @@
       "description": "Unified context/provenance banner for 3. Provider Health. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only. Provider health is owned by provider-status telemetry, while ID and Processed Records below are bounded pipeline-context evidence only.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.45;\"><div style=\"font-size:18px;font-weight:700;\">Which provider is degraded or failing, and why?<br><strong>Global provider posture is shown separately from selected provider context.</strong></div><div style=\"margin-top:6px;font-size:12px;opacity:0.85;\"><strong>Provider-global selected-range:</strong> adapter latency and HTTP error panels aggregate by provider and do not filter by run_id/run_type in PromQL. For backfill-specific stage latency or exact-run identity, open <strong>2. Runtime</strong> or <strong>0. Control Plane</strong> with preserved scope.</div></div>"
+        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.45;\"><div style=\"font-size:18px;font-weight:700;\">Which provider is degraded or failing, and why?<br><strong>Start with GLOBAL severity + telemetry freshness; selected-provider Status can disagree by design.</strong></div><div style=\"margin-top:6px;font-size:12px;opacity:0.85;\"><strong>Provider-global selected-range:</strong> adapter latency and HTTP error panels aggregate by provider and do not filter by run_id/run_type in PromQL. For backfill-specific stage latency or exact-run identity, open <strong>2. Runtime</strong> or <strong>0. Control Plane</strong> with preserved scope.</div></div>"
       }
     },
     {
@@ -120,13 +120,14 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Selected-range provider-first severity for the selected provider. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Uses bioetl_provider_current_status and bioetl_provider_range_operational_ok inside the active Grafana time range (default Last 12 hours). Operational OK is projected when health-check or adapter request counters show successful provider activity without failures or HTTP errors in range; it does not prove the currently selected pipeline run succeeded, but it prevents UNKNOWN after successful provider operations in range. If both series are absent, UNKNOWN remains fail-closed; inspect Monitor Provider Telemetry Freshness and Review Raw Provider Health Enum. Pipeline/run_type/workflow are secondary context only; run_id does not filter Prometheus. This compact Status is selected-provider scope; GLOBAL Provider Severity Matrix and Critical Providers are global fleet posture and may disagree by design. Do not compare the selected-provider OK card to a GLOBAL WARN/CRIT panel without reading the scope labels.",
+      "description": "Selected-range provider-first severity for the selected provider. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Uses bioetl_provider_current_status and bioetl_provider_range_operational_ok inside the active Grafana time range (default Last 12 hours). Operational OK is projected when health-check or adapter request counters show successful provider activity without failures or HTTP errors in range; it does not prove the currently selected pipeline run succeeded, but it prevents UNKNOWN after successful provider operations in range. If both series are absent, UNKNOWN remains fail-closed; inspect Monitor Provider Telemetry Freshness and Review Raw Provider Health Enum. Pipeline/run_type/workflow are secondary context only; run_id does not filter Prometheus. This compact Status is selected-provider scope and is intentionally rendered as a supporting selected-provider verdict, not as the visual owner of the fleet answer. GLOBAL Provider Severity Matrix and Critical Providers are global fleet posture and may disagree by design. Do not compare the selected-provider OK card to a GLOBAL WARN/CRIT panel without reading the scope labels.",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
           "decimals": 0,
+          "displayName": "Selected Provider Verdict",
           "mappings": [
             {
               "type": "value",
@@ -183,7 +184,7 @@
         "overrides": []
       },
       "options": {
-        "colorMode": "background",
+        "colorMode": "value",
         "dataLinks": [
           {
             "title": "Inspect Provider Telemetry Freshness",
@@ -211,7 +212,7 @@
           }
         ],
         "graphMode": "none",
-        "justifyMode": "auto",
+        "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
@@ -220,7 +221,7 @@
           "fields": "",
           "values": false
         },
-        "textMode": "value"
+        "textMode": "value_and_name"
       },
       "targets": [
         {
@@ -265,13 +266,57 @@
             }
           ]
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "parameter"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 165
+              },
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          }
+        ]
       },
       "options": {
-        "showHeader": false,
+        "showHeader": true,
         "footer": {
           "show": false
-        }
+        },
+        "cellHeight": "sm"
       },
       "targets": [
         {
@@ -409,6 +454,10 @@
                 "value": {
                   "type": "color-text"
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 165
               }
             ]
           },
@@ -718,7 +767,7 @@
         ]
       },
       "options": {
-        "showHeader": false,
+        "showHeader": true,
         "sortBy": [
           {
             "desc": false,
@@ -1104,6 +1153,7 @@
             "mode": "thresholds"
           },
           "decimals": 0,
+          "displayName": "Telemetry Freshness",
           "mappings": [
             {
               "type": "value",
@@ -1175,8 +1225,8 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value",
-        "wideLayout": true
+        "textMode": "value_and_name",
+        "wideLayout": false
       },
       "pluginVersion": "10.4.0",
       "targets": [
@@ -1195,7 +1245,7 @@
       "id": 9002,
       "type": "text",
       "title": "First Action",
-      "description": "First operator CTA for global provider incidents and early-warning provider causes. Start with the current severity matrix, then inspect critical providers and top causes. If Status is UNKNOWN, treat that as missing provider-current-status evidence until telemetry freshness and raw enum evidence say otherwise. Use this after the current answer row; selected-range latency/error evidence stays below and downstream Runtime or Control Plane follow-up depends on the diagnosed cause.",
+      "description": "First operator CTA for global provider incidents and early-warning provider causes. Start with the current GLOBAL severity matrix, then telemetry freshness, then critical providers and top causes. Treat selected-provider Status as supporting scoped evidence; if Status is UNKNOWN, treat that as missing provider-current-status evidence until telemetry freshness and raw enum evidence say otherwise. Use this after the current answer row; selected-range latency/error evidence stays below and downstream Runtime or Control Plane follow-up depends on the diagnosed cause.",
       "gridPos": {
         "h": 10,
         "w": 8,
@@ -1203,7 +1253,7 @@
         "y": 7
       },
       "options": {
-        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\"><strong>First action:</strong> start with the GLOBAL severity matrix, then inspect critical providers and top causes. If <strong>Status = UNKNOWN</strong>, treat that as a telemetry-gap hypothesis first: inspect <strong>Monitor Provider Telemetry Freshness</strong>, then <strong>Review Raw Provider Health Enum</strong>, before assuming the provider is healthy or degraded. The shared <strong>ID</strong> and <strong>Processed Records</strong> cards stay bounded to pipeline context and do not prove current provider health. If top causes are visible while GLOBAL severity still reads OK, treat that as an early-warning provider lead rather than proof of a current degraded/failing provider: confirm raw provider status first, then inspect selected-range latency/error evidence before escalating. If the top-cause table stays empty while severity is non-OK, treat that as a provider explainability gap: confirm raw provider status, then inspect optional rate-limit/circuit-breaker panels before leaving the page. If cause is retry/rate-limit/circuit-breaker, inspect control-plane safety before replay. If cause is latency/errors, correlate with Runtime impact, then logs/traces from the runtime or DQ dashboards.</div>",
+        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.45\"><strong>Read order:</strong><ol style=\"margin:0.25rem 0 0 1.1rem;padding:0;\"><li><strong>GLOBAL severity matrix</strong> is the fleet verdict owner.</li><li><strong>Telemetry freshness</strong> explains UNKNOWN/no-data before health assumptions.</li><li><strong>Critical providers</strong> and <strong>top causes</strong> explain current/early-warning provider risk.</li><li><strong>Status</strong> and <strong>raw enum</strong> are selected-provider supporting evidence and can disagree with GLOBAL scope by design.</li></ol><div style=\"margin-top:0.35rem;\">If top causes are visible while GLOBAL severity still reads OK, treat that as an early-warning provider lead. If causes are empty while severity is non-OK, inspect optional rate-limit/circuit-breaker evidence before leaving the page.</div></div>",
         "mode": "html"
       },
       "links": [
@@ -1268,7 +1318,8 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "s",
+          "noValue": "No provider latency samples in range. This optional telemetry is neutral; use severity, freshness, and raw enum panels for provider verdict."
         },
         "overrides": []
       },
@@ -1286,7 +1337,8 @@
             "mean"
           ],
           "displayMode": "table",
-          "placement": "bottom"
+          "placement": "bottom",
+          "showLegend": false
         },
         "tooltip": {
           "mode": "multi",
@@ -2003,7 +2055,7 @@
     },
     {
       "collapsed": false,
-      "description": "Detailed provider evidence intended for one provider or a bounded provider subset.",
+      "description": "Compact optional selected-provider telemetry. Expanded by repository dashboard contract, but intentionally kept short so empty latency, adapter, rate-limit, and circuit-breaker samples do not dominate the provider verdict.",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -2049,6 +2101,7 @@
             ]
           },
           "unit": "s",
+          "noValue": "No optional health-check latency samples in range; not a provider verdict.",
           "mappings": [
             {
               "type": "special",
@@ -2065,8 +2118,8 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 24,
+        "h": 4,
+        "w": 6,
         "x": 0,
         "y": 63
       },
@@ -2092,7 +2145,7 @@
       ],
       "title": "Inspect Provider Health Check Latency (p95) - $provider",
       "type": "gauge",
-      "description": "Selected-range evidence: per-provider p95 health-check latency over the active Grafana range. No data means no latency samples or no probe activity in range, not 0s latency."
+      "description": "Compact optional selected-range evidence: per-provider p95 health-check latency over the active Grafana range. No data means no latency samples or no probe activity in range, not 0s latency and not a provider verdict."
     },
     {
       "datasource": {
@@ -2128,6 +2181,7 @@
             ]
           },
           "unit": "s",
+          "noValue": "No optional adapter latency samples in range; not a provider verdict.",
           "links": [
             {
               "targetBlank": false,
@@ -2146,10 +2200,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 14,
-        "w": 12,
-        "x": 0,
-        "y": 71
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 63
       },
       "id": 110,
       "options": {
@@ -2157,7 +2211,7 @@
           "calcs": [
             "max"
           ],
-          "displayMode": "list",
+          "displayMode": "hidden",
           "placement": "bottom"
         },
         "tooltip": {
@@ -2174,7 +2228,7 @@
       ],
       "title": "Inspect Adapter Request Latency by Endpoint (p95)",
       "type": "timeseries",
-      "description": "Selected-range evidence: p95 adapter request latency by endpoint for the selected provider scope. Provider-global selected-range only; for backfill-specific stage latency open 2. Runtime with preserved pipeline/run_type/run_id scope. No data remains diagnostic and means no endpoint latency samples in range."
+      "description": "Compact optional selected-range evidence: p95 adapter request latency by endpoint for the selected provider scope. Provider-global selected-range only; for backfill-specific stage latency open 2. Runtime with preserved pipeline/run_type/run_id scope. No data remains diagnostic and means no endpoint latency samples in range; it does not refute current provider severity."
     },
     {
       "datasource": {
@@ -2223,15 +2277,16 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "noValue": "No optional rate-limit error samples in range; not a provider verdict."
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 14,
-        "w": 12,
+        "h": 4,
+        "w": 6,
         "x": 12,
-        "y": 71
+        "y": 63
       },
       "id": 111,
       "options": {
@@ -2239,7 +2294,7 @@
           "calcs": [
             "sum"
           ],
-          "displayMode": "list",
+          "displayMode": "hidden",
           "placement": "bottom"
         },
         "tooltip": {
@@ -2256,7 +2311,7 @@
       ],
       "title": "Inspect Rate Limit Errors by Method",
       "type": "timeseries",
-      "description": "Selected-range rate-limit pressure from HTTP errors where error_type indicates throttling/rate-limit classes. Use alongside Monitor Rate Limiter Wait p95 for provider-global scope."
+      "description": "Compact optional selected-range rate-limit pressure from HTTP errors where error_type indicates throttling/rate-limit classes. Empty samples stay diagnostic and do not refute current provider severity. Use alongside Monitor Rate Limiter Wait p95 for provider-global scope."
     },
     {
       "datasource": {
@@ -2297,15 +2352,16 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "noValue": "No optional timeout/network samples in range; not a provider verdict."
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 14,
-        "w": 12,
-        "x": 0,
-        "y": 85
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 63
       },
       "id": 115,
       "options": {
@@ -2313,7 +2369,7 @@
           "calcs": [
             "sum"
           ],
-          "displayMode": "list",
+          "displayMode": "hidden",
           "placement": "bottom"
         },
         "tooltip": {
@@ -2330,7 +2386,7 @@
       ],
       "title": "Inspect Network Timeout Errors by Method",
       "type": "timeseries",
-      "description": "Selected-range network/timeout failures separated from rate-limit pressure. Provider-global scope; correlate with Runtime stage errors when pipeline handoff context is set."
+      "description": "Compact optional selected-range network/timeout failures separated from rate-limit pressure. Empty samples stay diagnostic and do not refute current provider severity. Provider-global scope; correlate with Runtime stage errors when pipeline handoff context is set."
     },
     {
       "datasource": {
@@ -2383,15 +2439,16 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "s",
+          "noValue": "No optional rate-limiter wait samples in range; not a provider verdict."
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 4,
+        "w": 6,
         "x": 0,
-        "y": 99
+        "y": 67
       },
       "id": 112,
       "options": {
@@ -2399,7 +2456,7 @@
           "calcs": [
             "max"
           ],
-          "displayMode": "table",
+          "displayMode": "hidden",
           "placement": "bottom"
         },
         "tooltip": {
@@ -2416,7 +2473,7 @@
       ],
       "title": "Track Rate Limiter Wait by Provider (p95)",
       "type": "timeseries",
-      "description": "Selected-range evidence: p95 wait time imposed by provider rate limiting. No data means no observed wait samples in range, not a healthy wait time. This optional telemetry can stay empty even when current provider severity is non-OK. The provider degraded-rule surface starts at p95 > 1s; this panel keeps a lower yellow band for earlier-warning inspection."
+      "description": "Compact optional selected-range evidence: p95 wait time imposed by provider rate limiting. No data means no observed wait samples in range, not a healthy wait time. This optional telemetry can stay empty even when current provider severity is non-OK. The provider degraded-rule surface starts at p95 > 1s; this panel keeps a lower yellow band for earlier-warning inspection."
     },
     {
       "datasource": {
@@ -2464,10 +2521,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 99
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 67
       },
       "id": 113,
       "options": {
@@ -2491,7 +2548,7 @@
       ],
       "title": "Monitor Minimum Rate Limiter Tokens Available",
       "type": "bargauge",
-      "description": "Selected-range evidence: minimum provider tokens available in the active Grafana range. Lower values indicate higher rate-limit pressure; 0 means requests can be blocked. No data remains diagnostic and means no token samples were observed in range. This optional telemetry can stay empty even when current provider severity is non-OK."
+      "description": "Compact optional selected-range evidence: minimum provider tokens available in the active Grafana range. Lower values indicate higher rate-limit pressure; 0 means requests can be blocked. No data remains diagnostic and means no token samples were observed in range. This optional telemetry can stay empty even when current provider severity is non-OK."
     },
     {
       "datasource": {
@@ -2539,10 +2596,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 107
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 67
       },
       "id": 31,
       "options": {
@@ -2567,7 +2624,7 @@
       ],
       "title": "Monitor Cross-Scope Adapter Circuit Breaker State (max)",
       "type": "stat",
-      "description": "Cross-scope adapter diagnostics over the active Grafana range: 0=CLOSED, 1=HALF_OPEN, 2=OPEN. Uses the adapter selector because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not imply a synthetic CLOSED state. This adapter-scoped telemetry can stay empty even when current provider severity is non-OK."
+      "description": "Compact cross-scope adapter diagnostics over the active Grafana range: 0=CLOSED, 1=HALF_OPEN, 2=OPEN. Uses the adapter selector because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not imply a synthetic CLOSED state. This adapter-scoped telemetry can stay empty even when current provider severity is non-OK."
     },
     {
       "datasource": {
@@ -2614,10 +2671,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 107
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 67
       },
       "id": 32,
       "options": {
@@ -2626,7 +2683,7 @@
             "sum",
             "max"
           ],
-          "displayMode": "list",
+          "displayMode": "hidden",
           "placement": "bottom"
         },
         "tooltip": {
@@ -2643,7 +2700,7 @@
       ],
       "title": "Track Cross-Scope Adapter Circuit Breaker Trips",
       "type": "timeseries",
-      "description": "Cross-scope adapter diagnostics: selected-range circuit-breaker trip count by adapter over the active Grafana interval. This panel is intentionally adapter-scoped because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not create synthetic adapter rows. Empty adapter telemetry does not refute current provider severity on its own."
+      "description": "Compact cross-scope adapter diagnostics: selected-range circuit-breaker trip count by adapter over the active Grafana interval. This panel is intentionally adapter-scoped because the shipped metric family is adapter-labelled rather than provider-labelled. No data remains diagnostic and does not create synthetic adapter rows. Empty adapter telemetry does not refute current provider severity on its own."
     }
   ],
   "refresh": "30s",

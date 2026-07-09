@@ -927,6 +927,34 @@ class TestGoldWriterRead:
         assert len(result) == 1
         assert result[0]["value"] == pytest.approx(7.2)
 
+    @patch("bioetl.infrastructure.storage.gold_writer.DeltaTable")
+    async def test_read_gold_filters_current_only_with_configured_current_flag(
+        self,
+        mock_delta_table,
+        gold_writer,
+    ):
+        """Test read_gold filters current records when _is_current exists."""
+
+        mock_table_instance = MagicMock()
+        mock_delta_table.return_value = mock_table_instance
+        mock_arrow_table = pa.table(
+            {
+                "entity_id": ["CHEMBL123", "CHEMBL123"],
+                "value": [5.5, 7.2],
+                "_is_current": [False, True],
+            }
+        )
+        mock_table_instance.to_pyarrow_table.return_value = mock_arrow_table
+
+        result = await gold_writer.read_gold(
+            "test.table",
+            columns=["entity_id", "value"],
+            current_only=True,
+        )
+
+        assert result == [{"entity_id": "CHEMBL123", "value": 7.2}]
+        mock_table_instance.to_pyarrow_table.assert_called_once_with()
+
 
 @pytest.mark.unit
 class TestGoldWriterHistory:

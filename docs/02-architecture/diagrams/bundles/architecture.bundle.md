@@ -1,10 +1,11 @@
 # BioETL Architecture Diagrams Bundle
 
-- Generated: 2026-06-15T21:08:28
-- Diagram count: 82
+- Generated: 2026-07-06T11:30:20
+- Diagram count: 83
 
 ## Table of Contents
 
+- [01-high-level-hexagonal-simple — Simplified High-Level Hexagonal Architecture](#01-high-level-hexagonal-simple)
 - [01-high-level-hexagonal — High-Level Hexagonal Architecture](#01-high-level-hexagonal)
 - [01a-hexagonal-overview — Hexagonal Overview](#01a-hexagonal-overview)
 - [01b-hexagonal-domain-app — Hexagonal Domain and Application](#01b-hexagonal-domain-app)
@@ -74,7 +75,7 @@
 - [33-pipeline-service-bundle-and-runner-dependencies — Pipeline Service Bundle And Runner Dependencies](#33-pipeline-service-bundle-and-runner-dependencies)
 - [34-pipelinerun-aggregate-stage-result-and-terminal-transition-model — PipelineRun Aggregate Stage Result And Terminal Transition Model](#34-pipelinerun-aggregate-stage-result-and-terminal-transition-model)
 - [35-batch-aggregate-seal-write-commit-failure-lifecycle — Batch Aggregate Seal Write Commit Failure Lifecycle](#35-batch-aggregate-seal-write-commit-failure-lifecycle)
-- [36-quarantine-entry-review-resolution-and-discard-flow — Quarantine Entry Review Resolution And Discard Flow](#36-quarantine-entry-review-resolution-and-discard-flow)
+- [36-quarantine-entry-review-resolution-and-discard-flow — Quarantine Entry Review And Resolution Flow](#36-quarantine-entry-review-resolution-and-discard-flow)
 - [37-observability-bootstrap-bundle-from-settings-to-ports — Observability Bootstrap Bundle From Settings To Ports](#37-observability-bootstrap-bundle-from-settings-to-ports)
 - [38-chembl-bronze-activity-extraction-to-artifact-publication — ChEMBL Activity Extraction To Bronze Artifact Publication](#38-chembl-bronze-activity-extraction-to-artifact-publication)
 - [39-crossref-search-fallback-and-batch-doi-fetch-publications — CrossRef Publication Search Fallback And Batch DOI Fetch](#39-crossref-search-fallback-and-batch-doi-fetch-publications)
@@ -87,6 +88,25 @@
 - [46-filter-config-resolution-and-column-filter-evaluation — Filter Config Resolution And Column Filter Evaluation](#46-filter-config-resolution-and-column-filter-evaluation)
 - [47-run-manifest-domain-model-and-serialization-surface — Run Manifest Domain Model And Serialization Surface](#47-run-manifest-domain-model-and-serialization-surface)
 - [48-effective-config-artifact-domain-model — Effective Config Artifact Domain Model](#48-effective-config-artifact-domain-model)
+
+\newpage
+
+<div style="page-break-before: always;"></div>
+
+## 01-high-level-hexagonal-simple
+
+**Simplified High-Level Hexagonal Architecture**
+
+*SVG/PNG не найдены: `../architecture/svg/01-high-level-hexagonal-simple.svg`, `../architecture/png/01-high-level-hexagonal-simple.png`*
+
+### Описание
+Диаграмма «Simplified High-Level Hexagonal Architecture» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «System / Component». В комментариях исходника зафиксирован фокус диаграммы: Simplified overview of Ports & Adapters pattern with essential layers only.. Схема имеет плотность порядка 13 узлов и 15 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: External Systems, Interfaces Layer, Composition Layer, Application Layer, Domain Layer, Infrastructure Layer. Показательные узлы для быстрого чтения: External APIs (ChEMBL, PubMed, UniProt, etc.), File System (Delta Lake / Parquet), Observability (Prometheus, OpenTelemetry), CLI Commands, Bootstrap / Assembly, Core Pipeline (Executor, Transformer, Writer). Примечание: Simplified version of 01-high-level-hexagonal.mmd (46 nodes → 13 nodes).
+
+### Метаданные
+- Тип: `flowchart`
+- Уровень: `System / Component`
+- Дата: `2026-07-03`
+- Узлы (metadata): `13`
 
 \newpage
 
@@ -1395,17 +1415,17 @@
 
 ## 36-quarantine-entry-review-resolution-and-discard-flow
 
-**Quarantine Entry Review Resolution And Discard Flow**
+**Quarantine Entry Review And Resolution Flow**
 
 *SVG/PNG не найдены: `../architecture/svg/36-quarantine-entry-review-resolution-and-discard-flow.svg`, `../architecture/png/36-quarantine-entry-review-resolution-and-discard-flow.png`*
 
 ### Описание
-Диаграмма «Quarantine Entry Review Resolution And Discard Flow» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате диаграмма состояний (state diagram) и служит ориентиром на уровне детализации «Domain / Aggregate». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%.
+Диаграмма «Quarantine Entry Review And Resolution Flow» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате диаграмма состояний (state diagram) и служит ориентиром на уровне детализации «Domain / Aggregate». В комментариях исходника зафиксирован фокус диаграммы: {init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%.
 
 ### Метаданные
 - Тип: `stateDiagram`
 - Уровень: `Domain / Aggregate`
-- Дата: `2026-05-12`
+- Дата: `2026-07-06`
 
 \newpage
 

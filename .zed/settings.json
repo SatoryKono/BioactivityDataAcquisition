@@ -1,0 +1,260 @@
+{
+  "format_on_save": "on",
+  "tab_size": 4,
+  "preferred_line_length": 88,
+  "soft_wrap": "preferred_line_length",
+  "autosave": "after_delay",
+  "autosave_delay_ms": 1000,
+  "languages": {
+    "Python": {
+      "format_on_save": "on",
+      "formatter": {
+        "language_server": {
+          "name": "ruff"
+        }
+      },
+      "code_actions_on_format": {
+        "source.organizeImports.ruff": true,
+        "source.fixAll.ruff": true
+      },
+      "language_servers": ["basedpyright", "ruff", "!pylsp"],
+      "indent_style": "space",
+      "tab_size": 4
+    },
+    "YAML": {
+      "format_on_save": "on",
+      "formatter": "language_server"
+    },
+    "Markdown": {
+      "format_on_save": "off",
+      "soft_wrap": "preferred_line_length",
+      "preferred_line_length": 88
+    },
+    "JSON": {
+      "format_on_save": "on",
+      "formatter": "language_server"
+    }
+  },
+  "lsp": {
+    "ruff": {
+      "initialization_options": {
+        "settings": {
+          "lineLength": 88,
+          "targetVersion": "py312",
+          "lint": {
+            "select": [
+              "E",
+              "W",
+              "F",
+              "FA",
+              "I",
+              "B",
+              "C4",
+              "UP",
+              "ARG",
+              "SIM",
+              "PTH",
+              "RUF",
+              "T201"
+            ],
+            "ignore": [
+              "RUF001",
+              "RUF002",
+              "RUF003"
+            ]
+          },
+          "format": {
+            "lineLength": 88
+          }
+        }
+      }
+    },
+    "basedpyright": {
+      "initialization_options": {
+        "analysis": {
+          "typeCheckingMode": "strict",
+          "pythonVersion": "3.12",
+          "autoSearchPaths": true,
+          "useLibraryCodeForTypes": true,
+          "diagnosticMode": "workspace",
+          "stubPath": "src"
+        }
+      }
+    }
+  },
+  "terminal": {
+    "env": {
+      "PYTHONPATH": "src;.",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "font_family": "JetBrains Mono",
+    "font_size": 14,
+    "line_height": "comfortable"
+  },
+  "vim_mode": false,
+  "context_servers": {
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory@2026.1.26"],
+      "env": {
+        "NPM_CONFIG_CACHE": ".cache/npm-cache",
+        "MEMORY_FILE_PATH": "docs/00-project/ai/memory/mcp-memory.json"
+      }
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem@2026.1.14", "."],
+      "env": {
+        "NPM_CONFIG_CACHE": ".cache/npm-cache"
+      }
+    },
+    "fetch": {
+      "command": "uvx",
+      "args": ["--from", "mcp-server-fetch==2025.4.7", "mcp-server-fetch"],
+      "env": {
+        "UV_CACHE_DIR": ".cache/uv-cache",
+        "UV_TOOL_DIR": ".cache/uv-tools"
+      }
+    },
+    "biomoltechDocs": {
+      "url": "https://biomoltech.mintlify.app/mcp"
+    },
+    "mintlify": {
+      "url": "https://mcp.mintlify.com"
+    },
+    "deepwiki": {
+      "url": "https://mcp.deepwiki.com/mcp"
+    }
+  },
+  "agent": {
+    "auto_compact": {
+      "enabled": true,
+      "threshold": "90%"
+    },
+    "profiles": {
+      "bioetl-ask": {
+        "name": "BioETL Ask",
+        "tools": {
+          "diagnostics": true,
+          "fetch": true,
+          "find_path": true,
+          "grep": true,
+          "list_directory": true,
+          "read_file": true,
+          "search_web": true,
+          "copy_path": false,
+          "create_directory": false,
+          "delete_path": false,
+          "edit_file": false,
+          "move_path": false,
+          "skill": false,
+          "spawn_agent": false,
+          "terminal": false,
+          "write_file": false
+        },
+        "enable_all_context_servers": false,
+        "context_servers": {}
+      },
+      "bioetl-write": {
+        "name": "BioETL Write",
+        "tools": {
+          "diagnostics": true,
+          "fetch": true,
+          "find_path": true,
+          "grep": true,
+          "list_directory": true,
+          "read_file": true,
+          "search_web": true,
+          "copy_path": true,
+          "create_directory": true,
+          "delete_path": false,
+          "edit_file": true,
+          "move_path": true,
+          "skill": true,
+          "spawn_agent": false,
+          "terminal": true,
+          "write_file": true
+        },
+        "enable_all_context_servers": true,
+        "context_servers": {}
+      }
+    },
+    "tool_permissions": {
+      "default": "allow",
+      "tools": {
+        "terminal": {
+          "default": "allow",
+          "always_deny": [
+            { "pattern": "\\brm\\s+-rf\\s+(/|~|\\.|\\.\\.|\\*)" },
+            { "pattern": "\\bsudo\\s+rm\\b" }
+          ],
+          "always_confirm": [
+            { "pattern": "\\bgit\\s+push\\b" },
+            { "pattern": "\\bsudo\\b" }
+          ]
+        },
+        "edit_file": {
+          "default": "allow",
+          "always_deny": [
+            { "pattern": "(^|/)\\.env(\\.|$|/)" },
+            { "pattern": "(^|/)secrets?/" },
+            { "pattern": "\\.(pem|key)$" }
+          ]
+        },
+        "write_file": {
+          "default": "allow",
+          "always_deny": [
+            { "pattern": "(^|/)\\.env(\\.|$|/)" },
+            { "pattern": "(^|/)secrets?/" },
+            { "pattern": "\\.(pem|key)$" }
+          ]
+        },
+        "delete_path": {
+          "default": "allow",
+          "always_deny": [
+            { "pattern": "(^|/)\\.git(/|$)" },
+            { "pattern": "(^|/)\\.env(\\.|$|/)" },
+            { "pattern": "(^|/)secrets?/" }
+          ]
+        },
+        "move_path": {
+          "default": "allow",
+          "always_deny": [
+            { "pattern": "(^|/)\\.git(/|$)" },
+            { "pattern": "(^|/)\\.env(\\.|$|/)" },
+            { "pattern": "(^|/)secrets?/" }
+          ]
+        },
+        "copy_path": {
+          "default": "allow",
+          "always_deny": [
+            { "pattern": "(^|/)\\.env(\\.|$|/)" },
+            { "pattern": "(^|/)secrets?/" }
+          ]
+        },
+        "create_directory": {
+          "default": "allow"
+        },
+        "fetch": {
+          "default": "allow"
+        },
+        "search_web": {
+          "default": "allow"
+        },
+        "skill": {
+          "default": "allow"
+        }
+      }
+    }
+  },
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
+  },
+  "show_sign_in": true,
+  "ui_font_family": "JetBrains Mono",
+  "ui_font_size": 14,
+  "buffer_font_family": "JetBrains Mono",
+  "buffer_font_size": 14,
+  "buffer_line_height": "comfortable"
+}

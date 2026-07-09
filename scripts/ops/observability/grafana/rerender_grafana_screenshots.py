@@ -8,7 +8,8 @@ import json
 import os
 import shutil
 import subprocess
-from dataclasses import asdict, dataclass
+import time
+from dataclasses import asdict, dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
@@ -31,6 +32,7 @@ DEFAULT_TOOL_PLAYWRIGHT_BROWSERS = Path("/tmp/playwright-browsers")
 LOCAL_PLAYWRIGHT_LIB_DIR = Path(
     ".cache/grafana-screenshot-runtime/root/usr/lib/x86_64-linux-gnu"
 )
+DEFAULT_MIN_PLAYWRIGHT_SCREENSHOT_BYTES = 100_000
 
 
 @dataclass(frozen=True)
@@ -333,6 +335,7 @@ def _render_dashboard(record: DashboardRecord, config: RenderConfig) -> Path:
             "width": config.width,
             "height": config.height,
             "tz": "UTC",
+            "timeout": max(int(config.timeout_seconds), 1),
             **_scope_query_params(config),
         }
     )
@@ -492,6 +495,9 @@ def _playwright_env(config: RenderConfig) -> dict[str, str]:
     env["GRAFANA_SCREENSHOT_CAPTURE_TIMEOUT_MS"] = str(
         max(int(config.timeout_seconds * 1000), 180000)
     )
+    env["GRAFANA_SCREENSHOT_SETTLE_MS"] = os.environ.get(
+        "GRAFANA_SCREENSHOT_SETTLE_MS", "12000"
+    )
     if config.selected_uids:
         env["GRAFANA_SCREENSHOT_UIDS"] = ",".join(config.selected_uids)
     scope_query = urlencode(_scope_query_params(config))
@@ -501,7 +507,7 @@ def _playwright_env(config: RenderConfig) -> dict[str, str]:
     return env
 
 
-def _run_playwright_fallback(config: RenderConfig) -> int:
+def _run_playwright_process(config: RenderConfig) -> int:
     script_path = _playwright_script_path()
     if not script_path.exists():
         print(f"Playwright fallback script not found: {script_path}")
@@ -535,6 +541,123 @@ def _run_playwright_fallback(config: RenderConfig) -> int:
         print(f"Playwright fallback failed to launch: {exc}")
         return 1
     return result.returncode
+
+
+def _read_playwright_manifest(path: Path) -> dict[str, Any]:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"Could not read Playwright render manifest {path}: {exc}") from exc
+    if not isinstance(payload, dict):
+        raise RuntimeError(f"Playwright render manifest {path} is not a JSON object")
+    return payload
+
+
+def _write_merged_playwright_manifest(
+    config: RenderConfig, manifests: list[dict[str, Any]]
+) -> None:
+    dashboards: list[dict[str, Any]] = []
+    for manifest in manifests:
+        manifest_dashboards = manifest.get("dashboards", [])
+        if isinstance(manifest_dashboards, list):
+            dashboards.extend(
+                item for item in manifest_dashboards if isinstance(item, dict)
+            )
+
+    scope_query = urlencode(_scope_query_params(config))
+    capture_timeout_ms = max(int(config.timeout_seconds * 1000), 180000)
+    merged = {
+        "generated_at": datetime.now(tz=UTC).isoformat(),
+        "engine": "playwright",
+        "base_url": config.base_url,
+        "scope_query": scope_query,
+        "timeout_ms": int(config.timeout_seconds * 1000),
+        "capture_timeout_ms": capture_timeout_ms,
+        "expand_collapsed_rows": os.getenv(
+            "GRAFANA_SCREENSHOT_EXPAND_COLLAPSED_ROWS", ""
+        ).strip().lower()
+        in {"1", "true", "yes"},
+        "dashboards": dashboards,
+    }
+    (config.output_dir / "render-manifest.json").write_text(
+        json.dumps(merged, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+
+def _playwright_min_screenshot_bytes() -> int:
+    raw_value = os.getenv("GRAFANA_SCREENSHOT_MIN_BYTES", "").strip()
+    if not raw_value:
+        return DEFAULT_MIN_PLAYWRIGHT_SCREENSHOT_BYTES
+    try:
+        return max(int(raw_value), 0)
+    except ValueError:
+        return DEFAULT_MIN_PLAYWRIGHT_SCREENSHOT_BYTES
+
+
+def _playwright_manifest_has_suspicious_screenshot(
+    config: RenderConfig, manifest: dict[str, Any]
+) -> bool:
+    min_bytes = _playwright_min_screenshot_bytes()
+    if min_bytes <= 0:
+        return False
+
+    dashboards = manifest.get("dashboards", [])
+    if not isinstance(dashboards, list):
+        return False
+
+    for dashboard in dashboards:
+        if not isinstance(dashboard, dict):
+            continue
+        rendered_count = dashboard.get("renderedPanelCount", 0)
+        if not isinstance(rendered_count, int) or rendered_count <= 0:
+            continue
+        file_name = dashboard.get("file") or dashboard.get("screenshot")
+        if not isinstance(file_name, str) or not file_name:
+            continue
+        screenshot_path = config.output_dir / file_name
+        try:
+            screenshot_size = screenshot_path.stat().st_size
+        except OSError:
+            continue
+        if screenshot_size < min_bytes:
+            print(
+                "Playwright screenshot looks suspiciously small despite "
+                f"{rendered_count} rendered panel marker(s): "
+                f"{screenshot_path} ({screenshot_size} bytes < {min_bytes})."
+            )
+            return True
+    return False
+
+
+def _run_playwright_fallback(config: RenderConfig) -> int:
+    dashboards = _load_dashboards(config)
+    if len(dashboards) <= 1:
+        return _run_playwright_process(config)
+
+    manifests: list[dict[str, Any]] = []
+    for dashboard in dashboards:
+        single_config = replace(config, selected_uids=(dashboard.uid,))
+        result = _run_playwright_process(single_config)
+        if result != 0:
+            return result
+        manifest = _read_playwright_manifest(config.output_dir / "render-manifest.json")
+        if _playwright_manifest_has_suspicious_screenshot(config, manifest):
+            print(
+                "Retrying isolated Playwright render once for "
+                f"{dashboard.uid} after suspicious screenshot capture."
+            )
+            time.sleep(2.0)
+            result = _run_playwright_process(single_config)
+            if result != 0:
+                return result
+            manifest = _read_playwright_manifest(
+                config.output_dir / "render-manifest.json"
+            )
+        manifests.append(manifest)
+
+    _write_merged_playwright_manifest(config, manifests)
+    return 0
 
 
 def _playwright_runtime_failure_detail(raw_detail: str) -> str:

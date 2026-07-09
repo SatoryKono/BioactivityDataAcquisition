@@ -24,10 +24,10 @@ def quote_literal(value: object) -> str:
     if isinstance(value, str):
         escaped = value.replace("'", "''")
         return f"'{escaped}'"
-    if isinstance(value, (int, float)):
-        return str(value)
     if isinstance(value, bool):
         return "true" if value else "false"
+    if isinstance(value, (int, float)):
+        return str(value)
     return f"'{value!s}'"
 
 

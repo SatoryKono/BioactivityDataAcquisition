@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-19'
+  Last verified: '2026-07-06'
 
 ______________________________________________________________________
 
@@ -129,7 +129,7 @@ See [Composite Pipeline Diagram](../02-architecture/diagrams/foundation/29-compo
 
 ## Current Version
 
-**v6.1.0** (2026-03-11) — See [CHANGELOG](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/CHANGELOG.md) and [Release Notes](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/CHANGELOG.md#610---2026-03-11) for details.
+**v6.1.4** (governance baseline per [RULES.md](RULES.md)) — See [CHANGELOG](https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/CHANGELOG.md) for release history.
 
 ## Getting Started
 

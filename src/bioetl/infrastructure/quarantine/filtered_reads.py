@@ -35,6 +35,33 @@ __all__ = [
 ]
 
 
+def _delta_partition_columns(dt: DeltaTable) -> frozenset[str]:
+    """Return partition columns for historical Delta tables when available."""
+    metadata = dt.metadata()
+    partition_columns = getattr(metadata, "partition_columns", ())
+    if not isinstance(partition_columns, (list, tuple, set, frozenset)):
+        return frozenset()
+    return frozenset(str(column) for column in partition_columns)
+
+
+def _load_scoped_pyarrow_table(
+    dt: DeltaTable,
+    *,
+    pipeline_single: str,
+    filters: list[tuple[str, str, object]],
+):
+    """Read rows scoped by pipeline for partitioned and legacy non-partitioned tables."""
+    if "pipeline" in _delta_partition_columns(dt):
+        return dt.to_pyarrow_table(
+            partitions=[("pipeline", "=", pipeline_single)],
+            filters=filters,
+        )
+    return dt.to_pyarrow_table(
+        partitions=None,
+        filters=[*filters, ("pipeline", "=", pipeline_single)],
+    )
+
+
 def _load_filtered_rows(
     base_path: str,
     storage_options: dict[str, str] | None,
@@ -70,10 +97,9 @@ def _load_filtered_rows(
     if payload_hash_single:
         filters.append(("payload_hash", "=", payload_hash_single))
 
-    partitions: list[tuple[str, str, object]] = [("pipeline", "=", pipeline_single)]
-
-    arrow_table = dt.to_pyarrow_table(
-        partitions=partitions,
+    arrow_table = _load_scoped_pyarrow_table(
+        dt,
+        pipeline_single=pipeline_single,
         filters=filters,
     )
     table_records: list[JsonDict] = arrow_table.to_pylist()
@@ -164,10 +190,9 @@ def get_filtered_record(
         ("error_code", "=", "FILTERED_OUT_SILVER"),
         ("payload_hash", "=", payload_hash),
     ]
-    partitions: list[tuple[str, str, object]] = [("pipeline", "=", pipeline_single)]
-
-    arrow_table = dt.to_pyarrow_table(
-        partitions=partitions,
+    arrow_table = _load_scoped_pyarrow_table(
+        dt,
+        pipeline_single=pipeline_single,
         filters=filters,
     )
     table_records: list[JsonDict] = arrow_table.to_pylist()

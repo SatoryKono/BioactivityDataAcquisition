@@ -79,3 +79,29 @@ def test_store_subprocess_disk_cache_skips_nonzero_returncodes(tmp_path: Path) -
     )
 
     assert not cache_path.exists()
+
+
+def test_effective_subprocess_timeout_detects_windows_pycharm_argv(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """PyCharm may be detectable only through the runner script argv."""
+    monkeypatch.setattr(architecture_conftest.sys, "platform", "win32")
+    monkeypatch.delenv("PYCHARM_HOSTED", raising=False)
+    monkeypatch.setattr(
+        architecture_conftest.sys,
+        "argv",
+        [r"C:\Program Files\JetBrains\PyCharm\helpers\pycharm\_jb_pytest_runner.py"],
+    )
+
+    assert architecture_conftest._effective_subprocess_timeout(60) == 180.0
+
+
+def test_effective_subprocess_timeout_keeps_non_pycharm_windows_timeout(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Non-PyCharm runs should keep the caller's explicit timeout."""
+    monkeypatch.setattr(architecture_conftest.sys, "platform", "win32")
+    monkeypatch.delenv("PYCHARM_HOSTED", raising=False)
+    monkeypatch.setattr(architecture_conftest.sys, "argv", ["pytest"])
+
+    assert architecture_conftest._effective_subprocess_timeout(60) == 60

@@ -44,6 +44,9 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.control_plane.file_workflow_manifest_store import (
         FileWorkflowManifestStore,
     )
+    from bioetl.infrastructure.control_plane.file_workflow_transform_artifact_store import (
+        FileWorkflowTransformArtifactStore,
+    )
 
 _EXPORT_MODULES = {
     "EffectiveConfigArtifactConflictError": (
@@ -81,6 +84,9 @@ _EXPORT_MODULES = {
     "FileWorkflowManifestStore": (
         "bioetl.infrastructure.control_plane.file_workflow_manifest_store"
     ),
+    "FileWorkflowTransformArtifactStore": (
+        "bioetl.infrastructure.control_plane.file_workflow_transform_artifact_store"
+    ),
     "RegistryLoadError": (
         "bioetl.infrastructure.control_plane.file_contract_registry_store"
     ),
@@ -106,6 +112,7 @@ __all__ = [
     "FileWorkflowExecutionStateStore",
     "FileWorkflowLedgerStore",
     "FileWorkflowManifestStore",
+    "FileWorkflowTransformArtifactStore",
     "RegistryLoadError",
     "RunManifestStoreCorruptionError",
     "create_contract_registry",

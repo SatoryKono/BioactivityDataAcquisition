@@ -140,10 +140,18 @@ class _RecordingTransformService:
         context_labels: dict[str, str] | None = None,
         completed_fingerprints: dict[str, str] | None = None,
         dry_run: bool = False,
+        workflow_run_id: str | None = None,
+        manifest_id: str | None = None,
+        debug_export_enabled: bool = False,
+        debug_export_dir: str | None = None,
+        artifact_sink: object | None = None,
+        created_at: object | None = None,
         destructive_commit_callback: object | None = None,
     ) -> WorkflowTransformExecutionResult:
         del workflow_name, context_labels, completed_fingerprints
         del destructive_commit_callback
+        del workflow_run_id, manifest_id, debug_export_enabled
+        del debug_export_dir, artifact_sink, created_at
         upstream_outputs = upstream_outputs or {}
         self.calls.append((step.step_id, tuple(sorted(upstream_outputs)), dry_run))
         return WorkflowTransformExecutionResult(
@@ -396,6 +404,16 @@ async def test_workflow_runner_executes_chembl_baseline_in_dependency_order() ->
             ("reconcile_assay_target_orphans", "run_chembl_publication"),
             False,
         ),
+        (
+            "reconcile_target_assay_orphans",
+            ("reconcile_assay_publication_orphans",),
+            False,
+        ),
+        (
+            "reconcile_publication_assay_orphans",
+            ("reconcile_target_assay_orphans",),
+            False,
+        ),
     ]
     assert [event[:3] for event in events] == [
         ("started", "run_chembl_assay", "chembl_assay"),
@@ -416,8 +434,20 @@ async def test_workflow_runner_executes_chembl_baseline_in_dependency_order() ->
             "reconcile_foreign_keys",
         ),
         ("completed", "reconcile_assay_publication_orphans", "success"),
+        (
+            "started",
+            "reconcile_target_assay_orphans",
+            "reconcile_foreign_keys",
+        ),
+        ("completed", "reconcile_target_assay_orphans", "success"),
+        (
+            "started",
+            "reconcile_publication_assay_orphans",
+            "reconcile_foreign_keys",
+        ),
+        ("completed", "reconcile_publication_assay_orphans", "success"),
     ]
-    assert all(isinstance(events[index][3], str) for index in (4, 8))
+    assert all(isinstance(events[index][3], str) for index in (4, 8, 10, 12))
 
 
 @pytest.mark.asyncio
@@ -440,6 +470,8 @@ async def test_workflow_runner_skips_chembl_baseline_reconciliation_after_failur
     assert [step.status for step in result.steps] == [
         "success",
         "failed",
+        "skipped",
+        "skipped",
         "skipped",
         "skipped",
         "skipped",

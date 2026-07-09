@@ -89,20 +89,20 @@
   ],
   "metrics": {
     "full_app_total_duplicate_clusters": {
-      "current": 40,
-      "max": 45,
+      "current": 0,
+      "max": 2,
       "opening": 57,
       "source": "reports/quality/full-app-duplication-baseline.json"
     },
     "adapter_duplicate_clusters": {
-      "current": 38,
-      "max": 42,
+      "current": 0,
+      "max": 0,
       "opening": 48,
       "source": "reports/quality/full-app-duplication-baseline.json"
     },
     "pipeline_duplicate_clusters": {
-      "current": 2,
-      "max": 3,
+      "current": 0,
+      "max": 2,
       "opening": 9,
       "source": "reports/quality/full-app-duplication-baseline.json"
     },
@@ -128,7 +128,7 @@
       "source": "reports/quality/module-coverage-inventory.json"
     },
     "zero_reference_supporting_scripts": {
-      "current": 45,
+      "current": 40,
       "max": 47,
       "entries_without_owner_metadata": 0,
       "source": "configs/quality/scripts_inventory_manifest.json"

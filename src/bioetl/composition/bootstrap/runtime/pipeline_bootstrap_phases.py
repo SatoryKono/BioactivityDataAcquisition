@@ -35,8 +35,8 @@ def assemble_filter_config(*args: object, **kwargs: object) -> object:
 
 def bootstrap_observability_bundle(*args: object, **kwargs: object) -> object:
     """Lazy wrapper for bootstrap observability wiring."""
-    from bioetl.composition.bootstrap.runtime.observability import (
-        bootstrap_observability_bundle as _bootstrap_observability_bundle,
+    from bioetl.composition.bootstrap.runtime.observability_bundle import (
+        bootstrap_observability_bundle_impl as _bootstrap_observability_bundle,
     )
 
     return _bootstrap_observability_bundle(*args, **kwargs)

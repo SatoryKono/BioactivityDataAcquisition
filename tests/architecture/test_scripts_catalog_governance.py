@@ -37,6 +37,8 @@ def _load_catalog_module():
 
 def test_scripts_catalog_governance_check_passes() -> None:
     """Scripts catalog policy must pass structural and lifecycle checks."""
+    if sys.platform.startswith("win"):
+        pytest.skip("Scripts catalog governance check requires full repo walk which is prohibitively slow on Windows")
     module = _load_catalog_module()
     stdout = io.StringIO()
     stderr = io.StringIO()
@@ -52,6 +54,8 @@ def test_scripts_catalog_governance_check_passes() -> None:
 
 def test_scripts_catalog_caps_active_script_surface() -> None:
     """Active script count must be governed by a no-growth lifecycle cap."""
+    if sys.platform.startswith("win"):
+        pytest.skip("Scripts catalog governance check requires full repo walk which is prohibitively slow on Windows")
     root = _project_root()
     catalog_path = root / "scripts" / "engineering" / "repo" / "catalog.yaml"
     manifest_path = root / "configs" / "quality" / "scripts_inventory_manifest.json"

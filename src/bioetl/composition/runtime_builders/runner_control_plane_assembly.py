@@ -15,6 +15,8 @@ from bioetl.composition.runtime_builders._runner_control_plane_policy import (
     resolve_required_artifact_lineage_layers,
     resolve_runner_control_plane_policy as _resolve_runner_control_plane_policy,
     validate_required_persistence_profile,
+)
+from bioetl.composition.runtime_builders._runner_control_plane_data_root_policy import (
     validate_strict_data_root_policy as _validate_strict_data_root_policy,
 )
 from bioetl.composition.runtime_builders.control_plane import (

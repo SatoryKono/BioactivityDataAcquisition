@@ -115,8 +115,8 @@ uv sync --extra dev --extra tracing --extra docs
 On Windows without `make` or `uv`:
 
 ```powershell
-python3.12 -m venv .venv
-.venv\Scripts\activate
+py -3.13 -m venv .venv-win
+.\.venv-win\Scripts\Activate.ps1
 pip install -e .[dev,tracing,docs]
 ```
 

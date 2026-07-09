@@ -15,6 +15,7 @@ from bioetl.domain.ports import (
     MetricsPort,
     RunLedgerPort,
     RunManifestPort,
+    WorkflowManifestPort,
 )
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.control_plane.file_run_ledger_store import (
@@ -22,6 +23,9 @@ from bioetl.infrastructure.control_plane.file_run_ledger_store import (
 )
 from bioetl.infrastructure.control_plane.file_run_manifest_store import (
     FileRunManifestStore,
+)
+from bioetl.infrastructure.control_plane.file_workflow_manifest_store import (
+    FileWorkflowManifestStore,
 )
 from bioetl.infrastructure.observability.prometheus_metrics import PrometheusMetrics
 
@@ -40,6 +44,7 @@ class HealthServerDependencies:
     checkpoint_port: CheckpointPort
     run_manifest_port: RunManifestPort
     run_ledger_port: RunLedgerPort
+    workflow_manifest_port: WorkflowManifestPort
 
 
 @dataclass(frozen=True, slots=True)
@@ -69,6 +74,7 @@ class _ReadOnlyHealthMonitor:
 class _RunManifestPorts:
     manifest_port: RunManifestPort
     ledger_port: RunLedgerPort
+    workflow_manifest_port: WorkflowManifestPort
 
 
 def _create_control_plane_ports(metrics: MetricsPort) -> _RunManifestPorts:
@@ -82,6 +88,10 @@ def _create_control_plane_ports(metrics: MetricsPort) -> _RunManifestPorts:
         ),
         ledger_port=FileRunLedgerStore(
             base_path=output_root / "run_ledger",
+            metrics=metrics,
+        ),
+        workflow_manifest_port=FileWorkflowManifestStore(
+            base_path=output_root / "workflow_manifest",
             metrics=metrics,
         ),
     )
@@ -101,4 +111,5 @@ def create_health_server_dependencies(
         checkpoint_port=checkpoint_port_factory(""),
         run_manifest_port=control_plane_ports.manifest_port,
         run_ledger_port=control_plane_ports.ledger_port,
+        workflow_manifest_port=control_plane_ports.workflow_manifest_port,
     )

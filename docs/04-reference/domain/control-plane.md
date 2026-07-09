@@ -54,6 +54,22 @@ contract-registry types, and reproducibility policy semantics.
 | Reproducibility policy | `reproducibility_policy.py`, `reproducibility_profiles.py`, `_reproducibility_profile_types.py`, `_reproducibility_profile_builders.py`, `_reproducibility_policy_profiles.py`, `_reproducibility_policy_support.py`, `_reproducibility_policy_verdicts.py` | Reproducibility classification and policy-verdict semantics. |
 | Artifact lifecycle | `artifact_lifecycle.py` | Domain lifecycle decisions and protected-reference policy for control-plane artifacts. |
 
+## High-Signal Symbol Map
+
+Use the API reference for the full symbol list. The domain-owned symbols below
+are the audit-critical anchors that must stay aligned with contracts, ADRs, and
+runbooks.
+
+| Symbol family | Representative symbols | Source |
+| --- | --- | --- |
+| Run manifest | `RunManifest`, `RunManifestArtifact`, `RunManifestSourceSnapshot` | `src/bioetl/domain/control_plane/run_manifest.py` |
+| Run ledger | `RunLedger`, `RunLedgerEntry`, `RunLedgerReplayPolicy`, `StageCompletionUpdate` | `src/bioetl/domain/control_plane/run_ledger.py`, `_run_ledger_runtime.py`, `_run_ledger_replay_policy.py` |
+| Workflow control plane | `WorkflowManifest`, `WorkflowLedger`, `WorkflowExecutionState`, `WorkflowStepState` | `src/bioetl/domain/control_plane/workflow_manifest.py`, `workflow_ledger.py`, `workflow_execution_state.py` |
+| Effective config | `EffectiveConfigArtifact`, `ConfigSourceRef`, `ConfigSourceHashes`, `SourceClassProvenance` | `src/bioetl/domain/control_plane/effective_config_artifact.py`, `config_source_hashing.py` |
+| Contract registry | `ContractRegistry`, `ContractRegistryEntry`, `RegistryValidationResult`, `RegistryValidationIssue` | `src/bioetl/domain/control_plane/contract_registry*.py` |
+| Reproducibility | `ReproducibilityPolicy`, `ReproducibilityFamilyProfile`, `ReplayReadinessVerdict` | `src/bioetl/domain/control_plane/reproducibility*.py`, `_reproducibility_*.py` |
+| Artifact lifecycle | `ControlPlaneArtifactLifecyclePolicy`, `ControlPlaneArtifactRef`, `ControlPlaneArtifactLifecyclePlan`, `ControlPlaneArtifactReplayImpact` | `src/bioetl/domain/control_plane/artifact_lifecycle.py` |
+
 ## Ownership Rules
 
 - `RunManifest` is immutable provenance and must not be reused as mutable run

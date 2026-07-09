@@ -34,10 +34,10 @@ docker --version
 docker compose --version
 ```
 
-## 1️⃣ Запуск основного стека (Neo4j + BioETL)
+## 1️⃣ Запуск optional helper stack (Neo4j + BioETL quarantine/health surface)
 
 ```powershell
-# Запустить основные контейнеры
+# Запустить optional helper containers
 docker network create bioetl-monitoring
 docker compose up -d
 
@@ -49,7 +49,7 @@ docker compose logs -f bioetl-app
 ```
 
 **Сервисы:**
-- BioETL: http://localhost:8081 (quarantine serve)
+- BioETL quarantine/health helper surface: http://localhost:8081
 - Neo4j Browser: http://localhost:7474
 - Neo4j Bolt: bolt://localhost:7687
 
@@ -268,7 +268,7 @@ docker ps | Select-String bioetl
 ---
 
 Вся конфигурация хранится в файлах:
-- `docker-compose.yml` — основной стек
+- `docker-compose.yml` — optional local helper stack
 - `docker-compose.monitoring.yml` — мониторинг
 - `docker-compose.codex.yml` — MCP серверы
 - `scripts/ops/runtime/docker/compose/alertmanager.yml` — optional local Alertmanager helper stack; legacy root filename: `docker-compose.alertmanager.yml`
@@ -283,5 +283,5 @@ docker ps | Select-String bioetl
   healthcheck-only in repo-default Prometheus because its native metrics
   endpoint requires runtime passcode authentication.
 - `.env` — переменные окружения
-- `Dockerfile.bioetl` — основной образ BioETL
+- `Dockerfile.bioetl` — optional local BioETL helper image
 - `scripts/ops/runtime/docker/images/**/Dockerfile` — optional helper image definitions

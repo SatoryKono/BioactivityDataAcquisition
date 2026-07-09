@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 import pytest
 
 from bioetl.domain.behavior.dq_rule_evaluator import evaluate_dq_rules_for_record
@@ -72,3 +74,48 @@ def test_warning_rule_outcome_does_not_override_warn_disposition() -> None:
     assert len(outcomes) == 1
     assert outcomes[0].disposition == DQDisposition.WARN
     assert outcomes[0].disposition_reason != "invalid_record_policy=fail"
+
+
+@pytest.mark.parametrize("value", [math.nan, math.inf, -math.inf, "not-a-number"])
+def test_range_rule_rejects_non_finite_or_non_numeric_values(value: object) -> None:
+    config = DQConfig(
+        contract_ref="chembl.activity",
+        field_validations=(
+            FieldValidation(
+                field="standard_value",
+                validation_type="range",
+                min_value=0,
+                max_value=100,
+            ),
+        ),
+        invalid_record_policy="fail",
+    )
+
+    outcomes = evaluate_dq_rules_for_record(
+        {"standard_value": value},
+        dq_config=config,
+    )
+
+    assert len(outcomes) == 1
+    assert outcomes[0].rule_id == "field.standard_value.range"
+    assert outcomes[0].disposition == DQDisposition.FAIL
+
+
+def test_range_rule_accepts_numeric_strings_inside_bounds() -> None:
+    config = DQConfig(
+        field_validations=(
+            FieldValidation(
+                field="standard_value",
+                validation_type="range",
+                min_value=0,
+                max_value=100,
+            ),
+        ),
+    )
+
+    outcomes = evaluate_dq_rules_for_record(
+        {"standard_value": "50"},
+        dq_config=config,
+    )
+
+    assert outcomes == []

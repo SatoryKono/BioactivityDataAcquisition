@@ -156,7 +156,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "556",
+      "line": "557",
       "path": "tests/unit/application/core/test_otel_spans.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_postrun_run_explicit_noop_tracer"
@@ -478,7 +478,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1175",
+      "line": "1203",
       "path": "tests/unit/infrastructure/quarantine/test_unified_quarantine.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_aclose_does_nothing"
@@ -506,7 +506,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1492",
+      "line": "1520",
       "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_write_gold_merged_empty_records_returns"
@@ -766,7 +766,7 @@
     "tests/unit/application/core/test_batch_writer_tracing_mixin.py:79",
     "tests/unit/application/core/test_batch_writer_tracing_mixin.py:255",
     "tests/unit/application/core/test_dq_metrics.py:33",
-    "tests/unit/application/core/test_otel_spans.py:556",
+    "tests/unit/application/core/test_otel_spans.py:557",
     "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:102",
     "tests/unit/application/observability/test_pipeline_metrics.py:270"
   ],
@@ -1081,7 +1081,7 @@
   "critical_behavior_envelope_count": 5,
   "critical_behavior_envelopes": {
     "control_plane_replay": {
-      "assertion_backed_tests": 55,
+      "assertion_backed_tests": 56,
       "assertion_examples": [
         "tests/architecture/test_determinism_identity_policy.py:166",
         "tests/architecture/test_determinism_identity_policy.py:320",
@@ -1102,21 +1102,21 @@
         "tests/architecture/test_determinism_identity_policy.py",
         "tests/architecture/test_replay_time_seam_inventory.py"
       ],
-      "test_count": 55
+      "test_count": 56
     },
     "gold_strict_contracts": {
-      "assertion_backed_tests": 12,
+      "assertion_backed_tests": 13,
       "assertion_examples": [
         "tests/contract/test_gold_dq_golden_snapshots.py:37",
         "tests/contract/test_gold_entity_coverage_complete.py:20",
         "tests/contract/test_gold_entity_coverage_complete.py:28",
         "tests/contract/test_gold_entity_coverage_complete.py:39",
         "tests/contract/test_gold_entity_coverage_complete.py:53",
+        "tests/contract/test_gold_entity_coverage_complete.py:66",
         "tests/contract/test_gold_pk_consistency.py:31",
         "tests/contract/test_gold_pk_consistency.py:64",
         "tests/contract/test_gold_pk_consistency.py:97",
-        "tests/contract/test_gold_schema_strict_violations.py:64",
-        "tests/contract/test_gold_schema_strict_violations.py:75"
+        "tests/contract/test_gold_schema_strict_violations.py:64"
       ],
       "assertless_tests": [],
       "intentional_no_exception_tests": 0,
@@ -1126,7 +1126,7 @@
         "tests/contract/test_gold_schema_strict_violations.py",
         "tests/contract/test_gold_dq_golden_snapshots.py"
       ],
-      "test_count": 12
+      "test_count": 13
     },
     "medallion_storage": {
       "assertion_backed_tests": 9,
@@ -1172,52 +1172,38 @@
       "test_count": 44
     },
     "test_governance": {
-      "assertion_backed_tests": 33,
+      "assertion_backed_tests": 35,
       "assertion_examples": [
         "tests/architecture/test_test_governance_audit.py:91",
         "tests/architecture/test_test_governance_audit.py:109",
         "tests/architecture/test_test_governance_audit.py:120",
         "tests/architecture/test_test_governance_audit.py:161",
         "tests/architecture/test_test_governance_audit.py:224",
-        "tests/architecture/test_test_governance_audit.py:269",
-        "tests/architecture/test_test_governance_audit.py:290",
-        "tests/architecture/test_test_governance_audit.py:305",
-        "tests/architecture/test_test_governance_audit.py:318",
-        "tests/architecture/test_test_governance_audit.py:350"
+        "tests/architecture/test_test_governance_audit.py:316",
+        "tests/architecture/test_test_governance_audit.py:344",
+        "tests/architecture/test_test_governance_audit.py:384",
+        "tests/architecture/test_test_governance_audit.py:405",
+        "tests/architecture/test_test_governance_audit.py:420"
       ],
       "assertless_tests": [],
       "intentional_no_exception_tests": 0,
       "paths": [
         "tests/architecture/test_test_governance_audit.py"
       ],
-      "test_count": 33
+      "test_count": 35
     }
   },
   "date_today_call_sites": 0,
-  "duplicate_test_name_inventory": [
-    {
-      "classification": "cross_file",
-      "count": 2,
-      "lane_counts": {
-        "architecture": 2
-      },
-      "locations": [
-        "tests/architecture/test_tech_debt_issues_5839_5845_closeout.py:96",
-        "tests/architecture/test_tech_debt_issues_5861_5864_closeout.py:81"
-      ],
-      "name": "test_tdx_audit_closeout_artifact_is_complete_and_budget_safe",
-      "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-    }
-  ],
+  "duplicate_test_name_inventory": [],
   "duplicate_test_name_inventory_summary": {
-    "cross_file_groups": 1,
-    "duplicate_occurrences": 2,
+    "cross_file_groups": 0,
+    "duplicate_occurrences": 0,
     "mixed_groups": 0,
     "same_file_groups": 0,
-    "total_duplicate_names": 1
+    "total_duplicate_names": 0
   },
-  "duplicate_test_name_occurrences": 2,
-  "duplicate_test_names": 1,
+  "duplicate_test_name_occurrences": 0,
+  "duplicate_test_names": 0,
   "fixture_asset_duplication": {
     "duplicate_files": 0,
     "duplicate_groups": 0,
@@ -1240,6 +1226,15 @@
   "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
+  "repo_backed_unit_inventory": {
+    "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
+    "lane": "repo-backed-unit",
+    "marked_test_files": 26,
+    "marker": "pytest.mark.repo_backed",
+    "subtree": "tests/unit/repo_backed/",
+    "test_files": 26,
+    "unmarked_test_files": []
+  },
   "report": {
     "assertless_candidates": [
       {
@@ -1398,7 +1393,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "556",
+        "line": "557",
         "path": "tests/unit/application/core/test_otel_spans.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_postrun_run_explicit_noop_tracer"
@@ -1720,7 +1715,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1175",
+        "line": "1203",
         "path": "tests/unit/infrastructure/quarantine/test_unified_quarantine.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_does_nothing"
@@ -1748,7 +1743,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1492",
+        "line": "1520",
         "path": "tests/unit/infrastructure/storage/test_gold_writer.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_write_gold_merged_empty_records_returns"
@@ -2008,7 +2003,7 @@
       "tests/unit/application/core/test_batch_writer_tracing_mixin.py:79",
       "tests/unit/application/core/test_batch_writer_tracing_mixin.py:255",
       "tests/unit/application/core/test_dq_metrics.py:33",
-      "tests/unit/application/core/test_otel_spans.py:556",
+      "tests/unit/application/core/test_otel_spans.py:557",
       "tests/unit/application/core/test_postrun_cleanup_orchestrator.py:102",
       "tests/unit/application/observability/test_pipeline_metrics.py:270"
     ],
@@ -2020,7 +2015,7 @@
     "critical_behavior_envelope_count": 5,
     "critical_behavior_envelopes": {
       "control_plane_replay": {
-        "assertion_backed_tests": 55,
+        "assertion_backed_tests": 56,
         "assertion_examples": [
           "tests/architecture/test_determinism_identity_policy.py:166",
           "tests/architecture/test_determinism_identity_policy.py:320",
@@ -2041,21 +2036,21 @@
           "tests/architecture/test_determinism_identity_policy.py",
           "tests/architecture/test_replay_time_seam_inventory.py"
         ],
-        "test_count": 55
+        "test_count": 56
       },
       "gold_strict_contracts": {
-        "assertion_backed_tests": 12,
+        "assertion_backed_tests": 13,
         "assertion_examples": [
           "tests/contract/test_gold_dq_golden_snapshots.py:37",
           "tests/contract/test_gold_entity_coverage_complete.py:20",
           "tests/contract/test_gold_entity_coverage_complete.py:28",
           "tests/contract/test_gold_entity_coverage_complete.py:39",
           "tests/contract/test_gold_entity_coverage_complete.py:53",
+          "tests/contract/test_gold_entity_coverage_complete.py:66",
           "tests/contract/test_gold_pk_consistency.py:31",
           "tests/contract/test_gold_pk_consistency.py:64",
           "tests/contract/test_gold_pk_consistency.py:97",
-          "tests/contract/test_gold_schema_strict_violations.py:64",
-          "tests/contract/test_gold_schema_strict_violations.py:75"
+          "tests/contract/test_gold_schema_strict_violations.py:64"
         ],
         "assertless_tests": [],
         "intentional_no_exception_tests": 0,
@@ -2065,7 +2060,7 @@
           "tests/contract/test_gold_schema_strict_violations.py",
           "tests/contract/test_gold_dq_golden_snapshots.py"
         ],
-        "test_count": 12
+        "test_count": 13
       },
       "medallion_storage": {
         "assertion_backed_tests": 9,
@@ -2111,52 +2106,38 @@
         "test_count": 44
       },
       "test_governance": {
-        "assertion_backed_tests": 33,
+        "assertion_backed_tests": 35,
         "assertion_examples": [
           "tests/architecture/test_test_governance_audit.py:91",
           "tests/architecture/test_test_governance_audit.py:109",
           "tests/architecture/test_test_governance_audit.py:120",
           "tests/architecture/test_test_governance_audit.py:161",
           "tests/architecture/test_test_governance_audit.py:224",
-          "tests/architecture/test_test_governance_audit.py:269",
-          "tests/architecture/test_test_governance_audit.py:290",
-          "tests/architecture/test_test_governance_audit.py:305",
-          "tests/architecture/test_test_governance_audit.py:318",
-          "tests/architecture/test_test_governance_audit.py:350"
+          "tests/architecture/test_test_governance_audit.py:316",
+          "tests/architecture/test_test_governance_audit.py:344",
+          "tests/architecture/test_test_governance_audit.py:384",
+          "tests/architecture/test_test_governance_audit.py:405",
+          "tests/architecture/test_test_governance_audit.py:420"
         ],
         "assertless_tests": [],
         "intentional_no_exception_tests": 0,
         "paths": [
           "tests/architecture/test_test_governance_audit.py"
         ],
-        "test_count": 33
+        "test_count": 35
       }
     },
     "date_today_call_sites": 0,
-    "duplicate_test_name_inventory": [
-      {
-        "classification": "cross_file",
-        "count": 2,
-        "lane_counts": {
-          "architecture": 2
-        },
-        "locations": [
-          "tests/architecture/test_tech_debt_issues_5839_5845_closeout.py:96",
-          "tests/architecture/test_tech_debt_issues_5861_5864_closeout.py:81"
-        ],
-        "name": "test_tdx_audit_closeout_artifact_is_complete_and_budget_safe",
-        "suggested_pattern": "test_<subject>__<condition>__<expected_behavior>"
-      }
-    ],
+    "duplicate_test_name_inventory": [],
     "duplicate_test_name_inventory_summary": {
-      "cross_file_groups": 1,
-      "duplicate_occurrences": 2,
+      "cross_file_groups": 0,
+      "duplicate_occurrences": 0,
       "mixed_groups": 0,
       "same_file_groups": 0,
-      "total_duplicate_names": 1
+      "total_duplicate_names": 0
     },
-    "duplicate_test_name_occurrences": 2,
-    "duplicate_test_names": 1,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
     "fixture_asset_duplication": {
       "duplicate_files": 0,
       "duplicate_groups": 0,
@@ -2178,45 +2159,130 @@
     "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
+    "repo_backed_unit_inventory": {
+      "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
+      "lane": "repo-backed-unit",
+      "marked_test_files": 26,
+      "marker": "pytest.mark.repo_backed",
+      "subtree": "tests/unit/repo_backed/",
+      "test_files": 26,
+      "unmarked_test_files": []
+    },
     "root": ".",
-    "top_duplicate_test_names": [
-      {
-        "count": 2,
-        "examples": [
-          "tests/architecture/test_tech_debt_issues_5839_5845_closeout.py:96",
-          "tests/architecture/test_tech_debt_issues_5861_5864_closeout.py:81"
-        ],
-        "name": "test_tdx_audit_closeout_artifact_is_complete_and_budget_safe"
-      }
-    ],
-    "total_test_files": 1947,
-    "total_test_functions": 21877,
+    "test_file_inventory": {
+      "pytest_python_files": [
+        "test_*.py"
+      ],
+      "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
+      "test_glob_file_count": 1975,
+      "test_python_file_count": 2184,
+      "top_level_directories": [
+        "tests/architecture/",
+        "tests/benchmarks/",
+        "tests/contract/",
+        "tests/e2e/",
+        "tests/fakes/",
+        "tests/fixtures/",
+        "tests/golden/",
+        "tests/helpers/",
+        "tests/infrastructure/",
+        "tests/integration/",
+        "tests/performance/",
+        "tests/security/",
+        "tests/smoke/",
+        "tests/snapshots/",
+        "tests/testing_support/",
+        "tests/unit/"
+      ],
+      "top_level_directories_including_pycache": [
+        "tests/__pycache__/",
+        "tests/architecture/",
+        "tests/benchmarks/",
+        "tests/contract/",
+        "tests/e2e/",
+        "tests/fakes/",
+        "tests/fixtures/",
+        "tests/golden/",
+        "tests/helpers/",
+        "tests/infrastructure/",
+        "tests/integration/",
+        "tests/performance/",
+        "tests/security/",
+        "tests/smoke/",
+        "tests/snapshots/",
+        "tests/testing_support/",
+        "tests/unit/"
+      ],
+      "top_level_directory_count": 16,
+      "top_level_directory_count_including_pycache": 17
+    },
+    "top_duplicate_test_names": [],
+    "total_test_files": 1975,
+    "total_test_functions": 22093,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "6d5a939e9005fbd84fc4f2b72569bf5a6d1f4cefd4e23fd64886cd855ae7ff65",
+  "source_tree_sha256": "7be923d9182187f7223a4b5b2ee1ccdd55feab00f39eed698d77653f9039e945",
   "summary": {
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
     "date_today_call_sites": 0,
-    "duplicate_test_name_occurrences": 2,
-    "duplicate_test_names": 1,
+    "duplicate_test_name_occurrences": 0,
+    "duplicate_test_names": 0,
     "intentional_no_exception_contract": 89,
     "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "uuid4_call_sites": 0
   },
-  "top_duplicate_test_names": [
-    {
-      "count": 2,
-      "examples": [
-        "tests/architecture/test_tech_debt_issues_5839_5845_closeout.py:96",
-        "tests/architecture/test_tech_debt_issues_5861_5864_closeout.py:81"
-      ],
-      "name": "test_tdx_audit_closeout_artifact_is_complete_and_budget_safe"
-    }
-  ],
-  "total_test_files": 1947,
-  "total_test_functions": 21877,
+  "test_file_inventory": {
+    "pytest_python_files": [
+      "test_*.py"
+    ],
+    "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
+    "test_glob_file_count": 1975,
+    "test_python_file_count": 2184,
+    "top_level_directories": [
+      "tests/architecture/",
+      "tests/benchmarks/",
+      "tests/contract/",
+      "tests/e2e/",
+      "tests/fakes/",
+      "tests/fixtures/",
+      "tests/golden/",
+      "tests/helpers/",
+      "tests/infrastructure/",
+      "tests/integration/",
+      "tests/performance/",
+      "tests/security/",
+      "tests/smoke/",
+      "tests/snapshots/",
+      "tests/testing_support/",
+      "tests/unit/"
+    ],
+    "top_level_directories_including_pycache": [
+      "tests/__pycache__/",
+      "tests/architecture/",
+      "tests/benchmarks/",
+      "tests/contract/",
+      "tests/e2e/",
+      "tests/fakes/",
+      "tests/fixtures/",
+      "tests/golden/",
+      "tests/helpers/",
+      "tests/infrastructure/",
+      "tests/integration/",
+      "tests/performance/",
+      "tests/security/",
+      "tests/smoke/",
+      "tests/snapshots/",
+      "tests/testing_support/",
+      "tests/unit/"
+    ],
+    "top_level_directory_count": 16,
+    "top_level_directory_count_including_pycache": 17
+  },
+  "top_duplicate_test_names": [],
+  "total_test_files": 1975,
+  "total_test_functions": 22093,
   "uuid4_call_sites": 0
 }

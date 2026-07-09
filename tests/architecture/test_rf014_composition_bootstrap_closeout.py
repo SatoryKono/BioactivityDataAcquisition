@@ -15,16 +15,17 @@ COMPOSITION_BOOTSTRAP_RATCHETS: dict[str, tuple[int, set[str]]] = {
         {
             "bioetl.composition.factories.datasource.data_source_factory",
             "bioetl.composition.factories.dq.context_resolver",
-            "bioetl.composition.factories.pipeline.factory_method_helpers",
+            "bioetl.composition.factories.pipeline.assembler_helpers",
             "bioetl.composition.factories.pipeline.runner_assembly",
         },
     ),
     "src/bioetl/composition/bootstrap/runtime/pipeline.py": (
-        82,
+        106,
         {
             "bioetl.composition.bootstrap.runtime.assembly",
             "bioetl.composition.runtime_builders.config_access",
             "bioetl.composition.runtime_builders.runner_builder",
+            "bioetl.composition.runtime_builders.cached_bronze_snapshot_support",
         },
     ),
     "src/bioetl/composition/bootstrap/cli/config.py": (

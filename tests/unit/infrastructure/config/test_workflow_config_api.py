@@ -238,14 +238,19 @@ def test_chembl_baseline_workflow_config_declares_dependency_minimal_reconciliat
         "reconcile_assay_target_orphans",
         "run_chembl_publication",
         "reconcile_assay_publication_orphans",
+        "reconcile_target_assay_orphans",
+        "reconcile_publication_assay_orphans",
     )
 
     reconcile_target = config.get_step("reconcile_assay_target_orphans")
     assert isinstance(reconcile_target, TransformStepConfig)
     assert reconcile_target.depends_on == ("run_chembl_assay", "run_chembl_target")
     assert reconcile_target.config == {
-        "source_table": "chembl_assay",
-        "reference_table": "chembl_target",
+        "source_layer": "gold",
+        "reference_layer": "gold",
+        "mutation_layer": "gold",
+        "source_table": "chembl.assay",
+        "reference_table": "chembl.target",
         "source_key": "target_id",
         "reference_key": "target_id",
         "primary_keys": ["assay_id"],
@@ -260,11 +265,52 @@ def test_chembl_baseline_workflow_config_declares_dependency_minimal_reconciliat
         "run_chembl_publication",
     )
     assert reconcile_publication.config == {
-        "source_table": "chembl_assay",
-        "reference_table": "chembl_publication",
+        "source_layer": "gold",
+        "reference_layer": "gold",
+        "mutation_layer": "gold",
+        "source_table": "chembl.assay",
+        "reference_table": "chembl.publication",
         "source_key": "publication_id",
         "reference_key": "publication_id",
         "primary_keys": ["assay_id"],
+        "action": "delete_orphans",
+        "nulls_equal": False,
+    }
+
+    reconcile_target_inverse = config.get_step("reconcile_target_assay_orphans")
+    assert isinstance(reconcile_target_inverse, TransformStepConfig)
+    assert reconcile_target_inverse.depends_on == (
+        "reconcile_assay_publication_orphans",
+    )
+    assert reconcile_target_inverse.config == {
+        "source_layer": "gold",
+        "reference_layer": "gold",
+        "mutation_layer": "gold",
+        "source_table": "chembl.target",
+        "reference_table": "chembl.assay",
+        "source_key": "target_id",
+        "reference_key": "target_id",
+        "primary_keys": ["target_id"],
+        "action": "delete_orphans",
+        "nulls_equal": False,
+    }
+
+    reconcile_publication_inverse = config.get_step(
+        "reconcile_publication_assay_orphans"
+    )
+    assert isinstance(reconcile_publication_inverse, TransformStepConfig)
+    assert reconcile_publication_inverse.depends_on == (
+        "reconcile_target_assay_orphans",
+    )
+    assert reconcile_publication_inverse.config == {
+        "source_layer": "gold",
+        "reference_layer": "gold",
+        "mutation_layer": "gold",
+        "source_table": "chembl.publication",
+        "reference_table": "chembl.assay",
+        "source_key": "publication_id",
+        "reference_key": "publication_id",
+        "primary_keys": ["publication_id"],
         "action": "delete_orphans",
         "nulls_equal": False,
     }

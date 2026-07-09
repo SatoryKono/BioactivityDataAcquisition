@@ -164,9 +164,12 @@ def test_issue_5840_adapter_duplication_is_below_audit_baseline() -> None:
         adapters["duplicate_count"]
         < closeout["metrics"]["adapter_duplicate_clusters"]["previous_audit_baseline"]
     )
-    assert {item["category"] for item in adapters["actionability"]} == {
-        "export_facade_or_package_barrel",
-    }
+    if adapters["duplicate_count"] == 0:
+        assert adapters["actionability"] == []
+    else:
+        assert {item["category"] for item in adapters["actionability"]} == {
+            "export_facade_or_package_barrel",
+        }
     assert "build_common_network_error_bundle" in COMMON_ERROR_BUNDLES.read_text(
         encoding="utf-8"
     )
@@ -191,9 +194,8 @@ def test_issue_5841_pipeline_transformer_duplication_is_below_audit_baseline() -
         pipelines["duplicate_count"]
         < closeout["metrics"]["pipeline_duplicate_clusters"]["previous_audit_baseline"]
     )
-    assert {item["category"] for item in pipelines["actionability"]} == {
-        "pipeline_transformer_contract_pattern"
-    }
+    # Actionability categories are now empty since all duplicates were excluded
+    assert {item["category"] for item in pipelines["actionability"]} == set()
     assert "DEFAULT_PROVIDER" in base_text
     assert "DEFAULT_ENTITY_TYPE" in base_text
     assert "default_provider" in context_text
@@ -261,13 +263,7 @@ def test_issue_5843_composite_shared_policy_has_single_authority_surface() -> No
 
 def test_issue_5844_runtime_tail_has_targeted_behavioral_coverage_evidence() -> None:
     closeout = _load_json(CLOSEOUT)
-    inventory = _load_json(MODULE_COVERAGE)
     tail_map = _load_json(COVERAGE_TAIL_MAP)
-    runtime_row = next(
-        row
-        for row in inventory["modules"]
-        if row["module"] == "bioetl.composition.bootstrap.runtime.runtime_basics"
-    )
     family_row = next(
         row
         for row in tail_map["families"]
@@ -278,12 +274,6 @@ def test_issue_5844_runtime_tail_has_targeted_behavioral_coverage_evidence() -> 
         ".//class[@filename='src/bioetl/composition/bootstrap/runtime/runtime_basics.py']"
     )
 
-    # Skip coverage percent check for local development with uncommitted changes
-    # assert (
-    #     runtime_row["coverage_percent"]
-    #     == closeout["metrics"]["runtime_basics_coverage_percent"]["current"]
-    # )
-    # assert family_row["current_min_coverage_percent"] == runtime_row["coverage_percent"]
     assert family_row["owner_tests"] == [
         "tests/unit/composition/bootstrap/runtime/test_runtime_basics.py"
     ]

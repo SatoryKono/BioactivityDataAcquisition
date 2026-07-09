@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-29'
+  Last verified: '2026-07-06'
 
 ______________________________________________________________________
 
@@ -30,6 +30,22 @@ Current implementation details:
 - Provider and entity layers are loaded from the unified `quality:` section when present.
 - For backward compatibility, `DQConfigLoader` still accepts flat fallback keys when a YAML file has no `quality:` section.
 - Inline overrides are resolved from `pipeline.dq_overrides` in the validated pipeline config.
+
+## Threshold layers (config vs runtime default)
+
+Hierarchical YAML and Silver DQ runtime use related but not identical default
+thresholds. Operators must treat both as active surfaces.
+
+| Layer | Source | `soft_fail` | `hard_fail` | Notes |
+| --- | --- | ---: | ---: | --- |
+| Global YAML defaults | `configs/base/quality.yaml` | `0.05` | `0.25` | Merged through provider/entity `quality:` sections |
+| Silver analyze request fallback | `src/bioetl/domain/ports/quality/silver_dq_request.py` (`SilverDQAnalyzeRequest`) | `0.05` | `0.20` | Used when runtime request does not override thresholds |
+| Composite overrides | `configs/composites/*.yaml` | per surface | per surface | Explicit per-composite DQ policy |
+
+Composite pipelines may define additional per-surface overrides. Contract-level
+DQ flags in entity contract YAML under `configs/contracts/{provider}/{entity}.yaml`
+remain DQ-only and do not control Gold strict validation
+([gold-schemas.md](../04-reference/contracts/gold-schemas.md)).
 
 ## Hierarchical DQ Config Structure
 

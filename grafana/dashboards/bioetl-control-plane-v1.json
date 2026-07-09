@@ -29,7 +29,7 @@
       },
       "id": 1000,
       "options": {
-        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><span aria-current=\"page\" style=\"padding:5px 10px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">0. Control Plane</span><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a></div>",
+        "content": "<div style=\"display:flex;gap:6px;flex-wrap:nowrap;align-items:center;padding:4px 6px;overflow:hidden;white-space:nowrap;font-size:12px;\"><span aria-current=\"page\" style=\"padding:3px 7px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">0. Control Plane</span><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a></div>",
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
@@ -208,7 +208,7 @@
       "type": "table",
       "title": "ID",
       "gridPos": {
-        "h": 10,
+        "h": 6,
         "w": 10,
         "x": 0,
         "y": 7
@@ -239,13 +239,57 @@
             }
           ]
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "parameter"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 165
+              },
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          }
+        ]
       },
       "options": {
-        "showHeader": false,
+        "showHeader": true,
         "footer": {
           "show": false
-        }
+        },
+        "cellHeight": "sm"
       },
       "targets": [
         {
@@ -289,7 +333,7 @@
       "type": "table",
       "title": "Processed Records",
       "gridPos": {
-        "h": 10,
+        "h": 6,
         "w": 6,
         "x": 10,
         "y": 7
@@ -383,6 +427,10 @@
                 "value": {
                   "type": "color-text"
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 165
               }
             ]
           },
@@ -692,7 +740,7 @@
         ]
       },
       "options": {
-        "showHeader": false,
+        "showHeader": true,
         "sortBy": [
           {
             "desc": false,
@@ -740,6 +788,64 @@
           }
         }
       ]
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [],
+      "type": "text",
+      "description": "Visible neutral fallback for the Control Plane identity table when the selected scope returns no rows.",
+      "gridPos": {
+        "h": 4,
+        "w": 10,
+        "x": 0,
+        "y": 13
+      },
+      "id": 9410,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"font-size:13px;line-height:1.45;color:#c9d1d9\"><b>Identity table guardrail.</b><br/>If no rows are visible, check <code>/health/live</code>, selector scope, and a concrete <code>pipeline/run_id</code> before treating the empty state as expected.</div>",
+        "mode": "html"
+      },
+      "title": "ID Empty State",
+      "transparent": true
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [],
+      "type": "text",
+      "description": "Visible neutral fallback for processed-record accounting when the selected Control Plane scope returns no rows.",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 10,
+        "y": 13
+      },
+      "id": 9411,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<div style=\"font-size:13px;line-height:1.45;color:#c9d1d9\"><b>Accounting table guardrail.</b><br/>Visible rows are backend accounting evidence; if this table becomes empty, verify backend health and scope before reading it as zero records.</div>",
+        "mode": "html"
+      },
+      "title": "Processed Records Empty State",
+      "transparent": true
     },
     {
       "datasource": {
@@ -2167,7 +2273,8 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "s",
+          "noValue": "No optional latency samples in range. Treat this as telemetry absence, not proof of a healthy control-plane path."
         },
         "overrides": []
       },
@@ -2182,7 +2289,8 @@
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom"
+          "placement": "bottom",
+          "showLegend": false
         },
         "tooltip": {
           "mode": "multi",
@@ -2261,7 +2369,8 @@
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom"
+          "placement": "bottom",
+          "showLegend": false
         },
         "tooltip": {
           "mode": "multi",
@@ -3098,7 +3207,8 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "s",
+          "noValue": "No optional latency samples in range. Treat this as telemetry absence, not proof of a healthy control-plane path."
         },
         "overrides": []
       },
@@ -3113,7 +3223,8 @@
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom"
+          "placement": "bottom",
+          "showLegend": false
         },
         "tooltip": {
           "mode": "multi",
@@ -3729,7 +3840,7 @@
     },
     {
       "datasource": "Quarantine Explorer",
-      "description": "HTTP-backed Control Plane identity overview from /ops/control-plane/identity-evidence. Long UUID/hash values are shortened in value_short and remain full in value_full. The overview contains the P0 identity anchors plus the P1 replay_capability card required for replay triage. Status uses OK/WARN/CRIT/UNKNOWN; no run_id, manifest_id, hashes, snapshot IDs, or artifact refs are Prometheus labels.",
+      "description": "Compact HTTP-backed Control Plane identity overview from /ops/control-plane/identity-evidence. Replay/resume decision summary stays above in the first-screen ID, Replay Safety State, Checkpoint Freshness, Manifest/Ledger, and Telemetry cards; this section is the compact forensic drilldown. Long UUID/hash values are shortened in value_short and remain full in value_full. Status uses OK/WARN/CRIT/UNKNOWN; no run_id, manifest_id, hashes, snapshot IDs, or artifact refs are Prometheus labels.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -3739,12 +3850,41 @@
             },
             "inspect": false
           },
-          "unit": "none"
+          "unit": "none",
+          "noValue": "No overview identity rows. Use the replay/resume summary above first; then verify backend health (/health/live) and selected run_id before treating this forensic view as empty."
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value_short"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
-        "h": 10,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 127
@@ -3754,7 +3894,8 @@
         "footer": {
           "show": false
         },
-        "showHeader": true
+        "showHeader": true,
+        "cellHeight": "sm"
       },
       "targets": [
         {
@@ -3817,7 +3958,7 @@
     },
     {
       "datasource": "Quarantine Explorer",
-      "description": "HTTP-backed identity gap table. Missing run_id or terminal manifest_id is CRIT; missing effective config, contract, input snapshot, replay parent, composite identity, or checkpoint anchors is explicit WARN/CRIT evidence instead of a green health signal.",
+      "description": "Compact HTTP-backed identity gap table. Missing run_id or terminal manifest_id is CRIT; missing effective config, contract, input snapshot, replay parent, composite identity, or checkpoint anchors is explicit WARN/CRIT evidence instead of a green health signal.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -3827,22 +3968,52 @@
             },
             "inspect": false
           },
-          "unit": "none"
+          "unit": "none",
+          "noValue": "No identity gap rows for this forensic view. Use the summary cards above, then verify backend health and selected run scope before treating this as expected empty."
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value_short"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
-        "h": 10,
+        "h": 3,
         "w": 12,
         "x": 0,
-        "y": 137
+        "y": 131
       },
       "id": 9405,
       "options": {
         "footer": {
           "show": false
         },
-        "showHeader": true
+        "showHeader": true,
+        "cellHeight": "sm"
       },
       "targets": [
         {
@@ -3875,22 +4046,52 @@
             },
             "inspect": false
           },
-          "unit": "none"
+          "unit": "none",
+          "noValue": "No checkpoint anchor comparison rows. Use checkpoint freshness above, then verify backend health and selected run scope before treating this as expected empty."
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value_short"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
-        "h": 10,
+        "h": 3,
         "w": 12,
         "x": 12,
-        "y": 137
+        "y": 131
       },
       "id": 9406,
       "options": {
         "footer": {
           "show": false
         },
-        "showHeader": true
+        "showHeader": true,
+        "cellHeight": "sm"
       },
       "targets": [
         {
@@ -3931,22 +4132,52 @@
               "url": "data:text/plain,${__data.fields.copy_value}"
             }
           ],
-          "unit": "none"
+          "unit": "none",
+          "noValue": "No copyable identity handoffs for this scope. Use the summary cards above, then select an exact run_id or verify backend health before treating this as expected empty."
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value_short"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
-        "h": 10,
+        "h": 3,
         "w": 24,
         "x": 0,
-        "y": 147
+        "y": 134
       },
       "id": 9407,
       "options": {
         "footer": {
           "show": false
         },
-        "showHeader": true
+        "showHeader": true,
+        "cellHeight": "sm"
       },
       "targets": [
         {
@@ -3979,22 +4210,52 @@
             },
             "inspect": false
           },
-          "unit": "none"
+          "unit": "none",
+          "noValue": "No P1 replay/evidence anchors for this forensic view. Use the replay/resume summary above, then verify backend health and selected run scope before treating this as expected empty."
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value_short"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
-        "h": 10,
+        "h": 3,
         "w": 12,
         "x": 0,
-        "y": 157
+        "y": 137
       },
       "id": 9408,
       "options": {
         "footer": {
           "show": false
         },
-        "showHeader": true
+        "showHeader": true,
+        "cellHeight": "sm"
       },
       "targets": [
         {
@@ -4027,22 +4288,52 @@
             },
             "inspect": false
           },
-          "unit": "none"
+          "unit": "none",
+          "noValue": "No P2 forensic anchors for this scope. Use the summary cards above, then select an exact run_id or verify backend health before treating this as expected empty."
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "status"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value_short"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
-        "h": 10,
+        "h": 3,
         "w": 12,
         "x": 12,
-        "y": 157
+        "y": 137
       },
       "id": 9409,
       "options": {
         "footer": {
           "show": false
         },
-        "showHeader": true
+        "showHeader": true,
+        "cellHeight": "sm"
       },
       "targets": [
         {
@@ -4065,10 +4356,10 @@
     },
     {
       "gridPos": {
-        "h": 6,
+        "h": 3,
         "w": 24,
         "x": 0,
-        "y": 167
+        "y": 140
       },
       "id": 139,
       "options": {

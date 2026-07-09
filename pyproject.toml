@@ -87,7 +87,10 @@ tests = [
 tests_full = [
     # Full-suite capability contract for architecture, observability, and benchmark surfaces
     "pytest-benchmark>=4.0",
-    "import-linter>=2.0",
+    "import-linter>=2.13",
+    # grimp 3.14 has a broken internal modulefinder import path under
+    # import-linter; keep the architecture gate installable locally.
+    "grimp>=3.15",
     "radon>=6.0",
     "vulture>=2.11",
 ]
@@ -116,7 +119,10 @@ dev = [
     "vcrpy>=6.0",
     "pytest-recording>=0.13",
     # Code formatting and linting - ruff replaces black+isort
-    "import-linter>=2.0",
+    "import-linter>=2.13",
+    # grimp 3.14 has a broken internal modulefinder import path under
+    # import-linter; keep the architecture gate installable locally.
+    "grimp>=3.15",
     # Docstring style checking
     "pydocstyle>=6.3",
     # Tracing stack for OpenTelemetry-backed tests

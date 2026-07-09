@@ -7,6 +7,7 @@ import argparse
 import ast
 import hashlib
 import json
+import os
 import time
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
@@ -22,7 +23,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 DEFAULT_COVERAGE_XML = PROJECT_ROOT / "reports" / "coverage" / "coverage.xml"
 DEFAULT_OUTPUT = PROJECT_ROOT / "reports" / "quality" / "module-coverage-inventory.json"
-DEFAULT_GATES_CONFIG = PROJECT_ROOT / "configs" / "quality" / "module_coverage_gates.yaml"
+DEFAULT_GATES_CONFIG = (
+    PROJECT_ROOT / "configs" / "quality" / "module_coverage_gates.yaml"
+)
 SOURCE_ROOT = PROJECT_ROOT / "src" / "bioetl"
 ENFORCEMENT_MODES = frozenset({"off", "warn", "block-regression", "block-all"})
 COVERAGE_STATUSES = (
@@ -39,6 +42,17 @@ DEFAULT_SOURCE_TREE_STABILIZATION_ATTEMPTS = 5
 DEFAULT_SOURCE_TREE_STABILIZATION_SLEEP_SECONDS = 0.1
 MOUNTED_SOURCE_TREE_STABILIZATION_ATTEMPTS = 12
 MOUNTED_SOURCE_TREE_STABILIZATION_SLEEP_SECONDS = 0.25
+
+
+def _write_text_atomically(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    try:
+        tmp_path.write_text(text, encoding="utf-8")
+        tmp_path.replace(path)
+    finally:
+        if tmp_path.exists():
+            tmp_path.unlink()
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -147,7 +161,10 @@ def _statement_is_declaration_only(node: ast.stmt) -> bool:
 def _assign_targets_are_declaration_only(targets: list[ast.expr]) -> bool:
     """Allow sentinel export/slot assignments in declaration-only modules."""
     allowed_names = {"__all__", "__slots__"}
-    return all(isinstance(target, ast.Name) and target.id in allowed_names for target in targets)
+    return all(
+        isinstance(target, ast.Name) and target.id in allowed_names
+        for target in targets
+    )
 
 
 def _if_is_type_checking_only(node: ast.If) -> bool:
@@ -156,7 +173,9 @@ def _if_is_type_checking_only(node: ast.If) -> bool:
     is_type_checking_guard = isinstance(test, ast.Name) and test.id == "TYPE_CHECKING"
     if not is_type_checking_guard:
         return False
-    return all(_statement_is_declaration_only(child) for child in node.body + node.orelse)
+    return all(
+        _statement_is_declaration_only(child) for child in node.body + node.orelse
+    )
 
 
 def _read_source_module_snapshots(
@@ -258,11 +277,7 @@ def _read_stable_source_module_snapshots(
     """Retry source-tree reads until two consecutive snapshots agree."""
     profile_attempts, profile_sleep = _source_tree_stabilization_profile(repo_root)
     attempts = max_attempts if max_attempts is not None else profile_attempts
-    pause_seconds = (
-        sleep_seconds
-        if sleep_seconds is not None
-        else profile_sleep
-    )
+    pause_seconds = sleep_seconds if sleep_seconds is not None else profile_sleep
     best_digest: str | None = None
     best_paths: tuple[str, ...] = ()
     best_snapshots: list[_SourceModuleSnapshot] | None = None
@@ -636,7 +651,11 @@ def build_module_coverage_inventory(
 
     for source_snapshot in source_snapshots:
         coverage_entry = coverage_by_path.get(source_snapshot.repo_path)
-        if coverage_entry is None and coverage_xml_exists and source_snapshot.declaration_only:
+        if (
+            coverage_entry is None
+            and coverage_xml_exists
+            and source_snapshot.declaration_only
+        ):
             coverage_entry = {
                 "executable_lines": 0,
                 "covered_lines": 0,
@@ -762,7 +781,11 @@ def _resolve_module_tier(
         prefixes = tier.get("path_prefixes", [])
         if not isinstance(prefixes, list):
             prefixes = []
-        if any(repo_path.startswith(prefix) for prefix in prefixes if isinstance(prefix, str)):
+        if any(
+            repo_path.startswith(prefix)
+            for prefix in prefixes
+            if isinstance(prefix, str)
+        ):
             line_min = tier.get("line_min_percent", 85)
             if isinstance(line_min, int | float):
                 return tier_name, float(line_min)
@@ -867,7 +890,10 @@ def evaluate_module_coverage_gates(
             continue
 
         baseline_percent = baseline_by_path.get(path)
-        if baseline_percent is not None and current_percent + min_delta < baseline_percent:
+        if (
+            baseline_percent is not None
+            and current_percent + min_delta < baseline_percent
+        ):
             violations.append(
                 _ModuleCoverageViolation(
                     path=path,
@@ -943,7 +969,9 @@ def _report_gate_violations(
     return 0
 
 
-def _source_tree_only_row(source_snapshot: _SourceModuleSnapshot, repo_root: Path) -> dict[str, Any]:
+def _source_tree_only_row(
+    source_snapshot: _SourceModuleSnapshot, repo_root: Path
+) -> dict[str, Any]:
     return {
         "module": _module_name(source_snapshot.path, repo_root),
         "path": source_snapshot.repo_path,
@@ -1030,7 +1058,9 @@ def _payload_for_check(args: argparse.Namespace) -> dict[str, Any]:
         current = json.loads(args.json_out.read_text(encoding="utf-8"))
         if not isinstance(current, dict):
             raise ValueError(f"Invalid module coverage inventory: {args.json_out}")
-        return _refresh_existing_inventory_source_tree(current, repo_root=args.repo_root)
+        return _refresh_existing_inventory_source_tree(
+            current, repo_root=args.repo_root
+        )
 
     snapshot_date = args.snapshot_date
     if args.check and args.json_out.exists() and snapshot_date is None:
@@ -1091,8 +1121,7 @@ def main(argv: list[str] | None = None) -> int:
         print("[module-coverage-inventory] artifact is current")
         return gate_exit
 
-    args.json_out.parent.mkdir(parents=True, exist_ok=True)
-    args.json_out.write_text(rendered, encoding="utf-8")
+    _write_text_atomically(args.json_out, rendered)
     print(
         "[module-coverage-inventory] "
         f"modules={payload['summary']['source_module_count']}; json={args.json_out}"

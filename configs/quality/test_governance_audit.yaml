@@ -61,8 +61,8 @@ issues:
   - configs/quality/compatibility_sunset_ledger.yaml
 budgets:
   refined_assertless_max: 0
-  duplicate_test_names_max: 1
-  duplicate_test_name_occurrences_max: 2
+  duplicate_test_names_max: 0
+  duplicate_test_name_occurrences_max: 0
   compatibility_test_file_max: 0
   markerless_test_functions_max: 0
   uuid4_call_sites_max: 0
@@ -75,12 +75,12 @@ budget_ratchet:
   stream_g_owner_notes:
   - issue: '#5763'
     owner: test-governance
-    status: telemetry_governance_baseline_refresh_then_duplicate_name_burndown
+    status: telemetry_governance_baseline_refresh_then_duplicate_names_zeroed
     note: >-
       Refreshed telemetry governance baseline and separated expensive report
-      collection from test execution. The residual duplicate-name inventory is
-      ratcheted to one reviewed duplicate name and two occurrences; new generic
-      duplicate test names are not allowed.
+      collection from test execution. The residual duplicate-name inventory is now
+      zero names and zero occurrences; new generic duplicate test names are not
+      allowed.
   - issue: '#5752'
     owner: test-governance
     status: compatibility_test_file_max_ratcheted_to_0
@@ -434,8 +434,8 @@ rf_009_closeout:
   - tracing_emission_observability
   live_metrics:
     refined_assertless_tests: 0
-    duplicate_test_names: 1
-    duplicate_test_name_occurrences: 2
+    duplicate_test_names: 0
+    duplicate_test_name_occurrences: 0
     compatibility_test_files: 0
     markerless_test_functions: 0
     uuid4_call_sites: 0
@@ -477,7 +477,7 @@ test_audit_closeout_2026_06_19:
     compatibility_test_files_less_than: 1
     repo_backed_unit_lane: repo-backed-unit
     repo_backed_unit_subtree: tests/unit/repo_backed/
-    runtime_import_reviewed_scc_max: 3
+    runtime_import_reviewed_scc_max: 2
     telemetry_reports:
     - reports/test-telemetry/coverage-summary.json
     - reports/test-telemetry/slowest-tests.json
@@ -551,6 +551,130 @@ test_audit_closeout_2026_06_19:
     evidence:
     - configs/quality/test_governance_audit.yaml
     - tests/architecture/test_test_governance_audit.py
+test_audit_closeout_2026_07_08:
+  decision: closeable
+  closed_on: '2026-07-08'
+  issue_set:
+  - '#6065'
+  - '#6066'
+  - '#6067'
+  - '#6068'
+  - '#6069'
+  - '#6070'
+  - '#6071'
+  - '#6072'
+  - '#6073'
+  evidence:
+  - configs/quality/test_governance_audit.yaml
+  - configs/quality/test_matrix.yaml
+  - docs/03-guides/testing.md
+  - docs/03-guides/test-optimization-guide.md
+  - docs/04-reference/contracts/gold-schemas.md
+  - reports/quality/test-governance-current.json
+  - reports/quality/test-fixture-asset-duplication.json
+  - reports/quality/vcr-metadata-catalog.json
+  - reports/test-telemetry/slowest-tests.json
+  - reports/test-telemetry/slowest-tests.md
+  - scripts/engineering/qa/report_test_governance_audit.py
+  - scripts/engineering/qa/refresh_test_governance_baseline.py
+  - scripts/engineering/qa/report_vcr_metadata_catalog.py
+  - scripts/engineering/qa/vcr/check_vcr_metadata_age.py
+  - tests/architecture/test_test_governance_audit.py
+  - tests/architecture/test_test_matrix_lane_policy.py
+  - tests/architecture/test_gold_snapshot_registry.py
+  - tests/architecture/test_vcr_metadata_inventory.py
+  - tests/architecture/test_integration_vcr_policy.py
+  - tests/architecture/test_port_contracts_hypothesis.py
+  - tests/unit/infrastructure/observability/test_tracing_port_contract.py
+  - tests/fakes/storage_fake.py
+  invariants:
+    canonical_test_governance_report: reports/quality/test-governance-current.json
+    canonical_fixture_duplication_inventory: reports/quality/test-fixture-asset-duplication.json
+    superseded_fixture_duplication_inventory: reports/quality/fixture-duplication-inventory.json
+    duplicate_name_inventory_policy: embedded_in_test_governance_current_json
+    test_file_count_definition: tests/**/test_*.py from pyproject python_files
+    repo_backed_unit_lane: repo-backed-unit
+    repo_backed_unit_subtree: tests/unit/repo_backed/
+    repo_backed_unit_test_files: 26
+    performance_baseline_reports:
+    - reports/test-telemetry/slowest-tests.json
+    - reports/test-telemetry/slowest-tests.md
+    local_pytest_default: serial
+    forbid_global_xdist_addopts: true
+    explicit_parallel_lanes:
+    - unit-parallel-safe
+    - architecture
+    - architecture-fast-boundary
+    - architecture-slow-governance
+    - coverage-verify
+    storage_test_seam_decision: use_fakes_or_tmp_path_storage_before_delta_replacement_claims
+    vcr_decision: freshness_metadata_pruning_not_mass_consolidation
+    observability_property_gap: tracing_port_runtime_adapters
+    gold_snapshot_scope: bounded_contract_and_dq_sensitive_gold_baseline
+  issue_dispositions:
+  - issue: '#6065'
+    status: normalized_test_audit_baseline_authority
+    evidence:
+    - scripts/engineering/qa/report_test_governance_audit.py
+    - reports/quality/test-governance-current.json
+    - reports/quality/test-fixture-asset-duplication.json
+    - docs/03-guides/testing.md
+  - issue: '#6066'
+    status: repo_backed_lane_is_nonzero_dedicated_and_excluded_from_unit_fast
+    evidence:
+    - configs/quality/test_matrix.yaml
+    - configs/quality/test_governance_audit.yaml
+    - reports/quality/test-governance-current.json
+    - tests/architecture/test_test_governance_audit.py
+    - tests/architecture/test_test_matrix_lane_policy.py
+  - issue: '#6067'
+    status: measurement_baseline_required_before_performance_optimization_claims
+    evidence:
+    - reports/test-telemetry/slowest-tests.json
+    - reports/test-telemetry/slowest-tests.md
+    - docs/03-guides/test-optimization-guide.md
+    - configs/quality/test_matrix.yaml
+  - issue: '#6068'
+    status: slow_architecture_scans_are_cached_and_split_without_gate_relaxation
+    evidence:
+    - configs/quality/test_governance_audit.yaml
+    - configs/quality/test_matrix.yaml
+    - scripts/engineering/qa/report_test_governance_audit.py
+    - tests/architecture/test_test_governance_audit.py
+  - issue: '#6069'
+    status: xdist_scope_limited_to_existing_parallel_safe_lanes
+    evidence:
+    - configs/quality/test_matrix.yaml
+    - tests/architecture/test_test_matrix_lane_policy.py
+    - docs/03-guides/testing.md
+  - issue: '#6070'
+    status: in_memory_delta_claim_replaced_by_test_storage_seams
+    evidence:
+    - tests/fakes/storage_fake.py
+    - docs/03-guides/testing.md
+    - tests/unit/infrastructure/storage/test_gold_writer.py
+    - tests/integration/infrastructure/storage/test_silver_writer.py
+  - issue: '#6071'
+    status: vcr_policy_uses_freshness_metadata_and_pruning_not_mass_consolidation
+    evidence:
+    - configs/quality/test_matrix.yaml
+    - reports/quality/vcr-metadata-catalog.json
+    - scripts/engineering/qa/vcr/check_vcr_metadata_age.py
+    - tests/architecture/test_vcr_metadata_inventory.py
+    - tests/architecture/test_integration_vcr_policy.py
+  - issue: '#6072'
+    status: observability_gap_scoped_to_tracing_port_runtime_adapter_contracts
+    evidence:
+    - tests/architecture/test_port_contracts_hypothesis.py
+    - tests/unit/infrastructure/observability/test_tracing_port_contract.py
+    - tests/integration/test_observability_emission_integration.py
+  - issue: '#6073'
+    status: gold_golden_policy_is_bounded_dq_sensitive_not_blanket_expansion
+    evidence:
+    - configs/quality/test_matrix.yaml
+    - docs/04-reference/contracts/gold-schemas.md
+    - tests/architecture/test_gold_snapshot_registry.py
+    - tests/contract/test_gold_dq_golden_snapshots.py
 preflight:
   script: scripts/engineering/qa/check_test_audit_preflight.py
   telemetry_baseline: docs/05-engineering/test-telemetry-baseline.md
@@ -622,11 +746,9 @@ assertless_triage:
     - tests/unit/application/core/
     - tests/unit/infrastructure/control_plane/
 duplicate_name_triage:
-  total_duplicate_names: 1
-  duplicate_occurrences: 2
-  top_generic_names:
-    - name: test_tdx_audit_closeout_artifact_is_complete_and_budget_safe
-      count: 2
+  total_duplicate_names: 0
+  duplicate_occurrences: 0
+  top_generic_names: []
   zero_enforcement:
     issue_set:
       - '#4894'
@@ -681,13 +803,25 @@ oversized_test_module_inventory:
     source: tests/integration/test_grafana_config.py
     source_lines_after_split: 1524
     extracted_surface: tests/integration/test_grafana_surface_contracts.py
-    extracted_surface_lines: 711
+    extracted_surface_lines: 677
+    owner: observability-dashboards
+  - issue_ref: '#4505'
+    source: tests/integration/test_grafana_surface_contracts.py
+    source_lines_after_split: 677
+    extracted_surface: tests/integration/test_grafana_technical_policy.py
+    extracted_surface_lines: 52
     owner: observability-dashboards
   - issue_ref: '#4506'
     source: tests/unit/composition/runtime_builders/test_runner_builder_profiles.py
     source_lines_after_split: 1138
     extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
-    extracted_surface_lines: 181
+    extracted_surface_lines: 220
+    owner: composition-runtime
+  - issue_ref: '#4506'
+    source: tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
+    source_lines_after_split: 220
+    extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_wiring_contracts.py
+    extracted_surface_lines: 96
     owner: composition-runtime
   - issue_ref: '#4506'
     source: tests/unit/application/services/test_run_manifest_inspection_service.py

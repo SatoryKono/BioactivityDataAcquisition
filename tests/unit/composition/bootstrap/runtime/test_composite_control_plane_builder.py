@@ -28,6 +28,9 @@ from bioetl.domain.control_plane import (
     RunManifest,
     RunSourceRef,
 )
+from bioetl.infrastructure.control_plane import (
+    file_run_ledger_store as run_ledger_store_module,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -504,6 +507,7 @@ def test_build_composite_control_plane_bundle_rejects_replay_ready_with_full_sna
 
 def test_build_composite_control_plane_bundle_persists_manifest_created_when_ledger_enabled(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     config = cast(Any, _RichMockCompositeConfig())
     bronze_root = tmp_path / "cached-bronze"
@@ -543,6 +547,9 @@ def test_build_composite_control_plane_bundle_persists_manifest_created_when_led
             lock=MagicMock(),
         ),
     )
+    # This builder test verifies manifest/ledger contents, not durable fsync policy.
+    # Avoid WSL /mnt fsync latency causing sharded coverage timeout noise.
+    monkeypatch.setattr(run_ledger_store_module.os, "fsync", lambda _fd: None)
 
     with patch(
         "bioetl.composition.bootstrap.runtime.composite_control_plane_builder.get_code_revision_provenance",

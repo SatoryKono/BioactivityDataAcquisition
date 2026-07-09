@@ -117,17 +117,10 @@ def _find_lint_imports_cmd(project_root: Path) -> str | None:
     return None
 
 
-def _import_linter_skip_reason(result: subprocess.CompletedProcess[str]) -> str | None:
-    """Return a skip reason for known environment-related import-linter failures."""
-    combined_output = "\n".join(part for part in (result.stdout, result.stderr) if part)
-    if any(
-        marker in combined_output
-        for marker in ("ModuleNotFoundError", "ImportError", "No module named")
-    ):
-        return (
-            "Skipping import-linter due to missing optional dependencies. "
-            "Install test extras and rerun lint-imports."
-        )
+def _import_linter_environment_skip_reason(
+    result: subprocess.CompletedProcess[str],
+) -> str | None:
+    """Return a skip reason for environment-specific import-linter failures."""
     if result.stderr and (
         "UnicodeEncodeError" in result.stderr or "charmap" in result.stderr
     ):
@@ -149,7 +142,12 @@ def _require_import_linter_capabilities() -> bool:
 
 
 def _handle_import_linter_capability_gap(message: str) -> None:
-    """Skip locally but fail fast when full test capabilities are required."""
+    """Skip locally but fail fast when full test capabilities are required.
+
+    This is only for absent optional capability surfaces. Once ``lint-imports``
+    is available and starts running, import/runtime failures must fail locally
+    so a broken dependency stack cannot silently bypass REQ-ARCH-007.
+    """
     if _require_import_linter_capabilities():
         pytest.fail(message)
     pytest.skip(message)
@@ -679,7 +677,7 @@ def test_import_linter_contracts(project_root: Path, src_dir: Path) -> None:
         return
 
     if result.returncode != 0:
-        skip_reason = _import_linter_skip_reason(result)
+        skip_reason = _import_linter_environment_skip_reason(result)
         if skip_reason is not None:
             _handle_import_linter_capability_gap(skip_reason)
             return

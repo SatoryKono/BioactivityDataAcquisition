@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Protocol
 from bioetl.application.core._runner_observability import (
     emit_postrun_observability,
 )
-from bioetl.application.core.batch_runtime_failure_policy import (
+from bioetl.application.core.batch_operation_errors import (
     OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
 )
 from bioetl.application.core.preflight.service import validate_infrastructure

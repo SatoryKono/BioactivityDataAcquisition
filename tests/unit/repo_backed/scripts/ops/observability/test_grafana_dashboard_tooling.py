@@ -5,6 +5,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 from urllib.error import HTTPError, URLError
+from urllib.parse import parse_qs, urlparse
 
 import pytest
 
@@ -90,6 +91,20 @@ def test_rerender_load_dashboards_filters_and_sorts(
     ]
 
 
+def test_playwright_fallback_prepares_inner_scroll_before_screenshot() -> None:
+    """Fallback screenshots must capture Grafana's scroll-container layout."""
+    script = Path(
+        "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs"
+    ).read_text(encoding="utf-8")
+
+    assert "setDashboardScrollPosition(page, 0)" in script
+    assert "dashboardCaptureMetrics(page)" in script
+    assert "prepareDashboardForCapture(page, dashboard, index, total)" in script
+    assert script.index(
+        "await prepareDashboardForCapture(page, dashboard, index, total);"
+    ) < script.index("await page.screenshot({")
+
+
 def test_rerender_scope_maps_run_id_to_silver_reject_explorer_run_filter(
     tmp_path: Path,
 ) -> None:
@@ -102,7 +117,7 @@ def test_rerender_scope_maps_run_id_to_silver_reject_explorer_run_filter(
         width=1600,
         height=2200,
         timeout_seconds=30.0,
-        selected_uids=(),
+        selected_uids=("bioetl-dq-v2",),
         fallback="auto",
         workflow="chembl_target",
         pipeline="chembl_target",
@@ -115,6 +130,56 @@ def test_rerender_scope_maps_run_id_to_silver_reject_explorer_run_filter(
 
     assert params["var-run_id"] == "run-123"
     assert params["var-quarantine_run_id"] == "run-123"
+
+
+def test_rerender_api_forwards_timeout_to_grafana_render_endpoint(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_download(
+        url: str, *, headers: dict[str, str], timeout_seconds: float
+    ) -> bytes:
+        captured["url"] = url
+        captured["headers"] = headers
+        captured["timeout_seconds"] = timeout_seconds
+        return b"png"
+
+    monkeypatch.setattr(rerender_subject, "_download_binary", fake_download)
+    config = rerender_subject.RenderConfig(
+        base_url="http://localhost:3000",
+        username="admin",
+        password="changeme",
+        service_account_token="",
+        output_dir=tmp_path,
+        width=1600,
+        height=2200,
+        timeout_seconds=123.0,
+        selected_uids=(),
+        fallback="none",
+        workflow="chembl_baseline",
+        pipeline="chembl_assay",
+        run_type="backfill",
+        run_id="run-123",
+        range_hours=12,
+    )
+
+    target = rerender_subject._render_dashboard(
+        rerender_subject.DashboardRecord(
+            uid="bioetl-workflow-overview",
+            url="/d/bioetl-workflow-overview/5-workflow",
+            title="5. Workflow",
+        ),
+        config,
+    )
+
+    query = parse_qs(urlparse(str(captured["url"])).query)
+    assert target == tmp_path / "bioetl-workflow-overview.png"
+    assert target.read_bytes() == b"png"
+    assert captured["timeout_seconds"] == 123.0
+    assert query["timeout"] == ["123"]
+    assert query["var-run_id"] == ["run-123"]
+    assert query["var-quarantine_run_id"] == ["run-123"]
 
 
 def test_rerender_failure_hint_includes_frontend_renderer_state(
@@ -385,6 +450,7 @@ def test_rerender_builds_playwright_env(tmp_path: Path) -> None:
     assert env["GRAFANA_SCREENSHOT_OUTPUT_DIR"] == str(tmp_path)
     assert env["GRAFANA_SCREENSHOT_TIMEOUT_MS"] == "45000"
     assert env["GRAFANA_SCREENSHOT_CAPTURE_TIMEOUT_MS"] == "180000"
+    assert env["GRAFANA_SCREENSHOT_SETTLE_MS"] == "12000"
     assert env["GRAFANA_SCREENSHOT_UIDS"] == "bioetl-control-plane-v1"
 
 
@@ -403,7 +469,7 @@ def test_rerender_builds_playwright_env_with_sidecar_node_modules(
         width=1600,
         height=2200,
         timeout_seconds=45.0,
-        selected_uids=(),
+        selected_uids=("bioetl-dq-v2",),
         fallback="auto",
     )
 
@@ -527,6 +593,14 @@ def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() 
     assert "[data-panelid]" in script
     assert "renderedPanelCount" in script
     assert "renderedPanelSelector" in script
+    assert "waitForDashboardContent" in script
+    assert "materializeLazyPanels" in script
+    assert "window.scrollTo" in script
+    assert "const browser = await chromium.launch({ headless: true });" in script
+    assert "page = await context.newPage();" in script
+    assert "await page.close();" in script
+    assert "GRAFANA_SCREENSHOT_EXPAND_COLLAPSED_ROWS" in script
+    assert "--expand-collapsed-rows" in script
 
 
 def test_rerender_playwright_fallback_streams_output_from_repo_root(
@@ -563,7 +637,7 @@ def test_rerender_playwright_fallback_streams_output_from_repo_root(
         width=1600,
         height=2200,
         timeout_seconds=45.0,
-        selected_uids=(),
+        selected_uids=("bioetl-dq-v2",),
         fallback="auto",
     )
 
@@ -580,6 +654,88 @@ def test_rerender_playwright_fallback_streams_output_from_repo_root(
     assert captured["kwargs"]["cwd"] == str(tmp_path)
     assert "capture_output" not in captured["kwargs"]
     assert captured["kwargs"]["env"]["GRAFANA_BASE_URL"] == "http://localhost:3000"
+    assert captured["kwargs"]["env"]["GRAFANA_SCREENSHOT_UIDS"] == "bioetl-dq-v2"
+
+
+def test_rerender_playwright_fallback_splits_and_merges_multi_dashboard_runs(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    script_path = tmp_path / "rerender_grafana_screenshots.cjs"
+    script_path.write_text("// noop\n", encoding="utf-8")
+    calls: list[str] = []
+
+    class _Result:
+        returncode = 0
+
+    monkeypatch.setattr(
+        rerender_subject, "_playwright_script_path", lambda: script_path
+    )
+    monkeypatch.setattr(
+        rerender_subject, "_resolve_node_executable", lambda: "/usr/bin/node"
+    )
+    monkeypatch.setattr(rerender_subject, "_repo_root", lambda: tmp_path)
+    monkeypatch.setattr(
+        rerender_subject,
+        "_load_dashboards",
+        lambda _config: [
+            rerender_subject.DashboardRecord(
+                uid="bioetl-provider-health-v2",
+                url="/d/bioetl-provider-health-v2/3-provider-health",
+                title="3. Provider Health",
+            ),
+            rerender_subject.DashboardRecord(
+                uid="bioetl-runtime",
+                url="/d/bioetl-runtime/2-runtime",
+                title="2. Runtime",
+            ),
+        ],
+    )
+
+    def fake_run(command: list[str], **kwargs: object) -> _Result:
+        env = kwargs["env"]
+        assert isinstance(env, dict)
+        uid = str(env["GRAFANA_SCREENSHOT_UIDS"])
+        calls.append(uid)
+        (tmp_path / "render-manifest.json").write_text(
+            json.dumps(
+                {
+                    "engine": "playwright",
+                    "dashboards": [
+                        {
+                            "uid": uid,
+                            "title": uid,
+                            "file": f"{uid}.png",
+                            "renderedPanelCount": 1,
+                        }
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+        return _Result()
+
+    monkeypatch.setattr(rerender_subject.subprocess, "run", fake_run)
+
+    config = rerender_subject.RenderConfig(
+        base_url="http://localhost:3000",
+        username="admin",
+        password="changeme",
+        service_account_token="",
+        output_dir=tmp_path,
+        width=1600,
+        height=2200,
+        timeout_seconds=45.0,
+        selected_uids=(),
+        fallback="auto",
+    )
+
+    result = rerender_subject._run_playwright_fallback(config)
+
+    assert result == 0
+    assert calls == ["bioetl-provider-health-v2", "bioetl-runtime"]
+    merged = json.loads((tmp_path / "render-manifest.json").read_text())
+    assert merged["engine"] == "playwright"
+    assert [item["uid"] for item in merged["dashboards"]] == calls
 
 
 def test_rerender_resolves_node_from_repo_local_bin(
@@ -1106,7 +1262,17 @@ def test_runtime_log_hygiene_trend_uses_aggregated_loki_range_queries() -> None:
     dashboard = json.loads(
         Path("grafana/dashboards/bioetl-runtime.json").read_text(encoding="utf-8")
     )
-    panel = next(panel for panel in dashboard["panels"] if panel.get("id") == 258)
+
+    def walk_panels(panels: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        result: list[dict[str, Any]] = []
+        for panel in panels:
+            result.append(panel)
+            nested = panel.get("panels")
+            if isinstance(nested, list):
+                result.extend(walk_panels(nested))
+        return result
+
+    panel = next(panel for panel in walk_panels(dashboard["panels"]) if panel.get("id") == 258)
     expressions = {target["refId"]: target["expr"] for target in panel["targets"]}
 
     assert expressions["A"].startswith("sum(count_over_time(")

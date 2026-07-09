@@ -62,7 +62,9 @@ services:
       retries: 5
       start_period: 30s
     networks:
-      - monitoring
+      monitoring:
+        aliases:
+          - quarantine-explorer
     restart: unless-stopped
 
   loki:
@@ -147,8 +149,6 @@ services:
         condition: service_healthy
       pushgateway:
         condition: service_healthy
-      quarantine-explorer:
-        condition: service_healthy
       renderer:
         condition: service_started
     healthcheck:
@@ -164,7 +164,7 @@ services:
     restart: unless-stopped
 
   renderer:
-    image: grafana/grafana-image-renderer:5.0.0
+    image: grafana/grafana-image-renderer:latest
     container_name: bioetl-grafana-renderer
     shm_size: "1gb"
     environment:

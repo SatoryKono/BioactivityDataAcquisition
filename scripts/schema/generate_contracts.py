@@ -42,11 +42,7 @@ ENTITY_NAME_OVERRIDES: dict[str, str] = {
     "chembl_document_similarity": "chembl_publication_similarity",
     "chembl_document_term": "chembl_publication_term",
 }
-LEGACY_CONTRACT_FILENAMES: tuple[str, ...] = (
-    "chembl_document_v1.0.json",
-    "chembl_document_similarity_v1.0.json",
-    "chembl_document_term_v1.0.json",
-)
+RETAINED_LEGACY_CONTRACT_FILENAMES: frozenset[str] = frozenset()
 
 
 def _camel_to_snake(name: str) -> str:
@@ -198,18 +194,28 @@ def _compute_diff(previous: dict[str, Any], current: dict[str, Any]) -> dict[str
     }
 
 
-def _remove_legacy_contracts() -> None:
-    for legacy_filename in LEGACY_CONTRACT_FILENAMES:
-        legacy_path = CONTRACTS_DIR / legacy_filename
-        if legacy_path.exists():
-            legacy_path.unlink()
-            print(f"Removed legacy contract {legacy_path}")
+def _remove_stale_contracts(active_filenames: set[str]) -> None:
+    retained_filenames = active_filenames | RETAINED_LEGACY_CONTRACT_FILENAMES
+    for contract_path in sorted(CONTRACTS_DIR.glob("*.json")):
+        if contract_path.name in retained_filenames:
+            continue
+        contract_path.unlink()
+        print(f"Removed stale contract {contract_path}")
+
+
+def _active_contract_filenames(schema_classes: list[type[Any]]) -> set[str]:
+    filenames: set[str] = set()
+    for schema_cls in schema_classes:
+        entity = _class_to_entity(schema_cls.__name__)
+        filenames.add(
+            _filename_from_version(entity, _contract_version_for_entity(entity))
+        )
+    return filenames
 
 
 def generate_contracts() -> None:
     CONTRACTS_DIR.mkdir(parents=True, exist_ok=True)
     DIFF_REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    _remove_legacy_contracts()
 
     schema_classes: list[type[Any]] = []
     for export_name in gold_contracts.__all__:
@@ -218,6 +224,7 @@ def generate_contracts() -> None:
             schema_classes.append(export_obj)
 
     schema_classes.sort(key=lambda cls: cls.__name__)
+    _remove_stale_contracts(_active_contract_filenames(schema_classes))
 
     diff_report: dict[str, Any] = {
         "generated_at": "2026-02-17",

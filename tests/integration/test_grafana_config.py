@@ -788,12 +788,11 @@ def test_dq_freshness_panel_uses_age_from_timestamp_metric() -> None:
         None,
     )
     assert panel is not None, "Freshness lag panel not found in bioetl-dq-v2.json"
-
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert any(
-        "max(clamp_min(time() - bioetl_data_freshness_seconds" in expr
+        "max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds" in expr
         for expr in expressions
-    ), "Freshness panel must derive worst lag from the freshness timestamp metric"
+    ), "Freshness panel must derive worst lag from range freshness timestamp evidence"
     assert all(
         "time() - max(bioetl_data_freshness_seconds" not in expr for expr in expressions
     ), "Freshness lag must not collapse scope to the freshest entity"
@@ -803,7 +802,6 @@ def test_freshness_panels_do_not_compute_age_from_counter_suffix_metrics() -> No
     """Freshness panels must never derive age from *_count metrics."""
     dashboard_dir = Path("grafana/dashboards")
     disallowed_pattern = re.compile(r"time\(\)\s*-\s*.*_count")
-
     violations: list[str] = []
     for dashboard_path in dashboard_dir.glob("*.json"):
         dashboard = load_dashboard(dashboard_path)
@@ -811,7 +809,6 @@ def test_freshness_panels_do_not_compute_age_from_counter_suffix_metrics() -> No
             panel_title = str(panel.get("title", ""))
             if "freshness" not in panel_title.lower():
                 continue
-
             for target in panel.get("targets", []):
                 expr = target.get("expr", "")
                 if isinstance(expr, str) and disallowed_pattern.search(expr):
@@ -842,7 +839,10 @@ def test_latest_timestamp_panels_are_explicitly_success_timestamp_panels(
     )
     assert panel is not None, f"Panel {panel_title!r} not found in {dashboard_file}"
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert any("max(bioetl_data_freshness_seconds" in expr for expr in expressions)
+    assert any(
+        "max(max_over_time(bioetl_data_freshness_seconds" in expr
+        for expr in expressions
+    )
     assert any("* 1000" in expr for expr in expressions)
 
 

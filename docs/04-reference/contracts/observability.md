@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-23'
+  Last verified: '2026-07-07'
 
 ______________________________________________________________________
 
 # BioETL Observability Specification (DD)
 
-Этот документ фиксирует **каноническую** спецификацию наблюдаемости BioETL по состоянию на **2026-04-23**.
+Этот документ фиксирует **каноническую** спецификацию наблюдаемости BioETL по состоянию на **2026-07-07**.
 
 - Статус: `active`
 - Версия: `3.5.0`
@@ -53,6 +53,10 @@ sed -n '1,320p' configs/providers/{chembl,pubchem,pubmed,crossref,openalex,seman
 - `tests/unit/infrastructure/observability/test_logger_port_contract.py`
 - `tests/unit/infrastructure/observability/test_metrics_port_contract.py`
 - `tests/unit/infrastructure/observability/test_tracing_port_contract.py`
+- Shipped Grafana dashboards (`grafana/dashboards/*.json`, 8 UIDs) and
+  `docs/03-guides/dashboards/contracts/dashboard-inventory.yaml`
+- Workflow/control-plane panels: `bioetl-workflow-overview`, `bioetl-control-plane-v1`,
+  `bioetl-alerts-slo` (see `docs/03-guides/dashboards/panel-title-inventory.md`)
 
 ## 2. Canonical Conventions
 

@@ -32,6 +32,11 @@ from tests.unit.application.services.run_manifest_test_support import (
 
 
 pytestmark = pytest.mark.unit
+_FIXED_CLOSURE_TIME = datetime(2026, 1, 4, 12, 0, tzinfo=UTC)
+
+
+def _fixed_closure_time() -> datetime:
+    return _FIXED_CLOSURE_TIME
 
 
 def _closure_entry_id_factory(prefix: str = "entry-historical") -> Callable[[], str]:
@@ -105,7 +110,8 @@ def test_closure_report_blocks_claim_without_explicit_residual_dispositions() ->
                 ledger_port=ledger_store,
                 entry_id_factory=_closure_entry_id_factory("entry-closure-gap"),
             ),
-        )
+        ),
+        now_factory=_fixed_closure_time,
     )
 
     report = closure_service.build_closure_report()
@@ -135,7 +141,10 @@ def test_closure_report_supports_global_claim_after_bulk_certification() -> None
             entry_id_factory=_closure_entry_id_factory("entry-closure-certification"),
         ),
     )
-    closure_service = HistoricalReplayClosureService(corpus_service=corpus_service)
+    closure_service = HistoricalReplayClosureService(
+        corpus_service=corpus_service,
+        now_factory=_fixed_closure_time,
+    )
 
     corpus_service.certify_retained_corpus(
         specs=(
@@ -216,7 +225,8 @@ def test_closure_report_classifies_irrecoverable_legacy_subset() -> None:
                 ledger_port=ledger_store,
                 entry_id_factory=_closure_entry_id_factory("entry-closure-residual"),
             ),
-        )
+        ),
+        now_factory=_fixed_closure_time,
     )
 
     report = closure_service.build_closure_report(
@@ -251,7 +261,8 @@ def test_closure_report_can_flip_claim_for_narrowed_certifiable_scope() -> None:
                 ledger_port=ledger_store,
                 entry_id_factory=_closure_entry_id_factory("entry-closure-complete"),
             ),
-        )
+        ),
+        now_factory=_fixed_closure_time,
     )
 
     report = closure_service.build_closure_report(

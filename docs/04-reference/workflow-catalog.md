@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-03'
+  Last verified: '2026-07-07'
 
 ______________________________________________________________________
 
@@ -32,6 +32,21 @@ Runtime model evidence:
 
 For current workflow lifecycle semantics, statuses, and repair/force behavior,
 use [Workflow State Machine](domain/workflow-state-machine.md).
+
+## Composite execution boundary
+
+Composite pipelines (`composite_activity`, `composite_assay`, `composite_molecule`,
+`composite_publication`, `composite_target`) are **not** declared in
+`configs/workflows/*.yaml`.
+
+| Surface | Source of truth | CLI entry |
+| --- | --- | --- |
+| Composite merge policy | `configs/composites/*.yaml` | `bioetl run-composite --composite <entity>` |
+| Composite entity contract | `configs/entities/composite/*.yaml` | same command |
+| Declarative workflow DAG | `configs/workflows/*.yaml` | `bioetl workflow run <name>` |
+
+Use [Running Pipelines](../03-guides/running-pipelines.md) for composite run
+examples and [Pipeline Catalog](pipeline-catalog.md) for composite inventory.
 
 ## Contract
 
@@ -67,10 +82,10 @@ invariant violations, not documentation conventions.
 | `chembl_activity` | `configs/workflows/chembl_activity.yaml` | 1 | `chembl_activity` | - | 0 | Single-pipeline workflow wrapper. |
 | `chembl_assay` | `configs/workflows/chembl_assay.yaml` | 1 | `chembl_assay` | - | 0 | Single-pipeline workflow wrapper. |
 | `chembl_assay_parameters` | `configs/workflows/chembl_assay_parameters.yaml` | 1 | `chembl_assay_parameters` | - | 0 | Single-pipeline workflow wrapper. |
-| `chembl_baseline` | `configs/workflows/chembl_baseline.yaml` | 5 | `chembl_assay`, `chembl_target`, `chembl_publication` | `reconcile_foreign_keys`, `reconcile_foreign_keys` | 6 | Baseline ChEMBL DAG with foreign-key reconciliation after source pipeline steps. |
+| `chembl_baseline` | `configs/workflows/chembl_baseline.yaml` | 7 | `chembl_assay`, `chembl_target`, `chembl_publication` | `reconcile_foreign_keys` x4 | 8 | Baseline ChEMBL DAG with bidirectional Gold foreign-key reconciliation after source pipeline steps. |
 | `chembl_cell_line` | `configs/workflows/chembl_cell_line.yaml` | 1 | `chembl_cell_line` | - | 0 | Single-pipeline workflow wrapper. |
 | `chembl_compound_record` | `configs/workflows/chembl_compound_record.yaml` | 1 | `chembl_compound_record` | - | 0 | Single-pipeline workflow wrapper. |
-| `chembl_core` | `configs/workflows/chembl_core.yaml` | 4 | `chembl_activity`, `chembl_assay` | `reconcile_foreign_keys`, `summarize_upstream_outputs` | 3 | Core ChEMBL DAG with assay-target reconciliation and output summary. |
+| `chembl_core` | `configs/workflows/chembl_core.yaml` | 5 | `chembl_activity`, `chembl_assay`, `chembl_target` | `reconcile_foreign_keys`, `summarize_upstream_outputs` | 5 | Core ChEMBL DAG with activity/assay/target ingests, assay-target reconciliation, and output summary. |
 | `chembl_molecule` | `configs/workflows/chembl_molecule.yaml` | 1 | `chembl_molecule` | - | 0 | Single-pipeline workflow wrapper. |
 | `chembl_protein_class` | `configs/workflows/chembl_protein_class.yaml` | 1 | `chembl_protein_class` | - | 0 | Single-pipeline workflow wrapper. |
 | `chembl_publication` | `configs/workflows/chembl_publication.yaml` | 1 | `chembl_publication` | - | 0 | Single-pipeline workflow wrapper. |

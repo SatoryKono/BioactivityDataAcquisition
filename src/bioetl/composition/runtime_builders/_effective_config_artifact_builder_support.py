@@ -22,11 +22,11 @@ from bioetl.composition.runtime_builders._effective_config_runtime_snapshot_supp
 from bioetl.composition.runtime_builders._runtime_launch_context_fields import (
     build_runtime_launch_field_snapshot,
 )
-from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
-    to_serializable_mapping as _to_serializable_mapping,
-)
-from bioetl.composition.runtime_builders.run_manifest_support import (
+from bioetl.composition.runtime_builders._run_context_values import (
     resolve_run_context_values,
+)
+from bioetl.composition.runtime_builders._snapshot_mapping_support import (
+    to_serializable_mapping as _to_serializable_mapping,
 )
 from bioetl.infrastructure.config.config_root import resolve_configs_root
 
@@ -122,6 +122,11 @@ def build_composite_runtime_overrides_snapshot(
         },
         "runtime": runtime_payload,
     }
+
+
+def build_resolved_config_snapshot(resolved_config: object) -> dict[str, object]:
+    """Convert resolved config into the effective-config artifact mapping shape."""
+    return _to_serializable_mapping(resolved_config)
 
 
 def build_effective_config_source_refs(

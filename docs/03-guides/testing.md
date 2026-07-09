@@ -193,6 +193,7 @@ reproducibility preflight and static governance budget report:
 
 ```bash
 python -m scripts.engineering.qa.check_test_audit_preflight --strict
+python -m scripts.engineering.qa check-vcr-replay-preflight --strict
 python -m scripts.engineering.qa.report_test_governance_audit --check
 ```
 
@@ -206,6 +207,11 @@ the primary blocker remains the actionable `missing_git_lfs` diagnosis instead
 of an opaque `git-lfs filter-process` failure or a timeout in a partially
 hydrated checkout. Normal project Git commands still require `git-lfs` to be
 installed in the active shell.
+`check-vcr-replay-preflight --strict` is the faster replay-lane gate for long
+VCR-backed integration/e2e runs. It reports exact unresolved cassette paths,
+flags replay-critical Git LFS pointers before pytest setup, performs cheap VCR
+metadata-catalog and sanitizer checks, and uses `git lfs pull` as the local
+remediation path.
 `report_test_governance_audit --check` enforces the current ratcheting
 budgets for assert-less candidates, duplicate test names, compatibility/legacy
 surface, marker/path drift, and deterministic-time/UUID call sites tracked in
@@ -219,13 +225,24 @@ searchable without opening the file. Avoid generic names such as
 `test_default_values`, `test_immutability`, `test_hash_consistency`,
 `test_valid_creation`, and `test_none_input` unless the name is already globally
 unique and retained only as historical compatibility during a rename batch.
-`report_test_governance_audit --duplicate-name-inventory-out <path>` writes the
-full duplicate-name inventory used to ratchet
-`duplicate_test_names_max` and `duplicate_test_name_occurrences_max` toward zero.
-The same collector also publishes the exact-byte fixture duplication inventory at
-`reports/quality/test-fixture-asset-duplication.json` so VCR cassettes, golden
-JSON, and other tracked fixture payloads stay visible even though `jscpd` does
-not scan those artifact classes directly.
+`reports/quality/test-governance-current.json` is the canonical test-audit
+baseline. Its `total_test_files` value means `tests/**/test_*.py` files matching
+`pyproject.toml -> tool.pytest.ini_options.python_files`; the broader
+`test_file_inventory.test_python_file_count` field tracks all Python files under
+`tests/`. The repo-backed unit lane is intentionally non-zero and is reported in
+`repo_backed_unit_inventory`; those tests live under `tests/unit/repo_backed/`
+and run through `repo-backed-unit`, not `unit-fast`.
+
+Duplicate test-name inventory is embedded in
+`reports/quality/test-governance-current.json`. The optional
+`--duplicate-name-inventory-out <path>` diagnostic may write a throwaway local
+inventory, but the repository does not commit a separate
+`test-duplicate-name-inventory.json` baseline. The same collector publishes the
+canonical exact-byte fixture duplication inventory at
+`reports/quality/test-fixture-asset-duplication.json`; similarly named historical
+fixture-duplication reports are not current merge-blocking gates. This keeps VCR
+cassettes, golden JSON, and other tracked fixture payloads visible even though
+`jscpd` does not scan those artifact classes directly.
 
 Failure classifications are informational and come from
 `configs/quality/test_health_classifiers.yaml`; pytest exit codes and quality
@@ -334,16 +351,22 @@ Supported policy slice for issue `#2598`:
   в lane `coverage-verify`. Локальные drift-проверки без fresh coverage XML
   должны использовать hash-only режим
   `python -m scripts.engineering.qa report-module-coverage --check --allow-missing-coverage-xml`.
+  `unmeasured_module_count=0` и `uncovered_module_count=0` означают, что все
+  source modules измерены и имеют хотя бы одну covered executable line; это не
+  утверждение о полном line/branch coverage.
   Artifact должен перечислять каждый `src/bioetl/**/*.py`
   module и явно фиксировать coverage status. Поле `source_tree_sha256` MUST
   обновляться после любых изменений под `src/bioetl/**/*.py` через
-  `python _refresh_module_coverage_inventory.py` (см.
+  `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml`
+  (см.
   `tests/architecture/test_module_coverage_inventory.py`).
 - Architecture quality scorecard теперь является committed trend artifact:
   `reports/quality/architecture-quality-scorecard.json` агрегирует dependency
   map, module coverage inventory, compatibility census, dead-code inventory,
   duplication baseline, hotspot-family baseline, test-governance inventory и
   contract diagnostics в 10-категорийную модель с суммой весов `1.00`.
+  Integral score is a governance scorecard snapshot, not a manual architecture
+  review or broad architecture-health guarantee.
   Category scores вычисляются из live metrics, а не остаются fixed constants,
   поэтому substantial duplication/hotspot/test-governance reductions должны
   менять integral score после регенерации committed artifact.
@@ -508,6 +531,11 @@ bash scripts/engineering/dev/run_pytest.sh tests/architecture/test_domain_unit_t
 
 - **Адаптеры**: Тестирование HTTP-клиентов (ChEMBL, PubChem, UniProt) с использованием VCR-кассет.
 - **Storage**: Проверка записи в Delta Lake и Bronze хранилище (используются локальные временные пути).
+  Unit-like storage checks should use explicit test seams such as
+  `tests/fakes/storage_fake.py` or `tmp_path`-backed storage instances before
+  claiming a storage optimization. Do not describe this as "in-memory Delta"
+  unless the actual Delta backend is part of that measured seam; real Delta I/O
+  remains in integration/e2e/contract lanes.
 - **VCR Policy**: canonical machine-readable policy живёт в `configs/quality/integration_vcr_policy.yaml`. Кассеты хранятся в `tests/fixtures/vcr/`, а стандартный CI path использует `--vcr-record=none`.
 - **Compatibility Policy**: `pytest-vcr` должен импортироваться против locked `wrapt` dependency из активного окружения. Repo-root workaround'ы вроде `wrapt/` или `sitecustomize.py` не считаются поддерживаемым fix path; если импорт ломается, нужно чинить environment/lock, а не shadowing dependency.
 - **Fixture Governance**: `_meta.yaml` sidecars и stale-age policy находятся в `enforced` rollout. Managed VCR inventory покрывается repo-wide sidecars, canonical catalog, и CI stale-age checks.
@@ -704,12 +732,14 @@ pytest tests/contract/test_gold_dq_golden_snapshots.py --update-golden
   падать при снижении line % относительно committed inventory; tier gaps
   (85/90/95) пока только warn до Phase C.
   После изменений в `src/bioetl/**/*.py` обновляй `source_tree_sha256`:
-  `python _refresh_module_coverage_inventory.py`, затем
+  `python -m scripts.engineering.qa report-module-coverage --allow-missing-coverage-xml`,
+  затем
   `pytest tests/architecture/test_module_coverage_inventory.py::test_module_coverage_inventory_source_tree_hash_is_current`.
 - **Architecture Quality Scorecard**:
   `reports/quality/architecture-quality-scorecard.json` фиксирует
   evidence-backed quality trend по слоям, DI, module boundaries, tests,
-  contracts, determinism и debt burden. Локальная drift-проверка:
+  contracts, determinism и debt burden. Это governance scorecard snapshot, а не
+  полный manual architecture review. Локальная drift-проверка:
   `pytest tests/architecture/test_architecture_quality_scorecard.py`.
 - **Regression**: Все исправления багов обязаны сопровождаться регрессионным тестом.
 - **Coverage Configuration**: Подробная информация о настройке покрытия, исключаемых паттернах и troubleshooting — см. [Coverage Configuration Guide](./coverage-configuration.md)

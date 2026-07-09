@@ -1,6 +1,8 @@
 %% View: Full | Parent: (root)
 %% Parent source: docs/02-architecture/diagrams/foundation/08-domain-ddd.mmd
 %% Full reference diagram retained after decomposition.
+%% Synced: 2026-07-08
+
 %% Title: Domain Layer — DDD Components
 %% Covers: RULES.md §1.1 (Domain Layer), §1.3 (DDD Aggregates), ADR-021
 %% Updated: 2026-02-17
@@ -10,19 +12,9 @@
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
-%% @uniform width=240 height=126 max_title_len=25 max_desc_lines=5
-%%{init: {
-  'flowchart': {
-    'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
-  },
-  'layout': 'elk',
-  'elk': {
-    'mergeEdges': true,
-    'nodePlacementStrategy': 'BRANDES_KOEPF',
-    'edgeRouting': 'ORTHOGONAL'
-  }
-}}%%
-
+%% @nodes   24
+%% @uniform width=256 height=144 max_title_len=25 max_desc_lines=6
+%%{init: {'layout': 'elk', 'flowchart': {'subGraphTitleMargin': {'top': 12, 'bottom': 12}}, 'elk': {'mergeEdges': true, 'nodePlacementStrategy': 'BRANDES_KOEPF', 'edgeRouting': 'ORTHOGONAL'}}}%%
 flowchart TB
 %% keep-orphan: BronzeStoragePort, SilverStoragePort, GoldStoragePort, MergedStoragePort, StorageLifecyclePort, CheckpointPort, CriticalError, DataQualityError, DataSourcePort, HealthStatus, InvalidStateError, LockPort, Measurement, MetricsPort, QuarantinePort, RecoverableError, RunType, TracingPort
     subgraph domain["Domain Layer (DDD)"]
@@ -41,11 +33,11 @@ flowchart TB
         end
 
         subgraph aggregates["aggregates/"]
-            Batch["Batch Aggregate<br/>add_record(), quarantine_record()<br/>seal(), mark_committed()"]
+            Batch["Batch Aggregate<br/>add_record + quarantine_record<br/>seal + mark_committed"]
 
-            PipelineRun["PipelineRun Aggregate<br/>start(), record_stage_success()<br/>complete(), fail()"]
+            PipelineRun["PipelineRun Aggregate<br/>start + record_stage_success<br/>complete + fail"]
 
-            QuarantineEntry["QuarantineEntry Aggregate<br/>start_review(), mark_ignored()<br/>mark_reprocessed(), mark_expired()"]
+            QuarantineEntry["QuarantineEntry Aggregate<br/>start_review + mark_ignored<br/>mark_reprocessed + mark_expired"]
         end
 
         subgraph events["Domain Events"]
@@ -58,16 +50,16 @@ flowchart TB
         end
 
         subgraph value_objects["value_objects/"]
-            RunID["RunID (UUID)<br/><br/><br/><br/>"]
-            BatchID["BatchID (UUID)<br/><br/><br/><br/>"]
-            EntityID["EntityID (str)<br/><br/><br/><br/>"]
-            ContentHash["ContentHash (str)<br/><br/><br/><br/>"]
-            Measurement["Measurement<br/>(value, unit, relation)<br/><br/><br/>"]
+            RunID["RunID (UUID)"]
+            BatchID["BatchID (UUID)"]
+            EntityID["EntityID (str)"]
+            ContentHash["ContentHash (str)"]
+            Measurement["Measurement<br/>(value, unit, relation)"]
         end
 
         subgraph types["types.py"]
-            RunType["RunType Enum<br/>(INCREMENTAL, BACKFILL, REBUILD)<br/><br/><br/>"]
-            HealthStatus["HealthStatus Enum<br/>(HEALTHY, DEGRADED, UNHEALTHY)<br/><br/><br/>"]
+            RunType["RunType Enum<br/>(INCREMENTAL, BACKFILL, REBUILD)"]
+            HealthStatus["HealthStatus Enum<br/>(HEALTHY, DEGRADED, UNHEALTHY)"]
         end
 
         subgraph exceptions["exceptions/"]
@@ -86,7 +78,7 @@ flowchart TB
     PipelineRun --> RunStarted
     PipelineRun --> RunCompleted
 
-    Batch --> RunID
+    Batch ==> RunID
     Batch --> BatchID
     PipelineRun --> RunID
     QuarantineEntry --> EntityID
@@ -94,41 +86,13 @@ flowchart TB
 
     %% State machines
     subgraph batch_states["Batch State Machine"]
-        B_OPEN["OPEN"] --> B_SEALED["SEALED"]
         B_SEALED --> B_WRITING["WRITING"]
         B_WRITING --> B_COMMITTED["COMMITTED"]
         B_WRITING --> B_FAILED["FAILED"]
     end
 
     subgraph run_states["PipelineRun State Machine"]
-        R_PENDING["PENDING"] --> R_RUNNING["RUNNING"]
         R_RUNNING --> R_COMPLETED["COMPLETED"]
         R_RUNNING --> R_FAILED["FAILED"]
         R_RUNNING --> R_SHUTDOWN["SHUTDOWN"]
     end
-
-    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
-    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
-    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
-    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
-    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
-
-    linkStyle 0 stroke:#1E293B,stroke-width:4px
-    linkStyle 1 stroke:#1E293B,stroke-width:4px
-    linkStyle 2 stroke:#1E293B,stroke-width:4px
-    linkStyle 3 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
-    linkStyle 4 stroke:#1E293B,stroke-width:4px
-    linkStyle 5 stroke:#1E293B,stroke-width:4px
-    linkStyle 6 stroke:#1E293B,stroke-width:4px
-    linkStyle 7 stroke:#1E293B,stroke-width:4px
-    linkStyle 8 stroke:#1E293B,stroke-width:4px
-    linkStyle 9 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
-    linkStyle 10 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
-    linkStyle 11 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 12 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 13 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 14 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
-    linkStyle 15 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 16 stroke:#475569,stroke-width:2px,stroke-dasharray:5
-    linkStyle 17 stroke:#EF4444,stroke-width:2px,stroke-dasharray:4
-    linkStyle 18 stroke:#475569,stroke-width:2px,stroke-dasharray:5

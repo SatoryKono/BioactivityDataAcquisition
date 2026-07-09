@@ -29,6 +29,10 @@ from bioetl.application.core.pre_silver_adapter_mixin import (
     PreSilverAdapterMixin,
 )
 from bioetl.application.core.pre_silver_record import PreSilverRecord
+from bioetl.application.pipelines.common.transformer_initialization import (
+    initialize_base_transformer,
+    transformer_init_kwargs,
+)
 
 if TYPE_CHECKING:
     from bioetl.domain.behavior import EntityIdentityGenerator
@@ -103,17 +107,13 @@ class BaseChemblTransformer(PreSilverAdapterMixin, BaseTransformer):
             resolved_entity_type = self.default_entity_type
         if resolved_entity_type is None and hasattr(self, "entity_class"):
             resolved_entity_type = self.entity_class.__name__.lower()
+        init_kwargs = transformer_init_kwargs(locals())
+        init_kwargs["entity_type"] = resolved_entity_type
 
-        super().__init__(
-            provider,
-            entity_type=resolved_entity_type,
-            silver_filters=silver_filters,
-            gold_filters=gold_filters,
-            tracer=tracer,
-            metrics=metrics,
-            identity_service=identity_service,
-            pii_hasher=pii_hasher,
-            dependencies=dependencies,
+        initialize_base_transformer(
+            self,
+            provider=provider,
+            kwargs=init_kwargs,
         )
 
     def _resolve_primary_id(self, record: BronzeRecord) -> PrimaryId:

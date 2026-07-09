@@ -64,7 +64,7 @@ Shared evidence sources:
 | `chembl_compound_record` | [Spec](chembl/09-compound-record-spec.md) | Shared | Direct | Direct | Shared | Shared | Shared | `configs/entities/chembl/compound_record.yaml` |
 | `chembl_target_component` | [Spec](chembl/10-target-component-spec.md) | Shared | Shared | Direct | Shared | Shared | Shared | `configs/entities/chembl/target_component.yaml` |
 | `chembl_target_protein_classification` | [Spec](chembl/11-target-protein-classification-spec.md) | Shared | Direct | Direct | Shared | Shared | Shared | `configs/entities/chembl/target_protein_classification.yaml` |
-| `chembl_publication_term` | [Spec](chembl/11-publication-term-spec.md) | Shared | Shared | Direct | Shared | Shared | Shared | `configs/entities/chembl/publication_term.yaml` |
+| `chembl_publication_term` | [Spec](chembl/13-publication-term-spec.md) | Shared | Shared | Direct | Shared | Shared | Shared | `configs/entities/chembl/publication_term.yaml` |
 | `chembl_publication_similarity` | [Spec](chembl/12-publication-similarity-spec.md) | Shared | Shared | Direct | Shared | Shared | Shared | `configs/entities/chembl/publication_similarity.yaml` |
 | `chembl_subcellular_fraction` | [Spec](chembl/14-subcellular-fraction-spec.md) | Shared | Direct | Direct | Shared | Shared | Shared | `configs/entities/chembl/subcellular_fraction.yaml` |
 | `chembl_tissue` | [Spec](chembl/15-tissue-spec.md) | Shared | Direct | Direct | Direct / Shared | Shared | Shared | `configs/entities/chembl/tissue.yaml` |

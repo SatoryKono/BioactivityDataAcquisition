@@ -35,7 +35,7 @@ _DEPRECATED_COMPOSITE_SYMBOL_BYTES = tuple(
 )
 _SCAN_CHUNK_SIZE = 64 * 1024
 _SCAN_OVERLAP = max(len(symbol) for symbol in _DEPRECATED_COMPOSITE_SYMBOL_BYTES) - 1
-_SYMBOL_SCAN_TIMEOUT_SECONDS = 120.0
+_SYMBOL_SCAN_TIMEOUT_SECONDS = 300.0
 
 
 _TEXT_SUFFIXES = frozenset({".py", ".mmd", ".mermaid", ".md", ".json", ".svg"})

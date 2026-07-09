@@ -1,14 +1,17 @@
-# Search Patterns
+# Search Patterns Reference Redirect
 
-## Query Templates
+Status: active compatibility reference
+Class: published-redirect
+Owner: BioETL Team
+Last verified: '2026-07-09'
 
-- `site:official.domain <topic> <version>`
-- `<topic> benchmark methodology`
-- `<topic> limitations OR caveats`
-- `<topic> comparison <alternative>`
+This page keeps the legacy local reference URL stable.
 
-## Practice
+The maintained mirror is
+[search-patterns.md](../../../_references/local/deep-research/references/search-patterns.md).
 
-- Start broad, then narrow with constraints.
-- Track why each query was run.
-- Stop when additional queries stop changing conclusions.
+Runtime source:
+
+- `.codex/skills/deep-research/references/search-patterns.md`
+
+Do not copy the reference body back into this page.

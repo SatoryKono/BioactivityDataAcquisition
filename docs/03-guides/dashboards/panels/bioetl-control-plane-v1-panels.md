@@ -28,6 +28,8 @@ JSON is the source of truth.
 | 9401 | Status | stat | Prometheus | Current control-plane severity from `bioetl_replay_safety_blockers_15m` for the selected pipeline/run type. | shared shell | Value mapping expresses current severity state. |
 | 9402 | ID | table | Quarantine Explorer | Identity anchors for the selected workflow/pipeline/run scope. | shared shell | No numeric threshold; forensic handoff table. |
 | 9403 | Processed Records | table | Quarantine Explorer | Current processed-record evidence for the selected run scope. | shared shell | No numeric threshold; read-path evidence table. |
+| 9410 | ID Empty State | text | Static | Neutral visible fallback when the Control Plane identity table returns no visible rows. | shared shell | No thresholds; prevents blank first-screen identity space. |
+| 9411 | Processed Records Empty State | text | Static | Neutral visible fallback when the Control Plane accounting table returns no visible rows. | shared shell | No thresholds; distinguishes missing accounting evidence from zero records. |
 | 891 | Monitor: Replay Safety State | stat | Prometheus | Replay-safety blocker state for the selected scope. | shared shell | Severity/value mapping. |
 | 892 | Monitor: Checkpoint Freshness Lag (seconds) | stat | Quarantine Explorer | Current checkpoint freshness lag from HTTP-backed control-plane evidence. | shared shell | Numeric lag; no PromQL threshold in doc. |
 | 893 | Monitor: Manifest / Ledger Integrity | stat | Prometheus | Current manifest/ledger failure state from `bioetl_manifest_ledger_failures_15m`. | shared shell | Severity/value mapping. |
@@ -95,14 +97,67 @@ JSON is the source of truth.
 
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
-| 905 | Identity evidence and remaining replay-safety signals | row | Static | Collapsible identity-evidence and handoff section. | shared shell | Groups Quarantine Explorer evidence tables. |
-| 9404 | Inspect: Overview Identity Anchors | table | Quarantine Explorer | Canonical identity anchors for the selected scope. | shared shell | Forensic handoff table. |
-| 9405 | Inspect: Identity Gaps | table | Quarantine Explorer | Missing identity surface inventory for the selected scope. | shared shell | Gap table; no numeric threshold. |
-| 9406 | Inspect: Checkpoint Anchor Compare | table | Quarantine Explorer | Side-by-side checkpoint anchor comparison. | shared shell | Comparison table; operator drilldown surface. |
-| 9407 | Inspect: Copyable Identity Handoffs | table | Quarantine Explorer | Copy-ready IDs/anchors for incident handoff. | shared shell | Handoff table only. |
-| 9408 | Inspect: P1 Replay and Evidence Anchors | table | Quarantine Explorer | Priority replay/evidence anchors for first-line investigation. | shared shell | Incident handoff table. |
-| 9409 | Inspect: P2 Forensic Anchors | table | Quarantine Explorer | Secondary forensic anchors for deeper analysis. | shared shell | Incident handoff table. |
+| 905 | Identity evidence and remaining replay-safety signals | row | Static | Compact identity-evidence and handoff section below the shell summary cards. | shared shell | Groups Quarantine Explorer evidence tables without replacing the first-screen replay/resume summary. |
+| 9404 | Inspect: Overview Identity Anchors | table | Quarantine Explorer | Compact forensic identity anchors for the selected scope; use after ID, Replay Safety, Checkpoint Freshness, Manifest/Ledger, and Telemetry summary cards. | shared shell | Forensic handoff table. |
+| 9405 | Inspect: Identity Gaps | table | Quarantine Explorer | Compact missing identity surface inventory for the selected scope. | shared shell | Gap table; no numeric threshold. |
+| 9406 | Inspect: Checkpoint Anchor Compare | table | Quarantine Explorer | Compact side-by-side checkpoint anchor comparison. | shared shell | Comparison table; operator drilldown surface. |
+| 9407 | Inspect: Copyable Identity Handoffs | table | Quarantine Explorer | Compact copy-ready IDs/anchors for incident handoff. | shared shell | Handoff table only. |
+| 9408 | Inspect: P1 Replay and Evidence Anchors | table | Quarantine Explorer | Compact priority replay/evidence anchors for first-line investigation. | shared shell | Incident handoff table. |
+| 9409 | Inspect: P2 Forensic Anchors | table | Quarantine Explorer | Compact secondary forensic anchors for deeper analysis. | shared shell | Incident handoff table. |
 | 139 | Review: Remaining Replay-Safety Signals | text | Static | Static reminder of residual replay-safety signals to inspect after core blockers. | shared shell | No thresholds; review checklist only. |
+
+## PromQL Formula Anchors
+
+The shipped dashboard JSON remains the byte-level source of truth. The formulas
+below document the current Prometheus query families for all Prometheus-backed
+panels; HTTP-backed identity panels are documented in the inventory above.
+
+- `Status`: `max((bioetl_replay_safety_blockers_15m{run_type=~"$run_type"}) and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), "pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))`
+- `Monitor: Replay Safety State`: `max((bioetl_replay_safety_blockers_15m{run_type=~"$run_type"}) and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), "pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))`
+- `Monitor: Manifest / Ledger Integrity`: `max((bioetl_manifest_ledger_failures_15m{run_type=~"$run_type"}) and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), "pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))`
+- `Inspect: Telemetry Missing`: `max((bioetl_control_plane_telemetry_missing_5m{run_type=~"$run_type"}) and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), "pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))`
+- `Track: Replay / Resume Blockers in Range`: `round((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~"$pipeline", run_type=~"$run_type", status="failed"}[$__range])) or vector(0)) + (sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~"$pipeline", status="failed"}[$__range])) or vector(0)) + (sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~"$pipeline", disposition=~".*_incompatible"}[$__range])) or vector(0)) + (sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~"$pipeline", status="not_reconstructable"}[$__range])) or vector(0)) + (sum(increase(bioetl_replay_drift_events_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__range])) or vector(0)) + (sum(increase(bioetl_lineage_refs_missing_total{pipeline=~"$pipeline"}[$__range])) or vector(0)))`
+- `Monitor: Checkpoint Incompatibilities`: `round(sum(increase(bioetl_checkpoint_compatibility_events_total{pipeline=~"$pipeline", disposition=~".*_incompatible"}[$__range])) or vector(0))`
+- `Monitor: Replay Not Reconstructable`: `round(sum(increase(bioetl_replay_reconstructability_events_total{pipeline=~"$pipeline", status="not_reconstructable"}[$__range])) or vector(0))`
+- `Monitor: Replay Drift`: `round(sum(increase(bioetl_replay_drift_events_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__range])) or vector(0))`
+- `Monitor: Checkpoint Load Failures`: `round(sum(increase(bioetl_checkpoint_load_events_total{pipeline=~"$pipeline", status="failed"}[$__range])) or vector(0))`
+- `Monitor: Checkpoint Save Failures`: `round(sum(increase(bioetl_checkpoint_save_events_total{pipeline=~"$pipeline", status="failed"}[$__range])) or vector(0))`
+- `Monitor: GLOBAL Checkpoint Operator Failures`: `round(sum(increase(bioetl_checkpoint_operator_operations_total{status="failed"}[$__range])) or vector(0))`
+- `Track: Replay Lag Seconds`: `max(max_over_time(bioetl_replay_lag_seconds{pipeline=~"$pipeline", run_type=~"$run_type"}[$__range]))`
+- `Track: Checkpoint Compatibility Outcomes`: `sum by (disposition) (increase(bioetl_checkpoint_compatibility_events_total{pipeline=~"$pipeline"}[$__interval])) or label_replace(vector(0), "disposition", "no_events", "", "")`
+- `Track: Replay Drift by Type`: `sum by (replay_capability, drift_type, status) (increase(bioetl_replay_drift_events_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))`
+- `Track: Replay Lag Trend`: `max by (replay_capability, status) (bioetl_replay_lag_seconds{pipeline=~"$pipeline", run_type=~"$run_type"})`
+- `Track: Checkpoint Save Latency p50`: `histogram_quantile(0.50, sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~"$pipeline"}[$__range])))`
+- `Track: Checkpoint Save Latency p95`: `histogram_quantile(0.95, sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~"$pipeline"}[$__range])))`
+- `Track: Checkpoint Save Latency p99`: `histogram_quantile(0.99, sum by (le, pipeline, operation) (increase(bioetl_checkpoint_save_duration_seconds_bucket{pipeline=~"$pipeline"}[$__range])))`
+- `Track: GLOBAL Checkpoint Operator Latency p50`: `histogram_quantile(0.50, sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])))`
+- `Track: GLOBAL Checkpoint Operator Latency p95`: `histogram_quantile(0.95, sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])))`
+- `Track: GLOBAL Checkpoint Operator Latency p99`: `histogram_quantile(0.99, sum by (le, operation) (increase(bioetl_checkpoint_operator_duration_seconds_bucket[$__range])))`
+- `Inspect: Terminal Run Events by Status in Range`: `sum by (terminal_status) (increase(bioetl_control_plane_terminal_events_total{pipeline=~"$pipeline"}[$__range]))`
+- `Monitor: Manifest Write Failures`: `round(sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~"$pipeline", run_type=~"$run_type", status="failed"}[$__range])) or vector(0))`
+- `Monitor: Ledger Append Failures`: `round(sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~"$pipeline", status="failed"}[$__range])) or vector(0))`
+- `Track: Manifest Writes by Status`: `sum by (status, run_type) (increase(bioetl_control_plane_manifest_writes_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))`
+- `Track: Ledger Appends by Event Type / Status`: `sum by (event_type, status) (increase(bioetl_control_plane_ledger_appends_total{pipeline=~"$pipeline"}[$__interval]))`
+- `Monitor: Manifest Write Failure Ratio`: `((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~"$pipeline", run_type=~"$run_type", status="failed"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_manifest_writes_total{pipeline=~"$pipeline", run_type=~"$run_type"}[30m])) or vector(0)), 1))` mapped to WARN/CRIT bands.
+- `Monitor: Ledger Append Failure Ratio`: `((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~"$pipeline", status="failed"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_ledger_appends_total{pipeline=~"$pipeline"}[30m])) or vector(0)), 1))` mapped to WARN/CRIT bands.
+- `Monitor: GLOBAL Control-Plane Read Failures`: `round(sum(increase(bioetl_control_plane_reads_total{status="failed"}[$__range])) or vector(0))`
+- `Monitor: GLOBAL Control-Plane Read Failure Ratio Severity`: `((sum(increase(bioetl_control_plane_reads_total{status="failed"}[30m])) or vector(0)) / clamp_min((sum(increase(bioetl_control_plane_reads_total[30m])) or vector(0)), 1))` mapped to WARN/CRIT bands.
+- `Track: GLOBAL Control-Plane Reads by Store / Operation / Status`: `sum by (store, operation, status) (increase(bioetl_control_plane_reads_total[$__interval]))`
+- `Track: GLOBAL Control-Plane Read Latency p50`: `histogram_quantile(0.50, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!="failed"}[$__range])))`
+- `Track: GLOBAL Control-Plane Read Latency p95`: `histogram_quantile(0.95, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!="failed"}[$__range])))`
+- `Track: GLOBAL Control-Plane Read Latency p99`: `histogram_quantile(0.99, sum by (le) (increase(bioetl_control_plane_read_duration_seconds_bucket{status!="failed"}[$__range])))`
+- `Monitor: Lineage Refs Missing`: `round(sum(increase(bioetl_lineage_refs_missing_total{pipeline=~"$pipeline"}[$__range])) or vector(0))`
+- `Monitor: Lineage Fragment Persistence Failures`: `round(sum(increase(bioetl_lineage_fragments_emitted_total{pipeline=~"$pipeline", status="failed"}[$__range])) or vector(0))`
+- `Inspect: Missing Lineage Refs by Layer / Type`: `sum by (layer, ref_type) (increase(bioetl_lineage_refs_missing_total{pipeline=~"$pipeline"}[$__range]))`
+- `Track: GLOBAL Audit Write Outcomes`: `round(sum by (layer, operation, status) (increase(bioetl_audit_write_events_total[$__interval])) or vector(0))`
+- `Track: GLOBAL Audit Query Outcomes`: `round(sum by (layer_filter, status) (increase(bioetl_audit_query_events_total[$__interval])) or vector(0))`
+- `Track: GLOBAL Audit Write Latency p50`: `histogram_quantile(0.50, sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])))`
+- `Track: GLOBAL Audit Write Latency p95`: `histogram_quantile(0.95, sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])))`
+- `Track: GLOBAL Audit Write Latency p99`: `histogram_quantile(0.99, sum by (le) (increase(bioetl_audit_write_duration_seconds_bucket[$__range])))`
+- `Track: GLOBAL Audit Query Latency p50`: `histogram_quantile(0.50, sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])))`
+- `Track: GLOBAL Audit Query Latency p95`: `histogram_quantile(0.95, sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])))`
+- `Track: GLOBAL Audit Query Latency p99`: `histogram_quantile(0.99, sum by (le) (increase(bioetl_audit_query_duration_seconds_bucket[$__range])))`
+- `Track: Lineage Fragment Outcomes`: `sum by (layer, status) (increase(bioetl_lineage_fragments_emitted_total{pipeline=~"$pipeline"}[$__interval]))`
 
 ## Notes
 
@@ -114,4 +169,4 @@ JSON is the source of truth.
   Prometheus metric panels.
 - Thresholds and value mappings not spelled out above should be taken from the
   shipped panel JSON; this page documents the panel inventory, datasource
-  family, and operator purpose 1:1.
+  family, primary PromQL formulas, and operator purpose 1:1.

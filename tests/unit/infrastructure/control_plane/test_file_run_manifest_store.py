@@ -468,3 +468,30 @@ def test_file_store_allows_idempotent_retry_for_same_run_id_mapping(tmp_path) ->
 
     assert store.get(manifest.manifest_id) == manifest
     assert store.get_by_run_id(manifest.run_id) == manifest
+
+
+def test_file_store_assert_saved_checks_materialized_paths(tmp_path) -> None:
+    store = FileRunManifestStore(base_path=tmp_path / "run_manifest")
+    manifest = RunManifest(
+        manifest_id="manifest-fast-post-save",
+        execution_fingerprint="fingerprint-fast-post-save",
+        schema_version="1.0",
+        created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+        run_id=RunID(deterministic_uuid_from_callsite("replay-sensitive")),
+        run_type=RunType.INCREMENTAL,
+        pipeline_name="chembl_activity",
+        provider="chembl",
+        entity="activity",
+        launch_context={},
+        runtime_config={},
+        resolved_config={},
+        code_provenance=RunCodeProvenance(),
+    )
+
+    store.save(manifest)
+
+    store.assert_saved(manifest)
+
+    (store.base_path / "_by_run_id" / f"{manifest.run_id}.txt").unlink()
+    with pytest.raises(RuntimeError, match="run_id index is not materialized"):
+        store.assert_saved(manifest)

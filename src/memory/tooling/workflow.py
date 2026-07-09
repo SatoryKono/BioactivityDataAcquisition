@@ -14,7 +14,9 @@ from typing import Any
 WORKFLOW_PRUNE_PREVIEW_LIMIT = 10
 DEFAULT_PROFILE = "general"
 DEFAULT_POST_TASK_VALIDATION_TIMEOUT_SECONDS = 15.0
-DEFAULT_POST_TASK_REFRESH_TIMEOUT_SECONDS = 15.0
+# Cold workflow refresh on mounted or cloud-synced checkouts can exceed the
+# validation budget while still being bounded enough for the post-task path.
+DEFAULT_POST_TASK_REFRESH_TIMEOUT_SECONDS = 120.0
 
 
 def _discover_memory_root() -> Path:

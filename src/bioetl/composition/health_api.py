@@ -22,6 +22,7 @@ if TYPE_CHECKING:
         QuarantinePort,
         RunLedgerPort,
         RunManifestPort,
+        WorkflowManifestPort,
     )
 
     class ObservabilitySettingsProtocol(Protocol):
@@ -75,6 +76,7 @@ class HealthServerDependenciesProtocol(Protocol):
     checkpoint_port: CheckpointPort
     run_manifest_port: RunManifestPort
     run_ledger_port: RunLedgerPort
+    workflow_manifest_port: WorkflowManifestPort
 
 
 def get_runtime_settings() -> object:

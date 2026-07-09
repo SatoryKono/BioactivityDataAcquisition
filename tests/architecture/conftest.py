@@ -49,6 +49,29 @@ _TEXT_CACHE_NAMES_WITHOUT_DISK = frozenset(
         "test-content",
     }
 )
+_WINDOWS_PYCHARM_SUBPROCESS_TIMEOUT_SECONDS = 180.0
+
+
+def _is_windows_pycharm_pytest_runner() -> bool:
+    """Return whether tests are running from the Windows PyCharm pytest runner."""
+    if not sys.platform.startswith("win"):
+        return False
+    if os.environ.get("PYCHARM_HOSTED") == "1":
+        return True
+    return any("_jb_pytest_runner.py" in arg.replace("\\", "/") for arg in sys.argv)
+
+
+def _effective_subprocess_timeout(timeout: float | None) -> float | None:
+    """Give repo-wide scanner subprocesses enough room under Windows/PyCharm."""
+    if (
+        timeout is not None
+        and _is_windows_pycharm_pytest_runner()
+        and timeout < _WINDOWS_PYCHARM_SUBPROCESS_TIMEOUT_SECONDS
+    ):
+        # Repo-backed scanner subprocesses can stall unpredictably on mixed
+        # Windows cloud-synced checkouts when launched from the PyCharm runner.
+        return _WINDOWS_PYCHARM_SUBPROCESS_TIMEOUT_SECONDS
+    return timeout
 
 
 def _list_python_files(root: Path) -> list[Path]:
@@ -663,16 +686,7 @@ def _run_cached_subprocess(
     if cached is not None:
         return cached
 
-    effective_timeout = timeout
-    if (
-        effective_timeout is not None
-        and sys.platform.startswith("win")
-        and os.environ.get("PYCHARM_HOSTED") == "1"
-        and effective_timeout < 180
-    ):
-        # Repo-backed scanner subprocesses can stall unpredictably on mixed
-        # Windows cloud-synced checkouts when launched from the PyCharm runner.
-        effective_timeout = 180
+    effective_timeout = _effective_subprocess_timeout(timeout)
 
     result = subprocess.run(
         command,

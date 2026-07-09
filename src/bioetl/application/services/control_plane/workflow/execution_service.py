@@ -205,11 +205,14 @@ async def _run_locked_workflow(
     )
     result = await runner.run_workflow(
         config,
+        workflow_run_id=str(prepared_manifest.workflow_run_id),
+        manifest_id=prepared_manifest.manifest_id,
         completed_step_ids=completed_step_ids,
         completed_transform_fingerprints=completed_transform_fingerprints,
         step_started_callback=partial(record_step_started, recorder),
         step_completed_callback=partial(record_step_completed, recorder),
         transform_commit_callback=partial(record_transform_commit, recorder),
+        created_at_factory=now_factory,
     )
 
     # Extract offset/limit for saving only if incremental is enabled

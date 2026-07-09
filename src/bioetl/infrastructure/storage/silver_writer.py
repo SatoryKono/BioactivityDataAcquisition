@@ -11,7 +11,10 @@ from bioetl.domain.ports import (
     LoggerPort,
     TracingPort,
 )
-from bioetl.infrastructure.storage.base_delta_writer import BaseDeltaWriter
+from bioetl.infrastructure.storage.base_delta_writer import (
+    BaseDeltaWriter,
+    _clear_delta_tables,
+)
 from bioetl.infrastructure.storage.silver.maintenance_mixin import (
     SilverWriterMaintenanceMixin,
 )
@@ -122,3 +125,11 @@ class SilverWriter(
         on_schema_mismatch: str,
     ) -> None:
         await super()._check_schema_drift(table_name, records, on_schema_mismatch)
+
+    async def clear_silver(self, table_name: str, dry_run: bool = False) -> int:
+        """Implement ``SilverStoragePort`` clear for rebuild/backfill paths."""
+        return _clear_delta_tables(
+            base_path=Path(str(self.base_path)),
+            table_path=Path(self._resolve_table_path(table_name)),
+            dry_run=dry_run,
+        )

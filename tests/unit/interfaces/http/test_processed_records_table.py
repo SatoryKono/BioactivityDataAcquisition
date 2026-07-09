@@ -226,6 +226,152 @@ class TestProcessedRecordsTable:
         assert all("No data" in str(row["value"]) for row in payload["rows"])
         assert all("No data" in str(row["percintage"]) for row in payload["rows"])
 
+    def test_prometheus_payload_fetches_values_for_known_pipeline(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Known scopes should fetch bounded Prometheus values before formatting."""
+        calls: list[dict[str, str | None]] = []
+
+        def fake_fetch(
+            *,
+            prometheus_base_url: str,
+            pipeline: str,
+            run_type: str | None,
+        ) -> dict[str, int]:
+            calls.append(
+                {
+                    "prometheus_base_url": prometheus_base_url,
+                    "pipeline": pipeline,
+                    "run_type": run_type,
+                }
+            )
+            return dict(self._SAMPLE_VALUES)
+
+        monkeypatch.setattr(
+            processed_records_module, "fetch_processed_record_values", fake_fetch
+        )
+
+        payload = processed_records_module.build_processed_records_table_payload_from_prometheus(
+            prometheus_base_url="http://prometheus.example",
+            pipeline="chembl_activity",
+            run_type="{backfill,incremental}",
+        )
+
+        rows = {row["parameter"]: row for row in payload["rows"]}
+        assert calls == [
+            {
+                "prometheus_base_url": "http://prometheus.example",
+                "pipeline": "chembl_activity",
+                "run_type": "{backfill,incremental}",
+            }
+        ]
+        assert payload["pipeline"] == "chembl_activity"
+        assert payload["run_type"] == ["backfill", "incremental"]
+        assert rows["01 bronze_records"]["value"] == "01 bronze_records|10 000"
+        assert rows["07 gold_written_records"]["row_status"] == "gold_deficit"
+
+    def test_empty_ledger_payload_returns_no_data_rows(self) -> None:
+        """Exact-run ledger payloads with no entries should remain deterministic."""
+        payload = build_processed_records_table_payload_from_ledger(
+            pipeline="chembl_target",
+            run_type="{backfill,incremental}",
+            ledger_entries=(),
+        )
+
+        assert payload["pipeline"] == "chembl_target"
+        assert payload["run_type"] == ["backfill", "incremental"]
+        assert len(payload["rows"]) == 11
+        assert all("No data" in str(row["value"]) for row in payload["rows"])
+        assert all("No data" in str(row["percintage"]) for row in payload["rows"])
+
+    def test_ledger_payload_uses_metrics_snapshot_when_artifacts_are_absent(
+        self,
+    ) -> None:
+        """RunLedger snapshots should format exact-run rows without artifacts."""
+        run_id = deterministic_run_uuid_from_callsite("test_processed_records_table")
+        payload = build_processed_records_table_payload_from_ledger(
+            pipeline="chembl_target",
+            run_type="backfill",
+            ledger_entries=(
+                RunLedgerEntry(
+                    entry_id="finished",
+                    manifest_id="manifest-chembl-target",
+                    run_id=run_id,
+                    event_type="run_finished",
+                    occurred_at=datetime(2026, 5, 29, 17, 37, tzinfo=UTC),
+                    status="success",
+                    metrics_snapshot={
+                        "records_bronze": 10,
+                        "records_silver": 8,
+                        "records_gold": 7,
+                        "records_quarantined": 1,
+                        "records_filtered_out": 1,
+                        "records_gold_excluded_by_contract": 1,
+                    },
+                ),
+            ),
+        )
+
+        rows = {row["parameter"]: row for row in payload["rows"]}
+        assert rows["01 bronze_records"]["value"] == "01 bronze_records|10"
+        assert rows["02 silver_valid_records"]["value"] == "02 silver_valid_records| 8"
+        assert rows["03 silver_filtered_out_records"]["value"] == (
+            "03 silver_filtered_out_records| 1"
+        )
+        assert rows["04 silver_quarantined_records"]["value"] == (
+            "04 silver_quarantined_records| 1"
+        )
+        assert rows["07 gold_written_records"]["value"] == "07 gold_written_records| 7"
+        assert rows["08 gold_excluded_by_contract_records"]["value"] == (
+            "08 gold_excluded_by_contract_records| 1"
+        )
+        assert rows["07 gold_written_records"]["row_status"] == ""
+
+    def test_ledger_artifact_count_above_snapshot_does_not_deduplicate(
+        self,
+    ) -> None:
+        """Artifact corrections must not create negative deduplication counts."""
+        run_id = deterministic_run_uuid_from_callsite("test_processed_records_table")
+        occurred_at = datetime(2026, 5, 29, 17, 37, tzinfo=UTC)
+        payload = build_processed_records_table_payload_from_ledger(
+            pipeline="chembl_target",
+            run_type="backfill",
+            ledger_entries=(
+                RunLedgerEntry(
+                    entry_id="finished",
+                    manifest_id="manifest-chembl-target",
+                    run_id=run_id,
+                    event_type="run_finished",
+                    occurred_at=occurred_at,
+                    status="success",
+                    metrics_snapshot={
+                        "records_bronze": 10,
+                        "records_silver": 3,
+                        "records_gold": 5,
+                    },
+                ),
+                RunLedgerEntry(
+                    entry_id="silver-artifact",
+                    manifest_id="manifest-chembl-target",
+                    run_id=run_id,
+                    event_type=ARTIFACT_PUBLISHED_EVENT,
+                    occurred_at=occurred_at,
+                    stage="silver",
+                    status="published",
+                    details={"stage": "silver", "record_count": 5},
+                ),
+            ),
+        )
+
+        rows = {row["parameter"]: row for row in payload["rows"]}
+        assert rows["02 silver_valid_records"]["value"] == "02 silver_valid_records| 5"
+        assert rows["06 silver_deduplicated_records"]["value"] == (
+            "06 silver_deduplicated_records| 0"
+        )
+        assert rows["06 silver_deduplicated_records"]["percintage"] == (
+            "06 silver_deduplicated_records|0%"
+        )
+
     def test_exact_run_payload_uses_run_ledger_artifacts_as_source_of_truth(
         self,
     ) -> None:

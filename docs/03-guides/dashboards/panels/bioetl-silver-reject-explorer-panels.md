@@ -68,22 +68,39 @@ Dashboard `Silver Reject Explorer` provides detailed Silver structural reject ev
 - **Purpose:** Show top reason signatures.
 - **Data sources:** `bioetl_silver_filter_reject_reason_total`
 
-### 13. Inspect Filtered Records Table
+### 13. Review: Trend Empty State
+- **Type:** Text
+- **Purpose:** Keep trend empty-state semantics visible when active filters
+  return no matching reject samples.
+- **Data sources:** Dashboard variables and operator copy.
+
+### 14. Review: Record Selection Empty State
+- **Type:** Text
+- **Purpose:** Keep record-selection guidance visible even when empty HTTP table
+  frames do not render field-level `noValue` text.
+- **Data sources:** Dashboard variables and operator copy.
+
+### 15. Inspect Filtered Records Table
 - **Type:** Table
-- **Purpose:** Show detailed filtered records table.
+- **Purpose:** Show a compact latest-record list and an explanatory empty state
+  when filters return no rows.
 - **Data sources:** HTTP quarantine backend filtered records query.
 
-### 14. Inspect Selected Record Details
+### 16. Inspect Selected Record Details
 - **Type:** Table
-- **Purpose:** Show detailed information for selected record.
+- **Purpose:** Show compact one-record details after `payload_hash` selection,
+  or guide the operator to select a row, widen filters, or verify backend
+  health when no record is selected.
 - **Data sources:** HTTP quarantine backend record detail query.
 
 ## Variables
 
 - `pipeline` is the primary selector for pipeline-specific evidence.
-- `reject_reason` narrows by specific reject reason.
+- `reason_code` narrows by specific reject reason.
 - `field` narrows by specific field name.
-- `run_id` narrows by specific run.
+- `quarantine_run_id` narrows by specific reject run without becoming a shared
+  shell `run_id` selector.
+- `payload_hash` focuses the selected record details panel.
 
 ## Notes
 

@@ -104,7 +104,9 @@ def test_merge_reviewed_baseline_metrics_prefers_scorecard_snapshot() -> None:
     assert merged["helper_function_ratio"] == 0.496
 
 
-def test_merge_reviewed_baseline_metrics_keeps_live_metrics_for_active_family() -> None:
+def test_merge_reviewed_baseline_metrics_uses_scorecard_metrics_for_active_family() -> (
+    None
+):
     family = {
         "name": "composition_bootstrap_runtime",
         "ratchet_stage": "active",
@@ -117,4 +119,5 @@ def test_merge_reviewed_baseline_metrics_keeps_live_metrics_for_active_family() 
 
     merged = _merge_reviewed_baseline_metrics(family=family, measured=measured)
 
-    assert merged["files_ge_250_loc"] == 5
+    # Active families now use scorecard metrics when provided
+    assert merged["files_ge_250_loc"] == 99

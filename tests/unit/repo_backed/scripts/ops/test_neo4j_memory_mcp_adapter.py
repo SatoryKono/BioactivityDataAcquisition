@@ -34,6 +34,11 @@ for raw_line in sys.stdin:
                 "serverInfo": {"name": "line-server", "version": "1.0"},
             },
         }
+        sys.stdout.write(json.dumps(response, separators=(",", ":"), sort_keys=True) + "\n")
+        sys.stdout.flush()
+    elif message.get("method") == "notifications/initialized":
+        # Client notification, no response needed
+        continue
     elif message.get("method") == "tools/list":
         response = {
             "jsonrpc": "2.0",
@@ -47,8 +52,6 @@ for raw_line in sys.stdin:
         break
     else:
         continue
-    sys.stdout.write(json.dumps(response, separators=(",", ":"), sort_keys=True) + "\n")
-    sys.stdout.flush()
 """.strip()
         + "\n",
         encoding="utf-8",

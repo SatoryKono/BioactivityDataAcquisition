@@ -2,7 +2,7 @@
 
 Quick overview of ADR status and distribution.
 
-**Last Updated**: 2026-06-16 19:05:56
+**Last Updated**: 2026-07-08 20:17:28
 
 ## 📈 Status Distribution
 
@@ -38,11 +38,11 @@ Quick overview of ADR status and distribution.
 
 Last 5 updated ADRs:
 
-- **ADR-050**: Silver Structural and Gold Semantic Filter Boundary (2026-06-15)
-- **ADR-003**: In-Memory Locking (MemoryLock) (2026-06-04)
-- **ADR-008**: Graceful Shutdown Strategy (2026-06-04)
-- **ADR-048**: Domain Schema Boundary and Runtime Pandera Compatibility (2026-05-26)
-- **ADR-049**: Context-Aware LOC Target Policy (2026-05-26)
+- **ADR-040**: Diagram Governance and Layout Policy (2026-07-08)
+- **ADR-021**: DDD Aggregates Adoption (2026-07-07)
+- **ADR-020**: BasePipeline Decomposition (2026-07-03)
+- **ADR-045**: Data Quality Contract System (2026-07-03)
+- **ADR-050**: Silver Structural and Gold Semantic Filter Boundary (2026-06-18)
 
 ## 🎯 Health Metrics
 

@@ -442,6 +442,26 @@ def test_post_task_workflow_timeout_payload_returns_nonzero_exit_code() -> None:
     assert workflow._emit(payload, as_json=False) == 1
 
 
+def test_post_task_cli_parser_uses_bounded_refresh_timeout_default() -> None:
+    args = workflow._build_parser().parse_args(
+        [
+            "post-task",
+            "--task-id",
+            "task-refresh-default",
+            "--title",
+            "Refresh default",
+            "--summary",
+            "Verify the configured refresh timeout default.",
+        ]
+    )
+
+    assert (
+        args.refresh_timeout_seconds
+        == workflow.DEFAULT_POST_TASK_REFRESH_TIMEOUT_SECONDS
+        == 120.0
+    )
+
+
 def test_post_task_workflow_returns_degraded_payload_when_refresh_times_out(
     tmp_path: Path,
     monkeypatch,

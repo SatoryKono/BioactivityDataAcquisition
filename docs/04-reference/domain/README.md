@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-19'
+  Last verified: '2026-07-06'
 
 ______________________________________________________________________
 
@@ -18,20 +18,20 @@ ______________________________________________________________________
 This section is the canonical published reference catalog for the BioETL domain
 model.
 
-Use these pages when you need the current catalog of aggregates, value objects,
-domain events, control-plane artifacts, ports, invariants, and workflow
-state-machine semantics.
+Use these pages when you need the current semantic catalog of aggregates,
+entities, value-object families, domain events, control-plane artifacts, port
+families, invariants, and workflow state-machine semantics.
 
 ## Boundary
 
 - Use [Domain Layer](../../02-architecture/01-domain-layer.md) for architecture
   rationale, layer boundaries, and DDD positioning.
-- Use this reference section for the current published catalog of live domain
-  surfaces.
+- Use this reference section for the current published semantic catalog of live
+  domain surfaces.
 - Use `src/bioetl/domain/README.md` as a code-navigation package map only. It
   is not the canonical published operator/reference surface.
-- Use [API Reference](../api/index.md) when you need module-level API lookup
-  instead of a semantic catalog.
+- Use [API Reference](../api/index.md) when you need module-level or
+  symbol-level API lookup instead of a semantic catalog.
 
 ## Source Of Truth
 
@@ -47,6 +47,7 @@ state-machine semantics.
 | Surface | Purpose | Entry point |
 | --- | --- | --- |
 | Aggregates | Aggregate roots, lifecycle boundaries, child objects, and invariants | [aggregates.md](aggregates.md) |
+| Entities | Provider DTOs and domain entity record models (non-aggregate) | [entities.md](entities.md) |
 | Value Objects | Immutable domain primitives and typed semantic families | [value-objects.md](value-objects.md) |
 | Events | Aggregate coordination events and observability event constants | [events.md](events.md) |
 | Control Plane | Run manifest, run ledger, workflow control-plane, contract-registry, and reproducibility domain surfaces | [control-plane.md](control-plane.md) |
@@ -59,15 +60,16 @@ state-machine semantics.
 ## Reading Order
 
 1. Start with [aggregates.md](aggregates.md) for lifecycle owners.
-2. Continue with [invariants.md](invariants.md) for rules that must stay true
+2. Use [entities.md](entities.md) for provider record models and DTO surfaces.
+3. Continue with [invariants.md](invariants.md) for rules that must stay true
    across code, contracts, and runbooks.
-3. Use [control-plane.md](control-plane.md) for immutable provenance,
+4. Use [control-plane.md](control-plane.md) for immutable provenance,
    append-only ledger, workflow control-plane, and reproducibility surfaces.
-4. Use [aggregate-state-machines.md](aggregate-state-machines.md) for
+5. Use [aggregate-state-machines.md](aggregate-state-machines.md) for
    transition-level aggregate lifecycle semantics.
-5. Use [workflow-state-machine.md](workflow-state-machine.md) for formal
+6. Use [workflow-state-machine.md](workflow-state-machine.md) for formal
    workflow/control-plane semantics.
-6. Use [contexts.md](contexts.md) when tracing runtime context ownership,
+7. Use [contexts.md](contexts.md) when tracing runtime context ownership,
    deterministic time seams, or replay/control-plane anchors.
-7. Use [ports.md](ports.md) and [events.md](events.md) when wiring or auditing
+8. Use [ports.md](ports.md) and [events.md](events.md) when wiring or auditing
    adapters, observability, or runtime orchestration.

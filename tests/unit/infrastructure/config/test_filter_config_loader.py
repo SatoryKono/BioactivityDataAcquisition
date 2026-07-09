@@ -809,6 +809,42 @@ filter_defaults:
             flt.column for flt in gold_filters.range_filters
         }
 
+    def test_chembl_target_gold_filters_exclude_non_multicellular_organisms(
+        self,
+    ) -> None:
+        """chembl_target Gold filters should exclude unicellular/acellular targets."""
+        loader = FilterConfigLoader(Path("configs"))
+
+        _, _, gold_filters, _ = loader.load("chembl", "target")
+
+        organism_class_filter = next(
+            flt for flt in gold_filters.column_filters if flt.column == "organism_class"
+        )
+        assert organism_class_filter.operator.value == "not_in"
+        assert organism_class_filter.values == frozenset({"unicellular", "acellular"})
+        assert gold_filters.should_include(
+            {
+                "target_type": "SINGLE PROTEIN",
+                "organism_class": "multicellular",
+                "component_accessions": ["P00533"],
+                "component_ids": ["1"],
+                "component_types": ["PROTEIN"],
+                "pref_name": "EGFR",
+                "organism": "Homo sapiens",
+            }
+        )
+        assert not gold_filters.should_include(
+            {
+                "target_type": "SINGLE PROTEIN",
+                "organism_class": "unicellular",
+                "component_accessions": ["P00533"],
+                "component_ids": ["1"],
+                "component_types": ["PROTEIN"],
+                "pref_name": "EGFR",
+                "organism": "Homo sapiens",
+            }
+        )
+
 
 class TestAssayExtractionParamsLoading:
     """Tests for assay extraction_params loading via FilterConfigLoader."""

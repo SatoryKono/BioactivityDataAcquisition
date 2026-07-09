@@ -14,10 +14,28 @@ allowed_output_roots:
     - docs/reports/generated/
     - docs/reports/dictionaries/
     - docs/02-architecture/generated/
+    - docs/02-architecture/diagrams/class-diagrams/90-pkg-
+    - docs/02-architecture/diagrams/bundles/
+    - docs/02-architecture/diagrams/descriptions/
+    - docs/02-architecture/diagrams/architecture/png/
+    - docs/02-architecture/diagrams/architecture/svg/
+    - docs/02-architecture/diagrams/class-diagrams/png/
+    - docs/02-architecture/diagrams/class-diagrams/svg/
+    - docs/02-architecture/diagrams/foundation/png/
+    - docs/02-architecture/diagrams/foundation/svg/
+    - docs/02-architecture/diagrams/views/png/
+    - docs/02-architecture/diagrams/views/svg/
+    - docs/02-architecture/adr-registry.md
+    - docs/02-architecture/adr-registry/
+    - docs/04-reference/config_comparison_matrix.csv
+    - docs/filters/inventory-baseline.csv
+    - docs/filters/inventory-baseline.json
+    - docs/filters/inventory-baseline.md
   ignored_docs_exports:
     - docs/exports/
   local_generated_docs_helpers:
     - docs/site/
+    - docs/00-project/ai/skills/_references/
   generated_source:
     - src/bioetl/domain/schemas/generated/
     - src/bioetl/domain/mapping/generated/
@@ -73,6 +91,26 @@ routes:
     outputs:
       - docs/reports/generated/pipeline_normalization_field_matrix/
     notes: Deterministic normalization matrix for pipeline governance.
+
+  - id: documentation-cleanup-inventory
+    generator: scripts/docs/checks/documentation_cleanup_inventory.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/reports/generated/documentation-cleanup-inventory.json
+      - docs/reports/generated/documentation-cleanup-inventory.md
+    notes: Deterministic per-file documentation cleanup matrix for lifecycle,
+      generated-artifact, duplicate, inbound-link, and recommended-action review.
+
+  - id: ai-skill-reference-mirror
+    generator: scripts/ai/codex/check_skills_mirror.sh
+    output_kind: curated_generated_docs
+    commit_policy: tracked_mirror_surface
+    outputs:
+      - docs/00-project/ai/skills/_references/
+    notes: Skill reference bundle copies are intentional mirrors used by
+      skills-consistency checks; exact duplicates with local skill references
+      are expected and must be refreshed from runtime skill sources.
 
   - id: matrix-dictionaries-curated-docs
     generator: scripts/docs/matrix/build_matrix_dicts.py
@@ -329,6 +367,88 @@ routes:
       - docs/02-architecture/generated/module-dependency-map.md
       - docs/02-architecture/generated/module-dependency-map.json
     notes: Architecture dependency maps are deterministic generated docs.
+
+  - id: architecture-diagram-package-family-sources
+    generator: scripts/diagrams/generate_package_family_class_diagrams.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/02-architecture/diagrams/class-diagrams/90-pkg-*.mmd
+    notes: Supplemental package-family class diagrams are regenerated from
+      source-tree introspection and must not be hand-edited for cleanup.
+
+  - id: architecture-diagram-bundles
+    generator: scripts/diagrams/generate_all_bundles.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/02-architecture/diagrams/bundles/
+    notes: Diagram bundle markdown is regenerated from curated diagram families.
+
+  - id: architecture-diagram-description-indexes
+    generator: scripts/diagrams/generate_description_indexes.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/02-architecture/diagrams/descriptions/
+    notes: Diagram description indexes and cards are maintained as derived
+      publication support for ADR-040 diagram governance.
+
+  - id: architecture-diagram-render-artifacts
+    generator: docs/02-architecture/diagrams/tooling/render.sh
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/02-architecture/diagrams/architecture/png/
+      - docs/02-architecture/diagrams/architecture/svg/
+      - docs/02-architecture/diagrams/class-diagrams/png/
+      - docs/02-architecture/diagrams/class-diagrams/svg/
+      - docs/02-architecture/diagrams/foundation/png/
+      - docs/02-architecture/diagrams/foundation/svg/
+      - docs/02-architecture/diagrams/views/png/
+      - docs/02-architecture/diagrams/views/svg/
+    notes: Rendered diagram assets are regenerated from Mermaid sources through
+      the checked diagram renderer and must not be hand-edited.
+
+  - id: adr-registry-generated-docs
+    generator: scripts/generate_adr_registry.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/02-architecture/adr-registry.md
+      - docs/02-architecture/adr-registry/
+    notes: ADR registry markdown and JSON artifacts are generated from accepted
+      ADR files and must not be hand-edited.
+
+  - id: config-comparison-matrix-generated-doc
+    generator: scripts/schema/generate_config_matrix.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/04-reference/config_comparison_matrix.csv
+    notes: Config comparison matrix is refreshed through
+      `python -m scripts.schema generate-config-matrix --update`.
+
+  - id: silver-filter-inventory-baseline
+    generator: scripts/data_quality/inventory_silver_filters_migration.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/filters/inventory-baseline.csv
+      - docs/filters/inventory-baseline.json
+      - docs/filters/inventory-baseline.md
+    notes: Silver filter migration inventory baseline is a committed generated
+      docs/control artifact guarded by architecture tests.
+
+  - id: debt-governance-gates-quality-baseline
+    generator: scripts/engineering/qa/report_debt_governance_gates.py
+    output_kind: working_report
+    commit_policy: tracked_quality_baseline
+    outputs:
+      - reports/quality/debt-governance-gates.json
+      - reports/quality/debt-governance-gates.md
+    notes: Debt governance gate rollup is a generated tracked baseline; do not
+      change budgets or thresholds to satisfy drift.
 
   - id: grafana-dashboard-screenshot-report
     generator: scripts/ops/observability/grafana/rerender_grafana_screenshots.py

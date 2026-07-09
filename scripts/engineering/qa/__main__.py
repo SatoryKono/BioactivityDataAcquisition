@@ -31,6 +31,7 @@ Commands:
     check-terminology    Terminology linting
     report-dep-map       Generate/check architecture dependency map
     report-vcr-metadata  Generate/check canonical VCR metadata catalog
+    check-vcr-replay-preflight  Fail fast on unresolved replay VCR pointers
     report-provider-contract-drift  Generate provider contract drift diagnostics from replay cassettes
     report-compatibility-importer-census Generate deterministic importer census for sanctioned seams and twin modules
     report-pipeline-config-contract-ownership-map Generate/check pipeline-config-contract ownership traces
@@ -64,6 +65,8 @@ Commands:
     check-dashboard-visual-semantics Validate Grafana status-panel visual semantic invariants
     report-dashboard-inventory Generate/check dashboard inventory parity plus
         provisioning/deployed drift and health summary
+    report-dashboard-panel-audit-matrix Generate/check dashboard panel audit matrix
+    report-panel-title-inventory Generate/check generated dashboard panel-title inventory mirror
     report-dashboard-query-duplicates Generate report-only exact/near-duplicate Grafana PromQL inventory
 """
 
@@ -99,6 +102,9 @@ COMMAND_MODULES: dict[str, str] = {
     "check-terminology": "scripts.engineering.qa.lint_terminology",
     "report-dep-map": "scripts.engineering.qa.generate_architecture_dependency_map",
     "report-vcr-metadata": "scripts.engineering.qa.report_vcr_metadata_catalog",
+    "check-vcr-replay-preflight": (
+        "scripts.engineering.qa.vcr.check_replay_preflight"
+    ),
     "report-provider-contract-drift": "scripts.engineering.qa.report_provider_contract_drift",
     "report-compatibility-importer-census": "scripts.engineering.qa.report_compatibility_importer_census",
     "report-pipeline-config-contract-ownership-map": "scripts.engineering.qa.report_pipeline_config_contract_ownership",
@@ -143,6 +149,9 @@ COMMAND_MODULES: dict[str, str] = {
     "report-dashboard-query-duplicates": "scripts.engineering.qa.report_dashboard_query_duplicates",
     "report-dashboard-panel-audit-matrix": (
         "scripts.engineering.qa.report_dashboard_panel_audit_matrix"
+    ),
+    "report-panel-title-inventory": (
+        "scripts.engineering.qa.report_panel_title_inventory"
     ),
 }
 COMMAND_SPECS = {

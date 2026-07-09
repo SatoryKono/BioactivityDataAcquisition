@@ -31,6 +31,41 @@ test_lanes:
       Committed coverage inventory source-tree hashes are authoritative only for
       a clean src/bioetl tree; dirty-tree runs may be useful diagnostics but must
       not be treated as merge-blocking coverage truth.
+  parallel_execution_policy:
+    local_pytest_default: serial
+    forbid_global_xdist_addopts: true
+    rationale: >
+      Local pytest defaults remain serial for deterministic developer feedback.
+      Parallelism is opt-in through maintained sharded lanes so VCR replay,
+      benchmark, memory, and stateful integration surfaces do not inherit
+      xdist implicitly.
+    explicit_parallel_lanes:
+      - unit-parallel-safe
+      - architecture
+      - architecture-fast-boundary
+      - architecture-slow-governance
+      - coverage-verify
+    serial_or_bounded_lanes:
+      - smoke
+      - unit-fast
+      - repo-backed-unit
+      - integration-replay
+      - integration-determinism
+      - integration-idempotency
+      - integration-composite-resume
+      - security
+      - contracts
+      - architecture-read-only-audit
+      - e2e
+      - e2e-smoke
+      - e2e-nightly-full
+      - memory
+      - performance
+    vcr_parallel_policy: >
+      VCR-backed replay lanes stay serial/bounded unless cassette isolation and
+      fixture writes are proven xdist-safe in the lane definition.
+    benchmark_parallel_policy: >
+      Benchmark lanes explicitly disable xdist through pytest_args.
   execution_defaults:
     pythonpath: src
     direct_runner: scripts/engineering/dev/run_pytest.sh

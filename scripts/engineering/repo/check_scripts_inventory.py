@@ -230,6 +230,7 @@ SUPPORTING_LIFECYCLE_DECISIONS: Final[frozenset[str]] = frozenset(
     {
         "compatibility_wrapper",
         "internal_compatibility_launcher",
+        "mcp_compatibility_wrapper",
         "windows_compatibility_wrapper",
         "shared_helper_module",
         "internal_helper_orphan",

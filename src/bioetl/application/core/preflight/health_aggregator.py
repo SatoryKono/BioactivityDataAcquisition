@@ -6,9 +6,6 @@ import asyncio
 import time
 from typing import TYPE_CHECKING, Literal
 
-from bioetl.application.core.batch_runtime_failure_policy import (
-    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
-)
 from bioetl.application.core.preflight.health_aggregator_runtime import (
     build_component_result,
     build_data_source_exception_result,
@@ -18,7 +15,7 @@ from bioetl.application.core.preflight.health_aggregator_runtime import (
     resolve_probe_fallback_reason,
 )
 from bioetl.domain.context import MISSING_RUNTIME_TIMESTAMP
-from bioetl.domain.exceptions import InfrastructureError
+from bioetl.domain.exceptions import BioETLError, InfrastructureError
 from bioetl.domain.types import ComponentHealthResult, HealthReport, HealthStatus
 
 if TYPE_CHECKING:
@@ -32,7 +29,13 @@ if TYPE_CHECKING:
         LoggerPort,
     )
 
-_HEALTH_CHECK_ERRORS = SHARED_OPERATION_ERRORS
+_HEALTH_CHECK_ERRORS = (
+    BioETLError,
+    OSError,
+    RuntimeError,
+    ValueError,
+    TypeError,
+)
 
 
 class HealthAggregator:

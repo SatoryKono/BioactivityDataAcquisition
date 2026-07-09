@@ -26,6 +26,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as a sourced WSL proxy environment helper for Codex setup flows; keep it supporting unless it becomes a standalone, documented CLI entrypoint."
     },
+    "scripts/ai/gemini/helper/check-env.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the WSL environment-check helper invoked by the Windows Gemini helper wrapper; keep it supporting unless it becomes a standalone documented launcher surface."
+    },
     "scripts/docs/common/markdown.py": {
       "owner": "@bioetl-docs",
       "decision": "shared_helper_module",
@@ -43,12 +49,6 @@
       "decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side companion for the canonical Brave Search MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
-    },
-    "scripts/ai/mcp/mcp_chembl_wrapper.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "windows_compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as the Windows-side companion for the canonical ChEMBL MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
     "scripts/ai/mcp/mcp_code_interpreter_wrapper.ps1": {
       "owner": "@bioetl-platform",
@@ -92,29 +92,47 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side companion for the canonical Neo4j Memory MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
+    "scripts/ai/mcp/mcp_docker_docs_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for Docker Docs server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
+    },
+    "scripts/ai/mcp/mcp_dockerhub_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for DockerHub server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
+    },
+    "scripts/ai/mcp/mcp_mermaid_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for Mermaid diagram server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
+    },
+    "scripts/ai/mcp/mcp_needle_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for Needle search server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
+    },
+    "scripts/ai/mcp/mcp_paper_search_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for Paper Search server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
+    },
     "scripts/ai/mcp/mcp_prometheus_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side companion for the canonical Prometheus MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
-    "scripts/ai/mcp/mcp_pubchem_wrapper.ps1": {
+    "scripts/ai/mcp/support/docker_cli_resolver.ps1": {
       "owner": "@bioetl-platform",
-      "decision": "windows_compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as the Windows-side companion for the canonical PubChem MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
-    },
-    "scripts/ai/mcp/mcp_pubmed_wrapper.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "windows_compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as the Windows-side companion for the canonical PubMed MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
-    },
-    "scripts/ai/mcp/mcp_sonarqube_wrapper.ps1": {
-      "owner": "@bioetl-platform",
-      "decision": "windows_compatibility_wrapper",
-      "review_by": "2026-07-15",
-      "next_step": "Retain as the Windows-side companion for the canonical SonarQube MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the PowerShell Docker CLI resolver helper used by MCP wrapper transports; keep it supporting unless Docker CLI discovery becomes a standalone governed MCP command."
     },
     "scripts/ai/sync_cursor_rules.py": {
       "owner": "@bioetl-platform",
@@ -410,6 +428,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain only as a bounded manual TDX-AUDIT issue publishing helper for local issue-template campaigns; keep it non-active unless it becomes a governed repo-operations workflow with a durable active-surface budget."
     },
+    "scripts/engineering/repo/sync_scripts_inventory.py": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the router implementation for the canonical scripts.engineering.repo sync-inventory command while inventory refresh remains exposed through the module entrypoint; keep this file non-active unless direct script execution becomes a governed public surface."
+    },
     "scripts/docs/generate_pipeline_normalization_validation_table.py": {
       "owner": "@bioetl-docs",
       "decision": "legacy_manual_utility",
@@ -535,6 +559,18 @@
       "decision": "compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a backward-compatible Gemini launcher while the canonical interactive entrypoint delegates through scripts/ai/gemini/run-gemini.sh; remove it once callers migrate to the canonical launcher surface."
+    },
+    "scripts/ai/gemini/gemini-interactive.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "windows_compatibility_wrapper",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as the Windows compatibility launcher that delegates through scripts/ai/gemini/gemini-interactive.sh; remove it once callers migrate to the canonical scripts/ai/gemini/run-gemini.ps1 or run-gemini.sh launcher surface."
+    },
+    "scripts/ai/mcp/check.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the shell backend for the canonical scripts.ai.mcp check router command; prefer the router in new docs and promote back to an active public script only if direct shell invocation remains a reviewed public surface."
     },
     "src/tools/apply_elk_layout.py": {
       "owner": "@bioetl-platform",

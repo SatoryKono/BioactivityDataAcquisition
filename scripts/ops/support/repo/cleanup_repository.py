@@ -681,6 +681,8 @@ def _review_status_for_evidence(
         return "blocked_cleanup_retained"
     if exists and not tracked:
         return "present_untracked_surface"
+    if classification == "owner_decision_resolved":
+        return "present_owner_decision_resolved"
     if classification == "owner_decision_required":
         return "present_owner_decision_required"
     if cmp_status == "match":

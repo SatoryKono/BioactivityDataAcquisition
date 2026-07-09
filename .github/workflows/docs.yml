@@ -72,6 +72,8 @@ jobs:
             tests/architecture/test_config_topology_docs_drift.py \
             tests/architecture/test_control_plane_runtime_docs_alignment.py \
             tests/architecture/test_diagram_narrative_docs_sync.py \
+            tests/architecture/test_diagram_drift_and_embed_guards.py \
+            tests/architecture/test_diagram_corpus_regression_guards.py \
             tests/architecture/test_documentation_audit_remediation.py \
             tests/architecture/test_docs_governance_workflow.py \
             tests/architecture/test_docs_version_sync.py::TestDocsVersionSync::test_rules_version_extractable \
@@ -107,6 +109,9 @@ jobs:
 
       - name: Check dashboard panel audit matrix parity
         run: uv run python -m scripts.engineering.qa report-dashboard-panel-audit-matrix --check
+
+      - name: Check dashboard panel title inventory parity
+        run: uv run python -m scripts.engineering.qa report-panel-title-inventory --check
 
   validate-mkdocs:
     needs: docs-governance
@@ -207,12 +212,20 @@ jobs:
           bash scripts/diagrams/validate_mermaid_syntax.sh \
             --puppeteer /tmp/puppeteer-config.json
 
-      - name: Diagram policy lint report (non-blocking)
+      - name: Diagram policy lint report
         run: |
-          python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json || true
+          set +e
+          python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json
+          lint_status=$?
+          set -e
           python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json
+          if [ "$lint_status" -ne 0 ]; then
+            echo "::error::Diagram lint failed. Fix the reported issues or update the accepted diagram budget."
+            exit "$lint_status"
+          fi
 
       - name: Upload diagram lint report
+        if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
           name: diagram-lint-report
@@ -311,12 +324,14 @@ jobs:
       - name: Check for source-vs-rendered drift
         run: |
           echo "Checking if diagram sources changed without updating rendered outputs..."
-          # Get list of changed diagram source files in PR
+          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+
           changed_diagrams=$(
             git diff --name-only origin/main...HEAD -- \
-              ':(glob)docs/**/*.mmd' \
-              ':(glob)docs/**/*.mermaid' \
-              ':(exclude)docs/99-archive/**' || true
+              ':(glob)docs/02-architecture/diagrams/architecture/*.mmd' \
+              ':(glob)docs/02-architecture/diagrams/foundation/*.mmd' \
+              ':(glob)docs/02-architecture/diagrams/class-diagrams/*.mmd' \
+              ':(glob)docs/02-architecture/diagrams/views/*.mermaid' || true
           )
           if [ -z "$changed_diagrams" ]; then
             echo "No diagram source files changed — skipping drift check."
@@ -326,15 +341,28 @@ jobs:
           echo "Changed diagram sources:"
           echo "$changed_diagrams"
 
-          # Check if corresponding SVG/PNG outputs changed too
           changed_rendered=$(
             git diff --name-only origin/main...HEAD -- \
               ':(glob)docs/**/svg/*.svg' \
               ':(glob)docs/**/png/*.png' || true
           )
-          if [ -z "$changed_rendered" ]; then
-            echo "::warning::Diagram sources changed but no rendered outputs updated."
-            echo "Run 'make render-diagrams-all' and commit rendered SVG/PNG files."
-          else
-            echo "Rendered outputs also updated — OK."
+
+          missing=""
+          while IFS= read -r source_path; do
+            [ -z "$source_path" ] && continue
+            source_dir="${source_path%/*}"
+            source_file="${source_path##*/}"
+            stem="${source_file%.*}"
+            expected_svg="${source_dir}/svg/${stem}.svg"
+            if ! grep -Fxq "$expected_svg" <<< "$changed_rendered"; then
+              missing="${missing}${expected_svg}\n"
+            fi
+          done <<< "$changed_diagrams"
+
+          if [ -n "$missing" ]; then
+            echo "::error::Diagram sources changed without corresponding rendered SVG outputs."
+            printf "%b" "$missing"
+            echo "Run 'bash docs/02-architecture/diagrams/tooling/render.sh --dir <changed-source-dir>' and commit sibling svg/ outputs."
+            exit 1
           fi
+          echo "All changed diagram sources have corresponding rendered SVG updates."

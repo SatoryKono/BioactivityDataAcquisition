@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
@@ -89,6 +90,8 @@ class ValueValidator:
 
     def _check_basic_concentration(self, value: float) -> str | None:
         """Check basic concentration constraints (non-negative, non-zero)."""
+        if not math.isfinite(value):
+            return f"Concentration must be finite: {value}"
         if value < 0:
             return f"Concentration cannot be negative: {value}"
         if value == 0:
@@ -149,6 +152,8 @@ class ValueValidator:
             (False, 'pChEMBL value cannot be negative: -1.00')
         """
         # Check absolute range
+        if not math.isfinite(value):
+            return False, f"pChEMBL value must be finite: {value}"
         range_error = self._check_pchembl_absolute_range(value)
         if range_error:
             return False, range_error
@@ -210,6 +215,8 @@ class ValueValidator:
         parsed_type = self._parse_activity_type(activity_type)
 
         # Basic numeric validation
+        if not math.isfinite(value):
+            return False, f"Activity value must be finite: {value}"
         if value < 0:
             return False, f"Activity value cannot be negative: {value}"
 

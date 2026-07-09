@@ -7,14 +7,14 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-01'
+  Last verified: '2026-07-07'
 
 ______________________________________________________________________
 
 # Current State Inventory
 
-This inventory is synchronized against the current `main` worktree on
-2026-07-01. Code, configs, domain contracts, ADRs, and tests are the source of
+This inventory is synchronized against the current worktree on 2026-07-08.
+Code, configs, domain contracts, ADRs, and tests are the source of
 truth; existing documentation is evidence only when it matches those sources.
 
 ## Scope
@@ -24,10 +24,11 @@ truth; existing documentation is evidence only when it matches those sources.
 | Entity pipeline configs | 27 | `configs/entities/**/*.yaml` | 22 provider configs plus 5 composite entity configs under `configs/entities/composite/`. |
 | Composite merge configs | 5 | `configs/composites/*.yaml` | ADR-026 seed/enrich/merge policies for activity, assay, molecule, publication, target. |
 | Workflow configs | 27 | `configs/workflows/*.yaml` | Strict `workflow.steps` DAG schema with `pipeline` and `transform` step kinds. |
-| Data contracts | 27 | `configs/contracts/**/*.yaml` | One contract per configured entity pipeline surface. |
+| Entity data contracts | 27 | `configs/contracts/{chembl,composite,crossref,openalex,pubchem,pubmed,semanticscholar,uniprot}/*.yaml` | One contract per configured entity pipeline surface. |
+| Error catalog | 1 | `configs/contracts/errors/error_catalog.yaml` | Canonical error-code taxonomy; not counted as an entity data contract. |
 | Provider configs | 7 | `configs/providers/*.yaml` | ChEMBL, CrossRef, OpenAlex, PubChem, PubMed, Semantic Scholar, UniProt. |
 | Grafana dashboards | 8 | `grafana/dashboards/*.json` | Overview, runtime, provider health, DQ, workflow, control-plane, alerts/SLO, silver reject explorer. |
-| Domain port files | 73 | `src/bioetl/domain/ports/**/*.py` | 18 top-level files plus nested config, control-plane, metadata, observability, quality, runtime, and storage packages. |
+| Domain port files | 74 | `src/bioetl/domain/ports/**/*.py` | 19 top-level files plus nested config, control-plane, metadata, observability, quality, runtime, and storage packages. |
 
 ## Architecture Quality Evidence
 
@@ -35,24 +36,34 @@ Current committed quality artifacts agree on the following architecture evidence
 
 | Artifact | Current value | Source |
 | --- | ---: | --- |
-| Architecture quality score | `8.58` (`good_targeted_improvements`) | `reports/quality/debt-governance-gates.json`, `reports/quality/architecture-quality-scorecard.json` |
+| Architecture quality score | `8.66` (`good_targeted_improvements`) | `reports/quality/debt-governance-gates.json`, `reports/quality/architecture-quality-scorecard.json` |
 | Layer violations | `0` | `reports/quality/architecture-quality-scorecard.json`, `.importlinter` |
-| Source modules in module coverage inventory | `2213` | `reports/quality/module-coverage-inventory.json` |
+| Source modules in module coverage inventory | `2219` | `reports/quality/module-coverage-inventory.json` |
 | Unmeasured / uncovered modules | `0` / `0` | `reports/quality/module-coverage-inventory.json` |
+| Coverage inventory status counts | `1360` fully covered, `848` partially covered, `11` with no executable lines | `reports/quality/module-coverage-inventory.json` |
 | Hotspot family count | `5` | `reports/quality/architecture-quality-scorecard.json` |
-| Debt-governance gates | `38` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
-| Full-app duplication hotspot baseline | `43` clusters | `reports/quality/full-app-duplication-baseline.json` |
+| Debt-governance gates | `44` pass, `0` warn, `0` fail | `reports/quality/debt-governance-gates.json` |
+| Full-app duplication hotspot baseline | `0` actionable / `38` raw excluded clusters | `reports/quality/full-app-duplication-baseline.json` |
 
-Generated artifact drift is currently clear (`stale_artifacts` are all false in
+The full-app duplication baseline distinguishes actionable clusters from raw
+excluded visibility: current actionable duplication is zero, while the retained
+raw excluded count remains visible for audit traceability. Generated artifact
+drift is currently clear (`stale_artifacts` are all false in
 `reports/quality/debt-governance-gates.json`). The debt gate rollup now includes
 `module_coverage_source_tree_hash_current`, so stale
 `reports/quality/module-coverage-inventory.json` source-tree hashes are fail-fast
 release-gate failures rather than hidden warning-only coverage drift. Module
-coverage currently reports no unmeasured or uncovered source modules. Read-only
+coverage currently reports no unmeasured or uncovered source modules. That is a
+module-inventory fact, not a line/branch coverage guarantee: `848` modules
+remain partially covered and line/branch coverage must be read from the
+`coverage-verify` artifacts. Read-only
 audit evidence should use
 `python -m scripts.engineering.qa run-architecture-audit-read-only`, which runs
 check-only architecture diagnostics and fails if tracked governance surfaces
 mutate.
+Baseline refreshes must preserve or lower scorecard budgets, hotspot family
+caps, SCC budgets, and exemption limits; if refreshed evidence hits a budget,
+reduce scope or debt instead of increasing the budget.
 
 ## Workflow Inventory
 
@@ -274,7 +285,7 @@ by storage technology. Current owner boundaries:
 | Domain storage port wording mixed application aggregate protocol into domain ports | `docs/02-architecture/01-domain-layer.md` listed `PipelineStorageProtocol` with domain storage ports. | `src/bioetl/application/core/pipeline_runtime_service_protocols.py`. | Described it as application-owned aggregate protocol. |
 | Docs guardrail command used obsolete module wording | `docs/00-project/governance/07-doc-nav-policy.md` and `docs/00-project/RULES.md` used the historical `check_doc_links` name. | `python -m scripts.docs check-links`; dispatch in `scripts/docs/__main__.py`. | Updated active policy wording to the current command/module. |
 | README architecture sketch used outdated single-bootstrap wording | `README.md` architecture sketch referenced `bootstrap_pipeline_runner() -> Factories`. | Composition public APIs and runtime bootstrap files under `src/bioetl/composition/`. | Updated README sketch to current composition APIs. |
-| Filter migration folder reused the ADR-048 number after canonical ADR-048 was accepted for another decision | `docs/filters/ADR-048-silver-filters-structural-scope.md` was a draft; canonical accepted ADR-048 is `docs/02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md`. | Filter compatibility is implemented in `src/bioetl/infrastructure/config/silver_filter_migration.py`; future filter decisions need a new ADR number. | Marked the filter draft as retired/non-canonical and updated the filter migration docs to describe current code reality. |
+| Filter migration folder reused the ADR-048 number after canonical ADR-048 was accepted for another decision | A retired filter draft previously used an ADR-like filename; canonical accepted ADR-048 is `docs/02-architecture/decisions/ADR-048-domain-schema-boundary-and-runtime-pandera-compat.md`. | Filter compatibility is implemented in `src/bioetl/infrastructure/config/silver_filter_migration.py`; future filter decisions need a new ADR number. | Renamed the filter draft to `docs/filters/retired-silver-filters-structural-scope.md` and kept ADR-050 as the normative filter-boundary decision. |
 | Generated artifact drift gate did not include module coverage source-tree hash freshness | `report-module-coverage --check` could fail stale source-tree evidence while `report-debt-governance-gates --check` still passed. | `scripts/engineering/qa/report_debt_governance_gates.py`; `reports/quality/debt-governance-gates.json`. | Added `module_coverage_source_tree_hash_current` as a fail-fast debt-governance gate. |
 | Compatibility retained entrypoint inventory still tracked a zero-import maintenance CLI seam | `reports/quality/compatibility-importer-census.json` now reports `retained_entrypoint_count=12` and no retained row for `src/bioetl/interfaces/cli/commands/maintenance.py`. | `configs/quality/compatibility_facade_inventory.yaml`, `configs/quality/debt_scorecard.yaml`. | Removed the zero-import maintenance CLI command from retained-entrypoint debt tracking while leaving normal CLI lazy discovery intact. |
 | Composite config compatibility taxonomy retained cross-provider alias leaves | `reports/quality/config-compatibility-legacy-taxonomy-review.json` now reports `composite_runtime.compatibility_legacy_count=0`. | `configs/field_registry/canonical_registry.json`; `bioetl.domain.registry.field_aliases`; `reports/quality/config-discrepancy-baseline.json`. | Removed residual composite `field_aliases` leaves from configs; HBA/HBD/logp/polar_surface_area ownership now remains in canonical registry and domain alias registry. |
@@ -282,15 +293,17 @@ by storage technology. Current owner boundaries:
 | Runtime Gold Pandera strictness had no production-path non-strict guard | `tests/architecture/test_gold_validator_strict_runtime_paths.py` scans `src/bioetl` for `PanderaGoldValidator(..., strict=False)` and `ContractAwareGoldValidator(..., strict=False)`. | `src/bioetl/infrastructure/storage/silver/merged_operations.py`; `src/bioetl/infrastructure/validation/pandera_validator.py`. | Replaced the Silver merged-write non-strict Gold validator with `PanderaSilverValidator(strict=False)` and added the runtime guard. |
 | Quarantine payload immutability evidence stopped at aggregate/mock level | `tests/unit/infrastructure/quarantine/test_unified_quarantine.py::TestUnifiedQuarantineUpdateStatus::test_update_status_preserves_persisted_payload_and_hash` writes a real Delta table, updates status, and checks persisted `payload`, `payload_hash`, and `metadata`. | `src/bioetl/infrastructure/quarantine/unified.py`. | Added persisted immutability coverage and a read fallback for Delta string-view filter failures after status updates. |
 | Test governance refined assertless residuals are now fully eliminated while compatibility coverage stays bounded | `reports/quality/test-governance-current.json` now reports `assertless_total_candidates=109`, `refined_assertless_tests=0`, `compatibility_test_files=0`, and zero budget violations. | Contract schema tests under `tests/contract/**` plus governance inventory under `tests/architecture/**`. | Tightened observable assertions and governance classification so the refined assertless residual count is zero without regrowing compatibility-test scope. |
-| Current-state architecture evidence table lagged live quality reports | `reports/quality/debt-governance-gates.json` reports score `8.58`, `38` passing gates, and no warnings; `reports/quality/module-coverage-inventory.json` reports `2213` source modules with zero unmeasured/uncovered modules; `reports/quality/full-app-duplication-baseline.json` reports `43` clusters. | Current committed `reports/quality/*.json` artifacts. | Refreshed the current-state table and verification date from live report artifacts. |
+| Current-state architecture evidence table lagged live quality reports | `reports/quality/debt-governance-gates.json` reports score `8.66`, `44` passing gates, and no warnings; `reports/quality/module-coverage-inventory.json` reports `2219` source modules with zero unmeasured/uncovered modules plus `848` partially covered modules; `reports/quality/full-app-duplication-baseline.json` reports `0` actionable / `38` raw excluded clusters. | Current committed `reports/quality/*.json` artifacts. | Refreshed the current-state table and verification date from live report artifacts, while keeping module inventory distinct from full line/branch coverage. |
 
 ## Open Questions
 
 - Module coverage currently has no unmeasured or uncovered source modules in
-  `reports/quality/module-coverage-inventory.json`; keep this as a regression
-  gate through `report-module-coverage --check` and
-  `report-debt-governance-gates --check`.
-- Existing historical diagram bundles still contain legacy `PipelineStorageProtocol`
-  references. They are retained as historical/generated diagram material until a
-  dedicated diagram regeneration pass refreshes rendered `.mmd`, SVG, and PNG
-  artifacts.
+  `reports/quality/module-coverage-inventory.json`, while `848` modules remain
+  partially covered. Keep the `0` unmeasured / `0` uncovered module inventory as
+  a regression gate through `report-module-coverage --check` and
+  `report-debt-governance-gates --check`; do not describe it as complete
+  line/branch coverage.
+- Diagram bundles and rendered artifacts have been refreshed for the known
+  `QuarantineEntry` transition wording drift. `PipelineStorageProtocol` remains
+  valid only as an application-owned aggregate protocol and must not be listed as
+  a domain storage port.

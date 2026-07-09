@@ -15,12 +15,12 @@ from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
 from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
     resolve_runtime_projection as _resolve_runtime_projection,
 )
-from bioetl.composition.runtime_builders.inputs_runtime_models import (
-    ResolvedVacuumSettings,
-)
 from bioetl.domain.config import RuntimeConfig
 
 if TYPE_CHECKING:
+    from bioetl.composition.runtime_builders.inputs_runtime_models import (
+        ResolvedVacuumSettings,
+    )
     from bioetl.domain.context import PipelineRunContext
     from bioetl.domain.filtering import InputFilterConfig
     from bioetl.infrastructure.config.settings_api import Settings
@@ -33,7 +33,7 @@ def validate_runner_data_root_policy(
     settings: Settings,
     required_persistence_profile: str,
 ) -> None:
-    from bioetl.composition.runtime_builders._runner_control_plane_policy import (
+    from bioetl.composition.runtime_builders._runner_control_plane_data_root_policy import (
         validate_strict_data_root_policy as _validate_strict_data_root_policy,
     )
 

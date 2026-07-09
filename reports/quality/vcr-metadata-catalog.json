@@ -122,7 +122,8 @@
       "reachability_owner_paths": [
         "tests/e2e/conftest.py",
         "tests/e2e/test_e2e_stability_policy.py",
-        "tests/e2e/test_full_pipeline.py"
+        "tests/e2e/test_full_pipeline.py",
+        "tests/unit/scripts/qa/test_vcr_replay_preflight.py"
       ]
     },
     {

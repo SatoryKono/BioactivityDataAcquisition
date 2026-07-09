@@ -49,13 +49,22 @@ def _load_prometheus_config() -> dict:
     return payload
 
 
-def test_prometheus_rules_directory_has_no_duplicate_fixed_rule_files() -> None:
-    """Wildcard rule loading must not pick up scratch/fixed copies of rule files."""
+def test_prometheus_rules_directory_has_no_duplicate_backup_rule_files() -> None:
+    """Wildcard rule loading must not pick up backup/scratch copies of rule files."""
+    rules_dir = Path("grafana/prometheus-rules")
     duplicate_candidates = sorted(
-        path.name for path in Path("grafana/prometheus-rules").glob("*fixed*.yml")
+        path.name
+        for path in rules_dir.iterdir()
+        if path.is_file()
+        and (
+            path.suffix == ".bak"
+            or path.name.endswith(".yml.bak")
+            or "fixed" in path.name.lower()
+            or "scratch" in path.name.lower()
+        )
     )
     assert not duplicate_candidates, (
-        "Prometheus rule_files uses /etc/prometheus/rules/*.yml, so fixed/scratch "
+        "Prometheus rule_files uses /etc/prometheus/rules/*.yml, so backup/scratch "
         f"copies would be loaded as duplicate rules: {duplicate_candidates}"
     )
 
@@ -886,8 +895,18 @@ def test_overview_workflow_input_uses_workflow_evidence_not_pipeline_counter_del
     assert workflow_rules, "Missing workflow input projection rule"
 
     expr = "\n".join(str(rule.get("expr", "")) for rule in workflow_rules)
+    expr_compact = re.sub(r"\s+", " ", expr)
     assert "bioetl_workflow_current_status" in expr
     assert "bioetl_overview_pipeline_run_type_universe" in expr
+    assert '"pipeline", "$1", "pipeline_context"' in expr_compact
+    assert '"run_type", "$1", "run_type_context"' in expr_compact
+    assert (
+        "max by (pipeline, run_type) (bioetl_workflow_current_status)"
+        not in expr_compact
+    )
+    assert (
+        "unless on (pipeline, run_type) max by (pipeline, run_type) (" in expr_compact
+    )
     assert "bioetl_workflow_runs_total" not in expr
     assert "bioetl_pipeline_runs_total" not in expr
 

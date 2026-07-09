@@ -30,7 +30,7 @@ dashboards:
     data_sources:
       - Prometheus
       - HTTP (control-plane backend)
-    panel_count: 55
+    panel_count: 57
     key_panels:
       - id: 891
         title: "Monitor: Replay Safety State"
@@ -199,7 +199,7 @@ dashboards:
     navigation_id: null
     data_sources:
       - HTTP (quarantine backend)
-    panel_count: 14
+    panel_count: 16
     key_panels:
       - id: 2
         title: "Monitor Filtered Records Total"

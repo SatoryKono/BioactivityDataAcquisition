@@ -2,7 +2,8 @@
 
 Complete catalog of all Prometheus metrics defined in BioETL observability system.
 
-**Total Metrics: 181** (excluding aliases)
+**Runtime Metrics: 181** (excluding aliases)
+**Governed Recording/Current-State Metrics: 46**
 
 ## Table of Contents
 
@@ -20,6 +21,7 @@ Complete catalog of all Prometheus metrics defined in BioETL observability syste
 - [Pipeline Transform Metrics](#pipeline-transform-metrics) - 3 metrics
 - [Pipeline Workflow Metrics](#pipeline-workflow-metrics) - 7 metrics
 - [Storage Metrics](#storage-metrics) - 33 metrics
+- [Governed Recording And Current-State Metrics](#governed-recording-and-current-state-metrics) - 46 metrics
 
 ---
 
@@ -304,10 +306,72 @@ Complete catalog of all Prometheus metrics defined in BioETL observability syste
 
 ---
 
+## Governed Recording And Current-State Metrics
+
+*Source: `configs/quality/observability_metric_declarations.yaml` and
+`grafana/prometheus-rules/*.yml`*
+
+These names are Prometheus recording rules, dashboard current-state projections,
+or policy-governed metric contracts. They are not all emitted directly by
+`prometheus_client` collectors, but they are part of the shipped observability
+surface used by dashboards, alerts, and metric-governance checks.
+
+| Metric Name | Type | Labels | Description |
+|-------------|------|--------|-------------|
+| `bioetl_alerts_active_total` | Recording rule | rule-defined | Active alert count projection for alert/SLO dashboards |
+| `bioetl_alerts_firing_total` | Recording rule | rule-defined | Firing alert count projection for alert/SLO dashboards |
+| `bioetl_checkpoint_age_seconds` | Recording rule | pipeline | Current checkpoint age derived from checkpoint save timestamp |
+| `bioetl_control_plane_status` | Recording rule | rule-defined | Control-plane severity/status projection |
+| `bioetl_current_status` | Recording rule | rule-defined | Top-level current system status projection |
+| `bioetl_dq_blocked_records` | Recording rule | rule-defined | DQ-blocked record count projection |
+| `bioetl_dq_check_duration_seconds` | Recording rule | rule-defined | Seconds-based DQ check duration projection for dashboard formulas |
+| `bioetl_dq_status` | Recording rule | rule-defined | DQ status projection for dashboard and alert summaries |
+| `bioetl_pipeline_phase_duration_seconds` | Recording rule | rule-defined | Pipeline phase duration projection normalized for dashboard use |
+| `bioetl_provider_status` | Recording rule | rule-defined | Provider status projection for provider health dashboards |
+| `bioetl_runtime_status` | Recording rule | rule-defined | Runtime status projection for overview/runtime dashboards |
+| `bioetl_shutdown_completed_total` | Recording rule | reason | Shutdown completion projection aligned with shutdown event metrics |
+| `bioetl_shutdown_initiated_total` | Recording rule | reason | Shutdown initiation projection aligned with shutdown event metrics |
+| `bioetl_silver_filter_reject_field_total` | Recording rule | field | Silver reject count grouped by field |
+| `bioetl_silver_filter_reject_reason_total` | Recording rule | reason_code | Silver reject count grouped by reason |
+| `bioetl_silver_reject_rate` | Recording rule | rule-defined | Silver reject-rate projection for reject explorer and DQ dashboards |
+| `bioetl_workflow_status` | Recording rule | workflow | Workflow status projection for dashboard summaries |
+| `bioetl_processed_records_bronze_current` | Recording rule | rule-defined | Current Bronze processed-record projection |
+| `bioetl_processed_records_gold_deduplicated_current` | Recording rule | rule-defined | Current Gold deduplicated-record projection |
+| `bioetl_processed_records_gold_excluded_by_contract_current` | Recording rule | rule-defined | Current Gold records excluded by contract projection |
+| `bioetl_processed_records_gold_quarantined_current` | Recording rule | rule-defined | Current Gold quarantined-record projection |
+| `bioetl_processed_records_gold_skipped_current` | Recording rule | rule-defined | Current Gold skipped-record projection |
+| `bioetl_processed_records_gold_written_current` | Recording rule | rule-defined | Current Gold written-record projection |
+| `bioetl_processed_records_reconciliation_status` | Recording rule | rule-defined | Current processed-record reconciliation status projection |
+| `bioetl_workflow_row_reconciliation_left_rows_total` | Counter contract | layer | Left-side rows inspected by workflow row reconciliation |
+| `bioetl_workflow_row_reconciliation_right_rows_total` | Counter contract | layer | Right-side rows inspected by workflow row reconciliation |
+| `bioetl_workflow_row_reconciliation_kept_rows_total` | Counter contract | layer | Rows retained by workflow row reconciliation |
+| `bioetl_workflow_row_reconciliation_excluded_rows_total` | Counter contract | layer | Rows excluded by workflow row reconciliation |
+| `bioetl_processed_records_silver_deduplicated_current` | Recording rule | rule-defined | Current Silver deduplicated-record projection |
+| `bioetl_processed_records_silver_filtered_out_current` | Recording rule | rule-defined | Current Silver filtered-out-record projection |
+| `bioetl_processed_records_silver_quarantined_current` | Recording rule | rule-defined | Current Silver quarantined-record projection |
+| `bioetl_processed_records_silver_skipped_current` | Recording rule | rule-defined | Current Silver skipped-record projection |
+| `bioetl_processed_records_silver_valid_current` | Recording rule | rule-defined | Current Silver valid-record projection |
+| `bioetl_dq_current_status` | Recording rule | rule-defined | Current DQ status signal used by L0/L1 dashboards |
+| `bioetl_l0_input_status` | Recording rule | rule-defined | L0 input status projection |
+| `bioetl_l0_status` | Recording rule | rule-defined | L0 overall status projection |
+| `bioetl_l1_control_plane_current_status` | Recording rule | rule-defined | L1 control-plane current status projection |
+| `bioetl_l1_dq_status` | Recording rule | rule-defined | L1 DQ status projection |
+| `bioetl_l1_gold_lifecycle_status` | Recording rule | rule-defined | L1 Gold lifecycle status projection |
+| `bioetl_l1_provider_global_status` | Recording rule | rule-defined | L1 provider global status projection |
+| `bioetl_l1_runtime_blocker_status` | Recording rule | rule-defined | L1 runtime blocker status projection |
+| `bioetl_l1_workflow_global_status` | Recording rule | rule-defined | L1 workflow global status projection |
+| `bioetl_l1_workflow_selected_status` | Recording rule | rule-defined | L1 selected-workflow status projection |
+| `bioetl_provider_current_status` | Recording rule | rule-defined | Provider current status projection |
+| `bioetl_runtime_current_status` | Recording rule | pipeline, run_type | Runtime current status projection used by overview/workflow dashboards |
+| `bioetl_workflow_pipeline_verdict_status` | Recording rule | pipeline, run_type | Workflow-to-pipeline verdict projection for workflow dashboard handoff |
+
+---
+
 ## Summary
 
-- **Total Metrics**: 181 (excluding aliases)
-- **Total Categories**: 14
+- **Runtime Metrics**: 181 (excluding aliases)
+- **Governed Recording/Current-State Metrics**: 46
+- **Total Categories**: 15
 - **Metric Types Distribution**:
   - Counter: ~110 metrics
   - Histogram: ~35 metrics

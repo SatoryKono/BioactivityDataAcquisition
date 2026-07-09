@@ -15,7 +15,7 @@ print(Path(sys.argv[1]).resolve())
 PY
 )"
 
-DOCKER_IMAGE="${MMDC_DOCKER_IMAGE:-minlag/mermaid-cli}"
+DOCKER_IMAGE="${MMDC_DOCKER_IMAGE:-minlag/mermaid-cli:10.6.1}"
 LOCAL_MMDC="/tmp/mermaid-cli-lite/node_modules/.bin/mmdc"
 FORCE_DOCKER="${MMDC_FORCE_DOCKER:-0}"
 HOST_PUPPETEER_CACHE_DIR="${PUPPETEER_CACHE_DIR:-${HOME:-}/.cache/puppeteer}"

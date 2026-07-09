@@ -28,6 +28,10 @@ recording_rule_metrics:
   - bioetl_workflow_reconciliation_rows_deleted_total
   - bioetl_workflow_reconciliation_rows_retained_total
   - bioetl_workflow_reconciliation_rows_scanned_total
+  - bioetl_workflow_row_reconciliation_excluded_rows_total
+  - bioetl_workflow_row_reconciliation_kept_rows_total
+  - bioetl_workflow_row_reconciliation_left_rows_total
+  - bioetl_workflow_row_reconciliation_right_rows_total
   - bioetl_processed_records_silver_deduplicated_current
   - bioetl_processed_records_silver_filtered_out_current
   - bioetl_processed_records_silver_quarantined_current
@@ -103,6 +107,10 @@ declared_label_contract_metrics:
   - bioetl_silver_validation_failures_total
   - bioetl_vacuum_files_removed_total
   - bioetl_workflow_current_status
+  - bioetl_workflow_row_reconciliation_excluded_rows_total
+  - bioetl_workflow_row_reconciliation_kept_rows_total
+  - bioetl_workflow_row_reconciliation_left_rows_total
+  - bioetl_workflow_row_reconciliation_right_rows_total
   - bioetl_workflow_runs_total
   - bioetl_workflow_step_duration_seconds
   - bioetl_workflow_step_events_total

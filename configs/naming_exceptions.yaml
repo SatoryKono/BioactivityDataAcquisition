@@ -25,6 +25,8 @@ documentation_exceptions:
     - docs/DOCKER_QUICKSTART.md    # Legacy root setup/troubleshooting entrypoint
     - docs/DOCKER_SETUP.md         # Legacy root setup/troubleshooting entrypoint
     - docs/00-project/DOCUMENTATION_GOVERNANCE.md
+    - docs/00-project/NORMATIVE_SOURCES.md
+    - docs/CODEX_HANG_FIX.md
     - docs/99-archive/legacy-05-architecture/COMPLEX_COMPONENTS_DOCUMENTATION.md
     - docs/99-archive/legacy-05-architecture/EXECUTION_LOG_2024-08-21.md
     - docs/99-archive/legacy-05-architecture/IMPLEMENTATION_PLAN.md

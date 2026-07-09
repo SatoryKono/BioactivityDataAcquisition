@@ -24,6 +24,7 @@ from bioetl.domain.ports import (
     MetricsPort,
     RunLedgerPort,
     RunManifestPort,
+    WorkflowManifestPort,
 )
 from bioetl.domain.ports.health_check import HealthCheckResult, HealthStatePort
 from bioetl.domain.types import HealthStatus
@@ -65,6 +66,7 @@ class TestHealthServerDependencies:
         checkpoint_port = MagicMock()
         manifest_store = InMemoryRunManifestStore()
         ledger_store = InMemoryRunLedgerStore()
+        workflow_manifest_store = MagicMock()
 
         deps = HealthServerDependencies(
             health_monitor=monitor,
@@ -72,6 +74,7 @@ class TestHealthServerDependencies:
             checkpoint_port=checkpoint_port,
             run_manifest_port=manifest_store,
             run_ledger_port=ledger_store,
+            workflow_manifest_port=workflow_manifest_store,
         )
 
         with pytest.raises(AttributeError):
@@ -88,6 +91,7 @@ class TestHealthServerDependencies:
         checkpoint_port = MagicMock()
         manifest_store = InMemoryRunManifestStore()
         ledger_store = InMemoryRunLedgerStore()
+        workflow_manifest_store = MagicMock()
 
         deps = HealthServerDependencies(
             health_monitor=monitor,
@@ -95,6 +99,7 @@ class TestHealthServerDependencies:
             checkpoint_port=checkpoint_port,
             run_manifest_port=manifest_store,
             run_ledger_port=ledger_store,
+            workflow_manifest_port=workflow_manifest_store,
         )
 
         assert deps.health_monitor is monitor
@@ -102,6 +107,7 @@ class TestHealthServerDependencies:
         assert deps.checkpoint_port is checkpoint_port
         assert deps.run_manifest_port is manifest_store
         assert deps.run_ledger_port is ledger_store
+        assert deps.workflow_manifest_port is workflow_manifest_store
 
 
 @pytest.mark.unit
@@ -191,6 +197,12 @@ class TestBootstrapHealthServerDependencies:
         result = bootstrap_health_server_dependencies()
 
         assert isinstance(result.run_ledger_port, RunLedgerPort)
+
+    def test_bootstrap_wires_workflow_manifest_port(self):
+        """Test that bootstrap exposes workflow manifests for selector aliases."""
+        result = bootstrap_health_server_dependencies()
+
+        assert isinstance(result.workflow_manifest_port, WorkflowManifestPort)
 
     def test_bootstrap_wires_metrics_to_health_monitor(self):
         """Test that the metrics are wired to the health monitor."""

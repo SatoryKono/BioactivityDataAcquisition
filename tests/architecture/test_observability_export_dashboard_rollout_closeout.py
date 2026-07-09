@@ -26,8 +26,7 @@ CLOSEOUT = (
     / "quality"
     / "observability-export-dashboard-rollout-closeout.json"
 )
-ERROR_CATALOG = ROOT / "configs" / "contracts" / "errors" / "error-catalog.yaml"
-BASELINE_AUDIT = ROOT / "docs" / "plans" / "dashboard-observability-baseline-audit.md"
+ERROR_CATALOG = ROOT / "configs" / "contracts" / "errors" / "error_catalog.yaml"
 ROLLOUT_CONTRACT = (
     ROOT / "docs" / "04-reference" / "contracts" / "observability-rollout-contracts.md"
 )
@@ -101,8 +100,6 @@ def _iter_dashboard_promql() -> list[tuple[str, str, str]]:
 def _iter_rule_promql() -> list[tuple[str, str, str]]:
     expressions: list[tuple[str, str, str]] = []
     for rules_path in sorted(PROM_RULES_DIR.glob("*.yml")):
-        if rules_path.name.endswith(".bak"):
-            continue
         payload = _load_yaml(rules_path)
         for group in payload.get("groups", []):
             if not isinstance(group, dict):
@@ -116,6 +113,22 @@ def _iter_rule_promql() -> list[tuple[str, str, str]]:
                     rule_name = str(rule.get("alert") or rule.get("record") or "<rule>")
                     expressions.append((group_name, rule_name, expr))
     return expressions
+
+
+def test_prometheus_rules_directory_contains_no_active_backups() -> None:
+    """Prometheus rule directories must not carry tracked backup copies."""
+    forbidden = sorted(
+        path.name
+        for path in PROM_RULES_DIR.iterdir()
+        if path.is_file()
+        and (
+            path.suffix == ".bak"
+            or path.name.endswith(".yml.bak")
+            or "fixed" in path.name.lower()
+            or "scratch" in path.name.lower()
+        )
+    )
+    assert forbidden == []
 
 
 def _forbidden_selector_labels(expr: str) -> set[str]:
@@ -233,7 +246,6 @@ def test_export_contract_exposes_audit_checksum_expiry_and_redaction_controls() 
 
 
 def test_rollout_docs_preserve_prompt_narrowing_and_projection_boundaries() -> None:
-    baseline = BASELINE_AUDIT.read_text(encoding="utf-8")
     contract = ROLLOUT_CONTRACT.read_text(encoding="utf-8")
     rbac = RBAC_MATRIX.read_text(encoding="utf-8")
 
@@ -244,10 +256,6 @@ def test_rollout_docs_preserve_prompt_narrowing_and_projection_boundaries() -> N
     assert "run_id" in contract and "forbidden as a Prometheus label" in contract
     assert "`export_jobs`" in contract
     assert "raw Bronze/Silver storage directly" in contract
-
-    assert "New SQL event-store migrations" in baseline
-    assert "Grafana inspector export is not a governed export surface" in baseline
-    assert "Domain filesystem/database writes" in baseline
 
     assert "hidden" in rbac.lower()
     assert "security boundary" in rbac.lower()

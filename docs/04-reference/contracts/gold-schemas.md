@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-03'
+  Last verified: '2026-07-07'
 
 ______________________________________________________________________
 
@@ -22,7 +22,7 @@ ______________________________________________________________________
 > Ниже применяется snake_case нотация полей, синхронизированная с автогенерацией контрактов.
 
 > **Версия**: 1.1.0
-> **Последнее обновление**: 2026-04-03
+> **Последнее обновление**: 2026-07-07
 > **Связанные ADR**: [ADR-018](../../02-architecture/decisions/ADR-018-gold-strict-validation.md), [ADR-014](../../02-architecture/decisions/ADR-014-deterministic-writes.md), [ADR-045](../../02-architecture/decisions/ADR-045-dq-contract-system.md)
 
 ______________________________________________________________________
@@ -74,7 +74,7 @@ Gold-слой содержит **бизнес-готовые данные** с:
 
 Отдельно фиксируем policy boundary для `#4768`:
 
-- `strict_dq_validation` в `configs/contracts/**/*.yaml` остаётся DQ-only флагом и не управляет Gold runtime strictness;
+- `strict_dq_validation` в entity contract YAML под `configs/contracts/{provider}/{entity}.yaml` остаётся DQ-only флагом и не управляет Gold runtime strictness;
 - canonical Gold strictness для composite outputs обеспечивается registered Pandera Gold schema и merged Gold write path;
 - любые composite-специфические исключения по этой границе должны быть явно заведены в `configs/quality/composite_gold_strictness_waivers.yaml` с owner, rationale, linked issue, approved_on и expires_on.
 
@@ -102,6 +102,17 @@ UPDATE_SNAPSHOTS=1 pytest tests/contract/test_gold_schema_snapshot_registry.py
 Bounded DQ golden bundles обновляются вместе с изменением output contract и
 должны оставаться перечисленными в
 `configs/quality/test_matrix.yaml -> fixture_governance.gold_snapshot_registry`.
+
+DQ bundle coverage policy is intentionally bounded. The registry field
+`dq_bundle_policy.scope` is `dq_sensitive_outputs`; bundle snapshots are
+required for outputs listed in `dq_sensitive_outputs`, not for every Gold
+entity in `entities`. An output belongs in this bounded subset when it carries
+DQ flags or DQ-sensitive provenance consumed by downstream checks, represents a
+high-value provider or composite contract surface, and has snapshot rows that
+exercise at least one warning or error DQ state. Contract tests enforce that
+required subset and do not imply entity-wide DQ bundle generation. This is not a
+blanket snapshot-expansion policy: adding a new Gold bundle requires registry
+membership and DQ-sensitive rationale, not only the existence of a Gold entity.
 
 ### Nullable Numeric Compatibility
 
@@ -969,10 +980,14 @@ validated = ChEMBLActivityGoldSchema.validate(df.to_pandas())
 
 ### Data Quality пороги
 
-| Порог    | Значение       | Действие        |
-| -------- | -------------- | --------------- |
-| **Soft** | >5% DQ errors  | Warning в логах |
-| **Hard** | >20% DQ errors | Fail batch      |
+Gold-schema validation participates in the same DQ threshold model documented in
+[DQ Contracts](dq-contracts.md#threshold-semantics). BioETL does not maintain one
+universal hard-fail default for every DQ surface:
+
+| Surface | Default | Action |
+| --- | --- | --- |
+| Hierarchical `quality:` config | `soft_fail=0.05`, `hard_fail=0.25` | warn above soft; reject/quarantine above hard according to active disposition policy |
+| Contract-backed DQ fallback, inline DQ override normalization, Silver DQ request | `soft_fail=0.05`, `hard_fail=0.20` | warn above soft; reject/quarantine above hard according to active disposition policy |
 
 ______________________________________________________________________
 
@@ -1003,8 +1018,6 @@ JSON exports для Gold-схем хранятся в `docs/04-reference/contrac
 - `chembl_subcellular_fraction_v1.0.json`
 - `chembl_target_component_v1.0.json`
 - `chembl_target_protein_classification_v2.2.json`
-- `chembl_target_protein_classification_v2.1.json`
-- `chembl_target_protein_classification_v2.0.json`
 - `chembl_target_v3.0.json`
 - `chembl_tissue_v1.0.json`
 - `composite_activity_v1.0.json`

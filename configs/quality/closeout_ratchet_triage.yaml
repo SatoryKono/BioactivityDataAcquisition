@@ -294,3 +294,48 @@ entries:
     classification: budget_closeout_ratchet
     live_guard: "debt issue #5978 branch coverage readiness remains at the 85% threshold with a promoted coverage-verify branch gate and without budget growth."
     rationale: Keeps the branch coverage readiness closeout tied to the blocking branch gate command, current branch coverage state (85.002% with zero branch-outcome margin), and module coverage gates policy alignment instead of stale historical signoff.
+  - path: tests/architecture/test_root_hygiene_issues_5992_5999_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "root hygiene issue batch #5992-#5999 remains aligned with live root-hygiene, env-security, data-retention, and fixture-governance evidence without budget growth."
+    rationale: Keeps the root-hygiene closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_test_audit_issues_5996_6003_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "test audit issue batch #5996-#6003 remains aligned with live test-audit preflight, telemetry baseline, topology retirement, VCR reachability, and coverage-tail evidence without budget growth."
+    rationale: Keeps the test-audit closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_test_infrastructure_refactor_closeout_6042_6044.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "test infrastructure issue batch #6042 and #6044 remains aligned with live fixture-scope and helper-ownership evidence without budget growth."
+    rationale: Keeps the test-infrastructure refactor closeout tied to executable live invariants for bootstrap fixture scope and support-helper ownership instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issues_6011_6020_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue batch #6011-#6020 remains aligned with live hotspot family fan-in margin, duplication triage baselines, and coverage attempt evidence without budget growth."
+    rationale: Keeps the newest architecture-debt closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issues_6022_6028_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue batch #6022-#6028 remains aligned with live governance, compatibility, duplication, and observability evidence without budget growth."
+    rationale: Keeps the newest architecture-debt closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issues_6032_6034_6037_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue batch #6032, #6034, and #6037 remains aligned with live hotspot fan-in and runtime SCC acceptance evidence without budget growth."
+    rationale: Keeps the newest architecture-debt closeout batch tied to executable live invariants for hotspot family headroom and runtime import-cycle acceptances instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issue_6060_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue #6060 remains aligned with live composition runtime-builder hotspot fan-in headroom without budget growth."
+    rationale: Keeps the architecture-debt closeout tied to executable live hotspot-family fan-in metrics and no-growth budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issue_6062_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "debt issue #6062 remains aligned with live Gold writer function-scoped import inventory without budget growth."
+    rationale: Keeps the architecture-debt closeout tied to executable Gold writer lazy-import and hidden-coupling evidence instead of stale historical signoff.
+  - path: tests/architecture/test_refactoring_followups_6097_6100_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "refactoring follow-up issues #6097-#6100 remain aligned with live facade ownership, runtime SCC, config governance, and VCR replay-preflight ratchets without budget growth."
+    rationale: Keeps the refactoring follow-up closeout tied to executable live invariants and flat-or-decreasing debt-budget evidence instead of stale historical signoff.

@@ -4,9 +4,6 @@
 
 minimum_pre_commit_version: "4.5.1"
 
-default_language_version:
-  python: python3.12
-
 default_install_hook_types:
   - pre-commit
   - pre-push
@@ -239,14 +236,29 @@ repos:
         name: Lint architecture diagrams (.mmd/.mermaid)
         entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams lint
         language: python
-        files: ^docs/02-architecture/(mmd-diagrams/.*\.mmd|diagrams/mermaid/.*\.mermaid)$
+        files: ^docs/02-architecture/diagrams/(architecture|foundation|class-diagrams)/.*\.mmd$
+        stages: [pre-commit]
+
+      - id: lint-diagrams-views
+        name: Lint architecture diagram views (.mermaid)
+        entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams lint
+        language: python
+        files: ^docs/02-architecture/diagrams/views/.*\.mermaid$
         stages: [pre-commit]
 
       - id: prune-orphan-diagram-nodes
         name: Check for orphan nodes in Mermaid diagrams (GRAPH-001)
         entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams fix-orphans --check
         language: python
-        files: ^docs/02-architecture/(mmd-diagrams/.*\.mmd|diagrams/mermaid/.*\.mermaid)$
+        files: ^docs/02-architecture/diagrams/(architecture|foundation|class-diagrams)/.*\.mmd$
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: prune-orphan-diagram-view-nodes
+        name: Check for orphan nodes in Mermaid view diagrams (GRAPH-001)
+        entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams fix-orphans --check
+        language: python
+        files: ^docs/02-architecture/diagrams/views/.*\.mermaid$
         pass_filenames: false
         stages: [pre-commit]
 
@@ -333,6 +345,16 @@ repos:
         language: python
         pass_filenames: false
         files: ^(src/bioetl/.*\.py|docs/02-architecture/generated/module-dependency-map\.(md|json)|scripts/engineering/qa/generate_architecture_dependency_map\.py)$
+        stages: [manual]
+
+      - id: check-dashboard-panel-title-inventory
+        name: Check dashboard panel title inventory parity
+        entry: >
+          python scripts/engineering/dev/run_project_python.py -m
+          scripts.engineering.qa report-panel-title-inventory --check
+        language: python
+        pass_filenames: false
+        files: ^(grafana/dashboards/.*\.json|docs/03-guides/dashboards/panel-title-inventory\.md|scripts/engineering/qa/report_panel_title_inventory\.py)$
         stages: [manual]
 
       - id: ruff-scripts-advisory

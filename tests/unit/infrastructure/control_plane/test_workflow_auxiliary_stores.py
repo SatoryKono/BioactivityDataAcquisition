@@ -33,13 +33,18 @@ def _run_id(seed: str) -> RunID:
     return RunID(UUID(seed))
 
 
-def _manifest(*, manifest_id: str, workflow_run_id: RunID) -> WorkflowManifest:
+def _manifest(
+    *,
+    manifest_id: str,
+    workflow_run_id: RunID,
+    created_at: datetime | None = None,
+) -> WorkflowManifest:
     return WorkflowManifest(
         manifest_id=manifest_id,
         workflow_run_id=workflow_run_id,
         execution_fingerprint=f"fp-{manifest_id}",
         schema_version="1.0",
-        created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+        created_at=created_at or datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
         workflow_name="chembl_core",
         workflow_version="2026.1",
         launch_context={"mode": "test"},
@@ -106,6 +111,27 @@ def test_workflow_manifest_store_round_trip_and_conflicting_run_id(
 
     assert "Workflow manifest" in str(exc_info.value)
     assert "different manifest_id" in str(exc_info.value)
+
+
+def test_workflow_manifest_store_list_all_orders_by_created_at(
+    tmp_path: Path,
+) -> None:
+    store = FileWorkflowManifestStore(base_path=tmp_path / "workflow_manifest")
+    older = _manifest(
+        manifest_id="manifest-older",
+        workflow_run_id=_run_id("00000000-0000-0000-0000-000000000111"),
+        created_at=datetime(2026, 1, 1, 12, 0, tzinfo=UTC),
+    )
+    newer = _manifest(
+        manifest_id="manifest-newer",
+        workflow_run_id=_run_id("00000000-0000-0000-0000-000000000112"),
+        created_at=datetime(2026, 1, 1, 12, 5, tzinfo=UTC),
+    )
+
+    store.save(newer)
+    store.save(older)
+
+    assert store.list_all() == (older, newer)
 
 
 def test_workflow_manifest_store_rolls_back_manifest_file_when_run_index_write_fails(

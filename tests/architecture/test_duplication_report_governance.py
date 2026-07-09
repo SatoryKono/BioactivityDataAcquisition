@@ -176,6 +176,13 @@ def test_specialized_duplication_markdown_matches_json_payload() -> None:
             exclude_module_patterns=tuple(
                 pattern for pattern in exclude_patterns if isinstance(pattern, str)
             ),
+            exclude_actionability_categories=tuple(
+                category
+                for category in normalization.get(
+                    "exclude_actionability_categories", []
+                )
+                if isinstance(category, str)
+            ),
             trend_summary=payload.get("trend")
             if isinstance(payload.get("trend"), dict)
             else None,
@@ -276,6 +283,11 @@ def test_full_app_duplication_markdown_matches_json_payload() -> None:
         _reports_from_payload(payload),
         exclude_module_patterns=tuple(
             pattern for pattern in exclude_patterns if isinstance(pattern, str)
+        ),
+        exclude_actionability_categories=tuple(
+            category
+            for category in normalization.get("exclude_actionability_categories", [])
+            if isinstance(category, str)
         ),
         trend_summary=payload.get("trend")
         if isinstance(payload.get("trend"), dict)

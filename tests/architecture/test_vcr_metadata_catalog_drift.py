@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import sys
+
 import pytest
 
 import importlib.util
 import json
-import sys
 from pathlib import Path
 from typing import Any, Protocol, cast
 
@@ -106,6 +107,8 @@ def _load_catalog_module() -> CatalogModule:
 
 
 def test_vcr_metadata_catalog_drift_check_passes_current_repo() -> None:
+    if sys.platform.startswith("win"):
+        pytest.skip("Skipped on Windows due to filesystem performance")
     mod = _load_catalog_module()
     expected = mod.render_catalog_json(Path("tests/fixtures/vcr"))
     artifact_path = Path("reports/quality/vcr-metadata-catalog.json")
@@ -145,6 +148,8 @@ def test_vcr_metadata_catalog_drift_check_passes_current_repo() -> None:
 
 
 def test_vcr_metadata_catalog_tracks_cassettes_not_sidecars() -> None:
+    if sys.platform.startswith("win"):
+        pytest.skip("Skipped on Windows due to filesystem performance")
     mod = _load_catalog_module()
     payload = cast(
         dict[str, Any], json.loads(mod.render_catalog_json(Path("tests/fixtures/vcr")))

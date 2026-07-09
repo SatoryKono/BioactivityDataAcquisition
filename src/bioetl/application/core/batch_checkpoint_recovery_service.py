@@ -7,9 +7,6 @@ __all__ = ["BatchCheckpointRecoveryService"]
 import time
 from typing import TYPE_CHECKING, cast
 
-from bioetl.application.core.batch_runtime_failure_policy import (
-    OPERATION_ERRORS as SHARED_OPERATION_ERRORS,
-)
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 
 if TYPE_CHECKING:
@@ -25,7 +22,6 @@ if TYPE_CHECKING:
 class BatchCheckpointRecoveryService:
     """Owns checkpoint save semantics for runtime, shutdown, and recovery."""
 
-    _CHECKPOINT_SAVE_ERRORS = SHARED_OPERATION_ERRORS
     _CHECKPOINT_TRACER_NAME = "bioetl.checkpoint"
 
     def __init__(
@@ -44,6 +40,7 @@ class BatchCheckpointRecoveryService:
         self._tracer = tracer
         self._pipeline_name = pipeline_name
         self._memory_manager = memory_manager
+        self._checkpoint_save_errors = checkpoint_manager._operation_errors
 
     async def save_periodic_checkpoint(
         self,
@@ -81,7 +78,7 @@ class BatchCheckpointRecoveryService:
                 error_type=type(error).__name__,
                 reason="checkpoint_saved_on_pipeline_exception",
             )
-        except self._CHECKPOINT_SAVE_ERRORS as checkpoint_error:
+        except self._checkpoint_save_errors as checkpoint_error:
             self._logger.warning(
                 "Checkpoint save failed during exception handling",
                 records_processed=self._total_processed(records_fetched, resume_offset),
@@ -99,7 +96,7 @@ class BatchCheckpointRecoveryService:
         try:
             total = self._total_processed(records_fetched, resume_offset)
             await self._save_checkpoint(total, operation="shutdown")
-        except self._CHECKPOINT_SAVE_ERRORS as checkpoint_error:
+        except self._checkpoint_save_errors as checkpoint_error:
             self._logger.warning(
                 "Emergency checkpoint save failed during shutdown",
                 records_processed=self._total_processed(records_fetched, resume_offset),
@@ -206,7 +203,7 @@ class BatchCheckpointRecoveryService:
             await self._checkpoint_manager.save_checkpoint(
                 self._checkpoint_payload(total)
             )
-        except self._CHECKPOINT_SAVE_ERRORS as error:
+        except self._checkpoint_save_errors as error:
             duration_seconds = time.monotonic() - started_at
             self._emit_checkpoint_save_event(
                 operation=operation,
