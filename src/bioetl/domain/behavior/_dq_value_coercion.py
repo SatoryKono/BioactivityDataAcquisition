@@ -6,6 +6,7 @@ Extracted from _dq_rule_evaluators.py to meet file size limits.
 from __future__ import annotations
 
 import json
+import math
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -30,9 +31,10 @@ def _coerce_numeric_value(value: object) -> float | None:
     if isinstance(value, bool):
         return None
     try:
-        return float(value)
+        numeric_value = float(value)
     except (TypeError, ValueError):
         return None
+    return numeric_value if math.isfinite(numeric_value) else None
 
 
 def _violates_minimum(numeric_value: float, rule: FieldValidation) -> bool:

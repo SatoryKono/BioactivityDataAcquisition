@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 import pytest
 
 from bioetl.domain.behavior.normalization_config import NormalizationConfig
@@ -38,6 +40,14 @@ def test_normalize_activity_returns_invalid_result_for_validation_or_conversion_
     assert invalid_value.validation_message == "Concentration cannot be zero"
     assert invalid_unit.is_valid is False
     assert "Unknown concentration unit" in str(invalid_unit.validation_message)
+
+
+@pytest.mark.parametrize("value", [math.nan, math.inf, -math.inf])
+def test_normalize_activity_rejects_non_finite_values(value: float) -> None:
+    result = BioactivityNormalizer().normalize_activity(value, "nM", "IC50")
+
+    assert result.is_valid is False
+    assert result.validation_message == f"Concentration must be finite: {value}"
 
 
 def test_normalize_to_pchembl_returns_none_for_invalid_or_out_of_range_values() -> None:

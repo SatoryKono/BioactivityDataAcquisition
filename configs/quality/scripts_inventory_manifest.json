@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-08T21:28:56.521391+00:00",
+  "generated_at": "2026-07-09T09:04:31.256166+00:00",
   "summary": {
     "total_scripts": 447,
     "status_counts": {
@@ -15,7 +15,7 @@
       "other": 23,
       "scripts": 348,
       "skills": 11,
-      "tests": 193
+      "tests": 194
     }
   },
   "scripts": [
@@ -4885,7 +4885,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 139,
+      "reference_count": 144,
       "references": [
         {
           "path": ".github/workflows/docs-kpi-weekly.yml",
@@ -5264,7 +5264,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/docs/README.md",
@@ -5277,6 +5277,12 @@
           "line": 44,
           "source_group": "scripts",
           "text": "\"generate-cleanup-inventory\": \"scripts.docs.checks.documentation_cleanup_inventory\","
+        },
+        {
+          "path": "tests/architecture/test_documentation_cleanup_inventory.py",
+          "line": 84,
+          "source_group": "tests",
+          "text": "assert route[\"generator\"] == \"scripts/docs/checks/documentation_cleanup_inventory.py\""
         }
       ]
     },
@@ -7628,7 +7634,7 @@
         },
         {
           "path": "docs/03-guides/docs-verification.md",
-          "line": 152,
+          "line": 176,
           "source_group": "docs",
           "text": ".\\scripts\\engineering\\dev\\setup_env_windows.ps1"
         },
@@ -7685,7 +7691,7 @@
         },
         {
           "path": "docs/03-guides/docs-verification.md",
-          "line": 157,
+          "line": 181,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/setup_env_wsl.sh"
         },
@@ -9595,7 +9601,7 @@
         },
         {
           "path": "docs/02-architecture/current-state-inventory.md",
-          "line": 286,
+          "line": 289,
           "source_group": "docs",
           "text": "| Generated artifact drift gate did not include module coverage source-tree hash freshness | `report-module-coverage --check` could fail stale source-tree evidence while `report-debt-governance-gates "
         },
