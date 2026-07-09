@@ -8,8 +8,15 @@ from pathlib import Path
 from bioetl.domain.control_plane import RunInputSnapshotRef
 
 __all__ = [
+    "CACHED_BRONZE_EMPTY_SNAPSHOT_PROVENANCE_MESSAGE",
     "build_cached_bronze_input_snapshot_refs",
+    "require_cached_bronze_input_snapshot_refs",
 ]
+
+CACHED_BRONZE_EMPTY_SNAPSHOT_PROVENANCE_MESSAGE = (
+    "Cached Bronze execution requires at least one persisted batch file "
+    "for snapshot provenance"
+)
 
 
 def build_cached_bronze_input_snapshot_refs(
@@ -37,6 +44,21 @@ def build_cached_bronze_input_snapshot_refs(
     # Persist snapshot refs in stable identity order so replay metadata
     # does not depend on filesystem enumeration or content hash/path interplay.
     return tuple(sorted(snapshot_refs, key=lambda ref: ref.snapshot_id))
+
+
+def require_cached_bronze_input_snapshot_refs(
+    *,
+    bronze_root: Path,
+    bronze_date: str | None,
+) -> tuple[RunInputSnapshotRef, ...]:
+    """Return cached-Bronze snapshot refs or fail closed when none are present."""
+    snapshot_refs = build_cached_bronze_input_snapshot_refs(
+        bronze_root=bronze_root,
+        bronze_date=bronze_date,
+    )
+    if not snapshot_refs:
+        raise RuntimeError(CACHED_BRONZE_EMPTY_SNAPSHOT_PROVENANCE_MESSAGE)
+    return snapshot_refs
 
 
 def _build_cached_bronze_snapshot_ref(

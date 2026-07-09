@@ -276,9 +276,9 @@
 ### First-screen структура
 - [ ] Tier 1 включает: First Action, Runtime Status, Runtime Telemetry Gap, Monitor Runtime Blockers, Runtime Blockers
 - [ ] `Runtime Status` описан как mirror of shared-shell `Status`, not independent second signal
-- [ ] Tier 2 expanded rows по сценариям: Backlog Trends, Durations, Shutdown Diagnostics, Tracing-only Log Hygiene
+- [ ] Tier 2 expanded rows по сценариям: Backlog Trends, Durations, Shutdown Diagnostics; optional Tracing-only Log Hygiene collapsed by default
 - [ ] Tier 3: selected-range evidence ниже
-- [ ] Tier 4 expanded: tracing-only log hygiene
+- [ ] Tier 4 collapsed: tracing-only log hygiene
 
 ### KPI ownership (mirrors)
 - [ ] System Status mirror (canonical: `bioetl-overview-v2`)
@@ -293,7 +293,7 @@
 
 ### Специфические требования
 - [ ] Prometheus-first в tracing-off режиме
-- [ ] Loki log-hygiene panels в expanded row `Tracing-only Log Hygiene`
+- [ ] Loki log-hygiene panels в collapsed row `Tracing-only Log Hygiene`
 - [ ] Runtime zero-count cards fail closed: selected pipeline/run_type cards anchor `0` to `bioetl_runtime_pipeline_run_type_universe`
 - [ ] GLOBAL provider handoff anchors `0` to `bioetl_provider_current_status`
 - [ ] Missing scope остаётся `UNKNOWN`, не synthetic OK

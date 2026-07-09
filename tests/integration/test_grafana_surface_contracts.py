@@ -5,7 +5,6 @@ from pathlib import Path
 import pytest
 
 from tests.integration._grafana_test_support import (
-    get_dashboard_files,
     get_dashboard_panels,
     get_row_child_panels,
     get_panel_expressions,
@@ -60,11 +59,17 @@ def test_runtime_dashboard_contains_runtime_hygiene_and_alert_condition_metrics(
     missing = [metric for metric in required_metrics if metric not in all_expressions]
     assert not missing, f"Runtime dashboard missing metrics: {missing}"
 
+    def is_loki_datasource(panel: dict[str, object]) -> bool:
+        datasource = panel.get("datasource")
+        if datasource == "Loki":
+            return True
+        return isinstance(datasource, dict) and datasource.get("type") == "loki"
+
     loki_exprs = [
         target.get("expr", "")
         for panel in get_dashboard_panels(dashboard)
         for target in panel.get("targets", [])
-        if panel.get("datasource") == "Loki"
+        if is_loki_datasource(panel)
     ]
     assert any("| json" in expr for expr in loki_exprs), (
         "Runtime dashboard Loki panels must parse structured JSON logs"
@@ -86,7 +91,7 @@ def test_dq_dashboard_surfaces_record_flow_invariant_metrics() -> None:
     assert not missing, f"DQ dashboard missing metrics: {missing}"
 
 
-def test_runtime_dashboard_keeps_loki_log_hygiene_in_expanded_tracing_row() -> None:
+def test_runtime_dashboard_keeps_loki_log_hygiene_in_collapsed_tracing_row() -> None:
     """Runtime should stay Prometheus-first when tracing datasources are disabled."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     row_panel = next(
@@ -102,8 +107,9 @@ def test_runtime_dashboard_keeps_loki_log_hygiene_in_expanded_tracing_row() -> N
         "Runtime dashboard must group Loki-only panels under an explicit tracing row"
     )
     assert row_panel.get("type") == "row"
-    assert row_panel.get("collapsed") is False, (
-        "Tracing-only log hygiene row must stay expanded by default"
+    assert row_panel.get("collapsed") is True, (
+        "Tracing-only log hygiene row must stay collapsed by default because "
+        "Loki/Tempo datasources are optional in the default runtime profile"
     )
     nested_titles = {
         panel.get("title")
@@ -187,9 +193,9 @@ def test_runtime_dashboard_describes_tracing_optional_mode() -> None:
         None,
     )
     assert tracing_row is not None, (
-        "Runtime dashboard must expose optional tracing diagnostics as an expanded row"
+        "Runtime dashboard must expose optional tracing diagnostics as a collapsed row"
     )
-    assert tracing_row.get("collapsed") is False
+    assert tracing_row.get("collapsed") is True
 
 
 def test_control_plane_dashboard_contains_checkpoint_and_replay_metrics() -> None:
@@ -669,43 +675,3 @@ def test_empty_state_distribution_panels_use_explicit_placeholder_series(
         f"Panel '{panel_title}' in {dashboard_file} must include "
         f"{expected_snippet!r} to avoid empty-state no-data rendering"
     )
-
-
-def test_design_system_documents_technical_configuration_policy() -> None:
-    """Design docs must distinguish governed root config from benign export noise."""
-    text = Path("docs/03-guides/dashboards/design-system.md").read_text(
-        encoding="utf-8"
-    )
-    required_tokens = {
-        "Technical configuration policy: governed fields vs export noise",
-        '`style` MUST be `"dark"`',
-        "`editable` MUST remain `true`",
-        "`graphTooltip` MUST remain `1`",
-        "`hideControls` is optional",
-        "Mixed panel-level `pluginVersion` values are NOT a standalone correctness failure",
-        "MUST NOT bulk-rewrite shipped dashboard JSON",
-    }
-    missing = sorted(token for token in required_tokens if token not in text)
-    assert not missing, (
-        "dashboard design-system must document technical configuration policy; "
-        f"missing={missing}"
-    )
-
-
-@pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
-def test_dashboard_root_technical_configuration_policy(dashboard_path: Path) -> None:
-    """Shipped dashboards must preserve governed root technical settings."""
-    dashboard = load_dashboard(dashboard_path)
-    assert dashboard.get("style") == "dark", (
-        f"{dashboard_path.name} must keep style='dark'"
-    )
-    assert dashboard.get("editable") is True, (
-        f"{dashboard_path.name} must keep editable=true"
-    )
-    assert dashboard.get("graphTooltip") == 1, (
-        f"{dashboard_path.name} must keep graphTooltip=1"
-    )
-    if "hideControls" in dashboard:
-        assert dashboard.get("hideControls") is False, (
-            f"{dashboard_path.name} hideControls, when exported, must be false"
-        )

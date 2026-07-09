@@ -46,22 +46,35 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
     gemini_settings = json.loads(
         (output_root / ".gemini" / "settings.json").read_text(encoding="utf-8")
     )
+    zed_payload = json.loads(
+        (output_root / ".zed" / "mcp.json").read_text(encoding="utf-8")
+    )
     servers = payload["mcpServers"]
     wrapper_suffix = ".ps1" if os.name == "nt" else ".sh"
+    removed_servers = {
+        "sequential-thinking",
+        "pdf",
+        "needle",
+        "docker-docs",
+        "dockerhub",
+        "paper-search",
+        "openaiDeveloperDocs",
+        "sonarqube",
+        "chembl",
+        "pubchem",
+        "pubmed",
+    }
 
     runtime_servers = codex_settings["mcpServers"]
     assert devin_config["mcpServers"] == runtime_servers
     assert qodo_payload["mcpServers"] == servers
+    assert zed_payload["mcpServers"] == servers
+    assert not removed_servers.intersection(servers)
     assert servers["filesystem"]["args"][-1] == "."
     assert runtime_servers["filesystem"]["args"][-1] == str(workspace_root.resolve())
-    assert servers["sequential-thinking"]["args"] == [
+    assert servers["memory"]["args"] == [
         "-y",
-        "@modelcontextprotocol/server-sequential-thinking@2025.12.18",
-    ]
-    assert servers["pdf"]["args"] == [
-        "-y",
-        "@modelcontextprotocol/server-pdf@1.3.1",
-        "--stdio",
+        "@modelcontextprotocol/server-memory@2026.1.26",
     ]
     assert (
         servers["memory"]["env"]["MEMORY_FILE_PATH"]
@@ -78,20 +91,17 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
             workspace_root / f"scripts/ai/mcp/github-mcp-wrapper{wrapper_suffix}"
         ).resolve()
     )
+    assert servers["docker"]["args"][0] == (
+        f"scripts/ai/mcp/mcp_docker_wrapper{wrapper_suffix}"
+    )
+    assert servers["context7"]["args"][0] == (
+        f"scripts/ai/mcp/mcp_context7_wrapper{wrapper_suffix}"
+    )
+    assert servers["grafana"]["args"][0] == (
+        f"scripts/ai/mcp/mcp_grafana_wrapper{wrapper_suffix}"
+    )
     assert servers["mermaid"]["args"][0] == (
         f"scripts/ai/mcp/mcp_mermaid_wrapper{wrapper_suffix}"
-    )
-    assert servers["docker-docs"]["args"][0] == (
-        f"scripts/ai/mcp/mcp_docker_docs_wrapper{wrapper_suffix}"
-    )
-    assert servers["paper-search"]["args"][0] == (
-        f"scripts/ai/mcp/mcp_paper_search_wrapper{wrapper_suffix}"
-    )
-    assert servers["dockerhub"]["args"][0] == (
-        f"scripts/ai/mcp/mcp_dockerhub_wrapper{wrapper_suffix}"
-    )
-    assert servers["needle"]["args"][0] == (
-        f"scripts/ai/mcp/mcp_needle_wrapper{wrapper_suffix}"
     )
     assert runtime_servers["mermaid"]["args"][0] == str(
         (
@@ -100,13 +110,11 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
     )
     assert servers["biomoltechDocs"]["type"] == "http"
     assert servers["biomoltechDocs"]["url"] == "https://biomoltech.mintlify.app/mcp"
-    assert servers["openaiDeveloperDocs"]["type"] == "http"
-    assert servers["openaiDeveloperDocs"]["url"] == "https://developers.openai.com/mcp"
     assert servers["mintlify"]["url"] == "https://mcp.mintlify.com"
     assert servers["deepwiki"]["url"] == "https://mcp.deepwiki.com/mcp"
     assert (
-        gemini_settings["mcpServers"]["openaiDeveloperDocs"]["httpUrl"]
-        == "https://developers.openai.com/mcp"
+        gemini_settings["mcpServers"]["biomoltechDocs"]["httpUrl"]
+        == "https://biomoltech.mintlify.app/mcp"
     )
 
 

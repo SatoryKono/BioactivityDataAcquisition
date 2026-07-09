@@ -69,13 +69,18 @@ def test_issue_5978_coverage_tail_status_documented() -> None:
     tail_status = closeout["coverage_tail_status"]
     assert tail_status["unmeasured_module_count"] == 0
     assert tail_status["uncovered_module_count"] == 0
-    assert tail_status["below_85_module_count"] == 82
     assert tail_status["below_85_branch_file_count"] == 552
     assert tail_status["ranked_low_tail_modules"] == 6
     assert tail_status["owner_tests_status"] == "focused_owner_tests_added"
 
     # Verify alignment with module coverage inventory
     coverage_summary = module_coverage["summary"]
+    below_85 = [
+        row
+        for row in module_coverage["modules"]
+        if row["coverage_percent"] is not None and row["coverage_percent"] < 85
+    ]
+    assert tail_status["below_85_module_count"] == len(below_85)
     assert coverage_summary["unmeasured_module_count"] == 0
     assert coverage_summary["uncovered_module_count"] == 0
 

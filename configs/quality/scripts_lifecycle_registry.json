@@ -92,6 +92,36 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side companion for the canonical Neo4j Memory MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
     },
+    "scripts/ai/mcp/mcp_docker_docs_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for Docker Docs server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
+    },
+    "scripts/ai/mcp/mcp_dockerhub_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for DockerHub server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
+    },
+    "scripts/ai/mcp/mcp_mermaid_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for Mermaid diagram server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
+    },
+    "scripts/ai/mcp/mcp_needle_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for Needle search server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
+    },
+    "scripts/ai/mcp/mcp_paper_search_wrapper.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for Paper Search server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
+    },
     "scripts/ai/mcp/mcp_prometheus_wrapper.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",

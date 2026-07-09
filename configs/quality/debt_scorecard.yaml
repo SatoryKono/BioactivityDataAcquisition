@@ -664,8 +664,8 @@ supporting_scripts_governance:
   inventory_source: configs/quality/scripts_inventory_manifest.json
   metrics:
     zero_reference_supporting_script_count:
-      current_count: 45
-      max_count: 45
+      current_count: 30
+      max_count: 35
       owner: '@bioetl-platform'
       linked_issue: '#5845'
       ratchet_policy: Zero-reference supporting scripts must stay triaged with

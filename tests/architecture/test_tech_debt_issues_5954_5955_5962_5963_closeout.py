@@ -45,7 +45,7 @@ def test_issue_5954_memory_workflow_smoke_is_bounded_and_wired() -> None:
     workflow_text = WORKFLOW_SCRIPT.read_text(encoding="utf-8")
     pretest_text = PRETEST_GUARDRAILS.read_text(encoding="utf-8")
 
-    assert "DEFAULT_POST_TASK_REFRESH_TIMEOUT_SECONDS = 15.0" in workflow_text
+    assert "DEFAULT_POST_TASK_REFRESH_TIMEOUT_SECONDS = 120.0" in workflow_text
     assert "def smoke_workflow(" in workflow_text
     assert "memory-workflow-smoke" in pretest_text
     assert '"$PYTHON_BIN" -m memory.tooling.workflow smoke' in pretest_text

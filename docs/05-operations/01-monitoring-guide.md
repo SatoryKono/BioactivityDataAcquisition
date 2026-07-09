@@ -213,7 +213,7 @@ L0 дашборд для одного operator question: что сейчас bro
 где pipeline runtime теряет время, падает, копит backlog или даёт
 warning/error conditions. Dashboard остаётся **Prometheus-first**:
 answer row, latency/localization и handoff-панели usable без Loki/Tempo, а
-tracing-backed log hygiene живёт в expanded row
+tracing-backed log hygiene живёт в collapsed row
 `Tracing-only Log Hygiene (requires optional tracing profile)`.
 
 - **Top answer area**:
@@ -267,7 +267,7 @@ tracing-backed log hygiene живёт в expanded row
 - **Logs/traces row**:
   `Warnings`, `GLOBAL Unstructured Logs`, `Top Warning Events by Message / Range`,
   `GLOBAL Log Hygiene Trend`
-  остаются shipped, но вынесены в expanded tracing-only row. Если tracing
+  остаются shipped, но вынесены в collapsed tracing-only row. Если tracing
   profile выключен, оператор всё равно получает usable runtime triage без Loki
   и Tempo. `Inspect GLOBAL Unstructured Logs` показывает parsed `.__error__`
   из Loki pipeline после `| json`; эти rows intentionally GLOBAL, потому что

@@ -20,11 +20,12 @@ COMPOSITION_BOOTSTRAP_RATCHETS: dict[str, tuple[int, set[str]]] = {
         },
     ),
     "src/bioetl/composition/bootstrap/runtime/pipeline.py": (
-        82,
+        106,
         {
             "bioetl.composition.bootstrap.runtime.assembly",
             "bioetl.composition.runtime_builders.config_access",
             "bioetl.composition.runtime_builders.runner_builder",
+            "bioetl.composition.runtime_builders.cached_bronze_snapshot_support",
         },
     ),
     "src/bioetl/composition/bootstrap/cli/config.py": (

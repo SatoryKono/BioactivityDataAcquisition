@@ -20,7 +20,21 @@ FETCH_SPEC = ["--from", "mcp-server-fetch==2025.4.7", "mcp-server-fetch"]
 MANAGED_BLOCK_BEGIN = "# === BEGIN MANAGED MCP SERVERS ==="
 MANAGED_BLOCK_END = "# === END MANAGED MCP SERVERS ==="
 CACHE_DIR_NAME = ".cache"
-REMOVED_MCP_SERVER_NAMES = frozenset({"sonarqube", "chembl", "pubchem", "pubmed"})
+REMOVED_MCP_SERVER_NAMES = frozenset(
+    {
+        "sonarqube",
+        "chembl",
+        "pubchem",
+        "pubmed",
+        "sequential-thinking",
+        "openaiDeveloperDocs",
+        "needle",
+        "docker-docs",
+        "dockerhub",
+        "pdf",
+        "paper-search",
+    }
+)
 
 
 def _config_path(
@@ -111,20 +125,11 @@ def _canonical_servers(
             workspace_root_str,
             npm_cache_dir=npm_cache_dir,
         ),
-        "sequential-thinking": _npx_server(
-            "@modelcontextprotocol/server-sequential-thinking@2025.12.18",
-            npm_cache_dir=npm_cache_dir,
-        ),
         "fetch": {
             "command": "uvx",
             "args": FETCH_SPEC,
             "env": {"UV_CACHE_DIR": uv_cache_dir, "UV_TOOL_DIR": uv_tool_dir},
         },
-        "pdf": _npx_server(
-            "@modelcontextprotocol/server-pdf@1.3.1",
-            "--stdio",
-            npm_cache_dir=npm_cache_dir,
-        ),
         "github": _wrapper_command(
             "github-mcp-wrapper",
             workspace_root,
@@ -135,23 +140,8 @@ def _canonical_servers(
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
         ),
-        "docker-docs": _wrapper_command(
-            "mcp_docker_docs_wrapper",
-            workspace_root,
-            portable_workspace_paths=portable_workspace_paths,
-        ),
         "context7": _wrapper_command(
             "mcp_context7_wrapper",
-            workspace_root,
-            portable_workspace_paths=portable_workspace_paths,
-        ),
-        "paper-search": _wrapper_command(
-            "mcp_paper_search_wrapper",
-            workspace_root,
-            portable_workspace_paths=portable_workspace_paths,
-        ),
-        "dockerhub": _wrapper_command(
-            "mcp_dockerhub_wrapper",
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
         ),
@@ -190,11 +180,6 @@ def _canonical_servers(
             workspace_root,
             portable_workspace_paths=portable_workspace_paths,
         ),
-        "needle": _wrapper_command(
-            "mcp_needle_wrapper",
-            workspace_root,
-            portable_workspace_paths=portable_workspace_paths,
-        ),
         "mermaid": _wrapper_command(
             "mcp_mermaid_wrapper",
             workspace_root,
@@ -203,7 +188,6 @@ def _canonical_servers(
         "biomoltechDocs": _http_server("https://biomoltech.mintlify.app/mcp"),
         "mintlify": _http_server("https://mcp.mintlify.com"),
         "deepwiki": _http_server("https://mcp.deepwiki.com/mcp"),
-        "openaiDeveloperDocs": _http_server("https://developers.openai.com/mcp"),
     }
 
     # Preserve the committed config shape where the GitHub wrapper receives npm cache.
@@ -256,7 +240,9 @@ def _write_devin_config(output_root: Path, workspace_root: Path) -> Path:
 
 def _write_configs(
     output_root: Path, workspace_root: Path, *, qodo_only: bool = False
-) -> tuple[Path | None, Path | None, Path | None, Path, Path | None, Path | None]:
+) -> tuple[
+    Path | None, Path | None, Path | None, Path, Path | None, Path | None, Path | None
+]:
     workspace_servers = _canonical_servers(
         workspace_root,
         portable_workspace_paths=True,
@@ -264,12 +250,14 @@ def _write_configs(
     codex_payload = {"mcpServers": deepcopy(workspace_servers)}
     vscode_payload = {"servers": deepcopy(workspace_servers)}
     qodo_payload = {"mcpServers": deepcopy(workspace_servers)}
+    zed_payload = {"mcpServers": deepcopy(workspace_servers)}
 
     mcp_path = output_root / ".mcp.json"
     scripts_ai_mcp_path = output_root / "scripts" / "ai" / ".mcp.json"
     vscode_path = output_root / ".vscode" / "mcp.json"
     cursor_path = output_root / ".cursor" / "mcp.json"
     qodo_path = output_root / ".qodo" / "mcp.json"
+    zed_path = output_root / ".zed" / "mcp.json"
     codex_settings_path: Path | None = None
     devin_config_path: Path | None = None
     if not qodo_only:
@@ -282,12 +270,14 @@ def _write_configs(
             _write_json(scripts_ai_mcp_path, codex_payload)
         _write_json(vscode_path, vscode_payload)
         _write_json(cursor_path, codex_payload)
+        _write_json(zed_path, zed_payload)
     _write_json(qodo_path, qodo_payload)
     return (
         mcp_path,
         vscode_path,
         cursor_path,
         qodo_path,
+        zed_path,
         codex_settings_path,
         devin_config_path,
     )
@@ -452,7 +442,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         default=REPO_ROOT,
         help=(
             "Directory where .mcp.json, .vscode/mcp.json, .cursor/mcp.json, "
-            ".qodo/mcp.json, .codex/settings.json, and .devin/config.json "
+            ".qodo/mcp.json, .zed/mcp.json, .codex/settings.json, and .devin/config.json "
             "should be written."
         ),
     )
@@ -501,6 +491,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         vscode_path,
         cursor_path,
         qodo_path,
+        zed_path,
         codex_settings_path,
         devin_config_path,
     ) = _write_configs(output_root, workspace_root, qodo_only=args.qodo_only)
@@ -511,6 +502,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     if cursor_path is not None and not args.qodo_only:
         print(f"Wrote {cursor_path}")
     print(f"Wrote {qodo_path}")
+    if zed_path is not None and not args.qodo_only:
+        print(f"Wrote {zed_path}")
     if codex_settings_path is not None and not args.qodo_only:
         print(f"Wrote {codex_settings_path}")
     if devin_config_path is not None and not args.qodo_only:

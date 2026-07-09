@@ -803,13 +803,25 @@ oversized_test_module_inventory:
     source: tests/integration/test_grafana_config.py
     source_lines_after_split: 1524
     extracted_surface: tests/integration/test_grafana_surface_contracts.py
-    extracted_surface_lines: 711
+    extracted_surface_lines: 677
+    owner: observability-dashboards
+  - issue_ref: '#4505'
+    source: tests/integration/test_grafana_surface_contracts.py
+    source_lines_after_split: 677
+    extracted_surface: tests/integration/test_grafana_technical_policy.py
+    extracted_surface_lines: 52
     owner: observability-dashboards
   - issue_ref: '#4506'
     source: tests/unit/composition/runtime_builders/test_runner_builder_profiles.py
     source_lines_after_split: 1138
     extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
-    extracted_surface_lines: 234
+    extracted_surface_lines: 220
+    owner: composition-runtime
+  - issue_ref: '#4506'
+    source: tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
+    source_lines_after_split: 220
+    extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_wiring_contracts.py
+    extracted_surface_lines: 96
     owner: composition-runtime
   - issue_ref: '#4506'
     source: tests/unit/application/services/test_run_manifest_inspection_service.py

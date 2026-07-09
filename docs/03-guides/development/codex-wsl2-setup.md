@@ -237,10 +237,9 @@ All MCP servers use `startup_timeout_sec = 30` to accommodate VPN latency:
 
 The generated workspace config from `python -m scripts.ai.codex.setup_mcp`
 also registers BioETL-specific wrapper and HTTP servers used in this repo:
-`docker`, `docker-docs`, `context7`, `paper-search`, `dockerhub`, `ast-grep`,
-`mcp-code-interpreter`, `brave-search`, `sonarqube`, `neo4j-cypher`,
-`neo4j-memory`, `needle`, `chembl`, `pubchem`, `pubmed`, `mermaid`,
-`biomoltechDocs`, `mintlify`, `deepwiki`, and `openaiDeveloperDocs`.
+`docker`, `context7`, `ast-grep`, `mcp-code-interpreter`, `brave-search`,
+`neo4j-cypher`, `neo4j-memory`, `mermaid`, `biomoltechDocs`, `mintlify`, and
+`deepwiki`.
 
 After the initial setup, manual MCP re-registration should not be necessary on
 every new Codex session: `bash scripts/ai/codex/run-codex.sh`,

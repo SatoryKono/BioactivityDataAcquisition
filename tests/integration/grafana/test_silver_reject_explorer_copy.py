@@ -26,7 +26,7 @@ def test_filtered_records_table_has_explicit_empty_and_failure_copy() -> None:
     assert panel["title"] == "Inspect Filtered Records Table"
     assert (
         panel["fieldConfig"]["defaults"]["noValue"]
-        == "No rejected records for current filters."
+        == "No rejected records for current filters. Backend and scope must be confirmed before treating this as zero rows."
     )
     assert "Backend/query failure copy:" in panel["description"]
 

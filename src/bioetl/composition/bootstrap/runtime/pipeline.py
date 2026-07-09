@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 from bioetl.composition.bootstrap.runtime.assembly import RuntimeBootstrapPhases
@@ -12,6 +13,9 @@ from bioetl.composition.bootstrap.runtime.pipeline_bootstrap_phases import (
 )
 from bioetl.composition.registry_api import PipelineRegistry
 from bioetl.composition.runtime_builders.config_access import resolve_configs_root
+from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
+    require_cached_bronze_input_snapshot_refs,
+)
 from bioetl.composition.runtime_builders.runner_builder import (
     build_pipeline_runner as _build_pipeline_runner,
 )
@@ -27,6 +31,27 @@ __all__ = [
     "bootstrap_pipeline_runner",
     "build_runtime_bootstrap_phases",
 ]
+
+
+def _coerce_optional_str(value: object | None) -> str | None:
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
+
+
+def _fail_fast_empty_explicit_cached_bronze(ctx: PipelineRunContext) -> None:
+    """Reject explicit cached-Bronze replay before heavy runtime bootstrap work."""
+    cached_bronze = getattr(ctx, "cached_bronze", None)
+    if cached_bronze is None or not getattr(cached_bronze, "enabled", False):
+        return
+    bronze_path = _coerce_optional_str(getattr(cached_bronze, "bronze_path", None))
+    if bronze_path is None:
+        return
+    require_cached_bronze_input_snapshot_refs(
+        bronze_root=Path(bronze_path),
+        bronze_date=_coerce_optional_str(getattr(cached_bronze, "bronze_date", None)),
+    )
 
 
 def apply_runtime_compatibility_patches() -> bool:
@@ -59,6 +84,7 @@ def bootstrap_pipeline_runner(
     load_pipeline_config_fn: Callable[[str], PipelineYamlConfig] | None = None,
 ) -> PipelineRunner:
     """Build one ready-to-run pipeline runner from runtime context and registry."""
+    _fail_fast_empty_explicit_cached_bronze(ctx)
     apply_runtime_compatibility_patches()
     registry = prepare_runtime_registry(
         registry=registry, pipeline_name=ctx.pipeline_name

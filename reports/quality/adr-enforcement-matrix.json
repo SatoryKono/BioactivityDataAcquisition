@@ -12,7 +12,8 @@
         "tests/unit/infrastructure/adr/test_adr_metadata_extractors.py",
         "tests/unit/infrastructure/adr/test_fs_adr_service.py",
         "tests/unit/interfaces/cli/commands/test_adr_commands.py",
-        "tests/unit/memory/graph/importers/test_expanded_json.py"
+        "tests/unit/memory/graph/importers/test_expanded_json.py",
+        "tests/unit/scripts/test_documentation_cleanup_inventory.py"
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
@@ -28,7 +29,8 @@
         "tests/unit/infrastructure/adr/test_adr_metadata_extractors.py",
         "tests/unit/infrastructure/adr/test_fs_adr_service.py",
         "tests/unit/interfaces/cli/commands/test_adr_commands.py",
-        "tests/unit/memory/graph/importers/test_expanded_json.py"
+        "tests/unit/memory/graph/importers/test_expanded_json.py",
+        "tests/unit/scripts/test_documentation_cleanup_inventory.py"
       ],
       "manual_exception": null,
       "owner": "BioETL Team",
@@ -229,8 +231,6 @@
         "docs/00-project/ai/skills/global/documentation-audit/references/audit-checklist.md",
         "docs/00-project/ai/skills/global/documentation-audit/references/report-template.md",
         "docs/00-project/ai/skills/local/documentation-audit/SKILL.md",
-        "docs/00-project/ai/skills/local/documentation-audit/references/audit-checklist.md",
-        "docs/00-project/ai/skills/local/documentation-audit/references/report-template.md",
         "docs/00-project/architecture-index.md",
         "docs/00-project/governance/03-file-policy.md",
         "docs/00-project/governance/06-doc-publication-policy.md",
@@ -409,8 +409,6 @@
         "docs/00-project/ai/skills/global/documentation-audit/references/audit-checklist.md",
         "docs/00-project/ai/skills/global/documentation-audit/references/report-template.md",
         "docs/00-project/ai/skills/local/documentation-audit/SKILL.md",
-        "docs/00-project/ai/skills/local/documentation-audit/references/audit-checklist.md",
-        "docs/00-project/ai/skills/local/documentation-audit/references/report-template.md",
         "docs/00-project/governance/03-file-policy.md",
         "docs/00-project/governance/governance-sync-audit-2026-06-25.md",
         "docs/00-project/index.md",
@@ -521,8 +519,6 @@
         "docs/00-project/ai/skills/global/documentation-audit/references/audit-checklist.md",
         "docs/00-project/ai/skills/global/documentation-audit/references/report-template.md",
         "docs/00-project/ai/skills/local/documentation-audit/SKILL.md",
-        "docs/00-project/ai/skills/local/documentation-audit/references/audit-checklist.md",
-        "docs/00-project/ai/skills/local/documentation-audit/references/report-template.md",
         "docs/00-project/governance/governance-sync-audit-2026-06-25.md",
         "docs/03-guides/docs-verification.md",
         "docs/03-guides/metrics-monitoring.md",
@@ -812,7 +808,6 @@
         "docs/00-project/ai/rules/windsurf/rules/03-testing.md",
         "docs/00-project/ai/rules/windsurf/rules/04-patterns.md",
         "docs/00-project/ai/skills/_references/local/technical-designer-mermaid/references/patterns.md",
-        "docs/00-project/ai/skills/local/technical-designer-mermaid/references/patterns.md",
         "docs/00-project/glossary.md",
         "docs/00-project/index.md",
         "docs/03-guides/pipeline-configuration.md",
@@ -1300,6 +1295,7 @@
       "decision_date": "2026-02-25",
       "decision_path": "docs/02-architecture/decisions/ADR-040-diagram-governance.md",
       "enforcement_owner_paths": [
+        "configs/quality/generated_artifact_routing.yaml",
         "configs/quality/scripts_inventory_manifest.json",
         "scripts/diagrams/lint_diagrams.py",
         "scripts/diagrams/prune_orphan_nodes.py",
@@ -1310,6 +1306,7 @@
       ],
       "gap_reasons": [],
       "implementation_owner_paths": [
+        "configs/quality/generated_artifact_routing.yaml",
         "configs/quality/scripts_inventory_manifest.json",
         "docs/00-project/00-map.md",
         "docs/00-project/RULES.md",
@@ -1321,7 +1318,6 @@
         "docs/00-project/ai/prompts/documentation_diagrams_audit.md",
         "docs/00-project/ai/skills/_references/local/technical-designer-mermaid/references/patterns.md",
         "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
-        "docs/00-project/ai/skills/local/technical-designer-mermaid/references/patterns.md",
         "scripts/diagrams/lint_diagrams.py",
         "scripts/diagrams/prune_orphan_nodes.py",
         "scripts/docs/checks/check_drift.py",
