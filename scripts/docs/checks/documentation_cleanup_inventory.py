@@ -172,6 +172,34 @@ def _extract_declared_status(text: str) -> str | None:
     return None
 
 
+def _extract_declared_class(text: str) -> str | None:
+    for line in text[:1500].splitlines():
+        stripped = line.strip()
+        if stripped.startswith("Class:"):
+            return stripped.split(":", 1)[1].strip() or None
+        if stripped.startswith("class:"):
+            return stripped.split(":", 1)[1].strip() or None
+    return None
+
+
+def _surface_family(path: str, status: str) -> str:
+    if status == "Canonical":
+        return "canonical"
+    if status == "Archived" or path.startswith("docs/99-archive/"):
+        return "archive"
+    if status == "Generated":
+        return "generated"
+    if status == "Working":
+        return "working"
+    if path.startswith("docs/00-project/ai/skills/_references/"):
+        return "mirror"
+    if status in {"Duplicate", "Deprecated"}:
+        return "duplicate"
+    if status == "Unknown":
+        return "unknown"
+    return "active"
+
+
 def _load_routes() -> list[Route]:
     if yaml is None or not ROUTING_CONFIG.exists():
         return []
@@ -305,9 +333,12 @@ def _classify(
         return "Canonical", "current", "keep"
     if path.startswith("docs/99-archive/"):
         return "Archived", "historical", "keep"
-    if path == "docs/00-project/DOCUMENTATION_GOVERNANCE.md":
-        return "Duplicate", "migration-required", "replace-with-link"
-    if "obsolete duplicate" in text[:1000].lower() or declared == "retired":
+    if path == "docs/00-project/DOCUMENTATION_GOVERNANCE.md" or declared in {
+        "deprecated",
+        "retired",
+    }:
+        return "Deprecated", "migration-required", "replace-with-link"
+    if "obsolete duplicate" in text[:1000].lower():
         return "Deprecated", "migration-required", "replace-with-link"
     if (
         route
@@ -328,6 +359,8 @@ def _classify(
             return "Active", "current", "keep"
         return "Generated", "regenerate", "generate-automatically"
     if path.startswith(WORKING_PATH_PREFIXES) or WORKING_NAME_RE.search(path):
+        return "Working", "review-required", "archive-after-migration"
+    if path.startswith(("architecture/", "diagrams/")):
         return "Working", "review-required", "archive-after-migration"
     if path.startswith("docs/") or path in ROOT_DOCS:
         return "Active", "current", "keep"
@@ -358,6 +391,7 @@ def _build_inventory() -> dict[str, Any]:
     status_counts: Counter[str] = Counter()
     action_counts: Counter[str] = Counter()
     section_counts: Counter[str] = Counter()
+    surface_counts: Counter[str] = Counter()
     duplicate_group_count = len(set(duplicate_groups.values()))
 
     for path in sorted(tracked):
@@ -365,8 +399,10 @@ def _build_inventory() -> dict[str, Any]:
         route = _route_for(path, routes)
         duplicate_group = duplicate_groups.get(path)
         status, freshness, action = _classify(path, text, duplicate_group, route)
+        surface_family = _surface_family(path, status)
         status_counts[status] += 1
         action_counts[action] += 1
+        surface_counts[surface_family] += 1
         section = (
             path.split("/")[1]
             if path.startswith("docs/") and "/" in path
@@ -380,6 +416,8 @@ def _build_inventory() -> dict[str, Any]:
                 "section": section,
                 "owner": _extract_owner(text) or "BioETL Team",
                 "declared_status": _extract_declared_status(text),
+                "declared_class": _extract_declared_class(text),
+                "surface_family": surface_family,
                 "status": status,
                 "freshness": freshness,
                 "inbound_links": int(incoming[path]),
@@ -417,6 +455,7 @@ def _build_inventory() -> dict[str, Any]:
         "summary": {
             "total_doc_like_tracked": len(records),
             "by_status": dict(sorted(status_counts.items())),
+            "by_surface_family": dict(sorted(surface_counts.items())),
             "by_recommended_action": dict(sorted(action_counts.items())),
             "by_section": dict(sorted(section_counts.items())),
             "duplicate_group_count": duplicate_group_count,
@@ -466,6 +505,13 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         _md_table(
             ["Status", "Count"],
             [[key, value] for key, value in summary["by_status"].items()],
+        )
+    )
+    lines.extend(["", "## Surface Families", ""])
+    lines.extend(
+        _md_table(
+            ["Surface", "Count"],
+            [[key, value] for key, value in summary["by_surface_family"].items()],
         )
     )
     lines.extend(["", "## Recommended Actions", ""])
