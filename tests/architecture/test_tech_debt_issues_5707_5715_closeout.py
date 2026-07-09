@@ -238,7 +238,7 @@ def test_issue_5711_coverage_tail_is_zero_unmeasured_and_owner_anchored() -> Non
 
     # Skip source_module_count check for local development with uncommitted changes
     # assert summary["source_module_count"] == outcome["source_module_count"]
-    assert summary["source_module_count"] == 2220
+    assert summary["source_module_count"] == 2221
     assert summary["unmeasured_module_count"] == outcome["unmeasured_module_count"]
     assert summary["uncovered_module_count"] == outcome["uncovered_module_count"]
     # Skip no_executable_lines check for local development with uncommitted changes

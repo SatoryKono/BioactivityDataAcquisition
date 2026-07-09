@@ -72,7 +72,7 @@
   "outcomes": {
     "5847": {
       "tracked_root_files_after": 46,
-      "tracked_root_dirs_after": 12,
+      "tracked_root_dirs_after": 13,
       "allowlist_entries_after": 46,
       "retired_root_entries": [
         "Dockerfile.mcp-fetch",

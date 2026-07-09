@@ -3,6 +3,8 @@
   "tab_size": 4,
   "preferred_line_length": 88,
   "soft_wrap": "preferred_line_length",
+  "autosave": "after_delay",
+  "autosave_delay_ms": 1000,
   "languages": {
     "Python": {
       "format_on_save": "on",
@@ -15,7 +17,22 @@
         "source.organizeImports.ruff": true,
         "source.fixAll.ruff": true
       },
-      "language_servers": ["basedpyright", "ruff", "!pylsp"]
+      "language_servers": ["basedpyright", "ruff", "!pylsp"],
+      "indent_style": "space",
+      "tab_size": 4
+    },
+    "YAML": {
+      "format_on_save": "on",
+      "formatter": "language_server"
+    },
+    "Markdown": {
+      "format_on_save": "off",
+      "soft_wrap": "preferred_line_length",
+      "preferred_line_length": 88
+    },
+    "JSON": {
+      "format_on_save": "on",
+      "formatter": "language_server"
     }
   },
   "lsp": {
@@ -23,16 +40,66 @@
       "initialization_options": {
         "settings": {
           "lineLength": 88,
-          "targetVersion": "py312"
+          "targetVersion": "py312",
+          "lint": {
+            "select": [
+              "E",
+              "W",
+              "F",
+              "FA",
+              "I",
+              "B",
+              "C4",
+              "UP",
+              "ARG",
+              "SIM",
+              "PTH",
+              "RUF",
+              "T201"
+            ],
+            "ignore": [
+              "RUF001",
+              "RUF002",
+              "RUF003"
+            ]
+          },
+          "format": {
+            "lineLength": 88
+          }
+        }
+      }
+    },
+    "basedpyright": {
+      "initialization_options": {
+        "analysis": {
+          "typeCheckingMode": "strict",
+          "pythonVersion": "3.12",
+          "autoSearchPaths": true,
+          "useLibraryCodeForTypes": true,
+          "diagnosticMode": "workspace",
+          "stubPath": "src"
         }
       }
     }
   },
   "terminal": {
     "env": {
-      "PYTHONPATH": "src;."
-    }
+      "PYTHONPATH": "src;.",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "font_family": "JetBrains Mono",
+    "font_size": 14,
+    "line_height": "comfortable"
   },
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
+  },
+  "ui_font_family": "JetBrains Mono",
+  "ui_font_size": 14,
+  "buffer_font_family": "JetBrains Mono",
+  "buffer_font_size": 14,
+  "buffer_line_height": "comfortable",
   "tasks": [
     {
       "label": "Format code",
@@ -97,6 +164,38 @@
       "label": "Architecture compliance",
       "command": "import-linter",
       "args": ["--config", ".importlinter"],
+      "reveal": "always"
+    },
+    {
+      "label": "Run all tests",
+      "command": "pytest",
+      "args": ["-v", "-m", "not benchmark and not slow"],
+      "tags": ["python-test"],
+      "reveal": "always"
+    },
+    {
+      "label": "Run fast tests only",
+      "command": "pytest",
+      "args": ["-v", "-m", "unit"],
+      "tags": ["python-test"],
+      "reveal": "always"
+    },
+    {
+      "label": "Dependency audit",
+      "command": "pip-audit",
+      "args": [],
+      "reveal": "always"
+    },
+    {
+      "label": "Dead code detection",
+      "command": "vulture",
+      "args": ["src/bioetl"],
+      "reveal": "always"
+    },
+    {
+      "label": "Complexity check",
+      "command": "xenon",
+      "args": ["--max-absolute", "B", "--max-modules", "B", "--max-average", "A", "src/bioetl"],
       "reveal": "always"
     }
   ]

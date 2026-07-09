@@ -14,6 +14,17 @@ allowed_output_roots:
     - docs/reports/generated/
     - docs/reports/dictionaries/
     - docs/02-architecture/generated/
+    - docs/02-architecture/diagrams/class-diagrams/90-pkg-
+    - docs/02-architecture/diagrams/bundles/
+    - docs/02-architecture/diagrams/descriptions/
+    - docs/02-architecture/diagrams/architecture/png/
+    - docs/02-architecture/diagrams/architecture/svg/
+    - docs/02-architecture/diagrams/class-diagrams/png/
+    - docs/02-architecture/diagrams/class-diagrams/svg/
+    - docs/02-architecture/diagrams/foundation/png/
+    - docs/02-architecture/diagrams/foundation/svg/
+    - docs/02-architecture/diagrams/views/png/
+    - docs/02-architecture/diagrams/views/svg/
     - docs/02-architecture/adr-registry.md
     - docs/02-architecture/adr-registry/
     - docs/04-reference/config_comparison_matrix.csv
@@ -356,6 +367,48 @@ routes:
       - docs/02-architecture/generated/module-dependency-map.md
       - docs/02-architecture/generated/module-dependency-map.json
     notes: Architecture dependency maps are deterministic generated docs.
+
+  - id: architecture-diagram-package-family-sources
+    generator: scripts/diagrams/generate_package_family_class_diagrams.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/02-architecture/diagrams/class-diagrams/90-pkg-*.mmd
+    notes: Supplemental package-family class diagrams are regenerated from
+      source-tree introspection and must not be hand-edited for cleanup.
+
+  - id: architecture-diagram-bundles
+    generator: scripts/diagrams/generate_all_bundles.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/02-architecture/diagrams/bundles/
+    notes: Diagram bundle markdown is regenerated from curated diagram families.
+
+  - id: architecture-diagram-description-indexes
+    generator: scripts/diagrams/generate_description_indexes.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/02-architecture/diagrams/descriptions/
+    notes: Diagram description indexes and cards are maintained as derived
+      publication support for ADR-040 diagram governance.
+
+  - id: architecture-diagram-render-artifacts
+    generator: docs/02-architecture/diagrams/tooling/render.sh
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/02-architecture/diagrams/architecture/png/
+      - docs/02-architecture/diagrams/architecture/svg/
+      - docs/02-architecture/diagrams/class-diagrams/png/
+      - docs/02-architecture/diagrams/class-diagrams/svg/
+      - docs/02-architecture/diagrams/foundation/png/
+      - docs/02-architecture/diagrams/foundation/svg/
+      - docs/02-architecture/diagrams/views/png/
+      - docs/02-architecture/diagrams/views/svg/
+    notes: Rendered diagram assets are regenerated from Mermaid sources through
+      the checked diagram renderer and must not be hand-edited.
 
   - id: adr-registry-generated-docs
     generator: scripts/generate_adr_registry.py
