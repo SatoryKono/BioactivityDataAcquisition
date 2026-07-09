@@ -14,7 +14,7 @@ class _BrokenStatPath:
         raise OSError(22, "Invalid argument")
 
 
-def test_safe_is_file_returns_false_on_oserror() -> None:
+def test_lint_config_paths_safe_is_file_returns_false_on_oserror() -> None:
     assert lint_config_paths._safe_is_file(_BrokenStatPath()) is False  # type: ignore[arg-type]
 
 

@@ -27,7 +27,7 @@
       },
       "id": 1000,
       "options": {
-        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context_exact&amp;var-run_type=$run_type_context_exact&amp;${__url_time_range}&amp;var-workflow=$workflow_context&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context_exact&amp;var-run_type=$run_type_context_exact&amp;${__url_time_range}&amp;var-workflow=$workflow_context&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context_exact&amp;var-run_type=$run_type_context_exact&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow_context&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$provider_context_exact&amp;var-pipeline_context=$pipeline_context_exact&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow_context&amp;var-pipeline=$pipeline_context_exact&amp;var-run_type=$run_type_context_exact&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context_exact&amp;var-run_type=$run_type_context_exact&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow_context&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><span aria-current=\"page\" style=\"padding:5px 10px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">5. Workflow</span><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline_context_exact&amp;var-run_type=$run_type_context_exact&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/explore?actionView=search&amp;from=now-150m&amp;to=now&amp;var-ds=tempo&amp;var-groupBy=resource.service.name&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline_context_exact:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D%20%22${run_type_context_exact}%22%20%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
+        "content": "<div style=\"display:flex;gap:6px;flex-wrap:nowrap;align-items:center;padding:4px 6px;overflow:hidden;white-space:nowrap;font-size:12px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context_exact&amp;var-run_type=$run_type_context_exact&amp;${__url_time_range}&amp;var-workflow=$workflow_context&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context_exact&amp;var-run_type=$run_type_context_exact&amp;${__url_time_range}&amp;var-workflow=$workflow_context&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context_exact&amp;var-run_type=$run_type_context_exact&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow_context&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=$provider_context_exact&amp;var-pipeline_context=$pipeline_context_exact&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow_context&amp;var-pipeline=$pipeline_context_exact&amp;var-run_type=$run_type_context_exact&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context_exact&amp;var-run_type=$run_type_context_exact&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow_context&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><span aria-current=\"page\" style=\"padding:3px 7px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">5. Workflow</span><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline_context_exact&amp;var-run_type=$run_type_context_exact&amp;${__url_time_range}\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/explore?actionView=search&amp;from=now-150m&amp;to=now&amp;var-ds=tempo&amp;var-groupBy=resource.service.name&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline_context_exact:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D%20%22${run_type_context_exact}%22%20%7D\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
@@ -216,7 +216,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Fail-closed entity pipeline verdict for the hidden pipeline/run_type handoff context. Backed by bioetl_workflow_pipeline_verdict_status: 2=CRIT when any failed pipeline run increased in the 15m rule window, 1=WARN for non-success/non-failed run outcomes, 0=OK only when a success/completed run increased and no failure/non-success evidence exists, null=UNKNOWN when no pipeline telemetry exists. This panel intentionally avoids run_id Prometheus labels and links to Runtime / Control Plane for detailed evidence.",
+      "description": "Secondary entity pipeline verdict for the hidden pipeline/run_type handoff context; it is not the canonical Workflow dashboard headline. Backed by bioetl_workflow_pipeline_verdict_status: 2=CRIT when any failed pipeline run increased in the 15m rule window, 1=WARN for non-success/non-failed run outcomes, 0=OK only when a success/completed run increased and no failure/non-success evidence exists, null=UNKNOWN when no pipeline telemetry exists. This panel intentionally avoids run_id Prometheus labels and links to Runtime / Control Plane for detailed evidence.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -279,7 +279,7 @@
         "overrides": []
       },
       "options": {
-        "colorMode": "background",
+        "colorMode": "value",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
@@ -349,13 +349,57 @@
             }
           ]
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "parameter"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 165
+              },
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          }
+        ]
       },
       "options": {
-        "showHeader": false,
+        "showHeader": true,
         "footer": {
           "show": false
-        }
+        },
+        "cellHeight": "sm"
       },
       "targets": [
         {
@@ -493,6 +537,10 @@
                 "value": {
                   "type": "color-text"
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 165
               }
             ]
           },
@@ -802,7 +850,7 @@
         ]
       },
       "options": {
-        "showHeader": false,
+        "showHeader": true,
         "sortBy": [
           {
             "desc": false,
@@ -1193,12 +1241,60 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "fixed",
+            "fixedColor": "gray"
           },
           "mappings": [],
-          "unit": "short"
+          "unit": "short",
+          "noValue": "No workflow run outcome samples in selected range; empty evidence is neutral, not OK."
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*success.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*failed.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*skipped.*|.*unknown.*|.*non.*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "orange"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -1208,7 +1304,7 @@
       },
       "id": 4,
       "options": {
-        "displayMode": "gradient",
+        "displayMode": "basic",
         "minVizHeight": 10,
         "minVizWidth": 0,
         "namePlacement": "left",

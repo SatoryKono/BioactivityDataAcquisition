@@ -28,7 +28,7 @@
       },
       "id": 1000,
       "options": {
-        "content": "<div style=\"display:flex;gap:10px;flex-wrap:wrap;padding:10px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><span aria-current=\"page\" style=\"padding:5px 10px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">3. Provider Health</span><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-run_id=$run_id\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/explore?actionView=search&amp;from=now-150m&amp;to=now&amp;var-ds=tempo&amp;var-groupBy=resource.service.name&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.provider%22%20%3D~%20%22${provider:regex}%22%20%7D\" style=\"padding:5px 10px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
+        "content": "<div style=\"display:flex;gap:6px;flex-wrap:nowrap;align-items:center;padding:4px 6px;overflow:hidden;white-space:nowrap;font-size:12px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><span aria-current=\"page\" style=\"padding:3px 7px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">3. Provider Health</span><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline_context&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/explore?actionView=search&amp;from=now-150m&amp;to=now&amp;var-ds=tempo&amp;var-groupBy=resource.service.name&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.provider%22%20%3D~%20%22${provider:regex}%22%20%7D\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
@@ -103,7 +103,7 @@
       "description": "Unified context/provenance banner for 3. Provider Health. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only. Provider health is owned by provider-status telemetry, while ID and Processed Records below are bounded pipeline-context evidence only.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.45;\"><div style=\"font-size:18px;font-weight:700;\">Which provider is degraded or failing, and why?<br><strong>Global provider posture is shown separately from selected provider context.</strong></div><div style=\"margin-top:6px;font-size:12px;opacity:0.85;\"><strong>Provider-global selected-range:</strong> adapter latency and HTTP error panels aggregate by provider and do not filter by run_id/run_type in PromQL. For backfill-specific stage latency or exact-run identity, open <strong>2. Runtime</strong> or <strong>0. Control Plane</strong> with preserved scope.</div></div>"
+        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.45;\"><div style=\"font-size:18px;font-weight:700;\">Which provider is degraded or failing, and why?<br><strong>Start with GLOBAL severity + telemetry freshness; selected-provider Status can disagree by design.</strong></div><div style=\"margin-top:6px;font-size:12px;opacity:0.85;\"><strong>Provider-global selected-range:</strong> adapter latency and HTTP error panels aggregate by provider and do not filter by run_id/run_type in PromQL. For backfill-specific stage latency or exact-run identity, open <strong>2. Runtime</strong> or <strong>0. Control Plane</strong> with preserved scope.</div></div>"
       }
     },
     {
@@ -265,13 +265,57 @@
             }
           ]
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "parameter"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 165
+              },
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "value"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "left"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "auto",
+                  "wrapText": true
+                }
+              }
+            ]
+          }
+        ]
       },
       "options": {
-        "showHeader": false,
+        "showHeader": true,
         "footer": {
           "show": false
-        }
+        },
+        "cellHeight": "sm"
       },
       "targets": [
         {
@@ -409,6 +453,10 @@
                 "value": {
                   "type": "color-text"
                 }
+              },
+              {
+                "id": "custom.width",
+                "value": 165
               }
             ]
           },
@@ -718,7 +766,7 @@
         ]
       },
       "options": {
-        "showHeader": false,
+        "showHeader": true,
         "sortBy": [
           {
             "desc": false,
@@ -1268,7 +1316,8 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "s",
+          "noValue": "No provider latency samples in range. This optional telemetry is neutral; use severity, freshness, and raw enum panels for provider verdict."
         },
         "overrides": []
       },
@@ -1286,7 +1335,8 @@
             "mean"
           ],
           "displayMode": "table",
-          "placement": "bottom"
+          "placement": "bottom",
+          "showLegend": false
         },
         "tooltip": {
           "mode": "multi",

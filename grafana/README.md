@@ -100,6 +100,9 @@ ______________________________________________________________________
 > (`GRAFANA_SCREENSHOT_CAPTURE_TIMEOUT_MS`, default `max(page_timeout, 180000)`),
 > because long dashboards such as `0. Control Plane` may finish loading well
 > before Playwright finishes writing the final PNG.
+> The Playwright fallback also waits `GRAFANA_SCREENSHOT_SETTLE_MS` before
+> materializing/capturing dashboards (default `12000`) so Grafana's virtualized
+> grid has time to paint operator panels after variables and rows settle.
 > `python -m scripts.ops audit-live-grafana` remains the reviewed live
 > datasource/frame audit. It now starts from the curated semantically sensitive
 > checks and then expands coverage from shipped dashboard JSON so every
@@ -1017,7 +1020,7 @@ ______________________________________________________________________
 | 9007 | Provider                      | Table      | `bioetl_l1_provider_global_status`                                                                                            | Global provider health across pipelines; intentionally not filtered by `$pipeline/$run_type`.                                                                                   |
 | 9013 | Workflow                      | Table      | `max by (pipeline) (bioetl_l1_workflow_global_status{pipeline=~"$pipeline",pipeline!="test_pipe"} or ... alias-normalized fallback ...)` | Compact selected workflow/pipeline summary: worst current workflow status per matching pipeline without unrelated pipeline leakage. Backed by the latest bounded terminal workflow signal, not cumulative workflow counters; `run_type`/`run_id` stay handoff context only. |
 | 9018 | Runtime Blockers Trend        | Timeseries | `bioetl_l1_runtime_blocker_status{pipeline=~"$pipeline",run_type=~"$run_type"}`                                              | Selected-range L1 runtime evidence below the current verdict path; does not determine L0 `Status` or `Next Action`; no-data/gaps are diagnostic; handoff `Open Runtime`.         |
-| 9019 | DQ Status Trend               | Timeseries | `bioetl_l1_dq_status{pipeline=~"$pipeline",run_type=~"$run_type"}`                                                            | Selected-range L1 Data Quality evidence below the current verdict path; does not determine L0 `Status` or `Next Action`; no-data/gaps are diagnostic; handoff `Open Data Quality`. |
+| 9019 | DQ Status Trend               | State timeline | `bioetl_l1_dq_status{pipeline=~"$pipeline",run_type=~"$run_type"}`                                                         | Selected-range L1 Data Quality evidence below the current verdict path; renders discrete OK/WARN/CRIT/UNKNOWN states instead of numeric ticks; does not determine L0 `Status` or `Next Action`; no-data/gaps are diagnostic; handoff `Open Data Quality`. |
 | 9020 | Gold Lifecycle Trend          | Timeseries | `bioetl_l1_gold_lifecycle_status{pipeline=~"$pipeline",run_type=~"$run_type"}`                                                | Selected-range L1 data-validation lifecycle evidence below the current verdict path; includes `lifecycle_state`, including `terminal_contract_excluded` for Gold records excluded by contract; handoffs `Open Runtime` and `Open Control Plane`. |
 | 9010 | Historical Failures | Table | `sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status="failed",...}[$__range]))`                         | Selected-range historical failure evidence only; zero matching rows is not proof of current OK; handoff `Open Runtime`.                                                          |
 | 9011 | Recent Terminal Runs | Table | `sum by (pipeline, status) (increase(bioetl_pipeline_runs_total{status!="success",...}[$__range]))`                          | Selected-range non-success terminal-run evidence only; no terminal rows is not proof of current OK; handoffs `Open Control Plane` and `Open Runtime`.                            |
@@ -1273,7 +1276,7 @@ ______________________________________________________________________
 где pipeline runtime теряет время, падает, копит backlog или даёт
 warning/error conditions. Dashboard остаётся **Prometheus-first**: first screen
 должен работать без Loki/Tempo, а tracing-backed log hygiene вынесен в
-expanded row `Tracing-only Log Hygiene (requires optional tracing profile)`.
+collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 
 ### Контракт
 
@@ -1360,7 +1363,7 @@ requires `bioetl_provider_current_status`. Missing anchor telemetry renders
 - `Inspect Warning Logs`, `Inspect GLOBAL Unstructured Logs`,
   `Inspect Top Warning Events by Event / Logger / Range`,
   `Track GLOBAL Log Hygiene Trend`
-  живут в expanded tracing-only row и не ломают base runtime surface в
+  живут в collapsed tracing-only row и не ломают base runtime surface в
   окружениях без Loki/Tempo
 - Loki handoff стартует с безопасного `{job="bioetl"}` entrypoint; warning
   panels parse JSON first, drop parser errors, then filter `pipeline` and

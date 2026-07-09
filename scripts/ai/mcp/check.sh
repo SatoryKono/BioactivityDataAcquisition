@@ -15,6 +15,7 @@ EXPECTED_GRAFANA_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_grafana_wrapper.s
 EXPECTED_BRAVE_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_brave_search_wrapper.sh"
 EXPECTED_NEO4J_CYPHER_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh"
 EXPECTED_NEO4J_MEMORY_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh"
+EXPECTED_MERMAID_WRAPPER_PATH="${REPO_ROOT}/scripts/ai/mcp/mcp_mermaid_wrapper.sh"
 EXPECTED_FILESYSTEM_SCOPE="${REPO_ROOT}"
 # shellcheck source=./support/load_repo_env.sh
 source "${SCRIPT_DIR}/support/load_repo_env.sh"
@@ -50,6 +51,7 @@ keys = [
     ("EXPECTED_BRAVE_WRAPPER_PATH", ("brave-search", "args", 0)),
     ("EXPECTED_NEO4J_CYPHER_WRAPPER_PATH", ("neo4j-cypher", "args", 0)),
     ("EXPECTED_NEO4J_MEMORY_WRAPPER_PATH", ("neo4j-memory", "args", 0)),
+    ("EXPECTED_MERMAID_WRAPPER_PATH", ("mermaid", "args", 0)),
     ("EXPECTED_FILESYSTEM_SCOPE", ("filesystem", "args", 2)),
 ]
 
@@ -144,6 +146,7 @@ grafana_out="$(codex mcp get grafana 2>&1 || true)"
 brave_out="$(codex mcp get brave-search 2>&1 || true)"
 neo4j_cypher_out="$(codex mcp get neo4j-cypher 2>&1 || true)"
 neo4j_memory_out="$(codex mcp get neo4j-memory 2>&1 || true)"
+mermaid_out="$(codex mcp get mermaid 2>&1 || true)"
 deepwiki_out="$(codex mcp get deepwiki 2>&1 || true)"
 
 require_contains "$memory_out" "@modelcontextprotocol/server-memory@2026.1.26" "memory is pinned to @2026.1.26" || status=1
@@ -159,6 +162,7 @@ require_wrapper_path "$grafana_out" "$EXPECTED_GRAFANA_WRAPPER_PATH" "grafana is
 require_wrapper_path "$brave_out" "$EXPECTED_BRAVE_WRAPPER_PATH" "brave-search is routed through the project wrapper" || status=1
 require_wrapper_path "$neo4j_cypher_out" "$EXPECTED_NEO4J_CYPHER_WRAPPER_PATH" "neo4j-cypher is routed through the project wrapper" || status=1
 require_wrapper_path "$neo4j_memory_out" "$EXPECTED_NEO4J_MEMORY_WRAPPER_PATH" "neo4j-memory is routed through the project wrapper" || status=1
+require_wrapper_path "$mermaid_out" "$EXPECTED_MERMAID_WRAPPER_PATH" "mermaid is routed through the project wrapper" || status=1
 biomoltech_out="$(codex mcp get biomoltechDocs 2>&1 || true)"
 mintlify_out="$(codex mcp get mintlify 2>&1 || true)"
 require_contains "$biomoltech_out" "https://biomoltech.mintlify.app/mcp" "biomoltechDocs is registered as a remote Mintlify MCP" || status=1

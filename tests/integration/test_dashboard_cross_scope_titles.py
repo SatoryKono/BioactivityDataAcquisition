@@ -147,7 +147,8 @@ def test_provider_health_descriptions_separate_global_and_selected_scope() -> No
     assert "may disagree by design" in status_description
 
     provenance_content = str(panels[9400].get("options", {}).get("content", ""))
-    assert "Global provider posture is shown separately" in provenance_content
+    assert "GLOBAL severity" in provenance_content
+    assert "selected-provider Status can disagree by design" in provenance_content
 
     for panel_id in (9101, 9102, 9103):
         description = str(panels[panel_id].get("description", ""))

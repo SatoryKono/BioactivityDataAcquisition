@@ -20,7 +20,7 @@ class _BrokenReadPath:
         raise OSError(22, "Invalid argument")
 
 
-def test_safe_is_file_returns_false_on_oserror() -> None:
+def test_docs_kpi_safe_is_file_returns_false_on_oserror() -> None:
     assert report_docs_kpi._safe_is_file(_BrokenStatPath()) is False  # type: ignore[arg-type]
 
 

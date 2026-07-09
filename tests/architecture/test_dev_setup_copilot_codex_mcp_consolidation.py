@@ -16,26 +16,19 @@ pytestmark = pytest.mark.architecture
 EXPECTED_MCP_SERVERS = {
     "memory",
     "filesystem",
-    "sequential-thinking",
     "fetch",
-    "pdf",
     "github",
     "docker",
-    "docker-docs",
     "context7",
-    "paper-search",
-    "dockerhub",
     "prometheus",
     "grafana",
     "brave-search",
     "neo4j-cypher",
     "neo4j-memory",
-    "needle",
     "mermaid",
     "biomoltechDocs",
     "mintlify",
     "deepwiki",
-    "openaiDeveloperDocs",
     "ast-grep",
     "mcp-code-interpreter",
 }
@@ -43,10 +36,7 @@ EXPECTED_MCP_SERVERS = {
 WRAPPER_SCRIPT_STEMS = {
     "github": "github-mcp-wrapper",
     "docker": "mcp_docker_wrapper",
-    "docker-docs": "mcp_docker_docs_wrapper",
     "context7": "mcp_context7_wrapper",
-    "paper-search": "mcp_paper_search_wrapper",
-    "dockerhub": "mcp_dockerhub_wrapper",
     "ast-grep": "mcp_ast_grep_wrapper",
     "mcp-code-interpreter": "mcp_code_interpreter_wrapper",
     "prometheus": "mcp_prometheus_wrapper",
@@ -54,7 +44,6 @@ WRAPPER_SCRIPT_STEMS = {
     "brave-search": "mcp_brave_search_wrapper",
     "neo4j-cypher": "mcp_neo4j_cypher_wrapper",
     "neo4j-memory": "mcp_neo4j_memory_wrapper",
-    "needle": "mcp_needle_wrapper",
     "mermaid": "mcp_mermaid_wrapper",
 }
 
@@ -188,15 +177,6 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
         "mcp-server-fetch==2025.4.7",
         "mcp-server-fetch",
     ]
-    assert servers["sequential-thinking"]["args"] == [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking@2025.12.18",
-    ]
-    assert servers["pdf"]["args"] == [
-        "-y",
-        "@modelcontextprotocol/server-pdf@1.3.1",
-        "--stdio",
-    ]
     _assert_platform_wrappers(servers)
     assert servers["biomoltechDocs"]["type"] == "http"
     assert servers["biomoltechDocs"]["url"] == "https://biomoltech.mintlify.app/mcp"
@@ -204,8 +184,6 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
     assert servers["mintlify"]["url"] == "https://mcp.mintlify.com"
     assert servers["deepwiki"]["type"] == "http"
     assert servers["deepwiki"]["url"] == "https://mcp.deepwiki.com/mcp"
-    assert servers["openaiDeveloperDocs"]["type"] == "http"
-    assert servers["openaiDeveloperDocs"]["url"] == "https://developers.openai.com/mcp"
 
 
 def test_setup_router_is_the_supported_public_entrypoint() -> None:

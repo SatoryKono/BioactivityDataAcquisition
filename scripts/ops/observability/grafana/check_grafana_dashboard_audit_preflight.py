@@ -175,8 +175,8 @@ def _check_expanded_row_capture(playwright_check: PreflightCheck) -> PreflightCh
         name="expanded-row-capture",
         status="ok",
         detail=(
-            "Playwright renderer can expand collapsed dashboard rows before "
-            "full-page screenshot capture and materialize lazy-rendered panels."
+            "Playwright renderer can optionally expand collapsed dashboard rows "
+            "for full-state audits and materialize lazy-rendered panels."
         ),
     )
 

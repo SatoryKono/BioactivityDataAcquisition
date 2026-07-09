@@ -194,6 +194,7 @@ tracked_suite_inventory:
       - tests/integration/test_grafana_selector_contract.py
       - tests/integration/test_grafana_silver_reject_config.py
       - tests/integration/test_grafana_surface_contracts.py
+      - tests/integration/test_grafana_technical_policy.py
       - tests/integration/test_grafana_variable_reference.py
       - tests/integration/test_pipeline_runtime_dashboard.py
       prometheus:

@@ -1,19 +1,19 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-09T09:04:31.256166+00:00",
+  "generated_at": "2026-07-09T12:49:51.186808+00:00",
   "summary": {
     "total_scripts": 447,
     "status_counts": {
-      "active": 354,
-      "supporting": 93
+      "active": 349,
+      "supporting": 98
     },
     "reference_group_coverage": {
       "agents": 5,
       "build": 9,
       "ci": 62,
-      "docs": 164,
+      "docs": 168,
       "other": 23,
-      "scripts": 348,
+      "scripts": 355,
       "skills": 11,
       "tests": 194
     }
@@ -649,7 +649,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py",
-          "line": 336,
+          "line": 339,
           "source_group": "tests",
           "text": "assert \"scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh\" in backlog_text"
         }
@@ -1080,7 +1080,7 @@
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 246,
+          "line": 245,
           "source_group": "docs",
           "text": "every new Codex session: `bash scripts/ai/codex/run-codex.sh`,"
         },
@@ -2179,11 +2179,17 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
+          "path": "scripts/ai/.mcp.json",
+          "line": 40,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/github-mcp-wrapper.ps1\""
+        },
+        {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 240,
+          "line": 218,
           "source_group": "tests",
           "text": "ps_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.ps1\").read_text("
         }
@@ -2194,14 +2200,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 61,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 8,
@@ -2210,7 +2210,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 237,
+          "line": 215,
           "source_group": "tests",
           "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
         }
@@ -2221,8 +2221,15 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 61,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.ps1\""
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
@@ -2233,14 +2240,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 100,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_ast_grep_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 11,
@@ -2254,8 +2255,15 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 85,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\""
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
@@ -2266,14 +2274,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 124,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 15,
@@ -2287,8 +2289,15 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 67,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_code_interpreter_wrapper.ps1\""
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
@@ -2299,14 +2308,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 106,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_code_interpreter_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 12,
@@ -2320,8 +2323,15 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 55,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_context7_wrapper.ps1\""
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
@@ -2332,14 +2342,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 82,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_context7_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 10,
@@ -2351,25 +2355,36 @@
     {
       "path": "scripts/ai/mcp/mcp_docker_docs_wrapper.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
         {
-          "path": "scripts/ai/.mcp.json",
-          "line": 76,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_docker_docs_wrapper.sh\""
+          "path": "docs/00-project/ai/mcp-governance.md",
+          "line": 38,
+          "source_group": "docs",
+          "text": "- `scripts/ai/mcp/mcp_docker_docs_wrapper.sh`"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for Docker Docs server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
     },
     {
       "path": "scripts/ai/mcp/mcp_docker_wrapper.ps1",
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 49,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_docker_wrapper.ps1\""
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
@@ -2380,14 +2395,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 70,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_docker_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 9,
@@ -2399,25 +2408,36 @@
     {
       "path": "scripts/ai/mcp/mcp_dockerhub_wrapper.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
         {
-          "path": "scripts/ai/.mcp.json",
-          "line": 94,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_dockerhub_wrapper.sh\""
+          "path": "docs/00-project/ai/mcp-governance.md",
+          "line": 39,
+          "source_group": "docs",
+          "text": "- `scripts/ai/mcp/mcp_dockerhub_wrapper.sh`"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for DockerHub server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
     },
     {
       "path": "scripts/ai/mcp/mcp_grafana_wrapper.ps1",
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 79,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.ps1\""
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
@@ -2428,14 +2448,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 118,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 14,
@@ -2449,8 +2463,15 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 103,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_mermaid_wrapper.ps1\""
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
@@ -2459,40 +2480,55 @@
     {
       "path": "scripts/ai/mcp/mcp_mermaid_wrapper.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
         {
-          "path": "scripts/ai/.mcp.json",
-          "line": 148,
+          "path": "scripts/ai/mcp/check.sh",
+          "line": 18,
           "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
+          "text": "EXPECTED_MERMAID_WRAPPER_PATH=\"${REPO_ROOT}/scripts/ai/mcp/mcp_mermaid_wrapper.sh\""
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for Mermaid diagram server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
     },
     {
       "path": "scripts/ai/mcp/mcp_needle_wrapper.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
         {
-          "path": "scripts/ai/.mcp.json",
-          "line": 142,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_needle_wrapper.sh\""
+          "path": "docs/00-project/ai/mcp-governance.md",
+          "line": 40,
+          "source_group": "docs",
+          "text": "- `scripts/ai/mcp/mcp_needle_wrapper.sh`"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for Needle search server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
     },
     {
       "path": "scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1",
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 91,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\""
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
@@ -2503,14 +2539,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 130,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 16,
@@ -2524,8 +2554,15 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 97,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\""
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
@@ -2536,7 +2573,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 21,
       "references": [
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
@@ -2591,25 +2628,36 @@
     {
       "path": "scripts/ai/mcp/mcp_paper_search_wrapper.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
         {
-          "path": "scripts/ai/.mcp.json",
-          "line": 88,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_paper_search_wrapper.sh\""
+          "path": "docs/00-project/ai/mcp-governance.md",
+          "line": 41,
+          "source_group": "docs",
+          "text": "- `scripts/ai/mcp/mcp_paper_search_wrapper.sh`"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "mcp_compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the MCP wrapper for Paper Search server integration; keep it supporting unless it becomes a governed CI workflow or first-class MCP entrypoint."
     },
     {
       "path": "scripts/ai/mcp/mcp_prometheus_wrapper.ps1",
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/.mcp.json",
+          "line": 73,
+          "source_group": "scripts",
+          "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.ps1\""
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
@@ -2620,14 +2668,8 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 1,
       "references": [
-        {
-          "path": "scripts/ai/.mcp.json",
-          "line": 112,
-          "source_group": "scripts",
-          "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\""
-        },
         {
           "path": "scripts/ai/mcp/check.sh",
           "line": 13,
@@ -2657,13 +2699,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/test_neo4j_memory_mcp_adapter.py",
-          "line": 57,
+          "line": 60,
           "source_group": "tests",
           "text": "adapter = Path(\"scripts/ai/mcp/neo4j_memory_mcp_adapter.py\").resolve()"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/test_neo4j_memory_mcp_adapter.py",
-          "line": 74,
+          "line": 77,
           "source_group": "tests",
           "text": "assert \"scripts/ai/mcp/neo4j_memory_mcp_adapter.py\" in wrapper"
         }
@@ -4885,7 +4927,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 144,
+      "reference_count": 143,
       "references": [
         {
           "path": ".github/workflows/docs-kpi-weekly.yml",
@@ -5280,7 +5322,7 @@
         },
         {
           "path": "tests/architecture/test_documentation_cleanup_inventory.py",
-          "line": 84,
+          "line": 151,
           "source_group": "tests",
           "text": "assert route[\"generator\"] == \"scripts/docs/checks/documentation_cleanup_inventory.py\""
         }
@@ -6885,13 +6927,13 @@
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 286,
+          "line": 285,
           "source_group": "docs",
           "text": "environment variables (set by `.wsl_proxy_env.sh`)."
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 309,
+          "line": 308,
           "source_group": "docs",
           "text": "source \"$BIOETL_DIR/.wsl_proxy_env.sh\" 2>/dev/null"
         },
@@ -7117,7 +7159,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 34,
+      "reference_count": 32,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -7176,7 +7218,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 34,
+      "reference_count": 32,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -7292,7 +7334,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 54,
+      "reference_count": 52,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -7351,7 +7393,7 @@
       "agent_usage": [
         "py-test-swarm"
       ],
-      "reference_count": 66,
+      "reference_count": 64,
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
@@ -12149,7 +12191,7 @@
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 248,
+          "line": 247,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/codex-exec.sh` resynchronize `~/.codex/config.toml`"
         },
@@ -12357,7 +12399,7 @@
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 247,
+          "line": 246,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/codex.sh`, and"
         },
@@ -12777,7 +12819,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 709,
+          "line": 726,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/audit_live_grafana_panels.py\","
         }
@@ -12907,7 +12949,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 545,
+          "line": 560,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1\""
         }
@@ -12944,13 +12986,13 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 545,
+          "line": 548,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 626,
+          "line": 629,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },
@@ -12962,13 +13004,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 366,
+          "line": 380,
           "source_group": "tests",
           "text": "assert \"setup_grafana_screenshot_runtime.sh\" in detail"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 542,
+          "line": 557,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh\""
         }
@@ -12987,7 +13029,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 1596,
+          "line": 1599,
           "source_group": "other",
           "text": "powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/start_quarantine_explorer.ps1"
         }
@@ -13282,7 +13324,7 @@
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 339,
+          "line": 338,
           "source_group": "docs",
           "text": "If not listening, run `scripts\\ops\\start-wsl-proxy.bat`."
         },
@@ -13345,7 +13387,7 @@
         },
         {
           "path": "docs/03-guides/development/codex-wsl2-setup.md",
-          "line": 282,
+          "line": 281,
           "source_group": "docs",
           "text": "**Layer 2: Proxy** (`scripts/ops/runtime/wsl/wsl_proxy.py`)"
         },
@@ -13404,7 +13446,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 233,
+          "line": 247,
           "source_group": "tests",
           "text": "assert \"scripts/ops/support/load_repo_env.sh\" in hint"
         }

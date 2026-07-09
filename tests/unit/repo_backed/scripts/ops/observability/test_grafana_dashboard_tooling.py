@@ -91,6 +91,20 @@ def test_rerender_load_dashboards_filters_and_sorts(
     ]
 
 
+def test_playwright_fallback_prepares_inner_scroll_before_screenshot() -> None:
+    """Fallback screenshots must capture Grafana's scroll-container layout."""
+    script = Path(
+        "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs"
+    ).read_text(encoding="utf-8")
+
+    assert "setDashboardScrollPosition(page, 0)" in script
+    assert "dashboardCaptureMetrics(page)" in script
+    assert "prepareDashboardForCapture(page, dashboard, index, total)" in script
+    assert script.index(
+        "await prepareDashboardForCapture(page, dashboard, index, total);"
+    ) < script.index("await page.screenshot({")
+
+
 def test_rerender_scope_maps_run_id_to_silver_reject_explorer_run_filter(
     tmp_path: Path,
 ) -> None:
@@ -436,6 +450,7 @@ def test_rerender_builds_playwright_env(tmp_path: Path) -> None:
     assert env["GRAFANA_SCREENSHOT_OUTPUT_DIR"] == str(tmp_path)
     assert env["GRAFANA_SCREENSHOT_TIMEOUT_MS"] == "45000"
     assert env["GRAFANA_SCREENSHOT_CAPTURE_TIMEOUT_MS"] == "180000"
+    assert env["GRAFANA_SCREENSHOT_SETTLE_MS"] == "12000"
     assert env["GRAFANA_SCREENSHOT_UIDS"] == "bioetl-control-plane-v1"
 
 
@@ -581,6 +596,10 @@ def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() 
     assert "waitForDashboardContent" in script
     assert "materializeLazyPanels" in script
     assert "window.scrollTo" in script
+    assert "const page = await context.newPage();" in script
+    assert "await page.close();" in script
+    assert "GRAFANA_SCREENSHOT_EXPAND_COLLAPSED_ROWS" in script
+    assert "--expand-collapsed-rows" in script
 
 
 def test_rerender_playwright_fallback_streams_output_from_repo_root(
@@ -1160,7 +1179,17 @@ def test_runtime_log_hygiene_trend_uses_aggregated_loki_range_queries() -> None:
     dashboard = json.loads(
         Path("grafana/dashboards/bioetl-runtime.json").read_text(encoding="utf-8")
     )
-    panel = next(panel for panel in dashboard["panels"] if panel.get("id") == 258)
+
+    def walk_panels(panels: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        result: list[dict[str, Any]] = []
+        for panel in panels:
+            result.append(panel)
+            nested = panel.get("panels")
+            if isinstance(nested, list):
+                result.extend(walk_panels(nested))
+        return result
+
+    panel = next(panel for panel in walk_panels(dashboard["panels"]) if panel.get("id") == 258)
     expressions = {target["refId"]: target["expr"] for target in panel["targets"]}
 
     assert expressions["A"].startswith("sum(count_over_time(")

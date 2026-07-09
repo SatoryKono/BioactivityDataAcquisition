@@ -183,10 +183,12 @@ Explorer health probe and monitoring setup docs for that reason.
    `Inspect: Telemetry Missing`, while `Silver Reject Explorer` relies on
    explicit no-data/backend-failure copy instead of a generic datasource-health
    stat tile.
-1. `bioetl-runtime`, expanded row-группы по сценарию:
-   `Detect`, `Localize`, `Escalate`, `Tracing-only Log Hygiene`. Открывайте
-   ровно одну нужную группу после чтения answer row и selected-range KPI,
-   чтобы сократить шум первого экрана.
+1. `bioetl-runtime`, row-группы по сценарию:
+   `Detect`, `Localize`, `Escalate`. Optional `Tracing-only Log Hygiene`
+   collapsed by default because Loki/Tempo datasources are tracing-profile
+   evidence, not first-pass runtime health. Открывайте ровно одну нужную
+   группу после чтения answer row и selected-range KPI, чтобы сократить шум
+   первого экрана.
 1. `bioetl-control-plane-v1`, answer row:
    `Provenance`, `Status`, `ID`, `Processed Records`, then
    `Monitor: Replay Safety State`, `Inspect: Checkpoint Freshness Gap`,
@@ -585,7 +587,9 @@ Variable handoff policy for dashboard links remains strict and bounded:
   `Inspect Warning Logs`, `Inspect GLOBAL Unstructured Logs`,
   `Inspect Top Warning Events by Event / Logger / Range` и
   `Track GLOBAL Log Hygiene Trend`. Это optional tracing-profile evidence, а
-  не first-screen status. Log panels используют активный Grafana time range;
+  не first-screen status; row collapsed by default in the canonical dashboard
+  to avoid datasource warning noise when the optional tracing profile is not
+  enabled. Log panels используют активный Grafana time range;
   unstructured parser-error panel intentionally renders parsed `.__error__`;
   Prometheus condition-summary panels в runtime используют shipped fixed-window
   recording rules и не зависят от `$__range`; freshness handoff is explicitly

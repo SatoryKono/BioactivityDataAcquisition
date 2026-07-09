@@ -6,7 +6,7 @@ from pathlib import Path
 from uuid import UUID
 
 from bioetl.composition.runtime_builders.cached_bronze_snapshot_support import (
-    build_cached_bronze_input_snapshot_refs,
+    require_cached_bronze_input_snapshot_refs,
 )
 from bioetl.composition.runtime_builders._run_manifest_control_plane_paths import (
     control_plane_root,
@@ -40,15 +40,10 @@ def resolve_cached_bronze_input_snapshot_refs(
         if bronze_path is not None
         else Path(str(settings.bronze_path)) / provider / entity
     )
-    snapshot_refs = build_cached_bronze_input_snapshot_refs(
+    return require_cached_bronze_input_snapshot_refs(
         bronze_root=bronze_root,
         bronze_date=_coerce_optional_str(bronze_date),
     )
-    if not snapshot_refs:
-        raise RuntimeError(
-            "Cached Bronze execution requires at least one persisted batch file for snapshot provenance"
-        )
-    return snapshot_refs
 
 
 def collect_manifest_input_snapshot_refs(

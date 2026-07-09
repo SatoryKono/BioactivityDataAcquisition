@@ -493,6 +493,9 @@ def _playwright_env(config: RenderConfig) -> dict[str, str]:
     env["GRAFANA_SCREENSHOT_CAPTURE_TIMEOUT_MS"] = str(
         max(int(config.timeout_seconds * 1000), 180000)
     )
+    env["GRAFANA_SCREENSHOT_SETTLE_MS"] = os.environ.get(
+        "GRAFANA_SCREENSHOT_SETTLE_MS", "12000"
+    )
     if config.selected_uids:
         env["GRAFANA_SCREENSHOT_UIDS"] = ",".join(config.selected_uids)
     scope_query = urlencode(_scope_query_params(config))

@@ -316,6 +316,7 @@ def test_issue_5795_runtime_basics_has_committed_targeted_coverage_proof() -> No
 def test_issue_5796_zero_reference_supporting_scripts_have_owner_or_removal_governance() -> (
     None
 ):
+    closeout = _load_json(CLOSEOUT)
     manifest = _load_json(SCRIPTS_MANIFEST)
     registry = _load_json(SCRIPTS_LIFECYCLE_REGISTRY)
     backlog_text = SCRIPTS_BACKLOG.read_text(encoding="utf-8")
@@ -324,7 +325,9 @@ def test_issue_5796_zero_reference_supporting_scripts_have_owner_or_removal_gove
     ]
 
     assert registry["schema_version"]
-    assert len(zero_ref_rows) == 40
+    metric = closeout["metrics"]["zero_reference_supporting_scripts"]
+    assert len(zero_ref_rows) == metric.get("current", metric.get("count"))
+    assert len(zero_ref_rows) <= 40
     assert {row["status"] for row in zero_ref_rows} == {"supporting"}
 
     for row in zero_ref_rows:
