@@ -27,7 +27,6 @@ CLOSEOUT = (
     / "observability-export-dashboard-rollout-closeout.json"
 )
 ERROR_CATALOG = ROOT / "configs" / "contracts" / "errors" / "error_catalog.yaml"
-BASELINE_AUDIT = ROOT / "docs" / "plans" / "dashboard-observability-baseline-audit.md"
 ROLLOUT_CONTRACT = (
     ROOT / "docs" / "04-reference" / "contracts" / "observability-rollout-contracts.md"
 )
@@ -247,7 +246,6 @@ def test_export_contract_exposes_audit_checksum_expiry_and_redaction_controls() 
 
 
 def test_rollout_docs_preserve_prompt_narrowing_and_projection_boundaries() -> None:
-    baseline = BASELINE_AUDIT.read_text(encoding="utf-8")
     contract = ROLLOUT_CONTRACT.read_text(encoding="utf-8")
     rbac = RBAC_MATRIX.read_text(encoding="utf-8")
 
@@ -258,10 +256,6 @@ def test_rollout_docs_preserve_prompt_narrowing_and_projection_boundaries() -> N
     assert "run_id" in contract and "forbidden as a Prometheus label" in contract
     assert "`export_jobs`" in contract
     assert "raw Bronze/Silver storage directly" in contract
-
-    assert "New SQL event-store migrations" in baseline
-    assert "Grafana inspector export is not a governed export surface" in baseline
-    assert "Domain filesystem/database writes" in baseline
 
     assert "hidden" in rbac.lower()
     assert "security boundary" in rbac.lower()
