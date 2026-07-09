@@ -480,16 +480,16 @@ hotspot_family_ratchets:
       duplication_clusters: 0
       files: 180
       total_loc: 22306
-      files_ge_250_loc: 5
+      files_ge_250_loc: 4
       helper_function_ratio: 0.356
-      max_internal_fan_in: 10
-      max_internal_fan_in_module: bioetl.application.core.batch_runtime_failure_policy
+      max_internal_fan_in: 7
+      max_internal_fan_in_module: bioetl.application.core.span_helpers
     trend:
-      status: reviewed_2026-07-01_application_core_live_metric_refresh
-      next_action: 2026-07-01 refreshes measured application_core metrics against
-        the committed hotspot-family baseline at 180 files, 22306 LOC, 5
+      status: reviewed_2026-07-07_application_core_live_metric_refresh
+      next_action: 2026-07-07 refreshes measured application_core metrics against
+        the committed hotspot-family baseline at 180 files, 22306 LOC, 4
         files_ge_250_loc, helper_function_ratio 0.356, and max_internal_fan_in
-        10. Bounded-growth budgets remain flat at 7 files_ge_250_loc and
+        7. Bounded-growth budgets remain flat at 7 files_ge_250_loc and
         max_internal_fan_in 10; no technical-debt budget is increased.
   - name: composition_bootstrap_runtime
     owner: '@bioetl-platform'
@@ -508,16 +508,18 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 49
-      total_loc: 5980
+      total_loc: 5984
       files_ge_250_loc: 0
       helper_function_ratio: 0.302
-      max_internal_fan_in: 3
+      max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.tracing_bootstrap
     trend:
-      status: corrected_2026-07-06_stale_loc_metric_refresh
-      next_action: 2026-07-06 corrects stale total_loc metric from 5987 to measured
-        5980 to align scorecard with actual code state. This is a metric correction,
-        not a budget increase; technical debt budgets remain unchanged.
+      status: reduced_2026-07-07_tracing_bootstrap_headroom_restored
+      next_action: 2026-07-07 refresh aligns the scorecard with the committed
+        hotspot-family baseline at 49 files, 5984 LOC, 0 files_ge_250_loc,
+        helper_function_ratio 0.302, and max_internal_fan_in 2. Bounded-growth
+        budgets remain flat at 0 files_ge_250_loc and max_internal_fan_in 3;
+        no technical-debt budget is increased.
   - name: composition_factories_pipeline
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -535,18 +537,18 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 35
-      total_loc: 4651
+      total_loc: 4647
       files_ge_250_loc: 2
       helper_function_ratio: 0.417
-      max_internal_fan_in: 3
-      max_internal_fan_in_module: bioetl.composition.factories.pipeline.factory_method_helpers
+      max_internal_fan_in: 2
+      max_internal_fan_in_module: bioetl.composition.factories.pipeline.transformer_builder
     trend:
-      status: reduced_2026-06-29_pipeline_factories_files_ge_250_loc_below_reviewed_budget
-      next_action: 2026-06-29 refresh confirms the pipeline-factory family holds
-        zero duplication and sits below the reviewed files_ge_250_loc budget at
-        2 live files_ge_250_loc versus the budget of 3, while max_internal_fan_in
-        remains pinned at 3. Bounded-growth budgets stay flat pending a future
-        reviewed ratchet; no technical-debt budget is increased.
+      status: reduced_2026-07-06_pipeline_factories_fan_in_below_reviewed_budget
+      next_action: 2026-07-06 refresh aligns the scorecard with the committed
+        hotspot-family baseline at 35 files, 4647 LOC, 2 files_ge_250_loc,
+        helper_function_ratio 0.417, and max_internal_fan_in 2. The family
+        remains below the files_ge_250_loc budget at 2/3 while max_internal_fan_in
+        is below budget at 2/3; no technical-debt budget is increased.
   - name: application_services_control_plane
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -562,20 +564,19 @@ hotspot_family_ratchets:
       max_internal_fan_in: 4
     metrics:
       duplication_clusters: 0
-      files: 120
-      total_loc: 14787
+      files: 123
+      total_loc: 15051
       files_ge_250_loc: 13
       helper_function_ratio: 0.457
-      max_internal_fan_in: 4
-      max_internal_fan_in_module: bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.persistence_policy
+      max_internal_fan_in: 3
+      max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_models
     trend:
-      status: ratcheted_2026-07-04_control_plane_type_only_import_cleanup
-      next_action: 2026-07-04 removes runtime imports from workflow execution
-        helpers that only needed WorkflowManifestService annotations, lowering
-        the reviewed live snapshot to 120 files, 14787 LOC, and 13
-        files_ge_250_loc while holding max_internal_fan_in at 4 under the
-        fan-in architecture guard; bounded-growth budgets remain flat at 16
-        files_ge_250_loc and max_internal_fan_in 4.
+      status: reduced_2026-07-08_issue_6033_control_plane_fan_in_headroom
+      next_action: 2026-07-08 issue 6033 closeout splits replay-invariant
+        parentage and policy lookup responsibilities across narrow owners,
+        lowering the reviewed live snapshot to 123 files, 15051 LOC, 13
+        files_ge_250_loc, and max_internal_fan_in 3. Bounded-growth budgets
+        remain flat at 16 files_ge_250_loc and max_internal_fan_in 4.
   - name: composition_runtime_builders
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -591,20 +592,21 @@ hotspot_family_ratchets:
       max_internal_fan_in: 5
     metrics:
       duplication_clusters: 0
-      files: 50
-      total_loc: 6472
+      files: 55
+      total_loc: 6668
       files_ge_250_loc: 0
-      helper_function_ratio: 0.359
-      max_internal_fan_in: 5
-      max_internal_fan_in_module: bioetl.composition.runtime_builders._run_manifest_snapshot_support
+      helper_function_ratio: 0.35
+      max_internal_fan_in: 3
+      max_internal_fan_in_module: bioetl.composition.runtime_builders.run_manifest_support
     trend:
-      status: ratcheted_2026-07-04_runtime_builder_snapshot_import_consolidation
-      next_action: 2026-07-04 routes runtime-builder callers through
-        _run_manifest_snapshot_support instead of direct _snapshot_mapping_support
-        imports, holding max_internal_fan_in at the bounded budget of 5 on
-        _run_manifest_snapshot_support.
+      status: reduced_2026-07-08_issue_6060_runtime_builder_fan_in_headroom
+      next_action: 2026-07-08 issue 6060 splits contract-identity shape helpers,
+        runtime-input type-only imports, effective-config serialization, and
+        data-root / runner policy seams across narrower owners, lowering measured
+        max_internal_fan_in from 4 to 3 while preserving the existing bounded
+        budget of 5. No technical-debt budget is increased.
 full_app_duplication_ratchets:
-  snapshot_date: '2026-07-03'
+  snapshot_date: '2026-07-07'
   mode: fail-fast
   artifact_policy:
     generator_command: python -m scripts.engineering.qa report-duplication-baseline
@@ -612,6 +614,7 @@ full_app_duplication_ratchets:
       src/bioetl/composition/bootstrap src/bioetl/interfaces/cli --json-out
       reports/quality/full-app-duplication-baseline.json --md-out
       reports/quality/full-app-duplication-baseline.md
+      --exclude-actionability-category export_facade_or_package_barrel
     baseline_artifact: reports/quality/full-app-duplication-baseline.json
     expected_direction: downward
     ratchet_policy: Full-app duplication families must ratchet downward during
@@ -624,17 +627,17 @@ full_app_duplication_ratchets:
     path_prefix: src/bioetl/infrastructure/adapters
     metrics:
       duplication_clusters:
-        current_count: 38
-        max_count: 38
+        current_count: 0
+        max_count: 0
         ratchet_policy: Non-growth fail-fast; decreases require regenerated baseline.
   - name: application_pipelines
     owner: '@bioetl-application'
-    linked_issue: '#5841'
+    linked_issue: '#6035'
     path_prefix: src/bioetl/application/pipelines
     metrics:
       duplication_clusters:
-        current_count: 2
-        max_count: 2
+        current_count: 0
+        max_count: 0
         ratchet_policy: Non-growth fail-fast; decreases require regenerated baseline.
   - name: composition_bootstrap_full_app
     owner: '@bioetl-platform'
@@ -654,15 +657,15 @@ full_app_duplication_ratchets:
         ratchet_policy: Zero-budget fail-fast.
   summary_metrics:
     total_duplicate_clusters:
-      current_count: 40
-      max_count: 40
+      current_count: 0
+      max_count: 0
       ratchet_policy: Non-growth fail-fast across full-app scan targets.
 supporting_scripts_governance:
   inventory_source: configs/quality/scripts_inventory_manifest.json
   metrics:
     zero_reference_supporting_script_count:
-      current_count: 45
-      max_count: 45
+      current_count: 30
+      max_count: 35
       owner: '@bioetl-platform'
       linked_issue: '#5845'
       ratchet_policy: Zero-reference supporting scripts must stay triaged with
@@ -679,7 +682,7 @@ oversized_source_module_inventory:
   max_tracked_lines: 500
   top_modules:
   - path: src/bioetl/application/pipelines/common/base_publication_transformer.py
-    lines: 318
+    lines: 316
     owner: '@bioetl-application'
     target_split: separate publication normalization, persistence shaping, and provenance
       helpers
@@ -709,7 +712,7 @@ oversized_source_module_inventory:
     owner: '@bioetl-reproducibility'
     target_split: separate score-card policy rules from manifest projection helpers
   - path: src/bioetl/interfaces/cli/commands/domains/health/server_integration.py
-    lines: 385
+    lines: 386
     owner: '@bioetl-interfaces'
     target_split: split health server integration, metrics server wiring, and quarantine
       service helpers

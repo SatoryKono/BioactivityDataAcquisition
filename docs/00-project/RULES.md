@@ -180,8 +180,10 @@ class MyAdapter:
 - **УВЕЛИЧИВАТЬ бюджеты тех. долга ЗАПРЕЩЕНО** — технический долг может только
   уменьшаться или оставаться неизменным. Любое изменение, которое увеличивает
   бюджеты тех. долга (scorecard budgets, exemption limits, hotspot thresholds),
-  **MUST** быть отклонено или требует явного ADR-утверждения с чётким обоснованием
-  необходимости увеличения и планом возврата к исходным или меньшим значениям.
+  **MUST** быть отклонено. Изменение самого запрета является отдельной
+  governance-программой с обновлением higher-precedence runtime contract и
+  нормативного стека; оно не может использоваться как разрешение увеличить
+  бюджет в обычной engineering task.
 
 Рекомендуемые проверки:
 
@@ -785,8 +787,11 @@ pmid → pmid → pubmed-id
 
 ### 3.1.2. Пороги Ошибок Батча (Thresholds)
 
-- **Soft Threshold**: >5% ошибок качества данных -> Warning.
-- **Hard Threshold**: >20% ошибок -> Fail Batch.
+- **Soft Threshold**: по умолчанию `>5%` ошибок качества данных -> Warning.
+- **Hard Threshold**: не является универсальным для всех DQ surfaces. Иерархический
+  `quality:` config использует `hard_fail=0.25`, а contract-backed fallback,
+  inline pipeline DQ override normalization и Silver DQ request contract используют
+  `hard_fail=0.20`. Каноническая матрица порогов: `docs/04-reference/contracts/dq-contracts.md`.
 - **Metric Scope**: Отслеживать как `record-error-rate` (доля битых строк), так и `entity-error-rate` (доля битых уникальных сущностей).
 
 ### 3.1.3. Параметры Retry (Backoff)
@@ -1761,7 +1766,7 @@ URL-адреса для ChEMBL формируются в `infrastructure/adapter
 | Rate limit exhausted   | `429` + пик `errors-total{type="recoverable"}` | Уменьшить `requests-per-second` в конфиге                                                                                                              |
 | Schema mismatch (Gold) | Pipeline fail + `schema-violations` > 0        | Проверить изменения API; обновить Gold-схему через ADR                                                                                                 |
 | Stale checkpoint       | Warning при старте                             | `--resume` для продолжения или удалить файл `data/output/checkpoints/{pipeline-name}.json` для рестарта                                                |
-| >20% DQ errors         | Batch fail                                     | Проверить источник; возможно API вернул ошибку в теле ответа                                                                                           |
+| DQ errors exceed active `hard_fail` | Batch rejected or quarantined according to the active disposition policy | Проверить источник и действующий DQ surface: `configs/base/quality.yaml`, `configs/contracts/**`, inline `pipeline.dq_overrides`, или Silver DQ request |
 | Lock timeout           | Alert "Lock expired"                           | Проверить зомби-процессы; определить owner `run-id`; для same-process диагностики использовать `bioetl lock check/release --pipeline ... --run-id ...` |
 
 ## Приложение D: Схема Конфигурации Пайплайна

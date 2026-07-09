@@ -10,6 +10,9 @@ import pytest
 
 from bioetl.domain.medallion import SilverWriteMode
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
+from bioetl.infrastructure.storage.delta.table_ops import (
+    normalize_delta_filesystem_path,
+)
 from bioetl.infrastructure.storage.silver.finalization_models import (
     _SilverWriteFinalizationPreparationRequest,
     _SilverWriteResultFinalizationRequest,
@@ -113,7 +116,9 @@ def test_read_delta_version_delegates_to_delta_table() -> None:
     ) as delta_table:
         result = _read_delta_version("/tmp/silver/chembl/activity")
 
-    delta_table.assert_called_once_with("/tmp/silver/chembl/activity")
+    delta_table.assert_called_once_with(
+        normalize_delta_filesystem_path("/tmp/silver/chembl/activity")
+    )
     assert result == 12
 
 

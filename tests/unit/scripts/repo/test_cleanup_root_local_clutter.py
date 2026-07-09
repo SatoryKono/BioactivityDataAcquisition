@@ -61,6 +61,12 @@ def _write_governance(tmp_path: Path) -> None:
                                 "action_if_reintroduced": "safe local pytest cache",
                             },
                             {
+                                "path": ".mypy_cache",
+                                "current_live_state": "present_local_only_root_surface",
+                                "canonical_path": None,
+                                "action_if_reintroduced": "safe local mypy cache",
+                            },
+                            {
                                 "path": ".venv",
                                 "current_live_state": "present_local_only_root_surface",
                                 "canonical_path": "pyproject.toml",
@@ -115,13 +121,16 @@ def test_collect_root_local_cleanup_candidates_excludes_env_and_opt_in_families(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _write_governance(tmp_path)
-    for path in (".pytest_cache", ".venv", "node_modules", ".env"):
+    for path in (".mypy_cache", ".pytest_cache", ".venv", "node_modules", ".env"):
         (tmp_path / path).mkdir()
     monkeypatch.setattr(module, "_tracked_paths", lambda _repo_root: frozenset())
 
     candidates = module.collect_root_local_cleanup_candidates(tmp_path)
 
-    assert [candidate.rel_path for candidate in candidates] == [".pytest_cache"]
+    assert [candidate.rel_path for candidate in candidates] == [
+        ".mypy_cache",
+        ".pytest_cache",
+    ]
 
 
 def test_collect_root_local_cleanup_candidates_includes_opt_in_families(
@@ -129,7 +138,7 @@ def test_collect_root_local_cleanup_candidates_includes_opt_in_families(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     _write_governance(tmp_path)
-    for path in (".pytest_cache", ".venv", "node_modules"):
+    for path in (".mypy_cache", ".pytest_cache", ".venv", "node_modules"):
         (tmp_path / path).mkdir()
     monkeypatch.setattr(module, "_tracked_paths", lambda _repo_root: frozenset())
 
@@ -140,6 +149,7 @@ def test_collect_root_local_cleanup_candidates_includes_opt_in_families(
     )
 
     assert [candidate.rel_path for candidate in candidates] == [
+        ".mypy_cache",
         ".pytest_cache",
         ".venv",
         "node_modules",
@@ -160,3 +170,51 @@ def test_main_apply_deletes_only_exact_reviewed_path(
 
     assert not (tmp_path / ".pytest_cache").exists()
     assert (tmp_path / ".env").exists()
+
+
+def test_main_apply_continues_after_delete_error(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    repo_root = tmp_path
+    monkeypatch.chdir(repo_root)
+    candidates = [
+        module.RootLocalCleanupCandidate(
+            path=Path(".hypothesis"),
+            lane_id="local_runtime_root_dirs",
+            category="local_cache",
+            reason="local property test cache",
+        ),
+        module.RootLocalCleanupCandidate(
+            path=Path(".pytest_cache"),
+            lane_id="local_runtime_root_dirs",
+            category="local_cache",
+            reason="local pytest cache",
+        ),
+    ]
+    deleted: list[str] = []
+
+    monkeypatch.setattr(module, "_project_root", lambda: repo_root)
+    monkeypatch.setattr(
+        module,
+        "collect_root_local_cleanup_candidates",
+        lambda *_args, **_kwargs: candidates,
+    )
+
+    def fake_delete(
+        _repo_root: Path,
+        candidate: module.RootLocalCleanupCandidate,
+    ) -> None:
+        if candidate.rel_path == ".hypothesis":
+            raise OSError("invalid argument")
+        deleted.append(candidate.rel_path)
+
+    monkeypatch.setattr(module, "_delete_candidate", fake_delete)
+
+    assert module.main(["--apply", "--json"]) == 1
+
+    output = capsys.readouterr().out
+    assert '"path": ".hypothesis"' in output
+    assert '"deleted": [' in output
+    assert deleted == [".pytest_cache"]

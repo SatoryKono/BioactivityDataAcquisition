@@ -63,6 +63,12 @@ FORBIDDEN_TRACKED_ROOT_FILES: frozenset[str] = frozenset(
         "trivy-results.sarif",
     }
 )
+FORBIDDEN_LOCAL_ROOT_FILES: frozenset[str] = frozenset(
+    {
+        "_tmp_panel_inventory.mjs",
+        "_tmp_panel_inventory.ps1",
+    }
+)
 FORBIDDEN_DATA_SUBPATH_PREFIXES: tuple[str, ...] = ("data/.idea/",)
 
 ALLOWED_ROOT_DIRECTORIES: frozenset[str] = root_governance.BASE_ALLOWED_ROOT_DIRECTORIES
@@ -566,6 +572,22 @@ def _unexpected_local_root_python_files(
     return sorted(violations)
 
 
+def _unexpected_local_root_temp_files(
+    repo_root: Path,
+    tracked_root_files: set[str],
+) -> list[str]:
+    """Return forbidden local root temp files present on disk."""
+    violations: list[str] = []
+    for entry in repo_root.iterdir():
+        if not entry.is_file():
+            continue
+        if entry.name in tracked_root_files:
+            continue
+        if entry.name in FORBIDDEN_LOCAL_ROOT_FILES:
+            violations.append(entry.name)
+    return sorted(violations)
+
+
 def _unexpected_local_root_dirs_on_disk(
     repo_root: Path,
     *,
@@ -591,6 +613,7 @@ def _unexpected_local_root_dirs_on_disk(
 def _report_strict_local_root_clutter(
     *,
     unexpected_local_root_python_files: list[str],
+    unexpected_local_root_temp_files: list[str],
     unexpected_local_root_dirs: list[str],
 ) -> bool:
     """Report local root clutter that strict mode must reject even if ignored."""
@@ -601,6 +624,13 @@ def _report_strict_local_root_clutter(
             "ERROR: unexpected local root Python files detected in strict mode:\n"
         )
         for entry in unexpected_local_root_python_files:
+            sys.stderr.write(f"  - {entry}\n")
+    if unexpected_local_root_temp_files:
+        has_violations = True
+        sys.stderr.write(
+            "ERROR: unexpected local root temporary files detected in strict mode:\n"
+        )
+        for entry in unexpected_local_root_temp_files:
             sys.stderr.write(f"  - {entry}\n")
     if unexpected_local_root_dirs:
         has_violations = True
@@ -747,6 +777,9 @@ def main() -> int:
 
     strict_local_root_violation = _report_strict_local_root_clutter(
         unexpected_local_root_python_files=_unexpected_local_root_python_files(
+            repo_root, tracked_root_files
+        ),
+        unexpected_local_root_temp_files=_unexpected_local_root_temp_files(
             repo_root, tracked_root_files
         ),
         unexpected_local_root_dirs=_unexpected_local_root_dirs_on_disk(

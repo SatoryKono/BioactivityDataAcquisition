@@ -38,6 +38,10 @@ from bioetl.application.pipelines.common.publication_transformer_records import 
 from bioetl.application.pipelines.common.publication_vocab_observability import (
     emit_unknown_publication_vocab_metrics,
 )
+from bioetl.application.pipelines.common.transformer_initialization import (
+    initialize_base_transformer,
+    transformer_context_kwargs,
+)
 from bioetl.domain.value_objects import PublicationYear
 
 if TYPE_CHECKING:
@@ -87,16 +91,10 @@ class BasePublicationTransformer(BaseTransformer):  # type: ignore[misc]
             default_entity_type=self.DEFAULT_ENTITY_TYPE,
             **kwargs,
         )
-        super().__init__(
+        initialize_base_transformer(
+            self,
             provider=resolved.provider,
-            entity_type=resolved.entity_type,
-            silver_filters=resolved.silver_filters,
-            gold_filters=resolved.gold_filters,
-            tracer=resolved.tracer,
-            metrics=resolved.metrics,
-            identity_service=resolved.identity_service,
-            pii_hasher=resolved.pii_hasher,
-            dependencies=resolved.dependencies,
+            kwargs=transformer_context_kwargs(resolved),
         )
         # Fallback to self if strategies are not provided (legacy subclass support)
         self._data_extractor = resolved.data_extractor or cast(

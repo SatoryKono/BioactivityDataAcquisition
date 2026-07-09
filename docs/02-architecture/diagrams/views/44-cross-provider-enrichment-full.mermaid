@@ -1,17 +1,18 @@
 %% View: Full | Parent: (root)
 %% Parent source: docs/02-architecture/diagrams/foundation/44-cross-provider-enrichment.mmd
 %% Full reference diagram retained after decomposition.
+%% Synced: 2026-07-08
+
 %% Title: Cross-Provider Data Enrichment Flow — Publication
 %% Covers: ADR-026 (Composite), publication composite pipeline config
 %% Rank: 19 (Score 8.00) — 5 providers merging into unified Gold
 %% Updated: 2026-02-17
-%% Legend: see 00-legend.mermaid
 
 %% @version 1.0.0
 %% @date    2026-02-24
 %% @type    flowchart
 %% @level   Mixed (System / Component / Class)
-
+%% @nodes   19
 %%{init: {
   'flowchart': {
     'subGraphTitleMargin': { 'top': 12, 'bottom': 12 }
@@ -23,46 +24,45 @@
     'edgeRouting': 'ORTHOGONAL'
   }
 }}%%
-%% @uniform width=336 height=162 max_title_len=37 max_desc_lines=7
+%% @uniform width=376 height=184 max_title_len=37 max_desc_lines=8
 flowchart LR
     subgraph ChEMBL["ChEMBL (Seed)"]
         CA["ChemblAdapter<br/>/document endpoint"]
         CT["PublicationTransformer"]
-        CS[("Silver<br/>chembl/publication")]
+        CS[("Silver<br/>chembl/publication"<br/>)]
     end
 
     subgraph CrossRef["CrossRef (Enricher)"]
         CRA["CrossRefAdapter<br/>/works?filter=doi:..."]
         CRT["CrossRefPublicationTransformer"]
-        CRS[("Silver<br/>crossref/publication")]
+        CRS[("Silver<br/>crossref/publication"<br/>)]
     end
 
     subgraph PubMed["PubMed (Enricher)"]
         PMA["PubMedAdapter<br/>efetch(PMIDs)"]
         PMT["PubMedPublicationTransformer"]
-        PMS[("Silver<br/>pubmed/publication")]
+        PMS[("Silver<br/>pubmed/publication"<br/>)]
     end
 
     subgraph OpenAlex["OpenAlex (Enricher)"]
         OAA["OpenAlexAdapter<br/>/works?filter=doi:..."]
         OAT["OpenAlexPublicationTransformer"]
-        OAS[("Silver<br/>openalex/publication")]
+        OAS[("Silver<br/>openalex/publication"<br/>)]
     end
 
     subgraph S2["Semantic Scholar (Enricher)"]
         SSA["SemanticScholarAdapter<br/>/paper/batch"]
         SST["SemanticScholarPublicationTransformer"]
-        S2S[("Silver<br/>semanticscholar/publication")]
+        S2S[("Silver<br/>semanticscholar/publication"<br/>)]
     end
 
     subgraph Merge["Merge Phase"]
         MS["MergeService<br/>LEFT OUTER JOIN<br/>conflict: coalesce"]
-        FIELDS["Field Groups<br/>ID_STATUS, BIBLIOGRAPHY, AUTHOR<br/>TERMS, CITATIONS, DATES, PUB_TYPES"]
+        FIELDS["Field groups<br/>id/status + bibliography<br/>author + terms<br/>citations + dates + types"]
     end
 
     subgraph Gold["Gold Output"]
         GS["CompositePublicationGoldSchema<br/>(Pandera strict validation)"]
-        GT[("Gold<br/>composite/publication")]
     end
 
     %% Flows
@@ -72,24 +72,16 @@ flowchart LR
     OAA --> OAT --> OAS
     SSA --> SST --> S2S
 
-    CS -->|K27| MS
-    CRS -->|K28| MS
-    PMS -->|K29| MS
-    OAS -->|K30| MS
-    S2S -->|K31| MS
+    CS ==>|"seed"| MS
+    CRS -->|"citations"| MS
+    PMS -->|"abstract"| MS
+    OAS -->|"concepts"| MS
+    S2S -->|"tldr"| MS
 
     MS --> FIELDS
     FIELDS --> GS --> GT
 
     %% Styling
-    style ChEMBL fill:#FFA500,stroke:#cc8400,color:#000
-    style Merge fill:#C0C0C0,stroke:#808080,color:#000
-    style Gold fill:#FFD700,stroke:#ccac00,color:#000
-
-    classDef port fill:#f5f3ff,stroke:#7c3aed,stroke-width:1px,color:#111827;
-    classDef adapter fill:#fff1f2,stroke:#dc2626,stroke-width:1px,color:#111827;
-    classDef service fill:#eff6ff,stroke:#2563eb,stroke-width:1px,color:#111827;
-    classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#111827;
-    classDef storage fill:#fff7ed,stroke:#f59e0b,stroke-width:1px,color:#111827;
-
-    linkStyle default stroke:#475569,stroke-width:2px,stroke-dasharray:5
+    style ChEMBL fill:#fff7ed,stroke:#f59e0b,color:#212121
+    style Merge fill:#f1f5f9,stroke:#475569,color:#212121
+    style Gold fill:#fefce8,stroke:#ca8a04,color:#212121

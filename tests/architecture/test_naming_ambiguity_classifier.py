@@ -27,13 +27,102 @@ def _load_naming_audit_module() -> ModuleType:
     return module
 
 
-def test_build_ambiguity_groups_reports_expected_ok_families() -> None:
+def _write_module(path: Path, body: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(body, encoding="utf-8")
+
+
+def _write_pipeline_config(path: Path, pipeline_name: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(f"pipeline:\n  pipeline_name: {pipeline_name}\n", encoding="utf-8")
+
+
+def _write_minimal_ambiguity_fixture(tmp_path: Path) -> tuple[Path, Path]:
+    src_path = tmp_path / "src" / "bioetl"
+    configs_path = tmp_path / "configs"
+
+    _write_module(
+        src_path / "domain" / "entities" / "canonical.py",
+        """
+class PubchemMolecule:
+    pass
+
+
+class UniprotTarget:
+    pass
+
+
+class ChemblPublication:
+    pass
+""",
+    )
+    _write_module(
+        src_path / "application" / "pipelines" / "pubchem" / "compound.py",
+        """
+class PubChemCompoundPipeline:
+    pass
+
+
+class PubChemCompoundTransformer:
+    pass
+""",
+    )
+    _write_module(
+        src_path / "application" / "pipelines" / "uniprot" / "protein.py",
+        """
+class UniProtProteinPipeline:
+    pass
+
+
+class UniProtProteinTransformer:
+    pass
+""",
+    )
+    _write_module(
+        src_path / "domain" / "contracts" / "gold" / "stable_public.py",
+        """
+class PubChemCompoundGoldSchema:
+    pass
+
+
+class UniProtProteinGoldSchema:
+    pass
+""",
+    )
+
+    _write_pipeline_config(
+        configs_path / "entities" / "pubchem" / "compound.yaml",
+        "pubchem_compound",
+    )
+    _write_pipeline_config(
+        configs_path / "entities" / "uniprot" / "protein.yaml",
+        "uniprot_protein",
+    )
+    _write_pipeline_config(
+        configs_path / "entities" / "chembl" / "publication.yaml",
+        "chembl_publication",
+    )
+    _write_pipeline_config(
+        configs_path / "entities" / "chembl" / "publication_similarity.yaml",
+        "chembl_publication_similarity",
+    )
+    _write_pipeline_config(
+        configs_path / "entities" / "chembl" / "publication_term.yaml",
+        "chembl_publication_term",
+    )
+    return src_path, configs_path
+
+
+def test_build_ambiguity_groups_reports_expected_ok_families(
+    tmp_path: Path,
+) -> None:
     mod = _load_naming_audit_module()
     registry = mod.load_naming_registry()
+    src_path, configs_path = _write_minimal_ambiguity_fixture(tmp_path)
 
     groups = mod.build_ambiguity_groups(
-        REPO_ROOT / "src" / "bioetl",
-        REPO_ROOT / "configs",
+        src_path,
+        configs_path,
         registry,
     )
     by_family = {group.normalized_stem: group for group in groups}
@@ -101,20 +190,21 @@ def test_classify_ambiguity_group_marks_forbidden_alias_export_as_conflict() -> 
     assert "Forbidden ADR-024 alias" in group.rationale
 
 
-def test_build_ambiguity_groups_is_deterministic() -> None:
+def test_build_ambiguity_groups_is_deterministic(tmp_path: Path) -> None:
     mod = _load_naming_audit_module()
     registry = mod.load_naming_registry()
-    module_trees = mod._build_python_module_tree_cache(REPO_ROOT / "src" / "bioetl")
+    src_path, configs_path = _write_minimal_ambiguity_fixture(tmp_path)
+    module_trees = mod._build_python_module_tree_cache(src_path)
 
     first = mod.build_ambiguity_groups(
-        REPO_ROOT / "src" / "bioetl",
-        REPO_ROOT / "configs",
+        src_path,
+        configs_path,
         registry,
         module_trees=module_trees,
     )
     second = mod.build_ambiguity_groups(
-        REPO_ROOT / "src" / "bioetl",
-        REPO_ROOT / "configs",
+        src_path,
+        configs_path,
         registry,
         module_trees=module_trees,
     )

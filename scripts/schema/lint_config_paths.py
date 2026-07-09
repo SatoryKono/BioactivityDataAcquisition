@@ -96,18 +96,26 @@ def _scan_file(filepath: Path) -> list[tuple[int, str, str, str]]:
     return hits
 
 
+def _safe_is_file(path: Path) -> bool:
+    """Return False when filesystem metadata cannot be read for a path."""
+    try:
+        return path.is_file()
+    except OSError:
+        return False
+
+
 def scan_tree(root: Path) -> dict[Path, list[tuple[int, str, str, str]]]:
     """Walk the tree under *root* and collect all violations."""
     results: dict[Path, list[tuple[int, str, str, str]]] = {}
 
-    if root.is_file():
+    if _safe_is_file(root):
         hits = _scan_file(root)
         if hits:
             results[root] = hits
         return results
 
     for path in sorted(root.rglob("*")):
-        if not path.is_file():
+        if not _safe_is_file(path):
             continue
         if _should_skip(path):
             continue

@@ -87,8 +87,8 @@ cd BioactivityDataAcquisition
 # Preferred manual path without make
 uv sync --extra dev --extra tracing
 
-# Fallback without uv
-python3.12 -m venv .venv
+# Fallback without uv: use an installed Python 3.12+ interpreter.
+python3 -m venv .venv
 . .venv/bin/activate
 pip install -e ".[dev,tracing]"
 ```

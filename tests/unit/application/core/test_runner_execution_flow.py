@@ -25,7 +25,7 @@ from bioetl.domain.value_objects.dq_anomaly import (
 from bioetl.domain.value_objects.dq_result import DQEvaluationStatus, DQResult
 from bioetl.domain.control_plane.run_ledger import ORDINARY_RUN_LEDGER_STAGE_NAMES
 from bioetl.application.core.postrun.compact_orchestrator import CompactionResult
-from bioetl.application.core.postrun.service import PostrunResult
+from bioetl.application.core.postrun.service import PostrunResult, PostrunService
 from bioetl.application.services.medallion_types import VacuumResult
 
 
@@ -55,7 +55,10 @@ class _ExecutionHost:
             validate_infrastructure=self._validate_infrastructure,
             assert_infrastructure_healthy=self._assert_infrastructure_healthy,
         )
-        self._postrun_service = SimpleNamespace(run=self._run_postrun)
+        self._postrun_service = SimpleNamespace(
+            OPERATION_ERRORS=PostrunService.OPERATION_ERRORS,
+            run=self._run_postrun,
+        )
         self._lifecycle_service = SimpleNamespace(
             prepare_for_run=self._prepare_for_run,
         )
@@ -320,6 +323,35 @@ async def test_tracked_stage_emits_failed_phase_completion() -> None:
         )
 
     assert host.started == [ORDINARY_RUN_LEDGER_STAGE_NAMES[2]]
+    assert host.completed == []
+    assert host.order == [
+        "start:execute_pipeline",
+        "observer:start:execution",
+        "boom",
+        "observer:complete:execution:failed",
+    ]
+
+
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_tracked_stage_uses_shared_operation_errors_not_postrun_instance() -> (
+    None
+):
+    host = _ExecutionHost()
+    host._postrun_service.OPERATION_ERRORS = object()
+
+    async def _boom() -> None:
+        await asyncio.sleep(0)
+        host.order.append("boom")
+        raise RuntimeError("forced")
+
+    with pytest.raises(RuntimeError, match="forced"):
+        await runner_execution_flow._run_tracked_stage(
+            cast(Any, host),
+            ORDINARY_RUN_LEDGER_STAGE_NAMES[2],
+            _boom,
+        )
+
     assert host.completed == []
     assert host.order == [
         "start:execute_pipeline",

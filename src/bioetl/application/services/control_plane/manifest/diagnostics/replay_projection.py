@@ -3,16 +3,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from bioetl.application.services.control_plane.manifest.diagnostics.operator_replay_mode import (
     _resolve_operator_replay_mode,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.persistence import (
     build_lineage_closure_boundary,
-)
-from bioetl.application.services.control_plane.manifest.diagnostics.replay import (
-    _resolve_exact_replay_support_boundary,
-    _resolve_replay_family_contract,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_blockers import (
     _collect_append_mode_semantic_sinks,
@@ -37,6 +34,11 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     ReproducibilityPolicyAssessment,
 )
 
+if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context import (
+        ReplayFamilyContext,
+    )
+
 
 @dataclass(frozen=True, slots=True)
 class _ReplayProjectionBundle:
@@ -54,6 +56,7 @@ def _build_replay_projection_context_kwargs(
     requested_exact_replay: bool,
     resume_requested: bool,
     policy_assessment: ReproducibilityPolicyAssessment,
+    replay_family_context: ReplayFamilyContext,
 ) -> dict[str, object]:
     """Return shared replay-projection context kwargs."""
     return {
@@ -62,6 +65,7 @@ def _build_replay_projection_context_kwargs(
         "requested_exact_replay": requested_exact_replay,
         "resume_requested": resume_requested,
         "policy_assessment": policy_assessment,
+        "replay_family_context": replay_family_context,
     }
 
 
@@ -72,21 +76,25 @@ def _build_operator_replay_projection_inputs(
     requested_exact_replay: bool,
     resume_requested: bool,
     policy_assessment: ReproducibilityPolicyAssessment,
+    replay_family_context: ReplayFamilyContext,
 ) -> dict[str, object]:
     """Return precomputed operator replay inputs shared by projection fields."""
     exact_replay_blockers = _resolve_exact_replay_blockers(
         manifest=manifest,
         policy_assessment=policy_assessment,
+        replay_family_context=replay_family_context,
     )
     replay_mode = _resolve_replay_mode(
         manifest=manifest,
         requested_exact_replay=requested_exact_replay,
         resume_requested=resume_requested,
+        replay_family_context=replay_family_context,
     )
     continuation_mode = _resolve_continuation_mode(
         manifest=manifest,
         requested_exact_replay=requested_exact_replay,
         resume_requested=resume_requested,
+        replay_family_context=replay_family_context,
     )
     replay_readiness_verdict = _resolve_manifest_replay_readiness_verdict(
         manifest=manifest,
@@ -94,11 +102,13 @@ def _build_operator_replay_projection_inputs(
         resume_requested=resume_requested,
         continuation_mode=continuation_mode,
         policy_assessment=policy_assessment,
+        replay_family_context=replay_family_context,
     ).value
     replay_state_projection = _build_replay_state_projection(
         manifest=manifest,
         input_snapshots=input_snapshots,
         policy_assessment=policy_assessment,
+        replay_family_context=replay_family_context,
     )
     return {
         "continuation_mode": continuation_mode,
@@ -120,6 +130,7 @@ def _build_operator_replay_projection_payload(
     requested_exact_replay: bool,
     resume_requested: bool,
     policy_assessment: ReproducibilityPolicyAssessment,
+    replay_family_context: ReplayFamilyContext,
     replay_family_contract: dict[str, object],
     replay_family_contract_payload: dict[str, object],
     replay_inputs: dict[str, object],
@@ -134,8 +145,8 @@ def _build_operator_replay_projection_payload(
     return {
         "replay_capability": manifest.replay_capability.value,
         "requested_exact_replay": requested_exact_replay,
-        "exact_replay_support_boundary": _resolve_exact_replay_support_boundary(
-            manifest
+        "exact_replay_support_boundary": (
+            replay_family_context.exact_replay_support_boundary
         ),
         "replay_family_contract": replay_family_contract,
         **replay_family_contract_payload,
@@ -155,6 +166,7 @@ def _build_operator_replay_projection_payload(
             input_snapshots=input_snapshots,
             resume_requested=resume_requested,
             policy_assessment=policy_assessment,
+            replay_family_context=replay_family_context,
         ),
         "replay_mode": replay_inputs["replay_mode"],
         "continuation_mode": replay_inputs["continuation_mode"],
@@ -186,16 +198,18 @@ def _build_operator_replay_projection(
     requested_exact_replay: bool,
     resume_requested: bool,
     policy_assessment: ReproducibilityPolicyAssessment,
+    replay_family_context: ReplayFamilyContext,
+    replay_family_contract: dict[str, object],
     replay_family_contract_payload: dict[str, object],
 ) -> dict[str, object]:
     """Return canonical operator-facing replay projection fields."""
-    replay_family_contract = _resolve_replay_family_contract(manifest)
     replay_projection_context = _build_replay_projection_context_kwargs(
         manifest,
         input_snapshots,
         requested_exact_replay,
         resume_requested,
         policy_assessment,
+        replay_family_context,
     )
     replay_inputs = _build_operator_replay_projection_inputs(
         **replay_projection_context
@@ -238,6 +252,8 @@ def _build_replay_projection_bundle(
     requested_exact_replay: bool,
     resume_requested: bool,
     policy_assessment: ReproducibilityPolicyAssessment,
+    replay_family_context: ReplayFamilyContext,
+    replay_family_contract: dict[str, object],
     replay_family_contract_payload: dict[str, object],
 ) -> _ReplayProjectionBundle:
     """Assemble the canonical replay projection bundle for diagnostics callers."""
@@ -247,15 +263,18 @@ def _build_replay_projection_bundle(
         requested_exact_replay,
         resume_requested,
         policy_assessment,
+        replay_family_context,
     )
     operator_projection = _build_operator_replay_projection(
         **replay_projection_context,
+        replay_family_contract=replay_family_contract,
         replay_family_contract_payload=replay_family_contract_payload,
     )
     replay_state_projection = _build_replay_state_projection(
         manifest=manifest,
         input_snapshots=input_snapshots,
         policy_assessment=policy_assessment,
+        replay_family_context=replay_family_context,
     )
     return _ReplayProjectionBundle(
         operator_projection=operator_projection,

@@ -1,13 +1,17 @@
 # BioETL local-first Makefile
 
-.PHONY: help install test lint test-fast test-cov-fast-stable test-architecture test-unit test-integration test-ci-local test-profile test-deps run-local sync-windsurf-rules
+.PHONY: help install test lint test-fast test-cov-fast-stable test-coverage test-architecture test-unit test-integration test-ci-local test-profile test-deps run-local sync-windsurf-rules
 .PHONY: docker-check docker-build docker-start docker-stop docker-logs docker-health docker-clean docker-compose-check
-.PHONY: precommit-install qa-arch-fast quarantine-inspect quarantine-replay quarantine-purge release-lock
+.PHONY: clean clean-all clean-local-artifacts clean-preflight precommit-install qa-arch-fast qa-debt security-check quarantine-inspect quarantine-replay quarantine-purge release-lock
 
 RUN ?= uv run
 PIPELINE ?= chembl_activity
 RUN_ID ?=
 LOCAL_COV_FAIL_UNDER ?= 80
+QUALITY_EXEMPTIONS_REGISTRY ?= configs/quality/architecture_metric_exemptions.yaml
+QUALITY_EXEMPTIONS_SCORECARD ?= configs/quality/debt_scorecard.yaml
+QUALITY_REPORT_OUTPUT ?= reports/quality/ci-quality-metrics.json
+QUALITY_SUMMARY_OUT ?=
 
 # Default target
 help:
@@ -19,9 +23,11 @@ help:
 	@echo "  make lint                  Run ruff and mypy checks"
 	@echo "  make test-fast             Run fast non-slow tests"
 	@echo "  make test-cov-fast-stable  Run fast coverage check"
+	@echo "  make test-coverage         Run stable tests with canonical coverage gate"
 	@echo "  make test-architecture     Run architecture tests"
 	@echo "  make test-unit             Run unit tests"
 	@echo "  make test-integration      Run non-e2e integration tests"
+	@echo "  make security-check        Run security test suite"
 	@echo "  make test-ci-local         Run local CI-oriented test subset"
 	@echo "  make test-profile          Run pytest duration profiling"
 	@echo "  make test-deps             Verify test dependencies import"
@@ -29,14 +35,25 @@ help:
 	@echo ""
 	@echo "Local governance:"
 	@echo "  make precommit-install      Install local pre-commit hooks"
+	@echo "  make qa-debt                Run integral quality/debt gate"
 	@echo "  make qa-arch-fast           Run fast architecture checks"
 	@echo "  make sync-windsurf-rules    Sync Cursor rules to Windsurf/Cascade"
+	@echo "  make clean                  Preview local cleanup targets"
+	@echo "  make clean-local-artifacts  Apply local cleanup targets"
+	@echo "  make clean-preflight        Run release-preflight cleanup"
 	@echo ""
 	@echo "Local operations:"
 	@echo "  make quarantine-inspect     Inspect quarantine state for PIPELINE=$(PIPELINE)"
 	@echo "  make quarantine-replay      Replay quarantine state for PIPELINE=$(PIPELINE)"
 	@echo "  make quarantine-purge       Purge quarantine state for PIPELINE=$(PIPELINE)"
 	@echo "  make release-lock           Release lock for PIPELINE=$(PIPELINE) RUN_ID=$(RUN_ID)"
+	@echo ""
+	@echo "Diagram tooling:"
+	@echo "  make render-diagrams        Render SVG/PNG for all diagram sources"
+	@echo "  make render-diagrams-svg    Render SVG only (faster local loop)"
+	@echo "  make render-diagrams-checks Run PR-profile diagram validation"
+	@echo "  make render-diagrams-bundles Regenerate Markdown diagram bundles"
+	@echo "  make render-diagrams-all    Render artifacts and refresh bundles"
 	@echo ""
 	@echo "Optional Docker helper commands:"
 	@echo "  make docker-check           Check Docker installation"
@@ -66,6 +83,8 @@ lint:
 
 test:
 	$(RUN) pytest tests/ --ignore=tests/e2e --ignore=tests/contract --cov=src/bioetl --cov-fail-under=85
+
+test-coverage: test
 
 test-fast:
 	$(RUN) pytest tests/ -q -m "not slow and not benchmark and not e2e and not memory" --ignore=tests/e2e
@@ -206,8 +225,32 @@ sync-windsurf-rules:
 precommit-install:
 	bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only
 
+clean:
+	$(RUN) python -m scripts.engineering.diagnostics cleanup
+
+clean-local-artifacts:
+	$(RUN) python -m scripts.engineering.diagnostics cleanup $(if $(DRY_RUN),,--apply) $(if $(PURGE_LOGS),--purge-logs,)
+	$(if $(PURGE_WORKTREES),$(RUN) python -m scripts.engineering.repo preflight-cleanup $(if $(DRY_RUN),--dry-run,),@true)
+
+clean-preflight:
+	$(RUN) python -m scripts.engineering.repo preflight-cleanup $(if $(DRY_RUN),--dry-run,)
+
+clean-all:
+	$(RUN) python -m scripts.engineering.diagnostics cleanup --apply --purge-logs
+	$(RUN) python -m scripts.engineering.repo preflight-cleanup
+
+qa-debt:
+	$(RUN) python -m scripts.engineering.ci quality-gate \
+		--registry "$(QUALITY_EXEMPTIONS_REGISTRY)" \
+		--scorecard "$(QUALITY_EXEMPTIONS_SCORECARD)" \
+		--output "$(QUALITY_REPORT_OUTPUT)" \
+		--summary-out "$(QUALITY_SUMMARY_OUT)"
+
 qa-arch-fast:
 	BIOETL_PYTEST_SHARDED_TEST_HEALTH_SUITE=architecture-fast-boundary bash scripts/engineering/dev/run_pytest_sharded.sh --shard S7-architecture-fast-boundary --stream -- tests/architecture/ -m "architecture and not slow and not benchmark and not memory"
+
+security-check:
+	$(RUN) pytest tests/security/ -q
 
 quarantine-inspect:
 	$(RUN) bioetl quarantine inspect --pipeline $(PIPELINE)
@@ -220,5 +263,21 @@ quarantine-purge:
 
 release-lock:
 	$(RUN) bioetl lock release --pipeline $(PIPELINE) --run-id $(RUN_ID)
+
+.PHONY: render-diagrams render-diagrams-svg render-diagrams-checks render-diagrams-bundles render-diagrams-all
+
+render-diagrams:
+	bash docs/02-architecture/diagrams/tooling/render.sh
+
+render-diagrams-svg:
+	bash docs/02-architecture/diagrams/tooling/render.sh --svg-only
+
+render-diagrams-checks:
+	bash scripts/diagrams/run_diagram_checks.sh --profile pr
+
+render-diagrams-bundles:
+	$(RUN) python scripts/diagrams/generate_all_bundles.py
+
+render-diagrams-all: render-diagrams render-diagrams-bundles
 
 .PHONY: docker-dev

@@ -10,6 +10,7 @@ Commands:
     check-naming       Enforce VCR filename policy
     check-secrets      Detect potential secret leaks in VCR cassettes
     check-metadata-age Enforce managed VCR metadata freshness
+    check-replay-preflight  Fail fast on unresolved replay VCR pointers
 """
 
 from __future__ import annotations
@@ -23,6 +24,7 @@ COMMANDS: dict[str, str] = {
     "check-naming": "check_vcr_filename_policy.py",
     "check-secrets": "check_vcr_secrets.py",
     "check-metadata-age": "check_vcr_metadata_age.py",
+    "check-replay-preflight": "check_replay_preflight.py",
 }
 COMMAND_SPECS = {name: python_command(script) for name, script in COMMANDS.items()}
 

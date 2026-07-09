@@ -50,6 +50,19 @@ def test_gold_dq_bundles_cover_primary_entity_outputs() -> None:
         )
 
 
+def test_gold_dq_bundle_policy_is_bounded_to_sensitive_outputs() -> None:
+    """DQ bundle snapshots are required for the explicit DQ-sensitive subset."""
+    registry = load_gold_schema_snapshot_registry()
+    policy = registry["dq_bundle_policy"]
+    entities = registry["entities"]
+    dq_outputs = registry["dq_sensitive_outputs"]
+
+    assert policy["scope"] == "dq_sensitive_outputs"
+    assert policy["coverage_model"] == "bounded_subset"
+    assert policy["all_gold_entities_required"] is False
+    assert {meta["entity"] for meta in dq_outputs.values()} < set(entities)
+
+
 def test_gold_contract_exports_are_schema_classes() -> None:
     """gold_contracts.__all__ must only expose GoldSchema DataFrameModel classes."""
     for export_name in gold_contracts.__all__:

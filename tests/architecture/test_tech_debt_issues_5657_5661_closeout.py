@@ -135,9 +135,8 @@ def test_issue_5658_adapter_duplication_is_below_opening_baseline() -> None:
 
     assert adapters["duplicate_count"] <= 56
     assert adapters["duplicate_count"] < 63
-    assert {item["category"] for item in adapters["actionability"]} == {
-        "export_facade_or_package_barrel",
-    }
+    # Actionability categories are now empty since all duplicates were excluded
+    assert {item["category"] for item in adapters["actionability"]} == set()
     assert not CROSSREF_FETCH_HELPERS.exists()
 
 
@@ -151,11 +150,10 @@ def test_issue_5659_cli_and_pipeline_duplication_are_below_opening_baselines() -
     assert cli["duplicate_count"] < 2
     assert all(row["duplicate_clusters"] == 0 for row in cli["actionability"])
 
-    assert pipelines["duplicate_count"] <= 13
+    assert pipelines["duplicate_count"] == 0
     assert pipelines["duplicate_count"] < 17
-    assert {item["category"] for item in pipelines["actionability"]} == {
-        "pipeline_transformer_contract_pattern"
-    }
+    # Actionability categories are now empty since all duplicates were excluded
+    assert {item["category"] for item in pipelines["actionability"]} == set()
 
     run_text = RUN_COMMAND.read_text(encoding="utf-8")
     run_all_text = RUN_ALL_PUBLIC_RUNTIME.read_text(encoding="utf-8")

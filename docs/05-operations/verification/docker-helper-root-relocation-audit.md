@@ -42,6 +42,29 @@ Reviewed root Docker helper surfaces:
 | `Dockerfile.warp` | reviewed network/tooling helper image | Docker docs, local operator flows | `rehomed_2026_07` | `scripts/ops/runtime/docker/images/warp/Dockerfile` |
 | `grafana-datasource.yml` | provisioning sidecar artifact | Grafana provisioning / compose mount assumptions | `rehomed_2026_07` | `grafana/provisioning/datasources-local/grafana-datasource.yml` |
 
+## Reference Map Verification
+
+Last verified: 2026-07-06 for root hygiene issue #5995.
+
+Current root Docker entrypoints remain root-retained because live repository
+consumers still use exact root filenames:
+
+| Root surface | Current consumers | Move condition |
+| --- | --- | --- |
+| `Dockerfile.bioetl` | `.github/workflows/docker.yml`, `Makefile`, manual image build flows | Move only after Docker workflow build inputs and local build commands are repointed or wrapped. |
+| `docker-compose.yml` | `.github/workflows/docker.yml`, `.github/workflows/tests.yml`, `Makefile`, `scripts/startup.*`, `scripts/shutdown.*`, operator docs | Move only behind a root-compatible shim or after every default `docker compose` flow is repointed. |
+| `docker-compose.monitoring.yml` | `.github/workflows/docker.yml`, `.github/workflows/tests.yml`, `Makefile`, `docs/DOCKER_SETUP.md`, `docs/DOCKER_QUICKSTART.md`, ops helpers | Move only after monitoring workflow and docs references use the new path or a shim. |
+| `docker-compose.codex.yml` | `scripts/startup.*`, `scripts/shutdown.*`, `scripts/ops/docker-setup.*`, Codex/MCP docs | Move only after Codex/MCP startup and shutdown wrappers are repointed. |
+| `docker-compose.neo4j.yml` | `Makefile`, Neo4j ops docs, local audit flows | Move only after Neo4j helper commands and docs are repointed. |
+| `docker-compose.neo4j-audit.yml` | Neo4j audit launchers and audit docs | Move only after audit launchers and docs are repointed. |
+| `docker-setup.ps1` | root compatibility entrypoint over `scripts/ops/docker-setup.ps1` | Remove only when operator docs no longer advertise the root entrypoint. |
+| `docker-setup.sh` | root compatibility entrypoint over `scripts/ops/docker-setup.sh` | Remove only when operator docs no longer advertise the root entrypoint. |
+
+This means root minimization for Docker is blocked on a wrapper-first migration,
+not on file movement alone. A future move must update workflows, `Makefile`,
+operator docs, root allowlist, and `configs/quality/docker_helper_contracts.yaml`
+together.
+
 ## Constraints
 
 - ADR-010 remains authoritative: helper stacks are optional local-only adjuncts.

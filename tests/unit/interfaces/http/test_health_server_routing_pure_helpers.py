@@ -336,6 +336,7 @@ async def test_routing_support_dispatches_control_plane_branches(
         {
             "run_manifest_port": True,
             "run_ledger_port": True,
+            "workflow_manifest_port": False,
             "checkpoint_port": True,
         },
     )

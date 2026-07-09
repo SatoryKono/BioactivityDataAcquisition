@@ -19,11 +19,9 @@ from bioetl.composition.runtime_builders._manifest_publication_context_support i
 from bioetl.composition.runtime_builders._effective_config_artifact_builder_support import (
     build_composite_runtime_overrides_snapshot,
     build_effective_config_source_refs,
+    build_resolved_config_snapshot,
     build_runtime_overrides_snapshot,
     resolve_effective_config_entity,
-)
-from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
-    to_serializable_mapping as _to_serializable_mapping,
 )
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigResolutionPolicy,
@@ -61,7 +59,7 @@ def _create_and_persist_effective_config_artifact_payload(
     artifact = service.create_effective_config_artifact(
         pipeline_name=pipeline_name,
         pipeline_kind=pipeline_kind,
-        resolved_config=_to_serializable_mapping(resolved_config),
+        resolved_config=build_resolved_config_snapshot(resolved_config),
         runtime_overrides=runtime_overrides,
         source_refs=build_effective_config_source_refs(
             provider=provider,

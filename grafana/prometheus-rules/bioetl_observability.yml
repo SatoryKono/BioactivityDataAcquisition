@@ -188,11 +188,39 @@ groups:
         labels:
           input: workflow
         expr: >-
-          max by (pipeline, run_type) (bioetl_workflow_current_status)
+          max by (pipeline, run_type) (
+            label_replace(
+              label_replace(
+                bioetl_workflow_current_status,
+                "pipeline",
+                "$1",
+                "pipeline_context",
+                "(.+)"
+              ),
+              "run_type",
+              "$1",
+              "run_type_context",
+              "(.+)"
+            )
+          )
           or label_replace(
             (
               bioetl_overview_pipeline_run_type_universe
-              unless on (pipeline, run_type) max by (pipeline, run_type) (bioetl_workflow_current_status)
+              unless on (pipeline, run_type) max by (pipeline, run_type) (
+                label_replace(
+                  label_replace(
+                    bioetl_workflow_current_status,
+                    "pipeline",
+                    "$1",
+                    "pipeline_context",
+                    "(.+)"
+                  ),
+                  "run_type",
+                  "$1",
+                  "run_type_context",
+                  "(.+)"
+                )
+              )
             ) * 3,
             "input",
             "workflow",

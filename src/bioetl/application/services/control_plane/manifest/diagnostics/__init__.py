@@ -23,7 +23,9 @@ from bioetl.application.services.control_plane.manifest.diagnostics.finalization
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay import (
     _build_resume_contract,
-    _resolve_replay_family_contract,
+)
+from bioetl.application.services.control_plane.manifest.diagnostics.replay_invariants.replay_family_context import (
+    build_replay_family_context,
 )
 from bioetl.application.services.control_plane.manifest.diagnostics.replay_projection import (
     _build_replay_projection_bundle,
@@ -160,8 +162,10 @@ def _build_refresh_replay_projection(
     effective_manifest = refresh_context.effective_manifest
     policy_assessment = refresh_context.policy_assessment
     input_snapshots = refresh_context.input_snapshots
+    replay_family_context = build_replay_family_context(effective_manifest)
+    replay_family_contract = replay_family_context.replay_family_contract
     replay_family_contract_payload = _build_replay_family_contract_payload(
-        _resolve_replay_family_contract(effective_manifest)
+        replay_family_contract
     )
     replay_projection_bundle = _build_replay_projection_bundle(
         manifest=effective_manifest,
@@ -169,6 +173,8 @@ def _build_refresh_replay_projection(
         requested_exact_replay=refresh_context.requested_exact_replay,
         resume_requested=refresh_context.resume_requested,
         policy_assessment=policy_assessment,
+        replay_family_context=replay_family_context,
+        replay_family_contract=replay_family_contract,
         replay_family_contract_payload=replay_family_contract_payload,
     )
     return _ReplayRefreshProjection(
@@ -236,11 +242,15 @@ def _build_refresh_summary_update(
         exact_replay_eligible=replay_projection.exact_replay_eligible,
         replay_mode=replay_projection.replay_mode,
     )
+    replay_family_context = build_replay_family_context(
+        refresh_context.effective_manifest
+    )
     updated["resume_contract"] = _build_resume_contract(
         manifest=refresh_context.effective_manifest,
         requested_exact_replay=refresh_context.requested_exact_replay,
         resume_requested=refresh_context.resume_requested,
         policy_assessment=refresh_context.policy_assessment,
+        replay_family_context=replay_family_context,
     )
     return _ReplayRefreshSummaryUpdate(payload=updated)
 

@@ -17,15 +17,15 @@ from bioetl.composition.runtime_builders.config_access import (
 from bioetl.composition.runtime_builders.inputs_runtime_helpers import (
     log_cached_bronze as _log_cached_bronze,
 )
-from bioetl.composition.runtime_builders.inputs_runtime_models import (
-    ResolvedVacuumSettings,
-)
 from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
     from bioetl.composition.observability import ObservabilityBundle
+    from bioetl.composition.runtime_builders.inputs_runtime_models import (
+        ResolvedVacuumSettings,
+    )
     from bioetl.domain.config import RuntimeConfig
     from bioetl.domain.context import (
         CachedBronzeContext,
@@ -54,6 +54,17 @@ __all__ = [
     "prepare_runner_inputs",
     "resolve_health_check_mode",
 ]
+
+
+def __getattr__(name: str) -> object:
+    """Lazily expose compatibility symbols from the public resolver facade."""
+    if name == "ResolvedVacuumSettings":
+        from bioetl.composition.runtime_builders.inputs_runtime_models import (
+            ResolvedVacuumSettings,
+        )
+
+        return ResolvedVacuumSettings
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def prepare_runner_inputs(

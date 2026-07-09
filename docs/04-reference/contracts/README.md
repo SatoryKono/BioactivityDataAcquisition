@@ -7,21 +7,28 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-01'
+  Last verified: '2026-07-06'
 
 ______________________________________________________________________
 
 # Contracts Registry
 
-Domain schemas в `src/bioetl/domain/schemas/` — **source of truth** для
-контрактов всех слоёв (Pandera DataFrameModel). JSON-экспорты в
-`docs/04-reference/contracts/gold/*.json` являются сгенерированными артефактами для
-публикации и обзора.
+BioETL deliberately splits contract ownership by surface:
+
+- Silver/runtime structural schemas use `src/bioetl/domain/schemas/` Pandera
+  `DataFrameModel` classes plus `configs/entities/**` field composition.
+- Gold validation contracts use `src/bioetl/domain/contracts/gold/**`.
+- DQ/data-contract routing uses `configs/contracts/**`.
+
+JSON-экспорты в `docs/04-reference/contracts/gold/*.json` являются
+сгенерированными артефактами Gold-контрактов для публикации и обзора.
 
 Текущий published contract pack должен оставаться согласованным с live code и
 config surfaces:
 
-- Domain schemas: `src/bioetl/domain/schemas/` (Pandera DataFrameModel contracts)
+- Silver/runtime schemas: `src/bioetl/domain/schemas/` (Pandera
+  `DataFrameModel` contracts)
+- Gold domain contracts: `src/bioetl/domain/contracts/gold/`
 - Contract configs: `configs/contracts/**`
 - Control-plane domain models and ports:
   `src/bioetl/domain/control_plane/`,
@@ -75,9 +82,12 @@ runbook остаются supported.
 
 Правило синхронизации:
 
-- изменения в `src/bioetl/domain/schemas/` выполняются в коде;
-- после изменения схем необходимо перегенерировать exported JSON;
-- parity-check между кодом и exported JSON не должен допускать расхождений по `name/type/nullable/description`.
+- изменения Silver/runtime schemas выполняются в `src/bioetl/domain/schemas/`
+  и связанных `configs/entities/**`;
+- изменения Gold schemas выполняются в `src/bioetl/domain/contracts/gold/`;
+- после изменения Gold contracts необходимо перегенерировать exported JSON;
+- parity-check между Gold contract code и exported JSON не должен допускать
+  расхождений по `name/type/nullable/description`.
 
 ## Published Surface Hygiene
 

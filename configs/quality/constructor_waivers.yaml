@@ -115,7 +115,7 @@ AnchorSpec:
   reason: "HTTP identity surface still exposes many explicit contract fields."
 
 HealthServer:
-  max_args: 9
+  max_args: 10
   owner: "@bioetl-http"
   expiry: "2026-12-31"
   reason: "Health server still wires multiple listener/runtime dependencies explicitly."

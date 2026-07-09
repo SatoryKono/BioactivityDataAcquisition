@@ -25,6 +25,12 @@
   "parameter_taxonomy": {
     "classification_mode": "derived_from_flattened_config_parameter_paths",
     "default_group": "domain_entity_contract",
+    "evolution_policy": {
+      "alias_registry": "configs/quality/config_compatibility_registry.yaml",
+      "blocking_issue_budget": 0,
+      "compatibility_preserving_changes": "registered_alias_or_migration_entry_required",
+      "contract_registry_diagnostics": "reports/quality/contract-registry-diagnostics.json"
+    },
     "families": {
       "composite_runtime": {
         "examples": {
@@ -68,6 +74,38 @@
             "composite.execution.retry",
             "composite.execution.retry.backoff_multiplier"
           ]
+        },
+        "group_owner_map": {
+          "domain_entity_contract": {
+            "change_policy": "contract_registry_or_schema_review_required",
+            "owner": "contract-governance",
+            "rationale": "Entity and composite contract parameters define runtime data shape and must evolve through contract ownership."
+          },
+          "dq_validation": {
+            "change_policy": "dq_contract_review_required",
+            "owner": "data-quality-governance",
+            "rationale": "DQ and schema validation parameters own acceptance criteria."
+          },
+          "medallion_write_policy": {
+            "change_policy": "storage_contract_review_required",
+            "owner": "storage-platform",
+            "rationale": "Bronze/Silver/Gold write settings affect persisted layout."
+          },
+          "provider_source_access": {
+            "change_policy": "provider_contract_review_required",
+            "owner": "provider-adapter-governance",
+            "rationale": "Provider request, pagination, and rate-limit settings own API access."
+          },
+          "replay_provenance": {
+            "change_policy": "replay_contract_review_required",
+            "owner": "control-plane-replay-governance",
+            "rationale": "Manifest, ledger, lineage, and snapshot parameters affect replay evidence."
+          },
+          "runtime_control_plane": {
+            "change_policy": "runtime_control_plane_review_required",
+            "owner": "runtime-orchestration",
+            "rationale": "Execution, checkpoint, lock, and scheduling knobs govern runtime behavior."
+          }
         },
         "groups": {
           "domain_entity_contract": 100,
@@ -125,6 +163,38 @@
             "pipeline.business_primary_keys"
           ]
         },
+        "group_owner_map": {
+          "domain_entity_contract": {
+            "change_policy": "contract_registry_or_schema_review_required",
+            "owner": "contract-governance",
+            "rationale": "Entity and composite contract parameters define runtime data shape and must evolve through contract ownership."
+          },
+          "dq_validation": {
+            "change_policy": "dq_contract_review_required",
+            "owner": "data-quality-governance",
+            "rationale": "DQ and schema validation parameters own acceptance criteria."
+          },
+          "medallion_write_policy": {
+            "change_policy": "storage_contract_review_required",
+            "owner": "storage-platform",
+            "rationale": "Bronze/Silver/Gold write settings affect persisted layout."
+          },
+          "provider_source_access": {
+            "change_policy": "provider_contract_review_required",
+            "owner": "provider-adapter-governance",
+            "rationale": "Provider request, pagination, and rate-limit settings own API access."
+          },
+          "replay_provenance": {
+            "change_policy": "replay_contract_review_required",
+            "owner": "control-plane-replay-governance",
+            "rationale": "Manifest, ledger, lineage, and snapshot parameters affect replay evidence."
+          },
+          "runtime_control_plane": {
+            "change_policy": "runtime_control_plane_review_required",
+            "owner": "runtime-orchestration",
+            "rationale": "Execution, checkpoint, lock, and scheduling knobs govern runtime behavior."
+          }
+        },
         "groups": {
           "domain_entity_contract": 36,
           "dq_validation": 57,
@@ -139,7 +209,49 @@
         "unclassified_parameters": []
       }
     },
+    "group_owner_map": {
+      "compatibility_legacy": {
+        "change_policy": "explicit_registry_entry_required",
+        "owner": "config-governance",
+        "rationale": "Compatibility-preserving config aliases and migrations must be registered before they are accepted."
+      },
+      "domain_entity_contract": {
+        "change_policy": "contract_registry_or_schema_review_required",
+        "owner": "contract-governance",
+        "rationale": "Entity and composite contract parameters define runtime data shape and must evolve through contract ownership."
+      },
+      "dq_validation": {
+        "change_policy": "dq_contract_review_required",
+        "owner": "data-quality-governance",
+        "rationale": "DQ and schema validation parameters own acceptance criteria."
+      },
+      "medallion_write_policy": {
+        "change_policy": "storage_contract_review_required",
+        "owner": "storage-platform",
+        "rationale": "Bronze/Silver/Gold write settings affect persisted layout."
+      },
+      "observability": {
+        "change_policy": "telemetry_contract_review_required",
+        "owner": "observability-governance",
+        "rationale": "Metric, logging, tracing, and health knobs affect telemetry contracts."
+      },
+      "provider_source_access": {
+        "change_policy": "provider_contract_review_required",
+        "owner": "provider-adapter-governance",
+        "rationale": "Provider request, pagination, and rate-limit settings own API access."
+      },
+      "replay_provenance": {
+        "change_policy": "replay_contract_review_required",
+        "owner": "control-plane-replay-governance",
+        "rationale": "Manifest, ledger, lineage, and snapshot parameters affect replay evidence."
+      },
+      "runtime_control_plane": {
+        "change_policy": "runtime_control_plane_review_required",
+        "owner": "runtime-orchestration",
+        "rationale": "Execution, checkpoint, lock, and scheduling knobs govern runtime behavior."
+      }
+    },
     "owner": "BioETL Team"
   },
-  "snapshot_date": "2026-07-04"
+  "snapshot_date": "2026-07-08"
 }

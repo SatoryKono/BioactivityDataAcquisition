@@ -53,6 +53,11 @@ class _FakeWorkflowRunnerService:
                     status="success",
                 ),
                 WorkflowStepExecutionResult(
+                    step_id="chembl_target_ingest",
+                    step_kind="pipeline",
+                    status="success",
+                ),
+                WorkflowStepExecutionResult(
                     step_id="summarize_core_extracts",
                     step_kind="transform",
                     status="success",
@@ -172,6 +177,15 @@ def test_workflow_status_renders_chembl_baseline_topology_without_history(
         "reconcile_assay_target_orphans [transform] transform=reconcile_foreign_keys "
         "depends_on=run_chembl_assay, run_chembl_target"
     ) in result.output
+    assert (
+        "reconcile_target_assay_orphans [transform] transform=reconcile_foreign_keys "
+        "depends_on=reconcile_assay_publication_orphans"
+    ) in result.output
+    assert (
+        "reconcile_publication_assay_orphans [transform] "
+        "transform=reconcile_foreign_keys "
+        "depends_on=reconcile_target_assay_orphans"
+    ) in result.output
 
 
 def test_workflow_run_dry_run_smoke_uses_canonical_example_without_network(
@@ -217,6 +231,7 @@ def test_workflow_run_dry_run_smoke_uses_canonical_example_without_network(
     assert step_ids == (
         "chembl_activity_ingest",
         "chembl_assay_ingest",
+        "chembl_target_ingest",
         "summarize_core_extracts",
     )
     pipeline_steps = [

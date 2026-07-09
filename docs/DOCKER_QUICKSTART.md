@@ -27,7 +27,7 @@ helper compose files остаются optional local-only adjunct tooling и MUS
 ## ✅ Что настроено
 
 - ✓ `.env.example` как шаблон переменных окружения; `.env` является local-only/secret-bearing файлом и не создается автоматически
-- ✓ `docker-compose.yml` - основной стек (Neo4j + BioETL)
+- ✓ `docker-compose.yml` - optional local helper stack (Neo4j + BioETL)
 - ✓ `docker-compose.monitoring.yml` - мониторинг (Prometheus, Grafana, Loki, Tempo)
 - ✓ `docker-compose.codex.yml` - MCP серверы для Codex
 - ✓ Dockerfile для BioETL (multi-stage build)
@@ -47,7 +47,7 @@ docker ps
 # или используйте Windows Search: Docker Desktop
 ```
 
-### 2. Запустите основной стек
+### 2. Запустите optional helper stack
 
 Если локального `.env` еще нет, создайте его вручную только после явного решения:
 
@@ -66,10 +66,10 @@ docker network create bioetl-monitoring
 docker compose up -d
 ```
 
-**Что запустится:**
+**Что запустится в optional helper stack:**
 - Neo4j База данных на порту 7687 (bolt)
 - Neo4j Browser на порту 7474
-- BioETL приложение на порту 8081
+- BioETL quarantine/health helper surface на порту 8081
 
 ### 3. (Опционально) Запустите мониторинг
 
@@ -106,7 +106,7 @@ files manually on a fresh machine, create the required network first.
 ## 📋 Основные команды
 
 ```powershell
-# Запустить все (основной стек)
+# Запустить optional helper stack
 docker compose up -d
 
 # Остановить
@@ -238,7 +238,7 @@ docker compose up --build -d
 
 ## ✨ Что дальше
 
-1. **Запустите основной стек**
+1. **Запустите optional helper stack**
    ```powershell
    docker compose up -d
    ```

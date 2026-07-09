@@ -109,6 +109,7 @@ def _create_pipeline_yaml_config(
 def _configure_registry_with_runner(
     mock_create_registry: MagicMock,
     *,
+    registered_pipelines: tuple[str, ...] = (),
     runner: object | None = None,
 ) -> tuple[MagicMock, MagicMock, object]:
     """Wire registry.get(...).factory.create_runner(...) to a provided runner."""
@@ -116,7 +117,7 @@ def _configure_registry_with_runner(
     factory = MagicMock()
     factory.create_runner.return_value = effective_runner
     registry = MagicMock()
-    registry.list_pipelines.return_value = []
+    registry.list_pipelines.return_value = list(registered_pipelines)
     registry.get.return_value.factory = factory
     mock_create_registry.return_value = registry
     return registry, factory, effective_runner
@@ -268,7 +269,10 @@ class TestBootstrapPipeline:
         mock_pipeline_loader = MagicMock()
         mock_pipeline_loader.return_value = _create_pipeline_yaml_config()
         mock_create_pipeline_loader.return_value = mock_pipeline_loader
-        _, _, mock_runner = _configure_registry_with_runner(mock_create_registry)
+        _, _, mock_runner = _configure_registry_with_runner(
+            mock_create_registry,
+            registered_pipelines=("chembl_activity",),
+        )
 
         ctx = _create_pipeline_context()
 
@@ -411,7 +415,10 @@ class TestBootstrapVacuumConfig:
         )
         mock_create_pipeline_loader.return_value = mock_pipeline_loader
 
-        _, mock_factory, _ = _configure_registry_with_runner(mock_create_registry)
+        _, mock_factory, _ = _configure_registry_with_runner(
+            mock_create_registry,
+            registered_pipelines=("chembl_activity",),
+        )
 
         # Context without CLI vacuum options (disabled VacuumSettings)
         ctx = _create_pipeline_context()
@@ -497,7 +504,10 @@ class TestBootstrapVacuumConfig:
         )
         mock_create_pipeline_loader.return_value = mock_pipeline_loader
 
-        _, mock_factory, _ = _configure_registry_with_runner(mock_create_registry)
+        _, mock_factory, _ = _configure_registry_with_runner(
+            mock_create_registry,
+            registered_pipelines=("chembl_activity",),
+        )
 
         # Context with CLI overrides (explicit enabled=True and 30 days)
         # Note: enabled=True means CLI is overriding, so its retention_days is used

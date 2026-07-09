@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-09'
+  Last verified: '2026-07-07'
 
 ______________________________________________________________________
 
 # Operations Documentation
 
-*Synced with RULES.md v6.1.3 (2026-04-29)*
+*Synced with RULES.md v6.1.4 (2026-07-07)*
 
 > Runtime profile: Local-Only single-instance (ADR-010), local filesystem storage, `MemoryLock`.
 

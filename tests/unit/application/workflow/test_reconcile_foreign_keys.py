@@ -39,6 +39,9 @@ class _RecordingPort:
             retained_rows=2,
             orphan_rows_deleted=1,
             mutated=True,
+            source_layer=request.source_layer,
+            reference_layer=request.reference_layer,
+            mutation_layer=request.effective_mutation_layer,
             dry_run=request.dry_run,
             would_mutate=False,
         )
@@ -72,6 +75,9 @@ class _WouldMutatePort:
             retained_rows=5,
             orphan_rows_deleted=0,
             mutated=False,
+            source_layer=request.source_layer,
+            reference_layer=request.reference_layer,
+            mutation_layer=request.effective_mutation_layer,
             dry_run=True,
             would_mutate=True,
         )
@@ -102,6 +108,35 @@ def test_build_request_supports_composite_keys_and_null_policy() -> None:
     assert request.effective_reference_keys == ("target_id", "target_type")
     assert request.nulls_equal is True
     assert request.dry_run is False
+    assert request.source_layer == "silver"
+    assert request.reference_layer == "silver"
+    assert request.effective_mutation_layer == "silver"
+
+
+def test_build_request_parses_gold_layers() -> None:
+    spec = WorkflowTransformSpec.from_step(
+        TransformStepConfig(
+            step_id="reconcile_assay_target_orphans",
+            transform_name="reconcile_foreign_keys",
+            config={
+                "source_layer": "gold",
+                "reference_layer": "gold",
+                "mutation_layer": "gold",
+                "source_table": "chembl.assay",
+                "reference_table": "chembl.target",
+                "source_key": "target_id",
+                "reference_key": "target_id",
+                "primary_keys": ["assay_id"],
+                "action": "delete_orphans",
+            },
+        )
+    )
+
+    request = _build_request(spec)
+
+    assert request.source_layer == "gold"
+    assert request.reference_layer == "gold"
+    assert request.effective_mutation_layer == "gold"
 
 
 def test_build_request_requires_delete_orphans_action() -> None:
@@ -140,7 +175,7 @@ def test_build_request_requires_non_empty_primary_keys() -> None:
         )
     )
 
-    with pytest.raises(ValueError, match="requires config.primary_keys"):
+    with pytest.raises(ValueError, match=r"requires config.primary_keys"):
         _build_request(spec)
 
 
@@ -208,10 +243,17 @@ async def test_executor_returns_serializable_metadata_only() -> None:
     assert payload == {
         "transform_name": "reconcile_foreign_keys",
         "fingerprint": spec.fingerprint,
+        "workflow_name": None,
+        "workflow_run_id": None,
+        "manifest_id": None,
+        "step_id": "reconcile_assay_target_orphans",
         "source_table": "chembl_assay",
         "reference_table": "chembl_target",
         "source_key": "target_id",
         "reference_key": "target_id",
+        "source_layer": "silver",
+        "reference_layer": "silver",
+        "mutation_layer": "silver",
         "source_keys": ["target_id"],
         "reference_keys": ["target_id"],
         "action": "delete_orphans",
@@ -222,6 +264,10 @@ async def test_executor_returns_serializable_metadata_only() -> None:
         "mutated": True,
         "dry_run": False,
         "would_mutate": False,
+        "mutation_mode": "unknown",
+        "quarantine_batch_id": None,
+        "quarantine_rows_written": 0,
+        "quarantine_error_code": None,
     }
 
 
@@ -290,6 +336,8 @@ async def test_executor_passes_workflow_name_to_request() -> None:
 
     assert port.request is not None
     assert port.request.workflow_name == "chembl_baseline"
+    assert port.request.step_id == "reconcile_assay_target_orphans"
+    assert port.request.transform_name == "reconcile_foreign_keys"
 
 
 @pytest.mark.asyncio

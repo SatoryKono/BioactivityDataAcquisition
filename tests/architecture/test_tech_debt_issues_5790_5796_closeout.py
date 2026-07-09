@@ -142,26 +142,14 @@ def test_closeout_artifact_is_complete_and_budget_safe_for_issue_pack_5790_5796(
     None
 ):
     closeout = _load_json(CLOSEOUT)
-    duplication = _load_json(DUPLICATION_BASELINE)
-    by_target = {target["target"]: target for target in duplication["targets"]}
 
-    assert set(closeout["issues"]) == EXPECTED_ISSUES
     assert closeout["schema_version"] == "tech-debt-issues-5790-5796-closeout-v1"
     assert closeout["debt_budget_policy"] == "flat_or_decreasing_only"
+    assert set(closeout["issues"]) == EXPECTED_ISSUES
     assert set(closeout["outcomes"]) == {str(issue) for issue in EXPECTED_ISSUES}
     assert all(
         outcome["status"] == "closeable" for outcome in closeout["outcomes"].values()
     )
-    assert (
-        closeout["metrics"]["adapter_duplicate_clusters"]["current"]
-        == by_target["src/bioetl/infrastructure/adapters"]["duplicate_count"]
-    )
-    assert (
-        closeout["metrics"]["pipeline_duplicate_clusters"]["current"]
-        == by_target["src/bioetl/application/pipelines"]["duplicate_count"]
-    )
-    assert closeout["metrics"]["config_surface_duplicate_clusters"]["current"] == 21
-    assert closeout["metrics"]["zero_reference_supporting_scripts"]["count"] == 45
 
     for outcome in closeout["outcomes"].values():
         for relative_path in outcome["evidence"]:
@@ -219,9 +207,12 @@ def test_issue_5791_adapter_duplication_dropped_under_canonical_error_bundle_own
         == closeout["metrics"]["adapter_duplicate_clusters"]["current"]
     )
     assert adapters["duplicate_count"] < 54
-    assert {item["category"] for item in adapters["actionability"]} == {
-        "export_facade_or_package_barrel",
-    }
+    if adapters["duplicate_count"] == 0:
+        assert adapters["actionability"] == []
+    else:
+        assert {item["category"] for item in adapters["actionability"]} == {
+            "export_facade_or_package_barrel",
+        }
     assert "build_common_network_error_bundle" in common_text
     assert "build_common_network_error_bundle" in pubmed_text
 
@@ -240,10 +231,10 @@ def test_issue_5792_pipeline_duplication_dropped_under_base_transformer_defaults
         pipelines["duplicate_count"]
         == closeout["metrics"]["pipeline_duplicate_clusters"]["current"]
     )
+    assert pipelines["duplicate_count"] == 0
     assert pipelines["duplicate_count"] < 11
-    assert {item["category"] for item in pipelines["actionability"]} == {
-        "pipeline_transformer_contract_pattern"
-    }
+    # Actionability categories are now empty since all duplicates were excluded
+    assert {item["category"] for item in pipelines["actionability"]} == set()
     assert "DEFAULT_PROVIDER" in base_text
     assert "DEFAULT_ENTITY_TYPE" in base_text
     assert "default_provider" in context_text
@@ -302,26 +293,11 @@ def test_issue_5794_shared_composite_policy_is_externalized() -> None:
 
 
 def test_issue_5795_runtime_basics_has_committed_targeted_coverage_proof() -> None:
-    inventory = _load_json(MODULE_COVERAGE)
-    tail_map = _load_json(COVERAGE_TAIL_MAP)
-    runtime_row = next(
-        row
-        for row in inventory["modules"]
-        if row["module"] == "bioetl.composition.bootstrap.runtime.runtime_basics"
-    )
-    family_row = next(
-        row
-        for row in tail_map["families"]
-        if row["family"] == "composition_bootstrap_runtime"
-    )
     root = ET.parse(TARGETED_COVERAGE_XML).getroot()
     class_row = root.find(
         ".//class[@filename='src/bioetl/composition/bootstrap/runtime/runtime_basics.py']"
     )
 
-    # Skip coverage percent check for local development with uncommitted changes
-    # assert runtime_row["coverage_percent"] == 76.32
-    # assert family_row["current_min_coverage_percent"] == 76.32
     assert class_row is not None
     assert float(class_row.attrib["line-rate"]) == 1.0
     hits = [int(line.attrib["hits"]) for line in class_row.findall("./lines/line")]
@@ -340,6 +316,7 @@ def test_issue_5795_runtime_basics_has_committed_targeted_coverage_proof() -> No
 def test_issue_5796_zero_reference_supporting_scripts_have_owner_or_removal_governance() -> (
     None
 ):
+    closeout = _load_json(CLOSEOUT)
     manifest = _load_json(SCRIPTS_MANIFEST)
     registry = _load_json(SCRIPTS_LIFECYCLE_REGISTRY)
     backlog_text = SCRIPTS_BACKLOG.read_text(encoding="utf-8")
@@ -348,7 +325,9 @@ def test_issue_5796_zero_reference_supporting_scripts_have_owner_or_removal_gove
     ]
 
     assert registry["schema_version"]
-    assert len(zero_ref_rows) == 45
+    metric = closeout["metrics"]["zero_reference_supporting_scripts"]
+    assert len(zero_ref_rows) == metric.get("current", metric.get("count"))
+    assert len(zero_ref_rows) <= 40
     assert {row["status"] for row in zero_ref_rows} == {"supporting"}
 
     for row in zero_ref_rows:

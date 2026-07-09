@@ -6,7 +6,6 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 
-from bioetl.application.runtime_clock import RuntimeClockService
 from bioetl.application.services.control_plane.replay.historical_closure_models import (
     RESIDUAL_BLOCKED_STATUSES,
     HistoricalReplayClaimScopeMode,
@@ -37,7 +36,7 @@ class HistoricalReplayClosureService:
     """Build closure artifacts and claim-gate verdicts for retained corpora."""
 
     corpus_service: HistoricalReplayCorpusService
-    now_factory: Callable[[], datetime] = RuntimeClockService().now
+    now_factory: Callable[[], datetime]
 
     def build_closure_report(
         self,

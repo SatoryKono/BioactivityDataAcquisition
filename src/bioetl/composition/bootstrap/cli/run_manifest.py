@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from bioetl.application.runtime_clock import current_utc_time
 from bioetl.application.services.control_plane.forensic import (
     ForensicRunDiffService,
 )
@@ -151,6 +152,7 @@ def bootstrap_historical_replay_closure_service() -> HistoricalReplayClosureServ
     )
     return HistoricalReplayClosureService(
         corpus_service=corpus_service,
+        now_factory=current_utc_time,
     )
 
 
@@ -172,6 +174,7 @@ def bootstrap_historical_replay_universe_service() -> HistoricalReplayUniverseSe
     )
     return HistoricalReplayUniverseService(
         corpus_service=corpus_service,
+        now_factory=current_utc_time,
     )
 
 

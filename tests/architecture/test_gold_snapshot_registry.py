@@ -63,3 +63,14 @@ class TestGoldSnapshotRegistry:
             assert (ROOT / relative_path).exists(), (
                 f"Gold DQ snapshot is missing: {relative_path}"
             )
+
+    def test_gold_snapshot_docs_reject_blanket_dq_bundle_expansion(self) -> None:
+        registry_meta = _gold_registry_from_matrix()
+        docs_path = ROOT / cast(str, registry_meta["documentation"])
+        text = docs_path.read_text(encoding="utf-8")
+
+        assert "DQ bundle coverage policy is intentionally bounded" in text
+        assert "blanket snapshot-expansion policy" in text
+        assert "adding a new Gold bundle requires registry" in text
+        assert "not for every Gold" in text
+        assert "entity in `entities`" in text

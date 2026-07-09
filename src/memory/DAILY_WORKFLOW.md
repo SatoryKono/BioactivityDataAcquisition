@@ -149,7 +149,10 @@ preserve `PYTHONDONTWRITEBYTECODE=1`.
 Set `--validation-timeout-seconds 0` only when you intentionally want the
 workflow to wait for a full in-process validation scan regardless of duration.
 Set `--refresh-timeout-seconds 0` only when you intentionally want post-task
-refresh to run in-process without the CLI subprocess timeout.
+refresh to run in-process without the CLI subprocess timeout. The CLI default
+post-task refresh timeout is `120` seconds so cold mounted or cloud-synced
+checkouts can finish bounded workflow-scope RAG and timeline refresh before the
+workflow returns a degraded payload.
 
 For a lightweight health check that exercises pre-task and post-task without
 committing rebuild-only artifacts:

@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-03'
+  Last verified: '2026-07-06'
 
 ______________________________________________________________________
 
@@ -15,7 +15,9 @@ ______________________________________________________________________
 
 Current source of truth:
 
-- Contract YAML: `configs/contracts/**/*.yaml`
+- Entity data contract YAML:
+  `configs/contracts/{chembl,composite,crossref,openalex,pubchem,pubmed,semanticscholar,uniprot}/*.yaml`
+- Error catalog contract: `configs/contracts/errors/error_catalog.yaml`
 - Entity config schemas: `configs/entities/**/*.yaml`
 - Gold domain contracts: `src/bioetl/domain/contracts/gold/`
 - Contract identity model: `src/bioetl/domain/types/contract_identity.py`
@@ -28,8 +30,10 @@ Current source of truth:
 
 ## Contract Inventory
 
-There are 27 active YAML data contracts, aligned one-to-one with the 27 entity
-pipeline configs.
+There are 27 active YAML entity data contracts, aligned one-to-one with the 27
+entity pipeline configs. The error catalog at
+`configs/contracts/errors/error_catalog.yaml` is a separate error-code taxonomy
+contract and is not counted in the 27 entity data contracts.
 
 | Provider | Contracts |
 | --- | --- |
@@ -46,7 +50,8 @@ pipeline configs.
 
 ```mermaid
 flowchart LR
-    ContractYaml["configs/contracts/**/*.yaml"]
+    ContractYaml["entity contract YAML"]
+    ErrorCatalog["error catalog contract"]
     EntityYaml["configs/entities/**/*.yaml"]
     Loader["infrastructure config loaders"]
     Policy["ContractRolloutPolicy / ContractIdentity"]
@@ -56,6 +61,7 @@ flowchart LR
     DQ["DQ contract policy"]
 
     ContractYaml --> Loader
+    ErrorCatalog --> Loader
     EntityYaml --> Loader
     Loader --> Policy
     Policy --> Pipeline

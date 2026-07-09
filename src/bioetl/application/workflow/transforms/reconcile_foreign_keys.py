@@ -4,6 +4,10 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
+from bioetl.application.services.workflow_transform_artifacts import (
+    WorkflowTransformArtifactContext,
+    artifact_refs_as_dicts,
+)
 from bioetl.application.workflow.transforms import WorkflowTransformRuntimeContext
 from bioetl.domain.ports import (
     ForeignKeyReconciliationPort,
@@ -39,15 +43,30 @@ def build_reconcile_foreign_keys_executor(
             spec,
             dry_run=context_dry_run,
             workflow_name=workflow_name,
+            workflow_run_id=_optional_runtime_str(runtime_context, "workflow_run_id"),
+            manifest_id=_optional_runtime_str(runtime_context, "manifest_id"),
+            debug_export_enabled=(
+                bool(getattr(runtime_context, "debug_export_enabled", False))
+                if runtime_context is not None
+                else False
+            ),
+            debug_export_dir=_optional_runtime_str(runtime_context, "debug_export_dir"),
         )
         result = await reconciliation_port.reconcile_foreign_keys(request)
         payload = {
             "transform_name": spec.transform_name,
             "fingerprint": spec.fingerprint,
+            "workflow_name": workflow_name,
+            "workflow_run_id": request.workflow_run_id,
+            "manifest_id": request.manifest_id,
+            "step_id": spec.step_id,
             "source_table": result.source_table,
             "reference_table": result.reference_table,
             "source_key": result.source_key,
             "reference_key": result.reference_key,
+            "source_layer": result.source_layer,
+            "reference_layer": result.reference_layer,
+            "mutation_layer": result.mutation_layer,
             "source_keys": list(request.source_keys or (request.source_key,)),
             "reference_keys": list(request.reference_keys or (request.reference_key,)),
             "action": result.action,
@@ -58,6 +77,10 @@ def build_reconcile_foreign_keys_executor(
             "mutated": result.mutated,
             "dry_run": result.dry_run,
             "would_mutate": result.would_mutate,
+            "mutation_mode": result.mutation_mode,
+            "quarantine_batch_id": result.quarantine_batch_id,
+            "quarantine_rows_written": result.quarantine_rows_written,
+            "quarantine_error_code": result.quarantine_error_code,
         }
         if result.dry_run and result.would_mutate:
             payload["mutation_blocked_reason"] = "workflow_dry_run"
@@ -73,6 +96,13 @@ def build_reconcile_foreign_keys_executor(
                 fingerprint=spec.fingerprint,
                 details=payload,
             )
+        artifact_refs = _persist_reconcile_result_artifact(
+            runtime_context,
+            spec=spec,
+            payload=payload,
+        )
+        if artifact_refs:
+            payload["artifact_refs"] = list(artifact_refs)
         return payload
 
     return _executor
@@ -83,6 +113,10 @@ def _build_request(
     *,
     dry_run: bool = False,
     workflow_name: str | None = None,
+    workflow_run_id: str | None = None,
+    manifest_id: str | None = None,
+    debug_export_enabled: bool = False,
+    debug_export_dir: str | None = None,
 ) -> ForeignKeyReconciliationRequest:
     config = spec.config or {}
     source_table = _required_str(config, "source_table")
@@ -99,12 +133,71 @@ def _build_request(
         reference_key=reference_key,
         primary_keys=primary_keys,
         action="delete_orphans",
+        source_layer=_optional_layer(config, "source_layer", default="silver"),
+        reference_layer=_optional_layer(config, "reference_layer", default="silver"),
+        mutation_layer=_optional_layer(config, "mutation_layer", default=None),
         source_keys=source_keys,
         reference_keys=reference_keys,
         nulls_equal=bool(config.get("nulls_equal", False)),
         dry_run=dry_run,
         workflow_name=workflow_name,
+        workflow_run_id=workflow_run_id,
+        manifest_id=manifest_id,
+        step_id=spec.step_id,
+        transform_name=spec.transform_name,
+        debug_export_enabled=debug_export_enabled,
+        debug_export_dir=debug_export_dir,
     )
+
+
+def _optional_runtime_str(
+    runtime_context: WorkflowTransformRuntimeContext | None,
+    attribute_name: str,
+) -> str | None:
+    if runtime_context is None:
+        return None
+    value = getattr(runtime_context, attribute_name, None)
+    return None if value is None else str(value)
+
+
+def _persist_reconcile_result_artifact(
+    runtime_context: WorkflowTransformRuntimeContext | None,
+    *,
+    spec: WorkflowTransformSpec,
+    payload: Mapping[str, object],
+) -> tuple[dict[str, object], ...]:
+    if runtime_context is None:
+        return ()
+    sink = getattr(runtime_context, "artifact_sink", None)
+    if sink is None:
+        return ()
+    workflow_name = getattr(runtime_context, "workflow_name", None)
+    workflow_run_id = getattr(runtime_context, "workflow_run_id", None)
+    manifest_id = getattr(runtime_context, "manifest_id", None)
+    if workflow_name is None or workflow_run_id is None or manifest_id is None:
+        return ()
+    writer = getattr(sink, "write_reconcile_result_artifact", None)
+    if not callable(writer):
+        return ()
+    refs = writer(
+        context=WorkflowTransformArtifactContext(
+            workflow_name=str(workflow_name),
+            workflow_run_id=str(workflow_run_id),
+            manifest_id=str(manifest_id),
+            step_id=spec.step_id,
+            transform_name=spec.transform_name,
+            debug_export_enabled=bool(
+                getattr(runtime_context, "debug_export_enabled", False)
+            ),
+            debug_export_dir=_optional_runtime_str(
+                runtime_context,
+                "debug_export_dir",
+            ),
+            created_at=getattr(runtime_context, "created_at", None),
+        ),
+        payload=payload,
+    )
+    return artifact_refs_as_dicts(tuple(refs))
 
 
 def _require_delete_orphans_action(config: Mapping[str, object]) -> None:
@@ -158,6 +251,23 @@ def _required_str(config: Mapping[str, object], key: str) -> str:
     if value is None or not str(value).strip():
         raise ValueError(f"reconcile_foreign_keys requires config.{key}")
     return str(value).strip()
+
+
+def _optional_layer(
+    config: Mapping[str, object],
+    key: str,
+    *,
+    default: str | None,
+) -> str | None:
+    value = config.get(key, default)
+    if value is None:
+        return None
+    rendered = str(value).strip().lower()
+    if rendered not in {"silver", "gold"}:
+        raise ValueError(
+            f"reconcile_foreign_keys requires config.{key} as 'silver' or 'gold'"
+        )
+    return rendered
 
 
 def _optional_key_tuple(

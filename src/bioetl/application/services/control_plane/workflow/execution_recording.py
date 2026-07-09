@@ -14,6 +14,7 @@ from bioetl.application.services.control_plane.workflow.execution_recording_payl
     _fingerprint_details,
     _resolve_result_fingerprint,
     _workflow_failure_message,
+    build_step_completion_details,
 )
 from bioetl.application.services.control_plane.workflow.execution_recording_state import (
     _apply_completed_step_state,
@@ -109,7 +110,7 @@ def record_step_completed(
         status=result.status,
         message=result.error_message,
         error_type=result.error_type,
-        details=_fingerprint_details(fingerprint),
+        details=build_step_completion_details(result),
     )
     if result.error_type == "AlreadyCompletedOnResume":
         context.state = replace(

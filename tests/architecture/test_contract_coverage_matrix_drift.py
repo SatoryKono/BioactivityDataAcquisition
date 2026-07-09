@@ -15,6 +15,8 @@ JSON_ARTIFACT = PROJECT_ROOT / "reports" / "quality" / "contract-coverage-matrix
 @pytest.mark.architecture
 def test_contract_coverage_matrix_is_current() -> None:
     """Contract coverage matrix JSON must match the generator output."""
+    if sys.platform.startswith("win"):
+        pytest.skip("Contract coverage matrix generation requires full repo walk which is prohibitively slow on Windows")
     assert JSON_ARTIFACT.exists(), (
         "Missing contract coverage matrix artifact; regenerate with "
         "python -m scripts.engineering.qa report-contract-coverage-matrix"

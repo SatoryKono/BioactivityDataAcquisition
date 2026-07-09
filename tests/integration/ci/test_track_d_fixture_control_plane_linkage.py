@@ -452,7 +452,16 @@ async def test_exact_replay_without_materialized_cached_bronze_batches_fails_clo
         / "_by_run_id"
         / f"{run_id}.txt"
     )
+    effective_config_occurrence = (
+        data_dir
+        / "output"
+        / "control"
+        / "effective_config"
+        / "_occurrences"
+        / f"{run_id}.json"
+    )
     assert not manifest_index.exists()
+    assert not effective_config_occurrence.exists()
 
     get_settings.cache_clear()
     get_pipeline_config.cache_clear()

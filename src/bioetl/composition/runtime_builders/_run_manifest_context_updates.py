@@ -6,11 +6,9 @@ from collections.abc import Mapping
 from typing import TYPE_CHECKING
 
 from bioetl.composition.runtime_builders._run_manifest_identity_ref_values import (
-    build_control_plane_identity_ref_values,
-)
-from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
     CONTRACT_IDENTITY_FIELD_NAMES,
     build_contract_identity_field_values_from_mapping,
+    build_control_plane_identity_ref_values,
 )
 from bioetl.domain.normalization import normalize_runtime_anchor_payload
 

@@ -98,11 +98,10 @@ def sort_columns(
 ) -> list[str]:
     """Sort columns with either seed-first or enricher-first strategy."""
 
-    def sort_key(col: str) -> int:
+    def sort_key(col: str) -> tuple[int, str]:
         is_seed = bool(seed_prefix_value and col.startswith(seed_prefix_value))
-        if prefer_seed:
-            return 0 if is_seed else 1
-        return 1 if is_seed else 0
+        priority = (0 if is_seed else 1) if prefer_seed else 1 if is_seed else 0
+        return (priority, col)
 
     return sorted(columns, key=sort_key)
 

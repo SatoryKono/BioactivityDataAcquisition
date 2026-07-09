@@ -6,6 +6,7 @@ from datetime import datetime
 
 from bioetl.domain.types import GoldRecord, RunID, ScdConfig
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
+from bioetl.infrastructure.storage.gold.pipeline_helpers import GoldWriteRequest
 
 __all__ = ["_build_gold_write_request"]
 
@@ -26,10 +27,6 @@ def _build_gold_write_request(
     contract_version: str | None = None,
 ) -> object:
     """Build the canonical Gold write request."""
-    from bioetl.infrastructure.storage.gold.pipeline_helpers import (
-        GoldWriteRequest,
-    )
-
     return GoldWriteRequest(
         table_name=table_name,
         records=records,

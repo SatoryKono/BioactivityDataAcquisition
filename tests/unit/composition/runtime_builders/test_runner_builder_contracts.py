@@ -3,20 +3,26 @@
 from __future__ import annotations
 
 import ast
-import inspect
 import sys
 from pathlib import Path
 from types import ModuleType
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
 
+from bioetl.composition.runtime_builders._runner_control_plane_artifact_policy import (
+    requires_artifact_publication_closure,
+    validate_artifact_recorder_attachment,
+)
+from bioetl.composition.runtime_builders._runner_control_plane_data_root_policy import (
+    validate_strict_data_root_policy,
+)
 from bioetl.composition.runtime_builders import inputs_runtime_assembly
 from bioetl.composition.runtime_builders import inputs_resolver
 from bioetl.composition.runtime_builders import runner_builder
 from bioetl.composition.runtime_builders import runner_control_plane_assembly
 from bioetl.composition.runtime_builders import runner_input_assembly
-from bioetl.composition.runtime_builders import runner_builder_wiring
 
 pytestmark = pytest.mark.unit
 
@@ -70,6 +76,104 @@ def test_runner_builder_uses_dedicated_control_plane_assembler() -> None:
     assert not hasattr(runner_builder, "_handle_control_plane_setup")
 
 
+def test_strict_artifact_publication_policy_requires_complete_attachment() -> None:
+    assert requires_artifact_publication_closure("best_effort") is False
+    assert requires_artifact_publication_closure("replay_ready") is True
+
+    validate_artifact_recorder_attachment(
+        required_profile="best_effort",
+        candidate_count=0,
+        attached_count=0,
+        missing_attach_method_count=0,
+        failed_count=0,
+    )
+    validate_artifact_recorder_attachment(
+        required_profile="replay_ready",
+        candidate_count=2,
+        attached_count=2,
+        missing_attach_method_count=0,
+        failed_count=0,
+    )
+    with pytest.raises(RuntimeError, match="no metadata-writer candidates"):
+        validate_artifact_recorder_attachment(
+            required_profile="replay_ready",
+            candidate_count=0,
+            attached_count=0,
+            missing_attach_method_count=0,
+            failed_count=0,
+        )
+    with pytest.raises(RuntimeError, match="recorder attachment was incomplete"):
+        validate_artifact_recorder_attachment(
+            required_profile="replay_ready",
+            candidate_count=2,
+            attached_count=1,
+            missing_attach_method_count=1,
+            failed_count=0,
+        )
+
+
+def test_strict_data_root_policy_requires_explicit_data_dir() -> None:
+    explicit_settings = SimpleNamespace(data_dir="/tmp/bioetl-data")
+    fallback_settings = SimpleNamespace(data_dir=None)
+
+    validate_strict_data_root_policy(
+        settings=fallback_settings,
+        required_profile="best_effort",
+    )
+    validate_strict_data_root_policy(
+        settings=explicit_settings,
+        required_profile="replay_ready",
+    )
+    with pytest.raises(RuntimeError) as replay_ready_error:
+        validate_strict_data_root_policy(
+            settings=fallback_settings,
+            required_profile="replay_ready",
+        )
+    assert "require an explicit settings.data_dir" in str(replay_ready_error.value)
+    with pytest.raises(RuntimeError) as exact_replay_error:
+        validate_strict_data_root_policy(
+            settings=fallback_settings,
+            required_profile="best_effort",
+            exact_replay=True,
+        )
+    assert "require an explicit settings.data_dir" in str(exact_replay_error.value)
+
+
+def test_runner_builder_leaf_keeps_runtime_builder_stages_split() -> None:
+    """The public builder stays a leaf orchestration surface."""
+    source = Path(
+        "src/bioetl/composition/runtime_builders/runner_builder.py"
+    ).read_text(encoding="utf-8")
+    tree = ast.parse(source)
+    imported_modules = {
+        node.module
+        for node in tree.body
+        if isinstance(node, ast.ImportFrom) and node.module is not None
+    }
+
+    assert len(source.splitlines()) <= 120
+    assert {
+        "bioetl.composition.runtime_builders._runner_builder_orchestration",
+        "bioetl.composition.runtime_builders.runner_input_assembly",
+        "bioetl.composition.runtime_builders.runner_control_plane_assembly",
+    }.issubset(imported_modules)
+    assert (
+        "bioetl.composition.runtime_builders._run_manifest_data_roots"
+        not in imported_modules
+    )
+    assert (
+        "bioetl.composition.runtime_builders._run_manifest_planned_artifacts"
+        not in imported_modules
+    )
+    assert (
+        "bioetl.composition.runtime_builders._exact_replay_cached_bronze_context"
+        not in imported_modules
+    )
+    assert "FileRunManifestStore" not in source
+    assert "FileRunLedgerStore" not in source
+    assert "build_planned_artifacts" not in source
+
+
 def test_inputs_resolver_uses_explicit_resolved_vacuumsettings_name() -> None:
     assert hasattr(inputs_resolver, "ResolvedVacuumSettings")
     assert not hasattr(inputs_resolver, "VacuumSettings")
@@ -114,68 +218,3 @@ def test_runner_input_assembly_lazy_resolves_default_observability_builder(
     assert resolved[2] is inputs_runtime_assembly.assemble_runtime_config
     assert resolved[3] is inputs_runtime_assembly.assemble_filter_config
     assert resolved[4] is inputs_runtime_assembly.assemble_cached_bronze_context
-
-
-def test_runner_builder_exposes_typed_wiring_bundles() -> None:
-    """Runtime builder fan-in should be grouped behind typed wiring bundles."""
-    assert hasattr(runner_builder, "RunnerBuilderWiring")
-    assert hasattr(runner_builder, "RunnerFactoryWiring")
-    assert hasattr(runner_builder, "RunnerInputWiring")
-
-    create_registry = MagicMock(name="create_registry")
-    wiring = runner_builder_wiring.resolve_runner_factory_wiring(
-        runner_builder_wiring.RunnerFactoryWiring(),
-        create_registry_fn=create_registry,
-    )
-
-    assert wiring.create_registry is create_registry
-    assert callable(wiring.ensure_providers_loaded)
-    assert callable(wiring.register_all_pipelines)
-
-
-def test_runner_builder_wiring_applies_legacy_overrides_without_mutating_base() -> None:
-    """Legacy keyword patch points must resolve into one immutable bundle."""
-    base = runner_builder_wiring.RunnerBuilderWiring()
-    create_registry = MagicMock(name="create_registry")
-    load_pipeline_config = MagicMock(name="load_pipeline_config")
-
-    resolved = runner_builder_wiring.resolve_runner_builder_wiring(
-        base,
-        legacy_overrides=runner_builder_wiring.LegacyRunnerBuilderOverrides(
-            create_registry_fn=create_registry,
-            load_pipeline_config_fn=load_pipeline_config,
-        ),
-    )
-
-    assert resolved is not base
-    assert resolved.factory.create_registry is create_registry
-    assert resolved.inputs.load_pipeline_config is load_pipeline_config
-    assert base.factory.create_registry is not create_registry
-    assert base.inputs.load_pipeline_config is not load_pipeline_config
-
-
-def test_build_pipeline_runner_override_surface_is_capped() -> None:
-    """Ad hoc builder injection must not grow outside the typed wiring seam."""
-    params = inspect.signature(runner_builder.build_pipeline_runner).parameters
-    legacy_override_names = {name for name in params if name.endswith("_fn")}
-
-    assert "wiring" in params
-    assert "legacy_overrides" not in params
-    assert "factory_wiring" not in params
-    assert "input_wiring" not in params
-    assert legacy_override_names == set()
-
-
-def test_runner_input_wiring_applies_legacy_overrides_without_mutating_base() -> None:
-    """Legacy keyword patch points must resolve into one immutable bundle."""
-    base = runner_builder_wiring.RunnerInputWiring()
-    load_pipeline_config = MagicMock(name="load_pipeline_config")
-
-    resolved = runner_builder_wiring.resolve_runner_input_wiring(
-        base,
-        load_pipeline_config_fn=load_pipeline_config,
-    )
-
-    assert resolved is not base
-    assert resolved.load_pipeline_config is load_pipeline_config
-    assert base.load_pipeline_config is not load_pipeline_config

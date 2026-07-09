@@ -254,3 +254,64 @@ async def test_transform_step_passes_dry_run_into_runtime_context() -> None:
         "fingerprint": result.fingerprint,
         "dry_run": True,
     }
+
+
+@pytest.mark.asyncio
+async def test_transform_step_passes_artifact_context_and_skip_avoids_sink() -> None:
+    metrics = _RecordingMetrics()
+    registry = WorkflowTransformRegistry()
+    seen: dict[str, object] = {}
+
+    def _capture(
+        spec: WorkflowTransformSpec,
+        _upstream: dict[str, Any],
+        runtime_context: object,
+    ) -> object:
+        seen["workflow_run_id"] = getattr(runtime_context, "workflow_run_id", None)
+        seen["manifest_id"] = getattr(runtime_context, "manifest_id", None)
+        seen["debug_export_enabled"] = getattr(
+            runtime_context,
+            "debug_export_enabled",
+            None,
+        )
+        seen["debug_export_dir"] = getattr(runtime_context, "debug_export_dir", None)
+        seen["artifact_sink"] = getattr(runtime_context, "artifact_sink", None)
+        seen["created_at"] = getattr(runtime_context, "created_at", None)
+        return {"fingerprint": spec.fingerprint}
+
+    registry.register("reconcile_foreign_keys", _capture)
+    service = WorkflowTransformService(registry=registry, metrics=metrics)
+    sink = object()
+    created_at = object()
+    step = TransformStepConfig(
+        step_id="repair_orphans",
+        transform_name="reconcile_foreign_keys",
+    )
+
+    result = await service.run_step(
+        workflow_name="activity_workflow",
+        step=step,
+        workflow_run_id="workflow-run-1",
+        manifest_id="manifest-1",
+        debug_export_enabled=True,
+        debug_export_dir="artifacts/debug_exports",
+        artifact_sink=sink,
+        created_at=created_at,  # type: ignore[arg-type]
+    )
+    skipped = await service.run_step(
+        workflow_name="activity_workflow",
+        step=step,
+        completed_fingerprints={"repair_orphans": result.fingerprint},
+        artifact_sink=object(),
+    )
+
+    assert result.status == "success"
+    assert seen == {
+        "workflow_run_id": "workflow-run-1",
+        "manifest_id": "manifest-1",
+        "debug_export_enabled": True,
+        "debug_export_dir": "artifacts/debug_exports",
+        "artifact_sink": sink,
+        "created_at": created_at,
+    }
+    assert skipped.status == "skipped"

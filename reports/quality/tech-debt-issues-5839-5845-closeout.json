@@ -98,13 +98,13 @@
       "source": "reports/quality/compatibility-importer-census.json"
     },
     "adapter_duplicate_clusters": {
-      "current": 38,
-      "max": 53,
+      "current": 0,
+      "max": 0,
       "previous_audit_baseline": 54,
       "source": "reports/quality/full-app-duplication-baseline.json"
     },
     "pipeline_duplicate_clusters": {
-      "current": 2,
+      "current": 0,
       "max": 10,
       "previous_audit_baseline": 11,
       "source": "reports/quality/full-app-duplication-baseline.json"
@@ -127,7 +127,7 @@
       "source": "reports/quality/module-coverage-inventory.json"
     },
     "zero_reference_supporting_scripts": {
-      "current": 45,
+      "current": 40,
       "entries_without_owner_metadata": 0,
       "source": "configs/quality/scripts_inventory_manifest.json"
     }

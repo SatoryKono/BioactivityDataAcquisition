@@ -1,6 +1,12 @@
 # BioETL Diagrams — SVG Index
 
-_Generated: 2026-05-12T12:39:45+03:00_
+_Generated: 2026-07-08T19:23:31+03:00_
+
+## High Level Hexagonal Simple
+
+![01-high-level-hexagonal-simple](./01-high-level-hexagonal-simple.svg)
+
+---
 
 ## High Level Hexagonal
 
@@ -341,6 +347,156 @@ _Generated: 2026-05-12T12:39:45+03:00_
 ## Reproducible Run Contract
 
 ![23-reproducible-run-contract](./23-reproducible-run-contract.svg)
+
+---
+
+## Control Plane Artifact Publication Pipeline
+
+![24-control-plane-artifact-publication-pipeline](./24-control-plane-artifact-publication-pipeline.svg)
+
+---
+
+## Effective Execution Config Resolution And Artifact Hashing
+
+![25-effective-execution-config-resolution-and-artifact-hashing](./25-effective-execution-config-resolution-and-artifact-hashing.svg)
+
+---
+
+## Reproducible Run Contract Across Manifest Ledger And Output Metadata
+
+![26-reproducible-run-contract-across-manifest-ledger-and-output-metadata](./26-reproducible-run-contract-across-manifest-ledger-and-output-metadata.svg)
+
+---
+
+## Composite Preflight Field Priority And Normalization Compatibility Resolution
+
+![27-composite-preflight-field-priority-and-normalization-compatibility-resolution](./27-composite-preflight-field-priority-and-normalization-compatibility-resolution.svg)
+
+---
+
+## Historical Replay Universe Inventory And Closure Report
+
+![28-historical-replay-universe-inventory-and-closure-report](./28-historical-replay-universe-inventory-and-closure-report.svg)
+
+---
+
+## Provider Registry Loading To Data Source Creation
+
+![29-provider-registry-loading-to-data-source-creation](./29-provider-registry-loading-to-data-source-creation.svg)
+
+---
+
+## Postrun Retention Deduplication And Vacuum Warning Path
+
+![30-postrun-retention-deduplication-and-vacuum-warning-path](./30-postrun-retention-deduplication-and-vacuum-warning-path.svg)
+
+---
+
+## Workflow Control Plane Manifest And Ledger Publication
+
+![31-workflow-control-plane-manifest-and-ledger-publication](./31-workflow-control-plane-manifest-and-ledger-publication.svg)
+
+---
+
+## Lock Heartbeat Checkpoint And Shutdown Collaboration
+
+![32-lock-heartbeat-checkpoint-and-shutdown-collaboration](./32-lock-heartbeat-checkpoint-and-shutdown-collaboration.svg)
+
+---
+
+## Pipeline Service Bundle And Runner Dependencies
+
+![33-pipeline-service-bundle-and-runner-dependencies](./33-pipeline-service-bundle-and-runner-dependencies.svg)
+
+---
+
+## Pipelinerun Aggregate Stage Result And Terminal Transition Model
+
+![34-pipelinerun-aggregate-stage-result-and-terminal-transition-model](./34-pipelinerun-aggregate-stage-result-and-terminal-transition-model.svg)
+
+---
+
+## Batch Aggregate Seal Write Commit Failure Lifecycle
+
+![35-batch-aggregate-seal-write-commit-failure-lifecycle](./35-batch-aggregate-seal-write-commit-failure-lifecycle.svg)
+
+---
+
+## Quarantine Entry Review Resolution And Discard Flow
+
+![36-quarantine-entry-review-resolution-and-discard-flow](./36-quarantine-entry-review-resolution-and-discard-flow.svg)
+
+---
+
+## Observability Bootstrap Bundle From Settings To Ports
+
+![37-observability-bootstrap-bundle-from-settings-to-ports](./37-observability-bootstrap-bundle-from-settings-to-ports.svg)
+
+---
+
+## Chembl Bronze Activity Extraction To Artifact Publication
+
+![38-chembl-bronze-activity-extraction-to-artifact-publication](./38-chembl-bronze-activity-extraction-to-artifact-publication.svg)
+
+---
+
+## Crossref Search Fallback And Batch Doi Fetch Publications
+
+![39-crossref-search-fallback-and-batch-doi-fetch-publications](./39-crossref-search-fallback-and-batch-doi-fetch-publications.svg)
+
+---
+
+## Pubmed Search Fetch Xml Parse And Publication Mapping
+
+![40-pubmed-search-fetch-xml-parse-and-publication-mapping](./40-pubmed-search-fetch-xml-parse-and-publication-mapping.svg)
+
+---
+
+## Openalex Cursor Pagination And Response Mapping Path
+
+![41-openalex-cursor-pagination-and-response-mapping-path](./41-openalex-cursor-pagination-and-response-mapping-path.svg)
+
+---
+
+## Semanticscholar Search Fallback And Batch Request Flow
+
+![42-semanticscholar-search-fallback-and-batch-request-flow](./42-semanticscholar-search-fallback-and-batch-request-flow.svg)
+
+---
+
+## Uniprot Mapping Job To Protein Fetch Enrichment
+
+![43-uniprot-mapping-job-to-protein-fetch-enrichment](./43-uniprot-mapping-job-to-protein-fetch-enrichment.svg)
+
+---
+
+## Pubchem Fetch Strategy Resolution For Compounds
+
+![44-pubchem-fetch-strategy-resolution-for-compounds](./44-pubchem-fetch-strategy-resolution-for-compounds.svg)
+
+---
+
+## Dq Contract Config Loading And Policy Resolution
+
+![45-dq-contract-config-loading-and-policy-resolution](./45-dq-contract-config-loading-and-policy-resolution.svg)
+
+---
+
+## Filter Config Resolution And Column Filter Evaluation
+
+![46-filter-config-resolution-and-column-filter-evaluation](./46-filter-config-resolution-and-column-filter-evaluation.svg)
+
+---
+
+## Run Manifest Domain Model And Serialization Surface
+
+![47-run-manifest-domain-model-and-serialization-surface](./47-run-manifest-domain-model-and-serialization-surface.svg)
+
+---
+
+## Effective Config Artifact Domain Model
+
+![48-effective-config-artifact-domain-model](./48-effective-config-artifact-domain-model.svg)
 
 ---
 

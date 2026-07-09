@@ -27,6 +27,11 @@ def main() -> int:
         help="Skip docstring inventory checks",
     )
     parser.add_argument(
+        "--skip-cleanup-inventory",
+        action="store_true",
+        help="Skip documentation cleanup inventory drift check",
+    )
+    parser.add_argument(
         "--skip-build", action="store_true", help="Skip strict MkDocs build"
     )
     args = parser.parse_args()
@@ -68,6 +73,18 @@ def main() -> int:
                     "-m",
                     "scripts.docs.checks.check_docstrings",
                     "--summary",
+                ],
+            )
+        )
+    if not args.skip_cleanup_inventory:
+        steps.append(
+            (
+                "generate-cleanup-inventory",
+                [
+                    sys.executable,
+                    "-m",
+                    "scripts.docs.checks.documentation_cleanup_inventory",
+                    "--check",
                 ],
             )
         )

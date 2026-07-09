@@ -386,9 +386,9 @@ L2 diagnostic runtime triage: blockers, latency, backlog, error localization, ha
 ### First-screen структура
 - **Tier 1**: `First Action`, `Runtime Status`, `Runtime Telemetry Gap`, `Monitor Runtime Blockers`, `Runtime Blockers`
 - `Runtime Status` is an expanded mirror of compact shared-shell `Status`, not an independent second current-status signal.
-- **Tier 2**: expanded rows по сценариям: `Backlog Trends`, `Durations`, `Shutdown Diagnostics`, `Tracing-only Log Hygiene`
+- **Tier 2**: expanded rows по сценариям: `Backlog Trends`, `Durations`, `Shutdown Diagnostics`; optional `Tracing-only Log Hygiene` collapsed by default
 - **Tier 3**: selected-range evidence ниже
-- **Tier 4**: expanded tracing-only log hygiene
+- **Tier 4**: collapsed tracing-only log hygiene
 
 ### KPI ownership (canonical mirrors)
 - Status → mirror (canonical: `bioetl-overview-v2`)
@@ -403,7 +403,7 @@ L2 diagnostic runtime triage: blockers, latency, backlog, error localization, ha
 
 ### Специфические требования
 - Prometheus-first в tracing-off режиме
-- Loki log-hygiene panels в expanded row `Tracing-only Log Hygiene`
+- Loki log-hygiene panels в collapsed row `Tracing-only Log Hygiene`
 - Runtime zero-count cards fail closed: selected pipeline/run_type cards anchor `0` to `bioetl_runtime_pipeline_run_type_universe`
 - GLOBAL provider handoff anchors `0` to `bioetl_provider_current_status`
 - Missing scope остаётся `UNKNOWN`, не synthetic OK
@@ -453,8 +453,10 @@ Incident triage по provider health: latency/failures/degraded/retries exhauste
 - Panel `id=114` остаётся raw source enum (`0=UNHEALTHY`, `1=DEGRADED`, `2=HEALTHY`) ниже first screen как evidence
 - Panel `id=9104` остаётся first-screen trust marker for `bioetl_provider_current_status` freshness; missing samples inside the active Grafana time range mean telemetry gap, not healthy provider state
 - `Status`, `GLOBAL Provider Severity Matrix`, `Inspect Critical Providers`, and `Inspect Provider Top Causes` MAY use the active Grafana time selector for sparse provider-current telemetry instead of a fixed 15m snapshot
+- `Status` is selected-provider supporting evidence and MUST NOT visually override the GLOBAL provider verdict hierarchy; `First Action` MUST spell out GLOBAL severity -> telemetry freshness -> critical providers/top causes -> selected-provider supporting evidence
 - `Inspect Provider Top Causes` может быть непустой даже при `GLOBAL severity = OK` (early-warning provider signals независимо от current-status projection)
 - Если status остаётся non-OK, а canonical cause projection пуста, `Inspect Provider Top Causes` остаётся empty table (explainability gap, не healthy state)
+- Optional latency/adapter/rate-limit/circuit-breaker telemetry SHOULD remain compact or collapsed; when expanded by dashboard row contract, empty optional samples MUST disclose no-data semantics and MUST NOT dominate the first-screen provider verdict
 - Переходы из pipeline-scoped dashboards сохраняют `pipeline_context=$pipeline` и fail-close к `provider=unknown`
 - Если source dashboard нет adapter context, `adapter` не передаётся, target использует собственный fallback `All adapters`
 - Critical panels SHOULD иметь actionable CTA

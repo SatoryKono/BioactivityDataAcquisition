@@ -1,8 +1,8 @@
 # Diagram Descriptions Index
 
-_Автогенерация: 2026-04-13T12:35:20+03:00_
+_Автогенерация: 2026-07-08T10:42:35+03:00_
 
-- Карточек описаний: **292**
+- Карточек описаний: **319**
 - Формат публикации: family-oriented index для derived description cards.
 - Source of truth: individual description cards под `descriptions/<family>/`.
 
@@ -17,13 +17,14 @@ _Автогенерация: 2026-04-13T12:35:20+03:00_
 
 ## Family Overview
 
-- Architecture cards: **57**
+- Architecture cards: **83**
 - Class cards: **16**
-- Foundation cards: **54**
+- Foundation cards: **55**
 - View cards: **165** across **38** parent families
 
 ## Architecture Cards
 
+- [01-high-level-hexagonal-simple](architecture/01-high-level-hexagonal-simple.md)
 - [01-high-level-hexagonal](architecture/01-high-level-hexagonal.md)
 - [01a-hexagonal-overview](architecture/01a-hexagonal-overview.md)
 - [01b-hexagonal-domain-app](architecture/01b-hexagonal-domain-app.md)
@@ -81,6 +82,31 @@ _Автогенерация: 2026-04-13T12:35:20+03:00_
 - [21-idempotent-processing-guards](architecture/21-idempotent-processing-guards.md)
 - [22-data-operations-observability](architecture/22-data-operations-observability.md)
 - [23-reproducible-run-contract](architecture/23-reproducible-run-contract.md)
+- [24-control-plane-artifact-publication-pipeline](architecture/24-control-plane-artifact-publication-pipeline.md)
+- [25-effective-execution-config-resolution-and-artifact-hashing](architecture/25-effective-execution-config-resolution-and-artifact-hashing.md)
+- [26-reproducible-run-contract-across-manifest-ledger-and-output-metadata](architecture/26-reproducible-run-contract-across-manifest-ledger-and-output-metadata.md)
+- [27-composite-preflight-field-priority-and-normalization-compatibility-resolution](architecture/27-composite-preflight-field-priority-and-normalization-compatibility-resolution.md)
+- [28-historical-replay-universe-inventory-and-closure-report](architecture/28-historical-replay-universe-inventory-and-closure-report.md)
+- [29-provider-registry-loading-to-data-source-creation](architecture/29-provider-registry-loading-to-data-source-creation.md)
+- [30-postrun-retention-deduplication-and-vacuum-warning-path](architecture/30-postrun-retention-deduplication-and-vacuum-warning-path.md)
+- [31-workflow-control-plane-manifest-and-ledger-publication](architecture/31-workflow-control-plane-manifest-and-ledger-publication.md)
+- [32-lock-heartbeat-checkpoint-and-shutdown-collaboration](architecture/32-lock-heartbeat-checkpoint-and-shutdown-collaboration.md)
+- [33-pipeline-service-bundle-and-runner-dependencies](architecture/33-pipeline-service-bundle-and-runner-dependencies.md)
+- [34-pipelinerun-aggregate-stage-result-and-terminal-transition-model](architecture/34-pipelinerun-aggregate-stage-result-and-terminal-transition-model.md)
+- [35-batch-aggregate-seal-write-commit-failure-lifecycle](architecture/35-batch-aggregate-seal-write-commit-failure-lifecycle.md)
+- [36-quarantine-entry-review-resolution-and-discard-flow](architecture/36-quarantine-entry-review-resolution-and-discard-flow.md)
+- [37-observability-bootstrap-bundle-from-settings-to-ports](architecture/37-observability-bootstrap-bundle-from-settings-to-ports.md)
+- [38-chembl-bronze-activity-extraction-to-artifact-publication](architecture/38-chembl-bronze-activity-extraction-to-artifact-publication.md)
+- [39-crossref-search-fallback-and-batch-doi-fetch-publications](architecture/39-crossref-search-fallback-and-batch-doi-fetch-publications.md)
+- [40-pubmed-search-fetch-xml-parse-and-publication-mapping](architecture/40-pubmed-search-fetch-xml-parse-and-publication-mapping.md)
+- [41-openalex-cursor-pagination-and-response-mapping-path](architecture/41-openalex-cursor-pagination-and-response-mapping-path.md)
+- [42-semanticscholar-search-fallback-and-batch-request-flow](architecture/42-semanticscholar-search-fallback-and-batch-request-flow.md)
+- [43-uniprot-mapping-job-to-protein-fetch-enrichment](architecture/43-uniprot-mapping-job-to-protein-fetch-enrichment.md)
+- [44-pubchem-fetch-strategy-resolution-for-compounds](architecture/44-pubchem-fetch-strategy-resolution-for-compounds.md)
+- [45-dq-contract-config-loading-and-policy-resolution](architecture/45-dq-contract-config-loading-and-policy-resolution.md)
+- [46-filter-config-resolution-and-column-filter-evaluation](architecture/46-filter-config-resolution-and-column-filter-evaluation.md)
+- [47-run-manifest-domain-model-and-serialization-surface](architecture/47-run-manifest-domain-model-and-serialization-surface.md)
+- [48-effective-config-artifact-domain-model](architecture/48-effective-config-artifact-domain-model.md)
 
 ## Class Diagram Cards
 
@@ -129,6 +155,7 @@ _Автогенерация: 2026-04-13T12:35:20+03:00_
 - [32-single-record-journey](foundation/32-single-record-journey.md)
 - [33-cli-run-interaction](foundation/33-cli-run-interaction.md)
 - [34-batch-processing-flow](foundation/34-batch-processing-flow.md)
+- [35-bootstrap-sequence](foundation/35-bootstrap-sequence.md)
 - [36-architecture-principles-mindmap](foundation/36-architecture-principles-mindmap.md)
 - [37-cli-entry-full-chain](foundation/37-cli-entry-full-chain.md)
 - [38-runtime-assembly-sequence](foundation/38-runtime-assembly-sequence.md)

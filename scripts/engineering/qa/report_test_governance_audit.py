@@ -26,7 +26,16 @@ DEFAULT_JSON_ARTIFACT = Path("reports/quality/test-governance-current.json")
 DEFAULT_FIXTURE_DUPLICATION_ARTIFACT = Path(
     "reports/quality/test-fixture-asset-duplication.json"
 )
+GOVERNANCE_SOURCE_FILES = (
+    Path("pyproject.toml"),
+    DEFAULT_CONFIG,
+    Path("configs/quality/test_matrix.yaml"),
+    Path("scripts/engineering/qa/file_discovery.py"),
+    Path("scripts/engineering/qa/report_test_governance_audit.py"),
+)
 TEST_FUNCTION_PREFIX = "test_"
+TESTS_ROOT = Path("tests")
+REPO_BACKED_UNIT_ROOT = Path("tests/unit/repo_backed")
 FIXTURE_DUPLICATION_SCAN_ROOT = Path("tests/fixtures")
 FIXTURE_DUPLICATION_EXTENSIONS = frozenset({".json", ".yaml", ".yml"})
 COMPATIBILITY_FILE_RE = re.compile(
@@ -147,13 +156,33 @@ def _iter_fixture_asset_files(root: Path) -> list[Path]:
     ]
 
 
+def _iter_all_test_python_files(root: Path) -> list[Path]:
+    tests_root = root / TESTS_ROOT
+    if not tests_root.exists():
+        return []
+    return [
+        path
+        for path in sorted(tests_root.rglob("*.py"))
+        if path.is_file() and "__pycache__" not in path.parts
+    ]
+
+
 @cache
 def _compute_test_governance_source_tree_sha256(root_str: str) -> str:
     """Hash the report inputs so committed artifacts can be reused when fresh."""
     root = Path(root_str).resolve()
     digest = hashlib.sha256()
+    governance_files = [
+        root / relative_path
+        for relative_path in GOVERNANCE_SOURCE_FILES
+        if (root / relative_path).exists()
+    ]
     files = sorted(
-        [*_iter_test_files(root), *_iter_fixture_asset_files(root)],
+        [
+            *governance_files,
+            *_iter_all_test_python_files(root),
+            *_iter_fixture_asset_files(root),
+        ],
         key=lambda path: path.relative_to(root).as_posix().lower(),
     )
     for path in files:
@@ -322,6 +351,63 @@ def _collect_fixture_asset_duplication(root: Path) -> dict[str, Any]:
             default=0,
         ),
         "groups": duplicate_groups,
+    }
+
+
+def _collect_test_file_inventory(root: Path, test_files: list[Path]) -> dict[str, Any]:
+    tests_root = root / TESTS_ROOT
+    all_top_level_dirs = [
+        path.relative_to(root).as_posix() + "/"
+        for path in sorted(tests_root.iterdir(), key=lambda item: item.name.lower())
+        if path.is_dir()
+    ]
+    top_level_dirs = [
+        path for path in all_top_level_dirs if not path.endswith("__pycache__/")
+    ]
+
+    return {
+        "test_file_count_definition": (
+            "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files"
+        ),
+        "pytest_python_files": [f"{TEST_FUNCTION_PREFIX}*.py"],
+        "test_glob_file_count": len(test_files),
+        "test_python_file_count": len(_iter_all_test_python_files(root)),
+        "top_level_directory_count": len(top_level_dirs),
+        "top_level_directory_count_including_pycache": len(all_top_level_dirs),
+        "top_level_directories": top_level_dirs,
+        "top_level_directories_including_pycache": all_top_level_dirs,
+    }
+
+
+def _collect_repo_backed_unit_inventory(root: Path) -> dict[str, Any]:
+    subtree = root / REPO_BACKED_UNIT_ROOT
+    test_files = (
+        sorted(subtree.rglob("test_*.py"), key=lambda path: path.as_posix().lower())
+        if subtree.exists()
+        else []
+    )
+    unmarked_paths: list[str] = []
+    marked_count = 0
+    for path in test_files:
+        relative = path.relative_to(root).as_posix()
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError:
+            unmarked_paths.append(relative)
+            continue
+        if "pytest.mark.repo_backed" in text:
+            marked_count += 1
+        else:
+            unmarked_paths.append(relative)
+
+    return {
+        "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
+        "subtree": REPO_BACKED_UNIT_ROOT.as_posix() + "/",
+        "lane": "repo-backed-unit",
+        "marker": "pytest.mark.repo_backed",
+        "test_files": len(test_files),
+        "marked_test_files": marked_count,
+        "unmarked_test_files": unmarked_paths,
     }
 
 
@@ -658,6 +744,8 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
         "root": ".",
         "total_test_files": len(test_files),
         "total_test_functions": total_functions,
+        "test_file_inventory": _collect_test_file_inventory(root, test_files),
+        "repo_backed_unit_inventory": _collect_repo_backed_unit_inventory(root),
         "assertless_total_candidates": assertless_total_candidates,
         "refined_assertless_tests": refined_assertless_tests,
         "assertless_category_counts": {
@@ -761,12 +849,22 @@ def main(argv: list[str] | None = None) -> int:
             "tests/fixtures/**/*.{json,yaml,yml}."
         ),
     )
+    parser.add_argument(
+        "--duplicate-name-inventory-out",
+        type=Path,
+        help=(
+            "Optionally write the duplicate test-name inventory. CI keeps this "
+            "inventory embedded in test-governance-current.json and does not "
+            "commit a separate duplicate-name artifact."
+        ),
+    )
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
 
     payload = collect_test_governance_report(args.root)
     json_out = args.json_out
     fixture_duplication_out = args.fixture_duplication_out
+    duplicate_name_inventory_out = args.duplicate_name_inventory_out
     if args.check and json_out is None:
         candidate = args.root / DEFAULT_JSON_ARTIFACT
         if candidate.exists():
@@ -775,6 +873,8 @@ def main(argv: list[str] | None = None) -> int:
         candidate = args.root / DEFAULT_FIXTURE_DUPLICATION_ARTIFACT
         if candidate.exists():
             fixture_duplication_out = candidate
+    if args.check and duplicate_name_inventory_out is not None:
+        duplicate_name_inventory_out = args.root / duplicate_name_inventory_out
     exit_code = 0
 
     if args.config.exists():
@@ -785,6 +885,10 @@ def main(argv: list[str] | None = None) -> int:
             exit_code = 1
 
     fixture_duplication_payload = payload["report"]["fixture_asset_duplication"]
+    duplicate_name_inventory_payload = {
+        "summary": payload["report"]["duplicate_test_name_inventory_summary"],
+        "inventory": payload["report"]["duplicate_test_name_inventory"],
+    }
     output = _canonical_json(payload)
     if args.check:
         if json_out is not None and not _check_json_artifact(json_out, payload):
@@ -792,6 +896,11 @@ def main(argv: list[str] | None = None) -> int:
         if fixture_duplication_out is not None and not _check_json_artifact(
             fixture_duplication_out,
             fixture_duplication_payload,
+        ):
+            exit_code = 1
+        if duplicate_name_inventory_out is not None and not _check_json_artifact(
+            duplicate_name_inventory_out,
+            duplicate_name_inventory_payload,
         ):
             exit_code = 1
     elif json_out:
@@ -803,6 +912,12 @@ def main(argv: list[str] | None = None) -> int:
         fixture_duplication_out.parent.mkdir(parents=True, exist_ok=True)
         fixture_duplication_out.write_text(
             _canonical_json(fixture_duplication_payload),
+            encoding="utf-8",
+        )
+    if duplicate_name_inventory_out and not args.check:
+        duplicate_name_inventory_out.parent.mkdir(parents=True, exist_ok=True)
+        duplicate_name_inventory_out.write_text(
+            _canonical_json(duplicate_name_inventory_payload),
             encoding="utf-8",
         )
     return exit_code

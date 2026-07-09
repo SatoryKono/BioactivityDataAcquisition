@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass
+from datetime import datetime
 from inspect import isawaitable, signature
 from time import perf_counter
 from typing import TYPE_CHECKING
@@ -18,6 +19,9 @@ from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.workflow import TransformStepConfig, WorkflowTransformSpec
 
 if TYPE_CHECKING:
+    from bioetl.application.services.workflow_transform_artifacts import (
+        WorkflowTransformArtifactSinkProtocol,
+    )
     from bioetl.domain.ports import MetricsPort
 
 __all__ = [
@@ -69,6 +73,12 @@ class WorkflowTransformService:
         context_labels: Mapping[str, str] | None = None,
         completed_fingerprints: Mapping[str, str] | None = None,
         dry_run: bool = False,
+        workflow_run_id: str | None = None,
+        manifest_id: str | None = None,
+        debug_export_enabled: bool = False,
+        debug_export_dir: str | None = None,
+        artifact_sink: WorkflowTransformArtifactSinkProtocol | None = None,
+        created_at: datetime | None = None,
         destructive_commit_callback: (
             Callable[[WorkflowTransformDestructiveCommit], None] | None
         ) = None,
@@ -99,6 +109,12 @@ class WorkflowTransformService:
             runtime_context = WorkflowTransformRuntimeContext(
                 dry_run=dry_run,
                 workflow_name=workflow_name,
+                workflow_run_id=workflow_run_id,
+                manifest_id=manifest_id,
+                debug_export_enabled=debug_export_enabled,
+                debug_export_dir=debug_export_dir,
+                artifact_sink=artifact_sink,
+                created_at=created_at,
                 destructive_commit_callback=destructive_commit_callback,
             )
             output = _invoke_transform_executor(

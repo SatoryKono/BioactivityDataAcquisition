@@ -31,6 +31,7 @@ class TestBootstrapPipelineRunner:
         expected_runner = MagicMock()
         ctx = MagicMock()
         ctx.pipeline_name = "chembl_activity"
+        ctx.cached_bronze = None
         registry = MagicMock()
         effective_registry = MagicMock()
         configs_root = Path("/tmp/bioetl-configs")
@@ -90,6 +91,7 @@ class TestBootstrapPipelineRunner:
         """Registry creation and registration are owned by prepare_runtime_registry."""
         ctx = MagicMock()
         ctx.pipeline_name = "chembl_activity"
+        ctx.cached_bronze = None
         with (
             patch(
                 "bioetl.composition.bootstrap.runtime.pipeline.prepare_runtime_registry"
@@ -125,6 +127,7 @@ class TestBootstrapPipelineRunner:
         configs_root = Path("/tmp/bioetl-configs")
         ctx = MagicMock()
         ctx.pipeline_name = "chembl_activity"
+        ctx.cached_bronze = None
         injected_loader = MagicMock(name="injected_pipeline_loader")
 
         with (
@@ -165,6 +168,7 @@ def test_build_runtime_bootstrap_phases_returns_typed_payload() -> None:
     """Runtime bootstrap phases must be explicit before runner construction."""
     ctx = MagicMock()
     ctx.pipeline_name = "chembl_activity"
+    ctx.cached_bronze = None
     registry = MagicMock(name="registry")
     effective_registry = MagicMock(name="effective_registry")
     configs_root = Path("/tmp/bioetl-configs")

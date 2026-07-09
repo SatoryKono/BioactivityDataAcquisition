@@ -21,6 +21,9 @@ Ports & Adapters architecture in BioETL.
 This page is the semantic catalog of port families and the complete module
 inventory for `src/bioetl/domain/ports/**`. For module-by-module API
 lookup, use [API Reference: domain ports](../api/domain/ports.md).
+For class/protocol-level lookup, use the API reference; this page intentionally
+keeps the published reference at family and module granularity so port ownership
+does not depend on duplicating every protocol symbol in narrative docs.
 
 ## Import Policy
 

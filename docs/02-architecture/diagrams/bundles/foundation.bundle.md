@@ -1,6 +1,6 @@
 # BioETL Foundation Diagrams Bundle
 
-- Generated: 2026-06-15T21:08:29
+- Generated: 2026-07-06T11:30:27
 - Diagram count: 55
 
 ## Table of Contents
@@ -320,7 +320,7 @@
 ![08-domain-ddd](../foundation/svg/08-domain-ddd.svg)
 
 ### Описание
-Диаграмма «Domain Layer — DDD Components» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Domain Layer), §1.3 (DDD Aggregates), ADR-021. Схема имеет плотность порядка 24 узлов и 17 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer (DDD), ports/, aggregates/, Domain Events, value_objects/, types.py. Показательные узлы для быстрого чтения: Batch Aggregate add_record + quarantine_record seal + mark_committed, PipelineRun Aggregate start + record_stage_success complete + fail, QuarantineEntry Aggregate mark_retrying + mark_recovered mark_dead_letter, RunID (UUID), BatchID (UUID), EntityID (str).
+Диаграмма «Domain Layer — DDD Components» из foundation-набора фиксирует устойчивый архитектурный или процессный паттерн проекта BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Mixed (System / Component / Class)». В комментариях исходника зафиксирован фокус диаграммы: RULES.md §1.1 (Domain Layer), §1.3 (DDD Aggregates), ADR-021. Схема имеет плотность порядка 24 узлов и 17 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Ключевые блоки/подграфы: Domain Layer (DDD), ports/, aggregates/, Domain Events, value_objects/, types.py. Показательные узлы для быстрого чтения: Batch Aggregate add_record + quarantine_record seal + mark_committed, PipelineRun Aggregate start + record_stage_success complete + fail, RunID (UUID), BatchID (UUID), EntityID (str), ContentHash (str).
 
 ### Метаданные
 - Тип: `flowchart`

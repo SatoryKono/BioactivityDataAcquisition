@@ -1,13 +1,17 @@
-# Source Evaluation
+# Source Evaluation Reference Redirect
 
-## Credibility Checklist
+Status: active compatibility reference
+Class: published-redirect
+Owner: BioETL Team
+Last verified: '2026-07-09'
 
-- Is this a primary source?
-- Is methodology explicit?
-- Is publication date current for the claim?
-- Are conflicts of interest disclosed?
-- Can the result be independently corroborated?
+This page keeps the legacy local reference URL stable.
 
-## Confidence Guidance
+The maintained mirror is
+[source-evaluation.md](../../../_references/local/deep-research/references/source-evaluation.md).
 
-Assign confidence from 0.0 to 1.0 and document the reason.
+Runtime source:
+
+- `.codex/skills/deep-research/references/source-evaluation.md`
+
+Do not copy the reference body back into this page.

@@ -110,10 +110,6 @@ async def _write_dual_targets_impl(
     schema_policy: GoldSchemaPolicyByVersion,
 ) -> None:
     """Write all versioned Gold targets and fail on the first error."""
-    from bioetl.infrastructure.storage.gold.pipeline_helpers import (
-        GoldWriteRequest,
-    )
-
     assert writer._contract_rollout_policy is not None
 
     write_versions = writer._contract_rollout_policy.write_versions
@@ -128,7 +124,7 @@ async def _write_dual_targets_impl(
             raise ValueError(
                 f"No Gold schema configured for contract version {contract_version}"
             )
-        target_request = GoldWriteRequest(
+        target_request = _GoldWriteRequest(
             table_name=physical_table,
             records=_project_records_for_gold_schema(
                 request.records,

@@ -18,6 +18,10 @@ ______________________________________________________________________
 `src/bioetl/domain/value_objects/` contains immutable domain primitives and
 typed semantic helpers that keep validation close to the domain boundary.
 
+This page is the semantic family and module catalog. Use
+[API Reference](../api/index.md) for symbol-level lookup when an audit needs
+every dataclass, enum, or helper class name.
+
 ## Family Catalog
 
 | Family | Representative modules | Semantic role |
@@ -27,6 +31,56 @@ typed semantic helpers that keep validation close to the domain boundary.
 | DQ and reporting | `dq_anomaly.py`, `dq_metrics.py`, `dq_result.py`, `dq_report.py`, `dq_report_builder.py`, `dq_report_results*.py`, `silver_result.py`, `bronze_result.py` | Quality scoring, anomaly summary, stage outcomes, and report assembly primitives that stay transport-neutral. |
 | Publication grouping and output structure | `column_order.py`, `column_qualifier.py`, `_publication_field_group_config.py`, `_publication_field_groups_data.py`, `publication_field_group_types.py`, `protein_class_hierarchy.py` | Stable structural metadata used for field grouping, output projection, and classification boundaries. |
 | Runtime and run context | `run_context.py`, `_run_context_models.py`, `_run_context_create_support.py` | Immutable execution-context shapes used to project deterministic run metadata into domain-safe primitives. |
+
+## Complete Module Catalog
+
+Every active module under `src/bioetl/domain/value_objects/` is listed below.
+Private-prefixed modules are implementation helpers or shared data fragments, not
+separate aggregate roots.
+
+| Module | Family | Purpose |
+| --- | --- | --- |
+| `__init__.py` | Package API | Re-exports public value-object symbols for stable imports. |
+| `_chemical_identifiers.py` | Chemistry identifiers | Shared parsing/normalization helpers for chemical identifiers. |
+| `_molecular_weight.py` | Chemistry semantics | Molecular-weight validation and normalization helper. |
+| `_publication_field_group_config.py` | Publication output structure | Field-group configuration model used by publication projections. |
+| `_publication_field_groups_data.py` | Publication output structure | Canonical publication field-group data definitions. |
+| `_publication_year.py` | Publication semantics | Publication-year validation and normalization helper. |
+| `_run_context_create_support.py` | Runtime context | Construction support for deterministic `RunContext` creation. |
+| `_run_context_models.py` | Runtime context | Internal immutable models used by `RunContext`. |
+| `academic_ids.py` | Publication identifiers | Academic identifier value objects such as DOI/ORCID-style identifiers. |
+| `activity.py` | Activity semantics | Activity-domain primitive values and semantic helpers. |
+| `activity_concentration.py` | Activity semantics | Concentration-specific activity measurements. |
+| `activity_confidence.py` | Activity semantics | Confidence and evidence semantics for activity observations. |
+| `activity_measurement.py` | Activity semantics | Measurement value objects for activity rows. |
+| `activity_relation.py` | Activity semantics | Relation/operator semantics for measured values. |
+| `activity_type.py` | Activity semantics | Typed activity classifications. |
+| `base.py` | Shared base | Common value-object base behavior. |
+| `bronze_result.py` | DQ/reporting | Bronze-stage result value object. |
+| `chemical.py` | Chemistry semantics | Chemical-domain primitives and validation helpers. |
+| `column_order.py` | Output structure | Stable output column ordering metadata. |
+| `column_qualifier.py` | Output structure | Column qualifier semantics. |
+| `compound_ids.py` | Chemistry identifiers | Compound identifier value objects. |
+| `dq_anomaly.py` | DQ/reporting | DQ anomaly summary primitives. |
+| `dq_metrics.py` | DQ/reporting | DQ metric value objects. |
+| `dq_metrics_calculations.py` | DQ/reporting | Calculation helpers for DQ metrics. |
+| `dq_report.py` | DQ/reporting | DQ report aggregate value object. |
+| `dq_report_builder.py` | DQ/reporting | Builder helpers for report value objects. |
+| `dq_report_enums.py` | DQ/reporting | Enumerations used by DQ report values. |
+| `dq_report_results.py` | DQ/reporting | Public result value objects for DQ reports. |
+| `dq_report_results_core.py` | DQ/reporting | Core result model helpers. |
+| `dq_report_results_quality.py` | DQ/reporting | Quality-specific result model helpers. |
+| `dq_result.py` | DQ/reporting | Generic DQ result value object. |
+| `identifiers.py` | Publication identifiers | General identifier primitives. |
+| `inchi.py` | Chemistry identifiers | InChI/InChIKey value objects and validation helpers. |
+| `molecular_descriptors.py` | Chemistry semantics | Molecular descriptor value objects. |
+| `pchembl_value.py` | Activity semantics | pChEMBL value validation and normalization. |
+| `protein_class_hierarchy.py` | Classification | Protein-class hierarchy value object. |
+| `publication_field_group_types.py` | Publication output structure | Publication field-group type definitions. |
+| `publications.py` | Publication semantics | Publication-specific value objects. |
+| `run_context.py` | Runtime context | Domain-safe run execution envelope. |
+| `silver_result.py` | DQ/reporting | Silver-stage result value object. |
+| `taxonomy_id.py` | Provider identifiers | Taxonomy identifier value object. |
 
 ## Design Rules
 

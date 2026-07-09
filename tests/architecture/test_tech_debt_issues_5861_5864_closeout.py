@@ -78,7 +78,7 @@ def _module_row(payload: dict[str, Any], module: str) -> dict[str, Any]:
     raise AssertionError(f"Missing module coverage row: {module}")
 
 
-def test_tdx_audit_closeout_artifact_is_complete_and_budget_safe() -> None:
+def test_issue_pack_5861_5864_closeout_artifact_is_complete_and_budget_safe() -> None:
     closeout = _load_json(CLOSEOUT)
 
     assert closeout["schema_version"] == "tech-debt-issues-5861-5864-closeout-v1"
@@ -127,11 +127,6 @@ def test_issue_5861_dq_evaluator_has_golden_and_property_evidence() -> None:
 def test_issue_5862_contract_registry_and_ledger_have_domain_invariant_evidence() -> (
     None
 ):
-    closeout = _load_json(CLOSEOUT)
-    inventory = _load_json(MODULE_COVERAGE)
-    ledger_row = _module_row(
-        inventory, "bioetl.domain.control_plane.ledger.core_events"
-    )
     ledger_source = (
         ROOT
         / "src"

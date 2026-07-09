@@ -37,8 +37,8 @@
       "status": "pass"
     },
     {
-      "current": "fbbba070d15f5c24b9648c5af184816c09c3b50bb8b67b62f94414d293933a5b",
-      "limit": "fbbba070d15f5c24b9648c5af184816c09c3b50bb8b67b62f94414d293933a5b",
+      "current": "4bde88364a11af558895d91ac8422929b7a58ea26564f45f3ee200fb7c9310c7",
+      "limit": "4bde88364a11af558895d91ac8422929b7a58ea26564f45f3ee200fb7c9310c7",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -47,14 +47,14 @@
     },
     {
       "current": {
-        "source_module_count": 2210,
-        "source_tree_sha256": "fbbba070d15f5c24b9648c5af184816c09c3b50bb8b67b62f94414d293933a5b",
+        "source_module_count": 2221,
+        "source_tree_sha256": "4bde88364a11af558895d91ac8422929b7a58ea26564f45f3ee200fb7c9310c7",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
-        "source_module_count": 2210,
-        "source_tree_sha256": "fbbba070d15f5c24b9648c5af184816c09c3b50bb8b67b62f94414d293933a5b",
+        "source_module_count": 2221,
+        "source_tree_sha256": "4bde88364a11af558895d91ac8422929b7a58ea26564f45f3ee200fb7c9310c7",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -181,8 +181,8 @@
       "status": "pass"
     },
     {
-      "current": 38,
-      "limit": 38,
+      "current": 0,
+      "limit": 0,
       "metric": "duplication_clusters",
       "name": "full_app_duplication_infrastructure_adapters",
       "remediation": "Reduce duplicate clusters and regenerate the full-app duplication baseline without raising scorecard budgets.",
@@ -190,8 +190,8 @@
       "status": "pass"
     },
     {
-      "current": 2,
-      "limit": 2,
+      "current": 0,
+      "limit": 0,
       "metric": "duplication_clusters",
       "name": "full_app_duplication_application_pipelines",
       "remediation": "Reduce duplicate clusters and regenerate the full-app duplication baseline without raising scorecard budgets.",
@@ -217,8 +217,8 @@
       "status": "pass"
     },
     {
-      "current": 40,
-      "limit": 40,
+      "current": 0,
+      "limit": 0,
       "metric": "total_duplicate_clusters",
       "name": "full_app_duplication_total_clusters",
       "remediation": "Burn down full-app duplicate clusters and refresh the reviewed baseline.",
@@ -226,8 +226,8 @@
       "status": "pass"
     },
     {
-      "current": 45,
-      "limit": 45,
+      "current": 30,
+      "limit": 35,
       "metric": "zero_reference_supporting_script_count",
       "name": "supporting_scripts_zero_reference_count",
       "remediation": "Triage or remove zero-reference supporting scripts; budgets must not grow.",
@@ -361,7 +361,7 @@
       "status": "pass"
     },
     {
-      "current": 6,
+      "current": 9,
       "limit": 21,
       "metric": "generated_at_age_days",
       "name": "observability_release_review_freshness",
@@ -397,7 +397,7 @@
       "status": "pass"
     },
     {
-      "current": "5653b8082cb97a618d8329552fe027d4f486eaad197bdee78609d66f395a0775",
+      "current": "80060e84d82ee783ca04617be15f48eed74964fac05ce491eaeda77e3434640b",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -431,7 +431,7 @@
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 8.58,
+    "architecture_quality_scorecard_integral_score": 8.66,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
     "fail_count": 0,
     "failing_gates": [],

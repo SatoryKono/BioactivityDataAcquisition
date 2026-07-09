@@ -37,6 +37,28 @@ When diagram drift is detected, the first remediation target should usually be t
 
 ______________________________________________________________________
 
+## Cleanup Classification Matrix
+
+Use this matrix before moving or deleting diagram files.
+
+| Path / artifact family | Cleanup class | Source of truth | Rule |
+| --- | --- | --- | --- |
+| `architecture/*.mmd`, `class-diagrams/*.mmd`, `foundation/*.mmd` | canonical source | Mermaid source file | Keep unless source drift is proven and reviewed under ADR-040. |
+| `class-diagrams/90-pkg-*.mmd` | generated source | `scripts/diagrams/generate_package_family_class_diagrams.py` | Regenerate from source tree; do not hand-edit for cleanup. |
+| `views/*.mermaid` | decomposed review view | focused view source | Keep as presentation-oriented slices; do not treat as replacement for canonical `.mmd`. |
+| `**/svg/**`, `**/png/**` | rendered artifact | diagram renderer | Regenerate; do not edit or delete without render/check evidence. |
+| `bundles/*.bundle.md` | generated bundle | diagram bundle generator | Regenerate from source families. |
+| `descriptions/**` | derived/published description cards | diagram description governance | Fix missing/stale description cards before deleting source or render files. |
+| `governance/**`, `manifests/**`, `tooling/**` | governance/tooling | ADR-040 + local policies | Keep with docs verification and diagram checks. |
+
+Required checks for diagram cleanup:
+
+- `python -m scripts.diagrams lint`
+- `python -m scripts.diagrams check-artifacts`
+- `python -m scripts.docs check-links --links --specs --configs`
+
+______________________________________________________________________
+
 ## Supplementary Non-Nav Indexes
 
 These artifacts are intentionally outside primary nav but linked here for discoverability.
@@ -303,16 +325,14 @@ Tooling note:
 
 ```bash
 # Render ALL diagrams (SVG + PNG) with custom theme
-make render-diagrams
+bash docs/02-architecture/diagrams/tooling/render.sh
 
 # SVG only (faster)
-make render-diagrams-svg
+bash docs/02-architecture/diagrams/tooling/render.sh --svg-only
 
 # Smoke-check visibility for edge labels and node text in SVG baselines
-make check-diagrams-visibility
-
-# Or run the script directly
-bash docs/02-architecture/diagrams/tooling/render.sh
+uv run python -m scripts.diagrams check-svg-text \
+  --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
 
 # Single diagram with theme
 mmdc -i docs/02-architecture/diagrams/architecture/01-high-level-hexagonal.mmd \
@@ -321,13 +341,13 @@ mmdc -i docs/02-architecture/diagrams/architecture/01-high-level-hexagonal.mmd \
      --cssFile docs/02-architecture/diagrams/theme/custom.css
 
 # Build print-safe PDF bundles with descriptions
-make render-diagrams-descriptions-pdf
+uv run python -m scripts.diagrams render-pdf-desc
 
 # Build DOCX bundles with descriptions
-make render-diagrams-descriptions-docx
+uv run python -m scripts.diagrams render-docx
 
 # Full agent pipeline (checks + render + DOCX + PDF)
-make run-diagram-docs-agent
+bash scripts/diagrams/run_diagram_docs_agent.sh
 ```
 
 Description PDF generation uses:
@@ -337,6 +357,12 @@ Description PDF generation uses:
 - unified orchestrator: `scripts/diagrams/run_diagram_docs_agent.sh`
 - print CSS: `docs/02-architecture/diagrams/theme/with-descriptions-print.css`
 - post-check: `scripts/diagrams/check_pdf_image_bounds.py`
+
+Description coverage policy:
+
+- `architecture/`, `foundation/`, and `views/` require one narrative card in `descriptions/<collection>/<stem>.md` for every active source file.
+- `class-diagrams/` requires narrative cards for the 16 primary curated family diagrams (`01-*` through `16-*`).
+- Focused class method catalogs (`01a`, `08a`, `14a`), the frontmatter sandbox copy, and generated `90-pkg-*` supplemental package slices are inventory/render surfaces; they are covered by their parent family cards or package-level generated context and are not required to have individual narrative cards.
 
 ### Render options
 
@@ -379,7 +405,7 @@ bash scripts/diagrams/validate_mermaid_syntax.sh --puppeteer /tmp/puppeteer-conf
 ```
 docs/02-architecture/diagrams/
   architecture/
-    *.mmd           # source diagrams (57)
+    *.mmd           # source diagrams (83)
     svg/*.svg       # rendered vector (scalable)
     png/*.png       # rendered raster (300 DPI)
   class-diagrams/
@@ -414,7 +440,7 @@ docs/02-architecture/diagrams/
 
 Diagrams are validated and rendered automatically in GitHub Actions
 (`.github/workflows/docs.yml`). Rendered SVG/PNG are uploaded as build artifacts.
-A drift check warns when `.mmd/.mermaid` sources change without re-rendering.
+A drift check fails when `.mmd/.mermaid` sources change without corresponding sibling SVG/PNG outputs.
 The workflow also validates SVG text visibility for the smoke baseline set.
 
 ### Quality Budget
@@ -442,7 +468,7 @@ uv run python -m scripts.diagrams check-quality-gates \
   --manifest docs/02-architecture/diagrams/manifests/quality-gates.txt \
   --json-out reports/diagrams/diagram-quality-report.json
 uv run python scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json \
-  > reports/diagrams/diagram-lint-report.json || true
+  > reports/diagrams/diagram-lint-report.json
 uv run python -m scripts.diagrams lint-budget \
   --mode pr \
   --quality-report reports/diagrams/diagram-quality-report.json \

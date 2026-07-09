@@ -15,7 +15,6 @@ CONFIG_TOPOLOGY_RATCHETS: dict[str, tuple[int, set[str]]] = {
         {
             "bioetl.composition.factories.pipeline._registry_manifest_chembl",
             "bioetl.composition.factories.pipeline._registry_manifest_non_chembl",
-            "bioetl.composition.factories.pipeline.config_types",
         },
     ),
     "src/bioetl/infrastructure/config/composite_config_api.py": (
@@ -185,12 +184,12 @@ def test_registry_manifest_imports_only_sanctioned_assembly_modules() -> None:
     unexpected_modules = imported_modules - {
         "bioetl.composition.factories.pipeline._registry_manifest_chembl",
         "bioetl.composition.factories.pipeline._registry_manifest_non_chembl",
-        "bioetl.composition.factories.pipeline.config_types",
         "__future__",
     }
     assert not unexpected_modules, (
         "registry_manifest.py should import only manifest tuple owners and "
-        "PipelineFactoryConfig:\n" + "\n".join(sorted(unexpected_modules))
+        "avoid pulling config type owners into the assembly seam:\n"
+        + "\n".join(sorted(unexpected_modules))
     )
 
 

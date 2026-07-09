@@ -1,14 +1,13 @@
-"""Data-root and artifact path helpers for run-manifest builders."""
+"""Data-root mode policy helpers for run-manifest builders."""
 
 from __future__ import annotations
 
 import os
 import tempfile
 from contextlib import suppress
-from pathlib import Path
+from importlib import import_module
+from pathlib import Path, PurePath
 from typing import TYPE_CHECKING, Literal
-
-from bioetl.domain.control_plane import RunArtifactRef
 
 if TYPE_CHECKING:
     from bioetl.infrastructure.config.settings_api import Settings
@@ -16,10 +15,50 @@ if TYPE_CHECKING:
 
 DataRootMode = Literal["explicit", "repo_default", "private_cache", "tmp"]
 
+__all__ = [
+    "DataRootMode",
+    "build_planned_artifacts",
+    "control_plane_root",
+    "is_explicit_data_root_configured",
+    "resolve_data_root_mode",
+]
 
-def _artifact_path_string(path: Path) -> str:
-    """Return portable artifact paths with normalized separators."""
-    return path.as_posix()
+
+def control_plane_root(*args: object, **kwargs: object) -> object:
+    """Compatibility wrapper for the control-plane path leaf helper."""
+    return (
+        import_module(
+            "bioetl.composition.runtime_builders._run_manifest_control_plane_paths"
+        )
+    ).control_plane_root(*args, **kwargs)
+
+
+def build_planned_artifacts(*args: object, **kwargs: object) -> object:
+    """Compatibility wrapper for the planned-artifact path leaf helper."""
+    return (
+        import_module(
+            "bioetl.composition.runtime_builders._run_manifest_planned_artifacts"
+        )
+    ).build_planned_artifacts(*args, **kwargs)
+
+
+def __getattr__(name: str) -> object:
+    """Lazily expose legacy path helpers without static facade fan-in."""
+    if name == "control_plane_root":
+        return getattr(
+            import_module(
+                "bioetl.composition.runtime_builders._run_manifest_control_plane_paths"
+            ),
+            name,
+        )
+    if name == "build_planned_artifacts":
+        return getattr(
+            import_module(
+                "bioetl.composition.runtime_builders._run_manifest_planned_artifacts"
+            ),
+            name,
+        )
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def is_explicit_data_root_configured(settings: Settings) -> bool:
@@ -43,54 +82,8 @@ def resolve_data_root_mode(settings: Settings) -> DataRootMode:
     return "repo_default"
 
 
-def build_planned_artifacts(
-    *,
-    settings: Settings,
-    provider: str,
-    entity: str,
-    run_id: str | None = None,
-    pipeline_name: str | None = None,
-    workflow_id: str = "standalone",
-    debug_export_root: str | None = None,
-) -> tuple[RunArtifactRef, ...]:
-    """Capture planned layer roots for the manifest control-plane snapshot."""
-    output_root = _resolve_data_root(settings) / "output"
-    planned = [
-        RunArtifactRef(
-            layer="bronze",
-            path=_artifact_path_string(output_root / "bronze" / provider / entity),
-        ),
-        RunArtifactRef(
-            layer="silver",
-            path=_artifact_path_string(output_root / "silver" / provider / entity),
-        ),
-        RunArtifactRef(
-            layer="gold",
-            path=_artifact_path_string(output_root / "gold" / provider / entity),
-        ),
-    ]
-    if debug_export_root and run_id and pipeline_name:
-        configured_root = Path(debug_export_root)
-        if not configured_root.is_absolute():
-            configured_root = Path.cwd() / configured_root
-        planned.append(
-            RunArtifactRef(
-                layer="debug_export",
-                path=_artifact_path_string(
-                    configured_root / workflow_id / pipeline_name / run_id
-                ),
-            )
-        )
-    return tuple(planned)
-
-
-def control_plane_root(settings: Settings, leaf: str) -> Path:
-    """Return the canonical control-plane output root for one leaf namespace."""
-    return _resolve_data_root(settings) / "output" / "control" / leaf
-
-
 def _resolve_data_root(settings: Settings) -> Path:
-    """Resolve a writable data root for control-plane artifacts."""
+    """Resolve a writable data root for legacy run-manifest facade callers."""
     configured_root = getattr(settings, "data_dir", None)
     if configured_root:
         return Path(configured_root)
@@ -105,17 +98,6 @@ def _resolve_data_root(settings: Settings) -> Path:
     return candidate
 
 
-def _private_fallback_data_root() -> Path:
-    """Return a user-private fallback data root when the checkout is read-only."""
-    preferred = Path.home() / ".cache" / "bioetl-data"
-    try:
-        return _prepare_private_runtime_dir(preferred)
-    except OSError:
-        runtime_user = getattr(os, "getuid", lambda: "user")()
-        fallback = Path(tempfile.gettempdir()) / f"bioetl-data-{runtime_user}"
-        return _prepare_private_runtime_dir(fallback)
-
-
 def _private_fallback_data_root_mode() -> DataRootMode:
     """Classify which private fallback would be used when checkout is read-only."""
     preferred = Path.home() / ".cache" / "bioetl-data"
@@ -126,8 +108,25 @@ def _private_fallback_data_root_mode() -> DataRootMode:
     return "private_cache"
 
 
+def _private_fallback_data_root() -> Path:
+    """Return a user-private fallback data root for legacy facade callers."""
+    preferred = Path.home() / ".cache" / "bioetl-data"
+    try:
+        return _prepare_private_runtime_dir(preferred)
+    except OSError:
+        runtime_user = getattr(os, "getuid", lambda: "user")()
+        fallback = Path(tempfile.gettempdir()) / f"bioetl-data-{runtime_user}"
+        return _prepare_private_runtime_dir(fallback)
+
+
 def _prepare_private_runtime_dir(path: Path) -> Path:
+    """Create a private runtime directory and normalize its permissions."""
     path.mkdir(parents=True, exist_ok=True, mode=0o700)
     with suppress(OSError):
         path.chmod(0o700)
     return path
+
+
+def _artifact_path_string(path: PurePath) -> str:
+    """Return portable artifact paths with normalized separators."""
+    return path.as_posix()

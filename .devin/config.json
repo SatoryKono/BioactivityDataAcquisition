@@ -22,16 +22,6 @@
         "NPM_CONFIG_CACHE": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.cache/npm-cache"
       }
     },
-    "sequential-thinking": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking@2025.12.18"
-      ],
-      "env": {
-        "NPM_CONFIG_CACHE": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.cache/npm-cache"
-      }
-    },
     "fetch": {
       "command": "uvx",
       "args": [
@@ -42,17 +32,6 @@
       "env": {
         "UV_CACHE_DIR": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.cache/uv-cache",
         "UV_TOOL_DIR": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.cache/uv-tools"
-      }
-    },
-    "pdf": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-pdf@1.3.1",
-        "--stdio"
-      ],
-      "env": {
-        "NPM_CONFIG_CACHE": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.cache/npm-cache"
       }
     },
     "github": {
@@ -70,28 +49,10 @@
         "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_docker_wrapper.sh"
       ]
     },
-    "docker-docs": {
-      "command": "bash",
-      "args": [
-        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_docker_docs_wrapper.sh"
-      ]
-    },
     "context7": {
       "command": "bash",
       "args": [
         "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_context7_wrapper.sh"
-      ]
-    },
-    "paper-search": {
-      "command": "bash",
-      "args": [
-        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_paper_search_wrapper.sh"
-      ]
-    },
-    "dockerhub": {
-      "command": "bash",
-      "args": [
-        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_dockerhub_wrapper.sh"
       ]
     },
     "ast-grep": {
@@ -124,12 +85,6 @@
         "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_brave_search_wrapper.sh"
       ]
     },
-    "sonarqube": {
-      "command": "bash",
-      "args": [
-        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_sonarqube_wrapper.sh"
-      ]
-    },
     "neo4j-cypher": {
       "command": "bash",
       "args": [
@@ -140,30 +95,6 @@
       "command": "bash",
       "args": [
         "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh"
-      ]
-    },
-    "needle": {
-      "command": "bash",
-      "args": [
-        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_needle_wrapper.sh"
-      ]
-    },
-    "chembl": {
-      "command": "bash",
-      "args": [
-        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_chembl_wrapper.sh"
-      ]
-    },
-    "pubchem": {
-      "command": "bash",
-      "args": [
-        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_pubchem_wrapper.sh"
-      ]
-    },
-    "pubmed": {
-      "command": "bash",
-      "args": [
-        "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/scripts/ai/mcp/mcp_pubmed_wrapper.sh"
       ]
     },
     "mermaid": {
@@ -183,10 +114,6 @@
     "deepwiki": {
       "type": "http",
       "url": "https://mcp.deepwiki.com/mcp"
-    },
-    "openaiDeveloperDocs": {
-      "type": "http",
-      "url": "https://developers.openai.com/mcp"
     }
   },
   "version": 1,

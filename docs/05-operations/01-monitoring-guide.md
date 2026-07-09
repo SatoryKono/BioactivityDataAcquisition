@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-13'
+  Last verified: '2026-07-07'
 
 ______________________________________________________________________
 
@@ -213,7 +213,7 @@ L0 дашборд для одного operator question: что сейчас bro
 где pipeline runtime теряет время, падает, копит backlog или даёт
 warning/error conditions. Dashboard остаётся **Prometheus-first**:
 answer row, latency/localization и handoff-панели usable без Loki/Tempo, а
-tracing-backed log hygiene живёт в expanded row
+tracing-backed log hygiene живёт в collapsed row
 `Tracing-only Log Hygiene (requires optional tracing profile)`.
 
 - **Top answer area**:
@@ -267,7 +267,7 @@ tracing-backed log hygiene живёт в expanded row
 - **Logs/traces row**:
   `Warnings`, `GLOBAL Unstructured Logs`, `Top Warning Events by Message / Range`,
   `GLOBAL Log Hygiene Trend`
-  остаются shipped, но вынесены в expanded tracing-only row. Если tracing
+  остаются shipped, но вынесены в collapsed tracing-only row. Если tracing
   profile выключен, оператор всё равно получает usable runtime triage без Loki
   и Tempo. `Inspect GLOBAL Unstructured Logs` показывает parsed `.__error__`
   из Loki pipeline после `| json`; эти rows intentionally GLOBAL, потому что
@@ -379,10 +379,11 @@ tracing-backed log hygiene живёт в expanded row
   (без UI-side ratio math).
 - **Anomalies / DQ p95 / Data Freshness**: детальные DQ-сигналы. `Worst Data
   Freshness Lag (seconds)` теперь показывает самый stale entity в выбранном
-  scope через `max(time() - bioetl_data_freshness_seconds)`, а
-  `Review: Latest Successful Data Timestamp` остаётся отдельным latest-success anchor
-  на первом экране. Это intentionally разные сигналы: latest success не должен
-  маскировать worst freshness lag.
+  scope через selected-range `max(time() - max_over_time(bioetl_data_freshness_seconds[$__range]))`,
+  а `Review: Latest Successful Data Timestamp` остаётся отдельным latest-success
+  anchor на первом экране, также основанным на `max_over_time(...)` внутри
+  выбранного range. Это intentionally разные сигналы: latest success не должен
+  маскировать worst freshness lag, а отсутствие samples в range остаётся UNKNOWN.
 - **Reject / Pareto / Fields** и
   **Validation Failures / Runtime Diagnostics / Trends** breakdown-панели
   сохраняют honest empty-state semantics: если в выбранном окне нет reject,
@@ -605,9 +606,10 @@ python -m scripts.ops check-observability-ports --json
   1. Для Grafana 12+ используйте `GF_PLUGINS_PREINSTALL=yesoreyeram-infinity-datasource`
      (legacy `GF_INSTALL_PLUGINS` оставляем только для обратной совместимости).
   1. Убедитесь, что Grafana datasource `Quarantine Explorer` указывает на
-     `http://host.docker.internal:8081` через host-gateway mapping Grafana
-     container (или ваш override `BIOETL_QUARANTINE_EXPLORER_URL`).
-  1. Проверьте, что host-side backend запущен как
+     Docker-default `http://quarantine-explorer:8081` через monitoring-network
+     alias или на ваш explicit override `BIOETL_QUARANTINE_EXPLORER_URL`.
+  1. Если используется host-side override `http://host.docker.internal:8081`,
+     проверьте, что backend запущен как
      `bioetl quarantine serve --host 0.0.0.0 --port 8081`.
   1. Если Grafana уходит в restart loop, проверьте `docker logs bioetl-grafana`:
      shipped bootstrap entrypoint удаляет stale local `grafana-image-renderer`

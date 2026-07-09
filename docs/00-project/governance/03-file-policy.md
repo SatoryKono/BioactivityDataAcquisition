@@ -27,6 +27,47 @@ ______________________________________________________________________
 
 ## 0. Политика корня репозитория
 
+### 0.0. Target root model
+
+Root allowlist является минимальной моделью корня, а не накопительным списком
+удобных entrypoints. Новые root-level файлы допускаются только после
+синхронного обновления `.github/root-allowlist.txt`, этой политики,
+`configs/quality/root_hygiene_review_registry.yaml` и, если файл является
+generated output, `configs/quality/generated_artifact_routing.yaml`.
+
+| Категория | Допустимые поверхности | Enforcement | Exit rule |
+| --- | --- | --- | --- |
+| Mandatory root minimum | project identity, package manager, security, license, and docs-tool files with exact-root contracts | `.github/root-allowlist.txt` and root cleanliness audit | move under `docs/**`, `configs/**`, or `scripts/**` when exact-root contract is gone |
+| Tool-required root files | exact filenames required by Git, packaging, npm, pre-commit, docs tooling, MCP workspace bootstrap, and review tooling | root allowlist plus owner lane when transitional | keep only while tool contract requires exact root filename |
+| Human-facing root docs | `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `LICENSE`, `AGENTS.md`, `GEMINI.md`, and reviewed vendor guidance such as `best_practices.md` | canonical root text policy in `audit_root_cleanliness.py` | non-canonical notes move to `docs/**` or `docs/99-archive/**` |
+| Allowed root directories | approved runtime, tooling, project, data, docs, report, source, and test trees listed below and in `configs/quality/repo_structure_catalog.yaml` | structure catalog and root governance docs check | new root directories require explicit structure governance |
+| Forbidden root files/directories | tracked `.env*` except `.env.example`, generated diagnostics, root scratch scripts/tests, local cache/output directories, and ad-hoc root dumps | strict root audit and generated-artifact routing | delete, ignore as local-only where approved, or route retained evidence to `reports/**` |
+| Temporary compatibility surfaces | thin launcher/setup shims and reviewed Docker helper entrypoints | `configs/quality/root_hygiene_review_registry.yaml` owner lanes | remove or rehome only after docs, CI, scripts, and operator flows no longer require the root entrypoint |
+
+Docker helper dispositions are resolved as follows and MUST stay aligned with
+`docs/05-operations/verification/docker-helper-root-relocation-audit.md`:
+
+| Surface | Disposition | Owner path / target | Exit rule |
+| --- | --- | --- | --- |
+| `Dockerfile.bioetl` | MUST stay root | `Dockerfile.bioetl` | move only after Docker workflow build inputs and manual build commands are repointed or wrapped |
+| `docker-compose.yml` | MUST stay root | `docker-compose.yml` | move only behind a root-compatible shim or after default `docker compose` flows are repointed |
+| `docker-compose.monitoring.yml` | MUST stay root | `docker-compose.monitoring.yml` | move only after monitoring CI/docs references use a new path or shim |
+| `docker-compose.codex.yml` | MUST stay root | `docker-compose.codex.yml` | move only after Codex/MCP startup and shutdown wrappers are repointed |
+| `docker-compose.neo4j.yml` | MUST stay root | `docker-compose.neo4j.yml` | move only after Neo4j helper commands and docs are repointed |
+| `docker-compose.neo4j-audit.yml` | MUST stay root | `docker-compose.neo4j-audit.yml` | move only after audit launchers and docs are repointed |
+| `docker-setup.ps1` | temporary shim | `scripts/ops/docker-setup.ps1` | remove root shim only when operator docs no longer advertise it |
+| `docker-setup.sh` | temporary shim | `scripts/ops/docker-setup.sh` | remove root shim only when operator docs no longer advertise it |
+| `docker-compose.alertmanager.yml` | moved to owned path | `scripts/ops/runtime/docker/compose/alertmanager.yml` | do not restore root filename without fresh owner review |
+| `docker-compose.minio.yml` | moved to owned path | `scripts/ops/runtime/docker/compose/minio.yml` | do not restore root filename without fresh owner review |
+| `docker-compose.redis.yml` | moved to owned path | `scripts/ops/runtime/docker/compose/redis.yml` | do not restore root filename without fresh owner review |
+| `docker-compose.sonarqube.yml` | moved to owned path | `scripts/ops/runtime/docker/compose/sonarqube.yml` | do not restore root filename without fresh owner review |
+| `Dockerfile.mcp-fetch` | moved to owned path | `scripts/ops/runtime/docker/images/mcp-fetch/Dockerfile` | do not restore root filename without fresh owner review |
+| `Dockerfile.mcp-filesystem` | moved to owned path | `scripts/ops/runtime/docker/images/mcp-filesystem/Dockerfile` | do not restore root filename without fresh owner review |
+| `Dockerfile.mcp-github` | moved to owned path | `scripts/ops/runtime/docker/images/mcp-github/Dockerfile` | do not restore root filename without fresh owner review |
+| `Dockerfile.mcp-memory` | moved to owned path | `scripts/ops/runtime/docker/images/mcp-memory/Dockerfile` | do not restore root filename without fresh owner review |
+| `Dockerfile.warp` | moved to owned path | `scripts/ops/runtime/docker/images/warp/Dockerfile` | do not restore root filename without fresh owner review |
+| `grafana-datasource.yml` | moved to owned path | `grafana/provisioning/datasources-local/grafana-datasource.yml` | do not restore root filename without fresh owner review |
+
 - Root-level tracked файлы MUST соответствовать `.github/root-allowlist.txt`.
 - Required root-level `docker-compose*.yml` files MAY оставаться tracked only
   when operator flows require the exact root filename. Optional adjunct helper
@@ -36,6 +77,14 @@ ______________________________________________________________________
 - Stable helper governance anchor:
   `BIOETL_DOCKER_HELPER_ADR010_ADJUNCT`; machine-readable helper contracts live
   in `configs/quality/docker_helper_contracts.yaml`.
+- Root `.mcp.json` is an exact-root workspace MCP entrypoint for compatible
+  tools and MUST remain tracked at the repository root. It MUST be generated
+  from `scripts/ai/codex/setup_mcp.py`, stay repo-relative/portable, and stay
+  synchronized with `scripts/ai/.mcp.json`. Machine-local absolute MCP paths are
+  allowed only in documented generated local runtime surfaces such as
+  `~/.codex/config.toml`, local ignored editor/runtime mirrors, or the reviewed
+  `.devin/config.json` runtime surface; see
+  `docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md`.
 - Root-level tracked markdown и txt артефакты MUST быть ограничены canonical
   root entrypoints. Операционные quick-reference материалы SHOULD жить в
   `docs/05-operations/`, а одноразовые status/recovery/final-summary артефакты
@@ -58,8 +107,9 @@ ______________________________________________________________________
   explicit compatibility entrypoints while their canonical maintained owner
   surfaces converge under `scripts/ai/codex/**`. Retired aliases such as
   `run-codex.ps1` and `run-codex-wsl.ps1` MUST NOT be restored without fresh
-  owner review. Retained root shims MUST stay thin and MUST NOT regrow
-  independent setup or launcher logic.
+  owner review. Retained root shims MUST stay thin, delegate to
+  `scripts/ai/codex/**`, and MUST NOT regrow independent setup or launcher
+  logic.
 - Root Docker helper relocation decisions MUST reference
   `docs/05-operations/verification/docker-helper-root-relocation-audit.md`
   before any helper/file move is approved.
@@ -69,7 +119,7 @@ ______________________________________________________________________
   root-level txt dump.
 - Root-level tracked директории MUST ограничиваться approved runtime/tooling and
   project surfaces: `.codex`, `.cursor`, `.devin`, `.gemini`, `.github`,
-  `.idea`, `.vibe`, `.vscode`, `artifacts`, `assets`, `configs`, `data`,
+  `.idea`, `.vibe`, `.vscode`, `.zed`, `artifacts`, `assets`, `configs`, `data`,
   `docs`, `grafana`, `reports`, `scripts`, `src`, and `tests`.
 - Canonical machine-readable root governance lives in `.github/root-allowlist.txt`,
   `configs/quality/repo_structure_catalog.yaml`,
@@ -79,17 +129,17 @@ ______________________________________________________________________
 - Служебные локальные деревья (`.worktrees/`, `.rollback/`) MUST NOT попадать в git-index.
 - Shared repo tooling surfaces such as `.codex/`, `.gemini/`, curated `.vibe/`,
   and curated shared editor metadata roots such as `.cursor/`, `.idea/`, and
-  `.vscode/` MAY оставаться tracked только если они поддерживаются как
+  `.vscode/`, `.zed/` MAY оставаться tracked только если они поддерживаются как
   проектные runtime/editor integrations.
 - Editor/vendor/tooling roots such as `.ai/`, `.aiassistant/`, `ai/`,
   `.jules/`, `.junie/`, `.sonarlint/`, `.windsurf/`, `.agent-work/`,
   `.agentbridge/`, `.agents/`, `.benchmarks/`, `.cache/`, `.qodo/`,
-  `.pytest_cache/`, `.ruff_cache/`, `.hypothesis/`,
+  `.mypy_cache/`, `.pytest_cache/`, `.ruff_cache/`, `.hypothesis/`,
   `.import_linter_cache/`, `.venv/`, `node_modules/`, and `test-output/`
   MAY существовать в рабочем дереве, но MUST оставаться untracked и
   игнорироваться `.gitignore`, если не были явно promoted через structure
   governance.
-- `.idea/`, `.vscode/`, and `.cursor/` MAY содержать curated shared project
+- `.idea/`, `.vscode/`, `.cursor/`, and `.zed/` MAY содержать curated shared project
   metadata (например, run configurations, scopes, inspections, словарь), но по
   умолчанию рассматриваются как local/editor state surfaces и MUST оставаться
   untracked, если не зарегистрированы как curated shared surfaces.

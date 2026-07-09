@@ -153,6 +153,14 @@ class BronzeWriter(
             )
         )
 
+    async def cleanup_bronze(
+        self,
+        cutoff_date: datetime,
+        dry_run: bool = False,
+    ) -> dict[str, int]:
+        """Implement ``BronzeStoragePort`` cleanup via the retained cleanup helper."""
+        return await self.cleanup_old_files(cutoff_date, dry_run=dry_run)
+
     async def _write_bronze_with_tracing(
         self,
         request: BronzeWriteRequest,

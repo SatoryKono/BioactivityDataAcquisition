@@ -21,9 +21,8 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.engineering.qa.report_test_governance_audit import (
+from scripts.engineering.qa.report_test_governance_audit import (  # noqa: E402
     DEFAULT_CONFIG,
-    DEFAULT_DUPLICATE_NAME_ARTIFACT,
     DEFAULT_FIXTURE_DUPLICATION_ARTIFACT,
     DEFAULT_JSON_ARTIFACT,
     collect_test_governance_report,
@@ -46,8 +45,11 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--duplicate-name-inventory",
-        default=str(DEFAULT_DUPLICATE_NAME_ARTIFACT),
-        help="Path to duplicate-name inventory JSON.",
+        default=None,
+        help=(
+            "Optional path to write a duplicate-name inventory JSON. The committed "
+            "baseline keeps this inventory embedded in the main governance artifact."
+        ),
     )
     parser.add_argument(
         "--fixture-duplication",
@@ -72,14 +74,16 @@ def main() -> int:
 
     root = Path(args.config).resolve().parents[2]
     output_path = Path(args.output)
-    duplicate_name_path = Path(args.duplicate_name_inventory)
+    duplicate_name_path = (
+        Path(args.duplicate_name_inventory) if args.duplicate_name_inventory else None
+    )
     fixture_duplication_path = Path(args.fixture_duplication)
 
     if args.verbose:
         print(f"Root: {root}")
         print(f"Config: {args.config}")
         print(f"Output: {output_path}")
-        print(f"Duplicate name inventory: {duplicate_name_path}")
+        print(f"Duplicate name inventory: {duplicate_name_path or '<embedded-only>'}")
         print(f"Fixture duplication: {fixture_duplication_path}")
 
     # Collect the report (this is the expensive operation)
@@ -88,14 +92,16 @@ def main() -> int:
     # Write the main artifact
     if not args.check:
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        output_path.write_text(
+            json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
 
     # Write duplicate name inventory
     duplicate_inventory_payload = {
         "summary": payload["report"]["duplicate_test_name_inventory_summary"],
         "inventory": payload["report"]["duplicate_test_name_inventory"],
     }
-    if not args.check:
+    if not args.check and duplicate_name_path is not None:
         duplicate_name_path.parent.mkdir(parents=True, exist_ok=True)
         duplicate_name_path.write_text(
             json.dumps(duplicate_inventory_payload, indent=2, sort_keys=True) + "\n",

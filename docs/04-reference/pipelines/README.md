@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-17'
+  Last verified: '2026-07-07'
 
 ______________________________________________________________________
 
 # BioETL Pipeline Documentation
 
-*Updated: 2026-06-17 | Aligned with RULES.md v6.1.3*
+*Updated: 2026-07-07 | Aligned with RULES.md v6.1.4*
 
 This directory contains the active pipeline reference surface for BioETL,
 including composite pipelines.
@@ -63,7 +63,7 @@ delegate detailed behavior to the linked provider reference and active config.
 | 9   | `chembl_compound_record`        | ChEMBL           | compound-record        | [Spec](chembl/09-compound-record-spec.md)        |
 | 10  | `chembl_target_component`       | ChEMBL           | target-component       | [Spec](chembl/10-target-component-spec.md)       |
 | 11  | `chembl_target_protein_classification` | ChEMBL           | target-protein-classification | [Spec](chembl/11-target-protein-classification-spec.md) |
-| 12  | `chembl_publication_term`       | ChEMBL           | publication-term       | [Spec](chembl/11-publication-term-spec.md)       |
+| 12  | `chembl_publication_term`       | ChEMBL           | publication-term       | [Spec](chembl/13-publication-term-spec.md)       |
 | 13  | `chembl_publication_similarity` | ChEMBL           | publication-similarity | [Spec](chembl/12-publication-similarity-spec.md) |
 | 14  | `chembl_subcellular_fraction`   | ChEMBL           | subcellular-fraction   | [Spec](chembl/14-subcellular-fraction-spec.md)   |
 | 15  | `chembl_tissue`                 | ChEMBL           | tissue                 | [Spec](chembl/15-tissue-spec.md)                 |

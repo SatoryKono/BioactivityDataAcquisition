@@ -174,13 +174,16 @@ class _FakeWorkflowRunner:
         self,
         config: WorkflowConfig,
         *,
+        workflow_run_id: str | None = None,
+        manifest_id: str | None = None,
         completed_step_ids: frozenset[str] | None = None,
         completed_transform_fingerprints: dict[str, str] | None = None,
         step_started_callback: object | None = None,
         step_completed_callback: object | None = None,
         transform_commit_callback: object | None = None,
+        created_at_factory: object | None = None,
     ) -> WorkflowRunExecutionResult:
-        del transform_commit_callback
+        del workflow_run_id, manifest_id, transform_commit_callback, created_at_factory
         self.received_completed_step_ids = completed_step_ids
         self.received_completed_transform_fingerprints = (
             None
@@ -717,16 +720,22 @@ async def test_workflow_execution_service_requires_explicit_repair_after_ambiguo
             self,
             config: WorkflowConfig,
             *,
+            workflow_run_id: str | None = None,
+            manifest_id: str | None = None,
             completed_step_ids: frozenset[str] | None = None,
             completed_transform_fingerprints: dict[str, str] | None = None,
             step_started_callback: object | None = None,
             step_completed_callback: object | None = None,
             transform_commit_callback: object | None = None,
+            created_at_factory: object | None = None,
         ) -> WorkflowRunExecutionResult:
             del (
+                workflow_run_id,
+                manifest_id,
                 completed_step_ids,
                 completed_transform_fingerprints,
                 step_completed_callback,
+                created_at_factory,
             )
             step = config.steps[0]
             if step_started_callback is not None:

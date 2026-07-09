@@ -97,8 +97,9 @@ Guidance:
 - Use `--fallback none` when you need to prove the server-side Grafana render
   path works independently of Playwright.
 - Use at least `--timeout-seconds 90` for full-suite server-side renders. The
-  larger BioETL dashboards can exceed short smoke-test timeouts even when the
-  Render API is healthy.
+  option is forwarded to the Grafana render API `timeout` parameter as well as
+  the local client timeout; larger BioETL dashboards can exceed short
+  smoke-test timeouts even when the Render API is healthy.
 - Use default fallback behavior when you want a best-effort screenshot refresh
   and browser capture is acceptable.
 

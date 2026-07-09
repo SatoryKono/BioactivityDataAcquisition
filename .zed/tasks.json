@@ -1,0 +1,165 @@
+[
+  {
+    "label": "Format code",
+    "command": "ruff",
+    "args": ["format", "."],
+    "reveal": "always"
+  },
+  {
+    "label": "Lint code",
+    "command": "ruff",
+    "args": ["check", "."],
+    "reveal": "always"
+  },
+  {
+    "label": "Type check",
+    "command": "mypy",
+    "args": ["src/"],
+    "reveal": "always"
+  },
+  {
+    "label": "Run unit tests",
+    "command": "pytest",
+    "args": ["tests/unit/", "-v"],
+    "tags": ["python-test"],
+    "reveal": "always"
+  },
+  {
+    "label": "Run integration tests",
+    "command": "pytest",
+    "args": ["tests/integration/", "-v"],
+    "tags": ["python-test"],
+    "reveal": "always"
+  },
+  {
+    "label": "Run architecture tests",
+    "command": "pytest",
+    "args": ["tests/architecture/", "-v"],
+    "tags": ["python-test"],
+    "reveal": "always"
+  },
+  {
+    "label": "Run E2E smoke tests",
+    "command": "pytest",
+    "args": ["-m", "e2e_smoke", "-v"],
+    "tags": ["python-test"],
+    "reveal": "always"
+  },
+  {
+    "label": "Security scan",
+    "command": "bandit",
+    "args": ["-r", "src/"],
+    "reveal": "always"
+  },
+  {
+    "label": "Coverage report",
+    "command": "pytest",
+    "args": ["--cov=src/bioetl", "--cov-report=html"],
+    "tags": ["python-test"],
+    "reveal": "always"
+  },
+  {
+    "label": "Architecture compliance",
+    "command": "import-linter",
+    "args": ["--config", ".importlinter"],
+    "reveal": "always"
+  },
+  {
+    "label": "Run all tests",
+    "command": "pytest",
+    "args": ["-v", "-m", "not benchmark and not slow"],
+    "tags": ["python-test"],
+    "reveal": "always"
+  },
+  {
+    "label": "Run fast tests only",
+    "command": "pytest",
+    "args": ["-v", "-m", "unit"],
+    "tags": ["python-test"],
+    "reveal": "always"
+  },
+  {
+    "label": "Dependency audit",
+    "command": "pip-audit",
+    "args": [],
+    "reveal": "always"
+  },
+  {
+    "label": "Dead code detection",
+    "command": "vulture",
+    "args": ["src/bioetl"],
+    "reveal": "always"
+  },
+  {
+    "label": "Complexity check",
+    "command": "xenon",
+    "args": [
+      "--max-absolute",
+      "B",
+      "--max-modules",
+      "B",
+      "--max-average",
+      "A",
+      "src/bioetl"
+    ],
+    "reveal": "always"
+  },
+  {
+    "label": "Refresh MCP config",
+    "command": "py",
+    "args": [
+      "scripts/ai/codex/setup_mcp.py",
+      "--skip-codex",
+      "--skip-gemini-settings"
+    ],
+    "reveal": "always"
+  },
+  {
+    "label": "Run py-audit-bot",
+    "command": "codex",
+    "args": ["agent", "run", "py-audit-bot"],
+    "reveal": "always"
+  },
+  {
+    "label": "Run py-test-bot",
+    "command": "codex",
+    "args": ["agent", "run", "py-test-bot"],
+    "reveal": "always"
+  },
+  {
+    "label": "Run py-doc-bot",
+    "command": "codex",
+    "args": ["agent", "run", "py-doc-bot"],
+    "reveal": "always"
+  },
+  {
+    "label": "Run py-config-bot",
+    "command": "codex",
+    "args": ["agent", "run", "py-config-bot"],
+    "reveal": "always"
+  },
+  {
+    "label": "Run py-debug-bot",
+    "command": "codex",
+    "args": ["agent", "run", "py-debug-bot"],
+    "reveal": "always"
+  },
+  {
+    "label": "Invoke grafana-dashboard-render skill",
+    "command": "devin",
+    "args": ["skill", "invoke", "grafana-dashboard-render"],
+    "reveal": "always"
+  },
+  {
+    "label": "Invoke py-test-swarm skill",
+    "command": "devin",
+    "args": ["skill", "invoke", "py-test-swarm"],
+    "reveal": "always"
+  },
+  {
+    "label": "Invoke documentation-audit skill",
+    "command": "devin",
+    "args": ["skill", "invoke", "documentation-audit"],
+    "reveal": "always"
+  }
+]

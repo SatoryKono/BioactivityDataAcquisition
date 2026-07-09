@@ -41,6 +41,21 @@ Boundary rules:
 - execution state MUST NOT infer destructive replay silently when ambiguity is
   present.
 
+## Workflow Domain Symbols
+
+The workflow state machine is backed by immutable domain config objects and DAG
+validation helpers. These are the symbol-level anchors for audits that need to
+trace documented statuses back to code.
+
+| Symbol | Role | Source |
+| --- | --- | --- |
+| `WorkflowRunOptionsConfig` | Partial run-options contract allowed in workflow YAML and CLI overrides | `src/bioetl/domain/workflow/config.py` |
+| `WorkflowStepConfig` | Declarative pipeline step in a workflow DAG | `src/bioetl/domain/workflow/config.py` |
+| `TransformStepConfig` | Declarative transform step in a workflow DAG | `src/bioetl/domain/workflow/config.py` |
+| `WorkflowConfig` | Complete workflow configuration root; validates DAG order on creation | `src/bioetl/domain/workflow/config.py` |
+| `WorkflowDagValidationError` | Domain exception for duplicate, missing, or cyclic workflow step dependencies | `src/bioetl/domain/workflow/dag.py` |
+| `WorkflowTransformSpec` | Transform registry contract used by workflow transform execution | `src/bioetl/domain/workflow/transform_spec.py` |
+
 ## Workflow-Level Statuses
 
 Current owner model: `WorkflowExecutionState.status`
