@@ -135,7 +135,9 @@ class TestAtomicWrite:
             return original_replace(self, target_path)
 
         with patch.object(Path, "replace", flaky_replace):
-            with patch("bioetl.infrastructure.storage.support.atomic_ops.time.sleep"):
+            with patch(
+                "bioetl.infrastructure.storage.support._atomic_replace.time.sleep"
+            ):
                 atomic_write_text(target, "ok")
 
         assert target.read_text() == "ok"
@@ -154,7 +156,9 @@ class TestAtomicWrite:
             raise OSError(2, "No such file or directory")
 
         with patch.object(Path, "replace", non_retryable_replace):
-            with patch("bioetl.infrastructure.storage.support.atomic_ops.time.sleep"):
+            with patch(
+                "bioetl.infrastructure.storage.support._atomic_replace.time.sleep"
+            ):
                 with pytest.raises(AtomicWriteError):
                     atomic_write_text(target, "x")
 
@@ -183,7 +187,9 @@ class TestAtomicWrite:
         )
 
         with patch.object(Path, "replace", flaky_replace):
-            with patch("bioetl.infrastructure.storage.support.atomic_ops.time.sleep"):
+            with patch(
+                "bioetl.infrastructure.storage.support._atomic_replace.time.sleep"
+            ):
                 atomic_write_text(
                     target,
                     "ok",
@@ -205,7 +211,7 @@ class TestAtomicRetryableErrors:
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Non-Windows EACCES should not be treated as transient lock contention."""
-        import bioetl.infrastructure.storage.support.atomic_ops as atomic_module
+        import bioetl.infrastructure.storage.support._atomic_replace as atomic_module
 
         monkeypatch.setattr(atomic_module, "_IS_WINDOWS", False)
         error = OSError(errno.EACCES, "Permission denied")
@@ -215,7 +221,7 @@ class TestAtomicRetryableErrors:
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """Non-Windows EBUSY should be treated as transient lock contention."""
-        import bioetl.infrastructure.storage.support.atomic_ops as atomic_module
+        import bioetl.infrastructure.storage.support._atomic_replace as atomic_module
 
         monkeypatch.setattr(atomic_module, "_IS_WINDOWS", False)
         error = OSError(errno.EBUSY, "Device or resource busy")
@@ -223,7 +229,7 @@ class TestAtomicRetryableErrors:
 
     def test_windows_eacces_is_retryable(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Windows EACCES should remain retryable for transient sharing violations."""
-        import bioetl.infrastructure.storage.support.atomic_ops as atomic_module
+        import bioetl.infrastructure.storage.support._atomic_replace as atomic_module
 
         monkeypatch.setattr(atomic_module, "_IS_WINDOWS", True)
         error = OSError(errno.EACCES, "Permission denied")
@@ -233,7 +239,7 @@ class TestAtomicRetryableErrors:
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """WinError=5 should be treated as retryable on Windows."""
-        import bioetl.infrastructure.storage.support.atomic_ops as atomic_module
+        import bioetl.infrastructure.storage.support._atomic_replace as atomic_module
 
         monkeypatch.setattr(atomic_module, "_IS_WINDOWS", True)
         error = _WindowsAccessDeniedError(
@@ -246,7 +252,7 @@ class TestAtomicRetryableErrors:
         self, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """WinError=33 should be treated as retryable on Windows."""
-        import bioetl.infrastructure.storage.support.atomic_ops as atomic_module
+        import bioetl.infrastructure.storage.support._atomic_replace as atomic_module
 
         monkeypatch.setattr(atomic_module, "_IS_WINDOWS", True)
         error = _WindowsLockViolationError(
@@ -294,7 +300,9 @@ class TestAtomicWriteWindowsLockStress:
             return original_replace(self, target_path)
 
         with patch.object(Path, "replace", flaky_replace):
-            with patch("bioetl.infrastructure.storage.support.atomic_ops.time.sleep"):
+            with patch(
+                "bioetl.infrastructure.storage.support._atomic_replace.time.sleep"
+            ):
                 for idx in range(writes):
                     call_counts["remaining_failures"] = transient_failures_per_write
                     atomic_write_text(
@@ -348,7 +356,9 @@ class TestAtomicWriteWindowsLockStress:
             atomic_write_text(targets[idx], f"value-{idx}", retry_policy=policy)
 
         with patch.object(Path, "replace", flaky_replace):
-            with patch("bioetl.infrastructure.storage.support.atomic_ops.time.sleep"):
+            with patch(
+                "bioetl.infrastructure.storage.support._atomic_replace.time.sleep"
+            ):
                 with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
                     list(pool.map(write_target, range(file_count)))
 

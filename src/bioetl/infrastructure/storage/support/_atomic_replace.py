@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import os
-from pathlib import Path
 import time
 from collections.abc import Callable
+from pathlib import Path
 
 from bioetl.domain.exceptions.infrastructure import InfrastructureError as _InfraBase
 from bioetl.infrastructure.storage.delta.resilience import AdaptiveRetryPolicy

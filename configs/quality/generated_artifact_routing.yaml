@@ -14,10 +14,17 @@ allowed_output_roots:
     - docs/reports/generated/
     - docs/reports/dictionaries/
     - docs/02-architecture/generated/
+    - docs/02-architecture/adr-registry.md
+    - docs/02-architecture/adr-registry/
+    - docs/04-reference/config_comparison_matrix.csv
+    - docs/filters/inventory-baseline.csv
+    - docs/filters/inventory-baseline.json
+    - docs/filters/inventory-baseline.md
   ignored_docs_exports:
     - docs/exports/
   local_generated_docs_helpers:
     - docs/site/
+    - docs/00-project/ai/skills/_references/
   generated_source:
     - src/bioetl/domain/schemas/generated/
     - src/bioetl/domain/mapping/generated/

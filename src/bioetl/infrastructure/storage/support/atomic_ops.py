@@ -39,7 +39,6 @@ from bioetl.infrastructure.storage.support._atomic_replace import (
     ATOMIC_WRITE_EXCEPTIONS,
     AtomicWriteError,
     ReplaceRetryHook,
-    _is_retryable_replace_error,
     _replace_with_retry,
 )
 

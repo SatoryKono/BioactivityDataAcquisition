@@ -37,8 +37,8 @@
       "status": "pass"
     },
     {
-      "current": "a773ee5b2514e8e5d05374c044e9cb03b06cfc3c63b23453091c5cb0897cb6c4",
-      "limit": "a773ee5b2514e8e5d05374c044e9cb03b06cfc3c63b23453091c5cb0897cb6c4",
+      "current": "0872e9b97c44e61c2adccdcc188aa42f18541ececf8df56d673d1918af1bb250",
+      "limit": "0872e9b97c44e61c2adccdcc188aa42f18541ececf8df56d673d1918af1bb250",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
@@ -47,14 +47,14 @@
     },
     {
       "current": {
-        "source_module_count": 2219,
-        "source_tree_sha256": "a773ee5b2514e8e5d05374c044e9cb03b06cfc3c63b23453091c5cb0897cb6c4",
+        "source_module_count": 2220,
+        "source_tree_sha256": "0872e9b97c44e61c2adccdcc188aa42f18541ececf8df56d673d1918af1bb250",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
-        "source_module_count": 2219,
-        "source_tree_sha256": "a773ee5b2514e8e5d05374c044e9cb03b06cfc3c63b23453091c5cb0897cb6c4",
+        "source_module_count": 2220,
+        "source_tree_sha256": "0872e9b97c44e61c2adccdcc188aa42f18541ececf8df56d673d1918af1bb250",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -361,7 +361,7 @@
       "status": "pass"
     },
     {
-      "current": 8,
+      "current": 9,
       "limit": 21,
       "metric": "generated_at_age_days",
       "name": "observability_release_review_freshness",
