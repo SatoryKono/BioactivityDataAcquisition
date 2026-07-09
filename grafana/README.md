@@ -89,7 +89,8 @@ ______________________________________________________________________
 > That helper also reuses or auto-downloads the same portable Node.js LTS
 > toolchain when `node` is not present in the current PowerShell `PATH`.
 > Shipped dashboard rows are expanded by default; the Playwright screenshot
-> renderer captures that full row surface.
+> renderer captures that full row surface and scrolls through the page before
+> capture so Grafana lazy-rendered panels are materialized in the final PNG.
 > Grafana Render API screenshots remain valid render/semantic evidence, but
 > a full-surface UX audit must
 > have `expanded-row-capture: ok` in

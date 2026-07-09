@@ -26,6 +26,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as a sourced WSL proxy environment helper for Codex setup flows; keep it supporting unless it becomes a standalone, documented CLI entrypoint."
     },
+    "scripts/ai/gemini/helper/check-env.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the WSL environment-check helper invoked by the Windows Gemini helper wrapper; keep it supporting unless it becomes a standalone documented launcher surface."
+    },
     "scripts/docs/common/markdown.py": {
       "owner": "@bioetl-docs",
       "decision": "shared_helper_module",
@@ -91,6 +97,12 @@
       "decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side companion for the canonical Prometheus MCP wrapper while Linux/WSL configs actively reference the .sh wrapper; promote only if Windows MCP configs become first-class tracked artifacts."
+    },
+    "scripts/ai/mcp/support/docker_cli_resolver.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the PowerShell Docker CLI resolver helper used by MCP wrapper transports; keep it supporting unless Docker CLI discovery becomes a standalone governed MCP command."
     },
     "scripts/ai/sync_cursor_rules.py": {
       "owner": "@bioetl-platform",

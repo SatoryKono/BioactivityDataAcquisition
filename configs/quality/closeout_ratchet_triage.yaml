@@ -334,3 +334,8 @@ entries:
     classification: budget_closeout_ratchet
     live_guard: "debt issue #6062 remains aligned with live Gold writer function-scoped import inventory without budget growth."
     rationale: Keeps the architecture-debt closeout tied to executable Gold writer lazy-import and hidden-coupling evidence instead of stale historical signoff.
+  - path: tests/architecture/test_refactoring_followups_6097_6100_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "refactoring follow-up issues #6097-#6100 remain aligned with live facade ownership, runtime SCC, config governance, and VCR replay-preflight ratchets without budget growth."
+    rationale: Keeps the refactoring follow-up closeout tied to executable live invariants and flat-or-decreasing debt-budget evidence instead of stale historical signoff.

@@ -309,16 +309,16 @@ def _classify(
         return "Duplicate", "migration-required", "replace-with-link"
     if "obsolete duplicate" in text[:1000].lower() or declared == "retired":
         return "Deprecated", "migration-required", "replace-with-link"
-    if duplicate_group and not path.startswith(
-        ("docs/99-archive/", "reports/quality/")
-    ):
-        return "Duplicate", "migration-required", "merge"
     if (
         route
         or generated_marker
         or any(marker in path for marker in GENERATED_PATH_MARKERS)
     ):
         return "Generated", "regenerate", "generate-automatically"
+    if duplicate_group and not path.startswith(
+        ("docs/99-archive/", "reports/quality/")
+    ):
+        return "Duplicate", "migration-required", "merge"
     if diagram_kind and diagram_kind.startswith("diagram_"):
         if diagram_kind in {
             "diagram_canonical_source",

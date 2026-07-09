@@ -413,9 +413,17 @@ def test_root_review_contract_entrypoints_have_exact_filename_owners() -> None:
         "mint.json",
         "pr_compliance_checklist.yaml",
     }
-    for path, candidate in by_path.items():
+    present_contract_paths = {
+        "commitlint.config.mjs",
+        "pr_compliance_checklist.yaml",
+    }
+    for path in present_contract_paths:
+        candidate = by_path[path]
         assert candidate["current_live_state"] == "present_approved_root_surface"
         assert candidate["canonical_path"] == path
+
+    assert by_path["mint.json"]["current_live_state"] == "absent_from_root_baseline"
+    assert by_path["mint.json"]["canonical_path"] is None
 
 
 def test_root_launcher_shims_lane_tracks_reviewed_root_compatibility_entrypoints() -> (

@@ -1774,7 +1774,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "docs/04-reference/observability/metrics-catalog.md",
       "occurrence_count": 1,
-      "first_line": 82,
+      "first_line": 84,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1785,7 +1785,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "grafana/README.md",
       "occurrence_count": 5,
-      "first_line": 701,
+      "first_line": 702,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1862,7 +1862,7 @@
       "symbol": "bioetl_silver_filter_reject_total_mismatch_15m",
       "path": "grafana/README.md",
       "occurrence_count": 2,
-      "first_line": 1093,
+      "first_line": 1094,
       "role": "Silver reject accounting reconciliation",
       "migration_relevance": "Recording rule reconciles stage totals with bounded Silver reject breakdowns.",
       "notes": ""
