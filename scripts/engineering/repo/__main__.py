@@ -23,7 +23,7 @@ Commands:
     publish-tdx-audit-issues  Publish or reopen TDX-AUDIT GitHub issues
     generate-branch-cleanup-inventory  Build branch cleanup inventory JSON (phase 0)
     apply-branch-cleanup  Apply branch cleanup phases 1-2 (dry-run by default)
-    cleanup-branch-candidates  Preview or apply curated branch cleanup plan
+    cleanup-branch-candidates  Preview or apply curated local branch cleanup plan
     check-all          Run read-only checks sequentially
     all                Alias for check-all
 """

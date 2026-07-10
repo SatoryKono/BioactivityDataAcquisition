@@ -86,7 +86,9 @@ the risky local branches.
 | ------------------------------ | --------------------------------------------------------- |
 | `check_cleanup_governance.py`  | Guard active docs/scripts against broad cleanup guidance  |
 | `preflight_cleanup.sh`         | Bounded release-preflight cleanup helper                  |
-| `cleanup_branch_candidates.sh` | Dry-run/apply cleanup for the curated branch deletion set |
+| `cleanup_branch_candidates.sh` | Dry-run/apply cleanup for curated branch deletion set |
+| `branch_cleanup.py` | Generate inventory and apply branch cleanup phases 1-2 |
+| `apply_branch_cleanup_phases_0_2.sh` | Orchestrate phases 0-2 (inventory + apply reports) |
 
 ## Preflight Cleanup Flags
 
