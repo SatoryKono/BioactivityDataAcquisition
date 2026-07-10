@@ -1,0 +1,4 @@
+interface:
+  display_name: "Suggest Users"
+  short_description: "Suggest reviewers or assignees"
+  default_prompt: "Use $suggest-users to rank reviewers or assignees from ownership, activity, and workload signals."

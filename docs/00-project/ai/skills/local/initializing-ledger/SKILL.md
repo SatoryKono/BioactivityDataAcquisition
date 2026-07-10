@@ -1,29 +1,26 @@
-> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
-> Canonical runtime source:
-> - Codex: `.codex/skills/initializing-ledger/SKILL.md`
-> Governance: [AI Runtime Mirror Ownership](../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../../agents/policy/POST_CHANGE_VALIDATION.md).
-> Edit the runtime source first, then refresh this mirror.
-______________________________________________________________________
-
-## name: initializing-ledger description: Use when starting a new product development project that needs traceable evidence and explicit decisions. Creates workspace structure from a project brief. context: fork agent: general-purpose
+---
+name: "initializing-ledger"
+description: "Use when starting a new product development project that needs traceable evidence and explicit decisions. Creates workspace structure from a project brief."
+context: "fork"
+agent: "general-purpose"
+---
 
 # Ledger Initialization
 
+## Source Of Truth
+
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+- Shared evidence/decision contract: [../collecting-evidence/references/evidence-decision-contract.md](../collecting-evidence/references/evidence-decision-contract.md)
 This skill creates a complete Context Ledger workspace from a project brief.
 
 ## Prerequisites
 
 - User must provide a project brief (text description of what they're building)
 - Optionally: custom path for ledger workspace (default: `./ledger/`)
-
-## Source Of Truth
-- Normative index: `../../../../NORMATIVE_SOURCES.md`
-- Root runtime contract: `../../../../../../AGENTS.md`
-- Project rules: `../../../../RULES.md`
-- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../../../02-architecture/decisions`
-- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
-- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
 
 ## Workflow
 
@@ -91,7 +88,7 @@ If validation fails, prompt for missing information before proceeding.
 
 ### Step 3: Create Directory Structure
 
-Create the full ledger workspace. See `references/pillar-definitions.md` for pillar details.
+Create the full ledger workspace. See [references/pillar-definitions.md](references/pillar-definitions.md) for pillar details.
 
 ```bash
 mkdir -p ledger/{00-brief,01-pillars}
@@ -101,7 +98,7 @@ mkdir -p ledger/{03-synthesis,04-decisions,05-risks,06-prd,07-architecture,08-pl
 
 ### Step 4: Generate BRIEF.md
 
-Write the parsed brief to `00-brief/BRIEF.md` using the template in `references/brief-template.md`.
+Write the parsed brief to `00-brief/BRIEF.md` using the template in [references/brief-template.md](references/brief-template.md).
 
 **Critical constraints:**
 
@@ -113,7 +110,7 @@ Write the parsed brief to `00-brief/BRIEF.md` using the template in `references/
 
 Create `01-pillars/PILLARS.md` with:
 
-1. List of all 8 pillars (see `references/pillar-definitions.md`)
+1. List of all 8 pillars (see [references/pillar-definitions.md](references/pillar-definitions.md))
 1. Priority ranking based on brief analysis
 1. Any pillar-specific scope notes
 
@@ -199,5 +196,6 @@ After successful initialization:
 
 ## References
 
-- `references/brief-template.md` - BRIEF.md template
-- `references/pillar-definitions.md` - Pillar definitions and scope
+- [../collecting-evidence/references/evidence-decision-contract.md](../collecting-evidence/references/evidence-decision-contract.md) - shared chain contract
+- [references/brief-template.md](references/brief-template.md) - BRIEF.md template
+- [references/pillar-definitions.md](references/pillar-definitions.md) - Pillar definitions and scope

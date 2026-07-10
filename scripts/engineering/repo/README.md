@@ -75,6 +75,8 @@ the risky local branches.
 | `sync-docs-issues`          | When applying the documentation-sync issue package metadata and execution-order comments | Manual maintenance workflow  |
 | `publish-tdx-audit-issues`  | When publishing or reopening TDX-AUDIT GitHub issues from `.github/ISSUES/` templates   | Manual maintenance workflow  |
 | `cleanup-branch-candidates` | When applying the agreed local-branch cleanup set with optional remote deletion          | Manual maintenance workflow  |
+| `generate-branch-cleanup-inventory` | When building the branch cleanup inventory JSON (phase 0)                             | Manual maintenance workflow  |
+| `apply-branch-cleanup`      | When applying branch cleanup phases 1-2 (garbage + stale draft automation branches)     | Manual maintenance workflow  |
 | `check-all`                 | Quick local sanity check before PR without refreshing manifests or applying cleanup plans | Manual                       |
 | `all`                       | Backward-compatible alias for `check-all`; never runs sync/apply commands                | Manual                       |
 

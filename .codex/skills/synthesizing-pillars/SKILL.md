@@ -8,11 +8,13 @@ agent: "general-purpose"
 # Pillar Synthesis
 
 ## Source Of Truth
+
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+- Shared evidence/decision contract: [../collecting-evidence/references/evidence-decision-contract.md](../collecting-evidence/references/evidence-decision-contract.md)
 This skill transforms raw evidence objects into structured insights for a single research pillar.
 
 ## Prerequisites
@@ -213,4 +215,5 @@ After synthesis:
 
 ## References
 
+- [../collecting-evidence/references/evidence-decision-contract.md](../collecting-evidence/references/evidence-decision-contract.md) - shared chain contract
 - [references/synthesis-template.md](references/synthesis-template.md) - Document template

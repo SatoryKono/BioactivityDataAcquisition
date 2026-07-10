@@ -60,9 +60,10 @@ export NPM_CONFIG_PREFIX="${CODEX_PREFIX}"
 export npm_config_prefix="${CODEX_PREFIX}"
 export PATH="${CODEX_PREFIX}/bin:${HOME}/.local/bin:/usr/local/bin:${PATH}"
 
-# Load proxy if available
-if [[ -f "${REPO_ROOT}/.wsl_proxy_env.sh" ]]; then
-    source "${REPO_ROOT}/.wsl_proxy_env.sh" 2>/dev/null || true
+# Load shared WSL proxy if available
+SHARED_WSL_PROXY_ENV="${REPO_ROOT}/scripts/engineering/dev/bash/.wsl_proxy_env.sh"
+if [[ -f "${SHARED_WSL_PROXY_ENV}" ]]; then
+    source "${SHARED_WSL_PROXY_ENV}" 2>/dev/null || true
 fi
 
 # Keep Codex's native config.toml in sync with the repo MCP config before

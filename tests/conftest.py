@@ -777,6 +777,41 @@ def populated_isolated_registry(isolated_registry: Any) -> Any:
     return isolated_registry
 
 
+@pytest.fixture(scope="session")
+def session_bootstrap_registry_cache() -> Any:
+    """Return opt-in session bootstrap cache for expensive repo-backed tests."""
+    from tests.helpers.bootstrap_cache import BootstrapRegistryCache
+
+    return BootstrapRegistryCache()
+
+
+@pytest.fixture(scope="session")
+def cached_bootstrap_registries(
+    project_root: Path,
+    session_bootstrap_registry_cache: Any,
+) -> Any:
+    """Return cached populated pipeline/provider registries for this test session."""
+    return session_bootstrap_registry_cache.get_or_build(
+        configs_root=project_root / "configs",
+    )
+
+
+@pytest.fixture
+def cached_populated_isolated_registry(cached_bootstrap_registries: Any) -> Any:
+    """Return a per-test pipeline registry clone from the session cache."""
+    from tests.helpers.bootstrap_cache import clone_pipeline_registry
+
+    return clone_pipeline_registry(cached_bootstrap_registries.pipeline_registry)
+
+
+@pytest.fixture
+def cached_provider_registry(cached_bootstrap_registries: Any) -> Any:
+    """Return a per-test provider registry clone from the session cache."""
+    from tests.helpers.bootstrap_cache import clone_provider_registry
+
+    return clone_provider_registry(cached_bootstrap_registries.provider_registry)
+
+
 @pytest.fixture(autouse=True)
 def _vcr_marker(request: pytest.FixtureRequest) -> None:
     """Handle VCR cassettes with Git LFS pointer checking for pytest-recording."""

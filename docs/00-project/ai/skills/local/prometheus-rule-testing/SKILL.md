@@ -1,13 +1,18 @@
-> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
-> Canonical runtime source:
-> - Codex: `.codex/skills/prometheus-rule-testing/SKILL.md`
-> Governance: [AI Runtime Mirror Ownership](../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../../agents/policy/POST_CHANGE_VALIDATION.md).
-> Edit the runtime source first, then refresh this mirror.
-______________________________________________________________________
-
-## name: prometheus-rule-testing description: Test repo-backed Prometheus alert and recording rules with `promtool` before deployment. Use when rule files are added, changed, reviewed, or debugged and deterministic validation is needed.
+---
+name: "prometheus-rule-testing"
+description: "Test repo-backed Prometheus alert and recording rules with `promtool` before deployment. Use when rule files are added, changed, reviewed, or debugged and deterministic validation is needed."
+---
 
 # Prometheus Rule Testing
+
+## Source Of Truth
+
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+- Shared Grafana/Prometheus prerequisites: [../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md](../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md)
 
 ## Overview
 
@@ -33,19 +38,12 @@ Trigger this skill when the user asks to:
 - debug why a rule fires too early, too late, or not at all
 - review repo-backed rules before merge
 
-## Source Of Truth
-- Normative index: `../../../../NORMATIVE_SOURCES.md`
-- Root runtime contract: `../../../../../../AGENTS.md`
-- Project rules: `../../../../RULES.md`
-- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../../../02-architecture/decisions`
-- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
-- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
-
 ## Workflow
 
 ### 1. Read the Rule File
 
+- Read the shared prerequisites when rule testing is part of an alert or
+  dashboard validation chain.
 - Inspect the target rule and its group context.
 - Confirm the rule is repo-backed and compatible with `promtool`.
 - Identify the behavior that needs to be proven.

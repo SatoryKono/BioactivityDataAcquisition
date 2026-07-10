@@ -4,7 +4,7 @@
 
 Store events in:
 
-- `reports/test-swarm/<task_id>/telemetry/raw/events_<agent_id>.jsonl`
+- `reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/telemetry/raw/events_<agent_id>.jsonl`
 
 Example:
 
@@ -18,7 +18,7 @@ Example:
   "test_nodeid": "tests/unit/domain/test_X.py::test_something",
   "test_type": "unit",
   "layer": "domain",
-  "module": "domain.behavior.validation",
+  "module": "domain.services.validation",
   "provider": null,
   "outcome": "fail",
   "error_type": "AssertionError",

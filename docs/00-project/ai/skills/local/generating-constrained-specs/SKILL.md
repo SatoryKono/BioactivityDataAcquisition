@@ -1,8 +1,3 @@
-> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
-> Canonical runtime source:
-> - Codex: `.codex/skills/generating-constrained-specs/SKILL.md`
-> Governance: [AI Runtime Mirror Ownership](../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../../agents/policy/POST_CHANGE_VALIDATION.md).
-> Edit the runtime source first, then refresh this mirror.
 ---
 name: generating-constrained-specs
 description: Use when generating PRD and architecture documents that must trace back to explicit decisions. Enforces citation requirements so no spec content exists without DEC-* references.
@@ -12,32 +7,27 @@ agent: general-purpose
 
 # Constrained Spec Generation
 
-This skill generates PRD and architecture documents that are constrained by the decision ledger.
+## Source Of Truth
+
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 
 ## Core Principle
 
 **No spec section without a DEC-* reference.**
 
-Every requirement, every architecture choice, must trace back to an explicit decision. This prevents:
-- Ungrounded requirements
-- Hidden assumptions
-- Scope creep
-- Orphaned features
+Every requirement and architecture choice must trace back to an explicit
+decision. See [references/constraint-rules.md](references/constraint-rules.md)
+for detailed citation rules.
 
 ## Prerequisites
 
 - Decisions complete (`/ledger-decide`)
 - `04-decisions/DECISIONS.yaml` exists
 - `05-risks/RISKS.yaml` exists
-
-## Source Of Truth
-- Normative index: `../../../../NORMATIVE_SOURCES.md`
-- Root runtime contract: `../../../../../../AGENTS.md`
-- Project rules: `../../../../RULES.md`
-- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../../../02-architecture/decisions`
-- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
-- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
 
 ## Workflow
 
@@ -63,124 +53,28 @@ Build decision index for quick lookup.
 
 ### Step 2: Generate PRD
 
-Write `06-prd/PRD.md` using template from `references/prd-template.md`.
-
-**Constraint enforcement:**
-Every section heading must include decision reference:
-```markdown
-## 2. Target Users (DEC-scope-power-users-first)
-```
-
-Every requirement must cite decisions:
-```markdown
-### 2.1 Primary Users
-Power users within SMB organizations who manage complex workflows.
-(DEC-scope-power-users-first, DEC-scope-smb-segment)
-```
+Write `06-prd/PRD.md` using
+[references/prd-template.md](references/prd-template.md). Every section and
+requirement must cite `DEC-*`.
 
 ### Step 3: Validate PRD Constraint Gate
 
-Check every PRD section:
-- [ ] Section heading has DEC-* reference
-- [ ] Requirements cite supporting decisions
-- [ ] Risks are cross-referenced where relevant
-
-**Gate failure:** If any section lacks DEC-* reference, cannot proceed.
+Use [references/constraint-rules.md](references/constraint-rules.md). Any PRD
+section without a decision citation blocks completion.
 
 ### Step 4: Generate Architecture
 
-Write `07-architecture/ARCHITECTURE.md` using template from `references/architecture-template.md`.
-
-**Constraint enforcement:**
-```markdown
-## 3. Data Model (DEC-tech-postgres-primary, DEC-scope-power-users-first)
-
-### 3.1 Core Entities
-Based on power user workflow requirements (DEC-scope-power-users-first),
-the data model supports complex nested structures.
-```
+Write `07-architecture/ARCHITECTURE.md` using
+[references/architecture-template.md](references/architecture-template.md).
+Every technical choice must cite `DEC-*`.
 
 ### Step 5: Validate Architecture Constraint Gate
 
-Check every architecture section:
-- [ ] Section heading has DEC-* reference
-- [ ] Technical choices cite supporting decisions
-- [ ] Risks are cross-referenced where relevant
+Every architecture section must cite decisions and relevant `RISK-*` entries.
 
 ### Step 6: Cross-Reference Risks
 
-In both documents, note relevant risks:
-```markdown
-### Risk Note
-This approach carries RISK-tech-cold-start. See risk register for mitigations.
-```
-
-## Constraint Rules
-
-See `references/constraint-rules.md` for detailed rules.
-
-### Citation Format
-
-**Section headings:**
-```markdown
-## 2. MVP Scope (DEC-scope-power-users-first, DEC-scope-web-only)
-```
-
-**Inline citations:**
-```markdown
-Users will access the application via web browser only. (DEC-scope-web-only)
-```
-
-**Evidence when needed:**
-```markdown
-Based on user research showing 78% onboarding drop-off at team invitation
-(EV-users-onboarding-dropoff), we will simplify the invitation flow.
-(DEC-ux-simplified-onboarding)
-```
-
-<good-example>
-```markdown
-## 2. Target Users (DEC-scope-power-users-first)
-
-Based on DEC-scope-power-users-first, the MVP targets power users within
-organizations who manage complex workflows. This decision was supported by
-evidence showing 3x higher retention among power users (EV-users-retention-power-users).
-
-### 2.1 User Needs
-- Complex workflow management (DEC-scope-power-users-first)
-- Keyboard-first interaction (DEC-ux-keyboard-shortcuts-priority)
-
-**Risk:** RISK-retention-expert-churn mitigated by advanced feature set.
-```
-- Section heading cites DEC-* reference
-- Every requirement traces to a decision
-- Evidence cited where relevant
-- Risks cross-referenced
-</good-example>
-
-<bad-example>
-```markdown
-## 2. Target Users
-
-We will target power users because they are important. Power users need
-features like advanced workflows and keyboard shortcuts.
-
-### 2.1 User Needs
-- Complex workflow management
-- Keyboard-first interaction
-```
-- No DEC-* citation in heading
-- No evidence supporting claims
-- No traceability to decisions
-- No risk acknowledgment
-</bad-example>
-
-### What Cannot Be Spec'd
-
-- Features not supported by any decision
-- Requirements contradicting decisions
-- Architecture choices without technical decisions
-- Scope outside decision boundaries
+In both documents, note relevant `RISK-*` entries and mitigation links.
 
 ## User Interaction
 
@@ -247,6 +141,6 @@ Run `/ledger-plan` to generate implementation backlog.
 
 ## References
 
-- `references/prd-template.md` - PRD template
-- `references/architecture-template.md` - Architecture template
-- `references/constraint-rules.md` - Detailed constraint rules
+- [references/constraint-rules.md](references/constraint-rules.md) - citation and gate rules
+- [references/prd-template.md](references/prd-template.md) - PRD shape
+- [references/architecture-template.md](references/architecture-template.md) - architecture shape

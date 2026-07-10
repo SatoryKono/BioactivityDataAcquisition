@@ -43,19 +43,9 @@ pr_compliance_checklist.yaml
 # Vendor-documented repo-wide review guidance retained at the exact root filename.
 best_practices.md
 
-# Reviewed launcher and setup shims retained as minimal compatibility entrypoints
-# while maintained logic stays under scripts/ai/codex/**.
-.wsl_proxy_env.sh
-codex.bat
-codex.ps1
-setup-codex-wsl.bat
-setup-codex-wsl.ps1
-setup-codex-wsl.sh
-
 # Reviewed optional ADR-010 Docker helper dispositions. Current exact-root
 # compose/image entrypoints below are retained only while operator flows still
-# require those filenames; root setup files are temporary shims over
-# scripts/ops/docker-setup.*. Candidate adjuncts moved under
+# require those filenames. Candidate adjuncts moved under
 # scripts/ops/runtime/docker/** after owner-approved shim-first review.
 # See docs/00-project/governance/03-file-policy.md §0 and
 # docs/05-operations/verification/docker-helper-root-relocation-audit.md for policy.
@@ -64,6 +54,4 @@ docker-compose.codex.yml
 docker-compose.neo4j-audit.yml
 docker-compose.neo4j.yml
 docker-compose.yml
-docker-setup.ps1
-docker-setup.sh
 Dockerfile.bioetl

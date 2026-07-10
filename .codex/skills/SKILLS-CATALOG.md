@@ -92,6 +92,8 @@ bash scripts/ai/codex/check_skills_mirror.sh --sync
 
 - All local skills are structurally valid.
 - `documentation-cascade-audit` has been normalized from template/TODO state to an active skill.
+- Shared wrapper, evidence/decision, and Grafana/Prometheus prerequisite contracts are factored into reusable `references/` files.
+- Active project skills provide `agents/openai.yaml` metadata and are covered by the Codex skill architecture gate.
 
 ## Mirror Doc Index
 

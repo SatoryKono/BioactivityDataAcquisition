@@ -1,15 +1,12 @@
 ---
 name: "py-doc-bot"
-description: "Execute BioETL py-doc-bot profile for role-specific workflow and constraints."
+description: "Execute the BioETL py-doc-bot profile for documentation updates, docs drift remediation, runtime mirror sync, and documentation validation. Use when work primarily changes docs or contributor guidance."
 ---
 
 # py-doc-bot
 
-## Objective
-
-Run the role-specific workflow as defined in the py-doc-bot profile.
-
 ## Source Of Truth
+
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
@@ -17,18 +14,35 @@ Run the role-specific workflow as defined in the py-doc-bot profile.
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 - Primary profile: `../../agents/py-doc-bot.md`
 - Team orchestration: `../../agents/ORCHESTRATION.md`
+- Shared wrapper contract: [../py-audit-bot/references/wrapper-contract.md](../py-audit-bot/references/wrapper-contract.md)
 - Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - Shared project context: `../../../docs/00-project/ai/memory/agent-memory.md`
-- Role-specific memory: matching `../../../docs/00-project/ai/memory/memory-py-*.md`
-  sheet when one exists for this profile
+- Role memory: `../../../docs/00-project/ai/memory/memory-py-doc-bot.md`
+
+## Trigger Scope
+
+Use this wrapper for docs edits, doc drift, docs generated artifact refresh,
+runtime mirror updates, and documentation validation.
 
 ## Workflow
 
-1. Start with the canonical memory loop from `../../../src/memory/DAILY_WORKFLOW.md` and run `python -m memory.tooling.workflow pre-task ...` for the current task.
-1. Read `MEMORY_USAGE.md`, `agent-memory.md`, and the matching role-specific
-   memory sheet when it exists. If no role-specific sheet exists for this
-   profile, record that and continue with project memory plus repo search.
-1. Open and follow `../../agents/py-doc-bot.md`.
-1. Keep output artifacts and scope aligned with `../../agents/ORCHESTRATION.md`.
-1. Respect BioETL architecture rules from `AGENTS.md` and project constraints.
-1. After doc work, run `python -m memory.tooling.workflow post-task ...` and promote only durable documentation guidance.
+1. Follow the shared wrapper contract.
+1. Read and apply `../../agents/py-doc-bot.md`.
+1. Verify cited code/config/runtime surfaces directly.
+1. Update runtime source first, then docs mirrors when runtime behavior changes.
+
+## Expected Output
+
+- Docs changed or drift audit result.
+- Claim-to-source verification summary.
+- Mirror-sync status.
+
+## Validation
+
+Use targeted docs checks such as `python -m scripts.docs check-links` and
+`python -m scripts.docs check-drift --runtime-mirrors --freshness`.
+
+## Fallback
+
+If docs validation is too broad for the environment, report the skipped command
+and keep claims limited to files inspected directly.

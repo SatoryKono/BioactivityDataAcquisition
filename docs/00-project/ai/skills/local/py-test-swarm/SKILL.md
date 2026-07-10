@@ -1,13 +1,16 @@
-> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
-> Canonical runtime source:
-> - Codex: `.codex/skills/py-test-swarm/SKILL.md`
-> Governance: [AI Runtime Mirror Ownership](../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../../agents/policy/POST_CHANGE_VALIDATION.md).
-> Edit the runtime source first, then refresh this mirror.
-______________________________________________________________________
-
-## name: py-test-swarm description: Orchestrate hierarchical BioETL test swarms (L1/L2/L3) for full_audit, fix_failures, coverage_boost, optimize, and flakiness_scan with workload-based delegation, telemetry aggregation, flaky analysis, and final reporting in `reports/{LLM}/review_py-test-swarm_{YYYYMMDD}_{HHMM}_FINAL.md`. Use when users request broad test campaigns, failure triage at scale, coverage expansion, or stability diagnostics across layers/providers.
+---
+name: "py-test-swarm"
+description: "Orchestrate hierarchical BioETL test swarms (L1/L2/L3) for full_audit, fix_failures, coverage_boost, optimize, and flakiness_scan with workload-based delegation, telemetry aggregation, flaky analysis, and final reporting in `reports/{LLM}/review_py-test-swarm_{YYYYMMDD}_{HHMM}_FINAL.md`. Use when users request broad test campaigns, failure triage at scale, coverage expansion, or stability diagnostics across layers/providers."
+---
 
 # py-test-swarm
+
+## Source Of Truth
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 
 ## Core Role
 
@@ -16,17 +19,21 @@ Decompose work into L2/L3 agents, enforce constraints, aggregate evidence, and p
 
 ## Startup Sequence
 
+1. Start with the canonical memory loop from `../../../src/memory/DAILY_WORKFLOW.md` and run `python -m memory.tooling.workflow pre-task ...` for the swarm task.
+1. Read `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md` before
+   consuming memory sheets.
 1. Read memory:
 
 - `../../../docs/00-project/ai/memory/agent-memory.md`
+- `../../../docs/00-project/ai/memory/memory-py-test-swarm.md`
 - `../../../docs/00-project/ai/memory/memory-py-test-bot.md`
 - `../../../.codex/agents/ORCHESTRATION.md` (sections 2-7)
 
-2. Read profile:
+3. Read profile:
 
-- `../../../.codex/agents/py-test-swarm.md`
+- this `SKILL.md`
 
-3. Confirm input contract:
+4. Confirm input contract:
 
 - `task_id` (required)
 - `mode` (required): `full_audit | fix_failures | coverage_boost | optimize | flakiness_scan`
@@ -34,12 +41,12 @@ Decompose work into L2/L3 agents, enforce constraints, aggregate evidence, and p
 - `baseline_report` (optional)
 - `flakiness_runs` (optional, default `5`)
 
-4. Create artifact root: `reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/` (LLM = caller).
+5. Create artifact root: `reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/` (LLM = caller).
 
 ## Cross-Platform Runtime Note
 
 - CI or single-OS checkout: `uv run python -m ...`
-- Windows PowerShell in a mixed checkout: `.\scripts\engineering\dev\run_pytest.ps1`, `.\scripts\engineering\dev\run_mypy.ps1`, or `.\.venv-win\Scripts\python.exe -m ...`
+- Windows PowerShell in a mixed checkout: `.\scripts\dev\run_pytest.ps1`, `.\scripts\dev\run_mypy.ps1`, or `.\.venv-win\Scripts\python.exe -m ...`
 - WSL/Linux in a mixed checkout: `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`, or `"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python" -m ...`
 
 ## L1 Workflow
@@ -147,6 +154,7 @@ Treat task as done only when:
 - L1 generated `FINAL-REPORT.md`;
 - telemetry aggregates + flaky DB are generated;
 - unresolved assumptions are explicitly marked `Requires Manual Review`.
+- after closeout, run `python -m memory.tooling.workflow post-task ...` and promote only durable testing lessons or incident knowledge.
 
 ## References
 
@@ -154,12 +162,3 @@ Treat task as done only when:
 - L2/L3 task briefs and prompt templates: [l2-l3-task-brief.md](references/l2-l3-task-brief.md)
 - Report and metrics templates: [report-templates.md](references/report-templates.md)
 - Telemetry schema and flaky DB contract: [telemetry-and-flaky-db.md](references/telemetry-and-flaky-db.md)
-
-## Source Of Truth
-- Normative index: `../../../../NORMATIVE_SOURCES.md`
-- Root runtime contract: `../../../../../../AGENTS.md`
-- Project rules: `../../../../RULES.md`
-- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../../../02-architecture/decisions`
-- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
-- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`

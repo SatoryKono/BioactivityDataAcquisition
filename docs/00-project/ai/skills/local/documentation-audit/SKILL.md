@@ -1,11 +1,7 @@
-> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
-> Canonical runtime source:
-> - Codex: `.codex/skills/documentation-audit/SKILL.md`
-> Governance: [AI Runtime Mirror Ownership](../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../../agents/policy/POST_CHANGE_VALIDATION.md).
-> Edit the runtime source first, then refresh this mirror.
-______________________________________________________________________
-
-## name: documentation-audit description: Full audit and update of BioETL project documentation for v5.23+. Use when asked to review docs for staleness, reconcile docs with code, sync RULES.md and REQUIREMENTS.md, update architecture/provider/contract docs, reflect ADR-010/ADR-014/ADR-017, or identify dead documentation.
+---
+name: "documentation-audit"
+description: "Full audit and update of BioETL project documentation for v5.23+. Use when asked to review docs for staleness, reconcile docs with code, sync RULES.md and REQUIREMENTS.md, update architecture/provider/contract docs, reflect ADR-010/ADR-014/ADR-017, or identify dead documentation."
+---
 
 # Documentation Audit
 
@@ -13,25 +9,22 @@ ______________________________________________________________________
 
 Perform a full documentation audit of BioETL and bring docs in sync with code and ADRs (v5.23+). Produce a clear audit report, a prioritized plan, and updated documentation changes.
 
-## BioETL Runtime Policy
 
-- Project runtime contract: `../../../AGENTS.md`
-- Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
-- Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+
+## Source Of Truth
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 
 ## Required inputs (before starting)
 
 - Load `references/audit-checklist.md` — checklist for each audit area.
 - Load `references/report-template.md` — template for the audit report.
-
-## Source Of Truth
-- Normative index: `../../../../NORMATIVE_SOURCES.md`
-- Root runtime contract: `../../../../../../AGENTS.md`
-- Project rules: `../../../../RULES.md`
-- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../../../02-architecture/decisions`
-- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
-- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
+- Treat `../../../AGENTS.md`, `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`,
+  and `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
+  as the active runtime policy entrypoints for AI-surface documentation work.
 
 ## Workflow
 
@@ -46,6 +39,8 @@ Perform a full documentation audit of BioETL and bring docs in sync with code an
 - Compare documentation to current code and configs.
 - Focus: RULES.md, REQUIREMENTS.md, architecture, provider, contract docs.
 - Check ADR alignment: ADR-010 (Local-Only), ADR-014 (Determinism), ADR-017 (Observability).
+- Trace doc claims back to runtime/code/config/workflow sources and note mirror
+  surfaces when AI guidance files are involved.
 - Record findings with severity: Critical, High, Medium, Low.
 
 ### 3. Plan
@@ -65,6 +60,8 @@ Perform a full documentation audit of BioETL and bring docs in sync with code an
 - Check links and nav entries (mkdocs.yml).
 - Confirm RULES.md and REQUIREMENTS.md are synchronized.
 - Ensure ADRs are reflected in top-level docs.
+- When AI runtime/docs surfaces were touched, verify runtime source first and
+  mirror consistency second.
 
 ## Practical commands
 

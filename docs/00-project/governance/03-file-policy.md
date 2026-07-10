@@ -42,7 +42,7 @@ generated output, `configs/quality/generated_artifact_routing.yaml`.
 | Human-facing root docs | `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `LICENSE`, `AGENTS.md`, `GEMINI.md`, and reviewed vendor guidance such as `best_practices.md` | canonical root text policy in `audit_root_cleanliness.py` | non-canonical notes move to `docs/**` or `docs/99-archive/**` |
 | Allowed root directories | approved runtime, tooling, project, data, docs, report, source, and test trees listed below and in `configs/quality/repo_structure_catalog.yaml` | structure catalog and root governance docs check | new root directories require explicit structure governance |
 | Forbidden root files/directories | tracked `.env*` except `.env.example`, generated diagnostics, root scratch scripts/tests, local cache/output directories, and ad-hoc root dumps | strict root audit and generated-artifact routing | delete, ignore as local-only where approved, or route retained evidence to `reports/**` |
-| Temporary compatibility surfaces | thin launcher/setup shims and reviewed Docker helper entrypoints | `configs/quality/root_hygiene_review_registry.yaml` owner lanes | remove or rehome only after docs, CI, scripts, and operator flows no longer require the root entrypoint |
+| Temporary compatibility surfaces | reviewed non-script exact-root compatibility entrypoints only | `configs/quality/root_hygiene_review_registry.yaml` owner lanes | root `.sh`, `.ps1`, `.py`, and `.bat` compatibility exceptions are closed and MUST NOT be restored |
 
 Docker helper dispositions are resolved as follows and MUST stay aligned with
 `docs/05-operations/verification/docker-helper-root-relocation-audit.md`:
@@ -55,8 +55,8 @@ Docker helper dispositions are resolved as follows and MUST stay aligned with
 | `docker-compose.codex.yml` | MUST stay root | `docker-compose.codex.yml` | move only after Codex/MCP startup and shutdown wrappers are repointed |
 | `docker-compose.neo4j.yml` | MUST stay root | `docker-compose.neo4j.yml` | move only after Neo4j helper commands and docs are repointed |
 | `docker-compose.neo4j-audit.yml` | MUST stay root | `docker-compose.neo4j-audit.yml` | move only after audit launchers and docs are repointed |
-| `docker-setup.ps1` | temporary shim | `scripts/ops/docker-setup.ps1` | remove root shim only when operator docs no longer advertise it |
-| `docker-setup.sh` | temporary shim | `scripts/ops/docker-setup.sh` | remove root shim only when operator docs no longer advertise it |
+| `docker-setup.ps1` | retired root script | `scripts/ops/docker-setup.ps1` | do not restore root filename; use the scripts-owned command-compatible helper |
+| `docker-setup.sh` | retired root script | `scripts/ops/docker-setup.sh` | do not restore root filename; use the scripts-owned command-compatible helper |
 | `docker-compose.alertmanager.yml` | moved to owned path | `scripts/ops/runtime/docker/compose/alertmanager.yml` | do not restore root filename without fresh owner review |
 | `docker-compose.minio.yml` | moved to owned path | `scripts/ops/runtime/docker/compose/minio.yml` | do not restore root filename without fresh owner review |
 | `docker-compose.redis.yml` | moved to owned path | `scripts/ops/runtime/docker/compose/redis.yml` | do not restore root filename without fresh owner review |
@@ -102,14 +102,13 @@ Docker helper dispositions are resolved as follows and MUST stay aligned with
   external review/runtime contract requires the exact root filename. Current
   reviewed example: `best_practices.md` for Qodo policy ingestion, with its
   retention rationale documented under `docs/00-project/governance/qodo/`.
-- Transitional root launcher/setup shims such as `.wsl_proxy_env.sh`,
-  `codex.ps1`, `codex.bat`, and `setup-codex-wsl.*` MAY remain tracked only as
-  explicit compatibility entrypoints while their canonical maintained owner
-  surfaces converge under `scripts/ai/codex/**`. Retired aliases such as
-  `run-codex.ps1` and `run-codex-wsl.ps1` MUST NOT be restored without fresh
-  owner review. Retained root shims MUST stay thin, delegate to
-  `scripts/ai/codex/**`, and MUST NOT regrow independent setup or launcher
-  logic.
+- Root launcher/setup shims such as `.wsl_proxy_env.sh`, `codex.ps1`,
+  `codex.bat`, `setup-codex-wsl.*`, `run-codex.ps1`, and
+  `run-codex-wsl.ps1` are retired from the repository root and MUST NOT be
+  restored without fresh owner review. Maintained launcher, setup, and proxy
+  logic MUST live under `scripts/**`: Codex launch/setup under
+  `scripts/ai/codex/**`, Windows operator launchers under `scripts/ops/**`, and
+  the shared WSL proxy helper under `scripts/engineering/dev/bash/.wsl_proxy_env.sh`.
 - Root Docker helper relocation decisions MUST reference
   `docs/05-operations/verification/docker-helper-root-relocation-audit.md`
   before any helper/file move is approved.

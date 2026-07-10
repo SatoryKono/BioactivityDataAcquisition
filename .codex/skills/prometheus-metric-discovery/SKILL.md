@@ -6,11 +6,13 @@ description: "Discover real Prometheus metrics, labels, label values, and metric
 # Prometheus Metric Discovery
 
 ## Source Of Truth
+
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+- Shared Grafana/Prometheus prerequisites: [../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md](../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md)
 
 ## Overview
 
@@ -40,6 +42,8 @@ Trigger this skill when the user asks to:
 
 ### 1. Discover Candidate Metrics
 
+- Read the shared prerequisites when discovery is part of dashboard, alert, or
+  render validation work.
 - Start with metric-name discovery instead of guessing.
 - Prefer nearby naming families over isolated one-off metrics.
 - If the task started from an existing query, extract its core metric names

@@ -8,12 +8,16 @@ agent: "general-purpose"
 # Decision Ledger
 
 ## Source Of Truth
+
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
-This skill guides the creation of explicit decisions with full trade-off documentation.
+- Shared evidence/decision contract: [../collecting-evidence/references/evidence-decision-contract.md](../collecting-evidence/references/evidence-decision-contract.md)
+
+This skill creates explicit decisions with evidence, alternatives, trade-offs,
+and linked risks.
 
 ## Prerequisites
 
@@ -78,61 +82,10 @@ Use **AskUserQuestion** to get user's decision.
 
 ### Step 4: Create Decision Entry
 
-Write entry to `04-decisions/DECISIONS.yaml` using schema from [references/decision-ledger-schema.md](references/decision-ledger-schema.md).
-
-<good-example>
-```yaml
-- id: DEC-scope-smb-first
-  decision: "Target SMB segment before enterprise"
-  status: accepted
-  owner: user
-  created_at: 2026-01-21
-  alternatives:
-    - Enterprise-first
-    - Multi-segment simultaneous
-  evidence:
-    - EV-users-smb-pain-points
-    - EV-economics-smb-unit-economics
-    - EV-market-enterprise-tam
-  tradeoffs:
-    wins:
-      - "Faster iteration cycles with smaller customers"
-      - "Lower sales friction (self-serve possible)"
-      - "Better unit economics at start"
-    loses:
-      - "Smaller initial contract values"
-      - "May need significant pivot for enterprise later"
-  risks:
-    - RISK-market-smb-churn-rate
-  implications:
-    - "MVP UX must optimize for self-serve onboarding"
-    - "Pricing must fit SMB budget constraints"
-```
-- Semantic ID (DEC-scope-smb-first)
-- Explicit alternatives documented
-- Multiple evidence citations (3+)
-- Both wins AND loses documented
-- Linked risks and implications
-</good-example>
-
-<bad-example>
-```yaml
-- id: DEC-001
-  decision: "Do the thing"
-  status: accepted
-  alternatives: []
-  evidence: []
-  tradeoffs:
-    wins:
-      - "It will be good"
-    loses: []
-```
-- Non-semantic ID (DEC-001)
-- Vague decision statement
-- No alternatives considered
-- No evidence cited
-- No loses documented (unrealistic)
-</bad-example>
+Write entries to `04-decisions/DECISIONS.yaml` using
+[references/decision-ledger-schema.md](references/decision-ledger-schema.md).
+Each decision must use a semantic `DEC-*` ID, cite evidence, list alternatives,
+and document both wins and loses.
 
 ### Step 5: Identify Created Risks
 
@@ -246,3 +199,4 @@ Run `/ledger-spec` to generate constrained PRD and architecture.
 
 - [references/decision-ledger-schema.md](references/decision-ledger-schema.md) - DECISIONS.yaml schema
 - [references/risk-ledger-schema.md](references/risk-ledger-schema.md) - RISKS.yaml schema
+- [../collecting-evidence/references/evidence-decision-contract.md](../collecting-evidence/references/evidence-decision-contract.md) - shared chain contract

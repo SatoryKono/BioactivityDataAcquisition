@@ -84,11 +84,12 @@ fi
 
 # Suggest adding proxy to bashrc
 BASHRC="$HOME/.bashrc"
+WSL_PROXY_RC="$REPO_ROOT/scripts/engineering/dev/bash/.wsl_proxy_env.sh"
 if ! grep -q "wsl_proxy_env.sh" "$BASHRC" 2>/dev/null; then
     echo "[INFO] To auto-configure proxy on shell login, add to $BASHRC:"
-    echo "  source $REPO_ROOT/.wsl_proxy_env.sh"
+    echo "  source $WSL_PROXY_RC"
     echo ""
-    echo "Run: echo \"source $REPO_ROOT/.wsl_proxy_env.sh\" >> $BASHRC"
+    echo "Run: echo \"source $WSL_PROXY_RC\" >> $BASHRC"
 fi
 
 echo ""

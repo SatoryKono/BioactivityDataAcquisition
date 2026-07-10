@@ -1,0 +1,4 @@
+interface:
+  display_name: "NCI Analysis"
+  short_description: "Analyze manipulation patterns"
+  default_prompt: "Use $nci-analysis to analyze content for manipulation patterns, NCI score, and balanced interpretations."

@@ -22,8 +22,9 @@ fi
 ENSURE_SCRIPT="${SCRIPT_DIR}/ensure-gemini-cli.sh"
 ENSURE_MCP_SCRIPT="${SCRIPT_DIR}/ensure-mcp.sh"
 
-if [[ -f "${REPO_ROOT}/.wsl_proxy_env.sh" ]]; then
-    source "${REPO_ROOT}/.wsl_proxy_env.sh" 2>/dev/null || true
+SHARED_WSL_PROXY_ENV="${REPO_ROOT}/scripts/engineering/dev/bash/.wsl_proxy_env.sh"
+if [[ -f "${SHARED_WSL_PROXY_ENV}" ]]; then
+    source "${SHARED_WSL_PROXY_ENV}" 2>/dev/null || true
 fi
 
 GREEN='\033[0;32m'

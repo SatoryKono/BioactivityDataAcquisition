@@ -261,6 +261,7 @@ coverage-*.xml
 coverage_*.xml
 /coverage.html
 /Test Results - Pytest_All.html
+/Test Results - Pytest_All.xml
 /coverage.json
 coverage_output.txt
 coverage_summary.txt

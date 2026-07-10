@@ -1,14 +1,21 @@
-> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
-> Canonical runtime source:
-> - Codex: `.codex/skills/repo-config/SKILL.md`
-> Governance: [AI Runtime Mirror Ownership](../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../../agents/policy/POST_CHANGE_VALIDATION.md).
-> Edit the runtime source first, then refresh this mirror.
-______________________________________________________________________
-
-## name: repo-config description: Use when needing to get the default branch, detect repository settings, fetch available labels, get repo info for API calls, or when any gh-workflow command needs dynamic repository configuration instead of hardcoded values. allowed-tools: Bash, Read context: fork agent: Explore
+---
+name: "repo-config"
+description: "Use when needing to get the default branch, detect repository settings, fetch available labels, get repo info for API calls, or when any gh-workflow command needs dynamic repository configuration instead of hardcoded values."
+allowed-tools:
+  - Bash
+  - Read
+context: "fork"
+agent: "Explore"
+---
 
 # Repository Configuration
 
+## Source Of Truth
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 This skill provides dynamic repository configuration for all gh-workflow commands, auto-detecting settings so commands work in any repository without hardcoding.
 
 ## BioETL Runtime Policy
@@ -200,12 +207,3 @@ If `gh` commands fail, check:
 - Does the repository have a GitHub remote? `git remote -v`
 
 Report clear, actionable error messages.
-
-## Source Of Truth
-- Normative index: `../../../../NORMATIVE_SOURCES.md`
-- Root runtime contract: `../../../../../../AGENTS.md`
-- Project rules: `../../../../RULES.md`
-- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../../../02-architecture/decisions`
-- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
-- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`

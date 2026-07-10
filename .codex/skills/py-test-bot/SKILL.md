@@ -1,15 +1,12 @@
 ---
 name: "py-test-bot"
-description: "Execute BioETL py-test-bot profile for role-specific workflow and constraints."
+description: "Execute the BioETL py-test-bot profile for test planning, failure classification, focused pytest runs, flaky-test triage, and coverage or regression validation."
 ---
 
 # py-test-bot
 
-## Objective
-
-Run the role-specific workflow as defined in the py-test-bot profile.
-
 ## Source Of Truth
+
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
@@ -17,18 +14,37 @@ Run the role-specific workflow as defined in the py-test-bot profile.
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 - Primary profile: `../../agents/py-test-bot.md`
 - Team orchestration: `../../agents/ORCHESTRATION.md`
+- Shared wrapper contract: [../py-audit-bot/references/wrapper-contract.md](../py-audit-bot/references/wrapper-contract.md)
 - Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - Shared project context: `../../../docs/00-project/ai/memory/agent-memory.md`
-- Role-specific memory: matching `../../../docs/00-project/ai/memory/memory-py-*.md`
-  sheet when one exists for this profile
+
+## Trigger Scope
+
+Use this wrapper to choose, run, or interpret tests. It can also classify
+failures and recommend the next debugging or implementation handoff.
 
 ## Workflow
 
-1. Start with the canonical memory loop from `../../../src/memory/DAILY_WORKFLOW.md` and run `python -m memory.tooling.workflow pre-task ...` for the current task.
-1. Read `MEMORY_USAGE.md`, `agent-memory.md`, and the matching role-specific
-   memory sheet when it exists. If no role-specific sheet exists for this
-   profile, record that and continue with project memory plus repo search.
-1. Open and follow `../../agents/py-test-bot.md`.
-1. Keep output artifacts and scope aligned with `../../agents/ORCHESTRATION.md`.
-1. Respect BioETL architecture rules from `AGENTS.md` and project constraints.
-1. After testing, run `python -m memory.tooling.workflow post-task ...` and promote only durable failure classifications or testing lessons.
+1. Follow the shared wrapper contract.
+1. Read and apply `../../agents/py-test-bot.md`.
+1. Locate related tests before choosing scope.
+1. Prefer the narrowest meaningful pytest node first.
+1. Broaden to architecture/integration/golden checks when behavior or shared
+   contracts are touched.
+
+## Expected Output
+
+- Test scope and rationale.
+- Commands run and outcomes.
+- Failure classification or pass evidence.
+
+## Validation
+
+Use repo wrappers when available, for example
+`bash scripts/engineering/dev/run_pytest.sh <tests>`, or the platform-specific
+equivalent from memory guidance.
+
+## Fallback
+
+If a suite times out or the environment blocks it, preserve the command and
+failure mode exactly and do not report it as green.
