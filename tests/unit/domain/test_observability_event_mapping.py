@@ -72,14 +72,14 @@ def test_batch_events_reject_string_layers_inside_domain() -> None:
         "batch_id": BatchID("batch-1"),
     }
 
-    with pytest.raises(TypeError, match="BatchWritten.layer must be a Layer"):
+    with pytest.raises(TypeError, match=r"BatchWritten\.layer must be a Layer"):
         BatchWritten(
             **event_kwargs,
             layer="silver",  # type: ignore[arg-type]
             record_count=10,
         )
 
-    with pytest.raises(TypeError, match="BatchFailed.layer must be a Layer"):
+    with pytest.raises(TypeError, match=r"BatchFailed\.layer must be a Layer"):
         BatchFailed(
             **event_kwargs,
             layer="platinum",  # type: ignore[arg-type]

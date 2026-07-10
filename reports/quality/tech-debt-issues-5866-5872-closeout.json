@@ -128,7 +128,7 @@
       "source": "reports/quality/module-coverage-inventory.json"
     },
     "zero_reference_supporting_scripts": {
-      "current": 37,
+      "current": 36,
       "max": 47,
       "entries_without_owner_metadata": 0,
       "source": "configs/quality/scripts_inventory_manifest.json"
@@ -161,8 +161,8 @@
     },
     "5870": {
       "status": "closeable",
-      "outcome": "Zero-reference supporting scripts are ratcheted in scorecard and architecture CI with zero untriaged entries.",
-      "debt_outcome": "unchanged_but_governed"
+      "outcome": "Zero-reference supporting scripts decreased to 36 and remain ratcheted in scorecard and architecture CI with zero untriaged entries.",
+      "debt_outcome": "improved"
     },
     "5871": {
       "status": "closeable",

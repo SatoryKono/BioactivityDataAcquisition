@@ -1213,7 +1213,7 @@
       "missing_lines": 1,
       "module": "bioetl.application.core._batch_write_support",
       "path": "src/bioetl/application/core/_batch_write_support.py",
-      "source_lines": 184
+      "source_lines": 185
     },
     {
       "coverage_percent": 76.92,
@@ -9473,7 +9473,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.aggregates._batch_lifecycle",
       "path": "src/bioetl/domain/aggregates/_batch_lifecycle.py",
-      "source_lines": 238
+      "source_lines": 239
     },
     {
       "coverage_percent": 100.0,
@@ -9483,7 +9483,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.aggregates._batch_mixins",
       "path": "src/bioetl/domain/aggregates/_batch_mixins.py",
-      "source_lines": 294
+      "source_lines": 295
     },
     {
       "coverage_percent": 100.0,
@@ -9583,7 +9583,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.aggregates.events",
       "path": "src/bioetl/domain/aggregates/events.py",
-      "source_lines": 228
+      "source_lines": 245
     },
     {
       "coverage_percent": 100.0,
@@ -23425,7 +23425,7 @@
       "missing_lines": 1,
       "module": "bioetl.application.core._batch_write_support",
       "path": "src/bioetl/application/core/_batch_write_support.py",
-      "source_lines": 184
+      "source_lines": 185
     },
     {
       "coverage_percent": 76.92,
@@ -31685,7 +31685,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.aggregates._batch_lifecycle",
       "path": "src/bioetl/domain/aggregates/_batch_lifecycle.py",
-      "source_lines": 238
+      "source_lines": 239
     },
     {
       "coverage_percent": 100.0,
@@ -31695,7 +31695,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.aggregates._batch_mixins",
       "path": "src/bioetl/domain/aggregates/_batch_mixins.py",
-      "source_lines": 294
+      "source_lines": 295
     },
     {
       "coverage_percent": 100.0,
@@ -31795,7 +31795,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.aggregates.events",
       "path": "src/bioetl/domain/aggregates/events.py",
-      "source_lines": 228
+      "source_lines": 245
     },
     {
       "coverage_percent": 100.0,
@@ -44430,7 +44430,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-09",
-  "source_tree_sha256": "4bde88364a11af558895d91ac8422929b7a58ea26564f45f3ee200fb7c9310c7",
+  "source_tree_sha256": "74c6e21ca8e18fe9e48df5e54e127835b7e83c7ac4137276a24057b195135e41",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

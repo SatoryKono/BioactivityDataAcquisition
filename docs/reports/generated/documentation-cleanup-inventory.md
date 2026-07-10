@@ -8,8 +8,8 @@
 | Metric | Value |
 | --- | --- |
 | Doc-like files | 2889 |
-| Tracked doc-like files | 1782 |
-| Ignored local docs/reports files | 1107 |
+| Tracked doc-like files | 1799 |
+| Ignored local docs/reports files | 1090 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
 | Generated routes | 58 |
@@ -18,8 +18,8 @@
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 1107 |
-| tracked | 1782 |
+| ignored_local | 1090 |
+| tracked | 1799 |
 
 ## Lifecycle Counts
 
@@ -299,7 +299,7 @@
 | Path | Tracking | Lifecycle | Action |
 | --- | --- | --- | --- |
 | `docs/reports/2026-04-23-documentation-audit-summary.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/README.md` | ignored_local | docs_reports_curated_entrypoint | keep |
+| `docs/reports/README.md` | tracked | docs_reports_curated_entrypoint | keep |
 | `docs/reports/audit-issues/2026-04-23-documentation-audit-issues.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/audit-issues/implementation-plans.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/audit-issues/issue-001-analysis.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |

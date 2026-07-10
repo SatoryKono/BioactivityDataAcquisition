@@ -171,7 +171,8 @@ class BatchWritten(DomainEvent):
 
     def __post_init__(self) -> None:
         _require_layer(self.layer, event_name=type(self).__name__)
-        super().__post_init__()
+        # Direct call avoids zero-arg super issues with slotted dataclass inheritance.
+        DomainEvent.__post_init__(self)
 
 
 @dataclass(frozen=True, slots=True)
@@ -190,7 +191,8 @@ class BatchFailed(DomainEvent):
 
     def __post_init__(self) -> None:
         _require_layer(self.layer, event_name=type(self).__name__)
-        super().__post_init__()
+        # Direct call avoids zero-arg super issues with slotted dataclass inheritance.
+        DomainEvent.__post_init__(self)
 
 
 # ──────────────────────────────────────────────────────────────────────────────

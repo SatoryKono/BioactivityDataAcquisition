@@ -129,13 +129,18 @@ def _iter_dashboard_promql() -> list[tuple[str, str, str]]:
     expressions: list[tuple[str, str, str]] = []
     for path in sorted(DASHBOARDS_DIR.glob("*.json")):
         payload = json.loads(path.read_text(encoding="utf-8"))
+        source_name = path.name
 
-        def _visit(node: object, panel_title: str = "<dashboard>") -> None:
+        def _visit(
+            node: object,
+            panel_title: str = "<dashboard>",
+            source_name: str = source_name,
+        ) -> None:
             if isinstance(node, dict):
                 current_title = str(node.get("title") or panel_title)
                 expr = node.get("expr")
                 if isinstance(expr, str):
-                    expressions.append((path.name, current_title, expr))
+                    expressions.append((source_name, current_title, expr))
                 for value in node.values():
                     _visit(value, current_title)
             elif isinstance(node, list):
