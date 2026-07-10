@@ -148,7 +148,7 @@ class MergeMetricsRecorderMixin:
         )
         # Performance optimization: sum the boolean mask directly to avoid
         # materializing a new filtered DataFrame in memory.
-        return df.select(any_enriched.sum()).item()
+        return int(df.select(any_enriched.sum()).item())
 
     def _count_fully_enriched(
         self,
@@ -193,7 +193,9 @@ class MergeMetricsRecorderMixin:
         exprs = [pl.col(col).is_not_null().sum().alias(col) for col in target_cols]
         non_null_counts = df.select(exprs).row(0, named=True)
 
-        return {col: count / df_len for col, count in non_null_counts.items()}
+        return {
+            str(col): float(count) / df_len for col, count in non_null_counts.items()
+        }
 
 
 __all__ = ["MergeMetricsRecorderMixin"]
