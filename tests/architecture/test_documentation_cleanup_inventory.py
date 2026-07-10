@@ -80,25 +80,12 @@ def test_documentation_cleanup_inventory_has_no_duplicate_surfaces() -> None:
         for row in files
         if isinstance(row, dict) and row.get("status") == "Duplicate"
     ]
-    # Temporarily skip this check due to inventory drift in .system skill licenses
-    # TODO: Fix inventory generation script to properly classify .system skill licenses
-    if duplicate_paths:
-        pytest.skip(
-            f"Duplicate surfaces found (inventory drift): {', '.join(duplicate_paths[:5])}. "
-            "Run: python -m scripts.docs generate-cleanup-inventory --update"
-        )
+    assert not duplicate_paths, duplicate_paths[:10]
 
 
 def test_ai_skill_reference_redirects_are_active_compatibility_surfaces() -> None:
     """Legacy local skill-reference URLs stay active after duplicate body removal."""
-    payload = _inventory_payload()
-    files = payload["files"]
-    assert isinstance(files, list)
-    rows = {
-        str(row["path"]): row
-        for row in files
-        if isinstance(row, dict) and isinstance(row.get("path"), str)
-    }
+    rows = _rows_by_path()
 
     redirect_paths = {
         "docs/00-project/ai/skills/local/deep-research/references/critique-framework.md",
@@ -113,36 +100,17 @@ def test_ai_skill_reference_redirects_are_active_compatibility_surfaces() -> Non
         "docs/00-project/ai/skills/local/technical-designer-mermaid/references/patterns.md",
     }
     missing = sorted(path for path in redirect_paths if path not in rows)
-    if missing:
-        pytest.skip(
-            f"Redirect paths missing from inventory: {', '.join(missing)}. "
-            "Run: python -m scripts.docs generate-cleanup-inventory --update"
-        )
+    assert not missing
     for path in sorted(redirect_paths):
-        if path not in rows:
-            continue
-        # Temporarily skip declared_class check due to inventory drift
-        # TODO: Fix inventory generation script to properly classify skill reference redirects
-        if rows[path].get("declared_class") != "published-redirect":
-            pytest.skip(
-                f"Redirect path {path} has wrong declared_class "
-                f"(expected 'published-redirect', got {rows[path].get('declared_class')}). "
-                "Run: python -m scripts.docs generate-cleanup-inventory --update"
-            )
         assert rows[path]["status"] == "Active"
+        assert rows[path]["lifecycle"] == "published_skill_reference_redirect"
+        assert rows[path]["duplicate_resolution"] == "published_skill_reference_redirect"
         assert rows[path]["recommended_action"] == "keep"
 
 
 def test_documentation_cleanup_inventory_routes_diagram_artifacts() -> None:
     """Generated diagram support artifacts must have explicit route ownership."""
-    payload = _inventory_payload()
-    files = payload["files"]
-    assert isinstance(files, list)
-    rows = {
-        str(row["path"]): row
-        for row in files
-        if isinstance(row, dict) and isinstance(row.get("path"), str)
-    }
+    rows = _rows_by_path()
 
     expected_routes = {
         "docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-checkpoint.mmd": "architecture-diagram-package-family-sources",
@@ -156,6 +124,146 @@ def test_documentation_cleanup_inventory_routes_diagram_artifacts() -> None:
         assert rows[path]["generated_route"] == route_id
 
 
+def test_documentation_cleanup_inventory_covers_github_issue_drafts() -> None:
+    """Issue drafts and packs must be lifecycle-classified before cleanup."""
+    rows = _rows_by_path()
+    tracked_issue_files = subprocess.run(
+        ["git", "ls-files", ".github/ISSUES"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    ).stdout.splitlines()
+
+    issue_rows = [path for path in rows if path.startswith(".github/ISSUES/")]
+    assert len(issue_rows) == len(tracked_issue_files)
+    assert len(issue_rows) >= 100
+    assert rows[".github/ISSUES/README.md"]["lifecycle"] == "guide"
+    assert rows[".github/ISSUES/CHEMBL-ISSUES-INDEX.md"]["lifecycle"] == "index"
+    assert (
+        rows[".github/ISSUES/DOC-AUDIT-2026-06-19-ISSUE-PACK.md"]["lifecycle"]
+        == "issue_pack"
+    )
+    live_issue = rows[
+        ".github/ISSUES/ADR-HYGIENE-4746-Archive-ADR-003-ADR-008.md"
+    ]
+    assert live_issue["lifecycle"] == "live_issue_mirror"
+    assert live_issue["github_issue_number"] == 4746
+    assert live_issue["recommended_action"] == "reconcile-with-github-state"
+
+
+def test_documentation_cleanup_inventory_covers_root_entrypoints() -> None:
+    """Root docs that are intentionally retained must have explicit kinds."""
+    rows = _rows_by_path()
+    expected = {
+        "CONTRIBUTING.md": "contributor_entrypoint",
+        "GEMINI.md": "ai_runtime_mirror",
+        "best_practices.md": "vendor_review_guidance",
+    }
+    for path, kind in expected.items():
+        assert rows[path]["status"] == "Active"
+        assert rows[path]["recommended_action"] == "keep"
+        assert rows[path]["root_doc_kind"] == kind
+
+
+def test_documentation_cleanup_inventory_includes_local_docs_reports() -> None:
+    """Ignored local docs/reports artifacts remain visible in cleanup planning."""
+    payload = _inventory_payload()
+    summary = payload["summary"]
+    assert isinstance(summary, dict)
+    rows = _rows_by_path()
+
+    assert summary["total_doc_like_ignored_local"] >= 1000
+    assert rows["docs/reports/index.md"]["tracking_state"] == "ignored_local"
+    assert (
+        rows["docs/reports/index.md"]["lifecycle"]
+        == "docs_reports_curated_entrypoint"
+    )
+    inventory_json = rows["docs/reports/generated/documentation-cleanup-inventory.json"]
+    assert inventory_json["tracking_state"] == "ignored_local"
+    assert inventory_json["status"] == "Generated"
+    assert inventory_json["generated_route"] == "documentation-cleanup-inventory"
+
+
+def test_documentation_cleanup_inventory_generated_routes_are_owned() -> None:
+    """Every Generated row needs a route or a documented deterministic exception."""
+    payload = _inventory_payload()
+    summary = payload["summary"]
+    assert isinstance(summary, dict)
+    rows = _rows_by_path()
+
+    assert summary["generated_without_route_or_exception_count"] == 0
+    unowned = [
+        path
+        for path, row in rows.items()
+        if row["status"] == "Generated"
+        and not row.get("generated_route")
+        and not row.get("generated_route_exception")
+    ]
+    assert not unowned, unowned[:20]
+    assert (
+        rows["docs/04-reference/api/application.md"]["generated_route"]
+        == "api-reference-generated-docs"
+    )
+    assert (
+        rows["docs/03-guides/dashboards/panel-title-inventory.md"][
+            "generated_route"
+        ]
+        == "dashboard-panel-title-inventory-generated-doc"
+    )
+    assert (
+        rows["docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md"][
+            "generated_route"
+        ]
+        == "ai-runtime-governance-mirrors"
+    )
+
+
+def test_documentation_cleanup_inventory_classifies_plans_and_reports() -> None:
+    """Plans and reports must distinguish active backlog from cleanup candidates."""
+    rows = _rows_by_path()
+
+    active_backlog = rows["docs/plans/consolidated-open-tasks-plan-2026-03-21.md"]
+    assert active_backlog["status"] == "Active"
+    assert active_backlog["lifecycle"] == "active_backlog"
+    assert active_backlog["recommended_action"] == "keep"
+
+    supporting_context = rows["docs/plans/chembl-baseline-refactor-plan-2026-06-01.md"]
+    assert supporting_context["status"] == "Working"
+    assert supporting_context["lifecycle"] == "supporting_context"
+    assert supporting_context["recommended_action"] == "archive-after-migration"
+
+    closeout = rows["reports/quality/tech-debt-issues-5847-5852-closeout.json"]
+    assert closeout["lifecycle"] == "closeout_evidence"
+    assert closeout["freshness"] == "retention-sensitive"
+    assert closeout["recommended_action"] == "keep"
+
+    baseline = rows["reports/quality/dead-code-inventory.md"]
+    assert baseline["lifecycle"] == "active_quality_baseline"
+    assert baseline["generated_route"] == "dead-code-inventory-quality-baseline"
+
+
+def test_documentation_cleanup_inventory_maps_drafts_and_skill_mirrors() -> None:
+    """D-series drafts and generated AI skill mirrors need explicit lifecycle."""
+    rows = _rows_by_path()
+
+    draft = rows["docs/D-01 Governance & Style Guide.md"]
+    assert draft["lifecycle"] == "docs_draft_with_canonical_successor"
+    assert (
+        draft["canonical_successor"]
+        == "docs/00-project/governance/01-documentation-governance-style-guide.md"
+    )
+    assert draft["recommended_action"] == "keep"
+
+    license_mirror = rows[
+        "docs/00-project/ai/skills/global/.system/skill-creator/license.txt"
+    ]
+    assert license_mirror["status"] == "Generated"
+    assert license_mirror["lifecycle"] == "generated_skill_license_mirror"
+    assert license_mirror["generated_route"] == "ai-skill-license-mirrors"
+
+
 def test_documentation_cleanup_inventory_check_passes() -> None:
     """Generator --check must stay synchronized with committed inventory artifacts."""
     result = subprocess.run(
@@ -166,13 +274,6 @@ def test_documentation_cleanup_inventory_check_passes() -> None:
         text=True,
         encoding="utf-8",
     )
-    # Temporarily skip this check due to inventory drift after --update
-    # TODO: Commit inventory changes after --update or fix generator script
-    if result.returncode != 0:
-        pytest.skip(
-            f"Inventory drift detected. Run: python -m scripts.docs generate-cleanup-inventory --update "
-            "and commit the changes."
-        )
     assert result.returncode == 0, result.stdout + result.stderr
 
 
