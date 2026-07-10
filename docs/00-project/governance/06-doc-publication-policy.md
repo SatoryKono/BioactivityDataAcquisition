@@ -260,6 +260,13 @@ Verified 2026-04-01: drift между publication policy и текущим MkDoc
 но при rename / move MUST обновляться в одном changeset вместе с published
 governance и navigator pages.
 
+Deployment boundary verified 2026-07-10: `.github/workflows/docs.yml` is a
+validation/build workflow, not a GitHub Pages deployment workflow. `docs/site/**`
+remains generated local publication-helper output per
+[`03-file-policy.md`](03-file-policy.md) and is ignored by VCS. If publication is
+later enabled, update `mkdocs.yml`, the deployment workflow, and this policy in
+one changeset.
+
 ## Freshness Protocol
 
 ### 1. Trigger events

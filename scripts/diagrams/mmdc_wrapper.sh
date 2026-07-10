@@ -19,6 +19,40 @@ DOCKER_IMAGE="${MMDC_DOCKER_IMAGE:-minlag/mermaid-cli:10.6.1}"
 LOCAL_MMDC="/tmp/mermaid-cli-lite/node_modules/.bin/mmdc"
 FORCE_DOCKER="${MMDC_FORCE_DOCKER:-0}"
 HOST_PUPPETEER_CACHE_DIR="${PUPPETEER_CACHE_DIR:-${HOME:-}/.cache/puppeteer}"
+MMDC_REQUIRED_VERSION="${MMDC_REQUIRED_VERSION:-10.6.1}"
+MMDC_ALLOW_VERSION_DRIFT="${MMDC_ALLOW_VERSION_DRIFT:-0}"
+MMDC_SKIP_VERSION_CHECK="${MMDC_SKIP_VERSION_CHECK:-0}"
+
+candidate_version() {
+  local candidate="$1"
+  "$candidate" --version 2>/dev/null | head -n 1 | sed -E 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/'
+}
+
+assert_candidate_version() {
+  local candidate="$1"
+  local version=""
+
+  [[ -z "$MMDC_REQUIRED_VERSION" ]] && return 0
+  [[ "$MMDC_ALLOW_VERSION_DRIFT" == "1" ]] && return 0
+  [[ "$MMDC_SKIP_VERSION_CHECK" == "1" ]] && return 0
+
+  version="$(candidate_version "$candidate" || true)"
+  if [[ "$version" != "$MMDC_REQUIRED_VERSION" ]]; then
+    echo "Error: Mermaid CLI version mismatch for $candidate" >&2
+    echo "  required: $MMDC_REQUIRED_VERSION" >&2
+    echo "  detected: ${version:-unknown}" >&2
+    echo "Set MMDC_ALLOW_VERSION_DRIFT=1 only for diagnostics/canary runs." >&2
+    return 1
+  fi
+  return 0
+}
+
+exec_candidate() {
+  local candidate="$1"
+  shift
+  assert_candidate_version "$candidate"
+  exec "$candidate" "$@"
+}
 
 run_with_docker() {
   if ! command -v docker >/dev/null 2>&1; then
@@ -56,30 +90,30 @@ run_with_docker() {
 }
 
 if [[ "$FORCE_DOCKER" != "1" ]]; then
-if [[ -n "${MMDC_BIN:-}" ]]; then
-  MMDC_CANDIDATE="$(command -v "$MMDC_BIN" 2>/dev/null || true)"
-  if [[ -z "$MMDC_CANDIDATE" && -x "$MMDC_BIN" ]]; then
-    MMDC_CANDIDATE="$MMDC_BIN"
-  fi
-  if [[ -n "$MMDC_CANDIDATE" ]]; then
-    MMDC_RESOLVED="$(readlink -f "$MMDC_CANDIDATE" 2>/dev/null || echo "$MMDC_CANDIDATE")"
-    if [[ "$MMDC_RESOLVED" != "$SELF_PATH" ]]; then
-      exec "$MMDC_CANDIDATE" "$@"
+  if [[ -n "${MMDC_BIN:-}" ]]; then
+    MMDC_CANDIDATE="$(command -v "$MMDC_BIN" 2>/dev/null || true)"
+    if [[ -z "$MMDC_CANDIDATE" && -x "$MMDC_BIN" ]]; then
+      MMDC_CANDIDATE="$MMDC_BIN"
+    fi
+    if [[ -n "$MMDC_CANDIDATE" ]]; then
+      MMDC_RESOLVED="$(readlink -f "$MMDC_CANDIDATE" 2>/dev/null || echo "$MMDC_CANDIDATE")"
+      if [[ "$MMDC_RESOLVED" != "$SELF_PATH" ]]; then
+        exec_candidate "$MMDC_CANDIDATE" "$@"
+      fi
     fi
   fi
-fi
 
-SYSTEM_MMDC="$(command -v mmdc 2>/dev/null || true)"
-if [[ -n "$SYSTEM_MMDC" ]]; then
-  SYSTEM_MMDC_RESOLVED="$(readlink -f "$SYSTEM_MMDC" 2>/dev/null || echo "$SYSTEM_MMDC")"
-  if [[ "$SYSTEM_MMDC_RESOLVED" != "$SELF_PATH" ]]; then
-    exec "$SYSTEM_MMDC" "$@"
+  SYSTEM_MMDC="$(command -v mmdc 2>/dev/null || true)"
+  if [[ -n "$SYSTEM_MMDC" ]]; then
+    SYSTEM_MMDC_RESOLVED="$(readlink -f "$SYSTEM_MMDC" 2>/dev/null || echo "$SYSTEM_MMDC")"
+    if [[ "$SYSTEM_MMDC_RESOLVED" != "$SELF_PATH" ]]; then
+      exec_candidate "$SYSTEM_MMDC" "$@"
+    fi
   fi
-fi
 
-if [[ -x "$LOCAL_MMDC" ]]; then
-  exec "$LOCAL_MMDC" "$@"
-fi
+  if [[ -x "$LOCAL_MMDC" ]]; then
+    exec_candidate "$LOCAL_MMDC" "$@"
+  fi
 fi
 
 run_with_docker "$@"

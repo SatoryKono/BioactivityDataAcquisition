@@ -295,9 +295,8 @@ tests.zip
 configs/pipelines.zip
 /all_fixtures.txt
 data/input/chembl_target_component.csv
-# Diagram render outputs (generated locally; source is .mmd/.mermaid)
-docs/02-architecture/mmd-diagrams/**/png/*.png
-docs/02-architecture/mmd-diagrams/**/svg/*.svg
+# Current diagram SVG/PNG outputs under docs/02-architecture/diagrams/** are
+# tracked render baselines for drift review, not ignored local build output.
 
 # Root-level test dump files (MUST be in tests/fixtures/vcr/)
 /test_backfill_*

@@ -1,3 +1,9 @@
+> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
+> Canonical runtime source: `.codex/skills/grafana-dashboard-extension/SKILL.md`
+> Governance: AI_RUNTIME_MIRROR_OWNERSHIP.md
+> Edit the runtime source first, then refresh this mirror.
+______________________________________________________________________
+
 ---
 name: "grafana-dashboard-extension"
 description: "Extend, edit, validate, and review shipped Grafana dashboards for BioETL. Use when tasks touch `grafana/dashboards/*.json`, dashboard navigation, panel queries, variables, units, thresholds, Loki/Tempo drilldowns, or operator-facing dashboard UX. Treat repo dashboard JSON as source of truth and update docs when shipped dashboard behavior changes."
@@ -7,6 +13,13 @@ description: "Extend, edit, validate, and review shipped Grafana dashboards for 
 
 ## Source Of Truth
 
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
+- Root runtime contract: `../../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../../../02-architecture/decisions/`
+- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`

@@ -8,9 +8,8 @@ Read before planning or editing:
 - `docs/02-architecture/decisions/`
 - `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
-- `docs/00-project/ai/memory/agent-memory.md`
-- `docs/00-project/ai/memory/memory-py-test-swarm.md`
 - `AGENTS.md`
+- Role memory: `docs/00-project/ai/memory/memory-py-test-swarm.md`
 
 ## name: py-test-swarm description: "Hierarchical testing system for BioETL (L1→L2→L3). Modes: full_audit, fix_failures, coverage_boost, optimize, flakiness_scan." model: opus
 

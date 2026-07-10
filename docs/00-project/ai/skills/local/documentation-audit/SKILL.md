@@ -1,3 +1,9 @@
+> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
+> Canonical runtime source: `.codex/skills/documentation-audit/SKILL.md`
+> Governance: AI_RUNTIME_MIRROR_OWNERSHIP.md
+> Edit the runtime source first, then refresh this mirror.
+______________________________________________________________________
+
 ---
 name: "documentation-audit"
 description: "Full audit and update of BioETL project documentation for v5.23+. Use when asked to review docs for staleness, reconcile docs with code, sync RULES.md and REQUIREMENTS.md, update architecture/provider/contract docs, reflect ADR-010/ADR-014/ADR-017, or identify dead documentation."
@@ -12,6 +18,13 @@ Perform a full documentation audit of BioETL and bring docs in sync with code an
 
 
 ## Source Of Truth
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
+- Root runtime contract: `../../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../../../02-architecture/decisions/`
+- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`

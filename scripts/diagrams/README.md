@@ -26,7 +26,7 @@ python -m scripts.diagrams <command> [args...]
 | `checks`              | `run_diagram_checks.sh`                                   | Run unified diagram validation profiles (`pr`, `nightly`, `quick`)    |
 | `check-artifacts`     | `check_diagram_artifacts.py`                              | Check required SVG artifacts and optional PNG compatibility artifacts |
 | `check-quality-gates` | `check_diagram_quality_gates.py`                          | Check diagram quality gates                                           |
-| `check-visual-smoke`  | `check_diagram_visual_smoke.py`                           | Visual smoke test for diagrams                                        |
+| `check-visual-smoke`  | `check_diagram_visual_smoke.py`                           | Visual smoke test for diagrams; supports `--json-out`                 |
 | `check-svg-text`      | `check_svg_text_visibility.py`                            | Check SVG text visibility                                             |
 | `check-class-methods` | `scripts/diagrams/check_class_method_render_integrity.py` | Check class method render integrity                                   |
 | `check-pdf-bounds`    | `check_pdf_image_bounds.py`                               | Check PDF image bounds                                                |
@@ -103,7 +103,7 @@ python -m scripts.diagrams <command> [args...]
 | `scripts/diagrams/run_diagram_docs_agent.sh`                 | Canonical shell entrypoint for checks + export pipeline                                       |
 | `scripts/diagrams/generate_with_descriptions_docx.py`        | Canonical DOCX exporter for description bundles                                               |
 | `scripts/diagrams/generate_with_descriptions_pdf.py`         | Canonical PDF exporter for description bundles                                                |
-| `scripts/diagrams/validate_mermaid_syntax.sh`                | Validate Mermaid syntax                                                                       |
+| `scripts/diagrams/validate_mermaid_syntax.sh`                | Validate Mermaid syntax, including optional active-doc embedded fences via `--include-embedded` |
 | `scripts/diagrams/svg2png.mjs`                               | Node.js SVG-to-PNG converter                                                                  |
 | `scripts/diagrams/pagebreak.lua`                             | Pandoc Lua filter for pagebreaks                                                              |
 
@@ -115,4 +115,5 @@ python -m scripts.diagrams <command> [args...]
 - `scripts/diagrams/generate_description_indexes.py` is the canonical generator for `descriptions/INDEX.md` and `descriptions/class/INDEX.md`.
 - `python -m scripts.diagrams render-pdf` and `python -m scripts.diagrams render-views` are the supported public entrypoints for collection-specific bundle refresh.
 - `visual-smoke.txt` remains the canonical SVG smoke manifest; `png-compatibility.txt` is a smaller curated manifest for PNG compatibility checks.
+- `check_diagram_visual_smoke.py --json-out <path>` writes `diagram-visual-smoke-report-v1` machine-readable status for CI and local diagnostics.
 - When bundle drift is corrected, prefer regenerating the narrow affected collection via `generate_all_bundles.py --collection <name>` instead of broad refresh of every derived artifact.

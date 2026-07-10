@@ -1,3 +1,9 @@
+> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
+> Canonical runtime source: `.codex/skills/py-review-orchestrator/SKILL.md`
+> Governance: AI_RUNTIME_MIRROR_OWNERSHIP.md
+> Edit the runtime source first, then refresh this mirror.
+______________________________________________________________________
+
 ---
 name: "py-review-orchestrator"
 description: "Execute BioETL hierarchical code review orchestration (L1/L2/L3) across sectors S1-S8 with delegated sub-reviews, scoring, and consolidated reporting in `reports/{LLM}/review_py-review-orchestrator_{YYYYMMDD}_{HHMM}_FINAL.md`. Use when a full-project audit or broad multi-layer review is requested."
@@ -10,6 +16,13 @@ description: "Execute BioETL hierarchical code review orchestration (L1/L2/L3) a
 Run the role-specific workflow as defined in the py-review-orchestrator profile.
 
 ## Source Of Truth
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
+- Root runtime contract: `../../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../../../02-architecture/decisions/`
+- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`

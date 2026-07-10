@@ -1,3 +1,9 @@
+> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
+> Canonical runtime source: `.codex/skills/deep-research/SKILL.md`
+> Governance: AI_RUNTIME_MIRROR_OWNERSHIP.md
+> Edit the runtime source first, then refresh this mirror.
+______________________________________________________________________
+
 ---
 name: "deep-research"
 description: "Use when asked for \"deep research\", \"thorough analysis\", \"comprehensive report\", \"investigate\", \"due diligence\", or when multiple sources are needed to answer complex questions. Produces well-sourced research reports through iterative refinement."
@@ -9,6 +15,13 @@ agent: "general-purpose"
 
 ## Source Of Truth
 
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
+- Root runtime contract: `../../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../../../02-architecture/decisions/`
+- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`

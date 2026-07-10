@@ -9,11 +9,13 @@ Intended usage:
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import shutil
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
@@ -26,6 +28,7 @@ except ImportError:  # pragma: no cover - direct script execution
 
 
 DEFAULT_MANIFEST = VISUAL_SMOKE_MANIFEST
+REPORT_SCHEMA_VERSION = "diagram-visual-smoke-report-v1"
 
 
 def iter_git_candidates() -> list[str]:
@@ -120,6 +123,35 @@ def changed_paths(rel_paths: list[str]) -> list[str]:
     return [line.strip() for line in completed.stdout.splitlines() if line.strip()]
 
 
+def build_report_payload(
+    *,
+    manifest: Path,
+    rel_paths: list[str],
+    changed: list[str],
+    status: str,
+    errors: list[str] | None = None,
+) -> dict[str, Any]:
+    """Build a machine-readable visual smoke report."""
+    return {
+        "schema_version": REPORT_SCHEMA_VERSION,
+        "status": status,
+        "manifest": manifest.as_posix(),
+        "checked_count": len(rel_paths),
+        "changed_count": len(changed),
+        "changed_paths": changed,
+        "errors": errors or [],
+    }
+
+
+def write_json_report(path: Path, payload: dict[str, Any]) -> None:
+    """Write visual smoke report JSON, creating parent directories."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Smoke-check selected SVG baselines for diagram render drift."
@@ -130,6 +162,12 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_MANIFEST,
         help=f"Path to manifest file (default: {DEFAULT_MANIFEST})",
     )
+    parser.add_argument(
+        "--json-out",
+        type=Path,
+        default=None,
+        help="Optional JSON report output path.",
+    )
     return parser.parse_args()
 
 
@@ -139,16 +177,44 @@ def main() -> int:
     manifest = (
         args.manifest if args.manifest.is_absolute() else repo_root / args.manifest
     )
+    json_out = (
+        args.json_out
+        if args.json_out is None or args.json_out.is_absolute()
+        else repo_root / args.json_out
+    )
+    rel_paths: list[str] = []
+    changed: list[str] = []
 
     try:
         rel_paths = load_manifest(manifest)
         ensure_paths_exist(repo_root, rel_paths)
         changed = changed_paths(rel_paths)
     except (FileNotFoundError, ValueError, RuntimeError) as exc:
+        if json_out is not None:
+            write_json_report(
+                json_out,
+                build_report_payload(
+                    manifest=manifest,
+                    rel_paths=rel_paths,
+                    changed=changed,
+                    status="error",
+                    errors=[str(exc)],
+                ),
+            )
         print(f"[ERROR] {exc}", file=sys.stderr)
         return 2
 
     if changed:
+        if json_out is not None:
+            write_json_report(
+                json_out,
+                build_report_payload(
+                    manifest=manifest,
+                    rel_paths=rel_paths,
+                    changed=changed,
+                    status="failed",
+                ),
+            )
         print(
             "[ERROR] Visual smoke regression detected in baseline SVG(s):",
             file=sys.stderr,
@@ -161,6 +227,16 @@ def main() -> int:
         )
         return 1
 
+    if json_out is not None:
+        write_json_report(
+            json_out,
+            build_report_payload(
+                manifest=manifest,
+                rel_paths=rel_paths,
+                changed=changed,
+                status="passed",
+            ),
+        )
     print(f"[OK] Visual smoke check passed ({len(rel_paths)} baseline SVGs unchanged).")
     return 0
 

@@ -40,3 +40,13 @@ def test_validator_retries_with_docker_fallback_when_chrome_is_missing() -> None
 
     assert "MMDC_FORCE_DOCKER=1" in script
     assert "Chrome runtime unavailable" in script
+
+
+def test_validator_supports_embedded_mermaid_options() -> None:
+    script = _script_text()
+
+    assert "--include-embedded" in script
+    assert "--embedded-only" in script
+    assert "INCLUDE_EMBEDDED=1" in script
+    assert "INCLUDE_SOURCES=0" in script
+    assert "embedded-mermaid.tsv" in script

@@ -13,6 +13,8 @@ TEMP_PUPPETEER_CFG=""
 TMP_DIR=""
 PYTHON_BIN=""
 MMDC_BIN="${MMDC_BIN:-$REPO_ROOT/scripts/diagrams/mmdc_wrapper.sh}"
+INCLUDE_SOURCES=1
+INCLUDE_EMBEDDED=0
 
 usage() {
   cat <<EOF
@@ -20,11 +22,14 @@ Usage: $(basename "$0") [OPTIONS]
 
 Validate all Mermaid source files in docs/:
   - includes: docs/**/*.mmd, docs/**/*.mermaid
+  - optionally includes fenced Mermaid diagrams in active Markdown docs
   - excludes: docs/99-archive/**
 
 Options:
   --docs-root DIR     Docs root directory (default: $DOCS_ROOT)
   --scope MODE        Validation scope: all|canonical (default: all)
+  --include-embedded  Also validate fenced Mermaid blocks with diagram declarations
+  --embedded-only     Validate fenced Mermaid blocks only
   --puppeteer FILE    Puppeteer config JSON path
   -h, --help          Show this help
 EOF
@@ -133,6 +138,15 @@ while [[ $# -gt 0 ]]; do
       SCOPE="$2"
       shift 2
       ;;
+    --include-embedded)
+      INCLUDE_EMBEDDED=1
+      shift
+      ;;
+    --embedded-only)
+      INCLUDE_SOURCES=0
+      INCLUDE_EMBEDDED=1
+      shift
+      ;;
     --puppeteer)
       [[ $# -ge 2 ]] || { echo "Missing value for $1" >&2; exit 2; }
       PUPPETEER_CFG="$2"
@@ -230,15 +244,21 @@ run_validation_with_docker_fallback() {
   return 1
 }
 
-while IFS= read -r -d '' file; do
+validate_file() {
+  local file="$1"
+  local label="$2"
+  local base
+  local out
+  local err
+
   base="$(basename "${file%.*}")"
-  [[ "$base" = _* ]] && continue
+  [[ "$base" = _* ]] && return 0
   count=$((count + 1))
   out="$TMP_DIR/${count}_${base}.svg"
   err="$TMP_DIR/${count}_${base}.err"
-  echo "Validating $file"
+  echo "Validating $label"
   if ! run_validation_with_docker_fallback "$file" "$out" "$err"; then
-    echo "ERROR: Mermaid validation failed for $file" >&2
+    echo "ERROR: Mermaid validation failed for $label" >&2
     if grep -q "Could not find Chrome" "$err"; then
       echo "HINT: mmdc could not find Chrome/Chromium for Puppeteer." >&2
       echo "      Install browser runtime: npx puppeteer browsers install chrome-headless-shell" >&2
@@ -252,8 +272,86 @@ while IFS= read -r -d '' file; do
     fi
     failed=$((failed + 1))
   fi
-done < <(find "$DOCS_ROOT" -type f \( -name "*.mermaid" -o -name "*.mmd" \) \
-  -not -path "$DOCS_ROOT/99-archive/*" -print0)
+}
+
+if [[ "$INCLUDE_SOURCES" -eq 1 ]]; then
+  while IFS= read -r -d '' file; do
+    validate_file "$file" "$file"
+  done < <(find "$DOCS_ROOT" -type f \( -name "*.mermaid" -o -name "*.mmd" \) \
+    -not -path "$DOCS_ROOT/99-archive/*" -print0)
+fi
+
+if [[ "$INCLUDE_EMBEDDED" -eq 1 ]]; then
+  if [[ -z "$PYTHON_BIN" ]]; then
+    echo "Error: python is required for embedded Mermaid extraction" >&2
+    exit 2
+  fi
+
+  embedded_dir="$TMP_DIR/embedded-mermaid"
+  embedded_manifest="$TMP_DIR/embedded-mermaid.tsv"
+  mkdir -p "$embedded_dir"
+  "$PYTHON_BIN" - <<'PY' "$DOCS_ROOT" "$embedded_dir" "$embedded_manifest"
+from __future__ import annotations
+
+import hashlib
+import re
+import sys
+from pathlib import Path
+
+docs_root = Path(sys.argv[1])
+out_dir = Path(sys.argv[2])
+manifest = Path(sys.argv[3])
+
+fence_re = re.compile(r"^```\s*mermaid\s*$", re.IGNORECASE)
+decl_re = re.compile(
+    r"^\s*(flowchart|graph|stateDiagram|classDiagram|sequenceDiagram|erDiagram|mindmap|gantt|pie|xychart)\b",
+    re.IGNORECASE,
+)
+
+rows: list[str] = []
+for md_path in sorted(docs_root.rglob("*.md")):
+    if "99-archive" in md_path.parts:
+        continue
+    try:
+        lines = md_path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        continue
+
+    in_block = False
+    block: list[str] = []
+    start_line = 0
+    for line_no, line in enumerate(lines, start=1):
+        if not in_block:
+            if fence_re.match(line.strip()):
+                in_block = True
+                block = []
+                start_line = line_no
+            continue
+
+        if line.strip().startswith("```"):
+            block_text = "\n".join(block).strip()
+            if block_text and any(decl_re.match(item) for item in block):
+                digest = hashlib.sha1(
+                    f"{md_path.as_posix()}:{start_line}".encode("utf-8")
+                ).hexdigest()[:12]
+                out_path = out_dir / f"embedded-{len(rows) + 1:04d}-{digest}.mmd"
+                out_path.write_text(block_text + "\n", encoding="utf-8")
+                rows.append(f"{out_path.as_posix()}\t{md_path.as_posix()}:{start_line}")
+            in_block = False
+            block = []
+            continue
+
+        block.append(line)
+
+manifest.write_text("\n".join(rows) + ("\n" if rows else ""), encoding="utf-8")
+print(f"Extracted {len(rows)} embedded Mermaid diagram block(s) for syntax validation.")
+PY
+
+  while IFS=$'\t' read -r file label; do
+    [[ -z "$file" ]] && continue
+    validate_file "$file" "$label"
+  done < "$embedded_manifest"
+fi
 
 if [[ "$failed" -gt 0 ]]; then
   echo "Validation failed: $failed of $count diagram(s) failed." >&2

@@ -8,9 +8,8 @@ Read before planning or editing:
 - `docs/02-architecture/decisions/`
 - `docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
-- `docs/00-project/ai/memory/agent-memory.md`
-- `docs/00-project/ai/memory/memory-py-review-orchestrator.md`
 - `AGENTS.md`
+- Role memory: `docs/00-project/ai/memory/memory-py-review-orchestrator.md`
 
 ## name: py-review-orchestrator description: "Hierarchical Code Review Agent for BioETL" model: sonnet
 

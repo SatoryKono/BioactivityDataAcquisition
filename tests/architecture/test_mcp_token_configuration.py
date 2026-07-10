@@ -81,11 +81,14 @@ def test_mcp_token_docs_cover_sources_rotation_validation_and_ci_stance() -> Non
     for needle in (
         "Token Matrix",
         "Wrapper Validation",
+        "Historical Exposure Note",
         "Troubleshooting",
         "CI/CD Stance",
         "GITHUB_PERSONAL_ACCESS_TOKEN",
         "BRAVE_API_KEY",
         "90 days",
+        "historical `.env` / `.env.local` path entries",
+        "treated as exposed and rotated before use",
     ):
         assert needle in token_doc
 

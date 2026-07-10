@@ -44,8 +44,10 @@ jobs:
 
       - name: Visual smoke baseline drift (DIAG-T026)
         run: |
+          mkdir -p reports/diagrams
           python3 scripts/diagrams/check_diagram_visual_smoke.py \
-            --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
+            --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt \
+            --json-out reports/diagrams/diagram-visual-smoke-nightly.json
 
       - name: Run PR quality-gates baseline (DIAG-T018..T023)
         run: |
@@ -92,6 +94,7 @@ jobs:
           path: |
             reports/diagrams/diagram-quality-report-nightly.json
             reports/diagrams/diagram-quality-report-nightly.md
+            reports/diagrams/diagram-visual-smoke-nightly.json
             reports/diagrams/diagram-lint-report-nightly.json
             reports/diagrams/diagram-nightly-phase2.json
             reports/diagrams/diagram-nightly-phase2.md
@@ -142,6 +145,8 @@ jobs:
           mermaid-version: ${{ matrix.mermaid_version }}
 
       - name: Validate Mermaid syntax
+        env:
+          MMDC_ALLOW_VERSION_DRIFT: ${{ matrix.label == 'canary' && '1' || '0' }}
         run: |
           bash scripts/diagrams/validate_mermaid_syntax.sh \
             --puppeteer /tmp/puppeteer-config.json

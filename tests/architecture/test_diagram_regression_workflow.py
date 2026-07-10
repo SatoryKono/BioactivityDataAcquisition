@@ -17,6 +17,7 @@ def test_docs_workflow_includes_quality_gates_step() -> None:
     assert "diagrams/manifests/quality-gates.txt" in workflow
     assert "diagram-quality-report.json" in workflow
     assert "diagrams-quality-report" in workflow
+    assert "diagram-visual-smoke.json" in workflow
 
 
 def test_docs_workflow_includes_artifact_validation_step() -> None:
@@ -24,6 +25,13 @@ def test_docs_workflow_includes_artifact_validation_step() -> None:
 
     assert "check_diagram_artifacts.py" in workflow
     assert "diagrams/manifests/visual-smoke.txt" in workflow
+
+
+def test_docs_workflow_validates_embedded_mermaid_blocks() -> None:
+    workflow = Path(".github/workflows/docs.yml").read_text(encoding="utf-8")
+
+    assert "--include-embedded" in workflow
+    assert "'docs/**/*.md'" in workflow
 
 
 def test_docs_workflow_publishes_step_summary() -> None:

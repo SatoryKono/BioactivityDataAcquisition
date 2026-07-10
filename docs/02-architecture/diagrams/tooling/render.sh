@@ -44,6 +44,8 @@ FIT=1            # adaptive sizing by default
 TEXT_LAYER="fallback-only"   # dual | fo-only | fallback-only
 EXCLUDE_PATHS=("docs/99-archive")
 MMDC_BIN="${MMDC_BIN:-$REPO_ROOT/scripts/diagrams/mmdc_wrapper.sh}"
+MMDC_REQUIRED_VERSION="${MMDC_REQUIRED_VERSION:-10.6.1}"
+MMDC_ALLOW_VERSION_DRIFT="${MMDC_ALLOW_VERSION_DRIFT:-0}"
 
 # ── Diagram source directories ──────────────────────────────
 DEFAULT_DIRS=(
@@ -107,6 +109,35 @@ cleanup_temp_files() {
   return 0
 }
 trap cleanup_temp_files EXIT
+
+normalize_mmdc_version() {
+  sed -E 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/'
+}
+
+detect_mmdc_version() {
+  MMDC_SKIP_VERSION_CHECK=1 "$MMDC_BIN" --version 2>/dev/null | head -n 1 | normalize_mmdc_version || true
+}
+
+enforce_mmdc_version() {
+  local version="$1"
+
+  [[ -z "$MMDC_REQUIRED_VERSION" ]] && return 0
+  [[ "$MMDC_ALLOW_VERSION_DRIFT" == "1" ]] && return 0
+
+  if [[ "$version" != "$MMDC_REQUIRED_VERSION" ]]; then
+    log_err "Mermaid CLI version mismatch"
+    echo "  required: $MMDC_REQUIRED_VERSION"
+    echo "  detected: ${version:-unknown}"
+    echo "  Set MMDC_ALLOW_VERSION_DRIFT=1 only for diagnostics/canary runs."
+    exit 1
+  fi
+}
+
+replace_atomically() {
+  local tmp_path="$1"
+  local final_path="$2"
+  mv -f "$tmp_path" "$final_path"
+}
 
 require_option_value() {
   local option_name="$1"
@@ -341,7 +372,9 @@ if [[ ! -x "$MMDC_BIN" ]]; then
   echo ""
   exit 1
 fi
-log_info "mmdc $("$MMDC_BIN" --version 2>/dev/null || echo '(version unknown)') found via $MMDC_BIN"
+MMDC_VERSION="$(detect_mmdc_version)"
+enforce_mmdc_version "$MMDC_VERSION"
+log_info "mmdc ${MMDC_VERSION:-'(version unknown)'} found via $MMDC_BIN"
 
 PYTHON_BIN=""
 if command -v python3 &>/dev/null; then
@@ -523,13 +556,17 @@ render_one() {
   if [[ $FORMAT_SVG -eq 1 ]]; then
     mkdir -p "$svg_dir"
     local svg_out="$svg_dir/${base}.svg"
-    if "$MMDC_BIN" -i "$src" -o "$svg_out" "${MMDC_ARGS[@]}" "${size_args[@]}" -b "$BG" 2>/dev/null; then
+    local svg_tmp_dir=""
+    local svg_tmp=""
+    svg_tmp_dir="$(mktemp -d "$svg_dir/.${base}.svg.tmp.XXXXXX")"
+    svg_tmp="$svg_tmp_dir/${base}.svg"
+    if "$MMDC_BIN" -i "$src" -o "$svg_tmp" "${MMDC_ARGS[@]}" "${size_args[@]}" -b "$BG" 2>/dev/null; then
       # Manage text rendering layers to avoid duplicate labels in viewers
       # that support both foreignObject and fallback text.
       case "$TEXT_LAYER" in
         dual)
           if [[ -n "$PYTHON_BIN" ]]; then
-            "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py" --fix -f "$svg_out" >/dev/null 2>&1 || true
+            "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py" --fix -f "$svg_tmp" >/dev/null 2>&1 || true
           fi
           ;;
         fo-only)
@@ -537,34 +574,41 @@ render_one() {
           ;;
         fallback-only)
           if [[ -n "$PYTHON_BIN" ]]; then
-            if ! "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py" --fix -f "$svg_out" >/dev/null 2>&1; then
+            if ! "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py" --fix -f "$svg_tmp" >/dev/null 2>&1; then
               log_err "Failed to add SVG fallback text: $svg_out"
+              rm -rf "$svg_tmp_dir"
               return 1
             fi
-            if ! "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/strip_svg_foreign_object.py" --fix -f "$svg_out" >/dev/null 2>&1; then
+            if ! "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/strip_svg_foreign_object.py" --fix -f "$svg_tmp" >/dev/null 2>&1; then
               log_err "Failed to strip foreignObject labels: $svg_out"
+              rm -rf "$svg_tmp_dir"
               return 1
             fi
           else
             log_err "fallback-only requires python for SVG post-processing"
+            rm -rf "$svg_tmp_dir"
             return 1
           fi
           ;;
         *)
           log_err "Unsupported TEXT_LAYER mode: $TEXT_LAYER"
+          rm -rf "$svg_tmp_dir"
           return 1
           ;;
       esac
       # Optimize SVG with svgo if available
       if [[ $HAS_SVGO -eq 1 ]]; then
-        svgo --quiet --config "$SCRIPT_DIR/svgo.config.js" "$svg_out" -o "$svg_out" 2>/dev/null || true
+        svgo --quiet --config "$SCRIPT_DIR/svgo.config.js" "$svg_tmp" -o "$svg_tmp" 2>/dev/null || true
       fi
       # Inject CSS overrides for edge label readability
       if [[ -n "$PYTHON_BIN" ]]; then
-        "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/inject_svg_styles.py" --fix -f "$svg_out" >/dev/null 2>&1 || true
+        "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/inject_svg_styles.py" --fix -f "$svg_tmp" >/dev/null 2>&1 || true
       fi
+      replace_atomically "$svg_tmp" "$svg_out"
+      rm -rf "$svg_tmp_dir"
       echo -e "  ${GREEN}✓${NC} SVG  [$idx/$TOTAL]  $base"
     else
+      rm -rf "$svg_tmp_dir"
       echo -e "  ${RED}✗${NC} SVG  [$idx/$TOTAL]  $base"
       return 1
     fi
@@ -574,16 +618,21 @@ render_one() {
   if [[ $FORMAT_PNG -eq 1 ]]; then
     mkdir -p "$png_dir"
     local png_out="$png_dir/${base}.png"
+    local png_tmp_dir=""
+    local png_tmp=""
     local png_svg_source="$svg_dir/${base}.svg"
+    local temp_png_svg_dir=""
     local temp_png_svg=""
 
     # PNG should always be produced from a post-processed SVG so text fallback
     # and foreignObject stripping are preserved in raster output as well.
     if [[ $FORMAT_SVG -eq 0 ]]; then
-      temp_png_svg="$(mktemp "${TMPDIR:-/tmp}/bioetl-render-${base}-XXXXXX.svg")"
+      mkdir -p "$svg_dir"
+      temp_png_svg_dir="$(mktemp -d "$svg_dir/.${base}.png-source.XXXXXX")"
+      temp_png_svg="$temp_png_svg_dir/${base}.svg"
       if ! "$MMDC_BIN" -i "$src" -o "$temp_png_svg" "${MMDC_ARGS[@]}" "${size_args[@]}" -b "$BG" 2>/dev/null; then
         echo -e "  ${RED}✗${NC} PNG  [$idx/$TOTAL]  $base"
-        rm -f "$temp_png_svg"
+        rm -rf "$temp_png_svg_dir"
         return 1
       fi
       case "$TEXT_LAYER" in
@@ -599,23 +648,23 @@ render_one() {
           if [[ -n "$PYTHON_BIN" ]]; then
             if ! "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py" --fix -f "$temp_png_svg" >/dev/null 2>&1; then
               echo -e "  ${RED}✗${NC} PNG  [$idx/$TOTAL]  $base"
-              rm -f "$temp_png_svg"
+              rm -rf "$temp_png_svg_dir"
               return 1
             fi
             if ! "$PYTHON_BIN" "$REPO_ROOT/scripts/diagrams/strip_svg_foreign_object.py" --fix -f "$temp_png_svg" >/dev/null 2>&1; then
               echo -e "  ${RED}✗${NC} PNG  [$idx/$TOTAL]  $base"
-              rm -f "$temp_png_svg"
+              rm -rf "$temp_png_svg_dir"
               return 1
             fi
           else
             echo -e "  ${RED}✗${NC} PNG  [$idx/$TOTAL]  $base"
-            rm -f "$temp_png_svg"
+            rm -rf "$temp_png_svg_dir"
             return 1
           fi
           ;;
         *)
           echo -e "  ${RED}✗${NC} PNG  [$idx/$TOTAL]  $base"
-          rm -f "$temp_png_svg"
+          rm -rf "$temp_png_svg_dir"
           return 1
           ;;
       esac
@@ -625,43 +674,84 @@ render_one() {
       png_svg_source="$temp_png_svg"
     fi
 
+    png_tmp_dir="$(mktemp -d "$png_dir/.${base}.png.tmp.XXXXXX")"
+    png_tmp="$png_tmp_dir/${base}.png"
+    local png_rendered=0
     if [[ $HAS_RSVG -eq 1 ]]; then
       # SVG → PNG via rsvg-convert (adaptive: use SVG intrinsic size)
       if [[ $FIT -eq 0 ]]; then
-        rsvg-convert -b "$BG" -w "$WIDTH" -h "$HEIGHT" "$png_svg_source" -o "$png_out" 2>/dev/null
+        if rsvg-convert -b "$BG" -w "$WIDTH" -h "$HEIGHT" "$png_svg_source" -o "$png_tmp" 2>/dev/null; then
+          png_rendered=1
+        fi
       else
-        rsvg-convert -b "$BG" -d "$dpi_for_file" -p "$dpi_for_file" "$png_svg_source" -o "$png_out" 2>/dev/null
+        if rsvg-convert -b "$BG" -d "$dpi_for_file" -p "$dpi_for_file" "$png_svg_source" -o "$png_tmp" 2>/dev/null; then
+          png_rendered=1
+        fi
       fi
     elif [[ $HAS_RSVG -eq 2 ]]; then
       # SVG → PNG via inkscape
       if [[ $FIT -eq 0 ]]; then
-        inkscape "$png_svg_source" --export-type=png --export-width="$WIDTH" \
+        if inkscape "$png_svg_source" --export-type=png --export-width="$WIDTH" \
           --export-height="$HEIGHT" --export-background="$BG" --export-background-opacity=1 \
-          --export-filename="$png_out" 2>/dev/null
+          --export-filename="$png_tmp" 2>/dev/null; then
+          png_rendered=1
+        fi
       else
-        inkscape "$png_svg_source" --export-type=png --export-dpi="$dpi_for_file" \
-          --export-background="$BG" --export-background-opacity=1 --export-filename="$png_out" 2>/dev/null
+        if inkscape "$png_svg_source" --export-type=png --export-dpi="$dpi_for_file" \
+          --export-background="$BG" --export-background-opacity=1 --export-filename="$png_tmp" 2>/dev/null; then
+          png_rendered=1
+        fi
       fi
     else
       if [[ -z "$NODE_BIN" ]]; then
         echo -e "  ${RED}✗${NC} PNG  [$idx/$TOTAL]  $base"
         echo "Node.js is required for SVG -> PNG fallback via scripts/diagrams/svg2png.mjs" >&2
-        [[ -n "$temp_png_svg" ]] && rm -f "$temp_png_svg"
+        [[ -n "$temp_png_svg_dir" ]] && rm -rf "$temp_png_svg_dir"
+        rm -rf "$png_tmp_dir"
         return 1
       fi
+      local node_tmp_root=""
+      local node_tmp_svg=""
+      local node_tmp_png=""
+      node_tmp_root="$(mktemp -d "$dir/.${base}.node-png.XXXXXX")"
+      mkdir -p "$node_tmp_root/svg"
+      node_tmp_svg="$node_tmp_root/svg/${base}.svg"
+      node_tmp_png="$node_tmp_root/png/${base}.png"
+      cp "$png_svg_source" "$node_tmp_svg"
       if ! PUPPETEER_MODULE_PATH="${PUPPETEER_MODULE_PATH:-/tmp/mermaid-cli-lite/node_modules/puppeteer}" \
-        "$NODE_BIN" "$REPO_ROOT/scripts/diagrams/svg2png.mjs" --scale "$scale_for_file" "$png_svg_source" >/dev/null 2>&1; then
+        "$NODE_BIN" "$REPO_ROOT/scripts/diagrams/svg2png.mjs" --scale "$scale_for_file" "$node_tmp_svg" >/dev/null 2>&1; then
         echo -e "  ${RED}✗${NC} PNG  [$idx/$TOTAL]  $base"
-        [[ -n "$temp_png_svg" ]] && rm -f "$temp_png_svg"
+        [[ -n "$temp_png_svg_dir" ]] && rm -rf "$temp_png_svg_dir"
+        rm -rf "$png_tmp_dir"
+        rm -rf "$node_tmp_root"
         return 1
       fi
+      if [[ ! -f "$node_tmp_png" ]]; then
+        echo -e "  ${RED}✗${NC} PNG  [$idx/$TOTAL]  $base"
+        [[ -n "$temp_png_svg_dir" ]] && rm -rf "$temp_png_svg_dir"
+        rm -rf "$png_tmp_dir"
+        rm -rf "$node_tmp_root"
+        return 1
+      fi
+      mv -f "$node_tmp_png" "$png_tmp"
+      rm -rf "$node_tmp_root"
+      png_rendered=1
     fi
 
-    if [[ -n "$temp_png_svg" ]]; then
-      rm -f "$temp_png_svg"
+    if [[ "$png_rendered" -ne 1 ]]; then
+      echo -e "  ${RED}✗${NC} PNG  [$idx/$TOTAL]  $base"
+      [[ -n "$temp_png_svg_dir" ]] && rm -rf "$temp_png_svg_dir"
+      rm -rf "$png_tmp_dir"
+      return 1
     fi
 
-    if [[ -f "$png_out" ]]; then
+    if [[ -n "$temp_png_svg_dir" ]]; then
+      rm -rf "$temp_png_svg_dir"
+    fi
+
+    if [[ -f "$png_tmp" ]]; then
+      replace_atomically "$png_tmp" "$png_out"
+      rm -rf "$png_tmp_dir"
       local size
       size=$(du -h "$png_out" | cut -f1)
       if [[ "$is_large" -eq 1 ]]; then
@@ -670,6 +760,7 @@ render_one() {
         echo -e "  ${GREEN}✓${NC} PNG  [$idx/$TOTAL]  $base  (${size})"
       fi
     else
+      rm -rf "$png_tmp_dir"
       echo -e "  ${RED}✗${NC} PNG  [$idx/$TOTAL]  $base"
       return 1
     fi

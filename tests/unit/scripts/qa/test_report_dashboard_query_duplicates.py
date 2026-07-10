@@ -311,6 +311,7 @@ def test_qa_cli_report_dashboard_query_duplicates_check_passes_current_allowlist
         "report-dashboard-query-duplicates",
         "--check",
         "--include-single-panel-near",
+        timeout=300,  # Increased from 60s to 300s for Windows performance
     )
 
     assert_cli_succeeded(result)
