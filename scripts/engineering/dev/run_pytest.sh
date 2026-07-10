@@ -232,6 +232,7 @@ _collect_selected_test_paths() {
         esac
 
         local candidate="${arg%%::*}"
+        candidate="${candidate%/}"
         case "$candidate" in
             tests|tests/*)
                 _SELECTED_TEST_PATHS+=("$candidate")
@@ -299,6 +300,9 @@ _needs_vcr_plugin() {
     if ! _has_selected_test_paths; then
         return 0
     fi
+    if _selected_has_exact_test_root; then
+        return 0
+    fi
     _paths_match_any tests/integration tests/e2e tests/contract
 }
 
@@ -307,7 +311,11 @@ _needs_syrupy_plugin() {
         return 0
     fi
 
-    if _selected_dirs_match_any tests/unit; then
+    if _selected_has_exact_test_root; then
+        return 0
+    fi
+
+    if _paths_match_any tests/unit; then
         return 0
     fi
 
@@ -321,7 +329,11 @@ _needs_hypothesis_plugin_for_selection() {
         return 0
     fi
 
-    if _selected_dirs_match_any tests/unit tests/architecture; then
+    if _selected_has_exact_test_root; then
+        return 0
+    fi
+
+    if _paths_match_any tests/unit tests/architecture; then
         return 0
     fi
 

@@ -92,7 +92,7 @@ dashboards:
       - id: 9100
         title: "Runtime Status"
         type: stat
-        description: "Current runtime health status"
+        description: "Trust-gated current runtime health status"
       - id: 205
         title: "Failed Runs"
         type: stat

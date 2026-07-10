@@ -414,6 +414,10 @@ uv run python -m scripts.engineering.qa report-dashboard-query-duplicates
   выражают одну и ту же metric family как sibling breakdown:
   - percentile triplets (`p50/p95/p99`) inside one latency panel,
   - stage-specific or status-specific variants inside one comparison surface.
+- The automated near-duplicate budget is scoped to BioETL metric families
+  (`bioetl_*`). Standard platform metrics such as Prometheus `ALERTS` remain
+  reviewable as dashboard PromQL, but they do not spend the BioETL
+  near-duplicate budget.
 - Если один и тот же query family повторяется across multiple panels or across
   dashboards, приоритет такой:
   1. recording rule / shared canonical metric,

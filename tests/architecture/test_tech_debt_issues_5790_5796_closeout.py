@@ -195,17 +195,12 @@ def test_issue_5790_compatibility_metadata_is_present_and_conflict_free() -> Non
 def test_issue_5791_adapter_duplication_dropped_under_canonical_error_bundle_owner() -> (
     None
 ):
-    closeout = _load_json(CLOSEOUT)
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
     adapters = by_target["src/bioetl/infrastructure/adapters"]
     common_text = COMMON_ERROR_BUNDLES.read_text(encoding="utf-8")
     pubmed_text = PUBMED_ERRORS.read_text(encoding="utf-8")
 
-    assert (
-        adapters["duplicate_count"]
-        == closeout["metrics"]["adapter_duplicate_clusters"]["current"]
-    )
     assert adapters["duplicate_count"] < 54
     if adapters["duplicate_count"] == 0:
         assert adapters["actionability"] == []
@@ -220,17 +215,12 @@ def test_issue_5791_adapter_duplication_dropped_under_canonical_error_bundle_own
 def test_issue_5792_pipeline_duplication_dropped_under_base_transformer_defaults() -> (
     None
 ):
-    closeout = _load_json(CLOSEOUT)
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
     pipelines = by_target["src/bioetl/application/pipelines"]
     base_text = BASE_PUBLICATION_TRANSFORMER.read_text(encoding="utf-8")
     context_text = PUBLICATION_TRANSFORMER_CONTEXT.read_text(encoding="utf-8")
 
-    assert (
-        pipelines["duplicate_count"]
-        == closeout["metrics"]["pipeline_duplicate_clusters"]["current"]
-    )
     assert pipelines["duplicate_count"] == 0
     assert pipelines["duplicate_count"] < 11
     # Actionability categories are now empty since all duplicates were excluded

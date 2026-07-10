@@ -1064,7 +1064,7 @@
         "h": 5,
         "w": 8,
         "x": 0,
-        "y": 39
+        "y": 35
       },
       "id": 9410,
       "options": {
@@ -1244,71 +1244,44 @@
             "mode": "fixed",
             "fixedColor": "gray"
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "NO OUTCOME EVENTS",
+                  "color": "gray"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
           "unit": "short",
-          "noValue": "No workflow run outcome samples in selected range; empty evidence is neutral, not OK."
+          "noValue": "UNKNOWN"
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*success.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "green"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*failed.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "red"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byRegexp",
-              "options": ".*skipped.*|.*unknown.*|.*non.*"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "fixed",
-                  "fixedColor": "orange"
-                }
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 4,
         "w": 24,
         "x": 0,
         "y": 22
       },
       "id": 4,
       "options": {
-        "displayMode": "basic",
-        "minVizHeight": 10,
-        "minVizWidth": 0,
-        "namePlacement": "left",
-        "orientation": "horizontal",
+        "colorMode": "none",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -1316,20 +1289,18 @@
           "fields": "",
           "values": false
         },
-        "showUnfilled": true,
-        "sizing": "auto",
-        "valueMode": "color"
+        "textMode": "value_and_name"
       },
       "targets": [
         {
-          "expr": "sum by (status) (increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=~\"$status\"}[$__range]))",
-          "legendFormat": "{{status}}",
+          "expr": "round(sum(increase(bioetl_workflow_runs_total{workflow=~\"$workflow\",status=~\"$status\"}[$__range]))) or vector(0)",
+          "legendFormat": "workflow run outcomes",
           "refId": "A"
         }
       ],
       "title": "Workflow Run Outcomes / Range",
-      "type": "bargauge",
-      "description": "Shows selected-range workflow run counts split by workflow run status. Use this panel to see whether the chosen window contains `success`, `failed`, or other bounded run outcomes for the selected workflow. `No data` means no matching workflow runs were observed for the selected filters or telemetry is absent; it is not equivalent to workflow success. If failures dominate, continue in `2. Runtime` or `0. Control Plane` depending on whether you need execution or replay/ledger evidence."
+      "type": "stat",
+      "description": "Compact selected-range workflow outcome evidence. `NO OUTCOME EVENTS` / `0` means no matching workflow runs were observed for the selected filters in the selected-range window; this is neutral empty evidence, not workflow success. The failed/skipped cards above carry severity, while this panel intentionally avoids green success-zero bars. `No data` / UNKNOWN means telemetry is absent. If failures dominate, continue in `2. Runtime` or `0. Control Plane` depending on whether you need execution or replay/ledger evidence."
     },
     {
       "gridPos": {
@@ -1417,7 +1388,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 26
       },
       "id": 10,
       "title": "Step Diagnostics",
@@ -1448,7 +1419,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 31
+        "y": 27
       },
       "id": 5,
       "options": {
@@ -1500,7 +1471,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 31
+        "y": 27
       },
       "id": 8,
       "options": {

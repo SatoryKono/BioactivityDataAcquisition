@@ -229,6 +229,7 @@
   - intentionally reused с role-specific justification, OR
   - consolidated into recording rule или single canonical panel surface
 - Near-duplicate query families SHOULD оставаться panel-local только когда они выражают ту же metric family как sibling breakdown
+- The automated near-duplicate budget is scoped to BioETL metric families (`bioetl_*`); standard platform metrics such as Prometheus `ALERTS` remain reviewable but do not spend that budget.
 - Если тот же query family повторяется across multiple panels/dashboards, priority:
   1. Recording rule / shared canonical metric
   2. Explicit justification в dashboard audit/tests

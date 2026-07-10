@@ -88,3 +88,20 @@ def test_wrapper_autopreflight_scope_is_limited_to_full_repo_and_config_heavy_ru
     ):
         assert unexpected not in shell_scope_block
         assert unexpected not in powershell_scope_block
+
+
+def test_shell_wrapper_loads_optional_test_plugins_for_full_tests_root() -> None:
+    shell = RUN_PYTEST_SH.read_text(encoding="utf-8")
+
+    for function_name in (
+        "_needs_vcr_plugin()",
+        "_needs_syrupy_plugin()",
+        "_needs_hypothesis_plugin_for_selection()",
+    ):
+        function_block = shell[
+            shell.index(function_name) : shell.index(
+                "\n}\n", shell.index(function_name)
+            )
+        ]
+        assert "_selected_has_exact_test_root" in function_block
+        assert "return 0" in function_block

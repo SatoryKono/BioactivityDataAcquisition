@@ -171,13 +171,17 @@ Explorer health probe and monitoring setup docs for that reason.
    `Runtime Status`, `Runtime Blockers` и
    `First Action` отвечают на L2 current-cause вопрос и next operator move.
    `Status` is the compact shared-shell verdict; `Runtime Status` is an
-   expanded first-screen mirror of the same current-status recording rule next
-   to blocker causes, not an independent second signal.
+   expanded first-screen mirror of the same trust-gated current-status
+   recording rule next to blocker causes, not an independent second signal.
+   `Runtime Telemetry Gap` is the trust precondition: non-zero/UNKNOWN
+   scrape/rule health raises or blocks the verdict before zero counters are
+   treated as conclusive.
    Compact evidence row содержит `Worst Stage Lag`,
    `Monitor Runtime Blockers`, `Runtime Error Rate`,
    `Runtime Telemetry Gap` и `Failed Runs`; selected-range risk
-   markers не определяют current status. Non-zero/UNKNOWN telemetry gap делает
-   zero-count cards недоказательными.
+   markers не определяют current status and render neutral zero evidence
+   instead of green OK cards. Non-zero/UNKNOWN telemetry gap делает zero-count
+   cards недоказательными.
    Datasource trust markers are targeted: `Runtime` keeps this explicit
    telemetry-gap panel first-screen, `Control Plane` uses
    `Inspect: Telemetry Missing`, while `Silver Reject Explorer` relies on
