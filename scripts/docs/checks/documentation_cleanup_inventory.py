@@ -399,10 +399,7 @@ def _classify(
         return "Canonical", "current", "keep"
     if path.startswith("docs/99-archive/"):
         return "Archived", "historical", "keep"
-    if path == "docs/00-project/DOCUMENTATION_GOVERNANCE.md" or declared in {
-        "deprecated",
-        "retired",
-    }:
+    if declared in {"deprecated", "retired"}:
         return "Deprecated", "migration-required", "replace-with-link"
     if "obsolete duplicate" in text[:1000].lower():
         return "Deprecated", "migration-required", "replace-with-link"

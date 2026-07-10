@@ -91,7 +91,7 @@
       "evidence": [
         "configs/naming_exceptions.yaml",
         "configs/contracts/errors/error_catalog.yaml",
-        "docs/plans/dashboard-observability-baseline-audit.md",
+        "docs/99-archive/plans/dashboard-observability-baseline-audit.md",
         "tests/architecture/test_observability_export_dashboard_rollout_closeout.py",
         "Makefile"
       ],

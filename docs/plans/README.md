@@ -1,7 +1,7 @@
 # Plans Directory
 
 *Status: Working planning artifacts (non-normative)*
-*Last updated: 2026-07-08*
+*Last updated: 2026-07-09*
 
 This directory contains implementation plans, corrective roadmaps, migration
 plans, and supporting architecture assessment snapshots.
@@ -61,31 +61,25 @@ Issue packs and closeout notes are not canonical requirements. They should be
 retained only while they support active work or evidence links; otherwise they
 belong in the archive lane.
 
-## DOC-CLEANUP-004 Triage Snapshot 2026-07-09
+## DOC-CLEANUP-004 Closeout Snapshot 2026-07-09
 
-This snapshot closes the current plan-surface triage without moving files whose
-future archive/delete action still needs exact-path verification in the same
-change that moves them.
+This snapshot closes the current plan-surface triage for the documentation
+refactoring issue set.
 
 Current decisions:
 
 - `docs/plans/consolidated-open-tasks-plan-2026-03-21.md` remains the only
   active backlog.
-- Retained operational context stays listed under "Active Plan Links" because
-  it still has repository inbound references or active implementation context.
-- Zero-inbound dated issue packs, dashboard plans, wrapper closeouts,
-  root-hygiene notes, and Sonar/tech-debt closeouts remain
-  `archive-after-migration` candidates, not deletion candidates.
-- Archive moves must be exact-path moves into `docs/99-archive/plans/**` with a
-  matching update to `docs/99-archive/plans/README.md`.
-- Deletion is allowed only for exact byproducts after durable guidance has been
-  migrated and `python -m scripts.docs check-links --links --specs --configs`
-  still passes.
-
-The generated matrix in
-`docs/reports/generated/documentation-cleanup-inventory.json` is the baseline
-for inbound-link counts and recommended actions. Do not treat age alone as
-evidence for removal.
+- Retained operational context is limited to the files listed under
+  "Active Plan Links" and cataloged in
+  `configs/quality/repo_structure_catalog.yaml`.
+- Completed issue packs, dashboard plans, wrapper closeouts, root-hygiene
+  notes, Sonar/tech-debt closeouts, and other superseded working plans were
+  moved to `docs/99-archive/plans/`.
+- Deleted redirect/byproduct files are no longer listed in naming or nav
+  baselines.
+- Future cleanup must continue to use exact-path archive/delete decisions and
+  validate links with `python -m scripts.docs check-links --links --specs --configs`.
 
 ## Freshness Triggers
 
@@ -118,6 +112,9 @@ This is now the only active execution/backlog document in `docs/plans/`.
 - [architecture-review-and-refactor-plan-2026-03-21.md](architecture-review-and-refactor-plan-2026-03-21.md)
 - [chembl-baseline-refactor-plan-2026-06-01.md](chembl-baseline-refactor-plan-2026-06-01.md)
 - [curated-memory-density-governance-plan-2026-04-21.md](curated-memory-density-governance-plan-2026-04-21.md)
+- [mcp-wrapper-contract-audit-2026-04-28.md](mcp-wrapper-contract-audit-2026-04-28.md)
+- [mcp-wrapper-deep-audit-2026-04-29.md](mcp-wrapper-deep-audit-2026-04-29.md)
+- [mcp-wrapper-redesign-prerequisites-2026-04-29.md](mcp-wrapper-redesign-prerequisites-2026-04-29.md)
 - [monitoring-observability-expansion-plan-2026-03-26.md](monitoring-observability-expansion-plan-2026-03-26.md)
 - [project-memory-layer-implementation-plan-2026-04-20.md](project-memory-layer-implementation-plan-2026-04-20.md)
 - [project-memory-layer-issue-pack-2026-04-20.md](project-memory-layer-issue-pack-2026-04-20.md)
@@ -141,192 +138,49 @@ longer compete with the current plan reading order:
 
 See `docs/99-archive/plans/README.md` for the archived plan index.
 
+## Archived On 2026-07-09
+
+These completed or superseded artifacts were moved to `docs/99-archive/plans/`
+as the documentation-refactoring closeout:
+
+- `claude-to-ai-runtime-migration-plan-2026-04-25.md`
+- `codex-launcher-parity-refresh-2026-04-29.md`
+- `control-plane-dashboard-issue-pack-2026-05-07.md`
+- `control-plane-id-panel-issue-pack-2026-05-15.md`
+- `dashboard-datasource-uid-refactoring-plan.md`
+- `dashboard-observability-baseline-audit.md`
+- `memory-shim-removal-migration-plan.md`
+- `provider-health-dashboard-audit-and-refactoring-plan.md`
+- `repo-governance-wrapper-closeout-2026-04-29.md`
+- `repository-file-structure-cleanup-plan-2026-04-20.md`
+- `root-hygiene-cleanup-hardening-2026-04-29.md`
+- `root-hygiene-review-lane-automation-2026-04-29.md`
+- `scripts-cli-wrapper-caller-matrix-2026-04-28.md`
+- `scripts-normalization-program-closeout-2026-04-29.md`
+- `scripts-supporting-retained-set-closeout-2026-04-29.md`
+- `scripts-supporting-taxonomy-2026-04-29.md`
+- `silver-filter-rejects-observability-plan.md`
+- `sonar-closeout-plan-2026-05-04.md`
+- `tech-debt-eradication-blueprint-v4-2026-05-31.md`
+- `test-health-observability-plan-2026-04-22.md`
+- `наблюдаемость.md`
+
 Earlier operational context files such as
 `onboarding-checklist-day-1-2026-03-20.md` and
 `project-briefing-capability-discovery-2026-03-20.md` are no longer retained as
 active repo entrypoints in this workspace snapshot.
 
-The architecture review plan was refreshed on `2026-03-23` with the current
-integral score, updated category table, and RF-style roadmap. It remains a
-supporting assessment map, not a second active backlog.
+The retained MCP wrapper notes document why the named
+`scripts/ai/mcp/*_wrapper.*` files are contract-bound runtime surfaces and why
+future simplification must start with explicit metadata in `setup_mcp.py`.
 
-The ChemblBaseline refactor plan was added on `2026-06-01` as a bounded
-hardening roadmap for the shipped canonical workflow in
-`configs/workflows/chembl_baseline.yaml`. It treats the workflow as an existing
-production-like surface and scopes the next wave to dry-run safety, baseline
-CI smoke, DAG cleanup, Actions hardening, and optional future execution seams
-rather than re-implementing workflow orchestration from scratch.
+The repository file structure remediation plan remains active context because
+it is grounded by `configs/quality/root_hygiene_review_registry.yaml` and tracks
+the remaining review-required cleanup lanes against the current root baseline.
 
-The curated memory density governance plan was added on `2026-04-21` as a
-bounded next-wave plan for keeping `src/memory/curated/` small, source-backed,
-reviewable, and high-density. It is retained as memory governance planning
-context, not as a normative knowledge-management policy.
-
-The monitoring observability expansion plan was added on `2026-03-26` as a
-bounded rollout plan for extending the existing Prometheus/Grafana stack around
-control-plane and lineage signals. It is retained as supporting operational
-context, not as a second active backlog.
-
-The project memory layer implementation plan was added on `2026-04-20` as a
-bounded rollout plan for introducing a hybrid project-memory subsystem rooted
-in `src/memory/`. It is retained as supporting implementation context, not as a
-second active backlog or a normative knowledge-management policy.
-
-The project memory layer issue pack was added on `2026-04-20` as a staging
-surface for decomposing that rollout into bounded GitHub issues. It is retained
-as implementation support context, not as a second backlog.
-
-The repository file structure cleanup plan was added on `2026-04-20` as a
-bounded hygiene and governance-convergence roadmap for root placement policy,
-generated artifact cleanup, and report-surface normalization. It was refreshed
-on `2026-04-21` after the root artifact cleanup wave: the current plan now
-tracks policy convergence, generated-artifact routing, AI/editor surface
-decisions, and enforcement hardening rather than repeating closed root cleanup
-items. It is retained as supporting implementation context, not as a second
-active backlog.
-
-The repository file structure remediation plan was added on `2026-04-28` after
-an architecture-strict audit found drift between the published root policy and
-the live GitHub root snapshot. It supersedes the 2026-04-21 live-state claims
-for remediation planning while retaining the older cleanup plan as historical
-baseline and policy context. Its current execution state is grounded by
-`configs/quality/root_hygiene_review_registry.yaml`, which tracks the
-review-required and blocked cleanup lanes against the current live root
-baseline. The linked GitHub remediation issue set is `#3219`, `#3223`, `#3226`,
-and `#3227`; however, the actual branch-protection admin state for required
-checks still needs authenticated owner/admin verification beyond public policy
-docs.
-
-The scripts CLI wrapper caller matrix was added on `2026-04-28` as supporting
-evidence for RF-008 compatibility-wrapper retention decisions. It is generated
-by `python -m scripts.engineering.repo sync-wrapper-caller-matrix` and retained
-as operational context for scripts cleanup, not as a second active backlog.
-
-The Codex launcher parity review was added on `2026-04-28` as a bounded
-classification note for `scripts/ops/launchers/codex/*`. It distinguishes thin
-compatibility wrappers from retained bootstrap and transport adapters so the
-scripts cleanup wave does not treat the entire launcher cluster as removable by
-default.
-
-The Codex launcher parity refresh was added on `2026-04-29` after a live body
-review found Windows-facing compatibility drift to non-existent
-`launch.bat` / `verify_setup.*` targets. It records the bounded fix:
-preserving the retained launcher surface while re-pointing compatibility
-wrappers to existing canonical transport and verification paths.
-
-The docs CLI wrapper closeout note was added on `2026-04-28` as the bounded
-closeout artifact for the `scripts/docs` wrapper wave. It records the removal
-of `check_doc_links.py` and `run_mkdocs_build.py`, plus the retained parity
-decision for `build_docs_site.sh`. The completed closeout note now lives under
-`docs/99-archive/plans/`.
-
-The MCP wrapper contract audit was added on `2026-04-28` to document why the
-named `scripts/ai/mcp/*_wrapper.*` files are contract-bound runtime surfaces
-and therefore out of scope for generic wrapper deletion.
-
-The build-docs-site parity audit was added on `2026-04-29` to record the
-follow-up redesign decision for `build_docs_site.sh`: retain it only as a shell
-transport adapter while keeping all build semantics in
-`scripts.docs.build.mkdocs_build`. The completed audit note now lives under
-`docs/99-archive/plans/`.
-
-The MCP wrapper deep audit was added on `2026-04-29` to classify the retained
-`scripts/ai/mcp/` wrapper families by launch semantics, generated-config
-contract, and redesign prerequisites. It complements the earlier contract note
-with a body-level family map.
-
-The MCP wrapper redesign prerequisites note was added on `2026-04-29` to turn
-that audit into an implementation gate: future wrapper simplification must
-start with an explicit metadata model in `setup_mcp.py`, not with ad-hoc stem
-renames or generic-wrapper collapse.
-
-The Claude runtime migration plan was refreshed on `2026-04-29` against the
-live `ai/claude/` snapshot. It now treats `ai/claude/` as a removable
-mirror/compatibility surface: Codex skill callers should be repointed to
-`.codex/*` first, stale missing-file references removed, and only then should
-the residual `ai/claude/` tree be deleted instead of migrated into `scripts/`.
-
-The testing-support migration plan was refreshed on `2026-04-29` against the
-live workspace snapshot. It now recommends a single-wave migration from the
-root-level `testing_support/` package into `tests/testing_support/`, because
-all currently known callers are test-only and `tests/__init__.py` already makes
-the destination package importable.
-
-The temporary diagnostic TTL review plan was added on `2026-04-29` to prevent
-`temporary_diagnostic` from becoming an unowned retention bucket. It groups the
-remaining bounded diagnostics by troubleshooting purpose, assigns explicit
-review horizons, and defines the only allowed outcomes for each file: promote,
-retain-with-review, or delete.
-
-The repo governance wrapper closeout note was added on `2026-04-29` to record
-the completed removal of `split_testing_roadmap_issue.sh` and
-`sync_docs_issues.sh`, plus the retained compatibility decision for
-`cleanup_branch_candidates.sh` after the canonical router command was added.
-
-The root hygiene cleanup hardening note was added on `2026-04-29` to record
-the bounded policy implementation step in `cleanup_repository.py`: exact local
-log/temp plus `.egg-info` and `.ipynb_checkpoints` discovery outside blocked
-cleanup zones, without broadening cleanup into governed report-like surfaces.
-
-The root hygiene audit issue pack was added on `2026-04-29` as a staging
-surface for converting the 2026-04-29 structure audit into bounded GitHub
-issues. It deliberately avoids reopening the already closed remediation issue
-set and instead focuses on the remaining hardening delta: blocked-zone cleanup
-proposal templates, machine-readable cleanup evidence export, regression guards
-against broad cleanup instructions, and owner/admin verification of live
-branch-protection state. The completed issue-pack artifact now lives under
-`docs/99-archive/plans/`.
-
-The root hygiene review lane automation note was added on `2026-04-29` to
-record the follow-up evidence layer in `cleanup_repository.py`: dry-run review
-reporting now synthesizes `exists`, `tracked`, history, canonical parity, and
-reference-hit signals from `root_hygiene_review_registry.yaml` without turning
-review lanes into auto-delete surfaces.
-
-The scripts supporting retained-set closeout note was added on `2026-04-29` to
-freeze the remaining `supporting` inventory cluster as an intentional retained
-surface. It also records that `scripts/ops/data/__main__.py` is now treated as
-`active`, so earlier “unknown/compatibility-oriented” audit language for that
-router should be read as historical context rather than live classification.
-
-The scripts supporting taxonomy note was added on `2026-04-29` to make the
-retained `supporting` bucket semantically explicit: the inventory status stays
-`supporting`, while lifecycle `decision` acts as the authoritative subtype for
-compatibility wrappers, Windows companion launchers, shared helpers, and other
-retained non-active surfaces.
-
-The temporary diagnostic TTL wave 1 closeout note was added on `2026-04-29` to
-record the first execution wave after the TTL plan: two zero-reference
-one-shot helpers were removed, and `scripts/engineering/qa/hotspot_family_metrics.py`
-was reclassified from `temporary_diagnostic` to `supporting`. The completed
-closeout note now lives under `docs/99-archive/plans/`.
-
-The temporary diagnostic TTL wave 2 closeout note was added on `2026-04-29` to
-record the second execution wave: six zero-reference Windows/WSL convenience
-and local repair helpers were removed, and the root-hygiene review registry was
-synchronized to stop treating those deleted helper targets as live canonical
-surfaces. The completed closeout note now lives under
-`docs/99-archive/plans/`.
-
-The temporary diagnostic TTL wave 3 closeout note was added on `2026-04-29` to
-record the third execution wave: a zero-reference duplicate WSL helper and a
-zero-reference Grafana tracing smoke script were removed, while
-`scripts/memory/mcp_smoke.py` was reclassified as a compatibility shim in the
-`supporting` bucket. The completed closeout note now lives under
-`docs/99-archive/plans/`.
-
-The temporary diagnostic program closeout note was added on `2026-04-29` to
-record the final end state of the TTL effort: `temporary_diagnostic=0`, with
-the remaining documented operator commands promoted to `active`, helper/shim
-surfaces moved to `supporting`, and the last dead launcher removed. The
-completed program closeout note now lives under `docs/99-archive/plans/`.
-
-The scripts normalization program closeout note was added on `2026-04-29` as
-the top-level completion artifact for the entire scripts cleanup and
-reclassification program. It records the end state `scripts=354`,
-`active=325`, `supporting=29`, `temporary_diagnostic=0`, `orphan=0`,
-`unknown=0`, `legacy=0`, and marks future work as targeted parity/redesign or
-caller-audit maintenance rather than generic cleanup.
+The testing-support migration plan remains active context because it still
+defines the migration direction from the root-level `testing_support/` package
+into `tests/testing_support/`.
 
 ### Retained Historical Context With Live Evidence References
 

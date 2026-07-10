@@ -21,7 +21,7 @@ false completion.
 
 ## Evidence
 
-- `docs/plans/tech-debt-eradication-blueprint-v4-2026-05-31.md`
+- `docs/99-archive/plans/tech-debt-eradication-blueprint-v4-2026-05-31.md`
 - `reports/quality/compatibility-importer-census.md`
 - `configs/quality/compatibility_twin_module_ratchet.yaml`
 - `reports/quality/hotspot-duplication-baseline.md`
@@ -43,7 +43,7 @@ false completion.
 
 ## Suggested File Targets
 
-- `docs/plans/tech-debt-eradication-blueprint-v4-2026-05-31.md`
+- `docs/99-archive/plans/tech-debt-eradication-blueprint-v4-2026-05-31.md`
 - `.github/ISSUES/TECH-DEBT-ZERO-BURNDOWN-EPIC.md`
 - any supporting plan or governance doc that still encodes the stale baseline
   values above

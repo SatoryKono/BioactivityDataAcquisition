@@ -50,13 +50,7 @@ plans:
       lifecycle: supporting_context
     - path: docs/plans/project-memory-layer-issue-pack-2026-04-20.md
       lifecycle: supporting_context
-    - path: docs/plans/repository-file-structure-cleanup-plan-2026-04-20.md
-      lifecycle: supporting_context
     - path: docs/plans/repository-file-structure-remediation-plan-2026-04-28.md
-      lifecycle: supporting_context
-    - path: docs/plans/scripts-cli-wrapper-caller-matrix-2026-04-28.md
-      lifecycle: supporting_context
-    - path: docs/plans/codex-launcher-parity-refresh-2026-04-29.md
       lifecycle: supporting_context
     - path: docs/plans/mcp-wrapper-contract-audit-2026-04-28.md
       lifecycle: supporting_context
@@ -66,45 +60,9 @@ plans:
       lifecycle: supporting_context
     - path: docs/plans/temporary-diagnostic-ttl-review-plan-2026-04-29.md
       lifecycle: supporting_context
-    - path: docs/plans/repo-governance-wrapper-closeout-2026-04-29.md
-      lifecycle: supporting_context
-    - path: docs/plans/root-hygiene-cleanup-hardening-2026-04-29.md
-      lifecycle: supporting_context
-    - path: docs/plans/root-hygiene-review-lane-automation-2026-04-29.md
-      lifecycle: supporting_context
-    - path: docs/plans/scripts-supporting-retained-set-closeout-2026-04-29.md
-      lifecycle: supporting_context
-    - path: docs/plans/scripts-supporting-taxonomy-2026-04-29.md
-      lifecycle: supporting_context
-    - path: docs/plans/scripts-normalization-program-closeout-2026-04-29.md
-      lifecycle: supporting_context
-    - path: docs/plans/silver-filter-rejects-observability-plan.md
-      lifecycle: supporting_context
-    - path: docs/plans/test-health-observability-plan-2026-04-22.md
-      lifecycle: supporting_context
-    - path: docs/plans/наблюдаемость.md
-      lifecycle: supporting_context
-    - path: docs/plans/claude-to-ai-runtime-migration-plan-2026-04-25.md
-      lifecycle: supporting_context
-    - path: docs/plans/control-plane-dashboard-issue-pack-2026-05-07.md
-      lifecycle: supporting_context
-    - path: docs/plans/control-plane-id-panel-issue-pack-2026-05-15.md
-      lifecycle: supporting_context
-    - path: docs/plans/dashboard-datasource-uid-refactoring-plan.md
-      lifecycle: supporting_context
-    - path: docs/plans/memory-shim-removal-migration-plan.md
-      lifecycle: supporting_context
-    - path: docs/plans/provider-health-dashboard-audit-and-refactoring-plan.md
-      lifecycle: supporting_context
     - path: docs/plans/testing-support-migration-plan-2026-04-25.md
       lifecycle: supporting_context
-    - path: docs/plans/sonar-closeout-plan-2026-05-04.md
-      lifecycle: supporting_context
     - path: docs/plans/chembl-baseline-refactor-plan-2026-06-01.md
-      lifecycle: supporting_context
-    - path: docs/plans/tech-debt-eradication-blueprint-v4-2026-05-31.md
-      lifecycle: supporting_context
-    - path: docs/plans/dashboard-observability-baseline-audit.md
       lifecycle: supporting_context
 
 src_sidecars:

@@ -16,6 +16,7 @@ class _FakeOptionNamespace:
     lf: bool = False
     tbstyle: str | None = None
     numprocesses: object | None = None
+    timeout: object | None = None
 
 
 @dataclass
@@ -28,12 +29,35 @@ class _FakeConfig:
             return self.option.lf
         raise ValueError(name)
 
+    def getini(self, name: str) -> object:
+        if name == "timeout":
+            return "60"
+        raise ValueError(name)
+
 
 @dataclass
 class _FakeSession:
     config: _FakeConfig
     testscollected: int
     exitstatus: int | pytest.ExitCode | None = None
+
+
+class _FakePytestItem:
+    def __init__(
+        self,
+        *,
+        config: _FakeConfig | None = None,
+        markers: dict[str, object] | None = None,
+    ) -> None:
+        self.config = config or _FakeConfig(option=_FakeOptionNamespace())
+        self._markers = markers or {}
+        self.added_markers: list[object] = []
+
+    def get_closest_marker(self, name: str) -> object | None:
+        return self._markers.get(name)
+
+    def add_marker(self, marker: object) -> None:
+        self.added_markers.append(marker)
 
 
 def test_should_treat_last_failed_empty_suite_as_success() -> None:
@@ -150,6 +174,65 @@ def test_windows_pycharm_traceback_policy_detects_jetbrains_runner_path(
     root_conftest._configure_windows_pycharm_traceback_style(config)
 
     assert config.option.tbstyle == "line"
+
+
+def test_windows_pycharm_vcr_timeout_policy_extends_default_timeout(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    item = _FakePytestItem(markers={"vcr": pytest.mark.vcr.mark})
+    monkeypatch.setattr(root_conftest.sys, "platform", "win32")
+    monkeypatch.setenv("PYCHARM_HOSTED", "1")
+
+    root_conftest._extend_windows_pycharm_vcr_timeout(item)
+
+    assert len(item.added_markers) == 1
+    timeout_marker = item.added_markers[0].mark
+    assert timeout_marker.name == "timeout"
+    assert timeout_marker.args == (180,)
+
+
+def test_windows_pycharm_vcr_timeout_policy_preserves_explicit_timeout(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    item = _FakePytestItem(
+        markers={
+            "vcr": pytest.mark.vcr.mark,
+            "timeout": pytest.mark.timeout(120).mark,
+        }
+    )
+    monkeypatch.setattr(root_conftest.sys, "platform", "win32")
+    monkeypatch.setenv("PYCHARM_HOSTED", "1")
+
+    root_conftest._extend_windows_pycharm_vcr_timeout(item)
+
+    assert item.added_markers == []
+
+
+def test_windows_pycharm_vcr_timeout_policy_skips_non_vcr_tests(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    item = _FakePytestItem()
+    monkeypatch.setattr(root_conftest.sys, "platform", "win32")
+    monkeypatch.setenv("PYCHARM_HOSTED", "1")
+
+    root_conftest._extend_windows_pycharm_vcr_timeout(item)
+
+    assert item.added_markers == []
+
+
+def test_windows_pycharm_vcr_timeout_policy_respects_larger_cli_timeout(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    item = _FakePytestItem(
+        config=_FakeConfig(option=_FakeOptionNamespace(timeout=300)),
+        markers={"vcr": pytest.mark.vcr.mark},
+    )
+    monkeypatch.setattr(root_conftest.sys, "platform", "win32")
+    monkeypatch.setenv("PYCHARM_HOSTED", "1")
+
+    root_conftest._extend_windows_pycharm_vcr_timeout(item)
+
+    assert item.added_markers == []
 
 
 def test_windows_xdist_policy_caps_auto_workers(

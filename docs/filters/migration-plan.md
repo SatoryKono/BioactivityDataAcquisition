@@ -288,7 +288,7 @@ Per-entity ревью с владельцем provider/entity.
 | `docs/04-reference/providers/{provider}/*.md` | Раздельные таблицы для silver structural и gold semantic |
 | `docs/05-operations/runbooks/quarantine-management.md` | Обновить раздел Silver filter rejects |
 | `docs/05-operations/01-monitoring-guide.md` | Обновить Silver Reject Explorer описание |
-| `docs/plans/silver-filter-rejects-observability-plan.md` | Update wording to align Silver structural rejects with ADR-050 |
+| `docs/99-archive/plans/silver-filter-rejects-observability-plan.md` | Update wording to align Silver structural rejects with ADR-050 |
 | `docs/00-project/RULES.md` | §2.1.2 / §2.1.3 — уточнение responsibility scope |
 
 ### Фаза 8: Rollout

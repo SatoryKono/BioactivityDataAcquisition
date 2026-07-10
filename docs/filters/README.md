@@ -144,7 +144,7 @@ The script is read-only and produces three artifacts:
 - `docs/02-architecture/decisions/ADR-028-filter-rules-externalization.md`
 - `docs/02-architecture/decisions/ADR-045-dq-contract-system.md`
 - `docs/02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md`
-- `docs/plans/silver-filter-rejects-observability-plan.md` (observability
+- `docs/99-archive/plans/silver-filter-rejects-observability-plan.md` (observability
   cleanup should align Silver structural reject wording with ADR-050)
 
 ## Out of scope (separate work items)

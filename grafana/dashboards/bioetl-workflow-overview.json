@@ -1241,8 +1241,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "fixed",
-            "fixedColor": "gray"
+            "mode": "thresholds"
           },
           "mappings": [
             {
@@ -1265,6 +1264,15 @@
               }
             }
           ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "gray",
+                "value": null
+              }
+            ]
+          },
           "unit": "short",
           "noValue": "UNKNOWN"
         },

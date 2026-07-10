@@ -24,7 +24,6 @@ documentation_exceptions:
     # Governance-approved legacy docs retained without bulk rename churn.
     - docs/DOCKER_QUICKSTART.md    # Legacy root setup/troubleshooting entrypoint
     - docs/DOCKER_SETUP.md         # Legacy root setup/troubleshooting entrypoint
-    - docs/00-project/DOCUMENTATION_GOVERNANCE.md
     - docs/00-project/NORMATIVE_SOURCES.md
     - docs/CODEX_HANG_FIX.md
     - docs/99-archive/legacy-05-architecture/COMPLEX_COMPONENTS_DOCUMENTATION.md

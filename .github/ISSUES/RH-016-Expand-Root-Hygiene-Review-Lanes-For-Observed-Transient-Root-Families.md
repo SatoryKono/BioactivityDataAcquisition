@@ -34,7 +34,7 @@ but weaker intermediate guidance about:
 - `configs/quality/root_hygiene_review_registry.yaml`
 - `scripts/ops/support/repo/cleanup_repository.py`
 - `scripts/engineering/repo/audit_root_cleanliness.py`
-- `docs/plans/root-hygiene-review-lane-automation-2026-04-29.md`
+- `docs/99-archive/plans/root-hygiene-review-lane-automation-2026-04-29.md`
 
 ## Proposed Solution
 

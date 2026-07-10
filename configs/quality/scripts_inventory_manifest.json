@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-09T15:41:06.012505+00:00",
+  "generated_at": "2026-07-10T05:21:40.318940+00:00",
   "summary": {
     "total_scripts": 447,
     "status_counts": {
@@ -649,7 +649,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py",
-          "line": 339,
+          "line": 411,
           "source_group": "tests",
           "text": "assert \"scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh\" in backlog_text"
         }
@@ -6314,7 +6314,7 @@
         },
         {
           "path": "tests/architecture/test_debt_governance_telemetry_reporting.py",
-          "line": 33,
+          "line": 35,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"_compatibility_telemetry.py\","
         }
@@ -7061,7 +7061,7 @@
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 480,
+          "line": 492,
           "source_group": "scripts",
           "text": "if should_run_preflight && [[ -f \"scripts/engineering/dev/pretest_guardrails.sh\" ]]; then"
         }
@@ -8017,7 +8017,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 263,
+      "reference_count": 261,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -10959,7 +10959,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 24,
+      "reference_count": 22,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -10980,12 +10980,6 @@
           "text": "uv run python -m scripts.engineering.repo check-inventory --check"
         },
         {
-          "path": "docs/00-project/ai/architecture-audit-2025-07-01-corrected.md",
-          "line": 140,
-          "source_group": "docs",
-          "text": "python scripts/engineering/repo/check_scripts_inventory.py --check-lifecycle"
-        },
-        {
           "path": "docs/00-project/ai/memory/agent-memory.md",
           "line": 190,
           "source_group": "docs",
@@ -11004,10 +10998,16 @@
           "text": "python -m scripts.engineering.repo check-inventory --check"
         },
         {
-          "path": "docs/00-project/ai/refactoring-plan-2025-07-01.md",
-          "line": 97,
+          "path": "docs/03-guides/script-management/README.md",
+          "line": 67,
           "source_group": "docs",
-          "text": "python scripts/engineering/repo/check_scripts_inventory.py --check-lifecycle"
+          "text": "python3 -m scripts.engineering.repo check-inventory --check"
+        },
+        {
+          "path": "scripts/engineering/README.md",
+          "line": 33,
+          "source_group": "scripts",
+          "text": "python -m scripts.engineering.repo check-inventory --check --manifest configs/quality/scripts_inventory_manifest.json"
         }
       ]
     },
@@ -12464,19 +12464,19 @@
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 553,
+          "line": 565,
           "source_group": "scripts",
           "text": "if [[ -f \"scripts/ops/launchers/codex/setup_plugins.sh\" ]]; then"
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 554,
+          "line": 566,
           "source_group": "scripts",
           "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --pytest-only"
         },
         {
           "path": "scripts/engineering/dev/run_pytest.sh",
-          "line": 558,
+          "line": 570,
           "source_group": "scripts",
           "text": "# setup_plugins.sh may provision a temporary pytest runtime under /tmp when"
         }
@@ -13013,7 +13013,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 1609,
+          "line": 1614,
           "source_group": "other",
           "text": "powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/start_quarantine_explorer.ps1"
         }

@@ -1,4 +1,3 @@
-00-project/DOCUMENTATION_GOVERNANCE.md
 00-project/ai/README.md
 00-project/ai/agents/CLAUDE.md
 00-project/ai/agents/agents/py-audit-bot.md
@@ -29,7 +28,6 @@
 00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md
 00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md
 00-project/ai/agents/runtime/orchestration/py-team-orchestration.md
-00-project/ai/architecture-audit-2025-07-01-corrected.md
 00-project/ai/mcp-governance.md
 00-project/ai/memory/README.md
 00-project/ai/memory/memory-py-architecture-debt-bot.md
@@ -59,7 +57,6 @@
 00-project/ai/prompts/scripts_inventory_consolidation_cleanup_prompt.md
 00-project/ai/prompts/test_fix_retest_loop.md
 00-project/ai/prompts/test_speed_optimization_loop.md
-00-project/ai/refactoring-plan-2025-07-01.md
 00-project/ai/rules/RULES_COVERAGE_MATRIX.md
 00-project/ai/rules/windsurf/rules/00-architecture.md
 00-project/ai/rules/windsurf/rules/00-bioetl-core-governance.md
@@ -157,7 +154,6 @@
 02-architecture/diagrams/descriptions/architecture/48-effective-config-artifact-domain-model.md
 02-architecture/diagrams/descriptions/foundation/35-bootstrap-sequence.md
 02-architecture/diagrams/governance/diagram-expansion-2026-05-12.md
-02-architecture/domain-ports-catalog.md
 02-architecture/governance-audit-evidence.md
 03-data-model/json-field-typing-inventory.md
 03-data-model/reference-identifier-families.md
@@ -202,7 +198,6 @@
 04-reference/observability/logging-guide.md
 04-reference/observability/tracing-guide.md
 04-reference/pipelines/chembl/11-target-protein-classification-spec.md
-04-reference/pipelines/pubmed/pipeline-specification.md
 04-reference/providers/publication-normalization.md
 04-reference/schemas/domain/chembl/observed-vocab-inventory.md
 04-reference/schemas/domain/chembl/ontology-governance.md

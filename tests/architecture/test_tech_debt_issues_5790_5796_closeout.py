@@ -147,6 +147,26 @@ def test_closeout_artifact_is_complete_and_budget_safe_for_issue_pack_5790_5796(
     assert closeout["debt_budget_policy"] == "flat_or_decreasing_only"
     assert set(closeout["issues"]) == EXPECTED_ISSUES
     assert set(closeout["outcomes"]) == {str(issue) for issue in EXPECTED_ISSUES}
+    assert closeout["metrics"]["adapter_duplicate_clusters"]["current"] == 0
+    assert closeout["metrics"]["adapter_duplicate_clusters"]["opening_baseline"] == 54
+    assert closeout["metrics"]["pipeline_duplicate_clusters"]["current"] == 0
+    assert closeout["metrics"]["pipeline_duplicate_clusters"]["opening_baseline"] == 11
+    assert closeout["metrics"]["retained_entrypoint_count"] == 12
+    assert closeout["metrics"]["retained_public_export_facade_count"] == 4
+    assert closeout["metrics"]["repo_wide_zero_import_candidates"]["count"] == 9
+    assert closeout["metrics"]["repo_wide_zero_import_candidates"]["classified"] == 9
+    assert closeout["metrics"]["repo_wide_zero_import_candidates"]["owner_test_anchored"] == 9
+    assert closeout["metrics"]["config_surface_duplicate_clusters"]["current"] == 21
+    assert closeout["metrics"]["config_surface_duplicate_clusters"]["opening_baseline"] == 24
+    assert closeout["metrics"]["runtime_basics_targeted_coverage_percent"]["targeted_closeout_proof"] == 100.0
+    assert "required_closeout_checks" in closeout
+    assert len(closeout["required_closeout_checks"]) > 0
+    assert "src/bioetl/infrastructure/adapters/common/error_bundles.py" in closeout[
+        "outcomes"
+    ]["5791"]["evidence"]
+    assert "src/bioetl/application/pipelines/common/base_publication_transformer.py" in (
+        closeout["outcomes"]["5792"]["evidence"]
+    )
     assert all(
         outcome["status"] == "closeable" for outcome in closeout["outcomes"].values()
     )
@@ -155,11 +175,30 @@ def test_closeout_artifact_is_complete_and_budget_safe_for_issue_pack_5790_5796(
         for relative_path in outcome["evidence"]:
             assert (ROOT / relative_path).exists(), relative_path
 
+    # Validate required_closeout_checks contains expected commands
+    checks = closeout["required_closeout_checks"]
+    assert any("report-duplication-baseline" in check for check in checks)
+    assert any("report_architecture_quality_scorecard" in check for check in checks)
+    assert any("report-module-coverage" in check for check in checks)
+    assert any("report-debt-governance-gates" in check for check in checks)
+    assert any("test_tech_debt_issues_5790_5796_closeout" in check for check in checks)
+
+    # Validate outcome structure includes debt_type and closeout_reason
+    for outcome in closeout["outcomes"].values():
+        assert "debt_type" in outcome
+        assert "closeout_reason" in outcome
+        assert "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py" in outcome["evidence"]
+
 
 def test_issue_5790_compatibility_metadata_is_present_and_conflict_free() -> None:
+    closeout = _load_json(CLOSEOUT)
     registry = _load_yaml(COMPATIBILITY_REGISTRY)
     census = _load_json(COMPATIBILITY_CENSUS)
     snapshot_text = COMPATIBILITY_SNAPSHOT.read_text(encoding="utf-8")
+
+    assert closeout["outcomes"]["5790"]["debt_type"] == "compatibility_entrypoint_governance"
+    assert closeout["outcomes"]["5790"]["outcome"] == "improved"
+    assert "closeout_reason" in closeout["outcomes"]["5790"]
 
     assert census["summary"]["retained_entrypoint_count"] == 12
     assert census["summary"]["retained_public_export_facade_count"] == 4
@@ -195,12 +234,23 @@ def test_issue_5790_compatibility_metadata_is_present_and_conflict_free() -> Non
 def test_issue_5791_adapter_duplication_dropped_under_canonical_error_bundle_owner() -> (
     None
 ):
+    closeout = _load_json(CLOSEOUT)
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
     adapters = by_target["src/bioetl/infrastructure/adapters"]
     common_text = COMMON_ERROR_BUNDLES.read_text(encoding="utf-8")
     pubmed_text = PUBMED_ERRORS.read_text(encoding="utf-8")
 
+    assert closeout["outcomes"]["5791"]["debt_type"] == "adapter_duplication"
+    assert closeout["outcomes"]["5791"]["outcome"] == "improved"
+    assert closeout["outcomes"]["5791"]["opening_baseline"] == 54
+    assert closeout["outcomes"]["5791"]["current_value"] == 0
+    assert "closeout_reason" in closeout["outcomes"]["5791"]
+
+    assert (
+        adapters["duplicate_count"]
+        == closeout["metrics"]["adapter_duplicate_clusters"]["current"]
+    )
     assert adapters["duplicate_count"] < 54
     if adapters["duplicate_count"] == 0:
         assert adapters["actionability"] == []
@@ -215,12 +265,23 @@ def test_issue_5791_adapter_duplication_dropped_under_canonical_error_bundle_own
 def test_issue_5792_pipeline_duplication_dropped_under_base_transformer_defaults() -> (
     None
 ):
+    closeout = _load_json(CLOSEOUT)
     duplication = _load_json(DUPLICATION_BASELINE)
     by_target = {target["target"]: target for target in duplication["targets"]}
     pipelines = by_target["src/bioetl/application/pipelines"]
     base_text = BASE_PUBLICATION_TRANSFORMER.read_text(encoding="utf-8")
     context_text = PUBLICATION_TRANSFORMER_CONTEXT.read_text(encoding="utf-8")
 
+    assert closeout["outcomes"]["5792"]["debt_type"] == "pipeline_transformer_duplication"
+    assert closeout["outcomes"]["5792"]["outcome"] == "improved"
+    assert closeout["outcomes"]["5792"]["opening_baseline"] == 11
+    assert closeout["outcomes"]["5792"]["current_value"] == 0
+    assert "closeout_reason" in closeout["outcomes"]["5792"]
+
+    assert (
+        pipelines["duplicate_count"]
+        == closeout["metrics"]["pipeline_duplicate_clusters"]["current"]
+    )
     assert pipelines["duplicate_count"] == 0
     assert pipelines["duplicate_count"] < 11
     # Actionability categories are now empty since all duplicates were excluded
@@ -236,9 +297,14 @@ def test_issue_5792_pipeline_duplication_dropped_under_base_transformer_defaults
 
 
 def test_issue_5793_zero_import_candidates_have_explicit_owner_governance() -> None:
+    closeout = _load_json(CLOSEOUT)
     inventory = _load_json(DEAD_CODE_INVENTORY)
     triage = _load_yaml(RETIREMENT_TRIAGE)
     summary = inventory["summary"]
+
+    assert closeout["outcomes"]["5793"]["debt_type"] == "zero_import_governance"
+    assert closeout["outcomes"]["5793"]["outcome"] == "improved"
+    assert "closeout_reason" in closeout["outcomes"]["5793"]
 
     assert (
         triage["repo_wide_zero_import_classification"]["owner"]
@@ -258,12 +324,19 @@ def test_issue_5793_zero_import_candidates_have_explicit_owner_governance() -> N
 
 
 def test_issue_5794_shared_composite_policy_is_externalized() -> None:
+    closeout = _load_json(CLOSEOUT)
     backlog = _load_json(CONFIG_BACKLOG)
     shared_policy = _load_yaml(SHARED_POLICY)
     summary = backlog["duplication_audit"]["summary"]
     cluster_paths = {
         row["block_path"] for row in backlog["duplication_audit"]["clusters"]
     }
+
+    assert closeout["outcomes"]["5794"]["debt_type"] == "composite_config_duplication"
+    assert closeout["outcomes"]["5794"]["outcome"] == "improved"
+    assert closeout["outcomes"]["5794"]["opening_baseline"] == 24
+    assert closeout["outcomes"]["5794"]["current_value"] == 21
+    assert "closeout_reason" in closeout["outcomes"]["5794"]
 
     assert summary["duplicate_cluster_count"] == 21
     assert summary["duplicate_cluster_count"] < 24
@@ -283,10 +356,15 @@ def test_issue_5794_shared_composite_policy_is_externalized() -> None:
 
 
 def test_issue_5795_runtime_basics_has_committed_targeted_coverage_proof() -> None:
+    closeout = _load_json(CLOSEOUT)
     root = ET.parse(TARGETED_COVERAGE_XML).getroot()
     class_row = root.find(
         ".//class[@filename='src/bioetl/composition/bootstrap/runtime/runtime_basics.py']"
     )
+
+    assert closeout["outcomes"]["5795"]["debt_type"] == "hotspot_tail_coverage"
+    assert closeout["outcomes"]["5795"]["outcome"] == "improved_targeted_proof"
+    assert "closeout_reason" in closeout["outcomes"]["5795"]
 
     assert class_row is not None
     assert float(class_row.attrib["line-rate"]) == 1.0
@@ -313,6 +391,10 @@ def test_issue_5796_zero_reference_supporting_scripts_have_owner_or_removal_gove
     zero_ref_rows = [
         row for row in manifest["scripts"] if row.get("reference_count") == 0
     ]
+
+    assert closeout["outcomes"]["5796"]["debt_type"] == "supporting_script_governance"
+    assert closeout["outcomes"]["5796"]["outcome"] == "improved"
+    assert "closeout_reason" in closeout["outcomes"]["5796"]
 
     assert registry["schema_version"]
     metric = closeout["metrics"]["zero_reference_supporting_scripts"]

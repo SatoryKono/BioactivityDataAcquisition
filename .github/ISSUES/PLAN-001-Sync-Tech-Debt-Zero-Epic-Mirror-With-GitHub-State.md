@@ -24,7 +24,7 @@ This breaks the execution protocol for the debt program:
 ## Evidence
 
 - `.github/ISSUES/TECH-DEBT-ZERO-BURNDOWN-EPIC.md`
-- `docs/plans/tech-debt-eradication-blueprint-v4-2026-05-31.md`
+- `docs/99-archive/plans/tech-debt-eradication-blueprint-v4-2026-05-31.md`
 - GitHub REST API:
   - `https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/issues/4814`
   - `https://api.github.com/repos/SatoryKono/BioactivityDataAcquisition/issues/4819`
@@ -43,7 +43,7 @@ This breaks the execution protocol for the debt program:
 ## Suggested File Targets
 
 - `.github/ISSUES/TECH-DEBT-ZERO-BURNDOWN-EPIC.md`
-- `docs/plans/tech-debt-eradication-blueprint-v4-2026-05-31.md`
+- `docs/99-archive/plans/tech-debt-eradication-blueprint-v4-2026-05-31.md`
 
 ## Acceptance Criteria
 
