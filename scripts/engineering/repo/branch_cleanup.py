@@ -40,9 +40,6 @@ try:
 except ImportError:  # pragma: no cover - optional in minimal envs
     load_dotenv = None  # type: ignore[assignment]
 
-from pathlib import Path
-from typing import Any, Final
-
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 

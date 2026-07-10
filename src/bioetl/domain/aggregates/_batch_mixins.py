@@ -12,6 +12,7 @@ from bioetl.domain.aggregates._batch_status import BatchStatus
 from bioetl.domain.exceptions import InvalidStateError
 
 if TYPE_CHECKING:
+    from bioetl.domain.medallion import Layer
     from bioetl.domain.types import (
         BatchID,
         BronzeRecord,
@@ -249,11 +250,11 @@ class _BatchLifecycleMixin(_BatchReadModelMixin):
         """Mark batch as being written (SEALED -> WRITING)."""
         self._status = lifecycle.mark_writing(self._status)
 
-    def mark_committed(self, layer: str, committed_at: datetime) -> None:
+    def mark_committed(self, layer: Layer, committed_at: datetime) -> None:
         """Mark batch as committed (WRITING -> COMMITTED).
 
         Args:
-            layer: Medallion layer that successfully received the batch (e.g., 'bronze').
+            layer: Medallion layer that successfully received the batch.
             committed_at: Explicit timestamp when the batch write completed.
         """
         self._status = lifecycle.mark_committed(
@@ -268,7 +269,7 @@ class _BatchLifecycleMixin(_BatchReadModelMixin):
 
     def mark_failed(
         self,
-        layer: str,
+        layer: Layer,
         error: str,
         error_type: str | None = None,
         *,

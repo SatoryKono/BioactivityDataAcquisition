@@ -3,8 +3,8 @@
 # Machine-readable mapping of shipped dashboards to their panels, data sources,
 # and contract metadata. This file enables drift detection and audibility.
 #
-# Version: 1.0.1
-# Last updated: 2026-06-30
+# Version: 1.0.2
+# Last updated: 2026-07-10
 # Source: grafana/dashboards/*.json
 #
 # Schema:
@@ -13,7 +13,7 @@
 #       title: Dashboard title
 #       family: Dashboard family (primary, adjunct, explorer, alert_triage)
 #       navigation_id: Navigation bus position (0-5) or null if not in primary bus
-#       data_sources: List of Prometheus/Loki/Tempo/HTTP data source UIDs
+#       data_sources: Normalized datasource names discovered from dashboard JSON
 #       panel_count: Total number of panels
 #       key_panels:
 #         - id: Panel ID
@@ -29,7 +29,8 @@ dashboards:
     navigation_id: 0
     data_sources:
       - Prometheus
-      - HTTP (control-plane backend)
+      - Quarantine Explorer
+      - Grafana
     panel_count: 57
     key_panels:
       - id: 891
@@ -60,7 +61,8 @@ dashboards:
     navigation_id: 1
     data_sources:
       - Prometheus
-      - HTTP (control-plane backend)
+      - Quarantine Explorer
+      - Grafana
     panel_count: 25
     key_panels:
       - id: 214
@@ -87,6 +89,9 @@ dashboards:
     navigation_id: 2
     data_sources:
       - Prometheus
+      - Loki
+      - Quarantine Explorer
+      - Grafana
     panel_count: 42
     key_panels:
       - id: 9100
@@ -115,6 +120,8 @@ dashboards:
     navigation_id: 3
     data_sources:
       - Prometheus
+      - Quarantine Explorer
+      - Grafana
     panel_count: 29
     key_panels:
       - id: 9101
@@ -140,6 +147,8 @@ dashboards:
     navigation_id: 4
     data_sources:
       - Prometheus
+      - Quarantine Explorer
+      - Grafana
     panel_count: 36
     key_panels:
       - id: 9100
@@ -167,6 +176,8 @@ dashboards:
     navigation_id: 5
     data_sources:
       - Prometheus
+      - Quarantine Explorer
+      - Grafana
     panel_count: 16
     key_panels:
       - id: 2
@@ -198,7 +209,9 @@ dashboards:
     family: explorer
     navigation_id: null
     data_sources:
-      - HTTP (quarantine backend)
+      - Prometheus
+      - Quarantine Explorer
+      - Grafana
     panel_count: 16
     key_panels:
       - id: 2
@@ -219,6 +232,7 @@ dashboards:
     navigation_id: null
     data_sources:
       - Prometheus
+      - Grafana
     panel_count: 7
     key_panels:
       - id: 1
@@ -232,8 +246,8 @@ dashboards:
 
 # Contract metadata
 contract_metadata:
-  version: "1.0.1"
-  last_updated: "2026-06-30"
+  version: "1.0.2"
+  last_updated: "2026-07-10"
   source_files:
     - "grafana/dashboards/bioetl-control-plane-v1.json"
     - "grafana/dashboards/bioetl-overview-v2.json"

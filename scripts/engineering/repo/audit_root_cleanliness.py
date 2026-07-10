@@ -170,6 +170,22 @@ def _collect_tracked_root_entries(paths: list[str]) -> tuple[set[str], set[str]]
     return root_files, root_dirs
 
 
+def _unexpected_tracked_root_files(
+    tracked_root_files: set[str],
+    allowed_root_files: frozenset[str],
+) -> list[str]:
+    """Return tracked root files missing from the root-file allowlist."""
+    return sorted(tracked_root_files - allowed_root_files)
+
+
+def _unexpected_tracked_root_dirs(
+    tracked_root_dirs: set[str],
+    allowed_root_dirs: frozenset[str],
+) -> list[str]:
+    """Return tracked root directories missing from directory governance."""
+    return sorted(tracked_root_dirs - allowed_root_dirs)
+
+
 def _get_untracked_paths(repo_root: Path) -> list[str]:
     """Return untracked (non-ignored) paths from git working tree."""
     completed = _run_git(repo_root, "ls-files", "--others", "--exclude-standard", "-z")
@@ -207,14 +223,26 @@ def _report_root_layout_violations(
     unexpected_root_files: list[str],
     unexpected_root_dirs: list[str],
 ) -> int:
-    if not unexpected_root_files and not unexpected_root_dirs:
-        return 0
+    file_exit = _report_unexpected_tracked_root_files(unexpected_root_files)
+    dir_exit = _report_unexpected_tracked_root_dirs(unexpected_root_dirs)
+    return 1 if file_exit or dir_exit else 0
 
-    sys.stderr.write("ERROR: root layout policy violation detected.\n")
+
+def _report_unexpected_tracked_root_files(unexpected_root_files: list[str]) -> int:
+    if not unexpected_root_files:
+        return 0
+    sys.stderr.write("ERROR: root file allowlist violation detected.\n")
     if unexpected_root_files:
         sys.stderr.write("Unexpected tracked root files:\n")
         for entry in unexpected_root_files:
             sys.stderr.write(f"  - {entry}\n")
+    return 1
+
+
+def _report_unexpected_tracked_root_dirs(unexpected_root_dirs: list[str]) -> int:
+    if not unexpected_root_dirs:
+        return 0
+    sys.stderr.write("ERROR: root directory approval violation detected.\n")
     if unexpected_root_dirs:
         sys.stderr.write("Unexpected tracked root directories:\n")
         for entry in unexpected_root_dirs:
@@ -678,6 +706,14 @@ def collect_root_layout_state(
     tracked_paths = _get_tracked_paths(repo_root)
     allowed_root_dirs = _approved_root_directories(structure_catalog)
     tracked_root_files, tracked_root_dirs = _collect_tracked_root_entries(tracked_paths)
+    unexpected_root_files = _unexpected_tracked_root_files(
+        tracked_root_files,
+        allowed_root_files,
+    )
+    unexpected_root_dirs = _unexpected_tracked_root_dirs(
+        tracked_root_dirs,
+        allowed_root_dirs,
+    )
 
     state: dict[str, object] = {
         "allowed_root_files": allowed_root_files,
@@ -686,8 +722,11 @@ def collect_root_layout_state(
         "tracked_paths": tracked_paths,
         "tracked_root_files": tracked_root_files,
         "tracked_root_dirs": tracked_root_dirs,
-        "unexpected_root_files": sorted(tracked_root_files - allowed_root_files),
-        "unexpected_root_dirs": sorted(tracked_root_dirs - allowed_root_dirs),
+        "root_file_allowlist_violations": unexpected_root_files,
+        "root_directory_approval_violations": unexpected_root_dirs,
+        # Backward-compatible keys for existing callers.
+        "unexpected_root_files": unexpected_root_files,
+        "unexpected_root_dirs": unexpected_root_dirs,
         "missing_allowed_files": sorted(allowed_root_files - tracked_root_files),
     }
     if include_untracked:

@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import pytest
+import yaml
 
 from tests.integration._grafana_test_support import (
     get_dashboard_files,
@@ -17,6 +18,7 @@ from tests.integration.grafana_contract_specs import (
 
 
 pytestmark = pytest.mark.integration
+RULES_PATH = Path("grafana/prometheus-rules/bioetl_observability.yml")
 _PROCESSED_RECORDS_DASHBOARDS = (
     "bioetl-control-plane-v1.json",
     "bioetl-dq-v2.json",
@@ -133,15 +135,7 @@ def _expected_duplicate_uses() -> dict[str, set[tuple[str, str]]]:
             ("bioetl-dq-v2.json", "Monitor DQ Current Status"),
             ("bioetl-dq-v2.json", "Status"),
         },
-        'max((bioetl_runtime_current_status{pipeline=~"$pipeline",run_type=~"$run_type"} '
-        'or ((bioetl_runtime_current_status{run_type=~"$run_type"}) and on(pipeline) '
-        'label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
-        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))) or '
-        '(clamp_max(max(1 - max_over_time(up{job="bioetl"}[10m])) + on() '
-        'group_left() ((sum(increase(prometheus_rule_evaluation_failures_total{rule_group=~".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$"}[10m])) '
-        '> bool 0) or ((time() - max(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$"})) '
-        '> bool 60) or absent(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$"})), '
-        "2) > 0))": {
+        'max(bioetl_runtime_current_status_trusted{pipeline=~"$pipeline",run_type=~"$run_type"})': {
             ("bioetl-runtime.json", "Runtime Status"),
             ("bioetl-runtime.json", "Status"),
         },
@@ -1090,20 +1084,21 @@ def test_runtime_telemetry_gap_checks_scrape_and_rule_health() -> None:
     assert panel is not None, "Panel 'Runtime Telemetry Gap' not found"
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
-    assert any('up{job="bioetl"}' in expr for expr in expressions)
-    assert any(
-        "prometheus_rule_evaluation_failures_total" in expr for expr in expressions
+    assert expressions == ["max(bioetl_runtime_trust_gap_status_10m)"]
+
+    rules = yaml.safe_load(RULES_PATH.read_text(encoding="utf-8"))
+    rule_expr = next(
+        rule.get("expr", "")
+        for group in rules.get("groups", [])
+        for rule in group.get("rules", [])
+        if rule.get("record") == "bioetl_runtime_trust_gap_status_10m"
     )
-    assert any(
-        "prometheus_rule_group_last_evaluation_timestamp_seconds" in expr
-        for expr in expressions
-    )
-    assert any("absent(" in expr for expr in expressions)
-    assert any(
-        "bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$" in expr
-        for expr in expressions
-    )
-    assert any("bioetl_runtime_dashboard_recording" in expr for expr in expressions), (
+    assert 'up{job="bioetl"}' in rule_expr
+    assert "prometheus_rule_evaluation_failures_total" in rule_expr
+    assert "prometheus_rule_group_last_evaluation_timestamp_seconds" in rule_expr
+    assert "absent(" in rule_expr
+    assert "bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$" in rule_expr
+    assert "bioetl_runtime_dashboard_recording" in rule_expr, (
         "Telemetry gap must check the runtime dashboard recording group"
     )
 

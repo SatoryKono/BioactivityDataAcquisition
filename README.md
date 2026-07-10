@@ -383,7 +383,7 @@ What this script does:
 
 - Writes workspace MCP config for Copilot at `.vscode/mcp.json`.
 - Synchronizes `.mcp.json`, `.vscode/mcp.json`, `.cursor/mcp.json`, `.qodo/mcp.json`, `.codex/settings.json`, `.devin/config.json`, and the managed MCP block in `~/.codex/config.toml`.
-- Registers the current MCP set: `memory`, `filesystem`, `fetch`, `github`, `docker`, `context7`, `ast-grep`, `mcp-code-interpreter`, `prometheus`, `grafana`, `brave-search`, `sonarqube`, `neo4j-cypher`, `neo4j-memory`, `chembl`, `pubchem`, `pubmed`, `mermaid`, `biomoltechDocs`, `mintlify`, and `deepwiki`.
+- Registers the current MCP set: `memory`, `filesystem`, `fetch`, `github`, `docker`, `context7`, `ast-grep`, `mcp-code-interpreter`, `prometheus`, `grafana`, `brave-search`, `neo4j-cypher`, `neo4j-memory`, `mermaid`, `biomoltechDocs`, `mintlify`, and `deepwiki`.
 - Uses repo-local wrappers for local and Docker-backed servers so auth and machine-local settings stay out of tracked MCP config files.
 - Uses local defaults when not overridden:
   - `PROMETHEUS_URL=http://host.docker.internal:9090`
@@ -421,10 +421,6 @@ GRAFANA_TOKEN=
 GRAFANA_API_KEY=
 BRAVE_API_KEY=
 BRAVE_SEARCH_API_KEY=
-SONARQUBE_TOKEN=
-SONAR_TOKEN=
-SONARQUBE_ORG=
-SONARQUBE_URL=
 DOCKERHUB_USERNAME=
 HUB_PAT_TOKEN=
 NEO4J_URI=bolt://localhost:7687
@@ -441,7 +437,6 @@ Before using tokenized MCP tools, prefer storing secrets in the local untracked 
 ```bash
 GITHUB_PERSONAL_ACCESS_TOKEN="<your_pat>"
 BRAVE_API_KEY="<your_brave_key>"
-SONARQUBE_TOKEN="<your_sonar_token>"
 GRAFANA_SERVICE_ACCOUNT_TOKEN="<your_grafana_token>"
 ```
 
@@ -450,7 +445,6 @@ Accepted alias names are normalized by the wrappers. For example:
 ```bash
 GITHUB_TOKEN="<your_pat>"
 BRAVE_SEARCH_API_KEY="<your_brave_key>"
-SONAR_TOKEN="<your_sonar_token>"
 GRAFANA_TOKEN="<your_grafana_token>"
 ```
 

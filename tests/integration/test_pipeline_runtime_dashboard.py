@@ -384,26 +384,28 @@ def test_runtime_blockers_preserves_unknown_without_inline_conditions() -> None:
     assert blockers_panel is not None
     expr = blockers_panel["targets"][0]["expr"]
     assert "or vector(0)" not in expr
-    assert "bioetl_runtime_current_status" in expr
+    assert "bioetl_runtime_current_status_trusted" in expr
     assert "== 0" in expr
     assert "bioetl_runtime_alert_condition_" not in expr
     defaults = blockers_panel.get("fieldConfig", {}).get("defaults", {})
     assert defaults.get("noValue") == "UNKNOWN"
 
 
-def test_runtime_current_panels_normalize_workflow_pipeline_aliases() -> None:
-    """Runtime current-triage panels must resolve workflow_<pipeline> selectors back to entity scope."""
+def test_runtime_current_panels_use_scoped_recording_rules_for_workflow_aliases() -> (
+    None
+):
+    """Runtime current-triage panels must delegate workflow_<pipeline> selectors to rules."""
     panels = {p.get("title"): p for p in _runtime_data_panels()}
-    expected_titles = {
-        "Runtime Status",
-        "Runtime Blockers",
-        "Monitor Runtime Blockers",
-        "Runtime Error Rate",
-        "Worst Stage Lag",
-        "Inspect Active Runtime Blocker Detail",
+    expected_rules = {
+        "Runtime Status": ("bioetl_runtime_current_status_trusted",),
+        "Runtime Blockers": ("bioetl_runtime_current_blocker_reason_scoped",),
+        "Monitor Runtime Blockers": (
+            "bioetl_runtime_current_blocker_reason_scoped",
+            "bioetl_runtime_current_status_trusted",
+        ),
     }
 
-    for title in expected_titles:
+    for title, required_tokens in expected_rules.items():
         panel = panels.get(title)
         assert panel is not None, f"Runtime dashboard missing {title!r}"
         expr = "\n".join(
@@ -411,8 +413,9 @@ def test_runtime_current_panels_normalize_workflow_pipeline_aliases() -> None:
             for target in panel.get("targets", [])
             if isinstance(target.get("expr"), str)
         )
-        assert 'label_replace(vector(1), "pipeline_raw", "$pipeline"' in expr
-        assert '"^(?:workflow_)?(.*)$"' in expr
+        for token in required_tokens:
+            assert token in expr
+        assert 'label_replace(vector(1), "pipeline_raw", "$pipeline"' not in expr
 
 
 def test_top_runtime_blockers_hides_prometheus_metric_name_column() -> None:

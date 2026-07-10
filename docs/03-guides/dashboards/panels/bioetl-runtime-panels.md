@@ -21,7 +21,7 @@ Dashboard `2. Runtime` is an L2 incident surface for runtime triage. It uses sha
 ### 3. Status
 - **Type:** Stat
 - **Purpose:** Current runtime severity for the selected scope.
-- **Data sources:** `bioetl_runtime_current_status`
+- **Data sources:** `bioetl_runtime_current_status_trusted`
 
 ### 4. ID
 - **Type:** Table
@@ -36,17 +36,17 @@ Dashboard `2. Runtime` is an L2 incident surface for runtime triage. It uses sha
 ### 6. Runtime Status
 - **Type:** Stat
 - **Purpose:** Trust-gated current runtime status summary.
-- **Data sources:** `bioetl_runtime_current_status` plus the runtime telemetry-gap trust gate (`up{job="bioetl"}` and runtime recording-rule health)
+- **Data sources:** `bioetl_runtime_current_status_trusted`
 
 ### 7. Runtime Telemetry Gap
 - **Type:** Stat
 - **Purpose:** Detect missing telemetry for selected scope.
-- **Data sources:** `up{job="bioetl"}`
+- **Data sources:** `bioetl_runtime_trust_gap_status_10m`
 
 ### 8. Runtime Blockers
 - **Type:** Table
 - **Purpose:** Show active runtime blockers with details.
-- **Data sources:** `bioetl_runtime_current_blocker_reason`
+- **Data sources:** `bioetl_runtime_current_blocker_reason_scoped`
 
 ### 9. Monitor Runtime Blockers
 - **Type:** Stat

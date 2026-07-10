@@ -12,6 +12,7 @@ from bioetl.application.core.quarantine_manager import (
 )
 from bioetl.domain.aggregates.events import BatchFailed, BatchWritten, DomainEvent
 from bioetl.domain.exceptions import SchemaViolationError
+from bioetl.domain.medallion import Layer
 from bioetl.domain.types import BatchID, ErrorType, RunID
 
 if TYPE_CHECKING:
@@ -52,7 +53,7 @@ def emit_batch_written(
             occurred_at=occurred_at,
             run_id=run_id,
             batch_id=batch_id,
-            layer=layer,
+            layer=Layer(layer),
             record_count=record_count,
         ),
     )
@@ -76,7 +77,7 @@ def emit_batch_failed(
             occurred_at=occurred_at,
             run_id=run_id,
             batch_id=batch_id,
-            layer=layer,
+            layer=Layer(layer),
             error=str(error),
             error_type=type(error).__name__,
         ),

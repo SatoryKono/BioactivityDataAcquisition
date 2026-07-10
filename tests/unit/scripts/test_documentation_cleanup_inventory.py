@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from scripts.docs.checks import documentation_cleanup_inventory as inventory
@@ -133,3 +135,56 @@ def test_generated_route_exception_requires_generated_status() -> None:
         )
         is None
     )
+
+
+def test_safe_iter_local_doc_tree_reports_quarantined_paths(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Local docs/report scans should skip quarantined paths without crashing."""
+    reports_root = tmp_path / "docs" / "reports"
+    reports_root.mkdir(parents=True)
+    (reports_root / "index.md").write_text("# Reports\n", encoding="utf-8")
+    quarantined = reports_root / ".quarantined-corrupt-evidence"
+    quarantined.mkdir()
+    (quarantined / "broken.md").write_text("# Do not scan\n", encoding="utf-8")
+    monkeypatch.setattr(inventory, "PROJECT_ROOT", tmp_path)
+
+    paths, errors = inventory._safe_iter_local_doc_tree("docs/reports")
+
+    assert paths == ["docs/reports/index.md"]
+    assert errors == [
+        {
+            "path": "docs/reports/.quarantined-corrupt-evidence",
+            "error": "QuarantinedPath",
+        }
+    ]
+
+
+def test_generated_route_violations_reports_unowned_generated_rows() -> None:
+    """Generator checks must fail when generated docs lack route ownership."""
+    payload = {
+        "files": [
+            {
+                "path": "docs/generated/unowned.md",
+                "status": "Generated",
+                "generated_route": None,
+                "generated_route_exception": None,
+            },
+            {
+                "path": "docs/generated/owned.md",
+                "status": "Generated",
+                "generated_route": "owned-route",
+                "generated_route_exception": None,
+            },
+            {
+                "path": "docs/generated/exception.md",
+                "status": "Generated",
+                "generated_route": None,
+                "generated_route_exception": "diagram_kind:diagram_support",
+            },
+        ]
+    }
+
+    assert inventory._generated_route_violations(payload) == [
+        "docs/generated/unowned.md"
+    ]

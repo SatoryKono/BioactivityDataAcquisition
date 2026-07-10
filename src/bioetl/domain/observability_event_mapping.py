@@ -163,7 +163,7 @@ def _build_batch_written(event: DomainEvent) -> DomainEventObservabilityEnvelope
         context={
             "run_id": str(typed.run_id),
             "batch_id": str(typed.batch_id),
-            "layer": typed.layer,
+            "layer": typed.layer.value,
             "record_count": typed.record_count,
         },
     )
@@ -179,7 +179,7 @@ def _build_batch_failed(event: DomainEvent) -> DomainEventObservabilityEnvelope:
         context={
             "run_id": str(typed.run_id),
             "batch_id": str(typed.batch_id),
-            "layer": typed.layer,
+            "layer": typed.layer.value,
             "error": typed.error,
             "error_type": typed.error_type or "unknown",
         },

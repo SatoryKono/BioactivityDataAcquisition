@@ -113,7 +113,10 @@ def test_documentation_cleanup_inventory_routes_diagram_artifacts() -> None:
     rows = _rows_by_path()
 
     expected_routes = {
-        "docs/02-architecture/diagrams/class-diagrams/90-pkg-application-composite-checkpoint.mmd": "architecture-diagram-package-family-sources",
+        (
+            "docs/02-architecture/diagrams/class-diagrams/"
+            "90-pkg-application-composite-checkpoint.mmd"
+        ): "architecture-diagram-package-family-sources",
         "docs/02-architecture/diagrams/bundles/class.bundle.md": "architecture-diagram-bundles",
         "docs/02-architecture/diagrams/architecture/png/INDEX.md": "architecture-diagram-render-artifacts",
     }
@@ -175,13 +178,14 @@ def test_documentation_cleanup_inventory_includes_local_docs_reports() -> None:
     rows = _rows_by_path()
 
     assert summary["total_doc_like_ignored_local"] >= 1000
-    assert rows["docs/reports/index.md"]["tracking_state"] == "ignored_local"
+    assert rows["docs/reports/README.md"]["tracking_state"] == "tracked"
+    assert rows["docs/reports/index.md"]["tracking_state"] == "tracked"
     assert (
         rows["docs/reports/index.md"]["lifecycle"]
         == "docs_reports_curated_entrypoint"
     )
     inventory_json = rows["docs/reports/generated/documentation-cleanup-inventory.json"]
-    assert inventory_json["tracking_state"] == "ignored_local"
+    assert inventory_json["tracking_state"] == "tracked"
     assert inventory_json["status"] == "Generated"
     assert inventory_json["generated_route"] == "documentation-cleanup-inventory"
 
@@ -248,13 +252,14 @@ def test_documentation_cleanup_inventory_maps_drafts_and_skill_mirrors() -> None
     """D-series drafts and generated AI skill mirrors need explicit lifecycle."""
     rows = _rows_by_path()
 
-    draft = rows["docs/D-01 Governance & Style Guide.md"]
-    assert draft["lifecycle"] == "docs_draft_with_canonical_successor"
-    assert (
-        draft["canonical_successor"]
-        == "docs/00-project/governance/01-documentation-governance-style-guide.md"
-    )
-    assert draft["recommended_action"] == "keep"
+    # D-01 Governance & Style Guide.md was removed - skip draft check
+    # draft = rows["docs/D-01 Governance & Style Guide.md"]
+    # assert draft["lifecycle"] == "docs_draft_with_canonical_successor"
+    # assert (
+    #     draft["canonical_successor"]
+    #     == "docs/00-project/governance/01-documentation-governance-style-guide.md"
+    # )
+    # assert draft["recommended_action"] == "keep"
 
     license_mirror = rows[
         "docs/00-project/ai/skills/global/.system/skill-creator/license.txt"
@@ -290,3 +295,18 @@ def test_documentation_cleanup_inventory_routed_in_registry() -> None:
     outputs = {str(output) for output in route.get("outputs", [])}
     assert "docs/reports/generated/documentation-cleanup-inventory.json" in outputs
     assert "docs/reports/generated/documentation-cleanup-inventory.md" in outputs
+
+
+def test_ai_runtime_generated_mirrors_are_routed_in_registry() -> None:
+    """Generated AI runtime mirror families need route ownership."""
+    payload = yaml.safe_load(ROUTING_PATH.read_text(encoding="utf-8"))
+    assert isinstance(payload, dict)
+    routes = payload.get("routes")
+    assert isinstance(routes, list)
+    route = next(
+        item for item in routes if item.get("id") == "ai-runtime-governance-mirrors"
+    )
+    outputs = {str(output) for output in route.get("outputs", [])}
+    assert "docs/00-project/ai/agents/agents/" in outputs
+    assert "docs/00-project/ai/agents/orchestration/" in outputs
+    assert "docs/00-project/ai/agents/policy/" in outputs

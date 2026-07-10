@@ -28,6 +28,13 @@ DASHBOARD_INVENTORY_CONTRACT = Path(
 PROVISIONING_CONFIG = Path("grafana/provisioning/dashboards/bioetl.yaml")
 VOLATILE_ROOT_KEYS = frozenset({"id", "version"})
 VOLATILE_PANEL_KEYS = frozenset({"pluginVersion"})
+DATASOURCE_ORDER = {
+    "Prometheus": 0,
+    "Loki": 1,
+    "Tempo": 2,
+    "Quarantine Explorer": 3,
+    "Grafana": 4,
+}
 
 MANDATORY_LINK_UIDS: dict[str, set[str]] = {
     "bioetl-overview-v2": {
@@ -93,6 +100,66 @@ def _extract_panel_plugin_versions(payload: dict[str, Any]) -> list[str]:
     return sorted(versions)
 
 
+def _sort_data_sources(names: set[str]) -> list[str]:
+    return sorted(names, key=lambda name: (DATASOURCE_ORDER.get(name, 99), name))
+
+
+def _normalize_datasource_ref(ref: object) -> str | None:
+    if isinstance(ref, str):
+        value = ref.strip()
+        if not value:
+            return None
+        if value == "Quarantine Explorer":
+            return "Quarantine Explorer"
+        if value == "-- Grafana --":
+            return "Grafana"
+        return value
+
+    if not isinstance(ref, dict):
+        return None
+
+    name = str(ref.get("name", "")).strip()
+    uid = str(ref.get("uid", "")).strip().lower()
+    kind = str(ref.get("type", "")).strip().lower()
+
+    if name == "Quarantine Explorer" or uid == "quarantine-explorer":
+        return "Quarantine Explorer"
+    if kind == "prometheus" or uid == "prometheus":
+        return "Prometheus"
+    if kind == "loki" or uid == "loki":
+        return "Loki"
+    if kind == "tempo" or uid == "tempo":
+        return "Tempo"
+    if kind == "grafana" or uid in {"grafana", "-- grafana --"}:
+        return "Grafana"
+    if name:
+        return name
+    if uid:
+        return uid
+    if kind:
+        return kind
+    return None
+
+
+def _extract_datasources(payload: dict[str, Any]) -> list[str]:
+    discovered: set[str] = set()
+
+    def _visit(node: object) -> None:
+        if isinstance(node, dict):
+            if "datasource" in node:
+                normalized = _normalize_datasource_ref(node.get("datasource"))
+                if normalized:
+                    discovered.add(normalized)
+            for value in node.values():
+                _visit(value)
+        elif isinstance(node, list):
+            for item in node:
+                _visit(item)
+
+    _visit(payload)
+    return _sort_data_sources(discovered)
+
+
 def _root_dashboard_payload(payload: dict[str, Any]) -> dict[str, Any]:
     if isinstance(payload.get("dashboard"), dict):
         dashboard = payload["dashboard"]
@@ -138,6 +205,7 @@ def _load_inventory() -> list[dict[str, object]]:
                 "editable": payload.get("editable"),
                 "graphTooltip": payload.get("graphTooltip"),
                 "hideControls": payload.get("hideControls", "<missing>"),
+                "data_sources": _extract_datasources(payload),
                 "panel_count": len(_iter_panels(payload)),
                 "panel_plugin_versions": _extract_panel_plugin_versions(payload),
             }
@@ -167,6 +235,17 @@ def _normalize_contract_variables(raw_variables: object) -> list[str]:
         variable = str(name)
         variables.append(variable if variable.startswith("$") else f"${variable}")
     return sorted(variables)
+
+
+def _normalize_contract_datasources(raw_sources: object) -> list[str]:
+    if not isinstance(raw_sources, list):
+        return []
+    sources = {
+        normalized
+        for item in raw_sources
+        if (normalized := _normalize_datasource_ref(item)) is not None
+    }
+    return _sort_data_sources(sources)
 
 
 def _dashboard_inventory_contract_entries() -> tuple[dict[str, dict[str, Any]], list[str]]:
@@ -247,6 +326,21 @@ def _check_dashboard_inventory_contract(
                     "dashboard-inventory: panel_count mismatch for "
                     f"{uid}: contract={contract_entry.get('panel_count')} "
                     f"actual={item.get('panel_count')}"
+                ),
+            )
+
+        contract_sources = _normalize_contract_datasources(
+            contract_entry.get("data_sources")
+        )
+        if contract_sources != list(item["data_sources"]):
+            _register_issue(
+                errors=errors,
+                per_dashboard=per_dashboard,
+                uid=uid,
+                message=(
+                    "dashboard-inventory: data_sources mismatch for "
+                    f"{uid}: contract={contract_sources} "
+                    f"actual={item['data_sources']}"
                 ),
             )
 

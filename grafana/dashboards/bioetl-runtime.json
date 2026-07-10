@@ -212,7 +212,7 @@
       },
       "targets": [
         {
-          "expr": "max((bioetl_runtime_current_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_runtime_current_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or (clamp_max(max(1 - max_over_time(up{job=\"bioetl\"}[10m])) + on() group_left() ((sum(increase(prometheus_rule_evaluation_failures_total{rule_group=~\".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$\"}[10m])) > bool 0) or ((time() - max(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~\".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$\"})) > bool 60) or absent(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~\".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$\"})), 2) > 0))",
+          "expr": "max(bioetl_runtime_current_status_trusted{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
           "refId": "A"
         }
       ]
@@ -907,7 +907,7 @@
       },
       "targets": [
         {
-          "expr": "max((bioetl_runtime_current_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_runtime_current_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or (clamp_max(max(1 - max_over_time(up{job=\"bioetl\"}[10m])) + on() group_left() ((sum(increase(prometheus_rule_evaluation_failures_total{rule_group=~\".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$\"}[10m])) > bool 0) or ((time() - max(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~\".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$\"})) > bool 60) or absent(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~\".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$\"})), 2) > 0))",
+          "expr": "max(bioetl_runtime_current_status_trusted{pipeline=~\"$pipeline\",run_type=~\"$run_type\"})",
           "refId": "A"
         }
       ],
@@ -1006,7 +1006,7 @@
       },
       "targets": [
         {
-          "expr": "clamp_max(max(1 - max_over_time(up{job=\"bioetl\"}[10m])) + on() group_left() ((sum(increase(prometheus_rule_evaluation_failures_total{rule_group=~\".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$\"}[10m])) > bool 0) or ((time() - max(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~\".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$\"})) > bool 60) or absent(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~\".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$\"})), 2)",
+          "expr": "max(bioetl_runtime_trust_gap_status_10m)",
           "refId": "A"
         }
       ],
@@ -1099,7 +1099,7 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "topk(3, (bioetl_runtime_current_blocker_reason{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_current_blocker_reason{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")))",
+          "expr": "topk(3, bioetl_runtime_current_blocker_reason_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0)",
           "format": "table",
           "instant": true,
           "legendFormat": "{{pipeline}} {{run_type}} {{reason}} {{severity}} {{action_target}}",
@@ -1198,7 +1198,7 @@
       },
       "targets": [
         {
-          "expr": "sum((bioetl_runtime_current_blocker_reason{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_current_blocker_reason{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or ((max((bioetl_runtime_current_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) or ((bioetl_runtime_current_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) == 0) * 0)",
+          "expr": "sum((bioetl_runtime_current_blocker_reason_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or ((max(bioetl_runtime_current_status_trusted{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) == 0) * 0))",
           "refId": "A"
         }
       ],
@@ -1292,7 +1292,7 @@
       },
       "targets": [
         {
-          "expr": "sum(max_over_time(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[15m])) or ((count(bioetl_runtime_pipeline_run_type_universe{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0) * 0)",
+          "expr": "sum(increase(bioetl_pipeline_runs_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",status=\"failed\"}[15m])) or ((count(bioetl_runtime_pipeline_run_type_universe_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"}) > bool 0) * 0)",
           "refId": "A"
         }
       ],
@@ -1379,7 +1379,7 @@
       },
       "targets": [
         {
-          "expr": "(((((sum(max_over_time(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\"}[30m])) or sum((max_over_time(bioetl_errors_total{stage=~\"$stage\"}[30m])) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or (0 * ((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[30m])) or sum((max_over_time(bioetl_records_processed_total{run_type=~\"$run_type\",stage=\"bronze\"}[30m])) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")))))) / clamp_min(((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[30m])) or sum((max_over_time(bioetl_records_processed_total{run_type=~\"$run_type\",stage=\"bronze\"}[30m])) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")))), 1))) and ((((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[30m])) or sum((max_over_time(bioetl_records_processed_total{run_type=~\"$run_type\",stage=\"bronze\"}[30m])) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")))) >= 20)))",
+          "expr": "(((((sum(increase(bioetl_errors_total{pipeline=~\"$pipeline\",stage=~\"$stage\"}[30m])) or sum((increase(bioetl_errors_total{stage=~\"$stage\"}[30m])) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or (0 * ((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[30m])) or sum((max_over_time(bioetl_records_processed_total{run_type=~\"$run_type\",stage=\"bronze\"}[30m])) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")))))) / clamp_min(((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[30m])) or sum((max_over_time(bioetl_records_processed_total{run_type=~\"$run_type\",stage=\"bronze\"}[30m])) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")))), 1))) and ((((sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\",run_type=~\"$run_type\",stage=\"bronze\"}[30m])) or sum((max_over_time(bioetl_records_processed_total{run_type=~\"$run_type\",stage=\"bronze\"}[30m])) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")))) >= 20)))",
           "refId": "A"
         }
       ],
@@ -1844,7 +1844,7 @@
       "pluginVersion": "10.4.0",
       "targets": [
         {
-          "expr": "topk(20, (bioetl_runtime_current_blocker_reason{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0) or (((bioetl_runtime_current_blocker_reason{run_type=~\"$run_type\"}) > 0) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")))",
+          "expr": "topk(20, bioetl_runtime_current_blocker_reason_scoped{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} > 0)",
           "legendFormat": "{{pipeline}} / {{reason}} / {{severity}} / {{action_target}}",
           "refId": "J",
           "instant": true,

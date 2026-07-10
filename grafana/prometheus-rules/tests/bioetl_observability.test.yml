@@ -701,7 +701,7 @@ tests:
       - series: 'bioetl_stage_records_total{pipeline="chembl",run_type="incremental",stage="gold",outcome="written"}'
         values: '60+0x20'
       - series: 'bioetl_pipeline_runs_total{pipeline="chembl",run_type="incremental",status="success"}'
-        values: '1+0x20'
+        values: '0+0x10 1+0x10'
     promql_expr_test:
       - expr: bioetl_processed_records_silver_delta_current{pipeline="chembl",run_type="incremental"}
         eval_time: 19m
@@ -725,7 +725,7 @@ tests:
       - series: 'bioetl_pipeline_stage_expected{pipeline="chembl_assay",stage="gold"}'
         values: '1+0x20'
       - series: 'bioetl_pipeline_runs_total{pipeline="chembl_assay",run_type="backfill",status="success"}'
-        values: '1+0x20'
+        values: '0+0x10 1+0x10'
       - series: 'bioetl_stage_backlog_records{pipeline="chembl_assay",run_type="backfill",stage="output"}'
         values: '0+0x20'
       - series: 'bioetl_stage_records_total{pipeline="chembl_assay",run_type="backfill",stage="gold",outcome="excluded_by_contract"}'
@@ -746,6 +746,11 @@ tests:
         exp_samples:
           - labels: '{__name__="bioetl_runtime_current_status",pipeline="chembl_assay",run_type="backfill"}'
             value: 0
+      - expr: bioetl_runtime_current_status_trusted{pipeline="workflow_chembl_assay",run_type="backfill"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_runtime_current_status_trusted",pipeline="workflow_chembl_assay",run_type="backfill"}'
+            value: 0
       - expr: bioetl_l1_gold_lifecycle_status{pipeline="chembl_assay",run_type="backfill",lifecycle_state="terminal_contract_excluded"}
         eval_time: 19m
         exp_samples:
@@ -754,6 +759,25 @@ tests:
       - expr: bioetl_l1_gold_lifecycle_status{pipeline="chembl_assay",run_type="backfill",lifecycle_state="pending_no_recent_gold"}
         eval_time: 19m
         exp_samples: []
+
+  - name: runtime-trusted-status-fails-closed-on-telemetry-gap
+    interval: 1m
+    input_series:
+      - series: 'bioetl_pipeline_runs_total{pipeline="chembl_assay",run_type="backfill",status="success"}'
+        values: '0+0x10 1+0x10'
+      - series: 'up{job="bioetl"}'
+        values: '0+0x20'
+    promql_expr_test:
+      - expr: bioetl_runtime_trust_gap_status_10m
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_runtime_trust_gap_status_10m"}'
+            value: 2
+      - expr: bioetl_runtime_current_status_trusted{pipeline="chembl_assay",run_type="backfill"}
+        eval_time: 19m
+        exp_samples:
+          - labels: '{__name__="bioetl_runtime_current_status_trusted",pipeline="chembl_assay",run_type="backfill"}'
+            value: 2
 
   - name: workflow-pipeline-verdict-fails-closed-after-intermediate-failure
     interval: 1m

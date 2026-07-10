@@ -63,6 +63,7 @@ Commands:
     summarize-junit      Aggregate existing JUnit XML into test-health JSON
     test-health          Summarize recent test-health run JSON artifacts
     check-dashboard-visual-semantics Validate Grafana status-panel visual semantic invariants
+    check-prometheus-rules Validate Prometheus rules with deterministic promtool preflight
     report-dashboard-inventory Generate/check dashboard inventory parity plus
         provisioning/deployed drift and health summary
     report-dashboard-panel-audit-matrix Generate/check dashboard panel audit matrix
@@ -145,6 +146,7 @@ COMMAND_MODULES: dict[str, str] = {
     "analyze-duplicate-functions": "scripts.engineering.qa.analyze_duplicate_functions",
     "calibrate-hotspots": "scripts.engineering.qa.calibrate_hotspot_budgets",
     "check-dashboard-visual-semantics": "scripts.engineering.qa.check_dashboard_visual_semantics",
+    "check-prometheus-rules": "scripts.engineering.qa.check_prometheus_rules",
     "report-dashboard-inventory": "scripts.engineering.qa.report_dashboard_inventory",
     "report-dashboard-query-duplicates": "scripts.engineering.qa.report_dashboard_query_duplicates",
     "report-dashboard-panel-audit-matrix": (

@@ -29,7 +29,6 @@ mint.json
 package-lock.json
 package.json
 pyproject.toml
-sonar-project.properties
 uv.lock
 
 # Canonical runtime / governance entrypoints retained at root.

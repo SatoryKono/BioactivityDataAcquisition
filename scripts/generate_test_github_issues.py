@@ -14,7 +14,6 @@ import os
 import subprocess
 import sys
 from datetime import datetime
-from typing import Dict, List, Optional
 
 import requests
 from dotenv import load_dotenv
@@ -147,15 +146,14 @@ def analyze_coverage_issues() -> dict[str, str]:
     issue_body = """# Missing Test Coverage Analysis
 
 ## Problem
-Significant portions of the codebase are excluded from SonarQube analysis,
-suggesting potential test coverage gaps.
+Coverage reports and test inventories indicate potential gaps in behavioral
+coverage.
 
 ## Identified Issues
 
-### 1. Massive Sonar Exclusions
-- **File**: `sonar-project.properties`
-- **Issue**: 168 files excluded from SonarQube analysis
-- **Impact**: No quality metrics for majority of codebase
+### 1. Coverage Inventory Gaps
+- **Issue**: Some modules have weak or missing behavioral assertions
+- **Impact**: Quality metrics may not describe the real risk surface
 - **Affected areas**:
   - Application layer (composite, core, pipelines)
   - Domain layer (schemas, services, exceptions)
@@ -164,7 +162,7 @@ suggesting potential test coverage gaps.
 
 ### 2. Coverage Thresholds Not Met
 - **Requirement**: 85% overall, 90% domain coverage
-- **Issue**: With 168 files excluded, coverage metrics are unreliable
+- **Issue**: Coverage gaps make quality gates less actionable
 - **Impact**: Cannot verify quality gates
 
 ### 3. Test Debt Accumulation
@@ -315,7 +313,6 @@ def generate_github_issues_for_all_problems():
 ## Related
 - Test infrastructure: `pytest.ini`, `conftest.py`
 - Test runner: `scripts/optimized_test_runner.py`
-- Sonar configuration: `sonar-project.properties`
 """
 
             if GITHUB_TOKEN:

@@ -24,6 +24,7 @@ from bioetl.domain.exceptions import InvalidStateError
 
 if TYPE_CHECKING:
     from bioetl.domain.aggregates.events import DomainEvent
+    from bioetl.domain.medallion import Layer
     from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID
 
 __all__: list[str] = []
@@ -123,7 +124,7 @@ def mark_committed(
     run_id: RunID,
     batch_id: BatchID,
     valid_count: int,
-    layer: str,
+    layer: Layer,
     committed_at: datetime,
 ) -> BatchStatus:
     """Validate and perform WRITING -> COMMITTED transition.
@@ -134,7 +135,7 @@ def mark_committed(
         run_id: Pipeline run identifier.
         batch_id: Batch identifier.
         valid_count: Number of valid records successfully written.
-        layer: Medallion layer name (e.g., 'bronze', 'silver', 'gold').
+        layer: Medallion layer that successfully received the batch.
         committed_at: Explicit timestamp when the batch write completed.
 
     Returns:
@@ -163,7 +164,7 @@ def mark_failed(
     events: list[DomainEvent],
     run_id: RunID,
     batch_id: BatchID,
-    layer: str,
+    layer: Layer,
     error: str,
     error_type: str | None = None,
     *,

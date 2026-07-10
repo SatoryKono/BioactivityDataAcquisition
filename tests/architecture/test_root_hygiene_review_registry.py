@@ -418,12 +418,16 @@ def test_root_review_contract_entrypoints_have_exact_filename_owners() -> None:
         "commitlint.config.mjs",
         "mint.json",
         "pr_compliance_checklist.yaml",
-        "sonar-project.properties",
     }
     for path in present_contract_paths:
         candidate = by_path[path]
         assert candidate["current_live_state"] == "present_approved_root_surface"
         assert candidate["canonical_path"] == path
+    assert (
+        by_path["sonar-project.properties"]["current_live_state"]
+        == "absent_from_root_baseline"
+    )
+    assert by_path["sonar-project.properties"]["canonical_path"] is None
 
 
 def test_no_tracked_repository_root_scripts_remain() -> None:

@@ -4,34 +4,7 @@ status: active
 docs_drafts:
   path_glob: docs/D-*.md
   policy: repo_only_sync_notes
-  allowed_files:
-    - path: docs/D-01 Governance & Style Guide.md
-      disposition: retained_repo_only_sync_note
-      canonical_successor: docs/00-project/governance/01-documentation-governance-style-guide.md
-    - path: docs/D-02 Provider Integration Handbook.md
-      disposition: retained_repo_only_sync_note
-      canonical_successor: docs/03-guides/add-new-source.md
-    - path: docs/D-03 Data Contracts & Schema Specification.md
-      disposition: retained_repo_only_sync_note
-      canonical_successor: docs/04-reference/contracts/README.md
-    - path: docs/D-04 Data Model, IDs & Lineage Specification.md
-      disposition: retained_repo_only_sync_note
-      canonical_successor: docs/03-guides/hash-policy.md
-    - path: docs/D-05 Pipelines & Config Specification.md
-      disposition: retained_repo_only_sync_note
-      canonical_successor: docs/03-guides/pipeline-configuration.md
-    - path: docs/D-06 Data Quality и Quarantine Handbook.md
-      disposition: retained_repo_only_sync_note
-      canonical_successor: docs/03-guides/dq-configuration.md
-    - path: docs/D-07 Observability Specification.md
-      disposition: retained_repo_only_sync_note
-      canonical_successor: docs/02-architecture/observability-layers.md
-    - path: docs/D-08 Security & Compliance dossier.md
-      disposition: retained_repo_only_sync_note
-      canonical_successor: docs/03-guides/development/security/compliance-audit-guidelines.md
-    - path: docs/D-09 Requirements Traceability.md
-      disposition: retained_repo_only_sync_note
-      canonical_successor: docs/01-requirements/REQUIREMENTS.md
+  allowed_files: []
 
 plans:
   path_prefix: docs/plans/

@@ -28,8 +28,8 @@ exact_duplicates:
         - "bioetl-dq-v2.json :: Status"
     - id: runtime-current-status-shared-card
       owner: "@bioetl-observability"
-      linked_issue: "#4876"
-      rationale: Runtime status expression is intentionally reused for overview and runtime status cards.
+      linked_issue: "#6213"
+      rationale: Runtime status cards intentionally reuse only the trust-gated recording-rule selector.
       panel_refs:
         - "bioetl-runtime.json :: Runtime Status"
         - "bioetl-runtime.json :: Status"
