@@ -40,7 +40,7 @@ replay, traceability, fixture-governance и control-plane guarantees.
 зафиксированы в `configs/quality/root_hygiene_review_registry.yaml`.
 
 Предыдущий план
-`docs/plans/repository-file-structure-cleanup-plan-2026-04-20.md` остается
+`docs/99-archive/plans/repository-file-structure-cleanup-plan-2026-04-20.md` остается
 историческим baseline и context document. Его live-state утверждение от
 2026-04-21 про `root cleanliness passes` нельзя использовать как текущее
 evidence после аудита 2026-04-28.
@@ -315,7 +315,7 @@ surfaces или вывести их из tracked root.
 
 Исполнять через существующий план:
 
-- `docs/plans/claude-to-ai-runtime-migration-plan-2026-04-25.md`
+- `docs/99-archive/plans/claude-to-ai-runtime-migration-plan-2026-04-25.md`
 
 Краткий порядок:
 

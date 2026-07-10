@@ -26,7 +26,7 @@ Without this archive step:
 
 ## Evidence
 
-- `docs/plans/tech-debt-eradication-blueprint-v4-2026-05-31.md`
+- `docs/99-archive/plans/tech-debt-eradication-blueprint-v4-2026-05-31.md`
 - `.github/ISSUES/NONCHEMBL-001-*.md`
 - `.github/ISSUES/NONCHEMBL-009-*.md`
 - `.github/ISSUES/NONCHEMBL-013-*.md`
@@ -47,7 +47,7 @@ Without this archive step:
 
 ## Suggested File Targets
 
-- `docs/plans/tech-debt-eradication-blueprint-v4-2026-05-31.md`
+- `docs/99-archive/plans/tech-debt-eradication-blueprint-v4-2026-05-31.md`
 - `.github/ISSUES/TECH-DEBT-ZERO-BURNDOWN-EPIC.md`
 - any `docs/plans/*` or local governance reports that still describe Stream D/E
   as active execution streams

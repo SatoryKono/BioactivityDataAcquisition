@@ -26,7 +26,7 @@ Completed:
 - canonical router mapping lives in
   `scripts/engineering/repo/__main__.py`
 - current wrapper status is recorded in
-  `docs/plans/scripts-cli-wrapper-caller-matrix-2026-04-28.md`
+  `docs/99-archive/plans/scripts-cli-wrapper-caller-matrix-2026-04-28.md`
 - branch-cleanup router contract is covered by
   `tests/architecture/test_repo_cleanup_branch_router.py`
 

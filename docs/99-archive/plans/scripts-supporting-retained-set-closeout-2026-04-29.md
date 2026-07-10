@@ -13,7 +13,7 @@ intentional retained set with bounded reasons per cluster.
 
 The subtype of each retained script is governed by the `decision` field in
 `configs/quality/scripts_lifecycle_registry.json`. See
-`docs/plans/scripts-supporting-taxonomy-2026-04-29.md` for the retained
+`docs/99-archive/plans/scripts-supporting-taxonomy-2026-04-29.md` for the retained
 subtype taxonomy.
 
 ## Retained Buckets

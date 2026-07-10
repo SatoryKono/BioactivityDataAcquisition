@@ -76,7 +76,7 @@ SKIP_FILE_EXTENSIONS: Final[set[str]] = {
 }
 MAX_SEARCH_FILE_BYTES: Final[int] = 512 * 1024
 DEFAULT_OUTPUT: Final[str] = (
-    "docs/plans/scripts-cli-wrapper-caller-matrix-2026-04-28.md"
+    "docs/99-archive/plans/scripts-cli-wrapper-caller-matrix-2026-04-28.md"
 )
 SELF_GENERATOR_REL: Final[str] = (
     "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py"

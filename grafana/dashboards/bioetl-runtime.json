@@ -1132,6 +1132,15 @@
           },
           "mappings": [
             {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "0",
+                  "color": "gray"
+                }
+              }
+            },
+            {
               "type": "special",
               "options": {
                 "match": "null",
@@ -1168,7 +1177,7 @@
       },
       "id": 16,
       "options": {
-        "colorMode": "none",
+        "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
@@ -1462,7 +1471,7 @@
       "id": 9991,
       "type": "text",
       "title": "First Action",
-      "description": "First operator action for Runtime triage. Uses current snapshot panels before selected-range evidence. UNKNOWN means missing status telemetry or scrape/rule gap until proven otherwise.",
+      "description": "First operator action for Runtime triage. Uses current snapshot panels and the Runtime Telemetry Gap trust gate before selected-range evidence. WARN can come from runtime blockers or scrape/rule health; inspect the telemetry gap first when it is non-zero.",
       "gridPos": {
         "h": 10,
         "w": 8,
@@ -1470,7 +1479,7 @@
         "y": 7
       },
       "options": {
-        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\">Read <em>Runtime Status</em>, then inspect the top blocker reason.<br>If status is CRIT, open <em>Inspect Active Runtime Blocker Detail</em>,<br>if WARN, inspect terminal-run/stage lag evidence,<br>if UNKNOWN, verify <em>Runtime Telemetry Gap</em> before treating zero as OK.</div>",
+        "content": "<div style=\"padding:0.45rem 0.7rem;line-height:1.55\">Read <em>Runtime Status</em> and <em>Runtime Telemetry Gap</em> first.<br>If telemetry gap is WARN/CRIT, fix scrape/rule health before trusting zero cards.<br>If status is CRIT, open <em>Inspect Active Runtime Blocker Detail</em>.<br>If status remains WARN after telemetry is clean, inspect terminal-run and stage-lag evidence.</div>",
         "mode": "html"
       },
       "links": [
@@ -1759,7 +1768,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Shows each active runtime blocker recording rule with its current value for the selected pipeline/run_type where the source metric exposes run_type. Expected Empty classification: an empty table is valid only when Runtime Status is OK and Runtime Telemetry Gap is not UNKNOWN; otherwise it is a telemetry/selector gap that must be investigated.",
+      "description": "Shows each active runtime blocker recording rule with its current value for the selected pipeline/run_type where the source metric exposes run_type. Expected Empty classification: an empty table is valid only when Runtime Status is OK and Runtime Telemetry Gap is clean; otherwise it is a telemetry/selector gap that must be investigated.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1787,7 +1796,7 @@
             ]
           },
           "unit": "short",
-          "noValue": "No active blockers when Runtime Status is OK"
+          "noValue": "No blocker rows. Trust this only when Runtime Status is OK and Telemetry Gap is clean."
         },
         "overrides": []
       },

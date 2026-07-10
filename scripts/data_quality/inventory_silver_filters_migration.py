@@ -289,7 +289,7 @@ SURFACE_PATTERNS: tuple[SurfacePattern, ...] = (
             "docs/03-guides/troubleshooting.md",
             "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
             "docs/03-guides/dashboards/dashboard-v2-usage.md",
-            "docs/plans/silver-filter-rejects-observability-plan.md",
+            "docs/99-archive/plans/silver-filter-rejects-observability-plan.md",
         ),
         role="Temporary legacy Silver reject alias",
         migration_relevance="Alias remains a compatibility surface, not target semantic rejection taxonomy.",
@@ -327,7 +327,7 @@ SURFACE_PATTERNS: tuple[SurfacePattern, ...] = (
             "grafana/prometheus-rules",
             "docs/05-operations",
             "docs/03-guides/running-pipelines.md",
-            "docs/plans/silver-filter-rejects-observability-plan.md",
+            "docs/99-archive/plans/silver-filter-rejects-observability-plan.md",
         ),
         role="Operator summary alias for Silver rejects",
         migration_relevance=(

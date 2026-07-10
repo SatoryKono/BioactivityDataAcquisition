@@ -33,6 +33,7 @@ _ASYNC_TIMEOUT_DIAGNOSTIC_MARGIN_SECONDS = 5.0
 _DISABLED_ENV_VALUES = frozenset({"0", "false", "no", "off"})
 _WINDOWS_XDIST_WORKER_CAP_ENV = "BIOETL_PYTEST_WINDOWS_XDIST_WORKERS"
 _DEFAULT_WINDOWS_XDIST_WORKER_CAP = 1
+_WINDOWS_PYCHARM_VCR_TIMEOUT_SECONDS = 180
 _RUNTIME_BOOTSTRAP_PIPELINE_PATH = (
     Path(__file__).resolve().parents[1]
     / "src"
@@ -255,6 +256,35 @@ def pytest_itemcollected(item: pytest.Item) -> None:
     config = item.config
     config._bioetl_last_failed_collected_count = (
         _last_failed_collected_count(config) + 1
+    )
+
+
+def pytest_collection_modifyitems(
+    config: pytest.Config, items: list[pytest.Item]
+) -> None:
+    """Give VCR tests enough setup budget on Windows/PyCharm cloud checkouts."""
+    del config
+    for item in items:
+        _extend_windows_pycharm_vcr_timeout(item)
+
+
+def _extend_windows_pycharm_vcr_timeout(item: pytest.Item) -> None:
+    """Apply a Windows/PyCharm-only timeout marker for VCR setup imports."""
+    if not _should_extend_windows_pycharm_vcr_timeout(item):
+        return
+    item.add_marker(pytest.mark.timeout(_WINDOWS_PYCHARM_VCR_TIMEOUT_SECONDS))
+
+
+def _should_extend_windows_pycharm_vcr_timeout(item: pytest.Item) -> bool:
+    if not sys.platform.startswith("win") or not _is_pycharm_pytest_runner():
+        return False
+    if item.get_closest_marker("vcr") is None:
+        return False
+    if item.get_closest_marker("timeout") is not None:
+        return False
+    current_timeout = _timeout_seconds_for_item(item)
+    return current_timeout is not None and (
+        current_timeout < _WINDOWS_PYCHARM_VCR_TIMEOUT_SECONDS
     )
 
 

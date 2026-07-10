@@ -12,9 +12,9 @@
     "conflict": 0
   },
   "surface_totals": {
-    "surfaces_total": 108,
+    "surfaces_total": 109,
     "by_category": {
-      "consumer_alias": 30,
+      "consumer_alias": 31,
       "observability": 11,
       "runtime_gate": 11,
       "silver_config": 10,
@@ -22,7 +22,7 @@
     },
     "by_symbol": {
       "--silver-filter-only": 7,
-      "FILTERED_OUT_SILVER": 16,
+      "FILTERED_OUT_SILVER": 17,
       "FORBIDDEN_SILVER_SEMANTIC_FILTER_KEYS": 1,
       "SilverFilterConfig": 1,
       "SilverFiltersConfig": 1,
@@ -1566,6 +1566,17 @@
       "path": "docs/05-operations/runbooks/quarantine-management.md",
       "occurrence_count": 12,
       "first_line": 39,
+      "role": "Temporary legacy Silver reject alias",
+      "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
+      "notes": ""
+    },
+    {
+      "category": "consumer_alias",
+      "surface": "legacy_silver_error_code",
+      "symbol": "FILTERED_OUT_SILVER",
+      "path": "docs/99-archive/plans/silver-filter-rejects-observability-plan.md",
+      "occurrence_count": 5,
+      "first_line": 44,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
