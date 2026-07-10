@@ -30,7 +30,8 @@ ______________________________________________________________________
 ## Source Of Truth And Publication Boundary
 
 - Canonical architecture/class/foundation sources live in the `.mmd` trees under this directory.
-- `png/`, `svg/`, `bundles/`, `descriptions/` and supplemental `INDEX.md` files are published or derived artifacts.
+- `svg/` and `png/` files under the current diagram tree are tracked render baselines used for drift review.
+- `bundles/`, `descriptions/` and supplemental `INDEX.md` files are published or derived artifacts.
 - `views/*.mermaid` are focused review views and should be treated as presentation-oriented slices, not as replacements for the canonical `.mmd` families.
 
 When diagram drift is detected, the first remediation target should usually be the publication layer: stale descriptions, bundles, indexes, and rendered artifacts. Broad redraw of canonical `.mmd` sources should be the exception, not the default response.
@@ -46,7 +47,7 @@ Use this matrix before moving or deleting diagram files.
 | `architecture/*.mmd`, `class-diagrams/*.mmd`, `foundation/*.mmd` | canonical source | Mermaid source file | Keep unless source drift is proven and reviewed under ADR-040. |
 | `class-diagrams/90-pkg-*.mmd` | generated source | `scripts/diagrams/generate_package_family_class_diagrams.py` | Regenerate from source tree; do not hand-edit for cleanup. |
 | `views/*.mermaid` | decomposed review view | focused view source | Keep as presentation-oriented slices; do not treat as replacement for canonical `.mmd`. |
-| `**/svg/**`, `**/png/**` | rendered artifact | diagram renderer | Regenerate; do not edit or delete without render/check evidence. |
+| `**/svg/**`, `**/png/**` | tracked rendered baseline | diagram renderer | Regenerate and commit with source changes; do not hand-edit without render/check evidence. |
 | `bundles/*.bundle.md` | generated bundle | diagram bundle generator | Regenerate from source families. |
 | `descriptions/**` | derived/published description cards | diagram description governance | Fix missing/stale description cards before deleting source or render files. |
 | `governance/**`, `manifests/**`, `tooling/**` | governance/tooling | ADR-040 + local policies | Keep with docs verification and diagram checks. |
@@ -297,8 +298,8 @@ ______________________________________________________________________
 ### Prerequisites
 
 ```bash
-# Mermaid CLI (required for native/local mode)
-npm install -g @mermaid-js/mermaid-cli
+# Mermaid CLI (required for native/local mode; matches CI)
+npm install -g @mermaid-js/mermaid-cli@10.6.1
 
 # Browser runtime for mmdc (required by Puppeteer in local validation)
 npx puppeteer browsers install chrome-headless-shell
@@ -316,7 +317,9 @@ sudo apt-get install librsvg2-bin
 Tooling note:
 
 - repo scripts now use `scripts/diagrams/mmdc_wrapper.sh` as the default `mmdc` entrypoint;
-- if a native `mmdc` is unavailable, the wrapper can fall back to Docker image `minlag/mermaid-cli`;
+- local and CI Mermaid CLI version must match `MMDC_REQUIRED_VERSION=10.6.1`;
+- version drift fails fast unless `MMDC_ALLOW_VERSION_DRIFT=1` is set for explicit diagnostics/canary runs;
+- if a native `mmdc` is unavailable, the wrapper can fall back to Docker image `minlag/mermaid-cli:10.6.1`;
 - Docker fallback can reuse a preinstalled Puppeteer cache when `PUPPETEER_CACHE_DIR=/path/to/cache` points to a host directory containing `chrome-headless-shell`;
 - to force Docker mode even when a local `mmdc` exists, set `MMDC_FORCE_DOCKER=1`;
 - to pin an explicit binary, set `MMDC_BIN=/path/to/mmdc`.
@@ -397,8 +400,33 @@ bash docs/02-architecture/diagrams/tooling/render.sh --puppeteer /tmp/puppeteer-
 bash docs/02-architecture/diagrams/tooling/render.sh --text-layer fallback-only
 
 # Syntax validation (shows explicit hint if Chrome runtime is missing)
-bash scripts/diagrams/validate_mermaid_syntax.sh --puppeteer /tmp/puppeteer-config.json
+bash scripts/diagrams/validate_mermaid_syntax.sh --include-embedded --puppeteer /tmp/puppeteer-config.json
 ```
+
+### Windows / PowerShell
+
+Run the renderer from Git Bash or WSL because the canonical renderer is a Bash
+script. PowerShell can still launch the same commands from the repo root:
+
+```powershell
+# Verify the pinned Mermaid CLI version used by the wrapper.
+mmdc --version
+
+# Syntax validation, including fenced Mermaid blocks in active docs.
+bash scripts/diagrams/validate_mermaid_syntax.sh --include-embedded --puppeteer /tmp/puppeteer-config.json
+
+# Render all diagrams or only SVG baselines.
+bash docs/02-architecture/diagrams/tooling/render.sh
+bash docs/02-architecture/diagrams/tooling/render.sh --svg-only
+
+# Run Python checks with the Windows virtualenv when using native Windows Python.
+.\.venv-win\Scripts\python.exe -m scripts.diagrams check-svg-text `
+  --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
+```
+
+If local `mmdc` is not installed, the wrapper can use Docker with
+`MMDC_FORCE_DOCKER=1`. Do not set `MMDC_ALLOW_VERSION_DRIFT=1` for normal local
+renders; reserve it for explicit canary diagnostics.
 
 ### Output layout
 
@@ -439,9 +467,18 @@ docs/02-architecture/diagrams/
 ### CI/CD
 
 Diagrams are validated and rendered automatically in GitHub Actions
-(`.github/workflows/docs.yml`). Rendered SVG/PNG are uploaded as build artifacts.
-A drift check fails when `.mmd/.mermaid` sources change without corresponding sibling SVG/PNG outputs.
-The workflow also validates SVG text visibility for the smoke baseline set.
+(`.github/workflows/docs.yml`). Current `svg/` and `png/` files under
+`docs/02-architecture/diagrams/**` are committed baselines, while CI also
+uploads freshly rendered SVG/PNG and diagram JSON/Markdown reports as build
+artifacts. A drift check fails when `.mmd/.mermaid` sources change without
+corresponding sibling SVG outputs. The workflow also validates fenced Mermaid
+blocks in active Markdown docs and validates SVG text visibility for the smoke
+baseline set.
+
+MkDocs is validation-only in the current repository workflow: `mkdocs.yml` is
+checked by docs verification, but there is no GitHub Pages deployment job.
+`docs/site/**` remains local generated publication-helper output and is ignored
+by VCS.
 
 ### Quality Budget
 

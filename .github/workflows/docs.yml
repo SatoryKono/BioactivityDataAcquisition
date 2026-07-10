@@ -158,9 +158,9 @@ jobs:
             docs/02-architecture/generated/module-dependency-map.json || \
             (echo "::error::Dependency map docs were regenerated. Commit updated generated files before merge." && exit 1)
 
-  # Detect whether mermaid/diagram sources changed so the expensive
+  # Detect whether mermaid/diagram sources or docs Markdown changed so the expensive
   # Puppeteer-based validate-mermaid and render-diagrams jobs can be skipped
-  # when only non-diagram docs or mkdocs.yml are modified.
+  # when only non-diagram tooling or mkdocs metadata is modified.
   detect-diagram-changes:
     runs-on: ubuntu-latest
     outputs:
@@ -182,6 +182,7 @@ jobs:
           fi
           changed=$(git diff --name-only "$base"...HEAD -- \
             '*.mmd' '*.mermaid' \
+            'docs/**/*.md' \
             'scripts/diagrams/**' \
             '.github/actions/setup-mermaid/**' \
             'docs/02-architecture/diagrams/theme/**' \
@@ -210,6 +211,7 @@ jobs:
       - name: Validate Mermaid diagrams (.mermaid + .mmd)
         run: |
           bash scripts/diagrams/validate_mermaid_syntax.sh \
+            --include-embedded \
             --puppeteer /tmp/puppeteer-config.json
 
       - name: Diagram policy lint report
@@ -264,8 +266,10 @@ jobs:
 
       - name: Visual smoke regression (selected SVG baselines)
         run: |
+          mkdir -p reports/diagrams
           python3 scripts/diagrams/check_diagram_visual_smoke.py \
-            --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
+            --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt \
+            --json-out reports/diagrams/diagram-visual-smoke.json
 
       - name: Validate link harmonization post-processor
         run: |
@@ -300,6 +304,7 @@ jobs:
           path: |
             reports/diagrams/diagram-quality-report.json
             reports/diagrams/diagram-quality-report.md
+            reports/diagrams/diagram-visual-smoke.json
 
       - name: Publish diagram quality summary
         if: always()

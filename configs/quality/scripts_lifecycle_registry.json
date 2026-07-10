@@ -14,6 +14,18 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the shared root-governance helper consumed by structure auditors and cleanup tooling; fold it into a broader canonical governance helper surface only if root policy loaders are consolidated further."
     },
+    "scripts/engineering/repo/_branch_cleanup_policy.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the shared branch-cleanup classification policy helper consumed by the governed branch cleanup command and unit tests; keep it side-effect free and fold it into branch_cleanup.py only if the cleanup workflow is retired."
+    },
+    "scripts/engineering/repo/branch_cleanup.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the governed manual branch-cleanup implementation behind scripts.engineering.repo commands while it remains dry-run by default; do not expand destructive apply behavior without fresh owner review."
+    },
     "scripts/engineering/common/cli_dispatch.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",

@@ -76,7 +76,21 @@ def test_mmdc_docker_fallback_is_version_pinned() -> None:
     )
 
     assert "minlag/mermaid-cli:10.6.1" in wrapper
+    assert 'MMDC_REQUIRED_VERSION="${MMDC_REQUIRED_VERSION:-10.6.1}"' in wrapper
+    assert "MMDC_ALLOW_VERSION_DRIFT" in wrapper
     assert "MMDC_DOCKER_IMAGE:-minlag/mermaid-cli}" not in wrapper
+
+
+def test_diagram_renderer_uses_atomic_svg_and_png_writes() -> None:
+    renderer = (
+        REPO_ROOT / "docs" / "02-architecture" / "diagrams" / "tooling" / "render.sh"
+    ).read_text(encoding="utf-8")
+
+    assert "replace_atomically" in renderer
+    assert ".${base}.svg.tmp.XXXXXX" in renderer
+    assert ".${base}.png.tmp.XXXXXX" in renderer
+    assert 'replace_atomically "$svg_tmp" "$svg_out"' in renderer
+    assert 'replace_atomically "$png_tmp" "$png_out"' in renderer
 
 
 def test_apply_elk_default_dir_is_canonical_architecture_tree() -> None:

@@ -102,6 +102,29 @@ routes:
     notes: Deterministic per-file documentation cleanup matrix for lifecycle,
       generated-artifact, duplicate, inbound-link, and recommended-action review.
 
+  - id: docs-reports-generated-curated-misc
+    generator: multiple governed docs and quality generators
+    output_kind: curated_generated_docs
+    commit_policy: tracked_or_local_curated_generated_doc
+    outputs:
+      - docs/reports/generated/
+    notes: Fallback ownership route for generated documentation reports that live
+      under the governed docs/reports generated namespace. More specific routes
+      above this entry remain authoritative for known generators.
+
+  - id: ai-runtime-governance-mirrors
+    generator: scripts/ai/sync_ai_governance.py and scripts/docs/checks/check_drift.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_mirror_surface
+    outputs:
+      - docs/00-project/ai/agents/orchestration/
+      - docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md
+      - docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md
+      - docs/00-project/ai/agents/policy/SPECIALIST_PROFILE_TEMPLATE.md
+    notes: AI runtime governance mirrors and deprecated alias pages are generated
+      or drift-checked against runtime source surfaces; docs mirrors do not own
+      runtime behavior.
+
   - id: ai-skill-reference-mirror
     generator: scripts/ai/codex/check_skills_mirror.sh
     output_kind: curated_generated_docs
@@ -111,6 +134,17 @@ routes:
     notes: Skill reference bundle copies are intentional mirrors used by
       skills-consistency checks; exact duplicates with local skill references
       are expected and must be refreshed from runtime skill sources.
+
+  - id: ai-skill-license-mirrors
+    generator: scripts/ai/codex/check_skills_mirror.sh
+    output_kind: curated_generated_docs
+    commit_policy: tracked_mirror_surface
+    outputs:
+      - docs/00-project/ai/skills/global/.system/
+      - docs/00-project/ai/skills/global/*/LICENSE
+    notes: Third-party skill license mirrors are retained for attribution and
+      should be refreshed through the skill mirror workflow, not edited as
+      canonical BioETL docs.
 
   - id: matrix-dictionaries-curated-docs
     generator: scripts/docs/matrix/build_matrix_dicts.py
@@ -127,6 +161,61 @@ routes:
     outputs:
       - src/bioetl/domain/schemas/generated/registry.py
     notes: Runtime generated source is restricted to explicit generated packages.
+
+  - id: compatibility-facade-snapshot-generated-doc
+    generator: scripts/engineering/qa/generate_compatibility_facade_snapshot.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/02-architecture/07-compatibility-facade-snapshot.md
+    notes: Compatibility facade snapshot is generated from the curated
+      compatibility facade inventory and must stay route-owned.
+
+  - id: reproducibility-support-matrix-generated-doc
+    generator: scripts/engineering/qa/generate_reproducibility_support_matrix.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/02-architecture/policies/reproducibility-support-matrix.md
+    notes: Reproducibility support matrix is a generated architecture policy
+      support surface backed by deterministic QA tooling.
+
+  - id: dashboard-panel-title-inventory-generated-doc
+    generator: scripts/engineering/qa/report_panel_title_inventory.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/03-guides/dashboards/panel-title-inventory.md
+    notes: Dashboard panel title inventory mirrors shipped Grafana dashboard JSON
+      for documentation and CI drift checks.
+
+  - id: api-reference-generated-docs
+    generator: docs API reference generation workflow
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/04-reference/api/
+    notes: Published API reference pages are generated from source-level layer
+      inventories and remain tracked curated docs for documentation builds.
+
+  - id: dq-contracts-generated-doc
+    generator: scripts/check_dq_dsl_parity.py
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/04-reference/contracts/dq-contracts.md
+      - docs/03-guides/silver-schema-testing-guide.md
+    notes: DQ contracts and Silver schema guide are generated or parity-checked
+      against the live DQ DSL and schema-governance workflows.
+
+  - id: engineering-closeout-curated-docs
+    generator: manual closeout plus architecture QA verification
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/05-engineering/chembl-protein-classification-migration-closeout.md
+    notes: Engineering closeout pages are retained as curated generated evidence
+      and should not be treated as canonical process policy.
 
   - id: unified-schema-quality-report
     generator: scripts/schema/generate_unified_schema_map.py

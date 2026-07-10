@@ -16,6 +16,15 @@ BioETL ETL runtime dependencies.
 - Rotate shared service-account tokens every 90 days, and rotate immediately
   after exposure, workstation turnover, or owner transfer.
 
+## Historical Exposure Note
+
+Current `HEAD` must not track real `.env` / `.env.local` files; only tracked
+templates such as `.env.example` may be present. Repository history contains
+historical `.env` / `.env.local` path entries, so any token that was ever
+committed there must be treated as exposed and rotated before use. Do not claim
+the repository history is secret-free unless a dedicated history rewrite or
+secret scan has been completed and reviewed.
+
 ## Environment Loading
 
 The MCP wrappers load environment values through:

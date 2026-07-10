@@ -3,7 +3,8 @@
 Operations:
 - normalize tracked Codex agent runtime files (``.codex/agents/*.md``)
 - inject canonical-source blocks into docs agent mirrors
-- add normative index links to Codex/docs skill mirrors
+- add source-of-truth links to Codex/docs skill mirrors
+- add non-canonical runtime headers to docs skill mirrors
 """
 
 from __future__ import annotations
@@ -31,6 +32,7 @@ NORMATIVE_SKILL_LINE_CODEX = (
     "- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`\n"
 )
 NORMATIVE_SKILL_LINE_DOCS = "- Normative index: `../../../../NORMATIVE_SOURCES.md`\n"
+SKILL_FILE_NAME = "SKILL.md"
 
 MIRROR_HEADER_PATTERN = re.compile(
     r"^> Mirror status:.*?^_{10,}\s*\n",
@@ -40,6 +42,10 @@ CANONICAL_SOURCES_PATTERN = re.compile(
     r"^## Canonical Sources\s*\n(?:.*?\n)*?(?=^(?:## |name:|# |\Z))",
     re.MULTILINE,
 )
+CODEX_AGENT_ROLE_MEMORY_LINES = {
+    "py-review-orchestrator.md": "- Role memory: `docs/00-project/ai/memory/memory-py-review-orchestrator.md`",
+    "py-test-swarm.md": "- Role memory: `docs/00-project/ai/memory/memory-py-test-swarm.md`",
+}
 
 
 def _repo_root() -> Path:
@@ -68,17 +74,53 @@ def _ensure_canonical_sources(text: str) -> str:
     return CANONICAL_SOURCES_BLOCK + "\n" + cleaned.lstrip("\n")
 
 
-def _insert_after_source_header(body: str, line: str) -> str:
+def _ensure_agent_role_memory(text: str, *, filename: str) -> str:
+    line = CODEX_AGENT_ROLE_MEMORY_LINES.get(filename)
+    if line is None:
+        return text
+    token = line.split("`", 2)[1]
+    if token in text:
+        return text
+
+    anchor = "- `AGENTS.md`\n"
+    if anchor in text:
+        return text.replace(anchor, anchor + line + "\n", 1)
+    return text.rstrip() + "\n\n" + line + "\n"
+
+
+GOVERNANCE_SKILL_LINES_CODEX = (
+    "- Root runtime contract: `../../../AGENTS.md`",
+    "- Project rules: `../../../docs/00-project/RULES.md`",
+    "- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`",
+    "- Accepted ADRs: `../../../docs/02-architecture/decisions`",
+    "- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`",
+)
+
+
+def _ensure_source_of_truth_lines(
+    body: str,
+    *,
+    lines: tuple[str, ...],
+    insert_before: str = "## Workflow",
+) -> str:
     marker = "## Source Of Truth\n"
-    if "NORMATIVE_SOURCES" in body:
-        return body
-    idx = body.find(marker)
-    if idx == -1:
-        return body
-    insert_at = idx + len(marker)
+    if marker not in body:
+        block = "## Source Of Truth\n\n" + "\n".join(lines) + "\n\n"
+        insert_idx = body.find(insert_before)
+        if insert_idx != -1:
+            return body[:insert_idx] + block + body[insert_idx:]
+        return body.rstrip() + "\n\n" + block
+
+    updated = body
+    insert_at = updated.find(marker) + len(marker)
     if insert_at < len(body) and body[insert_at] == "\n":
         insert_at += 1
-    return body[:insert_at] + line + body[insert_at:]
+    for line in lines:
+        token = line.split("`", 2)[1]
+        if token not in updated:
+            updated = updated[:insert_at] + line + "\n" + updated[insert_at:]
+            insert_at += len(line) + 1
+    return updated
 
 
 def normalize_codex_agents(root: Path, *, check_only: bool) -> list[str]:
@@ -91,6 +133,7 @@ def normalize_codex_agents(root: Path, *, check_only: bool) -> list[str]:
     for path in sorted(agents_dir.glob("*.md")):
         original = path.read_text(encoding="utf-8")
         updated = _ensure_canonical_sources(original)
+        updated = _ensure_agent_role_memory(updated, filename=path.name)
         if updated != original:
             rel = path.relative_to(root)
             if check_only:
@@ -135,11 +178,14 @@ def normalize_codex_skills(root: Path, *, check_only: bool) -> list[str]:
     issues: list[str] = []
     for path in sorted(skills_root.glob("*/SKILL.md")):
         original = path.read_text(encoding="utf-8")
-        updated = _insert_after_source_header(original, NORMATIVE_SKILL_LINE_CODEX)
+        updated = _ensure_source_of_truth_lines(
+            original,
+            lines=GOVERNANCE_SKILL_LINES_CODEX,
+        )
         if updated != original:
             rel = path.relative_to(root)
             if check_only:
-                issues.append(f"{rel}: would add normative index link")
+                issues.append(f"{rel}: would sync source-of-truth links")
             else:
                 _atomic_write(path, updated)
     return issues
@@ -147,7 +193,7 @@ def normalize_codex_skills(root: Path, *, check_only: bool) -> list[str]:
 
 GOVERNANCE_SKILL_LINES_DOCS = (
     "- Normative index: `../../../../NORMATIVE_SOURCES.md`",
-    "- Root runtime contract: `../../../../../AGENTS.md`",
+    "- Root runtime contract: `../../../../../../AGENTS.md`",
     "- Project rules: `../../../../RULES.md`",
     "- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`",
     "- Accepted ADRs in `../../../../../02-architecture/decisions/`",
@@ -156,37 +202,48 @@ GOVERNANCE_SKILL_LINES_DOCS = (
 )
 
 
-def _ensure_docs_skill_governance(body: str) -> str:
-    if "## Source Of Truth" not in body:
-        workflow_idx = body.find("## Workflow")
-        block = "## Source Of Truth\n\n" + "\n".join(GOVERNANCE_SKILL_LINES_DOCS) + "\n\n"
-        if workflow_idx != -1:
-            return body[:workflow_idx] + block + body[workflow_idx:]
-        return body.rstrip() + "\n\n" + block
+def _docs_skill_mirror_header(canonical: Path) -> str:
+    canonical_text = canonical.as_posix()
+    return (
+        "> Mirror status: This file is a published/internal mirror under "
+        "`docs/00-project/ai/**`. It is not a canonical runtime surface.\n"
+        f"> Canonical runtime source: `{canonical_text}`\n"
+        "> Governance: AI_RUNTIME_MIRROR_OWNERSHIP.md\n"
+        "> Edit the runtime source first, then refresh this mirror.\n"
+        "______________________________________________________________________\n\n"
+    )
 
-    updated = body
-    marker = "## Source Of Truth\n"
-    insert_at = updated.find(marker) + len(marker)
-    if insert_at < len(updated) and updated[insert_at] == "\n":
-        insert_at += 1
-    for line in GOVERNANCE_SKILL_LINES_DOCS:
-        token = line.split("`", 2)[1]
-        if token not in updated:
-            updated = updated[:insert_at] + line + "\n" + updated[insert_at:]
-            insert_at += len(line) + 1
-    return updated
+
+def _ensure_docs_skill_mirror_header(body: str, canonical: Path) -> str:
+    return _docs_skill_mirror_header(canonical) + _strip_mirror_header(body).lstrip(
+        "\n"
+    )
+
+
+def _ensure_docs_skill_governance(body: str) -> str:
+    return _ensure_source_of_truth_lines(
+        body,
+        lines=GOVERNANCE_SKILL_LINES_DOCS,
+    )
 
 
 def sync_docs_skill_mirrors(root: Path, *, check_only: bool) -> list[str]:
     docs_root = root / "docs/00-project/ai/skills/local"
     issues: list[str] = []
-    for path in sorted(docs_root.glob("*/SKILL.md")):
+    for path in sorted(docs_root.rglob(SKILL_FILE_NAME)):
+        canonical = (
+            Path(".codex")
+            / "skills"
+            / path.parent.relative_to(docs_root)
+            / SKILL_FILE_NAME
+        )
         original = path.read_text(encoding="utf-8")
-        updated = _ensure_docs_skill_governance(original)
+        updated = _ensure_docs_skill_mirror_header(original, canonical)
+        updated = _ensure_docs_skill_governance(updated)
         if updated != original:
             rel = path.relative_to(root)
             if check_only:
-                issues.append(f"{rel}: would sync governance source-of-truth links")
+                issues.append(f"{rel}: would sync docs skill mirror governance")
             else:
                 _atomic_write(path, updated)
     return issues

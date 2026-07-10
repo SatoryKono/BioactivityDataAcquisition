@@ -1,3 +1,9 @@
+> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
+> Canonical runtime source: `.codex/skills/py-architecture-debt-bot/SKILL.md`
+> Governance: AI_RUNTIME_MIRROR_OWNERSHIP.md
+> Edit the runtime source first, then refresh this mirror.
+______________________________________________________________________
+
 ---
 name: "py-architecture-debt-bot"
 description: "Execute the full BioETL architecture-debt reduction workflow: generate tasks from the exemptions registry, build an execution plan, coordinate targeted debt reduction, and close with verification across py-test-bot, py-config-bot, py-doc-bot, and py-audit-bot."
@@ -10,6 +16,13 @@ description: "Execute the full BioETL architecture-debt reduction workflow: gene
 Run the role-specific workflow as defined in the py-architecture-debt-bot profile.
 
 ## Source Of Truth
+- Normative index: `../../../../NORMATIVE_SOURCES.md`
+- Root runtime contract: `../../../../../../AGENTS.md`
+- Project rules: `../../../../RULES.md`
+- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs in `../../../../../02-architecture/decisions/`
+- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
+- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`

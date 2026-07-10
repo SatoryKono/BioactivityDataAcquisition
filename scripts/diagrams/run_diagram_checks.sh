@@ -423,8 +423,10 @@ run_pr_profile() {
     --manifest "$RENDER_MANIFEST"
 
   log "DIAG-T013/DIAG-T026: Visual smoke drift"
+  mkdir -p "$REPO_ROOT/reports/diagrams"
   python3 "$REPO_ROOT/scripts/diagrams/check_diagram_visual_smoke.py" \
-    --manifest "$RENDER_MANIFEST"
+    --manifest "$RENDER_MANIFEST" \
+    --json-out "$REPO_ROOT/reports/diagrams/diagram-visual-smoke.json"
 
   log "DIAG-T018..T023: Quality gates"
   if [[ "$ENFORCE_BUDGET" -eq 1 ]]; then

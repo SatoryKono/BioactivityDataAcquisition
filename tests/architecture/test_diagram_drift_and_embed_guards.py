@@ -11,6 +11,7 @@ import pytest
 pytestmark = pytest.mark.architecture
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+DOCS_ROOT = REPO_ROOT / "docs"
 DIAGRAM_ROOT = REPO_ROOT / "docs" / "02-architecture" / "diagrams"
 VIEW_COLLECTION = DIAGRAM_ROOT / "views"
 MMD_COLLECTIONS: dict[str, Path] = {
@@ -53,6 +54,19 @@ def _rendered_stems(source_dir: Path, rendered_dir_name: str, suffix: str) -> se
     if not rendered_dir.exists():
         return set()
     return {p.stem for p in rendered_dir.glob(f"*{suffix}") if p.is_file()}
+
+
+def _active_markdown_paths(root: Path) -> list[Path]:
+    paths: list[Path] = []
+    for path in root.rglob("*.md"):
+        if "99-archive" in path.parts:
+            continue
+        try:
+            if path.is_file():
+                paths.append(path)
+        except OSError:
+            continue
+    return sorted(paths)
 
 
 def test_architecture_svg_coverage_for_all_mmd() -> None:
@@ -166,16 +180,14 @@ def test_embedded_mermaid_in_active_docs_valid() -> None:
 
         return blocks
 
-    md_root = DIAGRAM_ROOT
-    md_paths = sorted(
-        p
-        for p in md_root.rglob("*.md")
-        if p.is_file() and "99-archive" not in p.parts
-    )
+    md_paths = _active_markdown_paths(DOCS_ROOT)
 
     issues: list[str] = []
     for md_path in md_paths:
-        lines = md_path.read_text(encoding="utf-8").splitlines()
+        try:
+            lines = md_path.read_text(encoding="utf-8").splitlines()
+        except OSError:
+            continue
         blocks = iter_fenced_mermaid_blocks(lines)
         for block_lines, start_ln in blocks:
             block_text = "\n".join(block_lines).strip()
@@ -202,4 +214,3 @@ def test_embedded_mermaid_in_active_docs_valid() -> None:
     assert not issues, "Invalid/unsupported embedded mermaid blocks:\n" + "\n".join(
         issues
     )
-

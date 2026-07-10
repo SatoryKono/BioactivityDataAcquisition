@@ -51,3 +51,37 @@ def test_load_manifest_rejects_parent_traversal_entries(tmp_path: Path) -> None:
         assert "must not escape the repository root" in str(exc)
     else:
         raise AssertionError("Expected traversal manifest validation to fail")
+
+
+def test_build_report_payload_records_visual_smoke_summary() -> None:
+    module = _load_module()
+
+    payload = module.build_report_payload(
+        manifest=Path("docs/manifest.txt"),
+        rel_paths=["docs/diagram.svg", "docs/other.svg"],
+        changed=["docs/other.svg"],
+        status="failed",
+    )
+
+    assert payload["schema_version"] == "diagram-visual-smoke-report-v1"
+    assert payload["status"] == "failed"
+    assert payload["checked_count"] == 2
+    assert payload["changed_count"] == 1
+    assert payload["changed_paths"] == ["docs/other.svg"]
+    assert payload["errors"] == []
+
+
+def test_write_json_report_creates_parent_directory(tmp_path: Path) -> None:
+    module = _load_module()
+    report_path = tmp_path / "reports" / "diagrams" / "visual-smoke.json"
+
+    module.write_json_report(
+        report_path,
+        {
+            "schema_version": "diagram-visual-smoke-report-v1",
+            "status": "passed",
+        },
+    )
+
+    assert report_path.exists()
+    assert '"status": "passed"' in report_path.read_text(encoding="utf-8")
