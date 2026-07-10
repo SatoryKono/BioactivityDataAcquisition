@@ -35,8 +35,8 @@ Dashboard `2. Runtime` is an L2 incident surface for runtime triage. It uses sha
 
 ### 6. Runtime Status
 - **Type:** Stat
-- **Purpose:** Current runtime status summary.
-- **Data sources:** `bioetl_runtime_current_status`
+- **Purpose:** Trust-gated current runtime status summary.
+- **Data sources:** `bioetl_runtime_current_status` plus the runtime telemetry-gap trust gate (`up{job="bioetl"}` and runtime recording-rule health)
 
 ### 7. Runtime Telemetry Gap
 - **Type:** Stat
@@ -50,22 +50,22 @@ Dashboard `2. Runtime` is an L2 incident surface for runtime triage. It uses sha
 
 ### 9. Monitor Runtime Blockers
 - **Type:** Stat
-- **Purpose:** Count active runtime blockers.
+- **Purpose:** Count active runtime blockers as neutral evidence when the count is `0`; non-zero values remain escalation signals.
 - **Data sources:** `bioetl_runtime_current_blocker_reason`
 
 ### 10. Failed Runs
 - **Type:** Stat
-- **Purpose:** Count failed runs in selected range.
+- **Purpose:** Count failed runs in selected range; rendered as neutral range evidence so `0` does not compete with the telemetry trust gate.
 - **Data sources:** `bioetl_pipeline_runs_total`
 
 ### 11. Runtime Error Rate
 - **Type:** Stat
-- **Purpose:** Show error rate across stages.
+- **Purpose:** Show selected-range error rate across stages; zero/low values are neutral range evidence unless current status and telemetry trust are valid.
 - **Data sources:** `bioetl_errors_total`
 
 ### 12. Worst Stage Lag
 - **Type:** Stat
-- **Purpose:** Identify the stage with worst lag.
+- **Purpose:** Identify the selected-range stage with worst lag; `0s` is neutral range evidence, not an override of telemetry trust.
 - **Data sources:** `bioetl_stage_lag_seconds`
 
 ### 13. First Action

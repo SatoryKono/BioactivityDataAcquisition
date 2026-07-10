@@ -120,7 +120,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Primary compact Runtime verdict for the selected pipeline/run_type scope. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. Workflow is context/evidence only; run_id is local control-plane identity context and does not filter Prometheus. Runtime Status below is an expanded first-screen mirror of this same current-status recording rule, not an independent second verdict.",
+      "description": "Primary compact Runtime verdict for the selected pipeline/run_type scope. Status mapping: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN. This verdict is trust-gated by Runtime Telemetry Gap: a non-zero scrape/rule gap raises Status to WARN/CRIT before selected-range zero counters are trusted. Workflow is context/evidence only; run_id is local control-plane identity context and does not filter Prometheus. Runtime Status below is an expanded first-screen mirror of this same trust-gated current-status recording rule, not an independent second verdict.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -212,7 +212,7 @@
       },
       "targets": [
         {
-          "expr": "max(bioetl_runtime_current_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_runtime_current_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")))",
+          "expr": "max((bioetl_runtime_current_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_runtime_current_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or (clamp_max(max(1 - max_over_time(up{job=\"bioetl\"}[10m])) + on() group_left() ((sum(increase(prometheus_rule_evaluation_failures_total{rule_group=~\".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$\"}[10m])) > bool 0) or ((time() - max(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~\".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$\"})) > bool 60) or absent(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~\".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$\"})), 2) > 0))",
           "refId": "A"
         }
       ]
@@ -808,7 +808,7 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Expanded mirror of the shared Runtime Status verdict, placed beside blocker causes for first-screen triage. Uses the same current-status recording rule as the compact Status panel: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN/no runtime status data; it is not an independent second signal. If UNKNOWN, check Runtime Telemetry Gap and Prometheus scrape/rule health before trusting zero count panels. Labels: pipeline, run_type. Next action: inspect top blocker reason, then active blocker detail or logs/traces.",
+      "description": "Expanded mirror of the shared Runtime Status verdict, placed beside blocker causes for first-screen triage. Uses the same trust-gated current-status recording rule as the compact Status panel: 0=OK, 1=WARN, >=2=CRIT, null=UNKNOWN/no runtime status data. Runtime Telemetry Gap is a trust precondition: a non-zero scrape/rule gap raises this mirror to WARN/CRIT so green OK cannot override signal-integrity loss; it is not an independent second signal. If UNKNOWN or WARN from telemetry gap, check Prometheus scrape/rule health before trusting zero count panels. Labels: pipeline, run_type. Next action: inspect top blocker reason, then active blocker detail or logs/traces.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -907,7 +907,7 @@
       },
       "targets": [
         {
-          "expr": "max(bioetl_runtime_current_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_runtime_current_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\")))",
+          "expr": "max((bioetl_runtime_current_status{pipeline=~\"$pipeline\",run_type=~\"$run_type\"} or ((bioetl_runtime_current_status{run_type=~\"$run_type\"}) and on(pipeline) label_replace(label_replace(vector(1), \"pipeline_raw\", \"$pipeline\", \"\", \"\"), \"pipeline\", \"$1\", \"pipeline_raw\", \"^(?:workflow_)?(.*)$\"))) or (clamp_max(max(1 - max_over_time(up{job=\"bioetl\"}[10m])) + on() group_left() ((sum(increase(prometheus_rule_evaluation_failures_total{rule_group=~\".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$\"}[10m])) > bool 0) or ((time() - max(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~\".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$\"})) > bool 60) or absent(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~\".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$\"})), 2) > 0))",
           "refId": "A"
         }
       ],
@@ -1168,7 +1168,7 @@
       },
       "id": 16,
       "options": {
-        "colorMode": "background",
+        "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
@@ -1249,7 +1249,7 @@
       },
       "id": 205,
       "options": {
-        "colorMode": "background",
+        "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
@@ -1345,7 +1345,7 @@
       },
       "id": 220,
       "options": {
-        "colorMode": "background",
+        "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
@@ -1430,7 +1430,7 @@
       },
       "id": 237,
       "options": {
-        "colorMode": "background",
+        "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",

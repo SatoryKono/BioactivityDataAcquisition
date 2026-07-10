@@ -89,9 +89,14 @@ notes. Если prose ниже расходится с JSON, править ну
 - Workflow selected-range evidence remains on the first screen:
   `Failed Workflow Runs / Range`, `Failed Pipeline Steps / Range`,
   `Failed Transform Steps / Range`, `Skipped Step Events / Range`,
-  `Workflow Run Outcomes / Range`, `First Action`.
+  `Workflow Run Outcomes / Range`, `First Action`. `Workflow Run Outcomes /
+  Range` is a compact neutral `stat` so empty selected-range evidence does not
+  render as large colored `success=0` / `failed=0` bars.
 - `bioetl-runtime` keeps `Runtime Telemetry Gap` as a first-screen datasource
   trust marker and now reserves readable dashboard width for that panel.
+  `Status` / `Runtime Status` are trust-gated by this marker, and compact
+  selected-range zero cards render as neutral evidence instead of green
+  verdicts when scrape/rule health is degraded.
 - `bioetl-control-plane-v1` keeps first-screen trust evidence dashboard-first:
   replay safety, checkpoint freshness, manifest/ledger integrity, telemetry
   missing, and `Next Action: Replay Diagnostics`.
@@ -124,7 +129,12 @@ notes. Если prose ниже расходится с JSON, править ну
    current shipped workflow and overview titles.
 5. Widened `bioetl-runtime` first-screen `Runtime Telemetry Gap` panel so the
    trust marker remains readable above fold.
-6. Added fresh UX evidence and CI guards for active dashboard-doc drift.
+6. Made Runtime status trust-gated by `Runtime Telemetry Gap` and neutralized
+   compact selected-range zero cards so scrape/rule gaps visually outrank `0`
+   evidence.
+7. Converted `Workflow Run Outcomes / Range` from a colored bar gauge to a
+   compact neutral `stat` for selected-range empty evidence.
+8. Added fresh UX evidence and CI guards for active dashboard-doc drift.
 
 ## Validation pointers
 

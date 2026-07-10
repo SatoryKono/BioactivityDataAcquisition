@@ -1305,7 +1305,7 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 | Панель | Query family | Unit | Threshold |
 | --- | --- | --- | --- |
 | `First Action` | text CTA | n/a | n/a |
-| `Monitor Runtime Current Status` | `bioetl_runtime_current_status` | status | `0=OK`, `1=WARN`, `2=CRIT`, `null=UNKNOWN` |
+| `Monitor Runtime Current Status` | `bioetl_runtime_current_status` plus `Runtime Telemetry Gap` trust gate | status | `0=OK`, `1=WARN`, `2=CRIT`, `null=UNKNOWN`; non-zero telemetry gap raises the verdict before zero counters are trusted |
 | `Monitor Runtime Telemetry Gap` | `up{job="bioetl"}` + exact runtime dashboard rule-group evaluation failures/presence/freshness | status | `0=SCRAPING/RULES OK`, `1=SCRAPE/RULE GAP`, `>=2=SCRAPE+RULE GAP`, `null=UNKNOWN` |
 | `Monitor Runtime Blockers` | `bioetl_runtime_current_blocker_reason{pipeline=~"$pipeline",run_type=~"$run_type"}` anchored by `bioetl_runtime_current_status == 0` | count | red `>=1`; `0` only when current status is explicitly OK; `null=UNKNOWN` |
 | `Inspect Top Runtime Blockers` | `topk(3, bioetl_runtime_current_blocker_reason{pipeline=~"$pipeline",run_type=~"$run_type"} > 0)` | table | reason/severity/action labels |
@@ -1315,6 +1315,11 @@ Range and localization evidence (`Monitor Failed Runs`,
 below the current-cause row or inside expanded rows. `Monitor Worst Stage Lag`
 is colocated with the compact evidence row as a selected-range risk marker; it
 is not a current status input.
+`Status` and `Runtime Status` are trust-gated by `Runtime Telemetry Gap`; a
+scrape/rule gap renders the verdict WARN/CRIT instead of allowing green OK to
+visually override signal-integrity loss. Selected-range zero cards in the
+compact evidence row use neutral stat coloring so `0` supports investigation
+without becoming a second green health verdict.
 `Inspect Active Runtime Blocker Detail` is an expanded `Detect` drilldown, not
 first-screen guidance. This evidence supports investigation but does not replace
 the canonical current status recording rule. `Monitor Runtime Error Rate`,

@@ -113,6 +113,38 @@ def test_build_near_duplicate_groups_surfaces_cross_panel_stage_variants() -> No
     assert len(groups[0].distinct_expressions) == 2
 
 
+def test_build_near_duplicate_groups_ignores_standard_prometheus_metrics() -> None:
+    query_uses = (
+        QueryUse(
+            dashboard="bioetl-alerts-slo.json",
+            panel_title="Firing Alerts / Range",
+            target_ref="target[1]",
+            expression='sum(ALERTS{alertstate="firing"}) or vector(0)',
+        ),
+        QueryUse(
+            dashboard="bioetl-alerts-slo.json",
+            panel_title="Critical/Page Alerts",
+            target_ref="target[1]",
+            expression=(
+                'sum(ALERTS{alertstate="firing",severity=~"critical|page|p0|p1"}) '
+                "or vector(0)"
+            ),
+        ),
+        QueryUse(
+            dashboard="bioetl-alerts-slo.json",
+            panel_title="SLO/SLA Alert Pressure",
+            target_ref="target[1]",
+            expression=(
+                'sum(ALERTS{alertstate="firing",alertname=~".*SLO.*|.*SLA.*|.*Budget.*|.*Burn.*"}) '
+                "or vector(0)"
+            ),
+        ),
+    )
+
+    assert build_near_duplicate_groups(query_uses) == ()
+    assert build_near_duplicate_groups(query_uses, include_single_panel=True) == ()
+
+
 def test_render_markdown_includes_exact_and_near_sections() -> None:
     query_uses = (
         QueryUse(
@@ -131,13 +163,13 @@ def test_render_markdown_includes_exact_and_near_sections() -> None:
             dashboard="bioetl-runtime.json",
             panel_title="Track Bronze",
             target_ref="target[1]",
-            expression='sum(metric_b{stage="bronze"})',
+            expression='sum(bioetl_metric_b{stage="bronze"})',
         ),
         QueryUse(
             dashboard="bioetl-runtime.json",
             panel_title="Track Gold",
             target_ref="target[1]",
-            expression='sum(metric_b{stage="gold"})',
+            expression='sum(bioetl_metric_b{stage="gold"})',
         ),
     )
 
@@ -230,13 +262,13 @@ def test_evaluate_governance_flags_near_duplicate_budget(tmp_path: Path) -> None
             dashboard="bioetl-runtime.json",
             panel_title="Track Bronze",
             target_ref="target[1]",
-            expression='sum(metric_b{stage="bronze"})',
+            expression='sum(bioetl_metric_b{stage="bronze"})',
         ),
         QueryUse(
             dashboard="bioetl-runtime.json",
             panel_title="Track Gold",
             target_ref="target[1]",
-            expression='sum(metric_b{stage="gold"})',
+            expression='sum(bioetl_metric_b{stage="gold"})',
         ),
     )
     allowlist = tmp_path / "allowlist.yaml"

@@ -227,13 +227,14 @@ tracing-backed log hygiene живёт в collapsed row
   оператор не должен сначала прокручивать в logs/traces.
   `Monitor Runtime Telemetry Gap` проверяет scrape plus runtime dashboard
   recording-rule evaluation failures, rule-group presence and evaluation
-  freshness; non-zero/UNKNOWN делает zero-count panels inconclusive.
+  freshness; non-zero/UNKNOWN поднимает/блокирует `Status` and `Runtime Status`
+  before zero-count panels are trusted.
   Это intentional datasource trust marker: runtime сохраняет явный first-screen
   health signal только там, где без него zero-count cards можно спутать с
   healthy state.
   `Monitor Worst Stage Lag`, `Monitor Failed Runs` и
-  `Monitor Runtime Error Rate` остаются selected-range evidence; они не
-  определяют current status.
+  `Monitor Runtime Error Rate` остаются selected-range evidence; они рендерятся
+  как neutral zero evidence and do not determine current status.
   `Inspect Active Runtime Blocker Detail` открывается как expanded `Detect`
   drilldown, а не как отдельная first-screen guidance panel.
 

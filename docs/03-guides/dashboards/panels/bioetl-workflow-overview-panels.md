@@ -36,7 +36,7 @@ is the source of truth.
 | 9410 | Failed Entity Pipeline Runs / Range | stat | Prometheus | Failed entity pipeline runs over the selected range. | shared shell + context selectors | Count panel. |
 | 6 | Failed Transform Steps / Range | stat | Prometheus | Failed workflow step events with `step_kind="transform"`. | shared shell | Count panel. |
 | 7 | Skipped Step Events / Range | stat | Prometheus | Skipped workflow step events over the selected range. | shared shell | Count panel. |
-| 4 | Workflow Run Outcomes / Range | bargauge | Prometheus | Workflow run outcomes grouped by `status` across the selected range. | shared shell + `status` | Value bars map workflow status families. |
+| 4 | Workflow Run Outcomes / Range | stat | Prometheus | Compact selected-range total for workflow run outcomes across the active status filter. | shared shell + `status` | `0` maps to neutral `NO OUTCOME EVENTS`; failed/skipped severity stays in the dedicated cards. |
 | 9 | First Action | text | Static | Static triage guidance for the first workflow drilldown action. | shared shell | No thresholds; operator routing only. |
 
 ### Step Diagnostics
@@ -68,7 +68,7 @@ without opening Grafana JSON for every panel.
 - `Skipped Step Events / Range`:
   `round(sum(increase(bioetl_workflow_step_events_total{workflow=~"$workflow",status="skipped"}[$__range]))) or vector(0)`
 - `Workflow Run Outcomes / Range`:
-  `sum by (status) (increase(bioetl_workflow_runs_total{workflow=~"$workflow",status=~"$status"}[$__range]))`
+  `round(sum(increase(bioetl_workflow_runs_total{workflow=~"$workflow",status=~"$status"}[$__range]))) or vector(0)`
 - `Step Outcomes by Kind / Step Status / Range`:
   `sum by (step_kind, status) (increase(bioetl_workflow_step_events_total{workflow=~"$workflow",step_kind=~"$step_kind",status=~"$step_status"}[$__range]))`
 - `Step Duration p95 by Kind / Step Status / Range`:
@@ -78,6 +78,9 @@ without opening Grafana JSON for every panel.
 
 - `Pipeline Status` intentionally merges workflow verdict status with runtime
   current status so workflow-only gaps still surface a pipeline state.
+- `Workflow Run Outcomes / Range` intentionally uses a neutral compact `stat`
+  instead of a status-colored bar gauge so an empty selected range does not
+  render as large `success=0` / `failed=0` bars.
 - `ID` and `Processed Records` are HTTP-backed evidence panels rather than
   Prometheus metric panels.
 - Thresholds and value mappings not spelled out above should be taken from the

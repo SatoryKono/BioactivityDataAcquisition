@@ -247,6 +247,7 @@ def pytest_configure(config):
     _configure_wsl_timeout(config)
     if _selected_paths_need_hypothesis(config):
         _configure_hypothesis_profiles()
+        _disable_hypothesis_local_constant_scan_on_wsl()
 
 
 def pytest_itemcollected(item: pytest.Item) -> None:
@@ -405,6 +406,30 @@ def _configure_wsl_timeout(config: pytest.Config) -> None:
             config.inicfg["timeout"] = "180"
     except (ValueError, TypeError, AttributeError):
         config.inicfg["timeout"] = "180"
+
+
+def _disable_hypothesis_local_constant_scan_on_wsl() -> None:
+    """Avoid Hypothesis local-constant path resolution stalls on WSL mounts."""
+    if not _is_wsl():
+        return
+
+    try:
+        from hypothesis.internal.conjecture import providers as hypothesis_providers
+    except ImportError:  # pragma: no cover
+        return
+
+    if getattr(
+        hypothesis_providers,
+        "_bioetl_wsl_local_constant_scan_disabled",
+        False,
+    ):
+        return
+
+    def _empty_local_constants() -> object:
+        return hypothesis_providers._local_constants
+
+    hypothesis_providers._get_local_constants = _empty_local_constants
+    hypothesis_providers._bioetl_wsl_local_constant_scan_disabled = True
 
 
 def _is_pycharm_pytest_runner() -> bool:

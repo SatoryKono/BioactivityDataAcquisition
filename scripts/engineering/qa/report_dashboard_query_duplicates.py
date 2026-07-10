@@ -219,6 +219,8 @@ def build_near_duplicate_groups(
                 }
             )
         )
+        if not metrics:
+            continue
         groups.append(
             NearDuplicateGroup(
                 signature=signature,

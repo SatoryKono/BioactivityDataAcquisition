@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -10,6 +11,21 @@ import pytest
 from tests.e2e import conftest as e2e_conftest
 
 pytestmark = pytest.mark.unit
+
+
+class _ImmediateExecutorLoop:
+    def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
+        self._loop = loop
+
+    def run_in_executor(
+        self, _executor: object, func: Callable[[], object]
+    ) -> asyncio.Future[object]:
+        future = self._loop.create_future()
+        try:
+            future.set_result(func())
+        except BaseException as exc:  # pragma: no cover - defensive helper
+            future.set_exception(exc)
+        return future
 
 
 def test_read_delta_records_uses_shared_delta_reader(
@@ -49,9 +65,16 @@ def test_read_delta_records_uses_shared_delta_reader(
         lambda: False,
     )
 
-    result = asyncio.run(
-        e2e_conftest._read_delta_records(tmp_path / "silver" / "chembl_activity")
-    )
+    async def _exercise() -> list[dict[str, object]]:
+        loop = asyncio.get_running_loop()
+        monkeypatch.setattr(
+            asyncio, "get_running_loop", lambda: _ImmediateExecutorLoop(loop)
+        )
+        return await e2e_conftest._read_delta_records(
+            tmp_path / "silver" / "chembl_activity"
+        )
+
+    result = asyncio.run(_exercise())
 
     assert result == expected
     assert observed == {
@@ -103,9 +126,16 @@ def test_read_delta_records_prefers_active_parquet_reader_on_windows(
         lambda: True,
     )
 
-    result = asyncio.run(
-        e2e_conftest._read_delta_records(tmp_path / "silver" / "chembl_activity")
-    )
+    async def _exercise() -> list[dict[str, object]]:
+        loop = asyncio.get_running_loop()
+        monkeypatch.setattr(
+            asyncio, "get_running_loop", lambda: _ImmediateExecutorLoop(loop)
+        )
+        return await e2e_conftest._read_delta_records(
+            tmp_path / "silver" / "chembl_activity"
+        )
+
+    result = asyncio.run(_exercise())
 
     assert result == expected
     assert observed == {

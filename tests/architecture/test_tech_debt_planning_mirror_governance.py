@@ -11,7 +11,6 @@ pytestmark = pytest.mark.architecture
 
 MIRROR_PATHS = (
     Path(".github/ISSUES/TECH-DEBT-ZERO-BURNDOWN-EPIC.md"),
-    Path("docs/plans/tech-debt-eradication-blueprint-v4-2026-05-31.md"),
 )
 
 
@@ -33,10 +32,8 @@ def test_local_tech_debt_planning_mirrors_are_explicitly_non_authoritative() -> 
 
 
 def test_local_tech_debt_planning_mirrors_do_not_present_stale_active_status() -> None:
-    blueprint = Path("docs/plans/tech-debt-eradication-blueprint-v4-2026-05-31.md")
     epic = Path(".github/ISSUES/TECH-DEBT-ZERO-BURNDOWN-EPIC.md")
 
-    assert "Status: active" not in blueprint.read_text(encoding="utf-8")
     assert "**Status**: in_progress" not in epic.read_text(encoding="utf-8")
 
 
