@@ -53,6 +53,40 @@ This policy applies to:
    template/strategy change instead of implying that all current runtime
    surfaces are portable.
 
+## Token Configuration
+
+MCP tokens are local runtime inputs, not portable workspace configuration. The
+tracked `.mcp.json` and `scripts/ai/.mcp.json` files must route token-bearing
+servers through `scripts/ai/mcp/*wrapper*` scripts rather than embedding token
+values.
+
+The repo env loaders are:
+
+- `scripts/ops/support/load_repo_env.sh`
+- `scripts/ai/mcp/support/load_repo_env.ps1`
+
+They load local env files when present and normalize common aliases such as:
+
+- `GITHUB_TOKEN` <-> `GITHUB_PERSONAL_ACCESS_TOKEN`
+- `BRAVE_SEARCH_API_KEY` -> `BRAVE_API_KEY`
+- `GRAFANA_TOKEN` / `GRAFANA_API_KEY` -> `GRAFANA_SERVICE_ACCOUNT_TOKEN`
+- `DOCKERHUB_PAT` / `DOCKERHUB_TOKEN` -> `HUB_PAT_TOKEN`
+
+Token-bearing wrappers must also use:
+
+- `scripts/ai/mcp/support/token_validation.sh`
+- `scripts/ai/mcp/support/token_validation.ps1`
+
+Validation must check missing required tokens, minimum length, and known token
+prefixes where a provider has stable prefixes. Optional service tokens should
+warn and continue with local-default or unauthenticated behavior.
+
+CI/CD stance: default CI may run static config checks and stub/local MCP smoke
+tests. CI must not require personal MCP tokens or third-party service tokens
+unless a separate security design approves the secret source, scopes, rotation,
+and fork/PR exposure model. Document any approved CI secret usage in
+[`../mcp-token-configuration.md`](../mcp-token-configuration.md).
+
 ## Required Documentation Language
 
 When AI docs mention these configs, they SHOULD state:

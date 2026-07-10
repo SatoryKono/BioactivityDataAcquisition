@@ -23,7 +23,7 @@ cd E:\g-drive\05_AI\github\BioactivityDataAcquisition2
 Or from repo root:
 
 ```powershell
-.\codex.ps1
+.\scripts\ai\codex\run-codex.ps1
 ```
 
 ### With a Prompt
@@ -62,30 +62,29 @@ bash run-codex.sh exec "fix the failing test"
 
 ### Start Codex (interactive)
 ```powershell
-.\codex.ps1
+.\scripts\ai\codex\run-codex.ps1
 ```
 
 ### Analyze code (auto-exec)
 ```powershell
-.\codex.ps1 exec "analyze the ChemBL parser"
+.\scripts\ai\codex\run-codex.ps1 exec "analyze the ChemBL parser"
 ```
 
 ### Check setup
 ```powershell
-.\codex.ps1 check
+.\scripts\ai\codex\run-codex.ps1 check
 ```
 
 ### Sync MCP before launch
 ```powershell
-.\codex.ps1 mcp-setup
+.\scripts\ai\codex\run-codex.ps1 mcp-setup
 ```
 
 ## 🔧 Scripts Breakdown
 
 All scripts delegate to the **canonical WSL launcher** at `scripts/ai/codex/run-codex.sh`:
 
-- **`codex.ps1`** → root compatibility transport to `scripts/ai/codex/run-codex.ps1`
-- **`run-codex.ps1`** → maintained PowerShell transport to bash launcher under `scripts/ai/codex/`
+- **`scripts/ai/codex/run-codex.ps1`** → maintained PowerShell transport to bash launcher under `scripts/ai/codex/`
 - **`run-codex.sh`** ⭐ → Main WSL/Bash entry point (loads env, checks setup, syncs MCP, launches Codex)
 - **`headless.ps1`** → Launch Codex without MCP sync
 - **`helper/setup-wsl-complete.sh`** → Full WSL setup (Node.js, Codex CLI, Docker check)
@@ -117,13 +116,13 @@ wsl --list --verbose
 ### "Node.js not found"
 Run setup:
 ```powershell
-.\codex.ps1 setup
+.\scripts\ai\codex\run-codex.ps1 setup
 ```
 
 ### "Codex CLI not found"
 Run setup to install:
 ```powershell
-.\codex.ps1 setup
+.\scripts\ai\codex\run-codex.ps1 setup
 ```
 
 ### Setup hangs/freezes
@@ -141,13 +140,13 @@ wsl -e bash -c "bash scripts/ai/codex/helper/setup-wsl-complete.sh 2>&1 | tail -
 Edit `.env.codex` and add your key:
 ```powershell
 $env:OPENAI_API_KEY = "sk-your-key"
-.\codex.ps1
+.\scripts\ai\codex\run-codex.ps1
 ```
 
 Or set in PowerShell before running:
 ```powershell
 $env:OPENAI_API_KEY = "sk-..."
-.\codex.ps1 exec "your prompt"
+.\scripts\ai\codex\run-codex.ps1 exec "your prompt"
 ```
 
 ## 📂 WSL Path Mapping
@@ -164,22 +163,22 @@ All scripts automatically convert paths between Windows and WSL.
 
 1. **Test interactive launch** (confirmations):
    ```powershell
-   .\codex.ps1
+   .\scripts\ai\codex\run-codex.ps1
    ```
 
 2. **Test with a prompt** (auto-exec):
    ```powershell
-   .\codex.ps1 exec "list the MCP servers in this repo"
+   .\scripts\ai\codex\run-codex.ps1 exec "list the MCP servers in this repo"
    ```
 
 3. **Check environment**:
    ```powershell
-   .\codex.ps1 check
+   .\scripts\ai\codex\run-codex.ps1 check
    ```
 
 4. **Sync MCP if needed**:
    ```powershell
-   .\codex.ps1 mcp-setup
+   .\scripts\ai\codex\run-codex.ps1 mcp-setup
    ```
 
 ## 📖 Full Documentation
@@ -191,5 +190,4 @@ All scripts automatically convert paths between Windows and WSL.
 
 ---
 
-**Status**: ✅ Ready to use. Run `.\codex.ps1` from the repository root or
-`.\scripts\ai\codex\run-codex.ps1` directly.
+**Status**: ✅ Ready to use. Run `.\scripts\ai\codex\run-codex.ps1` from the repository root.

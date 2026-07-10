@@ -9,11 +9,13 @@ source scripts/ai/mcp/support/load_repo_env.sh
 load_repo_env_if_present
 
 echo "=== Environment Variables Loaded ==="
-echo "NEO4J_URI=${NEO4J_URI:-NOT SET}"
-echo "NEO4J_USERNAME=${NEO4J_USERNAME:-NOT SET}"
-echo "NEO4J_PASSWORD=${NEO4J_PASSWORD:-NOT SET}"
-echo "NEO4J_DATABASE=${NEO4J_DATABASE:-NOT SET}"
-echo "NEO4J_AUTH=${NEO4J_AUTH:-NOT SET}"
+for name in NEO4J_URI NEO4J_USERNAME NEO4J_PASSWORD NEO4J_DATABASE NEO4J_AUTH; do
+    if [[ -n "${!name:-}" ]]; then
+        echo "${name}=SET"
+    else
+        echo "${name}=NOT SET"
+    fi
+done
 echo ""
 
 if [[ "${NEO4J_URI:-}" == "bolt://host.docker.internal:7687" ]]; then

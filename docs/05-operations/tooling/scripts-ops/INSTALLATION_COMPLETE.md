@@ -127,7 +127,7 @@ bash ./scripts/ai/codex/helper/setup-wsl.sh
 .\scripts\ops\start-wsl-proxy.bat
 
 # Then in WSL, configure proxy
-source .wsl_proxy_env.sh
+source scripts/engineering/dev/bash/.wsl_proxy_env.sh
 
 # Test connectivity
 curl -I https://api.openai.com
@@ -228,7 +228,7 @@ The setup script configured:
 To manually configure proxy in future sessions:
 
 ```bash
-source .wsl_proxy_env.sh
+source scripts/engineering/dev/bash/.wsl_proxy_env.sh
 ```
 
 ______________________________________________________________________

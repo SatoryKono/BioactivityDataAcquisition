@@ -7,6 +7,7 @@ $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "../../..")).Path
 $env:BIOETL_SKIP_ENV_LOCAL = "1"
 Import-BioetlRepoEnv -RepoRoot $repoRoot
 Remove-Item Env:BIOETL_SKIP_ENV_LOCAL -ErrorAction SilentlyContinue
+. (Join-Path $PSScriptRoot "support/token_validation.ps1")
 
 if (-not $env:NEO4J_URI) {
     $env:NEO4J_URI = "bolt://localhost:7687"
@@ -59,6 +60,9 @@ foreach ($managedNodePrefix in $managedNodePrefixes) {
 if (-not $env:NEO4J_URL) {
     $env:NEO4J_URL = $env:NEO4J_URI
 }
+
+Test-McpNeo4jCredentials -Purpose "Neo4j Cypher MCP"
+Exit-McpValidateOnly -ServerName "neo4j-cypher"
 
 & npx -y @daanrongen/neo4j-mcp@1.1.4 @args
 exit $LASTEXITCODE

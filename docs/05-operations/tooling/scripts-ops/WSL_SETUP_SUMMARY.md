@@ -9,7 +9,7 @@ Your project has existing Codex scripts for Windows:
 - `scripts/ops/launchers/codex/start-codex.bat` - Quick start wrapper
 - `scripts/ops/runtime/wsl/wsl_proxy.py` - HTTP proxy bridge for VPN access
 - `scripts/ai/mcp/support/load_repo_env.ps1` - PowerShell environment loader
-- `.wsl_proxy_env.sh` - WSL proxy environment setup
+- `scripts/engineering/dev/bash/.wsl_proxy_env.sh` - WSL proxy environment setup
 - Documentation: `CODEX_SETUP.md`, `CODEX_QUICK_REF.md`
 
 ## What Was Created
@@ -185,7 +185,7 @@ OpenAI API (via proxy if behind VPN)
 | `start-codex.bat`                  | Existing quick launcher            | PowerShell       |
 | `wsl_proxy.py`                     | HTTP proxy bridge                  | Python (Windows) |
 | `start-wsl-proxy.bat`              | Existing proxy launcher            | PowerShell       |
-| `.wsl_proxy_env.sh`                | Proxy environment vars             | WSL bash         |
+| `scripts/engineering/dev/bash/.wsl_proxy_env.sh`                | Proxy environment vars             | WSL bash         |
 | `CODEX_WSL_SETUP.md`               | **NEW** Detailed guide             | Markdown         |
 | `CODEX_WSL_QUICK_REF.md`           | **NEW** Quick reference            | Markdown         |
 | `CODEX_SETUP.md`                   | Existing setup guide               | Markdown         |
@@ -227,7 +227,7 @@ OpenAI API (via proxy if behind VPN)
 ## Troubleshooting Quick Links
 
 - **Codex not found**: Run `scripts/ai/codex/helper/setup-wsl.sh`
-- **API unreachable**: Run `wsl -d Debian -- source .wsl_proxy_env.sh`
+- **API unreachable**: Run `wsl -d Debian -- source scripts/engineering/dev/bash/.wsl_proxy_env.sh`
 - **WSL not installed**: `wsl --install -d Debian` (requires Windows Admin)
 - **Permission issues**: Add `-d Debian --` after `wsl` in batch files
 - **Path issues**: Scripts auto-convert paths; ensure running from project root

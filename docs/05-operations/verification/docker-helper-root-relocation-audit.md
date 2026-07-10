@@ -60,10 +60,26 @@ consumers still use exact root filenames:
 | `docker-setup.ps1` | retired root script; command parity retained in `scripts/ops/docker-setup.ps1` | Do not restore the root filename. |
 | `docker-setup.sh` | retired root script; command parity retained in `scripts/ops/docker-setup.sh` | Do not restore the root filename. |
 
-This means root minimization for Docker is blocked on a wrapper-first migration,
-not on file movement alone. A future move must update workflows, `Makefile`,
-operator docs, root allowlist, and `configs/quality/docker_helper_contracts.yaml`
-together.
+Root minimization for Docker setup helpers is no longer blocked on the root
+script filenames: legacy verbs are retained by `scripts/ops/docker-setup.ps1`
+and `scripts/ops/docker-setup.sh`. Future moves for compose files or
+`Dockerfile.bioetl` remain blocked on exact-root tool contracts and must update
+workflows, `Makefile`, operator docs, root allowlist, and
+`configs/quality/docker_helper_contracts.yaml` together.
+
+## RF-003 Command Compatibility Matrix
+
+| Legacy root verb | Scripts-owned Bash command | Scripts-owned PowerShell command | Parity decision |
+| --- | --- | --- | --- |
+| `check` | `scripts/ops/docker-setup.sh check` | `.\scripts\ops\docker-setup.ps1 check` | retained non-mutating Docker/Compose check |
+| `build` | `scripts/ops/docker-setup.sh build` | `.\scripts\ops\docker-setup.ps1 build` | retained `bioetl:latest` build from `Dockerfile.bioetl` |
+| `start` | `scripts/ops/docker-setup.sh start` | `.\scripts\ops\docker-setup.ps1 start` | retained main stack start plus health check |
+| `start-full` | `scripts/ops/docker-setup.sh start-full` | `.\scripts\ops\docker-setup.ps1 start-full` | retained image build, full helper stack start, and health check |
+| `stop` | `scripts/ops/docker-setup.sh stop` | `.\scripts\ops\docker-setup.ps1 stop` | retained main stack stop |
+| `stop-full` | `scripts/ops/docker-setup.sh stop-full` | `.\scripts\ops\docker-setup.ps1 stop-full` | retained main plus helper stack stop |
+| `logs [service]` | `scripts/ops/docker-setup.sh logs [service]` | `.\scripts\ops\docker-setup.ps1 logs [service]` | retained compose log tailing |
+| `health` | `scripts/ops/docker-setup.sh health` | `.\scripts\ops\docker-setup.ps1 health` | retained compose status plus readiness probe |
+| `clean` | `scripts/ops/docker-setup.sh clean` | `.\scripts\ops\docker-setup.ps1 clean` | retained destructive cleanup wording and behavior |
 
 ## Constraints
 

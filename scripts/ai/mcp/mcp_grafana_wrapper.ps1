@@ -7,8 +7,19 @@ $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "../../..")).Path
 $env:BIOETL_SKIP_ENV_LOCAL = "1"
 Import-BioetlRepoEnv -RepoRoot $repoRoot
 Remove-Item Env:BIOETL_SKIP_ENV_LOCAL -ErrorAction SilentlyContinue
+. (Join-Path $PSScriptRoot "support/token_validation.ps1")
 
 $grafanaUrl = if ($env:GRAFANA_URL) { $env:GRAFANA_URL } else { "http://host.docker.internal:3000" }
+Test-McpOptionalToken `
+    -Name "GRAFANA_SERVICE_ACCOUNT_TOKEN" `
+    -MinLength 20 `
+    -Purpose "Grafana MCP" `
+    -AllowedPrefixes @("glsa_", "eyJ")
+if ((-not $env:GRAFANA_SERVICE_ACCOUNT_TOKEN) -and (-not $env:GRAFANA_PASSWORD)) {
+    Write-McpTokenWarning "Grafana MCP has neither GRAFANA_SERVICE_ACCOUNT_TOKEN nor username/password; server may start but Grafana calls can fail."
+}
+Exit-McpValidateOnly -ServerName "grafana"
+
 $dockerArgs = @(
     "run",
     "--rm",

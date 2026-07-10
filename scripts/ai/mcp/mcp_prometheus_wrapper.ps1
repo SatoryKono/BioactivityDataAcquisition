@@ -5,8 +5,16 @@ $ErrorActionPreference = "Stop"
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "../../..")).Path
 . (Join-Path $PSScriptRoot "support/load_repo_env.ps1")
 Import-BioetlRepoEnv -RepoRoot $repoRoot
+. (Join-Path $PSScriptRoot "support/token_validation.ps1")
 
 $prometheusUrl = if ($env:PROMETHEUS_URL) { $env:PROMETHEUS_URL } else { "http://host.docker.internal:9090" }
+Test-McpOptionalToken `
+    -Name "PROMETHEUS_TOKEN" `
+    -MinLength 20 `
+    -Purpose "Prometheus MCP" `
+    -AllowedPrefixes @("eyJ")
+Exit-McpValidateOnly -ServerName "prometheus"
+
 $dockerArgs = @(
     "run",
     "--rm",

@@ -27,8 +27,9 @@
       "status": "closed-ready",
       "title": "root-hygiene/codex-shims: collapse legacy root Codex launcher aliases under the primary shim surface",
       "evidence": [
-        "codex.ps1",
-        "codex.bat",
+        "configs/quality/root_hygiene_review_registry.yaml",
+        "scripts/ops/codex.bat",
+        "scripts/ai/codex/run-codex.ps1",
         "scripts/ai/codex/README.md",
         "scripts/ai/codex/QUICKSTART_WSL.md"
       ]
@@ -71,22 +72,30 @@
   ],
   "outcomes": {
     "5847": {
-      "tracked_root_files_after": 46,
+      "tracked_root_files_after": 38,
       "tracked_root_dirs_after": 13,
-      "allowlist_entries_after": 46,
+      "allowlist_entries_after": 38,
       "retired_root_entries": [
+        ".wsl_proxy_env.sh",
         "Dockerfile.mcp-fetch",
         "Dockerfile.mcp-filesystem",
         "Dockerfile.mcp-github",
         "Dockerfile.mcp-memory",
         "Dockerfile.warp",
+        "codex.bat",
+        "codex.ps1",
         "docker-compose.alertmanager.yml",
         "docker-compose.minio.yml",
         "docker-compose.redis.yml",
         "docker-compose.sonarqube.yml",
+        "docker-setup.ps1",
+        "docker-setup.sh",
         "grafana-datasource.yml",
         "run-codex.ps1",
-        "run-codex-wsl.ps1"
+        "run-codex-wsl.ps1",
+        "setup-codex-wsl.bat",
+        "setup-codex-wsl.ps1",
+        "setup-codex-wsl.sh"
       ]
     },
     "5848": {
@@ -109,14 +118,26 @@
     },
     "5849": {
       "primary_root_shims": [
+        ".wsl_proxy_env.sh",
+        "codex.bat",
         "codex.ps1",
-        "codex.bat"
+        "run-codex.ps1",
+        "run-codex-wsl.ps1",
+        "setup-codex-wsl.bat",
+        "setup-codex-wsl.ps1",
+        "setup-codex-wsl.sh"
       ],
       "retired_legacy_aliases": [
+        ".wsl_proxy_env.sh",
+        "codex.bat",
+        "codex.ps1",
         "run-codex.ps1",
-        "run-codex-wsl.ps1"
+        "run-codex-wsl.ps1",
+        "setup-codex-wsl.bat",
+        "setup-codex-wsl.ps1",
+        "setup-codex-wsl.sh"
       ],
-      "canonical_owner": "scripts/ai/codex/run-codex.ps1"
+      "canonical_owner": "configs/quality/root_hygiene_review_registry.yaml"
     },
     "5850": {
       "compose_rehome_map": {

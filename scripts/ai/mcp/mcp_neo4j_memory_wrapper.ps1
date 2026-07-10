@@ -7,6 +7,7 @@ $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "../../..")).Path
 $env:BIOETL_SKIP_ENV_LOCAL = "1"
 Import-BioetlRepoEnv -RepoRoot $repoRoot
 Remove-Item Env:BIOETL_SKIP_ENV_LOCAL -ErrorAction SilentlyContinue
+. (Join-Path $PSScriptRoot "support/token_validation.ps1")
 
 if (-not $env:NEO4J_URI) {
     $env:NEO4J_URI = "bolt://localhost:7687"
@@ -46,6 +47,9 @@ if (-not $env:NEO4J_DATABASE) {
 if (-not $env:NPM_CONFIG_CACHE) {
     $env:NPM_CONFIG_CACHE = "/tmp/npm-cache"
 }
+
+Test-McpNeo4jCredentials -Purpose "Neo4j Memory MCP"
+Exit-McpValidateOnly -ServerName "neo4j-memory"
 
 & npx -y @knowall-ai/mcp-neo4j-agent-memory@0.2.5 @args
 exit $LASTEXITCODE

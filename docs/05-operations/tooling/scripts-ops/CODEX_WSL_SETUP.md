@@ -133,7 +133,7 @@ In WSL:
 
 ```bash
 # Automatic (recommended):
-source .wsl_proxy_env.sh
+source scripts/engineering/dev/bash/.wsl_proxy_env.sh
 
 # Or manual:
 export http_proxy=http://$(ip route show default | awk '{print $3}'):3128
@@ -143,7 +143,7 @@ export https_proxy=http://$(ip route show default | awk '{print $3}'):3128
 To make this permanent, add to `~/.bashrc`:
 
 ```bash
-echo "source /path/to/repo/.wsl_proxy_env.sh" >> ~/.bashrc
+echo "source /path/to/repo/scripts/engineering/dev/bash/.wsl_proxy_env.sh" >> ~/.bashrc
 ```
 
 Test connectivity:
@@ -219,7 +219,7 @@ cd <YOUR_WSL_REPO_PATH>
 | `scripts/ai/codex/helper/setup-wsl.sh` | Installation script          | WSL2 (bash)        |
 | `wsl_proxy.py`                     | HTTP proxy bridge            | Windows (Python)   |
 | `start-wsl-proxy.bat`              | Proxy launcher               | Windows PowerShell |
-| `.wsl_proxy_env.sh`                | Proxy environment setup      | WSL2 (bash)        |
+| `scripts/engineering/dev/bash/.wsl_proxy_env.sh`                | Proxy environment setup      | WSL2 (bash)        |
 
 ## Common Usage Examples
 
@@ -414,7 +414,7 @@ Original files remain unchanged:
 - `scripts/ops/launchers/codex/codex.bat` - Original Windows launcher
 - `scripts/ops/launchers/codex/codex-exec.bat` - Original auto-exec
 - `scripts/ops/runtime/wsl/wsl_proxy.py` - HTTP proxy bridge
-- `.wsl_proxy_env.sh` - Proxy environment config
+- `scripts/engineering/dev/bash/.wsl_proxy_env.sh` - Proxy environment config
 
 ______________________________________________________________________
 

@@ -2,31 +2,32 @@
 
 Единая точка входа для запуска Codex через canonical WSL/Bash launcher.
 
-Retained root-level launchers such as `codex.ps1`, `codex.bat`,
-`setup-codex-wsl.*`, and `.wsl_proxy_env.sh` are compatibility shims only.
-Legacy aliases `run-codex.ps1` and `run-codex-wsl.ps1` are retired from the
-repository root; use `codex.ps1` or the maintained launcher under
-`scripts/ai/codex/**`.
+Root-level launchers such as `codex.ps1`, `codex.bat`,
+`setup-codex-wsl.*`, `.wsl_proxy_env.sh`, `run-codex.ps1`, and
+`run-codex-wsl.ps1` are retired from the repository root. Use the maintained
+launchers under `scripts/**`.
 
-## Root Shim Verification
+## Retired Root Shim Verification
 
-Last verified: 2026-07-06 for root hygiene issue #5994.
+Last verified: 2026-07-10 for root script hygiene issues #6152-#6158.
+This supersedes the earlier root hygiene issue #5994 root-shim delegation
+contract by retiring the root files instead of retaining thin wrappers.
 
-The repository root keeps only thin compatibility entrypoints:
+The repository root keeps no tracked `.sh`, `.ps1`, `.py`, or `.bat`
+compatibility entrypoints:
 
-| Root shim | Canonical owner | Retention decision |
+| Retired root shim | Canonical owner | Retention decision |
 | --- | --- | --- |
-| `codex.ps1` | `scripts/ai/codex/run-codex.ps1` | Keep as the primary root PowerShell transport while Windows/WSL operator flows need a root entrypoint. |
-| `codex.bat` | `codex.ps1` -> `scripts/ai/codex/run-codex.ps1` | Keep as a CMD transport only. |
-| `setup-codex-wsl.bat` | `scripts/ai/codex/setup-codex-wsl.bat` | Keep as a Windows setup transport only. |
-| `setup-codex-wsl.ps1` | `scripts/ai/codex/setup-codex-wsl.bat` | Keep as a PowerShell setup transport only. |
-| `setup-codex-wsl.sh` | `scripts/ai/codex/helper/setup-wsl-complete.sh` | Keep as a Bash setup transport only. |
-| `.wsl_proxy_env.sh` | `scripts/ai/codex/helper/wsl_proxy_env.sh` | Keep as a source-compatible proxy helper shim only. |
+| `codex.ps1` | `scripts/ai/codex/run-codex.ps1` | root file retired; use the scripts-owned PowerShell transport |
+| `codex.bat` | `scripts/ops/codex.bat` | root file retired; use the scripts-owned CMD transport |
+| `setup-codex-wsl.bat` | `scripts/ai/codex/setup-codex-wsl.bat` | root file retired; use the scripts-owned Windows setup transport |
+| `setup-codex-wsl.ps1` | `scripts/ai/codex/setup.ps1` | root file retired; deletion-first decision retained |
+| `setup-codex-wsl.sh` | `scripts/ai/codex/helper/setup-wsl-complete.sh` | root file retired; use the scripts-owned Bash setup helper |
+| `.wsl_proxy_env.sh` | `scripts/engineering/dev/bash/.wsl_proxy_env.sh` | root file retired; shared proxy helper is scripts-owned |
 
-Any future removal must update `.github/root-allowlist.txt`,
+Any future root-script restoration must update `.github/root-allowlist.txt`,
 `configs/quality/root_hygiene_review_registry.yaml`, operator docs, and wrapper
-surface tests in the same change. Retired root aliases `run-codex.ps1` and
-`run-codex-wsl.ps1` must not be restored without a fresh owner decision.
+surface tests in the same change, and requires a fresh owner decision.
 
 ## 📁 Структура
 

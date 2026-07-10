@@ -71,8 +71,8 @@ If Docker sandbox VMs remain unstable, prefer the canonical Codex launchers
 that run the CLI in WSL and keep Docker/MCP as optional adjunct tooling:
 
 ```powershell
-.\codex.ps1
-.\codex.ps1 exec "analyze the failing launcher flow"
+.\scripts\ai\codex\run-codex.ps1
+.\scripts\ai\codex\run-codex.ps1 exec "analyze the failing launcher flow"
 .\scripts\ai\codex\run-codex.ps1 check
 ```
 

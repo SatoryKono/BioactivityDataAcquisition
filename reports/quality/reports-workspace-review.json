@@ -1,7 +1,87 @@
 {
   "reports_workspace_evidence": [
     {
-      "age_days": 4,
+      "age_days": 1,
+      "classification": "PRUNE_CANDIDATE",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/Codex",
+      "reason": "local model/tmp reports are exact-path prune candidates",
+      "reference_hits": 0,
+      "retention_entry_id": null,
+      "retention_owner": null,
+      "retention_ttl_days": null,
+      "tracked": false,
+      "ttl_expired": null
+    },
+    {
+      "age_days": 2,
+      "classification": "PRUNE_CANDIDATE",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/application_merged.md",
+      "reason": "untracked root report matches approved local prune pattern",
+      "reference_hits": 0,
+      "retention_entry_id": null,
+      "retention_owner": null,
+      "retention_ttl_days": null,
+      "tracked": false,
+      "ttl_expired": null
+    },
+    {
+      "age_days": 1,
+      "classification": "PRUNE_CANDIDATE",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/codex",
+      "reason": "non-curated top-level reports workspace surface is a local prune candidate",
+      "reference_hits": 0,
+      "retention_entry_id": null,
+      "retention_owner": null,
+      "retention_ttl_days": null,
+      "tracked": false,
+      "ttl_expired": null
+    },
+    {
+      "age_days": 2,
+      "classification": "PRUNE_CANDIDATE",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/composition_merged.md",
+      "reason": "untracked root report matches approved local prune pattern",
+      "reference_hits": 0,
+      "retention_entry_id": null,
+      "retention_owner": null,
+      "retention_ttl_days": null,
+      "tracked": false,
+      "ttl_expired": null
+    },
+    {
+      "age_days": 0,
+      "classification": "PRUNE_CANDIDATE",
+      "commit_policy": "working_output",
+      "exists": true,
+      "generator": "src/tools/file_merger.py",
+      "has_history": false,
+      "path": "reports/configs_merged.md",
+      "reason": "registered working report exists only locally and may be pruned after review",
+      "reference_hits": 0,
+      "retention_entry_id": null,
+      "retention_owner": null,
+      "retention_ttl_days": null,
+      "tracked": false,
+      "ttl_expired": null
+    },
+    {
+      "age_days": 0,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -17,7 +97,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 5,
+      "age_days": 10,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -33,7 +113,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 4,
+      "age_days": 0,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": "working_output",
       "exists": true,
@@ -49,7 +129,119 @@
       "ttl_expired": null
     },
     {
-      "age_days": 1,
+      "age_days": 0,
+      "classification": "PRUNE_CANDIDATE",
+      "commit_policy": "ignored_local_output",
+      "exists": true,
+      "generator": "scripts/engineering/dev/run_tests.py",
+      "has_history": false,
+      "path": "reports/coverage/htmlcov",
+      "reason": "registered working report exists only locally and may be pruned after review",
+      "reference_hits": 0,
+      "retention_entry_id": null,
+      "retention_owner": null,
+      "retention_ttl_days": null,
+      "tracked": false,
+      "ttl_expired": null
+    },
+    {
+      "age_days": 3,
+      "classification": "PRUNE_CANDIDATE",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/deep_test_audit_optimization_plan.md",
+      "reason": "non-curated top-level reports workspace surface is a local prune candidate",
+      "reference_hits": 0,
+      "retention_entry_id": null,
+      "retention_owner": null,
+      "retention_ttl_days": null,
+      "tracked": false,
+      "ttl_expired": null
+    },
+    {
+      "age_days": 3,
+      "classification": "PRUNE_CANDIDATE",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/deep_test_audit_problem_map.md",
+      "reason": "non-curated top-level reports workspace surface is a local prune candidate",
+      "reference_hits": 0,
+      "retention_entry_id": null,
+      "retention_owner": null,
+      "retention_ttl_days": null,
+      "tracked": false,
+      "ttl_expired": null
+    },
+    {
+      "age_days": 0,
+      "classification": "PRUNE_CANDIDATE",
+      "commit_policy": "working_output",
+      "exists": true,
+      "generator": "src/tools/file_merger.py",
+      "has_history": false,
+      "path": "reports/documentation_merged.md",
+      "reason": "registered working report exists only locally and may be pruned after review",
+      "reference_hits": 0,
+      "retention_entry_id": null,
+      "retention_owner": null,
+      "retention_ttl_days": null,
+      "tracked": false,
+      "ttl_expired": null
+    },
+    {
+      "age_days": 2,
+      "classification": "PRUNE_CANDIDATE",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/domain_merged.md",
+      "reason": "untracked root report matches approved local prune pattern",
+      "reference_hits": 0,
+      "retention_entry_id": null,
+      "retention_owner": null,
+      "retention_ttl_days": null,
+      "tracked": false,
+      "ttl_expired": null
+    },
+    {
+      "age_days": 2,
+      "classification": "PRUNE_CANDIDATE",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/infrastructure_merged.md",
+      "reason": "untracked root report matches approved local prune pattern",
+      "reference_hits": 0,
+      "retention_entry_id": null,
+      "retention_owner": null,
+      "retention_ttl_days": null,
+      "tracked": false,
+      "ttl_expired": null
+    },
+    {
+      "age_days": 2,
+      "classification": "PRUNE_CANDIDATE",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/interfaces_merged.md",
+      "reason": "untracked root report matches approved local prune pattern",
+      "reference_hits": 0,
+      "retention_entry_id": null,
+      "retention_owner": null,
+      "retention_ttl_days": null,
+      "tracked": false,
+      "ttl_expired": null
+    },
+    {
+      "age_days": 0,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": "ignored_runtime_output",
       "exists": true,
@@ -65,7 +257,55 @@
       "ttl_expired": null
     },
     {
-      "age_days": 20,
+      "age_days": 0,
+      "classification": "PRUNE_CANDIDATE",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/plans",
+      "reason": "non-curated top-level reports workspace surface is a local prune candidate",
+      "reference_hits": 0,
+      "retention_entry_id": null,
+      "retention_owner": null,
+      "retention_ttl_days": null,
+      "tracked": false,
+      "ttl_expired": null
+    },
+    {
+      "age_days": 2,
+      "classification": "PRUNE_CANDIDATE",
+      "commit_policy": "working_output",
+      "exists": true,
+      "generator": "src/tools/file_merger.py",
+      "has_history": false,
+      "path": "reports/project_structure.md",
+      "reason": "registered working report exists only locally and may be pruned after review",
+      "reference_hits": 0,
+      "retention_entry_id": null,
+      "retention_owner": null,
+      "retention_ttl_days": null,
+      "tracked": false,
+      "ttl_expired": null
+    },
+    {
+      "age_days": 4,
+      "classification": "PRUNE_CANDIDATE",
+      "commit_policy": "working_output",
+      "exists": true,
+      "generator": "scripts/engineering/ci/run_pytest_resilient.py",
+      "has_history": false,
+      "path": "reports/pytest",
+      "reason": "registered working report exists only locally and may be pruned after review",
+      "reference_hits": 0,
+      "retention_entry_id": null,
+      "retention_owner": null,
+      "retention_ttl_days": null,
+      "tracked": false,
+      "ttl_expired": null
+    },
+    {
+      "age_days": 25,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -81,7 +321,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 19,
+      "age_days": 24,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -97,7 +337,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 19,
+      "age_days": 24,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -113,7 +353,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 19,
+      "age_days": 24,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -129,7 +369,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 19,
+      "age_days": 24,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -145,7 +385,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 18,
+      "age_days": 23,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -161,7 +401,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 18,
+      "age_days": 23,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -177,7 +417,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 17,
+      "age_days": 22,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -193,7 +433,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -209,7 +449,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -225,7 +465,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -241,7 +481,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -257,7 +497,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -273,7 +513,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -289,7 +529,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -305,7 +545,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 13,
+      "age_days": 18,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -321,7 +561,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 13,
+      "age_days": 18,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -337,7 +577,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 13,
+      "age_days": 18,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -353,7 +593,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 13,
+      "age_days": 18,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -369,7 +609,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 13,
+      "age_days": 18,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -385,7 +625,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 13,
+      "age_days": 18,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -401,7 +641,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -417,7 +657,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -433,7 +673,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -449,7 +689,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -465,7 +705,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -481,7 +721,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -497,7 +737,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -513,7 +753,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -529,7 +769,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -545,7 +785,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -561,7 +801,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -577,7 +817,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -593,7 +833,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 6,
+      "age_days": 11,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -609,7 +849,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 6,
+      "age_days": 11,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -625,7 +865,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 6,
+      "age_days": 11,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -641,7 +881,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 4,
+      "age_days": 9,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -657,7 +897,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 4,
+      "age_days": 9,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -673,7 +913,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 4,
+      "age_days": 9,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -689,7 +929,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 4,
+      "age_days": 9,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -705,7 +945,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 4,
+      "age_days": 9,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -721,7 +961,39 @@
       "ttl_expired": null
     },
     {
-      "age_days": 5,
+      "age_days": 2,
+      "classification": "PRUNE_CANDIDATE",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/architecture_debt_execution_plan_2026-07-08-09-03.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": null,
+      "retention_owner": null,
+      "retention_ttl_days": null,
+      "tracked": false,
+      "ttl_expired": null
+    },
+    {
+      "age_days": 2,
+      "classification": "PRUNE_CANDIDATE",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/architecture_debt_execution_plan_2026-07-08-09-54.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": null,
+      "retention_owner": null,
+      "retention_ttl_days": null,
+      "tracked": false,
+      "ttl_expired": null
+    },
+    {
+      "age_days": 10,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": "working_output",
       "exists": true,
@@ -737,7 +1009,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": "working_output",
       "exists": true,
@@ -753,7 +1025,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": "working_output",
       "exists": true,
@@ -769,7 +1041,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 32,
+      "age_days": 37,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -785,7 +1057,7 @@
       "ttl_expired": true
     },
     {
-      "age_days": 32,
+      "age_days": 37,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -801,7 +1073,7 @@
       "ttl_expired": true
     },
     {
-      "age_days": 32,
+      "age_days": 37,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -817,7 +1089,7 @@
       "ttl_expired": true
     },
     {
-      "age_days": 32,
+      "age_days": 37,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -833,7 +1105,7 @@
       "ttl_expired": true
     },
     {
-      "age_days": 31,
+      "age_days": 36,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -849,7 +1121,7 @@
       "ttl_expired": true
     },
     {
-      "age_days": 31,
+      "age_days": 36,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -865,7 +1137,7 @@
       "ttl_expired": true
     },
     {
-      "age_days": 31,
+      "age_days": 36,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -881,7 +1153,7 @@
       "ttl_expired": true
     },
     {
-      "age_days": 31,
+      "age_days": 36,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -897,7 +1169,7 @@
       "ttl_expired": true
     },
     {
-      "age_days": 31,
+      "age_days": 36,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -913,7 +1185,7 @@
       "ttl_expired": true
     },
     {
-      "age_days": 31,
+      "age_days": 36,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -929,7 +1201,7 @@
       "ttl_expired": true
     },
     {
-      "age_days": 31,
+      "age_days": 36,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -945,7 +1217,7 @@
       "ttl_expired": true
     },
     {
-      "age_days": 31,
+      "age_days": 36,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -961,7 +1233,7 @@
       "ttl_expired": true
     },
     {
-      "age_days": 2,
+      "age_days": 7,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": "working_output",
       "exists": true,
@@ -977,7 +1249,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 33,
+      "age_days": 38,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -993,7 +1265,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 20,
+      "age_days": 25,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1009,7 +1281,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 19,
+      "age_days": 24,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1025,7 +1297,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 19,
+      "age_days": 24,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1041,7 +1313,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 19,
+      "age_days": 24,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1057,7 +1329,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 19,
+      "age_days": 24,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1073,7 +1345,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 19,
+      "age_days": 24,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1089,7 +1361,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 18,
+      "age_days": 23,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1105,7 +1377,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 18,
+      "age_days": 23,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1121,7 +1393,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 17,
+      "age_days": 22,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1137,7 +1409,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1153,7 +1425,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1169,7 +1441,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1185,7 +1457,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1201,7 +1473,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1217,7 +1489,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1233,7 +1505,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1249,7 +1521,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 13,
+      "age_days": 18,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1265,7 +1537,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 13,
+      "age_days": 18,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1281,7 +1553,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 13,
+      "age_days": 18,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1297,7 +1569,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 13,
+      "age_days": 18,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1313,7 +1585,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 13,
+      "age_days": 18,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1329,7 +1601,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1345,7 +1617,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1361,7 +1633,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1377,7 +1649,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1393,7 +1665,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1409,7 +1681,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1425,7 +1697,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1441,7 +1713,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1457,7 +1729,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1473,7 +1745,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1489,7 +1761,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1505,7 +1777,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 6,
+      "age_days": 11,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1521,7 +1793,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 6,
+      "age_days": 11,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1537,7 +1809,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 4,
+      "age_days": 9,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1553,7 +1825,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 4,
+      "age_days": 9,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1569,7 +1841,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 4,
+      "age_days": 9,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": null,
       "exists": true,
@@ -1585,7 +1857,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 3,
+      "age_days": 0,
       "classification": "PRUNE_CANDIDATE",
       "commit_policy": "ignored_local_output",
       "exists": true,
@@ -1601,7 +1873,23 @@
       "ttl_expired": null
     },
     {
-      "age_days": 52,
+      "age_days": 0,
+      "classification": "PRUNE_CANDIDATE",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/semantic_pipeline_audit",
+      "reason": "non-curated top-level reports workspace surface is a local prune candidate",
+      "reference_hits": 0,
+      "retention_entry_id": null,
+      "retention_owner": null,
+      "retention_ttl_days": null,
+      "tracked": false,
+      "ttl_expired": null
+    },
+    {
+      "age_days": 1,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -1617,7 +1905,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 1,
+      "age_days": 2,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -1665,7 +1953,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 20,
+      "age_days": 25,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -1681,7 +1969,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 20,
+      "age_days": 25,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -1697,7 +1985,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 20,
+      "age_days": 25,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -1713,7 +2001,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 20,
+      "age_days": 25,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -1729,7 +2017,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 20,
+      "age_days": 25,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -1745,7 +2033,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 19,
+      "age_days": 24,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -1761,7 +2049,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 19,
+      "age_days": 24,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -1777,7 +2065,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 19,
+      "age_days": 24,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -1793,7 +2081,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 19,
+      "age_days": 24,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -1809,7 +2097,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 19,
+      "age_days": 24,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -1825,7 +2113,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 19,
+      "age_days": 24,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -1841,7 +2129,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 19,
+      "age_days": 24,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -1857,7 +2145,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 19,
+      "age_days": 24,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -1873,7 +2161,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 19,
+      "age_days": 24,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -1889,7 +2177,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 19,
+      "age_days": 24,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -1905,7 +2193,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 19,
+      "age_days": 24,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -1921,7 +2209,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 18,
+      "age_days": 23,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -1937,7 +2225,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 18,
+      "age_days": 23,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -1953,7 +2241,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 18,
+      "age_days": 23,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -1969,7 +2257,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 18,
+      "age_days": 23,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -1985,7 +2273,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 18,
+      "age_days": 23,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2001,7 +2289,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 18,
+      "age_days": 23,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2017,7 +2305,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 18,
+      "age_days": 23,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2033,7 +2321,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 17,
+      "age_days": 22,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2049,7 +2337,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 17,
+      "age_days": 22,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2065,7 +2353,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 17,
+      "age_days": 22,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2081,7 +2369,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 17,
+      "age_days": 22,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2097,7 +2385,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 17,
+      "age_days": 22,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2113,7 +2401,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 17,
+      "age_days": 22,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2129,7 +2417,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 17,
+      "age_days": 22,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2145,7 +2433,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 17,
+      "age_days": 22,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2161,7 +2449,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 17,
+      "age_days": 22,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2177,7 +2465,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 17,
+      "age_days": 22,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2193,7 +2481,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 17,
+      "age_days": 22,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2209,7 +2497,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 17,
+      "age_days": 22,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2225,7 +2513,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2241,7 +2529,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2257,7 +2545,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2273,7 +2561,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2289,7 +2577,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2305,7 +2593,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2321,7 +2609,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2337,7 +2625,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2353,7 +2641,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2369,7 +2657,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2385,7 +2673,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2401,7 +2689,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2417,7 +2705,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2433,7 +2721,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2449,7 +2737,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 16,
+      "age_days": 21,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2465,7 +2753,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 13,
+      "age_days": 18,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2481,7 +2769,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 13,
+      "age_days": 18,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2497,7 +2785,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 13,
+      "age_days": 18,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2513,7 +2801,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 13,
+      "age_days": 18,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2529,7 +2817,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 13,
+      "age_days": 18,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2545,7 +2833,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 13,
+      "age_days": 18,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2561,7 +2849,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 13,
+      "age_days": 18,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2577,7 +2865,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 13,
+      "age_days": 18,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2593,7 +2881,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2609,7 +2897,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2625,7 +2913,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2641,7 +2929,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2657,7 +2945,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2673,7 +2961,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2689,7 +2977,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2705,7 +2993,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2721,7 +3009,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2737,7 +3025,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2753,7 +3041,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2769,7 +3057,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2785,7 +3073,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2801,7 +3089,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2817,7 +3105,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2833,7 +3121,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2849,7 +3137,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2865,7 +3153,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2881,7 +3169,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2897,7 +3185,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2913,7 +3201,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2929,7 +3217,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 12,
+      "age_days": 17,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2945,7 +3233,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 11,
+      "age_days": 16,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2961,7 +3249,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 10,
+      "age_days": 15,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2977,7 +3265,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 10,
+      "age_days": 15,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -2993,7 +3281,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3009,7 +3297,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3025,7 +3313,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3041,7 +3329,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3057,7 +3345,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3073,7 +3361,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3089,7 +3377,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 9,
+      "age_days": 14,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3105,7 +3393,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 6,
+      "age_days": 11,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3121,7 +3409,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 6,
+      "age_days": 11,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3137,7 +3425,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 6,
+      "age_days": 11,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3153,7 +3441,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 6,
+      "age_days": 11,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3169,7 +3457,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 6,
+      "age_days": 11,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3185,7 +3473,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 6,
+      "age_days": 11,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3201,7 +3489,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 6,
+      "age_days": 11,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3217,7 +3505,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 6,
+      "age_days": 11,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3233,7 +3521,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 6,
+      "age_days": 11,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3249,7 +3537,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 5,
+      "age_days": 10,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3265,7 +3553,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 5,
+      "age_days": 10,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3281,7 +3569,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 5,
+      "age_days": 10,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3297,7 +3585,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 5,
+      "age_days": 10,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3313,7 +3601,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 5,
+      "age_days": 10,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3329,7 +3617,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 5,
+      "age_days": 10,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3345,7 +3633,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 5,
+      "age_days": 10,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3361,7 +3649,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 5,
+      "age_days": 10,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3377,7 +3665,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 5,
+      "age_days": 10,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3393,7 +3681,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 5,
+      "age_days": 10,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3409,7 +3697,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 5,
+      "age_days": 10,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3425,7 +3713,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 5,
+      "age_days": 10,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3441,7 +3729,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 5,
+      "age_days": 10,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3457,7 +3745,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 5,
+      "age_days": 10,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3473,7 +3761,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 5,
+      "age_days": 10,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3489,7 +3777,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 4,
+      "age_days": 9,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3505,7 +3793,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 4,
+      "age_days": 9,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3521,7 +3809,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 4,
+      "age_days": 9,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3537,7 +3825,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 4,
+      "age_days": 9,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3553,7 +3841,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 4,
+      "age_days": 9,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3569,7 +3857,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 4,
+      "age_days": 9,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3585,7 +3873,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 4,
+      "age_days": 9,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3601,7 +3889,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 4,
+      "age_days": 9,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3617,7 +3905,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 4,
+      "age_days": 9,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3633,7 +3921,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 4,
+      "age_days": 9,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3649,7 +3937,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 3,
+      "age_days": 8,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3665,7 +3953,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 3,
+      "age_days": 8,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3681,7 +3969,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 3,
+      "age_days": 8,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3697,7 +3985,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 3,
+      "age_days": 8,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3713,7 +4001,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 3,
+      "age_days": 8,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3729,7 +4017,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 3,
+      "age_days": 8,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3745,7 +4033,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 3,
+      "age_days": 8,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3761,7 +4049,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 2,
+      "age_days": 7,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3777,7 +4065,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 2,
+      "age_days": 7,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3793,7 +4081,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 2,
+      "age_days": 7,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3809,7 +4097,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 2,
+      "age_days": 7,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3825,7 +4113,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 2,
+      "age_days": 7,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3841,7 +4129,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 2,
+      "age_days": 7,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3857,7 +4145,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 2,
+      "age_days": 7,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3873,7 +4161,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 2,
+      "age_days": 7,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3889,7 +4177,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 2,
+      "age_days": 7,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3905,7 +4193,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 2,
+      "age_days": 7,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3921,7 +4209,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 2,
+      "age_days": 7,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3937,7 +4225,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 2,
+      "age_days": 7,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3953,7 +4241,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 2,
+      "age_days": 7,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3969,7 +4257,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 2,
+      "age_days": 7,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -3985,7 +4273,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 2,
+      "age_days": 7,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -4001,7 +4289,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 2,
+      "age_days": 7,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -4017,7 +4305,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 1,
+      "age_days": 6,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -4033,7 +4321,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 1,
+      "age_days": 6,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -4049,7 +4337,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 1,
+      "age_days": 6,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -4065,7 +4353,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 1,
+      "age_days": 6,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -4081,7 +4369,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 1,
+      "age_days": 6,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -4097,7 +4385,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 1,
+      "age_days": 6,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -4113,7 +4401,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 1,
+      "age_days": 6,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -4129,7 +4417,7 @@
       "ttl_expired": false
     },
     {
-      "age_days": 1,
+      "age_days": 6,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -4145,7 +4433,567 @@
       "ttl_expired": false
     },
     {
-      "age_days": 66,
+      "age_days": 5,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260705_124629.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 5,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260705_144910.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 5,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260705_163022.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 5,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260705_181904.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 4,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260706_064258.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 4,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260706_071651.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 4,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260706_074239.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 4,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260706_082111.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 4,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260706_082914.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 4,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260706_125053.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 4,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260706_142623.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 4,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260706_150314.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 4,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260706_152420.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 3,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260707_051725.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 3,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260707_061905.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 3,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260707_063111.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 3,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260707_090233.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 3,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260707_091249.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 3,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260707_095210.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 3,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260707_102729.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 3,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260707_104801.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 3,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260707_122707.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 3,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260707_123957.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 3,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260707_130719.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 3,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260707_131719.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 3,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260707_145933.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 3,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260707_182822.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 3,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260707_191749.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 2,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260708_175214.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 1,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260709_084728.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 1,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260709_085045.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 1,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260709_090834.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 1,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260709_120139.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 1,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260709_154624.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 0,
+      "classification": "RETAIN",
+      "commit_policy": null,
+      "exists": true,
+      "generator": null,
+      "has_history": false,
+      "path": "reports/quality/pretest_guardrails_20260710_053204.json",
+      "reason": "transient retained-surface artifact is still within its TTL window and should be retained",
+      "reference_hits": 0,
+      "retention_entry_id": "reports_quality_pretest_guardrails_history",
+      "retention_owner": "Engineering / Quality",
+      "retention_ttl_days": 30,
+      "tracked": false,
+      "ttl_expired": false
+    },
+    {
+      "age_days": 71,
       "classification": "RETAIN",
       "commit_policy": null,
       "exists": true,
@@ -4193,7 +5041,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 1,
+      "age_days": 2,
       "classification": "REVIEW_REQUIRED",
       "commit_policy": "working_output",
       "exists": true,
@@ -4209,7 +5057,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 1,
+      "age_days": 2,
       "classification": "REVIEW_REQUIRED",
       "commit_policy": "tracked_quality_baseline",
       "exists": true,
@@ -4225,13 +5073,45 @@
       "ttl_expired": null
     },
     {
-      "age_days": 1,
+      "age_days": 2,
       "classification": "REVIEW_REQUIRED",
       "commit_policy": "tracked_quality_baseline",
       "exists": true,
       "generator": "scripts/engineering/qa/report_dead_code_inventory.py",
       "has_history": true,
       "path": "reports/quality/dead-code-inventory.md",
+      "reason": "registered working report exists as tracked output and needs explicit retention review",
+      "reference_hits": 0,
+      "retention_entry_id": null,
+      "retention_owner": null,
+      "retention_ttl_days": null,
+      "tracked": true,
+      "ttl_expired": null
+    },
+    {
+      "age_days": 1,
+      "classification": "REVIEW_REQUIRED",
+      "commit_policy": "tracked_quality_baseline",
+      "exists": true,
+      "generator": "scripts/engineering/qa/report_debt_governance_gates.py",
+      "has_history": true,
+      "path": "reports/quality/debt-governance-gates.json",
+      "reason": "registered working report exists as tracked output and needs explicit retention review",
+      "reference_hits": 0,
+      "retention_entry_id": null,
+      "retention_owner": null,
+      "retention_ttl_days": null,
+      "tracked": true,
+      "ttl_expired": null
+    },
+    {
+      "age_days": 1,
+      "classification": "REVIEW_REQUIRED",
+      "commit_policy": "tracked_quality_baseline",
+      "exists": true,
+      "generator": "scripts/engineering/qa/report_debt_governance_gates.py",
+      "has_history": true,
+      "path": "reports/quality/debt-governance-gates.md",
       "reason": "registered working report exists as tracked output and needs explicit retention review",
       "reference_hits": 0,
       "retention_entry_id": null,
@@ -4273,7 +5153,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 1,
+      "age_days": 0,
       "classification": "REVIEW_REQUIRED",
       "commit_policy": "tracked_quality_baseline",
       "exists": true,
@@ -4289,7 +5169,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 1,
+      "age_days": 0,
       "classification": "REVIEW_REQUIRED",
       "commit_policy": "tracked_quality_baseline",
       "exists": true,
@@ -4305,7 +5185,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 1,
+      "age_days": 2,
       "classification": "REVIEW_REQUIRED",
       "commit_policy": "tracked_quality_baseline",
       "exists": true,
@@ -4321,7 +5201,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 1,
+      "age_days": 2,
       "classification": "REVIEW_REQUIRED",
       "commit_policy": "tracked_quality_baseline",
       "exists": true,
@@ -4337,7 +5217,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 1,
+      "age_days": 2,
       "classification": "REVIEW_REQUIRED",
       "commit_policy": "tracked_quality_baseline",
       "exists": true,
@@ -4353,29 +5233,13 @@
       "ttl_expired": null
     },
     {
-      "age_days": 1,
+      "age_days": 2,
       "classification": "REVIEW_REQUIRED",
       "commit_policy": "tracked_quality_baseline",
       "exists": true,
       "generator": "scripts/engineering/qa/report_pipeline_config_contract_ownership.py",
       "has_history": true,
       "path": "reports/quality/pipeline-config-contract-ownership-map.md",
-      "reason": "registered working report exists as tracked output and needs explicit retention review",
-      "reference_hits": 0,
-      "retention_entry_id": null,
-      "retention_owner": null,
-      "retention_ttl_days": null,
-      "tracked": true,
-      "ttl_expired": null
-    },
-    {
-      "age_days": 1,
-      "classification": "REVIEW_REQUIRED",
-      "commit_policy": "tracked_quality_baseline",
-      "exists": true,
-      "generator": "scripts/engineering/qa/report_test_governance_audit.py",
-      "has_history": true,
-      "path": "reports/quality/test-duplicate-name-inventory.json",
       "reason": "registered working report exists as tracked output and needs explicit retention review",
       "reference_hits": 0,
       "retention_entry_id": null,
@@ -4433,23 +5297,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 1,
-      "classification": "REVIEW_REQUIRED",
-      "commit_policy": null,
-      "exists": true,
-      "generator": null,
-      "has_history": true,
-      "path": "reports/semantic_pipeline_audit",
-      "reason": "tracked reports workspace surface sits outside retained families and needs explicit retention review",
-      "reference_hits": 0,
-      "retention_entry_id": null,
-      "retention_owner": null,
-      "retention_ttl_days": null,
-      "tracked": true,
-      "ttl_expired": null
-    },
-    {
-      "age_days": 1,
+      "age_days": 2,
       "classification": "REVIEW_REQUIRED",
       "commit_policy": null,
       "exists": true,
@@ -4465,7 +5313,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 1,
+      "age_days": 2,
       "classification": "REVIEW_REQUIRED",
       "commit_policy": "tracked_quality_baseline",
       "exists": true,
@@ -4481,7 +5329,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 1,
+      "age_days": 2,
       "classification": "REVIEW_REQUIRED",
       "commit_policy": "tracked_quality_baseline",
       "exists": true,
@@ -4497,7 +5345,7 @@
       "ttl_expired": null
     },
     {
-      "age_days": 1,
+      "age_days": 2,
       "classification": "REVIEW_REQUIRED",
       "commit_policy": "tracked_quality_baseline",
       "exists": true,
@@ -4513,11 +5361,11 @@
       "ttl_expired": null
     }
   ],
-  "repository_root": "E:/g-drive/05_AI/github/BioactivityDataAcquisition2",
+  "repository_root": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2",
   "schema_version": 1,
   "summary": {
-    "PRUNE_CANDIDATE": 100,
-    "RETAIN": 160,
+    "PRUNE_CANDIDATE": 118,
+    "RETAIN": 195,
     "REVIEW_REQUIRED": 22
   },
   "tool": "scripts/ops/support/repo/cleanup_repository.py"

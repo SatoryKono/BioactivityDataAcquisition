@@ -7,7 +7,7 @@
 bash ./scripts/ai/codex/helper/setup-wsl.sh
 
 # If issues, configure proxy manually:
-source .wsl_proxy_env.sh
+source scripts/engineering/dev/bash/.wsl_proxy_env.sh
 curl -I https://api.openai.com  # Test
 ```
 
@@ -62,7 +62,7 @@ cd <YOUR_WSL_REPO_PATH>
 | Problem              | Solution                                                                       |
 | -------------------- | ------------------------------------------------------------------------------ |
 | `Codex not found`    | Run: `bash ./scripts/ai/codex/helper/setup-wsl.sh`                                 |
-| `OpenAI timeout`     | Source proxy: `source .wsl_proxy_env.sh` then `curl -I https://api.openai.com` |
+| `OpenAI timeout`     | Source proxy: `source scripts/engineering/dev/bash/.wsl_proxy_env.sh` then `curl -I https://api.openai.com` |
 | `WSL not found`      | From PowerShell: `wsl -l -v` then `wsl --install -d Ubuntu`                    |
 | `Permission denied`  | `chmod +x ./scripts/ops/launchers/codex/codex.sh`                              |
 | `No internet in WSL` | Start Windows proxy: `.\scripts\ops\start-wsl-proxy.bat`                       |

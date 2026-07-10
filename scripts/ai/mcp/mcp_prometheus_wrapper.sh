@@ -6,11 +6,16 @@ script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 source "${script_dir}/support/docker_cli_resolver.sh"
 # shellcheck source=./support/load_repo_env.sh
 source "${script_dir}/support/load_repo_env.sh"
+# shellcheck source=./support/token_validation.sh
+source "${script_dir}/support/token_validation.sh"
 
 load_repo_env_if_present
 
-docker_bin="$(resolve_docker_bin)"
 prometheus_url="${PROMETHEUS_URL:-http://host.docker.internal:9090}"
+mcp_validate_optional_token "PROMETHEUS_TOKEN" 20 "Prometheus MCP" "eyJ"
+mcp_exit_if_validate_only "prometheus"
+
+docker_bin="$(resolve_docker_bin)"
 docker_args=(
   run
   --rm

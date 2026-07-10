@@ -21,18 +21,26 @@ DOCKER_CONTRACTS = ROOT / "configs" / "quality" / "docker_helper_contracts.yaml"
 
 EXPECTED_ISSUES = {5847, 5848, 5849, 5850, 5851, 5852}
 RETIRED_ROOT_ENTRIES = {
+    ".wsl_proxy_env.sh",
     "Dockerfile.mcp-fetch",
     "Dockerfile.mcp-filesystem",
     "Dockerfile.mcp-github",
     "Dockerfile.mcp-memory",
     "Dockerfile.warp",
+    "codex.bat",
+    "codex.ps1",
     "docker-compose.alertmanager.yml",
     "docker-compose.minio.yml",
     "docker-compose.redis.yml",
     "docker-compose.sonarqube.yml",
+    "docker-setup.ps1",
+    "docker-setup.sh",
     "grafana-datasource.yml",
     "run-codex.ps1",
     "run-codex-wsl.ps1",
+    "setup-codex-wsl.bat",
+    "setup-codex-wsl.ps1",
+    "setup-codex-wsl.sh",
 }
 COMPOSE_REHOME_MAP = {
     "docker-compose.alertmanager.yml": "scripts/ops/runtime/docker/compose/alertmanager.yml",
@@ -161,15 +169,28 @@ def test_issue_5849_legacy_codex_root_aliases_are_retired() -> None:
     candidates = _registry_candidates()
     allowlist_text = ROOT_ALLOWLIST.read_text(encoding="utf-8")
 
-    assert set(payload["outcomes"]["5849"]["primary_root_shims"]) == {
-        "codex.ps1",
-        "codex.bat",
+    expected_retired_shims = {
+        ".wsl_proxy_env.sh": "scripts/engineering/dev/bash/.wsl_proxy_env.sh",
+        "codex.bat": "scripts/ops/codex.bat",
+        "codex.ps1": "scripts/ai/codex/run-codex.ps1",
+        "run-codex.ps1": "scripts/ai/codex/run-codex.ps1",
+        "run-codex-wsl.ps1": "scripts/ai/codex/run-codex.ps1",
+        "setup-codex-wsl.bat": "scripts/ai/codex/setup-codex-wsl.bat",
+        "setup-codex-wsl.ps1": "scripts/ai/codex/setup.ps1",
+        "setup-codex-wsl.sh": "scripts/ai/codex/helper/setup-wsl-complete.sh",
     }
-    for path in payload["outcomes"]["5849"]["retired_legacy_aliases"]:
+    assert set(payload["outcomes"]["5849"]["primary_root_shims"]) == set(
+        expected_retired_shims
+    )
+    assert set(payload["outcomes"]["5849"]["retired_legacy_aliases"]) == set(
+        expected_retired_shims
+    )
+    for path, canonical_path in expected_retired_shims.items():
         assert path not in tracked
         assert path not in allowlist_text
         assert candidates[path]["current_live_state"] == "absent_from_root_baseline"
-        assert candidates[path]["canonical_path"] == "scripts/ai/codex/run-codex.ps1"
+        assert candidates[path]["canonical_path"] == canonical_path
+        assert (ROOT / canonical_path).exists()
 
 
 def test_issue_5850_compose_adjuncts_are_rehomed_and_contract_backed() -> None:

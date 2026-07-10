@@ -67,18 +67,18 @@
     "5834": {
       "committed_root_review_summary": {
         "BLOCKED": 6,
-        "REVIEW_REQUIRED": 83,
+        "REVIEW_REQUIRED": 90,
         "ROOT_POLICY_MISMATCH": 0,
         "SECURITY_REVIEW_REQUIRED": 3
       },
       "committed_cleanup_summary": {
         "BLOCKED": 6,
-        "REVIEW_REQUIRED": 83,
-        "SAFE": 4,
+        "REVIEW_REQUIRED": 90,
+        "SAFE": 9,
         "SECURITY_REVIEW_REQUIRED": 3
       },
-      "root_review_rows": 92,
-      "cleanup_candidates": 4,
+      "root_review_rows": 99,
+      "cleanup_candidates": 9,
       "reports_workspace_review": "reports/quality/reports-workspace-review.json"
     },
     "5835": {

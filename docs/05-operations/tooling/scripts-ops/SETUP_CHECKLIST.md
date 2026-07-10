@@ -199,7 +199,7 @@ If something doesn't work:
 ### "OpenAI timeout"
 
 - [ ] Check: `curl -I https://api.openai.com`
-- [ ] If fails, run: `source .wsl_proxy_env.sh`
+- [ ] If fails, run: `source scripts/engineering/dev/bash/.wsl_proxy_env.sh`
 - [ ] If still fails: Start proxy from Windows: `.\scripts\ops\start-wsl-proxy.bat`
 - [ ] Then retry: `curl -I https://api.openai.com`
 

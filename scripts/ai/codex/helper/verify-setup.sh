@@ -78,7 +78,7 @@ elif grep -q "_WIN_HOST_IP\|http_proxy" ~/.bashrc 2>/dev/null; then
 else
     echo "⚠ OpenAI API not accessible"
     echo "  → If behind VPN/proxy, source the proxy config:"
-    echo "    source .wsl_proxy_env.sh"
+    echo "    source scripts/engineering/dev/bash/.wsl_proxy_env.sh"
     echo "  → Or start Windows proxy:"
     echo "    .\scripts\ops\start-wsl-proxy.bat"
 fi

@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-import pytest
-
+import subprocess
 from pathlib import Path
 
+import pytest
 import yaml
 
 
@@ -426,9 +426,23 @@ def test_root_review_contract_entrypoints_have_exact_filename_owners() -> None:
         assert candidate["canonical_path"] == path
 
 
-def test_root_launcher_shims_lane_tracks_reviewed_root_compatibility_entrypoints() -> (
-    None
-):
+def test_no_tracked_repository_root_scripts_remain() -> None:
+    completed = subprocess.run(
+        ["git", "ls-files", "-z", "*.sh", "*.ps1", "*.py", "*.bat"],
+        cwd=ROOT,
+        capture_output=True,
+        check=True,
+    )
+    root_scripts = sorted(
+        path
+        for path in completed.stdout.decode("utf-8", errors="replace").split("\0")
+        if path and "/" not in path
+    )
+
+    assert root_scripts == []
+
+
+def test_root_launcher_shims_lane_tracks_retired_root_entrypoints() -> None:
     registry = _load_yaml(REGISTRY_PATH)
     lanes = registry["review_lanes"]
     assert isinstance(lanes, list)
@@ -446,31 +460,33 @@ def test_root_launcher_shims_lane_tracks_reviewed_root_compatibility_entrypoints
         if isinstance(candidate, dict) and isinstance(candidate.get("path"), str)
     }
 
-    assert by_path["codex.bat"]["current_live_state"] == "present_approved_root_surface"
-    assert by_path["codex.ps1"]["current_live_state"] == "present_approved_root_surface"
-    assert by_path["codex.bat"]["canonical_path"] == "scripts/ai/codex/run-codex.ps1"
+    assert shim_lane["classification"] == "owner_decision_resolved"
+    assert shim_lane["cleanup_policy"] == (
+        "do_not_restore_root_shims_without_fresh_owner_review"
+    )
+
+    expected_canonical_paths = {
+        ".wsl_proxy_env.sh": "scripts/engineering/dev/bash/.wsl_proxy_env.sh",
+        "codex.bat": "scripts/ops/codex.bat",
+        "codex.ps1": "scripts/ai/codex/run-codex.ps1",
+        "run-codex.ps1": "scripts/ai/codex/run-codex.ps1",
+        "run-codex-wsl.ps1": "scripts/ai/codex/run-codex.ps1",
+        "setup-codex-wsl.bat": "scripts/ai/codex/setup-codex-wsl.bat",
+        "setup-codex-wsl.ps1": "scripts/ai/codex/setup.ps1",
+        "setup-codex-wsl.sh": "scripts/ai/codex/helper/setup-wsl-complete.sh",
+    }
+    assert set(by_path) == set(expected_canonical_paths)
+
+    for path, canonical_path in expected_canonical_paths.items():
+        assert by_path[path]["current_live_state"] == "absent_from_root_baseline"
+        assert by_path[path]["canonical_path"] == canonical_path
+        assert (ROOT / path).exists() is False
+        assert (ROOT / canonical_path).exists()
+
     assert by_path["codex.ps1"]["canonical_path"] == "scripts/ai/codex/run-codex.ps1"
-    assert (
-        by_path["run-codex.ps1"]["canonical_path"] == "scripts/ai/codex/run-codex.ps1"
-    )
-    assert (
-        by_path["run-codex-wsl.ps1"]["canonical_path"]
-        == "scripts/ai/codex/run-codex.ps1"
-    )
-    assert (
-        by_path["setup-codex-wsl.bat"]["canonical_path"]
-        == "scripts/ai/codex/setup-codex-wsl.bat"
-    )
-    assert (
-        by_path["setup-codex-wsl.ps1"]["canonical_path"]
-        == "scripts/ai/codex/setup-codex-wsl.bat"
-    )
-    assert (
-        by_path["setup-codex-wsl.sh"]["canonical_path"] == "scripts/ai/codex/README.md"
-    )
-    assert (
-        by_path[".wsl_proxy_env.sh"]["canonical_path"]
-        == "scripts/ai/codex/helper/wsl_proxy_env.sh"
+    assert by_path["codex.bat"]["canonical_path"] == "scripts/ops/codex.bat"
+    assert by_path[".wsl_proxy_env.sh"]["canonical_path"] == (
+        "scripts/engineering/dev/bash/.wsl_proxy_env.sh"
     )
 
 
@@ -523,6 +539,8 @@ def test_root_docker_adjunct_lane_tracks_reviewed_root_docker_surfaces() -> None
         "docker-compose.minio.yml",
         "docker-compose.redis.yml",
         "docker-compose.sonarqube.yml",
+        "docker-setup.ps1",
+        "docker-setup.sh",
         "Dockerfile.mcp-fetch",
         "Dockerfile.mcp-filesystem",
         "Dockerfile.mcp-github",
@@ -541,8 +559,6 @@ def test_root_docker_adjunct_lane_tracks_reviewed_root_docker_surfaces() -> None
         "docker-compose.neo4j-audit.yml": "must_stay_root",
         "docker-compose.neo4j.yml": "must_stay_root",
         "docker-compose.yml": "must_stay_root",
-        "docker-setup.ps1": "temporary_shim",
-        "docker-setup.sh": "temporary_shim",
         "Dockerfile.bioetl": "must_stay_root",
     }
     for path, disposition in expected_dispositions.items():
@@ -577,7 +593,8 @@ def test_root_policy_declares_target_root_model_and_docker_dispositions() -> Non
         "Forbidden root files/directories",
         "Temporary compatibility surfaces",
         "MUST stay root",
-        "temporary shim",
+        "retired root script",
+        "MUST NOT be restored",
         "moved to owned path",
         "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
         "configs/quality/generated_artifact_routing.yaml",
