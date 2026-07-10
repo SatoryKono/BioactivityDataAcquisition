@@ -1,0 +1,4 @@
+interface:
+  display_name: "Capability Discovery"
+  short_description: "Discover available agents and skills"
+  default_prompt: "Use $capability-discovery to map available BioETL agents, skills, and tools before execution."

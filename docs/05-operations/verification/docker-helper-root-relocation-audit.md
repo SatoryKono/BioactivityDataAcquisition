@@ -1,8 +1,8 @@
 # Docker Helper Root Relocation Audit
 
-Status: implemented for post-2026-07 candidate adjuncts. Required root compose
-entrypoints remain at root; optional helper adjuncts were rehomed behind
-reviewed owned paths.
+Status: implemented for post-2026-07 candidate adjuncts and RF-003 root setup
+helper retirement. Required root compose entrypoints remain at root; optional
+helper adjuncts and setup helpers are owned by scripts paths.
 
 This audit closes the "review before move" requirement for the reviewed root
 Docker helper family. It complements
@@ -32,8 +32,8 @@ Reviewed root Docker helper surfaces:
 | `docker-compose.minio.yml` | optional ADR-010 adjunct helper | contract file, Docker docs, local operator flows | `rehomed_2026_07` | `scripts/ops/runtime/docker/compose/minio.yml` |
 | `docker-compose.redis.yml` | optional ADR-010 adjunct helper | contract file, Makefile, Docker docs | `rehomed_2026_07` | `scripts/ops/runtime/docker/compose/redis.yml` |
 | `docker-compose.sonarqube.yml` | optional ADR-010 adjunct helper | contract file, Docker docs | `rehomed_2026_07` | `scripts/ops/runtime/docker/compose/sonarqube.yml` |
-| `docker-setup.ps1` | reviewed Windows bootstrap helper | operator docs, launcher instructions | `must_stay_root_for_now` | `scripts/ops/runtime/docker/docker-setup.ps1` behind a root shim |
-| `docker-setup.sh` | reviewed Bash bootstrap helper | operator docs, launcher instructions | `must_stay_root_for_now` | `scripts/ops/runtime/docker/docker-setup.sh` behind a root shim |
+| `docker-setup.ps1` | retired root Windows bootstrap helper | legacy operator docs, launcher instructions | `retired_root_script_2026_07_10` | `scripts/ops/docker-setup.ps1` command-compatible helper |
+| `docker-setup.sh` | retired root Bash bootstrap helper | legacy operator docs, launcher instructions | `retired_root_script_2026_07_10` | `scripts/ops/docker-setup.sh` command-compatible helper |
 | `Dockerfile.bioetl` | main local image build surface | manual builds, compose context assumptions | `must_stay_root_for_now` | `docker/images/bioetl/Dockerfile` only with compose/build refactor |
 | `Dockerfile.mcp-fetch` | Codex/MCP helper build surface | `docker-compose.codex.yml` | `rehomed_2026_07` | `scripts/ops/runtime/docker/images/mcp-fetch/Dockerfile` |
 | `Dockerfile.mcp-filesystem` | Codex/MCP helper build surface | `docker-compose.codex.yml` | `rehomed_2026_07` | `scripts/ops/runtime/docker/images/mcp-filesystem/Dockerfile` |
@@ -57,8 +57,8 @@ consumers still use exact root filenames:
 | `docker-compose.codex.yml` | `scripts/startup.*`, `scripts/shutdown.*`, `scripts/ops/docker-setup.*`, Codex/MCP docs | Move only after Codex/MCP startup and shutdown wrappers are repointed. |
 | `docker-compose.neo4j.yml` | `Makefile`, Neo4j ops docs, local audit flows | Move only after Neo4j helper commands and docs are repointed. |
 | `docker-compose.neo4j-audit.yml` | Neo4j audit launchers and audit docs | Move only after audit launchers and docs are repointed. |
-| `docker-setup.ps1` | root compatibility entrypoint over `scripts/ops/docker-setup.ps1` | Remove only when operator docs no longer advertise the root entrypoint. |
-| `docker-setup.sh` | root compatibility entrypoint over `scripts/ops/docker-setup.sh` | Remove only when operator docs no longer advertise the root entrypoint. |
+| `docker-setup.ps1` | retired root script; command parity retained in `scripts/ops/docker-setup.ps1` | Do not restore the root filename. |
+| `docker-setup.sh` | retired root script; command parity retained in `scripts/ops/docker-setup.sh` | Do not restore the root filename. |
 
 This means root minimization for Docker is blocked on a wrapper-first migration,
 not on file movement alone. A future move must update workflows, `Makefile`,

@@ -1,13 +1,18 @@
-> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
-> Canonical runtime source:
-> - Codex: `.codex/skills/grafana-dashboard-extension/SKILL.md`
-> Governance: [AI Runtime Mirror Ownership](../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../../agents/policy/POST_CHANGE_VALIDATION.md).
-> Edit the runtime source first, then refresh this mirror.
-______________________________________________________________________
-
-## name: grafana-dashboard-extension description: Extend, edit, validate, and review shipped Grafana dashboards for BioETL. Use when tasks touch `grafana/dashboards/*.json`, dashboard navigation, panel queries, variables, units, thresholds, Loki/Tempo drilldowns, or operator-facing dashboard UX. Treat repo dashboard JSON as source of truth and update docs when shipped dashboard behavior changes.
+---
+name: "grafana-dashboard-extension"
+description: "Extend, edit, validate, and review shipped Grafana dashboards for BioETL. Use when tasks touch `grafana/dashboards/*.json`, dashboard navigation, panel queries, variables, units, thresholds, Loki/Tempo drilldowns, or operator-facing dashboard UX. Treat repo dashboard JSON as source of truth and update docs when shipped dashboard behavior changes."
+---
 
 # Grafana Dashboard Extension
+
+## Source Of Truth
+
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+- Shared Grafana/Prometheus prerequisites: [references/grafana-prometheus-prerequisites.md](references/grafana-prometheus-prerequisites.md)
 
 ## Overview
 
@@ -45,6 +50,9 @@ Trigger this skill when the user asks to:
 Before editing:
 
 1. Read the target dashboard JSON in `grafana/dashboards/`.
+1. Read [references/grafana-prometheus-prerequisites.md](references/grafana-prometheus-prerequisites.md)
+   when the change touches Prometheus queries, no-data semantics, alert links,
+   render evidence, or datasource assumptions.
 1. Read `docs/03-guides/dashboards/dashboard-extension-llm.md`.
 1. If the task affects shipped navigation or operator workflow, also read:
    - `docs/03-guides/dashboards/README.md`
@@ -56,48 +64,47 @@ Before editing:
 ## BioETL Rules
 
 ### Source of Truth
-- Normative index: `../../../../NORMATIVE_SOURCES.md`
-- Root runtime contract: `../../../../../../AGENTS.md`
-- Project rules: `../../../../RULES.md`
-- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../../../02-architecture/decisions`
+
 - Treat `grafana/dashboards/*.json` as the primary source of truth.
 - Do not infer dashboard structure from screenshots, memory, or stale docs.
 - If docs and JSON disagree, trust the JSON and then reconcile docs.
+
 ### Current Navigation Model
+
 Preserve the current shipped model unless the task explicitly changes it:
+
 - `1. Overview`
 - `2. Runtime`
 - `3. Provider Health`
 - `4. Data Quality`
+
 If this model changes, update the affected docs in the same change set.
+
 ### Query and Panel Safety
+
 - Do not invent metric names.
 - Avoid unnecessary high-cardinality label filters in summary panels.
 - Be explicit about `0` versus `No data`.
 - Do not silently turn dashboard hints into real alerting behavior.
 - Keep drilldown links readable, stable, and operator-friendly.
+
 ### Datasource Conventions
+
 #### Prometheus
+
 - Use `or vector(0)` only when missing series really means zero events.
 - Preserve absence when missing data is diagnostic.
+
 #### Loki
+
 - Prefer safe baselines such as `{job="bioetl"}` when narrowing queries.
 - Use `| json` and `__error__` deliberately when extracting structured logs.
 - Do not rely on brittle encoded interpolation as a hidden source of truth.
+
 #### Tempo
+
 - Keep trace search behavior explicit.
 - Prefer minimal, stable search expressions before introducing richer filters.
-
-## Source Of Truth
-
-- Normative index: `../../../../NORMATIVE_SOURCES.md`
-- Root runtime contract: `../../../../../AGENTS.md`
-- Project rules: `../../../../RULES.md`
-- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs in `../../../../../02-architecture/decisions/`
-- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
-- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
 
 ## Workflow
 

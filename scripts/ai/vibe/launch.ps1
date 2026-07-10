@@ -18,7 +18,7 @@ $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $WSLRepoRoot = $RepoRoot -replace '\\', '/' -replace '^([A-Z]):', '/mnt/$1'
 $WSLRepoRoot = $WSLRepoRoot.ToLower()
 $VibeEnvWSL = "$WSLRepoRoot/scripts/ai/vibe/.env.vibe"
-$ProxyEnvWSL = "$WSLRepoRoot/.wsl_proxy_env.sh"
+$ProxyEnvWSL = "$WSLRepoRoot/scripts/engineering/dev/bash/.wsl_proxy_env.sh"
 
 $Colors = @{ Error = "Red"; Warning = "Yellow"; Info = "Cyan" }
 

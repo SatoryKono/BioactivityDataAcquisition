@@ -1,0 +1,4 @@
+interface:
+  display_name: "New Pipeline"
+  short_description: "Scaffold BioETL pipelines"
+  default_prompt: "Use $new-pipeline to scaffold a new BioETL provider/entity pipeline with configs, tests, and validation."

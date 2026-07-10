@@ -1,14 +1,18 @@
-> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
-> Canonical runtime source:
-> - Codex: `.codex/skills/create-pr/SKILL.md`
-> Governance: [AI Runtime Mirror Ownership](../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../../agents/policy/POST_CHANGE_VALIDATION.md).
-> Edit the runtime source first, then refresh this mirror.
-______________________________________________________________________
-
-## name: create-pr description: "Creates GitHub PRs with Conventional Commits titles adapted for BioETL project." context: none agent: general-purpose
+---
+name: "create-pr"
+description: "Creates GitHub PRs with Conventional Commits titles adapted for BioETL project."
+context: "none"
+agent: "general-purpose"
+---
 
 # Create Pull Request
 
+## Source Of Truth
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 Creates GitHub PRs with Conventional Commits titles adapted for BioETL project.
 
 ## BioETL Runtime Policy
@@ -87,6 +91,13 @@ Creates GitHub PRs with Conventional Commits titles adapted for BioETL project.
    - Type: What kind of change is this?
    - Scope: Which provider/layer/feature is affected?
    - Summary: What does the change do?
+
+1. **Run impact discovery** before finalizing the PR body:
+
+   - Use memory plus repo search to list related tests, docs, ADRs, contracts,
+     configs, diagrams, and reports.
+   - Note any checks that were intentionally skipped and the exact command that
+     should be run later.
 
 1. **Run checks before PR**:
 
@@ -203,12 +214,3 @@ Key validation rules:
 - Scope is optional but must be in parentheses if present
 - Exclamation mark for breaking changes goes before the colon
 - Summary must not end with a period
-
-## Source Of Truth
-- Normative index: `../../../../NORMATIVE_SOURCES.md`
-- Root runtime contract: `../../../../../../AGENTS.md`
-- Project rules: `../../../../RULES.md`
-- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../../../02-architecture/decisions`
-- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
-- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`

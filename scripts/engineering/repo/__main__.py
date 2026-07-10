@@ -21,6 +21,8 @@ Commands:
     split-testing-roadmap  Create or preview #2511 child issues
     sync-docs-issues   Preview or apply docs-sync issue metadata
     publish-tdx-audit-issues  Publish or reopen TDX-AUDIT GitHub issues
+    generate-branch-cleanup-inventory  Build branch cleanup inventory JSON (phase 0)
+    apply-branch-cleanup  Apply branch cleanup phases 1-2 (dry-run by default)
     cleanup-branch-candidates  Preview or apply curated branch cleanup plan
     check-all          Run read-only checks sequentially
     all                Alias for check-all
@@ -84,6 +86,12 @@ CHECK_COMMANDS = (
 _DIR = Path(__file__).parent
 
 
+def _run_branch_cleanup(subcommand: str, rest: list[str]) -> int:
+    from scripts.engineering.repo.branch_cleanup import main as branch_cleanup_main
+
+    return branch_cleanup_main([subcommand, *rest])
+
+
 def _run_check_all(rest: list[str]) -> int:
     for name in CHECK_COMMANDS:
         print(f"\n{'=' * 60}")
@@ -110,6 +118,12 @@ def main(argv: list[str] | None = None) -> int:
 
     if cmd in {"all", "check-all"}:
         return _run_check_all(rest)
+
+    if cmd == "generate-branch-cleanup-inventory":
+        return _run_branch_cleanup("inventory", rest)
+
+    if cmd == "apply-branch-cleanup":
+        return _run_branch_cleanup("apply", rest)
 
     if cmd not in COMMAND_SPECS:
         return print_unknown_command(

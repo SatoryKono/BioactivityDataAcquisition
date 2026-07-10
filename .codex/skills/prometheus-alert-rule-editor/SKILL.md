@@ -6,11 +6,13 @@ description: "Create, review, and safely update Prometheus-backed alert rules, i
 # Prometheus Alert Rule Editor
 
 ## Source Of Truth
+
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+- Shared Grafana/Prometheus prerequisites: [../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md](../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md)
 
 ## Overview
 
@@ -40,6 +42,8 @@ Trigger this skill when the user asks to:
 
 ### 1. Read the Current Rule Shape
 
+- Read the shared prerequisites when datasource discovery, query debugging,
+  promtool testing, or Grafana-managed alert behavior is involved.
 - Determine whether the rule lives in repo files or Grafana-managed alerting.
 - Read the current rule and its surrounding group.
 - Identify the actual operational intent before editing the expression.

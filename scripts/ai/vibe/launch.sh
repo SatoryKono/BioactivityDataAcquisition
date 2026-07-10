@@ -52,11 +52,12 @@ if timeout 5 test -f "${HOME}/.local/bin/env" 2>/dev/null \
     source "${HOME}/.local/bin/env" 2>/dev/null || true
 fi
 
-# Load WSL proxy environment if available with timeout
-if timeout 5 test -f "${REPO_ROOT}/.wsl_proxy_env.sh" 2>/dev/null \
-    && timeout 5 bash -c "source '${REPO_ROOT}/.wsl_proxy_env.sh'" 2>/dev/null; then
+# Load shared WSL proxy environment if available with timeout
+SHARED_WSL_PROXY_ENV="${REPO_ROOT}/scripts/engineering/dev/bash/.wsl_proxy_env.sh"
+if timeout 5 test -f "${SHARED_WSL_PROXY_ENV}" 2>/dev/null \
+    && timeout 5 bash -c "source '${SHARED_WSL_PROXY_ENV}'" 2>/dev/null; then
     # shellcheck disable=SC1091
-    source "${REPO_ROOT}/.wsl_proxy_env.sh" 2>/dev/null || true
+    source "${SHARED_WSL_PROXY_ENV}" 2>/dev/null || true
 fi
 
 # Load local Vibe configuration with timeout protection

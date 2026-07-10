@@ -11,11 +11,12 @@ Usage:
 
 Behavior:
   - Dry-run is the default mode.
-  - Deletes only the curated local branch candidates agreed during the branch audit.
+  - Deletes curated local branch candidates from the 2026-07 branch hygiene plan.
   - Creates archive tags before deleting the archive group.
-  - Removes origin/cleanup-backup only when --with-remote is provided.
+  - Removes origin garbage branches when --with-remote is provided.
   - Skips missing branches and refuses to delete the current branch.
   - Skips protected branches and branches that are still attached to a worktree.
+  - Never deletes main/master or master_202606*/master_202607*/main_202606*/main_202607*.
 EOF
   return 0
 }
@@ -65,8 +66,19 @@ done
 
 CURRENT_BRANCH="$(git branch --show-current)"
 
-MERGED_BRANCHES=(
+GARBAGE_BRANCHES=(
+  "1"
+  "2"
+  "a1"
+  "tmp"
+  "tmp01"
+  "tmp2"
+  "tmp-audit-noop-cleanup"
+  "ьфыеук"
   "cleanup-backup"
+)
+
+MERGED_BRANCHES=(
   "consolidate/recent-branches-20260422"
   "issue-2858-2861-normalization-cleanup"
   "main_20260414"
@@ -100,11 +112,27 @@ ARCHIVE_BRANCHES=(
 )
 
 REMOTE_BRANCHES=(
+  "1"
+  "2"
+  "a1"
+  "tmp"
+  "tmp01"
+  "tmp2"
+  "tmp-audit-noop-cleanup"
+  "ьфыеук"
   "cleanup-backup"
 )
 
 PROTECTED_BRANCHES=(
-  "main_20260404"
+  "main"
+  "master"
+)
+
+PROTECTED_PREFIXES=(
+  "master_202606"
+  "master_202607"
+  "main_202606"
+  "main_202607"
 )
 
 branch_exists() {
@@ -138,8 +166,14 @@ log_action() {
 is_protected_branch() {
   local branch="$1"
   local protected
+  local prefix
   for protected in "${PROTECTED_BRANCHES[@]}"; do
     if [[ "${branch}" == "${protected}" ]]; then
+      return 0
+    fi
+  done
+  for prefix in "${PROTECTED_PREFIXES[@]}"; do
+    if [[ "${branch}" == "${prefix}"* ]]; then
       return 0
     fi
   done
@@ -237,6 +271,10 @@ delete_remote_branch() {
   local -a git_cmd=(git push origin --delete "${branch}")
   local -a env_cmd=()
 
+  if is_protected_branch "${branch}"; then
+    log_action "SKIP" "origin/${branch} (protected)"
+    return 0
+  fi
   if ! remote_branch_exists "${branch}"; then
     log_action "SKIP" "origin/${branch} (missing)"
     return 0
@@ -281,6 +319,12 @@ echo "repo: ${REPO_ROOT}"
 echo "current branch: ${CURRENT_BRANCH}"
 echo "mode: $([[ "${APPLY}" -eq 1 ]] && echo apply || echo dry-run)"
 echo "archive date: ${ARCHIVE_DATE}"
+echo
+
+echo "-- phase 1 garbage local branches --"
+for branch in "${GARBAGE_BRANCHES[@]}"; do
+  delete_local_branch "${branch}" -D
+done
 echo
 
 echo "-- merged local branches --"

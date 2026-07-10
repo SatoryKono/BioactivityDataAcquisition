@@ -6,11 +6,13 @@ description: "Extend, edit, validate, and review shipped Grafana dashboards for 
 # Grafana Dashboard Extension
 
 ## Source Of Truth
+
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+- Shared Grafana/Prometheus prerequisites: [references/grafana-prometheus-prerequisites.md](references/grafana-prometheus-prerequisites.md)
 
 ## Overview
 
@@ -48,6 +50,9 @@ Trigger this skill when the user asks to:
 Before editing:
 
 1. Read the target dashboard JSON in `grafana/dashboards/`.
+1. Read [references/grafana-prometheus-prerequisites.md](references/grafana-prometheus-prerequisites.md)
+   when the change touches Prometheus queries, no-data semantics, alert links,
+   render evidence, or datasource assumptions.
 1. Read `docs/03-guides/dashboards/dashboard-extension-llm.md`.
 1. If the task affects shipped navigation or operator workflow, also read:
    - `docs/03-guides/dashboards/README.md`

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Generating Constrained Specs"
+  short_description: "Generate DEC-traced specs"
+  default_prompt: "Use $generating-constrained-specs to generate PRD and architecture sections constrained by DEC-* decisions."

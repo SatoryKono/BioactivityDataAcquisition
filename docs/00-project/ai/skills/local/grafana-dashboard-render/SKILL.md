@@ -3,12 +3,6 @@ name: grafana-dashboard-render
 description: Render, preflight-check, and capture evidence for shipped BioETL Grafana dashboards. Use when the task is to produce reproducible dashboard screenshots, validate Grafana render/auth readiness, run live reviewed panel audits, or explain why full render is blocked on the current host.
 ---
 
-> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
-> Canonical runtime source:
-> - Codex: `.codex/skills/grafana-dashboard-render/SKILL.md`
-> Governance: [AI Runtime Mirror Ownership](../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../../agents/policy/POST_CHANGE_VALIDATION.md).
-> Edit the runtime source first, then refresh this mirror.
-
 # Grafana Dashboard Render
 
 ## Overview
@@ -35,11 +29,13 @@ dashboard JSON, queries, navigation, or operator-facing UX.
 - Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 
 ## Source Of Truth
-- Normative index: `../../../../NORMATIVE_SOURCES.md`
-- Root runtime contract: `../../../../../../AGENTS.md`
-- Project rules: `../../../../RULES.md`
-- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../../../02-architecture/decisions`
+
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+- Shared Grafana/Prometheus prerequisites: [../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md](../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md)
 - Shipped dashboards: `grafana/dashboards/*.json`
 - Canonical screenshot tooling:
   - `python -m scripts.ops rerender-grafana`
@@ -53,6 +49,9 @@ they match the shipped tooling path.
 
 ### 1. Inventory the target
 
+- Read the shared prerequisites when render work includes Prometheus-backed
+  panel semantics, zero-vs-no-data interpretation, or validation handoff:
+  [../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md](../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md).
 - If the user asked for all dashboards, enumerate `grafana/dashboards/*.json`.
 - If the user named specific dashboards, preserve those UIDs and avoid broad
   rerender noise.

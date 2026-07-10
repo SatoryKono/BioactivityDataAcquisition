@@ -10,8 +10,8 @@ Consolidated registry of BioETL-focused local skills under `.codex/skills/`.
 - Verify and sync the local docs mirror with:
 
 ```bash
-bash scripts/check_skills_mirror.sh --check
-bash scripts/check_skills_mirror.sh --sync
+bash scripts/ai/codex/check_skills_mirror.sh --check
+bash scripts/ai/codex/check_skills_mirror.sh --sync
 ```
 
 ## Skill Groups
@@ -51,6 +51,7 @@ bash scripts/check_skills_mirror.sh --sync
 
 | Skill                          | Path                                         | Purpose                                               |
 | ------------------------------ | -------------------------------------------- | ----------------------------------------------------- |
+| `grafana-dashboard-render`     | `.codex/skills/grafana-dashboard-render`     | Render, preflight, and audit shipped Grafana dashboards |
 | `grafana-dashboard-extension`  | `.codex/skills/grafana-dashboard-extension`  | Edit and validate shipped Grafana dashboards          |
 | `prometheus-metric-discovery`  | `.codex/skills/prometheus-metric-discovery`  | Discover real metrics, labels, and selectors          |
 | `prometheus-query-debugger`    | `.codex/skills/prometheus-query-debugger`    | Debug PromQL semantics and empty-state behavior       |
@@ -91,6 +92,8 @@ bash scripts/check_skills_mirror.sh --sync
 
 - All local skills are structurally valid.
 - `documentation-cascade-audit` has been normalized from template/TODO state to an active skill.
+- Shared wrapper, evidence/decision, and Grafana/Prometheus prerequisite contracts are factored into reusable `references/` files.
+- Active project skills provide `agents/openai.yaml` metadata and are covered by the Codex skill architecture gate.
 
 ## Mirror Doc Index
 
@@ -101,6 +104,7 @@ bash scripts/check_skills_mirror.sh --sync
 - [deep-research](deep-research/SKILL.md)
 - [documentation-audit](documentation-audit/SKILL.md)
 - [documentation-cascade-audit](documentation-cascade-audit/SKILL.md)
+- [grafana-dashboard-render](grafana-dashboard-render/SKILL.md)
 - [grafana-dashboard-extension](grafana-dashboard-extension/SKILL.md)
 - [generating-constrained-specs](generating-constrained-specs/SKILL.md)
 - [initializing-ledger](initializing-ledger/SKILL.md)

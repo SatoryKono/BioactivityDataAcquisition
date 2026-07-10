@@ -1020,6 +1020,9 @@ repo_backed_unit_test_exceptions:
   - path: tests/unit/repo_backed/composition/bootstrap/runtime/test_pipeline_bootstrap.py
     target_lane: repo-backed-unit
     protected_surface: src/bioetl/composition/bootstrap/runtime/pipeline.py
+  - path: tests/unit/repo_backed/composition/test_bootstrap_cache_fixtures.py
+    target_lane: repo-backed-unit
+    protected_surface: tests/conftest.py bootstrap registry cache fixtures
   - path: tests/unit/repo_backed/composition/test_coverage_boost_facades.py
     target_lane: repo-backed-unit
     protected_surface: src/bioetl/composition/factories/storage/maintenance_mixin.py

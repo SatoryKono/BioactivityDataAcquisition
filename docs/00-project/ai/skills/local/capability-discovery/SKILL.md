@@ -1,14 +1,23 @@
-> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
-> Canonical runtime source:
-> - Codex: `.codex/skills/capability-discovery/SKILL.md`
-> Governance: [AI Runtime Mirror Ownership](../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../../agents/policy/POST_CHANGE_VALIDATION.md).
-> Edit the runtime source first, then refresh this mirror.
-______________________________________________________________________
-
-## name: capability-discovery description: Use before workflow execution to discover available agents, skills, and quality commands in the project environment. Use when adapting gh-workflow commands to project-specific tooling. allowed-tools: Bash, Read, Glob, Grep context: fork agent: Explore
+---
+name: "capability-discovery"
+description: "Use before workflow execution to discover available agents, skills, and quality commands in the project environment. Use when adapting gh-workflow commands to project-specific tooling."
+allowed-tools:
+  - Bash
+  - Read
+  - Glob
+  - Grep
+context: "fork"
+agent: "Explore"
+---
 
 # Capability Discovery
 
+## Source Of Truth
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 This skill discovers available capabilities (skills, agents, commands) in the user's environment to enable dynamic workflow adaptation.
 
 ## Purpose
@@ -27,6 +36,9 @@ Before executing workflows, discover what tools are available so commands can:
 ```bash
 # Project-level Codex agents (preferred source of truth)
 ls .codex/agents/*.md 2>/dev/null | xargs -I {} basename {} .md
+
+# Project-level Gemini mirrors
+ls .gemini/agents/*.md 2>/dev/null | xargs -I {} basename {} .md
 
 # Plugin agents
 ls plugins/*/agents/*.md 2>/dev/null | while read f; do
@@ -56,8 +68,8 @@ done
 ### Step 3: Scan for Custom Commands
 
 ```bash
-# Project-level command registries
-ls scripts/*/__main__.py 2>/dev/null | xargs -I {} dirname {}
+# Project-level command trees are not expected in the Codex runtime.
+# Prefer runtime skills plus AGENTS.md / repo docs as the command surface.
 
 # Plugin commands
 ls plugins/*/commands/*.md 2>/dev/null | while read f; do
@@ -78,9 +90,6 @@ sed -n '1,120p' .codex/config.toml 2>/dev/null
 
 # MCP server inventory
 sed -n '1,220p' .codex/settings.json 2>/dev/null
-
-# Active tools hub
-grep -E "scripts\\.|make |uv run python -m" docs/00-project/TOOLS.md 2>/dev/null
 ```
 
 ### Step 5: Detect Tech Stack
@@ -145,7 +154,7 @@ Based on capabilities:
 
 Before implementation:
 1. Invoke capability-discovery skill
-2. Note available `.codex/agents` and `.codex/skills`
+2. Note available `.codex/agents`, `.gemini/agents`, and `.codex/skills`
 3. Note quality commands for Phase 3
 4. Store tech stack and Codex runtime constraints for appropriate tooling
 ```
@@ -192,12 +201,3 @@ Results inform:
 1. **Prefer explicit** - `AGENTS.md` and `.codex/config.toml` over inferred defaults
 1. **Report clearly** - Show what was found and what wasn't
 1. **Enable fallbacks** - Never block workflow due to missing capabilities
-
-## Source Of Truth
-- Normative index: `../../../../NORMATIVE_SOURCES.md`
-- Root runtime contract: `../../../../../../AGENTS.md`
-- Project rules: `../../../../RULES.md`
-- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../../../02-architecture/decisions`
-- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
-- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`

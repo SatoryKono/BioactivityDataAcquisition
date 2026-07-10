@@ -29,11 +29,13 @@ dashboard JSON, queries, navigation, or operator-facing UX.
 - Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 
 ## Source Of Truth
+
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+- Shared Grafana/Prometheus prerequisites: [../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md](../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md)
 - Shipped dashboards: `grafana/dashboards/*.json`
 - Canonical screenshot tooling:
   - `python -m scripts.ops rerender-grafana`
@@ -47,6 +49,9 @@ they match the shipped tooling path.
 
 ### 1. Inventory the target
 
+- Read the shared prerequisites when render work includes Prometheus-backed
+  panel semantics, zero-vs-no-data interpretation, or validation handoff:
+  [../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md](../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md).
 - If the user asked for all dashboards, enumerate `grafana/dashboards/*.json`.
 - If the user named specific dashboards, preserve those UIDs and avoid broad
   rerender noise.

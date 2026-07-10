@@ -1,13 +1,18 @@
-> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
-> Canonical runtime source:
-> - Codex: `.codex/skills/prometheus-metric-discovery/SKILL.md`
-> Governance: [AI Runtime Mirror Ownership](../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../../agents/policy/POST_CHANGE_VALIDATION.md).
-> Edit the runtime source first, then refresh this mirror.
-______________________________________________________________________
-
-## name: prometheus-metric-discovery description: Discover real Prometheus metrics, labels, label values, and metric metadata before writing PromQL or editing dashboards and alerts. Use when tasks touch Prometheus-backed Grafana panels, alert rules, recording rules, query debugging, or datasource investigation.
+---
+name: "prometheus-metric-discovery"
+description: "Discover real Prometheus metrics, labels, label values, and metric metadata before writing PromQL or editing dashboards and alerts. Use when tasks touch Prometheus-backed Grafana panels, alert rules, recording rules, query debugging, or datasource investigation."
+---
 
 # Prometheus Metric Discovery
+
+## Source Of Truth
+
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+- Shared Grafana/Prometheus prerequisites: [../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md](../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md)
 
 ## Overview
 
@@ -33,19 +38,12 @@ Trigger this skill when the user asks to:
 - find the right metric or label set for a dashboard
 - verify whether a metric, label, or series really exists
 
-## Source Of Truth
-- Normative index: `../../../../NORMATIVE_SOURCES.md`
-- Root runtime contract: `../../../../../../AGENTS.md`
-- Project rules: `../../../../RULES.md`
-- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../../../02-architecture/decisions`
-- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
-- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
-
 ## Workflow
 
 ### 1. Discover Candidate Metrics
 
+- Read the shared prerequisites when discovery is part of dashboard, alert, or
+  render validation work.
 - Start with metric-name discovery instead of guessing.
 - Prefer nearby naming families over isolated one-off metrics.
 - If the task started from an existing query, extract its core metric names

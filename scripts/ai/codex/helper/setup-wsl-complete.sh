@@ -183,7 +183,7 @@ echo ""
 log_header "Step 6: Configure WSL Proxy Autoload"
 
 BASHRC="$HOME/.bashrc"
-WSL_PROXY_RC="${REPO_ROOT}/.wsl_proxy_env.sh"
+WSL_PROXY_RC="${REPO_ROOT}/scripts/engineering/dev/bash/.wsl_proxy_env.sh"
 
 if [[ ! -f "${WSL_PROXY_RC}" ]]; then
     log_warn "WSL proxy config not found: ${WSL_PROXY_RC}"

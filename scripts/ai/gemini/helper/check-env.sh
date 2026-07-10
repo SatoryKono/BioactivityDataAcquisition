@@ -122,9 +122,10 @@ else
     ALL_CHECKS=false
 fi
 
-# 6. Load proxy if available
-if [[ -f "${REPO_ROOT}/.wsl_proxy_env.sh" ]]; then
-    source "${REPO_ROOT}/.wsl_proxy_env.sh" 2>/dev/null || true
+# 6. Load shared WSL proxy if available
+SHARED_WSL_PROXY_ENV="${REPO_ROOT}/scripts/engineering/dev/bash/.wsl_proxy_env.sh"
+if [[ -f "${SHARED_WSL_PROXY_ENV}" ]]; then
+    source "${SHARED_WSL_PROXY_ENV}" 2>/dev/null || true
 fi
 
 # 7. Check MCP configuration

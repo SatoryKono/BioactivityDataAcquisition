@@ -1,13 +1,18 @@
-> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
-> Canonical runtime source:
-> - Codex: `.codex/skills/prometheus-query-debugger/SKILL.md`
-> Governance: [AI Runtime Mirror Ownership](../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../../agents/policy/POST_CHANGE_VALIDATION.md).
-> Edit the runtime source first, then refresh this mirror.
-______________________________________________________________________
-
-## name: prometheus-query-debugger description: Debug PromQL semantics, empty results, aggregation mistakes, histogram queries, and `No data` versus `0` behavior. Use when Prometheus-backed Grafana panels, recording rules, or alert expressions behave unexpectedly.
+---
+name: "prometheus-query-debugger"
+description: "Debug PromQL semantics, empty results, aggregation mistakes, histogram queries, and `No data` versus `0` behavior. Use when Prometheus-backed Grafana panels, recording rules, or alert expressions behave unexpectedly."
+---
 
 # Prometheus Query Debugger
+
+## Source Of Truth
+
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+- Shared Grafana/Prometheus prerequisites: [../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md](../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md)
 
 ## Overview
 
@@ -32,19 +37,12 @@ Trigger this skill when the user asks to:
 - repair histogram or percentile queries
 - clarify whether missing series should show `0` or `No data`
 
-## Source Of Truth
-- Normative index: `../../../../NORMATIVE_SOURCES.md`
-- Root runtime contract: `../../../../../../AGENTS.md`
-- Project rules: `../../../../RULES.md`
-- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../../../02-architecture/decisions`
-- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
-- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
-
 ## Workflow
 
 ### 1. Reproduce the Current Query
 
+- Read the shared prerequisites when the query belongs to a dashboard panel,
+  alert rule, recording rule, or render blocker.
 - Start from the exact current expression.
 - Use instant or range query mode intentionally.
 - Confirm whether the issue is reproducible before changing anything.

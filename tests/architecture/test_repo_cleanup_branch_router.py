@@ -17,6 +17,8 @@ def test_repo_router_exposes_cleanup_branch_candidates_command() -> None:
         "cleanup-branch-candidates  Preview or apply curated branch cleanup plan"
         in router
     )
+    assert "generate-branch-cleanup-inventory" in router
+    assert "apply-branch-cleanup" in router
 
 
 def test_repo_readme_prefers_canonical_cleanup_branch_candidates_route() -> None:

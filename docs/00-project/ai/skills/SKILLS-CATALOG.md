@@ -1,7 +1,7 @@
 # Каталог Локальных Skills (Ядро BioETL)
 
 *Статус: internal-published (Internal / Extended)*
-*Обновлено: 2026-04-02 (Grafana and Prometheus observability skills added)*
+*Обновлено: 2026-07-10 (Codex skills refactor and metadata gates)*
 
 Сводный реестр локальных BioETL-skills.
 
@@ -36,10 +36,13 @@
 | Skill           | Назначение           |
 | --------------- | -------------------- |
 | `py-audit-bot`  | Профиль аудита       |
+| `py-architecture-debt-bot` | Полный workflow снижения архитектурного долга |
+| `py-code-bot`   | Deprecated compatibility marker for historical references |
 | `py-config-bot` | Профиль конфигурации |
 | `py-debug-bot`  | Профиль отладки      |
 | `py-doc-bot`    | Профиль документации |
 | `py-plan-bot`   | Профиль планирования |
+| `py-reproducibility-audit` | Аудит replay determinism и воспроизводимости |
 | `py-test-bot`   | Профиль тестирования |
 
 ### Архитектура и Качество
@@ -55,6 +58,7 @@
 | Skill                          | Назначение                                                               |
 | ------------------------------ | ------------------------------------------------------------------------ |
 | `grafana-dashboard-extension`  | Расширение, правка и валидация shipped Grafana dashboards                |
+| `grafana-dashboard-render`     | Render/preflight/audit evidence for shipped Grafana dashboards           |
 | `prometheus-metric-discovery`  | Поиск реальных Prometheus metrics, labels и selector-кандидатов          |
 | `prometheus-query-debugger`    | Отладка PromQL, empty-state semantics и aggregation mistakes             |
 | `prometheus-alert-rule-editor` | Создание и безопасная правка Prometheus-backed alert rules               |
@@ -72,7 +76,13 @@
 | Skill                  | Назначение                                                 |
 | ---------------------- | ---------------------------------------------------------- |
 | `capability-discovery` | Обнаружение доступных agents/skills/quality commands       |
+| `collecting-evidence`  | Создание traceable evidence objects                         |
 | `deep-research`        | Структурированный deep research workflow                   |
+| `synthesizing-pillars` | Синтез evidence pillars в insights и contradictions         |
+| `making-decisions`     | Превращение синтеза в явные DEC-* decisions                 |
+| `generating-constrained-specs` | Генерация PRD/architecture specs из decisions       |
+| `initializing-ledger`  | Инициализация evidence/decision workspace                   |
+| `nci-analysis`         | Анализ манипулятивных и пропагандистских паттернов          |
 | `repo-config`          | Получение динамической конфигурации репозитория            |
 | `suggest-users`        | Подбор reviewers/assignees на основе контекста репозитория |
 | `create-pr`            | Гайд по workflow создания PR                               |
@@ -84,37 +94,45 @@
 | `new-pipeline`               | Создание provider/entity pipeline           |
 | `technical-designer-mermaid` | Проектирование технических Mermaid-диаграмм |
 
-## Wave 6 Consolidation (2026-03-12)
+## Skill Refactor Status (2026-07-10)
 
-Удалены 6 skills из устаревшего parallel runtime surface и docs-зеркал:
-
-| Удалён                         | Причина                                     |
-| ------------------------------ | ------------------------------------------- |
-| `collecting-evidence`          | Ledger framework — не используется в BioETL |
-| `synthesizing-pillars`         | Ledger framework — не используется          |
-| `making-decisions`             | Ledger framework — не используется          |
-| `generating-constrained-specs` | Ledger framework — не используется          |
-| `initializing-ledger`          | Ledger framework — не используется          |
-| `nci-analysis`                 | Propaganda analysis — нерелевантно для ETL  |
-
-Также удалены 2 OpenAI metadata файла (`*.openai.yaml`).
+- `documentation-cascade-audit` promoted to project-local Codex runtime source.
+- Thin `py-*` and maintenance wrappers use a shared wrapper contract for scope,
+  expected output, validation, and fallback behavior.
+- Long-form generic skills use concise entrypoints with progressive disclosure
+  references.
+- Evidence, synthesis, decision, and constrained-spec skills share one
+  evidence/decision workflow contract.
+- Grafana and Prometheus skills share one prerequisites contract for runtime
+  discovery, datasource checks, and no-data semantics.
+- Active project skills are expected to provide `agents/openai.yaml` metadata
+  and pass the Codex skill architecture gate.
 
 ## Индекс Зеркала Документации
 
 - [agent-orchestration](local/agent-orchestration/SKILL.md)
 - [capability-discovery](local/capability-discovery/SKILL.md)
+- [collecting-evidence](local/collecting-evidence/SKILL.md)
 - [create-pr](local/create-pr/SKILL.md)
 - [deep-research](local/deep-research/SKILL.md)
 - [documentation-audit](local/documentation-audit/SKILL.md)
 - [documentation-cascade-audit](local/documentation-cascade-audit/SKILL.md)
 - [grafana-dashboard-extension](local/grafana-dashboard-extension/SKILL.md)
-- [new-pipeline](local/new-pipeline/SKILL.md)
+- [grafana-dashboard-render](local/grafana-dashboard-render/SKILL.md)
+- [generating-constrained-specs](local/generating-constrained-specs/SKILL.md)
 - [hierarchical-evidence-orchestration](local/hierarchical-evidence-orchestration/SKILL.md)
+- [initializing-ledger](local/initializing-ledger/SKILL.md)
+- [making-decisions](local/making-decisions/SKILL.md)
+- [nci-analysis](local/nci-analysis/SKILL.md)
+- [new-pipeline](local/new-pipeline/SKILL.md)
+- [py-architecture-debt-bot](local/py-architecture-debt-bot/SKILL.md)
 - [py-audit-bot](local/py-audit-bot/SKILL.md)
+- [py-code-bot](local/py-code-bot/SKILL.md)
 - [py-config-bot](local/py-config-bot/SKILL.md)
 - [py-debug-bot](local/py-debug-bot/SKILL.md)
 - [py-doc-bot](local/py-doc-bot/SKILL.md)
 - [py-plan-bot](local/py-plan-bot/SKILL.md)
+- [py-reproducibility-audit](local/py-reproducibility-audit/SKILL.md)
 - [py-review-orchestrator](local/py-review-orchestrator/SKILL.md)
 - [prometheus-alert-rule-editor](local/prometheus-alert-rule-editor/SKILL.md)
 - [prometheus-metric-discovery](local/prometheus-metric-discovery/SKILL.md)
@@ -124,6 +142,7 @@
 - [py-test-swarm](local/py-test-swarm/SKILL.md)
 - [repo-config](local/repo-config/SKILL.md)
 - [suggest-users](local/suggest-users/SKILL.md)
+- [synthesizing-pillars](local/synthesizing-pillars/SKILL.md)
 - [technical-designer-mermaid](local/technical-designer-mermaid/SKILL.md)
 - [vcr-record](local/vcr-record/SKILL.md)
 - [verify-architecture](local/verify-architecture/SKILL.md)

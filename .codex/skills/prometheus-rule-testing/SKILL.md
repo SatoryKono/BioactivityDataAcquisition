@@ -6,11 +6,13 @@ description: "Test repo-backed Prometheus alert and recording rules with `promto
 # Prometheus Rule Testing
 
 ## Source Of Truth
+
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+- Shared Grafana/Prometheus prerequisites: [../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md](../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md)
 
 ## Overview
 
@@ -40,6 +42,8 @@ Trigger this skill when the user asks to:
 
 ### 1. Read the Rule File
 
+- Read the shared prerequisites when rule testing is part of an alert or
+  dashboard validation chain.
 - Inspect the target rule and its group context.
 - Confirm the rule is repo-backed and compatible with `promtool`.
 - Identify the behavior that needs to be proven.

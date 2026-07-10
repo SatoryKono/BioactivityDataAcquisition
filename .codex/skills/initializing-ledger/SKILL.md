@@ -8,11 +8,13 @@ agent: "general-purpose"
 # Ledger Initialization
 
 ## Source Of Truth
+
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+- Shared evidence/decision contract: [../collecting-evidence/references/evidence-decision-contract.md](../collecting-evidence/references/evidence-decision-contract.md)
 This skill creates a complete Context Ledger workspace from a project brief.
 
 ## Prerequisites
@@ -194,5 +196,6 @@ After successful initialization:
 
 ## References
 
+- [../collecting-evidence/references/evidence-decision-contract.md](../collecting-evidence/references/evidence-decision-contract.md) - shared chain contract
 - [references/brief-template.md](references/brief-template.md) - BRIEF.md template
 - [references/pillar-definitions.md](references/pillar-definitions.md) - Pillar definitions and scope

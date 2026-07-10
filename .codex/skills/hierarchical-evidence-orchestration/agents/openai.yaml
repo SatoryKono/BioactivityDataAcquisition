@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hierarchical Evidence Orchestration"
+  short_description: "Coordinate evidence shard waves"
+  default_prompt: "Use $hierarchical-evidence-orchestration to decompose a BioETL evidence wave into shard packs and synthesis."

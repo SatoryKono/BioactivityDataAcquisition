@@ -6,11 +6,13 @@ description: "Orchestrate hierarchical evidence work for a BioETL topic by decom
 # Hierarchical Evidence Orchestration
 
 ## Source Of Truth
+
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+- Shared evidence/decision contract: [../collecting-evidence/references/evidence-decision-contract.md](../collecting-evidence/references/evidence-decision-contract.md)
 
 ## Core Role
 
@@ -226,5 +228,6 @@ Treat the hierarchical wave as complete only when:
 
 ## References
 
+- Shared evidence and decision chain contract: [../collecting-evidence/references/evidence-decision-contract.md](../collecting-evidence/references/evidence-decision-contract.md)
 - Orchestration artifact and gate contract: [references/orchestration-contract.md](references/orchestration-contract.md)
 - Collector and synthesizer shard briefs: [references/shard-task-briefs.md](references/shard-task-briefs.md)

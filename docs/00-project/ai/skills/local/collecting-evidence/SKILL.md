@@ -1,14 +1,20 @@
-> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
-> Canonical runtime source:
-> - Codex: `.codex/skills/collecting-evidence/SKILL.md`
-> Governance: [AI Runtime Mirror Ownership](../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../../agents/policy/POST_CHANGE_VALIDATION.md).
-> Edit the runtime source first, then refresh this mirror.
-______________________________________________________________________
-
-## name: collecting-evidence description: Use when researching a specific pillar and need to create traceable evidence objects. Guides creation of YAML evidence files with semantic IDs, confidence scores, and assumptions. context: fork agent: general-purpose
+---
+name: "collecting-evidence"
+description: "Use when researching a specific pillar and need to create traceable evidence objects. Guides creation of YAML evidence files with semantic IDs, confidence scores, and assumptions."
+context: "fork"
+agent: "general-purpose"
+---
 
 # Evidence Collection
 
+## Source Of Truth
+
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+- Shared evidence/decision contract: [references/evidence-decision-contract.md](references/evidence-decision-contract.md)
 This skill guides the creation of structured Evidence Objects for a single research pillar.
 
 ## Prerequisites
@@ -16,15 +22,6 @@ This skill guides the creation of structured Evidence Objects for a single resea
 - Ledger workspace initialized (`/ledger-init` completed)
 - Pillar assignment (which pillar to research)
 - Research scope from `01-pillars/PILLARS.md`
-
-## Source Of Truth
-- Normative index: `../../../../NORMATIVE_SOURCES.md`
-- Root runtime contract: `../../../../../../AGENTS.md`
-- Project rules: `../../../../RULES.md`
-- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../../../02-architecture/decisions`
-- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
-- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
 
 ## Workflow
 
@@ -47,7 +44,7 @@ Read `01-pillars/PILLARS.md` to understand:
 - Specific research questions for this pillar
 - Any scope restrictions
 
-See `references/research-protocols.md` for pillar-specific protocols.
+See [references/research-protocols.md](references/research-protocols.md) for pillar-specific protocols.
 
 ### Step 2: Identify Evidence Sources
 
@@ -82,9 +79,9 @@ For each source:
 
 Write YAML files to `02-evidence/<pillar>/`.
 
-**Naming:** Use semantic IDs per `references/id-generation-rules.md`.
+**Naming:** Use semantic IDs per [references/id-generation-rules.md](references/id-generation-rules.md).
 
-**Schema:** See `references/evidence-object-schema.md`.
+**Schema:** See [references/evidence-object-schema.md](references/evidence-object-schema.md).
 
 <good-example>
 ```yaml
@@ -242,6 +239,7 @@ After evidence collection:
 
 ## References
 
-- `references/evidence-object-schema.md` - YAML schema
-- `references/research-protocols.md` - Pillar-specific research guidance
-- `references/id-generation-rules.md` - Semantic ID creation
+- [references/evidence-decision-contract.md](references/evidence-decision-contract.md) - shared chain contract
+- [references/evidence-object-schema.md](references/evidence-object-schema.md) - YAML schema
+- [references/research-protocols.md](references/research-protocols.md) - Pillar-specific research guidance
+- [references/id-generation-rules.md](references/id-generation-rules.md) - Semantic ID creation

@@ -1,17 +1,54 @@
-# Report Template Reference Redirect
+# Documentation Audit Report (BioETL v5.23+)
 
-Status: active compatibility reference
-Class: published-redirect
-Owner: BioETL Team
-Last verified: '2026-07-09'
+## Summary
 
-This page keeps the legacy local reference URL stable.
+- Date:
+- Scope:
+- Overall status:
 
-The maintained mirror is
-[report-template.md](../../../_references/local/documentation-audit/references/report-template.md).
+## Inventory
 
-Runtime source:
+- Docs scanned:
+- Entry points (README.md, mkdocs.yml):
 
-- `.codex/skills/documentation-audit/references/report-template.md`
+## Findings by severity
 
-Do not copy the reference body back into this page.
+### Critical
+
+-
+
+### High
+
+-
+
+### Medium
+
+-
+
+### Low
+
+-
+
+## Proposed changes (prioritized)
+
+1.
+1.
+1.
+
+## Required decisions
+
+-
+
+## Updated files (if changes applied)
+
+-
+
+## Dead or orphan docs (candidates)
+
+-
+
+## Verification
+
+- RULES.md and REQUIREMENTS.md sync:
+- ADR alignment (ADR-010, ADR-014, ADR-017):
+- Link check:

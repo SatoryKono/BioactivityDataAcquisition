@@ -1,14 +1,22 @@
-> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
-> Canonical runtime source:
-> - Codex: `.codex/skills/suggest-users/SKILL.md`
-> Governance: [AI Runtime Mirror Ownership](../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../../agents/policy/POST_CHANGE_VALIDATION.md).
-> Edit the runtime source first, then refresh this mirror.
-______________________________________________________________________
-
-## name: suggest-users description: Use when creating PRs to suggest reviewers, when creating issues to suggest assignees, or when re-requesting review after addressing comments. Ranks users by CODEOWNERS match, file expertise, recent activity, and workload balancing. allowed-tools: Bash, Read context: fork agent: Explore
+---
+name: "suggest-users"
+description: "Use when creating PRs to suggest reviewers, when creating issues to suggest assignees, or when re-requesting review after addressing comments. Ranks users by CODEOWNERS match, file expertise, recent activity, and workload balancing."
+allowed-tools:
+  - Bash
+  - Read
+context: "fork"
+agent: "Explore"
+---
 
 # Suggest Users
 
+## Source Of Truth
+
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
 This skill provides intelligent user suggestions for PRs (reviewers) and issues (assignees) based on GitHub repository data, file ownership, and activity patterns.
 
 ## Purpose
@@ -62,26 +70,8 @@ gh api repos/$REPO/teams --jq '.[].slug' 2>/dev/null
 
 ## Scoring Algorithm
 
-### For Reviewers (PR Context)
-
-| Signal                              | Points                 | Rationale                      |
-| ----------------------------------- | ---------------------- | ------------------------------ |
-| CODEOWNERS match                    | +50                    | Explicit ownership declaration |
-| Commits to changed files (last 30d) | +10 per match          | File-level expertise           |
-| Recent PR reviews                   | +5 per review (max 25) | Active reviewer                |
-| Recent PR authorship                | +3 per PR (max 15)     | Active contributor             |
-| Same team membership                | +10                    | Team context                   |
-| Open review load                    | -3 per open review     | Workload balancing             |
-| Is PR author                        | -100                   | Cannot self-review             |
-
-### For Assignees (Issue Context)
-
-| Signal                          | Points        | Rationale              |
-| ------------------------------- | ------------- | ---------------------- |
-| Recent issues with same label   | +10 per issue | Domain expertise       |
-| Recent commits to related files | +5 per commit | Code familiarity       |
-| Current open issue count        | -2 per issue  | Workload balancing     |
-| Explicit @mention in issue      | +20           | Stakeholder indication |
+Use [references/scoring.md](references/scoring.md) for reviewer and assignee
+signals, point values, data-source order, and edge cases.
 
 ## Usage Workflow
 
@@ -208,82 +198,10 @@ If current reviewer wants to defer:
 3. Present suggestions with AskUserQuestion
 ```
 
-## CODEOWNERS Parsing
+## CODEOWNERS, Workload, And Edge Cases
 
-### Pattern Matching Rules
-
-```bash
-# Pattern precedence (later = higher priority)
-*                    # Default owners for everything
-*.js                 # All JavaScript files
-/docs/               # /docs/ directory at root
-docs/                # docs/ directory anywhere
-/src/api/**/*.ts     # TypeScript files in src/api/
-
-# Multiple owners
-/src/core/ @alice @bob @org/core-team
-
-# Escaping special characters
-/path/with\ space/   # Space in path
-```
-
-### Team Resolution
-
-When CODEOWNERS specifies a team (`@org/team-name`):
-
-```bash
-# Resolve team members
-gh api orgs/{org}/teams/{team-name}/members --jq '.[].login'
-```
-
-## Workload Balancing
-
-To prevent overloading active reviewers:
-
-```bash
-# Count open reviews per user
-gh pr list --state open --json reviews --jq '
-  [.[].reviews[] | select(.state == "PENDING" or .state == "COMMENTED") | .author.login]
-  | group_by(.)
-  | map({user: .[0], count: length})
-  | sort_by(-.count)
-'
-```
-
-Apply penalty: `-3 points per open review`
-
-## Edge Cases
-
-### No CODEOWNERS File
-
-Fall back to:
-
-1. Recent file contributors
-1. Recent PR reviewers
-1. All collaborators (alphabetical)
-
-### No Recent Activity
-
-If no commits or PRs in last 30 days:
-
-1. Extend window to 90 days
-1. Fall back to all collaborators
-
-### Private Repository / API Limits
-
-If API calls fail:
-
-1. Use git log for local contributor data
-1. Present collaborator list from gh api
-1. Allow manual input
-
-### Single Contributor Repository
-
-Skip suggestion and note:
-
-```markdown
-**Note**: Single contributor detected. Self-review checklist recommended instead of external reviewer.
-```
+Read [references/scoring.md](references/scoring.md) when CODEOWNERS parsing,
+team resolution, workload balancing, or API-failure fallback is needed.
 
 ## Output Format
 
@@ -323,12 +241,3 @@ Based on scoring, **@{user1}** is the recommended {reviewer/assignee} because:
 1. **Allow override** - Always provide "Someone else" option
 1. **Cache results** - Don't re-fetch data within same session
 1. **Handle failures gracefully** - API errors shouldn't block workflow
-
-## Source Of Truth
-- Normative index: `../../../../NORMATIVE_SOURCES.md`
-- Root runtime contract: `../../../../../../AGENTS.md`
-- Project rules: `../../../../RULES.md`
-- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../../../02-architecture/decisions`
-- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
-- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`

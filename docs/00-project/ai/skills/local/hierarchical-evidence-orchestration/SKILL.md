@@ -1,13 +1,18 @@
-> Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
-> Canonical runtime source:
-> - Codex: `.codex/skills/hierarchical-evidence-orchestration/SKILL.md`
-> Governance: [AI Runtime Mirror Ownership](../../../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md), [Memory Usage](../../../agents/guides/MEMORY_USAGE.md), [Post-Change Validation](../../../agents/policy/POST_CHANGE_VALIDATION.md).
-> Edit the runtime source first, then refresh this mirror.
-______________________________________________________________________
-
-## name: hierarchical-evidence-orchestration description: Orchestrate hierarchical evidence work for a BioETL topic by decomposing it into shard packs, delegating `collecting-evidence` across those shards, and then running `synthesizing-pillars` on completed packs before assembling a cross-synthesis. Use when users ask for repo-wide or multi-package evidence programs, recursive topology studies, naming/documentation drift waves, or coordinated evidence-then-synthesis workflows.
+---
+name: "hierarchical-evidence-orchestration"
+description: "Orchestrate hierarchical evidence work for a BioETL topic by decomposing it into shard packs, delegating `collecting-evidence` across those shards, and then running `synthesizing-pillars` on completed packs before assembling a cross-synthesis. Use when users ask for repo-wide or multi-package evidence programs, recursive topology studies, naming/documentation drift waves, or coordinated evidence-then-synthesis workflows."
+---
 
 # Hierarchical Evidence Orchestration
+
+## Source Of Truth
+
+- Root runtime contract: `../../../AGENTS.md`
+- Project rules: `../../../docs/00-project/RULES.md`
+- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
+- Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+- Shared evidence/decision contract: [../collecting-evidence/references/evidence-decision-contract.md](../collecting-evidence/references/evidence-decision-contract.md)
 
 ## Core Role
 
@@ -223,14 +228,6 @@ Treat the hierarchical wave as complete only when:
 
 ## References
 
+- Shared evidence and decision chain contract: [../collecting-evidence/references/evidence-decision-contract.md](../collecting-evidence/references/evidence-decision-contract.md)
 - Orchestration artifact and gate contract: [references/orchestration-contract.md](references/orchestration-contract.md)
 - Collector and synthesizer shard briefs: [references/shard-task-briefs.md](references/shard-task-briefs.md)
-
-## Source Of Truth
-- Normative index: `../../../../NORMATIVE_SOURCES.md`
-- Root runtime contract: `../../../../../../AGENTS.md`
-- Project rules: `../../../../RULES.md`
-- Requirements: `../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../../../02-architecture/decisions`
-- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
-- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`

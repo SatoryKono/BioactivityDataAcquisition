@@ -4,7 +4,11 @@ from __future__ import annotations
 
 import json
 import os
+from dataclasses import MISSING
+from dataclasses import fields as dataclass_fields
+from datetime import UTC, datetime
 from pathlib import Path
+from uuid import UUID
 
 import pytest
 
@@ -15,6 +19,22 @@ from bioetl.domain.control_plane.contract_registry_types import (
     RegistryValidationSeverity,
 )
 from bioetl.domain.control_plane.gold_contract import GoldContract
+from bioetl.domain.control_plane.run_ledger import (
+    CANONICAL_RUN_LEDGER_STAGE_NAMES,
+    RUN_LEDGER_BASELINE_EVENT_TYPES,
+    RUN_LEDGER_STAGE_EVENT_TYPES,
+    RunLedgerEntry,
+)
+from bioetl.domain.control_plane.run_manifest import (
+    DOCUMENTED_SOURCE_REVISION_STATES,
+    ReplayCapability,
+    RunArtifactRef,
+    RunCodeProvenance,
+    RunInputSnapshotRef,
+    RunManifest,
+    RunSourceRef,
+)
+from bioetl.domain.types import RunID, RunType
 from bioetl.domain.types.contract_identity import (
     CompatibilityLevel,
     ContractIdentity,
@@ -99,6 +119,83 @@ def _make_gold_contract() -> GoldContract:
         owners=["team-bioetl"],
         downstream_dependencies=["gold.analytics"],
     )
+
+
+def _field_contract(dataclass_type: type[object]) -> list[dict[str, str]]:
+    payload: list[dict[str, str]] = []
+    for field in dataclass_fields(dataclass_type):
+        default_kind = "required"
+        if field.default is not MISSING:
+            default_kind = "literal"
+        elif field.default_factory is not MISSING:
+            default_kind = "factory"
+        payload.append({"name": field.name, "default": default_kind})
+    return payload
+
+
+def _assert_golden_payload(payload: dict[str, object], fixture_name: str) -> None:
+    fixture_path = FIXTURE_DIR / fixture_name
+    if UPDATE_SNAPSHOTS:
+        fixture_path.parent.mkdir(parents=True, exist_ok=True)
+        fixture_path.write_text(
+            json.dumps(payload, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        pytest.skip(f"Updated control-plane golden fixture {fixture_path}")
+
+    if not fixture_path.exists():
+        pytest.fail(
+            f"Missing control-plane golden fixture {fixture_path}. "
+            "Run with UPDATE_SNAPSHOTS=1 to create it."
+        )
+
+    assert payload == json.loads(fixture_path.read_text(encoding="utf-8"))
+
+
+def _run_manifest_contract_payload() -> dict[str, object]:
+    return {
+        "contract": "RunManifest",
+        "version": 1,
+        "field_contracts": {
+            "RunArtifactRef": _field_contract(RunArtifactRef),
+            "RunCodeProvenance": _field_contract(RunCodeProvenance),
+            "RunInputSnapshotRef": _field_contract(RunInputSnapshotRef),
+            "RunManifest": _field_contract(RunManifest),
+            "RunSourceRef": _field_contract(RunSourceRef),
+        },
+        "documented_source_revision_states": sorted(DOCUMENTED_SOURCE_REVISION_STATES),
+        "replay_capability_values": sorted(item.value for item in ReplayCapability),
+        "run_type_values": sorted(item.value for item in RunType),
+        "default_payload": RunManifest().to_dict(),
+    }
+
+
+def _run_ledger_contract_payload() -> dict[str, object]:
+    sample_entry = RunLedgerEntry(
+        entry_id="ledger-entry-0001",
+        manifest_id="manifest-0001",
+        run_id=RunID(UUID(int=1)),
+        event_type="stage_completed",
+        occurred_at=datetime(2026, 7, 10, 0, 0, 0, tzinfo=UTC),
+        status="success",
+        stage="execute_pipeline",
+        message="sample ledger contract event",
+        dataset_ref="silver://chembl/activity",
+        idempotency_key="sample-idempotency-key",
+        metrics_snapshot={"records": 1},
+        details={"contract": "sample"},
+    )
+    return {
+        "contract": "RunLedgerEntry",
+        "version": 1,
+        "field_contracts": {
+            "RunLedgerEntry": _field_contract(RunLedgerEntry),
+        },
+        "baseline_event_types": sorted(RUN_LEDGER_BASELINE_EVENT_TYPES),
+        "canonical_stage_names": sorted(CANONICAL_RUN_LEDGER_STAGE_NAMES),
+        "stage_event_types": sorted(RUN_LEDGER_STAGE_EVENT_TYPES),
+        "sample_payload": sample_entry.to_dict(),
+    }
 
 
 def test_validate_all_issue_ordering_is_deterministic() -> None:
@@ -225,3 +322,17 @@ def test_gold_contract_identity_golden_fixture() -> None:
         )
 
     assert payload == json.loads(fixture_path.read_text(encoding="utf-8"))
+
+
+def test_run_manifest_contract_golden_fixture() -> None:
+    _assert_golden_payload(
+        _run_manifest_contract_payload(),
+        "run_manifest_contract.json",
+    )
+
+
+def test_run_ledger_contract_golden_fixture() -> None:
+    _assert_golden_payload(
+        _run_ledger_contract_payload(),
+        "run_ledger_contract.json",
+    )
