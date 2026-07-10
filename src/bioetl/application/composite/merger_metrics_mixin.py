@@ -11,7 +11,7 @@ import polars as pl
 from bioetl.application.composite.join_planner_helpers import parse_pipeline_name
 from bioetl.domain.composite import EnricherConfig, MergeConfig
 from bioetl.domain.composite.result import DependencyResult, EnrichmentResult
-from bioetl.domain.ports import LoggerPort
+from bioetl.domain.ports.logger_port import LoggerPort
 
 
 class MergeMetricsRecorderMixin:
