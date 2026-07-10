@@ -12,6 +12,8 @@ export BIOETL_SKIP_ENV_LOCAL=1
 source "${SCRIPT_DIR}/support/load_repo_env.sh"
 load_repo_env_if_present
 unset BIOETL_SKIP_ENV_LOCAL
+# shellcheck source=./support/token_validation.sh
+source "${REPO_ROOT}/scripts/ai/mcp/support/token_validation.sh"
 
 parse_neo4j_auth() {
     local auth_value="${1:-}"
@@ -41,6 +43,8 @@ export NEO4J_USERNAME
 export NEO4J_PASSWORD
 export NEO4J_DATABASE
 export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-/tmp/npm-cache}"
+mcp_validate_neo4j_credentials "Neo4j Memory MCP"
+mcp_exit_if_validate_only "neo4j-memory"
 
 PYTHON_BIN="${PYTHON_BIN:-$(command -v python3 || command -v python || true)}"
 if [[ -z "${PYTHON_BIN}" ]]; then

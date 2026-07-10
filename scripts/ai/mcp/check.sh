@@ -108,6 +108,32 @@ require_wrapper_path() {
   return $?
 }
 
+validate_wrapper_if_possible() {
+  local server="$1"
+  local wrapper="$2"
+  shift 2
+
+  local missing=()
+  local required_name
+  for required_name in "$@"; do
+    if [[ -z "${!required_name:-}" ]]; then
+      missing+=("${required_name}")
+    fi
+  done
+
+  if (( ${#missing[@]} > 0 )); then
+    warn "Skipping ${server} wrapper token preflight; missing required env: ${missing[*]}"
+    return 0
+  fi
+
+  if BIOETL_MCP_VALIDATE_ONLY=1 "${wrapper}" >/dev/null; then
+    ok "${server} wrapper token preflight passed"
+  else
+    fail "${server} wrapper token preflight failed"
+    return 1
+  fi
+}
+
 if ! command -v codex >/dev/null 2>&1; then
   fail "codex CLI not found in PATH"
   exit 1
@@ -191,5 +217,11 @@ else
   warn "Neither GITHUB_PERSONAL_ACCESS_TOKEN nor GITHUB_TOKEN is set (GitHub MCP auth may fail)"
 fi
 
+validate_wrapper_if_possible "github" "${EXPECTED_GITHUB_WRAPPER_PATH}" "GITHUB_PERSONAL_ACCESS_TOKEN" || status=1
+validate_wrapper_if_possible "brave-search" "${EXPECTED_BRAVE_WRAPPER_PATH}" "BRAVE_API_KEY" || status=1
+validate_wrapper_if_possible "prometheus" "${EXPECTED_PROMETHEUS_WRAPPER_PATH}" || status=1
+validate_wrapper_if_possible "grafana" "${EXPECTED_GRAFANA_WRAPPER_PATH}" || status=1
+validate_wrapper_if_possible "neo4j-cypher" "${EXPECTED_NEO4J_CYPHER_WRAPPER_PATH}" || status=1
+validate_wrapper_if_possible "neo4j-memory" "${EXPECTED_NEO4J_MEMORY_WRAPPER_PATH}" || status=1
 
 exit "$status"

@@ -168,7 +168,7 @@ bash scripts/ai/gemini/run-gemini.sh "why is my Docker build failing?"
 | "Node.js not found" | Run: `bash scripts/ai/gemini/run-gemini.sh setup` |
 | "MCP servers disconnected" | Start Docker Desktop if using Docker MCP server |
 | "Permission denied on scripts" | Fix: `chmod +x scripts/ai/gemini/*.sh scripts/ai/gemini/helper/*.sh` |
-| "Connection timeout" | Check: Network proxy settings (see `.wsl_proxy_env.sh` if behind corporate proxy) |
+| "Connection timeout" | Check: Network proxy settings (see `scripts/engineering/dev/bash/.wsl_proxy_env.sh` if behind corporate proxy) |
 
 ## 📚 Full Documentation
 

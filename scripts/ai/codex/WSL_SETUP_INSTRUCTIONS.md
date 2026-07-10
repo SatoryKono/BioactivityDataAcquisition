@@ -90,7 +90,7 @@ OPENAI_API_KEY=sk-ваш-ключ-здесь
 
 ```powershell
 $env:BIOETL_CREATE_LOCAL_ENV_FILES="1"
-.\setup-codex-wsl.bat
+.\scripts\ai\codex\setup-codex-wsl.bat
 ```
 
 ### 3.2. Запустите автоматическую настройку
@@ -99,7 +99,7 @@ $env:BIOETL_CREATE_LOCAL_ENV_FILES="1"
 
 ```powershell
 cd E:\g-drive\05_AI\github\BioactivityDataAcquisition2\scripts\ai\codex
-.\setup-codex-wsl.bat
+.\scripts\ai\codex\setup-codex-wsl.bat
 ```
 
 Или из WSL:

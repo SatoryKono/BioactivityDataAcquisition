@@ -10,234 +10,54 @@ agent: "Explore"
 
 # Suggest Users
 
+Suggest reviewers or assignees from repository ownership, activity, expertise,
+and workload signals. Use this skill only for suggestion/ranking; the caller
+still decides whether to request review, assign an issue, or leave ownership
+manual.
+
 ## Source Of Truth
 
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
-- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../docs/02-architecture/decisions`
 - Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
-This skill provides intelligent user suggestions for PRs (reviewers) and issues (assignees) based on GitHub repository data, file ownership, and activity patterns.
-
-## Purpose
-
-Instead of manually picking reviewers or assignees, this skill analyzes:
-
-- CODEOWNERS file for explicit ownership
-- Recent PR activity for active contributors
-- File-specific commit history for expertise
-- Current review load to balance workload
-
-## Quick Reference
-
-### Get Suggested Reviewers for a PR
-
-```bash
-# 1. Get repository info
-REPO=$(gh repo view --json nameWithOwner --jq '.nameWithOwner')
-
-# 2. Get changed files in PR
-CHANGED_FILES=$(gh pr view {PR_NUMBER} --json files --jq '.files[].path')
-
-# 3. Check CODEOWNERS matches
-gh api repos/$REPO/contents/.github/CODEOWNERS --jq '.content' | base64 -d 2>/dev/null
-
-# 4. Get collaborators with push access
-gh api repos/$REPO/collaborators --jq '.[] | select(.permissions.push) | .login'
-
-# 5. Get recent PR authors/reviewers
-gh pr list --state merged --limit 20 --json author,reviews --jq '.[].author.login, .[].reviews[].author.login' | sort | uniq -c | sort -rn
-
-# 6. Get file-specific contributors (last 30 days)
-git log --format='%an' --since="30 days ago" -- {changed_files} | sort | uniq -c | sort -rn
-```
-
-### Get Suggested Assignees for an Issue
-
-```bash
-# 1. Get repository info
-REPO=$(gh repo view --json nameWithOwner --jq '.nameWithOwner')
-
-# 2. Get collaborators
-gh api repos/$REPO/collaborators --jq '.[] | select(.permissions.push) | .login'
-
-# 3. Get recent issue assignees by label
-gh issue list --state closed --limit 20 --label "{label}" --json assignees --jq '.[].assignees[].login' | sort | uniq -c | sort -rn
-
-# 4. Get team members if applicable
-gh api repos/$REPO/teams --jq '.[].slug' 2>/dev/null
-```
-
-## Scoring Algorithm
-
-Use [references/scoring.md](references/scoring.md) for reviewer and assignee
-signals, point values, data-source order, and edge cases.
-
-## Usage Workflow
-
-### Step 1: Gather Data (Parallel)
-
-Execute these commands in parallel to collect all signals:
-
-```bash
-# Repository info
-REPO=$(gh repo view --json nameWithOwner --jq '.nameWithOwner')
-
-# Collaborators
-gh api repos/$REPO/collaborators --jq '.[] | select(.permissions.push) | {login: .login, admin: .permissions.admin}'
-
-# CODEOWNERS (may not exist)
-gh api repos/$REPO/contents/.github/CODEOWNERS --jq '.content' 2>/dev/null | base64 -d
-
-# Alternative CODEOWNERS location
-gh api repos/$REPO/contents/CODEOWNERS --jq '.content' 2>/dev/null | base64 -d
-
-# Recent merged PRs with authors and reviewers
-gh pr list --state merged --limit 30 --json number,author,reviews,mergedAt --jq '.[] | {author: .author.login, reviewers: [.reviews[].author.login]}'
-
-# Open PRs with pending reviews (for workload)
-gh pr list --state open --json number,reviews --jq '.[] | {number, pending_reviewers: [.reviews[] | select(.state == "PENDING") | .author.login]}'
-```
-
-### Step 2: Match CODEOWNERS
-
-Parse CODEOWNERS file and match against changed files:
-
-```
-# CODEOWNERS format examples:
-# * @default-owner
-# /src/api/ @api-team
-# *.ts @typescript-owners
-
-# Match rules:
-# 1. More specific paths take precedence
-# 2. Multiple owners can be specified per pattern
-# 3. Teams use @org/team-name format
-```
-
-### Step 3: Calculate Scores
-
-For each potential reviewer/assignee:
-
-```markdown
-## Scoring: {username}
-
-| Signal | Value | Points |
-|--------|-------|--------|
-| CODEOWNERS match | Yes/No | +50/0 |
-| File commits (30d) | {N} files | +{N*10} |
-| Recent reviews | {M} PRs | +{min(M*5, 25)} |
-| Open reviews | {K} PRs | -{K*3} |
-| **Total** | | **{sum}** |
-```
-
-### Step 4: Present Suggestions
-
-Use the **AskUserQuestion tool** with ranked options:
-
-```markdown
-## Suggested Reviewers
-
-Based on file ownership, recent activity, and current workload:
-
-| Rank | User | Score | Reasons |
-|------|------|-------|---------|
-| 1 | @alice | 75 | CODEOWNERS (+50), 2 file commits (+20), low workload (+5) |
-| 2 | @bob | 45 | 4 recent reviews (+20), 2 file commits (+20), 1 open review (-3) |
-| 3 | @carol | 30 | 3 file commits (+30), no ownership |
-```
-
-Then invoke AskUserQuestion:
-
-- **Option 1**: "@alice (Recommended)" - Top ranked reviewer
-- **Option 2**: "@bob" - Active reviewer
-- **Option 3**: "@carol" - File expertise
-- **Option 4**: "Someone else" - Manual selection
-
-## Integration Points
-
-### In gh-pr Command
-
-```markdown
-## Phase 5: Reviewer Suggestion
-
-1. Invoke suggest-users skill
-2. Get changed files from staged commits
-3. Calculate scores for all collaborators
-4. Present top 3-4 suggestions with AskUserQuestion
-5. Add selected reviewers to PR creation command
-```
-
-### In gh-address Command
-
-```markdown
-## Reviewer Re-engagement
-
-1. Fetch previous reviewers from PR
-2. Score based on: previous review (+30), comment count (+5 per)
-3. Suggest re-requesting review from engaged reviewers
-```
-
-### In gh-review Command
-
-```markdown
-## Alternative Reviewer Suggestion
-
-If current reviewer wants to defer:
-1. Calculate scores excluding current reviewer
-2. Suggest alternatives with expertise in PR's changed files
-```
-
-### In gh-issue Command
-
-```markdown
-## Assignee Suggestion
-
-1. Parse issue labels and title
-2. Find users with history on similar issues
-3. Present suggestions with AskUserQuestion
-```
-
-## CODEOWNERS, Workload, And Edge Cases
-
-Read [references/scoring.md](references/scoring.md) when CODEOWNERS parsing,
-team resolution, workload balancing, or API-failure fallback is needed.
-
-## Output Format
-
-When invoked by other commands, return structured data:
-
-```markdown
-## User Suggestions
-
-**Context**: {PR/Issue} #{number}
-**Changed Files**: {count} files
-**CODEOWNERS Matches**: {yes/no}
-
-### Ranked Suggestions
-
-1. **@{user1}** (Score: {N})
-   - {reason1}
-   - {reason2}
-
-2. **@{user2}** (Score: {M})
-   - {reason1}
-
-3. **@{user3}** (Score: {K})
-   - {reason1}
-
-### Recommendation
-
-Based on scoring, **@{user1}** is the recommended {reviewer/assignee} because:
-- {primary reason}
-- {secondary reason}
-```
-
-## Best Practices
-
-1. **Always check CODEOWNERS first** - Explicit ownership trumps heuristics
-1. **Balance workload** - Don't always suggest the most active reviewer
-1. **Show reasoning** - Users should understand why suggestions were made
-1. **Allow override** - Always provide "Someone else" option
-1. **Cache results** - Don't re-fetch data within same session
-1. **Handle failures gracefully** - API errors shouldn't block workflow
+- CODEOWNERS and GitHub permissions when available
+
+## Progressive Disclosure
+
+Read only the references needed for the current request:
+
+- [references/scoring.md](references/scoring.md) - signal weights, data source
+  order, and edge cases.
+- [references/workflow.md](references/workflow.md) - command patterns,
+  CODEOWNERS matching notes, integration points, and output shape.
+
+## Workflow
+
+1. Identify context: PR reviewer suggestion, issue assignee suggestion, or
+   reviewer re-engagement.
+1. Gather available signals in parallel: changed files, CODEOWNERS,
+   collaborators, recent PR/issue activity, file-specific commit history, and
+   current review/issue load.
+1. Score candidates with [references/scoring.md](references/scoring.md).
+1. Exclude invalid candidates such as the PR author, unavailable users, or
+   users without required repository access.
+1. Present the top candidates with concise reasons and any missing-data caveats.
+1. If all signals are weak, recommend manual selection instead of pretending the
+   ranking is strong.
+
+## Output Contract
+
+Return:
+
+- context (`PR`, `issue`, or `review re-request`)
+- data sources used and missing
+- top 3 candidates with scores and primary reasons
+- recommendation with confidence
+- fallback/manual-selection note when confidence is low
+
+## Guardrails
+
+- Do not invent repository permissions, team membership, or ownership.
+- Do not suggest self-review for a PR author.
+- Do not use activity volume alone as ownership proof.
+- Always allow the user to override the recommendation.

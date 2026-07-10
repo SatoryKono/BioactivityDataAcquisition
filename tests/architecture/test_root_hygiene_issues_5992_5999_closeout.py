@@ -46,25 +46,26 @@ def test_issue_5993_generated_output_routing_keeps_forbidden_root_outputs() -> N
     assert payload["allowed_output_roots"]["working_reports"] == ["reports/"]
 
 
-def test_issue_5994_root_codex_shims_delegate_to_canonical_owners() -> None:
-    expected_delegates = {
-        "codex.ps1": "scripts\\ai\\codex\\run-codex.ps1",
-        "codex.bat": "codex.ps1",
-        "setup-codex-wsl.bat": "scripts\\ai\\codex\\setup-codex-wsl.bat",
-        "setup-codex-wsl.ps1": "scripts\\ai\\codex\\setup-codex-wsl.bat",
+def test_issue_5994_root_codex_shims_are_retired_to_canonical_owners() -> None:
+    retired_root_shims = {
+        ".wsl_proxy_env.sh": "scripts/engineering/dev/bash/.wsl_proxy_env.sh",
+        "codex.bat": "scripts/ops/codex.bat",
+        "codex.ps1": "scripts/ai/codex/run-codex.ps1",
+        "run-codex.ps1": "scripts/ai/codex/run-codex.ps1",
+        "run-codex-wsl.ps1": "scripts/ai/codex/run-codex.ps1",
+        "setup-codex-wsl.bat": "scripts/ai/codex/setup-codex-wsl.bat",
+        "setup-codex-wsl.ps1": "scripts/ai/codex/setup.ps1",
         "setup-codex-wsl.sh": "scripts/ai/codex/helper/setup-wsl-complete.sh",
-        ".wsl_proxy_env.sh": "scripts/ai/codex/helper/wsl_proxy_env.sh",
     }
 
-    for root_shim, canonical_owner in expected_delegates.items():
-        assert canonical_owner in _read(root_shim)
-
-    assert not (ROOT / "run-codex.ps1").exists()
-    assert not (ROOT / "run-codex-wsl.ps1").exists()
+    for root_shim, canonical_owner in retired_root_shims.items():
+        assert not (ROOT / root_shim).exists()
+        assert (ROOT / canonical_owner).exists()
 
     readme = _read("scripts/ai/codex/README.md")
-    assert "Root Shim Verification" in readme
+    assert "Retired Root Shim Verification" in readme
     assert "root hygiene issue #5994" in readme
+    assert "#6152-#6158" in readme
 
 
 def test_issue_5995_docker_root_entrypoints_have_reference_map() -> None:
@@ -84,9 +85,14 @@ def test_issue_5995_docker_root_entrypoints_have_reference_map() -> None:
     ):
         assert root_surface in audit
 
+    assert not (ROOT / "docker-setup.ps1").exists()
+    assert not (ROOT / "docker-setup.sh").exists()
+    assert (ROOT / "scripts/ops/docker-setup.ps1").exists()
+    assert (ROOT / "scripts/ops/docker-setup.sh").exists()
     assert "Reference Map Verification" in audit
     assert "root hygiene issue #5995" in audit
-    assert "wrapper-first migration" in audit
+    assert "retired root script" in audit
+    assert "RF-003 Command Compatibility Matrix" in audit
 
 
 def test_issue_5999_exact_root_review_tooling_has_retention_decisions() -> None:

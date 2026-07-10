@@ -74,7 +74,7 @@ wsl -- npm install -g @openai/codex
 Configure proxy (if behind corporate VPN):
 
 ```bash
-wsl -- bash -c "source .wsl_proxy_env.sh && codex"
+wsl -- bash -c "source scripts/engineering/dev/bash/.wsl_proxy_env.sh && codex"
 ```
 
 ## Best Workflow

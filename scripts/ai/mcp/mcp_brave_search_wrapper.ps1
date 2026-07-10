@@ -7,10 +7,10 @@ $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "../../..")).Path
 $env:BIOETL_SKIP_ENV_LOCAL = "1"
 Import-BioetlRepoEnv -RepoRoot $repoRoot
 Remove-Item Env:BIOETL_SKIP_ENV_LOCAL -ErrorAction SilentlyContinue
+. (Join-Path $PSScriptRoot "support/token_validation.ps1")
 
-if (-not $env:BRAVE_API_KEY) {
-    throw "BRAVE_API_KEY is required for brave-search MCP."
-}
+Test-McpRequiredToken -Name "BRAVE_API_KEY" -MinLength 32 -Purpose "Brave Search MCP"
+Exit-McpValidateOnly -ServerName "brave-search"
 
 $dockerArgs = @(
     "run",

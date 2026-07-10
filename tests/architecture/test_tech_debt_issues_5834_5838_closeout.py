@@ -75,6 +75,8 @@ REHOMED_DOCKER_SURFACES = {
     "docker-compose.minio.yml",
     "docker-compose.redis.yml",
     "docker-compose.sonarqube.yml",
+    "docker-setup.ps1",
+    "docker-setup.sh",
     "Dockerfile.mcp-fetch",
     "Dockerfile.mcp-filesystem",
     "Dockerfile.mcp-github",
@@ -83,7 +85,6 @@ REHOMED_DOCKER_SURFACES = {
     "grafana-datasource.yml",
 }
 OWNER_DECISION_CLASSIFICATIONS = {
-    "owner_decision_required",
     "owner_decision_resolved",
 }
 
@@ -234,7 +235,7 @@ def test_issue_5836_root_env_surfaces_remain_security_review_only() -> None:
         assert evidence_row["registry_classification"] == "security_review_required"
 
 
-def test_issue_5837_root_codex_wsl_shims_stay_thin_and_owner_anchored() -> None:
+def test_issue_5837_root_codex_wsl_shims_are_retired_and_owner_anchored() -> None:
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5837"]
     candidates = _registry_candidates()
@@ -246,16 +247,27 @@ def test_issue_5837_root_codex_wsl_shims_stay_thin_and_owner_anchored() -> None:
         evidence_row = evidence[path]
         assert registry_row["lane_id"] == "root_launcher_shims"
         assert registry_row["lane_classification"] in OWNER_DECISION_CLASSIFICATIONS
+        assert registry_row["current_live_state"] == "absent_from_root_baseline"
+        assert not (ROOT / path).exists()
         assert evidence_row["classification"] == "REVIEW_REQUIRED"
 
     assert candidates["codex.ps1"]["canonical_path"] == "scripts/ai/codex/run-codex.ps1"
+    assert candidates["codex.bat"]["canonical_path"] == "scripts/ops/codex.bat"
     assert (
         candidates["setup-codex-wsl.bat"]["canonical_path"]
         == "scripts/ai/codex/setup-codex-wsl.bat"
     )
     assert (
+        candidates["setup-codex-wsl.ps1"]["canonical_path"]
+        == "scripts/ai/codex/setup.ps1"
+    )
+    assert (
+        candidates["setup-codex-wsl.sh"]["canonical_path"]
+        == "scripts/ai/codex/helper/setup-wsl-complete.sh"
+    )
+    assert (
         candidates[".wsl_proxy_env.sh"]["canonical_path"]
-        == "scripts/ai/codex/helper/wsl_proxy_env.sh"
+        == "scripts/engineering/dev/bash/.wsl_proxy_env.sh"
     )
 
 
@@ -280,15 +292,11 @@ def test_issue_5838_root_docker_adjuncts_are_reviewed_and_evidence_backed() -> N
             assert registry_row["current_live_state"] == "present_approved_root_surface"
         assert registry_row["lane_id"] == "root_docker_adjuncts"
         # Lane classification changed from owner_decision_required to owner_decision_resolved
-        assert registry_row["lane_classification"] in {
-            "owner_decision_required",
-            "owner_decision_resolved",
-        }
+        assert registry_row["lane_classification"] == "owner_decision_resolved"
         assert registry_row["owner"] == "Engineering / Runtime Platform"
         assert registry_row["disposition"] in {
             "moved_to_owned_path",
             "must_stay_root",
-            "temporary_shim",
         }
         assert evidence_row["classification"] == "REVIEW_REQUIRED"
 

@@ -62,29 +62,27 @@ Required validation:
 
 ## HGN-004 Codex / WSL Shim Exit Criteria
 
-The following root shims remain approved compatibility entrypoints until their
-operator flows are repointed and verified:
+The following root shims are retired from the repository root. Operator flows
+must use the scripts-owned replacements:
 
-| Root shim | Canonical owner | Exit criterion |
+| Retired root shim | Canonical owner | Restoration policy |
 | --- | --- | --- |
-| `.wsl_proxy_env.sh` | `scripts/ai/codex/helper/wsl_proxy_env.sh` | Remove only after shell setup docs and launchers source the canonical helper directly. |
-| `codex.bat` | `scripts/ai/codex/run-codex.ps1` | Remove only after Windows CMD users have a documented replacement and CI/docs no longer reference the root transport. |
-| `codex.ps1` | `scripts/ai/codex/run-codex.ps1` | Remove only after the canonical script is the documented root-compatible entrypoint or a replacement shim exists. |
-| `setup-codex-wsl.bat` | `scripts/ai/codex/setup-codex-wsl.bat` | Remove only after Windows setup docs no longer advertise the root batch file. |
-| `setup-codex-wsl.ps1` | `scripts/ai/codex/setup-codex-wsl.bat` | Remove only after PowerShell setup docs no longer advertise the root transport. |
-| `setup-codex-wsl.sh` | `scripts/ai/codex/README.md` and helper setup scripts | Remove only after Bash/WSL setup docs use the canonical maintained setup path. |
+| `.wsl_proxy_env.sh` | `scripts/engineering/dev/bash/.wsl_proxy_env.sh` | Do not restore root sourcing shim without fresh owner review. |
+| `codex.bat` | `scripts/ops/codex.bat` | Do not restore root CMD transport. |
+| `codex.ps1` | `scripts/ai/codex/run-codex.ps1` | Do not restore root PowerShell transport. |
+| `setup-codex-wsl.bat` | `scripts/ai/codex/setup-codex-wsl.bat` | Do not restore root Windows setup transport. |
+| `setup-codex-wsl.ps1` | `scripts/ai/codex/setup.ps1` | Deletion-first decision; do not add a new alias without lifecycle review. |
+| `setup-codex-wsl.sh` | `scripts/ai/codex/helper/setup-wsl-complete.sh` | Do not restore root Bash setup transport. |
 
-Before deleting any shim:
+Validation:
 
 ```bash
-rg -n "codex\\.bat|codex\\.ps1|setup-codex-wsl|wsl_proxy_env" docs scripts .github README.md configs/quality/root_hygiene_review_registry.yaml
-./.venv/bin/python -m pytest tests/architecture/test_root_hygiene_issues_5992_5999_closeout.py::test_issue_5994_root_codex_shims_delegate_to_canonical_owners -q
+git ls-files '*.sh' '*.ps1' '*.py' '*.bat' | awk -F/ 'NF == 1 { print }'
+./.venv/bin/python -m pytest tests/architecture/test_root_hygiene_issues_5992_5999_closeout.py::test_issue_5994_root_codex_shims_are_retired_from_root -q
 ```
 
-If references remain, the root shim stays. If references are intentionally
-removed, update `.github/root-allowlist.txt`,
-`configs/quality/root_hygiene_review_registry.yaml`, and the architecture tests
-in the same change.
+If any root script appears in the filtered `git ls-files` output, root script
+hygiene has regressed.
 
 ## HGN-005 Docker Setup Shim Exit Criteria
 
@@ -98,19 +96,21 @@ exist:
 - `docker-compose.neo4j.yml`
 - `docker-compose.neo4j-audit.yml`
 
-Only `docker-setup.ps1` and `docker-setup.sh` are temporary setup shims.
+Root `docker-setup.ps1` and `docker-setup.sh` are retired. Their legacy verbs
+are retained in `scripts/ops/docker-setup.ps1` and
+`scripts/ops/docker-setup.sh`.
 
-Exit criterion for removing either root setup shim:
+Exit criterion for keeping them retired:
 
 1. All operator docs and scripts point to `scripts/ops/docker-setup.ps1` or
    `scripts/ops/docker-setup.sh`.
 2. CI, README, Makefile, and pyproject references no longer require the root
    filenames.
-3. The Docker helper relocation audit remains aligned with the new reference
-   map.
+3. The Docker helper relocation audit keeps the RF-003 command compatibility
+   matrix current.
 4. `.github/root-allowlist.txt` and
-   `configs/quality/root_hygiene_review_registry.yaml` are updated in the same
-   change.
+   `configs/quality/root_hygiene_review_registry.yaml` continue to mark root
+   setup helpers absent.
 
 Reference-map command:
 

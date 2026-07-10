@@ -7,11 +7,12 @@ source "${script_dir}/support/docker_cli_resolver.sh"
 # shellcheck source=./support/load_repo_env.sh
 export BIOETL_SKIP_ENV_LOCAL=1
 source "${script_dir}/support/load_repo_env.sh"
+# shellcheck source=./support/token_validation.sh
+source "${script_dir}/support/token_validation.sh"
 
 load_repo_env_if_present
 unset BIOETL_SKIP_ENV_LOCAL
 
-docker_bin="$(resolve_docker_bin)"
 grafana_url="${GRAFANA_URL:-http://host.docker.internal:3000}"
 grafana_username=""
 grafana_password=""
@@ -24,6 +25,19 @@ elif [[ -n "${GRAFANA_ADMIN_USER:-}" && -n "${GRAFANA_ADMIN_PASSWORD:-}" ]]; the
   grafana_password="${GRAFANA_ADMIN_PASSWORD}"
 fi
 
+mcp_validate_optional_token \
+  "GRAFANA_SERVICE_ACCOUNT_TOKEN" \
+  20 \
+  "Grafana MCP" \
+  "glsa_" "eyJ"
+if [[ "${BIOETL_MCP_VALIDATE_ONLY:-0}" == "1" ]]; then
+  if [[ -z "${GRAFANA_SERVICE_ACCOUNT_TOKEN:-}" && -z "${grafana_password}" ]]; then
+    mcp_warn "Grafana MCP has neither GRAFANA_SERVICE_ACCOUNT_TOKEN nor username/password; server may start but Grafana calls can fail."
+  fi
+  mcp_exit_if_validate_only "grafana"
+fi
+
+docker_bin="$(resolve_docker_bin)"
 if [[ -z "${grafana_password}" ]]; then
   grafana_container_env="$(
     "${docker_bin}" inspect bioetl-grafana \
@@ -38,6 +52,10 @@ if [[ -z "${grafana_password}" ]]; then
     )"
     grafana_username="${grafana_username:-admin}"
   fi
+fi
+
+if [[ -z "${GRAFANA_SERVICE_ACCOUNT_TOKEN:-}" && -z "${grafana_password}" ]]; then
+  mcp_warn "Grafana MCP has neither GRAFANA_SERVICE_ACCOUNT_TOKEN nor username/password; server may start but Grafana calls can fail."
 fi
 
 docker_args=(

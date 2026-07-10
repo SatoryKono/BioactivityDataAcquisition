@@ -15,8 +15,8 @@ current_live_root_baseline:
     untracked local-only surfaces; this registry tracks their live state so the
     review gate does not drift from the current workspace. Tracked root
     dispositions are reconciled by family in `.github/root-allowlist.txt`; the
-    post-2026-07 residual tranche retired legacy Codex aliases and rehomed
-    optional Docker adjunct helpers behind owned scripts/ops and grafana paths.
+    2026-07-10 RF root-script tranche retired tracked repository-root script
+    shims and retained maintained command-compatible owners under scripts/**.
 
 review_lanes:
   - lane_id: root_env_security
@@ -79,7 +79,7 @@ review_lanes:
     issue_refs:
       - "#6046"
     verification:
-      - git ls-files docker-compose.monitoring.yml docker-compose.codex.yml docker-compose.neo4j-audit.yml docker-compose.neo4j.yml docker-compose.yml docker-setup.ps1 docker-setup.sh Dockerfile.bioetl scripts/ops/runtime/docker/compose scripts/ops/runtime/docker/images grafana/provisioning/datasources-local/grafana-datasource.yml
+      - git ls-files docker-compose.monitoring.yml docker-compose.codex.yml docker-compose.neo4j-audit.yml docker-compose.neo4j.yml docker-compose.yml Dockerfile.bioetl scripts/ops/docker-setup.ps1 scripts/ops/docker-setup.sh scripts/ops/runtime/docker/compose scripts/ops/runtime/docker/images grafana/provisioning/datasources-local/grafana-datasource.yml
       - rg -n "docker-compose(\\.monitoring|\\.codex|\\.neo4j-audit|\\.neo4j)?\\.yml|scripts/ops/runtime/docker/compose/(alertmanager|minio|redis|sonarqube)\\.yml|scripts/ops/runtime/docker/images/(mcp-fetch|mcp-filesystem|mcp-github|mcp-memory|warp)/Dockerfile|docker-setup\\.ps1|docker-setup\\.sh|Dockerfile\\.bioetl|grafana/provisioning/datasources-local/grafana-datasource\\.yml" .github docs scripts README.md Makefile pyproject.toml
       - docs/05-operations/verification/docker-helper-root-relocation-audit.md
     candidates:
@@ -129,15 +129,15 @@ review_lanes:
         disposition: must_stay_root
         action_if_reintroduced: retain_only_while_root_compose_entrypoints_and_operator_docs_still_require_the_exact_root_filename
       - path: docker-setup.ps1
-        current_live_state: present_approved_root_surface
+        current_live_state: absent_from_root_baseline
         canonical_path: scripts/ops/docker-setup.ps1
-        disposition: temporary_shim
-        action_if_reintroduced: retain_only_as_a_reviewed_root_setup_entrypoint_while_canonical_logic_lives_under_scripts_ops
+        disposition: moved_to_owned_path
+        action_if_reintroduced: do_not_restore_root_setup_entrypoint_use_scripts_ops_docker_setup_ps1
       - path: docker-setup.sh
-        current_live_state: present_approved_root_surface
+        current_live_state: absent_from_root_baseline
         canonical_path: scripts/ops/docker-setup.sh
-        disposition: temporary_shim
-        action_if_reintroduced: retain_only_as_a_reviewed_root_setup_entrypoint_while_canonical_logic_lives_under_scripts_ops
+        disposition: moved_to_owned_path
+        action_if_reintroduced: do_not_restore_root_setup_entrypoint_use_scripts_ops_docker_setup_sh
       - path: Dockerfile.bioetl
         current_live_state: present_approved_root_surface
         canonical_path: Dockerfile.bioetl
@@ -318,30 +318,30 @@ review_lanes:
         action_if_reintroduced: retain_as_exact_root_sonar_contract_while_sonarcloud_requires_the_standard_filename
 
   - lane_id: root_launcher_shims
-    classification: owner_decision_required
-    scope: reviewed root launcher and setup shims retained as compatibility entrypoints over canonical Codex owner surfaces
+    classification: owner_decision_resolved
+    scope: retired root launcher and setup shims with scripts-owned replacements
     owner: Engineering / AI Runtime
-    retention_class: reviewed_root_launcher_compatibility_entrypoint
-    retention_action: retain_minimal_root_shims_only_while_their_owned_logic_stays_under_scripts_ai_codex
-    cleanup_policy: thin_wrapper_only_rehome_or_remove_when_docs_and_operator_flows_no_longer_need_the_root_entrypoint
+    retention_class: retired_root_launcher_compatibility_entrypoint
+    retention_action: keep_root_script_shims_absent_and_route_users_to_scripts_owned_entrypoints
+    cleanup_policy: do_not_restore_root_shims_without_fresh_owner_review
     issue_refs:
       - "#6048"
     verification:
-      - git ls-files .wsl_proxy_env.sh codex.bat codex.ps1 run-codex.ps1 run-codex-wsl.ps1 setup-codex-wsl.bat setup-codex-wsl.ps1 setup-codex-wsl.sh
+      - git ls-files '*.sh' '*.ps1' '*.py' '*.bat' | awk -F/ 'NF == 1 { print }'
       - rg -n "codex\\.bat|codex\\.ps1|run-codex|setup-codex-wsl|wsl_proxy_env" docs scripts .github README.md configs/quality/root_hygiene_review_registry.yaml
     candidates:
       - path: .wsl_proxy_env.sh
-        current_live_state: present_approved_root_surface
-        canonical_path: scripts/ai/codex/helper/wsl_proxy_env.sh
-        action_if_reintroduced: keep_only_as_a_root_sourcing_shim_and_preserve_the_canonical_logic_under_scripts_ai_codex_helper
+        current_live_state: absent_from_root_baseline
+        canonical_path: scripts/engineering/dev/bash/.wsl_proxy_env.sh
+        action_if_reintroduced: do_not_restore_root_sourcing_shim_use_shared_scripts_engineering_dev_bash_helper
       - path: codex.bat
-        current_live_state: present_approved_root_surface
-        canonical_path: scripts/ai/codex/run-codex.ps1
-        action_if_reintroduced: retain_as_cmd_transport_only_while_the_primary_powershell_and_wsl_logic_stays_under_scripts_ai_codex
+        current_live_state: absent_from_root_baseline
+        canonical_path: scripts/ops/codex.bat
+        action_if_reintroduced: do_not_restore_root_cmd_transport_use_scripts_ops_codex_bat
       - path: codex.ps1
-        current_live_state: present_approved_root_surface
+        current_live_state: absent_from_root_baseline
         canonical_path: scripts/ai/codex/run-codex.ps1
-        action_if_reintroduced: retain_as_the_primary_root_powershell_shim_only_while_the_canonical_launcher_logic_stays_under_scripts_ai_codex
+        action_if_reintroduced: do_not_restore_root_powershell_transport_use_scripts_ai_codex_run_codex_ps1
       - path: run-codex.ps1
         current_live_state: absent_from_root_baseline
         canonical_path: scripts/ai/codex/run-codex.ps1
@@ -351,17 +351,17 @@ review_lanes:
         canonical_path: scripts/ai/codex/run-codex.ps1
         action_if_reintroduced: do_not_restore_legacy_root_alias_use_codex_ps1_or_scripts_ai_codex_run_codex_ps1
       - path: setup-codex-wsl.bat
-        current_live_state: present_approved_root_surface
+        current_live_state: absent_from_root_baseline
         canonical_path: scripts/ai/codex/setup-codex-wsl.bat
-        action_if_reintroduced: retain_as_a_windows_setup_transport_only_while_canonical_setup_logic_lives_under_scripts_ai_codex
+        action_if_reintroduced: do_not_restore_root_windows_setup_transport_use_scripts_ai_codex_setup_codex_wsl_bat
       - path: setup-codex-wsl.ps1
-        current_live_state: present_approved_root_surface
-        canonical_path: scripts/ai/codex/setup-codex-wsl.bat
-        action_if_reintroduced: retain_as_a_powershell_setup_transport_only_while_canonical_setup_logic_lives_under_scripts_ai_codex
+        current_live_state: absent_from_root_baseline
+        canonical_path: scripts/ai/codex/setup.ps1
+        action_if_reintroduced: do_not_restore_root_powershell_setup_alias_use_scripts_ai_codex_setup_ps1
       - path: setup-codex-wsl.sh
-        current_live_state: present_approved_root_surface
-        canonical_path: scripts/ai/codex/README.md
-        action_if_reintroduced: retain_only_as_a_thin_root_wrapper_while_operator_setup_guidance_stays_under_the_canonical_codex_runtime_docs
+        current_live_state: absent_from_root_baseline
+        canonical_path: scripts/ai/codex/helper/setup-wsl-complete.sh
+        action_if_reintroduced: do_not_restore_root_bash_setup_transport_use_scripts_ai_codex_helper_setup_wsl_complete_sh
 
   - lane_id: local_runtime_root_dirs
     classification: review_required

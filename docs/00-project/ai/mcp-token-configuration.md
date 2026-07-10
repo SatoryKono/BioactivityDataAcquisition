@@ -1,0 +1,117 @@
+# MCP Token Configuration
+
+Status: internal-published
+
+This guide documents local MCP token sources, aliases, validation, rotation,
+and troubleshooting. It is intentionally about AI tooling/runtime helpers, not
+BioETL ETL runtime dependencies.
+
+## Local Storage Policy
+
+- Keep real values in the shell environment or local untracked `.env` /
+  `.env.local` files.
+- Do not commit, paste, log, or screenshot real token values.
+- Use `.env.example` only as a template and status/source checklist.
+- Prefer provider-specific read-only or least-privilege scopes.
+- Rotate shared service-account tokens every 90 days, and rotate immediately
+  after exposure, workstation turnover, or owner transfer.
+
+## Environment Loading
+
+The MCP wrappers load environment values through:
+
+- `scripts/ops/support/load_repo_env.sh`
+- `scripts/ai/mcp/support/load_repo_env.ps1`
+
+Supported aliases:
+
+| Canonical variable | Accepted aliases |
+| --- | --- |
+| `GITHUB_PERSONAL_ACCESS_TOKEN` | `GITHUB_TOKEN` |
+| `BRAVE_API_KEY` | `BRAVE_SEARCH_API_KEY` |
+| `GRAFANA_SERVICE_ACCOUNT_TOKEN` | `GRAFANA_TOKEN`, `GRAFANA_API_KEY` |
+| `GRAFANA_USERNAME` | `GF_SECURITY_ADMIN_USER` |
+| `GRAFANA_PASSWORD` | `GF_SECURITY_ADMIN_PASSWORD` |
+| `HUB_PAT_TOKEN` | `DOCKERHUB_PAT`, `DOCKERHUB_TOKEN` |
+| `DOCKERHUB_USERNAME` | `DOCKER_USERNAME` |
+| `NEO4J_USERNAME` / `NEO4J_PASSWORD` | `NEO4J_AUTH`, `NEO4J_AUTH_USERNAME`, `NEO4J_AUTH_PASSWORD` |
+
+Run a non-secret status check:
+
+```bash
+bash scripts/ai/mcp/test_env_loading.sh
+```
+
+The script reports `SET` / `NOT SET` only and must not print secret values.
+
+## Token Matrix
+
+| MCP | Variable | Required | Source | Minimum scope | Rotation |
+| --- | --- | --- | --- | --- | --- |
+| GitHub | `GITHUB_PERSONAL_ACCESS_TOKEN` | Yes for GitHub MCP | GitHub fine-grained PAT or classic PAT | Repository read access needed for the task | 90 days |
+| Brave Search | `BRAVE_API_KEY` | Yes for Brave MCP | Brave Search API console | Web Search API quota | 90 days |
+| Prometheus | `PROMETHEUS_TOKEN` or username/password | No | Local protected Prometheus endpoint | Read/query only | 90 days for shared service accounts |
+| Grafana | `GRAFANA_SERVICE_ACCOUNT_TOKEN` or username/password | No | Grafana service account preferred | Viewer/read-only dashboard and datasource access | 90 days |
+| Neo4j Cypher | `NEO4J_*` | No for local defaults | Local Neo4j memory instance | Local memory database only | Rotate default before shared-host use |
+| Neo4j Memory | `NEO4J_*` | No for local defaults | Local Neo4j memory instance | Local memory database only | Rotate default before shared-host use |
+| Docker Hub | `HUB_PAT_TOKEN` | No | Docker Hub PAT | Read-only pull access unless publishing is explicitly required | 90 days |
+
+## Wrapper Validation
+
+Token-bearing wrappers use:
+
+- `scripts/ai/mcp/support/token_validation.sh`
+- `scripts/ai/mcp/support/token_validation.ps1`
+
+Validation behavior:
+
+- required tokens fail fast when missing or too short
+- known token prefixes are checked where stable
+- optional tokens warn and continue
+- values are never printed
+- `BIOETL_MCP_VALIDATE_ONLY=1` validates configuration and exits before
+  launching a long-lived stdio server
+
+Examples:
+
+```bash
+BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/github-mcp-wrapper.sh
+BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/mcp_brave_search_wrapper.sh
+BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/mcp_grafana_wrapper.sh
+```
+
+For the full local registration and wrapper preflight:
+
+```bash
+bash scripts/ai/mcp/check.sh
+```
+
+## Troubleshooting
+
+| Symptom | Check |
+| --- | --- |
+| GitHub MCP says token missing | Set `GITHUB_PERSONAL_ACCESS_TOKEN` or `GITHUB_TOKEN`; verify alias normalization with `test_env_loading.sh` or `check.sh`. |
+| GitHub token prefix warning | Confirm the token came from GitHub and has only the scopes needed by the local MCP task. |
+| Brave MCP exits immediately | Set `BRAVE_API_KEY`; keys shorter than 32 characters are rejected. |
+| Grafana MCP starts but queries fail | Set `GRAFANA_SERVICE_ACCOUNT_TOKEN` or local username/password; confirm `GRAFANA_URL`. |
+| Prometheus MCP cannot query | Confirm `PROMETHEUS_URL`; add token or username/password only if the endpoint is protected. |
+| Neo4j MCP authentication fails | Confirm `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`, or `NEO4J_AUTH`. Rotate the documented local default before shared-host use. |
+| Docker-backed MCP cannot start | Confirm Docker is installed and available through the wrapper resolver. |
+
+## CI/CD Stance
+
+Default CI may validate MCP config structure, wrapper syntax, token-validation
+behavior with synthetic values, and stub/local MCP smoke tests.
+
+Default CI must not require real personal or third-party MCP tokens. Adding
+GitHub Actions secrets for live MCP token tests requires a separate security
+design that defines:
+
+- exact secret names and owners
+- least-privilege scopes
+- rotation cadence
+- fork/PR exposure rules
+- failure mode when secrets are unavailable
+
+Until that design exists, live configured-token MCP checks remain local
+operator validation.

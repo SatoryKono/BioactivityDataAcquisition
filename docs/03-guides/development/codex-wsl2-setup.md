@@ -66,7 +66,7 @@ ______________________________________________________________________
 | `codex.bat`            | `scripts/ops/`             | Launch interactive Codex from Windows    |
 | `codex-exec.bat`       | `scripts/ops/`             | Launch full-auto Codex from Windows      |
 | `.setup_wsl_codex.sh`  | `scripts/engineering/dev/` | DNS resolver (dig + PowerShell fallback) |
-| `.wsl_proxy_env.sh`    | repo root                  | Auto-configure proxy env vars            |
+| `.wsl_proxy_env.sh`    | `scripts/engineering/dev/bash/` | Auto-configure proxy env vars            |
 | `.codex/config.toml`   | repo root                  | Project-level Codex config               |
 | `~/.codex/config.toml` | WSL home                   | Global Codex config (MCP servers)        |
 | `~/.bashrc`            | WSL home                   | Sources DNS + proxy scripts              |
@@ -170,7 +170,7 @@ Follow the prompts: open the URL in your browser and enter the one-time code.
 
 > **VPN note:** The proxy must be running for authentication to work.
 > Make sure `http_proxy` / `https_proxy` are set (happens automatically
-> via `~/.bashrc` → `.wsl_proxy_env.sh`).
+> via `~/.bashrc` → `scripts/engineering/dev/bash/.wsl_proxy_env.sh`).
 
 ### Verify
 
@@ -292,7 +292,7 @@ bash "$BIOETL_DIR/scripts/engineering/dev/.setup_wsl_codex.sh"
 
 Minimal HTTP CONNECT proxy running on Windows, listening on `0.0.0.0:3128`.
 WSL2 routes all HTTP/HTTPS traffic through it via `http_proxy` / `https_proxy`
-environment variables (set by `.wsl_proxy_env.sh`).
+environment variables (set by `scripts/engineering/dev/bash/.wsl_proxy_env.sh`).
 
 The proxy runs on the Windows host where VPN routing works correctly.
 
@@ -315,7 +315,7 @@ if ! grep -q "api.openai.com" /etc/hosts 2>/dev/null; then
 fi
 
 # WSL2 proxy (VPN workaround)
-source "$BIOETL_DIR/.wsl_proxy_env.sh" 2>/dev/null
+source "$BIOETL_DIR/scripts/engineering/dev/bash/.wsl_proxy_env.sh" 2>/dev/null
 ```
 
 ### Proxy control aliases
