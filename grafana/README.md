@@ -1305,19 +1305,19 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 | Панель | Query family | Unit | Threshold |
 | --- | --- | --- | --- |
 | `First Action` | text CTA | n/a | n/a |
-| `Monitor Runtime Current Status` | `bioetl_runtime_current_status` plus `Runtime Telemetry Gap` trust gate | status | `0=OK`, `1=WARN`, `2=CRIT`, `null=UNKNOWN`; non-zero telemetry gap raises the verdict before zero counters are trusted |
-| `Monitor Runtime Telemetry Gap` | `up{job="bioetl"}` + exact runtime dashboard rule-group evaluation failures/presence/freshness | status | `0=SCRAPING/RULES OK`, `1=SCRAPE/RULE GAP`, `>=2=SCRAPE+RULE GAP`, `null=UNKNOWN` |
-| `Monitor Runtime Blockers` | `bioetl_runtime_current_blocker_reason{pipeline=~"$pipeline",run_type=~"$run_type"}` anchored by `bioetl_runtime_current_status == 0` | count | red `>=1`; `0` only when current status is explicitly OK; `null=UNKNOWN` |
-| `Inspect Top Runtime Blockers` | `topk(3, bioetl_runtime_current_blocker_reason{pipeline=~"$pipeline",run_type=~"$run_type"} > 0)` | table | reason/severity/action labels |
+| `Monitor Runtime Current Status` | `bioetl_runtime_current_status_trusted{pipeline=~"$pipeline",run_type=~"$run_type"}` | status | `0=OK`, `1=WARN`, `2=CRIT`, `null=UNKNOWN`; the recording rule applies telemetry trust-gate and workflow alias projection before dashboard filtering |
+| `Monitor Runtime Telemetry Gap` | `bioetl_runtime_trust_gap_status_10m` | status | `0=SCRAPING/RULES OK`, `1=SCRAPE/RULE GAP`, `>=2=SCRAPE+RULE GAP`, `null=UNKNOWN` |
+| `Monitor Runtime Blockers` | `bioetl_runtime_current_blocker_reason_scoped{pipeline=~"$pipeline",run_type=~"$run_type"}` anchored by `bioetl_runtime_current_status_trusted == 0` | count | red `>=1`; `0` only when current status is explicitly OK; `null=UNKNOWN` |
+| `Inspect Top Runtime Blockers` | `topk(3, bioetl_runtime_current_blocker_reason_scoped{pipeline=~"$pipeline",run_type=~"$run_type"} > 0)` | table | reason/severity/action labels |
 
 Range and localization evidence (`Monitor Failed Runs`,
 `Monitor Runtime Error Rate`, latency, records by stage, logs/traces) lives
 below the current-cause row or inside expanded rows. `Monitor Worst Stage Lag`
 is colocated with the compact evidence row as a selected-range risk marker; it
 is not a current status input.
-`Status` and `Runtime Status` are trust-gated by `Runtime Telemetry Gap`; a
-scrape/rule gap renders the verdict WARN/CRIT instead of allowing green OK to
-visually override signal-integrity loss. Selected-range zero cards in the
+`Status` and `Runtime Status` consume `bioetl_runtime_current_status_trusted`;
+that recording rule applies the runtime telemetry trust gate before dashboard
+cards can show green OK. Selected-range zero cards in the
 compact evidence row use neutral stat coloring so `0` supports investigation
 without becoming a second green health verdict.
 `Inspect Active Runtime Blocker Detail` is an expanded `Detect` drilldown, not
@@ -2241,6 +2241,16 @@ Legacy v1 dashboards сохранены только как archived comparison 
    ```
 1. Добавьте panel/rule consumers в shipped JSON/YAML surfaces и обновите promtool/python tests.
 
+### Counter-window semantics
+
+Use `increase(<counter>[$window])` for event-delta counters such as
+`bioetl_pipeline_runs_total`, `bioetl_errors_total`, and
+`bioetl_silver_validation_failures_total`. Use `max_over_time(...)` only for
+pushed snapshot/range-evidence totals where the latest pushed value inside the
+window is the intended evidence, including `bioetl_records_processed_total`,
+`bioetl_stage_records_total`, `bioetl_dq_records_quarantined_total`, and
+`bioetl_silver_filter_rejections_total`.
+
 ### Как метрики переживают перезапуск приложения?
 
 При перезапуске BioETL все Counter-метрики сбрасываются в 0 (это стандартное поведение Prometheus client). Prometheus обрабатывает это корректно: функция `rate()` и `increase()` автоматически учитывают сброс счётчика (counter reset), вычисляя дельту с учётом последнего известного значения перед перезапуском. Gauge-метрики также сбрасываются, но будут установлены заново при первом измерении после запуска.
@@ -2466,6 +2476,24 @@ adds a machine-readable rollup for local dashboard health. `--deployed-dir`
 compares shipped JSON against exported/deployed snapshots while ignoring benign
 Grafana export noise such as root `id` / `version` and panel-level
 `pluginVersion`.
+
+### 27.2 Prometheus rule validation
+
+Use the deterministic QA entrypoint for repo-backed Prometheus rules:
+
+```bash
+uv run python -m scripts.engineering.qa check-prometheus-rules
+```
+
+It runs:
+
+```bash
+promtool check rules grafana/prometheus-rules/bioetl_observability.yml
+promtool test rules grafana/prometheus-rules/tests/bioetl_observability.test.yml
+```
+
+If local `promtool` is missing, the command fails fast with install/Docker
+guidance. CI runs the same entrypoint with `--runner docker`.
 
 ______________________________________________________________________
 

@@ -9,11 +9,13 @@ from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 import pytest
 
 from bioetl.domain.aggregates.events import (
+    BatchFailed,
     BatchWritten,
     DomainEvent,
     PipelineCompleted,
     QuarantineEntryResolved,
 )
+from bioetl.domain.medallion import Layer
 from bioetl.domain.observability_event_mapping import (
     map_domain_event_to_observability_event,
 )
@@ -48,7 +50,7 @@ def test_batch_written_maps_to_batch_family_event() -> None:
         occurred_at=datetime(2026, 4, 10, tzinfo=UTC),
         run_id=deterministic_run_uuid_from_callsite("test_observability_event_mapping"),
         batch_id=BatchID("batch-1"),
-        layer="silver",
+        layer=Layer.SILVER,
         record_count=10,
     )
 
@@ -59,6 +61,30 @@ def test_batch_written_maps_to_batch_family_event() -> None:
     assert envelope.phase_hint == "execution"
     assert envelope.context["layer"] == "silver"
     assert envelope.context["record_count"] == 10
+
+
+def test_batch_events_reject_string_layers_inside_domain() -> None:
+    event_kwargs = {
+        "occurred_at": datetime(2026, 4, 10, tzinfo=UTC),
+        "run_id": deterministic_run_uuid_from_callsite(
+            "test_observability_event_mapping"
+        ),
+        "batch_id": BatchID("batch-1"),
+    }
+
+    with pytest.raises(TypeError, match="BatchWritten.layer must be a Layer"):
+        BatchWritten(
+            **event_kwargs,
+            layer="silver",  # type: ignore[arg-type]
+            record_count=10,
+        )
+
+    with pytest.raises(TypeError, match="BatchFailed.layer must be a Layer"):
+        BatchFailed(
+            **event_kwargs,
+            layer="platinum",  # type: ignore[arg-type]
+            error="write failed",
+        )
 
 
 def test_quarantine_resolution_maps_to_postrun_hint() -> None:

@@ -1348,12 +1348,20 @@ def build_cleanup_classification_report(
     *,
     candidates: list[CleanupCandidate],
     review_evidence: list[ReviewLaneEvidence],
+    mode: str = "dry-run",
 ) -> dict[str, object]:
     """Build a deterministic machine-readable cleanup classification report."""
     return {
         "schema_version": 1,
         "tool": "scripts/ops/support/repo/cleanup_repository.py",
+        "mode": mode,
         "repository_root": repo_root.as_posix(),
+        "safety_contract": {
+            "non_destructive_dry_run": mode == "dry-run",
+            "exact_candidates_only": True,
+            "blocked_cleanup_zones_respected": True,
+            "secret_env_files_excluded": True,
+        },
         "summary": _summarize_classifications(
             candidates=candidates,
             review_evidence=review_evidence,
@@ -1863,6 +1871,13 @@ def main() -> int:
                 repo_root,
                 candidates=candidates,
                 review_evidence=review_evidence,
+                mode=(
+                    "apply"
+                    if args.apply
+                    else "apply-reports-prune"
+                    if args.apply_reports_prune
+                    else "dry-run"
+                ),
             ),
         )
         logger.info("Wrote cleanup classification report: %s", report_path)

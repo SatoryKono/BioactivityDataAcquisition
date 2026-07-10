@@ -28,6 +28,7 @@ from bioetl.domain.aggregates.events import (
     RecordQuarantined,
 )
 from bioetl.domain.exceptions import InvalidStateError
+from bioetl.domain.medallion import Layer
 from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID
 from tests.helpers.deterministic_ids import (
     deterministic_batch_uuid,
@@ -174,39 +175,39 @@ class TestBatchLifecycleFunctions:
 
         # Should succeed from WRITING
         new_status = lifecycle.mark_committed(
-            BatchStatus.WRITING, events, run_id, batch_id, 8, "silver", _ts(20)
+            BatchStatus.WRITING, events, run_id, batch_id, 8, Layer.SILVER, _ts(20)
         )
         assert new_status == BatchStatus.COMMITTED
 
         # Should fail from OPEN
         with pytest.raises(InvalidStateError, match="Cannot commit"):
             lifecycle.mark_committed(
-                BatchStatus.OPEN, events, run_id, batch_id, 8, "silver", _ts(20)
+                BatchStatus.OPEN, events, run_id, batch_id, 8, Layer.SILVER, _ts(20)
             )
 
         # Should fail from SEALED
         with pytest.raises(InvalidStateError, match="Cannot commit"):
             lifecycle.mark_committed(
-                BatchStatus.SEALED, events, run_id, batch_id, 8, "silver", _ts(20)
+                BatchStatus.SEALED, events, run_id, batch_id, 8, Layer.SILVER, _ts(20)
             )
 
         # Should fail from COMMITTED
         with pytest.raises(InvalidStateError, match="Cannot commit"):
             lifecycle.mark_committed(
-                BatchStatus.COMMITTED, events, run_id, batch_id, 8, "silver", _ts(20)
+                BatchStatus.COMMITTED, events, run_id, batch_id, 8, Layer.SILVER, _ts(20)
             )
 
         # Should fail from FAILED
         with pytest.raises(InvalidStateError, match="Cannot commit"):
             lifecycle.mark_committed(
-                BatchStatus.FAILED, events, run_id, batch_id, 8, "silver", _ts(20)
+                BatchStatus.FAILED, events, run_id, batch_id, 8, Layer.SILVER, _ts(20)
             )
 
     def test_lifecycle_mark_committed_emits_batch_written_event(self, run_id, batch_id):
         """mark_committed should emit BatchWritten event."""
         events: list = []
         lifecycle.mark_committed(
-            BatchStatus.WRITING, events, run_id, batch_id, 8, "silver", _ts(20)
+            BatchStatus.WRITING, events, run_id, batch_id, 8, Layer.SILVER, _ts(20)
         )
 
         assert len(events) == 1
@@ -214,7 +215,7 @@ class TestBatchLifecycleFunctions:
         assert isinstance(event, BatchWritten)
         assert event.run_id == run_id
         assert event.batch_id == batch_id
-        assert event.layer == "silver"
+        assert event.layer is Layer.SILVER
         assert event.record_count == 8
         assert event.occurred_at == _ts(20)
 
@@ -228,7 +229,7 @@ class TestBatchLifecycleFunctions:
             events,
             run_id,
             batch_id,
-            "silver",
+            Layer.SILVER,
             "Write error",
             None,
             failed_at=_ts(20),
@@ -242,7 +243,7 @@ class TestBatchLifecycleFunctions:
                 events,
                 run_id,
                 batch_id,
-                "silver",
+                Layer.SILVER,
                 "Error",
                 None,
                 failed_at=_ts(20),
@@ -255,7 +256,7 @@ class TestBatchLifecycleFunctions:
                 events,
                 run_id,
                 batch_id,
-                "silver",
+                Layer.SILVER,
                 "Error",
                 None,
                 failed_at=_ts(20),
@@ -268,7 +269,7 @@ class TestBatchLifecycleFunctions:
                 events,
                 run_id,
                 batch_id,
-                "silver",
+                Layer.SILVER,
                 "Error",
                 None,
                 failed_at=_ts(20),
@@ -281,7 +282,7 @@ class TestBatchLifecycleFunctions:
                 events,
                 run_id,
                 batch_id,
-                "silver",
+                Layer.SILVER,
                 "Error",
                 None,
                 failed_at=_ts(20),
@@ -295,7 +296,7 @@ class TestBatchLifecycleFunctions:
             events,
             run_id,
             batch_id,
-            "silver",
+            Layer.SILVER,
             "Connection timeout",
             "TimeoutError",
             failed_at=_ts(20),
@@ -306,7 +307,7 @@ class TestBatchLifecycleFunctions:
         assert isinstance(event, BatchFailed)
         assert event.run_id == run_id
         assert event.batch_id == batch_id
-        assert event.layer == "silver"
+        assert event.layer is Layer.SILVER
         assert event.error == "Connection timeout"
         assert event.error_type == "TimeoutError"
         assert event.occurred_at == _ts(20)
@@ -588,14 +589,14 @@ class TestBatchLifecycleMixin:
         batch.mark_writing()
         batch.collect_events()  # Clear previous events
 
-        batch.mark_committed("silver", _ts(20))
+        batch.mark_committed(Layer.SILVER, _ts(20))
 
         assert batch.status == BatchStatus.COMMITTED
 
         events = batch.collect_events()
         assert len(events) == 1
         assert isinstance(events[0], BatchWritten)
-        assert events[0].layer == "silver"
+        assert events[0].layer is Layer.SILVER
 
     def test_mark_failed_delegates_to_lifecycle_function(self, run_id):
         """mark_failed should delegate to lifecycle.mark_failed."""
@@ -605,7 +606,7 @@ class TestBatchLifecycleMixin:
         batch.mark_writing()
         batch.collect_events()  # Clear previous events
 
-        batch.mark_failed("bronze", "Write error", "IOError", failed_at=_ts(20))
+        batch.mark_failed(Layer.BRONZE, "Write error", "IOError", failed_at=_ts(20))
 
         assert batch.status == BatchStatus.FAILED
 
@@ -614,7 +615,7 @@ class TestBatchLifecycleMixin:
         assert isinstance(events[0], BatchFailed)
         assert events[0].run_id == run_id
         assert events[0].batch_id == batch.batch_id
-        assert events[0].layer == "bronze"
+        assert events[0].layer is Layer.BRONZE
         assert events[0].error == "Write error"
         assert events[0].error_type == "IOError"
 
@@ -633,7 +634,7 @@ class TestBatchLifecycleMixin:
         batch.seal(_ts(10))
 
         with pytest.raises(InvalidStateError, match="Cannot commit"):
-            batch.mark_committed("silver", _ts(20))
+            batch.mark_committed(Layer.SILVER, _ts(20))
 
     def test_mark_failed_invalid_without_writing(self, run_id):
         """mark_failed should require WRITING status on aggregate level."""
@@ -642,7 +643,7 @@ class TestBatchLifecycleMixin:
         batch.seal(_ts(10))
 
         with pytest.raises(InvalidStateError, match="Cannot fail"):
-            batch.mark_failed("bronze", "Write error", "IOError", failed_at=_ts(20))
+            batch.mark_failed(Layer.BRONZE, "Write error", "IOError", failed_at=_ts(20))
 
     def test_quarantine_record_event_payloads(self, run_id):
         """quarantine_record should emit full RecordQuarantined payload."""

@@ -10,19 +10,6 @@ function Normalize-BioetlRepoEnvAliases {
         $env:GITHUB_TOKEN = $env:GITHUB_PERSONAL_ACCESS_TOKEN
     }
 
-    if (-not $env:SONARQUBE_TOKEN -and $env:SONAR_TOKEN) {
-        $env:SONARQUBE_TOKEN = $env:SONAR_TOKEN
-    }
-    if (-not $env:SONAR_TOKEN -and $env:SONARQUBE_TOKEN) {
-        $env:SONAR_TOKEN = $env:SONARQUBE_TOKEN
-    }
-    if (-not $env:SONARQUBE_ORG -and $env:SONAR_ORG) {
-        $env:SONARQUBE_ORG = $env:SONAR_ORG
-    }
-    if (-not $env:SONARQUBE_URL -and $env:SONAR_HOST_URL) {
-        $env:SONARQUBE_URL = $env:SONAR_HOST_URL
-    }
-
     if (-not $env:NEEDLE_API_KEY -and $env:NEEDLE_TOKEN) {
         $env:NEEDLE_API_KEY = $env:NEEDLE_TOKEN
     }

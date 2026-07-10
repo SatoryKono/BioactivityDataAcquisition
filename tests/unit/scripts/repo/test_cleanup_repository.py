@@ -6,6 +6,7 @@ import pytest
 
 import json
 import os
+import sys
 from pathlib import Path
 
 import yaml
@@ -587,6 +588,73 @@ def test_build_cleanup_classification_report_distinguishes_policy_classes(
     }
     assert loaded["cleanup_candidates"][0]["classification"] == "SAFE"
     assert loaded["root_review_evidence"][0]["classification"] == "BLOCKED"
+
+
+def test_build_cleanup_classification_report_records_dry_run_safety_contract(
+    tmp_path: Path,
+) -> None:
+    report = module.build_cleanup_classification_report(
+        tmp_path,
+        mode="dry-run",
+        candidates=[
+            module.CleanupCandidate(
+                path=Path(".pytest_cache"),
+                category="local_cache_dir",
+                tracked=False,
+                apply_allowed=True,
+                reason="exact local artifact family outside blocked cleanup zones",
+            )
+        ],
+        review_evidence=[],
+    )
+
+    assert report["mode"] == "dry-run"
+    assert report["safety_contract"] == {
+        "non_destructive_dry_run": True,
+        "exact_candidates_only": True,
+        "blocked_cleanup_zones_respected": True,
+        "secret_env_files_excluded": True,
+    }
+    assert report["summary"]["SAFE"] == 1
+    assert report["cleanup_candidates"][0]["classification"] == "SAFE"
+
+
+def test_main_dry_run_report_writes_non_destructive_classification_metadata(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _write_governance_files(tmp_path)
+    _write_review_registry(tmp_path, [])
+    (tmp_path / ".pytest_cache").mkdir()
+    report_path = tmp_path / "reports" / "quality" / "root-clutter.json"
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(module, "_tracked_paths", lambda _repo_root: [])
+    monkeypatch.setattr(module, "_git_path_has_history", lambda _repo_root, _path: False)
+    monkeypatch.setattr(module, "_count_reference_hits", lambda _repo_root, _path: 0)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "cleanup_repository.py",
+            "--dry-run",
+            "--no-root",
+            "--detail-limit",
+            "0",
+            "--report-json",
+            str(report_path),
+        ],
+    )
+
+    assert module.main() == 0
+
+    loaded = json.loads(report_path.read_text(encoding="utf-8"))
+    assert loaded["mode"] == "dry-run"
+    assert loaded["safety_contract"]["non_destructive_dry_run"] is True
+    assert loaded["safety_contract"]["secret_env_files_excluded"] is True
+    assert loaded["cleanup_candidates"][0]["path"] == ".pytest_cache"
+    assert loaded["cleanup_candidates"][0]["classification"] == "SAFE"
+    assert (tmp_path / ".pytest_cache").exists()
 
 
 def test_collect_root_policy_mismatches_includes_live_root_violation(

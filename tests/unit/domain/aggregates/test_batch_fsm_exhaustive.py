@@ -29,6 +29,7 @@ import pytest
 
 from bioetl.domain.aggregates.batch import Batch, BatchStatus
 from bioetl.domain.exceptions import InvalidStateError
+from bioetl.domain.medallion import Layer
 from bioetl.domain.types import RunID
 from tests.helpers.deterministic_ids import deterministic_uuid_value
 
@@ -130,12 +131,12 @@ def test_valid_state_transitions_succeed(
         batch.mark_writing()
     elif method == "mark_committed":
         batch.mark_committed(
-            layer="bronze",
+            layer=Layer.BRONZE,
             committed_at=_ts(3),
         )
     elif method == "mark_failed":
         batch.mark_failed(
-            layer="bronze",
+            layer=Layer.BRONZE,
             error="Test error",
             failed_at=_ts(3),
         )
@@ -173,7 +174,7 @@ def test_invalid_state_transitions_raise_error(
         batch.seal(sealed_at=_ts(1))
         batch.mark_writing()
         batch.mark_committed(
-            layer="bronze",
+            layer=Layer.BRONZE,
             committed_at=_ts(3),
         )
         assert batch.status == BatchStatus.COMMITTED
@@ -181,7 +182,7 @@ def test_invalid_state_transitions_raise_error(
         batch.seal(sealed_at=_ts(1))
         batch.mark_writing()
         batch.mark_failed(
-            layer="bronze",
+            layer=Layer.BRONZE,
             error="Test error",
             failed_at=_ts(3),
         )
@@ -197,12 +198,12 @@ def test_invalid_state_transitions_raise_error(
             batch.mark_writing()
         elif to_state == BatchStatus.COMMITTED:
             batch.mark_committed(
-                layer="bronze",
+                layer=Layer.BRONZE,
                 committed_at=_ts(3),
             )
         elif to_state == BatchStatus.FAILED:
             batch.mark_failed(
-                layer="bronze",
+                layer=Layer.BRONZE,
                 error="Test error",
                 failed_at=_ts(3),
             )
@@ -250,7 +251,7 @@ def test_committed_state_invariants(run_id: RunID) -> None:
     batch.seal(sealed_at=_ts(1))
     batch.mark_writing()
     batch.mark_committed(
-        layer="bronze",
+        layer=Layer.BRONZE,
         committed_at=_ts(3),
     )
 
@@ -269,7 +270,7 @@ def test_failed_state_invariants(run_id: RunID) -> None:
     batch.seal(sealed_at=_ts(1))
     batch.mark_writing()
     batch.mark_failed(
-        layer="bronze",
+        layer=Layer.BRONZE,
         error="Test error",
         failed_at=_ts(3),
     )
@@ -304,7 +305,7 @@ def test_mark_committed_emits_batch_written_event(run_id: RunID) -> None:
     batch.seal(sealed_at=_ts(1))
     batch.mark_writing()
     batch.mark_committed(
-        layer="bronze",
+        layer=Layer.BRONZE,
         committed_at=_ts(3),
     )
 
@@ -322,7 +323,7 @@ def test_mark_failed_emits_batch_failed_event(run_id: RunID) -> None:
     batch.seal(sealed_at=_ts(1))
     batch.mark_writing()
     batch.mark_failed(
-        layer="bronze",
+        layer=Layer.BRONZE,
         error="Test error",
         failed_at=_ts(3),
     )
@@ -360,7 +361,7 @@ def test_cannot_mark_committed_from_sealed_state(sealed_batch: Batch) -> None:
     """Test that committing from SEALED state raises error."""
     with pytest.raises(InvalidStateError) as exc_info:
         sealed_batch.mark_committed(
-            layer="bronze",
+            layer=Layer.BRONZE,
             committed_at=_ts(3),
         )
 
@@ -371,7 +372,7 @@ def test_cannot_mark_failed_from_sealed_state(sealed_batch: Batch) -> None:
     """Test that failing from SEALED state raises error."""
     with pytest.raises(InvalidStateError) as exc_info:
         sealed_batch.mark_failed(
-            layer="bronze",
+            layer=Layer.BRONZE,
             error="Test error",
             failed_at=_ts(3),
         )
@@ -385,13 +386,13 @@ def test_cannot_transition_from_committed_to_failed(run_id: RunID) -> None:
     batch.seal(sealed_at=_ts(1))
     batch.mark_writing()
     batch.mark_committed(
-        layer="bronze",
+        layer=Layer.BRONZE,
         committed_at=_ts(3),
     )
 
     with pytest.raises(InvalidStateError) as exc_info:
         batch.mark_failed(
-            layer="bronze",
+            layer=Layer.BRONZE,
             error="Test error",
             failed_at=_ts(4),
         )
@@ -405,14 +406,14 @@ def test_cannot_transition_from_failed_to_committed(run_id: RunID) -> None:
     batch.seal(sealed_at=_ts(1))
     batch.mark_writing()
     batch.mark_failed(
-        layer="bronze",
+        layer=Layer.BRONZE,
         error="Test error",
         failed_at=_ts(3),
     )
 
     with pytest.raises(InvalidStateError) as exc_info:
         batch.mark_committed(
-            layer="bronze",
+            layer=Layer.BRONZE,
             committed_at=_ts(4),
         )
 

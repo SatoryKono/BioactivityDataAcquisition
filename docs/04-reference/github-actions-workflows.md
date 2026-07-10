@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 ## Purpose
 
-This page is the canonical published inventory of the **38** live GitHub Actions
+This page is the canonical published inventory of the **37** live GitHub Actions
 workflows shipped under `.github/workflows/`.
 
 Use it when you need to answer:
@@ -53,7 +53,6 @@ Use it when you need to answer:
 | `security.yml` | `Security Scans` | `push`, `pull_request` | Secrets, dependency, and Bandit scans |
 | `semantic-governance.yml` | `Semantic Pipeline Governance` | `push`, `pull_request` | Semantic pipeline contract/policy governance |
 | `skills-consistency.yml` | `Skills Consistency` | `push`, `pull_request` | Local skill mirror consistency |
-| `sonarcloud.yml` | `SonarCloud` | `push`, `pull_request`, `workflow_dispatch` | SonarCloud analysis |
 | `tests.yml` | `Tests` | `push`, `pull_request` | Main test matrix, DQ gates, coverage, telemetry, control-plane E2E |
 | `type-checking.yml` | `Type Checking (Strict)` | `push`, `pull_request`, `workflow_dispatch` | Strict mypy lane |
 | `validate-mermaid.yml` | `Validate vendored Mermaid` | `push`, `pull_request` | Mermaid vendor/runtime validation |

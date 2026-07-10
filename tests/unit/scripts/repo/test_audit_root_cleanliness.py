@@ -183,6 +183,60 @@ def test_collect_tracked_policy_violations_allows_current_canonical_root_files()
     assert violations == []
 
 
+def test_collect_root_layout_state_splits_root_file_and_dir_policy_violations(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        module,
+        "_load_allowed_root_files",
+        lambda _repo_root: frozenset({"README.md"}),
+    )
+    monkeypatch.setattr(module, "_load_structure_catalog", lambda _repo_root: {})
+    monkeypatch.setattr(
+        module,
+        "_approved_root_directories",
+        lambda _catalog: frozenset({"docs"}),
+    )
+    monkeypatch.setattr(
+        module,
+        "_get_tracked_paths",
+        lambda _repo_root: [
+            "README.md",
+            "SYNC_COMPLETE.md",
+            "docs/index.md",
+            "scratch/output.txt",
+        ],
+    )
+    monkeypatch.setattr(module, "_get_untracked_paths", lambda _repo_root: [])
+
+    state = module.collect_root_layout_state(tmp_path)
+
+    assert state["root_file_allowlist_violations"] == ["SYNC_COMPLETE.md"]
+    assert state["root_directory_approval_violations"] == ["scratch"]
+    assert state["unexpected_root_files"] == ["SYNC_COMPLETE.md"]
+    assert state["unexpected_root_dirs"] == ["scratch"]
+
+
+def test_report_root_layout_violations_uses_separate_file_and_dir_headers(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert (
+        module._report_root_layout_violations(
+            unexpected_root_files=["SYNC_COMPLETE.md"],
+            unexpected_root_dirs=["scratch"],
+        )
+        == 1
+    )
+
+    captured = capsys.readouterr()
+
+    assert "ERROR: root file allowlist violation detected." in captured.err
+    assert "Unexpected tracked root files:" in captured.err
+    assert "ERROR: root directory approval violation detected." in captured.err
+    assert "Unexpected tracked root directories:" in captured.err
+
+
 def test_collect_structure_policy_violations_rejects_uncataloged_legacy_doc(
     tmp_path: Path,
 ) -> None:

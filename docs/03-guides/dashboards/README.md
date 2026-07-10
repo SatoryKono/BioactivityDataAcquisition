@@ -244,7 +244,7 @@ uv run python -m scripts.engineering.qa report-dashboard-inventory --json
 ```
 
 Для проверки parity с каноническими документами (`variables-guide.md`, `monitoring-index.md`)
-и mandatory links contract:
+dashboard inventory, datasource refs и mandatory links contract:
 
 ```bash
 uv run python -m scripts.engineering.qa report-dashboard-inventory --check --json
@@ -264,3 +264,19 @@ uv run python -m scripts.engineering.qa report-dashboard-inventory --deployed-di
 
 CI gate запускает эту проверку в `docs.yml` и фейлит pipeline при расхождении
 канонических полей.
+
+Для deterministic validation repo-backed Prometheus rules:
+
+```bash
+uv run python -m scripts.engineering.qa check-prometheus-rules
+```
+
+Этот command surface выполняет:
+
+```bash
+promtool check rules grafana/prometheus-rules/bioetl_observability.yml
+promtool test rules grafana/prometheus-rules/tests/bioetl_observability.test.yml
+```
+
+Если локальный `promtool` не найден, команда fail-fast возвращает понятную
+инструкцию. В CI используется тот же entry point с `--runner docker`.

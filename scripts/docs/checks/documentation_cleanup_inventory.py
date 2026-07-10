@@ -144,6 +144,11 @@ SKIP_TEXT_SCAN_PATHS = {
     "reports/project_structure.md",
 }
 SKIP_TEXT_SCAN_SUFFIXES = {".csv", ".json"}
+MAX_LOCAL_DOC_REPORT_FILES = 25_000
+QUARANTINED_PATH_MARKERS = (
+    "/.quarantined",
+    ".quarantined",
+)
 
 
 @dataclass(frozen=True)
@@ -171,53 +176,64 @@ def _run_git_ls_files() -> list[str]:
     return result.stdout.splitlines()
 
 
-def _safe_iter_local_docs_reports() -> tuple[list[str], list[dict[str, str]]]:
-    root = PROJECT_ROOT / "docs" / "reports"
+def _is_quarantined_path(path: str) -> bool:
+    return path.startswith(".quarantined") or any(
+        marker in path for marker in QUARANTINED_PATH_MARKERS
+    )
+
+
+def _scan_error(path: str, error: str) -> dict[str, str]:
+    return {"path": path, "error": error}
+
+
+def _safe_iter_local_doc_tree(root_relative: str) -> tuple[list[str], list[dict[str, str]]]:
+    """Scan an explicit local docs root without shelling out to broad traversal."""
+    root = PROJECT_ROOT / root_relative
     if not root.exists():
         return [], []
 
     paths: list[str] = []
     errors: list[dict[str, str]] = []
+    stack = [root]
 
-    try:
-        result = subprocess.run(
-            ["find", "docs/reports", "-type", "f"],
-            cwd=PROJECT_ROOT,
-            check=True,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-    except (OSError, subprocess.CalledProcessError) as error:
-        errors.append(
-            {
-                "path": "docs/reports",
-                "error": error.__class__.__name__,
-            }
-        )
-    else:
-        for raw in result.stdout.splitlines():
-            relative = raw.removeprefix("./")
-            if _is_doc_like(relative):
-                paths.append(relative)
-        return sorted(set(paths)), errors
+    while stack:
+        current = stack.pop()
+        relative_current = _repo_relative(current)
+        if _is_quarantined_path(relative_current):
+            errors.append(_scan_error(relative_current, "QuarantinedPath"))
+            continue
 
-    def _onerror(error: OSError) -> None:
-        errors.append(
-            {
-                "path": getattr(error, "filename", "") or "docs/reports",
-                "error": error.__class__.__name__,
-            }
-        )
+        try:
+            with os.scandir(current) as iterator:
+                entries = sorted(iterator, key=lambda entry: entry.name)
+        except OSError as error:
+            errors.append(_scan_error(relative_current, error.__class__.__name__))
+            continue
 
-    for current_root, _dirs, filenames in os.walk(root, onerror=_onerror):
-        current = Path(current_root)
-        for filename in filenames:
-            path = current / filename
-            relative = _repo_relative(path)
-            if _is_doc_like(relative):
-                paths.append(relative)
+        for entry in entries:
+            entry_path = Path(entry.path)
+            relative = _repo_relative(entry_path)
+            try:
+                if entry.is_dir(follow_symlinks=False):
+                    if _is_quarantined_path(relative):
+                        errors.append(_scan_error(relative, "QuarantinedPath"))
+                    else:
+                        stack.append(entry_path)
+                    continue
+                if entry.is_file(follow_symlinks=False) and _is_doc_like(relative):
+                    paths.append(relative)
+                    if len(paths) > MAX_LOCAL_DOC_REPORT_FILES:
+                        errors.append(
+                            _scan_error(root_relative, "LocalScanFileLimitExceeded")
+                        )
+                        return sorted(set(paths)), errors
+            except OSError as error:
+                errors.append(_scan_error(relative, error.__class__.__name__))
     return sorted(set(paths)), errors
+
+
+def _safe_iter_local_docs_reports() -> tuple[list[str], list[dict[str, str]]]:
+    return _safe_iter_local_doc_tree("docs/reports")
 
 
 def _is_doc_like(path: str) -> bool:
@@ -843,7 +859,7 @@ def _build_inventory() -> dict[str, Any]:
         "check_command": "python -m scripts.docs generate-cleanup-inventory --check",
         "source_inputs": [
             "git ls-files",
-            "docs/reports local ignored docs scan",
+            "bounded docs/reports local ignored docs scan",
             "configs/quality/repo_structure_catalog.yaml",
             "configs/quality/generated_artifact_routing.yaml",
             "local markdown links",
@@ -871,6 +887,7 @@ def _build_inventory() -> dict[str, Any]:
             "generated_without_route_or_exception_count": generated_without_route_or_exception_count,
             "generated_route_count": len(routes_payload),
             "scan_errors": scan_errors,
+            "scan_error_count": len(scan_errors),
         },
         "generated_routes": routes_payload,
         "files": records,
@@ -1088,6 +1105,17 @@ def _write_if_changed(path: Path, content: str) -> bool:
     return True
 
 
+def _generated_route_violations(payload: dict[str, Any]) -> list[str]:
+    return sorted(
+        str(row["path"])
+        for row in payload.get("files", [])
+        if isinstance(row, dict)
+        and row.get("status") == "Generated"
+        and not row.get("generated_route")
+        and not row.get("generated_route_exception")
+    )
+
+
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group()
@@ -1130,6 +1158,15 @@ def main(argv: list[str] | None = None) -> int:
             print(
                 "[hint] run: python -m scripts.docs generate-cleanup-inventory --update"
             )
+            return 1
+        route_violations = _generated_route_violations(payload)
+        if route_violations:
+            print("[route-gap] Generated docs without route or exception:")
+            for path in route_violations[:20]:
+                print(f"  - {path}")
+            if len(route_violations) > 20:
+                print(f"  ... and {len(route_violations) - 20} more")
+            print("[hint] add a route to configs/quality/generated_artifact_routing.yaml")
             return 1
         print("[documentation-cleanup-inventory] inventory is synchronized")
         return 0

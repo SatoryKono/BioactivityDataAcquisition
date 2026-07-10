@@ -313,9 +313,9 @@ review_lanes:
         canonical_path: pr_compliance_checklist.yaml
         action_if_reintroduced: retain_as_exact_root_pr_review_contract_until_review_tooling_is_repointed
       - path: sonar-project.properties
-        current_live_state: present_approved_root_surface
-        canonical_path: sonar-project.properties
-        action_if_reintroduced: retain_as_exact_root_sonar_contract_while_sonarcloud_requires_the_standard_filename
+        current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: do_not_restore_root_sonar_contract_without_fresh_owner_review_and_tooling_need
 
   - lane_id: root_launcher_shims
     classification: owner_decision_resolved

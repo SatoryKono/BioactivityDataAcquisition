@@ -32,14 +32,14 @@ policy.
 
 | Dashboard | JSON file | Family | Primary docs | Panel docs | Datasources | Versioning form |
 | --- | --- | --- | --- | --- | --- | --- |
-| `0. Control Plane` | `grafana/dashboards/bioetl-control-plane-v1.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [Monitoring Guide](../../05-operations/01-monitoring-guide.md) | [bioetl-control-plane-v1-panels.md](panels/bioetl-control-plane-v1-panels.md) | Prometheus, HTTP control-plane backend | versioned (`v1`) |
-| `1. Overview` | `grafana/dashboards/bioetl-overview-v2.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [monitoring-index.md](monitoring-index.md) | [bioetl-overview-v2-panels.md](panels/bioetl-overview-v2-panels.md) | Prometheus, HTTP control-plane backend | versioned (`v2`) |
-| `2. Runtime` | `grafana/dashboards/bioetl-runtime.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [Monitoring Guide](../../05-operations/01-monitoring-guide.md) | [bioetl-runtime-panels.md](panels/bioetl-runtime-panels.md) | Prometheus | stable unversioned |
-| `3. Provider Health` | `grafana/dashboards/bioetl-provider-health-v2.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [monitoring-index.md](monitoring-index.md) | [bioetl-provider-health-v2-panels.md](panels/bioetl-provider-health-v2-panels.md) | Prometheus | versioned (`v2`) |
-| `4. Data Quality` | `grafana/dashboards/bioetl-dq-v2.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [Monitoring Guide](../../05-operations/01-monitoring-guide.md) | [bioetl-dq-v2-panels.md](panels/bioetl-dq-v2-panels.md) | Prometheus | versioned (`v2`) |
-| `5. Workflow` | `grafana/dashboards/bioetl-workflow-overview.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [monitoring-index.md](monitoring-index.md) | [bioetl-workflow-overview-panels.md](panels/bioetl-workflow-overview-panels.md) | Prometheus | stable unversioned |
-| `Silver Reject Explorer` | `grafana/dashboards/bioetl-silver-reject-explorer.json` | explorer | [monitoring-index.md](monitoring-index.md), [dashboard-v2-usage.md](dashboard-v2-usage.md) | [bioetl-silver-reject-explorer-panels.md](panels/bioetl-silver-reject-explorer-panels.md) | HTTP quarantine backend | stable unversioned |
-| `6. Alerts & SLO` | `grafana/dashboards/bioetl-alerts-slo.json` | alert triage | [Monitoring Guide](../../05-operations/01-monitoring-guide.md), [monitoring-index.md](monitoring-index.md) | [bioetl-alerts-slo-panels.md](panels/bioetl-alerts-slo-panels.md) | Prometheus | stable unversioned |
+| `0. Control Plane` | `grafana/dashboards/bioetl-control-plane-v1.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [Monitoring Guide](../../05-operations/01-monitoring-guide.md) | [bioetl-control-plane-v1-panels.md](panels/bioetl-control-plane-v1-panels.md) | Prometheus, Quarantine Explorer, Grafana | versioned (`v1`) |
+| `1. Overview` | `grafana/dashboards/bioetl-overview-v2.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [monitoring-index.md](monitoring-index.md) | [bioetl-overview-v2-panels.md](panels/bioetl-overview-v2-panels.md) | Prometheus, Quarantine Explorer, Grafana | versioned (`v2`) |
+| `2. Runtime` | `grafana/dashboards/bioetl-runtime.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [Monitoring Guide](../../05-operations/01-monitoring-guide.md) | [bioetl-runtime-panels.md](panels/bioetl-runtime-panels.md) | Prometheus, Loki, Quarantine Explorer, Grafana | stable unversioned |
+| `3. Provider Health` | `grafana/dashboards/bioetl-provider-health-v2.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [monitoring-index.md](monitoring-index.md) | [bioetl-provider-health-v2-panels.md](panels/bioetl-provider-health-v2-panels.md) | Prometheus, Quarantine Explorer, Grafana | versioned (`v2`) |
+| `4. Data Quality` | `grafana/dashboards/bioetl-dq-v2.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [Monitoring Guide](../../05-operations/01-monitoring-guide.md) | [bioetl-dq-v2-panels.md](panels/bioetl-dq-v2-panels.md) | Prometheus, Quarantine Explorer, Grafana | versioned (`v2`) |
+| `5. Workflow` | `grafana/dashboards/bioetl-workflow-overview.json` | primary | [dashboard-v2-usage.md](dashboard-v2-usage.md), [monitoring-index.md](monitoring-index.md) | [bioetl-workflow-overview-panels.md](panels/bioetl-workflow-overview-panels.md) | Prometheus, Quarantine Explorer, Grafana | stable unversioned |
+| `Silver Reject Explorer` | `grafana/dashboards/bioetl-silver-reject-explorer.json` | explorer | [monitoring-index.md](monitoring-index.md), [dashboard-v2-usage.md](dashboard-v2-usage.md) | [bioetl-silver-reject-explorer-panels.md](panels/bioetl-silver-reject-explorer-panels.md) | Prometheus, Quarantine Explorer, Grafana | stable unversioned |
+| `6. Alerts & SLO` | `grafana/dashboards/bioetl-alerts-slo.json` | alert triage | [Monitoring Guide](../../05-operations/01-monitoring-guide.md), [monitoring-index.md](monitoring-index.md) | [bioetl-alerts-slo-panels.md](panels/bioetl-alerts-slo-panels.md) | Prometheus, Grafana | stable unversioned |
 
 ## Versioning And Naming Policy
 
@@ -80,13 +80,14 @@ Current examples:
 Current shipped datasource families:
 
 - Prometheus
-- HTTP control-plane backend
-- HTTP quarantine backend
+- Loki
+- Quarantine Explorer
+- Grafana
 
-Loki and Tempo are part of the wider observability stack and Explore handoff
-workflow, but they are not the primary datasource owners for every shipped
-dashboard panel. Use the panel docs and monitoring guide when validating
-Explore-side behavior.
+Tempo is part of the wider observability stack and Explore handoff workflow,
+but it is not referenced by a shipped dashboard JSON panel in the current
+inventory. Use the panel docs and monitoring guide when validating Explore-side
+behavior.
 
 ## Validation
 
@@ -96,6 +97,7 @@ Preferred validation surfaces:
 python -m scripts.ops check-grafana-audit-preflight
 python -m scripts.ops audit-live-grafana
 python -m scripts.ops rerender-grafana
+python -m scripts.engineering.qa report-dashboard-inventory --check --json
 python -m pytest tests/integration/ci/test_dashboard_docs_yaml_consistency.py -q
 python -m pytest tests/integration/ci/test_dashboard_active_docs_sync.py -q
 ```

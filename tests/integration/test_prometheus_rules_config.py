@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import re
 
@@ -9,6 +10,7 @@ import pytest
 import yaml
 
 RULES_PATH = Path("grafana/prometheus-rules/bioetl_observability.yml")
+DASHBOARDS_DIR = Path("grafana/dashboards")
 CONTROL_PLANE_CURRENT_STATUS_RULES_PATH = Path(
     "grafana/prometheus-rules/bioetl_control_plane_current_status.yml"
 )
@@ -21,6 +23,25 @@ pytestmark = pytest.mark.integration
 _PROMQL_METRIC_SELECTOR_RE = re.compile(r"([a-zA-Z_:][a-zA-Z0-9_:]*)\{([^{}]*)\}")
 _PROMQL_LABEL_MATCHER_RE = re.compile(r'([a-zA-Z_]\w*)\s*(=~|=|!=|!~)\s*"')
 _PROMQL_BIOETL_METRIC_TOKEN_RE = re.compile(r"\b(bioetl_[a-z0-9_]+)\b")
+_PROMQL_QUOTED_STRING_RE = re.compile(r'"(?:\\.|[^"\\])*"')
+_MAX_OVER_COUNTER_RE = re.compile(
+    r"max_over_time\(\s*([a-zA-Z_:][a-zA-Z0-9_:]*_total)(?=\{|\[)"
+)
+_EVENT_DELTA_COUNTERS = frozenset(
+    {
+        "bioetl_pipeline_runs_total",
+        "bioetl_errors_total",
+        "bioetl_silver_validation_failures_total",
+    }
+)
+_PUSHED_SNAPSHOT_COUNTERS = frozenset(
+    {
+        "bioetl_records_processed_total",
+        "bioetl_stage_records_total",
+        "bioetl_dq_records_quarantined_total",
+        "bioetl_silver_filter_rejections_total",
+    }
+)
 
 
 def _load_rules() -> dict:
@@ -102,6 +123,39 @@ def _recording_rules_named(payload: dict, record_name: str) -> list[dict]:
             if rule.get("record") == record_name:
                 rules.append(rule)
     return rules
+
+
+def _iter_dashboard_promql() -> list[tuple[str, str, str]]:
+    expressions: list[tuple[str, str, str]] = []
+    for path in sorted(DASHBOARDS_DIR.glob("*.json")):
+        payload = json.loads(path.read_text(encoding="utf-8"))
+
+        def _visit(node: object, panel_title: str = "<dashboard>") -> None:
+            if isinstance(node, dict):
+                current_title = str(node.get("title") or panel_title)
+                expr = node.get("expr")
+                if isinstance(expr, str):
+                    expressions.append((path.name, current_title, expr))
+                for value in node.values():
+                    _visit(value, current_title)
+            elif isinstance(node, list):
+                for item in node:
+                    _visit(item, panel_title)
+
+        _visit(payload)
+    return expressions
+
+
+def _iter_rule_promql(payload: dict) -> list[tuple[str, str, str]]:
+    expressions: list[tuple[str, str, str]] = []
+    for group in payload.get("groups", []):
+        group_name = str(group.get("name", "<group>"))
+        for rule in group.get("rules", []):
+            name = str(rule.get("record") or rule.get("alert") or "<rule>")
+            expr = rule.get("expr")
+            if isinstance(expr, str):
+                expressions.append((group_name, name, expr))
+    return expressions
 
 
 def _infer_recording_rule_labels(expr: str) -> frozenset[str]:
@@ -219,7 +273,10 @@ def _unknown_bioetl_metrics_for_expr(
 ) -> list[str]:
     """Return BioETL metric tokens not declared in registries or recording rules."""
     unknown: set[str] = set()
-    for metric_name in _PROMQL_BIOETL_METRIC_TOKEN_RE.findall(expr):
+    expr_without_string_literals = _PROMQL_QUOTED_STRING_RE.sub('""', expr)
+    for metric_name in _PROMQL_BIOETL_METRIC_TOKEN_RE.findall(
+        expr_without_string_literals
+    ):
         if metric_name in label_sets:
             continue
         base_name = re.sub(r"(_total|_bucket|_sum|_count|_created)$", "", metric_name)
@@ -860,6 +917,12 @@ def test_canonical_current_status_recording_rules_exist() -> None:
         "bioetl_runtime_current_failure_signals_15m": "bioetl_runtime_alert_condition_pipeline_runs_failed_15m",
         "bioetl_runtime_current_degraded_signals_15m": "bioetl_runtime_alert_condition_no_terminal_run_30m",
         "bioetl_runtime_current_status": "bioetl_runtime_current_failure_signals_15m",
+        "bioetl_runtime_trust_gap_status_10m": 'up{job="bioetl"}',
+        "bioetl_runtime_trust_gap_active_10m": "bioetl_runtime_trust_gap_status_10m",
+        "bioetl_runtime_pipeline_run_type_universe_scoped": "label_replace",
+        "bioetl_runtime_current_status_scoped": "bioetl_runtime_current_status",
+        "bioetl_runtime_current_status_trusted": "bioetl_runtime_current_status_scoped",
+        "bioetl_runtime_current_blocker_reason_scoped": "bioetl_runtime_current_blocker_reason",
         "bioetl_provider_current_status": "bioetl_provider_health_status",
         "bioetl_provider_current_cause": "bioetl_provider_health_status",
         "bioetl_dq_current_activity_15m": "bioetl_records_processed_total",
@@ -920,6 +983,8 @@ def test_canonical_current_status_rules_do_not_use_grafana_range_or_zero_fallbac
 
     current_status_records = (
         "bioetl_runtime_current_status",
+        "bioetl_runtime_current_status_scoped",
+        "bioetl_runtime_current_status_trusted",
         "bioetl_provider_current_status",
         "bioetl_dq_current_status",
     )
@@ -927,6 +992,32 @@ def test_canonical_current_status_rules_do_not_use_grafana_range_or_zero_fallbac
         expr = record_map[record_name].get("expr", "")
         assert "$__range" not in expr
         assert "or vector(0)" not in expr
+
+
+def test_counter_window_promql_semantics_are_classified() -> None:
+    """Counters in max_over_time windows must be reviewed as snapshots, not events."""
+    payload = _load_rules()
+    offenders: list[str] = []
+    snapshot_hits: set[str] = set()
+
+    for source, owner, expr in [
+        *_iter_rule_promql(payload),
+        *_iter_dashboard_promql(),
+    ]:
+        for metric in _MAX_OVER_COUNTER_RE.findall(expr):
+            if metric in _EVENT_DELTA_COUNTERS:
+                offenders.append(
+                    f"{source}::{owner}: event counter {metric} must use increase()"
+                )
+            elif metric in _PUSHED_SNAPSHOT_COUNTERS:
+                snapshot_hits.add(metric)
+            else:
+                offenders.append(
+                    f"{source}::{owner}: unclassified max_over_time counter {metric}"
+                )
+
+    assert not offenders, "\n".join(offenders[:40])
+    assert snapshot_hits == _PUSHED_SNAPSHOT_COUNTERS
 
 
 def test_canonical_reason_records_expose_operator_routing_labels() -> None:

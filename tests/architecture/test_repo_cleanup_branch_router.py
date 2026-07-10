@@ -14,7 +14,7 @@ def test_repo_router_exposes_cleanup_branch_candidates_command() -> None:
 
     assert '"cleanup-branch-candidates": "cleanup_branch_candidates.sh"' in router
     assert (
-        "cleanup-branch-candidates  Preview or apply curated branch cleanup plan"
+        "cleanup-branch-candidates  Preview or apply curated local branch cleanup plan"
         in router
     )
     assert "generate-branch-cleanup-inventory" in router

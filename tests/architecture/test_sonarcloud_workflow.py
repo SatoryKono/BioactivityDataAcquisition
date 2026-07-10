@@ -1,4 +1,4 @@
-"""Workflow contract checks for SonarCloud CI gating."""
+"""Repository contract checks for the retired SonarCloud integration."""
 
 import pytest
 
@@ -8,40 +8,9 @@ from pathlib import Path
 pytestmark = pytest.mark.architecture
 
 
-def test_sonarcloud_workflow_avoids_secret_based_job_if() -> None:
-    workflow = Path(".github/workflows/sonarcloud.yml").read_text(encoding="utf-8")
-
-    assert "if: ${{ secrets.SONAR_TOKEN != '' }}" not in workflow
-    assert "id: sonar-token" in workflow
-    assert "steps.sonar-token.outputs.available == 'true'" in workflow
-    assert "SONAR_TOKEN is not configured; skipping SonarCloud scan." in workflow
+def test_sonarcloud_workflow_is_not_shipped() -> None:
+    assert not Path(".github/workflows/sonarcloud.yml").exists()
 
 
-def test_sonarcloud_workflow_passes_canonical_scan_scope() -> None:
-    workflow = Path(".github/workflows/sonarcloud.yml").read_text(encoding="utf-8")
-
-    assert "sonar.sources=src/bioetl" in workflow
-    assert "sonar.inclusions=src/bioetl/**/*.py" in workflow
-    assert "-Dsonar.sources=src/bioetl" in workflow
-    assert "-Dsonar.inclusions=src/bioetl/**/*.py" in workflow
-
-
-def test_sonarcloud_config_declares_scope_contract() -> None:
-    content = Path("sonar-project.properties").read_text(encoding="utf-8")
-
-    assert "sonar.sources=src/bioetl" in content
-    assert "sonar.inclusions=src/bioetl/**/*.py" in content
-
-
-def test_sonarcloud_config_excludes_non_production_roots() -> None:
-    content = Path("sonar-project.properties").read_text(encoding="utf-8")
-
-    for excluded_root in (
-        "tests/**",
-        "scripts/**",
-        "docs/**",
-        "reports/**",
-        "grafana/**",
-        "configs/**",
-    ):
-        assert excluded_root in content
+def test_sonarcloud_root_config_is_not_shipped() -> None:
+    assert not Path("sonar-project.properties").exists()

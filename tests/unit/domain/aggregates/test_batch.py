@@ -20,6 +20,7 @@ from bioetl.domain.aggregates.batch import (
     BatchStatus,
 )
 from bioetl.domain.exceptions import InvalidStateError
+from bioetl.domain.medallion import Layer
 from bioetl.domain.types import BatchID, ContentHash, EntityID, RunID
 from tests.helpers.deterministic_ids import deterministic_uuid_value
 
@@ -204,7 +205,7 @@ class TestBatchStateTransitions:
         batch.mark_writing()
         assert batch.status == BatchStatus.WRITING
 
-        batch.mark_committed("silver", _ts(20))
+        batch.mark_committed(Layer.SILVER, _ts(20))
         assert batch.status == BatchStatus.COMMITTED
 
     def test_writing_to_failed_transitions(self, batch: Batch) -> None:
@@ -213,7 +214,7 @@ class TestBatchStateTransitions:
         batch.seal(_ts(10))
         batch.mark_writing()
 
-        batch.mark_failed("silver", "Write error", failed_at=_ts(20))
+        batch.mark_failed(Layer.SILVER, "Write error", failed_at=_ts(20))
         assert batch.status == BatchStatus.FAILED
 
 
@@ -423,12 +424,12 @@ class TestBatchDomainEvents:
         batch.seal(_ts(10))
         batch.mark_writing()
         batch.collect_events()  # Clear sealed event
-        batch.mark_committed("silver", _ts(20))
+        batch.mark_committed(Layer.SILVER, _ts(20))
 
         events = batch.collect_events()
         assert len(events) == 1
         assert events[0].__class__.__name__ == "BatchWritten"
-        assert events[0].layer == "silver"
+        assert events[0].layer is Layer.SILVER
         assert events[0].occurred_at == _ts(20)
 
     def test_mark_writing_validates_status(self, batch: Batch) -> None:
@@ -442,7 +443,7 @@ class TestBatchDomainEvents:
         batch.seal(_ts(10))
 
         with pytest.raises(InvalidStateError, match="Cannot commit"):
-            batch.mark_committed("silver", _ts(20))
+            batch.mark_committed(Layer.SILVER, _ts(20))
 
     def test_mark_failed_validates_status(self, batch: Batch) -> None:
         """mark_failed() should only work from WRITING status."""
@@ -450,7 +451,7 @@ class TestBatchDomainEvents:
         batch.seal(_ts(10))
 
         with pytest.raises(InvalidStateError, match="Cannot fail"):
-            batch.mark_failed("silver", "Error", "TypeError", failed_at=_ts(20))
+            batch.mark_failed(Layer.SILVER, "Error", "TypeError", failed_at=_ts(20))
 
     def test_mark_failed_emits_event(self, batch: Batch) -> None:
         """mark_failed() should emit BatchFailed event."""
@@ -459,12 +460,12 @@ class TestBatchDomainEvents:
         batch.seal(_ts(10))
         batch.mark_writing()
         batch.collect_events()  # Clear writing event
-        batch.mark_failed("silver", "Write error", "IOError", failed_at=_ts(20))
+        batch.mark_failed(Layer.SILVER, "Write error", "IOError", failed_at=_ts(20))
 
         events = batch.collect_events()
         assert len(events) == 1
         assert events[0].__class__.__name__ == "BatchFailed"
-        assert events[0].layer == "silver"
+        assert events[0].layer is Layer.SILVER
         assert events[0].error == "Write error"
         assert events[0].error_type == "IOError"
         assert events[0].occurred_at == _ts(20)

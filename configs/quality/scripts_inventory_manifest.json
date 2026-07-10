@@ -1,21 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-10T08:47:49.356015+00:00",
+  "generated_at": "2026-07-10T13:38:47.166076+00:00",
   "summary": {
-    "total_scripts": 451,
+    "total_scripts": 450,
     "status_counts": {
-      "active": 351,
+      "active": 350,
       "supporting": 100
     },
     "reference_group_coverage": {
       "agents": 5,
       "build": 9,
-      "ci": 62,
+      "ci": 60,
       "docs": 174,
       "other": 23,
       "scripts": 347,
       "skills": 16,
-      "tests": 206
+      "tests": 205
     }
   },
   "scripts": [
@@ -73,57 +73,6 @@
           "line": 16,
           "source_group": "scripts",
           "text": "python -m scripts.ai vibe setup"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/check_sonar_issues.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 7,
-      "references": [
-        {
-          "path": ".github/workflows/sonarcloud.yml",
-          "line": 88,
-          "source_group": "ci",
-          "text": "python3 scripts/ai/check_sonar_issues.py \\"
-        },
-        {
-          "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
-          "line": 18,
-          "source_group": "scripts",
-          "text": "1. `scripts/ai/check_sonar_issues.py`"
-        },
-        {
-          "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
-          "line": 52,
-          "source_group": "scripts",
-          "text": "python3 scripts/ai/check_sonar_issues.py"
-        },
-        {
-          "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
-          "line": 58,
-          "source_group": "scripts",
-          "text": "python3 scripts/ai/check_sonar_issues.py --strict-live"
-        },
-        {
-          "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
-          "line": 66,
-          "source_group": "scripts",
-          "text": "python3 scripts/ai/check_sonar_issues.py --max-quarantine-entries 159"
-        },
-        {
-          "path": "tests/unit/scripts/test_sonar_issue_processor.py",
-          "line": 71,
-          "source_group": "tests",
-          "text": "{\"path\": \"scripts/ai/check_sonar_issues.py\"},"
-        },
-        {
-          "path": "tests/unit/scripts/test_sonar_issue_processor.py",
-          "line": 80,
-          "source_group": "tests",
-          "text": "\"path_prefix\": \"scripts/ai/check_sonar_issues.py\","
         }
       ]
     },
@@ -1200,7 +1149,7 @@
         },
         {
           "path": "tests/architecture/test_root_hygiene_review_registry.py",
-          "line": 475,
+          "line": 473,
           "source_group": "tests",
           "text": "\"setup-codex-wsl.ps1\": \"scripts/ai/codex/setup.ps1\","
         },
@@ -2101,13 +2050,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 86,
+          "line": 95,
           "source_group": "docs",
           "text": "bash scripts/ai/mcp/check.sh"
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 93,
+          "line": 102,
           "source_group": "docs",
           "text": "| GitHub MCP says token missing | Set `GITHUB_PERSONAL_ACCESS_TOKEN` or `GITHUB_TOKEN`; verify alias normalization with `test_env_loading.sh` or `check.sh`. |"
         },
@@ -2234,7 +2183,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 78,
+          "line": 87,
           "source_group": "docs",
           "text": "BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/github-mcp-wrapper.sh"
         },
@@ -2325,7 +2274,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 79,
+          "line": 88,
           "source_group": "docs",
           "text": "BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/mcp_brave_search_wrapper.sh"
         },
@@ -2514,7 +2463,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 80,
+          "line": 89,
           "source_group": "docs",
           "text": "BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/mcp_grafana_wrapper.sh"
         },
@@ -2926,7 +2875,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 24,
+          "line": 33,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/load_repo_env.ps1`"
         },
@@ -3010,7 +2959,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 64,
+          "line": 73,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.ps1`"
         },
@@ -3067,7 +3016,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 63,
+          "line": 72,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.sh`"
         },
@@ -3118,13 +3067,13 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 42,
+          "line": 51,
           "source_group": "docs",
           "text": "bash scripts/ai/mcp/test_env_loading.sh"
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 93,
+          "line": 102,
           "source_group": "docs",
           "text": "| GitHub MCP says token missing | Set `GITHUB_PERSONAL_ACCESS_TOKEN` or `GITHUB_TOKEN`; verify alias normalization with `test_env_loading.sh` or `check.sh`. |"
         },
@@ -3139,51 +3088,6 @@
           "line": 66,
           "source_group": "tests",
           "text": "text = _read(\"scripts/ai/mcp/test_env_loading.sh\")"
-        }
-      ]
-    },
-    {
-      "path": "scripts/ai/sonar_issue_processor.py",
-      "type": "py",
-      "status": "active",
-      "agent_usage": [],
-      "reference_count": 6,
-      "references": [
-        {
-          "path": ".github/workflows/sonarcloud.yml",
-          "line": 68,
-          "source_group": "ci",
-          "text": "python3 scripts/ai/sonar_issue_processor.py --write"
-        },
-        {
-          "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
-          "line": 11,
-          "source_group": "scripts",
-          "text": "1. `scripts/ai/sonar_issue_processor.py`"
-        },
-        {
-          "path": "scripts/ai/SONARQUBE_ISSUE_PROCESSOR_README.md",
-          "line": 40,
-          "source_group": "scripts",
-          "text": "python3 scripts/ai/sonar_issue_processor.py --write"
-        },
-        {
-          "path": "scripts/ai/improved_sonar_prompt.md",
-          "line": 63,
-          "source_group": "scripts",
-          "text": "The script `sonar_issue_processor.py` automates this entire workflow:"
-        },
-        {
-          "path": "scripts/ai/improved_sonar_prompt.md",
-          "line": 77,
-          "source_group": "scripts",
-          "text": "python3 sonar_issue_processor.py"
-        },
-        {
-          "path": "scripts/ai/improved_sonar_prompt.md",
-          "line": 88,
-          "source_group": "scripts",
-          "text": "python3 sonar_issue_processor.py"
         }
       ]
     },
@@ -3762,25 +3666,25 @@
         },
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
-          "line": 532,
+          "line": 569,
           "source_group": "docs",
-          "text": "\"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py\" --fix -f \"$svg_out\" >/dev/null 2>&1 || true"
+          "text": "\"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py\" --fix -f \"$svg_tmp\" >/dev/null 2>&1 || true"
         },
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
-          "line": 540,
+          "line": 577,
           "source_group": "docs",
-          "text": "if ! \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py\" --fix -f \"$svg_out\" >/dev/null 2>&1; then"
+          "text": "if ! \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py\" --fix -f \"$svg_tmp\" >/dev/null 2>&1; then"
         },
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
-          "line": 592,
+          "line": 641,
           "source_group": "docs",
           "text": "\"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py\" --fix -f \"$temp_png_svg\" >/dev/null 2>&1 || true"
         },
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
-          "line": 600,
+          "line": 649,
           "source_group": "docs",
           "text": "if ! \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/add_svg_text_fallback.py\" --fix -f \"$temp_png_svg\" >/dev/null 2>&1; then"
         },
@@ -3864,7 +3768,7 @@
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 257,
+          "line": 259,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_artifacts.py \\"
         },
@@ -3915,13 +3819,13 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 53,
+          "line": 55,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_quality_gates.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 277,
+          "line": 281,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_quality_gates.py \\"
         },
@@ -3970,7 +3874,7 @@
       "agent_usage": [
         "technical-designer-mermaid"
       ],
-      "reference_count": 10,
+      "reference_count": 11,
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
@@ -3980,19 +3884,19 @@
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 47,
+          "line": 48,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 267,
+          "line": 270,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_diagram_visual_smoke.py \\"
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
-          "line": 121,
+          "line": 134,
           "source_group": "docs",
           "text": "- `python scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`"
         },
@@ -4012,13 +3916,13 @@
           "path": "scripts/diagrams/README.md",
           "line": 29,
           "source_group": "scripts",
-          "text": "| `check-visual-smoke`  | `check_diagram_visual_smoke.py`                           | Visual smoke test for diagrams                                        |"
+          "text": "| `check-visual-smoke`  | `check_diagram_visual_smoke.py`                           | Visual smoke test for diagrams; supports `--json-out`                 |"
         },
         {
-          "path": "scripts/diagrams/__main__.py",
-          "line": 63,
+          "path": "scripts/diagrams/README.md",
+          "line": 118,
           "source_group": "scripts",
-          "text": "\"check-visual-smoke\": python_command(\"check_diagram_visual_smoke.py\"),"
+          "text": "- `check_diagram_visual_smoke.py --json-out <path>` writes `diagram-visual-smoke-report-v1` machine-readable status for CI and local diagnostics."
         }
       ]
     },
@@ -4031,7 +3935,7 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 359,
+          "line": 362,
           "source_group": "docs",
           "text": "- post-check: `scripts/diagrams/check_pdf_image_bounds.py`"
         },
@@ -4070,13 +3974,13 @@
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 170,
+          "line": 175,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_svg_text_visibility.py --manifest \"$manifest_tmp\""
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 262,
+          "line": 264,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/check_svg_text_visibility.py \\"
         },
@@ -4173,13 +4077,13 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 74,
+          "line": 76,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/enforce_diagram_quality_budget.py \\"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 449,
+          "line": 486,
           "source_group": "docs",
           "text": "`scripts/diagrams/enforce_diagram_quality_budget.py`."
         },
@@ -4332,7 +4236,7 @@
         },
         {
           "path": "scripts/diagrams/README.md",
-          "line": 118,
+          "line": 119,
           "source_group": "scripts",
           "text": "- When bundle drift is corrected, prefer regenerating the narrow affected collection via `generate_all_bundles.py --collection <name>` instead of broad refresh of every derived artifact."
         },
@@ -4398,13 +4302,13 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 47,
+          "line": 48,
           "source_group": "docs",
           "text": "| `class-diagrams/90-pkg-*.mmd` | generated source | `scripts/diagrams/generate_package_family_class_diagrams.py` | Regenerate from source tree; do not hand-edit for cleanup. |"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 174,
+          "line": 175,
           "source_group": "docs",
           "text": "- Supplemental generator: `scripts/diagrams/generate_package_family_class_diagrams.py`"
         },
@@ -4431,7 +4335,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 356,
+          "line": 359,
           "source_group": "docs",
           "text": "- `scripts/diagrams/generate_with_descriptions_docx.py`"
         },
@@ -4482,7 +4386,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 355,
+          "line": 358,
           "source_group": "docs",
           "text": "- `scripts/diagrams/generate_with_descriptions_pdf.py`"
         },
@@ -4527,13 +4431,13 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
-          "line": 564,
+          "line": 605,
           "source_group": "docs",
-          "text": "\"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/inject_svg_styles.py\" --fix -f \"$svg_out\" >/dev/null 2>&1 || true"
+          "text": "\"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/inject_svg_styles.py\" --fix -f \"$svg_tmp\" >/dev/null 2>&1 || true"
         },
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
-          "line": 623,
+          "line": 672,
           "source_group": "docs",
           "text": "\"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/inject_svg_styles.py\" --fix -f \"$temp_png_svg\" >/dev/null 2>&1 || true"
         },
@@ -4568,19 +4472,19 @@
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 60,
+          "line": 62,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 218,
+          "line": 220,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json > /tmp/diagram-lint.json"
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
-          "line": 117,
+          "line": 130,
           "source_group": "docs",
           "text": "- `python scripts/diagrams/lint_diagrams.py docs`"
         },
@@ -4604,7 +4508,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 470,
+          "line": 507,
           "source_group": "docs",
           "text": "uv run python scripts/diagrams/lint_diagrams.py docs/02-architecture/diagrams --json \\"
         }
@@ -4619,7 +4523,7 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 318,
+          "line": 319,
           "source_group": "docs",
           "text": "- repo scripts now use `scripts/diagrams/mmdc_wrapper.sh` as the default `mmdc` entrypoint;"
         },
@@ -4631,7 +4535,7 @@
         },
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
-          "line": 340,
+          "line": 371,
           "source_group": "docs",
           "text": "echo \"  Provide MMDC_BIN=/path/to/mmdc or restore scripts/diagrams/mmdc_wrapper.sh\""
         },
@@ -4688,25 +4592,25 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 537,
+          "line": 574,
           "source_group": "docs",
           "text": "`scripts/diagrams/prune_orphan_nodes.py` detects nodes defined in a diagram but not"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 545,
+          "line": 582,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --check"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 548,
+          "line": 585,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --check --json"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 551,
+          "line": 588,
           "source_group": "docs",
           "text": "python scripts/diagrams/prune_orphan_nodes.py --fix"
         }
@@ -4768,13 +4672,13 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 485,
+          "line": 522,
           "source_group": "docs",
           "text": "bash scripts/diagrams/run_diagram_checks.sh --profile pr --enforce-budget"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 486,
+          "line": 523,
           "source_group": "docs",
           "text": "bash scripts/diagrams/run_diagram_checks.sh --profile nightly --enforce-budget"
         },
@@ -4807,13 +4711,13 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 350,
+          "line": 353,
           "source_group": "docs",
           "text": "bash scripts/diagrams/run_diagram_docs_agent.sh"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 357,
+          "line": 360,
           "source_group": "docs",
           "text": "- unified orchestrator: `scripts/diagrams/run_diagram_docs_agent.sh`"
         },
@@ -4852,7 +4756,7 @@
       "references": [
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 65,
+          "line": 67,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/run_diagram_nightly_suite.py \\"
         },
@@ -4888,13 +4792,13 @@
         },
         {
           "path": "scripts/diagrams/run_diagram_checks.sh",
-          "line": 465,
+          "line": 467,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/run_diagram_nightly_suite.py\""
         },
         {
           "path": "scripts/diagrams/run_diagram_checks.sh",
-          "line": 529,
+          "line": 531,
           "source_group": "scripts",
           "text": "python3 \"$REPO_ROOT/scripts/diagrams/run_diagram_nightly_suite.py\" \\"
         }
@@ -4909,13 +4813,13 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
-          "line": 544,
+          "line": 582,
           "source_group": "docs",
-          "text": "if ! \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/strip_svg_foreign_object.py\" --fix -f \"$svg_out\" >/dev/null 2>&1; then"
+          "text": "if ! \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/strip_svg_foreign_object.py\" --fix -f \"$svg_tmp\" >/dev/null 2>&1; then"
         },
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
-          "line": 605,
+          "line": 654,
           "source_group": "docs",
           "text": "if ! \"$PYTHON_BIN\" \"$REPO_ROOT/scripts/diagrams/strip_svg_foreign_object.py\" --fix -f \"$temp_png_svg\" >/dev/null 2>&1; then"
         },
@@ -4954,7 +4858,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 221,
+          "line": 223,
           "source_group": "ci",
           "text": "python3 scripts/diagrams/summarize_diagram_lint.py /tmp/diagram-lint.json"
         },
@@ -4981,21 +4885,21 @@
       "references": [
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
-          "line": 369,
+          "line": 402,
           "source_group": "docs",
           "text": "log_warn \"Neither rsvg-convert nor inkscape found; PNG will be rendered from SVG via scripts/diagrams/svg2png.mjs\""
         },
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
-          "line": 648,
+          "line": 708,
           "source_group": "docs",
           "text": "echo \"Node.js is required for SVG -> PNG fallback via scripts/diagrams/svg2png.mjs\" >&2"
         },
         {
           "path": "docs/02-architecture/diagrams/tooling/render.sh",
-          "line": 653,
+          "line": 722,
           "source_group": "docs",
-          "text": "\"$NODE_BIN\" \"$REPO_ROOT/scripts/diagrams/svg2png.mjs\" --scale \"$scale_for_file\" \"$png_svg_source\" >/dev/null 2>&1; then"
+          "text": "\"$NODE_BIN\" \"$REPO_ROOT/scripts/diagrams/svg2png.mjs\" --scale \"$scale_for_file\" \"$node_tmp_svg\" >/dev/null 2>&1; then"
         },
         {
           "path": "scripts/diagrams/README.md",
@@ -5026,19 +4930,19 @@
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 493,
+          "line": 530,
           "source_group": "docs",
           "text": "Use `scripts/diagrams/uniform_diagram_sizes.py` to normalize class/flowchart object sizes:"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 497,
+          "line": 534,
           "source_group": "docs",
           "text": "python3 scripts/diagrams/uniform_diagram_sizes.py --check"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 500,
+          "line": 537,
           "source_group": "docs",
           "text": "python3 scripts/diagrams/uniform_diagram_sizes.py --fix -f docs/02-architecture/diagrams/class-diagrams/07-application-core-services.mmd"
         },
@@ -5075,7 +4979,7 @@
       "agent_usage": [
         "technical-designer-mermaid"
       ],
-      "reference_count": 16,
+      "reference_count": 17,
       "references": [
         {
           "path": ".codex/skills/technical-designer-mermaid/SKILL.md",
@@ -5085,13 +4989,13 @@
         },
         {
           "path": ".github/workflows/diagram-nightly.yml",
-          "line": 146,
+          "line": 151,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
         {
           "path": ".github/workflows/docs.yml",
-          "line": 212,
+          "line": 213,
           "source_group": "ci",
           "text": "bash scripts/diagrams/validate_mermaid_syntax.sh \\"
         },
@@ -5103,27 +5007,27 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
-          "line": 118,
+          "line": 131,
           "source_group": "docs",
           "text": "- `bash scripts/diagrams/validate_mermaid_syntax.sh`"
         },
         {
           "path": "docs/02-architecture/diagrams/README.md",
-          "line": 400,
+          "line": 403,
           "source_group": "docs",
-          "text": "bash scripts/diagrams/validate_mermaid_syntax.sh --puppeteer /tmp/puppeteer-config.json"
+          "text": "bash scripts/diagrams/validate_mermaid_syntax.sh --include-embedded --puppeteer /tmp/puppeteer-config.json"
+        },
+        {
+          "path": "docs/02-architecture/diagrams/README.md",
+          "line": 416,
+          "source_group": "docs",
+          "text": "bash scripts/diagrams/validate_mermaid_syntax.sh --include-embedded --puppeteer /tmp/puppeteer-config.json"
         },
         {
           "path": "docs/02-architecture/diagrams/governance/diagram-modernization-program.md",
           "line": 133,
           "source_group": "docs",
           "text": "1. `scripts/diagrams/validate_mermaid_syntax.sh`"
-        },
-        {
-          "path": "docs/02-architecture/diagrams/governance/diagram-regression-test-plan.md",
-          "line": 43,
-          "source_group": "docs",
-          "text": "| DIAG-T001 | Mermaid syntax valid              | Исключить синтаксические ошибки                          | `scripts/diagrams/validate_mermaid_syntax.sh`             | Auto      | PR             | Ha"
         }
       ]
     },
@@ -5562,7 +5466,7 @@
         },
         {
           "path": "tests/architecture/test_documentation_cleanup_inventory.py",
-          "line": 151,
+          "line": 289,
           "source_group": "tests",
           "text": "assert route[\"generator\"] == \"scripts/docs/checks/documentation_cleanup_inventory.py\""
         }
@@ -6627,7 +6531,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 263,
+          "line": 278,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"apply_ci_fixes.py\""
         }
@@ -6774,7 +6678,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 164,
+          "line": 179,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"quality_integral_gate.py\""
         }
@@ -6858,7 +6762,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 158,
+          "line": 173,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"ci\" / \"run_pytest_resilient.py\""
         }
@@ -6900,7 +6804,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 94,
+          "line": 109,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_contract_identity.py\","
         }
@@ -6921,7 +6825,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 95,
+          "line": 110,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_contract_registry.py\","
         },
@@ -6987,7 +6891,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 96,
+          "line": 111,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py\","
         },
@@ -7038,7 +6942,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 97,
+          "line": 112,
           "source_group": "tests",
           "text": "\"scripts/engineering/ci/validate_schema_classifier_gate.py\","
         }
@@ -7403,13 +7307,13 @@
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 40,
+          "line": 39,
           "source_group": "agents",
           "text": "- Mixed checkout в Windows PowerShell: `.\\scripts\\engineering\\dev\\run_pytest.ps1`, `.\\scripts\\engineering\\dev\\run_mypy.ps1`, `.\\.venv-win\\Scripts\\python.exe -m ...`"
         },
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 373,
+          "line": 372,
           "source_group": "agents",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         },
@@ -7462,13 +7366,13 @@
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 41,
+          "line": 40,
           "source_group": "agents",
           "text": "- Mixed checkout в WSL/Linux: `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`, `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`"
         },
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 373,
+          "line": 372,
           "source_group": "agents",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         },
@@ -7578,13 +7482,13 @@
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 40,
+          "line": 39,
           "source_group": "agents",
           "text": "- Mixed checkout в Windows PowerShell: `.\\scripts\\engineering\\dev\\run_pytest.ps1`, `.\\scripts\\engineering\\dev\\run_mypy.ps1`, `.\\.venv-win\\Scripts\\python.exe -m ...`"
         },
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 373,
+          "line": 372,
           "source_group": "agents",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         },
@@ -7638,13 +7542,13 @@
       "references": [
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 41,
+          "line": 40,
           "source_group": "agents",
           "text": "- Mixed checkout в WSL/Linux: `bash scripts/engineering/dev/run_pytest.sh`, `bash scripts/engineering/dev/run_mypy.sh`, `\"${BIOETL_WSL_VENV_DIR:-$HOME/.venvs/bioetl}/bin/python\" -m ...`"
         },
         {
           "path": ".codex/agents/py-test-swarm.md",
-          "line": 373,
+          "line": 372,
           "source_group": "agents",
           "text": "> - Команды: используй OS-appropriate path. CI/single-OS: `uv run python -m ...`; PowerShell mixed checkout: `.\\scripts\\engineering\\dev\\run_pytest.ps1` / `.\\scripts\\engineering\\dev\\run_mypy.ps1`; WSL "
         },
@@ -8274,7 +8178,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 259,
+      "reference_count": 260,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -9178,7 +9082,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 347,
+          "line": 362,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"generate_architecture_debt_tasks.py\""
         }
@@ -9560,7 +9464,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 350,
+          "line": 365,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"engineering\" / \"qa\" / \"reduce_architecture_debt.py\""
         }
@@ -9788,7 +9692,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/grafana-dashboard-render/SKILL.md",
-          "line": 62,
+          "line": 75,
           "source_group": "docs",
           "text": "uv run python scripts/engineering/qa/report_dashboard_inventory.py --json"
         },
@@ -10756,7 +10660,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/vcr-record/SKILL.md",
-          "line": 49,
+          "line": 62,
           "source_group": "docs",
           "text": "python -m scripts.engineering.qa.vcr check-placement"
         },
@@ -10902,7 +10806,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 68,
+      "reference_count": 71,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -10979,6 +10883,21 @@
       "next_step": "Retain as the shared root-governance helper consumed by structure auditors and cleanup tooling; fold it into a broader canonical governance helper surface only if root policy loaders are consolidated further."
     },
     {
+      "path": "scripts/engineering/repo/apply_branch_cleanup_phases_0_2.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/README.md",
+          "line": 91,
+          "source_group": "scripts",
+          "text": "| `apply_branch_cleanup_phases_0_2.sh` | Orchestrate phases 0-2 (inventory + apply reports) |"
+        }
+      ]
+    },
+    {
       "path": "scripts/engineering/repo/audit_root_cleanliness.py",
       "type": "py",
       "status": "active",
@@ -11040,8 +10959,15 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/repo/README.md",
+          "line": 90,
+          "source_group": "scripts",
+          "text": "| `branch_cleanup.py` | Generate inventory and apply branch cleanup phases 1-2 |"
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
@@ -11352,7 +11278,7 @@
           "path": "scripts/engineering/repo/README.md",
           "line": 89,
           "source_group": "scripts",
-          "text": "| `cleanup_branch_candidates.sh` | Dry-run/apply cleanup for the curated branch deletion set |"
+          "text": "| `cleanup_branch_candidates.sh` | Dry-run/apply cleanup for curated branch deletion set |"
         },
         {
           "path": "scripts/engineering/repo/__main__.py",
@@ -13082,7 +13008,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 231,
+          "line": 246,
           "source_group": "tests",
           "text": "/ \"audit_live_grafana_panels.py\""
         },
@@ -13170,7 +13096,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 216,
+          "line": 231,
           "source_group": "tests",
           "text": "/ \"rerender_grafana_screenshots.py\""
         }
@@ -13703,13 +13629,13 @@
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 23,
+          "line": 32,
           "source_group": "docs",
           "text": "- `scripts/ops/support/load_repo_env.sh`"
         },
         {
           "path": "docs/00-project/ai/skills/local/grafana-dashboard-render/SKILL.md",
-          "line": 153,
+          "line": 166,
           "source_group": "docs",
           "text": "- Repo env bootstrap: `scripts/ops/support/load_repo_env.sh`"
         },
@@ -13871,13 +13797,13 @@
         },
         {
           "path": "scripts/generate_test_github_issues.py",
-          "line": 317,
+          "line": 315,
           "source_group": "scripts",
           "text": "- Test runner: `scripts/optimized_test_runner.py`"
         },
         {
           "path": "scripts/generate_test_github_issues.py",
-          "line": 359,
+          "line": 356,
           "source_group": "scripts",
           "text": "\"2. Implement the optimized test runner: python3 scripts/optimized_test_runner.py --list\""
         }
@@ -14301,7 +14227,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 93,
+          "line": 108,
           "source_group": "tests",
           "text": "\"scripts/schema/generate_schema_artifacts.py\","
         },
@@ -14816,7 +14742,7 @@
         },
         {
           "path": "tests/architecture/test_generated_artifact_routing.py",
-          "line": 92,
+          "line": 107,
           "source_group": "tests",
           "text": "\"src/tools/generate_docs_export.py\","
         }
@@ -14870,7 +14796,7 @@
       "references": [
         {
           "path": ".github/workflows/docs.yml",
-          "line": 272,
+          "line": 276,
           "source_group": "ci",
           "text": "python3 src/tools/harmonize_link_styles.py --dry-run --fail-on-errors"
         }

@@ -1683,7 +1683,7 @@
       },
       "targets": [
         {
-          "expr": "round((sum(max_over_time(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) + ((sum(increase(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) * 0))",
+          "expr": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) + ((sum(increase(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) * 0))",
           "legendFormat": "Validation Failures",
           "refId": "A"
         }
@@ -2770,7 +2770,7 @@
       },
       "targets": [
         {
-          "expr": "round(sum(max_over_time(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
+          "expr": "round(sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
           "legendFormat": "Validation Failures",
           "refId": "A"
         }

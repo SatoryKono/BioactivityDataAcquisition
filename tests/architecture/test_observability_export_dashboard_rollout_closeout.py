@@ -281,12 +281,6 @@ def test_ci_contains_dashboard_rule_and_contract_drift_gates() -> None:
     closeout = _load_json(CLOSEOUT)
 
     assert "Prometheus rules syntax + promtool test vectors" in workflow
-    assert "promtool check rules grafana/prometheus-rules/bioetl_observability.yml" in (
-        workflow
-    )
-    assert (
-        "promtool test rules grafana/prometheus-rules/tests/bioetl_observability.test.yml"
-        in (workflow)
-    )
+    assert "check-prometheus-rules --runner docker" in workflow
     assert "Dashboard navigation contract sync gate" in workflow
     assert closeout["outcomes"]["5725"]["ci_contract_drift_validation"] is True

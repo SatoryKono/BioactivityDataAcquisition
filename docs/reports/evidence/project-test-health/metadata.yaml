@@ -1,0 +1,14 @@
+version: 1
+policy_scope: non_canonical_evidence_summary
+summary_path: docs/reports/evidence/project-test-health/SUMMARY.md
+owner: "@bioetl-quality"
+last_verified: "2026-04-30"
+freshness_window_days: 30
+allowed_interpretation: backlog_signal_only
+canonical_sources:
+  - configs/quality/test_matrix.yaml
+  - configs/quality/test_health_reporting.yaml
+  - configs/quality/fixture_governance_ledger.yaml
+  - .github/workflows/tests.yml
+companion_artifacts:
+  - docs/reports/evidence/project-test-health/shard_registry.yaml

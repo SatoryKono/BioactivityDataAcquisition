@@ -45,6 +45,7 @@ def _write_canonical_test_layout(tmp_path: Path) -> tuple[Path, Path, Path, Path
         "panels": [
             {
                 "id": 1000,
+                "datasource": {"type": "prometheus", "uid": "prometheus"},
                 "type": "text",
                 "title": "Review Dashboard Navigation",
                 "links": [
@@ -197,10 +198,11 @@ def test_compare_deployed_dashboards_ignores_benign_export_noise(
             "id": 777,
             "version": 123,
             "panels": [
-                {
-                    "id": 1000,
-                    "type": "text",
-                    "title": "Review Dashboard Navigation",
+                    {
+                        "id": 1000,
+                        "datasource": {"type": "prometheus", "uid": "prometheus"},
+                        "type": "text",
+                        "title": "Review Dashboard Navigation",
                     "pluginVersion": "10.4.0",
                     "links": [
                         {
@@ -322,6 +324,43 @@ def test_check_parity_detects_dashboard_inventory_key_panel_drift(
 
     assert any(
         "dashboard-inventory: bioetl-overview-v2 key_panel id=1000 type mismatch"
+        in error
+        for error in errors
+    )
+    assert "bioetl-overview-v2" in per_dashboard
+
+
+def test_check_parity_detects_dashboard_inventory_datasource_drift(
+    tmp_path: Path, monkeypatch
+) -> None:
+    dashboards_dir, docs_dir, contracts_dir, provisioning_path = (
+        _write_canonical_test_layout(tmp_path)
+    )
+    monkeypatch.setattr(inventory, "DASHBOARDS_DIR", dashboards_dir)
+    monkeypatch.setattr(inventory, "VARIABLES_GUIDE", docs_dir / "variables-guide.md")
+    monkeypatch.setattr(inventory, "MONITORING_INDEX", docs_dir / "monitoring-index.md")
+    monkeypatch.setattr(
+        inventory, "SELECTOR_CONTRACT", contracts_dir / "selector-contracts.yaml"
+    )
+    monkeypatch.setattr(
+        inventory,
+        "DASHBOARD_INVENTORY_CONTRACT",
+        contracts_dir / "dashboard-inventory.yaml",
+    )
+    monkeypatch.setattr(inventory, "PROVISIONING_CONFIG", provisioning_path)
+
+    dashboard_inventory = yaml.safe_load(
+        (contracts_dir / "dashboard-inventory.yaml").read_text(encoding="utf-8")
+    )
+    dashboard_inventory["dashboards"][0]["data_sources"] = ["Loki"]
+    (contracts_dir / "dashboard-inventory.yaml").write_text(
+        yaml.safe_dump(dashboard_inventory, sort_keys=False), encoding="utf-8"
+    )
+
+    errors, per_dashboard = inventory._check_parity(inventory._load_inventory())
+
+    assert any(
+        "dashboard-inventory: data_sources mismatch for bioetl-overview-v2"
         in error
         for error in errors
     )

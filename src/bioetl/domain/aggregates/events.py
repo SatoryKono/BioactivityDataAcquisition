@@ -22,6 +22,7 @@ from dataclasses import dataclass, field, fields
 from datetime import datetime
 
 from bioetl.domain.deterministic_identity import deterministic_id
+from bioetl.domain.medallion import Layer
 from bioetl.domain.types import BatchID, ContentHash, MetaDict, RunID
 
 __all__ = [
@@ -37,6 +38,12 @@ __all__ = [
     "QuarantineEntryResolved",
     "RecordQuarantined",
 ]
+
+
+def _require_layer(value: object, *, event_name: str) -> Layer:
+    if isinstance(value, Layer):
+        return value
+    raise TypeError(f"{event_name}.layer must be a Layer, got {type(value).__name__}")
 
 
 @dataclass(frozen=True, slots=True)
@@ -159,8 +166,12 @@ class BatchWritten(DomainEvent):
 
     run_id: RunID
     batch_id: BatchID
-    layer: str  # "bronze", "silver", "gold"
+    layer: Layer
     record_count: int
+
+    def __post_init__(self) -> None:
+        _require_layer(self.layer, event_name=type(self).__name__)
+        super().__post_init__()
 
 
 @dataclass(frozen=True, slots=True)
@@ -173,9 +184,13 @@ class BatchFailed(DomainEvent):
 
     run_id: RunID
     batch_id: BatchID
-    layer: str
+    layer: Layer
     error: str
     error_type: str | None = None
+
+    def __post_init__(self) -> None:
+        _require_layer(self.layer, event_name=type(self).__name__)
+        super().__post_init__()
 
 
 # ──────────────────────────────────────────────────────────────────────────────

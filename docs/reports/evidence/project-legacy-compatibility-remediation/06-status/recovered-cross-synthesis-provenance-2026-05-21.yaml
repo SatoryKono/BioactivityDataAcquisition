@@ -1,0 +1,18 @@
+schema_version: 1
+artifact:
+  path: docs/reports/evidence/project-legacy-compatibility-remediation/03-synthesis/CROSS-SYNTHESIS-project-legacy-compatibility-remediation.md
+  status: recovered-canonical-copy
+  recovered_on: "2026-05-21"
+  sha256: 5245ad6053ceadb53d53d6df7ccc32fdf2e0f71bbb2fe6e31daae02ff5c694a3
+  byte_size: 11921
+recovery_note:
+  original_entry_status: unreadable-filesystem-entry
+  quarantine_path: docs/reports/evidence/project-legacy-compatibility-remediation/.quarantined-03-synthesis-corrupt-20260521/
+  verification_scope: checksum protects the recovered canonical copy from silent
+    drift; it does not prove byte-for-byte identity with the corrupted original.
+source_inputs:
+  - docs/reports/evidence/project-legacy-compatibility-remediation/SUMMARY.md
+  - docs/reports/evidence/project-legacy-compatibility-remediation/04-decisions/DECISIONS.yaml
+  - docs/reports/evidence/project-legacy-compatibility-remediation/05-risks/RISKS.yaml
+  - docs/reports/evidence/project-legacy-compatibility-remediation/06-status/
+  - docs/reports/evidence/project-legacy-compatibility-remediation/*/SUMMARY.md

@@ -153,19 +153,6 @@ normalize_repo_env_aliases() {
     export GITHUB_TOKEN="${GITHUB_PERSONAL_ACCESS_TOKEN}"
   fi
 
-  if [[ -z "${SONARQUBE_TOKEN:-}" && -n "${SONAR_TOKEN:-}" ]]; then
-    export SONARQUBE_TOKEN="${SONAR_TOKEN}"
-  fi
-  if [[ -z "${SONAR_TOKEN:-}" && -n "${SONARQUBE_TOKEN:-}" ]]; then
-    export SONAR_TOKEN="${SONARQUBE_TOKEN}"
-  fi
-  if [[ -z "${SONARQUBE_ORG:-}" && -n "${SONAR_ORG:-}" ]]; then
-    export SONARQUBE_ORG="${SONAR_ORG}"
-  fi
-  if [[ -z "${SONARQUBE_URL:-}" && -n "${SONAR_HOST_URL:-}" ]]; then
-    export SONARQUBE_URL="${SONAR_HOST_URL}"
-  fi
-
   if [[ -z "${NEEDLE_API_KEY:-}" && -n "${NEEDLE_TOKEN:-}" ]]; then
     export NEEDLE_API_KEY="${NEEDLE_TOKEN}"
   fi
