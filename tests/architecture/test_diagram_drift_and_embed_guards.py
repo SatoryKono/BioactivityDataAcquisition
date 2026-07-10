@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import os
 import re
 import sys
 from pathlib import Path
@@ -21,7 +22,8 @@ MMD_COLLECTIONS: dict[str, Path] = {
 }
 
 _DECL_LINE_RE = re.compile(
-    r"^(flowchart|graph|stateDiagram|classDiagram|sequenceDiagram|erDiagram|mindmap|gantt|pie|xychart)\b",
+    r"^(flowchart|graph|stateDiagram|classDiagram|sequenceDiagram|erDiagram|"
+    r"mindmap|gantt|pie|xychart|C4Context|C4Container|C4Component|C4Dynamic)\b",
     flags=re.IGNORECASE,
 )
 _PARENT_SOURCE_RE = re.compile(r"^%%\s*Parent source:\s*(.+?)\s*$")
@@ -57,15 +59,20 @@ def _rendered_stems(source_dir: Path, rendered_dir_name: str, suffix: str) -> se
 
 
 def _active_markdown_paths(root: Path) -> list[Path]:
+    skipped_dirs = {"99-archive", "reports", "site"}
     paths: list[Path] = []
-    for path in root.rglob("*.md"):
-        if "99-archive" in path.parts:
-            continue
-        try:
-            if path.is_file():
-                paths.append(path)
-        except OSError:
-            continue
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [item for item in dirnames if item not in skipped_dirs]
+        base = Path(dirpath)
+        for filename in filenames:
+            if not filename.endswith(".md"):
+                continue
+            path = base / filename
+            try:
+                if path.is_file():
+                    paths.append(path)
+            except OSError:
+                continue
     return sorted(paths)
 
 

@@ -53,3 +53,83 @@ def test_resolve_link_normalizes_relative_paths_without_filesystem() -> None:
     )
 
     assert resolved == "docs/02-architecture/decisions/ADR-001-example.md"
+
+
+@pytest.mark.parametrize(
+    ("path", "expected"),
+    [
+        (".github/ISSUES/README.md", None),
+        (
+            ".github/ISSUES/ADR-HYGIENE-4746-Archive-ADR-003-ADR-008.md",
+            4746,
+        ),
+        (".github/ISSUES/DOC-AUDIT-2026-06-19-ISSUE-PACK.md", None),
+    ],
+)
+def test_github_issue_number_ignores_dates(path: str, expected: int | None) -> None:
+    """Issue number extraction must not treat dates as live GitHub issue ids."""
+    assert inventory._github_issue_number(path) == expected
+
+
+@pytest.mark.parametrize(
+    ("path", "expected"),
+    [
+        (".github/ISSUES/CREATION_GUIDE.md", "guide"),
+        (".github/ISSUES/CHEMBL-ISSUES-INDEX.md", "index"),
+        (".github/ISSUES/DOC-AUDIT-2026-06-19-ISSUE-PACK.md", "issue_pack"),
+        (
+            ".github/ISSUES/ADR-HYGIENE-4746-Archive-ADR-003-ADR-008.md",
+            "live_issue_mirror",
+        ),
+        (".github/ISSUES/PLAN-EXAMPLE.md", "active_draft"),
+    ],
+)
+def test_github_issue_lifecycle(path: str, expected: str) -> None:
+    """GitHub issue drafts need deterministic lifecycle buckets."""
+    assert inventory._github_issue_lifecycle(path) == expected
+
+
+@pytest.mark.parametrize(
+    ("path", "expected"),
+    [
+        ("docs/reports/index.md", "docs_reports_curated_entrypoint"),
+        (
+            "docs/reports/generated/documentation-cleanup-inventory.json",
+            "docs_reports_generated_or_route_owned",
+        ),
+        (
+            "docs/reports/evidence/project-test-health/SUMMARY.md",
+            "docs_reports_retention_sensitive_evidence",
+        ),
+        (
+            "reports/quality/tech-debt-issues-5847-5852-closeout.json",
+            "closeout_evidence",
+        ),
+        ("reports/quality/dead-code-inventory.md", "active_quality_baseline"),
+    ],
+)
+def test_reports_lifecycle(path: str, expected: str) -> None:
+    """Reports surfaces must be distinguishable by cleanup lifecycle."""
+    assert inventory._reports_lifecycle(path) == expected
+
+
+def test_generated_route_exception_requires_generated_status() -> None:
+    """Route exceptions are limited to generated rows with deterministic ownership."""
+    assert (
+        inventory._generated_route_exception(
+            status="Generated",
+            route=None,
+            diagram_kind="diagram_support",
+            lifecycle=None,
+        )
+        == "diagram_kind:diagram_support"
+    )
+    assert (
+        inventory._generated_route_exception(
+            status="Active",
+            route=None,
+            diagram_kind="diagram_support",
+            lifecycle=None,
+        )
+        is None
+    )

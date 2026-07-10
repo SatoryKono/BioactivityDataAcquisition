@@ -294,6 +294,7 @@ if [[ "$INCLUDE_EMBEDDED" -eq 1 ]]; then
 from __future__ import annotations
 
 import hashlib
+import os
 import re
 import sys
 from pathlib import Path
@@ -304,44 +305,48 @@ manifest = Path(sys.argv[3])
 
 fence_re = re.compile(r"^```\s*mermaid\s*$", re.IGNORECASE)
 decl_re = re.compile(
-    r"^\s*(flowchart|graph|stateDiagram|classDiagram|sequenceDiagram|erDiagram|mindmap|gantt|pie|xychart)\b",
+    r"^\s*(flowchart|graph|stateDiagram|classDiagram|sequenceDiagram|erDiagram|mindmap|gantt|pie|xychart|C4Context|C4Container|C4Component|C4Dynamic)\b",
     re.IGNORECASE,
 )
 
 rows: list[str] = []
-for md_path in sorted(docs_root.rglob("*.md")):
-    if "99-archive" in md_path.parts:
-        continue
-    try:
-        lines = md_path.read_text(encoding="utf-8").splitlines()
-    except OSError:
-        continue
+skipped_dirs = {"99-archive", "reports", "site"}
+for dirpath, dirnames, filenames in os.walk(docs_root):
+    dirnames[:] = [item for item in dirnames if item not in skipped_dirs]
+    for filename in sorted(filenames):
+        if not filename.endswith(".md"):
+            continue
+        md_path = Path(dirpath) / filename
+        try:
+            lines = md_path.read_text(encoding="utf-8").splitlines()
+        except OSError:
+            continue
 
-    in_block = False
-    block: list[str] = []
-    start_line = 0
-    for line_no, line in enumerate(lines, start=1):
-        if not in_block:
-            if fence_re.match(line.strip()):
-                in_block = True
+        in_block = False
+        block: list[str] = []
+        start_line = 0
+        for line_no, line in enumerate(lines, start=1):
+            if not in_block:
+                if fence_re.match(line.strip()):
+                    in_block = True
+                    block = []
+                    start_line = line_no
+                continue
+
+            if line.strip().startswith("```"):
+                block_text = "\n".join(block).strip()
+                if block_text and any(decl_re.match(item) for item in block):
+                    digest = hashlib.sha1(
+                        f"{md_path.as_posix()}:{start_line}".encode("utf-8")
+                    ).hexdigest()[:12]
+                    out_path = out_dir / f"embedded-{len(rows) + 1:04d}-{digest}.mmd"
+                    out_path.write_text(block_text + "\n", encoding="utf-8")
+                    rows.append(f"{out_path.as_posix()}\t{md_path.as_posix()}:{start_line}")
+                in_block = False
                 block = []
-                start_line = line_no
-            continue
+                continue
 
-        if line.strip().startswith("```"):
-            block_text = "\n".join(block).strip()
-            if block_text and any(decl_re.match(item) for item in block):
-                digest = hashlib.sha1(
-                    f"{md_path.as_posix()}:{start_line}".encode("utf-8")
-                ).hexdigest()[:12]
-                out_path = out_dir / f"embedded-{len(rows) + 1:04d}-{digest}.mmd"
-                out_path.write_text(block_text + "\n", encoding="utf-8")
-                rows.append(f"{out_path.as_posix()}\t{md_path.as_posix()}:{start_line}")
-            in_block = False
-            block = []
-            continue
-
-        block.append(line)
+            block.append(line)
 
 manifest.write_text("\n".join(rows) + ("\n" if rows else ""), encoding="utf-8")
 print(f"Extracted {len(rows)} embedded Mermaid diagram block(s) for syntax validation.")
