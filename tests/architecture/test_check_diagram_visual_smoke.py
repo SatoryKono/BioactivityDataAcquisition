@@ -85,3 +85,35 @@ def test_write_json_report_creates_parent_directory(tmp_path: Path) -> None:
 
     assert report_path.exists()
     assert '"status": "passed"' in report_path.read_text(encoding="utf-8")
+
+
+def test_main_writes_failed_json_report_when_baseline_changed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    module = _load_module()
+    manifest = tmp_path / "visual-smoke.txt"
+    svg_path = tmp_path / "diagram.svg"
+    manifest.write_text("diagram.svg\n", encoding="utf-8")
+    svg_path.write_text("<svg></svg>", encoding="utf-8")
+    report_path = tmp_path / "visual-smoke.json"
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(module, "changed_paths", lambda rel_paths: rel_paths)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "check_diagram_visual_smoke.py",
+            "--manifest",
+            "visual-smoke.txt",
+            "--json-out",
+            "visual-smoke.json",
+        ],
+    )
+
+    exit_code = module.main()
+
+    assert exit_code == 1
+    payload = module.json.loads(report_path.read_text(encoding="utf-8"))
+    assert payload["status"] == "failed"
+    assert payload["changed_paths"] == ["diagram.svg"]

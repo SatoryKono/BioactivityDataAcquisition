@@ -397,6 +397,22 @@ bash docs/02-architecture/diagrams/tooling/render.sh
 
 Результат записывается в `<source-dir>/svg/` и `<source-dir>/png/` рядом с исходником диаграммы.
 
+### 8.2. Windows / PowerShell
+
+Канонический рендерер остаётся Bash-скриптом, поэтому на Windows используйте
+Git Bash или WSL. PowerShell может запускать те же команды из корня репозитория,
+а Python-проверки — через `.\.venv-win\Scripts\python.exe`.
+
+```powershell
+bash scripts/diagrams/validate_mermaid_syntax.sh --include-embedded --puppeteer /tmp/puppeteer-config.json
+bash docs/02-architecture/diagrams/tooling/render.sh --svg-only
+.\.venv-win\Scripts\python.exe scripts/diagrams/check_diagram_visual_smoke.py `
+  --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt `
+  --json-out reports/diagrams/diagram-visual-smoke.json
+```
+
+Подробнее: `docs/02-architecture/diagrams/README.md` (раздел **Windows / PowerShell**).
+
 ______________________________________________________________________
 
 ## 9. Типичный workflow создания диаграммы

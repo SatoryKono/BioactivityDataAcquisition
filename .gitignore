@@ -350,7 +350,6 @@ data/.idea/
 .claude/.dropbox.cache/
 .claude/*.docx
 /docs/.claude/settings*
-/docs/02-architecture/diagrams/mermaid/png
 /.venv-docs
 /script-codex
 /script-gemini

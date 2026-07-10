@@ -412,6 +412,9 @@ script. PowerShell can still launch the same commands from the repo root:
 # Verify the pinned Mermaid CLI version used by the wrapper.
 mmdc --version
 
+# Optional: pin an explicit mmdc binary for the Bash renderer/validator.
+$env:MMDC_BIN = "C:\Program Files\nodejs\mmdc.cmd"
+
 # Syntax validation, including fenced Mermaid blocks in active docs.
 bash scripts/diagrams/validate_mermaid_syntax.sh --include-embedded --puppeteer /tmp/puppeteer-config.json
 
@@ -422,6 +425,10 @@ bash docs/02-architecture/diagrams/tooling/render.sh --svg-only
 # Run Python checks with the Windows virtualenv when using native Windows Python.
 .\.venv-win\Scripts\python.exe -m scripts.diagrams check-svg-text `
   --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt
+
+.\.venv-win\Scripts\python.exe scripts/diagrams/check_diagram_visual_smoke.py `
+  --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt `
+  --json-out reports/diagrams/diagram-visual-smoke.json
 ```
 
 If local `mmdc` is not installed, the wrapper can use Docker with
