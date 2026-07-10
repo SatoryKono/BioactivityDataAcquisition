@@ -47683,7 +47683,7 @@
       "section": "reports",
       "status": "Active",
       "surface_family": "active",
-      "tracking_state": "ignored_local"
+      "tracking_state": "tracked"
     },
     {
       "canonical_successor": null,
@@ -62523,7 +62523,7 @@
       "section": "reports",
       "status": "Active",
       "surface_family": "active",
-      "tracking_state": "ignored_local"
+      "tracking_state": "tracked"
     },
     {
       "canonical_successor": null,
@@ -62551,7 +62551,7 @@
       "section": "reports",
       "status": "Active",
       "surface_family": "active",
-      "tracking_state": "ignored_local"
+      "tracking_state": "tracked"
     },
     {
       "canonical_successor": null,
@@ -62579,7 +62579,7 @@
       "section": "reports",
       "status": "Active",
       "surface_family": "active",
-      "tracking_state": "ignored_local"
+      "tracking_state": "tracked"
     },
     {
       "canonical_successor": null,
@@ -62635,7 +62635,7 @@
       "section": "reports",
       "status": "Active",
       "surface_family": "active",
-      "tracking_state": "ignored_local"
+      "tracking_state": "tracked"
     },
     {
       "canonical_successor": null,
@@ -62943,7 +62943,7 @@
       "section": "reports",
       "status": "Active",
       "surface_family": "active",
-      "tracking_state": "ignored_local"
+      "tracking_state": "tracked"
     },
     {
       "canonical_successor": null,
@@ -63195,7 +63195,7 @@
       "section": "reports",
       "status": "Active",
       "surface_family": "active",
-      "tracking_state": "ignored_local"
+      "tracking_state": "tracked"
     },
     {
       "canonical_successor": null,
@@ -63475,7 +63475,7 @@
       "section": "reports",
       "status": "Active",
       "surface_family": "active",
-      "tracking_state": "ignored_local"
+      "tracking_state": "tracked"
     },
     {
       "canonical_successor": null,
@@ -63727,7 +63727,7 @@
       "section": "reports",
       "status": "Active",
       "surface_family": "active",
-      "tracking_state": "ignored_local"
+      "tracking_state": "tracked"
     },
     {
       "canonical_successor": null,
@@ -64035,7 +64035,7 @@
       "section": "reports",
       "status": "Active",
       "surface_family": "active",
-      "tracking_state": "ignored_local"
+      "tracking_state": "tracked"
     },
     {
       "canonical_successor": null,
@@ -64287,7 +64287,7 @@
       "section": "reports",
       "status": "Active",
       "surface_family": "active",
-      "tracking_state": "ignored_local"
+      "tracking_state": "tracked"
     },
     {
       "canonical_successor": null,
@@ -64539,7 +64539,7 @@
       "section": "reports",
       "status": "Active",
       "surface_family": "active",
-      "tracking_state": "ignored_local"
+      "tracking_state": "tracked"
     },
     {
       "canonical_successor": null,
@@ -71483,7 +71483,7 @@
       "section": "reports",
       "status": "Active",
       "surface_family": "active",
-      "tracking_state": "ignored_local"
+      "tracking_state": "tracked"
     },
     {
       "canonical_successor": null,
@@ -72267,7 +72267,7 @@
       "section": "reports",
       "status": "Active",
       "surface_family": "active",
-      "tracking_state": "ignored_local"
+      "tracking_state": "tracked"
     },
     {
       "canonical_successor": null,
@@ -78091,7 +78091,7 @@
       "section": "reports",
       "status": "Generated",
       "surface_family": "generated",
-      "tracking_state": "ignored_local"
+      "tracking_state": "tracked"
     },
     {
       "canonical_successor": null,
@@ -78119,7 +78119,7 @@
       "section": "reports",
       "status": "Generated",
       "surface_family": "generated",
-      "tracking_state": "ignored_local"
+      "tracking_state": "tracked"
     },
     {
       "canonical_successor": null,
@@ -78539,7 +78539,7 @@
       "section": "reports",
       "status": "Active",
       "surface_family": "active",
-      "tracking_state": "ignored_local"
+      "tracking_state": "tracked"
     },
     {
       "canonical_successor": null,
@@ -81598,8 +81598,8 @@
       "working": 237
     },
     "by_tracking_state": {
-      "ignored_local": 1107,
-      "tracked": 1782
+      "ignored_local": 1090,
+      "tracked": 1799
     },
     "docs_reports_local_count": 1107,
     "duplicate_group_count": 2,
@@ -81621,7 +81621,7 @@
       }
     ],
     "total_doc_like": 2889,
-    "total_doc_like_ignored_local": 1107,
-    "total_doc_like_tracked": 1782
+    "total_doc_like_ignored_local": 1090,
+    "total_doc_like_tracked": 1799
   }
 }

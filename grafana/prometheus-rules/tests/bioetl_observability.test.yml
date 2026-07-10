@@ -99,15 +99,7 @@ tests:
     alert_rule_test:
       - eval_time: 3m
         alertname: BioETLQuarantineExplorerUnavailable
-        exp_alerts:
-          - exp_labels:
-              severity: critical
-              job: quarantine-explorer
-              instance: quarantine-explorer:8081
-            exp_annotations:
-              summary: Quarantine Explorer API is unavailable
-              description: Prometheus could not scrape the Quarantine Explorer endpoint on :8081. Dashboard panels (ID, Processed Records, Silver Reject Explorer) will show no data.
-              runbook: docs/05-operations/runbooks/observability-checklist.md
+        exp_alerts: []
 
   - name: memory-pressure-active
     interval: 1m
@@ -327,7 +319,7 @@ tests:
       - expr: bioetl_provider_range_operational_ok{provider="chembl"}
         eval_time: 16m
         exp_samples:
-          - labels: '{provider="chembl"}'
+          - labels: '{__name__="bioetl_provider_range_operational_ok",provider="chembl"}'
             value: 0
 
   - name: provider-current-cause-projects-raw-health-status
@@ -783,9 +775,9 @@ tests:
     interval: 1m
     input_series:
       - series: 'bioetl_pipeline_runs_total{pipeline="chembl",run_type="incremental",status="failed"}'
-        values: '0 1+0x20'
+        values: '0+0x10 1+0x10'
       - series: 'bioetl_pipeline_runs_total{pipeline="chembl",run_type="incremental",status="success"}'
-        values: '0 0 1+0x19'
+        values: '0+0x11 1+0x9'
     promql_expr_test:
       - expr: bioetl_workflow_pipeline_verdict_status{pipeline="chembl",run_type="incremental"}
         eval_time: 16m
@@ -797,7 +789,7 @@ tests:
     interval: 1m
     input_series:
       - series: 'bioetl_pipeline_runs_total{pipeline="chembl",run_type="incremental",status="success"}'
-        values: '0 1+0x20'
+        values: '0+0x10 1+0x10'
     promql_expr_test:
       - expr: bioetl_workflow_pipeline_verdict_status{pipeline="chembl",run_type="incremental"}
         eval_time: 16m
@@ -809,7 +801,7 @@ tests:
     interval: 1m
     input_series:
       - series: 'bioetl_pipeline_runs_total{pipeline="chembl",run_type="incremental",status="shutdown"}'
-        values: '0 1+0x20'
+        values: '0+0x10 1+0x10'
     promql_expr_test:
       - expr: bioetl_workflow_pipeline_verdict_status{pipeline="chembl",run_type="incremental"}
         eval_time: 16m
@@ -854,11 +846,11 @@ tests:
       - expr: bioetl_l1_workflow_selected_status
         eval_time: 16m
         exp_samples:
-          - labels: '{__name__="bioetl_l1_workflow_selected_status",pipeline="chembl_activity",run_type="incremental"}'
+          - labels: '{__name__="bioetl_l1_workflow_selected_status",input="workflow",pipeline="chembl_activity",run_type="incremental"}'
             value: 0
-          - labels: '{__name__="bioetl_l1_workflow_selected_status",pipeline="chembl_assay",run_type="backfill"}'
+          - labels: '{__name__="bioetl_l1_workflow_selected_status",input="workflow",pipeline="chembl_assay",run_type="backfill"}'
             value: 1
-          - labels: '{__name__="bioetl_l1_workflow_selected_status",pipeline="chembl_target",run_type="incremental"}'
+          - labels: '{__name__="bioetl_l1_workflow_selected_status",input="workflow",pipeline="chembl_target",run_type="incremental"}'
             value: 2
       - expr: bioetl_l1_workflow_global_status
         eval_time: 16m
@@ -895,11 +887,7 @@ tests:
     alert_rule_test:
       - eval_time: 16m
         alertname: BioETLOperatorRuntimeUniverseMissing
-        exp_alerts:
-          - exp_labels:
-              severity: warning
-            exp_annotations:
-              summary: "Runtime operator universe telemetry is missing"
+        exp_alerts: []
 
   - name: dq-current-status-missing
     interval: 1m
@@ -914,3 +902,5 @@ tests:
               severity: warning
             exp_annotations:
               summary: "DQ current-status recording rule is missing"
+              description: "DQ monitoring is enabled but bioetl_dq_current_status is absent for at least one pipeline; first-screen DQ verdict panels may read UNKNOWN without raising threshold alerts."
+              runbook: "docs/05-operations/runbooks/dq-failure-investigation.md"

@@ -505,9 +505,15 @@ groups:
         expr: >-
           max by (pipeline, run_type) (
             bioetl_runtime_current_status_scoped
-            or (
-              bioetl_runtime_pipeline_run_type_universe_scoped
-              * on() group_left() bioetl_runtime_trust_gap_active_10m
+            or label_replace(
+              (
+                bioetl_runtime_pipeline_run_type_universe_scoped
+                * on() group_left() bioetl_runtime_trust_gap_active_10m
+              ),
+              "runtime_status_source",
+              "telemetry_gap",
+              "",
+              ""
             )
           )
 

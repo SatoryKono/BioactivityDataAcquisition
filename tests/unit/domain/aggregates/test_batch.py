@@ -429,6 +429,7 @@ class TestBatchDomainEvents:
         events = batch.collect_events()
         assert len(events) == 1
         assert events[0].__class__.__name__ == "BatchWritten"
+        assert events[0].event_id
         assert events[0].layer is Layer.SILVER
         assert events[0].occurred_at == _ts(20)
 
@@ -465,6 +466,7 @@ class TestBatchDomainEvents:
         events = batch.collect_events()
         assert len(events) == 1
         assert events[0].__class__.__name__ == "BatchFailed"
+        assert events[0].event_id
         assert events[0].layer is Layer.SILVER
         assert events[0].error == "Write error"
         assert events[0].error_type == "IOError"

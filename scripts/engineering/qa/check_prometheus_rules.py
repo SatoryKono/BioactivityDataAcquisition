@@ -4,10 +4,10 @@
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
 import shutil
 import subprocess
 import sys
+from pathlib import Path
 
 RULES_FILE = Path("grafana/prometheus-rules/bioetl_observability.yml")
 TESTS_FILE = Path("grafana/prometheus-rules/tests/bioetl_observability.test.yml")
@@ -63,8 +63,8 @@ def _run_local(*, promtool: str, rules_file: Path, test_file: Path) -> int:
         print(_missing_promtool_message(promtool), file=sys.stderr)
         return 127
     checks = [
-        [resolved, "check", "rules", str(rules_file)],
-        [resolved, "test", "rules", str(test_file)],
+        [resolved, "check", "rules", rules_file.as_posix()],
+        [resolved, "test", "rules", test_file.as_posix()],
     ]
     for command in checks:
         result = _run(command)
@@ -82,10 +82,10 @@ def _run_docker(*, image: str, rules_file: Path, test_file: Path) -> int:
             file=sys.stderr,
         )
         return 127
-    workspace = Path.cwd()
+    workspace = Path.cwd().as_posix()
     checks = [
-        ["check", "rules", str(rules_file)],
-        ["test", "rules", str(test_file)],
+        ["check", "rules", rules_file.as_posix()],
+        ["test", "rules", test_file.as_posix()],
     ]
     for check in checks:
         command = [

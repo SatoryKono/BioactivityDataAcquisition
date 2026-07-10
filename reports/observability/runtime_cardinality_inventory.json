@@ -42,6 +42,11 @@
     "bioetl_replay_drift_events_total",
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
+    "bioetl_runtime_current_status",
+    "bioetl_runtime_current_status_scoped",
+    "bioetl_runtime_pipeline_run_type_universe_scoped",
+    "bioetl_runtime_trust_gap_active_10m",
+    "bioetl_runtime_trust_gap_status_10m",
     "bioetl_silver_filter_rejections_total",
     "bioetl_silver_validation_failures_total",
     "bioetl_stage_backlog_records",
@@ -215,8 +220,12 @@
     "bioetl_replay_drift_events_total",
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
+    "bioetl_runtime_current_blocker_reason_scoped",
     "bioetl_runtime_current_status",
+    "bioetl_runtime_current_status_trusted",
+    "bioetl_runtime_pipeline_run_type_universe_scoped",
     "bioetl_runtime_status",
+    "bioetl_runtime_trust_gap_status_10m",
     "bioetl_shutdown_completed",
     "bioetl_shutdown_completed_total",
     "bioetl_shutdown_initiated",
@@ -486,8 +495,14 @@
     "bioetl_replay_drift_events_total",
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
+    "bioetl_runtime_current_blocker_reason_scoped",
     "bioetl_runtime_current_status",
+    "bioetl_runtime_current_status_scoped",
+    "bioetl_runtime_current_status_trusted",
+    "bioetl_runtime_pipeline_run_type_universe_scoped",
     "bioetl_runtime_status",
+    "bioetl_runtime_trust_gap_active_10m",
+    "bioetl_runtime_trust_gap_status_10m",
     "bioetl_shutdown_completed",
     "bioetl_shutdown_completed_total",
     "bioetl_shutdown_initiated",
@@ -1671,21 +1686,36 @@
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
+    "bioetl_runtime_current_blocker_reason_scoped": [
+      "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
+      "grafana/README.md",
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
     "bioetl_runtime_current_status": [
       "docs/03-guides/dashboards/README.md",
       "docs/03-guides/dashboards/dashboard-checklist-per-dashboard.md",
       "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
       "docs/03-guides/dashboards/design-system.md",
-      "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "docs/03-guides/dashboards/panels/bioetl-workflow-overview-panels.md",
       "docs/04-reference/observability/alerting-guide.md",
       "docs/04-reference/observability/metrics-catalog.md",
-      "grafana/README.md",
-      "grafana/dashboards/bioetl-runtime.json",
       "grafana/dashboards/bioetl-workflow-overview.json"
+    ],
+    "bioetl_runtime_current_status_trusted": [
+      "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
+      "grafana/README.md",
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_pipeline_run_type_universe_scoped": [
+      "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_runtime_status": [
       "docs/04-reference/observability/metrics-catalog.md"
+    ],
+    "bioetl_runtime_trust_gap_status_10m": [
+      "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
+      "grafana/README.md",
+      "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_shutdown_completed": [
       "docs/03-guides/metrics-monitoring.md",
@@ -1790,6 +1820,7 @@
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
+      "grafana/README.md",
       "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_storage_optimization_total": [
@@ -2573,8 +2604,14 @@
     "bioetl_replay_drift_events_total",
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
+    "bioetl_runtime_current_blocker_reason_scoped",
     "bioetl_runtime_current_status",
+    "bioetl_runtime_current_status_scoped",
+    "bioetl_runtime_current_status_trusted",
+    "bioetl_runtime_pipeline_run_type_universe_scoped",
     "bioetl_runtime_status",
+    "bioetl_runtime_trust_gap_active_10m",
+    "bioetl_runtime_trust_gap_status_10m",
     "bioetl_shutdown_completed",
     "bioetl_shutdown_completed_total",
     "bioetl_shutdown_initiated",
@@ -2767,6 +2804,21 @@
     ],
     "bioetl_replay_reconstructability_events_total": [
       "grafana/prometheus-rules/bioetl_control_plane_current_status.yml",
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_current_status": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_current_status_scoped": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_pipeline_run_type_universe_scoped": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_trust_gap_active_10m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_trust_gap_status_10m": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_silver_filter_rejections_total": [
