@@ -39,6 +39,11 @@ SAFE_ROOT_LOCAL_PATHS: frozenset[str] = frozenset(
         ".mypy_cache",
         ".pytest_cache",
         ".ruff_cache",
+        ".xml",
+        "coverage.xml",
+        "mcp-shell.log",
+        "Test Results - Pytest_All.html",
+        "Test Results - Pytest_All.xml",
         "test-output",
         "tmp",
     }
@@ -203,8 +208,12 @@ def _candidate_category(path: str) -> str:
         return "local_dependency_tree"
     if path in LOG_ROOT_LOCAL_PATHS:
         return "local_logs"
-    if path.startswith(".coverage"):
+    if path.startswith(".coverage") or path == "coverage.xml":
         return "coverage"
+    if path == "mcp-shell.log":
+        return "local_logs"
+    if path == ".xml" or path.startswith("Test Results - Pytest_All."):
+        return "test_report_output"
     if path in {"test-output", "tmp"}:
         return "test_or_temp_output"
     return "local_cache"

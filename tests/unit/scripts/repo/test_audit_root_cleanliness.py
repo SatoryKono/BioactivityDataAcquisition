@@ -154,16 +154,36 @@ def test_unexpected_local_root_python_files_reject_untracked_root_python(
 def test_unexpected_local_root_temp_files_reject_panel_inventory_artifacts(
     tmp_path: Path,
 ) -> None:
+    (tmp_path / ".xml").write_text("<testsuite />\n", encoding="utf-8")
     (tmp_path / "_tmp_panel_inventory.mjs").write_text("{}", encoding="utf-8")
     (tmp_path / "_tmp_panel_inventory.ps1").write_text("{}", encoding="utf-8")
+    (tmp_path / "coverage.xml").write_text("<coverage />\n", encoding="utf-8")
+    (tmp_path / "mcp-shell.log").write_text("local log\n", encoding="utf-8")
     (tmp_path / "README.md").write_text("ok\n", encoding="utf-8")
+    # HTML reports are tracked by cleanup-root-local-clutter, but are not a
+    # strict blocker because Windows viewers can keep them locked on WSL drives.
+    (tmp_path / "Test Results - Pytest_All.html").write_text(
+        "<html></html>\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "Test Results - Pytest_All.xml").write_text(
+        "<testsuite />\n",
+        encoding="utf-8",
+    )
 
     violations = module._unexpected_local_root_temp_files(
         tmp_path,
         tracked_root_files={"README.md"},
     )
 
-    assert violations == ["_tmp_panel_inventory.mjs", "_tmp_panel_inventory.ps1"]
+    assert violations == [
+        ".xml",
+        "Test Results - Pytest_All.xml",
+        "_tmp_panel_inventory.mjs",
+        "_tmp_panel_inventory.ps1",
+        "coverage.xml",
+        "mcp-shell.log",
+    ]
 
 
 def test_collect_tracked_policy_violations_allows_current_canonical_root_files() -> (
