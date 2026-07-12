@@ -3,6 +3,6 @@ provider: chembl
 cassette_rel_path: tests/fixtures/vcr/chembl/TestChemblCellLinePipeline.test_chembl_cell_line_source_fields.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: a468392c97e25879ffcde28f3a2d54ea3f92f631ad4bbfb9f8a68a0d9678ec3c
-recorded_at: '2026-07-03'
+cassette_sha256: ed282168928b9bb2be9c7063bcfbf3ab747c76351952fd6e61db0728a5808d7c
+recorded_at: '2026-07-12'
 staleness_ready: true

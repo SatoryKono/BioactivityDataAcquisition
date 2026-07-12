@@ -146,8 +146,9 @@ class MergeMetricsRecorderMixin:
         any_enriched = pl.any_horizontal(
             [pl.col(col).is_not_null() for col in enricher_cols]
         )
-        # Performance optimization: Count matches via sum() directly in C instead of materializing a filtered dataframe
-        return int(df.select(any_enriched.sum()).item())
+
+        # Optimization: Use expr.sum() to count matching rows directly without materializing a filtered DataFrame.
+        return int(df.select(any_enriched.sum()).item() or 0)
 
     def _count_fully_enriched(
         self,
@@ -178,25 +179,27 @@ class MergeMetricsRecorderMixin:
             to its non-null ratio between 0.0 and 1.0. Returns an empty dict for
             empty DataFrames.
         """
+        total_rows = len(df)
+        if total_rows == 0:
+            return {}
+
         import polars as pl
 
-        if len(df) == 0:
+        cols_to_check = [col for col in df.columns if not col.startswith("_")]
+        if not cols_to_check:
             return {}
 
-        cols = [col for col in df.columns if not col.startswith("_")]
-        if not cols:
-            return {}
-
-        total_rows = len(df)
-
-        # Performance optimization: Build a list of expressions and evaluate them simultaneously
-        # in a single Polars operation, avoiding Python loops and DataFrame materializations
+        # Optimization: Build expressions and execute once instead of Python loop with filter
         exprs = [
-            (pl.col(col).is_not_null().sum() / total_rows).alias(col) for col in cols
+            (pl.col(col).is_not_null().sum() / total_rows).alias(col)
+            for col in cols_to_check
         ]
 
-        row = df.select(exprs).row(0, named=True)
-        return {str(k): float(v) for k, v in row.items()}
+        coverage_row = df.select(exprs).row(0, named=True)
+        # Type coerce float values for strict typing compliance
+        coverage = {k: float(v) for k, v in coverage_row.items()}
+
+        return coverage
 
 
 __all__ = ["MergeMetricsRecorderMixin"]

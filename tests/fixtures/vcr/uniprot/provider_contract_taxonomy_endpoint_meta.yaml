@@ -3,6 +3,6 @@ provider: uniprot
 cassette_rel_path: tests/fixtures/vcr/uniprot/provider_contract_taxonomy_endpoint.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 2814382058510b6066f399afbf883e887034967d84c7659589e7abb65e81670d
-recorded_at: '2026-07-03'
+cassette_sha256: 9878fa8e1ae0239902f6e52cf84a51f6958650b8ce2d04239a5197cced2f17fd
+recorded_at: '2026-07-12'
 staleness_ready: true

@@ -3,6 +3,6 @@ provider: chembl
 cassette_rel_path: tests/fixtures/vcr/chembl/test_chembl_molecule_then_activity_chain.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 2aac12bb5607c49f5f9caa8f76b6f961fe0994bbaee74f5e78405bd35afaf53b
-recorded_at: '2026-07-03'
+cassette_sha256: 46ca1cb626c9be50229d22626b5cbabf001e698b47269e65b5e42252599b8904
+recorded_at: '2026-07-12'
 staleness_ready: true

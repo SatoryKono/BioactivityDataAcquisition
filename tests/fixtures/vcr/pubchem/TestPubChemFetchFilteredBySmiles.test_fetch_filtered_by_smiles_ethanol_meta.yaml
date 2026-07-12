@@ -3,6 +3,6 @@ provider: pubchem
 cassette_rel_path: tests/fixtures/vcr/pubchem/TestPubChemFetchFilteredBySmiles.test_fetch_filtered_by_smiles_ethanol.yaml
 metadata_status: managed_inventory
 source: backfill_vcr_metadata_sidecars.py
-cassette_sha256: 64e74810a346c07f7dc10f418a474b47f68b69a97a1f548961641d9eba2e1c6d
-recorded_at: '2026-07-03'
+cassette_sha256: 46cae27ab9c7296be09e50560f4452271baaef958caf1d65051a90b354b90d9e
+recorded_at: '2026-07-12'
 staleness_ready: true
