@@ -2,6 +2,24 @@
   "schema_version": "1.0",
   "description": "Lifecycle and supporting-taxonomy decisions for non-active scripts.",
   "entries": {
+    "scripts/docker-setup.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the legacy root PowerShell Docker setup wrapper while operator references migrate to scripts/ops/docker-setup.ps1; keep it supporting and do not promote root setup launchers back to active script inventory."
+    },
+    "scripts/docker-setup.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the legacy root shell Docker setup wrapper while operator references migrate to scripts/ops/docker-setup.sh; keep it supporting and do not promote root setup launchers back to active script inventory."
+    },
+    "scripts/generate_test_github_issues.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual historical test-issue generator; prefer current GitHub issue creation workflows and keep token-bearing direct script invocation out of active script inventory."
+    },
     "scripts/ai/sync_ai_governance.py": {
       "owner": "@bioetl-platform",
       "decision": "shared_helper_module",
@@ -649,6 +667,12 @@
       "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded manual Mermaid semantics helper while diagram-governance guidance and security regression tests still reference the direct script path; promote it only if link-style normalization graduates to a canonical scripts.docs or scripts.engineering diagram workflow."
+    },
+    "src/tools/harmonize_link_styles.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-07-15",
+      "next_step": "Retain only as a bounded manual Mermaid semantics helper while diagram-governance guidance still references the direct script path; promote it only if link-style harmonization graduates to a canonical scripts.docs or scripts.engineering diagram workflow."
     },
     "src/tools/neo4j_audit.py": {
       "owner": "@bioetl-platform",

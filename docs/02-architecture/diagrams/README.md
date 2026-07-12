@@ -408,7 +408,8 @@ bash scripts/diagrams/validate_mermaid_syntax.sh --include-embedded --puppeteer 
 
 Run the renderer through `scripts/diagrams/render.ps1` from PowerShell. The
 wrapper delegates to the canonical Bash renderer through Git Bash and forwards
-all render arguments.
+all render arguments. Direct Git Bash or WSL execution remains supported for
+developers who prefer the Bash command surface.
 
 ```powershell
 # Verify the pinned Mermaid CLI version used by the wrapper.

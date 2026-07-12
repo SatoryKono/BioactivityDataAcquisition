@@ -376,6 +376,7 @@ def _build_ledger_entries(
     service.record_artifact_published(
         layer="silver",
         artifact_path="data/output/silver/chembl/activity",
+        artifact_content_hash="a" * 64,
         dataset_ref="silver:chembl.activity@1",
         lineage_fragment_id="silver:fragment-1",
     )

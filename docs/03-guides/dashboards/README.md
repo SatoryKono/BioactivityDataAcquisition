@@ -274,7 +274,7 @@ uv run python -m scripts.engineering.qa check-prometheus-rules
 Этот command surface выполняет:
 
 ```bash
-promtool check rules grafana/prometheus-rules/bioetl_observability.yml
+promtool check rules grafana/prometheus-rules/bioetl_observability.yml grafana/prometheus-rules/bioetl_control_plane_current_status.yml
 promtool test rules grafana/prometheus-rules/tests/bioetl_observability.test.yml
 ```
 

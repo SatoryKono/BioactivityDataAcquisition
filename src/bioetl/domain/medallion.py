@@ -86,7 +86,7 @@ class WriteModePolicy:
     ALLOWED_MODES: ClassVar[dict[Layer, set[WriteMode]]] = {
         Layer.BRONZE: {WriteMode.APPEND},
         Layer.SILVER: {WriteMode.MERGE, WriteMode.APPEND},
-        Layer.GOLD: {WriteMode.MERGE, WriteMode.OVERWRITE, WriteMode.APPEND},
+        Layer.GOLD: {WriteMode.OVERWRITE, WriteMode.APPEND},
     }
 
     def validate(self, layer: Layer, mode: WriteMode) -> None:

@@ -9,10 +9,7 @@ from deltalake.exceptions import TableNotFoundError
 
 from bioetl.domain.serialization import deserialize_from_json
 from bioetl.domain.types import JsonDict, QuarantineRecordStatus
-from bioetl.infrastructure.quarantine._pyarrow_helpers import (
-    and_mask,
-    equal_mask,
-)
+from bioetl.infrastructure.quarantine.status_events import apply_latest_statuses
 
 if TYPE_CHECKING:
     pass
@@ -26,6 +23,8 @@ def inspect_records(
     error_code: str | None = None,
     run_id: str | None = None,
     dq_status: QuarantineRecordStatus | None = None,
+    *,
+    status_events_path: str | None = None,
 ) -> list[JsonDict]:
     """Inspect quarantine records for a pipeline.
 
@@ -48,20 +47,21 @@ def inspect_records(
     arrow_table = dt.to_pyarrow_table(partitions=[("pipeline", "=", pipeline)])
     status_filter = dq_status or QuarantineRecordStatus.NEW
 
-    mask = equal_mask(arrow_table["pipeline"], pipeline)
-    if error_code:
-        mask = and_mask(mask, equal_mask(arrow_table["error_code"], error_code))
-    if run_id:
-        mask = and_mask(mask, equal_mask(arrow_table["run_id"], run_id))
-    mask = and_mask(mask, equal_mask(arrow_table["dq_status"], status_filter.value))
-
-    filtered_table = arrow_table.filter(mask)
-    filtered_table = filtered_table.sort_by([("ingestion_ts", "descending")])
-
+    records = apply_latest_statuses(
+        arrow_table.to_pylist(), status_events_path, storage_options
+    )
+    records = [
+        record
+        for record in records
+        if str(record.get("pipeline", "")) == pipeline
+        and (error_code is None or str(record.get("error_code", "")) == error_code)
+        and (run_id is None or str(record.get("run_id", "")) == run_id)
+        and str(record.get("dq_status", "")) == status_filter.value
+    ]
+    records.sort(key=lambda row: str(row.get("ingestion_ts", "")), reverse=True)
     if limit > 0:
-        filtered_table = filtered_table.slice(length=limit)
+        records = records[:limit]
 
-    records: list[JsonDict] = filtered_table.to_pylist()
     for record in records:
         record["payload"] = deserialize_from_json(record["payload"])
         record["metadata"] = deserialize_from_json(record.get("metadata", "{}"))

@@ -51,7 +51,6 @@ services:
       - ./data:/app/data
       - ./logs:/app/logs
     ports:
-      - "8000:8000"
       - "8081:8081"
     environment:
       NEO4J_URI: bolt://neo4j:7687

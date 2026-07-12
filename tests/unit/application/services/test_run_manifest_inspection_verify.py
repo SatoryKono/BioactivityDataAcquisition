@@ -229,6 +229,7 @@ def test_control_plane_chain_surfaces_effective_config_and_artifact_links() -> N
     ledger_service.record_artifact_published(
         layer="silver",
         artifact_path="data/output/silver/chembl/activity",
+        artifact_content_hash="a" * 64,
         dataset_ref="silver:chembl.activity@1",
         lineage_fragment_id="silver:fragment-chain-1",
         details={
@@ -331,6 +332,7 @@ def test_control_plane_chain_surfaces_lifecycle_smoke_summary() -> None:
     ledger_service.record_artifact_published(
         layer="silver",
         artifact_path="data/output/silver/chembl/activity",
+        artifact_content_hash="a" * 64,
         dataset_ref="silver:chembl.activity@1",
         lineage_fragment_id="silver:fragment-smoke-1",
     )

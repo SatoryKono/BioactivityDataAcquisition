@@ -64,6 +64,7 @@ class _FakeRunLedgerService:
         *,
         layer: str,
         artifact_path: str,
+        artifact_content_hash: str,
         dataset_ref: str | None,
         lineage_fragment_id: str | None,
         details: dict[str, object] | None,
@@ -71,6 +72,7 @@ class _FakeRunLedgerService:
         entry = {
             "layer": layer,
             "artifact_path": artifact_path,
+            "artifact_content_hash": artifact_content_hash,
             "dataset_ref": dataset_ref,
             "lineage_fragment_id": lineage_fragment_id,
             "details": details,
@@ -100,6 +102,7 @@ async def test_artifact_recorder_publishes_bronze_input_snapshot_events(
     metadata = _make_bronze_metadata()
     metadata.runtime.run_id = str(run_id)
     metadata.runtime.manifest_id = "manifest-1"
+    metadata.output.content_hash = "b" * 64
     metadata.source.input_snapshots = [
         InputSnapshotRef(
             snapshot_id="sha256:bronze-live-1",
@@ -196,6 +199,7 @@ def test_attached_artifact_recorder_records_only_valid_bronze_snapshots() -> Non
         {
             "dataset_ref": 42,
             "lineage_fragment_id": "lineage-1",
+            "content_hash": "a" * 64,
             "provider": "chembl",
             "entity": "activity",
             "pipeline_name": "chembl_activity",
@@ -255,6 +259,7 @@ def test_artifact_recorder_ignores_bronze_snapshot_payloads_that_are_not_lists()
             "provider": "chembl",
             "entity": "activity",
             "pipeline_name": "chembl_activity",
+            "content_hash": "b" * 64,
             "input_snapshots": object(),
         },
     )

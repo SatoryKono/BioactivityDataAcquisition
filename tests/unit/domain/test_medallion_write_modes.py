@@ -150,11 +150,12 @@ class TestWriteModePolicy:
         with pytest.raises(PolicyViolationError, match="silver"):
             policy.validate(Layer.SILVER, WriteMode.OVERWRITE)
 
-    def test_gold_allows_merge(self) -> None:
-        """Test that Gold layer allows MERGE mode."""
+    def test_gold_rejects_merge(self) -> None:
+        """Test that Gold layer rejects MERGE mode."""
         policy = WriteModePolicy()
-        policy.validate(Layer.GOLD, WriteMode.MERGE)
-        assert WriteMode.MERGE in policy.ALLOWED_MODES[Layer.GOLD]
+        with pytest.raises(PolicyViolationError, match="gold"):
+            policy.validate(Layer.GOLD, WriteMode.MERGE)
+        assert WriteMode.MERGE not in policy.ALLOWED_MODES[Layer.GOLD]
 
     def test_gold_allows_overwrite(self) -> None:
         """Test that Gold layer allows OVERWRITE mode."""

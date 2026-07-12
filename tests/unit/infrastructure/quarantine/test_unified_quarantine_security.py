@@ -65,16 +65,17 @@ def test_update_status_handles_malicious_hash(mock_delta_table):
     quarantine = UnifiedQuarantineAdapter(base_path="/fake/path")
     malicious_hash = "abc'; --"
 
-    quarantine.update_status(
-        payload_hash=malicious_hash, new_status=QuarantineRecordStatus.IGNORED
+    with patch(
+        "bioetl.infrastructure.quarantine.unified.append_status_event"
+    ) as append_mock:
+        quarantine.update_status(
+            payload_hash=malicious_hash, new_status=QuarantineRecordStatus.IGNORED
+        )
+
+    append_mock.assert_called_once_with(
+        quarantine.status_events_path,
+        None,
+        payload_hash=malicious_hash,
+        new_status=QuarantineRecordStatus.IGNORED,
     )
-
-    # Verify that the predicate is properly escaped
-    _args, kwargs = mock_instance.update.call_args
-    predicate = kwargs["predicate"]
-    escaped_hash = malicious_hash.replace("'", "''")
-    assert f"payload_hash = '{escaped_hash}'" in predicate
-
-    # Verify that the update value is also escaped
-    updates = kwargs["updates"]
-    assert f"'{QuarantineRecordStatus.IGNORED.value}'" in updates["dq_status"]
+    mock_instance.update.assert_not_called()

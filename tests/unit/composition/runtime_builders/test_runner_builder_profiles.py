@@ -1122,6 +1122,7 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
         SILVER_OUTPUT_PATH,
         {
             "metadata_path": SILVER_METADATA_PATH,
+            "artifact_content_hash": "sha256:silver-artifact",
             "dataset_ref": "silver:chembl.activity@1",
             "lineage_fragment_id": "silver:fragment-1",
         },
@@ -1134,5 +1135,6 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
     ledger_payload = json.loads(lines[1])
     assert ledger_payload["event_type"] == "artifact_published"
     assert ledger_payload["stage"] == "silver"
+    assert ledger_payload["details"]["artifact_content_hash"] == "sha256:silver-artifact"
     assert ledger_payload["dataset_ref"] == "silver:chembl.activity@1"
     assert ledger_payload["lineage_fragment_id"] == "silver:fragment-1"

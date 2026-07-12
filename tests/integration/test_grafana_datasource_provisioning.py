@@ -68,6 +68,10 @@ def test_quarantine_explorer_compose_uses_service_dns_backend() -> None:
         "--port",
         "8081",
     ]
+    assert "8081:8081" in bioetl["ports"]
+    assert "8000:8000" not in bioetl["ports"], (
+        "Quarantine Explorer must not occupy the BioETL /metrics host port."
+    )
 
 
 def test_grafana_compose_installs_infinity_plugin() -> None:

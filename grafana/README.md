@@ -1184,6 +1184,8 @@ The default Docker-backed Grafana datasource URL is
 `quarantine-explorer` network alias on the monitoring network, even when the
 container name is `bioetl-quarantine-explorer`. Local host-backed overrides may
 still set `BIOETL_QUARANTINE_EXPLORER_URL` to `http://host.docker.internal:8081`.
+Compose surfaces must not publish Quarantine Explorer on host port `8000`;
+that port is reserved for the BioETL Prometheus `/metrics` endpoint.
 The shipped Grafana bootstrap entrypoint also removes a stale local
 `grafana-image-renderer` plugin from `/var/lib/grafana/plugins/` when remote
 renderer mode is active, preventing restart loops caused by old persistent
@@ -1637,6 +1639,8 @@ network alias на monitoring network даже при container name
 `bioetl-quarantine-explorer`. Если backend запускается вручную на host,
 переопредели переменную на `http://host.docker.internal:8081`; такой backend
 должен слушать `0.0.0.0:8081`, не только `127.0.0.1`.
+Не публикуй Quarantine Explorer на host `:8000`: этот порт зарезервирован для
+BioETL `/metrics`, который Prometheus скрейпит как `host.docker.internal:8000`.
 
 ### 15.2 Prometheus Target DOWN
 

@@ -10,11 +10,8 @@ from deltalake.exceptions import TableNotFoundError
 
 from bioetl.domain.serialization import deserialize_from_json
 from bioetl.domain.types import JsonDict, QuarantineRecordStatus
-from bioetl.infrastructure.quarantine._pyarrow_helpers import (
-    and_mask,
-    equal_mask,
-)
 from bioetl.infrastructure.quarantine.record_encoding import quote_literal
+from bioetl.infrastructure.quarantine.status_events import apply_latest_statuses
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -28,6 +25,7 @@ def replay_records(
     max_age_days: int = 7,
     *,
     now: datetime,
+    status_events_path: str | None = None,
 ) -> Iterator[JsonDict]:
     """Replay quarantine records for reprocessing.
 
@@ -48,23 +46,27 @@ def replay_records(
     except TableNotFoundError:
         return
 
-    cutoff_date = now - timedelta(days=max_age_days)
+    cutoff_date = (now - timedelta(days=max_age_days)).isoformat()
     arrow_table = dt.to_pyarrow_table(
         partitions=[("pipeline", "=", pipeline)],
         filters=[
             ("ingestion_ts", ">=", cutoff_date),
-            ("dq_status", "=", QuarantineRecordStatus.NEW.value),
         ],
     )
 
-    mask = equal_mask(arrow_table["pipeline"], pipeline)
-    if error_code:
-        mask = and_mask(mask, equal_mask(arrow_table["error_code"], error_code))
+    records = apply_latest_statuses(
+        arrow_table.to_pylist(), status_events_path, storage_options
+    )
+    records = [
+        record
+        for record in records
+        if str(record.get("pipeline", "")) == pipeline
+        and str(record.get("dq_status", "")) == QuarantineRecordStatus.NEW.value
+        and (error_code is None or str(record.get("error_code", "")) == error_code)
+    ]
+    records.sort(key=lambda row: str(row.get("ingestion_ts", "")))
 
-    filtered_table = arrow_table.filter(mask)
-    filtered_table = filtered_table.sort_by([("ingestion_ts", "ascending")])
-
-    for record in filtered_table.to_pylist():
+    for record in records:
         record["payload"] = deserialize_from_json(record["payload"])
         record["metadata"] = deserialize_from_json(record.get("metadata", "{}"))
         record["error_details"] = deserialize_from_json(record["error_details"])

@@ -25,6 +25,7 @@ pytestmark = pytest.mark.unit
 TEST_ROOT = synthetic_test_root("run-ledger-service")
 SILVER_ARTIFACT_PATH = str(TEST_ROOT / "output" / "silver" / "chembl" / "activity")
 SILVER_METADATA_PATH = str(Path(SILVER_ARTIFACT_PATH) / "_metadata.yaml")
+SILVER_ARTIFACT_CONTENT_HASH = "a" * 64
 GOLD_DQ_REPORT_PATH = str(
     TEST_ROOT / "output" / "gold" / "chembl" / "activity" / "_dq.json"
 )
@@ -478,6 +479,7 @@ def test_record_artifact_published_captures_layer_and_path() -> None:
     entry = service.record_artifact_published(
         layer="silver",
         artifact_path=SILVER_ARTIFACT_PATH,
+        artifact_content_hash=SILVER_ARTIFACT_CONTENT_HASH,
         dataset_ref="silver:chembl.activity@7",
         lineage_fragment_id="silver:fragment-1",
         details={"metadata_path": SILVER_METADATA_PATH},
@@ -491,6 +493,7 @@ def test_record_artifact_published_captures_layer_and_path() -> None:
     assert entry.lineage_fragment_id == "silver:fragment-1"
     assert entry.details == {
         "artifact_path": SILVER_ARTIFACT_PATH,
+        "artifact_content_hash": SILVER_ARTIFACT_CONTENT_HASH,
         "metadata_path": SILVER_METADATA_PATH,
         "_diagnostic": {
             "diagnostic_contract_version": "v1",
@@ -524,6 +527,26 @@ def test_record_artifact_published_rejects_unlinked_artifact() -> None:
         service.record_artifact_published(
             layer="silver",
             artifact_path=SILVER_ARTIFACT_PATH,
+            artifact_content_hash=SILVER_ARTIFACT_CONTENT_HASH,
+        )
+
+
+def test_record_artifact_published_rejects_missing_content_hash() -> None:
+    run_id = _run_id("artifact-published-missing-hash")
+    store = _InMemoryRunLedgerStore()
+    service = RunLedgerService(
+        ledger_port=store,
+        manifest_id="manifest-1",
+        run_id=run_id,
+        _entry_id_factory=lambda: "entry-missing-hash",
+    )
+
+    with pytest.raises(ValueError, match="artifact_content_hash is required"):
+        service.record_artifact_published(
+            layer="silver",
+            artifact_path=SILVER_ARTIFACT_PATH,
+            artifact_content_hash=" ",
+            dataset_ref="silver:chembl.activity@7",
         )
 
 

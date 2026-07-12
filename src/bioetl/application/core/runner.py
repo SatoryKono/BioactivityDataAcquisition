@@ -234,6 +234,7 @@ class PipelineRunner(PipelineRunnerSupportMixin):
             self._run_ledger_service.record_artifact_published(
                 layer="debug_export",
                 artifact_path=result.root_path,
+                artifact_content_hash=result.debug_export_hash,
                 dataset_ref=f"debug_export:{self._config.pipeline_name}@{self.run_id}",
                 details={
                     "manifest_path": result.manifest_path,

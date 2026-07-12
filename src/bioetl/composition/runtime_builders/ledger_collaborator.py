@@ -57,9 +57,15 @@ def _record_artifact(
         lineage_fragment_id = (
             None if raw_lineage_fragment_id is None else str(raw_lineage_fragment_id)
         )
+        artifact_content_hash = str(
+            details.get("artifact_content_hash") or details.get("content_hash") or ""
+        )
+    else:
+        artifact_content_hash = ""
     entry = service.record_artifact_published(
         layer=layer,
         artifact_path=artifact_path,
+        artifact_content_hash=artifact_content_hash,
         dataset_ref=dataset_ref,
         lineage_fragment_id=lineage_fragment_id,
         details=details,

@@ -39,6 +39,13 @@ class _RunLedgerCoreEventAppender(Protocol):
     ) -> RunLedgerEntry: ...
 
 
+def _required_text(value: str, field_name: str) -> str:
+    stripped = value.strip()
+    if not stripped:
+        raise ValueError(f"{field_name} is required")
+    return stripped
+
+
 def record_manifest_created(
     appender: _RunLedgerCoreEventAppender,
     manifest: RunManifest,
@@ -76,6 +83,7 @@ def record_artifact_published(
     *,
     layer: str,
     artifact_path: str,
+    artifact_content_hash: str,
     dataset_ref: str | None = None,
     lineage_fragment_id: str | None = None,
     details: dict[str, object] | None = None,
@@ -85,7 +93,12 @@ def record_artifact_published(
         raise ValueError(
             "Artifact publication requires dataset_ref or lineage_fragment_id"
         )
-    payload: dict[str, object] = {"artifact_path": artifact_path}
+    payload: dict[str, object] = {
+        "artifact_path": artifact_path,
+        "artifact_content_hash": _required_text(
+            artifact_content_hash, "artifact_content_hash"
+        ),
+    }
     if details:
         payload.update(details)
     return appender._append(

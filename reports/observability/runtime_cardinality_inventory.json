@@ -10,10 +10,13 @@
     "bioetl_control_plane_ledger_appends_total",
     "bioetl_control_plane_manifest_writes_total",
     "bioetl_control_plane_reads_total",
+    "bioetl_control_plane_run_type_universe",
     "bioetl_control_plane_terminal_events_total",
     "bioetl_data_freshness_seconds",
     "bioetl_data_source_retry_exhausted_total",
     "bioetl_dq_anomaly_detected",
+    "bioetl_dq_current_activity_15m",
+    "bioetl_dq_current_reason",
     "bioetl_dq_current_status",
     "bioetl_dq_monitor_enabled",
     "bioetl_dq_records_quarantined_total",
@@ -105,6 +108,7 @@
     "bioetl_composite_phase_records_total",
     "bioetl_composite_phase_retries_total",
     "bioetl_composite_source_selection_total",
+    "bioetl_control_plane_current_status",
     "bioetl_control_plane_ledger_append_duration_seconds",
     "bioetl_control_plane_ledger_appends_total",
     "bioetl_control_plane_lifecycle_apply_total",
@@ -114,7 +118,9 @@
     "bioetl_control_plane_manifest_writes_total",
     "bioetl_control_plane_read_duration_seconds",
     "bioetl_control_plane_reads_total",
+    "bioetl_control_plane_run_type_universe",
     "bioetl_control_plane_status",
+    "bioetl_control_plane_telemetry_missing_5m",
     "bioetl_control_plane_terminal_events_total",
     "bioetl_current_status",
     "bioetl_data_freshness_seconds",
@@ -128,6 +134,7 @@
     "bioetl_dq_check_duration_seconds",
     "bioetl_dq_check_failures_total",
     "bioetl_dq_context_build_failures_total",
+    "bioetl_dq_current_reason",
     "bioetl_dq_current_status",
     "bioetl_dq_dispositions_total",
     "bioetl_dq_monitor_disabled_total",
@@ -173,6 +180,7 @@
     "bioetl_l1_workflow_selected_status",
     "bioetl_lineage_fragments_emitted_total",
     "bioetl_lineage_refs_missing_total",
+    "bioetl_manifest_ledger_failures_15m",
     "bioetl_memory_batch_resize_events_total",
     "bioetl_memory_monitor_fallback_events_total",
     "bioetl_memory_pressure_events_total",
@@ -220,6 +228,7 @@
     "bioetl_replay_drift_events_total",
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
+    "bioetl_replay_safety_blockers_15m",
     "bioetl_runtime_current_blocker_reason_scoped",
     "bioetl_runtime_current_status",
     "bioetl_runtime_current_status_trusted",
@@ -380,6 +389,7 @@
     "bioetl_composite_phase_records_total",
     "bioetl_composite_phase_retries_total",
     "bioetl_composite_source_selection_total",
+    "bioetl_control_plane_current_status",
     "bioetl_control_plane_ledger_append_duration_seconds",
     "bioetl_control_plane_ledger_appends_total",
     "bioetl_control_plane_lifecycle_apply_total",
@@ -389,7 +399,9 @@
     "bioetl_control_plane_manifest_writes_total",
     "bioetl_control_plane_read_duration_seconds",
     "bioetl_control_plane_reads_total",
+    "bioetl_control_plane_run_type_universe",
     "bioetl_control_plane_status",
+    "bioetl_control_plane_telemetry_missing_5m",
     "bioetl_control_plane_terminal_events_total",
     "bioetl_current_status",
     "bioetl_data_freshness_seconds",
@@ -403,6 +415,10 @@
     "bioetl_dq_check_duration_seconds",
     "bioetl_dq_check_failures_total",
     "bioetl_dq_context_build_failures_total",
+    "bioetl_dq_current_activity_15m",
+    "bioetl_dq_current_degraded_signals_15m",
+    "bioetl_dq_current_failure_signals_15m",
+    "bioetl_dq_current_reason",
     "bioetl_dq_current_status",
     "bioetl_dq_dispositions_total",
     "bioetl_dq_monitor_disabled_total",
@@ -448,6 +464,7 @@
     "bioetl_l1_workflow_selected_status",
     "bioetl_lineage_fragments_emitted_total",
     "bioetl_lineage_refs_missing_total",
+    "bioetl_manifest_ledger_failures_15m",
     "bioetl_memory_batch_resize_events_total",
     "bioetl_memory_monitor_fallback_events_total",
     "bioetl_memory_pressure_events_total",
@@ -495,6 +512,7 @@
     "bioetl_replay_drift_events_total",
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
+    "bioetl_replay_safety_blockers_15m",
     "bioetl_runtime_current_blocker_reason_scoped",
     "bioetl_runtime_current_status",
     "bioetl_runtime_current_status_scoped",
@@ -528,6 +546,7 @@
     "bioetl_storage_optimization_total",
     "bioetl_structural_policy_events_total",
     "bioetl_structural_policy_shadow_comparisons_total",
+    "bioetl_terminal_events_15m",
     "bioetl_traced_runs_total",
     "bioetl_transform_duration_seconds",
     "bioetl_transform_errors_total",
@@ -1009,6 +1028,9 @@
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md"
     ],
+    "bioetl_control_plane_current_status": [
+      "docs/03-guides/dashboards/README.md"
+    ],
     "bioetl_control_plane_ledger_append_duration_seconds": [
       "docs/04-reference/observability/metrics-catalog.md"
     ],
@@ -1057,8 +1079,17 @@
       "docs/05-operations/sli-slo-baseline.md",
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
+    "bioetl_control_plane_run_type_universe": [
+      "docs/03-guides/dashboards/variable-reference.md",
+      "grafana/README.md",
+      "grafana/dashboards/bioetl-control-plane-v1.json"
+    ],
     "bioetl_control_plane_status": [
       "docs/04-reference/observability/metrics-catalog.md"
+    ],
+    "bioetl_control_plane_telemetry_missing_5m": [
+      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
+      "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
     "bioetl_control_plane_terminal_events_total": [
       "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
@@ -1141,6 +1172,14 @@
     "bioetl_dq_context_build_failures_total": [
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/observability/metrics-catalog.md"
+    ],
+    "bioetl_dq_current_reason": [
+      "docs/03-guides/dashboards/dashboard-checklist-per-dashboard.md",
+      "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
+      "docs/03-guides/dashboards/design-system.md",
+      "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md",
+      "grafana/README.md",
+      "grafana/dashboards/bioetl-dq-v2.json"
     ],
     "bioetl_dq_current_status": [
       "docs/03-guides/dashboards/README.md",
@@ -1414,6 +1453,10 @@
       "docs/05-operations/sli-slo-baseline.md",
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
+    "bioetl_manifest_ledger_failures_15m": [
+      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
+      "grafana/dashboards/bioetl-control-plane-v1.json"
+    ],
     "bioetl_memory_batch_resize_events_total": [
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md"
@@ -1684,6 +1727,10 @@
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
+      "grafana/dashboards/bioetl-control-plane-v1.json"
+    ],
+    "bioetl_replay_safety_blockers_15m": [
+      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
     "bioetl_runtime_current_blocker_reason_scoped": [
@@ -2489,6 +2536,7 @@
     "bioetl_composite_phase_records_total",
     "bioetl_composite_phase_retries_total",
     "bioetl_composite_source_selection_total",
+    "bioetl_control_plane_current_status",
     "bioetl_control_plane_ledger_append_duration_seconds",
     "bioetl_control_plane_ledger_appends_total",
     "bioetl_control_plane_lifecycle_apply_total",
@@ -2498,7 +2546,9 @@
     "bioetl_control_plane_manifest_writes_total",
     "bioetl_control_plane_read_duration_seconds",
     "bioetl_control_plane_reads_total",
+    "bioetl_control_plane_run_type_universe",
     "bioetl_control_plane_status",
+    "bioetl_control_plane_telemetry_missing_5m",
     "bioetl_control_plane_terminal_events_total",
     "bioetl_current_status",
     "bioetl_data_freshness_seconds",
@@ -2512,6 +2562,10 @@
     "bioetl_dq_check_duration_seconds",
     "bioetl_dq_check_failures_total",
     "bioetl_dq_context_build_failures_total",
+    "bioetl_dq_current_activity_15m",
+    "bioetl_dq_current_degraded_signals_15m",
+    "bioetl_dq_current_failure_signals_15m",
+    "bioetl_dq_current_reason",
     "bioetl_dq_current_status",
     "bioetl_dq_dispositions_total",
     "bioetl_dq_monitor_disabled_total",
@@ -2557,6 +2611,7 @@
     "bioetl_l1_workflow_selected_status",
     "bioetl_lineage_fragments_emitted_total",
     "bioetl_lineage_refs_missing_total",
+    "bioetl_manifest_ledger_failures_15m",
     "bioetl_memory_batch_resize_events_total",
     "bioetl_memory_monitor_fallback_events_total",
     "bioetl_memory_pressure_events_total",
@@ -2604,6 +2659,7 @@
     "bioetl_replay_drift_events_total",
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
+    "bioetl_replay_safety_blockers_15m",
     "bioetl_runtime_current_blocker_reason_scoped",
     "bioetl_runtime_current_status",
     "bioetl_runtime_current_status_scoped",
@@ -2637,6 +2693,7 @@
     "bioetl_storage_optimization_total",
     "bioetl_structural_policy_events_total",
     "bioetl_structural_policy_shadow_comparisons_total",
+    "bioetl_terminal_events_15m",
     "bioetl_traced_runs_total",
     "bioetl_transform_duration_seconds",
     "bioetl_transform_errors_total",
@@ -2707,6 +2764,9 @@
     "bioetl_control_plane_reads_total": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
+    "bioetl_control_plane_run_type_universe": [
+      "grafana/prometheus-rules/bioetl_control_plane_current_status.yml"
+    ],
     "bioetl_control_plane_terminal_events_total": [
       "grafana/prometheus-rules/bioetl_control_plane_current_status.yml"
     ],
@@ -2717,6 +2777,12 @@
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_dq_anomaly_detected": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_dq_current_activity_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_dq_current_reason": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_dq_current_status": [

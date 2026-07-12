@@ -597,7 +597,7 @@ ______________________________________________________________________
 #### REQ-DQ-002
 
 - **Уровень**: MUST
-- **Описание**: Метрика `bioetl_dq_validation_score` с bounded labels `check`, `column`
+- **Описание**: Метрика `bioetl_dq_validation_score` с bounded labels `pipeline`, `entity`
 - **Проверка**: Проверить наличие метрики с правильными лейблами
 
 #### REQ-DQ-003
