@@ -134,7 +134,7 @@ _Основание: POL-LLM-DIAGRAMS-001, ADR-040, DIAGRAM-WORKFLOW-GUIDE.md_
 1. `docs/02-architecture/diagrams/tooling/render.sh`
 1. `scripts/diagrams/add_svg_text_fallback.py`
 1. `.github/workflows/docs.yml`
-1. `.github/workflows/validate-mermaid.yml`
+1. `.github/workflows/validate-vendored-mermaid-assets.yml`
 
 ## 9. Артефакты программы
 

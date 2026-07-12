@@ -36,10 +36,13 @@ python -m scripts.diagrams <command> [args...]
 
 | Command              | Script                                          | Description                      |
 | -------------------- | ----------------------------------------------- | -------------------------------- |
+| `apply-elk`          | `apply_elk_layout.py`                           | Add or audit ELK init            |
+| `differentiate-linkstyle` | `differentiate_linkstyle.py`                | Add semantic linkStyle groups    |
 | `fix-operators`      | `fix_mermaid_operators.py`                      | Fix Mermaid operators            |
 | `fix-svg-text`       | `add_svg_text_fallback.py`                      | Add SVG text fallback            |
 | `fix-svg-styles`     | `scripts/diagrams/inject_svg_styles.py`         | Inject SVG styles                |
 | `fix-foreign-object` | `strip_svg_foreign_object.py`                   | Strip SVG foreignObject elements |
+| `harmonize-link-styles` | `harmonize_link_styles.py`                   | Harmonize rendered SVG links     |
 | `fix-orphans`        | `prune_orphan_nodes.py`                         | Prune orphan nodes in diagrams   |
 | `fix-sizes`          | `uniform_diagram_sizes.py`                      | Uniform diagram sizes            |
 | `fix-pagebreaks`     | `scripts/diagrams/fix_pagebreaks_in_bundles.py` | Fix pagebreaks in bundles        |
@@ -70,12 +73,15 @@ python -m scripts.diagrams <command> [args...]
 | `lint-summarize`      | After `lint` produces a report; generates human-readable summary                                            | Manual, post-lint                      |
 | `lint-budget`         | After lint run; enforces quality budget thresholds                                                          | CI gate (nightly)                      |
 | `check-artifacts`     | After rendering diagrams; validates required SVG artifacts and, when requested, PNG compatibility artifacts | Nightly CI (post-render)               |
-| `check-quality-gates` | Before merge; implements DIAG-T018..T023 regression gates (edge markers, classdefs, node counts)            | CI gate (`architecture.yml` + nightly) |
+| `check-quality-gates` | Before merge; implements DIAG-T018..T023 regression gates (edge markers, classdefs, node counts)            | CI gate (`docs.yml` + nightly) |
 | `check-visual-smoke`  | After rendering; visual baseline comparison (DIAG-T026)                                                     | Nightly CI                             |
 | `check-svg-text`      | After rendering SVGs; validates text readability (DIAG-T014..T015)                                          | Nightly CI                             |
 | `check-class-methods` | After modifying class diagrams; validates method render integrity                                           | Manual or nightly                      |
 | `check-pdf-bounds`    | After generating PDF bundles; validates image bounds                                                        | Manual, post-render                    |
 | `check-padding`       | When diagrams have layout issues; analyzes padding problems                                                 | Manual, on-demand                      |
+| `apply-elk`           | When large flowchart diagrams need ELK init or routing normalization                                        | Manual codemod                         |
+| `differentiate-linkstyle` | When dense flowcharts need semantic linkStyle classes                                                   | Manual codemod                         |
+| `harmonize-link-styles` | After rendering when SVG link styles need cross-diagram harmonization                                     | Manual/CI post-render                  |
 | `fix-operators`       | When diagrams contain invalid thick-arrow operators (`==>` → `-->`)                                         | Manual codemod                         |
 | `fix-svg-text`        | When SVG text is not rendering properly; injects text fallback                                              | Manual codemod                         |
 | `fix-svg-styles`      | When SVG styles are missing or inconsistent; injects standard styles                                        | Manual codemod                         |
@@ -114,6 +120,6 @@ python -m scripts.diagrams <command> [args...]
 - Markdown bundles prefer `svg/` renders as the primary publication artifact and fall back to `png/` only when an SVG is missing.
 - `scripts/diagrams/generate_description_indexes.py` is the canonical generator for `descriptions/INDEX.md` and `descriptions/class/INDEX.md`.
 - `python -m scripts.diagrams render-pdf` and `python -m scripts.diagrams render-views` are the supported public entrypoints for collection-specific bundle refresh.
-- `visual-smoke.txt` remains the canonical SVG smoke manifest; `png-compatibility.txt` is a smaller curated manifest for PNG compatibility checks.
+- `visual-smoke.txt` remains the canonical PR-sized SVG smoke manifest; `visual-smoke-extended.txt` is the nightly blocking tier, `visual-smoke-broad.txt` is the nightly warn-only expansion tier, and `png-compatibility.txt` is a smaller curated manifest for PNG compatibility checks.
 - `check_diagram_visual_smoke.py --json-out <path>` writes `diagram-visual-smoke-report-v1` machine-readable status for CI and local diagnostics.
 - When bundle drift is corrected, prefer regenerating the narrow affected collection via `generate_all_bundles.py --collection <name>` instead of broad refresh of every derived artifact.

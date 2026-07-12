@@ -21,10 +21,15 @@ Check:
     check-padding        Report diagram padding issues
 
 Fix:
+    apply-elk            Add ELK init to large Mermaid flowcharts
+    differentiate-linkstyle
+                         Add semantic linkStyle groups to dense flowcharts
     fix-operators        Fix Mermaid operators
     fix-svg-text         Add SVG text fallback
     fix-svg-styles       Inject SVG styles
     fix-foreign-object   Strip SVG foreignObject elements
+    harmonize-link-styles
+                         Harmonize rendered SVG link styles
     fix-orphans          Prune orphan nodes in diagrams
     fix-sizes            Uniform diagram sizes
     fix-pagebreaks       Fix pagebreaks in bundles
@@ -66,10 +71,13 @@ COMMAND_SPECS = {
     "check-pdf-bounds": python_command("check_pdf_image_bounds.py"),
     "check-padding": python_command("report_diagram_padding.py"),
     # Fix
+    "apply-elk": python_command("apply_elk_layout.py"),
+    "differentiate-linkstyle": python_command("differentiate_linkstyle.py"),
     "fix-operators": python_command("fix_mermaid_operators.py"),
     "fix-svg-text": python_command("add_svg_text_fallback.py"),
     "fix-svg-styles": python_command("inject_svg_styles.py"),
     "fix-foreign-object": python_command("strip_svg_foreign_object.py"),
+    "harmonize-link-styles": python_command("harmonize_link_styles.py"),
     "fix-orphans": python_command("prune_orphan_nodes.py"),
     "fix-sizes": python_command("uniform_diagram_sizes.py"),
     "fix-pagebreaks": python_command("fix_pagebreaks_in_bundles.py"),

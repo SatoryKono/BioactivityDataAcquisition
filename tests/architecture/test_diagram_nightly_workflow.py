@@ -34,3 +34,10 @@ def test_nightly_workflow_includes_mermaid_canary_matrix() -> None:
         composite.read_text(encoding="utf-8") if composite.exists() else ""
     )
     assert "puppeteer browsers install chrome-headless-shell" in sources
+
+
+def test_nightly_workflow_render_requires_svgo() -> None:
+    workflow = Path(".github/workflows/diagram-nightly.yml").read_text(encoding="utf-8")
+
+    assert "Render diagrams" in workflow
+    assert 'REQUIRE_SVGO: "1"' in workflow

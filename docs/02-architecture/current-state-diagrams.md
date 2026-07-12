@@ -41,6 +41,8 @@ Evidence anchors:
 
 ## C4 Context
 
+<!-- diagram-audit:summary-only -->
+
 ```mermaid
 C4Context
     title BioETL C4 Context
@@ -63,6 +65,8 @@ C4Context
 ```
 
 ## C4 Container
+
+<!-- diagram-audit:summary-only -->
 
 ```mermaid
 C4Container
@@ -91,6 +95,8 @@ C4Container
 ```
 
 ## Layer Diagram
+
+<!-- diagram-audit:summary-only -->
 
 ```mermaid
 flowchart TB
@@ -138,6 +144,8 @@ flowchart TB
 
 ## Dependency Direction
 
+<!-- diagram-audit:summary-only -->
+
 ```mermaid
 flowchart LR
     Domain["domain"]
@@ -163,6 +171,8 @@ flowchart LR
 ```
 
 ## Medallion Data Flow
+
+<!-- diagram-audit:summary-only -->
 
 ```mermaid
 flowchart LR
@@ -191,6 +201,8 @@ flowchart LR
 
 ## Composite Pipeline
 
+<!-- diagram-audit:summary-only -->
+
 ```mermaid
 flowchart TB
     Config["configs/composites/{entity}.yaml<br/>seed/enrichers/merge/cross_validation"]
@@ -217,6 +229,8 @@ flowchart TB
 
 ## Run Lifecycle
 
+<!-- diagram-audit:summary-only -->
+
 ```mermaid
 stateDiagram-v2
     [*] --> ResolveConfig
@@ -238,6 +252,8 @@ stateDiagram-v2
 
 ## Quarantine Lifecycle
 
+<!-- diagram-audit:summary-only -->
+
 ```mermaid
 stateDiagram-v2
     [*] --> NEW
@@ -254,6 +270,8 @@ stateDiagram-v2
 ```
 
 ## Workflow DAG
+
+<!-- diagram-audit:summary-only -->
 
 ```mermaid
 flowchart LR

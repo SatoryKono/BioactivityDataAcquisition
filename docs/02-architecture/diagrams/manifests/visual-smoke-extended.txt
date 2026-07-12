@@ -1,0 +1,35 @@
+# Extended diagram visual smoke set (relative to repository root).
+# Nightly blocking tier; keep representative and stable.
+
+# T0 baseline
+docs/02-architecture/diagrams/foundation/svg/01-full-system-component.svg
+docs/02-architecture/diagrams/foundation/svg/30-port-adapter-mapping.svg
+docs/02-architecture/diagrams/views/svg/01-full-system-component-full.svg
+docs/02-architecture/diagrams/views/svg/30-port-adapter-mapping-full.svg
+docs/02-architecture/diagrams/views/svg/31-pipeline-run-lifecycle-infra.svg
+
+# architecture/
+docs/02-architecture/diagrams/architecture/svg/01-high-level-hexagonal.svg
+docs/02-architecture/diagrams/architecture/svg/02-layer-dependency-matrix.svg
+docs/02-architecture/diagrams/architecture/svg/03-medallion-data-flow.svg
+docs/02-architecture/diagrams/architecture/svg/08-composite-pipeline.svg
+docs/02-architecture/diagrams/architecture/svg/09-observability-stack.svg
+docs/02-architecture/diagrams/architecture/svg/12-bootstrap-di-container.svg
+docs/02-architecture/diagrams/architecture/svg/13-port-protocol-contracts.svg
+docs/02-architecture/diagrams/architecture/svg/17-security-pii-audit.svg
+docs/02-architecture/diagrams/architecture/svg/23-reproducible-run-contract.svg
+docs/02-architecture/diagrams/architecture/svg/28-historical-replay-universe-inventory-and-closure-report.svg
+
+# class-diagrams/
+docs/02-architecture/diagrams/class-diagrams/svg/01-domain-ports.svg
+docs/02-architecture/diagrams/class-diagrams/svg/02-entities-aggregates.svg
+docs/02-architecture/diagrams/class-diagrams/svg/07-application-core-services.svg
+docs/02-architecture/diagrams/class-diagrams/svg/10-adapters.svg
+docs/02-architecture/diagrams/class-diagrams/svg/16-factories-bootstrap.svg
+
+# views/
+docs/02-architecture/diagrams/views/svg/05-layers-interaction-full.svg
+docs/02-architecture/diagrams/views/svg/08-complete-etl-workflow-full.svg
+docs/02-architecture/diagrams/views/svg/13-port-protocol-contracts-full.svg
+docs/02-architecture/diagrams/views/svg/28-composition-root-di-graph-full.svg
+docs/02-architecture/diagrams/views/svg/29-composite-pipeline-workflow-full.svg

@@ -304,7 +304,7 @@ npm install -g @mermaid-js/mermaid-cli@10.6.1
 # Browser runtime for mmdc (required by Puppeteer in local validation)
 npx puppeteer browsers install chrome-headless-shell
 
-# svgo — SVG optimization (recommended)
+# svgo — SVG optimization (required for CI render baseline)
 npm install -g svgo
 
 # librsvg — high-quality SVG → PNG (recommended)
@@ -319,6 +319,7 @@ Tooling note:
 - repo scripts now use `scripts/diagrams/mmdc_wrapper.sh` as the default `mmdc` entrypoint;
 - local and CI Mermaid CLI version must match `MMDC_REQUIRED_VERSION=10.6.1`;
 - version drift fails fast unless `MMDC_ALLOW_VERSION_DRIFT=1` is set for explicit diagnostics/canary runs;
+- CI render jobs set `REQUIRE_SVGO=1`; local renders may opt out with `REQUIRE_SVGO=0` or `--skip-svgo`;
 - if a native `mmdc` is unavailable, the wrapper can fall back to Docker image `minlag/mermaid-cli:10.6.1`;
 - Docker fallback can reuse a preinstalled Puppeteer cache when `PUPPETEER_CACHE_DIR=/path/to/cache` points to a host directory containing `chrome-headless-shell`;
 - to force Docker mode even when a local `mmdc` exists, set `MMDC_FORCE_DOCKER=1`;
@@ -405,8 +406,9 @@ bash scripts/diagrams/validate_mermaid_syntax.sh --include-embedded --puppeteer 
 
 ### Windows / PowerShell
 
-Run the renderer from Git Bash or WSL because the canonical renderer is a Bash
-script. PowerShell can still launch the same commands from the repo root:
+Run the renderer through `scripts/diagrams/render.ps1` from PowerShell. The
+wrapper delegates to the canonical Bash renderer through Git Bash and forwards
+all render arguments.
 
 ```powershell
 # Verify the pinned Mermaid CLI version used by the wrapper.
@@ -419,8 +421,9 @@ $env:MMDC_BIN = "C:\Program Files\nodejs\mmdc.cmd"
 bash scripts/diagrams/validate_mermaid_syntax.sh --include-embedded --puppeteer /tmp/puppeteer-config.json
 
 # Render all diagrams or only SVG baselines.
-bash docs/02-architecture/diagrams/tooling/render.sh
-bash docs/02-architecture/diagrams/tooling/render.sh --svg-only
+.\scripts\diagrams\render.ps1
+.\scripts\diagrams\render.ps1 --svg-only
+.\scripts\diagrams\render.ps1 --filter "01-*"
 
 # Run Python checks with the Windows virtualenv when using native Windows Python.
 .\.venv-win\Scripts\python.exe -m scripts.diagrams check-svg-text `
@@ -462,7 +465,7 @@ docs/02-architecture/diagrams/
     *.bundle.pdf    # print-safe PDF exports
     *.bundle.docx   # editable DOCX exports
   manifests/
-    *.txt           # smoke, quality-gate, and compatibility manifests
+    *.txt           # PR smoke, nightly tier, quality-gate, and compatibility manifests
   tooling/
     render.sh       # unified renderer entrypoint
   theme/
@@ -475,12 +478,19 @@ docs/02-architecture/diagrams/
 
 Diagrams are validated and rendered automatically in GitHub Actions
 (`.github/workflows/docs.yml`). Current `svg/` and `png/` files under
-`docs/02-architecture/diagrams/**` are committed baselines, while CI also
-uploads freshly rendered SVG/PNG and diagram JSON/Markdown reports as build
-artifacts. A drift check fails when `.mmd/.mermaid` sources change without
-corresponding sibling SVG outputs. The workflow also validates fenced Mermaid
-blocks in active Markdown docs and validates SVG text visibility for the smoke
-baseline set.
+`docs/02-architecture/diagrams/**` are render baselines, while CI also uploads
+freshly rendered SVG/PNG and diagram JSON/Markdown reports as build artifacts.
+The PR drift check is intentionally SVG-primary: it fails when `.mmd/.mermaid`
+sources change without corresponding sibling SVG outputs. PNG compatibility is
+checked through the curated `manifests/png-compatibility.txt` nightly gate
+rather than through a full-repository PR PNG drift rule. The workflow also
+validates fenced Mermaid blocks in active Markdown docs and validates SVG text
+visibility for the smoke baseline set.
+
+Visual-smoke coverage is tiered: `visual-smoke.txt` is the PR-sized T0 set,
+`visual-smoke-extended.txt` is nightly blocking coverage, and
+`visual-smoke-broad.txt` is a nightly warn-only expansion tier until its broader
+baseline is stable.
 
 MkDocs is validation-only in the current repository workflow: `mkdocs.yml` is
 checked by docs verification, but there is no GitHub Pages deployment job.

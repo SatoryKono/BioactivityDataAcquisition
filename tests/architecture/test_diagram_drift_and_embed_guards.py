@@ -30,7 +30,7 @@ _PARENT_SOURCE_RE = re.compile(r"^%%\s*Parent source:\s*(.+?)\s*$")
 
 
 def _load_apply_elk_layout() -> ModuleType:
-    module_path = REPO_ROOT / "src" / "tools" / "apply_elk_layout.py"
+    module_path = REPO_ROOT / "scripts" / "diagrams" / "apply_elk_layout.py"
     spec = importlib.util.spec_from_file_location(
         "apply_elk_layout_module", module_path
     )
@@ -115,15 +115,15 @@ def test_full_mermaid_matches_foundation_mmd() -> None:
         if not view_path.is_file() or view_path.name.startswith("_"):
             continue
         mmd_path = extract_parent_source(view_path)
-        assert (
-            mmd_path.parent in source_dirs
-        ), f"Full view parent must be a canonical source: {view_path} -> {mmd_path}"
+        assert mmd_path.parent in source_dirs, (
+            f"Full view parent must be a canonical source: {view_path} -> {mmd_path}"
+        )
         assert mmd_path.exists(), f"Missing parent source for full view: {view_path}"
         mmd_body = extract_body(mmd_path)
         view_body = extract_body(view_path)
-        assert (
-            mmd_body == view_body
-        ), f"Drift in diagram body for {mmd_path.relative_to(DIAGRAM_ROOT)} ↔ {view_path}"
+        assert mmd_body == view_body, (
+            f"Drift in diagram body for {mmd_path.relative_to(DIAGRAM_ROOT)} ↔ {view_path}"
+        )
 
 
 def test_no_orphan_svg_without_source() -> None:
@@ -138,17 +138,17 @@ def test_no_orphan_svg_without_source() -> None:
         source_stems = _active_source_stems(source_dir, suffix)
         rendered_stems = _rendered_stems(source_dir, "svg", ".svg")
         orphan_svg = sorted(rendered_stems - source_stems)
-        assert (
-            not orphan_svg
-        ), f"{collection} has orphan SVG artifacts without source: {orphan_svg}"
+        assert not orphan_svg, (
+            f"{collection} has orphan SVG artifacts without source: {orphan_svg}"
+        )
 
 
 def test_apply_elk_default_dir_is_canonical() -> None:
     """F004: apply_elk_layout.py default dir MUST be canonical architecture tree."""
     module = _load_apply_elk_layout()
-    assert (
-        module.ARCH_DIR == DIAGRAM_ROOT / "architecture"
-    ), f"ARCH_DIR mismatch: {module.ARCH_DIR}"
+    assert module.ARCH_DIR == DIAGRAM_ROOT / "architecture", (
+        f"ARCH_DIR mismatch: {module.ARCH_DIR}"
+    )
 
 
 def test_embedded_mermaid_in_active_docs_valid() -> None:

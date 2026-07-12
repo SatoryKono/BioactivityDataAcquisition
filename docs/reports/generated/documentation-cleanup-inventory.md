@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2889 |
-| Tracked doc-like files | 1799 |
-| Ignored local docs/reports files | 1090 |
+| Doc-like files | 2875 |
+| Tracked doc-like files | 1800 |
+| Ignored local docs/reports files | 1075 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
 | Generated routes | 58 |
@@ -18,8 +18,8 @@
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 1090 |
-| tracked | 1799 |
+| ignored_local | 1075 |
+| tracked | 1800 |
 
 ## Lifecycle Counts
 
@@ -28,9 +28,9 @@
 | active_backlog | 1 |
 | active_draft | 104 |
 | active_quality_baseline | 18 |
-| closeout_evidence | 26 |
+| closeout_evidence | 27 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 36 |
+| docs_reports_curated_or_historical_report | 21 |
 | docs_reports_generated_or_route_owned | 23 |
 | docs_reports_retention_sensitive_evidence | 1046 |
 | generated_skill_license_mirror | 5 |
@@ -63,7 +63,7 @@
 | Archived | 60 |
 | Canonical | 63 |
 | Generated | 703 |
-| Working | 237 |
+| Working | 223 |
 
 ## Surface Families
 
@@ -73,16 +73,16 @@
 | archive | 60 |
 | canonical | 63 |
 | generated | 703 |
-| working | 237 |
+| working | 223 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 115 |
-| archive-after-migration | 74 |
+| archive-after-migration | 59 |
 | generate-automatically | 703 |
-| keep | 1993 |
+| keep | 1994 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -106,21 +106,6 @@
 | `docs/plans/temporary-diagnostic-ttl-review-plan-2026-04-29.md` | Working | 1 | archive-after-migration |
 | `docs/plans/testing-support-migration-plan-2026-04-25.md` | Working | 1 | archive-after-migration |
 | `docs/reports/2026-04-23-documentation-audit-summary.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audit-issues/2026-04-23-documentation-audit-issues.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audit-issues/implementation-plans.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audit-issues/issue-001-analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audit-issues/issue-001-progress.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audit-issues/issue-002-analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audit-issues/issue-002-progress.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audit-issues/issue-003-analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audit-issues/issue-003-progress.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audit-issues/issue-004-progress.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audit-issues/issue-005-progress.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audit-issues/issue-006-analysis.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audit-issues/issue-006-progress.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audit-issues/issue-006-status-update.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audit-issues/issue-006-summary.md` | Working | 0 | archive-after-migration |
-| `docs/reports/audit-issues/open-issues-summary.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audits/compatibility-surface-issue-pack-20260413.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audits/dashboard-audit-report-2026-05-08.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audits/documentation-audit-github-issues.md` | Working | 0 | archive-after-migration |
@@ -300,21 +285,6 @@
 | --- | --- | --- | --- |
 | `docs/reports/2026-04-23-documentation-audit-summary.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/README.md` | tracked | docs_reports_curated_entrypoint | keep |
-| `docs/reports/audit-issues/2026-04-23-documentation-audit-issues.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audit-issues/implementation-plans.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audit-issues/issue-001-analysis.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audit-issues/issue-001-progress.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audit-issues/issue-002-analysis.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audit-issues/issue-002-progress.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audit-issues/issue-003-analysis.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audit-issues/issue-003-progress.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audit-issues/issue-004-progress.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audit-issues/issue-005-progress.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audit-issues/issue-006-analysis.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audit-issues/issue-006-progress.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audit-issues/issue-006-status-update.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audit-issues/issue-006-summary.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
-| `docs/reports/audit-issues/open-issues-summary.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/audits/compatibility-surface-issue-pack-20260413.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/audits/dashboard-audit-report-2026-05-08.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/audits/documentation-audit-github-issues.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
@@ -338,6 +308,21 @@
 | `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-custom-creator-dynamic-contract.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-http-adapters-require-fallback-helper.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-openalex-custom-creator-synthesizes-default-helpers.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-pubchem-custom-creator-delegates-to-composition-factory.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-tests-preserve-minimal-provider-bound-surface.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-uniprot-idmapping-creator-encodes-hybrid-input-contract.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/03-synthesis/SYN-adapter-interface-alignment.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/04-decisions/DEC-ADAPT-proposed-decisions-2026-03-20.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/04-decisions/DECISIONS.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/04-decisions/MATRIX-adapter-seams-current-to-target.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/05-risks/RISKS.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/adapter-interface-alignment/summary.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-doc-drift/SUMMARY.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/01-pillars/PILLARS.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/02-evidence/architecture-patterns/EV-patterns-dependency-injection-lives-in-composition.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/02-evidence/architecture-patterns/EV-patterns-domain-driven-design-primitives.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/02-evidence/architecture-patterns/EV-patterns-hexagonal-ports-and-adapters-is-explicit.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
+| `docs/reports/evidence/architecture-foundations/02-evidence/architecture-patterns/EV-patterns-medallion-bronze-silver-gold-flow.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 
 ## Generated Route Registry
 

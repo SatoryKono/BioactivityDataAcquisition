@@ -206,23 +206,23 @@ flowchart TB
 
 ### 4.5. Автоматизация: apply_elk_layout.py
 
-Утилита `src/tools/apply_elk_layout.py` автоматически добавляет ELK init к диаграммам, превышающим порог нод:
+Утилита `scripts/diagrams/apply_elk_layout.py` автоматически добавляет ELK init к диаграммам, превышающим порог нод:
 
 ```bash
 # Предварительный просмотр (без записи)
-python src/tools/apply_elk_layout.py --dry-run
+python -m scripts.diagrams apply-elk --dry-run
 
 # Применить к architecture/ (по умолчанию)
-python src/tools/apply_elk_layout.py
+python -m scripts.diagrams apply-elk
 
 # Применить ко всем .mmd в foundation/
-python src/tools/apply_elk_layout.py --dir docs/02-architecture/diagrams/foundation
+python -m scripts.diagrams apply-elk --dir docs/02-architecture/diagrams/foundation
 
 # Свой порог (по умолчанию 20)
-python src/tools/apply_elk_layout.py --threshold 15
+python -m scripts.diagrams apply-elk --threshold 15
 
 # Принудительно выровнять routing у уже существующих ELK-диаграмм
-python src/tools/apply_elk_layout.py --enforce-routing ORTHOGONAL
+python -m scripts.diagrams apply-elk --enforce-routing ORTHOGONAL
 ```
 
 Скрипт парсит `@nodes`, проверяет тип диаграммы, пропускает файлы с уже установленной директивой, и опционально меняет направление TB→LR для pipeline-паттернов (medallion, data-flow, storage-layer, config, cli-interface).
@@ -239,7 +239,7 @@ ______________________________________________________________________
 
 ### 5.1. Классификация рёбер
 
-Инструмент `src/tools/differentiate_linkstyle.py` классифицирует связи по 6 семантическим типам:
+Инструмент `scripts/diagrams/differentiate_linkstyle.py` классифицирует связи по 6 семантическим типам:
 
 | Тип                  | Стиль                                 | Семантика                                  |
 | -------------------- | ------------------------------------- | ------------------------------------------ |
@@ -264,8 +264,8 @@ ______________________________________________________________________
 Рёбра классифицируются по: типу стрелки (`.` = dashed → DI), ключевым словам в метках (implement, inject → DI), принадлежности целевой ноды к domain-subgraph (→ DI), ключевым словам observability в ID нод, целям quarantine/error, кросс-слойным связям с Infrastructure (→ data).
 
 ```bash
-python src/tools/differentiate_linkstyle.py --dry-run   # Предпросмотр
-python src/tools/differentiate_linkstyle.py              # Применить
+python -m scripts.diagrams differentiate-linkstyle --dry-run   # Предпросмотр
+python -m scripts.diagrams differentiate-linkstyle              # Применить
 ```
 
 ______________________________________________________________________
@@ -399,13 +399,14 @@ bash docs/02-architecture/diagrams/tooling/render.sh
 
 ### 8.2. Windows / PowerShell
 
-Канонический рендерер остаётся Bash-скриптом, поэтому на Windows используйте
-Git Bash или WSL. PowerShell может запускать те же команды из корня репозитория,
-а Python-проверки — через `.\.venv-win\Scripts\python.exe`.
+Канонический рендерер остаётся Bash-скриптом. На Windows используйте
+`scripts/diagrams/render.ps1`: wrapper запускает тот же Bash renderer через Git
+Bash и передаёт аргументы без отдельного ручного path setup. Python-проверки
+запускайте через `.\.venv-win\Scripts\python.exe`.
 
 ```powershell
 bash scripts/diagrams/validate_mermaid_syntax.sh --include-embedded --puppeteer /tmp/puppeteer-config.json
-bash docs/02-architecture/diagrams/tooling/render.sh --svg-only
+.\scripts\diagrams\render.ps1 --svg-only
 .\.venv-win\Scripts\python.exe scripts/diagrams/check_diagram_visual_smoke.py `
   --manifest docs/02-architecture/diagrams/manifests/visual-smoke.txt `
   --json-out reports/diagrams/diagram-visual-smoke.json
@@ -421,8 +422,8 @@ ______________________________________________________________________
 1. **Заполнить метаданные:** `@version`, `@date`, `@type`, `@level`, `@nodes`
 1. **Нарисовать диаграмму:** использовать каноническую палитру цветов
 1. **Проверить lint:** `python scripts/diagrams/lint_diagrams.py`
-1. **Применить ELK** (если @nodes > 20): `python src/tools/apply_elk_layout.py`
-1. **Применить linkStyle** (если flowchart с 5+ связями): `python src/tools/differentiate_linkstyle.py`
+1. **Применить ELK** (если @nodes > 20): `python -m scripts.diagrams apply-elk`
+1. **Применить linkStyle** (если flowchart с 5+ связями): `python -m scripts.diagrams differentiate-linkstyle`
 1. **Проверить orphan-ноды:** `python scripts/diagrams/prune_orphan_nodes.py --check`
 1. **Отрендерить:** `bash docs/02-architecture/diagrams/tooling/render.sh`
    Для усиленного рендера больших схем можно задать: `--large-threshold`, `--large-scale`, `--large-png-dpi`.
@@ -452,8 +453,8 @@ ______________________________________________________________________
 | Инструмент                     | Расположение        | Назначение                                                                          |
 | ------------------------------ | ------------------- | ----------------------------------------------------------------------------------- |
 | run_diagram_checks.sh          | `scripts/diagrams/` | Единый запуск профилей проверок (`pr`/`nightly`/`quick`)                            |
-| apply_elk_layout.py            | `src/tools/`        | Добавление ELK init к flowchart с >20 нод                                           |
-| differentiate_linkstyle.py     | `src/tools/`        | Семантическая стилизация рёбер                                                      |
+| apply_elk_layout.py            | `scripts/diagrams/` | Добавление ELK init к flowchart с >20 нод                                           |
+| differentiate_linkstyle.py     | `scripts/diagrams/` | Семантическая стилизация рёбер                                                      |
 | lint_diagrams.py               | `scripts/diagrams/` | Lint-проверка по 14 правилам                                                        |
 | prune_orphan_nodes.py          | `scripts/diagrams/` | Детекция и удаление orphan-нод                                                      |
 | check_diagram_artifacts.py     | `scripts/diagrams/` | DIAG-T010/T012 для обязательных SVG и DIAG-T011/T012 для optional PNG compatibility |

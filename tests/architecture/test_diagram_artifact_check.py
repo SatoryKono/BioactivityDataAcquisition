@@ -119,3 +119,40 @@ def test_nightly_workflow_uses_curated_png_compatibility_manifest() -> None:
 
     assert "png-compatibility.txt" in workflow
     assert "--require-png" in workflow
+
+
+def _manifest_entries(path: Path) -> list[str]:
+    return [
+        line.strip()
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.startswith("#")
+    ]
+
+
+def test_visual_smoke_manifest_tiers_are_ordered_and_resolve() -> None:
+    base = Path("docs/02-architecture/diagrams/manifests/visual-smoke.txt")
+    extended = Path("docs/02-architecture/diagrams/manifests/visual-smoke-extended.txt")
+    broad = Path("docs/02-architecture/diagrams/manifests/visual-smoke-broad.txt")
+
+    base_entries = _manifest_entries(base)
+    extended_entries = _manifest_entries(extended)
+    broad_entries = _manifest_entries(broad)
+
+    assert len(base_entries) == 5
+    assert len(extended_entries) >= 25
+    assert len(broad_entries) >= 50
+    assert set(base_entries).issubset(extended_entries)
+    assert set(extended_entries).issubset(broad_entries)
+    assert all(entry.endswith(".svg") for entry in broad_entries)
+    missing = [entry for entry in broad_entries if not Path(entry).exists()]
+    assert missing == []
+
+
+def test_nightly_workflow_uses_visual_smoke_tiers() -> None:
+    workflow = Path(".github/workflows/diagram-nightly.yml").read_text(encoding="utf-8")
+
+    assert "visual-smoke-extended.txt" in workflow
+    assert "diagram-visual-smoke-extended-nightly.json" in workflow
+    assert "visual-smoke-broad.txt" in workflow
+    assert "diagram-visual-smoke-broad-nightly.json" in workflow
+    assert "continue-on-error: true" in workflow
