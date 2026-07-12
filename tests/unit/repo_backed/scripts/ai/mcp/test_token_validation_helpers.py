@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import platform
 import subprocess
 from pathlib import Path
 
@@ -10,6 +11,12 @@ import pytest
 
 
 pytestmark = pytest.mark.unit
+
+# Skip bash-based tests on Windows
+pytestmark = pytest.mark.skipif(
+    platform.system() == "Windows",
+    reason="bash-based MCP token validation tests are not reliable on native Windows shells"
+)
 
 ROOT = Path(__file__).resolve().parents[6]
 HELPER = ROOT / "scripts" / "ai" / "mcp" / "support" / "token_validation.sh"

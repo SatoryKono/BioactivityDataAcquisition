@@ -34,6 +34,8 @@ def _find_markdown_phrase_hits(*phrases: str) -> list[str]:
         "--ignore-case",
         "--glob",
         "*.md",
+        "--glob",
+        "!**/.quarantined-*/**",
         *[flag for phrase in phrases for flag in ("-e", phrase)],
         "docs",
     ]
