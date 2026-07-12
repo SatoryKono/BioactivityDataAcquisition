@@ -1,18 +1,4 @@
-"""Data Quality Service for centralized DQ evaluation.
-
-Application Service that handles all data quality checks and anomaly detection.
-Extracted from PostrunService to follow Single Responsibility Principle.
-
-Responsibilities:
-- Threshold checks (soft/hard fail)
-- AnomalyRecord detection via DQMonitorPort
-- DQ metrics emission
-- Baseline updates
-
-Does NOT handle:
-- VACUUM operations (MedallionLifecycleService)
-- Tracer cleanup (PostrunService)
-"""
+"""Data Quality Service for centralized DQ evaluation."""
 
 from __future__ import annotations
 
@@ -47,17 +33,7 @@ class DataQualityService(
         run_type: str = "unknown",
         pipeline_metrics: PipelineMetricsRecorder | None = None,
     ) -> None:
-        """Initialize DataQualityService.
-
-        Args:
-            dq_monitor: Optional DQ monitor for anomaly detection.
-            config: DQ configuration with soft/hard thresholds.
-            logger: Structured logger for DQ events.
-            metrics: Optional metrics port for observability.
-            pipeline_name: Pipeline name for metric labels.
-            entity_type: Entity type for metric labels.
-            pipeline_metrics: Optional prebuilt pipeline-scoped metrics recorder.
-        """
+        """Initialize DataQualityService."""
         self._dq_monitor = dq_monitor
         self._config = config
         self._logger = logger
@@ -100,33 +76,12 @@ class DataQualityService(
         record_count = max(int(metrics.get("record_count", 0.0)), 0)
         quarantined_count = max(int(metrics.get("quarantined_count", 0.0)), 0)
 
-        # Emit validation score gauge (1.0 - error_rate)
-        if self._metrics:
-            labels = {"pipeline": self._pipeline_name, "entity": self._entity_type}
-            self._metrics.set_gauge(
-                "bioetl_dq_monitor_enabled",
-                1.0 if self._dq_monitor is not None else 0.0,
-                labels,
-            )
-            self._metrics.set_gauge(
-                "bioetl_dq_validation_score",
-                1.0 - error_rate,
-                labels,
-            )
-            self._metrics.set_gauge(
-                "bioetl_dq_validation_record_count",
-                record_count,
-                labels,
-            )
-            if freshness_anchor is not None:
-                # Store the canonical ingestion/publication anchor timestamp in
-                # seconds. Dashboards and alerts derive lag via:
-                #   time() - bioetl_data_freshness_seconds
-                self._metrics.set_gauge(
-                    "bioetl_data_freshness_seconds",
-                    freshness_anchor,
-                    labels,
-                )
+        self._emit_validation_gauges(
+            monitor_enabled=self._dq_monitor is not None,
+            error_rate=error_rate,
+            record_count=record_count,
+            freshness_anchor=freshness_anchor,
+        )
         self._emit_validation_stage_metrics(
             record_count=record_count,
         )

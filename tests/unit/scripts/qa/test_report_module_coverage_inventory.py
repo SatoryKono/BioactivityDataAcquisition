@@ -6,9 +6,11 @@ from types import SimpleNamespace
 import pytest
 
 from scripts.engineering.qa.report_module_coverage_inventory import (
+    _SourceModuleSnapshot,
     _module_is_declaration_only,
     _read_source_module_snapshots,
     _read_stable_source_module_snapshots,
+    _refresh_existing_inventory_source_tree,
 )
 
 pytestmark = pytest.mark.unit
@@ -60,6 +62,57 @@ def test_read_stable_source_module_snapshots_retries_until_digest_stabilizes(
 
     assert [snapshot.repo_path for snapshot in snapshots] == ["present.py"]
     assert digest == "digest-b"
+
+
+def test_refresh_existing_inventory_reuses_stable_snapshot_digest(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    source_path = tmp_path / "src" / "bioetl" / "present.py"
+    source_path.parent.mkdir(parents=True)
+    source_path.write_text("x = 1\n", encoding="utf-8")
+    snapshot = _SourceModuleSnapshot(
+        path=source_path,
+        repo_path="src/bioetl/present.py",
+        source_lines=1,
+        declaration_only=False,
+    )
+
+    monkeypatch.setattr(
+        "scripts.engineering.qa.report_module_coverage_inventory._read_stable_source_module_snapshots",
+        lambda repo_root: ([snapshot], "stable-digest"),
+    )
+    monkeypatch.setattr(
+        "scripts.engineering.qa.report_module_coverage_inventory._build_hotspot_family_coverage",
+        lambda rows, *, repo_root: {},
+    )
+    monkeypatch.setattr(
+        "scripts.engineering.qa.report_module_coverage_inventory.compute_source_tree_sha256",
+        lambda *, repo_root: pytest.fail("source hash should come from stable snapshot read"),
+    )
+
+    refreshed = _refresh_existing_inventory_source_tree(
+        {
+            "modules": [
+                {
+                    "module": "bioetl.present",
+                    "path": "src/bioetl/present.py",
+                    "source_lines": 999,
+                    "coverage_status": "fully_covered",
+                    "coverage_percent": 100.0,
+                    "executable_lines": 1,
+                    "covered_lines": 1,
+                    "missing_lines": 0,
+                }
+            ],
+            "summary": {},
+            "source_tree_sha256": "old-digest",
+        },
+        repo_root=tmp_path,
+    )
+
+    assert refreshed["source_tree_sha256"] == "stable-digest"
+    assert refreshed["summary"]["source_module_count"] == 1
 
 
 def test_module_is_declaration_only_treats_private_attrs_surface_as_non_runtime() -> (

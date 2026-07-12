@@ -1,33 +1,33 @@
 {
   "artifacts": [
     {
-      "blob_sha256": "1c33e4e862245c0df41743c90120fc715a53bfd344a0df389ec80eed43b15fad",
+      "blob_sha256": "94300593e96b394c18fdc452101bddcb1c0c10a1501d5f881a5f2fcef7cbda0e",
       "introduced_after_remote_main": false,
       "path": "reports/quality/architecture-quality-scorecard.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "6510ae47f6b9ca775eff88976816030dfd7879e7",
+      "source_revision": "120d1e48170296bacf20f4241843dff928dea711",
       "summary": {
         "available": true,
-        "integral_score": 8.58,
+        "integral_score": 8.66,
         "schema_version": 1,
         "weights_sum": 1.0
       }
     },
     {
-      "blob_sha256": "76c6530dc6c13ff18b2a4d42adc9f63291d9a079e8832fdfbff0a80dcf1953b7",
+      "blob_sha256": "c1a1c4e9c3b245f8e319a8209261fefd19ceb2f7e44abfd59f5f437911feffe6",
       "introduced_after_remote_main": false,
       "path": "reports/quality/module-coverage-inventory.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "6510ae47f6b9ca775eff88976816030dfd7879e7",
+      "source_revision": "120d1e48170296bacf20f4241843dff928dea711",
       "summary": {
         "available": true,
-        "coverage_xml_sha256": "9a58b23b7c9cc7bb4c2ce0753dbd8999782d201d6cd1e0fd44214833bcdf3791",
+        "coverage_xml_sha256": "f1947b8d46581e0a95c820d321c8ae4cc7af0759e657650b40ae8d6ed21dabd5",
         "schema_version": 1,
-        "snapshot_date": "2026-07-06",
-        "source_module_count": 2210,
-        "source_tree_sha256": "fbbba070d15f5c24b9648c5af184816c09c3b50bb8b67b62f94414d293933a5b",
+        "snapshot_date": "2026-07-09",
+        "source_module_count": 2221,
+        "source_tree_sha256": "4bde88364a11af558895d91ac8422929b7a58ea26564f45f3ee200fb7c9310c7",
         "unmeasured_module_count": 0
       }
     },
@@ -37,7 +37,7 @@
       "path": "reports/quality/compatibility-importer-census.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "6510ae47f6b9ca775eff88976816030dfd7879e7",
+      "source_revision": "120d1e48170296bacf20f4241843dff928dea711",
       "summary": {
         "available": true,
         "retained_entrypoint_count": 12,
@@ -50,7 +50,7 @@
       "path": "reports/quality/dead-code-inventory.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "6510ae47f6b9ca775eff88976816030dfd7879e7",
+      "source_revision": "120d1e48170296bacf20f4241843dff928dea711",
       "summary": {
         "available": true,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
@@ -63,7 +63,7 @@
       "path": "reports/quality/contract-registry-diagnostics.json",
       "required": true,
       "required_on_remote": true,
-      "source_revision": "6510ae47f6b9ca775eff88976816030dfd7879e7",
+      "source_revision": "120d1e48170296bacf20f4241843dff928dea711",
       "summary": {
         "available": true,
         "blocking_issue_count": 0,
@@ -71,18 +71,18 @@
       }
     },
     {
-      "blob_sha256": "3554c3ea10f38a60d7c5017898e527cbcfb61adc48a72ad296b884ece641bc52",
+      "blob_sha256": "003a1871a0e02fac82a2d82bc6fa0c2d11cf6663101f1df14509ac9299789fac",
       "introduced_after_remote_main": false,
       "path": "reports/observability/runtime_cardinality_inventory.json",
       "required": false,
       "required_on_remote": false,
-      "source_revision": "6510ae47f6b9ca775eff88976816030dfd7879e7",
+      "source_revision": "120d1e48170296bacf20f4241843dff928dea711",
       "summary": {
         "available": true
       }
     }
   ],
-  "baseline_artifact_fingerprint": "80060e84d82ee783ca04617be15f48eed74964fac05ce491eaeda77e3434640b",
+  "baseline_artifact_fingerprint": "65b25afb67c9a4534b00983fa180f4112bcd5068da286ca4bff26144a33917b6",
   "branch": "main",
   "dirty_closeout_guard": {
     "command": "git status --porcelain --untracked-files=no",
@@ -102,9 +102,9 @@
   ],
   "local_tracking_ref": "origin/main",
   "local_tracking_ref_matches_remote": true,
-  "local_tracking_ref_sha": "6510ae47f6b9ca775eff88976816030dfd7879e7",
+  "local_tracking_ref_sha": "120d1e48170296bacf20f4241843dff928dea711",
   "remote": "origin",
   "remote_main_ref": "refs/heads/main",
-  "remote_main_sha": "6510ae47f6b9ca775eff88976816030dfd7879e7",
+  "remote_main_sha": "120d1e48170296bacf20f4241843dff928dea711",
   "schema_version": 1
 }

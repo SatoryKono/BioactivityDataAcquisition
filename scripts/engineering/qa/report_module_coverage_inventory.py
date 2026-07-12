@@ -989,7 +989,9 @@ def _refresh_existing_inventory_source_tree(
     *,
     repo_root: Path,
 ) -> dict[str, Any]:
-    source_snapshots, _ = _read_stable_source_module_snapshots(repo_root)
+    source_snapshots, source_tree_sha256 = _read_stable_source_module_snapshots(
+        repo_root
+    )
     rows = payload.get("modules", [])
     rows_by_path = {
         str(row.get("path")): row
@@ -1049,7 +1051,7 @@ def _refresh_existing_inventory_source_tree(
     refreshed["modules"] = refreshed_rows
     refreshed["rows"] = refreshed_rows
     refreshed["summary"] = summary
-    refreshed["source_tree_sha256"] = compute_source_tree_sha256(repo_root=repo_root)
+    refreshed["source_tree_sha256"] = source_tree_sha256
     return refreshed
 
 
