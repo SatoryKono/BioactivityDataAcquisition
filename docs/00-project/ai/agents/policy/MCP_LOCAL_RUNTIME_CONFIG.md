@@ -85,7 +85,7 @@ CI/CD stance: default CI may run static config checks and stub/local MCP smoke
 tests. CI must not require personal MCP tokens or third-party service tokens
 unless a separate security design approves the secret source, scopes, rotation,
 and fork/PR exposure model. Document any approved CI secret usage in
-[`../mcp-token-configuration.md`](../mcp-token-configuration.md).
+[`../../mcp-token-configuration.md`](../../mcp-token-configuration.md).
 
 ## Required Documentation Language
 

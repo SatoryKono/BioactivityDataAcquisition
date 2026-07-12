@@ -67,6 +67,24 @@ def _write_governance(tmp_path: Path) -> None:
                                 "action_if_reintroduced": "safe local mypy cache",
                             },
                             {
+                                "path": "coverage.xml",
+                                "current_live_state": "present_local_only_root_surface",
+                                "canonical_path": None,
+                                "action_if_reintroduced": "safe local coverage output",
+                            },
+                            {
+                                "path": "mcp-shell.log",
+                                "current_live_state": "present_local_only_root_surface",
+                                "canonical_path": None,
+                                "action_if_reintroduced": "safe local log output",
+                            },
+                            {
+                                "path": "Test Results - Pytest_All.html",
+                                "current_live_state": "present_local_only_root_surface",
+                                "canonical_path": None,
+                                "action_if_reintroduced": "safe local test report",
+                            },
+                            {
                                 "path": ".venv",
                                 "current_live_state": "present_local_only_root_surface",
                                 "canonical_path": "pyproject.toml",
@@ -123,6 +141,8 @@ def test_collect_root_local_cleanup_candidates_excludes_env_and_opt_in_families(
     _write_governance(tmp_path)
     for path in (".mypy_cache", ".pytest_cache", ".venv", "node_modules", ".env"):
         (tmp_path / path).mkdir()
+    for path in ("coverage.xml", "mcp-shell.log", "Test Results - Pytest_All.html"):
+        (tmp_path / path).write_text("generated\n", encoding="utf-8")
     monkeypatch.setattr(module, "_tracked_paths", lambda _repo_root: frozenset())
 
     candidates = module.collect_root_local_cleanup_candidates(tmp_path)
@@ -130,6 +150,9 @@ def test_collect_root_local_cleanup_candidates_excludes_env_and_opt_in_families(
     assert [candidate.rel_path for candidate in candidates] == [
         ".mypy_cache",
         ".pytest_cache",
+        "Test Results - Pytest_All.html",
+        "coverage.xml",
+        "mcp-shell.log",
     ]
 
 
@@ -140,6 +163,7 @@ def test_collect_root_local_cleanup_candidates_includes_opt_in_families(
     _write_governance(tmp_path)
     for path in (".mypy_cache", ".pytest_cache", ".venv", "node_modules"):
         (tmp_path / path).mkdir()
+    (tmp_path / "coverage.xml").write_text("generated\n", encoding="utf-8")
     monkeypatch.setattr(module, "_tracked_paths", lambda _repo_root: frozenset())
 
     candidates = module.collect_root_local_cleanup_candidates(
@@ -152,6 +176,7 @@ def test_collect_root_local_cleanup_candidates_includes_opt_in_families(
         ".mypy_cache",
         ".pytest_cache",
         ".venv",
+        "coverage.xml",
         "node_modules",
     ]
 
@@ -162,13 +187,15 @@ def test_main_apply_deletes_only_exact_reviewed_path(
 ) -> None:
     _write_governance(tmp_path)
     (tmp_path / ".pytest_cache").mkdir()
+    (tmp_path / "coverage.xml").write_text("generated\n", encoding="utf-8")
     (tmp_path / ".env").mkdir()
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(module, "_tracked_paths", lambda _repo_root: frozenset())
 
-    assert module.main(["--apply", "--path", ".pytest_cache"]) == 0
+    assert module.main(["--apply", "--path", "coverage.xml"]) == 0
 
-    assert not (tmp_path / ".pytest_cache").exists()
+    assert (tmp_path / ".pytest_cache").exists()
+    assert not (tmp_path / "coverage.xml").exists()
     assert (tmp_path / ".env").exists()
 
 

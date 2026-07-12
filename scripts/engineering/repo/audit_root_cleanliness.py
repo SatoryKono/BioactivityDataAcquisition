@@ -65,8 +65,12 @@ FORBIDDEN_TRACKED_ROOT_FILES: frozenset[str] = frozenset(
 )
 FORBIDDEN_LOCAL_ROOT_FILES: frozenset[str] = frozenset(
     {
+        ".xml",
         "_tmp_panel_inventory.mjs",
         "_tmp_panel_inventory.ps1",
+        "coverage.xml",
+        "mcp-shell.log",
+        "Test Results - Pytest_All.xml",
     }
 )
 FORBIDDEN_DATA_SUBPATH_PREFIXES: tuple[str, ...] = ("data/.idea/",)
