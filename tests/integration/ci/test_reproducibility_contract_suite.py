@@ -1068,6 +1068,11 @@ async def test_reproducibility_contract_forensic_grade_artifact_publication_reco
         return ledger_service.record_artifact_published(
             layer=layer,
             artifact_path=artifact_path,
+            artifact_content_hash=str(
+                payload.get("artifact_content_hash")
+                or payload.get("content_hash")
+                or "a" * 64
+            ),
             dataset_ref=(
                 str(payload["dataset_ref"]) if payload.get("dataset_ref") else None
             ),

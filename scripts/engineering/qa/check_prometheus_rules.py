@@ -9,7 +9,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-RULES_FILE = Path("grafana/prometheus-rules/bioetl_observability.yml")
+OBSERVABILITY_RULES_FILE = Path("grafana/prometheus-rules/bioetl_observability.yml")
+CONTROL_PLANE_RULES_FILE = Path(
+    "grafana/prometheus-rules/bioetl_control_plane_current_status.yml"
+)
+DEFAULT_RULES_FILES = (OBSERVABILITY_RULES_FILE, CONTROL_PLANE_RULES_FILE)
 TESTS_FILE = Path("grafana/prometheus-rules/tests/bioetl_observability.test.yml")
 PROMETHEUS_IMAGE = "prom/prometheus:v2.54.1"
 
@@ -21,7 +25,16 @@ def _build_parser() -> argparse.ArgumentParser:
             "Prometheus rules."
         )
     )
-    parser.add_argument("--rules-file", type=Path, default=RULES_FILE)
+    parser.add_argument(
+        "--rules-file",
+        action="append",
+        type=Path,
+        default=None,
+        help=(
+            "Prometheus rule file to check. Repeat to check multiple files. "
+            "Defaults to all shipped BioETL rule files."
+        ),
+    )
     parser.add_argument("--test-file", type=Path, default=TESTS_FILE)
     parser.add_argument(
         "--runner",
@@ -57,13 +70,24 @@ def _missing_promtool_message(promtool: str) -> str:
     )
 
 
-def _run_local(*, promtool: str, rules_file: Path, test_file: Path) -> int:
+def _resolve_rules_files(raw_rules_files: list[Path] | None) -> tuple[Path, ...]:
+    if raw_rules_files:
+        return tuple(raw_rules_files)
+    return DEFAULT_RULES_FILES
+
+
+def _run_local(
+    *,
+    promtool: str,
+    rules_files: tuple[Path, ...],
+    test_file: Path,
+) -> int:
     resolved = shutil.which(promtool)
     if resolved is None:
         print(_missing_promtool_message(promtool), file=sys.stderr)
         return 127
     checks = [
-        [resolved, "check", "rules", rules_file.as_posix()],
+        [resolved, "check", "rules", *(path.as_posix() for path in rules_files)],
         [resolved, "test", "rules", test_file.as_posix()],
     ]
     for command in checks:
@@ -73,7 +97,12 @@ def _run_local(*, promtool: str, rules_file: Path, test_file: Path) -> int:
     return 0
 
 
-def _run_docker(*, image: str, rules_file: Path, test_file: Path) -> int:
+def _run_docker(
+    *,
+    image: str,
+    rules_files: tuple[Path, ...],
+    test_file: Path,
+) -> int:
     docker = shutil.which("docker")
     if docker is None:
         print(
@@ -84,7 +113,7 @@ def _run_docker(*, image: str, rules_file: Path, test_file: Path) -> int:
         return 127
     workspace = Path.cwd().as_posix()
     checks = [
-        ["check", "rules", rules_file.as_posix()],
+        ["check", "rules", *(path.as_posix() for path in rules_files)],
         ["test", "rules", test_file.as_posix()],
     ]
     for check in checks:
@@ -109,15 +138,16 @@ def _run_docker(*, image: str, rules_file: Path, test_file: Path) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
+    rules_files = _resolve_rules_files(args.rules_file)
     if args.runner == "docker":
         return _run_docker(
             image=args.image,
-            rules_file=args.rules_file,
+            rules_files=rules_files,
             test_file=args.test_file,
         )
     return _run_local(
         promtool=args.promtool,
-        rules_file=args.rules_file,
+        rules_files=rules_files,
         test_file=args.test_file,
     )
 

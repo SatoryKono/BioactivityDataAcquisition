@@ -42,7 +42,13 @@ from bioetl.infrastructure.quarantine.operations import (
 from bioetl.infrastructure.quarantine.record_encoding import (
     MAX_PAYLOAD_SIZE,
     calculate_hash,
-    quote_literal,
+)
+from bioetl.infrastructure.quarantine.status_events import (
+    append_status_event,
+    apply_latest_statuses,
+)
+from bioetl.infrastructure.quarantine.status_events import (
+    status_events_path as build_status_events_path,
 )
 
 if TYPE_CHECKING:
@@ -72,6 +78,7 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
 
         """
         self.base_path = base_path.rstrip("/")
+        self.status_events_path = build_status_events_path(self.base_path)
 
     async def write(
         self,
@@ -207,7 +214,14 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
             List of quarantine record dicts with payload, error, and status fields.
         """
         return inspect_records(
-            self.base_path, None, pipeline, limit, error_code, run_id, dq_status
+            self.base_path,
+            None,
+            pipeline,
+            limit,
+            error_code,
+            run_id,
+            dq_status,
+            status_events_path=self.status_events_path,
         )
 
     def replay(
@@ -231,7 +245,13 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
             Iterator yielding individual quarantine record dicts for reprocessing.
         """
         return replay_records(
-            self.base_path, None, pipeline, error_code, max_age_days, now=now
+            self.base_path,
+            None,
+            pipeline,
+            error_code,
+            max_age_days,
+            now=now,
+            status_events_path=self.status_events_path,
         )
 
     def purge(
@@ -264,7 +284,7 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
             new_status: New quarantine status to set.
 
         Returns:
-            True if a matching record was found and updated, False if no
+            True if a matching record was found and status was appended, False if no
             quarantine table exists or no record matches the hash.
         """
         try:
@@ -272,15 +292,16 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
         except TableNotFoundError:
             return False
 
-        predicate = f"payload_hash = {quote_literal(payload_hash)}"
         arrow_table = dt.to_pyarrow_table(filters=[("payload_hash", "=", payload_hash)])
 
         if len(arrow_table) == 0:
             return False
 
-        dt.update(
-            updates={"dq_status": quote_literal(new_status.value)},
-            predicate=predicate,
+        append_status_event(
+            self.status_events_path,
+            None,
+            payload_hash=payload_hash,
+            new_status=new_status,
         )
         return True
 
@@ -318,6 +339,7 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
         if not records:
             return None
         records.sort(key=lambda row: str(row.get("ingestion_ts", "")), reverse=True)
+        records = apply_latest_statuses(records, self.status_events_path, None)
         return records[0]
 
     async def get_stats(
@@ -337,7 +359,14 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
             Dict with counts by error code, status distribution, and totals.
         """
         await asyncio.sleep(0)
-        return get_statistics(self.base_path, None, pipeline, error_code, run_id)
+        return get_statistics(
+            self.base_path,
+            None,
+            pipeline,
+            error_code,
+            run_id,
+            status_events_path=self.status_events_path,
+        )
 
     async def aclose(self) -> None:
         """Close resources."""

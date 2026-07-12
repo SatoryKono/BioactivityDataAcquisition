@@ -88,6 +88,7 @@ def test_control_plane_rollout_smoke_emits_artifacts_and_aggregate_metrics(
     ledger_service.record_artifact_published(
         layer="silver",
         artifact_path="data/output/silver/chembl/activity",
+        artifact_content_hash="a" * 64,
         dataset_ref="silver:chembl.activity@1",
         lineage_fragment_id="silver:fragment-1",
         details={"source_batch_id": "batch-123", "dataset_hash": "hash-123"},

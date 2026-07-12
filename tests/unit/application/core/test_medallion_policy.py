@@ -3,7 +3,7 @@
 Tests all layer/mode combinations per RULES.md §3 (Medallion Architecture):
 - Bronze: APPEND only
 - Silver: APPEND or MERGE
-- Gold: MERGE, OVERWRITE, or APPEND
+- Gold: OVERWRITE or APPEND
 """
 
 from __future__ import annotations
@@ -74,9 +74,8 @@ class TestWriteModePolicyAllowedModes:
         }
 
     def test_gold_allowed_modes(self):
-        """Test Gold layer allows MERGE, OVERWRITE, and APPEND."""
+        """Test Gold layer allows OVERWRITE and APPEND."""
         assert WriteModePolicy.ALLOWED_MODES[Layer.GOLD] == {
-            WriteMode.MERGE,
             WriteMode.OVERWRITE,
             WriteMode.APPEND,
         }
@@ -140,10 +139,11 @@ class TestWriteModePolicyValidateSilver:
 class TestWriteModePolicyValidateGold:
     """Tests for Gold layer validation."""
 
-    def test_validate_gold_accepts_merge_mode(self):
-        """Test Gold MERGE is allowed."""
+    def test_validate_gold_rejects_merge_mode(self):
+        """Test Gold MERGE is rejected."""
         policy = WriteModePolicy()
-        assert policy.validate(Layer.GOLD, WriteMode.MERGE) is None
+        with pytest.raises(PolicyViolationError):
+            policy.validate(Layer.GOLD, WriteMode.MERGE)
 
     def test_validate_gold_accepts_overwrite_mode(self):
         """Test Gold OVERWRITE is allowed."""
@@ -166,7 +166,6 @@ class TestWriteModePolicyValidateAllCombinations:
             (Layer.BRONZE, WriteMode.APPEND),
             (Layer.SILVER, WriteMode.APPEND),
             (Layer.SILVER, WriteMode.MERGE),
-            (Layer.GOLD, WriteMode.MERGE),
             (Layer.GOLD, WriteMode.OVERWRITE),
             (Layer.GOLD, WriteMode.APPEND),
         ],
@@ -184,6 +183,7 @@ class TestWriteModePolicyValidateAllCombinations:
             (Layer.BRONZE, WriteMode.MERGE),
             (Layer.BRONZE, WriteMode.OVERWRITE),
             (Layer.SILVER, WriteMode.OVERWRITE),
+            (Layer.GOLD, WriteMode.MERGE),
         ],
     )
     def test_disallowed_combinations(self, layer: Layer, mode: WriteMode):

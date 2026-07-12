@@ -8,6 +8,7 @@ import pandas as pd
 import pandera as pa
 import pytest
 
+from bioetl.domain.contracts.gold import ChEMBLAssayGoldSchema
 from bioetl.domain.contracts.gold.pubchem import PubChemCompoundGoldSchema
 from tests.contract.schemas._schema_row_helpers import minimal_schema_dataframe
 
@@ -55,6 +56,15 @@ def _minimal_pubchem_gold_df() -> pd.DataFrame:
     return frame
 
 
+def _minimal_chembl_assay_gold_df() -> pd.DataFrame:
+    frame = minimal_schema_dataframe(ChEMBLAssayGoldSchema)
+    frame.loc[0, "entity_id"] = "chembl_assay:CHEMBL1234"
+    frame.loc[0, "assay_id"] = "CHEMBL1234"
+    frame.loc[0, "content_hash"] = "a" * 64
+    frame.loc[0, "confidence_score"] = 9.0
+    return frame
+
+
 @pytest.mark.parametrize(
     ("entity", "schema_cls"),
     [
@@ -89,3 +99,22 @@ def test_pubchem_gold_strict_rejects_null_required_entity_id() -> None:
     df.loc[0, "entity_id"] = None
     with pytest.raises((pa.errors.SchemaError, pa.errors.SchemaErrors)):
         PubChemCompoundGoldSchema.validate(df)
+
+
+def test_chembl_assay_gold_strict_minimal_row_validates() -> None:
+    validated = ChEMBLAssayGoldSchema.validate(_minimal_chembl_assay_gold_df())
+    assert validated["assay_id"].iloc[0] == "CHEMBL1234"
+
+
+def test_chembl_assay_gold_rejects_invalid_content_hash() -> None:
+    df = _minimal_chembl_assay_gold_df()
+    df.loc[0, "content_hash"] = "not-a-sha256"
+    with pytest.raises((pa.errors.SchemaError, pa.errors.SchemaErrors)):
+        ChEMBLAssayGoldSchema.validate(df)
+
+
+def test_chembl_assay_gold_rejects_out_of_range_confidence_score() -> None:
+    df = _minimal_chembl_assay_gold_df()
+    df.loc[0, "confidence_score"] = -1.0
+    with pytest.raises((pa.errors.SchemaError, pa.errors.SchemaErrors)):
+        ChEMBLAssayGoldSchema.validate(df)

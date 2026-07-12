@@ -4,13 +4,22 @@ recording_rule_metrics:
   - bioetl_alerts_active_total
   - bioetl_alerts_firing_total
   - bioetl_checkpoint_age_seconds
+  - bioetl_control_plane_current_status
+  - bioetl_control_plane_run_type_universe
   - bioetl_control_plane_status
+  - bioetl_control_plane_telemetry_missing_5m
   - bioetl_current_status
   - bioetl_dq_blocked_records
   - bioetl_dq_check_duration_seconds
+  - bioetl_dq_current_activity_15m
+  - bioetl_dq_current_degraded_signals_15m
+  - bioetl_dq_current_failure_signals_15m
+  - bioetl_dq_current_reason
   - bioetl_dq_status
+  - bioetl_manifest_ledger_failures_15m
   - bioetl_pipeline_phase_duration_seconds
   - bioetl_provider_status
+  - bioetl_replay_safety_blockers_15m
   - bioetl_runtime_status
   - bioetl_shutdown_completed_total
   - bioetl_shutdown_initiated_total
@@ -55,6 +64,7 @@ recording_rule_metrics:
   - bioetl_runtime_pipeline_run_type_universe_scoped
   - bioetl_runtime_trust_gap_active_10m
   - bioetl_runtime_trust_gap_status_10m
+  - bioetl_terminal_events_15m
   - bioetl_workflow_pipeline_verdict_status
 declared_label_contract_metrics:
   - bioetl_adapter_batch_size

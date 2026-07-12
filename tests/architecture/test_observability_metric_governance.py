@@ -10,12 +10,24 @@ import subprocess
 import sys
 
 import pytest
+from scripts.engineering.qa import check_prometheus_rules
 from scripts.engineering.qa import report_observability_metric_inventory as inventory
 import yaml
 
 
 ROOT = Path(__file__).resolve().parents[2]
 GOVERNANCE_PATH = ROOT / "configs" / "quality" / "observability_metric_governance.yaml"
+DECLARATIONS_PATH = (
+    ROOT / "configs" / "quality" / "observability_metric_declarations.yaml"
+)
+CONTROL_PLANE_RULES_PATH = (
+    ROOT / "grafana" / "prometheus-rules" / "bioetl_control_plane_current_status.yml"
+)
+REQUIREMENTS_PATH = ROOT / "docs" / "01-requirements" / "REQUIREMENTS.md"
+RULES_PATH = ROOT / "docs" / "00-project" / "RULES.md"
+METRICS_DEFS_CORE_PATH = (
+    ROOT / "src" / "bioetl" / "infrastructure" / "observability" / "_metrics_defs_core.py"
+)
 POLICY_REVIEW_DATE = date(2026, 5, 15)
 ALLOWLIST_PATH = (
     ROOT / "configs" / "quality" / "observability_metric_inventory_allowlist.yaml"
@@ -85,6 +97,53 @@ def _collect_fresh_metric_inventory() -> dict[str, object]:
     loaded = json.loads(result.stdout)
     assert isinstance(loaded, dict)
     return loaded
+
+
+def _collect_recording_rule_names(path: Path) -> set[str]:
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    names: set[str] = set()
+    for group in payload.get("groups", []):
+        for rule in group.get("rules", []):
+            record_name = rule.get("record")
+            if record_name:
+                names.add(str(record_name))
+    return names
+
+
+@pytest.mark.architecture
+def test_control_plane_rules_are_in_default_prometheus_rule_check() -> None:
+    """The shipped control-plane rule file must stay in default promtool coverage."""
+    assert (
+        check_prometheus_rules.CONTROL_PLANE_RULES_FILE
+        in check_prometheus_rules.DEFAULT_RULES_FILES
+    )
+
+
+@pytest.mark.architecture
+def test_control_plane_recording_rules_are_declared() -> None:
+    """Control-plane recording rules must be under declaration governance."""
+    declarations = yaml.safe_load(DECLARATIONS_PATH.read_text(encoding="utf-8"))
+    declared = set(declarations["recording_rule_metrics"])
+    recording_rules = _collect_recording_rule_names(CONTROL_PLANE_RULES_PATH)
+
+    assert recording_rules
+    assert sorted(recording_rules - declared) == []
+
+
+@pytest.mark.architecture
+def test_dq_validation_score_label_contract_matches_runtime() -> None:
+    """REQ-DQ-002 must stay aligned with the runtime metric label contract."""
+    requirements = REQUIREMENTS_PATH.read_text(encoding="utf-8")
+    rules = RULES_PATH.read_text(encoding="utf-8")
+    metric_defs = METRICS_DEFS_CORE_PATH.read_text(encoding="utf-8")
+
+    assert (
+        "Метрика `bioetl_dq_validation_score` с bounded labels `pipeline`, `entity`"
+        in requirements
+    )
+    assert 'bioetl_dq_validation_score{pipeline="...", entity="..."}' in rules
+    assert "bioetl_dq_validation_score{check=" not in rules
+    assert '["pipeline", "entity"]' in metric_defs
 
 
 @pytest.mark.architecture

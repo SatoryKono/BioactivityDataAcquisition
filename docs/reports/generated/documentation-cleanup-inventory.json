@@ -29925,6 +29925,62 @@
       "lifecycle": null,
       "outbound_links": 0,
       "owner": "BioETL Team",
+      "path": "docs/02-architecture/diagrams/manifests/visual-smoke-broad.txt",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "02-architecture",
+      "status": "Active",
+      "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": "diagram_tooling",
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".txt",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/02-architecture/diagrams/manifests/visual-smoke-extended.txt",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "02-architecture",
+      "status": "Active",
+      "surface_family": "active",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": "diagram_tooling",
+      "duplicate_group": null,
+      "duplicate_resolution": null,
+      "extension": ".txt",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 0,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
       "path": "docs/02-architecture/diagrams/manifests/visual-smoke.txt",
       "recommended_action": "keep",
       "root_doc_kind": null,
@@ -81154,14 +81210,14 @@
       "archive-after-github-state-check": 115,
       "archive-after-migration": 59,
       "generate-automatically": 703,
-      "keep": 1994,
+      "keep": 1996,
       "reconcile-with-github-state": 4
     },
     "by_section": {
       ".github": 125,
       "00-project": 282,
       "01-requirements": 3,
-      "02-architecture": 835,
+      "02-architecture": 837,
       "03-data-model": 2,
       "03-guides": 76,
       "04-reference": 193,
@@ -81192,14 +81248,14 @@
       "security": 2
     },
     "by_status": {
-      "Active": 1826,
+      "Active": 1828,
       "Archived": 60,
       "Canonical": 63,
       "Generated": 703,
       "Working": 223
     },
     "by_surface_family": {
-      "active": 1826,
+      "active": 1828,
       "archive": 60,
       "canonical": 63,
       "generated": 703,
@@ -81207,7 +81263,7 @@
     },
     "by_tracking_state": {
       "ignored_local": 1075,
-      "tracked": 1800
+      "tracked": 1802
     },
     "docs_reports_local_count": 1092,
     "duplicate_group_count": 2,
@@ -81228,8 +81284,8 @@
         "path": "docs/reports/evidence/project-legacy-compatibility-remediation/.quarantined-03-synthesis-corrupt-20260521"
       }
     ],
-    "total_doc_like": 2875,
+    "total_doc_like": 2877,
     "total_doc_like_ignored_local": 1075,
-    "total_doc_like_tracked": 1800
+    "total_doc_like_tracked": 1802
   }
 }

@@ -341,65 +341,61 @@ class TestUnifiedQuarantineInspect:
     @pytest.mark.asyncio
     async def test_inspect_with_filters(self, quarantine, mock_delta_table):
         """Test inspect with error_code and dq_status filters."""
-        import pyarrow.compute as pc
-
         mock_table = MagicMock()
         mock_arrow_table = MagicMock()
         mock_arrow_table.__len__ = MagicMock(return_value=0)
-        mock_arrow_table.filter.return_value = mock_arrow_table
-        mock_arrow_table.sort_by.return_value = mock_arrow_table
-        mock_arrow_table.slice.return_value = mock_arrow_table
         mock_arrow_table.to_pylist.return_value = []
-        mock_arrow_table.__getitem__ = MagicMock(return_value=MagicMock())
         mock_table.to_pyarrow_table.return_value = mock_arrow_table
         mock_delta_table.return_value = mock_table
 
-        with (
-            patch.object(pc, "equal", return_value=MagicMock()),
-            patch.object(pc, "and_", return_value=MagicMock()),
-        ):
-            result = await quarantine.inspect(
-                pipeline="test",
-                limit=50,
-                error_code="INVALID_DATA",
-                dq_status=QuarantineRecordStatus.IGNORED,
-            )
+        result = await quarantine.inspect(
+            pipeline="test",
+            limit=50,
+            error_code="INVALID_DATA",
+            dq_status=QuarantineRecordStatus.IGNORED,
+        )
 
         assert result == []
 
     @pytest.mark.asyncio
     async def test_inspect_with_run_id_filter(self, quarantine, mock_delta_table):
         """Test inspect applies a run_id filter when provided."""
-        import pyarrow.compute as pc
-
         mock_table = MagicMock()
         mock_arrow_table = MagicMock()
-        mock_arrow_table.__len__ = MagicMock(return_value=0)
-        mock_arrow_table.filter.return_value = mock_arrow_table
-        mock_arrow_table.sort_by.return_value = mock_arrow_table
-        mock_arrow_table.slice.return_value = mock_arrow_table
-        mock_arrow_table.to_pylist.return_value = []
-        mock_arrow_table.__getitem__.side_effect = lambda key: f"column:{key}"
+        mock_arrow_table.to_pylist.return_value = [
+            {
+                "pipeline": "test",
+                "error_code": "INVALID_DATA",
+                "run_id": "run-123",
+                "dq_status": QuarantineRecordStatus.NEW.value,
+                "ingestion_ts": "2024-01-15T12:00:00+00:00",
+                "payload": '{"id": 1}',
+                "metadata": "{}",
+                "error_details": "{}",
+            },
+            {
+                "pipeline": "test",
+                "error_code": "INVALID_DATA",
+                "run_id": "run-other",
+                "dq_status": QuarantineRecordStatus.NEW.value,
+                "ingestion_ts": "2024-01-16T12:00:00+00:00",
+                "payload": '{"id": 2}',
+                "metadata": "{}",
+                "error_details": "{}",
+            },
+        ]
         mock_table.to_pyarrow_table.return_value = mock_arrow_table
         mock_delta_table.return_value = mock_table
 
-        with (
-            patch.object(
-                pc, "equal", side_effect=["pipeline-mask", "run-mask", "status-mask"]
-            ) as equal_mock,
-            patch.object(
-                pc, "and_", side_effect=["pipeline-run-mask", "final-mask"]
-            ) as and_mock,
-        ):
-            result = await quarantine.inspect(
-                pipeline="test",
-                run_id="run-123",
-                dq_status=QuarantineRecordStatus.NEW,
-            )
+        result = await quarantine.inspect(
+            pipeline="test",
+            run_id="run-123",
+            dq_status=QuarantineRecordStatus.NEW,
+        )
 
-        assert result == []
-        assert equal_mock.call_args_list[1].args == ("column:run_id", "run-123")
-        assert and_mock.call_count == 2
+        assert len(result) == 1
+        assert result[0]["run_id"] == "run-123"
+        assert result[0]["payload"] == {"id": 1}
 
 
 @pytest.mark.unit
@@ -431,7 +427,12 @@ class TestUnifiedQuarantineReplay:
         mock_arrow_table.__getitem__ = MagicMock(return_value=MagicMock())
         mock_arrow_table.to_pylist.return_value = [
             {
+                "pipeline": "test",
+                "error_code": "INVALID_DATA",
+                "dq_status": QuarantineRecordStatus.NEW.value,
+                "ingestion_ts": "2024-01-15T12:00:00+00:00",
                 "payload": '{"id": 1}',
+                "metadata": "{}",
                 "error_details": '{"reason": "test"}',
             }
         ]
@@ -538,20 +539,31 @@ class TestUnifiedQuarantineUpdateStatus:
 
         assert result is False
 
-    def test_update_status_updates_record(self, quarantine, mock_delta_table):
-        """Test update_status updates the record."""
+    def test_update_status_appends_status_event(self, quarantine, mock_delta_table):
+        """Test update_status appends a status transition event."""
         mock_table = MagicMock()
         mock_arrow_table = MagicMock()
         mock_arrow_table.__len__ = MagicMock(return_value=1)
         mock_table.to_pyarrow_table.return_value = mock_arrow_table
         mock_delta_table.return_value = mock_table
 
-        result = quarantine.update_status("hash123", QuarantineRecordStatus.REPROCESSED)
+        with patch(
+            "bioetl.infrastructure.quarantine.unified.append_status_event"
+        ) as append_mock:
+            result = quarantine.update_status(
+                "hash123", QuarantineRecordStatus.REPROCESSED
+            )
 
         assert result is True
-        mock_table.update.assert_called_once()
+        append_mock.assert_called_once_with(
+            quarantine.status_events_path,
+            None,
+            payload_hash="hash123",
+            new_status=QuarantineRecordStatus.REPROCESSED,
+        )
+        mock_table.update.assert_not_called()
 
-    def test_update_status_only_mutates_status_column(
+    def test_update_status_appends_status_event_without_mutating_record(
         self, quarantine, mock_delta_table
     ):
         """Status transitions must not rewrite stored payload bytes or hash."""
@@ -568,20 +580,24 @@ class TestUnifiedQuarantineUpdateStatus:
         mock_table.to_pyarrow_table.return_value = mock_arrow_table
         mock_delta_table.return_value = mock_table
 
-        result = quarantine.update_status(
-            "sha256:stable-payload", QuarantineRecordStatus.REPROCESSED
-        )
+        with patch(
+            "bioetl.infrastructure.quarantine.unified.append_status_event"
+        ) as append_mock:
+            result = quarantine.update_status(
+                "sha256:stable-payload", QuarantineRecordStatus.REPROCESSED
+            )
 
         assert result is True
         mock_table.to_pyarrow_table.assert_called_once_with(
             filters=[("payload_hash", "=", "sha256:stable-payload")]
         )
-        mock_table.update.assert_called_once_with(
-            updates={
-                "dq_status": quote_literal(QuarantineRecordStatus.REPROCESSED.value)
-            },
-            predicate="payload_hash = 'sha256:stable-payload'",
+        append_mock.assert_called_once_with(
+            quarantine.status_events_path,
+            None,
+            payload_hash="sha256:stable-payload",
+            new_status=QuarantineRecordStatus.REPROCESSED,
         )
+        mock_table.update.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_update_status_preserves_persisted_payload_and_hash(
@@ -626,6 +642,11 @@ class TestUnifiedQuarantineUpdateStatus:
         assert after["payload_hash"] == before["payload_hash"]
         assert after["metadata"] == before["metadata"]
         assert after["dq_status"] == QuarantineRecordStatus.REPROCESSED.value
+        base_record = quarantine.get_record(
+            payload_hash=payload_hash,
+            pipeline="test",
+        )
+        assert base_record is not None
 
 
 @pytest.mark.unit

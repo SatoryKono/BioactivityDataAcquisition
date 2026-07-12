@@ -19,6 +19,7 @@ from bioetl.infrastructure.quarantine.statistics_support import (
     _process_quarantine_records,
     _sorted_counter_items,
 )
+from bioetl.infrastructure.quarantine.status_events import apply_latest_statuses
 
 
 def get_filtered_stats(
@@ -88,6 +89,8 @@ def get_statistics(
     pipeline: str,
     error_code: str | None = None,
     run_id: str | None = None,
+    *,
+    status_events_path: str | None = None,
 ) -> JsonDict:
     """Get quarantine statistics for a pipeline.
 
@@ -136,7 +139,9 @@ def get_statistics(
         if len(arrow_table) == 0:
             return empty_stats
 
-    df = arrow_table.to_pylist()
+    df = apply_latest_statuses(
+        arrow_table.to_pylist(), status_events_path, storage_options
+    )
     total_records = len(df)
 
     (
