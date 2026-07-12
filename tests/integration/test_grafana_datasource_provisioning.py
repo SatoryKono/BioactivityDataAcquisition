@@ -10,6 +10,11 @@ import yaml
 
 pytestmark = pytest.mark.integration
 
+RENDERER_IMAGE = (
+    "grafana/grafana-image-renderer"
+    "@sha256:c0c920e6974b0d30ae25313051344afcd2054362529968ebd9545a4b2bc8119b"
+)
+
 
 def _load_monitoring_compose() -> dict[str, object]:
     compose_path = Path("docker-compose.monitoring.yml")
@@ -104,7 +109,7 @@ def test_grafana_uses_remote_renderer_sidecar() -> None:
         "/bin/sh",
         "/usr/local/bin/bioetl-bootstrap-grafana.sh",
     ]
-    assert renderer["image"] == "grafana/grafana-image-renderer:latest"
+    assert renderer["image"] == RENDERER_IMAGE
     assert renderer["shm_size"] == "1gb"
     assert (
         "AUTH_TOKEN=${GF_RENDERING_RENDERER_TOKEN:-bioetl-local-renderer-token}"
@@ -112,6 +117,10 @@ def test_grafana_uses_remote_renderer_sidecar() -> None:
     )
     assert (
         "BROWSER_FLAGS=--no-sandbox,--disable-dev-shm-usage" in renderer["environment"]
+    )
+    assert (
+        "BROWSER_READINESS_TIMEOUT=${GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT:-90s}"
+        in renderer["environment"]
     )
     assert (
         "GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-1GiB}"

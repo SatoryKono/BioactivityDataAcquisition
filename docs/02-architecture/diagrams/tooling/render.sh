@@ -46,6 +46,7 @@ EXCLUDE_PATHS=("docs/99-archive")
 MMDC_BIN="${MMDC_BIN:-$REPO_ROOT/scripts/diagrams/mmdc_wrapper.sh}"
 MMDC_REQUIRED_VERSION="${MMDC_REQUIRED_VERSION:-10.6.1}"
 MMDC_ALLOW_VERSION_DRIFT="${MMDC_ALLOW_VERSION_DRIFT:-0}"
+REQUIRE_SVGO="${REQUIRE_SVGO:-0}"
 
 # ── Diagram source directories ──────────────────────────────
 DEFAULT_DIRS=(
@@ -94,6 +95,7 @@ Options:
   --text-layer MODE   Text layer mode: dual | fo-only | fallback-only
                       (default: $TEXT_LAYER)
   --puppeteer FILE    Puppeteer config JSON   (CI sandboxing; defaults to theme/puppeteer-config.json if present)
+  --skip-svgo         Allow local render without svgo even when REQUIRE_SVGO=1
   -h, --help          Show this help
 EOF
   return 0
@@ -303,6 +305,7 @@ while [[ $# -gt 0 ]]; do
     --text-layer)   require_option_value "$1" "$#"; TEXT_LAYER="$2";    shift 2 ;;
     --no-fit)       FIT=0;                                                shift ;;
     --puppeteer)    require_option_value "$1" "$#"; PUPPETEER_CFG="$2"; shift 2 ;;
+    --skip-svgo)    REQUIRE_SVGO=0;                                        shift ;;
     -h|--help)      usage; exit 0 ;;
     *)              log_err "Unknown option: $1"; usage; exit 1 ;;
   esac
@@ -417,6 +420,12 @@ if command -v svgo &>/dev/null; then
   HAS_SVGO=1
   log_info "svgo found (SVG optimization enabled)"
 else
+  if [[ "$REQUIRE_SVGO" == "1" ]]; then
+    log_err "svgo is required but not found on PATH."
+    echo "  Install: npm install -g svgo"
+    echo "  Local override: REQUIRE_SVGO=0 or --skip-svgo"
+    exit 1
+  fi
   log_warn "svgo not found; SVG optimization skipped. Install: npm install -g svgo"
 fi
 
@@ -598,7 +607,14 @@ render_one() {
       esac
       # Optimize SVG with svgo if available
       if [[ $HAS_SVGO -eq 1 ]]; then
-        svgo --quiet --config "$SCRIPT_DIR/svgo.config.js" "$svg_tmp" -o "$svg_tmp" 2>/dev/null || true
+        if ! svgo --quiet --config "$SCRIPT_DIR/svgo.config.js" "$svg_tmp" -o "$svg_tmp" 2>/dev/null; then
+          if [[ "$REQUIRE_SVGO" == "1" ]]; then
+            log_err "svgo optimization failed for $base"
+            rm -rf "$svg_tmp_dir"
+            return 1
+          fi
+          log_warn "svgo optimization failed for $base; continuing without optimization"
+        fi
       fi
       # Inject CSS overrides for edge label readability
       if [[ -n "$PYTHON_BIN" ]]; then

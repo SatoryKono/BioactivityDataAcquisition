@@ -85,7 +85,7 @@ BioETL uses **38 GitHub Actions workflows** (including reusable helper workflows
 | **Block Compiled Artifacts** | `compiled-artifacts-block.yml` | `no-pyc-check`                                                                                     | No `*.pyc` / `--pycache--` committed                                                                                                               |
 | **Root Hygiene**             | `root-hygiene.yml`             | `root-hygiene`                                                                                     | Repository root cleanliness audit                                                                                                                  |
 | **Docs & Diagrams**          | `docs.yml`                     | `docs-governance`, `validate-mkdocs`, `validate-mermaid`, `render-diagrams`, `check-diagram-drift` | Docs-only PR path, lightweight architecture doc-sync tests, strict MkDocs build, Mermaid syntax, diagram rendering, rendered-artifact drift checks |
-| **Validate Mermaid**         | `validate-mermaid.yml`         | `check-mermaid`                                                                                    | Vendored Mermaid asset integrity                                                                                                                   |
+| **Validate vendored Mermaid assets** | `validate-vendored-mermaid-assets.yml` | `check-mermaid` | Vendored Mermaid asset presence check |
 
 ### 2.5 Scheduled & On-Demand
 

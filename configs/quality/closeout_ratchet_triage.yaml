@@ -344,6 +344,11 @@ entries:
     classification: budget_closeout_ratchet
     live_guard: "selected DBT issues #6159, #6160, #6162-#6166, and #6169 remain aligned with live governance, compatibility, hotspot, coverage, dead-code, contract/config, and script-governance evidence without budget growth."
     rationale: Keeps the selected DBT closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
+  - path: tests/architecture/test_tech_debt_issues_6220_6229_closeout.py
+    disposition: retain_active
+    classification: budget_closeout_ratchet
+    live_guard: "selected DBT issues #6220-#6222, #6224-#6227, and #6229 remain aligned with live lazy-facade, config-compatibility, ownership, dead-code, aggregate, contract, replay, observability, and test-infrastructure evidence without budget growth."
+    rationale: Keeps the selected DBT closeout batch tied to executable live invariants and reduced-or-unchanged debt-budget evidence instead of stale historical signoff.
   - path: tests/architecture/test_diagram_issues_6205_6211_closeout.py
     disposition: retain_active
     classification: budget_closeout_ratchet

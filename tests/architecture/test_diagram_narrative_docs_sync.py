@@ -27,6 +27,9 @@ ARCHITECTURE_REFERENCE = (
     / "guide"
     / "architecture-reference.md"
 )
+CURRENT_STATE_DIAGRAMS = (
+    REPO_ROOT / "docs" / "02-architecture" / "current-state-diagrams.md"
+)
 
 
 def test_class_summary_is_explicitly_narrative_not_inventory() -> None:
@@ -44,3 +47,20 @@ def test_architecture_reference_avoids_stale_inventory_labels() -> None:
     assert "9 Entities" not in content
     assert "11 Value Objects" not in content
     assert ".mermaid](../" not in content
+
+
+def test_current_state_diagrams_embedded_blocks_are_marked_summary_only() -> None:
+    lines = CURRENT_STATE_DIAGRAMS.read_text(encoding="utf-8").splitlines()
+    unmarked: list[int] = []
+
+    for idx, line in enumerate(lines):
+        if line.strip() != "```mermaid":
+            continue
+        marker_window = "\n".join(lines[max(0, idx - 3) : idx])
+        if (
+            "diagram-audit:summary-only" not in marker_window
+            and "diagram-audit:canonical-id=" not in marker_window
+        ):
+            unmarked.append(idx + 1)
+
+    assert unmarked == []

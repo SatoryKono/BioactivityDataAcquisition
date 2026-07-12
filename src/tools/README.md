@@ -240,26 +240,30 @@ Prefer the maintained project workflow for new pipelines when possible; use this
 
 Diagram-layout helper for adding or auditing ELK layout hints in Mermaid sources.
 
-**Location:** `src/tools/apply_elk_layout.py`
+**Canonical location:** `scripts/diagrams/apply_elk_layout.py`
+
+`src/tools/apply_elk_layout.py` is a temporary compatibility wrapper.
 
 **Typical usage:**
 
 ```bash
-python src/tools/apply_elk_layout.py --dry-run
-python src/tools/apply_elk_layout.py
+python -m scripts.diagrams apply-elk --dry-run
+python -m scripts.diagrams apply-elk
 ```
 
 ### differentiate_linkstyle.py
 
 Diagram semantics helper for assigning differentiated Mermaid `linkStyle` classes.
 
-**Location:** `src/tools/differentiate_linkstyle.py`
+**Canonical location:** `scripts/diagrams/differentiate_linkstyle.py`
+
+`src/tools/differentiate_linkstyle.py` is a temporary compatibility wrapper.
 
 **Typical usage:**
 
 ```bash
-python src/tools/differentiate_linkstyle.py --dry-run
-python src/tools/differentiate_linkstyle.py
+python -m scripts.diagrams differentiate-linkstyle --dry-run
+python -m scripts.diagrams differentiate-linkstyle
 ```
 
 ### Schema config commands

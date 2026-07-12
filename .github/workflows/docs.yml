@@ -185,6 +185,7 @@ jobs:
             '*.mmd' '*.mermaid' \
             'docs/**/*.md' \
             'scripts/diagrams/**' \
+            'tests/architecture/test_diagram*.py' \
             '.github/actions/setup-mermaid/**' \
             'docs/02-architecture/diagrams/theme/**' \
             'docs/02-architecture/diagrams/tooling/**' \
@@ -251,6 +252,8 @@ jobs:
           install-librsvg: "true"
 
       - name: Render diagrams with unified script
+        env:
+          REQUIRE_SVGO: "1"
         run: |
           bash docs/02-architecture/diagrams/tooling/render.sh \
             --puppeteer /tmp/puppeteer-config.json
@@ -274,7 +277,7 @@ jobs:
 
       - name: Validate link harmonization post-processor
         run: |
-          python3 src/tools/harmonize_link_styles.py --dry-run --fail-on-errors
+          python3 scripts/diagrams/harmonize_link_styles.py --dry-run --fail-on-errors
 
       - name: Diagram regression quality gates (DIAG-T018..T023)
         run: |
@@ -330,10 +333,11 @@ jobs:
       - name: Check for source-vs-rendered drift
         run: |
           echo "Checking if diagram sources changed without updating rendered outputs..."
+          base_ref="origin/${{ github.base_ref }}"
           git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
 
           changed_diagrams=$(
-            git diff --name-only origin/main...HEAD -- \
+            git diff --name-only "${base_ref}"...HEAD -- \
               ':(glob)docs/02-architecture/diagrams/architecture/*.mmd' \
               ':(glob)docs/02-architecture/diagrams/foundation/*.mmd' \
               ':(glob)docs/02-architecture/diagrams/class-diagrams/*.mmd' \
@@ -348,7 +352,7 @@ jobs:
           echo "$changed_diagrams"
 
           changed_rendered=$(
-            git diff --name-only origin/main...HEAD -- \
+            git diff --name-only "${base_ref}"...HEAD -- \
               ':(glob)docs/**/svg/*.svg' \
               ':(glob)docs/**/png/*.png' || true
           )

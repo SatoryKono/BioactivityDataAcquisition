@@ -1,3 +1,5 @@
+name: bioactivitydataacquisition2
+
 services:
   neo4j:
     image: neo4j:5.15-community
@@ -17,8 +19,18 @@ services:
       NEO4J_server_jvm_additional: "-XX:+UseG1GC -XX:G1HeapRegionSize=16m"
     restart: unless-stopped
     volumes:
-      - neo4j_data:/var/lib/neo4j/data
-      - neo4j_logs:/var/lib/neo4j/logs
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "cypher-shell -u neo4j -p bioetl_secure_password 'RETURN 1' > /dev/null 2>&1",
+        ]
+      interval: 30s
+      timeout: 20s
+      retries: 10
+      start_period: 180s
 
 volumes:
   neo4j_data:

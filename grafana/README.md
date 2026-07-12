@@ -554,6 +554,7 @@ curl -s http://localhost:8000/metrics | grep bioetl_
 | `GF_SECURITY_ADMIN_PASSWORD`                   | `admin`               | Пароль администратора Grafana                           |
 | `GF_RENDERING_RENDERER_TOKEN`                  | `bioetl-local-renderer-token` | Shared token between Grafana `GF_RENDERING_RENDERER_TOKEN` and renderer `AUTH_TOKEN`; override locally for non-default stacks |
 | `GRAFANA_IMAGE_RENDERER_GOMEMLIMIT`            | `1GiB`                | Go memory soft limit for the remote image renderer      |
+| `GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT`     | `90s`                 | Maximum wait for heavy dashboard pages before the remote renderer returns a timeout |
 | `BIOETL_ENABLE_TRACING_DATASOURCES`            | `auto`                | Авто-подключать Loki/Tempo datasource в Grafana provisioning по live reachability (`true`/`false` override доступны) |
 | `BIOETL_OBSERVABILITY__TRACING_ENABLED`        | `false`               | Включить OpenTelemetry spans и log-trace correlation    |
 | `BIOETL_OBSERVABILITY__DQ_MONITOR_ENABLED`     | `true`                | Включить DQ anomaly monitor для всех pipeline runs       |
@@ -1560,10 +1561,11 @@ make monitoring-tracing-up
 
 Server-side screenshots идут через remote `grafana-image-renderer` sidecar.
 Для Grafana Image Renderer 5.x repo compose использует pinned image
-`grafana/grafana-image-renderer:5.0.0`, explicit shared token
-(`GF_RENDERING_RENDERER_TOKEN` в Grafana и `AUTH_TOKEN` в renderer), актуальный
-`BROWSER_FLAGS=--no-sandbox,--disable-dev-shm-usage`, `shm_size: 1gb` и
-renderer metrics scrape target `grafana-image-renderer`.
+`grafana/grafana-image-renderer@sha256:c0c920e6974b0d30ae25313051344afcd2054362529968ebd9545a4b2bc8119b`,
+explicit shared token (`GF_RENDERING_RENDERER_TOKEN` в Grafana и `AUTH_TOKEN`
+в renderer), актуальный `BROWSER_FLAGS=--no-sandbox,--disable-dev-shm-usage`,
+`BROWSER_READINESS_TIMEOUT=90s`, `shm_size: 1gb` и renderer metrics scrape
+target `grafana-image-renderer`.
 
 ```bash
 # Проверить, что Grafana видит renderer

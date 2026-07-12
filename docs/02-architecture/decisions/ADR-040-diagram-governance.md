@@ -254,7 +254,7 @@ ELK (Eclipse Layout Kernel) SHOULD использоваться для `flowchar
 | LAYOUT-001 | `flowchart/graph` с `@nodes > 20` без ELK init | WARNING  |
 | LAYOUT-002 | `flowchart/graph` с `@nodes > 40` без ELK init | ERROR    |
 
-**Инструмент:** `src/tools/apply_elk_layout.py --dry-run` для аудита, без `--dry-run` для применения.
+**Инструмент:** `python -m scripts.diagrams apply-elk --dry-run` для аудита, без `--dry-run` для применения.
 
 ______________________________________________________________________
 

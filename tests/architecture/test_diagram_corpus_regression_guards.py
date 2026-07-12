@@ -26,7 +26,7 @@ VIEW_COLLECTION = DIAGRAM_ROOT / "views"
 
 
 def _load_apply_elk_layout() -> ModuleType:
-    module_path = REPO_ROOT / "src" / "tools" / "apply_elk_layout.py"
+    module_path = REPO_ROOT / "scripts" / "diagrams" / "apply_elk_layout.py"
     spec = importlib.util.spec_from_file_location(
         "apply_elk_layout_module", module_path
     )
@@ -91,12 +91,40 @@ def test_diagram_renderer_uses_atomic_svg_and_png_writes() -> None:
     assert ".${base}.png.tmp.XXXXXX" in renderer
     assert 'replace_atomically "$svg_tmp" "$svg_out"' in renderer
     assert 'replace_atomically "$png_tmp" "$png_out"' in renderer
+    assert 'REQUIRE_SVGO="${REQUIRE_SVGO:-0}"' in renderer
+    assert "--skip-svgo" in renderer
+    assert (
+        'svgo --quiet --config "$SCRIPT_DIR/svgo.config.js" "$svg_tmp" -o "$svg_tmp" 2>/dev/null || true'
+        not in renderer
+    )
 
 
 def test_apply_elk_default_dir_is_canonical_architecture_tree() -> None:
     module = _load_apply_elk_layout()
 
     assert module.ARCH_DIR == DIAGRAM_ROOT / "architecture"
+
+
+def test_diagram_codemods_are_owned_by_scripts_diagrams() -> None:
+    canonical = {
+        "apply_elk_layout.py",
+        "differentiate_linkstyle.py",
+        "harmonize_link_styles.py",
+    }
+
+    for name in canonical:
+        assert (REPO_ROOT / "scripts" / "diagrams" / name).exists()
+        wrapper = (REPO_ROOT / "src" / "tools" / name).read_text(encoding="utf-8")
+        assert "Compatibility wrapper" in wrapper
+        assert f"scripts.diagrams.{name[:-3]}" in wrapper
+
+    runtime_import_hits: list[str] = []
+    for path in sorted((REPO_ROOT / "src" / "bioetl").rglob("*.py")):
+        text = path.read_text(encoding="utf-8")
+        if "scripts.diagrams" in text or "src.tools" in text:
+            runtime_import_hits.append(path.relative_to(REPO_ROOT).as_posix())
+
+    assert runtime_import_hits == []
 
 
 def test_governance_docs_match_active_diagram_counts() -> None:

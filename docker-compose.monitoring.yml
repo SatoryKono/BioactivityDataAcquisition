@@ -1,3 +1,5 @@
+name: bioactivitydataacquisition2
+
 services:
   prometheus:
     image: prom/prometheus:latest
@@ -164,7 +166,7 @@ services:
     restart: unless-stopped
 
   renderer:
-    image: grafana/grafana-image-renderer:latest
+    image: grafana/grafana-image-renderer@sha256:c0c920e6974b0d30ae25313051344afcd2054362529968ebd9545a4b2bc8119b
     container_name: bioetl-grafana-renderer
     shm_size: "1gb"
     environment:
@@ -172,6 +174,7 @@ services:
       - HTTP_HOST=0.0.0.0
       - AUTH_TOKEN=${GF_RENDERING_RENDERER_TOKEN:-bioetl-local-renderer-token}
       - BROWSER_FLAGS=--no-sandbox,--disable-dev-shm-usage
+      - BROWSER_READINESS_TIMEOUT=${GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT:-90s}
       - GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-1GiB}
     networks:
       - monitoring

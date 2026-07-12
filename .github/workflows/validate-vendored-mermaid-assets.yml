@@ -1,4 +1,4 @@
-name: Validate vendored Mermaid
+name: Validate vendored Mermaid assets
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -8,13 +8,13 @@ on:
       paths:
         - 'assets/javascripts/mermaid*'
         - 'assets/stylesheets/mermaid*'
-        - '.github/workflows/validate-mermaid.yml'
+        - '.github/workflows/validate-vendored-mermaid-assets.yml'
     push:
       branches: [ main ]
       paths:
         - 'assets/javascripts/mermaid*'
         - 'assets/stylesheets/mermaid*'
-        - '.github/workflows/validate-mermaid.yml'
+        - '.github/workflows/validate-vendored-mermaid-assets.yml'
 
 jobs:
     check-mermaid:

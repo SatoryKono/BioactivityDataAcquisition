@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 
 import importlib.util
+import re
 import sys
 from pathlib import Path
 from types import ModuleType
@@ -117,3 +118,23 @@ def test_bundle_generator_falls_back_to_png_when_svg_missing(tmp_path: Path) -> 
     )
 
     assert "png/01-sample.png" in markdown
+
+
+def test_tracked_bundle_image_links_resolve_to_rendered_artifacts() -> None:
+    bundle_dir = Path("docs/02-architecture/diagrams/bundles")
+    image_link_re = re.compile(r"!\[[^\]]*]\(([^)]+)\)")
+    missing: list[str] = []
+
+    for bundle in sorted(bundle_dir.glob("*.bundle.md")):
+        for line_no, line in enumerate(
+            bundle.read_text(encoding="utf-8").splitlines(), start=1
+        ):
+            for match in image_link_re.finditer(line):
+                target = match.group(1).split("#", maxsplit=1)[0]
+                if not target.endswith((".svg", ".png")):
+                    continue
+                resolved = (bundle.parent / target).resolve()
+                if not resolved.exists():
+                    missing.append(f"{bundle}:{line_no}: {target}")
+
+    assert missing == []

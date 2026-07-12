@@ -1,8 +1,10 @@
+name: bioactivitydataacquisition2
+
 services:
   neo4j:
     image: neo4j:5.15-community
     container_name: bioetl-neo4j
-    restart: on-failure:2
+    restart: unless-stopped
     ports:
       - "7474:7474"
       - "7687:7687"
@@ -14,8 +16,8 @@ services:
       NEO4J_server_memory_pagecache_size: 256m
       NEO4J_server_jvm_additional: "-XX:+UseG1GC -XX:G1HeapRegionSize=16m"
     volumes:
-      - neo4j_data:/var/lib/neo4j/data
-      - neo4j_logs:/var/lib/neo4j/logs
+      - neo4j_data:/data
+      - neo4j_logs:/logs
     networks:
       - warp-network
     deploy:
@@ -31,9 +33,9 @@ services:
           "cypher-shell -u neo4j -p bioetl_secure_password 'RETURN 1' > /dev/null 2>&1",
         ]
       interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 120s
+      timeout: 20s
+      retries: 10
+      start_period: 180s
   bioetl:
     build:
       context: .
@@ -110,9 +112,12 @@ services:
           memory: 128M
 
   grafana-renderer:
-    image: grafana/grafana-image-renderer:latest
+    image: grafana/grafana-image-renderer@sha256:c0c920e6974b0d30ae25313051344afcd2054362529968ebd9545a4b2bc8119b
     container_name: bioetl-grafana-renderer
     restart: unless-stopped
+    environment:
+      - BROWSER_FLAGS=--no-sandbox,--disable-dev-shm-usage
+      - BROWSER_READINESS_TIMEOUT=${GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT:-90s}
     networks:
       - monitoring
     deploy:
