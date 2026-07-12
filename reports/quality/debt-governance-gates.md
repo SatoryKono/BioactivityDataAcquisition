@@ -16,8 +16,8 @@
 | `retained_public_entrypoint_burden` | `pass` | `current_count` | `0` | `0` | `configs/quality/debt_scorecard.yaml#compatibility_debt_metrics` |
 | `debt_budget_growth_policy` | `pass` | `budget_growth_allowed` | `False` | `False` | `configs/quality/debt_scorecard.yaml` |
 | `debt_scorecard_budget_no_growth` | `pass` | `budget_increase_count` | `not_evaluated_without_changed_from_ref` | `0` | `configs/quality/debt_scorecard.yaml` |
-| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `74c6e21ca8e18fe9e48df5e54e127835b7e83c7ac4137276a24057b195135e41` | `74c6e21ca8e18fe9e48df5e54e127835b7e83c7ac4137276a24057b195135e41` | `reports/quality/module-coverage-inventory.json` |
-| `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2221, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '74c6e21ca8e18fe9e48df5e54e127835b7e83c7ac4137276a24057b195135e41'}` | `{'source_module_count': 2221, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '74c6e21ca8e18fe9e48df5e54e127835b7e83c7ac4137276a24057b195135e41'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
+| `module_coverage_source_tree_hash_current` | `pass` | `source_tree_sha256` | `1e9c0e4caaf9a2417383c5bdd50c3bb0ec1f5b4a6ea261bd577f0f3d566ca4f9` | `1e9c0e4caaf9a2417383c5bdd50c3bb0ec1f5b4a6ea261bd577f0f3d566ca4f9` | `reports/quality/module-coverage-inventory.json` |
+| `module_coverage_scorecard_coherence` | `pass` | `module_coverage_scorecard_alignment` | `{'source_module_count': 2221, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '1e9c0e4caaf9a2417383c5bdd50c3bb0ec1f5b4a6ea261bd577f0f3d566ca4f9'}` | `{'source_module_count': 2221, 'unmeasured_module_count': 0, 'uncovered_module_count': 0, 'source_tree_sha256': '1e9c0e4caaf9a2417383c5bdd50c3bb0ec1f5b4a6ea261bd577f0f3d566ca4f9'}` | `reports/quality/module-coverage-inventory.json + reports/quality/architecture-quality-scorecard.json` |
 | `module_coverage_unmeasured_modules` | `pass` | `unmeasured_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `module_coverage_uncovered_modules` | `pass` | `uncovered_module_count` | `0` | `0` | `configs/quality/module_coverage_gates.yaml#aggregate_residual_ratchets` |
 | `hotspot_family_baseline_budget_warnings` | `pass` | `budget_warnings` | `0` | `0` | `reports/quality/hotspot-family-baseline.json` |
@@ -50,9 +50,9 @@
 | `observability_runtime_cardinality_review_required` | `pass` | `runtime_cardinality_review_required` | `0` | `0` | `reports/observability/runtime_cardinality_inventory.json` |
 | `observability_runtime_cardinality_threshold_violations` | `pass` | `runtime_cardinality_threshold_violations` | `0` | `0` | `reports/observability/runtime_cardinality_inventory.json` |
 | `observability_release_review_status` | `pass` | `status` | `passed` | `passed` | `reports/observability/runtime_cardinality_review.json` |
-| `observability_release_review_freshness` | `pass` | `generated_at_age_days` | `10` | `21` | `reports/observability/runtime_cardinality_review.json` |
+| `observability_release_review_freshness` | `pass` | `generated_at_age_days` | `12` | `21` | `reports/observability/runtime_cardinality_review.json` |
 | `observability_touched_metric_inventory_freshness` | `pass` | `changed_metric_surface_count` | `0` | `0` | `reports/observability/runtime_cardinality_inventory.json` |
 | `observability_touched_metric_review_freshness` | `pass` | `changed_metric_surface_count` | `0` | `0` | `reports/observability/runtime_cardinality_review.json` |
 | `adr_enforcement_blocking_gaps` | `pass` | `blocking_gap_count` | `0` | `0` | `reports/quality/adr-enforcement-matrix.json` |
-| `remote_main_architecture_debt_baseline` | `pass` | `baseline_artifact_fingerprint` | `80060e84d82ee783ca04617be15f48eed74964fac05ce491eaeda77e3434640b` | `clean remote-main artifact blobs` | `reports/quality/architecture-debt-remote-main-baseline.json` |
+| `remote_main_architecture_debt_baseline` | `pass` | `baseline_artifact_fingerprint` | `65b25afb67c9a4534b00983fa180f4112bcd5068da286ca4bff26144a33917b6` | `clean remote-main artifact blobs` | `reports/quality/architecture-debt-remote-main-baseline.json` |
 | `generated_artifact_drift` | `pass` | `stale_artifact_count` | `0` | `0` | `reports/quality/*.json` |

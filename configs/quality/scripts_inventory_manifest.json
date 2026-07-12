@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-12T12:52:45.624269+00:00",
+  "generated_at": "2026-07-12T12:57:21.281497+00:00",
   "summary": {
     "total_scripts": 451,
     "status_counts": {
-      "active": 344,
-      "supporting": 107
+      "active": 342,
+      "supporting": 109
     },
     "reference_group_coverage": {
       "agents": 5,
@@ -1948,7 +1948,7 @@
     {
       "path": "scripts/ai/gemini/setup-bash-alias.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -1958,7 +1958,11 @@
           "source_group": "scripts",
           "text": "| `setup-bash-alias.sh` | Optional: Add `gemini` command alias to bash |"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as an optional manual shell-alias helper for local Gemini ergonomics; keep it supporting and do not promote it to a canonical launcher while run-gemini.sh remains the governed entrypoint."
     },
     {
       "path": "scripts/ai/gemini/setup-gemini-wsl.bat",
@@ -10946,7 +10950,7 @@
     {
       "path": "scripts/engineering/repo/apply_branch_cleanup_phases_0_2.sh",
       "type": "sh",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 1,
       "references": [
@@ -10956,7 +10960,11 @@
           "source_group": "scripts",
           "text": "| `apply_branch_cleanup_phases_0_2.sh` | Orchestrate phases 0-2 (inventory + apply reports) |"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual branch-cleanup orchestration helper for phases 0-2 evidence runs; keep it supporting unless branch cleanup becomes a governed operator workflow with an explicit active-surface budget."
     },
     {
       "path": "scripts/engineering/repo/audit_root_cleanliness.py",

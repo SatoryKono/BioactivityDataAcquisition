@@ -20,6 +20,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as the shared branch-cleanup classification policy helper consumed by the governed branch cleanup command and unit tests; keep it side-effect free and fold it into branch_cleanup.py only if the cleanup workflow is retired."
     },
+    "scripts/engineering/repo/apply_branch_cleanup_phases_0_2.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual branch-cleanup orchestration helper for phases 0-2 evidence runs; keep it supporting unless branch cleanup becomes a governed operator workflow with an explicit active-surface budget."
+    },
     "scripts/engineering/repo/branch_cleanup.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -44,11 +50,47 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as the WSL environment-check helper invoked by the Windows Gemini helper wrapper; keep it supporting unless it becomes a standalone documented launcher surface."
     },
+    "scripts/ai/gemini/setup-bash-alias.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as an optional manual shell-alias helper for local Gemini ergonomics; keep it supporting and do not promote it to a canonical launcher while run-gemini.sh remains the governed entrypoint."
+    },
     "scripts/docs/common/markdown.py": {
       "owner": "@bioetl-docs",
       "decision": "shared_helper_module",
       "review_by": "2026-07-15",
       "next_step": "Retain as a shared markdown parsing helper imported by docs checks and docs KPI reporting; keep it non-active unless it is promoted to a standalone docs command surface."
+    },
+    "scripts/docs/chembl_matrix_structural_contract.py": {
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a top-level ChEMBL matrix compatibility shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
+    },
+    "scripts/docs/enrich_chembl_matrix_normalization_details.py": {
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a top-level ChEMBL matrix enrichment compatibility shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
+    },
+    "scripts/docs/export_chembl_matrix_structural_contract.py": {
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a top-level ChEMBL structural contract export shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
+    },
+    "scripts/docs/filter_chembl_matrix_rows.py": {
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a top-level ChEMBL matrix row-filter compatibility shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
+    },
+    "scripts/docs/generate_chembl_activity_field_matrix.py": {
+      "owner": "@bioetl-docs",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a top-level ChEMBL activity-field matrix shim while legacy direct-file tests still require the exact path; keep it supporting and prefer python -m scripts.docs dispatch for active use."
     },
     "scripts/ai/mcp/mcp_ast_grep_wrapper.ps1": {
       "owner": "@bioetl-platform",
@@ -163,6 +205,18 @@
       "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a historical standalone review orchestrator snapshot; prefer the governed py-review-orchestrator skill and current reports workflow instead of extending this orphan script."
+    },
+    "scripts/engineering/ci/apply-ci-optimizations-fixed.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual Windows CI-optimization variant while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow."
+    },
+    "scripts/engineering/ci/apply-ci-optimizations.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded manual Windows CI-optimization helper while historical docs still reference the exact script; keep it supporting and retire or consolidate it before promoting any CI optimization workflow."
     },
     "scripts/engineering/qa/audit_pipeline_semantics.py": {
       "owner": "@bioetl-platform",

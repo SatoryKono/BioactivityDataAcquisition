@@ -3489,7 +3489,7 @@
       "src/bioetl/infrastructure/control_plane/_file_run_ledger_helpers.py"
     ],
     "bioetl_data_freshness_seconds": [
-      "src/bioetl/application/services/data_quality_service.py"
+      "src/bioetl/application/services/data_quality_anomalies.py"
     ],
     "bioetl_data_source_retries_total": [
       "src/bioetl/infrastructure/adapters/decorators/_retry_support.py"
@@ -3523,7 +3523,7 @@
       "src/bioetl/application/services/data_quality_anomalies.py"
     ],
     "bioetl_dq_monitor_enabled": [
-      "src/bioetl/application/services/data_quality_service.py"
+      "src/bioetl/application/services/data_quality_anomalies.py"
     ],
     "bioetl_dq_records_quarantined_total": [
       "src/bioetl/application/core/_quarantine_metrics_support.py",
@@ -3542,10 +3542,10 @@
       "src/bioetl/application/observability/pipeline_metrics.py"
     ],
     "bioetl_dq_validation_record_count": [
-      "src/bioetl/application/services/data_quality_service.py"
+      "src/bioetl/application/services/data_quality_anomalies.py"
     ],
     "bioetl_dq_validation_score": [
-      "src/bioetl/application/services/data_quality_service.py"
+      "src/bioetl/application/services/data_quality_anomalies.py"
     ],
     "bioetl_errors_total": [
       "src/bioetl/application/core/batch_metrics.py"

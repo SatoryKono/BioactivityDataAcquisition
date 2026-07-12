@@ -111,6 +111,45 @@ class DataQualityMetricsMixin:
             count=record_count,
         )
 
+    def _emit_validation_gauges(
+        self,
+        *,
+        monitor_enabled: bool,
+        error_rate: float,
+        record_count: int,
+        freshness_anchor: float | None,
+    ) -> None:
+        """Emit validation gauges for DQ dashboards and freshness alerts."""
+        if self._metrics is None:
+            return
+
+        labels = {"pipeline": self._pipeline_name, "entity": self._entity_type}
+        self._metrics.set_gauge(
+            "bioetl_dq_monitor_enabled",
+            1.0 if monitor_enabled else 0.0,
+            labels,
+        )
+        self._metrics.set_gauge(
+            "bioetl_dq_validation_score",
+            1.0 - error_rate,
+            labels,
+        )
+        self._metrics.set_gauge(
+            "bioetl_dq_validation_record_count",
+            record_count,
+            labels,
+        )
+        if freshness_anchor is None:
+            return
+
+        # Dashboards and alerts derive lag via:
+        #   time() - bioetl_data_freshness_seconds
+        self._metrics.set_gauge(
+            "bioetl_data_freshness_seconds",
+            freshness_anchor,
+            labels,
+        )
+
 
 class DataQualityAnomalyMixin(DataQualityMetricsMixin):
     """Anomaly detection and anomaly logging helpers."""
