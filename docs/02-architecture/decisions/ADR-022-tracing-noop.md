@@ -61,7 +61,7 @@ span surface.
    requires only a composition wiring change; application code stays the same.
 1. **Ecosystem compatibility** — any OTel-compatible backend (Jaeger, Zipkin, Tempo,
    OTLP Collector) can be plugged in without modifying the port contract.
-1. **`Any` return type** — `get-tracer()` returns `Any` to avoid a hard dependency
+1. **`Any` return type** — `get_tracer()` returns `Any` to avoid a hard dependency
    on the `opentelemetry` package in the domain layer while preserving the OTel
    calling convention in all implementations.
 
@@ -118,7 +118,7 @@ This enables:
 
 ```python
 class NoOpTracing:
-    def get-tracer(self, name: str) -> NoOpTracer:
+    def get_tracer(self, name: str) -> NoOpTracer:
         return NoOpTracer()  # Stateless, no allocations per span
 
     def close(self) -> None:

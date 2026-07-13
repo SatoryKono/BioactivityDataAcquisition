@@ -542,7 +542,7 @@ class TestOpenTelemetryTracerSpanAdapter:
         self,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        """Returned handle should support set_attribute/record_exception/__exit__."""
+        """Returned handle supports attributes, events, exceptions, and exit."""
         from bioetl.infrastructure.observability import tracing
 
         if not tracing.OTEL_AVAILABLE:
