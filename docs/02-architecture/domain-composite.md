@@ -4,7 +4,7 @@
 
 Composite Domain Layer реализует паттерн Composite для оркестрации составных пайплайнов обогащения данных. Этот слой управляет конфигурацией, выполнением и слиянием данных из multiple enrichment pipelines в единую результирующую структуру.
 
-**Связанный ADR:** ADR-008 (Composite Pattern), ADR-026 (Composite Pipeline Architecture)
+**Связанный ADR:** ADR-026 (Composite Pipeline Pattern).
 
 ## Архитектура
 
@@ -16,6 +16,7 @@ src/bioetl/domain/composite/
 ├── config.py                         # Публичный API конфигурации
 ├── config_composite_serialization.py # Сериализация/десериализация
 ├── config_composite_validation.py    # Валидация конфигурации
+├── config_cross_validation.py        # Immutable cross-enricher config и пороговые инварианты
 ├── config_dq.py                      # DQ конфигурация
 ├── config_merge.py                   # Конфигурация слияния
 ├── config_models.py                  # Базовые модели конфигурации
@@ -256,8 +257,9 @@ src/bioetl/domain/composite/
 
 ## Связанные ADR
 
-- **ADR-008:** Composite Pattern - архитектурное решение для composite pattern
-- **ADR-026:** Composite Pipeline Architecture - детальная архитектура composite пайплайнов
+- **ADR-026:** принятое архитектурное решение для этого слоя.
+- **ADR-008:** Graceful Shutdown Strategy — исторический superseded ADR;
+  он не определяет архитектуру этого слоя.
 
 ## Зависимости
 
