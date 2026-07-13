@@ -2,6 +2,9 @@ version: 1
 policy_scope: project_test_health_evidence_shards
 owner: "@bioetl-quality"
 last_reviewed: "2026-04-30"
+last_inventory_rebaseline: "2026-07-13"
+inventory_source_ref: c9d639733928a2b699be2cc5031a38c4b3a3707e
+inventory_scope: tracked_test_module_inventory
 summary_path: docs/reports/evidence/project-test-health/SUMMARY.md
 shards:
   - id: failure-stability

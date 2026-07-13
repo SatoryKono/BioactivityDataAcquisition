@@ -532,12 +532,17 @@ domain surface. Runtime execution остаётся на `PipelineRunContext` и
 - `aggregation.py` - агрегация composite configs
 - `config.py` - composite domain config
 - `config_*.py` - специализированные composite configs
+- `config_cross_validation.py` - immutable cross-enricher config и пороговые инварианты
 - `cross_validation.py` - cross-validation logic
 - `field_groups.py` - field groups
 - `lineage.py` - lineage для composite
 - `result.py` - composite results
 
-**Зависимости:** Связан с ADR-008 (Composite Pattern).
+**Зависимости:** Связан с
+[ADR-026](decisions/ADR-026-composite-pipeline-pattern.md).
+
+**Историческая граница:** ADR-008 описывает superseded graceful-shutdown
+strategy и не является решением для этого слоя.
 
 #### 2.8.2. `contracts/`
 
