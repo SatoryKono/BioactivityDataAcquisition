@@ -1,22 +1,22 @@
 ______________________________________________________________________
 
-Version: 1.0.2
+Version: 1.0.3
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-07'
+  Last verified: '2026-07-13'
 
 ______________________________________________________________________
 
 # BioETL Observability Specification (DD)
 
-Этот документ фиксирует **каноническую** спецификацию наблюдаемости BioETL по состоянию на **2026-07-07**.
+Этот документ фиксирует **каноническую** спецификацию наблюдаемости BioETL по состоянию на **2026-07-13**.
 
 - Статус: `active`
-- Версия: `3.5.0`
+- Версия: `3.5.1`
 - Scope: `logs + metrics + tracing + correlation + provider health + control plane + audit + traceability`
 - Source of truth: код в `src/bioetl/**/observability*`, `src/bioetl/application/observability/*`, `src/bioetl/infrastructure/adapters/http/*`
 
@@ -340,6 +340,10 @@ alert `BioETLControlPlaneReadFailureRate` (см. `docs/05-operations/runbooks/ob
 
 - По умолчанию: `NoOpTracing` (tracing disabled)
 - При `BIOETL_OBSERVABILITY__TRACING_ENABLED=true`: `OpenTelemetryTracer`
+- NoOp и real adapter возвращают единый span surface:
+  `set_attribute`, `add_event`, `record_exception` и context-manager lifecycle
+- `OpenTelemetryTracer` владеет `TracerProvider` локально и не заменяет
+  process-global provider при повторной или nested инициализации
 - Exporter:
   - OTLP exporter при установленном OTLP пакете
   - fallback: Console exporter
@@ -350,6 +354,9 @@ alert `BioETLControlPlaneReadFailureRate` (см. `docs/05-operations/runbooks/ob
 Текущее состояние:
 
 - Спаны создаются на pipeline, composite lifecycle и HTTP-операциях
+- Adaptive-memory decisions публикуются как bounded
+  `bioetl.memory.decision` span events; tracing ON/OFF не меняет B/S/G counts
+  или terminal execution status
 - `CompositeLifecycleObserverService` использует sanctioned `TracingPort` seam
   для composite runtime lifecycle и создаёт bounded spans:
   - `pipeline.composite:<pipeline>`

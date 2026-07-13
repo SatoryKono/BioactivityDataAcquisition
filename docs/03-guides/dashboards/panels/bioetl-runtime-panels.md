@@ -20,7 +20,9 @@ Dashboard `2. Runtime` is an L2 incident surface for runtime triage. It uses sha
 
 ### 3. Status
 - **Type:** Stat
-- **Purpose:** Current runtime severity for the selected scope.
+- **Purpose:** Evidence-aware runtime severity: `0=OK`, `1=WARN`, `2=CRIT`,
+  `3=INCOMPLETE`, `null=UNKNOWN`. A scrape/rule trust gap forces
+  `INCOMPLETE` before zero counters may be trusted.
 - **Data sources:** `bioetl_runtime_current_status_trusted`
 
 ### 4. ID
@@ -35,12 +37,14 @@ Dashboard `2. Runtime` is an L2 incident surface for runtime triage. It uses sha
 
 ### 6. Runtime Status
 - **Type:** Stat
-- **Purpose:** Trust-gated current runtime status summary.
+- **Purpose:** Expanded mirror of the same trust-gated headline rule; it is not
+  an independent second verdict.
 - **Data sources:** `bioetl_runtime_current_status_trusted`
 
 ### 7. Runtime Telemetry Gap
 - **Type:** Stat
-- **Purpose:** Detect missing telemetry for selected scope.
+- **Purpose:** Detect missing/stale scrape or rule-group evidence. Non-zero makes
+  both runtime status panels `INCOMPLETE`.
 - **Data sources:** `bioetl_runtime_trust_gap_status_10m`
 
 ### 8. Runtime Blockers
@@ -75,7 +79,8 @@ Dashboard `2. Runtime` is an L2 incident surface for runtime triage. It uses sha
 
 ### 14. Detect
 - **Type:** Row
-- **Purpose:** Row-based detection workflow for stage backlog.
+- **Purpose:** Collapsed-by-default detection workflow for stage backlog and
+  blocker detail.
 - **Data sources:** `bioetl_stage_backlog_records`
 
 ### 15. Track Stage Backlog Trend
@@ -100,7 +105,7 @@ Dashboard `2. Runtime` is an L2 incident surface for runtime triage. It uses sha
 
 ### 19. Localize
 - **Type:** Row
-- **Purpose:** Row-based localization workflow for errors.
+- **Purpose:** Collapsed-by-default localization workflow for errors.
 - **Data sources:** `bioetl_errors_total`
 
 ### 20. Track Pipeline Phase Duration p50/p95/p99
@@ -125,7 +130,7 @@ Dashboard `2. Runtime` is an L2 incident surface for runtime triage. It uses sha
 
 ### 24. Escalate
 - **Type:** Row
-- **Purpose:** Row-based escalation workflow for cross-domain issues.
+- **Purpose:** Collapsed-by-default escalation workflow for cross-domain issues.
 - **Data sources:** `bioetl_runtime_alert_condition_*`
 
 ### 25. Review Runtime-owned escalation
@@ -195,7 +200,8 @@ Dashboard `2. Runtime` is an L2 incident surface for runtime triage. It uses sha
 
 ### 38. Tracing-only Log Hygiene (requires optional tracing profile)
 - **Type:** Row
-- **Purpose:** Row-based log hygiene inspection for tracing.
+- **Purpose:** Collapsed optional log-hygiene evidence; never required for the
+  Prometheus-first headline.
 - **Data sources:** `{job="bioetl"} | json`
 
 ### 39. Inspect Warning Logs
@@ -227,5 +233,6 @@ Dashboard `2. Runtime` is an L2 incident surface for runtime triage. It uses sha
 
 - This dashboard is an L2 incident surface, not a legacy CPU/RSS/GC dashboard.
 - It uses shared shell/status/ID/provenance contracts across all runtime dashboards.
-- Row-based workflows (Detect, Localize, Escalate) provide structured triage paths.
+- Row-based workflows (Detect, Localize, Escalate) provide structured triage
+  paths and remain collapsed until the headline/cause row points to one branch.
 - GLOBAL panels show cross-scope aggregate signals for escalation context.

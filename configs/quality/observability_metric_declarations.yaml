@@ -4,7 +4,9 @@ recording_rule_metrics:
   - bioetl_alerts_active_total
   - bioetl_alerts_firing_total
   - bioetl_checkpoint_age_seconds
+  - bioetl_control_plane_checkpoint_evidence_status
   - bioetl_control_plane_current_status
+  - bioetl_control_plane_current_status_trusted
   - bioetl_control_plane_run_type_universe
   - bioetl_control_plane_status
   - bioetl_control_plane_telemetry_missing_5m

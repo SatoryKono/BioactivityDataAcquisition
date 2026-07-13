@@ -434,6 +434,15 @@ routes:
       - reports/test-telemetry/slowest-tests.md
     notes: Branch-consumable telemetry summaries are regenerated alongside the committed baseline refresh workflow.
 
+  - id: targeted-s7-governance-hotspot-telemetry
+    generator: manual closeout from bounded pytest JUnit telemetry
+    output_kind: test_report
+    commit_policy: tracked_quality_evidence
+    outputs:
+      - reports/test-telemetry/s7-governance-hotspots.json
+    notes: Reviewed targeted S7 timing evidence supports the canonical pytest shard
+      rebalance without being represented as the full-suite telemetry baseline.
+
   - id: architecture-debt-task-backlog-quality-report
     generator: scripts/engineering/qa/generate_architecture_debt_tasks.py
     output_kind: working_report

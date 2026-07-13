@@ -10,7 +10,9 @@ Dashboard `6. Alerts & SLO` monitors active alert state, SLO pressure, alert sev
 
 ### 1. Navigation
 - **Type:** Text
-- **Purpose:** Explain dashboard navigation and escalation flow.
+- **Purpose:** Render the shared theme-safe bus `0..6` plus
+  `Silver Reject Explorer`, `Explore Logs`, and `Explore Traces`; wraps at
+  `1024px` and keeps the current item visibly disabled.
 - **Data sources:** Dashboard variables and operator copy.
 
 ### 2. Scope
@@ -40,7 +42,8 @@ Dashboard `6. Alerts & SLO` monitors active alert state, SLO pressure, alert sev
 
 ### 7. Firing Alert Details
 - **Type:** Table
-- **Purpose:** Show detailed information for currently firing alerts.
+- **Purpose:** Show detailed information for currently firing alerts with an
+  explicit `Global`, `Pipeline`, or `Run` scope badge on every row.
 - **Data sources:** `ALERTS{alertstate="firing"}` (standard Prometheus metric)
 
 ## Variables
@@ -58,5 +61,7 @@ separate template variables in the shipped JSON.
 ## Notes
 
 - This dashboard focuses on alert state and SLO pressure, not detailed metric breakdowns.
+- Global alerts remain visible when dashboard pipeline/workflow selectors are
+  set; their `Global` badge prevents false attribution to the selected scope.
 - Use with monitoring-index.md for incident-time navigation.
 - SLO calculations are based on defined error budgets and burn rates.

@@ -28,18 +28,32 @@ class TestTracingPortContract:
         ) as span:
             assert span is not None
             assert span.set_attribute("bioetl.status", "success") is None
+            assert (
+                span.add_event(
+                    "bioetl.memory.decision",
+                    attributes={"bioetl.memory.decision_index": 1},
+                )
+                is None
+            )
             assert span.record_exception(RuntimeError("boom")) is None
 
         assert tracing.flush() is None
         assert tracing.close() is None
         assert tracing.close() is None
 
-    def test_open_telemetry_tracer_wraps_span_context_manager(self) -> None:
+    def test_open_telemetry_tracer_wraps_span_context_manager(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
         """One canonical span path must forward into the underlying tracer."""
         from bioetl.infrastructure.observability import tracing as tracing_module
 
         if not tracing_module.OTEL_AVAILABLE:
             pytest.skip("OpenTelemetry is not available")
+
+        from opentelemetry.sdk.trace.export.in_memory_span_exporter import (
+            InMemorySpanExporter,
+        )
 
         entered_span = MagicMock()
         context_manager = MagicMock()
@@ -48,9 +62,17 @@ class TestTracingPortContract:
         otel_tracer = MagicMock()
         otel_tracer.start_as_current_span.return_value = context_manager
 
-        original_get_tracer = tracing_module.trace.get_tracer
-        tracing_module.trace.get_tracer = MagicMock(return_value=otel_tracer)
+        monkeypatch.setattr(
+            tracing_module,
+            "_build_telemetry_exporter",
+            InMemorySpanExporter,
+        )
         tracer_port = tracing_module.OpenTelemetryTracer("bioetl-contract-tests")
+        monkeypatch.setattr(
+            tracer_port._provider,
+            "get_tracer",
+            MagicMock(return_value=otel_tracer),
+        )
         try:
             assert isinstance(tracer_port, TracingPort)
 
@@ -63,6 +85,10 @@ class TestTracingPortContract:
 
             with span_handle as span:
                 span.set_attribute("bioetl.status", "success")
+                span.add_event(
+                    "bioetl.memory.decision",
+                    attributes={"bioetl.memory.decision_index": 1},
+                )
                 span.record_exception(RuntimeError("boom"))
 
             otel_tracer.start_as_current_span.assert_called_once_with(
@@ -73,7 +99,10 @@ class TestTracingPortContract:
                 "bioetl.status",
                 "success",
             )
+            entered_span.add_event.assert_called_once_with(
+                "bioetl.memory.decision",
+                attributes={"bioetl.memory.decision_index": 1},
+            )
             entered_span.record_exception.assert_called_once()
         finally:
-            tracing_module.trace.get_tracer = original_get_tracer
             tracer_port.close()

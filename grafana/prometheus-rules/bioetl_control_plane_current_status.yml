@@ -88,5 +88,53 @@ groups:
       - record: bioetl_checkpoint_age_seconds
         expr: clamp_min(time() - max by (pipeline) (bioetl_checkpoint_saved_at_seconds), 0)
 
+      - record: bioetl_control_plane_checkpoint_evidence_status
+        expr: >-
+          (
+            (
+              bioetl_control_plane_run_type_universe
+              unless on (pipeline) bioetl_checkpoint_age_seconds
+            ) * 3
+          )
+          or
+          (
+            bioetl_control_plane_run_type_universe
+            * on (pipeline) group_left()
+            clamp_max(
+              (bioetl_checkpoint_age_seconds >= bool 900)
+              +
+              (bioetl_checkpoint_age_seconds >= bool 3600),
+              2
+            )
+          )
+
+      - record: bioetl_control_plane_current_status_trusted
+        expr: >-
+          max by (pipeline, run_type) (
+            label_replace(
+              clamp_max(bioetl_replay_safety_blockers_15m, 2),
+              "required_evidence",
+              "replay_safety",
+              "",
+              ""
+            )
+            or
+            label_replace(
+              bioetl_control_plane_checkpoint_evidence_status,
+              "required_evidence",
+              "checkpoint_freshness",
+              "",
+              ""
+            )
+            or
+            label_replace(
+              (bioetl_control_plane_telemetry_missing_5m > bool 0) * 3,
+              "required_evidence",
+              "telemetry_completeness",
+              "",
+              ""
+            )
+          )
+
       - record: bioetl_terminal_events_15m
         expr: sum by (pipeline) (increase(bioetl_control_plane_terminal_events_total[15m]))

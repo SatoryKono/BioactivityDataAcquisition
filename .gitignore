@@ -371,6 +371,10 @@ scripts/docs/build/**/*.pyc
 !/docs/99-archive/legacy-05-architecture/**
 !/docs/99-archive/root-concepts-surface/
 !/docs/99-archive/root-concepts-surface/**
+# Preserve the reviewed branch-cleanup completion report after its root rehome.
+!/docs/99-archive/root-status-artifacts/
+/docs/99-archive/root-status-artifacts/*
+!/docs/99-archive/root-status-artifacts/BRANCH_CLEANUP_PLAN.md
 # docs/reports is retention-sensitive. Keep broad local reports ignored and
 # allowlist only curated entrypoints, generated cleanup inventory, and reviewed
 # bounded evidence manifests.

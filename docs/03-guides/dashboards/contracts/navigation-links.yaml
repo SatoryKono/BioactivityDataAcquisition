@@ -20,6 +20,7 @@ required_top_level_links_by_uid:
     - 3. Provider Health
     - 4. Data Quality
     - 5. Workflow
+    - 6. Alerts & SLO
     - Explore Logs
     - Explore Traces
     - Silver Reject Explorer
@@ -29,6 +30,7 @@ required_top_level_links_by_uid:
     - 3. Provider Health
     - 4. Data Quality
     - 5. Workflow
+    - 6. Alerts & SLO
     - Explore Logs
     - Explore Traces
     - Silver Reject Explorer
@@ -38,6 +40,9 @@ required_top_level_links_by_uid:
     - 3. Provider Health
     - 4. Data Quality
     - 5. Workflow
+    - 6. Alerts & SLO
+    - Explore Logs
+    - Explore Traces
     - Silver Reject Explorer
   bioetl-provider-health-v2:
     - 0. Control Plane
@@ -45,6 +50,7 @@ required_top_level_links_by_uid:
     - 2. Runtime
     - 4. Data Quality
     - 5. Workflow
+    - 6. Alerts & SLO
     - Explore Logs
     - Explore Traces
     - Silver Reject Explorer
@@ -54,6 +60,7 @@ required_top_level_links_by_uid:
     - 2. Runtime
     - 3. Provider Health
     - 5. Workflow
+    - 6. Alerts & SLO
     - Silver Reject Explorer
     - Explore Logs
     - Explore Traces
@@ -64,6 +71,7 @@ required_top_level_links_by_uid:
     - 3. Provider Health
     - 4. Data Quality
     - 5. Workflow
+    - 6. Alerts & SLO
     - Explore Logs
     - Explore Traces
   bioetl-alerts-slo:
@@ -82,6 +90,7 @@ required_top_level_links_by_uid:
     - 2. Runtime
     - 3. Provider Health
     - 4. Data Quality
+    - 6. Alerts & SLO
     - Explore Logs
     - Explore Traces
     - Silver Reject Explorer
@@ -232,6 +241,9 @@ required_panel_links_by_uid:
     - panel_id: 9013
       target_uid: bioetl-workflow-overview
       link_titles: [Open Workflow]
+    - panel_id: 9601
+      target_uid: bioetl-alerts-slo
+      link_titles: [Open 6. Alerts & SLO]
   bioetl-dq-v2:
     - panel_id: 116
       target_uid: bioetl-control-plane-v1
@@ -297,6 +309,10 @@ default_time_refresh_policy:
     dashboards: [bioetl-runtime, bioetl-control-plane-v1, bioetl-provider-health-v2, bioetl-dq-v2, bioetl-workflow-overview]
     time_from: now-12h
     refresh: 30s
+  Alerts:
+    dashboards: [bioetl-alerts-slo]
+    time_from: now-24h
+    refresh: 30s
   L2:
     dashboards: [bioetl-silver-reject-explorer]
     time_from: now-24h
@@ -318,10 +334,10 @@ navigation_transition_contract:
   dashboard_levels:
     L0:
       dashboards: [bioetl-overview-v2]
-      required_outbound: [bioetl-runtime, bioetl-control-plane-v1, bioetl-provider-health-v2, bioetl-dq-v2, bioetl-workflow-overview]
+      required_outbound: [bioetl-runtime, bioetl-control-plane-v1, bioetl-provider-health-v2, bioetl-dq-v2, bioetl-workflow-overview, bioetl-alerts-slo]
       required_inbound: []
     L1:
-      dashboards: [bioetl-runtime, bioetl-control-plane-v1, bioetl-provider-health-v2, bioetl-dq-v2, bioetl-workflow-overview]
+      dashboards: [bioetl-runtime, bioetl-control-plane-v1, bioetl-provider-health-v2, bioetl-dq-v2, bioetl-workflow-overview, bioetl-alerts-slo]
       required_outbound: [bioetl-overview-v2]
       required_inbound: [bioetl-overview-v2]
     L2:
@@ -344,42 +360,56 @@ navigation_transition_contract:
     bioetl-control-plane-v1->bioetl-dq-v2: scoped_handoff
     bioetl-control-plane-v1->bioetl-silver-reject-explorer: context_mapping
     bioetl-control-plane-v1->bioetl-workflow-overview: context_mapping
+    bioetl-control-plane-v1->bioetl-alerts-slo: scoped_handoff
     bioetl-overview-v2->bioetl-control-plane-v1: scoped_handoff
     bioetl-overview-v2->bioetl-runtime: scoped_handoff
     bioetl-overview-v2->bioetl-provider-health-v2: context_mapping
     bioetl-overview-v2->bioetl-dq-v2: scoped_handoff
     bioetl-overview-v2->bioetl-silver-reject-explorer: context_mapping
     bioetl-overview-v2->bioetl-workflow-overview: context_mapping
+    bioetl-overview-v2->bioetl-alerts-slo: scoped_handoff
     bioetl-runtime->bioetl-control-plane-v1: scoped_handoff
     bioetl-runtime->bioetl-overview-v2: scoped_handoff
     bioetl-runtime->bioetl-provider-health-v2: context_mapping
     bioetl-runtime->bioetl-dq-v2: scoped_handoff
     bioetl-runtime->bioetl-silver-reject-explorer: context_mapping
     bioetl-runtime->bioetl-workflow-overview: context_mapping
+    bioetl-runtime->bioetl-alerts-slo: scoped_handoff
     bioetl-provider-health-v2->bioetl-control-plane-v1: context_mapping
     bioetl-provider-health-v2->bioetl-overview-v2: context_mapping
     bioetl-provider-health-v2->bioetl-runtime: context_mapping
     bioetl-provider-health-v2->bioetl-dq-v2: context_mapping
     bioetl-provider-health-v2->bioetl-silver-reject-explorer: context_mapping
     bioetl-provider-health-v2->bioetl-workflow-overview: context_mapping
+    bioetl-provider-health-v2->bioetl-alerts-slo: context_mapping
     bioetl-dq-v2->bioetl-control-plane-v1: scoped_handoff
     bioetl-dq-v2->bioetl-overview-v2: scoped_handoff
     bioetl-dq-v2->bioetl-runtime: scoped_handoff
     bioetl-dq-v2->bioetl-provider-health-v2: context_mapping
     bioetl-dq-v2->bioetl-workflow-overview: context_mapping
     bioetl-dq-v2->bioetl-silver-reject-explorer: context_mapping
+    bioetl-dq-v2->bioetl-alerts-slo: scoped_handoff
     bioetl-silver-reject-explorer->bioetl-control-plane-v1: context_mapping
     bioetl-silver-reject-explorer->bioetl-overview-v2: context_mapping
     bioetl-silver-reject-explorer->bioetl-runtime: context_mapping
     bioetl-silver-reject-explorer->bioetl-provider-health-v2: context_mapping
     bioetl-silver-reject-explorer->bioetl-dq-v2: context_mapping
     bioetl-silver-reject-explorer->bioetl-workflow-overview: context_mapping
+    bioetl-silver-reject-explorer->bioetl-alerts-slo: context_mapping
     bioetl-workflow-overview->bioetl-control-plane-v1: scoped_handoff
     bioetl-workflow-overview->bioetl-overview-v2: scoped_handoff
     bioetl-workflow-overview->bioetl-runtime: scoped_handoff
     bioetl-workflow-overview->bioetl-provider-health-v2: context_mapping
     bioetl-workflow-overview->bioetl-dq-v2: scoped_handoff
     bioetl-workflow-overview->bioetl-silver-reject-explorer: context_mapping
+    bioetl-workflow-overview->bioetl-alerts-slo: scoped_handoff
+    bioetl-alerts-slo->bioetl-control-plane-v1: scoped_handoff
+    bioetl-alerts-slo->bioetl-overview-v2: scoped_handoff
+    bioetl-alerts-slo->bioetl-runtime: scoped_handoff
+    bioetl-alerts-slo->bioetl-provider-health-v2: context_mapping
+    bioetl-alerts-slo->bioetl-dq-v2: scoped_handoff
+    bioetl-alerts-slo->bioetl-silver-reject-explorer: context_mapping
+    bioetl-alerts-slo->bioetl-workflow-overview: context_mapping
   incident_critical_reciprocal_paths:
     - [bioetl-runtime, bioetl-control-plane-v1]
     - [bioetl-control-plane-v1, bioetl-dq-v2]

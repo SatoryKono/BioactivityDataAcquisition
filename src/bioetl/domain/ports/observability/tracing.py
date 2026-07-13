@@ -19,7 +19,10 @@ class TracingPort(Protocol):
             name: Tracer name, typically the instrumented module or component name.
 
         Returns:
-            OTel-compatible Tracer object for creating spans.
+            OTel-compatible Tracer object for creating spans. Context-managed
+            spans returned by the tracer must expose ``set_attribute()``,
+            ``add_event()``, and ``record_exception()`` so NoOp and concrete
+            adapters remain behaviorally interchangeable.
         """
         ...
 

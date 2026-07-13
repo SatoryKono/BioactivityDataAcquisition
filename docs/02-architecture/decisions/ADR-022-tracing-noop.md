@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.0.1
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-07-13'
 
 ______________________________________________________________________
 
@@ -49,7 +49,9 @@ This overhead provides no benefit for single-process local execution.
 
 `TracingPort` is intentionally modeled after the **OpenTelemetry Tracing API**.
 `get-tracer()` returns an object whose interface mirrors `opentelemetry.trace.Tracer`
-(`start-as-current-span`, span context manager, `set-attribute`, `record-exception`).
+(`start-as-current-span`, span context manager, `set-attribute`, `add-event`,
+`record-exception`). Both the NoOp and real adapter MUST preserve this callable
+span surface.
 
 **Why OTel as the port surface?**
 
@@ -82,7 +84,8 @@ tracing = OpenTelemetryTracer(service_name="bioetl")
 
 # Both implementations expose the same OTel calling convention:
 otel_tracer = tracing.get_tracer("bioetl.pipeline")
-with otel_tracer.start_as_current_span("my-operation", attributes={...}):
+with otel_tracer.start_as_current_span("my-operation", attributes={...}) as span:
+    span.add_event("bioetl.memory.decision", attributes={...})
     ...  # works identically with NoOp or real OTel
 ```
 
@@ -138,6 +141,7 @@ class TracingPort(Protocol):
 `OpenTelemetryTracer` class exists in `tracing.py` for future use:
 
 - Supports OTLP export (production) and Console export (debug)
+- Owns its `TracerProvider` locally instead of replacing process-global tracing state
 - Graceful shutdown with span flushing
 - Compatible with TracingPort interface
 

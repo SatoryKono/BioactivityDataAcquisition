@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-
 import pytest
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
@@ -123,6 +122,10 @@ def test_tracing_adapters_expose_otel_compatible_surface() -> None:
             tracer = tracing_adapter.get_tracer("test.component")
             with tracer.start_as_current_span("test-span") as span:
                 span.set_attribute("key", "value")
+                span.add_event(
+                    "bioetl.memory.decision",
+                    attributes={"bioetl.memory.decision_index": 1},
+                )
     finally:
         for tracing_adapter in adapters:
             tracing_adapter.close()

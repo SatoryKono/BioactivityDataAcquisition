@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+import subprocess
 import tempfile
 import threading
 import time
@@ -21,6 +23,7 @@ from bioetl.infrastructure.storage.silver.delta_request_models import (
 )
 from bioetl.infrastructure.storage.silver.delta_write_execution import (
     _await_blocking_deltalake_call,
+    _run_plain_delta_write_subprocess,
     _write_plain_delta_request,
 )
 
@@ -138,6 +141,43 @@ async def test_write_plain_delta_request_can_use_process_isolation(
     assert "partition_by" not in kwargs
     assert arrow_data is request.arrow_data
     assert timeout_seconds == pytest.approx(3.0)
+
+
+def test_run_plain_delta_write_subprocess_uses_arrow_file_not_stdin(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    """Large Arrow payloads must not be piped through stdin on Windows."""
+    table_path = tmp_path / "silver" / "entity" / "table"
+    request = _make_request(str(table_path))
+    captured: dict[str, object] = {}
+
+    def _fake_run(cmd: list[str], **kwargs: object) -> SimpleNamespace:
+        captured["kwargs"] = kwargs
+        metadata = json.loads(cmd[3])
+        arrow_path = Path(str(metadata["arrow_path"]))
+        assert arrow_path.exists()
+        assert arrow_path.stat().st_size > 0
+        return SimpleNamespace(returncode=0, stdout=b"", stderr=b"")
+
+    monkeypatch.setattr(subprocess, "run", _fake_run)
+
+    _run_plain_delta_write_subprocess(
+        kwargs={
+            "table_or_uri": normalize_delta_filesystem_path(request.table_path),
+            "mode": "append",
+        },
+        arrow_data=request.arrow_data,
+        timeout_seconds=3.0,
+    )
+
+    subprocess_kwargs = captured["kwargs"]
+    assert isinstance(subprocess_kwargs, dict)
+    assert "input" not in subprocess_kwargs
+    assert not any(
+        path.exists()
+        for path in table_path.parent.glob(".plain_delta_payload_*.arrow")
+    )
 
 
 @pytest.mark.asyncio

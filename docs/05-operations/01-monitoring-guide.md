@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.1.0
+Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-07'
+  Last verified: '2026-07-13'
 
 ______________________________________________________________________
 
@@ -95,6 +95,13 @@ Pushgateway publication на завершении run. Это позволяет
 - availability/risk notes: SLA, known limitations, sensitivity
 - `First action`: что делать при `CRIT` и `WARN`
 
+Use the shipped state vocabulary literally: `OK/WARN/CRIT` are business
+severity; `INCOMPLETE` means required evidence is missing/stale; `UNKNOWN`
+means no truthful verdict; `ERROR` is an explicit query/datasource/backend
+failure. `VALID EMPTY`, `TELEMETRY ABSENT`, and `N/A` are distinct neutral
+terminal states. `LOADING` is transient only, and blank panel bodies are never
+acceptable evidence.
+
 Canonical `1. Overview` (`bioetl-overview-v2`) now uses the frozen Overview v3
 layout for this transition: explicit provenance header, aggregate-first status
 cards, visible `workflow`/`run_id` context, and local control-plane identity
@@ -116,6 +123,11 @@ control-plane backend health (`/health/live`) before interpreting the card as
 an absent run, expected empty scope, or zero processed records. The shipped
 cards include no-value copy and backend-health links so backend-down is not
 visually equivalent to valid zero evidence.
+
+All eight shipped dashboards use one theme-safe navigation composition:
+numbered bus `0..6`, then `Silver Reject Explorer`, `Explore Logs`, and
+`Explore Traces`. The bus wraps at `1024px` and keeps visible contrast in dark
+and light themes; Control Plane has no navigation exception.
 
 `0. Control Plane` keeps the compact shared `ID` panel backed by
 `/ops/control-plane/identity-table`. It is a two-column operator summary, not a
@@ -176,15 +188,15 @@ L0 дашборд для одного operator question: что сейчас bro
 куда drill down первым.
 
 - **Answer surface**: `Provenance`, `Status`, `ID`, `Processed Records`,
-  `First Action`, `Control Plane`, `Runtime`, `Data Quality`, `Provider`,
-  `Data Validation`, `Inputs`, `Workflow`. `OK` requires recent signal; no
+  `First Action`, first-screen `Alert/SLO Triage`, and the deviation-first
+  `Inputs` matrix. `OK` requires recent signal; no
   recent samples stay `UNKNOWN`, not green. Workflow summary is current-state
   evidence and must follow the latest bounded terminal workflow signal rather
   than cumulative workflow-run counters.
 - **Above-the-fold layout**: first screen without scroll contains the
   provenance header, `Status`, local identity context (`ID`), processed-record
-  context, `First Action`, compact subsystem current-status cards, `Inputs`,
-  and `Workflow`.
+  context, `First Action`, actual alert evidence, and `Inputs`. Repeated
+  subsystem detail moves to collapsed historical/detail rows.
 - **L1 historical context**: immediately below the first screen lives the
   `L1 Historical Trends` row with `Runtime Blockers Trend`, `DQ Status Trend`,
   and `Gold Lifecycle Trend`. Эти графики дают recent-history context и не
@@ -199,19 +211,16 @@ L0 дашборд для одного operator question: что сейчас bro
   ledger, checkpoint, lineage и `Silver Rejects + Rate`. Distribution
   pie panels, standalone vanity yield/rate gauges и composite source-selection
   detail не входят в L0 flow.
-- **Expanded rows**: `Range Evidence` содержит
+- **Collapsed rows**: `L1 Historical Trends` contains repeated subsystem detail
+  and trends; `Range Evidence` содержит
   `Historical Failures`, `Recent Terminal Runs` и `Silver Rejects + Rate`;
   `Diagnostics & Docs` остаётся отдельной
-  expanded navigation/support surface.
-- **Drilldown**: top-level шина содержит `0. Control Plane`, `2. Runtime`,
-  `3. Provider Health`, `4. Data Quality`, `5. Workflow`, `Silver Reject Explorer`;
+  collapsed navigation/support surface.
+- **Drilldown**: top-level шина содержит полный bus `0..6`, затем
+  `Silver Reject Explorer`, `Explore Logs`, `Explore Traces`;
   ключевые current-status panels дублируют этот handoff через panel `dataLinks`.
   Каноническая shipped surface этой шины — navigation panel `id=1000`; header
   row рядом с Grafana variables не обязан повторять те же dashboard links.
-  Для `bioetl-control-plane-v1` top-level navigation намеренно не уводит
-  оператора напрямую в Grafana Explore apps: first screen остаётся dashboard +
-  runbook surface, а logs/traces расследование начинается из связанных
-  dashboard handoff и runbook-пути.
 
 #### 2. 2. Runtime
 
@@ -223,26 +232,25 @@ tracing-backed log hygiene живёт в collapsed row
 `Tracing-only Log Hygiene (requires optional tracing profile)`.
 
 - **Top answer area**:
-  `Monitor Runtime Current Status` and `Inspect Top Runtime Blockers` share the
+  `Runtime Status` and `Runtime Blockers` share the
   current-cause row. The compact evidence row contains
-  `Monitor Worst Stage Lag`, `Monitor Runtime Blockers`,
-  `Monitor Runtime Error Rate`, `Monitor Runtime Telemetry Gap`, and
-  `Monitor Failed Runs`; `First Action` remains a full-width operator CTA below
-  those compact rows.
+  `Worst Stage Lag`, `Monitor Runtime Blockers`, `Runtime Error Rate`, `Runtime
+  Telemetry Gap`, and `Failed Runs`; `First Action` remains the first-screen CTA.
   Это первый экран triage. Если здесь уже понятно, что runtime blocked,
   оператор не должен сначала прокручивать в logs/traces.
-  `Monitor Runtime Telemetry Gap` проверяет scrape plus runtime dashboard
+  `Runtime Telemetry Gap` проверяет scrape plus runtime dashboard
   recording-rule evaluation failures, rule-group presence and evaluation
-  freshness; non-zero/UNKNOWN поднимает/блокирует `Status` and `Runtime Status`
-  before zero-count panels are trusted.
+  freshness; non-zero forces `Status` and `Runtime Status` to `INCOMPLETE`,
+  while UNKNOWN also blocks zero-count panels from being trusted.
   Это intentional datasource trust marker: runtime сохраняет явный first-screen
   health signal только там, где без него zero-count cards можно спутать с
   healthy state.
-  `Monitor Worst Stage Lag`, `Monitor Failed Runs` и
-  `Monitor Runtime Error Rate` остаются selected-range evidence; они рендерятся
+  `Worst Stage Lag`, `Failed Runs` и `Runtime Error Rate` остаются
+  selected-range evidence; они рендерятся
   как neutral zero evidence and do not determine current status.
-  `Inspect Active Runtime Blocker Detail` открывается как expanded `Detect`
-  drilldown, а не как отдельная first-screen guidance panel.
+  `Inspect Active Runtime Blocker Detail` открывается внутри collapsed `Detect`
+  drilldown по явному запросу оператора, а не как отдельная first-screen
+  guidance panel.
 
 - **Localization row**:
   `Stage Backlog Trend`, `Records by Stage / Interval`,
@@ -266,7 +274,7 @@ tracing-backed log hygiene живёт в collapsed row
   telemetry подтверждает scope; отсутствующий scope остаётся `UNKNOWN`.
 
 - **Alert/SLO triage surface**:
-  `1. Overview` includes expanded `Alert/SLO Triage` with
+  `1. Overview` includes first-screen expanded `Alert/SLO Triage` with
   `Triage Alert State`. This panel reads Prometheus `ALERTS` for firing and
   pending alert state, preserving the alert-rule source of truth instead of
   re-encoding alert thresholds in dashboard queries.
@@ -281,8 +289,8 @@ tracing-backed log hygiene живёт в collapsed row
   parser failures нельзя безопасно scoped by `$pipeline`.
 
 - **Drilldown contract**:
-  navigation bus `0. Control Plane`, `1. Overview`, `3. Provider Health`,
-  `4. Data Quality`, `5. Workflow`, `Explore Logs`, `Explore Traces`.
+  navigation bus `0..6`, then `Silver Reject Explorer`, `Explore Logs`,
+  `Explore Traces`.
   Panel-level dashboard handoffs запрещены, если target уже доступен в
   top-level шине. `run_id`, `payload_hash`, `record_id` в runtime dashboard
   запрещены.
@@ -358,7 +366,7 @@ tracing-backed log hygiene живёт в collapsed row
 - Для provider/control-plane/runtime/DQ latency panels `No data` нужно читать
   как “в окне нет latency samples”, а не как нормализованный `0s`.
 - **Drilldown**: navigation bus `0. Control Plane`, `1. Overview`,
-  `2. Runtime`, `4. Data Quality`, `5. Workflow`, `Explore Logs`,
+  `2. Runtime`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO`, `Explore Logs`,
   `Explore Traces`, `Silver Reject Explorer`. Provider correlation по-прежнему
   идёт через Runtime/DQ переходы и runbook links; sticky shortcuts в `id=1000`
   не заменяют canonical provider triage flow.
@@ -374,19 +382,23 @@ tracing-backed log hygiene живёт в collapsed row
   as `WARN` or `UNKNOWN`, not as unconditional green.
 - **Current-context row below the answer row**: `Monitor: Data Quality Score
   (Volume-weighted)`, `Monitor: Worst-Entity DQ Score`,
-  `Monitor: Worst Data Freshness Lag (seconds)`, `Track: Records Quarantined in Range`,
-  `Track: Soft Threshold Exceeded in Range` и `Track: Silver Filter Rejects in Range`
-  дают compact supporting context до перехода к full-width historical evidence.
-- **Track Range Evidence: Bronze -> Silver -> Gold**: полноширинный
-  selected-range flow panel ниже current-context row.
+  `Time Range · Worst Freshness Age (hours; SLA 24/72)`, `Track: Records
+  Quarantined in Range`, `Track: Silver Filter Rejects in Range` и `Track: DQ
+  Blocked Records in Range (Evidence)` дают compact TIME RANGE context.
+- **Scope labels**: headline/reasons are `CURRENT`; HTTP `ID`/accounting can be
+  `SELECTED RUN`; score/count/freshness cards are `TIME RANGE`. These scopes are
+  not interchangeable.
+- **Track Range Evidence: Bronze -> Silver -> Gold**: selected-range flow panel
+  lives under collapsed diagnostics.
 - **Monitor: Silver Validation Failures / Gold Strict Validation Failures / Track: DQ Blocked Records in Range (Evidence) / Track: DQ Threshold Events in Range Trend**:
   контроль hard-failure и operator impact surfaces ниже first-screen band. Blocked-record
   и threshold-event панели показывают absolute evidence + domain threshold counters, а
   severity-вердикт остаётся за `Monitor DQ Current Status` / `Monitor DQ Threshold State`
   (без UI-side ratio math).
-- **Anomalies / DQ p95 / Data Freshness**: детальные DQ-сигналы. `Worst Data
-  Freshness Lag (seconds)` теперь показывает самый stale entity в выбранном
-  scope через selected-range `max(time() - max_over_time(bioetl_data_freshness_seconds[$__range]))`,
+- **Anomalies / DQ p95 / Data Freshness**: детальные DQ-сигналы. `Time Range ·
+  Worst Freshness Age (hours; SLA 24/72)` показывает самый stale entity в
+  выбранном scope через selected-range age divided by `3600`; display and
+  thresholds use hours (`24h` WARN, `72h` CRIT),
   а `Review: Latest Successful Data Timestamp` остаётся отдельным latest-success
   anchor на первом экране, также основанным на `max_over_time(...)` внутри
   выбранного range. Это intentionally разные сигналы: latest success не должен
@@ -405,7 +417,7 @@ tracing-backed log hygiene живёт в collapsed row
   bar comparison surface, а не `piechart`: для quarantine triage сравнение
   категорий по объёму важнее процентной композиции.
 - **Drilldown**: navigation bus `0. Control Plane`, `1. Overview`,
-  `2. Runtime`, `3. Provider Health`, `5. Workflow`, `Silver Reject Explorer`,
+  `2. Runtime`, `3. Provider Health`, `5. Workflow`, `6. Alerts & SLO`, `Silver Reject Explorer`,
   `Explore Logs`, `Explore Traces`. Panel-level dashboard handoffs запрещены:
   replay/checkpoint traceability открывается через `0. Control Plane` в
   top-level шине.
@@ -429,18 +441,22 @@ surfaces.
   а когда `No data`, `unknown` pipeline, unsupported filter chain,
   backend/plugin failure или `bronze_records=0` остаются UNKNOWN/error.
 - **Datasource**: `Quarantine Explorer` (JSON/Infinity), не Prometheus.
-- **Trust model**: Explorer intentionally uses explicit first-screen copy and
-  panel descriptions instead of a dedicated datasource-health stat tile; treat
-  empty tables as OK only after the CTA confirms valid scope and backend
-  availability.
+- **Trust model**: `Monitor Explorer Backend Health` is the required first-screen
+  transport marker. It must terminate as healthy, explicit error, or valid
+  empty; blank/loading and error-icon + `No data` contradictions fail render
+  evidence.
 - **Custom noValue copy**: per-panel `noValue` strings here intentionally stay
   datasource-specific instead of collapsing into plain `UNKNOWN`, because they
   distinguish empty result, missing scoped summary, excluded record, and
   backend/API ambiguity.
 - **Scope contract**: `$pipeline` всегда single-select/no-All; `run_id` и
   `payload_hash` остаются Explorer-only forensic filters.
+- **Progressive sequence**: scope → Backend Health → one action → summary → top
+  causes. `Trends · expand when rejects exist` and `Records and selected detail
+  · expand after narrowing` are collapsed by default.
 - **Drilldown**: navigation bus `0. Control Plane`, `1. Overview`,
-  `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`;
+  `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`,
+  `6. Alerts & SLO`, then the remaining global adjuncts;
   DQ panels can now open scoped Explorer views directly for
   `reason_code`/`field` narrowing;
   row-level link в CLI-команду остаётся для action handoff.
@@ -453,18 +469,22 @@ step outcomes.
 
 - **Workflow Runs**: selected-range count по `bioetl_workflow_runs_total`.
 - **Missing data semantics**: first-screen workflow count cards intentionally
-  render `0` for empty selected ranges because they are bounded event counters,
+  render neutral `0 · valid empty range` for empty selected ranges because they are bounded event counters,
   not current-status panels. Этот `0` не доказывает, что workflow сейчас
   healthy/running; live current state remains out of scope for this dashboard.
 - **Step Outcomes by Kind**: breakdown по bounded `step_kind/status` без
   `run_id` или `step_id` labels; panel now respects selected `$status` and
-  lives under expanded row `Step Diagnostics`.
+  lives under collapsed row `Step Diagnostics`.
 - **Step Duration p95**: latency по `bioetl_workflow_step_duration_seconds`;
-  panel now also respects selected `$status` and lives under expanded row
+  panel now also respects selected `$status` and lives under collapsed row
   `Step Diagnostics`.
 - **First Screen**: keep run/step failure cards, `Workflow Run Outcomes / Range`,
   and `First Action` visible before expanding detailed step
   diagnostics.
+- **Outcome states**: `Workflow Run Outcomes / Range` distinguishes `VALID
+  EMPTY`, `NO MATCHING SCOPE`, `TELEMETRY ABSENT`, and `ERROR / UNKNOWN`.
+  `Pipeline Status` has no Runtime fallback: absent workflow pipeline evidence
+  is neutral `NOT RESOLVED`, never green.
 - **Drilldown**: links `0. Control Plane`, `1. Overview`, `2. Runtime`,
   `3. Provider Health`, `4. Data Quality`.
 

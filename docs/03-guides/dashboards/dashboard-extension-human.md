@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-13'
+  Last verified: '2026-07-13'
 
 ______________________________________________________________________
 
 # Dashboard Extension Guide (Human)
 
-Дата сверки: **2026-04-13**
+Дата сверки: **2026-07-13**
 Источник истины: `grafana/dashboards/*.json`
 
 Короткий guide для инженера, который вручную расширяет shipped Grafana dashboards
@@ -47,11 +47,16 @@ ______________________________________________________________________
 ### Навигация
 
 - Top-level шина: `0. Control Plane` / `1. Overview` / `2. Runtime` /
-  `3. Provider Health` / `4. Data Quality` / `5. Workflow`.
-- На текущей странице текущий dashboard остаётся видимым в navigation panel `id=1000` как disabled dark-gray item; machine-readable `panel.links` по-прежнему не содержат self-link.
+  `3. Provider Health` / `4. Data Quality` / `5. Workflow` /
+  `6. Alerts & SLO`.
+- На текущей странице текущий dashboard остаётся видимым в navigation panel
+  `id=1000` как disabled theme-safe item; machine-readable `panel.links`
+  по-прежнему не содержат self-link. Полная навигация читаема в dark/light
+  themes и переносится без обрезки на viewport `1024px`.
 - Любые дубли dashboard-to-dashboard links из одного dashboard в один target
   dashboard запрещены.
-- Во всех shipped navigation panels `id=1000` после bus `0..5` закреплены
+- Во всех восьми shipped navigation panels `id=1000` после bus `0..6`
+  закреплены
   global adjunct links `Silver Reject Explorer`, `Explore Logs`,
   `Explore Traces`.
 - Navigation panel links должны открываться в том же окне; не используйте
@@ -60,8 +65,9 @@ ______________________________________________________________________
   `Tier 1` answer row,
   `Tier 2` current-context support,
   `Tier 3` selected-range evidence below fold,
-  `Tier 4` diagnostic/detail rows below fold. Row-группы шиппятся expanded by
-  default, чтобы render/audit paths не скрывали secondary/noisy detail.
+  `Tier 4` diagnostic/detail rows below fold. Tier 4 row-группы шиппятся
+  collapsed by default; полный render/audit явно раскрывает их, когда нужно
+  проверить secondary/noisy detail.
 
 ### Prometheus
 

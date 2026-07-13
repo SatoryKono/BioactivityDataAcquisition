@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Grafana render-first remediation program (#6246-#6253):** Unified all
+  eight shipped dashboards on a theme-safe wrapping navigation bus (`0..6`
+  plus Silver/Logs/Traces); added evidence-aware Control Plane and Runtime
+  trust gates; made DQ scope/units explicit; neutralized Workflow zero
+  evidence; added alert row scope badges; and collapsed forensic detail behind
+  progressive disclosure. Silver Reject Explorer now exposes explicit backend
+  and terminal-state semantics. The screenshot workflow records/verifies theme
+  and viewport, supports the dark/light × 1600/1024 evidence matrix, and fails
+  on blank/loading/contradictory required panels.
+
 - **Removed control-plane `run_manifest_diagnostics_*` compatibility shims (Stream C post-sunset):** Deleted nine thin re-export wrappers under `bioetl.application.services.control_plane`; import `bioetl.application.services.control_plane.manifest.diagnostics.*` instead (`base`, `base_summary_helpers`, `checkpoint_projection`, `finalization`, `replay`, `replay_projection`, `snapshot_support`, `source_refs`, `artifact_support`).
 
 - **Claude runtime path migration (`.claude/*` -> `ai/claude/*`)**: Canonical Claude runtime tree now lives under `ai/claude/`; architecture tests, CI workflows, engineering scripts, and runtime/docs links were updated. Legacy `.claude/` compatibility layer has been removed after stabilization.
