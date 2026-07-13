@@ -26,6 +26,8 @@ from scripts.engineering.qa.report_test_governance_audit import (  # noqa: E402
     DEFAULT_FIXTURE_DUPLICATION_ARTIFACT,
     DEFAULT_JSON_ARTIFACT,
     collect_test_governance_report,
+    evaluate_budgets,
+    load_config,
 )
 
 
@@ -88,6 +90,12 @@ def main() -> int:
 
     # Collect the report (this is the expensive operation)
     payload = collect_test_governance_report(root)
+    config_path = Path(args.config)
+    if config_path.exists():
+        payload["budget_violations"] = evaluate_budgets(
+            payload["report"],
+            load_config(config_path),
+        )
 
     # Write the main artifact
     if not args.check:

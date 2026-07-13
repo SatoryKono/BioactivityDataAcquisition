@@ -32,8 +32,8 @@
     "below_85_module_count": 56,
     "uncovered_module_count": 0,
     "unmeasured_module_count": 0,
-    "tracked_module_coverage_percent": 100.0,
-    "tracked_module_status": "fully_covered"
+    "tracked_module_coverage_percent": 94.12,
+    "tracked_module_status": "partially_covered"
   },
   "closeout": {
     "status": "regressed_after_closeout",

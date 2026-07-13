@@ -39,8 +39,46 @@ def test_metric_dispatch_normalizes_pipeline_label_after_group_normalizer() -> N
     )
 
     assert labels == {
-        "outcome": "other",
         "pipeline": "chembl_activity",
         "run_type": "incremental",
         "stage": "silver",
+        "outcome": "other",
+    }
+
+
+def test_metric_dispatch_stage_model_uses_bounded_defaults() -> None:
+    """The dispatch snapshot owns the full published stage-model contract."""
+    labels = normalize_metric_dispatch_labels(
+        "bioetl_stage_records_total",
+        {
+            "pipeline": "chembl.activity",
+            "run_type": "incremental",
+            "stage": "unbounded-stage",
+        },
+    )
+
+    assert labels == {
+        "pipeline": "chembl_activity",
+        "run_type": "incremental",
+        "stage": "other",
+        "outcome": "other",
+    }
+
+
+def test_metric_dispatch_canonicalizes_composite_pipeline_after_phase_normalizer() -> (
+    None
+):
+    labels = normalize_metric_dispatch_labels(
+        "bioetl_composite_phase_records_total",
+        {
+            "pipeline": "composite:target",
+            "phase": "extract",
+            "outcome": "success",
+        },
+    )
+
+    assert labels == {
+        "pipeline": "composite_target",
+        "phase": "other",
+        "outcome": "other",
     }
