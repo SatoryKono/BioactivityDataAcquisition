@@ -27,8 +27,7 @@ def publish_metrics_safely(
         }
         if metric_names is not None:
             gateway_kwargs["metric_names"] = metric_names
-        push_metrics_to_gateway(**gateway_kwargs)
-        return True
+        return bool(push_metrics_to_gateway(**gateway_kwargs))
     except (
         OSError,
         ConnectionError,

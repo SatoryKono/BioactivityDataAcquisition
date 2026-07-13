@@ -47,3 +47,17 @@ def test_publish_metrics_safely_swallows_observability_failures() -> None:
         )
 
     assert result is False
+
+
+def test_publish_metrics_safely_propagates_failed_publication_result() -> None:
+    with patch(
+        "bioetl.composition.observability_api.push_metrics_to_gateway",
+        return_value=False,
+    ):
+        result = publish_metrics_safely(
+            run_label="bioetl",
+            pipeline_name="chembl_activity",
+            run_type="incremental",
+        )
+
+    assert result is False

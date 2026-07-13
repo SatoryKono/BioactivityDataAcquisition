@@ -537,6 +537,7 @@ class TestExecutePipeline:
             health_server=True,
             health_port=8080,
         )
+        request.options.run_type = "incremental"
         expected = _make_result()
         flushed = MagicMock()
 
@@ -553,7 +554,10 @@ class TestExecutePipeline:
         )
 
         assert result is expected
-        flushed.assert_called_once_with(pipeline_name="chembl_activity")
+        flushed.assert_called_once_with(
+            pipeline_name="chembl_activity",
+            run_type="incremental",
+        )
 
     def test_execute_pipeline_flushes_metrics_when_run_coroutine_raises(self) -> None:
         service = CliRunOrchestrationService()
@@ -563,6 +567,7 @@ class TestExecutePipeline:
             health_server=True,
             health_port=8080,
         )
+        request.options.run_type = "incremental"
         flushed = MagicMock()
 
         async def _run_pipeline(prepared: RunExecutionRequest) -> RunResult:
@@ -581,7 +586,10 @@ class TestExecutePipeline:
                 flush_metrics=flushed,
             )
 
-        flushed.assert_called_once_with(pipeline_name="chembl_activity")
+        flushed.assert_called_once_with(
+            pipeline_name="chembl_activity",
+            run_type="incremental",
+        )
 
     def test_execute_pipeline_closes_created_coroutine_after_exception(self) -> None:
         service = CliRunOrchestrationService()
@@ -591,6 +599,7 @@ class TestExecutePipeline:
             health_server=False,
             health_port=8081,
         )
+        request.options.run_type = "incremental"
         flushed = MagicMock()
         created: dict[str, object] = {}
 
@@ -616,4 +625,7 @@ class TestExecutePipeline:
 
         created_coro = created["coro"]
         assert getattr(created_coro, "cr_frame", None) is None
-        flushed.assert_called_once_with(pipeline_name="chembl_activity")
+        flushed.assert_called_once_with(
+            pipeline_name="chembl_activity",
+            run_type="incremental",
+        )
