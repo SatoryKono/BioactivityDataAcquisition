@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-13T02:28:16.638963+00:00",
+  "generated_at": "2026-07-13T09:40:50.695908+00:00",
   "summary": {
     "total_scripts": 455,
     "status_counts": {
@@ -966,25 +966,25 @@
         },
         {
           "path": "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
-          "line": 74,
+          "line": 96,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\codex\\run-codex.ps1"
         },
         {
           "path": "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
-          "line": 75,
+          "line": 97,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\codex\\run-codex.ps1 exec \"analyze the failing launcher flow\""
         },
         {
           "path": "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
-          "line": 76,
+          "line": 98,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\codex\\run-codex.ps1 check"
         },
         {
           "path": "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
-          "line": 106,
+          "line": 117,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\codex\\run-codex.ps1 check"
         },
@@ -1461,7 +1461,7 @@
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 133,
+          "line": 152,
           "source_group": "scripts",
           "text": "- `headless.sh` / `headless.ps1` set `GEMINI_SKIP_MCP_SETUP=1` for one launch and then delegate back to the canonical launcher."
         }
@@ -1512,7 +1512,7 @@
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 133,
+          "line": 152,
           "source_group": "scripts",
           "text": "- `headless.sh` / `headless.ps1` set `GEMINI_SKIP_MCP_SETUP=1` for one launch and then delegate back to the canonical launcher."
         },
@@ -1836,7 +1836,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 33,
+      "reference_count": 34,
       "references": [
         {
           "path": "scripts/ai/gemini/GEMINI_INTERACTIVE_GUIDE.md",
@@ -1979,7 +1979,7 @@
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 132,
+          "line": 151,
           "source_group": "scripts",
           "text": "- `setup.ps1` and `setup-gemini-wsl.bat` are Windows setup transports. They delegate to `run-gemini.sh setup` inside WSL and then run `mcp-check`."
         },
@@ -2024,7 +2024,7 @@
         },
         {
           "path": "scripts/ai/gemini/README.md",
-          "line": 132,
+          "line": 151,
           "source_group": "scripts",
           "text": "- `setup.ps1` and `setup-gemini-wsl.bat` are Windows setup transports. They delegate to `run-gemini.sh setup` inside WSL and then run `mcp-check`."
         }
