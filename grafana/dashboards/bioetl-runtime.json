@@ -3578,7 +3578,7 @@
           "type": "prometheus",
           "uid": "prometheus"
         },
-        "definition": "label_values(bioetl_workflow_runs_total, workflow)",
+        "definition": "label_values(bioetl_workflow_universe, workflow)",
         "description": "Shared operator context: workflow evidence selector. This selector does not imply exact current-status intersection unless the dashboard explicitly documents that semantics.",
         "hide": 0,
         "includeAll": true,
@@ -3587,7 +3587,7 @@
         "name": "workflow",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_workflow_runs_total, workflow)",
+          "query": "label_values(bioetl_workflow_universe, workflow)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,

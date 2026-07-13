@@ -107,7 +107,9 @@
         "bioetl_stage_lag_seconds",
         "bioetl_checkpoint_saved_at_seconds",
         "bioetl_replay_lag_seconds",
-        "bioetl_workflow_current_status"
+        "bioetl_workflow_current_status",
+        "bioetl_workflow_expected",
+        "bioetl_workflow_pipeline_expected"
       ],
       "histograms": [
         "bioetl_pipeline_duration_seconds",

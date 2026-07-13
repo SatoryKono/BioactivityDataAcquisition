@@ -133,16 +133,6 @@ Dashboard `1. Overview` is the primary entry point for incident triage. It uses 
 - **Purpose:** Show alert state for triage.
 - **Data sources:** `ALERTS{alertstate="firing"}` (standard Prometheus metric)
 
-### 26. SLO/SLA Alert Pressure
-- **Type:** Stat
-- **Purpose:** Show SLO/SLA alert pressure indicators.
-- **Data sources:** `ALERTS{alertstate="firing"}` (standard Prometheus metric)
-
-### 27. Firing Alert Details
-- **Type:** Table
-- **Purpose:** Show detailed information for currently firing alerts.
-- **Data sources:** `ALERTS{alertstate="firing"}` (standard Prometheus metric)
-
 ## Recording Rules
 
 This dashboard uses Prometheus recording rules to aggregate and transform raw metrics into L0 (level 0) and L1 (level 1) aggregate status metrics. These recording rules enable complex label manipulation and workflow pipeline mapping.

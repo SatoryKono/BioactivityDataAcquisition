@@ -1304,6 +1304,7 @@
       "enforcement_owner_paths": [
         "configs/quality/generated_artifact_routing.yaml",
         "configs/quality/scripts_inventory_manifest.json",
+        "scripts/diagrams/harmonize_link_styles.py",
         "scripts/diagrams/lint_diagrams.py",
         "scripts/diagrams/prune_orphan_nodes.py",
         "scripts/docs/checks/check_drift.py",
@@ -1326,6 +1327,7 @@
         "docs/00-project/ai/skills/_references/local/technical-designer-mermaid/references/patterns.md",
         "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
         "docs/00-project/ai/skills/local/technical-designer-mermaid/references/patterns.md",
+        "scripts/diagrams/harmonize_link_styles.py",
         "scripts/diagrams/lint_diagrams.py",
         "scripts/diagrams/prune_orphan_nodes.py",
         "scripts/docs/checks/check_drift.py",

@@ -136,6 +136,10 @@ class WorkflowExecutionService:
                 exclusive=True,
             )
 
+    def record_expected_pipeline_metrics(self, config: WorkflowConfig) -> None:
+        """Record planned pipeline scopes for workflow-backed selectors."""
+        self.workflow_runner.record_expected_pipeline_metrics(config)
+
 
 def _resolve_launch_context(
     *,

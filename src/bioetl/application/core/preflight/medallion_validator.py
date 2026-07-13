@@ -20,6 +20,10 @@ if TYPE_CHECKING:
     from bioetl.domain.ports import LoggerPort
 
 
+_GOLD_SEMANTIC_WRITE_MODES = frozenset({"append", "overwrite", "scd2"})
+_GOLD_SEMANTIC_WRITE_MODES_EXPECTED = "one of: append, overwrite, scd2"
+
+
 class MedallionConfigValidator:
     """Validates Medallion architecture invariants and write-mode policies."""
 
@@ -101,7 +105,6 @@ class MedallionConfigValidator:
         silver_mode_value = str(silver_mode)
         gold_mode = self._config.table.gold_write_mode
         gold_mode_value = str(gold_mode)
-        effective_gold_mode = "merge" if gold_mode_value == "scd2" else gold_mode_value
         errors = [
             *validate_single_write_mode(
                 write_mode_policy=self._write_mode_policy,
@@ -110,15 +113,7 @@ class MedallionConfigValidator:
                 field="write_mode",
                 rule="RULES §2.1: Silver layer allowed modes",
             ),
-            *validate_single_write_mode(
-                write_mode_policy=self._write_mode_policy,
-                layer=Layer.GOLD,
-                mode_value=effective_gold_mode,
-                field="gold_write_mode",
-                rule="RULES §2.1: Gold layer allowed modes",
-                actual_mode=gold_mode_value,
-                expected_suffix=", scd2",
-            ),
+            *self._validate_gold_semantic_write_mode(gold_mode_value),
             *validate_idempotency_contracts(
                 silver_mode=silver_mode_value,
                 gold_mode=gold_mode_value,
@@ -130,6 +125,20 @@ class MedallionConfigValidator:
             errors, silver_mode_value, gold_mode_value
         )
         return errors
+
+    def _validate_gold_semantic_write_mode(
+        self, gold_mode_value: str
+    ) -> list[ConfigValidationError]:
+        if gold_mode_value in _GOLD_SEMANTIC_WRITE_MODES:
+            return []
+        return [
+            ConfigValidationError(
+                field="gold_write_mode",
+                expected=_GOLD_SEMANTIC_WRITE_MODES_EXPECTED,
+                actual=gold_mode_value,
+                rule="RULES §2.1: Gold layer allowed modes",
+            )
+        ]
 
     def _log_write_mode_validation_result(
         self,

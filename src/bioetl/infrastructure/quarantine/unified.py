@@ -55,6 +55,64 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
 
 
+def _normalize_quarantine_record(record: QuarantineWriteRequest) -> JsonDict:
+    """Normalize a write request into the stored quarantine schema."""
+    payload = record["payload"]
+    payload_json = serialize_to_json(payload, ensure_ascii=True)
+
+    if len(payload_json) > MAX_PAYLOAD_SIZE:
+        payload_json = payload_json[:MAX_PAYLOAD_SIZE]
+        truncated = True
+    else:
+        truncated = False
+
+    payload_hash = calculate_hash(payload_json)
+    meta = record.get("metadata") or {}
+    bronze_batch_id = record["bronze_batch_id"]
+    run_id = record.get("run_id")
+    ingestion_ts = record["ingestion_ts"]
+
+    return {
+        "ingestion_ts": ingestion_ts.isoformat(),
+        "pipeline": record["pipeline"],
+        "error_code": record["error_code"],
+        "payload": payload_json,
+        "metadata": serialize_to_json(meta),
+        "payload_hash": payload_hash,
+        "payload_truncated": truncated,
+        "bronze_batch_id": str(bronze_batch_id),
+        "bronze_file_uri": meta.get("bronze_file_uri", ""),
+        "error_details": serialize_to_json(meta.get("error_details", {})),
+        "dq_status": QuarantineRecordStatus.NEW.value,
+        "run_id": str(run_id) if run_id else "",
+    }
+
+
+def _write_records_to_delta(base_path: str, records: list[JsonDict]) -> None:
+    """Write normalized records to Delta table."""
+    arrow_table = pa.Table.from_pylist(records)
+    arrow_reader = pa.RecordBatchReader.from_batches(
+        arrow_table.schema, arrow_table.to_batches()
+    )
+
+    try:
+        write_deltalake(
+            table_or_uri=base_path,
+            data=arrow_reader,
+            mode="append",
+        )
+    except TableNotFoundError:
+        arrow_reader = pa.RecordBatchReader.from_batches(
+            arrow_table.schema, arrow_table.to_batches()
+        )
+        write_deltalake(
+            table_or_uri=base_path,
+            data=arrow_reader,
+            mode="append",
+            partition_by=["pipeline"],
+        )
+
+
 class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
     """Unified quarantine table for failed records.
 
@@ -136,62 +194,14 @@ class UnifiedQuarantineAdapter(UnifiedQuarantineFilteredMixin):
         record: QuarantineWriteRequest,
     ) -> JsonDict:
         """Normalize a write request into the stored quarantine schema."""
-        payload = record["payload"]
-        payload_json = serialize_to_json(payload, ensure_ascii=True)
-
-        if len(payload_json) > MAX_PAYLOAD_SIZE:
-            payload_json = payload_json[:MAX_PAYLOAD_SIZE]
-            truncated = True
-        else:
-            truncated = False
-
-        payload_hash = calculate_hash(payload_json)
-        meta = record.get("metadata") or {}
-        bronze_batch_id = record["bronze_batch_id"]
-        run_id = record.get("run_id")
-        ingestion_ts = record["ingestion_ts"]
-
-        return {
-            "ingestion_ts": ingestion_ts.isoformat(),
-            "pipeline": record["pipeline"],
-            "error_code": record["error_code"],
-            "payload": payload_json,
-            "metadata": serialize_to_json(meta),
-            "payload_hash": payload_hash,
-            "payload_truncated": truncated,
-            "bronze_batch_id": str(bronze_batch_id),
-            "bronze_file_uri": meta.get("bronze_file_uri", ""),
-            "error_details": serialize_to_json(meta.get("error_details", {})),
-            "dq_status": QuarantineRecordStatus.NEW.value,
-            "run_id": str(run_id) if run_id else "",
-        }
+        return _normalize_quarantine_record(record)
 
     def _write_to_delta(
         self,
         records: list[JsonDict],  # Any: quarantine record has heterogeneous values
     ) -> None:
         """Write normalized records to Delta table."""
-        arrow_table = pa.Table.from_pylist(records)
-        arrow_reader = pa.RecordBatchReader.from_batches(
-            arrow_table.schema, arrow_table.to_batches()
-        )
-
-        try:
-            write_deltalake(
-                table_or_uri=self.base_path,
-                data=arrow_reader,
-                mode="append",
-            )
-        except TableNotFoundError:
-            arrow_reader = pa.RecordBatchReader.from_batches(
-                arrow_table.schema, arrow_table.to_batches()
-            )
-            write_deltalake(
-                table_or_uri=self.base_path,
-                data=arrow_reader,
-                mode="append",
-                partition_by=["pipeline"],
-            )
+        _write_records_to_delta(self.base_path, records)
 
     async def inspect(
         self,

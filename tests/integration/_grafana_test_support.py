@@ -346,10 +346,11 @@ def _assert_standard_variable_contract(
     expected_pipeline_metric_by_dashboard = {
         "bioetl-control-plane-v1.json": "bioetl_control_plane_run_type_universe",
         "bioetl-runtime.json": "bioetl_runtime_pipeline_run_type_universe",
+        "bioetl-silver-reject-explorer.json": "bioetl_records_processed_total",
     }
     expected_pipeline_metric = expected_pipeline_metric_by_dashboard.get(
         dashboard_path.name,
-        "bioetl_records_processed_total",
+        "bioetl_overview_pipeline_run_type_universe",
     )
     assert expected_pipeline_metric in pipeline_query_text, (
         f"Dashboard {dashboard_path.name} 'pipeline' query must use "
@@ -385,8 +386,8 @@ def _assert_operator_context_shell_contract(
     workflow_query_text = (
         workflow_query.get("query", "") if isinstance(workflow_query, dict) else ""
     )
-    assert "bioetl_workflow_runs_total" in workflow_query_text, (
-        f"Dashboard {dashboard_path.name} 'workflow' query must use workflow runs"
+    assert "bioetl_workflow_universe" in workflow_query_text, (
+        f"Dashboard {dashboard_path.name} 'workflow' query must use workflow universe"
     )
 
     run_id_var = variable_map.get("run_id")
@@ -430,7 +431,7 @@ def _assert_provider_health_variable_contract(
     pipeline_query_text = (
         pipeline_query.get("query", "") if isinstance(pipeline_query, dict) else ""
     )
-    assert "bioetl_records_processed_total" in pipeline_query_text
+    assert "bioetl_overview_pipeline_run_type_universe" in pipeline_query_text
 
     run_type_var = variable_map.get("run_type")
     assert run_type_var is not None, (
@@ -440,7 +441,7 @@ def _assert_provider_health_variable_contract(
     run_type_query_text = (
         run_type_query.get("query", "") if isinstance(run_type_query, dict) else ""
     )
-    assert "bioetl_records_processed_total" in run_type_query_text
+    assert "bioetl_overview_pipeline_run_type_universe" in run_type_query_text
 
     provider_var = variable_map.get("provider")
     assert provider_var is not None, (

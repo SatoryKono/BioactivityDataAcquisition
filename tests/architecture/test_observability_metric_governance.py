@@ -23,6 +23,7 @@ DECLARATIONS_PATH = (
 CONTROL_PLANE_RULES_PATH = (
     ROOT / "grafana" / "prometheus-rules" / "bioetl_control_plane_current_status.yml"
 )
+OBSERVABILITY_RULES_PATH = ROOT / "grafana" / "prometheus-rules" / "bioetl_observability.yml"
 REQUIREMENTS_PATH = ROOT / "docs" / "01-requirements" / "REQUIREMENTS.md"
 RULES_PATH = ROOT / "docs" / "00-project" / "RULES.md"
 METRICS_DEFS_CORE_PATH = (
@@ -110,6 +111,18 @@ def _collect_recording_rule_names(path: Path) -> set[str]:
     return names
 
 
+def _collect_recording_rule_exprs(path: Path) -> dict[str, str]:
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    exprs: dict[str, str] = {}
+    for group in payload.get("groups", []):
+        for rule in group.get("rules", []):
+            record_name = rule.get("record")
+            expr = rule.get("expr")
+            if record_name and expr:
+                exprs[str(record_name)] = str(expr)
+    return exprs
+
+
 @pytest.mark.architecture
 def test_control_plane_rules_are_in_default_prometheus_rule_check() -> None:
     """The shipped control-plane rule file must stay in default promtool coverage."""
@@ -128,6 +141,32 @@ def test_control_plane_recording_rules_are_declared() -> None:
 
     assert recording_rules
     assert sorted(recording_rules - declared) == []
+
+
+@pytest.mark.architecture
+def test_workflow_planned_pipeline_universe_rules_cover_selectors() -> None:
+    """Workflow-planned child pipelines must feed dashboard selector universes."""
+    observability_exprs = _collect_recording_rule_exprs(OBSERVABILITY_RULES_PATH)
+    control_plane_exprs = _collect_recording_rule_exprs(CONTROL_PLANE_RULES_PATH)
+
+    assert "bioetl_workflow_universe" in observability_exprs
+    assert "bioetl_workflow_expected" in observability_exprs["bioetl_workflow_universe"]
+    assert (
+        "bioetl_workflow_pipeline_expected"
+        in observability_exprs["bioetl_overview_pipeline_universe"]
+    )
+    assert (
+        "bioetl_workflow_pipeline_expected"
+        in observability_exprs["bioetl_runtime_pipeline_run_type_universe"]
+    )
+    assert (
+        observability_exprs["bioetl_overview_pipeline_run_type_universe"]
+        == "bioetl_runtime_pipeline_run_type_universe"
+    )
+    assert (
+        "bioetl_workflow_pipeline_expected"
+        in control_plane_exprs["bioetl_control_plane_run_type_universe"]
+    )
 
 
 @pytest.mark.architecture

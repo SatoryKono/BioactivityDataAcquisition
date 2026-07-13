@@ -29,6 +29,8 @@ from bioetl.interfaces.cli.exit_codes import ExitCode
 from bioetl.interfaces.cli.formatters import echo_error
 
 _WORKFLOW_PUBLICATION_METRIC_NAMES = (
+    "bioetl_workflow_expected",
+    "bioetl_workflow_pipeline_expected",
     "bioetl_workflow_runs",
     "bioetl_workflow_runs_total",
     "bioetl_workflow_runs_created",
@@ -41,6 +43,11 @@ _WORKFLOW_PUBLICATION_METRIC_NAMES = (
     "bioetl_workflow_step_duration_seconds_count",
     "bioetl_workflow_step_duration_seconds_sum",
     "bioetl_workflow_step_duration_seconds_created",
+)
+
+_WORKFLOW_PLANNED_PUBLICATION_METRIC_NAMES = (
+    "bioetl_workflow_expected",
+    "bioetl_workflow_pipeline_expected",
 )
 
 if TYPE_CHECKING:
@@ -147,8 +154,16 @@ def _execute_workflow_and_publish_metrics(
     """Execute workflow and publish metrics."""
     parsed_force_steps = parse_only_steps(force_steps) or ()
     parsed_repair_steps = parse_only_steps(repair_steps) or ()
+    workflow_execution_service = get_workflow_execution_service_fn(registry=registry)
+    if not dry_run:
+        ensure_metrics_server_started_fn()
+        _record_expected_pipeline_metrics(workflow_execution_service, config)
+        publish_metrics_safely_fn(
+            run_label="bioetl",
+            metric_names=_WORKFLOW_PLANNED_PUBLICATION_METRIC_NAMES,
+        )
     result = asyncio.run(
-        get_workflow_execution_service_fn(registry=registry).run_workflow(
+        workflow_execution_service.run_workflow(
             config,
             launch_context={"only_steps": list(parse_only_steps(only_steps) or ())},
             resume_last=resume_last,
@@ -162,7 +177,6 @@ def _execute_workflow_and_publish_metrics(
     if dry_run:
         return result
 
-    ensure_metrics_server_started_fn()
     publication_kwargs: dict[str, object] = {
         "run_label": "bioetl",
         "pipeline_name": _workflow_metrics_pipeline_name(config),
@@ -177,6 +191,20 @@ def _execute_workflow_and_publish_metrics(
         publication_kwargs["metric_names"] = _WORKFLOW_PUBLICATION_METRIC_NAMES
     publish_metrics_safely_fn(**publication_kwargs)
     return result
+
+
+def _record_expected_pipeline_metrics(
+    workflow_execution_service: object,
+    config: object,
+) -> None:
+    """Record planned workflow pipeline selector scopes when the service supports it."""
+    recorder = getattr(
+        workflow_execution_service,
+        "record_expected_pipeline_metrics",
+        None,
+    )
+    if callable(recorder):
+        recorder(config)
 
 
 def _handle_workflow_result(result: object) -> None:

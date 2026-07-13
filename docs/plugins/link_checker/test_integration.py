@@ -23,10 +23,9 @@ def test_plugin_import():
 
         assert LinkCheckerPlugin is not None
         print("✅ Plugin imported successfully")
-        return True
     except ImportError as e:
         print(f"❌ Failed to import plugin: {e}")
-        return False
+        raise AssertionError(f"Failed to import plugin: {e}") from e
 
 
 def test_plugin_initialization():
@@ -46,10 +45,9 @@ def test_plugin_initialization():
         assert len(plugin.link_results) == 0
 
         print("✅ Plugin default state verified")
-        return True
     except Exception as e:
         print(f"❌ Failed to initialize plugin: {e}")
-        return False
+        raise AssertionError(f"Failed to initialize plugin: {e}") from e
 
 
 def test_plugin_configuration():
@@ -88,10 +86,9 @@ def test_plugin_configuration():
         assert plugin.config["fail_on_error"] is False
 
         print("✅ Plugin configuration verified")
-        return True
     except Exception as e:
         print(f"❌ Failed to configure plugin: {e}")
-        return False
+        raise AssertionError(f"Failed to configure plugin: {e}") from e
 
 
 def test_plugin_methods():
@@ -126,10 +123,9 @@ def test_plugin_methods():
         assert callable(plugin._log_summary)
 
         print("✅ Plugin methods verified")
-        return True
     except Exception as e:
         print(f"❌ Failed to verify plugin methods: {e}")
-        return False
+        raise AssertionError(f"Failed to verify plugin methods: {e}") from e
 
 
 def test_html_file_discovery():
@@ -154,10 +150,9 @@ def test_html_file_discovery():
             assert all(Path(f).exists() for f in html_files)
 
         print("✅ HTML file discovery verified")
-        return True
     except Exception as e:
         print(f"❌ Failed to test HTML file discovery: {e}")
-        return False
+        raise AssertionError(f"Failed to test HTML file discovery: {e}") from e
 
 
 def test_report_generation():
@@ -222,10 +217,9 @@ def test_report_generation():
         assert "warning" in badge
 
         print("✅ Report generation verified")
-        return True
     except Exception as e:
         print(f"❌ Failed to test report generation: {e}")
-        return False
+        raise AssertionError(f"Failed to test report generation: {e}") from e
 
 
 def main():
@@ -248,12 +242,9 @@ def main():
     for test_name, test_func in tests:
         print(f"\n📋 {test_name}...")
         try:
-            if test_func():
-                passed += 1
-                print(f"✅ {test_name} PASSED")
-            else:
-                failed += 1
-                print(f"❌ {test_name} FAILED")
+            test_func()
+            passed += 1
+            print(f"✅ {test_name} PASSED")
         except Exception as e:
             failed += 1
             print(f"❌ {test_name} FAILED with exception: {e}")

@@ -809,6 +809,41 @@ tests:
           - labels: '{__name__="bioetl_workflow_pipeline_verdict_status",pipeline="chembl",run_type="incremental"}'
             value: 1
 
+  - name: workflow-planned-pipeline-universe-materializes-child-pipelines
+    interval: 1m
+    input_series:
+      - series: 'bioetl_workflow_pipeline_expected{workflow="chembl_baseline",pipeline="chembl_target",run_type="backfill",provider="chembl"}'
+        values: '1+0x10'
+      - series: 'bioetl_workflow_pipeline_expected{workflow="chembl_baseline",pipeline="chembl_publication",run_type="backfill",provider="chembl"}'
+        values: '1+0x10'
+    promql_expr_test:
+      - expr: bioetl_runtime_pipeline_run_type_universe{pipeline=~"chembl_target|chembl_publication"}
+        eval_time: 2m
+        exp_samples:
+          - labels: '{__name__="bioetl_runtime_pipeline_run_type_universe",pipeline="chembl_target",run_type="backfill"}'
+            value: 1
+          - labels: '{__name__="bioetl_runtime_pipeline_run_type_universe",pipeline="chembl_publication",run_type="backfill"}'
+            value: 1
+      - expr: bioetl_overview_pipeline_run_type_universe{pipeline=~"chembl_target|chembl_publication"}
+        eval_time: 2m
+        exp_samples:
+          - labels: '{__name__="bioetl_overview_pipeline_run_type_universe",pipeline="chembl_target",run_type="backfill"}'
+            value: 1
+          - labels: '{__name__="bioetl_overview_pipeline_run_type_universe",pipeline="chembl_publication",run_type="backfill"}'
+            value: 1
+
+  - name: workflow-expected-universe-materializes-started-workflows
+    interval: 1m
+    input_series:
+      - series: 'bioetl_workflow_expected{workflow="chembl_target",provider="chembl"}'
+        values: '1+0x10'
+    promql_expr_test:
+      - expr: bioetl_workflow_universe{workflow="chembl_target"}
+        eval_time: 2m
+        exp_samples:
+          - labels: '{__name__="bioetl_workflow_universe",workflow="chembl_target"}'
+            value: 1
+
   - name: workflow-l0-input-status-projects-context-labels
     interval: 1m
     input_series:

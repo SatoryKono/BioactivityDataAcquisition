@@ -119,6 +119,16 @@ class _RoutingHost(HealthServerRoutingMixin):
     ) -> None:
         self.sent.append(("payload", status_code, payload))
 
+    async def _send_text_response(
+        self,
+        writer: _Writer,
+        status_code: int,
+        body: str,
+        *,
+        content_type: str = "text/plain; charset=utf-8",
+    ) -> None:
+        self.sent.append(("text_response", status_code, (body, content_type)))
+
     async def _handle_request_error(
         self,
         writer: _Writer,
@@ -259,9 +269,18 @@ async def test_routing_mixin_parses_queries_and_routes_without_sockets(
     await host._route_request(writer, "/ops/quarantine/list?pipeline=chembl")
     await host._route_request(writer, "/ops/control-plane/ready")
     await host._route_request(writer, "/ops/observability/metrics")
+    await host._route_request(writer, "/metrics")
     await host._route_request(writer, "/missing")
 
     assert isinstance(host.sent[0][1], HealthResponse)
+    assert host.sent[-2] == (
+        "text_response",
+        200,
+        (
+            "# BioETL health server scrape endpoint\n",
+            "text/plain; version=0.0.4; charset=utf-8",
+        ),
+    )
     assert routed == [
         ("quarantine", "/ops/quarantine/list", {"pipeline": "chembl"}),
         ("control", "/ops/control-plane/ready", {}),
@@ -728,3 +747,20 @@ async def test_http_mixin_serializes_payload_responses() -> None:
     await host._send_response(writer, 404, "Not Found")
     assert writer.data.startswith(b"HTTP/1.1 404 Not Found")
     assert b'"error": "Not Found"' in writer.data
+
+
+@pytest.mark.asyncio
+async def test_http_mixin_serializes_text_responses() -> None:
+    host = HealthServerHTTPMixin()
+    writer = _Writer()
+
+    await host._send_text_response(
+        writer,
+        200,
+        "# scrape endpoint\n",
+        content_type="text/plain; version=0.0.4; charset=utf-8",
+    )
+
+    assert writer.data.startswith(b"HTTP/1.1 200 OK")
+    assert b"Content-Type: text/plain; version=0.0.4; charset=utf-8" in writer.data
+    assert writer.data.endswith(b"# scrape endpoint\n")

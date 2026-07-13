@@ -33,6 +33,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `report-dashboard-inventory`     | `report_dashboard_inventory.py`                       | Generate/check dashboard inventory parity, provisioning drift, deployed drift, and local health   |
 | `report-dashboard-panel-audit-matrix` | `report_dashboard_panel_audit_matrix.py`         | Generate/check the dashboard panel audit matrix mirror                                            |
 | `report-panel-title-inventory`   | `report_panel_title_inventory.py`                     | Generate/check the dashboard panel-title inventory mirror from shipped JSON                       |
+| `report-dashboard-promql-scope`  | `report_dashboard_promql_scope.py`                    | Generate/check dashboard PromQL scope, forbidden `run_id` selectors, and deprecated metric tokens |
 | `report-family-baseline`         | `report_hotspot_family_baseline.py`                   | Generate/check RF-06 hotspot-family baseline artifacts                                            |
 | `report-adr-enforcement-matrix`  | `report_adr_enforcement_matrix.py`                    | Generate/check accepted ADR enforcement coverage matrix                                           |
 | `report-invariant-audit-rebaseline` | `report_invariant_audit_rebaseline.py`              | Generate/check stale invariant-audit evidence matrix and duplicate-issue gates                    |
@@ -71,6 +72,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `report-dashboard-inventory`     | When validating shipped Grafana dashboards against docs, provisioning, or exported/deployed snapshots; use `--health-summary` for a local rollup | Dashboard governance / drift check         |
 | `report-dashboard-panel-audit-matrix` | When shipped dashboard panel audit metadata must match the generated docs mirror                                                        | Docs CI dashboard governance gate          |
 | `report-panel-title-inventory`   | After changing shipped Grafana dashboard panel titles or layout rows; use `--check` to catch generated mirror drift                              | Docs CI dashboard governance gate          |
+| `report-dashboard-promql-scope`  | After changing dashboard PromQL, selectors, or deprecated observability metrics; use `--check` to catch forbidden `run_id` selectors and stale metric tokens | Dashboard PromQL governance gate           |
 | `report-family-baseline`         | When reviewing RF-06 hotspot-family budgets or checking that the committed family baseline artifacts still match the code                        | Manual, preflight / CI drift check         |
 | `report-adr-enforcement-matrix`  | When accepted ADR coverage must be mapped to implementation owners and enforcement owners                                                        | Architecture governance / CI drift check   |
 | `report-invariant-audit-rebaseline` | When converting architecture/invariant audits into GitHub issues; validates stale paths, current anchors, and duplicate issue evidence        | Audit governance / issue triage gate       |
@@ -138,6 +140,7 @@ python -m scripts.engineering.qa check-prometheus-rules
 python -m scripts.engineering.qa check-prometheus-rules --rules-file grafana/prometheus-rules/bioetl_control_plane_current_status.yml
 python -m scripts.engineering.qa report-dashboard-panel-audit-matrix --check
 python -m scripts.engineering.qa report-panel-title-inventory --check
+python -m scripts.engineering.qa report-dashboard-promql-scope --check
 python scripts/engineering/qa/report_duplication_baseline.py
 python -m scripts.engineering.qa report-artifact-duplication-audit --check
 python -m scripts.engineering.qa check-architecture

@@ -148,6 +148,19 @@ def test_prometheus_scrapes_remote_renderer_metrics() -> None:
     assert renderer["static_configs"] == [{"targets": ["renderer:8081"]}]
 
 
+def test_prometheus_scrapes_quarantine_explorer_metrics_endpoint() -> None:
+    """Quarantine Explorer health probes must not be scraped as Prometheus text."""
+    prometheus = yaml.safe_load(
+        Path("grafana/prometheus.yml").read_text(encoding="utf-8")
+    )
+    jobs = {item["job_name"]: item for item in prometheus["scrape_configs"]}
+
+    quarantine = jobs["quarantine-explorer"]
+
+    assert quarantine["metrics_path"] == "/metrics"
+    assert quarantine["static_configs"] == [{"targets": ["quarantine-explorer:8081"]}]
+
+
 def test_tracing_datasource_default_matches_optional_tracing_profile() -> None:
     """Tracing datasources must auto-detect Loki/Tempo when the profile is present."""
     compose = _load_monitoring_compose()

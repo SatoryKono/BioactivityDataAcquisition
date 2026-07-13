@@ -911,6 +911,36 @@ def test_control_plane_current_status_recording_rules_exist_and_reference_source
         )
 
 
+def test_pipeline_universe_rules_include_workflow_planned_scopes() -> None:
+    """Pipeline selectors must include planned workflow child pipelines before completion."""
+    payload = _load_rules()
+    record_map = _build_record_map(payload)
+
+    for record_name in (
+        "bioetl_overview_pipeline_universe",
+        "bioetl_runtime_pipeline_run_type_universe",
+    ):
+        expr = record_map[record_name].get("expr", "")
+        assert "bioetl_workflow_pipeline_expected" in expr
+
+    control_plane_payload = _load_control_plane_current_status_rules()
+    control_plane_record_map = _build_record_map(control_plane_payload)
+    control_plane_expr = control_plane_record_map[
+        "bioetl_control_plane_run_type_universe"
+    ].get("expr", "")
+    assert "bioetl_workflow_pipeline_expected" in control_plane_expr
+
+
+def test_workflow_universe_rule_includes_started_workflows() -> None:
+    """Workflow selectors must include started workflows before terminal outcomes."""
+    payload = _load_rules()
+    record_map = _build_record_map(payload)
+
+    expr = record_map["bioetl_workflow_universe"].get("expr", "")
+    assert "bioetl_workflow_runs_total" in expr
+    assert "bioetl_workflow_expected" in expr
+
+
 def test_canonical_current_status_recording_rules_exist() -> None:
     """Dashboard first screens must consume canonical current-status records."""
     payload = _load_rules()

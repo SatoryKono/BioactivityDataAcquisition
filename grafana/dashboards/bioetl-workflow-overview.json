@@ -1524,7 +1524,7 @@
           "value": "$__all"
         },
         "datasource": "Prometheus",
-        "definition": "label_values(bioetl_workflow_runs_total, workflow)",
+        "definition": "label_values(bioetl_workflow_universe, workflow)",
         "hide": 0,
         "includeAll": true,
         "label": "Workflow",
@@ -1532,7 +1532,7 @@
         "name": "workflow",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_workflow_runs_total, workflow)",
+          "query": "label_values(bioetl_workflow_universe, workflow)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -1552,7 +1552,7 @@
           "type": "prometheus",
           "uid": "prometheus"
         },
-        "definition": "label_values(bioetl_records_processed_total, pipeline)",
+        "definition": "label_values(bioetl_overview_pipeline_run_type_universe, pipeline)",
         "description": "Shared operator context: pipeline selector for identity and processed-record evidence. Dashboard-specific primary selectors remain authoritative where documented.",
         "hide": 0,
         "includeAll": false,
@@ -1561,7 +1561,7 @@
         "name": "pipeline",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_records_processed_total, pipeline)",
+          "query": "label_values(bioetl_overview_pipeline_run_type_universe, pipeline)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -1585,7 +1585,7 @@
           "type": "prometheus",
           "uid": "prometheus"
         },
-        "definition": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
+        "definition": "label_values(bioetl_overview_pipeline_run_type_universe{pipeline=~\"$pipeline\"}, run_type)",
         "description": "Shared operator context: run_type selector bounded by pipeline; fallback is All rather than unknown.",
         "hide": 0,
         "includeAll": true,
@@ -1594,7 +1594,7 @@
         "name": "run_type",
         "options": [],
         "query": {
-          "query": "label_values(bioetl_records_processed_total{pipeline=~\"$pipeline\"}, run_type)",
+          "query": "label_values(bioetl_overview_pipeline_run_type_universe{pipeline=~\"$pipeline\"}, run_type)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,

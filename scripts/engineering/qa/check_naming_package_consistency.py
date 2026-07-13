@@ -20,6 +20,7 @@ import ast
 import importlib.util
 import os
 import re
+import subprocess
 import sys
 from dataclasses import dataclass
 from datetime import date
@@ -1095,19 +1096,80 @@ def _layer_aware_suffix_violations_for_files(
 
 
 def _collect_src_tree(repo_root: Path) -> tuple[tuple[Path, ...], tuple[Path, ...]]:
+    git_tree = _collect_src_tree_from_git(repo_root)
+    if git_tree is not None:
+        return git_tree
+
     py_files: list[Path] = []
     directories: list[Path] = []
     src_root = repo_root / SRC_ROOT
     for dirpath, dirnames, filenames in os.walk(src_root):
-        if "__pycache__" in Path(dirpath).parts:
-            dirnames[:] = []
-            continue
+        dirnames[:] = [dirname for dirname in dirnames if dirname != "__pycache__"]
         current_dir = Path(dirpath)
         directories.append(current_dir)
         py_files.extend(
             current_dir / filename for filename in filenames if filename.endswith(".py")
         )
     return tuple(py_files), tuple(directories)
+
+
+def _collect_src_tree_from_git(
+    repo_root: Path,
+) -> tuple[tuple[Path, ...], tuple[Path, ...]] | None:
+    try:
+        result = subprocess.run(
+            [
+                "git",
+                "-C",
+                str(repo_root),
+                "ls-files",
+                "-z",
+                "--",
+                SRC_ROOT.as_posix(),
+            ],
+            capture_output=True,
+            check=False,
+            text=True,
+            timeout=10,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if result.returncode != 0:
+        return None
+
+    relative_files = tuple(
+        Path(path)
+        for path in result.stdout.split("\0")
+        if (
+            path.endswith(".py")
+            and Path(path).parts[: len(SRC_ROOT.parts)] == SRC_ROOT.parts
+            and "__pycache__" not in Path(path).parts
+        )
+    )
+    if not relative_files:
+        return None
+
+    py_files = tuple(
+        repo_root / path for path in sorted(relative_files, key=lambda item: item.as_posix())
+    )
+    directories = _tracked_source_directories(relative_files, repo_root=repo_root)
+    return py_files, directories
+
+
+def _tracked_source_directories(
+    relative_files: tuple[Path, ...],
+    *,
+    repo_root: Path,
+) -> tuple[Path, ...]:
+    directories: set[Path] = {repo_root / SRC_ROOT}
+    src_parts = SRC_ROOT.parts
+    for relative_file in relative_files:
+        parent = relative_file.parent
+        if parent.parts[: len(src_parts)] != src_parts:
+            continue
+        for index in range(len(src_parts), len(parent.parts) + 1):
+            directories.add(repo_root / Path(*parent.parts[:index]))
+    return tuple(sorted(directories, key=lambda item: item.as_posix()))
 
 
 def _is_under_layer(relative_path: str, layer: Path) -> bool:

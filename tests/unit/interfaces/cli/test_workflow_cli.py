@@ -556,12 +556,19 @@ def test_workflow_run_starts_metrics_server_and_publishes_metrics(
     assert published_calls == [
         {
             "run_label": "bioetl",
+            "metric_names": (
+                "bioetl_workflow_expected",
+                "bioetl_workflow_pipeline_expected",
+            ),
+        },
+        {
+            "run_label": "bioetl",
             "pipeline_name": "chembl_activity",
             "run_type": "backfill",
             "grouping_key_extra": {
                 "workflow_run_id": "00000000-0000-0000-0000-000000000111"
             },
-        }
+        },
     ]
 
 
@@ -682,12 +689,21 @@ def test_workflow_run_omits_pipeline_grouping_for_multi_pipeline_workflow(
     assert published_calls == [
         {
             "run_label": "bioetl",
+            "metric_names": (
+                "bioetl_workflow_expected",
+                "bioetl_workflow_pipeline_expected",
+            ),
+        },
+        {
+            "run_label": "bioetl",
             "pipeline_name": None,
             "run_type": None,
             "grouping_key_extra": {
                 "workflow_run_id": "00000000-0000-0000-0000-000000000111"
             },
             "metric_names": (
+                "bioetl_workflow_expected",
+                "bioetl_workflow_pipeline_expected",
                 "bioetl_workflow_runs",
                 "bioetl_workflow_runs_total",
                 "bioetl_workflow_runs_created",
@@ -701,7 +717,7 @@ def test_workflow_run_omits_pipeline_grouping_for_multi_pipeline_workflow(
                 "bioetl_workflow_step_duration_seconds_sum",
                 "bioetl_workflow_step_duration_seconds_created",
             ),
-        }
+        },
     ]
 
 
@@ -776,12 +792,19 @@ def test_workflow_run_publishes_metrics_even_when_workflow_fails(
     assert published_calls == [
         {
             "run_label": "bioetl",
+            "metric_names": (
+                "bioetl_workflow_expected",
+                "bioetl_workflow_pipeline_expected",
+            ),
+        },
+        {
+            "run_label": "bioetl",
             "pipeline_name": "chembl_activity",
             "run_type": "backfill",
             "grouping_key_extra": {
                 "workflow_run_id": "00000000-0000-0000-0000-000000000222"
             },
-        }
+        },
     ]
 
 

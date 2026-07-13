@@ -69,17 +69,15 @@ def test_basic_plugin_structure():
         assert len(plugin.config_scheme) > 0
         print("✅ Plugin has configuration scheme")
 
-        return True
-
     except ImportError as e:
         print(f"❌ Import error: {e}")
-        return False
+        raise AssertionError(f"Import error: {e}") from e
     except AssertionError as e:
         print(f"❌ Assertion failed: {e}")
-        return False
+        raise
     except Exception as e:
         print(f"❌ Unexpected error: {e}")
-        return False
+        raise AssertionError(f"Unexpected error: {e}") from e
 
 
 def test_plugin_configuration():
@@ -110,11 +108,10 @@ def test_plugin_configuration():
         assert plugin.config["fail_on_error"] is False
 
         print("✅ Plugin configuration works correctly")
-        return True
 
     except Exception as e:
         print(f"❌ Configuration test failed: {e}")
-        return False
+        raise AssertionError(f"Configuration test failed: {e}") from e
 
 
 def test_html_file_discovery():
@@ -151,11 +148,10 @@ def test_html_file_discovery():
                 assert filename in found_filenames
 
         print("✅ HTML file discovery works correctly")
-        return True
 
     except Exception as e:
         print(f"❌ HTML file discovery failed: {e}")
-        return False
+        raise AssertionError(f"HTML file discovery failed: {e}") from e
 
 
 def test_report_generation():
@@ -243,11 +239,9 @@ def test_report_generation():
 
         print("✅ SVG badge generation works correctly")
 
-        return True
-
     except Exception as e:
         print(f"❌ Report generation failed: {e}")
-        return False
+        raise AssertionError(f"Report generation failed: {e}") from e
 
 
 def main():
@@ -268,12 +262,9 @@ def main():
     for test_name, test_func in tests:
         print(f"\n📋 {test_name}...")
         try:
-            if test_func():
-                passed += 1
-                print(f"✅ {test_name} PASSED")
-            else:
-                failed += 1
-                print(f"❌ {test_name} FAILED")
+            test_func()
+            passed += 1
+            print(f"✅ {test_name} PASSED")
         except Exception as e:
             failed += 1
             print(f"❌ {test_name} FAILED with exception: {e}")

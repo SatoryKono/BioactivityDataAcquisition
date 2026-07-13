@@ -137,6 +137,10 @@ from bioetl.infrastructure.observability._metrics_defs_pipeline import (
     WORKFLOW_STEP_DURATION_SECONDS,
     WORKFLOW_STEP_EVENTS_TOTAL,
 )
+from bioetl.infrastructure.observability._metrics_defs_pipeline_workflow import (
+    WORKFLOW_EXPECTED,
+    WORKFLOW_PIPELINE_EXPECTED,
+)
 from bioetl.infrastructure.observability._metrics_defs_storage import (
     AUDIT_QUERY_DURATION_SECONDS,
     AUDIT_QUERY_EVENTS_TOTAL,
@@ -323,6 +327,8 @@ __all__ = [
     "TRANSFORM_ERRORS_TOTAL",
     "VACUUM_FILES_REMOVED_TOTAL",
     "WORKFLOW_CURRENT_STATUS",
+    "WORKFLOW_EXPECTED",
+    "WORKFLOW_PIPELINE_EXPECTED",
     "WORKFLOW_RECONCILIATION_ROWS_DELETED_TOTAL",
     "WORKFLOW_RECONCILIATION_ROWS_RETAINED_TOTAL",
     "WORKFLOW_RECONCILIATION_ROWS_SCANNED_TOTAL",

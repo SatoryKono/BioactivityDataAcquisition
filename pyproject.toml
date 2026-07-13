@@ -75,6 +75,8 @@ tests = [
     "opentelemetry-exporter-otlp>=1.20",
     # HTTP mocking (required by adapter tests)
     "respx>=0.21",
+    # Docs link checker plugin tests import BeautifulSoup directly
+    "beautifulsoup4>=4.11.0",
     # Property-based testing (required by domain tests)
     "hypothesis>=6.100",
     # VCR.py for API testing (RULES.md Section 4.2)
@@ -105,6 +107,8 @@ dev = [
     # Resource monitoring
     "psutil>=5.9",
     "respx>=0.21",
+    # Docs link checker plugin tests import BeautifulSoup directly
+    "beautifulsoup4>=4.11.0",
     "mypy==1.20.2",
     "ruff>=0.4",
     "basedpyright>=1.0",

@@ -35,8 +35,11 @@ REQUIRED_SCHEMAS = (
     "chembl_target_protein_classification_v2.2.json",
     "chembl_target_component_v1.0.json",
     "chembl_tissue_v1.0.json",
+    "composite_activity_v1.0.json",
+    "composite_assay_v1.0.json",
     "composite_molecule_v1.0.json",
     "composite_publication_v1.0.json",
+    "composite_target_v1.0.json",
     "crossref_publication_v1.0.json",
     "openalex_publication_v1.0.json",
     "pubchem_compound_v1.0.json",
@@ -90,6 +93,18 @@ class TestGoldSchemaContracts:
             + "\n".join(f"  - {s}" for s in sorted(missing))
             + "\n\nGold contracts are required for data consumer documentation. "
             "See ADR-018 for Gold strict validation requirements."
+        )
+
+    def test_required_schema_list_matches_exported_gold_contracts(
+        self, schema_files: dict[str, Path]
+    ) -> None:
+        """The static required-contract guard must cover every published export."""
+        unguarded_exports = sorted(set(schema_files) - set(REQUIRED_SCHEMAS))
+
+        assert not unguarded_exports, (
+            "Gold schema exports missing from REQUIRED_SCHEMAS:\n"
+            + "\n".join(f"  - {name}" for name in unguarded_exports)
+            + "\n\nEvery published Gold contract must be covered by architecture guards."
         )
 
     @pytest.mark.parametrize("schema_name", sorted(REQUIRED_SCHEMAS))

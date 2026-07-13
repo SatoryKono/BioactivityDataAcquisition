@@ -24,9 +24,12 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from bioetl.domain.ports import MetricsPort
+    from bioetl.domain.workflow import WorkflowConfig
 
 _WORKFLOW_RUNS_TOTAL = "bioetl_workflow_runs_total"
 _WORKFLOW_CURRENT_STATUS = "bioetl_workflow_current_status"
+_WORKFLOW_EXPECTED = "bioetl_workflow_expected"
+_WORKFLOW_PIPELINE_EXPECTED = "bioetl_workflow_pipeline_expected"
 _WORKFLOW_STEP_EVENTS_TOTAL = "bioetl_workflow_step_events_total"
 _WORKFLOW_STEP_DURATION_SECONDS = "bioetl_workflow_step_duration_seconds"
 
@@ -74,6 +77,48 @@ def record_workflow_run_metrics(
             **context_labels,
         },
     )
+
+
+def record_workflow_pipeline_expected_metrics(
+    *,
+    metrics: MetricsPort,
+    config: WorkflowConfig,
+) -> None:
+    """Record bounded planned pipeline scopes for workflow-backed selectors."""
+    metrics.set_gauge(
+        _WORKFLOW_EXPECTED,
+        1.0,
+        {
+            "workflow": config.name,
+            "provider": _workflow_expected_provider(config),
+        },
+    )
+    for step in config.pipeline_steps:
+        pipeline_name = step.pipeline_name
+        provider, _separator, _entity = pipeline_name.partition("_")
+        run_options = config.defaults.merged_with(step.run_options)
+        metrics.set_gauge(
+            _WORKFLOW_PIPELINE_EXPECTED,
+            1.0,
+            {
+                "workflow": config.name,
+                "pipeline": pipeline_name,
+                "run_type": run_options.run_type or "incremental",
+                "provider": provider or pipeline_name,
+            },
+        )
+
+
+def _workflow_expected_provider(config: WorkflowConfig) -> str:
+    """Resolve one bounded provider label for the workflow selector universe."""
+    if config.pipeline_steps:
+        provider, _separator, _entity = config.pipeline_steps[
+            0
+        ].pipeline_name.partition("_")
+        if provider:
+            return provider
+    provider_context = config.workflow_context_labels.get("provider_context")
+    return provider_context or "unknown"
 
 
 def build_skipped_step_result(
@@ -219,6 +264,7 @@ __all__ = [
     "build_resume_skipped_step_result",
     "build_skipped_step_result",
     "record_step_metrics",
+    "record_workflow_pipeline_expected_metrics",
     "record_workflow_run_metrics",
     "run_options_from_config",
     "step_result_from_transform_result",

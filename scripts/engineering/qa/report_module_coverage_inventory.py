@@ -443,6 +443,22 @@ def _coverage_status(
     return "partially_covered"
 
 
+def _declaration_only_coverage_entry(
+    source_snapshot: _SourceModuleSnapshot,
+    coverage_entry: dict[str, int] | None,
+) -> dict[str, int] | None:
+    """Treat unexecuted declaration-only modules as having no coverable behavior."""
+    if not source_snapshot.declaration_only:
+        return coverage_entry
+    if coverage_entry is None or coverage_entry.get("covered_lines", 0) == 0:
+        return {
+            "executable_lines": 0,
+            "covered_lines": 0,
+            "missing_lines": 0,
+        }
+    return coverage_entry
+
+
 def _coverage_percent(coverage_entry: dict[str, int] | None) -> float | None:
     if coverage_entry is None:
         return None
@@ -661,6 +677,10 @@ def build_module_coverage_inventory(
                 "covered_lines": 0,
                 "missing_lines": 0,
             }
+        coverage_entry = _declaration_only_coverage_entry(
+            source_snapshot,
+            coverage_entry,
+        )
         status = _coverage_status(
             coverage_xml_exists=coverage_xml_exists,
             coverage_entry=coverage_entry,
@@ -1002,11 +1022,34 @@ def _refresh_existing_inventory_source_tree(
     refreshed_rows: list[dict[str, Any]] = []
     for source_snapshot in source_snapshots:
         existing = rows_by_path.get(source_snapshot.repo_path)
-        row = (
-            dict(existing)
-            if existing is not None
-            else _source_tree_only_row(source_snapshot, repo_root)
-        )
+        if existing is not None:
+            row = dict(existing)
+            coverage_entry = None
+            if isinstance(row.get("executable_lines"), int) and isinstance(
+                row.get("covered_lines"), int
+            ):
+                coverage_entry = {
+                    "executable_lines": int(row["executable_lines"]),
+                    "covered_lines": int(row["covered_lines"]),
+                    "missing_lines": int(row.get("missing_lines") or 0),
+                }
+            coverage_entry = _declaration_only_coverage_entry(
+                source_snapshot,
+                coverage_entry,
+            )
+            if coverage_entry is not None:
+                row["coverage_status"] = _coverage_status(
+                    coverage_xml_exists=bool(
+                        payload.get("summary", {}).get("coverage_xml_present", True)
+                    ),
+                    coverage_entry=coverage_entry,
+                )
+                row["coverage_percent"] = _coverage_percent(coverage_entry)
+                row["executable_lines"] = coverage_entry["executable_lines"]
+                row["covered_lines"] = coverage_entry["covered_lines"]
+                row["missing_lines"] = coverage_entry["missing_lines"]
+        else:
+            row = _source_tree_only_row(source_snapshot, repo_root)
         row["module"] = _module_name(source_snapshot.path, repo_root)
         row["path"] = source_snapshot.repo_path
         row["source_lines"] = source_snapshot.source_lines

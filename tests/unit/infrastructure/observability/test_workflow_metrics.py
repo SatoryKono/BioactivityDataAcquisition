@@ -19,6 +19,8 @@ pytestmark = pytest.mark.unit
 
 def test_workflow_metrics_are_registered() -> None:
     assert "bioetl_workflow_current_status" in GAUGES
+    assert "bioetl_workflow_expected" in GAUGES
+    assert "bioetl_workflow_pipeline_expected" in GAUGES
     assert "bioetl_workflow_runs_total" in COUNTERS
     assert "bioetl_workflow_step_events_total" in COUNTERS
     assert "bioetl_workflow_reconciliation_rows_scanned_total" in COUNTERS
@@ -73,6 +75,40 @@ def test_workflow_step_metrics_use_bounded_label_surface() -> None:
         ].labels.assert_called_once_with(**labels)
 
 
+def test_workflow_expected_uses_bounded_label_surface() -> None:
+    metrics = PrometheusMetrics()
+    with patch.dict(GAUGES, {"bioetl_workflow_expected": MagicMock()}):
+        labels = {
+            "workflow": "chembl_target",
+            "provider": "chembl",
+        }
+
+        metrics.set_gauge("bioetl_workflow_expected", 1.0, labels)
+
+        GAUGES["bioetl_workflow_expected"].labels.assert_called_once_with(**labels)
+        GAUGES["bioetl_workflow_expected"].labels().set.assert_called_once_with(1.0)
+
+
+def test_workflow_pipeline_expected_uses_bounded_label_surface() -> None:
+    metrics = PrometheusMetrics()
+    with patch.dict(GAUGES, {"bioetl_workflow_pipeline_expected": MagicMock()}):
+        labels = {
+            "workflow": "chembl_baseline",
+            "pipeline": "chembl_target",
+            "run_type": "backfill",
+            "provider": "chembl",
+        }
+
+        metrics.set_gauge("bioetl_workflow_pipeline_expected", 1.0, labels)
+
+        GAUGES["bioetl_workflow_pipeline_expected"].labels.assert_called_once_with(
+            **labels
+        )
+        GAUGES[
+            "bioetl_workflow_pipeline_expected"
+        ].labels().set.assert_called_once_with(1.0)
+
+
 def test_workflow_reconciliation_metrics_support_no_label_dispatch() -> None:
     metrics = PrometheusMetrics()
     counter = MagicMock()
@@ -114,17 +150,14 @@ def test_workflow_reconciliation_metrics_reject_unexpected_labels() -> None:
 
 def test_workflow_metrics_reject_run_id_label() -> None:
     metrics = PrometheusMetrics()
-    with patch.dict(COUNTERS, {"bioetl_workflow_runs_total": MagicMock()}):
+    with patch.dict(GAUGES, {"bioetl_workflow_expected": MagicMock()}):
         with pytest.raises(ValueError, match="run_id"):
-            metrics.increment_counter(
-                "bioetl_workflow_runs_total",
-                1,
+            metrics.set_gauge(
+                "bioetl_workflow_expected",
+                1.0,
                 {
-                    "workflow": "activity_workflow",
-                    "status": "success",
-                    "pipeline_context": "chembl_activity",
-                    "run_type_context": "incremental",
-                    "provider_context": "chembl",
+                    "workflow": "chembl_target",
+                    "provider": "chembl",
                     "run_id": "run-1",
                 },
             )

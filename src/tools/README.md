@@ -266,6 +266,21 @@ python -m scripts.diagrams differentiate-linkstyle --dry-run
 python -m scripts.diagrams differentiate-linkstyle
 ```
 
+### harmonize_link_styles.py
+
+Diagram semantics helper for normalizing Mermaid link stroke colors and classes.
+
+**Canonical location:** `scripts/diagrams/harmonize_link_styles.py`
+
+`src/tools/harmonize_link_styles.py` is a temporary compatibility wrapper.
+
+**Typical usage:**
+
+```bash
+python -m scripts.diagrams harmonize-link-styles --dry-run
+python -m scripts.diagrams harmonize-link-styles
+```
+
 ### Schema config commands
 
 Cross-config comparison and unified-config validation now live only on the

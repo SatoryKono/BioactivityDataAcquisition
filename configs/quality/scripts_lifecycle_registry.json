@@ -322,9 +322,9 @@
     },
     "scripts/engineering/qa/report_dashboard_promql_scope.py": {
       "owner": "@bioetl-platform",
-      "decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded manual observability audit report utility while dashboard PromQL scope reviews remain episodic; promote it into the canonical dashboard-audit workflow or retire it after those checks are fully absorbed by governed reports/tests."
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-31",
+      "next_step": "Retain as the supporting QA helper behind dashboard PromQL scope checks while dashboard selector and forbidden-label governance remains split across static dashboard audits and live Grafana evidence; promote to active only with an explicit active-surface budget reduction elsewhere."
     },
     "scripts/engineering/qa/create_github_issues.py": {
       "owner": "@bioetl-platform",

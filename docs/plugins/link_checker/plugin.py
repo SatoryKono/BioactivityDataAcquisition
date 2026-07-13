@@ -12,6 +12,7 @@ import logging
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -166,10 +167,9 @@ class LinkCheckerPlugin(BasePlugin):
             log.debug(f"Skipping ignored link: {href}")
             return None
 
-        # Determine if internal or external link
-        is_internal = (
-            href.startswith("/") or href.startswith("./") or href.startswith("../")
-        )
+        # Relative HTML links like "target.html" are internal too.
+        parsed_href = urlparse(href)
+        is_internal = not (parsed_href.scheme or parsed_href.netloc)
 
         result = {
             "source_file": source_file,

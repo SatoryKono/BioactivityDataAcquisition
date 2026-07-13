@@ -6,6 +6,7 @@ import pytest
 
 import importlib.util
 from pathlib import Path
+import subprocess
 import sys
 from types import ModuleType
 
@@ -83,6 +84,71 @@ def test_tests_workflow_runs_naming_package_consistency_gate() -> None:
     workflow = (repo_root / ".github/workflows/tests.yml").read_text(encoding="utf-8")
     assert "Pre-merge naming/package consistency gate" in workflow
     assert "python -m scripts.engineering.qa check-naming-pkg --check" in workflow
+
+
+def test_collect_src_tree_uses_git_tracked_inventory(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    module = _load_consistency_gate_module()
+    git_stdout = "\0".join(
+        [
+            "src/bioetl/domain/example.py",
+            "src/bioetl/application/services/runner.py",
+            "docs/ignored.py",
+            "",
+        ]
+    )
+
+    def fake_run(*args: object, **_kwargs: object) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(
+            args=args,
+            returncode=0,
+            stdout=git_stdout,
+            stderr="",
+        )
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+
+    py_files, directories = module._collect_src_tree(tmp_path)
+
+    assert [path.relative_to(tmp_path).as_posix() for path in py_files] == [
+        "src/bioetl/application/services/runner.py",
+        "src/bioetl/domain/example.py",
+    ]
+    assert {
+        path.relative_to(tmp_path).as_posix() for path in directories
+    } >= {
+        "src/bioetl",
+        "src/bioetl/application",
+        "src/bioetl/application/services",
+        "src/bioetl/domain",
+    }
+
+
+def test_collect_src_tree_falls_back_to_filesystem_walk(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    module = _load_consistency_gate_module()
+
+    def fake_run(*args: object, **_kwargs: object) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(
+            args=args,
+            returncode=1,
+            stdout="",
+            stderr="not a git repository",
+        )
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+    target = tmp_path / "src" / "bioetl" / "domain" / "example.py"
+    target.parent.mkdir(parents=True)
+    target.write_text("class Example: ...\n", encoding="utf-8")
+
+    py_files, directories = module._collect_src_tree(tmp_path)
+
+    assert py_files == (target,)
+    assert target.parent in directories
 
 
 def test_builder_outside_composition_fails_consistency_gate(tmp_path: Path) -> None:

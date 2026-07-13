@@ -69,6 +69,7 @@ Commands:
     report-dashboard-panel-audit-matrix Generate/check dashboard panel audit matrix
     report-panel-title-inventory Generate/check generated dashboard panel-title inventory mirror
     report-dashboard-query-duplicates Generate report-only exact/near-duplicate Grafana PromQL inventory
+    report-dashboard-promql-scope Generate/check dashboard PromQL scope and forbidden-label inventory
 """
 
 from __future__ import annotations
@@ -149,6 +150,7 @@ COMMAND_MODULES: dict[str, str] = {
     "check-prometheus-rules": "scripts.engineering.qa.check_prometheus_rules",
     "report-dashboard-inventory": "scripts.engineering.qa.report_dashboard_inventory",
     "report-dashboard-query-duplicates": "scripts.engineering.qa.report_dashboard_query_duplicates",
+    "report-dashboard-promql-scope": "scripts.engineering.qa.report_dashboard_promql_scope",
     "report-dashboard-panel-audit-matrix": (
         "scripts.engineering.qa.report_dashboard_panel_audit_matrix"
     ),

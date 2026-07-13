@@ -1,6 +1,6 @@
 # Contract Coverage Matrix
 
-- snapshot_date: 2026-07-07
+- snapshot_date: 2026-07-13
 - row_count: 27
 - gold_enabled_count: 27
 - covered_gold_enabled_count: 27
