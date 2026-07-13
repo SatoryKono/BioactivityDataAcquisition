@@ -1,0 +1,2315 @@
+{
+  "summary": {
+    "total": 348,
+    "old_branches": 291,
+    "safe_to_delete": 11,
+    "needs_check": 278,
+    "protected": 2,
+    "too_recent": 0
+  },
+  "safe_to_delete": [
+    {
+      "name": "codex/close-5395-5401",
+      "author": "SatoryKono",
+      "date": "2026-06-18T20:37:54",
+      "sha": "7ff3b97103f582fa64186c9b035a16a38fbfcdcd",
+      "source": "local"
+    },
+    {
+      "name": "fix/issue-3105-sonar-baseline-step1",
+      "author": "SatoryKono",
+      "date": "2026-04-24T17:12:55",
+      "sha": "402d616722bb6c3b0cfc87c8a8f06821171ad088",
+      "source": "local"
+    },
+    {
+      "name": "fix/repro-4526-4530",
+      "author": "SatoryKono",
+      "date": "2026-05-22T14:00:08",
+      "sha": "18f4c1a75404419d217f9feed0cefeb571f04a0e",
+      "source": "local"
+    },
+    {
+      "name": "main_20250426",
+      "author": "SatoryKono",
+      "date": "2026-04-25T18:42:02",
+      "sha": "c97c4bcf9cb19478d54772f29f90b866ffc7d7dd",
+      "source": "local"
+    },
+    {
+      "name": "main_20260426-1",
+      "author": "SatoryKono",
+      "date": "2026-04-26T13:48:10",
+      "sha": "35fdc976f6c3b2cfc0ca3b342b95eb7f20e8306c",
+      "source": "local"
+    },
+    {
+      "name": "main_20260503",
+      "author": "SatoryKono",
+      "date": "2026-05-03T10:48:28",
+      "sha": "31b7fe908ed9f655f93cdb08532a9a73d4babc29",
+      "source": "local"
+    },
+    {
+      "name": "main_20260505",
+      "author": "SatoryKono",
+      "date": "2026-05-04T07:35:49",
+      "sha": "47846528e2a6202a84f725a54d9ace52fd7c9ddc",
+      "source": "local"
+    },
+    {
+      "name": "main_20260514",
+      "author": "SatoryKono",
+      "date": "2026-05-14T08:33:58",
+      "sha": "5d34468b9dc6a2a6965737bb223f5776ce42b000",
+      "source": "local"
+    },
+    {
+      "name": "main_20260514-2",
+      "author": "SatoryKono",
+      "date": "2026-05-15T16:13:12",
+      "sha": "8e551ab1c22032b9997e6ce88a77ea24241fa5c4",
+      "source": "local"
+    },
+    {
+      "name": "main_20260615",
+      "author": "SatoryKono",
+      "date": "2026-05-15T16:10:47",
+      "sha": "f23e92c9b97d57ff7df2c9d0f2780b0018f59060",
+      "source": "local"
+    },
+    {
+      "name": "tmp-20260626",
+      "author": "SatoryKono",
+      "date": "2026-06-25T20:57:51",
+      "sha": "b2e3f1baa08e0e55368ef077684ade9a98190a7d",
+      "source": "local"
+    }
+  ],
+  "needs_check": [
+    {
+      "name": "backup/local-main-before-4083-4085",
+      "author": "SatoryKono",
+      "date": "2026-05-14T14:29:32",
+      "sha": "1d8f4594d380dfa14db35a8e584ab4d6c3b5c046",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "chore/consolidate-recent-branches",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-03-20T10:13:41",
+      "sha": "9b373071d71e5581eee3ce7658561d04936749e6",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "integration/repro-2754-2761",
+      "author": "SatoryKono",
+      "date": "2026-04-10T13:33:53",
+      "sha": "48f5ca00cb5c137894ee545d85491d2d83b09fc8",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/2686-checkpoint-fingerprint-sync",
+      "author": "SatoryKono",
+      "date": "2026-04-09T18:53:45",
+      "sha": "6fe4865f7096ea3f6129731796ff456d6dff3af9",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/2687-registry-hash-canonical",
+      "author": "SatoryKono",
+      "date": "2026-04-09T19:05:39",
+      "sha": "946c16b8152ec0ba9471f0496a0791053ae7df14",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/2688-smiles-vo",
+      "author": "SatoryKono",
+      "date": "2026-04-09T19:40:07",
+      "sha": "089c45a4dcb5f3063727df45b4c3914927fed3cf",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/2689-field-matrix-contract",
+      "author": "SatoryKono",
+      "date": "2026-04-09T19:29:24",
+      "sha": "c8db8414031bd2dff2e916189312baed4ffbb0a5",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/2690-workflow-config",
+      "author": "SatoryKono",
+      "date": "2026-04-09T20:00:54",
+      "sha": "5b08e6ee4d2970cd1b87ebaf3b96468628864683",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/2712-audit-runtime-wiring-clean",
+      "author": "SatoryKono",
+      "date": "2026-04-10T07:23:23",
+      "sha": "3b55b0d4b26680a546d18139951da302962015c0",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/2723-deterministic-persisted-contract",
+      "author": "SatoryKono",
+      "date": "2026-04-10T09:46:46",
+      "sha": "70517c137a8a1a08cd01be542d3c700935c03b83",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/2733-bounded-observability-labels",
+      "author": "SatoryKono",
+      "date": "2026-04-10T08:16:02",
+      "sha": "d3f3898ccc1f918d1ecf7fc99031ace9e16d7edd",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/2733-bounded-observability-labels-v3",
+      "author": "SatoryKono",
+      "date": "2026-04-10T09:45:25",
+      "sha": "9766f755f0e0928c9d50271e017a24912e95fdd3",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/2735-metrics-port-split",
+      "author": "SatoryKono",
+      "date": "2026-04-10T11:12:43",
+      "sha": "4ff9a8b36e4b5ee0197a405ce17e2d33ff1be133",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/2736-freshness-from-anchors",
+      "author": "SatoryKono",
+      "date": "2026-04-10T11:39:09",
+      "sha": "4bcedcc66298fa321475c9d6f669949550b2ed9e",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/2737-observability-diagnostics",
+      "author": "SatoryKono",
+      "date": "2026-04-10T12:24:34",
+      "sha": "6f7bdc12b66e0d8c955afa7b97553dec89ba18c2",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/2741-composite-join-merge-core",
+      "author": "SatoryKono",
+      "date": "2026-04-10T09:01:53",
+      "sha": "308535f47e4881bf8012c888e7b1cf5958798579",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/2754-deterministic-dq-context",
+      "author": "SatoryKono",
+      "date": "2026-04-10T13:11:22",
+      "sha": "c08511594855c8f66c854193fb5573b1768d87e8",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/2762-domain-event-observability-map",
+      "author": "SatoryKono",
+      "date": "2026-04-10T12:32:04",
+      "sha": "27f9a2256bd425f7ef2bf118fc5762565d4ba7e3",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/2769-observability-api-consolidation",
+      "author": "SatoryKono",
+      "date": "2026-04-10T12:57:59",
+      "sha": "cf30507bc123ef2cefe5780ecfcb2eab08c831b6",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/2770-checkpoint-observability",
+      "author": "SatoryKono",
+      "date": "2026-04-10T13:42:42",
+      "sha": "03cc13687bfaff8e3bfcd4735151259614d61bf6",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/2771-audit-checkpoint-diagnostics",
+      "author": "SatoryKono",
+      "date": "2026-04-10T14:52:11",
+      "sha": "a09c854098decacce692d227f5bd9382570df561",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/2772-runtime-observability-contract",
+      "author": "SatoryKono",
+      "date": "2026-04-10T15:02:06",
+      "sha": "fa1166b26e35c414fb2f631115889ca25039ba20",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/2778-2780-phase1",
+      "author": "SatoryKono",
+      "date": "2026-04-10T16:49:30",
+      "sha": "4d87cff64597b98c1c297873e61bc0fbb5707848",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/2786-domain-schema-metadata",
+      "author": "SatoryKono",
+      "date": "2026-04-10T16:02:26",
+      "sha": "9f01e68978e23eb0c2486c4f924cde5be17958bf",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/2788-observability-cli-workflows",
+      "author": "SatoryKono",
+      "date": "2026-04-10T16:37:38",
+      "sha": "29598f6565cb5168604f253510f2a1a55b932396",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/obs-p0-audited-main",
+      "author": "SatoryKono",
+      "date": "2026-04-10T16:14:11",
+      "sha": "95a8e979d6e153aea77cfb6b73caf9f0969f76f7",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "issue/obs-p0-observability-surface",
+      "author": "SatoryKono",
+      "date": "2026-04-10T16:43:52",
+      "sha": "ea75c8aec2e77ffda0cc4a599bc650e3f31bc4a6",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "main_20260404",
+      "author": "SatoryKono",
+      "date": "2026-04-04T17:23:04",
+      "sha": "1fdb9d2ce52a2f211ccda0c033216630977317a3",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "main_20260505-1",
+      "author": "SatoryKono",
+      "date": "2026-05-05T19:35:41",
+      "sha": "fa794d68d99273a352d0f31de6dbbc9bfaf791c7",
+      "source": "local",
+      "is_merged": false
+    },
+    {
+      "name": "origin/1",
+      "author": "SatoryKono",
+      "date": "2026-04-29T22:27:18",
+      "sha": "e150777eab9b903bf629c7acdce0dcf58950e5ca",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/2",
+      "author": "SatoryKono",
+      "date": "2026-05-02T21:02:15",
+      "sha": "470226a810541ce554562b20b8135cc8f1617a4f",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/a1",
+      "author": "SatoryKono",
+      "date": "2026-05-08T23:18:57",
+      "sha": "07d1406c07d1b77041a86c1e1674ea81be9ecbe5",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/add-py-review-reports-11144737295225843882",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-02T10:22:04",
+      "sha": "a3591628da32783f0738c603dc5d42dcc86d688f",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/add-review-reports-14140296571349509559",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-03-22T01:57:22",
+      "sha": "721fb071381c04632e5a1455023a4eb07d840551",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/add-review-reports-15212041285903641743",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-16T01:27:19",
+      "sha": "2e18b2849dc0479d6ef1e8578dee3df00f55d2a9",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/agent/py-test-swarm-12417312919147295313",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-29T09:16:59",
+      "sha": "8b83ca579575e0f8fe29b0b6ebe5c69a9252e691",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/ai-code-review-11260436480377693745",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-03-28T02:43:46",
+      "sha": "e7db42ee7fcda3f4538a5e379b724ce7f6138a33",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/ai-hierarchical-code-review-377991794209424974",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-03T06:27:00",
+      "sha": "7624d687f200de4d5e4814b248dcd1aa1b00d1fb",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-column-orderer-optimization-12451496822357224538",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-14T00:12:38",
+      "sha": "b310cf2d0037eac6ee3015441385cdf157cda47c",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-column-orderer-optimization-14810891722418602958",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-10T23:39:59",
+      "sha": "6889ea2da399e967c2bcf8b09b84b4de922601aa",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-deduplication-optimization-8274021130803546245",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-05T22:16:19",
+      "sha": "f1a76a65fb14bcfedd23595fb0f8fbe551c437b1",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-merger-metrics-polars-12766459557031402223",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-24T22:27:18",
+      "sha": "8e63748b7a6ec05687a58b9ea261d3bc96faef74",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-o1-dedup-lookups-11579477624918295499",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-16T11:16:00",
+      "sha": "6dc2541ccd3427d9cf0a3a781d81b8efc5416ca0",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-opt-dedup-1468882191191777561",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-26T22:04:06",
+      "sha": "966eda8c27b277c62b0be8e79ab2d767b7fbcf81",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-opt-dedup-classify-14628367632292570352",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-07T22:17:19",
+      "sha": "3772ec955290446220417b1e25dd349be3476af8",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-opt-dedup-order-3021074673319568711",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-29T22:15:13",
+      "sha": "1c08d1b40c38631edcf41ce7321c4dce2e0f3bd8",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-opt-dict-fromkeys-dedup-10615874350658858341",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-23T22:13:00",
+      "sha": "65d2096fbffec824cc0cb727754e584d6b4ffb7d",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-opt-pyarrow-serialization-11361349624622865950",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-02T15:21:35",
+      "sha": "b6e31c483218246d024081120daa00c4a7bdcc35",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-optimize-as-py-7292696041886100102",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-02T18:48:39",
+      "sha": "2c1b9f1ef239d536c6e13e40ed3c58f58edb82fb",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-optimize-as-py-8558119282180853928",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-02T16:58:35",
+      "sha": "19d5534e50f7f38bede5feb9919a873ca647f450",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-optimize-batch-writer-columns-12498982139199116125",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-28T08:41:05",
+      "sha": "f6fc8c296a02f38f0d05b0fdc9a1ea712ea6f28b",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-optimize-batch-writer-columns-16936686487385688466",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-28T10:03:45",
+      "sha": "594d2f2a89533853a38e97b8a48f43d907799f45",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-optimize-collect-columns-13801393632892711024",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-28T07:52:30",
+      "sha": "355060bbc3f1585a034145528d1ed47288d2628f",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-optimize-column-extraction-689721539992570819",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-17T00:51:55",
+      "sha": "12c8d8ea09c8653eebd6bfa2bc9d010553e4f15e",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-optimize-column-grouping-17738006681299087434",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-15T08:06:45",
+      "sha": "5b88aec4d754fdf8ca4e0bea3ea0aa720088f42d",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-optimize-column-orderer-5205473834508319501",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-05T22:38:31",
+      "sha": "90e71dd19dafa6c2600d514771f5fb5f44521ed0",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-optimize-column-orderer-6158355552435111923",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-12T23:26:28",
+      "sha": "2a06882c3d0317c6ed6744a1edc3b6ed6f3ae5d2",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-optimize-column-orderer-helpers-17720322478388326854",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-08T23:36:35",
+      "sha": "6b8565901b63fa91843892b640e0622aa31051a9",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-optimize-config-merge-4329707387837610625",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-03T22:17:28",
+      "sha": "e5e1ae3ff617e1f12ef0f00db86e6a966056abdf",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-optimize-config-merge-9341964786402236775",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-28T22:07:55",
+      "sha": "9f3aecaf0226fa13c77eab2bcd55ff81abff5511",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-optimize-deduplication-3701702357763310375",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-20T04:00:26",
+      "sha": "c896ba273909eb0becc4508bddf29496e21aaa2c",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-optimize-deduplication-classify-columns-3569398847841258281",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-20T23:10:11",
+      "sha": "87554909a4bb5577d6376675ba975fddaf692616",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-optimize-execution-phase-transitions-and-outcome-lookups-1773400555353960426",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-14T11:10:15",
+      "sha": "efa23dab4f86b11bb38062aae23b21a00fa9df0f",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-optimize-fsm-terminal-checks-14531961114285725488",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-27T22:09:47",
+      "sha": "1b57fbb7bf6d3c958a14e6a2103c4687b0c7445a",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-optimize-polars-filtering-6524830792403182346",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-22T22:28:51",
+      "sha": "b84b29ff8151b94ffc4eb51d77f024fc9fcdf99b",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-optimize-pyarrow-array-iteration-6632901958787221962",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-03-23T03:02:52",
+      "sha": "325bdb474dad04453c4a417335eb00829d41a23e",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-optimize-regex-compilation-rename-plan-7257696906953506882",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-02T11:37:31",
+      "sha": "d32d64284853e2cc2b7f43f30e5cb35281d1b489",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-optimize-rename-regex-16801739255094068371",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-02T11:47:56",
+      "sha": "11bd965094c4b33000fbb8440fdde6e70bf62785",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-optimize-serialization-11981813293212672735",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-03-21T23:25:07",
+      "sha": "43316100174cb16374712baafc66ba44423c43b7",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-optimize-sorting-13782224520442588262",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-07T23:07:48",
+      "sha": "37908e9faef7f85503d8b5afe695589d0f9a68bd",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-perf-as-py-walrus-14961036920701690183",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-03-24T22:38:36",
+      "sha": "a59a3d752d3f252a0a5404efa749575404b922ec",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-perf-column-orderer-1636038478784210036",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-11T23:40:57",
+      "sha": "9e5083953035076d1a14a6297fb681cb19f4081d",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-perf-column-priority-orderer-13246302042727590600",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-21T23:00:48",
+      "sha": "07045df6c470be049ceae40090bfd91cad863405",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-perf-column-sorting-4446340893621848788",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-20T20:16:37",
+      "sha": "03949f5991168e34bb8c4a10a218ddde9aaaa6ec",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-perf-deduplication-classify-2213516478732808912",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-16T19:24:57",
+      "sha": "9f5c69e82d9620d724e0cc8515db1e90d6f61dbb",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-perf-dict-fromkeys-dedup-7715370720002705802",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-01T00:11:34",
+      "sha": "d338c2bc4f346f3cc5d58d64c62b5336a267b381",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-perf-dict-fromkeys-dedup-9520745943003468050",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-04T22:45:10",
+      "sha": "6503f5519aea8421818bbd24253350aa3adaf108",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-perf-merger-metrics-814170549152989596",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-17T22:15:52",
+      "sha": "6cbf52caa3c80e7a43ece08a562166aa0ea9f574",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-perf-opt-collect-record-columns-17571701619834015013",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-19T23:44:37",
+      "sha": "3c1a985a6743375fe94027359f6e4809849b9cac",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-perf-polars-coverage-optimizations-7583565822371623805",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-28T23:43:56",
+      "sha": "0bca6b0e3a06d514d0f7665ce1da03b364eea849",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-performance-optimization-batch-writer-columns-3162871056242518814",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-28T01:21:40",
+      "sha": "1eeee4872168af1ac1a0d80846e78b6c23a2bfaa",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-polars-filter-optimization-4877564212703090533",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-21T22:10:35",
+      "sha": "b215dc78647d6a85ff3f006ca0ffa88a79eea33b",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-polars-merge-metrics-8330861873969777422",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-27T22:15:31",
+      "sha": "1e82a23e5f2cf10f14a436836b3a6f0eb4cb3be5",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-polars-perf-optimizations-16882367997201977206",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-18T22:07:36",
+      "sha": "6efe5e377be29e895de5e509c46a3163d7f41a27",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-pre-compile-regex-5545211759892233130",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-02T23:41:13",
+      "sha": "370a57494d07eda8ebc28cb5f5e3fb3fac6dfa25",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-pyarrow-optimization-15390637702947754433",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-03-26T23:09:27",
+      "sha": "f0b357380332ad70e2856c71cb01942a44f009b6",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-pyarrow-serialization-optimization-9019484177672752884",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-02T16:59:26",
+      "sha": "5e7fa959bc6d4e59a150959573a021e1827ae4f1",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-pyarrow-walrus-1084369658741524042",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-03-20T22:56:40",
+      "sha": "457fdbf5472b7a31d240b1ed4f556eabce119df9",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt-pyarrow-walrus-optimization-17871461688299747827",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-03-27T22:35:07",
+      "sha": "f1298d7d439d9537960b6038784f9ce12159acae",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt/optimize-arrow-serialization-2343942983033981456",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-03-23T23:21:13",
+      "sha": "07e612b3cb982eb31c982ea7081a1f7c00a1cd3a",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt/optimize-batch-writer-columns-5183829520280024199",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-19T21:20:57",
+      "sha": "a17a4590ad6b067dce2c12de199a97b46217e3a4",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt/optimize-collect-record-columns-16304631928236897231",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-21T21:59:58",
+      "sha": "675621d875d07a760f490303ad69a6d7990ac609",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt/optimize-collect-record-columns-5909343882218732408",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-28T13:30:20",
+      "sha": "e6725be5bd0d0f54389f22cdc141bb1e811bf9f7",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt/optimize-column-orderer-17721841042678993171",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-15T23:38:58",
+      "sha": "f6a0b7fd3f957d41a13a9323d5c4037190faa4f2",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt/optimize-column-orderer-helpers-16488552751990894326",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-09T23:18:21",
+      "sha": "c89eace76f0c9bc41125fbdcfb9241462c3c9377",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt/optimize-config-merge-dedupe-4028371139934933189",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-06T22:13:59",
+      "sha": "23ed3a240c35ec70407fec5a16eeefbb2d27d46d",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt/optimize-dedup-classification-1481184040348046250",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-16T22:12:21",
+      "sha": "33b021623a4b82b649f050e53a3bb22d5fb7b4e5",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt/optimize-dedup-dict-fromkeys-11315254958779717426",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-26T22:09:27",
+      "sha": "00a27568389b263e03a1549c8792b04f36b6f295",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt/optimize-deduplicate-columns-10109927881230104389",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-01T22:07:44",
+      "sha": "8362cd7988fb666d7f159dd4dc74b585e9dabbad",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt/optimize-group-cols-15298025439771168803",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-22T23:11:50",
+      "sha": "2acf8cc80b9aa1e3be1f13d72208328aa6e6f449",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt/optimize-missing-key-filtering-7838702624539042872",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-28T22:53:13",
+      "sha": "762dc00594abfe56544e779ac365776849569c89",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt/optimize-polars-coverage-15752706670434777967",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-16T18:41:02",
+      "sha": "9d9b788d66769514a14b52b7bde2a85823b72058",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt/optimize-polars-metrics-16319493333469337967",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-23T22:21:50",
+      "sha": "518b3df0e42fbf1d4d3e010071ce4be1385e8e54",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt/optimize-sort-columns-provider-5202864366498938613",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-06T23:02:38",
+      "sha": "ed654049bdf8d1846ad22d68f5262378860ae4eb",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt/polars-expression-optimization-18289084263926193787",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-29T22:06:49",
+      "sha": "b0f9eb88610246769b1d86e4a27ab5d96d9041b0",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt/polars-metrics-optimization-16004818869328574279",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-20T22:24:43",
+      "sha": "f4f51f8e604c54fa73a5eff0bbc20651e557ece6",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt/polars-metrics-optimization-16742393718832112396",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-25T22:08:59",
+      "sha": "c9dc394b0c20f5045861b9718fafb33bac79a197",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/bolt/pyarrow-as-py-optimization-14437032280125748650",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-30T13:24:22",
+      "sha": "86a02eff06cd0aa5fa14950fd86ab2f7630d12a6",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/chore/generate-hierarchical-code-review-3242891352865395421",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-14T03:18:11",
+      "sha": "30e6c0bf84839b78677a705e868358015f5aefe8",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/chore/hf-remove-stray-mkdocs-dirs",
+      "author": "SatoryKono",
+      "date": "2026-04-05T15:51:00",
+      "sha": "f557d0bbec70e83a9afadcf95efa81820cc1940a",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/chore/test-swarm-L1-reports-15004924872670863230",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-17T11:11:00",
+      "sha": "fea08c1d7dffdcb3b8b83ae07ec868faf606427a",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/chore/test-swarm-reports-438511226440799505",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-26T09:58:23",
+      "sha": "d5a7fbfa7cffbfc9c2a600a05219cc469f8b09af",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/chore/update-review-reports-11907008669985223964",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-13T04:27:25",
+      "sha": "0a77cef4c3b566d6aab93a488e0e7e0f4258bd8d",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/claude/add-interactive-debugger",
+      "author": "anthropic-code-agent[bot]",
+      "date": "2026-03-10T06:56:51",
+      "sha": "0141e47f4e0f04f84595ce72a01659b0af9a3ca0",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/claude/architecture-review-refactor-r590e",
+      "author": "Claude",
+      "date": "2026-03-15T20:29:49",
+      "sha": "ce638767a1ed196f29515f0728b630e93b55dfcc",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/claude/audit-refactor-review-AOMLk",
+      "author": "Claude",
+      "date": "2026-03-10T22:57:16",
+      "sha": "cb28bf95bb683cb23437a689cdd2a9bad72f0071",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/claude/configure-setup-script-ei3rR",
+      "author": "Claude",
+      "date": "2026-03-10T21:41:50",
+      "sha": "1c4f9b828ad7e5673910dd28db8363312be3af8f",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/claude/consolidate-project-scripts-IyUir",
+      "author": "Claude",
+      "date": "2026-03-11T22:49:36",
+      "sha": "0d1885f5216cc140dc366155b0cff0e4e7810a64",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/claude/consolidate-project-scripts-NzcGh",
+      "author": "Claude",
+      "date": "2026-03-11T21:41:35",
+      "sha": "693fd353a16ef31392d7e8fdd9c6939bb4e52e9c",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/cleanup-backup",
+      "author": "SatoryKono",
+      "date": "2026-04-15T12:49:20",
+      "sha": "196bc7eca05c156d69a2fe369abeaf558c3f6a6d",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/cleanup-legacy-publication-aliases-1721716041649646680",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-02T13:17:07",
+      "sha": "771577ed4baa0e14a61b7865cbc3392bffa711cf",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/add-clockport-and-implement-systemclock",
+      "author": "SatoryKono",
+      "date": "2026-03-11T00:04:41",
+      "sha": "64519ba2dd9602666a6c4fce8f62da4c44654c65",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/add-clockport-and-integrate-with-services",
+      "author": "SatoryKono",
+      "date": "2026-03-11T00:01:09",
+      "sha": "ea6eda605b349b3e30901d9ccc3a39b74cd5a2b9",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/add-control-plane-v1-link-to-bioetl-dq-v2.json",
+      "author": "SatoryKono",
+      "date": "2026-05-03T21:55:32",
+      "sha": "5170ef670ad50cc4fc7c3f4de2725061eee98d86",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/add-control-plane-v1-link-to-bioetl-dq-v2.json-ryb9bi",
+      "author": "SatoryKono",
+      "date": "2026-05-03T22:08:17",
+      "sha": "f630bbc7dbb0d96dd89d0ffef70401025c4f50bd",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/add-filter-order-instruction-to-panels",
+      "author": "SatoryKono",
+      "date": "2026-05-03T23:01:02",
+      "sha": "7da3af806e27be1f4795deb362f6db400609008a",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/add-fsmstatehelperservice-to-compositepipelinerunnerservice",
+      "author": "SatoryKono",
+      "date": "2026-03-11T00:05:19",
+      "sha": "43f9727c37355e769860184866be75581286220d",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/add-next-recommended-drilldown-block",
+      "author": "SatoryKono",
+      "date": "2026-05-03T23:59:18",
+      "sha": "854865f8f7aca49c2bfe151cb415bc14a7f93bbd",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/add-tooltips-to-core-and-workflow-links",
+      "author": "SatoryKono",
+      "date": "2026-05-03T23:19:41",
+      "sha": "1523e9515c2f8e39e01651271fd8b3e932082549",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/adopt-consistent-link-standards",
+      "author": "SatoryKono",
+      "date": "2026-05-03T21:55:41",
+      "sha": "aa7e83e94ba346c09bbebf0117c31bc4af8f8931",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/categorize-and-tidy-up-type-ignores",
+      "author": "SatoryKono",
+      "date": "2026-03-11T00:07:48",
+      "sha": "e08dadee16253561a6ede4ee995b708f18e8aebd",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/close-doc-issues-5340-5342",
+      "author": "SatoryKono",
+      "date": "2026-06-18T11:54:51",
+      "sha": "bcd996198f41ec7eb4abdf9a476c17842801ac11",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/establish-versioning-standard-in-documentation",
+      "author": "SatoryKono",
+      "date": "2026-05-05T04:34:17",
+      "sha": "bc4ed75857bcb898cb786d207f69680bbd971c50",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/filter-architecture-metric-exemptions",
+      "author": "SatoryKono",
+      "date": "2026-03-11T00:04:47",
+      "sha": "e406ed5bc00230631c8ca876eeb6e8e00ebf145a",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/fix-inventory-drift-errors-in-scripts",
+      "author": "SatoryKono",
+      "date": "2026-05-05T03:00:29",
+      "sha": "c2ac547fe3ceed2fcd636080e0fd1c056392a5ac",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/fix-sonarqube-backend-issues",
+      "author": "openai-code-agent[bot]",
+      "date": "2026-04-18T20:11:25",
+      "sha": "0e2293f5ddd85aa0b46be21529d1d22263d01bfa",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/implement-clockport-with-systemclock-and-fixedclock",
+      "author": "SatoryKono",
+      "date": "2026-03-11T00:05:03",
+      "sha": "8a787fb02c3a45f5a90e2e2b9a053cefca30f7a7",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/main_20250309-01",
+      "author": "SatoryKono",
+      "date": "2026-03-14T01:10:52",
+      "sha": "996b127fcd522d773ee0d3ab2f4399e2397800af",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/refactor-batch-executor-dependencies",
+      "author": "SatoryKono",
+      "date": "2026-03-11T00:05:08",
+      "sha": "b4df62f267ba691ddd6b38ad26b4e755856eda04",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/refactor-dependency-injection-in-core-modules",
+      "author": "SatoryKono",
+      "date": "2026-03-11T00:04:26",
+      "sha": "41f1fc75ee858afa8b70b8fbb030a85f41410793",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/refactor-getattr-calls-in-bioetl",
+      "author": "SatoryKono",
+      "date": "2026-03-11T00:02:14",
+      "sha": "4574ba268f1592e824acc09de681d2068ba5ff70",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/refactor-mixin-files-for-type-safety",
+      "author": "SatoryKono",
+      "date": "2026-03-11T00:04:08",
+      "sha": "45a563141940d7c41e8b33ed8950ddaafb3c0905",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/refactor-silverdqanalyzer-into-components",
+      "author": "SatoryKono",
+      "date": "2026-03-11T00:01:12",
+      "sha": "81eb1f0bef449fd17d96695d931d4191a8811182",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/refactor-silverdqanalyzer-into-components-bpi4lc",
+      "author": "SatoryKono",
+      "date": "2026-03-11T00:05:27",
+      "sha": "0605e51ef23c996504d1974c10d5255f2f37db21",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/refactor-to-use-constructor-injection",
+      "author": "SatoryKono",
+      "date": "2026-03-11T00:07:39",
+      "sha": "d44b1b5f41bf1699d8808fc68781011e8afe1438",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/remove-back-to-overview-from-bioetl-overview-v2.json",
+      "author": "SatoryKono",
+      "date": "2026-05-03T21:55:49",
+      "sha": "e198fb4e27f93cb2317aa08cb2af9bd5d16e078e",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/unify-links-title-in-dashboards",
+      "author": "SatoryKono",
+      "date": "2026-05-03T21:55:25",
+      "sha": "92e5a7fcc1141c65e51201ee67432d713ba628ef",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/update-grafana-dashboards-structure-and-documentation",
+      "author": "SatoryKono",
+      "date": "2026-05-03T21:17:00",
+      "sha": "be85fe7a52d1712f70d2a92988f13dab7c59953b",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/codex/update-grafana-dashboards-with-data-links",
+      "author": "SatoryKono",
+      "date": "2026-05-03T23:39:34",
+      "sha": "d64a5826b507b1fae894cbef073b1e676b2630e7",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/consolidate/hygiene-low-risk",
+      "author": "SatoryKono",
+      "date": "2026-04-03T09:43:29",
+      "sha": "f73d744cd8592a2e73d3bca7326f3dafd082bc84",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/consolidate/test-swarm-2649-clean",
+      "author": "SatoryKono",
+      "date": "2026-04-05T16:35:53",
+      "sha": "87b4f0d5f8755c84d4a156067a69733f8d7ae47b",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/consolidation-campaign-warp-setup-10891144980073298943",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-28T21:45:47",
+      "sha": "c985b2a99cef4d94581a813dad6211e6d58f1d06",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/copilot/fix-sonarqube-issues-backend",
+      "author": "copilot-swe-agent[bot]",
+      "date": "2026-04-18T20:11:21",
+      "sha": "c0d56c4777f80d8fd7ac51329567e662ef328fa7",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/copilot/ip-allow-list-github",
+      "author": "SatoryKono",
+      "date": "2026-05-20T13:22:53",
+      "sha": "4bfe9be2e2abfabf1da191fdddc0290d816560d4",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/dependabot/docker/debian-13-slim",
+      "author": "dependabot[bot]",
+      "date": "2026-04-25T14:13:03",
+      "sha": "c4f14dd677d13dada98e760f09e6fb967c268cf5",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/dependabot/github_actions/actions/cache-5",
+      "author": "dependabot[bot]",
+      "date": "2026-04-05T08:44:41",
+      "sha": "6f63907f5b0e93475436152ceb43e9d466b74d1c",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/dependabot/github_actions/actions/setup-node-6",
+      "author": "dependabot[bot]",
+      "date": "2026-04-05T08:44:42",
+      "sha": "391cb544e33eac73f35ba169c95c72ca8b5f7d44",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/dependabot/github_actions/actions/stale-10",
+      "author": "dependabot[bot]",
+      "date": "2026-04-04T14:12:48",
+      "sha": "bcc3302acb42813af7bf9b89e8b989a0d665ac71",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/dependabot/github_actions/astral-sh/setup-uv-7",
+      "author": "dependabot[bot]",
+      "date": "2026-04-19T13:50:48",
+      "sha": "7e663330ae9923bf7dd6ec79842a81ce8ccd36a8",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/dependabot/github_actions/docker/build-push-action-7",
+      "author": "dependabot[bot]",
+      "date": "2026-04-05T08:25:34",
+      "sha": "31af92c2a79f742e95547feed4be3d74534f2e75",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/dependabot/pip/arro3-core-0.8.0",
+      "author": "dependabot[bot]",
+      "date": "2026-04-04T14:12:48",
+      "sha": "20f997f2f10f44e43b799592fed558b0b0a5a1d8",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/dependabot/pip/autoflake-gte-2.3.3",
+      "author": "dependabot[bot]",
+      "date": "2026-04-11T14:13:06",
+      "sha": "83dafb4fa3d9f2bf1ec6516042428ef60321d976",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/dependabot/pip/mutmut-gte-3.5.0",
+      "author": "dependabot[bot]",
+      "date": "2026-04-11T14:12:49",
+      "sha": "8abc2d26854fac20433c3659ac225bc4110a9314",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/dependabot/pip/opentelemetry-api-gte-1.41.0",
+      "author": "dependabot[bot]",
+      "date": "2026-04-11T14:13:11",
+      "sha": "34dc601c4ed4caa91daf3dff29a95bd8672afce8",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/dependabot/pip/pandas-gte-2.0-and-lt-3.1",
+      "author": "dependabot[bot]",
+      "date": "2026-04-04T14:14:05",
+      "sha": "6fe3497fcccf1c8eaf9e260fa7018f85290b9256",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/dependabot/pip/pyarrow-gte-23.0.1",
+      "author": "dependabot[bot]",
+      "date": "2026-04-11T14:13:02",
+      "sha": "0662d7d81b9a3f581c43e3e333c889d4fc159a46",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/dependabot/pip/pylint-gte-4.0.5",
+      "author": "dependabot[bot]",
+      "date": "2026-04-11T14:13:17",
+      "sha": "da065f359a7d81930d7c6d370cff3133dc999679",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/dependabot/pip/pyrefly-gte-0.60.2",
+      "author": "dependabot[bot]",
+      "date": "2026-04-11T14:12:46",
+      "sha": "4eaf7187bf70a0ab8acbf1836bb23fd054c88cb4",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/dependabot/pip/pytest-vcr-gte-1.0.2",
+      "author": "dependabot[bot]",
+      "date": "2026-04-11T14:12:53",
+      "sha": "c89c8a4b1b4bb7deb0bda276b0d519b45cbdf698",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/devin/1777217389-test-quality-improvements",
+      "author": "Devin AI",
+      "date": "2026-04-27T09:41:40",
+      "sha": "9906fb8b61b4c11810b27edeeecbeeb0081fab29",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/devin/1777232744-add-wiki-pages",
+      "author": "Devin AI",
+      "date": "2026-04-26T19:55:59",
+      "sha": "859acae51d7169d0684aeb66b01a1ea01ba074ec",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/devin/1777282924-fix-preexisting-ci-failures",
+      "author": "Devin AI",
+      "date": "2026-04-27T11:11:30",
+      "sha": "254e44692d154421fa4b2a86cea4748b13db6245",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/devin/1777793674-provider-health-l1-dashboard",
+      "author": "Devin AI",
+      "date": "2026-05-03T20:44:07",
+      "sha": "447c7ebb8d3630319ac2217ba8bd88dd0267c28e",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/devin/1777795449-fix-novalue-copypaste",
+      "author": "Devin AI",
+      "date": "2026-05-03T08:04:41",
+      "sha": "49c7aa3220674cc84faa06821b0eb9e0202226d2",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/docs-code-review-5155988922031284115",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-03-27T02:40:25",
+      "sha": "44277cfd99ed2130a82c29473a2e160a4632caf4",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/docs/2685-normalization-sync",
+      "author": "SatoryKono",
+      "date": "2026-04-09T18:25:06",
+      "sha": "89f318b428b15613dea3cc7d5e7115a5d0cbce4d",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/docs/arch-review-refactoring-plan-1254790078704454945",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-03-18T06:19:52",
+      "sha": "0f27a23c8c603d399ca77a32e78dd36140bb093b",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/feat/2712-audit-runtime-wiring",
+      "author": "SatoryKono",
+      "date": "2026-04-09T20:29:33",
+      "sha": "d629c03db09d1afc7a4357b79865364bccfd1315",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/feat/add-py-test-swarm-agent-1807235064800334383",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-27T09:15:34",
+      "sha": "75c57f7356da4e84a8363bfdc1e5e63a18ae4704",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/feat/add-py-test-swarm-agent-7293180411525256129",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-28T09:21:42",
+      "sha": "b6c7fa7b70f3d66f1433ec0f123025d724ebf2a0",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/feat/mmd-diagrams-improvements",
+      "author": "SatoryKono",
+      "date": "2026-03-14T02:13:55",
+      "sha": "ed1d6815925b9915417c20205b7eac82d584af68",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/feat/py-file-structure-bot",
+      "author": "SatoryKono",
+      "date": "2026-05-28T23:02:33",
+      "sha": "3d090996e821b5d2862623585040a43539e19d2b",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/feat/py-review-orchestrator-17304303517006074442",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-07T05:39:36",
+      "sha": "f450e2095aea86652ac4d4dab85010f086cde597",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/feat/review-reports-14838491997822328842",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-03-18T02:45:36",
+      "sha": "4b666db2312a241ac3646ab5c0892bf5fee1ee5f",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/feat/setup-script-17819454605928969349",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-30T21:32:14",
+      "sha": "b1346fc7d0a2a210f4d0ae702d9217eed2b917a2",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/feat/test-swarm-001-15873705378234296519",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-20T17:04:25",
+      "sha": "01d0b2e334ad49cdf2430c52cf9304c4d67efdfc",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/feat/test-swarm-reports-17307245637785176327",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-25T21:02:14",
+      "sha": "36e824884647c023be3593eb094cfb4a6dafeff6",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/feat/test-swarm-reports-9245634493075346195",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-24T10:26:25",
+      "sha": "ba46fb2dfd6a01f1a17c5f0f8adedc11c848e278",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/feat/test-swarm-reports-SWARM-001-14497679483782139473",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-29T11:22:10",
+      "sha": "219c1c598223dfd646576f26aea8bdbef4716bab",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/feature/py-review-orchestrator-reports-16321445128357912329",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-03-26T04:48:22",
+      "sha": "895fb0d1fa8135f2f022210ff249da99a0bf2b12",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/feature/review-orchestrator-2340624145261315589",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-03-17T02:16:30",
+      "sha": "81f6f3b6e253ae3c84ec140cabc5ed050e307827",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/feature/semanticscholar-concurrent-batch-fetching-4855270832142738248",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-28T09:31:21",
+      "sha": "98ac0425205ea48f62ba36ea62ea8e6ee103d363",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/fedor/chore/run-l1-review-orchestrator-13807189075434735210",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-03-16T10:31:09",
+      "sha": "741f2077d9f958f8aa36bbd344f3f8e681b5506d",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/fedor/review-reports-8398596340436730263",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-27T21:28:56",
+      "sha": "cce23fd0725aeef86a82e9ed0753d5ae50615c97",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/fix-dashboard-errors-13249332482520436398",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-02T01:55:42",
+      "sha": "1181b1b0a77ce621c8ccaa10cb1dbd0e6ad09e08",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/fix-doi-tests-7308324249921386090",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-27T09:07:13",
+      "sha": "1b1449b64096c9ea9ced85c400b70ea986a7137e",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/fix-skill-creator-todo-3495655612695235095",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-27T11:52:32",
+      "sha": "c113ee5c44f4cc85b41d762c5007fcfc3643efcb",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/fix-unused-get-resource-name-10073976247236922223",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-27T07:09:22",
+      "sha": "8d2d2f538034e4621b0720eb79ec2369d1dfee10",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/fix/config-discrepancy-metrics-5381983574006693728",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-31T10:07:30",
+      "sha": "5522f8ee9fb0d079c349e264b2a7c9af195a0789",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/fix/domain-init-unused-imports-16117066321080392556",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-02T20:21:36",
+      "sha": "4a53feb21e2b13b356c10c6ed5d6ba90498dac44",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/fix/hf-checkout-hygiene-v6",
+      "author": "SatoryKono",
+      "date": "2026-04-05T15:51:00",
+      "sha": "f557d0bbec70e83a9afadcf95efa81820cc1940a",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/fix/py-test-swarm-arch-tests-13704176743142189750",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-03-18T09:57:41",
+      "sha": "780efa19a029b8c4084c5578a88b46fb7c91d8ea",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/fix/remove-unused-imports-13765935383322656675",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-29T23:06:29",
+      "sha": "cabac70ca1f3e70609d2d25eb6b04b02e24042cc",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/fix/test-swarm-docs-9679889761782584646",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-03-20T10:19:53",
+      "sha": "105e8ae368fc656b7fbdd336fe80a437c8b33829",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/issue/2733-bounded-observability-labels-v2",
+      "author": "SatoryKono",
+      "date": "2026-04-10T08:42:53",
+      "sha": "5d1257ffd719e0c5949cb9aed4ce67727e6bf5af",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/jules-112197741998465037-2be7ecc6",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-28T09:12:54",
+      "sha": "851b59a3e0fc69fbd444c656027aeb1d183cb447",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/jules-11826823908592812871-df3a7988",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-27T10:19:01",
+      "sha": "aa9abf8345d2ffa89322edf884f6553e6f7aa018",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/jules-2845814033682854815-2165a7a7",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-19T17:45:33",
+      "sha": "51227cacc6e9887b2495d160f47dd38f1cd558b1",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/jules-py-test-swarm-agent-13260072378651192753",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-16T09:19:31",
+      "sha": "d0a8e008e2994a654bd705ae530a9727933b71aa",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/main-20260514",
+      "author": "SatoryKono",
+      "date": "2026-05-14T18:34:26",
+      "sha": "f8964232b7f6ebd7a987086e400b2194d6975b1e",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/main_20250312",
+      "author": "SatoryKono",
+      "date": "2026-03-12T01:56:25",
+      "sha": "26aef0c83dbcf81bd3220107edf4a23e86d9517f",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/main_20250404",
+      "author": "SatoryKono",
+      "date": "2026-04-05T11:47:34",
+      "sha": "ea08381b0737f8163440b7c66c8774c1015c605e",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/main_20250408",
+      "author": "SatoryKono",
+      "date": "2026-04-08T21:38:53",
+      "sha": "91f18c7711b2fe91ed66702269d5de96bcabf0c5",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/main_20250426",
+      "author": "SatoryKono",
+      "date": "2026-04-25T18:42:02",
+      "sha": "c97c4bcf9cb19478d54772f29f90b866ffc7d7dd",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/main_20260404",
+      "author": "SatoryKono",
+      "date": "2026-04-04T17:23:04",
+      "sha": "1fdb9d2ce52a2f211ccda0c033216630977317a3",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/main_20260426-1",
+      "author": "SatoryKono",
+      "date": "2026-04-26T13:48:10",
+      "sha": "35fdc976f6c3b2cfc0ca3b342b95eb7f20e8306c",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/main_20260503",
+      "author": "SatoryKono",
+      "date": "2026-05-03T10:48:28",
+      "sha": "31b7fe908ed9f655f93cdb08532a9a73d4babc29",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/main_20260505",
+      "author": "SatoryKono",
+      "date": "2026-05-04T07:35:49",
+      "sha": "47846528e2a6202a84f725a54d9ace52fd7c9ddc",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/main_20260514-2",
+      "author": "SatoryKono",
+      "date": "2026-05-15T16:13:12",
+      "sha": "8e551ab1c22032b9997e6ce88a77ea24241fa5c4",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/master-20260310",
+      "author": "SatoryKono",
+      "date": "2026-03-10T08:18:22",
+      "sha": "10fda97c7067af65c43a832158f89cefa3cd57fa",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/master-20260626",
+      "author": "SatoryKono",
+      "date": "2026-06-29T19:40:11",
+      "sha": "543a04938e5a919605ca54cd155796b15fb6dc21",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/master_20250310-1",
+      "author": "SatoryKono",
+      "date": "2026-03-10T11:38:08",
+      "sha": "b287cc5bc35cc300ea5ccf6b19ffba37254348e3",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/master_20260513",
+      "author": "SatoryKono",
+      "date": "2026-05-13T20:27:19",
+      "sha": "0ce243dc689dbf6b4445592bb48d255a0f3cc01f",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/master_20260526",
+      "author": "SatoryKono",
+      "date": "2026-05-27T09:21:36",
+      "sha": "e9c7ba700527900ccdafaa4644e68d1df9da69c1",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/master_20260527",
+      "author": "SatoryKono",
+      "date": "2026-05-27T21:36:57",
+      "sha": "b0e88b747e7f99fe7631961066e43f39c0708b8a",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/master_20260601",
+      "author": "SatoryKono",
+      "date": "2026-06-01T14:29:10",
+      "sha": "58eef26b196b8a58eb6e8bd927f8ea620849386c",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/master_20260604",
+      "author": "SatoryKono",
+      "date": "2026-06-04T22:53:36",
+      "sha": "bfef548b571713f4681a1679fc8619025a51eef7",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/perf-async-metrics-server-1814537927827611323",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-03-11T23:01:19",
+      "sha": "d2d0478e7b1ff3727940f8e4790cf18c0348b248",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/perf-crossref-fallback-9396241092094386141",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-29T23:48:00",
+      "sha": "db5b662e9e500c3568bdbf75f5eb770ca814b5a5",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/perf-dedup-10678796098399410738",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-30T22:02:33",
+      "sha": "0f95d725c02d26646d9d3ce5346f8f55ca89c5ed",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/perf-list-deduplication-9066108671930857351",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-17T22:23:39",
+      "sha": "283aa216741df40efedb8f1002f2164a735d3001",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/perf-optimize-column-orderer-helpers-4503632652623781416",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-04T22:35:47",
+      "sha": "f91f4fa157e77ce8ce4d67601b71d12496189148",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/perf-walrus-as-py-10541830836116349845",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-03-25T22:44:02",
+      "sha": "90d07bfa81322b149387db990bff9281ac89b6fd",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/perf/dedup-loops-15442019378457888819",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-16T09:26:30",
+      "sha": "54fe8fe3dd32cb5c8cc8fbae78ad1d3de6bdffba",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/perf/optimize-merger-metrics-3444051941429499172",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-19T22:12:52",
+      "sha": "9b1c4fa36d860acfa671c38959239255c89a88af",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/perf/precompute-index-lookups-9139824317647287032",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-19T01:56:23",
+      "sha": "2eadef54affe10d6e0960265711d6f805bd17f9a",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/performance-pubchem-batch-13441175631070016139",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-25T21:24:10",
+      "sha": "ca29901109fa7ceb004deafdba5bd4c2caa4fe4a",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/py-review-orchestrator-ast-script-12739399795982722227",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-05T01:08:47",
+      "sha": "f69359664cb4fd045665b191075dcfc1c1799f1d",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/py-review-orchestrator-execution-7162427255251795129",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-01T01:31:28",
+      "sha": "a34509f6ae1003af60790434cfc9b0a66a8443b8",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/py-review-orchestrator-reports-1815655086280680364",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-11T06:11:29",
+      "sha": "ea75b08ea29a6faf3968413462eeb77ef4bc1139",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/py-review-reports-17528222623286304100",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-12T03:18:54",
+      "sha": "b31ea5e3175227df0ed5ef4c558d646469de9b4e",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/py-review-reports-4872115911989544239",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-17T06:53:04",
+      "sha": "25328696d41085b9e726d71cbd63c2267ea8eb92",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/py-test-swarm-baseline-10671376537938146816",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-07T12:52:16",
+      "sha": "ffe6a942a93bdeb7743de859606e37cf3138360c",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/py-test-swarm-reports-17470800817558701356",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-08T09:42:05",
+      "sha": "92b8eef100884b54b7f82a49ed387272e19441e5",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/repro-4152-4157-20260515",
+      "author": "SatoryKono",
+      "date": "2026-05-15T16:13:52",
+      "sha": "020e83af56495ce10a2a5dd45104909265235b36",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/review-orchestrator-analysis-8687423604472367922",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-04T02:13:01",
+      "sha": "7af7a16a629fc8bf31f8985e5bd8e58dfc54e28c",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/review/hierarchical-code-review-13047481877801782444",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-02T14:33:27",
+      "sha": "99d1314b2dbbb5b9d33613f69d74d188874474ec",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/security-fix-ast-literal-eval-17293590732592342983",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-02T16:28:22",
+      "sha": "0bf0522c66542e0cbe60f8bfddbf0be06b4b4e76",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/swarm-001-reports-2479479471661306667",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-11T13:23:52",
+      "sha": "ea39417733caf4dd5132d9eda8dcbf9a6c3405c8",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/swarm-metrics-7763761693969922558",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-02T15:11:44",
+      "sha": "eaaef98c648dc3ff149b2bab3a6c43046c141d8e",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/swarm-mock-reports-6166127889258653620",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-19T11:19:27",
+      "sha": "f01338840436c63e772fa706647c1cb35d7bd810",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/test-ensure-registrations-3856219660841993164",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-29T23:22:00",
+      "sha": "78957ca2d4d81a3774aa03e197f38a65cff44499",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/test-extract-response-text-8991647446678882575",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-28T08:12:59",
+      "sha": "2679176d2864b6cdc9737d99a24088def0c121e5",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/test-observability-resolution-15162923237048108216",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-22T03:08:16",
+      "sha": "e8aa861839677f4e1506f1e2ae7bb7d244ac5a25",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/test-split-filter-ids-for-fallback-11889934895464523170",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-27T09:25:50",
+      "sha": "f0899ac6911c71716fb12e11f1037ce63d376117",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/test-swarm-001-15854285726824048224",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-16T12:46:48",
+      "sha": "54786d3e508a3b84431625e1bd18009b97e4ea86",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/test-swarm-001-5772441663179906613",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-13T11:14:57",
+      "sha": "d678978381f1be48ffbccb98b002e05c0295bc0e",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/test-swarm-001-8132820724407800786",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-25T09:41:01",
+      "sha": "b7630db4ea0658ccd3447e8216085aa3476dc21e",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/test-swarm-L1-orchestration-5184293979462306662",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-19T11:33:39",
+      "sha": "a964dea2cb6633dc06631d4e3b58ae92b3bb671a",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/test-swarm-reports-001-15088476181238200278",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-15T14:12:45",
+      "sha": "dc2753a89e1b6121a52158bd5bde5c2ac2ea09aa",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/test-swarm-reports-10243538192987335790",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-17T01:06:20",
+      "sha": "d00ce1e23aec0a16fbf6db4c3f685f665fa8c9b5",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/test-swarm-reports-11115732830350980092",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-07T14:25:50",
+      "sha": "edee374bccd4e401e06d634218387c64a5e300c6",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/test-swarm-reports-13829140366471339353",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-28T13:59:50",
+      "sha": "030047ffb0ca089a585d4194b9e74818a8663675",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/test-swarm-reports-14143138294627453662",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-06-23T10:02:36",
+      "sha": "ad8734feeac407278ab2d5e6f162adfb04cea753",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/test-swarm-reports-18362556605675404592",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-03-30T09:51:54",
+      "sha": "6a9b28cd749d7efb9640d8c66435ee501ba2ea9f",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/test-swarm-reports-2662041481410732620",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-29T13:19:25",
+      "sha": "73930e9e967f90d0e5cb2dddafa721169ddbdf65",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/test-swarm-reports-5233428585478151309",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-28T10:39:35",
+      "sha": "a3338c6ef5ffcdb6b6d79128c8b669ad23714cff",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/test-swarm-reports-6841942603068135714",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-03T10:11:40",
+      "sha": "de2f2db44eb4aa2a699fef3ea7d04c4616355337",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/test-swarm-reports-simulation-14264569517035647868",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-22T11:47:18",
+      "sha": "7af719bdb43e950e27c3d5115fb629e867eecc84",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/test-swarm-reports-swarm-001-6464421493149807499",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-02T09:28:18",
+      "sha": "0089099fbf7cabe7e32811ce22d42f72383785f8",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/test-swarm-ru-translation-222434020690109999",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-30T03:23:07",
+      "sha": "1dcc8434dd693c6f0e03fa850cb3fad78c0774c1",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/test/audit-attr-shutdown-type-error-10768777861619467875",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-05-30T19:57:26",
+      "sha": "69f426d805e4d4b19dfb2f1524074ebbb6f6e9fb",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/testing-normalization-value-error-13101571771386145486",
+      "author": "google-labs-jules[bot]",
+      "date": "2026-04-15T05:43:51",
+      "sha": "dfd1007f510685ae5b5c4d31f7d06dc344775048",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/tmp",
+      "author": "SatoryKono",
+      "date": "2026-06-18T11:59:59",
+      "sha": "f16be36a91750da53dd02413207747b5da529e5c",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/tmp-audit-noop-cleanup",
+      "author": "SatoryKono",
+      "date": "2026-04-10T10:38:36",
+      "sha": "3d70865bb77be8bf0324c04f47c2eadc185c47b3",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/tmp01",
+      "author": "SatoryKono",
+      "date": "2026-03-14T05:06:35",
+      "sha": "8f4b88c60ab5680d9e69954a9d31d9b74f7d0835",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/tmp2",
+      "author": "SatoryKono",
+      "date": "2026-06-18T12:01:40",
+      "sha": "39e06c234498daafd88460f8f79ff350d3e44962",
+      "source": "origin",
+      "is_merged": false
+    },
+    {
+      "name": "origin/ьфыеук",
+      "author": "SatoryKono",
+      "date": "2026-04-30T10:04:51",
+      "sha": "c3e5ce0b79d97da753540b757d1a401b51cf3891",
+      "source": "origin",
+      "is_merged": false
+    }
+  ]
+}

@@ -7,6 +7,35 @@ $script:GeminiWslDistro = if ($env:BIOETL_WSL_DISTRO) {
     ""
 }
 $script:GeminiWslCommand = $null
+$script:GeminiProxyEnvironmentVariables = @(
+    "HTTP_PROXY",
+    "HTTPS_PROXY",
+    "ALL_PROXY",
+    "NO_PROXY"
+)
+
+function Enable-GeminiWslProxyEnvironment {
+    $entries = @()
+    if ($env:WSLENV) {
+        $entries = @($env:WSLENV -split ":" | Where-Object { $_ })
+    }
+
+    foreach ($name in $script:GeminiProxyEnvironmentVariables) {
+        $value = [Environment]::GetEnvironmentVariable($name, "Process")
+        if ([string]::IsNullOrWhiteSpace($value)) {
+            continue
+        }
+
+        $entryPattern = "^{0}(?:/.*)?$" -f [regex]::Escape($name)
+        if (-not ($entries | Where-Object { $_ -match $entryPattern })) {
+            $entries += "$name/u"
+        }
+    }
+
+    if ($entries.Count -gt 0) {
+        $env:WSLENV = $entries -join ":"
+    }
+}
 
 function Get-GeminiWslCommand {
     if ($script:GeminiWslCommand -and (Test-Path $script:GeminiWslCommand)) {
@@ -102,11 +131,21 @@ function Invoke-GeminiWslBashScript {
         return 1
     }
 
-    $wslArgs = @()
-    $wslArgs += Get-GeminiWslDistroArgs
-    $wslArgs += @("-e", "env", "-u", "GEMINI_CLI_IDE_WORKSPACE_PATH", "bash", "--", $ScriptPath)
-    $wslArgs += $Arguments
+    $previousWslEnv = [Environment]::GetEnvironmentVariable("WSLENV", "Process")
+    try {
+        # WSL does not automatically inherit arbitrary Windows environment
+        # variables. WSLENV forwards only explicitly supplied proxy settings,
+        # without placing their values on the wsl.exe command line.
+        Enable-GeminiWslProxyEnvironment
 
-    & $wslCommand @wslArgs
-    return $LASTEXITCODE
+        $wslArgs = @()
+        $wslArgs += Get-GeminiWslDistroArgs
+        $wslArgs += @("-e", "env", "-u", "GEMINI_CLI_IDE_WORKSPACE_PATH", "bash", "--", $ScriptPath)
+        $wslArgs += $Arguments
+
+        & $wslCommand @wslArgs
+        return $LASTEXITCODE
+    } finally {
+        [Environment]::SetEnvironmentVariable("WSLENV", $previousWslEnv, "Process")
+    }
 }

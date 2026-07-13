@@ -39,6 +39,7 @@ def test_metric_dispatch_normalizes_pipeline_label_after_group_normalizer() -> N
     )
 
     assert labels == {
+        "outcome": "other",
         "pipeline": "chembl_activity",
         "run_type": "incremental",
         "stage": "silver",

@@ -108,6 +108,25 @@ GEMINI_API_KEY=your-api-key-here
 
 Get an API key from https://aistudio.google.com/app/apikeys.
 
+### Proxy from PowerShell to WSL
+
+The PowerShell launchers forward non-empty `HTTP_PROXY`, `HTTPS_PROXY`,
+`ALL_PROXY`, and `NO_PROXY` variables to the WSL Gemini process for that
+single launch. Their values are passed through `WSLENV`, are not written to
+`.env.gemini` or tracked configuration, and are not printed by the launcher.
+An explicitly supplied proxy takes precedence over the repository's optional
+WSL fallback proxy script.
+
+```powershell
+$env:HTTP_PROXY = "http://<user>:<password>@<host>:<port>"
+$env:HTTPS_PROXY = $env:HTTP_PROXY
+$env:ALL_PROXY = $env:HTTP_PROXY
+.\scripts\ai\gemini\run-gemini.ps1
+```
+
+Use `Remove-Item Env:HTTP_PROXY, Env:HTTPS_PROXY, Env:ALL_PROXY` after the
+session when the proxy should no longer apply.
+
 ## MCP Configuration
 
 Gemini CLI reads MCP servers from Gemini settings, not from the repository `.mcp.json` file directly. The launcher synchronizes the workspace-level `.gemini/settings.json` before startup so the CLI sees the repository MCP servers after `cd "${REPO_ROOT}"`.
@@ -127,7 +146,7 @@ Docker-backed MCP servers require Docker Desktop or a working Docker CLI. If Doc
 ## Notes
 
 - `.env.gemini` is local and git-ignored. Do not copy real keys into docs, logs, reports, or PRs.
-- `scripts/engineering/dev/bash/.wsl_proxy_env.sh` is sourced automatically when present before network/API operations.
-- PowerShell does not duplicate setup logic; it resolves the repository WSL path and delegates to `run-gemini.sh`. PowerShell launchers use `BIOETL_WSL_DISTRO` when it is set and otherwise use the default WSL distro.
+- `scripts/engineering/dev/bash/.wsl_proxy_env.sh` is sourced automatically as a fallback when no explicit proxy variables are present.
+- PowerShell does not duplicate setup logic; it resolves the repository WSL path, forwards explicit proxy variables through `WSLENV`, and delegates to `run-gemini.sh`. PowerShell launchers use `BIOETL_WSL_DISTRO` when it is set and otherwise use the default WSL distro.
 - `setup.ps1` and `setup-gemini-wsl.bat` are Windows setup transports. They delegate to `run-gemini.sh setup` inside WSL and then run `mcp-check`.
 - `headless.sh` / `headless.ps1` set `GEMINI_SKIP_MCP_SETUP=1` for one launch and then delegate back to the canonical launcher.
