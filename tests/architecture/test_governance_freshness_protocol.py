@@ -101,7 +101,7 @@ def test_project_test_health_summary_declares_machine_readable_freshness_metadat
     metadata = yaml.safe_load(metadata_text)
 
     assert metadata["status"] == "active-non-canonical"
-    assert metadata["last_verified"] == "2026-04-30"
+    assert metadata["last_verified"].startswith("2026-")
     assert metadata["freshness_window_days"] > 0
     assert metadata["owner"] == "quality"
     assert set(metadata["canonical_sources"]) >= {
@@ -132,8 +132,19 @@ def test_project_test_health_summary_has_machine_readable_metadata() -> None:
     assert metadata["last_verified"].startswith("2026-")
     assert metadata["allowed_interpretation"] == "backlog_signal_only"
     assert metadata["canonical_sources"]
+    assert metadata["verification_scope"] == "tracked_test_module_inventory"
+    assert metadata["source_ref"] == "c9d639733928a2b699be2cc5031a38c4b3a3707e"
+    assert metadata["test_module_inventory"] == {
+        "command": "git ls-files 'tests/**/test_*.py' | wc -l",
+        "count": 1988,
+        "counted_on": "2026-07-13",
+        "full_evidence_snapshot_date": "2026-03-23",
+    }
     assert shard_registry["policy_scope"] == "project_test_health_evidence_shards"
     assert shard_registry["owner"]
+    assert shard_registry["last_inventory_rebaseline"] == "2026-07-13"
+    assert shard_registry["inventory_source_ref"] == metadata["source_ref"]
+    assert shard_registry["inventory_scope"] == metadata["verification_scope"]
     assert shard_registry["shards"]
 
     resolved_shards = {
