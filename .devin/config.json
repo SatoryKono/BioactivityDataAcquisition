@@ -7,7 +7,6 @@
         "@modelcontextprotocol/server-memory@2026.1.26"
       ],
       "env": {
-        "NPM_CONFIG_CACHE": "/mnt/e/g-drive/05_AI/github/BioactivityDataAcquisition2/.cache/npm-cache",
         "NPM_CONFIG_CACHE": "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/.cache/npm-cache",
         "MEMORY_FILE_PATH": "/mnt/wsl/docker-desktop-bind-mounts/Ubuntu/ccd98afae0adb4ee090bbfed89f354b31936eafe0874d43825bf3cb903f3bd1d/docs/00-project/ai/memory/mcp-memory.json"
       }
