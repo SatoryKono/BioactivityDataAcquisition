@@ -33,7 +33,6 @@ DEFAULT_TOOL_PLAYWRIGHT_BROWSERS = Path("/tmp/playwright-browsers")
 LOCAL_PLAYWRIGHT_LIB_DIR = Path(
     ".cache/grafana-screenshot-runtime/root/usr/lib/x86_64-linux-gnu"
 )
-DEFAULT_MIN_PLAYWRIGHT_SCREENSHOT_BYTES = 100_000
 
 
 @dataclass(frozen=True)
@@ -695,75 +694,90 @@ def _write_merged_playwright_manifest(
     )
 
 
-def _playwright_min_screenshot_bytes() -> int:
-    raw_value = os.getenv("GRAFANA_SCREENSHOT_MIN_BYTES", "").strip()
-    if not raw_value:
-        return DEFAULT_MIN_PLAYWRIGHT_SCREENSHOT_BYTES
-    try:
-        return max(int(raw_value), 0)
-    except ValueError:
-        return DEFAULT_MIN_PLAYWRIGHT_SCREENSHOT_BYTES
-
-
-def _playwright_manifest_has_suspicious_screenshot(
+def _playwright_manifest_screenshot_problem(
     config: RenderConfig, manifest: dict[str, Any]
-) -> bool:
-    min_bytes = _playwright_min_screenshot_bytes()
-    if min_bytes <= 0:
-        return False
-
+) -> str | None:
     dashboards = manifest.get("dashboards", [])
-    if not isinstance(dashboards, list):
-        return False
+    if not isinstance(dashboards, list) or not dashboards:
+        return "render manifest contains no dashboard screenshot evidence"
 
     for dashboard in dashboards:
         if not isinstance(dashboard, dict):
-            continue
+            return "render manifest contains a malformed dashboard record"
+        uid = str(dashboard.get("uid", "unknown"))
+        if dashboard.get("renderStatus") != "rendered":
+            return f"dashboard {uid} did not reach rendered status"
         rendered_count = dashboard.get("renderedPanelCount", 0)
         if not isinstance(rendered_count, int) or rendered_count <= 0:
-            continue
+            return f"dashboard {uid} contains no rendered panel markers"
         file_name = dashboard.get("file") or dashboard.get("screenshot")
         if not isinstance(file_name, str) or not file_name:
-            continue
+            return f"dashboard {uid} does not identify its screenshot file"
         screenshot_path = config.output_dir / file_name
         try:
             screenshot_size = screenshot_path.stat().st_size
-        except OSError:
-            continue
-        if screenshot_size < min_bytes:
-            print(
-                "Playwright screenshot looks suspiciously small despite "
-                f"{rendered_count} rendered panel marker(s): "
-                f"{screenshot_path} ({screenshot_size} bytes < {min_bytes})."
+        except OSError as exc:
+            return f"dashboard {uid} screenshot is unreadable: {exc}"
+        dimensions = _png_dimensions(screenshot_path)
+        if dimensions is None:
+            return f"dashboard {uid} screenshot is not a valid PNG"
+        if dimensions[0] != config.width or dimensions[1] <= 0:
+            return (
+                f"dashboard {uid} screenshot dimensions drift: "
+                f"requested_width={config.width} actual={dimensions}"
             )
-            return True
-    return False
+        evidence = dashboard.get("screenshotEvidence")
+        if not isinstance(evidence, dict):
+            return f"dashboard {uid} lacks screenshotEvidence"
+        if evidence.get("file") != file_name:
+            return f"dashboard {uid} screenshot filename evidence drift"
+        if evidence.get("bytes") != screenshot_size:
+            return f"dashboard {uid} screenshot byte-size evidence drift"
+        if (
+            evidence.get("width") != dimensions[0]
+            or evidence.get("height") != dimensions[1]
+        ):
+            return f"dashboard {uid} screenshot dimension evidence drift"
+    return None
+
+
+def _run_playwright_with_retry(
+    config: RenderConfig,
+) -> tuple[int, dict[str, Any] | None]:
+    for attempt in range(2):
+        result = _run_playwright_process(config)
+        if result != 0:
+            return result, None
+        try:
+            manifest = _read_playwright_manifest(
+                config.output_dir / "render-manifest.json"
+            )
+        except RuntimeError as exc:
+            print(str(exc))
+            return 1, None
+        problem = _playwright_manifest_screenshot_problem(config, manifest)
+        if problem is None:
+            return 0, manifest
+        if attempt == 1:
+            print(f"Playwright screenshot validation failed after retry: {problem}")
+            return 1, None
+        print(f"Retrying Playwright render once after screenshot validation: {problem}")
+        time.sleep(2.0)
+    return 1, None
 
 
 def _run_playwright_fallback(config: RenderConfig) -> int:
     dashboards = _load_dashboards(config)
     if len(dashboards) <= 1:
-        return _run_playwright_process(config)
+        result, _manifest = _run_playwright_with_retry(config)
+        return result
 
     manifests: list[dict[str, Any]] = []
     for dashboard in dashboards:
         single_config = replace(config, selected_uids=(dashboard.uid,))
-        result = _run_playwright_process(single_config)
-        if result != 0:
-            return result
-        manifest = _read_playwright_manifest(config.output_dir / "render-manifest.json")
-        if _playwright_manifest_has_suspicious_screenshot(config, manifest):
-            print(
-                "Retrying isolated Playwright render once for "
-                f"{dashboard.uid} after suspicious screenshot capture."
-            )
-            time.sleep(2.0)
-            result = _run_playwright_process(single_config)
-            if result != 0:
-                return result
-            manifest = _read_playwright_manifest(
-                config.output_dir / "render-manifest.json"
-            )
+        result, manifest = _run_playwright_with_retry(single_config)
+        if result != 0 or manifest is None:
+            return result or 1
         manifests.append(manifest)
 
     _write_merged_playwright_manifest(config, manifests)

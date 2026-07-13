@@ -101,9 +101,10 @@ def test_rf001_headline_status_is_evidence_aware() -> None:
     assert "bioetl_runtime_current_status" not in str(
         _panel(workflow, 9404).get("targets")
     )
-    assert _panel(workflow, 9404).get("fieldConfig", {}).get("defaults", {}).get(
-        "noValue"
-    ) == "NOT RESOLVED"
+    assert (
+        _panel(workflow, 9404).get("fieldConfig", {}).get("defaults", {}).get("noValue")
+        == "NOT RESOLVED"
+    )
     for panel_id in (2, 3, 6, 7):
         assert _panel(workflow, panel_id).get("options", {}).get("colorMode") != (
             "background"
@@ -244,9 +245,14 @@ def test_rf005_incident_hierarchy_and_semantic_encoding() -> None:
     failure_rate = _panel(provider, 104)
     assert failure_rate.get("type") == "stat"
     assert failure_rate.get("options", {}).get("colorMode") == "value"
-    assert failure_rate.get("fieldConfig", {}).get("defaults", {}).get(
-        "thresholds", {}
-    ).get("steps", [])[0].get("color") == "gray"
+    assert (
+        failure_rate.get("fieldConfig", {})
+        .get("defaults", {})
+        .get("thresholds", {})
+        .get("steps", [])[0]
+        .get("color")
+        == "gray"
+    )
 
     dq = _load("bioetl-dq-v2.json")
     freshness = _panel(dq, 8)
@@ -278,7 +284,9 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
     assert max(panel["gridPos"]["y"] for panel in root_panels) <= 29
     control_rows = [panel for panel in root_panels if panel.get("type") == "row"]
     assert len(control_rows) == 5
-    assert all(panel.get("collapsed") is True and panel.get("panels") for panel in control_rows)
+    assert all(
+        panel.get("collapsed") is True and panel.get("panels") for panel in control_rows
+    )
 
     overview = _load("bioetl-overview-v2.json")
     inputs = _panel(overview, 9002)

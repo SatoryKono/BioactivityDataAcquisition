@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 from pathlib import Path
 from types import SimpleNamespace
@@ -693,6 +694,8 @@ const contradictory = classify({
 }).classification;
 if (contradictory !== "contradictory") throw new Error(contradictory);
 """
+    env = os.environ.copy()
+    rerender_subject._apply_playwright_runtime_env(env)
 
     result = subprocess.run(
         [node_path, "-e", program, str(script_path)],
@@ -700,6 +703,7 @@ if (contradictory !== "contradictory") throw new Error(contradictory);
         capture_output=True,
         text=True,
         cwd=Path.cwd(),
+        env=env,
     )
 
     assert result.returncode == 0, result.stderr
@@ -743,7 +747,7 @@ def test_rerender_playwright_fallback_streams_output_from_repo_root(
         fallback="auto",
     )
 
-    result = rerender_subject._run_playwright_fallback(config)
+    result = rerender_subject._run_playwright_process(config)
 
     assert result == 0
     assert captured["command"] == [
@@ -764,8 +768,7 @@ def test_rerender_playwright_fallback_streams_output_from_repo_root(
     assert captured["kwargs"]["env"]["GRAFANA_BASE_URL"] == "http://localhost:3000"
     assert captured["kwargs"]["env"]["GRAFANA_SCREENSHOT_UIDS"] == "bioetl-dq-v2"
     assert (
-        captured["kwargs"]["env"]["GRAFANA_SCREENSHOT_EXPAND_COLLAPSED_ROWS"]
-        == "true"
+        captured["kwargs"]["env"]["GRAFANA_SCREENSHOT_EXPAND_COLLAPSED_ROWS"] == "true"
     )
     assert captured["kwargs"]["timeout"] == (
         rerender_subject._playwright_process_timeout_seconds(config)
@@ -812,6 +815,13 @@ def test_rerender_playwright_fallback_splits_and_merges_multi_dashboard_runs(
         assert isinstance(env, dict)
         uid = str(env["GRAFANA_SCREENSHOT_UIDS"])
         calls.append(uid)
+        png = (
+            b"\x89PNG\r\n\x1a\n"
+            + b"\x00\x00\x00\rIHDR"
+            + (1600).to_bytes(4, "big")
+            + (2200).to_bytes(4, "big")
+        )
+        (tmp_path / f"{uid}.png").write_bytes(png)
         (tmp_path / "render-manifest.json").write_text(
             json.dumps(
                 {
@@ -826,6 +836,13 @@ def test_rerender_playwright_fallback_splits_and_merges_multi_dashboard_runs(
                             "renderStatus": "rendered",
                             "actualViewport": {"width": 1600, "height": 2200},
                             "actualTheme": "dark",
+                            "screenshotEvidence": {
+                                "file": f"{uid}.png",
+                                "bytes": len(png),
+                                "width": 1600,
+                                "height": 2200,
+                                "sha256": "test-digest",
+                            },
                             "terminalStateValidation": {
                                 "status": "ok",
                                 "panelStates": [{"id": 1, "classification": "healthy"}],

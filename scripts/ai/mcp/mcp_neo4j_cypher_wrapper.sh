@@ -11,21 +11,16 @@ unset BIOETL_SKIP_ENV_LOCAL
 # shellcheck source=./support/token_validation.sh
 source "${REPO_ROOT}/scripts/ai/mcp/support/token_validation.sh"
 
-parse_neo4j_auth() {
-    local auth_value="${1:-}"
-    if [[ -z "${auth_value}" || "${auth_value}" != */* ]]; then
-        return 1
-    fi
-    printf '%s\n' "${auth_value%%/*}" "${auth_value#*/}"
-}
-
 NEO4J_URI="${NEO4J_URI:-bolt://localhost:7687}"
 NEO4J_USERNAME="${NEO4J_USERNAME:-${NEO4J_AUTH_USERNAME:-}}"
 NEO4J_PASSWORD="${NEO4J_PASSWORD:-${NEO4J_AUTH_PASSWORD:-}}"
 
-if [[ -z "${NEO4J_USERNAME}" || -z "${NEO4J_PASSWORD}" ]] && mapfile -t auth_parts < <(parse_neo4j_auth "${NEO4J_AUTH:-}"); then
-    NEO4J_USERNAME="${NEO4J_USERNAME:-${auth_parts[0]}}"
-    NEO4J_PASSWORD="${NEO4J_PASSWORD:-${auth_parts[1]}}"
+if [[ ( -z "${NEO4J_USERNAME}" || -z "${NEO4J_PASSWORD}" ) \
+    && -n "${NEO4J_AUTH:-}" && "${NEO4J_AUTH}" == */* ]]; then
+    parsed_username="${NEO4J_AUTH%%/*}"
+    parsed_password="${NEO4J_AUTH#*/}"
+    NEO4J_USERNAME="${NEO4J_USERNAME:-${parsed_username}}"
+    NEO4J_PASSWORD="${NEO4J_PASSWORD:-${parsed_password}}"
 fi
 
 export NEO4J_URI
