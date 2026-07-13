@@ -642,6 +642,21 @@ def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() 
     assert "sha256" in script
 
 
+def test_playwright_terminal_state_extraction_uses_panel_local_content() -> None:
+    script = Path(
+        "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs"
+    ).read_text(encoding="utf-8")
+
+    assert '[data-griditem-key="grid-item-${panelId}"]' in script
+    assert '[data-testid="data-testid panel content"]' in script
+    assert '[class*="panel-loading-bar"]' in script
+    assert "hasVisibleMarker(surface, loadingSelector, true)" in script
+    assert "hasVisibleMarker(surface, errorSelector, true)" in script
+    assert "hasVisibleMarker(content.element, visualSelector)" in script
+    assert "cloneNode(true)" not in script
+    assert "header.remove()" not in script
+
+
 def test_playwright_terminal_classifier_uses_leading_state_tokens() -> None:
     node_path = rerender_subject._resolve_node_executable()
     if node_path is None:
