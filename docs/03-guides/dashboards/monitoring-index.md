@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-07'
+  Last verified: '2026-07-13'
 
 ______________________________________________________________________
 
@@ -24,8 +24,8 @@ For the authoritative shipped dashboard mapping
 
 | Question / symptom | Open first | Then use | Owner doc |
 | ------------------ | ---------- | -------- | --------- |
-| What is currently broken or degraded? | `bioetl-overview-v2` | `Status`, `First Action`, then `0. Control Plane`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow` | [Dashboard v2 Usage](dashboard-v2-usage.md) |
-| Is a Prometheus alert actually firing or pending? | `bioetl-overview-v2` | expanded `Alert/SLO Triage` -> `Triage Alert State` | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
+| What is currently broken or degraded? | `bioetl-overview-v2` | `Status`, `First Action`, then `0. Control Plane`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO` | [Dashboard v2 Usage](dashboard-v2-usage.md) |
+| Is a Prometheus alert actually firing or pending? | `bioetl-overview-v2` | first-screen `Alert/SLO Triage` -> `Triage Alert State`, then `6. Alerts & SLO` | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
 | Need a dashboard dedicated to active alert state or SLO pressure? | `bioetl-alerts-slo` | `Active Alert Status`, `Firing Alerts / Range`, `Firing Alert Details` | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
 | Runtime latency, logs, memory, or alert-condition concern? | `bioetl-runtime` | `bioetl diagnostics guide`; [Observability Checklist](../../05-operations/runbooks/observability-checklist.md) | [Monitoring Guide](../../05-operations/01-monitoring-guide.md) |
 | Provider retries, slowness, or failures? | `bioetl-provider-health-v2` | `bioetl diagnostics health --json`; provider incident runbook | [Incident Response](../../05-operations/runbooks/incident-response.md) |
@@ -53,13 +53,17 @@ scopes resolve from RunLedger artifact/metrics evidence; aggregate scopes are
 backed by `bioetl_processed_records_*` recording rules with `value` and
 formatted `percintage` columns, including zero-valued outcome rows and not
 acting as a `$__range` throughput summary.
+All eight shipped dashboards share one theme-safe navigation panel: numbered
+bus `0..6` plus `Silver Reject Explorer`, `Explore Logs`, and `Explore Traces`.
+The bus wraps at `1024px` and stays readable in dark and light themes.
+
 The shared `ID` and `Processed Records` cards are HTTP-backed. Their empty
 state must be interpreted only after the Quarantine Explorer/control-plane
 backend responds on `/health/live`; backend-down, invalid scope, and true
 zero/absent run are distinct operator states.
 
-For `0. Control Plane`, exact identity graph evidence is available in the
-expanded `Identity evidence and remaining replay-safety signals` row. Those
+For `0. Control Plane`, exact identity graph evidence is available by expanding
+the collapsed-by-default `Identity evidence and remaining replay-safety signals` row. Those
 tables call `/ops/control-plane/identity-evidence` for P0/P1/P2 anchors,
 identity gaps, checkpoint anchor comparison, and copy-friendly full values;
 they are HTTP-backed forensic surfaces, not Prometheus label filters.
@@ -77,10 +81,10 @@ Current canonical Overview baseline:
 | Symptom (X) | Dashboard (Y) | Panel (Z) |
 | --- | --- | --- |
 | "What is broken or degraded now?" | `bioetl-overview-v2` | `Status`, then `First Action` |
-| Runtime failures / lag / blocker drift | `bioetl-runtime` | `Runtime Status`, `Runtime Telemetry Gap`, `Monitor Runtime Blockers`, `Runtime Blockers` |
+| Runtime failures / lag / blocker drift | `bioetl-runtime` | trust-gated `Runtime Status`, `Runtime Telemetry Gap`, `Monitor Runtime Blockers`, `Runtime Blockers`; `INCOMPLETE` means repair scrape/rules first |
 | Provider degradation, retry exhaustion, or provider telemetry gap | `bioetl-provider-health-v2` | `Monitor GLOBAL Provider Severity Matrix`, `Inspect Provider Top Causes`, `Monitor Provider Telemetry Freshness` |
-| DQ quality or quarantine increase | `bioetl-dq-v2` | `Monitor DQ Current Status`, `Monitor DQ Threshold State`, `Inspect DQ Current Reasons` |
-| Replay confidence / checkpoint issues | `bioetl-control-plane-v1` | `Track: Replay / Resume Blockers in Range` |
+| DQ quality or quarantine increase | `bioetl-dq-v2` | `Monitor DQ Current Status`, `Monitor DQ Threshold State`, `Inspect DQ Current Reasons`, then TIME RANGE freshness in hours (SLA 24h/72h) |
+| Replay confidence / checkpoint issues | `bioetl-control-plane-v1` | evidence-aware `Status`; `INCOMPLETE` blocks replay/resume approval, then inspect the four trust cards |
 | Exact rejected record evidence | `bioetl-silver-reject-explorer` | `Monitor Filtered Records Total`, then filtered records by `payload_hash` |
 
 ## Architecture Map

@@ -12,7 +12,7 @@
   "current_metrics": {
     "repo_uncovered_module_count": 0,
     "repo_unmeasured_module_count": 0,
-    "application_core_covered_line_percent": 96.48,
+    "application_core_covered_line_percent": 96.29,
     "application_core_uncovered_module_count": 0,
     "application_core_unmeasured_module_count": 0
   },
@@ -34,5 +34,5 @@
     "application_core_uncovered_module_count": "zero",
     "application_core_unmeasured_module_count": "zero"
   },
-  "notes": "Application core coverage improved significantly (49.09% -> 96.48%) and uncovered/unmeasured modules dropped to zero. However, 56 production modules remain below the default coverage floor, preventing full parent-epic closeout."
+  "notes": "Application core coverage improved significantly (49.09% -> 96.29%) and uncovered/unmeasured modules dropped to zero. However, 56 production modules remain below the default coverage floor, preventing full parent-epic closeout."
 }

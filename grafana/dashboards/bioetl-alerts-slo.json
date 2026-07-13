@@ -32,7 +32,7 @@
       },
       "id": 1000,
       "options": {
-        "content": "<div style=\"display:flex;gap:6px;flex-wrap:nowrap;align-items:center;padding:4px 6px;overflow:hidden;white-space:nowrap;font-size:12px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/explore?actionView=search&amp;from=now-150m&amp;to=now&amp;var-ds=tempo&amp;var-groupBy=resource.service.name&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D%20%22${run_type}%22%20%7D\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a><span aria-current=\"page\" style=\"padding:3px 7px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">6. Alerts & SLO</span></div>",
+        "content": "<style>.bioetl-nav{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:11px}.bioetl-nav a,.bioetl-nav span{box-sizing:border-box;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35}.bioetl-nav a{color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none}.bioetl-nav a:hover{color:#fff;background:#475569;border-color:#e2e8f0}.bioetl-nav a:focus-visible{outline:3px solid #38bdf8;outline-offset:2px}.bioetl-nav span[aria-current=page]{color:#fff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default}@media(max-width:1100px){.bioetl-nav a,.bioetl-nav span{flex:1 1 145px;text-align:center}}</style><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type\">3. Provider Health</a><a href=\"/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow\">4. Data Quality</a><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?var-workflow=$workflow&amp;${__url_time_range}&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type\">5. Workflow</a><span aria-current=\"page\">6. Alerts &amp; SLO</span><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/explore?actionView=search&amp;from=${__from}&amp;to=${__to}&amp;var-ds=tempo&amp;var-groupBy=resource.service.name&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D%20%22${run_type}%22%20%7D\">Explore Traces</a></div>",
         "mode": "html"
       },
       "pluginVersion": "12.2.0",
@@ -83,22 +83,24 @@
           "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false,
-          "tooltip": "Cross-scope handoff: bounded pipeline/run_type explorer scope. Reset scope: Silver Reject Explorer owns its own record-level filters. Opens in the same tab."
+          "tooltip": "Cross-scope handoff: bounded pipeline/run_type explorer scope. Reset scope: record-level filters remain explorer-owned. Opens in the same tab."
         },
         {
           "title": "Explore Logs",
           "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D",
           "targetBlank": false,
-          "tooltip": "Requires optional tracing profile. Opens Logs Drilldown in the same tab with safe {job=\"bioetl\"} baseline. Zero lines can legitimately mean Loki shipping is disabled, no BioETL log streams were shipped in range, or the baseline query still needs refinement inside Explore."
+          "tooltip": "Optional tracing profile adjunct evidence. Zero lines can legitimately mean shipping is disabled or no BioETL streams exist; refine in Explore.",
+          "includeVars": false
         },
         {
           "title": "Explore Traces",
-          "url": "/a/grafana-exploretraces-app/explore?actionView=search&from=now-150m&to=now&var-ds=tempo&var-groupBy=resource.service.name&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D%20%22${run_type}%22%20%7D",
+          "url": "/a/grafana-exploretraces-app/explore?actionView=search&from=${__from}&to=${__to}&var-ds=tempo&var-groupBy=resource.service.name&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D%20%22${run_type}%22%20%7D",
           "targetBlank": false,
-          "tooltip": "Available only for traced runs. Enable tracing with --tracing or BIOETL_OBSERVABILITY__TRACING_ENABLED=true. Opens Traces Drilldown in the same tab with bounded pipeline/run_type TraceQL scope. NoOpTracing or tracing-off runs can legitimately be empty, so treat this as adjunct evidence rather than first-screen proof."
+          "tooltip": "Available only for traced runs. Enable the optional tracing profile with --tracing; this is adjunct evidence, not a headline verdict.",
+          "includeVars": false
         }
       ],
-      "description": "Top navigation bus for the dashboard suite. Uses same-tab handoffs, preserves the current time range for dashboard-to-dashboard links, passes only target-scoped variables, and exposes Explore Logs plus Explore Traces as an optional tracing profile available only for traced runs."
+      "description": "Responsive same-tab navigation bus with identical composition and order across all shipped dashboards. It preserves the current time range and supported scope, uses theme-safe normal/hover/focus/active tokens, and wraps predictably at 1024 px. Explore Logs and Explore Traces require the optional tracing profile; traces are available only for traced runs. Alerts keep explicit Global/Pipeline/Run scope."
     },
     {
       "datasource": null,
@@ -110,7 +112,7 @@
       },
       "id": 1001,
       "options": {
-        "content": "<h2>BioETL Alerts & SLO</h2><p>First-class alert surface for active Prometheus alert state and SLO/SLA-oriented incident triage. This dashboard reads alerting evidence only; it does not implement alert logic or duplicate DQ validation.</p>",
+        "content": "<h2>BioETL Alerts & SLO</h2><p><b>Row scope is explicit:</b> GLOBAL, PIPELINE or RUN. Dashboard selectors are context; GLOBAL alerts remain visible and cannot be attributed to the selected pipeline.</p>",
         "mode": "html"
       },
       "pluginVersion": "12.2.0",
@@ -161,8 +163,8 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
-        "w": 6,
+        "h": 4,
+        "w": 12,
         "x": 0,
         "y": 6
       },
@@ -209,16 +211,12 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "gray",
                 "value": null
               },
               {
-                "color": "orange",
-                "value": 1
-              },
-              {
                 "color": "red",
-                "value": 5
+                "value": 1
               }
             ]
           },
@@ -227,14 +225,72 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
-        "w": 6,
-        "x": 6,
+        "h": 4,
+        "w": 12,
+        "x": 12,
         "y": 6
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        {
+          "expr": "sum(ALERTS{alertstate=\"firing\",severity=~\"critical|page|p0|p1\"}) or vector(0)",
+          "legendFormat": "critical/page alerts",
+          "refId": "A"
+        }
+      ],
+      "title": "Critical/Page Alerts",
+      "type": "stat",
+      "description": "Count of critical/page firing alerts in the selected alert scope. Zero fallback means no matching critical/page ALERTS series was observed for the current filters. Any non-zero critical/page count is red; aggregate firing count remains neutral."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "gray",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 0,
+        "y": 10
       },
       "id": 2,
       "options": {
-        "colorMode": "background",
+        "colorMode": "value",
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
@@ -293,76 +349,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 5,
-        "w": 6,
+        "h": 4,
+        "w": 12,
         "x": 12,
-        "y": 6
-      },
-      "id": 3,
-      "options": {
-        "colorMode": "background",
-        "graphMode": "none",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.2.0",
-      "targets": [
-        {
-          "expr": "sum(ALERTS{alertstate=\"firing\",severity=~\"critical|page|p0|p1\"}) or vector(0)",
-          "legendFormat": "critical/page alerts",
-          "refId": "A"
-        }
-      ],
-      "title": "Critical/Page Alerts",
-      "type": "stat",
-      "description": "Count of critical/page firing alerts in the selected alert scope. Zero fallback means no matching critical/page ALERTS series was observed for the current filters."
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 3
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 6,
-        "x": 18,
-        "y": 6
+        "y": 10
       },
       "id": 4,
       "options": {
@@ -570,14 +560,54 @@
                 }
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "scope"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "Global": {
+                        "text": "GLOBAL",
+                        "color": "purple"
+                      },
+                      "Pipeline": {
+                        "text": "PIPELINE",
+                        "color": "blue"
+                      },
+                      "Run": {
+                        "text": "RUN",
+                        "color": "green"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
           }
         ]
       },
       "gridPos": {
-        "h": 10,
+        "h": 6,
         "w": 24,
         "x": 0,
-        "y": 11
+        "y": 14
       },
       "id": 5,
       "options": {
@@ -595,7 +625,7 @@
       "pluginVersion": "12.2.0",
       "targets": [
         {
-          "expr": "ALERTS{alertstate=\"firing\"}",
+          "expr": "label_replace(label_replace(ALERTS{alertstate=\"firing\"}, \"scope\", \"Global\", \"\", \"\"), \"scope\", \"Pipeline\", \"pipeline\", \".+\")",
           "format": "table",
           "instant": true,
           "legendFormat": "{{alertname}}",
@@ -604,24 +634,26 @@
       ],
       "title": "Firing Alert Details",
       "type": "table",
-      "description": "Raw firing alert label table for the selected alert scope. No data means no matching firing ALERTS series or an unavailable alert datasource; compare with Active Alert Status.",
+      "description": "Compact firing alert table with an explicit Global/Pipeline/Run badge on every row. Global rows remain visually separate from scoped results; full values wrap or remain inspectable.",
       "transformations": [
         {
           "id": "organize",
           "options": {
             "excludeByName": {
               "__name__": true,
-              "Value": true
+              "Value": true,
+              "run_id": true
             },
             "indexByName": {
               "Time": 0,
-              "alertname": 1,
-              "severity": 2,
-              "pipeline": 3,
-              "run_type": 4,
-              "instance": 5,
-              "job": 6,
-              "alertstate": 7
+              "scope": 1,
+              "alertname": 2,
+              "severity": 3,
+              "pipeline": 4,
+              "run_type": 5,
+              "instance": 6,
+              "job": 7,
+              "alertstate": 8
             },
             "renameByName": {}
           }

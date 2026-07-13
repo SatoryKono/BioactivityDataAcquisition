@@ -266,6 +266,7 @@
         "docs/05-operations/performance-baselines.md",
         "docs/05-operations/runbooks/backfill-rebuild.md",
         "docs/05-operations/runbooks/checkpoint-debugging.md",
+        "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
         "docs/05-operations/runbooks/data-recovery.md",
         "docs/05-operations/runbooks/dq-failure-investigation.md",
         "docs/05-operations/runbooks/generated-artifact-drift-workflow.md",

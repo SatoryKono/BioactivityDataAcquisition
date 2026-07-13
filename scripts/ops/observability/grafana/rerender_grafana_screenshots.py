@@ -24,6 +24,7 @@ DEFAULT_PASSWORD = "changeme"
 DEFAULT_OUTPUT_DIR = Path("reports/observability/grafana/screenshots")
 DEFAULT_WIDTH = 1600
 DEFAULT_HEIGHT = 2200
+DEFAULT_THEME = "dark"
 DEFAULT_TIMEOUT_SECONDS = 120.0
 DEFAULT_TOOL_PLAYWRIGHT_NODE_MODULES = Path(
     "/tmp/bioetl-tools/playwright-runtime/node_modules"
@@ -32,7 +33,6 @@ DEFAULT_TOOL_PLAYWRIGHT_BROWSERS = Path("/tmp/playwright-browsers")
 LOCAL_PLAYWRIGHT_LIB_DIR = Path(
     ".cache/grafana-screenshot-runtime/root/usr/lib/x86_64-linux-gnu"
 )
-DEFAULT_MIN_PLAYWRIGHT_SCREENSHOT_BYTES = 100_000
 
 
 @dataclass(frozen=True)
@@ -47,11 +47,13 @@ class RenderConfig:
     timeout_seconds: float
     selected_uids: tuple[str, ...]
     fallback: str
+    theme: str = DEFAULT_THEME
     workflow: str = ""
     pipeline: str = ""
     run_type: str = ""
     run_id: str = ""
     range_hours: int = 12
+    expand_collapsed_rows: bool = True
 
 
 @dataclass(frozen=True)
@@ -238,6 +240,12 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
     parser.add_argument("--width", type=int, default=DEFAULT_WIDTH)
     parser.add_argument("--height", type=int, default=DEFAULT_HEIGHT)
     parser.add_argument(
+        "--theme",
+        choices=("dark", "light"),
+        default=DEFAULT_THEME,
+        help="Explicit Grafana color theme for reproducible render evidence.",
+    )
+    parser.add_argument(
         "--timeout-seconds",
         type=float,
         default=DEFAULT_TIMEOUT_SECONDS,
@@ -264,6 +272,15 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
     parser.add_argument("--var-run-type", default="")
     parser.add_argument("--var-run-id", default="")
     parser.add_argument("--range-hours", type=int, default=12)
+    parser.add_argument(
+        "--expand-collapsed-rows",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help=(
+            "Expand every collapsed row before terminal-state validation. "
+            "Enabled by default for full-surface audit evidence."
+        ),
+    )
     args = parser.parse_args(argv)
     return RenderConfig(
         base_url=args.base_url.rstrip("/"),
@@ -276,11 +293,13 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
         timeout_seconds=args.timeout_seconds,
         selected_uids=tuple(str(uid) for uid in args.uids),
         fallback=args.fallback,
+        theme=args.theme,
         workflow=str(args.var_workflow).strip(),
         pipeline=str(args.var_pipeline).strip(),
         run_type=str(args.var_run_type).strip(),
         run_id=str(args.var_run_id).strip(),
         range_hours=max(int(args.range_hours), 1),
+        expand_collapsed_rows=bool(args.expand_collapsed_rows),
     )
 
 
@@ -314,6 +333,7 @@ def _scope_query_params(config: RenderConfig) -> dict[str, str]:
         "from": f"now-{config.range_hours}h",
         "to": "now",
         "timezone": "UTC",
+        "theme": config.theme,
     }
     if config.workflow:
         params["var-workflow"] = config.workflow
@@ -367,12 +387,31 @@ def _write_manifest(
         )
         for record, path in rendered
     ]
+    actual_viewports = {record.uid: _png_dimensions(path) for record, path in rendered}
     manifest = {
         "generated_at": datetime.now(tz=UTC).isoformat(),
         "base_url": config.base_url,
         "engine": "grafana-render-api",
         "width": config.width,
         "height": config.height,
+        "requested": {
+            "viewport": {"width": config.width, "height": config.height},
+            "theme": config.theme,
+        },
+        "actual": {
+            "viewports": {
+                uid: ({"width": size[0], "height": size[1]} if size else None)
+                for uid, size in actual_viewports.items()
+            },
+            "themes": {record.uid: "unverified" for record, _path in rendered},
+        },
+        "terminal_state_validation": {
+            "status": "not-checked",
+            "reason": (
+                "Grafana Render API captures pixels but cannot prove panel terminal "
+                "states; use --fallback playwright for auditable evidence."
+            ),
+        },
         "selected_uids": list(config.selected_uids),
         "scope": {
             "workflow": config.workflow,
@@ -394,6 +433,17 @@ def _write_manifest(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+
+
+def _png_dimensions(path: Path) -> tuple[int, int] | None:
+    """Return PNG IHDR dimensions without requiring an image dependency."""
+    try:
+        header = path.read_bytes()[:24]
+    except OSError:
+        return None
+    if len(header) < 24 or header[:8] != b"\x89PNG\r\n\x1a\n":
+        return None
+    return int.from_bytes(header[16:20], "big"), int.from_bytes(header[20:24], "big")
 
 
 def _playwright_script_path() -> Path:
@@ -491,12 +541,18 @@ def _playwright_env(config: RenderConfig) -> dict[str, str]:
     if config.service_account_token:
         env["GRAFANA_SERVICE_ACCOUNT_TOKEN"] = config.service_account_token
     env["GRAFANA_SCREENSHOT_OUTPUT_DIR"] = str(config.output_dir)
+    env["GRAFANA_SCREENSHOT_WIDTH"] = str(config.width)
+    env["GRAFANA_SCREENSHOT_HEIGHT"] = str(config.height)
+    env["GRAFANA_SCREENSHOT_THEME"] = config.theme
     env["GRAFANA_SCREENSHOT_TIMEOUT_MS"] = str(int(config.timeout_seconds * 1000))
     env["GRAFANA_SCREENSHOT_CAPTURE_TIMEOUT_MS"] = str(
         max(int(config.timeout_seconds * 1000), 180000)
     )
     env["GRAFANA_SCREENSHOT_SETTLE_MS"] = os.environ.get(
         "GRAFANA_SCREENSHOT_SETTLE_MS", "12000"
+    )
+    env["GRAFANA_SCREENSHOT_EXPAND_COLLAPSED_ROWS"] = (
+        "true" if config.expand_collapsed_rows else "false"
     )
     if config.selected_uids:
         env["GRAFANA_SCREENSHOT_UIDS"] = ",".join(config.selected_uids)
@@ -520,6 +576,16 @@ def _run_playwright_process(config: RenderConfig) -> int:
         )
         return 1
     node_command = [node_path, str(script_path)]
+    node_command.extend(
+        [
+            "--width",
+            str(config.width),
+            "--height",
+            str(config.height),
+            "--theme",
+            config.theme,
+        ]
+    )
     scope_query = urlencode(_scope_query_params(config))
     if scope_query:
         node_command.extend(["--scope-query", scope_query])
@@ -529,7 +595,7 @@ def _run_playwright_process(config: RenderConfig) -> int:
             check=False,
             cwd=str(_repo_root()),
             env=_playwright_env(config),
-            timeout=max(config.timeout_seconds + 30.0, 60.0),
+            timeout=_playwright_process_timeout_seconds(config),
         )
     except subprocess.TimeoutExpired as exc:
         print(
@@ -543,11 +609,19 @@ def _run_playwright_process(config: RenderConfig) -> int:
     return result.returncode
 
 
+def _playwright_process_timeout_seconds(config: RenderConfig) -> float:
+    """Return an end-to-end budget longer than every browser capture stage."""
+    capture_seconds = max(config.timeout_seconds, 180.0)
+    return max((4.0 * config.timeout_seconds) + capture_seconds + 90.0, 300.0)
+
+
 def _read_playwright_manifest(path: Path) -> dict[str, Any]:
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        raise RuntimeError(f"Could not read Playwright render manifest {path}: {exc}") from exc
+        raise RuntimeError(
+            f"Could not read Playwright render manifest {path}: {exc}"
+        ) from exc
     if not isinstance(payload, dict):
         raise RuntimeError(f"Playwright render manifest {path} is not a JSON object")
     return payload
@@ -566,6 +640,17 @@ def _write_merged_playwright_manifest(
 
     scope_query = urlencode(_scope_query_params(config))
     capture_timeout_ms = max(int(config.timeout_seconds * 1000), 180000)
+    terminal_statuses = [
+        manifest.get("terminal_state_validation", {}).get("status")
+        for manifest in manifests
+        if isinstance(manifest.get("terminal_state_validation"), dict)
+    ]
+    terminal_status = (
+        "ok"
+        if len(terminal_statuses) == len(manifests)
+        and all(status == "ok" for status in terminal_statuses)
+        else "error"
+    )
     merged = {
         "generated_at": datetime.now(tz=UTC).isoformat(),
         "engine": "playwright",
@@ -573,10 +658,34 @@ def _write_merged_playwright_manifest(
         "scope_query": scope_query,
         "timeout_ms": int(config.timeout_seconds * 1000),
         "capture_timeout_ms": capture_timeout_ms,
-        "expand_collapsed_rows": os.getenv(
-            "GRAFANA_SCREENSHOT_EXPAND_COLLAPSED_ROWS", ""
-        ).strip().lower()
-        in {"1", "true", "yes"},
+        "requested": {
+            "viewport": {"width": config.width, "height": config.height},
+            "theme": config.theme,
+        },
+        "actual": {
+            "viewports": {
+                str(item["uid"]): item.get("actualViewport")
+                for item in dashboards
+                if isinstance(item.get("uid"), str)
+            },
+            "themes": {
+                str(item["uid"]): item.get("actualTheme")
+                for item in dashboards
+                if isinstance(item.get("uid"), str)
+            },
+        },
+        "terminal_state_validation": {
+            "status": terminal_status,
+            "dashboards": {
+                str(item["uid"]): item.get("terminalStateValidation", {}).get(
+                    "status", "missing"
+                )
+                for item in dashboards
+                if isinstance(item.get("uid"), str)
+                and isinstance(item.get("terminalStateValidation"), dict)
+            },
+        },
+        "expand_collapsed_rows": config.expand_collapsed_rows,
         "dashboards": dashboards,
     }
     (config.output_dir / "render-manifest.json").write_text(
@@ -585,75 +694,90 @@ def _write_merged_playwright_manifest(
     )
 
 
-def _playwright_min_screenshot_bytes() -> int:
-    raw_value = os.getenv("GRAFANA_SCREENSHOT_MIN_BYTES", "").strip()
-    if not raw_value:
-        return DEFAULT_MIN_PLAYWRIGHT_SCREENSHOT_BYTES
-    try:
-        return max(int(raw_value), 0)
-    except ValueError:
-        return DEFAULT_MIN_PLAYWRIGHT_SCREENSHOT_BYTES
-
-
-def _playwright_manifest_has_suspicious_screenshot(
+def _playwright_manifest_screenshot_problem(
     config: RenderConfig, manifest: dict[str, Any]
-) -> bool:
-    min_bytes = _playwright_min_screenshot_bytes()
-    if min_bytes <= 0:
-        return False
-
+) -> str | None:
     dashboards = manifest.get("dashboards", [])
-    if not isinstance(dashboards, list):
-        return False
+    if not isinstance(dashboards, list) or not dashboards:
+        return "render manifest contains no dashboard screenshot evidence"
 
     for dashboard in dashboards:
         if not isinstance(dashboard, dict):
-            continue
+            return "render manifest contains a malformed dashboard record"
+        uid = str(dashboard.get("uid", "unknown"))
+        if dashboard.get("renderStatus") != "rendered":
+            return f"dashboard {uid} did not reach rendered status"
         rendered_count = dashboard.get("renderedPanelCount", 0)
         if not isinstance(rendered_count, int) or rendered_count <= 0:
-            continue
+            return f"dashboard {uid} contains no rendered panel markers"
         file_name = dashboard.get("file") or dashboard.get("screenshot")
         if not isinstance(file_name, str) or not file_name:
-            continue
+            return f"dashboard {uid} does not identify its screenshot file"
         screenshot_path = config.output_dir / file_name
         try:
             screenshot_size = screenshot_path.stat().st_size
-        except OSError:
-            continue
-        if screenshot_size < min_bytes:
-            print(
-                "Playwright screenshot looks suspiciously small despite "
-                f"{rendered_count} rendered panel marker(s): "
-                f"{screenshot_path} ({screenshot_size} bytes < {min_bytes})."
+        except OSError as exc:
+            return f"dashboard {uid} screenshot is unreadable: {exc}"
+        dimensions = _png_dimensions(screenshot_path)
+        if dimensions is None:
+            return f"dashboard {uid} screenshot is not a valid PNG"
+        if dimensions[0] != config.width or dimensions[1] <= 0:
+            return (
+                f"dashboard {uid} screenshot dimensions drift: "
+                f"requested_width={config.width} actual={dimensions}"
             )
-            return True
-    return False
+        evidence = dashboard.get("screenshotEvidence")
+        if not isinstance(evidence, dict):
+            return f"dashboard {uid} lacks screenshotEvidence"
+        if evidence.get("file") != file_name:
+            return f"dashboard {uid} screenshot filename evidence drift"
+        if evidence.get("bytes") != screenshot_size:
+            return f"dashboard {uid} screenshot byte-size evidence drift"
+        if (
+            evidence.get("width") != dimensions[0]
+            or evidence.get("height") != dimensions[1]
+        ):
+            return f"dashboard {uid} screenshot dimension evidence drift"
+    return None
+
+
+def _run_playwright_with_retry(
+    config: RenderConfig,
+) -> tuple[int, dict[str, Any] | None]:
+    for attempt in range(2):
+        result = _run_playwright_process(config)
+        if result != 0:
+            return result, None
+        try:
+            manifest = _read_playwright_manifest(
+                config.output_dir / "render-manifest.json"
+            )
+        except RuntimeError as exc:
+            print(str(exc))
+            return 1, None
+        problem = _playwright_manifest_screenshot_problem(config, manifest)
+        if problem is None:
+            return 0, manifest
+        if attempt == 1:
+            print(f"Playwright screenshot validation failed after retry: {problem}")
+            return 1, None
+        print(f"Retrying Playwright render once after screenshot validation: {problem}")
+        time.sleep(2.0)
+    return 1, None
 
 
 def _run_playwright_fallback(config: RenderConfig) -> int:
     dashboards = _load_dashboards(config)
     if len(dashboards) <= 1:
-        return _run_playwright_process(config)
+        result, _manifest = _run_playwright_with_retry(config)
+        return result
 
     manifests: list[dict[str, Any]] = []
     for dashboard in dashboards:
         single_config = replace(config, selected_uids=(dashboard.uid,))
-        result = _run_playwright_process(single_config)
-        if result != 0:
-            return result
-        manifest = _read_playwright_manifest(config.output_dir / "render-manifest.json")
-        if _playwright_manifest_has_suspicious_screenshot(config, manifest):
-            print(
-                "Retrying isolated Playwright render once for "
-                f"{dashboard.uid} after suspicious screenshot capture."
-            )
-            time.sleep(2.0)
-            result = _run_playwright_process(single_config)
-            if result != 0:
-                return result
-            manifest = _read_playwright_manifest(
-                config.output_dir / "render-manifest.json"
-            )
+        result, manifest = _run_playwright_with_retry(single_config)
+        if result != 0 or manifest is None:
+            return result or 1
         manifests.append(manifest)
 
     _write_merged_playwright_manifest(config, manifests)

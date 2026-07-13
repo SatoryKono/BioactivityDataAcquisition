@@ -10,98 +10,83 @@ import pytest
 pytestmark = pytest.mark.integration
 
 
-def test_filtered_records_table_has_explicit_empty_and_failure_copy() -> None:
-    dashboard = json.loads(
+def _load_dashboard() -> dict[str, object]:
+    return json.loads(
         Path("grafana/dashboards/bioetl-silver-reject-explorer.json").read_text(
             encoding="utf-8"
         )
     )
 
-    panel = next((p for p in dashboard["panels"] if p.get("id") == 8), None)
 
-    assert panel is not None, (
-        "Silver Reject Explorer panel id=8 is missing; available panels: "
-        + ", ".join(f"{p.get('id')}:{p.get('title')}" for p in dashboard["panels"])
-    )
+def _iter_panels(panels: list[object]):
+    for panel in panels:
+        if not isinstance(panel, dict):
+            continue
+        yield panel
+        nested = panel.get("panels")
+        if isinstance(nested, list):
+            yield from _iter_panels(nested)
+
+
+def _panel(dashboard: dict[str, object], panel_id: int) -> dict[str, object]:
+    matches = [
+        panel
+        for panel in _iter_panels(list(dashboard.get("panels", [])))
+        if panel.get("id") == panel_id
+    ]
+    assert len(matches) == 1, (panel_id, len(matches))
+    return matches[0]
+
+
+def test_filtered_records_table_has_explicit_empty_and_failure_copy() -> None:
+    panel = _panel(_load_dashboard(), 8)
+
     assert panel["title"] == "Inspect Filtered Records Table"
-    assert panel["fieldConfig"]["defaults"]["noValue"] == (
-        "No rejected records for current filters. Use the reason/field summaries "
-        "above to widen filters or select a payload_hash when rows exist; backend "
-        "and scope must be confirmed before treating this as zero rows."
-    )
+    no_value = str(panel["fieldConfig"]["defaults"]["noValue"])
+    assert no_value.startswith("VALID EMPTY")
+    assert "QUERY/DATASOURCE ERROR" in no_value
     assert "Backend/query failure copy:" in panel["description"]
 
 
 def test_record_selection_guidance_is_visible_before_empty_record_panels() -> None:
-    dashboard = json.loads(
-        Path("grafana/dashboards/bioetl-silver-reject-explorer.json").read_text(
-            encoding="utf-8"
-        )
-    )
+    dashboard = _load_dashboard()
+    row = _panel(dashboard, 15)
 
-    panel = next((p for p in dashboard["panels"] if p.get("id") == 15), None)
-
-    assert panel is not None
-    assert panel["title"] == "Review: Record Selection Empty State"
-    assert panel.get("type") == "text"
-    assert panel.get("gridPos", {}).get("y") == 35
-    content = str(panel.get("options", {}).get("content", "")).lower()
-    assert "payload_hash" in content
-    assert "widen filters" in content
-    assert "quarantine explorer health" in content
+    assert row["title"] == "Records and selected detail · expand after narrowing"
+    assert row.get("type") == "row"
+    assert row.get("collapsed") is True
+    assert {panel.get("id") for panel in row.get("panels", [])} == {8, 9}
+    first_action = str(_panel(dashboard, 10).get("options", {}).get("content", ""))
+    assert "expand Trends only for non-zero rejects" in first_action
+    assert "Records only after narrowing" in first_action
 
 
 def test_trend_empty_state_guidance_is_visible_before_forensic_tables() -> None:
-    dashboard = json.loads(
-        Path("grafana/dashboards/bioetl-silver-reject-explorer.json").read_text(
-            encoding="utf-8"
-        )
-    )
+    row = _panel(_load_dashboard(), 16)
 
-    panel = next((p for p in dashboard["panels"] if p.get("id") == 16), None)
-
-    assert panel is not None
-    assert panel["title"] == "Review: Trend Empty State"
-    assert panel.get("type") == "text"
-    assert panel.get("gridPos", {}).get("y") == 27
-    content = str(panel.get("options", {}).get("content", "")).lower()
-    assert "active filters returned no matching reject samples" in content
-    assert "datasource failure" in content
+    assert row["title"] == "Trends · expand when rejects exist"
+    assert row.get("type") == "row"
+    assert row.get("collapsed") is True
+    assert {panel.get("id") for panel in row.get("panels", [])} == {11, 12}
 
 
 def test_scope_banner_explains_origin_dashboard_ownership() -> None:
-    dashboard = json.loads(
-        Path("grafana/dashboards/bioetl-silver-reject-explorer.json").read_text(
-            encoding="utf-8"
-        )
-    )
-
-    panel = next((p for p in dashboard["panels"] if p.get("id") == 1), None)
-
-    assert panel is not None
+    panel = _panel(_load_dashboard(), 1)
     content = str(panel.get("options", {}).get("content", "")).lower()
     description = str(panel.get("description", "")).lower()
-    assert "origin dashboards own shared workflow/run_id shell context" in content
-    assert "never owns shared workflow or run_id selectors" in content
+    combined = f"{content} {description}"
+    assert "origin dashboards own shared workflow/run_id shell context" in combined
+    assert "never owns shared workflow or run_id selectors" in combined
     assert "stays pipeline/run_type forensic" in description
-    assert "filtered_out_silver is a legacy alias" in content
-    assert "silver structural rejects only" in content
-    assert "gold contract and semantic rejects are not shown here" in content
+    assert "filtered_out_silver is a legacy alias" in combined
+    assert "silver structural rejects only" in combined
     assert (
         "gold contract and semantic rejects are intentionally excluded" in description
     )
 
 
 def test_filtered_records_table_documents_legacy_silver_alias_scope() -> None:
-    dashboard = json.loads(
-        Path("grafana/dashboards/bioetl-silver-reject-explorer.json").read_text(
-            encoding="utf-8"
-        )
-    )
-
-    panel = next((p for p in dashboard["panels"] if p.get("id") == 8), None)
-
-    assert panel is not None
+    panel = _panel(_load_dashboard(), 8)
     description = str(panel.get("description", "")).lower()
     assert "silver structural filtered_out_silver records" in description
     assert "filtered_out_silver is a legacy alias" in description
@@ -109,18 +94,11 @@ def test_filtered_records_table_documents_legacy_silver_alias_scope() -> None:
 
 
 def test_first_action_copy_keeps_zero_result_and_unknown_states_distinct() -> None:
-    dashboard = json.loads(
-        Path("grafana/dashboards/bioetl-silver-reject-explorer.json").read_text(
-            encoding="utf-8"
-        )
-    )
-
-    panel = next((p for p in dashboard["panels"] if p.get("id") == 10), None)
-
-    assert panel is not None
+    panel = _panel(_load_dashboard(), 10)
     content = str(panel.get("options", {}).get("content", "")).lower()
     description = str(panel.get("description", "")).lower()
-    assert "zero-reject workflow run is an intentional empty explorer state" in content
-    assert "zero matching rows for the active filters is an empty result" in content
-    assert "bronze_records=0 are unknown or error states" in content
+    assert "valid empty" in content
+    assert "telemetry absent" in content
+    assert "query error" in content
+    assert "datasource error" in content
     assert "0 vs no data" in description

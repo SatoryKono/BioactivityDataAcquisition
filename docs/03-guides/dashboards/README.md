@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.1.0
+Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-05-13'
+  Last verified: '2026-07-13'
 
 ______________________________________________________________________
 
 # Dashboards Docs Index
 
-Дата сверки: **2026-05-13**
+Дата сверки: **2026-07-13**
 Источник истины: `grafana/dashboards/*.json`
 
 ## Актуальные документы
@@ -52,16 +52,24 @@ ______________________________________________________________________
 
 Текущий reproducible render contract:
 
-- Full-surface dashboard audits must use the Playwright screenshot path from
-  `python -m scripts.ops rerender-grafana`, because that path captures the
-  shipped expanded row surface and still protects against future collapsed-row
-  regressions.
+- Full-surface dashboard audits use the Playwright screenshot path from
+  `python -m scripts.ops rerender-grafana`. The renderer accepts explicit
+  `--theme dark|light`, `--width`, and `--height`, verifies actual theme and
+  viewport, and records requested/actual values in `render-manifest.json`.
+- Closure evidence covers every shipped dashboard at `1600px` and `1024px` in
+  both dark and light themes. The `1024px` pass verifies wrapping navigation and
+  non-clipped first-action/identity content.
+- Shipped forensic rows are collapsed by default. Full-surface audit mode may
+  expand them and materialize lazy panels before capture; ordinary first-screen
+  evidence preserves the shipped collapsed state.
+- Playwright classifies required non-row panels as `healthy`, `valid-empty`, or
+  `explicit-error`. Blank, still-loading, and contradictory combinations such
+  as an error marker plus `No data` fail capture.
 - `python -m scripts.ops check-grafana-audit-preflight` must report
-  `expanded-row-capture: ok` before a full UX/render audit can claim diagnostic
-  row groups were reviewed.
+  `expanded-row-capture: ok`; when a screenshot directory is supplied, its
+  manifest must also prove matching viewport/theme and terminal-state success.
 - Grafana Render API screenshots remain acceptable for render/auth smoke
-  evidence, but they are not sufficient for the full row-surface audit
-  acceptance criterion.
+  evidence, but they do not prove panel terminal states.
 - On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap
   for repo-local Playwright plus the supported headless Chromium shared
   library surface.
@@ -69,26 +77,26 @@ ______________________________________________________________________
 Текущая навигационная модель:
 
 - `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`,
-  `4. Data Quality`, `5. Workflow` образуют единую primary top-level шину.
-- `6. Alerts & SLO` (`bioetl-alerts-slo`) существует как отдельный alert/SLO triage dashboard, но не включён в primary navigation panels других dashboards.
-- На каждой странице navigation panel `id=1000` визуально показывает полный bus `0..5`; текущий dashboard рендерится как disabled dark-gray item, а machine-readable `panel.links` сохраняют omit-self contract.
+  `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO` образуют единую
+  numbered top-level шину `0..6`.
+- На всех восьми shipped dashboards navigation panel `id=1000` визуально
+  показывает bus `0..6`, затем `Silver Reject Explorer`, `Explore Logs` и
+  `Explore Traces`; текущий dashboard рендерится как disabled high-contrast
+  item, а machine-readable `panel.links` сохраняют omit-self contract.
 - Каноническая shipped surface этой шины — text navigation panel `id=1000`;
   root `dashboard.links[]` не обязаны дублировать те же handoff в header row
   рядом с Grafana variables.
 - Любые дублирующие dashboard-to-dashboard ссылки из одного dashboard в один
   target dashboard запрещены: переход должен быть ровно один.
-- Во всех shipped navigation panels `id=1000`, кроме
-  `bioetl-control-plane-v1`, после bus `0..5` закреплены global adjunct links:
-  `Silver Reject Explorer`, `Explore Logs`, `Explore Traces`.
-- `bioetl-control-plane-v1` является намеренным исключением: top-level
-  navigation удерживает первый экран в dashboard/runbook flow и не уводит
-  оператора напрямую в `Explore Logs` / `Explore Traces`; logs/traces
-  расследование начинается из связанных dashboard handoff или runbook-пути.
+- Navigation uses theme-safe solid foreground/background tokens, visible
+  hover/focus states and `flex-wrap: wrap`. At `1024px` links wrap into readable
+  rows instead of being clipped or disappearing on a light background.
 - `Explore Traces` остаётся optional adjunct surface и считается доступным
   только для traced runs; если runtime использовал `NoOpTracing`, пустой Tempo
   result считается корректным поведением.
 - Shipped `Explore Traces` handoff opens the explicit search-first Tempo route,
-  bounds the initial window to `now-150m..now`, pins `var-ds=tempo`, uses
+  preserves the active dashboard range via `${__from}` / `${__to}`, pins
+  `var-ds=tempo`, uses
   `var-groupBy=resource.service.name`, and keeps only stable pipeline/provider
   TraceQL scope so Tempo metrics queries stay under the local limit and
   `includeAll` run-type selectors cannot collapse into an invalid empty regex.
@@ -132,33 +140,33 @@ ______________________________________________________________________
 scope/provenance/first-action блоки, current-status row, panel descriptions и
 monitoring guide.
 
-`bioetl-overview-v2` is the canonical L0 answer-first surface and now uses the
+`bioetl-overview-v2` is the canonical L0 answer-first surface and uses the
 frozen `1. Overview v3` layout as its baseline. It answers one question:
 what is currently broken or degraded in BioETL, and where should the operator
 drill down first? The first screen materializes provenance/scope, `Status`,
-`First Action`, `ID`, and `Processed Records`, then keeps current subsystem
-summaries (`Control Plane`, `Runtime`, `Data Quality`, `Provider`,
-`Data Validation`) plus selected workflow context. Historical evidence remains
-below the current answer rows, and diagnostics routing lives under the expanded
-`Diagnostics & Docs (Logs / Traces / Raw Metrics)` row. Actual firing/pending
-alert state is exposed in the expanded `Alert/SLO Triage` row via Prometheus
-`ALERTS`; this is presentation-only triage and does not duplicate alert-rule
-business logic in dashboard queries.
+`First Action`, `ID`, and `Processed Records`, then keeps the expanded
+`Alert/SLO Triage` table and deviation-first `Inputs` matrix in the first
+operator path. Repeated subsystem cards, historical evidence, and diagnostics
+routing live in collapsed rows. The alert table reads Prometheus `ALERTS`; this
+is presentation-only triage and does not duplicate alert-rule business logic in
+dashboard queries.
 
-`bioetl-control-plane-v1` is the `0. Control Plane` surface. It
-starts with answer-first trust cards for replay safety state, checkpoint
-freshness gap, ledger/manifest consistency, and telemetry presence for the
-selected pipeline scope. Replay/checkpoint panels route to
+`bioetl-control-plane-v1` is the `0. Control Plane` surface. It starts with the
+evidence-aware `bioetl_control_plane_current_status_trusted` headline plus
+trust cards for replay safety state, checkpoint freshness, ledger/manifest
+consistency, and telemetry presence for the selected pipeline scope. `OK` is
+possible only when all required evidence is complete; missing or stale
+checkpoint/telemetry evidence renders `INCOMPLETE`. Replay/checkpoint panels route to
 `checkpoint-debugging.md`, while manifest/ledger evidence panels route to
 `run-manifest-inspection.md`. **Known Blind Spots** and terminal-event
-evidence live below fold in expanded incident rows, not in the first-screen
+evidence live below fold in collapsed incident rows, not in the first-screen
 trust block.
 
 Control Plane keeps the shared compact `ID` shell panel (`9402`) backed by
 `/ops/control-plane/identity-table`. The shell panel is a two-column summary of
 run/manifest identity, Provider.Entity version, contract schema, execution
 flags, replay capability and mode, checkpoint anchors, optional composite run
-identity, and identity health. The deeper expanded
+identity, and identity health. The deeper collapsed
 `Identity evidence and remaining replay-safety signals` row uses
 `/ops/control-plane/identity-evidence` for P0/P1/P2 anchors, identity gaps,
 replay parentage, composite identity, checkpoint anchor comparison, and
@@ -174,13 +182,15 @@ Global lookup/read-path panels stay separated in a dedicated
 **Global diagnostics (non-pipeline scoped)** block and MUST remain unfiltered by
 `$pipeline` / `$run_type`.
 
-`bioetl-runtime`, `bioetl-provider-health-v2`, and `bioetl-dq-v2` are now
+`bioetl-runtime`, `bioetl-provider-health-v2`, and `bioetl-dq-v2` are
 answer-first L2 incident surfaces. Their first visible rows use canonical
-current-status recording rules (`bioetl_runtime_current_status`,
+current-status recording rules (`bioetl_runtime_current_status_trusted`,
 `bioetl_provider_current_status`, `bioetl_dq_current_status`) plus reason/cause
 tables before any selected-range evidence. Range counters, trends, raw tables,
 Silver reject breakdowns, logs, and traces stay below the first-screen answer
-row or in expanded diagnostic rows. `bioetl-provider-health-v2` also exposes
+row or in collapsed diagnostic rows. Runtime `Status` and `Runtime Status`
+share the trusted rule; a scrape/rule gap forces `INCOMPLETE`, never green
+`OK`. `bioetl-provider-health-v2` also exposes
 `Monitor Provider Telemetry Freshness` on the first screen so missing
 `bioetl_provider_current_status` samples are treated as telemetry gap, not
 healthy provider state.
@@ -204,7 +214,7 @@ secondary mirrors только как локальный контекст. Mirro
 
 | KPI | Canonical dashboard | Secondary mirrors |
 | --- | --- | --- |
-| Status | `1. Overview` | `2. Runtime`, `0. Control Plane`, `5. Workflow` |
+| Status | `1. Overview` | trusted derivatives in `2. Runtime`, `0. Control Plane` |
 | First Action | `1. Overview` | `2. Runtime`, `3. Provider Health` |
 | Inputs | `1. Overview` | `2. Runtime`, `4. Data Quality`, `0. Control Plane` |
 | Data Validation | `1. Overview` | `2. Runtime`, `0. Control Plane` |

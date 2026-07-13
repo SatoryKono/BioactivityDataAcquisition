@@ -75,6 +75,7 @@ EXPLICIT_VALUE_MAPPING_STAT_PANELS = {
         "0": {"text": "OK", "color": "green"},
         "1": {"text": "WARN", "color": "orange"},
         "2": {"text": "CRIT", "color": "red"},
+        "3": {"text": "INCOMPLETE", "color": "gray"},
     },
     ("bioetl-runtime.json", "Runtime Telemetry Gap"): {
         "0": {"text": "SCRAPING", "color": "green"},
@@ -85,6 +86,7 @@ EXPLICIT_VALUE_MAPPING_STAT_PANELS = {
         "0": {"text": "OK", "color": "green"},
         "1": {"text": "WARN", "color": "orange"},
         "2": {"text": "CRIT", "color": "red"},
+        "3": {"text": "INCOMPLETE", "color": "gray"},
     },
     ("bioetl-dq-v2.json", "Monitor DQ Threshold State"): {
         "0": {"text": "OK", "color": "green"},

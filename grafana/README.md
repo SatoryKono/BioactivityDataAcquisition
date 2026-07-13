@@ -1,7 +1,7 @@
 # BioETL Мониторинг: Prometheus + Grafana
 
-**Версия документа:** 2.0.0
-**Дата обновления:** 2026-07-03
+**Версия документа:** 2.1.0
+**Дата обновления:** 2026-07-13
 **Статус:** Production Ready
 **Совместимость:** BioETL v6.x (current main), Grafana 9+, Prometheus 2.40+
 
@@ -55,6 +55,9 @@ ______________________________________________________________________
 > repo-local dashboard JSON, uses explicit Grafana auth for render-sensitive
 > probes, and automatically falls back to the repo-local Playwright renderer
 > when the render API fails or times out.
+> Reproducible evidence passes explicit `--theme dark|light`, `--width`, and
+> `--height`; the Playwright manifest records requested and actual theme and
+> viewport. Closure runs cover `1600px` and responsive `1024px` in both themes.
 > Playwright mode additionally requires the local `playwright` npm dependency,
 > downloaded browser runtime, and the usual headless Chromium shared libraries
 > (`libnspr4`, `libnss3`, `libasound2`/`libasound2t64`, etc.) on the host.
@@ -88,9 +91,9 @@ ______________________________________________________________________
 > `powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1`.
 > That helper also reuses or auto-downloads the same portable Node.js LTS
 > toolchain when `node` is not present in the current PowerShell `PATH`.
-> Shipped dashboard rows are expanded by default; the Playwright screenshot
-> renderer captures that full row surface and scrolls through the page before
-> capture so Grafana lazy-rendered panels are materialized in the final PNG.
+> Shipped forensic/detail rows are collapsed by default. Full-audit Playwright
+> mode can expand them, scroll through the page, and materialize lazy panels
+> before capture without changing the shipped progressive-disclosure layout.
 > Grafana Render API screenshots remain valid render/semantic evidence, but
 > a full-surface UX audit must
 > have `expanded-row-capture: ok` in
@@ -114,6 +117,10 @@ ______________________________________________________________________
 > availability, canonical Quarantine Explorer health probes (`/health/live`
 > before `/health`), and whether local screenshot artifacts are missing or
 > stale relative to shipped dashboard JSON.
+> Playwright also validates required non-row panel terminal states. Healthy,
+> explicit error, and valid-empty are terminal; blank, loading, or an error
+> marker combined with `No data` fail the capture. Screenshot preflight verifies
+> the manifest's actual theme/viewport and terminal-state result.
 > `python -m scripts.ops run-grafana-audit-cycle` is the canonical full audit
 > workflow: service preflight, reviewed live discovery of filled dashboards,
 > screenshot refresh for that filled-dashboard subset, screenshot freshness
@@ -140,6 +147,11 @@ ______________________________________________________________________
 > while Docker-adjacent backends may need `http://host.docker.internal:9090`.
 > `localhost:9090` is therefore only correct for topologies where Prometheus is
 > actually bound on the same network namespace as `bioetl quarantine serve`.
+>
+> Operator state vocabulary is explicit: `OK/WARN/CRIT`, trust-gate
+> `INCOMPLETE`, no-verdict `UNKNOWN`, explicit `ERROR`, and neutral terminal
+> `VALID EMPTY` / `TELEMETRY ABSENT` / `N/A`. `LOADING` is transient only;
+> accepted screenshots cannot contain a blank or still-loading required panel.
 
 ## 1. Архитектура мониторинга
 
@@ -780,6 +792,11 @@ Primary dashboards `0..5` используют общий operator context shell
 `$pipeline_context`, `$adapter`) добавляются поверх shell. Переменные
 отображаются как выпадающие списки в верхней части дашборда.
 
+Navigation is broader than the shared selector shell: all eight shipped
+dashboards render the same theme-safe bus `0..6`, followed by `Silver Reject
+Explorer`, `Explore Logs`, and `Explore Traces`. The current item is visibly
+disabled, links wrap at `1024px`, and no dashboard has an omission exception.
+
 `$run_id` в primary dashboards остаётся HTTP-backed local identity selector
 для панели `ID`; он не используется в Prometheus label filtering и не
 становится Prometheus-backed cross-dashboard filter. Между primary dashboards
@@ -806,9 +823,9 @@ default.
 
 | Variable | Primary dashboards | Source | Semantics |
 | --- | --- | --- | --- |
-| `$workflow` | `0..5` | `label_values(bioetl_workflow_universe, workflow)` for query-backed dashboards; Alerts uses a textbox. | Context/evidence unless a panel documents truthful current-status intersection. The universe includes terminal workflow outcomes and started workflows published through `bioetl_workflow_expected`. |
-| `$pipeline` | `0..5` | Dashboard-bounded Prometheus universe: Overview/DQ/Provider/Workflow/Alerts use `bioetl_overview_pipeline_run_type_universe`; Runtime uses `bioetl_runtime_pipeline_run_type_universe`; Control Plane uses `bioetl_control_plane_run_type_universe`. | Canonical pipeline context; Overview may default to `All`, non-Overview dashboards fail-close to `unknown`. Planned workflow child pipelines appear after `bioetl_workflow_pipeline_expected` is published. |
-| `$run_type` | `0..5` | Same bounded universe as `$pipeline` for the dashboard role. | Multi-select Include All; missing context is `All`, not `unknown`. |
+| `$workflow` | `0..6` | `label_values(bioetl_workflow_universe, workflow)` for query-backed dashboards; Alerts uses a textbox. | Context/evidence unless a panel documents truthful current-status intersection. The universe includes terminal workflow outcomes and started workflows published through `bioetl_workflow_expected`. |
+| `$pipeline` | `0..6` | Dashboard-bounded Prometheus universe: Overview/DQ/Provider/Workflow/Alerts use `bioetl_overview_pipeline_run_type_universe`; Runtime uses `bioetl_runtime_pipeline_run_type_universe`; Control Plane uses `bioetl_control_plane_run_type_universe`. | Canonical pipeline context; Overview may default to `All`, non-Overview dashboards fail-close to `unknown`. Planned workflow child pipelines appear after `bioetl_workflow_pipeline_expected` is published. |
+| `$run_type` | `0..6` | Same bounded universe as `$pipeline` for the dashboard role. | Multi-select Include All; missing context is `All`, not `unknown`. |
 | `$run_id` | `0..5` | Quarantine Explorer HTTP `/ops/control-plane/filter-options?dimension=run_id...&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}` | Preserved HTTP identity context for `ID`/details panels; no Include All; default `-`; never a Prometheus label. |
 
 `$workflow` stays single-select with Include All across primary dashboards,
@@ -895,9 +912,11 @@ host/WSL setups, prefer an explicit value over assuming `localhost:9090`.
   `Next Action: Replay Diagnostics` now occupies the rightmost shared-shell slot
   beside `ID` and `Processed Records`, while the four compact trust cards remain
   directly below the shared context shell.
-  First-screen trust panels preserve `UNKNOWN` for missing
-  telemetry; `Inspect: Telemetry Missing` must be `0` before operator
-  treats current trust cards as replay/resume-safe evidence. `Inspect: Terminal Run Events by Status in Range`
+  Headline `Status` reads `bioetl_control_plane_current_status_trusted`:
+  `0=OK`, `1=WARN`, `2=CRIT`, `3=INCOMPLETE`, `null=UNKNOWN`. Replay/resume
+  approval requires complete replay-safety, checkpoint freshness/presence, and
+  required telemetry evidence; `Inspect: Telemetry Missing` must be `0`.
+  `Inspect: Terminal Run Events by Status in Range`
   stays below fold as selected-range terminal ledger evidence, while exact `run_id` /
   `manifest_id`, config/contract hashes, artifact refs, replay parentage,
   composite identity, and checkpoint anchor compare are surfaced by
@@ -1028,7 +1047,7 @@ ______________________________________________________________________
 | 9010 | Historical Failures | Table | `sum by (pipeline, run_type) (increase(bioetl_pipeline_runs_total{status="failed",...}[$__range]))`                         | Selected-range historical failure evidence only; zero matching rows is not proof of current OK; handoff `Open Runtime`.                                                          |
 | 9011 | Recent Terminal Runs | Table | `sum by (pipeline, status) (increase(bioetl_pipeline_runs_total{status!="success",...}[$__range]))`                          | Selected-range non-success terminal-run evidence only; no terminal rows is not proof of current OK; handoffs `Open Control Plane` and `Open Runtime`.                            |
 | 9012/9021 | Diagnostics & Docs (Logs / Traces / Raw Metrics) / Diagnostics Navigation | Row/Text | n/a                                                                                                       | Collapsed diagnostics row is populated again with raw-metric routing guidance and dashboard navigation pointers.                                                                |
-| 9600/9601 | Alert/SLO Triage / Triage Alert State | Row/Table | `ALERTS{alertstate=~"firing|pending"}` | Collapsed alert-state triage surface backed by Prometheus `ALERTS`; shows firing/pending alert state without reimplementing alert rules in dashboard queries. |
+| 9600/9601 | Alert/SLO Triage / Triage Alert State | Row/Table | `ALERTS{alertstate=~"firing|pending"}` | Expanded first-screen alert-state triage backed by Prometheus `ALERTS`; shows firing/pending alert state without reimplementing alert rules in dashboard queries. |
 
 **Используемые метрики:** `bioetl_pipeline_runs_total`, `bioetl_records_processed_total`,
 `bioetl_stage_backlog_records`, `bioetl_stage_lag_seconds`,
@@ -1036,18 +1055,18 @@ ______________________________________________________________________
 control-plane metrics, provider health metrics и `bioetl_workflow_runs_total`.
 
 **Drilldown:** canonical navigation bus `0. Control Plane`, `2. Runtime`,
-`3. Provider Health`, `4. Data Quality`, `5. Workflow` используют текущее
+`3. Provider Health`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO` используют текущее
 временное окно. Critical current-status panels also expose panel `dataLinks`
 to the same canonical dashboards. Navigation panel `id=1000` now also carries
 global adjunct links `Silver Reject Explorer`, `Explore Logs`, and
 `Explore Traces` in the same tab. `Explore Traces` is a traced-run-only adjunct
 surface, so `NoOpTracing` runs can legitimately return empty Tempo results. The
-shipped trace handoff opens an explicit search-first Tempo route, bounds the
-initial window to `now-150m..now`, pins `var-ds=tempo`, uses
+shipped trace handoff opens an explicit search-first Tempo route, preserves the
+active dashboard range via `${__from}` / `${__to}`, pins `var-ds=tempo`, uses
 `var-groupBy=resource.service.name`, and keeps only stable pipeline/provider
 TraceQL scope so Tempo metrics queries stay under the local limit and
 `includeAll` run-type selectors cannot collapse into an empty regex. The
-current dashboard remains visible in `id=1000` as a disabled dark-gray item
+current dashboard remains visible in `id=1000` as a disabled high-contrast item
 rather than disappearing from the bus.
 
 **Silver Rejects triage sequence:**
@@ -1080,16 +1099,16 @@ not use it as a Prometheus label.
 
 | ID  | Название                                     | Тип        | PromQL                                                                                                                                 | Описание                                                                                                                                                                   |
 | --- | -------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 100 | Run Type                                     | Stat       | `max(label_values(..., run_type)) or vector(0)`                                                                                        | Информационная панель типа запуска.                                                                                                                                        |
 | 9100 | Monitor DQ Current Status                   | Stat       | `max(bioetl_dq_current_status{pipeline=~"$pipeline"})`                                                                                | Pipeline-wide current DQ state: `0=OK`, `1=WARN`, `2=CRIT`, `null=UNKNOWN`; disabled/noop DQ monitoring contributes WARN rather than unconditional green. Selected-range evidence ниже не меняет этот first-screen статус. |
 | 9101 | Monitor DQ Threshold State                  | Stat       | `max(bioetl_dq_current_reason{severity=...})` + explicit `OK` fallback                                                                | Bounded current threshold summary: warning reasons map to WARN, hard reasons map to CRIT, explicit current OK stays `0=OK`.                                                |
 | 9102 | Inspect DQ Current Reasons                  | Table      | `topk(5, bioetl_dq_current_reason{pipeline=~"$pipeline"} > 0)`                                                                        | Current DQ reasons table with `severity` and `action_target`; `CRIT` can come from quarantine/validation blockers even when `filtered_out=0`.                             |
-| 9103 | Review: First Action                         | Text      | n/a                                                                                                                                    | CTA block now sits in the same shared-shell row as `ID` and `Processed Records` (`w=8`, `h=6`). Review current status and reasons first; if `filtered_out=0`, inspect quarantine, silver validation failures, and blocked share before assuming reject-path only. |
+| 9103 | Review: First Action                         | Text      | n/a                                                                                                                                    | CTA block sits in the same shared-shell row as `ID` and `Processed Records` (`w=8`, `h=10`). Review current status and reasons first; if `filtered_out=0`, inspect quarantine, validation failures, and blocked records before assuming reject-path only. |
 | 1   | Track Range Evidence: Bronze -> Silver -> Gold | Timeseries | `sum by (pipeline, stage) (max_over_time(bioetl_records_processed_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__interval]))` | Full-width selected-range evidence panel that now sits below the compact current-context band; не определяет current DQ status.                                            |
-| 2   | Monitor: Data Quality Score (Volume-weighted) | Gauge      | `sum(score * record_count) / clamp_min(sum(record_count), 1)`                                                                          | Канонический DQ gauge на базе `bioetl_dq_validation_score` и `bioetl_dq_validation_record_count`; в layout он входит в compact current-context row сразу под answer row.   |
+| 2   | Monitor: Data Quality Score (Volume-weighted) | Stat      | `sum(score * record_count) / clamp_min(sum(record_count), 1)`                                                                          | Neutral TIME RANGE score evidence на базе `bioetl_dq_validation_score` и `bioetl_dq_validation_record_count`; it does not replace CURRENT status.   |
 | 3   | Track: Source Records in Range (Bronze)      | Stat       | `round(sum(max_over_time(bioetl_records_processed_total{...stage="bronze"}[$__range])) or vector(0))`                                  | Суммарный Bronze input для pushed-counter evidence внутри активного Grafana окна; это bounded range evidence, а не latest-value snapshot.                                   |
 | 4   | Track: Clean Records in Range (Gold)         | Stat       | `round(sum(max_over_time(bioetl_records_processed_total{...stage="gold"}[$__range])) or vector(0))`                                    | Суммарный Gold output для pushed-counter evidence внутри активного Grafana окна; это bounded range evidence, а не latest-value snapshot.                                    |
-| 5   | Monitor: Worst-Entity DQ Score               | Gauge      | `min(bioetl_dq_validation_score{pipeline=~"$pipeline"})`                                                                                | Худший observed DQ score по сущностям внутри выбранного pipeline scope. При отсутствии DQ samples panel должен оставаться в состоянии `No data`, а не показывать synthetic `0`. |
+| 5   | Monitor: Worst-Entity DQ Score               | Stat      | `min(bioetl_dq_validation_score{pipeline=~"$pipeline"})`                                                                                | Худший TIME RANGE DQ score. При отсутствии samples panel remains `UNKNOWN`, not synthetic `0`. |
+| 8   | Time Range · Worst Freshness Age (hours; SLA 24/72) | Gauge | `max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds{pipeline=~"$pipeline"}[$__range]), 0)) / 3600` | TIME RANGE freshness age in hours; WARN `>=24h`, CRIT `>=72h`, null `UNKNOWN`. Query, unit, title, and thresholds use hours. |
 | 6   | Track: Records Quarantined in Range          | Stat       | `round(sum(max_over_time(bioetl_dq_records_quarantined_total{...}[$__range])) or vector(0))`                                           | Selected-range quarantine evidence; non-zero here can explain current DQ pressure even when Silver structural rejects remain zero.                                           |
 | 7   | Track: Silver Validation Failures in Range   | Stat       | `round(sum(max_over_time(bioetl_silver_validation_failures_total{pipeline=~"$pipeline", run_type=~"$run_type"}[$__range])) or vector(0))` | Visible selected-range validation blocker count; non-zero can drive current `CRIT` even when `filtered_out=0`.                                                               |
 | 117 | Track: Silver Filter Rejects in Range        | Stat       | `round(sum(max_over_time(bioetl_records_processed_total{...stage="filtered_out"}[$__range])) or vector(0))`                             | Отдельный счётчик Silver structural rejects внутри выбранного временного окна; не заменяет `Track: Records Quarantined in Range` или Gold reject panels.                    |
@@ -1126,9 +1145,9 @@ BioETL run may first appear to Prometheus as an already non-zero sample; plain
 - raw `message` не используется как Prometheus label
 
 **Drilldown:** canonical navigation bus `0. Control Plane`, `1. Overview`, `2. Runtime`,
-`3. Provider Health`, `5. Workflow`, `Silver Reject Explorer`, `Explore Logs`,
-`Explore Traces` открывается с безопасным bounded окном `now-150m..now`, а не
-наследует текущее окно dashboard. Panel-level
+`3. Provider Health`, `5. Workflow`, `6. Alerts & SLO`, `Silver Reject Explorer`, `Explore Logs`,
+`Explore Traces` сохраняет текущее окно dashboard через `${__from}` /
+`${__to}`. Panel-level
 dashboard-to-dashboard handoffs удалены; replay/checkpoint расследование
 открывается через `0. Control Plane` в top-level шине. Tempo drilldown
 предфильтрован по `span."bioetl.pipeline"` для pipeline-scoped dashboards и по
@@ -1160,10 +1179,11 @@ surfaces.
 | Monitor Filtered Records Total                    | Table | `/ops/quarantine/filtered-stats`                           |
 | Track Reject Rate vs Bronze                       | Table | `/ops/quarantine/filtered-stats`                           |
 | Inspect Run Scope Summary                         | Table | `/ops/quarantine/filtered-stats`                           |
+| Trends · expand when rejects exist                | Row   | Collapsed progressive-disclosure row                       |
 | Track Filtered Rejects Over Time                  | Timeseries | `/ops/quarantine/filtered-timeseries`                  |
 | Track Reject Ratio vs Bronze Over Time            | Timeseries | `/ops/quarantine/filtered-timeseries`                  |
 | Inspect Top Reject Reasons / Fields / Signatures  | Table | `/ops/quarantine/filtered-stats`                           |
-| Review: Record Selection Empty State              | Text  | Visible guidance for selecting `payload_hash`, widening filters, and confirming backend/scope before interpreting zero matching rows. |
+| Records and selected detail · expand after narrowing | Row | Collapsed progressive-disclosure row                    |
 | Inspect Filtered Records Table                    | Table | Compact latest-record list from `/ops/quarantine/filtered-records`; empty state asks the operator to confirm backend/scope and widen filters before treating it as zero rows. |
 | Inspect Selected Record Details                   | Table | Compact one-record projection from `/ops/quarantine/filtered-records?...&payload_hash=<hash>`; no-selection state tells the operator to select `payload_hash`, widen filters, or check backend health. |
 
@@ -1216,9 +1236,14 @@ UNKNOWN/error until the backend is checked.
 `Monitor Explorer Backend Health` is the first-screen transport trust marker:
 if it does not return a healthy backend response, treat empty explorer tables as
 UNKNOWN/backend-unavailable rather than proof of zero rejects.
+Required terminal states are healthy, explicit error, or valid empty. Blank,
+loading, and error marker + `No data` contradictions fail Playwright evidence.
+Read in order: scope → Backend Health → one action → summary → top causes;
+expand Trends only for non-zero rejects and Records only after narrowing.
 
 **Drilldown:** canonical navigation bus `0. Control Plane`, `1. Overview`,
-`2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`; DQ
+`2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`,
+`6. Alerts & SLO`; DQ
 panels `Track: Silver Filter Rejects in Range`, `Inspect: Top Silver Reject
 Reasons (Pareto)`, and `Inspect: Top Silver Reject Fields` now hand off
 directly into scoped Explorer views. Table row links внутри Explorer дают
@@ -1274,7 +1299,7 @@ plus primary `$provider`. Health-check counters и histograms в текущем
 context/identity/evidence shell.
 
 **Drilldown:** canonical navigation bus `0. Control Plane`, `1. Overview`,
-`2. Runtime`, `4. Data Quality`, `5. Workflow`, `Explore Logs`,
+`2. Runtime`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO`, `Explore Logs`,
 `Explore Traces`, `Silver Reject Explorer`. Sticky shortcuts в navigation panel
 не заменяют canonical provider triage flow; correlation по-прежнему идёт через
 Runtime/Data Quality или runbook links без дублирования dashboard handoffs.
@@ -1299,8 +1324,8 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 - **Primary question:** где runtime теряет время, падает, копит backlog или даёт warning/error signals
 - **Variables:** shared `$workflow`, `$pipeline`, `$run_type`, `$run_id` plus bounded `$stage`
 - **Forbidden Prometheus labels:** `run_id`, `quarantine_run_id`, `payload_hash`, `manifest_id`, `execution_fingerprint`, `record_id`
-- **Top links:** navigation bus `0. Control Plane`, `1. Overview`, `3. Provider Health`,
-  `4. Data Quality`, `5. Workflow`, `Explore Logs`, `Explore Traces`
+- **Top links:** navigation bus `0..6`, then `Silver Reject Explorer`,
+  `Explore Logs`, `Explore Traces`; current Runtime stays disabled
 - **Known blocked panels:** `Retry vs Failure` и `Batch Size Distribution`
   сознательно не shipped, потому что в текущем metric surface нет подтверждённых
   bounded runtime metrics для этих решений
@@ -1310,14 +1335,14 @@ collapsed row `Tracing-only Log Hygiene (requires optional tracing profile)`.
 | Панель | Query family | Unit | Threshold |
 | --- | --- | --- | --- |
 | `First Action` | text CTA | n/a | n/a |
-| `Monitor Runtime Current Status` | `bioetl_runtime_current_status_trusted{pipeline=~"$pipeline",run_type=~"$run_type"}` | status | `0=OK`, `1=WARN`, `2=CRIT`, `null=UNKNOWN`; the recording rule applies telemetry trust-gate and workflow alias projection before dashboard filtering |
-| `Monitor Runtime Telemetry Gap` | `bioetl_runtime_trust_gap_status_10m` | status | `0=SCRAPING/RULES OK`, `1=SCRAPE/RULE GAP`, `>=2=SCRAPE+RULE GAP`, `null=UNKNOWN` |
+| `Runtime Status` | `bioetl_runtime_current_status_trusted{pipeline=~"$pipeline",run_type=~"$run_type"}` | status | `0=OK`, `1=WARN`, `2=CRIT`, `3=INCOMPLETE`, `null=UNKNOWN`; a trust gap forces INCOMPLETE before dashboard filtering |
+| `Runtime Telemetry Gap` | `bioetl_runtime_trust_gap_status_10m` | status | `0=SCRAPING/RULES OK`, `1=SCRAPE/RULE GAP`, `>=2=SCRAPE+RULE GAP`, `null=UNKNOWN` |
 | `Monitor Runtime Blockers` | `bioetl_runtime_current_blocker_reason_scoped{pipeline=~"$pipeline",run_type=~"$run_type"}` anchored by `bioetl_runtime_current_status_trusted == 0` | count | red `>=1`; `0` only when current status is explicitly OK; `null=UNKNOWN` |
-| `Inspect Top Runtime Blockers` | `topk(3, bioetl_runtime_current_blocker_reason_scoped{pipeline=~"$pipeline",run_type=~"$run_type"} > 0)` | table | reason/severity/action labels |
+| `Runtime Blockers` | `topk(3, bioetl_runtime_current_blocker_reason_scoped{pipeline=~"$pipeline",run_type=~"$run_type"} > 0)` | table | reason/severity/action labels |
 
-Range and localization evidence (`Monitor Failed Runs`,
-`Monitor Runtime Error Rate`, latency, records by stage, logs/traces) lives
-below the current-cause row or inside expanded rows. `Monitor Worst Stage Lag`
+Range and localization evidence (`Failed Runs`,
+`Runtime Error Rate`, latency, records by stage, logs/traces) lives
+below the current-cause row or inside collapsed rows. `Worst Stage Lag`
 is colocated with the compact evidence row as a selected-range risk marker; it
 is not a current status input.
 `Status` and `Runtime Status` consume `bioetl_runtime_current_status_trusted`;
@@ -1325,10 +1350,10 @@ that recording rule applies the runtime telemetry trust gate before dashboard
 cards can show green OK. Selected-range zero cards in the
 compact evidence row use neutral stat coloring so `0` supports investigation
 without becoming a second green health verdict.
-`Inspect Active Runtime Blocker Detail` is an expanded `Detect` drilldown, not
+`Inspect Active Runtime Blocker Detail` is a collapsed `Detect` drilldown, not
 first-screen guidance. This evidence supports investigation but does not replace
-the canonical current status recording rule. `Monitor Runtime Error Rate`,
-`Monitor Runtime Blockers`, `Monitor Worst Stage Lag`, and
+the canonical current status recording rule. `Runtime Error Rate`,
+`Monitor Runtime Blockers`, `Worst Stage Lag`, and
 `Monitor Memory Pressure Active` preserve `UNKNOWN` when telemetry is absent
 instead of coercing missing metrics to `0`.
 `Monitor Failed Runs` and `Monitor No-Records Runs` show `0` only when
@@ -1397,8 +1422,9 @@ requires `bioetl_provider_current_status`. Missing anchor telemetry renders
   through this baseline query when Promtail/Loki wiring is healthy.
 - Tempo handoff остаётся bounded по `pipeline`; forensic IDs и include-all
   `run_type` selectors в runtime dashboard не протаскиваются. Shipped trace links now open the explicit
-search-first Explore Traces route with bounded initial window `now-150m..now`,
-`var-ds=tempo`, and safe `var-groupBy=resource.service.name`, so Tempo metrics
+search-first Explore Traces route with the active dashboard range passed as
+`${__from}` / `${__to}`, `var-ds=tempo`, and safe
+`var-groupBy=resource.service.name`, so Tempo metrics
 queries stay under the local limit and missing trace data stays an empty Tempo
 search rather than failing in a generated breakdown query. Empty trace
 drilldowns are legitimate when the runtime used `NoOpTracing` or when no
@@ -1579,6 +1605,9 @@ curl -u admin:<password> http://localhost:3000/api/frontend/settings
 UV_CACHE_DIR=.cache/uv uv run python -m scripts.ops rerender-grafana \
   --uids bioetl-overview-v2 \
   --fallback none \
+  --theme light \
+  --width 1024 \
+  --height 2200 \
   --timeout-seconds 90 \
   --output-dir /tmp/bioetl-grafana-render-smoke
 
@@ -1595,6 +1624,10 @@ bioetl-grafana-renderer` и target `grafana-image-renderer` в Prometheus. Дл�
 и в параметр Grafana render API `timeout`, поэтому тяжелые dashboard pages не
 обрываются на коротком renderer-side smoke-test таймауте при полностью рабочем
 renderer sidecar.
+
+For closure/full UX evidence force `--fallback playwright` and run the complete
+dark/light × 1600/1024 matrix. `render-manifest.json` must show requested and
+actual theme/viewport parity plus `terminal_state_validation.status=ok`.
 
 **Причина 4: Метрики отключены в приложении.**
 
@@ -2046,8 +2079,8 @@ sum(rate(bioetl_circuit_breaker_success_total{adapter="chembl"}[5m]))
   counters, failure/degraded trends, retry exhaustion, and compact optional
   telemetry for per-provider p95 latency, adapter endpoint latency, HTTP error
   volume, rate-limiter wait/tokens, and circuit-breaker state/trips. Optional
-  panels stay expanded by dashboard contract but use a compact two-row layout so
-  empty samples do not look like a large empty tail.
+  panels stay collapsed under `Selected Provider Detail` so empty samples do not
+  look like a large empty tail.
 
 Ключевые operator semantics:
 
@@ -2449,14 +2482,14 @@ ______________________________________________________________________
 
 | Dashboard                 | UID                             | JSON version | Panels / rows | Refresh | Time Range | Primary surface | Purpose |
 | ------------------------- | ------------------------------- | ------------ | ------------- | ------- | ---------- | --------------- | ------- |
-| 0. Control Plane          | `bioetl-control-plane-v1`       | 2            | 50 / 5        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Replay/resume safety, telemetry gap detection, terminal ledger evidence, GLOBAL read diagnostics, missing-signal markers |
-| 1. Overview               | `bioetl-overview-v2`            | 1            | 20 / 3        | 30s     | 12h        | Prometheus      | L0 broken/degraded answer and operational handoff |
-| 2. Runtime                | `bioetl-runtime`                | 2            | 34 / 4        | 30s     | 12h        | Prometheus + Quarantine Explorer identity + optional Loki/Tempo links | L2 runtime triage: blockers, latency, backlog, handoffs |
+| 0. Control Plane          | `bioetl-control-plane-v1`       | 2            | 52 / 5        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Evidence-aware replay/resume status plus collapsed incident forensics |
+| 1. Overview               | `bioetl-overview-v2`            | 1            | 21 / 4        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | L0 answer, first-screen alert evidence, deviation-first matrix, collapsed historical detail |
+| 2. Runtime                | `bioetl-runtime`                | 2            | 38 / 4        | 30s     | 12h        | Prometheus + Quarantine Explorer identity + optional Loki/Tempo links | Trust-gated runtime triage with collapsed Detect/Localize/Escalate rows |
 | 3. Provider Health        | `bioetl-provider-health-v2`     | 6            | 28 / 1        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Provider latency, health, retries, failure ratios |
-| 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 33 / 2        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | DQ score, quarantine, freshness, validation failures |
-| 5. Workflow               | `bioetl-workflow-overview`      | 2            | 13 / 1        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Selected-range workflow run and step evidence with explicit scope badges in the shared shell; exact `run_id` populates local HTTP identity/accounting cards while Prometheus panels stay selected-range workflow evidence |
+| 4. Data Quality           | `bioetl-dq-v2`                  | 4            | 34 / 2        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | CURRENT/SELECTED RUN/TIME RANGE scopes; freshness hours SLA 24/72; collapsed forensics |
+| 5. Workflow               | `bioetl-workflow-overview`      | 2            | 15 / 1        | 30s     | 12h        | Prometheus + Quarantine Explorer identity | Neutral zero counts, explicit outcome terminal states, collapsed step detail |
 | 6. Alerts & SLO           | `bioetl-alerts-slo`             | 1            | 7 / 0         | 30s     | 24h        | Prometheus `ALERTS` | First-class firing alert and SLO/SLA pressure triage surface; does not implement alert rules in dashboard queries |
-| Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1001         | 11 / 0        | 1m      | 24h        | Quarantine Explorer API | Record-level browsing and action handoff for Silver rejects; bounded forensic pipeline/run_type/reason/field/quarantine_run_id/payload_hash scope and no shared workflow/run_id shell ownership |
+| Silver Reject Explorer | `bioetl-silver-reject-explorer` | 1001         | 14 / 2        | 1m      | 24h        | Quarantine Explorer API | Backend-health-gated progressive sequence with collapsed trends and narrowed record detail |
 
 ______________________________________________________________________
 

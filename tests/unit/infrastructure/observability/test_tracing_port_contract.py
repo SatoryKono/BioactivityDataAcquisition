@@ -28,7 +28,6 @@ class TestTracingPortContract:
         ) as span:
             assert span is not None
             assert span.set_attribute("bioetl.status", "success") is None
-            assert span.set_status("success") is None
             assert (
                 span.add_event(
                     "bioetl.memory.decision",

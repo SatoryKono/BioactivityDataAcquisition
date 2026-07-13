@@ -23,6 +23,10 @@ pytestmark = [
 
 ROOT = Path(__file__).resolve().parents[6]
 HELPER = ROOT / "scripts" / "ai" / "mcp" / "support" / "token_validation.sh"
+NEO4J_WRAPPERS = [
+    ROOT / "scripts" / "ai" / "mcp" / "mcp_neo4j_cypher_wrapper.sh",
+    ROOT / "scripts" / "ai" / "mcp" / "mcp_neo4j_memory_wrapper.sh",
+]
 
 
 def _run_bash(
@@ -95,3 +99,35 @@ def test_validate_only_exits_successfully() -> None:
 
     assert result.returncode == 0
     assert "[OK] demo MCP wrapper validation completed" in result.stdout
+
+
+@pytest.mark.parametrize("wrapper", NEO4J_WRAPPERS)
+def test_neo4j_wrapper_validate_only_uses_local_defaults_without_auth(
+    wrapper: Path,
+) -> None:
+    merged_env = {
+        key: value
+        for key, value in os.environ.items()
+        if not key.startswith("NEO4J_")
+        and not key.endswith("TOKEN")
+        and "API_KEY" not in key
+        and "PASSWORD" not in key
+    }
+    merged_env.update(
+        {
+            "BIOETL_MCP_VALIDATE_ONLY": "1",
+            "BIOETL_REPO_ENV_LOADED": "1",
+        }
+    )
+
+    result = subprocess.run(
+        ["bash", str(wrapper)],
+        cwd=ROOT,
+        env=merged_env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert "MCP wrapper validation completed" in result.stdout

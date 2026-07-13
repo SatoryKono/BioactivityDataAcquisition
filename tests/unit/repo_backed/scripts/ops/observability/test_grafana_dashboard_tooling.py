@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
@@ -41,7 +43,18 @@ def test_rerender_config_uses_env_defaults(monkeypatch: Any, tmp_path: Path) -> 
     monkeypatch.setenv("GRAFANA_SERVICE_ACCOUNT_TOKEN", "grafana-token")
 
     config = rerender_subject._parse_args(
-        ["--output-dir", str(tmp_path), "--uids", "bioetl-dq-v2"]
+        [
+            "--output-dir",
+            str(tmp_path),
+            "--width",
+            "1024",
+            "--height",
+            "1800",
+            "--theme",
+            "light",
+            "--uids",
+            "bioetl-dq-v2",
+        ]
     )
 
     assert config.base_url == "http://grafana.local:3000"
@@ -51,6 +64,13 @@ def test_rerender_config_uses_env_defaults(monkeypatch: Any, tmp_path: Path) -> 
     assert config.output_dir == tmp_path
     assert config.selected_uids == ("bioetl-dq-v2",)
     assert config.fallback == "auto"
+    assert config.width == 1024
+    assert config.height == 1800
+    assert config.theme == "light"
+    assert config.expand_collapsed_rows is True
+
+    collapsed_config = rerender_subject._parse_args(["--no-expand-collapsed-rows"])
+    assert collapsed_config.expand_collapsed_rows is False
 
 
 def test_rerender_load_dashboards_filters_and_sorts(
@@ -178,6 +198,9 @@ def test_rerender_api_forwards_timeout_to_grafana_render_endpoint(
     assert target.read_bytes() == b"png"
     assert captured["timeout_seconds"] == 123.0
     assert query["timeout"] == ["123"]
+    assert query["width"] == ["1600"]
+    assert query["height"] == ["2200"]
+    assert query["theme"] == ["dark"]
     assert query["var-run_id"] == ["run-123"]
     assert query["var-quarantine_run_id"] == ["run-123"]
 
@@ -284,6 +307,11 @@ def test_rerender_manifest_records_engine_and_run_scope(tmp_path: Path) -> None:
 
     manifest = json.loads((tmp_path / "render-manifest.json").read_text())
     assert manifest["engine"] == "grafana-render-api"
+    assert manifest["requested"] == {
+        "viewport": {"width": 1600, "height": 2200},
+        "theme": "dark",
+    }
+    assert manifest["terminal_state_validation"]["status"] == "not-checked"
     assert manifest["scope"] == {
         "workflow": "chembl_target",
         "pipeline": "chembl_target",
@@ -448,6 +476,9 @@ def test_rerender_builds_playwright_env(tmp_path: Path) -> None:
     assert env["GRAFANA_USERNAME"] == "admin"
     assert env["GRAFANA_PASSWORD"] == "changeme"
     assert env["GRAFANA_SCREENSHOT_OUTPUT_DIR"] == str(tmp_path)
+    assert env["GRAFANA_SCREENSHOT_WIDTH"] == "1600"
+    assert env["GRAFANA_SCREENSHOT_HEIGHT"] == "2200"
+    assert env["GRAFANA_SCREENSHOT_THEME"] == "dark"
     assert env["GRAFANA_SCREENSHOT_TIMEOUT_MS"] == "45000"
     assert env["GRAFANA_SCREENSHOT_CAPTURE_TIMEOUT_MS"] == "180000"
     assert env["GRAFANA_SCREENSHOT_SETTLE_MS"] == "12000"
@@ -601,6 +632,81 @@ def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() 
     assert "await page.close();" in script
     assert "GRAFANA_SCREENSHOT_EXPAND_COLLAPSED_ROWS" in script
     assert "--expand-collapsed-rows" in script
+    assert "requiredNonRowPanels" in script
+    assert "validateDashboardTerminalStates" in script
+    assert "terminalStateValidation" in script
+    assert "requiredTerminalPanelIds" in script
+    assert "bioetl-silver-reject-explorer" in script
+    assert 'classification: "contradictory"' in script
+    assert 'classification: "valid-empty"' in script
+    assert "screenshotEvidence" in script
+    assert "sha256" in script
+
+
+def test_playwright_terminal_state_extraction_uses_panel_local_content() -> None:
+    script = Path(
+        "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs"
+    ).read_text(encoding="utf-8")
+
+    assert '[data-griditem-key="grid-item-${panelId}"]' in script
+    assert '[data-testid="data-testid panel content"]' in script
+    assert '[class*="panel-loading-bar"]' in script
+    assert "hasVisibleMarker(surface, loadingSelector, true)" in script
+    assert "hasVisibleMarker(surface, errorSelector, true)" in script
+    assert "hasVisibleMarker(content.element, visualSelector)" in script
+    assert "cloneNode(true)" not in script
+    assert "header.remove()" not in script
+
+
+def test_playwright_terminal_classifier_uses_leading_state_tokens() -> None:
+    node_path = rerender_subject._resolve_node_executable()
+    if node_path is None:
+        pytest.skip("Node.js is unavailable")
+    script_path = Path(
+        "scripts/ops/observability/grafana/rerender_grafana_screenshots.cjs"
+    ).resolve()
+    program = """
+const { classifyPanelTerminalEvidence: classify } = require(process.argv[1]);
+const cases = [
+  ["ERROR — no backend health payload; blank or loading is forbidden", "explicit-error"],
+  ["VALID EMPTY — if an error marker is present, treat it as QUERY/DATASOURCE ERROR", "valid-empty"],
+  ["UNKNOWN", "incomplete"],
+  ["Not resolved — no identity rows", "incomplete"],
+  ["TELEMETRY ABSENT · check scrape", "telemetry-absent"],
+  ["NO MATCHING SCOPE · reset filters", "not-applicable"],
+];
+for (const [bodyText, expected] of cases) {
+  const actual = classify({
+    type: "stat",
+    bodyText,
+    hasLoadingMarker: false,
+    hasErrorIcon: false,
+    hasVisualEvidence: false,
+  }).classification;
+  if (actual !== expected) throw new Error(`${bodyText}: ${actual} != ${expected}`);
+}
+const contradictory = classify({
+  type: "table",
+  bodyText: cases[1][0],
+  hasLoadingMarker: false,
+  hasErrorIcon: true,
+  hasVisualEvidence: false,
+}).classification;
+if (contradictory !== "contradictory") throw new Error(contradictory);
+"""
+    env = os.environ.copy()
+    rerender_subject._apply_playwright_runtime_env(env)
+
+    result = subprocess.run(
+        [node_path, "-e", program, str(script_path)],
+        check=False,
+        capture_output=True,
+        text=True,
+        cwd=Path.cwd(),
+        env=env,
+    )
+
+    assert result.returncode == 0, result.stderr
 
 
 def test_rerender_playwright_fallback_streams_output_from_repo_root(
@@ -641,20 +747,33 @@ def test_rerender_playwright_fallback_streams_output_from_repo_root(
         fallback="auto",
     )
 
-    result = rerender_subject._run_playwright_fallback(config)
+    result = rerender_subject._run_playwright_process(config)
 
     assert result == 0
     assert captured["command"] == [
         "/usr/bin/node",
         str(script_path),
+        "--width",
+        "1600",
+        "--height",
+        "2200",
+        "--theme",
+        "dark",
         "--scope-query",
-        "from=now-12h&to=now&timezone=UTC",
+        "from=now-12h&to=now&timezone=UTC&theme=dark",
     ]
     assert captured["kwargs"]["check"] is False
     assert captured["kwargs"]["cwd"] == str(tmp_path)
     assert "capture_output" not in captured["kwargs"]
     assert captured["kwargs"]["env"]["GRAFANA_BASE_URL"] == "http://localhost:3000"
     assert captured["kwargs"]["env"]["GRAFANA_SCREENSHOT_UIDS"] == "bioetl-dq-v2"
+    assert (
+        captured["kwargs"]["env"]["GRAFANA_SCREENSHOT_EXPAND_COLLAPSED_ROWS"] == "true"
+    )
+    assert captured["kwargs"]["timeout"] == (
+        rerender_subject._playwright_process_timeout_seconds(config)
+    )
+    assert captured["kwargs"]["timeout"] > 180.0
 
 
 def test_rerender_playwright_fallback_splits_and_merges_multi_dashboard_runs(
@@ -696,16 +815,38 @@ def test_rerender_playwright_fallback_splits_and_merges_multi_dashboard_runs(
         assert isinstance(env, dict)
         uid = str(env["GRAFANA_SCREENSHOT_UIDS"])
         calls.append(uid)
+        png = (
+            b"\x89PNG\r\n\x1a\n"
+            + b"\x00\x00\x00\rIHDR"
+            + (1600).to_bytes(4, "big")
+            + (2200).to_bytes(4, "big")
+        )
+        (tmp_path / f"{uid}.png").write_bytes(png)
         (tmp_path / "render-manifest.json").write_text(
             json.dumps(
                 {
                     "engine": "playwright",
+                    "terminal_state_validation": {"status": "ok"},
                     "dashboards": [
                         {
                             "uid": uid,
                             "title": uid,
                             "file": f"{uid}.png",
                             "renderedPanelCount": 1,
+                            "renderStatus": "rendered",
+                            "actualViewport": {"width": 1600, "height": 2200},
+                            "actualTheme": "dark",
+                            "screenshotEvidence": {
+                                "file": f"{uid}.png",
+                                "bytes": len(png),
+                                "width": 1600,
+                                "height": 2200,
+                                "sha256": "test-digest",
+                            },
+                            "terminalStateValidation": {
+                                "status": "ok",
+                                "panelStates": [{"id": 1, "classification": "healthy"}],
+                            },
                         }
                     ],
                 }
@@ -736,6 +877,11 @@ def test_rerender_playwright_fallback_splits_and_merges_multi_dashboard_runs(
     merged = json.loads((tmp_path / "render-manifest.json").read_text())
     assert merged["engine"] == "playwright"
     assert [item["uid"] for item in merged["dashboards"]] == calls
+    assert merged["requested"] == {
+        "viewport": {"width": 1600, "height": 2200},
+        "theme": "dark",
+    }
+    assert merged["terminal_state_validation"]["status"] == "ok"
 
 
 def test_rerender_resolves_node_from_repo_local_bin(
@@ -1272,7 +1418,9 @@ def test_runtime_log_hygiene_trend_uses_aggregated_loki_range_queries() -> None:
                 result.extend(walk_panels(nested))
         return result
 
-    panel = next(panel for panel in walk_panels(dashboard["panels"]) if panel.get("id") == 258)
+    panel = next(
+        panel for panel in walk_panels(dashboard["panels"]) if panel.get("id") == 258
+    )
     expressions = {target["refId"]: target["expr"] for target in panel["targets"]}
 
     assert expressions["A"].startswith("sum(count_over_time(")

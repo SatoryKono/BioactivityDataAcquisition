@@ -1,4 +1,5 @@
 const fs = require("node:fs");
+const crypto = require("node:crypto");
 const path = require("node:path");
 
 const { chromium, request } = require("playwright");
@@ -13,7 +14,11 @@ function parseArgs(argv) {
       process.env.GRAFANA_SCREENSHOT_OUTPUT_DIR ||
         path.join("reports", "observability", "grafana", "screenshots"),
     ),
-    viewport: { width: 1600, height: 2200 },
+    viewport: {
+      width: Number.parseInt(process.env.GRAFANA_SCREENSHOT_WIDTH || "1600", 10),
+      height: Number.parseInt(process.env.GRAFANA_SCREENSHOT_HEIGHT || "2200", 10),
+    },
+    theme: (process.env.GRAFANA_SCREENSHOT_THEME || "dark").trim().toLowerCase(),
     timeoutMs: Number.parseInt(
       process.env.GRAFANA_SCREENSHOT_TIMEOUT_MS || "90000",
       10,
@@ -33,8 +38,8 @@ function parseArgs(argv) {
         .filter(Boolean),
     ),
     scopeQuery: process.env.GRAFANA_SCREENSHOT_SCOPE_QUERY || "",
-    expandCollapsedRows: /^(1|true|yes)$/i.test(
-      process.env.GRAFANA_SCREENSHOT_EXPAND_COLLAPSED_ROWS || "",
+    expandCollapsedRows: !/^(0|false|no)$/i.test(
+      process.env.GRAFANA_SCREENSHOT_EXPAND_COLLAPSED_ROWS || "true",
     ),
   };
   for (let index = 0; index < argv.length; index += 1) {
@@ -52,6 +57,15 @@ function parseArgs(argv) {
     } else if (arg === "--output-dir" && next) {
       config.outputDir = path.resolve(next);
       index += 1;
+    } else if (arg === "--width" && next) {
+      config.viewport.width = Number.parseInt(next, 10);
+      index += 1;
+    } else if (arg === "--height" && next) {
+      config.viewport.height = Number.parseInt(next, 10);
+      index += 1;
+    } else if (arg === "--theme" && next) {
+      config.theme = next.trim().toLowerCase();
+      index += 1;
     } else if (arg === "--timeout-ms" && next) {
       config.timeoutMs = Number.parseInt(next, 10);
       index += 1;
@@ -68,10 +82,21 @@ function parseArgs(argv) {
       index += 1;
     } else if (arg === "--expand-collapsed-rows") {
       config.expandCollapsedRows = true;
+    } else if (arg === "--no-expand-collapsed-rows") {
+      config.expandCollapsedRows = false;
     }
   }
   if (!Number.isFinite(config.captureTimeoutMs) || config.captureTimeoutMs <= 0) {
     config.captureTimeoutMs = Math.max(config.timeoutMs, 180000);
+  }
+  if (!Number.isInteger(config.viewport.width) || config.viewport.width <= 0) {
+    throw new Error("Playwright screenshot width must be a positive integer");
+  }
+  if (!Number.isInteger(config.viewport.height) || config.viewport.height <= 0) {
+    throw new Error("Playwright screenshot height must be a positive integer");
+  }
+  if (!new Set(["dark", "light"]).has(config.theme)) {
+    throw new Error("Playwright screenshot theme must be 'dark' or 'light'");
   }
   return config;
 }
@@ -103,6 +128,120 @@ const SCROLL_CONTAINER_SELECTORS = [
   "main",
 ];
 const MAX_CAPTURE_VIEWPORT_HEIGHT = 12000;
+const TERMINAL_POLL_INTERVAL_MS = 500;
+const TERMINAL_CLASSIFICATIONS = new Set([
+  "healthy",
+  "explicit-error",
+  "valid-empty",
+  "telemetry-absent",
+  "not-applicable",
+  "incomplete",
+  "loading",
+  "blank",
+  "contradictory",
+]);
+
+function classifyPanelTerminalEvidence(evidence) {
+  const bodyText = String(evidence.bodyText || "").replace(/\s+/g, " ").trim();
+  const supportsQueryTerminalState = evidence.type !== "text";
+  const hasLoadingMarker = evidence.hasLoadingMarker === true;
+  const hasErrorIcon = evidence.hasErrorIcon === true;
+  const hasVisualEvidence = evidence.hasVisualEvidence === true;
+
+  if (hasLoadingMarker) {
+    return {
+      classification: "loading",
+      reason: "panel still exposes a visible loading marker",
+    };
+  }
+  if (!supportsQueryTerminalState) {
+    return bodyText || hasVisualEvidence
+      ? {
+          classification: "healthy",
+          reason: "static operator copy reached a rendered state",
+        }
+      : {
+          classification: "blank",
+          reason: "text panel body has no visible content",
+        };
+  }
+
+  const leadingError = /^(?:ERROR|QUERY ERROR|DATASOURCE ERROR|REQUEST ERROR)\b/i.test(
+    bodyText,
+  );
+  const leadingValidEmpty = /^(?:VALID EMPTY|EMPTY RESULT)\b/i.test(bodyText);
+  const leadingNoMatch = /^(?:NO MATCHING(?: SCOPE| DATA| ROWS?)?|NOT APPLICABLE|N\/A)\b/i.test(
+    bodyText,
+  );
+  const leadingTelemetryAbsent = /^(?:TELEMETRY ABSENT|TELEMETRY MISSING)\b/i.test(
+    bodyText,
+  );
+  const leadingIncomplete = /^(?:UNKNOWN|INCOMPLETE|NOT RESOLVED|UNRESOLVED)\b/i.test(
+    bodyText,
+  );
+  const leadingLoading = /^(?:LOADING|PENDING QUERY|WAITING FOR DATA)\b/i.test(
+    bodyText,
+  );
+  const leadingGenericNoData = /^(?:NO DATA|NO\b|NOT FOUND\b)/i.test(bodyText);
+
+  if (leadingError) {
+    return {
+      classification: "explicit-error",
+      reason: "panel exposes an explicit terminal query or datasource error",
+    };
+  }
+  if (leadingValidEmpty || leadingNoMatch) {
+    if (hasErrorIcon) {
+      return {
+        classification: "contradictory",
+        reason: "panel combines an error marker with a non-error empty state",
+      };
+    }
+    return leadingValidEmpty
+      ? {
+          classification: "valid-empty",
+          reason: "panel explicitly identifies a successful empty result",
+        }
+      : {
+          classification: "not-applicable",
+          reason: "panel explicitly identifies an unmatched or inapplicable scope",
+        };
+  }
+  if (hasErrorIcon) {
+    return {
+      classification: "explicit-error",
+      reason: "panel exposes a visible terminal error marker",
+    };
+  }
+  if (leadingLoading) {
+    return {
+      classification: "loading",
+      reason: "panel copy still identifies a loading state",
+    };
+  }
+  if (leadingTelemetryAbsent) {
+    return {
+      classification: "telemetry-absent",
+      reason: "panel explicitly identifies missing telemetry",
+    };
+  }
+  if (leadingIncomplete || leadingGenericNoData) {
+    return {
+      classification: "incomplete",
+      reason: "panel explicitly identifies incomplete or unresolved evidence",
+    };
+  }
+  if (!bodyText && !hasVisualEvidence) {
+    return {
+      classification: "blank",
+      reason: "panel body has no visible text or visual evidence",
+    };
+  }
+  return {
+    classification: "healthy",
+    reason: "panel body reached a visible terminal rendered state",
+  };
+}
 
 async function ensureOutputDir() {
   await fs.promises.mkdir(CONFIG.outputDir, { recursive: true });
@@ -122,6 +261,43 @@ function grafanaSlugify(title) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function pngEvidence(buffer) {
+  const signature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+  if (buffer.length < 24 || !buffer.subarray(0, 8).equals(signature)) {
+    throw new Error("captured screenshot is not a valid PNG with an IHDR header");
+  }
+  return {
+    bytes: buffer.length,
+    sha256: crypto.createHash("sha256").update(buffer).digest("hex"),
+    width: buffer.readUInt32BE(16),
+    height: buffer.readUInt32BE(20),
+  };
+}
+
+function requiredNonRowPanels(panels, includeCollapsedRows) {
+  const required = [];
+  for (const panel of panels) {
+    if (!panel || typeof panel !== "object") {
+      continue;
+    }
+    if (panel.type === "row") {
+      if (includeCollapsedRows && Array.isArray(panel.panels)) {
+        required.push(...requiredNonRowPanels(panel.panels, true));
+      }
+      continue;
+    }
+    if (!Number.isInteger(panel.id)) {
+      continue;
+    }
+    required.push({
+      id: panel.id,
+      title: typeof panel.title === "string" ? panel.title.trim() : "",
+      type: typeof panel.type === "string" ? panel.type : "unknown",
+    });
+  }
+  return required;
 }
 
 async function createAuthenticatedApiContext() {
@@ -191,11 +367,23 @@ function listDashboardsFromRepo() {
     }
     const slug = grafanaSlugify(title) || uid;
     const panels = Array.isArray(payload.panels) ? payload.panels : [];
+    const requiredPanels = requiredNonRowPanels(panels, CONFIG.expandCollapsedRows);
+    if (
+      uid === "bioetl-silver-reject-explorer" &&
+      !requiredPanels.some((panel) => panel.id === 13)
+    ) {
+      throw new Error(
+        "Silver Reject Explorer must expose required Backend Health panel 13",
+      );
+    }
     dashboards.push({
       uid,
       title,
       url: `/d/${uid}/${slug}`,
       file: `${uid}.png`,
+      requiredPanels,
+      requiredTerminalPanelIds:
+        uid === "bioetl-silver-reject-explorer" ? [13] : [],
       collapsedRowTitles: CONFIG.expandCollapsedRows
         ? panels
             .filter((panel) => panel && panel.type === "row" && panel.collapsed === true)
@@ -260,8 +448,10 @@ async function expandCollapsedRows(page, dashboard, index, total) {
   console.log(
     `[${index}/${total}] expanded ${expanded}/${titles.length} collapsed row(s) for ${dashboard.uid}`,
   );
-  if (expanded === 0) {
-    return;
+  if (expanded !== titles.length) {
+    throw new Error(
+      `Collapsed-row expansion failed for ${dashboard.uid}: expanded ${expanded}/${titles.length}`,
+    );
   }
   await page.waitForLoadState("networkidle", { timeout: CONFIG.timeoutMs }).catch(() => {
     console.warn(
@@ -282,6 +472,324 @@ async function countRenderedPanels(page) {
     }
   }
   return { selector: "", count: 0 };
+}
+
+async function detectActualTheme(page) {
+  return page.evaluate(() => {
+    const root = document.documentElement;
+    const body = document.body;
+    const tokens = [
+      root ? root.className : "",
+      body ? body.className : "",
+      root && root.dataset ? root.dataset.theme || "" : "",
+      body && body.dataset ? body.dataset.theme || "" : "",
+    ]
+      .join(" ")
+      .toLowerCase();
+    if (/(^|[\s_-])dark($|[\s_-])/.test(tokens)) {
+      return "dark";
+    }
+    if (/(^|[\s_-])light($|[\s_-])/.test(tokens)) {
+      return "light";
+    }
+
+    const scheme = root ? getComputedStyle(root).colorScheme.toLowerCase() : "";
+    if (scheme.includes("dark") && !scheme.includes("light")) {
+      return "dark";
+    }
+    if (scheme.includes("light") && !scheme.includes("dark")) {
+      return "light";
+    }
+
+    for (const element of [body, root]) {
+      if (!element) {
+        continue;
+      }
+      const match = getComputedStyle(element).backgroundColor.match(
+        /rgba?\(\s*(\d+)\D+(\d+)\D+(\d+)(?:\D+([\d.]+))?/,
+      );
+      if (!match || (match[4] !== undefined && Number.parseFloat(match[4]) === 0)) {
+        continue;
+      }
+      const red = Number.parseInt(match[1], 10);
+      const green = Number.parseInt(match[2], 10);
+      const blue = Number.parseInt(match[3], 10);
+      const luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+      return luminance < 128 ? "dark" : "light";
+    }
+    return "unknown";
+  });
+}
+
+async function collectPanelTerminalStates(page, dashboard) {
+  const states = await page.evaluate(({ requiredPanels }) => {
+    const normalize = (value) => String(value || "").replace(/\s+/g, " ").trim();
+    const panelContainer = (panelId, panelTitle) => {
+      const selectors = [
+        `[data-panelid="${panelId}"]`,
+        `[data-viz-panel-key="panel-${panelId}"]`,
+        `[data-griditem-key="grid-item-${panelId}"]`,
+        `[data-griditem-key="panel-${panelId}"]`,
+        `[data-griditem-key="${panelId}"]`,
+        `[data-testid="panel-${panelId}"]`,
+      ];
+      for (const selector of selectors) {
+        const element = document.querySelector(selector);
+        if (element) {
+          return { element, selector };
+        }
+      }
+      if (panelTitle) {
+        const headerSelectors = [
+          '[data-testid^="data-testid Panel header"]',
+          '[data-testid*="Panel header"]',
+          '[aria-label="Panel header"]',
+          '[aria-label*="Panel header"]',
+          ".panel-title",
+        ];
+        for (const headerSelector of headerSelectors) {
+          for (const header of document.querySelectorAll(headerSelector)) {
+            const headerText = normalize(
+              [
+                header.innerText || header.textContent || "",
+                header.getAttribute("data-testid") || "",
+                header.getAttribute("aria-label") || "",
+                header.getAttribute("title") || "",
+              ].join(" "),
+            );
+            if (!headerText.includes(panelTitle)) {
+              continue;
+            }
+            const container = header.closest(
+              '[data-panelid],[data-viz-panel-key],[data-griditem-key],.react-grid-item',
+            );
+            if (container) {
+              return { element: container, selector: `${headerSelector} -> closest` };
+            }
+          }
+        }
+      }
+      return { element: null, selector: "" };
+    };
+    const panelSurface = (element) =>
+      element.matches('[data-testid^="data-testid Panel header"]')
+        ? element
+        : element.querySelector('[data-testid^="data-testid Panel header"]') ||
+          element;
+    const panelContent = (element) => {
+      const selectors = [
+        '[data-testid="data-testid panel content"]',
+        '[data-testid="panel content"]',
+        '[data-testid$="panel content"]',
+        ".panel-content",
+      ];
+      for (const selector of selectors) {
+        const content = element.querySelector(selector);
+        if (content) {
+          return { element: content, selector };
+        }
+      }
+      return { element: null, selector: "" };
+    };
+    const headerContentSelectors = [
+      '[data-testid="header-container"]',
+      '[data-testid="title-items-container"]',
+      ".panel-title-container",
+      ".panel-header",
+      ".panel-title",
+    ];
+    const headerContentSelector = headerContentSelectors.join(",");
+    const loadingSelector = [
+      '[aria-label*="loading" i]',
+      '[data-testid*="loading" i]',
+      '[aria-busy="true"]',
+      ".panel-loading",
+      '[class*="panel-loading-bar"]',
+    ].join(",");
+    const errorSelector = [
+      '[aria-label="error" i]',
+      '[aria-label^="error:" i]',
+      '[data-testid*="panel-alert" i]',
+      '[data-testid*="query-error" i]',
+      '[data-testid*="datasource-error" i]',
+      ".panel-alert-error",
+      '[class*="panel-alert"]',
+    ].join(",");
+    const visualSelector = [
+      "canvas",
+      "svg",
+      "img",
+      "table",
+      '[role="table"]',
+      '[role="grid"]',
+    ].join(",");
+    const availablePanelHeaders = Array.from(
+      document.querySelectorAll('[data-testid*="Panel header"],[aria-label*="Panel header"]'),
+    )
+      .slice(0, 5)
+      .map((header) =>
+        normalize(
+          [
+            header.innerText || header.textContent || "",
+            header.getAttribute("data-testid") || "",
+            header.getAttribute("aria-label") || "",
+          ].join(" "),
+        ),
+      );
+
+    return requiredPanels.map((panel) => {
+      const located = panelContainer(panel.id, panel.title);
+      if (!located.element) {
+        return {
+          ...panel,
+          selector: "",
+          bodyText: "",
+          hasLoadingMarker: true,
+          hasErrorIcon: false,
+          hasVisualEvidence: false,
+          missingReason: `panel container is not rendered yet; visible headers=${JSON.stringify(availablePanelHeaders)}`,
+        };
+      }
+
+      const surface = panelSurface(located.element);
+      const content = panelContent(surface);
+      const bodyText = content.element
+        ? normalize(content.element.innerText || content.element.textContent || "")
+        : "";
+      const hasVisibleMarker = (root, selector, excludeHeaderContent = false) =>
+        Array.from(root.querySelectorAll(selector)).some((element) => {
+          if (
+            excludeHeaderContent &&
+            element.closest(headerContentSelector)
+          ) {
+            return false;
+          }
+          const rect = element.getBoundingClientRect();
+          const style = getComputedStyle(element);
+          return (
+            rect.width > 0 &&
+            rect.height > 0 &&
+            style.display !== "none" &&
+            style.visibility !== "hidden" &&
+            style.opacity !== "0"
+          );
+        });
+      const hasLoadingMarker = hasVisibleMarker(surface, loadingSelector, true);
+      const hasErrorIcon = hasVisibleMarker(surface, errorSelector, true);
+      const hasVisualEvidence = content.element
+        ? hasVisibleMarker(content.element, visualSelector)
+        : false;
+
+      return {
+        ...panel,
+        selector: located.selector,
+        contentSelector: content.selector,
+        bodyText: bodyText.slice(0, 500),
+        hasLoadingMarker,
+        hasErrorIcon,
+        hasVisualEvidence,
+      };
+    });
+  }, { requiredPanels: dashboard.requiredPanels });
+
+  const classifiedStates = states.map((state) => {
+    const classification = classifyPanelTerminalEvidence(state);
+    return {
+      ...state,
+      ...classification,
+      reason: state.missingReason || classification.reason,
+    };
+  });
+  for (const state of classifiedStates) {
+    if (!TERMINAL_CLASSIFICATIONS.has(state.classification)) {
+      throw new Error(
+        `Unknown panel terminal classification '${state.classification}' for ${dashboard.uid} panel ${state.id}`,
+      );
+    }
+  }
+  return classifiedStates;
+}
+
+function terminalStateSummary(dashboard, panelStates, status) {
+  const counts = {};
+  for (const state of panelStates) {
+    counts[state.classification] = (counts[state.classification] || 0) + 1;
+  }
+  return {
+    status,
+    checkedPanelCount: panelStates.length,
+    requiredPanelCount: dashboard.requiredPanels.length,
+    requiredTerminalPanelIds: dashboard.requiredTerminalPanelIds,
+    classificationCounts: counts,
+    panelStates,
+  };
+}
+
+async function validateDashboardTerminalStates(page, dashboard, index, total) {
+  const timeoutMs = Math.max(3000, Math.min(CONFIG.timeoutMs, 15000));
+  const deadline = Date.now() + timeoutMs;
+  let panelStates = [];
+
+  while (Date.now() <= deadline) {
+    panelStates = await collectPanelTerminalStates(page, dashboard);
+    const contradiction = panelStates.find(
+      (state) => state.classification === "contradictory",
+    );
+    if (contradiction) {
+      return terminalStateSummary(dashboard, panelStates, "error");
+    }
+    const pending = panelStates.filter((state) =>
+      new Set(["blank", "loading"]).has(state.classification),
+    );
+    if (pending.length === 0) {
+      const requiredTerminalStates = dashboard.requiredTerminalPanelIds.map((panelId) =>
+        panelStates.find((state) => state.id === panelId),
+      );
+      if (
+        requiredTerminalStates.some(
+          (state) =>
+            !state ||
+            !new Set([
+              "healthy",
+              "explicit-error",
+              "valid-empty",
+              "telemetry-absent",
+              "not-applicable",
+              "incomplete",
+            ]).has(
+              state.classification,
+            ),
+        )
+      ) {
+        return terminalStateSummary(dashboard, panelStates, "error");
+      }
+      console.log(
+        `[${index}/${total}] terminal-state validation passed for ${dashboard.uid} (${panelStates.length} required non-row panel(s))`,
+      );
+      return terminalStateSummary(dashboard, panelStates, "ok");
+    }
+    await page.waitForTimeout(TERMINAL_POLL_INTERVAL_MS);
+  }
+
+  return terminalStateSummary(dashboard, panelStates, "error");
+}
+
+function describeTerminalStateFailure(dashboard) {
+  const validation = dashboard.terminalStateValidation || {};
+  const states = Array.isArray(validation.panelStates)
+    ? validation.panelStates
+    : [];
+  const failures = states
+    .filter((state) =>
+      new Set(["blank", "loading", "contradictory"]).has(state.classification),
+    )
+    .map(
+      (state) =>
+        `panel ${state.id}${state.title ? ` (${state.title})` : ""}: ${state.classification}`,
+    );
+  return failures.length > 0
+    ? failures.join("; ")
+    : "required terminal panel evidence is missing or invalid";
 }
 
 async function waitForDashboardContent(page, dashboard, index, total) {
@@ -457,7 +965,7 @@ async function materializeLazyPanels(page, dashboard, index, total) {
 }
 
 function dashboardRenderUrl(dashboard) {
-  const params = new URLSearchParams({ orgId: "1" });
+  const params = new URLSearchParams({ orgId: "1", theme: CONFIG.theme });
   if (CONFIG.scopeQuery) {
     for (const [key, value] of new URLSearchParams(CONFIG.scopeQuery)) {
       params.set(key, value);
@@ -511,6 +1019,26 @@ async function renderDashboard(page, dashboard, index, total) {
     );
   }
   await prepareDashboardForCapture(page, dashboard, index, total);
+  dashboard.requestedViewport = { ...CONFIG.viewport };
+  dashboard.actualViewport = page.viewportSize() || { ...CONFIG.viewport };
+  dashboard.requestedTheme = CONFIG.theme;
+  dashboard.actualTheme = await detectActualTheme(page);
+  if (dashboard.actualTheme !== CONFIG.theme) {
+    throw new Error(
+      `Theme verification failed for ${dashboard.uid}: requested=${CONFIG.theme} actual=${dashboard.actualTheme}`,
+    );
+  }
+  dashboard.terminalStateValidation = await validateDashboardTerminalStates(
+    page,
+    dashboard,
+    index,
+    total,
+  );
+  if (dashboard.terminalStateValidation.status !== "ok") {
+    throw new Error(
+      `Terminal-state validation failed for ${dashboard.uid}: ${describeTerminalStateFailure(dashboard)}`,
+    );
+  }
 
   const filePath = path.join(CONFIG.outputDir, dashboard.file);
   console.log(
@@ -523,10 +1051,25 @@ async function renderDashboard(page, dashboard, index, total) {
     animations: "disabled",
     caret: "hide",
   });
+  const screenshotBuffer = await fs.promises.readFile(filePath);
+  dashboard.screenshotEvidence = {
+    file: dashboard.file,
+    ...pngEvidence(screenshotBuffer),
+    capturedAt: new Date().toISOString(),
+  };
+  if (dashboard.screenshotEvidence.width !== CONFIG.viewport.width) {
+    throw new Error(
+      `Screenshot width verification failed for ${dashboard.uid}: requested=${CONFIG.viewport.width} actual=${dashboard.screenshotEvidence.width}`,
+    );
+  }
+  dashboard.renderStatus = "rendered";
   console.log(`rendered ${dashboard.uid} -> ${dashboard.file}`);
 }
 
 async function writeManifest(dashboards) {
+  const terminalStatuses = dashboards.map(
+    (dashboard) => dashboard.terminalStateValidation?.status || "missing",
+  );
   const payload = {
     generated_at: new Date().toISOString(),
     engine: "playwright",
@@ -535,6 +1078,30 @@ async function writeManifest(dashboards) {
     timeout_ms: CONFIG.timeoutMs,
     capture_timeout_ms: CONFIG.captureTimeoutMs,
     expand_collapsed_rows: CONFIG.expandCollapsedRows,
+    requested: {
+      viewport: CONFIG.viewport,
+      theme: CONFIG.theme,
+    },
+    actual: {
+      viewports: Object.fromEntries(
+        dashboards.map((dashboard) => [dashboard.uid, dashboard.actualViewport || null]),
+      ),
+      themes: Object.fromEntries(
+        dashboards.map((dashboard) => [dashboard.uid, dashboard.actualTheme || "unknown"]),
+      ),
+    },
+    terminal_state_validation: {
+      status:
+        terminalStatuses.length > 0 && terminalStatuses.every((status) => status === "ok")
+          ? "ok"
+          : "error",
+      dashboards: Object.fromEntries(
+        dashboards.map((dashboard) => [
+          dashboard.uid,
+          dashboard.terminalStateValidation?.status || "missing",
+        ]),
+      ),
+    },
     dashboards,
   };
   await fs.promises.writeFile(
@@ -547,6 +1114,7 @@ async function writeManifest(dashboards) {
 async function main() {
   await ensureOutputDir();
   const dashboards = listDashboardsFromRepo();
+  let renderFailure = null;
   for (const [index, dashboard] of dashboards.entries()) {
     const browser = await chromium.launch({ headless: true });
     let contextBundle = null;
@@ -557,6 +1125,10 @@ async function main() {
       const page = await context.newPage();
       try {
         await renderDashboard(page, dashboard, index + 1, dashboards.length);
+      } catch (error) {
+        dashboard.renderStatus = "error";
+        dashboard.error = String(error && error.message ? error.message : error);
+        renderFailure = error;
       } finally {
         await page.close();
       }
@@ -569,20 +1141,33 @@ async function main() {
       }
       await browser.close();
     }
+    if (renderFailure) {
+      break;
+    }
   }
   await writeManifest(dashboards);
+  if (renderFailure) {
+    throw renderFailure;
+  }
 }
 
-main().catch((error) => {
-  const message = String(error && error.message ? error.message : error);
-  if (message.includes("error while loading shared libraries")) {
-    console.error(
-      "Playwright fallback could not launch Chromium because required shared",
-      "libraries are missing on the host. Install the standard headless",
-      "Chromium runtime packages such as libnspr4, libnss3, and libasound2,",
-      "then rerun rerender-grafana.",
-    );
-  }
-  console.error(error);
-  process.exit(1);
-});
+if (require.main === module) {
+  main().catch((error) => {
+    const message = String(error && error.message ? error.message : error);
+    if (message.includes("error while loading shared libraries")) {
+      console.error(
+        "Playwright fallback could not launch Chromium because required shared",
+        "libraries are missing on the host. Install the standard headless",
+        "Chromium runtime packages such as libnspr4, libnss3, and libasound2,",
+        "then rerun rerender-grafana.",
+      );
+    }
+    console.error(error);
+    process.exit(1);
+  });
+}
+
+module.exports = {
+  classifyPanelTerminalEvidence,
+  pngEvidence,
+};

@@ -1,8 +1,8 @@
 # Dashboard Audit Checklist
 
-**Version**: 1.1.0  
-**Status**: active  
-**Date**: 2026-05-13  
+**Version**: 1.2.0
+**Status**: active
+**Date**: 2026-07-13
 **Source of truth**: `grafana/dashboards/*.json`, `docs/03-guides/dashboards/contracts/*.yaml`
 
 ## Usage
@@ -22,7 +22,7 @@ uv run python -m scripts.engineering.qa report-dashboard-inventory --check --jso
 
 ### 1.1 Dashboard Question (MUST)
 - [ ] Dashboard answers exactly one `ONE BIG QUESTION`
-- [ ] Secondary questions stay in supporting panels, expanded below-fold rows, tabs, or drilldowns
+- [ ] Secondary questions stay in supporting panels, collapsed-by-default below-fold rows, tabs, or drilldowns
 - [ ] Primary KPI/verdict is visible on the first screen without scroll
 
 ### 1.2 Scope / Provenance Block (MUST for operator dashboards)
@@ -49,13 +49,14 @@ uv run python -m scripts.engineering.qa report-dashboard-inventory --check --jso
 
 ### 2.1 Navigation Bus (MUST)
 - [ ] Dashboard has navigation panel with `id=1000`
-- [ ] Navigation panel includes full bus: `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`
-- [ ] Current dashboard is rendered as disabled dark-gray item
+- [ ] Navigation panel includes full bus: `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO`
+- [ ] Current dashboard is rendered as a disabled theme-safe item
 - [ ] Machine-readable `panel.links` omit self-links (no duplicate navigation)
 - [ ] All navigation links open in same tab (`targetBlank: false`)
+- [ ] Bus remains readable in dark/light themes, has visible focus/hover states, and wraps without clipping at `1024px`
 
 ### 2.2 Global Adjunct Links (MUST)
-- [ ] After bus `0..5`, includes `Silver Reject Explorer`
+- [ ] After bus `0..6`, includes `Silver Reject Explorer`
 - [ ] Includes `Explore Logs` with safe baseline `{job="bioetl"}`
 - [ ] Includes `Explore Traces` (adjunct, traced-run-only)
 - [ ] Explore Traces tooltip mentions traced-run-only requirement
@@ -74,13 +75,14 @@ uv run python -m scripts.engineering.qa report-dashboard-inventory --check --jso
 
 ### 2.5 Required Top-Level Links by UID (MUST)
 Check against `contracts/navigation-links.yaml` → `required_top_level_links_by_uid`:
-- [ ] `bioetl-overview-v2`: 0. Control Plane, 2. Runtime, 3. Provider Health, 4. Data Quality, 5. Workflow, Explore Logs, Explore Traces, Silver Reject Explorer
-- [ ] `bioetl-runtime`: 0. Control Plane, 1. Overview, 3. Provider Health, 4. Data Quality, 5. Workflow, Explore Logs, Explore Traces, Silver Reject Explorer
-- [ ] `bioetl-control-plane-v1`: 1. Overview, 2. Runtime, 3. Provider Health, 4. Data Quality, 5. Workflow, Silver Reject Explorer
-- [ ] `bioetl-provider-health-v2`: 0. Control Plane, 1. Overview, 2. Runtime, 4. Data Quality, 5. Workflow, Explore Logs, Explore Traces, Silver Reject Explorer
-- [ ] `bioetl-dq-v2`: 0. Control Plane, 1. Overview, 2. Runtime, 3. Provider Health, 5. Workflow, Silver Reject Explorer, Explore Logs, Explore Traces
-- [ ] `bioetl-silver-reject-explorer`: 0. Control Plane, 1. Overview, 2. Runtime, 3. Provider Health, 4. Data Quality, 5. Workflow, Explore Logs, Explore Traces
-- [ ] `bioetl-workflow-overview`: 0. Control Plane, 1. Overview, 2. Runtime, 3. Provider Health, 4. Data Quality, Explore Logs, Explore Traces, Silver Reject Explorer
+- [ ] `bioetl-overview-v2`: 0. Control Plane, 2. Runtime, 3. Provider Health, 4. Data Quality, 5. Workflow, 6. Alerts & SLO, Explore Logs, Explore Traces, Silver Reject Explorer
+- [ ] `bioetl-runtime`: 0. Control Plane, 1. Overview, 3. Provider Health, 4. Data Quality, 5. Workflow, 6. Alerts & SLO, Explore Logs, Explore Traces, Silver Reject Explorer
+- [ ] `bioetl-control-plane-v1`: 1. Overview, 2. Runtime, 3. Provider Health, 4. Data Quality, 5. Workflow, 6. Alerts & SLO, Silver Reject Explorer, Explore Logs, Explore Traces
+- [ ] `bioetl-provider-health-v2`: 0. Control Plane, 1. Overview, 2. Runtime, 4. Data Quality, 5. Workflow, 6. Alerts & SLO, Explore Logs, Explore Traces, Silver Reject Explorer
+- [ ] `bioetl-dq-v2`: 0. Control Plane, 1. Overview, 2. Runtime, 3. Provider Health, 5. Workflow, 6. Alerts & SLO, Silver Reject Explorer, Explore Logs, Explore Traces
+- [ ] `bioetl-silver-reject-explorer`: 0. Control Plane, 1. Overview, 2. Runtime, 3. Provider Health, 4. Data Quality, 5. Workflow, 6. Alerts & SLO, Explore Logs, Explore Traces
+- [ ] `bioetl-workflow-overview`: 0. Control Plane, 1. Overview, 2. Runtime, 3. Provider Health, 4. Data Quality, 6. Alerts & SLO, Explore Logs, Explore Traces, Silver Reject Explorer
+- [ ] `bioetl-alerts-slo`: 0. Control Plane, 1. Overview, 2. Runtime, 3. Provider Health, 4. Data Quality, 5. Workflow, Silver Reject Explorer, Explore Logs, Explore Traces
 
 ---
 
@@ -135,11 +137,13 @@ Check against `contracts/selector-contracts.yaml` → `shipped_selector_registry
 ## 4. Design System and Visualization
 
 ### 4.1 Status Semantics (MUST)
-**L0 operator dashboards** (`1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`):
+**L0 operator dashboards** (`0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`):
 - [ ] `0` maps to `OK` (green)
 - [ ] `1` maps to `WARN` (orange)
 - [ ] `>=2` maps to `CRIT` (red)
 - [ ] `null` maps to `UNKNOWN` (gray)
+- [ ] Trusted Control/Runtime headline cards override the generic mapping with `3 → INCOMPLETE` (gray) when required evidence is missing or stale
+- [ ] Query-backed surfaces distinguish terminal `VALID EMPTY`, `TELEMETRY ABSENT`, `N/A`, and explicit `ERROR` from transient `LOADING`; blank accepted renders are forbidden
 
 **Diagnostic dashboards only**:
 - [ ] If using alias terms (`DEGRADED`, `BROKEN`, `HEALTHY`), description includes alias mapping
@@ -208,16 +212,16 @@ For each panel:
 - [ ] **Tier 1** (always-visible answer surface): current status, verdict, first action, current causes
 - [ ] **Tier 2** (always-visible supporting context): KPI context, trust markers, bounded mirrors
 - [ ] **Tier 3** (below-fold evidence): selected-range evidence
-- [ ] **Tier 4** (expanded diagnostics): tracing-only, raw, verbose, rare forensic breakdowns
+- [ ] **Tier 4** (collapsed-by-default diagnostics): tracing-only, raw, verbose, rare forensic breakdowns; full audits expand these rows explicitly
 - [ ] Critical signal does NOT live exclusively inside a diagnostic row
 
 ### 5.5 GridPos Layout (MUST)
 - [ ] Top-level `gridPos` rectangles do NOT overlap
-- [ ] Navigation, scope, first-action, current-status, range evidence, expanded rows occupy explicit non-overlapping bands
+- [ ] Navigation, scope, first-action, current-status, range evidence, and collapsible rows occupy explicit non-overlapping bands
 - [ ] No unexplained empty row gaps between adjacent bands (unless justified in audit/docs)
 
 ### 5.6 Collapsed Row Policy (MUST)
-- [ ] Tracing-only, raw, verbose, or not-required-for-first-pass-triage panels are expanded below fold
+- [ ] Tracing-only, raw, verbose, or not-required-for-first-pass-triage panels are grouped in rows collapsed by default
 - [ ] Collapsed rows have descriptive titles by incident scenario (e.g., `Incident Drilldown: ...`)
 
 ---
@@ -334,7 +338,7 @@ Run: `uv run python -m scripts.engineering.qa report-dashboard-query-duplicates`
 ## 11. KPI Ownership (MUST)
 
 ### 11.1 Canonical Dashboard Mapping
-- [ ] System Status → canonical: `1. Overview`, mirrors: `2. Runtime`, `0. Control Plane`, `5. Workflow`
+- [ ] System Status → canonical: `1. Overview`; trusted derivatives: `2. Runtime`, `0. Control Plane`
 - [ ] First Action → canonical: `1. Overview`, mirrors: `2. Runtime`, `3. Provider Health`
 - [ ] L0 Inputs → canonical: `1. Overview`, mirrors: `2. Runtime`, `4. Data Quality`, `0. Control Plane`
 - [ ] Gold Lifecycle → canonical: `1. Overview`, mirrors: `2. Runtime`, `0. Control Plane`

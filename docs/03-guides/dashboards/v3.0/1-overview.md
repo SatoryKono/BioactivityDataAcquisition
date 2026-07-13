@@ -115,7 +115,7 @@ Row 0: L0 Policy Header
 Row 1: Navigation
 
 - panel `id=1000`;
-- top-level bus `0..5`;
+- top-level bus `0..6`;
 - global adjunct links as required by navigation contract;
 - explicit `var-*` and time handoff.
 
