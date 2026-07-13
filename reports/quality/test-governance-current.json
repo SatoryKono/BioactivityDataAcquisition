@@ -2174,8 +2174,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 1989,
-      "test_python_file_count": 2199,
+      "test_glob_file_count": 1990,
+      "test_python_file_count": 2200,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2185,6 +2185,7 @@
         "tests/fixtures/",
         "tests/golden/",
         "tests/helpers/",
+        "tests/infrastructure/",
         "tests/integration/",
         "tests/performance/",
         "tests/security/",
@@ -2203,6 +2204,7 @@
         "tests/fixtures/",
         "tests/golden/",
         "tests/helpers/",
+        "tests/infrastructure/",
         "tests/integration/",
         "tests/performance/",
         "tests/security/",
@@ -2211,16 +2213,16 @@
         "tests/testing_support/",
         "tests/unit/"
       ],
-      "top_level_directory_count": 15,
-      "top_level_directory_count_including_pycache": 16
+      "top_level_directory_count": 16,
+      "top_level_directory_count_including_pycache": 17
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 1989,
-    "total_test_functions": 22216,
+    "total_test_files": 1990,
+    "total_test_functions": 22230,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "44034f27cf8e2658f17d5171305e8b966521c3d2f91a1a001213a398bef61cb1",
+  "source_tree_sha256": "30a4b2b5826f04f69d7344ebd868e48f229f69971df7cb8b6f9b0e318505a1d6",
   "summary": {
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
@@ -2237,8 +2239,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 1989,
-    "test_python_file_count": 2199,
+    "test_glob_file_count": 1990,
+    "test_python_file_count": 2200,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2248,6 +2250,7 @@
       "tests/fixtures/",
       "tests/golden/",
       "tests/helpers/",
+      "tests/infrastructure/",
       "tests/integration/",
       "tests/performance/",
       "tests/security/",
@@ -2266,6 +2269,7 @@
       "tests/fixtures/",
       "tests/golden/",
       "tests/helpers/",
+      "tests/infrastructure/",
       "tests/integration/",
       "tests/performance/",
       "tests/security/",
@@ -2274,11 +2278,11 @@
       "tests/testing_support/",
       "tests/unit/"
     ],
-    "top_level_directory_count": 15,
-    "top_level_directory_count_including_pycache": 16
+    "top_level_directory_count": 16,
+    "top_level_directory_count_including_pycache": 17
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 1989,
-  "total_test_functions": 22216,
+  "total_test_files": 1990,
+  "total_test_functions": 22230,
   "uuid4_call_sites": 0
 }

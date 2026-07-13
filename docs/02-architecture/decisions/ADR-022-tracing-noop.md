@@ -48,9 +48,9 @@ This overhead provides no benefit for single-process local execution.
 ### TracingPort = OpenTelemetry Facade (deliberate choice)
 
 `TracingPort` is intentionally modeled after the **OpenTelemetry Tracing API**.
-`get_tracer()` returns an object whose interface mirrors `opentelemetry.trace.Tracer`
-(`start_as_current_span`, span context manager, `set_attribute`, `add_event`,
-`record_exception`). Both the NoOp and real adapter MUST preserve this callable
+`get-tracer()` returns an object whose interface mirrors `opentelemetry.trace.Tracer`
+(`start-as-current-span`, span context manager, `set-attribute`, `add-event`,
+`record-exception`). Both the NoOp and real adapter MUST preserve this callable
 span surface.
 
 **Why OTel as the port surface?**

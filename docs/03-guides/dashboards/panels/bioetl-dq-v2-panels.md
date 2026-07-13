@@ -6,6 +6,10 @@
 
 Dashboard `4. Data Quality` monitors DQ current status, validation score, freshness, quarantine, Silver structural rejects, and Gold contract-semantic reject outcomes. Shipped dashboard JSON is the source of truth.
 
+Visible scope vocabulary is strict: headline cards are `CURRENT`, HTTP identity
+is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
+`TIME RANGE`. A TIME RANGE value never proves an exact run result.
+
 ## Key Panels
 
 ### 1. Review Dashboard Navigation
@@ -59,8 +63,8 @@ Dashboard `4. Data Quality` monitors DQ current status, validation score, freshn
 - **Data sources:** Dashboard variables and operator copy.
 
 ### 11. Monitor: Data Quality Score (Volume-weighted)
-- **Type:** Gauge
-- **Purpose:** Show volume-weighted DQ score.
+- **Type:** Stat
+- **Purpose:** Show TIME RANGE volume-weighted DQ score as neutral supporting evidence.
 - **Data sources:** `bioetl_dq_validation_score`
 
 ### 12. Track: Source Records in Range (Bronze)
@@ -74,8 +78,8 @@ Dashboard `4. Data Quality` monitors DQ current status, validation score, freshn
 - **Data sources:** `bioetl_records_processed_total`
 
 ### 14. Monitor: Worst-Entity DQ Score
-- **Type:** Gauge
-- **Purpose:** Show worst entity DQ score.
+- **Type:** Stat
+- **Purpose:** Show TIME RANGE worst-entity DQ score as neutral supporting evidence.
 - **Data sources:** `bioetl_dq_validation_score`
 
 ### 15. Track: Records Quarantined in Range
@@ -88,9 +92,10 @@ Dashboard `4. Data Quality` monitors DQ current status, validation score, freshn
 - **Purpose:** Count Silver validation failures.
 - **Data sources:** `bioetl_silver_validation_failures_total`
 
-### 17. Monitor: Worst Data Freshness Lag (seconds)
+### 17. Time Range · Worst Freshness Age (hours; SLA 24/72)
 - **Type:** Gauge
-- **Purpose:** Show worst freshness lag.
+- **Purpose:** Show worst TIME RANGE freshness age in hours. WARN begins at
+  `24h`, CRIT at `72h`; query output, unit, title, and thresholds use hours.
 - **Data sources:** `bioetl_data_freshness_seconds`
 
 ### 18. Track: DQ Blocked Records in Range (Evidence)
@@ -110,7 +115,8 @@ Dashboard `4. Data Quality` monitors DQ current status, validation score, freshn
 
 ### 21. Silver Structural / Gold Contract-Semantic Rejects
 - **Type:** Row
-- **Purpose:** Row-based reject analysis workflow.
+- **Purpose:** Collapsed-by-default reject analysis; expand after current reasons
+  or TIME RANGE delivery-impact cards identify a reject path.
 - **Data sources:** `bioetl_silver_filter_rejections_total`, `bioetl_dq_validation_failures_total`
 
 ### 22. Monitor: Silver Filter Reject Accounting Mismatch
@@ -140,7 +146,7 @@ Dashboard `4. Data Quality` monitors DQ current status, validation score, freshn
 
 ### 27. Validation Failures / Runtime Diagnostics / Trends
 - **Type:** Row
-- **Purpose:** Row-based diagnostics workflow.
+- **Purpose:** Collapsed-by-default validation/runtime/trend forensics.
 - **Data sources:** `bioetl_dq_validation_failures_total`, `bioetl_dq_anomaly_detected`
 
 ### 28. Inspect: Quarantine by Error Type
@@ -201,3 +207,7 @@ Dashboard `4. Data Quality` monitors DQ current status, validation score, freshn
   rules and validation failure metrics.
 - Legacy aggregate names for generic DQ scores, rule pass rates, Silver reject
   rates, and validation errors are intentionally not documented here.
+- `Track: Records Quarantined in Range`, `Track: Silver Filter Rejects in
+  Range`, and `Track: DQ Blocked Records in Range (Evidence)` render a zero as
+  neutral valid-empty TIME RANGE evidence. They do not override a CURRENT
+  WARN/CRIT verdict.

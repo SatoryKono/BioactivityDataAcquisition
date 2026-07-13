@@ -10,6 +10,7 @@ from tests.integration._grafana_test_support import (
     get_dashboard_files,
     get_dashboard_panels,
     get_panel_expressions,
+    get_row_child_panels,
     load_dashboard,
 )
 from tests.integration.grafana_contract_specs import (
@@ -125,12 +126,6 @@ def _expected_duplicate_uses() -> dict[str, set[tuple[str, str]]]:
                 "Track: Data Quality Score Trend (Volume-weighted)",
             ),
         },
-        'max((bioetl_replay_safety_blockers_15m{run_type=~"$run_type"}) and '
-        'on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), '
-        '"pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))': {
-            ("bioetl-control-plane-v1.json", "Monitor: Replay Safety State"),
-            ("bioetl-control-plane-v1.json", "Status"),
-        },
         'max(bioetl_dq_current_status{pipeline=~"$pipeline"})': {
             ("bioetl-dq-v2.json", "Monitor DQ Current Status"),
             ("bioetl-dq-v2.json", "Status"),
@@ -149,13 +144,23 @@ def _assert_dq_duplicate_reuse_semantics() -> None:
         for panel in get_dashboard_panels(dq_dashboard)
         if panel.get("title")
     }
-    score_gauge = dq_panels["Monitor: Data Quality Score (Volume-weighted)"]
+    score_summary = dq_panels["Monitor: Data Quality Score (Volume-weighted)"]
     score_trend = dq_panels["Track: Data Quality Score Trend (Volume-weighted)"]
-    assert score_gauge.get("type") == "gauge"
-    assert score_gauge.get("options", {}).get("showThresholdMarkers") is True
+    assert score_summary.get("type") == "stat"
+    assert score_summary.get("options", {}).get("colorMode") == "value"
+    assert score_summary.get("options", {}).get("graphMode") == "none"
+    summary_defaults = score_summary.get("fieldConfig", {}).get("defaults", {})
+    assert summary_defaults.get("unit") == "percentunit"
+    assert summary_defaults.get("min") == 0
+    assert summary_defaults.get("max") == 1
+    assert summary_defaults.get("thresholds", {}).get("steps") == [
+        {"color": "red", "value": None},
+        {"color": "orange", "value": 0.8},
+        {"color": "green", "value": 0.95},
+    ]
     assert score_trend.get("type") == "timeseries"
     assert score_trend.get("options", {}).get("tooltip", {}).get("mode") == "single"
-    assert "review trend" in str(score_gauge.get("description", "")).lower()
+    assert "review trend" in str(score_summary.get("description", "")).lower()
     assert (
         "trend over selected time range"
         in str(score_trend.get("description", "")).lower()
@@ -291,17 +296,12 @@ def test_workflow_selected_range_counters_use_zero_valid_empty_state() -> None:
 
 
 def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> None:
-    """Overview compact evidence panels must stay below the current L0 verdict path."""
-    current_verdict_titles = {
+    """Historical evidence must stay behind disclosure below the L0 answer path."""
+    first_answer_titles = {
         "Status",
         "First Action",
+        "Triage Alert State",
         "Inputs",
-        "Control Plane",
-        "Runtime",
-        "Data Quality",
-        "Provider",
-        "Data Validation",
-        "Workflow",
     }
     compact_evidence = {
         "Runtime Blockers Trend": (9018, "bioetl_l1_runtime_blocker_status"),
@@ -309,6 +309,13 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
         "Gold Lifecycle Trend": (9020, "bioetl_l1_gold_lifecycle_status"),
         "Historical Failures": (9010, "bioetl_pipeline_runs_total"),
         "Recent Terminal Runs": (9011, "bioetl_pipeline_runs_total"),
+    }
+    disclosure_by_panel = {
+        "Runtime Blockers Trend": "L1 Historical Trends",
+        "DQ Status Trend": "L1 Historical Trends",
+        "Gold Lifecycle Trend": "L1 Historical Trends",
+        "Historical Failures": "Range Evidence (Historical / Recent History)",
+        "Recent Terminal Runs": "Range Evidence (Historical / Recent History)",
     }
 
     for dashboard_path in (Path("grafana/dashboards/bioetl-overview-v2.json"),):
@@ -318,13 +325,37 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
             for panel in get_dashboard_panels(dashboard)
             if panel.get("title")
         }
-        max_current_y = max(
+        max_first_answer_y = max(
             panels[title].get("gridPos", {}).get("y", 0)
-            for title in current_verdict_titles
+            for title in first_answer_titles
         )
+        disclosure_rows = {
+            title: next(
+                panel
+                for panel in dashboard.get("panels", [])
+                if panel.get("title") == title
+            )
+            for title in set(disclosure_by_panel.values())
+        }
+        disclosure_children = {
+            title: {
+                panel.get("title"): panel
+                for panel in get_row_child_panels(dashboard, title)
+                if panel.get("title")
+            }
+            for title in disclosure_rows
+        }
+        for row in disclosure_rows.values():
+            assert row.get("type") == "row"
+            assert row.get("collapsed") is True
+            assert row.get("gridPos", {}).get("y", 0) > max_first_answer_y
+        for panel_title, row_title in disclosure_by_panel.items():
+            assert panel_title in disclosure_children[row_title]
 
         for panel_title, (panel_id, expected_metric) in compact_evidence.items():
-            panel = panels[panel_title]
+            row_title = disclosure_by_panel[panel_title]
+            row = disclosure_rows[row_title]
+            panel = disclosure_children[row_title][panel_title]
             expressions = [
                 target.get("expr", "")
                 for target in panel.get("targets", [])
@@ -334,7 +365,9 @@ def test_overview_compact_evidence_panels_do_not_claim_l0_current_verdict() -> N
             data_links = panel.get("options", {}).get("dataLinks", [])
 
             assert panel.get("id") == panel_id, dashboard_path
-            assert panel.get("gridPos", {}).get("y", 0) > max_current_y
+            assert panel.get("gridPos", {}).get("y", 0) > row.get("gridPos", {}).get(
+                "y", 0
+            )
             assert any(expected_metric in expr for expr in expressions), dashboard_path
             assert all(
                 forbidden not in "\n".join(expressions)
@@ -437,6 +470,15 @@ def test_operator_context_shell_panels_preserve_canonical_semantics(
         assert "review raw provider health enum" in status_description
         assert "secondary context only" in status_description
         assert not any("), max_over_time" in expr for expr in status_expressions)
+    elif dashboard_name == "bioetl-control-plane-v1.json":
+        assert all("$__range" not in expr for expr in status_expressions)
+        assert any(
+            "bioetl_control_plane_current_status_trusted" in expr
+            for expr in status_expressions
+        )
+        assert "evidence-aware" in status_description
+        assert "replay/resume" in status_description
+        assert "3=incomplete" in status_description
     else:
         assert all("$__range" not in expr for expr in status_expressions)
         assert "current" in status_description
@@ -756,11 +798,23 @@ def test_silver_reject_explorer_custom_no_value_copy_is_intentional_http_forensi
         Path("grafana/dashboards/bioetl-silver-reject-explorer.json")
     )
     expected_panels = {
-        "Monitor Filtered Records Total": "Verify Quarantine Explorer before treating this as OK.",
-        "Track Reject Rate vs Bronze": "Treat as UNKNOWN until Bronze denominator and quarantine API are confirmed.",
-        "Inspect Run Scope Summary": "Check pipeline selection and Quarantine Explorer availability.",
-        "Inspect Filtered Records Table": "No rejected records for current filters.",
-        "Inspect Selected Record Details": "Select a payload_hash from the table",
+        "Monitor Filtered Records Total": (
+            "Verify Quarantine Explorer before treating this as OK.",
+        ),
+        "Track Reject Rate vs Bronze": (
+            "Treat as UNKNOWN until Bronze denominator and quarantine API are confirmed.",
+        ),
+        "Inspect Run Scope Summary": (
+            "Check pipeline selection and Quarantine Explorer availability.",
+        ),
+        "Inspect Filtered Records Table": (
+            "VALID EMPTY",
+            "QUERY/DATASOURCE ERROR",
+        ),
+        "Inspect Selected Record Details": (
+            "VALID EMPTY",
+            "QUERY/DATASOURCE ERROR",
+        ),
     }
     panels = {
         panel.get("title"): panel
@@ -769,14 +823,15 @@ def test_silver_reject_explorer_custom_no_value_copy_is_intentional_http_forensi
     }
     assert set(panels) == set(expected_panels)
 
-    for panel_title, expected_no_value in expected_panels.items():
+    for panel_title, expected_no_value_tokens in expected_panels.items():
         panel = panels[panel_title]
         no_value = str(
             panel.get("fieldConfig", {}).get("defaults", {}).get("noValue", "")
         )
-        assert expected_no_value in no_value, (
-            f"{panel_title} must preserve datasource-specific noValue guidance"
-        )
+        for token in expected_no_value_tokens:
+            assert token in no_value, (
+                f"{panel_title} must preserve terminal noValue token {token!r}"
+            )
         description = str(panel.get("description", "")).lower()
         assert any(
             token in description
@@ -937,10 +992,18 @@ def test_dq_current_status_panels_use_explicit_status_value_mappings() -> None:
     }
     assert set(panels) == expected_panels
 
-    expected_mapping = {
-        "0": {"text": "OK", "color": "green"},
-        "1": {"text": "WARN", "color": "orange"},
-        "2": {"text": "CRIT", "color": "red"},
+    expected_mappings = {
+        "Monitor DQ Current Status": {
+            "0": {"text": "OK", "color": "green"},
+            "1": {"text": "WARN", "color": "orange"},
+            "2": {"text": "CRIT", "color": "red"},
+            "3": {"text": "INCOMPLETE", "color": "gray"},
+        },
+        "Monitor DQ Threshold State": {
+            "0": {"text": "OK", "color": "green"},
+            "1": {"text": "WARN", "color": "orange"},
+            "2": {"text": "CRIT", "color": "red"},
+        },
     }
     for panel_title, panel in panels.items():
         mappings = panel.get("fieldConfig", {}).get("defaults", {}).get("mappings", [])
@@ -949,10 +1012,10 @@ def test_dq_current_status_panels_use_explicit_status_value_mappings() -> None:
             None,
         )
         assert value_mapping is not None, (
-            f"{panel_title} must define explicit value mappings for 0/1/2"
+            f"{panel_title} must define explicit operator status mappings"
         )
-        assert value_mapping.get("options") == expected_mapping, (
-            f"{panel_title} must map 0/1/2 to OK/WARN/CRIT"
+        assert value_mapping.get("options") == expected_mappings[panel_title], (
+            f"{panel_title} status vocabulary drifted"
         )
 
 
@@ -1164,10 +1227,8 @@ def test_runtime_freshness_handoff_preserves_missing_telemetry() -> None:
     assert defaults.get("noValue") == "UNKNOWN"
 
 
-def test_provider_failure_rate_panel_uses_percentunit_domain_and_policy_thresholds() -> (
-    None
-):
-    """Provider failure-rate gauge must use ratio semantics and policy thresholds."""
+def test_provider_failure_rate_panel_uses_neutral_zero_and_policy_thresholds() -> None:
+    """Provider failure rate must keep neutral zero plus explicit WARN/CRIT policy."""
     dashboard = load_dashboard(
         Path("grafana/dashboards/bioetl-provider-health-v2.json")
     )
@@ -1188,10 +1249,12 @@ def test_provider_failure_rate_panel_uses_percentunit_domain_and_policy_threshol
     assert defaults.get("min") == 0
     assert defaults.get("max") == 1
     assert defaults.get("thresholds", {}).get("steps") == [
-        {"color": "green", "value": None},
+        {"color": "gray", "value": None},
         {"color": "orange", "value": 0.05},
         {"color": "red", "value": 0.2},
     ]
+    assert panel.get("type") == "stat"
+    assert "neutral supporting evidence" in str(panel.get("description", "")).lower()
 
 
 def test_provider_severity_matrix_preserves_unknown_and_critical_mapping() -> None:
@@ -1580,24 +1643,28 @@ def test_dq_blocked_record_evidence_panels_use_neutral_thresholds() -> None:
 
 
 def test_dq_freshness_lag_panel_uses_time_domain_thresholds() -> None:
-    """Freshness lag must use the same 24h/72h thresholds as the DQ alert policy."""
+    """Freshness age must expose the DQ 24h/72h policy directly in hours."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     panel = next(
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor: Worst Data Freshness Lag (seconds)"
+            if item.get("title")
+            == "Time Range · Worst Freshness Age (hours; SLA 24/72)"
         ),
         None,
     )
     assert panel is not None, "Freshness lag panel not found in bioetl-dq-v2.json"
 
     defaults = panel.get("fieldConfig", {}).get("defaults", {})
+    assert defaults.get("unit") == "h"
     assert defaults.get("thresholds", {}).get("steps") == [
         {"color": "green", "value": None},
-        {"color": "orange", "value": 86400},
-        {"color": "red", "value": 259200},
+        {"color": "orange", "value": 24},
+        {"color": "red", "value": 72},
     ]
+    expressions = get_panel_expressions({"panels": [panel]})
+    assert expressions and all("/ 3600" in expr for expr in expressions)
 
 
 def test_dq_problem_panels_expose_actionable_datalinks() -> None:
@@ -1605,7 +1672,7 @@ def test_dq_problem_panels_expose_actionable_datalinks() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     expected_panels = {
         "Monitor: Worst-Entity DQ Score",
-        "Monitor: Worst Data Freshness Lag (seconds)",
+        "Time Range · Worst Freshness Age (hours; SLA 24/72)",
         "Track: Silver Filter Rejects in Range",
     }
     panels = {

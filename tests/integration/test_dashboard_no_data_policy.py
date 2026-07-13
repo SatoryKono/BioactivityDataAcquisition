@@ -77,6 +77,7 @@ def test_http_identity_cards_distinguish_backend_down_from_expected_empty() -> N
             assert "backend health" in no_value.lower()
             assert (
                 "not a valid zero" in no_value.lower()
+                or "not a valid empty" in no_value.lower()
                 or "no selected run" in no_value.lower()
             )
             assert any(

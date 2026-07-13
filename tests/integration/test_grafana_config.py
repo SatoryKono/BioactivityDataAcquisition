@@ -1,6 +1,8 @@
 """Integration tests for Grafana dashboard configurations and observability contracts."""
 
 from collections import Counter
+from collections.abc import Iterator
+from html import unescape
 import json
 from pathlib import Path
 import re
@@ -311,49 +313,63 @@ def test_dashboard_prometheus_datasource_contract(dashboard_path: Path) -> None:
 def test_explore_traces_links_use_safe_search_first_handoff(
     dashboard_path: Path,
 ) -> None:
-    """Explore Traces links must open the explicit search-first Tempo handoff."""
-    content = dashboard_path.read_text(encoding="utf-8")
-    if "grafana-exploretraces-app" not in content:
-        return
+    """Explore Traces links must preserve the dashboard range in the safe handoff."""
+    dashboard = load_dashboard(dashboard_path)
 
-    assert "/a/grafana-exploretraces-app/explore?actionView=search" in content, (
-        f"{dashboard_path.name} must use the explicit Explore Traces route"
-    )
-    assert "from=now-150m&to=now" in content, (
-        f"{dashboard_path.name} must bound the Explore Traces handoff to the locally safe Tempo breakdown window"
-    )
-    assert "var-ds=tempo" in content, (
-        f"{dashboard_path.name} must pin the Tempo datasource for Explore Traces"
-    )
-    assert "var-groupBy=resource.service.name" in content, (
-        f"{dashboard_path.name} must use a safe default groupBy for Explore Traces"
-    )
-    assert (
-        "span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22" not in content
-    ), (
-        f"{dashboard_path.name} must not couple Explore Traces to ${{run_type:regex}}; "
-        "includeAll run_type selectors can collapse into an empty regex"
-    )
-    assert (
-        "span.%22bioetl.run_type%22%20%3D~%20%22${run_type_context:regex}%22"
-        not in content
-    ), (
-        f"{dashboard_path.name} must not couple Explore Traces to "
-        "${run_type_context:regex}; includeAll run_type selectors can collapse "
-        "into an empty regex"
-    )
-    assert "/a/grafana-exploretraces-app/?from=" not in content, (
-        f"{dashboard_path.name} still uses the legacy Explore Traces root route"
-    )
-    assert (
-        "/a/grafana-exploretraces-app/explore?actionView=search&from=${__from}&to=${__to}"
-        not in content
-    ), (
-        f"{dashboard_path.name} must not forward the dashboard time range into Explore Traces"
-    )
-    assert "var-groupBy=undefined" not in content, (
-        f"{dashboard_path.name} must not encode an invalid Explore Traces groupBy"
-    )
+    def _iter_structured_urls(value: object) -> Iterator[str]:
+        if isinstance(value, dict):
+            url = value.get("url")
+            if isinstance(url, str):
+                yield url
+            for child in value.values():
+                yield from _iter_structured_urls(child)
+        elif isinstance(value, list):
+            for child in value:
+                yield from _iter_structured_urls(child)
+
+    trace_urls = [
+        unescape(url)
+        for url in _iter_structured_urls(dashboard)
+        if "grafana-exploretraces-app" in url
+    ]
+    for panel in dashboard.get("panels", []):
+        if panel.get("id") != 1000:
+            continue
+        nav_content = unescape(str(panel.get("options", {}).get("content", "")))
+        trace_urls.extend(
+            re.findall(r'href="([^"]*grafana-exploretraces-app[^"]*)"', nav_content)
+        )
+
+    assert trace_urls, f"{dashboard_path.name} must expose Explore Traces URLs"
+    for url in trace_urls:
+        assert "/a/grafana-exploretraces-app/explore?actionView=search" in url, (
+            f"{dashboard_path.name} must use the explicit Explore Traces route: {url}"
+        )
+        assert "from=${__from}" in url and "to=${__to}" in url, (
+            f"{dashboard_path.name} must preserve the active dashboard range: {url}"
+        )
+        assert "var-ds=tempo" in url, (
+            f"{dashboard_path.name} must pin the Tempo datasource: {url}"
+        )
+        assert "var-groupBy=resource.service.name" in url, (
+            f"{dashboard_path.name} must use a safe default groupBy: {url}"
+        )
+        assert (
+            "span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22" not in url
+        ), (
+            f"{dashboard_path.name} must not couple Explore Traces to "
+            f"${{run_type:regex}}: {url}"
+        )
+        assert (
+            "span.%22bioetl.run_type%22%20%3D~%20%22${run_type_context:regex}%22"
+            not in url
+        ), (
+            f"{dashboard_path.name} must not couple Explore Traces to "
+            f"${{run_type_context:regex}}: {url}"
+        )
+        assert "/a/grafana-exploretraces-app/?from=" not in url
+        assert "from=now-150m&to=now" not in url
+        assert "var-groupBy=undefined" not in url
 
 
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
@@ -365,6 +381,10 @@ def test_panel_title_vocabulary_matches_group_by_vocabulary(
     errors: list[str] = []
 
     for panel in get_dashboard_panels(dashboard):
+        if panel.get("type") == "row":
+            # Collapsed rows own nested panels. Their titles describe the disclosure
+            # group, while aggregation vocabulary belongs to each child panel.
+            continue
         title = panel.get("title", "")
         if not isinstance(title, str):
             continue
@@ -781,13 +801,14 @@ def test_dq_dashboard_contains_core_dq_metrics():
 
 
 def test_dq_freshness_panel_uses_age_from_timestamp_metric() -> None:
-    """Freshness lag must show the stalest entity, not the freshest timestamp."""
+    """Freshness age must show the stalest entity in explicit operator hours."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-dq-v2.json"))
     panel = next(
         (
             item
             for item in get_dashboard_panels(dashboard)
-            if item.get("title") == "Monitor: Worst Data Freshness Lag (seconds)"
+            if item.get("title")
+            == "Time Range · Worst Freshness Age (hours; SLA 24/72)"
         ),
         None,
     )
@@ -795,8 +816,9 @@ def test_dq_freshness_panel_uses_age_from_timestamp_metric() -> None:
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert any(
         "max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds" in expr
+        and "/ 3600" in expr
         for expr in expressions
-    ), "Freshness panel must derive worst lag from range freshness timestamp evidence"
+    ), "Freshness panel must derive worst age in hours from range timestamp evidence"
     assert all(
         "time() - max(bioetl_data_freshness_seconds" not in expr for expr in expressions
     ), "Freshness lag must not collapse scope to the freshest entity"
@@ -1342,7 +1364,7 @@ def test_workflow_step_panels_apply_status_variable() -> None:
             )
 
 
-def test_workflow_pipeline_status_falls_back_to_runtime_current_status() -> None:
+def test_workflow_pipeline_status_fails_closed_without_runtime_fallback() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-workflow-overview.json"))
     panel = next(
         (
@@ -1355,9 +1377,15 @@ def test_workflow_pipeline_status_falls_back_to_runtime_current_status() -> None
     assert panel is not None
     expr = panel["targets"][0]["expr"]
     assert "bioetl_workflow_pipeline_verdict_status" in expr
-    assert "bioetl_runtime_current_status" in expr
-    assert 'pipeline=~"$pipeline"' in expr
-    assert 'run_type=~"$run_type"' in expr
+    assert "bioetl_runtime_current_status" not in expr
+    assert 'pipeline=~"$pipeline_context"' in expr
+    assert 'run_type=~"$run_type_context"' in expr
+    assert " or " not in expr
+    defaults = panel.get("fieldConfig", {}).get("defaults", {})
+    assert defaults.get("noValue") == "NOT RESOLVED"
+    description = str(panel.get("description", ""))
+    assert "Runtime fallback is intentionally forbidden" in description
+    assert "never green" in description
 
 
 def test_workflow_dashboard_descriptions_explain_selected_range_limits() -> None:
@@ -1380,7 +1408,13 @@ def test_workflow_dashboard_descriptions_explain_selected_range_limits() -> None
         "Failed Pipeline Steps / Range": ("step_kind=pipeline", "2. runtime"),
         "Failed Transform Steps / Range": ("transform", "4. data quality"),
         "Skipped Step Events / Range": ("skipped", "selected time range"),
-        "Workflow Run Outcomes / Range": ("no data", "selected-range"),
+        "Workflow Run Outcomes / Range": (
+            "valid empty",
+            "no matching scope",
+            "telemetry absent",
+            "query/datasource failures",
+            "next action",
+        ),
         "Step Outcomes by Kind / Step Status / Range": (
             "step kind",
             "step status",
@@ -1410,7 +1444,7 @@ def test_workflow_dashboard_descriptions_explain_selected_range_limits() -> None
             )
 
 
-def test_workflow_dashboard_expands_step_diagnostics_below_first_screen() -> None:
+def test_workflow_dashboard_collapses_step_diagnostics_below_first_screen() -> None:
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-workflow-overview.json"))
 
     panels = dashboard.get("panels", [])
@@ -1420,7 +1454,7 @@ def test_workflow_dashboard_expands_step_diagnostics_below_first_screen() -> Non
     )
     assert row_panel is not None, "Workflow dashboard must expose step diagnostics row"
     assert row_panel.get("type") == "row"
-    assert row_panel.get("collapsed") is False
+    assert row_panel.get("collapsed") is True
 
     row_titles = {
         panel.get("title")
@@ -1430,14 +1464,16 @@ def test_workflow_dashboard_expands_step_diagnostics_below_first_screen() -> Non
     assert "Step Outcomes by Kind / Step Status / Range" in row_titles
     assert "Step Duration p95 by Kind / Step Status / Range" in row_titles
 
-    row_index = panels.index(row_panel)
-    child_indexes = {
-        panel.get("title"): index
-        for index, panel in enumerate(panels)
-        if panel.get("title") in row_titles
+    root_titles = {
+        panel.get("title") for panel in panels if isinstance(panel.get("title"), str)
     }
-    assert child_indexes["Step Outcomes by Kind / Step Status / Range"] > row_index
-    assert child_indexes["Step Duration p95 by Kind / Step Status / Range"] > row_index
+    assert "Step Outcomes by Kind / Step Status / Range" not in root_titles
+    assert "Step Duration p95 by Kind / Step Status / Range" not in root_titles
+    row_y = row_panel.get("gridPos", {}).get("y", 0)
+    assert all(
+        panel.get("gridPos", {}).get("y", 0) > row_y
+        for panel in get_row_child_panels(dashboard, "Step Diagnostics")
+    )
 
     next_panel = next(
         (panel for panel in panels if panel.get("title") == "First Action"),
@@ -1445,10 +1481,7 @@ def test_workflow_dashboard_expands_step_diagnostics_below_first_screen() -> Non
     )
     assert next_panel is not None
     next_grid = next_panel.get("gridPos", {})
-    assert next_grid.get("x") == 16
-    assert next_grid.get("y") == 7
-    assert next_grid.get("w") == 8
-    assert next_grid.get("h") == 10
+    assert next_grid == {"x": 0, "y": 17, "w": 24, "h": 5}
     data_links = next_panel.get("options", {}).get("dataLinks", [])
     assert data_links, "Workflow First Action must expose actionable dataLinks"
     observed_titles = {

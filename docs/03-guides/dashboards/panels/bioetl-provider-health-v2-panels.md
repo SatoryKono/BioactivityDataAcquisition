@@ -74,8 +74,9 @@ Dashboard `3. Provider Health` monitors provider current status, health-check la
 - **Data sources:** `bioetl_health_check_success_total`
 
 ### 14. Track Provider Failure Rate (Selected Range)
-- **Type:** Gauge
-- **Purpose:** Show provider failure rate.
+- **Type:** Stat
+- **Purpose:** Show provider failure rate as neutral selected-range supporting
+  evidence at 0%; WARN `>=5%`, CRIT `>=20%`.
 - **Data sources:** `bioetl_health_check_failures_total`
 
 ### 15. Track Health Checks Total (Selected Range)
@@ -110,7 +111,8 @@ Dashboard `3. Provider Health` monitors provider current status, health-check la
 
 ### 21. Selected Provider Detail
 - **Type:** Row
-- **Purpose:** Row-based provider detail workflow.
+- **Purpose:** Collapsed-by-default provider forensics. Expand when current
+  severity or a non-zero selected-range failure signal requires localization.
 - **Data sources:** `bioetl_adapter_request_duration_seconds_bucket`, `bioetl_http_request_errors_total`
 
 ### 22. Inspect Provider Health Check Latency (p95) - $provider
@@ -161,4 +163,7 @@ Dashboard `3. Provider Health` monitors provider current status, health-check la
 ## Notes
 
 - Provider health uses the health-check, adapter, HTTP, rate-limiter, and circuit-breaker families above.
+- Failure/degraded trends and provider failure-share stay inside `Selected
+  Provider Detail`; zero-range evidence no longer occupies the headline path or
+  renders as a dominant red gauge arc.
 - Legacy provider request-success/rate-limited placeholders are intentionally not documented here.

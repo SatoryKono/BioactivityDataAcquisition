@@ -28,11 +28,11 @@
       },
       "id": 1000,
       "options": {
-        "content": "<div style=\"display:flex;gap:6px;flex-wrap:nowrap;align-items:center;padding:4px 6px;overflow:hidden;white-space:nowrap;font-size:12px;\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$stage&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">3. Provider Health</a><span aria-current=\"page\" style=\"padding:3px 7px;color:#4b5563;text-decoration:none;border:1px solid #4b5563;border-radius:3px;background:rgba(75,85,99,0.18);cursor:default;\">4. Data Quality</span><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">5. Workflow</a><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/explore?actionView=search&amp;from=now-150m&amp;to=now&amp;var-ds=tempo&amp;var-groupBy=resource.service.name&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D%20%22${run_type}%22%20%7D\" style=\"padding:3px 7px;color:#ffffff;text-decoration:none;border:1px solid #ffffff;border-radius:3px;\">Explore Traces</a></div>",
+        "content": "<style>.bioetl-nav{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px 6px;overflow:visible;white-space:normal;font-size:11px}.bioetl-nav a,.bioetl-nav span{box-sizing:border-box;padding:3px 7px;border-radius:3px;font-weight:600;line-height:1.35}.bioetl-nav a{color:#f8fafc;background:#334155;border:1px solid #94a3b8;text-decoration:none}.bioetl-nav a:hover{color:#fff;background:#475569;border-color:#e2e8f0}.bioetl-nav a:focus-visible{outline:3px solid #38bdf8;outline-offset:2px}.bioetl-nav span[aria-current=page]{color:#fff;background:#1d4ed8;border:2px solid #7dd3fc;cursor:default}@media(max-width:1100px){.bioetl-nav a,.bioetl-nav span{flex:1 1 145px;text-align:center}}</style><div class=\"bioetl-nav\" role=\"navigation\" aria-label=\"BioETL dashboards\"><a href=\"/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">0. Control Plane</a><a href=\"/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">1. Overview</a><a href=\"/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-stage=$stage&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-run_id=$run_id\">2. Runtime</a><a href=\"/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&amp;var-pipeline_context=$pipeline&amp;var-adapter=unknown&amp;${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id\">3. Provider Health</a><span aria-current=\"page\">4. Data Quality</span><a href=\"/d/bioetl-workflow-overview/bioetl-workflow-overview?${__url_time_range}&amp;var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;var-run_id=$run_id\">5. Workflow</a><a href=\"/d/bioetl-alerts-slo/bioetl-alerts-slo?var-workflow=$workflow&amp;var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\">6. Alerts &amp; SLO</a><a href=\"/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&amp;var-run_type=$run_type&amp;${__url_time_range}\">Silver Reject Explorer</a><a href=\"/a/grafana-lokiexplore-app/explore?from=${__from}&amp;to=${__to}&amp;query=%7Bjob%3D%22bioetl%22%7D\">Explore Logs</a><a href=\"/a/grafana-exploretraces-app/explore?actionView=search&amp;from=${__from}&amp;to=${__to}&amp;var-ds=tempo&amp;var-groupBy=resource.service.name&amp;queryType=traceqlSearch&amp;query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D%20%22${run_type}%22%20%7D\">Explore Traces</a></div>",
         "mode": "html"
       },
       "title": "Review Dashboard Navigation",
-      "description": "Top navigation bus for the dashboard suite. Uses same-tab handoffs, preserves the current time range for dashboard-to-dashboard links, resets unsupported dashboard-specific scope where needed, and exposes Explore Logs plus an Explore Traces adjunct that is available only for traced runs with a safe bounded 150m Tempo handoff.",
+      "description": "Responsive same-tab navigation bus with identical composition and order across all shipped dashboards. It preserves the current time range and supported scope, uses theme-safe normal/hover/focus/active tokens, and wraps predictably at 1024 px. Explore Logs and Explore Traces require the optional tracing profile; traces are available only for traced runs. Alerts keep explicit Global/Pipeline/Run scope.",
       "type": "text",
       "links": [
         {
@@ -68,25 +68,32 @@
           "tooltip": "Preserves selected scope and time range."
         },
         {
+          "title": "6. Alerts & SLO",
+          "url": "/d/bioetl-alerts-slo/bioetl-alerts-slo?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false,
+          "tooltip": "Open the alert surface in the same tab. Global alerts remain explicitly badged and are not attributed to the selected pipeline."
+        },
+        {
           "title": "Silver Reject Explorer",
           "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
           "targetBlank": false,
           "includeVars": false,
-          "tooltip": "Cross-scope handoff: bounded pipeline/run_type explorer scope. Reset scope: Silver Reject Explorer owns record-level filters and forensic narrowing. Opens in the same tab."
+          "tooltip": "Cross-scope handoff: bounded pipeline/run_type explorer scope. Reset scope: record-level filters remain explorer-owned. Opens in the same tab."
         },
         {
           "title": "Explore Logs",
           "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D",
           "targetBlank": false,
           "includeVars": false,
-          "tooltip": "Tracing-profile dependency: opens Logs Drilldown in the same tab with safe {job=\"bioetl\"} baseline. Reset scope: dashboard selectors are not pre-applied; preserve the time range and refine pipeline/run_type inside Explore. Zero lines can legitimately mean Loki shipping is disabled, no BioETL log streams were shipped in range, or the baseline query still needs refinement inside Explore."
+          "tooltip": "Optional tracing profile adjunct evidence. Zero lines can legitimately mean shipping is disabled or no BioETL streams exist; refine in Explore."
         },
         {
           "title": "Explore Traces",
-          "url": "/a/grafana-exploretraces-app/explore?actionView=search&from=now-150m&to=now&var-ds=tempo&var-groupBy=resource.service.name&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D%20%22${run_type}%22%20%7D",
+          "url": "/a/grafana-exploretraces-app/explore?actionView=search&from=${__from}&to=${__to}&var-ds=tempo&var-groupBy=resource.service.name&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%26%26%20span.%22bioetl.run_type%22%20%3D%20%22${run_type}%22%20%7D",
           "targetBlank": false,
           "includeVars": false,
-          "tooltip": "Tracing-profile dependency: Available only for traced runs. Enable tracing with --tracing or BIOETL_OBSERVABILITY__TRACING_ENABLED=true. Reset scope: opens Traces Drilldown in the same tab with bounded pipeline/run_type TraceQL scope. NoOpTracing or tracing-off runs can legitimately be empty, so treat this as adjunct evidence rather than first-screen proof."
+          "tooltip": "Available only for traced runs. Enable the optional tracing profile with --tracing; this is adjunct evidence, not a headline verdict."
         }
       ]
     },
@@ -100,10 +107,10 @@
         "x": 0,
         "y": 3
       },
-      "description": "Unified context/provenance banner for 4. Data Quality. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only.",
+      "description": "Unified context/provenance banner for 4. Data Quality. Scope: workflow=$workflow, pipeline=$pipeline, run_type=$run_type, run_id=$run_id, selected Grafana time range. Workflow is context/evidence unless documented otherwise; run_id is local control-plane identity context only. Visible scope badges distinguish CURRENT, SELECTED RUN, and TIME RANGE evidence.",
       "options": {
         "mode": "html",
-        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;background:rgba(255,152,48,0.08);line-height:1.45;\"><div style=\"font-size:18px;font-weight:700;\">Is Data Quality currently OK/WARN/CRIT and what should be inspected first?</div></div>"
+        "content": "<div style=\"padding:10px 14px;border-left:4px solid #ff9830;line-height:1.4\"><div style=\"font-size:18px;font-weight:700\">Is data conformant, and what delivery impact needs action?</div><div><b>Scope:</b> CURRENT = Status/reasons · SELECTED RUN = ID/Processed Records · TIME RANGE = score, freshness and impact cards below. Do not compare different badges as peers.</div></div>"
       }
     },
     {
@@ -144,7 +151,7 @@
                   "color": "red"
                 },
                 "3": {
-                  "text": "UNKNOWN",
+                  "text": "INCOMPLETE",
                   "color": "gray"
                 }
               }
@@ -239,7 +246,7 @@
             "inspect": false
           },
           "unit": "none",
-          "noValue": "No identity rows. Check Quarantine Explorer/control-plane backend health (/health/live) and selected pipeline/run_id before treating this as no selected run.",
+          "noValue": "Not resolved — no identity rows for the selected run/scope. Check backend health (/health/live), then select or reset run_id; this is not a valid empty run.",
           "links": [
             {
               "title": "Check Quarantine Explorer health",
@@ -365,7 +372,7 @@
           },
           "decimals": 0,
           "unit": "none",
-          "noValue": "No processed-record rows. Check Quarantine Explorer backend health and selector scope; backend unavailable is not a valid zero-record state.",
+          "noValue": "Not resolved — no processed-record rows. Check backend health and selector scope; backend unavailable is not a valid zero-record state.",
           "links": [
             {
               "title": "Check Quarantine Explorer health",
@@ -804,99 +811,42 @@
       ]
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Selected-range evidence only. This panel no longer drives current DQ status; use Monitor DQ Current Status for incident state.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "Records",
-            "axisPlacement": "auto",
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
+      "id": 9103,
+      "type": "text",
+      "title": "Review: First Action",
       "gridPos": {
-        "h": 9,
-        "w": 24,
-        "x": 0,
-        "y": 36
+        "h": 10,
+        "w": 8,
+        "x": 16,
+        "y": 7
       },
-      "id": 1,
       "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max"
-          ],
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        },
-        "dataLinks": [
-          {
-            "title": "Open Logs in Loki Explore (tracing profile)",
-            "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
-          },
-          {
-            "title": "Open Traces in Tempo Explore (tracing profile)",
-            "url": "/a/grafana-exploretraces-app/explore?actionView=search&from=now-150m&to=now&var-ds=tempo&var-groupBy=resource.service.name&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%7D"
-          },
-          {
-            "title": "Open Logs (Loki, contextual scope marker, tracing)",
-            "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D%20%7C%20json%20%7C%20scope_marker%3D%22dashboard_context%22",
-            "targetBlank": true
-          }
-        ]
+        "content": "<h3>First Action</h3><p><b>1.</b> Read CURRENT verdict/reason. <b>2.</b> Read TIME RANGE delivery impact separately. <b>3.</b> Open the Silver explorer for structural rejects or expand the matching cause row.</p>",
+        "mode": "html"
       },
-      "targets": [
+      "description": "Operator CTA for first-pass DQ triage. It explains what to do for CRIT versus WARN states, clarifies that the answer row above is pipeline-wide current state while run_type and stage mainly shape selected-range evidence, and explicitly distinguishes reject-path evidence from quarantine/validation blockers when filtered_out remains zero.",
+      "links": [
         {
-          "expr": "sum by (pipeline, stage) (max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=~\"$stage\"}[$__interval]))",
-          "legendFormat": "{{pipeline}} / {{stage}}",
-          "refId": "A"
+          "title": "Review current status",
+          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9100&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}&var-workflow=$workflow",
+          "targetBlank": false,
+          "includeVars": false
         },
         {
-          "expr": "sum by (invariant, status) (increase(bioetl_record_flow_invariants_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
-          "legendFormat": "{{invariant}} / {{status}}",
-          "refId": "B"
+          "title": "Inspect current reasons",
+          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9102&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}&var-workflow=$workflow",
+          "targetBlank": false,
+          "includeVars": false
+        },
+        {
+          "title": "Open Silver Reject Explorer",
+          "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+          "targetBlank": false,
+          "includeVars": false
         }
       ],
-      "title": "Track Range Evidence: Bronze -> Silver -> Gold",
-      "type": "timeseries"
+      "pluginVersion": "12.2.0",
+      "transparent": true
     },
     {
       "datasource": {
@@ -924,6 +874,10 @@
                 "2": {
                   "text": "CRIT",
                   "color": "red"
+                },
+                "3": {
+                  "text": "INCOMPLETE",
+                  "color": "gray"
                 }
               }
             },
@@ -962,7 +916,7 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 5,
+        "w": 6,
         "x": 0,
         "y": 17
       },
@@ -1061,8 +1015,8 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 5,
-        "x": 5,
+        "w": 6,
+        "x": 6,
         "y": 17
       },
       "id": 9101,
@@ -1141,8 +1095,8 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 10,
-        "x": 10,
+        "w": 12,
+        "x": 12,
         "y": 17
       },
       "id": 9102,
@@ -1178,44 +1132,6 @@
       ],
       "title": "Inspect DQ Current Reasons",
       "type": "table"
-    },
-    {
-      "id": 9103,
-      "type": "text",
-      "title": "Review: First Action",
-      "gridPos": {
-        "h": 10,
-        "w": 8,
-        "x": 16,
-        "y": 7
-      },
-      "options": {
-        "content": "<div style=\"padding:0.45rem 0.6rem;line-height:1.35\"><table style=\"width:100%;border-collapse:collapse;font-size:12px\"><tr><th style=\"text-align:left;padding:2px 4px\">Verdict</th><th style=\"text-align:left;padding:2px 4px\">Next step</th></tr><tr><td style=\"padding:3px 4px;color:#f2495c\"><strong>CRIT</strong></td><td style=\"padding:3px 4px\">Inspect DQ current reasons first.</td></tr><tr><td style=\"padding:3px 4px;color:#ffb357\"><strong>WARN</strong></td><td style=\"padding:3px 4px\">Open Silver Reject Explorer for bounded reject evidence.</td></tr><tr><td style=\"padding:3px 4px;color:#9ca3af\"><strong>UNKNOWN</strong></td><td style=\"padding:3px 4px\">Verify telemetry/backend health before treating blanks as zero.</td></tr></table><div style=\"margin-top:0.35rem\"><strong>If filtered_out=0:</strong> check Quarantined, Silver Validation Failures, and Blocked Records before assuming reject-path only.</div><div style=\"margin-top:0.25rem\"><strong>Scope:</strong> headline status is pipeline-wide current state; run_type and stage shape selected-range evidence below.</div></div>",
-        "mode": "html"
-      },
-      "description": "Operator CTA for first-pass DQ triage. It explains what to do for CRIT versus WARN states, clarifies that the answer row above is pipeline-wide current state while run_type and stage mainly shape selected-range evidence, and explicitly distinguishes reject-path evidence from quarantine/validation blockers when filtered_out remains zero.",
-      "links": [
-        {
-          "title": "Review current status",
-          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9100&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}&var-workflow=$workflow",
-          "targetBlank": false,
-          "includeVars": false
-        },
-        {
-          "title": "Inspect current reasons",
-          "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9102&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}&var-workflow=$workflow",
-          "targetBlank": false,
-          "includeVars": false
-        },
-        {
-          "title": "Open Silver Reject Explorer",
-          "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-          "targetBlank": false,
-          "includeVars": false
-        }
-      ],
-      "pluginVersion": "12.2.0",
-      "transparent": true
     },
     {
       "datasource": {
@@ -1266,26 +1182,16 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
-        "w": 6,
+        "h": 6,
+        "w": 8,
         "x": 0,
         "y": 24
       },
       "id": 2,
       "options": {
-        "dataLinks": [
-          {
-            "targetBlank": true,
-            "title": "Open DQ Investigation Runbook",
-            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
-          },
-          {
-            "targetBlank": false,
-            "title": "Open Silver Reject Explorer",
-            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}",
-            "includeVars": false
-          }
-        ],
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
@@ -1294,8 +1200,7 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
+        "textMode": "auto"
       },
       "targets": [
         {
@@ -1305,144 +1210,6 @@
         }
       ],
       "title": "Monitor: Data Quality Score (Volume-weighted)",
-      "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Selected-range Bronze denominator for DQ triage. 0 means no Bronze records were observed inside the active window; it does not prove DQ metrics are missing. Compare with Gold output and blocked-share panels below.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 0,
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
-              }
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "gray",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 8,
-        "x": 0,
-        "y": 45
-      },
-      "id": 3,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "targets": [
-        {
-          "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])) or vector(0))",
-          "instant": true,
-          "legendFormat": "Bronze",
-          "refId": "A"
-        }
-      ],
-      "title": "Track: Source Records in Range (Bronze)",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Selected-range Gold output count for DQ deliverability triage. 0 means no Gold records were observed inside the active window; it does not prove the current DQ verdict is OK or UNKNOWN. Compare with Bronze denominator, blocked-share, and the shared Processed Records table before interpreting data loss.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 0,
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
-              }
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "gray",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 8,
-        "x": 8,
-        "y": 45
-      },
-      "id": 4,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "targets": [
-        {
-          "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}[$__range])) or vector(0))",
-          "instant": true,
-          "legendFormat": "Gold",
-          "refId": "A"
-        }
-      ],
-      "title": "Track: Clean Records in Range (Gold)",
       "type": "stat"
     },
     {
@@ -1493,12 +1260,96 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
-        "w": 6,
-        "x": 6,
+        "h": 6,
+        "w": 8,
+        "x": 8,
         "y": 24
       },
       "id": 5,
+      "options": {
+        "colorMode": "value",
+        "dataLinks": [
+          {
+            "targetBlank": true,
+            "title": "Open DQ Investigation Runbook",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
+          }
+        ],
+        "graphMode": "none",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "min(bioetl_dq_validation_score{pipeline=~\"$pipeline\"})",
+          "legendFormat": "Worst Entity",
+          "refId": "A"
+        }
+      ],
+      "title": "Monitor: Worst-Entity DQ Score",
+      "type": "stat",
+      "description": "Selected-range pipeline-scoped worst-entity DQ score. No data means no matching validation score samples for the selected scope, not a successful exact run."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "TIME RANGE freshness age in hours. Explicit SLA: WARN at 24h and CRIT at 72h. An ~8h value is green only because it is below the visible 24h SLA; null is UNKNOWN.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 1,
+          "mappings": [
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "UNKNOWN",
+                  "color": "gray"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 24
+              },
+              {
+                "color": "red",
+                "value": 72
+              }
+            ]
+          },
+          "unit": "h"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 24
+      },
+      "id": 8,
       "options": {
         "dataLinks": [
           {
@@ -1520,21 +1371,20 @@
       },
       "targets": [
         {
-          "expr": "min(bioetl_dq_validation_score{pipeline=~\"$pipeline\"})",
-          "legendFormat": "Worst Entity",
+          "expr": "(max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}[$__range]), 0))) / 3600",
+          "legendFormat": "Worst Freshness",
           "refId": "A"
         }
       ],
-      "title": "Monitor: Worst-Entity DQ Score",
-      "type": "gauge",
-      "description": "Selected-range pipeline-scoped worst-entity DQ score. No data means no matching validation score samples for the selected scope, not a successful exact run."
+      "title": "Time Range · Worst Freshness Age (hours; SLA 24/72)",
+      "type": "gauge"
     },
     {
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Selected-range quarantine count. Non-zero means records were withheld from normal promotion and require quarantine triage even when Silver filter rejects remain zero; 0 means no quarantined records were reported in the selected window.",
+      "description": "TIME RANGE delivery impact. Selected-range quarantine count. Non-zero means records were withheld from normal promotion and require quarantine triage even when Silver filter rejects remain zero; 0 means no quarantined records were reported in the selected window.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1542,6 +1392,15 @@
           },
           "decimals": 0,
           "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "0 · valid empty range",
+                  "color": "gray"
+                }
+              }
+            },
             {
               "type": "special",
               "options": {
@@ -1567,10 +1426,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
-        "w": 6,
-        "x": 18,
-        "y": 24
+        "h": 5,
+        "w": 8,
+        "x": 0,
+        "y": 30
       },
       "id": 6,
       "options": {
@@ -1615,7 +1474,6 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Selected-range count of Silver validation failures. Non-zero means Silver validation blocked or degraded promotion in the active window, and this can drive current CRIT even when filtered_out stays zero. Correlate with current DQ reasons and quarantine evidence before replay.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1623,6 +1481,15 @@
           },
           "decimals": 0,
           "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "0 · valid empty range",
+                  "color": "gray"
+                }
+              }
+            },
             {
               "type": "special",
               "options": {
@@ -1643,7 +1510,8 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "short",
+          "links": []
         },
         "overrides": []
       },
@@ -1651,21 +1519,16 @@
         "h": 5,
         "w": 8,
         "x": 8,
-        "y": 31
+        "y": 30
       },
-      "id": 7,
+      "id": 117,
       "options": {
         "colorMode": "value",
         "dataLinks": [
           {
-            "targetBlank": true,
-            "title": "Open DQ Investigation Runbook",
-            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
-          },
-          {
             "targetBlank": false,
-            "title": "Open DQ Current Reasons",
-            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9102&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}&var-workflow=$workflow",
+            "title": "Open Silver Reject Explorer",
+            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}",
             "includeVars": false
           }
         ],
@@ -1683,101 +1546,22 @@
       },
       "targets": [
         {
-          "expr": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) + ((sum(increase(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) * 0))",
-          "legendFormat": "Validation Failures",
+          "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))",
+          "instant": true,
+          "legendFormat": "Filtered Out",
           "refId": "A"
         }
       ],
-      "title": "Track: Silver Validation Failures in Range",
-      "type": "stat"
+      "title": "Track: Silver Filter Rejects in Range",
+      "type": "stat",
+      "description": "TIME RANGE delivery impact. Selected-range Silver structural reject count from the filtered_out path only. FILTERED_OUT_SILVER is a legacy alias for this Silver structural path and is not a Gold contract/semantic reject code. A zero here does not refute current CRIT because quarantine, Gold reject outcomes, and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation/Gold panels before assuming the incident is filter-driven. The Explorer handoff preserves pipeline/run_type and time range so the operator can validate scoped totals before narrowing by reason_code or field."
     },
     {
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Current worst freshness lag in seconds for the selected pipeline. Large values indicate stale data even if no DQ hard-fail is active; compare with latest-success timestamp to distinguish stale entities from total pipeline inactivity.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 0,
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
-              }
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 86400
-              },
-              {
-                "color": "red",
-                "value": 259200
-              }
-            ]
-          },
-          "unit": "s"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 8,
-        "x": 0,
-        "y": 31
-      },
-      "id": 8,
-      "options": {
-        "dataLinks": [
-          {
-            "targetBlank": true,
-            "title": "Open DQ Investigation Runbook",
-            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
-          }
-        ],
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
-      },
-      "targets": [
-        {
-          "expr": "max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}[$__range]), 0))",
-          "legendFormat": "Worst Freshness",
-          "refId": "A"
-        }
-      ],
-      "title": "Monitor: Worst Data Freshness Lag (seconds)",
-      "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Selected-range blocked-record evidence only. Counts Silver filter rejects plus DQ quarantine records for the pipeline/run_type window without applying entity YAML thresholds in Grafana. Read alongside the adjacent Track: Source Records in Range (Bronze) panel for the denominator/magnitude context, and rely on Monitor DQ Current Status / Monitor DQ Threshold State (bioetl_dq_current_* recording rules) for the soft/hard severity verdict instead of the absolute count. 0 means no blocked records were observed in the selected window.",
+      "description": "TIME RANGE delivery impact. Selected-range blocked-record evidence only. Counts Silver filter rejects plus DQ quarantine records for the pipeline/run_type window without applying entity YAML thresholds in Grafana. Read alongside the adjacent Track: Source Records in Range (Bronze) panel for the denominator/magnitude context, and rely on Monitor DQ Current Status / Monitor DQ Threshold State (bioetl_dq_current_* recording rules) for the soft/hard severity verdict instead of the absolute count. 0 means no blocked records were observed in the selected window.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1796,6 +1580,15 @@
           "unit": "short",
           "mappings": [
             {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "0 · valid empty range",
+                  "color": "gray"
+                }
+              }
+            },
+            {
               "type": "special",
               "options": {
                 "match": "null",
@@ -1810,10 +1603,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
+        "h": 5,
         "w": 8,
         "x": 16,
-        "y": 45
+        "y": 30
       },
       "id": 154,
       "options": {
@@ -1858,1227 +1651,1475 @@
       "type": "stat"
     },
     {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            }
-          },
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
-              }
-            }
-          ],
-          "noValue": "UNKNOWN",
-          "unit": "dateTimeAsIso",
-          "decimals": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "gray",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 7,
-        "w": 4,
-        "x": 20,
-        "y": 17
-      },
-      "id": 101,
-      "options": {
-        "colorMode": "value",
-        "dataLinks": [
-          {
-            "targetBlank": true,
-            "title": "Open DQ Investigation Runbook",
-            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
-          },
-          {
-            "targetBlank": false,
-            "title": "Open DQ Current Reasons",
-            "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9102&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}&var-workflow=$workflow",
-            "includeVars": false
-          }
-        ],
-        "graphMode": "none",
-        "justifyMode": "center",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "targets": [
-        {
-          "expr": "max(max_over_time(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}[$__range])) * 1000",
-          "legendFormat": "Latest Data",
-          "refId": "A"
-        }
-      ],
-      "description": "Latest successful data timestamp for the selected pipeline scope. This is current freshness context and compact supporting evidence rather than a first-answer verdict or selected-range proof. UNKNOWN means no freshness proof is available now; next action: inspect DQ Current Reasons and the DQ investigation runbook before treating stale or blank values as healthy.",
-      "title": "Review: Latest Successful Data Timestamp",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 0,
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
-              }
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "gray",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short",
-          "links": []
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 5,
-        "w": 8,
-        "x": 16,
-        "y": 31
-      },
-      "id": 117,
-      "options": {
-        "colorMode": "value",
-        "dataLinks": [
-          {
-            "targetBlank": false,
-            "title": "Open Silver Reject Explorer",
-            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}",
-            "includeVars": false
-          }
-        ],
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "targets": [
-        {
-          "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range])) or vector(0))",
-          "instant": true,
-          "legendFormat": "Filtered Out",
-          "refId": "A"
-        }
-      ],
-      "title": "Track: Silver Filter Rejects in Range",
-      "type": "stat",
-      "description": "Selected-range Silver structural reject count from the filtered_out path only. FILTERED_OUT_SILVER is a legacy alias for this Silver structural path and is not a Gold contract/semantic reject code. A zero here does not refute current CRIT because quarantine, Gold reject outcomes, and Silver validation blockers are separate paths; use first-screen DQ reasons and the quarantine/validation/Gold panels before assuming the incident is filter-driven. The Explorer handoff preserves pipeline/run_type and time range so the operator can validate scoped totals before narrowing by reason_code or field."
-    },
-    {
-      "collapsed": false,
+      "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 52
+        "y": 35
       },
       "id": 220,
       "title": "Silver Structural / Gold Contract-Semantic Rejects",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Silver structural reject reconciliation signal. Non-zero means the stage-total filtered_out counter diverges from the bounded Silver reject breakdown metric over the selected range. Gold contract/semantic reject outcomes are excluded from this guardrail.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
+      "type": "row",
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
           },
-          "decimals": 0,
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
+          "description": "Silver structural reject reconciliation signal. Non-zero means the stage-total filtered_out counter diverges from the bounded Silver reject breakdown metric over the selected range. Gold contract/semantic reject outcomes are excluded from this guardrail.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0,
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
                 }
-              }
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "gray",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "short",
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 24,
+            "x": 0,
+            "y": 36
+          },
+          "id": 152,
+          "options": {
+            "colorMode": "backgroundSolid",
+            "dataLinks": [
               {
-                "color": "gray",
-                "value": null
+                "targetBlank": false,
+                "title": "Open Silver Reject Explorer",
+                "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}",
+                "includeVars": false
               },
               {
-                "color": "green",
-                "value": 0
+                "targetBlank": true,
+                "title": "Open Traceability Signal Ownership Runbook",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/traceability-signal-ownership.md?pipeline=${pipeline:queryparam}&${__url_time_range}"
+              }
+            ],
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))",
+              "refId": "A"
+            }
+          ],
+          "title": "Monitor: Silver Filter Reject Accounting Mismatch",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
               },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          },
-          "unit": "short",
-          "links": []
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 0,
-        "y": 53
-      },
-      "id": 152,
-      "options": {
-        "colorMode": "backgroundSolid",
-        "dataLinks": [
-          {
-            "targetBlank": false,
-            "title": "Open Silver Reject Explorer",
-            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&${__url_time_range}",
-            "includeVars": false
-          },
-          {
-            "targetBlank": true,
-            "title": "Open Traceability Signal Ownership Runbook",
-            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/traceability-signal-ownership.md?pipeline=${pipeline:queryparam}&${__url_time_range}"
-          }
-        ],
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "targets": [
-        {
-          "expr": "round(sum(max_over_time(bioetl_silver_filter_reject_total_mismatch_15m{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])) or vector(0))",
-          "refId": "A"
-        }
-      ],
-      "title": "Monitor: Silver Filter Reject Accounting Mismatch",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Selected-range pipeline breakdown of Silver structural rejects from the filtered_out stage-total counter. This is a scope/distribution panel, not a reason_code summary, and it intentionally excludes Gold contract/semantic rejects. No data means no filtered_out samples were observed in the active window; the panel must not invent a synthetic pipeline row.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "Rejects",
-            "axisPlacement": "auto",
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
+              "custom": {
+                "axisLabel": "Rejects",
+                "axisPlacement": "auto",
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "noValue": "No reject reason samples in range",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short",
+              "links": [],
+              "decimals": 0
             },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
+            "overrides": []
           },
-          "mappings": [],
-          "noValue": "No filtered-out samples in range",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 41
+          },
+          "id": 121,
+          "options": {
+            "dataLinks": [
               {
-                "color": "green",
-                "value": null
+                "targetBlank": false,
+                "title": "Open Silver Reject Explorer for this reason",
+                "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&var-reason_code=${__series.name}&${__url_time_range}",
+                "includeVars": false
               }
-            ]
-          },
-          "unit": "short",
-          "links": []
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 0,
-        "y": 61
-      },
-      "id": 118,
-      "options": {
-        "dataLinks": [
-          {
-            "targetBlank": false,
-            "title": "Open Silver Reject Explorer for this pipeline scope",
-            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${__series.name}&var-run_type=${run_type:queryparam}&${__url_time_range}",
-            "includeVars": false
-          }
-        ],
-        "displayMode": "gradient",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true
-      },
-      "targets": [
-        {
-          "expr": "sum by (pipeline) (max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range]))",
-          "instant": true,
-          "legendFormat": "{{pipeline}}",
-          "refId": "A"
-        }
-      ],
-      "title": "Inspect: Silver Filter Rejects by Pipeline",
-      "type": "bargauge"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Selected-range Gold reject outcomes by pipeline. This panel separates Gold contract quarantines and semantic/contract exclusions from Silver structural FILTERED_OUT_SILVER rows; use it when DQ pressure is not explained by the Silver Reject Explorer. No data means no Gold reject outcome samples were observed in the active window.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "Gold rejects",
-            "axisPlacement": "auto",
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
+            ],
+            "displayMode": "gradient",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
             },
-            "thresholdsStyle": {
-              "mode": "off"
+            "showUnfilled": true
+          },
+          "targets": [
+            {
+              "expr": "topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))",
+              "instant": true,
+              "legendFormat": "{{reason_code}}",
+              "refId": "A"
             }
-          },
-          "mappings": [],
-          "noValue": "No Gold reject samples in range",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short",
-          "links": []
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 8,
-        "y": 61
-      },
-      "id": 156,
-      "options": {
-        "dataLinks": [
-          {
-            "targetBlank": true,
-            "title": "Open Silver/Gold Boundary ADR",
-            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md?pipeline=${pipeline:queryparam}&${__url_time_range}"
-          }
-        ],
-        "displayMode": "gradient",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
           ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true
-      },
-      "targets": [
-        {
-          "expr": "sum by (pipeline) (max_over_time(bioetl_processed_records_gold_quarantined_current{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
-          "instant": true,
-          "legendFormat": "gold_quarantined {{pipeline}}",
-          "refId": "A"
+          "title": "Inspect: Top Silver Reject Reasons (Pareto)",
+          "type": "bargauge",
+          "description": "Pareto ranking of bounded Silver structural reject reasons across the selected range. Use the direct Silver Reject Explorer drilldown on each bar to open record-level detail already filtered by pipeline/run_type/reason_code and then validate representative payload_hash rows. Gold contract/semantic rejects are intentionally excluded. No data means no bounded reject breakdown samples were observed in range; the panel must not invent a synthetic reason bucket."
         },
         {
-          "expr": "sum by (pipeline) (max_over_time(bioetl_processed_records_gold_excluded_by_contract_current{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
-          "instant": true,
-          "legendFormat": "gold_excluded_by_contract {{pipeline}}",
-          "refId": "B"
-        }
-      ],
-      "title": "Inspect: Gold Reject Outcomes by Pipeline",
-      "type": "bargauge"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
           },
-          "custom": {
-            "axisLabel": "Rejects",
-            "axisPlacement": "auto",
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "Rejects",
+                "axisPlacement": "auto",
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "noValue": "No reject field samples in range",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short",
+              "links": [],
+              "decimals": 0
             },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
+            "overrides": []
           },
-          "mappings": [],
-          "noValue": "No reject reason samples in range",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 41
+          },
+          "id": 122,
+          "options": {
+            "dataLinks": [
               {
-                "color": "green",
-                "value": null
+                "targetBlank": false,
+                "title": "Open Silver Reject Explorer for this field",
+                "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&var-field=${__series.name}&${__url_time_range}",
+                "includeVars": false
               }
-            ]
-          },
-          "unit": "short",
-          "links": []
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 8,
-        "y": 53
-      },
-      "id": 121,
-      "options": {
-        "dataLinks": [
-          {
-            "targetBlank": false,
-            "title": "Open Silver Reject Explorer for this reason",
-            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&var-reason_code=${__series.name}&${__url_time_range}",
-            "includeVars": false
-          }
-        ],
-        "displayMode": "gradient",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true
-      },
-      "targets": [
-        {
-          "expr": "topk(10, sum by (reason_code) (increase(bioetl_silver_filter_rejections_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))",
-          "instant": true,
-          "legendFormat": "{{reason_code}}",
-          "refId": "A"
-        }
-      ],
-      "title": "Inspect: Top Silver Reject Reasons (Pareto)",
-      "type": "bargauge",
-      "description": "Pareto ranking of bounded Silver structural reject reasons across the selected range. Use the direct Silver Reject Explorer drilldown on each bar to open record-level detail already filtered by pipeline/run_type/reason_code and then validate representative payload_hash rows. Gold contract/semantic rejects are intentionally excluded. No data means no bounded reject breakdown samples were observed in range; the panel must not invent a synthetic reason bucket."
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "Rejects",
-            "axisPlacement": "auto",
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
+            ],
+            "displayMode": "gradient",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
             },
-            "thresholdsStyle": {
-              "mode": "off"
+            "showUnfilled": true
+          },
+          "targets": [
+            {
+              "expr": "topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))",
+              "instant": true,
+              "legendFormat": "{{field}}",
+              "refId": "A"
             }
-          },
-          "mappings": [],
-          "noValue": "No reject field samples in range",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short",
-          "links": []
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 16,
-        "y": 53
-      },
-      "id": 122,
-      "options": {
-        "dataLinks": [
-          {
-            "targetBlank": false,
-            "title": "Open Silver Reject Explorer for this field",
-            "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${pipeline:queryparam}&var-run_type=${run_type:queryparam}&var-field=${__series.name}&${__url_time_range}",
-            "includeVars": false
-          }
-        ],
-        "displayMode": "gradient",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
           ],
-          "fields": "",
-          "values": false
+          "title": "Inspect: Top Silver Reject Fields",
+          "type": "bargauge",
+          "description": "Bounded Silver structural schema-field summary for the selected range. Use the direct Silver Reject Explorer drilldown on each bar to open record-level detail already filtered by pipeline/run_type/field and then compare top reason signatures inside the explorer. Gold contract/semantic rejects are intentionally excluded. No data means no bounded reject field samples were observed in range; the panel must not invent a synthetic field bucket."
         },
-        "showUnfilled": true
-      },
-      "targets": [
         {
-          "expr": "topk(10, sum by (field) (increase(bioetl_silver_filter_rejections_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range])))",
-          "instant": true,
-          "legendFormat": "{{field}}",
-          "refId": "A"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Selected-range pipeline breakdown of Silver structural rejects from the filtered_out stage-total counter. This is a scope/distribution panel, not a reason_code summary, and it intentionally excludes Gold contract/semantic rejects. No data means no filtered_out samples were observed in the active window; the panel must not invent a synthetic pipeline row.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "Rejects",
+                "axisPlacement": "auto",
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "noValue": "No filtered-out samples in range",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short",
+              "links": [],
+              "decimals": 0
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 47
+          },
+          "id": 118,
+          "options": {
+            "dataLinks": [
+              {
+                "targetBlank": false,
+                "title": "Open Silver Reject Explorer for this pipeline scope",
+                "url": "/d/bioetl-silver-reject-explorer/bioetl-silver-reject-explorer?var-pipeline=${__series.name}&var-run_type=${run_type:queryparam}&${__url_time_range}",
+                "includeVars": false
+              }
+            ],
+            "displayMode": "gradient",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showUnfilled": true
+          },
+          "targets": [
+            {
+              "expr": "sum by (pipeline) (max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"filtered_out\"}[$__range]))",
+              "instant": true,
+              "legendFormat": "{{pipeline}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Inspect: Silver Filter Rejects by Pipeline",
+          "type": "bargauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Selected-range Gold reject outcomes by pipeline. This panel separates Gold contract quarantines and semantic/contract exclusions from Silver structural FILTERED_OUT_SILVER rows; use it when DQ pressure is not explained by the Silver Reject Explorer. No data means no Gold reject outcome samples were observed in the active window.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "Gold rejects",
+                "axisPlacement": "auto",
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "noValue": "No Gold reject samples in range",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short",
+              "links": [],
+              "decimals": 0
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 47
+          },
+          "id": 156,
+          "options": {
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open Silver/Gold Boundary ADR",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/02-architecture/decisions/ADR-050-silver-structural-gold-semantic-filter-boundary.md?pipeline=${pipeline:queryparam}&${__url_time_range}"
+              }
+            ],
+            "displayMode": "gradient",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showUnfilled": true
+          },
+          "targets": [
+            {
+              "expr": "sum by (pipeline) (max_over_time(bioetl_processed_records_gold_quarantined_current{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
+              "instant": true,
+              "legendFormat": "gold_quarantined {{pipeline}}",
+              "refId": "A"
+            },
+            {
+              "expr": "sum by (pipeline) (max_over_time(bioetl_processed_records_gold_excluded_by_contract_current{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
+              "instant": true,
+              "legendFormat": "gold_excluded_by_contract {{pipeline}}",
+              "refId": "B"
+            }
+          ],
+          "title": "Inspect: Gold Reject Outcomes by Pipeline",
+          "type": "bargauge"
         }
-      ],
-      "title": "Inspect: Top Silver Reject Fields",
-      "type": "bargauge",
-      "description": "Bounded Silver structural schema-field summary for the selected range. Use the direct Silver Reject Explorer drilldown on each bar to open record-level detail already filtered by pipeline/run_type/field and then compare top reason signatures inside the explorer. Gold contract/semantic rejects are intentionally excluded. No data means no bounded reject field samples were observed in range; the panel must not invent a synthetic field bucket."
+      ]
     },
     {
-      "collapsed": false,
+      "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 69
+        "y": 36
       },
       "id": 221,
       "title": "Validation Failures / Runtime Diagnostics / Trends",
-      "type": "row"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Selected-range quarantine breakdown by error_type. Use it to determine whether current DQ pressure is dominated by a specific quarantine signature before moving to logs, traces, or downstream validation surfaces. Horizontal bars are intentional here because category comparison matters more than composition percentage. No data means no quarantined records were observed in the active window; the panel must not invent a synthetic error_type bucket.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "Quarantined records",
-            "axisPlacement": "auto",
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "none",
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "noValue": "No quarantined records in range",
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 70
-      },
-      "id": 9,
-      "options": {
-        "displayMode": "gradient",
-        "orientation": "horizontal",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showUnfilled": true
-      },
-      "targets": [
-        {
-          "expr": "sum by (error_type) (max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
-          "legendFormat": "{{error_type}}",
-          "refId": "A"
-        }
-      ],
-      "title": "Inspect: Quarantine by Error Type",
-      "type": "bargauge"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Selected-range anomaly counts by severity and anomaly type. WARN-only anomalies indicate drift; CRIT anomalies are blocking and should be correlated with current DQ reasons before replay or promotion. No data means no anomaly events were observed in the current window; the panel must not invent a synthetic severity/type series.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "Anomalies",
-            "axisPlacement": "auto",
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "noValue": "No anomaly events in range",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 0,
-        "y": 78
-      },
-      "id": 10,
-      "options": {
-        "legend": {
-          "calcs": [
-            "sum",
-            "max"
-          ],
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "targets": [
-        {
-          "expr": "sum by (severity, anomaly_type) (increase(bioetl_dq_anomaly_detected{pipeline=~\"$pipeline\"}[$__interval]))",
-          "legendFormat": "{{severity}} / {{anomaly_type}}",
-          "refId": "A"
-        }
-      ],
-      "title": "Track: Anomalies Detected",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Selected-range p95 duration of DQ checks. This is a diagnostics/performance surface, not a quality outcome; use it when DQ checks themselves look slow or noisy during an incident. Samples exist only when the runtime emitted bioetl_dq_check_duration_ms, which requires an active DQ monitor path rather than disabled/noop monitoring. No data means no DQ duration samples were observed in range or DQ timing telemetry is absent; it is not equivalent to fast checks.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "Duration (ms)",
-            "axisPlacement": "auto",
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "lineInterpolation": "linear",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "noValue": "No DQ duration samples",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "ms"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 12,
-        "x": 12,
-        "y": 78
-      },
-      "id": 11,
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean",
-            "max"
-          ],
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "targets": [
-        {
-          "expr": "histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__interval])))",
-          "legendFormat": "{{pipeline}} p95",
-          "refId": "A"
-        }
-      ],
-      "title": "Track: DQ Check Duration (p95)",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Selected-range count of canonical Silver validation failures. Non-zero means Silver validation blocked or degraded promotion and should be correlated with current DQ reasons and reject/quarantine evidence.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 0,
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
-              }
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "gray",
-                "value": null
-              },
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 1
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 12,
-        "y": 70
-      },
-      "id": 12,
-      "options": {
-        "colorMode": "backgroundSolid",
-        "dataLinks": [
-          {
-            "targetBlank": true,
-            "title": "Open DQ Investigation Runbook",
-            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
-          }
-        ],
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "targets": [
-        {
-          "expr": "round(sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
-          "legendFormat": "Validation Failures",
-          "refId": "A"
-        }
-      ],
-      "title": "Monitor: Silver Validation Failures",
-      "type": "stat"
-    },
-    {
-      "description": "Lineage-reference gaps remain a replay/control-plane trust signal owned by `0. Control Plane`. This DQ surface keeps only a compact handoff so the trends row can stay focused on local DQ evidence. Open the canonical control-plane panels when missing lineage must be reviewed together with replay blockers, manifest / ledger evidence, and artifact identity anchors.",
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [],
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 16,
-        "y": 87
-      },
-      "id": 116,
-      "links": [
-        {
-          "includeVars": false,
-          "targetBlank": false,
-          "title": "Open Control Plane lineage diagnostics",
-          "tooltip": "Canonical lineage/replay trust surface. Opens the Control Plane dashboard focused on its lineage diagnostics row.",
-          "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?viewPanel=904&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id"
-        }
-      ],
-      "options": {
-        "content": "### Open Control Plane for lineage trust\n- Use **0. Control Plane** for the canonical `Monitor: Lineage Refs Missing` signal.\n- Review lineage gaps together with replay blockers, manifest / ledger integrity, and artifact identity anchors.\n- This DQ row keeps local reject, quarantine, validation, and trend evidence separate from control-plane trust ownership.\n",
-        "dataLinks": [
-          {
-            "includeVars": false,
-            "targetBlank": false,
-            "title": "Open Control Plane lineage diagnostics",
-            "tooltip": "Canonical lineage/replay trust surface. Opens the Control Plane dashboard focused on its lineage diagnostics row.",
-            "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?viewPanel=904&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id"
-          }
-        ],
-        "mode": "markdown"
-      },
-      "title": "Review: Lineage Handoff to Control Plane",
-      "type": "text"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Quality score trend over selected time range. Kept separate from operational gating indicators. Score thresholds: <0.80=CRIT, 0.80-0.95=WARN, >=0.95=OK; null=UNKNOWN.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 2,
-          "max": 1,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "orange",
-                "value": 0.8
-              },
-              {
-                "color": "green",
-                "value": 0.95
-              }
-            ]
-          },
-          "unit": "percentunit",
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
-              }
-            }
-          ]
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 8,
-        "y": 87
-      },
-      "id": 153,
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
+      "type": "row",
+      "panels": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "editorMode": "code",
-          "expr": "((sum((bioetl_dq_validation_score{pipeline=~\"$pipeline\"} * bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}))) / clamp_min(sum(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}), 1))",
-          "legendFormat": "DQ score",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Track: Data Quality Score Trend (Volume-weighted)",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Selected-range trend of domain-emitted DQ threshold events. Uses bioetl_dq_soft_threshold_exceeded and hard_fail validation counters only; Grafana does not recompute entity YAML thresholds here.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
+          "description": "Selected-range evidence only. This panel no longer drives current DQ status; use Monitor DQ Current Status for incident state. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "Records",
+                "axisPlacement": "auto",
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
           },
-          "decimals": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
+          "gridPos": {
+            "h": 5,
+            "w": 24,
+            "x": 0,
+            "y": 37
+          },
+          "id": 1,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "dataLinks": [
               {
-                "color": "green",
-                "value": null
+                "title": "Open Logs in Loki Explore (tracing profile)",
+                "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D"
+              },
+              {
+                "title": "Open Traces in Tempo Explore (tracing profile)",
+                "url": "/a/grafana-exploretraces-app/explore?actionView=search&from=${__from}&to=${__to}&var-ds=tempo&var-groupBy=resource.service.name&queryType=traceqlSearch&query=%7B%20span.%22bioetl.pipeline%22%20%3D~%20%22${pipeline:regex}%22%20%7D"
+              },
+              {
+                "title": "Open Logs (Loki, contextual scope marker, tracing)",
+                "url": "/a/grafana-lokiexplore-app/explore?from=${__from}&to=${__to}&query=%7Bjob%3D%22bioetl%22%7D%20%7C%20json%20%7C%20scope_marker%3D%22dashboard_context%22",
+                "targetBlank": true
               }
             ]
           },
-          "unit": "short",
-          "mappings": [
+          "targets": [
             {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
-                }
-              }
+              "expr": "sum by (pipeline, stage) (max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=~\"$stage\"}[$__interval]))",
+              "legendFormat": "{{pipeline}} / {{stage}}",
+              "refId": "A"
+            },
+            {
+              "expr": "sum by (invariant, status) (increase(bioetl_record_flow_invariants_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__interval]))",
+              "legendFormat": "{{invariant}} / {{status}}",
+              "refId": "B"
             }
-          ]
+          ],
+          "title": "Track Range Evidence: Bronze -> Silver -> Gold",
+          "type": "timeseries"
         },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 0,
-        "y": 87
-      },
-      "id": 155,
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "editorMode": "code",
-          "expr": "round((sum(increase(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[$__interval])) or vector(0)) + (sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__interval])) or vector(0)))",
-          "legendFormat": "threshold events",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Track: DQ Threshold Events in Range Trend",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [],
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 24,
-        "x": 0,
-        "y": 95
-      },
-      "id": 150,
-      "description": "Compact handoff note for aggregate control-plane symptoms. Keep this as footer guidance only; operational evidence still lives in `0. Control Plane` and its runbook surfaces.",
-      "options": {
-        "content": "### Use Control Plane for aggregate failures\n- Open `0. Control Plane` for aggregated manifest writes, ledger appends, checkpoint compatibility outcomes, and control-plane read failures.\n- Use the `Observability Checklist (runbook)` link when `BioETLControlPlaneReadFailureRate` or related aggregate signals require operator follow-up.\n",
-        "mode": "markdown"
-      },
-      "title": "Review: Aggregate Control-plane Handoff",
-      "type": "text"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Selected-range Gold strict-validation hard-fail count. Non-zero means Gold promotion was blocked. Zero means no hard-fail samples were observed in the selected window; it does not prove Gold validation ran or that Gold output exists.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "decimals": 0,
-          "mappings": [
-            {
-              "type": "special",
-              "options": {
-                "match": "null",
-                "result": {
-                  "text": "UNKNOWN",
-                  "color": "gray"
+          "description": "Selected-range Bronze denominator for DQ triage. 0 means no Bronze records were observed inside the active window; it does not prove DQ metrics are missing. Compare with Gold output and blocked-share panels below.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0,
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
                 }
-              }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "gray",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 42
+          },
+          "id": 3,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"bronze\"}[$__range])) or vector(0))",
+              "instant": true,
+              "legendFormat": "Bronze",
+              "refId": "A"
             }
           ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
+          "title": "Track: Source Records in Range (Bronze)",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Selected-range Gold output count for DQ deliverability triage. 0 means no Gold records were observed inside the active window; it does not prove the current DQ verdict is OK or UNKNOWN. Compare with Bronze denominator, blocked-share, and the shared Processed Records table before interpreting data loss.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0,
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "gray",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 48
+          },
+          "id": 4,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "round(sum(max_over_time(bioetl_records_processed_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\", stage=\"gold\"}[$__range])) or vector(0))",
+              "instant": true,
+              "legendFormat": "Gold",
+              "refId": "A"
+            }
+          ],
+          "title": "Track: Clean Records in Range (Gold)",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Selected-range count of Silver validation failures. Non-zero means Silver validation blocked or degraded promotion in the active window, and this can drive current CRIT even when filtered_out stays zero. Correlate with current DQ reasons and quarantine evidence before replay.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0,
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "gray",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 48
+          },
+          "id": 7,
+          "options": {
+            "colorMode": "value",
+            "dataLinks": [
               {
-                "color": "gray",
-                "value": null
+                "targetBlank": true,
+                "title": "Open DQ Investigation Runbook",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
               },
               {
-                "color": "green",
-                "value": 0
+                "targetBlank": false,
+                "title": "Open DQ Current Reasons",
+                "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9102&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}&var-workflow=$workflow",
+                "includeVars": false
+              }
+            ],
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) + ((sum(increase(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) * 0))",
+              "legendFormat": "Validation Failures",
+              "refId": "A"
+            }
+          ],
+          "title": "Track: Silver Validation Failures in Range",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              },
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
+              "noValue": "UNKNOWN",
+              "unit": "dateTimeAsIso",
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "gray",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 54
+          },
+          "id": 101,
+          "options": {
+            "colorMode": "value",
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open DQ Investigation Runbook",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
               },
               {
-                "color": "red",
-                "value": 1
+                "targetBlank": false,
+                "title": "Open DQ Current Reasons",
+                "url": "/d/bioetl-dq-v2/bioetl-dq-v2?viewPanel=9102&var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}&var-workflow=$workflow",
+                "includeVars": false
+              }
+            ],
+            "graphMode": "none",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "max(max_over_time(bioetl_data_freshness_seconds{pipeline=~\"$pipeline\"}[$__range])) * 1000",
+              "legendFormat": "Latest Data",
+              "refId": "A"
+            }
+          ],
+          "description": "Latest successful data timestamp for the selected pipeline scope. This is current freshness context and compact supporting evidence rather than a first-answer verdict or selected-range proof. UNKNOWN means no freshness proof is available now; next action: inspect DQ Current Reasons and the DQ investigation runbook before treating stale or blank values as healthy.",
+          "title": "Review: Latest Successful Data Timestamp",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Selected-range quarantine breakdown by error_type. Use it to determine whether current DQ pressure is dominated by a specific quarantine signature before moving to logs, traces, or downstream validation surfaces. Horizontal bars are intentional here because category comparison matters more than composition percentage. No data means no quarantined records were observed in the active window; the panel must not invent a synthetic error_type bucket.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "Quarantined records",
+                "axisPlacement": "auto",
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "noValue": "No quarantined records in range",
+              "unit": "short",
+              "decimals": 0
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 54
+          },
+          "id": 9,
+          "options": {
+            "displayMode": "gradient",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showUnfilled": true
+          },
+          "targets": [
+            {
+              "expr": "sum by (error_type) (max_over_time(bioetl_dq_records_quarantined_total{pipeline=~\"$pipeline\", run_type=~\"$run_type\"}[$__range]))",
+              "legendFormat": "{{error_type}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Inspect: Quarantine by Error Type",
+          "type": "bargauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Selected-range count of canonical Silver validation failures. Non-zero means Silver validation blocked or degraded promotion and should be correlated with current DQ reasons and reject/quarantine evidence.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0,
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "gray",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 60
+          },
+          "id": 12,
+          "options": {
+            "colorMode": "backgroundSolid",
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open DQ Investigation Runbook",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
+              }
+            ],
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "round(sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0))",
+              "legendFormat": "Validation Failures",
+              "refId": "A"
+            }
+          ],
+          "title": "Monitor: Silver Validation Failures",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Selected-range Gold strict-validation hard-fail count. Non-zero means Gold promotion was blocked. Zero means no hard-fail samples were observed in the selected window; it does not prove Gold validation ran or that Gold output exists.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0,
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "gray",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 60
+          },
+          "id": 151,
+          "options": {
+            "colorMode": "backgroundSolid",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto",
+            "dataLinks": [
+              {
+                "targetBlank": true,
+                "title": "Open DQ Investigation Runbook",
+                "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
               }
             ]
           },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 18,
-        "y": 70
-      },
-      "id": 151,
-      "options": {
-        "colorMode": "backgroundSolid",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
+          "targets": [
+            {
+              "expr": "round(sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", stage=\"gold\", severity=\"hard_fail\"}[$__range])) or vector(0))",
+              "refId": "A"
+            }
           ],
-          "fields": "",
-          "values": false
+          "title": "Monitor: Gold Strict Validation Failures",
+          "type": "stat"
         },
-        "textMode": "auto",
-        "dataLinks": [
-          {
-            "targetBlank": true,
-            "title": "Open DQ Investigation Runbook",
-            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/dq-failure-investigation.md?pipeline=${pipeline:queryparam}&run_type=${run_type:queryparam}&${__url_time_range}"
-          }
-        ]
-      },
-      "targets": [
         {
-          "expr": "round(sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", stage=\"gold\", severity=\"hard_fail\"}[$__range])) or vector(0))",
-          "refId": "A"
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Selected-range anomaly counts by severity and anomaly type. WARN-only anomalies indicate drift; CRIT anomalies are blocking and should be correlated with current DQ reasons before replay or promotion. No data means no anomaly events were observed in the current window; the panel must not invent a synthetic severity/type series. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "Anomalies",
+                "axisPlacement": "auto",
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "noValue": "No anomaly events in range",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 66
+          },
+          "id": 10,
+          "options": {
+            "legend": {
+              "calcs": [
+                "sum",
+                "max"
+              ],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum by (severity, anomaly_type) (increase(bioetl_dq_anomaly_detected{pipeline=~\"$pipeline\"}[$__interval]))",
+              "legendFormat": "{{severity}} / {{anomaly_type}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Track: Anomalies Detected",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Selected-range p95 duration of DQ checks. This is a diagnostics/performance surface, not a quality outcome; use it when DQ checks themselves look slow or noisy during an incident. Samples exist only when the runtime emitted bioetl_dq_check_duration_ms, which requires an active DQ monitor path rather than disabled/noop monitoring. No data means no DQ duration samples were observed in range or DQ timing telemetry is absent; it is not equivalent to fast checks. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "Duration (ms)",
+                "axisPlacement": "auto",
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "lineInterpolation": "linear",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "noValue": "No DQ duration samples",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 66
+          },
+          "id": 11,
+          "options": {
+            "legend": {
+              "calcs": [
+                "mean",
+                "max"
+              ],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.95, sum by (le, pipeline) (increase(bioetl_dq_check_duration_ms_bucket{pipeline=~\"(${pipeline:regex}|workflow_${pipeline:regex})\"}[$__interval])))",
+              "legendFormat": "{{pipeline}} p95",
+              "refId": "A"
+            }
+          ],
+          "title": "Track: DQ Check Duration (p95)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Selected-range trend of domain-emitted DQ threshold events. Uses bioetl_dq_soft_threshold_exceeded and hard_fail validation counters only; Grafana does not recompute entity YAML thresholds here. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "decimals": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "short",
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 72
+          },
+          "id": 155,
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "round((sum(increase(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[$__interval])) or vector(0)) + (sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__interval])) or vector(0)))",
+              "legendFormat": "threshold events",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Track: DQ Threshold Events in Range Trend",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "description": "Quality score trend over selected time range. Kept separate from operational gating indicators. Score thresholds: <0.80=CRIT, 0.80-0.95=WARN, >=0.95=OK; null=UNKNOWN. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 2,
+              "max": 1,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0.8
+                  },
+                  {
+                    "color": "green",
+                    "value": 0.95
+                  }
+                ]
+              },
+              "unit": "percentunit",
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "UNKNOWN",
+                      "color": "gray"
+                    }
+                  }
+                }
+              ]
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 72
+          },
+          "id": 153,
+          "options": {
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": false
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "((sum((bioetl_dq_validation_score{pipeline=~\"$pipeline\"} * bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}))) / clamp_min(sum(bioetl_dq_validation_record_count{pipeline=~\"$pipeline\"}), 1))",
+              "legendFormat": "DQ score",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Track: Data Quality Score Trend (Volume-weighted)",
+          "type": "timeseries"
+        },
+        {
+          "description": "Lineage-reference gaps remain a replay/control-plane trust signal owned by `0. Control Plane`. This DQ surface keeps only a compact handoff so the trends row can stay focused on local DQ evidence. Open the canonical control-plane panels when missing lineage must be reviewed together with replay blockers, manifest / ledger evidence, and artifact identity anchors.",
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [],
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 24,
+            "x": 0,
+            "y": 78
+          },
+          "id": 116,
+          "links": [
+            {
+              "includeVars": false,
+              "targetBlank": false,
+              "title": "Open Control Plane lineage diagnostics",
+              "tooltip": "Canonical lineage/replay trust surface. Opens the Control Plane dashboard focused on its lineage diagnostics row.",
+              "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?viewPanel=904&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id"
+            }
+          ],
+          "options": {
+            "content": "### Open Control Plane for lineage trust\n- Use **0. Control Plane** for the canonical `Monitor: Lineage Refs Missing` signal.\n- Review lineage gaps together with replay blockers, manifest / ledger integrity, and artifact identity anchors.\n- This DQ row keeps local reject, quarantine, validation, and trend evidence separate from control-plane trust ownership.\n",
+            "dataLinks": [
+              {
+                "includeVars": false,
+                "targetBlank": false,
+                "title": "Open Control Plane lineage diagnostics",
+                "tooltip": "Canonical lineage/replay trust surface. Opens the Control Plane dashboard focused on its lineage diagnostics row.",
+                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?viewPanel=904&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id"
+              }
+            ],
+            "mode": "markdown"
+          },
+          "title": "Review: Lineage Handoff to Control Plane",
+          "type": "text"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [],
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 24,
+            "x": 0,
+            "y": 82
+          },
+          "id": 150,
+          "description": "Compact handoff note for aggregate control-plane symptoms. Keep this as footer guidance only; operational evidence still lives in `0. Control Plane` and its runbook surfaces.",
+          "options": {
+            "content": "### Use Control Plane for aggregate failures\n- Open `0. Control Plane` for aggregated manifest writes, ledger appends, checkpoint compatibility outcomes, and control-plane read failures.\n- Use the `Observability Checklist (runbook)` link when `BioETLControlPlaneReadFailureRate` or related aggregate signals require operator follow-up.\n",
+            "mode": "markdown"
+          },
+          "title": "Review: Aggregate Control-plane Handoff",
+          "type": "text"
         }
-      ],
-      "title": "Monitor: Gold Strict Validation Failures",
-      "type": "stat"
+      ]
     }
   ],
   "refresh": "30s",

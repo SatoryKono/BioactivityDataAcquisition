@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import UUID
 
 import pytest
@@ -841,6 +841,25 @@ class TestUnifiedQuarantineGetStats:
 @pytest.mark.unit
 class TestUnifiedQuarantineFilteredExplorer:
     """Tests for record-level filtered explorer methods."""
+
+    @pytest.mark.asyncio
+    async def test_filtered_stats_runs_delta_read_off_event_loop(
+        self, quarantine
+    ) -> None:
+        """Blocking Delta reads must not stall health-server request handling."""
+        with patch(
+            "bioetl.infrastructure.quarantine._unified_filtered_mixin.asyncio.to_thread",
+            new_callable=AsyncMock,
+            return_value={"total": 0},
+        ) as to_thread:
+            result = await quarantine.get_filtered_stats(pipeline="test")
+
+        assert result == {"total": 0}
+        to_thread.assert_awaited_once()
+        offloaded = to_thread.await_args.args
+        assert offloaded[0].__name__ == "get_filtered_stats"
+        assert offloaded[1:] == (quarantine.base_path, None)
+        assert to_thread.await_args.kwargs["pipeline"] == "test"
 
     @pytest.mark.asyncio
     async def test_filtered_explorer__filtered_records__250ce62a(

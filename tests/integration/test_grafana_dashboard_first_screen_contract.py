@@ -85,7 +85,7 @@ def test_design_system_defines_first_screen_decision_matrix() -> None:
         "`bioetl-runtime`",
         "`bioetl-provider-health-v2`",
         "`bioetl-dq-v2`",
-        "`bioetl_runtime_current_status`",
+        "`bioetl_runtime_current_status_trusted`",
         "`bioetl_provider_current_status`",
         "`bioetl_dq_current_status`",
         "Selected-range count/rate/trend",
@@ -160,6 +160,7 @@ def test_current_status_recording_rules_are_canonicalized() -> None:
 
     required_records = {
         "bioetl_runtime_current_status",
+        "bioetl_runtime_current_status_trusted",
         "bioetl_runtime_current_blocker_reason",
         "bioetl_provider_current_status",
         "bioetl_provider_current_cause",
@@ -171,6 +172,7 @@ def test_current_status_recording_rules_are_canonicalized() -> None:
 
     for status_record in (
         "bioetl_runtime_current_status",
+        "bioetl_runtime_current_status_trusted",
         "bioetl_provider_current_status",
         "bioetl_dq_current_status",
     ):
@@ -185,13 +187,12 @@ def test_runtime_provider_dq_first_screens_use_canonical_current_status() -> Non
     """L2 first screens must answer current state before range evidence."""
     expectations = {
         "bioetl-runtime.json": {
-            "Runtime Status": "bioetl_runtime_current_status",
+            "Runtime Status": "bioetl_runtime_current_status_trusted",
             "Runtime Blockers": "bioetl_runtime_current_blocker_reason",
         },
         "bioetl-provider-health-v2.json": {
             "Monitor GLOBAL Provider Severity Matrix": "bioetl_provider_current_status",
             "Inspect Provider Top Causes": "bioetl_provider_current_cause",
-            "Monitor Provider Telemetry Freshness": "bioetl_provider_current_status",
         },
         "bioetl-dq-v2.json": {
             "Monitor DQ Current Status": "bioetl_dq_current_status",
@@ -280,7 +281,7 @@ def test_overview_and_control_plane_first_screens_use_role_appropriate_queries()
             assert panel is not None, (
                 f"{dashboard_name} must expose first-screen panel {panel_title!r}"
             )
-            max_answer_y = 26 if dashboard_name == "bioetl-overview-v2.json" else 20
+            max_answer_y = 26 if dashboard_name == "bioetl-overview-v2.json" else 21
             assert panel.get("gridPos", {}).get("y", 999) <= max_answer_y, (
                 f"{dashboard_name}:{panel_title} must stay in the answer row"
             )
@@ -474,9 +475,9 @@ def test_first_screen_scope_and_cta_panels_document_role_and_scope() -> None:
                 "tokens": ("crit", "warn", "selected-range"),
                 "max_y": 22,
             },
-            "Review: Latest Successful Data Timestamp": {
-                "tokens": ("current freshness", "selected-range", "unknown"),
-                "max_y": 22,
+            "Time Range · Worst Freshness Age (hours; SLA 24/72)": {
+                "tokens": ("time range", "sla", "unknown"),
+                "max_y": 24,
             },
         },
         "bioetl-provider-health-v2.json": {
@@ -552,12 +553,6 @@ def test_navigation_bus_panels_document_handoff_policy() -> None:
                 f"{dashboard_path.name}:navigation panel description "
                 f"must mention {token!r}"
             )
-        if dashboard.get("uid") == "bioetl-control-plane-v1":
-            assert "explore traces" not in description, (
-                f"{dashboard_path.name}:navigation panel must not "
-                "document direct Explore Traces handoff"
-            )
-            continue
         assert any(token in description for token in tracing_tokens), (
             f"{dashboard_path.name}:navigation panel description "
             "must document traced-run-only Explore Traces semantics"

@@ -164,6 +164,170 @@ def test_grafana_audit_preflight_detects_stale_screenshot(tmp_path: Path) -> Non
     assert "stale dashboard screenshots" in result.detail
 
 
+def _terminal_render_manifest(
+    *,
+    uid: str = "bioetl-silver-reject-explorer",
+    classification: str = "healthy",
+    theme: str = "light",
+    width: int = 1024,
+) -> dict[str, object]:
+    return {
+        "engine": "playwright",
+        "expand_collapsed_rows": True,
+        "requested": {
+            "viewport": {"width": width, "height": 2200},
+            "theme": theme,
+        },
+        "terminal_state_validation": {
+            "status": "ok",
+            "dashboards": {uid: "ok"},
+        },
+        "dashboards": [
+            {
+                "uid": uid,
+                "renderStatus": "rendered",
+                "actualViewport": {"width": width, "height": 1900},
+                "actualTheme": theme,
+                "terminalStateValidation": {
+                    "status": "ok",
+                    "checkedPanelCount": 1,
+                    "requiredPanelCount": 1,
+                    "panelStates": [{"id": 13, "classification": classification}],
+                },
+            }
+        ],
+    }
+
+
+@pytest.mark.parametrize("classification", ["healthy", "explicit-error", "valid-empty"])
+def test_grafana_audit_preflight_accepts_silver_backend_terminal_states(
+    classification: str,
+) -> None:
+    error = preflight_subject._validate_manifest_render_contract(
+        _terminal_render_manifest(classification=classification),
+        expected_uids=("bioetl-silver-reject-explorer",),
+    )
+
+    assert error is None
+
+
+@pytest.mark.parametrize(
+    "classification", ["telemetry-absent", "not-applicable", "incomplete"]
+)
+def test_grafana_audit_preflight_accepts_explicit_terminal_evidence_gaps(
+    classification: str,
+) -> None:
+    manifest = _terminal_render_manifest(
+        uid="bioetl-runtime", classification=classification
+    )
+
+    error = preflight_subject._validate_manifest_render_contract(
+        manifest,
+        expected_uids=("bioetl-runtime",),
+    )
+
+    assert error is None
+
+
+def test_grafana_audit_preflight_requires_expanded_rows_and_exact_panel_ids() -> None:
+    manifest = _terminal_render_manifest(uid="bioetl-runtime")
+    manifest["expand_collapsed_rows"] = False
+
+    expansion_error = preflight_subject._validate_manifest_render_contract(
+        manifest,
+        expected_uids=("bioetl-runtime",),
+        expected_panel_ids={"bioetl-runtime": (13,)},
+    )
+
+    assert expansion_error == "render manifest must prove expand_collapsed_rows=true"
+
+    manifest["expand_collapsed_rows"] = True
+    coverage_error = preflight_subject._validate_manifest_render_contract(
+        manifest,
+        expected_uids=("bioetl-runtime",),
+        expected_panel_ids={"bioetl-runtime": (13, 14)},
+    )
+
+    assert coverage_error is not None
+    assert "panel coverage drift" in coverage_error
+
+
+@pytest.mark.parametrize("classification", ["blank", "loading", "contradictory"])
+def test_grafana_audit_preflight_rejects_non_terminal_panel_states(
+    classification: str,
+) -> None:
+    error = preflight_subject._validate_manifest_render_contract(
+        _terminal_render_manifest(classification=classification),
+        expected_uids=("bioetl-silver-reject-explorer",),
+    )
+
+    assert error is not None
+    assert "non-terminal or contradictory" in error
+
+
+def test_grafana_audit_preflight_rejects_actual_viewport_or_theme_drift() -> None:
+    manifest = _terminal_render_manifest()
+    dashboards = manifest["dashboards"]
+    assert isinstance(dashboards, list)
+    dashboard = dashboards[0]
+    assert isinstance(dashboard, dict)
+    actual_viewport = dashboard["actualViewport"]
+    assert isinstance(actual_viewport, dict)
+    actual_viewport["width"] = 1600
+
+    viewport_error = preflight_subject._validate_manifest_render_contract(
+        manifest,
+        expected_uids=("bioetl-silver-reject-explorer",),
+    )
+
+    assert viewport_error is not None
+    assert "width drift" in viewport_error
+
+    actual_viewport["width"] = 1024
+    dashboard["actualTheme"] = "dark"
+    theme_error = preflight_subject._validate_manifest_render_contract(
+        manifest,
+        expected_uids=("bioetl-silver-reject-explorer",),
+    )
+
+    assert theme_error is not None
+    assert "theme drift" in theme_error
+
+
+def test_grafana_audit_preflight_screenshot_check_enforces_terminal_manifest(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    screenshot_dir = tmp_path / "screens"
+    screenshot_dir.mkdir()
+    dashboard_path = tmp_path / "silver.json"
+    screenshot_path = screenshot_dir / "bioetl-silver-reject-explorer.png"
+    manifest_path = screenshot_dir / "render-manifest.json"
+    dashboard_path.write_text("{}\n", encoding="utf-8")
+    screenshot_path.write_bytes(b"png")
+    manifest_path.write_text(
+        json.dumps(_terminal_render_manifest(classification="loading")),
+        encoding="utf-8",
+    )
+    os.utime(dashboard_path, (1, 1))
+    os.utime(screenshot_path, (2, 2))
+    monkeypatch.setattr(
+        preflight_subject,
+        "_expected_dashboard_screenshot_pairs",
+        lambda *_args, **_kwargs: [
+            (
+                dashboard_path,
+                screenshot_path,
+                "bioetl-silver-reject-explorer",
+            )
+        ],
+    )
+
+    result = preflight_subject._check_screenshot_artifacts(screenshot_dir)
+
+    assert result.status == "error"
+    assert "non-terminal or contradictory" in result.detail
+
+
 def test_grafana_audit_preflight_run_checks_collects_ok_results(
     monkeypatch: Any, tmp_path: Path
 ) -> None:

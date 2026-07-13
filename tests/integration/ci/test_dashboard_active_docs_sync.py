@@ -54,17 +54,23 @@ def _documented_panel_titles(doc_path: Path) -> Counter[str]:
     return Counter(title for title in titles if title)
 
 
-def test_active_docs_capture_control_plane_navigation_exception() -> None:
+def test_active_docs_capture_uniform_responsive_navigation_bus() -> None:
     readme = Path("docs/03-guides/dashboards/README.md").read_text(encoding="utf-8")
     usage = Path("docs/03-guides/dashboards/dashboard-v2-usage.md").read_text(
         encoding="utf-8"
     )
 
-    for token in ("bioetl-control-plane-v1", "Explore Logs", "Explore Traces"):
+    for token in (
+        "bioetl-control-plane-v1",
+        "6. Alerts & SLO",
+        "Explore Logs",
+        "Explore Traces",
+        "1024",
+    ):
         assert token in readme
         assert token in usage
-    assert "намеренным исключением" in readme
-    assert "intentional exception" in usage
+    assert "намеренным исключением" not in readme
+    assert "intentional exception" not in usage
 
 
 def test_active_docs_sync_workflow_selector_and_cta_titles() -> None:

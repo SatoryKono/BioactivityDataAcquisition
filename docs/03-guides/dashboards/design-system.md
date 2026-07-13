@@ -1,9 +1,9 @@
 # Dashboard Design System (BioETL)
 
-Дата актуализации: **2026-05-14**
+Дата актуализации: **2026-07-13**
 Источник истины: `grafana/dashboards/*.json`
 
-## 1) Единая семантика статусов OK/WARN/CRIT/UNKNOWN (обязательно)
+## 1) Единая семантика состояний (обязательно)
 
 Для status-панелей (`stat`/`gauge`) применяется фиксированная палитра:
 
@@ -11,9 +11,22 @@
 - **WARN** → `orange`
 - **CRIT** → `red`
 - **UNKNOWN** → `gray`
+- **INCOMPLETE** → `gray` (required evidence is missing or stale; never OK)
+- **ERROR** → `red` for an explicit query/datasource/backend failure
 
 `UNKNOWN` обязателен как явное отображение no-data/null через mapping:
 - `null` → текст `UNKNOWN` + цвет `gray`.
+
+Terminal-state vocabulary is role-aware:
+
+- `VALID EMPTY` / `valid-empty` — query completed and the selected scope has
+  zero matching rows/events; neutral gray, with the next action in panel copy.
+- `TELEMETRY ABSENT` — required metric family is absent; neutral gray and a
+  scrape/target action. On headline trust gates this resolves to `INCOMPLETE`.
+- `N/A` — the signal is not applicable to the selected lifecycle/scope; neutral
+  gray and never a healthy verdict.
+- `LOADING` — transient only. It MUST NOT remain in accepted render evidence.
+- A blank panel body is not a state and MUST fail reproducible capture.
 
 ### 1.1 Canonical mapping: L0 vs diagnostic dashboards
 
@@ -23,6 +36,7 @@
 | **L0 operator dashboards** (`1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`) | `1` | `WARN` | `orange` |
 | **L0 operator dashboards** (`1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`) | `>=2` | `CRIT` | `red` |
 | **L0 operator dashboards** (`1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`) | `null` | `UNKNOWN` | `gray` |
+| **Evidence-aware trust gates** (`0. Control Plane`, `2. Runtime`) | `3` | `INCOMPLETE` | `gray` |
 | **Diagnostic dashboards only** (drilldown / deep-dive) | `<1` | `OK` *(alias `HEALTHY` optional)* | `green` |
 | **Diagnostic dashboards only** (drilldown / deep-dive) | `>=1 and <2` | `WARN` *(alias `DEGRADED` optional)* | `orange` |
 | **Diagnostic dashboards only** (drilldown / deep-dive) | `>=2` | `CRIT` *(alias `BROKEN` optional)* | `red` |
@@ -30,6 +44,9 @@
 
 Норматив:
 - В **L0 operator dashboards** MUST использоваться только термины `OK/WARN/CRIT/UNKNOWN`.
+- `0. Control Plane` and `2. Runtime` MAY additionally use `INCOMPLETE` when
+  required checkpoint/scrape/rule evidence is missing or stale. Numeric `3`
+  remains `UNKNOWN` on Overview/DQ surfaces that do not define this trust gate.
 - Термины `DEGRADED/BROKEN/HEALTHY` допускаются только в диагностических deep-dive поверхностях и MUST быть явно привязаны к этой таблице.
 - Если в диагностическом UI используются alias-термины, в description MUST присутствовать строка вида `Alias mapping: DEGRADED=WARN, BROKEN=CRIT`.
 
@@ -66,6 +83,7 @@ DEGRADED / FAILING`, `CLOSED / HALF-OPEN / OPEN`) или на range-evidence car
 - `1` → WARN
 - `>=2` → CRIT
 - `null` → UNKNOWN
+- `3` → `INCOMPLETE` only on explicitly documented trust-gated panels
 
 ### 2.2 Time-series
 
@@ -146,11 +164,11 @@ timeseries without checking whether the panel compares multiple series.
 
 | Dashboard | First-screen responsibility | Current-status rules | Selected-range evidence | Drilldown / forensic surface |
 | --- | --- | --- | --- | --- |
-| `bioetl-overview-v2` | Что сейчас broken/degraded и куда идти дальше? | `bioetl_l0_status`, `bioetl_l0_next_action_route`, `bioetl_l0_input_status` | `L1 Historical Trends` row plus expanded `Range Evidence` row | linked L1 dashboards |
-| `bioetl-runtime` | Что прямо сейчас блокирует runtime execution? | `bioetl_runtime_current_status`, `bioetl_runtime_current_blocker_reason` | failed/no-record runs, stage lag/backlog trends, shutdown intervals | Runtime detail tables, Loki/Tempo handoff |
+| `bioetl-overview-v2` | Что сейчас broken/degraded и куда идти дальше? | `bioetl_l0_status`, `bioetl_l0_next_action_route`, `bioetl_l0_input_status` | collapsed `L1 Historical Trends` and `Range Evidence` rows | linked L1 dashboards |
+| `bioetl-runtime` | Что прямо сейчас блокирует runtime execution? | `bioetl_runtime_current_status_trusted`, `bioetl_runtime_current_blocker_reason`, `bioetl_runtime_trust_gap_status_10m` | failed/no-record runs, stage lag/backlog trends, shutdown intervals | collapsed Detect/Localize/Escalate rows, Loki/Tempo handoff |
 | `bioetl-provider-health-v2` | Какой provider сейчас degraded/failing и почему? | `bioetl_provider_current_status`, `bioetl_provider_current_cause` | health-check counters, failure/degraded trends, latency/rate-limit history | provider detail panels and runbook links |
-| `bioetl-dq-v2` | Каково текущее DQ состояние и первое действие? | `bioetl_dq_current_status`, `bioetl_dq_current_reason` | Bronze→Silver→Gold range flow, reject counts/rates, validation histories | `bioetl-silver-reject-explorer`, DQ diagnostics |
-| `bioetl-control-plane-v1` | Можно ли доверять control plane и безопасно replay/resume? | replay/checkpoint/manifest trust summary rules | manifest/ledger/checkpoint/audit histories | replay safety diagnostics and runbooks |
+| `bioetl-dq-v2` | Каково текущее DQ состояние и первое действие? | `bioetl_dq_current_status`, `bioetl_dq_current_reason` | explicitly labelled CURRENT / SELECTED RUN / TIME RANGE evidence; freshness hours with SLA 24/72 | `bioetl-silver-reject-explorer`, collapsed DQ diagnostics |
+| `bioetl-control-plane-v1` | Можно ли доверять control plane и безопасно replay/resume? | `bioetl_control_plane_current_status_trusted`, replay/checkpoint/manifest/telemetry evidence | manifest/ledger/checkpoint/audit histories | collapsed replay-safety diagnostics and runbooks |
 
 Decision matrix:
 
@@ -186,6 +204,11 @@ Normative rules:
   means zero events; status panels preserve `UNKNOWN`.
 - Deep details (`run_id`, `payload_hash`, record-level tables) MUST NOT appear
   on first-screen status rows.
+- DQ values MUST identify their evidence scope as `CURRENT`, `SELECTED RUN`, or
+  `TIME RANGE` in a visible title/banner/value mapping. A selected-range value
+  must not be read as exact-run evidence.
+- DQ freshness uses hours end-to-end in the panel: query output, unit, title,
+  and thresholds. The explicit SLA is WARN at `24h`, CRIT at `72h`.
 
 ### 4.1.1 Shared operator context shell
 
@@ -245,9 +268,9 @@ same answer-first reading order.
 
 | Dashboard role | Shipped dashboards | Above-the-fold responsibility | Lower bands |
 | --- | --- | --- | --- |
-| L0 answer-first hub | `bioetl-overview-v2` | current answer, next route, bounded mirrors | historical context, routing aids, expanded diagnostics |
-| L1/L2 triage | `bioetl-runtime`, `bioetl-control-plane-v1`, `bioetl-provider-health-v2`, `bioetl-dq-v2` | current verdict, first action, causes, trust markers | selected-range evidence, expanded diagnostics |
-| Selected-range operational evidence | `bioetl-workflow-overview` | selected-range operational verdict and immediate fallout | lower evidence bands, optional expanded diagnostics |
+| L0 answer-first hub | `bioetl-overview-v2` | current answer, next route, bounded mirrors | historical context, routing aids, collapsed-by-default diagnostics |
+| L1/L2 triage | `bioetl-runtime`, `bioetl-control-plane-v1`, `bioetl-provider-health-v2`, `bioetl-dq-v2` | current verdict, first action, causes, trust markers | selected-range evidence, collapsed-by-default diagnostics |
+| Selected-range operational evidence | `bioetl-workflow-overview` | selected-range operational verdict and immediate fallout | lower evidence bands, optional collapsed-by-default diagnostics |
 | Forensic explorer | `bioetl-silver-reject-explorer` | scope semantics, no-data guidance, bounded summary | row-level browsing, record details, forensic tables |
 
 Normative rules:
@@ -260,14 +283,14 @@ Normative rules:
 
 ## 4.3) Visibility tiers and collapse policy (обязательно)
 
-Every shipped dashboard should classify panels into one of four tiers. Expanded
-rows stay open by default unless a dashboard-specific contract explicitly
-documents another collapse policy:
+Every shipped dashboard should classify panels into one of four tiers.
+Answer surfaces stay visible; forensic/detail rows are collapsed by default and
+opened only after the summary identifies a relevant branch:
 
 - `Tier 1`: always-visible answer surface
 - `Tier 2`: always-visible supporting current context
 - `Tier 3`: below-fold selected-range evidence
-- `Tier 4`: expanded diagnostics, raw evidence, tracing-only detail, rare
+- `Tier 4`: collapsible diagnostics, raw evidence, tracing-only detail, rare
   forensic breakdowns
 
 Normative rules:
@@ -278,10 +301,17 @@ Normative rules:
   support `Tier 1` rather than compete with it.
 - `Tier 3` belongs below the answer bands unless the dashboard role is itself
   selected-range evidence.
-- `Tier 4` SHOULD live below fold and be expanded by default when it is
+- `Tier 4` SHOULD live below fold and be collapsed by default when it is
   tracing-only, raw, verbose, or not required for first-pass operator triage.
 - The only copy of a critical signal MUST NOT live exclusively inside a
   diagnostic row.
+- Overview keeps `Alert/SLO Triage` expanded because active alerts are a
+  first-pass signal. Runtime Detect/Localize/Escalate, Control Plane incident
+  rows, Provider detail, DQ forensic rows, Workflow Step Diagnostics, and the
+  Silver trend/record rows remain collapsed in the shipped layout.
+- Audit tooling MAY expand collapsed rows to materialize and review their full
+  content; that audit mode does not change the shipped progressive-disclosure
+  default.
 
 ## 4.4) Datasource trust semantics (обязательно)
 
@@ -350,6 +380,9 @@ datasource/query failure по роли панели.
   failure MUST отличаться от empty result.
 - `Silver Reject Explorer` MUST объяснять это distinction в first-screen CTA и
   в detail-table descriptions.
+- `Monitor Explorer Backend Health` MUST terminate as healthy, explicit error,
+  or valid empty. Blank/loading and error-icon + `No data` contradictions are
+  render failures.
 
 ### 4.5.5 Telemetry-gap / trust-marker policy
 
@@ -358,6 +391,12 @@ datasource/query failure по роли панели.
 - Они required для surfaces наподобие `Runtime` и `Control Plane`, где zero
   counters без telemetry health могут вводить в заблуждение.
 - Они не являются blanket requirement для всех dashboards.
+- Control Plane status gates replay safety, checkpoint age/presence, and
+  required telemetry through `bioetl_control_plane_current_status_trusted`.
+- Runtime status gates the scoped runtime verdict with
+  `bioetl_runtime_trust_gap_status_10m` through
+  `bioetl_runtime_current_status_trusted`. A trust gap renders `INCOMPLETE`, not
+  WARN/OK inferred from selected-range zero counters.
 
 ### 4.5.6 Compact Overview selected-range evidence
 
@@ -447,9 +486,15 @@ Implementation guardrails:
 Источник фиксированного словаря для `links[].title`: `docs/03-guides/dashboards/navigation-contract.md`.
 
 Правила:
-- Названия top-level ссылок MUST совпадать с каноническими строками из navigation contract (например: `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`, `Silver Reject Explorer`).
+- Названия top-level ссылок MUST совпадать с каноническими строками из navigation contract (например: `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`, `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO`, `Silver Reject Explorer`).
 - Explore-ссылки MUST использовать короткие названия: `Explore Logs` и `Explore Traces`.
 - Формулировки вида `Back to Overview`, `5. Control Plane`, `6. Workflow Overview`, `Explore Logs (Loki, tracing profile)`, `Explore Traces (Tempo, tracing profile)`, `Next Recommended Drilldown` считаются legacy-лексикой и не допускаются в shipped top navigation.
+
+Every navigation panel renders the same ordered composition on all eight
+shipped dashboards: bus `0..6`, `Silver Reject Explorer`, `Explore Logs`,
+`Explore Traces`. It MUST use theme-safe contrast, a visible focus state, and
+wrapping responsive layout at `1024px`; no dashboard-specific omission is
+allowed.
 
 ### 7.1) Link title style-guide: Back / Open / Investigate
 
@@ -511,7 +556,8 @@ Implementation guardrails:
 
 - ровно один верхний triage-row с **3–5 KPI**;
 - в этом же ряду MUST быть **ровно одна** явная панель next-step/drilldown;
-- панели глубокой диагностики MUST быть вынесены в secondary expanded rows с
+- панели глубокой диагностики MUST быть вынесены в secondary rows, collapsed
+  by default, с
   заголовками по incident-сценариям (`Incident Drilldown: ...`).
 
 Нельзя дублировать next-step call-to-action в нескольких L1 панелях одного

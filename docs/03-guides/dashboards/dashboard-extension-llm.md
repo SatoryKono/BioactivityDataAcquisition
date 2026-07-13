@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.1.0
+Version: 1.2.0
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-04-13'
+  Last verified: '2026-07-13'
 
 ______________________________________________________________________
 
 # Dashboard Extension Guide (LLM)
 
-Дата сверки: **2026-05-14**
+Дата сверки: **2026-07-13**
 Источник истины: `grafana/dashboards/*.json`
 
 Короткий playbook для LLM/AI-агента, который меняет или расширяет shipped
@@ -30,8 +30,13 @@ Grafana dashboards в BioETL.
 ## 2. Текущая модель shipped dashboards
 
 - `0. Control Plane`, `1. Overview`, `2. Runtime`, `3. Provider Health`,
-  `4. Data Quality`, `5. Workflow` — единая top-level шина.
-- На каждой странице navigation panel `id=1000` визуально показывает полный bus `0..5`; текущий dashboard рендерится как disabled dark-gray item, а machine-readable `panel.links` сохраняют omit-self contract.
+  `4. Data Quality`, `5. Workflow`, `6. Alerts & SLO` — единая top-level
+  шина.
+- На каждой из восьми shipped страниц navigation panel `id=1000` визуально
+  показывает полный bus `0..6`; текущий dashboard рендерится как disabled
+  theme-safe item, а machine-readable `panel.links` сохраняют omit-self
+  contract. Навигация MUST оставаться читаемой в dark/light themes и
+  переноситься без обрезки на viewport `1024px`.
 - Каноническая surface этой шины — navigation panel `id=1000`. Root
   `dashboard.links[]` MAY be empty, если те же handoff already shipped через
   panel `id=1000` и header row рядом с Grafana variables не должен дублировать
@@ -40,18 +45,18 @@ Grafana dashboards в BioETL.
   dashboard запрещены, если только machine-readable contract в
   `contracts/navigation-links.yaml` явно не требует repeated panel-level CTAs
   для critical surfaces.
-- Во всех shipped navigation panels `id=1000` после bus `0..5` должны
+- Во всех shipped navigation panels `id=1000` после bus `0..6` должны
   присутствовать global adjunct links `Silver Reject Explorer`,
-  `Explore Logs`, `Explore Traces`; исключение — `0. Control Plane`, где
-  top-level Explore handoffs намеренно отсутствуют, чтобы first screen оставался
-  на runbook/dashboard surfaces. Current dashboard item MUST stay visible and disabled instead of disappearing from the visual bus.
+  `Explore Logs`, `Explore Traces`. Current dashboard item MUST stay visible
+  and disabled instead of disappearing from the visual bus.
 - Navigation panel links MUST open in the same window; do not ship
   `target="_blank"` in panel `id=1000` HTML.
 - Layout hierarchy follows the dashboard design system:
   `Tier 1` answer surface first, `Tier 2` current context second,
   `Tier 3` selected-range evidence below fold, `Tier 4` diagnostic/detail rows
-  below fold. Row groups are shipped expanded by default so render/audit paths
-  do not hide secondary or noisy detail.
+  below fold. Tier 4 row groups ship collapsed by default; full render/audit
+  paths MAY expand them explicitly when secondary or noisy detail must be
+  reviewed.
 - Primary dashboards `0..5` expose the shared operator context shell:
   `$workflow`, `$pipeline`, `$run_type`, `$run_id`, plus role-specific
   extensions. `run_id` remains HTTP-backed identity context for the `ID` panel,
@@ -145,7 +150,7 @@ sum(increase(metric_name[24h])) or vector(0)
 Используй explicit search-first, но contextual handoff:
 
 ```text
-route = /a/grafana-exploretraces-app/explore?actionView=search&from=now-150m&to=now&var-ds=tempo&var-groupBy=resource.service.name
+route = /a/grafana-exploretraces-app/explore?actionView=search&from=${__from}&to=${__to}&var-ds=tempo&var-groupBy=resource.service.name
 queryType = traceqlSearch
 query = { span."bioetl.pipeline" =~ "${pipeline:regex}" }
 ```
@@ -172,8 +177,8 @@ query = { span."bioetl.provider" =~ "${provider:regex}" }
 - Loki drilldown links стартуют с `{job="bioetl"}` и не encode'ят
   `$pipeline/$provider` в query payload.
 - Tempo drilldown links используют explicit search-first route
-  `/a/grafana-exploretraces-app/explore?actionView=search`, фиксируют safe
-  bounded window `from=now-150m&to=now`, pin'ят `var-ds=tempo`, задают
+  `/a/grafana-exploretraces-app/explore?actionView=search`, сохраняют active
+  dashboard range через `from=${__from}&to=${__to}`, pin'ят `var-ds=tempo`, задают
   `var-groupBy=resource.service.name` и сохраняют contextual TraceQL scope
   (`bioetl.pipeline` либо `bioetl.provider`). Не привязывай shipped
   TraceQL handoff к `${run_type:regex}` для `includeAll` variables: Grafana

@@ -4,6 +4,13 @@
 
 Machine-readable SSOT: `docs/03-guides/dashboards/contracts/navigation-links.yaml`.
 
+The visual contract is one identical, theme-safe composition on all eight
+shipped dashboards: numbered bus `0. Control Plane` through `6. Alerts & SLO`,
+followed by `Silver Reject Explorer`, `Explore Logs`, and `Explore Traces`.
+The current surface remains visible but disabled. Links use solid
+contrast-safe colors and wrap at `1024px`; horizontal clipping and
+light-theme white-on-white states are defects.
+
 YAML также фиксирует time handoff policy в `time_handoff_requirements`:
 - `dashboard_links.required_tokens`: `${__url_time_range}`
 - `explore_links.required_tokens`: `from=${__from}`, `to=${__to}`
@@ -22,6 +29,7 @@ YAML также фиксирует time handoff policy в `time_handoff_requirem
 - Dashboard: `/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=$stage&${__url_time_range}`
 - Dashboard: `/d/bioetl-overview-v2/bioetl-overview-v2?var-pipeline=unknown&var-run_type=All&${__url_time_range}`
 - Provider context mapping (fail-closed): `/d/bioetl-provider-health-v2/bioetl-provider-health-v2?var-provider=unknown&var-pipeline_context=$pipeline&${__url_time_range}`
+- Alerts/SLO: `/d/bioetl-alerts-slo/bioetl-alerts-slo?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}`
 
 ## Справка
 
