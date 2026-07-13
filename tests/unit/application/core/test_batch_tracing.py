@@ -177,6 +177,75 @@ def test_set_execution_stats_none_span(service: BatchTracingManagerService) -> N
     assert result is None
 
 
+def test_real_tracer_accepts_non_empty_memory_decision_trace(
+    mock_context: MagicMock,
+    mock_config: MagicMock,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Real tracing must not change successful terminal statistics."""
+    from opentelemetry.sdk.trace.export.in_memory_span_exporter import (
+        InMemorySpanExporter,
+    )
+
+    from bioetl.infrastructure.observability import tracing
+
+    if not tracing.OTEL_AVAILABLE:
+        pytest.skip("OpenTelemetry is not available")
+
+    exporter = InMemorySpanExporter()
+    monkeypatch.setattr(
+        tracing,
+        "_build_telemetry_exporter",
+        lambda: exporter,
+    )
+    tracer = tracing.OpenTelemetryTracer("bioetl-batch-contract")
+    manager = BatchTracingManagerService(
+        tracer=tracer,
+        context=mock_context,
+        config=mock_config,
+        initial_batch_size=100,
+        adaptive_sizing_enabled=True,
+    )
+    span = manager.start_execution_span()
+    try:
+        manager.set_execution_stats(
+            span,
+            total_fetched=5,
+            total_bronze=5,
+            total_silver=5,
+            total_gold=5,
+            total_quarantined=0,
+            batch_size_reductions=1,
+            min_batch_size_used=50,
+            memory_decision_trace=(
+                {
+                    "decision_index": 1,
+                    "record_index": 5,
+                    "stage": "pressure_check",
+                    "old_batch_size": 100,
+                    "new_batch_size": 50,
+                    "adaptive_sizing_enabled": True,
+                    "monitor_available": True,
+                    "config_available": True,
+                    "pressure_state": True,
+                    "monitor_mode": "psutil",
+                    "reason": "monitor_pressure_detected",
+                },
+            ),
+        )
+    finally:
+        manager.end_span(span)
+        tracer.close()
+
+    finished_spans = exporter.get_finished_spans()
+    assert len(finished_spans) == 1
+    root_span = finished_spans[0]
+    assert root_span.attributes["bioetl.total_bronze"] == 5
+    assert root_span.attributes["bioetl.total_silver"] == 5
+    assert root_span.attributes["bioetl.total_gold"] == 5
+    assert [event.name for event in root_span.events] == ["bioetl.memory.decision"]
+
+
 def test_noop_tracing(mock_context: MagicMock, mock_config: MagicMock) -> None:
     """Explicit NoOpTracing keeps the service safe without hidden defaults."""
     svc = BatchTracingManagerService(

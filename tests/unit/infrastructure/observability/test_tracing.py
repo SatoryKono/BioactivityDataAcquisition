@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import builtins
 import importlib.util
+import logging
 from collections.abc import Generator
 from pathlib import Path
 from types import ModuleType
@@ -413,6 +414,10 @@ class TestTracingProtocolAndSpanBranchPaths:
         handle = tracing._SpanHandle(context_manager)
 
         handle.set_attribute("bioetl.status", "pending")
+        handle.add_event(
+            "bioetl.memory.decision",
+            attributes={"bioetl.memory.decision_index": 1},
+        )
         handle.record_exception(RuntimeError("not-entered"))
 
         context_manager.__enter__.assert_not_called()
@@ -435,6 +440,14 @@ class TestTracingProtocolAndSpanBranchPaths:
         from bioetl.infrastructure.observability import tracing
 
         assert tracing._SpanProtocol.set_attribute(object(), "k", "v") is None
+        assert (
+            tracing._SpanProtocol.add_event(
+                object(),
+                "bioetl.memory.decision",
+                {"bioetl.memory.decision_index": 1},
+            )
+            is None
+        )
         assert (
             tracing._SpanProtocol.record_exception(
                 object(),
@@ -529,7 +542,7 @@ class TestOpenTelemetryTracerSpanAdapter:
         self,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        """Returned handle should support set_attribute/record_exception/__exit__."""
+        """Returned handle supports attributes, events, exceptions, and exit."""
         from bioetl.infrastructure.observability import tracing
 
         if not tracing.OTEL_AVAILABLE:
@@ -539,19 +552,34 @@ class TestOpenTelemetryTracerSpanAdapter:
         context_manager = MagicMock()
         context_manager.__enter__.return_value = entered_span
         context_manager.__exit__.return_value = None
+        from opentelemetry.sdk.trace.export.in_memory_span_exporter import (
+            InMemorySpanExporter,
+        )
+
         otel_tracer = MagicMock()
         otel_tracer.start_as_current_span.return_value = context_manager
         monkeypatch.setattr(
-            tracing.trace, "get_tracer", MagicMock(return_value=otel_tracer)
+            tracing,
+            "_build_telemetry_exporter",
+            InMemorySpanExporter,
         )
 
         tracer = tracing.OpenTelemetryTracer("test_service")
+        monkeypatch.setattr(
+            tracer._provider,
+            "get_tracer",
+            MagicMock(return_value=otel_tracer),
+        )
         span = tracer.get_tracer("bioetl.test").start_as_current_span(
             "demo",
             attributes={"bioetl.pipeline": "chembl_activity"},
         )
         span.__enter__()
         span.set_attribute("bioetl.status", "success")
+        span.add_event(
+            "bioetl.memory.decision",
+            attributes={"bioetl.memory.decision_index": 1},
+        )
         span.record_exception(RuntimeError("boom"))
         span.__exit__(None, None, None)
 
@@ -559,9 +587,55 @@ class TestOpenTelemetryTracerSpanAdapter:
             "bioetl.status",
             "success",
         )
+        entered_span.add_event.assert_called_once_with(
+            "bioetl.memory.decision",
+            attributes={"bioetl.memory.decision_index": 1},
+        )
         entered_span.record_exception.assert_called_once()
         context_manager.__exit__.assert_called_once_with(None, None, None)
         tracer.close()
+
+    def test_repeated_initialization_keeps_provider_and_context_ownership_local(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+        caplog: pytest.LogCaptureFixture,
+    ) -> None:
+        """Nested adapters must not override global providers or leak contexts."""
+        from bioetl.infrastructure.observability import tracing
+
+        if not tracing.OTEL_AVAILABLE:
+            pytest.skip("OpenTelemetry is not available")
+
+        from opentelemetry.sdk.trace.export.in_memory_span_exporter import (
+            InMemorySpanExporter,
+        )
+
+        monkeypatch.setattr(
+            tracing,
+            "_build_telemetry_exporter",
+            InMemorySpanExporter,
+        )
+        caplog.set_level(logging.WARNING)
+        first = tracing.OpenTelemetryTracer("bioetl-first")
+        second = tracing.OpenTelemetryTracer("bioetl-second")
+        try:
+            with first.get_tracer("bioetl.outer").start_as_current_span(
+                "outer"
+            ) as outer_span:
+                outer_span.add_event("outer-ready", attributes={"index": 1})
+                with second.get_tracer("bioetl.inner").start_as_current_span(
+                    "inner"
+                ) as inner_span:
+                    inner_span.add_event("inner-ready", attributes={"index": 2})
+        finally:
+            second.close()
+            first.close()
+
+        messages = [record.getMessage() for record in caplog.records]
+        assert not any(
+            "Overriding of current TracerProvider" in message for message in messages
+        )
+        assert not any("Failed to detach context" in message for message in messages)
 
 
 class TestModuleAll:
