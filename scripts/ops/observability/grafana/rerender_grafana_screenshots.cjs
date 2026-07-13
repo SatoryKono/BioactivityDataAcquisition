@@ -528,6 +528,7 @@ async function collectPanelTerminalStates(page, dashboard) {
       const selectors = [
         `[data-panelid="${panelId}"]`,
         `[data-viz-panel-key="panel-${panelId}"]`,
+        `[data-griditem-key="grid-item-${panelId}"]`,
         `[data-griditem-key="panel-${panelId}"]`,
         `[data-griditem-key="${panelId}"]`,
         `[data-testid="panel-${panelId}"]`,
@@ -570,27 +571,47 @@ async function collectPanelTerminalStates(page, dashboard) {
       }
       return { element: null, selector: "" };
     };
-    const headerSelectors = [
-      '[data-testid^="data-testid Panel header"]',
-      '[data-testid*="Panel header"]',
-      '[aria-label="Panel header"]',
-      '[aria-label*="Panel header"]',
+    const panelSurface = (element) =>
+      element.matches('[data-testid^="data-testid Panel header"]')
+        ? element
+        : element.querySelector('[data-testid^="data-testid Panel header"]') ||
+          element;
+    const panelContent = (element) => {
+      const selectors = [
+        '[data-testid="data-testid panel content"]',
+        '[data-testid="panel content"]',
+        '[data-testid$="panel content"]',
+        ".panel-content",
+      ];
+      for (const selector of selectors) {
+        const content = element.querySelector(selector);
+        if (content) {
+          return { element: content, selector };
+        }
+      }
+      return { element: null, selector: "" };
+    };
+    const headerContentSelectors = [
       '[data-testid="header-container"]',
       '[data-testid="title-items-container"]',
       ".panel-title-container",
       ".panel-header",
       ".panel-title",
     ];
-    const headerSelector = headerSelectors.join(",");
+    const headerContentSelector = headerContentSelectors.join(",");
     const loadingSelector = [
       '[aria-label*="loading" i]',
       '[data-testid*="loading" i]',
       '[aria-busy="true"]',
       ".panel-loading",
+      '[class*="panel-loading-bar"]',
     ].join(",");
     const errorSelector = [
-      '[aria-label*="error" i]',
-      '[data-testid*="error" i]',
+      '[aria-label="error" i]',
+      '[aria-label^="error:" i]',
+      '[data-testid*="panel-alert" i]',
+      '[data-testid*="query-error" i]',
+      '[data-testid*="datasource-error" i]',
       ".panel-alert-error",
       '[class*="panel-alert"]',
     ].join(",");
@@ -630,16 +651,17 @@ async function collectPanelTerminalStates(page, dashboard) {
         };
       }
 
-      const clone = located.element.cloneNode(true);
-      for (const selector of headerSelectors) {
-        for (const header of clone.querySelectorAll(selector)) {
-          header.remove();
-        }
-      }
-      const bodyText = normalize(clone.innerText || clone.textContent || "");
-      const hasVisibleMarker = (selector, excludeHeaders = false) =>
-        Array.from(located.element.querySelectorAll(selector)).some((element) => {
-          if (excludeHeaders && element.closest(headerSelector)) {
+      const surface = panelSurface(located.element);
+      const content = panelContent(surface);
+      const bodyText = content.element
+        ? normalize(content.element.innerText || content.element.textContent || "")
+        : "";
+      const hasVisibleMarker = (root, selector, excludeHeaderContent = false) =>
+        Array.from(root.querySelectorAll(selector)).some((element) => {
+          if (
+            excludeHeaderContent &&
+            element.closest(headerContentSelector)
+          ) {
             return false;
           }
           const rect = element.getBoundingClientRect();
@@ -648,16 +670,20 @@ async function collectPanelTerminalStates(page, dashboard) {
             rect.width > 0 &&
             rect.height > 0 &&
             style.display !== "none" &&
-            style.visibility !== "hidden"
+            style.visibility !== "hidden" &&
+            style.opacity !== "0"
           );
         });
-      const hasLoadingMarker = hasVisibleMarker(loadingSelector);
-      const hasErrorIcon = hasVisibleMarker(errorSelector);
-      const hasVisualEvidence = hasVisibleMarker(visualSelector, true);
+      const hasLoadingMarker = hasVisibleMarker(surface, loadingSelector, true);
+      const hasErrorIcon = hasVisibleMarker(surface, errorSelector, true);
+      const hasVisualEvidence = content.element
+        ? hasVisibleMarker(content.element, visualSelector)
+        : false;
 
       return {
         ...panel,
         selector: located.selector,
+        contentSelector: content.selector,
         bodyText: bodyText.slice(0, 500),
         hasLoadingMarker,
         hasErrorIcon,
