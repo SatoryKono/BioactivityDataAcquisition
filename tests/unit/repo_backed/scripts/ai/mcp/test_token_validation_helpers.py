@@ -10,13 +10,16 @@ from pathlib import Path
 import pytest
 
 
-pytestmark = pytest.mark.unit
-
-# Skip bash-based tests on Windows
-pytestmark = pytest.mark.skipif(
-    platform.system() == "Windows",
-    reason="bash-based MCP token validation tests are not reliable on native Windows shells"
-)
+# Skip bash-based tests on Windows; the checked-in shell helper is a repository
+# contract, so this test belongs to the deterministic repo-backed unit lane.
+pytestmark = [
+    pytest.mark.unit,
+    pytest.mark.repo_backed,
+    pytest.mark.skipif(
+        platform.system() == "Windows",
+        reason="bash-based MCP token validation tests are not reliable on native Windows shells",
+    ),
+]
 
 ROOT = Path(__file__).resolve().parents[6]
 HELPER = ROOT / "scripts" / "ai" / "mcp" / "support" / "token_validation.sh"

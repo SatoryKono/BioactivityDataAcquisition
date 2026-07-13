@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import re
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any, cast
 
@@ -417,16 +418,22 @@ def test_tests_workflow_runs_strict_test_audit_preflight_before_governance_close
 
 
 @pytest.mark.architecture
-def test_test_governance_artifacts_match_live_collector() -> None:
+def test_test_governance_artifacts_match_live_collector(
+    cached_subprocess_run,
+) -> None:
     """Committed governance snapshots must fail fast on collector drift."""
-    # Just verify artifacts exist and are valid JSON - live collection hangs
-    governance_payload = _load_json(TEST_GOVERNANCE_ARTIFACT_PATH)
-    fixture_duplication_payload = _load_json(FIXTURE_DUPLICATION_INVENTORY_PATH)
+    result = cached_subprocess_run(
+        [
+            sys.executable,
+            "-m",
+            "scripts.engineering.qa.report_test_governance_audit",
+            "--check",
+        ],
+        cwd=ROOT,
+        timeout=60,
+    )
 
-    # Verify basic structure
-    assert "report" in governance_payload
-    assert fixture_duplication_payload["scan_root"] == "tests/fixtures"
-    assert "groups" in fixture_duplication_payload
+    assert result.returncode == 0, result.stdout + result.stderr
 
 
 @pytest.mark.architecture
