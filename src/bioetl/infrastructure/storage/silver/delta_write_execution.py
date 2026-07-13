@@ -22,10 +22,10 @@ from bioetl.domain.medallion import SilverWriteMode
 from bioetl.infrastructure.storage.delta.table_ops import (
     normalize_delta_filesystem_path,
 )
-from bioetl.infrastructure.storage.support.atomic_ops import atomic_write_bytes
 from bioetl.infrastructure.storage.silver.delta_request_models import (
     _DeltaWriteRequest,
 )
+from bioetl.infrastructure.storage.support.atomic_ops import atomic_write_bytes
 
 __all__ = [
     "_build_plain_delta_write_kwargs",
