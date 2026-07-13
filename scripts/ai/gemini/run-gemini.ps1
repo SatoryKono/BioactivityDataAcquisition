@@ -10,6 +10,14 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Treat the process-scoped HTTP proxy as the canonical Gemini proxy. Keep the
+# credential outside the tracked script and provide the aliases used by HTTPS
+# and proxy-aware CLI clients before WSLENV forwards them to the launcher.
+if (-not [string]::IsNullOrWhiteSpace($env:HTTP_PROXY)) {
+    $env:HTTPS_PROXY = $env:HTTP_PROXY
+    $env:ALL_PROXY = $env:HTTP_PROXY
+}
+
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $WslSupport = Join-Path $ScriptDir "helper\wsl-support.ps1"
 . $WslSupport

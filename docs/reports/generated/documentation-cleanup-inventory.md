@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2877 |
+| Doc-like files | 2878 |
 | Tracked doc-like files | 1802 |
-| Ignored local docs/reports files | 1075 |
+| Ignored local docs/reports files | 1076 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
 | Generated routes | 58 |
@@ -18,7 +18,7 @@
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 1075 |
+| ignored_local | 1076 |
 | tracked | 1802 |
 
 ## Lifecycle Counts
@@ -30,7 +30,7 @@
 | active_quality_baseline | 18 |
 | closeout_evidence | 27 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 21 |
+| docs_reports_curated_or_historical_report | 22 |
 | docs_reports_generated_or_route_owned | 23 |
 | docs_reports_retention_sensitive_evidence | 1046 |
 | generated_skill_license_mirror | 5 |
@@ -63,7 +63,7 @@
 | Archived | 60 |
 | Canonical | 63 |
 | Generated | 703 |
-| Working | 223 |
+| Working | 224 |
 
 ## Surface Families
 
@@ -73,14 +73,14 @@
 | archive | 60 |
 | canonical | 63 |
 | generated | 703 |
-| working | 223 |
+| working | 224 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 115 |
-| archive-after-migration | 59 |
+| archive-after-migration | 60 |
 | generate-automatically | 703 |
 | keep | 1996 |
 | reconcile-with-github-state | 4 |
@@ -120,6 +120,7 @@
 | `docs/reports/dashboard-ux-checks/README.md` | Working | 0 | archive-after-migration |
 | `docs/reports/docs-link-check-report.json` | Working | 0 | archive-after-migration |
 | `docs/reports/docs-parity-report.json` | Working | 0 | archive-after-migration |
+| `docs/reports/documentation-audit-report-2026-07-13.md` | Working | 0 | archive-after-migration |
 | `docs/reports/governance_check_report.json` | Working | 0 | archive-after-migration |
 | `docs/reports/grafana_silver_filter_rejections_prompt.md` | Working | 0 | archive-after-migration |
 | `docs/reports/great-expectations-spike-2026-04-01.md` | Working | 1 | archive-after-migration |
@@ -299,6 +300,7 @@
 | `docs/reports/dashboard-ux-checks/README.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/docs-link-check-report.json` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/docs-parity-report.json` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/documentation-audit-report-2026-07-13.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/evidence/INDEX.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/adapter-interface-alignment/01-pillars/pillars.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-biblio-data-source-creators-centralize-helper-wiring.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
@@ -322,7 +324,6 @@
 | `docs/reports/evidence/architecture-foundations/02-evidence/architecture-patterns/EV-patterns-dependency-injection-lives-in-composition.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/architecture-foundations/02-evidence/architecture-patterns/EV-patterns-domain-driven-design-primitives.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/architecture-foundations/02-evidence/architecture-patterns/EV-patterns-hexagonal-ports-and-adapters-is-explicit.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/architecture-foundations/02-evidence/architecture-patterns/EV-patterns-medallion-bronze-silver-gold-flow.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 
 ## Generated Route Registry
 
