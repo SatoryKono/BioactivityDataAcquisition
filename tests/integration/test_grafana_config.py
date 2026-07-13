@@ -337,9 +337,7 @@ def test_explore_traces_links_use_safe_search_first_handoff(
             continue
         nav_content = unescape(str(panel.get("options", {}).get("content", "")))
         trace_urls.extend(
-            re.findall(
-                r'href="([^"]*grafana-exploretraces-app[^"]*)"', nav_content
-            )
+            re.findall(r'href="([^"]*grafana-exploretraces-app[^"]*)"', nav_content)
         )
 
     assert trace_urls, f"{dashboard_path.name} must expose Explore Traces URLs"
@@ -357,8 +355,7 @@ def test_explore_traces_links_use_safe_search_first_handoff(
             f"{dashboard_path.name} must use a safe default groupBy: {url}"
         )
         assert (
-            "span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22"
-            not in url
+            "span.%22bioetl.run_type%22%20%3D~%20%22${run_type:regex}%22" not in url
         ), (
             f"{dashboard_path.name} must not couple Explore Traces to "
             f"${{run_type:regex}}: {url}"

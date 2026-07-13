@@ -101,9 +101,7 @@ def _load_navigation_links_contract() -> dict[str, object]:
         "navigation_transition_contract": raw_contract.get(
             "navigation_transition_contract", {}
         ),
-        "time_handoff_requirements": raw_contract.get(
-            "time_handoff_requirements", {}
-        ),
+        "time_handoff_requirements": raw_contract.get("time_handoff_requirements", {}),
         "kpi_ownership": raw_contract.get("kpi_ownership", {}),
     }
 

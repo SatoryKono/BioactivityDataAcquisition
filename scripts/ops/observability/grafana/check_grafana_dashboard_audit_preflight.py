@@ -238,7 +238,10 @@ def _expected_panel_ids_by_uid(
         try:
             payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
-            return {}, f"could not read dashboard panel contract {dashboard_path}: {exc}"
+            return (
+                {},
+                f"could not read dashboard panel contract {dashboard_path}: {exc}",
+            )
         if not isinstance(payload, dict):
             return {}, f"dashboard panel contract {dashboard_path} is not an object"
         panel_ids = _required_non_row_panel_ids(payload.get("panels"))
