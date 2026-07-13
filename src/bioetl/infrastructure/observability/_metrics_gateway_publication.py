@@ -19,6 +19,8 @@ __all__ = [
 ]
 
 _PUSHGATEWAY_GROUPING_LABELS = ("pipeline", "run_type")
+_PUSHGATEWAY_PUBLICATION_TIMEOUT_SECONDS = 5.0
+_PUSHGATEWAY_DELETE_TIMEOUT_SECONDS = 1.0
 
 
 def _emit_metrics_publication_event(
@@ -82,7 +84,7 @@ def publish_metrics_to_gateway(
             job=effective_run_label,
             registry=selected_registry,
             grouping_key=safe_grouping_key,
-            timeout=1.0,
+            timeout=_PUSHGATEWAY_PUBLICATION_TIMEOUT_SECONDS,
         )
         logger.info(
             "Metrics pushed to gateway",
@@ -140,7 +142,7 @@ def remove_metrics_from_gateway(
             gateway,
             job=effective_run_label,
             grouping_key=safe_grouping_key,
-            timeout=1.0,
+            timeout=_PUSHGATEWAY_DELETE_TIMEOUT_SECONDS,
         )
         logger.info(
             "Metrics deleted from gateway",

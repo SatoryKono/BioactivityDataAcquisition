@@ -210,6 +210,9 @@ class CliRunOrchestrationService:
         try:
             return run_coroutine(coro)
         finally:
-            flush_metrics(pipeline_name=request.pipeline)
+            flush_metrics(
+                pipeline_name=request.pipeline,
+                run_type=request.options.run_type,
+            )
             if getattr(coro, "cr_frame", None) is not None:
                 coro.close()
