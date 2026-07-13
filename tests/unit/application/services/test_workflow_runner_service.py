@@ -29,6 +29,9 @@ from bioetl.domain.workflow import (
 from tests.helpers.clock import FIXED_TEST_TIME
 
 
+pytestmark = pytest.mark.unit
+
+
 @dataclass
 class _RecordingMetrics:
     counters: list[tuple[str, int, dict[str, str]]] = field(default_factory=list)
@@ -173,6 +176,27 @@ def _build_chembl_baseline_config() -> WorkflowConfig:
     )
 
 
+def _build_chembl_baseline_metrics_config() -> WorkflowConfig:
+    return WorkflowConfig(
+        name="chembl_baseline",
+        defaults=WorkflowRunOptionsConfig(run_type="backfill"),
+        steps=(
+            WorkflowStepConfig(
+                step_id="chembl_assay",
+                pipeline_name="chembl_assay",
+            ),
+            WorkflowStepConfig(
+                step_id="chembl_target",
+                pipeline_name="chembl_target",
+            ),
+            WorkflowStepConfig(
+                step_id="chembl_publication",
+                pipeline_name="chembl_publication",
+            ),
+        ),
+    )
+
+
 def test_workflow_runner_records_expected_pipeline_universe_for_baseline() -> None:
     metrics = _RecordingMetrics()
     service = WorkflowRunnerService(
@@ -181,7 +205,7 @@ def test_workflow_runner_records_expected_pipeline_universe_for_baseline() -> No
         metrics=metrics,
     )
 
-    service.record_expected_pipeline_metrics(_build_chembl_baseline_config())
+    service.record_expected_pipeline_metrics(_build_chembl_baseline_metrics_config())
 
     assert metrics.gauges == [
         (

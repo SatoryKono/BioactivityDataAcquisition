@@ -919,10 +919,16 @@ def test_pipeline_configs_schema(project_root: Path):
     """Validate all pipeline YAMLs against the strict schema."""
     import yaml
 
+    validation_errors = []
     for yaml_file in _iter_pipeline_yaml_files(project_root):
         with yaml_file.open(encoding="utf-8") as f:
             data = yaml.safe_load(f)
-        PipelineYamlConfig(**data)
+        try:
+            PipelineYamlConfig(**data)
+        except (TypeError, ValueError) as exc:
+            validation_errors.append(f"{yaml_file}: {exc}")
+
+    assert not validation_errors, "\n".join(validation_errors)
 
 
 # =============================================================================

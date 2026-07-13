@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "profile_scope": "targeted_s7_governance_hotspots",
+  "selection": {
+    "test_paths": [
+      "tests/architecture/test_checkpoint_runtime_facade_usage.py",
+      "tests/architecture/test_config_discrepancy_report_drift.py",
+      "tests/architecture/test_config_root_governance.py",
+      "tests/architecture/test_cli_command_import_guards.py",
+      "tests/architecture/test_adr_enforcement_matrix.py",
+      "tests/architecture/test_add_svg_text_fallback.py",
+      "tests/architecture/test_adapter_contracts.py"
+    ],
+    "rationale": "A bounded S7 profile refreshes routing evidence without representing itself as the full-suite telemetry baseline."
+  },
+  "source_branch": "main",
+  "source_commit": "c9d639733928a2b699be2cc5031a38c4b3a3707e",
+  "source_run_id": "local-issues-6237-6242-s7-hotspots-20260713",
+  "refreshed_at_utc": "2026-07-13T08:58:53.124004+00:00",
+  "refresh_status": "captured",
+  "total_cases": 36,
+  "top_slowest": [
+    {
+      "source": "bioetl-issues-6237-6242-s7-hotspots.xml",
+      "test": "tests.architecture.test_checkpoint_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_tests",
+      "duration_s": 11.304
+    },
+    {
+      "source": "bioetl-issues-6237-6242-s7-hotspots.xml",
+      "test": "tests.architecture.test_checkpoint_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_is_not_used_in_src",
+      "duration_s": 4.054
+    },
+    {
+      "source": "bioetl-issues-6237-6242-s7-hotspots.xml",
+      "test": "tests.architecture.test_config_root_governance::test_runtime_config_discovery_does_not_use_source_parent_arithmetic",
+      "duration_s": 3.169
+    },
+    {
+      "source": "bioetl-issues-6237-6242-s7-hotspots.xml",
+      "test": "tests.architecture.test_adapter_contracts.TestAdapterMixinPolicy::test_src_does_not_use_legacy_adapter_mixin_symbols",
+      "duration_s": 0.452
+    },
+    {
+      "source": "bioetl-issues-6237-6242-s7-hotspots.xml",
+      "test": "tests.architecture.test_adapter_contracts.TestStorageWriterContracts::test_atomic_write_used_in_writers",
+      "duration_s": 0.319
+    },
+    {
+      "source": "bioetl-issues-6237-6242-s7-hotspots.xml",
+      "test": "tests.architecture.test_adr_enforcement_matrix::test_adr_enforcement_matrix_artifact_matches_live_generator",
+      "duration_s": 0.161
+    },
+    {
+      "source": "bioetl-issues-6237-6242-s7-hotspots.xml",
+      "test": "tests.architecture.test_adapter_contracts.TestAdapterMixinPolicy::test_src_does_not_import_legacy_adapter_mixin_modules",
+      "duration_s": 0.126
+    },
+    {
+      "source": "bioetl-issues-6237-6242-s7-hotspots.xml",
+      "test": "tests.architecture.test_adapter_contracts.TestAdapterPortCompliance::test_primary_adapter_classes_use_package_root_imports",
+      "duration_s": 0.12
+    },
+    {
+      "source": "bioetl-issues-6237-6242-s7-hotspots.xml",
+      "test": "tests.architecture.test_checkpoint_runtime_facade_usage::test_checkpoint_compatibility_runtime_facade_file_stays_absent",
+      "duration_s": 0.088
+    },
+    {
+      "source": "bioetl-issues-6237-6242-s7-hotspots.xml",
+      "test": "tests.architecture.test_cli_command_import_guards::test_non_cli_source_avoids_interfaces_package_root_convenience_imports",
+      "duration_s": 0.056
+    }
+  ],
+  "top_slowest_zones": [
+    {
+      "zone": "tests.architecture.test_checkpoint_runtime_facade_usage",
+      "test_count": 4,
+      "total_duration_s": 15.448,
+      "max_duration_s": 11.304
+    },
+    {
+      "zone": "tests.architecture.test_config_root_governance",
+      "test_count": 1,
+      "total_duration_s": 3.169,
+      "max_duration_s": 3.169
+    },
+    {
+      "zone": "tests.architecture.test_adapter_contracts.TestAdapterMixinPolicy",
+      "test_count": 3,
+      "total_duration_s": 0.58,
+      "max_duration_s": 0.452
+    },
+    {
+      "zone": "tests.architecture.test_adapter_contracts.TestStorageWriterContracts",
+      "test_count": 1,
+      "total_duration_s": 0.319,
+      "max_duration_s": 0.319
+    },
+    {
+      "zone": "tests.architecture.test_adr_enforcement_matrix",
+      "test_count": 2,
+      "total_duration_s": 0.166,
+      "max_duration_s": 0.161
+    },
+    {
+      "zone": "tests.architecture.test_adapter_contracts.TestAdapterPortCompliance",
+      "test_count": 7,
+      "total_duration_s": 0.141,
+      "max_duration_s": 0.12
+    },
+    {
+      "zone": "tests.architecture.test_cli_command_import_guards",
+      "test_count": 2,
+      "total_duration_s": 0.112,
+      "max_duration_s": 0.056
+    },
+    {
+      "zone": "tests.architecture.test_config_discrepancy_report_drift",
+      "test_count": 1,
+      "total_duration_s": 0.041,
+      "max_duration_s": 0.041
+    }
+  ]
+}

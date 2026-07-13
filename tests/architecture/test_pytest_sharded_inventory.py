@@ -15,8 +15,6 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 INVENTORY_PATH = ROOT / "configs/quality/pytest_shards.yaml"
 RUNNER_PATH = ROOT / "scripts/engineering/dev/run_pytest_sharded.sh"
-SLOWEST_TELEMETRY_PATH = ROOT / "reports/test-telemetry/slowest-tests.json"
-
 _BASH_RUNNER_UNSUPPORTED_ON_WINDOWS = pytest.mark.skipif(
     sys.platform.startswith("win"),
     reason="bash-based sharded runner checks are not reliable on native Windows shells",
@@ -234,13 +232,16 @@ def test_architecture_shard_rebalance_manifest_matches_slow_test_telemetry() -> 
     inventory = _load_inventory()
     rebalance = inventory["telemetry_rebalance"]
     assert isinstance(rebalance, dict)
-    telemetry = json.loads(SLOWEST_TELEMETRY_PATH.read_text(encoding="utf-8"))
+    telemetry_path = ROOT / str(rebalance["source_report"])
+    assert telemetry_path.exists()
+    telemetry = json.loads(telemetry_path.read_text(encoding="utf-8"))
     generated_paths = _telemetry_hotspot_paths(
         telemetry=telemetry,
         min_duration_s=float(rebalance["min_architecture_duration_s"]),
     )
 
-    assert rebalance["source_report"] == "reports/test-telemetry/slowest-tests.json"
+    assert telemetry["profile_scope"] == "targeted_s7_governance_hotspots"
+    assert telemetry["total_cases"] > 0
     assert telemetry["source_commit"] == rebalance["source_commit"]
     assert telemetry["source_run_id"] == rebalance["source_run_id"]
     assert telemetry["refreshed_at_utc"] == rebalance["refreshed_at_utc"]

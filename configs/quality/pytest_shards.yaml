@@ -5,25 +5,15 @@ summary: >
   The runner must read shard membership and ignore/deselect rules from this
   inventory rather than hardcoding them inline.
 telemetry_rebalance:
-  source_report: reports/test-telemetry/slowest-tests.json
-  source_commit: 51979de96630ce1eff88b6a2b82df04a5c9be157
-  source_run_id: local-issues-5710-5711-20260630
-  refreshed_at_utc: "2026-06-30T13:06:54.324571+00:00"
+  source_report: reports/test-telemetry/s7-governance-hotspots.json
+  source_commit: c9d639733928a2b699be2cc5031a38c4b3a3707e
+  source_run_id: local-issues-6237-6242-s7-hotspots-20260713
+  refreshed_at_utc: "2026-07-13T08:58:53.124004+00:00"
   min_architecture_duration_s: 7.0
   slow_governance_shard: S7-crosscutting-architecture-guardrails
   fast_boundary_alias: S7-architecture-fast-boundary
   generated_architecture_hotspot_paths:
-    - tests/architecture/test_config_discrepancy_metrics_ratchets.py
-    - tests/architecture/test_config_discrepancy_report_drift.py
     - tests/architecture/test_checkpoint_runtime_facade_usage.py
-    - tests/architecture/test_cli_command_import_guards.py
-    - tests/architecture/test_config_root_governance.py
-    - tests/architecture/test_adr_enforcement_matrix.py
-    - tests/architecture/test_add_svg_text_fallback.py
-    - tests/architecture/test_adapter_contracts.py
-    - tests/architecture/test_contract_registry_loader_boundary.py
-    - tests/architecture/test_config_ci_invariants.py
-    - tests/architecture/test_config_surface_entity_residual_plateau.py
 aliases:
   S7-crosscutting-architecture:
     expands_to:
