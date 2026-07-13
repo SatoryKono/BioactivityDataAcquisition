@@ -1646,7 +1646,7 @@
             "dataLinks": [
               {
                 "title": "Open Runtime",
-                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=&var-run_type=&var-stage=unknown&&var-workflow=&var-run_id=",
+                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
                 "targetBlank": false,
                 "includeVars": false
               }
@@ -1737,7 +1737,7 @@
             "dataLinks": [
               {
                 "title": "Open Data Quality",
-                "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=&var-run_type=&var-stage=unknown&&var-workflow=&var-run_id=",
+                "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
                 "targetBlank": false,
                 "includeVars": false
               }
@@ -1828,13 +1828,13 @@
             "dataLinks": [
               {
                 "title": "Open Runtime",
-                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=&var-run_type=&var-stage=unknown&&var-workflow=&var-run_id=",
+                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
                 "targetBlank": false,
                 "includeVars": false
               },
               {
                 "title": "Open Control Plane",
-                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=&var-run_type=&&var-workflow=&var-run_id=",
+                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
                 "targetBlank": false,
                 "includeVars": false
               }
@@ -1905,7 +1905,7 @@
             "dataLinks": [
               {
                 "title": "Open Runtime",
-                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=&var-run_type=&var-stage=unknown&&var-workflow=&var-run_id=",
+                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
                 "targetBlank": false,
                 "includeVars": false
               }
@@ -1976,13 +1976,13 @@
             "dataLinks": [
               {
                 "title": "Open Control Plane",
-                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=&var-run_type=&&var-workflow=&var-run_id=",
+                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
                 "targetBlank": false,
                 "includeVars": false
               },
               {
                 "title": "Open Runtime",
-                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=&var-run_type=&var-stage=unknown&&var-workflow=&var-run_id=",
+                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
                 "targetBlank": false,
                 "includeVars": false
               }

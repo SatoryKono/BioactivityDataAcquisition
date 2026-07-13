@@ -51,6 +51,7 @@ _ALLOWED_DASHBOARD_LINK_VARS = {
         {"workflow", "pipeline", "run_type", "run_id"}
     ),
     "bioetl-silver-reject-explorer": frozenset({"pipeline", "run_type"}),
+    "bioetl-alerts-slo": frozenset({"workflow", "pipeline", "run_type"}),
 }
 
 

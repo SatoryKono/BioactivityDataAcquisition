@@ -172,10 +172,13 @@ Explorer health probe and monitoring setup docs for that reason.
    the L0 question: what is broken/degraded, what exact control-plane identity
    is selected or resolved, and where to open drilldown first. `OK` requires
    recent activity; missing current evidence remains `UNKNOWN`, not green zero.
-   Firing/pending alert state follows immediately in expanded first-screen
-   `Alert/SLO Triage`; it reads Prometheus `ALERTS` and is an incident triage
-   surface, not a replacement for the shipped Prometheus alert rules. Repeated
-   subsystem detail and historical/diagnostic evidence remain collapsed.
+   Compact current-state cards for Control Plane, Runtime, Data Quality,
+   Provider, and Data Validation follow the answer band, then `Inputs` and
+   `Workflow` share the final first-screen row. Firing/pending alert state lives
+   immediately below in collapsed `Alert/SLO Triage`; it reads Prometheus
+   `ALERTS` and is an incident triage surface, not a replacement for the
+   shipped Prometheus alert rules. Historical/diagnostic evidence remains
+   collapsed.
 1. `bioetl-runtime`, first-screen answer area (без скролла):
    `Provenance`, `Status`, `ID`, `Processed Records`, then
    `Runtime Status`, `Runtime Blockers` и
@@ -325,18 +328,21 @@ Panel-level dashboard handoffs и `First Action` dashboard CTAs намеренн
 │ ID                   │ Processed    │ First Action                           │
 │                      │ Records      │                                        │
 ├──────────────┬───────┬──────────────┬──────────┬─────────────────────────────┤
-│ Alert/SLO Triage: Triage Alert State (actual ALERTS evidence)                │
-├──────────────────────────────────────────────────────────────────────────────┤
-│ Inputs: deviation-first matrix across six operator inputs                    │
-├──────────────────────────────────────────────────────────────────────────────┤
-│ ▸ L1 Historical Trends + repeated subsystem details                          │
-│ ▾ Range Evidence                                                             │
-│ ▾ Diagnostics & Docs                                                         │
+│ Control Plane│ Runtime│ Data Quality │ Provider │ Data Validation             │
+├──────────────────────────────────────┬───────────────────────────────────────┤
+│ Inputs: deviation-first matrix       │ Workflow: current-state matrix        │
+├──────────────────────────────────────┴───────────────────────────────────────┤
+│ ▸ Alert/SLO Triage: actual ALERTS evidence                                   │
+│ ▸ L1 Historical Trends                                                       │
+│ ▸ Range Evidence                                                             │
+│ ▸ Diagnostics & Docs                                                         │
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 Первый экран без скролла должен отвечать на вопрос **«что сломано и куда идти дальше»**:
-- что сломано: `Status` + `Triage Alert State` + deviation-first `Inputs`;
+- что сломано: `Status` + compact L1 current-state cards + deviation-first
+  `Inputs` / `Workflow`; `Triage Alert State` раскрывается после первичного
+  narrowing, когда нужен alert-level context;
 - куда идти дальше: `First Action` с `action_target/action_reason/action_dashboard_uid`;
 - какая execution identity выбрана: `ID`, backed by local control-plane manifests;
 - что было в окне времени: collapsed `L1 Historical Trends` и `Range Evidence`;
