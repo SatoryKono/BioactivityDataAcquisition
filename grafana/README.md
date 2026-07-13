@@ -806,8 +806,8 @@ default.
 
 | Variable | Primary dashboards | Source | Semantics |
 | --- | --- | --- | --- |
-| `$workflow` | `0..5` | `label_values(bioetl_workflow_runs_total, workflow)` | Context/evidence unless a panel documents truthful current-status intersection. |
-| `$pipeline` | `0..5` | Dashboard-bounded Prometheus universe: Overview/DQ/Provider/Workflow use `bioetl_records_processed_total`; Runtime uses `bioetl_runtime_pipeline_run_type_universe`; Control Plane uses `bioetl_control_plane_run_type_universe`. | Canonical pipeline context; Overview may default to `All`, non-Overview dashboards fail-close to `unknown`. |
+| `$workflow` | `0..5` | `label_values(bioetl_workflow_universe, workflow)` for query-backed dashboards; Alerts uses a textbox. | Context/evidence unless a panel documents truthful current-status intersection. The universe includes terminal workflow outcomes and started workflows published through `bioetl_workflow_expected`. |
+| `$pipeline` | `0..5` | Dashboard-bounded Prometheus universe: Overview/DQ/Provider/Workflow/Alerts use `bioetl_overview_pipeline_run_type_universe`; Runtime uses `bioetl_runtime_pipeline_run_type_universe`; Control Plane uses `bioetl_control_plane_run_type_universe`. | Canonical pipeline context; Overview may default to `All`, non-Overview dashboards fail-close to `unknown`. Planned workflow child pipelines appear after `bioetl_workflow_pipeline_expected` is published. |
 | `$run_type` | `0..5` | Same bounded universe as `$pipeline` for the dashboard role. | Multi-select Include All; missing context is `All`, not `unknown`. |
 | `$run_id` | `0..5` | Quarantine Explorer HTTP `/ops/control-plane/filter-options?dimension=run_id...&workflow=${workflow}&pipeline=${pipeline}&run_type=${run_type:csv}` | Preserved HTTP identity context for `ID`/details panels; no Include All; default `-`; never a Prometheus label. |
 
@@ -851,8 +851,8 @@ host/WSL setups, prefer an explicit value over assuming `localhost:9090`.
 
 ### 6.1 `$pipeline`
 
-- **Определение:** dashboard-bounded query family. Overview/DQ/Provider/Workflow
-  use `bioetl_records_processed_total`; Runtime uses
+- **Определение:** dashboard-bounded query family. Overview/DQ/Provider/Workflow/Alerts
+  use `bioetl_overview_pipeline_run_type_universe`; Runtime uses
   `bioetl_runtime_pipeline_run_type_universe`; Control Plane uses
   `bioetl_control_plane_run_type_universe`.
 - **Тип:** Query (автоматическое обнаружение значений)
@@ -1186,6 +1186,8 @@ container name is `bioetl-quarantine-explorer`. Local host-backed overrides may
 still set `BIOETL_QUARANTINE_EXPLORER_URL` to `http://host.docker.internal:8081`.
 Compose surfaces must not publish Quarantine Explorer on host port `8000`;
 that port is reserved for the BioETL Prometheus `/metrics` endpoint.
+Prometheus scrapes Quarantine Explorer at `/metrics`; `/health/live` remains a
+JSON health probe for Docker healthchecks, Grafana links, and operator checks.
 The shipped Grafana bootstrap entrypoint also removes a stale local
 `grafana-image-renderer` plugin from `/var/lib/grafana/plugins/` when remote
 renderer mode is active, preventing restart loops caused by old persistent
@@ -1623,6 +1625,7 @@ python -m scripts.ops ensure-quarantine-explorer
 
 # Проверка
 curl http://127.0.0.1:8081/health/live
+curl http://127.0.0.1:8081/metrics
 curl "http://127.0.0.1:8081/ops/control-plane/identity-table?pipeline=chembl_target&run_type=backfill&run_id=<run-id>"
 ```
 
@@ -1641,6 +1644,8 @@ network alias на monitoring network даже при container name
 должен слушать `0.0.0.0:8081`, не только `127.0.0.1`.
 Не публикуй Quarantine Explorer на host `:8000`: этот порт зарезервирован для
 BioETL `/metrics`, который Prometheus скрейпит как `host.docker.internal:8000`.
+Quarantine Explorer Prometheus target использует `/metrics`; не возвращай
+`metrics_path` на `/health/live`, потому что этот endpoint отдаёт JSON.
 
 ### 15.2 Prometheus Target DOWN
 

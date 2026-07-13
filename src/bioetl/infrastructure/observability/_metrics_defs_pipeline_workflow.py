@@ -6,6 +6,8 @@ from prometheus_client import Counter, Gauge, Histogram
 
 __all__ = [
     "WORKFLOW_CURRENT_STATUS",
+    "WORKFLOW_EXPECTED",
+    "WORKFLOW_PIPELINE_EXPECTED",
     "WORKFLOW_RECONCILIATION_ROWS_DELETED_TOTAL",
     "WORKFLOW_RECONCILIATION_ROWS_RETAINED_TOTAL",
     "WORKFLOW_RECONCILIATION_ROWS_SCANNED_TOTAL",
@@ -24,6 +26,18 @@ WORKFLOW_CURRENT_STATUS = Gauge(
     "bioetl_workflow_current_status",
     "Current terminal workflow status by bounded workflow context: 0=OK, 1=WARN, 2=CRIT",
     ["workflow", "pipeline_context", "run_type_context", "provider_context"],
+)
+
+WORKFLOW_EXPECTED = Gauge(
+    "bioetl_workflow_expected",
+    "Planned workflow scopes for dashboard selector universes",
+    ["workflow", "provider"],
+)
+
+WORKFLOW_PIPELINE_EXPECTED = Gauge(
+    "bioetl_workflow_pipeline_expected",
+    "Planned workflow pipeline/run_type scopes for dashboard selector universes",
+    ["workflow", "pipeline", "run_type", "provider"],
 )
 
 WORKFLOW_RECONCILIATION_ROWS_SCANNED_TOTAL = Counter(

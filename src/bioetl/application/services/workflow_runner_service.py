@@ -18,6 +18,7 @@ from bioetl.application.services.workflow_runner_support import (
     build_resume_skipped_step_result,
     build_skipped_step_result,
     record_step_metrics,
+    record_workflow_pipeline_expected_metrics,
     record_workflow_run_metrics,
     run_options_from_config,
     step_result_from_transform_result,
@@ -65,6 +66,28 @@ _WORKFLOW_STEP_FAILURES = (
 )
 
 
+def _apply_workflow_step_transition(
+    *,
+    state: WorkflowExecutionState,
+    step: WorkflowStepDefinition,
+    transition: ResolvedWorkflowStepTransitionRecord,
+    step_completed_callback: Callable[[WorkflowStepExecutionResult], None] | None,
+) -> None:
+    """Apply one resolved transition to mutable workflow execution state."""
+    result = transition.result
+    state.step_results.append(result)
+    if step_completed_callback is not None:
+        step_completed_callback(result)
+    if transition.policy.stores_output:
+        state.step_outputs[step.step_id] = result.payload
+    state.status, state.failed_step_id = apply_step_result_transition(
+        step=step,
+        result_status=result.status,
+        workflow_status=state.status,
+        failed_step_id=state.failed_step_id,
+    )
+
+
 @dataclass(slots=True)
 class WorkflowRunnerService:
     """Execute workflow pipeline and transform steps in topological order."""
@@ -94,6 +117,7 @@ class WorkflowRunnerService:
         created_at_factory: Callable[[], datetime] | None = None,
     ) -> WorkflowRunExecutionResult:
         """Run a workflow config and stop on first failed step."""
+        self.record_expected_pipeline_metrics(config)
         state = WorkflowExecutionState(step_results=[], step_outputs={})
         workflow_context_labels = config.workflow_context_labels
         effective_dry_run = bool(config.defaults.dry_run)
@@ -120,7 +144,7 @@ class WorkflowRunnerService:
                 debug_export_dir=debug_export_dir,
                 created_at_factory=created_at_factory,
             )
-            self._apply_step_transition(
+            _apply_workflow_step_transition(
                 state=state,
                 step=step,
                 transition=transition,
@@ -134,6 +158,13 @@ class WorkflowRunnerService:
             context_labels=workflow_context_labels,
         )
         return workflow_result_from_state(config.name, state)
+
+    def record_expected_pipeline_metrics(self, config: WorkflowConfig) -> None:
+        """Record planned pipeline scopes before workflow step execution."""
+        record_workflow_pipeline_expected_metrics(
+            metrics=self.metrics,
+            config=config,
+        )
 
     async def _resolve_step_transition(
         self,
@@ -199,28 +230,6 @@ class WorkflowRunnerService:
                 debug_export_dir=debug_export_dir,
                 created_at_factory=created_at_factory,
             ),
-        )
-
-    def _apply_step_transition(
-        self,
-        *,
-        state: WorkflowExecutionState,
-        step: WorkflowStepDefinition,
-        transition: ResolvedWorkflowStepTransitionRecord,
-        step_completed_callback: Callable[[WorkflowStepExecutionResult], None] | None,
-    ) -> None:
-        """Apply one resolved transition to mutable workflow execution state."""
-        result = transition.result
-        state.step_results.append(result)
-        if step_completed_callback is not None:
-            step_completed_callback(result)
-        if transition.policy.stores_output:
-            state.step_outputs[step.step_id] = result.payload
-        state.status, state.failed_step_id = apply_step_result_transition(
-            step=step,
-            result_status=result.status,
-            workflow_status=state.status,
-            failed_step_id=state.failed_step_id,
         )
 
     async def _run_step(

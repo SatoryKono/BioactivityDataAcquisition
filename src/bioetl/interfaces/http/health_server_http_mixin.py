@@ -234,6 +234,30 @@ class HealthServerHTTPMixin:
         writer.write(http_response.encode("utf-8"))
         await writer.drain()
 
+    async def _send_text_response(
+        self,
+        writer: asyncio.StreamWriter,
+        status_code: int,
+        body: str,
+        *,
+        content_type: str = "text/plain; charset=utf-8",
+    ) -> None:
+        """Send a generic text response."""
+        body_bytes = body.encode("utf-8")
+        try:
+            status_text = HTTPStatus(status_code).phrase
+        except ValueError:
+            status_text = "OK"
+        http_response = (
+            f"HTTP/1.1 {status_code} {status_text}\r\n"
+            f"Content-Type: {content_type}\r\n"
+            f"Content-Length: {len(body_bytes)}\r\n"
+            "Connection: close\r\n"
+            "\r\n"
+        ).encode() + body_bytes
+        writer.write(http_response)
+        await writer.drain()
+
     async def _send_response(
         self,
         writer: asyncio.StreamWriter,

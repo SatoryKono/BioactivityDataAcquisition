@@ -33,7 +33,7 @@ def mock_config() -> Mock:
     """Create mock pipeline config."""
     config = Mock()
     config.table.silver_write_mode = "merge"
-    config.table.gold_write_mode = "merge"
+    config.table.gold_write_mode = "append"
     config.table.primary_keys = ["record_id"]
     config.table.partition_cols = []
     config.dq.key_nullability_rules = []
@@ -237,9 +237,9 @@ class TestWriteModeValidation:
         """Test validation passes for merge mode in silver."""
         config = Mock()
         config.table.silver_write_mode = "merge"
-        config.table.gold_write_mode = "merge"
+        config.table.gold_write_mode = "append"
         config.table.silver_idempotency_contract = "merge_upsert"
-        config.table.gold_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = "append_log"
 
         validator = MedallionConfigValidator(
             config=config, logger=mock_logger, write_mode_policy=WriteModePolicy()
@@ -251,9 +251,9 @@ class TestWriteModeValidation:
         """Test validation passes for append mode in silver."""
         config = Mock()
         config.table.silver_write_mode = "append"
-        config.table.gold_write_mode = "merge"
+        config.table.gold_write_mode = "append"
         config.table.silver_idempotency_contract = "append_log"
-        config.table.gold_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = "append_log"
 
         validator = MedallionConfigValidator(
             config=config, logger=mock_logger, write_mode_policy=WriteModePolicy()
@@ -265,7 +265,9 @@ class TestWriteModeValidation:
         """Test validation fails for overwrite mode in silver."""
         config = Mock()
         config.table.silver_write_mode = "overwrite"  # Not allowed for silver
-        config.table.gold_write_mode = "merge"
+        config.table.gold_write_mode = "append"
+        config.table.silver_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = "append_log"
 
         validator = MedallionConfigValidator(
             config=config, logger=mock_logger, write_mode_policy=WriteModePolicy()
@@ -274,8 +276,8 @@ class TestWriteModeValidation:
         assert len(errors) == 1
         assert errors[0].field == "write_mode"
 
-    def test_valid_gold_merge(self, mock_logger: Mock) -> None:
-        """Test validation passes for merge mode in gold."""
+    def test_invalid_gold_merge(self, mock_logger: Mock) -> None:
+        """Test validation fails for merge mode in gold."""
         config = Mock()
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "merge"
@@ -286,7 +288,8 @@ class TestWriteModeValidation:
             config=config, logger=mock_logger, write_mode_policy=WriteModePolicy()
         )
         errors = validator.validate_write_modes()
-        assert len(errors) == 0
+        assert len(errors) == 1
+        assert errors[0].field == "gold_write_mode"
 
     def test_valid_gold_overwrite(self, mock_logger: Mock) -> None:
         """Test validation passes for overwrite mode in gold."""

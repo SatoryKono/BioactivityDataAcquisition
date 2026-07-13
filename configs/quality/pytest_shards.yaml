@@ -63,6 +63,7 @@ shards:
       - tests/unit/domain/transformations
       - tests/unit/domain/lineage
       - tests/unit/domain/hash_policy
+      - tests/unit/domain/normalization
     workers_override: 0
   - name: S1-domain-services
     wave: 1
@@ -241,6 +242,7 @@ shards:
       - tests/unit/infrastructure/locking
       - tests/unit/infrastructure/observability
       - tests/unit/infrastructure/quality
+      - tests/unit/infrastructure/quarantine
       - tests/unit/infrastructure/schemas
       - tests/unit/infrastructure/security
       - tests/unit/infrastructure/serialization

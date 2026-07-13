@@ -744,6 +744,7 @@ class TestPipelineRunnerRun:
         ledger_service.record_artifact_published.assert_called_once_with(
             layer="debug_export",
             artifact_path="artifacts/debug_exports/standalone/test_runner_pipeline/run-1",
+            artifact_content_hash="hash-1",
             dataset_ref=f"debug_export:{runner._config.pipeline_name}@{runner.run_id}",
             details={
                 "manifest_path": "artifacts/debug_exports/standalone/test_runner_pipeline/run-1/manifest.json",

@@ -55,7 +55,10 @@
     "bioetl_stage_backlog_records",
     "bioetl_stage_lag_seconds",
     "bioetl_stage_records_total",
-    "bioetl_workflow_current_status"
+    "bioetl_workflow_current_status",
+    "bioetl_workflow_expected",
+    "bioetl_workflow_pipeline_expected",
+    "bioetl_workflow_runs_total"
   ],
   "alerted_without_declaration": [],
   "alerted_without_emission": [],
@@ -265,6 +268,8 @@
     "bioetl_transform_errors_total",
     "bioetl_vacuum_files_removed_total",
     "bioetl_workflow_current_status",
+    "bioetl_workflow_expected",
+    "bioetl_workflow_pipeline_expected",
     "bioetl_workflow_pipeline_verdict_status",
     "bioetl_workflow_reconciliation_rows_deleted_total",
     "bioetl_workflow_reconciliation_rows_retained_total",
@@ -338,6 +343,8 @@
     "bioetl_silver_validation_failures_total",
     "bioetl_vacuum_files_removed_total",
     "bioetl_workflow_current_status",
+    "bioetl_workflow_expected",
+    "bioetl_workflow_pipeline_expected",
     "bioetl_workflow_row_reconciliation_excluded_rows_total",
     "bioetl_workflow_row_reconciliation_kept_rows_total",
     "bioetl_workflow_row_reconciliation_left_rows_total",
@@ -552,6 +559,8 @@
     "bioetl_transform_errors_total",
     "bioetl_vacuum_files_removed_total",
     "bioetl_workflow_current_status",
+    "bioetl_workflow_expected",
+    "bioetl_workflow_pipeline_expected",
     "bioetl_workflow_pipeline_verdict_status",
     "bioetl_workflow_reconciliation_rows_deleted_total",
     "bioetl_workflow_reconciliation_rows_retained_total",
@@ -796,6 +805,8 @@
     "bioetl_transform_errors_total",
     "bioetl_vacuum_files_removed_total",
     "bioetl_workflow_current_status",
+    "bioetl_workflow_expected",
+    "bioetl_workflow_pipeline_expected",
     "bioetl_workflow_reconciliation_rows_deleted_total",
     "bioetl_workflow_reconciliation_rows_retained_total",
     "bioetl_workflow_reconciliation_rows_scanned_total",
@@ -1704,13 +1715,10 @@
       "docs/05-operations/runbooks/publication-validation-runbook.md",
       "docs/05-operations/sli-slo-baseline.md",
       "grafana/README.md",
-      "grafana/dashboards/bioetl-alerts-slo.json",
       "grafana/dashboards/bioetl-dq-v2.json",
       "grafana/dashboards/bioetl-overview-v2.json",
-      "grafana/dashboards/bioetl-provider-health-v2.json",
       "grafana/dashboards/bioetl-runtime.json",
-      "grafana/dashboards/bioetl-silver-reject-explorer.json",
-      "grafana/dashboards/bioetl-workflow-overview.json"
+      "grafana/dashboards/bioetl-silver-reject-explorer.json"
     ],
     "bioetl_replay_drift_events_total": [
       "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
@@ -1904,6 +1912,14 @@
     "bioetl_workflow_current_status": [
       "docs/04-reference/observability/metrics-catalog.md"
     ],
+    "bioetl_workflow_expected": [
+      "docs/03-guides/dashboards/variable-reference.md",
+      "grafana/README.md"
+    ],
+    "bioetl_workflow_pipeline_expected": [
+      "docs/03-guides/dashboards/variable-reference.md",
+      "grafana/README.md"
+    ],
     "bioetl_workflow_pipeline_verdict_status": [
       "docs/03-guides/dashboards/panels/bioetl-workflow-overview-panels.md",
       "docs/03-guides/metrics-monitoring.md",
@@ -1940,11 +1956,6 @@
       "docs/04-reference/observability/metrics-catalog.md",
       "docs/05-operations/01-monitoring-guide.md",
       "grafana/README.md",
-      "grafana/dashboards/bioetl-control-plane-v1.json",
-      "grafana/dashboards/bioetl-dq-v2.json",
-      "grafana/dashboards/bioetl-overview-v2.json",
-      "grafana/dashboards/bioetl-provider-health-v2.json",
-      "grafana/dashboards/bioetl-runtime.json",
       "grafana/dashboards/bioetl-workflow-overview.json"
     ],
     "bioetl_workflow_status": [
@@ -2132,6 +2143,8 @@
     "bioetl_transform_errors_total",
     "bioetl_vacuum_files_removed_total",
     "bioetl_workflow_current_status",
+    "bioetl_workflow_expected",
+    "bioetl_workflow_pipeline_expected",
     "bioetl_workflow_reconciliation_rows_deleted_total",
     "bioetl_workflow_reconciliation_rows_retained_total",
     "bioetl_workflow_reconciliation_rows_scanned_total",
@@ -2408,6 +2421,8 @@
     "bioetl_transform_errors_total",
     "bioetl_vacuum_files_removed_total",
     "bioetl_workflow_current_status",
+    "bioetl_workflow_expected",
+    "bioetl_workflow_pipeline_expected",
     "bioetl_workflow_reconciliation_rows_deleted_total",
     "bioetl_workflow_reconciliation_rows_retained_total",
     "bioetl_workflow_reconciliation_rows_scanned_total",
@@ -2699,6 +2714,8 @@
     "bioetl_transform_errors_total",
     "bioetl_vacuum_files_removed_total",
     "bioetl_workflow_current_status",
+    "bioetl_workflow_expected",
+    "bioetl_workflow_pipeline_expected",
     "bioetl_workflow_pipeline_verdict_status",
     "bioetl_workflow_reconciliation_rows_deleted_total",
     "bioetl_workflow_reconciliation_rows_retained_total",
@@ -2903,6 +2920,16 @@
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_workflow_current_status": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_workflow_expected": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_workflow_pipeline_expected": [
+      "grafana/prometheus-rules/bioetl_control_plane_current_status.yml",
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_workflow_runs_total": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ]
   },
@@ -3379,6 +3406,12 @@
       "observed_series_count=0"
     ],
     "bioetl_workflow_current_status": [
+      "observed_series_count=0"
+    ],
+    "bioetl_workflow_expected": [
+      "observed_series_count=0"
+    ],
+    "bioetl_workflow_pipeline_expected": [
       "observed_series_count=0"
     ],
     "bioetl_workflow_reconciliation_rows_deleted_total": [
@@ -3865,6 +3898,12 @@
       "src/bioetl/application/observability/observer_postrun_mixin.py"
     ],
     "bioetl_workflow_current_status": [
+      "src/bioetl/application/services/workflow_runner_support.py"
+    ],
+    "bioetl_workflow_expected": [
+      "src/bioetl/application/services/workflow_runner_support.py"
+    ],
+    "bioetl_workflow_pipeline_expected": [
       "src/bioetl/application/services/workflow_runner_support.py"
     ],
     "bioetl_workflow_reconciliation_rows_deleted_total": [

@@ -127,7 +127,7 @@
       "source": "reports/quality/module-coverage-inventory.json"
     },
     "zero_reference_supporting_scripts": {
-      "current": 36,
+      "current": 35,
       "entries_without_owner_metadata": 0,
       "source": "configs/quality/scripts_inventory_manifest.json"
     }

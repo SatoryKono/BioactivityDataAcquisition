@@ -350,6 +350,72 @@ def test_allow_missing_coverage_xml_preserves_existing_inventory_rows(
 
 
 @pytest.mark.architecture
+def test_declaration_only_modules_with_zero_hit_xml_are_not_uncovered(
+    tmp_path: Path,
+) -> None:
+    repo_root = tmp_path / "repo"
+    source_root = repo_root / "src" / "bioetl" / "infrastructure" / "compat"
+    quality_root = repo_root / "configs" / "quality"
+    source_root.mkdir(parents=True)
+    quality_root.mkdir(parents=True)
+    (repo_root / "reports" / "quality").mkdir(parents=True)
+
+    shutil.copy2(SCORECARD_PATH, quality_root / SCORECARD_PATH.name)
+    shutil.copy2(GATES_PATH, quality_root / GATES_PATH.name)
+
+    (source_root / "__init__.py").write_text(
+        '"""Infrastructure compatibility namespace."""\n'
+        "\n"
+        "from __future__ import annotations\n"
+        "\n"
+        "__all__: list[str] = []\n",
+        encoding="utf-8",
+    )
+    json_out = repo_root / "reports" / "quality" / "module-coverage-inventory.json"
+    coverage_xml = repo_root / "reports" / "coverage" / "coverage.xml"
+    coverage_xml.parent.mkdir(parents=True)
+    coverage_xml.write_text(
+        '<?xml version="1.0" ?>\n'
+        "<coverage>\n"
+        "  <sources>\n"
+        f"    <source>{repo_root.as_posix()}</source>\n"
+        "  </sources>\n"
+        "  <packages>\n"
+        '    <package name="bioetl.infrastructure.compat">\n'
+        "      <classes>\n"
+        '        <class name="__init__.py" filename="src/bioetl/infrastructure/compat/__init__.py">\n'
+        "          <lines>\n"
+        '            <line number="5" hits="0" />\n'
+        "          </lines>\n"
+        "        </class>\n"
+        "      </classes>\n"
+        "    </package>\n"
+        "  </packages>\n"
+        "</coverage>\n",
+        encoding="utf-8",
+    )
+
+    create_exit = module_coverage_inventory_main(
+        [
+            "--repo-root",
+            str(repo_root),
+            "--coverage-xml",
+            str(coverage_xml),
+            "--json-out",
+            str(json_out),
+            "--snapshot-date",
+            "2026-06-19",
+        ]
+    )
+    assert create_exit == 0
+
+    payload = json.loads(json_out.read_text(encoding="utf-8"))
+    assert payload["summary"]["uncovered_module_count"] == 0
+    assert payload["modules"][0]["coverage_status"] == "no_executable_lines"
+    assert payload["modules"][0]["executable_lines"] == 0
+
+
+@pytest.mark.architecture
 def test_existing_inventory_refresh_preserves_rows_unless_xml_refresh_is_explicit(
     tmp_path: Path,
 ) -> None:

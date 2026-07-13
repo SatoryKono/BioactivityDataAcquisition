@@ -233,12 +233,17 @@ def test_issue_5711_coverage_tail_is_zero_unmeasured_and_owner_anchored() -> Non
     payload = _load_json(CLOSEOUT)
     outcome = payload["outcomes"]["5711"]
     coverage = _load_json(MODULE_COVERAGE)
+    scorecard = _load_json(SCORECARD)
     policy = _load_yaml(MODULE_COVERAGE_POLICY)
     summary = coverage["summary"]
 
-    # Skip source_module_count check for local development with uncommitted changes
-    # assert summary["source_module_count"] == outcome["source_module_count"]
-    assert summary["source_module_count"] == 2221
+    # Source module count can move with covered source additions; this closeout
+    # guard owns residual tail debt, so require current artifacts to agree.
+    assert summary["source_module_count"] == len(coverage["modules"])
+    assert (
+        scorecard["metrics"]["source_module_count"]
+        == summary["source_module_count"]
+    )
     assert summary["unmeasured_module_count"] == outcome["unmeasured_module_count"]
     assert summary["uncovered_module_count"] == outcome["uncovered_module_count"]
     # Skip no_executable_lines check for local development with uncommitted changes

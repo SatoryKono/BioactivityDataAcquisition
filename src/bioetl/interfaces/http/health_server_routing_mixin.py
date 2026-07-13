@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     )
 
 _NOT_FOUND_MESSAGE = "Not Found"
+_PROMETHEUS_TEXT_CONTENT_TYPE = "text/plain; version=0.0.4; charset=utf-8"
 
 
 class _HealthResponseSupport(Protocol):
@@ -48,6 +49,15 @@ class _HealthResponseSupport(Protocol):
         writer: asyncio.StreamWriter,
         status_code: int,
         payload: dict[str, object],
+    ) -> None: ...
+
+    async def _send_text_response(
+        self,
+        writer: asyncio.StreamWriter,
+        status_code: int,
+        body: str,
+        *,
+        content_type: str = "text/plain; charset=utf-8",
     ) -> None: ...
 
     async def _handle_request_error(
@@ -102,10 +112,18 @@ class HealthServerRoutingMixin:
             "/health/ready": self._handle_readiness,
             "/health/providers": self._handle_providers,
         }
+        response_support = cast(_HealthResponseSupport, self)
+        if route_path == "/metrics":
+            await response_support._send_text_response(
+                writer,
+                200,
+                self._handle_metrics(),
+                content_type=_PROMETHEUS_TEXT_CONTENT_TYPE,
+            )
+            return
         handler = handlers.get(route_path)
         if handler:
             response = await handler()
-            response_support = cast(_HealthResponseSupport, self)
             await response_support._send_json_response(writer, response)
             return
         if route_path.startswith("/ops/quarantine/"):
@@ -132,7 +150,6 @@ class HealthServerRoutingMixin:
                 query=query,
             )
             return
-        response_support = cast(_HealthResponseSupport, self)
         await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
 
     def _parse_query_params(self, raw_query: str) -> dict[str, str]:
@@ -289,6 +306,15 @@ class HealthServerRoutingMixin:
             timestamp=self._response_timestamp(),
             checks={"providers": state_support._get_provider_statuses()},
         )
+
+    def _handle_metrics(self) -> str:
+        """Return minimal Prometheus exposition for scrape liveness.
+
+        Prometheus derives the bounded availability signal from
+        up{job="quarantine-explorer"} after a successful scrape. This endpoint
+        intentionally avoids record-level or run-level labels.
+        """
+        return "# BioETL health server scrape endpoint\n"
 
 
 __all__ = ["HealthServerRoutingMixin"]

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-12T21:11:36.512464+00:00",
+  "generated_at": "2026-07-13T02:28:16.638963+00:00",
   "summary": {
     "total_scripts": 455,
     "status_counts": {
@@ -13,7 +13,7 @@
       "ci": 60,
       "docs": 175,
       "other": 23,
-      "scripts": 351,
+      "scripts": 353,
       "skills": 16,
       "tests": 205
     }
@@ -3603,7 +3603,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 66,
+      "reference_count": 68,
       "references": [
         {
           "path": ".pre-commit-config.yaml",
@@ -4503,7 +4503,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": ".github/workflows/docs.yml",
@@ -4522,6 +4522,12 @@
           "line": 80,
           "source_group": "scripts",
           "text": "\"harmonize-link-styles\": python_command(\"harmonize_link_styles.py\"),"
+        },
+        {
+          "path": "src/tools/README.md",
+          "line": 273,
+          "source_group": "scripts",
+          "text": "**Canonical location:** `scripts/diagrams/harmonize_link_styles.py`"
         }
       ]
     },
@@ -8374,7 +8380,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 266,
+      "reference_count": 267,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-012-Add-Full-App-Duplication-Ratchet.md",
@@ -8435,13 +8441,13 @@
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 45,
+          "line": 46,
           "source_group": "scripts",
           "text": "| `analyze-duplicate-functions`    | `analyze_duplicate_functions.py`                      | Compatibility wrapper for the legacy AST duplicate-function analyzer                              |"
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 146,
+          "line": 147,
           "source_group": "scripts",
           "text": "\"analyze-duplicate-functions\": \"scripts.engineering.qa.analyze_duplicate_functions\","
         }
@@ -8484,13 +8490,13 @@
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 46,
+          "line": 47,
           "source_group": "scripts",
           "text": "| `calibrate-hotspots`             | `scripts/engineering/qa/calibrate_hotspot_budgets.py` | Calibrate hotspot budgets                                                                         |"
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 147,
+          "line": 148,
           "source_group": "scripts",
           "text": "\"calibrate-hotspots\": \"scripts.engineering.qa.calibrate_hotspot_budgets\","
         }
@@ -8511,7 +8517,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 81,
+          "line": 82,
           "source_group": "scripts",
           "text": "\"check-app-deps\": \"scripts.engineering.qa.check_application_deps\","
         }
@@ -8532,7 +8538,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 80,
+          "line": 81,
           "source_group": "scripts",
           "text": "\"check-architecture\": \"scripts.engineering.qa.check_architecture\","
         }
@@ -8547,7 +8553,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 120,
+          "line": 121,
           "source_group": "scripts",
           "text": "\"check-branch-coverage\": \"scripts.engineering.qa.check_branch_coverage\","
         }
@@ -8625,7 +8631,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 82,
+          "line": 83,
           "source_group": "scripts",
           "text": "\"check-constructor-args\": \"scripts.engineering.qa.check_constructor_args\","
         }
@@ -8640,7 +8646,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 148,
+          "line": 149,
           "source_group": "scripts",
           "text": "\"check-dashboard-visual-semantics\": \"scripts.engineering.qa.check_dashboard_visual_semantics\","
         }
@@ -8655,7 +8661,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 89,
+          "line": 90,
           "source_group": "scripts",
           "text": "\"check-docs-drift\": \"scripts.engineering.qa.check_docs_drift\","
         },
@@ -8688,7 +8694,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 84,
+          "line": 85,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.check_duplication_complexity_exemptions\""
         }
@@ -8731,7 +8737,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 99,
+          "line": 100,
           "source_group": "scripts",
           "text": "\"check-generic-field-ownership\": \"scripts.engineering.qa.check_generic_field_ownership\","
         }
@@ -8752,7 +8758,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 98,
+          "line": 99,
           "source_group": "scripts",
           "text": "\"check-gold-nullable-numeric\": \"scripts.engineering.qa.check_gold_nullable_numeric_compatibility\","
         }
@@ -8791,7 +8797,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 87,
+          "line": 88,
           "source_group": "scripts",
           "text": "\"check-naming-pkg\": \"scripts.engineering.qa.check_naming_package_consistency\","
         },
@@ -8848,7 +8854,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 100,
+          "line": 101,
           "source_group": "scripts",
           "text": "\"check-ontology-unit-semantics\": \"scripts.engineering.qa.check_ontology_unit_semantics\","
         }
@@ -8869,7 +8875,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 149,
+          "line": 150,
           "source_group": "scripts",
           "text": "\"check-prometheus-rules\": \"scripts.engineering.qa.check_prometheus_rules\","
         }
@@ -8902,7 +8908,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 88,
+          "line": 89,
           "source_group": "scripts",
           "text": "\"check-exemptions\": \"scripts.engineering.qa.check_quality_exemptions\","
         }
@@ -8941,7 +8947,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 97,
+          "line": 98,
           "source_group": "scripts",
           "text": "\"check-semantic-anchor-parity\": \"scripts.engineering.qa.check_semantic_anchor_parity\","
         }
@@ -8962,7 +8968,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 92,
+          "line": 93,
           "source_group": "scripts",
           "text": "\"check-semantic-field-registry\": \"scripts.engineering.qa.check_semantic_field_registry\","
         }
@@ -8989,7 +8995,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 96,
+          "line": 97,
           "source_group": "scripts",
           "text": "\"check-semantic-governance-policy\": \"scripts.engineering.qa.check_semantic_governance_policy\","
         }
@@ -9028,7 +9034,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 94,
+          "line": 95,
           "source_group": "scripts",
           "text": "\"check-semantic-pair-budget\": \"scripts.engineering.qa.check_semantic_pair_matrix_budget\","
         }
@@ -9067,7 +9073,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 93,
+          "line": 94,
           "source_group": "scripts",
           "text": "\"check-semantic-registry-drift\": \"scripts.engineering.qa.check_semantic_registry_drift\","
         }
@@ -9131,7 +9137,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 90,
+          "line": 91,
           "source_group": "scripts",
           "text": "\"check-xwalk-missing-backlog\": \"scripts.engineering.qa.check_xwalk_missing_backlog\","
         }
@@ -9208,7 +9214,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 122,
+          "line": 123,
           "source_group": "scripts",
           "text": "\"report-pubchem-property-vocab\": \"scripts.engineering.qa.extract_pubchem_property_vocab\","
         }
@@ -9229,7 +9235,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 123,
+          "line": 124,
           "source_group": "scripts",
           "text": "\"report-publication-nested-vocab\": \"scripts.engineering.qa.extract_publication_nested_vocab\","
         }
@@ -9281,13 +9287,13 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 107,
+          "line": 109,
           "source_group": "scripts",
           "text": "- `scripts/engineering/qa/generate_architecture_debt_tasks.py` (`python -m scripts.engineering.qa generate-debt-tasks`) generates the canonical architecture debt task backlog."
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 101,
+          "line": 102,
           "source_group": "scripts",
           "text": "\"generate-debt-tasks\": \"scripts.engineering.qa.generate_architecture_debt_tasks\","
         },
@@ -9440,13 +9446,13 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 42,
+          "line": 43,
           "source_group": "scripts",
           "text": "| `report-hotspots`                | `generate_hotspot_degradation_report.py`              | Generate performance hotspot degradation report                                                   |"
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 126,
+          "line": 127,
           "source_group": "scripts",
           "text": "\"report-hotspots\": \"scripts.engineering.qa.generate_hotspot_degradation_report\","
         }
@@ -9492,7 +9498,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 95,
+          "line": 96,
           "source_group": "scripts",
           "text": "\"report-semantic-pipeline-audit\": \"scripts.engineering.qa.generate_semantic_pipeline_audit\","
         }
@@ -9612,7 +9618,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 79,
+          "line": 80,
           "source_group": "scripts",
           "text": "\"check-naming\": \"scripts.engineering.qa.naming_audit\","
         },
@@ -9624,13 +9630,13 @@
         },
         {
           "path": "scripts/engineering/qa/check_naming_package_consistency.py",
-          "line": 31,
+          "line": 32,
           "source_group": "scripts",
           "text": "CANONICAL_NAMING_AUDIT_PATH = Path(\"scripts/engineering/qa/naming_audit.py\")"
         },
         {
           "path": "scripts/engineering/qa/check_naming_package_consistency.py",
-          "line": 246,
+          "line": 247,
           "source_group": "scripts",
           "text": "location=\"scripts/engineering/qa/naming_audit.py --check\","
         }
@@ -9663,13 +9669,13 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 108,
+          "line": 110,
           "source_group": "scripts",
           "text": "- `scripts/engineering/qa/reduce_architecture_debt.py` (`python -m scripts.engineering.qa reduce-architecture-debt`) builds the orchestration plan consumed by the architecture-debt agent."
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 102,
+          "line": 103,
           "source_group": "scripts",
           "text": "\"reduce-architecture-debt\": \"scripts.engineering.qa.reduce_architecture_debt\","
         },
@@ -9708,13 +9714,13 @@
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 37,
+          "line": 38,
           "source_group": "scripts",
           "text": "| `report-adr-enforcement-matrix`  | `report_adr_enforcement_matrix.py`                    | Generate/check accepted ADR enforcement coverage matrix                                           |"
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 135,
+          "line": 136,
           "source_group": "scripts",
           "text": "\"report-adr-enforcement-matrix\": \"scripts.engineering.qa.report_adr_enforcement_matrix\","
         },
@@ -9739,13 +9745,13 @@
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 39,
+          "line": 40,
           "source_group": "scripts",
           "text": "| `report-architecture-debt-remote-main-baseline` | `report_architecture_debt_remote_main_baseline.py` | Generate/check clean remote-main architecture debt baseline artifacts                          "
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 140,
+          "line": 141,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_architecture_debt_remote_main_baseline\""
         },
@@ -9789,13 +9795,13 @@
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 44,
+          "line": 45,
           "source_group": "scripts",
           "text": "| `report-artifact-duplication-audit` | `report_artifact_duplication_audit.py`              | Generate/check exact-byte duplication audit for JSCPD-excluded config, contract, and registry artifacts |"
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 129,
+          "line": 130,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_artifact_duplication_audit\""
         },
@@ -9820,7 +9826,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 133,
+          "line": 134,
           "source_group": "scripts",
           "text": "\"report-chembl-observed-value-inventory\": \"scripts.engineering.qa.report_chembl_observed_value_inventory\","
         }
@@ -9847,7 +9853,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 110,
+          "line": 111,
           "source_group": "scripts",
           "text": "\"report-compatibility-importer-census\": \"scripts.engineering.qa.report_compatibility_importer_census\","
         }
@@ -9886,7 +9892,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 112,
+          "line": 113,
           "source_group": "scripts",
           "text": "\"report-contract-coverage-matrix\": \"scripts.engineering.qa.report_contract_coverage_matrix\","
         }
@@ -9921,7 +9927,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 150,
+          "line": 151,
           "source_group": "scripts",
           "text": "\"report-dashboard-inventory\": \"scripts.engineering.qa.report_dashboard_inventory\","
         }
@@ -9942,7 +9948,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 153,
+          "line": 155,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_dashboard_panel_audit_matrix\""
         }
@@ -9953,12 +9959,25 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/README.md",
+          "line": 36,
+          "source_group": "scripts",
+          "text": "| `report-dashboard-promql-scope`  | `report_dashboard_promql_scope.py`                    | Generate/check dashboard PromQL scope, forbidden `run_id` selectors, and deprecated metric tokens |"
+        },
+        {
+          "path": "scripts/engineering/qa/__main__.py",
+          "line": 153,
+          "source_group": "scripts",
+          "text": "\"report-dashboard-promql-scope\": \"scripts.engineering.qa.report_dashboard_promql_scope\","
+        }
+      ],
       "owner": "@bioetl-platform",
-      "lifecycle_decision": "legacy_manual_utility",
-      "review_by": "2026-07-15",
-      "next_step": "Retain only as a bounded manual observability audit report utility while dashboard PromQL scope reviews remain episodic; promote it into the canonical dashboard-audit workflow or retire it after those checks are fully absorbed by governed reports/tests."
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-10-31",
+      "next_step": "Retain as the supporting QA helper behind dashboard PromQL scope checks while dashboard selector and forbidden-label governance remains split across static dashboard audits and live Grafana evidence; promote to active only with an explicit active-surface budget reduction elsewhere."
     },
     {
       "path": "scripts/engineering/qa/report_dashboard_query_duplicates.py",
@@ -9969,7 +9988,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 151,
+          "line": 152,
           "source_group": "scripts",
           "text": "\"report-dashboard-query-duplicates\": \"scripts.engineering.qa.report_dashboard_query_duplicates\","
         }
@@ -9984,7 +10003,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 121,
+          "line": 122,
           "source_group": "scripts",
           "text": "\"report-dead-code-inventory\": \"scripts.engineering.qa.report_dead_code_inventory\","
         }
@@ -10011,13 +10030,13 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 40,
+          "line": 41,
           "source_group": "scripts",
           "text": "| `report-debt-governance-gates`   | `report_debt_governance_gates.py`                     | Generate/check normalized debt-reduction fail-fast gate rollup                                    |"
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 142,
+          "line": 143,
           "source_group": "scripts",
           "text": "\"report-debt-governance-gates\": \"scripts.engineering.qa.report_debt_governance_gates\","
         },
@@ -10038,7 +10057,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 114,
+          "line": 115,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_domain_io_taint_inventory\""
         },
@@ -10075,25 +10094,25 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 43,
+          "line": 44,
           "source_group": "scripts",
           "text": "| `report-duplication-baseline`    | `report_duplication_baseline.py`                      | Generate report-only duplication baseline for `composition`/`application`                         |"
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 105,
+          "line": 107,
           "source_group": "scripts",
           "text": "- `scripts/engineering/qa/report_duplication_baseline.py` (`python -m scripts.engineering.qa report-duplication-baseline`) generates report-only duplication baseline artifacts for governance review."
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 141,
+          "line": 144,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_duplication_baseline.py"
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 127,
+          "line": 128,
           "source_group": "scripts",
           "text": "\"report-duplication-baseline\": \"scripts.engineering.qa.report_duplication_baseline\","
         }
@@ -10108,7 +10127,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 131,
+          "line": 132,
           "source_group": "scripts",
           "text": "\"report-function-length-inventory\": \"scripts.engineering.qa.report_function_length_inventory\","
         }
@@ -10123,13 +10142,13 @@
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 36,
+          "line": 37,
           "source_group": "scripts",
           "text": "| `report-family-baseline`         | `report_hotspot_family_baseline.py`                   | Generate/check RF-06 hotspot-family baseline artifacts                                            |"
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 125,
+          "line": 126,
           "source_group": "scripts",
           "text": "\"report-family-baseline\": \"scripts.engineering.qa.report_hotspot_family_baseline\","
         }
@@ -10144,13 +10163,13 @@
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 38,
+          "line": 39,
           "source_group": "scripts",
           "text": "| `report-invariant-audit-rebaseline` | `report_invariant_audit_rebaseline.py`              | Generate/check stale invariant-audit evidence matrix and duplicate-issue gates                    |"
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 137,
+          "line": 138,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_invariant_audit_rebaseline\""
         }
@@ -10187,7 +10206,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 119,
+          "line": 120,
           "source_group": "scripts",
           "text": "\"report-module-coverage\": \"scripts.engineering.qa.report_module_coverage_inventory\","
         },
@@ -10199,7 +10218,7 @@
         },
         {
           "path": "tests/architecture/test_module_coverage_inventory.py",
-          "line": 721,
+          "line": 787,
           "source_group": "tests",
           "text": "\"scripts/engineering/qa/report_module_coverage_inventory.py\""
         }
@@ -10238,7 +10257,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 132,
+          "line": 133,
           "source_group": "scripts",
           "text": "\"report-normalization-fallback-inventory\": \"scripts.engineering.qa.report_normalization_fallback_inventory\","
         },
@@ -10283,13 +10302,13 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 134,
+          "line": 135,
           "source_group": "scripts",
           "text": "\"report-observability-metric-inventory\": \"scripts.engineering.qa.report_observability_metric_inventory\","
         },
         {
           "path": "tests/architecture/test_observability_metric_governance.py",
-          "line": 159,
+          "line": 198,
           "source_group": "tests",
           "text": "== \"scripts/engineering/qa/report_observability_metric_inventory.py\""
         }
@@ -10310,7 +10329,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 156,
+          "line": 158,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_panel_title_inventory\""
         }
@@ -10337,7 +10356,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 111,
+          "line": 112,
           "source_group": "scripts",
           "text": "\"report-pipeline-config-contract-ownership-map\": \"scripts.engineering.qa.report_pipeline_config_contract_ownership\","
         }
@@ -10352,7 +10371,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 117,
+          "line": 118,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.report_port_adapter_factory_coverage\""
         }
@@ -10389,13 +10408,13 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 118,
+          "line": 120,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_provider_contract_drift.py --output reports/quality/provider-contract-drift-report.json --fail-on breaking"
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 109,
+          "line": 110,
           "source_group": "scripts",
           "text": "\"report-provider-contract-drift\": \"scripts.engineering.qa.report_provider_contract_drift\","
         }
@@ -10446,19 +10465,19 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 115,
+          "line": 117,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_vcr_metadata_catalog.py --check"
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 116,
+          "line": 118,
           "source_group": "scripts",
           "text": "python scripts/engineering/qa/report_vcr_metadata_catalog.py --update"
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 105,
+          "line": 106,
           "source_group": "scripts",
           "text": "\"report-vcr-metadata\": \"scripts.engineering.qa.report_vcr_metadata_catalog\","
         },
@@ -10521,19 +10540,19 @@
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 41,
+          "line": 42,
           "source_group": "scripts",
           "text": "| `run-architecture-audit-read-only` | `run_architecture_audit_read_only.py`                | Run check-only architecture evidence diagnostics without pretest sync or artifact writes          |"
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 106,
+          "line": 108,
           "source_group": "scripts",
           "text": "- `scripts/engineering/qa/run_architecture_audit_read_only.py` (`python -m scripts.engineering.qa run-architecture-audit-read-only`) runs check-only architecture diagnostics and fails if tracked gover"
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 144,
+          "line": 145,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.run_architecture_audit_read_only\""
         },
@@ -10690,7 +10709,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 124,
+          "line": 125,
           "source_group": "scripts",
           "text": "\"sync-integration-vcr-policy\": \"scripts.engineering.qa.sync_integration_vcr_policy\","
         }
@@ -10705,25 +10724,25 @@
       "references": [
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 47,
+          "line": 48,
           "source_group": "scripts",
           "text": "| `run-tests`                      | `test_health.py`                                      | Run a named test-health lane and emit JUnit XML plus JSON summary                                 |"
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 48,
+          "line": 49,
           "source_group": "scripts",
           "text": "| `summarize-junit`                | `test_health.py`                                      | Aggregate existing JUnit XML into test-health JSON summary                                        |"
         },
         {
           "path": "scripts/engineering/qa/README.md",
-          "line": 49,
+          "line": 50,
           "source_group": "scripts",
           "text": "| `test-health`                    | `test_health.py`                                      | Summarize historical lane history from recent `reports/quality/test-runs/*.json` evidence         |"
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 164,
+          "line": 166,
           "source_group": "scripts",
           "text": "\"run-tests\": module_command(\"scripts.engineering.qa.test_health\", \"run-tests\"),"
         }
@@ -10738,7 +10757,7 @@
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 91,
+          "line": 92,
           "source_group": "scripts",
           "text": "\"validate-dq-consistency\": \"scripts.engineering.qa.validate_dq_consistency\","
         }
@@ -10818,7 +10837,7 @@
         },
         {
           "path": "scripts/engineering/qa/__main__.py",
-          "line": 107,
+          "line": 108,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.vcr.check_replay_preflight\""
         },
@@ -13449,7 +13468,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 1618,
+          "line": 1620,
           "source_group": "other",
           "text": "powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/start_quarantine_explorer.ps1"
         }
@@ -14545,7 +14564,7 @@
         },
         {
           "path": "pyproject.toml",
-          "line": 136,
+          "line": 140,
           "source_group": "build",
           "text": "# JSON Schema validation (scripts/validate_pipeline_configs.py)"
         },
@@ -14969,8 +14988,27 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": [],
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "src/tools/README.md",
+          "line": 269,
+          "source_group": "scripts",
+          "text": "### harmonize_link_styles.py"
+        },
+        {
+          "path": "src/tools/README.md",
+          "line": 273,
+          "source_group": "scripts",
+          "text": "**Canonical location:** `scripts/diagrams/harmonize_link_styles.py`"
+        },
+        {
+          "path": "src/tools/README.md",
+          "line": 275,
+          "source_group": "scripts",
+          "text": "`src/tools/harmonize_link_styles.py` is a temporary compatibility wrapper."
+        }
+      ],
       "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-07-15",

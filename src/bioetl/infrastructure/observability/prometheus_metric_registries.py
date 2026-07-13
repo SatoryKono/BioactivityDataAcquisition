@@ -8,6 +8,10 @@ from dataclasses import dataclass
 from prometheus_client.metrics import Counter, Gauge, Histogram
 
 from . import metrics_definitions as _metrics
+from ._metrics_defs_pipeline_workflow import (
+    WORKFLOW_EXPECTED,
+    WORKFLOW_PIPELINE_EXPECTED,
+)
 
 type PrometheusCounter = Counter
 type PrometheusGauge = Gauge
@@ -94,6 +98,8 @@ PIPELINE_RUNTIME_REGISTRY = MetricRegistryFamily(
         "bioetl_checkpoint_saved_at_seconds": _metrics.CHECKPOINT_SAVED_AT_SECONDS,
         "bioetl_replay_lag_seconds": _metrics.REPLAY_LAG_SECONDS,
         "bioetl_workflow_current_status": _metrics.WORKFLOW_CURRENT_STATUS,
+        "bioetl_workflow_expected": WORKFLOW_EXPECTED,
+        "bioetl_workflow_pipeline_expected": WORKFLOW_PIPELINE_EXPECTED,
     },
     histograms={
         "bioetl_pipeline_duration_seconds": _metrics.PIPELINE_DURATION_SECONDS,

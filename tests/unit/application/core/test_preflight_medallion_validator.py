@@ -506,9 +506,9 @@ class TestWriteModeValidation:
         """Test that merge is valid for silver."""
         config = MagicMock()
         config.table.silver_write_mode = "merge"
-        config.table.gold_write_mode = "merge"
+        config.table.gold_write_mode = "scd2"
         config.table.silver_idempotency_contract = "merge_upsert"
-        config.table.gold_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = "scd2"
         validator = _build_validator(config=config, logger=mock_logger)
         assert validator.validate_write_modes() == []
 
@@ -516,9 +516,9 @@ class TestWriteModeValidation:
         """Test that append is valid for silver."""
         config = MagicMock()
         config.table.silver_write_mode = "append"
-        config.table.gold_write_mode = "merge"
+        config.table.gold_write_mode = "append"
         config.table.silver_idempotency_contract = "append_log"
-        config.table.gold_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = "append_log"
         validator = _build_validator(config=config, logger=mock_logger)
         assert validator.validate_write_modes() == []
 
@@ -526,26 +526,28 @@ class TestWriteModeValidation:
         """Test that overwrite is invalid for silver layer."""
         config = MagicMock()
         config.table.silver_write_mode = "overwrite"
-        config.table.gold_write_mode = "merge"
+        config.table.gold_write_mode = "scd2"
         config.table.silver_idempotency_contract = "merge_upsert"
-        config.table.gold_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = "scd2"
         validator = _build_validator(config=config, logger=mock_logger)
         errors = validator.validate_write_modes()
         assert len(errors) == 1
         assert errors[0].field == "write_mode"
 
-    def test_valid_gold_merge_passes(self, mock_logger: MagicMock) -> None:
-        """Test that merge is valid for gold."""
+    def test_invalid_gold_merge_fails(self, mock_logger: MagicMock) -> None:
+        """Test that merge is invalid for gold."""
         config = MagicMock()
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "merge"
         config.table.silver_idempotency_contract = "merge_upsert"
         config.table.gold_idempotency_contract = "merge_upsert"
         validator = _build_validator(config=config, logger=mock_logger)
-        assert validator.validate_write_modes() == []
+        errors = validator.validate_write_modes()
+        assert len(errors) == 1
+        assert errors[0].field == "gold_write_mode"
 
     def test_valid_gold_scd2_passes(self, mock_logger: MagicMock) -> None:
-        """Test that scd2 is valid for gold (mapped to merge internally)."""
+        """Test that scd2 is valid for gold."""
         config = MagicMock()
         config.table.silver_write_mode = "merge"
         config.table.gold_write_mode = "scd2"
@@ -644,9 +646,9 @@ class TestMedallionValidatorLogging:
         """Test that warning is logged when write mode validation fails."""
         config = MagicMock()
         config.table.silver_write_mode = "overwrite"
-        config.table.gold_write_mode = "merge"
+        config.table.gold_write_mode = "scd2"
         config.table.silver_idempotency_contract = "merge_upsert"
-        config.table.gold_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = "scd2"
         validator = _build_validator(config=config, logger=mock_logger)
 
         validator.validate_write_modes()
@@ -657,9 +659,9 @@ class TestMedallionValidatorLogging:
         """Test that debug is logged when write mode validation passes."""
         config = MagicMock()
         config.table.silver_write_mode = "merge"
-        config.table.gold_write_mode = "merge"
+        config.table.gold_write_mode = "scd2"
         config.table.silver_idempotency_contract = "merge_upsert"
-        config.table.gold_idempotency_contract = "merge_upsert"
+        config.table.gold_idempotency_contract = "scd2"
         validator = _build_validator(config=config, logger=mock_logger)
 
         validator.validate_write_modes()

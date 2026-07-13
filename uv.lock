@@ -185,6 +185,7 @@ dev = [
     { name = "autoflake" },
     { name = "bandit" },
     { name = "basedpyright" },
+    { name = "beautifulsoup4" },
     { name = "detect-secrets" },
     { name = "grimp" },
     { name = "hypothesis" },
@@ -233,6 +234,7 @@ performance = [
     { name = "orjson" },
 ]
 tests = [
+    { name = "beautifulsoup4" },
     { name = "detect-secrets" },
     { name = "hypothesis" },
     { name = "opentelemetry-api" },
@@ -275,6 +277,8 @@ requires-dist = [
     { name = "backrefs", marker = "extra == 'docs'", specifier = ">=6.2" },
     { name = "bandit", extras = ["toml"], marker = "extra == 'dev'", specifier = ">=1.7" },
     { name = "basedpyright", marker = "extra == 'dev'", specifier = ">=1.0" },
+    { name = "beautifulsoup4", marker = "extra == 'dev'", specifier = ">=4.11.0" },
+    { name = "beautifulsoup4", marker = "extra == 'tests'", specifier = ">=4.11.0" },
     { name = "click", specifier = ">=8.1" },
     { name = "defusedxml", specifier = ">=0.7.1" },
     { name = "deltalake", specifier = ">=0.18,<1.0" },

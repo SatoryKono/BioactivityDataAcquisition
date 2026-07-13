@@ -783,7 +783,7 @@ oversized_test_module_inventory:
   split_on_touch: true
   top_modules:
   - path: tests/integration/ci/test_reproducibility_contract_suite.py
-    lines: 1904
+    lines: 1909
     owner: reproducibility-contracts
     target_split: integration/ci reproducibility phases
   - path: tests/unit/application/services/test_metadata_coordinator.py
@@ -801,7 +801,7 @@ oversized_test_module_inventory:
   completed_splits:
   - issue_ref: '#4505'
     source: tests/integration/test_grafana_config.py
-    source_lines_after_split: 1524
+    source_lines_after_split: 1528
     extracted_surface: tests/integration/test_grafana_surface_contracts.py
     extracted_surface_lines: 677
     owner: observability-dashboards
@@ -813,7 +813,7 @@ oversized_test_module_inventory:
     owner: observability-dashboards
   - issue_ref: '#4506'
     source: tests/unit/composition/runtime_builders/test_runner_builder_profiles.py
-    source_lines_after_split: 1138
+    source_lines_after_split: 1140
     extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
     extracted_surface_lines: 220
     owner: composition-runtime

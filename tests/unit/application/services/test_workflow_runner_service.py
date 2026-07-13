@@ -173,6 +173,58 @@ def _build_chembl_baseline_config() -> WorkflowConfig:
     )
 
 
+def test_workflow_runner_records_expected_pipeline_universe_for_baseline() -> None:
+    metrics = _RecordingMetrics()
+    service = WorkflowRunnerService(
+        pipeline_runner=_PipelineRunner(),  # type: ignore[arg-type]
+        transform_service=_RecordingTransformService(),  # type: ignore[arg-type]
+        metrics=metrics,
+    )
+
+    service.record_expected_pipeline_metrics(_build_chembl_baseline_config())
+
+    assert metrics.gauges == [
+        (
+            "bioetl_workflow_expected",
+            1.0,
+            {
+                "workflow": "chembl_baseline",
+                "provider": "chembl",
+            },
+        ),
+        (
+            "bioetl_workflow_pipeline_expected",
+            1.0,
+            {
+                "workflow": "chembl_baseline",
+                "pipeline": "chembl_assay",
+                "run_type": "backfill",
+                "provider": "chembl",
+            },
+        ),
+        (
+            "bioetl_workflow_pipeline_expected",
+            1.0,
+            {
+                "workflow": "chembl_baseline",
+                "pipeline": "chembl_target",
+                "run_type": "backfill",
+                "provider": "chembl",
+            },
+        ),
+        (
+            "bioetl_workflow_pipeline_expected",
+            1.0,
+            {
+                "workflow": "chembl_baseline",
+                "pipeline": "chembl_publication",
+                "run_type": "backfill",
+                "provider": "chembl",
+            },
+        ),
+    ]
+
+
 @pytest.mark.asyncio
 async def test_workflow_runner_executes_pipeline_then_transform() -> None:
     metrics = _RecordingMetrics()

@@ -123,6 +123,8 @@ declared_label_contract_metrics:
   - bioetl_silver_validation_failures_total
   - bioetl_vacuum_files_removed_total
   - bioetl_workflow_current_status
+  - bioetl_workflow_expected
+  - bioetl_workflow_pipeline_expected
   - bioetl_workflow_row_reconciliation_excluded_rows_total
   - bioetl_workflow_row_reconciliation_kept_rows_total
   - bioetl_workflow_row_reconciliation_left_rows_total

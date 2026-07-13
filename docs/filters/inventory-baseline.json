@@ -1686,7 +1686,7 @@
       "symbol": "silver_filter_rejects",
       "path": "grafana/prometheus-rules/bioetl_observability.yml",
       "occurrence_count": 4,
-      "first_line": 701,
+      "first_line": 712,
       "role": "Operator summary alias for Silver rejects",
       "migration_relevance": "Summary key is a compatibility alias while semantic/business rejects move to Gold taxonomy.",
       "notes": ""
@@ -1708,7 +1708,7 @@
       "symbol": "silver_filter_rejects",
       "path": "src/bioetl/infrastructure/quarantine/_statistics.py",
       "occurrence_count": 1,
-      "first_line": 109,
+      "first_line": 112,
       "role": "Operator summary alias for Silver rejects",
       "migration_relevance": "Summary key is a compatibility alias while semantic/business rejects move to Gold taxonomy.",
       "notes": ""
@@ -1807,7 +1807,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "grafana/prometheus-rules/bioetl_observability.yml",
       "occurrence_count": 3,
-      "first_line": 658,
+      "first_line": 669,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1851,7 +1851,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "src/bioetl/infrastructure/observability/prometheus_metric_registries.py",
       "occurrence_count": 1,
-      "first_line": 150,
+      "first_line": 156,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1873,7 +1873,7 @@
       "symbol": "bioetl_silver_filter_reject_total_mismatch_15m",
       "path": "grafana/prometheus-rules/bioetl_observability.yml",
       "occurrence_count": 2,
-      "first_line": 791,
+      "first_line": 802,
       "role": "Silver reject accounting reconciliation",
       "migration_relevance": "Recording rule reconciles stage totals with bounded Silver reject breakdowns.",
       "notes": ""

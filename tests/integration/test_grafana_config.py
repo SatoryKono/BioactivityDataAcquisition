@@ -552,10 +552,10 @@ def test_variable_query_sources(dashboard_path):
 
     if dashboard_path.name == "bioetl-alerts-slo.json":
         assert variable_map["workflow"].get("type") == "textbox"
-        assert "bioetl_records_processed_total" in str(
+        assert "bioetl_overview_pipeline_run_type_universe" in str(
             variable_map["pipeline"].get("query", {})
         )
-        assert "bioetl_records_processed_total" in str(
+        assert "bioetl_overview_pipeline_run_type_universe" in str(
             variable_map["run_type"].get("query", {})
         )
         return
@@ -594,9 +594,13 @@ def test_variable_query_sources(dashboard_path):
         assert isinstance(provider_context_exact_query, dict)
         assert isinstance(step_status_query, dict)
         assert isinstance(step_kind_query, dict)
-        assert "bioetl_workflow_runs_total" in workflow_query.get("query", "")
-        assert "bioetl_records_processed_total" in pipeline_query.get("query", "")
-        assert "bioetl_records_processed_total" in run_type_query.get("query", "")
+        assert "bioetl_workflow_universe" in workflow_query.get("query", "")
+        assert "bioetl_overview_pipeline_run_type_universe" in pipeline_query.get(
+            "query", ""
+        )
+        assert "bioetl_overview_pipeline_run_type_universe" in run_type_query.get(
+            "query", ""
+        )
         assert "bioetl_workflow_runs_total" in status_query.get("query", "")
         assert workflow_context_query.get("queryType") == "infinity"
         assert "bioetl_workflow_runs_total" in pipeline_context_query.get("query", "")
@@ -655,21 +659,21 @@ def test_variable_query_sources(dashboard_path):
             "type": "prometheus",
             "uid": "prometheus",
         }
-        assert "bioetl_workflow_runs_total" in workflow_query_text
+        assert "bioetl_workflow_universe" in workflow_query_text
 
         pipeline_var = variable_map["pipeline"]
         pipeline_query = pipeline_var.get("query", {})
         pipeline_query_text = (
             pipeline_query.get("query", "") if isinstance(pipeline_query, dict) else ""
         )
-        assert "bioetl_records_processed_total" in pipeline_query_text
+        assert "bioetl_overview_pipeline_run_type_universe" in pipeline_query_text
 
         run_type_var = variable_map["run_type"]
         run_type_query = run_type_var.get("query", {})
         run_type_query_text = (
             run_type_query.get("query", "") if isinstance(run_type_query, dict) else ""
         )
-        assert "bioetl_records_processed_total" in run_type_query_text
+        assert "bioetl_overview_pipeline_run_type_universe" in run_type_query_text
         assert "run_type" in run_type_query_text
 
         run_id_var = variable_map["run_id"]
