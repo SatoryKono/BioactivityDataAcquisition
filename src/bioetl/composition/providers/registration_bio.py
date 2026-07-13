@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.application.core.data_sources.idmapping import IDMappingDataSource
@@ -80,7 +79,7 @@ def _create_chembl_data_source(
         return _wrap_with_filter(
             TargetProteinClassificationSnapshotDataSource(
                 delta_reader=DeltaReader(
-                    base_path=Path(settings.data_dir) / "output",
+                    base_path=settings.gold_path,
                     logger=logger,
                 ),
                 logger=logger,
