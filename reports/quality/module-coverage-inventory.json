@@ -13263,7 +13263,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.ports.noop._tracing",
       "path": "src/bioetl/domain/ports/noop/_tracing.py",
-      "source_lines": 119
+      "source_lines": 120
     },
     {
       "coverage_percent": 100.0,
@@ -13313,7 +13313,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.ports.observability.tracing",
       "path": "src/bioetl/domain/ports/observability/tracing.py",
-      "source_lines": 32
+      "source_lines": 35
     },
     {
       "coverage_percent": 100.0,
@@ -18583,7 +18583,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.observability.tracing",
       "path": "src/bioetl/infrastructure/observability/tracing.py",
-      "source_lines": 310
+      "source_lines": 324
     },
     {
       "coverage_percent": 98.31,
@@ -35485,7 +35485,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.ports.noop._tracing",
       "path": "src/bioetl/domain/ports/noop/_tracing.py",
-      "source_lines": 119
+      "source_lines": 120
     },
     {
       "coverage_percent": 100.0,
@@ -35535,7 +35535,7 @@
       "missing_lines": 0,
       "module": "bioetl.domain.ports.observability.tracing",
       "path": "src/bioetl/domain/ports/observability/tracing.py",
-      "source_lines": 32
+      "source_lines": 35
     },
     {
       "coverage_percent": 100.0,
@@ -40805,7 +40805,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.observability.tracing",
       "path": "src/bioetl/infrastructure/observability/tracing.py",
-      "source_lines": 310
+      "source_lines": 324
     },
     {
       "coverage_percent": 98.31,
@@ -44450,7 +44450,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "f86fec1f1a5099fb64f80eabb5ff095399f9d6bea5995cdf7a5e50738d975147",
+  "source_tree_sha256": "7a5a878088ea1d72d873331a21c8c6e60beff792e70dfa92ecbf250ea041179e",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

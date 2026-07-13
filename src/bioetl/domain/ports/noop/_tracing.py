@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, Self
 
 if TYPE_CHECKING:
@@ -54,7 +55,7 @@ class _NoOpSpan:
     def add_event(
         self,
         _name: str,
-        attributes: object | None = None,
+        attributes: Mapping[str, object] | None = None,
     ) -> None:
         """No-op implementation — discards span events.
 

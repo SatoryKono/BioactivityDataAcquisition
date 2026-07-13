@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.0.1
 Status: Accepted
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-03-30'
+  Last verified: '2026-07-13'
 
 ______________________________________________________________________
 
@@ -48,8 +48,10 @@ This overhead provides no benefit for single-process local execution.
 ### TracingPort = OpenTelemetry Facade (deliberate choice)
 
 `TracingPort` is intentionally modeled after the **OpenTelemetry Tracing API**.
-`get-tracer()` returns an object whose interface mirrors `opentelemetry.trace.Tracer`
-(`start-as-current-span`, span context manager, `set-attribute`, `record-exception`).
+`get_tracer()` returns an object whose interface mirrors `opentelemetry.trace.Tracer`
+(`start_as_current_span`, span context manager, `set_attribute`, `add_event`,
+`record_exception`). Both the NoOp and real adapter MUST preserve this callable
+span surface.
 
 **Why OTel as the port surface?**
 
@@ -59,7 +61,7 @@ This overhead provides no benefit for single-process local execution.
    requires only a composition wiring change; application code stays the same.
 1. **Ecosystem compatibility** — any OTel-compatible backend (Jaeger, Zipkin, Tempo,
    OTLP Collector) can be plugged in without modifying the port contract.
-1. **`Any` return type** — `get-tracer()` returns `Any` to avoid a hard dependency
+1. **`Any` return type** — `get_tracer()` returns `Any` to avoid a hard dependency
    on the `opentelemetry` package in the domain layer while preserving the OTel
    calling convention in all implementations.
 
@@ -82,7 +84,8 @@ tracing = OpenTelemetryTracer(service_name="bioetl")
 
 # Both implementations expose the same OTel calling convention:
 otel_tracer = tracing.get_tracer("bioetl.pipeline")
-with otel_tracer.start_as_current_span("my-operation", attributes={...}):
+with otel_tracer.start_as_current_span("my-operation", attributes={...}) as span:
+    span.add_event("bioetl.memory.decision", attributes={...})
     ...  # works identically with NoOp or real OTel
 ```
 
@@ -115,7 +118,7 @@ This enables:
 
 ```python
 class NoOpTracing:
-    def get-tracer(self, name: str) -> NoOpTracer:
+    def get_tracer(self, name: str) -> NoOpTracer:
         return NoOpTracer()  # Stateless, no allocations per span
 
     def close(self) -> None:
@@ -138,6 +141,7 @@ class TracingPort(Protocol):
 `OpenTelemetryTracer` class exists in `tracing.py` for future use:
 
 - Supports OTLP export (production) and Console export (debug)
+- Owns its `TracerProvider` locally instead of replacing process-global tracing state
 - Graceful shutdown with span flushing
 - Compatible with TracingPort interface
 

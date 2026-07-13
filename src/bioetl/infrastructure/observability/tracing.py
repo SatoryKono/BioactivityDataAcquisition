@@ -30,6 +30,7 @@ Implements TracingPort (OTel facade).
 from __future__ import annotations
 
 import os
+from collections.abc import Mapping
 from contextlib import suppress
 from typing import Any, Protocol, cast
 from urllib.parse import urlparse
@@ -46,7 +47,6 @@ _OtlpExporterClass: (
 ) = None
 
 try:
-    from opentelemetry import trace
     from opentelemetry.sdk.resources import Resource
     from opentelemetry.sdk.trace import TracerProvider
     from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
@@ -80,6 +80,12 @@ class _SpanProtocol(Protocol):
     """Minimal span surface used by BioETL tracing helpers."""
 
     def set_attribute(self, key: str, value: object) -> None: ...
+
+    def add_event(
+        self,
+        name: str,
+        attributes: Mapping[str, object] | None = None,
+    ) -> None: ...
 
     def record_exception(self, exception: Exception) -> None: ...
 
@@ -133,6 +139,15 @@ class _SpanHandle:
     def set_attribute(self, key: str, value: object) -> None:
         if self._span is not None:
             self._span.set_attribute(key, value)
+
+    def add_event(
+        self,
+        name: str,
+        attributes: Mapping[str, object] | None = None,
+    ) -> None:
+        """Forward one bounded event to the entered OpenTelemetry span."""
+        if self._span is not None:
+            self._span.add_event(name, attributes=attributes)
 
     def record_exception(self, exception: Exception) -> None:
         if self._span is not None:
@@ -239,10 +254,11 @@ class OpenTelemetryTracer:
     """Concrete TracingPort adapter backed by the OpenTelemetry SDK.
 
     This is the "real" half of the OTel facade: ``get_tracer()`` delegates
-    to ``opentelemetry.trace.get_tracer()``, returning a genuine OTel
-    ``Tracer`` that creates exportable spans.  The port contract (TracingPort)
-    is intentionally aligned with the OTel API, so this adapter is a thin
-    wrapper rather than a translation layer.
+    to the adapter-owned ``TracerProvider`` and returns a genuine OTel
+    ``Tracer`` that creates exportable spans. Provider ownership stays local,
+    so repeated adapter construction cannot replace process-global tracing
+    state. The port contract (TracingPort) is intentionally aligned with the
+    OTel API, so this adapter is a thin wrapper rather than a translation layer.
     """
 
     def __init__(self, service_name: str = "bioetl") -> None:
@@ -270,8 +286,6 @@ class OpenTelemetryTracer:
 
         processor = BatchSpanProcessor(exporter)
         self._provider.add_span_processor(processor)
-        trace.set_tracer_provider(self._provider)
-        self._tracer = trace.get_tracer(resolved_service_name)
         self._closed = False
 
     def get_tracer(self, name: str) -> Any:  # Any: returns OTel Tracer wh...
@@ -284,7 +298,7 @@ class OpenTelemetryTracer:
             OpenTelemetry tracer instance.
 
         """
-        return _TracerAdapter(cast(_TracerProtocol, trace.get_tracer(name)))
+        return _TracerAdapter(cast(_TracerProtocol, self._provider.get_tracer(name)))
 
     def flush(self) -> None:
         """Force-flush pending spans without shutting down the provider."""
