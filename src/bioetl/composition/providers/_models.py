@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
@@ -30,6 +31,11 @@ class SecretValueProviderProtocol(Protocol):
 
 class ProviderSettingsProtocol(Protocol):
     """Minimal settings surface required by provider registration helpers."""
+
+    @property
+    def gold_path(self) -> Path:
+        """Return the canonical Gold layer storage path."""
+        ...
 
     @property
     def default_email(self) -> str | None:

@@ -90,7 +90,8 @@ class TestChemblTargetProteinClassificationBranch:
     ) -> None:
         support = MagicMock()
         logger = MagicMock()
-        settings = SimpleNamespace(data_dir="/tmp/bioetl-data")
+        gold_path = Path("/tmp/bioetl-data") / "output" / "gold"
+        settings = SimpleNamespace(gold_path=gold_path)
         pipeline_config = MagicMock()
         pipeline_config.entity_type = "target_protein_classification"
         pipeline_config.extraction_params = {
@@ -114,7 +115,7 @@ class TestChemblTargetProteinClassificationBranch:
 
         assert result is filtered_source
         mock_delta_reader_cls.assert_called_once_with(
-            base_path=Path("/tmp/bioetl-data") / "output",
+            base_path=gold_path,
             logger=logger,
         )
         mock_snapshot_source_cls.assert_called_once_with(
