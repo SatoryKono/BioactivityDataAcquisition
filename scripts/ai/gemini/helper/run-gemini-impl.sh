@@ -33,7 +33,7 @@ if [[ -f "${ENV_FILE}" ]]; then
 fi
 
 SHARED_WSL_PROXY_ENV="${REPO_ROOT}/scripts/engineering/dev/bash/.wsl_proxy_env.sh"
-if [[ -f "${SHARED_WSL_PROXY_ENV}" ]]; then
+if [[ -z "${HTTP_PROXY:-}${HTTPS_PROXY:-}${ALL_PROXY:-}${http_proxy:-}${https_proxy:-}${all_proxy:-}" && -f "${SHARED_WSL_PROXY_ENV}" ]]; then
     source "${SHARED_WSL_PROXY_ENV}" 2>/dev/null || true
 fi
 

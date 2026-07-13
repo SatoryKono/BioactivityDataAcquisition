@@ -51,7 +51,13 @@ live in [../03-guides/dashboards/dashboard-inventory.md](../03-guides/dashboards
 Важно:
 
 - metrics HTTP server startup остаётся auto-managed during normal pipeline runs;
-- Pushgateway publication остаётся best-effort on run completion;
+- Pushgateway publication остаётся best-effort on run completion; CLI runs do
+  not fail solely because publication fails, but publication helpers propagate
+  failed push results for diagnostics and emit bounded publication status
+  metrics;
+- Pushgateway snapshots are grouped only by bounded `pipeline` and `run_type`,
+  so short-lived ChEMBL runs remain queryable after process exit without
+  introducing occurrence-scoped labels such as `run_id`;
 - `bioetl diagnostics metrics` — canonical operator summary для этих
   auto-managed observability behaviors.
 

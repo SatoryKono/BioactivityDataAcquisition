@@ -6073,7 +6073,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.execution.cli_run_orchestration_service",
       "path": "src/bioetl/application/services/execution/cli_run_orchestration_service.py",
-      "source_lines": 215
+      "source_lines": 218
     },
     {
       "coverage_percent": 100.0,
@@ -18203,7 +18203,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.observability._metrics_gateway_publication",
       "path": "src/bioetl/infrastructure/observability/_metrics_gateway_publication.py",
-      "source_lines": 175
+      "source_lines": 177
     },
     {
       "coverage_percent": 96.3,
@@ -18533,7 +18533,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.observability.prometheus_metric_label_dispatch",
       "path": "src/bioetl/infrastructure/observability/prometheus_metric_label_dispatch.py",
-      "source_lines": 40
+      "source_lines": 54
     },
     {
       "coverage_percent": 100.0,
@@ -21233,7 +21233,7 @@
       "missing_lines": 0,
       "module": "bioetl.interfaces.cli.commands.domains.health.metrics_publication_integration",
       "path": "src/bioetl/interfaces/cli/commands/domains/health/metrics_publication_integration.py",
-      "source_lines": 41
+      "source_lines": 40
     },
     {
       "coverage_percent": 100.0,
@@ -28295,7 +28295,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.execution.cli_run_orchestration_service",
       "path": "src/bioetl/application/services/execution/cli_run_orchestration_service.py",
-      "source_lines": 215
+      "source_lines": 218
     },
     {
       "coverage_percent": 100.0,
@@ -40425,7 +40425,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.observability._metrics_gateway_publication",
       "path": "src/bioetl/infrastructure/observability/_metrics_gateway_publication.py",
-      "source_lines": 175
+      "source_lines": 177
     },
     {
       "coverage_percent": 96.3,
@@ -40755,7 +40755,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.observability.prometheus_metric_label_dispatch",
       "path": "src/bioetl/infrastructure/observability/prometheus_metric_label_dispatch.py",
-      "source_lines": 40
+      "source_lines": 54
     },
     {
       "coverage_percent": 100.0,
@@ -43455,7 +43455,7 @@
       "missing_lines": 0,
       "module": "bioetl.interfaces.cli.commands.domains.health.metrics_publication_integration",
       "path": "src/bioetl/interfaces/cli/commands/domains/health/metrics_publication_integration.py",
-      "source_lines": 41
+      "source_lines": 40
     },
     {
       "coverage_percent": 100.0,
@@ -44450,7 +44450,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "f74ba48a952c59e632e29bdaf19a29571086fbcdf6450175e4f30d319def1293",
+  "source_tree_sha256": "e14c4c3e48e88e77f99e678e076cb458dce5c3516e38d095b85003326225bb44",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
