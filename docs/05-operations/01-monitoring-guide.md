@@ -188,15 +188,17 @@ L0 дашборд для одного operator question: что сейчас bro
 куда drill down первым.
 
 - **Answer surface**: `Provenance`, `Status`, `ID`, `Processed Records`,
-  `First Action`, first-screen `Alert/SLO Triage`, and the deviation-first
-  `Inputs` matrix. `OK` requires recent signal; no
+  `First Action`, compact current-state cards for Control Plane, Runtime, Data
+  Quality, Provider, and Data Validation, plus side-by-side deviation-first
+  `Inputs` and `Workflow` matrices. `OK` requires recent signal; no
   recent samples stay `UNKNOWN`, not green. Workflow summary is current-state
   evidence and must follow the latest bounded terminal workflow signal rather
   than cumulative workflow-run counters.
 - **Above-the-fold layout**: first screen without scroll contains the
   provenance header, `Status`, local identity context (`ID`), processed-record
-  context, `First Action`, actual alert evidence, and `Inputs`. Repeated
-  subsystem detail moves to collapsed historical/detail rows.
+  context, `First Action`, compact L1 current-state evidence, and the
+  `Inputs` / `Workflow` matrices. Alert evidence starts immediately below in a
+  collapsed incident row; historical/detail evidence remains collapsed.
 - **L1 historical context**: immediately below the first screen lives the
   `L1 Historical Trends` row with `Runtime Blockers Trend`, `DQ Status Trend`,
   and `Gold Lifecycle Trend`. Эти графики дают recent-history context и не
@@ -211,8 +213,9 @@ L0 дашборд для одного operator question: что сейчас bro
   ledger, checkpoint, lineage и `Silver Rejects + Rate`. Distribution
   pie panels, standalone vanity yield/rate gauges и composite source-selection
   detail не входят в L0 flow.
-- **Collapsed rows**: `L1 Historical Trends` contains repeated subsystem detail
-  and trends; `Range Evidence` содержит
+- **Collapsed rows**: `Alert/SLO Triage` contains actual firing/pending alert
+  evidence; `L1 Historical Trends` contains selected-range trends;
+  `Range Evidence` содержит
   `Historical Failures`, `Recent Terminal Runs` и `Silver Rejects + Rate`;
   `Diagnostics & Docs` остаётся отдельной
   collapsed navigation/support surface.
@@ -274,10 +277,12 @@ tracing-backed log hygiene живёт в collapsed row
   telemetry подтверждает scope; отсутствующий scope остаётся `UNKNOWN`.
 
 - **Alert/SLO triage surface**:
-  `1. Overview` includes first-screen expanded `Alert/SLO Triage` with
-  `Triage Alert State`. This panel reads Prometheus `ALERTS` for firing and
-  pending alert state, preserving the alert-rule source of truth instead of
-  re-encoding alert thresholds in dashboard queries.
+  `1. Overview` places collapsed `Alert/SLO Triage` with `Triage Alert State`
+  immediately after the bounded first path. Expand it after current-state
+  narrowing when alert-level context is required, or use the canonical
+  `6. Alerts & SLO` dashboard. The panel reads Prometheus `ALERTS` for firing
+  and pending alert state, preserving the alert-rule source of truth instead
+  of re-encoding alert thresholds in dashboard queries.
 
 - **Logs/traces row**:
   `Warnings`, `GLOBAL Unstructured Logs`, `Top Warning Events by Message / Range`,

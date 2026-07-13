@@ -144,12 +144,13 @@ monitoring guide.
 frozen `1. Overview v3` layout as its baseline. It answers one question:
 what is currently broken or degraded in BioETL, and where should the operator
 drill down first? The first screen materializes provenance/scope, `Status`,
-`First Action`, `ID`, and `Processed Records`, then keeps the expanded
-`Alert/SLO Triage` table and deviation-first `Inputs` matrix in the first
-operator path. Repeated subsystem cards, historical evidence, and diagnostics
-routing live in collapsed rows. The alert table reads Prometheus `ALERTS`; this
-is presentation-only triage and does not duplicate alert-rule business logic in
-dashboard queries.
+`First Action`, `ID`, and `Processed Records`, then keeps compact current-state
+cards for Control Plane, Runtime, Data Quality, Provider, and Data Validation
+above the side-by-side deviation-first `Inputs` and `Workflow` matrices.
+`Alert/SLO Triage`, historical evidence, and diagnostics routing live in
+collapsed rows immediately after that bounded first path. The alert table reads
+Prometheus `ALERTS`; this is presentation-only triage and does not duplicate
+alert-rule business logic in dashboard queries.
 
 `bioetl-control-plane-v1` is the `0. Control Plane` surface. It starts with the
 evidence-aware `bioetl_control_plane_current_status_trusted` headline plus

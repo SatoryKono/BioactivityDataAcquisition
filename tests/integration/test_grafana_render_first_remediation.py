@@ -290,7 +290,7 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
 
     overview = _load("bioetl-overview-v2.json")
     inputs = _panel(overview, 9002)
-    assert inputs["gridPos"] == {"h": 6, "w": 24, "x": 0, "y": 24}
+    assert inputs["gridPos"] == {"h": 8, "w": 12, "x": 0, "y": 22}
     for row_id in (9014, 9009, 9012):
         assert _panel(overview, row_id).get("collapsed") is True
 

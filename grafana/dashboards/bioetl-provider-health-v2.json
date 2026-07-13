@@ -1665,6 +1665,13 @@
       "id": 104,
       "options": {
         "colorMode": "value",
+        "dataLinks": [
+          {
+            "targetBlank": true,
+            "title": "Open Provider Incident Runbook",
+            "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/incident-response.md"
+          }
+        ],
         "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
