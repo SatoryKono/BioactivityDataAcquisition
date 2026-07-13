@@ -1,6 +1,5 @@
 """Grafana dashboard layout and metadata integration contracts."""
 
-import json
 from pathlib import Path
 import re
 
@@ -8,6 +7,7 @@ import pytest
 import yaml
 from tests.integration._grafana_test_support import (
     get_dashboard_files,
+    get_dashboard_navigation_links,
     get_dashboard_panels,
     get_row_child_panels,
     load_dashboard,
@@ -26,6 +26,36 @@ def _load_navigation_contract() -> dict:
         "navigation-links contract must deserialize into a mapping"
     )
     return payload
+
+
+def _assert_panels_stay_in_grid_without_overlap(
+    panels: list[dict], *, context: str
+) -> None:
+    """Require positive 24-column geometry with no pairwise intersections."""
+    overlaps: list[str] = []
+    for index, left in enumerate(panels):
+        left_grid = left.get("gridPos", {})
+        left_x = left_grid.get("x", -1)
+        left_y = left_grid.get("y", -1)
+        left_w = left_grid.get("w", 0)
+        left_h = left_grid.get("h", 0)
+        assert left_x >= 0 and left_y >= 0
+        assert left_w > 0 and left_h > 0
+        assert left_x + left_w <= 24
+        for right in panels[index + 1 :]:
+            right_grid = right.get("gridPos", {})
+            right_x = right_grid.get("x", -1)
+            right_y = right_grid.get("y", -1)
+            right_w = right_grid.get("w", 0)
+            right_h = right_grid.get("h", 0)
+            x_overlap = left_x < right_x + right_w and right_x < left_x + left_w
+            y_overlap = left_y < right_y + right_h and right_y < left_y + left_h
+            if x_overlap and y_overlap:
+                overlaps.append(
+                    f"{left.get('id')}:{left.get('title')} overlaps "
+                    f"{right.get('id')}:{right.get('title')}"
+                )
+    assert not overlaps, f"{context} panels overlap:\n" + "\n".join(overlaps)
 
 
 @pytest.mark.parametrize("dashboard_path", get_dashboard_files(), ids=lambda p: p.name)
@@ -81,7 +111,7 @@ def test_runtime_top_fold_text_panels_do_not_overlap() -> None:
 
 
 def test_runtime_redundant_guidance_panels_stay_out_of_root_layout() -> None:
-    """Runtime root layout must keep duplicated guidance out of operator triage."""
+    """Runtime detail guidance must stay nested behind collapsed disclosure."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     root_titles = {
         panel.get("title")
@@ -101,16 +131,14 @@ def test_runtime_redundant_guidance_panels_stay_out_of_root_layout() -> None:
         None,
     )
     assert detect_row is not None, "Runtime dashboard must keep Detect row"
-    assert detect_row.get("collapsed") is False
+    assert detect_row.get("collapsed") is True
+    assert "Inspect Active Runtime Blocker Detail" not in root_titles
+    detect_panels = get_row_child_panels(dashboard, "Detect")
     detail_panel = next(
-        (
-            panel
-            for panel in dashboard.get("panels", [])
-            if panel.get("title") == "Inspect Active Runtime Blocker Detail"
-        ),
-        None,
+        panel
+        for panel in detect_panels
+        if panel.get("title") == "Inspect Active Runtime Blocker Detail"
     )
-    assert detail_panel is not None
     assert detail_panel.get("gridPos", {}).get("y", 0) > detect_row.get(
         "gridPos", {}
     ).get("y", 0)
@@ -120,6 +148,9 @@ def test_runtime_redundant_guidance_panels_stay_out_of_root_layout() -> None:
         if isinstance(panel.get("title"), str)
     }
     assert "Inspect Active Runtime Blocker Detail" in detect_titles
+    _assert_panels_stay_in_grid_without_overlap(
+        detect_panels, context="Runtime Detect disclosure"
+    )
 
 
 def test_runtime_first_screen_grid_uses_shared_panel_reference_sizes() -> None:
@@ -202,12 +233,10 @@ def test_control_plane_root_layout_keeps_range_evidence_and_rows_non_overlapping
 
 
 def test_control_plane_row_sequence_matches_operator_flow() -> None:
-    """Control Plane diagnostic rows preserve the operator flow order."""
+    """Collapsed Control Plane diagnostics preserve the operator flow order."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     row_panels = [
-        panel
-        for panel in dashboard.get("panels", [])
-        if panel.get("type") == "row" and panel.get("collapsed") is False
+        panel for panel in dashboard.get("panels", []) if panel.get("type") == "row"
     ]
     row_pairs = [
         (panel.get("id"), panel.get("title"))
@@ -222,6 +251,7 @@ def test_control_plane_row_sequence_matches_operator_flow() -> None:
         (904, "Incident Drilldown: Audit / Lineage Completeness"),
         (905, "Identity evidence and remaining replay-safety signals"),
     ], f"Control Plane row order/title drifted: {row_pairs}"
+    assert all(panel.get("collapsed") is True for panel in row_panels)
 
 
 def test_control_plane_first_evidence_panel_stays_close_to_answer_row() -> None:
@@ -277,48 +307,46 @@ def test_control_plane_terminal_events_table_has_readable_width() -> None:
 
 
 def test_control_plane_manifest_evidence_top_band_uses_full_row_width() -> None:
-    """Manifest/ledger evidence top band should use the full row width to avoid avoidable dead space."""
+    """Manifest evidence must use packed, non-overlapping disclosure bands."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    panels = {
-        panel.get("title"): panel
-        for panel in get_dashboard_panels(dashboard)
-        if panel.get("title")
+    row = next(
+        panel
+        for panel in dashboard.get("panels", [])
+        if panel.get("title") == "Incident Drilldown: Manifest / Ledger Integrity"
+    )
+    assert row.get("collapsed") is True
+    child_panels = get_row_child_panels(
+        dashboard, "Incident Drilldown: Manifest / Ledger Integrity"
+    )
+    panels = {panel.get("title"): panel for panel in child_panels if panel.get("title")}
+    terminal = panels["Inspect: Terminal Run Events by Status in Range"]
+    terminal_grid = terminal.get("gridPos", {})
+    assert terminal_grid == {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": row.get("gridPos", {}).get("y", 0) + 1,
     }
-    top_band_titles = (
-        "Inspect: Terminal Run Events by Status in Range",
-        "Monitor: Manifest Write Failures",
-        "Monitor: Ledger Append Failures",
-    )
-    widths = []
-    xs = []
-    ys = set()
-    heights = set()
-    for panel_title in top_band_titles:
-        panel = panels.get(panel_title)
-        assert panel is not None
-        grid_pos = panel.get("gridPos", {})
-        widths.append(grid_pos.get("w", 0))
-        xs.append(grid_pos.get("x", 0))
-        ys.add(grid_pos.get("y", 0))
-        heights.add(grid_pos.get("h", 0))
-
-    row_y = (
-        panels["Incident Drilldown: Manifest / Ledger Integrity"]
-        .get("gridPos", {})
-        .get("y", 0)
-    )
-    assert ys == {row_y + 1}
-    assert heights == {6}
-    assert sum(widths) == 24, (
-        f"Manifest/ledger top band should fill the row, got widths={widths}"
-    )
-    assert sorted(xs) == [0, 12, 18], (
-        f"Unexpected manifest/ledger top band placement: xs={xs}"
+    failure_panels = [
+        panels["Monitor: Manifest Write Failures"],
+        panels["Monitor: Ledger Append Failures"],
+    ]
+    assert {panel.get("gridPos", {}).get("x") for panel in failure_panels} == {
+        0,
+        12,
+    }
+    assert {panel.get("gridPos", {}).get("w") for panel in failure_panels} == {12}
+    assert {panel.get("gridPos", {}).get("h") for panel in failure_panels} == {6}
+    assert {panel.get("gridPos", {}).get("y") for panel in failure_panels} == {
+        terminal_grid["y"] + terminal_grid["h"]
+    }
+    _assert_panels_stay_in_grid_without_overlap(
+        child_panels, context="Control Plane manifest/ledger disclosure"
     )
 
 
 def test_control_plane_replay_safety_detail_top_bands_use_full_row_width() -> None:
-    """Replay-safety detail row should not leave dead horizontal space in its visible top bands."""
+    """Replay-safety disclosure must pack evidence into non-overlapping bands."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
     row_panel = next(
         panel
@@ -327,12 +355,11 @@ def test_control_plane_replay_safety_detail_top_bands_use_full_row_width() -> No
         and panel.get("title")
         == "Incident Drilldown: Replay Safety (Checkpoint / Replay)"
     )
-    panels = {
-        panel.get("id"): panel
-        for panel in get_row_child_panels(
-            dashboard, "Incident Drilldown: Replay Safety (Checkpoint / Replay)"
-        )
-    }
+    assert row_panel.get("collapsed") is True
+    child_panels = get_row_child_panels(
+        dashboard, "Incident Drilldown: Replay Safety (Checkpoint / Replay)"
+    )
+    panels = {panel.get("id"): panel for panel in child_panels}
 
     known_blind_spots = panels[894]
     blind_spots_grid = known_blind_spots.get("gridPos", {})
@@ -341,18 +368,26 @@ def test_control_plane_replay_safety_detail_top_bands_use_full_row_width() -> No
     row_y = row_panel.get("gridPos", {}).get("y", 0)
     assert blind_spots_grid.get("y") == row_y + 1
 
-    trio = [panels[3], panels[104], panels[120]]
-    trio_widths = [panel.get("gridPos", {}).get("w", 0) for panel in trio]
-    trio_xs = sorted(panel.get("gridPos", {}).get("x", 0) for panel in trio)
-    trio_ys = {panel.get("gridPos", {}).get("y", 0) for panel in trio}
-    assert sum(trio_widths) == 24, (
-        f"Replay-safety KPI trio should fill the row, got widths={trio_widths}"
+    blocker_grid = panels[130].get("gridPos", {})
+    assert blocker_grid.get("x") == 0
+    assert blocker_grid.get("w") == 24
+    assert blocker_grid.get("y") == blind_spots_grid.get("y") + blind_spots_grid.get(
+        "h"
     )
-    assert trio_xs == [0, 8, 16], (
-        f"Unexpected replay-safety KPI placement: xs={trio_xs}"
+    for left_id, right_id in ((3, 104), (120, 101)):
+        pair = [panels[left_id], panels[right_id]]
+        assert {panel.get("gridPos", {}).get("x") for panel in pair} == {0, 12}
+        assert {panel.get("gridPos", {}).get("w") for panel in pair} == {12}
+        assert len({panel.get("gridPos", {}).get("y") for panel in pair}) == 1
+    assert panels[3].get("gridPos", {}).get("y") == blocker_grid.get(
+        "y"
+    ) + blocker_grid.get("h")
+    assert panels[120].get("gridPos", {}).get("y") == panels[3].get("gridPos", {}).get(
+        "y"
+    ) + panels[3].get("gridPos", {}).get("h")
+    _assert_panels_stay_in_grid_without_overlap(
+        child_panels, context="Control Plane replay-safety disclosure"
     )
-    assert len(trio_ys) == 1
-    assert next(iter(trio_ys)) > blind_spots_grid.get("y", 0)
 
 
 def test_control_plane_lineage_top_band_uses_full_row_width() -> None:
@@ -705,8 +740,8 @@ def test_dashboard_default_time_and_refresh_policy_by_uid_class() -> None:
         )
 
 
-def test_provider_health_selected_provider_detail_row_is_expanded() -> None:
-    """Provider detail repeat row should be explicit and expanded by default."""
+def test_provider_health_selected_provider_detail_row_is_collapsed() -> None:
+    """Provider detail telemetry must stay behind explicit progressive disclosure."""
     dashboard = load_dashboard(
         Path("grafana/dashboards/bioetl-provider-health-v2.json")
     )
@@ -721,21 +756,33 @@ def test_provider_health_selected_provider_detail_row_is_expanded() -> None:
         None,
     )
     assert detail_row is not None
-    assert detail_row.get("collapsed") is False
+    assert detail_row.get("collapsed") is True
 
+    child_panels = get_row_child_panels(dashboard, "Selected Provider Detail")
+    child_titles = {
+        panel.get("title")
+        for panel in child_panels
+        if isinstance(panel.get("title"), str)
+    }
+    assert "Inspect Provider Health Check Latency (p95) - $provider" in child_titles
+    root_titles = {
+        panel.get("title")
+        for panel in dashboard.get("panels", [])
+        if isinstance(panel.get("title"), str)
+    }
+    assert "Inspect Provider Health Check Latency (p95) - $provider" not in root_titles
     detail_panel = next(
-        (
-            panel
-            for panel in panels
-            if panel.get("title")
-            == "Inspect Provider Health Check Latency (p95) - $provider"
-        ),
-        None,
+        panel
+        for panel in child_panels
+        if panel.get("title")
+        == "Inspect Provider Health Check Latency (p95) - $provider"
     )
-    assert detail_panel is not None
-    assert detail_panel.get("gridPos", {}).get("y", 0) >= detail_row.get(
+    assert detail_panel.get("gridPos", {}).get("y", 0) > detail_row.get(
         "gridPos", {}
     ).get("y", 0)
+    _assert_panels_stay_in_grid_without_overlap(
+        child_panels, context="Provider selected-detail disclosure"
+    )
 
 
 def test_runtime_dq_control_plane_expose_contextual_loki_explore_link() -> None:
@@ -838,10 +885,21 @@ def test_dashboard_design_system_documents_metadata_policy() -> None:
     assert not missing, f"design-system metadata policy missing tokens: {missing}"
 
 
-def test_control_plane_does_not_expose_explore_links() -> None:
-    """Control Plane uses the dashboard bus and runbooks, not direct Explore links."""
+def test_control_plane_exposes_scope_preserving_explore_links() -> None:
+    """Control Plane navigation must offer scoped Logs and Traces handoffs."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-control-plane-v1.json"))
-    serialized = json.dumps(dashboard.get("panels", []))
+    links_by_title = {
+        str(link.get("title")): str(link.get("url"))
+        for link in get_dashboard_navigation_links(dashboard)
+    }
 
-    assert "grafana-lokiexplore-app" not in serialized
-    assert "grafana-exploretraces-app" not in serialized
+    expected_routes = {
+        "Explore Logs": "grafana-lokiexplore-app",
+        "Explore Traces": "grafana-exploretraces-app",
+    }
+    for title, route in expected_routes.items():
+        url = links_by_title.get(title, "")
+        assert route in url
+        assert "from=${__from}" in url
+        assert "to=${__to}" in url
+        assert "from=now-150m&to=now" not in url

@@ -1,5 +1,6 @@
 rule_files:
   - ../bioetl_observability.yml
+  - ../bioetl_control_plane_current_status.yml
 
 evaluation_interval: 1m
 
@@ -769,6 +770,52 @@ tests:
         eval_time: 19m
         exp_samples:
           - labels: '{__name__="bioetl_runtime_current_status_trusted",pipeline="chembl_assay",run_type="backfill"}'
+            value: 3
+
+  - name: control-plane-trusted-status-ok-with-complete-fresh-evidence
+    interval: 1m
+    input_series:
+      - series: 'bioetl_control_plane_manifest_writes_total{pipeline="chembl",run_type="incremental",status="success"}'
+        values: '0+1x10'
+      - series: 'bioetl_control_plane_ledger_appends_total{pipeline="chembl",status="success"}'
+        values: '0+1x10'
+      - series: 'bioetl_checkpoint_saved_at_seconds{pipeline="chembl"}'
+        values: '0+60x10'
+    promql_expr_test:
+      - expr: bioetl_control_plane_current_status_trusted{pipeline="chembl",run_type="incremental"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_control_plane_current_status_trusted",pipeline="chembl",run_type="incremental"}'
+            value: 0
+
+  - name: control-plane-trusted-status-incomplete-with-missing-checkpoint
+    interval: 1m
+    input_series:
+      - series: 'bioetl_control_plane_manifest_writes_total{pipeline="chembl",run_type="incremental",status="success"}'
+        values: '0+1x10'
+      - series: 'bioetl_control_plane_ledger_appends_total{pipeline="chembl",status="success"}'
+        values: '0+1x10'
+    promql_expr_test:
+      - expr: bioetl_control_plane_current_status_trusted{pipeline="chembl",run_type="incremental"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_control_plane_current_status_trusted",pipeline="chembl",run_type="incremental"}'
+            value: 3
+
+  - name: control-plane-trusted-status-critical-with-stale-checkpoint
+    interval: 1m
+    input_series:
+      - series: 'bioetl_control_plane_manifest_writes_total{pipeline="chembl",run_type="incremental",status="success"}'
+        values: '0+1x70'
+      - series: 'bioetl_control_plane_ledger_appends_total{pipeline="chembl",status="success"}'
+        values: '0+1x70'
+      - series: 'bioetl_checkpoint_saved_at_seconds{pipeline="chembl"}'
+        values: '0+0x70'
+    promql_expr_test:
+      - expr: bioetl_control_plane_current_status_trusted{pipeline="chembl",run_type="incremental"}
+        eval_time: 70m
+        exp_samples:
+          - labels: '{__name__="bioetl_control_plane_current_status_trusted",pipeline="chembl",run_type="incremental"}'
             value: 2
 
   - name: workflow-pipeline-verdict-fails-closed-after-intermediate-failure

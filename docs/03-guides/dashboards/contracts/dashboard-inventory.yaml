@@ -3,8 +3,8 @@
 # Machine-readable mapping of shipped dashboards to their panels, data sources,
 # and contract metadata. This file enables drift detection and audibility.
 #
-# Version: 1.0.2
-# Last updated: 2026-07-10
+# Version: 1.1.0
+# Last updated: 2026-07-13
 # Source: grafana/dashboards/*.json
 #
 # Schema:
@@ -12,7 +12,7 @@
 #     - uid: Grafana dashboard UID
 #       title: Dashboard title
 #       family: Dashboard family (primary, adjunct, explorer, alert_triage)
-#       navigation_id: Navigation bus position (0-5) or null if not in primary bus
+#       navigation_id: Numbered navigation bus position (0-6) or null for an unnumbered adjunct
 #       data_sources: Normalized datasource names discovered from dashboard JSON
 #       panel_count: Total number of panels
 #       key_panels:
@@ -49,6 +49,10 @@ dashboards:
         title: "Processed Records"
         type: table
         description: "Shared shell panel for Bronze/Silver/Gold accounting"
+      - id: 9401
+        title: "Status"
+        type: stat
+        description: "Evidence-aware replay/resume verdict; required evidence gaps render INCOMPLETE"
     selector_variables:
       - workflow
       - pipeline
@@ -76,7 +80,7 @@ dashboards:
       - id: 1000
         title: "Navigation"
         type: text
-        description: "Primary navigation bus (0-5)"
+        description: "Theme-safe wrapping navigation bus (0-6 plus global adjuncts)"
     selector_variables:
       - workflow
       - pipeline
@@ -106,6 +110,10 @@ dashboards:
         title: "Worst Stage Lag"
         type: stat
         description: "Worst observed stage lag in the selected range"
+      - id: 9102
+        title: "Runtime Telemetry Gap"
+        type: stat
+        description: "Scrape/rule trust gate; a gap forces the headline to INCOMPLETE"
     selector_variables:
       - workflow
       - pipeline
@@ -163,6 +171,10 @@ dashboards:
         title: "Inspect DQ Current Reasons"
         type: table
         description: "Current DQ violation reasons breakdown"
+      - id: 8
+        title: "Time Range · Worst Freshness Age (hours; SLA 24/72)"
+        type: gauge
+        description: "TIME RANGE freshness age in hours with WARN 24h and CRIT 72h"
     selector_variables:
       - workflow
       - pipeline
@@ -218,6 +230,14 @@ dashboards:
         title: "Monitor Filtered Records Total"
         type: table
         description: "Quarantined/silver-rejected records table"
+      - id: 16
+        title: "Trends · expand when rejects exist"
+        type: row
+        description: "Collapsed progressive-disclosure trend row"
+      - id: 15
+        title: "Records and selected detail · expand after narrowing"
+        type: row
+        description: "Collapsed record-level row opened after scope narrowing"
     selector_variables:
       - pipeline
       - run_type
@@ -229,7 +249,7 @@ dashboards:
   - uid: bioetl-alerts-slo
     title: "6. Alerts & SLO"
     family: alert_triage
-    navigation_id: null
+    navigation_id: 6
     data_sources:
       - Prometheus
       - Grafana
@@ -239,6 +259,10 @@ dashboards:
         title: "Active Alert Status"
         type: stat
         description: "Fail-closed firing-alert status from the ALERTS metric family"
+      - id: 5
+        title: "Firing Alert Details"
+        type: table
+        description: "Firing alerts with an explicit Global/Pipeline/Run scope badge per row"
     selector_variables:
       - workflow
       - pipeline
@@ -246,8 +270,8 @@ dashboards:
 
 # Contract metadata
 contract_metadata:
-  version: "1.0.2"
-  last_updated: "2026-07-10"
+  version: "1.1.0"
+  last_updated: "2026-07-13"
   source_files:
     - "grafana/dashboards/bioetl-control-plane-v1.json"
     - "grafana/dashboards/bioetl-overview-v2.json"
@@ -258,7 +282,7 @@ contract_metadata:
     - "grafana/dashboards/bioetl-silver-reject-explorer.json"
     - "grafana/dashboards/bioetl-alerts-slo.json"
   governance:
-    - Primary dashboards (0-5) must include navigation panel id=1000
-    - Navigation bus must be consistent across primary dashboards
+    - All eight shipped dashboards must include navigation panel id=1000
+    - Navigation bus 0-6 plus Silver/Logs/Traces must be identical, theme-safe, and wrap at 1024px
     - KPI ownership mirrors must be documented in navigation-links.yaml
     - Selector contracts must match selector-contracts.yaml

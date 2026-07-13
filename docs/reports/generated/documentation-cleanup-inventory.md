@@ -7,19 +7,19 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2878 |
-| Tracked doc-like files | 1802 |
-| Ignored local docs/reports files | 1076 |
+| Doc-like files | 2978 |
+| Tracked doc-like files | 1804 |
+| Ignored local docs/reports files | 1174 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
-| Generated routes | 58 |
+| Generated routes | 59 |
 
 ## Tracking State
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 1076 |
-| tracked | 1802 |
+| ignored_local | 1174 |
+| tracked | 1804 |
 
 ## Lifecycle Counts
 
@@ -32,10 +32,10 @@
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 22 |
 | docs_reports_generated_or_route_owned | 23 |
-| docs_reports_retention_sensitive_evidence | 1046 |
+| docs_reports_retention_sensitive_evidence | 1144 |
 | generated_skill_license_mirror | 5 |
 | generated_skill_reference_mirror | 12 |
-| generated_test_run_evidence | 3 |
+| generated_test_run_evidence | 4 |
 | guide | 2 |
 | index | 4 |
 | issue_pack | 11 |
@@ -59,20 +59,20 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 1828 |
-| Archived | 60 |
+| Active | 1926 |
+| Archived | 61 |
 | Canonical | 63 |
-| Generated | 703 |
+| Generated | 704 |
 | Working | 224 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 1828 |
-| archive | 60 |
+| active | 1926 |
+| archive | 61 |
 | canonical | 63 |
-| generated | 703 |
+| generated | 704 |
 | working | 224 |
 
 ## Recommended Actions
@@ -81,8 +81,8 @@
 | --- | --- |
 | archive-after-github-state-check | 115 |
 | archive-after-migration | 60 |
-| generate-automatically | 703 |
-| keep | 1996 |
+| generate-automatically | 704 |
+| keep | 2095 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -382,6 +382,7 @@
 | runtime-structured-log-file | `src/bioetl/infrastructure/observability/logging_config.py` | ignored_runtime_output |
 | schema-generated-source | `scripts/schema/generate_schema_artifacts.py` | tracked_generated_source |
 | silver-filter-inventory-baseline | `scripts/data_quality/inventory_silver_filters_migration.py` | tracked_curated_generated_doc |
+| targeted-s7-governance-hotspot-telemetry | `manual closeout from bounded pytest JUnit telemetry` | tracked_quality_evidence |
 | test-governance-quality-baseline | `scripts/engineering/qa/report_test_governance_audit.py` | tracked_quality_baseline |
 | test-health-run-history | `scripts/engineering/qa/test_health.py` | ignored_local_output |
 | unified-schema-quality-report | `scripts/schema/generate_unified_schema_map.py` | working_output |

@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import subprocess
 import sys
+import tempfile
 import threading
 from collections.abc import Callable
 from contextlib import suppress
@@ -20,6 +22,7 @@ from bioetl.domain.medallion import SilverWriteMode
 from bioetl.infrastructure.storage.delta.table_ops import (
     normalize_delta_filesystem_path,
 )
+from bioetl.infrastructure.storage.support.atomic_ops import atomic_write_bytes
 from bioetl.infrastructure.storage.silver.delta_request_models import (
     _DeltaWriteRequest,
 )
@@ -36,11 +39,12 @@ _PLAIN_DELTA_WRITE_SUBPROCESS_CODE = (
     "import json\n"
     "import sys\n"
     "from pathlib import Path\n"
-    "import pyarrow as pa\n"
     "import pyarrow.ipc as ipc\n"
     "from deltalake import write_deltalake\n"
     "metadata = json.loads(sys.argv[1])\n"
-    "table = ipc.open_stream(pa.py_buffer(sys.stdin.buffer.read())).read_all()\n"
+    "arrow_path = Path(metadata['arrow_path'])\n"
+    "with arrow_path.open('rb') as handle:\n"
+    "    table = ipc.open_stream(handle).read_all()\n"
     "table_path = Path(metadata['table_or_uri']).expanduser().resolve()\n"
     "table_path.parent.mkdir(parents=True, exist_ok=True)\n"
     "kwargs = {\n"
@@ -139,6 +143,26 @@ def _serialize_arrow_table_for_subprocess(table: pa.Table) -> bytes:
     return sink.getvalue().to_pybytes()
 
 
+def _write_arrow_payload_for_subprocess(*, table_path: str, table: pa.Table) -> Path:
+    """Persist one Arrow IPC payload for a child-process Delta write.
+
+    Passing large payloads through ``subprocess.run(..., input=...)`` can deadlock
+    on Windows when the child has not started reading stdin yet. A temp file keeps
+    the parent/child contract bounded without coupling to pipe buffer sizes.
+    """
+    payload_dir = Path(normalize_delta_filesystem_path(table_path)).parent
+    payload_dir.mkdir(parents=True, exist_ok=True)
+    fd, payload_path_str = tempfile.mkstemp(
+        suffix=".arrow",
+        prefix=".plain_delta_payload_",
+        dir=payload_dir,
+    )
+    os.close(fd)
+    payload_path = Path(payload_path_str)
+    atomic_write_bytes(payload_path, _serialize_arrow_table_for_subprocess(table))
+    return payload_path
+
+
 def _decode_subprocess_output(payload: bytes) -> str:
     """Decode bounded subprocess output for deterministic error messages."""
     return payload.decode("utf-8", errors="replace").strip()[-4000:]
@@ -156,22 +180,31 @@ def _run_plain_delta_write_subprocess(
     outlive Python thread timeouts. The child process keeps the timeout
     enforceable without changing the default production write path.
     """
+    table_or_uri = str(kwargs["table_or_uri"])
     metadata = {key: value for key, value in kwargs.items() if key != "data"}
+    payload_path = _write_arrow_payload_for_subprocess(
+        table_path=table_or_uri,
+        table=arrow_data,
+    )
+    metadata["arrow_path"] = payload_path.as_posix()
     try:
-        completed = subprocess.run(
-            [
-                sys.executable,
-                "-c",
-                _PLAIN_DELTA_WRITE_SUBPROCESS_CODE,
-                json.dumps(metadata),
-            ],
-            input=_serialize_arrow_table_for_subprocess(arrow_data),
-            capture_output=True,
-            check=False,
-            timeout=timeout_seconds,
-        )
-    except subprocess.TimeoutExpired as exc:
-        raise TimeoutError from exc
+        try:
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "-c",
+                    _PLAIN_DELTA_WRITE_SUBPROCESS_CODE,
+                    json.dumps(metadata),
+                ],
+                capture_output=True,
+                check=False,
+                timeout=timeout_seconds,
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise TimeoutError from exc
+    finally:
+        with suppress(OSError):
+            payload_path.unlink(missing_ok=True)
 
     if completed.returncode != 0:
         stderr = _decode_subprocess_output(completed.stderr)

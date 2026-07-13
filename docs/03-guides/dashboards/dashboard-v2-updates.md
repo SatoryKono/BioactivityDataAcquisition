@@ -68,14 +68,13 @@ notes. Если prose ниже расходится с JSON, править ну
 - Dashboard-to-dashboard links используют `includeVars=false` и передают только
   allowlisted `var-*` target scope.
 - Same-tab navigation остаётся обязательной для shipped dashboard handoff.
-- Большинство shipped navigation panels `id=1000` после bus `0..5` содержат
+- Все восемь shipped navigation panels `id=1000` после bus `0..6` содержат
   global adjunct links `Silver Reject Explorer`, `Explore Logs`,
   `Explore Traces`.
-- `bioetl-control-plane-v1` является intentional exception: top-level
-  navigation не уводит оператора напрямую в `Explore Logs` / `Explore Traces`,
-  а удерживает first screen в dashboard/runbook triage flow.
-- `Explore Traces` uses the explicit search-first Tempo route with bounded
-  initial window `now-150m..now`, `var-ds=tempo`,
+- Текущий dashboard остаётся видимым как disabled theme-safe item; шина
+  переносится на `1024px` и сохраняет контраст в dark/light themes.
+- `Explore Traces` uses the explicit search-first Tempo route with the active
+  dashboard range (`from=${__from}`, `to=${__to}`), `var-ds=tempo`,
   `var-groupBy=resource.service.name`, and stable low-cardinality TraceQL
   scope.
 

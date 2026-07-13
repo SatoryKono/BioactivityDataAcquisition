@@ -24,6 +24,7 @@ DEFAULT_PASSWORD = "changeme"
 DEFAULT_OUTPUT_DIR = Path("reports/observability/grafana/screenshots")
 DEFAULT_WIDTH = 1600
 DEFAULT_HEIGHT = 2200
+DEFAULT_THEME = "dark"
 DEFAULT_TIMEOUT_SECONDS = 120.0
 DEFAULT_TOOL_PLAYWRIGHT_NODE_MODULES = Path(
     "/tmp/bioetl-tools/playwright-runtime/node_modules"
@@ -47,11 +48,13 @@ class RenderConfig:
     timeout_seconds: float
     selected_uids: tuple[str, ...]
     fallback: str
+    theme: str = DEFAULT_THEME
     workflow: str = ""
     pipeline: str = ""
     run_type: str = ""
     run_id: str = ""
     range_hours: int = 12
+    expand_collapsed_rows: bool = True
 
 
 @dataclass(frozen=True)
@@ -238,6 +241,12 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
     parser.add_argument("--width", type=int, default=DEFAULT_WIDTH)
     parser.add_argument("--height", type=int, default=DEFAULT_HEIGHT)
     parser.add_argument(
+        "--theme",
+        choices=("dark", "light"),
+        default=DEFAULT_THEME,
+        help="Explicit Grafana color theme for reproducible render evidence.",
+    )
+    parser.add_argument(
         "--timeout-seconds",
         type=float,
         default=DEFAULT_TIMEOUT_SECONDS,
@@ -264,6 +273,15 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
     parser.add_argument("--var-run-type", default="")
     parser.add_argument("--var-run-id", default="")
     parser.add_argument("--range-hours", type=int, default=12)
+    parser.add_argument(
+        "--expand-collapsed-rows",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help=(
+            "Expand every collapsed row before terminal-state validation. "
+            "Enabled by default for full-surface audit evidence."
+        ),
+    )
     args = parser.parse_args(argv)
     return RenderConfig(
         base_url=args.base_url.rstrip("/"),
@@ -276,11 +294,13 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
         timeout_seconds=args.timeout_seconds,
         selected_uids=tuple(str(uid) for uid in args.uids),
         fallback=args.fallback,
+        theme=args.theme,
         workflow=str(args.var_workflow).strip(),
         pipeline=str(args.var_pipeline).strip(),
         run_type=str(args.var_run_type).strip(),
         run_id=str(args.var_run_id).strip(),
         range_hours=max(int(args.range_hours), 1),
+        expand_collapsed_rows=bool(args.expand_collapsed_rows),
     )
 
 
@@ -314,6 +334,7 @@ def _scope_query_params(config: RenderConfig) -> dict[str, str]:
         "from": f"now-{config.range_hours}h",
         "to": "now",
         "timezone": "UTC",
+        "theme": config.theme,
     }
     if config.workflow:
         params["var-workflow"] = config.workflow
@@ -367,12 +388,31 @@ def _write_manifest(
         )
         for record, path in rendered
     ]
+    actual_viewports = {record.uid: _png_dimensions(path) for record, path in rendered}
     manifest = {
         "generated_at": datetime.now(tz=UTC).isoformat(),
         "base_url": config.base_url,
         "engine": "grafana-render-api",
         "width": config.width,
         "height": config.height,
+        "requested": {
+            "viewport": {"width": config.width, "height": config.height},
+            "theme": config.theme,
+        },
+        "actual": {
+            "viewports": {
+                uid: ({"width": size[0], "height": size[1]} if size else None)
+                for uid, size in actual_viewports.items()
+            },
+            "themes": {record.uid: "unverified" for record, _path in rendered},
+        },
+        "terminal_state_validation": {
+            "status": "not-checked",
+            "reason": (
+                "Grafana Render API captures pixels but cannot prove panel terminal "
+                "states; use --fallback playwright for auditable evidence."
+            ),
+        },
         "selected_uids": list(config.selected_uids),
         "scope": {
             "workflow": config.workflow,
@@ -394,6 +434,17 @@ def _write_manifest(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+
+
+def _png_dimensions(path: Path) -> tuple[int, int] | None:
+    """Return PNG IHDR dimensions without requiring an image dependency."""
+    try:
+        header = path.read_bytes()[:24]
+    except OSError:
+        return None
+    if len(header) < 24 or header[:8] != b"\x89PNG\r\n\x1a\n":
+        return None
+    return int.from_bytes(header[16:20], "big"), int.from_bytes(header[20:24], "big")
 
 
 def _playwright_script_path() -> Path:
@@ -491,12 +542,18 @@ def _playwright_env(config: RenderConfig) -> dict[str, str]:
     if config.service_account_token:
         env["GRAFANA_SERVICE_ACCOUNT_TOKEN"] = config.service_account_token
     env["GRAFANA_SCREENSHOT_OUTPUT_DIR"] = str(config.output_dir)
+    env["GRAFANA_SCREENSHOT_WIDTH"] = str(config.width)
+    env["GRAFANA_SCREENSHOT_HEIGHT"] = str(config.height)
+    env["GRAFANA_SCREENSHOT_THEME"] = config.theme
     env["GRAFANA_SCREENSHOT_TIMEOUT_MS"] = str(int(config.timeout_seconds * 1000))
     env["GRAFANA_SCREENSHOT_CAPTURE_TIMEOUT_MS"] = str(
         max(int(config.timeout_seconds * 1000), 180000)
     )
     env["GRAFANA_SCREENSHOT_SETTLE_MS"] = os.environ.get(
         "GRAFANA_SCREENSHOT_SETTLE_MS", "12000"
+    )
+    env["GRAFANA_SCREENSHOT_EXPAND_COLLAPSED_ROWS"] = (
+        "true" if config.expand_collapsed_rows else "false"
     )
     if config.selected_uids:
         env["GRAFANA_SCREENSHOT_UIDS"] = ",".join(config.selected_uids)
@@ -520,6 +577,16 @@ def _run_playwright_process(config: RenderConfig) -> int:
         )
         return 1
     node_command = [node_path, str(script_path)]
+    node_command.extend(
+        [
+            "--width",
+            str(config.width),
+            "--height",
+            str(config.height),
+            "--theme",
+            config.theme,
+        ]
+    )
     scope_query = urlencode(_scope_query_params(config))
     if scope_query:
         node_command.extend(["--scope-query", scope_query])
@@ -529,7 +596,7 @@ def _run_playwright_process(config: RenderConfig) -> int:
             check=False,
             cwd=str(_repo_root()),
             env=_playwright_env(config),
-            timeout=max(config.timeout_seconds + 30.0, 60.0),
+            timeout=_playwright_process_timeout_seconds(config),
         )
     except subprocess.TimeoutExpired as exc:
         print(
@@ -543,11 +610,19 @@ def _run_playwright_process(config: RenderConfig) -> int:
     return result.returncode
 
 
+def _playwright_process_timeout_seconds(config: RenderConfig) -> float:
+    """Return an end-to-end budget longer than every browser capture stage."""
+    capture_seconds = max(config.timeout_seconds, 180.0)
+    return max((4.0 * config.timeout_seconds) + capture_seconds + 90.0, 300.0)
+
+
 def _read_playwright_manifest(path: Path) -> dict[str, Any]:
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        raise RuntimeError(f"Could not read Playwright render manifest {path}: {exc}") from exc
+        raise RuntimeError(
+            f"Could not read Playwright render manifest {path}: {exc}"
+        ) from exc
     if not isinstance(payload, dict):
         raise RuntimeError(f"Playwright render manifest {path} is not a JSON object")
     return payload
@@ -566,6 +641,17 @@ def _write_merged_playwright_manifest(
 
     scope_query = urlencode(_scope_query_params(config))
     capture_timeout_ms = max(int(config.timeout_seconds * 1000), 180000)
+    terminal_statuses = [
+        manifest.get("terminal_state_validation", {}).get("status")
+        for manifest in manifests
+        if isinstance(manifest.get("terminal_state_validation"), dict)
+    ]
+    terminal_status = (
+        "ok"
+        if len(terminal_statuses) == len(manifests)
+        and all(status == "ok" for status in terminal_statuses)
+        else "error"
+    )
     merged = {
         "generated_at": datetime.now(tz=UTC).isoformat(),
         "engine": "playwright",
@@ -573,10 +659,34 @@ def _write_merged_playwright_manifest(
         "scope_query": scope_query,
         "timeout_ms": int(config.timeout_seconds * 1000),
         "capture_timeout_ms": capture_timeout_ms,
-        "expand_collapsed_rows": os.getenv(
-            "GRAFANA_SCREENSHOT_EXPAND_COLLAPSED_ROWS", ""
-        ).strip().lower()
-        in {"1", "true", "yes"},
+        "requested": {
+            "viewport": {"width": config.width, "height": config.height},
+            "theme": config.theme,
+        },
+        "actual": {
+            "viewports": {
+                str(item["uid"]): item.get("actualViewport")
+                for item in dashboards
+                if isinstance(item.get("uid"), str)
+            },
+            "themes": {
+                str(item["uid"]): item.get("actualTheme")
+                for item in dashboards
+                if isinstance(item.get("uid"), str)
+            },
+        },
+        "terminal_state_validation": {
+            "status": terminal_status,
+            "dashboards": {
+                str(item["uid"]): item.get("terminalStateValidation", {}).get(
+                    "status", "missing"
+                )
+                for item in dashboards
+                if isinstance(item.get("uid"), str)
+                and isinstance(item.get("terminalStateValidation"), dict)
+            },
+        },
+        "expand_collapsed_rows": config.expand_collapsed_rows,
         "dashboards": dashboards,
     }
     (config.output_dir / "render-manifest.json").write_text(

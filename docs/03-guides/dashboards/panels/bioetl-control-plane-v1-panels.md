@@ -25,7 +25,7 @@ JSON is the source of truth.
 | --- | --- | --- | --- | --- | --- | --- |
 | 1000 | Review Dashboard Navigation | text | Static | Static navigation handoff into related dashboards and incident paths. | shared shell | No thresholds; operator routing only. |
 | 9400 | Provenance | text | Static | Static explanation of selector scope, data sources, and evidence posture. | shared shell | No thresholds; provenance note only. |
-| 9401 | Status | stat | Prometheus | Current control-plane severity from `bioetl_replay_safety_blockers_15m` for the selected pipeline/run type. | shared shell | Value mapping expresses current severity state. |
+| 9401 | Status | stat | Prometheus | Evidence-aware replay/resume verdict from `bioetl_control_plane_current_status_trusted`; gates replay blockers, checkpoint freshness/presence, and required telemetry. | shared shell | `0=OK`, `1=WARN`, `2=CRIT`, `3=INCOMPLETE`, `null=UNKNOWN`. `INCOMPLETE` blocks replay/resume approval. |
 | 9402 | ID | table | Quarantine Explorer | Identity anchors for the selected workflow/pipeline/run scope. | shared shell | No numeric threshold; forensic handoff table. |
 | 9403 | Processed Records | table | Quarantine Explorer | Current processed-record evidence for the selected run scope. | shared shell | No numeric threshold; read-path evidence table. |
 | 9410 | ID Empty State | text | Static | Neutral visible fallback when the Control Plane identity table returns no visible rows. | shared shell | No thresholds; prevents blank first-screen identity space. |
@@ -40,7 +40,7 @@ JSON is the source of truth.
 
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
-| 902 | Incident Drilldown: Replay Safety (Checkpoint / Replay) | row | Static | Collapsible incident section for checkpoint/replay safety evidence. | shared shell | Groups replay-safety panels; no direct metric. |
+| 902 | Incident Drilldown: Replay Safety (Checkpoint / Replay) | row | Static | Collapsed-by-default incident section for checkpoint/replay safety evidence. | shared shell | Expand only after the first-screen verdict points to replay/checkpoint evidence. |
 | 894 | Inspect: Known Blind Spots | text | Static | Static explanation of expected-empty and backend caveat cases. | shared shell | No thresholds; interpretive guidance only. |
 | 130 | Track: Replay / Resume Blockers in Range | stat | Prometheus | Selected-range blocker rollup across manifest, ledger, replay, and checkpoint failure families. | shared shell | Count panel; no separate threshold mapping documented. |
 | 3 | Monitor: Checkpoint Incompatibilities | stat | Prometheus | Incompatible checkpoint compatibility events from `bioetl_checkpoint_compatibility_events_total`. | shared shell | Count panel. |
@@ -60,7 +60,7 @@ JSON is the source of truth.
 
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
-| 901 | Incident Drilldown: Manifest / Ledger Integrity | row | Static | Collapsible manifest/ledger incident section. | shared shell | Groups integrity panels; no direct metric. |
+| 901 | Incident Drilldown: Manifest / Ledger Integrity | row | Static | Collapsed-by-default manifest/ledger incident section. | shared shell | Groups integrity panels; no direct metric. |
 | 908 | Inspect: Terminal Run Events by Status in Range | table | Prometheus | Terminal run-event totals by `terminal_status`. | shared shell | Forensic table; status breakdown is the key mapping. |
 | 1 | Monitor: Manifest Write Failures | stat | Prometheus | Failed manifest writes over the selected range. | shared shell | Count panel. |
 | 2 | Monitor: Ledger Append Failures | stat | Prometheus | Failed ledger appends over the selected range. | shared shell | Count panel. |
@@ -73,7 +73,7 @@ JSON is the source of truth.
 
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
-| 903 | Incident Drilldown: Global Control-Plane Store Reliability | row | Static | Collapsible global store-read reliability section. | shared shell | Groups global read panels; no direct metric. |
+| 903 | Incident Drilldown: Global Control-Plane Store Reliability | row | Static | Collapsed-by-default global store-read reliability section. | shared shell | Groups global read panels; no direct metric. |
 | 4 | Monitor: GLOBAL Control-Plane Read Failures | stat | Prometheus | Failed control-plane reads across stores/operations. | shared shell | Count panel. |
 | 136 | Monitor: GLOBAL Control-Plane Read Failure Ratio Severity | stat | Prometheus | 30-minute failure-ratio severity for global control-plane reads. | shared shell | Threshold/value mapping encodes severity bands. |
 | 6 | Track: GLOBAL Control-Plane Reads by Store / Operation / Status | timeseries | Prometheus | Read outcomes by `store`, `operation`, and `status`. | shared shell | Series legend is the key mapping. |
@@ -83,7 +83,7 @@ JSON is the source of truth.
 
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
-| 904 | Incident Drilldown: Audit / Lineage Completeness | row | Static | Collapsible audit/lineage evidence section. | shared shell | Groups lineage and audit panels; no direct metric. |
+| 904 | Incident Drilldown: Audit / Lineage Completeness | row | Static | Collapsed-by-default audit/lineage evidence section. | shared shell | Groups lineage and audit panels; no direct metric. |
 | 122 | Monitor: Lineage Refs Missing | stat | Prometheus | Missing lineage reference count over the selected range. | shared shell | Count panel. |
 | 137 | Monitor: Lineage Fragment Persistence Failures | stat | Prometheus | Failed lineage fragment persistence events. | shared shell | Count panel. |
 | 138 | Inspect: Missing Lineage Refs by Layer / Type | table | Prometheus | Missing lineage references grouped by `layer` and `ref_type`. | shared shell | Forensic table; grouped breakdown is the key mapping. |
@@ -97,7 +97,7 @@ JSON is the source of truth.
 
 | ID | Title | Type | Datasource | Query / purpose | Variables | Thresholds / drilldown |
 | --- | --- | --- | --- | --- | --- | --- |
-| 905 | Identity evidence and remaining replay-safety signals | row | Static | Compact identity-evidence and handoff section below the shell summary cards. | shared shell | Groups Quarantine Explorer evidence tables without replacing the first-screen replay/resume summary. |
+| 905 | Identity evidence and remaining replay-safety signals | row | Static | Collapsed identity-evidence and handoff section; the copyable identity anchor panels `9404` and `9407` remain above it on the first path. | shared shell | Groups remaining Quarantine Explorer evidence without replacing the first-screen replay/resume summary. |
 | 9404 | Inspect: Overview Identity Anchors | table | Quarantine Explorer | Compact forensic identity anchors for the selected scope; use after ID, Replay Safety, Checkpoint Freshness, Manifest/Ledger, and Telemetry summary cards. | shared shell | Forensic handoff table. |
 | 9405 | Inspect: Identity Gaps | table | Quarantine Explorer | Compact missing identity surface inventory for the selected scope. | shared shell | Gap table; no numeric threshold. |
 | 9406 | Inspect: Checkpoint Anchor Compare | table | Quarantine Explorer | Compact side-by-side checkpoint anchor comparison. | shared shell | Comparison table; operator drilldown surface. |
@@ -112,7 +112,7 @@ The shipped dashboard JSON remains the byte-level source of truth. The formulas
 below document the current Prometheus query families for all Prometheus-backed
 panels; HTTP-backed identity panels are documented in the inventory above.
 
-- `Status`: `max((bioetl_replay_safety_blockers_15m{run_type=~"$run_type"}) and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), "pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))`
+- `Status`: `max((bioetl_control_plane_current_status_trusted{run_type=~"$run_type"}) and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), "pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))`
 - `Monitor: Replay Safety State`: `max((bioetl_replay_safety_blockers_15m{run_type=~"$run_type"}) and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), "pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))`
 - `Monitor: Manifest / Ledger Integrity`: `max((bioetl_manifest_ledger_failures_15m{run_type=~"$run_type"}) and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), "pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))`
 - `Inspect: Telemetry Missing`: `max((bioetl_control_plane_telemetry_missing_5m{run_type=~"$run_type"}) and on(pipeline) label_replace(label_replace(vector(1), "pipeline_raw", "$pipeline", "", ""), "pipeline", "$1", "pipeline_raw", "^(?:workflow_)?(.*)$"))`
@@ -161,9 +161,10 @@ panels; HTTP-backed identity panels are documented in the inventory above.
 
 ## Notes
 
-- `Status` and `Monitor: Replay Safety State` intentionally share the same
-  current blocker family so the dashboard shell and the replay drilldown agree
-  on current severity.
+- `Monitor: Replay Safety State` remains one business-signal card. `Status` is
+  intentionally stricter: it reads `bioetl_control_plane_current_status_trusted`
+  so replay blockers cannot render green when checkpoint evidence is missing or
+  stale (`>=900s` WARN, `>=3600s` CRIT) or required telemetry is incomplete.
 - `Checkpoint Freshness Lag`, `ID`, `Processed Records`, and the identity
   evidence tables are HTTP-backed `Quarantine Explorer` surfaces rather than
   Prometheus metric panels.

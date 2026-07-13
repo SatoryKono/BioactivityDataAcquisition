@@ -26,6 +26,23 @@ FORBIDDEN_SILVER_MARKERS = (
 DQ_DASHBOARD = ROOT / "grafana" / "dashboards" / "bioetl-dq-v2.json"
 
 
+def _iter_dashboard_panels(dashboard: dict) -> list[dict]:
+    """Flatten root and row-nested Grafana panels."""
+    flattened: list[dict] = []
+    for panel in dashboard.get("panels", []):
+        if not isinstance(panel, dict):
+            continue
+        flattened.append(panel)
+        nested = panel.get("panels", [])
+        if isinstance(nested, list):
+            flattened.extend(
+                nested_panel
+                for nested_panel in nested
+                if isinstance(nested_panel, dict)
+            )
+    return flattened
+
+
 def _iter_python_files(path: Path) -> tuple[Path, ...]:
     if path.is_file():
         return (path,)
@@ -49,7 +66,7 @@ def test_dq_dashboard_gold_reject_panel_is_not_silver_alias_surface() -> None:
     panel = next(
         (
             item
-            for item in dashboard.get("panels", [])
+            for item in _iter_dashboard_panels(dashboard)
             if item.get("title") == "Inspect: Gold Reject Outcomes by Pipeline"
         ),
         None,
