@@ -401,7 +401,7 @@ class TestPrometheusMetrics:
             COUNTERS[
                 "bioetl_composite_phase_records_total"
             ].labels.assert_called_once_with(
-                pipeline="composite:target",
+                pipeline="composite_target",
                 phase="other",
                 outcome="other",
             )
