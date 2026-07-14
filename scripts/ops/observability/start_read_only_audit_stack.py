@@ -16,7 +16,13 @@ from urllib.request import urlopen
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 BASE_COMPOSE = REPO_ROOT / "docker-compose.monitoring.yml"
-AUDIT_COMPOSE = REPO_ROOT / "docker-compose.monitoring.audit.yml"
+AUDIT_COMPOSE = (
+    REPO_ROOT
+    / "scripts"
+    / "ops"
+    / "observability"
+    / "docker-compose.monitoring.audit.yml"
+)
 READY_URL = "http://127.0.0.1:18081/ops/control-plane/ready"
 CATALOG_URL = (
     "http://127.0.0.1:18081/ops/control-plane/filter-options"

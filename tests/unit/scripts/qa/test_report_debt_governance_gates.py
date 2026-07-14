@@ -378,6 +378,11 @@ def test_build_payload_tolerates_unavailable_remote_main_baseline_builder(
         lambda *, repo_root, rel_path, payload_builder: True,
     )
     monkeypatch.setattr(
+        gates,
+        "_hotspot_family_baseline_artifact_matches_builder",
+        lambda *, repo_root: True,
+    )
+    monkeypatch.setattr(
         gates.report_architecture_debt_remote_main_baseline,
         "build_payload",
         lambda **kwargs: (_ for _ in ()).throw(
@@ -416,6 +421,47 @@ def test_build_payload_marks_config_surface_backlog_drift_as_stale_artifact(
     assert isinstance(summary, dict)
     assert payload["stale_artifacts"]["config_surface_backlog"] is True
     assert "generated_artifact_drift" in summary["failing_gates"]
+
+
+def test_build_payload_marks_in_budget_hotspot_census_drift_as_stale_artifact(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A stale hotspot census must fail even when its budget warnings remain zero."""
+    module_coverage = gates._load_json(
+        gates.PROJECT_ROOT,
+        "reports/quality/module-coverage-inventory.json",
+    )
+    monkeypatch.setattr(
+        gates,
+        "_refresh_existing_inventory_source_tree",
+        lambda payload, *, repo_root: {
+            "source_tree_sha256": module_coverage["source_tree_sha256"]
+        },
+    )
+    monkeypatch.setattr(
+        gates,
+        "_artifact_matches_builder",
+        lambda *, repo_root, rel_path, payload_builder: True,
+    )
+    monkeypatch.setattr(
+        gates,
+        "_hotspot_family_baseline_artifact_matches_builder",
+        lambda *, repo_root: False,
+    )
+
+    payload = gates.build_payload(repo_root=gates.PROJECT_ROOT)
+    summary = payload["summary"]
+    assert isinstance(summary, dict)
+
+    hotspot_gate = next(
+        row
+        for row in payload["gates"]
+        if row["name"] == "hotspot_family_baseline_budget_warnings"
+    )
+    assert hotspot_gate["current"] == 0
+    assert payload["stale_artifacts"]["hotspot_family_baseline"] is True
+    assert "generated_artifact_drift" in summary["failing_gates"]
+    assert summary["release_gate_status"] == "failing"
 
 
 def test_remote_main_baseline_stale_check_ignores_revision_metadata_only(

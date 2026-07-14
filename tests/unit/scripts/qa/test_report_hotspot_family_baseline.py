@@ -71,7 +71,7 @@ def test_budget_review_notes_report_near_and_at_budget_metrics() -> None:
     ]
 
 
-def test_merge_reviewed_baseline_metrics_prefers_scorecard_snapshot() -> None:
+def test_merge_reviewed_baseline_metrics_preserves_live_measured_census() -> None:
     family = {
         "name": "application_services_control_plane",
         "ratchet_stage": "reviewed-baseline",
@@ -98,13 +98,13 @@ def test_merge_reviewed_baseline_metrics_prefers_scorecard_snapshot() -> None:
 
     merged = _merge_reviewed_baseline_metrics(family=family, measured=measured)
 
-    assert merged["files"] == 66
-    assert merged["total_loc"] == 12998
-    assert merged["files_ge_250_loc"] == 22
-    assert merged["helper_function_ratio"] == 0.496
+    assert merged["files"] == 71
+    assert merged["total_loc"] == 13453
+    assert merged["files_ge_250_loc"] == 21
+    assert merged["helper_function_ratio"] == 0.499
 
 
-def test_merge_reviewed_baseline_metrics_uses_scorecard_metrics_for_active_family() -> (
+def test_merge_reviewed_baseline_metrics_preserves_live_metrics_for_active_family() -> (
     None
 ):
     family = {
@@ -119,5 +119,4 @@ def test_merge_reviewed_baseline_metrics_uses_scorecard_metrics_for_active_famil
 
     merged = _merge_reviewed_baseline_metrics(family=family, measured=measured)
 
-    # Active families now use scorecard metrics when provided
-    assert merged["files_ge_250_loc"] == 99
+    assert merged["files_ge_250_loc"] == 5
