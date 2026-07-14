@@ -779,12 +779,22 @@ def test_attempt_command_is_explicitly_incremental_online_and_traced() -> None:
         tracing=True,
         cached_bronze_root=Path("/cache"),
     )
+    online = campaign._attempt_command(
+        python=Path("/python"),
+        pipeline="chembl_activity",
+        limit=1,
+        tracing=False,
+        cached_bronze_root=None,
+    )
     assert "--run-type" in off and "incremental" in off
     assert "--use-cached-bronze" in off
     assert "--cached-bronze-path" in off
     assert "--no-ensure-observability-backend" in off
     assert "--no-tracing" in off
     assert "--tracing" in on
+    assert "--no-cached-bronze" in online
+    profile_index = online.index("--required-persistence-profile")
+    assert online[profile_index + 1] == "degraded_observable"
 
 
 def test_execute_then_finalize_writes_complete_report_only_when_every_gate_is_satisfied(
