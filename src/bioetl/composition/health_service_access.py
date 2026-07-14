@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
@@ -30,11 +31,16 @@ __all__ = [
 ]
 
 
-def get_health_server_dependencies() -> HealthServerDependencies:
+def get_health_server_dependencies(
+    *,
+    data_root: Path | None = None,
+) -> HealthServerDependencies:
     """Load health-listener dependencies through one composition owner seam."""
     from bioetl.composition._services import get_health_server_dependencies as _impl
 
-    return cast("HealthServerDependencies", _impl())
+    if data_root is None:
+        return cast("HealthServerDependencies", _impl())
+    return cast("HealthServerDependencies", _impl(data_root=data_root))
 
 
 def get_health_service() -> HealthService:
@@ -55,8 +61,10 @@ def get_quarantine_runtime_service(
     return cast("QuarantineRuntimeServiceProtocol", _impl(pipeline))
 
 
-def get_quarantine_service() -> QuarantineService:
+def get_quarantine_service(*, data_root: Path | None = None) -> QuarantineService:
     """Load the quarantine admin service through one composition owner seam."""
     from bioetl.composition._services import get_quarantine_service as _impl
 
-    return cast("QuarantineService", _impl())
+    if data_root is None:
+        return cast("QuarantineService", _impl())
+    return cast("QuarantineService", _impl(data_root=data_root))

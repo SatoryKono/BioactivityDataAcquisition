@@ -1,0 +1,59 @@
+services:
+  quarantine-explorer-audit:
+    profiles: ["audit"]
+    build:
+      context: .
+      dockerfile: Dockerfile.bioetl
+    container_name: bioetl-quarantine-explorer-audit
+    command:
+      - "quarantine"
+      - "serve"
+      - "--host"
+      - "0.0.0.0"
+      - "--port"
+      - "8081"
+      - "--data-root"
+      - "${BIOETL_AUDIT_DATA_ROOT:?Pass an explicit absolute data root}"
+    ports:
+      - "18081:8081"
+    environment:
+      - BIOETL_PROMETHEUS_URL=http://prometheus:9090
+    volumes:
+      - "${BIOETL_AUDIT_DATA_ROOT:?Pass an explicit absolute data root}:${BIOETL_AUDIT_DATA_ROOT:?Pass an explicit absolute data root}:ro"
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8081/ops/control-plane/ready', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+  loki:
+    profiles: ["tracing", "audit"]
+
+  promtail-audit:
+    image: grafana/promtail:3.6.8
+    container_name: bioetl-promtail-audit
+    profiles: ["audit"]
+    command:
+      - "-config.file=/etc/promtail/config.yml"
+    volumes:
+      - ./grafana/promtail-config.yml:/etc/promtail/config.yml:ro
+      - "${BIOETL_AUDIT_LOG_ROOT:?Pass an explicit absolute log root}:/audit-logs:ro"
+    depends_on:
+      - loki
+    networks:
+      - monitoring
+    restart: unless-stopped
+
+  grafana:
+    environment:
+      - BIOETL_QUARANTINE_EXPLORER_URL=http://quarantine-explorer-audit:8081
+    depends_on:
+      quarantine-explorer-audit:
+        condition: service_healthy

@@ -28,173 +28,173 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 23
       }
     },
     {
-      "id": 9601,
-      "type": "table",
-      "title": "Triage Alert State",
-      "gridPos": {
-        "h": 6,
-        "w": 24,
-        "x": 0,
-        "y": 31
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Actual Prometheus alert-state triage for firing and pending BioETL rules. This panel reads the Prometheus `ALERTS` series and does not duplicate alert business logic in dashboard queries; inactive/no-alert state is rendered as an explicit zero row. Critical/page severity is red, warning is amber, and inactive aggregate evidence is neutral. Open 6. Alerts & SLO for row scope.",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
+          "id": 9601,
+          "type": "table",
+          "title": "Triage Alert State",
+          "gridPos": {
+            "h": 6,
+            "w": 24,
+            "x": 0,
+            "y": 24
           },
-          "custom": {
-            "align": "left",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
           },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
+          "description": "Actual Prometheus alert-state triage for firing and pending BioETL rules. This panel reads the Prometheus `ALERTS` series and does not duplicate alert business logic in dashboard queries; inactive/no-alert state is rendered as an explicit zero row. Critical/page severity is red, warning is amber, and inactive aggregate evidence is neutral. Open 6. Alerts & SLO for row scope.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
               },
-              {
-                "color": "orange",
-                "value": 1
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
               },
-              {
-                "color": "red",
-                "value": 2
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Value"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "Active Alerts"
-              },
-              {
-                "id": "custom.align",
-                "value": "right"
-              },
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background",
-                  "applyToRow": true
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "severity"
-            },
-            "properties": [
-              {
-                "id": "mappings",
-                "value": [
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
                   {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^(critical|page|p0|p1)$",
-                      "result": {
-                        "text": "$1 · CRITICAL",
-                        "color": "red"
-                      }
-                    }
+                    "color": "green",
+                    "value": null
                   },
                   {
-                    "type": "regex",
-                    "options": {
-                      "pattern": "^(warning|warn)$",
-                      "result": {
-                        "text": "$1 · WARNING",
-                        "color": "orange"
-                      }
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Active Alerts"
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "right"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-background",
+                      "applyToRow": true
                     }
                   }
                 ]
               },
               {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "color-background"
-                }
+                "matcher": {
+                  "id": "byName",
+                  "options": "severity"
+                },
+                "properties": [
+                  {
+                    "id": "mappings",
+                    "value": [
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^(critical|page|p0|p1)$",
+                          "result": {
+                            "text": "$1 · CRITICAL",
+                            "color": "red"
+                          }
+                        }
+                      },
+                      {
+                        "type": "regex",
+                        "options": {
+                          "pattern": "^(warning|warn)$",
+                          "result": {
+                            "text": "$1 · WARNING",
+                            "color": "orange"
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-background"
+                    }
+                  }
+                ]
               }
             ]
-          }
-        ]
-      },
-      "targets": [
-        {
-          "expr": "sum by (alertname, alertstate, severity) (ALERTS{alertstate=~\"firing|pending\"}) or label_replace(label_replace(label_replace(vector(0), \"alertname\", \"none\", \"\", \"\"), \"alertstate\", \"inactive\", \"\", \"\"), \"severity\", \"none\", \"\", \"\")",
-          "format": "table",
-          "instant": true,
-          "refId": "A"
-        }
-      ],
-      "options": {
-        "showHeader": true,
-        "footer": {
-          "show": false
-        },
-        "dataLinks": [
-          {
-            "title": "Open Runtime Conditions",
-            "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id",
-            "targetBlank": false,
-            "includeVars": false
           },
-          {
-            "title": "Open 6. Alerts & SLO",
-            "url": "/d/bioetl-alerts-slo/bioetl-alerts-slo?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-            "targetBlank": false,
-            "includeVars": false
-          }
-        ]
-      },
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Time": true,
-              "__name__": true
-            },
-            "indexByName": {
-              "alertname": 0,
-              "alertstate": 1,
-              "severity": 2,
-              "Value": 3
-            },
-            "renameByName": {
-              "alertname": "Alert",
-              "alertstate": "State",
-              "severity": "Severity",
-              "Value": "Active Alerts"
+          "targets": [
+            {
+              "expr": "sum by (alertname, alertstate, severity) (ALERTS{alertstate=~\"firing|pending\"}) or label_replace(label_replace(label_replace(vector(0), \"alertname\", \"none\", \"\", \"\"), \"alertstate\", \"inactive\", \"\", \"\"), \"severity\", \"none\", \"\", \"\")",
+              "format": "table",
+              "instant": true,
+              "refId": "A"
             }
-          }
-        }
-      ]
-    },
+          ],
+          "options": {
+            "showHeader": true,
+            "footer": {
+              "show": false
+            },
+            "dataLinks": [
+              {
+                "title": "Open Runtime Conditions",
+                "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id",
+                "targetBlank": false,
+                "includeVars": false
+              },
+              {
+                "title": "Open 6. Alerts & SLO",
+                "url": "/d/bioetl-alerts-slo/bioetl-alerts-slo?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+                "targetBlank": false,
+                "includeVars": false
+              }
+            ]
+          },
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true
+                },
+                "indexByName": {
+                  "alertname": 0,
+                  "alertstate": 1,
+                  "severity": 2,
+                  "Value": 3
+                },
+                "renameByName": {
+                  "alertname": "Alert",
+                  "alertstate": "State",
+                  "severity": "Severity",
+                  "Value": "Active Alerts"
+                }
+              }
+            }
+          ]
+        },
     {
       "gridPos": {
         "h": 3,
@@ -1320,10 +1320,10 @@
       "type": "table",
       "title": "Inputs",
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 6,
+        "w": 24,
         "x": 0,
-        "y": 22
+        "y": 17
       },
       "datasource": {
         "type": "prometheus",
@@ -1554,7 +1554,7 @@
           }
         }
       ],
-      "description": "Compact L0 input summary for the selected pipeline/run_type scope. Rows are shown in the canonical operator order: Control Plane, Runtime, Provider, Data Quality, Data Validation, Workflow. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Use the panel links to open the matching drilldown; Workflow resets scope on handoff. This is the deviation-first matrix; the six repeated subsystem cards are available in one collapsed detail row."
+      "description": "Compact L0 input summary for the selected pipeline/run_type scope. Rows are shown in the canonical operator order: Control Plane, Runtime, Provider, Data Quality, Data Validation, Workflow. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Use the panel links to open the matching drilldown; Workflow resets scope on handoff. This is the deviation-first first-level matrix; the six repeated subsystem cards are available only in the collapsed Diagnostics & Docs row."
     },
     {
       "id": 9014,
@@ -1564,7 +1564,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 37
+        "y": 30
       },
       "collapsed": true,
       "panels": [
@@ -1576,7 +1576,7 @@
             "h": 6,
             "w": 8,
             "x": 0,
-            "y": 38
+            "y": 41
           },
           "datasource": {
             "type": "prometheus",
@@ -1667,7 +1667,7 @@
             "h": 6,
             "w": 8,
             "x": 8,
-            "y": 38
+            "y": 41
           },
           "datasource": {
             "type": "prometheus",
@@ -1758,7 +1758,7 @@
             "h": 6,
             "w": 8,
             "x": 16,
-            "y": 38
+            "y": 41
           },
           "datasource": {
             "type": "prometheus",
@@ -1857,7 +1857,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 39
+        "y": 31
       },
       "collapsed": true,
       "panels": [
@@ -1869,7 +1869,7 @@
             "h": 6,
             "w": 8,
             "x": 0,
-            "y": 40
+            "y": 32
           },
           "datasource": {
             "type": "prometheus",
@@ -1940,7 +1940,7 @@
             "h": 6,
             "w": 8,
             "x": 8,
-            "y": 40
+            "y": 32
           },
           "datasource": {
             "type": "prometheus",
@@ -2017,7 +2017,7 @@
             "h": 6,
             "w": 8,
             "x": 16,
-            "y": 40
+            "y": 32
           },
           "datasource": {
             "type": "prometheus",
@@ -2134,13 +2134,14 @@
       "id": 9012,
       "type": "row",
       "title": "Diagnostics & Docs (Logs / Traces / Raw Metrics)",
+      "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 38
+        "y": 32
       },
-      "collapsed": true,
+      "description": "Optional per-subsystem mirrors, raw metric starting points, and cross-dashboard handoffs retained for one-expand drilldown after the deviation-first Inputs matrix identifies a domain. These repeated cards do not compete with the first-level verdict, impact, scope, or action path.",
       "panels": [
         {
           "description": "Operator note for raw metric starting points and cross-dashboard diagnostics handoffs; no datasource query is expected.",
@@ -2159,9 +2160,7 @@
           },
           "links": [],
           "transparent": true
-        }
-      ]
-    },
+        },
     {
       "id": 9006,
       "type": "table",
@@ -3216,7 +3215,9 @@
           }
         }
       ],
-      "description": "Compact selected workflow/pipeline scope for the first-screen overview, excluding the synthetic `test_pipe` surface. Each row keeps the worst current workflow status per matching pipeline so the first screen stays readable without unrelated pipeline leakage. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Current workflow status is driven by the latest bounded terminal workflow signal, not by cumulative workflow-run counters. `run_type` and `run_id` remain handoff context only for this card."
+      "description": "Compact selected workflow/pipeline scope retained in the collapsed subsystem detail row, excluding the synthetic `test_pipe` surface. Each row keeps the worst current workflow status per matching pipeline without unrelated pipeline leakage. Status values are OK (0), WARN (1), CRIT (2), or UNKNOWN (3/null). Current workflow status is driven by the latest bounded terminal workflow signal, not by cumulative workflow-run counters. `run_type` and `run_id` remain handoff context only for this card."
+    }
+      ]
     }
   ],
   "refresh": "30s",

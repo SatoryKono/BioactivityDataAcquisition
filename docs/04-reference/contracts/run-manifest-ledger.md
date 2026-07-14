@@ -151,6 +151,37 @@ root to come from an explicit `settings.data_dir` configuration. Fallback
 resolution to repo-local `data/`, private-cache, or `/tmp` is degraded-only and
 must not be treated as a strict reproducibility anchor.
 
+### Isolated read-only observability root
+
+For local forensic inspection, `bioetl quarantine serve --data-root
+/absolute/path` injects one explicit absolute data root into checkpoint,
+run-manifest, run-ledger, workflow-manifest, and quarantine read adapters. The
+CLI rejects relative paths and does not require or mutate any `.env` file. The
+`/ops/control-plane/ready` response publishes the resolved `data_root`, so an
+operator can distinguish a reachable backend serving the wrong root from the
+intended backend. A reachable empty catalog remains a valid empty response;
+connection failure and timeout remain transport failures rather than empty
+evidence.
+
+The monitoring compose `audit` profile is published only through the
+fail-closed `docker-compose.monitoring.audit.yml` override. The supported
+launcher is:
+
+```bash
+python scripts/ops/observability/start_read_only_audit_stack.py \
+  --data-root /absolute/data/root \
+  --log-root /absolute/log/root
+```
+
+The launcher rejects missing, relative, or non-directory roots before invoking
+Docker. The override requires both selectors through Compose `:?` guards,
+mounts them read-only, points Grafana explicitly at
+`http://quarantine-explorer-audit:8081`, and makes Grafana wait for that backend.
+After startup the launcher probes `/ops/control-plane/ready` and fails unless
+the served `data_root` exactly equals the requested root. It writes no `.env`
+file. `promtail-audit` publishes only the bounded `job=bioetl-audit` Loki label
+and does not add run or manifest IDs as labels.
+
 ## Lifecycle Management
 
 File-backed control-plane lifecycle management is planner-driven:
@@ -685,6 +716,9 @@ Canonical identity roles are intentionally split:
 | `pipeline_name`         | `str`      |      yes | Canonical pipeline ID                                                                                                                                                         |
 | `provider`              | `str`      |      yes | Source provider                                                                                                                                                               |
 | `entity`                | `str`      |      yes | Domain entity                                                                                                                                                                 |
+| `workflow_run_id`       | `str`      |       no | Occurrence-scoped parent workflow run ID for a child pipeline execution                                                                                                       |
+| `workflow_name`         | `str`      |       no | Canonical parent workflow name                                                                                                                                                |
+| `workflow_step_id`      | `str`      |       no | Stable workflow DAG step ID that launched the child pipeline                                                                                                                  |
 | `launch_context`        | `object`   |      yes | Launch options relevant to execution                                                                                                                                          |
 | `runtime_config`        | `object`   |      yes | Runtime-only settings snapshot                                                                                                                                                |
 | `resolved_config`       | `object`   |      yes | Effective resolved pipeline config                                                                                                                                            |
@@ -694,6 +728,18 @@ Canonical identity roles are intentionally split:
 | `replay_of_manifest_id` | `str`      |       no | Parent manifest anchor when this manifest is an exact replay of a prior manifest                                                                                              |
 | `source_refs`           | `array`    |       no | Canonical input/source references                                                                                                                                             |
 | `planned_artifacts`     | `array`    |       no | Intended output locations by layer                                                                                                                                            |
+
+The three workflow correlation fields form an optional typed child envelope.
+Older standalone manifests that omit them remain readable and hydrate the
+fields as `null`. They are occurrence/control-plane anchors and are excluded
+from `execution_fingerprint` and from Prometheus label sets.
+
+For reciprocal inspection, terminal workflow pipeline-step ledger details
+persist `child_run_id` and `child_manifest_id` whenever the pipeline runner
+returns a terminal result, for both success and failure. The child manifest
+points back with `workflow_run_id`, `workflow_name`, and `workflow_step_id`.
+Together these anchors reconstruct repeated or concurrent workflow executions
+without using timestamps or metric labels as joins.
 
 `launch_context` is also the persisted support-boundary surface for exact replay:
 

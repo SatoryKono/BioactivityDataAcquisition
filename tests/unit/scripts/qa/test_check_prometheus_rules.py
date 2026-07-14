@@ -11,6 +11,30 @@ from scripts.engineering.qa import check_prometheus_rules
 pytestmark = pytest.mark.unit
 
 
+def test_prometheus_toolchain_compatibility_is_pinned_to_supported_series() -> None:
+    assert check_prometheus_rules.PROMETHEUS_IMAGE == "prom/prometheus:v3.13.1"
+    assert check_prometheus_rules.PROMETHEUS_COMPATIBILITY_SERIES == "3.13.x"
+    assert check_prometheus_rules.PUSHGATEWAY_COMPATIBILITY_SERIES == "1.11.x"
+
+
+def test_rule_test_coverage_is_measured_and_regression_guarded() -> None:
+    coverage = check_prometheus_rules.collect_rule_test_coverage(
+        rules_files=check_prometheus_rules.DEFAULT_RULES_FILES,
+        test_file=check_prometheus_rules.TESTS_FILE,
+    )
+
+    assert coverage["alert_definitions"] == 53
+    assert coverage["tested_alerts"] >= check_prometheus_rules.MIN_TESTED_ALERTS
+    assert coverage["firing_alerts"] >= check_prometheus_rules.MIN_TESTED_ALERTS
+    assert coverage["directly_tested_records"] >= (
+        check_prometheus_rules.MIN_DIRECTLY_TESTED_RECORDS
+    )
+    assert len(coverage["control_plane_records"]) == 8
+    assert coverage["untested_control_plane_records"] == []
+    assert coverage["undefined_fixture_alerts"] == []
+    assert check_prometheus_rules.validate_rule_test_coverage(coverage) == []
+
+
 def test_router_exposes_check_prometheus_rules_command() -> None:
     spec = qa_router.COMMAND_SPECS["check-prometheus-rules"]
     assert spec.runner == "module"

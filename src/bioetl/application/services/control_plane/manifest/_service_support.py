@@ -200,6 +200,15 @@ class RunManifestHydrationMixin:
             pipeline_name=request.pipeline_name,
             provider=request.provider,
             entity=request.entity,
+            workflow_run_id=_optional_payload_string(
+                normalized_payload, "workflow_run_id"
+            ),
+            workflow_name=_optional_payload_string(
+                normalized_payload, "workflow_name"
+            ),
+            workflow_step_id=_optional_payload_string(
+                normalized_payload, "workflow_step_id"
+            ),
             launch_context=cast(
                 dict[str, object],
                 normalized_payload["launch_context"],
@@ -277,6 +286,9 @@ class RunManifestPayloadMixin:
             "pipeline_name": request.pipeline_name,
             "provider": request.provider,
             "entity": request.entity,
+            "workflow_run_id": request.workflow_run_id,
+            "workflow_name": request.workflow_name,
+            "workflow_step_id": request.workflow_step_id,
             "launch_context": request.launch_context,
             "runtime_config": request.runtime_config,
             "resolved_config": request.resolved_config,

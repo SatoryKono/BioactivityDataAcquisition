@@ -343,6 +343,7 @@ async def test_routing_support_dispatches_control_plane_branches(
     )
 
     host._run_manifest_port = _ManifestPort()
+    host._data_root = "/audit-root"
     await routing_support.dispatch_control_plane_request(
         host,
         writer=writer,
@@ -357,6 +358,7 @@ async def test_routing_support_dispatches_control_plane_branches(
             "run_ledger_port": True,
             "workflow_manifest_port": False,
             "checkpoint_port": True,
+            "data_root": "/audit-root",
         },
     )
 

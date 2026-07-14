@@ -26,6 +26,9 @@ class RunManifestCreateSpec:
     resolved_config: dict[str, object]
     replay_of_run_id: str | None = None
     replay_of_manifest_id: str | None = None
+    workflow_run_id: str | None = None
+    workflow_name: str | None = None
+    workflow_step_id: str | None = None
     source_refs: tuple[RunSourceRef, ...] = ()
     planned_artifacts: tuple[RunArtifactRef, ...] = ()
     pipeline_version: str | None = None

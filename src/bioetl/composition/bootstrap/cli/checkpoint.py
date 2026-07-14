@@ -12,6 +12,8 @@ Note:
 
 from __future__ import annotations
 
+from functools import partial
+from pathlib import Path
 from typing import TYPE_CHECKING
 from uuid import UUID
 
@@ -156,7 +158,10 @@ def bootstrap_observability_workflow_service() -> ObservabilityWorkflowService:
     )
 
 
-def bootstrap_quarantine_service() -> QuarantineService:
+def bootstrap_quarantine_service(
+    *,
+    data_root: Path | None = None,
+) -> QuarantineService:
     """Bootstrap QuarantineService for CLI administrative operations.
 
     Creates a QuarantineService for quarantine inspection, replay, and purge.
@@ -166,7 +171,10 @@ def bootstrap_quarantine_service() -> QuarantineService:
     """
     return build_cli_quarantine_service(
         settings=get_settings(),
-        quarantine_port_factory=bootstrap_quarantine_adapter,
+        quarantine_port_factory=partial(
+            bootstrap_quarantine_adapter,
+            data_root=data_root,
+        ),
         logger_factory=create_noop_logger,
         metrics_resolver=resolve_metrics_port,
         tracing_resolver=resolve_tracing_port,

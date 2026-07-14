@@ -6,6 +6,8 @@ Used primarily by CLI health operations.
 
 from __future__ import annotations
 
+from functools import partial
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.composition.bootstrap.assembly.health_server import (
@@ -71,11 +73,17 @@ def bootstrap_health_service() -> HealthService:
     )
 
 
-def bootstrap_health_server_quarantine_service() -> QuarantineService:
+def bootstrap_health_server_quarantine_service(
+    *,
+    data_root: Path | None = None,
+) -> QuarantineService:
     """Build quarantine explorer storage without manifest-service fan-out."""
     return build_cli_quarantine_service(
         settings=get_settings(),
-        quarantine_port_factory=bootstrap_quarantine_adapter,
+        quarantine_port_factory=partial(
+            bootstrap_quarantine_adapter,
+            data_root=data_root,
+        ),
         logger_factory=create_noop_logger,
         metrics_resolver=lambda **_: create_noop_metrics(),
         tracing_resolver=lambda **_: create_noop_tracing(),
@@ -84,7 +92,10 @@ def bootstrap_health_server_quarantine_service() -> QuarantineService:
     )
 
 
-def bootstrap_health_server_dependencies() -> HealthServerDependencies:
+def bootstrap_health_server_dependencies(
+    *,
+    data_root: Path | None = None,
+) -> HealthServerDependencies:
     """Bootstrap dependencies for HealthServer via DI.
 
     Creates and wires up:
@@ -104,5 +115,9 @@ def bootstrap_health_server_dependencies() -> HealthServerDependencies:
         ...                       health_monitor=deps.health_monitor)
     """
     return create_health_server_dependencies(
-        checkpoint_port_factory=bootstrap_checkpoint_adapter,
+        checkpoint_port_factory=partial(
+            bootstrap_checkpoint_adapter,
+            data_root=data_root,
+        ),
+        data_root=data_root,
     )

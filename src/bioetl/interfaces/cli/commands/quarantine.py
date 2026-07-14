@@ -6,6 +6,7 @@ Provides error recovery dashboard functionality (ERR-001).
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import cast
 
 import click
@@ -80,9 +81,30 @@ def quarantine() -> None:
     help="Port for the long-lived Quarantine Explorer backend.",
     show_default=True,
 )
-def quarantine_serve(host: str, port: int) -> None:
+@click.option(
+    "--data-root",
+    type=click.Path(path_type=Path, exists=True, file_okay=False),
+    help=(
+        "Explicit absolute read-only data root for forensic inspection. "
+        "The root is never inferred from an env file."
+    ),
+)
+def quarantine_serve(host: str, port: int, data_root: Path | None) -> None:
     """Start the backend used by Grafana Silver structural Reject Explorer."""
-    run_long_lived_quarantine_backend_command(host=host, port=port)
+    if data_root is not None and not data_root.is_absolute():
+        raise click.BadParameter(
+            "must be an absolute directory path",
+            param_hint="--data-root",
+        )
+    resolved_data_root = data_root.resolve(strict=True) if data_root is not None else None
+    if resolved_data_root is None:
+        run_long_lived_quarantine_backend_command(host=host, port=port)
+    else:
+        run_long_lived_quarantine_backend_command(
+            host=host,
+            port=port,
+            data_root=resolved_data_root,
+        )
 
 
 @quarantine.command("inspect")

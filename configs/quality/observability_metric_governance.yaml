@@ -17,6 +17,24 @@ governance_views:
   alerted_without_emission_field: alerted_without_emission
   runtime_cardinality_review_required_field: runtime_cardinality_review_required
   runtime_cardinality_threshold_violations_field: runtime_cardinality_threshold_violations
+typed_observability_views:
+  command: >
+    python -m scripts.engineering.qa.report_observability_metric_inventory
+    --typed-observability-views --json
+  fail_closed_fields:
+    - recording_outputs_without_declaration
+    - recording_declarations_without_output
+    - policy_aliases_overlapping_outputs
+    - prometheus_run_id_selector_violations
+  coverage_fields:
+    documented: documented_metrics
+    direct_dashboard_target: direct_dashboard_targets
+    recording_rule_input: recording_rule_inputs
+    direct_alert_input: direct_alert_inputs
+    http_target: http_targets
+  identity_boundary: >
+    HTTP run_id query parameters are operator identity context and must never
+    appear in Prometheus selectors or metric labels.
 runtime_cardinality_review:
   heuristic: runtime_evidence_with_static_hotspot_seed
   min_distinct_emitters: 3

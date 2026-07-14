@@ -41,3 +41,44 @@ def test_navigation_contract_uids_match_shipped_dashboards() -> None:
         shipped_uids.add(uid)
 
     assert contract_uids == shipped_uids
+
+
+def test_required_inbound_paths_match_overview_first_action_mirror() -> None:
+    contract = _load_contract()
+    target_uids = (
+        "bioetl-runtime",
+        "bioetl-control-plane-v1",
+        "bioetl-provider-health-v2",
+        "bioetl-dq-v2",
+        "bioetl-workflow-overview",
+    )
+    route = {
+        "source_uid": "bioetl-overview-v2",
+        "source_panel_id": 215,
+        "source_panel_title": "First Action",
+        "source_status_row_panel_title_matcher": "^Provenance$",
+    }
+    assert contract["required_discoverable_inbound_paths"] == {
+        "L1": {target_uid: [route] for target_uid in target_uids}
+    }
+
+    narrative = _NAV_DOC_PATH.read_text(encoding="utf-8")
+    for target_uid in target_uids:
+        expected_row = (
+            f"| `{target_uid}` | `bioetl-overview-v2` | `215` | "
+            "`First Action` | `^Provenance$` |"
+        )
+        assert expected_row in narrative
+
+    overview = json.loads(
+        (_DASHBOARDS_DIR / "bioetl-overview-v2.json").read_text(encoding="utf-8")
+    )
+    first_action = next(
+        panel for panel in overview["panels"] if panel.get("id") == 215
+    )
+    urls = {
+        str(link.get("url", ""))
+        for link in first_action.get("options", {}).get("dataLinks", [])
+    }
+    for target_uid in target_uids:
+        assert any(url.startswith(f"/d/{target_uid}/") for url in urls)

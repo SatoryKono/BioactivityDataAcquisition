@@ -1417,6 +1417,7 @@ def _load_declared_metric_definitions(repo_root: Path) -> dict[str, set[str]]:
     if not path.exists():
         return {
             "recording_rule_metrics": set(),
+            "policy_alias_metrics": set(),
             "declared_label_contract_metrics": set(),
         }
     try:
@@ -1424,17 +1425,23 @@ def _load_declared_metric_definitions(repo_root: Path) -> dict[str, set[str]]:
     except ImportError:
         return {
             "recording_rule_metrics": set(),
+            "policy_alias_metrics": set(),
             "declared_label_contract_metrics": set(),
         }
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         return {
             "recording_rule_metrics": set(),
+            "policy_alias_metrics": set(),
             "declared_label_contract_metrics": set(),
         }
 
     definitions: dict[str, set[str]] = {}
-    for field in ("recording_rule_metrics", "declared_label_contract_metrics"):
+    for field in (
+        "recording_rule_metrics",
+        "policy_alias_metrics",
+        "declared_label_contract_metrics",
+    ):
         raw_metrics = payload.get(field, [])
         if not isinstance(raw_metrics, list):
             definitions[field] = set()
@@ -1445,6 +1452,154 @@ def _load_declared_metric_definitions(repo_root: Path) -> dict[str, set[str]]:
             if isinstance(value, str) and value.startswith("bioetl_")
         }
     return definitions
+
+
+def _iter_dashboard_panels(payload: dict[str, object]) -> list[dict[str, object]]:
+    panels: list[dict[str, object]] = []
+    for raw_panel in payload.get("panels", []):
+        if not isinstance(raw_panel, dict):
+            continue
+        panels.append(raw_panel)
+        panels.extend(_iter_dashboard_panels(raw_panel))
+    return panels
+
+
+def collect_typed_observability_inventory(repo_root: Path) -> dict[str, object]:
+    """Collect deterministic rule/dashboard usage views without conflating sources."""
+    try:
+        import yaml
+    except ImportError as exc:  # pragma: no cover - project runtime ships PyYAML
+        raise RuntimeError("PyYAML is required for typed observability inventory") from exc
+
+    declarations = _load_declared_metric_definitions(repo_root)
+    recording_outputs: set[str] = set()
+    recording_inputs: set[str] = set()
+    direct_alert_inputs: set[str] = set()
+    direct_dashboard_targets: set[str] = set()
+    documented_metrics: set[str] = set()
+    http_targets: list[dict[str, object]] = []
+    run_id_selector_violations: list[str] = []
+
+    for relative_path in (
+        Path("grafana/prometheus-rules/bioetl_observability.yml"),
+        Path("grafana/prometheus-rules/bioetl_control_plane_current_status.yml"),
+    ):
+        payload = yaml.safe_load((repo_root / relative_path).read_text(encoding="utf-8"))
+        for group in payload.get("groups", []):
+            for rule in group.get("rules", []):
+                expr = str(rule.get("expr", ""))
+                metric_names = set(_CANONICAL_METRIC_RE.findall(expr))
+                if rule.get("record"):
+                    recording_outputs.add(str(rule["record"]))
+                    recording_inputs.update(metric_names)
+                elif rule.get("alert"):
+                    direct_alert_inputs.update(metric_names)
+                if re.search(r"\{[^{}]*\brun_id\s*(?:=|!=|=~|!~)", expr):
+                    run_id_selector_violations.append(
+                        f"{relative_path.as_posix()}::{rule.get('record') or rule.get('alert')}"
+                    )
+
+    dashboards_root = repo_root / "grafana" / "dashboards"
+    for dashboard_path in sorted(dashboards_root.glob("*.json")):
+        payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
+        dashboard_uid = str(payload.get("uid", dashboard_path.stem))
+        for panel in _iter_dashboard_panels(payload):
+            panel_id = int(panel.get("id", -1))
+            panel_datasource = panel.get("datasource", {})
+            panel_datasource_type = (
+                str(panel_datasource.get("type", ""))
+                if isinstance(panel_datasource, dict)
+                else str(panel_datasource)
+            )
+            for target in panel.get("targets", []):
+                if not isinstance(target, dict):
+                    continue
+                expr = str(target.get("expr", ""))
+                direct_dashboard_targets.update(_CANONICAL_METRIC_RE.findall(expr))
+                if re.search(r"\{[^{}]*\brun_id\s*(?:=|!=|=~|!~)", expr):
+                    run_id_selector_violations.append(
+                        f"{dashboard_path.relative_to(repo_root).as_posix()}::panel={panel_id}"
+                    )
+                target_datasource = target.get("datasource", {})
+                target_datasource_type = (
+                    str(target_datasource.get("type", ""))
+                    if isinstance(target_datasource, dict)
+                    else panel_datasource_type
+                )
+                if not target_datasource_type:
+                    target_datasource_type = panel_datasource_type
+                url = target.get("url")
+                if isinstance(url, str) and (
+                    url.startswith("/ops/")
+                    or str(target.get("source", "")) == "url"
+                ):
+                    description = str(panel.get("description", ""))
+                    http_targets.append(
+                        {
+                            "dashboard_uid": dashboard_uid,
+                            "panel_id": panel_id,
+                            "ref_id": str(target.get("refId", "")),
+                            "url": url,
+                            "uses_run_id_query_parameter": "run_id=" in url,
+                            "documents_valid_empty": any(
+                                token in description.lower()
+                                for token in ("valid empty", "zero", "0 ", "no matching")
+                            ),
+                            "documents_backend_down": any(
+                                token in description.lower()
+                                for token in (
+                                    "backend",
+                                    "datasource",
+                                    "health/live",
+                                    "unavailable",
+                                )
+                            ),
+                        }
+                    )
+
+    for scan_root in _DOC_SCAN_ROOTS:
+        if scan_root == Path("grafana/dashboards"):
+            continue
+        path = repo_root / scan_root
+        candidates = [path] if path.is_file() else sorted(path.rglob("*"))
+        for candidate in candidates:
+            if candidate.is_file() and candidate.suffix in _TEXT_SUFFIXES:
+                try:
+                    documented_metrics.update(
+                        _CANONICAL_METRIC_RE.findall(
+                            candidate.read_text(encoding="utf-8")
+                        )
+                    )
+                except UnicodeDecodeError:
+                    continue
+
+    declared_outputs = declarations["recording_rule_metrics"]
+    policy_aliases = declarations["policy_alias_metrics"]
+    return {
+        "recording_rule_outputs": sorted(recording_outputs),
+        "policy_alias_metrics": sorted(policy_aliases),
+        "documented_metrics": sorted(documented_metrics),
+        "direct_dashboard_targets": sorted(direct_dashboard_targets),
+        "recording_rule_inputs": sorted(recording_inputs),
+        "direct_alert_inputs": sorted(direct_alert_inputs),
+        "http_targets": sorted(
+            http_targets,
+            key=lambda row: (
+                str(row["dashboard_uid"]),
+                int(row["panel_id"]),
+                str(row["ref_id"]),
+                str(row["url"]),
+            ),
+        ),
+        "recording_outputs_without_declaration": sorted(
+            recording_outputs - declared_outputs
+        ),
+        "recording_declarations_without_output": sorted(
+            declared_outputs - recording_outputs
+        ),
+        "policy_aliases_overlapping_outputs": sorted(policy_aliases & recording_outputs),
+        "prometheus_run_id_selector_violations": sorted(run_id_selector_violations),
+    }
 
 
 def _filter_declared_label_contract_metrics(
@@ -2259,6 +2414,14 @@ def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true", help="Emit JSON report")
     parser.add_argument(
+        "--typed-observability-views",
+        action="store_true",
+        help=(
+            "Emit the deterministic typed rule/dashboard/HTTP inventory and fail "
+            "on one-way recording-rule or run_id selector drift"
+        ),
+    )
+    parser.add_argument(
         "--check",
         action="store_true",
         help="Fail when metric registry/runtime/docs drift exceeds the allowlist",
@@ -2614,6 +2777,24 @@ def _append_runtime_cardinality_review_summary(
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
+    if args.typed_observability_views:
+        typed_report = collect_typed_observability_inventory(args.repo_root)
+        violations = {
+            key: typed_report[key]
+            for key in (
+                "recording_outputs_without_declaration",
+                "recording_declarations_without_output",
+                "policy_aliases_overlapping_outputs",
+                "prometheus_run_id_selector_violations",
+            )
+            if typed_report[key]
+        }
+        if args.json:
+            json.dump(typed_report, sys.stdout, indent=2, sort_keys=True)
+            sys.stdout.write("\n")
+        else:
+            print(json.dumps(typed_report, indent=2, sort_keys=True))
+        return 1 if violations else 0
     report = collect_metric_inventory(args.repo_root)
     _write_evidence_report(
         report,

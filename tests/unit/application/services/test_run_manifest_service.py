@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 from dataclasses import replace
 from datetime import UTC, datetime
 from itertools import permutations
@@ -121,7 +120,14 @@ def test_create_manifest_persists_and_links_run_id() -> None:
         _manifest_id_factory=lambda: "manifest-1",
     )
 
-    manifest = service.create_manifest(_make_request())
+    manifest = service.create_manifest(
+        replace(
+            _make_request(),
+            workflow_run_id="workflow-run-42",
+            workflow_name="chembl_baseline",
+            workflow_step_id="run_chembl_activity",
+        )
+    )
 
     assert manifest.manifest_id == "manifest-1"
     assert manifest.code_provenance.git_commit == "abc1234"
@@ -134,6 +140,9 @@ def test_create_manifest_persists_and_links_run_id() -> None:
     assert manifest.code_provenance.normalization_profile_ref == "chembl.activity"
     assert manifest.code_provenance.normalization_profile_version == "1.0.0"
     assert manifest.code_provenance.normalization_profile_hash == "d" * 64
+    assert manifest.workflow_run_id == "workflow-run-42"
+    assert manifest.workflow_name == "chembl_baseline"
+    assert manifest.workflow_step_id == "run_chembl_activity"
     assert store.get("manifest-1") == manifest
     assert store.get_by_run_id(manifest.run_id) == manifest
 
