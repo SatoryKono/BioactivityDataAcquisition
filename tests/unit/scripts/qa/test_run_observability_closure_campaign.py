@@ -11,6 +11,8 @@ import pytest
 
 from scripts.engineering.qa import run_observability_closure_campaign as campaign
 
+_REAL_STAGE_WORKFLOW_FIXTURE = campaign._stage_workflow_fixture
+
 
 @pytest.fixture(autouse=True)
 def _stub_registry_cli(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -53,6 +55,16 @@ def _stub_registry_cli(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr(campaign, "_run_phase_command", fake_phase)
 
+    def fake_stage_fixture(
+        *, canonical_bronze_root: Path, audit_root: Path
+    ) -> tuple[Path, dict[str, object]]:
+        _ = canonical_bronze_root
+        root = audit_root / "fixtures" / "chembl-baseline"
+        root.mkdir(parents=True, exist_ok=True)
+        return root, {"records": []}
+
+    monkeypatch.setattr(campaign, "_stage_workflow_fixture", fake_stage_fixture)
+
 
 def _canonical_roots(tmp_path: Path) -> tuple[Path, Path]:
     data_root = tmp_path / "canonical" / "data"
@@ -78,6 +90,35 @@ def test_tree_signature_tracks_manifest_mutations_without_reading_payloads(
     os.utime(payload, ns=(previous_mtime + 1, previous_mtime + 1))
 
     assert campaign._tree_signature(root) != before
+
+
+def test_stage_workflow_fixture_selects_compatible_join_records(
+    tmp_path: Path,
+) -> None:
+    bronze = tmp_path / "bronze"
+    rows = {
+        "assay": {
+            "assay_chembl_id": "CHEMBL-A",
+            "target_chembl_id": "CHEMBL-T",
+            "document_chembl_id": "CHEMBL-D",
+        },
+        "target": {"target_chembl_id": "CHEMBL-T", "target_type": "SINGLE PROTEIN"},
+        "publication": {"document_chembl_id": "CHEMBL-D", "title": "Evidence"},
+    }
+    for entity, row in rows.items():
+        path = bronze / "chembl" / entity / "2026-07-14" / "batch.jsonl"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(row) + "\n", encoding="utf-8")
+
+    fixture_root, evidence = _REAL_STAGE_WORKFLOW_FIXTURE(
+        canonical_bronze_root=bronze,
+        audit_root=tmp_path / "audit",
+    )
+
+    assert evidence["target_id"] == "CHEMBL-T"
+    assert evidence["publication_id"] == "CHEMBL-D"
+    assert len(evidence["records"]) == 3
+    assert len(list(fixture_root.rglob("*.jsonl"))) == 3
 
 
 def _retain_raw(path: Path, raw_bytes: bytes, kind: str) -> dict[str, str]:
@@ -763,6 +804,7 @@ def test_execute_then_finalize_writes_complete_report_only_when_every_gate_is_sa
             checkpoint_artifacts=(artifacts["checkpoint"],),
             output_artifacts=(artifacts["output"],),
             semantic_output_records=1,
+            terminal_details={"adaptive_memory": {"decision_trace": [{"step": 1}]}},
             result_signature=f"signature-{pipeline}",
             run_mode=run_mode,
         )
