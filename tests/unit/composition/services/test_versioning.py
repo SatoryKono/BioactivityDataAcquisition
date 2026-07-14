@@ -27,6 +27,7 @@ def test_get_git_commit_returns_full_hash_on_success(mock_run: MagicMock) -> Non
     assert versioning.get_git_commit() == full_hash
     mock_run.assert_called_once_with(
         ["git", "rev-parse", "HEAD"],
+        cwd=versioning._REPO_ROOT,
         capture_output=True,
         text=True,
         timeout=5,
