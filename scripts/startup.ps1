@@ -19,18 +19,18 @@ docker network create bioetl-monitoring 2>$null
 
 # Pre-pull images
 Write-Host "🔄 Pre-pulling images..."
-docker compose -f "$ProjectDir\docker-compose.codex.yml" pull --quiet 2>$null
+docker compose -p bioetl-codex -f "$ProjectDir\docker-compose.codex.yml" pull --quiet 2>$null
 
 # Start base infrastructure if production
 if ($Environment -eq 'prod') {
     Write-Host "🏗️  Starting production stack..."
-    docker compose -f "$ProjectDir\docker-compose.yml" up -d
+    docker compose -p bioetl-main -f "$ProjectDir\docker-compose.yml" up -d
     Start-Sleep -Seconds 5
 }
 
 # Start MCP servers
 Write-Host "🤖 Starting MCP servers..."
-docker compose -f "$ProjectDir\docker-compose.codex.yml" up -d
+docker compose -p bioetl-codex -f "$ProjectDir\docker-compose.codex.yml" up -d
 
 # Wait for services
 Write-Host "⏳ Waiting for services to stabilize..."
@@ -66,7 +66,7 @@ if ($failed -eq 0) {
     Write-Host "📁 Filesystem: bioetl-mcp-filesystem"
     Write-Host "🐙 GitHub: bioetl-mcp-github"
     Write-Host ""
-    Write-Host "View logs with: docker compose -f docker-compose.codex.yml logs -f"
+    Write-Host "View logs with: docker compose -p bioetl-codex -f docker-compose.codex.yml logs -f"
 } else {
     Write-Host ""
     Write-Host "⚠️  $failed service(s) failed to start" -ForegroundColor Yellow

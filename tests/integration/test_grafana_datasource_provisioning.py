@@ -59,7 +59,13 @@ def test_quarantine_explorer_compose_uses_service_dns_backend() -> None:
         in grafana["environment"]
     )
     assert "host.docker.internal:host-gateway" in grafana["extra_hosts"]
-    assert "quarantine-explorer" in monitoring["services"]
+    assert "quarantine-explorer" not in monitoring["services"]
+    assert "quarantine-explorer" in bioetl["networks"]["monitoring"]["aliases"]
+    assert root["networks"]["monitoring"] == {
+        "external": True,
+        "name": "bioetl-monitoring",
+    }
+    assert monitoring["networks"]["monitoring"] == root["networks"]["monitoring"]
     assert bioetl["command"] == [
         "quarantine",
         "serve",
@@ -68,7 +74,7 @@ def test_quarantine_explorer_compose_uses_service_dns_backend() -> None:
         "--port",
         "8081",
     ]
-    assert "8081:8081" in bioetl["ports"]
+    assert "127.0.0.1:8081:8081" in bioetl["ports"]
     assert "8000:8000" not in bioetl["ports"], (
         "Quarantine Explorer must not occupy the BioETL /metrics host port."
     )
@@ -106,7 +112,7 @@ def test_grafana_uses_remote_renderer_sidecar() -> None:
     )
     assert "GF_RENDERING_CALLBACK_URL=http://grafana:3000/" in grafana["environment"]
     assert (
-        "GF_RENDERING_RENDERER_TOKEN=${GF_RENDERING_RENDERER_TOKEN:-bioetl-local-renderer-token}"
+        "GF_RENDERING_RENDERER_TOKEN=${GF_RENDERING_RENDERER_TOKEN:?GF_RENDERING_RENDERER_TOKEN is required}"
         in grafana["environment"]
     )
     assert grafana["entrypoint"] == [
@@ -116,7 +122,7 @@ def test_grafana_uses_remote_renderer_sidecar() -> None:
     assert renderer["image"] == RENDERER_IMAGE
     assert renderer["shm_size"] == "1gb"
     assert (
-        "AUTH_TOKEN=${GF_RENDERING_RENDERER_TOKEN:-bioetl-local-renderer-token}"
+        "AUTH_TOKEN=${GF_RENDERING_RENDERER_TOKEN:?GF_RENDERING_RENDERER_TOKEN is required}"
         in renderer["environment"]
     )
     assert (

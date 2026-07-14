@@ -102,7 +102,7 @@ def test_validate_only_exits_successfully() -> None:
 
 
 @pytest.mark.parametrize("wrapper", NEO4J_WRAPPERS)
-def test_neo4j_wrapper_validate_only_uses_local_defaults_without_auth(
+def test_neo4j_wrapper_validate_only_fails_closed_without_auth(
     wrapper: Path,
 ) -> None:
     merged_env = {
@@ -117,6 +117,39 @@ def test_neo4j_wrapper_validate_only_uses_local_defaults_without_auth(
         {
             "BIOETL_MCP_VALIDATE_ONLY": "1",
             "BIOETL_REPO_ENV_LOADED": "1",
+        }
+    )
+
+    result = subprocess.run(
+        ["bash", str(wrapper)],
+        cwd=ROOT,
+        env=merged_env,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "NEO4J_" in result.stderr
+    assert "is required" in result.stderr
+
+
+@pytest.mark.parametrize("wrapper", NEO4J_WRAPPERS)
+def test_neo4j_wrapper_validate_only_accepts_explicit_auth(wrapper: Path) -> None:
+    merged_env = {
+        key: value
+        for key, value in os.environ.items()
+        if not key.startswith("NEO4J_")
+        and not key.endswith("TOKEN")
+        and "API_KEY" not in key
+        and "PASSWORD" not in key
+    }
+    merged_env.update(
+        {
+            "BIOETL_MCP_VALIDATE_ONLY": "1",
+            "BIOETL_REPO_ENV_LOADED": "1",
+            "NEO4J_USERNAME": "validation-user",
+            "NEO4J_PASSWORD": "validation-password",
         }
     )
 

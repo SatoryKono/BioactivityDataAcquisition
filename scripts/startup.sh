@@ -23,18 +23,18 @@ fi
 
 # Pre-pull images to avoid delays
 echo "🔄 Pre-pulling images..."
-docker compose -f "$PROJECT_DIR/docker-compose.codex.yml" pull --quiet 2>/dev/null || true
+docker compose -p bioetl-codex -f "$PROJECT_DIR/docker-compose.codex.yml" pull --quiet 2>/dev/null || true
 
 # Start base infrastructure (Neo4j, etc.)
 if [ "$ENV" = "prod" ]; then
     echo "🏗️  Starting production stack..."
-    docker compose -f "$PROJECT_DIR/docker-compose.yml" up -d
+    docker compose -p bioetl-main -f "$PROJECT_DIR/docker-compose.yml" up -d
     sleep 5
 fi
 
 # Start MCP servers
 echo "🤖 Starting MCP servers..."
-docker compose -f "$PROJECT_DIR/docker-compose.codex.yml" up -d
+docker compose -p bioetl-codex -f "$PROJECT_DIR/docker-compose.codex.yml" up -d
 
 # Wait for critical services
 echo "⏳ Waiting for services to stabilize..."
@@ -69,7 +69,7 @@ if [ $FAILED -eq 0 ]; then
     echo "📁 Filesystem: bioetl-mcp-filesystem"
     echo "🐙 GitHub: bioetl-mcp-github"
     echo ""
-    echo "View logs with: docker compose -f docker-compose.codex.yml logs -f"
+    echo "View logs with: docker compose -p bioetl-codex -f docker-compose.codex.yml logs -f"
 else
     echo ""
     echo "⚠️  $FAILED service(s) failed to start"

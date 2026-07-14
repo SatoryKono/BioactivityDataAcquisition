@@ -123,7 +123,7 @@ function Start-MainStack {
     Ensure-EnvFile
     Ensure-ExternalNetworks
     Write-Info "Starting BioETL services..."
-    docker compose up -d
+    docker compose -p bioetl-main -f docker-compose.yml up -d
     Write-Success "BioETL services started."
 }
 
@@ -132,23 +132,23 @@ function Start-FullStack {
     Ensure-ExternalNetworks
 
     Write-Info "Starting Neo4j..."
-    docker compose -f docker-compose.neo4j.yml up -d
+    docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d
     Write-Success "Neo4j started."
 
     Write-Info "Starting Redis..."
-    docker compose -f scripts/ops/runtime/docker/compose/redis.yml up -d
+    docker compose -p bioetl-redis -f scripts/ops/runtime/docker/compose/redis.yml up -d
     Write-Success "Redis started."
 
     Write-Info "Starting MinIO..."
-    docker compose -f scripts/ops/runtime/docker/compose/minio.yml up -d
+    docker compose -p bioetl-minio -f scripts/ops/runtime/docker/compose/minio.yml up -d
     Write-Success "MinIO started."
 
     Write-Info "Starting monitoring stack..."
-    docker compose -f docker-compose.monitoring.yml up -d
+    docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml up -d
     Write-Success "Monitoring stack started."
 
     Write-Info "Starting BioETL services..."
-    docker compose up -d
+    docker compose -p bioetl-main -f docker-compose.yml up -d
     Write-Success "BioETL services started."
 }
 
@@ -156,7 +156,7 @@ function Start-Monitoring {
     Ensure-EnvFile
     Ensure-ExternalNetworks
     Write-Info "Starting monitoring stack..."
-    docker compose -f docker-compose.monitoring.yml up -d
+    docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml up -d
     Write-Success "Monitoring stack started."
 }
 
@@ -164,24 +164,24 @@ function Start-MCP {
     Ensure-EnvFile
     Ensure-ExternalNetworks
     Write-Info "Starting MCP servers..."
-    docker compose -f docker-compose.codex.yml up -d
+    docker compose -p bioetl-codex -f docker-compose.codex.yml up -d
     Write-Success "MCP servers started."
 }
 
 function Stop-MainStack {
     Write-Info "Stopping BioETL services..."
-    docker compose down
+    docker compose -p bioetl-main -f docker-compose.yml down
     Write-Success "BioETL services stopped."
 }
 
 function Stop-FullStack {
     Write-Info "Stopping all Docker helper services..."
-    docker compose down
-    docker compose -f docker-compose.neo4j.yml down 2>$null
-    docker compose -f scripts/ops/runtime/docker/compose/redis.yml down 2>$null
-    docker compose -f scripts/ops/runtime/docker/compose/minio.yml down 2>$null
-    docker compose -f docker-compose.monitoring.yml down 2>$null
-    docker compose -f docker-compose.codex.yml down 2>$null
+    docker compose -p bioetl-main -f docker-compose.yml down
+    docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml down 2>$null
+    docker compose -p bioetl-redis -f scripts/ops/runtime/docker/compose/redis.yml down 2>$null
+    docker compose -p bioetl-minio -f scripts/ops/runtime/docker/compose/minio.yml down 2>$null
+    docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml down 2>$null
+    docker compose -p bioetl-codex -f docker-compose.codex.yml down 2>$null
     Write-Success "All Docker helper services stopped."
 }
 
@@ -189,18 +189,18 @@ function View-Logs {
     param([string]$TargetService = "")
 
     if ($TargetService -eq "") {
-        docker compose logs -f
+        docker compose -p bioetl-main -f docker-compose.yml logs -f
     }
     else {
-        docker compose logs -f $TargetService
+        docker compose -p bioetl-main -f docker-compose.yml logs -f $TargetService
     }
 }
 
 function Health-Check {
     Write-Info "Checking service health..."
-    docker compose ps
+    docker compose -p bioetl-main -f docker-compose.yml ps
 
-    docker compose exec -T bioetl curl -f http://127.0.0.1:8081/health/ready 2>$null
+    docker compose -p bioetl-main -f docker-compose.yml exec -T bioetl curl -f http://127.0.0.1:8081/health/ready 2>$null
     if ($LASTEXITCODE -eq 0) {
         Write-Success "BioETL is healthy."
     }
@@ -211,7 +211,7 @@ function Health-Check {
 
 function Cleanup {
     Write-Warn "Removing Docker resources for the main BioETL stack."
-    docker compose down --volumes
+    docker compose -p bioetl-main -f docker-compose.yml down --volumes
     docker rmi bioetl:latest 2>$null
     Write-Success "Cleanup complete."
 }

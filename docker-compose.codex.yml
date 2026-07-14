@@ -1,3 +1,5 @@
+name: bioetl-codex
+
 services:
   # MCP Servers for Codex integration under WSL2
   # Optimized for stable startup: pinned versions, volume caching, disabled audit
@@ -89,7 +91,7 @@ services:
     container_name: bioetl-codex-config
     restart: unless-stopped
     ports:
-      - "9100:9100"
+      - "127.0.0.1:9100:9100"
     volumes:
       - ./:/data
       - ./.codex:/data/.codex

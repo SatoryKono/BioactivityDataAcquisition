@@ -46,7 +46,7 @@ ______________________________________________________________________
 ```
 http://localhost:7474/browser/
 Username: neo4j
-Password: [REDACTED]
+Password: value from `NEO4J_PASSWORD`
 ```
 
 ### Codex MCP

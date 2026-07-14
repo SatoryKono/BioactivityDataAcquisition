@@ -549,7 +549,7 @@ curl -s http://localhost:8000/metrics | grep bioetl_
 # Открыть http://localhost:9090/targets — target должен быть "UP"
 
 # 3. Открыть Grafana
-# http://localhost:3000 (admin/admin)
+# http://localhost:3000 (`admin`; пароль из `GF_SECURITY_ADMIN_PASSWORD`)
 # Перейти: Home → Dashboards → BioETL → выбрать дашборд
 ```
 
@@ -563,8 +563,8 @@ curl -s http://localhost:8000/metrics | grep bioetl_
 | `BIOETL_OBSERVABILITY__METRICS_FAIL_FAST`      | `false`               | Падать при ошибке запуска сервера                       |
 | `BIOETL_OBSERVABILITY__METRICS_RETRY_COUNT`    | `3`                   | Количество попыток запуска (1-10)                       |
 | `BIOETL_OBSERVABILITY__METRICS_RETRY_DELAY`    | `1.0`                 | Задержка между попытками (0.1-10.0 с)                   |
-| `GF_SECURITY_ADMIN_PASSWORD`                   | `admin`               | Пароль администратора Grafana                           |
-| `GF_RENDERING_RENDERER_TOKEN`                  | `bioetl-local-renderer-token` | Shared token between Grafana `GF_RENDERING_RENDERER_TOKEN` and renderer `AUTH_TOKEN`; override locally for non-default stacks |
+| `GF_SECURITY_ADMIN_PASSWORD`                   | обязательная          | Пароль администратора Grafana                           |
+| `GF_RENDERING_RENDERER_TOKEN`                  | обязательная          | Общий secret для Grafana и renderer `AUTH_TOKEN`; задаётся локально до запуска |
 | `GRAFANA_IMAGE_RENDERER_GOMEMLIMIT`            | `1GiB`                | Go memory soft limit for the remote image renderer      |
 | `GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT`     | `90s`                 | Maximum wait for heavy dashboard pages before the remote renderer returns a timeout |
 | `BIOETL_ENABLE_TRACING_DATASOURCES`            | `auto`                | Авто-подключать Loki/Tempo datasource в Grafana provisioning по live reachability (`true`/`false` override доступны) |

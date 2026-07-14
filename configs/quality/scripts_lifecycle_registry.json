@@ -2,6 +2,30 @@
   "schema_version": "1.0",
   "description": "Lifecycle and supporting-taxonomy decisions for non-active scripts.",
   "entries": {
+    "scripts/startup.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the legacy root shell launcher while canonical Docker helper lifecycle management moves to scripts/ops/docker-setup.sh; keep it supporting and do not expand its fixed-delay startup behavior."
+    },
+    "scripts/startup.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the legacy root PowerShell launcher while canonical Docker helper lifecycle management moves to scripts/ops/docker-setup.ps1; keep it supporting and do not expand its fixed-delay startup behavior."
+    },
+    "scripts/shutdown.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the legacy root shell shutdown wrapper for project-isolated Compose helpers; prefer scripts/ops/docker-setup.sh and keep this surface supporting."
+    },
+    "scripts/shutdown.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "compatibility_wrapper",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as the legacy root PowerShell shutdown wrapper for project-isolated Compose helpers; prefer scripts/ops/docker-setup.ps1 and keep this surface supporting."
+    },
     "scripts/docker-setup.ps1": {
       "owner": "@bioetl-platform",
       "decision": "compatibility_wrapper",
