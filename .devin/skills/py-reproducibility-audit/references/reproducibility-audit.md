@@ -305,7 +305,7 @@ If a change fails audit:
 
 ## References
 
-- `docs/styleguide/04-deterministic-io.md` - Deterministic I/O guidelines
-- `docs/styleguide/05-testing-standards.md` - Testing standards
 - `docs/00-project/RULES.md` - Project rules
 - `docs/01-requirements/REQUIREMENTS.md` - Project requirements
+- `docs/03-guides/testing.md` - Testing guidelines
+- `docs/02-architecture/decisions/ADR-014-deterministic-writes.md` - Deterministic writes ADR
