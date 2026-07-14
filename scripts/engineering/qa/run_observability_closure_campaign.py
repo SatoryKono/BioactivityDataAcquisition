@@ -260,9 +260,14 @@ def _registry_pipeline_command(
 ) -> tuple[tuple[str, ...], subprocess.CompletedProcess[str]]:
     """Discover pipeline names through the canonical public CLI command."""
     command = (str(python), "-m", "bioetl", "config", "list-pipelines")
+    env = os.environ.copy()
+    env["PYTHONPATH"] = os.pathsep.join(
+        (str((repo_root / "src").resolve()), str(repo_root.resolve()))
+    )
     completed = subprocess.run(  # nosec B603
         command,
         cwd=repo_root,
+        env=env,
         capture_output=True,
         text=True,
         timeout=900,
