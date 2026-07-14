@@ -2282,7 +2282,7 @@
     "top_level_directory_count_including_pycache": 17
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 1993,
-  "total_test_functions": 22266,
+  "total_test_files": 1992,
+  "total_test_functions": 22250,
   "uuid4_call_sites": 0
 }

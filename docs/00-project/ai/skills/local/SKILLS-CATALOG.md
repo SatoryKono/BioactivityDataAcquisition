@@ -82,6 +82,7 @@ runtime change.
 | `capability-discovery`         | `.codex/skills/capability-discovery`         | Discover available agents/skills/quality commands |
 | `collecting-evidence`          | `.codex/skills/collecting-evidence`          | Build traceable evidence objects                  |
 | `deep-research`                | `.codex/skills/deep-research`                | Structured deep research workflow                 |
+| `hierarchical-evidence-orchestration` | `.codex/skills/hierarchical-evidence-orchestration` | Coordinate hierarchical evidence collection |
 | `synthesizing-pillars`         | `.codex/skills/synthesizing-pillars`         | Convert evidence into synthesis insights          |
 | `making-decisions`             | `.codex/skills/making-decisions`             | Turn synthesis into explicit decisions            |
 | `generating-constrained-specs` | `.codex/skills/generating-constrained-specs` | Generate PRD/architecture specs from decisions    |
@@ -96,8 +97,7 @@ runtime change.
 | Skill                        | Path                                       | Purpose                              |
 | ---------------------------- | ------------------------------------------ | ------------------------------------ |
 | `new-pipeline`               | `.codex/skills/new-pipeline`               | Provider/entity pipeline scaffolding |
-| `technical-designer-mermaid` | `.codex/skills/technical-designer-mermaid` | Mermaid technical diagram design     |
-
+| `py-reproducibility-audit`  | `.codex/skills/py-reproducibility-audit`  | Reproducibility and replay audit  |
 ## Current Consolidation Status
 
 - All local skills are structurally valid.
@@ -113,6 +113,7 @@ runtime change.
 - [collecting-evidence](collecting-evidence/SKILL.md)
 - [create-pr](create-pr/SKILL.md)
 - [deep-research](deep-research/SKILL.md)
+- [hierarchical-evidence-orchestration](hierarchical-evidence-orchestration/SKILL.md)
 - [documentation-audit](documentation-audit/SKILL.md)
 - [documentation-cascade-audit](documentation-cascade-audit/SKILL.md)
 - [grafana-dashboard-render](grafana-dashboard-render/SKILL.md)
@@ -129,6 +130,7 @@ runtime change.
 - [py-debug-bot](py-debug-bot/SKILL.md)
 - [py-doc-bot](py-doc-bot/SKILL.md)
 - [py-plan-bot](py-plan-bot/SKILL.md)
+- [py-reproducibility-audit](py-reproducibility-audit/SKILL.md)
 - [py-review-orchestrator](py-review-orchestrator/SKILL.md)
 - [py-reproducibility-audit](py-reproducibility-audit/SKILL.md)
 - [prometheus-alert-rule-editor](prometheus-alert-rule-editor/SKILL.md)
@@ -143,7 +145,7 @@ runtime change.
 - [technical-designer-mermaid](technical-designer-mermaid/SKILL.md)
 - [vcr-record](vcr-record/SKILL.md)
 - [verify-architecture](verify-architecture/SKILL.md)
-- [architecture-guardian (public)](public/architecture-guardian/SKILL.md)
+
 
 ## Shared Generic Skills
 

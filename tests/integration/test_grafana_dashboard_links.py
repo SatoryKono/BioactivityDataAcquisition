@@ -1484,19 +1484,28 @@ def test_navigation_panel_renders_full_visual_bus_with_disabled_current_item() -
         assert positions == sorted(positions), (
             f"{dashboard_path.name} must preserve canonical navigation order"
         )
+        assert "<style" not in content.lower(), (
+            f"{dashboard_path.name} navigation must survive Grafana Text-panel "
+            "sanitization without a style block"
+        )
         for token in (
+            "display:flex",
             "flex-wrap:wrap",
+            "overflow:visible",
+            "flex:1 1 145px",
+            "text-align:center",
+            "color:#f8fafc",
             "background:#334155",
             "border:1px solid #94a3b8",
-            ":hover",
-            ":focus-visible",
-            "outline:3px solid #38bdf8",
             "background:#1d4ed8",
             "border:2px solid #7dd3fc",
         ):
             assert token in content, (
-                f"{dashboard_path.name} navigation must define theme-safe {token}"
+                f"{dashboard_path.name} navigation must define sanitizer-safe {token}"
             )
+        description = str(panel.get("description", ""))
+        assert "Sanitizer-compatible" in description
+        assert "native keyboard focus" in description
 
         current_title = expected_current_title[uid]
         disabled_pattern = re.compile(

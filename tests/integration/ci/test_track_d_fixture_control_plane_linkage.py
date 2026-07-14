@@ -53,6 +53,7 @@ def _stub_quarantine_delta_writes_for_cached_fixture_replay(
 @pytest.mark.integration
 @pytest.mark.no_api
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)  # Extended timeout for DQ service imports on Windows
 async def test_tracked_fixture_run_persists_linked_control_plane_artifacts(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -196,6 +197,7 @@ async def test_tracked_fixture_run_persists_linked_control_plane_artifacts(
 @pytest.mark.integration
 @pytest.mark.no_api
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)  # Extended timeout for DQ service imports on Windows
 async def test_tracked_fixture_run_keeps_control_plane_stores_consistent(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -263,6 +265,7 @@ async def test_tracked_fixture_run_keeps_control_plane_stores_consistent(
 @pytest.mark.integration
 @pytest.mark.no_api
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)  # Extended timeout for DQ service imports on Windows
 async def test_tracked_fixture_strict_replay_uses_explicit_data_dir_for_control_plane_artifacts(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -347,6 +350,7 @@ async def test_tracked_fixture_strict_replay_uses_explicit_data_dir_for_control_
 @pytest.mark.integration
 @pytest.mark.no_api
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)  # Extended timeout for DQ service imports on Windows
 async def test_tracked_fixture_exact_replay_avoids_live_data_source_path(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -408,6 +412,7 @@ async def test_tracked_fixture_exact_replay_avoids_live_data_source_path(
 @pytest.mark.integration
 @pytest.mark.no_api
 @pytest.mark.asyncio
+@pytest.mark.timeout(120)  # Extended timeout for DQ service imports on Windows
 async def test_exact_replay_without_materialized_cached_bronze_batches_fails_closed(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

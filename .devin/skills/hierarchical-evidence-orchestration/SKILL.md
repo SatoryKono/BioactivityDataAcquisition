@@ -1,229 +1,307 @@
 ---
-name: hierarchical-evidence-orchestration
-description: Orchestrate hierarchical evidence work for a BioETL topic by decomposing it into shard packs, delegating `collecting-evidence` across those shards, and then running `synthesizing-pillars` on completed packs before assembling a cross-synthesis. Use when users ask for repo-wide or multi-package evidence programs, recursive topology studies, naming/documentation drift waves, or coordinated evidence-then-synthesis workflows.
+name: "hierarchical-evidence-orchestration"
+description: "Use when orchestrating complex evidence collection across multiple pillars or research streams. Coordinates parallel evidence gathering, manages task delegation, and ensures consistent quality standards across hierarchical research workflows."
+context: "fork"
+agent: "general-purpose"
 ---
 
 # Hierarchical Evidence Orchestration
 
 ## Source Of Truth
+
 - Root runtime contract: `../../../AGENTS.md`
 - Project rules: `../../../docs/00-project/RULES.md`
 - Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
 - Accepted ADRs: `../../../docs/02-architecture/decisions`
+- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+- Orchestration contract: [references/orchestration-contract.md](references/orchestration-contract.md)
+This skill coordinates hierarchical evidence collection across multiple research pillars or complex research streams.
 
-## Core Role
+## Prerequisites
 
-Act as the L1 orchestrator for evidence programs that are too large for one linear pass.
-Use this skill to coordinate a topic-level evidence wave, not to replace the shard-level
-skills:
+- Ledger workspace initialized (`/ledger-init` completed)
+- Multiple pillar assignments or complex research scope
+- Evidence collection capacity assessment
 
-- shard collection -> `collecting-evidence`
-- shard synthesis -> `synthesizing-pillars`
-
-## When To Use
-
-Use this skill when:
-
-- the topic spans multiple layers, packages, provider families, or doc domains
-- the user explicitly asks for hierarchical, recursive, parallel, or multi-agent evidence collection
-- one parent topic needs multiple child evidence packs and then a consolidated synthesis
-
-Do not use this skill for a single small pillar that fits cleanly into one `collecting-evidence` pass.
-
-## Startup Sequence
-
-Read, in this order:
-
-1. `../../../docs/00-project/ai/memory/agent-memory.md`
-1. `../../../docs/00-project/ai/agents/agents/ORCHESTRATION.md`
-1. `../collecting-evidence/SKILL.md`
-1. `../synthesizing-pillars/SKILL.md`
-1. [references/orchestration-contract.md](references/orchestration-contract.md)
-1. [references/shard-task-briefs.md](references/shard-task-briefs.md)
-
-## Input Contract
-
-Confirm these inputs before orchestration starts:
-
-- `topic_id` (required): parent topic, e.g. `project-package-topology`
-- `mode` (required): `collect | synthesize | full`
-- `shard_strategy` (required): `by-layer | by-package-family | by-doc-domain | custom`
-- `output_root` (optional, default): `docs/reports/evidence/<topic_id>/`
-- `shards` (optional): explicit shard list if the user already knows the decomposition
-
-## Artifact Contract
-
-Parent pack:
-
-- `docs/reports/evidence/<topic_id>/ORCHESTRATION.md`
-- `docs/reports/evidence/<topic_id>/SUMMARY.md`
-- `docs/reports/evidence/<topic_id>/03-synthesis/CROSS-SYNTHESIS-<topic_id>.md` (for `synthesize` or `full`)
-
-Child shard packs:
-
-- `docs/reports/evidence/<shard-topic>/01-pillars/PILLARS.md`
-- `docs/reports/evidence/<shard-topic>/02-evidence/<shard-topic>/EV-*.yaml`
-- `docs/reports/evidence/<shard-topic>/02-evidence/<shard-topic>/RAW-<shard-topic>-<date>.md`
-- `docs/reports/evidence/<shard-topic>/SUMMARY.md`
-- `docs/reports/evidence/<shard-topic>/03-synthesis/SYN-<shard-topic>.md` (after synthesis)
-
-## L1 Workflow
+## Workflow
 
 Use TodoWrite to track these mandatory steps:
 
 <required>
-1. Define parent topic and shard map
-2. Create parent orchestration artifact
-3. Create or validate shard pillar files
-4. Launch shard collectors
-5. Validate shard evidence gates
-6. Launch shard synthesizers for completed packs
-7. Build parent cross-synthesis
-8. Publish parent summary and gate status
+1. Analyze research scope and identify hierarchy
+2. Create orchestration plan with task delegation
+3. Assign evidence collection tasks to appropriate agents
+4. Monitor parallel evidence collection progress
+5. Consolidate evidence across streams
+6. Validate hierarchical consistency
+7. Generate unified evidence report
 </required>
 
-### Step 1: Define Shard Map
+### Step 1: Analyze Research Scope
 
-Decompose the topic into non-overlapping shards where possible.
+Assess the research complexity:
 
-Preferred shard shapes:
+- Number of pillars involved
+- Dependencies between research streams
+- Evidence collection capacity requirements
+- Timeline constraints
 
-- layers: `application`, `composition`, `domain`, `infrastructure`, `interfaces`
-- package families: `application/core`, `application/pipelines`, `composition/bootstrap`, `composition/factories`
-- doc domains: project/AI, architecture, reference/guides, operations/generated
-- custom families driven by the user's explicit request
+**Complexity assessment:**
 
-Avoid shards that overlap heavily in write scope or duplicate the same claims.
+| Complexity Level | Pillars | Parallel Streams | Orchestration Needed |
+| ---------------- | ------- | ---------------- | ---------------------- |
+| Low              | 1-2    | 1-2              | Basic coordination      |
+| Medium           | 3-5    | 2-3              | Task delegation       |
+| High             | 6+     | 4+               | Full orchestration     |
 
-### Step 2: Create Parent Orchestration Artifact
+### Step 2: Create Orchestration Plan
 
-Write `ORCHESTRATION.md` in the parent topic pack with:
+Define the orchestration strategy per [references/orchestration-contract.md](references/orchestration-contract.md):
 
-- topic scope
-- chosen shard strategy
-- shard list
-- owner/agent assignment
-- child output roots
-- mode (`collect`, `synthesize`, `full`)
+**Plan components:**
 
-Use the template guidance in [references/orchestration-contract.md](references/orchestration-contract.md).
+```yaml
+orchestration_plan:
+  pillars:
+    - name: market
+      priority: 1
+      evidence_target: 5
+      streams:
+        - market_size
+        - pricing_research
+        - competitive_analysis
+    - name: technology
+      priority: 2
+      evidence_target: 5
+      streams:
+        - architecture
+        - scalability
+        - security
+  parallel_strategy: "concurrent_independent"
+  delegation_rules:
+    - "Independent streams run in parallel"
+    - "Dependent streams wait for upstream completion"
+    - "Cross-pillar dependencies flagged for coordination"
+```
 
-### Step 3: Prepare Shard Packs
+### Step 3: Assign Evidence Collection Tasks
 
-For each shard:
+For each research stream, delegate to appropriate agents:
 
-- create `01-pillars/PILLARS.md`
-- define in-scope / out-of-scope
-- name the shard topic explicitly
-- keep shard output roots disjoint
+**Task delegation template:**
 
-If `mode = synthesize`, skip creation and validate that shard packs already exist and passed evidence gate.
+```yaml
+stream_tasks:
+  - stream: market_size
+    assigned_to: "collecting-evidence"
+    scope:
+      pillar: market
+      questions: ["TAM", SAM, SOM"]
+      sources: ["industry_reports", "analyst_research"]
+    deliverables:
+      - "02-evidence/market/EV-market-tam-b2b-saas.yaml"
+      - "02-evidence/market/EV-market-sam-vertical.yaml"
+    dependencies: []
+  - stream: pricing_research
+    assigned_to: "collecting-evidence"
+    scope:
+      pillar: market
+      questions: ["willingness_to_pay", "pricing_models"]
+      sources: ["surveys", "competitor_analysis"]
+    deliverables:
+      - "02-evidence/market/EV-market-pricing-smb-wtp.yaml"
+    dependencies: ["market_size"]
+```
 
-### Step 4: Run Shard Collection
+### Step 4: Monitor Parallel Progress
 
-For `mode = collect` or `mode = full`:
+Track progress across streams:
 
-- delegate each shard to `collecting-evidence`
-- require minimum 5 `EV-*.yaml` per shard unless the topic is explicitly narrow
-- require `SUMMARY.md`
-- require `git diff --check -- docs/reports/evidence/<shard-topic>`
+**Progress monitoring:**
 
-Do not perform synthesis in the child shard during collection unless the mode is `full` and the evidence gate is already satisfied.
+```yaml
+stream_progress:
+  market_size:
+    status: "in_progress"
+    evidence_collected: 3
+    evidence_target: 5
+    blockers: []
+  pricing_research:
+    status: "pending"
+    evidence_collected: 0
+    evidence_target: 5
+    blockers: ["market_size"]
+  technology_architecture:
+    status: "in_progress"
+    evidence_collected: 2
+    evidence_target: 5
+    blockers: []
+```
 
-### Step 5: Validate Shard Gates
+**Blocker resolution:**
 
-Each shard must report:
+- Identify cross-stream dependencies
+- Prioritize critical path streams
+- Reallocate resources if needed
 
-- evidence object count
-- gate status
-- YAML validation status
-- `git diff --check` status
+### Step 5: Consolidate Evidence
 
-If a shard fails gate:
+When streams complete, consolidate evidence:
 
-- mark it as `incomplete`
-- do not promote it to synthesis
-- record the gap in the parent summary
+**Consolidation checks:**
 
-### Step 6: Run Shard Synthesis
+- Remove duplicate evidence across streams
+- Identify contradictions between streams
+- Ensure consistent confidence scoring
+- Validate semantic ID uniqueness
 
-For `mode = synthesize` or `mode = full`:
+**Evidence inventory:**
 
-- delegate each completed shard to `synthesizing-pillars`
-- require `03-synthesis/SYN-<shard-topic>.md`
-- require evidence citations by `EV-*` id
-- require explicit contradictions and gaps
+```yaml
+evidence_inventory:
+  total_evidence_objects: 15
+  by_pillar:
+    market: 5
+    technology: 5
+    business_model: 5
+  by_confidence:
+    high: 8
+    medium: 5
+    low: 2
+  contradictions: 2
+```
 
-Do not create decisions in this workflow unless the user explicitly asks for `making-decisions`.
+### Step 6: Validate Hierarchical Consistency
 
-### Step 7: Build Parent Cross-Synthesis
+Ensure consistency across hierarchy:
 
-After shard synthesis is complete, create:
+**Consistency checks:**
 
-- `docs/reports/evidence/<topic_id>/03-synthesis/CROSS-SYNTHESIS-<topic_id>.md`
+| Check Type | Description | Action |
+| ---------- | ----------- | ------ |
+| Cross-pillar consistency | Same facts should have same evidence | Flag contradictions |
+| Confidence alignment | Related claims should have aligned confidence | Investigate outliers |
+| ID namespace | Semantic IDs should not collide across pillars | Rename if needed |
+| Source attribution | Same sources cited consistently | Standardize references |
 
-Parent cross-synthesis should:
+### Step 7: Generate Unified Report
 
-- summarize strongest patterns across shards
-- call out contradictions across shard boundaries
-- distinguish breadth from confirmed hotspot/debt signals
-- list unresolved gaps
+Produce hierarchical evidence report:
 
-This document is not a decision memo. Stop at synthesis unless the user explicitly asks for decisions.
+```markdown
+## Hierarchical Evidence Collection Report
 
-### Step 8: Publish Parent Summary
+**Orchestration Summary:**
+- Pillars: [N]
+- Research streams: [M]
+- Total evidence objects: [X]
+- Orchestration time: [Y hours]
+- Blockers resolved: [Z]
 
-Write `SUMMARY.md` in the parent pack with:
+### Evidence by Pillar
 
-- shard list
-- evidence counts per shard
-- synthesis status per shard
-- top 3-5 cross-topic findings
-- gate status for the full wave
+#### Market Pillar
+- Evidence objects: 5/5 ✓
+- Gate status: PASSED
+- Key findings: [...]
 
-## Delegation Rules
+#### Technology Pillar
+- Evidence objects: 5/5 ✓
+- Gate status: PASSED
+- Key findings: [...]
 
-Use subagents only when the user explicitly requested hierarchical, delegated, or parallel evidence work.
+### Cross-Pillar Insights
 
-Recommended split:
+- [Synthesized insights from multiple pillars]
+- [Identified contradictions and resolutions]
+- [Gap analysis across research scope]
 
-- `1-3` shards: orchestrator may self-run
-- `4-6` shards: delegate collection in parallel
-- `>6` shards: batch into waves and avoid excessive overlap
+### Orchestration Metrics
 
-Keep child write scopes disjoint:
+- Parallel efficiency: [X% faster than sequential]
+- Resource utilization: [Y%]
+- Quality consistency: [Z%]
+```
 
-- one shard -> one evidence package root
-- no child should edit the parent cross-synthesis
+## User Interaction
 
-## Constraints
+Use the **AskUserQuestion tool** when:
 
-MUST:
+### Orchestration strategy unclear
 
-- keep evidence collection separate from synthesis
-- use shard-local evidence IDs and summaries
-- cite evidence IDs in every synthesis insight
-- preserve uncertainties and contradictions
-- treat package count, file count, and breadth as observations, not defects by themselves
+```
+Question: "Research scope involves [N] pillars with [M] potential streams. Orchestration complexity assessment:"
+Options:
+- "Low complexity - basic coordination needed"
+- "Medium complexity - task delegation recommended"
+- "High complexity - full orchestration required"
+- "Help me assess complexity further"
+```
 
-MUST NOT:
+### Task delegation conflicts
 
-- skip the evidence gate and jump straight to synthesis
-- collapse multiple unrelated claims into one YAML object
-- produce `DEC-*` artifacts unless the user explicitly asks for decision work
-- let child shards overwrite each other's output roots
+```
+Question: "Stream [A] and Stream [B] both require [resource]. How to resolve?"
+Options:
+- "Prioritize Stream A (critical path)"
+- "Prioritize Stream B (higher priority pillar)"
+- "Split resource between streams"
+- "Wait for additional capacity"
+```
 
-## Completion Criteria
+### Contradiction resolution needed
 
-Treat the hierarchical wave as complete only when:
+```
+Question: "Evidence contradiction found: [details]. How to resolve?"
+Options:
+- "Flag for manual review"
+- "Prioritize more authoritative source"
+- "Create evidence for both with contradiction note"
+- "Research additional sources for resolution"
+```
 
-- parent `ORCHESTRATION.md` exists
-- each completed shard has `SUMMARY.md`
-- each synthesized shard has `SYN-<shard-topic>.md`
-- parent `CROSS-SYNTHESIS-<topic_id>.md` exists for `synthesize` or `full`
-- parent `SUMMARY.md` reports gate status and remaining gaps
+### Timeline pressure
+
+```
+Question: "Evidence collection behind schedule. [N] streams pending, [M] evidence objects remaining."
+Options:
+- "Extend timeline for quality"
+- "Accept partial evidence (document gaps)"
+- "Reallocate resources to critical streams"
+- "Deprioritize lower-priority pillars"
+```
+
+## Output
+
+After hierarchical orchestration:
+
+```markdown
+## Orchestration Complete
+
+**Streams Completed:** [M]/[M]
+**Total Evidence Objects:** [X]
+**Gate Status:** [ALL PASSED/PARTIAL/FAILED]
+
+### Stream Performance
+| Stream | Status | Evidence | Time | Blockers |
+| ------ | ------ | -------- | ---- | -------- |
+| market_size | ✓ | 5/5 | 2h | None |
+| pricing_research | ✓ | 5/5 | 3h | None |
+| ... | ... | ... | ... | ... |
+
+### Cross-Pillar Consistency
+- Consistency score: [X%]
+- Contradictions resolved: [Y]/[Z]
+- ID collisions: [0]
+
+### Orchestration Efficiency
+- Parallel speedup: [X% faster]
+- Resource utilization: [Y%]
+- Quality maintained: [Yes/No]
+```
 
 ## References
 
-- Orchestration artifact and gate contract: [references/orchestration-contract.md](references/orchestration-contract.md)
-- Collector and synthesizer shard briefs: [references/shard-task-briefs.md](references/shard-task-briefs.md)
+- [references/orchestration-contract.md](references/orchestration-contract.md) - orchestration rules
+- [references/shard-task-briefs.md](references/shard-task-briefs.md) - task delegation templates
+- [collecting-evidence/SKILL.md](../collecting-evidence/SKILL.md) - base evidence collection skill
