@@ -1,160 +1,291 @@
-# GitHub Issue Design Reference
+# GitHub Issue Design for Reproducibility Issues
 
-## When To Use
+## Purpose
 
-Use this only after a completed reproducibility audit produced confirmed
-findings backed by repository evidence.
+This document provides templates and guidelines for creating GitHub issues when reproducibility violations are found during audit.
 
-## Working Mode
+## Issue Template
 
-1. Use only confirmed problems from the audit.
-2. Do not add new hypotheses.
-3. Exclude:
-   - duplicates
-   - already fixed problems
-   - vague umbrella refactors
-   - architecture-breaking proposals
-4. Create exactly one root cause per issue.
-5. Decompose large findings into multiple issues.
+```markdown
+## Reproducibility Violation Found
 
-## Output Order
+**Severity:** [High/Medium/Low]
+**Component:** [component_name]
+**Audit Date:** [timestamp]
+**Auditor:** [agent/skill]
 
-### Step 1 — Plan
+### Summary
 
-Start with a table:
+[Brief description of the reproducibility violation]
 
-| # | Title | Area | Priority | Size | Root cause | Key files |
+### Violation Type
 
-### Step 2 — Issues
+- [ ] Determinism violation
+- [ ] Test coverage insufficient
+- [ ] I/O non-determinism
+- [ ] Schema validation missing
+- [ ] Logging issue
+- [ ] Dependency issue
+- [ ] Breaking change undocumented
 
-Then provide the full issue set using the structure below.
+### Details
 
-## Required Structure For Each Issue
+**File:** [file_path]
+**Line:** [line_number]
+**Pattern:** [violation_pattern]
 
-### 1. Title
+**Code:**
+```python
+[code_snippet]
+```
 
-Format:
+**Risk:**
+[Description of risk]
 
-`[area] Imperative description`
+### Impact
 
-### 2. Problem
+- [ ] Breaks replay capability
+- [ ] Causes non-deterministic behavior
+- [ ] Reduces test reliability
+- [ ] Exposes secrets
+- [ ] Breaking change without documentation
 
-Facts only. No solution language.
+### Recommended Fix
 
-### 3. Evidence
+[Description of recommended fix]
 
-Mandatory file-level evidence, for example:
+**Example:**
+```python
+[fixed_code_snippet]
+```
 
-- `path/to/file.py::ClassName`
-- `configs/...yaml`
-- `tests/...`
+### Acceptance Criteria
 
-If there is no concrete evidence, do not create the issue.
+- [ ] Fix implements deterministic pattern
+- [ ] Tests added for new code paths
+- [ ] Schema validation in place
+- [ ] Structured logging used
+- [ ] Dependencies pinned
+- [ ] Breaking changes documented
 
-### 4. Root Cause
+### Priority
 
-State the architectural violation, design flaw, or drift briefly.
+**Priority:** [P0/P1/P2/P3]
 
-### 5. Architectural Impact
+**Rationale:**
+[Justification for priority]
 
-Assess only relevant impact on:
+### Related
 
-- layer boundaries
-- dependency direction
-- determinism / idempotency
-- DQ / validation
-- observability
-- reproducibility
+- [ ] ADR
+- [ ] Requirement
+- [ ] Related issue
+- [ ] Related PR
+```
 
-### 6. Required Outcome
+## Example Issues
 
-Describe the post-fix state as explicit truths about the system.
+### Example 1: Non-Deterministic DataFrame Operation
 
-### 7. File-level Implementation Plan
+```markdown
+## Reproducibility Violation Found
 
-#### Changes
+**Severity:** High
+**Component:** src/bioetl/pipelines/chembl/activity.py
+**Audit Date:** 2026-01-21T10:00:00Z
+**Auditor:** py-reproducibility-audit
 
-List concrete file edits:
+### Summary
 
-- `src/.../file.py`
-  - what to remove / move / rename / rewrite
-- `configs/...`
-  - what fields to add / change / remove
-- `tests/...`
-  - what tests to add / update / delete
+Non-deterministic DataFrame operation found - `df.head(10)` without stable sorting.
 
-#### Refactoring actions
+### Violation Type
 
-Describe any movement of logic between layers, deduplication, or legacy removal.
+- [x] Determinism violation
+- [ ] Test coverage insufficient
+- [ ] I/O non-determinism
+- [ ] Schema validation missing
+- [ ] Logging issue
+- [ ] Dependency issue
+- [ ] Breaking change undocumented
 
-#### Contracts impact
+### Details
 
-State impact on:
+**File:** src/bioetl/pipelines/chembl/activity.py
+**Line:** 145
+**Pattern:** Unsorted DataFrame head operation
 
-- ports
-- schemas
-- DQ rules
-- config contracts
+**Code:**
+```python
+result = df.head(10)
+```
 
-#### Migration
+**Risk:**
+Results will vary between runs, breaking replay capability and causing inconsistent test results.
 
-If needed, describe:
+### Impact
 
-- backfill
-- contract version bump
-- data rewrite
+- [x] Breaks replay capability
+- [x] Causes non-deterministic behavior
+- [x] Reduces test reliability
+- [ ] Exposes secrets
+- [ ] Breaking change without documentation
 
-### 8. Constraints
+### Recommended Fix
 
-State explicitly that the fix must not:
+Add stable sorting before head operation:
 
-- import infrastructure into domain
-- add I/O into domain
-- violate dependency direction
-- mutate Quarantine payload
-- weaken Gold strict validation
-- create dependency cycles
+```python
+result = df.sort_values('activity_id').head(10)
+```
 
-### 9. Acceptance Criteria
+### Acceptance Criteria
 
-Use verifiable conditions:
+- [x] Fix implements deterministic pattern
+- [ ] Tests added for new code paths
+- [ ] Schema validation in place
+- [ ] Structured logging used
+- [ ] Dependencies pinned
+- [ ] Breaking changes documented
 
-- unit / integration / architecture tests pass
-- no RULES.md violations
-- no new dependency cycles
-- determinism preserved
-- idempotency preserved
+### Priority
 
-### 10. Priority
+**Priority:** P0
 
-Use `P0` / `P1` / `P2` / `P3` with justification.
+**Rationale:**
+High severity - breaks core reproducibility invariant, affects all downstream consumers.
 
-### 11. Size
+### Related
 
-Use `S` / `M` / `L` / `XL` with justification.
+- [ ] ADR-001: Determinism Requirements
+- [ ] REQ-045: Reproducibility
+```
 
-### 12. Labels
+### Example 2: Insufficient Test Coverage
 
-Choose only from:
+```markdown
+## Reproducibility Violation Found
 
-- `architecture`
-- `dq`
-- `observability`
-- `technical-debt`
-- `refactor`
-- `testing`
-- `configs`
-- `governance`
+**Severity:** Medium
+**Component:** src/bioetl/clients/chembl.py
+**Audit Date:** 2026-01-21T11:00:00Z
+**Auditor:** py-reproducibility-audit
 
-### 13. Dependencies
+### Summary
 
-List issue dependencies when they exist.
+Test coverage for new function `fetch_activity_data` is 65%, below 80% threshold.
 
-## Guardrails
+### Violation Type
 
-- No generic recommendations.
-- No “could improve” language.
-- Only actionable engineering work.
-- Every issue must be implementable without guesswork.
-- If the natural fix would violate BioETL architecture, say so and propose the
-  architecture-safe alternative.
+- [ ] Determinism violation
+- [x] Test coverage insufficient
+- [ ] I/O non-determinism
+- [ ] Schema validation missing
+- [ ] Logging issue
+- [ ] Dependency issue
+- [ ] Breaking change undocumented
+
+### Details
+
+**File:** src/bioetl/clients/chembl.py
+**Line:** 78-120
+**Pattern:** New function without adequate test coverage
+
+**Code:**
+```python
+def fetch_activity_data(self, activity_ids: List[str]) -> pd.DataFrame:
+    # Implementation
+    pass
+```
+
+**Risk:**
+Untested code paths may contain bugs that only manifest in production, reducing reliability.
+
+### Impact
+
+- [ ] Breaks replay capability
+- [ ] Causes non-deterministic behavior
+- [x] Reduces test reliability
+- [ ] Exposes secrets
+- [ ] Breaking change without documentation
+
+### Recommended Fix
+
+Add unit tests for all code paths:
+
+```python
+def test_fetch_activity_data_success():
+    # Test successful fetch
+    pass
+
+def test_fetch_activity_data_empty():
+    # Test empty result
+    pass
+
+def test_fetch_activity_data_error():
+    # Test error handling
+    pass
+```
+
+### Acceptance Criteria
+
+- [ ] Fix implements deterministic pattern
+- [x] Tests added for new code paths
+- [ ] Schema validation in place
+- [ ] Structured logging used
+- [ ] Dependencies pinned
+- [ ] Breaking changes documented
+
+### Priority
+
+**Priority:** P1
+
+**Rationale:**
+Medium severity - affects test reliability but doesn't break core invariants.
+
+### Related
+
+- [ ] REQ-089: Test Coverage Requirements
+```
+
+## Severity Guidelines
+
+| Severity | Criteria | Response Time |
+| -------- | -------- | ------------- |
+| High | Breaks core invariant, affects replay capability | Immediate |
+| Medium | Reduces reliability, below threshold | Within 1 day |
+| Low | Cosmetic, documentation only | Within 1 week |
+
+## Priority Guidelines
+
+| Priority | Severity | Impact | Example |
+| -------- | -------- | ------ | ------- |
+| P0 | High | Critical path | Non-deterministic core operation |
+| P1 | Medium | Important feature | Insufficient test coverage |
+| P2 | Low | Nice to have | Documentation gap |
+| P3 | Low | Backlog | Minor cosmetic issue |
+
+## Labels
+
+Use these labels for reproducibility issues:
+
+- `reproducibility`
+- `determinism`
+- `test-coverage`
+- `schema-validation`
+- `logging`
+- `dependencies`
+- `breaking-change`
+
+## Checklist
+
+Before creating issue:
+
+- [ ] Violation confirmed in audit
+- [ ] File and line identified
+- [ ] Risk assessed
+- [ ] Impact documented
+- [ ] Recommended fix proposed
+- [ ] Acceptance criteria defined
+- [ ] Priority justified
+- [ ] Related artifacts linked
