@@ -30,11 +30,7 @@ manual.
 - Accepted ADRs in `../../../../../02-architecture/decisions/`
 - Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
 - Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
-- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../docs/02-architecture/decisions`
-- Root runtime contract: `../../../AGENTS.md`
-- Project rules: `../../../docs/00-project/RULES.md`
-- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+
 - CODEOWNERS and GitHub permissions when available
 
 ## Progressive Disclosure

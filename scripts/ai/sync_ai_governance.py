@@ -205,6 +205,15 @@ GOVERNANCE_SKILL_LINES_DOCS = (
     "- Memory policy: `../../../agents/guides/MEMORY_USAGE.md`",
     "- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`",
 )
+GOVERNANCE_SKILL_LABELS = (
+    "- Normative index:",
+    "- Root runtime contract:",
+    "- Project rules:",
+    "- Requirements:",
+    "- Accepted ADRs",
+    "- Memory policy:",
+    "- Post-change validation:",
+)
 
 
 def _docs_skill_mirror_header(canonical: Path) -> str:
@@ -226,25 +235,44 @@ def _ensure_docs_skill_mirror_header(body: str, canonical: Path) -> str:
 
 
 def _ensure_docs_skill_governance(body: str) -> str:
-    return _ensure_source_of_truth_lines(
+    body = "".join(
+        line
+        for line in body.splitlines(keepends=True)
+        if not line.startswith(GOVERNANCE_SKILL_LABELS)
+    )
+    updated = _ensure_source_of_truth_lines(
         body,
         lines=GOVERNANCE_SKILL_LINES_DOCS,
     )
+    final_governance_line = GOVERNANCE_SKILL_LINES_DOCS[-1] + "\n"
+    if final_governance_line + "\n" not in updated:
+        updated = updated.replace(
+            final_governance_line,
+            final_governance_line + "\n",
+            1,
+        )
+    return updated
 
 
-def sync_docs_skill_mirrors(root: Path, *, check_only: bool) -> list[str]:
-    docs_root = root / "docs/00-project/ai/skills/local"
+def sync_docs_skill_mirrors(
+    root: Path,
+    *,
+    check_only: bool,
+    docs_root: Path | None = None,
+    canonical_reference_root: Path = Path(".codex/skills"),
+) -> list[str]:
+    docs_root = docs_root or root / "docs/00-project/ai/skills/local"
     issues: list[str] = []
     for path in sorted(docs_root.rglob(SKILL_FILE_NAME)):
         canonical = (
-            Path(".codex")
-            / "skills"
+            canonical_reference_root
             / path.parent.relative_to(docs_root)
             / SKILL_FILE_NAME
         )
         original = path.read_text(encoding="utf-8")
         updated = _ensure_docs_skill_mirror_header(original, canonical)
         updated = _ensure_docs_skill_governance(updated)
+        updated = updated.rstrip("\r\n") + "\n"
         if updated != original:
             rel = path.relative_to(root)
             if check_only:
@@ -274,7 +302,32 @@ def _contract_paths(root: Path, contract: dict[str, object]) -> dict[str, Path]:
         raise ValueError(
             "skills mirror contract is missing root paths: " + ", ".join(missing)
         )
-    return {name: root / str(raw_roots[name]) for name in required}
+    root_resolved = root.resolve()
+    paths: dict[str, Path] = {}
+    for name in required:
+        raw_path = Path(str(raw_roots[name]))
+        if raw_path.is_absolute() or ".." in raw_path.parts:
+            raise ValueError(
+                f"skills mirror contract root {name} must be repository-relative "
+                f"without '..': {raw_path}"
+            )
+        resolved = (root_resolved / raw_path).resolve()
+        if resolved == root_resolved or not resolved.is_relative_to(root_resolved):
+            raise ValueError(
+                f"skills mirror contract root {name} escapes repository: {raw_path}"
+            )
+        paths[name] = resolved
+    docs_mirror = paths["docs_mirror"]
+    for protected_name in ("canonical", "devin", "reference_overlay"):
+        protected = paths[protected_name]
+        if docs_mirror.is_relative_to(protected) or protected.is_relative_to(
+            docs_mirror
+        ):
+            raise ValueError(
+                "skills mirror contract docs_mirror must not overlap "
+                f"{protected_name}: {docs_mirror} vs {protected}"
+            )
+    return paths
 
 
 def _skill_entrypoints(skills_root: Path, entrypoint: str) -> set[str]:
@@ -480,14 +533,18 @@ def _materialize_expected_docs_mirror(
     paths: dict[str, Path],
     temp_root: Path,
 ) -> Path:
-    docs_relative = paths["docs_mirror"].relative_to(root)
-    expected_docs = temp_root / docs_relative
+    root_resolved = root.resolve()
+    temp_resolved = temp_root.resolve()
+    docs_relative = paths["docs_mirror"].relative_to(root_resolved)
+    expected_docs = (temp_resolved / docs_relative).resolve()
+    if expected_docs == temp_resolved or not expected_docs.is_relative_to(
+        temp_resolved
+    ):
+        raise ValueError(f"Docs mirror temp target escapes temp root: {docs_relative}")
     expected_docs.parent.mkdir(parents=True, exist_ok=True)
     shutil.copytree(paths["canonical"], expected_docs)
 
     overlay_root = paths["reference_overlay"]
-    if not overlay_root.is_dir():
-        raise FileNotFoundError(f"Reference overlay root missing: {overlay_root}")
     for source in sorted(overlay_root.rglob("*")):
         if not source.is_file():
             continue
@@ -495,9 +552,13 @@ def _materialize_expected_docs_mirror(
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, target)
 
-    transform_issues = sync_docs_skill_mirrors(temp_root, check_only=False)
-    if transform_issues:
-        raise RuntimeError("; ".join(transform_issues))
+    canonical_reference_root = paths["canonical"].relative_to(root_resolved)
+    sync_docs_skill_mirrors(
+        temp_resolved,
+        check_only=False,
+        docs_root=expected_docs,
+        canonical_reference_root=canonical_reference_root,
+    )
     return expected_docs
 
 
@@ -527,6 +588,11 @@ def sync_skill_mirrors(root: Path, *, check_only: bool) -> list[str]:
     contract = _load_skills_mirror_contract(root)
     paths = _contract_paths(root, contract)
     issues = _validate_codex_devin_parity(paths, contract)
+    if not paths["canonical"].is_dir() or not paths["devin"].is_dir():
+        return issues
+    if not paths["reference_overlay"].is_dir():
+        issues.append(f"Reference overlay root missing: {paths['reference_overlay']}")
+        return issues
 
     with tempfile.TemporaryDirectory(prefix="bioetl-skills-mirror-") as temp_dir:
         expected_docs = _materialize_expected_docs_mirror(root, paths, Path(temp_dir))

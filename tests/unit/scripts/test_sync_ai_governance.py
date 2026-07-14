@@ -175,6 +175,11 @@ def test_sync_docs_skill_mirrors_adds_runtime_header_and_tokens(
                 "",
                 "# Architecture Guardian",
                 "",
+                "## Source Of Truth",
+                "",
+                "- Root runtime contract: `../../../AGENTS.md`",
+                "- Project rules: `../../../docs/00-project/RULES.md`",
+                "",
                 "## Workflow",
                 "",
                 "1. Check architecture.",
@@ -196,6 +201,14 @@ def test_sync_docs_skill_mirrors_adds_runtime_header_and_tokens(
     assert "AI_RUNTIME_MIRROR_OWNERSHIP.md" in "\n".join(text.splitlines()[:40])
     assert "../../../../../../AGENTS.md" in text
     assert "../../../../NORMATIVE_SOURCES.md" in text
+    assert "- Root runtime contract: `../../../AGENTS.md`" not in text.splitlines()
+    assert (
+        "- Project rules: `../../../docs/00-project/RULES.md`" not in text.splitlines()
+    )
+    assert (
+        "- Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`"
+        "\n\n## Workflow"
+    ) in text
 
     before = text
     assert sync_ai_governance.sync_docs_skill_mirrors(tmp_path, check_only=False) == []
@@ -209,6 +222,47 @@ def test_skills_mirror_reports_missing_devin_entrypoint(tmp_path: Path) -> None:
     issues = sync_ai_governance.sync_skill_mirrors(tmp_path, check_only=True)
 
     assert "Devin missing skill entrypoint: demo/SKILL.md" in issues
+
+
+def test_skills_mirror_reports_missing_root_without_traceback(tmp_path: Path) -> None:
+    _seed_skills_mirror_fixture(tmp_path)
+    devin_root = tmp_path / ".devin/skills"
+    for path in sorted(devin_root.rglob("*"), reverse=True):
+        if path.is_file():
+            path.unlink()
+        else:
+            path.rmdir()
+    devin_root.rmdir()
+
+    issues = sync_ai_governance.sync_skill_mirrors(tmp_path, check_only=True)
+
+    assert issues == [f"Devin skills root missing: {devin_root.resolve()}"]
+
+
+def test_skills_mirror_rejects_contract_path_traversal(tmp_path: Path) -> None:
+    _seed_skills_mirror_fixture(tmp_path)
+    contract_path = tmp_path / sync_ai_governance.SKILLS_MIRROR_CONTRACT_PATH
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    contract["roots"]["docs_mirror"] = "../outside"
+    contract_path.write_text(json.dumps(contract) + "\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="repository-relative without '\\.\\.'"):
+        sync_ai_governance.sync_skill_mirrors(tmp_path, check_only=False)
+
+    assert not (tmp_path.parent / "outside").exists()
+
+
+def test_skills_mirror_rejects_destructive_root_overlap(tmp_path: Path) -> None:
+    _seed_skills_mirror_fixture(tmp_path)
+    contract_path = tmp_path / sync_ai_governance.SKILLS_MIRROR_CONTRACT_PATH
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    contract["roots"]["docs_mirror"] = ".codex"
+    contract_path.write_text(json.dumps(contract) + "\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="docs_mirror must not overlap canonical"):
+        sync_ai_governance.sync_skill_mirrors(tmp_path, check_only=False)
+
+    assert (tmp_path / ".codex/skills/demo/SKILL.md").is_file()
 
 
 def test_skills_mirror_reports_unexpected_devin_entrypoint(tmp_path: Path) -> None:
