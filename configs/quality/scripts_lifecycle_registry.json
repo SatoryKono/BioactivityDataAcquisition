@@ -554,6 +554,24 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side compatibility launcher for the canonical scripts.ops ensure-quarantine-explorer command while Grafana local audit flows may still need a direct PowerShell entrypoint; retire it once Windows-specific observability launch wrappers are fully consolidated."
     },
+    "scripts/ops/observability/validate_emitter_contracts.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded manual observability contract-audit utility while audit evidence references the direct script; promote it to an active governed command only after CI ownership and deterministic regression coverage are established."
+    },
+    "scripts/ops/observability/validate_live_observability.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded manual live-stack validation utility while audit evidence references the direct script; promote it to an active governed command only after local-only runtime prerequisites, CI ownership, and deterministic checks are formalized."
+    },
+    "scripts/ops/observability/validate_metric_to_panel_mapping.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded manual metric-to-panel audit utility while audit evidence references the direct script; promote it to an active governed command only after CI ownership and deterministic dashboard-contract coverage are established."
+    },
     "scripts/ops/maintenance/git/delete-stale-branches.sh": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",

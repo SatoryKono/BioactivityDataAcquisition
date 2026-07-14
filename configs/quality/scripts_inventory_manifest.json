@@ -1,22 +1,21 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-14T10:02:50.125866+00:00",
+  "generated_at": "2026-07-14T10:29:24.535596+00:00",
   "summary": {
     "total_scripts": 461,
     "status_counts": {
       "active": 345,
-      "supporting": 113,
-      "unknown": 3
+      "supporting": 116
     },
     "reference_group_coverage": {
       "agents": 5,
       "build": 9,
-      "ci": 62,
+      "ci": 60,
       "docs": 179,
-      "other": 28,
-      "scripts": 357,
+      "other": 32,
+      "scripts": 356,
       "skills": 16,
-      "tests": 205
+      "tests": 206
     }
   },
   "scripts": [
@@ -86,7 +85,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/README.md",
-          "line": 36,
+          "line": 35,
           "source_group": "docs",
           "text": "| `scripts/ai/codex/check_skills_layout.sh` | Validates `_references` exists as a required subdirectory              |"
         },
@@ -103,19 +102,13 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 10,
       "references": [
         {
           "path": ".codex/skills/SKILLS-CATALOG.md",
-          "line": 17,
+          "line": 13,
           "source_group": "skills",
           "text": "bash scripts/ai/codex/check_skills_mirror.sh --check"
-        },
-        {
-          "path": ".codex/skills/SKILLS-CATALOG.md",
-          "line": 18,
-          "source_group": "skills",
-          "text": "bash scripts/ai/codex/check_skills_mirror.sh --sync"
         },
         {
           "path": ".github/ISSUES/AI-RUNTIME-AUDIT-001-Make-AI-Skill-Mirror-CI-Truthful-And-Enforce-Devin-Parity.md",
@@ -136,22 +129,28 @@
           "text": "bash scripts/ai/codex/check_skills_mirror.sh --check"
         },
         {
-          "path": ".github/workflows/skills-consistency.yml",
-          "line": 20,
-          "source_group": "ci",
-          "text": "- \"scripts/ai/codex/check_skills_mirror.sh\""
-        },
-        {
-          "path": ".github/workflows/skills-consistency.yml",
-          "line": 37,
-          "source_group": "ci",
-          "text": "- \"scripts/ai/codex/check_skills_mirror.sh\""
-        },
-        {
-          "path": "docs/00-project/ai/skills/README.md",
-          "line": 62,
+          "path": "docs/00-project/ai/skills/_references/README.md",
+          "line": 26,
           "source_group": "docs",
-          "text": "Use `bash scripts/ai/codex/check_skills_mirror.sh --check` for the read-only CI"
+          "text": "- Check command: `bash scripts/ai/codex/check_skills_mirror.sh`."
+        },
+        {
+          "path": "docs/00-project/ai/skills/_references/README.md",
+          "line": 34,
+          "source_group": "docs",
+          "text": "| `scripts/ai/codex/check_skills_mirror.sh` | Overlays reference bundles from `_references/local` onto skill mirrors |"
+        },
+        {
+          "path": "docs/00-project/ai/skills/local/SKILLS-CATALOG.md",
+          "line": 13,
+          "source_group": "docs",
+          "text": "bash scripts/ai/codex/check_skills_mirror.sh --check"
+        },
+        {
+          "path": "docs/05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md",
+          "line": 159,
+          "source_group": "docs",
+          "text": "| HGN-007 / #6177 | `configs/quality/generated_artifact_routing.yaml` owns `ai-skill-reference-mirror` and `ai-skill-license-mirrors` through `scripts/ai/codex/check_skills_mirror.sh`. | Closed. Skill"
         }
       ]
     },
@@ -170,7 +169,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 193,
+          "line": 195,
           "source_group": "scripts",
           "text": "for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the"
         },
@@ -203,7 +202,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 193,
+          "line": 195,
           "source_group": "scripts",
           "text": "for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the"
         },
@@ -242,7 +241,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 193,
+          "line": 195,
           "source_group": "scripts",
           "text": "for you. `diagnose_wsl.sh`, `diagnose_wsl.ps1`, and `diagnose_wsl.bat` are the"
         },
@@ -305,7 +304,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 192,
+          "line": 194,
           "source_group": "scripts",
           "text": "The canonical `headless.sh` / `headless.ps1` launchers set `CODEX_SKIP_MCP_SETUP=1`"
         }
@@ -332,7 +331,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 192,
+          "line": 194,
           "source_group": "scripts",
           "text": "The canonical `headless.sh` / `headless.ps1` launchers set `CODEX_SKIP_MCP_SETUP=1`"
         },
@@ -407,13 +406,13 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 212,
+          "line": 214,
           "source_group": "scripts",
           "text": ".\\helper\\diagnose-hang.ps1"
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 274,
+          "line": 276,
           "source_group": "scripts",
           "text": "- `diagnose-hang.ps1` - **NEW**: Debug tool for setup hangs"
         },
@@ -572,7 +571,7 @@
         },
         {
           "path": "scripts/ai/codex/README.md",
-          "line": 275,
+          "line": 277,
           "source_group": "scripts",
           "text": "- `run-codex-impl.sh` - Launch Codex with environment"
         },
@@ -1327,7 +1326,7 @@
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
           "line": 35,
           "source_group": "docs",
-          "text": "| `.devin/config.json` | yes | portable tracked active Devin runtime config | generated by `scripts/ai/codex/setup_mcp.py`; MCP paths are repo-relative, while existing Devin-owned non-MCP settings are"
+          "text": "| `.devin/config.json` | yes | portable tracked Devin runtime config | generated by `scripts/ai/codex/setup_mcp.py`; `mcpServers` is repo-relative while Devin-owned top-level settings are preserved |"
         },
         {
           "path": "docs/00-project/governance/03-file-policy.md",
@@ -2248,7 +2247,7 @@
       "references": [
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 257,
+          "line": 244,
           "source_group": "tests",
           "text": "ps_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.ps1\").read_text("
         },
@@ -2287,7 +2286,7 @@
         },
         {
           "path": "tests/architecture/test_dev_setup_copilot_codex_mcp_consolidation.py",
-          "line": 254,
+          "line": 241,
           "source_group": "tests",
           "text": "sh_content = (root / \"scripts/ai/mcp/github-mcp-wrapper.sh\").read_text("
         },
@@ -2961,7 +2960,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 73,
+          "line": 70,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/load_repo_env.ps1`"
         },
@@ -3045,7 +3044,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 85,
+          "line": 82,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.ps1`"
         },
@@ -3102,7 +3101,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 84,
+          "line": 81,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.sh`"
         },
@@ -3188,20 +3187,8 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 2,
       "references": [
-        {
-          "path": ".github/workflows/skills-consistency.yml",
-          "line": 22,
-          "source_group": "ci",
-          "text": "- \"scripts/ai/sync_ai_governance.py\""
-        },
-        {
-          "path": ".github/workflows/skills-consistency.yml",
-          "line": 39,
-          "source_group": "ci",
-          "text": "- \"scripts/ai/sync_ai_governance.py\""
-        },
         {
           "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
           "line": 97,
@@ -3213,18 +3200,6 @@
           "line": 167,
           "source_group": "docs",
           "text": "uv run python scripts/ai/sync_ai_governance.py"
-        },
-        {
-          "path": "scripts/ai/codex/check_skills_mirror.sh",
-          "line": 23,
-          "source_group": "scripts",
-          "text": "exec python3 \"$REPO_ROOT/scripts/ai/sync_ai_governance.py\" \\"
-        },
-        {
-          "path": "scripts/ai/codex/check_skills_mirror.sh",
-          "line": 27,
-          "source_group": "scripts",
-          "text": "exec python3 \"$REPO_ROOT/scripts/ai/sync_ai_governance.py\" \\"
         }
       ],
       "owner": "@bioetl-platform",
@@ -3268,7 +3243,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 13,
       "references": [
         {
           "path": "Makefile",
@@ -4057,7 +4032,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
-          "line": 128,
+          "line": 134,
           "source_group": "docs",
           "text": "- `python scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`"
         },
@@ -4378,10 +4353,16 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 12,
       "references": [
         {
           "path": "Makefile",
+          "line": 279,
+          "source_group": "build",
+          "text": "$(RUN) python scripts/diagrams/generate_all_bundles.py"
+        },
+        {
+          "path": "makefile",
           "line": 279,
           "source_group": "build",
           "text": "$(RUN) python scripts/diagrams/generate_all_bundles.py"
@@ -4421,12 +4402,6 @@
           "line": 87,
           "source_group": "scripts",
           "text": "\"generate_all_bundles.py\", \"--collection\", \"architecture\""
-        },
-        {
-          "path": "scripts/diagrams/__main__.py",
-          "line": 91,
-          "source_group": "scripts",
-          "text": "\"render-views\": python_command(\"generate_all_bundles.py\", \"--collection\", \"views\"),"
         }
       ]
     },
@@ -4699,7 +4674,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
-          "line": 124,
+          "line": 130,
           "source_group": "docs",
           "text": "- `python scripts/diagrams/lint_diagrams.py docs`"
         },
@@ -4916,7 +4891,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 24,
+      "reference_count": 25,
       "references": [
         {
           "path": ".codex/agents/py-doc-bot.md",
@@ -5279,7 +5254,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
-          "line": 125,
+          "line": 131,
           "source_group": "docs",
           "text": "- `bash scripts/diagrams/validate_mermaid_syntax.sh`"
         },
@@ -5349,7 +5324,7 @@
         "grafana-dashboard-extension",
         "py-doc-bot"
       ],
-      "reference_count": 155,
+      "reference_count": 154,
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md",
@@ -6680,7 +6655,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 24,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -7193,7 +7168,7 @@
         },
         {
           "path": "scripts/engineering/qa/report_debt_governance_gates.py",
-          "line": 1015,
+          "line": 1032,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py::\""
         },
@@ -7909,7 +7884,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 22,
       "references": [
         {
           "path": "Makefile",
@@ -8230,7 +8205,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 20,
       "references": [
         {
           "path": ".github/workflows/root-hygiene.yml",
@@ -10027,7 +10002,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/grafana-dashboard-render/SKILL.md",
-          "line": 69,
+          "line": 75,
           "source_group": "docs",
           "text": "uv run python scripts/engineering/qa/report_dashboard_inventory.py --json"
         },
@@ -11008,7 +10983,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/vcr-record/SKILL.md",
-          "line": 56,
+          "line": 62,
           "source_group": "docs",
           "text": "python -m scripts.engineering.qa.vcr check-placement"
         },
@@ -11154,7 +11129,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 73,
+      "reference_count": 76,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -12168,7 +12143,7 @@
       "agent_usage": [
         "grafana-dashboard-render"
       ],
-      "reference_count": 55,
+      "reference_count": 56,
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
@@ -12997,7 +12972,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 18,
       "references": [
         {
           "path": "Makefile",
@@ -13016,6 +12991,12 @@
           "line": 282,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
+        },
+        {
+          "path": "makefile",
+          "line": 226,
+          "source_group": "build",
+          "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only"
         },
         {
           "path": "scripts/engineering/dev/README.md",
@@ -13040,12 +13021,6 @@
           "line": 570,
           "source_group": "scripts",
           "text": "# setup_plugins.sh may provision a temporary pytest runtime under /tmp when"
-        },
-        {
-          "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
-          "line": 109,
-          "source_group": "scripts",
-          "text": "Candidate(\"scripts/ops/launchers/codex/setup_plugins.sh\", BOOTSTRAP_HELPER_ROLE),"
         }
       ]
     },
@@ -13354,8 +13329,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
+        {
+          "path": ".github/ISSUES/AUD-OBS-20260714-002-Add-Truthful-Observability-Validation-Gates.md",
+          "line": 17,
+          "source_group": "other",
+          "text": "- `scripts/ops/observability/grafana/audit_live_grafana_panels.py`"
+        },
         {
           "path": "docs/00-project/ai/audit/observability-issues/OBS-006-validation-findings.md",
           "line": 5,
@@ -13605,10 +13586,16 @@
     {
       "path": "scripts/ops/observability/validate_emitter_contracts.py",
       "type": "py",
-      "status": "unknown",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
+        {
+          "path": ".github/ISSUES/AUD-OBS-20260714-002-Add-Truthful-Observability-Validation-Gates.md",
+          "line": 16,
+          "source_group": "other",
+          "text": "- `scripts/ops/observability/validate_emitter_contracts.py`"
+        },
         {
           "path": "docs/00-project/ai/audit/observability-issues/OBS-004-validation-findings.md",
           "line": 5,
@@ -13633,15 +13620,31 @@
           "source_group": "docs",
           "text": "python scripts/ops/observability/validate_emitter_contracts.py"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded manual observability contract-audit utility while audit evidence references the direct script; promote it to an active governed command only after CI ownership and deterministic regression coverage are established."
     },
     {
       "path": "scripts/ops/observability/validate_live_observability.py",
       "type": "py",
-      "status": "unknown",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 7,
       "references": [
+        {
+          "path": ".github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md",
+          "line": 115,
+          "source_group": "other",
+          "text": "- Run `python scripts/ops/observability/validate_live_observability.py` against"
+        },
+        {
+          "path": ".github/ISSUES/AUD-OBS-20260714-002-Add-Truthful-Observability-Validation-Gates.md",
+          "line": 14,
+          "source_group": "other",
+          "text": "- `scripts/ops/observability/validate_live_observability.py`"
+        },
         {
           "path": "docs/00-project/ai/audit/observability-issues/OBS-003-validation-findings.md",
           "line": 5,
@@ -13672,15 +13675,31 @@
           "source_group": "docs",
           "text": "python scripts/ops/observability/validate_live_observability.py"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded manual live-stack validation utility while audit evidence references the direct script; promote it to an active governed command only after local-only runtime prerequisites, CI ownership, and deterministic checks are formalized."
     },
     {
       "path": "scripts/ops/observability/validate_metric_to_panel_mapping.py",
       "type": "py",
-      "status": "unknown",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 8,
       "references": [
+        {
+          "path": ".github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md",
+          "line": 117,
+          "source_group": "other",
+          "text": "- Run `python scripts/ops/observability/validate_metric_to_panel_mapping.py`"
+        },
+        {
+          "path": ".github/ISSUES/AUD-OBS-20260714-002-Add-Truthful-Observability-Validation-Gates.md",
+          "line": 15,
+          "source_group": "other",
+          "text": "- `scripts/ops/observability/validate_metric_to_panel_mapping.py`"
+        },
         {
           "path": "docs/00-project/ai/audit/observability-issues/OBS-002-validation-findings.md",
           "line": 5,
@@ -13717,7 +13736,11 @@
           "source_group": "docs",
           "text": "python scripts/ops/observability/validate_metric_to_panel_mapping.py"
         }
-      ]
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a bounded manual metric-to-panel audit utility while audit evidence references the direct script; promote it to an active governed command only after CI ownership and deterministic dashboard-contract coverage are established."
     },
     {
       "path": "scripts/ops/runtime/deploy/deploy-bioetl.sh",
@@ -14108,7 +14131,7 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
-          "line": 72,
+          "line": 69,
           "source_group": "docs",
           "text": "- `scripts/ops/support/load_repo_env.sh`"
         },
@@ -14120,7 +14143,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/grafana-dashboard-render/SKILL.md",
-          "line": 160,
+          "line": 166,
           "source_group": "docs",
           "text": "- Repo env bootstrap: `scripts/ops/support/load_repo_env.sh`"
         },
@@ -14220,19 +14243,19 @@
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 24,
+          "line": 23,
           "source_group": "ci",
           "text": "- \"scripts/ops/support/skills/check_ai_skills_layout.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 41,
+          "line": 39,
           "source_group": "ci",
           "text": "- \"scripts/ops/support/skills/check_ai_skills_layout.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 57,
+          "line": 60,
           "source_group": "ci",
           "text": "run: bash scripts/ops/support/skills/check_ai_skills_layout.sh"
         },
@@ -14257,19 +14280,19 @@
       "references": [
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 23,
+          "line": 21,
           "source_group": "ci",
           "text": "- \"scripts/ops/support/skills/check_skills_mirror.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 40,
+          "line": 37,
           "source_group": "ci",
           "text": "- \"scripts/ops/support/skills/check_skills_mirror.sh\""
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
-          "line": 54,
+          "line": 57,
           "source_group": "ci",
           "text": "run: bash scripts/ops/support/skills/check_skills_mirror.sh --check"
         }
