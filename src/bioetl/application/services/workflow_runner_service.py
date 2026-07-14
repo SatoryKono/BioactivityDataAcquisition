@@ -257,6 +257,7 @@ class WorkflowRunnerService:
                 step=step,
                 workflow_context_labels=workflow_context_labels,
                 step_started_callback=step_started_callback,
+                workflow_run_id=workflow_run_id,
             )
         return await self._run_transform_step(
             workflow_name=workflow_name,
@@ -281,6 +282,7 @@ class WorkflowRunnerService:
         step: WorkflowStepConfig,
         workflow_context_labels: Mapping[str, str],
         step_started_callback: Callable[..., None] | None,
+        workflow_run_id: str | None,
     ) -> WorkflowStepExecutionResult:
         if step_started_callback is not None:
             step_started_callback(step, fingerprint=None)
@@ -289,6 +291,9 @@ class WorkflowRunnerService:
             step_options = replace(
                 run_options_from_config(step.run_options),
                 workflow_id=workflow_name,
+                workflow_run_id=workflow_run_id,
+                workflow_name=workflow_name,
+                workflow_step_id=step.step_id,
             )
             result = await self.pipeline_runner.run(
                 step.pipeline_name,

@@ -22,7 +22,15 @@ slo_contracts:
         for: 1m
         runbook: docs/05-operations/runbooks/pipeline-failure-critical.md
   monitoring_stack_health:
-    target: "Monitoring stack must keep BioETL, Prometheus, Grafana, and Pushgateway observable"
+    owner: "@bioetl-observability"
+    target: "Monitoring stack must keep BioETL, Prometheus, Grafana, Pushgateway, Quarantine Explorer, and the Grafana renderer observable"
+    service_boundaries:
+      quarantine_explorer:
+        owner: "@bioetl-observability"
+        slo_intent: "HTTP-backed identity and forensic evidence remains available before dashboard data is treated as trustworthy"
+      grafana_image_renderer:
+        owner: "@bioetl-observability"
+        slo_intent: "Reviewed screenshot and render evidence remains available; an outage blocks render acceptance but not Prometheus collection"
     metrics:
       - up
     alerts:
@@ -45,6 +53,14 @@ slo_contracts:
       - name: BioETLPushgatewayUnavailable
         severity: warning
         for: 5m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+      - name: BioETLQuarantineExplorerUnavailable
+        severity: critical
+        for: 2m
+        runbook: docs/05-operations/runbooks/observability-checklist.md
+      - name: BioETLGrafanaRendererUnavailable
+        severity: warning
+        for: 2m
         runbook: docs/05-operations/runbooks/observability-checklist.md
   pipeline_throughput_continuity:
     target: "Every observed pipeline run should process records unless explicitly empty by design"
@@ -312,10 +328,6 @@ slo_contracts:
       - bioetl_dq_monitor_enabled
       - bioetl_dq_current_status
     alerts:
-      - name: BioETLOperatorRuntimeUniverseMissing
-        severity: warning
-        for: 15m
-        runbook: docs/05-operations/runbooks/observability-checklist.md
       - name: BioETLDQCurrentStatusMissing
         severity: warning
         for: 15m

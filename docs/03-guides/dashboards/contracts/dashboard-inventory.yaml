@@ -11,6 +11,8 @@
 #   dashboards:
 #     - uid: Grafana dashboard UID
 #       title: Dashboard title
+#       owner: Bounded machine-routable owner handle
+#       owner_route: Reviewed repository runbook path
 #       family: Dashboard family (primary, adjunct, explorer, alert_triage)
 #       navigation_id: Numbered navigation bus position (0-6) or null for an unnumbered adjunct
 #       data_sources: Normalized datasource names discovered from dashboard JSON
@@ -25,6 +27,8 @@
 dashboards:
   - uid: bioetl-control-plane-v1
     title: "0. Control Plane"
+    owner: "@bioetl-observability"
+    owner_route: docs/05-operations/runbooks/run-manifest-inspection.md
     family: primary
     navigation_id: 0
     data_sources:
@@ -61,6 +65,8 @@ dashboards:
 
   - uid: bioetl-overview-v2
     title: "1. Overview"
+    owner: "@bioetl-observability"
+    owner_route: docs/05-operations/runbooks/observability-checklist.md
     family: primary
     navigation_id: 1
     data_sources:
@@ -89,6 +95,8 @@ dashboards:
 
   - uid: bioetl-runtime
     title: "2. Runtime"
+    owner: "@bioetl-observability"
+    owner_route: docs/05-operations/runbooks/pipeline-failure-critical.md
     family: primary
     navigation_id: 2
     data_sources:
@@ -124,6 +132,8 @@ dashboards:
 
   - uid: bioetl-provider-health-v2
     title: "3. Provider Health"
+    owner: "@bioetl-observability"
+    owner_route: docs/05-operations/runbooks/incident-response.md
     family: primary
     navigation_id: 3
     data_sources:
@@ -151,6 +161,8 @@ dashboards:
 
   - uid: bioetl-dq-v2
     title: "4. Data Quality"
+    owner: "@bioetl-observability"
+    owner_route: docs/05-operations/runbooks/dq-failure-investigation.md
     family: primary
     navigation_id: 4
     data_sources:
@@ -184,6 +196,8 @@ dashboards:
 
   - uid: bioetl-workflow-overview
     title: "5. Workflow"
+    owner: "@bioetl-observability"
+    owner_route: docs/05-operations/runbooks/pipeline-failure-critical.md
     family: primary
     navigation_id: 5
     data_sources:
@@ -218,6 +232,8 @@ dashboards:
 
   - uid: bioetl-silver-reject-explorer
     title: "Silver Reject Explorer"
+    owner: "@bioetl-observability"
+    owner_route: docs/05-operations/runbooks/quarantine-management.md
     family: explorer
     navigation_id: null
     data_sources:
@@ -248,6 +264,8 @@ dashboards:
 
   - uid: bioetl-alerts-slo
     title: "6. Alerts & SLO"
+    owner: "@bioetl-observability"
+    owner_route: docs/05-operations/runbooks/observability-checklist.md
     family: alert_triage
     navigation_id: 6
     data_sources:

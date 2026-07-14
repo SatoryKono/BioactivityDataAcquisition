@@ -70,6 +70,7 @@ Commands:
     report-panel-title-inventory Generate/check generated dashboard panel-title inventory mirror
     report-dashboard-query-duplicates Generate report-only exact/near-duplicate Grafana PromQL inventory
     report-dashboard-promql-scope Generate/check dashboard PromQL scope and forbidden-label inventory
+    run-observability-closure-campaign Run the bounded 15-pipeline observability closure campaign
 """
 
 from __future__ import annotations
@@ -156,6 +157,9 @@ COMMAND_MODULES: dict[str, str] = {
     ),
     "report-panel-title-inventory": (
         "scripts.engineering.qa.report_panel_title_inventory"
+    ),
+    "run-observability-closure-campaign": (
+        "scripts.engineering.qa.run_observability_closure_campaign"
     ),
 }
 COMMAND_SPECS = {

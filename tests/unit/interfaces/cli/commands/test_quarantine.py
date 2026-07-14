@@ -6,6 +6,7 @@ Tests quarantine management CLI commands including inspect, stats, replay, purge
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -70,6 +71,7 @@ class TestQuarantineGroup:
         assert result.exit_code == 0
         assert "--host" in result.output
         assert "--port" in result.output
+        assert "--data-root" in result.output
         assert "0.0.0.0" in result.output
         assert "8081" in result.output
 
@@ -92,6 +94,39 @@ class TestQuarantineGroup:
             host="127.0.0.1",
             port=18081,
         )
+
+    @patch(
+        "bioetl.interfaces.cli.commands.quarantine.run_long_lived_quarantine_backend_command"
+    )
+    def test_quarantine_serve_injects_explicit_absolute_data_root(
+        self,
+        mock_run_quarantine_backend_command: MagicMock,
+        cli_runner: CliRunner,
+        tmp_path: Path,
+    ) -> None:
+        result = cli_runner.invoke(
+            cli,
+            ["quarantine", "serve", "--data-root", str(tmp_path)],
+        )
+
+        assert result.exit_code == ExitCode.OK.value
+        mock_run_quarantine_backend_command.assert_called_once_with(
+            host="0.0.0.0",
+            port=8081,
+            data_root=tmp_path.resolve(),
+        )
+
+    def test_quarantine_serve_rejects_relative_data_root(
+        self,
+        cli_runner: CliRunner,
+    ) -> None:
+        result = cli_runner.invoke(
+            cli,
+            ["quarantine", "serve", "--data-root", "."],
+        )
+
+        assert result.exit_code != ExitCode.OK.value
+        assert "must be an absolute directory path" in result.output
 
 
 class TestQuarantineInspect:

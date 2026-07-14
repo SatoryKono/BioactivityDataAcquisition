@@ -95,6 +95,9 @@ class RunOptions:
     debug_export_formats: tuple[str, ...] | None = None
     debug_export_dir: str | None = None
     workflow_id: str | None = None
+    workflow_run_id: str | None = None
+    workflow_name: str | None = None
+    workflow_step_id: str | None = None
 
 
 class PipelineNotFoundError(ValueError):

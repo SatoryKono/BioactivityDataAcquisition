@@ -2,7 +2,7 @@ name: bioactivitydataacquisition2
 
 services:
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.13.1
     container_name: bioetl-prometheus
     ports:
       - "9090:9090"
@@ -27,7 +27,7 @@ services:
     restart: unless-stopped
 
   pushgateway:
-    image: prom/pushgateway:latest
+    image: prom/pushgateway:v1.11.3
     container_name: bioetl-pushgateway
     ports:
       - "9091:9091"

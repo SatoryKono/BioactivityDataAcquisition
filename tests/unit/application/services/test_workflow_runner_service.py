@@ -284,7 +284,10 @@ async def test_workflow_runner_executes_pipeline_then_transform() -> None:
         ),
     )
 
-    result = await service.run_workflow(config)
+    result = await service.run_workflow(
+        config,
+        workflow_run_id="workflow-run-42",
+    )
 
     assert result.status == "success"
     assert [step.step_id for step in result.steps] == ["extract", "normalize"]
@@ -293,6 +296,9 @@ async def test_workflow_runner_executes_pipeline_then_transform() -> None:
         "degraded_observable"
     )
     assert pipeline_runner.calls[0][1].workflow_id == "activity_workflow"
+    assert pipeline_runner.calls[0][1].workflow_run_id == "workflow-run-42"
+    assert pipeline_runner.calls[0][1].workflow_name == "activity_workflow"
+    assert pipeline_runner.calls[0][1].workflow_step_id == "extract"
     assert metrics.gauges[-1] == (
         "bioetl_workflow_current_status",
         0.0,

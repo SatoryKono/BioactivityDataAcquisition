@@ -46,6 +46,7 @@ The machine-readable SLO/alert binding lives in
 
 | SLI | Metric source | Window | Target baseline | Alert / runbook linkage |
 | --- | --- | --- | --- | --- |
+| Monitoring stack availability | Prometheus `up` for `bioetl`, `prometheus`, `grafana`, `pushgateway`, `quarantine-explorer`, `grafana-image-renderer` | continuous, 2m/5m alert holds | Core collection and HTTP identity surfaces available; renderer outages explicitly block screenshot acceptance | `BioETL*Unavailable` alerts -> `runbooks/observability-checklist.md`; owner `@bioetl-observability` |
 | Pipeline terminal success rate | `bioetl_pipeline_runs_total`, `bioetl_pipeline_health_check_passed`, `bioetl_infrastructure_validated` | 7d rolling | `>= 95%` successful terminal runs per `pipeline,run_type` | `BioETLPipelineRunFailed`, preflight/infrastructure alerts -> `runbooks/pipeline-failure-critical.md` |
 | Control-plane write success ratio | `bioetl_control_plane_manifest_writes_total`, `bioetl_control_plane_ledger_appends_total` | 7d rolling | `>= 99%` successful writes per `pipeline` | manifest/ledger write alerts -> `runbooks/run-manifest-inspection.md` |
 | Control-plane read success ratio | `bioetl_control_plane_reads_total` | 24h rolling | `>= 99%` successful reads per `store,operation` | `BioETLControlPlaneReadFailureRate` -> `runbooks/observability-checklist.md` |
@@ -182,6 +183,10 @@ run freshness timestamp rather than to an infrastructure-local monitor clock.
   relabel it as source-publication freshness without an additional metric.
 - For local-only stacks, temporary tracing disablement or maintenance windows
   should be annotated in the incident log rather than silently ignored.
+- `BioETLQuarantineExplorerUnavailable` means HTTP-backed identity/forensic
+  panels are not trustworthy even when Prometheus panels remain healthy.
+- `BioETLGrafanaRendererUnavailable` blocks screenshot/render acceptance but
+  does not by itself prove Prometheus collection or interactive Grafana is down.
 
 ## Review Cadence
 

@@ -195,7 +195,15 @@
       ],
       "title": "Active Alert Status",
       "type": "stat",
-      "description": "Fail-closed firing-alert status from ALERTS. Null/no data remains UNKNOWN because absence of the ALERTS series may mean alertmanager/Prometheus telemetry is unavailable, not zero active alerts."
+      "description": "Fail-closed firing-alert status from ALERTS. Null/no data remains UNKNOWN because absence of the ALERTS series may mean alertmanager/Prometheus telemetry is unavailable, not zero active alerts.",
+      "links": [
+        {
+          "title": "Runbook · @bioetl-observability",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md",
+          "targetBlank": true,
+          "includeVars": false
+        }
+      ]
     },
     {
       "datasource": {
@@ -257,7 +265,15 @@
       ],
       "title": "Critical/Page Alerts",
       "type": "stat",
-      "description": "Count of critical/page firing alerts in the selected alert scope. Zero fallback means no matching critical/page ALERTS series was observed for the current filters. Any non-zero critical/page count is red; aggregate firing count remains neutral."
+      "description": "Count of critical/page firing alerts in the selected alert scope. Zero fallback means no matching critical/page ALERTS series was observed for the current filters. Any non-zero critical/page count is red; aggregate firing count remains neutral.",
+      "links": [
+        {
+          "title": "Runbook · @bioetl-observability",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md",
+          "targetBlank": true,
+          "includeVars": false
+        }
+      ]
     },
     {
       "datasource": {
@@ -315,7 +331,15 @@
       ],
       "title": "Firing Alerts / Range",
       "type": "stat",
-      "description": "Count of firing alerts in the selected range/scope. Zero fallback means no matching firing ALERTS series was observed; use Active Alert Status for fail-closed telemetry uncertainty."
+      "description": "Count of firing alerts in the selected range/scope. Zero fallback means no matching firing ALERTS series was observed; use Active Alert Status for fail-closed telemetry uncertainty.",
+      "links": [
+        {
+          "title": "Runbook · @bioetl-observability",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md",
+          "targetBlank": true,
+          "includeVars": false
+        }
+      ]
     },
     {
       "datasource": {
@@ -381,7 +405,15 @@
       ],
       "title": "SLO/SLA Alert Pressure",
       "type": "stat",
-      "description": "Count of SLO/SLA/burn-budget firing alerts in the selected alert scope. Zero fallback means no matching SLO/SLA alert series was observed for the current filters."
+      "description": "Count of SLO/SLA/burn-budget firing alerts in the selected alert scope. Zero fallback means no matching SLO/SLA alert series was observed for the current filters.",
+      "links": [
+        {
+          "title": "Runbook · @bioetl-observability",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md",
+          "targetBlank": true,
+          "includeVars": false
+        }
+      ]
     },
     {
       "datasource": {
@@ -635,6 +667,14 @@
       "title": "Firing Alert Details",
       "type": "table",
       "description": "Compact firing alert table with an explicit Global/Pipeline/Run badge on every row. Global rows remain visually separate from scoped results; full values wrap or remain inspectable.",
+      "links": [
+        {
+          "title": "Runbook · @bioetl-observability",
+          "url": "https://github.com/SatoryKono/BioactivityDataAcquisition/blob/main/docs/05-operations/runbooks/observability-checklist.md",
+          "targetBlank": true,
+          "includeVars": false
+        }
+      ],
       "transformations": [
         {
           "id": "organize",

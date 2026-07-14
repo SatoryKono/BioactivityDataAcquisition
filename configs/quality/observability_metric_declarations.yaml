@@ -1,55 +1,22 @@
 version: 1
 policy_scope: observability_metric_declarations
 recording_rule_metrics:
-  - bioetl_alerts_active_total
-  - bioetl_alerts_firing_total
   - bioetl_checkpoint_age_seconds
   - bioetl_control_plane_checkpoint_evidence_status
-  - bioetl_control_plane_current_status
   - bioetl_control_plane_current_status_trusted
   - bioetl_control_plane_run_type_universe
-  - bioetl_control_plane_status
   - bioetl_control_plane_telemetry_missing_5m
-  - bioetl_current_status
-  - bioetl_dq_blocked_records
-  - bioetl_dq_check_duration_seconds
   - bioetl_dq_current_activity_15m
   - bioetl_dq_current_degraded_signals_15m
   - bioetl_dq_current_failure_signals_15m
   - bioetl_dq_current_reason
-  - bioetl_dq_status
-  - bioetl_manifest_ledger_failures_15m
-  - bioetl_pipeline_phase_duration_seconds
-  - bioetl_provider_status
-  - bioetl_replay_safety_blockers_15m
-  - bioetl_runtime_status
-  - bioetl_shutdown_completed_total
-  - bioetl_shutdown_initiated_total
-  - bioetl_silver_filter_reject_field_total
-  - bioetl_silver_filter_reject_reason_total
-  - bioetl_silver_reject_rate
-  - bioetl_workflow_status
-  - bioetl_processed_records_bronze_current
-  - bioetl_processed_records_gold_deduplicated_current
-  - bioetl_processed_records_gold_excluded_by_contract_current
-  - bioetl_processed_records_gold_quarantined_current
-  - bioetl_processed_records_gold_skipped_current
-  - bioetl_processed_records_gold_written_current
-  - bioetl_processed_records_reconciliation_status
-  - bioetl_workflow_reconciliation_rows_deleted_total
-  - bioetl_workflow_reconciliation_rows_retained_total
-  - bioetl_workflow_reconciliation_rows_scanned_total
-  - bioetl_workflow_row_reconciliation_excluded_rows_total
-  - bioetl_workflow_row_reconciliation_kept_rows_total
-  - bioetl_workflow_row_reconciliation_left_rows_total
-  - bioetl_workflow_row_reconciliation_right_rows_total
-  - bioetl_processed_records_silver_deduplicated_current
-  - bioetl_processed_records_silver_filtered_out_current
-  - bioetl_processed_records_silver_quarantined_current
-  - bioetl_processed_records_silver_skipped_current
-  - bioetl_processed_records_silver_valid_current
   - bioetl_dq_current_status
+  - bioetl_dq_monitor_disabled_current
+  - bioetl_gold_terminal_records_15m
   - bioetl_l0_input_status
+  - bioetl_l0_input_status_selected
+  - bioetl_l0_next_action
+  - bioetl_l0_next_action_route
   - bioetl_l0_status
   - bioetl_l1_control_plane_current_status
   - bioetl_l1_dq_status
@@ -58,16 +25,110 @@ recording_rule_metrics:
   - bioetl_l1_runtime_blocker_status
   - bioetl_l1_workflow_global_status
   - bioetl_l1_workflow_selected_status
+  - bioetl_manifest_ledger_failures_15m
+  - bioetl_overview_pipeline_run_type_universe
+  - bioetl_overview_pipeline_universe
+  - bioetl_processed_records_bronze_current
+  - bioetl_processed_records_delta_abs_current
+  - bioetl_processed_records_gold_accounted_current
+  - bioetl_processed_records_gold_deduplicated_current
+  - bioetl_processed_records_gold_delta_current
+  - bioetl_processed_records_gold_excluded_by_contract_current
+  - bioetl_processed_records_gold_quarantined_current
+  - bioetl_processed_records_gold_skipped_current
+  - bioetl_processed_records_gold_written_current
+  - bioetl_processed_records_reconciliation_status
+  - bioetl_processed_records_silver_accounted_current
+  - bioetl_processed_records_silver_deduplicated_current
+  - bioetl_processed_records_silver_delta_current
+  - bioetl_processed_records_silver_filtered_out_current
+  - bioetl_processed_records_silver_quarantined_current
+  - bioetl_processed_records_silver_skipped_current
+  - bioetl_processed_records_silver_valid_current
+  - bioetl_provider_current_cause
   - bioetl_provider_current_status
+  - bioetl_provider_health_check_degraded_12h
+  - bioetl_provider_health_check_degraded_15m
+  - bioetl_provider_health_check_failures_12h
+  - bioetl_provider_health_check_failures_15m
+  - bioetl_provider_health_check_provider_universe_12h
+  - bioetl_provider_health_check_provider_universe_15m
+  - bioetl_provider_health_check_success_12h
+  - bioetl_provider_health_check_success_15m
+  - bioetl_provider_health_check_total_12h
+  - bioetl_provider_health_check_total_15m
+  - bioetl_provider_range_operational_ok
+  - bioetl_replay_safety_blockers_15m
+  - bioetl_runtime_alert_condition_checkpoint_incompatible_30m
+  - bioetl_runtime_alert_condition_dq_critical_anomaly_30m
+  - bioetl_runtime_alert_condition_dq_hard_fail_15m
+  - bioetl_runtime_alert_condition_dq_soft_threshold_15m
+  - bioetl_runtime_alert_condition_gold_write_missing_15m
+  - bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m
+  - bioetl_runtime_alert_condition_ledger_append_failed_15m
+  - bioetl_runtime_alert_condition_lineage_refs_missing_15m
+  - bioetl_runtime_alert_condition_manifest_write_failed_15m
+  - bioetl_runtime_alert_condition_no_terminal_run_30m
+  - bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m
+  - bioetl_runtime_alert_condition_pipeline_preflight_failed_15m
+  - bioetl_runtime_alert_condition_pipeline_runs_failed_15m
+  - bioetl_runtime_alert_condition_provider_adapter_latency_high_30m
+  - bioetl_runtime_alert_condition_provider_failure_rate_high_15m
+  - bioetl_runtime_alert_condition_provider_http_error_rate_high_15m
+  - bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m
+  - bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m
+  - bioetl_runtime_alert_condition_provider_retries_exhausted_1h
+  - bioetl_runtime_alert_condition_record_flow_invariant_violated_15m
+  - bioetl_runtime_alert_condition_replay_drift_detected_30m
+  - bioetl_runtime_alert_condition_replay_lag_high_15m
+  - bioetl_runtime_alert_condition_runtime_error_rate_high_30m
+  - bioetl_runtime_alert_condition_silver_validation_failures_30m
+  - bioetl_runtime_alert_condition_stage_backlog_active_15m
+  - bioetl_runtime_alert_condition_stage_lag_high_15m
+  - bioetl_runtime_alert_condition_validation_backlog_active_15m
+  - bioetl_runtime_current_activity_15m
+  - bioetl_runtime_current_blocker_reason
   - bioetl_runtime_current_blocker_reason_scoped
+  - bioetl_runtime_current_degraded_signals_15m
+  - bioetl_runtime_current_failure_signals_15m
   - bioetl_runtime_current_status
   - bioetl_runtime_current_status_scoped
   - bioetl_runtime_current_status_trusted
+  - bioetl_runtime_pipeline_run_type_universe
   - bioetl_runtime_pipeline_run_type_universe_scoped
   - bioetl_runtime_trust_gap_active_10m
   - bioetl_runtime_trust_gap_status_10m
+  - bioetl_silver_filter_reject_total_mismatch_15m
+  - bioetl_silver_filter_rejections_breakdown_total_15m
+  - bioetl_silver_filter_rejects_stage_total_15m
   - bioetl_terminal_events_15m
   - bioetl_workflow_pipeline_verdict_status
+  - bioetl_workflow_universe
+policy_alias_metrics:
+  - bioetl_alerts_active_total
+  - bioetl_alerts_firing_total
+  - bioetl_control_plane_current_status
+  - bioetl_control_plane_status
+  - bioetl_current_status
+  - bioetl_dq_blocked_records
+  - bioetl_dq_check_duration_seconds
+  - bioetl_dq_status
+  - bioetl_pipeline_phase_duration_seconds
+  - bioetl_provider_status
+  - bioetl_runtime_status
+  - bioetl_shutdown_completed_total
+  - bioetl_shutdown_initiated_total
+  - bioetl_silver_filter_reject_field_total
+  - bioetl_silver_filter_reject_reason_total
+  - bioetl_silver_reject_rate
+  - bioetl_workflow_reconciliation_rows_deleted_total
+  - bioetl_workflow_reconciliation_rows_retained_total
+  - bioetl_workflow_reconciliation_rows_scanned_total
+  - bioetl_workflow_row_reconciliation_excluded_rows_total
+  - bioetl_workflow_row_reconciliation_kept_rows_total
+  - bioetl_workflow_row_reconciliation_left_rows_total
+  - bioetl_workflow_row_reconciliation_right_rows_total
+  - bioetl_workflow_status
 declared_label_contract_metrics:
   - bioetl_adapter_batch_size
   - bioetl_adapter_fallback_attempts_total

@@ -61,6 +61,36 @@ def _mapping_text(panel: dict[str, object], value: str) -> str:
     raise AssertionError((panel.get("title"), value))
 
 
+def _mapping_result(panel: dict[str, object], value: str) -> dict[str, object]:
+    mappings = panel.get("fieldConfig", {}).get("defaults", {}).get("mappings", [])
+    for mapping in mappings:
+        if mapping.get("type") == "value" and value in mapping.get("options", {}):
+            return dict(mapping["options"][value])
+    raise AssertionError((panel.get("title"), value))
+
+
+def _relative_luminance(hex_color: str) -> float:
+    value = hex_color.removeprefix("#")
+    if len(value) == 3:
+        value = "".join(component * 2 for component in value)
+    channels = [int(value[offset : offset + 2], 16) / 255 for offset in (0, 2, 4)]
+    linear = [
+        channel / 12.92
+        if channel <= 0.04045
+        else ((channel + 0.055) / 1.055) ** 2.4
+        for channel in channels
+    ]
+    return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2]
+
+
+def _contrast_ratio(foreground: str, background: str) -> float:
+    first, second = sorted(
+        (_relative_luminance(foreground), _relative_luminance(background)),
+        reverse=True,
+    )
+    return (first + 0.05) / (second + 0.05)
+
+
 def test_rf001_headline_status_is_evidence_aware() -> None:
     control = _load("bioetl-control-plane-v1.json")
     runtime = _load("bioetl-runtime.json")
@@ -109,6 +139,26 @@ def test_rf001_headline_status_is_evidence_aware() -> None:
         assert _panel(workflow, panel_id).get("options", {}).get("colorMode") != (
             "background"
         )
+
+
+def test_rf001_shared_headline_vocabulary_is_fail_closed() -> None:
+    trusted_headlines = (
+        _panel(_load("bioetl-control-plane-v1.json"), 9401),
+        _panel(_load("bioetl-runtime.json"), 9401),
+    )
+    for panel in trusted_headlines:
+        assert _mapping_result(panel, "0") == {"text": "OK", "color": "green"}
+        assert _mapping_result(panel, "1") == {"text": "WARN", "color": "orange"}
+        assert _mapping_result(panel, "2") == {"text": "CRIT", "color": "red"}
+        assert _mapping_result(panel, "3") == {
+            "text": "INCOMPLETE",
+            "color": "gray",
+        }
+
+    design_system = Path("docs/03-guides/dashboards/design-system.md").read_text(
+        encoding="utf-8"
+    )
+    assert "ERROR > INCOMPLETE/UNKNOWN > CRIT > WARN > OK" in design_system
 
 
 def test_rf002_terminal_states_are_explicit() -> None:
@@ -176,7 +226,31 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
             assert token in content, (path.name, token)
 
 
+def test_rf003_navigation_tokens_meet_wcag_contrast_floors() -> None:
+    text_pairs = (
+        ("#f8fafc", "#334155"),
+        ("#ffffff", "#475569"),
+        ("#ffffff", "#1d4ed8"),
+    )
+    boundary_pairs = (
+        ("#94a3b8", "#334155"),
+        ("#38bdf8", "#334155"),
+        ("#7dd3fc", "#1d4ed8"),
+    )
+    assert all(_contrast_ratio(*pair) >= 4.5 for pair in text_pairs)
+    assert all(_contrast_ratio(*pair) >= 3.0 for pair in boundary_pairs)
+
+
 def test_rf003_1024_layout_prioritizes_actions_and_readability() -> None:
+    overview = _load("bioetl-overview-v2.json")
+    first_action = _panel(overview, 215)
+    assert first_action["title"] == "First Action"
+    assert first_action["gridPos"]["h"] >= 10
+    assert first_action["gridPos"]["w"] >= 8
+    assert len(str(first_action["title"])) <= 24
+    assert len(first_action.get("options", {}).get("dataLinks", [])) >= 5
+    assert _panel(overview, 9002)["gridPos"]["w"] == 24
+
     workflow = _load("bioetl-workflow-overview.json")
     assert _panel(workflow, 9)["gridPos"]["w"] == 24
     provider = _load("bioetl-provider-health-v2.json")
@@ -237,7 +311,8 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
 
 def test_rf005_incident_hierarchy_and_semantic_encoding() -> None:
     overview = _load("bioetl-overview-v2.json")
-    assert _panel(overview, 9601)["gridPos"]["y"] == 31
+    assert _panel(overview, 215)["gridPos"]["y"] == 7
+    assert _panel(overview, 9601)["gridPos"]["y"] == 24
     assert _panel(overview, 9018).get("type") == "state-timeline"
     assert _panel(overview, 9020).get("type") == "state-timeline"
 
@@ -290,9 +365,27 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
 
     overview = _load("bioetl-overview-v2.json")
     inputs = _panel(overview, 9002)
-    assert inputs["gridPos"] == {"h": 8, "w": 12, "x": 0, "y": 22}
+    assert inputs["gridPos"] == {"h": 6, "w": 24, "x": 0, "y": 17}
+    root_ids = {panel.get("id") for panel in overview.get("panels", [])}
+    assert not ({9003, 9004, 9005, 9006, 9007, 9013} & root_ids)
+    diagnostics = _panel(overview, 9012)
+    assert {panel.get("id") for panel in diagnostics.get("panels", [])} == {
+        9021,
+        9003,
+        9004,
+        9005,
+        9006,
+        9007,
+        9013,
+    }
     for row_id in (9014, 9009, 9012):
         assert _panel(overview, row_id).get("collapsed") is True
+    assert _panel(overview, 9600).get("collapsed") is False
+    assert 9601 in root_ids
+    assert [
+        _panel(overview, panel_id)["gridPos"]["y"]
+        for panel_id in (9600, 9601, 9014, 9009, 9012)
+    ] == [23, 24, 30, 31, 32]
 
     runtime = _load("bioetl-runtime.json")
     for row_id in (252, 253, 254, 255):

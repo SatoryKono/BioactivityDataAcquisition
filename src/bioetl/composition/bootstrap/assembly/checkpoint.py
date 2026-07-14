@@ -11,6 +11,7 @@ Note:
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from bioetl.composition.runtime_builders.config_access import get_settings
@@ -39,7 +40,7 @@ __all__ = [
 ]
 
 
-def bootstrap_quarantine_adapter() -> QuarantinePort:
+def bootstrap_quarantine_adapter(*, data_root: Path | None = None) -> QuarantinePort:
     """Create a quarantine port implementation for record quarantine storage.
 
     Creates a UnifiedQuarantineAdapter adapter using centralized quarantine_path
@@ -52,14 +53,23 @@ def bootstrap_quarantine_adapter() -> QuarantinePort:
         QuarantinePort implementation for quarantine operations.
     """
     settings = get_settings()
-    quarantine = UnifiedQuarantineAdapter(base_path=str(settings.quarantine_path))
+    quarantine_path = (
+        data_root / "output" / "quarantine"
+        if data_root is not None
+        else settings.quarantine_path
+    )
+    quarantine = UnifiedQuarantineAdapter(base_path=str(quarantine_path))
     assert isinstance(quarantine, QuarantinePort), (
         f"UnifiedQuarantineAdapter must implement QuarantinePort, got {type(quarantine)}"
     )
     return quarantine
 
 
-def bootstrap_checkpoint_adapter(pipeline_name: str) -> CheckpointPort:
+def bootstrap_checkpoint_adapter(
+    pipeline_name: str,
+    *,
+    data_root: Path | None = None,
+) -> CheckpointPort:
     """Create a checkpoint port implementation for pipeline state persistence.
 
     Creates a LocalCheckpointAdapter adapter for the specified pipeline using
@@ -74,8 +84,13 @@ def bootstrap_checkpoint_adapter(pipeline_name: str) -> CheckpointPort:
         CheckpointPort implementation for checkpoint operations.
     """
     settings = get_settings()
+    checkpoint_path = (
+        data_root / "output" / "checkpoints"
+        if data_root is not None
+        else settings.checkpoint_path
+    )
     checkpoint = LocalCheckpointAdapter(
-        base_path=settings.checkpoint_path,
+        base_path=checkpoint_path,
         pipeline_name=pipeline_name,
     )
     assert isinstance(checkpoint, CheckpointPort), (

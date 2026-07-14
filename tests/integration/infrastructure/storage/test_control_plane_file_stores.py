@@ -40,6 +40,9 @@ class TestControlPlaneFileStores:
             pipeline_name="test_pipeline",
             provider="test_provider",
             entity="test_entity",
+            workflow_run_id="workflow-run-123",
+            workflow_name="test_workflow",
+            workflow_step_id="extract",
             launch_context={"mode": "integration-test"},
             runtime_config={"run_type": "incremental"},
             resolved_config={"provider": "test_provider", "entity_type": "test_entity"},
@@ -69,6 +72,18 @@ class TestControlPlaneFileStores:
         # Test deserialization
         manifest_restored = RunManifest.from_dict(manifest_dict)
         assert manifest_restored.run_id == manifest.run_id
+        assert manifest_restored.workflow_run_id == "workflow-run-123"
+        assert manifest_restored.workflow_name == "test_workflow"
+        assert manifest_restored.workflow_step_id == "extract"
+
+        legacy_payload = dict(manifest_dict)
+        legacy_payload.pop("workflow_run_id")
+        legacy_payload.pop("workflow_name")
+        legacy_payload.pop("workflow_step_id")
+        legacy_manifest = RunManifest.from_dict(legacy_payload)
+        assert legacy_manifest.workflow_run_id is None
+        assert legacy_manifest.workflow_name is None
+        assert legacy_manifest.workflow_step_id is None
 
     def test_run_manifest_artifact_validation(self) -> None:
         """Test RunArtifactRef validation."""
@@ -120,7 +135,7 @@ class TestControlPlaneFileStores:
                 f.write(content)
 
         async def read_file(file_path: Path) -> str:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 return f.read()
 
         async def test_concurrent_writes() -> None:
@@ -136,8 +151,6 @@ class TestControlPlaneFileStores:
 
     def test_file_permission_handling(self, tmp_path: Path) -> None:
         """Test file permissions are set correctly for control-plane artifacts."""
-        import stat
-
         test_file = tmp_path / "test_permissions.json"
         test_file.write_text("test content", encoding="utf-8")
 
@@ -202,7 +215,7 @@ class TestControlPlaneFileStores:
         assert sidecar_file.exists()
 
         # Verify metadata can be read back
-        with open(sidecar_file, "r", encoding="utf-8") as f:
+        with open(sidecar_file, encoding="utf-8") as f:
             loaded_metadata = yaml.safe_load(f)
 
         assert loaded_metadata["runtime"]["run_id"] == "test-run-123"
@@ -227,8 +240,6 @@ class TestControlPlaneStorageContracts:
 
     def test_manifest_storage_contract(self) -> None:
         """Test manifest storage contract is defined."""
-        from bioetl.domain.control_plane.run_manifest import RunManifest
-
         # Verify RunManifest can be instantiated
         manifest = TestControlPlaneFileStores._build_manifest()
 

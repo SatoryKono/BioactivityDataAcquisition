@@ -1,9 +1,6 @@
 apiVersion: 1
 
-datasources:
-  - name: Prometheus
-    type: prometheus
-    access: proxy
-    url: http://pushgateway:9091
-    isDefault: true
-    editable: true
+# Legacy relocation tombstone. Pushgateway is a metrics ingestion endpoint,
+# not a Prometheus query API, so this local-only provisioning surface must stay
+# inert even if it is mounted accidentally.
+datasources: []

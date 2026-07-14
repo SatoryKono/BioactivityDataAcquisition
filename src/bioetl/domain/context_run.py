@@ -99,6 +99,9 @@ class PipelineRunContext:
     debug_export_formats: tuple[str, ...] = ()
     debug_export_dir: str | None = None
     workflow_id: str = "standalone"
+    workflow_run_id: str | None = None
+    workflow_name: str | None = None
+    workflow_step_id: str | None = None
     execution_context: ExecutionContext = ExecutionContext.ISOLATED
 
     @classmethod
@@ -149,6 +152,9 @@ class PipelineRunContext:
         debug_export_formats: tuple[str, ...] = (),
         debug_export_dir: str | None = None,
         workflow_id: str = "standalone",
+        workflow_run_id: str | None = None,
+        workflow_name: str | None = None,
+        workflow_step_id: str | None = None,
         execution_context: ExecutionContext = ExecutionContext.ISOLATED,
     ) -> PipelineRunContext:
         """Create a new PipelineRunContext with explicit timestamp ownership."""
@@ -199,6 +205,9 @@ class PipelineRunContext:
             debug_export_formats=debug_export_formats,
             debug_export_dir=debug_export_dir,
             workflow_id=workflow_id,
+            workflow_run_id=workflow_run_id,
+            workflow_name=workflow_name,
+            workflow_step_id=workflow_step_id,
             execution_context=execution_context,
         )
 

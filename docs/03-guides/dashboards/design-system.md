@@ -155,6 +155,13 @@ timeseries without checking whether the panel compares multiple series.
 - Если no-data действительно эквивалентно нулевому событию, это должно быть отражено в query явно (`... or vector(0)`) и подтверждено в description.
 - Во всех остальных случаях no-data должен остаться `UNKNOWN`.
 
+Shared headline precedence is fail-closed:
+`ERROR > INCOMPLETE/UNKNOWN > CRIT > WARN > OK`. `ERROR` owns an explicit
+query/datasource/backend failure; `INCOMPLETE` or `UNKNOWN` owns the verdict
+when required evidence cannot support a truthful business-severity decision.
+Only complete evidence may resolve to `CRIT`, `WARN`, or `OK`. Presentation
+colors never override this ordering.
+
 ## 4.1) First-screen responsibility and panel decision matrix (обязательно)
 
 Каждый shipped dashboard имеет ровно один основной операторский вопрос. Первый
@@ -305,14 +312,14 @@ Normative rules:
   tracing-only, raw, verbose, or not required for first-pass operator triage.
 - The only copy of a critical signal MUST NOT live exclusively inside a
   diagnostic row.
-- Overview keeps compact Control Plane, Runtime, Data Quality, Provider, Data
-  Validation, Inputs, and Workflow current-state evidence in the bounded first
-  path. `Alert/SLO Triage` is collapsed immediately below it and expands only
-  after the operator narrows toward alert-level context; the top-level
-  `6. Alerts & SLO` dashboard remains the canonical alert surface. Runtime
+- Overview keeps the deviation-first `Inputs` matrix visible and moves the six
+  repeated subsystem mirrors into collapsed `Diagnostics & Docs`.
+  `Alert/SLO Triage` remains the intentional expanded decision-row exception
+  immediately after the compact matrix so firing critical impact is visible;
+  `Status` and `First Action` retain the first route above it. Runtime
   Detect/Localize/Escalate, Control Plane incident rows, Provider detail, DQ
   forensic rows, Workflow Step Diagnostics, and the Silver trend/record rows
-  also remain collapsed in the shipped layout.
+  remain collapsed in the shipped layout.
 - Audit tooling MAY expand collapsed rows to materialize and review their full
   content; that audit mode does not change the shipped progressive-disclosure
   default.
