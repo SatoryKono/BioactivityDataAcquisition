@@ -126,21 +126,29 @@ class EnricherDeduplicatorService:
         aggregated = df.group_by(key_columns).agg(agg_exprs)
 
         # Classify each column based on the single aggregation result
-        columns_with_conflicts: list[str] = []
-        columns_without_conflicts: list[str] = []
+        # OPTIMIZATION: Build a list of Polars expressions and evaluate them simultaneously
+        # using a single .select() operation to eliminate Python loop overhead
+        eval_exprs: list[pl.Expr] = []
         for col in non_key_columns:
             n_unique_col = f"{col}__n_unique"
             has_null_col = f"{col}__has_null"
             all_null_col = f"{col}__all_null"
 
-            has_conflict = (
-                aggregated.filter(
+            conflict_expr = (
+                (
                     (pl.col(n_unique_col) > 1)
                     | (pl.col(has_null_col) & ~pl.col(all_null_col))
-                ).height
-                > 0
+                )
+                .any()
+                .alias(col)
             )
+            eval_exprs.append(conflict_expr)
 
+        conflict_results = aggregated.select(eval_exprs).row(0, named=True)
+
+        columns_with_conflicts: list[str] = []
+        columns_without_conflicts: list[str] = []
+        for col, has_conflict in conflict_results.items():
             if has_conflict:
                 columns_with_conflicts.append(col)
             else:
