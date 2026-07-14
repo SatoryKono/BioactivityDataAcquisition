@@ -31,14 +31,14 @@ if (-not $env:NEO4J_USERNAME) {
     if ($env:NEO4J_AUTH_USERNAME) {
         $env:NEO4J_USERNAME = $env:NEO4J_AUTH_USERNAME
     } else {
-        $env:NEO4J_USERNAME = "neo4j"
+        throw "NEO4J_USERNAME is required for Neo4j Memory MCP"
     }
 }
 if (-not $env:NEO4J_PASSWORD) {
     if ($env:NEO4J_AUTH_PASSWORD) {
         $env:NEO4J_PASSWORD = $env:NEO4J_AUTH_PASSWORD
     } else {
-        $env:NEO4J_PASSWORD = "bioetl_secure_password"
+        throw "NEO4J_PASSWORD is required for Neo4j Memory MCP"
     }
 }
 if (-not $env:NEO4J_DATABASE) {

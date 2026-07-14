@@ -56,7 +56,7 @@ NEO4J_URI=bolt://localhost:7687
 NEO4J_USERNAME=
 NEO4J_PASSWORD=
 NEO4J_DATABASE=neo4j
-NEO4J_AUTH=neo4j/bioetl_secure_password
+NEO4J_AUTH=
 NEO4J_AUTH_USERNAME=
 NEO4J_AUTH_PASSWORD=
 ```
@@ -72,17 +72,10 @@ The Neo4j **backend container** is not running in the current environment becaus
 **Step 1: Start Neo4j Backend**
 
 ```bash
-docker run -d --name bioetl-neo4j \
-  -p 7474:7474 -p 7687:7687 \
-  -e NEO4J_AUTH=neo4j/bioetl_secure_password \
-  neo4j:5.15-community
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait
 ```
 
-**Alternative (if Docker Compose available):**
-
-```bash
-docker compose up -d neo4j
-```
+This project supports only the Compose owner shown above.
 
 **Step 2: Verify Setup**
 
@@ -98,7 +91,7 @@ bash scripts/ai/mcp/check_neo4j_memory.sh
 
 - URL: http://localhost:7474/browser/
 - Username: `neo4j`
-- Password: `bioetl_secure_password`
+- Password: required value from `NEO4J_PASSWORD`
 
 ______________________________________________________________________
 
@@ -159,12 +152,11 @@ ______________________________________________________________________
 
 | Task                 | Command                                                                                                                       |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| **Start Neo4j**      | `docker run -d --name bioetl-neo4j -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/bioetl_secure_password neo4j:5.15-community` |
-| **Start (Compose)**  | `docker compose up -d neo4j`                                                                                                  |
+| **Start Neo4j**      | `docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait` |
+| **Start (Compose)**  | same canonical command |
 | **Check Status**     | `docker ps \| grep bioetl-neo4j`                                                                                              |
 | **View Logs**        | `docker logs -f bioetl-neo4j`                                                                                                 |
-| **Stop Container**   | `docker stop bioetl-neo4j`                                                                                                    |
-| **Remove Container** | `docker rm bioetl-neo4j`                                                                                                      |
+| **Stop Project**     | `docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml down` |
 | **Verify MCP**       | `bash scripts/ai/mcp/check_neo4j_memory.sh`                                                                                   |
 | **Quick Start**      | `bash scripts/ops/runtime/neo4j/neo4j_quick_start.sh`                                                                         |
 | **MCP Details**      | `codex mcp get neo4j-memory`                                                                                                  |
@@ -176,9 +168,8 @@ ______________________________________________________________________
 
 The wrapper script (`wrapper.sh`) reads from:
 
-1. **`.env` file** (if present)
-1. **Shell environment variables**
-1. **Defaults** (if nothing set)
+1. Shell environment variables
+1. Explicit machine-local configuration approved by the operator
 
 Priority order:
 
@@ -186,23 +177,16 @@ Priority order:
 NEO4J_URI → bolt://localhost:7687
 NEO4J_USERNAME → (parsed from NEO4J_AUTH if set)
 NEO4J_PASSWORD → (parsed from NEO4J_AUTH if set)
-NEO4J_AUTH → neo4j/bioetl_secure_password (default)
+NEO4J_AUTH → optional derived form; no credential default exists
 ```
 
 To use custom credentials:
 
 ```bash
-# Option 1: Via docker run
-docker run -d --name bioetl-neo4j \
-  -p 7474:7474 -p 7687:7687 \
-  -e NEO4J_AUTH=neo4j/custom-password \
-  neo4j:5.15-community
-
-# Option 2: Via .env file
-echo "NEO4J_AUTH=neo4j/custom-password" >> .env
-
-# Option 3: Via shell export
-export NEO4J_AUTH="neo4j/custom-password"
+# Supply required variables in the current shell, then use the single owner.
+export NEO4J_USERNAME="neo4j"
+export NEO4J_PASSWORD="<set-locally>"
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait
 ```
 
 ______________________________________________________________________
@@ -239,7 +223,7 @@ ______________________________________________________________________
 
 ```
 Priority 1 (Required to activate MCP):
-[ ] Run: docker run -d --name bioetl-neo4j -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/bioetl_secure_password neo4j:5.15-community
+[ ] Run: docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait
 [ ] Verify: bash scripts/ai/mcp/check_neo4j_memory.sh
 [ ] Test: codex mcp get neo4j-memory
 

@@ -27,6 +27,14 @@ orchestration dependencies.
 Relocation audit source:
 `docs/05-operations/verification/docker-helper-root-relocation-audit.md`.
 
+Runtime stability contract: `configs/quality/docker_runtime_contracts.yaml`.
+Run the read-only gate with
+`python scripts/ops/runtime/docker/docker_runtime_preflight.py`. Root Compose
+projects are isolated as `bioetl-main`, `bioetl-monitoring`, `bioetl-neo4j`,
+`bioetl-neo4j-audit`, and `bioetl-codex`; never merge their files into one
+Compose invocation. Existing volumes must follow
+`docs/05-operations/runbooks/docker-compose-project-migration.md`.
+
 ## ✓ Проверка Docker
 
 ```powershell
@@ -34,42 +42,38 @@ docker --version
 docker compose --version
 ```
 
-## 1️⃣ Запуск optional helper stack (Neo4j + BioETL quarantine/health surface)
+## 1️⃣ Запуск optional BioETL quarantine/health helper
 
 ```powershell
 # Запустить optional helper containers
 docker network create bioetl-monitoring
-docker compose up -d
+docker compose -p bioetl-main -f docker-compose.yml up -d
 
 # Проверить статус
-docker compose ps
+docker compose -p bioetl-main -f docker-compose.yml ps
 
 # Посмотреть логи
-docker compose logs -f bioetl-app
+docker compose -p bioetl-main -f docker-compose.yml logs -f bioetl
 ```
 
 **Сервисы:**
 - BioETL quarantine/health helper surface: http://localhost:8081
-- Neo4j Browser: http://localhost:7474
-- Neo4j Bolt: bolt://localhost:7687
-
-**Учетные данные Neo4j:**
-- Пользователь: `neo4j`
-- Пароль: `bioetl_secure_password`
+Neo4j is owned by its standalone project:
+`docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d`.
 
 ## 2️⃣ Запуск Monitoring стека (Prometheus, Grafana, Loki, Tempo)
 
 ```powershell
 # Запустить мониторинг
 docker network create bioetl-monitoring
-docker compose -f docker-compose.monitoring.yml up -d
+docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml up -d
 
 # Проверить статус
-docker compose -f docker-compose.monitoring.yml ps
+docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml ps
 ```
 
 **Сервисы мониторинга:**
-- Grafana: http://localhost:3000 (admin/changeme)
+- Grafana: http://localhost:3000 (`admin`; пароль из `GF_SECURITY_ADMIN_PASSWORD`)
 - Prometheus: http://localhost:9090
 - Loki: http://localhost:3100
 - Tempo: http://localhost:3200
@@ -79,10 +83,10 @@ docker compose -f docker-compose.monitoring.yml ps
 ```powershell
 # Запустить MCP серверы
 docker network create warp-network
-docker compose -f docker-compose.codex.yml up -d
+docker compose -p bioetl-codex -f docker-compose.codex.yml up -d
 
 # Проверить статус
-docker compose -f docker-compose.codex.yml ps
+docker compose -p bioetl-codex -f docker-compose.codex.yml ps
 ```
 
 Canonical helper scripts `scripts/ops/docker-setup.ps1` and
@@ -101,35 +105,35 @@ fresh machine must create them first.
 ### Основной стек
 ```powershell
 # Запустить
-docker compose up -d
+docker compose -p bioetl-main -f docker-compose.yml up -d
 
 # Остановить
-docker compose down
+docker compose -p bioetl-main -f docker-compose.yml down
 
 # Перестартовать
-docker compose restart
+docker compose -p bioetl-main -f docker-compose.yml restart
 
 # Посмотреть логи
-docker compose logs -f
-docker compose logs -f bioetl-app
-docker compose logs -f bioetl-neo4j
+docker compose -p bioetl-main -f docker-compose.yml logs -f
+docker compose -p bioetl-main -f docker-compose.yml logs -f bioetl
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml logs -f neo4j
 
 # Проверить статус
-docker compose ps
+docker compose -p bioetl-main -f docker-compose.yml ps
 ```
 
 ### Мониторинг
 ```powershell
-docker compose -f docker-compose.monitoring.yml up -d
-docker compose -f docker-compose.monitoring.yml down
-docker compose -f docker-compose.monitoring.yml logs -f
+docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml up -d
+docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml down
+docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml logs -f
 ```
 
 ### MCP Серверы
 ```powershell
-docker compose -f docker-compose.codex.yml up -d
-docker compose -f docker-compose.codex.yml down
-docker compose -f docker-compose.codex.yml logs -f
+docker compose -p bioetl-codex -f docker-compose.codex.yml up -d
+docker compose -p bioetl-codex -f docker-compose.codex.yml down
+docker compose -p bioetl-codex -f docker-compose.codex.yml logs -f
 ```
 
 ### Общие команды
@@ -155,14 +159,16 @@ docker system df
 
 ## 🔧 Конфигурация
 
-Основной файл конфигурации: `.env`
-
-Важные переменные:
+Перед запуском задайте обязательные переменные в окружении процесса. Значения
+секретов не выводятся preflight-проверкой:
 ```
-NEO4J_AUTH_USERNAME=neo4j
-NEO4J_AUTH_PASSWORD=bioetl_secure_password
-LOG_LEVEL=INFO
-GRAFANA_ADMIN_PASSWORD=changeme
+NEO4J_USERNAME
+NEO4J_PASSWORD
+NEO4J_AUDIT_USERNAME
+NEO4J_AUDIT_PASSWORD
+GF_SECURITY_ADMIN_PASSWORD
+GF_RENDERING_RENDERER_TOKEN
+TUNNEL_TOKEN
 ```
 
 Optional adjunct helper compose files require explicit local credentials rather
@@ -217,42 +223,46 @@ docker network create bioetl-monitoring
 ### Пересборка контейнеров
 ```powershell
 # Пересобрать и запустить
-docker compose up --build -d
+docker compose -p bioetl-main -f docker-compose.yml up --build -d
 
 # Пересобрать конкретный сервис
-docker compose build bioetl
+docker compose -p bioetl-main -f docker-compose.yml build bioetl
 ```
 
 ## 📊 Проверка здоровья
 
 ```powershell
 # Все контейнеры должны быть "Up"
-docker compose ps
+docker compose -p bioetl-main -f docker-compose.yml ps
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml ps
 
 # Проверить healthcheck
 docker ps --filter health=healthy
 docker ps --filter health=unhealthy
 
 # Детально проверить контейнер
-docker inspect bioetl-app | findstr -i health
+docker compose -p bioetl-main -f docker-compose.yml ps bioetl
 ```
 
 ## 🚀 Полное включение проекта
 
 ```powershell
 # 1. Основной стек
-docker compose up -d
+docker compose -p bioetl-main -f docker-compose.yml up -d
 
-# 2. Мониторинг (опционально)
-docker compose -f docker-compose.monitoring.yml up -d
+# 2. Neo4j helper (опционально)
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d
 
-# 3. MCP серверы для Codex
-docker compose -f docker-compose.codex.yml up -d
+# 3. Мониторинг (опционально)
+docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml up -d
 
-# 4. Проверить все контейнеры
+# 4. MCP серверы для Codex
+docker compose -p bioetl-codex -f docker-compose.codex.yml up -d
+
+# 5. Проверить все контейнеры
 docker ps | Select-String bioetl
 
-# 5. Запустить Codex
+# 6. Запустить Codex
 .\scripts\ai\codex\run-codex.ps1 mcp-setup
 .\scripts\ai\codex\run-codex.ps1
 ```
@@ -260,7 +270,7 @@ docker ps | Select-String bioetl
 ## 📝 Примечания
 
 - Neo4j по умолчанию использует 512MB heap, можно увеличить если нужно
-- Grafana пароль `changeme` — измените после первого входа
+- Grafana использует обязательный пароль из `GF_SECURITY_ADMIN_PASSWORD`
 - MCP серверы автоматически подключаются к Codex
 - Docker Desktop должен быть запущен перед использованием
 - WSL2 интеграция должна быть включена в Docker Desktop Settings

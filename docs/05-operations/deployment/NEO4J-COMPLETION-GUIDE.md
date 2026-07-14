@@ -27,16 +27,13 @@ The MCP wrapper is registered and ready, but it cannot function without a runnin
 ### Quick Start (One Command)
 
 ```bash
-docker run -d --name bioetl-neo4j \
-  -p 7474:7474 -p 7687:7687 \
-  -e NEO4J_AUTH=neo4j/bioetl_secure_password \
-  neo4j:5.15-community
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait
 ```
 
 ### Docker Compose (If Available)
 
 ```bash
-docker compose up -d neo4j
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait
 ```
 
 ### Verify Running
@@ -88,7 +85,7 @@ Once container is running:
 
 - **URL**: http://localhost:7474/browser/
 - **Username**: `neo4j`
-- **Password**: `bioetl_secure_password`
+- **Password**: обязательное значение `NEO4J_PASSWORD`
 
 ## Integration with Codex
 
@@ -120,10 +117,7 @@ If using non-standard credentials or port:
 
 ```bash
 # Custom password
-docker run -d --name bioetl-neo4j \
-  -p 7474:7474 -p 7687:7687 \
-  -e NEO4J_AUTH=neo4j/custom-password \
-  neo4j:5.15-community
+NEO4J_PASSWORD="<set-locally>" docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait
 
 # Update .env or export
 export NEO4J_AUTH="neo4j/custom-password"
@@ -134,7 +128,7 @@ The wrapper script (`wrapper.sh`) will:
 1. Source `.env` if present
 1. Parse `NEO4J_AUTH` into username/password
 1. Use `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD` if set explicitly
-1. Fall back to `neo4j/bioetl_secure_password` if nothing is configured
+1. Fail closed if `NEO4J_USERNAME` or `NEO4J_PASSWORD` is not configured
 
 ## Troubleshooting
 
@@ -145,8 +139,8 @@ Neo4j container is not running.
 **Solution:**
 
 ```bash
-docker start bioetl-neo4j
-# OR restart with docker run command above
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait
+# OR restart with the Compose command above
 ```
 
 ### Issue: "Port 7687 is already allocated"
@@ -163,10 +157,7 @@ docker ps | grep 7687
 docker stop <container_id>
 
 # OR use a different port
-docker run -d --name bioetl-neo4j \
-  -p 7474:7474 -p 7688:7687 \
-  -e NEO4J_AUTH=neo4j/bioetl_secure_password \
-  neo4j:5.15-community
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait
 
 # Update MCP wrapper to use new port:
 export NEO4J_URI="bolt://localhost:7688"
@@ -193,10 +184,7 @@ The MCP server is registered but not responding.
 1. **Start Neo4j**:
 
    ```bash
-   docker run -d --name bioetl-neo4j \
-     -p 7474:7474 -p 7687:7687 \
-     -e NEO4J_AUTH=neo4j/bioetl_secure_password \
-     neo4j:5.15-community
+   docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait
    ```
 
 1. **Verify Connection**:

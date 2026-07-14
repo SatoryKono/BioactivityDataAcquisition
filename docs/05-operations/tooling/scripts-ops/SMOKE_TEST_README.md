@@ -26,10 +26,7 @@ ______________________________________________________________________
 
 ```bash
 # 1. Start Neo4j (one-time)
-docker run -d --name bioetl-neo4j \
-  -p 7474:7474 -p 7687:7687 \
-  -e NEO4J_AUTH=neo4j/bioetl_secure_password \
-  neo4j:5.15-community
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait
 
 # 2. Wait ~10-15 seconds for startup
 
@@ -140,7 +137,7 @@ ______________________________________________________________________
 
 | Issue                                | Solution                                                                                                                                |
 | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
-| **"Container is NOT RUNNING"**       | Start it: `docker run -d --name bioetl-neo4j -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/bioetl_secure_password neo4j:5.15-community` |
+| **"Container is NOT RUNNING"**       | Start it: `docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait` |
 | **Ports are closed**                 | Neo4j is starting. Wait 10-15 seconds and re-run test.                                                                                  |
 | **"neo4j-memory is NOT registered"** | Register MCP: `uv run python -m scripts.engineering.dev setup-mcp`                                                                      |
 | **Wrapper script not executable**    | Fix permissions: `chmod +x scripts/ai/mcp/mcp_neo4j_memory_wrapper.sh`                                                                  |
@@ -152,10 +149,7 @@ ______________________________________________________________________
 
 ```bash
 # Start Neo4j
-docker run -d --name bioetl-neo4j \
-  -p 7474:7474 -p 7687:7687 \
-  -e NEO4J_AUTH=neo4j/bioetl_secure_password \
-  neo4j:5.15-community
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait
 
 # View Neo4j logs (watch startup)
 docker logs -f bioetl-neo4j
@@ -164,7 +158,7 @@ docker logs -f bioetl-neo4j
 docker ps | grep bioetl-neo4j
 
 # Access Neo4j directly via cypher-shell
-docker exec -it bioetl-neo4j cypher-shell -u neo4j -p bioetl_secure_password
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml exec neo4j cypher-shell -u "$NEO4J_USERNAME" -p "$NEO4J_PASSWORD"
 
 # Open Neo4j Browser
 open http://localhost:7474/browser/  # macOS
@@ -179,8 +173,7 @@ codex mcp get neo4j-memory
 codex interactive
 
 # Stop and remove container
-docker stop bioetl-neo4j
-docker rm bioetl-neo4j
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml down
 ```
 
 ______________________________________________________________________

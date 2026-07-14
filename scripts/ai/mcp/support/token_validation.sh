@@ -78,12 +78,12 @@ mcp_validate_neo4j_credentials() {
     mcp_warn "NEO4J_URI is not set for ${purpose}; wrapper will use its local default."
   fi
   if [[ -z "${NEO4J_USERNAME:-}" ]]; then
-    mcp_warn "NEO4J_USERNAME is not set for ${purpose}; wrapper will use its local default."
+    mcp_warn "NEO4J_USERNAME is not set for ${purpose}; wrapper will fail closed."
   fi
   if [[ -z "${NEO4J_PASSWORD:-}" ]]; then
-    mcp_warn "NEO4J_PASSWORD is not set for ${purpose}; wrapper will use its local default."
-  elif [[ "${NEO4J_PASSWORD}" == "bioetl_secure_password" ]]; then
-    mcp_warn "NEO4J_PASSWORD for ${purpose} uses the documented local-dev default; rotate it for shared hosts."
+    mcp_warn "NEO4J_PASSWORD is not set for ${purpose}; wrapper will fail closed."
+  elif [[ "${NEO4J_PASSWORD}" == *_secure_password ]]; then
+    mcp_warn "NEO4J_PASSWORD for ${purpose} matches a legacy placeholder pattern; rotate it."
   fi
 }
 

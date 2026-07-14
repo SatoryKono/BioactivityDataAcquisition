@@ -93,7 +93,7 @@ The startup script creates `.env.local` with:
 ```bash
 NEO4J_URI=bolt://host.docker.internal:7687
 NEO4J_USERNAME=neo4j
-NEO4J_PASSWORD=bioetl_secure_password
+NEO4J_PASSWORD=
 NEO4J_DATABASE=neo4j
 ```
 
@@ -129,7 +129,7 @@ docker ps
 docker logs bioetl-neo4j
 
 # Remove broken container and retry
-docker rm -f bioetl-neo4j
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml down
 bash scripts/memory/setup/wsl_startup.sh
 ```
 
@@ -184,16 +184,16 @@ wsl-open http://host.docker.internal:7474/browser/
 docker logs -f bioetl-neo4j
 
 # Test connection from WSL
-docker exec bioetl-neo4j cypher-shell -u neo4j -p bioetl_secure_password "RETURN 1"
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml exec neo4j cypher-shell -u "$NEO4J_USERNAME" -p "$NEO4J_PASSWORD" "RETURN 1"
 
 # Stop container
-docker stop bioetl-neo4j
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml down
 
 # Remove container (keep data)
-docker rm bioetl-neo4j
+# Project containers were removed by `down`; named volumes are preserved.
 
 # Full cleanup (remove all)
-docker rm -f bioetl-neo4j
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml down
 
 # Check MCP status
 codex mcp list | grep neo4j
@@ -299,7 +299,7 @@ ______________________________________________________________________
 1. Loads `.env` if exists
 1. Loads `.env.local` if exists (WSL-specific, auto-created)
 1. Checks `NEO4J_AUTH`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`
-1. Falls back to defaults: `neo4j/bioetl_secure_password`
+1. Fails closed unless `NEO4J_USERNAME` and `NEO4J_PASSWORD` are supplied
 
 ### Package differences
 

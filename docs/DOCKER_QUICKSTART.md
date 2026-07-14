@@ -24,10 +24,17 @@ Governance anchor: `BIOETL_DOCKER_HELPER_ADR010_ADJUNCT`. Machine-readable
 helper compose files остаются optional local-only adjunct tooling и MUST NOT
 использоваться для storage, locking или orchestration semantics приложения.
 
+The shared read-only gate is
+`python scripts/ops/runtime/docker/docker_runtime_preflight.py`. The root
+Compose files have isolated project names; migration from the former
+`bioactivitydataacquisition2` namespace is documented in
+`docs/05-operations/runbooks/docker-compose-project-migration.md`.
+
 ## ✅ Что настроено
 
 - ✓ `.env.example` как шаблон переменных окружения; `.env` является local-only/secret-bearing файлом и не создается автоматически
-- ✓ `docker-compose.yml` - optional local helper stack (Neo4j + BioETL)
+- ✓ `docker-compose.yml` - isolated `bioetl-main` quarantine/Warp helper
+- ✓ `docker-compose.neo4j.yml` - isolated `bioetl-neo4j` helper
 - ✓ `docker-compose.monitoring.yml` - мониторинг (Prometheus, Grafana, Loki, Tempo)
 - ✓ `docker-compose.codex.yml` - MCP серверы для Codex
 - ✓ Dockerfile для BioETL (multi-stage build)
@@ -63,13 +70,14 @@ Docker helpers также поддерживают явный opt-in `-AllowEnvF
 
 # Или вручную
 docker network create bioetl-monitoring
-docker compose up -d
+docker compose -p bioetl-main -f docker-compose.yml up -d
 ```
 
 **Что запустится в optional helper stack:**
-- Neo4j База данных на порту 7687 (bolt)
-- Neo4j Browser на порту 7474
 - BioETL quarantine/health helper surface на порту 8081
+
+Neo4j starts separately with
+`docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d`.
 
 ### 3. (Опционально) Запустите мониторинг
 
@@ -79,12 +87,12 @@ docker compose up -d
 
 # Или вручную
 docker network create bioetl-monitoring
-docker compose -f docker-compose.monitoring.yml up -d
+docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml up -d
 ```
 
 **Что запустится:**
 - Prometheus на порту 9090
-- Grafana на порту 3000 (admin/changeme)
+- Grafana на порту 3000 (`admin`; пароль из `GF_SECURITY_ADMIN_PASSWORD`)
 - Loki на порту 3100
 - Tempo на порту 3200
 
@@ -96,7 +104,7 @@ docker compose -f docker-compose.monitoring.yml up -d
 
 # Или вручную
 docker network create warp-network
-docker compose -f docker-compose.codex.yml up -d
+docker compose -p bioetl-codex -f docker-compose.codex.yml up -d
 ```
 
 Canonical helper scripts now bootstrap the shared external Docker networks
@@ -107,26 +115,26 @@ files manually on a fresh machine, create the required network first.
 
 ```powershell
 # Запустить optional helper stack
-docker compose up -d
+docker compose -p bioetl-main -f docker-compose.yml up -d
 
 # Остановить
-docker compose down
+docker compose -p bioetl-main -f docker-compose.yml down
 
 # Перезагрузить
-docker compose restart
+docker compose -p bioetl-main -f docker-compose.yml restart
 
 # Посмотреть логи
-docker compose logs -f
+docker compose -p bioetl-main -f docker-compose.yml logs -f
 
 # Логи конкретного контейнера
-docker compose logs -f bioetl-app
-docker compose logs -f bioetl-neo4j
+docker compose -p bioetl-main -f docker-compose.yml logs -f bioetl
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml logs -f neo4j
 
 # Статус контейнеров
-docker compose ps
+docker compose -p bioetl-main -f docker-compose.yml ps
 
 # Вход в контейнер
-docker exec -it bioetl-app bash
+docker compose -p bioetl-main -f docker-compose.yml exec bioetl bash
 docker exec -it bioetl-neo4j bash
 
 # Очистка неиспользуемых образов
@@ -139,14 +147,14 @@ docker system prune -a
 ## 🔑 Учетные данные
 
 ### Neo4j
-- Пользователь: `neo4j`
-- Пароль: `bioetl_secure_password`
+- Пользователь: задаётся через `NEO4J_USERNAME`
+- Пароль: задаётся через `NEO4J_PASSWORD`
 - HTTP: http://localhost:7474
 - Bolt: bolt://localhost:7687
 
 ### Grafana
 - Пользователь: `admin`
-- Пароль: `changeme` (измените после входа!)
+- Пароль: задаётся через `GF_SECURITY_ADMIN_PASSWORD`
 - URL: http://localhost:3000
 
 ## 📁 Файлы конфигурации
@@ -154,7 +162,7 @@ docker system prune -a
 | Файл | Описание |
 |------|---------|
 | `.env` | Machine-local переменные окружения (создается только вручную или через явный opt-in helper flag) |
-| `docker-compose.yml` | Основной стек (Neo4j + BioETL) |
+| `docker-compose.yml` | Основной helper-стек BioETL/Warp; Neo4j принадлежит отдельному проекту `bioetl-neo4j` |
 | `docker-compose.monitoring.yml` | Мониторинг (Prometheus, Grafana, Loki, Tempo) |
 | `docker-compose.codex.yml` | MCP серверы для Codex |
 | `scripts/ops/runtime/docker/compose/alertmanager.yml` | Optional adjunct Alertmanager helper stack; not part of baseline runtime; legacy root filename: `docker-compose.alertmanager.yml` |
@@ -170,9 +178,9 @@ docker system prune -a
 
 ### Docker не запускается
 ```powershell
-# Перезагрузить Docker Desktop
-taskkill /F /IM Docker.exe  # Убить процесс
-# Запустить Docker Desktop вручную
+# Перезапустить Docker Desktop штатной командой или через GUI;
+# принудительное завершение процесса не является первым шагом восстановления.
+docker desktop restart
 ```
 
 ### Порты уже заняты
@@ -181,7 +189,7 @@ taskkill /F /IM Docker.exe  # Убить процесс
 Get-Process -Id (Get-NetTCPConnection -LocalPort 8081).OwningProcess
 
 # Если контейнер уже запущен
-docker compose restart
+docker compose -p bioetl-main -f docker-compose.yml restart
 
 # Если нужно изменить порт, отредактируйте docker-compose.yml
 ```
@@ -195,7 +203,7 @@ docker logs bioetl-neo4j
 docker port bioetl-neo4j
 
 # Перезагрузить
-docker compose restart bioetl-neo4j
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml restart neo4j
 ```
 
 ### Нет места на диске
@@ -215,17 +223,17 @@ docker ps --filter health=healthy
 docker ps --filter health=unhealthy
 
 # Детальная информация
-docker inspect bioetl-app | findstr -i health
+docker compose -p bioetl-main -f docker-compose.yml ps bioetl
 ```
 
 ## 🔄 Обновление образов
 
 ```powershell
 # Скачать новые версии
-docker compose pull
+docker compose -p bioetl-main -f docker-compose.yml pull
 
 # Пересобрать и запустить
-docker compose up --build -d
+docker compose -p bioetl-main -f docker-compose.yml up --build -d
 ```
 
 ## 📚 Документация
@@ -240,7 +248,8 @@ docker compose up --build -d
 
 1. **Запустите optional helper stack**
    ```powershell
-   docker compose up -d
+   docker compose -p bioetl-main -f docker-compose.yml up -d
+   docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d
    ```
 
 2. **Проверьте Neo4j Browser**

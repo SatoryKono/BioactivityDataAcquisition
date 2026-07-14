@@ -41,7 +41,7 @@ A: `composition/bootstrap/runtime/pipeline.py` is the main entrypoint. `runtime_
 A: Use `bolt://host.docker.internal:7687` in WSL. The Docker container name is `bioetl-neo4j`.
 
 **Q: What are the default Neo4j credentials?**
-A: Username: `neo4j`, Password: `bioetl_secure_password` (from `NEO4J_AUTH=neo4j/bioetl_secure_password`).
+A: Credentials are supplied through `NEO4J_USERNAME` and `NEO4J_PASSWORD`; no repository default exists.
 
 **Q: How to verify Neo4j MCP setup?**
 A: Run:
@@ -79,14 +79,11 @@ A: `infrastructure.config` is the canonical owner for YAML loading and normaliza
 A:
 
 ```bash
-docker run -d --name bioetl-neo4j \
-  -p 7474:7474 -p 7687:7687 \
-  -e NEO4J_AUTH=neo4j/bioetl_secure_password \
-  neo4j:5.15-community
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait
 ```
 
 **Q: How to access Neo4j Browser?**
-A: http://localhost:7474/browser/ with credentials neo4j/bioetl_secure_password
+A: http://localhost:7474/browser/ with credentials from `NEO4J_USERNAME` / `NEO4J_PASSWORD`
 
 **Q: What environment variables does the MCP wrapper use?**
 A:

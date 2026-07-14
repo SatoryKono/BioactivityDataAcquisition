@@ -57,61 +57,26 @@ if ! command -v codex >/dev/null 2>&1; then
   warn "Codex CLI not found in PATH. Some features will be unavailable."
 fi
 
-# Check if container already exists
-section "Docker Container Status"
+: "${NEO4J_USERNAME:?NEO4J_USERNAME is required}"
+: "${NEO4J_PASSWORD:?NEO4J_PASSWORD is required}"
 
-if docker ps -a --format "table {{.Names}}" | grep -q "^bioetl-neo4j$"; then
-  if docker ps --format "table {{.Names}}" | grep -q "^bioetl-neo4j$"; then
-    ok "Container bioetl-neo4j is already RUNNING"
-    docker ps | grep bioetl-neo4j | sed 's/^/  /'
-  else
-    warn "Container bioetl-neo4j exists but is STOPPED"
-    info "Starting container..."
-    docker start bioetl-neo4j
-    sleep 5
-    ok "Container started"
-  fi
-else
-  section "Starting Neo4j Container"
+section "Docker Compose Owner"
 
-  info "Launching: docker run -d --name bioetl-neo4j -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/bioetl_secure_password neo4j:5.15-community"
-
-  if docker run -d --name bioetl-neo4j \
-    -p 7474:7474 -p 7687:7687 \
-    -e NEO4J_AUTH=neo4j/bioetl_secure_password \
-    neo4j:5.15-community >/dev/null 2>&1; then
-    ok "Container created successfully"
-
-    info "Waiting for Neo4j to start (this takes ~10-15 seconds)..."
-    sleep 3
-
-    # Wait for Bolt port to be ready
-    max_attempts=30
-    attempt=0
-    while [[ $attempt -lt $max_attempts ]]; do
-      if docker logs bioetl-neo4j 2>/dev/null | grep -q "Started"; then
-        ok "Neo4j started successfully"
-        break
-      fi
-
-      if docker logs bioetl-neo4j 2>/dev/null | grep -q "ERROR"; then
-        fail "Neo4j startup error detected"
-        docker logs bioetl-neo4j | grep ERROR >&2
-        exit 1
-      fi
-
-      sleep 1
-      attempt=$((attempt + 1))
-    done
-
-    if [[ $attempt -ge $max_attempts ]]; then
-      warn "Timeout waiting for Neo4j to start, continuing anyway..."
-    fi
-  else
-    fail "Failed to create container"
-    exit 1
-  fi
+if ! docker network inspect warp-network >/dev/null 2>&1; then
+  fail "External network warp-network is missing. Run scripts/ops/docker-setup.sh first."
+  exit 1
 fi
+
+info "Starting the single owner: docker compose -p bioetl-neo4j"
+if ! docker compose \
+  -p bioetl-neo4j \
+  -f "${REPO_ROOT}/docker-compose.neo4j.yml" \
+  up -d --wait --wait-timeout 240; then
+  fail "Neo4j Compose project did not become ready within 240 seconds"
+  docker compose -p bioetl-neo4j -f "${REPO_ROOT}/docker-compose.neo4j.yml" logs --tail 50 neo4j >&2
+  exit 1
+fi
+ok "Neo4j Compose project is healthy"
 
 # Verify port accessibility
 section "Port Verification"
@@ -155,15 +120,13 @@ info "Neo4j Backend Status:"
 printf "  ${BLUE}Container:${NC} bioetl-neo4j\n"
 printf "  ${BLUE}HTTP UI:${NC}   http://localhost:7474/browser/\n"
 printf "  ${BLUE}Bolt:${NC}      bolt://localhost:7687\n"
-printf "  ${BLUE}Username:${NC}  neo4j\n"
-printf "  ${BLUE}Password:${NC}  bioetl_secure_password\n"
+printf "  ${BLUE}Auth:${NC}      supplied via NEO4J_USERNAME / NEO4J_PASSWORD\n"
 
 printf "\n${GREEN}Next steps:${NC}\n"
 printf "  1. Access Neo4j Browser at http://localhost:7474/browser/\n"
 printf "  2. Run verification: ${BLUE}bash scripts/ai/mcp/check_neo4j_memory.sh${NC}\n"
 printf "  3. Use in Codex: ${BLUE}codex interactive${NC}\n"
-printf "  4. Stop container: ${BLUE}docker stop bioetl-neo4j${NC}\n"
-printf "  5. Remove container: ${BLUE}docker rm bioetl-neo4j${NC}\n"
+printf "  4. Stop project: ${BLUE}docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml down${NC}\n"
 
 ok "Setup complete!"
 exit 0

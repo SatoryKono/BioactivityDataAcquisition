@@ -49,7 +49,7 @@ out of the repository root and archived under
 1. Start Neo4j:
 
    ```bash
-   docker compose up -d neo4j
+   docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait
    ```
 
    `docker-compose.yml` now reads these optional env vars for memory tuning:
@@ -374,29 +374,29 @@ NEO4J_GLOBAL_TX_MAX=16g
 
 ```bash
 # Check if Neo4j is healthy
-docker compose ps neo4j
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml ps neo4j
 
 # View logs
-docker compose logs neo4j
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml logs neo4j
 
 # Test connectivity
-docker compose exec neo4j cypher-shell -u neo4j -p <password> "RETURN 1"
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml exec neo4j cypher-shell -u "$NEO4J_USERNAME" -p "$NEO4J_PASSWORD" "RETURN 1"
 ```
 
 ## Useful Commands
 
 ```bash
 # Start Neo4j only
-docker compose up -d neo4j
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait
 
 # Restart Neo4j
-docker compose restart neo4j
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml restart neo4j
 
 # View real-time logs
-docker compose logs -f neo4j
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml logs -f neo4j
 
 # Stop Neo4j
-docker compose down neo4j
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml down
 ```
 
 ## Performance Tuning Tips

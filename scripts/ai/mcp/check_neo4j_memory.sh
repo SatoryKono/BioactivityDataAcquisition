@@ -44,6 +44,10 @@ section() {
   return 0
 }
 
+compose_start_hint() {
+  printf "  ${BLUE}docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait${NC}\n"
+}
+
 # shellcheck source=./support/load_repo_env.sh
 source "${SCRIPT_DIR}/support/load_repo_env.sh"
 load_repo_env_if_present
@@ -98,8 +102,13 @@ fi
 section "Neo4j Backend Status"
 
 NEO4J_URI="${NEO4J_URI:-bolt://localhost:7687}"
-NEO4J_USERNAME="${NEO4J_USERNAME:-${NEO4J_AUTH_USERNAME:-neo4j}}"
-NEO4J_PASSWORD="${NEO4J_PASSWORD:-${NEO4J_AUTH_PASSWORD:-bioetl_secure_password}}"
+NEO4J_USERNAME="${NEO4J_USERNAME:-${NEO4J_AUTH_USERNAME:-}}"
+NEO4J_PASSWORD="${NEO4J_PASSWORD:-${NEO4J_AUTH_PASSWORD:-}}"
+
+if [[ -z "${NEO4J_USERNAME}" || -z "${NEO4J_PASSWORD}" ]]; then
+  fail "NEO4J_USERNAME and NEO4J_PASSWORD are required; no credential default exists"
+  status=1
+fi
 
 info "Configured Neo4j URI: $NEO4J_URI"
 info "Configured username: $NEO4J_USERNAME"
@@ -117,10 +126,7 @@ if command -v nc >/dev/null 2>&1; then
   else
     fail "Neo4j port $NEO4J_PORT is NOT open (Neo4j backend may not be running)"
     warn "To start Neo4j, run:"
-    printf "  ${BLUE}docker run -d --name bioetl-neo4j \\${NC}\n"
-    printf "    ${BLUE}-p 7474:7474 -p 7687:7687 \\${NC}\n"
-    printf "    ${BLUE}-e NEO4J_AUTH=neo4j/bioetl_secure_password \\${NC}\n"
-    printf "    ${BLUE}neo4j:5.15-community${NC}\n"
+    compose_start_hint
     status=1
   fi
 elif command -v timeout >/dev/null 2>&1; then
@@ -129,10 +135,7 @@ elif command -v timeout >/dev/null 2>&1; then
   else
     fail "Neo4j port $NEO4J_PORT is NOT open (Neo4j backend may not be running)"
     warn "To start Neo4j, run:"
-    printf "  ${BLUE}docker run -d --name bioetl-neo4j \\${NC}\n"
-    printf "    ${BLUE}-p 7474:7474 -p 7687:7687 \\${NC}\n"
-    printf "    ${BLUE}-e NEO4J_AUTH=neo4j/bioetl_secure_password \\${NC}\n"
-    printf "    ${BLUE}neo4j:5.15-community${NC}\n"
+    compose_start_hint
     status=1
   fi
 else
@@ -143,23 +146,14 @@ fi
 section "Docker Container Status"
 
 if command -v docker >/dev/null 2>&1; then
-  info "Checking Docker containers..."
-
-  if docker ps | grep -q "$NEO4J_CONTAINER_NAME"; then
-    ok "Neo4j container is RUNNING"
-    docker ps | grep "$NEO4J_CONTAINER_NAME" | sed "$INDENT_SED"
-  elif docker ps -a | grep -q "$NEO4J_CONTAINER_NAME"; then
-    fail "Neo4j container EXISTS but is NOT RUNNING"
-    docker ps -a | grep "$NEO4J_CONTAINER_NAME" | sed "$INDENT_SED"
-    warn "To start the container:"
-    printf "  ${BLUE}docker start bioetl-neo4j${NC}\n"
+  info "Checking the bioetl-neo4j Compose project..."
+  compose_status="$(docker compose -p bioetl-neo4j -f "${REPO_ROOT}/docker-compose.neo4j.yml" ps --status running neo4j 2>&1 || true)"
+  if grep -q "$NEO4J_CONTAINER_NAME" <<<"$compose_status"; then
+    ok "Compose-owned Neo4j container is RUNNING"
+    printf '%s\n' "$compose_status" | sed "$INDENT_SED"
   else
-    warn "Neo4j container does not exist"
-    warn "To create and start it, run:"
-    printf "  ${BLUE}docker run -d --name bioetl-neo4j \\${NC}\n"
-    printf "    ${BLUE}-p 7474:7474 -p 7687:7687 \\${NC}\n"
-    printf "    ${BLUE}-e NEO4J_AUTH=neo4j/bioetl_secure_password \\${NC}\n"
-    printf "    ${BLUE}neo4j:5.15-community${NC}\n"
+    warn "Compose-owned Neo4j service is not running"
+    compose_start_hint
   fi
 else
   warn "Docker not available in this environment"
@@ -171,7 +165,7 @@ section "Environment Configuration"
 if [[ -n "${NEO4J_AUTH:-}" ]]; then
   ok "NEO4J_AUTH is set"
 else
-  warn "NEO4J_AUTH is not set (using defaults)"
+  warn "NEO4J_AUTH is not set (individual required variables are used)"
 fi
 
 if [[ -f "${REPO_ROOT}/.env" ]]; then
@@ -211,10 +205,7 @@ else
   fail "Some checks failed"
   printf "\n${YELLOW}To complete setup:${NC}\n"
   printf "  1. Start Neo4j backend:\n"
-  printf "     ${BLUE}docker run -d --name bioetl-neo4j \\${NC}\n"
-  printf "       ${BLUE}-p 7474:7474 -p 7687:7687 \\${NC}\n"
-  printf "       ${BLUE}-e NEO4J_AUTH=neo4j/bioetl_secure_password \\${NC}\n"
-  printf "       ${BLUE}neo4j:5.15-community${NC}\n"
+  compose_start_hint
   printf "  2. Re-run this check:\n"
   printf "     ${BLUE}bash scripts/ai/mcp/check_neo4j_memory.sh${NC}\n"
 fi

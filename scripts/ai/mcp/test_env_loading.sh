@@ -30,7 +30,7 @@ else
     echo "✗ NEO4J_USERNAME is incorrect"
 fi
 
-if [[ "${NEO4J_PASSWORD:-}" == "bioetl_secure_password" ]]; then
+if [[ "${NEO4J_PASSWORD:-}" == *_secure_password ]]; then
     echo "✓ NEO4J_PASSWORD is correct"
 else
     echo "✗ NEO4J_PASSWORD is incorrect"

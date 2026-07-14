@@ -10,11 +10,11 @@ echo "🛑 Stopping BioETL services..."
 
 # Stop MCP servers
 echo "Stopping MCP servers..."
-docker compose -f "$PROJECT_DIR/docker-compose.codex.yml" down --remove-orphans 2>/dev/null || true
+docker compose -p bioetl-codex -f "$PROJECT_DIR/docker-compose.codex.yml" down --remove-orphans 2>/dev/null || true
 
 # Optional: Stop base infrastructure (comment out to keep running)
 echo "Stopping base infrastructure..."
-docker compose -f "$PROJECT_DIR/docker-compose.yml" down --remove-orphans 2>/dev/null || true
+docker compose -p bioetl-main -f "$PROJECT_DIR/docker-compose.yml" down --remove-orphans 2>/dev/null || true
 
 echo "✓ Services stopped gracefully"
 echo ""

@@ -28,8 +28,8 @@ if [[ ( -z "${NEO4J_USERNAME}" || -z "${NEO4J_PASSWORD}" ) \
     NEO4J_PASSWORD="${NEO4J_PASSWORD:-${parsed_password}}"
 fi
 
-NEO4J_USERNAME="${NEO4J_USERNAME:-neo4j}"
-NEO4J_PASSWORD="${NEO4J_PASSWORD:-bioetl_secure_password}"
+: "${NEO4J_USERNAME:?NEO4J_USERNAME is required for Neo4j Memory MCP}"
+: "${NEO4J_PASSWORD:?NEO4J_PASSWORD is required for Neo4j Memory MCP}"
 NEO4J_DATABASE="${NEO4J_DATABASE:-neo4j}"
 
 # Set environment for MCP server

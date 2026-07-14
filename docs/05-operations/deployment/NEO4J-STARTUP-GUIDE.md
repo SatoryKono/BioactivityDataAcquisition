@@ -20,10 +20,7 @@ ______________________________________________________________________
 ### Шаг 1: Запустить Neo4j контейнер
 
 ```bash
-docker run -d --name bioetl-neo4j \
-  -p 7474:7474 -p 7687:7687 \
-  -e NEO4J_AUTH=neo4j/bioetl_secure_password \
-  neo4j:5.15-community
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait
 ```
 
 **Параметры:**
@@ -65,20 +62,20 @@ curl -I http://localhost:7474/browser/ 2>&1 | head -5
 
 ```bash
 # Из корня проекта
-docker compose up -d neo4j
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait
 ```
 
 ## Остановка Neo4j
 
 ```bash
 # Остановить контейнер (сохранить данные)
-docker stop bioetl-neo4j
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml down
 
 # Полностью удалить контейнер
-docker rm bioetl-neo4j
+# Compose `down` removes project containers but preserves named volumes by default.
 
-# Если удалять тома с данными (⚠️ потеря данных)
-docker rm -v bioetl-neo4j
+# Удаление томов с данными выполняется только отдельной процедурой из
+# docker-compose-project-migration.md после проверенного backup/restore drill.
 ```
 
 ## Проверка MCP Подключения
@@ -123,18 +120,15 @@ docker logs bioetl-neo4j | grep -E "Started|ERROR"
 
 - **URL**: http://localhost:7474/browser/
 - **Username**: `neo4j`
-- **Password**: `bioetl_secure_password` (или ваша кастомная пароль)
+- **Password**: обязательное значение `NEO4J_PASSWORD`
 
 ## Переменные Окружения
 
 Если нужно использовать кастомные учетные данные:
 
 ```bash
-# Вариант 1: Через docker run
-docker run -d --name bioetl-neo4j \
-  -p 7474:7474 -p 7687:7687 \
-  -e NEO4J_AUTH=neo4j/your-custom-password \
-  neo4j:5.15-community
+# Единственный владелец — Compose project bioetl-neo4j
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait
 
 # Вариант 2: Через .env (если используется docker-compose)
 # Создать или обновить .env:
@@ -157,7 +151,7 @@ NEO4J_URI=bolt://localhost:7687
 | ---------------- | -------------------------------------- | ------------------------ |
 | `NEO4J_URI`      | `.env` или переменная                  | `bolt://localhost:7687`  |
 | `NEO4J_USERNAME` | `NEO4J_AUTH` или `NEO4J_AUTH_USERNAME` | `neo4j`                  |
-| `NEO4J_PASSWORD` | `NEO4J_AUTH` или `NEO4J_AUTH_PASSWORD` | `bioetl_secure_password` |
+| `NEO4J_PASSWORD` | `NEO4J_AUTH` или `NEO4J_AUTH_PASSWORD` | обязательное локальное значение |
 | `NEO4J_DATABASE` | `.env`                                 | `neo4j`                  |
 
 ## Troubleshooting
@@ -169,13 +163,10 @@ NEO4J_URI=bolt://localhost:7687
 docker ps | grep bioetl-neo4j
 
 # Если контейнер не запущен:
-docker start bioetl-neo4j
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait
 
-# Если контейнера нет вообще, запустить заново
-docker run -d --name bioetl-neo4j \
-  -p 7474:7474 -p 7687:7687 \
-  -e NEO4J_AUTH=neo4j/bioetl_secure_password \
-  neo4j:5.15-community
+# Если сервиса нет, запустить его через единственного Compose-владельца
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait
 ```
 
 ### Ошибка: "port 7687 is already allocated"
@@ -184,11 +175,8 @@ docker run -d --name bioetl-neo4j \
 # Найти процесс на порте 7687
 docker ps | grep 7687
 
-# Остановить конфликтующий контейнер или использовать другой порт
-docker run -d --name bioetl-neo4j \
-  -p 7474:7474 -p 7688:7687 \
-  -e NEO4J_AUTH=neo4j/bioetl_secure_password \
-  neo4j:5.15-community
+# Остановить конфликтующий процесс, затем повторить канонический запуск
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait
 ```
 
 ### Ошибка: "Invalid memory configuration"
@@ -213,7 +201,7 @@ docker inspect bioetl-neo4j
 
 ## Next Steps
 
-1. ✅ Запустить Neo4j: `docker run -d --name bioetl-neo4j -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/bioetl_secure_password neo4j:5.15-community`
+1. ✅ Запустить Neo4j: `docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait`
 1. ✅ Проверить статус: `codex mcp get neo4j-memory`
 1. ✅ Запустить тест: `bash scripts/ai/mcp/check.sh`
 1. ✅ Открыть Neo4j Browser: http://localhost:7474/browser/

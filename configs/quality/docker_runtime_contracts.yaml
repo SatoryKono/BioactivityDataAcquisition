@@ -1,0 +1,307 @@
+schema_version: docker-runtime-contract-v1
+policy:
+  adr: ADR-010
+  status: optional_local_only_adjunct
+  canonical_runtime: false
+  owner: BioETL maintainers
+  gate_command: >-
+    python scripts/ops/runtime/docker/docker_runtime_preflight.py
+    --contract configs/quality/docker_runtime_contracts.yaml
+  runtime_guardrail: >-
+    Docker helpers are optional local adjuncts and MUST NOT be required for the
+    canonical Python/venv runtime, tests, storage, locking, or orchestration.
+
+stability_slo:
+  startup_cycles: 100
+  soak_hours: 72
+  unexpected_exits: 0
+  restart_count_delta: 0
+  oom_kills: 0
+  unresolved_unhealthy: 0
+  recovery_seconds_p99: 180
+  recovery_trials: 100
+
+diagnostics:
+  F001:
+    severity: error
+    title: Bind mount obscures image-installed dependencies
+  F002:
+    severity: error
+    title: Warp client starts without warp-svc
+  F003:
+    severity: error
+    title: Compose project or service ownership drift
+
+hardening_targets:
+  implementation_issue: 6293
+  images:
+    immutable_digest_required: true
+    mutable_tags_forbidden: [latest, alpine]
+  resources:
+    memory_limit_required: true
+    cpu_limit_required: true
+    pids_limit_required: true
+  logging:
+    driver: json-file
+    max_size: 10m
+    max_files: 3
+  readiness:
+    real_service_probe_required: true
+    running_state_is_not_ready: true
+
+path_policy:
+  preferred_repository_origin: linux_filesystem
+  discouraged_origins:
+    - /mnt/c
+    - /mnt/d
+    - /mnt/e
+  mixed_origin_for_same_project_forbidden: true
+
+stacks:
+  main:
+    compose_file: docker-compose.yml
+    project_name: bioetl-main
+    owner: local-main-helper
+    required_services:
+      - bioetl
+    optional_services:
+      - warp
+    required_environment_names:
+      - LOG_LEVEL
+      - TUNNEL_TOKEN
+      - NEO4J_USERNAME
+      - NEO4J_PASSWORD
+    required_secret_environment_names:
+      - TUNNEL_TOKEN
+      - NEO4J_PASSWORD
+    readiness:
+      bioetl: http://127.0.0.1:8081/health/live
+    restart_policy:
+      bioetl: on-failure:3
+      warp: unless-stopped
+    migration:
+      legacy_project_name: bioactivitydataacquisition2
+      volume_map:
+        bioactivitydataacquisition2_warp-data: bioetl-main_warp-data
+  monitoring:
+    compose_file: docker-compose.monitoring.yml
+    project_name: bioetl-monitoring
+    owner: observability-helper
+    required_services:
+      - prometheus
+      - pushgateway
+      - grafana
+      - renderer
+    optional_services:
+      - loki
+      - promtail
+      - tempo
+    required_environment_names:
+      - GF_SECURITY_ADMIN_PASSWORD
+      - GF_RENDERING_RENDERER_TOKEN
+    required_secret_environment_names:
+      - GF_SECURITY_ADMIN_PASSWORD
+      - GF_RENDERING_RENDERER_TOKEN
+    readiness:
+      prometheus: http://127.0.0.1:9090/-/healthy
+      pushgateway: http://127.0.0.1:9091/-/healthy
+      grafana: http://127.0.0.1:3000/api/health
+    migration:
+      legacy_project_name: bioactivitydataacquisition2
+      volume_map:
+        bioactivitydataacquisition2_prometheus-data: bioetl-monitoring_prometheus-data
+        bioactivitydataacquisition2_grafana-data: bioetl-monitoring_grafana-data
+        bioactivitydataacquisition2_loki-data: bioetl-monitoring_loki-data
+        bioactivitydataacquisition2_tempo-data: bioetl-monitoring_tempo-data
+  neo4j:
+    compose_file: docker-compose.neo4j.yml
+    project_name: bioetl-neo4j
+    owner: neo4j-helper
+    required_services:
+      - neo4j
+    optional_services: []
+    required_environment_names:
+      - NEO4J_USERNAME
+      - NEO4J_PASSWORD
+    required_secret_environment_names:
+      - NEO4J_PASSWORD
+    readiness:
+      neo4j: http://127.0.0.1:7474
+    migration:
+      legacy_project_name: bioactivitydataacquisition2
+      requires_backup_restore_drill: true
+      volume_map:
+        bioactivitydataacquisition2_neo4j_data: bioetl-neo4j_neo4j_data
+        bioactivitydataacquisition2_neo4j_logs: bioetl-neo4j_neo4j_logs
+  neo4j-audit:
+    compose_file: docker-compose.neo4j-audit.yml
+    project_name: bioetl-neo4j-audit
+    owner: neo4j-audit-helper
+    required_services:
+      - neo4j-audit
+    optional_services: []
+    required_environment_names:
+      - NEO4J_AUDIT_USERNAME
+      - NEO4J_AUDIT_PASSWORD
+    required_secret_environment_names:
+      - NEO4J_AUDIT_PASSWORD
+    readiness:
+      neo4j-audit: http://127.0.0.1:7475
+  codex:
+    compose_file: docker-compose.codex.yml
+    project_name: bioetl-codex
+    owner: legacy-mcp-helper
+    status: pending_retirement_rf002
+    canonical_runtime: false
+    required_services:
+      - mcp-memory
+      - mcp-filesystem
+      - mcp-github
+      - mcp-fetch
+      - mcp-codex-config
+    optional_services: []
+    required_environment_names:
+      - GITHUB_PERSONAL_ACCESS_TOKEN
+    required_secret_environment_names:
+      - GITHUB_PERSONAL_ACCESS_TOKEN
+    readiness: {}
+    migration:
+      legacy_project_name: bioactivitydataacquisition2
+      volume_map:
+        bioactivitydataacquisition2_mcp-fetch-cache: bioetl-codex_mcp-fetch-cache
+  redis:
+    compose_file: scripts/ops/runtime/docker/compose/redis.yml
+    project_name: bioetl-redis
+    owner: optional-redis-diagnostics
+    required_services: [redis, redis-exporter]
+    optional_services: []
+    required_environment_names: [REDIS_PASSWORD]
+    required_secret_environment_names: [REDIS_PASSWORD]
+    readiness:
+      redis: redis-cli ping
+  minio:
+    compose_file: scripts/ops/runtime/docker/compose/minio.yml
+    project_name: bioetl-minio
+    owner: optional-minio-diagnostics
+    required_services: [minio]
+    optional_services: []
+    required_environment_names: [MINIO_ROOT_USER, MINIO_ROOT_PASSWORD]
+    required_secret_environment_names: [MINIO_ROOT_PASSWORD]
+    readiness:
+      minio: http://127.0.0.1:9000/minio/health/ready
+  alertmanager:
+    compose_file: scripts/ops/runtime/docker/compose/alertmanager.yml
+    project_name: bioetl-alertmanager
+    owner: optional-alertmanager-diagnostics
+    required_services: [alertmanager]
+    optional_services: []
+    required_environment_names: []
+    readiness:
+      alertmanager: http://127.0.0.1:9093/-/healthy
+  sonarqube:
+    compose_file: scripts/ops/runtime/docker/compose/sonarqube.yml
+    project_name: bioetl-sonarqube
+    owner: optional-sonarqube-diagnostics
+    required_services: [postgres-sonarqube, sonarqube]
+    optional_services: []
+    required_environment_names:
+      - SONARQUBE_DB_PASSWORD
+      - SONARQUBE_SYSTEM_PASSCODE
+    required_secret_environment_names:
+      - SONARQUBE_DB_PASSWORD
+      - SONARQUBE_SYSTEM_PASSCODE
+    readiness:
+      sonarqube: http://127.0.0.1:9010/api/system/status
+
+service_ownership:
+  bioetl: main
+  warp: main
+  prometheus: monitoring
+  pushgateway: monitoring
+  grafana: monitoring
+  renderer: monitoring
+  loki: monitoring
+  promtail: monitoring
+  tempo: monitoring
+  neo4j: neo4j
+  neo4j-audit: neo4j-audit
+  mcp-memory: codex
+  mcp-filesystem: codex
+  mcp-github: codex
+  mcp-fetch: codex
+  mcp-codex-config: codex
+  redis: redis
+  redis-exporter: redis
+  minio: minio
+  alertmanager: alertmanager
+  postgres-sonarqube: sonarqube
+  sonarqube: sonarqube
+
+host_ports:
+  3000: {stack: monitoring, service: grafana, bind: 127.0.0.1}
+  3100: {stack: monitoring, service: loki, bind: 127.0.0.1}
+  3200: {stack: monitoring, service: tempo, bind: 127.0.0.1}
+  4317: {stack: monitoring, service: tempo, bind: 127.0.0.1}
+  7474: {stack: neo4j, service: neo4j, bind: 127.0.0.1}
+  7475: {stack: neo4j-audit, service: neo4j-audit, bind: 127.0.0.1}
+  7687: {stack: neo4j, service: neo4j, bind: 127.0.0.1}
+  7688: {stack: neo4j-audit, service: neo4j-audit, bind: 127.0.0.1}
+  8081: {stack: main, service: bioetl, bind: 127.0.0.1}
+  6379: {stack: redis, service: redis, bind: 127.0.0.1}
+  9000: {stack: minio, service: minio, bind: 127.0.0.1}
+  9001: {stack: minio, service: minio, bind: 127.0.0.1}
+  9010: {stack: sonarqube, service: sonarqube, bind: 127.0.0.1}
+  9090: {stack: monitoring, service: prometheus, bind: 127.0.0.1}
+  9091: {stack: monitoring, service: pushgateway, bind: 127.0.0.1}
+  9093: {stack: alertmanager, service: alertmanager, bind: 127.0.0.1}
+  9100: {stack: codex, service: mcp-codex-config, bind: 127.0.0.1}
+  9121: {stack: redis, service: redis-exporter, bind: 127.0.0.1}
+  9999: {stack: main, service: warp, bind: 127.0.0.1}
+
+retained_container_names:
+  bioetl-neo4j:
+    stack: neo4j
+    reason: Existing Neo4j recovery, MCP, and operator scripts address this name.
+  bioetl-neo4j-audit:
+    stack: neo4j-audit
+    reason: Existing audit launchers and verification scripts address this name.
+  bioetl-prometheus:
+    stack: monitoring
+    reason: Published endpoint verification addresses this name.
+  bioetl-pushgateway:
+    stack: monitoring
+    reason: Published endpoint verification addresses this name.
+  bioetl-grafana:
+    stack: monitoring
+    reason: Published endpoint verification addresses this name.
+  bioetl-mcp-memory:
+    stack: codex
+    reason: Legacy MCP startup checks address this name pending RF-002 retirement.
+  bioetl-mcp-filesystem:
+    stack: codex
+    reason: Legacy MCP startup checks address this name pending RF-002 retirement.
+  bioetl-mcp-github:
+    stack: codex
+    reason: Legacy MCP startup checks address this name pending RF-002 retirement.
+  bioetl-mcp-fetch:
+    stack: codex
+    reason: Legacy MCP startup checks address this name pending RF-002 retirement.
+  bioetl-codex-config:
+    stack: codex
+    reason: Legacy MCP startup checks address this name pending RF-002 retirement.
+
+shared_networks:
+  monitoring:
+    name: bioetl-monitoring
+    owner: scripts/ops/docker-setup
+    consumers: [main, monitoring]
+  warp-network:
+    name: warp-network
+    owner: scripts/ops/docker-setup
+    consumers: [main, neo4j, codex]
+
+capacity:
+  minimum_free_disk_gib: 50
+  minimum_free_disk_percent: 20
+  minimum_free_memory_gib: 2
+  minimum_cpus: 2

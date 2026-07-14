@@ -1,7 +1,8 @@
+name: bioetl-redis
+
 services:
   redis:
     image: redis:7.2-alpine
-    container_name: bioetl-redis
     ports:
       - "127.0.0.1:6379:6379"
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:?Set REDIS_PASSWORD before starting scripts/ops/runtime/docker/compose/redis.yml}
@@ -23,7 +24,6 @@ services:
 
   redis-exporter:
     image: oliver006/redis_exporter:latest
-    container_name: bioetl-redis-exporter
     ports:
       - "127.0.0.1:9121:9121"
     environment:

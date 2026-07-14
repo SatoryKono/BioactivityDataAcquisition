@@ -10,7 +10,7 @@ CONTAINER_NAME="bioetl-neo4j-audit"
 case "${1:-}" in
   --stop)
     echo "Stopping audit instance..."
-    docker compose -f "$COMPOSE_FILE" down
+    docker compose -p bioetl-neo4j-audit -f "$COMPOSE_FILE" down
     echo "Stopped."
     exit 0
     ;;
@@ -20,8 +20,10 @@ case "${1:-}" in
     exit 0
     ;;
   *)
+    : "${NEO4J_AUDIT_USERNAME:?NEO4J_AUDIT_USERNAME is required}"
+    : "${NEO4J_AUDIT_PASSWORD:?NEO4J_AUDIT_PASSWORD is required}"
     echo "Starting Neo4j audit instance (1024m heap)..."
-    docker compose -f "$COMPOSE_FILE" up -d
+    docker compose -p bioetl-neo4j-audit -f "$COMPOSE_FILE" up -d
 
     echo "Waiting for startup (45 seconds)..."
     sleep 45
@@ -32,7 +34,7 @@ case "${1:-}" in
       echo "Connection details:"
       echo "  HTTP:  http://localhost:7475"
       echo "  Bolt:  bolt://localhost:7688"
-      echo "  Auth:  neo4j / audit_secure_password"
+      echo "  Auth:  supplied via NEO4J_AUDIT_USERNAME / NEO4J_AUDIT_PASSWORD"
       echo ""
       echo "To run live validation:"
       echo "  export LIVE_AUDIT_MODE=1"
