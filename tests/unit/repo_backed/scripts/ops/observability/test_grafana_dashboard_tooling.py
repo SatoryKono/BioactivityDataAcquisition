@@ -120,9 +120,12 @@ def test_playwright_fallback_prepares_inner_scroll_before_screenshot() -> None:
     assert "setDashboardScrollPosition(page, 0)" in script
     assert "dashboardCaptureMetrics(page)" in script
     assert "prepareDashboardForCapture(page, dashboard, index, total)" in script
+    assert "height: MAX_CAPTURE_VIEWPORT_HEIGHT" in script
+    assert "dashboard.captureHeight = desiredHeight" in script
+    assert "screenshotOptions.clip" in script
     assert script.index(
-        "await prepareDashboardForCapture(page, dashboard, index, total);"
-    ) < script.index("await page.screenshot({")
+        "const viewportChanged = await prepareDashboardForCapture("
+    ) < script.index("await page.screenshot(screenshotOptions)")
 
 
 def test_rerender_scope_maps_run_id_to_silver_reject_explorer_run_filter(
@@ -601,7 +604,14 @@ def test_screenshot_runtime_setup_scripts_keep_bootstrap_contract() -> None:
     assert "BIOETL_PLAYWRIGHT_NODE_MODULES" in shell_script
     assert "BIOETL_PLAYWRIGHT_LIBRARY_PATH" in shell_script
     assert "playwright-runtime" in shell_script
-    assert "libasound2t64" in shell_script
+    assert "-type f -o -type l" in shell_script
+    for package_name in (
+        "libatk-bridge2.0-0t64",
+        "libatk1.0-0t64",
+        "libcups2t64",
+        "libasound2t64",
+    ):
+        assert package_name in shell_script
     assert "ci --include=dev --no-bin-links" in powershell_script
     assert 'NPM_CONFIG_PRODUCTION = "false"' in powershell_script
 
@@ -626,16 +636,23 @@ def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() 
     assert "renderedPanelSelector" in script
     assert "waitForDashboardContent" in script
     assert "materializeLazyPanels" in script
+    assert "settleDashboardAfterViewportChange" in script
+    assert script.index("await settleDashboardAfterViewportChange") < script.index(
+        "dashboard.terminalStateValidation = await validateDashboardTerminalStates"
+    )
     assert "window.scrollTo" in script
     assert "const browser = await chromium.launch({ headless: true });" in script
     assert "page = await context.newPage();" in script
     assert "await page.close();" in script
     assert "GRAFANA_SCREENSHOT_EXPAND_COLLAPSED_ROWS" in script
     assert "--expand-collapsed-rows" in script
+    assert "const networkIdleTimeoutMs = Math.max(3000, Math.min(CONFIG.timeoutMs, 15000))" in script
     assert "requiredNonRowPanels" in script
     assert "validateDashboardTerminalStates" in script
     assert "terminalStateValidation" in script
     assert "requiredTerminalPanelIds" in script
+    assert "Math.min(CONFIG.timeoutMs, 60000)" in script
+    assert 'refresh: "off"' in script
     assert "bioetl-silver-reject-explorer" in script
     assert 'classification: "contradictory"' in script
     assert 'classification: "valid-empty"' in script
@@ -693,6 +710,22 @@ const contradictory = classify({
   hasVisualEvidence: false,
 }).classification;
 if (contradictory !== "contradictory") throw new Error(contradictory);
+const renderedWithResidualMarker = classify({
+  type: "stat",
+  bodyText: "0",
+  hasLoadingMarker: true,
+  hasErrorIcon: false,
+  hasVisualEvidence: true,
+}).classification;
+if (renderedWithResidualMarker !== "healthy") throw new Error(renderedWithResidualMarker);
+const markerWithoutEvidence = classify({
+  type: "stat",
+  bodyText: "",
+  hasLoadingMarker: true,
+  hasErrorIcon: false,
+  hasVisualEvidence: false,
+}).classification;
+if (markerWithoutEvidence !== "loading") throw new Error(markerWithoutEvidence);
 """
     env = os.environ.copy()
     rerender_subject._apply_playwright_runtime_env(env)

@@ -1,3 +1,10 @@
+---
+name: "py-reproducibility-audit"
+description: "Use when auditing code changes for reproducibility and replay capability. Ensures that changes maintain deterministic behavior, proper test coverage, and can be reliably replayed across environments."
+context: "fork"
+agent: "general-purpose"
+---
+
 > Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
 > Canonical runtime source: `.codex/skills/py-reproducibility-audit/SKILL.md`
 > Governance: AI_RUNTIME_MIRROR_OWNERSHIP.md
@@ -5,35 +12,16 @@
 ______________________________________________________________________
 
 ---
-name: py-reproducibility-audit
-description: Audit BioETL pipeline reproducibility, determinism, idempotency, checkpoint safety, lineage completeness, and replay readiness against current code, configs, docs, and control-plane artifacts, then turn confirmed findings into actionable BioETL GitHub issues. Use when asked to assess exact replay/debug readiness, audit run manifests or execution fingerprints, verify checkpoint/run identity consistency, or prepare issue backlogs from a completed reproducibility audit.
+name: "py-reproducibility-audit"
+description: "Use when auditing code changes for reproducibility and replay capability. Ensures that changes maintain deterministic behavior, proper test coverage, and can be reliably replayed across environments."
+context: "fork"
+agent: "general-purpose"
 ---
 
-# py-reproducibility-audit
-
-## Objective
-
-Run a source-first BioETL reproducibility audit and, only after confirmed
-findings exist, prepare root-cause GitHub issues with file-level implementation
-plans.
-
-## Required Inputs
-
-- `target_type`: `pipeline` | `workflow`
-  Default: `pipeline`
-- `target_name`: canonical target name
-  Default: `chembl_assay`
-- `execution_mode`: `fresh_run` | `existing_run_ids`
-  Default: `fresh_run`
-- `run_count`: number of independent audit runs to compare
-  Default: `2`
-- `limit`: bounded-run limit when `execution_mode=fresh_run`
-  Default: `1000`
-
-When the user does not override these values, audit the `chembl_assay`
-pipeline via two fresh bounded runs.
+# Python Reproducibility Audit
 
 ## Source Of Truth
+
 - Normative index: `../../../../NORMATIVE_SOURCES.md`
 - Root runtime contract: `../../../../../../AGENTS.md`
 - Project rules: `../../../../RULES.md`
@@ -45,68 +33,305 @@ pipeline via two fresh bounded runs.
 - Runtime map: `../../agents/CODEX-RUNTIME.md`
 - Shared project memory: `../../../docs/00-project/ai/memory/agent-memory.md`
 - Daily loop: `../../../src/memory/DAILY_WORKFLOW.md`
+- Requirements: `../../../../../../01-requirements/REQUIREMENTS.md`
+- Accepted ADRs: `../../../../../../02-architecture/decisions`
+- Reproducibility contract: [references/reproducibility-audit.md](references/reproducibility-audit.md)
+This skill audits code changes for reproducibility and replay capability.
+
+## Prerequisites
+
+- Code changes proposed or committed
+- Test coverage available
+- Environment configuration documented
 
 ## Workflow
 
-1. Start with the canonical memory loop from
-   `../../../src/memory/DAILY_WORKFLOW.md` and run
-   `python -m memory.tooling.workflow pre-task ...`.
-1. Read `MEMORY_USAGE.md`, `agent-memory.md`, and the matching
-   `memory-py-*.md` sheet when a role-specific memory page is relevant.
-1. Read [references/reproducibility-audit.md](references/reproducibility-audit.md)
-   before making any architectural claims about reproducibility.
-1. Resolve the audit target before any run:
-   - if `target_type=pipeline`, audit the named pipeline directly
-   - if `target_type=workflow`, audit the named workflow and the pipeline steps
-     it actually executes
-   - if the target is not provided, use the defaults from `Required Inputs`
-   - if the canonical command for the target is ambiguous, stop and report the
-     ambiguity instead of guessing
-1. Resolve the execution lane before collecting evidence:
-   - `fresh_run`: perform `run_count` sequential bounded executions using the
-     canonical CLI for the resolved target
-   - `existing_run_ids`: audit existing manifests / ledgers / sidecars / output
-     artifacts without starting a new run
-1. Audit only against confirmed repository evidence:
-   - code
-   - configs
-   - tests
-   - runtime/control-plane artifacts
-   - accepted docs/ADRs
-1. Treat reproducibility as distinct from generic observability:
-   - keep determinism, idempotency, replay, resume, rebuild, and incremental
-     semantics separate
-   - evaluate `run_id`, `manifest_id`, `execution_fingerprint`,
-     `config_hash`, `effective_config_hash`, `git_commit`, `contract_ref`,
-     `contract_version`, `content_hash`, checkpoint identity, and lineage
-     metadata as current architectural baseline, not optional ideas
-1. For `workflow` targets, report both:
-   - workflow-level reproducibility findings
-   - per-pipeline findings for every executed pipeline step
-1. For `pipeline` targets, prefer the direct pipeline CLI surface when the
-   project exposes one; use a workflow wrapper only when the pipeline is
-   workflow-managed by design and no direct supported CLI exists.
-1. Produce the audit in the mandatory section order defined in
-   `references/reproducibility-audit.md`.
-1. Create issues only if the audit produced confirmed problems with concrete
-   evidence. Then read
-   [references/github-issue-design.md](references/github-issue-design.md) and
-   generate one issue per root cause.
-1. Keep every issue architecture-safe:
-   - no infrastructure imports into domain
-   - no I/O in domain
-   - no weakened Gold strict validation
-   - no dependency-direction violations
-   - no cyclic dependencies
-1. Finish with `python -m memory.tooling.workflow post-task ...` and promote
-   only durable lessons or decisions.
+Use TodoWrite to track these mandatory steps:
+
+<required>
+1. Analyze code changes for determinism violations
+2. Review test coverage for new code paths
+3. Check for non-deterministic I/O operations
+4. Validate schema and contract compliance
+5. Review logging and observability
+6. Check environment dependencies
+7. Generate reproducibility audit report
+</required>
+
+### Step 1: Analyze Code Changes for Determinism
+
+Review code changes for determinism violations:
+
+**Common violations:**
+
+| Violation Type | Pattern | Risk Level |
+| -------------- | ------- | ---------- |
+| Unsorted DataFrame operations | `df.head()`, `df.tail()` without `sort_values()` | High |
+| Non-UTC timestamps | `datetime.now()`, `datetime.utcnow()` | High |
+| Random operations without seed | `random.random()`, `np.random.rand()` | High |
+| Unstable iteration | `dict.keys()`, `set` iteration | Medium |
+| File system ordering | `os.listdir()`, `glob.glob()` without sorting | Medium |
+
+**Check for:**
+
+```python
+# BAD: Non-deterministic
+result = df.head(10)
+timestamp = datetime.now()
+items = list(my_dict.keys())
+
+# GOOD: Deterministic
+result = df.sort_values('id').head(10)
+timestamp = datetime.now(timezone.utc)
+items = sorted(my_dict.keys())
+```
+
+### Step 2: Review Test Coverage
+
+Ensure new code paths have test coverage:
+
+**Coverage requirements:**
+
+- New functions: ≥80% line coverage
+- New classes: ≥75% line coverage
+- Critical paths: 100% coverage
+- Error handling: All branches covered
+
+**Check for:**
+
+- Unit tests for new functions
+- Integration tests for new workflows
+- Edge case tests for boundary conditions
+- Error handling tests for exceptions
+
+### Step 3: Check Non-Deterministic I/O
+
+Review I/O operations for determinism:
+
+**I/O patterns to check:**
+
+```python
+# BAD: Non-deterministic file ordering
+files = os.listdir('data/')
+
+# GOOD: Deterministic file ordering
+files = sorted(os.listdir('data/'))
+
+# BAD: Non-atomic writes
+with open('output.json', 'w') as f:
+    json.dump(data, f)
+
+# GOOD: Atomic writes via write_dataset_atomic
+write_dataset_atomic(data, 'output.json')
+```
+
+**Check for:**
+
+- File operations without sorting
+- Non-atomic writes
+- Network calls without retry logic
+- Database operations without transactions
+
+### Step 4: Validate Schema and Contract Compliance
+
+Ensure schema validation is in place:
+
+**Schema checks:**
+
+- Pandera schemas defined for all data structures
+- Schema validation before writes
+- Proper error handling for validation failures
+- Schema evolution documented
+
+**Contract checks:**
+
+- API contracts defined and tested
+- Breaking changes documented
+- Version bumps if needed
+- Migration plans provided
+
+### Step 5: Review Logging and Observability
+
+Ensure proper structured logging:
+
+**Logging checks:**
+
+- Only `UnifiedLogger` used (no `print()`)
+- Structured logging with context
+- Proper log levels (DEBUG, INFO, WARNING, ERROR)
+- No secrets in logs
+
+**Observability checks:**
+
+- Metrics defined for key operations
+- Tracing for critical paths
+- Error tracking configured
+- No PII in telemetry
+
+### Step 6: Check Environment Dependencies
+
+Review environment configuration:
+
+**Dependency checks:**
+
+- All dependencies version-pinned
+- No floating ranges (e.g., `>=`, `latest`)
+- Dependency security scan passed
+- No deprecated packages
+
+**Configuration checks:**
+
+- `.env` files not committed
+- Configuration via environment variables
+- Secrets management documented
+- Local-only runtime by default
+
+### Step 7: Generate Reproducibility Audit Report
+
+Produce audit report:
+
+```markdown
+## Reproducibility Audit Report
+
+**Changes Audited:** [file list]
+**Audit Date:** [timestamp]
+**Auditor:** [agent/skill]
+
+### Determinism Analysis
+
+| Check | Status | Notes |
+| ----- | ------ | ----- |
+| DataFrame operations | ✓ PASS | All operations use stable sorting |
+| Timestamp handling | ✓ PASS | All timestamps in UTC |
+| Random operations | ✓ PASS | Seeded where used |
+| Iteration stability | ✓ PASS | All iterations sorted |
+
+### Test Coverage
+
+| Component | Coverage | Status |
+| --------- | -------- | ------ |
+| New functions | 85% | ✓ PASS |
+| New classes | 78% | ✓ PASS |
+| Critical paths | 100% | ✓ PASS |
+| Error handling | 92% | ✓ PASS |
+
+### I/O Operations
+
+| Operation | Deterministic | Atomic | Status |
+| --------- | ------------- | ------ | ------ |
+| File reads | ✓ | N/A | ✓ PASS |
+| File writes | ✓ | ✓ | ✓ PASS |
+| Network calls | ✓ | N/A | ✓ PASS |
+
+### Schema Validation
+
+| Schema | Validated | Status |
+| ------ | --------- | ------ |
+| Input schema | ✓ | ✓ PASS |
+| Output schema | ✓ | ✓ PASS |
+| Internal schema | ✓ | ✓ PASS |
+
+### Logging & Observability
+
+| Check | Status | Notes |
+| ----- | ------ | ----- |
+| UnifiedLogger only | ✓ PASS | No print() found |
+| Structured logging | ✓ PASS | Context bound |
+| No secrets in logs | ✓ PASS | Scan passed |
+| Metrics defined | ✓ PASS | Key operations covered |
+
+### Environment Dependencies
+
+| Check | Status | Notes |
+| ----- | ------ | ----- |
+| Version-pinned | ✓ PASS | All dependencies pinned |
+| Security scan | ✓ PASS | No vulnerabilities |
+| No deprecated packages | ✓ PASS | All current |
+
+### Overall Assessment
+
+**Reproducibility Score:** [X]/10
+**Replay Capability:** [YES/NO]
+**Recommendation:** [APPROVE/REQUEST CHANGES]
+
+### Required Changes (if any)
+
+- [List any required changes to meet reproducibility standards]
+```
+
+## User Interaction
+
+Use the **AskUserQuestion tool** when:
+
+### Determinism violation found
+
+```
+Question: "Non-deterministic pattern found: [pattern]. How to resolve?"
+Options:
+- "Fix with stable sorting"
+- "Add deterministic seed"
+- "Accept with justification"
+- "Help me understand the risk"
+```
+
+### Test coverage insufficient
+
+```
+Question: "Test coverage for [component] is [X]%, below threshold of 80%. How to proceed?"
+Options:
+- "Add unit tests for missing paths"
+- "Add integration tests"
+- "Accept with risk documentation"
+- "Help me identify test gaps"
+```
+
+### Breaking change detected
+
+```
+Question: "Breaking change detected in [component]. Schema/contract changed without version bump."
+Options:
+- "Add version bump and migration plan"
+- "Revert breaking change"
+- "Document as non-breaking with justification"
+- "Help me assess impact"
+```
+
+### Environment dependency issue
+
+```
+Question: "Dependency [package] uses floating range [version]. This may cause reproducibility issues."
+Options:
+- "Pin to specific version"
+- "Accept with justification"
+- "Find alternative package"
+- "Help me understand the risk"
+```
+
+## Output
+
+After reproducibility audit:
+
+```markdown
+## Audit Complete
+
+**Reproducibility Score:** [X]/10
+**Replay Capability:** [YES/NO]
+**Recommendation:** [APPROVE/REQUEST CHANGES]
+
+### Summary
+- Determinism violations: [N]
+- Test coverage gaps: [N]
+- I/O issues: [N]
+- Schema violations: [N]
+- Logging issues: [N]
+- Dependency issues: [N]
+
+### Required Actions
+- [List any required actions]
+- [List any recommended actions]
+```
 
 ## References
 
-- `references/reproducibility-audit.md`
-  Read when running the audit itself. It contains the mandatory audit scope,
-  scoring, section order, critical-defect definition, and final key question.
-- `references/github-issue-design.md`
-  Read when converting confirmed findings into GitHub issues. It contains the
-  strict issue template, decomposition rules, and file-level planning
-  requirements.
+- [references/reproducibility-audit.md](references/reproducibility-audit.md) - reproducibility standards
+- [references/github-issue-design.md](references/github-issue-design.md) - issue template for reproducibility issues

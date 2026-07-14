@@ -22,9 +22,6 @@ PLAYWRIGHT_INSTALL_ROOT=""
 APT_PACKAGES=(
   libnspr4
   libnss3
-  libatk-bridge2.0-0
-  libatk1.0-0
-  libcups2
   libdrm2
   libgbm1
   libxcomposite1
@@ -35,6 +32,9 @@ APT_PACKAGES=(
 )
 
 APT_PACKAGE_ALTERNATIVES=(
+  "libatk-bridge2.0-0|libatk-bridge2.0-0t64"
+  "libatk1.0-0|libatk1.0-0t64"
+  "libcups2|libcups2t64"
   "libasound2|libasound2t64"
 )
 
@@ -130,7 +130,8 @@ ensure_dirs() {
 local_lib_available() {
   local lib="$1"
   [[ -d "${LOCAL_SYSTEM_LIB_ROOT}" ]] || return 1
-  find "${LOCAL_SYSTEM_LIB_ROOT}" -type f -name "${lib}" -print -quit 2>/dev/null \
+  find "${LOCAL_SYSTEM_LIB_ROOT}" \( -type f -o -type l \) \
+    -name "${lib}" -print -quit 2>/dev/null \
     | grep -Fq "${lib}"
 }
 
@@ -163,9 +164,10 @@ print_install_hint() {
   log "Install the standard headless Chromium runtime packages with:"
   log ""
   log "  sudo apt-get update -qq"
-  log "  sudo apt-get install -y ${APT_PACKAGES[*]} libasound2"
+  log "  sudo apt-get install -y ${APT_PACKAGES[*]} libatk-bridge2.0-0 libatk1.0-0 libcups2 libasound2"
   log ""
-  log "On Ubuntu 24.04, use libasound2t64 when libasound2 has no candidate."
+  log "On Ubuntu 24.04, use the corresponding *t64 package when a legacy"
+  log "libatk/libcups/libasound package has no candidate."
   log "Without sudo, this setup script can download and extract the missing"
   log "runtime libraries into ${LOCAL_SYSTEM_LIB_ROOT}."
   log ""
