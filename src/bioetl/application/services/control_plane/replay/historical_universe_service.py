@@ -6,15 +6,13 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
-from bioetl.application.services.control_plane.replay._historical_record_payload import (
-    build_historical_certified_identity_payload_from_record,
-)
 from bioetl.application.services.control_plane.replay.historical_corpus_service import (
     HistoricalReplayCertifiabilityInventory,
     HistoricalReplayCorpusService,
 )
 from bioetl.application.services.control_plane.replay.historical_identity_models import (
-    HistoricalReplayRunIdentity,
+    HistoricalReplayUniverseExternalRecord,
+    HistoricalReplayUniverseRecord,
 )
 from bioetl.application.services.control_plane.replay.historical_universe_policy import (
     build_authoritative_truth_surface,
@@ -33,48 +31,6 @@ __all__ = [
 ]
 
 _CLOSED_CERTIFICATION_STATUSES = frozenset({"already_replayable", "already_certified"})
-
-
-@dataclass(frozen=True, slots=True)
-class HistoricalReplayUniverseExternalRecord(HistoricalReplayRunIdentity):
-    """One authoritative non-local historical run record."""
-
-    certification_status: str
-    replay_occurrence_kind: str
-    blocking_reasons: tuple[str, ...] = ()
-    evidence_residency: str = "archived"
-    durable_evidence_coverage: bool = False
-    source_pack_ref: str | None = None
-
-    def to_dict(self) -> dict[str, object]:
-        return build_historical_certified_identity_payload_from_record(
-            self,
-            evidence_residency=self.evidence_residency,
-            durable_evidence_coverage=self.durable_evidence_coverage,
-            source_pack_ref=self.source_pack_ref,
-        )
-
-
-@dataclass(frozen=True, slots=True)
-class HistoricalReplayUniverseRecord(HistoricalReplayRunIdentity):
-    """One merged historical-run record in the full replay universe."""
-
-    certification_status: str
-    replay_occurrence_kind: str
-    blocking_reasons: tuple[str, ...]
-    universe_origin: str
-    evidence_residency: str
-    durable_evidence_coverage: bool
-    source_pack_ref: str | None = None
-
-    def to_dict(self) -> dict[str, object]:
-        return build_historical_certified_identity_payload_from_record(
-            self,
-            universe_origin=self.universe_origin,
-            evidence_residency=self.evidence_residency,
-            durable_evidence_coverage=self.durable_evidence_coverage,
-            source_pack_ref=self.source_pack_ref,
-        )
 
 
 @dataclass(frozen=True, slots=True)

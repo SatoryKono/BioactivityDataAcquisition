@@ -703,7 +703,7 @@
       "missing_lines": 1,
       "module": "bioetl.application.composite.merger_metrics_mixin",
       "path": "src/bioetl/application/composite/merger_metrics_mixin.py",
-      "source_lines": 192
+      "source_lines": 197
     },
     {
       "coverage_percent": 97.18,
@@ -5373,7 +5373,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.replay._historical_record_payload",
       "path": "src/bioetl/application/services/control_plane/replay/_historical_record_payload.py",
-      "source_lines": 93
+      "source_lines": 80
     },
     {
       "coverage_percent": 100.0,
@@ -5503,7 +5503,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.replay.historical_identity_models",
       "path": "src/bioetl/application/services/control_plane/replay/historical_identity_models.py",
-      "source_lines": 36
+      "source_lines": 111
     },
     {
       "coverage_percent": 100.0,
@@ -5523,7 +5523,7 @@
       "missing_lines": 2,
       "module": "bioetl.application.services.control_plane.replay.historical_universe_service",
       "path": "src/bioetl/application/services/control_plane/replay/historical_universe_service.py",
-      "source_lines": 260
+      "source_lines": 216
     },
     {
       "coverage_percent": 96.3,
@@ -8673,7 +8673,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.providers._models",
       "path": "src/bioetl/composition/providers/_models.py",
-      "source_lines": 114
+      "source_lines": 120
     },
     {
       "coverage_percent": 79.49,
@@ -8793,7 +8793,7 @@
       "missing_lines": 4,
       "module": "bioetl.composition.providers.registration_bio",
       "path": "src/bioetl/composition/providers/registration_bio.py",
-      "source_lines": 343
+      "source_lines": 342
     },
     {
       "coverage_percent": 100.0,
@@ -20143,7 +20143,7 @@
       "missing_lines": 16,
       "module": "bioetl.infrastructure.storage.silver.delta_write_execution",
       "path": "src/bioetl/infrastructure/storage/silver/delta_write_execution.py",
-      "source_lines": 318
+      "source_lines": 351
     },
     {
       "coverage_percent": 100.0,
@@ -22925,7 +22925,7 @@
       "missing_lines": 1,
       "module": "bioetl.application.composite.merger_metrics_mixin",
       "path": "src/bioetl/application/composite/merger_metrics_mixin.py",
-      "source_lines": 192
+      "source_lines": 197
     },
     {
       "coverage_percent": 97.18,
@@ -27595,7 +27595,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.replay._historical_record_payload",
       "path": "src/bioetl/application/services/control_plane/replay/_historical_record_payload.py",
-      "source_lines": 93
+      "source_lines": 80
     },
     {
       "coverage_percent": 100.0,
@@ -27725,7 +27725,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.replay.historical_identity_models",
       "path": "src/bioetl/application/services/control_plane/replay/historical_identity_models.py",
-      "source_lines": 36
+      "source_lines": 111
     },
     {
       "coverage_percent": 100.0,
@@ -27745,7 +27745,7 @@
       "missing_lines": 2,
       "module": "bioetl.application.services.control_plane.replay.historical_universe_service",
       "path": "src/bioetl/application/services/control_plane/replay/historical_universe_service.py",
-      "source_lines": 260
+      "source_lines": 216
     },
     {
       "coverage_percent": 96.3,
@@ -30895,7 +30895,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.providers._models",
       "path": "src/bioetl/composition/providers/_models.py",
-      "source_lines": 114
+      "source_lines": 120
     },
     {
       "coverage_percent": 79.49,
@@ -31015,7 +31015,7 @@
       "missing_lines": 4,
       "module": "bioetl.composition.providers.registration_bio",
       "path": "src/bioetl/composition/providers/registration_bio.py",
-      "source_lines": 343
+      "source_lines": 342
     },
     {
       "coverage_percent": 100.0,
@@ -42365,7 +42365,7 @@
       "missing_lines": 16,
       "module": "bioetl.infrastructure.storage.silver.delta_write_execution",
       "path": "src/bioetl/infrastructure/storage/silver/delta_write_execution.py",
-      "source_lines": 318
+      "source_lines": 351
     },
     {
       "coverage_percent": 100.0,
@@ -44450,7 +44450,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "7a5a878088ea1d72d873331a21c8c6e60beff792e70dfa92ecbf250ea041179e",
+  "source_tree_sha256": "6757cc23fd6e9acace3e436c01bfeb9446df0ccb3a61e748fb4c28c82bbfbf37",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

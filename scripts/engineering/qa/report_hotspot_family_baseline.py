@@ -43,15 +43,6 @@ except ModuleNotFoundError:  # pragma: no cover - direct script execution fallba
 DEFAULT_JSON_OUTPUT = PROJECT_ROOT / "reports/quality/hotspot-family-baseline.json"
 DEFAULT_MD_OUTPUT = PROJECT_ROOT / "reports/quality/hotspot-family-baseline.md"
 NEAR_BUDGET_RATIO = 0.8
-_REVIEWED_BASELINE_METRIC_KEYS = (
-    "duplication_clusters",
-    "files",
-    "total_loc",
-    "files_ge_250_loc",
-    "helper_function_ratio",
-    "max_internal_fan_in",
-    "max_internal_fan_in_module",
-)
 
 
 def _display_path(path: Path) -> str:
@@ -161,28 +152,39 @@ def _merge_reviewed_baseline_metrics(
     family: dict[str, object],
     measured: dict[str, object],
 ) -> dict[str, object]:
-    """Pin reviewed-baseline rows to the scorecard's explicit reviewed metrics.
+    """Return live measurements while retaining policy metadata from the family.
 
-    The hotspot-family baseline artifact is the reviewed RF-06 control surface.
-    For reviewed-baseline families, the artifact must mirror the scorecard's
-    locked metrics even if the current live code shape has already improved.
-    Active families also use scorecard metrics when explicitly provided.
+    Scorecard ``metrics`` rows are reviewed evidence, not a substitute for the
+    current source census.  Pinning generated artifacts to those rows made
+    ``--check`` incapable of detecting source regrowth while budgets still had
+    headroom.  Policy fields such as ownership and bounded-growth budgets are
+    already carried by ``measured``; live metrics must therefore win here.
     """
-    merged = dict(measured)
-    ratchet_stage = family.get("ratchet_stage")
-    
-    # For both reviewed-baseline and active families, use scorecard metrics when provided
-    if ratchet_stage not in ("reviewed-baseline", "active"):
-        return merged
+    del family
+    return dict(measured)
 
-    reviewed_metrics = family.get("metrics", {})
-    if not isinstance(reviewed_metrics, dict):
-        return merged
 
-    for key in _REVIEWED_BASELINE_METRIC_KEYS:
-        if key in reviewed_metrics:
-            merged[key] = reviewed_metrics[key]
-    return merged
+def build_artifacts() -> tuple[dict[str, object], str]:
+    """Build the live JSON payload and Markdown rendering without writing files."""
+    scorecard = load_scorecard()
+    snapshot_date = _resolve_snapshot_date(scorecard)
+    measured_metrics = collect_hotspot_family_metrics(
+        scorecard=scorecard,
+        active_only=False,
+    )
+    measured_by_name = {item.name: item.to_dict() for item in measured_metrics}
+    metrics = [
+        _merge_reviewed_baseline_metrics(
+            family=family,
+            measured=measured_by_name[str(family.get("name", ""))],
+        )
+        for family in iter_hotspot_families(scorecard=scorecard)
+        if str(family.get("name", "")) in measured_by_name
+    ]
+    return (
+        _build_json_payload(snapshot_date=snapshot_date, metrics=metrics),
+        _render_markdown(snapshot_date=snapshot_date, metrics=metrics),
+    )
 
 
 def _render_markdown(
@@ -299,27 +301,22 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    scorecard = load_scorecard()
-    snapshot_date = _resolve_snapshot_date(scorecard)
-    measured_metrics = collect_hotspot_family_metrics(
-        scorecard=scorecard,
-        active_only=args.active_only,
-    )
-    measured_by_name = {item.name: item.to_dict() for item in measured_metrics}
-    metrics = [
-        _merge_reviewed_baseline_metrics(
-            family=family,
-            measured=measured_by_name[str(family.get("name", ""))],
-        )
-        for family in iter_hotspot_families(
+    if args.active_only:
+        scorecard = load_scorecard()
+        snapshot_date = _resolve_snapshot_date(scorecard)
+        measured_metrics = collect_hotspot_family_metrics(
             scorecard=scorecard,
-            active_only=args.active_only,
+            active_only=True,
         )
-        if str(family.get("name", "")) in measured_by_name
-    ]
-    json_payload = _build_json_payload(snapshot_date=snapshot_date, metrics=metrics)
+        metrics = [item.to_dict() for item in measured_metrics]
+        json_payload = _build_json_payload(
+            snapshot_date=snapshot_date,
+            metrics=metrics,
+        )
+        markdown = _render_markdown(snapshot_date=snapshot_date, metrics=metrics)
+    else:
+        json_payload, markdown = build_artifacts()
     json_text = json.dumps(json_payload, ensure_ascii=False, indent=2) + "\n"
-    markdown = _render_markdown(snapshot_date=snapshot_date, metrics=metrics)
 
     if args.check:
         json_ok = _check_file_sync(args.json_output, json_text)
