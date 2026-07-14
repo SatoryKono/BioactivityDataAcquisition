@@ -601,7 +601,14 @@ def test_screenshot_runtime_setup_scripts_keep_bootstrap_contract() -> None:
     assert "BIOETL_PLAYWRIGHT_NODE_MODULES" in shell_script
     assert "BIOETL_PLAYWRIGHT_LIBRARY_PATH" in shell_script
     assert "playwright-runtime" in shell_script
-    assert "libasound2t64" in shell_script
+    assert "-type f -o -type l" in shell_script
+    for package_name in (
+        "libatk-bridge2.0-0t64",
+        "libatk1.0-0t64",
+        "libcups2t64",
+        "libasound2t64",
+    ):
+        assert package_name in shell_script
     assert "ci --include=dev --no-bin-links" in powershell_script
     assert 'NPM_CONFIG_PRODUCTION = "false"' in powershell_script
 

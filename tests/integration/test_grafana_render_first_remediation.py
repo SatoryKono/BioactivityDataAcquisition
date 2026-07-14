@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from html import unescape
+from html.parser import HTMLParser
 import json
 from pathlib import Path
 
@@ -59,6 +60,21 @@ def _mapping_text(panel: dict[str, object], value: str) -> str:
         if mapping.get("type") == "value" and value in mapping.get("options", {}):
             return str(mapping["options"][value].get("text", ""))
     raise AssertionError((panel.get("title"), value))
+
+
+class _NavigationMarkupParser(HTMLParser):
+    """Collect sanitizer-safe navigation elements without executing markup."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.elements: list[tuple[str, dict[str, str]]] = []
+
+    def handle_starttag(
+        self, tag: str, attrs: list[tuple[str, str | None]]
+    ) -> None:
+        self.elements.append(
+            (tag, {name: value or "" for name, value in attrs})
+        )
 
 
 def test_rf001_headline_status_is_evidence_aware() -> None:
@@ -163,17 +179,47 @@ def test_rf003_navigation_is_theme_safe_ordered_and_wrapping() -> None:
         )
         positions = [content.index(title) for title in canonical_titles]
         assert positions == sorted(positions), path.name
+        parser = _NavigationMarkupParser()
+        parser.feed(content)
+        tags = [tag for tag, _attrs in parser.elements]
+        assert not ({"style", "script", "iframe", "object"} & set(tags)), path.name
+
+        containers = [
+            attrs
+            for tag, attrs in parser.elements
+            if tag == "div" and attrs.get("class") == "bioetl-nav"
+        ]
+        assert len(containers) == 1, path.name
+        container_style = containers[0].get("style", "")
+        for token in ("display:flex", "flex-wrap:wrap", "overflow:visible"):
+            assert token in container_style, (path.name, token)
+
+        links = [attrs for tag, attrs in parser.elements if tag == "a"]
+        current = [
+            attrs
+            for tag, attrs in parser.elements
+            if tag == "span" and attrs.get("aria-current") == "page"
+        ]
+        assert len(links) == 9, path.name
+        assert len(current) == 1, path.name
+        for attrs in links:
+            style = attrs.get("style", "")
+            for token in (
+                "flex:1 1 145px",
+                "text-align:center",
+                "color:#f8fafc",
+                "background:#334155",
+                "border:1px solid #94a3b8",
+            ):
+                assert token in style, (path.name, token)
+            assert attrs.get("href"), path.name
+        current_style = current[0].get("style", "")
         for token in (
-            "flex-wrap:wrap",
-            "@media(max-width:1100px)",
-            "color:#f8fafc",
-            "background:#334155",
-            ":hover",
-            ":focus-visible",
-            "outline:3px solid #38bdf8",
+            "flex:1 1 145px",
             "background:#1d4ed8",
+            "border:2px solid #7dd3fc",
         ):
-            assert token in content, (path.name, token)
+            assert token in current_style, (path.name, token)
 
 
 def test_rf003_1024_layout_prioritizes_actions_and_readability() -> None:

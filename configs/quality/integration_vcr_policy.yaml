@@ -186,6 +186,7 @@ tracked_suite_inventory:
       - tests/integration/test_grafana_dashboard_first_screen_contract.py
       - tests/integration/test_grafana_dashboard_links.py
       - tests/integration/test_grafana_dashboard_metric_semantics.py
+      - tests/integration/test_grafana_dashboard_promql_reuse.py
       - tests/integration/test_grafana_dashboard_query_governance.py
       - tests/integration/test_grafana_datasource_provisioning.py
       - tests/integration/test_grafana_layout_and_metadata.py

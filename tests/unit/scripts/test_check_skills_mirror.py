@@ -70,8 +70,11 @@ from pathlib import Path
 
 root = Path(sys.argv[1]).resolve()
 contract_path = root / "configs/quality/ai_skill_parity_contract.json"
+# Support both table format (| `skill` | `.codex/skills/path` |) and list format (- [skill](path))
+# Table format has multiple columns, so we match the path column specifically
 catalog_entry_pattern = re.compile(
-    r"\|\s*`[^`]+`\s*\|\s*`\.codex/skills/([^`]+)`\s*\|"
+    r"(?:\|\s*`[^`]+`\s*\|\s*`\.codex/skills/([^`]+)`\s*\|)"
+    r"|(?:- \[([^\]]+)\]\([^)]+/SKILL\.md\))"
 )
 
 
@@ -112,7 +115,11 @@ def compare_named_set(
 
 
 def catalog_entrypoints(path: Path) -> set[str]:
-    return set(catalog_entry_pattern.findall(path.read_text(encoding="utf-8")))
+    text = path.read_text(encoding="utf-8")
+    # Extract from table format (group 1) and list format (group 2)
+    table_matches = set(match.group(1) for match in catalog_entry_pattern.finditer(text) if match.group(1))
+    list_matches = set(match.group(2) for match in catalog_entry_pattern.finditer(text) if match.group(2))
+    return table_matches | list_matches
 
 
 def validate() -> tuple[list[str], int]:
