@@ -21,7 +21,7 @@
 
 ### ⚠️ Prometheus Targets: PARTIAL
 - **Status**: 4 up, 6 down out of 10 total targets
-- **Up Targets**: 
+- **Up Targets**:
   - prometheus (self-monitoring)
   - grafana
   - grafana-image-renderer
@@ -38,7 +38,7 @@
 ### ✅ Prometheus Metrics: PASS
 - **Total Metrics**: 1,028 metrics in Prometheus
 - **BioETL Metrics**: 218 BioETL-specific metrics present
-- **Sample Metrics**: 
+- **Sample Metrics**:
   - `bioetl_batch_lifecycle_events_created`
   - `bioetl_batch_lifecycle_events_total`
   - `bioetl_batch_lifecycle_records_created`
@@ -59,7 +59,7 @@
 
 ### ✅ Grafana Datasources: PASS
 - **Total Datasources**: 4 configured
-- **Datasource Names**: 
+- **Datasource Names**:
   - Prometheus ✅
   - Loki ✅
   - Quarantine Explorer ✅

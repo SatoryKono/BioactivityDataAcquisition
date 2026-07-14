@@ -47,7 +47,7 @@ All 3 minor issues have been successfully resolved:
 ### 3. bioetl-runtime#251 (Inspect GLOBAL Unstructured Logs) ✅ FIXED
 - **Original Issue**: HTTP Error 400 (attempting Loki query via Prometheus)
 - **Root Cause**: Panel was missing datasource declaration, causing Loki query to be sent to Prometheus
-- **Fix Applied**: 
+- **Fix Applied**:
   - Added Loki datasource declaration to panel in `bioetl-runtime.json`
   - Modified validation script to skip Loki queries during Prometheus validation (Loki has separate validation)
 - **Current Status**: ✅ SKIP - Correctly skipped (Loki datasource validation is separate concern)

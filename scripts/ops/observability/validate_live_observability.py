@@ -61,7 +61,7 @@ def check_prometheus_health(prometheus_url: str, timeout: float) -> ValidationRe
         health_url = f"{prometheus_url}/-/healthy"
         response = urlopen(health_url, timeout=timeout)
         content = response.read().decode("utf-8").strip()
-        
+
         if "Healthy" in content:
             return ValidationResult(
                 check_name="prometheus_health",
@@ -89,7 +89,7 @@ def check_prometheus_targets(prometheus_url: str, timeout: float) -> ValidationR
     try:
         targets_url = f"{prometheus_url}/api/v1/targets"
         data = _fetch_json(targets_url, timeout)
-        
+
         if data.get("status") != "success":
             return ValidationResult(
                 check_name="prometheus_targets",
@@ -97,11 +97,11 @@ def check_prometheus_targets(prometheus_url: str, timeout: float) -> ValidationR
                 message="Prometheus targets API returned non-success status",
                 details={"api_response": data}
             )
-        
+
         active_targets = data.get("data", {}).get("activeTargets", [])
         up_count = sum(1 for t in active_targets if t.get("health") == "up")
         down_count = sum(1 for t in active_targets if t.get("health") == "down")
-        
+
         down_targets = [
             {
                 "job": t.get("labels", {}).get("job", "unknown"),
@@ -110,7 +110,7 @@ def check_prometheus_targets(prometheus_url: str, timeout: float) -> ValidationR
             }
             for t in active_targets if t.get("health") == "down"
         ]
-        
+
         return ValidationResult(
             check_name="prometheus_targets",
             status="pass" if down_count == 0 else "partial",
@@ -135,7 +135,7 @@ def check_prometheus_metrics(prometheus_url: str, timeout: float) -> ValidationR
     try:
         label_url = f"{prometheus_url}/api/v1/label/__name__/values"
         data = _fetch_json(label_url, timeout)
-        
+
         if data.get("status") != "success":
             return ValidationResult(
                 check_name="prometheus_metrics",
@@ -143,10 +143,10 @@ def check_prometheus_metrics(prometheus_url: str, timeout: float) -> ValidationR
                 message="Prometheus label API returned non-success status",
                 details={"api_response": data}
             )
-        
+
         metric_names = data.get("data", [])
         bioetl_metrics = [m for m in metric_names if "bioetl" in m.lower()]
-        
+
         return ValidationResult(
             check_name="prometheus_metrics",
             status="pass" if len(metric_names) > 0 else "fail",
@@ -170,10 +170,10 @@ def check_grafana_health(grafana_url: str, timeout: float) -> ValidationResult:
     try:
         health_url = f"{grafana_url}/api/health"
         data = _fetch_json(health_url, timeout)
-        
+
         database = data.get("database", "unknown")
         version = data.get("version", "unknown")
-        
+
         if database == "ok":
             return ValidationResult(
                 check_name="grafana_health",
@@ -202,7 +202,7 @@ def check_grafana_datasources(grafana_url: str, username: str, password: str, ti
         datasources_url = f"{grafana_url}/api/datasources"
         headers = {"Authorization": _auth_header(username, password)}
         data = _fetch_json(datasources_url, timeout, headers)
-        
+
         if not isinstance(data, list):
             return ValidationResult(
                 check_name="grafana_datasources",
@@ -210,10 +210,10 @@ def check_grafana_datasources(grafana_url: str, username: str, password: str, ti
                 message="Grafana datasources API did not return a list",
                 details={"response_type": type(data).__name__}
             )
-        
+
         datasource_names = [ds.get("name", "unknown") for ds in data]
         prometheus_ds = any("prometheus" in name.lower() for name in datasource_names)
-        
+
         return ValidationResult(
             check_name="grafana_datasources",
             status="pass" if prometheus_ds else "fail",
@@ -252,7 +252,7 @@ def check_grafana_dashboards(grafana_url: str, username: str, password: str, tim
         dashboards_url = f"{grafana_url}/api/search?query=&type=dash-db"
         headers = {"Authorization": _auth_header(username, password)}
         data = _fetch_json(dashboards_url, timeout, headers)
-        
+
         if not isinstance(data, list):
             return ValidationResult(
                 check_name="grafana_dashboards",
@@ -260,10 +260,10 @@ def check_grafana_dashboards(grafana_url: str, username: str, password: str, tim
                 message="Grafana search API did not return a list",
                 details={"response_type": type(data).__name__}
             )
-        
+
         dashboard_uids = [ds.get("uid", "unknown") for ds in data]
         bioetl_dashboards = [uid for uid in dashboard_uids if "bioetl" in uid.lower()]
-        
+
         return ValidationResult(
             check_name="grafana_dashboards",
             status="pass" if len(bioetl_dashboards) >= 8 else "partial",
@@ -302,7 +302,7 @@ def check_prometheus_query(prometheus_url: str, timeout: float) -> ValidationRes
     try:
         query_url = f"{prometheus_url}/api/v1/query?query=up"
         data = _fetch_json(query_url, timeout)
-        
+
         if data.get("status") != "success":
             return ValidationResult(
                 check_name="prometheus_query",
@@ -310,10 +310,10 @@ def check_prometheus_query(prometheus_url: str, timeout: float) -> ValidationRes
                 message="Prometheus query API returned non-success status",
                 details={"api_response": data}
             )
-        
+
         result_type = data.get("data", {}).get("resultType", "unknown")
         results = data.get("data", {}).get("result", [])
-        
+
         return ValidationResult(
             check_name="prometheus_query",
             status="pass",
@@ -341,24 +341,24 @@ def run_validation(
 ) -> ValidationReport:
     """Run complete observability validation."""
     results = []
-    
+
     # Prometheus checks
     results.append(check_prometheus_health(prometheus_url, timeout))
     results.append(check_prometheus_targets(prometheus_url, timeout))
     results.append(check_prometheus_metrics(prometheus_url, timeout))
     results.append(check_prometheus_query(prometheus_url, timeout))
-    
+
     # Grafana checks
     results.append(check_grafana_health(grafana_url, timeout))
     results.append(check_grafana_datasources(grafana_url, grafana_username, grafana_password, timeout))
     results.append(check_grafana_dashboards(grafana_url, grafana_username, grafana_password, timeout))
-    
+
     # Calculate summary
     passed = sum(1 for r in results if r.status == "pass")
     failed = sum(1 for r in results if r.status == "fail")
     partial = sum(1 for r in results if r.status == "partial")
     total = len(results)
-    
+
     summary = {
         "total_checks": total,
         "passed": passed,
@@ -366,7 +366,7 @@ def run_validation(
         "partial": partial,
         "success_rate": f"{(passed / total * 100):.1f}%" if total > 0 else "0%"
     }
-    
+
     return ValidationReport(
         prometheus_url=prometheus_url,
         grafana_url=grafana_url,
@@ -411,18 +411,18 @@ def main():
         default=DEFAULT_OUTPUT_DIR,
         help="Output directory for validation report"
     )
-    
+
     args = parser.parse_args()
-    
+
     # Create output directory
     args.output_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # Run validation
     print(f"Starting observability validation...")
     print(f"Prometheus: {args.prometheus_url}")
     print(f"Grafana: {args.grafana_url}")
     print()
-    
+
     report = run_validation(
         prometheus_url=args.prometheus_url,
         grafana_url=args.grafana_url,
@@ -430,7 +430,7 @@ def main():
         grafana_password=args.grafana_password,
         timeout=args.timeout
     )
-    
+
     # Print results
     print("Validation Results:")
     print("=" * 60)
@@ -441,19 +441,19 @@ def main():
         if result.details:
             print(f"  Details: {json.dumps(result.details, indent=2)[:200]}...")
         print()
-    
+
     print("Summary:")
     print("=" * 60)
     for key, value in report.summary.items():
         print(f"  {key}: {value}")
-    
+
     # Save report
     report_path = args.output_dir / f"validation-report-{datetime.now(tz=UTC).strftime('%Y%m%d-%H%M%S')}.json"
     with open(report_path, "w") as f:
         json.dump(asdict(report), f, indent=2, default=str)
-    
+
     print(f"\nReport saved to: {report_path}")
-    
+
     # Exit with appropriate code
     if report.summary["failed"] > 0:
         sys.exit(1)
