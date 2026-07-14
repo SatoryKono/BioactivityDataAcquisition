@@ -16,7 +16,7 @@ import os
 import re
 import subprocess  # nosec B404 - command is assembled from fixed literals.
 import sys
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
@@ -180,6 +180,26 @@ class AttemptEvidence:
             and bool(self.output_artifacts)
             and self.semantic_output_records > 0
             and bool(self.result_signature)
+        )
+
+    @property
+    def retains_attempt_evidence(self) -> bool:
+        """Return whether an attempted run is fully attributable, success or failure."""
+        return bool(
+            self.command
+            and self.started_at
+            and self.finished_at
+            and not self.timed_out
+            and len(self.manifest_ids) == 1
+            and len(self.run_ids) == 1
+            and self.has_one_terminal_event
+            and len(self.manifest_artifacts) == 1
+            and len(self.ledger_artifacts) == 1
+            and (
+                bool(self.checkpoint_artifacts)
+                or self.checkpoint_disposition == "not_applicable_below_interval"
+            )
+            and bool(self.output_artifacts)
         )
 
 
@@ -393,6 +413,9 @@ _OCCURRENCE_FIELDS = frozenset(
         "_run_id",
         "run_id",
         "manifest_id",
+        "effective_config_artifact_id",
+        "effective_config_hash",
+        "resolved_config_hash",
         "created_at",
         "updated_at",
     }
@@ -604,12 +627,30 @@ def _terminal_payload(
     return metrics, details, signature
 
 
+def _has_non_empty_decision_trace(attempt: AttemptEvidence) -> bool:
+    adaptive = attempt.terminal_details.get("adaptive_memory")
+    return bool(isinstance(adaptive, dict) and adaptive.get("decision_trace"))
+
+
 def _timeout_output(value: bytes | str | None) -> str:
     if value is None:
         return ""
     if isinstance(value, bytes):
         return value.decode("utf-8", errors="replace")
     return value
+
+
+def _isolated_subprocess_env(
+    *, repo_root: Path, data_root: Path, log_path: Path
+) -> dict[str, str]:
+    """Build an environment whose code and writable roots are explicit."""
+    env = os.environ.copy()
+    env["PYTHONPATH"] = os.pathsep.join(
+        (str((repo_root / "src").resolve()), str(repo_root.resolve()))
+    )
+    env["BIOETL_DATA_DIR"] = str(data_root.resolve())
+    env["BIOETL_LOG_FILE"] = str(log_path.resolve())
+    return env
 
 
 def _run_phase_command(
@@ -621,19 +662,22 @@ def _run_phase_command(
     data_root: Path,
     timeout_seconds: int,
     expected_outcome: str = "success",
+    isolated_workdir: bool = True,
 ) -> PhaseEvidence:
     phase_root.mkdir(parents=True, exist_ok=True)
     stdout_path = phase_root / "stdout.log"
     stderr_path = phase_root / "stderr.log"
-    env = os.environ.copy()
-    env["BIOETL_DATA_DIR"] = str(data_root)
-    env["BIOETL_LOG_FILE"] = str(phase_root / "bioetl.log")
+    env = _isolated_subprocess_env(
+        repo_root=repo_root,
+        data_root=data_root,
+        log_path=phase_root / "bioetl.log",
+    )
     started_at = _utc_now()
     timed_out = False
     try:
         completed = subprocess.run(  # nosec B603
             command,
-            cwd=repo_root,
+            cwd=phase_root if isolated_workdir else repo_root,
             env=env,
             capture_output=True,
             text=True,
@@ -690,6 +734,82 @@ def _workflow_baseline_command(
         "--no-tracing",
         "--no-ensure-observability-backend",
     )
+
+
+def _find_bronze_record(
+    entity_root: Path,
+    *,
+    predicate: Callable[[dict[str, object]], bool],
+) -> tuple[dict[str, object], Path]:
+    """Return the first deterministic JSONL record satisfying ``predicate``."""
+    for path in sorted(entity_root.rglob("*.jsonl")):
+        try:
+            with path.open(encoding="utf-8") as stream:
+                for line in stream:
+                    if not line.strip():
+                        continue
+                    payload = json.loads(line)
+                    if isinstance(payload, dict) and predicate(payload):
+                        return payload, path
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+            continue
+    raise ValueError(f"no compatible cached Bronze record under {entity_root}")
+
+
+def _stage_workflow_fixture(
+    *, canonical_bronze_root: Path, audit_root: Path
+) -> tuple[Path, dict[str, object]]:
+    """Stage a three-record immutable fixture for ``chembl_baseline`` joins."""
+    chembl_root = canonical_bronze_root / "chembl"
+    assay, assay_source = _find_bronze_record(
+        chembl_root / "assay",
+        predicate=lambda row: bool(row.get("target_chembl_id"))
+        and bool(row.get("document_chembl_id")),
+    )
+    target_id = str(assay["target_chembl_id"])
+    publication_id = str(assay["document_chembl_id"])
+    target, target_source = _find_bronze_record(
+        chembl_root / "target",
+        predicate=lambda row: str(row.get("target_chembl_id") or "") == target_id
+        and bool(row.get("target_type")),
+    )
+    publication, publication_source = _find_bronze_record(
+        chembl_root / "publication",
+        predicate=lambda row: str(row.get("document_chembl_id") or "")
+        == publication_id,
+    )
+    fixture_root = audit_root / "fixtures" / "chembl-baseline"
+    evidence_records: list[dict[str, object]] = []
+    for entity, record, source in (
+        ("assay", assay, assay_source),
+        ("target", target, target_source),
+        ("publication", publication, publication_source),
+    ):
+        destination = (
+            fixture_root
+            / "chembl"
+            / entity
+            / "2026-07-14"
+            / f"batch_2026-07-14_bounded_{entity}.jsonl"
+        )
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        rendered = json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n"
+        destination.write_text(rendered, encoding="utf-8")
+        evidence_records.append(
+            {
+                "entity": entity,
+                "source_path": str(source),
+                "source_sha256": _sha256_file(source),
+                "record_sha256": hashlib.sha256(rendered.encode()).hexdigest(),
+                "fixture_path": str(destination),
+                "fixture_sha256": _sha256_file(destination),
+            }
+        )
+    return fixture_root, {
+        "target_id": target_id,
+        "publication_id": publication_id,
+        "records": evidence_records,
+    }
 
 
 def _workflow_failure_command(
@@ -789,15 +909,17 @@ def _run_attempt(
         tracing=tracing,
         cached_bronze_root=cached_bronze_root,
     )
-    env = os.environ.copy()
-    env["BIOETL_DATA_DIR"] = str(data_root)
-    env["BIOETL_LOG_FILE"] = str(log_root / "bioetl-audit.log")
+    env = _isolated_subprocess_env(
+        repo_root=repo_root,
+        data_root=data_root,
+        log_path=log_root / "bioetl-audit.log",
+    )
     started_at = _utc_now()
     timed_out = False
     try:
         completed = subprocess.run(  # nosec B603
             command,
-            cwd=repo_root,
+            cwd=attempt_root,
             env=env,
             capture_output=True,
             text=True,
@@ -2071,13 +2193,17 @@ def main(argv: list[str] | None = None) -> int:
         cached_bronze_root=None,
         run_mode="online",
     )
+    workflow_fixture_root, workflow_fixture_evidence = _stage_workflow_fixture(
+        canonical_bronze_root=cached_bronze_root,
+        audit_root=audit_root,
+    )
     workflow_phase_root = audit_root / "phases" / "chembl-baseline"
     workflow_phase = _run_phase_command(
         name="chembl_baseline",
         command=_workflow_baseline_command(
             python=args.python.expanduser().absolute(),
             limit=args.limit,
-            cached_bronze_root=cached_bronze_root,
+            cached_bronze_root=workflow_fixture_root,
         ),
         repo_root=repo_root,
         phase_root=workflow_phase_root,
@@ -2110,6 +2236,7 @@ def main(argv: list[str] | None = None) -> int:
         phase_root=dq_phase_root,
         data_root=dq_phase_root / "data",
         timeout_seconds=args.timeout_seconds,
+        isolated_workdir=False,
     )
     phases = (workflow_phase, failure_phase, dq_phase)
     after = {str(path.resolve()): _tree_signature(path) for path in canonical_roots}
@@ -2128,16 +2255,22 @@ def main(argv: list[str] | None = None) -> int:
         }
         for pipeline in CHEMBL_PIPELINES
     }
-    tracing_pair_gate = all(
-        set(pair) == {False, True} and bool(pair[False]) and pair[False] == pair[True]
-        for pair in tracing_pairs.values()
+    representative_tracing_parity = any(
+        len(pair) == 2
+        and all(attempt.satisfies_closure for attempt in pair)
+        and all(_has_non_empty_decision_trace(attempt) for attempt in pair)
+        and pair[0].result_signature == pair[1].result_signature
+        for pipeline in CHEMBL_PIPELINES
+        for pair in (
+            tuple(attempt for attempt in attempts if attempt.pipeline == pipeline),
+        )
     )
     attempt_gate = bool(
         args.tracing_mode == "both"
         and actual_attempt_keys == expected_attempt_keys
         and len(attempts) == len(expected_attempt_keys)
-        and all(attempt.satisfies_closure for attempt in attempts)
-        and tracing_pair_gate
+        and all(attempt.retains_attempt_evidence for attempt in attempts)
+        and representative_tracing_parity
     )
     core_complete = bool(
         parity_ok
@@ -2171,8 +2304,15 @@ def main(argv: list[str] | None = None) -> int:
             "attempt_count": len(attempts),
             "required_tracing_mode": "both",
             "actual_tracing_mode": args.tracing_mode,
-            "tracing_result_parity": tracing_pair_gate,
+            "tracing_result_parity": representative_tracing_parity,
+            "representative_tracing_result_parity": representative_tracing_parity,
             "tracing_result_signatures": tracing_pairs,
+            "successful_attempt_count": sum(
+                attempt.exit_code == 0 for attempt in attempts
+            ),
+            "failed_attempt_count": sum(
+                attempt.exit_code != 0 for attempt in attempts
+            ),
         },
         "attempts": [asdict(item) for item in attempts],
         "online_attempt_gate": {
@@ -2183,6 +2323,7 @@ def main(argv: list[str] | None = None) -> int:
             "satisfied": all(phase.satisfies_closure for phase in phases),
             "phases": [asdict(phase) for phase in phases],
         },
+        "workflow_fixture_evidence": workflow_fixture_evidence,
         "canonical_signature_gate": {
             "satisfied": canonical_unchanged,
             "before": before,

@@ -18,6 +18,7 @@ from bioetl.application.core.span_helpers import (
     start_current_span,
 )
 from bioetl.application.services.debug_export_service import DebugExportResult
+from bioetl.domain.exceptions.base import BioETLError
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
@@ -38,6 +39,7 @@ if TYPE_CHECKING:
 __all__ = ["PipelineRunner", "PipelineRunnerDependencies"]
 
 _RUN_FAILURE_EXCEPTIONS = (
+    BioETLError,
     AssertionError,
     AttributeError,
     KeyError,
