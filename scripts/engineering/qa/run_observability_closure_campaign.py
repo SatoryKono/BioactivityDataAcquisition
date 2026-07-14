@@ -441,6 +441,10 @@ def _file_artifacts(paths: Iterable[Path], *, root: Path) -> tuple[dict[str, str
 _OCCURRENCE_FIELDS = frozenset(
     {
         "_ingestion_ts",
+        "_source_batch_id",
+        "_valid_from",
+        "batch_id",
+        "bronze_batch_id",
         "ingestion_ts",
         "_run_id",
         "run_id",
@@ -515,8 +519,11 @@ def _semantic_output_payload(
 ) -> tuple[list[dict[str, object]], int]:
     """Return path-independent rows suitable for tracing parity comparison."""
     materialized = tuple(paths)
-    parquet_paths = tuple(path for path in materialized if path.suffix == ".parquet")
-    selected = parquet_paths or materialized
+    business_paths = tuple(path for path in materialized if "control" not in path.parts)
+    parquet_paths = tuple(path for path in business_paths if path.suffix == ".parquet")
+    jsonl_paths = tuple(path for path in business_paths if path.suffix == ".jsonl")
+    csv_paths = tuple(path for path in business_paths if path.suffix == ".csv")
+    selected = parquet_paths or jsonl_paths or csv_paths
     payload: list[dict[str, object]] = []
     row_count = 0
     for path in selected:
@@ -1214,7 +1221,6 @@ def _run_attempt(
                 {
                     "terminal_events": terminal_events,
                     "metrics_snapshot": metrics,
-                    "details": _semantic_value(details),
                     "semantic_output": semantic_output,
                 },
                 sort_keys=True,
@@ -2496,7 +2502,7 @@ def main(argv: list[str] | None = None) -> int:
         }
         for pipeline in CHEMBL_PIPELINES
     }
-    representative_tracing_parity = any(
+    tracing_result_parity = all(
         len(pair) == 2
         and all(attempt.satisfies_closure for attempt in pair)
         and all(_has_non_empty_decision_trace(attempt) for attempt in pair)
@@ -2511,7 +2517,7 @@ def main(argv: list[str] | None = None) -> int:
         and actual_attempt_keys == expected_attempt_keys
         and len(attempts) == len(expected_attempt_keys)
         and all(attempt.retains_attempt_evidence for attempt in attempts)
-        and representative_tracing_parity
+        and tracing_result_parity
     )
     core_complete = bool(
         parity_ok
@@ -2545,8 +2551,8 @@ def main(argv: list[str] | None = None) -> int:
             "attempt_count": len(attempts),
             "required_tracing_mode": "both",
             "actual_tracing_mode": args.tracing_mode,
-            "tracing_result_parity": representative_tracing_parity,
-            "representative_tracing_result_parity": representative_tracing_parity,
+            "tracing_result_parity": tracing_result_parity,
+            "representative_tracing_result_parity": tracing_result_parity,
             "tracing_result_signatures": tracing_pairs,
             "successful_attempt_count": sum(
                 attempt.exit_code == 0 for attempt in attempts
