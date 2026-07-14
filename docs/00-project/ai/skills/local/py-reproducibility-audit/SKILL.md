@@ -1,10 +1,3 @@
----
-name: "py-reproducibility-audit"
-description: "Use when auditing code changes for reproducibility and replay capability. Ensures that changes maintain deterministic behavior, proper test coverage, and can be reliably replayed across environments."
-context: "fork"
-agent: "general-purpose"
----
-
 > Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
 > Canonical runtime source: `.codex/skills/py-reproducibility-audit/SKILL.md`
 > Governance: AI_RUNTIME_MIRROR_OWNERSHIP.md
@@ -30,11 +23,6 @@ agent: "general-purpose"
 - Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
 - Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
 
-- Runtime map: `../../agents/CODEX-RUNTIME.md`
-- Shared project memory: `../../../docs/00-project/ai/memory/agent-memory.md`
-- Daily loop: `../../../src/memory/DAILY_WORKFLOW.md`
-- Requirements: `../../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../../../../02-architecture/decisions`
 - Reproducibility contract: [references/reproducibility-audit.md](references/reproducibility-audit.md)
 This skill audits code changes for reproducibility and replay capability.
 

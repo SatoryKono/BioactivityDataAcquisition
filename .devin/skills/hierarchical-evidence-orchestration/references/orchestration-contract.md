@@ -2,169 +2,233 @@
 
 ## Purpose
 
-This contract defines the rules and responsibilities for hierarchical evidence orchestration across multiple research pillars or complex research streams.
+This document defines the contract for hierarchical evidence orchestration across multiple research pillars or streams.
 
 ## Core Principles
 
-1. **Parallel Independence**: Independent research streams should run in parallel to maximize efficiency
-2. **Dependency Awareness**: Dependent streams must wait for upstream completion
-3. **Consistency Maintenance**: Evidence quality standards must be consistent across all streams
-4. **Cross-Pillar Coordination**: Contradictions and dependencies across pillars must be identified and resolved
+1. **Parallel Execution**: Independent streams should run in parallel when possible
+2. **Quality Gates**: All streams must meet quality gate criteria before synthesis
+3. **Consistent Standards**: All streams use the same evidence object schema
+4. **Traceability**: All evidence must be traceable to source and assumptions
+5. **Determinism**: Orchestration must be deterministic and replayable
 
 ## Orchestration Levels
 
-### Level 1: Basic Coordination
+### Level 1: Single Skill Orchestration
 
 **Use when:**
-- 1-2 pillars
-- 1-2 parallel streams
-- Simple dependencies
+- Simple research scope (1-3 pillars)
+- Single skill can handle all evidence collection
+- No complex dependencies
 
-**Responsibilities:**
-- Track stream completion status
-- Ensure evidence gate compliance
-- Basic progress reporting
+**Approach:**
+- Single orchestrator delegates to one skill
+- Skill handles all pillars sequentially or in parallel
+- Minimal coordination overhead
 
-### Level 2: Task Delegation
-
-**Use when:**
-- 3-5 pillars
-- 2-3 parallel streams
-- Moderate dependencies
-
-**Responsibilities:**
-- All Level 1 responsibilities
-- Delegate tasks to appropriate agents
-- Monitor resource allocation
-- Resolve simple conflicts
-
-### Level 3: Full Orchestration
+### Level 2: Multi-Skill Orchestration
 
 **Use when:**
-- 6+ pillars
-- 4+ parallel streams
-- Complex dependencies
+- Medium complexity (3-6 pillars)
+- Different skills for different pillar types
+- Some dependencies between pillars
 
-**Responsibilities:**
-- All Level 2 responsibilities
-- Complex dependency management
-- Cross-pillar consistency validation
-- Resource optimization
-- Timeline management
+**Approach:**
+- Orchestrator delegates to multiple skills
+- Each skill handles specific pillar types
+- Orchestrator manages dependencies and synchronization
 
-## Task Delegation Rules
+### Level 3: Hierarchical Orchestration
 
-### Assignment Criteria
+**Use when:**
+- High complexity (6+ pillars)
+- Nested research streams
+- Complex dependency graphs
 
-| Task Type | Preferred Agent | Rationale |
-| --------- | --------------- | --------- |
-| Evidence collection | collecting-evidence | Specialized in evidence object creation |
-| Synthesis | synthesizing-pillars | Specialized in evidence synthesis |
-| Decision making | making-decisions | Specialized in decision ledger management |
-| Documentation | documentation-audit | Ensures documentation standards |
+**Approach:**
+- L1 orchestrator manages top-level streams
+- L2 orchestrators manage sub-streams
+- L3 orchestrators manage leaf tasks
+- Hierarchical progress reporting and error handling
 
-### Dependency Management
+## Quality Gates
 
-**Dependency types:**
+### Gate 1: Minimum Evidence Count
 
-1. **Sequential**: Stream B must complete before Stream A starts
-2. **Parallel**: Streams can run independently
-3. **Conditional**: Stream A starts if Stream B meets criteria
+**Requirement:**
+- Each stream must collect minimum N evidence objects
+- N is defined in task brief (default: 5)
 
-**Dependency resolution:**
+**Failure handling:**
+- Retry with additional research
+- Accept partial evidence with documentation
+- Deprioritize pillar if acceptable
 
-- Critical path prioritization
-- Resource reallocation when blocked
-- Timeline adjustment for dependencies
+### Gate 2: All Gates Passed
 
-## Quality Standards
+**Requirement:**
+- All evidence objects must pass validation gates
+- No schema violations
+- No missing required fields
 
-### Evidence Quality Gates
+**Failure handling:**
+- Fix validation errors
+- Remove invalid evidence
+- Document gaps
 
-All streams must pass the same quality gates:
+### Gate 3: Confidence Alignment
 
-- Minimum 5 evidence objects per pillar
-- Confidence scores 0.0-1.0
-- At least 1 assumption per evidence object
-- Falsifiable claims only
-- Traceable sources
+**Requirement:**
+- Confidence scores must be consistent across evidence
+- No major contradictions (confidence delta > 0.5)
+- At least 50% of evidence has confidence ≥ 0.5
 
-### Consistency Requirements
+**Failure handling:**
+- Investigate contradictions
+- Add additional research
+- Document conflicts
 
-**Cross-stream consistency:**
+## Dependency Management
 
-- Same facts should have consistent evidence
-- Confidence scores should be aligned for related claims
-- Semantic IDs should not collide across pillars
-- Source attribution should be standardized
+### Sequential Dependencies
 
-## Progress Monitoring
+**Pattern:**
+```yaml
+dependencies:
+  - "upstream_stream_id"
+```
 
-### Required Metrics
+**Behavior:**
+- Downstream stream waits for upstream completion
+- Upstream failure blocks downstream
+- Orchestrator manages retry logic
 
-| Metric | Description | Target |
-| ------ | ----------- | ------ |
-| Stream completion | % of streams completed | 100% |
-| Evidence gate pass rate | % of pillars passing gate | 100% |
-| Contradiction resolution | % of contradictions resolved | 100% |
-| Timeline adherence | % of streams on schedule | ≥80% |
+### Parallel Dependencies
 
-### Blocker Categories
+**Pattern:**
+```yaml
+dependencies: []
+```
 
-| Category | Severity | Resolution Time |
-| ---------- | -------- | --------------- |
-| Resource conflict | High | Immediate |
-| Dependency deadlock | High | Immediate |
-| Quality gate failure | Medium | Within stream |
-| Contradiction | Medium | Before synthesis |
-| Timeline pressure | Low | At discretion |
+**Behavior:**
+- Streams run independently
+- No blocking between streams
+- Orchestrator monitors all streams
 
-## Reporting Requirements
+### Conditional Dependencies
 
-### Stream-Level Reports
+**Pattern:**
+```yaml
+dependencies:
+  - stream_id: "upstream_stream_id"
+    condition: "evidence_gate_passed"
+    threshold: 5
+```
 
-Each stream must report:
-
-- Evidence objects created
-- Gate status
-- Blockers encountered
-- Time spent
-
-### Hierarchical Reports
-
-Orchestrator must produce:
-
-- Cross-pillar consistency summary
-- Contradiction inventory
-- Resource utilization metrics
-- Efficiency analysis
+**Behavior:**
+- Downstream starts if upstream meets condition
+- Condition can be gate status, evidence count, confidence score
+- Orchestrator evaluates condition before starting downstream
 
 ## Error Handling
 
 ### Stream Failure
 
-If a stream fails:
-
-1. Document failure reason
+**When a stream fails:**
+1. Document failure reason in progress report
 2. Assess impact on dependent streams
-3. Propose resolution options
-4. Escalate if critical path
+3. Propose resolution options:
+   - Retry with different approach
+   - Accept partial evidence with documentation
+   - Deprioritize pillar if acceptable
+   - Escalate if critical path
 
 ### Quality Gate Failure
 
-If a gate fails:
-
+**When a gate fails:**
 1. Identify missing evidence
 2. Propose additional research
-3. Accept partial evidence with documentation
+3. Accept partial evidence with gap documentation
 4. Deprioritize pillar if acceptable
 
-## Success Criteria
+### Orchestrator Failure
 
-Orchestration is successful when:
+**When orchestrator fails:**
+1. Document failure state
+2. Save all collected evidence
+3. Provide recovery checkpoint
+4. Escalate to user
 
-- All required streams complete
-- All evidence gates pass (or gaps documented)
-- Cross-pillar consistency validated
-- Contradictions resolved or documented
-- Timeline within acceptable variance
+## Progress Reporting
+
+### Progress Update Frequency
+
+- Real-time: For critical path streams
+- Every 30 minutes: For high priority streams
+- Every hour: For standard priority streams
+- On completion: For all streams
+
+### Progress Report Structure
+
+```yaml
+progress_report:
+  stream_id: "stream_name"
+  status: "in_progress|completed|blocked|failed"
+  evidence_collected: 3
+  evidence_target: 5
+  blockers:
+    - "blocker_description"
+  time_spent: "1.5 hours"
+  estimated_remaining: "0.5 hours"
+  quality_gates:
+    - gate: "minimum_evidence"
+      status: "passed|failed|pending"
+      score: 3/5
+```
+
+## Synthesis Rules
+
+### Cross-Pillar Pattern Identification
+
+- Look for consistent themes across pillars
+- Identify supporting or contradictory evidence
+- Aggregate confidence scores for patterns
+
+### Contradiction Resolution
+
+- Identify contradictions (confidence delta > 0.5)
+- Investigate source reliability
+- Add additional research if needed
+- Document resolution rationale
+
+### Confidence Aggregation
+
+- Use weighted average for pattern confidence
+- Weights based on evidence count and source reliability
+- Minimum confidence threshold for synthesis: 0.5
+
+## Orchestration Constraints
+
+### Time Budgets
+
+- Maximum orchestration duration: 24 hours
+- Per-stream timeout: 4 hours
+- Orchestrator checkpoint interval: 1 hour
+
+### Resource Limits
+
+- Maximum parallel streams: 10
+- Maximum evidence objects per stream: 50
+- Maximum total evidence objects: 200
+
+### Quality Thresholds
+
+- Minimum evidence per stream: 5
+- Minimum confidence for synthesis: 0.5
+- Maximum contradiction delta: 0.5
+
+## References
+
+- `docs/00-project/ai/skills/local/collecting-evidence/SKILL.md` - evidence collection
+- `docs/00-project/ai/skills/local/making-decisions/SKILL.md` - decision making
+- `docs/00-project/ai/skills/local/synthesizing-pillars/SKILL.md` - pillar synthesis

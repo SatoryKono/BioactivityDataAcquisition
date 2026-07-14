@@ -1,10 +1,3 @@
----
-name: "hierarchical-evidence-orchestration"
-description: "Use when orchestrating complex evidence collection across multiple pillars or research streams. Coordinates parallel evidence gathering, manages task delegation, and ensures consistent quality standards across hierarchical research workflows."
-context: "fork"
-agent: "general-purpose"
----
-
 > Mirror status: This file is a published/internal mirror under `docs/00-project/ai/**`. It is not a canonical runtime surface.
 > Canonical runtime source: `.codex/skills/hierarchical-evidence-orchestration/SKILL.md`
 > Governance: AI_RUNTIME_MIRROR_OWNERSHIP.md
@@ -30,341 +23,244 @@ agent: "general-purpose"
 - Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
 - Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
 
-- Shared evidence/decision contract: [../collecting-evidence/references/evidence-decision-contract.md](../collecting-evidence/references/evidence-decision-contract.md)
-
-## Core Role
-
-Act as the L1 orchestrator for evidence programs that are too large for one linear pass.
-Use this skill to coordinate a topic-level evidence wave, not to replace the shard-level
-skills:
-
-- shard collection -> `collecting-evidence`
-- shard synthesis -> `synthesizing-pillars`
-
-## When To Use
-
-Use this skill when:
-
-- the topic spans multiple layers, packages, provider families, or doc domains
-- the user explicitly asks for hierarchical, recursive, parallel, or multi-agent evidence collection
-- one parent topic needs multiple child evidence packs and then a consolidated synthesis
-
-Do not use this skill for a single small pillar that fits cleanly into one `collecting-evidence` pass.
-
-## Startup Sequence
-
-Read, in this order:
-
-1. `../../../docs/00-project/ai/memory/agent-memory.md`
-1. `../../../docs/00-project/ai/agents/agents/ORCHESTRATION.md`
-1. `../collecting-evidence/SKILL.md`
-1. `../synthesizing-pillars/SKILL.md`
-1. [references/orchestration-contract.md](references/orchestration-contract.md)
-1. [references/shard-task-briefs.md](references/shard-task-briefs.md)
-
-## Input Contract
-
-Confirm these inputs before orchestration starts:
-
-- `topic_id` (required): parent topic, e.g. `project-package-topology`
-- `mode` (required): `collect | synthesize | full`
-- `shard_strategy` (required): `by-layer | by-package-family | by-doc-domain | custom`
-- `output_root` (optional, default): `docs/reports/evidence/<topic_id>/`
-- `shards` (optional): explicit shard list if the user already knows the decomposition
-
-## Artifact Contract
-
-Parent pack:
-- Requirements: `../../../../../../01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../../../../02-architecture/decisions`
 - Orchestration contract: [references/orchestration-contract.md](references/orchestration-contract.md)
 This skill coordinates hierarchical evidence collection across multiple research pillars or complex research streams.
 
 ## Prerequisites
 
-- Ledger workspace initialized (`/ledger-init` completed)
-- Multiple pillar assignments or complex research scope
-- Evidence collection capacity assessment
+- Research questions defined for each pillar
+- Evidence object schema available
+- Task delegation framework established
+- Quality gates defined
 
 ## Workflow
 
 Use TodoWrite to track these mandatory steps:
 
 <required>
-1. Analyze research scope and identify hierarchy
-2. Create orchestration plan with task delegation
-3. Assign evidence collection tasks to appropriate agents
-4. Monitor parallel evidence collection progress
-5. Consolidate evidence across streams
-6. Validate hierarchical consistency
-7. Generate unified evidence report
+1. Analyze research scope and identify pillars
+2. Define task delegation strategy
+3. Create task briefs for each stream
+4. Orchestrate parallel evidence collection
+5. Monitor progress and quality gates
+6. Synthesize results across pillars
+7. Generate orchestration report
 </required>
 
 ### Step 1: Analyze Research Scope
 
-Assess the research complexity:
+Identify research pillars and their dependencies:
 
-- Number of pillars involved
-- Dependencies between research streams
-- Evidence collection capacity requirements
-- Timeline constraints
+**Pillar types:**
+- Market (TAM, SAM, SOM, pricing, competition)
+- Technology (architecture, scalability, security)
+- Operations (team, processes, tools)
+- Financial (costs, revenue, projections)
 
-**Complexity assessment:**
+**Dependency analysis:**
+- Sequential dependencies (pillar B requires pillar A)
+- Parallel streams (independent pillars)
+- Conditional dependencies (pillar A starts if pillar B meets criteria)
 
-| Complexity Level | Pillars | Parallel Streams | Orchestration Needed |
-| ---------------- | ------- | ---------------- | ---------------------- |
-| Low              | 1-2    | 1-2              | Basic coordination      |
-| Medium           | 3-5    | 2-3              | Task delegation       |
-| High             | 6+     | 4+               | Full orchestration     |
+### Step 2: Define Task Delegation Strategy
 
-### Step 2: Create Orchestration Plan
+Determine delegation approach:
 
-Define the orchestration strategy per [references/orchestration-contract.md](references/orchestration-contract.md):
+**Delegation options:**
+- Single skill for all pillars (simple scope)
+- Multiple skills per pillar (complex scope)
+- Hierarchical delegation (L1 → L2 → L3 streams)
 
-**Plan components:**
+**Priority assignment:**
+- P1: Critical path, blocks other streams
+- P2: High priority, important but not blocking
+- P3: Medium priority, standard priority
+- P4: Low priority, nice to have
+- P5: Backlog, can be deferred
 
+### Step 3: Create Task Briefs
+
+Use [references/shard-task-briefs.md](references/shard-task-briefs.md) templates:
+
+**Brief structure:**
 ```yaml
-orchestration_plan:
-  pillars:
-    - name: market
-      priority: 1
-      evidence_target: 5
-      streams:
-        - market_size
-        - pricing_research
-        - competitive_analysis
-    - name: technology
-      priority: 2
-      evidence_target: 5
-      streams:
-        - architecture
-        - scalability
-        - security
-  parallel_strategy: "concurrent_independent"
-  delegation_rules:
-    - "Independent streams run in parallel"
-    - "Dependent streams wait for upstream completion"
-    - "Cross-pillar dependencies flagged for coordination"
+task_brief:
+  stream_id: "stream_name"
+  assigned_to: "skill_name"
+  priority: 1-5
+  estimated_duration: "X hours"
+  dependencies:
+    - "upstream_stream_id"
+  scope:
+    pillar: "pillar_name"
+    research_questions:
+      - "question_1"
+      - "question_2"
+    sources:
+      - "source_type_1"
+      - "source_type_2"
+  deliverables:
+    - "path/to/evidence_object_1.yaml"
+    - "path/to/evidence_object_2.yaml"
+  acceptance_criteria:
+    - "minimum_5_evidence_objects"
+    - "all_gates_passed"
+    - "quality_standards_met"
 ```
 
-### Step 3: Assign Evidence Collection Tasks
+### Step 4: Orchestrate Parallel Evidence Collection
 
-For each research stream, delegate to appropriate agents:
+Execute task delegation:
 
-**Task delegation template:**
+**Execution modes:**
+- Parallel: Independent streams run simultaneously
+- Sequential: Dependent streams run in order
+- Conditional: Streams start based on gate results
 
+**Monitoring:**
+- Track progress per stream
+- Monitor quality gate results
+- Handle blockers and failures
+- Adjust priorities as needed
+
+### Step 5: Monitor Progress and Quality Gates
+
+Track stream progress:
+
+**Progress tracking:**
 ```yaml
-stream_tasks:
-  - stream: market_size
-    assigned_to: "collecting-evidence"
-    scope:
-      pillar: market
-      questions: ["TAM", SAM, SOM"]
-      sources: ["industry_reports", "analyst_research"]
-    deliverables:
-      - "02-evidence/market/EV-market-tam-b2b-saas.yaml"
-      - "02-evidence/market/EV-market-sam-vertical.yaml"
-    dependencies: []
-  - stream: pricing_research
-    assigned_to: "collecting-evidence"
-    scope:
-      pillar: market
-      questions: ["willingness_to_pay", "pricing_models"]
-      sources: ["surveys", "competitor_analysis"]
-    deliverables:
-      - "02-evidence/market/EV-market-pricing-smb-wtp.yaml"
-    dependencies: ["market_size"]
+progress_report:
+  stream_id: "stream_name"
+  status: "in_progress|completed|blocked|failed"
+  evidence_collected: 3
+  evidence_target: 5
+  blockers:
+    - "blocker_description"
+  time_spent: "1.5 hours"
+  estimated_remaining: "0.5 hours"
 ```
 
-### Step 4: Monitor Parallel Progress
+**Quality gate checks:**
+- Minimum evidence count met
+- All gates passed
+- Confidence scores adequate
+- No contradictions flagged
 
-Track progress across streams:
+### Step 6: Synthesize Results
 
-**Progress monitoring:**
+Combine evidence across pillars:
 
-```yaml
-stream_progress:
-  market_size:
-    status: "in_progress"
-    evidence_collected: 3
-    evidence_target: 5
-    blockers: []
-  pricing_research:
-    status: "pending"
-    evidence_collected: 0
-    evidence_target: 5
-    blockers: ["market_size"]
-  technology_architecture:
-    status: "in_progress"
-    evidence_collected: 2
-    evidence_target: 5
-    blockers: []
-```
+**Synthesis approach:**
+- Identify cross-pillar patterns
+- Resolve contradictions
+- Aggregate confidence scores
+- Generate unified insights
 
-**Blocker resolution:**
+**Output:**
+- Synthesis document
+- Decision recommendations
+- Gap analysis
+- Risk assessment
 
-- Identify cross-stream dependencies
-- Prioritize critical path streams
-- Reallocate resources if needed
+### Step 7: Generate Orchestration Report
 
-### Step 5: Consolidate Evidence
-
-When streams complete, consolidate evidence:
-
-**Consolidation checks:**
-
-- Remove duplicate evidence across streams
-- Identify contradictions between streams
-- Ensure consistent confidence scoring
-- Validate semantic ID uniqueness
-
-**Evidence inventory:**
-
-```yaml
-evidence_inventory:
-  total_evidence_objects: 15
-  by_pillar:
-    market: 5
-    technology: 5
-    business_model: 5
-  by_confidence:
-    high: 8
-    medium: 5
-    low: 2
-  contradictions: 2
-```
-
-### Step 6: Validate Hierarchical Consistency
-
-Ensure consistency across hierarchy:
-
-**Consistency checks:**
-
-| Check Type | Description | Action |
-| ---------- | ----------- | ------ |
-| Cross-pillar consistency | Same facts should have same evidence | Flag contradictions |
-| Confidence alignment | Related claims should have aligned confidence | Investigate outliers |
-| ID namespace | Semantic IDs should not collide across pillars | Rename if needed |
-| Source attribution | Same sources cited consistently | Standardize references |
-
-### Step 7: Generate Unified Report
-
-Produce hierarchical evidence report:
+Produce final report:
 
 ```markdown
-## Hierarchical Evidence Collection Report
+## Orchestration Report
 
-**Orchestration Summary:**
-- Pillars: [N]
-- Research streams: [M]
-- Total evidence objects: [X]
-- Orchestration time: [Y hours]
-- Blockers resolved: [Z]
+**Orchestration Date:** [timestamp]
+**Orchestrator:** [agent/skill]
+**Total Streams:** [N]
+**Completed Streams:** [N]
+**Failed Streams:** [N]
 
-### Evidence by Pillar
+### Stream Summary
 
-#### Market Pillar
-- Evidence objects: 5/5 ✓
-- Gate status: PASSED
-- Key findings: [...]
+| Stream | Status | Evidence | Gates | Duration |
+| ------ | ------ | -------- | ----- | -------- |
+| stream_1 | completed | 5/5 | ✓ | 2.0h |
+| stream_2 | completed | 4/5 | ✓ | 1.5h |
+| stream_3 | blocked | 2/5 | ✗ | 1.0h |
 
-#### Technology Pillar
-- Evidence objects: 5/5 ✓
-- Gate status: PASSED
-- Key findings: [...]
+### Quality Gate Results
 
-### Cross-Pillar Insights
+| Gate | Status | Notes |
+| ---- | ------ | ----- |
+| Minimum evidence | ✓ PASS | All streams met minimum |
+| All gates passed | ✗ FAIL | stream_3 failed gate |
+| Confidence aligned | ✓ PASS | No major conflicts |
 
-- [Synthesized insights from multiple pillars]
-- [Identified contradictions and resolutions]
-- [Gap analysis across research scope]
+### Synthesis Summary
 
-### Orchestration Metrics
-
-- Parallel efficiency: [X% faster than sequential]
-- Resource utilization: [Y%]
-- Quality consistency: [Z%]
+- [Key findings]
+- [Cross-pillar patterns]
+- [Contradictions resolved]
+- [Recommendations]
 ```
 
 ## User Interaction
 
 Use the **AskUserQuestion tool** when:
 
-### Orchestration strategy unclear
+### Dependency conflict
 
 ```
-Question: "Research scope involves [N] pillars with [M] potential streams. Orchestration complexity assessment:"
+Question: "Stream A depends on Stream B, but Stream B failed quality gate. How to proceed?"
 Options:
-- "Low complexity - basic coordination needed"
-- "Medium complexity - task delegation recommended"
-- "High complexity - full orchestration required"
-- "Help me assess complexity further"
+- "Retry Stream B with different approach"
+- "Accept partial evidence from Stream B"
+- "Deprioritize Stream A"
+- "Escalate to user for decision"
 ```
 
-### Task delegation conflicts
+### Priority adjustment needed
 
 ```
-Question: "Stream [A] and Stream [B] both require [resource]. How to resolve?"
+Question: "Stream X is taking longer than expected. Should we adjust priority?"
 Options:
-- "Prioritize Stream A (critical path)"
-- "Prioritize Stream B (higher priority pillar)"
-- "Split resource between streams"
-- "Wait for additional capacity"
+- "Increase priority to P1"
+- "Keep current priority"
+- "Deprioritize to P4"
+- "Cancel stream"
 ```
 
-### Contradiction resolution needed
+### Quality gate failure
 
 ```
-Question: "Evidence contradiction found: [details]. How to resolve?"
+Question: "Stream Y failed quality gate with 3/5 evidence objects. How to proceed?"
 Options:
-- "Flag for manual review"
-- "Prioritize more authoritative source"
-- "Create evidence for both with contradiction note"
-- "Research additional sources for resolution"
-```
-
-### Timeline pressure
-
-```
-Question: "Evidence collection behind schedule. [N] streams pending, [M] evidence objects remaining."
-Options:
-- "Extend timeline for quality"
-- "Accept partial evidence (document gaps)"
-- "Reallocate resources to critical streams"
-- "Deprioritize lower-priority pillars"
+- "Add additional research to meet gate"
+- "Accept partial evidence with documentation"
+- "Deprioritize pillar if acceptable"
+- "Escalate to user for decision"
 ```
 
 ## Output
 
-After hierarchical orchestration:
+After orchestration:
 
 ```markdown
 ## Orchestration Complete
 
-**Streams Completed:** [M]/[M]
-**Total Evidence Objects:** [X]
-**Gate Status:** [ALL PASSED/PARTIAL/FAILED]
+**Total Streams:** [N]
+**Completed:** [N]
+**Failed:** [N]
+**Total Duration:** [X hours]
 
-### Stream Performance
-| Stream | Status | Evidence | Time | Blockers |
-| ------ | ------ | -------- | ---- | -------- |
-| market_size | ✓ | 5/5 | 2h | None |
-| pricing_research | ✓ | 5/5 | 3h | None |
-| ... | ... | ... | ... | ... |
+### Summary
+- Evidence collected: [N] objects
+- Quality gates passed: [N]/[N]
+- Contradictions resolved: [N]
+- Synthesis generated: [YES/NO]
 
-### Cross-Pillar Consistency
-- Consistency score: [X%]
-- Contradictions resolved: [Y]/[Z]
-- ID collisions: [0]
-
-### Orchestration Efficiency
-- Parallel speedup: [X% faster]
-- Resource utilization: [Y%]
-- Quality maintained: [Yes/No]
+### Next Steps
+- [List any follow-up actions]
+- [List any recommendations]
 ```
 
 ## References
 
-- [references/orchestration-contract.md](references/orchestration-contract.md) - orchestration rules
+- [references/orchestration-contract.md](references/orchestration-contract.md) - orchestration rules and levels
 - [references/shard-task-briefs.md](references/shard-task-briefs.md) - task delegation templates
-- [collecting-evidence/SKILL.md](../collecting-evidence/SKILL.md) - base evidence collection skill
+- [../../../docs/00-project/ai/skills/local/collecting-evidence/SKILL.md](../../../docs/00-project/ai/skills/local/collecting-evidence/SKILL.md) - evidence collection skill
