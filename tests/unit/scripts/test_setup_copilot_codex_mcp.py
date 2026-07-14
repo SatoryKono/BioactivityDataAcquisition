@@ -66,11 +66,13 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
     }
 
     runtime_servers = codex_settings["mcpServers"]
-    assert devin_config["mcpServers"] == runtime_servers
+    devin_servers = devin_config["mcpServers"]
+    assert devin_servers == servers
     assert qodo_payload["mcpServers"] == servers
     assert zed_payload["mcpServers"] == servers
     assert not removed_servers.intersection(servers)
     assert servers["filesystem"]["args"][-1] == "."
+    assert devin_servers["filesystem"]["args"][-1] == "."
     assert runtime_servers["filesystem"]["args"][-1] == str(workspace_root.resolve())
     assert servers["memory"]["args"] == [
         "-y",
@@ -145,12 +147,62 @@ def test_main_recreates_empty_workspace_json_configs(tmp_path: Path) -> None:
     assert json.loads(
         (output_root / ".codex" / "settings.json").read_text(encoding="utf-8")
     )["mcpServers"]["filesystem"]["args"][-1] == str(workspace_root.resolve())
-    assert json.loads(
-        (output_root / ".devin" / "config.json").read_text(encoding="utf-8")
-    )["mcpServers"]["filesystem"]["args"][-1] == str(workspace_root.resolve())
+    assert (
+        json.loads(
+            (output_root / ".devin" / "config.json").read_text(encoding="utf-8")
+        )["mcpServers"]["filesystem"]["args"][-1]
+        == "."
+    )
     assert json.loads(
         (output_root / ".gemini" / "settings.json").read_text(encoding="utf-8")
     )["mcpServers"]["filesystem"]["args"][-1] == str(workspace_root.resolve())
+
+
+def test_devin_projection_is_portable_across_workspace_roots(
+    tmp_path: Path,
+) -> None:
+    """Tracked Devin MCP data should be stable and preserve Devin-owned settings."""
+    generated: list[dict[str, object]] = []
+    for name in ("first-clone", "second-clone"):
+        workspace_root = tmp_path / name / "workspace"
+        output_root = tmp_path / name / "output"
+        workspace_root.mkdir(parents=True)
+        devin_path = output_root / ".devin" / "config.json"
+        devin_path.parent.mkdir(parents=True)
+        devin_path.write_text(
+            json.dumps(
+                {
+                    "version": 2,
+                    "devin": {"org_id": "org-test"},
+                    "shell": {"setup_complete": True},
+                    "theme_mode": "light",
+                    "mcpServers": {"stale": {"command": "old"}},
+                }
+            ),
+            encoding="utf-8",
+        )
+
+        assert (
+            setup_mcp.main(
+                [
+                    "--root",
+                    str(output_root),
+                    "--workspace-root",
+                    str(workspace_root),
+                    "--skip-codex",
+                    "--skip-codex-config",
+                    "--skip-gemini-settings",
+                ]
+            )
+            == 0
+        )
+        generated.append(json.loads(devin_path.read_text(encoding="utf-8")))
+
+    assert generated[0] == generated[1]
+    assert generated[0]["devin"] == {"org_id": "org-test"}
+    assert generated[0]["shell"] == {"setup_complete": True}
+    assert generated[0]["theme_mode"] == "light"
+    assert generated[0]["mcpServers"]["filesystem"]["args"][-1] == "."
 
 
 def test_skip_codex_validation_still_updates_codex_config(

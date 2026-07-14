@@ -51,6 +51,18 @@ mirror when behavior or contributor guidance changes.
 - Cross-runtime ownership and sync rules are described in
   [AI Runtime Mirror Ownership](../agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md).
 
+## Parity Contract
+
+`scripts/ai/codex/skills-mirror-contract.json` is the reviewed contract for
+Codex, Devin, and the transformed docs mirror. It requires equal Codex-Devin
+`SKILL.md` entrypoint sets and complete catalog membership. Shared reference
+files must match, while runtime-specific `SKILL.md` content, optional reference
+presence, and `agents/openai.yaml` metadata are explicitly sanctioned variants.
+
+Use `bash scripts/ai/codex/check_skills_mirror.sh --check` for the read-only CI
+gate. Use `--sync` to regenerate only `local/`; it does not rewrite
+`.devin/skills/**`.
+
 ## Layout
 
 - `local/` — published mirror for repository-local skills

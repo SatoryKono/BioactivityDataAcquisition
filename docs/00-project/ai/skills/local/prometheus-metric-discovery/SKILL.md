@@ -20,11 +20,7 @@ description: "Discover real Prometheus metrics, labels, label values, and metric
 - Accepted ADRs in `../../../../../02-architecture/decisions/`
 - Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
 - Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
-- Root runtime contract: `../../../AGENTS.md`
-- Project rules: `../../../docs/00-project/RULES.md`
-- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../docs/02-architecture/decisions`
-- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+
 - Shared Grafana/Prometheus prerequisites: [../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md](../grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md)
 
 ## Overview
@@ -35,8 +31,6 @@ query, dashboard panel, or rule.
 ## BioETL Runtime Policy
 
 - Project runtime contract: `../../../AGENTS.md`
-- Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
-- Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 
 Treat discovery as a required first step, not optional cleanup after a failed
 query.

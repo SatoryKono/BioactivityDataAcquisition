@@ -11,25 +11,35 @@ on:
     branches: [ main ]
     paths:
       - ".codex/skills/**"
+      - ".devin/skills/**"
       - "docs/00-project/ai/skills/local/**"
       - "docs/00-project/ai/skills/global/**"
       - "docs/00-project/ai/skills/_references/**"
       - "docs/00-project/ai/skills/README.md"
       - "docs/00-project/ai/skills/SKILLS-CATALOG.md"
+      - "scripts/ai/codex/check_skills_mirror.sh"
+      - "scripts/ai/codex/skills-mirror-contract.json"
+      - "scripts/ai/sync_ai_governance.py"
       - "scripts/ops/support/skills/check_skills_mirror.sh"
       - "scripts/ops/support/skills/check_ai_skills_layout.sh"
+      - "tests/unit/scripts/test_sync_ai_governance.py"
       - ".github/workflows/skills-consistency.yml"
   pull_request:
     branches: [ main ]
     paths:
       - ".codex/skills/**"
+      - ".devin/skills/**"
       - "docs/00-project/ai/skills/local/**"
       - "docs/00-project/ai/skills/global/**"
       - "docs/00-project/ai/skills/_references/**"
       - "docs/00-project/ai/skills/README.md"
       - "docs/00-project/ai/skills/SKILLS-CATALOG.md"
+      - "scripts/ai/codex/check_skills_mirror.sh"
+      - "scripts/ai/codex/skills-mirror-contract.json"
+      - "scripts/ai/sync_ai_governance.py"
       - "scripts/ops/support/skills/check_skills_mirror.sh"
       - "scripts/ops/support/skills/check_ai_skills_layout.sh"
+      - "tests/unit/scripts/test_sync_ai_governance.py"
       - ".github/workflows/skills-consistency.yml"
 
 jobs:
@@ -40,7 +50,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - name: Verify docs/00-project/ai/skills/local mirror
+      - name: Verify docs mirror and Codex-Devin parity
         run: bash scripts/ops/support/skills/check_skills_mirror.sh --check
 
       - name: Verify ai/skills canonical layout

@@ -20,15 +20,10 @@ description: "Execute the BioETL py-config-bot profile for configuration, schema
 - Accepted ADRs in `../../../../../02-architecture/decisions/`
 - Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
 - Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
-- Root runtime contract: `../../../AGENTS.md`
-- Project rules: `../../../docs/00-project/RULES.md`
-- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../docs/02-architecture/decisions`
-- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+
 - Primary profile: `../../agents/py-config-bot.md`
 - Team orchestration: `../../agents/ORCHESTRATION.md`
 - Shared wrapper contract: [../py-audit-bot/references/wrapper-contract.md](../py-audit-bot/references/wrapper-contract.md)
-- Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
 - Shared project context: `../../../docs/00-project/ai/memory/agent-memory.md`
 - Role memory: `../../../docs/00-project/ai/memory/memory-py-config-bot.md`
 

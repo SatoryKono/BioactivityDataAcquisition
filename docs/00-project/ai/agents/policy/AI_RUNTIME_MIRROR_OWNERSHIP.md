@@ -102,6 +102,10 @@ applying changes with the same script.
 The following divergence is intentional and not a bug by itself:
 
 - runtime-specific commands, wrappers, and settings may differ between runtimes
+- Codex and Devin skill bodies and runtime metadata may differ only within the
+  sanctioned patterns in `scripts/ai/codex/skills-mirror-contract.json`; their
+  entrypoint sets, catalog membership, and shared required-identical references
+  remain CI-enforced
 - docs mirrors may summarize or normalize runtime concepts for navigation
   purposes instead of reproducing every runtime file verbatim
 - local-only Gemini config may exist without a tracked Gemini agent/skill tree
@@ -116,7 +120,7 @@ The following divergence is not acceptable:
   source for behavior changes
 - active Codex/Gemini runtime surfaces depend on `.claude/**` as a canonical
   behavior source
-- runtime config docs claim portability while the checked-in config still
+- runtime config docs claim portability while a checked-in portable config
   depends on machine-local absolute paths
 
 ## Edit Rules

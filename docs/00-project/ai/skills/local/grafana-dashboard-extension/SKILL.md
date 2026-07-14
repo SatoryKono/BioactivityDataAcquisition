@@ -20,11 +20,7 @@ description: "Extend, edit, validate, and review shipped Grafana dashboards for 
 - Accepted ADRs in `../../../../../02-architecture/decisions/`
 - Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
 - Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
-- Root runtime contract: `../../../AGENTS.md`
-- Project rules: `../../../docs/00-project/RULES.md`
-- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../docs/02-architecture/decisions`
-- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+
 - Shared Grafana/Prometheus prerequisites: [references/grafana-prometheus-prerequisites.md](references/grafana-prometheus-prerequisites.md)
 
 ## Overview
@@ -35,8 +31,6 @@ reviewing Grafana dashboards in BioETL.
 ## BioETL Runtime Policy
 
 - Project runtime contract: `../../../AGENTS.md`
-- Memory policy: `../../../docs/00-project/ai/agents/guides/MEMORY_USAGE.md`
-- Post-change validation: `../../../docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`
 
 Default to repo dashboard mode first:
 
@@ -86,10 +80,15 @@ Before editing:
 
 Preserve the current shipped model unless the task explicitly changes it:
 
-- `1. Overview`
-- `2. Runtime`
-- `3. Provider Health`
-- `4. Data Quality`
+- All eight navigation panels (`id=1000`) render the complete visual bus
+  `0. Control Plane` through `6. Alerts & SLO`, followed by
+  `Silver Reject Explorer`, `Explore Logs`, and `Explore Traces`.
+- The current dashboard remains visible as a disabled, theme-safe item;
+  machine-readable `panel.links` omit only the self-link.
+- Dashboard handoffs preserve `${__url_time_range}`. Every Logs/Traces
+  handoff preserves the active range with `from=${__from}` and `to=${__to}`.
+- Forensic/detail rows use progressive disclosure and remain collapsed by
+  default; first-screen answer and action surfaces remain expanded.
 
 If this model changes, update the affected docs in the same change set.
 
