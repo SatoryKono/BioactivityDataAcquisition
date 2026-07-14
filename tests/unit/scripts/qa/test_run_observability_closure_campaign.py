@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -28,17 +29,25 @@ def _stub_registry_cli(monkeypatch: pytest.MonkeyPatch) -> None:
     def fake_phase(**kwargs: object) -> campaign.PhaseEvidence:
         name = str(kwargs["name"])
         command = tuple(str(item) for item in kwargs["command"])
+        expected_outcome = str(kwargs.get("expected_outcome", "success"))
+        phase_root = Path(str(kwargs["phase_root"]))
+        phase_root.mkdir(parents=True, exist_ok=True)
+        stdout_path = phase_root / "stdout.log"
+        stderr_path = phase_root / "stderr.log"
+        stdout_path.write_text("phase success", encoding="utf-8")
+        stderr_path.write_text("", encoding="utf-8")
         return campaign.PhaseEvidence(
             name=name,
             command=command,
             started_at="2026-07-14T00:00:00+00:00",
             finished_at="2026-07-14T00:00:01+00:00",
-            exit_code=0,
+            exit_code=1 if expected_outcome == "failure" else 0,
             timed_out=False,
-            stdout_path="stdout.log",
-            stdout_sha256="a" * 64,
-            stderr_path="stderr.log",
-            stderr_sha256="b" * 64,
+            stdout_path=str(stdout_path),
+            stdout_sha256=campaign._sha256_file(stdout_path),
+            stderr_path=str(stderr_path),
+            stderr_sha256=campaign._sha256_file(stderr_path),
+            expected_outcome=expected_outcome,
         )
 
     monkeypatch.setattr(campaign, "_run_phase_command", fake_phase)
@@ -66,28 +75,48 @@ def _retain_raw(path: Path, raw_bytes: bytes, kind: str) -> dict[str, str]:
 def _raw_payload(key: str, kind: str, index: int) -> dict[str, object]:
     if key == "tracing_parity":
         return {
-            "pipeline": "chembl_activity",
-            "tracing": bool(index),
+            "pipeline": campaign.CHEMBL_PIPELINES[index // 2],
+            "tracing": bool(index % 2),
             "status": "success",
-            "data_signature": "same-data-signature",
+            "run_id": (
+                f"run-{campaign.CHEMBL_PIPELINES[index // 2]}-{bool(index % 2)}"
+            ),
+            "data_signature": f"signature-{campaign.CHEMBL_PIPELINES[index // 2]}",
             "decision_trace": [{"decision": "retain"}],
         }
     if key == "metric_reconciliation":
-        return (
-            {"status": "success", "expected": 1, "actual": 1}
-            if kind == "prometheus-response"
-            else {
-                "events": [{"event_type": "run_finished"}],
-                "expected": 1,
-                "actual": 1,
+        pipeline = campaign.CHEMBL_PIPELINES[index]
+        if kind == "prometheus-response":
+            return {
+                "status": "success",
+                "pipeline": pipeline,
+                "run_id": f"run-{pipeline}",
+                "pipeline_runs_total_delta": 1,
+                "health_probe_counter_delta": 0,
             }
-        )
+        if kind == "ledger-snapshot":
+            return {
+                "pipeline": pipeline,
+                "run_id": f"run-{pipeline}",
+                "events": [{"event_type": "run_finished"}],
+                "terminal_run_result_count": 1,
+            }
+        return {
+            "source_present": True,
+            "metric": "bioetl_dq_anomaly_detected",
+            "delta": 1,
+            "test_node_id": "tests/unit/dq/test_hard_failure.py::test_hard_failure",
+        }
     if key == "workflow_correlation":
         workflow_index = index % 2
         workflow_run_id = f"workflow-{workflow_index}"
         if kind == "workflow-result":
             return {
                 "workflow_run_id": workflow_run_id,
+                "workflow_name": "chembl_baseline",
+                "workflow_step_id": "extract",
+                "child_run_id": f"run-{index}",
+                "child_manifest_id": f"manifest-{index}",
                 "status": "success" if workflow_index == 0 else "failed",
             }
         return {
@@ -95,14 +124,27 @@ def _raw_payload(key: str, kind: str, index: int) -> dict[str, object]:
             "run_id": f"run-{index}",
             "manifest_id": f"manifest-{index}",
             "workflow_name": "chembl_baseline",
-            "workflow_step_id": f"step-{index}",
+            "workflow_step_id": "extract",
             "terminal_event": ("run_finished" if workflow_index == 0 else "run_failed"),
         }
     if key == "metric_surface":
         return {
             "recording_rule_outputs": [f"bioetl_record_{item}" for item in range(103)],
+            "policy_alias_metrics": [f"bioetl_alias_{item}" for item in range(20)],
+            "typed_target_counts": {
+                "promql": 171,
+                "http": 30,
+                "loki": 5,
+                "tempo": 0,
+                "unknown": 0,
+            },
             "recording_declarations_without_output": [],
             "recording_outputs_without_declaration": [],
+            "policy_aliases_without_catalog": [],
+            "catalog_aliases_without_declaration": [],
+            "policy_aliases_overlapping_outputs": [],
+            "http_semantics_violations": [],
+            "panel_contract_drift": [],
             "prometheus_run_id_selector_violations": [],
         }
     if key == "dashboard_variables":
@@ -143,13 +185,44 @@ def _raw_payload(key: str, kind: str, index: int) -> dict[str, object]:
         return {
             "raw_source_present": True,
             "metrics": {
-                "bioetl_adapter_requests_total": 1,
-                "bioetl_data_source_retries_total": 0,
-                "bioetl_rate_limiter_tokens_available": 1,
-                "bioetl_circuit_breaker_state": 0,
-                "bioetl_adapter_request_duration_seconds": 0.1,
+                "bioetl_adapter_requests_total": {
+                    "source_present": True,
+                    "delta": 1,
+                },
+                "bioetl_data_source_retries_total": {
+                    "source_present": True,
+                    "delta": 1,
+                },
+                "bioetl_rate_limiter_wait_seconds_count": {
+                    "source_present": True,
+                    "delta": 1,
+                },
+                "bioetl_circuit_breaker_success_total": {
+                    "source_present": True,
+                    "delta": 1,
+                },
+                "bioetl_adapter_request_duration_seconds_count": {
+                    "source_present": True,
+                    "delta": 1,
+                },
             },
         }
+    if key == "backend_profile" and kind == "backend-http-response":
+        return {
+            "state": "populated",
+            "read_only_mount": True,
+            "data_root": "/audit/data",
+            "record_count": 1,
+        }
+    if key == "backend_profile" and kind == "loki-response":
+        return {
+            "job": "bioetl-audit",
+            "sentinel_match_count": 1,
+            "read_only_mount": True,
+            "log_root": "/audit/logs",
+        }
+    if key == "backend_profile":
+        return {"before": {"data": "x"}, "after": {"data": "x"}, "unchanged": True}
     raise AssertionError(f"unsupported raw payload: {key}/{kind}")
 
 
@@ -194,11 +267,16 @@ def _write_valid_raw_artifacts(raw_root: Path, key: str) -> list[dict[str, str]]
     return retained
 
 
-def _write_evidence_bundle(audit_root: Path, *, source_revision: str) -> list[str]:
+def _write_evidence_bundle(
+    audit_root: Path,
+    *,
+    source_revision: str,
+    campaign_binding: dict[str, object] | None = None,
+) -> list[str]:
     evidence_root = audit_root / "evidence"
-    evidence_root.mkdir(parents=True)
+    evidence_root.mkdir(parents=True, exist_ok=True)
     raw_root = evidence_root / "raw"
-    raw_root.mkdir()
+    raw_root.mkdir(exist_ok=True)
     args: list[str] = []
     for key, requirements in campaign.EVIDENCE_SUMMARY_REQUIREMENTS.items():
         path = evidence_root / f"{key}.json"
@@ -208,9 +286,22 @@ def _write_evidence_bundle(audit_root: Path, *, source_revision: str) -> list[st
             "status": "pass",
             "source_revision": source_revision,
             "generated_at": "2026-07-14T00:00:00+00:00",
+            **(
+                {"campaign_binding": campaign_binding}
+                if campaign_binding is not None
+                else {}
+            ),
             "summary": dict(requirements),
             "producer": {
-                "command": ["validated-producer", key],
+                "command": [
+                    sys.executable,
+                    "-m",
+                    campaign.CANONICAL_EVIDENCE_ASSEMBLER,
+                    "--category",
+                    key,
+                    "--output",
+                    str(path),
+                ],
                 "exit_code": 0,
                 **({"tool_version": "3.13.1"} if key == "promtool" else {}),
             },
@@ -348,10 +439,45 @@ def test_external_evidence_gate_accepts_typed_unique_current_artifacts(
 
     assert gate["satisfied"] is True
     assert gate["errors"] == {}
-    assert len(gate["artifacts"]) == 10
+    assert len(gate["artifacts"]) == 11
 
 
-def test_raw_content_gate_rejects_fabricated_tracing_payloads(tmp_path: Path) -> None:
+def test_metric_reconciliation_rejects_vacuous_and_misaligned_rows(
+    tmp_path: Path,
+) -> None:
+    retained = _write_valid_raw_artifacts(tmp_path, "metric_reconciliation")
+    prometheus_path = next(
+        Path(row["path"]) for row in retained if row["kind"] == "prometheus-response"
+    )
+    payload = json.loads(prometheus_path.read_text(encoding="utf-8"))
+    payload["pipeline_runs_total_delta"] = 0
+    prometheus_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    errors = campaign._validate_metric_reconciliation_raw(retained)
+
+    assert "each terminal run must increment pipeline_runs_total exactly once" in errors
+
+
+def test_online_raw_requires_observed_instrumentation_deltas(tmp_path: Path) -> None:
+    retained = _write_valid_raw_artifacts(tmp_path, "online_run")
+    instrumentation_path = next(
+        Path(row["path"])
+        for row in retained
+        if row["kind"] == "instrumentation-response"
+    )
+    payload = json.loads(instrumentation_path.read_text(encoding="utf-8"))
+    payload["metrics"]["bioetl_data_source_retries_total"]["delta"] = 0
+    instrumentation_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    errors = campaign._validate_online_raw(retained)
+
+    assert (
+        "controlled online retry probe must increment retry metric exactly once"
+        in errors
+    )
+
+
+def test_raw_content_gate_rejects_incomplete_tracing_payloads(tmp_path: Path) -> None:
     retained: list[dict[str, str]] = []
     for index in range(2):
         path = tmp_path / f"attempt-{index}.json"
@@ -368,23 +494,90 @@ def test_raw_content_gate_rejects_fabricated_tracing_payloads(tmp_path: Path) ->
 
     errors = campaign._validate_raw_content("tracing_parity", retained)
 
-    assert "tracing attempt data signatures must be identical and non-empty" in errors
-    assert "at least one tracing attempt requires a non-empty decision trace" in errors
+    assert "tracing parity requires exactly 30 attempt results" in errors
 
 
-def test_residual_findings_gate_requires_one_unique_real_issue_mapping() -> None:
+def _workflow_raw_artifacts(
+    tmp_path: Path,
+    *,
+    second_step_id: str = "extract",
+    second_child_workflow_run_id: str = "workflow-1",
+) -> list[dict[str, str]]:
+    retained: list[dict[str, str]] = []
+    for index, status in enumerate(("success", "failed")):
+        workflow_run_id = f"workflow-{index}"
+        step_id = "extract" if index == 0 else second_step_id
+        parent = {
+            "workflow_run_id": workflow_run_id,
+            "workflow_name": "chembl_baseline",
+            "workflow_step_id": step_id,
+            "child_run_id": f"run-{index}",
+            "child_manifest_id": f"manifest-{index}",
+            "status": status,
+        }
+        child = {
+            "workflow_run_id": (
+                workflow_run_id if index == 0 else second_child_workflow_run_id
+            ),
+            "run_id": f"run-{index}",
+            "manifest_id": f"manifest-{index}",
+            "workflow_name": "chembl_baseline",
+            "workflow_step_id": step_id,
+            "terminal_event": "run_finished" if index == 0 else "run_failed",
+        }
+        for kind, payload in (("workflow-result", parent), ("child-result", child)):
+            retained.append(
+                _retain_raw(
+                    tmp_path / f"{kind}-{index}.json",
+                    json.dumps(payload).encode(),
+                    kind,
+                )
+            )
+    return retained
+
+
+def test_workflow_raw_accepts_reciprocal_repeated_step_runs(tmp_path: Path) -> None:
+    retained = _workflow_raw_artifacts(tmp_path)
+
+    assert campaign._validate_workflow_raw(retained) == []
+
+
+def test_workflow_raw_rejects_nonreciprocal_child_context(tmp_path: Path) -> None:
+    retained = _workflow_raw_artifacts(
+        tmp_path,
+        second_child_workflow_run_id="workflow-wrong",
+    )
+
+    errors = campaign._validate_workflow_raw(retained)
+
+    assert "parent/child workflow_run_id must match for reciprocal anchors" in errors
+
+
+def test_workflow_raw_requires_repeated_runs_of_same_step(tmp_path: Path) -> None:
+    retained = _workflow_raw_artifacts(tmp_path, second_step_id="publish")
+
+    errors = campaign._validate_workflow_raw(retained)
+
+    assert (
+        "workflow raw evidence requires repeated success/failure runs for one step"
+        in errors
+    )
+
+
+def test_residual_findings_gate_requires_resolution_before_completion() -> None:
     missing = campaign._residual_findings_gate(["renderer remains unstable"], [])
     valid = campaign._residual_findings_gate(
         ["renderer remains unstable"],
         [
             "RENDER-001=https://github.com/SatoryKono/"
-            "BioactivityDataAcquisition/issues/7000"
+            "BioactivityDataAcquisition/issues/6268"
         ],
     )
 
     assert missing["satisfied"] is False
-    assert valid["satisfied"] is True
+    assert valid["satisfied"] is False
     assert valid["mappings"][0]["finding_id"] == "RENDER-001"
+    assert "must be resolved" in valid["errors"][-1]
 
 
 def test_attempt_closure_rejects_timeout_failure_and_ambiguous_identity() -> None:
@@ -408,6 +601,7 @@ def test_attempt_closure_rejects_timeout_failure_and_ambiguous_identity() -> Non
         ledger_artifacts=({"path": "ledger.jsonl"},),
         checkpoint_artifacts=({"path": "checkpoint.json"},),
         output_artifacts=({"path": "silver.delta", "sha256": "c" * 64},),
+        semantic_output_records=1,
         result_signature="signature",
     ).satisfies_closure
     assert not campaign.AttemptEvidence(
@@ -426,6 +620,53 @@ def test_attempt_closure_rejects_timeout_failure_and_ambiguous_identity() -> Non
         run_ids=("run-1",),
         terminal_ledger_events=("run_finished",),
     ).satisfies_closure
+
+
+def test_attempt_closure_accepts_checkpoint_not_applicable_below_interval() -> None:
+    disposition, interval = campaign._checkpoint_policy(
+        campaign._repo_root(), "chembl_activity", 1
+    )
+    assert (disposition, interval) == ("not_applicable_below_interval", 1000)
+    assert campaign.AttemptEvidence(
+        pipeline="chembl_activity",
+        tracing=False,
+        started_at="2026-07-14T00:00:00+00:00",
+        finished_at="2026-07-14T00:00:01+00:00",
+        exit_code=0,
+        timed_out=False,
+        command=("python",),
+        stdout_path="stdout.log",
+        stderr_path="stderr.log",
+        manifest_ids=("manifest-1",),
+        run_ids=("run-1",),
+        terminal_ledger_events=("run_finished",),
+        manifest_artifacts=({"path": "manifest.json"},),
+        ledger_artifacts=({"path": "ledger.jsonl"},),
+        checkpoint_disposition=disposition,
+        checkpoint_interval=interval,
+        output_artifacts=({"path": "silver.parquet"},),
+        semantic_output_records=1,
+        result_signature="signature",
+    ).satisfies_closure
+
+
+def test_semantic_output_payload_ignores_occurrence_identity(tmp_path: Path) -> None:
+    first = tmp_path / "first.jsonl"
+    second = tmp_path / "second.jsonl"
+    first.write_text(
+        json.dumps({"molecule_id": "CHEMBL1", "run_id": "run-a"}) + "\n",
+        encoding="utf-8",
+    )
+    second.write_text(
+        json.dumps({"molecule_id": "CHEMBL1", "run_id": "run-b"}) + "\n",
+        encoding="utf-8",
+    )
+
+    first_payload, first_count = campaign._semantic_output_payload([first])
+    second_payload, second_count = campaign._semantic_output_payload([second])
+
+    assert first_count == second_count == 1
+    assert first_payload == second_payload
 
 
 def test_attempt_command_is_explicitly_incremental_online_and_traced() -> None:
@@ -450,7 +691,7 @@ def test_attempt_command_is_explicitly_incremental_online_and_traced() -> None:
     assert "--tracing" in on
 
 
-def test_execute_writes_complete_report_only_when_every_gate_is_satisfied(
+def test_execute_then_finalize_writes_complete_report_only_when_every_gate_is_satisfied(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -458,7 +699,6 @@ def test_execute_writes_complete_report_only_when_every_gate_is_satisfied(
     audit_root = tmp_path / "audit"
     data_root, log_root = _canonical_roots(tmp_path)
     revision = campaign._source_revision(campaign._repo_root())
-    evidence_args = _write_evidence_bundle(audit_root, source_revision=revision)
     monkeypatch.setattr(
         campaign,
         "_source_provenance",
@@ -473,6 +713,20 @@ def test_execute_writes_complete_report_only_when_every_gate_is_satisfied(
     def fake_attempt(**kwargs: object) -> campaign.AttemptEvidence:
         pipeline = str(kwargs["pipeline"])
         tracing = bool(kwargs["tracing"])
+        run_mode = str(kwargs.get("run_mode", "standalone_cached"))
+        run_id = "online-run-1" if run_mode == "online" else f"run-{pipeline}-{tracing}"
+        artifact_root = (
+            audit_root / "fake-artifacts" / f"{run_mode}-{pipeline}-{tracing}"
+        )
+        artifact_root.mkdir(parents=True, exist_ok=True)
+        artifacts: dict[str, dict[str, str]] = {}
+        for name in ("manifest", "ledger", "checkpoint", "output"):
+            path = artifact_root / f"{name}.json"
+            path.write_text(json.dumps({"name": name}), encoding="utf-8")
+            artifacts[name] = {
+                "path": str(path),
+                "sha256": campaign._sha256_file(path),
+            }
         return campaign.AttemptEvidence(
             pipeline=pipeline,
             tracing=tracing,
@@ -484,13 +738,15 @@ def test_execute_writes_complete_report_only_when_every_gate_is_satisfied(
             stdout_path="stdout.log",
             stderr_path="stderr.log",
             manifest_ids=(f"manifest-{pipeline}-{tracing}",),
-            run_ids=(f"run-{pipeline}-{tracing}",),
+            run_ids=(run_id,),
             terminal_ledger_events=("run_finished",),
-            manifest_artifacts=({"path": "manifest.json"},),
-            ledger_artifacts=({"path": "ledger.jsonl"},),
-            checkpoint_artifacts=({"path": "checkpoint.json"},),
-            output_artifacts=({"path": "silver.delta", "sha256": "c" * 64},),
+            manifest_artifacts=(artifacts["manifest"],),
+            ledger_artifacts=(artifacts["ledger"],),
+            checkpoint_artifacts=(artifacts["checkpoint"],),
+            output_artifacts=(artifacts["output"],),
+            semantic_output_records=1,
             result_signature=f"signature-{pipeline}",
+            run_mode=run_mode,
         )
 
     monkeypatch.setattr(campaign, "_run_attempt", fake_attempt)
@@ -506,21 +762,42 @@ def test_execute_writes_complete_report_only_when_every_gate_is_satisfied(
             "--tracing-mode",
             "both",
             "--execute",
-            *evidence_args,
         ]
     )
 
     summary = json.loads(capsys.readouterr().out)
-    report = json.loads(Path(summary["report"]).read_text(encoding="utf-8"))
+    report_path = Path(summary["report"])
+    report = json.loads(report_path.read_text(encoding="utf-8"))
     assert exit_code == 0
-    assert summary["status"] == "complete"
+    assert summary["status"] == "awaiting_external_evidence"
     assert report["attempt_gate"]["actual_tracing_mode"] == "both"
     assert report["attempt_gate"]["attempt_count"] == 30
     assert report["attempt_gate"]["required_tracing_mode"] == "both"
     assert report["attempt_gate"]["tracing_result_parity"] is True
     assert report["attempt_gate"]["satisfied"] is True
     assert report["canonical_signature_gate"]["satisfied"] is True
-    assert report["external_evidence_gate"]["satisfied"] is True
+    assert report["external_evidence_gate"]["satisfied"] is False
+
+    evidence_args = _write_evidence_bundle(
+        audit_root,
+        source_revision=revision,
+        campaign_binding=report["campaign_binding"],
+    )
+    finalize_exit = campaign.main(
+        [
+            "--audit-root",
+            str(audit_root),
+            "--finalize-report",
+            str(report_path),
+            *evidence_args,
+        ]
+    )
+    finalized_summary = json.loads(capsys.readouterr().out)
+    finalized_report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert finalize_exit == 0
+    assert finalized_summary["status"] == "complete"
+    assert finalized_report["external_evidence_gate"]["satisfied"] is True
+    assert finalized_report["retained_artifact_gate"]["satisfied"] is True
 
 
 def test_execute_returns_nonzero_when_campaign_is_incomplete(

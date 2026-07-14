@@ -36,11 +36,11 @@
 - ✅ Проверка root gaps (уже есть)
 - ✅ Проверка first-screen position (уже есть)
 - ✅ Проверка recording rules (уже есть)
-- ❌ Проверка status value mapping — НОВЫЙ ТЕСТ
-- ❌ Проверка thresholds configuration — НОВЫЙ ТЕСТ
-- ❌ Проверка panel-type visualization standards — НОВЫЙ ТЕСТ
-- ❌ Проверка заголовков по шаблону — НОВЫЙ ТЕСТ
-- ❌ Проверка описаний панелей — НОВЫЙ ТЕСТ (частично есть)
+- ✅ Проверка status value mapping — CURRENT (dashboard contracts)
+- ✅ Проверка thresholds configuration — CURRENT (full panel-contract inventory)
+- ✅ Проверка panel-type visualization standards — CURRENT (dashboard contracts)
+- ✅ Проверка заголовков по шаблону — CURRENT (panel title inventory)
+- ✅ Проверка описаний панелей — CURRENT (full panel-contract inventory)
 
 **JSON инварианты:**
 - ✅ Проверка timezone/style/editable/graphTooltip (частично в layout tests)
@@ -49,15 +49,15 @@
 
 **Данные и метрики:**
 - ✅ Проверка отсутствия `or vector(0)` в current-status panels (уже есть)
-- ❌ Проверка units/decimals consistency — НОВЫЙ ТЕСТ
-- ❌ Проверка no-data/UNKNOWN policy — НОВЫЙ ТЕСТ
-- ❌ Проверка что range panels используют `$__range` — НОВЫЙ ТЕСТ
-- ❌ Проверка что current-status panels НЕ используют `$__range` (уже есть)
+- ✅ Проверка units/decimals consistency — CURRENT (full panel-contract inventory)
+- ✅ Проверка no-data/UNKNOWN policy — CURRENT (HTTP semantics + dashboard contracts)
+- ✅ Проверка что range panels используют `$__range` — CURRENT (dashboard contracts)
+- ✅ Проверка что current-status panels НЕ используют `$__range` — CURRENT
 
 **Actionable links:**
 - ✅ Проверка CTA links (частично есть)
-- ❌ Проверка что critical panels имеют dataLinks — НОВЫЙ ТЕСТ
-- ❌ Проверка runbook link format — НОВЫЙ ТЕСТ
+- ✅ Проверка что critical panels имеют dataLinks — CURRENT (actionable-link contracts)
+- ✅ Проверка runbook link format — CURRENT (full panel-contract inventory)
 
 ### Полностью ручные (SHOULD)
 

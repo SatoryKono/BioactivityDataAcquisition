@@ -524,6 +524,26 @@
     "family": "pipeline_runtime",
     "type": "counter"
   },
+  "bioetl_workflow_row_reconciliation_excluded_rows_total": {
+    "description": "Total rows excluded by workflow row reconciliation",
+    "family": "pipeline_runtime",
+    "type": "counter"
+  },
+  "bioetl_workflow_row_reconciliation_kept_rows_total": {
+    "description": "Total rows retained by workflow row reconciliation",
+    "family": "pipeline_runtime",
+    "type": "counter"
+  },
+  "bioetl_workflow_row_reconciliation_left_rows_total": {
+    "description": "Total left-side rows inspected by workflow row reconciliation",
+    "family": "pipeline_runtime",
+    "type": "counter"
+  },
+  "bioetl_workflow_row_reconciliation_right_rows_total": {
+    "description": "Total right-side rows inspected by workflow row reconciliation",
+    "family": "pipeline_runtime",
+    "type": "counter"
+  },
   "bioetl_workflow_runs_total": {
     "description": "Total declarative workflow run outcomes by bounded workflow and status",
     "family": "pipeline_runtime",

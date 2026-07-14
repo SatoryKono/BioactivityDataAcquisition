@@ -5673,7 +5673,7 @@
       "missing_lines": 2,
       "module": "bioetl.application.services.control_plane.workflow.execution_recording_payloads",
       "path": "src/bioetl/application/services/control_plane/workflow/execution_recording_payloads.py",
-      "source_lines": 147
+      "source_lines": 149
     },
     {
       "coverage_percent": 100.0,
@@ -6563,7 +6563,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.workflow_runner_models",
       "path": "src/bioetl/application/services/workflow_runner_models.py",
-      "source_lines": 42
+      "source_lines": 44
     },
     {
       "coverage_percent": 98.72,
@@ -6573,7 +6573,7 @@
       "missing_lines": 1,
       "module": "bioetl.application.services.workflow_runner_service",
       "path": "src/bioetl/application/services/workflow_runner_service.py",
-      "source_lines": 378
+      "source_lines": 388
     },
     {
       "coverage_percent": 95.45,
@@ -18083,7 +18083,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.observability._metrics_defs_pipeline",
       "path": "src/bioetl/infrastructure/observability/_metrics_defs_pipeline.py",
-      "source_lines": 131
+      "source_lines": 139
     },
     {
       "coverage_percent": 100.0,
@@ -18183,7 +18183,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.observability._metrics_defs_pipeline_workflow",
       "path": "src/bioetl/infrastructure/observability/_metrics_defs_pipeline_workflow.py",
-      "source_lines": 83
+      "source_lines": 111
     },
     {
       "coverage_percent": 100.0,
@@ -18473,7 +18473,7 @@
       "missing_lines": 1,
       "module": "bioetl.infrastructure.observability.metrics_definitions",
       "path": "src/bioetl/infrastructure/observability/metrics_definitions.py",
-      "source_lines": 341
+      "source_lines": 349
     },
     {
       "coverage_percent": 100.0,
@@ -18483,7 +18483,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.observability.metrics_export_names",
       "path": "src/bioetl/infrastructure/observability/metrics_export_names.py",
-      "source_lines": 165
+      "source_lines": 169
     },
     {
       "coverage_percent": 90.91,
@@ -18553,7 +18553,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.observability.prometheus_metric_registries",
       "path": "src/bioetl/infrastructure/observability/prometheus_metric_registries.py",
-      "source_lines": 322
+      "source_lines": 334
     },
     {
       "coverage_percent": 91.04,
@@ -27895,7 +27895,7 @@
       "missing_lines": 2,
       "module": "bioetl.application.services.control_plane.workflow.execution_recording_payloads",
       "path": "src/bioetl/application/services/control_plane/workflow/execution_recording_payloads.py",
-      "source_lines": 147
+      "source_lines": 149
     },
     {
       "coverage_percent": 100.0,
@@ -28785,7 +28785,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.workflow_runner_models",
       "path": "src/bioetl/application/services/workflow_runner_models.py",
-      "source_lines": 42
+      "source_lines": 44
     },
     {
       "coverage_percent": 98.72,
@@ -28795,7 +28795,7 @@
       "missing_lines": 1,
       "module": "bioetl.application.services.workflow_runner_service",
       "path": "src/bioetl/application/services/workflow_runner_service.py",
-      "source_lines": 378
+      "source_lines": 388
     },
     {
       "coverage_percent": 95.45,
@@ -40305,7 +40305,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.observability._metrics_defs_pipeline",
       "path": "src/bioetl/infrastructure/observability/_metrics_defs_pipeline.py",
-      "source_lines": 131
+      "source_lines": 139
     },
     {
       "coverage_percent": 100.0,
@@ -40405,7 +40405,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.observability._metrics_defs_pipeline_workflow",
       "path": "src/bioetl/infrastructure/observability/_metrics_defs_pipeline_workflow.py",
-      "source_lines": 83
+      "source_lines": 111
     },
     {
       "coverage_percent": 100.0,
@@ -40695,7 +40695,7 @@
       "missing_lines": 1,
       "module": "bioetl.infrastructure.observability.metrics_definitions",
       "path": "src/bioetl/infrastructure/observability/metrics_definitions.py",
-      "source_lines": 341
+      "source_lines": 349
     },
     {
       "coverage_percent": 100.0,
@@ -40705,7 +40705,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.observability.metrics_export_names",
       "path": "src/bioetl/infrastructure/observability/metrics_export_names.py",
-      "source_lines": 165
+      "source_lines": 169
     },
     {
       "coverage_percent": 90.91,
@@ -40775,7 +40775,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.observability.prometheus_metric_registries",
       "path": "src/bioetl/infrastructure/observability/prometheus_metric_registries.py",
-      "source_lines": 322
+      "source_lines": 334
     },
     {
       "coverage_percent": 91.04,
@@ -44450,7 +44450,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "0bfaf9aba9b1ce0154fe794528af380d53a85f8d3026b8c54a21e221e7a00996",
+  "source_tree_sha256": "8b37b754c25c10be897038f7f0456551f866b06bdca9d8263aac07a7b363b18e",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

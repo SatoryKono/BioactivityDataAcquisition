@@ -34,6 +34,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `report-dashboard-panel-audit-matrix` | `report_dashboard_panel_audit_matrix.py`         | Generate/check the dashboard panel audit matrix mirror                                            |
 | `report-panel-title-inventory`   | `report_panel_title_inventory.py`                     | Generate/check the dashboard panel-title inventory mirror from shipped JSON                       |
 | `report-dashboard-promql-scope`  | `report_dashboard_promql_scope.py`                    | Generate/check dashboard PromQL scope, forbidden `run_id` selectors, and deprecated metric tokens |
+| `assemble-observability-closure-evidence` | `assemble_observability_closure_evidence.py` | Validate, hash, and occurrence-bind one typed closure-campaign evidence envelope                    |
 | `report-family-baseline`         | `report_hotspot_family_baseline.py`                   | Generate/check RF-06 hotspot-family baseline artifacts                                            |
 | `report-adr-enforcement-matrix`  | `report_adr_enforcement_matrix.py`                    | Generate/check accepted ADR enforcement coverage matrix                                           |
 | `report-invariant-audit-rebaseline` | `report_invariant_audit_rebaseline.py`              | Generate/check stale invariant-audit evidence matrix and duplicate-issue gates                    |

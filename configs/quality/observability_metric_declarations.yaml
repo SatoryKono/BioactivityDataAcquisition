@@ -124,10 +124,6 @@ policy_alias_metrics:
   - bioetl_workflow_reconciliation_rows_deleted_total
   - bioetl_workflow_reconciliation_rows_retained_total
   - bioetl_workflow_reconciliation_rows_scanned_total
-  - bioetl_workflow_row_reconciliation_excluded_rows_total
-  - bioetl_workflow_row_reconciliation_kept_rows_total
-  - bioetl_workflow_row_reconciliation_left_rows_total
-  - bioetl_workflow_row_reconciliation_right_rows_total
   - bioetl_workflow_status
 declared_label_contract_metrics:
   - bioetl_adapter_batch_size

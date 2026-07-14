@@ -11,6 +11,10 @@ __all__ = [
     "WORKFLOW_RECONCILIATION_ROWS_DELETED_TOTAL",
     "WORKFLOW_RECONCILIATION_ROWS_RETAINED_TOTAL",
     "WORKFLOW_RECONCILIATION_ROWS_SCANNED_TOTAL",
+    "WORKFLOW_ROW_RECONCILIATION_EXCLUDED_ROWS_TOTAL",
+    "WORKFLOW_ROW_RECONCILIATION_KEPT_ROWS_TOTAL",
+    "WORKFLOW_ROW_RECONCILIATION_LEFT_ROWS_TOTAL",
+    "WORKFLOW_ROW_RECONCILIATION_RIGHT_ROWS_TOTAL",
     "WORKFLOW_RUNS_TOTAL",
     "WORKFLOW_STEP_DURATION_SECONDS",
     "WORKFLOW_STEP_EVENTS_TOTAL",
@@ -53,6 +57,30 @@ WORKFLOW_RECONCILIATION_ROWS_RETAINED_TOTAL = Counter(
 WORKFLOW_RECONCILIATION_ROWS_DELETED_TOTAL = Counter(
     "bioetl_workflow_reconciliation_rows_deleted_total",
     "Total workflow reconciliation rows deleted",
+)
+
+WORKFLOW_ROW_RECONCILIATION_LEFT_ROWS_TOTAL = Counter(
+    "bioetl_workflow_row_reconciliation_left_rows_total",
+    "Total left-side rows inspected by workflow row reconciliation",
+    ["layer"],
+)
+
+WORKFLOW_ROW_RECONCILIATION_RIGHT_ROWS_TOTAL = Counter(
+    "bioetl_workflow_row_reconciliation_right_rows_total",
+    "Total right-side rows inspected by workflow row reconciliation",
+    ["layer"],
+)
+
+WORKFLOW_ROW_RECONCILIATION_KEPT_ROWS_TOTAL = Counter(
+    "bioetl_workflow_row_reconciliation_kept_rows_total",
+    "Total rows retained by workflow row reconciliation",
+    ["layer"],
+)
+
+WORKFLOW_ROW_RECONCILIATION_EXCLUDED_ROWS_TOTAL = Counter(
+    "bioetl_workflow_row_reconciliation_excluded_rows_total",
+    "Total rows excluded by workflow row reconciliation",
+    ["layer"],
 )
 
 WORKFLOW_STEP_EVENTS_TOTAL = Counter(

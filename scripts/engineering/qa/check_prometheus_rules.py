@@ -19,6 +19,8 @@ TESTS_FILE = Path("grafana/prometheus-rules/tests/bioetl_observability.test.yml"
 PROMETHEUS_IMAGE = "prom/prometheus:v3.13.1"
 PROMETHEUS_COMPATIBILITY_SERIES = "3.13.x"
 PUSHGATEWAY_COMPATIBILITY_SERIES = "1.11.x"
+EXPECTED_ALERT_DEFINITIONS = 53
+EXPECTED_RECORD_DEFINITIONS = 103
 MIN_TESTED_ALERTS = 34
 MIN_DIRECTLY_TESTED_RECORDS = 28
 
@@ -109,6 +111,8 @@ def collect_rule_test_coverage(
                 else:
                     non_firing_alerts.add(alert_name)
         for assertion in test_case.get("promql_expr_test", []):
+            if not assertion.get("exp_samples"):
+                continue
             expr = str(assertion.get("expr", ""))
             for record_name in record_definitions:
                 if re.search(rf"\b{re.escape(record_name)}\b", expr):
@@ -134,6 +138,16 @@ def collect_rule_test_coverage(
 def validate_rule_test_coverage(coverage: dict[str, object]) -> list[str]:
     """Return fail-closed rule-test coverage violations."""
     violations: list[str] = []
+    if int(coverage["alert_definitions"]) != EXPECTED_ALERT_DEFINITIONS:
+        violations.append(
+            "alert definitions changed from baseline "
+            f"{EXPECTED_ALERT_DEFINITIONS}: {coverage['alert_definitions']}"
+        )
+    if int(coverage["record_definitions"]) != EXPECTED_RECORD_DEFINITIONS:
+        violations.append(
+            "record definitions changed from baseline "
+            f"{EXPECTED_RECORD_DEFINITIONS}: {coverage['record_definitions']}"
+        )
     if coverage["undefined_fixture_alerts"]:
         violations.append(
             "fixtures reference undefined alerts: "
@@ -148,6 +162,11 @@ def validate_rule_test_coverage(coverage: dict[str, object]) -> list[str]:
         violations.append(
             f"tested alerts regressed below {MIN_TESTED_ALERTS}: "
             f"{coverage['tested_alerts']}"
+        )
+    if int(coverage["firing_alerts"]) < MIN_TESTED_ALERTS:
+        violations.append(
+            f"firing alert fixtures regressed below {MIN_TESTED_ALERTS}: "
+            f"{coverage['firing_alerts']}"
         )
     if int(coverage["directly_tested_records"]) < MIN_DIRECTLY_TESTED_RECORDS:
         violations.append(

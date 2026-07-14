@@ -66,6 +66,12 @@ _WORKFLOW_STEP_FAILURES = (
 )
 
 
+def _optional_identity(value: object, field_name: str) -> str | None:
+    """Return a stable child identity exposed by a result or typed failure."""
+    raw_identity = getattr(value, field_name, None)
+    return str(raw_identity) if raw_identity is not None else None
+
+
 def _apply_workflow_step_transition(
     *,
     state: WorkflowExecutionState,
@@ -314,6 +320,8 @@ class WorkflowRunnerService:
                 status="failed",
                 error_type=type(exc).__name__,
                 error_message=str(exc),
+                child_run_id=_optional_identity(exc, "run_id"),
+                child_manifest_id=_optional_identity(exc, "manifest_id"),
             )
         status = "success" if result.is_success else "failed"
         record_step_metrics(
@@ -331,6 +339,8 @@ class WorkflowRunnerService:
             payload=result,
             error_type=getattr(result, "error_type", None),
             error_message=getattr(result, "error_message", None),
+            child_run_id=_optional_identity(result, "run_id"),
+            child_manifest_id=_optional_identity(result, "manifest_id"),
         )
 
     async def _run_transform_step(
