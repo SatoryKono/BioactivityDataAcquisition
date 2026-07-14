@@ -231,6 +231,21 @@ def test_rf003_1024_layout_prioritizes_actions_and_readability() -> None:
     for panel_id in (10, 2, 3, 4, 5, 6, 7):
         assert _panel(silver, panel_id)["gridPos"]["w"] == 24
 
+    alerts = _load("bioetl-alerts-slo.json")
+    alert_table = _panel(alerts, 5)
+    widths = [
+        prop["value"]
+        for override in alert_table.get("fieldConfig", {}).get("overrides", [])
+        for prop in override.get("properties", [])
+        if prop.get("id") == "custom.width"
+        and override.get("matcher", {}).get("options")
+        in {"Time", "scope", "alertname", "severity", "pipeline", "run_type", "alertstate"}
+    ]
+    assert sum(widths) <= 865
+    excluded = alert_table.get("transformations", [])[0]["options"]["excludeByName"]
+    assert excluded["instance"] is True
+    assert excluded["job"] is True
+
 
 def test_rf004_identity_and_scope_are_persistent() -> None:
     control = _load("bioetl-control-plane-v1.json")
