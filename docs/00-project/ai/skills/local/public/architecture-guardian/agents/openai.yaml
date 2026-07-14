@@ -1,4 +1,0 @@
-interface:
-  display_name: "Architecture Guardian"
-  short_description: "Audit BioETL architecture rules"
-  default_prompt: "Use $architecture-guardian to validate BioETL architecture boundaries, ADR compliance, and anti-patterns."

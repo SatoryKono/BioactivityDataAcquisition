@@ -148,10 +148,14 @@ function classifyPanelTerminalEvidence(evidence) {
   const hasErrorIcon = evidence.hasErrorIcon === true;
   const hasVisualEvidence = evidence.hasVisualEvidence === true;
 
-  if (hasLoadingMarker) {
+  // Grafana can retain an internal loading marker after a viewport resize even
+  // when the panel-local terminal value/table is already visible. Treat the
+  // marker as blocking only while the panel has no rendered terminal evidence;
+  // explicit LOADING/PENDING copy remains blocking below.
+  if (hasLoadingMarker && !bodyText && !hasVisualEvidence) {
     return {
       classification: "loading",
-      reason: "panel still exposes a visible loading marker",
+      reason: "panel exposes a loading marker without rendered terminal evidence",
     };
   }
   if (!supportsQueryTerminalState) {
@@ -453,7 +457,11 @@ async function expandCollapsedRows(page, dashboard, index, total) {
       `Collapsed-row expansion failed for ${dashboard.uid}: expanded ${expanded}/${titles.length}`,
     );
   }
-  await page.waitForLoadState("networkidle", { timeout: CONFIG.timeoutMs }).catch(() => {
+  // Auto-refreshing Grafana dashboards may never become globally network-idle.
+  // Row expansion only needs a short bounded grace period; panel-local terminal
+  // polling below is the authoritative readiness gate.
+  const networkIdleTimeoutMs = Math.max(3000, Math.min(CONFIG.timeoutMs, 15000));
+  await page.waitForLoadState("networkidle", { timeout: networkIdleTimeoutMs }).catch(() => {
     console.warn(
       `[${index}/${total}] networkidle timeout after row expansion for ${dashboard.uid}; continuing`,
     );
@@ -726,7 +734,11 @@ function terminalStateSummary(dashboard, panelStates, status) {
 }
 
 async function validateDashboardTerminalStates(page, dashboard, index, total) {
-  const timeoutMs = Math.max(3000, Math.min(CONFIG.timeoutMs, 15000));
+  // HTTP-backed forensic panels can legitimately settle after Prometheus panels,
+  // especially while an observability campaign is writing evidence. Keep the
+  // wait bounded by the caller timeout, but do not fail a full-surface audit at
+  // the old 15 second cap while those panels are still transitioning.
+  const timeoutMs = Math.max(3000, Math.min(CONFIG.timeoutMs, 60000));
   const deadline = Date.now() + timeoutMs;
   let panelStates = [];
 
@@ -783,10 +795,13 @@ function describeTerminalStateFailure(dashboard) {
     .filter((state) =>
       new Set(["blank", "loading", "contradictory"]).has(state.classification),
     )
-    .map(
-      (state) =>
-        `panel ${state.id}${state.title ? ` (${state.title})` : ""}: ${state.classification}`,
-    );
+    .map((state) => {
+      const evidence = [state.reason, state.bodyText]
+        .filter(Boolean)
+        .join("; ")
+        .slice(0, 240);
+      return `panel ${state.id}${state.title ? ` (${state.title})` : ""}: ${state.classification}${evidence ? ` [${evidence}]` : ""}`;
+    });
   return failures.length > 0
     ? failures.join("; ")
     : "required terminal panel evidence is missing or invalid";
@@ -914,8 +929,10 @@ async function prepareDashboardForCapture(page, dashboard, index, total) {
     MAX_CAPTURE_VIEWPORT_HEIGHT,
     Math.max(900, Math.ceil(measuredBottom || CONFIG.viewport.height) + 32),
   );
+  dashboard.captureHeight = desiredHeight;
   const currentViewport = page.viewportSize() || CONFIG.viewport;
-  if (Math.abs(desiredHeight - currentViewport.height) > 4) {
+  let viewportChanged = false;
+  if (desiredHeight > currentViewport.height + 4) {
     console.log(
       `[${index}/${total}] setting capture viewport for ${dashboard.uid} to ${CONFIG.viewport.width}x${desiredHeight} based on ${metrics.markerCount} panel marker(s) ...`,
     );
@@ -923,10 +940,21 @@ async function prepareDashboardForCapture(page, dashboard, index, total) {
       width: CONFIG.viewport.width,
       height: desiredHeight,
     });
+    viewportChanged = true;
     await page.waitForTimeout(Math.max(250, Math.min(1000, CONFIG.settleMs)));
   }
   await setDashboardScrollPosition(page, 0);
   await page.waitForTimeout(Math.max(250, Math.min(1000, Math.floor(CONFIG.settleMs / 3))));
+  return viewportChanged;
+}
+
+async function settleDashboardAfterViewportChange(page, dashboard, index, total) {
+  console.log(
+    `[${index}/${total}] settling ${dashboard.uid} after capture viewport change for ${CONFIG.settleMs}ms ...`,
+  );
+  await page.waitForTimeout(CONFIG.settleMs);
+  await waitForDashboardContent(page, dashboard, index, total);
+  await materializeLazyPanels(page, dashboard, index, total);
 }
 
 async function materializeLazyPanels(page, dashboard, index, total) {
@@ -965,7 +993,14 @@ async function materializeLazyPanels(page, dashboard, index, total) {
 }
 
 function dashboardRenderUrl(dashboard) {
-  const params = new URLSearchParams({ orgId: "1", theme: CONFIG.theme });
+  // Freeze dashboard auto-refresh during audit capture. Otherwise a 30s refresh
+  // can restart a subset of 50+ expanded-row queries while terminal-state
+  // validation is polling, producing non-deterministic "loading" evidence.
+  const params = new URLSearchParams({
+    orgId: "1",
+    theme: CONFIG.theme,
+    refresh: "off",
+  });
   if (CONFIG.scopeQuery) {
     for (const [key, value] of new URLSearchParams(CONFIG.scopeQuery)) {
       params.set(key, value);
@@ -977,7 +1012,13 @@ function dashboardRenderUrl(dashboard) {
 async function renderDashboard(page, dashboard, index, total) {
   const target = dashboardRenderUrl(dashboard);
   console.log(`[${index}/${total}] loading ${dashboard.uid} ...`);
-  await page.setViewportSize(CONFIG.viewport);
+  // Start full-surface audits with enough vertical space for expanded rows.
+  // Shrinking/resizing only after queries settle makes Grafana re-run every
+  // panel and can strand Infinity/HTTP panels in a loading state.
+  const auditViewport = CONFIG.expandCollapsedRows
+    ? { width: CONFIG.viewport.width, height: MAX_CAPTURE_VIEWPORT_HEIGHT }
+    : CONFIG.viewport;
+  await page.setViewportSize(auditViewport);
   console.log(`[${index}/${total}] goto ${dashboard.uid} -> ${target}`);
   await page.goto(target, {
     timeout: CONFIG.timeoutMs,
@@ -1018,7 +1059,15 @@ async function renderDashboard(page, dashboard, index, total) {
       `[${index}/${total}] detected ${renderedPanelEvidence.count} rendered panel marker(s) for ${dashboard.uid} using ${renderedPanelEvidence.selector}`,
     );
   }
-  await prepareDashboardForCapture(page, dashboard, index, total);
+  const viewportChanged = await prepareDashboardForCapture(
+    page,
+    dashboard,
+    index,
+    total,
+  );
+  if (viewportChanged) {
+    await settleDashboardAfterViewportChange(page, dashboard, index, total);
+  }
   dashboard.requestedViewport = { ...CONFIG.viewport };
   dashboard.actualViewport = page.viewportSize() || { ...CONFIG.viewport };
   dashboard.requestedTheme = CONFIG.theme;
@@ -1044,13 +1093,23 @@ async function renderDashboard(page, dashboard, index, total) {
   console.log(
     `[${index}/${total}] capturing screenshot ${dashboard.uid} with timeout ${CONFIG.captureTimeoutMs}ms ...`,
   );
-  await page.screenshot({
+  const screenshotOptions = {
     path: filePath,
-    fullPage: true,
     timeout: CONFIG.captureTimeoutMs,
     animations: "disabled",
     caret: "hide",
-  });
+  };
+  if (CONFIG.expandCollapsedRows && Number.isFinite(dashboard.captureHeight)) {
+    screenshotOptions.clip = {
+      x: 0,
+      y: 0,
+      width: CONFIG.viewport.width,
+      height: dashboard.captureHeight,
+    };
+  } else {
+    screenshotOptions.fullPage = true;
+  }
+  await page.screenshot(screenshotOptions);
   const screenshotBuffer = await fs.promises.readFile(filePath);
   dashboard.screenshotEvidence = {
     file: dashboard.file,
