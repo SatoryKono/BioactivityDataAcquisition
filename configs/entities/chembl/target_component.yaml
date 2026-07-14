@@ -43,7 +43,7 @@ schema:
     - component_id
     - accession
     - component_type
-    - component_description
+    - description
     - organism
     - taxonomy_id
     - target_component_synonyms
@@ -186,7 +186,7 @@ hash_policy:
     - component_id
     - accession
     - component_type
-    - component_description
+    - description
     - organism
     - taxonomy_id
     - target_component_synonyms
