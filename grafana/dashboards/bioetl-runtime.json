@@ -3363,10 +3363,6 @@
           "type": "table"
         },
         {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki"
-          },
           "description": "GLOBAL log events that failed JSON parsing or are missing expected fields over the active range. Not pipeline-scoped runtime evidence; compare with pipeline-scoped warning logs. Terminal-state contract: successful empty=VALID EMPTY; datasource/query failures=ERROR; blank/loading is forbidden.",
           "fieldConfig": {
             "defaults": {
