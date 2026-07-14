@@ -21,6 +21,8 @@ from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 
+import zstandard
+
 CHEMBL_PIPELINES = (
     "chembl_activity",
     "chembl_assay",
@@ -653,6 +655,19 @@ def _isolated_subprocess_env(
     return env
 
 
+def _ensure_tracked_runtime_links(*, work_root: Path, repo_root: Path) -> None:
+    """Expose tracked read-only configuration to a non-repository CWD."""
+    configs_link = work_root / "configs"
+    expected = (repo_root / "configs").resolve()
+    if configs_link.is_symlink():
+        if configs_link.resolve() != expected:
+            raise ValueError(f"unexpected configs link target: {configs_link}")
+        return
+    if configs_link.exists():
+        raise ValueError(f"audit work root already contains configs: {configs_link}")
+    configs_link.symlink_to(expected, target_is_directory=True)
+
+
 def _run_phase_command(
     *,
     name: str,
@@ -665,6 +680,8 @@ def _run_phase_command(
     isolated_workdir: bool = True,
 ) -> PhaseEvidence:
     phase_root.mkdir(parents=True, exist_ok=True)
+    if isolated_workdir:
+        _ensure_tracked_runtime_links(work_root=phase_root, repo_root=repo_root)
     stdout_path = phase_root / "stdout.log"
     stderr_path = phase_root / "stderr.log"
     env = _isolated_subprocess_env(
@@ -795,6 +812,10 @@ def _stage_workflow_fixture(
         destination.parent.mkdir(parents=True, exist_ok=True)
         rendered = json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n"
         destination.write_text(rendered, encoding="utf-8")
+        compressed_destination = destination.with_suffix(".jsonl.zst")
+        compressed_destination.write_bytes(
+            zstandard.ZstdCompressor(level=3).compress(rendered.encode("utf-8"))
+        )
         evidence_records.append(
             {
                 "entity": entity,
@@ -803,6 +824,8 @@ def _stage_workflow_fixture(
                 "record_sha256": hashlib.sha256(rendered.encode()).hexdigest(),
                 "fixture_path": str(destination),
                 "fixture_sha256": _sha256_file(destination),
+                "compressed_fixture_path": str(compressed_destination),
+                "compressed_fixture_sha256": _sha256_file(compressed_destination),
             }
         )
     return fixture_root, {
@@ -897,6 +920,7 @@ def _run_attempt(
     data_root = attempt_root / "data"
     log_root = attempt_root / "logs"
     attempt_root.mkdir(parents=True, exist_ok=True)
+    _ensure_tracked_runtime_links(work_root=attempt_root, repo_root=repo_root)
     log_root.mkdir(parents=True, exist_ok=True)
     stdout_path = attempt_root / "stdout.log"
     stderr_path = attempt_root / "stderr.log"

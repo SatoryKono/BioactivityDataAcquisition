@@ -7573,7 +7573,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.factories._observability_wiring",
       "path": "src/bioetl/composition/factories/_observability_wiring.py",
-      "source_lines": 150
+      "source_lines": 152
     },
     {
       "coverage_percent": 100.0,
@@ -29795,7 +29795,7 @@
       "missing_lines": 0,
       "module": "bioetl.composition.factories._observability_wiring",
       "path": "src/bioetl/composition/factories/_observability_wiring.py",
-      "source_lines": 150
+      "source_lines": 152
     },
     {
       "coverage_percent": 100.0,
@@ -44450,7 +44450,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "85756b738b0fae14f78f5aacecbfa88bb606f6eb9026a9eb794f3f30c7082f0d",
+  "source_tree_sha256": "02851b39c7a4e030fa2d05f9e5cd31da212d4adb59bf38e66c8689d8ee9d543f",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
