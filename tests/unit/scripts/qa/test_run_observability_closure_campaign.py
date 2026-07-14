@@ -13,6 +13,7 @@ import zstandard
 from scripts.engineering.qa import run_observability_closure_campaign as campaign
 
 _REAL_STAGE_WORKFLOW_FIXTURE = campaign._stage_workflow_fixture
+_REAL_REGISTRY_PIPELINE_COMMAND = campaign._registry_pipeline_command
 
 
 @pytest.fixture(autouse=True)
@@ -75,6 +76,33 @@ def _canonical_roots(tmp_path: Path) -> tuple[Path, Path]:
     (data_root / "sentinel.txt").write_text("data", encoding="utf-8")
     (log_root / "sentinel.log").write_text("logs", encoding="utf-8")
     return data_root, log_root
+
+
+def test_registry_discovery_binds_subprocess_to_checkout(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo_root = tmp_path / "checkout"
+    (repo_root / "src").mkdir(parents=True)
+    captured: dict[str, object] = {}
+
+    def fake_run(command: tuple[str, ...], **kwargs: object) -> subprocess.CompletedProcess[str]:
+        captured.update(kwargs)
+        stdout = "Available pipelines:\n" + "".join(
+            f"  - {pipeline}\n" for pipeline in campaign.CHEMBL_PIPELINES
+        )
+        return subprocess.CompletedProcess(command, 0, stdout, "")
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    names, _ = _REAL_REGISTRY_PIPELINE_COMMAND(repo_root, python=Path(sys.executable))
+
+    env = captured["env"]
+    assert isinstance(env, dict)
+    assert env["PYTHONPATH"].split(os.pathsep)[:2] == [
+        str((repo_root / "src").resolve()),
+        str(repo_root.resolve()),
+    ]
+    assert names == campaign.CHEMBL_PIPELINES
 
 
 def test_tree_signature_tracks_manifest_mutations_without_reading_payloads(

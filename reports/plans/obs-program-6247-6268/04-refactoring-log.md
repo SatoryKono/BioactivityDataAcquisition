@@ -51,3 +51,15 @@
   join projection with separate source-record and staged-record SHA-256 values.
 - **Debt outcome**: workflow evidence becomes reproducible and provenance-bound;
   no DQ threshold or debt budget changes.
+
+## DBG-005 — registry discovery checkout isolation
+
+- **Symptom**: the network-capable campaign stalled before creating its audit root
+  while the nested `bioetl config list-pipelines` command resolved an ambient
+  editable environment.
+- **Root cause**: registry discovery did not receive the explicit checkout
+  `PYTHONPATH` used by isolated pipeline attempts.
+- **Change**: bind registry discovery to the campaign checkout's `src` and root
+  paths through its subprocess environment.
+- **Debt outcome**: campaign provenance becomes independent of ambient editable
+  installs; no runtime configuration or budget changes.
