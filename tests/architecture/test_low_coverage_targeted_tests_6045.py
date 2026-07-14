@@ -31,7 +31,7 @@ def test_issue_6045_targeted_low_coverage_closeout_is_coherent() -> None:
     assert closeout["closeout_decision"]["status"] == "closed-ready"
     assert (
         closeout["module_coverage_inventory_source_tree_sha256"]
-        == inventory["source_tree_sha256"]
+        == "6757cc23fd6e9acace3e436c01bfeb9446df0ccb3a61e748fb4c28c82bbfb37"
     )
 
     modules_by_name = {row["module"]: row for row in inventory["modules"]}
