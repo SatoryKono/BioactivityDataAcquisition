@@ -22,6 +22,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
 
+import yaml
 import zstandard
 
 CHEMBL_PIPELINES = (
@@ -40,6 +41,17 @@ CHEMBL_PIPELINES = (
     "chembl_target_component",
     "chembl_target_protein_classification",
     "chembl_tissue",
+)
+
+_RECORDED_SPECIAL_FIXTURES = frozenset(
+    {
+        "chembl_assay_parameters",
+        "chembl_protein_class",
+        "chembl_publication_similarity",
+        "chembl_publication_term",
+        "chembl_subcellular_fraction",
+        "chembl_tissue",
+    }
 )
 
 REQUIRED_EXTERNAL_EVIDENCE = (
@@ -798,6 +810,106 @@ def _find_bronze_record(
     raise ValueError(f"no compatible cached Bronze record under {entity_root}")
 
 
+def _first_recorded_response(path: Path) -> dict[str, object]:
+    """Return the first non-status record from one governed VCR cassette."""
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    interactions = payload.get("interactions") if isinstance(payload, dict) else None
+    if not isinstance(interactions, list):
+        raise ValueError(f"invalid recorded fixture: {path}")
+    for interaction in interactions:
+        if not isinstance(interaction, dict):
+            continue
+        response = interaction.get("response")
+        body = response.get("body") if isinstance(response, dict) else None
+        raw = body.get("string") if isinstance(body, dict) else None
+        if not isinstance(raw, str):
+            continue
+        try:
+            decoded = json.loads(raw)
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(decoded, dict) or "status" in decoded:
+            continue
+        for value in decoded.values():
+            if isinstance(value, list) and value and isinstance(value[0], dict):
+                return dict(value[0])
+    raise ValueError(f"no bounded response record found in {path}")
+
+
+def _stage_standalone_fixture_cache(
+    *, repo_root: Path, audit_root: Path
+) -> tuple[Path, dict[str, object]]:
+    """Stage source-bound compatible cached input for every ChEMBL pipeline."""
+    manifest_path = repo_root / "configs" / "base" / "bronze_fixture_manifest.yaml"
+    manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+    fixtures = manifest.get("fixtures") if isinstance(manifest, dict) else None
+    if not isinstance(fixtures, dict):
+        raise ValueError("Bronze fixture manifest has no fixtures mapping")
+
+    cache_root = audit_root / "fixtures" / "standalone-cache"
+    evidence: list[dict[str, object]] = []
+    compressor = zstandard.ZstdCompressor(level=3)
+    for pipeline in CHEMBL_PIPELINES:
+        entity = pipeline.removeprefix("chembl_")
+        fixture = fixtures.get(f"chembl/{entity}")
+        if not isinstance(fixture, dict) or fixture.get("validation_status") != "valid":
+            raise ValueError(f"missing valid tracked fixture for {pipeline}")
+
+        if pipeline in _RECORDED_SPECIAL_FIXTURES:
+            source_path = (
+                repo_root
+                / "tests"
+                / "fixtures"
+                / "vcr"
+                / "chembl"
+                / f"test_pipeline_matrix__{pipeline}.yaml"
+            )
+            record = _first_recorded_response(source_path)
+            rendered = json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n"
+            raw = rendered.encode()
+            source_kind = "recorded_provider_response"
+        else:
+            source_path = repo_root / str(fixture.get("fixture_path") or "")
+            raw = source_path.read_bytes()
+            source_kind = "tracked_bronze_fixture"
+        if repo_root.resolve() not in source_path.resolve().parents:
+            raise ValueError(f"fixture escapes checkout: {source_path}")
+        if not raw.strip():
+            raise ValueError(f"fixture is empty: {source_path}")
+
+        destination = (
+            cache_root
+            / "chembl"
+            / entity
+            / "2026-07-14"
+            / f"batch_2026-07-14_bounded_{entity}.jsonl"
+        )
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(raw)
+        compressed = destination.with_suffix(".jsonl.zst")
+        compressed.write_bytes(compressor.compress(raw))
+        evidence.append(
+            {
+                "pipeline": pipeline,
+                "source_kind": source_kind,
+                "source_path": str(source_path),
+                "source_sha256": _sha256_file(source_path),
+                "fixture_path": str(destination),
+                "fixture_sha256": _sha256_file(destination),
+                "compressed_fixture_path": str(compressed),
+                "compressed_fixture_sha256": _sha256_file(compressed),
+                "record_count": sum(bool(line.strip()) for line in raw.splitlines()),
+                "provenance": str(fixture.get("provenance") or ""),
+                "validation_status": fixture.get("validation_status"),
+            }
+        )
+    return cache_root, {
+        "manifest_path": str(manifest_path),
+        "manifest_sha256": _sha256_file(manifest_path),
+        "records": evidence,
+    }
+
+
 def _stage_workflow_fixture(
     *, canonical_bronze_root: Path, audit_root: Path
 ) -> tuple[Path, dict[str, object]]:
@@ -927,6 +1039,11 @@ def _dq_hard_failure_test_command(*, python: Path) -> tuple[str, ...]:
         "-m",
         "pytest",
         "-q",
+        "--noconftest",
+        "-o",
+        "addopts=",
+        "-o",
+        "timeout=0",
         (
             "tests/unit/application/services/test_data_quality_service.py::"
             "TestDataQualityServiceThresholds::"
@@ -2261,7 +2378,9 @@ def main(argv: list[str] | None = None) -> int:
     registry_stdout_path.write_text(registry_completed.stdout, encoding="utf-8")
     before = {str(path.resolve()): _tree_signature(path) for path in canonical_roots}
     assert args.canonical_data_root is not None
-    cached_bronze_root = args.canonical_data_root.resolve() / "output" / "bronze"
+    cached_bronze_root, standalone_fixture_evidence = (
+        _stage_standalone_fixture_cache(repo_root=repo_root, audit_root=audit_root)
+    )
     # Validate and stage the cross-entity workflow fixture before spending the
     # campaign budget on 30 standalone processes.  A bounded input snapshot can
     # be valid for every individual pipeline yet still lack join-compatible
@@ -2421,6 +2540,7 @@ def main(argv: list[str] | None = None) -> int:
             "satisfied": all(phase.satisfies_closure for phase in phases),
             "phases": [asdict(phase) for phase in phases],
         },
+        "standalone_fixture_evidence": standalone_fixture_evidence,
         "workflow_fixture_evidence": workflow_fixture_evidence,
         "canonical_signature_gate": {
             "satisfied": canonical_unchanged,

@@ -92,7 +92,7 @@ def test_no_sentinel_values(source_content_cache: dict) -> None:
 
 @pytest.mark.slow
 @pytest.mark.timeout(600)  # Increased timeout to 10 minutes
-def test_no_hardcoded_secrets(src_python_files: list[Path]) -> None:
+def test_no_hardcoded_secrets() -> None:
     baseline_path = REPO_ROOT / ".secrets.baseline"
     if not baseline_path.exists():
         raise AssertionError("Missing .secrets.baseline for detect-secrets scan")
@@ -113,7 +113,7 @@ def test_no_hardcoded_secrets(src_python_files: list[Path]) -> None:
 
     violations: list[str] = []
     with transient_settings(baseline_output):
-        for path in src_python_files:
+        for path in sorted((REPO_ROOT / "src").rglob("*.py")):
             relative_path = path.relative_to(REPO_ROOT).as_posix()
             for finding in scan_file(str(path)):
                 if finding.secret_hash in baseline_hashes:

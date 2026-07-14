@@ -170,6 +170,33 @@ def test_stage_workflow_fixture_selects_compatible_join_records(
     assert len(list(fixture_root.rglob("*.jsonl.zst"))) == 3
 
 
+def test_stage_standalone_fixture_cache_covers_canonical_universe(
+    tmp_path: Path,
+) -> None:
+    fixture_root, evidence = campaign._stage_standalone_fixture_cache(
+        repo_root=Path.cwd(),
+        audit_root=tmp_path / "audit",
+    )
+
+    records = evidence["records"]
+    assert isinstance(records, list)
+    assert {row["pipeline"] for row in records} == set(campaign.CHEMBL_PIPELINES)
+    assert sum(
+        row["source_kind"] == "recorded_provider_response" for row in records
+    ) == len(campaign._RECORDED_SPECIAL_FIXTURES)
+    assert len(list(fixture_root.rglob("*.jsonl"))) == 15
+    assert len(list(fixture_root.rglob("*.jsonl.zst"))) == 15
+    assert all(row["record_count"] >= 1 for row in records)
+
+
+def test_dq_boundary_probe_avoids_global_conftest() -> None:
+    command = campaign._dq_hard_failure_test_command(python=Path(sys.executable))
+
+    assert "--noconftest" in command
+    assert "addopts=" in command
+    assert "timeout=0" in command
+
+
 def test_stage_workflow_fixture_projects_disjoint_compressed_samples(
     tmp_path: Path,
 ) -> None:

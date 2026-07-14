@@ -20143,7 +20143,7 @@
       "missing_lines": 16,
       "module": "bioetl.infrastructure.storage.silver.delta_write_execution",
       "path": "src/bioetl/infrastructure/storage/silver/delta_write_execution.py",
-      "source_lines": 351
+      "source_lines": 352
     },
     {
       "coverage_percent": 100.0,
@@ -42365,7 +42365,7 @@
       "missing_lines": 16,
       "module": "bioetl.infrastructure.storage.silver.delta_write_execution",
       "path": "src/bioetl/infrastructure/storage/silver/delta_write_execution.py",
-      "source_lines": 351
+      "source_lines": 352
     },
     {
       "coverage_percent": 100.0,
@@ -44450,7 +44450,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "5ffab313b8495f24cf340bc21b23fb7bc1076791444c7cc6741947026c671576",
+  "source_tree_sha256": "c9d9b4eb16d497296346cb2d09348f3db5b6a9e0001f5401f95c7a88e0dc6c81",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

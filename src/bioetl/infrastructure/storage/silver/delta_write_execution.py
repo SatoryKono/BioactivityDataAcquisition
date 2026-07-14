@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
-import subprocess
+import subprocess  # nosec B404
 import sys
 import tempfile
 import threading
@@ -189,7 +189,8 @@ def _run_plain_delta_write_subprocess(
     metadata["arrow_path"] = payload_path.as_posix()
     try:
         try:
-            completed = subprocess.run(
+            # No shell or user-controlled command is involved.
+            completed = subprocess.run(  # nosec B603
                 [
                     sys.executable,
                     "-c",
