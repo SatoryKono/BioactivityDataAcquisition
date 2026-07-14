@@ -3392,6 +3392,10 @@
             },
             "overrides": []
           },
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
           "gridPos": {
             "h": 8,
             "w": 12,

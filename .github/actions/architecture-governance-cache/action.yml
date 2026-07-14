@@ -37,7 +37,7 @@ runs:
 
     - name: Restore architecture governance scan cache
       if: inputs.operation == 'restore'
-      uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v4
+      uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
         path: ${{ inputs.cache-path }}
         key: arch-gov-cache-${{ runner.os }}-${{ steps.arch-cache-key.outputs.source_tree_sha256 }}
@@ -46,7 +46,7 @@ runs:
 
     - name: Save architecture governance scan cache
       if: inputs.operation == 'save'
-      uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v4
+      uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
         path: ${{ inputs.cache-path }}
         key: arch-gov-cache-${{ runner.os }}-${{ steps.arch-cache-key.outputs.source_tree_sha256 }}

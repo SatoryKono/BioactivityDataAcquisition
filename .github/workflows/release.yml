@@ -1,4 +1,4 @@
-﻿﻿name: Release
+name: Release
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true

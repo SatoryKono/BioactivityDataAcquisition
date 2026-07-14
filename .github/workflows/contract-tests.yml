@@ -21,7 +21,7 @@ on:
         description: 'Skip slow/rate-limited tests'
         required: false
         default: false
-      type: boolean
+        type: boolean
 
 permissions:
   contents: read

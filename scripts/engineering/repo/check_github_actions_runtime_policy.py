@@ -15,6 +15,8 @@ ALLOWED_USES: dict[str, set[str]] = {
     "actions/checkout": {"de0fac2e4500dabe0009e67214ff5f5447ce83dd"},  # v6.0.2
     "actions/setup-python": {"a309ff8b426b58ec0e2a45f0f869d46889d02405"},  # v6.2.0
     "actions/cache": {"27d5ce7f107fe9357f9df03efb73ab90386fccae"},  # v5.0.5
+    "actions/cache/restore": {"27d5ce7f107fe9357f9df03efb73ab90386fccae"},
+    "actions/cache/save": {"27d5ce7f107fe9357f9df03efb73ab90386fccae"},
     "actions/upload-artifact": {"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"},  # v7.0.1
     "actions/setup-node": {"48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e"},  # v6.4.0
     "actions/download-artifact": {"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c"},  # v8.0.1
@@ -46,8 +48,15 @@ ALLOWED_USES: dict[str, set[str]] = {
     },
 }
 
+ALLOWED_DOCKER_IMAGES: dict[str, set[str]] = {
+    "docker://codiumai/pr-agent": {
+        "sha256:a5741a479f21d20a9bbeca7847a720f92ac6f427e8dc0920fefa039ecafd5e6f"
+    },
+}
+
 USES_PATTERN = re.compile(r"^\s*uses:\s*([^\s#]+)")
 FULL_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
+FULL_SHA256_DIGEST_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 
 
 def iter_yaml_files() -> list[Path]:
@@ -71,8 +80,17 @@ def _parsed_uses_reference(line: str) -> tuple[str, str] | None:
 
 def _validate_allowed_uses_ref(uses_ref: str, action: str) -> str | None:
     if "@" not in uses_ref:
-        return f"external action {uses_ref} must include a full commit SHA ref"
+        return f"external action {uses_ref} must include an immutable ref"
     _, _, ref = uses_ref.partition("@")
+    if action.startswith("docker://"):
+        if not FULL_SHA256_DIGEST_PATTERN.fullmatch(ref):
+            return f"Docker image {uses_ref} must be pinned by full sha256 digest"
+        allowed_refs = ALLOWED_DOCKER_IMAGES.get(action)
+        if allowed_refs is None:
+            return f"unrecognized Docker image {action}; add an approved digest"
+        if ref in allowed_refs:
+            return None
+        return f"disallowed {uses_ref}; expected one of {sorted(allowed_refs)}"
     if not FULL_SHA_PATTERN.fullmatch(ref):
         return f"external action {uses_ref} must be pinned by full 40-character SHA"
     allowed_refs = ALLOWED_USES.get(action)
