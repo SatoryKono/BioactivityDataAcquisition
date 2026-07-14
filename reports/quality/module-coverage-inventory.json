@@ -9393,7 +9393,7 @@
       "missing_lines": 1,
       "module": "bioetl.composition.services.versioning",
       "path": "src/bioetl/composition/services/versioning.py",
-      "source_lines": 315
+      "source_lines": 317
     },
     {
       "coverage_percent": 100.0,
@@ -31615,7 +31615,7 @@
       "missing_lines": 1,
       "module": "bioetl.composition.services.versioning",
       "path": "src/bioetl/composition/services/versioning.py",
-      "source_lines": 315
+      "source_lines": 317
     },
     {
       "coverage_percent": 100.0,
@@ -44450,7 +44450,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "02851b39c7a4e030fa2d05f9e5cd31da212d4adb59bf38e66c8689d8ee9d543f",
+  "source_tree_sha256": "b887f62878663423ecbcda1b3d81b08c5866b448661a9d049a411cca5bca6ff0",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
