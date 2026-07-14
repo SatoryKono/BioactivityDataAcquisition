@@ -334,6 +334,88 @@ def _relative_files(root: Path) -> set[str]:
     }
 
 
+def _missing_skills_roots(canonical_root: Path, devin_root: Path) -> list[str]:
+    return [
+        f"{label} skills root missing: {path}"
+        for label, path in (("Codex", canonical_root), ("Devin", devin_root))
+        if not path.is_dir()
+    ]
+
+
+def _codex_devin_parity_rules(
+    contract: dict[str, object],
+) -> tuple[tuple[str, ...], tuple[str, ...], tuple[str, ...]]:
+    raw_parity = contract.get("codex_devin")
+    if not isinstance(raw_parity, dict):
+        raise ValueError("skills mirror contract must define codex_devin")
+    return (
+        _string_tuple(
+            raw_parity.get("optional_presence_globs"),
+            label="codex_devin.optional_presence_globs",
+        ),
+        _string_tuple(
+            raw_parity.get("allowed_content_variant_globs"),
+            label="codex_devin.allowed_content_variant_globs",
+        ),
+        _string_tuple(
+            raw_parity.get("required_identical_when_shared_globs"),
+            label="codex_devin.required_identical_when_shared_globs",
+        ),
+    )
+
+
+def _content_mismatch_issue(
+    relative: str,
+    *,
+    canonical_root: Path,
+    devin_root: Path,
+    allowed_variants: tuple[str, ...],
+    required_identical: tuple[str, ...],
+) -> str | None:
+    if (canonical_root / relative).read_bytes() == (devin_root / relative).read_bytes():
+        return None
+    if _matches_any(relative, required_identical):
+        return f"Codex/Devin required-identical mismatch: {relative}"
+    if not _matches_any(relative, allowed_variants):
+        return f"Codex/Devin unsanctioned content mismatch: {relative}"
+    return None
+
+
+def _validate_nonstructural_skill_files(
+    *,
+    canonical_root: Path,
+    devin_root: Path,
+    structural_files: set[str],
+    optional_presence: tuple[str, ...],
+    allowed_variants: tuple[str, ...],
+    required_identical: tuple[str, ...],
+) -> list[str]:
+    canonical_files = _relative_files(canonical_root)
+    devin_files = _relative_files(devin_root)
+    issues: list[str] = []
+    for relative in sorted((canonical_files | devin_files) - structural_files):
+        in_codex = relative in canonical_files
+        in_devin = relative in devin_files
+        if in_codex != in_devin:
+            if not _matches_any(relative, optional_presence):
+                missing_label = "Devin" if in_codex else "Codex"
+                issues.append(
+                    f"{missing_label} missing required skill file: {relative}"
+                )
+            continue
+
+        mismatch = _content_mismatch_issue(
+            relative,
+            canonical_root=canonical_root,
+            devin_root=devin_root,
+            allowed_variants=allowed_variants,
+            required_identical=required_identical,
+        )
+        if mismatch is not None:
+            issues.append(mismatch)
+    return issues
+
+
 def _validate_codex_devin_parity(
     paths: dict[str, Path], contract: dict[str, object]
 ) -> list[str]:
@@ -341,11 +423,7 @@ def _validate_codex_devin_parity(
     devin_root = paths["devin"]
     entrypoint = str(contract.get("entrypoint", SKILL_FILE_NAME))
     catalog_name = str(contract.get("catalog", "SKILLS-CATALOG.md"))
-    issues: list[str] = []
-
-    for label, path in (("Codex", canonical_root), ("Devin", devin_root)):
-        if not path.is_dir():
-            issues.append(f"{label} skills root missing: {path}")
+    issues = _missing_skills_roots(canonical_root, devin_root)
     if issues:
         return issues
 
@@ -378,46 +456,22 @@ def _validate_codex_devin_parity(
         )
     )
 
-    raw_parity = contract.get("codex_devin")
-    if not isinstance(raw_parity, dict):
-        raise ValueError("skills mirror contract must define codex_devin")
-    optional_presence = _string_tuple(
-        raw_parity.get("optional_presence_globs"),
-        label="codex_devin.optional_presence_globs",
+    optional_presence, allowed_variants, required_identical = _codex_devin_parity_rules(
+        contract
     )
-    allowed_variants = _string_tuple(
-        raw_parity.get("allowed_content_variant_globs"),
-        label="codex_devin.allowed_content_variant_globs",
-    )
-    required_identical = _string_tuple(
-        raw_parity.get("required_identical_when_shared_globs"),
-        label="codex_devin.required_identical_when_shared_globs",
-    )
-
-    canonical_files = _relative_files(canonical_root)
-    devin_files = _relative_files(devin_root)
     structural_files = {catalog_name} | {
         f"{skill}/{entrypoint}" for skill in canonical_skills | devin_skills
     }
-    for relative in sorted((canonical_files | devin_files) - structural_files):
-        in_codex = relative in canonical_files
-        in_devin = relative in devin_files
-        if in_codex != in_devin:
-            if not _matches_any(relative, optional_presence):
-                missing_label = "Devin" if in_codex else "Codex"
-                issues.append(
-                    f"{missing_label} missing required skill file: {relative}"
-                )
-            continue
-
-        codex_path = canonical_root / relative
-        devin_path = devin_root / relative
-        if codex_path.read_bytes() == devin_path.read_bytes():
-            continue
-        if _matches_any(relative, required_identical):
-            issues.append(f"Codex/Devin required-identical mismatch: {relative}")
-        elif not _matches_any(relative, allowed_variants):
-            issues.append(f"Codex/Devin unsanctioned content mismatch: {relative}")
+    issues.extend(
+        _validate_nonstructural_skill_files(
+            canonical_root=canonical_root,
+            devin_root=devin_root,
+            structural_files=structural_files,
+            optional_presence=optional_presence,
+            allowed_variants=allowed_variants,
+            required_identical=required_identical,
+        )
+    )
     return issues
 
 
