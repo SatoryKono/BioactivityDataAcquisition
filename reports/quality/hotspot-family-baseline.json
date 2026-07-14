@@ -4,7 +4,7 @@
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
     "budget_warnings": 0,
-    "budget_review_notes": 1
+    "budget_review_notes": 0
   },
   "families": [
     {
@@ -18,9 +18,9 @@
       ],
       "duplication_clusters": 0,
       "files": 180,
-      "total_loc": 22306,
+      "total_loc": 22317,
       "files_ge_250_loc": 4,
-      "helper_function_ratio": 0.356,
+      "helper_function_ratio": 0.357,
       "max_internal_fan_in": 7,
       "max_internal_fan_in_module": "bioetl.application.core.span_helpers",
       "bounded_growth_budgets": {
@@ -41,9 +41,9 @@
       ],
       "duplication_clusters": 0,
       "files": 49,
-      "total_loc": 5984,
+      "total_loc": 6010,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.302,
+      "helper_function_ratio": 0.309,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.tracing_bootstrap",
       "bounded_growth_budgets": {
@@ -86,9 +86,9 @@
         "src/bioetl/application/services/control_plane/"
       ],
       "duplication_clusters": 0,
-      "files": 123,
-      "total_loc": 15051,
-      "files_ge_250_loc": 13,
+      "files": 124,
+      "total_loc": 15088,
+      "files_ge_250_loc": 11,
       "helper_function_ratio": 0.457,
       "max_internal_fan_in": 3,
       "max_internal_fan_in_module": "bioetl.application.services.control_plane.workflow.manifest_models",
@@ -97,9 +97,7 @@
         "max_internal_fan_in": 4
       },
       "budget_warnings": [],
-      "budget_review_notes": [
-        "near_budget:files_ge_250_loc=13/16"
-      ]
+      "budget_review_notes": []
     },
     {
       "name": "composition_runtime_builders",
@@ -112,9 +110,9 @@
       ],
       "duplication_clusters": 0,
       "files": 55,
-      "total_loc": 6668,
+      "total_loc": 6741,
       "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.35,
+      "helper_function_ratio": 0.359,
       "max_internal_fan_in": 3,
       "max_internal_fan_in_module": "bioetl.composition.runtime_builders.run_manifest_support",
       "bounded_growth_budgets": {
