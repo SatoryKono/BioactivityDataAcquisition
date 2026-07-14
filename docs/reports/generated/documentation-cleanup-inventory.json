@@ -8531,7 +8531,7 @@
       "github_issue_url": null,
       "inbound_links": 0,
       "lifecycle": null,
-      "outbound_links": 35,
+      "outbound_links": 38,
       "owner": "BioETL Team",
       "path": "docs/00-project/ai/skills/local/SKILLS-CATALOG.md",
       "recommended_action": "keep",
@@ -8613,7 +8613,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 1,
+      "inbound_links": 2,
       "lifecycle": null,
       "outbound_links": 0,
       "owner": "BioETL Team",
@@ -9061,7 +9061,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 1,
+      "inbound_links": 2,
       "lifecycle": null,
       "outbound_links": 0,
       "owner": "BioETL Team",
@@ -10097,7 +10097,7 @@
       "generator": null,
       "github_issue_number": null,
       "github_issue_url": null,
-      "inbound_links": 1,
+      "inbound_links": 2,
       "lifecycle": null,
       "outbound_links": 1,
       "owner": "BioETL Team",
@@ -10298,34 +10298,6 @@
       "outbound_links": 0,
       "owner": "BioETL Team",
       "path": "docs/00-project/ai/skills/local/prometheus-rule-testing/agents/openai.yaml",
-      "recommended_action": "keep",
-      "root_doc_kind": null,
-      "section": "00-project",
-      "status": "Active",
-      "surface_family": "active",
-      "tracking_state": "tracked"
-    },
-    {
-      "canonical_successor": null,
-      "catalog_lifecycle": null,
-      "commit_policy": null,
-      "declared_class": null,
-      "declared_status": null,
-      "diagram_kind": null,
-      "duplicate_group": null,
-      "duplicate_resolution": null,
-      "extension": ".md",
-      "freshness": "current",
-      "generated_route": null,
-      "generated_route_exception": null,
-      "generator": null,
-      "github_issue_number": null,
-      "github_issue_url": null,
-      "inbound_links": 1,
-      "lifecycle": null,
-      "outbound_links": 0,
-      "owner": "BioETL Team",
-      "path": "docs/00-project/ai/skills/local/public/architecture-guardian/SKILL.md",
       "recommended_action": "keep",
       "root_doc_kind": null,
       "section": "00-project",
@@ -84664,12 +84636,12 @@
       "archive-after-github-state-check": 121,
       "archive-after-migration": 60,
       "generate-automatically": 704,
-      "keep": 2111,
+      "keep": 2110,
       "reconcile-with-github-state": 4
     },
     "by_section": {
       ".github": 131,
-      "00-project": 291,
+      "00-project": 290,
       "01-requirements": 3,
       "02-architecture": 837,
       "03-data-model": 2,
@@ -84702,14 +84674,14 @@
       "security": 2
     },
     "by_status": {
-      "Active": 1942,
+      "Active": 1941,
       "Archived": 61,
       "Canonical": 63,
       "Generated": 704,
       "Working": 230
     },
     "by_surface_family": {
-      "active": 1942,
+      "active": 1941,
       "archive": 61,
       "canonical": 63,
       "generated": 704,
@@ -84717,7 +84689,7 @@
     },
     "by_tracking_state": {
       "ignored_local": 1180,
-      "tracked": 1820
+      "tracked": 1819
     },
     "docs_reports_local_count": 1198,
     "duplicate_group_count": 2,
@@ -84738,8 +84710,8 @@
         "path": "docs/reports/evidence/project-legacy-compatibility-remediation/.quarantined-03-synthesis-corrupt-20260521"
       }
     ],
-    "total_doc_like": 3000,
+    "total_doc_like": 2999,
     "total_doc_like_ignored_local": 1180,
-    "total_doc_like_tracked": 1820
+    "total_doc_like_tracked": 1819
   }
 }

@@ -2222,7 +2222,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "058e9c9c6acb721a04c26171232bbf393e2e599c6f17b5c32857cd1a9b08f829",
+  "source_tree_sha256": "c5ebd38dcb1c08d8273977591d29171cf29441210427ad34f6a63a56ce2e9c86",
   "summary": {
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
@@ -2282,7 +2282,7 @@
     "top_level_directory_count_including_pycache": 17
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 1992,
-  "total_test_functions": 22250,
+  "total_test_files": 1993,
+  "total_test_functions": 22266,
   "uuid4_call_sites": 0
 }
