@@ -9,6 +9,7 @@ configuration is resolved from the checkout containing this script.
 from __future__ import annotations
 
 import argparse
+import csv
 import hashlib
 import json
 import os
@@ -49,6 +50,7 @@ REQUIRED_EXTERNAL_EVIDENCE = (
     "render_stability",
     "promtool",
     "online_run",
+    "backend_profile",
 )
 
 EVIDENCE_SUMMARY_REQUIREMENTS: dict[str, dict[str, int]] = {
@@ -92,11 +94,20 @@ EVIDENCE_SUMMARY_REQUIREMENTS: dict[str, dict[str, int]] = {
         "failure_count": 0,
         "overall_observability_score_x100": 4600,
     },
+    "backend_profile": {
+        "http_root_match_count": 1,
+        "loki_match_count": 1,
+        "canonical_mismatch_count": 0,
+    },
 }
 
 EVIDENCE_RAW_KIND_REQUIREMENTS: dict[str, dict[str, int]] = {
-    "tracing_parity": {"attempt-result": 2},
-    "metric_reconciliation": {"prometheus-response": 1, "ledger-snapshot": 1},
+    "tracing_parity": {"attempt-result": 30},
+    "metric_reconciliation": {
+        "prometheus-response": 15,
+        "ledger-snapshot": 15,
+        "dq-anomaly-response": 1,
+    },
     "workflow_correlation": {"workflow-result": 2, "child-result": 2},
     "metric_surface": {"inventory-report": 1},
     "dashboard_variables": {"dashboard-variable-report": 8},
@@ -105,9 +116,17 @@ EVIDENCE_RAW_KIND_REQUIREMENTS: dict[str, dict[str, int]] = {
     "render_stability": {"render-manifest": 16, "screenshot": 16},
     "promtool": {"promtool-output": 3},
     "online_run": {"online-run-result": 1, "instrumentation-response": 1},
+    "backend_profile": {
+        "backend-http-response": 1,
+        "loki-response": 1,
+        "canonical-signature": 1,
+    },
 }
 
 TERMINAL_EVENTS = frozenset({"run_finished", "run_failed"})
+CANONICAL_EVIDENCE_ASSEMBLER = (
+    "scripts.engineering.qa.assemble_observability_closure_evidence"
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -129,7 +148,10 @@ class AttemptEvidence:
     manifest_artifacts: tuple[dict[str, str], ...] = ()
     ledger_artifacts: tuple[dict[str, str], ...] = ()
     checkpoint_artifacts: tuple[dict[str, str], ...] = ()
+    checkpoint_disposition: str = ""
+    checkpoint_interval: int | None = None
     output_artifacts: tuple[dict[str, str], ...] = ()
+    semantic_output_records: int = 0
     terminal_metrics_snapshot: dict[str, int] = field(default_factory=dict)
     terminal_details: dict[str, object] = field(default_factory=dict)
     result_signature: str = ""
@@ -151,8 +173,12 @@ class AttemptEvidence:
             and self.terminal_ledger_events == ("run_finished",)
             and len(self.manifest_artifacts) == 1
             and len(self.ledger_artifacts) == 1
-            and bool(self.checkpoint_artifacts)
+            and (
+                bool(self.checkpoint_artifacts)
+                or self.checkpoint_disposition == "not_applicable_below_interval"
+            )
             and bool(self.output_artifacts)
+            and self.semantic_output_records > 0
             and bool(self.result_signature)
         )
 
@@ -171,10 +197,16 @@ class PhaseEvidence:
     stdout_sha256: str
     stderr_path: str
     stderr_sha256: str
+    expected_outcome: str = "success"
 
     @property
     def satisfies_closure(self) -> bool:
-        return self.exit_code == 0 and not self.timed_out
+        exit_matches = (
+            self.exit_code == 0
+            if self.expected_outcome == "success"
+            else self.exit_code != 0
+        )
+        return exit_matches and not self.timed_out
 
 
 def _utc_now() -> str:
@@ -346,6 +378,126 @@ def _file_artifacts(paths: Iterable[Path], *, root: Path) -> tuple[dict[str, str
     )
 
 
+_OCCURRENCE_FIELDS = frozenset(
+    {
+        "_ingestion_ts",
+        "ingestion_ts",
+        "_run_id",
+        "run_id",
+        "manifest_id",
+        "created_at",
+        "updated_at",
+    }
+)
+
+
+def _semantic_value(value: object) -> object:
+    """Remove per-occurrence identity while retaining business data semantics."""
+    if isinstance(value, dict):
+        return {
+            str(key): _semantic_value(item)
+            for key, item in value.items()
+            if str(key) not in _OCCURRENCE_FIELDS
+        }
+    if isinstance(value, (list, tuple)):
+        return [_semantic_value(item) for item in value]
+    return value
+
+
+def _output_layer(path: Path) -> str:
+    parts = path.parts
+    try:
+        return parts[parts.index("output") + 1]
+    except (ValueError, IndexError):
+        return "unknown"
+
+
+def _semantic_rows_from_path(path: Path) -> list[object]:
+    """Read business rows from a supported output artifact."""
+    if "_delta_log" in path.parts:
+        return []
+    try:
+        if path.suffix == ".parquet":
+            import pyarrow.parquet as parquet
+
+            return [
+                _semantic_value(row) for row in parquet.read_table(path).to_pylist()
+            ]
+        if path.suffix == ".jsonl":
+            return [
+                _semantic_value(json.loads(line))
+                for line in path.read_text(encoding="utf-8").splitlines()
+                if line.strip()
+            ]
+        if path.suffix == ".json":
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            rows = payload if isinstance(payload, list) else [payload]
+            return [_semantic_value(row) for row in rows]
+        if path.suffix == ".csv":
+            with path.open(encoding="utf-8", newline="") as stream:
+                return [_semantic_value(row) for row in csv.DictReader(stream)]
+    except (
+        ImportError,
+        OSError,
+        UnicodeDecodeError,
+        json.JSONDecodeError,
+        ValueError,
+    ):
+        return []
+    return []
+
+
+def _semantic_output_payload(
+    paths: Iterable[Path],
+) -> tuple[list[dict[str, object]], int]:
+    """Return path-independent rows suitable for tracing parity comparison."""
+    materialized = tuple(paths)
+    parquet_paths = tuple(path for path in materialized if path.suffix == ".parquet")
+    selected = parquet_paths or materialized
+    payload: list[dict[str, object]] = []
+    row_count = 0
+    for path in selected:
+        rows = _semantic_rows_from_path(path)
+        if not rows:
+            continue
+        row_count += len(rows)
+        payload.append(
+            {
+                "layer": _output_layer(path),
+                "rows": sorted(
+                    rows,
+                    key=lambda row: json.dumps(row, sort_keys=True, default=str),
+                ),
+            }
+        )
+    payload.sort(key=lambda item: json.dumps(item, sort_keys=True, default=str))
+    return payload, row_count
+
+
+def _checkpoint_policy(
+    repo_root: Path, pipeline: str, limit: int
+) -> tuple[str, int | None]:
+    """Classify checkpoint evidence against the configured record interval."""
+    config_root = repo_root / "configs" / "entities" / "chembl"
+    for path in sorted(config_root.glob("*.yaml")):
+        text = path.read_text(encoding="utf-8")
+        if not re.search(
+            rf"^\s*pipeline_name:\s*{re.escape(pipeline)}\s*$", text, re.MULTILINE
+        ):
+            continue
+        intervals = [
+            int(value)
+            for value in re.findall(
+                r"^\s*checkpoint_interval:\s*(\d+)\s*$", text, re.MULTILINE
+            )
+        ]
+        interval = min(intervals) if intervals else None
+        if interval is not None and limit < interval:
+            return "not_applicable_below_interval", interval
+        return "required", interval
+    return "required", None
+
+
 def _read_new_manifest_identity(
     paths: Iterable[Path], *, expected_pipeline: str
 ) -> tuple[tuple[str, ...], tuple[str, ...], tuple[Path, ...]]:
@@ -460,6 +612,7 @@ def _run_phase_command(
     phase_root: Path,
     data_root: Path,
     timeout_seconds: int,
+    expected_outcome: str = "success",
 ) -> PhaseEvidence:
     phase_root.mkdir(parents=True, exist_ok=True)
     stdout_path = phase_root / "stdout.log"
@@ -505,6 +658,7 @@ def _run_phase_command(
         stdout_sha256=_sha256_file(stdout_path),
         stderr_path=str(stderr_path),
         stderr_sha256=_sha256_file(stderr_path),
+        expected_outcome=expected_outcome,
     )
 
 
@@ -530,16 +684,34 @@ def _workflow_baseline_command(
     )
 
 
-def _workflow_failure_tests_command(*, python: Path) -> tuple[str, ...]:
+def _workflow_failure_command(
+    *, python: Path, limit: int, empty_bronze_root: Path
+) -> tuple[str, ...]:
+    return (
+        str(python),
+        "-m",
+        "bioetl",
+        "workflow",
+        "run",
+        "chembl_baseline",
+        "--run-type",
+        "incremental",
+        "--limit",
+        str(limit),
+        "--use-cached-bronze",
+        "--cached-bronze-path",
+        str(empty_bronze_root),
+        "--no-tracing",
+        "--no-ensure-observability-backend",
+    )
+
+
+def _dq_hard_failure_test_command(*, python: Path) -> tuple[str, ...]:
     return (
         str(python),
         "-m",
         "pytest",
         "-q",
-        (
-            "tests/unit/application/services/test_workflow_runner_service.py::"
-            "test_workflow_runner_marks_downstream_steps_skipped_after_failure"
-        ),
         (
             "tests/unit/application/services/test_data_quality_service.py::"
             "TestDataQualityServiceThresholds::"
@@ -664,22 +836,26 @@ def _run_attempt(
         and "/output/checkpoints/" not in path.as_posix()
     )
     output_artifacts = _file_artifacts(output_paths, root=data_root)
+    semantic_output, semantic_output_records = _semantic_output_payload(output_paths)
+    checkpoint_disposition, checkpoint_interval = _checkpoint_policy(
+        repo_root, pipeline, limit
+    )
+    if checkpoint_paths:
+        checkpoint_disposition = "retained"
     result_signature = (
         hashlib.sha256(
             json.dumps(
                 {
                     "terminal_events": terminal_events,
                     "metrics_snapshot": metrics,
-                    "details": details,
-                    "output_sha256": sorted(
-                        artifact["sha256"] for artifact in output_artifacts
-                    ),
+                    "details": _semantic_value(details),
+                    "semantic_output": semantic_output,
                 },
                 sort_keys=True,
                 default=str,
             ).encode()
         ).hexdigest()
-        if len(terminal_rows) == 1 and output_artifacts
+        if len(terminal_rows) == 1 and semantic_output_records > 0
         else ""
     )
     return AttemptEvidence(
@@ -698,7 +874,10 @@ def _run_attempt(
         manifest_artifacts=_file_artifacts(manifest_paths, root=data_root),
         ledger_artifacts=_file_artifacts(ledger_paths, root=data_root),
         checkpoint_artifacts=_file_artifacts(checkpoint_paths, root=data_root),
+        checkpoint_disposition=checkpoint_disposition,
+        checkpoint_interval=checkpoint_interval,
         output_artifacts=output_artifacts,
+        semantic_output_records=semantic_output_records,
         terminal_metrics_snapshot=metrics,
         terminal_details=details,
         result_signature=result_signature,
@@ -726,7 +905,9 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--evidence", action="append", default=[])
     parser.add_argument("--residual-limitation", action="append", default=[])
     parser.add_argument("--finding-id", action="append", default=[])
-    parser.add_argument("--execute", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--execute", action="store_true")
+    mode.add_argument("--finalize-report", type=Path)
     return parser
 
 
@@ -827,6 +1008,15 @@ def _validate_evidence_producer(key: str, producer: object) -> list[str]:
         errors.append("producer.command must be a non-empty string array")
     if producer.get("exit_code") != 0:
         errors.append("producer.exit_code must equal 0")
+    if isinstance(command, list) and (
+        len(command) < 6
+        or command[1:3] != ["-m", CANONICAL_EVIDENCE_ASSEMBLER]
+        or "--category" not in command
+        or key not in command
+    ):
+        errors.append(
+            "producer.command must use the canonical typed evidence assembler"
+        )
     if key == "promtool" and producer.get("tool_version") != "3.13.1":
         errors.append("producer.tool_version must equal pinned 3.13.1")
     return errors
@@ -912,22 +1102,58 @@ def _json_payloads_by_kind(
     return payloads, errors
 
 
-def _validate_tracing_raw(retained: list[dict[str, str]]) -> list[str]:
+def _validate_tracing_raw(
+    retained: list[dict[str, str]],
+    expected_binding: dict[str, object] | None = None,
+) -> list[str]:
     payloads, errors = _json_payloads_by_kind(retained, "attempt-result")
-    if len(payloads) != 2:
-        return [*errors, "tracing parity requires exactly two attempt results"]
+    if len(payloads) != 30:
+        return [*errors, "tracing parity requires exactly 30 attempt results"]
     pipelines = {str(payload.get("pipeline") or "") for payload in payloads}
-    tracing_modes = {payload.get("tracing") for payload in payloads}
     statuses = {payload.get("status") for payload in payloads}
-    signatures = {str(payload.get("data_signature") or "") for payload in payloads}
-    if len(pipelines) != 1 or "" in pipelines:
-        errors.append("tracing attempts must describe one non-empty pipeline")
-    if tracing_modes != {False, True}:
-        errors.append("tracing attempts must contain explicit OFF and ON results")
+    if pipelines != set(CHEMBL_PIPELINES):
+        errors.append("tracing attempts must cover all 15 canonical pipelines")
     if statuses != {"success"}:
-        errors.append("tracing attempt statuses must both equal success")
-    if len(signatures) != 1 or "" in signatures:
-        errors.append("tracing attempt data signatures must be identical and non-empty")
+        errors.append("tracing attempt statuses must all equal success")
+    for pipeline in CHEMBL_PIPELINES:
+        pair = [payload for payload in payloads if payload.get("pipeline") == pipeline]
+        modes = {payload.get("tracing") for payload in pair}
+        signatures = {str(payload.get("data_signature") or "") for payload in pair}
+        if len(pair) != 2 or modes != {False, True}:
+            errors.append(f"{pipeline} requires explicit OFF and ON results")
+        if len(signatures) != 1 or "" in signatures:
+            errors.append(
+                f"{pipeline} tracing data signatures must be identical and non-empty"
+            )
+    if expected_binding is not None:
+        expected_attempts = expected_binding.get("standalone_attempts")
+        expected_occurrences = (
+            {
+                (
+                    str(item.get("pipeline") or ""),
+                    item.get("tracing"),
+                    str((item.get("run_ids") or [""])[0]),
+                    str(item.get("result_signature") or ""),
+                )
+                for item in expected_attempts
+                if isinstance(item, dict)
+                and isinstance(item.get("run_ids"), list)
+                and len(item["run_ids"]) == 1
+            }
+            if isinstance(expected_attempts, list)
+            else set()
+        )
+        actual_occurrences = {
+            (
+                str(payload.get("pipeline") or ""),
+                payload.get("tracing"),
+                str(payload.get("run_id") or ""),
+                str(payload.get("data_signature") or ""),
+            )
+            for payload in payloads
+        }
+        if actual_occurrences != expected_occurrences:
+            errors.append("tracing raw results do not match executed run occurrences")
     decision_traces = [payload.get("decision_trace") for payload in payloads]
     if not any(isinstance(trace, list) and trace for trace in decision_traces):
         errors.append(
@@ -941,18 +1167,67 @@ def _validate_metric_reconciliation_raw(
 ) -> list[str]:
     prometheus, errors = _json_payloads_by_kind(retained, "prometheus-response")
     ledgers, ledger_errors = _json_payloads_by_kind(retained, "ledger-snapshot")
+    dq_rows, dq_errors = _json_payloads_by_kind(retained, "dq-anomaly-response")
     errors.extend(ledger_errors)
-    if not prometheus or any(
-        payload.get("status") != "success" for payload in prometheus
-    ):
-        errors.append("Prometheus reconciliation responses must report status=success")
-    if not ledgers or any(
-        not isinstance(payload.get("events"), list) for payload in ledgers
-    ):
-        errors.append("ledger reconciliation snapshots must contain events")
-    for payload in (*prometheus, *ledgers):
-        if payload.get("expected") != payload.get("actual"):
-            errors.append("metric reconciliation raw expected/actual values must match")
+    errors.extend(dq_errors)
+    if len(prometheus) != 15 or len(ledgers) != 15:
+        errors.append("metric reconciliation requires 15 Prometheus and 15 ledger rows")
+    prom_by_key: dict[tuple[str, str], dict[str, object]] = {}
+    ledger_by_key: dict[tuple[str, str], dict[str, object]] = {}
+    for payload in prometheus:
+        key = (str(payload.get("pipeline") or ""), str(payload.get("run_id") or ""))
+        if not all(key) or key in prom_by_key:
+            errors.append("Prometheus rows require unique pipeline/run_id anchors")
+        prom_by_key[key] = payload
+        if payload.get("status") != "success":
+            errors.append(
+                "Prometheus reconciliation responses must report status=success"
+            )
+        if payload.get("pipeline_runs_total_delta") != 1:
+            errors.append(
+                "each terminal run must increment pipeline_runs_total exactly once"
+            )
+        if payload.get("health_probe_counter_delta") != 0:
+            errors.append("pipeline completion must not change health-probe counters")
+    for payload in ledgers:
+        key = (str(payload.get("pipeline") or ""), str(payload.get("run_id") or ""))
+        if not all(key) or key in ledger_by_key:
+            errors.append("ledger rows require unique pipeline/run_id anchors")
+        ledger_by_key[key] = payload
+        events = payload.get("events")
+        terminal = (
+            [
+                event
+                for event in events
+                if isinstance(event, dict)
+                and event.get("event_type") in TERMINAL_EVENTS
+            ]
+            if isinstance(events, list)
+            else []
+        )
+        if len(terminal) != 1:
+            errors.append(
+                "each ledger snapshot must contain exactly one terminal event"
+            )
+        if payload.get("terminal_run_result_count") != 1:
+            errors.append("each ledger snapshot must reconcile one terminal RunResult")
+    if set(prom_by_key) != set(ledger_by_key):
+        errors.append("Prometheus and ledger pipeline/run anchors must match exactly")
+    if {pipeline for pipeline, _run_id in prom_by_key} != set(CHEMBL_PIPELINES):
+        errors.append("metric reconciliation must cover all 15 canonical pipelines")
+    if len(dq_rows) != 1:
+        errors.append("metric reconciliation requires one focused DQ anomaly row")
+    else:
+        dq_row = dq_rows[0]
+        if (
+            dq_row.get("source_present") is not True
+            or dq_row.get("metric") != "bioetl_dq_anomaly_detected"
+            or dq_row.get("delta") != 1
+            or not str(dq_row.get("test_node_id") or "").strip()
+        ):
+            errors.append(
+                "focused DQ failure must increment one present anomaly metric"
+            )
     return errors
 
 
@@ -960,20 +1235,12 @@ def _validate_workflow_raw(retained: list[dict[str, str]]) -> list[str]:
     parents, errors = _json_payloads_by_kind(retained, "workflow-result")
     children, child_errors = _json_payloads_by_kind(retained, "child-result")
     errors.extend(child_errors)
-    parent_ids = {
-        str(payload.get("workflow_run_id") or "")
-        for payload in parents
-        if str(payload.get("workflow_run_id") or "")
-    }
+    parent_ids: set[str] = set()
     statuses = {payload.get("status") for payload in parents}
-    if len(parent_ids) < 2 or not {"success", "failed"}.issubset(statuses):
-        errors.append(
-            "workflow raw evidence requires distinct success and failure parents"
-        )
+    child_by_anchor: dict[tuple[str, str], dict[str, object]] = {}
     for child in children:
-        if str(child.get("workflow_run_id") or "") not in parent_ids:
-            errors.append("child workflow_run_id must resolve to a retained parent")
         for field_name in (
+            "workflow_run_id",
             "run_id",
             "manifest_id",
             "workflow_name",
@@ -983,6 +1250,80 @@ def _validate_workflow_raw(retained: list[dict[str, str]]) -> list[str]:
                 errors.append(f"child {field_name} must be non-empty")
         if child.get("terminal_event") not in TERMINAL_EVENTS:
             errors.append("child terminal_event must be run_finished or run_failed")
+        anchor = (
+            str(child.get("run_id") or ""),
+            str(child.get("manifest_id") or ""),
+        )
+        if all(anchor):
+            if anchor in child_by_anchor:
+                errors.append("child run/manifest anchors must be unique")
+            child_by_anchor[anchor] = child
+
+    repeated_steps: dict[tuple[str, str], list[dict[str, object]]] = {}
+    for parent in parents:
+        for field_name in (
+            "workflow_run_id",
+            "workflow_name",
+            "workflow_step_id",
+            "child_run_id",
+            "child_manifest_id",
+        ):
+            if not str(parent.get(field_name) or "").strip():
+                errors.append(f"parent {field_name} must be non-empty")
+        workflow_run_id = str(parent.get("workflow_run_id") or "")
+        if workflow_run_id:
+            parent_ids.add(workflow_run_id)
+        repeated_steps.setdefault(
+            (
+                str(parent.get("workflow_name") or ""),
+                str(parent.get("workflow_step_id") or ""),
+            ),
+            [],
+        ).append(parent)
+        anchor = (
+            str(parent.get("child_run_id") or ""),
+            str(parent.get("child_manifest_id") or ""),
+        )
+        child = child_by_anchor.get(anchor)
+        if child is None:
+            errors.append("parent child run/manifest anchors must resolve to a child")
+            continue
+        for field_name in (
+            "workflow_run_id",
+            "workflow_name",
+            "workflow_step_id",
+        ):
+            if str(child.get(field_name) or "") != str(parent.get(field_name) or ""):
+                errors.append(
+                    f"parent/child {field_name} must match for reciprocal anchors"
+                )
+
+    if len(parent_ids) < 2 or not {"success", "failed"}.issubset(statuses):
+        errors.append(
+            "workflow raw evidence requires distinct success and failure parents"
+        )
+    for child in children:
+        if str(child.get("workflow_run_id") or "") not in parent_ids:
+            errors.append("child workflow_run_id must resolve to a retained parent")
+    has_repeated_success_and_failure = any(
+        len(
+            {
+                str(parent.get("workflow_run_id") or "")
+                for parent in occurrences
+                if str(parent.get("workflow_run_id") or "")
+            }
+        )
+        >= 2
+        and {"success", "failed"}.issubset(
+            {parent.get("status") for parent in occurrences}
+        )
+        for (workflow_name, workflow_step_id), occurrences in repeated_steps.items()
+        if workflow_name and workflow_step_id
+    )
+    if not has_repeated_success_and_failure:
+        errors.append(
+            "workflow raw evidence requires repeated success/failure runs for one step"
+        )
     return errors
 
 
@@ -997,10 +1338,27 @@ def _validate_inventory_raw(retained: list[dict[str, str]]) -> list[str]:
     for field_name in (
         "recording_declarations_without_output",
         "recording_outputs_without_declaration",
+        "policy_aliases_without_catalog",
+        "catalog_aliases_without_declaration",
+        "policy_aliases_overlapping_outputs",
+        "http_semantics_violations",
+        "panel_contract_drift",
         "prometheus_run_id_selector_violations",
     ):
         if payload.get(field_name) != []:
             errors.append(f"inventory {field_name} must be empty")
+    aliases = payload.get("policy_alias_metrics")
+    if not isinstance(aliases, list) or len(set(map(str, aliases))) != 20:
+        errors.append("inventory must retain exactly 20 governed policy aliases")
+    counts = payload.get("typed_target_counts")
+    if counts != {
+        "promql": 171,
+        "http": 30,
+        "loki": 5,
+        "tempo": 0,
+        "unknown": 0,
+    }:
+        errors.append("inventory typed target counts do not match shipped dashboards")
     return errors
 
 
@@ -1111,7 +1469,10 @@ def _validate_promtool_raw(retained: list[dict[str, str]]) -> list[str]:
     return errors
 
 
-def _validate_online_raw(retained: list[dict[str, str]]) -> list[str]:
+def _validate_online_raw(
+    retained: list[dict[str, str]],
+    expected_binding: dict[str, object] | None = None,
+) -> list[str]:
     runs, errors = _json_payloads_by_kind(retained, "online-run-result")
     instrumentation, metric_errors = _json_payloads_by_kind(
         retained, "instrumentation-response"
@@ -1130,14 +1491,17 @@ def _validate_online_raw(retained: list[dict[str, str]]) -> list[str]:
         for field_name in ("run_id", "manifest_id"):
             if not str(run.get(field_name) or "").strip():
                 errors.append(f"online run {field_name} must be non-empty")
-    required_metrics = {
-        "bioetl_adapter_requests_total",
-        "bioetl_data_source_retries_total",
-        "bioetl_rate_limiter_tokens_available",
-        "bioetl_circuit_breaker_state",
-        "bioetl_adapter_request_duration_seconds",
+        if expected_binding is not None and run.get("run_id") != expected_binding.get(
+            "online_run_id"
+        ):
+            errors.append("online raw result does not match the executed online run")
+    required_deltas = {
+        "bioetl_adapter_requests_total": 1,
+        "bioetl_rate_limiter_wait_seconds_count": 1,
+        "bioetl_circuit_breaker_success_total": 1,
+        "bioetl_adapter_request_duration_seconds_count": 1,
     }
-    metric_names: set[str] = set()
+    metric_rows: dict[str, dict[str, object]] = {}
     for payload in instrumentation:
         metrics = payload.get("metrics")
         if (
@@ -1146,15 +1510,76 @@ def _validate_online_raw(retained: list[dict[str, str]]) -> list[str]:
         ):
             errors.append("online instrumentation requires a present raw metric source")
             continue
-        metric_names.update(str(name) for name in metrics)
-    if not required_metrics.issubset(metric_names):
+        for name, row in metrics.items():
+            if isinstance(row, dict):
+                metric_rows[str(name)] = row
+    for metric_name, minimum_delta in required_deltas.items():
+        row = metric_rows.get(metric_name, {})
+        if row.get("source_present") is not True:
+            errors.append(f"online metric {metric_name} requires a present raw source")
+        delta = row.get("delta")
+        if (
+            not isinstance(delta, (int, float))
+            or isinstance(delta, bool)
+            or delta < minimum_delta
+        ):
+            errors.append(
+                f"online metric {metric_name} delta must be >= {minimum_delta}"
+            )
+    retry_row = metric_rows.get("bioetl_data_source_retries_total", {})
+    if retry_row.get("source_present") is not True or retry_row.get("delta") != 1:
         errors.append(
-            "online instrumentation is missing API/retry/rate-limit/circuit metrics"
+            "controlled online retry probe must increment retry metric exactly once"
         )
     return errors
 
 
-def _validate_raw_content(key: str, retained: list[dict[str, str]]) -> list[str]:
+def _validate_backend_profile_raw(retained: list[dict[str, str]]) -> list[str]:
+    http_rows, errors = _json_payloads_by_kind(retained, "backend-http-response")
+    loki_rows, loki_errors = _json_payloads_by_kind(retained, "loki-response")
+    signatures, signature_errors = _json_payloads_by_kind(
+        retained, "canonical-signature"
+    )
+    errors.extend(loki_errors)
+    errors.extend(signature_errors)
+    if len(http_rows) != 1:
+        errors.append("backend profile requires exactly one retained HTTP response")
+    else:
+        row = http_rows[0]
+        if (
+            row.get("state") != "populated"
+            or row.get("read_only_mount") is not True
+            or not str(row.get("data_root") or "").strip()
+            or int(row.get("record_count", 0)) < 1
+        ):
+            errors.append(
+                "backend HTTP response must prove the exact populated read-only root"
+            )
+    if len(loki_rows) != 1:
+        errors.append("backend profile requires exactly one retained Loki response")
+    else:
+        row = loki_rows[0]
+        if (
+            row.get("job") != "bioetl-audit"
+            or row.get("sentinel_match_count") != 1
+            or row.get("read_only_mount") is not True
+            or not str(row.get("log_root") or "").strip()
+        ):
+            errors.append("Loki response must prove one bounded bioetl-audit sentinel")
+    if len(signatures) != 1:
+        errors.append("backend profile requires one canonical before/after signature")
+    else:
+        row = signatures[0]
+        if row.get("before") != row.get("after") or row.get("unchanged") is not True:
+            errors.append("canonical data/log signatures must remain unchanged")
+    return errors
+
+
+def _validate_raw_content(
+    key: str,
+    retained: list[dict[str, str]],
+    expected_binding: dict[str, object] | None = None,
+) -> list[str]:
     validators = {
         "tracing_parity": _validate_tracing_raw,
         "metric_reconciliation": _validate_metric_reconciliation_raw,
@@ -1166,7 +1591,12 @@ def _validate_raw_content(key: str, retained: list[dict[str, str]]) -> list[str]
         "render_stability": _validate_render_raw,
         "promtool": _validate_promtool_raw,
         "online_run": _validate_online_raw,
+        "backend_profile": _validate_backend_profile_raw,
     }
+    if key == "tracing_parity":
+        return _validate_tracing_raw(retained, expected_binding)
+    if key == "online_run":
+        return _validate_online_raw(retained, expected_binding)
     return validators[key](retained)
 
 
@@ -1175,6 +1605,7 @@ def _evidence_gate(
     *,
     audit_root: Path,
     source_revision: str,
+    expected_binding: dict[str, object] | None = None,
 ) -> dict[str, object]:
     errors: dict[str, list[str]] = {}
     evidence_root = (audit_root / "evidence").resolve()
@@ -1217,6 +1648,13 @@ def _evidence_gate(
                 key_errors.append("status must equal pass")
             if payload.get("source_revision") != source_revision:
                 key_errors.append("source_revision does not match campaign revision")
+            if (
+                expected_binding is not None
+                and payload.get("campaign_binding") != expected_binding
+            ):
+                key_errors.append(
+                    "campaign_binding does not match the executed campaign"
+                )
             if not _parse_generated_at(payload.get("generated_at")):
                 key_errors.append("generated_at must be timezone-aware ISO-8601")
             key_errors.extend(_validate_summary(key, payload.get("summary")))
@@ -1235,7 +1673,9 @@ def _evidence_gate(
             )
             key_errors.extend(raw_errors)
             if not raw_errors:
-                key_errors.extend(_validate_raw_content(key, retained))
+                key_errors.extend(
+                    _validate_raw_content(key, retained, expected_binding)
+                )
             raw_artifacts_retained[key] = retained
         if key_errors:
             errors[key] = key_errors
@@ -1319,7 +1759,193 @@ def _residual_findings_gate(
                 "issue_url": issue_url,
             }
         )
+    if limitations:
+        errors.append(
+            "residual limitations must be resolved before campaign completion"
+        )
     return {"satisfied": not errors, "errors": errors, "mappings": mappings}
+
+
+def _stable_sha256(payload: object) -> str:
+    return hashlib.sha256(
+        json.dumps(payload, sort_keys=True, default=str).encode()
+    ).hexdigest()
+
+
+def _campaign_binding(
+    *,
+    source_provenance: dict[str, object],
+    attempts: list[AttemptEvidence],
+    online_attempt: AttemptEvidence,
+    phases: tuple[PhaseEvidence, ...],
+) -> dict[str, object]:
+    """Bind external observations to one immutable execution occurrence."""
+    standalone = [
+        {
+            "pipeline": attempt.pipeline,
+            "tracing": attempt.tracing,
+            "run_ids": list(attempt.run_ids),
+            "result_signature": attempt.result_signature,
+        }
+        for attempt in sorted(attempts, key=lambda item: (item.pipeline, item.tracing))
+    ]
+    phase_payload = [
+        {
+            "name": phase.name,
+            "command": list(phase.command),
+            "stdout_sha256": phase.stdout_sha256,
+            "stderr_sha256": phase.stderr_sha256,
+        }
+        for phase in phases
+    ]
+    return {
+        "source_revision": source_provenance["revision"],
+        "source_tree": source_provenance["tree"],
+        "standalone_attempts_sha256": _stable_sha256(standalone),
+        "standalone_attempts": standalone,
+        "online_run_id": online_attempt.run_ids[0]
+        if len(online_attempt.run_ids) == 1
+        else "",
+        "phase_evidence_sha256": _stable_sha256(phase_payload),
+    }
+
+
+def _retained_artifacts_valid(report: dict[str, object]) -> tuple[bool, list[str]]:
+    """Re-hash execution artifacts before accepting separately produced evidence."""
+    errors: list[str] = []
+
+    def validate_artifact(artifact: object, label: str) -> None:
+        if not isinstance(artifact, dict):
+            errors.append(f"{label} must be an object")
+            return
+        path = Path(str(artifact.get("path") or ""))
+        expected = str(artifact.get("sha256") or "")
+        if not path.is_file():
+            errors.append(f"{label} is missing")
+        elif _sha256_file(path) != expected:
+            errors.append(f"{label} hash changed after execution")
+
+    attempts = report.get("attempts")
+    if not isinstance(attempts, list) or not attempts:
+        errors.append("attempts must be a non-empty array")
+    else:
+        for attempt_index, attempt in enumerate(attempts):
+            if not isinstance(attempt, dict):
+                errors.append(f"attempts[{attempt_index}] must be an object")
+                continue
+            for field_name in (
+                "manifest_artifacts",
+                "ledger_artifacts",
+                "checkpoint_artifacts",
+                "output_artifacts",
+            ):
+                artifacts = attempt.get(field_name)
+                if not isinstance(artifacts, list):
+                    errors.append(
+                        f"attempts[{attempt_index}].{field_name} must be an array"
+                    )
+                    continue
+                for artifact_index, artifact in enumerate(artifacts):
+                    validate_artifact(
+                        artifact,
+                        f"attempts[{attempt_index}].{field_name}[{artifact_index}]",
+                    )
+    workflow_gate = report.get("workflow_phase_gate")
+    phases = workflow_gate.get("phases") if isinstance(workflow_gate, dict) else None
+    if not isinstance(phases, list) or not phases:
+        errors.append("workflow phase evidence is missing")
+    else:
+        for phase_index, phase in enumerate(phases):
+            if not isinstance(phase, dict):
+                errors.append(f"workflow phase {phase_index} must be an object")
+                continue
+            for stream_name in ("stdout", "stderr"):
+                validate_artifact(
+                    {
+                        "path": phase.get(f"{stream_name}_path"),
+                        "sha256": phase.get(f"{stream_name}_sha256"),
+                    },
+                    f"workflow phase {phase_index} {stream_name}",
+                )
+    return not errors, errors
+
+
+def _finalize_campaign(
+    *,
+    args: argparse.Namespace,
+    audit_root: Path,
+    source_provenance: dict[str, object],
+    evidence: dict[str, str],
+) -> int:
+    report_path = args.finalize_report.expanduser().resolve()
+    expected_report_path = (
+        audit_root / "observability-closure-campaign.json"
+    ).resolve()
+    if report_path != expected_report_path or not report_path.is_file():
+        raise ValueError(
+            "--finalize-report must name AUDIT_ROOT/observability-closure-campaign.json"
+        )
+    payload = json.loads(report_path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict) or payload.get("schema_version") != 1:
+        raise ValueError("campaign report must be a schema_version=1 object")
+    if payload.get("status") != "awaiting_external_evidence":
+        raise ValueError("campaign report is not awaiting external evidence")
+    if payload.get("source_revision") != source_provenance["revision"]:
+        raise ValueError("campaign report source revision no longer matches HEAD")
+    report_provenance = payload.get("source_provenance")
+    if not isinstance(report_provenance, dict) or report_provenance.get(
+        "tree"
+    ) != source_provenance.get("tree"):
+        raise ValueError("campaign report source tree no longer matches HEAD")
+    retained_ok, retained_errors = _retained_artifacts_valid(payload)
+    binding = payload.get("campaign_binding")
+    if not isinstance(binding, dict):
+        raise ValueError("campaign report has no occurrence binding")
+    external_gate = _evidence_gate(
+        evidence,
+        audit_root=audit_root,
+        source_revision=str(source_provenance["revision"]),
+        expected_binding=binding,
+    )
+    residual_gate = _residual_findings_gate(args.residual_limitation, args.finding_id)
+    core_gates = (
+        payload.get("pipeline_config_parity") is True
+        and isinstance(payload.get("attempt_gate"), dict)
+        and payload["attempt_gate"].get("satisfied") is True
+        and isinstance(payload.get("online_attempt_gate"), dict)
+        and payload["online_attempt_gate"].get("satisfied") is True
+        and isinstance(payload.get("workflow_phase_gate"), dict)
+        and payload["workflow_phase_gate"].get("satisfied") is True
+        and isinstance(payload.get("canonical_signature_gate"), dict)
+        and payload["canonical_signature_gate"].get("satisfied") is True
+    )
+    complete = bool(
+        source_provenance["clean"]
+        and retained_ok
+        and core_gates
+        and external_gate["satisfied"]
+        and residual_gate["satisfied"]
+    )
+    payload.update(
+        {
+            "generated_at": _utc_now(),
+            "status": "complete" if complete else "incomplete",
+            "external_evidence_gate": external_gate,
+            "scorecard": _scorecard(external_gate),
+            "retained_artifact_gate": {
+                "satisfied": retained_ok,
+                "errors": retained_errors,
+            },
+            "residual_limitations": args.residual_limitation,
+            "finding_ids": args.finding_id,
+            "residual_finding_gate": residual_gate,
+        }
+    )
+    report_path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    print(json.dumps({"status": payload["status"], "report": str(report_path)}))
+    return 0 if complete else 1
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -1347,9 +1973,11 @@ def main(argv: list[str] | None = None) -> int:
             )
             _validate_fresh_audit_root(audit_root)
         source_provenance = _source_provenance(repo_root)
-        if args.execute and not source_provenance["clean"]:
+        if (args.execute or args.finalize_report is not None) and not source_provenance[
+            "clean"
+        ]:
             raise ValueError(
-                "--execute requires a clean tracked and untracked source tree"
+                "execution and finalization require a clean tracked and untracked source tree"
             )
         registered_pipelines, registry_completed = _registry_pipeline_command(
             repo_root,
@@ -1362,6 +1990,17 @@ def main(argv: list[str] | None = None) -> int:
     parity_ok = pipelines == registered_pipelines == CHEMBL_PIPELINES
     planned = _planned_attempts(pipelines, args.tracing_mode)
     source_revision = str(source_provenance["revision"])
+    if args.finalize_report is not None:
+        try:
+            return _finalize_campaign(
+                args=args,
+                audit_root=audit_root,
+                source_provenance=source_provenance,
+                evidence=evidence,
+            )
+        except (ValueError, OSError, json.JSONDecodeError) as exc:
+            print(json.dumps({"status": "error", "error": str(exc)}, sort_keys=True))
+            return 2
     external_gate = _evidence_gate(
         evidence,
         audit_root=audit_root,
@@ -1436,18 +2075,34 @@ def main(argv: list[str] | None = None) -> int:
         data_root=workflow_phase_root / "data",
         timeout_seconds=args.timeout_seconds,
     )
-    failure_phase_root = audit_root / "phases" / "workflow-failure-cases"
+    failure_phase_root = audit_root / "phases" / "chembl-baseline-failure"
+    empty_bronze_root = failure_phase_root / "empty-bronze"
+    empty_bronze_root.mkdir(parents=True, exist_ok=True)
     failure_phase = _run_phase_command(
-        name="workflow_failure_and_dq_hard_failure",
-        command=_workflow_failure_tests_command(
-            python=args.python.expanduser().absolute()
+        name="chembl_baseline_expected_failure",
+        command=_workflow_failure_command(
+            python=args.python.expanduser().absolute(),
+            limit=args.limit,
+            empty_bronze_root=empty_bronze_root,
         ),
         repo_root=repo_root,
         phase_root=failure_phase_root,
         data_root=failure_phase_root / "data",
         timeout_seconds=args.timeout_seconds,
+        expected_outcome="failure",
     )
-    phases = (workflow_phase, failure_phase)
+    dq_phase_root = audit_root / "phases" / "dq-hard-failure"
+    dq_phase = _run_phase_command(
+        name="dq_hard_failure_boundary",
+        command=_dq_hard_failure_test_command(
+            python=args.python.expanduser().absolute()
+        ),
+        repo_root=repo_root,
+        phase_root=dq_phase_root,
+        data_root=dq_phase_root / "data",
+        timeout_seconds=args.timeout_seconds,
+    )
+    phases = (workflow_phase, failure_phase, dq_phase)
     after = {str(path.resolve()): _tree_signature(path) for path in canonical_roots}
     canonical_unchanged = before == after
     expected_attempt_keys = {
@@ -1475,21 +2130,25 @@ def main(argv: list[str] | None = None) -> int:
         and all(attempt.satisfies_closure for attempt in attempts)
         and tracing_pair_gate
     )
-    complete = bool(
+    core_complete = bool(
         parity_ok
         and canonical_unchanged
         and attempt_gate
         and online_attempt.satisfies_closure
         and all(phase.satisfies_closure for phase in phases)
-        and external_gate["satisfied"]
-        and residual_finding_gate["satisfied"]
+    )
+    binding = _campaign_binding(
+        source_provenance=source_provenance,
+        attempts=attempts,
+        online_attempt=online_attempt,
+        phases=phases,
     )
     report = {
         "schema_version": 1,
         "generated_at": _utc_now(),
         "source_revision": source_revision,
         "source_provenance": source_provenance,
-        "status": "complete" if complete else "incomplete",
+        "status": "awaiting_external_evidence" if core_complete else "incomplete",
         "pipeline_config_parity": parity_ok,
         "pipelines": list(pipelines),
         "registered_pipelines": list(registered_pipelines),
@@ -1520,6 +2179,7 @@ def main(argv: list[str] | None = None) -> int:
             "before": before,
             "after": after,
         },
+        "campaign_binding": binding,
         "external_evidence_gate": external_gate,
         "scorecard": scorecard,
         "residual_limitations": args.residual_limitation,
@@ -1535,7 +2195,7 @@ def main(argv: list[str] | None = None) -> int:
             {"status": report["status"], "report": str(output_path)}, sort_keys=True
         )
     )
-    return 0 if complete else 1
+    return 0 if core_complete else 1
 
 
 if __name__ == "__main__":

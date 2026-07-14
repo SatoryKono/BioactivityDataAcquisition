@@ -38,17 +38,16 @@ class _Response:
 def test_require_absolute_directory_is_fail_closed(tmp_path: Path) -> None:
     subject = _load_subject()
 
-    assert subject.require_absolute_directory(
-        str(tmp_path), option_name="--data-root"
-    ) == tmp_path.resolve()
+    assert (
+        subject.require_absolute_directory(str(tmp_path), option_name="--data-root")
+        == tmp_path.resolve()
+    )
     with pytest.raises(ValueError, match="must be an absolute path"):
         subject.require_absolute_directory("relative", option_name="--data-root")
     file_path = tmp_path / "not-a-directory"
     file_path.write_text("x", encoding="utf-8")
     with pytest.raises(ValueError, match="must identify a directory"):
-        subject.require_absolute_directory(
-            str(file_path), option_name="--data-root"
-        )
+        subject.require_absolute_directory(str(file_path), option_name="--data-root")
 
 
 def test_start_and_verify_routes_grafana_backend_to_requested_root(
@@ -66,16 +65,22 @@ def test_start_and_verify_routes_grafana_backend_to_requested_root(
         captured["kwargs"] = kwargs
         return object()
 
-    subject.start_and_verify_audit_stack(
+    def fake_open(url: str, **_kwargs: object) -> _Response:
+        if url == subject.READY_URL:
+            return _Response({"data_root": str(data_root.resolve())})
+        assert url == subject.CATALOG_URL
+        return _Response({"items": []})
+
+    result = subject.start_and_verify_audit_stack(
         data_root=data_root.resolve(),
         log_root=log_root.resolve(),
         timeout_seconds=5.0,
         run=fake_run,
-        opener=lambda *_args, **_kwargs: _Response(
-            {"data_root": str(data_root.resolve())}
-        ),
+        opener=fake_open,
     )
 
+    assert result.state is subject.AuditBackendState.VALID_EMPTY
+    assert result.item_count == 0
     command = captured["command"]
     assert isinstance(command, tuple)
     assert str(subject.AUDIT_COMPOSE) in command
@@ -110,3 +115,80 @@ def test_start_and_verify_rejects_backend_serving_wrong_root(tmp_path: Path) -> 
             monotonic=lambda: next(ticks),
             sleep=lambda _seconds: None,
         )
+
+
+def test_probe_classifies_backend_down(tmp_path: Path) -> None:
+    subject = _load_subject()
+
+    def unavailable(*_args: object, **_kwargs: object) -> _Response:
+        raise OSError("connection refused")
+
+    result = subject.probe_audit_backend(
+        expected_data_root=tmp_path.resolve(),
+        opener=unavailable,
+    )
+
+    assert result.state is subject.AuditBackendState.DOWN
+    assert "connection refused" in result.detail
+
+
+def test_probe_classifies_backend_timeout(tmp_path: Path) -> None:
+    subject = _load_subject()
+
+    def timed_out(*_args: object, **_kwargs: object) -> _Response:
+        raise TimeoutError("deadline exceeded")
+
+    result = subject.probe_audit_backend(
+        expected_data_root=tmp_path.resolve(),
+        opener=timed_out,
+    )
+
+    assert result.state is subject.AuditBackendState.TIMEOUT
+    assert "deadline exceeded" in result.detail
+
+
+def test_probe_classifies_backend_wrong_root(tmp_path: Path) -> None:
+    subject = _load_subject()
+    result = subject.probe_audit_backend(
+        expected_data_root=tmp_path.resolve(),
+        opener=lambda *_args, **_kwargs: _Response({"data_root": "/wrong"}),
+    )
+
+    assert result.state is subject.AuditBackendState.WRONG_ROOT
+    assert result.data_root == "/wrong"
+
+
+def test_probe_classifies_valid_empty_backend(tmp_path: Path) -> None:
+    subject = _load_subject()
+
+    def fake_open(url: str, **_kwargs: object) -> _Response:
+        if url == subject.READY_URL:
+            return _Response({"data_root": str(tmp_path.resolve())})
+        assert url == subject.CATALOG_URL
+        return _Response({"items": []})
+
+    result = subject.probe_audit_backend(
+        expected_data_root=tmp_path.resolve(),
+        opener=fake_open,
+    )
+
+    assert result.state is subject.AuditBackendState.VALID_EMPTY
+    assert result.item_count == 0
+
+
+def test_probe_classifies_populated_backend(tmp_path: Path) -> None:
+    subject = _load_subject()
+
+    def fake_open(url: str, **_kwargs: object) -> _Response:
+        if url == subject.READY_URL:
+            return _Response({"data_root": str(tmp_path.resolve())})
+        assert url == subject.CATALOG_URL
+        return _Response({"items": ["chembl_activity", "chembl_assay"]})
+
+    result = subject.probe_audit_backend(
+        expected_data_root=tmp_path.resolve(),
+        opener=fake_open,
+    )
+
+    assert result.state is subject.AuditBackendState.POPULATED
+    assert result.item_count == 2

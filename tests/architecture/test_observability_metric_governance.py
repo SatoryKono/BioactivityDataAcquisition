@@ -23,11 +23,18 @@ DECLARATIONS_PATH = (
 CONTROL_PLANE_RULES_PATH = (
     ROOT / "grafana" / "prometheus-rules" / "bioetl_control_plane_current_status.yml"
 )
-OBSERVABILITY_RULES_PATH = ROOT / "grafana" / "prometheus-rules" / "bioetl_observability.yml"
+OBSERVABILITY_RULES_PATH = (
+    ROOT / "grafana" / "prometheus-rules" / "bioetl_observability.yml"
+)
 REQUIREMENTS_PATH = ROOT / "docs" / "01-requirements" / "REQUIREMENTS.md"
 RULES_PATH = ROOT / "docs" / "00-project" / "RULES.md"
 METRICS_DEFS_CORE_PATH = (
-    ROOT / "src" / "bioetl" / "infrastructure" / "observability" / "_metrics_defs_core.py"
+    ROOT
+    / "src"
+    / "bioetl"
+    / "infrastructure"
+    / "observability"
+    / "_metrics_defs_core.py"
 )
 POLICY_REVIEW_DATE = date(2026, 5, 15)
 ALLOWLIST_PATH = (
@@ -149,11 +156,15 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     report = inventory.collect_typed_observability_inventory(ROOT)
 
     assert len(report["recording_rule_outputs"]) == 103
-    assert len(report["policy_alias_metrics"]) == 24
+    assert len(report["policy_alias_metrics"]) == 20
     assert report["recording_outputs_without_declaration"] == []
     assert report["recording_declarations_without_output"] == []
     assert report["policy_aliases_overlapping_outputs"] == []
+    assert report["policy_aliases_without_catalog"] == []
+    assert report["catalog_aliases_without_declaration"] == []
     assert report["prometheus_run_id_selector_violations"] == []
+    assert report["http_semantics_violations"] == []
+    assert report["panel_contract_drift"] == []
     assert report["documented_metrics"]
     assert report["direct_dashboard_targets"]
     assert report["recording_rule_inputs"]
@@ -163,7 +174,20 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     assert len(http_targets) == 30
     assert any(target["uses_run_id_query_parameter"] for target in http_targets)
     assert all(
-        str(target["url"]).startswith(("/ops/", "/health/"))
+        str(target["url"]).startswith(("/ops/", "/health/")) for target in http_targets
+    )
+    assert report["typed_target_counts"] == {
+        "promql": 171,
+        "http": 30,
+        "loki": 5,
+        "tempo": 0,
+        "unknown": 0,
+    }
+    assert all(target["datasource_type"] for target in report["typed_targets"])
+    assert all(
+        target["datasource_type"] == "yesoreyeram-infinity-datasource"
+        and target["documents_valid_empty"]
+        and target["documents_backend_down"]
         for target in http_targets
     )
 
@@ -268,6 +292,10 @@ def test_observability_metric_governance_declares_required_views_and_evidence_pa
         "recording_outputs_without_declaration",
         "recording_declarations_without_output",
         "policy_aliases_overlapping_outputs",
+        "policy_aliases_without_catalog",
+        "catalog_aliases_without_declaration",
+        "http_semantics_violations",
+        "panel_contract_drift",
         "prometheus_run_id_selector_violations",
     ]
     assert set(typed_views["coverage_fields"]) == {
@@ -276,6 +304,7 @@ def test_observability_metric_governance_declares_required_views_and_evidence_pa
         "recording_rule_input",
         "direct_alert_input",
         "http_target",
+        "typed_target",
     }
 
     runtime_cardinality_review = payload["runtime_cardinality_review"]

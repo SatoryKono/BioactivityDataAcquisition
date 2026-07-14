@@ -25,6 +25,10 @@ typed_observability_views:
     - recording_outputs_without_declaration
     - recording_declarations_without_output
     - policy_aliases_overlapping_outputs
+    - policy_aliases_without_catalog
+    - catalog_aliases_without_declaration
+    - http_semantics_violations
+    - panel_contract_drift
     - prometheus_run_id_selector_violations
   coverage_fields:
     documented: documented_metrics
@@ -32,6 +36,16 @@ typed_observability_views:
     recording_rule_input: recording_rule_inputs
     direct_alert_input: direct_alert_inputs
     http_target: http_targets
+    typed_target: typed_targets
+  panel_contract_inventory: docs/03-guides/dashboards/panel-contract-inventory.json
+  panel_contract_update_command: >
+    python -m scripts.engineering.qa.report_observability_metric_inventory
+    --typed-observability-views --update-panel-contracts --json
+  target_kinds:
+    - promql
+    - http
+    - loki
+    - tempo
   identity_boundary: >
     HTTP run_id query parameters are operator identity context and must never
     appear in Prometheus selectors or metric labels.

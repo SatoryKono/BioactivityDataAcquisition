@@ -75,11 +75,13 @@ def _pipeline_child_details(
     details: dict[str, object] = {}
     if fingerprint is not None:
         details["fingerprint"] = fingerprint
-    for result_field, detail_field in (
-        ("run_id", "child_run_id"),
-        ("manifest_id", "child_manifest_id"),
+    for direct_field, payload_field, detail_field in (
+        ("child_run_id", "run_id", "child_run_id"),
+        ("child_manifest_id", "manifest_id", "child_manifest_id"),
     ):
-        value = getattr(result.payload, result_field, None)
+        value = getattr(result, direct_field, None)
+        if value is None:
+            value = getattr(result.payload, payload_field, None)
         if value is not None:
             details[detail_field] = str(value)
     return details or None

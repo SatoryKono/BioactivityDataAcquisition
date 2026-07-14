@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
 from scripts.engineering.qa import __main__ as qa_router
 from scripts.engineering.qa import check_prometheus_rules
+import yaml
 
 
 pytestmark = pytest.mark.unit
@@ -23,7 +25,14 @@ def test_rule_test_coverage_is_measured_and_regression_guarded() -> None:
         test_file=check_prometheus_rules.TESTS_FILE,
     )
 
-    assert coverage["alert_definitions"] == 53
+    assert (
+        coverage["alert_definitions"]
+        == check_prometheus_rules.EXPECTED_ALERT_DEFINITIONS
+    )
+    assert (
+        coverage["record_definitions"]
+        == check_prometheus_rules.EXPECTED_RECORD_DEFINITIONS
+    )
     assert coverage["tested_alerts"] >= check_prometheus_rules.MIN_TESTED_ALERTS
     assert coverage["firing_alerts"] >= check_prometheus_rules.MIN_TESTED_ALERTS
     assert coverage["directly_tested_records"] >= (
@@ -33,6 +42,66 @@ def test_rule_test_coverage_is_measured_and_regression_guarded() -> None:
     assert coverage["untested_control_plane_records"] == []
     assert coverage["undefined_fixture_alerts"] == []
     assert check_prometheus_rules.validate_rule_test_coverage(coverage) == []
+
+
+def test_rule_test_coverage_rejects_vacuous_expected_results(
+    tmp_path: Path,
+) -> None:
+    fixture = yaml.safe_load(
+        check_prometheus_rules.TESTS_FILE.read_text(encoding="utf-8")
+    )
+    for test_case in fixture["tests"]:
+        for assertion in test_case.get("alert_rule_test", []):
+            assertion["exp_alerts"] = []
+        for assertion in test_case.get("promql_expr_test", []):
+            assertion["exp_samples"] = []
+
+    fixture_path = tmp_path / "vacuous-prometheus-rules.test.yml"
+    fixture_path.write_text(
+        yaml.safe_dump(fixture, sort_keys=False),
+        encoding="utf-8",
+    )
+    coverage = check_prometheus_rules.collect_rule_test_coverage(
+        rules_files=check_prometheus_rules.DEFAULT_RULES_FILES,
+        test_file=fixture_path,
+    )
+
+    assert coverage["tested_alerts"] == check_prometheus_rules.MIN_TESTED_ALERTS
+    assert coverage["firing_alerts"] == 0
+    assert coverage["directly_tested_records"] == 0
+    violations = check_prometheus_rules.validate_rule_test_coverage(coverage)
+    assert "firing alert fixtures regressed below 34: 0" in violations
+    assert "directly tested records regressed below 28: 0" in violations
+
+
+def test_rule_test_coverage_rejects_new_untested_record(
+    tmp_path: Path,
+) -> None:
+    rules = yaml.safe_load(
+        check_prometheus_rules.OBSERVABILITY_RULES_FILE.read_text(encoding="utf-8")
+    )
+    record_name = "bioetl_uncovered_regression_probe"
+    rules["groups"][0]["rules"].append({"record": record_name, "expr": "vector(1)"})
+    rules_path = tmp_path / "bioetl_observability_with_uncovered_record.yml"
+    rules_path.write_text(
+        yaml.safe_dump(rules, sort_keys=False),
+        encoding="utf-8",
+    )
+
+    coverage = check_prometheus_rules.collect_rule_test_coverage(
+        rules_files=(
+            rules_path,
+            check_prometheus_rules.CONTROL_PLANE_RULES_FILE,
+        ),
+        test_file=check_prometheus_rules.TESTS_FILE,
+    )
+
+    assert coverage["record_definitions"] == 104
+    assert record_name in coverage["untested_records"]
+    assert (
+        "record definitions changed from baseline 103: 104"
+        in check_prometheus_rules.validate_rule_test_coverage(coverage)
+    )
 
 
 def test_router_exposes_check_prometheus_rules_command() -> None:

@@ -316,6 +316,37 @@ or policy-governed metric contracts. They are not all emitted directly by
 `prometheus_client` collectors, but they are part of the shipped observability
 surface used by dashboards, alerts, and metric-governance checks.
 
+## Governed Policy Aliases
+
+This table is the independently published, bidirectional documentation contract
+for compatibility and query-policy aliases. These names are deliberately kept
+separate from actual `record:` outputs and direct runtime collector families.
+
+| Metric Name | Classification |
+|-------------|----------------|
+| `bioetl_alerts_active_total` | Policy alias |
+| `bioetl_alerts_firing_total` | Policy alias |
+| `bioetl_control_plane_current_status` | Policy alias |
+| `bioetl_control_plane_status` | Policy alias |
+| `bioetl_current_status` | Policy alias |
+| `bioetl_dq_blocked_records` | Policy alias |
+| `bioetl_dq_check_duration_seconds` | Policy alias |
+| `bioetl_dq_status` | Policy alias |
+| `bioetl_pipeline_phase_duration_seconds` | Policy alias |
+| `bioetl_provider_status` | Policy alias |
+| `bioetl_runtime_status` | Policy alias |
+| `bioetl_shutdown_completed_total` | Policy alias |
+| `bioetl_shutdown_initiated_total` | Policy alias |
+| `bioetl_silver_filter_reject_field_total` | Policy alias |
+| `bioetl_silver_filter_reject_reason_total` | Policy alias |
+| `bioetl_silver_reject_rate` | Policy alias |
+| `bioetl_workflow_reconciliation_rows_deleted_total` | Policy alias |
+| `bioetl_workflow_reconciliation_rows_retained_total` | Policy alias |
+| `bioetl_workflow_reconciliation_rows_scanned_total` | Policy alias |
+| `bioetl_workflow_status` | Policy alias |
+
+## Governed Recording And Current-State Inventory
+
 | Metric Name | Type | Labels | Description |
 |-------------|------|--------|-------------|
 | `bioetl_alerts_active_total` | Recording rule | rule-defined | Active alert count projection for alert/SLO dashboards |

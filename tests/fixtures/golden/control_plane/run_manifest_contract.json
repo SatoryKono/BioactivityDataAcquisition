@@ -37,7 +37,10 @@
     "run_type": "incremental",
     "runtime_config": {},
     "schema_version": "1.0",
-    "source_refs": []
+    "source_refs": [],
+    "workflow_name": null,
+    "workflow_run_id": null,
+    "workflow_step_id": null
   },
   "documented_source_revision_states": [
     "clean",
@@ -212,6 +215,18 @@
       {
         "default": "literal",
         "name": "entity"
+      },
+      {
+        "default": "literal",
+        "name": "workflow_run_id"
+      },
+      {
+        "default": "literal",
+        "name": "workflow_name"
+      },
+      {
+        "default": "literal",
+        "name": "workflow_step_id"
       },
       {
         "default": "factory",
