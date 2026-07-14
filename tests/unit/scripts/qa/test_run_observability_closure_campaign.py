@@ -704,6 +704,7 @@ def test_attempt_command_is_explicitly_incremental_online_and_traced() -> None:
     assert "--run-type" in off and "incremental" in off
     assert "--use-cached-bronze" in off
     assert "--cached-bronze-path" in off
+    assert "--no-ensure-observability-backend" in off
     assert "--no-tracing" in off
     assert "--tracing" in on
 
