@@ -7,9 +7,9 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2985 |
-| Tracked doc-like files | 1804 |
-| Ignored local docs/reports files | 1181 |
+| Doc-like files | 3001 |
+| Tracked doc-like files | 1821 |
+| Ignored local docs/reports files | 1180 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
 | Generated routes | 59 |
@@ -18,15 +18,15 @@
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 1181 |
-| tracked | 1804 |
+| ignored_local | 1180 |
+| tracked | 1821 |
 
 ## Lifecycle Counts
 
 | Lifecycle | Count |
 | --- | --- |
 | active_backlog | 1 |
-| active_draft | 104 |
+| active_draft | 108 |
 | active_quality_baseline | 18 |
 | closeout_evidence | 27 |
 | docs_reports_curated_entrypoint | 2 |
@@ -38,7 +38,7 @@
 | generated_test_run_evidence | 4 |
 | guide | 2 |
 | index | 4 |
-| issue_pack | 11 |
+| issue_pack | 13 |
 | live_issue_mirror | 4 |
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 36 |
@@ -49,40 +49,40 @@
 
 | Lifecycle | Count |
 | --- | --- |
-| active_draft | 104 |
+| active_draft | 108 |
 | guide | 2 |
 | index | 4 |
-| issue_pack | 11 |
+| issue_pack | 13 |
 | live_issue_mirror | 4 |
 
 ## Status Counts
 
 | Status | Count |
 | --- | --- |
-| Active | 1933 |
+| Active | 1943 |
 | Archived | 61 |
 | Canonical | 63 |
 | Generated | 704 |
-| Working | 224 |
+| Working | 230 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 1933 |
+| active | 1943 |
 | archive | 61 |
 | canonical | 63 |
 | generated | 704 |
-| working | 224 |
+| working | 230 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
-| archive-after-github-state-check | 115 |
+| archive-after-github-state-check | 121 |
 | archive-after-migration | 60 |
 | generate-automatically | 704 |
-| keep | 2102 |
+| keep | 2112 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -240,10 +240,15 @@
 | Path | Lifecycle | Issue | Action |
 | --- | --- | --- | --- |
 | `.github/ISSUES/ADR-HYGIENE-4746-Archive-ADR-003-ADR-008.md` | live_issue_mirror | 4746 | reconcile-with-github-state |
+| `.github/ISSUES/AI-AGENT-CONFIG-AUDIT-2026-07-14-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
+| `.github/ISSUES/AI-RUNTIME-AUDIT-001-Make-AI-Skill-Mirror-CI-Truthful-And-Enforce-Devin-Parity.md` | active_draft |  | archive-after-github-state-check |
+| `.github/ISSUES/AI-RUNTIME-AUDIT-002-Eliminate-Tracked-Devin-MCP-Workstation-Paths.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/ARCHITECTURE-FACADE-4745-Enforce-No-Growth-Bioetl-Infrastructure-Config-Seam.md` | live_issue_mirror | 4745 | reconcile-with-github-state |
 | `.github/ISSUES/ARCHITECTURE_AUDIT_2025-01-30_aggregate_invariants.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/ARCHITECTURE_AUDIT_2025-01-30_batch_fsm_tests.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/ARCHITECTURE_AUDIT_2025-01-30_scripts_governance.md` | active_draft |  | archive-after-github-state-check |
+| `.github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md` | active_draft |  | archive-after-github-state-check |
+| `.github/ISSUES/AUD-OBS-20260714-002-Add-Truthful-Observability-Validation-Gates.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/CHEMBL-001-Align-Publication-Term-Derived-Contract.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/CHEMBL-002-Rename-ChEMBL-Taxonomy-DQ-Fields-To-Taxonomy-Id.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/CHEMBL-003-Align-Tissue-Ontology-DQ-Patterns-With-Canonical-Ids.md` | active_draft |  | archive-after-github-state-check |
@@ -274,11 +279,6 @@
 | `.github/ISSUES/DOC-AUDIT-003-Align-Windows-Pytest-Docs-With-Xdist-Policy.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/DOC-AUDIT-004-Repair-Control-Plane-ADR-And-Architecture-Docs.md` | active_draft |  | archive-after-github-state-check |
 | `.github/ISSUES/DOC-AUDIT-005-Refresh-Inventory-And-Publish-Control-Plane-Domain-Reference.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/DOC-AUDIT-2026-06-19-ISSUE-PACK.md` | issue_pack |  | archive-after-github-state-check |
-| `.github/ISSUES/FILE_STRUCTURE_AUDIT_2025-01-30_cache_gitignore.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/FILE_STRUCTURE_AUDIT_2025-01-30_devin_governance.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/NONCHEMBL-001-Add-Raw-Sidecars-For-UniProt-Semantic-Payloads.md` | active_draft |  | archive-after-github-state-check |
-| `.github/ISSUES/NONCHEMBL-002-Align-Governed-OA-And-Identifier-DQ-With-Profile-Normalization.md` | active_draft |  | archive-after-github-state-check |
 
 ## Docs Reports Evidence Examples
 
