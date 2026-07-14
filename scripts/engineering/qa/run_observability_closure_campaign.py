@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
+import io
 import json
 import os
 import re
@@ -768,9 +769,19 @@ def _find_bronze_record(
     predicate: Callable[[dict[str, object]], bool],
 ) -> tuple[dict[str, object], Path]:
     """Return the first deterministic JSONL record satisfying ``predicate``."""
-    for path in sorted(entity_root.rglob("*.jsonl")):
+    paths = sorted(
+        (*entity_root.rglob("*.jsonl"), *entity_root.rglob("*.jsonl.zst")),
+        key=lambda path: path.as_posix(),
+    )
+    for path in paths:
         try:
-            with path.open(encoding="utf-8") as stream:
+            if path.name.endswith(".jsonl.zst"):
+                compressed = path.open("rb")
+                reader = zstandard.ZstdDecompressor().stream_reader(compressed)
+                stream_context = io.TextIOWrapper(reader, encoding="utf-8")
+            else:
+                stream_context = path.open(encoding="utf-8")
+            with stream_context as stream:
                 for line in stream:
                     if not line.strip():
                         continue
@@ -785,31 +796,59 @@ def _find_bronze_record(
 def _stage_workflow_fixture(
     *, canonical_bronze_root: Path, audit_root: Path
 ) -> tuple[Path, dict[str, object]]:
-    """Stage a three-record immutable fixture for ``chembl_baseline`` joins."""
+    """Stage a traceable three-record fixture for ``chembl_baseline`` joins."""
     chembl_root = canonical_bronze_root / "chembl"
     assay, assay_source = _find_bronze_record(
         chembl_root / "assay",
         predicate=lambda row: bool(row.get("target_chembl_id"))
         and bool(row.get("document_chembl_id")),
     )
-    target_id = str(assay["target_chembl_id"])
-    publication_id = str(assay["document_chembl_id"])
-    target, target_source = _find_bronze_record(
-        chembl_root / "target",
-        predicate=lambda row: str(row.get("target_chembl_id") or "") == target_id
-        and bool(row.get("target_type")),
-    )
-    publication, publication_source = _find_bronze_record(
-        chembl_root / "publication",
-        predicate=lambda row: str(row.get("document_chembl_id") or "")
-        == publication_id,
-    )
+    source_assay = dict(assay)
+    try:
+        target_id = str(assay["target_chembl_id"])
+        publication_id = str(assay["document_chembl_id"])
+        target, target_source = _find_bronze_record(
+            chembl_root / "target",
+            predicate=lambda row: str(row.get("target_chembl_id") or "")
+            == target_id
+            and bool(row.get("target_type")),
+        )
+        publication, publication_source = _find_bronze_record(
+            chembl_root / "publication",
+            predicate=lambda row: str(row.get("document_chembl_id") or "")
+            == publication_id,
+        )
+        assay_derivation = "lossless_join_compatible_source_record"
+    except ValueError:
+        target, target_source = _find_bronze_record(
+            chembl_root / "target",
+            predicate=lambda row: bool(row.get("target_chembl_id"))
+            and bool(row.get("target_type")),
+        )
+        publication, publication_source = _find_bronze_record(
+            chembl_root / "publication",
+            predicate=lambda row: bool(row.get("document_chembl_id")),
+        )
+        target_id = str(target["target_chembl_id"])
+        publication_id = str(publication["document_chembl_id"])
+        assay = {
+            **assay,
+            "target_chembl_id": target_id,
+            "document_chembl_id": publication_id,
+        }
+        assay_derivation = "deterministic_workflow_join_projection"
     fixture_root = audit_root / "fixtures" / "chembl-baseline"
     evidence_records: list[dict[str, object]] = []
-    for entity, record, source in (
-        ("assay", assay, assay_source),
-        ("target", target, target_source),
-        ("publication", publication, publication_source),
+    for entity, record, source, source_record, derivation in (
+        ("assay", assay, assay_source, source_assay, assay_derivation),
+        ("target", target, target_source, target, "lossless_source_record"),
+        (
+            "publication",
+            publication,
+            publication_source,
+            publication,
+            "lossless_source_record",
+        ),
     ):
         destination = (
             fixture_root
@@ -830,6 +869,17 @@ def _stage_workflow_fixture(
                 "entity": entity,
                 "source_path": str(source),
                 "source_sha256": _sha256_file(source),
+                "source_record_sha256": hashlib.sha256(
+                    (
+                        json.dumps(
+                            source_record,
+                            sort_keys=True,
+                            separators=(",", ":"),
+                        )
+                        + "\n"
+                    ).encode()
+                ).hexdigest(),
+                "derivation": derivation,
                 "record_sha256": hashlib.sha256(rendered.encode()).hexdigest(),
                 "fixture_path": str(destination),
                 "fixture_sha256": _sha256_file(destination),

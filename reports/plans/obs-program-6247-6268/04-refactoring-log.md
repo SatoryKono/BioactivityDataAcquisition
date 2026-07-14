@@ -38,3 +38,16 @@
   Silver relation surface.
 - **Debt outcome**: schema drift decreases; no contract relaxation or budget
   increase is introduced.
+
+## DBG-004 — workflow fixture compatibility
+
+- **Symptom**: campaign preflight could not find workflow records in a canonical
+  compressed Bronze cache; independent CI samples also had no shared
+  assay-to-target-to-publication keys.
+- **Root cause**: staging searched only `*.jsonl` and assumed independently
+  sampled entity fixtures were naturally join-compatible.
+- **Change**: stream both JSONL and Zstandard JSONL inputs, preserve lossless
+  compatible joins when available, and otherwise record an explicit deterministic
+  join projection with separate source-record and staged-record SHA-256 values.
+- **Debt outcome**: workflow evidence becomes reproducible and provenance-bound;
+  no DQ threshold or debt budget changes.
