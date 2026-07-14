@@ -242,7 +242,7 @@ def _registry_pipeline_command(
         cwd=repo_root,
         capture_output=True,
         text=True,
-        timeout=120,
+        timeout=900,
         check=True,
     )
     names = tuple(
