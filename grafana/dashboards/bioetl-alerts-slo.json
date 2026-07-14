@@ -421,7 +421,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 170
+                "value": 140
               },
               {
                 "id": "custom.cellOptions",
@@ -439,7 +439,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 260
+                "value": 220
               },
               {
                 "id": "custom.cellOptions",
@@ -458,7 +458,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 100
+                "value": 90
               },
               {
                 "id": "custom.cellOptions",
@@ -476,7 +476,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 90
+                "value": 85
               },
               {
                 "id": "custom.cellOptions",
@@ -494,7 +494,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 180
+                "value": 140
               },
               {
                 "id": "custom.cellOptions",
@@ -513,7 +513,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 150
+                "value": 100
               },
               {
                 "id": "custom.cellOptions",
@@ -569,7 +569,7 @@
             "properties": [
               {
                 "id": "custom.width",
-                "value": 110
+                "value": 90
               },
               {
                 "id": "mappings",
@@ -642,6 +642,8 @@
             "excludeByName": {
               "__name__": true,
               "Value": true,
+              "instance": true,
+              "job": true,
               "run_id": true
             },
             "indexByName": {
@@ -676,7 +678,7 @@
         "current": {
           "selected": true,
           "text": "All",
-          "value": "$__all"
+          "value": "All"
         },
         "hide": 0,
         "includeAll": true,
