@@ -320,8 +320,8 @@ def _tree_signature(root: Path) -> str:
     The canonical lake can contain large Parquet payloads.  Re-reading every byte
     before and after a bounded audit makes the safety gate dominate (and sometimes
     prevent) the campaign itself.  A manifest over every entry's relative path,
-    mode, size, and nanosecond mtime detects additions, removals, and ordinary
-    mutations without streaming the complete lake twice.
+    mode, size, and nanosecond timestamps detects additions, removals, and
+    ordinary mutations without streaming the complete lake twice.
     """
     digest = hashlib.sha256()
     if not root.exists():
@@ -343,7 +343,8 @@ def _tree_signature(root: Path) -> str:
         digest.update(relative.encode())
         digest.update(b"\0")
         digest.update(
-            f"{stat_result.st_mode}:{stat_result.st_size}:{stat_result.st_mtime_ns}".encode()
+            f"{stat_result.st_mode}:{stat_result.st_size}:"
+            f"{stat_result.st_mtime_ns}:{stat_result.st_ctime_ns}".encode()
         )
         digest.update(b"\n")
     return digest.hexdigest()
@@ -692,17 +693,46 @@ def _isolated_subprocess_env(
     return env
 
 
+def _is_directory_link(path: Path) -> bool:
+    """Return whether *path* is a symlink or Windows directory junction."""
+    return path.is_symlink() or path.is_junction()
+
+
+def _create_windows_directory_junction(*, link: Path, target: Path) -> None:
+    """Create a directory junction without requiring symlink privileges."""
+    command = (
+        os.environ.get("COMSPEC", "cmd.exe"),
+        "/d",
+        "/c",
+        "mklink",
+        "/j",
+        str(link),
+        str(target),
+    )
+    subprocess.run(  # nosec B603 - fixed mklink command and validated paths.
+        command,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+
+
 def _ensure_tracked_runtime_links(*, work_root: Path, repo_root: Path) -> None:
     """Expose tracked read-only configuration to a non-repository CWD."""
     configs_link = work_root / "configs"
     expected = (repo_root / "configs").resolve()
-    if configs_link.is_symlink():
+    if _is_directory_link(configs_link):
         if configs_link.resolve() != expected:
             raise ValueError(f"unexpected configs link target: {configs_link}")
         return
     if configs_link.exists():
         raise ValueError(f"audit work root already contains configs: {configs_link}")
-    configs_link.symlink_to(expected, target_is_directory=True)
+    try:
+        configs_link.symlink_to(expected, target_is_directory=True)
+    except OSError as exc:
+        if sys.platform != "win32" or getattr(exc, "winerror", None) != 1314:
+            raise
+        _create_windows_directory_junction(link=configs_link, target=expected)
 
 
 def _run_phase_command(

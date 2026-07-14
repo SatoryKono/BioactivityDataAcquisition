@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 2999 |
-| Tracked doc-like files | 1819 |
+| Doc-like files | 3003 |
+| Tracked doc-like files | 1823 |
 | Ignored local docs/reports files | 1180 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
@@ -19,7 +19,7 @@
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 1180 |
-| tracked | 1819 |
+| tracked | 1823 |
 
 ## Lifecycle Counts
 
@@ -27,7 +27,7 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_draft | 108 |
-| active_quality_baseline | 18 |
+| active_quality_baseline | 19 |
 | closeout_evidence | 27 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_curated_or_historical_report | 22 |
@@ -43,7 +43,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 36 |
 | supporting_context | 12 |
-| working_report | 28 |
+| working_report | 29 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -59,30 +59,30 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 1941 |
+| Active | 1943 |
 | Archived | 61 |
 | Canonical | 63 |
 | Generated | 704 |
-| Working | 230 |
+| Working | 232 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 1941 |
+| active | 1943 |
 | archive | 61 |
 | canonical | 63 |
 | generated | 704 |
-| working | 230 |
+| working | 232 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 121 |
-| archive-after-migration | 60 |
+| archive-after-migration | 61 |
 | generate-automatically | 704 |
-| keep | 2110 |
+| keep | 2113 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -129,6 +129,7 @@
 | `docs/reports/scripts-inventory-2026-03-01.md` | Working | 0 | archive-after-migration |
 | `reports/observability/runtime_cardinality_allowlist_review_5574.json` | Working | 0 | archive-after-migration |
 | `reports/observability/runtime_cardinality_review.json` | Working | 0 | archive-after-migration |
+| `reports/plans/obs-program-6247-6268/04-refactoring-log.md` | Working | 0 | archive-after-migration |
 | `reports/quality/adr-enforcement-matrix.json` | Working | 0 | archive-after-migration |
 | `reports/quality/adr-enforcement-matrix.md` | Working | 0 | archive-after-migration |
 | `reports/quality/architecture-quality-scorecard.json` | Working | 0 | archive-after-migration |

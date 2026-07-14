@@ -52,7 +52,6 @@ runtime change.
 
 | Skill                   | Path                                         | Purpose                          |
 | ----------------------- | -------------------------------------------- | -------------------------------- |
-| `architecture-guardian` | `.codex/skills/public/architecture-guardian` | Architecture boundary validation |
 | `verify-architecture`   | `.codex/skills/verify-architecture`          | Quick/full architecture checks   |
 | `vcr-record`            | `.codex/skills/vcr-record`                   | VCR cassette recording/safety    |
 
