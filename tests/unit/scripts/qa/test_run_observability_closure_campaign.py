@@ -92,6 +92,25 @@ def test_tree_signature_tracks_manifest_mutations_without_reading_payloads(
     assert campaign._tree_signature(root) != before
 
 
+def test_tree_signature_records_concurrently_removed_entry(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = tmp_path / "canonical"
+    root.mkdir()
+    payload = root / "ephemeral.parquet"
+    payload.write_bytes(b"payload")
+    original_lstat = Path.lstat
+
+    def lstat_with_disappearance(path: Path) -> os.stat_result:
+        if path == payload:
+            raise FileNotFoundError(path)
+        return original_lstat(path)
+
+    monkeypatch.setattr(Path, "lstat", lstat_with_disappearance)
+
+    assert campaign._tree_signature(root)
+
+
 def test_stage_workflow_fixture_selects_compatible_join_records(
     tmp_path: Path,
 ) -> None:

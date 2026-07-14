@@ -308,8 +308,17 @@ def _tree_signature(root: Path) -> str:
         return digest.hexdigest()
     paths = (root,) if root.is_file() else (root, *sorted(root.rglob("*")))
     for path in paths:
-        stat_result = path.lstat()
         relative = "." if path == root else path.relative_to(root).as_posix()
+        try:
+            stat_result = path.lstat()
+        except FileNotFoundError:
+            # A concurrently managed canonical lake may remove an entry between
+            # directory enumeration and lstat().  Retain that observation in the
+            # signature so the safety gate reports drift instead of losing the
+            # complete campaign to an unhandled traceback.
+            digest.update(relative.encode())
+            digest.update(b"\0vanished-during-scan\n")
+            continue
         digest.update(relative.encode())
         digest.update(b"\0")
         digest.update(
