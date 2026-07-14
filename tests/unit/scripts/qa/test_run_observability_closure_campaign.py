@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -61,6 +62,22 @@ def _canonical_roots(tmp_path: Path) -> tuple[Path, Path]:
     (data_root / "sentinel.txt").write_text("data", encoding="utf-8")
     (log_root / "sentinel.log").write_text("logs", encoding="utf-8")
     return data_root, log_root
+
+
+def test_tree_signature_tracks_manifest_mutations_without_reading_payloads(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "canonical"
+    root.mkdir()
+    payload = root / "large.parquet"
+    payload.write_bytes(b"before")
+    before = campaign._tree_signature(root)
+
+    previous_mtime = payload.stat().st_mtime_ns
+    payload.write_bytes(b"after!")
+    os.utime(payload, ns=(previous_mtime + 1, previous_mtime + 1))
+
+    assert campaign._tree_signature(root) != before
 
 
 def _retain_raw(path: Path, raw_bytes: bytes, kind: str) -> dict[str, str]:

@@ -272,19 +272,27 @@ def _sha256_file(path: Path) -> str:
 
 
 def _tree_signature(root: Path) -> str:
-    """Return a deterministic content signature for one canonical root."""
+    """Return a deterministic metadata-manifest signature for one canonical root.
+
+    The canonical lake can contain large Parquet payloads.  Re-reading every byte
+    before and after a bounded audit makes the safety gate dominate (and sometimes
+    prevent) the campaign itself.  A manifest over every entry's relative path,
+    mode, size, and nanosecond mtime detects additions, removals, and ordinary
+    mutations without streaming the complete lake twice.
+    """
     digest = hashlib.sha256()
     if not root.exists():
         digest.update(b"missing")
         return digest.hexdigest()
-    if root.is_file():
-        digest.update(root.name.encode())
-        digest.update(_sha256_file(root).encode())
-        return digest.hexdigest()
-    for path in sorted(item for item in root.rglob("*") if item.is_file()):
-        digest.update(path.relative_to(root).as_posix().encode())
+    paths = (root,) if root.is_file() else (root, *sorted(root.rglob("*")))
+    for path in paths:
+        stat_result = path.lstat()
+        relative = "." if path == root else path.relative_to(root).as_posix()
+        digest.update(relative.encode())
         digest.update(b"\0")
-        digest.update(_sha256_file(path).encode())
+        digest.update(
+            f"{stat_result.st_mode}:{stat_result.st_size}:{stat_result.st_mtime_ns}".encode()
+        )
         digest.update(b"\n")
     return digest.hexdigest()
 
