@@ -1,19 +1,20 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-14T08:50:31.556549+00:00",
+  "generated_at": "2026-07-14T10:02:50.125866+00:00",
   "summary": {
-    "total_scripts": 455,
+    "total_scripts": 461,
     "status_counts": {
-      "active": 342,
-      "supporting": 113
+      "active": 345,
+      "supporting": 113,
+      "unknown": 3
     },
     "reference_group_coverage": {
       "agents": 5,
       "build": 9,
       "ci": 62,
-      "docs": 175,
-      "other": 23,
-      "scripts": 354,
+      "docs": 179,
+      "other": 28,
+      "scripts": 357,
       "skills": 16,
       "tests": 205
     }
@@ -102,7 +103,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 15,
       "references": [
         {
           "path": ".codex/skills/SKILLS-CATALOG.md",
@@ -115,6 +116,24 @@
           "line": 18,
           "source_group": "skills",
           "text": "bash scripts/ai/codex/check_skills_mirror.sh --sync"
+        },
+        {
+          "path": ".github/ISSUES/AI-RUNTIME-AUDIT-001-Make-AI-Skill-Mirror-CI-Truthful-And-Enforce-Devin-Parity.md",
+          "line": 18,
+          "source_group": "other",
+          "text": "- `scripts/ai/codex/check_skills_mirror.sh --check` only verifies that"
+        },
+        {
+          "path": ".github/ISSUES/AI-RUNTIME-AUDIT-001-Make-AI-Skill-Mirror-CI-Truthful-And-Enforce-Devin-Parity.md",
+          "line": 50,
+          "source_group": "other",
+          "text": "`scripts/ai/codex/check_skills_mirror.sh` with truthful `--check` and `--sync`"
+        },
+        {
+          "path": ".github/ISSUES/AI-RUNTIME-AUDIT-001-Make-AI-Skill-Mirror-CI-Truthful-And-Enforce-Devin-Parity.md",
+          "line": 90,
+          "source_group": "other",
+          "text": "bash scripts/ai/codex/check_skills_mirror.sh --check"
         },
         {
           "path": ".github/workflows/skills-consistency.yml",
@@ -133,24 +152,6 @@
           "line": 62,
           "source_group": "docs",
           "text": "Use `bash scripts/ai/codex/check_skills_mirror.sh --check` for the read-only CI"
-        },
-        {
-          "path": "docs/00-project/ai/skills/_references/README.md",
-          "line": 26,
-          "source_group": "docs",
-          "text": "- Check command: `bash scripts/ai/codex/check_skills_mirror.sh --check`."
-        },
-        {
-          "path": "docs/00-project/ai/skills/_references/README.md",
-          "line": 27,
-          "source_group": "docs",
-          "text": "- Regeneration command: `bash scripts/ai/codex/check_skills_mirror.sh --sync`."
-        },
-        {
-          "path": "docs/00-project/ai/skills/_references/README.md",
-          "line": 35,
-          "source_group": "docs",
-          "text": "| `scripts/ai/codex/check_skills_mirror.sh` | Validates Codex-Devin parity and overlays `_references/local` while regenerating the transformed docs mirror |"
         }
       ]
     },
@@ -946,6 +947,45 @@
       ]
     },
     {
+      "path": "scripts/ai/codex/login-codex.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": "scripts/ai/codex/FINAL_SOLUTION.md",
+          "line": 100,
+          "source_group": "scripts",
+          "text": "./login-codex.sh"
+        },
+        {
+          "path": "scripts/ai/codex/FINAL_SOLUTION.md",
+          "line": 115,
+          "source_group": "scripts",
+          "text": "- `login-codex.sh` - Quick login script"
+        },
+        {
+          "path": "scripts/ai/codex/QUICK_LOGIN_GUIDE.md",
+          "line": 58,
+          "source_group": "scripts",
+          "text": "Создайте скрипт `login-codex.sh`:"
+        },
+        {
+          "path": "scripts/ai/codex/QUICK_LOGIN_GUIDE.md",
+          "line": 69,
+          "source_group": "scripts",
+          "text": "chmod +x login-codex.sh"
+        },
+        {
+          "path": "scripts/ai/codex/QUICK_LOGIN_GUIDE.md",
+          "line": 74,
+          "source_group": "scripts",
+          "text": "./login-codex.sh"
+        }
+      ]
+    },
+    {
       "path": "scripts/ai/codex/run-codex.ps1",
       "type": "ps1",
       "status": "active",
@@ -1007,7 +1047,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 48,
+      "reference_count": 53,
       "references": [
         {
           "path": "docs/03-guides/development/codex-paths.md",
@@ -1026,6 +1066,12 @@
           "line": 37,
           "source_group": "scripts",
           "text": "return [\"bash\", str((_DIR / \"codex\" / \"run-codex.sh\").resolve()), *rest]"
+        },
+        {
+          "path": "scripts/ai/codex/FINAL_SOLUTION.md",
+          "line": 63,
+          "source_group": "scripts",
+          "text": "bash run-codex.sh \"your prompt here\""
         },
         {
           "path": "scripts/ai/codex/QUICKSTART_WSL.md",
@@ -1050,12 +1096,6 @@
           "line": 88,
           "source_group": "scripts",
           "text": "- **`run-codex.sh`** ⭐ → Main WSL/Bash entry point (loads env, checks setup, syncs MCP, launches Codex)"
-        },
-        {
-          "path": "scripts/ai/codex/README.md",
-          "line": 37,
-          "source_group": "scripts",
-          "text": "├── run-codex.sh               ⭐ Canonical WSL/Bash entry point"
         }
       ]
     },
@@ -1113,6 +1153,42 @@
           "line": 137,
           "source_group": "scripts",
           "text": ".\\scripts\\ai\\codex\\setup-codex-wsl.bat"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/codex/setup-windows-dns.ps1",
+      "type": "ps1",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 2,
+      "references": [
+        {
+          "path": "scripts/ai/codex/WINDOWS_DNS_SETUP.md",
+          "line": 16,
+          "source_group": "scripts",
+          "text": ".\\setup-windows-dns.ps1"
+        },
+        {
+          "path": "scripts/ai/codex/WINDOWS_DNS_SETUP.md",
+          "line": 201,
+          "source_group": "scripts",
+          "text": "Используйте автоматический PowerShell скрипт `setup-windows-dns.ps1` для быстрой и безопасной настройки DNS."
+        }
+      ]
+    },
+    {
+      "path": "scripts/ai/codex/setup-wsl-dns.sh",
+      "type": "sh",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/ai/codex/TLS_DNS_FIX.md",
+          "line": 138,
+          "source_group": "scripts",
+          "text": "- `setup-wsl-dns.sh` - скрипт настройки DNS (требует ручного выполнения sudo команд)"
         }
       ]
     },
@@ -1215,8 +1291,32 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 16,
       "references": [
+        {
+          "path": ".github/ISSUES/AI-AGENT-CONFIG-AUDIT-2026-07-14-ISSUE-PACK.md",
+          "line": 12,
+          "source_group": "other",
+          "text": "| F-02: one MCP setup flow is documented | `scripts/ai/codex/setup_mcp.py` generates the tracked and local projections described by `README.md` | Confirmed design fact; no issue by itself |"
+        },
+        {
+          "path": ".github/ISSUES/AI-AGENT-CONFIG-AUDIT-2026-07-14-ISSUE-PACK.md",
+          "line": 16,
+          "source_group": "other",
+          "text": "| F-06: Cursor/Copilot runtime files are not auditable | `.cursor/mcp.json` and `.vscode/mcp.json` remain intentionally local/generated, but their shape is owned by `setup_mcp.py` and covered by setup"
+        },
+        {
+          "path": ".github/ISSUES/AI-RUNTIME-AUDIT-002-Eliminate-Tracked-Devin-MCP-Workstation-Paths.md",
+          "line": 19,
+          "source_group": "other",
+          "text": "- `scripts/ai/codex/setup_mcp.py` intentionally generates `.devin/config.json`"
+        },
+        {
+          "path": ".github/ISSUES/AI-RUNTIME-AUDIT-002-Eliminate-Tracked-Devin-MCP-Workstation-Paths.md",
+          "line": 60,
+          "source_group": "other",
+          "text": "- Update `scripts/ai/codex/setup_mcp.py` so Devin generation follows the chosen"
+        },
         {
           "path": "docs/00-project/ai/agents/policy/MCP_LOCAL_RUNTIME_CONFIG.md",
           "line": 28,
@@ -1240,30 +1340,6 @@
           "line": 37,
           "source_group": "docs",
           "text": "`python scripts\\ai\\codex\\setup_mcp.py --qodo-only` when only the local Qodo"
-        },
-        {
-          "path": "docs/03-guides/development/codex-paths.md",
-          "line": 39,
-          "source_group": "docs",
-          "text": "| MCP setup backend | `scripts/ai/codex/setup_mcp.py` | Canonical Python backend for generated MCP runtime config files. |"
-        },
-        {
-          "path": "scripts/ai/codex/helper/ensure-mcp.sh",
-          "line": 9,
-          "source_group": "scripts",
-          "text": "SETUP_MCP=\"${ROOT_DIR}/setup_mcp.py\""
-        },
-        {
-          "path": "scripts/ai/codex/helper/run-codex-impl.sh",
-          "line": 76,
-          "source_group": "scripts",
-          "text": "# Add 60-second timeout to prevent hanging on setup_mcp.py"
-        },
-        {
-          "path": "scripts/ai/cursor/README.md",
-          "line": 21,
-          "source_group": "scripts",
-          "text": "python3 scripts/ai/codex/setup_mcp.py --root . --workspace-root . --skip-codex --skip-gemini-settings"
         }
       ]
     },
@@ -3981,7 +4057,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
-          "line": 134,
+          "line": 128,
           "source_group": "docs",
           "text": "- `python scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`"
         },
@@ -4623,7 +4699,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
-          "line": 130,
+          "line": 124,
           "source_group": "docs",
           "text": "- `python scripts/diagrams/lint_diagrams.py docs`"
         },
@@ -5203,7 +5279,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
-          "line": 131,
+          "line": 125,
           "source_group": "docs",
           "text": "- `bash scripts/diagrams/validate_mermaid_syntax.sh`"
         },
@@ -5273,7 +5349,7 @@
         "grafana-dashboard-extension",
         "py-doc-bot"
       ],
-      "reference_count": 153,
+      "reference_count": 155,
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md",
@@ -5294,6 +5370,18 @@
           "text": "`python -m scripts.docs check-drift --runtime-mirrors --freshness`."
         },
         {
+          "path": ".github/ISSUES/AI-RUNTIME-AUDIT-001-Make-AI-Skill-Mirror-CI-Truthful-And-Enforce-Devin-Parity.md",
+          "line": 93,
+          "source_group": "other",
+          "text": "uv run python -m scripts.docs check-drift --runtime-mirrors --freshness"
+        },
+        {
+          "path": ".github/ISSUES/AI-RUNTIME-AUDIT-002-Eliminate-Tracked-Devin-MCP-Workstation-Paths.md",
+          "line": 107,
+          "source_group": "other",
+          "text": "uv run python -m scripts.docs check-drift --runtime-mirrors --freshness"
+        },
+        {
           "path": ".github/workflows/docs-kpi-weekly.yml",
           "line": 30,
           "source_group": "ci",
@@ -5310,18 +5398,6 @@
           "line": 145,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs verify"
-        },
-        {
-          "path": ".github/workflows/provider-contract-drift.yml",
-          "line": 75,
-          "source_group": "ci",
-          "text": "uv run python -m scripts.docs generate-pipeline-normalization-matrix --check"
-        },
-        {
-          "path": ".github/workflows/tests.yml",
-          "line": 414,
-          "source_group": "ci",
-          "text": "run: uv run python -m scripts.docs export-matrix-structural-contract --check"
         }
       ]
     },
@@ -5568,8 +5644,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
+        {
+          "path": ".github/ISSUES/AI-RUNTIME-AUDIT-001-Make-AI-Skill-Mirror-CI-Truthful-And-Enforce-Devin-Parity.md",
+          "line": 25,
+          "source_group": "other",
+          "text": "- `scripts/docs/checks/check_drift.py` scans both runtime roots for selected"
+        },
         {
           "path": "scripts/docs/README.md",
           "line": 44,
@@ -5670,9 +5752,9 @@
         },
         {
           "path": "tests/architecture/test_documentation_cleanup_inventory.py",
-          "line": 294,
+          "line": 292,
           "source_group": "tests",
-          "text": "assert route[\"generator\"] == \"scripts/docs/checks/documentation_cleanup_inventory.py\""
+          "text": "route[\"generator\"] == \"scripts/docs/checks/documentation_cleanup_inventory.py\""
         }
       ]
     },
@@ -9945,7 +10027,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/grafana-dashboard-render/SKILL.md",
-          "line": 75,
+          "line": 69,
           "source_group": "docs",
           "text": "uv run python scripts/engineering/qa/report_dashboard_inventory.py --json"
         },
@@ -10926,7 +11008,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/vcr-record/SKILL.md",
-          "line": 62,
+          "line": 56,
           "source_group": "docs",
           "text": "python -m scripts.engineering.qa.vcr check-placement"
         },
@@ -13272,8 +13354,20 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 5,
       "references": [
+        {
+          "path": "docs/00-project/ai/audit/observability-issues/OBS-006-validation-findings.md",
+          "line": 5,
+          "source_group": "docs",
+          "text": "**Validation Script**: `scripts/ops/observability/grafana/audit_live_grafana_panels.py`"
+        },
+        {
+          "path": "docs/00-project/ai/audit/observability-issues/OBS-006-validation-findings.md",
+          "line": 176,
+          "source_group": "docs",
+          "text": "The existing `audit_live_grafana_panels.py` script is ready for:"
+        },
         {
           "path": "scripts/ops/__main__.py",
           "line": 47,
@@ -13507,6 +13601,123 @@
       "lifecycle_decision": "windows_compatibility_wrapper",
       "review_by": "2026-07-15",
       "next_step": "Retain as the Windows-side compatibility launcher for the canonical scripts.ops ensure-quarantine-explorer command while Grafana local audit flows may still need a direct PowerShell entrypoint; retire it once Windows-specific observability launch wrappers are fully consolidated."
+    },
+    {
+      "path": "scripts/ops/observability/validate_emitter_contracts.py",
+      "type": "py",
+      "status": "unknown",
+      "agent_usage": [],
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "docs/00-project/ai/audit/observability-issues/OBS-004-validation-findings.md",
+          "line": 5,
+          "source_group": "docs",
+          "text": "**Validation Script**: `scripts/ops/observability/validate_emitter_contracts.py`"
+        },
+        {
+          "path": "docs/00-project/ai/audit/observability-issues/OBS-004-validation-findings.md",
+          "line": 137,
+          "source_group": "docs",
+          "text": "The `validate_emitter_contracts.py` script is ready for:"
+        },
+        {
+          "path": "docs/00-project/ai/audit/observability-issues/VALIDATION-SUMMARY.md",
+          "line": 115,
+          "source_group": "docs",
+          "text": "### 3. `validate_emitter_contracts.py`"
+        },
+        {
+          "path": "docs/00-project/ai/audit/observability-issues/VALIDATION-SUMMARY.md",
+          "line": 138,
+          "source_group": "docs",
+          "text": "python scripts/ops/observability/validate_emitter_contracts.py"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/observability/validate_live_observability.py",
+      "type": "py",
+      "status": "unknown",
+      "agent_usage": [],
+      "reference_count": 5,
+      "references": [
+        {
+          "path": "docs/00-project/ai/audit/observability-issues/OBS-003-validation-findings.md",
+          "line": 5,
+          "source_group": "docs",
+          "text": "**Validation Script**: `scripts/ops/observability/validate_live_observability.py`"
+        },
+        {
+          "path": "docs/00-project/ai/audit/observability-issues/OBS-003-validation-findings.md",
+          "line": 128,
+          "source_group": "docs",
+          "text": "The validation script `validate_live_observability.py` is ready for:"
+        },
+        {
+          "path": "docs/00-project/ai/audit/observability-issues/VALIDATION-SUMMARY.md",
+          "line": 7,
+          "source_group": "docs",
+          "text": "**Validation Script**: `scripts/ops/observability/validate_live_observability.py`"
+        },
+        {
+          "path": "docs/00-project/ai/audit/observability-issues/VALIDATION-SUMMARY.md",
+          "line": 97,
+          "source_group": "docs",
+          "text": "### 1. `validate_live_observability.py`"
+        },
+        {
+          "path": "docs/00-project/ai/audit/observability-issues/VALIDATION-SUMMARY.md",
+          "line": 132,
+          "source_group": "docs",
+          "text": "python scripts/ops/observability/validate_live_observability.py"
+        }
+      ]
+    },
+    {
+      "path": "scripts/ops/observability/validate_metric_to_panel_mapping.py",
+      "type": "py",
+      "status": "unknown",
+      "agent_usage": [],
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "docs/00-project/ai/audit/observability-issues/OBS-002-validation-findings.md",
+          "line": 5,
+          "source_group": "docs",
+          "text": "**Validation Script**: `scripts/ops/observability/validate_metric_to_panel_mapping.py`"
+        },
+        {
+          "path": "docs/00-project/ai/audit/observability-issues/OBS-002-validation-findings.md",
+          "line": 38,
+          "source_group": "docs",
+          "text": "- **Fix Applied**: Improved error handling in `validate_metric_to_panel_mapping.py` to handle missing keys gracefully using `.get()` with default values"
+        },
+        {
+          "path": "docs/00-project/ai/audit/observability-issues/OBS-002-validation-findings.md",
+          "line": 117,
+          "source_group": "docs",
+          "text": "The validation script `validate_metric_to_panel_mapping.py` is ready for:"
+        },
+        {
+          "path": "docs/00-project/ai/audit/observability-issues/VALIDATION-SUMMARY.md",
+          "line": 25,
+          "source_group": "docs",
+          "text": "**Validation Script**: `scripts/ops/observability/validate_metric_to_panel_mapping.py`"
+        },
+        {
+          "path": "docs/00-project/ai/audit/observability-issues/VALIDATION-SUMMARY.md",
+          "line": 105,
+          "source_group": "docs",
+          "text": "### 2. `validate_metric_to_panel_mapping.py`"
+        },
+        {
+          "path": "docs/00-project/ai/audit/observability-issues/VALIDATION-SUMMARY.md",
+          "line": 135,
+          "source_group": "docs",
+          "text": "python scripts/ops/observability/validate_metric_to_panel_mapping.py"
+        }
+      ]
     },
     {
       "path": "scripts/ops/runtime/deploy/deploy-bioetl.sh",
@@ -13909,7 +14120,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/grafana-dashboard-render/SKILL.md",
-          "line": 166,
+          "line": 160,
           "source_group": "docs",
           "text": "- Repo env bootstrap: `scripts/ops/support/load_repo_env.sh`"
         },
@@ -13999,8 +14210,14 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
+        {
+          "path": ".github/ISSUES/AI-RUNTIME-AUDIT-001-Make-AI-Skill-Mirror-CI-Truthful-And-Enforce-Devin-Parity.md",
+          "line": 91,
+          "source_group": "other",
+          "text": "bash scripts/ops/support/skills/check_ai_skills_layout.sh"
+        },
         {
           "path": ".github/workflows/skills-consistency.yml",
           "line": 24,
@@ -14137,7 +14354,7 @@
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 74,
+          "line": 62,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.schema generate-artifacts --check"
         },
@@ -14299,13 +14516,13 @@
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 18,
+          "line": 12,
           "source_group": "ci",
           "text": "- 'scripts/schema/generate_contracts.py'"
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 38,
+          "line": 26,
           "source_group": "ci",
           "text": "- 'scripts/schema/generate_contracts.py'"
         },
@@ -14477,13 +14694,13 @@
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 19,
+          "line": 13,
           "source_group": "ci",
           "text": "- 'scripts/schema/generate_schema_artifacts.py'"
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 39,
+          "line": 27,
           "source_group": "ci",
           "text": "- 'scripts/schema/generate_schema_artifacts.py'"
         },
@@ -14983,19 +15200,19 @@
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 21,
+          "line": 15,
           "source_group": "ci",
           "text": "- 'src/tools/generate_json_field_typing_inventory.py'"
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 41,
+          "line": 29,
           "source_group": "ci",
           "text": "- 'src/tools/generate_json_field_typing_inventory.py'"
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 129,
+          "line": 117,
           "source_group": "ci",
           "text": "run: uv run python src/tools/generate_json_field_typing_inventory.py"
         },
@@ -15114,19 +15331,19 @@
       "references": [
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 20,
+          "line": 14,
           "source_group": "ci",
           "text": "- 'src/tools/verify_schema_parity.py'"
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 40,
+          "line": 28,
           "source_group": "ci",
           "text": "- 'src/tools/verify_schema_parity.py'"
         },
         {
           "path": ".github/workflows/schema-governance.yml",
-          "line": 126,
+          "line": 114,
           "source_group": "ci",
           "text": "run: uv run python src/tools/verify_schema_parity.py --mode blocking"
         },

@@ -5,26 +5,20 @@ concurrency:
 
 on:
   push:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '.ai/**'
-      - '.github/workflows/**'
-      - 'LICENSE'
     branches:
       - main
       - master
-  pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '.ai/**'
-      - '.github/workflows/**'
-      - 'LICENSE'
     paths:
       - 'src/bioetl/domain/**'
       - 'src/bioetl/application/**'
       - 'tests/**'
+      - '.github/workflows/mutation-testing.yml'
+  pull_request:
+    paths:
+      - 'src/bioetl/domain/**'
+      - 'src/bioetl/application/**'
+      - 'tests/**'
+      - '.github/workflows/mutation-testing.yml'
   schedule:
     # Run weekly on Sundays at 00:00 UTC
     - cron: '0 0 * * 0'

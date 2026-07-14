@@ -394,14 +394,14 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "165",
+      "line": "166",
       "path": "tests/unit/infrastructure/observability/test_tracing.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_close_is_idempotent__test_open_telemetry_tracer_close_infrastructure_observability_test_tracing_158"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "347",
+      "line": "348",
       "path": "tests/unit/infrastructure/observability/test_tracing.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_flush_swallows_provider_errors"
@@ -478,7 +478,7 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "1224",
+      "line": "1243",
       "path": "tests/unit/infrastructure/quarantine/test_unified_quarantine.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_aclose_does_nothing"
@@ -1631,14 +1631,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "165",
+        "line": "166",
         "path": "tests/unit/infrastructure/observability/test_tracing.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_close_is_idempotent__test_open_telemetry_tracer_close_infrastructure_observability_test_tracing_158"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "347",
+        "line": "348",
         "path": "tests/unit/infrastructure/observability/test_tracing.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_flush_swallows_provider_errors"
@@ -1715,7 +1715,7 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "1224",
+        "line": "1243",
         "path": "tests/unit/infrastructure/quarantine/test_unified_quarantine.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_aclose_does_nothing"
@@ -2174,8 +2174,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 1990,
-      "test_python_file_count": 2200,
+      "test_glob_file_count": 1992,
+      "test_python_file_count": 2202,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2217,12 +2217,12 @@
       "top_level_directory_count_including_pycache": 17
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 1990,
-    "total_test_functions": 22230,
+    "total_test_files": 1992,
+    "total_test_functions": 22243,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "30a4b2b5826f04f69d7344ebd868e48f229f69971df7cb8b6f9b0e318505a1d6",
+  "source_tree_sha256": "a8575fb97148761fab35549fec948096b801e112d7e00944f4b84e6090309d5d",
   "summary": {
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
@@ -2239,8 +2239,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 1990,
-    "test_python_file_count": 2200,
+    "test_glob_file_count": 1992,
+    "test_python_file_count": 2202,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2282,7 +2282,7 @@
     "top_level_directory_count_including_pycache": 17
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 1990,
-  "total_test_functions": 22230,
+  "total_test_files": 1992,
+  "total_test_functions": 22243,
   "uuid4_call_sites": 0
 }

@@ -28,6 +28,17 @@ def test_workflow_is_valid_yaml(
 
 
 @pytest.mark.parametrize("wf", _all_workflow_files(), ids=lambda p: p.name)
+def test_workflow_has_no_utf8_bom(
+    wf: Path,
+    workflow_text_cache: dict[Path, str],
+) -> None:
+    """Workflow keys must not be prefixed by hidden UTF-8 BOM characters."""
+    assert not workflow_text_cache[wf].startswith("\ufeff"), (
+        f"{wf.name}: remove the UTF-8 BOM before the top-level name key"
+    )
+
+
+@pytest.mark.parametrize("wf", _all_workflow_files(), ids=lambda p: p.name)
 def test_workflow_has_required_top_keys(
     wf: Path,
     workflow_yaml_cache: dict[Path, object],
@@ -38,6 +49,26 @@ def test_workflow_has_required_top_keys(
     # YAML parses unquoted 'on:' as boolean True
     assert "on" in data or True in data, f"{wf.name}: missing 'on:' trigger"
     assert "jobs" in data, f"{wf.name}: missing 'jobs:'"
+
+
+@pytest.mark.parametrize("wf", _all_workflow_files(), ids=lambda p: p.name)
+def test_event_does_not_mix_paths_and_paths_ignore(
+    wf: Path,
+    workflow_yaml_cache: dict[Path, object],
+) -> None:
+    """GitHub forbids paths and paths-ignore on the same event."""
+    data = workflow_yaml_cache[wf]
+    assert isinstance(data, dict), f"{wf.name}: not a YAML mapping"
+    triggers = data.get("on", data.get(True))
+    if not isinstance(triggers, dict):
+        return
+
+    for event_name, event_config in triggers.items():
+        if not isinstance(event_config, dict):
+            continue
+        assert not ({"paths", "paths-ignore"} <= event_config.keys()), (
+            f"{wf.name}:{event_name} cannot define both paths and paths-ignore"
+        )
 
 
 @pytest.mark.parametrize("wf", _all_workflow_files(), ids=lambda p: p.name)

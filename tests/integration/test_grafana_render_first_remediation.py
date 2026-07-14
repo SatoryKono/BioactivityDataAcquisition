@@ -237,7 +237,7 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
 
 def test_rf005_incident_hierarchy_and_semantic_encoding() -> None:
     overview = _load("bioetl-overview-v2.json")
-    assert _panel(overview, 9601)["gridPos"]["y"] == 18
+    assert _panel(overview, 9601)["gridPos"]["y"] == 31
     assert _panel(overview, 9018).get("type") == "state-timeline"
     assert _panel(overview, 9020).get("type") == "state-timeline"
 
@@ -290,7 +290,7 @@ def test_rf006_progressive_disclosure_reduces_first_path() -> None:
 
     overview = _load("bioetl-overview-v2.json")
     inputs = _panel(overview, 9002)
-    assert inputs["gridPos"] == {"h": 6, "w": 24, "x": 0, "y": 24}
+    assert inputs["gridPos"] == {"h": 8, "w": 12, "x": 0, "y": 22}
     for row_id in (9014, 9009, 9012):
         assert _panel(overview, row_id).get("collapsed") is True
 

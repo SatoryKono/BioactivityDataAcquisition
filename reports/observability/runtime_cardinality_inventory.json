@@ -1,16 +1,19 @@
 {
   "alerted_metrics": [
     "bioetl_adapter_requests_total",
+    "bioetl_checkpoint_age_seconds",
     "bioetl_checkpoint_compatibility_events_total",
     "bioetl_checkpoint_load_events_total",
     "bioetl_checkpoint_operator_operations_total",
     "bioetl_checkpoint_save_events_total",
     "bioetl_checkpoint_saved_at_seconds",
     "bioetl_circuit_breaker_state",
+    "bioetl_control_plane_checkpoint_evidence_status",
     "bioetl_control_plane_ledger_appends_total",
     "bioetl_control_plane_manifest_writes_total",
     "bioetl_control_plane_reads_total",
     "bioetl_control_plane_run_type_universe",
+    "bioetl_control_plane_telemetry_missing_5m",
     "bioetl_control_plane_terminal_events_total",
     "bioetl_data_freshness_seconds",
     "bioetl_data_source_retry_exhausted_total",
@@ -45,6 +48,7 @@
     "bioetl_replay_drift_events_total",
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
+    "bioetl_replay_safety_blockers_15m",
     "bioetl_runtime_current_status",
     "bioetl_runtime_current_status_scoped",
     "bioetl_runtime_pipeline_run_type_universe_scoped",
@@ -112,6 +116,7 @@
     "bioetl_composite_phase_retries_total",
     "bioetl_composite_source_selection_total",
     "bioetl_control_plane_current_status",
+    "bioetl_control_plane_current_status_trusted",
     "bioetl_control_plane_ledger_append_duration_seconds",
     "bioetl_control_plane_ledger_appends_total",
     "bioetl_control_plane_lifecycle_apply_total",
@@ -396,7 +401,9 @@
     "bioetl_composite_phase_records_total",
     "bioetl_composite_phase_retries_total",
     "bioetl_composite_source_selection_total",
+    "bioetl_control_plane_checkpoint_evidence_status",
     "bioetl_control_plane_current_status",
+    "bioetl_control_plane_current_status_trusted",
     "bioetl_control_plane_ledger_append_duration_seconds",
     "bioetl_control_plane_ledger_appends_total",
     "bioetl_control_plane_lifecycle_apply_total",
@@ -1041,6 +1048,16 @@
     ],
     "bioetl_control_plane_current_status": [
       "docs/03-guides/dashboards/README.md"
+    ],
+    "bioetl_control_plane_current_status_trusted": [
+      "docs/03-guides/dashboards/README.md",
+      "docs/03-guides/dashboards/dashboard-checklist-per-dashboard.md",
+      "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
+      "docs/03-guides/dashboards/dashboard-v2-usage.md",
+      "docs/03-guides/dashboards/design-system.md",
+      "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
+      "grafana/README.md",
+      "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
     "bioetl_control_plane_ledger_append_duration_seconds": [
       "docs/04-reference/observability/metrics-catalog.md"
@@ -1747,16 +1764,15 @@
       "grafana/dashboards/bioetl-runtime.json"
     ],
     "bioetl_runtime_current_status": [
+      "docs/03-guides/dashboards/dashboard-checklist-per-dashboard.md",
+      "docs/04-reference/observability/alerting-guide.md",
+      "docs/04-reference/observability/metrics-catalog.md"
+    ],
+    "bioetl_runtime_current_status_trusted": [
       "docs/03-guides/dashboards/README.md",
       "docs/03-guides/dashboards/dashboard-checklist-per-dashboard.md",
       "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
       "docs/03-guides/dashboards/design-system.md",
-      "docs/03-guides/dashboards/panels/bioetl-workflow-overview-panels.md",
-      "docs/04-reference/observability/alerting-guide.md",
-      "docs/04-reference/observability/metrics-catalog.md",
-      "grafana/dashboards/bioetl-workflow-overview.json"
-    ],
-    "bioetl_runtime_current_status_trusted": [
       "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-runtime.json"
@@ -1768,6 +1784,8 @@
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_runtime_trust_gap_status_10m": [
+      "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
+      "docs/03-guides/dashboards/design-system.md",
       "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-runtime.json"
@@ -2551,7 +2569,9 @@
     "bioetl_composite_phase_records_total",
     "bioetl_composite_phase_retries_total",
     "bioetl_composite_source_selection_total",
+    "bioetl_control_plane_checkpoint_evidence_status",
     "bioetl_control_plane_current_status",
+    "bioetl_control_plane_current_status_trusted",
     "bioetl_control_plane_ledger_append_duration_seconds",
     "bioetl_control_plane_ledger_appends_total",
     "bioetl_control_plane_lifecycle_apply_total",
@@ -2751,6 +2771,9 @@
     "bioetl_adapter_requests_total": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
+    "bioetl_checkpoint_age_seconds": [
+      "grafana/prometheus-rules/bioetl_control_plane_current_status.yml"
+    ],
     "bioetl_checkpoint_compatibility_events_total": [
       "grafana/prometheus-rules/bioetl_control_plane_current_status.yml",
       "grafana/prometheus-rules/bioetl_observability.yml"
@@ -2770,6 +2793,9 @@
     "bioetl_circuit_breaker_state": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
+    "bioetl_control_plane_checkpoint_evidence_status": [
+      "grafana/prometheus-rules/bioetl_control_plane_current_status.yml"
+    ],
     "bioetl_control_plane_ledger_appends_total": [
       "grafana/prometheus-rules/bioetl_control_plane_current_status.yml",
       "grafana/prometheus-rules/bioetl_observability.yml"
@@ -2782,6 +2808,9 @@
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_control_plane_run_type_universe": [
+      "grafana/prometheus-rules/bioetl_control_plane_current_status.yml"
+    ],
+    "bioetl_control_plane_telemetry_missing_5m": [
       "grafana/prometheus-rules/bioetl_control_plane_current_status.yml"
     ],
     "bioetl_control_plane_terminal_events_total": [
@@ -2888,6 +2917,9 @@
     "bioetl_replay_reconstructability_events_total": [
       "grafana/prometheus-rules/bioetl_control_plane_current_status.yml",
       "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_replay_safety_blockers_15m": [
+      "grafana/prometheus-rules/bioetl_control_plane_current_status.yml"
     ],
     "bioetl_runtime_current_status": [
       "grafana/prometheus-rules/bioetl_observability.yml"

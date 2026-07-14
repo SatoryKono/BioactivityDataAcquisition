@@ -104,7 +104,9 @@ def test_ai_skill_reference_redirects_are_active_compatibility_surfaces() -> Non
     for path in sorted(redirect_paths):
         assert rows[path]["status"] == "Active"
         assert rows[path]["lifecycle"] == "published_skill_reference_redirect"
-        assert rows[path]["duplicate_resolution"] == "published_skill_reference_redirect"
+        assert (
+            rows[path]["duplicate_resolution"] == "published_skill_reference_redirect"
+        )
         assert rows[path]["recommended_action"] == "keep"
 
 
@@ -141,16 +143,14 @@ def test_documentation_cleanup_inventory_covers_github_issue_drafts() -> None:
 
     issue_rows = [path for path in rows if path.startswith(".github/ISSUES/")]
     assert len(issue_rows) == len(tracked_issue_files)
-    assert len(issue_rows) >= 100
+    assert len(issue_rows) >= 128
     assert rows[".github/ISSUES/README.md"]["lifecycle"] == "guide"
     assert rows[".github/ISSUES/CHEMBL-ISSUES-INDEX.md"]["lifecycle"] == "index"
     assert (
         rows[".github/ISSUES/DOC-AUDIT-2026-06-19-ISSUE-PACK.md"]["lifecycle"]
         == "issue_pack"
     )
-    live_issue = rows[
-        ".github/ISSUES/ADR-HYGIENE-4746-Archive-ADR-003-ADR-008.md"
-    ]
+    live_issue = rows[".github/ISSUES/ADR-HYGIENE-4746-Archive-ADR-003-ADR-008.md"]
     assert live_issue["lifecycle"] == "live_issue_mirror"
     assert live_issue["github_issue_number"] == 4746
     assert live_issue["recommended_action"] == "reconcile-with-github-state"
@@ -181,8 +181,7 @@ def test_documentation_cleanup_inventory_includes_local_docs_reports() -> None:
     assert rows["docs/reports/README.md"]["tracking_state"] == "tracked"
     assert rows["docs/reports/index.md"]["tracking_state"] == "tracked"
     assert (
-        rows["docs/reports/index.md"]["lifecycle"]
-        == "docs_reports_curated_entrypoint"
+        rows["docs/reports/index.md"]["lifecycle"] == "docs_reports_curated_entrypoint"
     )
     inventory_json = rows["docs/reports/generated/documentation-cleanup-inventory.json"]
     assert inventory_json["tracking_state"] == "tracked"
@@ -211,9 +210,7 @@ def test_documentation_cleanup_inventory_generated_routes_are_owned() -> None:
         == "api-reference-generated-docs"
     )
     assert (
-        rows["docs/03-guides/dashboards/panel-title-inventory.md"][
-            "generated_route"
-        ]
+        rows["docs/03-guides/dashboards/panel-title-inventory.md"]["generated_route"]
         == "dashboard-panel-title-inventory-generated-doc"
     )
     assert (
@@ -291,7 +288,9 @@ def test_documentation_cleanup_inventory_routed_in_registry() -> None:
     route = next(
         item for item in routes if item.get("id") == "documentation-cleanup-inventory"
     )
-    assert route["generator"] == "scripts/docs/checks/documentation_cleanup_inventory.py"
+    assert (
+        route["generator"] == "scripts/docs/checks/documentation_cleanup_inventory.py"
+    )
     outputs = {str(output) for output in route.get("outputs", [])}
     assert "docs/reports/generated/documentation-cleanup-inventory.json" in outputs
     assert "docs/reports/generated/documentation-cleanup-inventory.md" in outputs
