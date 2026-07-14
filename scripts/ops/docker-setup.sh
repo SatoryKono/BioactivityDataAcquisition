@@ -110,7 +110,7 @@ start_main_stack() {
     ensure_env_file
     ensure_external_networks
     log_info "Starting BioETL services..."
-    docker compose up -d
+    docker compose -p bioetl-main -f docker-compose.yml up -d
     log_success "BioETL services started."
 }
 
@@ -119,23 +119,23 @@ start_full_stack() {
     ensure_external_networks
 
     log_info "Starting Neo4j..."
-    docker compose -f docker-compose.neo4j.yml up -d
+    docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d
     log_success "Neo4j started."
 
     log_info "Starting Redis..."
-    docker compose -f scripts/ops/runtime/docker/compose/redis.yml up -d
+    docker compose -p bioetl-redis -f scripts/ops/runtime/docker/compose/redis.yml up -d
     log_success "Redis started."
 
     log_info "Starting MinIO..."
-    docker compose -f scripts/ops/runtime/docker/compose/minio.yml up -d
+    docker compose -p bioetl-minio -f scripts/ops/runtime/docker/compose/minio.yml up -d
     log_success "MinIO started."
 
     log_info "Starting monitoring stack..."
-    docker compose -f docker-compose.monitoring.yml up -d
+    docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml up -d
     log_success "Monitoring stack started."
 
     log_info "Starting BioETL services..."
-    docker compose up -d
+    docker compose -p bioetl-main -f docker-compose.yml up -d
     log_success "BioETL services started."
 }
 
@@ -143,7 +143,7 @@ start_monitoring() {
     ensure_env_file
     ensure_external_networks
     log_info "Starting monitoring stack..."
-    docker compose -f docker-compose.monitoring.yml up -d
+    docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml up -d
     log_success "Monitoring stack started."
 }
 
@@ -151,41 +151,41 @@ start_mcp() {
     ensure_env_file
     ensure_external_networks
     log_info "Starting MCP servers..."
-    docker compose -f docker-compose.codex.yml up -d
+    docker compose -p bioetl-codex -f docker-compose.codex.yml up -d
     log_success "MCP servers started."
 }
 
 stop_main_stack() {
     log_info "Stopping BioETL services..."
-    docker compose down
+    docker compose -p bioetl-main -f docker-compose.yml down
     log_success "BioETL services stopped."
 }
 
 stop_full_stack() {
     log_info "Stopping all Docker helper services..."
-    docker compose down
-    docker compose -f docker-compose.neo4j.yml down || true
-    docker compose -f scripts/ops/runtime/docker/compose/redis.yml down || true
-    docker compose -f scripts/ops/runtime/docker/compose/minio.yml down || true
-    docker compose -f docker-compose.monitoring.yml down || true
-    docker compose -f docker-compose.codex.yml down || true
+    docker compose -p bioetl-main -f docker-compose.yml down
+    docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml down || true
+    docker compose -p bioetl-redis -f scripts/ops/runtime/docker/compose/redis.yml down || true
+    docker compose -p bioetl-minio -f scripts/ops/runtime/docker/compose/minio.yml down || true
+    docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml down || true
+    docker compose -p bioetl-codex -f docker-compose.codex.yml down || true
     log_success "All Docker helper services stopped."
 }
 
 view_logs() {
     local service="${1:-}"
     if [[ -z "$service" ]]; then
-        docker compose logs -f
+        docker compose -p bioetl-main -f docker-compose.yml logs -f
     else
-        docker compose logs -f "$service"
+        docker compose -p bioetl-main -f docker-compose.yml logs -f "$service"
     fi
 }
 
 health_check() {
     log_info "Checking service health..."
-    docker compose ps
+    docker compose -p bioetl-main -f docker-compose.yml ps
 
-    if docker compose exec -T bioetl curl -f http://127.0.0.1:8081/health/ready 2>/dev/null; then
+    if docker compose -p bioetl-main -f docker-compose.yml exec -T bioetl curl -f http://127.0.0.1:8081/health/ready 2>/dev/null; then
         log_success "BioETL is healthy."
     else
         log_warning "BioETL health check failed."
@@ -194,7 +194,7 @@ health_check() {
 
 cleanup() {
     log_warning "Removing Docker resources for the main BioETL stack."
-    docker compose down --volumes
+    docker compose -p bioetl-main -f docker-compose.yml down --volumes
     docker rmi bioetl:latest || true
     log_success "Cleanup complete."
 }

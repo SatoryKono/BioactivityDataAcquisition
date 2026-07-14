@@ -71,12 +71,12 @@ function Test-McpNeo4jCredentials {
         Write-McpTokenWarning "NEO4J_URI is not set for $Purpose; wrapper will use its local default."
     }
     if (-not $env:NEO4J_USERNAME) {
-        Write-McpTokenWarning "NEO4J_USERNAME is not set for $Purpose; wrapper will use its local default."
+        Write-McpTokenWarning "NEO4J_USERNAME is not set for $Purpose; wrapper will fail closed."
     }
     if (-not $env:NEO4J_PASSWORD) {
-        Write-McpTokenWarning "NEO4J_PASSWORD is not set for $Purpose; wrapper will use its local default."
-    } elseif ($env:NEO4J_PASSWORD -eq "bioetl_secure_password") {
-        Write-McpTokenWarning "NEO4J_PASSWORD for $Purpose uses the documented local-dev default; rotate it for shared hosts."
+        Write-McpTokenWarning "NEO4J_PASSWORD is not set for $Purpose; wrapper will fail closed."
+    } elseif ($env:NEO4J_PASSWORD -match "_secure_password$") {
+        Write-McpTokenWarning "NEO4J_PASSWORD for $Purpose matches a legacy placeholder pattern; rotate it."
     }
 }
 

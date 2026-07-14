@@ -53,7 +53,7 @@ Expected output:
 Connection details:
   HTTP:  http://localhost:7475
   Bolt:  bolt://localhost:7688
-  Auth:  neo4j / audit_secure_password
+  Auth:  supplied via NEO4J_AUDIT_USERNAME / NEO4J_AUDIT_PASSWORD
 ```
 
 ### Start Audit Instance (WSL/Bash)
@@ -111,11 +111,11 @@ from src.tools.neo4j_audit import get_neo4j_uri, get_neo4j_auth
 
 # If LIVE_AUDIT_MODE=1:
 get_neo4j_uri()  # → bolt://localhost:7688 (audit)
-get_neo4j_auth()  # → ('neo4j', 'audit_secure_password')
+get_neo4j_auth()  # → values from NEO4J_AUDIT_USERNAME / NEO4J_AUDIT_PASSWORD
 
 # If LIVE_AUDIT_MODE not set:
 get_neo4j_uri()  # → bolt://host.docker.internal:7687 (MCP)
-get_neo4j_auth()  # → ('neo4j', 'bioetl_secure_password')
+get_neo4j_auth()  # → values from NEO4J_USERNAME / NEO4J_PASSWORD
 ```
 
 ______________________________________________________________________
@@ -188,7 +188,7 @@ ______________________________________________________________________
 netstat -an | findstr "7475\|7688"
 
 # If busy, close MCP instance first:
-docker compose -f docker-compose.neo4j.yml down
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml down
 ```
 
 ### OOMKilled during audit

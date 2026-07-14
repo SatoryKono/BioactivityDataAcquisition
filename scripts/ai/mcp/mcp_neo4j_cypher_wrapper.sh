@@ -25,8 +25,10 @@ fi
 
 export NEO4J_URI
 export NEO4J_URL="${NEO4J_URL:-${NEO4J_URI}}"
-export NEO4J_USERNAME="${NEO4J_USERNAME:-neo4j}"
-export NEO4J_PASSWORD="${NEO4J_PASSWORD:-bioetl_secure_password}"
+: "${NEO4J_USERNAME:?NEO4J_USERNAME is required for Neo4j Cypher MCP}"
+: "${NEO4J_PASSWORD:?NEO4J_PASSWORD is required for Neo4j Cypher MCP}"
+export NEO4J_USERNAME
+export NEO4J_PASSWORD
 export NPM_CONFIG_CACHE="${NPM_CONFIG_CACHE:-${REPO_ROOT}/.cache/npm-cache}"
 mcp_validate_neo4j_credentials "Neo4j Cypher MCP"
 mcp_exit_if_validate_only "neo4j-cypher"

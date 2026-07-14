@@ -52,57 +52,49 @@ try {
 }
 
 Write-Host ""
-Write-Host "═ STEP 1: Clean Old Container ═" -ForegroundColor Magenta
+Write-Host "═ STEP 1: Validate Compose Owner ═" -ForegroundColor Magenta
 Write-Host ""
-docker rm -f bioetl-neo4j 2>&1 | Out-Null
-Write-Host "✅ Old container removed (or didn't exist)"
-
-Write-Host ""
-Write-Host "═ STEP 2: Start Neo4j 5.13-community ═" -ForegroundColor Magenta
-Write-Host ""
-Write-Host "Starting container..."
-$containerId = docker run -d --name bioetl-neo4j `
-  -p 7474:7474 -p 7687:7687 `
-  -e "NEO4J_AUTH=neo4j/bioetl_secure_password" `
-  -e "NEO4J_ACCEPT_LICENSE_AGREEMENT=yes" `
-  -e "NEO4J_server_memory_heap_initial__size=256m" `
-  -e "NEO4J_server_memory_heap_max__size=512m" `
-  neo4j:5.13-community 2>&1
-
-if ($containerId) {
-    Write-Host "✅ Container started: $($containerId.Substring(0, 12))"
-} else {
-    Write-Host "❌ Failed to start container"
+if ([string]::IsNullOrWhiteSpace($env:NEO4J_USERNAME) -or
+    [string]::IsNullOrWhiteSpace($env:NEO4J_PASSWORD)) {
+    Write-Host "❌ NEO4J_USERNAME and NEO4J_PASSWORD are required" -ForegroundColor Red
+    exit 1
+}
+if (-not (Test-Path "docker-compose.neo4j.yml")) {
+    Write-Host "❌ Run this checklist from the repository root" -ForegroundColor Red
     exit 1
 }
 
-Write-Host ""
-Write-Host "⏳ Waiting 60 seconds for Neo4j initialization..." -ForegroundColor Cyan
-for ($i = 60; $i -gt 0; $i--) {
-    Write-Progress -Activity "Neo4j starting" -Status "$i seconds remaining" -PercentComplete (($i / 60) * 100)
-    Start-Sleep -Seconds 1
+docker network inspect warp-network *> $null
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "❌ External network warp-network is missing" -ForegroundColor Red
+    Write-Host "   Run scripts/ops/docker-setup.ps1 first."
+    exit 1
 }
-Write-Host "✅ Wait complete"
+Write-Host "✅ Compose owner inputs are present"
+
+Write-Host ""
+Write-Host "═ STEP 2: Start bioetl-neo4j Compose Project ═" -ForegroundColor Magenta
+Write-Host ""
+Write-Host "Running: docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait --wait-timeout 240"
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait --wait-timeout 240
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "❌ Compose project failed readiness" -ForegroundColor Red
+    docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml logs --tail 50 neo4j
+    exit 1
+}
+Write-Host "✅ Compose project is healthy"
 
 Write-Host ""
 Write-Host "═ STEP 3: Verify Container Status ═" -ForegroundColor Magenta
 Write-Host ""
-$status = docker ps -a | Select-String "bioetl-neo4j"
-if ($status) {
-    Write-Host $status
-    if ($status -match "Up") {
-        Write-Host "✅ Container is running"
-    } else {
-        Write-Host "❌ Container is NOT running (Exited)"
-        Write-Host ""
-        Write-Host "Container logs:"
-        docker logs bioetl-neo4j | Select-Object -Last 50
-        exit 1
-    }
-} else {
-    Write-Host "❌ Container not found"
+$status = docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml ps --status running neo4j
+if ($LASTEXITCODE -ne 0 -or -not ($status -match "neo4j")) {
+    Write-Host "❌ Compose-owned Neo4j service is not running"
+    docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml logs --tail 50 neo4j
     exit 1
 }
+Write-Host $status
+Write-Host "✅ Compose-owned container is running"
 
 Write-Host ""
 Write-Host "═ STEP 4: Test HTTP Port (7474) ═" -ForegroundColor Magenta
@@ -123,7 +115,7 @@ try {
         } else {
             Write-Host "❌ HTTP port still not responding"
             Write-Host "   Container may have crashed. Check logs:"
-            docker logs bioetl-neo4j | Select-Object -Last 50
+            docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml logs --tail 50 neo4j
             exit 1
         }
     }
@@ -172,7 +164,7 @@ if ($driverTestPassed) {
     Write-Host "❌ MCP/backend verification FAILED"
     Write-Host ""
     Write-Host "Detailed container logs:"
-    docker logs bioetl-neo4j | Select-Object -Last 100
+    docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml logs --tail 100 neo4j
     exit 1
 }
 

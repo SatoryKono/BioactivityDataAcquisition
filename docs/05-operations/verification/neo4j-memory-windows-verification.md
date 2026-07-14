@@ -46,7 +46,7 @@ ______________________________________________________________________
 ```
 http://localhost:7474/browser/
 Username: neo4j
-Password: bioetl_secure_password
+Password: value from `NEO4J_PASSWORD`
 ```
 
 ### Codex MCP

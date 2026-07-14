@@ -1,7 +1,8 @@
+name: bioetl-alertmanager
+
 services:
   alertmanager:
     image: prom/alertmanager:latest
-    container_name: bioetl-alertmanager
     ports:
       - "127.0.0.1:9093:9093"
     volumes:

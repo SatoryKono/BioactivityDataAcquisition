@@ -12,7 +12,7 @@ $containerName = "bioetl-neo4j-audit"
 
 if ($Stop) {
     Write-Host "Stopping audit instance..." -ForegroundColor Yellow
-    docker compose -f $composeFile down
+    docker compose -p bioetl-neo4j-audit -f $composeFile down
     Write-Host "Stopped." -ForegroundColor Green
     exit 0
 }
@@ -24,7 +24,12 @@ if ($Logs) {
 }
 
 Write-Host "Starting Neo4j audit instance (1024m heap)..." -ForegroundColor Cyan
-docker compose -f $composeFile up -d
+if ([string]::IsNullOrWhiteSpace($env:NEO4J_AUDIT_USERNAME) -or
+    [string]::IsNullOrWhiteSpace($env:NEO4J_AUDIT_PASSWORD)) {
+    Write-Error "NEO4J_AUDIT_USERNAME and NEO4J_AUDIT_PASSWORD are required."
+    exit 1
+}
+docker compose -p bioetl-neo4j-audit -f $composeFile up -d
 
 Write-Host "Waiting for startup..." -ForegroundColor Yellow
 Start-Sleep -Seconds 45
@@ -36,7 +41,7 @@ if ($status -match "healthy") {
     Write-Host "Connection details:" -ForegroundColor Cyan
     Write-Host "  HTTP:  http://localhost:7475"
     Write-Host "  Bolt:  bolt://localhost:7688"
-    Write-Host "  Auth:  neo4j / audit_secure_password"
+    Write-Host "  Auth:  supplied via NEO4J_AUDIT_USERNAME / NEO4J_AUDIT_PASSWORD"
     Write-Host ""
     Write-Host "To run live validation:" -ForegroundColor Cyan
     Write-Host "  live --apply --only-complexity-layer --batch-size 5"

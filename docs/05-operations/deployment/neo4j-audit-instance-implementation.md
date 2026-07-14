@@ -22,7 +22,7 @@ ______________________________________________________________________
    - Separate Neo4j instance for audit workload
    - Memory: 512m initial, 1024m max (4x MCP instance)
    - Ports: 7475 (HTTP), 7688 (Bolt)
-   - Auth: neo4j / audit_secure_password
+   - Auth: `NEO4J_AUDIT_USERNAME` / `NEO4J_AUDIT_PASSWORD`
 
 1. ✅ **scripts/ops/runtime/neo4j/start-neo4j-audit.ps1**
 
@@ -99,7 +99,7 @@ grep -r "neo4j.driver" src/
 
    ```powershell
    $body = @{statements = @(@{statement = "RETURN 1 as test"})} | ConvertTo-Json
-   curl.exe -u neo4j:audit_secure_password -X POST `
+   curl.exe -u "${env:NEO4J_AUDIT_USERNAME}:${env:NEO4J_AUDIT_PASSWORD}" -X POST `
      -H "Content-Type: application/json" `
      -d $body `
      http://localhost:7475/db/neo4j/tx

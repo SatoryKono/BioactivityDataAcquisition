@@ -29,7 +29,7 @@ ______________________________________________________________________
 Connection details:
   HTTP:  http://localhost:7475
   Bolt:  bolt://localhost:7688
-  Auth:  neo4j / audit_secure_password
+  Auth:  supplied via NEO4J_AUDIT_USERNAME / NEO4J_AUDIT_PASSWORD
 ```
 
 ### 2. Run Live Validation
@@ -59,8 +59,8 @@ ______________________________________________________________________
 
 | Instance               | Purpose     | Memory     | Port HTTP | Port Bolt | Password               |
 | ---------------------- | ----------- | ---------- | --------- | --------- | ---------------------- |
-| **bioetl-neo4j**       | MCP (Codex) | 256m heap  | 7474      | 7687      | bioetl_secure_password |
-| **bioetl-neo4j-audit** | Live audit  | 1024m heap | 7475      | 7688      | audit_secure_password  |
+| **bioetl-neo4j**       | MCP (Codex) | 256m heap  | 7474      | 7687      | `NEO4J_PASSWORD` |
+| **bioetl-neo4j-audit** | Live audit  | 1024m heap | 7475      | 7688      | `NEO4J_AUDIT_PASSWORD` |
 
 ### Automatic Routing
 
@@ -72,7 +72,7 @@ uri = get_neo4j_uri()
 # Returns: bolt://localhost:7688 (audit instance)
 
 auth = get_neo4j_auth()
-# Returns: ('neo4j', 'audit_secure_password')
+# Returns credentials supplied through the audit environment variables
 ```
 
 Code automatically connects to the audit instance.
@@ -226,7 +226,7 @@ ______________________________________________________________________
 .\scripts\ops\start-neo4j-audit.ps1 -Logs
 
 # Common issues:
-# - Port 7475 already in use: docker kill bioetl-neo4j
+# - Port 7475 already in use: identify the owning project/process; do not kill containers by name
 # - Out of memory: Close other applications
 # - Image not found: docker pull neo4j:5.13-community
 ```
@@ -272,7 +272,7 @@ ______________________________________________________________________
 
 | Scenario                   | Instance           | Command                                            |
 | -------------------------- | ------------------ | -------------------------------------------------- |
-| Use @neo4j-memory in Codex | bioetl-neo4j       | `docker compose -f docker-compose.neo4j.yml up -d` |
+| Use @neo4j-memory in Codex | bioetl-neo4j       | `docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait` |
 | Run live validation        | bioetl-neo4j-audit | `.\scripts\ops\start-neo4j-audit.ps1`              |
 | Both simultaneously        | Both               | Start both, set LIVE_AUDIT_MODE for audit code     |
 

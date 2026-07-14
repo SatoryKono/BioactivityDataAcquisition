@@ -101,8 +101,6 @@ select_docker_bin() {
 
 ENV_TYPE=$(detect_env)
 DOCKER_BIN="$(select_docker_bin "$ENV_TYPE" || true)"
-CONTAINER_ALREADY_RUNNING=0
-CONTAINER_RESTARTED=0
 WSL_NEO4J_HOST="host.docker.internal"
 ENV_FILE_WRITE_ALLOWED=0
 if [[ "${BIOETL_CREATE_LOCAL_ENV_FILES:-0}" == "1" ]]; then
@@ -122,22 +120,12 @@ if [[ -z "${DOCKER_BIN}" ]]; then
 fi
 ok "Docker available via ${DOCKER_BIN}"
 
-# Check if container already exists
-if "${DOCKER_BIN}" ps -a --format "table {{.Names}}" 2>/dev/null | grep -q "^bioetl-neo4j$" \
-  && "${DOCKER_BIN}" ps --format "table {{.Names}}" 2>/dev/null | grep -q "^bioetl-neo4j$"; then
-    ok "Container bioetl-neo4j already RUNNING"
-    "${DOCKER_BIN}" ps 2>/dev/null | grep bioetl-neo4j | sed 's/^/  /'
-    CONTAINER_ALREADY_RUNNING=1
-elif "${DOCKER_BIN}" ps -a --format "table {{.Names}}" 2>/dev/null | grep -q "^bioetl-neo4j$"; then
-  warn "Container exists but is stopped"
-  info "Starting container..."
-  "${DOCKER_BIN}" start bioetl-neo4j >/dev/null 2>&1
-  sleep 5
-  ok "Container restarted"
-  CONTAINER_RESTARTED=1
-  else
-  :
+if ! "${DOCKER_BIN}" compose version >/dev/null 2>&1; then
+  fail "Docker Compose v2 is required"
+  exit 1
 fi
+: "${NEO4J_USERNAME:?NEO4J_USERNAME is required}"
+: "${NEO4J_PASSWORD:?NEO4J_PASSWORD is required}"
 
 # ============================================================================
 # Step 2: Configure for WSL or Native Docker
@@ -184,10 +172,10 @@ if [[ ! -f "$ENV_LOCAL" ]]; then
 
 # Connection: Use host.docker.internal for cross-WSL/Windows access
 NEO4J_URI=bolt://${NEO4J_HOST}:7687
-NEO4J_USERNAME=neo4j
-NEO4J_PASSWORD=bioetl_secure_password
+NEO4J_USERNAME=${NEO4J_USERNAME}
+NEO4J_PASSWORD=${NEO4J_PASSWORD}
 NEO4J_DATABASE=neo4j
-NEO4J_AUTH=neo4j/bioetl_secure_password
+NEO4J_AUTH=${NEO4J_USERNAME}/${NEO4J_PASSWORD}
 
 # Cache directory (WSL-friendly)
 NPM_CONFIG_CACHE=/tmp/npm-cache
@@ -208,10 +196,10 @@ fi
 
 if [[ ${ENV_FILE_WRITE_ALLOWED} -eq 1 ]]; then
   upsert_env_local "$ENV_LOCAL" "NEO4J_URI" "bolt://${NEO4J_HOST}:7687"
-  upsert_env_local "$ENV_LOCAL" "NEO4J_USERNAME" "neo4j"
-  upsert_env_local "$ENV_LOCAL" "NEO4J_PASSWORD" "bioetl_secure_password"
+  upsert_env_local "$ENV_LOCAL" "NEO4J_USERNAME" "${NEO4J_USERNAME}"
+  upsert_env_local "$ENV_LOCAL" "NEO4J_PASSWORD" "${NEO4J_PASSWORD}"
   upsert_env_local "$ENV_LOCAL" "NEO4J_DATABASE" "neo4j"
-  upsert_env_local "$ENV_LOCAL" "NEO4J_AUTH" "neo4j/bioetl_secure_password"
+  upsert_env_local "$ENV_LOCAL" "NEO4J_AUTH" "${NEO4J_USERNAME}/${NEO4J_PASSWORD}"
   upsert_env_local "$ENV_LOCAL" "NPM_CONFIG_CACHE" "/tmp/npm-cache"
   upsert_env_local "$ENV_LOCAL" "MEMORY_FILE_PATH" "${REPO_ROOT}/docs/00-project/ai/memory/mcp-memory.json"
   ok "Neo4j keys in .env.local synchronized for ${ENV_TYPE}"
@@ -222,82 +210,32 @@ fi
 # ============================================================================
 header "Step 4: Starting Neo4j Container"
 
-if [[ $CONTAINER_ALREADY_RUNNING -eq 1 ]]; then
-  info "Container already running — skipping create step"
-elif [[ $CONTAINER_RESTARTED -eq 1 ]]; then
-  info "Container restarted — skipping create step"
-else
-  info "Launching Neo4j 5.15-community..."
-  info "This takes 10-15 seconds on first startup"
-
-  if ! docker_run_output="$(
-    "${DOCKER_BIN}" run -d \
-      --name bioetl-neo4j \
-      -p 7474:7474 \
-      -p 7687:7687 \
-      -e NEO4J_AUTH=neo4j/bioetl_secure_password \
-      -e NEO4J_ACCEPT_LICENSE_AGREEMENT=yes \
-      -e NEO4J_server_memory_heap_max_size=512m \
-      -e NEO4J_server_memory_pagecache_size=256m \
-      neo4j:5.15-community 2>&1
-  )"; then
-    fail "Failed to start container"
-    printf '%s\n' "$docker_run_output" >&2
-    if grep -qi "permission denied while trying to connect to the Docker daemon socket" <<<"$docker_run_output"; then
-      info "Hint: in WSL, prefer Docker Desktop integration via docker.exe or enable docker daemon access for your Linux docker client"
-    fi
-    if grep -qi "Conflict.*container name" <<<"$docker_run_output"; then
-      info "Hint: remove stale container with: docker rm -f bioetl-neo4j"
-    fi
-    if grep -qi "port is already allocated\|bind.*address already in use" <<<"$docker_run_output"; then
-      info "Hint: ports 7474 or 7687 are already occupied on the host"
-    fi
-    exit 1
-  fi
-
-  ok "Container created"
-  printf '  %s\n' "$docker_run_output"
+if ! "${DOCKER_BIN}" network inspect warp-network >/dev/null 2>&1; then
+  fail "External network warp-network is missing; run scripts/ops/docker-setup.sh first"
+  exit 1
 fi
+
+info "Starting the single owner: docker compose -p bioetl-neo4j"
+if ! "${DOCKER_BIN}" compose \
+  -p bioetl-neo4j \
+  -f "${REPO_ROOT}/docker-compose.neo4j.yml" \
+  up -d --wait --wait-timeout 240; then
+  fail "Neo4j Compose project failed readiness"
+  "${DOCKER_BIN}" compose -p bioetl-neo4j -f "${REPO_ROOT}/docker-compose.neo4j.yml" logs --tail 50 neo4j >&2
+  exit 1
+fi
+ok "Neo4j Compose project is healthy"
 
 # ============================================================================
 # Step 5: Wait for Neo4j to Start
 # ============================================================================
-header "Step 5: Waiting for Neo4j to Start"
-
-info "Waiting for Neo4j to be ready..."
-
-max_attempts=30
-attempt=0
-while [[ $attempt -lt $max_attempts ]]; do
-  if "${DOCKER_BIN}" logs bioetl-neo4j 2>/dev/null | grep -q "Started"; then
-    ok "Neo4j is ready"
-    break
-  fi
-
-  if "${DOCKER_BIN}" logs bioetl-neo4j 2>/dev/null | grep -q "ERROR"; then
-    fail "Neo4j startup error detected"
-    "${DOCKER_BIN}" logs bioetl-neo4j 2>&1 | grep ERROR >&2
-    "${DOCKER_BIN}" stop bioetl-neo4j >/dev/null 2>&1 || true
-    "${DOCKER_BIN}" rm bioetl-neo4j >/dev/null 2>&1 || true
-    exit 1
-  fi
-
-  printf "."
-  sleep 1
-  attempt=$((attempt + 1))
-done
-printf "\n"
-
-if [[ $attempt -ge $max_attempts ]]; then
-  warn "Timeout waiting for Neo4j (but continuing)"
-fi
+header "Step 5: Neo4j Readiness Confirmed"
+"${DOCKER_BIN}" compose -p bioetl-neo4j -f "${REPO_ROOT}/docker-compose.neo4j.yml" ps neo4j
 
 # ============================================================================
 # Step 6: Verify Connectivity
 # ============================================================================
 header "Step 6: Verify Connectivity"
-
-sleep 2
 
 VERIFY_HOST="127.0.0.1"
 VERIFY_LABEL="localhost"
@@ -333,13 +271,13 @@ case "$ENV_TYPE" in
     printf "From Windows (PowerShell/CMD):${NC}\n"
     printf "  Bolt URI: ${BLUE}bolt://localhost:7687${NC}\n"
     printf "  Browser:  ${BLUE}http://localhost:7474/browser${NC}\n\n"
-    printf "Credentials: ${BLUE}neo4j / bioetl_secure_password${NC}\n"
+    printf "Credentials: supplied via ${BLUE}NEO4J_USERNAME / NEO4J_PASSWORD${NC}\n"
     ;;
   *)
     printf "Connection details:${NC}\n"
     printf "  Bolt URI: ${BLUE}bolt://localhost:7687${NC}\n"
     printf "  Browser:  ${BLUE}http://localhost:7474/browser${NC}\n"
-    printf "  Credentials: ${BLUE}neo4j / bioetl_secure_password${NC}\n"
+    printf "  Credentials: supplied via ${BLUE}NEO4J_USERNAME / NEO4J_PASSWORD${NC}\n"
     ;;
 esac
 
@@ -390,6 +328,6 @@ printf "4. View logs (if needed):\n"
 printf "   ${BLUE}docker logs -f bioetl-neo4j${NC}\n\n"
 
 printf "5. Stop container:\n"
-printf "   ${BLUE}docker stop bioetl-neo4j${NC}\n\n"
+printf "   ${BLUE}docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml down${NC}\n\n"
 
 exit 0

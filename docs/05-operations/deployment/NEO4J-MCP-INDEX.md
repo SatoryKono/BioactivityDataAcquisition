@@ -57,10 +57,7 @@ ______________________________________________________________________
 ### Step 1: Start Neo4j Backend
 
 ```bash
-docker run -d --name bioetl-neo4j \
-  -p 7474:7474 -p 7687:7687 \
-  -e NEO4J_AUTH=neo4j/bioetl_secure_password \
-  neo4j:5.15-community
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait
 ```
 
 ### Step 2: Verify MCP Connection
@@ -81,7 +78,7 @@ bash scripts/ops/runtime/neo4j/neo4j_quick_start.sh
 ```
 http://localhost:7474/browser/
 Username: neo4j
-Password: bioetl_secure_password
+Password: required value from `NEO4J_PASSWORD`
 ```
 
 ### Step 4: Use in Codex
@@ -121,18 +118,18 @@ ______________________________________________________________________
 Used by `wrapper.sh`:
 
 ```bash
-# Required (or defaults used)
+# Required local configuration
 NEO4J_URI=bolt://localhost:7687           # Bolt connection string
 NEO4J_USERNAME=neo4j                      # Username
-NEO4J_PASSWORD=bioetl_secure_password     # Password
+NEO4J_PASSWORD=                           # Required local secret
 NEO4J_DATABASE=neo4j                      # Database name
 
 # Alternative (parses to above)
-NEO4J_AUTH=neo4j/bioetl_secure_password   # Format: username/password
+NEO4J_AUTH=                               # Optional derived username/password form
 
 # Individual credential overrides
 NEO4J_AUTH_USERNAME=neo4j
-NEO4J_AUTH_PASSWORD=bioetl_secure_password
+NEO4J_AUTH_PASSWORD=
 ```
 
 Set via:
@@ -190,10 +187,7 @@ ______________________________________________________________________
 
 ```bash
 # 1. Start backend
-docker run -d --name bioetl-neo4j \
-  -p 7474:7474 -p 7687:7687 \
-  -e NEO4J_AUTH=neo4j/bioetl_secure_password \
-  neo4j:5.15-community
+docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait
 
 # 2. Verify
 bash scripts/ai/mcp/check_neo4j_memory.sh
@@ -215,7 +209,7 @@ ______________________________________________________________________
 
 **Problem**: `codex mcp get neo4j-memory` fails
 
-- Solution: Run `docker start bioetl-neo4j`
+- Solution: Run `docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d --wait`
 
 **Problem**: "Port 7687 already in use"
 
