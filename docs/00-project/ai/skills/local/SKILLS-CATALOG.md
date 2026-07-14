@@ -52,6 +52,7 @@ runtime change.
 
 | Skill                   | Path                                         | Purpose                          |
 | ----------------------- | -------------------------------------------- | -------------------------------- |
+| `architecture-guardian` | `.codex/skills/public/architecture-guardian` | Architecture boundary validation |
 | `verify-architecture`   | `.codex/skills/verify-architecture`          | Quick/full architecture checks   |
 | `vcr-record`            | `.codex/skills/vcr-record`                   | VCR cassette recording/safety    |
 
@@ -95,7 +96,7 @@ runtime change.
 | Skill                        | Path                                       | Purpose                              |
 | ---------------------------- | ------------------------------------------ | ------------------------------------ |
 | `new-pipeline`               | `.codex/skills/new-pipeline`               | Provider/entity pipeline scaffolding |
-| `technical-designer-mermaid` | `.codex/skills/technical-designer-mermaid` | Mermaid technical diagram design     |
+| `py-reproducibility-audit`  | `.codex/skills/py-reproducibility-audit`  | Reproducibility and replay audit  |
 ## Current Consolidation Status
 
 - All local skills are structurally valid.
@@ -107,10 +108,12 @@ runtime change.
 
 - [agent-orchestration](agent-orchestration/SKILL.md)
 - [hierarchical-evidence-orchestration](hierarchical-evidence-orchestration/SKILL.md)
+- [capability-discovery](capability-discovery/SKILL.md)
 - [collecting-evidence](collecting-evidence/SKILL.md)
 - [create-pr](create-pr/SKILL.md)
 - [deep-research](deep-research/SKILL.md)
 - [hierarchical-evidence-orchestration](hierarchical-evidence-orchestration/SKILL.md)
+- [documentation-audit](documentation-audit/SKILL.md)
 - [documentation-cascade-audit](documentation-cascade-audit/SKILL.md)
 - [grafana-dashboard-render](grafana-dashboard-render/SKILL.md)
 - [grafana-dashboard-extension](grafana-dashboard-extension/SKILL.md)
@@ -129,6 +132,7 @@ runtime change.
 - [py-reproducibility-audit](py-reproducibility-audit/SKILL.md)
 - [py-review-orchestrator](py-review-orchestrator/SKILL.md)
 - [py-reproducibility-audit](py-reproducibility-audit/SKILL.md)
+- [prometheus-alert-rule-editor](prometheus-alert-rule-editor/SKILL.md)
 - [prometheus-metric-discovery](prometheus-metric-discovery/SKILL.md)
 - [prometheus-query-debugger](prometheus-query-debugger/SKILL.md)
 - [prometheus-rule-testing](prometheus-rule-testing/SKILL.md)
