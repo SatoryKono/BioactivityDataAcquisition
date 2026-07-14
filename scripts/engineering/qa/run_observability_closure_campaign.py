@@ -748,6 +748,7 @@ def _attempt_command(
         "--limit",
         str(limit),
         "--no-health-server",
+        "--no-ensure-observability-backend",
         "--tracing" if tracing else "--no-tracing",
     ]
     if cached_bronze_root is None:
