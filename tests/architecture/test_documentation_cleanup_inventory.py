@@ -143,7 +143,7 @@ def test_documentation_cleanup_inventory_covers_github_issue_drafts() -> None:
 
     issue_rows = [path for path in rows if path.startswith(".github/ISSUES/")]
     assert len(issue_rows) == len(tracked_issue_files)
-    assert len(issue_rows) >= 128
+    assert len(issue_rows) >= 131
     assert rows[".github/ISSUES/README.md"]["lifecycle"] == "guide"
     assert rows[".github/ISSUES/CHEMBL-ISSUES-INDEX.md"]["lifecycle"] == "index"
     assert (

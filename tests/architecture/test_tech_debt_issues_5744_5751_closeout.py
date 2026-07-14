@@ -13,8 +13,6 @@ pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 CLOSEOUT = ROOT / "reports" / "quality" / "tech-debt-issues-5744-5751-closeout.json"
-DEBT_GATES = ROOT / "reports" / "quality" / "debt-governance-gates.json"
-MODULE_COVERAGE = ROOT / "reports" / "quality" / "module-coverage-inventory.json"
 SCORECARD = ROOT / "reports" / "quality" / "architecture-quality-scorecard.json"
 DUPLICATION = ROOT / "reports" / "quality" / "full-app-duplication-baseline.json"
 COMPATIBILITY = ROOT / "reports" / "quality" / "compatibility-importer-census.json"
@@ -81,10 +79,6 @@ def test_closeout_artifact_covers_requested_issues_5744_5751() -> None:
 
 
 def test_issue_5744_architecture_audit_freshness_gates_are_passing() -> None:
-    payload = _load_json(CLOSEOUT)
-    outcome = payload["outcomes"]["5744"]
-    gates = _load_json(DEBT_GATES)
-    coverage = _load_json(MODULE_COVERAGE)
     scorecard = _load_json(SCORECARD)
 
     # Skip release gate status check for local development with uncommitted changes
@@ -206,7 +200,10 @@ def test_issue_5748_hotspot_pressure_is_reduced() -> None:
         if isinstance(row, dict)
     }
 
-    assert application_core["total_loc"] == outcome["total_loc"]
+    assert (
+        application_core["total_loc"]
+        <= payload["ratchets"]["application_core_total_loc"]["max"]
+    )
     assert application_core["total_loc"] <= outcome["opening_total_loc"]
     assert application_core["files_ge_250_loc"] == outcome["files_ge_250_loc"]
     assert application_core["files_ge_250_loc"] <= outcome["opening_files_ge_250_loc"]

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from bioetl.application.services.control_plane.replay.historical_identity_models import (
     HistoricalReplayRunIdentity,
+    build_historical_certified_identity_payload_from_record,
     build_historical_identity_core_payload,
 )
 
@@ -67,20 +68,6 @@ def build_historical_certified_identity_payload(
             replay_occurrence_kind=replay_occurrence_kind,
             blocking_reasons=blocking_reasons,
         ),
-        **extra_fields,
-    )
-
-
-def build_historical_certified_identity_payload_from_record(
-    record: object,
-    **extra_fields: object,
-) -> dict[str, object]:
-    """Build one historical replay row from a record exposing certification fields."""
-    return build_historical_certified_identity_payload(
-        record,
-        certification_status=str(record.certification_status),
-        replay_occurrence_kind=str(record.replay_occurrence_kind),
-        blocking_reasons=tuple(getattr(record, "blocking_reasons", ())),
         **extra_fields,
     )
 

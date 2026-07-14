@@ -5373,7 +5373,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.replay._historical_record_payload",
       "path": "src/bioetl/application/services/control_plane/replay/_historical_record_payload.py",
-      "source_lines": 93
+      "source_lines": 80
     },
     {
       "coverage_percent": 100.0,
@@ -5503,7 +5503,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.replay.historical_identity_models",
       "path": "src/bioetl/application/services/control_plane/replay/historical_identity_models.py",
-      "source_lines": 36
+      "source_lines": 111
     },
     {
       "coverage_percent": 100.0,
@@ -5523,7 +5523,7 @@
       "missing_lines": 2,
       "module": "bioetl.application.services.control_plane.replay.historical_universe_service",
       "path": "src/bioetl/application/services/control_plane/replay/historical_universe_service.py",
-      "source_lines": 260
+      "source_lines": 216
     },
     {
       "coverage_percent": 96.3,
@@ -27595,7 +27595,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.replay._historical_record_payload",
       "path": "src/bioetl/application/services/control_plane/replay/_historical_record_payload.py",
-      "source_lines": 93
+      "source_lines": 80
     },
     {
       "coverage_percent": 100.0,
@@ -27725,7 +27725,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.replay.historical_identity_models",
       "path": "src/bioetl/application/services/control_plane/replay/historical_identity_models.py",
-      "source_lines": 36
+      "source_lines": 111
     },
     {
       "coverage_percent": 100.0,
@@ -27745,7 +27745,7 @@
       "missing_lines": 2,
       "module": "bioetl.application.services.control_plane.replay.historical_universe_service",
       "path": "src/bioetl/application/services/control_plane/replay/historical_universe_service.py",
-      "source_lines": 260
+      "source_lines": 216
     },
     {
       "coverage_percent": 96.3,
@@ -44450,7 +44450,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "fbb8af3648d80071284a41c8004945cbd98b669f7d10254514a1399af316f6c2",
+  "source_tree_sha256": "5ffab313b8495f24cf340bc21b23fb7bc1076791444c7cc6741947026c671576",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

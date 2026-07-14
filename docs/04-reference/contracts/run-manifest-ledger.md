@@ -164,8 +164,9 @@ connection failure and timeout remain transport failures rather than empty
 evidence.
 
 The monitoring compose `audit` profile is published only through the
-fail-closed `docker-compose.monitoring.audit.yml` override. The supported
-launcher is:
+fail-closed
+`scripts/ops/observability/docker-compose.monitoring.audit.yml` override. The
+supported launcher is:
 
 ```bash
 python scripts/ops/observability/start_read_only_audit_stack.py \

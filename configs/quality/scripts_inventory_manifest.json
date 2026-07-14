@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-14T11:52:57.378897+00:00",
+  "generated_at": "2026-07-14T15:56:01.124669+00:00",
   "summary": {
     "total_scripts": 464,
     "status_counts": {
@@ -12,10 +12,10 @@
       "build": 9,
       "ci": 62,
       "docs": 180,
-      "other": 28,
+      "other": 32,
       "scripts": 359,
       "skills": 16,
-      "tests": 206
+      "tests": 207
     }
   },
   "scripts": [
@@ -102,7 +102,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 15,
+      "reference_count": 16,
       "references": [
         {
           "path": ".codex/skills/SKILLS-CATALOG.md",
@@ -3215,13 +3215,13 @@
         },
         {
           "path": "scripts/ai/codex/check_skills_mirror.sh",
-          "line": 23,
+          "line": 239,
           "source_group": "scripts",
           "text": "exec python3 \"$REPO_ROOT/scripts/ai/sync_ai_governance.py\" \\"
         },
         {
           "path": "scripts/ai/codex/check_skills_mirror.sh",
-          "line": 27,
+          "line": 243,
           "source_group": "scripts",
           "text": "exec python3 \"$REPO_ROOT/scripts/ai/sync_ai_governance.py\" \\"
         }
@@ -7192,7 +7192,7 @@
         },
         {
           "path": "scripts/engineering/qa/report_debt_governance_gates.py",
-          "line": 1015,
+          "line": 1032,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_registry_dq_refs.py::\""
         },
@@ -10733,7 +10733,7 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 268,
+          "line": 269,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_closure_campaign.py --require-global-claim`"
         },
@@ -10772,19 +10772,19 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 265,
+          "line": 266,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py` persists"
         },
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 271,
+          "line": 272,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py --require-universal-claim`"
         },
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 274,
+          "line": 275,
           "source_group": "docs",
           "text": "- `scripts/engineering/qa/run_historical_replay_universe_campaign.py --require-durable-evidence-coverage`"
         },
@@ -12203,7 +12203,7 @@
       "agent_usage": [
         "grafana-dashboard-render"
       ],
-      "reference_count": 55,
+      "reference_count": 56,
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
@@ -13389,8 +13389,14 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 6,
       "references": [
+        {
+          "path": ".github/ISSUES/AUD-OBS-20260714-002-Add-Truthful-Observability-Validation-Gates.md",
+          "line": 17,
+          "source_group": "other",
+          "text": "- `scripts/ops/observability/grafana/audit_live_grafana_panels.py`"
+        },
         {
           "path": "docs/00-project/ai/audit/observability-issues/OBS-006-validation-findings.md",
           "line": 5,
@@ -13417,7 +13423,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 957,
+          "line": 990,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/audit_live_grafana_panels.py\","
         }
@@ -13547,7 +13553,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 591,
+          "line": 594,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.ps1\""
         }
@@ -13602,13 +13608,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 408,
+          "line": 411,
           "source_group": "tests",
           "text": "assert \"setup_grafana_screenshot_runtime.sh\" in detail"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 588,
+          "line": 591,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh\""
         }
@@ -13646,7 +13652,7 @@
       "references": [
         {
           "path": "docs/04-reference/contracts/run-manifest-ledger.md",
-          "line": 171,
+          "line": 172,
           "source_group": "docs",
           "text": "python scripts/ops/observability/start_read_only_audit_stack.py \\"
         },
@@ -13663,8 +13669,14 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 5,
       "references": [
+        {
+          "path": ".github/ISSUES/AUD-OBS-20260714-002-Add-Truthful-Observability-Validation-Gates.md",
+          "line": 16,
+          "source_group": "other",
+          "text": "- `scripts/ops/observability/validate_emitter_contracts.py`"
+        },
         {
           "path": "docs/00-project/ai/audit/observability-issues/OBS-004-validation-findings.md",
           "line": 5,
@@ -13690,18 +13702,30 @@
           "text": "python scripts/ops/observability/validate_emitter_contracts.py"
         }
       ],
-      "owner": "@bioetl-observability",
+      "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded historical emitter-contract diagnostic while the canonical typed inventory and closure campaign own active validation; retire after operator references migrate and do not promote it to an active CI surface."
+      "next_step": "Retain as a bounded manual observability contract-audit utility while audit evidence references the direct script; promote it to an active governed command only after CI ownership and deterministic regression coverage are established."
     },
     {
       "path": "scripts/ops/observability/validate_live_observability.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 7,
       "references": [
+        {
+          "path": ".github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md",
+          "line": 115,
+          "source_group": "other",
+          "text": "- Run `python scripts/ops/observability/validate_live_observability.py` against"
+        },
+        {
+          "path": ".github/ISSUES/AUD-OBS-20260714-002-Add-Truthful-Observability-Validation-Gates.md",
+          "line": 14,
+          "source_group": "other",
+          "text": "- `scripts/ops/observability/validate_live_observability.py`"
+        },
         {
           "path": "docs/00-project/ai/audit/observability-issues/OBS-003-validation-findings.md",
           "line": 5,
@@ -13733,18 +13757,30 @@
           "text": "python scripts/ops/observability/validate_live_observability.py"
         }
       ],
-      "owner": "@bioetl-observability",
+      "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded historical live-observability diagnostic while the canonical closure campaign owns reproducible evidence; retire after operator references migrate and do not promote it to an active CI surface."
+      "next_step": "Retain as a bounded manual live-stack validation utility while audit evidence references the direct script; promote it to an active governed command only after local-only runtime prerequisites, CI ownership, and deterministic checks are formalized."
     },
     {
       "path": "scripts/ops/observability/validate_metric_to_panel_mapping.py",
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 8,
       "references": [
+        {
+          "path": ".github/ISSUES/AUD-OBS-20260714-001-Complete-Application-Level-Observability-Validation.md",
+          "line": 117,
+          "source_group": "other",
+          "text": "- Run `python scripts/ops/observability/validate_metric_to_panel_mapping.py`"
+        },
+        {
+          "path": ".github/ISSUES/AUD-OBS-20260714-002-Add-Truthful-Observability-Validation-Gates.md",
+          "line": 15,
+          "source_group": "other",
+          "text": "- `scripts/ops/observability/validate_metric_to_panel_mapping.py`"
+        },
         {
           "path": "docs/00-project/ai/audit/observability-issues/OBS-002-validation-findings.md",
           "line": 5,
@@ -13782,10 +13818,10 @@
           "text": "python scripts/ops/observability/validate_metric_to_panel_mapping.py"
         }
       ],
-      "owner": "@bioetl-observability",
+      "owner": "@bioetl-platform",
       "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
-      "next_step": "Retain only as a bounded historical metric-to-panel diagnostic while the generated full panel-contract inventory owns parity; retire after operator references migrate and do not promote it to an active CI surface."
+      "next_step": "Retain as a bounded manual metric-to-panel audit utility while audit evidence references the direct script; promote it to an active governed command only after CI ownership and deterministic dashboard-contract coverage are established."
     },
     {
       "path": "scripts/ops/runtime/deploy/deploy-bioetl.sh",
@@ -14212,7 +14248,7 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
-          "line": 270,
+          "line": 273,
           "source_group": "tests",
           "text": "assert \"scripts/ops/support/load_repo_env.sh\" in hint"
         }
