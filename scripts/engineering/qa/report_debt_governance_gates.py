@@ -36,6 +36,7 @@ from scripts.engineering.ci.validate_registry_dq_refs import (  # noqa: E402
 from scripts.engineering.qa import (  # noqa: E402
     report_adr_enforcement_matrix,
     report_architecture_debt_remote_main_baseline,
+    report_hotspot_family_baseline,
     report_observability_metric_inventory,
 )
 from scripts.engineering.qa.report_config_surface_backlog import (  # noqa: E402
@@ -341,6 +342,22 @@ def _artifact_matches_builder(
         rel_path=rel_path,
         live_payload=live_payload,
     )
+
+
+def _hotspot_family_baseline_artifact_matches_builder(*, repo_root: Path) -> bool:
+    """Verify both hotspot-family artifacts against a fresh live source census."""
+    try:
+        live_payload, live_markdown = report_hotspot_family_baseline.build_artifacts()
+        live_json = json.dumps(live_payload, ensure_ascii=False, indent=2) + "\n"
+        committed_json = (
+            repo_root / "reports/quality/hotspot-family-baseline.json"
+        ).read_text(encoding="utf-8")
+        committed_markdown = (
+            repo_root / "reports/quality/hotspot-family-baseline.md"
+        ).read_text(encoding="utf-8")
+    except Exception:
+        return False
+    return committed_json == live_json and committed_markdown == live_markdown
 
 
 def _remote_main_baseline_artifact_matches_builder(*, repo_root: Path) -> bool | None:
@@ -1417,6 +1434,9 @@ def build_payload(
         stale_artifacts = {
             "module_coverage_inventory": False,
             "architecture_quality_scorecard": False,
+            "hotspot_family_baseline": not _hotspot_family_baseline_artifact_matches_builder(
+                repo_root=repo_root
+            ),
             "config_surface_backlog": not _artifact_matches_builder(
                 repo_root=repo_root,
                 rel_path="reports/quality/config-surface-backlog.json",
@@ -1443,6 +1463,9 @@ def build_payload(
                 payload_builder=lambda: build_architecture_quality_scorecard(
                     repo_root=repo_root
                 ),
+            ),
+            "hotspot_family_baseline": not _hotspot_family_baseline_artifact_matches_builder(
+                repo_root=repo_root
             ),
             "config_surface_backlog": not _artifact_matches_builder(
                 repo_root=repo_root,
