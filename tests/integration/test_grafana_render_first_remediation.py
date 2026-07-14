@@ -237,7 +237,7 @@ def test_rf004_identity_and_scope_are_persistent() -> None:
 
 def test_rf005_incident_hierarchy_and_semantic_encoding() -> None:
     overview = _load("bioetl-overview-v2.json")
-    assert _panel(overview, 9601)["gridPos"]["y"] == 18
+    assert _panel(overview, 9601)["gridPos"]["y"] == 31
     assert _panel(overview, 9018).get("type") == "state-timeline"
     assert _panel(overview, 9020).get("type") == "state-timeline"
 
