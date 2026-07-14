@@ -904,7 +904,13 @@ def _attempt_command(
         "--tracing" if tracing else "--no-tracing",
     ]
     if cached_bronze_root is None:
-        command.append("--no-cached-bronze")
+        command.extend(
+            (
+                "--no-cached-bronze",
+                "--required-persistence-profile",
+                "degraded_observable",
+            )
+        )
     else:
         command.extend(
             ("--use-cached-bronze", "--cached-bronze-path", str(cached_bronze_root))
