@@ -2207,6 +2207,14 @@ def main(argv: list[str] | None = None) -> int:
     before = {str(path.resolve()): _tree_signature(path) for path in canonical_roots}
     assert args.canonical_data_root is not None
     cached_bronze_root = args.canonical_data_root.resolve() / "output" / "bronze"
+    # Validate and stage the cross-entity workflow fixture before spending the
+    # campaign budget on 30 standalone processes.  A bounded input snapshot can
+    # be valid for every individual pipeline yet still lack join-compatible
+    # assay/target/publication rows; fail that contract before execution.
+    workflow_fixture_root, workflow_fixture_evidence = _stage_workflow_fixture(
+        canonical_bronze_root=cached_bronze_root,
+        audit_root=audit_root,
+    )
     attempts: list[AttemptEvidence] = []
     for item in planned:
         attempts.append(
@@ -2231,10 +2239,6 @@ def main(argv: list[str] | None = None) -> int:
         timeout_seconds=args.timeout_seconds,
         cached_bronze_root=None,
         run_mode="online",
-    )
-    workflow_fixture_root, workflow_fixture_evidence = _stage_workflow_fixture(
-        canonical_bronze_root=cached_bronze_root,
-        audit_root=audit_root,
     )
     workflow_phase_root = audit_root / "phases" / "chembl-baseline"
     workflow_phase = _run_phase_command(
