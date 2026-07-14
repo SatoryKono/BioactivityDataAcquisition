@@ -104,6 +104,31 @@ def test_create_cached_bronze_data_source_uses_explicit_path(
 @pytest.mark.unit
 @patch("bioetl.infrastructure.adapters.CachedBronzeDataSource")
 @patch("bioetl.infrastructure.storage.bronze_writer.BronzeWriter")
+def test_create_cached_bronze_data_source_scopes_explicit_root(
+    mock_bronze_writer: MagicMock,
+    mock_cached_source: MagicMock,
+    tmp_path: Path,
+) -> None:
+    scoped_path = tmp_path / "bronze" / "chembl" / "publication"
+    scoped_path.mkdir(parents=True)
+
+    _create_cached_bronze_data_source(
+        settings=SimpleNamespace(bronze_path=Path("/data/output/bronze")),
+        pipeline_config=SimpleNamespace(provider="chembl", entity_type="publication"),
+        logger=MagicMock(),
+        cached_bronze=SimpleNamespace(
+            bronze_path=str(tmp_path / "bronze"),
+            bronze_date=None,
+        ),
+    )
+
+    assert mock_bronze_writer.call_args.kwargs["base_path"] == scoped_path
+    mock_cached_source.assert_called_once()
+
+
+@pytest.mark.unit
+@patch("bioetl.infrastructure.adapters.CachedBronzeDataSource")
+@patch("bioetl.infrastructure.storage.bronze_writer.BronzeWriter")
 def test_create_cached_bronze_data_source_falls_back_to_convention_path(
     mock_bronze_writer: MagicMock,
     mock_cached_source: MagicMock,

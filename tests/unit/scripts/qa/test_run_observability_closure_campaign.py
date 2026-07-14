@@ -119,6 +119,24 @@ def test_stage_workflow_fixture_selects_compatible_join_records(
     assert evidence["publication_id"] == "CHEMBL-D"
     assert len(evidence["records"]) == 3
     assert len(list(fixture_root.rglob("*.jsonl"))) == 3
+    assert len(list(fixture_root.rglob("*.jsonl.zst"))) == 3
+
+
+def test_isolated_work_root_links_only_tracked_configs(tmp_path: Path) -> None:
+    repo_root = tmp_path / "repo"
+    configs_root = repo_root / "configs"
+    configs_root.mkdir(parents=True)
+    work_root = tmp_path / "attempt"
+    work_root.mkdir()
+
+    campaign._ensure_tracked_runtime_links(
+        work_root=work_root,
+        repo_root=repo_root,
+    )
+
+    assert (work_root / "configs").is_symlink()
+    assert (work_root / "configs").resolve() == configs_root.resolve()
+    assert not (work_root / "data").exists()
 
 
 def _retain_raw(path: Path, raw_bytes: bytes, kind: str) -> dict[str, str]:

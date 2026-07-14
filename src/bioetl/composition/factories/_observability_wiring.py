@@ -72,7 +72,9 @@ def _create_cached_bronze_data_source(
     entity_type = pipeline_config.entity_type
 
     if cached_bronze.bronze_path:
-        bronze_path = Path(cached_bronze.bronze_path)
+        configured_path = Path(cached_bronze.bronze_path)
+        scoped_path = configured_path / provider / entity_type
+        bronze_path = scoped_path if scoped_path.is_dir() else configured_path
     else:
         bronze_path = settings.bronze_path / provider / entity_type
 
