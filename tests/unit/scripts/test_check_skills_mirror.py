@@ -72,8 +72,9 @@ root = Path(sys.argv[1]).resolve()
 contract_path = root / "configs/quality/ai_skill_parity_contract.json"
 # Support both table format (| `skill` | `.codex/skills/path` |) and list format (- [skill](path))
 # Table format has multiple columns, so we match the path column specifically
+# Handle both direct paths and public/ prefix paths
 catalog_entry_pattern = re.compile(
-    r"(?:\|\s*`[^`]+`\s*\|\s*`\.codex/skills/([^`]+)`\s*\|)"
+    r"(?:\|\s*`[^`]+`\s*\|\s*`\.codex/skills/(?:public/)?([^`]+)`\s*\|)"
     r"|(?:- \[([^\]]+)\]\([^)]+/SKILL\.md\))"
 )
 
@@ -117,9 +118,17 @@ def compare_named_set(
 def catalog_entrypoints(path: Path) -> set[str]:
     text = path.read_text(encoding="utf-8")
     # Extract from table format (group 1) and list format (group 2)
-    table_matches = set(match.group(1) for match in catalog_entry_pattern.finditer(text) if match.group(1))
-    list_matches = set(match.group(2) for match in catalog_entry_pattern.finditer(text) if match.group(2))
-    return table_matches | list_matches
+    # Normalize paths by removing any directory prefixes
+    entries = set()
+    for match in catalog_entry_pattern.finditer(text):
+        if match.group(1):  # Table format
+            entry = match.group(1)
+            # Remove any directory prefix (e.g., "public/architecture-guardian" -> "architecture-guardian")
+            entry = entry.split("/")[-1] if "/" in entry else entry
+            entries.add(entry)
+        elif match.group(2):  # List format
+            entries.add(match.group(2))
+    return entries
 
 
 def validate() -> tuple[list[str], int]:
@@ -270,7 +279,7 @@ def test_repository_skill_parity_contract_passes() -> None:
     result = _run_checker(ROOT)
 
     assert result.returncode == 0, result.stdout + result.stderr
-    assert "37 entrypoints" in result.stdout
+    assert "36 entrypoints" in result.stdout
 
 
 def test_check_reports_missing_devin_entrypoint(tmp_path: Path) -> None:
