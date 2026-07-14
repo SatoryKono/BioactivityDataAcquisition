@@ -25,6 +25,9 @@ from pathlib import Path
 import yaml
 import zstandard
 
+from bioetl.domain.mapping.organism_classification import classify_organism
+from bioetl.domain.types import CellularityType
+
 CHEMBL_PIPELINES = (
     "chembl_activity",
     "chembl_assay",
@@ -928,7 +931,7 @@ def _stage_workflow_fixture(
             chembl_root / "target",
             predicate=lambda row: str(row.get("target_chembl_id") or "")
             == target_id
-            and bool(row.get("target_type")),
+            and _workflow_target_is_gold_eligible(row),
         )
         publication, publication_source = _find_bronze_record(
             chembl_root / "publication",
@@ -940,7 +943,7 @@ def _stage_workflow_fixture(
         target, target_source = _find_bronze_record(
             chembl_root / "target",
             predicate=lambda row: bool(row.get("target_chembl_id"))
-            and bool(row.get("target_type")),
+            and _workflow_target_is_gold_eligible(row),
         )
         publication, publication_source = _find_bronze_record(
             chembl_root / "publication",
@@ -1009,6 +1012,27 @@ def _stage_workflow_fixture(
         "publication_id": publication_id,
         "records": evidence_records,
     }
+
+
+def _workflow_target_is_gold_eligible(row: dict[str, object]) -> bool:
+    """Match the target fields needed by the governed Gold join surface."""
+    components = row.get("target_components")
+    if not isinstance(components, list) or len(components) != 1:
+        return False
+    component = components[0]
+    if not isinstance(component, dict):
+        return False
+    if component.get("component_type") != "PROTEIN":
+        return False
+    if not component.get("accession") or not component.get("component_id"):
+        return False
+    classification = classify_organism(row.get("organism"), row.get("tax_id"))
+    return (
+        row.get("target_type") == "SINGLE PROTEIN"
+        and bool(row.get("pref_name"))
+        and bool(row.get("organism"))
+        and classification.organism_class == CellularityType.MULTICELLULAR
+    )
 
 
 def _workflow_failure_command(

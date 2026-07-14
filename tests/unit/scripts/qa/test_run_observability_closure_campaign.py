@@ -150,7 +150,20 @@ def test_stage_workflow_fixture_selects_compatible_join_records(
             "target_chembl_id": "CHEMBL-T",
             "document_chembl_id": "CHEMBL-D",
         },
-        "target": {"target_chembl_id": "CHEMBL-T", "target_type": "SINGLE PROTEIN"},
+        "target": {
+            "target_chembl_id": "CHEMBL-T",
+            "target_type": "SINGLE PROTEIN",
+            "pref_name": "Human target",
+            "organism": "Homo sapiens",
+            "tax_id": 9606,
+            "target_components": [
+                {
+                    "accession": "P12345",
+                    "component_id": 1,
+                    "component_type": "PROTEIN",
+                }
+            ],
+        },
         "publication": {"document_chembl_id": "CHEMBL-D", "title": "Evidence"},
     }
     for entity, row in rows.items():
@@ -210,6 +223,16 @@ def test_stage_workflow_fixture_projects_disjoint_compressed_samples(
         "target": {
             "target_chembl_id": "CHEMBL-T",
             "target_type": "SINGLE PROTEIN",
+            "pref_name": "Human target",
+            "organism": "Homo sapiens",
+            "tax_id": 9606,
+            "target_components": [
+                {
+                    "accession": "P12345",
+                    "component_id": 1,
+                    "component_type": "PROTEIN",
+                }
+            ],
         },
         "publication": {"document_chembl_id": "CHEMBL-D", "title": "Evidence"},
     }
