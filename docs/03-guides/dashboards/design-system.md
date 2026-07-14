@@ -305,10 +305,14 @@ Normative rules:
   tracing-only, raw, verbose, or not required for first-pass operator triage.
 - The only copy of a critical signal MUST NOT live exclusively inside a
   diagnostic row.
-- Overview keeps `Alert/SLO Triage` expanded because active alerts are a
-  first-pass signal. Runtime Detect/Localize/Escalate, Control Plane incident
-  rows, Provider detail, DQ forensic rows, Workflow Step Diagnostics, and the
-  Silver trend/record rows remain collapsed in the shipped layout.
+- Overview keeps compact Control Plane, Runtime, Data Quality, Provider, Data
+  Validation, Inputs, and Workflow current-state evidence in the bounded first
+  path. `Alert/SLO Triage` is collapsed immediately below it and expands only
+  after the operator narrows toward alert-level context; the top-level
+  `6. Alerts & SLO` dashboard remains the canonical alert surface. Runtime
+  Detect/Localize/Escalate, Control Plane incident rows, Provider detail, DQ
+  forensic rows, Workflow Step Diagnostics, and the Silver trend/record rows
+  also remain collapsed in the shipped layout.
 - Audit tooling MAY expand collapsed rows to materialize and review their full
   content; that audit mode does not change the shipped progressive-disclosure
   default.

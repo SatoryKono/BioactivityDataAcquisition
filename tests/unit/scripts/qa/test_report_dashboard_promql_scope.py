@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 
 from scripts.engineering.qa import __main__ as qa_router
-from tests.helpers import assert_cli_succeeded, run_main_in_process, run_python_cli
+from tests.helpers import assert_cli_succeeded, run_main_in_process
 
 
 pytestmark = pytest.mark.unit
@@ -24,15 +26,17 @@ def test_qa_cli_report_dashboard_promql_scope_help_smoke() -> None:
     assert "PromQL scope coverage" in result.stdout
 
 
-def test_qa_cli_report_dashboard_promql_scope_check_passes_current_dashboards() -> (
-    None
-):
-    result = run_python_cli(
-        "-m",
-        "scripts.engineering.qa",
+def test_qa_cli_report_dashboard_promql_scope_check_passes_current_dashboards(
+    tmp_path: Path,
+) -> None:
+    output_path = tmp_path / "dashboard-promql-scope-matrix.csv"
+    result = run_main_in_process(
+        qa_router.main,
         "report-dashboard-promql-scope",
         "--check",
-        timeout=180,
+        "--output",
+        str(output_path),
     )
 
     assert_cli_succeeded(result)
+    assert output_path.is_file()

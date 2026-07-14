@@ -1422,7 +1422,7 @@
       "symbol": "--silver-filter-only",
       "path": "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "occurrence_count": 1,
-      "first_line": 382,
+      "first_line": 403,
       "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
       "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
       "notes": ""
@@ -1455,7 +1455,7 @@
       "symbol": "--silver-filter-only",
       "path": "docs/05-operations/01-monitoring-guide.md",
       "occurrence_count": 1,
-      "first_line": 505,
+      "first_line": 530,
       "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
       "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
       "notes": ""
@@ -1477,7 +1477,7 @@
       "symbol": "--silver-filter-only",
       "path": "grafana/dashboards/bioetl-silver-reject-explorer.json",
       "occurrence_count": 1,
-      "first_line": 812,
+      "first_line": 799,
       "role": "CLI/operator shortcut for FILTERED_OUT_SILVER",
       "migration_relevance": "Shortcut is a compatibility alias while operator wording moves to structural rejects.",
       "notes": ""
@@ -1499,7 +1499,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
       "occurrence_count": 1,
-      "first_line": 572,
+      "first_line": 584,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1554,7 +1554,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "docs/05-operations/01-monitoring-guide.md",
       "occurrence_count": 3,
-      "first_line": 416,
+      "first_line": 433,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1586,7 +1586,7 @@
       "surface": "legacy_silver_error_code",
       "symbol": "FILTERED_OUT_SILVER",
       "path": "grafana/dashboards/bioetl-silver-reject-explorer.json",
-      "occurrence_count": 8,
+      "occurrence_count": 6,
       "first_line": 15,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
@@ -1785,7 +1785,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "grafana/README.md",
       "occurrence_count": 6,
-      "first_line": 706,
+      "first_line": 718,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1796,7 +1796,7 @@
       "symbol": "bioetl_silver_filter_rejections_total",
       "path": "grafana/dashboards/bioetl-dq-v2.json",
       "occurrence_count": 2,
-      "first_line": 2375,
+      "first_line": 1829,
       "role": "Silver filter rejection metric",
       "migration_relevance": "Metric semantics are narrowed to Silver structural rejects during compatibility cleanup.",
       "notes": ""
@@ -1862,7 +1862,7 @@
       "symbol": "bioetl_silver_filter_reject_total_mismatch_15m",
       "path": "grafana/README.md",
       "occurrence_count": 2,
-      "first_line": 1100,
+      "first_line": 1119,
       "role": "Silver reject accounting reconciliation",
       "migration_relevance": "Recording rule reconciles stage totals with bounded Silver reject breakdowns.",
       "notes": ""
