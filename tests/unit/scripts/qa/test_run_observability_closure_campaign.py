@@ -116,8 +116,10 @@ def test_tree_signature_tracks_manifest_mutations_without_reading_payloads(
 
     previous_mtime = payload.stat().st_mtime_ns
     payload.write_bytes(b"after!")
-    os.utime(payload, ns=(previous_mtime + 1, previous_mtime + 1))
+    distinct_mtime = previous_mtime + 10_000_000_000
+    os.utime(payload, ns=(distinct_mtime, distinct_mtime))
 
+    assert payload.stat().st_mtime_ns != previous_mtime
     assert campaign._tree_signature(root) != before
 
 
@@ -271,7 +273,7 @@ def test_isolated_work_root_links_only_tracked_configs(tmp_path: Path) -> None:
         repo_root=repo_root,
     )
 
-    assert (work_root / "configs").is_symlink()
+    assert campaign._is_directory_link(work_root / "configs")
     assert (work_root / "configs").resolve() == configs_root.resolve()
     assert not (work_root / "data").exists()
 
