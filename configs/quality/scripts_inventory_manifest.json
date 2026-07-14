@@ -85,7 +85,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/skills/_references/README.md",
-          "line": 35,
+          "line": 36,
           "source_group": "docs",
           "text": "| `scripts/ai/codex/check_skills_layout.sh` | Validates `_references` exists as a required subdirectory              |"
         },
@@ -106,7 +106,7 @@
       "references": [
         {
           "path": ".codex/skills/SKILLS-CATALOG.md",
-          "line": 13,
+          "line": 17,
           "source_group": "skills",
           "text": "bash scripts/ai/codex/check_skills_mirror.sh --check"
         },
@@ -129,20 +129,20 @@
           "text": "bash scripts/ai/codex/check_skills_mirror.sh --check"
         },
         {
-          "path": "docs/00-project/ai/skills/_references/README.md",
-          "line": 26,
-          "source_group": "docs",
-          "text": "- Check command: `bash scripts/ai/codex/check_skills_mirror.sh`."
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 20,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/codex/check_skills_mirror.sh\""
         },
         {
-          "path": "docs/00-project/ai/skills/_references/README.md",
-          "line": 34,
-          "source_group": "docs",
-          "text": "| `scripts/ai/codex/check_skills_mirror.sh` | Overlays reference bundles from `_references/local` onto skill mirrors |"
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 37,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/codex/check_skills_mirror.sh\""
         },
         {
-          "path": "docs/00-project/ai/skills/local/SKILLS-CATALOG.md",
-          "line": 13,
+          "path": "docs/00-project/ai/skills/README.md",
+          "line": 62,
           "source_group": "docs",
           "text": "bash scripts/ai/codex/check_skills_mirror.sh --check"
         },
@@ -3187,8 +3187,20 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 6,
       "references": [
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 22,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/sync_ai_governance.py\""
+        },
+        {
+          "path": ".github/workflows/skills-consistency.yml",
+          "line": 39,
+          "source_group": "ci",
+          "text": "- \"scripts/ai/sync_ai_governance.py\""
+        },
         {
           "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
           "line": 97,
@@ -3200,6 +3212,18 @@
           "line": 167,
           "source_group": "docs",
           "text": "uv run python scripts/ai/sync_ai_governance.py"
+        },
+        {
+          "path": "scripts/ai/codex/check_skills_mirror.sh",
+          "line": 23,
+          "source_group": "scripts",
+          "text": "exec python3 \"$REPO_ROOT/scripts/ai/sync_ai_governance.py\" \\"
+        },
+        {
+          "path": "scripts/ai/codex/check_skills_mirror.sh",
+          "line": 27,
+          "source_group": "scripts",
+          "text": "exec python3 \"$REPO_ROOT/scripts/ai/sync_ai_governance.py\" \\"
         }
       ],
       "owner": "@bioetl-platform",
@@ -3243,7 +3267,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 12,
       "references": [
         {
           "path": "Makefile",
@@ -4032,7 +4056,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
-          "line": 134,
+          "line": 128,
           "source_group": "docs",
           "text": "- `python scripts/diagrams/check_diagram_visual_smoke.py --manifest docs/02-architecture/mmd-diagrams/visual-smoke-manifest.txt`"
         },
@@ -4353,16 +4377,10 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 11,
       "references": [
         {
           "path": "Makefile",
-          "line": 279,
-          "source_group": "build",
-          "text": "$(RUN) python scripts/diagrams/generate_all_bundles.py"
-        },
-        {
-          "path": "makefile",
           "line": 279,
           "source_group": "build",
           "text": "$(RUN) python scripts/diagrams/generate_all_bundles.py"
@@ -4402,6 +4420,12 @@
           "line": 87,
           "source_group": "scripts",
           "text": "\"generate_all_bundles.py\", \"--collection\", \"architecture\""
+        },
+        {
+          "path": "scripts/diagrams/__main__.py",
+          "line": 91,
+          "source_group": "scripts",
+          "text": "\"render-views\": python_command(\"generate_all_bundles.py\", \"--collection\", \"views\"),"
         }
       ]
     },
@@ -4674,7 +4698,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
-          "line": 130,
+          "line": 124,
           "source_group": "docs",
           "text": "- `python scripts/diagrams/lint_diagrams.py docs`"
         },
@@ -4891,7 +4915,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 25,
+      "reference_count": 24,
       "references": [
         {
           "path": ".codex/agents/py-doc-bot.md",
@@ -5254,7 +5278,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/technical-designer-mermaid/SKILL.md",
-          "line": 131,
+          "line": 125,
           "source_group": "docs",
           "text": "- `bash scripts/diagrams/validate_mermaid_syntax.sh`"
         },
@@ -5324,7 +5348,7 @@
         "grafana-dashboard-extension",
         "py-doc-bot"
       ],
-      "reference_count": 154,
+      "reference_count": 155,
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md",
@@ -6655,7 +6679,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 24,
+      "reference_count": 23,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -7884,7 +7908,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 21,
       "references": [
         {
           "path": "Makefile",
@@ -8205,7 +8229,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 20,
+      "reference_count": 17,
       "references": [
         {
           "path": ".github/workflows/root-hygiene.yml",
@@ -10002,7 +10026,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/grafana-dashboard-render/SKILL.md",
-          "line": 75,
+          "line": 69,
           "source_group": "docs",
           "text": "uv run python scripts/engineering/qa/report_dashboard_inventory.py --json"
         },
@@ -10983,7 +11007,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/vcr-record/SKILL.md",
-          "line": 62,
+          "line": 56,
           "source_group": "docs",
           "text": "python -m scripts.engineering.qa.vcr check-placement"
         },
@@ -11129,7 +11153,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 76,
+      "reference_count": 73,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -12972,7 +12996,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 18,
+      "reference_count": 17,
       "references": [
         {
           "path": "Makefile",
@@ -12991,12 +13015,6 @@
           "line": 282,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
-        },
-        {
-          "path": "makefile",
-          "line": 226,
-          "source_group": "build",
-          "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only"
         },
         {
           "path": "scripts/engineering/dev/README.md",
@@ -13021,6 +13039,12 @@
           "line": 570,
           "source_group": "scripts",
           "text": "# setup_plugins.sh may provision a temporary pytest runtime under /tmp when"
+        },
+        {
+          "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
+          "line": 109,
+          "source_group": "scripts",
+          "text": "Candidate(\"scripts/ops/launchers/codex/setup_plugins.sh\", BOOTSTRAP_HELPER_ROLE),"
         }
       ]
     },
@@ -14143,7 +14167,7 @@
         },
         {
           "path": "docs/00-project/ai/skills/local/grafana-dashboard-render/SKILL.md",
-          "line": 166,
+          "line": 160,
           "source_group": "docs",
           "text": "- Repo env bootstrap: `scripts/ops/support/load_repo_env.sh`"
         },
