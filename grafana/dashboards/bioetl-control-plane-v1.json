@@ -838,7 +838,7 @@
     },
     {
       "datasource": "Quarantine Explorer",
-      "description": "Compact HTTP-backed Control Plane identity overview from /ops/control-plane/identity-evidence. Replay/resume decision summary stays above in the first-screen ID, Replay Safety State, Checkpoint Freshness, Manifest/Ledger, and Telemetry cards; this section is the compact forensic drilldown. Long UUID/hash values are shortened in value_short and remain full in value_full. Status uses OK/WARN/CRIT/UNKNOWN; no run_id, manifest_id, hashes, snapshot IDs, or artifact refs are Prometheus labels. This copyable Selected Run identity strip is intentionally visible in the second semantic block.",
+      "description": "Compact HTTP-backed Control Plane identity overview from /ops/control-plane/identity-evidence. Replay/resume decision summary stays above in the first-screen ID, Replay Safety State, Checkpoint Freshness, Manifest/Ledger, and Telemetry cards; this section is the compact forensic drilldown. Long UUID/hash values are shortened in value_short and remain full in value_full. Status uses OK/WARN/CRIT/UNKNOWN; no run_id, manifest_id, hashes, snapshot IDs, or artifact refs are Prometheus labels. This copyable Selected Run identity strip is intentionally visible in the second semantic block. VALID EMPTY means a successful HTTP response with zero rows; BACKEND DOWN or datasource error is UNKNOWN, never empty.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -956,7 +956,7 @@
     },
     {
       "datasource": "Quarantine Explorer",
-      "description": "Copy-friendly full-value handoffs for UUID, hash, artifact, lineage, snapshot, and checkpoint refs. Simple enum/status badges intentionally do not appear here. Use the data:text/plain link to open the raw full value without adding it as a Prometheus label. It remains above incident drilldowns so full identity values are one copy action away.",
+      "description": "Copy-friendly full-value handoffs for UUID, hash, artifact, lineage, snapshot, and checkpoint refs. Simple enum/status badges intentionally do not appear here. Use the data:text/plain link to open the raw full value without adding it as a Prometheus label. It remains above incident drilldowns so full identity values are one copy action away. VALID EMPTY means a successful HTTP response with zero rows; BACKEND DOWN or datasource error is UNKNOWN, never empty.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -1143,7 +1143,7 @@
     },
     {
       "datasource": "Quarantine Explorer",
-      "description": "Latest persisted checkpoint age in seconds for the selected pipeline. This is bounded freshness evidence derived from persisted checkpoint metadata via /ops/control-plane/checkpoint-freshness and the canonical bioetl_checkpoint_age_seconds recording rule, not from short-lived Prometheus scrape history. Lower is fresher. Null/No data means no persisted checkpoint evidence for the current scope, so treat the result as UNKNOWN and inspect checkpoint artifacts/runbook before replay or resume decisions.",
+      "description": "Latest persisted checkpoint age in seconds for the selected pipeline. This is bounded freshness evidence derived from persisted checkpoint metadata via /ops/control-plane/checkpoint-freshness and the canonical bioetl_checkpoint_age_seconds recording rule, not from short-lived Prometheus scrape history. Lower is fresher. Null/No data means no persisted checkpoint evidence for the current scope, so treat the result as UNKNOWN and inspect checkpoint artifacts/runbook before replay or resume decisions. VALID EMPTY means a successful HTTP response with zero rows; BACKEND DOWN or datasource error is UNKNOWN, never empty.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -4074,7 +4074,7 @@
         },
         {
           "datasource": "Quarantine Explorer",
-          "description": "Compact HTTP-backed identity gap table. Missing run_id or terminal manifest_id is CRIT; missing effective config, contract, input snapshot, replay parent, composite identity, or checkpoint anchors is explicit WARN/CRIT evidence instead of a green health signal.",
+          "description": "Compact HTTP-backed identity gap table. Missing run_id or terminal manifest_id is CRIT; missing effective config, contract, input snapshot, replay parent, composite identity, or checkpoint anchors is explicit WARN/CRIT evidence instead of a green health signal. VALID EMPTY means a successful HTTP response with zero rows; BACKEND DOWN or datasource error is UNKNOWN, never empty.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4152,7 +4152,7 @@
         },
         {
           "datasource": "Quarantine Explorer",
-          "description": "Compares current runtime anchors with persisted checkpoint anchors from the identity evidence endpoint. Checkpoint status values are OK, MISMATCH, MISSING, PARTIAL, or UNKNOWN; MISMATCH maps to CRIT and missing/partial maps to WARN.",
+          "description": "Compares current runtime anchors with persisted checkpoint anchors from the identity evidence endpoint. Checkpoint status values are OK, MISMATCH, MISSING, PARTIAL, or UNKNOWN; MISMATCH maps to CRIT and missing/partial maps to WARN. VALID EMPTY means a successful HTTP response with zero rows; BACKEND DOWN or datasource error is UNKNOWN, never empty.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4230,7 +4230,7 @@
         },
         {
           "datasource": "Quarantine Explorer",
-          "description": "P1 support anchors from the identity evidence endpoint: source config, DQ policy/rule bundle, input snapshot IDs and content hashes, replay eligibility/blockers, lineage fragments, artifact refs, and ledger watermark. Full values stay in HTTP table data and are not Prometheus labels.",
+          "description": "P1 support anchors from the identity evidence endpoint: source config, DQ policy/rule bundle, input snapshot IDs and content hashes, replay eligibility/blockers, lineage fragments, artifact refs, and ledger watermark. Full values stay in HTTP table data and are not Prometheus labels. VALID EMPTY means a successful HTTP response with zero rows; BACKEND DOWN or datasource error is UNKNOWN, never empty.",
           "fieldConfig": {
             "defaults": {
               "custom": {
@@ -4308,7 +4308,7 @@
         },
         {
           "datasource": "Quarantine Explorer",
-          "description": "P2 forensic anchors from the identity evidence endpoint: launch/runtime config hashes, planned and published artifacts, composite component run IDs, checkpoint file, lock owner, DQ reports, cross-validation rules, and Bronze batch IDs. These fields are details-only and must not become Prometheus labels.",
+          "description": "P2 forensic anchors from the identity evidence endpoint: launch/runtime config hashes, planned and published artifacts, composite component run IDs, checkpoint file, lock owner, DQ reports, cross-validation rules, and Bronze batch IDs. These fields are details-only and must not become Prometheus labels. VALID EMPTY means a successful HTTP response with zero rows; BACKEND DOWN or datasource error is UNKNOWN, never empty.",
           "fieldConfig": {
             "defaults": {
               "custom": {

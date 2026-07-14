@@ -928,6 +928,28 @@ groups:
           description: "Pushgateway is not reachable for instance={{ $labels.instance }}."
           runbook: "docs/05-operations/runbooks/observability-checklist.md"
 
+      - alert: BioETLQuarantineExplorerUnavailable
+        expr: up{job="quarantine-explorer"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          owner: bioetl-observability
+        annotations:
+          summary: "Quarantine Explorer is unavailable"
+          description: "Quarantine Explorer metrics/health surface is not reachable for instance={{ $labels.instance }}; HTTP-backed identity and forensic panels are not trustworthy."
+          runbook: "docs/05-operations/runbooks/observability-checklist.md"
+
+      - alert: BioETLGrafanaRendererUnavailable
+        expr: up{job="grafana-image-renderer"} == 0
+        for: 2m
+        labels:
+          severity: warning
+          owner: bioetl-observability
+        annotations:
+          summary: "Grafana image renderer is unavailable"
+          description: "Grafana image renderer metrics endpoint is unavailable for instance={{ $labels.instance }}; screenshot evidence and reviewed render workflows are blocked."
+          runbook: "docs/05-operations/runbooks/observability-checklist.md"
+
   - name: bioetl_pipeline_runtime_observability
     rules:
       - alert: BioETLPipelinePreflightDataSourceFailed
@@ -979,16 +1001,6 @@ groups:
         annotations:
           summary: "Pipeline runtime error ratio is elevated"
           description: "Pipeline runtime error ratio exceeded 5% for pipeline={{ $labels.pipeline }} over the last 30m, with at least 20 bronze records observed."
-          runbook: "docs/05-operations/runbooks/observability-checklist.md"
-
-      - alert: BioETLOperatorRuntimeUniverseMissing
-        expr: (sum(increase(bioetl_pipeline_runs_total[15m])) > 0) unless on() (count(bioetl_runtime_pipeline_run_type_universe) > 0)
-        for: 15m
-        labels:
-          severity: warning
-        annotations:
-          summary: "Runtime operator universe telemetry is missing"
-          description: "Pipeline runs were observed in the last 15m but bioetl_runtime_pipeline_run_type_universe is absent; runtime dashboards may show empty state without raising domain alerts."
           runbook: "docs/05-operations/runbooks/observability-checklist.md"
 
       - alert: BioETLDQCurrentStatusMissing

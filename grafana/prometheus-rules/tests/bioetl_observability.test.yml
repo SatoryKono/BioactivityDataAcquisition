@@ -96,10 +96,58 @@ tests:
     interval: 1m
     input_series:
       - series: 'up{job="quarantine-explorer",instance="quarantine-explorer:8081"}'
-        values: '0 0 0 0 0 0 0'
+        values: '0 0 0 0 0'
     alert_rule_test:
       - eval_time: 3m
         alertname: BioETLQuarantineExplorerUnavailable
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              owner: bioetl-observability
+              job: quarantine-explorer
+              instance: quarantine-explorer:8081
+            exp_annotations:
+              summary: Quarantine Explorer is unavailable
+              description: Quarantine Explorer metrics/health surface is not reachable for instance=quarantine-explorer:8081; HTTP-backed identity and forensic panels are not trustworthy.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
+
+  - name: quarantine-explorer-healthy
+    interval: 1m
+    input_series:
+      - series: 'up{job="quarantine-explorer",instance="quarantine-explorer:8081"}'
+        values: '1 1 1 1 1'
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: BioETLQuarantineExplorerUnavailable
+        exp_alerts: []
+
+  - name: grafana-renderer-unavailable
+    interval: 1m
+    input_series:
+      - series: 'up{job="grafana-image-renderer",instance="renderer:8081"}'
+        values: '0 0 0 0 0'
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: BioETLGrafanaRendererUnavailable
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              owner: bioetl-observability
+              job: grafana-image-renderer
+              instance: renderer:8081
+            exp_annotations:
+              summary: Grafana image renderer is unavailable
+              description: Grafana image renderer metrics endpoint is unavailable for instance=renderer:8081; screenshot evidence and reviewed render workflows are blocked.
+              runbook: docs/05-operations/runbooks/observability-checklist.md
+
+  - name: grafana-renderer-healthy
+    interval: 1m
+    input_series:
+      - series: 'up{job="grafana-image-renderer",instance="renderer:8081"}'
+        values: '1 1 1 1 1'
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: BioETLGrafanaRendererUnavailable
         exp_alerts: []
 
   - name: memory-pressure-active
@@ -781,12 +829,65 @@ tests:
         values: '0+1x10'
       - series: 'bioetl_checkpoint_saved_at_seconds{pipeline="chembl"}'
         values: '0+60x10'
+      - series: 'bioetl_control_plane_terminal_events_total{pipeline="chembl",status="success"}'
+        values: '0+1x10'
     promql_expr_test:
+      - expr: bioetl_control_plane_run_type_universe{pipeline="chembl",run_type="incremental"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_control_plane_run_type_universe",pipeline="chembl",run_type="incremental"}'
+            value: 1
+      - expr: bioetl_replay_safety_blockers_15m{pipeline="chembl",run_type="incremental"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_replay_safety_blockers_15m",pipeline="chembl",run_type="incremental"}'
+            value: 0
+      - expr: bioetl_manifest_ledger_failures_15m{pipeline="chembl",run_type="incremental"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_manifest_ledger_failures_15m",pipeline="chembl",run_type="incremental"}'
+            value: 0
+      - expr: bioetl_control_plane_telemetry_missing_5m{pipeline="chembl",run_type="incremental"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_control_plane_telemetry_missing_5m",pipeline="chembl",run_type="incremental"}'
+            value: 0
+      - expr: bioetl_checkpoint_age_seconds{pipeline="chembl"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_checkpoint_age_seconds",pipeline="chembl"}'
+            value: 0
+      - expr: bioetl_control_plane_checkpoint_evidence_status{pipeline="chembl",run_type="incremental"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_control_plane_checkpoint_evidence_status",pipeline="chembl",run_type="incremental"}'
+            value: 0
       - expr: bioetl_control_plane_current_status_trusted{pipeline="chembl",run_type="incremental"}
         eval_time: 10m
         exp_samples:
           - labels: '{__name__="bioetl_control_plane_current_status_trusted",pipeline="chembl",run_type="incremental"}'
             value: 0
+      - expr: bioetl_terminal_events_15m{pipeline="chembl"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_terminal_events_15m",pipeline="chembl"}'
+            value: 10
+
+  - name: control-plane-counter-reset-preserves-failure-evidence
+    interval: 1m
+    input_series:
+      - series: 'bioetl_control_plane_manifest_writes_total{pipeline="chembl",run_type="incremental",status="failed"}'
+        values: '0 1 2 3 4 0 1 2 3 4 5'
+      - series: 'bioetl_control_plane_ledger_appends_total{pipeline="chembl",status="success"}'
+        values: '0+1x10'
+      - series: 'bioetl_checkpoint_saved_at_seconds{pipeline="chembl"}'
+        values: '0+60x10'
+    promql_expr_test:
+      - expr: bioetl_manifest_ledger_failures_15m{pipeline="chembl",run_type="incremental"}
+        eval_time: 10m
+        exp_samples:
+          - labels: '{__name__="bioetl_manifest_ledger_failures_15m",pipeline="chembl",run_type="incremental"}'
+            value: 9
 
   - name: control-plane-trusted-status-incomplete-with-missing-checkpoint
     interval: 1m
@@ -960,16 +1061,6 @@ tests:
         exp_samples:
           - labels: '{__name__="bioetl_l1_workflow_global_status",pipeline="chembl_publication",run_type="backfill"}'
             value: 3
-
-  - name: operator-runtime-universe-missing
-    interval: 1m
-    input_series:
-      - series: 'bioetl_pipeline_runs_total{pipeline="chembl_target",run_type="backfill",status="success"}'
-        values: '0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15'
-    alert_rule_test:
-      - eval_time: 16m
-        alertname: BioETLOperatorRuntimeUniverseMissing
-        exp_alerts: []
 
   - name: dq-current-status-missing
     interval: 1m

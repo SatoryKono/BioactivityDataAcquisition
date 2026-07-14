@@ -20,6 +20,8 @@ class WorkflowStepExecutionResult:
     payload: object | None = None
     error_type: str | None = None
     error_message: str | None = None
+    child_run_id: str | None = None
+    child_manifest_id: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

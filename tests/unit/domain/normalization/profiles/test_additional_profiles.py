@@ -566,6 +566,15 @@ def test_chembl_target_component_organism_display_normalization_is_profile_visib
     assert "organism" in (organism_rule.notes or "").lower()
 
 
+def test_chembl_target_component_description_is_profile_backed() -> None:
+    description_rule = CHEMBL_TARGET_COMPONENT_PROFILE.rule_for("description")
+
+    assert description_rule is not None
+    assert description_rule.apply("Test component") == "Test component"
+    assert description_rule.apply("unknown") is None
+    assert description_rule.apply(None) is None
+
+
 def test_chembl_cell_line_cellosaurus_id_uses_canonical_identifier_rule() -> None:
     cellosaurus_rule = CHEMBL_CELL_LINE_PROFILE.rule_for("cellosaurus_id")
 

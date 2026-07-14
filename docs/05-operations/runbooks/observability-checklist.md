@@ -122,6 +122,19 @@ cat reports/logs/bioetl.log | jq 'select(.run_id and .pipeline and .pipeline_nam
 
 ### 3. Dashboard / Alert Surface
 
+Service ownership for this section is `@bioetl-observability`.
+
+- `BioETLQuarantineExplorerUnavailable`: verify
+  `up{job="quarantine-explorer"}`, then `/health/live` and `/metrics`. Until the
+  alert clears, classify HTTP-backed identity, processed-record, and quarantine
+  panels as backend unavailable rather than valid-empty.
+- `BioETLGrafanaRendererUnavailable`: verify
+  `up{job="grafana-image-renderer"}`, Grafana `rendererAvailable`, and one
+  server-side render probe. Until it clears, mark screenshot evidence as render
+  blocked; do not reinterpret interactive Grafana/Prometheus as unavailable.
+- Panels 1–5 on `6. Alerts & SLO` expose this owner/runbook route directly and
+  display Prometheus `ALERTS` output without duplicating rule thresholds.
+
 - Check that the shipped Grafana dashboards load and that the expected filters are
   available for the active pipeline or provider.
 - Run the canonical inventory helper before escalating a missing dashboard panel
@@ -231,6 +244,51 @@ uv run pytest -q tests/unit/application/services/test_checkpoint_compatibility_s
 uv run pytest -q tests/unit/infrastructure/control_plane/test_file_artifact_lifecycle_store.py
 uv run pytest -q tests/integration/test_runner_lifecycle.py
 ```
+
+### 6b. 15-pipeline closure campaign
+
+Use the QA entry point to inventory the exact ChEMBL config/registry universe
+before an execution run:
+
+```bash
+python -m scripts.engineering.qa run-observability-closure-campaign \
+  --audit-root /absolute/fresh/audit-root \
+  --tracing-mode both
+```
+
+Execution is fail-closed. It requires existing canonical data and log roots,
+a fresh audit root, both explicit tracing modes, and one typed JSON evidence
+artifact for every external acceptance category:
+
+```bash
+python -m scripts.engineering.qa run-observability-closure-campaign \
+  --audit-root /absolute/fresh/audit-root \
+  --canonical-data-root /absolute/canonical/data \
+  --canonical-log-root /absolute/canonical/logs \
+  --tracing-mode both \
+  --execute \
+  --evidence tracing_parity=/absolute/fresh/audit-root/evidence/tracing_parity.json \
+  --evidence metric_reconciliation=/absolute/fresh/audit-root/evidence/metric_reconciliation.json \
+  --evidence workflow_correlation=/absolute/fresh/audit-root/evidence/workflow_correlation.json \
+  --evidence metric_surface=/absolute/fresh/audit-root/evidence/metric_surface.json \
+  --evidence dashboard_variables=/absolute/fresh/audit-root/evidence/dashboard_variables.json \
+  --evidence zero_evidence=/absolute/fresh/audit-root/evidence/zero_evidence.json \
+  --evidence scrape_targets=/absolute/fresh/audit-root/evidence/scrape_targets.json \
+  --evidence render_stability=/absolute/fresh/audit-root/evidence/render_stability.json \
+  --evidence promtool=/absolute/fresh/audit-root/evidence/promtool.json \
+  --evidence online_run=/absolute/fresh/audit-root/evidence/online_run.json
+```
+
+Each evidence file is unique, resides below `AUDIT_ROOT/evidence`, and carries
+`schema_version: 1`, its matching `evidence_type`, `status: pass`, the exact
+campaign `source_revision`, a timezone-aware `generated_at`, and the
+category-specific numeric `summary`. The runner hashes each artifact into the
+final report. It returns non-zero for missing/malformed/stale evidence, a
+timeout or failed/ambiguous pipeline attempt, tracing-mode gaps, registry/config
+drift, reused audit state, or any canonical-root mutation. The specialized
+Prometheus, dashboard render, workflow and online-run checks remain the
+producers of those typed artifacts; this command is their final aggregation
+and immutable-root gate.
 
 ### 7. Operator Sign-off
 

@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -17,6 +18,9 @@ from bioetl.composition.bootstrap.cli.health import (
     bootstrap_health_server_dependencies,
     bootstrap_health_server_quarantine_service,
     bootstrap_health_service,
+)
+from bioetl.composition.bootstrap.assembly.health_server import (
+    create_health_server_dependencies,
 )
 from bioetl.domain.ports import (
     CheckpointPort,
@@ -108,6 +112,25 @@ class TestHealthServerDependencies:
         assert deps.run_manifest_port is manifest_store
         assert deps.run_ledger_port is ledger_store
         assert deps.workflow_manifest_port is workflow_manifest_store
+
+    def test_explicit_data_root_owns_all_control_plane_read_ports(
+        self,
+        tmp_path: Path,
+    ) -> None:
+        checkpoint_port = MagicMock()
+        deps = create_health_server_dependencies(
+            checkpoint_port_factory=lambda _pipeline: checkpoint_port,
+            data_root=tmp_path,
+        )
+
+        assert deps.data_root == tmp_path.resolve()
+        assert deps.checkpoint_port is checkpoint_port
+        control_root = tmp_path.resolve() / "output" / "control"
+        assert deps.run_manifest_port.base_path == control_root / "run_manifest"
+        assert deps.run_ledger_port.base_path == control_root / "run_ledger"
+        assert deps.workflow_manifest_port.base_path == (
+            control_root / "workflow_manifest"
+        )
 
 
 @pytest.mark.unit

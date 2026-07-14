@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from importlib import import_module
+from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 from bioetl.composition._service_protocols import (
@@ -134,9 +135,17 @@ def get_audit_service() -> AuditInspectionService:
     )
 
 
-def get_quarantine_service() -> QuarantineService:
+def get_quarantine_service(*, data_root: Path | None = None) -> QuarantineService:
     """Get quarantine administration service without pipeline registration."""
-    return cast("QuarantineService", _invoke_bootstrap("bootstrap_quarantine_service"))
+    if data_root is None:
+        return cast(
+            "QuarantineService",
+            _invoke_bootstrap("bootstrap_quarantine_service"),
+        )
+    return cast(
+        "QuarantineService",
+        _invoke_bootstrap("bootstrap_quarantine_service", data_root=data_root),
+    )
 
 
 def get_bronze_cleanup_service() -> BronzeCleanupService:
@@ -233,11 +242,22 @@ def get_observability_workflow_service() -> ObservabilityWorkflowService:
     )
 
 
-def get_health_server_dependencies() -> HealthServerDependenciesProtocol:
+def get_health_server_dependencies(
+    *,
+    data_root: Path | None = None,
+) -> HealthServerDependenciesProtocol:
     """Get health-server dependencies without pipeline registration."""
+    if data_root is None:
+        return cast(
+            "HealthServerDependenciesProtocol",
+            _invoke_bootstrap("bootstrap_health_server_dependencies"),
+        )
     return cast(
         "HealthServerDependenciesProtocol",
-        _invoke_bootstrap("bootstrap_health_server_dependencies"),
+        _invoke_bootstrap(
+            "bootstrap_health_server_dependencies",
+            data_root=data_root,
+        ),
     )
 
 

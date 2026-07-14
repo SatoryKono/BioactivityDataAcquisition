@@ -66,6 +66,7 @@ class _HealthRoutingHost(_HealthResponseSupport, Protocol):
     _run_manifest_port: object | None
     _run_ledger_port: object | None
     _workflow_manifest_port: object | None
+    _data_root: str | None
 
     def _read_required_param(self, query: dict[str, str], name: str) -> str: ...
 
@@ -138,12 +139,13 @@ async def handle_control_plane_ready(
     writer: asyncio.StreamWriter,
 ) -> None:
     """Handle lightweight control-plane readiness probes without catalog scans."""
-    payload = {
+    payload: dict[str, object] = {
         "run_manifest_port": host._run_manifest_port is not None,
         "run_ledger_port": host._run_ledger_port is not None,
         "workflow_manifest_port": getattr(host, "_workflow_manifest_port", None)
         is not None,
         "checkpoint_port": host._checkpoint_port is not None,
+        "data_root": getattr(host, "_data_root", None),
     }
     status_code = 200 if payload["run_manifest_port"] else 503
     await host._send_payload_response(writer, status_code, payload)

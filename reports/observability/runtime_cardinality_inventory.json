@@ -21,26 +21,46 @@
     "bioetl_dq_current_activity_15m",
     "bioetl_dq_current_reason",
     "bioetl_dq_current_status",
+    "bioetl_dq_monitor_disabled_current",
     "bioetl_dq_monitor_enabled",
     "bioetl_dq_records_quarantined_total",
     "bioetl_dq_soft_threshold_exceeded",
     "bioetl_dq_validation_failures_total",
     "bioetl_errors_total",
+    "bioetl_gold_terminal_records_15m",
     "bioetl_health_check_degraded_total",
     "bioetl_health_check_failures_total",
     "bioetl_health_check_success_total",
     "bioetl_http_request_errors_total",
     "bioetl_infrastructure_validated",
     "bioetl_l0_input_status",
+    "bioetl_l0_input_status_selected",
     "bioetl_l0_status",
     "bioetl_lineage_fragments_emitted_total",
     "bioetl_lineage_refs_missing_total",
     "bioetl_memory_pressure_state",
+    "bioetl_overview_pipeline_run_type_universe",
+    "bioetl_overview_pipeline_universe",
     "bioetl_pipeline_health_check_passed",
     "bioetl_pipeline_runs_total",
     "bioetl_pipeline_stage_expected",
     "bioetl_processed_records_bronze_current",
+    "bioetl_processed_records_delta_abs_current",
+    "bioetl_processed_records_gold_accounted_current",
+    "bioetl_processed_records_gold_delta_current",
+    "bioetl_processed_records_silver_accounted_current",
+    "bioetl_processed_records_silver_delta_current",
     "bioetl_processed_records_silver_valid_current",
+    "bioetl_provider_health_check_degraded_12h",
+    "bioetl_provider_health_check_degraded_15m",
+    "bioetl_provider_health_check_failures_12h",
+    "bioetl_provider_health_check_failures_15m",
+    "bioetl_provider_health_check_provider_universe_12h",
+    "bioetl_provider_health_check_provider_universe_15m",
+    "bioetl_provider_health_check_success_12h",
+    "bioetl_provider_health_check_success_15m",
+    "bioetl_provider_health_check_total_12h",
+    "bioetl_provider_health_check_total_15m",
     "bioetl_provider_health_status",
     "bioetl_rate_limiter_tokens_available",
     "bioetl_record_flow_invariants_total",
@@ -49,12 +69,46 @@
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
     "bioetl_replay_safety_blockers_15m",
+    "bioetl_runtime_alert_condition_checkpoint_incompatible_30m",
+    "bioetl_runtime_alert_condition_dq_critical_anomaly_30m",
+    "bioetl_runtime_alert_condition_dq_hard_fail_15m",
+    "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
+    "bioetl_runtime_alert_condition_gold_write_missing_15m",
+    "bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m",
+    "bioetl_runtime_alert_condition_ledger_append_failed_15m",
+    "bioetl_runtime_alert_condition_lineage_refs_missing_15m",
+    "bioetl_runtime_alert_condition_manifest_write_failed_15m",
+    "bioetl_runtime_alert_condition_no_terminal_run_30m",
+    "bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m",
+    "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
+    "bioetl_runtime_alert_condition_pipeline_runs_failed_15m",
+    "bioetl_runtime_alert_condition_provider_adapter_latency_high_30m",
+    "bioetl_runtime_alert_condition_provider_failure_rate_high_15m",
+    "bioetl_runtime_alert_condition_provider_http_error_rate_high_15m",
+    "bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m",
+    "bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m",
+    "bioetl_runtime_alert_condition_provider_retries_exhausted_1h",
+    "bioetl_runtime_alert_condition_record_flow_invariant_violated_15m",
+    "bioetl_runtime_alert_condition_replay_drift_detected_30m",
+    "bioetl_runtime_alert_condition_replay_lag_high_15m",
+    "bioetl_runtime_alert_condition_silver_validation_failures_30m",
+    "bioetl_runtime_alert_condition_stage_backlog_active_15m",
+    "bioetl_runtime_alert_condition_stage_lag_high_15m",
+    "bioetl_runtime_alert_condition_validation_backlog_active_15m",
+    "bioetl_runtime_current_activity_15m",
+    "bioetl_runtime_current_blocker_reason",
+    "bioetl_runtime_current_degraded_signals_15m",
+    "bioetl_runtime_current_failure_signals_15m",
     "bioetl_runtime_current_status",
     "bioetl_runtime_current_status_scoped",
+    "bioetl_runtime_pipeline_run_type_universe",
     "bioetl_runtime_pipeline_run_type_universe_scoped",
     "bioetl_runtime_trust_gap_active_10m",
     "bioetl_runtime_trust_gap_status_10m",
+    "bioetl_silver_filter_reject_total_mismatch_15m",
+    "bioetl_silver_filter_rejections_breakdown_total_15m",
     "bioetl_silver_filter_rejections_total",
+    "bioetl_silver_filter_rejects_stage_total_15m",
     "bioetl_silver_validation_failures_total",
     "bioetl_stage_backlog_records",
     "bioetl_stage_lag_seconds",
@@ -178,6 +232,8 @@
     "bioetl_http_retry_budget_exhausted_total",
     "bioetl_infrastructure_validated",
     "bioetl_l0_input_status",
+    "bioetl_l0_input_status_selected",
+    "bioetl_l0_next_action_route",
     "bioetl_l0_status",
     "bioetl_l1_control_plane_current_status",
     "bioetl_l1_dq_status",
@@ -199,6 +255,7 @@
     "bioetl_observability_events_total",
     "bioetl_observability_runtime_status",
     "bioetl_output_artifact_publication_events_total",
+    "bioetl_overview_pipeline_run_type_universe",
     "bioetl_phase_duration_seconds",
     "bioetl_pipeline_duration_seconds",
     "bioetl_pipeline_health_check_passed",
@@ -221,8 +278,11 @@
     "bioetl_processed_records_silver_quarantined_current",
     "bioetl_processed_records_silver_skipped_current",
     "bioetl_processed_records_silver_valid_current",
+    "bioetl_provider_current_cause",
     "bioetl_provider_current_status",
+    "bioetl_provider_health_check_provider_universe_15m",
     "bioetl_provider_health_status",
+    "bioetl_provider_range_operational_ok",
     "bioetl_provider_status",
     "bioetl_publication_raw_vocab_unknown_total",
     "bioetl_quarantine_operator_duration_seconds",
@@ -237,9 +297,37 @@
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
     "bioetl_replay_safety_blockers_15m",
+    "bioetl_runtime_alert_condition_checkpoint_incompatible_30m",
+    "bioetl_runtime_alert_condition_dq_critical_anomaly_30m",
+    "bioetl_runtime_alert_condition_dq_hard_fail_15m",
+    "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
+    "bioetl_runtime_alert_condition_gold_write_missing_15m",
+    "bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m",
+    "bioetl_runtime_alert_condition_ledger_append_failed_15m",
+    "bioetl_runtime_alert_condition_lineage_refs_missing_15m",
+    "bioetl_runtime_alert_condition_manifest_write_failed_15m",
+    "bioetl_runtime_alert_condition_no_terminal_run_30m",
+    "bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m",
+    "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
+    "bioetl_runtime_alert_condition_pipeline_runs_failed_15m",
+    "bioetl_runtime_alert_condition_provider_adapter_latency_high_30m",
+    "bioetl_runtime_alert_condition_provider_failure_rate_high_15m",
+    "bioetl_runtime_alert_condition_provider_http_error_rate_high_15m",
+    "bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m",
+    "bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m",
+    "bioetl_runtime_alert_condition_provider_retries_exhausted_1h",
+    "bioetl_runtime_alert_condition_record_flow_invariant_violated_15m",
+    "bioetl_runtime_alert_condition_replay_drift_detected_30m",
+    "bioetl_runtime_alert_condition_replay_lag_high_15m",
+    "bioetl_runtime_alert_condition_runtime_error_rate_high_30m",
+    "bioetl_runtime_alert_condition_silver_validation_failures_30m",
+    "bioetl_runtime_alert_condition_stage_backlog_active_15m",
+    "bioetl_runtime_alert_condition_stage_lag_high_15m",
+    "bioetl_runtime_current_blocker_reason",
     "bioetl_runtime_current_blocker_reason_scoped",
     "bioetl_runtime_current_status",
     "bioetl_runtime_current_status_trusted",
+    "bioetl_runtime_pipeline_run_type_universe",
     "bioetl_runtime_pipeline_run_type_universe_scoped",
     "bioetl_runtime_status",
     "bioetl_runtime_trust_gap_status_10m",
@@ -252,6 +340,7 @@
     "bioetl_silver_csv_export_success_total",
     "bioetl_silver_filter_reject_field_total",
     "bioetl_silver_filter_reject_reason_total",
+    "bioetl_silver_filter_reject_total_mismatch_15m",
     "bioetl_silver_filter_rejections_total",
     "bioetl_silver_merge_failures_total",
     "bioetl_silver_merge_retries_total",
@@ -286,7 +375,8 @@
     "bioetl_workflow_runs_total",
     "bioetl_workflow_status",
     "bioetl_workflow_step_duration_seconds",
-    "bioetl_workflow_step_events_total"
+    "bioetl_workflow_step_events_total",
+    "bioetl_workflow_universe"
   ],
   "dashboarded_without_declaration": [],
   "dashboarded_without_emission": [],
@@ -435,6 +525,7 @@
     "bioetl_dq_current_reason",
     "bioetl_dq_current_status",
     "bioetl_dq_dispositions_total",
+    "bioetl_dq_monitor_disabled_current",
     "bioetl_dq_monitor_disabled_total",
     "bioetl_dq_monitor_enabled",
     "bioetl_dq_records_quarantined_total",
@@ -450,6 +541,7 @@
     "bioetl_filter_ids_duplicates_total",
     "bioetl_filter_ids_loaded_total",
     "bioetl_gold_lifecycle_state_total",
+    "bioetl_gold_terminal_records_15m",
     "bioetl_gold_validation_failures_total",
     "bioetl_gold_write_attempts_total",
     "bioetl_gold_write_duration_seconds",
@@ -468,6 +560,9 @@
     "bioetl_http_retry_budget_exhausted_total",
     "bioetl_infrastructure_validated",
     "bioetl_l0_input_status",
+    "bioetl_l0_input_status_selected",
+    "bioetl_l0_next_action",
+    "bioetl_l0_next_action_route",
     "bioetl_l0_status",
     "bioetl_l1_control_plane_current_status",
     "bioetl_l1_dq_status",
@@ -489,6 +584,8 @@
     "bioetl_observability_events_total",
     "bioetl_observability_runtime_status",
     "bioetl_output_artifact_publication_events_total",
+    "bioetl_overview_pipeline_run_type_universe",
+    "bioetl_overview_pipeline_universe",
     "bioetl_phase_duration_seconds",
     "bioetl_pipeline_duration_seconds",
     "bioetl_pipeline_health_check_passed",
@@ -500,19 +597,36 @@
     "bioetl_postrun_phase_events_total",
     "bioetl_probe_mode_fallback_total",
     "bioetl_processed_records_bronze_current",
+    "bioetl_processed_records_delta_abs_current",
+    "bioetl_processed_records_gold_accounted_current",
     "bioetl_processed_records_gold_deduplicated_current",
+    "bioetl_processed_records_gold_delta_current",
     "bioetl_processed_records_gold_excluded_by_contract_current",
     "bioetl_processed_records_gold_quarantined_current",
     "bioetl_processed_records_gold_skipped_current",
     "bioetl_processed_records_gold_written_current",
     "bioetl_processed_records_reconciliation_status",
+    "bioetl_processed_records_silver_accounted_current",
     "bioetl_processed_records_silver_deduplicated_current",
+    "bioetl_processed_records_silver_delta_current",
     "bioetl_processed_records_silver_filtered_out_current",
     "bioetl_processed_records_silver_quarantined_current",
     "bioetl_processed_records_silver_skipped_current",
     "bioetl_processed_records_silver_valid_current",
+    "bioetl_provider_current_cause",
     "bioetl_provider_current_status",
+    "bioetl_provider_health_check_degraded_12h",
+    "bioetl_provider_health_check_degraded_15m",
+    "bioetl_provider_health_check_failures_12h",
+    "bioetl_provider_health_check_failures_15m",
+    "bioetl_provider_health_check_provider_universe_12h",
+    "bioetl_provider_health_check_provider_universe_15m",
+    "bioetl_provider_health_check_success_12h",
+    "bioetl_provider_health_check_success_15m",
+    "bioetl_provider_health_check_total_12h",
+    "bioetl_provider_health_check_total_15m",
     "bioetl_provider_health_status",
+    "bioetl_provider_range_operational_ok",
     "bioetl_provider_status",
     "bioetl_publication_raw_vocab_unknown_total",
     "bioetl_quarantine_operator_duration_seconds",
@@ -527,10 +641,42 @@
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
     "bioetl_replay_safety_blockers_15m",
+    "bioetl_runtime_alert_condition_checkpoint_incompatible_30m",
+    "bioetl_runtime_alert_condition_dq_critical_anomaly_30m",
+    "bioetl_runtime_alert_condition_dq_hard_fail_15m",
+    "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
+    "bioetl_runtime_alert_condition_gold_write_missing_15m",
+    "bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m",
+    "bioetl_runtime_alert_condition_ledger_append_failed_15m",
+    "bioetl_runtime_alert_condition_lineage_refs_missing_15m",
+    "bioetl_runtime_alert_condition_manifest_write_failed_15m",
+    "bioetl_runtime_alert_condition_no_terminal_run_30m",
+    "bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m",
+    "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
+    "bioetl_runtime_alert_condition_pipeline_runs_failed_15m",
+    "bioetl_runtime_alert_condition_provider_adapter_latency_high_30m",
+    "bioetl_runtime_alert_condition_provider_failure_rate_high_15m",
+    "bioetl_runtime_alert_condition_provider_http_error_rate_high_15m",
+    "bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m",
+    "bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m",
+    "bioetl_runtime_alert_condition_provider_retries_exhausted_1h",
+    "bioetl_runtime_alert_condition_record_flow_invariant_violated_15m",
+    "bioetl_runtime_alert_condition_replay_drift_detected_30m",
+    "bioetl_runtime_alert_condition_replay_lag_high_15m",
+    "bioetl_runtime_alert_condition_runtime_error_rate_high_30m",
+    "bioetl_runtime_alert_condition_silver_validation_failures_30m",
+    "bioetl_runtime_alert_condition_stage_backlog_active_15m",
+    "bioetl_runtime_alert_condition_stage_lag_high_15m",
+    "bioetl_runtime_alert_condition_validation_backlog_active_15m",
+    "bioetl_runtime_current_activity_15m",
+    "bioetl_runtime_current_blocker_reason",
     "bioetl_runtime_current_blocker_reason_scoped",
+    "bioetl_runtime_current_degraded_signals_15m",
+    "bioetl_runtime_current_failure_signals_15m",
     "bioetl_runtime_current_status",
     "bioetl_runtime_current_status_scoped",
     "bioetl_runtime_current_status_trusted",
+    "bioetl_runtime_pipeline_run_type_universe",
     "bioetl_runtime_pipeline_run_type_universe_scoped",
     "bioetl_runtime_status",
     "bioetl_runtime_trust_gap_active_10m",
@@ -544,7 +690,10 @@
     "bioetl_silver_csv_export_success_total",
     "bioetl_silver_filter_reject_field_total",
     "bioetl_silver_filter_reject_reason_total",
+    "bioetl_silver_filter_reject_total_mismatch_15m",
+    "bioetl_silver_filter_rejections_breakdown_total_15m",
     "bioetl_silver_filter_rejections_total",
+    "bioetl_silver_filter_rejects_stage_total_15m",
     "bioetl_silver_merge_failures_total",
     "bioetl_silver_merge_retries_total",
     "bioetl_silver_optimize_start_total",
@@ -579,7 +728,8 @@
     "bioetl_workflow_runs_total",
     "bioetl_workflow_status",
     "bioetl_workflow_step_duration_seconds",
-    "bioetl_workflow_step_events_total"
+    "bioetl_workflow_step_events_total",
+    "bioetl_workflow_universe"
   ],
   "declared_observability_events": [
     "batch_created",
@@ -1047,7 +1197,9 @@
       "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_control_plane_current_status": [
-      "docs/03-guides/dashboards/README.md"
+      "docs/03-guides/dashboards/README.md",
+      "docs/04-reference/observability/metrics-catalog.md",
+      "grafana/README.md"
     ],
     "bioetl_control_plane_current_status_trusted": [
       "docs/03-guides/dashboards/README.md",
@@ -1415,6 +1567,19 @@
       "docs/03-guides/dashboards/design-system.md",
       "docs/04-reference/observability/metrics-catalog.md"
     ],
+    "bioetl_l0_input_status_selected": [
+      "docs/03-guides/dashboards/dashboard-v2-usage.md",
+      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
+      "docs/04-reference/observability/alerting-guide.md",
+      "grafana/README.md",
+      "grafana/dashboards/bioetl-overview-v2.json"
+    ],
+    "bioetl_l0_next_action_route": [
+      "docs/03-guides/dashboards/design-system.md",
+      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
+      "grafana/README.md",
+      "grafana/dashboards/bioetl-overview-v2.json"
+    ],
     "bioetl_l0_status": [
       "docs/03-guides/dashboards/design-system.md",
       "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
@@ -1527,6 +1692,16 @@
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md"
+    ],
+    "bioetl_overview_pipeline_run_type_universe": [
+      "docs/03-guides/dashboards/dashboard-v2-usage.md",
+      "docs/03-guides/dashboards/variable-reference.md",
+      "grafana/README.md",
+      "grafana/dashboards/bioetl-alerts-slo.json",
+      "grafana/dashboards/bioetl-dq-v2.json",
+      "grafana/dashboards/bioetl-overview-v2.json",
+      "grafana/dashboards/bioetl-provider-health-v2.json",
+      "grafana/dashboards/bioetl-workflow-overview.json"
     ],
     "bioetl_phase_duration_seconds": [
       "docs/03-guides/metrics-monitoring.md",
@@ -1642,6 +1817,14 @@
     "bioetl_processed_records_silver_valid_current": [
       "docs/04-reference/observability/metrics-catalog.md"
     ],
+    "bioetl_provider_current_cause": [
+      "docs/03-guides/dashboards/dashboard-checklist-per-dashboard.md",
+      "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
+      "docs/03-guides/dashboards/design-system.md",
+      "docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md",
+      "grafana/README.md",
+      "grafana/dashboards/bioetl-provider-health-v2.json"
+    ],
     "bioetl_provider_current_status": [
       "docs/03-guides/dashboards/README.md",
       "docs/03-guides/dashboards/dashboard-checklist-per-dashboard.md",
@@ -1657,11 +1840,22 @@
       "grafana/dashboards/bioetl-provider-health-v2.json",
       "grafana/dashboards/bioetl-runtime.json"
     ],
+    "bioetl_provider_health_check_provider_universe_15m": [
+      "grafana/README.md",
+      "grafana/dashboards/bioetl-provider-health-v2.json"
+    ],
     "bioetl_provider_health_status": [
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/contracts/observability.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "docs/05-operations/01-monitoring-guide.md",
+      "grafana/README.md",
+      "grafana/dashboards/bioetl-provider-health-v2.json"
+    ],
+    "bioetl_provider_range_operational_ok": [
+      "docs/03-guides/dashboards/dashboard-v2-usage.md",
+      "docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md",
+      "docs/03-guides/dashboards/variables-guide.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-provider-health-v2.json"
     ],
@@ -1758,6 +1952,99 @@
       "docs/03-guides/dashboards/panels/bioetl-control-plane-v1-panels.md",
       "grafana/dashboards/bioetl-control-plane-v1.json"
     ],
+    "bioetl_runtime_alert_condition_checkpoint_incompatible_30m": [
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_dq_critical_anomaly_30m": [
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_dq_hard_fail_15m": [
+      "docs/04-reference/observability/alerting-guide.md",
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_dq_soft_threshold_15m": [
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_gold_write_missing_15m": [
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m": [
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_ledger_append_failed_15m": [
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_lineage_refs_missing_15m": [
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_manifest_write_failed_15m": [
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_no_terminal_run_30m": [
+      "docs/04-reference/observability/alerting-guide.md",
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m": [
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m": [
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_pipeline_runs_failed_15m": [
+      "docs/04-reference/observability/alerting-guide.md",
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_provider_adapter_latency_high_30m": [
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_provider_failure_rate_high_15m": [
+      "docs/04-reference/observability/alerting-guide.md",
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_provider_http_error_rate_high_15m": [
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m": [
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m": [
+      "docs/04-reference/observability/alerting-guide.md",
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_provider_retries_exhausted_1h": [
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_record_flow_invariant_violated_15m": [
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_replay_drift_detected_30m": [
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_replay_lag_high_15m": [
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_runtime_error_rate_high_30m": [
+      "docs/04-reference/observability/alerting-guide.md",
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_silver_validation_failures_30m": [
+      "docs/04-reference/observability/alerting-guide.md",
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_stage_backlog_active_15m": [
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_alert_condition_stage_lag_high_15m": [
+      "docs/04-reference/observability/alerting-guide.md",
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_current_blocker_reason": [
+      "docs/03-guides/dashboards/dashboard-checklist-per-dashboard.md",
+      "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
+      "docs/03-guides/dashboards/design-system.md",
+      "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
+      "docs/04-reference/observability/alerting-guide.md"
+    ],
     "bioetl_runtime_current_blocker_reason_scoped": [
       "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "grafana/README.md",
@@ -1774,6 +2061,15 @@
       "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
       "docs/03-guides/dashboards/design-system.md",
       "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
+      "grafana/README.md",
+      "grafana/dashboards/bioetl-runtime.json"
+    ],
+    "bioetl_runtime_pipeline_run_type_universe": [
+      "docs/03-guides/dashboards/README.md",
+      "docs/03-guides/dashboards/dashboard-checklist-per-dashboard.md",
+      "docs/03-guides/dashboards/dashboard-requirements-comprehensive.md",
+      "docs/03-guides/dashboards/dashboard-v2-usage.md",
+      "docs/03-guides/dashboards/variable-reference.md",
       "grafana/README.md",
       "grafana/dashboards/bioetl-runtime.json"
     ],
@@ -1828,6 +2124,12 @@
       "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md",
       "docs/03-guides/dashboards/panels/bioetl-silver-reject-explorer-panels.md",
       "docs/04-reference/observability/metrics-catalog.md"
+    ],
+    "bioetl_silver_filter_reject_total_mismatch_15m": [
+      "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md",
+      "docs/04-reference/observability/alerting-guide.md",
+      "grafana/README.md",
+      "grafana/dashboards/bioetl-dq-v2.json"
     ],
     "bioetl_silver_filter_rejections_total": [
       "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md",
@@ -1987,6 +2289,16 @@
       "docs/03-guides/dashboards/panels/bioetl-workflow-overview-panels.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md",
+      "grafana/dashboards/bioetl-workflow-overview.json"
+    ],
+    "bioetl_workflow_universe": [
+      "docs/03-guides/dashboards/variable-reference.md",
+      "grafana/README.md",
+      "grafana/dashboards/bioetl-control-plane-v1.json",
+      "grafana/dashboards/bioetl-dq-v2.json",
+      "grafana/dashboards/bioetl-overview-v2.json",
+      "grafana/dashboards/bioetl-provider-health-v2.json",
+      "grafana/dashboards/bioetl-runtime.json",
       "grafana/dashboards/bioetl-workflow-overview.json"
     ]
   },
@@ -2603,6 +2915,7 @@
     "bioetl_dq_current_reason",
     "bioetl_dq_current_status",
     "bioetl_dq_dispositions_total",
+    "bioetl_dq_monitor_disabled_current",
     "bioetl_dq_monitor_disabled_total",
     "bioetl_dq_monitor_enabled",
     "bioetl_dq_records_quarantined_total",
@@ -2618,6 +2931,7 @@
     "bioetl_filter_ids_duplicates_total",
     "bioetl_filter_ids_loaded_total",
     "bioetl_gold_lifecycle_state_total",
+    "bioetl_gold_terminal_records_15m",
     "bioetl_gold_validation_failures_total",
     "bioetl_gold_write_attempts_total",
     "bioetl_gold_write_duration_seconds",
@@ -2636,6 +2950,9 @@
     "bioetl_http_retry_budget_exhausted_total",
     "bioetl_infrastructure_validated",
     "bioetl_l0_input_status",
+    "bioetl_l0_input_status_selected",
+    "bioetl_l0_next_action",
+    "bioetl_l0_next_action_route",
     "bioetl_l0_status",
     "bioetl_l1_control_plane_current_status",
     "bioetl_l1_dq_status",
@@ -2657,6 +2974,8 @@
     "bioetl_observability_events_total",
     "bioetl_observability_runtime_status",
     "bioetl_output_artifact_publication_events_total",
+    "bioetl_overview_pipeline_run_type_universe",
+    "bioetl_overview_pipeline_universe",
     "bioetl_phase_duration_seconds",
     "bioetl_pipeline_duration_seconds",
     "bioetl_pipeline_health_check_passed",
@@ -2668,19 +2987,36 @@
     "bioetl_postrun_phase_events_total",
     "bioetl_probe_mode_fallback_total",
     "bioetl_processed_records_bronze_current",
+    "bioetl_processed_records_delta_abs_current",
+    "bioetl_processed_records_gold_accounted_current",
     "bioetl_processed_records_gold_deduplicated_current",
+    "bioetl_processed_records_gold_delta_current",
     "bioetl_processed_records_gold_excluded_by_contract_current",
     "bioetl_processed_records_gold_quarantined_current",
     "bioetl_processed_records_gold_skipped_current",
     "bioetl_processed_records_gold_written_current",
     "bioetl_processed_records_reconciliation_status",
+    "bioetl_processed_records_silver_accounted_current",
     "bioetl_processed_records_silver_deduplicated_current",
+    "bioetl_processed_records_silver_delta_current",
     "bioetl_processed_records_silver_filtered_out_current",
     "bioetl_processed_records_silver_quarantined_current",
     "bioetl_processed_records_silver_skipped_current",
     "bioetl_processed_records_silver_valid_current",
+    "bioetl_provider_current_cause",
     "bioetl_provider_current_status",
+    "bioetl_provider_health_check_degraded_12h",
+    "bioetl_provider_health_check_degraded_15m",
+    "bioetl_provider_health_check_failures_12h",
+    "bioetl_provider_health_check_failures_15m",
+    "bioetl_provider_health_check_provider_universe_12h",
+    "bioetl_provider_health_check_provider_universe_15m",
+    "bioetl_provider_health_check_success_12h",
+    "bioetl_provider_health_check_success_15m",
+    "bioetl_provider_health_check_total_12h",
+    "bioetl_provider_health_check_total_15m",
     "bioetl_provider_health_status",
+    "bioetl_provider_range_operational_ok",
     "bioetl_provider_status",
     "bioetl_publication_raw_vocab_unknown_total",
     "bioetl_quarantine_operator_duration_seconds",
@@ -2695,10 +3031,42 @@
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
     "bioetl_replay_safety_blockers_15m",
+    "bioetl_runtime_alert_condition_checkpoint_incompatible_30m",
+    "bioetl_runtime_alert_condition_dq_critical_anomaly_30m",
+    "bioetl_runtime_alert_condition_dq_hard_fail_15m",
+    "bioetl_runtime_alert_condition_dq_soft_threshold_15m",
+    "bioetl_runtime_alert_condition_gold_write_missing_15m",
+    "bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m",
+    "bioetl_runtime_alert_condition_ledger_append_failed_15m",
+    "bioetl_runtime_alert_condition_lineage_refs_missing_15m",
+    "bioetl_runtime_alert_condition_manifest_write_failed_15m",
+    "bioetl_runtime_alert_condition_no_terminal_run_30m",
+    "bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m",
+    "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m",
+    "bioetl_runtime_alert_condition_pipeline_runs_failed_15m",
+    "bioetl_runtime_alert_condition_provider_adapter_latency_high_30m",
+    "bioetl_runtime_alert_condition_provider_failure_rate_high_15m",
+    "bioetl_runtime_alert_condition_provider_http_error_rate_high_15m",
+    "bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m",
+    "bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m",
+    "bioetl_runtime_alert_condition_provider_retries_exhausted_1h",
+    "bioetl_runtime_alert_condition_record_flow_invariant_violated_15m",
+    "bioetl_runtime_alert_condition_replay_drift_detected_30m",
+    "bioetl_runtime_alert_condition_replay_lag_high_15m",
+    "bioetl_runtime_alert_condition_runtime_error_rate_high_30m",
+    "bioetl_runtime_alert_condition_silver_validation_failures_30m",
+    "bioetl_runtime_alert_condition_stage_backlog_active_15m",
+    "bioetl_runtime_alert_condition_stage_lag_high_15m",
+    "bioetl_runtime_alert_condition_validation_backlog_active_15m",
+    "bioetl_runtime_current_activity_15m",
+    "bioetl_runtime_current_blocker_reason",
     "bioetl_runtime_current_blocker_reason_scoped",
+    "bioetl_runtime_current_degraded_signals_15m",
+    "bioetl_runtime_current_failure_signals_15m",
     "bioetl_runtime_current_status",
     "bioetl_runtime_current_status_scoped",
     "bioetl_runtime_current_status_trusted",
+    "bioetl_runtime_pipeline_run_type_universe",
     "bioetl_runtime_pipeline_run_type_universe_scoped",
     "bioetl_runtime_status",
     "bioetl_runtime_trust_gap_active_10m",
@@ -2712,7 +3080,10 @@
     "bioetl_silver_csv_export_success_total",
     "bioetl_silver_filter_reject_field_total",
     "bioetl_silver_filter_reject_reason_total",
+    "bioetl_silver_filter_reject_total_mismatch_15m",
+    "bioetl_silver_filter_rejections_breakdown_total_15m",
     "bioetl_silver_filter_rejections_total",
+    "bioetl_silver_filter_rejects_stage_total_15m",
     "bioetl_silver_merge_failures_total",
     "bioetl_silver_merge_retries_total",
     "bioetl_silver_optimize_start_total",
@@ -2747,7 +3118,8 @@
     "bioetl_workflow_runs_total",
     "bioetl_workflow_status",
     "bioetl_workflow_step_duration_seconds",
-    "bioetl_workflow_step_events_total"
+    "bioetl_workflow_step_events_total",
+    "bioetl_workflow_universe"
   ],
   "registered_without_runtime": [],
   "registry_only_metrics": [],
@@ -2834,6 +3206,9 @@
     "bioetl_dq_current_status": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
+    "bioetl_dq_monitor_disabled_current": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
     "bioetl_dq_monitor_enabled": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
@@ -2847,6 +3222,9 @@
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_errors_total": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_gold_terminal_records_15m": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_health_check_degraded_total": [
@@ -2867,6 +3245,9 @@
     "bioetl_l0_input_status": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
+    "bioetl_l0_input_status_selected": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
     "bioetl_l0_status": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
@@ -2878,6 +3259,12 @@
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_memory_pressure_state": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_overview_pipeline_run_type_universe": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_overview_pipeline_universe": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_pipeline_health_check_passed": [
@@ -2892,7 +3279,52 @@
     "bioetl_processed_records_bronze_current": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
+    "bioetl_processed_records_delta_abs_current": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_processed_records_gold_accounted_current": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_processed_records_gold_delta_current": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_processed_records_silver_accounted_current": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_processed_records_silver_delta_current": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
     "bioetl_processed_records_silver_valid_current": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_provider_health_check_degraded_12h": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_provider_health_check_degraded_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_provider_health_check_failures_12h": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_provider_health_check_failures_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_provider_health_check_provider_universe_12h": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_provider_health_check_provider_universe_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_provider_health_check_success_12h": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_provider_health_check_success_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_provider_health_check_total_12h": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_provider_health_check_total_15m": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_provider_health_status": [
@@ -2921,10 +3353,103 @@
     "bioetl_replay_safety_blockers_15m": [
       "grafana/prometheus-rules/bioetl_control_plane_current_status.yml"
     ],
+    "bioetl_runtime_alert_condition_checkpoint_incompatible_30m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_dq_critical_anomaly_30m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_dq_hard_fail_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_dq_soft_threshold_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_gold_write_missing_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_ingestion_throughput_degraded_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_ledger_append_failed_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_lineage_refs_missing_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_manifest_write_failed_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_no_terminal_run_30m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_pipeline_infrastructure_failed_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_pipeline_preflight_failed_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_pipeline_runs_failed_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_provider_adapter_latency_high_30m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_provider_failure_rate_high_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_provider_http_error_rate_high_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_provider_rate_limiter_tokens_depleted_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_provider_rate_limiter_wait_high_30m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_provider_retries_exhausted_1h": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_record_flow_invariant_violated_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_replay_drift_detected_30m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_replay_lag_high_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_silver_validation_failures_30m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_stage_backlog_active_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_stage_lag_high_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_alert_condition_validation_backlog_active_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_current_activity_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_current_blocker_reason": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_current_degraded_signals_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_current_failure_signals_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
     "bioetl_runtime_current_status": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_runtime_current_status_scoped": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_runtime_pipeline_run_type_universe": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_runtime_pipeline_run_type_universe_scoped": [
@@ -2936,7 +3461,16 @@
     "bioetl_runtime_trust_gap_status_10m": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
+    "bioetl_silver_filter_reject_total_mismatch_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_silver_filter_rejections_breakdown_total_15m": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
     "bioetl_silver_filter_rejections_total": [
+      "grafana/prometheus-rules/bioetl_observability.yml"
+    ],
+    "bioetl_silver_filter_rejects_stage_total_15m": [
       "grafana/prometheus-rules/bioetl_observability.yml"
     ],
     "bioetl_silver_validation_failures_total": [
@@ -3454,6 +3988,18 @@
     ],
     "bioetl_workflow_reconciliation_rows_scanned_total": [
       "observed_series_count=1"
+    ],
+    "bioetl_workflow_row_reconciliation_excluded_rows_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_workflow_row_reconciliation_kept_rows_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_workflow_row_reconciliation_left_rows_total": [
+      "observed_series_count=0"
+    ],
+    "bioetl_workflow_row_reconciliation_right_rows_total": [
+      "observed_series_count=0"
     ],
     "bioetl_workflow_runs_total": [
       "observed_series_count=0"

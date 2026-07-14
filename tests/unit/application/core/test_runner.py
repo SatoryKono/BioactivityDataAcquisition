@@ -32,6 +32,7 @@ from bioetl.application.services.control_plane import RunLedgerService
 from bioetl.domain.config import PipelineConfig, RuntimeConfig, TableConfig
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.control_plane.run_ledger import ORDINARY_RUN_LEDGER_STAGE_NAMES
+from bioetl.domain.exceptions.data_quality import DataQualityThresholdError
 from bioetl.domain.ports.noop import NoOpTracing
 from bioetl.domain.locking import FencingToken
 from bioetl.domain.types import RunID, RunType
@@ -697,6 +698,27 @@ class TestPipelineRunnerRun:
             "details": None,
         }
         ledger_service.record_run_failed.assert_not_called()
+        ledger_service.record_run_finished.assert_not_called()
+        ledger_service.record_run_shutdown.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_run_records_domain_failure_as_terminal_ledger_event(
+        self, runner, mock_executor
+    ) -> None:
+        """Domain failures must still append exactly one terminal run_failed row."""
+        ledger_service = MagicMock(spec=RunLedgerService)
+        runner.attach_run_ledger_service(ledger_service)
+        failure = DataQualityThresholdError(error_rate=1.0, threshold=0.25)
+        mock_executor.execute.side_effect = failure
+
+        with pytest.raises(DataQualityThresholdError):
+            await runner.run()
+
+        ledger_service.record_run_exception.assert_called_once_with(
+            error=failure,
+            metrics_snapshot=runner.execution_metrics,
+            details=None,
+        )
         ledger_service.record_run_finished.assert_not_called()
         ledger_service.record_run_shutdown.assert_not_called()
 

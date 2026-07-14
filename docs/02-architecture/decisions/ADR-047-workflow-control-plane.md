@@ -85,6 +85,21 @@ Workflow execution uses one local workflow lock per workflow name through
 
 This is an ADR-010 consequence, not a gap.
 
+### 5. Parent/child correlation is reciprocal and durable
+
+Every pipeline child launched from a workflow receives an optional typed
+correlation envelope containing `workflow_run_id`, `workflow_name`, and the
+stable DAG `workflow_step_id`. These fields are persisted in the child
+`RunManifest`; standalone and historical manifests may omit them.
+
+When the child returns a terminal result, the parent workflow step ledger
+details persist `child_run_id` and `child_manifest_id` for both successful and
+failed results. The parent-to-child and child-to-parent anchors allow repeated
+or concurrent executions of the same workflow to be reconstructed without
+timestamp inference. Occurrence IDs remain control-plane fields: they do not
+participate in semantic execution fingerprints and must not be introduced as
+Prometheus labels.
+
 ## Resume and Recovery
 
 ### Semantic resume identity
@@ -143,6 +158,7 @@ It is storage-backed, config-driven, and idempotent under repeated execution.
 1. `bioetl workflow status` can expose real persisted workflow state.
 1. Destructive transform recovery is explicit and auditable.
 1. Workflow locking stays inside the local-only runtime contract.
+1. Parent and child control-plane records can be joined in both directions.
 
 ### Negative
 

@@ -217,7 +217,7 @@ CHEMBL_PSEUDO_NULL_FIELDS = MappingProxyType(
             {
                 "accession",
                 "component_type",
-                "component_description",
+                "description",
                 "organism",
                 "protein_classification_id",
                 "protein_classification_ids",

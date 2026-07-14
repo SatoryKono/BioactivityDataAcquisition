@@ -197,9 +197,9 @@ review_lanes:
       - .venv/bin/python scripts/engineering/repo/audit_root_cleanliness.py --strict-untracked
     candidates:
       - path: artifacts
-        current_live_state: present_approved_root_surface
-        canonical_path: artifacts/debug_exports
-        action_if_reintroduced: keep_tracked_only_for_governed_debug_export_evidence_and_route_other_diagnostics_into_approved_reports_or_data_surfaces
+        current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: keep_generated_debug_exports_untracked_and_route retained evidence into approved reports or data surfaces
       - path: .coverage
         current_live_state: present_local_only_root_surface
         canonical_path: null
@@ -274,9 +274,9 @@ review_lanes:
         canonical_path: .codex
         action_if_reintroduced: migrate_to_codex_or_remove_root_surface
       - path: .gemini
-        current_live_state: present_curated_root_surface
+        current_live_state: absent_from_root_baseline
         canonical_path: GEMINI.md
-        action_if_reintroduced: keep_curated_runtime_surface_and_preserve_local_generated_state_as_untracked
+        action_if_reintroduced: keep machine-local Gemini configuration untracked and use GEMINI.md for tracked contributor guidance
       - path: .jules
         current_live_state: absent_from_root_baseline
         canonical_path: null
@@ -535,7 +535,7 @@ review_lanes:
         action_if_reintroduced: require explicit owner decision or remove root leftover
       - path: MCP_SETUP.md
         current_live_state: absent_from_root_baseline
-        canonical_path: docs/99-archive/mcp-codex-stable-startup-guide.md
+        canonical_path: null
         action_if_reintroduced: move_to_docs_or_archive_surface_or_remove
       - path: QUICK_START.md
         current_live_state: absent_from_root_baseline
@@ -543,7 +543,7 @@ review_lanes:
         action_if_reintroduced: move_to_docs_or_remove
       - path: dashboard-audit-report.md
         current_live_state: absent_from_root_baseline
-        canonical_path: docs/reports/audits/dashboard-audit-report-2026-05-08.md
+        canonical_path: null
         action_if_reintroduced: move_to_curated_report_surface_or_remove
       - path: query_test_docs_memory.js
         current_live_state: absent_from_root_baseline

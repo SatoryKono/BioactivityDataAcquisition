@@ -45,6 +45,7 @@ class HealthServerDependencies:
     run_manifest_port: RunManifestPort
     run_ledger_port: RunLedgerPort
     workflow_manifest_port: WorkflowManifestPort
+    data_root: Path = Path()
 
 
 @dataclass(frozen=True, slots=True)
@@ -77,10 +78,15 @@ class _RunManifestPorts:
     workflow_manifest_port: WorkflowManifestPort
 
 
-def _create_control_plane_ports(metrics: MetricsPort) -> _RunManifestPorts:
+def _create_control_plane_ports(
+    metrics: MetricsPort,
+    *,
+    data_root: Path | None = None,
+) -> _RunManifestPorts:
     """Create file-backed read ports without importing full pipeline runtime."""
     settings = get_settings()
-    output_root = Path(settings.data_dir) / "output" / "control"
+    resolved_data_root = data_root if data_root is not None else Path(settings.data_dir)
+    output_root = resolved_data_root / "output" / "control"
     return _RunManifestPorts(
         manifest_port=FileRunManifestStore(
             base_path=output_root / "run_manifest",
@@ -101,10 +107,18 @@ def create_health_server_dependencies(
     *,
     metrics: MetricsPort | None = None,
     checkpoint_port_factory: Callable[[str], CheckpointPort],
+    data_root: Path | None = None,
 ) -> HealthServerDependencies:
     """Build listener dependencies without provider/pipeline factory imports."""
     resolved_metrics = metrics or PrometheusMetrics()
-    control_plane_ports = _create_control_plane_ports(resolved_metrics)
+    settings = get_settings()
+    resolved_data_root = (
+        data_root if data_root is not None else Path(settings.data_dir)
+    ).resolve()
+    control_plane_ports = _create_control_plane_ports(
+        resolved_metrics,
+        data_root=resolved_data_root,
+    )
     return HealthServerDependencies(
         health_monitor=_ReadOnlyHealthMonitor(metrics=resolved_metrics),
         metrics=resolved_metrics,
@@ -112,4 +126,5 @@ def create_health_server_dependencies(
         run_manifest_port=control_plane_ports.manifest_port,
         run_ledger_port=control_plane_ports.ledger_port,
         workflow_manifest_port=control_plane_ports.workflow_manifest_port,
+        data_root=resolved_data_root,
     )

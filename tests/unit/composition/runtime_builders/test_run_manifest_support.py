@@ -280,6 +280,9 @@ def test_creation_helper_assemble_manifest_create_spec_populates_contract_and_de
             run_type="incremental",
             pipeline_name="chembl_activity",
             workflow_id="wf-123",
+            workflow_run_id="workflow-run-123",
+            workflow_name="chembl_baseline",
+            workflow_step_id="run_chembl_activity",
             debug_export_enabled=True,
             debug_export_dir="artifacts/debug_exports",
         ),
@@ -339,6 +342,9 @@ def test_creation_helper_assemble_manifest_create_spec_populates_contract_and_de
     assert request.contract_schema_hash == "schema-hash"
     assert request.effective_config_artifact_id == "artifact-123"
     assert request.replay_capability is ReplayCapability.EXACT_REPLAY_SUPPORTED
+    assert request.workflow_run_id == "workflow-run-123"
+    assert request.workflow_name == "chembl_baseline"
+    assert request.workflow_step_id == "run_chembl_activity"
     debug_export = next(
         artifact
         for artifact in request.planned_artifacts

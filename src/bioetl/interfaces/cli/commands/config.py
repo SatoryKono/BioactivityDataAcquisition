@@ -38,7 +38,7 @@ def get_config_service() -> ConfigService:
 
 def get_configured_pipeline_names() -> list[str]:
     """Load configured pipeline names through the lightweight composition seam."""
-    from bioetl.composition.control_plane_service_access import (
+    from bioetl.composition.config_catalog import (
         list_configured_pipeline_names as _impl,
     )
 

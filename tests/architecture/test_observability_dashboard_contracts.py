@@ -15,6 +15,9 @@ pytestmark = pytest.mark.architecture
 ROOT = Path(__file__).resolve().parents[2]
 DASHBOARD_DIR = ROOT / "grafana" / "dashboards"
 ALLOWLIST_PATH = ROOT / "configs" / "quality" / "dashboard_promql_scope_allowlist.yaml"
+DASHBOARD_INVENTORY_PATH = (
+    ROOT / "docs" / "03-guides" / "dashboards" / "contracts" / "dashboard-inventory.yaml"
+)
 
 _DQ_VERDICT_RATIO_RE = re.compile(
     r"records_processed_total\{[^}]*stage\s*=\s*\"(?:filtered_out|bronze)\"[^}]*\}"
@@ -63,6 +66,45 @@ def _panel_expressions(panel: dict[str, object]) -> list[str]:
         if isinstance(expr, str) and expr.strip():
             expressions.append(expr)
     return expressions
+
+
+def test_all_shipped_dashboards_have_bounded_owner_routes() -> None:
+    """Every shipped dashboard must route ownership to one reviewed runbook."""
+    payload = yaml.safe_load(DASHBOARD_INVENTORY_PATH.read_text(encoding="utf-8"))
+    dashboards = payload["dashboards"]
+    assert len(dashboards) == 8
+
+    allowed_owners = {"@bioetl-observability"}
+    allowed_routes = {
+        "docs/05-operations/runbooks/observability-checklist.md",
+        "docs/05-operations/runbooks/run-manifest-inspection.md",
+        "docs/05-operations/runbooks/pipeline-failure-critical.md",
+        "docs/05-operations/runbooks/incident-response.md",
+        "docs/05-operations/runbooks/dq-failure-investigation.md",
+        "docs/05-operations/runbooks/quarantine-management.md",
+    }
+    for dashboard in dashboards:
+        assert dashboard["owner"] in allowed_owners
+        route = str(dashboard["owner_route"])
+        assert route in allowed_routes
+        assert (ROOT / route).is_file(), f"Missing owner route: {route}"
+
+
+def test_alerts_slo_panels_one_through_five_link_reviewed_owner_runbook() -> None:
+    """The alert decision surface must expose a direct owner/runbook handoff."""
+    dashboard = json.loads(
+        (DASHBOARD_DIR / "bioetl-alerts-slo.json").read_text(encoding="utf-8")
+    )
+    panels = {int(panel["id"]): panel for panel in _iter_panels(dashboard)}
+    for panel_id in range(1, 6):
+        links = panels[panel_id].get("links", [])
+        assert len(links) == 1
+        link = links[0]
+        assert link["title"] == "Runbook · @bioetl-observability"
+        assert link["url"].endswith(
+            "/docs/05-operations/runbooks/observability-checklist.md"
+        )
+        assert link["includeVars"] is False
 
 
 def test_dashboard_json_must_not_reference_deprecated_checkpoint_alias() -> None:

@@ -581,7 +581,9 @@ ______________________________________________________________________
 
 **Prometheus:**
 
-- Image: `prom/prometheus:latest`
+- Supported series: `3.13.x`; the deterministic QA image is
+  `prom/prometheus:v3.13.1`. The compose pin must remain in the same major/minor
+  series as QA `promtool`.
 - Container: `bioetl-prometheus`
 - Порт: `9090:9090`
 - Volumes:
@@ -604,7 +606,8 @@ ______________________________________________________________________
 
 **Pushgateway:**
 
-- Image: `prom/pushgateway:latest`
+- Supported series: `1.11.x`; validate the deployed patch version through
+  `pushgateway_build_info`.
 - Container: `bioetl-pushgateway`
 - Порт: `9091:9091`
 - Restart: `unless-stopped`
@@ -2530,12 +2533,15 @@ uv run python -m scripts.engineering.qa check-prometheus-rules
 It runs:
 
 ```bash
-promtool check rules grafana/prometheus-rules/bioetl_observability.yml
+promtool check rules grafana/prometheus-rules/bioetl_observability.yml \
+  grafana/prometheus-rules/bioetl_control_plane_current_status.yml
 promtool test rules grafana/prometheus-rules/tests/bioetl_observability.test.yml
 ```
 
 If local `promtool` is missing, the command fails fast with install/Docker
-guidance. CI runs the same entrypoint with `--runner docker`.
+guidance. CI runs the same entrypoint with `--runner docker`; add
+`--coverage-json` to publish the regression-guarded alert/record/control-plane
+fixture coverage summary.
 
 ______________________________________________________________________
 

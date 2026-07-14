@@ -230,6 +230,7 @@ def start_detached_quarantine_backend(
     bind_host: str = "0.0.0.0",
     port: int = DEFAULT_HEALTH_SERVER_PORT,
     python_executable: str | None = None,
+    data_root: Path | None = None,
     popen_factory: Callable[..., subprocess.Popen[bytes]] = subprocess.Popen,
 ) -> subprocess.Popen[bytes]:
     """Launch ``bioetl quarantine serve`` as a detached background process."""
@@ -244,6 +245,10 @@ def start_detached_quarantine_backend(
         "--port",
         str(port),
     ]
+    if data_root is not None:
+        if not data_root.is_absolute():
+            raise ValueError("data_root must be an absolute path")
+        command.extend(("--data-root", str(data_root.resolve(strict=True))))
     kwargs = _build_detached_backend_popen_kwargs()
     kwargs.pop("stdout", None)
     kwargs.pop("stderr", None)

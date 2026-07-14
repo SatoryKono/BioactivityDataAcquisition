@@ -137,8 +137,8 @@ def test_root_hygiene_review_registry_tracks_observed_transient_root_families() 
         if isinstance(candidate, dict) and isinstance(candidate.get("path"), str)
     }
 
-    assert by_path["artifacts"]["current_live_state"] == "present_approved_root_surface"
-    assert by_path["artifacts"]["canonical_path"] == "artifacts/debug_exports"
+    assert by_path["artifacts"]["current_live_state"] == "absent_from_root_baseline"
+    assert by_path["artifacts"]["canonical_path"] is None
     assert (
         by_path[".coverage"]["current_live_state"] == "present_local_only_root_surface"
     )
