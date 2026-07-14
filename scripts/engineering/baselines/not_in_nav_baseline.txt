@@ -1,5 +1,14 @@
 00-project/ai/README.md
+00-project/ai/audit/observability-issues/OBS-002-metric-to-panel-runtime.md
+00-project/ai/audit/observability-issues/OBS-002-validation-findings.md
+00-project/ai/audit/observability-issues/OBS-003-live-validation.md
+00-project/ai/audit/observability-issues/OBS-003-validation-findings.md
+00-project/ai/audit/observability-issues/OBS-004-emitter-bypass-proof.md
+00-project/ai/audit/observability-issues/OBS-006-live-datasource-compliance.md
+00-project/ai/audit/observability-issues/README.md
+00-project/ai/audit/observability-issues/VALIDATION-SUMMARY.md
 00-project/ai/agents/CLAUDE.md
+00-project/ai/mcp-token-configuration.md
 00-project/ai/agents/agents/py-audit-bot.md
 00-project/ai/agents/agents/py-config-bot.md
 00-project/ai/agents/agents/py-debug-bot.md
@@ -95,6 +104,7 @@
 00-project/ai/skills/global/.system/skill-creator/SKILL.md
 00-project/ai/skills/global/.system/skill-creator/references/openai_yaml.md
 00-project/ai/skills/global/.system/skill-installer/SKILL.md
+00-project/ai/skills/local/collecting-evidence/references/evidence-decision-contract.md
 00-project/ai/skills/local/collecting-evidence/references/evidence-object-schema.md
 00-project/ai/skills/local/collecting-evidence/references/id-generation-rules.md
 00-project/ai/skills/local/collecting-evidence/references/research-protocols.md

@@ -37,6 +37,23 @@ def test_runtime_policy_rejects_mutable_external_action_refs() -> None:
     assert "full 40-character SHA" in violation
 
 
+def test_runtime_policy_rejects_mutable_docker_image_tags() -> None:
+    violation = policy._validate_allowed_uses_ref(
+        "docker://codiumai/pr-agent:latest",
+        "docker://codiumai/pr-agent:latest",
+    )
+
+    assert violation is not None
+    assert "immutable ref" in violation
+
+
+def test_runtime_policy_accepts_approved_docker_image_digest() -> None:
+    image = "docker://codiumai/pr-agent"
+    digest = next(iter(policy.ALLOWED_DOCKER_IMAGES[image]))
+
+    assert policy._validate_allowed_uses_ref(f"{image}@{digest}", image) is None
+
+
 def test_runtime_policy_rejects_unrecognized_external_actions() -> None:
     violation = policy._validate_allowed_uses_ref(
         "example/action@0123456789abcdef0123456789abcdef01234567",
@@ -59,6 +76,23 @@ def test_runtime_policy_accepts_only_approved_sha_refs() -> None:
     )
 
 
+def test_runtime_policy_allows_cache_restore_and_save_subactions() -> None:
+    cache_sha = next(iter(policy.ALLOWED_USES["actions/cache"]))
+
+    assert (
+        policy._validate_allowed_uses_ref(
+            f"actions/cache/restore@{cache_sha}", "actions/cache/restore"
+        )
+        is None
+    )
+    assert (
+        policy._validate_allowed_uses_ref(
+            f"actions/cache/save@{cache_sha}", "actions/cache/save"
+        )
+        is None
+    )
+
+
 def test_contract_tests_workflow_uses_least_privilege_issue_permissions() -> None:
     workflow = _load_yaml(CONTRACT_TESTS_WORKFLOW)
     jobs = cast(dict[str, dict[str, Any]], workflow["jobs"])
@@ -69,3 +103,12 @@ def test_contract_tests_workflow_uses_least_privilege_issue_permissions() -> Non
         "issues": "write",
     }
     assert jobs["notify-success"]["permissions"] == {"contents": "read"}
+
+
+def test_contract_tests_workflow_declares_boolean_dispatch_input() -> None:
+    workflow = _load_yaml(CONTRACT_TESTS_WORKFLOW)
+    triggers = cast(dict[str, Any], workflow.get("on", workflow.get(True)))
+    dispatch = cast(dict[str, Any], triggers["workflow_dispatch"])
+    inputs = cast(dict[str, dict[str, Any]], dispatch["inputs"])
+
+    assert inputs["skip_slow"]["type"] == "boolean"

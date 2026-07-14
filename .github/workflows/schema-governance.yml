@@ -2,12 +2,6 @@ name: Schema Governance
 
 on:
   push:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '.ai/**'
-      - '.github/workflows/**'
-      - 'LICENSE'
     branches: [main, master]
     paths:
       - 'src/bioetl/domain/schemas/**'
@@ -23,12 +17,6 @@ on:
       - 'docs/03-data-model/json-field-typing-inventory.md'
       - '.github/workflows/schema-governance.yml'
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
-      - '.ai/**'
-      - '.github/workflows/**'
-      - 'LICENSE'
     paths:
       - 'src/bioetl/domain/schemas/**'
       - 'src/bioetl/domain/contracts/**'

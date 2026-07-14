@@ -34,10 +34,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Run Qodo Merge (PR Agent)
-        uses: docker://codiumai/pr-agent:latest
+        uses: docker://codiumai/pr-agent@sha256:a5741a479f21d20a9bbeca7847a720f92ac6f427e8dc0920fefa039ecafd5e6f
         env:
           # GitHub token — provided automatically, no secrets needed
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
