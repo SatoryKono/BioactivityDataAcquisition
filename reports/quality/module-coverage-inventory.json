@@ -19253,7 +19253,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.schemas.silver_chembl_core",
       "path": "src/bioetl/infrastructure/schemas/silver_chembl_core.py",
-      "source_lines": 395
+      "source_lines": 416
     },
     {
       "coverage_percent": 100.0,
@@ -41475,7 +41475,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.schemas.silver_chembl_core",
       "path": "src/bioetl/infrastructure/schemas/silver_chembl_core.py",
-      "source_lines": 395
+      "source_lines": 416
     },
     {
       "coverage_percent": 100.0,
@@ -44450,7 +44450,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "b887f62878663423ecbcda1b3d81b08c5866b448661a9d049a411cca5bca6ff0",
+  "source_tree_sha256": "fbb8af3648d80071284a41c8004945cbd98b669f7d10254514a1399af316f6c2",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
