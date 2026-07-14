@@ -86,10 +86,15 @@ Before editing:
 
 Preserve the current shipped model unless the task explicitly changes it:
 
-- `1. Overview`
-- `2. Runtime`
-- `3. Provider Health`
-- `4. Data Quality`
+- All eight navigation panels (`id=1000`) render the complete visual bus
+  `0. Control Plane` through `6. Alerts & SLO`, followed by
+  `Silver Reject Explorer`, `Explore Logs`, and `Explore Traces`.
+- The current dashboard remains visible as a disabled, theme-safe item;
+  machine-readable `panel.links` omit only the self-link.
+- Dashboard handoffs preserve `${__url_time_range}`. Every Logs/Traces
+  handoff preserves the active range with `from=${__from}` and `to=${__to}`.
+- Forensic/detail rows use progressive disclosure and remain collapsed by
+  default; first-screen answer and action surfaces remain expanded.
 
 If this model changes, update the affected docs in the same change set.
 

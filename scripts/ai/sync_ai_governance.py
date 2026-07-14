@@ -10,9 +10,13 @@ Operations:
 from __future__ import annotations
 
 import argparse
+import fnmatch
+import json
 import os
 import re
+import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 CANONICAL_SOURCES_BLOCK = """## Canonical Sources
@@ -33,6 +37,7 @@ NORMATIVE_SKILL_LINE_CODEX = (
 )
 NORMATIVE_SKILL_LINE_DOCS = "- Normative index: `../../../../NORMATIVE_SOURCES.md`\n"
 SKILL_FILE_NAME = "SKILL.md"
+SKILLS_MIRROR_CONTRACT_PATH = Path("scripts/ai/codex/skills-mirror-contract.json")
 
 MIRROR_HEADER_PATTERN = re.compile(
     r"^> Mirror status:.*?^_{10,}\s*\n",
@@ -249,13 +254,252 @@ def sync_docs_skill_mirrors(root: Path, *, check_only: bool) -> list[str]:
     return issues
 
 
+def _load_skills_mirror_contract(root: Path) -> dict[str, object]:
+    path = root / SKILLS_MIRROR_CONTRACT_PATH
+    if not path.is_file():
+        raise FileNotFoundError(f"Missing skills mirror contract: {path}")
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict) or payload.get("schema_version") != 1:
+        raise ValueError(f"Unsupported skills mirror contract: {path}")
+    return payload
+
+
+def _contract_paths(root: Path, contract: dict[str, object]) -> dict[str, Path]:
+    raw_roots = contract.get("roots")
+    if not isinstance(raw_roots, dict):
+        raise ValueError("skills mirror contract must define a roots object")
+    required = ("canonical", "devin", "docs_mirror", "reference_overlay")
+    missing = [name for name in required if not isinstance(raw_roots.get(name), str)]
+    if missing:
+        raise ValueError(
+            "skills mirror contract is missing root paths: " + ", ".join(missing)
+        )
+    return {name: root / str(raw_roots[name]) for name in required}
+
+
+def _skill_entrypoints(skills_root: Path, entrypoint: str) -> set[str]:
+    return {
+        path.parent.relative_to(skills_root).as_posix()
+        for path in skills_root.rglob(entrypoint)
+        if path.is_file()
+    }
+
+
+def _catalog_entries(path: Path, entrypoint: str) -> set[str]:
+    if not path.is_file():
+        return set()
+    pattern = re.compile(rf"\]\(([^)\s]+/{re.escape(entrypoint)})\)")
+    return {
+        Path(match).parent.as_posix()
+        for match in pattern.findall(path.read_text(encoding="utf-8"))
+    }
+
+
+def _matches_any(path: str, patterns: tuple[str, ...]) -> bool:
+    return any(fnmatch.fnmatchcase(path, pattern) for pattern in patterns)
+
+
+def _string_tuple(value: object, *, label: str) -> tuple[str, ...]:
+    if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+        raise ValueError(f"skills mirror contract {label} must be a string list")
+    return tuple(value)
+
+
+def _validate_catalog(
+    *,
+    label: str,
+    skills_root: Path,
+    expected_skills: set[str],
+    catalog_name: str,
+    entrypoint: str,
+) -> list[str]:
+    catalog_path = skills_root / catalog_name
+    if not catalog_path.is_file():
+        return [f"{label} catalog missing: {catalog_path}"]
+    entries = _catalog_entries(catalog_path, entrypoint)
+    issues = [
+        f"{label} catalog missing entry: {skill}/{entrypoint}"
+        for skill in sorted(expected_skills - entries)
+    ]
+    issues.extend(
+        f"{label} catalog unexpected entry: {skill}/{entrypoint}"
+        for skill in sorted(entries - expected_skills)
+    )
+    return issues
+
+
+def _relative_files(root: Path) -> set[str]:
+    return {
+        path.relative_to(root).as_posix() for path in root.rglob("*") if path.is_file()
+    }
+
+
+def _validate_codex_devin_parity(
+    paths: dict[str, Path], contract: dict[str, object]
+) -> list[str]:
+    canonical_root = paths["canonical"]
+    devin_root = paths["devin"]
+    entrypoint = str(contract.get("entrypoint", SKILL_FILE_NAME))
+    catalog_name = str(contract.get("catalog", "SKILLS-CATALOG.md"))
+    issues: list[str] = []
+
+    for label, path in (("Codex", canonical_root), ("Devin", devin_root)):
+        if not path.is_dir():
+            issues.append(f"{label} skills root missing: {path}")
+    if issues:
+        return issues
+
+    canonical_skills = _skill_entrypoints(canonical_root, entrypoint)
+    devin_skills = _skill_entrypoints(devin_root, entrypoint)
+    issues.extend(
+        f"Devin missing skill entrypoint: {skill}/{entrypoint}"
+        for skill in sorted(canonical_skills - devin_skills)
+    )
+    issues.extend(
+        f"Devin unexpected skill entrypoint: {skill}/{entrypoint}"
+        for skill in sorted(devin_skills - canonical_skills)
+    )
+    issues.extend(
+        _validate_catalog(
+            label="Codex",
+            skills_root=canonical_root,
+            expected_skills=canonical_skills,
+            catalog_name=catalog_name,
+            entrypoint=entrypoint,
+        )
+    )
+    issues.extend(
+        _validate_catalog(
+            label="Devin",
+            skills_root=devin_root,
+            expected_skills=devin_skills,
+            catalog_name=catalog_name,
+            entrypoint=entrypoint,
+        )
+    )
+
+    raw_parity = contract.get("codex_devin")
+    if not isinstance(raw_parity, dict):
+        raise ValueError("skills mirror contract must define codex_devin")
+    optional_presence = _string_tuple(
+        raw_parity.get("optional_presence_globs"),
+        label="codex_devin.optional_presence_globs",
+    )
+    allowed_variants = _string_tuple(
+        raw_parity.get("allowed_content_variant_globs"),
+        label="codex_devin.allowed_content_variant_globs",
+    )
+    required_identical = _string_tuple(
+        raw_parity.get("required_identical_when_shared_globs"),
+        label="codex_devin.required_identical_when_shared_globs",
+    )
+
+    canonical_files = _relative_files(canonical_root)
+    devin_files = _relative_files(devin_root)
+    structural_files = {catalog_name} | {
+        f"{skill}/{entrypoint}" for skill in canonical_skills | devin_skills
+    }
+    for relative in sorted((canonical_files | devin_files) - structural_files):
+        in_codex = relative in canonical_files
+        in_devin = relative in devin_files
+        if in_codex != in_devin:
+            if not _matches_any(relative, optional_presence):
+                missing_label = "Devin" if in_codex else "Codex"
+                issues.append(
+                    f"{missing_label} missing required skill file: {relative}"
+                )
+            continue
+
+        codex_path = canonical_root / relative
+        devin_path = devin_root / relative
+        if codex_path.read_bytes() == devin_path.read_bytes():
+            continue
+        if _matches_any(relative, required_identical):
+            issues.append(f"Codex/Devin required-identical mismatch: {relative}")
+        elif not _matches_any(relative, allowed_variants):
+            issues.append(f"Codex/Devin unsanctioned content mismatch: {relative}")
+    return issues
+
+
+def _materialize_expected_docs_mirror(
+    root: Path,
+    paths: dict[str, Path],
+    temp_root: Path,
+) -> Path:
+    docs_relative = paths["docs_mirror"].relative_to(root)
+    expected_docs = temp_root / docs_relative
+    expected_docs.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(paths["canonical"], expected_docs)
+
+    overlay_root = paths["reference_overlay"]
+    if not overlay_root.is_dir():
+        raise FileNotFoundError(f"Reference overlay root missing: {overlay_root}")
+    for source in sorted(overlay_root.rglob("*")):
+        if not source.is_file():
+            continue
+        target = expected_docs / source.relative_to(overlay_root)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
+
+    transform_issues = sync_docs_skill_mirrors(temp_root, check_only=False)
+    if transform_issues:
+        raise RuntimeError("; ".join(transform_issues))
+    return expected_docs
+
+
+def _compare_trees(expected: Path, actual: Path) -> list[str]:
+    if not actual.is_dir():
+        return [f"Docs skill mirror root missing: {actual}"]
+    expected_files = _relative_files(expected)
+    actual_files = _relative_files(actual)
+    issues = [
+        f"Docs skill mirror missing: {relative}"
+        for relative in sorted(expected_files - actual_files)
+    ]
+    issues.extend(
+        f"Docs skill mirror unexpected: {relative}"
+        for relative in sorted(actual_files - expected_files)
+    )
+    issues.extend(
+        f"Docs skill mirror mismatch: {relative}"
+        for relative in sorted(expected_files & actual_files)
+        if (expected / relative).read_bytes() != (actual / relative).read_bytes()
+    )
+    return issues
+
+
+def sync_skill_mirrors(root: Path, *, check_only: bool) -> list[str]:
+    """Validate parity and check or regenerate the transformed docs mirror."""
+    contract = _load_skills_mirror_contract(root)
+    paths = _contract_paths(root, contract)
+    issues = _validate_codex_devin_parity(paths, contract)
+
+    with tempfile.TemporaryDirectory(prefix="bioetl-skills-mirror-") as temp_dir:
+        expected_docs = _materialize_expected_docs_mirror(root, paths, Path(temp_dir))
+        if check_only:
+            issues.extend(_compare_trees(expected_docs, paths["docs_mirror"]))
+        else:
+            if paths["docs_mirror"].exists():
+                shutil.rmtree(paths["docs_mirror"])
+            shutil.copytree(expected_docs, paths["docs_mirror"])
+            issues.extend(_compare_trees(expected_docs, paths["docs_mirror"]))
+    return issues
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=_repo_root())
     parser.add_argument("--check", action="store_true")
     parser.add_argument(
         "--only",
-        choices=("codex-agents", "docs-agents", "codex-skills", "docs-skills", "all"),
+        choices=(
+            "codex-agents",
+            "docs-agents",
+            "codex-skills",
+            "docs-skills",
+            "skill-mirrors",
+            "all",
+        ),
         default="all",
     )
     args = parser.parse_args(argv)
@@ -265,6 +509,7 @@ def main(argv: list[str] | None = None) -> int:
         "docs-agents": inject_docs_agent_sources,
         "codex-skills": normalize_codex_skills,
         "docs-skills": sync_docs_skill_mirrors,
+        "skill-mirrors": sync_skill_mirrors,
     }
     selected = list(runners) if args.only == "all" else [args.only]
 

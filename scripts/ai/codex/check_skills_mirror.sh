@@ -1,12 +1,38 @@
 #!/usr/bin/env bash
+# Verify or regenerate the transformed docs mirror and Codex-Devin parity.
 set -euo pipefail
-repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
-source_dir="$repo_root/.codex/skills"
-mirror_dir="$repo_root/docs/00-project/ai/skills/local"
 
-if [[ ! -d "$source_dir" || ! -d "$mirror_dir" ]]; then
-  echo "[FAIL] missing skills source or mirror directory" >&2
-  exit 1
-fi
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+MODE="${1:---check}"
 
-echo "[OK] skills mirror check passed"
+usage() {
+  cat <<'EOF'
+Usage:
+  bash scripts/ai/codex/check_skills_mirror.sh --check
+  bash scripts/ai/codex/check_skills_mirror.sh --sync
+
+Modes:
+  --check  Read-only validation of docs mirror and Codex-Devin parity.
+  --sync   Regenerate the transformed docs mirror, then validate parity.
+EOF
+}
+
+case "$MODE" in
+  --check)
+    exec python3 "$REPO_ROOT/scripts/ai/sync_ai_governance.py" \
+      --root "$REPO_ROOT" --only skill-mirrors --check
+    ;;
+  --sync)
+    exec python3 "$REPO_ROOT/scripts/ai/sync_ai_governance.py" \
+      --root "$REPO_ROOT" --only skill-mirrors
+    ;;
+  -h|--help)
+    usage
+    ;;
+  *)
+    echo "Unknown option: $MODE" >&2
+    usage >&2
+    exit 2
+    ;;
+esac

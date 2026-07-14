@@ -33,9 +33,9 @@ Timebox
 - Runtime budget: <estimate>
 
 Deliverables
-- reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/<agent_id>/report.md
-- reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/<agent_id>/metrics.json
-- reports/{LLM}/py-test-swarm_{YYYYMMDD}_{HHMM}/telemetry/raw/events_<agent_id>.jsonl
+- reports/test-swarm/<task_id>/<agent_id>/report.md
+- reports/test-swarm/<task_id>/<agent_id>/metrics.json
+- reports/test-swarm/<task_id>/telemetry/raw/events_<agent_id>.jsonl
 
 Escalation rule
 - If workload_score >= 40, create L3 agents and aggregate their reports.
