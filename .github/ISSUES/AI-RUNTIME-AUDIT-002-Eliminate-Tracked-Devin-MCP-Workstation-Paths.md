@@ -127,4 +127,3 @@ validate the tracked template plus a generated temporary materialization.
 - Suggested labels: `ai-runtime`, `governance`, `config`, `technical-debt`
 - Suggested assignee: `@SatoryKono`
 - Assignee confidence: high (CODEOWNERS plus recent file history)
-

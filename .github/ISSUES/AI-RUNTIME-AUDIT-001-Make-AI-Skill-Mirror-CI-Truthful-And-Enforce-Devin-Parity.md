@@ -113,4 +113,3 @@ parity gap; it does not reopen the completed documentation cleanup scopes.
 - Suggested labels: `ai-runtime`, `governance`, `testing`, `technical-debt`
 - Suggested assignee: `@SatoryKono`
 - Assignee confidence: high (CODEOWNERS plus recent file history)
-

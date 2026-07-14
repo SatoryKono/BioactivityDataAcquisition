@@ -15,7 +15,7 @@
 - ✅ All datasources (Prometheus, Loki, Quarantine Explorer, Tempo) configured
 - ✅ Query API functional and returning data
 
-**Evidence**: 
+**Evidence**:
 - Report: `reports/observability/live-validation/validation-report-20260714-083129.json`
 - Findings: `docs/00-project/ai/audit/observability-issues/OBS-003-validation-findings.md`
 - GitHub Issue #6283 updated with validation results
@@ -62,7 +62,7 @@
 - Tempo handoff links functional
 - No datasource bypass patterns detected
 
-**Evidence**: 
+**Evidence**:
 - Report: `reports/observability/datasource-compliance/datasource-audit-report.json`
 - Findings: `docs/00-project/ai/audit/observability-issues/OBS-006-validation-findings.md`
 - GitHub Issue #6286 updated with validation results
