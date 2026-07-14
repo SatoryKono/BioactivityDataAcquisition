@@ -867,16 +867,39 @@ def test_semantic_output_payload_ignores_occurrence_identity(tmp_path: Path) -> 
     first = tmp_path / "first.jsonl"
     second = tmp_path / "second.jsonl"
     first.write_text(
-        json.dumps({"molecule_id": "CHEMBL1", "run_id": "run-a"}) + "\n",
+        json.dumps(
+            {
+                "molecule_id": "CHEMBL1",
+                "run_id": "run-a",
+                "bronze_batch_id": "batch-a",
+                "_valid_from": "2026-07-14T00:00:00Z",
+            }
+        )
+        + "\n",
         encoding="utf-8",
     )
     second.write_text(
-        json.dumps({"molecule_id": "CHEMBL1", "run_id": "run-b"}) + "\n",
+        json.dumps(
+            {
+                "molecule_id": "CHEMBL1",
+                "run_id": "run-b",
+                "bronze_batch_id": "batch-b",
+                "_valid_from": "2026-07-14T00:01:00Z",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    diagnostic = tmp_path / "dq-report.json"
+    diagnostic.write_text(
+        json.dumps({"execution_fingerprint": "occurrence-specific"}),
         encoding="utf-8",
     )
 
-    first_payload, first_count = campaign._semantic_output_payload([first])
-    second_payload, second_count = campaign._semantic_output_payload([second])
+    first_payload, first_count = campaign._semantic_output_payload([first, diagnostic])
+    second_payload, second_count = campaign._semantic_output_payload(
+        [second, diagnostic]
+    )
 
     assert first_count == second_count == 1
     assert first_payload == second_payload
