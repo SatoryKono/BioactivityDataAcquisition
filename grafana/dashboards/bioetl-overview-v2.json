@@ -23,177 +23,175 @@
       "id": 9600,
       "type": "row",
       "title": "Alert/SLO Triage",
-      "collapsed": true,
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 30
+      }
+    },
+    {
+      "id": 9601,
+      "type": "table",
+      "title": "Triage Alert State",
+      "gridPos": {
+        "h": 6,
+        "w": 24,
+        "x": 0,
+        "y": 31
       },
-      "panels": [
-        {
-          "id": 9601,
-          "type": "table",
-          "title": "Triage Alert State",
-          "gridPos": {
-            "h": 6,
-            "w": 24,
-            "x": 0,
-            "y": 18
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "description": "Actual Prometheus alert-state triage for firing and pending BioETL rules. This panel reads the Prometheus `ALERTS` series and does not duplicate alert business logic in dashboard queries; inactive/no-alert state is rendered as an explicit zero row. Critical/page severity is red, warning is amber, and inactive aggregate evidence is neutral. Open 6. Alerts & SLO for row scope.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
           },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "description": "Actual Prometheus alert-state triage for firing and pending BioETL rules. This panel reads the Prometheus `ALERTS` series and does not duplicate alert business logic in dashboard queries; inactive/no-alert state is rendered as an explicit zero row. Critical/page severity is red, warning is amber, and inactive aggregate evidence is neutral. Open 6. Alerts & SLO for row scope.",
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "custom": {
-                "align": "left",
-                "cellOptions": {
-                  "type": "auto"
-                },
-                "inspect": false
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 1
-                  },
-                  {
-                    "color": "red",
-                    "value": 2
-                  }
-                ]
-              },
-              "unit": "none"
+          "custom": {
+            "align": "left",
+            "cellOptions": {
+              "type": "auto"
             },
-            "overrides": [
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
               {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Value"
-                },
-                "properties": [
-                  {
-                    "id": "displayName",
-                    "value": "Active Alerts"
-                  },
-                  {
-                    "id": "custom.align",
-                    "value": "right"
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-background",
-                      "applyToRow": true
-                    }
-                  }
-                ]
+                "color": "green",
+                "value": null
               },
               {
-                "matcher": {
-                  "id": "byName",
-                  "options": "severity"
-                },
-                "properties": [
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^(critical|page|p0|p1)$",
-                          "result": {
-                            "text": "$1 · CRITICAL",
-                            "color": "red"
-                          }
-                        }
-                      },
-                      {
-                        "type": "regex",
-                        "options": {
-                          "pattern": "^(warning|warn)$",
-                          "result": {
-                            "text": "$1 · WARNING",
-                            "color": "orange"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-background"
-                    }
-                  }
-                ]
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
               }
             ]
           },
-          "targets": [
-            {
-              "expr": "sum by (alertname, alertstate, severity) (ALERTS{alertstate=~\"firing|pending\"}) or label_replace(label_replace(label_replace(vector(0), \"alertname\", \"none\", \"\", \"\"), \"alertstate\", \"inactive\", \"\", \"\"), \"severity\", \"none\", \"\", \"\")",
-              "format": "table",
-              "instant": true,
-              "refId": "A"
-            }
-          ],
-          "options": {
-            "showHeader": true,
-            "footer": {
-              "show": false
+          "unit": "none"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
             },
-            "dataLinks": [
+            "properties": [
               {
-                "title": "Open Runtime Conditions",
-                "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id",
-                "targetBlank": false,
-                "includeVars": false
+                "id": "displayName",
+                "value": "Active Alerts"
               },
               {
-                "title": "Open 6. Alerts & SLO",
-                "url": "/d/bioetl-alerts-slo/bioetl-alerts-slo?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
-                "targetBlank": false,
-                "includeVars": false
-              }
-            ]
-          },
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {
-                  "Time": true,
-                  "__name__": true
-                },
-                "indexByName": {
-                  "alertname": 0,
-                  "alertstate": 1,
-                  "severity": 2,
-                  "Value": 3
-                },
-                "renameByName": {
-                  "alertname": "Alert",
-                  "alertstate": "State",
-                  "severity": "Severity",
-                  "Value": "Active Alerts"
+                "id": "custom.align",
+                "value": "right"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "applyToRow": true
                 }
               }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "severity"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^(critical|page|p0|p1)$",
+                      "result": {
+                        "text": "$1 · CRITICAL",
+                        "color": "red"
+                      }
+                    }
+                  },
+                  {
+                    "type": "regex",
+                    "options": {
+                      "pattern": "^(warning|warn)$",
+                      "result": {
+                        "text": "$1 · WARNING",
+                        "color": "orange"
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "expr": "sum by (alertname, alertstate, severity) (ALERTS{alertstate=~\"firing|pending\"}) or label_replace(label_replace(label_replace(vector(0), \"alertname\", \"none\", \"\", \"\"), \"alertstate\", \"inactive\", \"\", \"\"), \"severity\", \"none\", \"\", \"\")",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false
+        },
+        "dataLinks": [
+          {
+            "title": "Open Runtime Conditions",
+            "url": "/d/bioetl-runtime/bioetl-runtime?${__url_time_range}&var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&var-run_id=$run_id",
+            "targetBlank": false,
+            "includeVars": false
+          },
+          {
+            "title": "Open 6. Alerts & SLO",
+            "url": "/d/bioetl-alerts-slo/bioetl-alerts-slo?var-workflow=$workflow&var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}",
+            "targetBlank": false,
+            "includeVars": false
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {
+              "alertname": 0,
+              "alertstate": 1,
+              "severity": 2,
+              "Value": 3
+            },
+            "renameByName": {
+              "alertname": "Alert",
+              "alertstate": "State",
+              "severity": "Severity",
+              "Value": "Active Alerts"
             }
-          ]
+          }
         }
       ]
     },
@@ -1566,7 +1564,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 31
+        "y": 37
       },
       "collapsed": true,
       "panels": [
@@ -1578,7 +1576,7 @@
             "h": 6,
             "w": 8,
             "x": 0,
-            "y": 41
+            "y": 38
           },
           "datasource": {
             "type": "prometheus",
@@ -1646,7 +1644,7 @@
             "dataLinks": [
               {
                 "title": "Open Runtime",
-                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=&var-run_type=&var-stage=unknown&&var-workflow=&var-run_id=",
+                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
                 "targetBlank": false,
                 "includeVars": false
               }
@@ -1669,7 +1667,7 @@
             "h": 6,
             "w": 8,
             "x": 8,
-            "y": 41
+            "y": 38
           },
           "datasource": {
             "type": "prometheus",
@@ -1737,7 +1735,7 @@
             "dataLinks": [
               {
                 "title": "Open Data Quality",
-                "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=&var-run_type=&var-stage=unknown&&var-workflow=&var-run_id=",
+                "url": "/d/bioetl-dq-v2/bioetl-dq-v2?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
                 "targetBlank": false,
                 "includeVars": false
               }
@@ -1760,7 +1758,7 @@
             "h": 6,
             "w": 8,
             "x": 16,
-            "y": 41
+            "y": 38
           },
           "datasource": {
             "type": "prometheus",
@@ -1828,13 +1826,13 @@
             "dataLinks": [
               {
                 "title": "Open Runtime",
-                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=&var-run_type=&var-stage=unknown&&var-workflow=&var-run_id=",
+                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
                 "targetBlank": false,
                 "includeVars": false
               },
               {
                 "title": "Open Control Plane",
-                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=&var-run_type=&&var-workflow=&var-run_id=",
+                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
                 "targetBlank": false,
                 "includeVars": false
               }
@@ -1859,7 +1857,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 32
+        "y": 39
       },
       "collapsed": true,
       "panels": [
@@ -1871,7 +1869,7 @@
             "h": 6,
             "w": 8,
             "x": 0,
-            "y": 32
+            "y": 40
           },
           "datasource": {
             "type": "prometheus",
@@ -1905,7 +1903,7 @@
             "dataLinks": [
               {
                 "title": "Open Runtime",
-                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=&var-run_type=&var-stage=unknown&&var-workflow=&var-run_id=",
+                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
                 "targetBlank": false,
                 "includeVars": false
               }
@@ -1942,7 +1940,7 @@
             "h": 6,
             "w": 8,
             "x": 8,
-            "y": 32
+            "y": 40
           },
           "datasource": {
             "type": "prometheus",
@@ -1976,13 +1974,13 @@
             "dataLinks": [
               {
                 "title": "Open Control Plane",
-                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=&var-run_type=&&var-workflow=&var-run_id=",
+                "url": "/d/bioetl-control-plane-v1/bioetl-control-plane-v1?var-pipeline=$pipeline&var-run_type=$run_type&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
                 "targetBlank": false,
                 "includeVars": false
               },
               {
                 "title": "Open Runtime",
-                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=&var-run_type=&var-stage=unknown&&var-workflow=&var-run_id=",
+                "url": "/d/bioetl-runtime/bioetl-runtime?var-pipeline=$pipeline&var-run_type=$run_type&var-stage=unknown&${__url_time_range}&var-workflow=$workflow&var-run_id=$run_id",
                 "targetBlank": false,
                 "includeVars": false
               }
@@ -2019,7 +2017,7 @@
             "h": 6,
             "w": 8,
             "x": 16,
-            "y": 32
+            "y": 40
           },
           "datasource": {
             "type": "prometheus",
@@ -2140,7 +2138,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 33
+        "y": 38
       },
       "collapsed": true,
       "panels": [
