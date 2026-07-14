@@ -6,6 +6,7 @@ import pytest
 
 import json
 import os
+import re
 from pathlib import Path
 
 from tests.helpers import repo_root, run_repo_python
@@ -50,6 +51,18 @@ WRAPPER_SCRIPT_STEMS = {
 
 def _posix(path_str: str) -> str:
     return path_str.replace("\\", "/")
+
+
+def _all_string_values(value: object) -> list[str]:
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, dict):
+        return [
+            item for nested in value.values() for item in _all_string_values(nested)
+        ]
+    if isinstance(value, list):
+        return [item for nested in value for item in _all_string_values(nested)]
+    return []
 
 
 def _load_workspace_mcp_config(
@@ -184,6 +197,32 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
     assert servers["mintlify"]["url"] == "https://mcp.mintlify.com"
     assert servers["deepwiki"]["type"] == "http"
     assert servers["deepwiki"]["url"] == "https://mcp.deepwiki.com/mcp"
+
+
+def test_tracked_mcp_projections_reject_workstation_paths() -> None:
+    """Tracked portable MCP projections must be clone-location independent."""
+    root = repo_root()
+    workspace_payload = json.loads((root / ".mcp.json").read_text(encoding="utf-8"))
+    scripts_payload = json.loads(
+        (root / "scripts/ai/.mcp.json").read_text(encoding="utf-8")
+    )
+    devin_payload = json.loads(
+        (root / ".devin/config.json").read_text(encoding="utf-8")
+    )
+
+    expected_servers = workspace_payload["mcpServers"]
+    assert scripts_payload["mcpServers"] == expected_servers
+    assert devin_payload["mcpServers"] == expected_servers
+    assert set(devin_payload["mcpServers"]) == EXPECTED_MCP_SERVERS
+    assert devin_payload["mcpServers"]["filesystem"]["args"][-1] == "."
+    assert devin_payload["devin"]["org_id"]
+    assert devin_payload["shell"] == {"setup_complete": True}
+
+    absolute_path = re.compile(r"^(?:/|[A-Za-z]:[\\/])")
+    for payload in (workspace_payload, scripts_payload, devin_payload):
+        assert not [
+            value for value in _all_string_values(payload) if absolute_path.match(value)
+        ]
 
 
 def test_setup_router_is_the_supported_public_entrypoint() -> None:

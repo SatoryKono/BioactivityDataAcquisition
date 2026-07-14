@@ -233,7 +233,9 @@ def _write_devin_config(output_root: Path, workspace_root: Path) -> Path:
     settings_path.parent.mkdir(parents=True, exist_ok=True)
 
     existing = _load_existing_json_object(settings_path, label="Devin workspace config")
-    existing["mcpServers"] = deepcopy(_canonical_servers(workspace_root))
+    existing["mcpServers"] = deepcopy(
+        _canonical_servers(workspace_root, portable_workspace_paths=True)
+    )
     _write_json(settings_path, existing)
     return settings_path
 

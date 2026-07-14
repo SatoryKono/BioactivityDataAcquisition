@@ -26,11 +26,7 @@ agent: "Explore"
 - Accepted ADRs in `../../../../../02-architecture/decisions/`
 - Memory policy: `../../../agents/guides/MEMORY_USAGE.md`
 - Post-change validation: `../../../agents/policy/POST_CHANGE_VALIDATION.md`
-- Root runtime contract: `../../../AGENTS.md`
-- Project rules: `../../../docs/00-project/RULES.md`
-- Requirements: `../../../docs/01-requirements/REQUIREMENTS.md`
-- Accepted ADRs: `../../../docs/02-architecture/decisions`
-- Normative index: `../../../docs/00-project/NORMATIVE_SOURCES.md`
+
 This skill discovers available capabilities (skills, agents, commands) in the user's environment to enable dynamic workflow adaptation.
 
 ## Purpose

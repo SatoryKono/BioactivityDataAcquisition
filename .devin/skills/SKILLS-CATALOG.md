@@ -6,6 +6,10 @@ Consolidated registry of BioETL-focused local skills under `.codex/skills/`.
 
 - `.codex/skills/` is the canonical source for repository-local skills.
 - `docs/00-project/ai/skills/local/` is a generated mirror and must not be edited manually.
+- `scripts/ai/codex/skills-mirror-contract.json` defines sanctioned parity with
+  `.devin/skills/`: entrypoint and catalog membership must match, shared
+  references must be identical, and runtime-specific metadata/content variants
+  remain explicit.
 - Treat each `SKILL.md` frontmatter (`name`, `description`) as the trigger contract.
 - Verify and sync the local docs mirror with:
 
@@ -14,6 +18,10 @@ bash scripts/ai/codex/check_skills_mirror.sh --check
 bash scripts/ai/codex/check_skills_mirror.sh --sync
 ```
 
+`--sync` regenerates only the transformed docs mirror. It never overwrites the
+Devin runtime tree; Codex-Devin parity violations require an owner-reviewed
+runtime change.
+
 ## Skill Groups
 
 ### Orchestration
@@ -21,6 +29,7 @@ bash scripts/ai/codex/check_skills_mirror.sh --sync
 | Skill                    | Path                                   | Purpose                            |
 | ------------------------ | -------------------------------------- | ---------------------------------- |
 | `agent-orchestration`    | `.codex/skills/agent-orchestration`    | Multi-agent coordination map       |
+| `hierarchical-evidence-orchestration` | `.codex/skills/hierarchical-evidence-orchestration` | Hierarchical evidence campaigns |
 | `py-review-orchestrator` | `.codex/skills/py-review-orchestrator` | Hierarchical review campaign       |
 | `py-test-swarm`          | `.codex/skills/py-test-swarm`          | Hierarchical test swarm (L1/L2/L3) |
 
@@ -44,6 +53,7 @@ bash scripts/ai/codex/check_skills_mirror.sh --sync
 | Skill                   | Path                                         | Purpose                          |
 | ----------------------- | -------------------------------------------- | -------------------------------- |
 | `architecture-guardian` | `.codex/skills/public/architecture-guardian` | Architecture boundary validation |
+| `py-reproducibility-audit` | `.codex/skills/py-reproducibility-audit` | Reproducibility and determinism audit |
 | `verify-architecture`   | `.codex/skills/verify-architecture`          | Quick/full architecture checks   |
 | `vcr-record`            | `.codex/skills/vcr-record`                   | VCR cassette recording/safety    |
 
@@ -96,6 +106,7 @@ bash scripts/ai/codex/check_skills_mirror.sh --sync
 ## Mirror Doc Index
 
 - [agent-orchestration](agent-orchestration/SKILL.md)
+- [hierarchical-evidence-orchestration](hierarchical-evidence-orchestration/SKILL.md)
 - [capability-discovery](capability-discovery/SKILL.md)
 - [collecting-evidence](collecting-evidence/SKILL.md)
 - [create-pr](create-pr/SKILL.md)
@@ -117,6 +128,7 @@ bash scripts/ai/codex/check_skills_mirror.sh --sync
 - [py-doc-bot](py-doc-bot/SKILL.md)
 - [py-plan-bot](py-plan-bot/SKILL.md)
 - [py-review-orchestrator](py-review-orchestrator/SKILL.md)
+- [py-reproducibility-audit](py-reproducibility-audit/SKILL.md)
 - [prometheus-alert-rule-editor](prometheus-alert-rule-editor/SKILL.md)
 - [prometheus-metric-discovery](prometheus-metric-discovery/SKILL.md)
 - [prometheus-query-debugger](prometheus-query-debugger/SKILL.md)

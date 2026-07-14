@@ -70,9 +70,9 @@ Task Brief:
 - Phase 5: reporting (always)
 
 Создай:
-- report.md
-- metrics.json
-- telemetry/raw/events_{agent_id}.jsonl
+- reports/test-swarm/<task_id>/<agent_id>/report.md
+- reports/test-swarm/<task_id>/<agent_id>/metrics.json
+- reports/test-swarm/<task_id>/telemetry/raw/events_<agent_id>.jsonl
 ```
 
 ## L3 Mandatory Prefix

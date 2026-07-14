@@ -23,7 +23,8 @@ tracked mirror/generated surface, not as standalone documentation.
 
 - Ownership route: `ai-skill-reference-mirror` in
   `configs/quality/generated_artifact_routing.yaml`.
-- Check command: `bash scripts/ai/codex/check_skills_mirror.sh`.
+- Check command: `bash scripts/ai/codex/check_skills_mirror.sh --check`.
+- Regeneration command: `bash scripts/ai/codex/check_skills_mirror.sh --sync`.
 - Cleanup rule: do not delete individual duplicate reference files to reduce
   duplication counts; re-sync the mirror from the runtime skill source instead.
 
@@ -31,7 +32,7 @@ tracked mirror/generated surface, not as standalone documentation.
 
 | Script                                    | What it checks                                                         |
 | ----------------------------------------- | ---------------------------------------------------------------------- |
-| `scripts/ai/codex/check_skills_mirror.sh` | Overlays reference bundles from `_references/local` onto skill mirrors |
+| `scripts/ai/codex/check_skills_mirror.sh` | Validates Codex-Devin parity and overlays `_references/local` while regenerating the transformed docs mirror |
 | `scripts/ai/codex/check_skills_layout.sh` | Validates `_references` exists as a required subdirectory              |
 
 ## Rules
