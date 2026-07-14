@@ -72,9 +72,9 @@
   ],
   "outcomes": {
     "5847": {
-      "tracked_root_files_after": 37,
+      "tracked_root_files_after": 38,
       "tracked_root_dirs_after": 13,
-      "allowlist_entries_after": 37,
+      "allowlist_entries_after": 38,
       "retired_root_entries": [
         ".wsl_proxy_env.sh",
         "Dockerfile.mcp-fetch",
