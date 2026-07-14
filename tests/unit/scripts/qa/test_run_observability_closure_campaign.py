@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 import pytest
+import zstandard
 
 from scripts.engineering.qa import run_observability_closure_campaign as campaign
 
@@ -139,6 +140,45 @@ def test_stage_workflow_fixture_selects_compatible_join_records(
     assert len(evidence["records"]) == 3
     assert len(list(fixture_root.rglob("*.jsonl"))) == 3
     assert len(list(fixture_root.rglob("*.jsonl.zst"))) == 3
+
+
+def test_stage_workflow_fixture_projects_disjoint_compressed_samples(
+    tmp_path: Path,
+) -> None:
+    bronze = tmp_path / "bronze"
+    rows = {
+        "assay": {
+            "assay_chembl_id": "CHEMBL-A",
+            "target_chembl_id": "CHEMBL-OLD-T",
+            "document_chembl_id": "CHEMBL-OLD-D",
+        },
+        "target": {
+            "target_chembl_id": "CHEMBL-T",
+            "target_type": "SINGLE PROTEIN",
+        },
+        "publication": {"document_chembl_id": "CHEMBL-D", "title": "Evidence"},
+    }
+    compressor = zstandard.ZstdCompressor(level=3)
+    for entity, row in rows.items():
+        path = bronze / "chembl" / entity / "2026-07-14" / "batch.jsonl.zst"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(compressor.compress((json.dumps(row) + "\n").encode()))
+
+    fixture_root, evidence = _REAL_STAGE_WORKFLOW_FIXTURE(
+        canonical_bronze_root=bronze,
+        audit_root=tmp_path / "audit",
+    )
+
+    assay = json.loads(
+        next((fixture_root / "chembl" / "assay").rglob("*.jsonl")).read_text()
+    )
+    assay_evidence = next(
+        row for row in evidence["records"] if row["entity"] == "assay"
+    )
+    assert assay["target_chembl_id"] == "CHEMBL-T"
+    assert assay["document_chembl_id"] == "CHEMBL-D"
+    assert assay_evidence["derivation"] == "deterministic_workflow_join_projection"
+    assert assay_evidence["source_record_sha256"] != assay_evidence["record_sha256"]
 
 
 def test_isolated_work_root_links_only_tracked_configs(tmp_path: Path) -> None:
