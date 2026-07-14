@@ -88,6 +88,7 @@ def _run_git_command(
     try:
         last_result = subprocess.run(  # nosec B603 B607
             ["git", *arguments],
+            cwd=_REPO_ROOT,
             capture_output=True,
             text=True,
             timeout=5,
@@ -104,6 +105,7 @@ def _run_git_command(
         try:
             candidate_result = subprocess.run(  # nosec B603
                 [executable, *arguments],
+                cwd=_REPO_ROOT,
                 capture_output=True,
                 text=True,
                 timeout=5,

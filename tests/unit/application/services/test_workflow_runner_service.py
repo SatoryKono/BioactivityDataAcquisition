@@ -103,6 +103,26 @@ class _FailingPipelineRunner:
         raise RuntimeError("pipeline boom")
 
 
+class _IdentifiedPipelineError(RuntimeError):
+    """Failure emitted after the child run and manifest identities exist."""
+
+    run_id = "00000000-0000-0000-0000-000000000199"
+    manifest_id = "manifest-child-199"
+
+
+class _IdentifiedFailingPipelineRunner:
+    async def run(
+        self,
+        pipeline_name: str,
+        dry_run: bool = False,
+        run_id: object | None = None,
+        options: object | None = None,
+    ) -> RunResult:
+        await asyncio.sleep(0)
+        del pipeline_name, dry_run, run_id, options
+        raise _IdentifiedPipelineError("identified pipeline boom")
+
+
 class _SelectiveFailingPipelineRunner:
     def __init__(self, failing_pipeline_name: str) -> None:
         self.calls: list[tuple[str, object]] = []
@@ -284,15 +304,22 @@ async def test_workflow_runner_executes_pipeline_then_transform() -> None:
         ),
     )
 
-    result = await service.run_workflow(config)
+    result = await service.run_workflow(
+        config,
+        workflow_run_id="workflow-run-42",
+    )
 
     assert result.status == "success"
     assert [step.step_id for step in result.steps] == ["extract", "normalize"]
+    assert result.steps[0].child_run_id == ("00000000-0000-0000-0000-000000000101")
     assert pipeline_runner.calls[0][0] == "chembl_activity"
     assert pipeline_runner.calls[0][1].required_persistence_profile == (
         "degraded_observable"
     )
     assert pipeline_runner.calls[0][1].workflow_id == "activity_workflow"
+    assert pipeline_runner.calls[0][1].workflow_run_id == "workflow-run-42"
+    assert pipeline_runner.calls[0][1].workflow_name == "activity_workflow"
+    assert pipeline_runner.calls[0][1].workflow_step_id == "extract"
     assert metrics.gauges[-1] == (
         "bioetl_workflow_current_status",
         0.0,
@@ -379,6 +406,35 @@ async def test_workflow_runner_returns_failed_step_result_for_pipeline_error() -
             "provider_context": "chembl",
         },
     )
+
+
+@pytest.mark.asyncio
+async def test_pipeline_exception_preserves_reciprocal_child_anchors() -> None:
+    metrics = _RecordingMetrics()
+    service = WorkflowRunnerService(
+        pipeline_runner=_IdentifiedFailingPipelineRunner(),  # type: ignore[arg-type]
+        transform_service=WorkflowTransformService(
+            registry=WorkflowTransformRegistry(),
+            metrics=metrics,
+        ),
+        metrics=metrics,
+    )
+    config = WorkflowConfig(
+        name="activity_workflow",
+        steps=(
+            WorkflowStepConfig(
+                step_id="extract",
+                pipeline_name="chembl_activity",
+            ),
+        ),
+    )
+
+    result = await service.run_workflow(config)
+
+    failed_step = result.steps[0]
+    assert failed_step.status == "failed"
+    assert failed_step.child_run_id == _IdentifiedPipelineError.run_id
+    assert failed_step.child_manifest_id == _IdentifiedPipelineError.manifest_id
 
 
 @pytest.mark.asyncio

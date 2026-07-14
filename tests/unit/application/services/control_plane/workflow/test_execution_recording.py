@@ -437,3 +437,44 @@ def test_step_completion_details_include_transform_summary_and_artifact_refs() -
             "size_bytes": 10,
         }
     ]
+
+
+@pytest.mark.parametrize("status", ["success", "failed"])
+def test_pipeline_step_completion_details_include_child_run_anchors(
+    status: str,
+) -> None:
+    details = execution_recording.build_step_completion_details(
+        WorkflowStepExecutionResult(
+            step_id="extract",
+            step_kind="pipeline",
+            status=status,
+            payload=SimpleNamespace(
+                run_id=UUID("00000000-0000-0000-0000-000000000411"),
+                manifest_id="manifest-child-411",
+            ),
+        )
+    )
+
+    assert details == {
+        "child_run_id": "00000000-0000-0000-0000-000000000411",
+        "child_manifest_id": "manifest-child-411",
+    }
+
+
+def test_failed_pipeline_completion_uses_exception_safe_child_anchors() -> None:
+    details = execution_recording.build_step_completion_details(
+        WorkflowStepExecutionResult(
+            step_id="extract",
+            step_kind="pipeline",
+            status="failed",
+            error_type="RuntimeError",
+            error_message="pipeline boom",
+            child_run_id="00000000-0000-0000-0000-000000000419",
+            child_manifest_id="manifest-child-419",
+        )
+    )
+
+    assert details == {
+        "child_run_id": "00000000-0000-0000-0000-000000000419",
+        "child_manifest_id": "manifest-child-419",
+    }

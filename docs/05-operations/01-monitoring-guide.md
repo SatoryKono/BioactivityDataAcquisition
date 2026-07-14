@@ -44,6 +44,11 @@ live in [../03-guides/dashboards/dashboard-inventory.md](../03-guides/dashboards
    расследование run/checkpoint state.
 1. `python -m scripts.engineering.qa report-observability-metric-inventory --json` —
    reconciliation surface между runtime emitters, docs и Prometheus rules.
+1. `python -m scripts.engineering.qa report-observability-metric-inventory --typed-observability-views --json` —
+   source-specific inventory for recording outputs, policy aliases, direct
+   dashboard targets, recording-rule inputs, direct alert inputs, and HTTP
+   panel endpoints. It fails closed on one-way output/declaration drift and on
+   any Prometheus selector that leaks `run_id`.
 1. Сравните inventory output с
    `grafana/prometheus-rules/bioetl_observability.yml` и shipped dashboard JSON
    до того, как трактовать missing panels как runtime outage.
@@ -614,6 +619,17 @@ python -m scripts.ops check-observability-ports --json
 1. Переменные фильтрации `$pipeline`, `$run_type` и `$provider` работают корректно.
 
 Подробнее см. в документации по тестированию наблюдаемости.
+
+### Prometheus / Pushgateway compatibility contract
+
+| Component | Supported series | Validation path |
+| --- | --- | --- |
+| Prometheus and `promtool` | `3.13.x` (QA image `prom/prometheus:v3.13.1`) | `python -m scripts.engineering.qa check-prometheus-rules --runner docker --coverage-json` checks both shipped rule files and the shared fixture |
+| Pushgateway | `1.11.x` | monitoring profile health plus `pushgateway_build_info`; publication remains bounded to `pipeline,run_type` |
+
+The monitoring profile and CI/QA `promtool` MUST stay on the same Prometheus
+major/minor series. A version change requires updating this matrix, the pinned
+QA image, rule fixtures, and monitoring-profile pins in one reviewed change.
 
 ## 5. Что делать если... (Runbook Lite)
 

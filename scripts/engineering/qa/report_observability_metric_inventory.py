@@ -76,6 +76,10 @@ _DEFAULT_DECLARED_METRIC_DEFINITIONS = Path(
 _DEFAULT_OBSERVABILITY_GOVERNANCE = Path(
     "configs/quality/observability_metric_governance.yaml"
 )
+_POLICY_ALIAS_CATALOG = Path("docs/04-reference/observability/metrics-catalog.md")
+_PANEL_CONTRACT_INVENTORY = Path(
+    "docs/03-guides/dashboards/panel-contract-inventory.json"
+)
 _RUNTIME_EXCLUDE_PARTS = (
     "src/bioetl/infrastructure/observability",
     "src/bioetl/domain",
@@ -598,7 +602,9 @@ def _read_runtime_event_candidate_text(path: Path) -> str | None:
     if cache_key in _RUNTIME_CANDIDATE_TEXT_CACHE:
         return cached
     text = _read_cached_text(path)
-    if text is None or not any(marker in text for marker in _RUNTIME_EVENT_SCAN_MARKERS):
+    if text is None or not any(
+        marker in text for marker in _RUNTIME_EVENT_SCAN_MARKERS
+    ):
         _RUNTIME_CANDIDATE_TEXT_CACHE[cache_key] = None
         return None
     _RUNTIME_CANDIDATE_TEXT_CACHE[cache_key] = text
@@ -1417,6 +1423,7 @@ def _load_declared_metric_definitions(repo_root: Path) -> dict[str, set[str]]:
     if not path.exists():
         return {
             "recording_rule_metrics": set(),
+            "policy_alias_metrics": set(),
             "declared_label_contract_metrics": set(),
         }
     try:
@@ -1424,17 +1431,23 @@ def _load_declared_metric_definitions(repo_root: Path) -> dict[str, set[str]]:
     except ImportError:
         return {
             "recording_rule_metrics": set(),
+            "policy_alias_metrics": set(),
             "declared_label_contract_metrics": set(),
         }
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         return {
             "recording_rule_metrics": set(),
+            "policy_alias_metrics": set(),
             "declared_label_contract_metrics": set(),
         }
 
     definitions: dict[str, set[str]] = {}
-    for field in ("recording_rule_metrics", "declared_label_contract_metrics"):
+    for field in (
+        "recording_rule_metrics",
+        "policy_alias_metrics",
+        "declared_label_contract_metrics",
+    ):
         raw_metrics = payload.get(field, [])
         if not isinstance(raw_metrics, list):
             definitions[field] = set()
@@ -1445,6 +1458,383 @@ def _load_declared_metric_definitions(repo_root: Path) -> dict[str, set[str]]:
             if isinstance(value, str) and value.startswith("bioetl_")
         }
     return definitions
+
+
+def _iter_dashboard_panels(payload: dict[str, object]) -> list[dict[str, object]]:
+    panels: list[dict[str, object]] = []
+    for raw_panel in payload.get("panels", []):
+        if not isinstance(raw_panel, dict):
+            continue
+        panels.append(raw_panel)
+        panels.extend(_iter_dashboard_panels(raw_panel))
+    return panels
+
+
+def _panel_runbook_urls(panel: dict[str, object]) -> list[str]:
+    """Return deterministic runbook links from panel and field data links."""
+    urls: set[str] = set()
+    candidates: list[object] = list(panel.get("links", []))
+    field_config = panel.get("fieldConfig", {})
+    if isinstance(field_config, dict):
+        defaults = field_config.get("defaults", {})
+        if isinstance(defaults, dict):
+            candidates.extend(defaults.get("links", []))
+        for override in field_config.get("overrides", []):
+            if not isinstance(override, dict):
+                continue
+            for prop in override.get("properties", []):
+                if isinstance(prop, dict) and prop.get("id") == "links":
+                    candidates.extend(prop.get("value", []))
+    for candidate in candidates:
+        if not isinstance(candidate, dict):
+            continue
+        url = str(candidate.get("url", ""))
+        if "runbook" in url.lower():
+            urls.add(url)
+    return sorted(urls)
+
+
+def _target_kind(*, datasource_type: str, target: dict[str, object]) -> str:
+    """Classify one dashboard target without parsing HTTP URLs as PromQL."""
+    normalized = datasource_type.lower()
+    url = target.get("url")
+    if isinstance(url, str) and url.startswith(("/ops/", "/health/")):
+        return "http"
+    if normalized == "loki":
+        return "loki"
+    if normalized == "tempo":
+        return "tempo"
+    if normalized in {"prometheus", "promql"} or target.get("expr") is not None:
+        return "promql"
+    return "unknown"
+
+
+def _canonical_datasource_type(raw: str) -> str:
+    """Resolve Grafana datasource names to their shipped plugin types."""
+    return {
+        "Quarantine Explorer": "yesoreyeram-infinity-datasource",
+        "Prometheus": "prometheus",
+        "Loki": "loki",
+        "Tempo": "tempo",
+    }.get(raw, raw)
+
+
+def _target_query_tokens(kind: str, query: str) -> list[str]:
+    """Extract stable, source-specific tokens for documentation parity."""
+    if kind == "http":
+        from urllib.parse import parse_qsl, urlsplit
+
+        parsed = urlsplit(query)
+        return [parsed.path, *(key for key, _value in parse_qsl(parsed.query))]
+    if kind == "promql":
+        return sorted(set(_CANONICAL_METRIC_RE.findall(query)))
+    if kind == "loki":
+        return sorted(
+            set(re.findall(r"\b(?:job|pipeline|level|event|logger)\b", query))
+        )
+    if kind == "tempo":
+        return sorted(
+            set(re.findall(r"\b(?:trace_id|span|resource|duration)\b", query))
+        )
+    return []
+
+
+def _panel_contract(
+    *,
+    dashboard_uid: str,
+    panel: dict[str, object],
+    target: dict[str, object],
+    datasource_type: str,
+) -> dict[str, object]:
+    """Build one complete, deterministic dashboard target documentation row."""
+    panel_id = int(panel.get("id", -1))
+    kind = _target_kind(datasource_type=datasource_type, target=target)
+    query = str(target.get("url") or target.get("expr") or target.get("query") or "")
+    description = str(panel.get("description", ""))
+    description_lower = description.lower()
+    field_config = panel.get("fieldConfig", {})
+    defaults = (
+        field_config.get("defaults", {}) if isinstance(field_config, dict) else {}
+    )
+    if not isinstance(defaults, dict):
+        defaults = {}
+    thresholds = defaults.get("thresholds", {})
+    threshold_steps = (
+        thresholds.get("steps", []) if isinstance(thresholds, dict) else []
+    )
+    return {
+        "dashboard_uid": dashboard_uid,
+        "panel_id": panel_id,
+        "panel_title": str(panel.get("title", "")),
+        "ref_id": str(target.get("refId", "")),
+        "kind": kind,
+        "datasource_type": _canonical_datasource_type(datasource_type),
+        "query": query,
+        "query_tokens": _target_query_tokens(kind, query),
+        "formula": str(target.get("expr") or target.get("expression") or ""),
+        "unit": str(defaults.get("unit", "")),
+        "thresholds": threshold_steps if isinstance(threshold_steps, list) else [],
+        "runbook_urls": _panel_runbook_urls(panel),
+        "documents_valid_empty": any(
+            token in description_lower
+            for token in (
+                "valid empty",
+                "expected empty",
+                "legitimate empty",
+                "empty means",
+                "empty-state",
+                "detail is empty",
+                "0 can mean no rejects",
+                "zero-row",
+                "zero row",
+                "0 rows",
+                "no matching",
+            )
+        ),
+        "documents_backend_down": any(
+            token in description_lower
+            for token in (
+                "backend down",
+                "backend unavailable",
+                "backend may be unavailable",
+                "backend/query failure",
+                "datasource failure",
+                "datasource error",
+                "datasource errors",
+                "quarantine explorer responds",
+                "quarantine explorer and pipeline",
+                "after the api",
+                "until the api",
+            )
+        ),
+    }
+
+
+def _catalog_policy_aliases(repo_root: Path) -> set[str]:
+    """Read the independent published policy-alias table."""
+    text = (repo_root / _POLICY_ALIAS_CATALOG).read_text(encoding="utf-8")
+    marker = "## Governed Policy Aliases"
+    if marker not in text:
+        return set()
+    section = text.split(marker, 1)[1].split("\n## ", 1)[0]
+    return {
+        match.group(1)
+        for line in section.splitlines()
+        if (match := re.match(r"^\| `([^`]+)` \|", line))
+    }
+
+
+def _panel_contract_document(
+    typed_report: dict[str, object],
+) -> dict[str, object]:
+    """Build the committed full panel-contract documentation artifact."""
+    return {
+        "schema_version": 1,
+        "source": "grafana/dashboards/*.json",
+        "fields": [
+            "datasource_type",
+            "query_tokens",
+            "formula",
+            "unit",
+            "thresholds",
+            "runbook_urls",
+            "documents_valid_empty",
+            "documents_backend_down",
+        ],
+        "target_counts": typed_report["typed_target_counts"],
+        "targets": typed_report["typed_targets"],
+    }
+
+
+def _panel_contract_drift(
+    repo_root: Path, typed_report: dict[str, object]
+) -> list[str]:
+    """Return a stable drift marker for the committed panel documentation."""
+    path = repo_root / _PANEL_CONTRACT_INVENTORY
+    if not path.is_file():
+        return [f"missing:{_PANEL_CONTRACT_INVENTORY.as_posix()}"]
+    try:
+        expected = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return [f"invalid:{_PANEL_CONTRACT_INVENTORY.as_posix()}"]
+    if expected != _panel_contract_document(typed_report):
+        return [f"mismatch:{_PANEL_CONTRACT_INVENTORY.as_posix()}"]
+    return []
+
+
+def write_panel_contract_inventory(
+    repo_root: Path, typed_report: dict[str, object]
+) -> Path:
+    """Regenerate the deterministic full panel-contract documentation."""
+    path = repo_root / _PANEL_CONTRACT_INVENTORY
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(_panel_contract_document(typed_report), indent=2, sort_keys=True)
+        + "\n",
+        encoding="utf-8",
+    )
+    return path
+
+
+def collect_typed_observability_inventory(repo_root: Path) -> dict[str, object]:
+    """Collect deterministic rule/dashboard usage views without conflating sources."""
+    try:
+        import yaml
+    except ImportError as exc:  # pragma: no cover - project runtime ships PyYAML
+        raise RuntimeError(
+            "PyYAML is required for typed observability inventory"
+        ) from exc
+
+    declarations = _load_declared_metric_definitions(repo_root)
+    recording_outputs: set[str] = set()
+    recording_inputs: set[str] = set()
+    direct_alert_inputs: set[str] = set()
+    direct_dashboard_targets: set[str] = set()
+    documented_metrics: set[str] = set()
+    http_targets: list[dict[str, object]] = []
+    typed_targets: list[dict[str, object]] = []
+    run_id_selector_violations: list[str] = []
+
+    for relative_path in (
+        Path("grafana/prometheus-rules/bioetl_observability.yml"),
+        Path("grafana/prometheus-rules/bioetl_control_plane_current_status.yml"),
+    ):
+        payload = yaml.safe_load(
+            (repo_root / relative_path).read_text(encoding="utf-8")
+        )
+        for group in payload.get("groups", []):
+            for rule in group.get("rules", []):
+                expr = str(rule.get("expr", ""))
+                metric_names = set(_CANONICAL_METRIC_RE.findall(expr))
+                if rule.get("record"):
+                    recording_outputs.add(str(rule["record"]))
+                    recording_inputs.update(metric_names)
+                elif rule.get("alert"):
+                    direct_alert_inputs.update(metric_names)
+                if re.search(r"\{[^{}]*\brun_id\s*(?:=|!=|=~|!~)", expr):
+                    run_id_selector_violations.append(
+                        f"{relative_path.as_posix()}::{rule.get('record') or rule.get('alert')}"
+                    )
+
+    dashboards_root = repo_root / "grafana" / "dashboards"
+    for dashboard_path in sorted(dashboards_root.glob("*.json")):
+        payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
+        dashboard_uid = str(payload.get("uid", dashboard_path.stem))
+        for panel in _iter_dashboard_panels(payload):
+            panel_id = int(panel.get("id", -1))
+            panel_datasource = panel.get("datasource", {})
+            panel_datasource_type = (
+                str(panel_datasource.get("type", ""))
+                if isinstance(panel_datasource, dict)
+                else str(panel_datasource)
+            )
+            for target in panel.get("targets", []):
+                if not isinstance(target, dict):
+                    continue
+                expr = str(target.get("expr", ""))
+                direct_dashboard_targets.update(_CANONICAL_METRIC_RE.findall(expr))
+                if re.search(r"\{[^{}]*\brun_id\s*(?:=|!=|=~|!~)", expr):
+                    run_id_selector_violations.append(
+                        f"{dashboard_path.relative_to(repo_root).as_posix()}::panel={panel_id}"
+                    )
+                target_datasource = target.get("datasource", {})
+                target_datasource_type = (
+                    str(target_datasource.get("type", ""))
+                    if isinstance(target_datasource, dict)
+                    else panel_datasource_type
+                )
+                if not target_datasource_type:
+                    target_datasource_type = panel_datasource_type
+                contract = _panel_contract(
+                    dashboard_uid=dashboard_uid,
+                    panel=panel,
+                    target=target,
+                    datasource_type=target_datasource_type,
+                )
+                if contract["query"]:
+                    typed_targets.append(contract)
+                url = target.get("url")
+                if isinstance(url, str) and (
+                    url.startswith("/ops/") or str(target.get("source", "")) == "url"
+                ):
+                    http_targets.append(
+                        contract
+                        | {
+                            "url": url,
+                            "uses_run_id_query_parameter": "run_id=" in url,
+                        }
+                    )
+
+    for scan_root in _DOC_SCAN_ROOTS:
+        if scan_root == Path("grafana/dashboards"):
+            continue
+        path = repo_root / scan_root
+        candidates = [path] if path.is_file() else sorted(path.rglob("*"))
+        for candidate in candidates:
+            if candidate.is_file() and candidate.suffix in _TEXT_SUFFIXES:
+                try:
+                    documented_metrics.update(
+                        _CANONICAL_METRIC_RE.findall(
+                            candidate.read_text(encoding="utf-8")
+                        )
+                    )
+                except UnicodeDecodeError:
+                    continue
+
+    declared_outputs = declarations["recording_rule_metrics"]
+    policy_aliases = declarations["policy_alias_metrics"]
+    catalog_aliases = _catalog_policy_aliases(repo_root)
+    typed_targets.sort(
+        key=lambda row: (
+            str(row["dashboard_uid"]),
+            int(row["panel_id"]),
+            str(row["ref_id"]),
+            str(row["kind"]),
+        )
+    )
+    http_semantics_violations = [
+        f"{row['dashboard_uid']}::panel={row['panel_id']}"
+        for row in typed_targets
+        if row["kind"] == "http"
+        and not (row["documents_valid_empty"] and row["documents_backend_down"])
+    ]
+    report: dict[str, object] = {
+        "recording_rule_outputs": sorted(recording_outputs),
+        "policy_alias_metrics": sorted(policy_aliases),
+        "documented_metrics": sorted(documented_metrics),
+        "direct_dashboard_targets": sorted(direct_dashboard_targets),
+        "recording_rule_inputs": sorted(recording_inputs),
+        "direct_alert_inputs": sorted(direct_alert_inputs),
+        "typed_targets": typed_targets,
+        "typed_target_counts": {
+            kind: sum(1 for row in typed_targets if row["kind"] == kind)
+            for kind in ("promql", "http", "loki", "tempo", "unknown")
+        },
+        "http_targets": sorted(
+            http_targets,
+            key=lambda row: (
+                str(row["dashboard_uid"]),
+                int(row["panel_id"]),
+                str(row["ref_id"]),
+                str(row["url"]),
+            ),
+        ),
+        "recording_outputs_without_declaration": sorted(
+            recording_outputs - declared_outputs
+        ),
+        "recording_declarations_without_output": sorted(
+            declared_outputs - recording_outputs
+        ),
+        "policy_aliases_overlapping_outputs": sorted(
+            policy_aliases & recording_outputs
+        ),
+        "policy_aliases_without_catalog": sorted(policy_aliases - catalog_aliases),
+        "catalog_aliases_without_declaration": sorted(catalog_aliases - policy_aliases),
+        "http_semantics_violations": sorted(set(http_semantics_violations)),
+        "prometheus_run_id_selector_violations": sorted(run_id_selector_violations),
+    }
+    report["panel_contract_drift"] = _panel_contract_drift(repo_root, report)
+    return report
 
 
 def _filter_declared_label_contract_metrics(
@@ -2040,11 +2430,14 @@ def collect_metric_inventory(
         return cached  # type: ignore[return-value]
     declared_metric_definitions = _load_declared_metric_definitions(repo_root)
     declared_rule_metrics = declared_metric_definitions["recording_rule_metrics"]
+    declared_policy_aliases = declared_metric_definitions["policy_alias_metrics"]
     declared_label_contract_metrics = declared_metric_definitions[
         "declared_label_contract_metrics"
     ]
     runtime_registered_set = set(REGISTERED_PROMETHEUS_METRIC_NAMES)
-    declared_set = runtime_registered_set | declared_rule_metrics
+    declared_set = (
+        runtime_registered_set | declared_rule_metrics | declared_policy_aliases
+    )
     registered = sorted(declared_set)
     (
         runtime_mentions,
@@ -2258,6 +2651,22 @@ def _combine_metric_emitters(
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true", help="Emit JSON report")
+    parser.add_argument(
+        "--typed-observability-views",
+        action="store_true",
+        help=(
+            "Emit the deterministic typed rule/dashboard/HTTP inventory and fail "
+            "on one-way recording-rule or run_id selector drift"
+        ),
+    )
+    parser.add_argument(
+        "--update-panel-contracts",
+        action="store_true",
+        help=(
+            "Regenerate docs/03-guides/dashboards/panel-contract-inventory.json "
+            "from shipped dashboard JSON; requires --typed-observability-views"
+        ),
+    )
     parser.add_argument(
         "--check",
         action="store_true",
@@ -2614,6 +3023,31 @@ def _append_runtime_cardinality_review_summary(
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
+    if args.typed_observability_views:
+        typed_report = collect_typed_observability_inventory(args.repo_root)
+        if args.update_panel_contracts:
+            write_panel_contract_inventory(args.repo_root, typed_report)
+            typed_report["panel_contract_drift"] = []
+        violations = {
+            key: typed_report[key]
+            for key in (
+                "recording_outputs_without_declaration",
+                "recording_declarations_without_output",
+                "policy_aliases_overlapping_outputs",
+                "policy_aliases_without_catalog",
+                "catalog_aliases_without_declaration",
+                "http_semantics_violations",
+                "panel_contract_drift",
+                "prometheus_run_id_selector_violations",
+            )
+            if typed_report[key]
+        }
+        if args.json:
+            json.dump(typed_report, sys.stdout, indent=2, sort_keys=True)
+            sys.stdout.write("\n")
+        else:
+            print(json.dumps(typed_report, indent=2, sort_keys=True))
+        return 1 if violations else 0
     report = collect_metric_inventory(args.repo_root)
     _write_evidence_report(
         report,

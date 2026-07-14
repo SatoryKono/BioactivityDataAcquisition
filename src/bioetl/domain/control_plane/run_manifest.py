@@ -123,6 +123,9 @@ class RunManifest:
     pipeline_name: str = "unknown_pipeline"
     provider: str = "unknown"
     entity: str = "unknown"
+    workflow_run_id: str | None = None
+    workflow_name: str | None = None
+    workflow_step_id: str | None = None
     launch_context: dict[str, object] = field(default_factory=dict)
     runtime_config: dict[str, object] = field(default_factory=dict)
     resolved_config: dict[str, object] = field(default_factory=dict)
@@ -175,6 +178,9 @@ class RunManifest:
             pipeline_name=str(payload["pipeline_name"]),
             provider=str(payload["provider"]),
             entity=str(payload["entity"]),
+            workflow_run_id=_load_optional_str(payload, "workflow_run_id"),
+            workflow_name=_load_optional_str(payload, "workflow_name"),
+            workflow_step_id=_load_optional_str(payload, "workflow_step_id"),
             launch_context=_load_object_mapping(payload.get("launch_context")),
             runtime_config=_load_object_mapping(payload.get("runtime_config")),
             resolved_config=_load_object_mapping(payload.get("resolved_config")),

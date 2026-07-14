@@ -21,6 +21,11 @@ def _load_monitoring_compose() -> dict[str, object]:
     return yaml.safe_load(compose_path.read_text(encoding="utf-8"))
 
 
+def _load_monitoring_audit_override() -> dict[str, object]:
+    compose_path = Path("docker-compose.monitoring.audit.yml")
+    return yaml.safe_load(compose_path.read_text(encoding="utf-8"))
+
+
 def test_quarantine_explorer_datasource_is_repo_provisioned() -> None:
     """Quarantine explorer datasource should be provisioned from repository files."""
     path = Path("grafana/provisioning/datasources-core/quarantine-explorer.yml")
@@ -99,6 +104,69 @@ def test_quarantine_explorer_defaults_to_monitoring_service_backend() -> None:
     )
     assert monitoring["networks"]["monitoring"]["name"] == "bioetl-monitoring"
     assert monitoring["networks"]["monitoring"]["external"] is True
+
+
+def test_audit_profile_mounts_explicit_roots_read_only_and_uses_bounded_loki_job() -> (
+    None
+):
+    services = _load_monitoring_audit_override()["services"]
+    audit_backend = services["quarantine-explorer-audit"]
+    audit_promtail = services["promtail-audit"]
+
+    assert audit_backend["profiles"] == ["audit"]
+    assert audit_backend["command"][-2:] == [
+        "--data-root",
+        "${BIOETL_AUDIT_DATA_ROOT:?Pass an explicit absolute data root}",
+    ]
+    assert audit_backend["volumes"] == [
+        "${BIOETL_AUDIT_DATA_ROOT:?Pass an explicit absolute data root}:"
+        "${BIOETL_AUDIT_DATA_ROOT:?Pass an explicit absolute data root}:ro"
+    ]
+    assert audit_promtail["profiles"] == ["audit"]
+    assert "${BIOETL_AUDIT_LOG_ROOT:?Pass an explicit absolute log root}:/audit-logs:ro" in (
+        audit_promtail["volumes"]
+    )
+    assert "audit" in services["loki"]["profiles"]
+
+    promtail = yaml.safe_load(
+        Path("grafana/promtail-config.yml").read_text(encoding="utf-8")
+    )
+    audit_jobs = [
+        job
+        for job in promtail["scrape_configs"]
+        if job["job_name"] == "bioetl-audit"
+    ]
+    assert len(audit_jobs) == 1
+    audit_labels = audit_jobs[0]["static_configs"][0]["labels"]
+    assert audit_labels == {
+        "job": "bioetl-audit",
+        "__path__": "/audit-logs/*.log",
+    }
+    assert services["grafana"]["environment"] == [
+        "BIOETL_QUARANTINE_EXPLORER_URL=http://quarantine-explorer-audit:8081"
+    ]
+    assert services["grafana"]["depends_on"]["quarantine-explorer-audit"] == {
+        "condition": "service_healthy"
+    }
+
+
+def test_monitoring_images_are_pinned_and_legacy_pushgateway_datasource_is_inert() -> (
+    None
+):
+    monitoring = _load_monitoring_compose()
+    assert monitoring["services"]["prometheus"]["image"] == (
+        "prom/prometheus:v3.13.1"
+    )
+    assert monitoring["services"]["pushgateway"]["image"] == (
+        "prom/pushgateway:v1.11.3"
+    )
+
+    legacy = yaml.safe_load(
+        Path("grafana/provisioning/datasources-local/grafana-datasource.yml").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert legacy["datasources"] == []
 
 
 def test_grafana_uses_remote_renderer_sidecar() -> None:

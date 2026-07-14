@@ -8,7 +8,7 @@ scrape_configs:
           - localhost
         labels:
           job: bioetl
-          __path__: /app/logs/*.log
+          __path__: /workspace-logs/*.log
   - job_name: bioetl-reports
     static_configs:
       - targets:
@@ -16,3 +16,10 @@ scrape_configs:
         labels:
           job: bioetl-reports
           __path__: /workspace-report-logs/*.log
+  - job_name: bioetl-audit
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: bioetl-audit
+          __path__: /audit-logs/*.log

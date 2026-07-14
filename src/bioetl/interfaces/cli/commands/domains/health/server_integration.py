@@ -44,20 +44,30 @@ _HEALTH_REASON_SUFFIXES = (
 )
 
 
-def get_health_server_dependencies() -> HealthServerDependenciesProtocol:
+def get_health_server_dependencies(
+    *,
+    data_root: Path | None = None,
+) -> HealthServerDependenciesProtocol:
     """Load health-listener dependencies from the canonical composition seam."""
     from bioetl.composition.health_service_access import (
         get_health_server_dependencies as _impl,
     )
 
-    return _impl()
+    if data_root is None:
+        return _impl()
+    return _impl(data_root=data_root)
 
 
-def get_health_server_quarantine_service() -> QuarantineService:
+def get_health_server_quarantine_service(
+    *,
+    data_root: Path | None = None,
+) -> QuarantineService:
     """Load read-only quarantine service for health listener endpoints."""
     from bioetl.composition.health_service_access import get_quarantine_service as _impl
 
-    return _impl()
+    if data_root is None:
+        return _impl()
+    return _impl(data_root=data_root)
 
 
 def get_quarantine_runtime_service(
@@ -153,10 +163,15 @@ def build_health_server_pycache_prefix() -> Path:
     return Path(tempfile.gettempdir()) / "bioetl-pycache"
 
 
-def _get_optional_health_server_quarantine_service() -> QuarantineService | None:
+def _get_optional_health_server_quarantine_service(
+    *,
+    data_root: Path | None = None,
+) -> QuarantineService | None:
     """Return quarantine service when available without failing health probes."""
     try:
-        return get_health_server_quarantine_service()
+        if data_root is None:
+            return get_health_server_quarantine_service()
+        return get_health_server_quarantine_service(data_root=data_root)
     except CLI_ENTRYPOINT_TYPED_ERRORS:
         return None
 
@@ -180,6 +195,9 @@ def build_health_server(
         run_manifest_port=deps.run_manifest_port,
         run_ledger_port=deps.run_ledger_port,
         workflow_manifest_port=deps.workflow_manifest_port,
+        data_root=(
+            str(deps.data_root) if getattr(deps, "data_root", None) is not None else None
+        ),
     )
 
 
@@ -231,11 +249,16 @@ async def _run_health_server(
     port: int,
     *,
     start_metrics: bool = True,
+    data_root: Path | None = None,
 ) -> None:
     """Start and keep the health server alive until interrupted."""
     if sys.pycache_prefix is None:
         sys.pycache_prefix = str(build_health_server_pycache_prefix())
-    deps = get_health_server_dependencies()
+    deps = (
+        get_health_server_dependencies()
+        if data_root is None
+        else get_health_server_dependencies(data_root=data_root)
+    )
     server = build_health_server(
         host=host,
         port=port,
@@ -245,7 +268,11 @@ async def _run_health_server(
     quarantine_service = None
     try:
         await server.start()
-        quarantine_service = _get_optional_health_server_quarantine_service()
+        quarantine_service = (
+            _get_optional_health_server_quarantine_service()
+            if data_root is None
+            else _get_optional_health_server_quarantine_service(data_root=data_root)
+        )
         server._quarantine_service = quarantine_service
         if start_metrics:
             _start_health_observability()
@@ -265,10 +292,19 @@ def run_long_lived_health_server_command(
     port: int,
     *,
     start_metrics: bool = True,
+    data_root: Path | None = None,
 ) -> None:
     """Start the long-lived health/quarantine explorer backend."""
     _echo_health_server_startup(host, port)
-    coro = _run_health_server(host=host, port=port, start_metrics=start_metrics)
+    if data_root is None:
+        coro = _run_health_server(host=host, port=port, start_metrics=start_metrics)
+    else:
+        coro = _run_health_server(
+            host=host,
+            port=port,
+            start_metrics=start_metrics,
+            data_root=data_root,
+        )
     try:
         asyncio.run(coro)
     except asyncio.CancelledError:

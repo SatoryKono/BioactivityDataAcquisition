@@ -66,8 +66,8 @@ Dashboard `1. Overview` is the primary entry point for incident triage. It uses 
 
 ### 12. L1 Historical Trends
 - **Type:** Row
-- **Purpose:** Collapsed row containing selected-range historical trends after
-  the compact current-state and Inputs/Workflow matrices.
+- **Purpose:** Collapsed row containing repeated subsystem detail and historical
+  trends after the compact Inputs matrix.
 - **Data sources:** `bioetl_historical_trends`
 
 ### 13. Runtime Blockers Trend
@@ -127,9 +127,9 @@ Dashboard `1. Overview` is the primary entry point for incident triage. It uses 
 
 ### 24. Alert/SLO Triage
 - **Type:** Row
-- **Purpose:** Collapsed alert/SLO triage immediately after the bounded
-  current-state and Inputs/Workflow path; expand after narrowing when actual
-  alert-state evidence is required.
+- **Purpose:** Expanded alert/SLO evidence immediately after the first-level
+  matrix. The visible `Status` and `First Action` retain the critical verdict
+  and route, while this compact table exposes alert-level impact.
 - **Data sources:** `bioetl_alerts`, `bioetl_slo_pressure`
 
 ### 25. Triage Alert State
@@ -179,6 +179,10 @@ Exact blocker reasons live in the Control Plane, Runtime, Data Quality, Provider
 - This dashboard is the primary L1 entry point for incident triage.
 - It uses shared shell/status/ID/provenance contracts across all primary dashboards.
 - Row-based workflows (L1 Historical Trends, Range Evidence, Diagnostics & Docs, Alert/SLO Triage) provide structured triage paths.
-- `Alert/SLO Triage`, L1 Historical Trends, Range Evidence, and Diagnostics &
-  Docs are collapsed progressive disclosure after the bounded first path.
+- The full-width `Inputs` matrix is the deviation-first subsystem summary.
+  Repeated Control Plane, Runtime, Data Quality, Provider, Data Validation, and
+  Workflow mirrors live in the collapsed `Diagnostics & Docs` row.
+- `Alert/SLO Triage` is the intentional expanded decision-row exception. L1
+  Historical Trends, Range Evidence, and Diagnostics & Docs are collapsed
+  progressive disclosure.
 - First Action panel provides operator guidance based on current state.

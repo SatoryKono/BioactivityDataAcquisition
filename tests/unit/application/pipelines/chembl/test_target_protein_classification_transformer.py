@@ -86,6 +86,7 @@ async def test_transform_preserves_shaped_relation_row_identity(
     assert result["depth"] == 2
     assert result["root_id"] == "1"
     assert result["is_leaf"] is True
+    assert result["l1_id"] == "1"
     assert result["canonical_l1"] == "membrane_receptor"
     assert result["l1_counts_for_target_type"] is True
     assert result["l1_mapping_version"] == "protein_class_l1_map_v1"

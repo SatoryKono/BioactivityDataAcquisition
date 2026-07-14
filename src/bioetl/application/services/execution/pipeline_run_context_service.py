@@ -105,6 +105,9 @@ class PipelineRunContextService:
             debug_export_formats=tuple(options.debug_export_formats or ()),
             debug_export_dir=options.debug_export_dir,
             workflow_id=options.workflow_id or "standalone",
+            workflow_run_id=options.workflow_run_id,
+            workflow_name=options.workflow_name,
+            workflow_step_id=options.workflow_step_id,
         )
 
     def _build_input_filter(self, options: RunOptions) -> InputFilterContext:

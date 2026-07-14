@@ -174,7 +174,33 @@ preserved_identity_handoff:
     not preserve primary `run_id` because those dashboards do not own the
     primary identity selector.
 
-required_discoverable_inbound_paths: {}
+required_discoverable_inbound_paths:
+  L1:
+    bioetl-runtime:
+      - source_uid: bioetl-overview-v2
+        source_panel_id: 215
+        source_panel_title: First Action
+        source_status_row_panel_title_matcher: ^Provenance$
+    bioetl-control-plane-v1:
+      - source_uid: bioetl-overview-v2
+        source_panel_id: 215
+        source_panel_title: First Action
+        source_status_row_panel_title_matcher: ^Provenance$
+    bioetl-provider-health-v2:
+      - source_uid: bioetl-overview-v2
+        source_panel_id: 215
+        source_panel_title: First Action
+        source_status_row_panel_title_matcher: ^Provenance$
+    bioetl-dq-v2:
+      - source_uid: bioetl-overview-v2
+        source_panel_id: 215
+        source_panel_title: First Action
+        source_status_row_panel_title_matcher: ^Provenance$
+    bioetl-workflow-overview:
+      - source_uid: bioetl-overview-v2
+        source_panel_id: 215
+        source_panel_title: First Action
+        source_status_row_panel_title_matcher: ^Provenance$
 
 required_panel_links_by_uid:
   bioetl-overview-v2:

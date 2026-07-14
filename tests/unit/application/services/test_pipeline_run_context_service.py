@@ -64,6 +64,28 @@ class TestMergeOptions:
 class TestBuildContext:
     """Direct coverage for PipelineRunContext assembly branches."""
 
+    def test_build_context_preserves_typed_workflow_correlation(self) -> None:
+        service = PipelineRunContextService()
+
+        context = service.build_context(
+            pipeline_name="chembl_activity",
+            run_id=deterministic_run_uuid_from_callsite(
+                "test_pipeline_run_context_service"
+            ),
+            options=RunOptions(
+                workflow_id="legacy-workflow-name",
+                workflow_run_id="workflow-run-42",
+                workflow_name="chembl_baseline",
+                workflow_step_id="run_chembl_activity",
+            ),
+            started_at=FIXED_STARTED_AT,
+        )
+
+        assert context.workflow_id == "legacy-workflow-name"
+        assert context.workflow_run_id == "workflow-run-42"
+        assert context.workflow_name == "chembl_baseline"
+        assert context.workflow_step_id == "run_chembl_activity"
+
     def test_build_context_with_csv_filter_uses_fallback_column(self) -> None:
         service = PipelineRunContextService()
 

@@ -665,13 +665,35 @@ def test_start_detached_quarantine_backend_sets_repo_cwd_and_env() -> None:
         "8081",
     ]
     assert isinstance(kwargs, dict)
-    assert str(kwargs["cwd"]).endswith("BioactivityDataAcquisition2")
+    backend_cwd = Path(str(kwargs["cwd"]))
+    assert (backend_cwd / "pyproject.toml").is_file()
+    assert (backend_cwd / "src" / "bioetl").is_dir()
     assert "env" in kwargs
     assert "stdout" in kwargs
     assert "stderr" in kwargs
     env = kwargs["env"]
     assert isinstance(env, dict)
     assert "PYTHONPATH" in env
+
+
+def test_start_detached_quarantine_backend_injects_absolute_data_root(
+    tmp_path: Path,
+) -> None:
+    captured: dict[str, object] = {}
+
+    class _Process:
+        args = ["python", "-m", "bioetl"]
+
+    def fake_popen(command: list[str], **kwargs: object) -> _Process:
+        captured["command"] = command
+        return _Process()
+
+    start_detached_quarantine_backend(
+        data_root=tmp_path,
+        popen_factory=fake_popen,
+    )
+
+    assert captured["command"][-2:] == ["--data-root", str(tmp_path.resolve())]
 
 
 def test_build_detached_backend_log_path_uses_tempdir_and_port() -> None:

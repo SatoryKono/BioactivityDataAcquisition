@@ -554,6 +554,24 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as an unreferenced Windows compatibility installer during the reviewed retirement window; remove it once external bootstrap docs and local operator flows no longer depend on the old Codex command shim."
     },
+    "scripts/ops/observability/validate_emitter_contracts.py": {
+      "owner": "@bioetl-observability",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded historical emitter-contract diagnostic while the canonical typed inventory and closure campaign own active validation; retire after operator references migrate and do not promote it to an active CI surface."
+    },
+    "scripts/ops/observability/validate_live_observability.py": {
+      "owner": "@bioetl-observability",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded historical live-observability diagnostic while the canonical closure campaign owns reproducible evidence; retire after operator references migrate and do not promote it to an active CI surface."
+    },
+    "scripts/ops/observability/validate_metric_to_panel_mapping.py": {
+      "owner": "@bioetl-observability",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Retain only as a bounded historical metric-to-panel diagnostic while the generated full panel-contract inventory owns parity; retire after operator references migrate and do not promote it to an active CI surface."
+    },
     "scripts/ops/observability/grafana/render_all_grafana_screenshots.ps1": {
       "owner": "@bioetl-platform",
       "decision": "windows_compatibility_wrapper",

@@ -70,6 +70,8 @@ Commands:
     report-panel-title-inventory Generate/check generated dashboard panel-title inventory mirror
     report-dashboard-query-duplicates Generate report-only exact/near-duplicate Grafana PromQL inventory
     report-dashboard-promql-scope Generate/check dashboard PromQL scope and forbidden-label inventory
+    run-observability-closure-campaign Run the bounded 15-pipeline observability closure campaign
+    assemble-observability-closure-evidence Validate and bind one typed campaign evidence envelope
 """
 
 from __future__ import annotations
@@ -104,9 +106,7 @@ COMMAND_MODULES: dict[str, str] = {
     "check-terminology": "scripts.engineering.qa.lint_terminology",
     "report-dep-map": "scripts.engineering.qa.generate_architecture_dependency_map",
     "report-vcr-metadata": "scripts.engineering.qa.report_vcr_metadata_catalog",
-    "check-vcr-replay-preflight": (
-        "scripts.engineering.qa.vcr.check_replay_preflight"
-    ),
+    "check-vcr-replay-preflight": ("scripts.engineering.qa.vcr.check_replay_preflight"),
     "report-provider-contract-drift": "scripts.engineering.qa.report_provider_contract_drift",
     "report-compatibility-importer-census": "scripts.engineering.qa.report_compatibility_importer_census",
     "report-pipeline-config-contract-ownership-map": "scripts.engineering.qa.report_pipeline_config_contract_ownership",
@@ -156,6 +156,12 @@ COMMAND_MODULES: dict[str, str] = {
     ),
     "report-panel-title-inventory": (
         "scripts.engineering.qa.report_panel_title_inventory"
+    ),
+    "run-observability-closure-campaign": (
+        "scripts.engineering.qa.run_observability_closure_campaign"
+    ),
+    "assemble-observability-closure-evidence": (
+        "scripts.engineering.qa.assemble_observability_closure_evidence"
     ),
 }
 COMMAND_SPECS = {

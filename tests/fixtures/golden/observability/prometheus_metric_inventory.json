@@ -96,7 +96,11 @@
         "bioetl_workflow_step_events_total",
         "bioetl_workflow_reconciliation_rows_scanned_total",
         "bioetl_workflow_reconciliation_rows_retained_total",
-        "bioetl_workflow_reconciliation_rows_deleted_total"
+        "bioetl_workflow_reconciliation_rows_deleted_total",
+        "bioetl_workflow_row_reconciliation_left_rows_total",
+        "bioetl_workflow_row_reconciliation_right_rows_total",
+        "bioetl_workflow_row_reconciliation_kept_rows_total",
+        "bioetl_workflow_row_reconciliation_excluded_rows_total"
       ],
       "gauges": [
         "bioetl_memory_pressure_state",
@@ -198,6 +202,6 @@
       ]
     }
   },
-  "total_counters": 107,
+  "total_counters": 111,
   "total_histograms": 25
 }

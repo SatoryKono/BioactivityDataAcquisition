@@ -38,7 +38,7 @@ _TRANSFORM_RESULT_SUMMARY_KEYS = (
 )
 
 
-def _fingerprint_details(fingerprint: str | None) -> dict[str, str] | None:
+def _fingerprint_details(fingerprint: str | None) -> dict[str, object] | None:
     return {"fingerprint": fingerprint} if fingerprint is not None else None
 
 
@@ -47,7 +47,9 @@ def build_step_completion_details(
 ) -> dict[str, object] | None:
     """Build compact workflow-step completion details for ledger persistence."""
     fingerprint = _resolve_result_fingerprint(result)
-    if result.step_kind != "transform" or result.status != "success":
+    if result.step_kind == "pipeline":
+        return _pipeline_child_details(result, fingerprint=fingerprint)
+    if result.status != "success":
         return _fingerprint_details(fingerprint)
     output = getattr(result.payload, "output", None)
     if not isinstance(output, dict):
@@ -61,6 +63,27 @@ def build_step_completion_details(
     artifact_refs = _artifact_refs(output)
     if artifact_refs is not None:
         details["artifacts"] = artifact_refs
+    return details or None
+
+
+def _pipeline_child_details(
+    result: WorkflowStepExecutionResult,
+    *,
+    fingerprint: str | None,
+) -> dict[str, object] | None:
+    """Return reciprocal child-run anchors for a terminal pipeline step."""
+    details: dict[str, object] = {}
+    if fingerprint is not None:
+        details["fingerprint"] = fingerprint
+    for direct_field, payload_field, detail_field in (
+        ("child_run_id", "run_id", "child_run_id"),
+        ("child_manifest_id", "manifest_id", "child_manifest_id"),
+    ):
+        value = getattr(result, direct_field, None)
+        if value is None:
+            value = getattr(result.payload, payload_field, None)
+        if value is not None:
+            details[detail_field] = str(value)
     return details or None
 
 

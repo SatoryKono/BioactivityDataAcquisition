@@ -108,6 +108,9 @@ def assemble_manifest_create_spec(
         resolved_config=to_serializable_mapping(_read_attr(inputs, "yaml_config")),
         replay_of_run_id=replay_of_run_id,
         replay_of_manifest_id=replay_of_manifest_id,
+        workflow_run_id=getattr(ctx, "workflow_run_id", None),
+        workflow_name=getattr(ctx, "workflow_name", None),
+        workflow_step_id=getattr(ctx, "workflow_step_id", None),
         source_refs=source_refs,
         planned_artifacts=build_planned_artifacts(
             settings=_read_attr(inputs, "settings"),

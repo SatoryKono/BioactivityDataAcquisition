@@ -340,9 +340,14 @@ def test_load_workflow_config_rejects_unknown_run_options(tmp_path: Path) -> Non
 
 @pytest.mark.unit
 def test_workflow_run_options_whitelist_matches_application_run_options() -> None:
+    internal_correlation_fields = {
+        "workflow_name",
+        "workflow_run_id",
+        "workflow_step_id",
+    }
     assert RUN_OPTIONS_OVERRIDE_FIELD_NAMES == {
         field.name for field in fields(RunOptions)
-    }
+    } - internal_correlation_fields
 
 
 @pytest.mark.unit

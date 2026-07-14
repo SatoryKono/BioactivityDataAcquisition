@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 
 import pytest
+from scripts.engineering.qa import check_prometheus_rules
 import yaml
 
 RULES_PATH = Path("grafana/prometheus-rules/bioetl_observability.yml")
@@ -367,6 +368,16 @@ _TUNED_ALERT_EXPECTATIONS: dict[str, dict[str, object]] = {
         "for": "5m",
         "fragments": ['up{job="pushgateway"}', "== 0"],
     },
+    "BioETLQuarantineExplorerUnavailable": {
+        "severity": "critical",
+        "for": "2m",
+        "fragments": ['up{job="quarantine-explorer"}', "== 0"],
+    },
+    "BioETLGrafanaRendererUnavailable": {
+        "severity": "warning",
+        "for": "2m",
+        "fragments": ['up{job="grafana-image-renderer"}', "== 0"],
+    },
     "BioETLNoRecordsProcessed": {
         "severity": "warning",
         "for": "10m",
@@ -704,13 +715,30 @@ def test_monitoring_stack_scrape_jobs_and_grafana_metrics_are_enabled() -> None:
         for job in prometheus_config.get("scrape_configs", [])
         if isinstance(job, dict)
     }
-    assert {"bioetl", "prometheus", "grafana", "pushgateway"} <= scrape_jobs
+    assert {
+        "bioetl",
+        "prometheus",
+        "grafana",
+        "pushgateway",
+        "quarantine-explorer",
+        "grafana-image-renderer",
+    } <= scrape_jobs
 
     grafana_service = compose.get("services", {}).get("grafana", {})
     environment = grafana_service.get("environment", [])
     assert "GF_METRICS_ENABLED=true" in environment, (
         "Grafana metrics must be enabled so the monitoring stack can self-monitor."
     )
+
+
+def test_monitoring_images_match_documented_qa_compatibility_series() -> None:
+    compose = _load_monitoring_compose()
+    services = compose["services"]
+
+    assert services["prometheus"]["image"] == check_prometheus_rules.PROMETHEUS_IMAGE
+    assert services["pushgateway"]["image"] == "prom/pushgateway:v1.11.3"
+    assert check_prometheus_rules.PROMETHEUS_COMPATIBILITY_SERIES == "3.13.x"
+    assert check_prometheus_rules.PUSHGATEWAY_COMPATIBILITY_SERIES == "1.11.x"
 
 
 def test_prometheus_config_loads_repo_rule_directory() -> None:
@@ -1480,6 +1508,8 @@ def test_monitoring_stack_alerts_reference_up_metric_and_checklist_runbook() -> 
         "BioETLPrometheusUnavailable": "2m",
         "BioETLGrafanaUnavailable": "2m",
         "BioETLPushgatewayUnavailable": "5m",
+        "BioETLQuarantineExplorerUnavailable": "2m",
+        "BioETLGrafanaRendererUnavailable": "2m",
     }
 
     for alert_name, expected_for in expected.items():
@@ -1491,6 +1521,20 @@ def test_monitoring_stack_alerts_reference_up_metric_and_checklist_runbook() -> 
         assert annotations.get("runbook") == (
             "docs/05-operations/runbooks/observability-checklist.md"
         )
+
+
+def test_monitoring_stack_contract_declares_service_ownership_before_thresholds() -> (
+    None
+):
+    payload = _load_slo_alert_contract()
+    contract = payload["slo_contracts"]["monitoring_stack_health"]
+
+    assert contract["owner"] == "@bioetl-observability"
+    boundaries = contract["service_boundaries"]
+    assert set(boundaries) == {"quarantine_explorer", "grafana_image_renderer"}
+    for boundary in boundaries.values():
+        assert boundary["owner"] == "@bioetl-observability"
+        assert str(boundary["slo_intent"]).strip()
 
 
 def test_pipeline_runtime_alerts_reference_expected_metrics() -> None:

@@ -23,11 +23,18 @@ DECLARATIONS_PATH = (
 CONTROL_PLANE_RULES_PATH = (
     ROOT / "grafana" / "prometheus-rules" / "bioetl_control_plane_current_status.yml"
 )
-OBSERVABILITY_RULES_PATH = ROOT / "grafana" / "prometheus-rules" / "bioetl_observability.yml"
+OBSERVABILITY_RULES_PATH = (
+    ROOT / "grafana" / "prometheus-rules" / "bioetl_observability.yml"
+)
 REQUIREMENTS_PATH = ROOT / "docs" / "01-requirements" / "REQUIREMENTS.md"
 RULES_PATH = ROOT / "docs" / "00-project" / "RULES.md"
 METRICS_DEFS_CORE_PATH = (
-    ROOT / "src" / "bioetl" / "infrastructure" / "observability" / "_metrics_defs_core.py"
+    ROOT
+    / "src"
+    / "bioetl"
+    / "infrastructure"
+    / "observability"
+    / "_metrics_defs_core.py"
 )
 POLICY_REVIEW_DATE = date(2026, 5, 15)
 ALLOWLIST_PATH = (
@@ -144,6 +151,59 @@ def test_control_plane_recording_rules_are_declared() -> None:
 
 
 @pytest.mark.architecture
+def test_typed_observability_inventory_is_bidirectional_and_source_specific() -> None:
+    """Recording outputs, aliases, consumers, and HTTP targets stay distinct."""
+    report = inventory.collect_typed_observability_inventory(ROOT)
+
+    assert len(report["recording_rule_outputs"]) == 103
+    assert len(report["policy_alias_metrics"]) == 20
+    assert report["recording_outputs_without_declaration"] == []
+    assert report["recording_declarations_without_output"] == []
+    assert report["policy_aliases_overlapping_outputs"] == []
+    assert report["policy_aliases_without_catalog"] == []
+    assert report["catalog_aliases_without_declaration"] == []
+    assert report["prometheus_run_id_selector_violations"] == []
+    assert report["http_semantics_violations"] == []
+    assert report["panel_contract_drift"] == []
+    assert report["documented_metrics"]
+    assert report["direct_dashboard_targets"]
+    assert report["recording_rule_inputs"]
+    assert report["direct_alert_inputs"]
+
+    http_targets = report["http_targets"]
+    assert len(http_targets) == 30
+    assert any(target["uses_run_id_query_parameter"] for target in http_targets)
+    assert all(
+        str(target["url"]).startswith(("/ops/", "/health/")) for target in http_targets
+    )
+    assert report["typed_target_counts"] == {
+        "promql": 171,
+        "http": 30,
+        "loki": 5,
+        "tempo": 0,
+        "unknown": 0,
+    }
+    assert all(target["datasource_type"] for target in report["typed_targets"])
+    assert all(
+        target["datasource_type"] == "yesoreyeram-infinity-datasource"
+        and target["documents_valid_empty"]
+        and target["documents_backend_down"]
+        for target in http_targets
+    )
+
+
+@pytest.mark.architecture
+def test_recording_rule_declarations_and_policy_aliases_are_disjoint() -> None:
+    declarations = yaml.safe_load(DECLARATIONS_PATH.read_text(encoding="utf-8"))
+    recording_outputs = declarations["recording_rule_metrics"]
+    policy_aliases = declarations["policy_alias_metrics"]
+
+    assert recording_outputs == sorted(recording_outputs)
+    assert policy_aliases == sorted(policy_aliases)
+    assert set(recording_outputs).isdisjoint(policy_aliases)
+
+
+@pytest.mark.architecture
 def test_workflow_planned_pipeline_universe_rules_cover_selectors() -> None:
     """Workflow-planned child pipelines must feed dashboard selector universes."""
     observability_exprs = _collect_recording_rule_exprs(OBSERVABILITY_RULES_PATH)
@@ -224,6 +284,27 @@ def test_observability_metric_governance_declares_required_views_and_evidence_pa
         "runtime_cardinality_threshold_violations_field": (
             "runtime_cardinality_threshold_violations"
         ),
+    }
+
+    typed_views = payload["typed_observability_views"]
+    assert "--typed-observability-views --json" in typed_views["command"]
+    assert typed_views["fail_closed_fields"] == [
+        "recording_outputs_without_declaration",
+        "recording_declarations_without_output",
+        "policy_aliases_overlapping_outputs",
+        "policy_aliases_without_catalog",
+        "catalog_aliases_without_declaration",
+        "http_semantics_violations",
+        "panel_contract_drift",
+        "prometheus_run_id_selector_violations",
+    ]
+    assert set(typed_views["coverage_fields"]) == {
+        "documented",
+        "direct_dashboard_target",
+        "recording_rule_input",
+        "direct_alert_input",
+        "http_target",
+        "typed_target",
     }
 
     runtime_cardinality_review = payload["runtime_cardinality_review"]
