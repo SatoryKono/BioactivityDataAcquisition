@@ -117,7 +117,7 @@ Docker helper dispositions are resolved as follows and MUST stay aligned with
   MUST route into approved `reports/**` or archive/report surfaces instead of a
   root-level txt dump.
 - Root-level tracked директории MUST ограничиваться approved runtime/tooling and
-  project surfaces: `.codex`, `.cursor`, `.devin`, `.gemini`, `.github`,
+  project surfaces: `.claude`, `.codex`, `.cursor`, `.devin`, `.gemini`, `.github`,
   `.idea`, `.vibe`, `.vscode`, `.zed`, `artifacts`, `assets`, `configs`, `data`,
   `docs`, `grafana`, `reports`, `scripts`, `src`, and `tests`.
 - Canonical machine-readable root governance lives in `.github/root-allowlist.txt`,
