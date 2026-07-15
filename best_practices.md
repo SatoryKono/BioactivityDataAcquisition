@@ -23,10 +23,8 @@ Avoid:
 
 Prefer:
 
-- Pure domain logic with deterministic state transitions and explicit
-  invariants.
-- Aggregate behavior centered on `Batch`, `PipelineRun`, and
-  `QuarantineEntry`.
+- Pure domain logic with deterministic state transitions and explicit invariants.
+- Aggregate behavior centered on `Batch`, `PipelineRun`, and `QuarantineEntry`.
 
 Avoid:
 
@@ -42,8 +40,7 @@ Prefer:
 
 Avoid:
 
-- Direct HTTP client usage in adapters when the unified client already covers
-  the use case.
+- Direct HTTP client usage in adapters when the unified client already covers the use case.
 - New bespoke networking wrappers that bypass the sanctioned HTTP surface.
 
 ## Medallion and Validation
