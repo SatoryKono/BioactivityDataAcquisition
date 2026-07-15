@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-14T17:52:00.706901+00:00",
+  "generated_at": "2026-07-15T06:44:36.201927+00:00",
   "summary": {
     "total_scripts": 465,
     "status_counts": {
@@ -13,7 +13,7 @@
       "ci": 62,
       "docs": 181,
       "other": 32,
-      "scripts": 361,
+      "scripts": 362,
       "skills": 16,
       "tests": 210
     }
@@ -13861,7 +13861,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 4,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/05-operations/runbooks/docker-compose-project-migration.md",
@@ -13880,6 +13880,18 @@
           "line": 32,
           "source_group": "docs",
           "text": "`python scripts/ops/runtime/docker/docker_runtime_preflight.py`. Root Compose"
+        },
+        {
+          "path": "scripts/ops/docker-setup.ps1",
+          "line": 20,
+          "source_group": "scripts",
+          "text": "$DockerPreflight = \"scripts/ops/runtime/docker/docker_runtime_preflight.py\""
+        },
+        {
+          "path": "scripts/ops/docker-setup.sh",
+          "line": 19,
+          "source_group": "scripts",
+          "text": "DOCKER_PREFLIGHT=\"scripts/ops/runtime/docker/docker_runtime_preflight.py\""
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",

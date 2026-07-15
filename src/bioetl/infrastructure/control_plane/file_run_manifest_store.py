@@ -11,9 +11,24 @@ from typing import TYPE_CHECKING
 
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.ports import RunManifestPort
-from bioetl.domain.types import RunID
+from bioetl.domain.types import RunID, RunType
 from bioetl.infrastructure.control_plane._read_metrics import (
     emit_control_plane_read_metrics,
+)
+from bioetl.infrastructure.control_plane._run_manifest_scope_index import (
+    LatestScopeIndexCatalog,
+    LatestScopeIndexRecord,
+    latest_scope_catalog_path,
+    latest_scope_index_path,
+    load_latest_scope_catalog,
+    load_latest_scope_index,
+    read_optional_text,
+    restore_optional_text,
+    write_latest_scope_catalog,
+    write_latest_scope_index,
+)
+from bioetl.infrastructure.control_plane._run_manifest_scope_rebuild import (
+    plan_latest_scope_index_rebuild,
 )
 from bioetl.infrastructure.errors import build_storage_error
 from bioetl.infrastructure.storage.atomic import atomic_write_text
@@ -72,6 +87,40 @@ def _emit_manifest_write_duration_metric(
     )
 
 
+def _load_latest_scope_manifest(
+    store: FileRunManifestStore,
+    pipeline_name: str,
+    run_type: RunType,
+) -> RunManifest | None:
+    index_path = store._latest_scope_index_path(pipeline_name, run_type)
+    try:
+        record = load_latest_scope_index(
+            index_path,
+            pipeline_name=pipeline_name,
+            run_type=run_type,
+        )
+    except (OSError, TypeError, ValueError) as error:
+        raise RunManifestStoreCorruptionError(
+            f"Run manifest latest-scope index corruption: cannot load '{index_path}'"
+        ) from error
+    if record is None:
+        return None
+    manifest = store._load_manifest(record.manifest_id)
+    if manifest is None:
+        raise RunManifestStoreCorruptionError(
+            "Run manifest latest-scope index corruption: index points to "
+            f"missing manifest file '{record.manifest_id}'"
+        )
+    if manifest.pipeline_name != pipeline_name or manifest.run_type != run_type:
+        raise RunManifestStoreCorruptionError(
+            "Run manifest latest-scope index corruption: indexed manifest "
+            f"'{manifest.manifest_id}' belongs to scope "
+            f"'{manifest.pipeline_name}/{manifest.run_type.value}', not "
+            f"'{pipeline_name}/{run_type.value}'"
+        )
+    return manifest
+
+
 @dataclass(slots=True)
 class FileRunManifestStore(RunManifestPort):
     """Persist manifests as JSON files under the control-plane output tree."""
@@ -97,6 +146,18 @@ class FileRunManifestStore(RunManifestPort):
             raise RuntimeError(
                 "Run manifest persistence failed: run_id index is not materialized"
             )
+        scope_index_path = self._latest_scope_index_path(
+            manifest.pipeline_name,
+            manifest.run_type,
+        )
+        if not scope_index_path.is_file():
+            raise RuntimeError(
+                "Run manifest persistence failed: latest-scope index is not materialized"
+            )
+        if not latest_scope_catalog_path(self.base_path).is_file():
+            raise RuntimeError(
+                "Run manifest persistence failed: latest-scope catalog is not materialized"
+            )
 
     def save(self, manifest: RunManifest) -> None:
         """Persist manifest JSON and run-id index."""
@@ -104,7 +165,13 @@ class FileRunManifestStore(RunManifestPort):
         manifest_path = self.base_path / f"{manifest.manifest_id}.json"
         run_index_dir = self.base_path / "_by_run_id"
         run_index_path = run_index_dir / f"{manifest.run_id}.txt"
+        scope_index_path = self._latest_scope_index_path(
+            manifest.pipeline_name,
+            manifest.run_type,
+        )
+        catalog_path = latest_scope_catalog_path(self.base_path)
         failed_path = manifest_path
+        rollback_state: dict[Path, str | None] = {}
         try:
             self.base_path.mkdir(parents=True, exist_ok=True)
             run_index_dir.mkdir(parents=True, exist_ok=True)
@@ -117,15 +184,56 @@ class FileRunManifestStore(RunManifestPort):
                     "run_id is already mapped to a different manifest_id: "
                     f"{existing_manifest_id}"
                 )
+            catalog = self._load_latest_scope_catalog()
+            if catalog is None:
+                catalog = LatestScopeIndexCatalog(
+                    complete=not any(self.base_path.glob("*.json")),
+                    scopes=(),
+                )
+            updated_catalog = LatestScopeIndexCatalog(
+                complete=catalog.complete,
+                scopes=tuple(
+                    sorted(
+                        {
+                            *catalog.scopes,
+                            (manifest.pipeline_name, manifest.run_type),
+                        },
+                        key=lambda item: (item[0], item[1].value),
+                    )
+                ),
+            )
+            existing_latest = self._load_latest_scope_manifest(
+                manifest.pipeline_name,
+                manifest.run_type,
+            )
+            should_update_scope_index = existing_latest is None or (
+                manifest.created_at,
+                manifest.manifest_id,
+            ) >= (existing_latest.created_at, existing_latest.manifest_id)
+            paths_to_write = [manifest_path, run_index_path, catalog_path]
+            if should_update_scope_index:
+                paths_to_write.append(scope_index_path)
+            rollback_state = {path: read_optional_text(path) for path in paths_to_write}
             atomic_write_text(
                 manifest_path,
                 json.dumps(manifest.to_dict(), indent=2, sort_keys=True),
             )
             failed_path = run_index_path
             atomic_write_text(run_index_path, manifest.manifest_id)
+            if should_update_scope_index:
+                failed_path = scope_index_path
+                write_latest_scope_index(
+                    scope_index_path,
+                    LatestScopeIndexRecord(
+                        pipeline_name=manifest.pipeline_name,
+                        run_type=manifest.run_type,
+                        manifest_id=manifest.manifest_id,
+                    ),
+                )
+            failed_path = catalog_path
+            write_latest_scope_catalog(catalog_path, updated_catalog)
         except (OSError, TypeError, ValueError) as error:
-            if failed_path == run_index_path:
-                self._rollback_manifest_file(manifest_path)
+            self._restore_save_transaction(rollback_state)
             _emit_manifest_write_metric(
                 self.metrics,
                 pipeline=manifest.pipeline_name,
@@ -217,6 +325,49 @@ class FileRunManifestStore(RunManifestPort):
                 duration_seconds=perf_counter() - started_at,
             )
 
+    def get_latest_for_scope(
+        self,
+        pipeline_name: str,
+        run_types: tuple[RunType, ...] = (),
+    ) -> RunManifest | None:
+        """Load the latest indexed manifest for one exact pipeline scope."""
+        started_at = perf_counter()
+        status = "success"
+        try:
+            bounded_run_types = tuple(
+                sorted(set(run_types or tuple(RunType)), key=lambda item: item.value)
+            )
+            catalog = self._load_latest_scope_catalog()
+            if catalog is None or not catalog.complete:
+                status = "miss"
+                return None
+            candidates = tuple(
+                manifest
+                for run_type in bounded_run_types
+                if (pipeline_name, run_type) in catalog.scopes
+                for manifest in (
+                    self._load_required_latest_scope_manifest(pipeline_name, run_type),
+                )
+            )
+            if not candidates:
+                status = "miss"
+                return None
+            return max(
+                candidates,
+                key=lambda manifest: (manifest.created_at, manifest.manifest_id),
+            )
+        except (OSError, TypeError, ValueError):
+            status = "failed"
+            raise
+        finally:
+            emit_control_plane_read_metrics(
+                self.metrics,
+                store="manifest",
+                operation="get_latest_for_scope",
+                status=status,
+                duration_seconds=perf_counter() - started_at,
+            )
+
     def list_all(self) -> tuple[RunManifest, ...]:
         """Enumerate every persisted manifest in deterministic order."""
         started_at = perf_counter()
@@ -249,6 +400,10 @@ class FileRunManifestStore(RunManifestPort):
                 duration_seconds=perf_counter() - started_at,
             )
 
+    def plan_latest_scope_index_rebuild(self) -> dict[str, object]:
+        """Build a deterministic, read-only rebuild plan for legacy data."""
+        return plan_latest_scope_index_rebuild(self)
+
     def _load_manifest(self, manifest_id: str) -> RunManifest | None:
         """Load one manifest payload without emitting public lookup metrics."""
         manifest_path = self.base_path / f"{manifest_id}.json"
@@ -275,9 +430,46 @@ class FileRunManifestStore(RunManifestPort):
         manifest_id = run_index_path.read_text(encoding="utf-8").strip()
         return manifest_id or None
 
+    def _latest_scope_index_path(
+        self,
+        pipeline_name: str,
+        run_type: RunType,
+    ) -> Path:
+        return latest_scope_index_path(self.base_path, pipeline_name, run_type)
+
+    def _load_latest_scope_catalog(self) -> LatestScopeIndexCatalog | None:
+        catalog_path = latest_scope_catalog_path(self.base_path)
+        try:
+            return load_latest_scope_catalog(catalog_path)
+        except (OSError, TypeError, ValueError) as error:
+            raise RunManifestStoreCorruptionError(
+                "Run manifest latest-scope index corruption: "
+                f"cannot load catalog '{catalog_path}'"
+            ) from error
+
+    def _load_latest_scope_manifest(
+        self,
+        pipeline_name: str,
+        run_type: RunType,
+    ) -> RunManifest | None:
+        return _load_latest_scope_manifest(self, pipeline_name, run_type)
+
+    def _load_required_latest_scope_manifest(
+        self,
+        pipeline_name: str,
+        run_type: RunType,
+    ) -> RunManifest:
+        manifest = self._load_latest_scope_manifest(pipeline_name, run_type)
+        if manifest is None:
+            raise RunManifestStoreCorruptionError(
+                "Run manifest latest-scope index corruption: catalog scope "
+                f"'{pipeline_name}/{run_type.value}' has no pointer record"
+            )
+        return manifest
+
     @staticmethod
-    def _rollback_manifest_file(manifest_path: Path) -> None:
-        """Remove a manifest file when a later consistency step fails."""
-        with suppress(OSError):
-            if manifest_path.exists():
-                manifest_path.unlink()
+    def _restore_save_transaction(rollback_state: dict[Path, str | None]) -> None:
+        """Best-effort restore of files changed by a failed save transaction."""
+        for path, previous in reversed(tuple(rollback_state.items())):
+            with suppress(OSError):
+                restore_optional_text(path, previous)

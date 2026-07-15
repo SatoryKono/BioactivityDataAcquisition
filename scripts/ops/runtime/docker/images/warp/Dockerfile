@@ -24,8 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Set logging
 ENV RUST_LOG=warn
 
-# Run as the non-root service user by default.
-USER warp
-
-ENTRYPOINT ["/bin/bash", "-c"]
-CMD ["warp-cli connect && exec sleep infinity"]
+# warp-svc requires the container capabilities declared by the opt-in Compose
+# profile. Keep the daemon as PID 1; operators can run warp-cli explicitly
+# after the service reports ready.
+CMD ["warp-svc"]

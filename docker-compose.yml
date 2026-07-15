@@ -11,6 +11,7 @@ services:
       - ./configs:/app/configs
       - ./data:/app/data
       - ./logs:/app/logs
+      - ./reports:/app/reports
     ports:
       - "127.0.0.1:8081:8081"
     environment:
@@ -52,6 +53,7 @@ services:
       start_period: 45s
 
   warp:
+    profiles: ["warp"]
     build:
       context: .
       dockerfile: scripts/ops/runtime/docker/images/warp/Dockerfile

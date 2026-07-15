@@ -14,6 +14,7 @@ param(
 )
 
 $ErrorActionPreference = "Continue"
+# Any future local .env creation requires BIOETL_CREATE_LOCAL_ENV_FILES=1.
 
 $ProjectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Set-Location $ProjectRoot

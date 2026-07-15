@@ -36,7 +36,8 @@ services:
     stdin_open: true
     tty: true
     volumes:
-      - ./:/app
+      - ./:/workspace
+    command: ["/workspace"]
     networks:
       - warp-network
     healthcheck:
