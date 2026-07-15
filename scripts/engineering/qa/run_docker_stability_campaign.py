@@ -254,11 +254,31 @@ def _sign(summary: Path, key: str) -> Path:
     return summary.with_suffix(summary.suffix + ".asc")
 
 
-def _signature_valid(summary: Path, signature: Path) -> bool:
+def _signature_valid(
+    summary: Path, signature: Path, expected_fingerprint: str
+) -> bool:
     if not signature.is_file():
         return False
-    result = _run(["gpg", "--batch", "--verify", str(signature), str(summary)], 60)
-    return result["returncode"] == 0
+    result = _run(
+        [
+            "gpg",
+            "--batch",
+            "--status-fd",
+            "1",
+            "--verify",
+            str(signature),
+            str(summary),
+        ],
+        60,
+    )
+    if result["returncode"] != 0:
+        return False
+    expected = re.sub(r"\s+", "", expected_fingerprint).upper()
+    return any(
+        line.startswith("[GNUPG:] VALIDSIG ")
+        and line.split()[2].upper() == expected
+        for line in result.get("stdout", "").splitlines()
+    )
 
 
 def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
@@ -286,6 +306,7 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         default=ROOT / "reports/quality/docker-stability-summary.json",
     )
     parser.add_argument("--signing-key")
+    parser.add_argument("--signing-fingerprint")
     parser.add_argument("--execute", action="store_true")
     return parser.parse_args(argv)
 
@@ -309,6 +330,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 2
     if not args.signing_key:
         print("A detached GPG signing key is required for promotion evidence", file=sys.stderr)
+        return 2
+    if not args.signing_fingerprint:
+        print(
+            "An expected GPG signing fingerprint is required for promotion evidence",
+            file=sys.stderr,
+        )
         return 2
     state = _load(args.state) or new_state(
         stack=args.stack,
@@ -439,13 +466,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     _atomic_json(args.summary, summary)
     _sign(args.summary, args.signing_key)
     gates = release_gates(
-        state, signature_exists=_signature_valid(args.summary, signature_path)
+        state,
+        signature_exists=_signature_valid(
+            args.summary, signature_path, args.signing_fingerprint
+        ),
     )
     summary["release_gates"] = gates
     summary["promotion_passed"] = all(gates.values())
     _atomic_json(args.summary, summary)
     _sign(args.summary, args.signing_key)
-    if not _signature_valid(args.summary, signature_path):
+    if not _signature_valid(args.summary, signature_path, args.signing_fingerprint):
         summary["release_gates"]["detached_signature_present"] = False
         summary["promotion_passed"] = False
         _atomic_json(args.summary, summary)
