@@ -116,7 +116,7 @@
       "source": "reports/quality/dead-code-inventory.json"
     },
     "config_surface_duplicate_clusters": {
-      "current": 21,
+      "current": 22,
       "max": 23,
       "previous_audit_baseline": 24,
       "source": "reports/quality/config-surface-backlog.json"
