@@ -12,6 +12,8 @@ import zstandard
 
 from scripts.engineering.qa import run_observability_closure_campaign as campaign
 
+pytestmark = pytest.mark.unit
+
 _REAL_STAGE_WORKFLOW_FIXTURE = campaign._stage_workflow_fixture
 _REAL_REGISTRY_PIPELINE_COMMAND = campaign._registry_pipeline_command
 

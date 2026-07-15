@@ -600,6 +600,7 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
     assertless_total_candidates = 0
     refined_assertless_tests = 0
     markerless_test_functions = 0
+    markerless_examples: list[str] = []
     uuid4_call_sites = 0
     date_today_call_sites = 0
 
@@ -679,6 +680,7 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
                 and not _has_pytest_mark(function.decorator_list)
             ):
                 markerless_test_functions += 1
+                markerless_examples.append(f"{relative}:{function.lineno}")
 
     duplicate_names = {
         name: locations
@@ -736,6 +738,7 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
         "duplicate_test_names": len(duplicate_names),
         "intentional_no_exception_contract": intentional_no_exception_contract,
         "markerless_test_functions": markerless_test_functions,
+        "markerless_examples": markerless_examples,
         "refined_assertless_tests": refined_assertless_tests,
         "uuid4_call_sites": uuid4_call_sites,
     }
@@ -754,6 +757,8 @@ def _collect_test_governance_report_cached(root_str: str) -> dict[str, Any]:
         },
         "assertless_candidates": assertless_candidates,
         "assertless_examples": assertless_examples,
+        "markerless_test_functions": markerless_test_functions,
+        "markerless_examples": markerless_examples,
         "duplicate_test_names": len(duplicate_names),
         "duplicate_test_name_occurrences": sum(
             len(locations) for locations in duplicate_names.values()
