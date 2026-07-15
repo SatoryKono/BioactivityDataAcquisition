@@ -156,8 +156,7 @@
       "exact_filename_contracts": [
         "best_practices.md",
         "commitlint.config.mjs",
-        "mint.json",
-        "pr_compliance_checklist.yaml"
+        "mint.json"
       ],
       "owner_lane_id": "root_review_contract_entrypoints"
     }

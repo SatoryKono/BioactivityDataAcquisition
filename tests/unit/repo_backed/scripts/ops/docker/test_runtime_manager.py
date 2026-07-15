@@ -11,13 +11,19 @@ from scripts.ops.runtime.docker import runtime_manager
 pytestmark = pytest.mark.repo_backed
 
 
-def _spec() -> runtime_manager.StackSpec:
+def _spec(
+    *, expected_images: dict[str, str] | None = None
+) -> runtime_manager.StackSpec:
     return runtime_manager.StackSpec(
         name="main",
         project="bioetl-main",
         compose_file=Path("docker-compose.yml"),
         required_services=("bioetl",),
-        expected_images={"bioetl": "bioetl:test@sha256:expected"},
+        expected_images=(
+            expected_images
+            if expected_images is not None
+            else {"bioetl": "bioetl:test@sha256:expected"}
+        ),
     )
 
 
@@ -42,13 +48,7 @@ def test_readiness_fails_on_restart_oom_and_image_drift() -> None:
 
 
 def test_readiness_accepts_matching_repo_digest_when_config_reference_differs() -> None:
-    spec = runtime_manager.StackSpec(
-        name="main",
-        project="bioetl-main",
-        compose_file=Path("docker-compose.yml"),
-        required_services=("bioetl",),
-        expected_images={"bioetl": "bioetl:test@sha256:" + "a" * 64},
-    )
+    spec = _spec(expected_images={"bioetl": "bioetl:test@sha256:" + "a" * 64})
     snapshot = runtime_manager.ServiceSnapshot(
         service="bioetl",
         container_id="abc",

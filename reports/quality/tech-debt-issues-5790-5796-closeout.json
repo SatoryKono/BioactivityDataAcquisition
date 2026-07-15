@@ -21,7 +21,7 @@
     },
     "config_surface_duplicate_clusters": {
       "opening_baseline": 24,
-      "current": 22
+      "current": 21
     },
     "runtime_basics_targeted_coverage_percent": {
       "current_canonical_inventory": 76.32,
@@ -95,7 +95,7 @@
       "debt_type": "composite_config_duplication",
       "outcome": "improved",
       "opening_baseline": 24,
-      "current_value": 22,
+      "current_value": 21,
       "evidence": [
         "configs/composites/field_groups/shared_policy.yaml",
         "configs/composites/activity.yaml",

@@ -107,12 +107,6 @@ SKIP_FILE_EXTENSIONS: Final[set[str]] = {
     ".zip",
 }
 SCRIPT_PATH_TOKENS: Final[tuple[str, ...]] = ("scripts/", "src/tools/")
-MODULE_REF_TOKENS: Final[tuple[str, ...]] = (
-    "python -m scripts.",
-    "python -m src.tools.",
-    "uv run python -m scripts.",
-    "uv run python -m src.tools.",
-)
 SCRIPT_PATH_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
     r"(?:scripts|src/tools)/[A-Za-z0-9._/-]+\.(?:py|sh|ps1|cmd|bat|mjs|sql)"
 )
@@ -394,7 +388,7 @@ def _line_has_reference_candidate(
 ) -> bool:
     return (
         any(token in normalized_line for token in SCRIPT_PATH_TOKENS)
-        or any(token in normalized_line for token in MODULE_REF_TOKENS)
+        or MODULE_REF_CANDIDATE_PATTERN.search(normalized_line) is not None
         or _line_has_basename_script_candidate(normalized_line, basename_map)
     )
 
@@ -506,7 +500,7 @@ def _discover_refs_in_file(
 
     normalized_text = text.replace("\\", "/")
     has_script_path_refs = any(token in normalized_text for token in SCRIPT_PATH_TOKENS)
-    has_module_refs = any(token in normalized_text for token in MODULE_REF_TOKENS)
+    has_module_refs = MODULE_REF_CANDIDATE_PATTERN.search(normalized_text) is not None
     has_dispatcher_module_refs = _has_dispatcher_module_refs(rel, normalized_text)
     has_basename_refs = _line_has_basename_script_candidate(
         normalized_text, basename_map

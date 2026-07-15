@@ -26,6 +26,7 @@ Makefile
 README.md
 mkdocs.yml
 mint.json
+pr_compliance_checklist.yaml
 package-lock.json
 package.json
 pyproject.toml
@@ -37,7 +38,6 @@ uv.lock
 AGENTS.md
 CHANGELOG.md
 GEMINI.md
-pr_compliance_checklist.yaml
 
 # Vendor-documented repo-wide review guidance retained at the exact root filename.
 best_practices.md

@@ -18,7 +18,6 @@ conflict:
 5. Repo-level Qodo artifacts:
    - `.pr_agent.toml`
    - `best_practices.md`
-   - `pr_compliance_checklist.yaml`
 
 ## Repo-Level Qodo Surfaces
 
@@ -26,8 +25,6 @@ conflict:
   behavior and extra review instructions.
 - `best_practices.md`: project-specific best-practice guidance consumed by Qodo
   rule enforcement paths.
-- `pr_compliance_checklist.yaml`: PR compliance checklist using the vendor
-  `pr_compliances` schema.
 
 ## Important Local Distinctions
 
@@ -57,9 +54,10 @@ verification in Qodo Portal or GitHub UI:
   configuration docs.
 - `best_practices.md` is a documented supported file name in Qodo rule
   enforcement docs.
-- `pr_compliance_checklist.yaml` is a documented supported file name in Qodo
-  Review Standards docs, and the local schema mirrors the vendor template from
-  `The-PR-Agent/pr-agent`.
+- The formerly root-level `pr_compliance_checklist.yaml` was removed after
+  confirming that no tracked workflow, script, or configuration consumes it.
+  Qodo Review Standards remain a portal/tooling concern and are not represented
+  by a local root contract.
 
 ## Root Retention Revalidation
 
@@ -69,7 +67,7 @@ Last verified: 2026-07-06 for root hygiene issue #5999.
 | --- | --- | --- |
 | `.pr_agent.toml` | Qodo / PR-Agent repository-level configuration | Retain at root until review tooling is explicitly repointed. |
 | `best_practices.md` | Qodo rule-enforcement guidance filename | Retain at root while vendor ingestion expects the documented filename. |
-| `pr_compliance_checklist.yaml` | Qodo Review Standards `pr_compliances` schema | Retain at root until the checklist path is repointed and validated. |
+| `pr_compliance_checklist.yaml` | Retired local Qodo checklist surface | Absent from root baseline; do not restore without fresh tooling evidence. |
 | `commitlint.config.mjs` | Commitlint workflow configuration | Retain at root while `.github/workflows/commit-lint.yml` uses this exact config path. |
 | `mint.json` | Mintlify docs configuration | Retain at root while docs tooling expects the standard root filename. |
 
