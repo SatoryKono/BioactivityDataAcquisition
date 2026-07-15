@@ -200,6 +200,19 @@ def test_prometheus_exposition_does_not_export_untrusted_cause_or_observations()
     assert "bioetl_docker_runtime_primary_cause{project=\"<redacted>\",stack=\"main\"} 0" in exposition
 
 
+def test_clean_probe_sample_remains_healthy() -> None:
+    spec = _spec(Path("/tmp"))
+    report = probe.build_report(
+        spec,
+        _contract(Path("/tmp")),
+        runner=_runner(spec),
+        disk_usage=_disk(),
+    )
+
+    assert report["primary_cause"] is None
+    assert report["summary"] == {"ok": True, "signal_count": 0}
+
+
 def test_probe_is_read_only_and_redacts_observations(tmp_path: Path) -> None:
     spec = _spec(tmp_path)
     calls: list[list[str]] = []
