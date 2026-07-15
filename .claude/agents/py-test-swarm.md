@@ -224,7 +224,7 @@ uv run python -m pytest tests/ --durations=20 -q 2>&1 | head -30
 | 2 | L2-app-unit | tests/unit/application/ | unit | ~N | N | P1 |
 | 3 | L2-infra-unit-integ | tests/unit/infrastructure/ + tests/integration/ | unit + integration | ~N | N | P1 |
 | 4 | L2-comp-iface-unit | tests/unit/composition/ + tests/unit/interfaces/ | unit | ~N | N | P2 |
-| 5 | L2-crosscutting | tests/architecture/ + tests/e2e/ + tests/contract/ + tests/benchmarks/ | architecture + e2e + contract + bench | ~N | N | P2 |
+| 5 | L2-crosscutting | tests/architecture/ + tests/e2e/ + tests/contract/ + bench | architecture + e2e + contract + bench | ~N | N | P2 |
 
 ## Порядок запуска
 1. L2-domain-unit ∥ L2-crosscutting (параллельно — независимы)

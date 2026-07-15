@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-15T09:34:39.396683+00:00",
+  "generated_at": "2026-07-15T06:44:36.201927+00:00",
   "summary": {
     "total_scripts": 465,
     "status_counts": {
@@ -3267,7 +3267,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 13,
       "references": [
         {
           "path": "Makefile",
@@ -4377,10 +4377,16 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 11,
+      "reference_count": 12,
       "references": [
         {
           "path": "Makefile",
+          "line": 279,
+          "source_group": "build",
+          "text": "$(RUN) python scripts/diagrams/generate_all_bundles.py"
+        },
+        {
+          "path": "makefile",
           "line": 279,
           "source_group": "build",
           "text": "$(RUN) python scripts/diagrams/generate_all_bundles.py"
@@ -4420,12 +4426,6 @@
           "line": 87,
           "source_group": "scripts",
           "text": "\"generate_all_bundles.py\", \"--collection\", \"architecture\""
-        },
-        {
-          "path": "scripts/diagrams/__main__.py",
-          "line": 91,
-          "source_group": "scripts",
-          "text": "\"render-views\": python_command(\"generate_all_bundles.py\", \"--collection\", \"views\"),"
         }
       ]
     },
@@ -4915,7 +4915,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 24,
+      "reference_count": 25,
       "references": [
         {
           "path": ".codex/agents/py-doc-bot.md",
@@ -6679,7 +6679,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 23,
+      "reference_count": 24,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
@@ -7908,7 +7908,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 21,
+      "reference_count": 22,
       "references": [
         {
           "path": "Makefile",
@@ -8229,7 +8229,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 20,
       "references": [
         {
           "path": ".github/workflows/root-hygiene.yml",
@@ -11189,7 +11189,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 73,
+      "reference_count": 76,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -12561,7 +12561,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/docker-compose-project-migration.md",
-          "line": 42,
+          "line": 37,
           "source_group": "docs",
           "text": "`scripts/ops/docker-setup.ps1` before starting a consumer. The former"
         },
@@ -12618,7 +12618,7 @@
         },
         {
           "path": "docs/05-operations/runbooks/docker-compose-project-migration.md",
-          "line": 41,
+          "line": 36,
           "source_group": "docs",
           "text": "Create or verify these networks through `scripts/ops/docker-setup.sh` or"
         },
@@ -13032,7 +13032,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 18,
       "references": [
         {
           "path": "Makefile",
@@ -13051,6 +13051,12 @@
           "line": 282,
           "source_group": "docs",
           "text": "`scripts/ops/launchers/codex/setup_plugins.sh --pytest-only` перед запуском pytest."
+        },
+        {
+          "path": "makefile",
+          "line": 226,
+          "source_group": "build",
+          "text": "bash scripts/ops/launchers/codex/setup_plugins.sh --hooks-only"
         },
         {
           "path": "scripts/engineering/dev/README.md",
@@ -13075,12 +13081,6 @@
           "line": 570,
           "source_group": "scripts",
           "text": "# setup_plugins.sh may provision a temporary pytest runtime under /tmp when"
-        },
-        {
-          "path": "scripts/engineering/repo/generate_scripts_wrapper_caller_matrix.py",
-          "line": 109,
-          "source_group": "scripts",
-          "text": "Candidate(\"scripts/ops/launchers/codex/setup_plugins.sh\", BOOTSTRAP_HELPER_ROLE),"
         }
       ]
     },
@@ -13883,13 +13883,13 @@
         },
         {
           "path": "scripts/ops/docker-setup.ps1",
-          "line": 21,
+          "line": 20,
           "source_group": "scripts",
           "text": "$DockerPreflight = \"scripts/ops/runtime/docker/docker_runtime_preflight.py\""
         },
         {
           "path": "scripts/ops/docker-setup.sh",
-          "line": 20,
+          "line": 19,
           "source_group": "scripts",
           "text": "DOCKER_PREFLIGHT=\"scripts/ops/runtime/docker/docker_runtime_preflight.py\""
         },
