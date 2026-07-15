@@ -70,6 +70,25 @@ _ALLOWED_CAUSES = {
     "unexpected_restart",
     "unresolved_incident",
 }
+_CAUSE_ENUM = {
+    cause: index
+    for index, cause in enumerate(
+        (
+            "daemon_unavailable",
+            "disk_reserve_low",
+            "image_identity_drift",
+            "oom_killed",
+            "project_origin_drift",
+            "recovery_objective_breach",
+            "resource_pressure",
+            "service_missing",
+            "service_unready",
+            "unexpected_restart",
+            "unresolved_incident",
+        ),
+        start=1,
+    )
+}
 
 Runner = Callable[[Sequence[str], Path, float], CommandResult]
 DiskUsage = Callable[[Path], Any]
@@ -346,10 +365,23 @@ def _metric(name: str, value: float | int, labels: Mapping[str, str]) -> str:
     return f"{name}{{{rendered}}} {value}"
 
 
+def _safe_metric_text(value: Any) -> str:
+    """Redact dynamic text before it reaches metrics or Pushgateway URLs."""
+    return str(_redact(value))
+
+
+def _cause_enum(report: Mapping[str, Any]) -> int:
+    """Map a cause to a bounded numeric enum without exporting its text."""
+    return _CAUSE_ENUM.get(str(report.get("primary_cause")), 0)
+
+
 def prometheus_exposition(report: Mapping[str, Any]) -> str:
     """Render bounded-cardinality host metrics from a probe report."""
 
-    labels = {"project": str(report["project"]), "stack": str(report["stack"])}
+    labels = {
+        "project": _safe_metric_text(report["project"]),
+        "stack": _safe_metric_text(report["stack"]),
+    }
     slo = report["slo"]
     lines = [
         "# TYPE bioetl_docker_runtime_probe_success gauge",
@@ -383,18 +415,17 @@ def prometheus_exposition(report: Mapping[str, Any]) -> str:
             labels,
         ),
         "# TYPE bioetl_docker_runtime_primary_cause gauge",
+        _metric(
+            "bioetl_docker_runtime_primary_cause",
+            _cause_enum(report),
+            labels,
+        ),
     ]
-    cause = report.get("primary_cause")
-    if cause:
-        lines.append(
-            _metric(
-                "bioetl_docker_runtime_primary_cause",
-                1,
-                {**labels, "cause": str(cause)},
-            )
-        )
     for service in report["services"]:
-        service_labels = {**labels, "service": str(service["service"])}
+        service_labels = {
+            **labels,
+            "service": _safe_metric_text(service["service"]),
+        }
         lines.extend(
             [
                 _metric(
@@ -415,7 +446,10 @@ def prometheus_exposition(report: Mapping[str, Any]) -> str:
             ]
         )
     for resource in report["resources"]:
-        service_labels = {**labels, "service": str(resource["service"])}
+        service_labels = {
+            **labels,
+            "service": _safe_metric_text(resource["service"]),
+        }
         for resource_name, key in (
             ("memory", "memory_limit_ratio"),
             ("cpu", "cpu_limit_ratio"),
@@ -442,8 +476,8 @@ def push_exposition(
     parsed = urllib.parse.urlsplit(gateway_url)
     if parsed.scheme not in {"http", "https"} or not parsed.netloc:
         raise ValueError("Pushgateway URL must use http or https")
-    stack = urllib.parse.quote(str(report["stack"]), safe="")
-    project = urllib.parse.quote(str(report["project"]), safe="")
+    stack = urllib.parse.quote(_safe_metric_text(report["stack"]), safe="")
+    project = urllib.parse.quote(_safe_metric_text(report["project"]), safe="")
     target = (
         gateway_url.rstrip("/")
         + "/metrics/job/bioetl_docker_runtime/project/"

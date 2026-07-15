@@ -740,6 +740,30 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as the shell backend for the canonical scripts.ai.mcp check router command; prefer the router in new docs and promote back to an active public script only if direct shell invocation remains a reviewed public surface."
     },
+    "scripts/ops/runtime/neo4j/neo4j_quick_start.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Deprecated for one release while callers migrate to runtime_manager.py --stack neo4j; do not add lifecycle behavior and remove after reference proof."
+    },
+    "scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Deprecated for one release while callers migrate to runtime_manager.py diagnose/recover --stack neo4j; retain only as historical operator guidance."
+    },
+    "scripts/ops/runtime/neo4j/start-neo4j-audit.sh": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Deprecated for one release while POSIX/WSL callers migrate to runtime_manager.py --stack neo4j-audit; remove after first-party shell reference proof."
+    },
+    "scripts/ops/runtime/neo4j/start-neo4j-audit.ps1": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-09-30",
+      "next_step": "Deprecated for one release while Windows PowerShell callers migrate to runtime_manager.py --stack neo4j-audit; remove after first-party PowerShell reference proof."
+    },
     "src/tools/apply_elk_layout.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",

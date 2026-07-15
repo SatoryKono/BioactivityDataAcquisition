@@ -56,6 +56,7 @@ supported_scopes:
       governance_and_runtime_surfaces:
       - control_plane
       - data_quality
+      - docker_integration
       - grafana
       - prometheus
   e2e:
@@ -178,6 +179,8 @@ tracked_suite_inventory:
       - tests/integration/config/test_non_chembl_identifier_dq_parity.py
       - tests/integration/test_dq_monitor_integration.py
       - tests/integration/test_dq_report_integration.py
+      docker_integration:
+      - tests/integration/test_docker_compose_smoke.py
       grafana:
       - tests/integration/test_dashboard_navigation_contract_sync.py
       - tests/integration/test_dashboard_ux_report_freshness.py

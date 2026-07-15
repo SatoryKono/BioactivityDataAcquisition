@@ -36,6 +36,17 @@ REMOVED_MCP_SERVER_NAMES = frozenset(
     }
 )
 
+# Allowlist of approved remote MCP server base URLs for security governance.
+# Any new remote HTTP MCP server must be added to this allowlist after security review.
+APPROVED_REMOTE_MCP_BASE_URLS = frozenset(
+    {
+        "https://biomoltech.mintlify.app/mcp",
+        "https://mcp.mintlify.com",
+        "https://mcp.deepwiki.com/mcp",
+        "https://api.ref.tools/mcp",
+    }
+)
+
 
 def _config_path(
     path: Path,
@@ -72,6 +83,12 @@ def _wrapper_command(
 
 
 def _http_server(url: str) -> dict[str, Any]:
+    if url not in APPROVED_REMOTE_MCP_BASE_URLS:
+        raise ValueError(
+            f"Remote MCP server URL not in approved allowlist: {url}. "
+            f"Approved URLs: {sorted(APPROVED_REMOTE_MCP_BASE_URLS)}. "
+            "Add new remote MCP servers to APPROVED_REMOTE_MCP_BASE_URLS after security review."
+        )
     return {"type": "http", "url": url}
 
 

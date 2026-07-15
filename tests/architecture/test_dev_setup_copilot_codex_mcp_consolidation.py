@@ -267,3 +267,50 @@ def test_github_mcp_wrappers_load_repo_env() -> None:
     assert "GITHUB_TOKEN" in sh_content
     assert "GITHUB_PERSONAL_ACCESS_TOKEN" in ps_content
     assert "GITHUB_TOKEN" in ps_content
+
+
+def test_remote_mcp_servers_are_in_allowlist() -> None:
+    """All remote HTTP MCP servers must be in the approved allowlist."""
+    root = repo_root()
+    setup_mcp_path = root / "scripts" / "ai" / "codex" / "setup_mcp.py"
+    setup_mcp_content = setup_mcp_path.read_text(encoding="utf-8")
+
+    # Extract the allowlist from the setup_mcp.py file
+    allowlist_match = re.search(
+        r'APPROVED_REMOTE_MCP_BASE_URLS = frozenset\(\s*\{([^}]+)\}\s*\)',
+        setup_mcp_content,
+        re.DOTALL,
+    )
+    assert allowlist_match, "APPROVED_REMOTE_MCP_BASE_URLS not found in setup_mcp.py"
+    allowlist_urls = {
+        url.strip().strip('"\'')
+        for url in allowlist_match.group(1).split(',')
+        if url.strip()
+    }
+
+    # Extract all _http_server calls to get the actual URLs used
+    http_server_calls = re.findall(r'_http_server\("([^"]+)"\)', setup_mcp_content)
+    actual_urls = set(http_server_calls)
+
+    # Verify all actual URLs are in the allowlist
+    unapproved_urls = actual_urls - allowlist_urls
+    assert not unapproved_urls, (
+        f"Remote MCP server URLs not in approved allowlist: {unapproved_urls}. "
+        f"Add these to APPROVED_REMOTE_MCP_BASE_URLS in setup_mcp.py after security review."
+    )
+
+    # Verify allowlist is not empty (security guardrail)
+    assert allowlist_urls, "APPROVED_REMOTE_MCP_BASE_URLS must not be empty"
+
+
+def test_unapproved_remote_mcp_url_rejected() -> None:
+    """Attempting to add an unapproved remote MCP URL should raise ValueError."""
+    from scripts.ai.codex import setup_mcp
+
+    # This should raise ValueError because the URL is not in the allowlist
+    try:
+        setup_mcp._http_server("https://unapproved.example.com/mcp")
+        assert False, "Expected ValueError for unapproved remote MCP URL"
+    except ValueError as e:
+        assert "not in approved allowlist" in str(e)
+        assert "https://unapproved.example.com/mcp" in str(e)

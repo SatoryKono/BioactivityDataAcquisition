@@ -4,7 +4,9 @@
 00-project/ai/audit/observability-issues/OBS-003-live-validation.md
 00-project/ai/audit/observability-issues/OBS-003-validation-findings.md
 00-project/ai/audit/observability-issues/OBS-004-emitter-bypass-proof.md
+00-project/ai/audit/observability-issues/OBS-004-validation-findings.md
 00-project/ai/audit/observability-issues/OBS-006-live-datasource-compliance.md
+00-project/ai/audit/observability-issues/OBS-006-validation-findings.md
 00-project/ai/audit/observability-issues/README.md
 00-project/ai/audit/observability-issues/VALIDATION-SUMMARY.md
 00-project/ai/agents/CLAUDE.md
@@ -102,6 +104,7 @@
 00-project/ai/skills/_references/local/py-test-swarm/references/telemetry-and-flaky-db.md
 00-project/ai/skills/_references/local/technical-designer-mermaid/references/patterns.md
 00-project/ai/skills/global/.system/skill-creator/SKILL.md
+00-project/ai/skills/global/public/architecture-guardian/SKILL.md
 00-project/ai/skills/global/.system/skill-creator/references/openai_yaml.md
 00-project/ai/skills/global/.system/skill-installer/SKILL.md
 00-project/ai/skills/local/collecting-evidence/references/evidence-decision-contract.md
@@ -112,6 +115,7 @@
 00-project/ai/skills/local/generating-constrained-specs/references/constraint-rules.md
 00-project/ai/skills/local/generating-constrained-specs/references/prd-template.md
 00-project/ai/skills/local/grafana-dashboard-extension/SKILL.md
+00-project/ai/skills/local/grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md
 00-project/ai/skills/local/grafana-dashboard-render/SKILL.md
 00-project/ai/skills/local/hierarchical-evidence-orchestration/references/orchestration-contract.md
 00-project/ai/skills/local/hierarchical-evidence-orchestration/references/shard-task-briefs.md
@@ -128,9 +132,12 @@
 00-project/ai/skills/local/prometheus-metric-discovery/SKILL.md
 00-project/ai/skills/local/prometheus-query-debugger/SKILL.md
 00-project/ai/skills/local/prometheus-rule-testing/SKILL.md
+00-project/ai/skills/local/py-audit-bot/references/wrapper-contract.md
 00-project/ai/skills/local/py-reproducibility-audit/SKILL.md
 00-project/ai/skills/local/py-reproducibility-audit/references/github-issue-design.md
 00-project/ai/skills/local/py-reproducibility-audit/references/reproducibility-audit.md
+00-project/ai/skills/local/suggest-users/references/scoring.md
+00-project/ai/skills/local/suggest-users/references/workflow.md
 00-project/ai/skills/local/synthesizing-pillars/references/synthesis-template.md
 02-architecture/adr-registry/README.md
 02-architecture/adr-registry/index.md
@@ -234,6 +241,9 @@
 05-operations/deployment/neo4j-audit-instance-quick-start.md
 05-operations/operations-doc-inventory.md
 05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md
+05-operations/runbooks/docker-compose-project-migration.md
+05-operations/runbooks/docker-image-resource-promotion.md
+05-operations/runbooks/docker-stability.md
 05-operations/runbooks/generated-artifact-drift-workflow.md
 05-operations/runbooks/merge-campaign.md
 05-operations/runbooks/neo4j-backend-recovery-quick-start.md

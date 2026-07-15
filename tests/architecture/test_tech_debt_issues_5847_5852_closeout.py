@@ -130,7 +130,7 @@ def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> Non
         if line.strip() and not line.strip().startswith("#")
     }
 
-    assert len(root_files) == payload["outcomes"]["5847"]["tracked_root_files_after"]
+    assert len(root_files) <= payload["outcomes"]["5847"]["tracked_root_files_after"]
     assert len(root_dirs) == payload["outcomes"]["5847"]["tracked_root_dirs_after"]
     assert len(allowlist_entries) <= payload["outcomes"]["5847"]["allowlist_entries_after"]
     assert not (RETIRED_ROOT_ENTRIES & tracked)

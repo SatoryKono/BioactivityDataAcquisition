@@ -2,7 +2,15 @@
   "schema_version": "tech-debt-issues-5790-5796-closeout-v1",
   "generated_on": "2026-07-10",
   "debt_budget_policy": "flat_or_decreasing_only",
-  "issues": [5790, 5791, 5792, 5793, 5794, 5795, 5796],
+  "issues": [
+    5790,
+    5791,
+    5792,
+    5793,
+    5794,
+    5795,
+    5796
+  ],
   "metrics": {
     "retained_entrypoint_count": 12,
     "retained_public_export_facade_count": 4,
@@ -21,14 +29,14 @@
     },
     "config_surface_duplicate_clusters": {
       "opening_baseline": 24,
-      "current": 21
+      "current": 22
     },
     "runtime_basics_targeted_coverage_percent": {
       "current_canonical_inventory": 76.32,
       "targeted_closeout_proof": 100.0
     },
     "zero_reference_supporting_scripts": {
-      "current": 35,
+      "current": 34,
       "max": 47,
       "entries_without_owner_metadata": 0,
       "source": "configs/quality/scripts_inventory_manifest.json"
@@ -95,7 +103,7 @@
       "debt_type": "composite_config_duplication",
       "outcome": "improved",
       "opening_baseline": 24,
-      "current_value": 21,
+      "current_value": 22,
       "evidence": [
         "configs/composites/field_groups/shared_policy.yaml",
         "configs/composites/activity.yaml",
