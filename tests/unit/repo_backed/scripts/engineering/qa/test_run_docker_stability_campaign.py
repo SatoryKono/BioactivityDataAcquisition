@@ -1,12 +1,34 @@
 from __future__ import annotations
 
 import subprocess
+from pathlib import Path
 
 import pytest
 
 from scripts.engineering.qa import run_docker_stability_campaign as campaign
 
 pytestmark = pytest.mark.repo_backed
+
+
+def test_signature_valid_requires_expected_fingerprint(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    summary = tmp_path / "summary.json"
+    signature = tmp_path / "summary.json.asc"
+    summary.write_text("{}\n", encoding="utf-8")
+    signature.write_text("signature", encoding="utf-8")
+
+    monkeypatch.setattr(
+        campaign,
+        "_run",
+        lambda *_args: {
+            "returncode": 0,
+            "stdout": "[GNUPG:] VALIDSIG ABCD1234 2026-07-15 1 10 00 1 00 ABCD1234\n",
+        },
+    )
+
+    assert campaign._signature_valid(summary, signature, "ABCD1234") is True
+    assert campaign._signature_valid(summary, signature, "FFFF9999") is False
 
 
 def test_release_gates_cannot_pass_partial_or_unsigned_campaign() -> None:

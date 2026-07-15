@@ -41,6 +41,23 @@ def test_readiness_fails_on_restart_oom_and_image_drift() -> None:
     }
 
 
+def test_readiness_accepts_matching_repo_digest_when_config_reference_differs() -> None:
+    snapshot = runtime_manager.ServiceSnapshot(
+        service="bioetl",
+        container_id="abc",
+        state="running",
+        health="healthy",
+        restart_count=0,
+        oom_killed=False,
+        image="sha256:container-image-id",
+        image_digests=("bioetl:test@sha256:" + "a" * 64,),
+    )
+
+    assert runtime_manager.readiness_findings(
+        _spec(), [snapshot], baseline={}
+    ) == []
+
+
 def test_running_without_health_is_not_ready() -> None:
     snapshot = runtime_manager.ServiceSnapshot(
         service="bioetl",
