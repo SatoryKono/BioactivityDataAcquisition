@@ -30,12 +30,10 @@ DOCUMENTED_SOURCE_REVISION_STATES = frozenset(
 _DEFAULT_RUN_ID = RunID(UUID(int=0))
 _DEFAULT_CREATED_AT = datetime(1970, 1, 1, tzinfo=UTC)
 
-
 def _require_non_empty_text(value: object, field_name: str) -> None:
     """Reject missing semantic identity fields before manifest persistence."""
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"RunManifest.{field_name} must be a non-empty string")
-
 
 class ReplayCapability(StrEnum):
     """Exact-replay capability classification for one manifested run."""
@@ -43,7 +41,6 @@ class ReplayCapability(StrEnum):
     EXACT_REPLAY_SUPPORTED = "exact_replay_supported"
     RESUME_ONLY = "resume_only"
     REBUILD_ONLY = "rebuild_only"
-
 
 @dataclass(frozen=True, slots=True)
 class RunInputSnapshotRef:
@@ -61,7 +58,6 @@ class RunInputSnapshotRef:
     last_modified: str | None = None
     captured_at: datetime | None = None
 
-
 @dataclass(frozen=True, slots=True)
 class RunSourceRef:
     """Canonical source reference captured in a run manifest."""
@@ -72,14 +68,12 @@ class RunSourceRef:
     query: str | None = None
     input_snapshots: tuple[RunInputSnapshotRef, ...] = ()
 
-
 @dataclass(frozen=True, slots=True)
 class RunArtifactRef:
     """Planned artifact location captured in a run manifest."""
 
     layer: str
     path: str
-
 
 @dataclass(frozen=True, slots=True)
 class RunCodeProvenance:
@@ -104,7 +98,6 @@ class RunCodeProvenance:
     # Data Quality integration
     dq_contract_compatibility_hash: str | None = None
     effective_config_artifact_id: str | None = None
-
 
 @dataclass(frozen=True, slots=True)
 class RunManifest:
@@ -192,12 +185,10 @@ class RunManifest:
             planned_artifacts=_load_artifacts(payload.get("planned_artifacts")),
         )
 
-
 def _load_optional_str(payload: dict[str, object], key: str) -> str | None:
     """Extract an optional string field from a serialized mapping."""
     value = payload.get(key)
     return None if value is None else str(value)
-
 
 def _load_code_provenance(raw_code: object) -> RunCodeProvenance:
     """Deserialize code provenance payload safely."""
@@ -233,18 +224,15 @@ def _load_code_provenance(raw_code: object) -> RunCodeProvenance:
         ),
     )
 
-
 def _load_replay_capability(raw_value: object) -> ReplayCapability:
     if raw_value is None:
         return ReplayCapability.REBUILD_ONLY
     return ReplayCapability(str(raw_value))
 
-
 def _load_object_mapping(raw_mapping: object) -> dict[str, object]:
     if not isinstance(raw_mapping, dict):
         return {}
     return {str(key): value for key, value in raw_mapping.items()}
-
 
 def _load_source_refs(raw_sources: object) -> tuple[RunSourceRef, ...]:
     if not isinstance(raw_sources, list):
@@ -261,7 +249,6 @@ def _load_source_refs(raw_sources: object) -> tuple[RunSourceRef, ...]:
         if isinstance(item, dict)
     )
 
-
 def _load_input_snapshots(raw_snapshots: object) -> tuple[RunInputSnapshotRef, ...]:
     if not isinstance(raw_snapshots, list):
         return ()
@@ -270,7 +257,6 @@ def _load_input_snapshots(raw_snapshots: object) -> tuple[RunInputSnapshotRef, .
         for item in raw_snapshots
         if isinstance(item, dict)
     )
-
 
 def _load_input_snapshot_ref(item: dict[str, object]) -> RunInputSnapshotRef:
     return RunInputSnapshotRef(
@@ -289,7 +275,6 @@ def _load_input_snapshot_ref(item: dict[str, object]) -> RunInputSnapshotRef:
         ),
     )
 
-
 def _load_optional_snapshot_field(
     item: dict[str, object],
     field_name: str,
@@ -299,7 +284,6 @@ def _load_optional_snapshot_field(
     if raw_value is None:
         return None
     return datetime.fromisoformat(str(raw_value)) if is_datetime else str(raw_value)
-
 
 def _load_artifacts(raw_artifacts: object) -> tuple[RunArtifactRef, ...]:
     if not isinstance(raw_artifacts, list):

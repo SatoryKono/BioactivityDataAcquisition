@@ -479,7 +479,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 180
-      total_loc: 22317
+      total_loc: 22319
       files_ge_250_loc: 4
       helper_function_ratio: 0.357
       max_internal_fan_in: 7
@@ -487,7 +487,7 @@ hotspot_family_ratchets:
     trend:
       status: reviewed_2026-07-07_application_core_live_metric_refresh
       next_action: 2026-07-07 refreshes measured application_core metrics against
-        the committed hotspot-family baseline at 180 files, 22317 LOC, 4
+        the committed hotspot-family baseline at 180 files, 22319 LOC, 4
         files_ge_250_loc, helper_function_ratio 0.357, and max_internal_fan_in
         7. Bounded-growth budgets remain flat at 7 files_ge_250_loc and
         max_internal_fan_in 10; no technical-debt budget is increased.
@@ -565,16 +565,16 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 124
-      total_loc: 15088
+      total_loc: 15126
       files_ge_250_loc: 11
-      helper_function_ratio: 0.457
+      helper_function_ratio: 0.458
       max_internal_fan_in: 3
       max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_models
     trend:
       status: reduced_2026-07-14_issue_6289_large_file_census_restored
       next_action: 2026-07-14 issue 6289 refreshes the measured control-plane
-        snapshot to 124 files, 15088 LOC, 11 files_ge_250_loc, helper_function_ratio
-        0.457, and max_internal_fan_in 3 after moving historical replay record
+        snapshot to 124 files, 15126 LOC, 11 files_ge_250_loc, helper_function_ratio
+        0.458, and max_internal_fan_in 3 after moving historical replay record
         models out of historical_universe_service.py. Bounded-growth budgets remain
         flat at 16 files_ge_250_loc and max_internal_fan_in 4; no technical-debt
         budget is increased.
@@ -594,7 +594,7 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 55
-      total_loc: 6741
+      total_loc: 6744
       files_ge_250_loc: 0
       helper_function_ratio: 0.359
       max_internal_fan_in: 3

@@ -158,7 +158,15 @@ class PipelineRunContext:
         execution_context: ExecutionContext = ExecutionContext.ISOLATED,
     ) -> PipelineRunContext:
         """Create a new PipelineRunContext with explicit timestamp ownership."""
-        return cls(
+        values = locals()
+        values.pop("cls")
+        values.pop("clock")
+        values["started_at"] = resolve_context_started_at(started_at=started_at, clock=clock)
+        values["vacuum"] = _resolve_vacuum_settings(vacuum)
+        values["input_filter"] = _resolve_input_filter_context(input_filter)
+        values["cached_bronze"] = _resolve_cached_bronze_context(cached_bronze)
+        return cls(**values)
+        """UNREACHABLE
             pipeline_name=pipeline_name,
             run_id=run_id,
             run_type=run_type,
@@ -209,7 +217,7 @@ class PipelineRunContext:
             workflow_name=workflow_name,
             workflow_step_id=workflow_step_id,
             execution_context=execution_context,
-        )
+        )"""
 
     @property
     def has_input_filter(self) -> bool:

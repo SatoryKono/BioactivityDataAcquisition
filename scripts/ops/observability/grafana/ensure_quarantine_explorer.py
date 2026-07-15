@@ -23,14 +23,10 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime
     build_observability_backend_health_url,
     ensure_observability_backend_started,
     probe_observability_backend,
+    probe_observability_backend_required_paths,
 )
 
-DEFAULT_IDENTITY_PROBE = (
-    "/ops/control-plane/identity-table?pipeline=unknown&run_type=__all&run_id=-"
-)
-DEFAULT_PROCESSED_RECORDS_PROBE = (
-    "/ops/observability/processed-records?pipeline=chembl_target&run_type=backfill"
-)
+DEFAULT_READINESS_PROBE = "/ops/control-plane/ready"
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -63,14 +59,10 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
-    required_probe_paths = (
-        DEFAULT_IDENTITY_PROBE,
-        DEFAULT_PROCESSED_RECORDS_PROBE,
-    )
+    required_probe_paths = (DEFAULT_READINESS_PROBE,)
     if args.refresh:
         from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
             drop_listening_backend_on_port,
-            probe_observability_backend_required_paths,
         )
 
         health_url = build_observability_backend_health_url(
@@ -95,6 +87,11 @@ def main(argv: list[str] | None = None) -> int:
         ),
         required_probe_paths=required_probe_paths,
     )
+    health_url = build_observability_backend_health_url(host=args.probe_host, port=args.port)
+    liveness_available = probe_observability_backend(health_url)
+    contract_ready = liveness_available and probe_observability_backend_required_paths(
+        health_url, required_probe_paths=required_probe_paths
+    )
     payload = {
         "status": result.status,
         "health_url": result.health_url,
@@ -102,6 +99,9 @@ def main(argv: list[str] | None = None) -> int:
         "pid": result.pid,
         "message": result.message,
         "command": list(result.command),
+        "liveness_available": liveness_available,
+        "contract_ready": contract_ready,
+        "readiness_probe": DEFAULT_READINESS_PROBE,
     }
     if args.json:
         print(json.dumps(payload, indent=2, sort_keys=True))
@@ -111,7 +111,7 @@ def main(argv: list[str] | None = None) -> int:
             print(result.message)
         if result.command:
             print("command:", " ".join(result.command))
-    return 0 if result.backend_available else 1
+    return 0 if result.backend_available and contract_ready else 1
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import math
 import os
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime, timedelta
@@ -31,6 +32,20 @@ DEFAULT_RANGE_HOURS = 24
 DEFAULT_REQUEST_TIMEOUT_SECONDS = 5.0
 _HEALTH_PROBE_PATHS: tuple[str, ...] = ("/health/live", "/health")
 _DASHBOARD_DIR = Path("grafana/dashboards")
+_PROCESSED_RECORDS_CONTRACT = "processed_records_table_v1"
+_UNRESOLVED_IDENTITY_MODES = frozenset(
+    {
+        "aggregate_scope_requires_exact_run_id",
+        "no_manifest_for_scope",
+    }
+)
+_IDENTITY_ANCHOR_PARAMETERS = frozenset(
+    {"Run ID [Pipeline]", "Manifest ID [Control Plane]"}
+)
+_PLACEHOLDER_PREFIXES = (
+    "not available",
+    "select one concrete pipeline",
+)
 
 
 @dataclass(frozen=True)
@@ -728,7 +743,7 @@ def _resolve_app_base_url(config: AuditConfig) -> str:
         attempted.append(f"{candidate}{path}")
         if isinstance(payload, dict):
             return candidate
-    attempted_urls = ", ".join(attempted)
+    attempted_urls = ", ".join(_redact_url(url) for url in attempted)
     raise OSError(
         "Could not reach Quarantine Explorer backend via canonical health probes using candidates: "
         f"{attempted_urls}"
@@ -808,9 +823,159 @@ def _classify_http_payload(payload: object) -> tuple[str, str]:
     return ("nonzero_result", "Explorer summary returned non-zero rejects")
 
 
-def _classify_http_table_payload(payload: object) -> tuple[str, str]:
+def _prefixed_cell_value(
+    row: dict[str, object],
+    *,
+    parameter: str,
+    field: str,
+) -> tuple[str | None, str | None]:
+    cell = row.get(field)
+    if not isinstance(cell, str):
+        return (None, f"{field} must be a prefixed string")
+    prefix, separator, display = cell.partition("|")
+    if separator != "|" or prefix != parameter:
+        return (None, f"{field} prefix does not match parameter")
+    display = display.strip()
+    if not display:
+        return (None, f"{field} display value is empty")
+    return (display, None)
+
+
+def _is_nonnegative_number(raw: str) -> bool:
+    normalized = raw.replace(" ", "")
+    try:
+        value = float(normalized)
+    except ValueError:
+        return False
+    return math.isfinite(value) and value >= 0
+
+
+def _classify_processed_records_payload(payload: dict[str, object]) -> tuple[str, str]:
+    if payload.get("contract") != _PROCESSED_RECORDS_CONTRACT:
+        return (
+            "invalid_shape",
+            "Processed Records payload has an unknown or missing contract",
+        )
+    rows = payload.get("rows")
+    if not isinstance(rows, list):
+        return ("invalid_shape", "Processed Records payload missing rows list")
+    if not rows:
+        return ("empty_result", "Processed Records payload returned no rows")
+
+    numeric_values: list[float] = []
+    missing_values = 0
+    parameters: set[str] = set()
+    for index, raw_row in enumerate(rows):
+        if not isinstance(raw_row, dict):
+            return ("invalid_shape", f"Processed Records row {index} is not an object")
+        parameter = raw_row.get("parameter")
+        if not isinstance(parameter, str) or not parameter.strip():
+            return ("invalid_shape", f"Processed Records row {index} has no parameter")
+        if parameter in parameters:
+            return ("invalid_shape", f"Processed Records parameter is duplicated: {parameter}")
+        parameters.add(parameter)
+
+        value, value_error = _prefixed_cell_value(raw_row, parameter=parameter, field="value")
+        percentage, percentage_error = _prefixed_cell_value(
+            raw_row, parameter=parameter, field="percintage"
+        )
+        if value_error or percentage_error:
+            return (
+                "invalid_shape",
+                f"Processed Records row {parameter!r} is malformed: "
+                f"{value_error or percentage_error}",
+            )
+        assert value is not None
+        assert percentage is not None
+        if percentage != "No data":
+            if not percentage.endswith("%") or not _is_nonnegative_number(percentage[:-1]):
+                return (
+                    "invalid_shape",
+                    f"Processed Records row {parameter!r} has malformed percentage",
+                )
+        row_status = raw_row.get("row_status", "")
+        if not isinstance(row_status, str):
+            return (
+                "invalid_shape",
+                f"Processed Records row {parameter!r} has malformed row_status",
+            )
+        if value == "No data":
+            missing_values += 1
+            continue
+        if not _is_nonnegative_number(value):
+            return (
+                "invalid_shape",
+                f"Processed Records row {parameter!r} has a non-numeric value",
+            )
+        numeric_values.append(float(value.replace(" ", "")))
+
+    if missing_values == len(rows):
+        return ("no_data", "Processed Records returned only No data values")
+    if missing_values:
+        return ("partial_data", "Processed Records mixed numeric and No data values")
+    if all(value == 0 for value in numeric_values):
+        return ("resolved_zero", "Processed Records returned resolved numeric zero")
+    return ("resolved_numeric", "Processed Records returned resolved numeric values")
+
+
+def _is_identity_placeholder(value: str) -> bool:
+    normalized = value.strip().lower()
+    return (
+        normalized in {"", "-", "no data", "none", "null", "unknown"}
+        or any(normalized.startswith(prefix) for prefix in _PLACEHOLDER_PREFIXES)
+    )
+
+
+def _classify_identity_payload(payload: dict[str, object]) -> tuple[str, str]:
+    resolved_via = payload.get("resolved_via")
+    if not isinstance(resolved_via, str) or not resolved_via:
+        return ("invalid_shape", "Identity payload missing resolved_via")
+    if resolved_via in _UNRESOLVED_IDENTITY_MODES:
+        return ("unresolved_identity", f"Identity scope resolved via {resolved_via}")
+    rows = payload.get("rows")
+    if not isinstance(rows, list):
+        return ("invalid_shape", "Identity payload missing rows list")
+    if not rows:
+        return ("empty_result", "Identity payload returned no rows")
+
+    anchors: dict[str, str] = {}
+    for index, row in enumerate(rows):
+        if not isinstance(row, dict):
+            return ("invalid_shape", f"Identity row {index} is not an object")
+        parameter = row.get("parameter")
+        value = row.get("value")
+        if not isinstance(parameter, str) or not isinstance(value, str):
+            return ("invalid_shape", f"Identity row {index} is malformed")
+        if parameter in _IDENTITY_ANCHOR_PARAMETERS:
+            anchors[parameter] = value
+    missing_anchors = _IDENTITY_ANCHOR_PARAMETERS - anchors.keys()
+    if missing_anchors:
+        return (
+            "unresolved_identity",
+            f"Identity payload missing anchors: {sorted(missing_anchors)}",
+        )
+    placeholder_anchors = sorted(
+        parameter for parameter, value in anchors.items() if _is_identity_placeholder(value)
+    )
+    if placeholder_anchors:
+        return (
+            "unresolved_identity",
+            f"Identity payload has placeholder anchors: {placeholder_anchors}",
+        )
+    return ("resolved_identity", "Identity payload returned concrete run anchors")
+
+
+def _classify_http_table_payload(
+    payload: object,
+    *,
+    title: str | None = None,
+) -> tuple[str, str]:
     if not isinstance(payload, dict):
         return ("invalid_shape", "HTTP table payload is not a JSON object")
+    if title == "Processed Records" or "contract" in payload:
+        return _classify_processed_records_payload(payload)
+    if title == "ID" or "resolved_via" in payload:
+        return _classify_identity_payload(payload)
     rows = payload.get("rows")
     if not isinstance(rows, list):
         return ("invalid_shape", "HTTP table payload missing rows list")
@@ -1008,9 +1173,12 @@ def _audit_http_panel(
             "error" if classification in {"invalid_shape", "empty_result"} else "ok"
         )
     elif spec.semantic_kind == "http_table":
-        classification, detail = _classify_http_table_payload(payload)
+        classification, detail = _classify_http_table_payload(payload, title=spec.title)
         status = (
-            "error" if classification in {"invalid_shape", "empty_result"} else "ok"
+            "error"
+            if classification
+            in {"empty_result", "invalid_shape", "no_data", "partial_data", "unresolved_identity"}
+            else "ok"
         )
     elif spec.semantic_kind == "http_summary":
         classification, detail = _classify_http_payload(payload)
@@ -1035,7 +1203,7 @@ def _audit_http_panel(
         semantic_kind=spec.semantic_kind,
         status=status,
         classification=classification,
-        detail=f"{detail}; app_base_url={app_base_url}",
+        detail=f"{detail}; app_base_url={_redact_url(app_base_url)}",
         query_preview=rendered_url,
         target_ref_id=spec.target_ref_id,
     )
@@ -1164,7 +1332,7 @@ def _blocked_http_backend_result(
     )
 
 
-def run_audit(config: AuditConfig) -> list[AuditResult]:
+def _run_audit_with_provenance(config: AuditConfig) -> tuple[list[AuditResult], str | None]:
     results: list[AuditResult] = []
     resolved_app_base_url: str | None = None
     app_resolution_error: str | None = None
@@ -1237,25 +1405,77 @@ def run_audit(config: AuditConfig) -> list[AuditResult]:
                     target_ref_id=spec.target_ref_id,
                 )
             )
+    return (results, resolved_app_base_url)
+
+
+def run_audit(config: AuditConfig) -> list[AuditResult]:
+    results, _ = _run_audit_with_provenance(config)
     return results
 
 
-def _write_report(config: AuditConfig, results: list[AuditResult]) -> None:
+def _redact_url(url: str) -> str:
+    parts = urlsplit(url)
+    host = parts.hostname or ""
+    if ":" in host and not host.startswith("["):
+        host = f"[{host}]"
+    netloc = host
+    if parts.port is not None:
+        netloc = f"{netloc}:{parts.port}"
+    return urlunsplit((parts.scheme, netloc, parts.path, parts.query, parts.fragment))
+
+
+def _read_prometheus_runtime_identity(config: AuditConfig) -> dict[str, object]:
+    source_url = _redact_url(config.prometheus_base_url.rstrip("/"))
+    try:
+        payload = _fetch_json(
+            f"{config.prometheus_base_url.rstrip('/')}/api/v1/status/runtimeinfo",
+            timeout_seconds=config.request_timeout_seconds,
+        )
+    except (HTTPError, URLError, OSError, TimeoutError, json.JSONDecodeError) as exc:
+        return {"source_url": source_url, "status": "unavailable", "error_type": type(exc).__name__}
+    if not isinstance(payload, dict) or payload.get("status") != "success":
+        return {"source_url": source_url, "status": "invalid_shape"}
+    data = payload.get("data")
+    if not isinstance(data, dict):
+        return {"source_url": source_url, "status": "invalid_shape"}
+    return {
+        "source_url": source_url,
+        "status": "resolved",
+        "start_time": data.get("startTime"),
+        "reload_config_success": data.get("reloadConfigSuccess"),
+        "last_config_time": data.get("lastConfigTime"),
+    }
+
+
+def _write_report(
+    config: AuditConfig,
+    results: list[AuditResult],
+    *,
+    resolved_backend_base_url: str | None = None,
+    prometheus_runtime_identity: dict[str, object] | None = None,
+) -> None:
     config.output_path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "generated_at": datetime.now(tz=UTC).isoformat(),
         "config": {
-            "prometheus_base_url": config.prometheus_base_url,
-            "app_base_url": config.app_base_url,
-            "loki_base_url": config.loki_base_url,
-            "tempo_base_url": config.tempo_base_url,
-            "grafana_base_url": config.grafana_base_url,
+            "prometheus_base_url": _redact_url(config.prometheus_base_url),
+            "app_base_url": _redact_url(config.app_base_url),
+            "loki_base_url": _redact_url(config.loki_base_url),
+            "tempo_base_url": _redact_url(config.tempo_base_url),
+            "grafana_base_url": _redact_url(config.grafana_base_url),
             "workflow": config.workflow,
             "pipeline": config.pipeline,
             "run_type": config.run_type,
             "run_id": config.run_id,
             "range_hours": config.range_hours,
             "request_timeout_seconds": config.request_timeout_seconds,
+        },
+        "runtime_provenance": {
+            "resolved_backend_base_url": (
+                _redact_url(resolved_backend_base_url) if resolved_backend_base_url else None
+            ),
+            "prometheus": prometheus_runtime_identity
+            or {"source_url": _redact_url(config.prometheus_base_url), "status": "not_collected"},
         },
         "panel_specs": [asdict(spec) for spec in effective_panel_specs()],
         "results": [asdict(result) for result in results],
@@ -1269,12 +1489,17 @@ def _write_report(config: AuditConfig, results: list[AuditResult]) -> None:
 def main(argv: list[str] | None = None) -> int:
     config = _parse_args(argv)
     try:
-        results = run_audit(config)
+        results, resolved_backend_base_url = _run_audit_with_provenance(config)
     except (FileNotFoundError, LookupError, OSError, json.JSONDecodeError) as exc:
         print(str(exc))
         return 1
 
-    _write_report(config, results)
+    _write_report(
+        config,
+        results,
+        resolved_backend_base_url=resolved_backend_base_url,
+        prometheus_runtime_identity=_read_prometheus_runtime_identity(config),
+    )
     for result in results:
         print(
             f"{result.dashboard_uid}#{result.panel_id} {result.title}: "
