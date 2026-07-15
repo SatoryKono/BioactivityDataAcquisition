@@ -62,6 +62,7 @@ class ServiceSnapshot:
     restart_count: int
     oom_killed: bool
     image: str
+    image_digests: tuple[str, ...] = ()
 
     @property
     def ready(self) -> bool:
@@ -196,7 +197,8 @@ def collect_snapshots(
                 (
                     '{"State":{{json .State}},'
                     '"RestartCount":{{.RestartCount}},'
-                    '"Image":{{json .Config.Image}}}'
+                    '"Image":{{json .Config.Image}},'
+                    '"RepoDigests":{{json .RepoDigests}}}'
                 ),
                 container_id,
             ],
@@ -224,6 +226,11 @@ def collect_snapshots(
                     or config.get("Image")
                     or row.get("Image")
                     or ""
+                ),
+                image_digests=tuple(
+                    str(value)
+                    for value in (item.get("RepoDigests") or [])
+                    if value
                 ),
             )
         )
@@ -267,7 +274,14 @@ def readiness_findings(
                 }
             )
         expected = spec.expected_images.get(service)
-        if expected and snapshot.image and snapshot.image != expected:
+        expected_digest = _digest_from_image(expected)
+        observed_images = (snapshot.image, *snapshot.image_digests)
+        image_matches = (
+            any(expected_digest == _digest_from_image(image) for image in observed_images)
+            if expected_digest
+            else expected in observed_images
+        )
+        if expected and snapshot.image and not image_matches:
             findings.append(
                 {
                     "cause": "image_identity_drift",
@@ -277,6 +291,11 @@ def readiness_findings(
                 }
             )
     return findings
+
+
+def _digest_from_image(value: str) -> str | None:
+    match = re.search(r"@(?P<digest>sha256:[0-9a-fA-F]{64})$", value)
+    return match.group("digest").lower() if match else None
 
 
 _CAUSE_PRIORITY = {

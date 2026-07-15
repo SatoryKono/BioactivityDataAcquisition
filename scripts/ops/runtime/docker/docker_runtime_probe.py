@@ -307,7 +307,7 @@ def build_report(
         )
 
     cause = primary_cause(findings) if findings else None
-    if cause not in _ALLOWED_CAUSES:
+    if findings and cause not in _ALLOWED_CAUSES:
         cause = "unresolved_incident"
     restart_delta = sum(
         int(item.get("restart_delta") or 0)
