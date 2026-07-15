@@ -547,6 +547,9 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert "uv==0.11.26" in operations_dockerfile
     assert "sys.exit(0)" not in dockerfile
     assert "/health/ready" in dockerfile
+    assert 'CMD ["health", "server", "--host", "0.0.0.0", "--port", "8000"]' in dockerfile
+    assert main["services"]["bioetl"]["command"][-1] == "8081"
+    assert main["services"]["bioetl"]["ports"] == ["127.0.0.1:8081:8081"]
 
 
 def test_warp_is_absent_from_default_and_optional_runtime_surfaces() -> None:
