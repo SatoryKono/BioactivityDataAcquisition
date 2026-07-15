@@ -1073,14 +1073,7 @@
     }
   },
   "assertless_total_candidates": 105,
-  "budget_violations": [
-    {
-      "actual": 30,
-      "budget": "markerless_test_functions_max",
-      "expected_max": 0,
-      "metric": "markerless_test_functions"
-    }
-  ],
+  "budget_violations": [],
   "compatibility_examples": [],
   "compatibility_files": [],
   "compatibility_test_files": 0,
@@ -1230,7 +1223,8 @@
     ]
   },
   "intentional_no_exception_contract": 89,
-  "markerless_test_functions": 30,
+  "markerless_examples": [],
+  "markerless_test_functions": 0,
   "parse_errors": [],
   "refined_assertless_tests": 0,
   "repo_backed_unit_inventory": {
@@ -2163,7 +2157,8 @@
         ".yml"
       ]
     },
-    "markerless_test_functions": 30,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "parse_errors": [],
     "refined_assertless_tests": 0,
     "repo_backed_unit_inventory": {
@@ -2225,11 +2220,11 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 1997,
-    "total_test_functions": 22348,
+    "total_test_functions": 22357,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "cff7cebf3a35c33bbaf4756b507fea4de59e35fc39b764722ad096deef7645bf",
+  "source_tree_sha256": "25e94146f3231fc395440792cfe48670a1cf7ab9ac97d0de3427b6a080fade5d",
   "summary": {
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
@@ -2237,7 +2232,8 @@
     "duplicate_test_name_occurrences": 0,
     "duplicate_test_names": 0,
     "intentional_no_exception_contract": 89,
-    "markerless_test_functions": 30,
+    "markerless_examples": [],
+    "markerless_test_functions": 0,
     "refined_assertless_tests": 0,
     "uuid4_call_sites": 0
   },
@@ -2290,6 +2286,6 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 1997,
-  "total_test_functions": 22348,
+  "total_test_functions": 22357,
   "uuid4_call_sites": 0
 }

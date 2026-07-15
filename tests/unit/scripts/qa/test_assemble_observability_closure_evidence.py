@@ -3,8 +3,12 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from scripts.engineering.qa import assemble_observability_closure_evidence as assembler
 from scripts.engineering.qa import run_observability_closure_campaign as campaign
+
+pytestmark = pytest.mark.unit
 
 
 def test_raw_specs_preserve_repeated_kinds() -> None:

@@ -1863,7 +1863,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.batch_transformer",
       "path": "src/bioetl/application/core/batch_transformer.py",
-      "source_lines": 242
+      "source_lines": 240
     },
     {
       "coverage_percent": 95.08,
@@ -4713,7 +4713,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.manifest._service_support",
       "path": "src/bioetl/application/services/control_plane/manifest/_service_support.py",
-      "source_lines": 307
+      "source_lines": 302
     },
     {
       "coverage_percent": 100.0,
@@ -4863,7 +4863,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.manifest.diagnostics.main_helpers",
       "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/main_helpers.py",
-      "source_lines": 173
+      "source_lines": 170
     },
     {
       "coverage_percent": 100.0,
@@ -5673,7 +5673,7 @@
       "missing_lines": 2,
       "module": "bioetl.application.services.control_plane.workflow.execution_recording_payloads",
       "path": "src/bioetl/application/services/control_plane/workflow/execution_recording_payloads.py",
-      "source_lines": 149
+      "source_lines": 118
     },
     {
       "coverage_percent": 100.0,
@@ -10543,7 +10543,7 @@
       "missing_lines": 1,
       "module": "bioetl.domain.context_run",
       "path": "src/bioetl/domain/context_run.py",
-      "source_lines": 264
+      "source_lines": 259
     },
     {
       "coverage_percent": 100.0,
@@ -11073,7 +11073,7 @@
       "missing_lines": 2,
       "module": "bioetl.domain.control_plane.run_manifest",
       "path": "src/bioetl/domain/control_plane/run_manifest.py",
-      "source_lines": 311
+      "source_lines": 305
     },
     {
       "coverage_percent": 91.76,
@@ -21303,7 +21303,7 @@
       "missing_lines": 19,
       "module": "bioetl.interfaces.cli.commands.domains.health.server_integration",
       "path": "src/bioetl/interfaces/cli/commands/domains/health/server_integration.py",
-      "source_lines": 422
+      "source_lines": 418
     },
     {
       "coverage_percent": 100.0,
@@ -24085,7 +24085,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.core.batch_transformer",
       "path": "src/bioetl/application/core/batch_transformer.py",
-      "source_lines": 242
+      "source_lines": 240
     },
     {
       "coverage_percent": 95.08,
@@ -26935,7 +26935,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.manifest._service_support",
       "path": "src/bioetl/application/services/control_plane/manifest/_service_support.py",
-      "source_lines": 307
+      "source_lines": 302
     },
     {
       "coverage_percent": 100.0,
@@ -27085,7 +27085,7 @@
       "missing_lines": 0,
       "module": "bioetl.application.services.control_plane.manifest.diagnostics.main_helpers",
       "path": "src/bioetl/application/services/control_plane/manifest/diagnostics/main_helpers.py",
-      "source_lines": 173
+      "source_lines": 170
     },
     {
       "coverage_percent": 100.0,
@@ -27895,7 +27895,7 @@
       "missing_lines": 2,
       "module": "bioetl.application.services.control_plane.workflow.execution_recording_payloads",
       "path": "src/bioetl/application/services/control_plane/workflow/execution_recording_payloads.py",
-      "source_lines": 149
+      "source_lines": 118
     },
     {
       "coverage_percent": 100.0,
@@ -32765,7 +32765,7 @@
       "missing_lines": 1,
       "module": "bioetl.domain.context_run",
       "path": "src/bioetl/domain/context_run.py",
-      "source_lines": 264
+      "source_lines": 259
     },
     {
       "coverage_percent": 100.0,
@@ -33295,7 +33295,7 @@
       "missing_lines": 2,
       "module": "bioetl.domain.control_plane.run_manifest",
       "path": "src/bioetl/domain/control_plane/run_manifest.py",
-      "source_lines": 311
+      "source_lines": 305
     },
     {
       "coverage_percent": 91.76,
@@ -43525,7 +43525,7 @@
       "missing_lines": 19,
       "module": "bioetl.interfaces.cli.commands.domains.health.server_integration",
       "path": "src/bioetl/interfaces/cli/commands/domains/health/server_integration.py",
-      "source_lines": 422
+      "source_lines": 418
     },
     {
       "coverage_percent": 100.0,
@@ -44450,7 +44450,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "c9d9b4eb16d497296346cb2d09348f3db5b6a9e0001f5401f95c7a88e0dc6c81",
+  "source_tree_sha256": "734b341b9ea3a5755adf50f07c6c31008942a314acb78dbec8ceba85db6ab87c",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

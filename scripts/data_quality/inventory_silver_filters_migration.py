@@ -612,9 +612,11 @@ def _iter_surface_files(path_specs: tuple[str, ...]) -> list[Path]:
             continue
         if not root.is_dir():
             continue
-        for path in sorted(root.rglob("*")):
-            if _is_scannable_surface_file(path):
-                files[path.as_posix()] = path
+        # Use specific glob patterns instead of rglob("*") for better performance
+        for suffix in _SURFACE_FILE_SUFFIXES:
+            for path in sorted(root.rglob(f"*{suffix}")):
+                if _is_scannable_surface_file(path):
+                    files[path.as_posix()] = path
     return [files[key] for key in sorted(files)]
 
 
