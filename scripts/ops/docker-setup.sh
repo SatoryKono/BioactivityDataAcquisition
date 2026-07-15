@@ -16,6 +16,14 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
+DOCKER_PREFLIGHT="scripts/ops/runtime/docker/docker_runtime_preflight.py"
+DOCKER_CONTRACT="configs/quality/docker_runtime_contracts.yaml"
+MAIN_PROJECT="bioetl-main"
+MAIN_COMPOSE="docker-compose.yml"
+MONITORING_PROJECT="bioetl-monitoring"
+MONITORING_COMPOSE="docker-compose.monitoring.yml"
+MONITORING_SERVICES=(prometheus pushgateway renderer grafana)
+declare -A RESTART_BASELINE=()
 
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
@@ -56,28 +64,108 @@ check_compose() {
     log_success "Docker Compose found: $(docker compose version)"
 }
 
-ensure_env_file() {
+require_env_file() {
     if [[ -f .env ]]; then
         return 0
     fi
 
-    if [[ "${BIOETL_CREATE_LOCAL_ENV_FILES:-}" == "1" ]]; then
-        if [[ ! -f .env.example ]]; then
-            log_error ".env.example not found; .env was not created."
-            exit 2
-        fi
-        log_warning ".env file is missing; BIOETL_CREATE_LOCAL_ENV_FILES=1 allows creating it from the example."
-        cp .env.example .env
-        log_success "Created .env file. Edit it before using secrets."
+    log_error ".env file is missing."
+    log_warning "Guardrail: Docker helper never creates or edits .env files."
+    log_warning "Provide the required values through an existing approved .env or process environment, then retry."
+    exit 2
+}
+
+python_command() {
+    if [[ -n "${BIOETL_PYTHON:-}" ]] && command -v "$BIOETL_PYTHON" >/dev/null 2>&1; then
+        printf '%s\n' "$BIOETL_PYTHON"
         return 0
     fi
+    command -v python >/dev/null 2>&1 && printf '%s\n' "python" && return 0
+    command -v python3 >/dev/null 2>&1 && printf '%s\n' "python3" && return 0
+    log_error "Python is required for the Docker runtime preflight."
+    return 1
+}
 
-    log_error ".env file is missing."
-    log_warning "Guardrail: Docker helper не создает .env автоматически."
-    log_warning "Create it manually after an explicit local decision: cp .env.example .env"
-    log_warning "Rerun with BIOETL_CREATE_LOCAL_ENV_FILES=1 only when local .env creation is intended."
-    log_warning "Default behavior is non-mutating without BIOETL_CREATE_LOCAL_ENV_FILES=1."
-    exit 2
+run_runtime_preflight() {
+    local phase="$1"
+    local python_bin
+    local report="reports/quality/docker-runtime-${phase}.json"
+    python_bin="$(python_command)"
+    log_info "Running fail-closed Docker runtime ${phase} preflight..."
+    if ! BIOETL_REPO_ROOT="$PROJECT_ROOT" "$python_bin" "$DOCKER_PREFLIGHT" \
+        --contract "$DOCKER_CONTRACT" --output "$report"; then
+        log_error "Docker runtime ${phase} preflight failed. Review $report before mutation."
+        return 1
+    fi
+    "$python_bin" -c 'import json, pathlib, sys
+payload = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+for row in payload.get("live", {}).get("compose_projects", []):
+    name = str(row.get("Name") or row.get("name") or "")
+    raw = row.get("ConfigFiles") or row.get("ConfigFile") or []
+    files = raw if isinstance(raw, list) else [item.strip() for item in str(raw).split(",") if item.strip()]
+    normalized = [str(item).replace("\\", "/") for item in files]
+    if any(item.startswith("/tmp/") for item in normalized):
+        raise SystemExit(f"{name}: /tmp Compose config origin is forbidden")
+    if name.startswith("bioetl-") and len(normalized) != 1:
+        raise SystemExit(f"{name}: multiple owning Compose files are forbidden: {normalized}")' "$report"
+    log_success "Docker runtime ${phase} preflight passed."
+}
+
+restart_key() { printf '%s/%s\n' "$1" "$3"; }
+
+capture_restart_baseline() {
+    local project="$1" compose_file="$2"
+    shift 2
+    local service container_id count key
+    for service in "$@"; do
+        key="$(restart_key "$project" "$compose_file" "$service")"
+        container_id="$(docker compose -p "$project" -f "$compose_file" ps -q "$service" 2>/dev/null)"
+        count=0
+        if [[ -n "$container_id" ]]; then
+            count="$(docker inspect --format '{{.RestartCount}}' "$container_id")"
+        fi
+        RESTART_BASELINE["$key"]="$count"
+    done
+}
+
+verify_service_state() {
+    local project="$1" compose_file="$2" service="$3"
+    local container_id state oom health restarts baseline key
+    key="$(restart_key "$project" "$compose_file" "$service")"
+    container_id="$(docker compose -p "$project" -f "$compose_file" ps -q "$service")"
+    [[ -n "$container_id" ]] || { log_error "$project/$service has no owned container."; return 1; }
+    read -r state oom health restarts < <(
+        docker inspect --format '{{.State.Status}} {{.State.OOMKilled}} {{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}} {{.RestartCount}}' "$container_id"
+    )
+    baseline="${RESTART_BASELINE[$key]:-0}"
+    [[ "$state" == "running" && "$oom" == "false" ]] || { log_error "$project/$service failed state/OOM verification: state=$state oom=$oom"; return 1; }
+    [[ "$health" == "none" || "$health" == "healthy" ]] || { log_error "$project/$service is not healthy: $health"; return 1; }
+    (( restarts <= baseline )) || { log_error "$project/$service restart count increased: $baseline -> $restarts"; return 1; }
+}
+
+wait_for_backend_readiness() {
+    local python_bin
+    python_bin="$(python_command)"
+    "$python_bin" -c 'import json, time, urllib.request
+url = "http://127.0.0.1:8081/ops/control-plane/ready"
+deadline = time.monotonic() + 90
+while time.monotonic() < deadline:
+    try:
+        with urllib.request.urlopen(url, timeout=2) as response:
+            payload = json.load(response)
+        if response.status < 400 and isinstance(payload, dict): raise SystemExit(0)
+    except Exception: time.sleep(1)
+raise SystemExit("BioETL control-plane readiness timed out")'
+}
+
+verify_prometheus_runtime_identity() {
+    local python_bin host_start container_payload container_start
+    python_bin="$(python_command)"
+    host_start="$("$python_bin" -c 'import json,sys,urllib.request; print(json.load(urllib.request.urlopen(sys.argv[1], timeout=5))["data"]["startTime"])' "http://127.0.0.1:9090/api/v1/status/runtimeinfo")"
+    container_payload="$(docker compose -p "$MONITORING_PROJECT" -f "$MONITORING_COMPOSE" exec -T prometheus wget -qO- http://127.0.0.1:9090/api/v1/status/runtimeinfo)"
+    container_start="$(printf '%s' "$container_payload" | "$python_bin" -c 'import json,sys; print(json.load(sys.stdin)["data"]["startTime"])')"
+    [[ -n "$host_start" && "$host_start" == "$container_start" ]] || { log_error "Host and container-network Prometheus runtime identities differ."; return 1; }
+    log_success "Prometheus runtime identity converged."
 }
 
 ensure_external_network() {
@@ -107,48 +195,66 @@ build_image() {
 }
 
 start_main_stack() {
-    ensure_env_file
+    require_env_file
+    run_runtime_preflight "pre"
     ensure_external_networks
-    log_info "Starting BioETL services..."
-    docker compose -p bioetl-main -f docker-compose.yml up -d
-    log_success "BioETL services started."
+    capture_restart_baseline "$MAIN_PROJECT" "$MAIN_COMPOSE" bioetl
+    log_info "Starting the explicit BioETL backend service..."
+    docker compose -p "$MAIN_PROJECT" -f "$MAIN_COMPOSE" up -d --wait --wait-timeout 120 bioetl
+    wait_for_backend_readiness
+    verify_service_state "$MAIN_PROJECT" "$MAIN_COMPOSE" bioetl
+    run_runtime_preflight "post"
+    log_success "BioETL backend is ready and postflight passed."
 }
 
 start_full_stack() {
-    ensure_env_file
+    require_env_file
+    run_runtime_preflight "pre"
     ensure_external_networks
+    capture_restart_baseline "$MAIN_PROJECT" "$MAIN_COMPOSE" bioetl
+    capture_restart_baseline "$MONITORING_PROJECT" "$MONITORING_COMPOSE" "${MONITORING_SERVICES[@]}"
+    log_info "Starting the explicit BioETL backend service..."
+    docker compose -p "$MAIN_PROJECT" -f "$MAIN_COMPOSE" up -d --wait --wait-timeout 120 bioetl
+    wait_for_backend_readiness
+    verify_service_state "$MAIN_PROJECT" "$MAIN_COMPOSE" bioetl
 
     log_info "Starting Neo4j..."
-    docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d
+    docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d neo4j
     log_success "Neo4j started."
 
     log_info "Starting Redis..."
-    docker compose -p bioetl-redis -f scripts/ops/runtime/docker/compose/redis.yml up -d
+    docker compose -p bioetl-redis -f scripts/ops/runtime/docker/compose/redis.yml up -d redis redis-exporter
     log_success "Redis started."
 
     log_info "Starting MinIO..."
-    docker compose -p bioetl-minio -f scripts/ops/runtime/docker/compose/minio.yml up -d
+    docker compose -p bioetl-minio -f scripts/ops/runtime/docker/compose/minio.yml up -d minio
     log_success "MinIO started."
 
     log_info "Starting monitoring stack..."
-    docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml up -d
-    log_success "Monitoring stack started."
-
-    log_info "Starting BioETL services..."
-    docker compose -p bioetl-main -f docker-compose.yml up -d
-    log_success "BioETL services started."
+    docker compose -p "$MONITORING_PROJECT" -f "$MONITORING_COMPOSE" up -d --wait --wait-timeout 120 "${MONITORING_SERVICES[@]}"
+    for service in "${MONITORING_SERVICES[@]}"; do verify_service_state "$MONITORING_PROJECT" "$MONITORING_COMPOSE" "$service"; done
+    verify_prometheus_runtime_identity
+    run_runtime_preflight "post"
+    log_success "Full helper stack is ready and postflight passed."
 }
 
 start_monitoring() {
-    ensure_env_file
+    require_env_file
+    run_runtime_preflight "pre"
     ensure_external_networks
+    wait_for_backend_readiness || { log_error "Monitoring requires the canonical bioetl-main HTTP backend on 127.0.0.1:8081."; return 1; }
+    capture_restart_baseline "$MONITORING_PROJECT" "$MONITORING_COMPOSE" "${MONITORING_SERVICES[@]}"
     log_info "Starting monitoring stack..."
-    docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml up -d
-    log_success "Monitoring stack started."
+    docker compose -p "$MONITORING_PROJECT" -f "$MONITORING_COMPOSE" up -d --wait --wait-timeout 120 "${MONITORING_SERVICES[@]}"
+    for service in "${MONITORING_SERVICES[@]}"; do verify_service_state "$MONITORING_PROJECT" "$MONITORING_COMPOSE" "$service"; done
+    verify_prometheus_runtime_identity
+    run_runtime_preflight "post"
+    log_success "Monitoring stack is ready and postflight passed."
 }
 
 start_mcp() {
-    ensure_env_file
+    require_env_file
+    run_runtime_preflight "pre"
     ensure_external_networks
     log_info "Starting MCP servers..."
     docker compose -p bioetl-codex -f docker-compose.codex.yml up -d
@@ -164,11 +270,11 @@ stop_main_stack() {
 stop_full_stack() {
     log_info "Stopping all Docker helper services..."
     docker compose -p bioetl-main -f docker-compose.yml down
-    docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml down || true
-    docker compose -p bioetl-redis -f scripts/ops/runtime/docker/compose/redis.yml down || true
-    docker compose -p bioetl-minio -f scripts/ops/runtime/docker/compose/minio.yml down || true
-    docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml down || true
-    docker compose -p bioetl-codex -f docker-compose.codex.yml down || true
+    docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml down
+    docker compose -p bioetl-redis -f scripts/ops/runtime/docker/compose/redis.yml down
+    docker compose -p bioetl-minio -f scripts/ops/runtime/docker/compose/minio.yml down
+    docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml down
+    docker compose -p bioetl-codex -f docker-compose.codex.yml down
     log_success "All Docker helper services stopped."
 }
 
@@ -189,13 +295,14 @@ health_check() {
         log_success "BioETL is healthy."
     else
         log_warning "BioETL health check failed."
+        return 1
     fi
 }
 
 cleanup() {
     log_warning "Removing Docker resources for the main BioETL stack."
     docker compose -p bioetl-main -f docker-compose.yml down --volumes
-    docker rmi bioetl:latest || true
+    if docker image inspect bioetl:latest >/dev/null 2>&1; then docker rmi bioetl:latest; fi
     log_success "Cleanup complete."
 }
 
@@ -232,7 +339,7 @@ EOF
 
 main() {
     local command="${1:-help}"
-    shift || true
+    if (( $# > 0 )); then shift; fi
 
     case "$command" in
         check)
@@ -246,15 +353,11 @@ main() {
         start|basic)
             check_docker
             start_main_stack
-            sleep 2
-            health_check
             ;;
         start-full|full)
             check_docker
             build_image
             start_full_stack
-            sleep 5
-            health_check
             ;;
         monitoring)
             check_docker

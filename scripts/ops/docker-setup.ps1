@@ -10,15 +10,21 @@ param(
     [Parameter(Position = 1)]
     [string]$Service = "",
 
-    [string]$Mode = "",
-
-    [switch]$AllowEnvFileCreate
+    [string]$Mode = ""
 )
 
 $ErrorActionPreference = "Continue"
 
 $ProjectRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 Set-Location $ProjectRoot
+$DockerPreflight = "scripts/ops/runtime/docker/docker_runtime_preflight.py"
+$DockerContract = "configs/quality/docker_runtime_contracts.yaml"
+$MainProject = "bioetl-main"
+$MainCompose = "docker-compose.yml"
+$MonitoringProject = "bioetl-monitoring"
+$MonitoringCompose = "docker-compose.monitoring.yml"
+$MonitoringServices = @("prometheus", "pushgateway", "renderer", "grafana")
+$RestartBaseline = @{}
 
 function Write-Info {
     Write-Host "[INFO] $args" -ForegroundColor Blue
@@ -34,6 +40,11 @@ function Write-Warn {
 
 function Write-Fail {
     Write-Host "[ERROR] $args" -ForegroundColor Red
+}
+
+function Assert-NativeSuccess {
+    param([string]$Action)
+    if ($LASTEXITCODE -ne 0) { throw "$Action failed with exit code $LASTEXITCODE." }
 }
 
 function Check-Docker {
@@ -63,29 +74,92 @@ function Check-Compose {
     Write-Success "Docker Compose found: $compose"
 }
 
-function Ensure-EnvFile {
+function Require-EnvFile {
     if (Test-Path ".env") {
         return
     }
 
-    if ($AllowEnvFileCreate -or $env:BIOETL_CREATE_LOCAL_ENV_FILES -eq "1") {
-        if (-not (Test-Path ".env.example")) {
-            Write-Fail ".env.example not found; .env was not created."
-            exit 2
-        }
-
-        Write-Warn ".env file is missing; BIOETL_CREATE_LOCAL_ENV_FILES=1 or explicit opt-in allows creating it from the example."
-        Copy-Item ".env.example" ".env"
-        Write-Success "Created .env file. Edit it before using secrets."
-        return
-    }
-
     Write-Fail ".env file is missing."
-    Write-Warn "Guardrail: Docker helper не создает .env автоматически."
-    Write-Warn "Create it manually after an explicit local decision: Copy-Item .env.example .env"
-    Write-Warn "Rerun with BIOETL_CREATE_LOCAL_ENV_FILES=1 only when local .env creation is intended."
-    Write-Warn "Default behavior is non-mutating without BIOETL_CREATE_LOCAL_ENV_FILES=1."
+    Write-Warn "Guardrail: Docker helper never creates or edits .env files."
+    Write-Warn "Provide the required values through an existing approved .env or process environment, then retry."
     exit 2
+}
+
+function Get-PythonCommand {
+    if ($env:BIOETL_PYTHON -and (Get-Command $env:BIOETL_PYTHON -ErrorAction SilentlyContinue)) { return $env:BIOETL_PYTHON }
+    foreach ($Candidate in @("python", "python3")) { if (Get-Command $Candidate -ErrorAction SilentlyContinue) { return $Candidate } }
+    throw "Python is required for the Docker runtime preflight."
+}
+
+function Invoke-RuntimePreflight {
+    param([string]$Phase)
+    $Python = Get-PythonCommand
+    $Report = "reports/quality/docker-runtime-$Phase.json"
+    Write-Info "Running fail-closed Docker runtime $Phase preflight..."
+    $PreviousRepoRoot = $env:BIOETL_REPO_ROOT
+    $env:BIOETL_REPO_ROOT = $ProjectRoot
+    try { & $Python $DockerPreflight --contract $DockerContract --output $Report }
+    finally { $env:BIOETL_REPO_ROOT = $PreviousRepoRoot }
+    if ($LASTEXITCODE -ne 0) { throw "Docker runtime $Phase preflight failed. Review $Report before mutation." }
+    $Payload = Get-Content -Raw $Report | ConvertFrom-Json
+    foreach ($Project in @($Payload.live.compose_projects)) {
+        $ProjectName = if ($Project.Name) { [string]$Project.Name } else { [string]$Project.name }
+        $RawFiles = if ($Project.ConfigFiles) { $Project.ConfigFiles } else { $Project.ConfigFile }
+        $ConfigFiles = if ($RawFiles -is [array]) { @($RawFiles) } else { @([string]$RawFiles -split "," | Where-Object { $_.Trim() }) }
+        $NormalizedFiles = @($ConfigFiles | ForEach-Object { ([string]$_).Replace("\", "/").Trim() })
+        if ($NormalizedFiles | Where-Object { $_.StartsWith("/tmp/") }) { throw "$ProjectName`: /tmp Compose config origin is forbidden." }
+        if ($ProjectName.StartsWith("bioetl-") -and $NormalizedFiles.Count -ne 1) { throw "$ProjectName`: multiple owning Compose files are forbidden: $NormalizedFiles" }
+    }
+    Write-Success "Docker runtime $Phase preflight passed."
+}
+
+function Get-RestartKey { param([string]$Project, [string]$ServiceName); return "$Project/$ServiceName" }
+
+function Save-RestartBaseline {
+    param([string]$Project, [string]$ComposeFile, [string[]]$Services)
+    foreach ($ServiceName in $Services) {
+        $ContainerId = docker compose -p $Project -f $ComposeFile ps -q $ServiceName 2>$null
+        $Count = 0
+        if ($LASTEXITCODE -eq 0 -and $ContainerId) {
+            $Count = [int](docker inspect --format '{{.RestartCount}}' $ContainerId)
+            if ($LASTEXITCODE -ne 0) { throw "Could not read restart baseline for $Project/$ServiceName." }
+        }
+        $RestartBaseline[(Get-RestartKey -Project $Project -ServiceName $ServiceName)] = $Count
+    }
+}
+
+function Assert-ServiceReady {
+    param([string]$Project, [string]$ComposeFile, [string]$ServiceName)
+    $ContainerId = docker compose -p $Project -f $ComposeFile ps -q $ServiceName
+    if ($LASTEXITCODE -ne 0 -or -not $ContainerId) { throw "$Project/$ServiceName has no owned container." }
+    $Inspection = (docker inspect $ContainerId | ConvertFrom-Json)[0]
+    if ($LASTEXITCODE -ne 0 -or -not $Inspection) { throw "Could not inspect $Project/$ServiceName." }
+    if ($Inspection.State.Status -ne "running" -or $Inspection.State.OOMKilled) { throw "$Project/$ServiceName failed state/OOM verification." }
+    if ($Inspection.State.Health -and $Inspection.State.Health.Status -ne "healthy") { throw "$Project/$ServiceName is not healthy: $($Inspection.State.Health.Status)" }
+    $Key = Get-RestartKey -Project $Project -ServiceName $ServiceName
+    $Baseline = if ($RestartBaseline.ContainsKey($Key)) { [int]$RestartBaseline[$Key] } else { 0 }
+    if ([int]$Inspection.RestartCount -gt $Baseline) { throw "$Project/$ServiceName restart count increased: $Baseline -> $($Inspection.RestartCount)" }
+}
+
+function Wait-BackendReadiness {
+    $Deadline = (Get-Date).AddSeconds(90)
+    while ((Get-Date) -lt $Deadline) {
+        try {
+            $Payload = Invoke-RestMethod -Uri "http://127.0.0.1:8081/ops/control-plane/ready" -TimeoutSec 2
+            if ($null -ne $Payload) { return }
+        }
+        catch { Start-Sleep -Seconds 1 }
+    }
+    throw "BioETL control-plane readiness timed out."
+}
+
+function Assert-PrometheusRuntimeIdentity {
+    $HostIdentity = Invoke-RestMethod -Uri "http://127.0.0.1:9090/api/v1/status/runtimeinfo" -TimeoutSec 5
+    $ContainerRaw = docker compose -p $MonitoringProject -f $MonitoringCompose exec -T prometheus wget -qO- http://127.0.0.1:9090/api/v1/status/runtimeinfo
+    if ($LASTEXITCODE -ne 0) { throw "Could not read container-network Prometheus runtime identity." }
+    $ContainerIdentity = $ContainerRaw | ConvertFrom-Json
+    if (-not $HostIdentity.data.startTime -or $HostIdentity.data.startTime -ne $ContainerIdentity.data.startTime) { throw "Host and container-network Prometheus runtime identities differ." }
+    Write-Success "Prometheus runtime identity converged."
 }
 
 function Ensure-ExternalNetwork {
