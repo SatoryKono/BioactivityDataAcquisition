@@ -169,7 +169,35 @@ def test_each_simulated_failure_has_one_primary_actionable_cause(
     assert report["primary_cause"] == cause
     exposition = probe.prometheus_exposition(report)
     assert exposition.count("bioetl_docker_runtime_primary_cause{") == 1
-    assert f'cause="{cause}"' in exposition
+    assert "cause=" not in exposition
+    assert 'project="bioetl-main",stack="main"' in exposition
+
+
+def test_prometheus_exposition_does_not_export_untrusted_cause_or_observations() -> None:
+    report = {
+        "project": "Bearer ghp_project-secret",
+        "stack": "main",
+        "primary_cause": "Bearer ghp_sensitive-value",
+        "slo": {
+            "daemon_available": False,
+            "restart_count_delta": 0,
+            "oom_kills": 0,
+            "disk_reserve_bytes": 0,
+            "recovery_attempt_count": 0,
+            "recovery_duration_seconds": 0,
+        },
+        "services": [],
+        "resources": [],
+        "observations": [{"stderr": "TOKEN=secret-value"}],
+    }
+
+    exposition = probe.prometheus_exposition(report)
+
+    assert "ghp_sensitive-value" not in exposition
+    assert "ghp_project-secret" not in exposition
+    assert "secret-value" not in exposition
+    assert "cause=" not in exposition
+    assert "bioetl_docker_runtime_primary_cause{project=\"<redacted>\",stack=\"main\"} 0" in exposition
 
 
 def test_probe_is_read_only_and_redacts_observations(tmp_path: Path) -> None:

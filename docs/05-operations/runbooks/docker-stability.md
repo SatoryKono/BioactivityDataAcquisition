@@ -26,6 +26,12 @@ the scheduled host probe or run it manually. Publishing to Pushgateway is
 explicit through `--pushgateway-url`; disabling publication does not start,
 stop, or modify Docker services.
 
+The `bioetl_docker_runtime_primary_cause` metric is intentionally label-free:
+its value is a bounded numeric cause enum (zero means no cause). Never add
+command output, image identifiers, incident text, or `stderr` to metric labels.
+Probe JSON is recursively redacted before it is written, while exposition
+contains only the bounded contract fields.
+
 Host-disruptive Docker Desktop/WSL restart tests are manual-only. They require
 explicit operator scheduling because unrelated local containers can be
 affected. Force-killing Docker Desktop, `wsl --shutdown`, VHDX deletion, and

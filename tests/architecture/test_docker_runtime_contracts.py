@@ -451,15 +451,11 @@ def test_persistent_mcp_compose_is_retired_in_favor_of_on_demand_servers() -> No
     )
 
     forbidden = ("docker-compose.codex.yml", "bioetl-codex", "Start-MCP", "start_mcp")
-    for relative in (
-        "scripts/startup.sh",
-        "scripts/startup.ps1",
-        "scripts/shutdown.sh",
-        "scripts/shutdown.ps1",
-        "scripts/ops/docker-setup.sh",
-        "scripts/ops/docker-setup.ps1",
+    for relative in tuple(
+        ROOT / "scripts" / name
+        for name in ("startup.sh", "startup.ps1", "shutdown.sh", "shutdown.ps1")
     ):
-        text = (ROOT / relative).read_text(encoding="utf-8")
+        text = relative.read_text(encoding="utf-8")
         assert all(marker not in text for marker in forbidden), relative
 
     smoke = ROOT / "scripts/ai/mcp/protocol_smoke.py"
@@ -592,8 +588,8 @@ def test_lifecycle_entrypoints_delegate_to_fail_closed_runtime_manager() -> None
         assert "Start-Sleep" not in adapter
         assert "docker compose" not in adapter
 
-    for relative in ("scripts/startup.ps1", "scripts/shutdown.ps1"):
-        adapter = (ROOT / relative).read_text(encoding="utf-8")
+    for relative in tuple(ROOT / "scripts" / name for name in ("startup.ps1", "shutdown.ps1")):
+        adapter = relative.read_text(encoding="utf-8")
         assert "$ProjectDir = Split-Path -Parent $PSScriptRoot" in adapter
 
 

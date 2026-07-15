@@ -24,6 +24,7 @@ _SCANNED_SUFFIXES = (".md", ".py", ".ps1", ".sh")
 _ALLOWED_MENTION_FILES = frozenset(
     {
         CURRENT_TEST_FILE,
+        ROOT / "tests" / "architecture" / "test_docker_runtime_contracts.py",
         ROOT / "scripts" / "docker-setup.ps1",
         ROOT / "scripts" / "docker-setup.sh",
         ROOT / "scripts" / "startup.ps1",
