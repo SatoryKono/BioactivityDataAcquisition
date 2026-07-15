@@ -22,7 +22,7 @@ def _load_monitoring_compose() -> dict[str, object]:
 
 
 def _load_monitoring_audit_override() -> dict[str, object]:
-    compose_path = Path("docker-compose.monitoring.audit.yml")
+    compose_path = Path("scripts/ops/observability/docker-compose.monitoring.audit.yml")
     return yaml.safe_load(compose_path.read_text(encoding="utf-8"))
 
 
