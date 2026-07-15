@@ -705,8 +705,8 @@
     },
     "summary": {
       "affected_file_count": 14,
-      "duplicate_cluster_count": 22,
-      "duplicate_occurrence_count": 62,
+      "duplicate_cluster_count": 21,
+      "duplicate_occurrence_count": 60,
       "reported_cluster_count": 21
     }
   },
