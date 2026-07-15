@@ -42,6 +42,13 @@ def test_readiness_fails_on_restart_oom_and_image_drift() -> None:
 
 
 def test_readiness_accepts_matching_repo_digest_when_config_reference_differs() -> None:
+    spec = runtime_manager.StackSpec(
+        name="main",
+        project="bioetl-main",
+        compose_file=Path("docker-compose.yml"),
+        required_services=("bioetl",),
+        expected_images={"bioetl": "bioetl:test@sha256:" + "a" * 64},
+    )
     snapshot = runtime_manager.ServiceSnapshot(
         service="bioetl",
         container_id="abc",
@@ -54,7 +61,7 @@ def test_readiness_accepts_matching_repo_digest_when_config_reference_differs() 
     )
 
     assert runtime_manager.readiness_findings(
-        _spec(), [snapshot], baseline={}
+        spec, [snapshot], baseline={}
     ) == []
 
 
