@@ -345,11 +345,11 @@ data/.idea/
 *.pak
 
 # Machine-local / one-off artifacts (do not track)
-.claude/settings*
-.claude/marketplace.json
-.claude/.dropbox.cache/
-.claude/*.docx
-/docs/.claude/settings*
+
+
+
+
+
 /.venv-docs
 /script-codex
 /script-gemini
@@ -416,3 +416,6 @@ data/2026-07-03_20-21-59.gif
 .github/workflows/docs.yml
 .xml
 .github/workflows/docs.yml
+!.claude/
+!.claude/agents/
+!.claude/agents/*.md

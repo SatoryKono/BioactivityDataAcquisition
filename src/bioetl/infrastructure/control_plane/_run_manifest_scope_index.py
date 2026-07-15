@@ -47,6 +47,24 @@ def latest_scope_catalog_path(base_path: Path) -> Path:
     return base_path / _INDEX_DIR / _CATALOG_FILE
 
 
+def _parse_scope_item(item: object, scopes: list[tuple[str, RunType]]) -> None:
+    """Parse and append a single scope item to the scopes list."""
+    if not isinstance(item, dict):
+        raise ValueError("latest-scope catalog scope must be a JSON object")
+    pipeline_name = item.get("pipeline_name")
+    run_type_value = item.get("run_type")
+    if not isinstance(pipeline_name, str) or not pipeline_name:
+        raise ValueError("latest-scope catalog pipeline_name is malformed")
+    try:
+        run_type = RunType(run_type_value)
+    except (TypeError, ValueError) as error:
+        raise ValueError("latest-scope catalog run_type is malformed") from error
+    scope = (pipeline_name, run_type)
+    if scope in scopes:
+        raise ValueError("latest-scope catalog contains a duplicate scope")
+    scopes.append(scope)
+
+
 def load_latest_scope_catalog(path: Path) -> LatestScopeIndexCatalog | None:
     """Load the catalog marker, rejecting malformed or ambiguous state."""
     if not path.exists():
@@ -62,20 +80,7 @@ def load_latest_scope_catalog(path: Path) -> LatestScopeIndexCatalog | None:
         raise ValueError("latest-scope catalog fields are malformed")
     scopes: list[tuple[str, RunType]] = []
     for item in scopes_payload:
-        if not isinstance(item, dict):
-            raise ValueError("latest-scope catalog scope must be a JSON object")
-        pipeline_name = item.get("pipeline_name")
-        run_type_value = item.get("run_type")
-        if not isinstance(pipeline_name, str) or not pipeline_name:
-            raise ValueError("latest-scope catalog pipeline_name is malformed")
-        try:
-            run_type = RunType(run_type_value)
-        except (TypeError, ValueError) as error:
-            raise ValueError("latest-scope catalog run_type is malformed") from error
-        scope = (pipeline_name, run_type)
-        if scope in scopes:
-            raise ValueError("latest-scope catalog contains a duplicate scope")
-        scopes.append(scope)
+        _parse_scope_item(item, scopes)
     if scopes != sorted(scopes, key=lambda item: (item[0], item[1].value)):
         raise ValueError("latest-scope catalog scopes are not deterministic")
     return LatestScopeIndexCatalog(complete=complete, scopes=tuple(scopes))
