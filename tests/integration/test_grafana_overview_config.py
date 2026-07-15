@@ -128,7 +128,9 @@ def test_run_id_selector_is_control_plane_backed_table_query() -> None:
     assert "run_type=${run_type:csv}" in query_url
 
 
-def test_first_screen_layout_matches_overview_v3_baseline() -> None:
+def test_first_screen_layout_matches_reviewed_progressive_disclosure_baseline() -> (
+    None
+):
     expected = {
         "Provenance": {"id": 99, "x": 0, "y": 3, "w": 16, "h": 4},
         "Status": {"id": 214, "x": 16, "y": 3, "w": 8, "h": 4},
@@ -140,7 +142,7 @@ def test_first_screen_layout_matches_overview_v3_baseline() -> None:
         "Data Quality": {"id": 9004, "x": 9, "y": 17, "w": 5, "h": 5},
         "Provider": {"id": 9007, "x": 14, "y": 17, "w": 4, "h": 5},
         "Data Validation": {"id": 9005, "x": 18, "y": 17, "w": 6, "h": 5},
-        "Inputs": {"id": 9002, "x": 0, "y": 22, "w": 12, "h": 8},
+        "Inputs": {"id": 9002, "x": 0, "y": 17, "w": 24, "h": 6},
         "Workflow": {"id": 9013, "x": 12, "y": 22, "w": 12, "h": 8},
     }
 
@@ -150,7 +152,7 @@ def test_first_screen_layout_matches_overview_v3_baseline() -> None:
         assert panel.get("id") == placement["id"]
         for key in ("x", "w"):
             assert grid_pos.get(key) == placement[key], (
-                f"Panel {title!r} must keep Overview v3 {key} placement"
+                f"Panel {title!r} must keep reviewed {key} placement"
             )
         expected_y = placement["y"]
         if title in {
@@ -169,12 +171,12 @@ def test_first_screen_layout_matches_overview_v3_baseline() -> None:
             )
         else:
             assert grid_pos.get("y") == expected_y, (
-                f"Panel {title!r} must keep Overview v3 y placement"
+                f"Panel {title!r} must keep reviewed y placement"
             )
         expected_height = placement.get("h")
         if expected_height is not None:
             assert grid_pos.get("h") == expected_height, (
-                f"Panel {title!r} must keep Overview v3 h placement"
+                f"Panel {title!r} must keep reviewed h placement"
             )
         else:
             assert grid_pos.get("h") in {6, 10}, (

@@ -4857,15 +4857,6 @@
           "required": false,
           "unique": false
         },
-        "component_description": {
-          "checks": [],
-          "coerce": false,
-          "description": "Component description.",
-          "dtype": "str",
-          "nullable": true,
-          "required": false,
-          "unique": false
-        },
         "component_id": {
           "checks": [],
           "coerce": false,
@@ -4901,6 +4892,15 @@
           "dtype": "str",
           "nullable": false,
           "required": true,
+          "unique": false
+        },
+        "description": {
+          "checks": [],
+          "coerce": false,
+          "description": "Component description.",
+          "dtype": "str",
+          "nullable": true,
+          "required": false,
           "unique": false
         },
         "entity_id": {
