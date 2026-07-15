@@ -420,6 +420,35 @@ class TestPushMetricsToGateway:
             "run_type": "incremental",
         }
 
+    def test_sequential_pushes_keep_distinct_bounded_scope_groups(self):
+        """Replace-style snapshots for different scopes must not clobber each other."""
+        with patch(
+            "bioetl.infrastructure.observability.server.push_to_gateway"
+        ) as mock_push:
+            push_metrics_to_gateway(
+                gateway="localhost:9091",
+                grouping_key={
+                    "pipeline": "chembl_activity",
+                    "run_type": "incremental",
+                },
+            )
+            push_metrics_to_gateway(
+                gateway="localhost:9091",
+                grouping_key={
+                    "pipeline": "chembl_target",
+                    "run_type": "backfill",
+                },
+            )
+
+        assert [call.kwargs["grouping_key"] for call in mock_push.call_args_list] == [
+            {"pipeline": "chembl_activity", "run_type": "incremental"},
+            {"pipeline": "chembl_target", "run_type": "backfill"},
+        ]
+        assert [call.kwargs["job"] for call in mock_push.call_args_list] == [
+            "bioetl",
+            "bioetl",
+        ]
+
     def test_push_grouping_key_drops_forensic_high_cardinality_labels(self):
         """Pushgateway bridge must use only bounded aggregate grouping labels."""
         with patch(

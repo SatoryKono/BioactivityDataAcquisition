@@ -47,7 +47,6 @@ class HealthServer(
         run_manifest_port: RunManifestPort | None = None,
         run_ledger_port: RunLedgerPort | None = None,
         workflow_manifest_port: WorkflowManifestPort | None = None,
-        data_root: str | None = None,
         prometheus_base_url: str | None = None,
         logger: LoggerPort | None = None,
     ) -> None:
@@ -69,7 +68,6 @@ class HealthServer(
                 to resolve latest terminal run completion for selector endpoints.
             workflow_manifest_port: Optional read-only workflow manifest catalog used
                 to relate workflow selectors to child pipeline run manifests.
-            data_root: Explicit absolute data root served by read-only explorer ports.
             prometheus_base_url: Optional Prometheus HTTP API base URL for local
                 dashboard helper endpoints such as
                 /ops/observability/processed-records.
@@ -85,7 +83,7 @@ class HealthServer(
         self._run_manifest_port = run_manifest_port
         self._run_ledger_port = run_ledger_port
         self._workflow_manifest_port = workflow_manifest_port
-        self._data_root = data_root
+        self._data_root: str | None = None
         self._prometheus_base_url = (
             prometheus_base_url or DEFAULT_PROMETHEUS_BASE_URL
         ).rstrip("/")
@@ -106,6 +104,10 @@ class HealthServer(
             ConnectionError,
             BrokenPipeError,
         )
+
+    def set_data_root(self, data_root: str | None) -> None:
+        """Set the explicit data root served by read-only explorer ports."""
+        self._data_root = data_root
 
     async def start(self) -> None:
         """Start the health server."""

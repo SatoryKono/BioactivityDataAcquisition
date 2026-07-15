@@ -2,7 +2,7 @@ name: bioetl-sonarqube
 
 services:
   postgres-sonarqube:
-    image: postgres:15-alpine
+    image: postgres:15-alpine@sha256:3d0f7584ed7d04e27fa050d6683a74746608faf21f202be78460d679cc56461f
     environment:
       POSTGRES_DB: sonarqube
       POSTGRES_USER: sonarqube
@@ -12,11 +12,25 @@ services:
     networks:
       - monitoring
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sonarqube -d sonarqube"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+    mem_limit: 1g
+    mem_reservation: 512m
+    cpus: 0.75
+    pids_limit: 256
+    init: true
+    stop_grace_period: 30s
+    logging: {driver: local, options: {max-size: "20m", max-file: "5"}}
 
   sonarqube:
-    image: sonarqube:10-community
+    image: sonarqube:10-community@sha256:0842dcd4c8f851ce44f8edaf45ac93f7c9079017d60d99f614663e60cef5efe9
     depends_on:
-      - postgres-sonarqube
+      postgres-sonarqube:
+        condition: service_healthy
     ports:
       - "127.0.0.1:9010:9000"
     environment:
@@ -43,6 +57,13 @@ services:
       retries: 6
       start_period: 60s
     restart: unless-stopped
+    mem_limit: 4g
+    mem_reservation: 2g
+    cpus: 2.0
+    pids_limit: 1024
+    init: true
+    stop_grace_period: 60s
+    logging: {driver: local, options: {max-size: "20m", max-file: "5"}}
 
 volumes:
   postgres-sonarqube-data:

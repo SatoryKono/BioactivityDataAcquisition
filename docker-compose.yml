@@ -6,6 +6,17 @@ services:
       context: .
       dockerfile: Dockerfile.bioetl
     restart: on-failure:3
+    mem_limit: 1536m
+    mem_reservation: 768m
+    cpus: 2.0
+    pids_limit: 512
+    init: true
+    stop_grace_period: 30s
+    logging:
+      driver: local
+      options:
+        max-size: "20m"
+        max-file: "5"
     volumes:
       - ./src:/app/src
       - ./configs:/app/configs
@@ -29,63 +40,27 @@ services:
       BIOETL_OBSERVABILITY__DQ_MONITOR_ENABLED: "true"
     command: ["quarantine", "serve", "--host", "0.0.0.0", "--port", "8081"]
     networks:
-      warp-network:
+      runtime:
       monitoring:
         aliases:
           - quarantine-explorer
-    deploy:
-      resources:
-        limits:
-          memory: 1.5G
-        reservations:
-          memory: 768M
     healthcheck:
       test:
         [
           "CMD",
           "python",
           "-c",
-          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8081/health/live').read(); exit(0)",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8081/health/ready').read(); exit(0)",
         ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 45s
 
-  warp:
-    profiles: ["warp"]
-    build:
-      context: .
-      dockerfile: scripts/ops/runtime/docker/images/warp/Dockerfile
-    restart: unless-stopped
-    cap_add:
-      - NET_ADMIN
-      - SYS_MODULE
-    volumes:
-      - warp-data:/var/lib/cloudflare-warp
-      - /dev/net/tun:/dev/net/tun
-    devices:
-      - /dev/net/tun
-    networks:
-      - warp-network
-    environment:
-      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
-    ports:
-      - "127.0.0.1:9999:8080"
-    deploy:
-      resources:
-        limits:
-          memory: 256M
-        reservations:
-          memory: 128M
-
-volumes:
-  warp-data:
-
 networks:
-  warp-network:
+  runtime:
     external: true
-    name: warp-network
+    name: bioetl-runtime
   monitoring:
     external: true
     name: bioetl-monitoring

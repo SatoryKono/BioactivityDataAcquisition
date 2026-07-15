@@ -13,13 +13,14 @@ from typing import TYPE_CHECKING, cast
 import click
 
 from bioetl.domain.exceptions import BioETLError
+from bioetl.interfaces.cli.commands.domains.health.failure_handling import (
+    handle_health_failure as _handle_health_failure,
+)
 from bioetl.interfaces.cli.commands.domains.health.rendering import (
     build_health_server_info_lines,
 )
 from bioetl.interfaces.cli.commands.domains.shared.execution_policy import (
     CLI_ENTRYPOINT_TYPED_ERRORS,
-    build_target_cli_boundary_policy,
-    handle_boundary_cli_failure,
 )
 from bioetl.interfaces.cli.exit_codes import ExitCode
 
@@ -37,11 +38,6 @@ DEFAULT_HEALTH_SERVER_PORT = 8081
 _HEALTH_SERVER_DOMAIN_ERROR_TITLE = "Health server failed with domain error"
 _HEALTH_SERVER_UNEXPECTED_ERROR_TITLE = "Unexpected error in health server command"
 _HEALTH_SERVER_INTERRUPTED_MESSAGE = "Health server interrupted by user (Ctrl+C)"
-_HEALTH_REASON_SUFFIXES = (
-    "DOMAIN_ERROR",
-    "UNEXPECTED_ERROR",
-    "SIGINT",
-)
 
 
 def get_health_server_dependencies(
@@ -118,46 +114,6 @@ def get_metrics_server_starter() -> Callable[..., bool]:
     return start_metrics_server
 
 
-def _handle_health_failure(
-    exc: BaseException,
-    *,
-    reason_code: str,
-    target: str,
-    domain_error_title: str,
-    unexpected_error_title: str,
-    interrupted_message: str,
-) -> None:
-    """Handle health command failures with the shared CLI execution policy."""
-    for suffix in _HEALTH_REASON_SUFFIXES:
-        token = f"_{suffix}"
-        if reason_code.endswith(token):
-            reason_prefix = reason_code.removesuffix(token)
-            reason_suffix = suffix
-            break
-    else:
-        reason_prefix = reason_code
-        reason_suffix = "UNEXPECTED_ERROR"
-
-    handle_boundary_cli_failure(
-        exc,
-        policy=build_target_cli_boundary_policy(
-            reason_prefix=reason_prefix,
-            target=target,
-            domain_error_title=domain_error_title,
-            unexpected_error_title=unexpected_error_title,
-            interrupted_message=interrupted_message,
-            default_exit_code=ExitCode.FAIL,
-        ),
-        reason_suffix=reason_suffix,
-    )
-
-
-def _echo_health_server_startup(host: str, port: int) -> None:
-    """Print startup information for the long-lived health server command."""
-    for line in build_health_server_info_lines(host, port):
-        click.echo(line)
-
-
 def build_health_server_pycache_prefix() -> Path:
     """Return the deterministic pycache root for the health server process."""
     return Path(tempfile.gettempdir()) / "bioetl-pycache"
@@ -186,7 +142,7 @@ def build_health_server(
     """Construct the HTTP health server from composition dependencies."""
     from bioetl.interfaces.http.health_server import HealthServer
 
-    return HealthServer(
+    server = HealthServer(
         host=host,
         port=port,
         health_monitor=deps.health_monitor,
@@ -195,10 +151,10 @@ def build_health_server(
         run_manifest_port=deps.run_manifest_port,
         run_ledger_port=deps.run_ledger_port,
         workflow_manifest_port=deps.workflow_manifest_port,
-        data_root=(
-            str(deps.data_root) if getattr(deps, "data_root", None) is not None else None
-        ),
     )
+    data_root = getattr(deps, "data_root", None)
+    server.set_data_root(str(data_root) if data_root is not None else None)
+    return server
 
 
 async def close_health_server_resources(
@@ -295,7 +251,8 @@ def run_long_lived_health_server_command(
     data_root: Path | None = None,
 ) -> None:
     """Start the long-lived health/quarantine explorer backend."""
-    _echo_health_server_startup(host, port)
+    for line in build_health_server_info_lines(host, port):
+        click.echo(line)
     if data_root is None:
         coro = _run_health_server(host=host, port=port, start_metrics=start_metrics)
     else:

@@ -60,24 +60,19 @@ Codex **не предназначен для запуска через WSL в т
 Если Codex всё ещё зависает:
 
 ```powershell
-# Проверьте статус MCP серверов
-docker compose -f docker-compose.codex.yml ps
+# Проверьте регистрацию и bounded protocol readiness
+bash scripts/ai/mcp/check.sh
+python scripts/ai/mcp/protocol_smoke.py --config .mcp.json --server memory
 
-# Посмотрите логи
-docker compose -f docker-compose.codex.yml logs -f bioetl-mcp-memory
-
-# Убейте зависшие процессы
-Get-Process wsl -ErrorAction SilentlyContinue | Stop-Process -Force
+# Docker Desktop диагностируется отдельно и не блокирует non-Docker MCP
+python scripts/ops/runtime/docker/runtime_manager.py diagnose --stack main
 ```
 
 ## Команды
 
 ```powershell
-# Запустить MCP серверы
-.\scripts\codex-start-wsl.ps1
-
-# Остановить серверы
-docker compose -f docker-compose.codex.yml down
+# Обновить frontend-конфигурации MCP
+python scripts/ai/codex/setup_mcp.py
 
 # Проверить статус
 .\scripts\codex-launcher.ps1 server

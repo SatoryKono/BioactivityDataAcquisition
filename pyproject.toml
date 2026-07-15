@@ -206,6 +206,7 @@ addopts = [
 markers = [
     "unit: Unit tests (fast, no I/O)",
     "integration: Integration tests (may use I/O)",
+    "docker_integration: Opt-in Docker lifecycle tests; requires explicit local scheduling",
     "relaxed_dq: Integration tests that explicitly opt in to relaxed DQ thresholds for replay stability",
     "e2e: End-to-end tests (slow, Local-Only runtime; maintenance paths intentionally carved out)",
     "e2e_smoke: PR-blocking E2E smoke subset (bootstrap + representative entity path; see test_matrix e2e-smoke lane)",

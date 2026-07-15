@@ -11,5 +11,5 @@ source "${script_dir}/support/load_repo_env.sh"
 load_repo_env_if_present
 unset BIOETL_SKIP_ENV_LOCAL
 
-docker_bin="$(resolve_docker_bin)"
+docker_bin="$(resolve_docker_mcp_gateway_bin)"
 exec "${docker_bin}" mcp gateway run --servers context7 --transport stdio "$@"

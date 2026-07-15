@@ -50,18 +50,19 @@ panic: whp error, failed to set extended vm exits: The parameter is incorrect
 
 ## Procedure
 
-### 1. Triage and restart Docker Desktop
+### 1. Capture evidence and use bounded Docker Desktop recovery
 
-Restart Docker Desktop completely, then check that its daemon responds:
+The helper feature-detects supported `docker desktop status`, `restart`,
+`logs`, and `diagnose` commands, captures bounded diagnostics first, and never
+begins with a force-kill or WSL shutdown:
 
 ```powershell
-taskkill /IM "Docker Desktop.exe" /F
-taskkill /IM "com.docker.proxy.exe" /F
-Start-Sleep -Seconds 5
-Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"
-Start-Sleep -Seconds 30
-docker ps
+.\scripts\ops\runtime\docker\restart-docker.ps1 -TimeoutSeconds 180
 ```
+
+Only after the normal path times out and its report has been reviewed may an
+operator explicitly pass `-ConfirmLastResort`; that action never invokes
+`wsl --shutdown` and requires PowerShell confirmation.
 
 ### 2. Verify virtualization and WSL prerequisites
 
@@ -84,7 +85,8 @@ wsl --set-version <distribution-name> 2
 ### 3. Check Docker Desktop settings
 
 - `Settings > General`: verify that the container runtime is healthy.
-- `Settings > Resources`: allocate at least 8 GB memory for Codex-heavy runs.
+- `Settings > Resources`: preserve at least 4 GB Docker-VM reserve and validate
+  host-specific peaks before changing limits.
 - `Settings > Resources > WSL Integration`: enable the active distribution.
 
 ### 4. Recover with the canonical WSL launchers

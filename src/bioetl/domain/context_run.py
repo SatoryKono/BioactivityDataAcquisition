@@ -161,63 +161,13 @@ class PipelineRunContext:
         values = locals()
         values.pop("cls")
         values.pop("clock")
-        values["started_at"] = resolve_context_started_at(started_at=started_at, clock=clock)
+        values["started_at"] = resolve_context_started_at(
+            started_at=started_at, clock=clock
+        )
         values["vacuum"] = _resolve_vacuum_settings(vacuum)
         values["input_filter"] = _resolve_input_filter_context(input_filter)
         values["cached_bronze"] = _resolve_cached_bronze_context(cached_bronze)
         return cls(**values)
-        """UNREACHABLE
-            pipeline_name=pipeline_name,
-            run_id=run_id,
-            run_type=run_type,
-            started_at=resolve_context_started_at(
-                started_at=started_at,
-                clock=clock,
-            ),
-            replay_of_run_id=replay_of_run_id,
-            replay_of_manifest_id=replay_of_manifest_id,
-            input_snapshot_fingerprint=input_snapshot_fingerprint,
-            resume_run_id=resume_run_id,
-            resume_manifest_id=resume_manifest_id,
-            manifest_id=manifest_id,
-            execution_fingerprint=execution_fingerprint,
-            config_hash=config_hash,
-            resolved_config_hash=resolved_config_hash,
-            effective_config_hash=effective_config_hash,
-            source_fingerprint=source_fingerprint,
-            dq_contract_compatibility_hash=dq_contract_compatibility_hash,
-            effective_config_artifact_id=effective_config_artifact_id,
-            contract_ref=contract_ref,
-            contract_version=contract_version,
-            contract_schema_hash=contract_schema_hash,
-            dq_policy_ref=dq_policy_ref,
-            rule_bundle_version=rule_bundle_version,
-            contract_identity=contract_identity,
-            dq_contract_compatibility=dq_contract_compatibility,
-            resume=resume,
-            dry_run=dry_run,
-            vacuum=_resolve_vacuum_settings(vacuum),
-            input_filter=_resolve_input_filter_context(input_filter),
-            cached_bronze=_resolve_cached_bronze_context(cached_bronze),
-            exact_replay=exact_replay,
-            required_persistence_profile=required_persistence_profile,
-            required_persistence_profile_opt_down=required_persistence_profile_opt_down,
-            limit=limit,
-            query=query,
-            start_offset=start_offset,
-            log_level=log_level,
-            ignore_yaml_filter=ignore_yaml_filter,
-            skip_gold=skip_gold,
-            tracing_enabled_override=tracing_enabled_override,
-            debug_export_enabled=debug_export_enabled,
-            debug_export_formats=debug_export_formats,
-            debug_export_dir=debug_export_dir,
-            workflow_id=workflow_id,
-            workflow_run_id=workflow_run_id,
-            workflow_name=workflow_name,
-            workflow_step_id=workflow_step_id,
-            execution_context=execution_context,
-        )"""
 
     @property
     def has_input_filter(self) -> bool:

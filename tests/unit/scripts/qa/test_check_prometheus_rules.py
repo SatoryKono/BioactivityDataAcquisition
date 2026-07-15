@@ -14,7 +14,10 @@ pytestmark = pytest.mark.unit
 
 
 def test_prometheus_toolchain_compatibility_is_pinned_to_supported_series() -> None:
-    assert check_prometheus_rules.PROMETHEUS_IMAGE == "prom/prometheus:v3.13.1"
+    assert check_prometheus_rules.PROMETHEUS_IMAGE == (
+        "prom/prometheus:v3.13.1@sha256:"
+        "3c42b892cf723fa54d2f262c37a0e1f80aa8c8ddb1da7b9b0df9455a35a7f893"
+    )
     assert check_prometheus_rules.PROMETHEUS_COMPATIBILITY_SERIES == "3.13.x"
     assert check_prometheus_rules.PUSHGATEWAY_COMPATIBILITY_SERIES == "1.11.x"
 
@@ -70,7 +73,7 @@ def test_rule_test_coverage_rejects_vacuous_expected_results(
     assert coverage["firing_alerts"] == 0
     assert coverage["directly_tested_records"] == 0
     violations = check_prometheus_rules.validate_rule_test_coverage(coverage)
-    assert "firing alert fixtures regressed below 34: 0" in violations
+    assert "firing alert fixtures regressed below 36: 0" in violations
     assert "directly tested records regressed below 28: 0" in violations
 
 

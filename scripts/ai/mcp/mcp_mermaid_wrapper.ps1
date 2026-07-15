@@ -9,7 +9,7 @@ $dockerCliResolverPath = Join-Path -Path $scriptDir -ChildPath "support\docker_c
 # Import the Docker CLI resolver
 . $dockerCliResolverPath
 
-$dockerBin = Resolve-DockerBin
+$dockerBin = Resolve-DockerMcpGatewayBin
 $arguments = @("mcp", "gateway", "run", "--servers", "mermaid", "--transport", "stdio") + $ArgumentList
 
 # Execute the command

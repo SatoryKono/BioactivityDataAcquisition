@@ -1,50 +1,60 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-resolve_docker_bin() {
+_resolve_first_working_docker() {
+  local capability="$1"
+  shift
+  local candidates=("$@")
+  local candidate
+  for candidate in "${candidates[@]}"; do
+    [[ -n "${candidate}" ]] || continue
+    if [[ "${capability}" == "engine" ]]; then
+      if "${candidate}" version >/dev/null 2>&1; then
+        printf '%s\n' "${candidate}"
+        return 0
+      fi
+    elif "${candidate}" mcp gateway --help >/dev/null 2>&1; then
+      printf '%s\n' "${candidate}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+resolve_docker_engine_bin() {
   local candidates=()
   local docker_desktop_default="/mnt/c/Program Files/Docker/Docker/resources/bin/docker.exe"
 
-  local docker_linux
-  if command -v docker >/dev/null 2>&1; then
-    docker_linux="$(command -v docker)"
-  fi
-
-  # Docker MCP Toolkit is owned by Docker Desktop. In WSL, the Linux Docker CLI
-  # can talk to the engine while `docker mcp gateway` still fails with
-  # "Docker Desktop is not running", so prefer Docker Desktop's docker.exe.
-  if [[ -x "${docker_desktop_default}" ]]; then
-    candidates+=("${docker_desktop_default}")
-  fi
-
-  if command -v docker.exe >/dev/null 2>&1; then
-    candidates+=("$(command -v docker.exe)")
-  fi
-
-  if [[ -n "${docker_linux}" ]]; then
-    candidates+=("${docker_linux}")
-  fi
   if command -v docker >/dev/null 2>&1; then
     candidates+=("$(command -v docker)")
   fi
-  if command -v cmd.exe >/dev/null 2>&1 && command -v wslpath >/dev/null 2>&1; then
-    local docker_win_path
-    docker_win_path="$(
-      cmd.exe /c where docker 2>/dev/null | tr -d '\r' | grep -m1 'docker' || true
-    )"
-    if [[ -n "${docker_win_path}" ]]; then
-      candidates+=("$(wslpath -u "${docker_win_path}")")
-    fi
+  if command -v docker.exe >/dev/null 2>&1; then
+    candidates+=("$(command -v docker.exe)")
   fi
+  if [[ -x "${docker_desktop_default}" ]]; then
+    candidates+=("${docker_desktop_default}")
+  fi
+  if _resolve_first_working_docker engine "${candidates[@]}"; then
+    return 0
+  fi
+  printf "Docker Engine CLI not found or not working. Install Docker or enable WSL integration.\n" >&2
+  return 1
+}
 
-  local candidate
-  for candidate in "${candidates[@]}"; do
-    if "${candidate}" version >/dev/null 2>&1; then
-      printf '%s\n' "${candidate}"
-      return
-    fi
-  done
+resolve_docker_mcp_gateway_bin() {
+  local candidates=()
+  local docker_desktop_default="/mnt/c/Program Files/Docker/Docker/resources/bin/docker.exe"
+  [[ -x "${docker_desktop_default}" ]] && candidates+=("${docker_desktop_default}")
+  command -v docker.exe >/dev/null 2>&1 && candidates+=("$(command -v docker.exe)")
+  if _resolve_first_working_docker mcp-gateway "${candidates[@]}"; then
+    return 0
+  fi
+  printf "Docker Desktop MCP gateway is unavailable; no incompatible Linux CLI fallback was used.\n" >&2
+  return 1
+}
 
-  printf "Docker CLI not found or not working. Install Docker Desktop or enable WSL integration.\n" >&2
-  exit 1
+# Compatibility alias for ordinary engine consumers. Gateway wrappers must use
+# resolve_docker_mcp_gateway_bin explicitly.
+resolve_docker_bin() {
+  resolve_docker_engine_bin
 }

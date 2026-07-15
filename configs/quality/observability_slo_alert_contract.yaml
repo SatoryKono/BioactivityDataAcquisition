@@ -62,6 +62,28 @@ slo_contracts:
         severity: warning
         for: 2m
         runbook: docs/05-operations/runbooks/observability-checklist.md
+  optional_docker_runtime_stability:
+    owner: "@bioetl-observability"
+    target: "Optional Docker stacks have zero unexpected restarts, OOM kills, unresolved unhealthy services, identity drift, and recovery breaches"
+    metrics:
+      - bioetl_docker_runtime_primary_cause
+      - bioetl_docker_runtime_probe_success
+      - bioetl_docker_runtime_daemon_available
+      - bioetl_docker_runtime_service_ready
+      - bioetl_docker_runtime_restart_delta
+      - bioetl_docker_runtime_oom_kills
+      - bioetl_docker_runtime_disk_free_bytes
+      - bioetl_docker_runtime_recovery_attempts
+      - bioetl_docker_runtime_recovery_duration_seconds
+    alerts:
+      - name: BioETLDockerRuntimeIncident
+        severity: critical
+        for: 1m
+        runbook: docs/05-operations/runbooks/docker-stability.md
+      - name: BioETLDockerRuntimeProbeMissing
+        severity: warning
+        for: 1m
+        runbook: docs/05-operations/runbooks/docker-stability.md
   pipeline_throughput_continuity:
     target: "Every observed pipeline run should process records unless explicitly empty by design"
     metrics:

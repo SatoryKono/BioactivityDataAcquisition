@@ -1,0 +1,251 @@
+from __future__ import annotations
+
+import json
+from collections.abc import Sequence
+from pathlib import Path
+from types import SimpleNamespace
+
+import pytest
+
+from scripts.ops.runtime.docker import docker_runtime_probe as probe
+from scripts.ops.runtime.docker import runtime_manager
+
+pytestmark = pytest.mark.repo_backed
+
+
+def _spec(tmp_path: Path) -> runtime_manager.StackSpec:
+    compose = tmp_path / "docker-compose.yml"
+    compose.write_text(
+        "services:\n  bioetl:\n    cpus: 2.0\n    pids_limit: 512\n",
+        encoding="utf-8",
+    )
+    return runtime_manager.StackSpec(
+        name="main",
+        project="bioetl-main",
+        compose_file=compose,
+        required_services=("bioetl",),
+        expected_images={"bioetl": "bioetl:test@sha256:expected"},
+    )
+
+
+def _contract(tmp_path: Path) -> Path:
+    path = tmp_path / "contract.yml"
+    path.write_text(
+        "capacity:\n  minimum_free_disk_gib: 4\n"
+        "stability_slo:\n  recovery_seconds_p99: 180\n",
+        encoding="utf-8",
+    )
+    return path
+
+
+def _runner(
+    spec: runtime_manager.StackSpec,
+    *,
+    state: str = "running",
+    health: str = "healthy",
+    restart_count: int = 0,
+    oom: bool = False,
+    image: str = "bioetl:test@sha256:expected",
+    origin: str | None = None,
+    memory: str = "10%",
+    cpu: str = "1%",
+    pids: str = "3",
+):
+    def run(
+        command: Sequence[str], cwd: Path, timeout: float
+    ) -> runtime_manager.CommandResult:
+        current = list(command)
+        if current[:2] == ["docker", "info"]:
+            return runtime_manager.CommandResult(current, 0, stdout="{}")
+        if "compose" in current and "ps" in current:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout=json.dumps([{"ID": "abcdef123456", "Service": "bioetl"}]),
+            )
+        if current[:2] == ["docker", "inspect"]:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout=json.dumps(
+                    [
+                        {
+                            "State": {
+                                "Status": state,
+                                "OOMKilled": oom,
+                                "Health": {"Status": health},
+                            },
+                            "RestartCount": restart_count,
+                            "Config": {"Image": image},
+                        }
+                    ]
+                ),
+            )
+        if "compose" in current and "ls" in current:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout=json.dumps(
+                    [
+                        {
+                            "Name": spec.project,
+                            "ConfigFiles": origin or str(spec.compose_file.resolve()),
+                        }
+                    ]
+                ),
+            )
+        if current[:2] == ["docker", "stats"]:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout=json.dumps(
+                    {
+                        "ID": "abcdef123456",
+                        "MemPerc": memory,
+                        "CPUPerc": cpu,
+                        "PIDs": pids,
+                    }
+                ),
+            )
+        raise AssertionError(current)
+
+    return run
+
+
+def _disk(free: int = 8 * 1024**3):
+    return lambda _path: SimpleNamespace(total=16 * 1024**3, used=0, free=free)
+
+
+@pytest.mark.parametrize(
+    ("runner_kwargs", "baseline", "incident", "free", "cause"),
+    [
+        ({"restart_count": 1}, {"bioetl": 0}, {}, 8 * 1024**3, "unexpected_restart"),
+        ({"oom": True}, {}, {}, 8 * 1024**3, "oom_killed"),
+        ({}, {}, {}, 1, "disk_reserve_low"),
+        (
+            {"origin": "/different/docker-compose.yml"},
+            {},
+            {},
+            8 * 1024**3,
+            "project_origin_drift",
+        ),
+        (
+            {"image": "bioetl:test@sha256:wrong"},
+            {},
+            {},
+            8 * 1024**3,
+            "image_identity_drift",
+        ),
+        ({"memory": "85%"}, {}, {}, 8 * 1024**3, "resource_pressure"),
+        ({"cpu": "180%"}, {}, {}, 8 * 1024**3, "resource_pressure"),
+        ({"pids": "500"}, {}, {}, 8 * 1024**3, "resource_pressure"),
+        (
+            {},
+            {},
+            {"attempts": 4, "elapsed_seconds": 181},
+            8 * 1024**3,
+            "recovery_objective_breach",
+        ),
+    ],
+)
+def test_each_simulated_failure_has_one_primary_actionable_cause(
+    tmp_path: Path,
+    runner_kwargs: dict[str, object],
+    baseline: dict[str, int],
+    incident: dict[str, object],
+    free: int,
+    cause: str,
+) -> None:
+    spec = _spec(tmp_path)
+    report = probe.build_report(
+        spec,
+        _contract(tmp_path),
+        baseline=baseline,
+        incident=incident,
+        runner=_runner(spec, **runner_kwargs),
+        disk_usage=_disk(free),
+    )
+
+    assert report["primary_cause"] == cause
+    exposition = probe.prometheus_exposition(report)
+    assert exposition.count("bioetl_docker_runtime_primary_cause{") == 1
+    assert f'cause="{cause}"' in exposition
+
+
+def test_probe_is_read_only_and_redacts_observations(tmp_path: Path) -> None:
+    spec = _spec(tmp_path)
+    calls: list[list[str]] = []
+    base = _runner(spec)
+
+    def runner(
+        command: Sequence[str], cwd: Path, timeout: float
+    ) -> runtime_manager.CommandResult:
+        calls.append(list(command))
+        result = base(command, cwd, timeout)
+        if command[:2] == ["docker", "info"]:
+            return runtime_manager.CommandResult(
+                list(command),
+                0,
+                stdout=(
+                    "Bearer ghp_abcdefghijklmnop "
+                    "NEO4J_PASSWORD=secret-value "
+                    "https://user:pass@example.test"
+                ),
+            )
+        return result
+
+    report = probe.build_report(
+        spec,
+        _contract(tmp_path),
+        baseline={},
+        runner=runner,
+        disk_usage=_disk(),
+    )
+
+    rendered = json.dumps(report)
+    assert "ghp_" not in rendered
+    assert "secret-value" not in rendered
+    assert "user:pass" not in rendered
+    inspect_calls = [call for call in calls if call[:2] == ["docker", "inspect"]]
+    assert inspect_calls
+    assert all("--format" in call for call in inspect_calls)
+    assert not any(
+        destructive in call
+        for call in calls
+        for destructive in ("up", "down", "restart", "stop", "kill", "prune")
+    )
+
+
+def test_pushgateway_publication_replaces_one_bounded_stack_group(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    class Response:
+        status = 200
+
+        def __enter__(self) -> Response:
+            return self
+
+        def __exit__(self, *_args: object) -> None:
+            return None
+
+    def urlopen(request: object, timeout: float) -> Response:
+        captured["url"] = request.full_url
+        captured["method"] = request.method
+        captured["timeout"] = timeout
+        return Response()
+
+    monkeypatch.setattr(probe.urllib.request, "urlopen", urlopen)
+    probe.push_exposition(
+        "http://127.0.0.1:9091",
+        {"stack": "main", "project": "bioetl-main"},
+        "bioetl_docker_runtime_probe_success 1\n",
+        timeout=3,
+    )
+
+    assert captured == {
+        "url": "http://127.0.0.1:9091/metrics/job/bioetl_docker_runtime/project/bioetl-main/stack/main",
+        "method": "PUT",
+        "timeout": 3,
+    }

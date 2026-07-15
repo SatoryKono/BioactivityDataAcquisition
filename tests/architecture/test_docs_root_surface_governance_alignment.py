@@ -280,10 +280,8 @@ def test_canonical_docker_helpers_bootstrap_shared_external_networks() -> None:
     powershell_helper = _read("scripts/ops/docker-setup.ps1")
 
     for helper_text in (bash_helper, powershell_helper):
-        assert "bioetl-monitoring" in helper_text
-        assert "warp-network" in helper_text
-        assert "docker network inspect" in helper_text
-        assert "docker network create" in helper_text
+        assert "runtime_manager.py" in helper_text
+        assert "docker network create" not in helper_text
 
 
 def test_concepts_root_surface_is_retired_from_repo_root() -> None:

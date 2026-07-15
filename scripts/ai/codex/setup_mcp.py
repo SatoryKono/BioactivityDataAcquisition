@@ -188,6 +188,7 @@ def _canonical_servers(
         "biomoltechDocs": _http_server("https://biomoltech.mintlify.app/mcp"),
         "mintlify": _http_server("https://mcp.mintlify.com"),
         "deepwiki": _http_server("https://mcp.deepwiki.com/mcp"),
+        "ref": _http_server("https://api.ref.tools/mcp"),
     }
 
     # Preserve the committed config shape where the GitHub wrapper receives npm cache.

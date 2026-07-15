@@ -45,7 +45,7 @@ This policy applies to:
    absolute paths when the consuming tool requires them.
 1. Treat `.devin/config.json` as a portable tracked Devin projection. The setup
    generator replaces only `mcpServers` with the canonical repo-relative
-   17-server payload and preserves existing Devin-owned top-level settings such
+   18-server payload and preserves existing Devin-owned top-level settings such
    as `version`, `devin`, `shell`, and `theme_mode`.
 1. Devin starts repository work in its cloned workspace and root environment
    commands from the repository root. Relative MCP filesystem, cache, memory,
@@ -93,6 +93,11 @@ tests. CI must not require personal MCP tokens or third-party service tokens
 unless a separate security design approves the secret source, scopes, rotation,
 and fork/PR exposure model. Document any approved CI secret usage in
 [`../../mcp-token-configuration.md`](../../mcp-token-configuration.md).
+
+Remote MCP servers that support OAuth, including Ref Tools at
+`https://api.ref.tools/mcp`, must use the key-free base URL in tracked and
+generated config. Authentication is completed interactively by the local MCP
+client; API keys must not be embedded in URLs or committed config.
 
 ## Required Documentation Language
 

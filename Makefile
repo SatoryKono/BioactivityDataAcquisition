@@ -58,18 +58,16 @@ help:
 	@echo "Optional Docker helper commands:"
 	@echo "  make docker-check           Check Docker installation"
 	@echo "  make docker-build           Build BioETL image"
-	@echo "  make docker-start           Start main services (bioetl + warp)"
+	@echo "  make docker-start           Start the main BioETL adjunct"
 	@echo "  make docker-start-full      Start all services (+ Neo4j, Redis, MinIO, monitoring)"
 	@echo "  make docker-stop            Stop main services"
 	@echo "  make docker-stop-full       Stop all services"
 	@echo "  make docker-logs            View logs (all services)"
 	@echo "  make docker-logs-bioetl     View BioETL logs only"
-	@echo "  make docker-logs-warp       View Warp logs only"
 	@echo "  make docker-health          Check service health"
-	@echo "  make docker-clean           Remove containers, volumes, images"
+	@echo "  make docker-clean           Stop containers; preserve volumes/images"
 	@echo "  make docker-compose-check   Validate docker-compose.yml"
 	@echo "  make docker-shell-bioetl    Open shell in bioetl container"
-	@echo "  make docker-shell-warp      Open shell in warp container"
 
 install:
 	uv sync --extra dev --extra tests --extra tests_full --extra export
@@ -112,10 +110,7 @@ run-local:
 
 # Check Docker
 docker-check:
-	@echo "Checking Docker installation..."
-	@docker --version
-	@docker compose version
-	@echo "✓ Docker is ready"
+	bash scripts/ops/docker-setup.sh check main
 
 # Build BioETL image
 docker-build: docker-check
@@ -127,58 +122,38 @@ docker-build: docker-check
 
 # Start services (main only)
 docker-start: docker-check
-	@echo "Starting main services..."
-	docker compose up -d
-	@sleep 3
-	@docker compose ps
-	@echo "✓ Services started"
+	bash scripts/ops/docker-setup.sh start main
 
 # Start full stack
 docker-start-full: docker-check docker-build
-	@echo "Starting full stack..."
-	docker compose -f docker-compose.neo4j.yml up -d
-	docker compose -f scripts/ops/runtime/docker/compose/redis.yml up -d
-	docker compose -f scripts/ops/runtime/docker/compose/minio.yml up -d
-	docker compose -f docker-compose.monitoring.yml up -d
-	docker compose up -d
-	@echo "Waiting for services to be ready..."
-	@sleep 5
-	@docker compose ps
-	@echo "✓ Full stack started"
+	bash scripts/ops/docker-setup.sh start neo4j
+	bash scripts/ops/docker-setup.sh start redis
+	bash scripts/ops/docker-setup.sh start minio
+	bash scripts/ops/docker-setup.sh start monitoring
+	bash scripts/ops/docker-setup.sh start main
 
 # Stop services (main only)
 docker-stop: docker-check
-	@echo "Stopping services..."
-	docker compose down
-	@echo "✓ Services stopped"
+	bash scripts/ops/docker-setup.sh stop main
 
 # Stop full stack
 docker-stop-full: docker-check
-	@echo "Stopping full stack..."
-	docker compose down
-	docker compose -f docker-compose.neo4j.yml down 2>/dev/null || true
-	docker compose -f scripts/ops/runtime/docker/compose/redis.yml down 2>/dev/null || true
-	docker compose -f scripts/ops/runtime/docker/compose/minio.yml down 2>/dev/null || true
-	docker compose -f docker-compose.monitoring.yml down 2>/dev/null || true
-	@echo "✓ Full stack stopped"
+	bash scripts/ops/docker-setup.sh stop main
+	bash scripts/ops/docker-setup.sh stop neo4j
+	bash scripts/ops/docker-setup.sh stop redis
+	bash scripts/ops/docker-setup.sh stop minio
+	bash scripts/ops/docker-setup.sh stop monitoring
 
 # View logs
 docker-logs: docker-check
-	docker compose logs -f
+	bash scripts/ops/docker-setup.sh logs main
 
 docker-logs-bioetl: docker-check
-	docker compose logs -f bioetl
-
-docker-logs-warp: docker-check
-	docker compose logs -f warp
+	bash scripts/ops/docker-setup.sh logs main
 
 # Health check
 docker-health: docker-check
-	@echo "Checking service status..."
-	@docker compose ps
-	@echo ""
-	@echo "Checking BioETL health..."
-	@docker compose exec -T bioetl curl -f http://127.0.0.1:8081/health/ready 2>/dev/null && echo "✓ BioETL is healthy" || echo "⚠ BioETL health check failed"
+	bash scripts/ops/docker-setup.sh status main
 
 # Validate compose files
 docker-compose-check: docker-check
@@ -196,19 +171,9 @@ docker-compose-check: docker-check
 docker-shell-bioetl: docker-check
 	docker compose exec bioetl /bin/bash
 
-docker-shell-warp: docker-check
-	docker compose exec warp /bin/bash
-
 # Clean up
 docker-clean: docker-check
-	@echo "Removing Docker resources..."
-	docker compose down --volumes
-	docker compose -f docker-compose.neo4j.yml down --volumes 2>/dev/null || true
-	docker compose -f scripts/ops/runtime/docker/compose/redis.yml down --volumes 2>/dev/null || true
-	docker compose -f scripts/ops/runtime/docker/compose/minio.yml down --volumes 2>/dev/null || true
-	docker compose -f docker-compose.monitoring.yml down --volumes 2>/dev/null || true
-	docker rmi bioetl:latest 2>/dev/null || true
-	@echo "✓ Cleanup complete"
+	$(RUN) python scripts/ops/runtime/docker/runtime_manager.py clean --stack main --confirm-destructive CLEAN
 
 # Development shortcuts
 docker-dev: docker-start
@@ -216,7 +181,6 @@ docker-dev: docker-start
 	@echo "Available endpoints:"
 	@echo "  BioETL:     http://localhost:8081"
 	@echo "  Metrics:    http://localhost:8000"
-	@echo "  Warp Proxy: http://localhost:9999"
 
 # Local governance and live-ops shortcuts
 sync-windsurf-rules:

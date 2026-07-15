@@ -64,9 +64,9 @@ if (-not (Test-Path "docker-compose.neo4j.yml")) {
     exit 1
 }
 
-docker network inspect warp-network *> $null
+docker network inspect bioetl-runtime *> $null
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "❌ External network warp-network is missing" -ForegroundColor Red
+    Write-Host "❌ External network bioetl-runtime is missing" -ForegroundColor Red
     Write-Host "   Run scripts/ops/docker-setup.ps1 first."
     exit 1
 }

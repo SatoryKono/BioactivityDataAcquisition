@@ -1,6 +1,6 @@
 # Multi-stage build for bioetl: dependencies → runtime
 # Stage 1: Builder (install dependencies with uv)
-FROM python:3.12-slim AS builder
+FROM python:3.12-slim@sha256:c3d81d25b3154142b0b42eb1e61300024426268edeb5b5a26dd7ddf64d9daf28 AS builder
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv for fast dependency resolution
-RUN pip install --no-cache-dir uv
+RUN pip install --no-cache-dir uv==0.11.26
 
 # Copy package metadata and source required by setuptools/uv build resolution.
 COPY pyproject.toml uv.lock ./
@@ -24,7 +24,7 @@ RUN printf '# BioETL\n' > README.md
 RUN uv sync --no-dev --frozen --directory /app
 
 # Stage 2: Runtime (minimal image)
-FROM python:3.12-slim
+FROM python:3.12-slim@sha256:c3d81d25b3154142b0b42eb1e61300024426268edeb5b5a26dd7ddf64d9daf28
 
 WORKDIR /app
 
@@ -64,7 +64,7 @@ ENTRYPOINT ["bioetl"]
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=10s \
-    CMD python -c "import sys; sys.exit(0)"
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready').read()"
 
 # Default command (override via docker-compose)
 CMD ["health", "server", "--host", "0.0.0.0", "--port", "8000"]

@@ -53,7 +53,6 @@ LAUNCHER_SHIMS = {
 DOCKER_ROOT_SURFACES = {
     "docker-compose.monitoring.yml",
     "docker-compose.alertmanager.yml",
-    "docker-compose.codex.yml",
     "docker-compose.minio.yml",
     "docker-compose.neo4j-audit.yml",
     "docker-compose.neo4j.yml",
@@ -63,11 +62,6 @@ DOCKER_ROOT_SURFACES = {
     "docker-setup.ps1",
     "docker-setup.sh",
     "Dockerfile.bioetl",
-    "Dockerfile.mcp-fetch",
-    "Dockerfile.mcp-filesystem",
-    "Dockerfile.mcp-github",
-    "Dockerfile.mcp-memory",
-    "Dockerfile.warp",
     "grafana-datasource.yml",
 }
 REHOMED_DOCKER_SURFACES = {
@@ -77,15 +71,18 @@ REHOMED_DOCKER_SURFACES = {
     "docker-compose.sonarqube.yml",
     "docker-setup.ps1",
     "docker-setup.sh",
+    "grafana-datasource.yml",
+}
+OWNER_DECISION_CLASSIFICATIONS = {
+    "owner_decision_resolved",
+}
+SUPERSEDED_DOCKER_SURFACES = {
+    "docker-compose.codex.yml",
     "Dockerfile.mcp-fetch",
     "Dockerfile.mcp-filesystem",
     "Dockerfile.mcp-github",
     "Dockerfile.mcp-memory",
     "Dockerfile.warp",
-    "grafana-datasource.yml",
-}
-OWNER_DECISION_CLASSIFICATIONS = {
-    "owner_decision_resolved",
 }
 
 
@@ -278,7 +275,11 @@ def test_issue_5838_root_docker_adjuncts_are_reviewed_and_evidence_backed() -> N
     evidence = _root_review_rows()
 
     assert DOCKER_RELOCATION_AUDIT.exists()
-    assert set(outcome["reviewed_root_docker_surfaces"]) == DOCKER_ROOT_SURFACES
+    assert (
+        set(outcome["reviewed_root_docker_surfaces"])
+        - SUPERSEDED_DOCKER_SURFACES
+        == DOCKER_ROOT_SURFACES
+    )
 
     allowlist_text = ROOT_ALLOWLIST.read_text(encoding="utf-8")
     for path in DOCKER_ROOT_SURFACES:
@@ -308,10 +309,6 @@ def test_issue_5838_root_docker_adjuncts_are_reviewed_and_evidence_backed() -> N
         candidates["docker-setup.sh"]["canonical_path"] == "scripts/ops/docker-setup.sh"
     )
     assert candidates["Dockerfile.bioetl"]["canonical_path"] == "Dockerfile.bioetl"
-    assert (
-        candidates["Dockerfile.warp"]["canonical_path"]
-        == "scripts/ops/runtime/docker/images/warp/Dockerfile"
-    )
     assert (
         candidates["grafana-datasource.yml"]["canonical_path"]
         == "grafana/provisioning/datasources-local/grafana-datasource.yml"

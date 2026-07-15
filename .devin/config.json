@@ -114,6 +114,10 @@
     "deepwiki": {
       "type": "http",
       "url": "https://mcp.deepwiki.com/mcp"
+    },
+    "ref": {
+      "type": "http",
+      "url": "https://api.ref.tools/mcp"
     }
   },
   "version": 2,

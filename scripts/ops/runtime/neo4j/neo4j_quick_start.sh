@@ -62,8 +62,8 @@ fi
 
 section "Docker Compose Owner"
 
-if ! docker network inspect warp-network >/dev/null 2>&1; then
-  fail "External network warp-network is missing. Run scripts/ops/docker-setup.sh first."
+if ! docker network inspect bioetl-runtime >/dev/null 2>&1; then
+  fail "External network bioetl-runtime is missing. Run scripts/ops/docker-setup.sh first."
   exit 1
 fi
 

@@ -210,8 +210,8 @@ fi
 # ============================================================================
 header "Step 4: Starting Neo4j Container"
 
-if ! "${DOCKER_BIN}" network inspect warp-network >/dev/null 2>&1; then
-  fail "External network warp-network is missing; run scripts/ops/docker-setup.sh first"
+if ! "${DOCKER_BIN}" network inspect bioetl-runtime >/dev/null 2>&1; then
+  fail "External network bioetl-runtime is missing; run scripts/ops/docker-setup.sh first"
   exit 1
 fi
 

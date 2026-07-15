@@ -673,7 +673,6 @@ on:
     branches: [ main, master, develop ]
     paths:
       - 'Dockerfile.bioetl'
-      - 'scripts/ops/runtime/docker/images/warp/Dockerfile'
       - 'docker-compose*.yml'
       - 'scripts/ops/runtime/docker/compose/*.yml'
       - '.dockerignore'
@@ -688,7 +687,6 @@ on:
     branches: [ main, master, develop ]
     paths:
       - 'Dockerfile.bioetl'
-      - 'scripts/ops/runtime/docker/images/warp/Dockerfile'
       - 'docker-compose*.yml'
       - 'scripts/ops/runtime/docker/compose/*.yml'
       - '.dockerignore'
@@ -704,7 +702,6 @@ jobs:
       matrix:
         dockerfile:
           - Dockerfile.bioetl
-          - scripts/ops/runtime/docker/images/warp/Dockerfile
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -950,7 +947,6 @@ CI06_OLD_PUSH = """\
     branches: [ main, master, develop ]
     paths:
       - 'Dockerfile.bioetl'
-      - 'scripts/ops/runtime/docker/images/warp/Dockerfile'
       - 'docker-compose*.yml'
       - 'scripts/ops/runtime/docker/compose/*.yml'
       - '.dockerignore'"""
@@ -960,7 +956,6 @@ CI06_NEW_PUSH = """\
     branches: [ main, master, develop ]
     paths:
       - 'Dockerfile.bioetl'
-      - 'scripts/ops/runtime/docker/images/warp/Dockerfile'
       - 'docker-compose*.yml'
       - 'scripts/ops/runtime/docker/compose/*.yml'
       - '.dockerignore'"""
@@ -977,7 +972,6 @@ CI06_OLD_PR = """\
     branches: [ main, master, develop ]
     paths:
       - 'Dockerfile.bioetl'
-      - 'scripts/ops/runtime/docker/images/warp/Dockerfile'
       - 'docker-compose*.yml'
       - 'scripts/ops/runtime/docker/compose/*.yml'
       - '.dockerignore'"""
@@ -987,7 +981,6 @@ CI06_NEW_PR = """\
     branches: [ main, master, develop ]
     paths:
       - 'Dockerfile.bioetl'
-      - 'scripts/ops/runtime/docker/images/warp/Dockerfile'
       - 'docker-compose*.yml'
       - 'scripts/ops/runtime/docker/compose/*.yml'
       - '.dockerignore'"""

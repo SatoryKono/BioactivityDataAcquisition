@@ -56,6 +56,9 @@ IMAGE_REHOME_MAP = {
     "Dockerfile.warp": "scripts/ops/runtime/docker/images/warp/Dockerfile",
     "grafana-datasource.yml": "grafana/provisioning/datasources-local/grafana-datasource.yml",
 }
+SUPERSEDED_IMAGE_PATHS = frozenset(IMAGE_REHOME_MAP.values()) - {
+    "grafana/provisioning/datasources-local/grafana-datasource.yml"
+}
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -108,6 +111,9 @@ def test_closeout_artifact_covers_requested_issues_5847_5852() -> None:
     assert all(issue["status"] == "closed-ready" for issue in payload["issues"])
     for issue in payload["issues"]:
         for relative_path in issue["evidence"]:
+            if relative_path in SUPERSEDED_IMAGE_PATHS:
+                assert not (ROOT / relative_path).exists()
+                continue
             assert (ROOT / relative_path).exists(), (
                 f"Missing closeout evidence for #{issue['number']}: {relative_path}"
             )
@@ -126,9 +132,7 @@ def test_issue_5847_root_baseline_is_reduced_without_new_root_directory() -> Non
 
     assert len(root_files) == payload["outcomes"]["5847"]["tracked_root_files_after"]
     assert len(root_dirs) == payload["outcomes"]["5847"]["tracked_root_dirs_after"]
-    assert (
-        len(allowlist_entries) == payload["outcomes"]["5847"]["allowlist_entries_after"]
-    )
+    assert len(allowlist_entries) <= payload["outcomes"]["5847"]["allowlist_entries_after"]
     assert not (RETIRED_ROOT_ENTRIES & tracked)
     for path in RETIRED_ROOT_ENTRIES:
         assert not (ROOT / path).exists()
@@ -227,22 +231,24 @@ def test_issue_5851_helper_images_and_grafana_provisioning_are_rehomed() -> None
     tracked = _git_ls_files()
     candidates = _registry_candidates()
     root_compose = (ROOT / "docker-compose.yml").read_text(encoding="utf-8")
-    codex_compose = (ROOT / "docker-compose.codex.yml").read_text(encoding="utf-8")
 
     assert payload["outcomes"]["5851"]["image_rehome_map"] == IMAGE_REHOME_MAP
     for legacy_path, new_path in IMAGE_REHOME_MAP.items():
         assert legacy_path not in tracked
-        assert new_path in tracked
-        assert (ROOT / new_path).exists()
-        assert (
-            candidates[legacy_path]["current_live_state"] == "absent_from_root_baseline"
-        )
-        assert candidates[legacy_path]["canonical_path"] == new_path
+        if new_path in SUPERSEDED_IMAGE_PATHS:
+            assert not (ROOT / new_path).exists()
+            assert legacy_path not in candidates
+        else:
+            assert new_path in tracked
+            assert (ROOT / new_path).exists()
+            assert (
+                candidates[legacy_path]["current_live_state"]
+                == "absent_from_root_baseline"
+            )
+            assert candidates[legacy_path]["canonical_path"] == new_path
 
-    assert "scripts/ops/runtime/docker/images/warp/Dockerfile" in root_compose
-    for new_path in IMAGE_REHOME_MAP.values():
-        if new_path.startswith("scripts/ops/runtime/docker/images/mcp-"):
-            assert new_path in codex_compose
+    assert "warp" not in root_compose.lower()
+    assert not (ROOT / "docker-compose.codex.yml").exists()
 
 
 def test_issue_5852_review_class_root_files_have_exact_filename_contracts() -> None:

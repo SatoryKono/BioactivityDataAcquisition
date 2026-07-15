@@ -2,7 +2,7 @@ name: bioetl-monitoring
 
 services:
   prometheus:
-    image: prom/prometheus:v3.13.1
+    image: prom/prometheus:v3.13.1@sha256:3c42b892cf723fa54d2f262c37a0e1f80aa8c8ddb1da7b9b0df9455a35a7f893
     container_name: bioetl-prometheus
     ports:
       - "127.0.0.1:9090:9090"
@@ -25,9 +25,16 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 512m
+    cpus: 1.0
+    pids_limit: 256
+    init: true
+    stop_grace_period: 30s
+    logging: {driver: json-file, options: {max-size: "20m", max-file: "5"}}
 
   pushgateway:
-    image: prom/pushgateway:v1.11.3
+    image: prom/pushgateway:v1.11.3@sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48
     container_name: bioetl-pushgateway
     ports:
       - "127.0.0.1:9091:9091"
@@ -40,9 +47,16 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+    mem_limit: 256m
+    mem_reservation: 128m
+    cpus: 0.50
+    pids_limit: 128
+    init: true
+    stop_grace_period: 20s
+    logging: {driver: json-file, options: {max-size: "10m", max-file: "3"}}
 
   loki:
-    image: grafana/loki:3.7.0
+    image: grafana/loki:3.7.0@sha256:c316b7c7589a5eeca843b6926c7446149d18300b79ac8538dc4ae063bc478da2
     profiles: ["tracing"]
     ports:
       - "127.0.0.1:3100:3100"
@@ -54,9 +68,22 @@ services:
     networks:
       - monitoring
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3100/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 20s
+    mem_limit: 768m
+    mem_reservation: 384m
+    cpus: 0.75
+    pids_limit: 256
+    init: true
+    stop_grace_period: 30s
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
 
   promtail:
-    image: grafana/promtail:3.6.8
+    image: grafana/promtail:3.6.8@sha256:6cfa64ec432b24a912d640e2edb940eeae2666f61861a66c121d763dd7241381
     profiles: ["tracing"]
     command:
       - "-config.file=/etc/promtail/config.yml"
@@ -65,13 +92,27 @@ services:
       - ./logs:/workspace-logs:ro
       - ./reports/logs:/workspace-report-logs:ro
     depends_on:
-      - loki
+      loki:
+        condition: service_healthy
     networks:
       - monitoring
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9080/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 20s
+    mem_limit: 256m
+    mem_reservation: 128m
+    cpus: 0.50
+    pids_limit: 128
+    init: true
+    stop_grace_period: 20s
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
 
   tempo:
-    image: grafana/tempo:2.10.3
+    image: grafana/tempo:2.10.3@sha256:cac9de2ac9f6da8efca5b64b690a7cb8c786a0c49cac7b4517dd1b0089a6c703
     profiles: ["tracing"]
     user: "0"
     ports:
@@ -85,9 +126,22 @@ services:
     networks:
       - monitoring
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3200/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+      start_period: 20s
+    mem_limit: 768m
+    mem_reservation: 384m
+    cpus: 0.75
+    pids_limit: 256
+    init: true
+    stop_grace_period: 30s
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
 
   grafana:
-    image: grafana/grafana:12.0.0
+    image: grafana/grafana:12.0.0@sha256:263cbefd5d9b179893c47c415daab4da5c1f3d6770154741eca4f45c81119884
     container_name: bioetl-grafana
     ports:
       - "127.0.0.1:3000:3000"
@@ -119,7 +173,7 @@ services:
       pushgateway:
         condition: service_healthy
       renderer:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
       interval: 10s
@@ -131,6 +185,13 @@ services:
     networks:
       - monitoring
     restart: unless-stopped
+    mem_limit: 768m
+    mem_reservation: 384m
+    cpus: 1.0
+    pids_limit: 256
+    init: true
+    stop_grace_period: 30s
+    logging: {driver: local, options: {max-size: "20m", max-file: "5"}}
 
   renderer:
     image: grafana/grafana-image-renderer@sha256:c0c920e6974b0d30ae25313051344afcd2054362529968ebd9545a4b2bc8119b
@@ -145,6 +206,19 @@ services:
     networks:
       - monitoring
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8081/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 45s
+    mem_limit: 1536m
+    mem_reservation: 768m
+    cpus: 2.0
+    pids_limit: 512
+    init: true
+    stop_grace_period: 30s
+    logging: {driver: local, options: {max-size: "20m", max-file: "5"}}
 
 volumes:
   prometheus-data:

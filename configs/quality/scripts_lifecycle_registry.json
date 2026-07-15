@@ -302,6 +302,18 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as a bounded ADR enforcement matrix reporter while architecture governance tests and generated QA evidence still depend on this surface; promote it into the canonical scripts.engineering.qa command router or retire it after ADR evidence generation consolidates."
     },
+    "scripts/ops/runtime/docker/docker_runtime_probe.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a Docker runtime probe helper for Docker health checks and diagnostics; keep it supporting unless it becomes a governed CI workflow or first-class ops entrypoint."
+    },
+    "scripts/ops/runtime/docker/runtime_manager.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as a Docker runtime manager helper for container lifecycle management; keep it supporting unless it becomes a governed CI workflow or first-class ops entrypoint."
+    },
     "scripts/engineering/qa/report_invariant_audit_rebaseline.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -385,6 +397,18 @@
       "decision": "legacy_manual_utility",
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded historical phased burn-down utility for surgical config text edits; do not extend it unless the config-surface remediation program is restarted under a governed workflow."
+    },
+    "scripts/ai/mcp/protocol_smoke.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the bounded MCP initialize/tools-list readiness helper behind frontend checks; keep it supporting and do not restore persistent stdio Compose servers."
+    },
+    "scripts/engineering/qa/run_docker_stability_campaign.py": {
+      "owner": "@bioetl-platform",
+      "decision": "legacy_manual_utility",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the opt-in resumable Docker stability campaign utility; keep it supporting because Docker is an ADR-010 adjunct and host-disruptive execution remains explicitly scheduled."
     },
     "scripts/engineering/qa/scaffold_non_chembl_hash_policy.py": {
       "owner": "@bioetl-platform",

@@ -123,8 +123,9 @@ def test_audit_profile_mounts_explicit_roots_read_only_and_uses_bounded_loki_job
         "${BIOETL_AUDIT_DATA_ROOT:?Pass an explicit absolute data root}:ro"
     ]
     assert audit_promtail["profiles"] == ["audit"]
-    assert "${BIOETL_AUDIT_LOG_ROOT:?Pass an explicit absolute log root}:/audit-logs:ro" in (
-        audit_promtail["volumes"]
+    assert (
+        "${BIOETL_AUDIT_LOG_ROOT:?Pass an explicit absolute log root}:/audit-logs:ro"
+        in (audit_promtail["volumes"])
     )
     assert "audit" in services["loki"]["profiles"]
 
@@ -132,9 +133,7 @@ def test_audit_profile_mounts_explicit_roots_read_only_and_uses_bounded_loki_job
         Path("grafana/promtail-config.yml").read_text(encoding="utf-8")
     )
     audit_jobs = [
-        job
-        for job in promtail["scrape_configs"]
-        if job["job_name"] == "bioetl-audit"
+        job for job in promtail["scrape_configs"] if job["job_name"] == "bioetl-audit"
     ]
     assert len(audit_jobs) == 1
     audit_labels = audit_jobs[0]["static_configs"][0]["labels"]
@@ -155,10 +154,11 @@ def test_monitoring_images_are_pinned_and_legacy_pushgateway_datasource_is_inert
 ):
     monitoring = _load_monitoring_compose()
     assert monitoring["services"]["prometheus"]["image"] == (
-        "prom/prometheus:v3.13.1"
+        "prom/prometheus:v3.13.1@sha256:3c42b892cf723fa54d2f262c37a0e1f80aa8c8ddb1da7b9b0df9455a35a7f893"
     )
     assert monitoring["services"]["pushgateway"]["image"] == (
-        "prom/pushgateway:v1.11.3"
+        "prom/pushgateway:v1.11.3@sha256:"
+        "74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48"
     )
 
     legacy = yaml.safe_load(

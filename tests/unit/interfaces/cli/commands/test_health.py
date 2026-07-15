@@ -6,6 +6,7 @@ Tests health check and health server CLI commands.
 from __future__ import annotations
 
 import asyncio
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -707,9 +708,11 @@ class TestHealthServerAsyncExecution:
         mock_get_health_server_quarantine_service: MagicMock,
         mock_server_cls: MagicMock,
         cli_runner: CliRunner,
+        tmp_path: Path,
     ) -> None:
         """Test health server passes custom host/port to HealthServer."""
         mock_deps = MagicMock()
+        mock_deps.data_root = tmp_path
         mock_deps.checkpoint_port.aclose = AsyncMock()
         mock_get_deps.return_value = mock_deps
         mock_get_health_server_quarantine_service.return_value = None
@@ -745,6 +748,7 @@ class TestHealthServerAsyncExecution:
             run_ledger_port=mock_deps.run_ledger_port,
             workflow_manifest_port=mock_deps.workflow_manifest_port,
         )
+        mock_server.set_data_root.assert_called_once_with(str(tmp_path))
 
     @patch("bioetl.interfaces.http.health_server.HealthServer")
     @patch(
@@ -759,9 +763,11 @@ class TestHealthServerAsyncExecution:
         mock_get_health_server_quarantine_service: MagicMock,
         mock_server_cls: MagicMock,
         cli_runner: CliRunner,
+        tmp_path: Path,
     ) -> None:
         """Test health server uses composition entrypoint for DI."""
         mock_deps = MagicMock()
+        mock_deps.data_root = tmp_path
         mock_deps.checkpoint_port.aclose = AsyncMock()
         mock_get_deps.return_value = mock_deps
         mock_get_health_server_quarantine_service.return_value = None
@@ -796,6 +802,7 @@ class TestHealthServerAsyncExecution:
             run_ledger_port=mock_deps.run_ledger_port,
             workflow_manifest_port=mock_deps.workflow_manifest_port,
         )
+        mock_server.set_data_root.assert_called_once_with(str(tmp_path))
 
 
 class TestHealthCheckEdgeCases:

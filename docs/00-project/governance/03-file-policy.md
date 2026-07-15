@@ -52,7 +52,6 @@ Docker helper dispositions are resolved as follows and MUST stay aligned with
 | `Dockerfile.bioetl` | MUST stay root | `Dockerfile.bioetl` | move only after Docker workflow build inputs and manual build commands are repointed or wrapped |
 | `docker-compose.yml` | MUST stay root | `docker-compose.yml` | move only behind a root-compatible shim or after default `docker compose` flows are repointed |
 | `docker-compose.monitoring.yml` | MUST stay root | `docker-compose.monitoring.yml` | move only after monitoring CI/docs references use a new path or shim |
-| `docker-compose.codex.yml` | MUST stay root | `docker-compose.codex.yml` | move only after Codex/MCP startup and shutdown wrappers are repointed |
 | `docker-compose.neo4j.yml` | MUST stay root | `docker-compose.neo4j.yml` | move only after Neo4j helper commands and docs are repointed |
 | `docker-compose.neo4j-audit.yml` | MUST stay root | `docker-compose.neo4j-audit.yml` | move only after audit launchers and docs are repointed |
 | `docker-setup.ps1` | retired root script | `scripts/ops/docker-setup.ps1` | do not restore root filename; use the scripts-owned command-compatible helper |
@@ -61,11 +60,8 @@ Docker helper dispositions are resolved as follows and MUST stay aligned with
 | `docker-compose.minio.yml` | moved to owned path | `scripts/ops/runtime/docker/compose/minio.yml` | do not restore root filename without fresh owner review |
 | `docker-compose.redis.yml` | moved to owned path | `scripts/ops/runtime/docker/compose/redis.yml` | do not restore root filename without fresh owner review |
 | `docker-compose.sonarqube.yml` | moved to owned path | `scripts/ops/runtime/docker/compose/sonarqube.yml` | do not restore root filename without fresh owner review |
-| `Dockerfile.mcp-fetch` | moved to owned path | `scripts/ops/runtime/docker/images/mcp-fetch/Dockerfile` | do not restore root filename without fresh owner review |
-| `Dockerfile.mcp-filesystem` | moved to owned path | `scripts/ops/runtime/docker/images/mcp-filesystem/Dockerfile` | do not restore root filename without fresh owner review |
-| `Dockerfile.mcp-github` | moved to owned path | `scripts/ops/runtime/docker/images/mcp-github/Dockerfile` | do not restore root filename without fresh owner review |
-| `Dockerfile.mcp-memory` | moved to owned path | `scripts/ops/runtime/docker/images/mcp-memory/Dockerfile` | do not restore root filename without fresh owner review |
-| `Dockerfile.warp` | moved to owned path | `scripts/ops/runtime/docker/images/warp/Dockerfile` | do not restore root filename without fresh owner review |
+| `docker-compose.codex.yml`, `Dockerfile.mcp-*` | retired | `.mcp.json` and `scripts/ai/mcp/**` | do not restore persistent stdio MCP containers |
+| `Dockerfile.warp` | retired | none | do not restore Warp to default/full startup |
 | `grafana-datasource.yml` | moved to owned path | `grafana/provisioning/datasources-local/grafana-datasource.yml` | do not restore root filename without fresh owner review |
 
 - Root-level tracked файлы MUST соответствовать `.github/root-allowlist.txt`.

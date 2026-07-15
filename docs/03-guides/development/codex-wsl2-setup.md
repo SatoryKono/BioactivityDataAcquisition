@@ -245,6 +245,7 @@ registers the active BioETL MCP server set:
 | `biomoltechDocs` | Remote HTTP MCP | BioETL documentation lookup |
 | `mintlify` | Remote HTTP MCP | Mintlify documentation lookup |
 | `deepwiki` | Remote HTTP MCP | DeepWiki repository documentation lookup |
+| `ref` | Remote HTTP MCP with OAuth | Ref Tools documentation search and URL retrieval |
 
 Retired MCP servers such as `sequential-thinking`, `pdf`, `needle`,
 `docker-docs`, `dockerhub`, and `paper-search` are intentionally not registered

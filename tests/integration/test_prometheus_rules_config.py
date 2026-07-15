@@ -192,6 +192,13 @@ def _build_metric_label_sets(payload: dict) -> dict[str, frozenset[str]]:
     label_sets: dict[str, frozenset[str]] = {
         "up": frozenset({"job", "instance"}),
     }
+    docker_contract = yaml.safe_load(
+        Path("configs/quality/docker_runtime_contracts.yaml").read_text(
+            encoding="utf-8"
+        )
+    )
+    for name, labels in docker_contract["host_probe"]["metric_labels"].items():
+        label_sets[str(name)] = frozenset(map(str, labels))
 
     for name, metric in COUNTERS.items():
         label_sets[name] = frozenset(metric._labelnames)
@@ -736,7 +743,10 @@ def test_monitoring_images_match_documented_qa_compatibility_series() -> None:
     services = compose["services"]
 
     assert services["prometheus"]["image"] == check_prometheus_rules.PROMETHEUS_IMAGE
-    assert services["pushgateway"]["image"] == "prom/pushgateway:v1.11.3"
+    assert services["pushgateway"]["image"] == (
+        "prom/pushgateway:v1.11.3@sha256:"
+        "74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48"
+    )
     assert check_prometheus_rules.PROMETHEUS_COMPATIBILITY_SERIES == "3.13.x"
     assert check_prometheus_rules.PUSHGATEWAY_COMPATIBILITY_SERIES == "1.11.x"
 
