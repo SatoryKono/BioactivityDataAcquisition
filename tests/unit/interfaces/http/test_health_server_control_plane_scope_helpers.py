@@ -32,6 +32,19 @@ class _ManifestPort:
     def get_by_run_id(self, run_id: RunID) -> object | None:
         return self._by_run_id.get(str(run_id))
 
+    def get_latest_for_scope(
+        self,
+        pipeline_name: str,
+        run_types: tuple[RunType, ...] = (),
+    ) -> object | None:
+        candidates = tuple(
+            manifest
+            for manifest in self._manifests
+            if manifest.pipeline_name == pipeline_name
+            and (not run_types or manifest.run_type in run_types)
+        )
+        return candidates[-1] if candidates else None
+
 
 class _Host:
     def __init__(self, manifest_port: _ManifestPort) -> None:
@@ -137,16 +150,11 @@ def test_control_plane_scope_resolves_unknown_exact_and_latest_paths() -> None:
     assert missing_scope.resolved_via == "no_manifest_for_scope"
 
 
-def test_control_plane_scope_handles_ports_without_exact_lookup() -> None:
+def test_control_plane_scope_uses_bounded_latest_lookup() -> None:
     selected = _manifest(pipeline_name="chembl_activity", run_id=_RUN_ID)
-    host = SimpleNamespace(
-        _run_manifest_port=SimpleNamespace(list_all=lambda: (selected,)),
-        _read_required_param=lambda query, name: query[name],
-        _read_optional_param=lambda query, name: query.get(name),
-        _read_scope_csv_param=_Host._read_scope_csv_param,
-    )
+    manifest_port = _ManifestPort((selected,), by_run_id={_RUN_ID: selected})
+    host = _Host(manifest_port)
 
-    assert scope._get_manifest_by_selected_run_id(object(), _RUN_ID) is None
     assert scope._ControlPlaneScopeHost._read_required_param(object(), {}, "x") is None
     assert scope._ControlPlaneScopeHost._read_optional_param({}, "x") is None
     assert scope._ControlPlaneScopeHost._read_scope_csv_param({}, "x") is None
@@ -162,3 +170,19 @@ def test_control_plane_scope_handles_ports_without_exact_lookup() -> None:
     )
     assert resolved.resolved_via == "latest_manifest_for_scope"
     assert resolved.resolved_manifest is selected
+
+
+def test_control_plane_scope_does_not_scan_catalog_for_latest_lookup() -> None:
+    selected = _manifest(pipeline_name="chembl_activity", run_id=_RUN_ID)
+    manifest_port = _ManifestPort((selected,))
+    manifest_port.list_all = lambda: (_ for _ in ()).throw(  # type: ignore[attr-defined]
+        AssertionError("latest scope must not scan the manifest catalog")
+    )
+
+    resolved = scope.resolve_control_plane_identity_scope(
+        _Host(manifest_port),
+        {"pipeline": "chembl_activity"},
+    )
+
+    assert resolved.resolved_manifest is selected
+    assert resolved.resolved_via == "latest_manifest_for_scope"

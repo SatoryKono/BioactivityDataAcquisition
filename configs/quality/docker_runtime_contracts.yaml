@@ -151,7 +151,7 @@ stacks:
     compose_file: docker-compose.codex.yml
     project_name: bioetl-codex
     owner: legacy-mcp-helper
-    status: pending_retirement_rf002
+    status: retired_rf002
     canonical_runtime: false
     required_services:
       - mcp-memory

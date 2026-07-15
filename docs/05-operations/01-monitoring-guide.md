@@ -651,8 +651,10 @@ QA image, rule fixtures, and monitoring-profile pins in one reviewed change.
      `curl -u admin:<password> http://localhost:3000/api/datasources` должен содержать `Quarantine Explorer`,
      а `curl -u admin:<password> http://localhost:3000/api/plugins/yesoreyeram-infinity-datasource/settings`
      должен возвращать `200`.
-  1. Для Grafana 12+ используйте `GF_PLUGINS_PREINSTALL=yesoreyeram-infinity-datasource`
-     (legacy `GF_INSTALL_PLUGINS` оставляем только для обратной совместимости).
+  1. Для закреплённого Grafana 12 используйте только
+     `GF_PLUGINS_PREINSTALL=yesoreyeram-infinity-datasource`. Не задавайте одновременно
+     legacy `GF_INSTALL_PLUGINS`: старый startup helper повторно запускает CLI installer,
+     задерживает readiness и может вызвать restart-loop после восстановления volume.
   1. Убедитесь, что Grafana datasource `Quarantine Explorer` указывает на
      Docker-default `http://quarantine-explorer:8081` через monitoring-network
      alias или на ваш explicit override `BIOETL_QUARANTINE_EXPLORER_URL`.

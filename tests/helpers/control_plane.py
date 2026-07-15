@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest, WorkflowManifest
 from bioetl.domain.ports import RunLedgerPort, RunManifestPort, WorkflowManifestPort
-from bioetl.domain.types import RunID
+from bioetl.domain.types import RunID, RunType
 
 __all__ = [
     "InMemoryRunLedgerStore",
@@ -32,6 +32,26 @@ class InMemoryRunManifestStore(RunManifestPort):
     def get_by_run_id(self, run_id: RunID) -> RunManifest | None:
         manifest_id = self._by_run_id.get(str(run_id))
         return None if manifest_id is None else self._items.get(manifest_id)
+
+    def get_latest_for_scope(
+        self,
+        pipeline_name: str,
+        run_types: tuple[RunType, ...] = (),
+    ) -> RunManifest | None:
+        candidates = tuple(
+            manifest
+            for manifest in self._items.values()
+            if manifest.pipeline_name == pipeline_name
+            and (not run_types or manifest.run_type in run_types)
+        )
+        return (
+            max(
+                candidates,
+                key=lambda manifest: (manifest.created_at, manifest.manifest_id),
+            )
+            if candidates
+            else None
+        )
 
     def list_all(self) -> tuple[RunManifest, ...]:
         return tuple(

@@ -7,6 +7,7 @@
 # bootstrap path.
 
 set -euo pipefail
+# Any future local .env creation requires BIOETL_CREATE_LOCAL_ENV_FILES=1.
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$PROJECT_ROOT"
