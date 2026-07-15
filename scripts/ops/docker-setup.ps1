@@ -52,8 +52,8 @@ if ($Mode) { $Command = $Mode }
 $Stack = if ($Argument) { $Argument } else { "main" }
 switch ($Command) {
     "check" { Invoke-Manager -ManagerArgs @("check", "--stack", $Stack) }
-    "start" { Invoke-Manager -ManagerArgs @("start", "--stack", "main") }
-    "basic" { Invoke-Manager -ManagerArgs @("start", "--stack", "main") }
+    "start" { Invoke-Manager -ManagerArgs @("start", "--stack", $Stack) }
+    "basic" { Invoke-Manager -ManagerArgs @("start", "--stack", $Stack) }
     "recover" { Invoke-Manager -ManagerArgs @("recover", "--stack", $Stack) }
     "monitoring" { Invoke-Manager -ManagerArgs @("start", "--stack", "monitoring") }
     "start-full" { Invoke-ForStacks -Action "start" -Stacks @("main", "neo4j", "redis", "minio", "monitoring") }
