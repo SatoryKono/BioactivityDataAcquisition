@@ -30,6 +30,7 @@ EXPECTED_MCP_SERVERS = {
     "biomoltechDocs",
     "mintlify",
     "deepwiki",
+    "ref",
     "ast-grep",
     "mcp-code-interpreter",
 }
@@ -197,6 +198,8 @@ def test_setup_backend_writes_expected_vscode_mcp_config(tmp_path: Path) -> None
     assert servers["mintlify"]["url"] == "https://mcp.mintlify.com"
     assert servers["deepwiki"]["type"] == "http"
     assert servers["deepwiki"]["url"] == "https://mcp.deepwiki.com/mcp"
+    assert servers["ref"]["type"] == "http"
+    assert servers["ref"]["url"] == "https://api.ref.tools/mcp"
 
 
 def test_tracked_mcp_projections_reject_workstation_paths() -> None:

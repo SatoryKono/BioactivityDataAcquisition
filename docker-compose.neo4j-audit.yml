@@ -2,7 +2,7 @@ name: bioetl-neo4j-audit
 
 services:
   neo4j-audit:
-    image: neo4j:5.13-community
+    image: neo4j:5.13-community@sha256:6c6003e890c75c9136df06b9061afbbf9a70673711d2d9abc5937ca7f01abb16
     container_name: bioetl-neo4j-audit
     ports:
       - "127.0.0.1:7475:7474"
@@ -22,3 +22,10 @@ services:
       retries: 20
       start_period: 30s
     restart: no
+    mem_limit: 2g
+    mem_reservation: 1g
+    cpus: 1.0
+    pids_limit: 256
+    init: true
+    stop_grace_period: 60s
+    logging: {driver: local, options: {max-size: "20m", max-file: "5"}}

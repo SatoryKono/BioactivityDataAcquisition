@@ -38,11 +38,11 @@ ______________________________________________________________________
 
 ## TL;DR
 
-1. **Restart Docker Desktop** (manual, takes 3 min):
+1. **Run evidence-first bounded Docker Desktop recovery**:
 
-   - Right-click tray icon → Quit
-   - Wait 10 seconds
-   - Relaunch → Wait 60 seconds
+   ```powershell
+   .\scripts\ops\runtime\docker\restart-docker.ps1 -TimeoutSeconds 180
+   ```
 
 1. **Run automated recovery**:
 
@@ -81,9 +81,9 @@ ______________________________________________________________________
 The `neo4j-recovery-checklist.ps1` does:
 
 1. ✅ Verify Docker daemon responsive
-1. ✅ Clean old container
-1. ✅ Start Neo4j 5.13-community
-1. ⏳ Wait 60 seconds (startup)
+1. ✅ Preserve volumes and project ownership
+1. ✅ Start the pinned Neo4j image through the readiness manager
+1. ⏳ Poll bounded readiness
 1. ✅ Check container status
 1. ✅ Test HTTP port (7474)
 1. ✅ Test Bolt driver (7687)

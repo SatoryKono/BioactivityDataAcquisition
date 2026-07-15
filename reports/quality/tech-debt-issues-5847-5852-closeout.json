@@ -51,11 +51,6 @@
       "status": "closed-ready",
       "title": "root-hygiene/docker-images: rehome candidate helper Dockerfiles and Grafana provisioning behind reviewed path updates",
       "evidence": [
-        "scripts/ops/runtime/docker/images/mcp-fetch/Dockerfile",
-        "scripts/ops/runtime/docker/images/mcp-filesystem/Dockerfile",
-        "scripts/ops/runtime/docker/images/mcp-github/Dockerfile",
-        "scripts/ops/runtime/docker/images/mcp-memory/Dockerfile",
-        "scripts/ops/runtime/docker/images/warp/Dockerfile",
         "grafana/provisioning/datasources-local/grafana-datasource.yml"
       ]
     },
@@ -168,5 +163,3 @@
     }
   }
 }
-
-

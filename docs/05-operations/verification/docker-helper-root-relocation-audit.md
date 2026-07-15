@@ -27,7 +27,6 @@ Reviewed root Docker helper surfaces:
 | `docker-compose.monitoring.yml` | reviewed monitoring stack entrypoint | `docs/DOCKER_SETUP.md`, `docs/DOCKER_QUICKSTART.md`, operator flows | `must_stay_root_for_now` | `docker/compose/monitoring.yml` behind a root shim only |
 | `docker-compose.neo4j.yml` | reviewed Neo4j helper stack | ops docs, manual audit flows | `must_stay_root_for_now` | `docker/compose/neo4j.yml` behind a root shim only |
 | `docker-compose.neo4j-audit.yml` | reviewed audit helper stack | audit docs and operator flows | `must_stay_root_for_now` | `docker/compose/neo4j-audit.yml` behind a root shim only |
-| `docker-compose.codex.yml` | Codex MCP adjunct stack | Codex setup docs, startup scripts | `must_stay_root_for_now` | `docker/compose/codex.yml` behind a root shim only |
 | `docker-compose.alertmanager.yml` | optional ADR-010 adjunct helper | `configs/quality/docker_helper_contracts.yaml`, Docker docs | `rehomed_2026_07` | `scripts/ops/runtime/docker/compose/alertmanager.yml` |
 | `docker-compose.minio.yml` | optional ADR-010 adjunct helper | contract file, Docker docs, local operator flows | `rehomed_2026_07` | `scripts/ops/runtime/docker/compose/minio.yml` |
 | `docker-compose.redis.yml` | optional ADR-010 adjunct helper | contract file, Makefile, Docker docs | `rehomed_2026_07` | `scripts/ops/runtime/docker/compose/redis.yml` |
@@ -35,11 +34,8 @@ Reviewed root Docker helper surfaces:
 | `docker-setup.ps1` | retired root Windows bootstrap helper | legacy operator docs, launcher instructions | `retired_root_script_2026_07_10` | `scripts/ops/docker-setup.ps1` command-compatible helper |
 | `docker-setup.sh` | retired root Bash bootstrap helper | legacy operator docs, launcher instructions | `retired_root_script_2026_07_10` | `scripts/ops/docker-setup.sh` command-compatible helper |
 | `Dockerfile.bioetl` | main local image build surface | manual builds, compose context assumptions | `must_stay_root_for_now` | `docker/images/bioetl/Dockerfile` only with compose/build refactor |
-| `Dockerfile.mcp-fetch` | Codex/MCP helper build surface | `docker-compose.codex.yml` | `rehomed_2026_07` | `scripts/ops/runtime/docker/images/mcp-fetch/Dockerfile` |
-| `Dockerfile.mcp-filesystem` | Codex/MCP helper build surface | `docker-compose.codex.yml` | `rehomed_2026_07` | `scripts/ops/runtime/docker/images/mcp-filesystem/Dockerfile` |
-| `Dockerfile.mcp-github` | Codex/MCP helper build surface | `docker-compose.codex.yml` | `rehomed_2026_07` | `scripts/ops/runtime/docker/images/mcp-github/Dockerfile` |
-| `Dockerfile.mcp-memory` | Codex/MCP helper build surface | `docker-compose.codex.yml` | `rehomed_2026_07` | `scripts/ops/runtime/docker/images/mcp-memory/Dockerfile` |
-| `Dockerfile.warp` | reviewed network/tooling helper image | Docker docs, local operator flows | `rehomed_2026_07` | `scripts/ops/runtime/docker/images/warp/Dockerfile` |
+| `docker-compose.codex.yml`, `Dockerfile.mcp-*` | retired persistent MCP surface | on-demand MCP manifests/wrappers | `retired_rf002` | do not restore |
+| `Dockerfile.warp` | retired privileged helper | none | `retired_rf004` | do not restore |
 | `grafana-datasource.yml` | provisioning sidecar artifact | Grafana provisioning / compose mount assumptions | `rehomed_2026_07` | `grafana/provisioning/datasources-local/grafana-datasource.yml` |
 
 ## Reference Map Verification
@@ -54,7 +50,6 @@ consumers still use exact root filenames:
 | `Dockerfile.bioetl` | `.github/workflows/docker.yml`, `Makefile`, manual image build flows | Move only after Docker workflow build inputs and local build commands are repointed or wrapped. |
 | `docker-compose.yml` | `.github/workflows/docker.yml`, `.github/workflows/tests.yml`, `Makefile`, `scripts/startup.*`, `scripts/shutdown.*`, operator docs | Move only behind a root-compatible shim or after every default `docker compose` flow is repointed. |
 | `docker-compose.monitoring.yml` | `.github/workflows/docker.yml`, `.github/workflows/tests.yml`, `Makefile`, `docs/DOCKER_SETUP.md`, `docs/DOCKER_QUICKSTART.md`, ops helpers | Move only after monitoring workflow and docs references use the new path or a shim. |
-| `docker-compose.codex.yml` | `scripts/startup.*`, `scripts/shutdown.*`, `scripts/ops/docker-setup.*`, Codex/MCP docs | Move only after Codex/MCP startup and shutdown wrappers are repointed. |
 | `docker-compose.neo4j.yml` | `Makefile`, Neo4j ops docs, local audit flows | Move only after Neo4j helper commands and docs are repointed. |
 | `docker-compose.neo4j-audit.yml` | Neo4j audit launchers and audit docs | Move only after audit launchers and docs are repointed. |
 | `docker-setup.ps1` | retired root script; command parity retained in `scripts/ops/docker-setup.ps1` | Do not restore the root filename. |

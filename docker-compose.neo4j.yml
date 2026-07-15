@@ -2,7 +2,7 @@ name: bioetl-neo4j
 
 services:
   neo4j:
-    image: neo4j:5.15-community
+    image: neo4j:5.15-community@sha256:d9e2fb1ba398536e50d22ebc3d5d585baa086c1c0cf8e5b96bdc9e11e87e002a
     container_name: bioetl-neo4j
     ports:
       - "127.0.0.1:7474:7474"
@@ -20,6 +20,13 @@ services:
       # JVM GC tuning
       NEO4J_server_jvm_additional: "-XX:+UseG1GC -XX:G1HeapRegionSize=16m"
     restart: unless-stopped
+    mem_limit: 4g
+    mem_reservation: 2g
+    cpus: 2.0
+    pids_limit: 512
+    init: true
+    stop_grace_period: 60s
+    logging: {driver: local, options: {max-size: "20m", max-file: "5"}}
     volumes:
       - neo4j_data:/data
       - neo4j_logs:/logs
@@ -34,13 +41,13 @@ services:
       retries: 10
       start_period: 180s
     networks:
-      - warp-network
+      - runtime
 
 volumes:
   neo4j_data:
   neo4j_logs:
 
 networks:
-  warp-network:
+  runtime:
     external: true
-    name: warp-network
+    name: bioetl-runtime

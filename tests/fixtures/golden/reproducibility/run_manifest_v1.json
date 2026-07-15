@@ -75,5 +75,8 @@
       "provider": "chembl",
       "query": "assay_type=B"
     }
-  ]
+  ],
+  "workflow_name": null,
+  "workflow_run_id": null,
+  "workflow_step_id": null
 }

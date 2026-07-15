@@ -72,14 +72,15 @@ def test_effective_config_source_refs_use_canonical_config_root_anchor() -> None
     assert "Path(__file__).resolve().parents" not in text
 
 
-def test_runtime_config_discovery_does_not_use_source_parent_arithmetic() -> None:
+def test_runtime_config_discovery_does_not_use_source_parent_arithmetic(
+    source_ast_cache: dict[Path, ast.Module],
+) -> None:
     """Runtime code must use config-root helpers instead of parents[N] / configs."""
     violations: list[str] = []
 
-    for path in sorted(SRC_ROOT.rglob("*.py")):
+    for path, tree in sorted(source_ast_cache.items()):
         if path == CANONICAL_CONFIG_ROOT_HELPER:
             continue
-        tree = ast.parse(path.read_text(encoding="utf-8"))
         parent_names = _parent_derived_names(tree)
         for node in ast.walk(tree):
             if not isinstance(node, ast.BinOp):

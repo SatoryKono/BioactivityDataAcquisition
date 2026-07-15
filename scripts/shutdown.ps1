@@ -1,19 +1,7 @@
-# Compatibility wrapper for the legacy root shutdown launcher.
-# Graceful shutdown script for BioETL + MCP servers
+# Compatibility wrapper. On-demand MCP processes have no Compose lifecycle.
 
 $ErrorActionPreference = "Stop"
-$ProjectDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+$ProjectDir = Split-Path -Parent $PSScriptRoot
 
-Write-Host "🛑 Stopping BioETL services..." -ForegroundColor Yellow
-
-# Stop MCP servers
-Write-Host "Stopping MCP servers..."
-docker compose -p bioetl-codex -f "$ProjectDir\docker-compose.codex.yml" down --remove-orphans 2>$null
-
-# Stop base infrastructure
-Write-Host "Stopping base infrastructure..."
-docker compose -p bioetl-main -f "$ProjectDir\docker-compose.yml" down --remove-orphans 2>$null
-
-Write-Host "✓ Services stopped gracefully" -ForegroundColor Green
-Write-Host ""
-Write-Host "To remove all volumes (data cleanup): docker system prune -a"
+& "$ProjectDir\scripts\ops\docker-setup.ps1" stop
+exit $LASTEXITCODE

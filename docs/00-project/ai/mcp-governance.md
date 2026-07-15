@@ -42,6 +42,11 @@ prometheus, grafana, mermaid,
 brave-search,
 docker, neo4j-cypher, neo4j-memory,
 biomoltechDocs, mintlify, deepwiki
+ref
+
+`ref` uses the key-free `https://api.ref.tools/mcp` endpoint. Local clients
+authenticate through OAuth; Ref API keys must not be embedded in tracked or
+generated MCP configuration.
 
 ## Удалённые MCP
 sonarqube  

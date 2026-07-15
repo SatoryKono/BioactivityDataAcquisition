@@ -12,25 +12,24 @@ from typing import TYPE_CHECKING
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.ports import RunManifestPort
 from bioetl.domain.types import RunID, RunType
+from bioetl.infrastructure.control_plane._file_run_manifest_persistence import (
+    persist_manifest,
+)
 from bioetl.infrastructure.control_plane._read_metrics import (
     emit_control_plane_read_metrics,
 )
 from bioetl.infrastructure.control_plane._run_manifest_scope_index import (
     LatestScopeIndexCatalog,
-    LatestScopeIndexRecord,
     latest_scope_catalog_path,
     latest_scope_index_path,
     load_latest_scope_catalog,
     load_latest_scope_index,
-    read_optional_text,
     restore_optional_text,
-    write_latest_scope_catalog,
     write_latest_scope_index,
 )
 from bioetl.infrastructure.control_plane._run_manifest_scope_rebuild import (
     plan_latest_scope_index_rebuild,
 )
-from bioetl.infrastructure.errors import build_storage_error
 from bioetl.infrastructure.storage.atomic import atomic_write_text
 
 __all__ = ["FileRunManifestStore", "RunManifestStoreCorruptionError"]
@@ -42,49 +41,6 @@ class RunManifestStoreCorruptionError(ValueError):
 
 if TYPE_CHECKING:
     from bioetl.domain.ports import MetricsPort
-
-
-def _emit_manifest_write_metric(
-    metrics: MetricsPort | None,
-    *,
-    pipeline: str,
-    run_type: str,
-    status: str,
-) -> None:
-    """Emit one control-plane manifest write metric when metrics are enabled."""
-    if metrics is None:
-        return
-    metrics.increment_counter(
-        "bioetl_control_plane_manifest_writes_total",
-        1,
-        {
-            "pipeline": pipeline,
-            "run_type": run_type,
-            "status": status,
-        },
-    )
-
-
-def _emit_manifest_write_duration_metric(
-    metrics: MetricsPort | None,
-    *,
-    pipeline: str,
-    run_type: str,
-    status: str,
-    duration_seconds: float,
-) -> None:
-    """Emit one control-plane manifest write duration metric when enabled."""
-    if metrics is None:
-        return
-    metrics.observe_histogram(
-        "bioetl_control_plane_manifest_write_duration_seconds",
-        duration_seconds,
-        {
-            "pipeline": pipeline,
-            "run_type": run_type,
-            "status": status,
-        },
-    )
 
 
 def _load_latest_scope_manifest(
@@ -161,112 +117,11 @@ class FileRunManifestStore(RunManifestPort):
 
     def save(self, manifest: RunManifest) -> None:
         """Persist manifest JSON and run-id index."""
-        started_at = perf_counter()
-        manifest_path = self.base_path / f"{manifest.manifest_id}.json"
-        run_index_dir = self.base_path / "_by_run_id"
-        run_index_path = run_index_dir / f"{manifest.run_id}.txt"
-        scope_index_path = self._latest_scope_index_path(
-            manifest.pipeline_name,
-            manifest.run_type,
-        )
-        catalog_path = latest_scope_catalog_path(self.base_path)
-        failed_path = manifest_path
-        rollback_state: dict[Path, str | None] = {}
-        try:
-            self.base_path.mkdir(parents=True, exist_ok=True)
-            run_index_dir.mkdir(parents=True, exist_ok=True)
-            existing_manifest_id = self._load_manifest_id_for_run_id(manifest.run_id)
-            if (
-                existing_manifest_id is not None
-                and existing_manifest_id != manifest.manifest_id
-            ):
-                raise ValueError(
-                    "run_id is already mapped to a different manifest_id: "
-                    f"{existing_manifest_id}"
-                )
-            catalog = self._load_latest_scope_catalog()
-            if catalog is None:
-                catalog = LatestScopeIndexCatalog(
-                    complete=not any(self.base_path.glob("*.json")),
-                    scopes=(),
-                )
-            updated_catalog = LatestScopeIndexCatalog(
-                complete=catalog.complete,
-                scopes=tuple(
-                    sorted(
-                        {
-                            *catalog.scopes,
-                            (manifest.pipeline_name, manifest.run_type),
-                        },
-                        key=lambda item: (item[0], item[1].value),
-                    )
-                ),
-            )
-            existing_latest = self._load_latest_scope_manifest(
-                manifest.pipeline_name,
-                manifest.run_type,
-            )
-            should_update_scope_index = existing_latest is None or (
-                manifest.created_at,
-                manifest.manifest_id,
-            ) >= (existing_latest.created_at, existing_latest.manifest_id)
-            paths_to_write = [manifest_path, run_index_path, catalog_path]
-            if should_update_scope_index:
-                paths_to_write.append(scope_index_path)
-            rollback_state = {path: read_optional_text(path) for path in paths_to_write}
-            atomic_write_text(
-                manifest_path,
-                json.dumps(manifest.to_dict(), indent=2, sort_keys=True),
-            )
-            failed_path = run_index_path
-            atomic_write_text(run_index_path, manifest.manifest_id)
-            if should_update_scope_index:
-                failed_path = scope_index_path
-                write_latest_scope_index(
-                    scope_index_path,
-                    LatestScopeIndexRecord(
-                        pipeline_name=manifest.pipeline_name,
-                        run_type=manifest.run_type,
-                        manifest_id=manifest.manifest_id,
-                    ),
-                )
-            failed_path = catalog_path
-            write_latest_scope_catalog(catalog_path, updated_catalog)
-        except (OSError, TypeError, ValueError) as error:
-            self._restore_save_transaction(rollback_state)
-            _emit_manifest_write_metric(
-                self.metrics,
-                pipeline=manifest.pipeline_name,
-                run_type=manifest.run_type.value,
-                status="failed",
-            )
-            _emit_manifest_write_duration_metric(
-                self.metrics,
-                pipeline=manifest.pipeline_name,
-                run_type=manifest.run_type.value,
-                status="failed",
-                duration_seconds=perf_counter() - started_at,
-            )
-            raise build_storage_error(
-                message_prefix="Run manifest",
-                operation="save",
-                path=failed_path,
-                error=error,
-                manifest_id=manifest.manifest_id,
-                run_id=str(manifest.run_id),
-            ) from error
-        _emit_manifest_write_metric(
-            self.metrics,
-            pipeline=manifest.pipeline_name,
-            run_type=manifest.run_type.value,
-            status="success",
-        )
-        _emit_manifest_write_duration_metric(
-            self.metrics,
-            pipeline=manifest.pipeline_name,
-            run_type=manifest.run_type.value,
-            status="success",
-            duration_seconds=perf_counter() - started_at,
+        persist_manifest(
+            self,
+            manifest,
+            atomic_writer=atomic_write_text,
+            scope_index_writer=write_latest_scope_index,
         )
 
     def get(self, manifest_id: str) -> RunManifest | None:

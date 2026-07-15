@@ -92,6 +92,43 @@ tests:
               description: Pushgateway is not reachable for instance=pushgateway:9091.
               runbook: docs/05-operations/runbooks/observability-checklist.md
 
+  - name: optional-docker-runtime-primary-incident
+    interval: 1m
+    input_series:
+      - series: 'bioetl_docker_runtime_primary_cause{project="bioetl-main",stack="main",cause="oom_killed"}'
+        values: '1 1 1'
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: BioETLDockerRuntimeIncident
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              owner: bioetl-observability
+              stack: main
+              project: bioetl-main
+              cause: oom_killed
+            exp_annotations:
+              summary: Optional Docker runtime has one actionable incident
+              description: Host probe classified stack=main with primary cause=oom_killed; inspect the bounded report before recovery.
+              runbook: docs/05-operations/runbooks/docker-stability.md
+
+  - name: optional-docker-runtime-probe-missing
+    interval: 1m
+    input_series:
+      - series: 'unrelated_metric{scope="fixture"}'
+        values: '1+0x12'
+    alert_rule_test:
+      - eval_time: 12m
+        alertname: BioETLDockerRuntimeProbeMissing
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              owner: bioetl-observability
+            exp_annotations:
+              summary: Optional Docker runtime probe stopped reporting
+              description: No host-side Docker stability probe sample was observed for 10m; Docker adjunct state is unknown.
+              runbook: docs/05-operations/runbooks/docker-stability.md
+
   - name: quarantine-explorer-unavailable
     interval: 1m
     input_series:

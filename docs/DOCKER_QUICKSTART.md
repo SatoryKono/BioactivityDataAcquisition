@@ -33,13 +33,11 @@ Compose files have isolated project names; migration from the former
 ## ✅ Что настроено
 
 - ✓ `.env.example` как шаблон переменных окружения; `.env` является local-only/secret-bearing файлом и не создается автоматически
-- ✓ `docker-compose.yml` - isolated `bioetl-main` quarantine/Warp helper
+- ✓ `docker-compose.yml` - isolated `bioetl-main` quarantine helper
 - ✓ `docker-compose.neo4j.yml` - isolated `bioetl-neo4j` helper
 - ✓ `docker-compose.monitoring.yml` - мониторинг (Prometheus, Grafana, Loki, Tempo)
-- ✓ `docker-compose.codex.yml` - MCP серверы для Codex
 - ✓ Dockerfile для BioETL (multi-stage build)
-- ✓ Dockerfile для Warp VPN клиента under `scripts/ops/runtime/docker/images/warp/Dockerfile`
-- ✓ Dockerfiles для MCP серверов (memory, filesystem, github, fetch) under `scripts/ops/runtime/docker/images/**/Dockerfile`
+- ✓ MCP серверы запускаются on demand из `.mcp.json`, без persistent Compose
 - ✓ `.dockerignore` оптимизирован
 
 ## 🚀 Как запустить
@@ -96,19 +94,15 @@ docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml up -d
 - Loki на порту 3100
 - Tempo на порту 3200
 
-### 4. (Опционально) Запустите MCP серверы для Codex
+### 4. (Опционально) Проверьте on-demand MCP для Codex
 
 ```powershell
-# Через скрипт
-.\scripts\ops\docker-setup.ps1 -Mode mcp
-
-# Или вручную
-docker network create warp-network
-docker compose -p bioetl-codex -f docker-compose.codex.yml up -d
+bash scripts/ai/mcp/check.sh
+python scripts/ai/mcp/protocol_smoke.py --config .mcp.json --server memory
 ```
 
 Canonical helper scripts now bootstrap the shared external Docker networks
-(`bioetl-monitoring` and `warp-network`) automatically. If you start compose
+(`bioetl-monitoring` and `bioetl-runtime`) automatically. If you start compose
 files manually on a fresh machine, create the required network first.
 
 ## 📋 Основные команды
@@ -162,16 +156,13 @@ docker system prune -a
 | Файл | Описание |
 |------|---------|
 | `.env` | Machine-local переменные окружения (создается только вручную или через явный opt-in helper flag) |
-| `docker-compose.yml` | Основной helper-стек BioETL/Warp; Neo4j принадлежит отдельному проекту `bioetl-neo4j` |
+| `docker-compose.yml` | Основной helper-стек BioETL; Neo4j принадлежит отдельному проекту `bioetl-neo4j` |
 | `docker-compose.monitoring.yml` | Мониторинг (Prometheus, Grafana, Loki, Tempo) |
-| `docker-compose.codex.yml` | MCP серверы для Codex |
 | `scripts/ops/runtime/docker/compose/alertmanager.yml` | Optional adjunct Alertmanager helper stack; not part of baseline runtime; legacy root filename: `docker-compose.alertmanager.yml` |
 | `scripts/ops/runtime/docker/compose/minio.yml` | Optional local MinIO helper stack; not part of ADR-010 runtime. Requires explicit `MINIO_ROOT_USER` and `MINIO_ROOT_PASSWORD`; binds to localhost only; legacy root filename: `docker-compose.minio.yml` |
 | `scripts/ops/runtime/docker/compose/redis.yml` | Optional local Redis helper stack; not part of ADR-010 runtime. Requires explicit `REDIS_PASSWORD`; binds to localhost only; legacy root filename: `docker-compose.redis.yml` |
 | `scripts/ops/runtime/docker/compose/sonarqube.yml` | Optional local SonarQube helper stack; not part of baseline runtime. Requires local-only `SONARQUBE_DB_PASSWORD` and `SONARQUBE_SYSTEM_PASSCODE`; binds to localhost only; legacy root filename: `docker-compose.sonarqube.yml` |
 | `Dockerfile.bioetl` | Образ BioETL (multi-stage Python) |
-| `scripts/ops/runtime/docker/images/warp/Dockerfile` | Warp VPN клиент; legacy root filename: `Dockerfile.warp` |
-| `scripts/ops/runtime/docker/images/mcp-*/Dockerfile` | MCP серверы (Node.js); legacy root filenames: `Dockerfile.mcp-*` |
 | `.dockerignore` | Файлы исключены из образа |
 
 ## 🐛 Решение проблем

@@ -114,9 +114,15 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
     assert servers["biomoltechDocs"]["url"] == "https://biomoltech.mintlify.app/mcp"
     assert servers["mintlify"]["url"] == "https://mcp.mintlify.com"
     assert servers["deepwiki"]["url"] == "https://mcp.deepwiki.com/mcp"
+    assert servers["ref"]["type"] == "http"
+    assert servers["ref"]["url"] == "https://api.ref.tools/mcp"
     assert (
         gemini_settings["mcpServers"]["biomoltechDocs"]["httpUrl"]
         == "https://biomoltech.mintlify.app/mcp"
+    )
+    assert (
+        gemini_settings["mcpServers"]["ref"]["httpUrl"]
+        == "https://api.ref.tools/mcp"
     )
 
 

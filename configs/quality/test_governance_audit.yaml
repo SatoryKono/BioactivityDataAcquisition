@@ -595,7 +595,7 @@ test_audit_closeout_2026_07_08:
     test_file_count_definition: tests/**/test_*.py from pyproject python_files
     repo_backed_unit_lane: repo-backed-unit
     repo_backed_unit_subtree: tests/unit/repo_backed/
-    repo_backed_unit_test_files: 29
+    repo_backed_unit_test_files: 33
     performance_baseline_reports:
     - reports/test-telemetry/slowest-tests.json
     - reports/test-telemetry/slowest-tests.md
@@ -1069,6 +1069,18 @@ repo_backed_unit_test_exceptions:
   - path: tests/unit/repo_backed/scripts/ai/mcp/test_token_validation_helpers.py
     target_lane: repo-backed-unit
     protected_surface: scripts/ai/mcp/support/token_validation.sh
+  - path: tests/unit/repo_backed/scripts/ai/mcp/test_protocol_smoke.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ai/mcp/protocol_smoke.py
+  - path: tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ops/runtime/docker/runtime_manager.py
+  - path: tests/unit/repo_backed/scripts/ops/docker/test_docker_runtime_probe.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ops/runtime/docker/docker_runtime_probe.py
+  - path: tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/engineering/qa/run_docker_stability_campaign.py
 mixed_scope_unit_path_policy:
   issue_ref: '#4665'
   decision: logical_unit_ownership_with_dedicated_repo_backed_subtree

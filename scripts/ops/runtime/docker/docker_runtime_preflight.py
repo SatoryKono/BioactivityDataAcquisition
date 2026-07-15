@@ -361,6 +361,8 @@ def _published_ports(service: Mapping[str, Any]) -> list[tuple[str, int, int]]:
 def _static_observations(
     root: Path,
     contract: Mapping[str, Any],
+    *,
+    selected_stack: str | None = None,
 ) -> tuple[list[Finding], dict[str, Any]]:
     findings: list[Finding] = []
     compose_observations: dict[str, Any] = {}
@@ -533,7 +535,12 @@ def _static_observations(
                     )
                 seen_ports[published] = actual_owner
 
-        for secret_name in stack_contract.get("required_secret_environment_names", []):
+        required_secrets = (
+            stack_contract.get("required_secret_environment_names", [])
+            if selected_stack in {None, stack_name}
+            else []
+        )
+        for secret_name in required_secrets:
             if secret_name not in environment:
                 findings.append(
                     Finding(
@@ -590,28 +597,33 @@ def _static_observations(
                     )
                 )
 
-    codex = compose_observations.get("codex", {})
-    codex_compose = _load_yaml(root / contract["stacks"]["codex"]["compose_file"])
-    filesystem_service = codex_compose.get("services", {}).get("mcp-filesystem", {})
-    obscuring_targets = [
-        target
-        for volume in filesystem_service.get("volumes", [])
-        if _is_bind_mount(volume) and (target := _volume_target(volume)) == "/app"
-    ]
-    if obscuring_targets:
-        findings.append(
-            Finding(
-                "F001",
-                "error",
-                "mcp-filesystem bind mount obscures /app and image-installed node_modules",
-                {
-                    "stack": "codex",
-                    "service": "mcp-filesystem",
-                    "targets": obscuring_targets,
-                    "project": codex.get("project_name"),
-                },
-            )
+    codex_contract = contract["stacks"].get("codex")
+    if codex_contract:
+        codex = compose_observations.get("codex", {})
+        codex_compose = _load_yaml(root / codex_contract["compose_file"])
+        filesystem_service = codex_compose.get("services", {}).get(
+            "mcp-filesystem", {}
         )
+        obscuring_targets = [
+            target
+            for volume in filesystem_service.get("volumes", [])
+            if _is_bind_mount(volume)
+            and (target := _volume_target(volume)) == "/app"
+        ]
+        if obscuring_targets:
+            findings.append(
+                Finding(
+                    "F001",
+                    "error",
+                    "mcp-filesystem bind mount obscures /app and image-installed node_modules",
+                    {
+                        "stack": "codex",
+                        "service": "mcp-filesystem",
+                        "targets": obscuring_targets,
+                        "project": codex.get("project_name"),
+                    },
+                )
+            )
 
     main_compose = _load_yaml(root / contract["stacks"]["main"]["compose_file"])
     warp_service = main_compose.get("services", {}).get("warp", {})
@@ -931,10 +943,18 @@ def _live_observations(
 
 
 def build_report(
-    root: Path, contract_path: Path, *, static_only: bool
+    root: Path,
+    contract_path: Path,
+    *,
+    static_only: bool,
+    selected_stack: str | None = None,
 ) -> dict[str, Any]:
     contract = _load_yaml(contract_path)
-    findings, compose = _static_observations(root, contract)
+    if selected_stack is not None and selected_stack not in contract["stacks"]:
+        raise ValueError(f"Unknown contracted Docker stack: {selected_stack}")
+    findings, compose = _static_observations(
+        root, contract, selected_stack=selected_stack
+    )
     capacity, capacity_findings = _capacity_observation(root, contract)
     findings.extend(capacity_findings)
     live: dict[str, Any] = {"skipped": True}
@@ -951,6 +971,7 @@ def build_report(
             "path": str(contract_path.relative_to(root)),
             "sha256": hashlib.sha256(contract_path.read_bytes()).hexdigest(),
             "canonical_runtime": contract["policy"]["canonical_runtime"],
+            "selected_stack": selected_stack,
         },
         "host": {
             "system": platform.system(),
@@ -971,6 +992,10 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--repo-root", type=Path, help="Override repository root")
     parser.add_argument("--output", type=Path)
     parser.add_argument(
+        "--stack",
+        help="Require secrets only for this stack while retaining global contract checks",
+    )
+    parser.add_argument(
         "--static-only",
         action="store_true",
         help="Skip project/container/image observations; Docker data-root capacity still runs",
@@ -984,7 +1009,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     contract_path = (
         args.contract if args.contract.is_absolute() else root / args.contract
     )
-    report = build_report(root, contract_path, static_only=args.static_only)
+    try:
+        report = build_report(
+            root,
+            contract_path,
+            static_only=args.static_only,
+            selected_stack=args.stack,
+        )
+    except (KeyError, OSError, ValueError, yaml.YAMLError) as exc:
+        print(f"docker runtime preflight: {exc}", file=sys.stderr)
+        return 2
     rendered = json.dumps(report, indent=2, sort_keys=True) + "\n"
     if args.output:
         output_path = args.output if args.output.is_absolute() else root / args.output

@@ -1,5 +1,5 @@
 # Multi-stage build for BioETL Python application
-FROM python:3.11-slim AS base
+FROM python:3.11-slim@sha256:baf89808ec37adeaab83cec287adb4a2afa4a11c1d51e961c7ec737877e61af6 AS base
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -21,7 +21,7 @@ FROM base AS builder
 COPY pyproject.toml uv.lock ./
 
 # Install uv and builder dependencies
-RUN pip install uv && \
+RUN pip install uv==0.11.26 && \
     uv pip install --system -e .
 
 # ============ Production Stage ============
@@ -44,10 +44,6 @@ RUN useradd -m -u 1000 bioetl && \
 
 USER bioetl
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD bioetl --version || exit 1
-
 # Default command
 CMD ["bioetl", "--help"]
 
@@ -66,7 +62,7 @@ COPY package.json package-lock.json /app/
 COPY docker-compose.yml docker-compose.monitoring.yml docker-compose.neo4j.yml /app/
 
 # Install development dependencies
-RUN pip install uv && \
+RUN pip install uv==0.11.26 && \
     uv pip install --system -e ".[dev,docs]" && \
     useradd -m -u 1000 bioetl && \
     chown -R bioetl:bioetl /app

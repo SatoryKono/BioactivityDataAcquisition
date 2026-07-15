@@ -536,7 +536,6 @@ def test_root_docker_adjunct_lane_tracks_reviewed_root_docker_surfaces() -> None
     expected_root_surfaces = {
         "docker-compose.monitoring.yml",
         "docker-compose.alertmanager.yml",
-        "docker-compose.codex.yml",
         "docker-compose.minio.yml",
         "docker-compose.neo4j-audit.yml",
         "docker-compose.neo4j.yml",
@@ -546,11 +545,6 @@ def test_root_docker_adjunct_lane_tracks_reviewed_root_docker_surfaces() -> None
         "docker-setup.ps1",
         "docker-setup.sh",
         "Dockerfile.bioetl",
-        "Dockerfile.mcp-fetch",
-        "Dockerfile.mcp-filesystem",
-        "Dockerfile.mcp-github",
-        "Dockerfile.mcp-memory",
-        "Dockerfile.warp",
         "grafana-datasource.yml",
     }
     assert expected_root_surfaces == set(by_path)
@@ -562,11 +556,6 @@ def test_root_docker_adjunct_lane_tracks_reviewed_root_docker_surfaces() -> None
         "docker-compose.sonarqube.yml",
         "docker-setup.ps1",
         "docker-setup.sh",
-        "Dockerfile.mcp-fetch",
-        "Dockerfile.mcp-filesystem",
-        "Dockerfile.mcp-github",
-        "Dockerfile.mcp-memory",
-        "Dockerfile.warp",
         "grafana-datasource.yml",
     }
     for path in expected_root_surfaces - rehomed_surfaces:
@@ -576,7 +565,6 @@ def test_root_docker_adjunct_lane_tracks_reviewed_root_docker_surfaces() -> None
 
     expected_dispositions = {
         "docker-compose.monitoring.yml": "must_stay_root",
-        "docker-compose.codex.yml": "must_stay_root",
         "docker-compose.neo4j-audit.yml": "must_stay_root",
         "docker-compose.neo4j.yml": "must_stay_root",
         "docker-compose.yml": "must_stay_root",
@@ -592,10 +580,6 @@ def test_root_docker_adjunct_lane_tracks_reviewed_root_docker_surfaces() -> None
     )
     assert by_path["docker-setup.sh"]["canonical_path"] == "scripts/ops/docker-setup.sh"
     assert by_path["Dockerfile.bioetl"]["canonical_path"] == "Dockerfile.bioetl"
-    assert (
-        by_path["Dockerfile.warp"]["canonical_path"]
-        == "scripts/ops/runtime/docker/images/warp/Dockerfile"
-    )
     assert (
         by_path["grafana-datasource.yml"]["canonical_path"]
         == "grafana/provisioning/datasources-local/grafana-datasource.yml"

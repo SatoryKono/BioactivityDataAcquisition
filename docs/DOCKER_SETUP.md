@@ -31,9 +31,13 @@ Runtime stability contract: `configs/quality/docker_runtime_contracts.yaml`.
 Run the read-only gate with
 `python scripts/ops/runtime/docker/docker_runtime_preflight.py`. Root Compose
 projects are isolated as `bioetl-main`, `bioetl-monitoring`, `bioetl-neo4j`,
-`bioetl-neo4j-audit`, and `bioetl-codex`; never merge their files into one
+and `bioetl-neo4j-audit`; never merge their files into one
 Compose invocation. Existing volumes must follow
 `docs/05-operations/runbooks/docker-compose-project-migration.md`.
+For bounded host/runtime diagnostics use
+`scripts/ops/runtime/docker/docker_runtime_probe.py`; for readiness-aware
+Compose status and lifecycle operations use
+`scripts/ops/runtime/docker/runtime_manager.py`.
 
 ## ✓ Проверка Docker
 
@@ -78,27 +82,16 @@ docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml ps
 - Loki: http://localhost:3100
 - Tempo: http://localhost:3200
 
-## 3️⃣ Запуск MCP серверов для Codex
+## 3️⃣ Проверка on-demand MCP серверов для Codex
 
 ```powershell
-# Запустить MCP серверы
-docker network create warp-network
-docker compose -p bioetl-codex -f docker-compose.codex.yml up -d
-
-# Проверить статус
-docker compose -p bioetl-codex -f docker-compose.codex.yml ps
+bash scripts/ai/mcp/check.sh
+python scripts/ai/mcp/protocol_smoke.py --config .mcp.json --server memory
 ```
 
-Canonical helper scripts `scripts/ops/docker-setup.ps1` and
-`scripts/ops/docker-setup.sh` automatically ensure these shared external
-networks before starting compose stacks. Manual `docker compose ... up` on a
-fresh machine must create them first.
-
-**MCP Серверы:**
-- bioetl-mcp-memory
-- bioetl-mcp-filesystem
-- bioetl-mcp-github
-- bioetl-mcp-fetch
+MCP uses bounded on-demand stdio/HTTP processes from the generated frontend
+manifests. Docker Desktop MCP gateway availability is isolated from memory,
+filesystem, fetch, and GitHub MCP availability.
 
 ## 📋 Полезные команды
 
@@ -127,13 +120,6 @@ docker compose -p bioetl-main -f docker-compose.yml ps
 docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml up -d
 docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml down
 docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml logs -f
-```
-
-### MCP Серверы
-```powershell
-docker compose -p bioetl-codex -f docker-compose.codex.yml up -d
-docker compose -p bioetl-codex -f docker-compose.codex.yml down
-docker compose -p bioetl-codex -f docker-compose.codex.yml logs -f
 ```
 
 ### Общие команды
@@ -212,11 +198,11 @@ Get-Process -Id (Get-NetTCPConnection -LocalPort 8081).OwningProcess
 ```powershell
 # Проверить сеть
 docker network ls
-docker network inspect warp-network
+docker network inspect bioetl-runtime
 docker network inspect bioetl-monitoring
 
 # Если shared external network ещё не создан
-docker network create warp-network
+docker network create bioetl-runtime
 docker network create bioetl-monitoring
 ```
 
@@ -256,8 +242,8 @@ docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d
 # 3. Мониторинг (опционально)
 docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml up -d
 
-# 4. MCP серверы для Codex
-docker compose -p bioetl-codex -f docker-compose.codex.yml up -d
+# 4. Проверить on-demand MCP
+bash scripts/ai/mcp/check.sh
 
 # 5. Проверить все контейнеры
 docker ps | Select-String bioetl
@@ -271,7 +257,7 @@ docker ps | Select-String bioetl
 
 - Neo4j по умолчанию использует 512MB heap, можно увеличить если нужно
 - Grafana использует обязательный пароль из `GF_SECURITY_ADMIN_PASSWORD`
-- MCP серверы автоматически подключаются к Codex
+- MCP серверы запускаются Codex по запросу
 - Docker Desktop должен быть запущен перед использованием
 - WSL2 интеграция должна быть включена в Docker Desktop Settings
 
@@ -280,7 +266,6 @@ docker ps | Select-String bioetl
 Вся конфигурация хранится в файлах:
 - `docker-compose.yml` — optional local helper stack
 - `docker-compose.monitoring.yml` — мониторинг
-- `docker-compose.codex.yml` — MCP серверы
 - `scripts/ops/runtime/docker/compose/alertmanager.yml` — optional local Alertmanager helper stack; legacy root filename: `docker-compose.alertmanager.yml`
 - `scripts/ops/runtime/docker/compose/minio.yml` — optional local MinIO helper stack; requires explicit `MINIO_ROOT_USER` and `MINIO_ROOT_PASSWORD`; binds to localhost only; legacy root filename: `docker-compose.minio.yml`
 - `scripts/ops/runtime/docker/compose/redis.yml` — optional local Redis helper stack; requires explicit `REDIS_PASSWORD`; binds to localhost only; legacy root filename: `docker-compose.redis.yml`

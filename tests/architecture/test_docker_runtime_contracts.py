@@ -442,6 +442,219 @@ def test_preflight_command_surface_is_read_only_and_secret_safe() -> None:
     assert "docker compose down" not in PREFLIGHT_PATH.read_text(encoding="utf-8")
 
 
+def test_persistent_mcp_compose_is_retired_in_favor_of_on_demand_servers() -> None:
+    contract = _load_yaml(CONTRACT_PATH)
+    assert "codex" not in contract["stacks"]
+    assert not (ROOT / "docker-compose.codex.yml").exists()
+    assert not list(
+        (ROOT / "scripts/ops/runtime/docker/images").glob("mcp-*/Dockerfile")
+    )
+
+    forbidden = ("docker-compose.codex.yml", "bioetl-codex", "Start-MCP", "start_mcp")
+    for relative in (
+        "scripts/startup.sh",
+        "scripts/startup.ps1",
+        "scripts/shutdown.sh",
+        "scripts/shutdown.ps1",
+        "scripts/ops/docker-setup.sh",
+        "scripts/ops/docker-setup.ps1",
+    ):
+        text = (ROOT / relative).read_text(encoding="utf-8")
+        assert all(marker not in text for marker in forbidden), relative
+
+    smoke = ROOT / "scripts/ai/mcp/protocol_smoke.py"
+    smoke_text = smoke.read_text(encoding="utf-8")
+    assert '"method": "initialize"' in smoke_text
+    assert '"method": "tools/list"' in smoke_text
+
+
+def test_docker_cli_resolver_separates_engine_and_desktop_mcp_capabilities() -> None:
+    shell = (ROOT / "scripts/ai/mcp/support/docker_cli_resolver.sh").read_text(
+        encoding="utf-8"
+    )
+    powershell = (ROOT / "scripts/ai/mcp/support/docker_cli_resolver.ps1").read_text(
+        encoding="utf-8"
+    )
+
+    assert "resolve_docker_engine_bin" in shell
+    assert "resolve_docker_mcp_gateway_bin" in shell
+    assert "Resolve-DockerEngineBin" in powershell
+    assert "Resolve-DockerMcpGatewayBin" in powershell
+    assert "no incompatible Linux CLI fallback" in shell
+    powershell_wrapper = (ROOT / "scripts/ai/mcp/mcp_docker_wrapper.ps1").read_text(
+        encoding="utf-8"
+    )
+    assert "Resolve-DockerMcpGatewayBin" in powershell_wrapper
+
+
+def test_retained_services_use_immutable_images_and_complete_envelopes() -> None:
+    contract = _load_yaml(CONTRACT_PATH)
+    required_fields = {
+        "mem_limit",
+        "mem_reservation",
+        "cpus",
+        "pids_limit",
+        "init",
+        "stop_grace_period",
+        "logging",
+        "healthcheck",
+        "restart",
+    }
+    for stack_name, stack in contract["stacks"].items():
+        compose = _load_yaml(ROOT / stack["compose_file"])
+        for service_name, service in compose["services"].items():
+            missing = required_fields - set(service)
+            assert not missing, (
+                f"{stack_name}/{service_name}: missing {sorted(missing)}"
+            )
+            assert service["init"] is True
+            logging = service["logging"]
+            assert logging["driver"] in {"local", "json-file"}
+            assert logging["options"]["max-size"]
+            assert logging["options"]["max-file"]
+            if "image" in service:
+                assert "@sha256:" in service["image"], (
+                    f"{stack_name}/{service_name}: image is not immutable"
+                )
+            if "build" in service:
+                dockerfile = ROOT / service["build"].get("dockerfile", "Dockerfile")
+                from_lines = [
+                    line
+                    for line in dockerfile.read_text(encoding="utf-8").splitlines()
+                    if line.startswith("FROM ")
+                ]
+                assert from_lines
+                assert all("@sha256:" in line for line in from_lines), dockerfile
+
+
+def test_readiness_and_build_tools_fail_closed() -> None:
+    main = _load_yaml(ROOT / "docker-compose.yml")
+    monitoring = _load_yaml(ROOT / "docker-compose.monitoring.yml")
+    main_health = " ".join(map(str, main["services"]["bioetl"]["healthcheck"]["test"]))
+
+    assert "/health/ready" in main_health
+    assert "/health/live" not in main_health
+    assert (
+        monitoring["services"]["grafana"]["depends_on"]["renderer"]["condition"]
+        == "service_healthy"
+    )
+    assert (
+        monitoring["services"]["promtail"]["depends_on"]["loki"]["condition"]
+        == "service_healthy"
+    )
+
+    dockerfile = (ROOT / "Dockerfile.bioetl").read_text(encoding="utf-8")
+    operations_dockerfile = (ROOT / "docs/05-operations/Dockerfile").read_text(
+        encoding="utf-8"
+    )
+    assert "uv==0.11.26" in dockerfile
+    assert "uv==0.11.26" in operations_dockerfile
+    assert "sys.exit(0)" not in dockerfile
+    assert "/health/ready" in dockerfile
+
+
+def test_warp_is_absent_from_default_and_optional_runtime_surfaces() -> None:
+    contract = _load_yaml(CONTRACT_PATH)
+    main = _load_yaml(ROOT / contract["stacks"]["main"]["compose_file"])
+
+    assert "warp" not in main["services"]
+    assert "warp" not in contract["service_ownership"]
+    assert not (ROOT / "scripts/ops/runtime/docker/images/warp/Dockerfile").exists()
+    assert contract["shared_networks"]["runtime"]["name"] == "bioetl-runtime"
+
+
+def test_lifecycle_entrypoints_delegate_to_fail_closed_runtime_manager() -> None:
+    manager = (ROOT / "scripts/ops/runtime/docker/runtime_manager.py").read_text(
+        encoding="utf-8"
+    )
+    assert "choices=(" in manager
+    for action in (
+        "check",
+        "start",
+        "stop",
+        "status",
+        "logs",
+        "diagnose",
+        "recover",
+        "clean",
+    ):
+        assert f'"{action}"' in manager
+    assert "max_attempts=max(1, min(args.max_attempts, 3))" in manager
+    assert "--confirm-destructive" in manager
+    assert '"down", "--remove-orphans"' in manager
+
+    for relative in ("scripts/ops/docker-setup.sh", "scripts/ops/docker-setup.ps1"):
+        adapter = (ROOT / relative).read_text(encoding="utf-8")
+        assert "runtime_manager.py" in adapter
+        assert "--volumes" not in adapter
+        assert "docker rmi" not in adapter
+        assert "docker system prune" not in adapter
+        assert "Start-Sleep" not in adapter
+        assert "docker compose" not in adapter
+
+    for relative in ("scripts/startup.ps1", "scripts/shutdown.ps1"):
+        adapter = (ROOT / relative).read_text(encoding="utf-8")
+        assert "$ProjectDir = Split-Path -Parent $PSScriptRoot" in adapter
+
+
+def test_desktop_recovery_is_evidence_first_bounded_and_user_confirmed() -> None:
+    recovery = (ROOT / "scripts/ops/runtime/docker/restart-docker.ps1").read_text(
+        encoding="utf-8"
+    )
+
+    for capability in ("status", "restart", "logs", "diagnose"):
+        assert (
+            f"Test-DesktopCapability '{capability}'" in recovery
+            or capability in recovery
+        )
+    assert "ConfirmLastResort" in recovery
+    assert "TimeoutSeconds" in recovery
+    assert "docker-desktop-recovery-v1" in recovery
+    assert "wsl --shutdown" not in recovery
+    assert recovery.index("diagnose") < recovery.index("Stop-Process -Force")
+
+
+def test_preflight_stack_scope_does_not_require_unselected_stack_secrets(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    preflight = _load_preflight()
+    contract = _load_yaml(CONTRACT_PATH)
+    for name in {
+        secret
+        for stack in contract["stacks"].values()
+        for secret in stack.get("required_secret_environment_names", [])
+    }:
+        monkeypatch.delenv(name, raising=False)
+
+    findings, _ = preflight._static_observations(ROOT, contract, selected_stack="main")
+    missing = {
+        finding.evidence["name"]
+        for finding in findings
+        if finding.code == "SECRET_MISSING"
+    }
+    assert missing == {"NEO4J_PASSWORD"}
+
+
+def test_host_probe_has_bounded_labels_and_no_container_socket_mount() -> None:
+    contract = _load_yaml(CONTRACT_PATH)
+    probe = (ROOT / "scripts/ops/runtime/docker/docker_runtime_probe.py").read_text(
+        encoding="utf-8"
+    )
+    assert "bioetl_docker_runtime_primary_cause" in probe
+    assert "primary_cause" in probe
+    assert "--pushgateway-url" in probe
+    assert "/var/run/docker.sock" not in probe
+    for metric, labels in contract["host_probe"]["metric_labels"].items():
+        assert metric in probe
+        assert labels == sorted(labels)
+
+    for stack in contract["stacks"].values():
+        compose = _load_yaml(ROOT / stack["compose_file"])
+        for service in compose["services"].values():
+            mounts = "\n".join(map(str, service.get("volumes", [])))
+            assert "/var/run/docker.sock" not in mounts
+
+
 def test_structured_command_output_is_parsed_before_evidence_is_bounded(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

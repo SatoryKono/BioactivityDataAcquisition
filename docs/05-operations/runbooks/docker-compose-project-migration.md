@@ -16,27 +16,24 @@ The machine-readable source is
 
 | Compose file | Project | Single-owner services |
 |---|---|---|
-| `docker-compose.yml` | `bioetl-main` | `bioetl`; `warp` is opt-in via profile `warp` |
+| `docker-compose.yml` | `bioetl-main` | `bioetl` |
 | `docker-compose.monitoring.yml` | `bioetl-monitoring` | monitoring, logging, tracing, renderer |
 | `docker-compose.neo4j.yml` | `bioetl-neo4j` | `neo4j` |
 | `docker-compose.neo4j-audit.yml` | `bioetl-neo4j-audit` | `neo4j-audit` |
-| `docker-compose.codex.yml` | `bioetl-codex` | retired legacy MCP helpers; use canonical on-demand wrappers |
 
 Never combine these files into one Compose invocation. Normal stop commands
 MUST NOT use `--volumes`; volume removal is a separate, explicit data-retention
 decision.
 
-Do not start the retired `bioetl-codex` project. The file remains as a bounded
-migration/reference surface only. `mcp-filesystem` mounts a repository at
-`/workspace`, never over image-owned `/app`, so an accidental render cannot
-hide image-installed `node_modules`.
+The retired `bioetl-codex` project and its helper images are removed. Use the
+canonical on-demand MCP manifests and bounded protocol smoke instead.
 
 The shared networks are external infrastructure with stable literal names:
 
 | Logical network | External name | Consumers | Owner |
 |---|---|---|---|
 | `monitoring` | `bioetl-monitoring` | `bioetl-main`, `bioetl-monitoring` | `scripts/ops/docker-setup` |
-| `warp-network` | `warp-network` | `bioetl-main`, `bioetl-neo4j`, `bioetl-codex` | `scripts/ops/docker-setup` |
+| `runtime` | `bioetl-runtime` | `bioetl-main`, `bioetl-neo4j` | `scripts/ops/docker-setup` |
 
 Create or verify these networks through `scripts/ops/docker-setup.sh` or
 `scripts/ops/docker-setup.ps1` before starting a consumer. The former
@@ -53,12 +50,10 @@ must be migrated explicitly:
 |---|---|
 | `bioactivitydataacquisition2_neo4j_data` | `bioetl-neo4j_neo4j_data` |
 | `bioactivitydataacquisition2_neo4j_logs` | `bioetl-neo4j_neo4j_logs` |
-| `bioactivitydataacquisition2_warp-data` | `bioetl-main_warp-data` |
 | `bioactivitydataacquisition2_prometheus-data` | `bioetl-monitoring_prometheus-data` |
 | `bioactivitydataacquisition2_grafana-data` | `bioetl-monitoring_grafana-data` |
 | `bioactivitydataacquisition2_loki-data` | `bioetl-monitoring_loki-data` |
 | `bioactivitydataacquisition2_tempo-data` | `bioetl-monitoring_tempo-data` |
-| `bioactivitydataacquisition2_mcp-fetch-cache` | `bioetl-codex_mcp-fetch-cache` |
 
 Do not remove a legacy volume until the corresponding new project has passed
 its readiness check and the backup has been retained.
@@ -112,7 +107,7 @@ After a successful drill, create the target volume, restore the verified
 archive, verify both external networks, and start only:
 
 ```bash
-docker network inspect warp-network
+docker network inspect bioetl-runtime
 docker network inspect bioetl-monitoring
 docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d
 docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml ps

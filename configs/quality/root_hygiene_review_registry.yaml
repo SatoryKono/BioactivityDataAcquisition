@@ -79,8 +79,8 @@ review_lanes:
     issue_refs:
       - "#6046"
     verification:
-      - git ls-files docker-compose.monitoring.yml docker-compose.codex.yml docker-compose.neo4j-audit.yml docker-compose.neo4j.yml docker-compose.yml Dockerfile.bioetl scripts/ops/docker-setup.ps1 scripts/ops/docker-setup.sh scripts/ops/runtime/docker/compose scripts/ops/runtime/docker/images grafana/provisioning/datasources-local/grafana-datasource.yml
-      - rg -n "docker-compose(\\.monitoring|\\.codex|\\.neo4j-audit|\\.neo4j)?\\.yml|scripts/ops/runtime/docker/compose/(alertmanager|minio|redis|sonarqube)\\.yml|scripts/ops/runtime/docker/images/(mcp-fetch|mcp-filesystem|mcp-github|mcp-memory|warp)/Dockerfile|docker-setup\\.ps1|docker-setup\\.sh|Dockerfile\\.bioetl|grafana/provisioning/datasources-local/grafana-datasource\\.yml" .github docs scripts README.md Makefile pyproject.toml
+      - git ls-files docker-compose.monitoring.yml docker-compose.neo4j-audit.yml docker-compose.neo4j.yml docker-compose.yml Dockerfile.bioetl scripts/ops/docker-setup.ps1 scripts/ops/docker-setup.sh scripts/ops/runtime/docker/compose grafana/provisioning/datasources-local/grafana-datasource.yml
+      - rg -n "docker-compose(\\.monitoring|\\.neo4j-audit|\\.neo4j)?\\.yml|scripts/ops/runtime/docker/compose/(alertmanager|minio|redis|sonarqube)\\.yml|docker-setup\\.ps1|docker-setup\\.sh|Dockerfile\\.bioetl|grafana/provisioning/datasources-local/grafana-datasource\\.yml" .github docs scripts README.md Makefile pyproject.toml
       - docs/05-operations/verification/docker-helper-root-relocation-audit.md
     candidates:
       - path: docker-compose.monitoring.yml
@@ -93,11 +93,6 @@ review_lanes:
         canonical_path: scripts/ops/runtime/docker/compose/alertmanager.yml
         disposition: moved_to_owned_path
         action_if_reintroduced: keep_rehomed_under_scripts_ops_runtime_docker_compose_and_do_not_restore_the_root_adjunct_without_new_owner_review
-      - path: docker-compose.codex.yml
-        current_live_state: present_approved_root_surface
-        canonical_path: docs/05-operations/verification/docker-helper-root-relocation-audit.md
-        disposition: must_stay_root
-        action_if_reintroduced: retain_only_while_root_compose_entrypoints_and_operator_docs_still_require_the_exact_root_filename
       - path: docker-compose.minio.yml
         current_live_state: absent_from_root_baseline
         canonical_path: scripts/ops/runtime/docker/compose/minio.yml
@@ -143,31 +138,6 @@ review_lanes:
         canonical_path: Dockerfile.bioetl
         disposition: must_stay_root
         action_if_reintroduced: retain_only_while_compose_and_manual_build_flows_still_require_the_root_image_definition
-      - path: Dockerfile.mcp-fetch
-        current_live_state: absent_from_root_baseline
-        canonical_path: scripts/ops/runtime/docker/images/mcp-fetch/Dockerfile
-        disposition: moved_to_owned_path
-        action_if_reintroduced: keep_rehomed_under_scripts_ops_runtime_docker_images_and_do_not_restore_the_root_helper_dockerfile_without_new_owner_review
-      - path: Dockerfile.mcp-filesystem
-        current_live_state: absent_from_root_baseline
-        canonical_path: scripts/ops/runtime/docker/images/mcp-filesystem/Dockerfile
-        disposition: moved_to_owned_path
-        action_if_reintroduced: keep_rehomed_under_scripts_ops_runtime_docker_images_and_do_not_restore_the_root_helper_dockerfile_without_new_owner_review
-      - path: Dockerfile.mcp-github
-        current_live_state: absent_from_root_baseline
-        canonical_path: scripts/ops/runtime/docker/images/mcp-github/Dockerfile
-        disposition: moved_to_owned_path
-        action_if_reintroduced: keep_rehomed_under_scripts_ops_runtime_docker_images_and_do_not_restore_the_root_helper_dockerfile_without_new_owner_review
-      - path: Dockerfile.mcp-memory
-        current_live_state: absent_from_root_baseline
-        canonical_path: scripts/ops/runtime/docker/images/mcp-memory/Dockerfile
-        disposition: moved_to_owned_path
-        action_if_reintroduced: keep_rehomed_under_scripts_ops_runtime_docker_images_and_do_not_restore_the_root_helper_dockerfile_without_new_owner_review
-      - path: Dockerfile.warp
-        current_live_state: absent_from_root_baseline
-        canonical_path: scripts/ops/runtime/docker/images/warp/Dockerfile
-        disposition: moved_to_owned_path
-        action_if_reintroduced: keep_rehomed_under_scripts_ops_runtime_docker_images_and_do_not_restore_the_root_helper_dockerfile_without_new_owner_review
       - path: grafana-datasource.yml
         current_live_state: absent_from_root_baseline
         canonical_path: grafana/provisioning/datasources-local/grafana-datasource.yml
@@ -486,8 +456,8 @@ review_lanes:
         action_if_reintroduced: keep_untracked_as_a_recovery_only_surface_and_prune_after_rebuilding_the_windows_virtualenv
       - path: caddy
         current_live_state: present_local_only_root_surface
-        canonical_path: docker-compose.codex.yml
-        action_if_reintroduced: keep_runtime_state_untracked_and_rebuild_from_the_documented_compose_stack
+        canonical_path: .mcp.json
+        action_if_reintroduced: keep_runtime_state_untracked; persistent MCP Compose is retired
 
   - lane_id: local_vendor_tooling_roots
     classification: review_required

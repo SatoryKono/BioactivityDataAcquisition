@@ -49,7 +49,6 @@ best_practices.md
 # See docs/00-project/governance/03-file-policy.md §0 and
 # docs/05-operations/verification/docker-helper-root-relocation-audit.md for policy.
 docker-compose.monitoring.yml
-docker-compose.codex.yml
 docker-compose.neo4j-audit.yml
 docker-compose.neo4j.yml
 docker-compose.yml

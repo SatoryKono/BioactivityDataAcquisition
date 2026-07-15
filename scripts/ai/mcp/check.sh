@@ -150,7 +150,7 @@ fi
 
 printf "=== MCP server list ===\n%s\n\n" "$list_out"
 
-for server in memory filesystem fetch github docker context7 ast-grep mcp-code-interpreter prometheus grafana brave-search neo4j-cypher neo4j-memory mermaid biomoltechDocs mintlify deepwiki; do
+for server in memory filesystem fetch github docker context7 ast-grep mcp-code-interpreter prometheus grafana brave-search neo4j-cypher neo4j-memory mermaid biomoltechDocs mintlify deepwiki ref; do
   if grep -Eq "^${server}[[:space:]]" <<<"$list_out"; then
     ok "Server '${server}' is registered"
   else
@@ -174,6 +174,7 @@ neo4j_cypher_out="$(codex mcp get neo4j-cypher 2>&1 || true)"
 neo4j_memory_out="$(codex mcp get neo4j-memory 2>&1 || true)"
 mermaid_out="$(codex mcp get mermaid 2>&1 || true)"
 deepwiki_out="$(codex mcp get deepwiki 2>&1 || true)"
+ref_out="$(codex mcp get ref 2>&1 || true)"
 
 require_contains "$memory_out" "@modelcontextprotocol/server-memory@2026.1.26" "memory is pinned to @2026.1.26" || status=1
 require_contains "$filesystem_out" "@modelcontextprotocol/server-filesystem@2026.1.14" "filesystem is pinned to @2026.1.14" || status=1
@@ -194,6 +195,7 @@ mintlify_out="$(codex mcp get mintlify 2>&1 || true)"
 require_contains "$biomoltech_out" "https://biomoltech.mintlify.app/mcp" "biomoltechDocs is registered as a remote Mintlify MCP" || status=1
 require_contains "$mintlify_out" "https://mcp.mintlify.com" "mintlify is registered as the OAuth-enabled Mintlify MCP" || status=1
 require_contains "$deepwiki_out" "https://mcp.deepwiki.com/mcp" "deepwiki is registered as the official DeepWiki MCP" || status=1
+require_contains "$ref_out" "https://api.ref.tools/mcp" "ref is registered as the OAuth-enabled Ref Tools MCP" || status=1
 
 if grep -Fq -- "${EXPECTED_FILESYSTEM_SCOPE}" <<<"$filesystem_out"; then
   ok "filesystem scope is restricted to repo root"
@@ -223,5 +225,14 @@ validate_wrapper_if_possible "prometheus" "${EXPECTED_PROMETHEUS_WRAPPER_PATH}" 
 validate_wrapper_if_possible "grafana" "${EXPECTED_GRAFANA_WRAPPER_PATH}" || status=1
 validate_wrapper_if_possible "neo4j-cypher" "${EXPECTED_NEO4J_CYPHER_WRAPPER_PATH}" || status=1
 validate_wrapper_if_possible "neo4j-memory" "${EXPECTED_NEO4J_MEMORY_WRAPPER_PATH}" || status=1
+
+if [[ "${BIOETL_MCP_SKIP_PROTOCOL_SMOKE:-0}" != "1" ]]; then
+  if python3 "${SCRIPT_DIR}/protocol_smoke.py" --config "${PROJECT_MCP_CONFIG}" --server memory --timeout 15 >/dev/null; then
+    ok "memory MCP initialize/tools-list protocol smoke passed"
+  else
+    fail "memory MCP initialize/tools-list protocol smoke failed"
+    status=1
+  fi
+fi
 
 exit "$status"

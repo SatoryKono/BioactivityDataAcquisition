@@ -32,6 +32,28 @@ diagnostics:
     severity: error
     title: Compose project or service ownership drift
 
+host_probe:
+  owner: scripts/ops/runtime/docker/docker_runtime_probe.py
+  transport: bounded_report_and_optional_pushgateway
+  label_values:
+    stack: contracted_stack_names_only
+    project: contracted_project_names_only
+    service: contracted_service_names_only
+    cause: fixed_primary_cause_enum_only
+  metric_labels:
+    bioetl_docker_runtime_probe_success: [project, stack]
+    bioetl_docker_runtime_daemon_available: [project, stack]
+    bioetl_docker_runtime_restart_delta: [project, stack]
+    bioetl_docker_runtime_oom_kills: [project, stack]
+    bioetl_docker_runtime_disk_free_bytes: [project, stack]
+    bioetl_docker_runtime_recovery_attempts: [project, stack]
+    bioetl_docker_runtime_recovery_duration_seconds: [project, stack]
+    bioetl_docker_runtime_primary_cause: [cause, project, stack]
+    bioetl_docker_runtime_resource_peak_ratio: [project, resource, service, stack]
+    bioetl_docker_runtime_service_ready: [project, service, stack]
+    bioetl_docker_runtime_service_restart_count: [project, service, stack]
+    bioetl_docker_runtime_service_oom_killed: [project, service, stack]
+
 hardening_targets:
   implementation_issue: 6293
   images:
@@ -64,25 +86,20 @@ stacks:
     owner: local-main-helper
     required_services:
       - bioetl
-    optional_services:
-      - warp
+    optional_services: []
     required_environment_names:
       - LOG_LEVEL
-      - TUNNEL_TOKEN
       - NEO4J_USERNAME
       - NEO4J_PASSWORD
     required_secret_environment_names:
-      - TUNNEL_TOKEN
       - NEO4J_PASSWORD
     readiness:
-      bioetl: http://127.0.0.1:8081/health/live
+      bioetl: http://127.0.0.1:8081/health/ready
     restart_policy:
       bioetl: on-failure:3
-      warp: unless-stopped
     migration:
       legacy_project_name: bioactivitydataacquisition2
-      volume_map:
-        bioactivitydataacquisition2_warp-data: bioetl-main_warp-data
+      volume_map: {}
   monitoring:
     compose_file: docker-compose.monitoring.yml
     project_name: bioetl-monitoring
@@ -147,28 +164,6 @@ stacks:
       - NEO4J_AUDIT_PASSWORD
     readiness:
       neo4j-audit: http://127.0.0.1:7475
-  codex:
-    compose_file: docker-compose.codex.yml
-    project_name: bioetl-codex
-    owner: legacy-mcp-helper
-    status: retired_rf002
-    canonical_runtime: false
-    required_services:
-      - mcp-memory
-      - mcp-filesystem
-      - mcp-github
-      - mcp-fetch
-      - mcp-codex-config
-    optional_services: []
-    required_environment_names:
-      - GITHUB_PERSONAL_ACCESS_TOKEN
-    required_secret_environment_names:
-      - GITHUB_PERSONAL_ACCESS_TOKEN
-    readiness: {}
-    migration:
-      legacy_project_name: bioactivitydataacquisition2
-      volume_map:
-        bioactivitydataacquisition2_mcp-fetch-cache: bioetl-codex_mcp-fetch-cache
   redis:
     compose_file: scripts/ops/runtime/docker/compose/redis.yml
     project_name: bioetl-redis
@@ -215,7 +210,6 @@ stacks:
 
 service_ownership:
   bioetl: main
-  warp: main
   prometheus: monitoring
   pushgateway: monitoring
   grafana: monitoring
@@ -225,11 +219,6 @@ service_ownership:
   tempo: monitoring
   neo4j: neo4j
   neo4j-audit: neo4j-audit
-  mcp-memory: codex
-  mcp-filesystem: codex
-  mcp-github: codex
-  mcp-fetch: codex
-  mcp-codex-config: codex
   redis: redis
   redis-exporter: redis
   minio: minio
@@ -254,9 +243,7 @@ host_ports:
   9090: {stack: monitoring, service: prometheus, bind: 127.0.0.1}
   9091: {stack: monitoring, service: pushgateway, bind: 127.0.0.1}
   9093: {stack: alertmanager, service: alertmanager, bind: 127.0.0.1}
-  9100: {stack: codex, service: mcp-codex-config, bind: 127.0.0.1}
   9121: {stack: redis, service: redis-exporter, bind: 127.0.0.1}
-  9999: {stack: main, service: warp, bind: 127.0.0.1}
 
 retained_container_names:
   bioetl-neo4j:
@@ -274,34 +261,19 @@ retained_container_names:
   bioetl-grafana:
     stack: monitoring
     reason: Published endpoint verification addresses this name.
-  bioetl-mcp-memory:
-    stack: codex
-    reason: Legacy MCP startup checks address this name pending RF-002 retirement.
-  bioetl-mcp-filesystem:
-    stack: codex
-    reason: Legacy MCP startup checks address this name pending RF-002 retirement.
-  bioetl-mcp-github:
-    stack: codex
-    reason: Legacy MCP startup checks address this name pending RF-002 retirement.
-  bioetl-mcp-fetch:
-    stack: codex
-    reason: Legacy MCP startup checks address this name pending RF-002 retirement.
-  bioetl-codex-config:
-    stack: codex
-    reason: Legacy MCP startup checks address this name pending RF-002 retirement.
 
 shared_networks:
   monitoring:
     name: bioetl-monitoring
     owner: scripts/ops/docker-setup
     consumers: [main, monitoring]
-  warp-network:
-    name: warp-network
+  runtime:
+    name: bioetl-runtime
     owner: scripts/ops/docker-setup
-    consumers: [main, neo4j, codex]
+    consumers: [main, neo4j]
 
 capacity:
   minimum_free_disk_gib: 50
   minimum_free_disk_percent: 20
-  minimum_free_memory_gib: 2
+  minimum_free_memory_gib: 4
   minimum_cpus: 2
