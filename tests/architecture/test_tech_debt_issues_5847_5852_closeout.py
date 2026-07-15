@@ -260,7 +260,6 @@ def test_issue_5852_review_class_root_files_have_exact_filename_contracts() -> N
         "best_practices.md",
         "commitlint.config.mjs",
         "mint.json",
-        "pr_compliance_checklist.yaml",
     }
     assert (
         candidates["best_practices.md"]["lane_id"] == "root_reviewed_human_facing_docs"
@@ -273,3 +272,5 @@ def test_issue_5852_review_class_root_files_have_exact_filename_contracts() -> N
             == "reviewed_exact_filename_tool_contract"
         )
         assert candidates[path]["current_live_state"] == "present_approved_root_surface"
+    assert candidates["pr_compliance_checklist.yaml"]["current_live_state"] == "absent_from_root_baseline"
+    assert candidates["pr_compliance_checklist.yaml"]["canonical_path"] is None

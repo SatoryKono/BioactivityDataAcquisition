@@ -217,7 +217,15 @@ log_test.txt
 .gemini/
 .jules/
 .junie/
-.qodo/
+.qodo/*
+!.qodo/
+!.qodo/README.md
+!.qodo/.pr_agent.toml
+!.qodo/best_practices.md
+!.qodo/pr_compliance_checklist.yaml
+!.qodo/workflows/
+!.qodo/workflows/best_practices.md
+!.qodo/workflows/pr_compliance_checklist.yaml
 
 # OS
 .DS_Store

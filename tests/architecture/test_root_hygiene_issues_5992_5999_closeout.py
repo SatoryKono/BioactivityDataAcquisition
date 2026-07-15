@@ -101,7 +101,6 @@ def test_issue_5999_exact_root_review_tooling_has_retention_decisions() -> None:
     for root_surface in (
         ".pr_agent.toml",
         "best_practices.md",
-        "pr_compliance_checklist.yaml",
         "commitlint.config.mjs",
         "mint.json",
     ):

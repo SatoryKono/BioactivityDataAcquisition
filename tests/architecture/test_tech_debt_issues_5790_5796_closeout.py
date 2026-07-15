@@ -156,8 +156,12 @@ def test_closeout_artifact_is_complete_and_budget_safe_for_issue_pack_5790_5796(
     assert closeout["metrics"]["repo_wide_zero_import_candidates"]["count"] == 9
     assert closeout["metrics"]["repo_wide_zero_import_candidates"]["classified"] == 9
     assert closeout["metrics"]["repo_wide_zero_import_candidates"]["owner_test_anchored"] == 9
-    assert closeout["metrics"]["config_surface_duplicate_clusters"]["current"] == 22
-    assert closeout["metrics"]["config_surface_duplicate_clusters"]["opening_baseline"] == 24
+    config_duplicate_metric = closeout["metrics"][
+        "config_surface_duplicate_clusters"
+    ]
+    assert config_duplicate_metric["current"] == 21
+    assert config_duplicate_metric["opening_baseline"] == 24
+    assert config_duplicate_metric["current"] < config_duplicate_metric["opening_baseline"]
     assert closeout["metrics"]["runtime_basics_targeted_coverage_percent"]["targeted_closeout_proof"] == 100.0
     assert "required_closeout_checks" in closeout
     assert len(closeout["required_closeout_checks"]) > 0
@@ -335,10 +339,13 @@ def test_issue_5794_shared_composite_policy_is_externalized() -> None:
     assert closeout["outcomes"]["5794"]["debt_type"] == "composite_config_duplication"
     assert closeout["outcomes"]["5794"]["outcome"] == "improved"
     assert closeout["outcomes"]["5794"]["opening_baseline"] == 24
-    assert closeout["outcomes"]["5794"]["current_value"] == 22
+    assert closeout["outcomes"]["5794"]["current_value"] == 21
     assert "closeout_reason" in closeout["outcomes"]["5794"]
 
-    assert summary["duplicate_cluster_count"] == 22
+    assert (
+        summary["duplicate_cluster_count"]
+        == closeout["outcomes"]["5794"]["current_value"]
+    )
     assert summary["duplicate_cluster_count"] < 24
     assert shared_policy["merge"]["field_priorities"]
     assert shared_policy["merge"]["field_mappings"]

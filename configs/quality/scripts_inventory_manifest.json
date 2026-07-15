@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-15T14:13:08.211933+00:00",
+  "generated_at": "2026-07-15T14:33:24.383771+00:00",
   "summary": {
     "total_scripts": 469,
     "status_counts": {
@@ -10,9 +10,9 @@
     "reference_group_coverage": {
       "agents": 5,
       "build": 11,
-      "ci": 62,
+      "ci": 60,
       "docs": 185,
-      "other": 32,
+      "other": 33,
       "scripts": 367,
       "skills": 16,
       "tests": 218
@@ -358,7 +358,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 213,
+          "line": 215,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/check-env.ps1\","
         },
@@ -379,7 +379,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 214,
+          "line": 216,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/check-env.sh\","
         }
@@ -616,7 +616,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py",
-          "line": 411,
+          "line": 418,
           "source_group": "tests",
           "text": "assert \"scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh\" in backlog_text"
         }
@@ -641,7 +641,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 215,
+          "line": 217,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/setup-env.sh\","
         },
@@ -788,7 +788,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 212,
+          "line": 214,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/test-basic.sh\","
         }
@@ -1608,7 +1608,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 216,
+          "line": 218,
           "source_group": "scripts",
           "text": "\"scripts/ai/gemini/helper/check-env.ps1\","
         }
@@ -1777,7 +1777,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 217,
+          "line": 219,
           "source_group": "scripts",
           "text": "\"scripts/ai/gemini/helper/setup-env.sh\","
         },
@@ -3406,7 +3406,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 218,
+          "line": 220,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/check-env.ps1\","
         }
@@ -3427,7 +3427,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 219,
+          "line": 221,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/check-env.sh\","
         }
@@ -3448,7 +3448,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 220,
+          "line": 222,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/setup-env.ps1\","
         }
@@ -3481,7 +3481,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 221,
+          "line": 223,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/setup-env.sh\","
         },
@@ -3616,7 +3616,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 208,
+          "line": 210,
           "source_group": "scripts",
           "text": "\"scripts/check_dq_dsl_parity.py\","
         }
@@ -3676,7 +3676,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 206,
+          "line": 208,
           "source_group": "scripts",
           "text": "\"scripts/ci_check_docs_parity.sh\","
         }
@@ -3782,32 +3782,8 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 68,
+      "reference_count": 64,
       "references": [
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 237,
-          "source_group": "ci",
-          "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams lint"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 244,
-          "source_group": "ci",
-          "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams lint"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 251,
-          "source_group": "ci",
-          "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams fix-orphans --check"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 259,
-          "source_group": "ci",
-          "text": "entry: python scripts/engineering/dev/run_project_python.py -m scripts.diagrams fix-orphans --check"
-        },
         {
           "path": "docs/00-project/TOOLS.md",
           "line": 80,
@@ -3831,6 +3807,30 @@
           "line": 204,
           "source_group": "docs",
           "text": "uv run python -m scripts.diagrams check-quality-gates"
+        },
+        {
+          "path": "docs/00-project/ai/memory/agent-memory.md",
+          "line": 205,
+          "source_group": "docs",
+          "text": "uv run python -m scripts.diagrams render-pdf"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-audit-bot.md",
+          "line": 304,
+          "source_group": "docs",
+          "text": "python -m scripts.diagrams check quality-gates"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-audit-bot.md",
+          "line": 305,
+          "source_group": "docs",
+          "text": "python -m scripts.diagrams lint"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-doc-bot.md",
+          "line": 262,
+          "source_group": "docs",
+          "text": "python -m scripts.diagrams lint [paths...]"
         }
       ]
     },
@@ -5446,7 +5446,7 @@
         "grafana-dashboard-extension",
         "py-doc-bot"
       ],
-      "reference_count": 155,
+      "reference_count": 159,
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md",
@@ -5479,22 +5479,22 @@
           "text": "uv run python -m scripts.docs check-drift --runtime-mirrors --freshness"
         },
         {
-          "path": ".github/workflows/docs-kpi-weekly.yml",
-          "line": 30,
-          "source_group": "ci",
-          "text": "uv run python -m scripts.docs check-kpi \\"
+          "path": ".github/ISSUES/DOC-AUDIT-2026-06-19-ISSUE-PACK.md",
+          "line": 79,
+          "source_group": "other",
+          "text": "python3 -m scripts.docs check-links --links --specs --configs"
         },
         {
-          "path": ".github/workflows/docs.yml",
-          "line": 133,
-          "source_group": "ci",
-          "text": "run: uv run python -m scripts.docs check-links --links --specs --configs --report-json docs/reports/docs-link-check-report.json"
+          "path": ".github/ISSUES/DOC-AUDIT-2026-06-19-ISSUE-PACK.md",
+          "line": 80,
+          "source_group": "other",
+          "text": "python3 -m scripts.docs check-drift --runtime-mirrors --freshness"
         },
         {
-          "path": ".github/workflows/docs.yml",
-          "line": 145,
-          "source_group": "ci",
-          "text": "run: uv run python -m scripts.docs verify"
+          "path": ".github/ISSUES/PLAN-001-Sync-Tech-Debt-Zero-Epic-Mirror-With-GitHub-State.md",
+          "line": 69,
+          "source_group": "other",
+          "text": "python3 -m scripts.docs check-links --links --specs --configs"
         }
       ]
     },
@@ -5776,7 +5776,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 36,
+      "reference_count": 38,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -5785,16 +5785,28 @@
           "text": "Use targeted docs checks such as `python -m scripts.docs check-links` and"
         },
         {
+          "path": ".github/ISSUES/DOC-AUDIT-2026-06-19-ISSUE-PACK.md",
+          "line": 79,
+          "source_group": "other",
+          "text": "python3 -m scripts.docs check-links --links --specs --configs"
+        },
+        {
+          "path": ".github/ISSUES/PLAN-001-Sync-Tech-Debt-Zero-Epic-Mirror-With-GitHub-State.md",
+          "line": 69,
+          "source_group": "other",
+          "text": "python3 -m scripts.docs check-links --links --specs --configs"
+        },
+        {
+          "path": ".github/ISSUES/PLAN-002-Archive-Closed-Streams-D-E-In-Local-Tech-Debt-Planning-Surfaces.md",
+          "line": 77,
+          "source_group": "other",
+          "text": "python3 -m scripts.docs check-links --links --specs --configs"
+        },
+        {
           "path": ".github/workflows/docs.yml",
           "line": 133,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.docs check-links --links --specs --configs --report-json docs/reports/docs-link-check-report.json"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 295,
-          "source_group": "ci",
-          "text": "- id: docs-check-links"
         },
         {
           "path": "docs/00-project/RULES.md",
@@ -5813,18 +5825,6 @@
           "line": 55,
           "source_group": "docs",
           "text": "- run `python -m scripts.docs check-links --links --specs --configs`"
-        },
-        {
-          "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 198,
-          "source_group": "docs",
-          "text": "uv run python -m scripts.docs check-links --links --specs --configs"
-        },
-        {
-          "path": "docs/00-project/ai/memory/memory-py-audit-bot.md",
-          "line": 299,
-          "source_group": "docs",
-          "text": "python -m scripts.docs check-links --links --specs --configs"
         }
       ]
     },
@@ -7188,7 +7188,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 210,
+          "line": 212,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/update_test_telemetry_baseline.py\","
         },
@@ -7257,7 +7257,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 209,
+          "line": 211,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_control_plane_artifacts.py\","
         }
@@ -7830,55 +7830,37 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 32,
+      "reference_count": 5,
       "references": [
         {
-          "path": ".pre-commit-config.yaml",
-          "line": 96,
-          "source_group": "ci",
-          "text": "python3 scripts/engineering/dev/run_project_python.py -m pytest"
+          "path": "docs/00-project/TOOLS.md",
+          "line": 45,
+          "source_group": "docs",
+          "text": "`python scripts/engineering/dev/run_project_python.py -m scripts.<group> ...`."
         },
         {
-          "path": ".pre-commit-config.yaml",
-          "line": 105,
-          "source_group": "ci",
-          "text": "entry: python scripts/engineering/dev/run_project_python.py -m pip_audit --cache-dir .cache/pip-audit --skip-editable --strict"
+          "path": "docs/03-guides/github-local-workflow.md",
+          "line": 88,
+          "source_group": "docs",
+          "text": "python3 scripts/engineering/dev/run_project_python.py -m scripts.engineering.qa.check_test_audit_preflight --strict"
         },
         {
-          "path": ".pre-commit-config.yaml",
-          "line": 113,
-          "source_group": "ci",
-          "text": "entry: python3 scripts/engineering/dev/run_project_python.py -m mypy --config-file pyproject.toml --strict --no-incremental src/bioetl"
+          "path": "docs/03-guides/github-local-workflow.md",
+          "line": 107,
+          "source_group": "docs",
+          "text": "python3 scripts/engineering/dev/run_project_python.py -m pre_commit run smoke-lane --hook-stage manual --all-files"
         },
         {
-          "path": ".pre-commit-config.yaml",
-          "line": 120,
-          "source_group": "ci",
-          "text": "entry: python3 scripts/engineering/dev/run_project_python.py -m bandit -c pyproject.toml -r src/bioetl"
+          "path": "tests/architecture/test_scripts_inventory_discovery.py",
+          "line": 117,
+          "source_group": "tests",
+          "text": "root / \"scripts\" / \"engineering\" / \"dev\" / \"run_project_python.py\","
         },
         {
-          "path": ".pre-commit-config.yaml",
-          "line": 128,
-          "source_group": "ci",
-          "text": "python3 scripts/engineering/dev/run_project_python.py -m pytest"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 148,
-          "source_group": "ci",
-          "text": "python scripts/engineering/dev/run_project_python.py -m pytest"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 158,
-          "source_group": "ci",
-          "text": "python scripts/engineering/dev/run_project_python.py -m"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 194,
-          "source_group": "ci",
-          "text": "python scripts/engineering/dev/run_project_python.py -m"
+          "path": "tests/architecture/test_scripts_inventory_discovery.py",
+          "line": 137,
+          "source_group": "tests",
+          "text": "wrapper_refs = refs[\"scripts/engineering/dev/run_project_python.py\"]"
         }
       ]
     },
@@ -9033,13 +9015,13 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 143,
+          "line": 145,
           "source_group": "scripts",
           "text": "\"check-naming-pkg\": ("
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 144,
+          "line": 146,
           "source_group": "scripts",
           "text": "\"scripts/engineering/qa/check_naming_package_consistency.py\""
         },
@@ -9546,7 +9528,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 29,
+      "reference_count": 28,
       "references": [
         {
           "path": ".github/workflows/architecture-docs-nightly.yml",
@@ -9573,12 +9555,6 @@
           "text": "run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
         {
-          "path": ".pre-commit-config.yaml",
-          "line": 344,
-          "source_group": "ci",
-          "text": "scripts/engineering/qa/generate_architecture_dependency_map.py --check"
-        },
-        {
           "path": "docs/00-project/RULES.md",
           "line": 1521,
           "source_group": "docs",
@@ -9595,6 +9571,12 @@
           "line": 76,
           "source_group": "docs",
           "text": "./.venv/Scripts/python.exe scripts/engineering/qa/generate_architecture_dependency_map.py --check"
+        },
+        {
+          "path": "docs/02-architecture/07-compatibility-facade-inventory.md",
+          "line": 77,
+          "source_group": "docs",
+          "text": "./.venv/Scripts/python.exe scripts/engineering/qa/generate_architecture_dependency_map.py --update"
         }
       ]
     },
@@ -11034,7 +11016,7 @@
       "agent_usage": [
         "vcr-record"
       ],
-      "reference_count": 27,
+      "reference_count": 25,
       "references": [
         {
           "path": ".codex/skills/vcr-record/SKILL.md",
@@ -11061,18 +11043,6 @@
           "text": "run: uv run python -m scripts.engineering.qa.vcr check-metadata-age --max-age-days 90"
         },
         {
-          "path": ".pre-commit-config.yaml",
-          "line": 325,
-          "source_group": "ci",
-          "text": "python scripts/engineering/dev/run_project_python.py -m scripts.engineering.qa.vcr"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 334,
-          "source_group": "ci",
-          "text": "python scripts/engineering/dev/run_project_python.py -m scripts.engineering.qa.vcr"
-        },
-        {
           "path": "docs/00-project/TOOLS.md",
           "line": 77,
           "source_group": "docs",
@@ -11083,6 +11053,18 @@
           "line": 174,
           "source_group": "docs",
           "text": "| `scripts.engineering.qa.vcr`      | `uv run python -m scripts.engineering.qa.vcr`      | VCR governance: placement, naming, secrets  |"
+        },
+        {
+          "path": "docs/00-project/ai/memory/agent-memory.md",
+          "line": 208,
+          "source_group": "docs",
+          "text": "uv run python -m scripts.engineering.qa.vcr check-placement"
+        },
+        {
+          "path": "docs/00-project/ai/memory/memory-py-debug-bot.md",
+          "line": 283,
+          "source_group": "docs",
+          "text": "python -m scripts.engineering.qa.vcr check-placement  # VCR cassette placement"
         }
       ]
     },
@@ -11120,7 +11102,7 @@
       "agent_usage": [
         "vcr-record"
       ],
-      "reference_count": 15,
+      "reference_count": 14,
       "references": [
         {
           "path": ".codex/skills/vcr-record/SKILL.md",
@@ -11133,12 +11115,6 @@
           "line": 102,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.qa.vcr check-placement"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 326,
-          "source_group": "ci",
-          "text": "check-placement"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
@@ -11169,6 +11145,12 @@
           "line": 809,
           "source_group": "docs",
           "text": "- `python -m scripts.engineering.qa.vcr check-placement`"
+        },
+        {
+          "path": "scripts/engineering/qa/vcr/__main__.py",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "check-placement    Block VCR cassette anti-patterns"
         }
       ]
     },
@@ -11177,19 +11159,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 15,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
           "line": 105,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.qa.vcr check-naming"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 335,
-          "source_group": "ci",
-          "text": "check-naming"
         },
         {
           "path": "docs/00-project/TOOLS.md",
@@ -11226,6 +11202,12 @@
           "line": 9,
           "source_group": "scripts",
           "text": "check-naming         Naming convention audit"
+        },
+        {
+          "path": "scripts/engineering/qa/vcr/__main__.py",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "check-naming       Enforce VCR filename policy"
         }
       ]
     },
@@ -11268,7 +11250,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 150,
+          "line": 152,
           "source_group": "scripts",
           "text": "\"check-metadata-age\": \"scripts/engineering/qa/vcr/check_vcr_metadata_age.py\","
         },
@@ -11306,7 +11288,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 76,
+      "reference_count": 75,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-016-Enforce-Zero-Reference-Script-Governance.md",
@@ -11617,19 +11599,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 11,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
           "line": 237,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.repo check-catalog --catalog scripts/engineering/repo/catalog.yaml"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 290,
-          "source_group": "ci",
-          "text": "check-catalog --catalog scripts/engineering/repo/catalog.yaml"
         },
         {
           "path": "docs/00-project/ai/memory/memory-py-audit-bot.md",
@@ -11666,6 +11642,12 @@
           "line": 12,
           "source_group": "scripts",
           "text": "check-catalog      Validate catalog governance policy"
+        },
+        {
+          "path": "scripts/engineering/repo/__main__.py",
+          "line": 49,
+          "source_group": "scripts",
+          "text": "\"check-catalog\": \"check_scripts_catalog.py\","
         }
       ]
     },
@@ -11674,19 +11656,13 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 22,
+      "reference_count": 21,
       "references": [
         {
           "path": ".github/workflows/tests.yml",
           "line": 229,
           "source_group": "ci",
           "text": "uv run python -m scripts.engineering.repo check-inventory \\"
-        },
-        {
-          "path": ".pre-commit-config.yaml",
-          "line": 277,
-          "source_group": "ci",
-          "text": "check-inventory --check"
         },
         {
           "path": "docs/00-project/TOOLS.md",
@@ -11723,6 +11699,12 @@
           "line": 33,
           "source_group": "scripts",
           "text": "python -m scripts.engineering.repo check-inventory --check --manifest configs/quality/scripts_inventory_manifest.json"
+        },
+        {
+          "path": "scripts/engineering/dev/pretest_guardrails.sh",
+          "line": 406,
+          "source_group": "scripts",
+          "text": "\"$PYTHON_BIN\" -m scripts.engineering.repo check-inventory \\"
         }
       ]
     },
@@ -12861,13 +12843,13 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 130,
+          "line": 132,
           "source_group": "scripts",
           "text": "\"scripts/ops/launchers/codex/codex-exec.bat\": (\"scripts/codex-exec.bat\",),"
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 133,
+          "line": 135,
           "source_group": "scripts",
           "text": "\"scripts/codex-exec.bat\": (\"scripts/ops/launchers/codex/codex-exec.bat\",),"
         },
@@ -13069,13 +13051,13 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 131,
+          "line": 133,
           "source_group": "scripts",
           "text": "\"scripts/ops/launchers/codex/codex.bat\": (\"scripts/codex.bat\",),"
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 134,
+          "line": 136,
           "source_group": "scripts",
           "text": "\"scripts/codex.bat\": (\"scripts/ops/launchers/codex/codex.bat\",),"
         },
@@ -14012,7 +13994,7 @@
         },
         {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 343,
+          "line": 362,
           "source_group": "scripts",
           "text": "str(ROOT / \"scripts/ops/runtime/docker/docker_runtime_preflight.py\"),"
         },
@@ -14024,13 +14006,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
-          "line": 107,
+          "line": 131,
           "source_group": "tests",
           "text": "if \"docker_runtime_preflight.py\" in \" \".join(current):"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
-          "line": 182,
+          "line": 206,
           "source_group": "tests",
           "text": "if \"docker_runtime_preflight.py\" in \" \".join(current) or \"config\" in current:"
         }
@@ -14063,7 +14045,7 @@
         },
         {
           "path": "scripts/engineering/qa/run_docker_stability_campaign.py",
-          "line": 20,
+          "line": 21,
           "source_group": "scripts",
           "text": "PROBE = ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\""
         },
@@ -14106,7 +14088,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 222,
+          "line": 224,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/docker/restart-docker.ps1\","
         },
@@ -14169,7 +14151,7 @@
         },
         {
           "path": "scripts/engineering/qa/run_docker_stability_campaign.py",
-          "line": 19,
+          "line": 20,
           "source_group": "scripts",
           "text": "MANAGER = ROOT / \"scripts/ops/runtime/docker/runtime_manager.py\""
         }
@@ -14218,7 +14200,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 223,
+          "line": 225,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1\","
         },
@@ -14279,7 +14261,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 224,
+          "line": 226,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/neo4j/neo4j_quick_start.sh\","
         },
@@ -14401,7 +14383,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 226,
+          "line": 228,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/neo4j/start-neo4j-audit.sh\","
         }
@@ -14621,7 +14603,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 207,
+          "line": 209,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/repo/cleanup_repository.py\","
         },
@@ -14748,7 +14730,7 @@
         "new-pipeline",
         "py-config-bot"
       ],
-      "reference_count": 85,
+      "reference_count": 82,
       "references": [
         {
           "path": ".codex/skills/new-pipeline/SKILL.md",
@@ -14974,7 +14956,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 196,
+          "line": 198,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/generate_contracts.py\","
         },

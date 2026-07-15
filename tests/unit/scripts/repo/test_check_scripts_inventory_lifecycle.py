@@ -99,3 +99,18 @@ def test_validate_stale_registry_entries_rejects_registry_entry_for_active_scrip
 
     assert invalid == []
     assert stale == ["scripts/example_active.py: status changed to active"]
+
+
+@pytest.mark.parametrize(
+    "line, expected",
+    [
+        ("python -m scripts.engineering.repo --help", True),
+        ("uv run python -m src.tools.audit --check", True),
+        ("documentation: use -m scripts.engineering.repo as an example", False),
+        ("a flag named --mode=-m scripts.engineering.repo", False),
+    ],
+)
+def test_module_reference_detection_requires_command_context(
+    line: str, expected: bool
+) -> None:
+    assert (inventory.MODULE_REF_CANDIDATE_PATTERN.search(line) is not None) is expected
