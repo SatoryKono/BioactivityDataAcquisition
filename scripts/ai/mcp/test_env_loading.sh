@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Quick test that the MCP-local repo env loader resolves Neo4j settings correctly.
+# Quick redacted test of MCP-local repo environment loading.
 
 set -euo pipefail
 
@@ -9,7 +9,7 @@ source scripts/ai/mcp/support/load_repo_env.sh
 load_repo_env_if_present
 
 echo "=== Environment Variables Loaded ==="
-for name in NEO4J_URI NEO4J_USERNAME NEO4J_PASSWORD NEO4J_DATABASE NEO4J_AUTH; do
+for name in BRAVE_API_KEY REF_TOOL_API_KEY NEO4J_URI NEO4J_USERNAME NEO4J_PASSWORD NEO4J_DATABASE NEO4J_AUTH; do
     if [[ -n "${!name:-}" ]]; then
         echo "${name}=SET"
     else

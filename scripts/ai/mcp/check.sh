@@ -195,7 +195,8 @@ mintlify_out="$(codex mcp get mintlify 2>&1 || true)"
 require_contains "$biomoltech_out" "https://biomoltech.mintlify.app/mcp" "biomoltechDocs is registered as a remote Mintlify MCP" || status=1
 require_contains "$mintlify_out" "https://mcp.mintlify.com" "mintlify is registered as the OAuth-enabled Mintlify MCP" || status=1
 require_contains "$deepwiki_out" "https://mcp.deepwiki.com/mcp" "deepwiki is registered as the official DeepWiki MCP" || status=1
-require_contains "$ref_out" "https://api.ref.tools/mcp" "ref is registered as the OAuth-enabled Ref Tools MCP" || status=1
+require_contains "$ref_out" "https://api.ref.tools/mcp" "ref is registered as the Ref Tools MCP" || status=1
+require_contains "$ref_out" "x-ref-api-key=REF_TOOL_API_KEY" "ref auth uses the local REF_TOOL_API_KEY env header" || status=1
 
 if grep -Fq -- "${EXPECTED_FILESYSTEM_SCOPE}" <<<"$filesystem_out"; then
   ok "filesystem scope is restricted to repo root"
@@ -217,6 +218,12 @@ elif [[ -n "${GITHUB_TOKEN:-}" ]]; then
   ok "GITHUB_TOKEN is set and will be mapped for GitHub MCP auth"
 else
   warn "Neither GITHUB_PERSONAL_ACCESS_TOKEN nor GITHUB_TOKEN is set (GitHub MCP auth may fail)"
+fi
+
+if [[ -n "${REF_TOOL_API_KEY:-}" ]]; then
+  ok "REF_TOOL_API_KEY is set (shell or .env)"
+else
+  warn "REF_TOOL_API_KEY is not set; Ref will require OAuth"
 fi
 
 validate_wrapper_if_possible "github" "${EXPECTED_GITHUB_WRAPPER_PATH}" "GITHUB_PERSONAL_ACCESS_TOKEN" || status=1

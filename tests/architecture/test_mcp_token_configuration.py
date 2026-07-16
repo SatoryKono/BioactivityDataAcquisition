@@ -24,6 +24,7 @@ def test_repo_env_loaders_preserve_mcp_token_aliases() -> None:
         assert "GITHUB_PERSONAL_ACCESS_TOKEN" in text
         assert "GITHUB_TOKEN" in text
         assert "BRAVE_SEARCH_API_KEY" in text
+        assert "BRAVE_API_KEY1" in text
         assert "BRAVE_API_KEY" in text
         assert "GRAFANA_SERVICE_ACCOUNT_TOKEN" in text
         assert "HUB_PAT_TOKEN" in text
@@ -97,6 +98,17 @@ def test_mcp_token_docs_cover_sources_rotation_validation_and_ci_stance() -> Non
     assert "token_validation.sh" in runtime_config
     assert "CI must not require personal MCP tokens" in runtime_config
     assert "third-party service tokens" in runtime_config
+
+
+def test_ref_uses_env_header_without_embedding_secret_in_url() -> None:
+    setup_mcp = _read("scripts/ai/codex/setup_mcp.py")
+    launcher = _read("scripts/ai/codex/helper/run-codex-impl.sh")
+
+    assert 'REF_API_KEY_ENV_VAR = "REF_TOOL_API_KEY"' in setup_mcp
+    assert '"x-ref-api-key": REF_API_KEY_ENV_VAR' in setup_mcp
+    assert "REF_TOOL_API_KEY" in launcher
+    assert "load_repo_env_if_present" in launcher
+    assert "?apiKey=" not in setup_mcp
 
 
 def test_env_example_documents_mcp_token_sources_without_real_tokens() -> None:

@@ -20,6 +20,7 @@ FETCH_SPEC = ["--from", "mcp-server-fetch==2025.4.7", "mcp-server-fetch"]
 MANAGED_BLOCK_BEGIN = "# === BEGIN MANAGED MCP SERVERS ==="
 MANAGED_BLOCK_END = "# === END MANAGED MCP SERVERS ==="
 CACHE_DIR_NAME = ".cache"
+REF_API_KEY_ENV_VAR = "REF_TOOL_API_KEY"
 REMOVED_MCP_SERVER_NAMES = frozenset(
     {
         "sonarqube",
@@ -214,6 +215,15 @@ def _canonical_servers(
     return servers
 
 
+def _codex_runtime_servers(workspace_root: Path) -> dict[str, dict[str, Any]]:
+    """Return local Codex servers with secret values referenced by env name."""
+    servers = deepcopy(_canonical_servers(workspace_root))
+    servers["ref"]["env_http_headers"] = {
+        "x-ref-api-key": REF_API_KEY_ENV_VAR,
+    }
+    return servers
+
+
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     rendered = json.dumps(payload, indent=2, ensure_ascii=True) + "\n"
@@ -354,6 +364,14 @@ def _toml_array(values: Sequence[Any]) -> str:
     return "[" + ", ".join(rendered) + "]"
 
 
+def _toml_inline_string_table(values: dict[str, Any]) -> str:
+    rendered = [
+        f"{_toml_key(key)} = {_toml_string(str(value))}"
+        for key, value in values.items()
+    ]
+    return "{ " + ", ".join(rendered) + " }"
+
+
 def _render_codex_mcp_toml(servers: dict[str, dict[str, Any]]) -> str:
     lines = [
         MANAGED_BLOCK_BEGIN,
@@ -368,6 +386,12 @@ def _render_codex_mcp_toml(servers: dict[str, dict[str, Any]]) -> str:
         else:
             lines.append(f"command = {_toml_string(str(server['command']))}")
             lines.append(f"args = {_toml_array(server.get('args', []))}")
+
+        env_http_headers = server.get("env_http_headers")
+        if env_http_headers:
+            lines.append(
+                f"env_http_headers = {_toml_inline_string_table(env_http_headers)}"
+            )
 
         env = server.get("env")
         if env:
@@ -416,7 +440,7 @@ def _strip_managed_mcp_blocks(content: str, managed_server_names: set[str]) -> s
 
 
 def _write_codex_config(workspace_root: Path) -> Path:
-    servers = _canonical_servers(workspace_root)
+    servers = _codex_runtime_servers(workspace_root)
     config_dir = Path.home() / ".codex"
     config_dir.mkdir(parents=True, exist_ok=True)
     config_path = config_dir / "config.toml"

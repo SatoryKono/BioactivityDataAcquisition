@@ -37,7 +37,7 @@ Supported aliases:
 | Canonical variable | Accepted aliases |
 | --- | --- |
 | `GITHUB_PERSONAL_ACCESS_TOKEN` | `GITHUB_TOKEN` |
-| `BRAVE_API_KEY` | `BRAVE_SEARCH_API_KEY` |
+| `BRAVE_API_KEY` | `BRAVE_SEARCH_API_KEY`, `BRAVE_API_KEY1` |
 | `GRAFANA_SERVICE_ACCOUNT_TOKEN` | `GRAFANA_TOKEN`, `GRAFANA_API_KEY` |
 | `GRAFANA_USERNAME` | `GF_SECURITY_ADMIN_USER` |
 | `GRAFANA_PASSWORD` | `GF_SECURITY_ADMIN_PASSWORD` |
@@ -59,6 +59,7 @@ The script reports `SET` / `NOT SET` only and must not print secret values.
 | --- | --- | --- | --- | --- | --- |
 | GitHub | `GITHUB_PERSONAL_ACCESS_TOKEN` | Yes for GitHub MCP | GitHub fine-grained PAT or classic PAT | Repository read access needed for the task | 90 days |
 | Brave Search | `BRAVE_API_KEY` | Yes for Brave MCP | Brave Search API console | Web Search API quota | 90 days |
+| Ref Tools | `REF_TOOL_API_KEY` or OAuth | No when OAuth is used | Ref Tools key console or interactive OAuth | Documentation search only | 90 days |
 | Prometheus | `PROMETHEUS_TOKEN` or username/password | No | Local protected Prometheus endpoint | Read/query only | 90 days for shared service accounts |
 | Grafana | `GRAFANA_SERVICE_ACCOUNT_TOKEN` or username/password | No | Grafana service account preferred | Viewer/read-only dashboard and datasource access | 90 days |
 | Neo4j Cypher | `NEO4J_*` | No for local defaults | Local Neo4j memory instance | Local memory database only | Rotate default before shared-host use |
@@ -101,7 +102,8 @@ bash scripts/ai/mcp/check.sh
 | --- | --- |
 | GitHub MCP says token missing | Set `GITHUB_PERSONAL_ACCESS_TOKEN` or `GITHUB_TOKEN`; verify alias normalization with `test_env_loading.sh` or `check.sh`. |
 | GitHub token prefix warning | Confirm the token came from GitHub and has only the scopes needed by the local MCP task. |
-| Brave MCP exits immediately | Set `BRAVE_API_KEY`; keys shorter than 32 characters are rejected. |
+| Brave MCP exits immediately | Set `BRAVE_API_KEY` or a supported alias; keys shorter than 31 characters are rejected. |
+| Ref MCP requires login | Use interactive OAuth, or set `REF_TOOL_API_KEY`; Codex sends it through `env_http_headers` as `x-ref-api-key` without placing the value in config. |
 | Grafana MCP starts but queries fail | Set `GRAFANA_SERVICE_ACCOUNT_TOKEN` or local username/password; confirm `GRAFANA_URL`. |
 | Prometheus MCP cannot query | Confirm `PROMETHEUS_URL`; add token or username/password only if the endpoint is protected. |
 | Neo4j MCP authentication fails | Confirm `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`, or `NEO4J_AUTH`. Rotate the documented local default before shared-host use. |

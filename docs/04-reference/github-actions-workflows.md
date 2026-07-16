@@ -7,7 +7,7 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-07'
+  Last verified: '2026-07-16'
 
 ______________________________________________________________________
 
@@ -56,7 +56,7 @@ Use it when you need to answer:
 | `tests.yml` | `Tests` | `push`, `pull_request` | Main test matrix, DQ gates, coverage, telemetry, control-plane E2E |
 | `type-checking.yml` | `Type Checking (Strict)` | `push`, `pull_request`, `workflow_dispatch` | Strict mypy lane |
 | `validate-vendored-mermaid-assets.yml` | `Validate vendored Mermaid assets` | `push`, `pull_request` | Vendored Mermaid asset presence check |
-| `qodo-merge.yml` | `Qodo Merge` | `pull_request`, `pull_request_review_comment`, `issue_comment`, `push` | Qodo Merge PR Agent for automated code review |
+| `coderabbit.yml` | `CodeRabbit` | `pull_request`, `push`, `workflow_dispatch` | CodeRabbit CLI automated code review |
 
 ### Scheduled / periodic workflows
 
