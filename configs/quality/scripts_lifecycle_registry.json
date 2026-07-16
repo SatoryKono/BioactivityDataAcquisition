@@ -410,6 +410,48 @@
       "review_by": "2026-10-15",
       "next_step": "Retain as the opt-in resumable Docker stability campaign utility; keep it supporting because Docker is an ADR-010 adjunct and host-disruptive execution remains explicitly scheduled."
     },
+    "scripts/engineering/qa/docker_stability_campaign/commands.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the bounded command and observation adapter behind the opt-in Docker stability campaign; keep it supporting and preserve hard timeouts, bounded output, and redaction."
+    },
+    "scripts/engineering/qa/docker_stability_campaign/cycles.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the cycle and fault-matrix coordinator behind the opt-in Docker stability campaign; keep it supporting while campaign orchestration remains explicitly scheduled."
+    },
+    "scripts/engineering/qa/docker_stability_campaign/faults.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the bounded fault-case construction and execution helper behind the opt-in Docker stability campaign; keep host-disruptive operations fail-closed and explicitly scheduled."
+    },
+    "scripts/engineering/qa/docker_stability_campaign/model.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the immutable state, release-gate, evidence-integrity, and redaction model behind the opt-in Docker stability campaign; keep it supporting and deterministic."
+    },
+    "scripts/engineering/qa/docker_stability_campaign/promotion.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the recovery-trial and promotion-gate helper behind the opt-in Docker stability campaign; keep promotion evidence fail-closed and reviewable."
+    },
+    "scripts/engineering/qa/docker_stability_campaign/soak.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the bounded soak-stage helper behind the opt-in Docker stability campaign; keep probe cadence, deadlines, and persisted evidence deterministic."
+    },
+    "scripts/engineering/qa/docker_stability_campaign/stage_support.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the shared stage-state, baseline, and restoration helper behind the opt-in Docker stability campaign; keep resumability evidence atomic and fail-closed."
+    },
     "scripts/engineering/qa/scaffold_non_chembl_hash_policy.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",

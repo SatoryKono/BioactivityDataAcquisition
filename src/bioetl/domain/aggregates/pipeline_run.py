@@ -6,6 +6,7 @@ for maintainability while the public aggregate API remains stable.
 
 from __future__ import annotations
 
+from copy import deepcopy
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -79,4 +80,4 @@ class PipelineRun(_PipelineRunReadModelMixin, _PipelineRunLifecycleMixin):
         self._ended_at = None
         self._events = []
         self._manifest_id = manifest_id
-        self._metadata = metadata or {}
+        self._metadata = deepcopy(metadata) if metadata is not None else {}

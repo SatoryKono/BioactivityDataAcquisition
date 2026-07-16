@@ -1,12 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-16T19:18:10.967397+00:00",
+  "generated_at": "2026-07-16T19:36:41.009835+00:00",
   "summary": {
     "total_scripts": 477,
     "status_counts": {
       "active": 342,
-      "orphan": 7,
-      "supporting": 128
+      "supporting": 135
     },
     "reference_group_coverage": {
       "agents": 5,
@@ -14,7 +13,7 @@
       "ci": 63,
       "docs": 183,
       "other": 33,
-      "scripts": 368,
+      "scripts": 376,
       "skills": 16,
       "tests": 221
     }
@@ -359,7 +358,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 207,
+          "line": 212,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/check-env.ps1\","
         },
@@ -380,7 +379,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 208,
+          "line": 213,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/check-env.sh\","
         }
@@ -642,7 +641,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 209,
+          "line": 214,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/setup-env.sh\","
         },
@@ -789,7 +788,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 206,
+          "line": 211,
           "source_group": "scripts",
           "text": "\"scripts/ai/codex/helper/test-basic.sh\","
         }
@@ -1609,7 +1608,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 210,
+          "line": 215,
           "source_group": "scripts",
           "text": "\"scripts/ai/gemini/helper/check-env.ps1\","
         }
@@ -1778,7 +1777,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 211,
+          "line": 216,
           "source_group": "scripts",
           "text": "\"scripts/ai/gemini/helper/setup-env.sh\","
         },
@@ -3425,7 +3424,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 212,
+          "line": 217,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/check-env.ps1\","
         }
@@ -3446,7 +3445,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 213,
+          "line": 218,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/check-env.sh\","
         }
@@ -3467,7 +3466,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 214,
+          "line": 219,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/setup-env.ps1\","
         }
@@ -3500,7 +3499,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 215,
+          "line": 220,
           "source_group": "scripts",
           "text": "\"scripts/ai/vibe/helper/setup-env.sh\","
         },
@@ -3635,7 +3634,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 202,
+          "line": 207,
           "source_group": "scripts",
           "text": "\"scripts/check_dq_dsl_parity.py\","
         }
@@ -3695,7 +3694,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 200,
+          "line": 205,
           "source_group": "scripts",
           "text": "\"scripts/ci_check_docs_parity.sh\","
         }
@@ -4262,13 +4261,55 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 18,
       "references": [
         {
           "path": "scripts/diagrams/README.md",
           "line": 107,
           "source_group": "scripts",
           "text": "| `scripts/diagrams/diagram_paths.py`                          | Shared diagram path/constants helper used by rendering and validation tooling                 |"
+        },
+        {
+          "path": "scripts/diagrams/add_svg_text_fallback.py",
+          "line": 34,
+          "source_group": "scripts",
+          "text": "from .diagram_paths import SOURCE_FAMILIES, render_dir"
+        },
+        {
+          "path": "scripts/diagrams/check_class_method_render_integrity.py",
+          "line": 27,
+          "source_group": "scripts",
+          "text": "from .diagram_paths import source_dir as diagram_source_dir"
+        },
+        {
+          "path": "scripts/diagrams/check_diagram_artifacts.py",
+          "line": 23,
+          "source_group": "scripts",
+          "text": "from .diagram_paths import VISUAL_SMOKE_MANIFEST"
+        },
+        {
+          "path": "scripts/diagrams/check_diagram_quality_gates.py",
+          "line": 23,
+          "source_group": "scripts",
+          "text": "from .diagram_paths import ("
+        },
+        {
+          "path": "scripts/diagrams/check_diagram_visual_smoke.py",
+          "line": 25,
+          "source_group": "scripts",
+          "text": "from .diagram_paths import VISUAL_SMOKE_MANIFEST"
+        },
+        {
+          "path": "scripts/diagrams/check_svg_text_visibility.py",
+          "line": 29,
+          "source_group": "scripts",
+          "text": "from .diagram_paths import VISUAL_SMOKE_MANIFEST"
+        },
+        {
+          "path": "scripts/diagrams/fix_mermaid_operators.py",
+          "line": 34,
+          "source_group": "scripts",
+          "text": "from .diagram_paths import DIAGRAM_ROOT"
         }
       ],
       "owner": "@bioetl-platform",
@@ -5522,7 +5563,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 21,
       "references": [
         {
           "path": ".github/ISSUES/TDX-AUDIT-007-Govern-Zero-Reference-Supporting-Scripts.md",
@@ -5537,10 +5578,40 @@
           "text": "- `scripts/docs/_compat_shim.py` and other zero-reference helpers: re-review for"
         },
         {
-          "path": "tests/architecture/test_docs_runtime_wrapper_governance.py",
-          "line": 51,
-          "source_group": "tests",
-          "text": "\"scripts/docs/_compat_shim.py\","
+          "path": "scripts/docs/check_doc_drift.py",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "from ._compat_shim import load_public_api"
+        },
+        {
+          "path": "scripts/docs/check_docstring_coverage.py",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "from ._compat_shim import load_main"
+        },
+        {
+          "path": "scripts/docs/chembl_matrix_structural_contract.py",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "from ._compat_shim import load_public_api"
+        },
+        {
+          "path": "scripts/docs/enrich_chembl_matrix_normalization_details.py",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "from ._compat_shim import load_public_api"
+        },
+        {
+          "path": "scripts/docs/export_chembl_matrix_structural_contract.py",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "from ._compat_shim import load_main"
+        },
+        {
+          "path": "scripts/docs/filter_chembl_matrix_rows.py",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "from ._compat_shim import load_main"
         }
       ],
       "owner": "@bioetl-docs",
@@ -6853,13 +6924,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
           "line": 46,
           "source_group": "scripts",
           "text": "| `scripts/engineering/ci/_compatibility_registry.py`       | Shared compatibility registry loader used by telemetry/reporting helpers      |"
+        },
+        {
+          "path": "scripts/engineering/ci/_compatibility_telemetry.py",
+          "line": 28,
+          "source_group": "scripts",
+          "text": "from ._compatibility_registry import ("
         },
         {
           "path": "tests/architecture/test_curated_surface_telemetry_reporting.py",
@@ -6880,13 +6957,25 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 5,
       "references": [
         {
           "path": "scripts/engineering/ci/README.md",
           "line": 47,
           "source_group": "scripts",
           "text": "| `scripts/engineering/ci/_compatibility_telemetry.py`      | Compatibility inventory telemetry helper used by architecture reporting flows |"
+        },
+        {
+          "path": "scripts/engineering/ci/quality_integral_gate.py",
+          "line": 30,
+          "source_group": "scripts",
+          "text": "from ._compatibility_telemetry import ("
+        },
+        {
+          "path": "scripts/engineering/ci/report_quality_debt_weekly.py",
+          "line": 20,
+          "source_group": "scripts",
+          "text": "from ._compatibility_telemetry import ("
         },
         {
           "path": "tests/architecture/test_curated_surface_telemetry_reporting.py",
@@ -7207,7 +7296,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 204,
+          "line": 209,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/update_test_telemetry_baseline.py\","
         },
@@ -7276,7 +7365,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 203,
+          "line": 208,
           "source_group": "scripts",
           "text": "\"scripts/engineering/ci/validate_control_plane_artifacts.py\","
         }
@@ -9052,13 +9141,13 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 137,
+          "line": 142,
           "source_group": "scripts",
           "text": "\"check-naming-pkg\": ("
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 138,
+          "line": 143,
           "source_group": "scripts",
           "text": "\"scripts/engineering/qa/check_naming_package_consistency.py\""
         },
@@ -9451,42 +9540,181 @@
     {
       "path": "scripts/engineering/qa/docker_stability_campaign/commands.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 6,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/cycles.py",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "from .commands import ("
+        },
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/faults.py",
+          "line": 12,
+          "source_group": "scripts",
+          "text": "from .commands import ("
+        },
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/faults.py",
+          "line": 337,
+          "source_group": "scripts",
+          "text": "from .commands import run_command"
+        },
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/promotion.py",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "from .commands import ("
+        },
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/soak.py",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "from .commands import observe_docker_vm_reserve, probe_command, record_probe"
+        },
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/stage_support.py",
+          "line": 9,
+          "source_group": "scripts",
+          "text": "from .commands import manager_command, restart_baseline"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the bounded command and observation adapter behind the opt-in Docker stability campaign; keep it supporting and preserve hard timeouts, bounded output, and redaction."
     },
     {
       "path": "scripts/engineering/qa/docker_stability_campaign/cycles.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/runner.py",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "from .cycles import bootstrap_campaign, run_cycles, run_fault_matrix"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the cycle and fault-matrix coordinator behind the opt-in Docker stability campaign; keep it supporting while campaign orchestration remains explicitly scheduled."
     },
     {
       "path": "scripts/engineering/qa/docker_stability_campaign/faults.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 3,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/__init__.py",
+          "line": 3,
+          "source_group": "scripts",
+          "text": "from .faults import build_fault_cases, execute_fault_case"
+        },
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/cycles.py",
+          "line": 17,
+          "source_group": "scripts",
+          "text": "from .faults import HostFaultExecutor, build_fault_cases, execute_fault_case"
+        },
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/runner.py",
+          "line": 14,
+          "source_group": "scripts",
+          "text": "from .faults import build_fault_cases"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the bounded fault-case construction and execution helper behind the opt-in Docker stability campaign; keep host-disruptive operations fail-closed and explicitly scheduled."
     },
     {
       "path": "scripts/engineering/qa/docker_stability_campaign/model.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 8,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/__init__.py",
+          "line": 4,
+          "source_group": "scripts",
+          "text": "from .model import ("
+        },
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/commands.py",
+          "line": 13,
+          "source_group": "scripts",
+          "text": "from .model import StackSpec, atomic_json, load_json, redact"
+        },
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/cycles.py",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "from .model import atomic_json, compose_origin_findings"
+        },
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/faults.py",
+          "line": 19,
+          "source_group": "scripts",
+          "text": "from .model import ("
+        },
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/promotion.py",
+          "line": 19,
+          "source_group": "scripts",
+          "text": "from .model import ("
+        },
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/runner.py",
+          "line": 15,
+          "source_group": "scripts",
+          "text": "from .model import ("
+        },
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/soak.py",
+          "line": 11,
+          "source_group": "scripts",
+          "text": "from .model import atomic_json, load_json"
+        },
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/stage_support.py",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "from .model import ("
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the immutable state, release-gate, evidence-integrity, and redaction model behind the opt-in Docker stability campaign; keep it supporting and deterministic."
     },
     {
       "path": "scripts/engineering/qa/docker_stability_campaign/promotion.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/runner.py",
+          "line": 24,
+          "source_group": "scripts",
+          "text": "from .promotion import finalize_campaign, run_recovery_trials, secret_fingerprint"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the recovery-trial and promotion-gate helper behind the opt-in Docker stability campaign; keep promotion evidence fail-closed and reviewable."
     },
     {
       "path": "scripts/engineering/qa/docker_stability_campaign/runner.py",
@@ -9548,18 +9776,58 @@
     {
       "path": "scripts/engineering/qa/docker_stability_campaign/soak.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 1,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/runner.py",
+          "line": 25,
+          "source_group": "scripts",
+          "text": "from .soak import run_soak"
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the bounded soak-stage helper behind the opt-in Docker stability campaign; keep probe cadence, deadlines, and persisted evidence deterministic."
     },
     {
       "path": "scripts/engineering/qa/docker_stability_campaign/stage_support.py",
       "type": "py",
-      "status": "orphan",
+      "status": "supporting",
       "agent_usage": [],
-      "reference_count": 0,
-      "references": []
+      "reference_count": 4,
+      "references": [
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/cycles.py",
+          "line": 19,
+          "source_group": "scripts",
+          "text": "from .stage_support import ("
+        },
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/promotion.py",
+          "line": 25,
+          "source_group": "scripts",
+          "text": "from .stage_support import ("
+        },
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/runner.py",
+          "line": 26,
+          "source_group": "scripts",
+          "text": "from .stage_support import save_state"
+        },
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/soak.py",
+          "line": 12,
+          "source_group": "scripts",
+          "text": "from .stage_support import ("
+        }
+      ],
+      "owner": "@bioetl-platform",
+      "lifecycle_decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the shared stage-state, baseline, and restoration helper behind the opt-in Docker stability campaign; keep resumability evidence atomic and fail-closed."
     },
     {
       "path": "scripts/engineering/qa/extract_pubchem_property_vocab.py",
@@ -11406,7 +11674,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 144,
+          "line": 149,
           "source_group": "scripts",
           "text": "\"check-metadata-age\": \"scripts/engineering/qa/vcr/check_vcr_metadata_age.py\","
         },
@@ -12999,13 +13267,13 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 124,
+          "line": 129,
           "source_group": "scripts",
           "text": "\"scripts/ops/launchers/codex/codex-exec.bat\": (\"scripts/codex-exec.bat\",),"
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 127,
+          "line": 132,
           "source_group": "scripts",
           "text": "\"scripts/codex-exec.bat\": (\"scripts/ops/launchers/codex/codex-exec.bat\",),"
         },
@@ -13207,13 +13475,13 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 125,
+          "line": 130,
           "source_group": "scripts",
           "text": "\"scripts/ops/launchers/codex/codex.bat\": (\"scripts/codex.bat\",),"
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 128,
+          "line": 133,
           "source_group": "scripts",
           "text": "\"scripts/codex.bat\": (\"scripts/ops/launchers/codex/codex.bat\",),"
         },
@@ -14256,7 +14524,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 216,
+          "line": 221,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/docker/restart-docker.ps1\","
         },
@@ -14273,7 +14541,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 49,
+      "reference_count": 50,
       "references": [
         {
           "path": "Makefile",
@@ -14338,7 +14606,7 @@
       "references": [
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 217,
+          "line": 222,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1\","
         },
@@ -14399,7 +14667,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 218,
+          "line": 223,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/neo4j/neo4j_quick_start.sh\","
         },
@@ -14521,7 +14789,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 220,
+          "line": 225,
           "source_group": "scripts",
           "text": "\"scripts/ops/runtime/neo4j/start-neo4j-audit.sh\","
         }
@@ -14741,7 +15009,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 201,
+          "line": 206,
           "source_group": "scripts",
           "text": "\"scripts/ops/support/repo/cleanup_repository.py\","
         },
@@ -15094,7 +15362,7 @@
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
-          "line": 190,
+          "line": 195,
           "source_group": "scripts",
           "text": "\"src/tools/scripts/generate_contracts.py\","
         },

@@ -247,7 +247,7 @@ class GoldSinkConfig(BaseModel):
     """
 
     path: str = Field(description="Base path for Gold data")
-    format: Literal["delta", "parquet"] = Field(default="delta")
+    format: Literal["delta"] = Field(default="delta")
     mode: Literal["append", "overwrite", "scd2"] = Field(default="overwrite")
     dq_report: GoldDQReportConfig = Field(default_factory=GoldDQReportConfig)
 

@@ -399,11 +399,11 @@ class TestMedallionFormatValidation:
             },
         }
 
-        with pytest.raises(ValidationError, match="Silver layer MUST use 'delta'"):
+        with pytest.raises(ValueError, match="Silver layer MUST use 'delta' format"):
             PipelineYamlConfig.model_validate(config_dict)
 
-    def test_gold_parquet_format_allowed(self):
-        """Test that Parquet format is allowed for Gold layer (RULES.md §2.1)."""
+    def test_gold_parquet_format_rejected(self):
+        """Test that Parquet format is rejected for Gold layer (RULES.md §2.1)."""
         config_dict = {
             "pipeline_name": "test_pipeline",
             "provider": "test",
@@ -415,9 +415,9 @@ class TestMedallionFormatValidation:
             },
         }
 
-        # Gold MAY use parquet (RULES.md §2.1)
-        yaml_config = PipelineYamlConfig.model_validate(config_dict)
-        assert yaml_config.sink["gold"].format == "parquet"
+        # Gold MUST use delta (RULES.md §2.1)
+        with pytest.raises(ValueError, match="Gold layer MUST use 'delta' format"):
+            PipelineYamlConfig.model_validate(config_dict)
 
     def test_silver_delta_format_accepted(self):
         """Test that Delta format is accepted for Silver layer."""

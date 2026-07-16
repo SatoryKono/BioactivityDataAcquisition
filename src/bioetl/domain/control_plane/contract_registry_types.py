@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 
+from bioetl.domain._immutability import freeze_fields
 from bioetl.domain.types.contract_identity import ContractIdentity, LifecycleStatus
 
 
@@ -36,6 +37,9 @@ class RegistryValidationResult:
 
     valid: bool
     issues: list[RegistryValidationIssue] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        freeze_fields(self, ("issues",))
 
     @property
     def has_blocking_issues(self) -> bool:
@@ -189,6 +193,17 @@ class ContractRegistryEntry:
     normalization_profile_ref: str | None = None
     normalization_profile_version: str | None = None
     normalization_profile_hash: str | None = None
+
+    def __post_init__(self) -> None:
+        freeze_fields(
+            self,
+            (
+                "published_artifacts",
+                "supported_versions",
+                "migration_guides",
+                "owners",
+            ),
+        )
 
     def validate(self) -> list[RegistryValidationIssue]:
         """Validate the registry entry."""

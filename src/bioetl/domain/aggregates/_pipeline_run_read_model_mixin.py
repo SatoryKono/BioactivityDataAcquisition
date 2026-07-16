@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -84,7 +85,7 @@ class _PipelineRunReadModelMixin(_PipelineRunAttrs):
     @property
     def metadata(self) -> JsonDict:
         """Copy of run metadata."""
-        return self._metadata.copy()
+        return deepcopy(self._metadata)
 
     @property
     def manifest_id(self) -> str | None:

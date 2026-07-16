@@ -8,6 +8,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from bioetl.domain.behavior._dq_value_coercion import _is_present
+from bioetl.domain.exceptions import ValidationError
 
 if TYPE_CHECKING:
     from bioetl.domain.config.validation import CrossFieldValidation
@@ -87,7 +88,10 @@ def _custom_cross_rule_violated_impl(
         return _is_present(protein_class_id) and protein_class_id == parent_id
     if rule.validator == "validate_alias_equality":
         return _alias_equality_rule_violated(record, rule)
-    return False
+    raise ValidationError(
+        f"Unknown custom cross-field validator: {rule.validator!r}",
+        field="validator",
+    )
 
 
 def _custom_cross_field_rule_violated(

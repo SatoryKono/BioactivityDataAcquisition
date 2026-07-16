@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import datetime
 from copy import deepcopy
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 import bioetl.domain.aggregates._batch_lifecycle as lifecycle

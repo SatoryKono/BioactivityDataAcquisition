@@ -59,10 +59,23 @@ def deep_freeze_json(value: object) -> object:
         return FrozenDict(
             {str(key): deep_freeze_json(item) for key, item in value.items()}
         )
-    if isinstance(value, (list, tuple)):
+    if isinstance(value, list):
         return FrozenList(deep_freeze_json(item) for item in value)
+    if isinstance(value, tuple):
+        return tuple(deep_freeze_json(item) for item in value)
     if isinstance(value, set):
         return frozenset(deep_freeze_json(item) for item in value)
+    return deepcopy(value)
+
+
+def deep_thaw_json(value: object) -> object:
+    """Return a detached mutable JSON-compatible copy of a frozen snapshot."""
+    if isinstance(value, dict):
+        return {str(key): deep_thaw_json(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [deep_thaw_json(item) for item in value]
+    if isinstance(value, (set, frozenset)):
+        return [deep_thaw_json(item) for item in value]
     return deepcopy(value)
 
 
