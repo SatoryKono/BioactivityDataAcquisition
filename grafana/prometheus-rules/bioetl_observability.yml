@@ -953,14 +953,14 @@ groups:
   - name: bioetl_optional_docker_runtime_stability
     rules:
       - alert: BioETLDockerRuntimeIncident
-        expr: bioetl_docker_runtime_primary_cause == 1
+        expr: bioetl_docker_runtime_primary_cause > 0
         for: 1m
         labels:
           severity: critical
           owner: bioetl-observability
         annotations:
           summary: "Optional Docker runtime has one actionable incident"
-          description: "Host probe classified stack={{ $labels.stack }} with primary cause={{ $labels.cause }}; inspect the bounded report before recovery."
+          description: "Host probe classified stack={{ $labels.stack }} with bounded primary cause code={{ $value }}; inspect the bounded report before recovery."
           runbook: "docs/05-operations/runbooks/docker-stability.md"
 
       - alert: BioETLDockerRuntimeProbeMissing

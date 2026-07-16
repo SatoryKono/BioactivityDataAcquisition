@@ -8,7 +8,7 @@
   "degraded_reasons": [
     "live Prometheus review failed for: bioetl_checkpoint_load_events_total, bioetl_checkpoint_saved_at_seconds, bioetl_health_check_latency_seconds, bioetl_pipeline_runs_total"
   ],
-  "generated_at": "2026-07-16T06:11:38Z",
+  "generated_at": "2026-07-16T06:42:16Z",
   "live_observed_series": {},
   "live_threshold_violations": [],
   "local_cardinality_fallback_allowed": false,
@@ -25,10 +25,10 @@
   "prometheus_token_env_var": "BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN",
   "prometheus_url_env_var": "BIOETL_OBSERVABILITY_PROMETHEUS_URL",
   "query_errors": {
-    "bioetl_checkpoint_load_events_total": "[Errno 1] Operation not permitted",
-    "bioetl_checkpoint_saved_at_seconds": "[Errno 1] Operation not permitted",
-    "bioetl_health_check_latency_seconds": "[Errno 1] Operation not permitted",
-    "bioetl_pipeline_runs_total": "[Errno 1] Operation not permitted"
+    "bioetl_checkpoint_load_events_total": "Prometheus query did not return a single scalar result",
+    "bioetl_checkpoint_saved_at_seconds": "Prometheus query did not return a single scalar result",
+    "bioetl_health_check_latency_seconds": "Prometheus query did not return a single scalar result",
+    "bioetl_pipeline_runs_total": "Prometheus query did not return a single scalar result"
   },
   "review_required_metrics": [],
   "reviewed_metrics": [
