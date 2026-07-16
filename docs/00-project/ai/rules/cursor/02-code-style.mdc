@@ -21,8 +21,9 @@ Exception: minimal re-export `__init__.py` without runtime logic (per architectu
 - ✅ `list[str]` NOT `List[str]`
 - ✅ `X | None` NOT `Optional[X]`
 - ✅ `X | Y` NOT `Union[X, Y]`
-- Public API fully typed; `mypy --strict` MUST exit 0
-- Avoid bare `Any` to hide boundary defects; `# type: ignore` single-line with justification only
+- Public API fully typed (params + return, including `-> None`); `mypy --strict` MUST exit 0
+- Avoid bare `Any` / `cast(Any, …)` to silence checker errors; isolate documented escape hatches at boundaries only
+- `# type: ignore` single-line with justification only
 
 # Naming Conventions
 
@@ -32,7 +33,7 @@ Exception: minimal re-export `__init__.py` without runtime logic (per architectu
 | classes | `PascalCase` |
 | constants | `UPPER_SNAKE_CASE` |
 
-Role suffixes when applicable: `*Factory`, `*Client`, `*Protocol`/`*ABC`, `*Config`, `*Error`, `*Impl`.
+Role suffixes when applicable: `*Port`, `*Service`, `*Factory`, `*Adapter`, `*Client`, `*Protocol`/`*ABC`, `*Config`, `*Error`, `*Impl`.
 
 Pipeline stage modules (when used): `extract.py`, `transform.py`, `validate.py`, `export.py`.
 
@@ -47,6 +48,9 @@ Pipeline stage modules (when used): `extract.py`, `transform.py`, `validate.py`,
 - Domain **MUST NOT** read files or environment variables directly
 - Unified entity config: `configs/entities/{provider}/{entity}.yaml` (pipeline, schema, quality, filters, contracts, hash-policy)
 - Reuse existing DTO/Value Object/port; remove superseded implementations after migration window
+- Critical mode fields (`run_mode`, `environment`, `run_type`, `data_layer`, write modes) **MUST** be explicit in schema — no silent implicit defaults
+- Enum-like config identifiers **MUST** validate against documented allowed values at load time
+- YAML key order **MUST** stay deterministic (canonical/documented order; no random reordering on serialize)
 
 # Quality Tools & Gates
 

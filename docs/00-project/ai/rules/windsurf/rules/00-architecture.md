@@ -34,7 +34,9 @@ globs:
 ## Ports & Protocols
 
 - Cross-layer ports: `typing.Protocol` in `bioetl.domain.ports`; import **only** via facade: `from bioetl.domain.ports import ...`
+- Direct imports from individual port modules (e.g. `bioetl.domain.ports.data_fetcher_port`) **MUST NOT**
 - `*Port` = cross-layer contract; local `*Protocol` = layer-internal structural typing (not a cross-layer port)
+- Naming suffixes: ports `*Port`, services `*Service`, factories `*Factory`, adapters `*Adapter`
 - Primary enforcement: `mypy --strict`; `@runtime_checkable` on composition boundary for critical ports per ADR
 - Critical ports SHOULD be `@runtime_checkable`: DataSourcePort, FilterableDataSourcePort, HealthCheckPort, StoragePort
 

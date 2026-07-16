@@ -28,6 +28,9 @@ Tests: `test_*.py`; mirror production concerns.
 - Pure domain/application via in-memory fakes — **MUST NOT** mock external libs (`httpx`, `requests`, etc.)
 - `MagicMock` only for own seam objects when fake impractical
 - Cover: aggregate state machines, invalid transitions, Value Objects, hash normalization, DQ boundaries, negative cases
+- **Deterministic:** no uncontrolled `datetime.now()` / `time.time()` / unseeded `random` / live network — use fixtures, frozen time, seeds, or mocks limited to controlled time/random seams and project-owned ports; external HTTP clients still require in-memory fakes, VCR cassettes, or fixtures (not library mocks)
+- Behavior or public-API changes **MUST** add/update regression tests in the same change; bug fixes **SHOULD** include a failing-before/passing-after case
+- **MUST NOT** weaken assertions to green-wash (exact → contains, drop asserts, widen ranges) without explicit justification
 
 # VCR.py Rules
 

@@ -29,6 +29,8 @@ ______________________________________________________________________
 | `docs/00-project/ai/rules/cursor/**` | Cursor rules source | Canonical for Cursor AI guidance in-repo | Yes | thematic `.mdc` rules derived from governance stack |
 | `docs/00-project/ai/rules/windsurf/**` | Windsurf/Cascade rules mirror | Derived from `cursor/` via sync script | Regenerate via `scripts/ai/sync_windsurf_rules.py` | `.md` rules + workflows for Cascade |
 | `.windsurf/**` | Windsurf local deploy surface | Machine-local deploy target | Deploy only | generated from `docs/00-project/ai/rules/windsurf/` |
+| `.devin/workflows/**` | Devin Cascade-style workflows | Tracked Devin guidance workflows | Yes (keep parity with Windsurf workflows) | `review`, `post-change`, `pre-commit`, `qodo-sync`, plus specialized audits |
+| `.devin/wiki.json` | Devin DeepWiki navigation | Derived discovery layer | Yes for navigation notes | MUST NOT override RULES/ADR/runtime truth |
 
 ## Source-of-Truth Rules
 

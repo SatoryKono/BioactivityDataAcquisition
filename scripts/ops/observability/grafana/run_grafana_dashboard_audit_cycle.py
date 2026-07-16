@@ -4,11 +4,14 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import socket
 import subprocess
 import sys
+import uuid
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 
 if __package__ in {None, ""}:
@@ -42,6 +45,7 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime
     wait_for_observability_backend_ready,
     wait_for_observability_backend_required_paths_ready,
 )
+from bioetl.infrastructure.storage.support.atomic_ops import atomic_write_text
 
 DEFAULT_GRAFANA_BASE_URL = "http://localhost:3000"
 DEFAULT_PROMETHEUS_BASE_URL = "http://localhost:9090"
@@ -69,6 +73,8 @@ class AuditCycleConfig:
     app_base_url: str
     screenshot_dir: Path
     gate_output_path: Path
+    semantic_output_path: Path
+    occurrence_id: str
     preflight_timeout_seconds: float
     render_timeout_seconds: float
     ensure_observability_backend: bool
@@ -115,8 +121,24 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--gate-output",
         type=Path,
-        default=DEFAULT_GATE_OUTPUT_PATH,
-        help="Write independently reviewable semantic/render gate evidence.",
+        default=None,
+        help=(
+            "Write independently reviewable semantic/render gate evidence. "
+            "When omitted with a non-default screenshot directory, the gate is "
+            "written beside that directory so tests cannot contaminate the "
+            "canonical repository report."
+        ),
+    )
+    parser.add_argument(
+        "--semantic-output",
+        type=Path,
+        default=None,
+        help="Path for the occurrence-bound live semantic audit artifact.",
+    )
+    parser.add_argument(
+        "--occurrence-id",
+        default=None,
+        help="Stable identifier shared by semantic, render, and gate artifacts.",
     )
     parser.add_argument(
         "--preflight-timeout-seconds",
@@ -168,6 +190,20 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def _parse_args(argv: list[str] | None) -> AuditCycleConfig:
     args = _build_parser().parse_args(argv)
+    gate_output = args.gate_output
+    if gate_output is None:
+        gate_output = (
+            DEFAULT_GATE_OUTPUT_PATH
+            if args.screenshot_dir == DEFAULT_SCREENSHOT_DIR
+            else args.screenshot_dir / "dashboard-release-gates.json"
+        )
+    semantic_output = args.semantic_output
+    if semantic_output is None:
+        semantic_output = (
+            live_audit.DEFAULT_OUTPUT_PATH
+            if args.screenshot_dir == DEFAULT_SCREENSHOT_DIR
+            else args.screenshot_dir / "live-panel-audit.json"
+        )
     return AuditCycleConfig(
         grafana_base_url=args.grafana_base_url.rstrip("/"),
         grafana_username=args.grafana_username,
@@ -175,7 +211,9 @@ def _parse_args(argv: list[str] | None) -> AuditCycleConfig:
         prometheus_base_url=args.prometheus_base_url.rstrip("/"),
         app_base_url=args.app_base_url.rstrip("/"),
         screenshot_dir=args.screenshot_dir,
-        gate_output_path=args.gate_output,
+        gate_output_path=gate_output,
+        semantic_output_path=semantic_output,
+        occurrence_id=str(args.occurrence_id or uuid.uuid4()),
         preflight_timeout_seconds=args.preflight_timeout_seconds,
         render_timeout_seconds=args.render_timeout_seconds,
         ensure_observability_backend=args.ensure_observability_backend,
@@ -236,22 +274,156 @@ def _write_gate_report(
 ) -> None:
     output_path = _resolve_gate_output_path(config.gate_output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    semantic_source = _artifact_descriptor(
+        config.semantic_output_path,
+        occurrence_id=config.occurrence_id,
+        kind="semantic",
+    )
+    render_source = _artifact_descriptor(
+        config.screenshot_dir / "render-manifest.json",
+        occurrence_id=config.occurrence_id,
+        kind="render",
+    )
+    semantic_effective = (
+        semantic_status
+        if semantic_source["validated"]
+        and semantic_source["terminal_status"] == semantic_status
+        else "fail"
+    )
+    render_effective = (
+        render_status
+        if render_source["validated"]
+        and render_source["terminal_status"] == render_status
+        else "fail"
+    )
     payload = {
-        "schema_version": 1,
+        "schema_version": 2,
+        "generated_at": datetime.now(tz=UTC).isoformat(),
+        "occurrence_id": config.occurrence_id,
+        "source_identity": _git_identity(),
+        "scope": {
+            "workflow": config.workflow,
+            "pipeline": config.pipeline,
+            "run_type": config.run_type,
+            "run_id": config.run_id,
+            "range_hours": config.range_hours,
+        },
         "dashboard_semantic_gate": {
-            "status": semantic_status,
+            "status": semantic_effective,
+            "claimed_status": semantic_status,
             "detail": semantic_detail,
-            "source_artifact": str(live_audit.DEFAULT_OUTPUT_PATH),
+            "source_artifact": semantic_source,
         },
         "dashboard_render_gate": {
-            "status": render_status,
+            "status": render_effective,
+            "claimed_status": render_status,
             "detail": render_detail,
-            "source_artifact": str(config.screenshot_dir / "render-manifest.json"),
+            "source_artifact": render_source,
         },
+        "release_passed": semantic_effective == "pass"
+        and render_effective == "pass",
     }
-    with output_path.open("w", encoding="utf-8", newline="\n") as stream:
-        json.dump(payload, stream, indent=2, sort_keys=True)
-        stream.write("\n")
+    atomic_write_text(
+        output_path,
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+    )
+
+
+def _git_identity() -> dict[str, str]:
+    repo_root = Path(__file__).resolve().parents[4]
+
+    def resolve(revision: str) -> str:
+        try:
+            completed = subprocess.run(
+                ["git", "rev-parse", revision],
+                cwd=repo_root,
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            return "unavailable"
+        value = completed.stdout.strip()
+        return value if completed.returncode == 0 and value else "unavailable"
+
+    return {"commit": resolve("HEAD"), "tree": resolve("HEAD^{tree}")}
+
+
+def _artifact_descriptor(
+    path: Path,
+    *,
+    occurrence_id: str,
+    kind: str,
+) -> dict[str, object]:
+    resolved = path.expanduser().resolve()
+    descriptor: dict[str, object] = {
+        "path": str(resolved),
+        "exists": resolved.is_file(),
+        "sha256": None,
+        "generated_at": None,
+        "occurrence_id": None,
+        "occurrence_match": False,
+        "terminal_status": "fail",
+        "dashboard_scope": [],
+        "validated": False,
+    }
+    if not resolved.is_file():
+        return descriptor
+    try:
+        raw = resolved.read_bytes()
+        payload = json.loads(raw)
+    except (OSError, json.JSONDecodeError):
+        return descriptor
+    if not isinstance(payload, dict):
+        return descriptor
+    descriptor["sha256"] = hashlib.sha256(raw).hexdigest()
+    descriptor["generated_at"] = payload.get("generated_at")
+    observed_occurrence = str(payload.get("occurrence_id") or "")
+    descriptor["occurrence_id"] = observed_occurrence
+    descriptor["occurrence_match"] = observed_occurrence == occurrence_id
+    if kind == "semantic":
+        gate = payload.get("semantic_gate")
+        status = str(gate.get("status") or "fail") if isinstance(gate, dict) else "fail"
+        descriptor["terminal_status"] = status
+        results = payload.get("results")
+        if isinstance(results, list):
+            descriptor["dashboard_scope"] = sorted(
+                {
+                    f"{item.get('dashboard_uid')}#{item.get('panel_id')}"
+                    for item in results
+                    if isinstance(item, dict)
+                    and item.get("dashboard_uid")
+                    and item.get("panel_id") is not None
+                }
+            )
+    elif kind == "render":
+        terminal = payload.get("terminal_state_validation")
+        dashboards = payload.get("dashboards")
+        terminal_ok = isinstance(terminal, dict) and terminal.get("status") == "ok"
+        rendered = (
+            isinstance(dashboards, list)
+            and bool(dashboards)
+            and all(
+                isinstance(item, dict) and item.get("renderStatus") == "rendered"
+                for item in dashboards
+            )
+        )
+        descriptor["terminal_status"] = "pass" if terminal_ok and rendered else "fail"
+        if isinstance(dashboards, list):
+            descriptor["dashboard_scope"] = sorted(
+                {
+                    str(item.get("uid"))
+                    for item in dashboards
+                    if isinstance(item, dict) and item.get("uid")
+                }
+            )
+    descriptor["validated"] = bool(
+        descriptor["occurrence_match"]
+        and descriptor["generated_at"]
+        and descriptor["sha256"]
+    )
+    return descriptor
 
 
 def _resolve_gate_output_path(output_path: Path) -> Path:
@@ -286,6 +458,8 @@ def _run_rerender(config: AuditCycleConfig, *, screenshot_uids: tuple[str, ...])
         config.run_id,
         "--range-hours",
         str(config.range_hours),
+        "--occurrence-id",
+        config.occurrence_id,
     ]
     if screenshot_uids:
         common_argv.extend(["--uids", *screenshot_uids])
@@ -566,6 +740,10 @@ def _run_live_audit(config: AuditCycleConfig, *, app_base_url: str) -> int:
             config.run_id,
             "--range-hours",
             str(config.range_hours),
+            "--output",
+            str(config.semantic_output_path),
+            "--occurrence-id",
+            config.occurrence_id,
         ]
     )
 
@@ -584,7 +762,7 @@ def _filled_dashboard_uids_from_results(
 
 
 def _load_cached_filled_dashboard_uids(config: AuditCycleConfig) -> tuple[str, ...]:
-    payload = json.loads(live_audit.DEFAULT_OUTPUT_PATH.read_text(encoding="utf-8"))
+    payload = json.loads(config.semantic_output_path.read_text(encoding="utf-8"))
     report_config = payload.get("config")
     if not isinstance(report_config, dict):
         raise ValueError("live-panel-audit cache missing config object")
@@ -626,7 +804,8 @@ def _discover_filled_dashboard_uids(
                 run_type=config.run_type,
                 run_id=config.run_id,
                 range_hours=config.range_hours,
-                output_path=live_audit.DEFAULT_OUTPUT_PATH,
+                output_path=config.semantic_output_path,
+                occurrence_id=config.occurrence_id,
             )
         )
         filled = _filled_dashboard_uids_from_results(results)
@@ -683,32 +862,41 @@ def main(argv: list[str] | None = None) -> int:
             else 1
         )
 
-        print("grafana-audit-cycle: discover filled dashboards")
-        try:
-            screenshot_uids = _discover_filled_dashboard_uids(
-                config,
-                app_base_url=app_base_url,
-            )
-        except (
-            FileNotFoundError,
-            LookupError,
-            OSError,
-            TypeError,
-            ValueError,
-            json.JSONDecodeError,
-        ) as exc:
-            print(f"grafana-audit-cycle: filled-dashboard discovery failed ({exc})")
-            screenshot_uids = ()
+        screenshot_uids: tuple[str, ...] = ()
+        semantic_status_code = 1
+        if backend_ready:
+            print("grafana-audit-cycle: discover filled dashboards")
+            try:
+                screenshot_uids = _discover_filled_dashboard_uids(
+                    config,
+                    app_base_url=app_base_url,
+                )
+            except (
+                FileNotFoundError,
+                LookupError,
+                OSError,
+                TypeError,
+                ValueError,
+                json.JSONDecodeError,
+            ) as exc:
+                print(
+                    "grafana-audit-cycle: filled-dashboard discovery failed "
+                    f"({exc})"
+                )
 
-        print("grafana-audit-cycle: live panel semantic gate")
-        try:
-            semantic_status_code = _run_live_audit(
-                config,
-                app_base_url=app_base_url,
+            print("grafana-audit-cycle: live panel semantic gate")
+            try:
+                semantic_status_code = _run_live_audit(
+                    config,
+                    app_base_url=app_base_url,
+                )
+            except Exception as exc:  # pragma: no cover - fail-closed runtime boundary
+                print(f"grafana-audit-cycle: live panel audit failed ({exc})")
+        else:
+            print(
+                "grafana-audit-cycle: semantic discovery/audit skipped because "
+                "the required backend is unavailable"
             )
-        except Exception as exc:  # pragma: no cover - fail-closed runtime boundary
-            print(f"grafana-audit-cycle: live panel audit failed ({exc})")
-            semantic_status_code = 1
         semantic_status = (
             "pass"
             if backend_ready

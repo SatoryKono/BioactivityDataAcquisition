@@ -9,12 +9,12 @@ scrape_configs:
         labels:
           job: bioetl
           __path__: /workspace-logs/*.log
-  - job_name: bioetl-reports
+  - job_name: bioetl-runtime-reports
     static_configs:
       - targets:
           - localhost
         labels:
-          job: bioetl-reports
+          job: bioetl
           __path__: /workspace-report-logs/*.log
   - job_name: bioetl-audit
     static_configs:

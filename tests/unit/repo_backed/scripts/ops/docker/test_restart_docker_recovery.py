@@ -44,7 +44,13 @@ if [ "$1" = "desktop" ] && [ "$2" = "logs" ]; then
 fi
 if [ "$1" = "desktop" ] && [ "$2" = "diagnose" ]; then exit 0; fi
 if [ "$1" = "desktop" ] && [ "$2" = "restart" ]; then
+  if [ "$mode" = "restart_timeout" ]; then /bin/sleep 20; fi
   if [ "$mode" != "never_ready" ]; then /usr/bin/touch "$state"; fi
+  exit 0
+fi
+if [ "$1" = "desktop" ] && [ "$2" = "stop" ]; then exit 0; fi
+if [ "$1" = "desktop" ] && [ "$2" = "start" ]; then
+  /usr/bin/touch "$state"
   exit 0
 fi
 if [ "$1" = "version" ]; then
@@ -62,7 +68,7 @@ if [ "$1" = "compose" ]; then
   exit 0
 fi
 if [ "$1" = "ps" ]; then
-  printf '%s\\n' '{"ID":"abc123","Names":"bioetl","Ports":"0.0.0.0:8080->8080/tcp"}'
+  printf '%s\\n' '{"ID":"abc123","Names":"bioetl","Ports":"0.0.0.0:8080->8080/tcp, [::]:8080->8080/tcp"}'
   exit 0
 fi
 if [ "$1" = "inspect" ]; then
@@ -133,7 +139,14 @@ def _run(
         str(report),
     ]
     if confirm_last_resort:
-        command.extend(["-ConfirmLastResort", "-WhatIf"])
+        command.extend(
+            [
+                "-ConfirmLastResort",
+                "-LastResortConfirmation",
+                "I_UNDERSTAND_FORCE_TERMINATION_IS_DESTRUCTIVE",
+                "-WhatIf",
+            ]
+        )
     started = time.monotonic()
     result = subprocess.run(command, env=env, text=True, capture_output=True, timeout=15)
     elapsed = time.monotonic() - started
@@ -216,11 +229,46 @@ def test_last_resort_requires_switch_and_should_process_confirmation(
     assert result.returncode != 0
     assert 9 <= elapsed < 15
     assert payload["last_resort_requested"] is True
+    assert payload["last_resort_token_valid"] is True
     assert "last_resort_requested" in payload["actions"]
     source = SCRIPT.read_text(encoding="utf-8")
     assert source.index("if ($ConfirmLastResort)") < source.index(
         "$PSCmdlet.ShouldProcess"
     ) < source.index("Stop-Process -Force")
+
+
+def test_last_resort_rejects_confirm_false_bypass() -> None:
+    source = SCRIPT.read_text(encoding="utf-8")
+
+    assert "last_resort_confirmation_bypass_rejected" in source
+    assert "$PSBoundParameters.ContainsKey('Confirm')" in source
+
+
+def test_supported_desktop_commands_are_issued_detached_before_polling() -> None:
+    source = SCRIPT.read_text(encoding="utf-8")
+
+    assert "@('desktop', 'restart', '--detach')" in source
+    assert "@('desktop', 'stop', '--detach')" in source
+    assert "@('desktop', 'start', '--detach')" in source
+    assert source.index("@('desktop', 'restart', '--detach')") < source.index(
+        "while ((Get-RemainingMilliseconds) -gt 0)"
+    )
+
+
+def test_bounded_restart_failure_uses_supported_stop_start_fallback(
+    tmp_path: Path,
+) -> None:
+    result, payload, elapsed = _run(tmp_path, mode="restart_timeout")
+
+    assert result.returncode == 0, result.stderr
+    assert elapsed < 10
+    assert payload["ok"] is True
+    assert payload["actions"] == [
+        "docker_desktop_restart",
+        "docker_desktop_restart_failed_bounded",
+        "docker_desktop_stop",
+        "docker_desktop_start",
+    ]
 
 
 def test_successful_recovery_has_per_command_deadlines_and_all_categories(

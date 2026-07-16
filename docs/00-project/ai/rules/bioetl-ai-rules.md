@@ -18,7 +18,8 @@ governance stack.
 - **application/**: Orchestration, use cases  
 - **infrastructure/**: Adapters, concrete implementations
 - **composition/**: DI wiring, ONLY place knowing all layers
-- **interfaces/**: CLI, may import from all
+- **interfaces/**: CLI/adapters; may import domain/application/composition, but
+  MUST NOT import concrete infrastructure implementations
 
 **Import Matrix:**
 | From ↓ To → | domain | app | infra | comp | iface |
@@ -27,7 +28,7 @@ governance stack.
 | application | ✅ | ✅ | ❌ | ❌ | ❌ |
 | infrastructure| ✅ | ❌ | ✅ | ❌ | ❌ |
 | composition | ✅ | ✅ | ✅ | ✅ | ❌ |
-| interfaces  | ✅ | ✅ | ✅ | ✅ | ✅ |
+| interfaces  | ✅ | ✅ | ❌ | ✅ | ✅ |
 
 ## Code Standards
 
@@ -36,7 +37,8 @@ governance stack.
 from __future__ import annotations
 ```
 
-**Type hints:** `list[str]`, `X | None`, `X | Y`  
+**Type hints:** `list[str]`, `X | None`, `X | Y`; public interfaces fully
+annotated; `Any` only as a documented narrow boundary.
 **Lint:** `mypy --strict`, `ruff`  
 **Coverage:** ≥85%
 
@@ -47,6 +49,11 @@ from __future__ import annotations
 | Bronze | JSONL+zstd | Minimal | Append-only |
 | Silver | Delta Lake | Soft (drift) | Merge/Upsert |
 | Gold   | Delta Lake | Strict | SCD Type 2 |
+
+The exact final Silver/Gold DataFrame MUST pass Pandera validation immediately
+before write; Gold validation is strict and fail-closed. Silver validation is soft
+only for permissible schema drift; contract validation before write is mandatory
+and must fail or quarantine invalid data.
 
 **Gold Modes:** `overwrite` (aggregates), `append` (facts), `scd2` (history)  
 **VACUUM:** Weekly, 7 days retention  
@@ -62,6 +69,8 @@ from __future__ import annotations
 6. **Content Hash:** `sha256(provider + canonical_json(record)).hexdigest()`
 7. **Secrets:** `BIOETL_{PROVIDER}_{KEY}` from env, NO hardcode
 8. **PII in Silver:** Salted `sha256(lowercase(value) + SALT)`
+9. **Artifacts:** stable/canonical/UTC output, write via tmp + `os.replace()`
+10. **Technical debt:** budgets, thresholds and exclusions MUST NOT increase
 
 ## Testing
 
@@ -69,6 +78,9 @@ from __future__ import annotations
 - **Integration:** VCR.py cassettes, sanitize secrets
 - **E2E:** `@pytest.mark.e2e`, local-only
 - **Architecture tests:** Layer boundaries, no random/datetime in wrong layers
+- **Behavior changes:** regression tests required; assertions MUST NOT be
+  weakened merely to pass the suite
+- **Determinism:** control time/random/network with fixtures, seeds, mocks or VCR
 
 ## Adapter Pattern
 

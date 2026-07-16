@@ -535,10 +535,19 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         monitoring["services"]["grafana"]["depends_on"]["renderer"]["condition"]
         == "service_healthy"
     )
+    # Loki, Promtail, and Tempo are distroless images and do not contain the
+    # wget command used by the former in-container checks.  Compose therefore
+    # must not publish a false/unexecutable health verdict for these optional
+    # services.  Their bounded HTTP/query readiness is enforced by the live
+    # tracing smoke and dashboard semantic audit instead.
     assert (
         monitoring["services"]["promtail"]["depends_on"]["loki"]["condition"]
-        == "service_healthy"
+        == "service_started"
     )
+    for service_name in ("loki", "promtail", "tempo"):
+        assert monitoring["services"][service_name]["healthcheck"] == {
+            "disable": True
+        }
     assert renderer_health == [
         "CMD",
         "grafana-image-renderer",
@@ -613,6 +622,8 @@ def test_desktop_recovery_is_evidence_first_bounded_and_user_confirmed() -> None
             or capability in recovery
         )
     assert "ConfirmLastResort" in recovery
+    assert "I_UNDERSTAND_FORCE_TERMINATION_IS_DESTRUCTIVE" in recovery
+    assert "last_resort_confirmation_bypass_rejected" in recovery
     assert "TimeoutSeconds" in recovery
     assert "CommandTimeoutSeconds" in recovery
     assert "System.Diagnostics.ProcessStartInfo" in recovery

@@ -1,0 +1,68 @@
+name: Dashboard render release evidence (host-only)
+
+on:
+  workflow_dispatch:
+    inputs:
+      pipeline:
+        description: Representative bounded pipeline scope
+        required: true
+        default: chembl_activity
+      run_type:
+        description: Representative run type
+        required: true
+        default: incremental
+
+permissions:
+  contents: read
+
+jobs:
+  dashboard-render-release:
+    name: Semantic + render occurrence
+    runs-on: [self-hosted, bioetl-observability]
+    timeout-minutes: 120
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Python + uv
+        uses: ./.github/actions/setup-python-uv
+
+      - name: Run occurrence-bound dashboard release cycle
+        env:
+          GRAFANA_USERNAME: ${{ secrets.GRAFANA_USERNAME }}
+          GRAFANA_PASSWORD: ${{ secrets.GRAFANA_PASSWORD }}
+        run: |
+          occurrence_id="dashboard-host-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          uv run python -m scripts.ops run-grafana-audit-cycle \
+            --pipeline "${{ inputs.pipeline }}" \
+            --run-type "${{ inputs.run_type }}" \
+            --occurrence-id "${occurrence_id}" \
+            --semantic-output reports/observability/grafana/live-panel-audit.json \
+            --screenshot-dir reports/observability/grafana/screenshots \
+            --gate-output reports/observability/grafana/dashboard-release-gates.json
+
+      - name: Upload semantic gate source
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: dashboard-semantic-gate-${{ github.run_id }}-${{ github.run_attempt }}
+          path: reports/observability/grafana/live-panel-audit.json
+          if-no-files-found: error
+
+      - name: Upload render gate source
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: dashboard-render-gate-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            reports/observability/grafana/screenshots/render-manifest.json
+            reports/observability/grafana/screenshots/*.png
+          if-no-files-found: error
+
+      - name: Upload combined occurrence receipt
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: dashboard-release-receipt-${{ github.run_id }}-${{ github.run_attempt }}
+          path: reports/observability/grafana/dashboard-release-gates.json
+          if-no-files-found: error

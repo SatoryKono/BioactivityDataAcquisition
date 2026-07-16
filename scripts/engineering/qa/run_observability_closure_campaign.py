@@ -27,6 +27,10 @@ import zstandard
 
 from bioetl.domain.mapping.organism_classification import classify_organism
 from bioetl.domain.types import CellularityType
+from bioetl.infrastructure.storage.support.atomic_ops import (
+    atomic_write_bytes,
+    atomic_write_text,
+)
 
 CHEMBL_PIPELINES = (
     "chembl_activity",
@@ -781,8 +785,8 @@ def _run_phase_command(
         stdout = ""
         stderr = f"{type(exc).__name__}: {exc}"
     finished_at = _utc_now()
-    stdout_path.write_text(str(stdout), encoding="utf-8")
-    stderr_path.write_text(str(stderr), encoding="utf-8")
+    atomic_write_text(stdout_path, str(stdout))
+    atomic_write_text(stderr_path, str(stderr))
     return PhaseEvidence(
         name=name,
         command=command,
@@ -925,9 +929,9 @@ def _stage_standalone_fixture_cache(
             / f"batch_2026-07-14_bounded_{entity}.jsonl"
         )
         destination.parent.mkdir(parents=True, exist_ok=True)
-        destination.write_bytes(raw)
+        atomic_write_bytes(destination, raw)
         compressed = destination.with_suffix(".jsonl.zst")
-        compressed.write_bytes(compressor.compress(raw))
+        atomic_write_bytes(compressed, compressor.compress(raw))
         evidence.append(
             {
                 "pipeline": pipeline,
@@ -1016,9 +1020,10 @@ def _stage_workflow_fixture(
         )
         destination.parent.mkdir(parents=True, exist_ok=True)
         rendered = json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n"
-        destination.write_text(rendered, encoding="utf-8")
+        atomic_write_text(destination, rendered)
         compressed_destination = destination.with_suffix(".jsonl.zst")
-        compressed_destination.write_bytes(
+        atomic_write_bytes(
+            compressed_destination,
             zstandard.ZstdCompressor(level=3).compress(rendered.encode("utf-8"))
         )
         evidence_records.append(
@@ -1212,8 +1217,8 @@ def _run_attempt(
         stdout = ""
         stderr = f"{type(exc).__name__}: {exc}"
     finished_at = _utc_now()
-    stdout_path.write_text(str(stdout), encoding="utf-8")
-    stderr_path.write_text(str(stderr), encoding="utf-8")
+    atomic_write_text(stdout_path, str(stdout))
+    atomic_write_text(stderr_path, str(stderr))
     new_manifests = _manifest_snapshot(data_root) - before_manifests
     manifest_ids, run_ids, manifest_paths = _read_new_manifest_identity(
         new_manifests,
@@ -2343,8 +2348,9 @@ def _finalize_campaign(
             "residual_finding_gate": residual_gate,
         }
     )
-    report_path.write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    atomic_write_text(
+        report_path,
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
     )
     print(json.dumps({"status": payload["status"], "report": str(report_path)}))
     return 0 if complete else 1
@@ -2435,7 +2441,7 @@ def main(argv: list[str] | None = None) -> int:
     registry_evidence_root = audit_root / "evidence" / "raw"
     registry_evidence_root.mkdir(parents=True, exist_ok=True)
     registry_stdout_path = registry_evidence_root / "registry-command.stdout"
-    registry_stdout_path.write_text(registry_completed.stdout, encoding="utf-8")
+    atomic_write_text(registry_stdout_path, registry_completed.stdout)
     before = {str(path.resolve()): _tree_signature(path) for path in canonical_roots}
     assert args.canonical_data_root is not None
     cached_bronze_root, standalone_fixture_evidence = (
@@ -2615,8 +2621,9 @@ def main(argv: list[str] | None = None) -> int:
         "residual_finding_gate": residual_finding_gate,
     }
     output_path = audit_root / "observability-closure-campaign.json"
-    output_path.write_text(
-        json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    atomic_write_text(
+        output_path,
+        json.dumps(report, indent=2, sort_keys=True) + "\n",
     )
     print(
         json.dumps(

@@ -1,13 +1,13 @@
 ______________________________________________________________________
 
-Version: 1.0.14
+Version: 1.0.15
 Status: active
 Class: internal-published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-19'
+  Last verified: '2026-07-16'
 
 ______________________________________________________________________
 
@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 *Статус: internal-published (Internal / Extended)*
 
-*Версия: 1.0.14 | Дата: 2026-06-03 | Синхронизировано с Codex ORCHESTRATION.md v4.2, RULES.md v6.1.4*
+*Версия: 1.0.15 | Дата: 2026-07-16 | Синхронизировано с Codex ORCHESTRATION.md v4.2, RULES.md v6.1.5*
 
 > **Runtime note:** для Codex source-of-truth orchestration живёт в `.codex/agents/ORCHESTRATION.md`; другие runtimes могут сохранять отдельные runtime-specific copies и не обязаны совпадать побайтно с Codex surface.
 
@@ -62,7 +62,7 @@ ______________________________________________________________________
 | Провайдеры      | ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar (7 шт.)     |
 | ADR             | Текущий набор в `docs/02-architecture/decisions/`; ADR-008 исторически superseded |
 | Coverage target | ≥85% overall, ≥90% domain                                                         |
-| RULES.md        | v6.1.4 (read `Version:` header in file)                                         |
+| RULES.md        | v6.1.5 (read `Version:` header in file)                                         |
 
 ### Ключевые файлы
 
@@ -128,6 +128,41 @@ ______________________________________________________________________
   без сохранения scorecard sync;
 - в closeout фиксировать debt outcome по затронутым файлам:
   `improved`, `unchanged` или `worsened`.
+
+### Qodo-reconciled change gates (2026-07-16)
+
+Каноническая нормализация находится в `RULES.md` §4.5. Источник — broad
+best-effort semantic extraction для
+`/SatoryKono/BioactivityDataAcquisition/`: 128 successful hits, 66 unique
+Qodo IDs после deduplication. Это не полный export: endpoint
+`POST /rules/search` ограничивает `top_k` значением 20. Qodo severity для всех
+записей отсутствовала и хранится как `UNSPECIFIED`; агент **не должен**
+выводить severity самостоятельно.
+
+Перед завершением changeset проверь применимые группы:
+
+- secrets отсутствуют во всех tracked surfaces и logs; `.env`/`.env.*` не
+  затронуты без explicit per-task user approval, а ignore/package protections
+  не ослаблены;
+- critical config modes required, enum-like values validated, YAML key order
+  deterministic, Qodo config keys/schema официально поддерживаются;
+- public interfaces полностью типизированы; `Any` не скрывает type defects и
+  остаётся только документированным boundary;
+- outputs stable/canonical/UTC, artifact writes выполняются через tmp +
+  `os.replace()`, merge/upsert keyed by stable primary/business key;
+- при изменении `src/bioetl/**/*.py` обновлён module coverage inventory hash;
+  debt budgets, thresholds и exclusions не увеличены;
+- behavior changes имеют regression tests, assertions не ослаблены, test
+  time/random/network контролируются fixtures/mocks/VCR;
+- contributor-facing и breaking CLI/API/schema/config changes синхронно
+  обновляют active docs, migration notes, changelog/version impact;
+- constructor DI, composition-only wiring, inward imports, pure domain,
+  adapter delegation, naming suffixes и `bioetl.domain.ports` facade
+  соблюдены;
+- runtime logging structured, provider/runtime HTTP идёт через
+  `UnifiedHTTPClient`;
+- Silver/Gold используют Delta Lake; exact final DataFrame проходит Pandera
+  validation непосредственно перед write, Gold validation strict/fail-closed.
 
 ### Быстрые команды
 
@@ -288,14 +323,17 @@ ______________________________________________________________________
 ### 2.3 DI через конструктор
 
 - Запрещено: `self.client = ConcreteClass()` в application/domain
-- Запрещено: Service Locator, Factory в business logic
+- Запрещено: Service Locator, global registry lookup и Factory в business logic
+- Factories и concrete wiring разрешены только в `composition/`
 - `structlog` только через `LoggerPort` (кроме `infrastructure/observability/`)
 
 ### 2.4 Medallion
 
 - Bronze: JSONL + zstd, append-only, 90d retention
 - Silver: **Delta Lake ONLY** (raw Parquet запрещён), merge/upsert по `content_hash`, ACID
-- Gold: Delta/Parquet, SCD Type 2
+- Gold: **Delta Lake ONLY**, SCD Type 2 или documented overwrite/append contract
+- Silver/Gold: exact final DataFrame валидируется Pandera непосредственно перед
+  write; Gold — `strict=True` и fail-closed
 - Content Hash: `sha256(provider + canonical_json(record))`
 - DQ пороги: soft=5%, hard=20%
 

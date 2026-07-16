@@ -265,11 +265,11 @@ retained_container_names:
 shared_networks:
   monitoring:
     name: bioetl-monitoring
-    owner: scripts/ops/docker-setup
+    owner: scripts/ops/runtime/docker/runtime_manager.py
     consumers: [main, monitoring]
   runtime:
     name: bioetl-runtime
-    owner: scripts/ops/docker-setup
+    owner: scripts/ops/runtime/docker/runtime_manager.py
     consumers: [main, neo4j]
 
 capacity:

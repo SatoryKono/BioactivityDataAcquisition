@@ -70,7 +70,7 @@ ChEMBL, PubChem, UniProt, PubMed, CrossRef, OpenAlex, SemanticScholar
 
 - **Bronze**: JSONL + zstd, append-only, 90d retention
 - **Silver**: Delta Lake, merge/upsert by `content_hash`, ACID mandatory
-- **Gold**: Delta/Parquet, SCD Type 2 or date partitions
+- **Gold**: Delta Lake, SCD Type 2 или documented overwrite/append contract
 
 ### Key ADR for Planning
 

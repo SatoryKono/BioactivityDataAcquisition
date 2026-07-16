@@ -76,10 +76,17 @@ def _runner(
                                 "Health": {"Status": health},
                             },
                             "RestartCount": restart_count,
-                            "Config": {"Image": image},
+                            "Image": image,
+                            "ImageID": "sha256:exact-image-id",
                         }
                     ]
                 ),
+            )
+        if current[:3] == ["docker", "image", "inspect"]:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout=json.dumps({"RepoDigests": [image]}),
             )
         if "compose" in current and "ls" in current:
             return runtime_manager.CommandResult(
@@ -290,3 +297,67 @@ def test_pushgateway_publication_replaces_one_bounded_stack_group(
         "method": "PUT",
         "timeout": 3,
     }
+
+
+def test_expected_image_override_is_scoped_to_required_service(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    spec = _spec(tmp_path)
+    captured: dict[str, object] = {}
+    monkeypatch.setattr(probe, "resolve_stack", lambda *_args: spec)
+
+    def build_report(candidate: runtime_manager.StackSpec, *_args: object, **_kwargs: object):
+        captured["expected_images"] = dict(candidate.expected_images)
+        return {
+            "summary": {"ok": True},
+            "project": candidate.project,
+            "stack": candidate.name,
+            "slo": {
+                "daemon_available": True,
+                "restart_count_delta": 0,
+                "oom_kills": 0,
+                "disk_reserve_bytes": 1,
+                "recovery_attempt_count": 0,
+                "recovery_duration_seconds": 0,
+            },
+            "services": [],
+            "resources": [],
+            "primary_cause": None,
+        }
+
+    monkeypatch.setattr(probe, "build_report", build_report)
+    monkeypatch.setattr(probe, "write_report", lambda *_args: None)
+
+    result = probe.main(
+        [
+            "--contract",
+            str(tmp_path / "contract.yml"),
+            "--output",
+            str(tmp_path / "probe.json"),
+            "--expected-image-override",
+            "bioetl=fault@sha256:" + "0" * 64,
+        ]
+    )
+
+    assert result == 0
+    assert captured["expected_images"] == {
+        "bioetl": "fault@sha256:" + "0" * 64
+    }
+
+
+def test_expected_image_override_rejects_unknown_service(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(probe, "resolve_stack", lambda *_args: _spec(tmp_path))
+
+    assert (
+        probe.main(
+            [
+                "--contract",
+                str(tmp_path / "contract.yml"),
+                "--expected-image-override",
+                "unknown=fault",
+            ]
+        )
+        == 2
+    )

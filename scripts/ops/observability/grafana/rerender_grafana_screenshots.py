@@ -18,6 +18,11 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
+from bioetl.infrastructure.storage.support.atomic_ops import (
+    atomic_write_bytes,
+    atomic_write_text,
+)
+
 DEFAULT_BASE_URL = "http://localhost:3000"
 DEFAULT_USERNAME = "admin"
 DEFAULT_PASSWORD = "changeme"
@@ -54,6 +59,7 @@ class RenderConfig:
     run_id: str = ""
     range_hours: int = 12
     expand_collapsed_rows: bool = True
+    occurrence_id: str = ""
 
 
 @dataclass(frozen=True)
@@ -273,6 +279,11 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
     parser.add_argument("--var-run-id", default="")
     parser.add_argument("--range-hours", type=int, default=12)
     parser.add_argument(
+        "--occurrence-id",
+        default="",
+        help="Bind render evidence to one dashboard release occurrence.",
+    )
+    parser.add_argument(
         "--expand-collapsed-rows",
         action=argparse.BooleanOptionalAction,
         default=True,
@@ -300,6 +311,7 @@ def _parse_args(argv: list[str] | None) -> RenderConfig:
         run_id=str(args.var_run_id).strip(),
         range_hours=max(int(args.range_hours), 1),
         expand_collapsed_rows=bool(args.expand_collapsed_rows),
+        occurrence_id=str(args.occurrence_id).strip(),
     )
 
 
@@ -361,7 +373,8 @@ def _render_dashboard(record: DashboardRecord, config: RenderConfig) -> Path:
     )
     render_url = f"{config.base_url}{render_path}?{query}"
     target = config.output_dir / f"{record.uid}.png"
-    target.write_bytes(
+    atomic_write_bytes(
+        target,
         _download_binary(
             render_url,
             headers=_auth_headers(config),
@@ -390,6 +403,7 @@ def _write_manifest(
     actual_viewports = {record.uid: _png_dimensions(path) for record, path in rendered}
     manifest = {
         "generated_at": datetime.now(tz=UTC).isoformat(),
+        "occurrence_id": config.occurrence_id,
         "base_url": config.base_url,
         "engine": "grafana-render-api",
         "width": config.width,
@@ -429,9 +443,9 @@ def _write_manifest(
         ],
         "render_results": [asdict(result) for result in render_results],
     }
-    (config.output_dir / "render-manifest.json").write_text(
+    atomic_write_text(
+        config.output_dir / "render-manifest.json",
         json.dumps(manifest, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
     )
 
 
@@ -653,6 +667,7 @@ def _write_merged_playwright_manifest(
     )
     merged = {
         "generated_at": datetime.now(tz=UTC).isoformat(),
+        "occurrence_id": config.occurrence_id,
         "engine": "playwright",
         "base_url": config.base_url,
         "scope_query": scope_query,
@@ -688,9 +703,9 @@ def _write_merged_playwright_manifest(
         "expand_collapsed_rows": config.expand_collapsed_rows,
         "dashboards": dashboards,
     }
-    (config.output_dir / "render-manifest.json").write_text(
+    atomic_write_text(
+        config.output_dir / "render-manifest.json",
         json.dumps(merged, indent=2) + "\n",
-        encoding="utf-8",
     )
 
 

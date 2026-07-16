@@ -7,11 +7,11 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3007 |
-| Tracked doc-like files | 1825 |
+| Doc-like files | 3006 |
+| Tracked doc-like files | 1824 |
 | Ignored local docs/reports files | 1182 |
 | Duplicate groups | 2 |
-| Generated without route or exception | 0 |
+| Generated without route or exception | 2 |
 | Generated routes | 59 |
 
 ## Tracking State
@@ -19,7 +19,7 @@
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 1182 |
-| tracked | 1825 |
+| tracked | 1824 |
 
 ## Lifecycle Counts
 
@@ -59,20 +59,20 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 1947 |
+| Active | 1944 |
 | Archived | 61 |
 | Canonical | 63 |
-| Generated | 704 |
+| Generated | 706 |
 | Working | 232 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 1947 |
+| active | 1944 |
 | archive | 61 |
 | canonical | 63 |
-| generated | 704 |
+| generated | 706 |
 | working | 232 |
 
 ## Recommended Actions
@@ -81,8 +81,8 @@
 | --- | --- |
 | archive-after-github-state-check | 121 |
 | archive-after-migration | 61 |
-| generate-automatically | 704 |
-| keep | 2117 |
+| generate-automatically | 706 |
+| keep | 2114 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -123,7 +123,7 @@
 | `docs/reports/documentation-audit-report-2026-07-13.md` | Working | 0 | archive-after-migration |
 | `docs/reports/governance_check_report.json` | Working | 0 | archive-after-migration |
 | `docs/reports/grafana_silver_filter_rejections_prompt.md` | Working | 0 | archive-after-migration |
-| `docs/reports/great-expectations-spike-2026-04-01.md` | Working | 1 | archive-after-migration |
+| `docs/reports/great-expectations-spike-2026-04-01.md` | Working | 0 | archive-after-migration |
 | `docs/reports/knowledge-graphs/bioetl-architecture-graph.json` | Working | 0 | archive-after-migration |
 | `docs/reports/knowledge-graphs/bioetl-runtime-detail-graph.json` | Working | 0 | archive-after-migration |
 | `docs/reports/scripts-inventory-2026-03-01.md` | Working | 0 | archive-after-migration |

@@ -1,19 +1,19 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.0.1
 Status: active
 Class: published
 Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-06-25'
+  Last verified: '2026-07-16'
 
 ______________________________________________________________________
 
 # Rules Summary
 
-*Синхронизировано с RULES.md v6.1.4 (2026-06-25)*
+*Синхронизировано с RULES.md v6.1.5 (2026-07-16)*
 
 > **Note**: Этот документ — выжимка из `docs/00-project/RULES.md`. Канонический источник правил — `RULES.md`.
 
@@ -25,19 +25,19 @@ ______________________________________________________________________
 
 ## Quick Reference
 
-| Задача                                 | Раздел RULES.md | Инструмент                               |
-| -------------------------------------- | --------------- | ---------------------------------------- |
-| Создать новый пайплайн                 | App D           | YAML config                              |
-| Добавить поле в схему                  | 2.2, App E      | Pydantic model                           |
-| Ошибка в проде (Alert)                 | App C           | Runbook                                  |
-| Удалить битые данные                   | 2.6             | `bioetl quarantine purge --pipeline ...` |
-| Подготовить staging-like local profile | 5.6.1           | Environment isolation                    |
-| Восстановление при аварии              | 5.5             | DR Runbook                               |
-| Откат релиза                           | 7.2             | Rollback Strategy                        |
-| Безопасность                           | 5.4             | Security Policy                          |
-| Forensic retention для таблицы         | 2.1.1, App D    | Config `forensic-retention`              |
-| Backfill с эксклюзивной блокировкой    | 2.4             | Lock Mechanism                           |
-| Deprecation поля                       | 7.1, App E      | Schema Evolution                         |
+|| Задача                                 | Раздел RULES.md | Инструмент                               |
+|| -------------------------------------- | --------------- | ---------------------------------------- |
+|| Создать новый пайплайн                 | App D           | YAML config                              |
+|| Добавить поле в схему                  | 2.2, App E      | Pydantic model                           |
+|| Ошибка в проде (Alert)                 | App C           | Runbook                                  |
+|| Удалить битые данные                   | 2.6             | `bioetl quarantine purge --pipeline ...` |
+|| Подготовить staging-like local profile | 5.6.1           | Environment isolation                    |
+|| Восстановление при аварии              | 5.5             | DR Runbook                               |
+|| Откат релиза                           | 7.2             | Rollback Strategy                        |
+|| Безопасность                           | 5.4             | Security Policy                          |
+|| Forensic retention для таблицы         | 2.1.1, App D    | Config `forensic-retention`              |
+|| Backfill с эксклюзивной блокировкой    | 2.4             | Lock Mechanism                           |
+|| Deprecation поля                       | 7.1, App E      | Schema Evolution                         |
 
 ## 1. Архитектура
 
@@ -46,14 +46,18 @@ ______________________________________________________________________
 - Контракты через `typing.Protocol` в `domain/ports/`.
 - Импорт портов только через фасад: `from bioetl.domain.ports import ...`.
 - `domain` слой не делает I/O.
+- Dependency direction: `domain` MUST NOT зависеть от `application` или `infrastructure`; `application` и `interfaces` MUST NOT импортировать concrete infrastructure implementations.
+- Dependency injection: зависимости MUST передаваться через конструкторы или явные параметры; создание concrete dependencies и service-locator/global-registry lookup вне `composition/` запрещено.
+- Factories и wiring принадлежат только composition root.
+- Naming: cross-layer ports, application services, factories и adapters MUST использовать проектные суффиксы `*Port`, `*Service`, `*Factory` и `*Adapter`.
 
 ## 2. Medallion Architecture
 
-| Уровень    | Формат       | Валидация               | Retention             | Идемпотентность                                         |
-| ---------- | ------------ | ----------------------- | --------------------- | ------------------------------------------------------- |
-| **Bronze** | JSONL + zstd | Мин./Нет                | 90 дней hot → Archive | Append-only. Path: `bronze/{provider}/{entity}/{date}/` |
-| **Silver** | Delta Lake   | Мягкая (дрейф схемы)    | Постоянно             | **Merge/Upsert**. Raw Parquet **MUST NOT**.             |
-| **Gold**   | Delta Lake   | Строгая (`strict=True`) | Постоянно             | SCD Type 2 или партиции по дате                         |
+|| Уровень    | Формат       | Валидация               | Retention             | Идемпотентность                                         |
+|| ---------- | ------------ | ----------------------- | --------------------- | ------------------------------------------------------- |
+|| **Bronze** | JSONL + zstd | Мин./Нет                | 90 дней hot → Archive | Append-only. Path: `bronze/{provider}/{entity}/{date}/` |
+|| **Silver** | Delta Lake   | Мягкая (дрейф схемы)    | Постоянно             | **Merge/Upsert**. Raw Parquet **MUST NOT**.             |
+|| **Gold**   | Delta Lake   | Строгая (`strict=True`) | Постоянно             | SCD Type 2 или партиции по дате                         |
 
 ### Delta Maintenance
 
@@ -63,11 +67,11 @@ ______________________________________________________________________
 
 ## 3. Обработка Ошибок
 
-| Тип          | Поведение             | Пример                             |
-| ------------ | --------------------- | ---------------------------------- |
-| Critical     | Падение пайплайна     | Auth failure, Gold schema mismatch |
-| Recoverable  | Retry N раз (Backoff) | 429, 502/504, сетевой сбой         |
-| Data Quality | Лог + Пропуск записи  | Невалидный SMILES                  |
+|| Тип          | Поведение             | Пример                             |
+|| ------------ | --------------------- | ---------------------------------- |
+|| Critical     | Падение пайплайна     | Auth failure, Gold schema mismatch |
+|| Recoverable  | Retry N раз (Backoff) | 429, 502/504, сетевой сбой         |
+|| Data Quality | Лог + Пропуск записи  | Невалидный SMILES                  |
 
 ### DQ Thresholds
 
@@ -77,21 +81,21 @@ ______________________________________________________________________
 
 ### Circuit Breaker
 
-| Параметр      | Значение                                       |
-| ------------- | ---------------------------------------------- |
-| Trigger       | 5 consecutive errors                           |
-| Open Duration | 5 минут                                        |
-| Recovery      | Half-Open → 1 пробный запрос                   |
-| Metrics       | `bioetl_circuit_breaker_state` (0/1/2), `bioetl_circuit_breaker_trips_total` |
+|| Параметр      | Значение                                       |
+|| ------------- | ---------------------------------------------- |
+|| Trigger       | 5 consecutive errors                           |
+|| Open Duration | 5 минут                                        |
+|| Recovery      | Half-Open → 1 пробный запрос                   |
+|| Metrics       | `bioetl_circuit_breaker_state` (0/1/2), `bioetl_circuit_breaker_trips_total` |
 
 ## 4. Блокировки (Local-Only)
 
-| Параметр     | Значение                       |
-| ------------ | ------------------------------ |
-| Механизм     | `MemoryLock` (in-process)      |
-| TTL          | `heartbeat-interval * 3` = 90s |
-| Heartbeat    | 30s                            |
-| Max Duration | 4 часа                         |
+|| Параметр     | Значение                       |
+|| ------------ | ------------------------------ |
+|| Механизм     | `MemoryLock` (in-process)      |
+|| TTL          | `heartbeat-interval * 3` = 90s |
+|| Heartbeat    | 30s                            |
+|| Max Duration | 4 часа                         |
 
 **Invariant**: Потеря блокировки = Потеря права на запись.
 
@@ -104,15 +108,19 @@ ______________________________________________________________________
 
 - Источник: `os.environ`
 - Формат: `BIOETL_{PROVIDER}_{KEY}`
-- **Хардкод MUST NOT. Файлы .env в git MUST NOT.**
+- **Хардкод секретов MUST NOT** во всех tracked code/docs/config/test/log surfaces.
+- Secret-bearing values и full environment/config objects **MUST NOT**
+  попадать в logs или published artifacts.
+- Файлы `.env`/`.env.*` в git **MUST NOT**; любые операции над ними требуют
+  explicit per-task user approval.
 
 ### Disaster Recovery
 
-| Параметр       | Значение                |
-| -------------- | ----------------------- |
-| RPO            | 24 часа                 |
-| RTO            | 4 часа                  |
-| Restore drills | **SHOULD** периодически |
+|| Параметр       | Значение                |
+|| -------------- | ----------------------- |
+|| RPO            | 24 часа                 |
+|| RTO            | 4 часа                  |
+|| Restore drills | **SHOULD** периодически |
 
 ### Graceful Shutdown (SIGTERM/SIGINT)
 
@@ -128,6 +136,28 @@ ______________________________________________________________________
 - `print()` запрещён.
 - Тесты: Unit, Integration (VCR.py), E2E. Coverage ≥85%
 - Детерминизм: без `random` в writers, timestamp только из application context.
+
+### Qodo-reconciled change-set gates
+
+- 66 unique Qodo IDs нормализованы в 18 project gates в `RULES.md` §4.5;
+  extraction best-effort, Qodo severity остаётся `UNSPECIFIED`.
+- Public interfaces полностью типизированы; `Any` — только documented narrow
+  boundary.
+- Persisted outputs имеют stable ordering, canonical serialization и UTC;
+  artifacts записываются через temporary file + `os.replace()`.
+- Behavior changes требуют regression tests; assertions нельзя ослаблять ради
+  прохождения suite; test time/random/network должны контролироваться.
+- Contributor-facing и breaking CLI/API/schema/config changes синхронно
+  обновляют docs, migration notes и changelog/version impact.
+- При изменении `src/bioetl/**/*.py` обновляется module coverage inventory hash.
+- Silver/Gold — Delta Lake; exact final DataFrame проходит Pandera validation
+  schema, nullability, types и DQ/business constraints непосредственно перед write;
+  невалидные данные останавливают запись или попадают в quarantine, Gold strict/fail-closed.
+- Technical-debt budgets, quality thresholds и exclusions нельзя ослаблять.
+- Architecture enforcement: inward dependency direction (domain не зависит от
+  application/infrastructure), constructor/explicit-parameter DI, composition-only
+  wiring (factories только в composition/), no service locator/global-registry lookup,
+  role suffixes (*Port, *Service, *Factory, *Adapter).
 
 ## 7. Anti-Patterns (MUST NOT)
 

@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
@@ -9,7 +9,7 @@ Reviewers:
 - BioETL Team
   Priority: P2
   Runtime profile: Local-Only single-instance (ADR-010); Docker/MCP are optional adjunct tooling.
-  Last verified: '2026-07-13'
+  Last verified: '2026-07-16'
 
 ______________________________________________________________________
 
@@ -60,9 +60,16 @@ begins with a force-kill or WSL shutdown:
 .\scripts\ops\runtime\docker\restart-docker.ps1 -TimeoutSeconds 180
 ```
 
+The v2 report classifies Desktop capabilities, CLI and engine origins,
+WSL/VHD accessibility, Compose origins, distinct port owners, bind translation,
+and Docker data capacity. Every external command and the complete recovery use
+the same bounded deadline.
+
 Only after the normal path times out and its report has been reviewed may an
-operator explicitly pass `-ConfirmLastResort`; that action never invokes
-`wsl --shutdown` and requires PowerShell confirmation.
+operator explicitly pass both `-ConfirmLastResort` and
+`-LastResortConfirmation I_UNDERSTAND_FORCE_TERMINATION_IS_DESTRUCTIVE`.
+PowerShell `ShouldProcess` confirmation is still required. The action never
+invokes `wsl --shutdown`.
 
 ### 2. Verify virtualization and WSL prerequisites
 
@@ -88,6 +95,12 @@ wsl --set-version <distribution-name> 2
 - `Settings > Resources`: preserve at least 4 GB Docker-VM reserve and validate
   host-specific peaks before changing limits.
 - `Settings > Resources > WSL Integration`: enable the active distribution.
+- Record `docker version`, `docker desktop version`, `wsl --version`, the one
+  integrated distribution, startup posture, and Resource Saver setting in the
+  incident. More than one active engine/CLI origin is a failed topology check.
+- Treat Resource Saver and `autoMemoryReclaim=gradual` as optional,
+  operator-reviewed host tuning. Automation must not edit `.wslconfig`; apply
+  either setting only after a host-specific recovery/volume-preservation test.
 
 ### 4. Recover with the canonical WSL launchers
 
@@ -114,9 +127,16 @@ containing secret-bearing files and do not use the fallback to perform writes.
 After remediation, verify the supported path:
 
 ```powershell
-docker ps
 wsl --list --verbose
 .\scripts\ai\codex\run-codex.ps1 check
+```
+
+From the Linux runtime mirror, require readiness rather than a running-only
+container check:
+
+```bash
+python scripts/ops/runtime/docker/runtime_manager.py check --stack main
+python scripts/ops/runtime/docker/runtime_manager.py status --stack main
 ```
 
 Record the observed Docker/WSL status and launcher result in the incident or

@@ -15,6 +15,8 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode, urlsplit, urlunsplit
 from urllib.request import Request, urlopen
 
+from bioetl.infrastructure.storage.support.atomic_ops import atomic_write_text
+
 DEFAULT_PROMETHEUS_BASE_URL = "http://localhost:9090"
 DEFAULT_APP_BASE_URL = "http://localhost:8081"
 DEFAULT_GRAFANA_BASE_URL = "http://localhost:3000"
@@ -85,6 +87,7 @@ class AuditConfig:
     range_hours: int
     output_path: Path
     request_timeout_seconds: float = DEFAULT_REQUEST_TIMEOUT_SECONDS
+    occurrence_id: str = ""
 
 
 @dataclass(frozen=True)
@@ -354,6 +357,11 @@ def _parse_args(argv: list[str] | None) -> AuditConfig:
         ),
     )
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT_PATH)
+    parser.add_argument(
+        "--occurrence-id",
+        default="",
+        help="Bind this semantic artifact to one dashboard release occurrence.",
+    )
     args = parser.parse_args(argv)
     return AuditConfig(
         prometheus_base_url=args.prometheus_base_url.rstrip("/"),
@@ -370,6 +378,7 @@ def _parse_args(argv: list[str] | None) -> AuditConfig:
         range_hours=args.range_hours,
         output_path=args.output,
         request_timeout_seconds=max(float(args.request_timeout_seconds), 0.1),
+        occurrence_id=str(args.occurrence_id).strip(),
     )
 
 
@@ -1561,6 +1570,7 @@ def _write_report(
     config.output_path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "generated_at": datetime.now(tz=UTC).isoformat(),
+        "occurrence_id": config.occurrence_id,
         "config": {
             "prometheus_base_url": _redact_url(config.prometheus_base_url),
             "app_base_url": _redact_url(config.app_base_url),
@@ -1590,9 +1600,9 @@ def _write_report(
         "semantic_gate": semantic_gate_evidence(results),
         "results": [asdict(result) for result in results],
     }
-    config.output_path.write_text(
+    atomic_write_text(
+        config.output_path,
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
     )
 
 

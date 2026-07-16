@@ -11,5 +11,8 @@ description: "Documentation standards and governance sync"
 - Align wording with RFC 2119 where requirements are normative.
 - Reflect code-level contract changes in docs and add migration guidance for breakings.
 - Keep ADR and cross-links consistent when architecture decisions are affected.
-- For schema/column/CLI changes, update docs and `CHANGELOG.md`.
+- For schema/column/CLI changes, update docs and `CHANGELOG.md` in the same PR.
 - Avoid ambiguous guidance; prefer explicit, testable statements.
+- Contributor-facing CLI/scripts/bootstrap steps **MUST** stay in sync with `CONTRIBUTING.md` / `docs/contributing/**` (or equivalent) in the same diff.
+- Docs that describe architecture boundaries, required gates, or sanctioned tooling **MUST NOT** contradict `.importlinter`, CI workflows, `AGENTS.md`, or `RULES.md`.
+- Breaking CLI/API/schema/config changes **MUST** include labeled Migration / Breaking notes (what/who/how) in the same change set.

@@ -179,7 +179,7 @@ ______________________________________________________________________
 
 - Bronze: JSONL + zstd compression, append-only, 90-day retention
 - Silver: Delta Lake с merge/upsert по `content_hash`, ACID mandatory
-- Gold: Delta/Parquet с SCD Type 2 или date partitions
+- Gold: Delta Lake с SCD Type 2 или date partitions
 
 **Composite Pipeline Patterns:**
 

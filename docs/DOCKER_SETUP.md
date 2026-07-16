@@ -1,282 +1,124 @@
-# Docker Setup for BioETL Project
+# Локальный Docker runtime BioETL
 
-Docker остается optional local-only runtime surface. Скрипты настройки не
-создают и не перезаписывают `.env` автоматически: `.env` считается
-machine-local/secret-bearing файлом. Если файл нужен для локального Docker
-запуска, создайте его вручную из `.env.example` после явного решения или
-используйте opt-in флаг helper-скрипта.
+Docker в BioETL — необязательный локальный adjunct по ADR-010. Канонический
+runtime проекта остаётся Python/venv; Docker не требуется для обычных тестов,
+хранилища, блокировок или orchestration.
 
-Reviewed extra compose files moved out of the repository root and now live
-under `scripts/ops/runtime/docker/compose/`:
-`scripts/ops/runtime/docker/compose/alertmanager.yml`,
-`scripts/ops/runtime/docker/compose/minio.yml`,
-`scripts/ops/runtime/docker/compose/redis.yml`, and
-`scripts/ops/runtime/docker/compose/sonarqube.yml`. Legacy root filenames
-(`docker-compose.alertmanager.yml`, `docker-compose.minio.yml`,
-`docker-compose.redis.yml`, `docker-compose.sonarqube.yml`) are retained only
-as historical compatibility labels in governance docs, not as tracked root
-entrypoints.
+## Безопасность и границы
 
-<!-- BIOETL_DOCKER_HELPER_ADR010_ADJUNCT -->
+- Не создавайте и не изменяйте `.env` или `.env.*` в рамках этого workflow.
+  Передавайте требуемые значения только в environment текущего процесса из
+  одобренного локального secret store.
+- Не используйте `docker compose down -v`, `docker volume prune`,
+  `docker system prune`, удаление VHDX или Docker data root как способ
+  восстановления.
+- Не запускайте один Compose project одновременно из Windows, `/mnt/*`,
+  `/tmp` и Linux runtime mirror. Поддерживается один origin на Linux filesystem.
+- Все lifecycle операции выполняются через
+  `scripts/ops/runtime/docker/runtime_manager.py`.
 
-Governance anchor: `BIOETL_DOCKER_HELPER_ADR010_ADJUNCT`. Reviewed helper stack
-contract source: `configs/quality/docker_helper_contracts.yaml`. Redis, MinIO,
-SonarQube and Alertmanager helper compose files MUST remain optional
-local-only adjunct tooling and MUST NOT become application storage, locking, or
-orchestration dependencies.
-Relocation audit source:
-`docs/05-operations/verification/docker-helper-root-relocation-audit.md`.
+## Предварительные условия
 
-Runtime stability contract: `configs/quality/docker_runtime_contracts.yaml`.
-Run the read-only gate with
-`python scripts/ops/runtime/docker/docker_runtime_preflight.py`. Root Compose
-projects are isolated as `bioetl-main`, `bioetl-monitoring`, `bioetl-neo4j`,
-and `bioetl-neo4j-audit`; never merge their files into one
-Compose invocation. Existing volumes must follow
-`docs/05-operations/runbooks/docker-compose-project-migration.md`.
-For bounded host/runtime diagnostics use
-`scripts/ops/runtime/docker/docker_runtime_probe.py`; for readiness-aware
-Compose status and lifecycle operations use
-`scripts/ops/runtime/docker/runtime_manager.py`.
+1. Docker Desktop установлен, WSL2 integration включена только для рабочего
+   Linux distribution, а `docker info` доступен из него.
+2. Репозиторий для фактического запуска находится на Linux filesystem, например
+   `/home/<user>/.local/share/bioetl-runtime/BioactivityDataAcquisition2`.
+3. Требуемые environment names для выбранного stack заданы в текущем процессе.
+   Полный список является частью
+   `configs/quality/docker_runtime_contracts.yaml`.
+4. Проверка запускается до мутации:
 
-## ✓ Проверка Docker
+   ```bash
+   python scripts/ops/runtime/docker/runtime_manager.py check --stack main
+   ```
+
+`start` и `recover` идемпотентно создают отсутствующие contracted external
+networks с owner label. Существующая сеть с другим owner отклоняется; manager
+никогда не удаляет и не пересоздаёт её автоматически.
+
+## Поддерживаемый lifecycle
+
+Замените `<stack>` на `main`, `monitoring`, `neo4j`, `neo4j-audit`, `redis`,
+`minio`, `alertmanager` или `sonarqube`.
+
+```bash
+# Статическая и host preflight-проверка
+python scripts/ops/runtime/docker/runtime_manager.py check --stack <stack>
+
+# Идемпотентный запуск с render, readiness и stabilization gates
+python scripts/ops/runtime/docker/runtime_manager.py start --stack <stack> --timeout 180
+
+# Readiness-aware статус, а не только состояние running
+python scripts/ops/runtime/docker/runtime_manager.py status --stack <stack>
+
+# Ограниченные логи
+python scripts/ops/runtime/docker/runtime_manager.py logs --stack <stack> --tail 100
+
+# Read-only diagnostic bundle
+python scripts/ops/runtime/docker/runtime_manager.py diagnose --stack <stack>
+
+# Bounded recovery после анализа diagnostics
+python scripts/ops/runtime/docker/runtime_manager.py recover --stack <stack> --timeout 180
+
+# Остановка без удаления volumes
+python scripts/ops/runtime/docker/runtime_manager.py stop --stack <stack> --timeout 60
+```
+
+Успешный `start`, `status` или `recover` означает, что обязательные services
+готовы, не имеют OOM/restart/image drift и прошли stabilization. Простого
+`docker ps` недостаточно.
+
+## Release bundle
+
+Рабочий release bundle состоит из двух независимых projects:
+
+| Stack | Project | Назначение |
+| --- | --- | --- |
+| `main` | `bioetl-main` | BioETL readiness endpoint |
+| `monitoring` | `bioetl-monitoring` | Prometheus, Pushgateway, Grafana, renderer |
+
+Запускайте и проверяйте каждый stack отдельно через manager. Общая сеть
+`bioetl-monitoring` создаётся manager только при отсутствии. Stateful volumes
+monitoring и их legacy‑имена защищены campaign evidence и не удаляются.
+
+## Docker Desktop / WSL recovery
+
+Сначала соберите evidence и выполните поддерживаемый restart:
 
 ```powershell
-docker --version
-docker compose --version
+.\scripts\ops\runtime\docker\restart-docker.ps1 `
+  -TimeoutSeconds 180 `
+  -ReportPath reports/quality/docker-desktop-recovery.json
 ```
 
-## 1️⃣ Запуск optional BioETL quarantine/health helper
+Скрипт ограничивает каждый subprocess и общий deadline, классифицирует Desktop
+capabilities, WSL/VHD, CLI/engine origins, Compose origins, port owners, bind
+translation и Docker data capacity, затем пишет redacted v2 report.
 
-```powershell
-# Запустить optional helper containers
-docker network create bioetl-monitoring
-docker compose -p bioetl-main -f docker-compose.yml up -d
+Force termination не является обычным recovery. Он доступен только при
+одновременном указании `-ConfirmLastResort`, точной строки
+`I_UNDERSTAND_FORCE_TERMINATION_IS_DESTRUCTIVE` через
+`-LastResortConfirmation` и подтверждении PowerShell `ShouldProcess`. Скрипт
+никогда не выполняет `wsl --shutdown`.
 
-# Проверить статус
-docker compose -p bioetl-main -f docker-compose.yml ps
+## Resource Saver и WSL memory reclaim
 
-# Посмотреть логи
-docker compose -p bioetl-main -f docker-compose.yml logs -f bioetl
-```
+Resource Saver и `autoMemoryReclaim=gradual` могут быть полезны на конкретной
+рабочей станции, но это operator-reviewed host settings. Автоматизация BioETL
+не изменяет `.wslconfig`; включайте их только после отдельной проверки Desktop/
+WSL версии, latency восстановления и отсутствия потери volumes.
 
-**Сервисы:**
-- BioETL quarantine/health helper surface: http://localhost:8081
-Neo4j is owned by its standalone project:
-`docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d`.
+## Promotion evidence
 
-## 2️⃣ Запуск Monitoring стека (Prometheus, Grafana, Loki, Tempo)
+100 cycles, полный fault matrix, непрерывный 72-hour soak и 100 Desktop recovery
+trials выполняются только запланированной командой из
+`docs/05-operations/runbooks/docker-image-resource-promotion.md`. Campaign
+требует точный disruption token и существующий GPG signing fingerprint; он не
+создаёт ключи, `.env`, volumes или host configuration.
 
-```powershell
-# Запустить мониторинг
-docker network create bioetl-monitoring
-docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml up -d
+См. также:
 
-# Проверить статус
-docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml ps
-```
-
-**Сервисы мониторинга:**
-- Grafana: http://localhost:3000 (`admin`; пароль из `GF_SECURITY_ADMIN_PASSWORD`)
-- Prometheus: http://localhost:9090
-- Loki: http://localhost:3100
-- Tempo: http://localhost:3200
-
-## 3️⃣ Проверка on-demand MCP серверов для Codex
-
-```powershell
-bash scripts/ai/mcp/check.sh
-python scripts/ai/mcp/protocol_smoke.py --config .mcp.json --server memory
-```
-
-MCP uses bounded on-demand stdio/HTTP processes from the generated frontend
-manifests. Docker Desktop MCP gateway availability is isolated from memory,
-filesystem, fetch, and GitHub MCP availability.
-
-## 📋 Полезные команды
-
-### Основной стек
-```powershell
-# Запустить
-docker compose -p bioetl-main -f docker-compose.yml up -d
-
-# Остановить
-docker compose -p bioetl-main -f docker-compose.yml down
-
-# Перестартовать
-docker compose -p bioetl-main -f docker-compose.yml restart
-
-# Посмотреть логи
-docker compose -p bioetl-main -f docker-compose.yml logs -f
-docker compose -p bioetl-main -f docker-compose.yml logs -f bioetl
-docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml logs -f neo4j
-
-# Проверить статус
-docker compose -p bioetl-main -f docker-compose.yml ps
-```
-
-### Мониторинг
-```powershell
-docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml up -d
-docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml down
-docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml logs -f
-```
-
-### Общие команды
-```powershell
-# Просмотр всех контейнеров
-docker ps -a
-
-# Просмотр образов
-docker images
-
-# Очистка неиспользуемых образов
-docker image prune
-
-# Очистка неиспользуемых томов
-docker volume prune
-
-# Полная очистка (внимание!)
-docker system prune -a
-
-# Используемое место
-docker system df
-```
-
-## 🔧 Конфигурация
-
-Перед запуском задайте обязательные переменные в окружении процесса. Значения
-секретов не выводятся preflight-проверкой:
-```
-NEO4J_USERNAME
-NEO4J_PASSWORD
-NEO4J_AUDIT_USERNAME
-NEO4J_AUDIT_PASSWORD
-GF_SECURITY_ADMIN_PASSWORD
-GF_RENDERING_RENDERER_TOKEN
-TUNNEL_TOKEN
-```
-
-Optional adjunct helper compose files require explicit local credentials rather
-than runnable defaults:
-
-```powershell
-# Redis helper
-$env:REDIS_PASSWORD = "<local-redis-password>"
-
-# MinIO helper
-$env:MINIO_ROOT_USER = "<local-minio-user>"
-$env:MINIO_ROOT_PASSWORD = "<local-minio-password>"
-
-# SonarQube helper
-$env:SONARQUBE_DB_PASSWORD = "<local-sonarqube-db-password>"
-$env:SONARQUBE_SYSTEM_PASSCODE = "<local-sonarqube-system-passcode>"
-```
-
-These variables may be stored in a machine-local `.env` after explicit operator
-approval. The tracked `.env.example` intentionally keeps secret-bearing helper
-values empty.
-
-## 🐛 Диагностика
-
-### Контейнер не запускается
-```powershell
-docker logs container_name
-docker inspect container_name
-```
-
-### Проблемы с портами
-```powershell
-# Проверить какие порты используются
-netstat -ano | findstr :8081
-
-# Если порт занят, найти процесс
-Get-Process -Id (Get-NetTCPConnection -LocalPort 8081).OwningProcess
-```
-
-### Проблемы с сетью
-```powershell
-# Проверить сеть
-docker network ls
-docker network inspect bioetl-runtime
-docker network inspect bioetl-monitoring
-
-# Если shared external network ещё не создан
-docker network create bioetl-runtime
-docker network create bioetl-monitoring
-```
-
-### Пересборка контейнеров
-```powershell
-# Пересобрать и запустить
-docker compose -p bioetl-main -f docker-compose.yml up --build -d
-
-# Пересобрать конкретный сервис
-docker compose -p bioetl-main -f docker-compose.yml build bioetl
-```
-
-## 📊 Проверка здоровья
-
-```powershell
-# Все контейнеры должны быть "Up"
-docker compose -p bioetl-main -f docker-compose.yml ps
-docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml ps
-
-# Проверить healthcheck
-docker ps --filter health=healthy
-docker ps --filter health=unhealthy
-
-# Детально проверить контейнер
-docker compose -p bioetl-main -f docker-compose.yml ps bioetl
-```
-
-## 🚀 Полное включение проекта
-
-```powershell
-# 1. Основной стек
-docker compose -p bioetl-main -f docker-compose.yml up -d
-
-# 2. Neo4j helper (опционально)
-docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d
-
-# 3. Мониторинг (опционально)
-docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml up -d
-
-# 4. Проверить on-demand MCP
-bash scripts/ai/mcp/check.sh
-
-# 5. Проверить все контейнеры
-docker ps | Select-String bioetl
-
-# 6. Запустить Codex
-.\scripts\ai\codex\run-codex.ps1 mcp-setup
-.\scripts\ai\codex\run-codex.ps1
-```
-
-## 📝 Примечания
-
-- Neo4j по умолчанию использует 512MB heap, можно увеличить если нужно
-- Grafana использует обязательный пароль из `GF_SECURITY_ADMIN_PASSWORD`
-- MCP серверы запускаются Codex по запросу
-- Docker Desktop должен быть запущен перед использованием
-- WSL2 интеграция должна быть включена в Docker Desktop Settings
-
----
-
-Вся конфигурация хранится в файлах:
-- `docker-compose.yml` — optional local helper stack
-- `docker-compose.monitoring.yml` — мониторинг
-- `scripts/ops/runtime/docker/compose/alertmanager.yml` — optional local Alertmanager helper stack; legacy root filename: `docker-compose.alertmanager.yml`
-- `scripts/ops/runtime/docker/compose/minio.yml` — optional local MinIO helper stack; requires explicit `MINIO_ROOT_USER` and `MINIO_ROOT_PASSWORD`; binds to localhost only; legacy root filename: `docker-compose.minio.yml`
-- `scripts/ops/runtime/docker/compose/redis.yml` — optional local Redis helper stack; requires explicit `REDIS_PASSWORD`; binds to localhost only; legacy root filename: `docker-compose.redis.yml`
-- `scripts/ops/runtime/docker/compose/sonarqube.yml` — optional local SonarQube helper stack; requires local-only `SONARQUBE_DB_PASSWORD` and `SONARQUBE_SYSTEM_PASSCODE`; binds to localhost only; legacy root filename: `docker-compose.sonarqube.yml`
-- Reviewed adjunct helper compose files that attach to `bioetl-monitoring`
-  require `docker network create bioetl-monitoring` before first manual start
-- Helper stack observability posture is governed by
-  `configs/quality/docker_helper_contracts.yaml`: Redis, MinIO and
-  Alertmanager have Prometheus scrape contracts; SonarQube remains
-  healthcheck-only in repo-default Prometheus because its native metrics
-  endpoint requires runtime passcode authentication.
-- `.env` — переменные окружения
-- `Dockerfile.bioetl` — optional local BioETL helper image
-- `scripts/ops/runtime/docker/images/**/Dockerfile` — optional helper image definitions
+- `docs/DOCKER_QUICKSTART.md`
+- `docs/05-operations/runbooks/docker-stability.md`
+- `docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md`
+- `docs/05-operations/runbooks/docker-compose-project-migration.md`

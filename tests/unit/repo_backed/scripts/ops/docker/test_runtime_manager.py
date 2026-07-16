@@ -5,6 +5,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 import pytest
+import yaml
 
 from scripts.ops.runtime.docker import runtime_manager
 
@@ -63,6 +64,62 @@ def test_readiness_accepts_matching_repo_digest_when_config_reference_differs() 
     assert runtime_manager.readiness_findings(
         spec, [snapshot], baseline={}
     ) == []
+
+
+def test_collect_snapshots_resolves_repo_digests_from_real_container_shape() -> None:
+    spec = _spec(expected_images={"bioetl": "bioetl:test@sha256:" + "a" * 64})
+    calls: list[list[str]] = []
+
+    def runner(
+        command: Sequence[str], cwd: Path, timeout: float
+    ) -> runtime_manager.CommandResult:
+        current = list(command)
+        calls.append(current)
+        if "compose" in current and "ps" in current:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout=json.dumps([{"ID": "abcdef123456", "Service": "bioetl"}]),
+            )
+        if current[:2] == ["docker", "inspect"]:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout=json.dumps(
+                    {
+                        "State": {
+                            "Status": "running",
+                            "OOMKilled": False,
+                            "Health": {"Status": "healthy"},
+                        },
+                        "RestartCount": 0,
+                        "Image": "bioetl:test",
+                        "ImageID": "sha256:exact-image-id",
+                    }
+                ),
+            )
+        if current[:3] == ["docker", "image", "inspect"]:
+            return runtime_manager.CommandResult(
+                current,
+                0,
+                stdout=json.dumps(
+                    {"RepoDigests": ["bioetl:test@sha256:" + "a" * 64]}
+                ),
+            )
+        raise AssertionError(current)
+
+    snapshots, observations = runtime_manager.collect_snapshots(spec, runner=runner)
+
+    assert len(snapshots) == 1
+    assert snapshots[0].image == "bioetl:test"
+    assert snapshots[0].image_digests == (
+        "bioetl:test@sha256:" + "a" * 64,
+    )
+    assert runtime_manager.readiness_findings(spec, snapshots, baseline={}) == []
+    assert len(observations) == 3
+    container_template = calls[1][calls[1].index("--format") + 1]
+    assert ".RepoDigests" not in container_template
+    assert calls[2][:3] == ["docker", "image", "inspect"]
 
 
 def test_running_without_health_is_not_ready() -> None:
@@ -233,3 +290,89 @@ def test_recovery_attempts_share_one_overall_deadline(tmp_path: Path) -> None:
         next(tmp_path.glob("docker-incident-*.json")).read_text(encoding="utf-8")
     )
     assert incident["elapsed_seconds"] <= 10
+
+
+def test_shared_network_bootstrap_creates_only_missing_contracted_networks(
+    tmp_path: Path,
+) -> None:
+    contract = tmp_path / "contract.yml"
+    contract.write_text(
+        yaml.safe_dump(
+            {
+                "shared_networks": {
+                    "monitoring": {
+                        "name": "bioetl-monitoring",
+                        "owner": "runtime-manager",
+                        "consumers": ["main", "monitoring"],
+                    },
+                    "unrelated": {
+                        "name": "bioetl-unrelated",
+                        "owner": "other",
+                        "consumers": ["neo4j"],
+                    },
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    calls: list[list[str]] = []
+
+    def runner(
+        command: Sequence[str], cwd: Path, timeout: float
+    ) -> runtime_manager.CommandResult:
+        current = list(command)
+        calls.append(current)
+        if "inspect" in current:
+            return runtime_manager.CommandResult(current, 1, stderr="not found")
+        if "create" in current:
+            return runtime_manager.CommandResult(current, 0, stdout="network-id")
+        raise AssertionError(current)
+
+    ok, findings = runtime_manager.ensure_shared_networks(
+        _spec(), contract, tmp_path / "networks.json", runner=runner
+    )
+
+    assert ok is True
+    assert findings == []
+    assert sum("create" in call for call in calls) == 1
+    assert all("bioetl-unrelated" not in call for call in calls)
+    assert "com.bioetl.owner=runtime-manager" in calls[-1]
+
+
+def test_shared_network_bootstrap_rejects_conflicting_owner(tmp_path: Path) -> None:
+    contract = tmp_path / "contract.yml"
+    contract.write_text(
+        yaml.safe_dump(
+            {
+                "shared_networks": {
+                    "monitoring": {
+                        "name": "bioetl-monitoring",
+                        "owner": "runtime-manager",
+                        "consumers": ["main"],
+                    }
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    def runner(
+        command: Sequence[str], cwd: Path, timeout: float
+    ) -> runtime_manager.CommandResult:
+        return runtime_manager.CommandResult(
+            list(command), 0, stdout="another-owner\n"
+        )
+
+    ok, findings = runtime_manager.ensure_shared_networks(
+        _spec(), contract, tmp_path / "networks.json", runner=runner
+    )
+
+    assert ok is False
+    assert findings == [
+        {
+            "cause": "network_owner_drift",
+            "network": "bioetl-monitoring",
+            "expected_owner": "runtime-manager",
+            "observed_owner": "another-owner",
+        }
+    ]

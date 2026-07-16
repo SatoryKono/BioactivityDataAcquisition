@@ -71,7 +71,43 @@ def test_audit_cycle_gate_output_rejects_shipped_dashboard_path() -> None:
 def test_audit_cycle_gate_output_writes_review_evidence(tmp_path: Path) -> None:
     """A normal gate target remains a deterministic JSON evidence artifact."""
     output_path = tmp_path / "dashboard-release-gates.json"
-    config = audit_cycle._parse_args(["--gate-output", str(output_path)])
+    screenshot_dir = tmp_path / "screenshots"
+    config = audit_cycle._parse_args(
+        [
+            "--gate-output",
+            str(output_path),
+            "--screenshot-dir",
+            str(screenshot_dir),
+            "--occurrence-id",
+            "architecture-test-occurrence",
+        ]
+    )
+    config.semantic_output_path.parent.mkdir(parents=True, exist_ok=True)
+    config.semantic_output_path.write_text(
+        json.dumps(
+            {
+                "generated_at": "2026-07-16T00:00:00+00:00",
+                "occurrence_id": config.occurrence_id,
+                "semantic_gate": {"status": "pass"},
+                "results": [{"dashboard_uid": "bioetl-dq-v2", "panel_id": 101}],
+            }
+        ),
+        encoding="utf-8",
+    )
+    screenshot_dir.mkdir(parents=True, exist_ok=True)
+    (screenshot_dir / "render-manifest.json").write_text(
+        json.dumps(
+            {
+                "generated_at": "2026-07-16T00:00:00+00:00",
+                "occurrence_id": config.occurrence_id,
+                "terminal_state_validation": {"status": "ok"},
+                "dashboards": [
+                    {"uid": "bioetl-dq-v2", "renderStatus": "rendered"}
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
 
     audit_cycle._write_gate_report(
         config,
@@ -84,6 +120,58 @@ def test_audit_cycle_gate_output_writes_review_evidence(tmp_path: Path) -> None:
     payload = json.loads(output_path.read_text(encoding="utf-8"))
     assert payload["dashboard_semantic_gate"]["status"] == "pass"
     assert payload["dashboard_render_gate"]["status"] == "pass"
+    assert payload["release_passed"] is True
+    assert payload["dashboard_semantic_gate"]["source_artifact"]["sha256"]
+    assert payload["dashboard_render_gate"]["source_artifact"]["sha256"]
+
+
+@pytest.mark.parametrize(
+    ("classification", "result_status", "expected_gate"),
+    [
+        ("query_invalid", "error", "fail"),
+        ("datasource_unavailable", "error", "fail"),
+        ("blocked_backend_unavailable", "error", "fail"),
+        ("empty_result", "ok", "review_required"),
+        ("zero_result", "ok", "pass"),
+        ("expected_empty", "ok", "pass"),
+        ("unknown_result", "ok", "review_required"),
+    ],
+)
+def test_semantic_classification_policy_is_release_enforced(
+    classification: str,
+    result_status: str,
+    expected_gate: str,
+) -> None:
+    result = live_audit.AuditResult(
+        dashboard_uid="bioetl-runtime",
+        panel_id=250,
+        title="policy fixture",
+        source_kind="loki",
+        semantic_kind="loki_query",
+        status=result_status,
+        classification=classification,
+        detail="fixture",
+        query_preview='{job="bioetl"}',
+    )
+
+    evidence = live_audit.semantic_gate_evidence([result])
+
+    assert evidence["status"] == expected_gate
+
+
+def test_closure_evidence_writers_use_atomic_storage_primitive() -> None:
+    paths = (
+        Path("scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py"),
+        Path("scripts/ops/observability/grafana/audit_live_grafana_panels.py"),
+        Path("scripts/ops/observability/grafana/rerender_grafana_screenshots.py"),
+        Path("scripts/engineering/qa/run_observability_closure_campaign.py"),
+    )
+
+    for path in paths:
+        source = path.read_text(encoding="utf-8")
+        assert "atomic_write_text" in source
+        assert ".write_text(" not in source
+        assert ".write_bytes(" not in source
 
 
 def test_live_panel_audit_blocks_all_http_panels_after_one_backend_failure(

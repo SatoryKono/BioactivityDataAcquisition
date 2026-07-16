@@ -41,6 +41,51 @@ def _backend_result(
     )
 
 
+def _write_gate_sources(
+    config: cycle_subject.AuditCycleConfig,
+    *,
+    semantic_status: str,
+    render_status: str,
+    occurrence_id: str | None = None,
+) -> None:
+    observed_occurrence = occurrence_id or config.occurrence_id
+    config.semantic_output_path.parent.mkdir(parents=True, exist_ok=True)
+    config.semantic_output_path.write_text(
+        json.dumps(
+            {
+                "generated_at": "2026-07-16T00:00:00+00:00",
+                "occurrence_id": observed_occurrence,
+                "semantic_gate": {"status": semantic_status},
+                "results": [
+                    {"dashboard_uid": "bioetl-dq-v2", "panel_id": 101}
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    config.screenshot_dir.mkdir(parents=True, exist_ok=True)
+    (config.screenshot_dir / "render-manifest.json").write_text(
+        json.dumps(
+            {
+                "generated_at": "2026-07-16T00:00:00+00:00",
+                "occurrence_id": observed_occurrence,
+                "terminal_state_validation": {
+                    "status": "ok" if render_status == "pass" else "error"
+                },
+                "dashboards": [
+                    {
+                        "uid": "bioetl-dq-v2",
+                        "renderStatus": (
+                            "rendered" if render_status == "pass" else "error"
+                        ),
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
 def test_grafana_audit_preflight_router_exposes_command() -> None:
     assert_router_python_command(
         ops_router,
@@ -584,6 +629,7 @@ def test_grafana_audit_cycle_writes_independent_gate_evidence(tmp_path: Path) ->
             str(tmp_path / "dashboard-release-gates.json"),
         ]
     )
+    _write_gate_sources(config, semantic_status="pass", render_status="fail")
 
     cycle_subject._write_gate_report(
         config,
@@ -596,9 +642,10 @@ def test_grafana_audit_cycle_writes_independent_gate_evidence(tmp_path: Path) ->
     payload = json.loads(config.gate_output_path.read_text(encoding="utf-8"))
     assert payload["dashboard_semantic_gate"]["status"] == "pass"
     assert payload["dashboard_render_gate"]["status"] == "fail"
-    assert payload["dashboard_semantic_gate"]["source_artifact"].endswith(
+    assert payload["dashboard_semantic_gate"]["source_artifact"]["path"].endswith(
         "live-panel-audit.json"
     )
+    assert payload["dashboard_semantic_gate"]["source_artifact"]["validated"] is True
 
 
 def test_grafana_audit_cycle_records_render_gate_when_semantic_gate_fails(
@@ -612,6 +659,7 @@ def test_grafana_audit_cycle_records_render_gate_when_semantic_gate_fails(
             str(tmp_path / "dashboard-release-gates.json"),
         ]
     )
+    _write_gate_sources(config, semantic_status="fail", render_status="pass")
 
     cycle_subject._write_gate_report(
         config,
@@ -625,6 +673,40 @@ def test_grafana_audit_cycle_records_render_gate_when_semantic_gate_fails(
     assert payload["dashboard_semantic_gate"]["status"] == "fail"
     assert payload["dashboard_render_gate"]["status"] == "pass"
     assert "manifest contract passed" in payload["dashboard_render_gate"]["detail"]
+
+
+def test_grafana_gate_rejects_cross_occurrence_source_artifacts(
+    tmp_path: Path,
+) -> None:
+    config = cycle_subject._parse_args(
+        [
+            "--screenshot-dir",
+            str(tmp_path / "screenshots"),
+            "--gate-output",
+            str(tmp_path / "dashboard-release-gates.json"),
+            "--occurrence-id",
+            "current-occurrence",
+        ]
+    )
+    _write_gate_sources(
+        config,
+        semantic_status="pass",
+        render_status="pass",
+        occurrence_id="stale-occurrence",
+    )
+
+    cycle_subject._write_gate_report(
+        config,
+        semantic_status="pass",
+        render_status="pass",
+        semantic_detail="claimed pass",
+        render_detail="claimed pass",
+    )
+
+    payload = json.loads(config.gate_output_path.read_text(encoding="utf-8"))
+    assert payload["dashboard_semantic_gate"]["status"] == "fail"
+    assert payload["dashboard_render_gate"]["status"] == "fail"
+    assert payload["release_passed"] is False
 
 
 def test_grafana_audit_cycle_router_exposes_command() -> None:
@@ -707,7 +789,7 @@ def test_grafana_audit_cycle_runs_preflight_rerender_and_live_audit(
     assert "http://127.0.0.1:8081" in calls[4][1]
 
 
-def test_grafana_audit_cycle_stops_on_service_preflight_failure(
+def test_grafana_audit_cycle_keeps_render_gate_after_semantic_preflight_failure(
     monkeypatch: Any, tmp_path: Path
 ) -> None:
     calls: list[str] = []
@@ -728,14 +810,19 @@ def test_grafana_audit_cycle_stops_on_service_preflight_failure(
         lambda argv: calls.append("preflight") or 1,
     )
     monkeypatch.setattr(
-        cycle_subject.rerender,
-        "main",
-        lambda argv: calls.append("rerender") or 0,
-    )
-    monkeypatch.setattr(
         cycle_subject.live_audit,
         "main",
         lambda argv: calls.append("audit") or 0,
+    )
+    monkeypatch.setattr(
+        cycle_subject,
+        "_discover_filled_dashboard_uids",
+        lambda *_args, **_kwargs: (),
+    )
+    monkeypatch.setattr(
+        cycle_subject.rerender,
+        "main",
+        lambda argv: calls.append("rerender") or 0,
     )
 
     result = cycle_subject.main(
@@ -743,10 +830,10 @@ def test_grafana_audit_cycle_stops_on_service_preflight_failure(
     )
 
     assert result == 1
-    assert calls == ["preflight"]
+    assert calls == ["preflight", "audit", "rerender", "rerender", "preflight"]
 
 
-def test_grafana_audit_cycle_stops_when_backend_cannot_be_ensured(
+def test_grafana_audit_cycle_skips_semantic_network_when_backend_is_unavailable(
     monkeypatch: Any, tmp_path: Path
 ) -> None:
     calls: list[str] = []
@@ -794,17 +881,42 @@ def test_grafana_audit_cycle_stops_when_backend_cannot_be_ensured(
         "main",
         lambda argv: calls.append("preflight") or 0,
     )
+    monkeypatch.setattr(
+        cycle_subject,
+        "_discover_filled_dashboard_uids",
+        lambda *_args, **_kwargs: pytest.fail(
+            "semantic discovery must be skipped without its backend"
+        ),
+    )
+    monkeypatch.setattr(
+        cycle_subject,
+        "_run_live_audit",
+        lambda *_args, **_kwargs: pytest.fail(
+            "semantic live audit must be skipped without its backend"
+        ),
+    )
+    monkeypatch.setattr(
+        cycle_subject,
+        "_run_rerender",
+        lambda *_args, **_kwargs: calls.append("render") or 0,
+    )
 
     result = cycle_subject.main(
         ["--screenshot-dir", str(tmp_path), "--no-refresh-observability-backend"]
     )
 
     assert result == 1
-    assert calls == ["ensure", "ensure"]
-    assert "preflight" not in calls
+    assert calls == ["ensure", "ensure", "render", "preflight"]
 
 
-def test_grafana_audit_cycle_stops_when_filled_dashboard_discovery_fails(
+def test_nondefault_screenshot_dir_cannot_write_canonical_gate(tmp_path: Path) -> None:
+    config = cycle_subject._parse_args(["--screenshot-dir", str(tmp_path)])
+
+    assert config.gate_output_path == tmp_path / "dashboard-release-gates.json"
+    assert config.gate_output_path != cycle_subject.DEFAULT_GATE_OUTPUT_PATH
+
+
+def test_grafana_audit_cycle_keeps_both_gates_when_filled_discovery_fails(
     monkeypatch: Any, tmp_path: Path
 ) -> None:
     calls: list[str] = []
@@ -841,13 +953,18 @@ def test_grafana_audit_cycle_stops_when_filled_dashboard_discovery_fails(
         "main",
         lambda argv: calls.append("rerender") or 0,
     )
+    monkeypatch.setattr(
+        cycle_subject.live_audit,
+        "main",
+        lambda argv: calls.append("audit") or 0,
+    )
 
     result = cycle_subject.main(
         ["--screenshot-dir", str(tmp_path), "--no-refresh-observability-backend"]
     )
 
-    assert result == 1
-    assert calls == ["preflight"]
+    assert result == 0
+    assert calls == ["preflight", "audit", "rerender", "rerender", "preflight"]
 
 
 def test_grafana_audit_cycle_uses_cached_filled_dashboards_after_timeout(
