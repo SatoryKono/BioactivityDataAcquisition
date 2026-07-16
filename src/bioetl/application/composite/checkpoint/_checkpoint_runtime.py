@@ -36,7 +36,21 @@ def latest_checkpoint_filename(
 ) -> str | None:
     """Return the newest checkpoint filename matching the storage glob."""
     matches = storage.list_glob(glob_pattern)
-    return matches[0] if matches else None
+    if len(matches) <= 1:
+        return matches[0] if matches else None
+    ranked: list[tuple[datetime, str]] = []
+    for path in matches:
+        try:
+            payload = storage.read(path)
+            state = CompositeCheckpointState.from_dict(json.loads(payload))
+            stamp = state.updated_at or state.created_at
+            if stamp is not None:
+                ranked.append((stamp, path))
+        except (CHECKPOINT_READ_ERRORS, BioETLError):
+            continue
+    if ranked:
+        return max(ranked, key=lambda item: (item[0], item[1]))[1]
+    return sorted(matches)[-1]
 
 
 def _emit_checkpoint_saved_at_from_state(

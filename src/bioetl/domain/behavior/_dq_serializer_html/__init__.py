@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from html import escape
+
 from bioetl.domain.types import JsonDict
 
 from ._renderers import (
@@ -53,7 +55,7 @@ def generate_html_report(data: JsonDict) -> str:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DQ Report - {layer} Layer</title>
+    <title>DQ Report - {escape(layer)} Layer</title>
     <style>
 {_REPORT_STYLES}
     </style>

@@ -84,32 +84,33 @@ class WorkflowExecutionService:
             force_steps=force_steps,
             repair_steps=repair_steps,
         )
-        prepared = prepare_workflow_execution(
-            config=config,
-            launch_context=resolved_launch_context,
-            resume_last=resume_last,
-            resume_manifest_id=resume_manifest_id,
-            resume_run_id=resume_run_id,
-            force_steps=force_steps,
-            repair_steps=repair_steps,
-            manifest_service=self.manifest_service,
-            workflow_state_port=self.workflow_state_port,
-            now_factory=self.now_factory,
-            run_id_factory=self.run_id_factory,
-            incremental=incremental,
-        )
-        ledger = self.workflow_ledger_factory(
-            self.workflow_ledger_port,
-            prepared.manifest,
-        )
         lock_key = _workflow_lock_key(config)
+        lock_owner_id = self.run_id_factory()
         await _acquire_workflow_lock(
             lock_port=self.workflow_lock_port,
             lock_key=lock_key,
             workflow_name=config.name,
-            owner_id=prepared.manifest.workflow_run_id,
+            owner_id=lock_owner_id,
         )
         try:
+            prepared = prepare_workflow_execution(
+                config=config,
+                launch_context=resolved_launch_context,
+                resume_last=resume_last,
+                resume_manifest_id=resume_manifest_id,
+                resume_run_id=resume_run_id,
+                force_steps=force_steps,
+                repair_steps=repair_steps,
+                manifest_service=self.manifest_service,
+                workflow_state_port=self.workflow_state_port,
+                now_factory=self.now_factory,
+                run_id_factory=lambda: lock_owner_id,
+                incremental=incremental,
+            )
+            ledger = self.workflow_ledger_factory(
+                self.workflow_ledger_port,
+                prepared.manifest,
+            )
             return await _run_locked_workflow(
                 runner=self.workflow_runner,
                 recorder=WorkflowExecutionRecorder(
@@ -132,7 +133,7 @@ class WorkflowExecutionService:
         finally:
             await self.workflow_lock_port.release(
                 lock_key,
-                prepared.manifest.workflow_run_id,
+                lock_owner_id,
                 exclusive=True,
             )
 

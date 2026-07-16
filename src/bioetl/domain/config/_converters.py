@@ -12,8 +12,17 @@ from bioetl.domain.medallion import GoldWriteMode, LoadingStrategy, SilverWriteM
 __all__ = [
     "convert_write_mode",
     "freeze_sequences",
+    "require_literal",
     "resolve_loading_strategy",
 ]
+
+
+def require_literal[T](value: T, *, field_name: str, allowed: frozenset[T]) -> T:
+    """Reject runtime values outside a statically declared Literal domain."""
+    if value not in allowed:
+        choices = ", ".join(sorted(repr(item) for item in allowed))
+        raise ValueError(f"{field_name} must be one of: {choices}; got {value!r}")
+    return value
 
 
 def convert_write_mode[_WM: (SilverWriteMode, GoldWriteMode)](

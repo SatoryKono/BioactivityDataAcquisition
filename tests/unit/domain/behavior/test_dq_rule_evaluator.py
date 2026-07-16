@@ -240,7 +240,7 @@ class TestEvaluateDQRulesForRecord:
                     validation_type="required",
                     nullable=False,
                     severity="error",
-                    severity_enricher="warning",  # Less severe for enricher
+                    severity_enricher="warn",  # Less severe for enricher
                 )
             ]
         )

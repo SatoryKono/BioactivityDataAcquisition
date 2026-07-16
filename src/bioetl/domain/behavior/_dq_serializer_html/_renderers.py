@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from html import escape
+
 import orjson
 
 from bioetl.domain.types import JsonDict
@@ -41,8 +43,8 @@ def render_checks_html(checks: JsonDict) -> str:
                 f"""
                 <div class="check-item {status_class}">
                     <h3>
-                        <span>{check_name.replace("_", " ").title()}</span>
-                        <span class="status-badge status-{status_class}">{status}</span>
+                        <span>{escape(str(check_name).replace("_", " ").title())}</span>
+                        <span class="status-badge status-{escape(status_class)}">{escape(str(status))}</span>
                     </h3>
                     <div class="check-details">
                         {render_check_details_html(check_data)}
@@ -54,8 +56,8 @@ def render_checks_html(checks: JsonDict) -> str:
             html_parts.append(
                 f"""
                 <div class="check-item pass">
-                    <h3>{check_name.replace("_", " ").title()}</h3>
-                    <div class="check-details">{check_data}</div>
+                    <h3>{escape(str(check_name).replace("_", " ").title())}</h3>
+                    <div class="check-details">{escape(str(check_data))}</div>
                 </div>
                 """
             )
@@ -75,7 +77,9 @@ def render_check_details_html(data: JsonDict) -> str:
             continue
         value_str = format_detail_value(value)
         rows.append(
-            f"<tr><td><strong>{key.replace('_', ' ').title()}</strong></td><td>{value_str}</td></tr>"
+            "<tr><td><strong>"
+            f"{escape(str(key).replace('_', ' ').title())}"
+            f"</strong></td><td>{value_str}</td></tr>"
         )
 
     if not rows:
@@ -92,10 +96,11 @@ def format_detail_value(value: object) -> str:
             are joined as comma-separated strings, all others are converted via str().
     """
     if isinstance(value, dict):
-        return f"<pre>{orjson.dumps(value, option=orjson.OPT_INDENT_2).decode()}</pre>"
+        payload = orjson.dumps(value, option=orjson.OPT_INDENT_2).decode()
+        return f"<pre>{escape(payload)}</pre>"
     if isinstance(value, (list, tuple)):
-        return ", ".join(str(item) for item in value) if value else "[]"
-    return str(value)
+        return ", ".join(escape(str(item)) for item in value) if value else "[]"
+    return escape(str(value))
 
 
 def render_thresholds_html(thresholds: JsonDict) -> str:
@@ -113,17 +118,20 @@ def render_thresholds_html(thresholds: JsonDict) -> str:
     soft = thresholds.get("soft_fail_threshold")
     hard = thresholds.get("hard_fail_threshold")
     rate = thresholds.get("current_error_rate")
+    soft_text = escape(str(soft)) if soft is not None else "—"
+    hard_text = escape(str(hard)) if hard is not None else "—"
+    rate_text = escape(str(rate)) if rate is not None else "—"
     return f"""
     <div class="card">
         <h2>DQ Thresholds</h2>
         <div class="check-item {status_class}">
             <table>
-                <tr><td><strong>Soft Fail Threshold</strong></td><td>{soft if soft is not None else "—"}</td></tr>
-                <tr><td><strong>Hard Fail Threshold</strong></td><td>{hard if hard is not None else "—"}</td></tr>
-                <tr><td><strong>Current Error Rate</strong></td><td>{rate if rate is not None else "—"}</td></tr>
+                <tr><td><strong>Soft Fail Threshold</strong></td><td>{soft_text}</td></tr>
+                <tr><td><strong>Hard Fail Threshold</strong></td><td>{hard_text}</td></tr>
+                <tr><td><strong>Current Error Rate</strong></td><td>{rate_text}</td></tr>
                 <tr>
                     <td><strong>Status</strong></td>
-                    <td><span class="status-badge status-{status_class}">{status}</span></td>
+                    <td><span class="status-badge status-{status_class}">{escape(status)}</span></td>
                 </tr>
             </table>
         </div>
@@ -132,16 +140,17 @@ def render_thresholds_html(thresholds: JsonDict) -> str:
 
 
 def _render_report_header(*, layer: str, status: str, data: JsonDict) -> str:
+    status_class = status_color_class(status)
     return f"""
     <div class="report-header">
-        <h1>{layer} Layer DQ Report</h1>
+        <h1>{escape(layer)} Layer DQ Report</h1>
         <div style="margin: 15px 0;">
-            <span class="status-badge status-{status}">{status}</span>
+            <span class="status-badge status-{status_class}">{escape(status)}</span>
         </div>
         <div class="meta">
-            <span><strong>Pipeline:</strong> {data.get("pipeline") or "—"}</span>
-            <span><strong>Run ID:</strong> {data.get("run_id") or "—"}</span>
-            <span><strong>Timestamp:</strong> {data.get("timestamp") or "—"}</span>
+            <span><strong>Pipeline:</strong> {escape(str(data.get("pipeline") or "—"))}</span>
+            <span><strong>Run ID:</strong> {escape(str(data.get("run_id") or "—"))}</span>
+            <span><strong>Timestamp:</strong> {escape(str(data.get("timestamp") or "—"))}</span>
         </div>
     </div>
     """
@@ -153,19 +162,19 @@ def _render_summary_card(summary: JsonDict) -> str:
         <h2>Summary</h2>
         <div class="summary-grid">
             <div class="summary-item">
-                <div class="value">{summary.get("total_checks", 0)}</div>
+                <div class="value">{escape(str(summary.get("total_checks", 0)))}</div>
                 <div class="label">Total Checks</div>
             </div>
             <div class="summary-item">
-                <div class="value" style="color: #28a745;">{summary.get("passed", 0)}</div>
+                <div class="value" style="color: #28a745;">{escape(str(summary.get("passed", 0)))}</div>
                 <div class="label">Passed</div>
             </div>
             <div class="summary-item">
-                <div class="value" style="color: #ffc107;">{summary.get("warnings", 0)}</div>
+                <div class="value" style="color: #ffc107;">{escape(str(summary.get("warnings", 0)))}</div>
                 <div class="label">Warnings</div>
             </div>
             <div class="summary-item">
-                <div class="value" style="color: #dc3545;">{summary.get("failed", 0)}</div>
+                <div class="value" style="color: #dc3545;">{escape(str(summary.get("failed", 0)))}</div>
                 <div class="label">Failed</div>
             </div>
         </div>
@@ -190,7 +199,7 @@ def _render_raw_data_card(data: JsonDict) -> str:
     return f"""
     <div class="card">
         <h2>Raw Report Data</h2>
-        <pre>{payload}</pre>
+        <pre>{escape(payload)}</pre>
     </div>
     """
 

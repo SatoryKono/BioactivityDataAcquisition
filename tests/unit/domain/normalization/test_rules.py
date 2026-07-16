@@ -7,6 +7,7 @@ import pytest
 from typing import Any, cast
 
 
+from bioetl.domain.exceptions import ValidationError
 from bioetl.domain.normalization.rules import (
     normalize_case,
     normalize_cross_pipeline_case,
@@ -87,8 +88,11 @@ class TestNormalizeCrossPipelineCase:
 
     def test_invalid_strategy(self) -> None:
         """Test invalid strategy handling."""
-        # Should default to preserve behavior for unknown strategies
-        assert normalize_cross_pipeline_case("Test", "unknown") == "Test"
+        with pytest.raises(
+            ValidationError,
+            match="Unknown case strategy: 'unknown'",
+        ):
+            normalize_cross_pipeline_case("Test", "unknown")
 
     def test_none_and_empty(self) -> None:
         """Test None and empty string handling."""

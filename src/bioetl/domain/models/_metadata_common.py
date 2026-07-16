@@ -3,10 +3,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import StrEnum
 
-from pydantic import BaseModel, ConfigDict, Field, computed_field
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 
 from bioetl.domain.medallion import Layer
 
@@ -20,7 +20,17 @@ __all__ = [
     "QualityExpectations",
     "RunTypeEnum",
     "RuntimeMetadata",
+    "validate_utc_datetime",
 ]
+
+
+def validate_utc_datetime(value: datetime | None) -> datetime | None:
+    """Require timezone-aware timestamps whose effective offset is UTC."""
+    if value is not None and (
+        value.tzinfo is None or value.utcoffset() != timedelta(0)
+    ):
+        raise ValueError("metadata timestamps must be timezone-aware UTC datetimes")
+    return value
 
 
 class RunTypeEnum(StrEnum):
@@ -125,6 +135,11 @@ class RuntimeMetadata(BaseModel):
         default=None,
         description="Canonical input snapshot identity fingerprint for replayable runs",
     )
+
+    @field_validator("started_at_utc", "completed_at_utc")
+    @classmethod
+    def _require_utc(cls, value: datetime | None) -> datetime | None:
+        return validate_utc_datetime(value)
 
 
 class PipelineMetadata(BaseModel):
@@ -247,6 +262,11 @@ class BaseOutputMetadata(BaseModel):
         default=None,
         description="Composite run identifier mapped from _composite_run_id",
     )
+
+    @field_validator("write_started_at", "write_completed_at")
+    @classmethod
+    def _require_utc(cls, value: datetime | None) -> datetime | None:
+        return validate_utc_datetime(value)
 
     @computed_field
     @property

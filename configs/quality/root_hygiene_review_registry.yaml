@@ -276,9 +276,13 @@ review_lanes:
     retention_action: retain_only_when_the_exact_root_filename_is_part_of_the_documented_tool_contract
     cleanup_policy: move_to_docs_or_archive_when_the_external_contract_no_longer_requires_root_retention
     verification:
-      - git ls-files best_practices.md
-      - rg -n "best_practices\\.md" docs/00-project/governance/qodo/README.md .github/root-allowlist.txt docs/00-project/governance/03-file-policy.md
+      - git ls-files DOCKER_QUICKSTART.md best_practices.md
+      - rg -n "DOCKER_QUICKSTART\\.md|best_practices\\.md" docs/00-project/governance/qodo/README.md docs/DOCKER_QUICKSTART.md .github/root-allowlist.txt docs/00-project/governance/03-file-policy.md
     candidates:
+      - path: DOCKER_QUICKSTART.md
+        current_live_state: present_approved_root_surface
+        canonical_path: docs/DOCKER_QUICKSTART.md
+        action_if_reintroduced: retain_only_while_the_reviewed_adr010_operator_entrypoint_requires_the_exact_root_filename_otherwise_route_callers_to_docs/DOCKER_QUICKSTART.md_and_drop_the_root_copy
       - path: best_practices.md
         current_live_state: present_approved_root_surface
         canonical_path: docs/00-project/governance/qodo/README.md

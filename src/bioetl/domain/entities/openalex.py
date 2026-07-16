@@ -9,6 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from bioetl.domain.entities.publication_base import PublicationEntityBase
+from bioetl.domain._immutability import freeze_fields
 from bioetl.domain.schemas.common.publication_base import LOOKUP_METHODS
 from bioetl.domain.types import JsonDict
 
@@ -69,6 +70,22 @@ class OpenAlexPublicationEntity(PublicationEntityBase):
 
     # Override: Default source for OpenAlex
     _source: str = "openalex"
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        freeze_fields(
+            self,
+            (
+                "institution_ids",
+                "institution_country_codes",
+                "ror_ids",
+                "subject_topics",
+                "primary_topic",
+                "grants",
+                "subject_mesh",
+                "subject_keywords",
+            ),
+        )
 
     def _validate_invariants(self) -> None:
         """Validate OpenAlex-specific publication invariants."""

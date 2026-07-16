@@ -199,11 +199,10 @@ class TestGoldOutputExt:
 
         assert ext.partition_count == 4
 
-    def test_parquet_format(self) -> None:
-        """GIVEN parquet format WHEN creating GoldOutputExt THEN valid."""
-        ext = GoldOutputExt(format="parquet")
-
-        assert ext.format == "parquet"
+    def test_parquet_format_rejected(self) -> None:
+        """GIVEN raw Parquet format WHEN creating GoldOutputExt THEN reject it."""
+        with pytest.raises(ValidationError, match="Input should be 'delta'"):
+            GoldOutputExt(format="parquet")  # type: ignore[arg-type]
 
     def test_invalid_format_rejected(self) -> None:
         """GIVEN invalid format WHEN creating GoldOutputExt THEN validation error."""

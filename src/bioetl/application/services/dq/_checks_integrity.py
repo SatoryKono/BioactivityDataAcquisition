@@ -204,15 +204,22 @@ def check_referential_integrity(
     for ref_key, ref_table in reference_tables.items():
         parsed_ref = _parse_reference_key(ref_key)
         if parsed_ref is None:
-            continue
+            raise ValueError(
+                "Invalid foreign-key specification; expected "
+                f"'local_column -> table.reference_column', got {ref_key!r}"
+            )
         local_col, ref_col = parsed_ref
 
         if local_col not in df.columns:
-            continue
+            raise ValueError(
+                f"Foreign-key local column {local_col!r} is missing from input"
+            )
 
         ref_df = _as_reference_dataframe(ref_table)
         if ref_col not in ref_df.columns:
-            continue
+            raise ValueError(
+                f"Foreign-key reference column {ref_col!r} is missing for {ref_key!r}"
+            )
 
         fk_results[ref_key] = _build_fk_result(
             df=df,
