@@ -516,6 +516,65 @@ def test_grafana_audit_preflight_can_run_semantic_checks_without_render_runtime(
     ]
 
 
+def test_preflight_can_run_render_checks_without_semantic_checks(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(
+        preflight_subject,
+        "_check_http_json",
+        lambda **kwargs: preflight_subject.PreflightCheck(
+            name=str(kwargs["name"]), status="ok", detail="ok"
+        ),
+    )
+    monkeypatch.setattr(
+        preflight_subject,
+        "_check_grafana_render_auth",
+        lambda **_kwargs: preflight_subject.PreflightCheck(
+            name="grafana-render-auth", status="ok", detail="ok"
+        ),
+    )
+    monkeypatch.setattr(
+        preflight_subject,
+        "_check_playwright_runtime",
+        lambda *_args, **_kwargs: preflight_subject.PreflightCheck(
+            name="playwright-runtime", status="ok", detail="ok"
+        ),
+    )
+    monkeypatch.setattr(
+        preflight_subject,
+        "_check_expanded_row_capture",
+        lambda _check: preflight_subject.PreflightCheck(
+            name="expanded-row-capture", status="ok", detail="ok"
+        ),
+    )
+    monkeypatch.setattr(
+        audit_subject,
+        "_resolve_app_base_url",
+        lambda *_args, **_kwargs: pytest.fail(
+            "semantic backend discovery must be skipped"
+        ),
+    )
+
+    checks = preflight_subject.run_checks(
+        grafana_base_url="http://localhost:3000",
+        prometheus_base_url="http://localhost:9090",
+        app_base_url="http://localhost:8081",
+        grafana_username="admin",
+        grafana_password="changeme",
+        timeout_seconds=5.0,
+        screenshot_dir=tmp_path,
+        include_screenshot_check=False,
+        include_semantic_checks=False,
+    )
+
+    assert [check.name for check in checks] == [
+        "grafana",
+        "grafana-render-auth",
+        "playwright-runtime",
+        "expanded-row-capture",
+    ]
+
+
 def test_grafana_audit_cycle_writes_independent_gate_evidence(tmp_path: Path) -> None:
     config = cycle_subject._parse_args(
         [
@@ -542,7 +601,7 @@ def test_grafana_audit_cycle_writes_independent_gate_evidence(tmp_path: Path) ->
     )
 
 
-def test_grafana_audit_cycle_blocks_render_gate_when_semantic_gate_fails(
+def test_grafana_audit_cycle_records_render_gate_when_semantic_gate_fails(
     tmp_path: Path,
 ) -> None:
     config = cycle_subject._parse_args(
@@ -557,15 +616,15 @@ def test_grafana_audit_cycle_blocks_render_gate_when_semantic_gate_fails(
     cycle_subject._write_gate_report(
         config,
         semantic_status="fail",
-        render_status="blocked",
+        render_status="pass",
         semantic_detail="Live panel audit reported blocking semantic results.",
-        render_detail="Screenshot render steps were skipped due to semantic gate failure.",
+        render_detail="Screenshot render and manifest contract passed.",
     )
 
     payload = json.loads(config.gate_output_path.read_text(encoding="utf-8"))
     assert payload["dashboard_semantic_gate"]["status"] == "fail"
-    assert payload["dashboard_render_gate"]["status"] == "blocked"
-    assert "semantic gate failure" in payload["dashboard_render_gate"]["detail"]
+    assert payload["dashboard_render_gate"]["status"] == "pass"
+    assert "manifest contract passed" in payload["dashboard_render_gate"]["detail"]
 
 
 def test_grafana_audit_cycle_router_exposes_command() -> None:
@@ -634,6 +693,7 @@ def test_grafana_audit_cycle_runs_preflight_rerender_and_live_audit(
     assert "--skip-screenshot-check" in calls[0][1]
     assert "--skip-render-checks" in calls[0][1]
     assert "--skip-screenshot-check" not in calls[4][1]
+    assert "--skip-semantic-checks" in calls[4][1]
     assert "--uids" in calls[2][1]
     assert "--fallback" in calls[2][1]
     assert calls[2][1][calls[2][1].index("--fallback") + 1] == "none"
@@ -1165,3 +1225,63 @@ def test_live_audit_writes_report(monkeypatch: Any, tmp_path: Path) -> None:
     payload = json.loads(output_path.read_text(encoding="utf-8"))
     assert payload["config"]["pipeline"] == "chembl_target"
     assert payload["results"][0]["panel_id"] == 101
+    assert payload["semantic_gate"]["status"] == "pass"
+
+
+def test_live_audit_semantic_gate_requires_review_for_unreviewed_empty() -> None:
+    result = audit_subject.AuditResult(
+        dashboard_uid="bioetl-overview-v2",
+        panel_id=999_001,
+        title="Unreviewed empty",
+        source_kind="prometheus",
+        semantic_kind="prometheus_query",
+        status="ok",
+        classification="empty_result",
+        detail="no samples",
+        query_preview="sum(metric)",
+    )
+
+    evidence = audit_subject.semantic_gate_evidence([result])
+
+    assert evidence["status"] == "review_required"
+    assert evidence["review_count"] == 1
+    assert evidence["panel_outcomes"][0]["decision"] == "review"
+
+
+def test_live_audit_semantic_gate_accepts_reviewed_freshness_gap() -> None:
+    result = audit_subject.AuditResult(
+        dashboard_uid="bioetl-dq-v2",
+        panel_id=101,
+        title="Review: Latest Successful Data Timestamp",
+        source_kind="prometheus",
+        semantic_kind="freshness",
+        status="ok",
+        classification="telemetry_missing",
+        detail="render UNKNOWN",
+        query_preview="max(max_over_time(...))",
+    )
+
+    evidence = audit_subject.semantic_gate_evidence([result])
+
+    assert evidence["status"] == "pass"
+    assert evidence["panel_outcomes"][0]["decision"] == "pass_reviewed"
+
+
+def test_live_audit_semantic_gate_blocks_invalid_query() -> None:
+    result = audit_subject.AuditResult(
+        dashboard_uid="bioetl-dq-v2",
+        panel_id=101,
+        title="Review: Latest Successful Data Timestamp",
+        source_kind="prometheus",
+        semantic_kind="freshness",
+        status="error",
+        classification="query_error",
+        detail="bad_data",
+        query_preview="invalid(",
+    )
+
+    evidence = audit_subject.semantic_gate_evidence([result])
+
+    assert evidence["status"] == "fail"
+    assert evidence["blocking_count"] == 1
+    assert evidence["panel_outcomes"][0]["canonical_classification"] == "query_invalid"

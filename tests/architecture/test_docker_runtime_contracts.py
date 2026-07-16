@@ -607,14 +607,29 @@ def test_desktop_recovery_is_evidence_first_bounded_and_user_confirmed() -> None
         encoding="utf-8"
     )
 
-    for capability in ("status", "restart", "logs", "diagnose"):
+    for capability in ("status", "restart", "start", "logs", "diagnose"):
         assert (
             f"Test-DesktopCapability '{capability}'" in recovery
             or capability in recovery
         )
     assert "ConfirmLastResort" in recovery
     assert "TimeoutSeconds" in recovery
-    assert "docker-desktop-recovery-v1" in recovery
+    assert "CommandTimeoutSeconds" in recovery
+    assert "System.Diagnostics.ProcessStartInfo" in recovery
+    assert "WaitForExit($WaitMilliseconds)" in recovery
+    assert "docker-desktop-recovery-v2" in recovery
+    for classification in (
+        "daemon_identity",
+        "wsl_integration",
+        "engine_topology",
+        "vhd_attachment",
+        "project_origins",
+        "port_owners",
+        "bind_path_translation",
+        "data_capacity",
+    ):
+        assert classification in recovery
+    assert "ConfirmImpact = 'High'" in recovery
     assert "wsl --shutdown" not in recovery
     assert recovery.index("diagnose") < recovery.index("Stop-Process -Force")
 

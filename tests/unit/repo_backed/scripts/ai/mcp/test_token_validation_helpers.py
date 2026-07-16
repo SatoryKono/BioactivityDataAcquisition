@@ -22,6 +22,7 @@ pytestmark = [
 ]
 
 ROOT = Path(__file__).resolve().parents[6]
+ENV_LOADER = ROOT / "scripts" / "ai" / "mcp" / "support" / "load_repo_env.sh"
 HELPER = ROOT / "scripts" / "ai" / "mcp" / "support" / "token_validation.sh"
 NEO4J_WRAPPERS = [
     ROOT / "scripts" / "ai" / "mcp" / "mcp_neo4j_cypher_wrapper.sh",
@@ -57,6 +58,17 @@ def test_required_token_rejects_missing_value() -> None:
     assert result.returncode == 1
     assert "TEST_TOKEN is required for test MCP" in result.stderr
     assert "secret" not in result.stdout.lower()
+
+
+def test_env_loader_preserves_caller_path_variables() -> None:
+    result = _run_bash(
+        "SCRIPT_DIR=caller-script-dir; "
+        "REPO_ROOT=caller-repo-root; "
+        f"source {ENV_LOADER}; "
+        '[[ "$SCRIPT_DIR" == caller-script-dir && "$REPO_ROOT" == caller-repo-root ]]'
+    )
+
+    assert result.returncode == 0, result.stderr
 
 
 def test_required_token_rejects_short_value_without_printing_secret() -> None:

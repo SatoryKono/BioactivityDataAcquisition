@@ -1,0 +1,2 @@
+{"expected_panel_ids":[250,257],"kind":"warning","line":{"event":"dashboard_audit_fixture_warning","level":"warning","logger":"bioetl.audit.fixture","message":"bounded Loki dashboard audit fixture","pipeline":"chembl_activity"}}
+{"expected_panel_ids":[251],"kind":"malformed","line":"dashboard-audit-fixture malformed-json"}

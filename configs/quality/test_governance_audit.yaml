@@ -803,11 +803,11 @@ oversized_test_module_inventory:
     source: tests/integration/test_grafana_config.py
     source_lines_after_split: 1561
     extracted_surface: tests/integration/test_grafana_surface_contracts.py
-    extracted_surface_lines: 677
+    extracted_surface_lines: 697
     owner: observability-dashboards
   - issue_ref: '#4505'
     source: tests/integration/test_grafana_surface_contracts.py
-    source_lines_after_split: 677
+    source_lines_after_split: 697
     extracted_surface: tests/integration/test_grafana_technical_policy.py
     extracted_surface_lines: 52
     owner: observability-dashboards
@@ -1078,6 +1078,9 @@ repo_backed_unit_test_exceptions:
   - path: tests/unit/repo_backed/scripts/ops/docker/test_docker_runtime_probe.py
     target_lane: repo-backed-unit
     protected_surface: scripts/ops/runtime/docker/docker_runtime_probe.py
+  - path: tests/unit/repo_backed/scripts/ops/docker/test_restart_docker_recovery.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ops/runtime/docker/restart-docker.ps1
   - path: tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py
     target_lane: repo-backed-unit
     protected_surface: scripts/engineering/qa/run_docker_stability_campaign.py

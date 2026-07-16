@@ -525,6 +525,7 @@ def run_checks(
     screenshot_dir: Path,
     include_screenshot_check: bool = True,
     include_render_checks: bool = True,
+    include_semantic_checks: bool = True,
     screenshot_uids: tuple[str, ...] = (),
 ) -> list[PreflightCheck]:
     checks = [
@@ -544,55 +545,55 @@ def run_checks(
                 timeout_seconds=timeout_seconds,
             )
         )
-    checks.append(
-        _check_http_json(
-            name="prometheus",
-            url=f"{prometheus_base_url.rstrip('/')}/api/v1/status/runtimeinfo",
-            timeout_seconds=timeout_seconds,
+    if include_semantic_checks:
+        checks.append(
+            _check_http_json(
+                name="prometheus",
+                url=f"{prometheus_base_url.rstrip('/')}/api/v1/status/runtimeinfo",
+                timeout_seconds=timeout_seconds,
+            )
         )
-    )
     if include_render_checks:
         playwright_check = _check_playwright_runtime(timeout_seconds)
-        checks.extend(
-            [playwright_check, _check_expanded_row_capture(playwright_check)]
-        )
+        checks.extend([playwright_check, _check_expanded_row_capture(playwright_check)])
 
-    try:
-        resolved_app_base_url = live_audit._resolve_app_base_url(
-            live_audit.AuditConfig(
-                prometheus_base_url=prometheus_base_url.rstrip("/"),
-                app_base_url=app_base_url.rstrip("/"),
-                loki_base_url=live_audit.DEFAULT_LOKI_BASE_URL,
-                tempo_base_url=live_audit.DEFAULT_TEMPO_BASE_URL,
-                grafana_base_url=grafana_base_url.rstrip("/"),
-                grafana_username=grafana_username,
-                grafana_password=grafana_password,
-                workflow=live_audit.DEFAULT_WORKFLOW,
-                pipeline=live_audit.DEFAULT_PIPELINE,
-                run_type=live_audit.DEFAULT_RUN_TYPE,
-                run_id=live_audit.DEFAULT_RUN_ID,
-                range_hours=live_audit.DEFAULT_RANGE_HOURS,
-                output_path=live_audit.DEFAULT_OUTPUT_PATH,
-                request_timeout_seconds=timeout_seconds,
+    if include_semantic_checks:
+        try:
+            resolved_app_base_url = live_audit._resolve_app_base_url(
+                live_audit.AuditConfig(
+                    prometheus_base_url=prometheus_base_url.rstrip("/"),
+                    app_base_url=app_base_url.rstrip("/"),
+                    loki_base_url=live_audit.DEFAULT_LOKI_BASE_URL,
+                    tempo_base_url=live_audit.DEFAULT_TEMPO_BASE_URL,
+                    grafana_base_url=grafana_base_url.rstrip("/"),
+                    grafana_username=grafana_username,
+                    grafana_password=grafana_password,
+                    workflow=live_audit.DEFAULT_WORKFLOW,
+                    pipeline=live_audit.DEFAULT_PIPELINE,
+                    run_type=live_audit.DEFAULT_RUN_TYPE,
+                    run_id=live_audit.DEFAULT_RUN_ID,
+                    range_hours=live_audit.DEFAULT_RANGE_HOURS,
+                    output_path=live_audit.DEFAULT_OUTPUT_PATH,
+                    request_timeout_seconds=timeout_seconds,
+                )
             )
-        )
-        checks.append(
-            PreflightCheck(
-                name="quarantine-explorer",
-                status="ok",
-                detail=(
-                    f"canonical health probe reachable via {resolved_app_base_url}"
-                ),
+            checks.append(
+                PreflightCheck(
+                    name="quarantine-explorer",
+                    status="ok",
+                    detail=(
+                        f"canonical health probe reachable via {resolved_app_base_url}"
+                    ),
+                )
             )
-        )
-    except Exception as exc:  # pragma: no cover - exercised by callers
-        checks.append(
-            PreflightCheck(
-                name="quarantine-explorer",
-                status="error",
-                detail=str(exc),
+        except Exception as exc:  # pragma: no cover - exercised by callers
+            checks.append(
+                PreflightCheck(
+                    name="quarantine-explorer",
+                    status="error",
+                    detail=str(exc),
+                )
             )
-        )
 
     if include_screenshot_check:
         checks.append(
@@ -668,6 +669,14 @@ def _build_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--skip-semantic-checks",
+        action="store_true",
+        help=(
+            "Run only Grafana/render readiness and screenshot contract checks; "
+            "skip Prometheus and Quarantine Explorer semantic readiness checks."
+        ),
+    )
+    parser.add_argument(
         "--screenshot-uids",
         nargs="*",
         default=(),
@@ -695,6 +704,7 @@ def main(argv: list[str] | None = None) -> int:
         screenshot_dir=args.screenshot_dir,
         include_screenshot_check=not args.skip_screenshot_check,
         include_render_checks=not args.skip_render_checks,
+        include_semantic_checks=not args.skip_semantic_checks,
         screenshot_uids=tuple(str(uid) for uid in args.screenshot_uids),
     )
 

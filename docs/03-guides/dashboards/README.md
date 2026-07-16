@@ -72,7 +72,14 @@ ______________________________________________________________________
   `dashboard_semantic_gate` and `dashboard_render_gate` outcomes to
   `reports/observability/grafana/dashboard-release-gates.json`. Semantic
   validation runs even when Playwright or screenshot capture is unavailable;
-  render failure therefore cannot mask a datasource/query failure.
+  render validation still runs when semantic validation fails. The render-only
+  preflight excludes Prometheus and Quarantine Explorer readiness, so neither
+  gate can mask or contaminate the other.
+- Semantic severity is UID/panel-attributable: invalid queries block; required
+  datasource/backend unavailability blocks; unreviewed empty or unknown
+  results require review; zero and expected-empty pass. `telemetry_missing`
+  passes only for explicitly reviewed DQ freshness panels `#8` and `#101`,
+  where the visual contract is `UNKNOWN` rather than zero.
 - Live audit uses a governed `15s` datasource timeout. Sparse Loki results are
   `expected_empty`; missing freshness samples are `telemetry_missing` and must
   render `UNKNOWN`, not zero.

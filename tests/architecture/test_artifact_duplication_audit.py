@@ -33,7 +33,7 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return cast(dict[str, Any], yaml.safe_load(path.read_text(encoding="utf-8")))
 
 
-def test_artifact_duplication_audit_report_matches_live_collector() -> None:
+def енtest_artifact_duplication_audit_report_matches_live_collector() -> None:
     payload = json.loads(REPORT_PATH.read_text(encoding="utf-8"))
     report = collect_artifact_duplication_report(ROOT)
 

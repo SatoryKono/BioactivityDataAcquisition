@@ -50,6 +50,9 @@ DEFAULT_SCREENSHOT_DIR = Path("reports/observability/grafana/screenshots")
 DEFAULT_GATE_OUTPUT_PATH = Path(
     "reports/observability/grafana/dashboard-release-gates.json"
 )
+SHIPPED_DASHBOARD_DIR = (
+    Path(__file__).resolve().parents[4] / "grafana" / "dashboards"
+).resolve()
 DEFAULT_PREFLIGHT_TIMEOUT_SECONDS = 5.0
 DEFAULT_RENDER_TIMEOUT_SECONDS = 60.0
 DEFAULT_PIPELINE = live_audit.DEFAULT_PIPELINE
@@ -193,6 +196,7 @@ def _run_preflight(
     app_base_url: str,
     include_screenshot_check: bool,
     include_render_checks: bool = True,
+    include_semantic_checks: bool = True,
     screenshot_uids: tuple[str, ...] = (),
 ) -> int:
     argv = [
@@ -217,6 +221,8 @@ def _run_preflight(
         argv.extend(["--screenshot-uids", *screenshot_uids])
     if not include_render_checks:
         argv.append("--skip-render-checks")
+    if not include_semantic_checks:
+        argv.append("--skip-semantic-checks")
     return preflight.main(argv)
 
 
@@ -228,7 +234,8 @@ def _write_gate_report(
     semantic_detail: str,
     render_detail: str,
 ) -> None:
-    config.gate_output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path = _resolve_gate_output_path(config.gate_output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "schema_version": 1,
         "dashboard_semantic_gate": {
@@ -242,10 +249,21 @@ def _write_gate_report(
             "source_artifact": str(config.screenshot_dir / "render-manifest.json"),
         },
     }
-    config.gate_output_path.write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
+    with output_path.open("w", encoding="utf-8", newline="\n") as stream:
+        json.dump(payload, stream, indent=2, sort_keys=True)
+        stream.write("\n")
+
+
+def _resolve_gate_output_path(output_path: Path) -> Path:
+    resolved = output_path.expanduser().resolve()
+    if resolved == SHIPPED_DASHBOARD_DIR or resolved.is_relative_to(
+        SHIPPED_DASHBOARD_DIR
+    ):
+        raise ValueError(
+            "Grafana audit gate evidence must not overwrite shipped dashboard JSON: "
+            f"{output_path}"
+        )
+    return resolved
 
 
 def _run_rerender(config: AuditCycleConfig, *, screenshot_uids: tuple[str, ...]) -> int:
@@ -639,30 +657,31 @@ def main(argv: list[str] | None = None) -> int:
         backend_outcome = _ensure_backend(config)
         backend_result = backend_outcome.result
         managed_backend_process = backend_outcome.managed_process
-        if config.ensure_observability_backend and not backend_result.backend_available:
+        backend_ready = (
+            not config.ensure_observability_backend or backend_result.backend_available
+        )
+        if not backend_ready:
             print(
                 "grafana-audit-cycle: observability backend is not ready "
                 f"({backend_result.message or backend_result.status})"
             )
-            return 1
-        app_base_url = _app_base_url_from_health_url(backend_result.health_url)
-
-        print("grafana-audit-cycle: preflight (services only)")
-        preflight_status = _run_preflight(
-            config,
-            app_base_url=app_base_url,
-            include_screenshot_check=False,
-            include_render_checks=False,
+        app_base_url = (
+            _app_base_url_from_health_url(backend_result.health_url)
+            if backend_result.health_url
+            else config.app_base_url
         )
-        if preflight_status != 0:
-            _write_gate_report(
+
+        print("grafana-audit-cycle: semantic preflight")
+        semantic_preflight_status = (
+            _run_preflight(
                 config,
-                semantic_status="fail",
-                render_status="not_run",
-                semantic_detail="Datasource/backend semantic preflight failed.",
-                render_detail="Render gate was not run because semantic preflight failed.",
+                app_base_url=app_base_url,
+                include_screenshot_check=False,
+                include_render_checks=False,
             )
-            return preflight_status
+            if backend_ready
+            else 1
+        )
 
         print("grafana-audit-cycle: discover filled dashboards")
         try:
@@ -679,65 +698,69 @@ def main(argv: list[str] | None = None) -> int:
             json.JSONDecodeError,
         ) as exc:
             print(f"grafana-audit-cycle: filled-dashboard discovery failed ({exc})")
-            return 1
+            screenshot_uids = ()
 
         print("grafana-audit-cycle: live panel semantic gate")
-        semantic_status_code = _run_live_audit(config, app_base_url=app_base_url)
-        semantic_status = "pass" if semantic_status_code == 0 else "fail"
+        try:
+            semantic_status_code = _run_live_audit(
+                config,
+                app_base_url=app_base_url,
+            )
+        except Exception as exc:  # pragma: no cover - fail-closed runtime boundary
+            print(f"grafana-audit-cycle: live panel audit failed ({exc})")
+            semantic_status_code = 1
+        semantic_status = (
+            "pass"
+            if backend_ready
+            and semantic_preflight_status == 0
+            and semantic_status_code == 0
+            else "fail"
+        )
+        semantic_detail = (
+            "Semantic preflight and live panel audit passed."
+            if semantic_status == "pass"
+            else "Semantic preflight or live panel audit reported blocking results."
+        )
 
         print("grafana-audit-cycle: rerender screenshots")
-        rerender_status = _run_rerender(config, screenshot_uids=screenshot_uids)
-        if rerender_status != 0:
-            _write_gate_report(
+        try:
+            rerender_status = _run_rerender(
                 config,
-                semantic_status=semantic_status,
-                render_status="fail",
-                semantic_detail=(
-                    "Live panel audit passed."
-                    if semantic_status == "pass"
-                    else "Live panel audit reported blocking semantic results."
-                ),
-                render_detail="Dashboard screenshot rerender failed.",
+                screenshot_uids=screenshot_uids,
             )
-            return 1
+        except Exception as exc:  # pragma: no cover - fail-closed runtime boundary
+            print(f"grafana-audit-cycle: screenshot rerender failed ({exc})")
+            rerender_status = 1
 
-        print("grafana-audit-cycle: preflight (services + screenshot freshness)")
-        screenshot_preflight_status = _run_preflight(
-            config,
-            app_base_url=app_base_url,
-            include_screenshot_check=True,
-            screenshot_uids=screenshot_uids,
-        )
-        if screenshot_preflight_status != 0:
-            _write_gate_report(
+        screenshot_preflight_status = 1
+        if rerender_status == 0:
+            print("grafana-audit-cycle: render-only preflight")
+            screenshot_preflight_status = _run_preflight(
                 config,
-                semantic_status=semantic_status,
-                render_status="fail",
-                semantic_detail=(
-                    "Live panel audit passed."
-                    if semantic_status == "pass"
-                    else "Live panel audit reported blocking semantic results."
-                ),
-                render_detail="Screenshot freshness/render contract preflight failed.",
+                app_base_url=app_base_url,
+                include_screenshot_check=True,
+                include_semantic_checks=False,
+                screenshot_uids=screenshot_uids,
             )
-            return 1
+        render_status = (
+            "pass"
+            if rerender_status == 0 and screenshot_preflight_status == 0
+            else "fail"
+        )
+        render_detail = (
+            "Screenshot render and manifest contract passed."
+            if render_status == "pass"
+            else "Screenshot rerender or render-only preflight failed."
+        )
 
         _write_gate_report(
             config,
             semantic_status=semantic_status,
-            render_status="pass" if semantic_status == "pass" else "blocked",
-            semantic_detail=(
-                "Live panel audit passed."
-                if semantic_status == "pass"
-                else "Live panel audit reported blocking semantic results."
-            ),
-            render_detail=(
-                "Screenshot render and manifest contract passed."
-                if semantic_status == "pass"
-                else "Screenshot render steps were skipped due to semantic gate failure."
-            ),
+            render_status=render_status,
+            semantic_detail=semantic_detail,
+            render_detail=render_detail,
         )
-        return 0 if semantic_status == "pass" else 1
+        return 0 if semantic_status == "pass" and render_status == "pass" else 1
     finally:
         if (
             managed_backend_process is not None

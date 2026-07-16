@@ -1138,7 +1138,6 @@
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "description": "Selected-range pipeline-scoped volume-weighted DQ score. This is Prometheus range evidence for the selected pipeline/run_type scope, not exact-run RunLedger identity evidence; use ID/Processed Records for exact run context. Review trend reuse is intentional: compare with the matching trend panel before treating this scalar as an incident verdict.",
       "fieldConfig": {
         "defaults": {
           "color": {

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-16T10:13:55.136314+00:00",
+  "generated_at": "2026-07-16T11:52:34.872042+00:00",
   "summary": {
     "total_scripts": 469,
     "status_counts": {
@@ -14562,7 +14562,7 @@
           "path": "scripts/ai/mcp/support/load_repo_env.sh",
           "line": 7,
           "source_group": "scripts",
-          "text": "source \"${REPO_ROOT}/scripts/ops/support/load_repo_env.sh\""
+          "text": "source \"${_BIOETL_MCP_REPO_ROOT}/scripts/ops/support/load_repo_env.sh\""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",

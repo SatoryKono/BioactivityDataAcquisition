@@ -7,6 +7,9 @@ import json
 from pathlib import Path
 
 from scripts.ops.observability.grafana import audit_live_grafana_panels as live_audit
+from scripts.ops.observability.grafana import (
+    run_grafana_dashboard_audit_cycle as audit_cycle,
+)
 
 
 pytestmark = pytest.mark.architecture
@@ -55,6 +58,32 @@ def test_observability_dashboard_scripts_do_not_write_dashboard_json() -> None:
         "Observability dashboard tooling must not mutate shipped dashboard JSON:\n"
         + "\n".join(offenders)
     )
+
+
+def test_audit_cycle_gate_output_rejects_shipped_dashboard_path() -> None:
+    """Gate evidence must not be writable over a shipped dashboard."""
+    dashboard_path = audit_cycle.SHIPPED_DASHBOARD_DIR / "blocked.json"
+
+    with pytest.raises(ValueError, match="must not overwrite shipped dashboard JSON"):
+        audit_cycle._resolve_gate_output_path(dashboard_path)
+
+
+def test_audit_cycle_gate_output_writes_review_evidence(tmp_path: Path) -> None:
+    """A normal gate target remains a deterministic JSON evidence artifact."""
+    output_path = tmp_path / "dashboard-release-gates.json"
+    config = audit_cycle._parse_args(["--gate-output", str(output_path)])
+
+    audit_cycle._write_gate_report(
+        config,
+        semantic_status="pass",
+        render_status="pass",
+        semantic_detail="semantic evidence passed",
+        render_detail="render evidence passed",
+    )
+
+    payload = json.loads(output_path.read_text(encoding="utf-8"))
+    assert payload["dashboard_semantic_gate"]["status"] == "pass"
+    assert payload["dashboard_render_gate"]["status"] == "pass"
 
 
 def test_live_panel_audit_blocks_all_http_panels_after_one_backend_failure(

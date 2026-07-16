@@ -259,7 +259,6 @@ def test_issue_5852_review_class_root_files_have_exact_filename_contracts() -> N
     assert expected == {
         "best_practices.md",
         "commitlint.config.mjs",
-        "mint.json",
     }
     assert (
         candidates["best_practices.md"]["lane_id"] == "root_reviewed_human_facing_docs"

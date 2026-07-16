@@ -157,8 +157,12 @@ normalize_repo_env_aliases() {
     export NEEDLE_API_KEY="${NEEDLE_TOKEN}"
   fi
 
-  if [[ -z "${BRAVE_API_KEY:-}" && -n "${BRAVE_SEARCH_API_KEY:-}" ]]; then
-    export BRAVE_API_KEY="${BRAVE_SEARCH_API_KEY}"
+  if [[ -z "${BRAVE_API_KEY:-}" ]]; then
+    if [[ -n "${BRAVE_SEARCH_API_KEY:-}" ]]; then
+      export BRAVE_API_KEY="${BRAVE_SEARCH_API_KEY}"
+    elif [[ -n "${BRAVE_API_KEY1:-}" ]]; then
+      export BRAVE_API_KEY="${BRAVE_API_KEY1}"
+    fi
   fi
 
   if [[ -z "${HUB_PAT_TOKEN:-}" ]]; then

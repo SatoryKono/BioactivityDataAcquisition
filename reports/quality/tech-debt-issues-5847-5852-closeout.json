@@ -155,8 +155,7 @@
     "5852": {
       "exact_filename_contracts": [
         "best_practices.md",
-        "commitlint.config.mjs",
-        "mint.json"
+        "commitlint.config.mjs"
       ],
       "owner_lane_id": "root_review_contract_entrypoints"
     }
