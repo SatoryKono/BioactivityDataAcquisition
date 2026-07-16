@@ -507,6 +507,136 @@ def test_secret_signing_identity_requires_exact_full_fingerprint(
     assert not promotion.secret_fingerprint(tmp_path, "release", "B" * 40)
 
 
+def test_desktop_recovery_bundle_is_bounded_and_never_requests_last_resort(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    report = tmp_path / "raw" / "docker-desktop-recovery.json"
+    observed: list[list[str]] = []
+
+    def run(command: list[str], timeout: float, *, cwd: Path) -> dict[str, object]:
+        del timeout, cwd
+        observed.append(command)
+        if command[0] == "wslpath":
+            return {
+                "returncode": 0,
+                "stdout": "C:\\runtime\\" + Path(command[-1]).name,
+            }
+        model.atomic_json(
+            report,
+            {
+                "schema_version": "bioetl-docker-desktop-recovery-v2",
+                "ok": True,
+            },
+        )
+        return {"returncode": 0, "stdout": "", "stderr": ""}
+
+    monkeypatch.setattr(commands, "run_command", run)
+
+    result = commands.desktop_recovery_diagnostic_bundle(tmp_path, report)
+
+    assert result["returncode"] == 0
+    assert result["diagnostic_bundle_present"] is True
+    invocation = observed[-1]
+    assert invocation[0] == "powershell.exe"
+    assert "-ConfirmLastResort" not in invocation
+    assert invocation[invocation.index("-TimeoutSeconds") + 1] == "175"
+
+
+def test_failed_recovery_trial_captures_v2_desktop_diagnostics(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    bundle = (
+        model.StackSpec("main", "bioetl-main", "docker-compose.yml", ("bioetl",)),
+    )
+    state = model.new_state(bundle=bundle, cycles=100, soak_hours=72)
+    state["required_engine_recovery_trials"] = 1
+    evidence = tmp_path / "raw"
+    diagnostic_paths: list[Path] = []
+
+    monkeypatch.setattr(
+        promotion,
+        "bundle_volume_ids",
+        lambda *_args, **_kwargs: {"bioetl-main": []},
+    )
+    monkeypatch.setattr(
+        promotion,
+        "manager_step",
+        lambda *_args, **_kwargs: {"returncode": 0},
+    )
+    monkeypatch.setattr(
+        promotion,
+        "observe_docker_vm_reserve",
+        lambda *_args, **_kwargs: {"returncode": 0},
+    )
+    monkeypatch.setattr(
+        promotion,
+        "run_command",
+        lambda *_args, **_kwargs: {"returncode": 1, "timed_out": False},
+    )
+
+    def probe(
+        runtime_origin: Path,
+        spec: model.StackSpec,
+        output: Path,
+        timeout: float,
+        **_kwargs: object,
+    ) -> dict[str, object]:
+        del runtime_origin, timeout
+        model.atomic_json(
+            output,
+            {
+                "summary": {"ok": True},
+                "services": [
+                    {
+                        "service": spec.required_services[0],
+                        "container_id": "container-id",
+                        "restart_count": 0,
+                    }
+                ],
+                "resources": [],
+            },
+        )
+        return {"returncode": 0}
+
+    def diagnostics(
+        runtime_origin: Path, report: Path, timeout: float
+    ) -> dict[str, object]:
+        del runtime_origin, timeout
+        diagnostic_paths.append(report)
+        model.atomic_json(
+            report,
+            {
+                "schema_version": "bioetl-docker-desktop-recovery-v2",
+                "ok": True,
+            },
+        )
+        return {"returncode": 0, "diagnostic_bundle_present": True}
+
+    monkeypatch.setattr(promotion, "probe_command", probe)
+    monkeypatch.setattr(
+        promotion, "desktop_recovery_diagnostic_bundle", diagnostics
+    )
+
+    assert promotion.run_recovery_trials(
+        state,
+        tmp_path / "state.json",
+        evidence,
+        tmp_path,
+        tmp_path / "contract.yml",
+        bundle,
+    )
+
+    assert diagnostic_paths == [
+        evidence / "recovery" / "trial-001" / "docker-desktop-recovery.json"
+    ]
+    trial = model.load_json(evidence / "recovery" / "trial-001" / "trial.json")
+    assert trial["success"] is False
+    assert trial["post_trial_restore"][0]["action"] == (
+        "desktop-recovery-diagnostics"
+    )
+    assert trial["incident_resolved"] is True
+
+
 def test_signed_summary_is_not_modified_after_signature(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

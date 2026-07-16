@@ -135,7 +135,6 @@ nav:
     -   "Project Rules":
             -   "Normative Sources": 00-project/NORMATIVE_SOURCES.md
             -   "RULES": 00-project/RULES.md
-            -   "Requirements": 01-requirements/REQUIREMENTS.md
             -   "Requirements Traceability Crosswalk": 01-requirements/traceability/requirements-traceability-crosswalk.md
             -   "Rules Summary": 00-project/rules-summary.md
             -   "Glossary": 00-project/glossary.md

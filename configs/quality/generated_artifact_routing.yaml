@@ -468,6 +468,16 @@ routes:
       - docs/02-architecture/generated/module-dependency-map.json
     notes: Architecture dependency maps are deterministic generated docs.
 
+  - id: docker-stability-runbooks-generated-docs
+    generator: manual closeout plus architecture QA verification
+    output_kind: curated_generated_docs
+    commit_policy: tracked_curated_generated_doc
+    outputs:
+      - docs/05-operations/runbooks/docker-compose-project-migration.md
+      - docs/05-operations/runbooks/docker-stability.md
+    notes: Docker stability runbooks are retained as curated generated evidence
+      and should not be treated as canonical process policy.
+
   - id: architecture-diagram-package-family-sources
     generator: scripts/diagrams/generate_package_family_class_diagrams.py
     output_kind: curated_generated_docs

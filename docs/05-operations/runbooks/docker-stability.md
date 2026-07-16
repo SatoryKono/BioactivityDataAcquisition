@@ -30,8 +30,8 @@ not blocked by Docker unavailability.
 Docker is an optional local adjunct under ADR-010. The canonical Python/venv
 runtime does not depend on this probe, its alerts, or any Docker service.
 
-Work from one Linux filesystem origin, preserve volumes, and do not edit `.env`
-or `.wslconfig`.
+Work from one Linux filesystem origin and preserve volumes. This procedure
+never creates or changes repository `.env` files or `.wslconfig`.
 
 ## Procedure
 

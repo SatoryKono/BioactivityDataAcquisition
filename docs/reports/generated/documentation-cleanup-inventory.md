@@ -7,19 +7,19 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3006 |
-| Tracked doc-like files | 1824 |
+| Doc-like files | 3005 |
+| Tracked doc-like files | 1823 |
 | Ignored local docs/reports files | 1182 |
 | Duplicate groups | 2 |
-| Generated without route or exception | 2 |
-| Generated routes | 59 |
+| Generated without route or exception | 0 |
+| Generated routes | 60 |
 
 ## Tracking State
 
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 1182 |
-| tracked | 1824 |
+| tracked | 1823 |
 
 ## Lifecycle Counts
 
@@ -61,7 +61,7 @@
 | --- | --- |
 | Active | 1944 |
 | Archived | 61 |
-| Canonical | 63 |
+| Canonical | 62 |
 | Generated | 706 |
 | Working | 232 |
 
@@ -71,7 +71,7 @@
 | --- | --- |
 | active | 1944 |
 | archive | 61 |
-| canonical | 63 |
+| canonical | 62 |
 | generated | 706 |
 | working | 232 |
 
@@ -82,7 +82,7 @@
 | archive-after-github-state-check | 121 |
 | archive-after-migration | 61 |
 | generate-automatically | 706 |
-| keep | 2114 |
+| keep | 2113 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -123,7 +123,7 @@
 | `docs/reports/documentation-audit-report-2026-07-13.md` | Working | 0 | archive-after-migration |
 | `docs/reports/governance_check_report.json` | Working | 0 | archive-after-migration |
 | `docs/reports/grafana_silver_filter_rejections_prompt.md` | Working | 0 | archive-after-migration |
-| `docs/reports/great-expectations-spike-2026-04-01.md` | Working | 0 | archive-after-migration |
+| `docs/reports/great-expectations-spike-2026-04-01.md` | Working | 1 | archive-after-migration |
 | `docs/reports/knowledge-graphs/bioetl-architecture-graph.json` | Working | 0 | archive-after-migration |
 | `docs/reports/knowledge-graphs/bioetl-runtime-detail-graph.json` | Working | 0 | archive-after-migration |
 | `docs/reports/scripts-inventory-2026-03-01.md` | Working | 0 | archive-after-migration |
@@ -356,6 +356,7 @@
 | dashboard-panel-title-inventory-generated-doc | `scripts/engineering/qa/report_panel_title_inventory.py` | tracked_curated_generated_doc |
 | dead-code-inventory-quality-baseline | `scripts/engineering/qa/report_dead_code_inventory.py` | tracked_quality_baseline |
 | debt-governance-gates-quality-baseline | `scripts/engineering/qa/report_debt_governance_gates.py` | tracked_quality_baseline |
+| docker-stability-runbooks-generated-docs | `manual closeout plus architecture QA verification` | tracked_curated_generated_doc |
 | docker-trivy-sarif-security-report | `.github/workflows/docker.yml` | ignored_ci_output |
 | docs-export-merged-markdown | `src/tools/generate_docs_export.py` | ignored_local_export |
 | docs-reports-generated-curated-misc | `multiple governed docs and quality generators` | tracked_or_local_curated_generated_doc |

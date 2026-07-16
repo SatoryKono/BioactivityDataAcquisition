@@ -32,6 +32,12 @@ only on an explicitly scheduled workstation lane. This runbook does not
 authorize edits to `.env`, `.wslconfig`, volumes, VHDX or Docker data. Obtain
 explicit host-disruption scheduling and an approved signing identity first.
 
+Before campaign execution, verify that every target volume named by the
+release-bundle `migration.volume_map` already exists. The bootstrap records each
+legacy volume as `present` or `not_applicable` and fails before Compose mutation
+when a target volume is missing. Provisioning or migration requires a separate
+approved maintenance procedure and a fresh campaign evidence directory.
+
 ## Procedure
 
 ## Static and image gates

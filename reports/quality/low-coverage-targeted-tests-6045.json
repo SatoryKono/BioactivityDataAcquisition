@@ -3,7 +3,7 @@
     "issue": 6045,
     "reviewed_on": "2026-07-08",
     "debt_budget_policy": "flat_or_decreasing_only",
-    "module_coverage_inventory_source_tree_sha256": "91ba385686c64097f7819427c9d092c8ee41e74108044b09ff8794e260dc16c9",
+    "module_coverage_inventory_source_tree_sha256": "605fd8215be54afd6f4ae29ae8f6572ead1d691ec069cdd095abe9cdd2505de5",
     "baseline": {
         "partially_covered_modules_below_50_percent": 13,
         "inventory_path": "reports/quality/module-coverage-inventory.json"
