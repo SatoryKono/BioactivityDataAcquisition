@@ -18,7 +18,7 @@ type FilterScalar = str | int | bool
 
 def check_required_fields(required_fields: tuple[str, ...], record: JsonDict) -> bool:
     """Check that all required fields are present and non-empty."""
-    return all(record.get(field) not in (None, "") for field in required_fields)
+    return all(not is_empty_value(record.get(field)) for field in required_fields)
 
 
 def check_exclude_if_present(

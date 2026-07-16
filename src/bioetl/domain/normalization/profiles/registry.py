@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from types import MappingProxyType
 
 from bioetl.domain.normalization.profiles._registry_declarations import (
     NORMALIZATION_PROFILE_DECLARATIONS,
@@ -54,28 +55,28 @@ def build_normalization_profile_registry() -> Mapping[
     tuple[str, str], NormalizationProfile
 ]:
     """Return the immutable registry of shipped normalization profiles."""
-    return {
+    return MappingProxyType({
         (declaration.provider, declaration.entity_type): declaration.profile
         for declaration in NORMALIZATION_PROFILE_DECLARATIONS
-    }
+    })
 
 
 def build_normalization_profile_identities() -> Mapping[
     tuple[str, str], NormalizationProfileIdentity
 ]:
     """Return deterministic identities for shipped normalization profiles."""
-    return {
+    return MappingProxyType({
         coordinates: profile.identity
         for coordinates, profile in build_normalization_profile_registry().items()
-    }
+    })
 
 
 def build_normalization_profile_module_paths() -> Mapping[tuple[str, str], str]:
     """Return canonical source-module paths for shipped normalization profiles."""
-    return {
+    return MappingProxyType({
         (declaration.provider, declaration.entity_type): declaration.module_path
         for declaration in NORMALIZATION_PROFILE_DECLARATIONS
-    }
+    })
 
 
 NORMALIZATION_PROFILE_REGISTRY = build_normalization_profile_registry()

@@ -30,6 +30,7 @@ from bioetl.domain.behavior._dq_value_coercion import (
     _violates_maximum,
     _violates_minimum,
 )
+from bioetl.domain.exceptions import ValidationError
 
 if TYPE_CHECKING:
     from bioetl.domain.config.validation import (
@@ -43,7 +44,10 @@ def _field_rule_violated(record: JsonDict, rule: FieldValidation) -> bool:
     value = record.get(rule.field)
     evaluator = _FIELD_RULE_EVALUATORS.get(rule.validation_type)
     if evaluator is None:
-        return False
+        raise ValidationError(
+            f"Unknown field validation type: {rule.validation_type!r}",
+            field="validation_type",
+        )
     return evaluator(record, rule, value)
 
 
@@ -52,7 +56,10 @@ def _cross_rule_violated(record: JsonDict, rule: CrossFieldValidation) -> bool:
     present_count = sum(1 for value in values if _is_present(value))
     evaluator = _CROSS_RULE_EVALUATORS.get(rule.condition)
     if evaluator is None:
-        return False
+        raise ValidationError(
+            f"Unknown cross-field validation condition: {rule.condition!r}",
+            field="condition",
+        )
     return evaluator(record, rule, present_count)
 
 
@@ -60,7 +67,10 @@ def _conditional_matches(record: JsonDict, rule: CrossFieldValidation) -> bool:
     value = record.get(rule.condition_field)
     evaluator = _CONDITIONAL_MATCHERS.get(rule.condition_operator)
     if evaluator is None:
-        return False
+        raise ValidationError(
+            f"Unknown conditional operator: {rule.condition_operator!r}",
+            field="condition_operator",
+        )
     return evaluator(value, rule.condition_value)
 
 
@@ -133,7 +143,9 @@ def _custom_rule_violated(
     if strategy is not None:
         return strategy(value, validator_name)
 
-    return False
+    raise ValidationError(
+        f"Unknown custom validator: {validator_name!r}", field="validator"
+    )
 
 
 def _custom_cross_rule_violated(

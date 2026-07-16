@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from copy import deepcopy
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import TypeGuard
@@ -25,6 +26,10 @@ class WorkflowTransformSpec:
     transform_name: str
     depends_on: tuple[str, ...] = ()
     config: JsonDict | None = None
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "depends_on", tuple(self.depends_on))
+        object.__setattr__(self, "config", deepcopy(self.config) if self.config is not None else None)
 
     @classmethod
     def from_step(cls, step: TransformStepConfig) -> WorkflowTransformSpec:

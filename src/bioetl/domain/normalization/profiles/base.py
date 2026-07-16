@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import inspect
 import json
+from types import MappingProxyType
 from collections.abc import Callable, Collection, Mapping
 from dataclasses import dataclass, field
 from functools import cache
@@ -40,6 +41,10 @@ def _normalizer_ref(normalizer: FieldNormalizer) -> str:
     module_name = getattr(normalizer, "__module__", None)
     qualname = getattr(normalizer, "__qualname__", None)
     if isinstance(module_name, str) and isinstance(qualname, str):
+        closure = getattr(normalizer, "__closure__", None)
+        if closure:
+            captured = [_stable_value(cell.cell_contents) for cell in closure]
+            return f"{module_name}:{qualname}:{_sha256_hex(captured)}"
         return f"{module_name}:{qualname}"
     return repr(normalizer)
 
@@ -53,6 +58,16 @@ def _sha256_hex(payload: object) -> str:
         ensure_ascii=True,
     )
     return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+
+
+def _stable_value(value: object) -> object:
+    if isinstance(value, Mapping):
+        return {str(k): _stable_value(v) for k, v in sorted(value.items(), key=lambda i: str(i[0]))}
+    if isinstance(value, (list, tuple)):
+        return [_stable_value(v) for v in value]
+    if isinstance(value, (str, int, float, bool)) or value is None:
+        return value
+    return repr(value)
 
 
 def _normalize_field_rules(
@@ -203,8 +218,9 @@ class NormalizationProfile:
             field_aliases=self.field_aliases,
             meta_fields=self.meta_fields,
         )
-        object.__setattr__(self, "field_rules", normalized_rules)
-        object.__setattr__(self, "field_aliases", normalized_aliases)
+        object.__setattr__(self, "field_rules", MappingProxyType(normalized_rules))
+        object.__setattr__(self, "field_aliases", MappingProxyType(normalized_aliases))
+        object.__setattr__(self, "meta_fields", frozenset(self.meta_fields))
 
     def rule_for(self, field_name: str) -> FieldRule | None:
         """Return the rule for one field when present."""
