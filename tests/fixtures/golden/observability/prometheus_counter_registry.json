@@ -174,12 +174,12 @@
     "family": "http_adapters",
     "type": "counter"
   },
-  "bioetl_dq_anomaly_detected": {
+  "bioetl_dq_anomaly_detected_total": {
     "description": "Total number of data quality anomalies detected",
     "family": "dq_validation",
     "type": "counter"
   },
-  "bioetl_dq_baseline_updated": {
+  "bioetl_dq_baseline_updated_total": {
     "description": "Number of times DQ monitor baseline was updated",
     "family": "dq_validation",
     "type": "counter"
@@ -219,7 +219,7 @@
     "family": "dq_validation",
     "type": "counter"
   },
-  "bioetl_dq_soft_threshold_exceeded": {
+  "bioetl_dq_soft_threshold_exceeded_total": {
     "description": "Total times DQ soft threshold was exceeded",
     "family": "dq_validation",
     "type": "counter"
@@ -409,12 +409,12 @@
     "family": "pipeline_runtime",
     "type": "counter"
   },
-  "bioetl_shutdown_completed": {
+  "bioetl_shutdown_completed_total": {
     "description": "Total shutdown completions",
     "family": "pipeline_runtime",
     "type": "counter"
   },
-  "bioetl_shutdown_initiated": {
+  "bioetl_shutdown_initiated_total": {
     "description": "Total shutdown initiations",
     "family": "pipeline_runtime",
     "type": "counter"

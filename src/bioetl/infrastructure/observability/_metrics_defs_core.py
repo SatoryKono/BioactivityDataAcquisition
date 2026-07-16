@@ -277,7 +277,7 @@ DATA_FRESHNESS_SECONDS = Gauge(
 )
 
 DQ_ANOMALY_DETECTED = Counter(
-    "bioetl_dq_anomaly_detected",
+    "bioetl_dq_anomaly_detected_total",
     "Total number of data quality anomalies detected",
     ["pipeline", "metric", "severity", "anomaly_type"],
 )
@@ -296,7 +296,7 @@ DQ_MONITOR_ENABLED = Gauge(
 )
 
 DQ_BASELINE_UPDATED = Counter(
-    "bioetl_dq_baseline_updated",
+    "bioetl_dq_baseline_updated_total",
     "Number of times DQ monitor baseline was updated",
     ["pipeline", "metric"],
 )

@@ -33,6 +33,11 @@ class _ScopeIndexStore(Protocol):
     ) -> RunManifest | None: ...
 
 
+def _relative_posix(path: Path, base_path: Path) -> str:
+    """Return platform-independent paths in the serialized rebuild contract."""
+    return path.relative_to(base_path).as_posix()
+
+
 def plan_latest_scope_index_rebuild(store: _ScopeIndexStore) -> dict[str, object]:
     """Build a deterministic report without writing any index file."""
     manifests = store.list_all()
@@ -66,11 +71,9 @@ def plan_latest_scope_index_rebuild(store: _ScopeIndexStore) -> dict[str, object
                     current.manifest_id if current is not None else None
                 ),
                 "desired_manifest_id": desired.manifest_id,
-                "index_path": str(
-                    store._latest_scope_index_path(
-                        pipeline_name,
-                        run_type,
-                    ).relative_to(store.base_path)
+                "index_path": _relative_posix(
+                    store._latest_scope_index_path(pipeline_name, run_type),
+                    store.base_path,
                 ),
                 "pipeline_name": pipeline_name,
                 "run_type": run_type.value,
@@ -97,8 +100,8 @@ def plan_latest_scope_index_rebuild(store: _ScopeIndexStore) -> dict[str, object
             "action": catalog_action,
             "complete": True,
             "corruption": catalog_corruption,
-            "index_path": str(
-                latest_scope_catalog_path(store.base_path).relative_to(store.base_path)
+            "index_path": _relative_posix(
+                latest_scope_catalog_path(store.base_path), store.base_path
             ),
             "scopes": [
                 {"pipeline_name": pipeline_name, "run_type": run_type.value}
