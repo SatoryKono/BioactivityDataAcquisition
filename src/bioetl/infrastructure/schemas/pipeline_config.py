@@ -334,6 +334,7 @@ class PipelineYamlConfig(BaseModel):
         """Validate Medallion Architecture format constraints."""
         bronze_config = self.sink.get("bronze")
         silver_config = self.sink.get("silver")
+        gold_config = self.sink.get("gold")
 
         if bronze_config:
             bronze_config.format = "jsonl"
@@ -342,5 +343,11 @@ class PipelineYamlConfig(BaseModel):
             raise ValueError(
                 f"Silver layer MUST use 'delta' format (RULES.md §2.1). "
                 f"Got '{silver_config.format}'. Only Delta Lake is allowed for Silver layer."
+            )
+
+        if gold_config and gold_config.format != "delta":
+            raise ValueError(
+                f"Gold layer MUST use 'delta' format (RULES.md §2.1). "
+                f"Got '{gold_config.format}'. Only Delta Lake is allowed for Gold layer."
             )
         return self

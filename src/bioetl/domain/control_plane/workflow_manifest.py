@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from uuid import UUID
 
+from bioetl.domain._immutability import deep_thaw_json, freeze_fields
 from bioetl.domain.types import RunID
 
 __all__ = ["WorkflowManifest", "WorkflowManifestStep"]
@@ -23,6 +24,9 @@ class WorkflowManifestStep:
     run_options: dict[str, object] | None = None
     config: dict[str, object] | None = None
 
+    def __post_init__(self) -> None:
+        freeze_fields(self, ("depends_on", "run_options", "config"))
+
     def to_dict(self) -> dict[str, object]:
         """Return a JSON-serializable step payload."""
         return {
@@ -31,8 +35,8 @@ class WorkflowManifestStep:
             "depends_on": list(self.depends_on),
             "pipeline_name": self.pipeline_name,
             "transform_name": self.transform_name,
-            "run_options": dict(self.run_options or {}),
-            "config": dict(self.config or {}),
+            "run_options": deep_thaw_json(self.run_options or {}),
+            "config": deep_thaw_json(self.config or {}),
         }
 
     @classmethod
@@ -68,6 +72,12 @@ class WorkflowManifest:
     steps: tuple[WorkflowManifestStep, ...]
     resumed_from_manifest_id: str | None = None
 
+    def __post_init__(self) -> None:
+        freeze_fields(
+            self,
+            ("launch_context", "defaults", "selected_step_ids", "steps"),
+        )
+
     def to_dict(self) -> dict[str, object]:
         """Return a JSON-serializable manifest payload."""
         return {
@@ -78,8 +88,8 @@ class WorkflowManifest:
             "created_at": self.created_at.isoformat(),
             "workflow_name": self.workflow_name,
             "workflow_version": self.workflow_version,
-            "launch_context": dict(self.launch_context),
-            "defaults": dict(self.defaults),
+            "launch_context": deep_thaw_json(self.launch_context),
+            "defaults": deep_thaw_json(self.defaults),
             "selected_step_ids": list(self.selected_step_ids),
             "steps": [step.to_dict() for step in self.steps],
             "resumed_from_manifest_id": self.resumed_from_manifest_id,

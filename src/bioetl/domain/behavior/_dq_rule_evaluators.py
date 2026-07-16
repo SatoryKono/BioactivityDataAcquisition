@@ -157,7 +157,9 @@ def _custom_cross_rule_violated(
             protein_class_id = record.get("protein_class_id")
             parent_id = record.get("parent_id")
             return _is_present(protein_class_id) and protein_class_id == parent_id
-        return False
+        raise ValidationError(
+            f"Unknown custom cross-field validator: {rule!r}", field="validator"
+        )
     return _custom_cross_rule_violated_impl(record, rule)
 
 

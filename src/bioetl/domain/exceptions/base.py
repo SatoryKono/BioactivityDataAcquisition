@@ -47,6 +47,7 @@ def _redact_string(value: str) -> str:
     query = "[REDACTED]" if parsed.query else ""
     return urlunsplit((parsed.scheme, hostname, parsed.path, query, ""))
 
+
 def _redact(value: object, key: str = "") -> object:
     if any(marker in key.lower() for marker in _SECRET_MARKERS):
         return "[REDACTED]"

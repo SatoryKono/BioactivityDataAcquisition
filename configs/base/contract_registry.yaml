@@ -36,7 +36,7 @@ entries:
       rule_bundle_version: "dq-rules.v1.0"
       normalization_profile_ref: "chembl.activity"
       normalization_profile_version: "1.0.0"
-      normalization_profile_hash: "4a622dd47df09c9c276c28210284e060f3ec0072ae17dff6fc0f5c9da8365894"
+      normalization_profile_hash: "480cf80b6a419a2db6b191d0065391d9d23c44bbe547a0e6174eac7a00a1b14e"
     status: "active"
     source_path: "../../src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py"
     published_artifacts:
@@ -49,7 +49,7 @@ entries:
     rule_bundle_version: "dq-rules.v1.0"
     normalization_profile_ref: "chembl.activity"
     normalization_profile_version: "1.0.0"
-    normalization_profile_hash: "4a622dd47df09c9c276c28210284e060f3ec0072ae17dff6fc0f5c9da8365894"
+    normalization_profile_hash: "480cf80b6a419a2db6b191d0065391d9d23c44bbe547a0e6174eac7a00a1b14e"
 
   chembl.assay:
     identity:
@@ -516,7 +516,7 @@ entries:
       rule_bundle_version: "dq-rules.v1.0"
       normalization_profile_ref: "uniprot.protein"
       normalization_profile_version: "1.0.0"
-      normalization_profile_hash: "f3c77dd7613ff37e298f69817b07aab59d94066590bde3f36aba4d43fbfde69a"
+      normalization_profile_hash: "e474c18d76fb2cede2ac8b1dedb6c12b8c78a7603000b1e2af8a66b1feb0a76c"
     status: "active"
     source_path: "../../src/bioetl/domain/contracts/gold/uniprot.py"
     published_artifacts:
@@ -529,7 +529,7 @@ entries:
     rule_bundle_version: "dq-rules.v1.0"
     normalization_profile_ref: "uniprot.protein"
     normalization_profile_version: "1.0.0"
-    normalization_profile_hash: "f3c77dd7613ff37e298f69817b07aab59d94066590bde3f36aba4d43fbfde69a"
+    normalization_profile_hash: "e474c18d76fb2cede2ac8b1dedb6c12b8c78a7603000b1e2af8a66b1feb0a76c"
 
   composite.activity:
     identity:

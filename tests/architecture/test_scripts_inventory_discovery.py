@@ -168,6 +168,33 @@ def test_discover_refs_counts_unified_dispatcher_command_modules() -> None:
     )
 
 
+def test_discover_refs_counts_package_relative_imports(tmp_path: Path) -> None:
+    """Relative imports should keep internal package helpers out of orphan debt."""
+    module = _load_inventory_module()
+    package = tmp_path / "scripts" / "example_package"
+    package.mkdir(parents=True)
+    consumer = package / "consumer.py"
+    helper = package / "helper.py"
+    consumer.write_text("from .helper import VALUE\n", encoding="utf-8")
+    helper.write_text("VALUE = 1\n", encoding="utf-8")
+    original_iter_search_files = module._iter_search_files
+
+    def _iter_only_consumer(_: Path) -> list[Path]:
+        return [consumer]
+
+    module._iter_search_files = _iter_only_consumer
+    try:
+        refs = module._discover_refs(tmp_path, [consumer, helper])
+    finally:
+        module._iter_search_files = original_iter_search_files
+
+    assert any(
+        item.path == "scripts/example_package/consumer.py"
+        and item.source_group == "scripts"
+        for item in refs["scripts/example_package/helper.py"]
+    )
+
+
 def test_agent_usage_includes_codex_agents_and_skills() -> None:
     """Agent usage should detect both skill wrappers and logical agent specs."""
     module = _load_inventory_module()

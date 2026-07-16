@@ -77,13 +77,22 @@ def validate_resume_state(
             "Workflow resume state belongs to a different workflow: "
             f"expected {workflow_name!r}, got {latest_state.workflow_name!r}"
         )
-    if not latest_state.manifest_id.strip() or not latest_state.execution_fingerprint.strip():
-        raise RuntimeError("Workflow resume state is damaged: identity fields are missing")
+    if (
+        not latest_state.manifest_id.strip()
+        or not latest_state.execution_fingerprint.strip()
+    ):
+        raise RuntimeError(
+            "Workflow resume state is damaged: identity fields are missing"
+        )
     step_ids = tuple(step.step_id for step in latest_state.steps)
     if not step_ids or len(step_ids) != len(set(step_ids)):
-        raise RuntimeError("Workflow resume state is damaged: step identities are missing or duplicated")
+        raise RuntimeError(
+            "Workflow resume state is damaged: step identities are missing or duplicated"
+        )
     unknown_selected = set(latest_state.selected_step_ids).difference(step_ids)
-    unknown_completed = set(latest_state.completed_transform_fingerprints).difference(step_ids)
+    unknown_completed = set(latest_state.completed_transform_fingerprints).difference(
+        step_ids
+    )
     if unknown_selected or unknown_completed:
         raise RuntimeError(
             "Workflow resume state is damaged: persisted step references are inconsistent"

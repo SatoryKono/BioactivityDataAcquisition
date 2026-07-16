@@ -27,8 +27,8 @@ from dataclasses import dataclass, field
 from pydantic import BaseModel, ConfigDict
 from pydantic import Field as PydanticField
 
-from bioetl.domain.entities.publication_base import PublicationEntityBase
 from bioetl.domain._immutability import freeze_fields
+from bioetl.domain.entities.publication_base import PublicationEntityBase
 
 # === Pydantic DTO Model ===
 

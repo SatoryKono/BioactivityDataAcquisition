@@ -41,10 +41,16 @@ def _normalizer_ref(normalizer: FieldNormalizer) -> str:
     module_name = getattr(normalizer, "__module__", None)
     qualname = getattr(normalizer, "__qualname__", None)
     if isinstance(module_name, str) and isinstance(qualname, str):
-        closure = getattr(normalizer, "__closure__", None)
-        if closure:
-            captured = [_stable_value(cell.cell_contents) for cell in closure]
-            return f"{module_name}:{qualname}:{_sha256_hex(captured)}"
+        closure = getattr(normalizer, "__closure__", None) or ()
+        semantics = {
+            "defaults": _stable_value(getattr(normalizer, "__defaults__", None)),
+            "kwdefaults": _stable_value(
+                getattr(normalizer, "__kwdefaults__", None)
+            ),
+            "closure": [_stable_value(cell.cell_contents) for cell in closure],
+        }
+        if any(semantics.values()):
+            return f"{module_name}:{qualname}:{_sha256_hex(semantics)}"
         return f"{module_name}:{qualname}"
     return repr(normalizer)
 
@@ -65,6 +71,19 @@ def _stable_value(value: object) -> object:
         return {str(k): _stable_value(v) for k, v in sorted(value.items(), key=lambda i: str(i[0]))}
     if isinstance(value, (list, tuple)):
         return [_stable_value(v) for v in value]
+    if isinstance(value, (set, frozenset)):
+        normalized = [_stable_value(item) for item in value]
+        return sorted(
+            normalized,
+            key=lambda item: json.dumps(item, sort_keys=True, default=str),
+        )
+    if isinstance(value, bytes):
+        return value.hex()
+    if callable(value):
+        return {
+            "module": getattr(value, "__module__", type(value).__module__),
+            "qualname": getattr(value, "__qualname__", type(value).__qualname__),
+        }
     if isinstance(value, (str, int, float, bool)) or value is None:
         return value
     return repr(value)

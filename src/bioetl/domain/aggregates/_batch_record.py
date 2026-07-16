@@ -8,7 +8,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from bioetl.domain._immutability import deep_freeze_json
-
 from bioetl.domain.types import (
     BronzeRecord,
     ContentHash,
