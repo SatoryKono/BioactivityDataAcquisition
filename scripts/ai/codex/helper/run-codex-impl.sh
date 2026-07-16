@@ -18,6 +18,26 @@ if [[ -f "${ENV_FILE}" ]]; then
     set +a
 fi
 
+# Ref is a remote HTTP MCP server, so Codex itself must receive the header
+# source variable. Load it selectively from the repo env in a subshell so other
+# project secrets are not added to the Codex parent environment.
+REPO_ENV_LOADER="${REPO_ROOT}/scripts/ai/mcp/support/load_repo_env.sh"
+if [[ -f "${REPO_ENV_LOADER}" ]]; then
+    while IFS= read -r -d '' key && IFS= read -r -d '' value; do
+        printf -v "${key}" '%s' "${value}"
+        export "${key}"
+    done < <(
+        (
+            # shellcheck source=../../mcp/support/load_repo_env.sh
+            source "${REPO_ENV_LOADER}"
+            load_repo_env_if_present
+            if [[ -n "${REF_TOOL_API_KEY:-}" ]]; then
+                printf 'REF_TOOL_API_KEY\0%s\0' "${REF_TOOL_API_KEY}"
+            fi
+        )
+    )
+fi
+
 # Verify API key
 if [[ -z "${OPENAI_API_KEY:-}" ]]; then
     echo "[ERROR] OPENAI_API_KEY not set in ${ENV_FILE}" >&2

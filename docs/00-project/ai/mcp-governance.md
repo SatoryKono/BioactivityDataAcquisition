@@ -20,7 +20,7 @@ Canonical token guidance lives in
 Required local tokens:
 
 - `GITHUB_PERSONAL_ACCESS_TOKEN` or alias `GITHUB_TOKEN` for `github`
-- `BRAVE_API_KEY` or alias `BRAVE_SEARCH_API_KEY` for `brave-search`
+- `BRAVE_API_KEY` or alias `BRAVE_SEARCH_API_KEY` / `BRAVE_API_KEY1` for `brave-search`
 
 Optional local auth:
 
@@ -30,6 +30,8 @@ Optional local auth:
   `grafana`
 - `NEO4J_URI`, `NEO4J_USERNAME`, `NEO4J_PASSWORD`, `NEO4J_AUTH` for
   `neo4j-cypher` and `neo4j-memory`
+- `REF_TOOL_API_KEY` for `ref` when local env-header authentication is used
+  instead of OAuth
 
 Wrappers must source the repo env loader and the token validation helper before
 starting token-bearing servers. Use `BIOETL_MCP_VALIDATE_ONLY=1` for safe
@@ -45,7 +47,8 @@ biomoltechDocs, mintlify, deepwiki
 ref
 
 `ref` uses the key-free `https://api.ref.tools/mcp` endpoint. Local clients
-authenticate through OAuth; Ref API keys must not be embedded in tracked or
+authenticate through OAuth or, for Codex, an `env_http_headers` reference to
+`REF_TOOL_API_KEY`. Ref API key values must not be embedded in tracked or
 generated MCP configuration.
 
 ## Удалённые MCP

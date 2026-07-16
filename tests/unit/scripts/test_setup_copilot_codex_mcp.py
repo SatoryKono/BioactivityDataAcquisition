@@ -121,8 +121,7 @@ def test_main_uses_workspace_root_for_generated_server_paths(tmp_path: Path) -> 
         == "https://biomoltech.mintlify.app/mcp"
     )
     assert (
-        gemini_settings["mcpServers"]["ref"]["httpUrl"]
-        == "https://api.ref.tools/mcp"
+        gemini_settings["mcpServers"]["ref"]["httpUrl"] == "https://api.ref.tools/mcp"
     )
 
 
@@ -243,6 +242,10 @@ def test_skip_codex_validation_still_updates_codex_config(
     rendered = codex_config.read_text(encoding="utf-8")
     assert "[mcp_servers.filesystem]" in rendered
     assert "[mcp_servers.memory]" in rendered
+    assert "[mcp_servers.ref]" in rendered
+    assert 'url = "https://api.ref.tools/mcp"' in rendered
+    assert 'env_http_headers = { x-ref-api-key = "REF_TOOL_API_KEY" }' in rendered
+    assert "?apiKey=" not in rendered
     # The workspace root appears in the filesystem server args, either as "." (portable)
     # or as an absolute path depending on the portable_workspace_paths flag
     assert "filesystem" in rendered

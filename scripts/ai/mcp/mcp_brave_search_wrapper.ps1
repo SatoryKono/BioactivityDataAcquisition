@@ -9,7 +9,7 @@ Import-BioetlRepoEnv -RepoRoot $repoRoot
 Remove-Item Env:BIOETL_SKIP_ENV_LOCAL -ErrorAction SilentlyContinue
 . (Join-Path $PSScriptRoot "support/token_validation.ps1")
 
-Test-McpRequiredToken -Name "BRAVE_API_KEY" -MinLength 32 -Purpose "Brave Search MCP"
+Test-McpRequiredToken -Name "BRAVE_API_KEY" -MinLength 31 -Purpose "Brave Search MCP"
 Exit-McpValidateOnly -ServerName "brave-search"
 
 $dockerArgs = @(

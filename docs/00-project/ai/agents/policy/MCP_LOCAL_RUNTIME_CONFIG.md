@@ -75,7 +75,7 @@ The repo env loaders are:
 They load local env files when present and normalize common aliases such as:
 
 - `GITHUB_TOKEN` <-> `GITHUB_PERSONAL_ACCESS_TOKEN`
-- `BRAVE_SEARCH_API_KEY` -> `BRAVE_API_KEY`
+- `BRAVE_SEARCH_API_KEY` / `BRAVE_API_KEY1` -> `BRAVE_API_KEY`
 - `GRAFANA_TOKEN` / `GRAFANA_API_KEY` -> `GRAFANA_SERVICE_ACCOUNT_TOKEN`
 - `DOCKERHUB_PAT` / `DOCKERHUB_TOKEN` -> `HUB_PAT_TOKEN`
 
@@ -96,8 +96,10 @@ and fork/PR exposure model. Document any approved CI secret usage in
 
 Remote MCP servers that support OAuth, including Ref Tools at
 `https://api.ref.tools/mcp`, must use the key-free base URL in tracked and
-generated config. Authentication is completed interactively by the local MCP
-client; API keys must not be embedded in URLs or committed config.
+generated config. Ref authentication may use interactive OAuth or the local
+Codex-only `env_http_headers` mapping from `x-ref-api-key` to
+`REF_TOOL_API_KEY`. Only the environment variable name may appear in generated
+config; API key values must not be embedded in URLs or committed config.
 
 ## Required Documentation Language
 
