@@ -7,11 +7,6 @@ on:
     types: [created]
   issue_comment:
     types: [created]
-  push:
-    branches:
-      - main
-      - master
-      - develop
 
 permissions:
   issues: write
@@ -29,8 +24,7 @@ jobs:
     if: |
       (github.event_name == 'pull_request' && github.event.pull_request.draft == false) ||
       github.event_name == 'pull_request_review_comment' ||
-      github.event_name == 'issue_comment' ||
-      github.event_name == 'push'
+      github.event_name == 'issue_comment'
 
     steps:
       - name: Checkout
@@ -60,9 +54,7 @@ jobs:
           entrypoint: /bin/bash
           args: >
             -c "
-            if [ '${{ github.event_name }}' = 'push' ]; then
-              python -m pr_agent.cli --pr_url='https://github.com/${{ github.repository }}/commit/${{ github.sha }}' push_trigger
-            elif [ '${{ github.event_name }}' = 'pull_request' ]; then
+            if [ '${{ github.event_name }}' = 'pull_request' ]; then
               python -m pr_agent.cli --pr_url='https://github.com/${{ github.repository }}/pull/${{ github.event.number }}' run
             elif [ '${{ github.event_name }}' = 'issue_comment' ] || [ '${{ github.event_name }}' = 'pull_request_review_comment' ]; then
               python -m pr_agent.cli --issue_url='${{ github.event.comment.html_url }}' run
