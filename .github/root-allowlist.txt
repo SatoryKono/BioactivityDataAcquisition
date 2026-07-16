@@ -25,7 +25,6 @@ LICENSE
 Makefile
 README.md
 mkdocs.yml
-mint.json
 package-lock.json
 package.json
 pyproject.toml

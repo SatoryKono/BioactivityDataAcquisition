@@ -12,7 +12,7 @@ from scripts.engineering.qa.report_dashboard_query_duplicates import (
     build_near_duplicate_groups,
     evaluate_governance,
 )
-from tests.helpers import assert_cli_succeeded, run_main_in_process, run_python_cli
+from tests.helpers import assert_cli_succeeded, run_main_in_process
 
 
 pytestmark = pytest.mark.unit
@@ -305,13 +305,11 @@ def test_qa_cli_report_dashboard_query_duplicates_help_smoke() -> None:
 def test_qa_cli_report_dashboard_query_duplicates_check_passes_current_allowlist() -> (
     None
 ):
-    result = run_python_cli(
-        "-m",
-        "scripts.engineering.qa",
+    result = run_main_in_process(
+        qa_router.main,
         "report-dashboard-query-duplicates",
         "--check",
         "--include-single-panel-near",
-        timeout=300,  # Increased from 60s to 300s for Windows performance
     )
 
     assert_cli_succeeded(result)

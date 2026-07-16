@@ -61,7 +61,7 @@ verification in Qodo Portal or GitHub UI:
 
 ## Root Retention Revalidation
 
-Last verified: 2026-07-06 for root hygiene issue #5999.
+Last verified: 2026-07-16 for root hygiene issue #5999.
 
 | Root surface | Owner contract | Current decision |
 | --- | --- | --- |
@@ -69,7 +69,7 @@ Last verified: 2026-07-06 for root hygiene issue #5999.
 | `best_practices.md` | Qodo rule-enforcement guidance filename | Retain at root while vendor ingestion expects the documented filename. |
 | `pr_compliance_checklist.yaml` | Retired local Qodo checklist surface | Absent from root baseline; do not restore without fresh tooling evidence. |
 | `commitlint.config.mjs` | Commitlint workflow configuration | Retain at root while `.github/workflows/commit-lint.yml` uses this exact config path. |
-| `mint.json` | Mintlify docs configuration | Retain at root while docs tooling expects the standard root filename. |
+| `mint.json` | Retired Mintlify root entrypoint | Absent from root baseline; do not restore without fresh tooling evidence and owner review. |
 
 No root review/tooling file should move based only on naming preference. A move
 requires tool-specific validation, updated workflows or external settings,

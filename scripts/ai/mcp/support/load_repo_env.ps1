@@ -14,8 +14,12 @@ function Normalize-BioetlRepoEnvAliases {
         $env:NEEDLE_API_KEY = $env:NEEDLE_TOKEN
     }
 
-    if (-not $env:BRAVE_API_KEY -and $env:BRAVE_SEARCH_API_KEY) {
-        $env:BRAVE_API_KEY = $env:BRAVE_SEARCH_API_KEY
+    if (-not $env:BRAVE_API_KEY) {
+        if ($env:BRAVE_SEARCH_API_KEY) {
+            $env:BRAVE_API_KEY = $env:BRAVE_SEARCH_API_KEY
+        } elseif ($env:BRAVE_API_KEY1) {
+            $env:BRAVE_API_KEY = $env:BRAVE_API_KEY1
+        }
     }
 
     if (-not $env:HUB_PAT_TOKEN) {

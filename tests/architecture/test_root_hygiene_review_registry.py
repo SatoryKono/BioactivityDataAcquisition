@@ -137,7 +137,10 @@ def test_root_hygiene_review_registry_tracks_observed_transient_root_families() 
         if isinstance(candidate, dict) and isinstance(candidate.get("path"), str)
     }
 
-    assert by_path["artifacts"]["current_live_state"] == "absent_from_root_baseline"
+    assert (
+        by_path["artifacts"]["current_live_state"]
+        == "present_local_only_root_surface"
+    )
     assert by_path["artifacts"]["canonical_path"] is None
     assert (
         by_path[".coverage"]["current_live_state"] == "present_local_only_root_surface"
@@ -431,11 +434,13 @@ def test_root_review_contract_entrypoints_have_exact_filename_owners() -> None:
         "pr_compliance_checklist.yaml",
         "sonar-project.properties",
     }
-    present_contract_paths = {"commitlint.config.mjs", "mint.json"}
+    present_contract_paths = {"commitlint.config.mjs"}
     for path in present_contract_paths:
         candidate = by_path[path]
         assert candidate["current_live_state"] == "present_approved_root_surface"
         assert candidate["canonical_path"] == path
+    assert by_path["mint.json"]["current_live_state"] == "absent_from_root_baseline"
+    assert by_path["mint.json"]["canonical_path"] is None
     assert by_path["pr_compliance_checklist.yaml"]["current_live_state"] == "absent_from_root_baseline"
     assert by_path["pr_compliance_checklist.yaml"]["canonical_path"] is None
     assert (

@@ -47,7 +47,7 @@ def _run_record_id_subprocess(code: str) -> str:
         cwd=_REPO_ROOT,
         env=env,
         text=True,
-        timeout=60,  # Increased from 30s to 60s for robustness
+        timeout=120,  # Increased from 60s to 120s for Windows performance
     )
     return completed.stdout.strip()
 

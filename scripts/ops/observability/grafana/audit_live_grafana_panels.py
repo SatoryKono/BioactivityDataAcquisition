@@ -101,6 +101,90 @@ class AuditResult:
     target_ref_id: str | None = None
 
 
+SEMANTIC_CLASSIFICATION_POLICY: dict[str, str] = {
+    "query_invalid": "block",
+    "datasource_unavailable": "block_when_required",
+    "blocked_backend_unavailable": "block_when_required",
+    "empty_result": "review_required",
+    "zero_result": "pass",
+    "expected_empty": "pass",
+    "unknown_result": "review_required",
+    "telemetry_missing": "review_required_unless_explicitly_reviewed",
+}
+_SEMANTIC_CLASSIFICATION_ALIASES = {
+    "invalid_shape": "query_invalid",
+    "missing_query": "query_invalid",
+    "missing_url": "query_invalid",
+    "query_error": "query_invalid",
+    "blocked_unavailable": "datasource_unavailable",
+}
+_REVIEWED_SEMANTIC_OUTCOMES = frozenset(
+    {
+        ("bioetl-dq-v2", 8, "telemetry_missing"),
+        ("bioetl-dq-v2", 101, "telemetry_missing"),
+    }
+)
+
+
+def semantic_gate_evidence(results: list[AuditResult]) -> dict[str, Any]:
+    """Build panel-attributable semantic gate evidence from live results."""
+    required_by_panel = {
+        (spec.dashboard_uid, spec.panel_id, spec.target_ref_id): spec.required
+        for spec in effective_panel_specs()
+    }
+    outcomes: list[dict[str, Any]] = []
+    for result in results:
+        key = (result.dashboard_uid, result.panel_id, result.target_ref_id)
+        required = required_by_panel.get(key, True)
+        canonical = _SEMANTIC_CLASSIFICATION_ALIASES.get(
+            result.classification,
+            result.classification,
+        )
+        reviewed = (
+            result.dashboard_uid,
+            result.panel_id,
+            canonical,
+        ) in _REVIEWED_SEMANTIC_OUTCOMES
+        policy = SEMANTIC_CLASSIFICATION_POLICY.get(canonical, "pass")
+        if result.status != "ok":
+            decision = "block"
+        elif policy == "block":
+            decision = "block"
+        elif policy == "block_when_required":
+            decision = "block" if required else "pass_optional"
+        elif policy == "review_required":
+            decision = "pass_reviewed" if reviewed else "review"
+        elif policy == "review_required_unless_explicitly_reviewed":
+            decision = "pass_reviewed" if reviewed else "review"
+        else:
+            decision = "pass"
+        outcomes.append(
+            {
+                "dashboard_uid": result.dashboard_uid,
+                "panel_id": result.panel_id,
+                "target_ref_id": result.target_ref_id,
+                "source_kind": result.source_kind,
+                "required": required,
+                "classification": result.classification,
+                "canonical_classification": canonical,
+                "policy": policy,
+                "decision": decision,
+            }
+        )
+
+    blocking_count = sum(item["decision"] == "block" for item in outcomes)
+    review_count = sum(item["decision"] == "review" for item in outcomes)
+    return {
+        "status": (
+            "fail" if blocking_count else "review_required" if review_count else "pass"
+        ),
+        "blocking_count": blocking_count,
+        "review_count": review_count,
+        "classification_policy": SEMANTIC_CLASSIFICATION_POLICY,
+        "panel_outcomes": outcomes,
+    }
+
+
 REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
     PanelAuditSpec(
         dashboard_uid="bioetl-control-plane-v1",
@@ -872,10 +956,15 @@ def _classify_processed_records_payload(payload: dict[str, object]) -> tuple[str
         if not isinstance(parameter, str) or not parameter.strip():
             return ("invalid_shape", f"Processed Records row {index} has no parameter")
         if parameter in parameters:
-            return ("invalid_shape", f"Processed Records parameter is duplicated: {parameter}")
+            return (
+                "invalid_shape",
+                f"Processed Records parameter is duplicated: {parameter}",
+            )
         parameters.add(parameter)
 
-        value, value_error = _prefixed_cell_value(raw_row, parameter=parameter, field="value")
+        value, value_error = _prefixed_cell_value(
+            raw_row, parameter=parameter, field="value"
+        )
         percentage, percentage_error = _prefixed_cell_value(
             raw_row, parameter=parameter, field="percintage"
         )
@@ -888,7 +977,9 @@ def _classify_processed_records_payload(payload: dict[str, object]) -> tuple[str
         assert value is not None
         assert percentage is not None
         if percentage != "No data":
-            if not percentage.endswith("%") or not _is_nonnegative_number(percentage[:-1]):
+            if not percentage.endswith("%") or not _is_nonnegative_number(
+                percentage[:-1]
+            ):
                 return (
                     "invalid_shape",
                     f"Processed Records row {parameter!r} has malformed percentage",
@@ -920,9 +1011,8 @@ def _classify_processed_records_payload(payload: dict[str, object]) -> tuple[str
 
 def _is_identity_placeholder(value: str) -> bool:
     normalized = value.strip().lower()
-    return (
-        normalized in {"", "-", "no data", "none", "null", "unknown"}
-        or any(normalized.startswith(prefix) for prefix in _PLACEHOLDER_PREFIXES)
+    return normalized in {"", "-", "no data", "none", "null", "unknown"} or any(
+        normalized.startswith(prefix) for prefix in _PLACEHOLDER_PREFIXES
     )
 
 
@@ -955,7 +1045,9 @@ def _classify_identity_payload(payload: dict[str, object]) -> tuple[str, str]:
             f"Identity payload missing anchors: {sorted(missing_anchors)}",
         )
     placeholder_anchors = sorted(
-        parameter for parameter, value in anchors.items() if _is_identity_placeholder(value)
+        parameter
+        for parameter, value in anchors.items()
+        if _is_identity_placeholder(value)
     )
     if placeholder_anchors:
         return (
@@ -1177,7 +1269,13 @@ def _audit_http_panel(
         status = (
             "error"
             if classification
-            in {"empty_result", "invalid_shape", "no_data", "partial_data", "unresolved_identity"}
+            in {
+                "empty_result",
+                "invalid_shape",
+                "no_data",
+                "partial_data",
+                "unresolved_identity",
+            }
             else "ok"
         )
     elif spec.semantic_kind == "http_summary":
@@ -1332,7 +1430,9 @@ def _blocked_http_backend_result(
     )
 
 
-def _run_audit_with_provenance(config: AuditConfig) -> tuple[list[AuditResult], str | None]:
+def _run_audit_with_provenance(
+    config: AuditConfig,
+) -> tuple[list[AuditResult], str | None]:
     results: list[AuditResult] = []
     resolved_app_base_url: str | None = None
     app_resolution_error: str | None = None
@@ -1432,7 +1532,11 @@ def _read_prometheus_runtime_identity(config: AuditConfig) -> dict[str, object]:
             timeout_seconds=config.request_timeout_seconds,
         )
     except (HTTPError, URLError, OSError, TimeoutError, json.JSONDecodeError) as exc:
-        return {"source_url": source_url, "status": "unavailable", "error_type": type(exc).__name__}
+        return {
+            "source_url": source_url,
+            "status": "unavailable",
+            "error_type": type(exc).__name__,
+        }
     if not isinstance(payload, dict) or payload.get("status") != "success":
         return {"source_url": source_url, "status": "invalid_shape"}
     data = payload.get("data")
@@ -1472,12 +1576,18 @@ def _write_report(
         },
         "runtime_provenance": {
             "resolved_backend_base_url": (
-                _redact_url(resolved_backend_base_url) if resolved_backend_base_url else None
+                _redact_url(resolved_backend_base_url)
+                if resolved_backend_base_url
+                else None
             ),
             "prometheus": prometheus_runtime_identity
-            or {"source_url": _redact_url(config.prometheus_base_url), "status": "not_collected"},
+            or {
+                "source_url": _redact_url(config.prometheus_base_url),
+                "status": "not_collected",
+            },
         },
         "panel_specs": [asdict(spec) for spec in effective_panel_specs()],
+        "semantic_gate": semantic_gate_evidence(results),
         "results": [asdict(result) for result in results],
     }
     config.output_path.write_text(
@@ -1505,7 +1615,7 @@ def main(argv: list[str] | None = None) -> int:
             f"{result.dashboard_uid}#{result.panel_id} {result.title}: "
             f"{result.status}/{result.classification}"
         )
-    return 1 if any(result.status != "ok" for result in results) else 0
+    return 0 if semantic_gate_evidence(results)["status"] == "pass" else 1
 
 
 if __name__ == "__main__":

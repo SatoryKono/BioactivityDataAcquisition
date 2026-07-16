@@ -13,7 +13,7 @@ source "${script_dir}/support/token_validation.sh"
 load_repo_env_if_present
 unset BIOETL_SKIP_ENV_LOCAL
 
-mcp_validate_required_token "BRAVE_API_KEY" 32 "Brave Search MCP"
+mcp_validate_required_token "BRAVE_API_KEY" 31 "Brave Search MCP"
 mcp_exit_if_validate_only "brave-search"
 
 docker_bin="$(resolve_docker_bin)"

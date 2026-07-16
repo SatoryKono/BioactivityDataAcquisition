@@ -132,8 +132,24 @@ ______________________________________________________________________
 > `dashboard_semantic_gate` covers datasource/backend readiness and the reviewed
 > live panel audit, while `dashboard_render_gate` covers render auth,
 > Playwright/expanded-row capture, screenshots, and the render manifest. The
-> semantic audit runs before screenshot refresh, so a browser-host failure does
-> not hide PromQL, LogQL, HTTP, or datasource evidence. If the
+> semantic audit runs before screenshot refresh, but both gates always record
+> their own terminal result: a browser-host failure does not hide PromQL,
+> LogQL, HTTP, or datasource evidence, and a semantic failure does not skip a
+> viable screenshot/manifest check. The final render preflight uses
+> `--skip-semantic-checks`, so Prometheus or Quarantine Explorer availability
+> cannot contaminate the browser verdict.
+>
+> Semantic severity is fail-closed and panel-attributable in the live audit
+> artifact. `query_invalid` blocks. `datasource_unavailable` and
+> `blocked_backend_unavailable` block required panels. `empty_result` and
+> `unknown_result` require explicit review. `zero_result` and `expected_empty`
+> pass. `telemetry_missing` passes only for an explicitly reviewed UID/panel
+> contract (currently DQ freshness panels `bioetl-dq-v2#8` and `#101`, which
+> render `UNKNOWN`). Each decision records dashboard UID, panel ID, datasource
+> kind, required/optional status, original classification, canonical
+> classification, and gate decision.
+>
+> If the
 > discovery pass times out, the cycle falls back to the last successful
 > `reports/observability/grafana/live-panel-audit.json` subset before failing
 > hard. By default the cycle also force-refreshes the detached Quarantine

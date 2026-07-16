@@ -1,11 +1,11 @@
 # Сводка evidence: project-package-topology
 
-Дата: 2026-07-13
+Дата: 2026-07-16
 Статус: refreshed
 
 Review note (2026-03-27): included in the repo-wide evidence-pack sweep; see `docs/reports/evidence/project-evidence-rebaseline/06-status/EVIDENCE-PACK-REVIEW-2026-03-27.md` for wave status, retained-vs-reopened interpretation, and current review scope.
 
-Refresh note (2026-07-13): top-level package counts were remeasured from the
+Refresh note (2026-07-16): top-level package counts were remeasured from the
 working tree with `find src/bioetl ... -name '*.py'` and first-order package
 directory scans excluding `__pycache__`. Targeted raw evidence snapshots for the
 `interfaces`, `composition`, and `application` pillar packs were refreshed in
@@ -13,13 +13,13 @@ place to remove known topology drift; older `2026-03-20` raw evidence files in
 other layer packs remain historical inputs and should not be treated as the
 latest package-count baseline.
 
-Current-baseline note (2026-07-13): architectural planning and GitHub issues
+Current-baseline note (2026-07-16): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current baseline is reconciled with
-`reports/quality/module-coverage-inventory.json` snapshot `2026-07-13`
+`reports/quality/module-coverage-inventory.json` snapshot `2026-07-16`
 (`source_module_count=2226`,
-`source_tree_sha256=5d910a3d52558b336af19c1d64804cdbfec59f0a1711fad321a104a02f436f31`).
-Raw files dated before `2026-07-13` are retained only as historical detailed
+`source_tree_sha256=91ba385686c64097f7819427c9d092c8ee41e74108044b09ff8794e260dc16c9`).
+Raw files dated before `2026-07-16` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence.
 

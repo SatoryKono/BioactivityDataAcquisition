@@ -1,0 +1,54 @@
+name: CodeRabbit
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: coderabbit-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  cli-review:
+    name: CodeRabbit CLI
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Install CodeRabbit CLI
+        run: curl -fsSL https://cli.coderabbit.ai/install.sh | sh
+
+      - name: Run CodeRabbit CLI review
+        env:
+          CODERABBIT_API_KEY: ${{ secrets.CODERABBIT_API_KEY }}
+        run: |
+          if [ -z "$CODERABBIT_API_KEY" ]; then
+            echo "::warning::CODERABBIT_API_KEY is not set. Skipping CLI review."
+            echo "Add an Agentic API key secret, or rely on the CodeRabbit GitHub App for PR reviews."
+            exit 0
+          fi
+
+          coderabbit auth login --api-key "$CODERABBIT_API_KEY"
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE="${{ github.event.pull_request.base.ref }}"
+            coderabbit review --base="$BASE" --pr="${{ github.event.pull_request.number }}"
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            BEFORE="${{ github.event.before }}"
+            coderabbit review --before="$BEFORE" --head="${{ github.sha }}"
+          else
+            coderabbit review --head="${{ github.sha }}"
+          fi

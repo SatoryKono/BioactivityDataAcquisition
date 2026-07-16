@@ -1,5 +1,6 @@
 """Integration tests for Grafana dashboard surface-level observability contracts."""
 
+import json
 from pathlib import Path
 
 import pytest
@@ -162,6 +163,25 @@ def test_runtime_warning_loki_queries_filter_parsed_fields_after_json() -> None:
     assert '__error__!=""' in unstructured_expr
     assert "{{.__error__}}" in unstructured_expr
     assert "{{__error__}}" not in unstructured_expr
+
+
+def test_runtime_loki_panel_fixtures_cover_warning_and_malformed_paths() -> None:
+    fixture_path = Path("tests/fixtures/grafana/loki_runtime_panel_events.jsonl")
+    fixtures = [
+        json.loads(line)
+        for line in fixture_path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+
+    warning = next(item for item in fixtures if item["kind"] == "warning")
+    malformed = next(item for item in fixtures if item["kind"] == "malformed")
+    assert warning["expected_panel_ids"] == [250, 257]
+    assert set(warning["line"]) >= {"pipeline", "level", "event", "logger"}
+    assert warning["line"]["pipeline"] == "chembl_activity"
+    assert warning["line"]["level"] == "warning"
+    assert malformed["expected_panel_ids"] == [251]
+    with pytest.raises(json.JSONDecodeError):
+        json.loads(malformed["line"])
 
 
 def test_runtime_dashboard_describes_tracing_optional_mode() -> None:
