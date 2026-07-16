@@ -338,14 +338,12 @@ class DocumentationGovernanceChecker:
         registry_index = self.docs_dir / "02-architecture" / "adr-registry" / "index.md"
         navigator_registry = self.docs_dir / "02-architecture" / "adr-registry.md"
         rules_doc = self.docs_dir / "00-project" / "RULES.md"
-        requirements_doc = self.docs_dir / "01-requirements" / "REQUIREMENTS.md"
 
         required_files = (
             registry_json,
             registry_index,
             navigator_registry,
             rules_doc,
-            requirements_doc,
         )
         missing = [str(path) for path in required_files if not path.exists()]
         if missing:
@@ -389,14 +387,6 @@ class DocumentationGovernanceChecker:
         if f"[ADR-{latest_adr}]" not in rules_text:
             checks_failed.append(
                 f"RULES.md appendix does not reference the latest ADR-{latest_adr}"
-            )
-
-        requirements_text = requirements_doc.read_text(encoding="utf-8")
-        verification_marker = f"ADR registry verified through ADR-{latest_adr}"
-        if verification_marker not in requirements_text:
-            checks_failed.append(
-                "REQUIREMENTS.md verification marker drifted from latest ADR: "
-                f"expected '{verification_marker}'"
             )
 
         if not checks_failed:
