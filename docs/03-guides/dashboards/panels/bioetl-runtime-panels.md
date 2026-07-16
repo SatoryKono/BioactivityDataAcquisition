@@ -6,6 +6,10 @@
 
 Dashboard `2. Runtime` is an L2 incident surface for runtime triage. It uses shared shell/status/ID/provenance contracts and provides rich runtime triage rows across stage backlog, errors, blockers, and escalation. Shipped dashboard JSON is the source of truth.
 
+Where a Counter appears inside `max_over_time()`, the value is Pushgateway
+snapshot evidence, a snapshot denominator, or a presence gate. Event deltas use
+`increase()`; exact multi-run totals come from RunLedger.
+
 ## Key Panels
 
 ### 1. Review Dashboard Navigation
@@ -28,12 +32,14 @@ Dashboard `2. Runtime` is an L2 incident surface for runtime triage. It uses sha
 ### 4. ID
 - **Type:** Table
 - **Purpose:** Show run ID, pipeline, run type, and timestamp for selected scope.
-- **Data sources:** `bioetl_pipeline_runs`
+- **Data sources:** Quarantine Explorer HTTP control-plane identity endpoint
+  `/ops/control-plane/identity-table`; this is not a Prometheus panel.
 
 ### 5. Processed Records
 - **Type:** Table
 - **Purpose:** Show records processed by stage for selected runs.
-- **Data sources:** `bioetl_records_processed_total`
+- **Data sources:** Quarantine Explorer HTTP
+  `/ops/observability/processed-records`; this is not a Prometheus panel.
 
 ### 6. Runtime Status
 - **Type:** Stat

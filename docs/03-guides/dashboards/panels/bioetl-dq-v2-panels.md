@@ -6,6 +6,10 @@
 
 Dashboard `4. Data Quality` monitors DQ current status, validation score, freshness, quarantine, Silver structural rejects, and Gold contract-semantic reject outcomes. Shipped dashboard JSON is the source of truth.
 
+Counter panels that use `max_over_time()` show the maximum Pushgateway final
+snapshot observed in the selected window. They are bounded range evidence, not
+an exact total across multiple runs; use RunLedger for exact multi-run totals.
+
 Visible scope vocabulary is strict: headline cards are `CURRENT`, HTTP identity
 is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 `TIME RANGE`. A TIME RANGE value never proves an exact run result.
@@ -30,12 +34,14 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 ### 4. ID
 - **Type:** Table
 - **Purpose:** Show run ID, pipeline, run type, and timestamp.
-- **Data sources:** `bioetl_pipeline_runs`
+- **Data sources:** Quarantine Explorer HTTP control-plane identity endpoint
+  `/ops/control-plane/identity-table`; this is not a Prometheus panel.
 
 ### 5. Processed Records
 - **Type:** Table
 - **Purpose:** Show records processed by stage.
-- **Data sources:** `bioetl_records_processed_total`
+- **Data sources:** Quarantine Explorer HTTP
+  `/ops/observability/processed-records`; this is not a Prometheus panel.
 
 ### 6. Track Range Evidence: Bronze -> Silver -> Gold
 - **Type:** Timeseries
@@ -64,7 +70,8 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 
 ### 11. Monitor: Data Quality Score (Volume-weighted)
 - **Type:** Stat
-- **Purpose:** Show TIME RANGE volume-weighted DQ score as neutral supporting evidence.
+- **Purpose:** Show TIME RANGE volume-weighted DQ score on the canonical
+  `0.0-1.0` ratio scale as neutral supporting evidence.
 - **Data sources:** `bioetl_dq_validation_score`
 
 ### 12. Track: Source Records in Range (Bronze)
@@ -79,7 +86,8 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 
 ### 14. Monitor: Worst-Entity DQ Score
 - **Type:** Stat
-- **Purpose:** Show TIME RANGE worst-entity DQ score as neutral supporting evidence.
+- **Purpose:** Show TIME RANGE worst-entity DQ score on the canonical `0.0-1.0`
+  ratio scale as neutral supporting evidence.
 - **Data sources:** `bioetl_dq_validation_score`
 
 ### 15. Track: Records Quarantined in Range
@@ -176,7 +184,8 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 
 ### 33. Track: Data Quality Score Trend (Volume-weighted)
 - **Type:** Timeseries
-- **Purpose:** Show DQ score trend over time.
+- **Purpose:** Show DQ score trend over time on the canonical `0.0-1.0` ratio
+  scale.
 - **Data sources:** `bioetl_dq_validation_score`
 
 ### 34. Track: DQ Threshold Events in Range Trend

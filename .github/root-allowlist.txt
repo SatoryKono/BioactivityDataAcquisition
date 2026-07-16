@@ -37,6 +37,7 @@ uv.lock
 AGENTS.md
 CHANGELOG.md
 GEMINI.md
+skills-lock.json
 
 # Vendor-documented repo-wide review guidance retained at the exact root filename.
 best_practices.md

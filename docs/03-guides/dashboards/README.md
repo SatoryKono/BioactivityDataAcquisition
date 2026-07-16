@@ -68,6 +68,14 @@ ______________________________________________________________________
 - `python -m scripts.ops check-grafana-audit-preflight` must report
   `expanded-row-capture: ok`; when a screenshot directory is supplied, its
   manifest must also prove matching viewport/theme and terminal-state success.
+- `python -m scripts.ops run-grafana-audit-cycle` writes independent
+  `dashboard_semantic_gate` and `dashboard_render_gate` outcomes to
+  `reports/observability/grafana/dashboard-release-gates.json`. Semantic
+  validation runs even when Playwright or screenshot capture is unavailable;
+  render failure therefore cannot mask a datasource/query failure.
+- Live audit uses a governed `15s` datasource timeout. Sparse Loki results are
+  `expected_empty`; missing freshness samples are `telemetry_missing` and must
+  render `UNKNOWN`, not zero.
 - Grafana Render API screenshots remain acceptable for render/auth smoke
   evidence, but they do not prove panel terminal states.
 - On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap

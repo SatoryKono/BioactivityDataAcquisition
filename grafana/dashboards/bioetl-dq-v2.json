@@ -1210,7 +1210,8 @@
         }
       ],
       "title": "Monitor: Data Quality Score (Volume-weighted)",
-      "type": "stat"
+      "type": "stat",
+      "description": "Selected-range volume-weighted DQ score on the canonical 0.0-1.0 ratio scale, where 1.0 means all records are valid. This is neutral supporting evidence, not the current-status gate. Review trend in the adjacent timeseries panel."
     },
     {
       "datasource": {
@@ -1296,7 +1297,7 @@
       ],
       "title": "Monitor: Worst-Entity DQ Score",
       "type": "stat",
-      "description": "Selected-range pipeline-scoped worst-entity DQ score. No data means no matching validation score samples for the selected scope, not a successful exact run."
+      "description": "Selected-range pipeline-scoped worst-entity DQ score on the canonical 0.0-1.0 ratio scale, where 1.0 means all records are valid. No data means no matching validation score samples for the selected scope, not a successful exact run."
     },
     {
       "datasource": {
@@ -1322,6 +1323,7 @@
               }
             }
           ],
+          "noValue": "UNKNOWN",
           "thresholds": {
             "mode": "absolute",
             "steps": [

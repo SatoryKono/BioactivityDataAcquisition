@@ -189,6 +189,11 @@ def test_grafana_uses_remote_renderer_sidecar() -> None:
     ]
     assert renderer["image"] == RENDERER_IMAGE
     assert renderer["shm_size"] == "1gb"
+    assert renderer["healthcheck"]["test"] == [
+        "CMD",
+        "grafana-image-renderer",
+        "healthcheck",
+    ]
     assert (
         "AUTH_TOKEN=${GF_RENDERING_RENDERER_TOKEN:?GF_RENDERING_RENDERER_TOKEN is required}"
         in renderer["environment"]

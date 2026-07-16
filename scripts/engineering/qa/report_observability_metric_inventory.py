@@ -1788,6 +1788,7 @@ def collect_typed_observability_inventory(repo_root: Path) -> dict[str, object]:
     declared_outputs = declarations["recording_rule_metrics"]
     policy_aliases = declarations["policy_alias_metrics"]
     catalog_aliases = _catalog_policy_aliases(repo_root)
+    registered_runtime_metrics = set(_scan_registered_metric_names(repo_root))
     typed_targets.sort(
         key=lambda row: (
             str(row["dashboard_uid"]),
@@ -1831,6 +1832,9 @@ def collect_typed_observability_inventory(repo_root: Path) -> dict[str, object]:
         ),
         "policy_aliases_overlapping_outputs": sorted(
             policy_aliases & recording_outputs
+        ),
+        "policy_aliases_overlapping_runtime_metrics": sorted(
+            policy_aliases & registered_runtime_metrics
         ),
         "policy_aliases_without_catalog": sorted(policy_aliases - catalog_aliases),
         "catalog_aliases_without_declaration": sorted(catalog_aliases - policy_aliases),
@@ -2181,19 +2185,22 @@ def _prometheus_cardinality_query(
     metric_name: str,
     *,
     label_names: frozenset[str],
+    allow_absent_zero: bool = False,
 ) -> str:
     selector = (
         "{__name__=~" + json.dumps(_prometheus_metric_family_matcher(metric_name)) + "}"
     )
     if label_names:
         labels_expr = ", ".join(sorted(label_names))
-        return f"count(count by ({labels_expr}) ({selector}))"
+        query = f"count(count by ({labels_expr}) ({selector}))"
+        return f"{query} or vector(0)" if allow_absent_zero else query
 
     ignored_labels = ["__name__"]
     if metric_name in HISTOGRAMS:
         ignored_labels.append("le")
     ignored_expr = ", ".join(sorted(ignored_labels))
-    return f"count(count without ({ignored_expr}) ({selector}))"
+    query = f"count(count without ({ignored_expr}) ({selector}))"
+    return f"{query} or vector(0)" if allow_absent_zero else query
 
 
 def _query_prometheus_scalar(
@@ -2391,6 +2398,7 @@ def _build_runtime_cardinality_review_summary(
                 metric_name,
                 frozenset(),
             ),
+            allow_absent_zero=True,
         )
         try:
             query_results[metric_name] = _query_prometheus_scalar(
@@ -2512,16 +2520,29 @@ def collect_metric_inventory(
     # the registry stores the canonical ``_total`` sample name.  Treat only
     # registered, exact suffix pairs as equivalent; do not generalize this to
     # arbitrary names because that would hide genuine registry drift.
-    runtime_counter_aliases = {
-        f"{metric_name}_total"
+    runtime_counter_bases = {
+        metric_name
         for metric_name in runtime_set
         if f"{metric_name}_total" in runtime_registered_set
     }
-    registry_only_metrics = runtime_registered_set - runtime_set - runtime_counter_aliases
-    runtime_without_registry = runtime_set - registered_set
+    runtime_counter_aliases = {
+        f"{metric_name}_total" for metric_name in runtime_counter_bases
+    }
+    canonical_runtime_set = runtime_set | runtime_counter_aliases
+    canonical_direct_runtime_set = direct_runtime_set | {
+        f"{metric_name}_total"
+        for metric_name in direct_runtime_set
+        if f"{metric_name}_total" in runtime_registered_set
+    }
+    canonical_helper_runtime_set = helper_runtime_set | {
+        f"{metric_name}_total"
+        for metric_name in helper_runtime_set
+        if f"{metric_name}_total" in runtime_registered_set
+    }
+    registry_only_metrics = runtime_registered_set - canonical_runtime_set
+    runtime_without_registry = runtime_set - registered_set - runtime_counter_bases
     dead_metrics = registry_only_metrics - docs_set - rules_set
-    documented_without_runtime = (docs_set & runtime_registered_set) - runtime_set
-    ruled_without_runtime = (rules_set & runtime_registered_set) - runtime_set
+    ruled_without_runtime = (rules_set & runtime_registered_set) - canonical_runtime_set
     combined_emitters = _combine_metric_emitters(
         runtime_mentions, helper_backed_mentions
     )
@@ -2531,7 +2552,9 @@ def collect_metric_inventory(
     reviewed_dashboarded_without_emission = drift_allowlist.get(
         "dashboarded_without_emission", set()
     )
-    raw_documented_without_runtime = (docs_set & runtime_registered_set) - runtime_set
+    raw_documented_without_runtime = (
+        docs_set & runtime_registered_set
+    ) - canonical_runtime_set
     documented_without_runtime = sorted(
         raw_documented_without_runtime - reviewed_dashboarded_without_emission
     )
@@ -2551,7 +2574,8 @@ def collect_metric_inventory(
         "unused_declared_observability_events", set()
     )
     unused_declared_observability_events = sorted(
-        set(raw_unused_declared_observability_events) - reviewed_unused_declared_observability_events
+        set(raw_unused_declared_observability_events)
+        - reviewed_unused_declared_observability_events
     )
     reviewed_alerted_without_emission = drift_allowlist.get(
         "alerted_without_emission", set()
@@ -2613,7 +2637,7 @@ def collect_metric_inventory(
 
     report: dict[str, list[str] | dict[str, list[str]]] = {
         "declared_metrics": registered,
-        "emitted_metrics": sorted(registered_set & runtime_set),
+        "emitted_metrics": sorted(registered_set & canonical_runtime_set),
         "declared_observability_events": declared_observability_events,
         "emitted_observability_events": emitted_observability_events,
         "unused_declared_observability_events": (unused_declared_observability_events),
@@ -2653,9 +2677,11 @@ def collect_metric_inventory(
         "runtime_label_contract_violations": label_contract_violations,
         "runtime_label_contract_unresolved": label_contract_unresolved,
         "registered_metrics": registered,
-        "live_metrics": sorted(registered_set & runtime_set),
-        "direct_live_metrics": sorted(registered_set & direct_runtime_set),
-        "helper_backed_live_metrics": sorted(registered_set & helper_runtime_set),
+        "live_metrics": sorted(registered_set & canonical_runtime_set),
+        "direct_live_metrics": sorted(registered_set & canonical_direct_runtime_set),
+        "helper_backed_live_metrics": sorted(
+            registered_set & canonical_helper_runtime_set
+        ),
         "registered_without_runtime": sorted(registry_only_metrics),
         "runtime_without_registry": sorted(runtime_without_registry),
         "registry_only_metrics": sorted(registry_only_metrics),
@@ -3078,6 +3104,7 @@ def main(argv: list[str] | None = None) -> int:
                 "recording_outputs_without_declaration",
                 "recording_declarations_without_output",
                 "policy_aliases_overlapping_outputs",
+                "policy_aliases_overlapping_runtime_metrics",
                 "policy_aliases_without_catalog",
                 "catalog_aliases_without_declaration",
                 "http_semantics_violations",

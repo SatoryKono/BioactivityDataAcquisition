@@ -527,6 +527,7 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     main = _load_yaml(ROOT / "docker-compose.yml")
     monitoring = _load_yaml(ROOT / "docker-compose.monitoring.yml")
     main_health = " ".join(map(str, main["services"]["bioetl"]["healthcheck"]["test"]))
+    renderer_health = monitoring["services"]["renderer"]["healthcheck"]["test"]
 
     assert "/health/ready" in main_health
     assert "/health/live" not in main_health
@@ -538,6 +539,11 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         monitoring["services"]["promtail"]["depends_on"]["loki"]["condition"]
         == "service_healthy"
     )
+    assert renderer_health == [
+        "CMD",
+        "grafana-image-renderer",
+        "healthcheck",
+    ]
 
     dockerfile = (ROOT / "Dockerfile.bioetl").read_text(encoding="utf-8")
     operations_dockerfile = (ROOT / "docs/05-operations/Dockerfile").read_text(

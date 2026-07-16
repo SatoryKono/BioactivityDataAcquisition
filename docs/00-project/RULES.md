@@ -921,7 +921,7 @@ pmid → pmid → pubmed-id
 
 Метрики экспортируются в формате Prometheus с использованием bounded labels для агрегации. `bioetl_dq_validation_score` использует `pipeline`, `entity`; column/check-level breakdowns должны публиковаться отдельными метриками или reports, а не через этот label contract:
 
-- `bioetl_dq_validation_score{pipeline="...", entity="..."}`: текущая DQ validation score (0-100) для pipeline/entity.
+- `bioetl_dq_validation_score{pipeline="...", entity="..."}`: текущая DQ validation score (0.0-1.0, где 1.0 означает, что все записи валидны) для pipeline/entity.
 - `bioetl_data_freshness_seconds`: разница между `now()` и `max(updated-at)`.
 
 ### 3.4.1. Детекция Аномалий DQ

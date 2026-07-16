@@ -135,6 +135,44 @@ def test_collect_metric_inventory_classifies_registry_runtime_and_docs(
     ]
 
 
+def test_collect_metric_inventory_normalizes_prometheus_counter_exposition_name(
+    tmp_path: Path,
+    monkeypatch: object,
+) -> None:
+    monkeypatch.setattr(
+        inventory,
+        "REGISTERED_PROMETHEUS_METRIC_NAMES",
+        frozenset({"bioetl_example_total"}),
+    )
+
+    runtime_dir = tmp_path / "src" / "bioetl" / "application"
+    runtime_dir.mkdir(parents=True)
+    (runtime_dir / "emitters.py").write_text(
+        'metrics.increment_counter("bioetl_example", labels={})',
+        encoding="utf-8",
+    )
+    docs_dir = tmp_path / "docs" / "03-guides"
+    docs_dir.mkdir(parents=True)
+    (docs_dir / "guide.md").write_text(
+        "bioetl_example_total\n",
+        encoding="utf-8",
+    )
+    rules_dir = tmp_path / "grafana" / "prometheus-rules"
+    rules_dir.mkdir(parents=True)
+    (rules_dir / "rules.yml").write_text(
+        "expr: increase(bioetl_example_total[5m])\n",
+        encoding="utf-8",
+    )
+
+    report = inventory.collect_metric_inventory(tmp_path)
+
+    assert report["emitted_metrics"] == ["bioetl_example_total"]
+    assert report["live_metrics"] == ["bioetl_example_total"]
+    assert report["dashboarded_without_emission"] == []
+    assert report["alerted_without_emission"] == []
+    assert report["runtime_without_registry"] == []
+
+
 def test_filter_documented_metric_mentions_ignores_generated_series_and_group_names() -> (
     None
 ):
@@ -1594,6 +1632,62 @@ def test_query_prometheus_scalar_parses_vector_response(
     )
 
     assert observed == 7
+
+
+@pytest.mark.parametrize(
+    ("label_names", "expected"),
+    [
+        (
+            frozenset({"pipeline", "run_type"}),
+            "count(count by (pipeline, run_type) "
+            '({__name__=~"^bioetl_hotspot_total'
+            '(?:_bucket|_sum|_count|_created)?$"}))',
+        ),
+        (
+            frozenset(),
+            "count(count without (__name__) "
+            '({__name__=~"^bioetl_hotspot_total'
+            '(?:_bucket|_sum|_count|_created)?$"}))',
+        ),
+    ],
+)
+def test_prometheus_cardinality_query_preserves_strict_absent_series_semantics(
+    label_names: frozenset[str], expected: str
+) -> None:
+    assert (
+        inventory._prometheus_cardinality_query(
+            "bioetl_hotspot_total", label_names=label_names, allow_absent_zero=False
+        )
+        == expected
+    )
+
+
+@pytest.mark.parametrize(
+    ("label_names", "expected"),
+    [
+        (
+            frozenset({"pipeline", "run_type"}),
+            "count(count by (pipeline, run_type) "
+            '({__name__=~"^bioetl_hotspot_total'
+            '(?:_bucket|_sum|_count|_created)?$"})) or vector(0)',
+        ),
+        (
+            frozenset(),
+            "count(count without (__name__) "
+            '({__name__=~"^bioetl_hotspot_total'
+            '(?:_bucket|_sum|_count|_created)?$"})) or vector(0)',
+        ),
+    ],
+)
+def test_prometheus_cardinality_query_treats_absent_series_as_zero_when_enabled(
+    label_names: frozenset[str], expected: str
+) -> None:
+    assert (
+        inventory._prometheus_cardinality_query(
+            "bioetl_hotspot_total", label_names=label_names, allow_absent_zero=True
+        )
+        == expected
+    )
 
 
 def test_query_prometheus_scalar_raises_runtime_error_for_url_failures(

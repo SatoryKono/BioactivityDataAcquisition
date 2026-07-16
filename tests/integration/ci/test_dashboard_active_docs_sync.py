@@ -54,6 +54,25 @@ def _documented_panel_titles(doc_path: Path) -> Counter[str]:
     return Counter(title for title in titles if title)
 
 
+def _dashboard_panel_by_title(
+    dashboard_path: Path, panel_title: str
+) -> dict[str, object]:
+    payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
+    panels = _iter_dashboard_panels(list(payload.get("panels", [])))
+    return next(panel for panel in panels if panel.get("title") == panel_title)
+
+
+def _documented_panel_section(doc_text: str, panel_title: str) -> str:
+    match = re.search(
+        rf"^###\s+(?:\d+\.\s+)?{re.escape(panel_title)}[ \t]*\r?\n"
+        r"(?P<body>.*?)(?=^#{1,3}[ \t]+|\Z)",
+        doc_text,
+        flags=re.MULTILINE | re.DOTALL,
+    )
+    assert match is not None, f"Missing panel documentation section: {panel_title}"
+    return match.group(0)
+
+
 def test_active_docs_capture_uniform_responsive_navigation_bus() -> None:
     readme = Path("docs/03-guides/dashboards/README.md").read_text(encoding="utf-8")
     usage = Path("docs/03-guides/dashboards/dashboard-v2-usage.md").read_text(
@@ -142,3 +161,51 @@ def test_panel_docs_match_shipped_dashboard_panel_titles() -> None:
             )
 
     assert not offenders, "\n".join(offenders)
+
+
+@pytest.mark.parametrize(
+    "dashboard_name",
+    (
+        "bioetl-dq-v2",
+        "bioetl-overview-v2",
+        "bioetl-provider-health-v2",
+        "bioetl-runtime",
+    ),
+)
+def test_http_identity_panel_docs_match_shipped_datasource_contract(
+    dashboard_name: str,
+) -> None:
+    """HTTP-backed identity panels must not drift back to Prometheus docs."""
+    dashboard_path = DASHBOARD_DIR / f"{dashboard_name}.json"
+    doc_text = (PANEL_DOCS_DIR / f"{dashboard_name}-panels.md").read_text(
+        encoding="utf-8"
+    )
+    identity_section = _documented_panel_section(doc_text, "ID")
+    processed_section = _documented_panel_section(doc_text, "Processed Records")
+
+    identity_panel = _dashboard_panel_by_title(dashboard_path, "ID")
+    processed_panel = _dashboard_panel_by_title(dashboard_path, "Processed Records")
+    identity_target = identity_panel["targets"][0]
+    processed_target = processed_panel["targets"][0]
+
+    for panel in (identity_panel, processed_panel):
+        assert panel["datasource"] == "Quarantine Explorer"
+    assert str(identity_target["url"]).startswith(
+        "/ops/control-plane/identity-table"
+    )
+    assert str(processed_target["url"]).startswith(
+        "/ops/observability/processed-records"
+    )
+
+    for token in (
+        "Quarantine Explorer HTTP control-plane identity endpoint",
+        "/ops/control-plane/identity-table",
+        "this is not a Prometheus panel",
+    ):
+        assert token in identity_section
+    for token in (
+        "Quarantine Explorer HTTP",
+        "/ops/observability/processed-records",
+        "this is not a Prometheus panel",
+    ):
+        assert token in processed_section

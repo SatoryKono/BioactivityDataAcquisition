@@ -116,14 +116,9 @@ policy_alias_metrics:
   - bioetl_pipeline_phase_duration_seconds
   - bioetl_provider_status
   - bioetl_runtime_status
-  - bioetl_shutdown_completed_total
-  - bioetl_shutdown_initiated_total
   - bioetl_silver_filter_reject_field_total
   - bioetl_silver_filter_reject_reason_total
   - bioetl_silver_reject_rate
-  - bioetl_workflow_reconciliation_rows_deleted_total
-  - bioetl_workflow_reconciliation_rows_retained_total
-  - bioetl_workflow_reconciliation_rows_scanned_total
   - bioetl_workflow_status
 declared_label_contract_metrics:
   - bioetl_adapter_batch_size

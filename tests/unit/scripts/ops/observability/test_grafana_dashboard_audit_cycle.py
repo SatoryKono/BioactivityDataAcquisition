@@ -471,6 +471,103 @@ def test_grafana_audit_preflight_can_skip_screenshot_check(
     assert called is False
 
 
+def test_grafana_audit_preflight_can_run_semantic_checks_without_render_runtime(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(
+        preflight_subject,
+        "_check_http_json",
+        lambda **kwargs: preflight_subject.PreflightCheck(
+            name=str(kwargs["name"]), status="ok", detail="ok"
+        ),
+    )
+    monkeypatch.setattr(
+        preflight_subject,
+        "_check_grafana_render_auth",
+        lambda **_kwargs: pytest.fail("render auth must be skipped"),
+    )
+    monkeypatch.setattr(
+        preflight_subject,
+        "_check_playwright_runtime",
+        lambda *_args, **_kwargs: pytest.fail("Playwright must be skipped"),
+    )
+    monkeypatch.setattr(
+        audit_subject,
+        "_resolve_app_base_url",
+        lambda *_args, **_kwargs: "http://localhost:8081",
+    )
+
+    checks = preflight_subject.run_checks(
+        grafana_base_url="http://localhost:3000",
+        prometheus_base_url="http://localhost:9090",
+        app_base_url="http://localhost:8081",
+        grafana_username="admin",
+        grafana_password="changeme",
+        timeout_seconds=5.0,
+        screenshot_dir=tmp_path,
+        include_screenshot_check=False,
+        include_render_checks=False,
+    )
+
+    assert [check.name for check in checks] == [
+        "grafana",
+        "prometheus",
+        "quarantine-explorer",
+    ]
+
+
+def test_grafana_audit_cycle_writes_independent_gate_evidence(tmp_path: Path) -> None:
+    config = cycle_subject._parse_args(
+        [
+            "--screenshot-dir",
+            str(tmp_path / "screenshots"),
+            "--gate-output",
+            str(tmp_path / "dashboard-release-gates.json"),
+        ]
+    )
+
+    cycle_subject._write_gate_report(
+        config,
+        semantic_status="pass",
+        render_status="fail",
+        semantic_detail="Live panel audit passed.",
+        render_detail="Playwright unavailable.",
+    )
+
+    payload = json.loads(config.gate_output_path.read_text(encoding="utf-8"))
+    assert payload["dashboard_semantic_gate"]["status"] == "pass"
+    assert payload["dashboard_render_gate"]["status"] == "fail"
+    assert payload["dashboard_semantic_gate"]["source_artifact"].endswith(
+        "live-panel-audit.json"
+    )
+
+
+def test_grafana_audit_cycle_blocks_render_gate_when_semantic_gate_fails(
+    tmp_path: Path,
+) -> None:
+    config = cycle_subject._parse_args(
+        [
+            "--screenshot-dir",
+            str(tmp_path / "screenshots"),
+            "--gate-output",
+            str(tmp_path / "dashboard-release-gates.json"),
+        ]
+    )
+
+    cycle_subject._write_gate_report(
+        config,
+        semantic_status="fail",
+        render_status="blocked",
+        semantic_detail="Live panel audit reported blocking semantic results.",
+        render_detail="Screenshot render steps were skipped due to semantic gate failure.",
+    )
+
+    payload = json.loads(config.gate_output_path.read_text(encoding="utf-8"))
+    assert payload["dashboard_semantic_gate"]["status"] == "fail"
+    assert payload["dashboard_render_gate"]["status"] == "blocked"
+    assert "semantic gate failure" in payload["dashboard_render_gate"]["detail"]
+
+
 def test_grafana_audit_cycle_router_exposes_command() -> None:
     assert_router_python_command(
         ops_router,
@@ -529,23 +626,25 @@ def test_grafana_audit_cycle_runs_preflight_rerender_and_live_audit(
     assert result == 0
     assert [name for name, _argv in calls] == [
         "preflight",
+        "audit",
         "rerender",
         "rerender",
         "preflight",
-        "audit",
     ]
     assert "--skip-screenshot-check" in calls[0][1]
-    assert "--skip-screenshot-check" not in calls[3][1]
-    assert "--uids" in calls[1][1]
-    assert "--fallback" in calls[1][1]
-    assert calls[1][1][calls[1][1].index("--fallback") + 1] == "none"
+    assert "--skip-render-checks" in calls[0][1]
+    assert "--skip-screenshot-check" not in calls[4][1]
+    assert "--uids" in calls[2][1]
     assert "--fallback" in calls[2][1]
-    assert calls[2][1][calls[2][1].index("--fallback") + 1] == "playwright"
-    assert any("render-api" in item for item in calls[1][1])
-    assert str(tmp_path) in calls[2][1]
-    assert "--screenshot-uids" in calls[3][1]
+    assert calls[2][1][calls[2][1].index("--fallback") + 1] == "none"
+    assert "--fallback" in calls[3][1]
+    assert calls[3][1][calls[3][1].index("--fallback") + 1] == "playwright"
+    assert any("render-api" in item for item in calls[2][1])
+    assert str(tmp_path) in calls[3][1]
+    assert "--screenshot-uids" in calls[4][1]
     assert "http://127.0.0.1:8081" in calls[0][1]
-    assert "http://127.0.0.1:8081" in calls[3][1]
+    assert "http://127.0.0.1:8081" in calls[1][1]
+    assert "http://127.0.0.1:8081" in calls[4][1]
 
 
 def test_grafana_audit_cycle_stops_on_service_preflight_failure(
@@ -739,14 +838,14 @@ def test_grafana_audit_cycle_uses_cached_filled_dashboards_after_timeout(
     assert result == 0
     assert [name for name, _argv in calls] == [
         "preflight",
+        "audit",
         "rerender",
         "rerender",
         "preflight",
-        "audit",
     ]
-    assert "--uids" in calls[1][1]
-    assert "bioetl-control-plane-v1" in calls[1][1]
-    assert "bioetl-dq-v2" in calls[1][1]
+    assert "--uids" in calls[2][1]
+    assert "bioetl-control-plane-v1" in calls[2][1]
+    assert "bioetl-dq-v2" in calls[2][1]
 
 
 def test_grafana_audit_cycle_can_disable_filled_dashboard_filtering(
@@ -850,7 +949,7 @@ def test_grafana_audit_cycle_retries_backend_on_fallback_port(
     assert result == 0
     assert ensured_ports == [8081, 18081]
     assert "http://127.0.0.1:18081" in calls[0][1]
-    assert "http://127.0.0.1:18081" in calls[3][1]
+    assert "http://127.0.0.1:18081" in calls[1][1]
     assert "http://127.0.0.1:18081" in calls[4][1]
 
 
@@ -909,13 +1008,13 @@ def test_grafana_audit_cycle_reuses_existing_backend_when_fallback_start_fails(
     assert result == 0
     assert [name for name, _argv in calls] == [
         "preflight",
+        "audit",
         "rerender",
         "rerender",
         "preflight",
-        "audit",
     ]
     assert "http://127.0.0.1:8081" in calls[0][1]
-    assert "http://127.0.0.1:8081" in calls[3][1]
+    assert "http://127.0.0.1:8081" in calls[1][1]
     assert "http://127.0.0.1:8081" in calls[4][1]
 
 
@@ -981,10 +1080,10 @@ def test_grafana_audit_cycle_uses_managed_backend_when_detached_backend_fails(
     assert result == 0
     assert [name for name, _argv in calls] == [
         "preflight",
+        "audit",
         "rerender",
         "rerender",
         "preflight",
-        "audit",
     ]
     assert "http://127.0.0.1:8081" in calls[0][1]
 

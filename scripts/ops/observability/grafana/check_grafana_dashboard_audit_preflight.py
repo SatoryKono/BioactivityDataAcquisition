@@ -524,29 +524,38 @@ def run_checks(
     timeout_seconds: float,
     screenshot_dir: Path,
     include_screenshot_check: bool = True,
+    include_render_checks: bool = True,
     screenshot_uids: tuple[str, ...] = (),
 ) -> list[PreflightCheck]:
-    playwright_check = _check_playwright_runtime(timeout_seconds)
     checks = [
         _check_http_json(
             name="grafana",
             url=f"{grafana_base_url.rstrip('/')}/api/health",
             timeout_seconds=timeout_seconds,
-        ),
-        _check_grafana_render_auth(
-            grafana_base_url=grafana_base_url,
-            grafana_username=grafana_username,
-            grafana_password=grafana_password,
-            timeout_seconds=timeout_seconds,
-        ),
+        )
+    ]
+
+    if include_render_checks:
+        checks.append(
+            _check_grafana_render_auth(
+                grafana_base_url=grafana_base_url,
+                grafana_username=grafana_username,
+                grafana_password=grafana_password,
+                timeout_seconds=timeout_seconds,
+            )
+        )
+    checks.append(
         _check_http_json(
             name="prometheus",
             url=f"{prometheus_base_url.rstrip('/')}/api/v1/status/runtimeinfo",
             timeout_seconds=timeout_seconds,
-        ),
-        playwright_check,
-        _check_expanded_row_capture(playwright_check),
-    ]
+        )
+    )
+    if include_render_checks:
+        playwright_check = _check_playwright_runtime(timeout_seconds)
+        checks.extend(
+            [playwright_check, _check_expanded_row_capture(playwright_check)]
+        )
 
     try:
         resolved_app_base_url = live_audit._resolve_app_base_url(
@@ -651,6 +660,14 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Skip local PNG/manifest freshness validation.",
     )
     parser.add_argument(
+        "--skip-render-checks",
+        action="store_true",
+        help=(
+            "Run only datasource/backend semantic readiness checks; skip Grafana "
+            "render auth, Playwright, and expanded-row capture checks."
+        ),
+    )
+    parser.add_argument(
         "--screenshot-uids",
         nargs="*",
         default=(),
@@ -677,6 +694,7 @@ def main(argv: list[str] | None = None) -> int:
         timeout_seconds=args.timeout_seconds,
         screenshot_dir=args.screenshot_dir,
         include_screenshot_check=not args.skip_screenshot_check,
+        include_render_checks=not args.skip_render_checks,
         screenshot_uids=tuple(str(uid) for uid in args.screenshot_uids),
     )
 

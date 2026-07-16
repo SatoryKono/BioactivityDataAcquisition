@@ -1012,7 +1012,9 @@ def test_live_audit_reviewed_specs_cover_semantically_sensitive_panels() -> None
     assert covered[("bioetl-control-plane-v1", 9402)] == "ID"
     assert covered[("bioetl-control-plane-v1", 9403)] == "Processed Records"
     assert covered[("bioetl-dq-v2", 101)] == "Review: Latest Successful Data Timestamp"
-    assert covered[("bioetl-dq-v2", 8)] == "Monitor: Worst Data Freshness Lag (seconds)"
+    assert covered[("bioetl-dq-v2", 8)] == (
+        "Time Range · Worst Freshness Age (hours; SLA 24/72)"
+    )
     assert covered[("bioetl-dq-v2", 9402)] == "ID"
     assert covered[("bioetl-dq-v2", 9403)] == "Processed Records"
     assert (
@@ -1039,6 +1041,61 @@ def test_live_audit_classifies_prometheus_zero_and_nonzero_results() -> None:
         audit_subject._classify_prometheus_payload(nonzero_payload)[0]
         == "nonzero_result"
     )
+
+
+def test_live_audit_treats_missing_freshness_as_explicit_telemetry_gap(
+    monkeypatch: Any,
+) -> None:
+    spec = audit_subject.PanelAuditSpec(
+        dashboard_uid="bioetl-dq-v2",
+        panel_id=101,
+        title="Review: Latest Successful Data Timestamp",
+        source_kind="prometheus",
+        semantic_kind="freshness",
+    )
+    panel = {
+        "targets": [
+            {
+                "expr": (
+                    "max(max_over_time(bioetl_data_freshness_seconds"
+                    '{pipeline=~"$pipeline"}[$__range])) * 1000'
+                )
+            }
+        ]
+    }
+    config = audit_subject.AuditConfig(
+        prometheus_base_url="http://localhost:9090",
+        app_base_url="http://localhost:8081",
+        loki_base_url="http://localhost:3100",
+        tempo_base_url="http://localhost:3200",
+        grafana_base_url="http://localhost:3000",
+        grafana_username="admin",
+        grafana_password="changeme",
+        workflow="smoke",
+        pipeline="chembl_activity",
+        run_type="incremental",
+        run_id="audit-run",
+        range_hours=24,
+        output_path=Path("reports/observability/grafana/live-panel-audit.json"),
+    )
+    monkeypatch.setattr(
+        audit_subject,
+        "_fetch_json",
+        lambda *_args, **_kwargs: {
+            "status": "success",
+            "data": {"resultType": "vector", "result": []},
+        },
+    )
+
+    result = audit_subject._audit_prometheus_panel(spec, panel, config)
+
+    assert result.status == "ok"
+    assert result.classification == "telemetry_missing"
+    assert "UNKNOWN" in result.detail
+
+
+def test_live_audit_default_timeout_covers_bounded_loki_range_queries() -> None:
+    assert audit_subject.DEFAULT_REQUEST_TIMEOUT_SECONDS == 15.0
 
 
 def test_live_audit_treats_checkpoint_freshness_unknown_as_valid_unknown_state(

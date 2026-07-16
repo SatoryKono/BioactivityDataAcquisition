@@ -6,6 +6,10 @@
 
 Dashboard `1. Overview` is the primary entry point for incident triage. It uses shared shell/status/ID/provenance contracts and provides a unified view across runtime, DQ, control plane, provider, and workflow surfaces. Shipped dashboard JSON is the source of truth.
 
+Counter panels that use `max_over_time()` show a Pushgateway final snapshot or
+a ratio derived from such snapshots. They do not claim an exact total across
+multiple runs; use RunLedger for exact reconciliation.
+
 ## Key Panels
 
 ### 1. Navigation
@@ -118,12 +122,14 @@ Dashboard `1. Overview` is the primary entry point for incident triage. It uses 
 ### 22. ID
 - **Type:** Table
 - **Purpose:** Show run ID, pipeline, run type, and timestamp.
-- **Data sources:** `bioetl_pipeline_runs`
+- **Data sources:** Quarantine Explorer HTTP control-plane identity endpoint
+  `/ops/control-plane/identity-table`; this is not a Prometheus panel.
 
 ### 23. Processed Records
 - **Type:** Table
 - **Purpose:** Show records processed by stage.
-- **Data sources:** `bioetl_records_processed_total`
+- **Data sources:** Quarantine Explorer HTTP
+  `/ops/observability/processed-records`; this is not a Prometheus panel.
 
 ### 24. Alert/SLO Triage
 - **Type:** Row

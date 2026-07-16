@@ -2,9 +2,12 @@
 
 import json
 from pathlib import Path
+import re
 
 import pytest
 import yaml
+
+from bioetl.infrastructure.observability.prometheus_metric_registries import COUNTERS
 
 from tests.integration._grafana_test_support import (
     get_dashboard_files,
@@ -20,6 +23,12 @@ from tests.integration.grafana_contract_specs import (
 
 pytestmark = pytest.mark.integration
 RULES_PATH = Path("grafana/prometheus-rules/bioetl_observability.yml")
+MAX_OVER_TIME_COUNTER_POLICY_PATH = Path(
+    "configs/quality/promql_max_over_time_counter_policy.yaml"
+)
+_MAX_OVER_TIME_METRIC_RE = re.compile(
+    r"max_over_time\(\s*([a-zA-Z_:][a-zA-Z0-9_:]*)"
+)
 _PROCESSED_RECORDS_DASHBOARDS = (
     "bioetl-control-plane-v1.json",
     "bioetl-dq-v2.json",
@@ -1738,6 +1747,55 @@ def test_selected_range_kpis_follow_declared_counter_window_intent() -> None:
                     f"Panel {panel_title!r} in {dashboard_name} has intent "
                     f"{expectation['intent']} and must not use {forbidden}"
                 )
+
+
+def test_all_max_over_time_counter_expressions_are_reviewed() -> None:
+    """Every Counter used with max_over_time must match the reviewed policy."""
+    policy = yaml.safe_load(MAX_OVER_TIME_COUNTER_POLICY_PATH.read_text("utf-8"))
+    allowed_metrics = set(policy["allowed_counter_metrics"])
+    counter_metrics = set(COUNTERS)
+    reviewed: list[tuple[str, set[str], str]] = []
+
+    for dashboard_path in get_dashboard_files():
+        dashboard = load_dashboard(dashboard_path)
+        for panel in get_dashboard_panels(dashboard):
+            for target in panel.get("targets", []):
+                expression = target.get("expr", "")
+                if not isinstance(expression, str):
+                    continue
+                matched = set(_MAX_OVER_TIME_METRIC_RE.findall(expression))
+                matched &= counter_metrics
+                if matched:
+                    source = (
+                        f"{dashboard_path.name}:panel={panel.get('id')}:"
+                        f"target={target.get('refId')}"
+                    )
+                    reviewed.append((source, matched, expression))
+
+    rules = yaml.safe_load(RULES_PATH.read_text(encoding="utf-8"))
+    for group in rules.get("groups", []):
+        for rule in group.get("rules", []):
+            expression = str(rule.get("expr", ""))
+            matched = set(_MAX_OVER_TIME_METRIC_RE.findall(expression))
+            matched &= counter_metrics
+            if matched:
+                rule_name = rule.get("record") or rule.get("alert")
+                source = f"{group.get('name')}:{rule_name}"
+                reviewed.append((source, matched, expression))
+
+    unexpected = {
+        metric
+        for _source, matched, _expression in reviewed
+        for metric in matched - allowed_metrics
+    }
+    assert not unexpected
+    assert len(reviewed) == policy["reviewed_expression_count"]
+    assert policy["event_delta_function"] == "increase"
+    assert policy["exact_multi_run_total_source"] == "RunLedger"
+
+    for source, matched, expression in reviewed:
+        if "bioetl_silver_filter_rejections_total" in matched:
+            assert "> bool 0" in expression or "> 0" in expression, source
 
 
 @pytest.mark.parametrize("dashboard_name", _PROCESSED_RECORDS_DASHBOARDS)
