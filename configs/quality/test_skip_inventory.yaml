@@ -134,6 +134,17 @@ entries:
     vcr_related: false
     review_date: "2026-06-02"
     rationale: Config loading checks may skip when optional provider/entity directories are absent in a reduced local checkout.
+  - path: tests/integration/infrastructure/storage/test_gold_writer_versioning.py
+    suite: integration
+    category: optional_local_fixture_absence
+    owner: "@bioetl-storage"
+    linked_issue: "#5562"
+    lifecycle: temporary_debt
+    expires_on: "2026-10-16"
+    reviewed_skip_calls: 1
+    vcr_related: false
+    review_date: "2026-07-16"
+    rationale: Gold writer Delta Lake integration tests skip on Windows network-drive checkouts where the required local-filesystem write precondition is unavailable and writes time out.
   - path: tests/integration/test_dashboard_ux_report_freshness.py
     suite: integration
     category: git_diff_scope_guard

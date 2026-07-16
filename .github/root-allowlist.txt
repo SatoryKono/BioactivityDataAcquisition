@@ -3,6 +3,7 @@
 # See docs/00-project/governance/03-file-policy.md §0 for root policy.
 # Canonical project / packaging / security / docs tooling entrypoints retained at root.
 .aiignore
+.coderabbit.yaml
 .dockerignore
 .editorconfig
 .env.example
@@ -38,7 +39,8 @@ CHANGELOG.md
 GEMINI.md
 skills-lock.json
 
-# Vendor-documented repo-wide review guidance retained at the exact root filename.
+# Vendor-documented repo-wide review configuration and guidance retained at
+# their exact root filenames.
 best_practices.md
 
 # Reviewed optional ADR-010 Docker helper dispositions. Current exact-root

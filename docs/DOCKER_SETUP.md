@@ -1,5 +1,8 @@
 # Локальный Docker runtime BioETL
 
+> BIOETL_DOCKER_HELPER_ADR010_ADJUNCT — Local-Only Docker helpers governed by ADR-010.
+> Contract: `configs/quality/docker_helper_contracts.yaml`
+
 Docker в BioETL — необязательный локальный adjunct по ADR-010. Канонический
 runtime проекта остаётся Python/venv; Docker не требуется для обычных тестов,
 хранилища, блокировок или orchestration.
@@ -16,6 +19,22 @@ runtime проекта остаётся Python/venv; Docker не требует�
   `/tmp` и Linux runtime mirror. Поддерживается один origin на Linux filesystem.
 - Все lifecycle операции выполняются через
   `scripts/ops/runtime/docker/runtime_manager.py`.
+
+## Reviewed helper Compose adjuncts
+
+Следующие legacy root-файлы перенесены под owner-controlled runtime path и
+остаются необязательными локальными adjuncts:
+
+| Legacy root path | Канонический путь |
+| --- | --- |
+| `docker-compose.alertmanager.yml` | `scripts/ops/runtime/docker/compose/alertmanager.yml` |
+| `docker-compose.minio.yml` | `scripts/ops/runtime/docker/compose/minio.yml` |
+| `docker-compose.redis.yml` | `scripts/ops/runtime/docker/compose/redis.yml` |
+| `docker-compose.sonarqube.yml` | `scripts/ops/runtime/docker/compose/sonarqube.yml` |
+
+В обычном workflow сеть создаёт manager. Команда
+`docker network create bioetl-monitoring` не является ручным prerequisite и
+приведена только как идентификатор управляемой операции.
 
 ## Предварительные условия
 

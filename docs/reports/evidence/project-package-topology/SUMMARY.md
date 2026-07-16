@@ -18,10 +18,15 @@ MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current baseline is reconciled with
 `reports/quality/module-coverage-inventory.json` snapshot `2026-07-16`
 (`source_module_count=2226`,
-`source_tree_sha256=91ba385686c64097f7819427c9d092c8ee41e74108044b09ff8794e260dc16c9`).
+`source_tree_sha256=605fd8215be54afd6f4ae29ae8f6572ead1d691ec069cdd095abe9cdd2505de5`).
 Raw files dated before `2026-07-16` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence.
+
+Pandera bootstrap ownership is also reconciled with the current runtime:
+`apply_runtime_compatibility_patches` remains a no-op compatibility seam, while
+the retired Pandera-specific validation shim and import-time side effects stay
+absent.
 
 > Это summary — repo-only evidence layer для package-topology
 > интерпретации. Он помогает калибровать structural observations, но не
