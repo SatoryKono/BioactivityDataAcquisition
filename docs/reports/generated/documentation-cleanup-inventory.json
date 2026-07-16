@@ -11966,6 +11966,34 @@
       "diagram_kind": null,
       "duplicate_group": null,
       "duplicate_resolution": null,
+      "extension": ".md",
+      "freshness": "current",
+      "generated_route": null,
+      "generated_route_exception": null,
+      "generator": null,
+      "github_issue_number": null,
+      "github_issue_url": null,
+      "inbound_links": 9,
+      "lifecycle": null,
+      "outbound_links": 0,
+      "owner": "BioETL Team",
+      "path": "docs/01-requirements/REQUIREMENTS.md",
+      "recommended_action": "keep",
+      "root_doc_kind": null,
+      "section": "01-requirements",
+      "status": "Canonical",
+      "surface_family": "canonical",
+      "tracking_state": "tracked"
+    },
+    {
+      "canonical_successor": null,
+      "catalog_lifecycle": null,
+      "commit_policy": null,
+      "declared_class": null,
+      "declared_status": null,
+      "diagram_kind": null,
+      "duplicate_group": null,
+      "duplicate_resolution": null,
       "extension": ".csv",
       "freshness": "current",
       "generated_route": null,
@@ -84815,13 +84843,13 @@
       "archive-after-github-state-check": 121,
       "archive-after-migration": 61,
       "generate-automatically": 706,
-      "keep": 2113,
+      "keep": 2114,
       "reconcile-with-github-state": 4
     },
     "by_section": {
       ".github": 131,
       "00-project": 290,
-      "01-requirements": 2,
+      "01-requirements": 3,
       "02-architecture": 837,
       "03-data-model": 2,
       "03-guides": 77,
@@ -84854,20 +84882,20 @@
     "by_status": {
       "Active": 1944,
       "Archived": 61,
-      "Canonical": 62,
+      "Canonical": 63,
       "Generated": 706,
       "Working": 232
     },
     "by_surface_family": {
       "active": 1944,
       "archive": 61,
-      "canonical": 62,
+      "canonical": 63,
       "generated": 706,
       "working": 232
     },
     "by_tracking_state": {
       "ignored_local": 1182,
-      "tracked": 1823
+      "tracked": 1824
     },
     "docs_reports_local_count": 1200,
     "duplicate_group_count": 2,
@@ -84888,8 +84916,8 @@
         "path": "docs/reports/evidence/project-legacy-compatibility-remediation/.quarantined-03-synthesis-corrupt-20260521"
       }
     ],
-    "total_doc_like": 3005,
+    "total_doc_like": 3006,
     "total_doc_like_ignored_local": 1182,
-    "total_doc_like_tracked": 1823
+    "total_doc_like_tracked": 1824
   }
 }
