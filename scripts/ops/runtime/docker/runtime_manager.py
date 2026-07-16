@@ -499,7 +499,7 @@ def ensure_shared_networks(
                 )
             continue
         observed_owner = inspection.stdout.strip()
-        owner_ok = not observed_owner or observed_owner == owner
+        owner_ok = observed_owner == owner
         observations.append(
             {
                 "name": name,
@@ -549,20 +549,32 @@ def _wait_ready(
     last_snapshots: list[ServiceSnapshot] = []
     last_findings: list[dict[str, Any]] = [{"cause": "readiness_timeout"}]
     while clock() < deadline:
+        remaining = deadline - clock()
+        if remaining <= 0:
+            break
         last_snapshots, _ = collect_snapshots(
-            spec, runner=runner, timeout=min(15.0, timeout)
+            spec, runner=runner, timeout=min(15.0, remaining)
         )
         last_findings = readiness_findings(spec, last_snapshots, baseline)
         if not last_findings:
             if stabilization_seconds > 0:
-                sleep(min(stabilization_seconds, max(0.0, deadline - clock())))
+                remaining = deadline - clock()
+                if remaining <= 0:
+                    break
+                sleep(min(stabilization_seconds, remaining))
+                remaining = deadline - clock()
+                if remaining <= 0:
+                    break
                 last_snapshots, _ = collect_snapshots(
-                    spec, runner=runner, timeout=min(15.0, timeout)
+                    spec, runner=runner, timeout=min(15.0, remaining)
                 )
                 last_findings = readiness_findings(spec, last_snapshots, baseline)
             if not last_findings:
                 return last_snapshots, []
-        sleep(min(poll_interval, max(0.0, deadline - clock())))
+        remaining = deadline - clock()
+        if remaining <= 0:
+            break
+        sleep(min(poll_interval, remaining))
     if not last_findings:
         last_findings = [{"cause": "readiness_timeout"}]
     return last_snapshots, last_findings
@@ -686,16 +698,24 @@ def start_or_recover(
                                 max(0.0, deadline - clock()),
                             )
                         )
-                log_result = runner(
-                    _compose(spec, "logs", "--no-color", "--tail", "100"),
-                    ROOT,
-                    min(15.0, max(0.1, deadline - clock())),
-                )
-                recent_logs = {
-                    "captured": log_result.returncode == 0,
-                    "stdout": _bounded(log_result.stdout),
-                    "stderr": _bounded(log_result.stderr),
-                }
+                remaining = deadline - clock()
+                if remaining > 0:
+                    log_result = runner(
+                        _compose(spec, "logs", "--no-color", "--tail", "100"),
+                        ROOT,
+                        min(15.0, remaining),
+                    )
+                    recent_logs = {
+                        "captured": log_result.returncode == 0,
+                        "stdout": _bounded(log_result.stdout),
+                        "stderr": _bounded(log_result.stderr),
+                    }
+                else:
+                    recent_logs = {
+                        "captured": False,
+                        "stdout": "",
+                        "stderr": "global recovery deadline exhausted",
+                    }
     cause = primary_cause(findings)
     disk = shutil.disk_usage(ROOT)
     incident = {

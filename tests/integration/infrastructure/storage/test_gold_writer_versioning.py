@@ -15,7 +15,10 @@ import pytest
 
 # Skip on Windows due to Delta Lake write timeout issues on network drives
 if platform.system() == "Windows":
-    pytest.skip("Gold writer tests skipped on Windows due to Delta Lake timeout", allow_module_level=True)
+    pytest.skip(
+        "Gold writer tests skipped on Windows due to Delta Lake timeout",
+        allow_module_level=True,
+    )
 
 from deltalake import DeltaTable
 from pandera.pandas import Column, DataFrameSchema
@@ -104,7 +107,9 @@ def _load_gold_rows(base_path: Path, table_name: str) -> list[dict[str, object]]
 @pytest.mark.integration
 @pytest.mark.asyncio
 @pytest.mark.timeout(120)  # Increased timeout for Windows compatibility
-@pytest.mark.skipif(sys.platform == "win32", reason="PyArrow/DeltaTable compatibility issues on Windows")
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="PyArrow/DeltaTable compatibility issues on Windows"
+)
 async def test_gold_writer_dual_write_projects_version_specific_schema(
     tmp_path: Path,
     noop_logger: object,

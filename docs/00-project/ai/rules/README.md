@@ -76,8 +76,8 @@ cp docs/00-project/ai/rules/cursor/*.mdc .cursor/rules/
 
 ### B. Windsurf Cascade
 
-**SSOT:** `docs/00-project/ai/rules/cursor/*.mdc`  
-**Tracked mirror:** `docs/00-project/ai/rules/windsurf/`  
+**SSOT:** `docs/00-project/ai/rules/cursor/*.mdc`
+**Tracked mirror:** `docs/00-project/ai/rules/windsurf/`
 **Local deploy:** `.windsurf/` (gitignored)
 
 ```bash

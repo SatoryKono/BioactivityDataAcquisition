@@ -219,6 +219,43 @@ def volume_ids(
     return names
 
 
+def required_volume_precondition(
+    runtime_origin: Path,
+    bundle: Sequence[StackSpec],
+    timeout: float = 20.0,
+) -> dict[str, Any]:
+    """Require target volumes before any campaign lifecycle mutation."""
+    result = run_command(
+        ["docker", "volume", "ls", "--format", "{{.Name}}"],
+        timeout,
+        cwd=runtime_origin,
+    )
+    if result["returncode"] != 0:
+        raise RuntimeError("unable to verify required campaign volumes")
+    existing = {line for line in str(result["stdout"]).splitlines() if line}
+    stacks: dict[str, Any] = {}
+    missing: list[str] = []
+    for spec in bundle:
+        absent = sorted(set(spec.required_volumes) - existing)
+        missing.extend(absent)
+        stacks[spec.stack] = {
+            "required_target_volumes": {
+                name: ("present" if name in existing else "missing")
+                for name in spec.required_volumes
+            },
+            "legacy_volumes": {
+                name: ("present" if name in existing else "not_applicable")
+                for name in spec.legacy_volumes
+            },
+        }
+    return {
+        "passed": not missing,
+        "missing_required_target_volumes": sorted(set(missing)),
+        "stacks": stacks,
+        "observation": result,
+    }
+
+
 def bundle_volume_ids(
     runtime_origin: Path,
     bundle: Sequence[StackSpec],

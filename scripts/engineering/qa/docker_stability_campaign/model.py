@@ -53,6 +53,8 @@ class StackSpec:
     compose_file: str
     required_services: tuple[str, ...]
     protected_volumes: tuple[str, ...] = ()
+    required_volumes: tuple[str, ...] = ()
+    legacy_volumes: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -215,14 +217,18 @@ def release_bundle(contract: dict[str, Any]) -> tuple[StackSpec, ...]:
         volume_map = migration.get("volume_map", {}) if isinstance(migration, dict) else {}
         if not isinstance(volume_map, dict):
             raise ValueError(f"Release stack {name} has an invalid migration volume map")
-        protected = sorted({str(item) for pair in volume_map.items() for item in pair})
+        legacy_volumes = tuple(sorted(str(item) for item in volume_map))
+        required_volumes = tuple(sorted(str(item) for item in volume_map.values()))
+        protected = tuple(sorted({*legacy_volumes, *required_volumes}))
         bundle.append(
             StackSpec(
                 stack=name,
                 project=str(raw["project_name"]),
                 compose_file=str(raw["compose_file"]),
                 required_services=tuple(map(str, services)),
-                protected_volumes=tuple(protected),
+                protected_volumes=protected,
+                required_volumes=required_volumes,
+                legacy_volumes=legacy_volumes,
             )
         )
     if len({spec.project for spec in bundle}) != len(bundle):

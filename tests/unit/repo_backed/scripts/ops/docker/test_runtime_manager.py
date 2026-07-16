@@ -61,9 +61,7 @@ def test_readiness_accepts_matching_repo_digest_when_config_reference_differs() 
         image_digests=("bioetl:test@sha256:" + "a" * 64,),
     )
 
-    assert runtime_manager.readiness_findings(
-        spec, [snapshot], baseline={}
-    ) == []
+    assert runtime_manager.readiness_findings(spec, [snapshot], baseline={}) == []
 
 
 def test_collect_snapshots_resolves_repo_digests_from_real_container_shape() -> None:
@@ -102,9 +100,7 @@ def test_collect_snapshots_resolves_repo_digests_from_real_container_shape() -> 
             return runtime_manager.CommandResult(
                 current,
                 0,
-                stdout=json.dumps(
-                    {"RepoDigests": ["bioetl:test@sha256:" + "a" * 64]}
-                ),
+                stdout=json.dumps({"RepoDigests": ["bioetl:test@sha256:" + "a" * 64]}),
             )
         raise AssertionError(current)
 
@@ -112,9 +108,7 @@ def test_collect_snapshots_resolves_repo_digests_from_real_container_shape() -> 
 
     assert len(snapshots) == 1
     assert snapshots[0].image == "bioetl:test"
-    assert snapshots[0].image_digests == (
-        "bioetl:test@sha256:" + "a" * 64,
-    )
+    assert snapshots[0].image_digests == ("bioetl:test@sha256:" + "a" * 64,)
     assert runtime_manager.readiness_findings(spec, snapshots, baseline={}) == []
     assert len(observations) == 3
     container_template = calls[1][calls[1].index("--format") + 1]
@@ -292,6 +286,53 @@ def test_recovery_attempts_share_one_overall_deadline(tmp_path: Path) -> None:
     assert incident["elapsed_seconds"] <= 10
 
 
+def test_readiness_stabilization_never_runs_past_global_deadline(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    now = [0.0]
+    observed_timeouts: list[float] = []
+    snapshot = runtime_manager.ServiceSnapshot(
+        service="bioetl",
+        container_id="abc",
+        state="running",
+        health="healthy",
+        restart_count=0,
+        oom_killed=False,
+        image="bioetl:test@sha256:expected",
+    )
+
+    def collect(
+        spec: runtime_manager.StackSpec,
+        *,
+        runner: runtime_manager.Runner,
+        timeout: float,
+    ) -> tuple[list[runtime_manager.ServiceSnapshot], list[runtime_manager.CommandResult]]:
+        del spec, runner
+        observed_timeouts.append(timeout)
+        now[0] += timeout
+        return [snapshot], []
+
+    monkeypatch.setattr(runtime_manager, "collect_snapshots", collect)
+
+    snapshots, findings = runtime_manager._wait_ready(
+        _spec(),
+        {},
+        runner=lambda command, cwd, timeout: runtime_manager.CommandResult(
+            list(command), 0
+        ),
+        timeout=10.0,
+        poll_interval=2.0,
+        stabilization_seconds=5.0,
+        sleep=lambda seconds: now.__setitem__(0, now[0] + seconds),
+        clock=lambda: now[0],
+    )
+
+    assert snapshots == [snapshot]
+    assert findings == [{"cause": "readiness_timeout"}]
+    assert observed_timeouts == [10.0]
+    assert now[0] == 10.0
+
+
 def test_shared_network_bootstrap_creates_only_missing_contracted_networks(
     tmp_path: Path,
 ) -> None:
@@ -359,9 +400,7 @@ def test_shared_network_bootstrap_rejects_conflicting_owner(tmp_path: Path) -> N
     def runner(
         command: Sequence[str], cwd: Path, timeout: float
     ) -> runtime_manager.CommandResult:
-        return runtime_manager.CommandResult(
-            list(command), 0, stdout="another-owner\n"
-        )
+        return runtime_manager.CommandResult(list(command), 0, stdout="another-owner\n")
 
     ok, findings = runtime_manager.ensure_shared_networks(
         _spec(), contract, tmp_path / "networks.json", runner=runner
@@ -374,5 +413,44 @@ def test_shared_network_bootstrap_rejects_conflicting_owner(tmp_path: Path) -> N
             "network": "bioetl-monitoring",
             "expected_owner": "runtime-manager",
             "observed_owner": "another-owner",
+        }
+    ]
+
+
+def test_shared_network_bootstrap_rejects_unlabeled_existing_network(
+    tmp_path: Path,
+) -> None:
+    contract = tmp_path / "contract.yml"
+    contract.write_text(
+        yaml.safe_dump(
+            {
+                "shared_networks": {
+                    "monitoring": {
+                        "name": "bioetl-monitoring",
+                        "owner": "runtime-manager",
+                        "consumers": ["main"],
+                    }
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    def runner(
+        command: Sequence[str], cwd: Path, timeout: float
+    ) -> runtime_manager.CommandResult:
+        return runtime_manager.CommandResult(list(command), 0, stdout="\n")
+
+    ok, findings = runtime_manager.ensure_shared_networks(
+        _spec(), contract, tmp_path / "networks.json", runner=runner
+    )
+
+    assert ok is False
+    assert findings == [
+        {
+            "cause": "network_owner_drift",
+            "network": "bioetl-monitoring",
+            "expected_owner": "runtime-manager",
+            "observed_owner": "",
         }
     ]

@@ -158,7 +158,9 @@ def test_default_runtime_log_sink_reaches_canonical_loki_dashboard_job() -> None
     logging_source = Path(
         "src/bioetl/infrastructure/observability/logging_config.py"
     ).read_text(encoding="utf-8")
-    assert '_DEFAULT_LOG_FILE = Path("reports") / "logs" / "bioetl.log"' in logging_source
+    assert (
+        '_DEFAULT_LOG_FILE = Path("reports") / "logs" / "bioetl.log"' in logging_source
+    )
 
     promtail = yaml.safe_load(
         Path("grafana/promtail-config.yml").read_text(encoding="utf-8")

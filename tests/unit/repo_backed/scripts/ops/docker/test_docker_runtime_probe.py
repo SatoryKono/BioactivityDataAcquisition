@@ -180,7 +180,9 @@ def test_each_simulated_failure_has_one_primary_actionable_cause(
     assert 'project="bioetl-main",stack="main"' in exposition
 
 
-def test_prometheus_exposition_does_not_export_untrusted_cause_or_observations() -> None:
+def test_prometheus_exposition_does_not_export_untrusted_cause_or_observations() -> (
+    None
+):
     report = {
         "project": "Bearer ghp_project-secret",
         "stack": "main",
@@ -204,7 +206,10 @@ def test_prometheus_exposition_does_not_export_untrusted_cause_or_observations()
     assert "ghp_project-secret" not in exposition
     assert "secret-value" not in exposition
     assert "cause=" not in exposition
-    assert "bioetl_docker_runtime_primary_cause{project=\"<redacted>\",stack=\"main\"} 0" in exposition
+    assert (
+        'bioetl_docker_runtime_primary_cause{project="<redacted>",stack="main"} 0'
+        in exposition
+    )
 
 
 def test_clean_probe_sample_remains_healthy(tmp_path: Path) -> None:
@@ -306,7 +311,9 @@ def test_expected_image_override_is_scoped_to_required_service(
     captured: dict[str, object] = {}
     monkeypatch.setattr(probe, "resolve_stack", lambda *_args: spec)
 
-    def build_report(candidate: runtime_manager.StackSpec, *_args: object, **_kwargs: object):
+    def build_report(
+        candidate: runtime_manager.StackSpec, *_args: object, **_kwargs: object
+    ):
         captured["expected_images"] = dict(candidate.expected_images)
         return {
             "summary": {"ok": True},
@@ -340,9 +347,7 @@ def test_expected_image_override_is_scoped_to_required_service(
     )
 
     assert result == 0
-    assert captured["expected_images"] == {
-        "bioetl": "fault@sha256:" + "0" * 64
-    }
+    assert captured["expected_images"] == {"bioetl": "fault@sha256:" + "0" * 64}
 
 
 def test_expected_image_override_rejects_unknown_service(

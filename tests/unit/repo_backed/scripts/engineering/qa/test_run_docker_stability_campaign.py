@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import time
 from pathlib import Path
 
 import pytest
@@ -15,7 +16,9 @@ pytestmark = pytest.mark.repo_backed
 
 
 def _passing_state() -> dict[str, object]:
-    state = model.new_state(stack="main", project="bioetl-main", cycles=100, soak_hours=72)
+    state = model.new_state(
+        stack="main", project="bioetl-main", cycles=100, soak_hours=72
+    )
     state.update(
         completed_cycles=100,
         soak_observed_seconds=72 * 3600,
@@ -66,9 +69,7 @@ def test_subprocess_timeout_is_bounded_evidence(
 
     monkeypatch.setattr(commands.subprocess, "run", timeout)
 
-    result = commands.run_command(
-        ["docker", "desktop", "restart"], 1, cwd=tmp_path
-    )
+    result = commands.run_command(["docker", "desktop", "restart"], 1, cwd=tmp_path)
 
     assert result["returncode"] == 124
     assert result["timed_out"] is True
@@ -98,9 +99,17 @@ def test_command_evidence_redacts_split_secret_value(
     ("result", "expected", "passed"),
     [
         ({"returncode": 0}, "success", True),
-        ({"returncode": 2, "primary_cause": "service_unready"}, "cause:service_unready", True),
+        (
+            {"returncode": 2, "primary_cause": "service_unready"},
+            "cause:service_unready",
+            True,
+        ),
         ({"returncode": 2, "primary_cause": "unknown"}, "cause:service_unready", False),
-        ({"returncode": 2, "preflight_findings": ["HOST_PORT_COLLISION"]}, "finding:HOST_PORT_COLLISION", True),
+        (
+            {"returncode": 2, "preflight_findings": ["HOST_PORT_COLLISION"]},
+            "finding:HOST_PORT_COLLISION",
+            True,
+        ),
         ({"returncode": 2}, "finding:HOST_PORT_COLLISION", False),
         ({"returncode": -15, "interrupted": True}, "interrupted", True),
         ({"returncode": 1}, "interrupted", False),
@@ -206,6 +215,102 @@ def test_failed_fault_emits_one_incident_and_evidence_cannot_be_replaced(
         )
 
 
+def test_fault_case_reserves_deadline_for_restore(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    now = [0.0]
+    monkeypatch.setattr(faults.time, "monotonic", lambda: now[0])
+    monkeypatch.setattr(faults, "volume_ids", lambda *_args, **_kwargs: {"data"})
+    case = faults.build_fault_cases()[0]
+
+    class DeadlineExecutor(_FakeFaultExecutor):
+        def __init__(self, root: Path) -> None:
+            super().__init__(root)
+            self.calls: list[tuple[str, float]] = []
+
+        def execute(
+            self,
+            operation: model.FaultOperation,
+            **kwargs: object,
+        ) -> dict[str, object]:
+            deadline = float(kwargs["deadline"])
+            self.calls.append((operation.kind, deadline))
+            if operation.kind == "probe":
+                now[0] = deadline
+            return super().execute(operation, **kwargs)
+
+    executor = DeadlineExecutor(tmp_path)
+    state = model.new_state(
+        bundle=tuple(executor.specs.values()), cycles=100, soak_hours=72
+    )
+
+    assert faults.execute_fault_case(
+        case, executor, state, tmp_path / "state.json", tmp_path / "raw"
+    )
+
+    deadlines = dict(executor.calls)
+    assert deadlines["recover"] > deadlines["probe"]
+    report = model.load_json(
+        tmp_path / "raw" / "faults" / case.name / "case.json"
+    )
+    assert report["steps"][-1]["phase"] == "restore"
+    assert report["steps"][-1]["operation"] == "recover"
+
+
+def test_pressure_fault_is_synchronous_and_verifies_no_residual_workload(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    calls: list[tuple[str, ...]] = []
+
+    def compose(
+        runtime_origin: Path,
+        spec: model.StackSpec,
+        args: tuple[str, ...],
+        timeout: float,
+    ) -> dict[str, object]:
+        del runtime_origin, spec, timeout
+        calls.append(args)
+        return {"returncode": 0}
+
+    monkeypatch.setattr(faults, "compose_command", compose)
+    bundle = (
+        model.StackSpec("main", "bioetl-main", "docker-compose.yml", ("bioetl",)),
+    )
+    executor = faults.HostFaultExecutor(
+        runtime_origin=tmp_path,
+        contract=tmp_path / "contract.yml",
+        evidence_dir=tmp_path / "raw",
+        bundle=bundle,
+        baselines={},
+    )
+    case = next(
+        item
+        for item in faults.build_fault_cases()
+        if item.name == "bounded_memory_pid_pressure"
+    )
+
+    executor.execute(
+        case.apply[0],
+        deadline=time.monotonic() + 30,
+        case_name=case.name,
+        ordinal=1,
+    )
+    executor.execute(
+        case.restore[0],
+        deadline=time.monotonic() + 30,
+        case_name=case.name,
+        ordinal=2,
+    )
+
+    assert "--detach" not in calls[0]
+    assert "bioetl-fault-pressure.pids" in calls[0][-1]
+    assert "os.kill(pid, 0)" in calls[1][-1]
+    assert [operation.kind for operation in case.restore] == [
+        "clear_pressure",
+        "probe",
+    ]
+
+
 def test_recursive_redaction_covers_nested_credentials_and_uri_userinfo() -> None:
     protected = model.redact(
         {
@@ -275,9 +380,7 @@ def test_compose_origins_require_both_projects_inside_linux_mirror() -> None:
             ("prometheus",),
         ),
     )
-    rows = [
-        {"Name": "bioetl-main", "ConfigFiles": str(runtime / "docker-compose.yml")}
-    ]
+    rows = [{"Name": "bioetl-main", "ConfigFiles": str(runtime / "docker-compose.yml")}]
 
     findings = model.compose_origin_findings(rows, bundle, runtime)
 
@@ -298,9 +401,7 @@ def test_release_bundle_pins_both_projects_and_protected_volume_names() -> None:
                 "compose_file": "docker-compose.monitoring.yml",
                 "required_services": ["prometheus"],
                 "migration": {
-                    "volume_map": {
-                        "legacy-prometheus": "bioetl-monitoring-prometheus"
-                    }
+                    "volume_map": {"legacy-prometheus": "bioetl-monitoring-prometheus"}
                 },
             },
         }
@@ -316,6 +417,43 @@ def test_release_bundle_pins_both_projects_and_protected_volume_names() -> None:
         "bioetl-monitoring-prometheus",
         "legacy-prometheus",
     )
+    assert bundle[1].required_volumes == ("bioetl-monitoring-prometheus",)
+    assert bundle[1].legacy_volumes == ("legacy-prometheus",)
+
+
+def test_required_volume_precondition_fails_before_lifecycle_mutation(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    bundle = (
+        model.StackSpec(
+            "monitoring",
+            "bioetl-monitoring",
+            "docker-compose.monitoring.yml",
+            ("prometheus",),
+            protected_volumes=("legacy-prometheus", "target-prometheus"),
+            required_volumes=("target-prometheus",),
+            legacy_volumes=("legacy-prometheus",),
+        ),
+    )
+    monkeypatch.setattr(
+        commands,
+        "run_command",
+        lambda *_args, **_kwargs: {
+            "returncode": 0,
+            "stdout": "legacy-prometheus\n",
+        },
+    )
+
+    result = commands.required_volume_precondition(tmp_path, bundle)
+
+    assert result["passed"] is False
+    assert result["missing_required_target_volumes"] == ["target-prometheus"]
+    assert result["stacks"]["monitoring"]["legacy_volumes"] == {
+        "legacy-prometheus": "present"
+    }
+    assert result["stacks"]["monitoring"]["required_target_volumes"] == {
+        "target-prometheus": "missing"
+    }
 
 
 def test_validate_args_refuses_reduced_thresholds() -> None:
@@ -397,16 +535,19 @@ def test_signed_summary_is_not_modified_after_signature(
 
     monkeypatch.setattr(promotion, "sign_and_verify", sign)
 
-    assert promotion.finalize_campaign(
-        state,
-        state_path,
-        evidence,
-        tmp_path,
-        summary,
-        "key",
-        "A" * 40,
-        bundle,
-    ) is True
+    assert (
+        promotion.finalize_campaign(
+            state,
+            state_path,
+            evidence,
+            tmp_path,
+            summary,
+            "key",
+            "A" * 40,
+            bundle,
+        )
+        is True
+    )
     signed_bytes = summary.read_bytes()
     receipt = json.loads(
         summary.with_suffix(".json.verification.json").read_text(encoding="utf-8")

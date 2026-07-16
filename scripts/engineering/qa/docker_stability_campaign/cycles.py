@@ -12,6 +12,7 @@ from .commands import (
     observe_docker_vm_reserve,
     probe_command,
     record_probe,
+    required_volume_precondition,
 )
 from .faults import HostFaultExecutor, build_fault_cases, execute_fault_case
 from .model import atomic_json, compose_origin_findings
@@ -35,6 +36,22 @@ def bootstrap_campaign(
     if state.get("bootstrap_complete"):
         return True
     steps: list[dict[str, Any]] = []
+    volume_precondition = required_volume_precondition(runtime_origin, bundle)
+    if not volume_precondition["passed"]:
+        state["last_failure"] = "bootstrap-required-volumes"
+        atomic_json(
+            evidence_dir / "bootstrap" / "bootstrap.json",
+            {
+                "schema_version": "bioetl-docker-campaign-bootstrap-v1",
+                "passed": False,
+                "runtime_origin": str(runtime_origin),
+                "volume_precondition": volume_precondition,
+                "steps": steps,
+            },
+            replace=False,
+        )
+        index_and_save(state, state_path, evidence_dir)
+        return False
     state["initial_volume_ids"] = bundle_volume_ids(runtime_origin, bundle)
     for spec in bundle:
         result = manager_step(
@@ -84,6 +101,7 @@ def bootstrap_campaign(
             "schema_version": "bioetl-docker-campaign-bootstrap-v1",
             "passed": passed,
             "runtime_origin": str(runtime_origin),
+            "volume_precondition": volume_precondition,
             "compose_rows": rows,
             "origin_findings": origins,
             "baselines": baselines,
