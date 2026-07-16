@@ -75,7 +75,9 @@ def desktop_recovery_diagnostic_bundle(
 ) -> dict[str, Any]:
     """Run bounded evidence-first Desktop recovery without destructive fallback."""
     if report.exists():
-        raise FileExistsError(f"refusing to replace Desktop recovery evidence: {report}")
+        raise FileExistsError(
+            f"refusing to replace Desktop recovery evidence: {report}"
+        )
     report.parent.mkdir(parents=True, exist_ok=True)
     script = runtime_origin / "scripts/ops/runtime/docker/restart-docker.ps1"
     converted_script = run_command(
@@ -225,7 +227,9 @@ def compose_command(
     )
 
 
-def live_compose_rows(runtime_origin: Path, timeout: float = 20.0) -> list[dict[str, Any]]:
+def live_compose_rows(
+    runtime_origin: Path, timeout: float = 20.0
+) -> list[dict[str, Any]]:
     result = run_command(
         ["docker", "compose", "ls", "--all", "--format", "json"],
         timeout,
@@ -324,7 +328,9 @@ def bundle_volume_ids(
     }
 
 
-def restart_baseline(report: Mapping[str, Any]) -> tuple[dict[str, int], dict[str, str]]:
+def restart_baseline(
+    report: Mapping[str, Any],
+) -> tuple[dict[str, int], dict[str, str]]:
     """Require a clean sample, then pin restart counters and container identities."""
     if not bool(report.get("summary", {}).get("ok")):
         raise ValueError("restart baseline requires a clean runtime probe")
@@ -356,7 +362,9 @@ def write_baseline(path: Path, report_path: Path) -> dict[str, str]:
     return container_ids
 
 
-def record_probe(state: dict[str, Any], path: Path, *, release_sample: bool = True) -> None:
+def record_probe(
+    state: dict[str, Any], path: Path, *, release_sample: bool = True
+) -> None:
     report = load_json(path)
     if not report:
         raise ValueError(f"runtime probe did not write evidence: {path}")
@@ -387,14 +395,11 @@ def record_probe(state: dict[str, Any], path: Path, *, release_sample: bool = Tr
     state["unhealthy_samples"] = int(state.get("unhealthy_samples", 0)) + int(
         not bool(slo.get("required_services_ready", False))
     )
-    state["disk_reserve_breaches"] = int(
-        state.get("disk_reserve_breaches", 0)
-    ) + int(not bool(slo.get("disk_reserve_ok", False)))
-    state["image_or_project_drift"] = int(
-        state.get("image_or_project_drift", 0)
-    ) + int(
-        bool(slo.get("image_identity_drift"))
-        or bool(slo.get("project_origin_drift"))
+    state["disk_reserve_breaches"] = int(state.get("disk_reserve_breaches", 0)) + int(
+        not bool(slo.get("disk_reserve_ok", False))
+    )
+    state["image_or_project_drift"] = int(state.get("image_or_project_drift", 0)) + int(
+        bool(slo.get("image_identity_drift")) or bool(slo.get("project_origin_drift"))
     )
 
 
@@ -422,7 +427,7 @@ def observe_docker_vm_reserve(
         free_bytes if previous is None else min(int(previous), free_bytes)
     )
     if free_bytes < DOCKER_VM_MIN_FREE_BYTES:
-        state["docker_vm_reserve_breaches"] = int(
-            state.get("docker_vm_reserve_breaches", 0)
-        ) + 1
+        state["docker_vm_reserve_breaches"] = (
+            int(state.get("docker_vm_reserve_breaches", 0)) + 1
+        )
     return {**result, "free_bytes": free_bytes}

@@ -137,7 +137,9 @@ def run(args: argparse.Namespace) -> bool:
     if not secret_fingerprint(
         runtime_origin, args.signing_key, args.signing_fingerprint
     ):
-        raise ValueError("approved secret signing key does not match the exact fingerprint")
+        raise ValueError(
+            "approved secret signing key does not match the exact fingerprint"
+        )
     state = load_json(state_path)
     if state:
         if state.get("campaign_identity") != identity:

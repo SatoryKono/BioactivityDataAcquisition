@@ -181,7 +181,9 @@ def origin_kind(value: str | Path) -> str:
 
 def canonical_runtime_origin(path: Path) -> Path:
     if origin_kind(path) != "linux":
-        raise ValueError("Runtime origin must be an absolute Linux path outside /mnt and /tmp")
+        raise ValueError(
+            "Runtime origin must be an absolute Linux path outside /mnt and /tmp"
+        )
     resolved = path.resolve(strict=True)
     if origin_kind(resolved) != "linux":
         raise ValueError("Resolved runtime origin must remain outside /mnt and /tmp")
@@ -214,9 +216,13 @@ def release_bundle(contract: dict[str, Any]) -> tuple[StackSpec, ...]:
         if not isinstance(services, list) or not services:
             raise ValueError(f"Release stack {name} has no required services")
         migration = raw.get("migration", {})
-        volume_map = migration.get("volume_map", {}) if isinstance(migration, dict) else {}
+        volume_map = (
+            migration.get("volume_map", {}) if isinstance(migration, dict) else {}
+        )
         if not isinstance(volume_map, dict):
-            raise ValueError(f"Release stack {name} has an invalid migration volume map")
+            raise ValueError(
+                f"Release stack {name} has an invalid migration volume map"
+            )
         legacy_volumes = tuple(sorted(str(item) for item in volume_map))
         required_volumes = tuple(sorted(str(item) for item in volume_map.values()))
         protected = tuple(sorted({*legacy_volumes, *required_volumes}))
@@ -270,7 +276,9 @@ def compose_origin_findings(
                 Path(origin).resolve(strict=False).relative_to(runtime_origin)
         except ValueError:
             findings.append(f"{project}: runtime origin outside pinned mirror")
-    findings.extend(f"{project}: project not running" for project in sorted(expected - seen))
+    findings.extend(
+        f"{project}: project not running" for project in sorted(expected - seen)
+    )
     return findings
 
 
@@ -331,7 +339,8 @@ def release_gates(state: dict[str, Any], *, signature_exists: bool) -> dict[str,
     faults = state.get("fault_cases", {})
     complete = required_faults == set(faults)
     return {
-        "cycles_complete": int(state["completed_cycles"]) >= int(state["required_cycles"]),
+        "cycles_complete": int(state["completed_cycles"])
+        >= int(state["required_cycles"]),
         "cycles_clean": int(state["cycle_failures"]) == 0,
         "soak_complete": float(state["soak_observed_seconds"])
         >= float(state["required_soak_hours"]) * 3600,

@@ -82,7 +82,9 @@ def run_recovery_trials(
                     trial_dir / f"manager-recover-{spec.stack}",
                     remaining_seconds(deadline, reserve=1.0),
                 )
-                steps.append({"stack": spec.stack, "action": "recover", "result": result})
+                steps.append(
+                    {"stack": spec.stack, "action": "recover", "result": result}
+                )
                 clean = clean and result["returncode"] == 0
             for spec in bundle:
                 probe = trial_dir / f"probe-recovery-{spec.stack}.json"
@@ -133,9 +135,8 @@ def run_recovery_trials(
                     "result": desktop_diagnostics,
                 }
             )
-            resolved = (
-                desktop_diagnostics["returncode"] == 0
-                and bool(desktop_diagnostics.get("diagnostic_bundle_present"))
+            resolved = desktop_diagnostics["returncode"] == 0 and bool(
+                desktop_diagnostics.get("diagnostic_bundle_present")
             )
             for spec in bundle:
                 repair = manager_step(
@@ -261,10 +262,14 @@ def sign_and_verify(
         cwd=runtime_origin,
     )
     expected = fingerprint.upper()
-    valid = signed["returncode"] == 0 and verified["returncode"] == 0 and any(
-        line.startswith("[GNUPG:] VALIDSIG ")
-        and line.split()[2].upper() == expected
-        for line in str(verified["stdout"]).splitlines()
+    valid = (
+        signed["returncode"] == 0
+        and verified["returncode"] == 0
+        and any(
+            line.startswith("[GNUPG:] VALIDSIG ")
+            and line.split()[2].upper() == expected
+            for line in str(verified["stdout"]).splitlines()
+        )
     )
     return signature, valid, {"sign": signed, "verify": verified}
 

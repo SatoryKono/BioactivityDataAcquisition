@@ -20,9 +20,7 @@ def save_state(path: Path, state: dict[str, Any]) -> None:
     atomic_json(path, state)
 
 
-def index_and_save(
-    state: dict[str, Any], state_path: Path, evidence_dir: Path
-) -> None:
+def index_and_save(state: dict[str, Any], state_path: Path, evidence_dir: Path) -> None:
     remember_evidence_tree(state, evidence_dir, evidence_dir)
     save_state(state_path, state)
 

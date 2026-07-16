@@ -306,7 +306,9 @@ def test_readiness_stabilization_never_runs_past_global_deadline(
         *,
         runner: runtime_manager.Runner,
         timeout: float,
-    ) -> tuple[list[runtime_manager.ServiceSnapshot], list[runtime_manager.CommandResult]]:
+    ) -> tuple[
+        list[runtime_manager.ServiceSnapshot], list[runtime_manager.CommandResult]
+    ]:
         del spec, runner
         observed_timeouts.append(timeout)
         now[0] += timeout
