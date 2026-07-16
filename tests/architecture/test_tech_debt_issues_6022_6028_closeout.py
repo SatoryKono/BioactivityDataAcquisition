@@ -166,9 +166,6 @@ def test_issue_6026_tracked_mcp_config_is_current_and_pruned() -> None:
 
 
 def test_issue_6027_pandera_and_topology_docs_match_current_runtime() -> None:
-    requirements = (ROOT / "docs" / "01-requirements" / "REQUIREMENTS.md").read_text(
-        encoding="utf-8"
-    )
     topology = (
         ROOT
         / "docs"
@@ -179,9 +176,7 @@ def test_issue_6027_pandera_and_topology_docs_match_current_runtime() -> None:
     ).read_text(encoding="utf-8")
     coverage = _load_json(MODULE_COVERAGE)
 
-    assert "validate_supported_pandera_runtime" not in requirements
-    assert "делегирует validation-only guard" not in requirements
-    assert "no-op compatibility seam" in requirements
+    # REQUIREMENTS.md was removed, so we only check topology and coverage
     coverage_summary = coverage["summary"]
     assert (
         f"`source_module_count={coverage_summary['source_module_count']}`" in topology

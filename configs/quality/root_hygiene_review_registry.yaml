@@ -292,9 +292,13 @@ review_lanes:
     retention_action: retain_only_when_the_exact_root_filename_is_required_by_a_tool_contract_or_public_entrypoint
     cleanup_policy: move_to_docs_or_config_subtree_only_after_the_external_contract_is_retired_or_repointed
     verification:
-      - git ls-files commitlint.config.mjs mint.json sonar-project.properties
-      - rg -n "commitlint\\.config\\.mjs|mint\\.json|sonar-project\\.properties" .github docs scripts tests configs README.md package.json
+      - git ls-files .coderabbit.yaml commitlint.config.mjs mint.json sonar-project.properties
+      - rg -n "\\.coderabbit\\.yaml|commitlint\\.config\\.mjs|mint\\.json|sonar-project\\.properties" .github docs scripts tests configs README.md package.json
     candidates:
+      - path: .coderabbit.yaml
+        current_live_state: present_approved_root_surface
+        canonical_path: .coderabbit.yaml
+        action_if_reintroduced: retain_as_exact_root_coderabbit_configuration_while_repo_level_review_tooling_requires_the_standard_filename
       - path: commitlint.config.mjs
         current_live_state: present_approved_root_surface
         canonical_path: commitlint.config.mjs

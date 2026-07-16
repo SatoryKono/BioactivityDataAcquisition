@@ -6,18 +6,6 @@
 Docker — optional local adjunct. Выполняйте команды из Linux filesystem mirror,
 не из `/mnt/*` или `/tmp`, и не создавайте/не изменяйте `.env`.
 
-## Reviewed helper Compose adjuncts
-
-| Legacy root path | Канонический путь |
-| --- | --- |
-| `docker-compose.alertmanager.yml` | `scripts/ops/runtime/docker/compose/alertmanager.yml` |
-| `docker-compose.minio.yml` | `scripts/ops/runtime/docker/compose/minio.yml` |
-| `docker-compose.redis.yml` | `scripts/ops/runtime/docker/compose/redis.yml` |
-| `docker-compose.sonarqube.yml` | `scripts/ops/runtime/docker/compose/sonarqube.yml` |
-
-В обычном workflow manager сам выполняет эквивалент управляемой операции
-`docker network create bioetl-monitoring`; вручную создавать сеть не требуется.
-
 ## Main stack
 
 После передачи обязательных environment values в текущий процесс:
