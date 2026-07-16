@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from bioetl.domain.config._converters import freeze_sequences
+from bioetl.domain.config._converters import freeze_sequences, require_literal
 
 __all__ = [
     "DEFAULT_VALIDATION_CONFIG",
@@ -170,6 +170,33 @@ class FieldValidation:
 
     def __post_init__(self) -> None:
         """Convert lists to tuples for immutability."""
+        require_literal(
+            self.validation_type,
+            field_name="validation_type",
+            allowed=frozenset(
+                {
+                    "required",
+                    "not_null",
+                    "range",
+                    "pattern",
+                    "enum",
+                    "max_length",
+                    "not_empty_list",
+                    "custom",
+                }
+            ),
+        )
+        require_literal(
+            self.severity,
+            field_name="severity",
+            allowed=frozenset({"error", "warn"}),
+        )
+        if self.severity_enricher is not None:
+            require_literal(
+                self.severity_enricher,
+                field_name="severity_enricher",
+                allowed=frozenset({"error", "warn"}),
+            )
         freeze_sequences(self, ("allowed",))
 
     def effective_severity(
@@ -227,6 +254,25 @@ class CrossFieldValidation:
 
     def __post_init__(self) -> None:
         """Convert lists to tuples for immutability."""
+        require_literal(
+            self.condition,
+            field_name="condition",
+            allowed=frozenset(
+                {
+                    "all_present",
+                    "any_present",
+                    "equality",
+                    "mutually_exclusive",
+                    "conditional_required",
+                    "custom",
+                }
+            ),
+        )
+        require_literal(
+            self.severity,
+            field_name="severity",
+            allowed=frozenset({"error", "warn"}),
+        )
         freeze_sequences(self, ("fields",))
 
 
@@ -252,4 +298,9 @@ class ConditionalValidation:
 
     def __post_init__(self) -> None:
         """Convert lists to tuples for immutability."""
+        require_literal(
+            self.condition_operator,
+            field_name="condition_operator",
+            allowed=frozenset({"eq", "ne", "in", "not_in"}),
+        )
         freeze_sequences(self, ("condition_value", "then_validations"))

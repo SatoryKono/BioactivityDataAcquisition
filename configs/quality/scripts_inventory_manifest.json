@@ -1,21 +1,22 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-16T11:52:34.872042+00:00",
+  "generated_at": "2026-07-16T19:18:10.967397+00:00",
   "summary": {
-    "total_scripts": 469,
+    "total_scripts": 477,
     "status_counts": {
-      "active": 341,
+      "active": 342,
+      "orphan": 7,
       "supporting": 128
     },
     "reference_group_coverage": {
       "agents": 5,
       "build": 11,
-      "ci": 62,
-      "docs": 185,
+      "ci": 63,
+      "docs": 183,
       "other": 33,
-      "scripts": 367,
+      "scripts": 368,
       "skills": 16,
-      "tests": 218
+      "tests": 221
     }
   },
   "scripts": [
@@ -549,7 +550,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 17,
+      "reference_count": 18,
       "references": [
         {
           "path": "docs/03-guides/development/codex-paths.md",
@@ -893,14 +894,8 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 16,
+      "reference_count": 15,
       "references": [
-        {
-          "path": "docs/CODEX_HANG_FIX.md",
-          "line": 5,
-          "source_group": "docs",
-          "text": "Когда запускаете `launch-codex-wsl.ps1 start`, Codex зависает потому что:"
-        },
         {
           "path": "scripts/ai/codex/WSL_SETUP_INSTRUCTIONS.md",
           "line": 125,
@@ -942,6 +937,12 @@
           "line": 155,
           "source_group": "scripts",
           "text": ".\\launch-codex-wsl.ps1 mcp-setup      # Настройка MCP"
+        },
+        {
+          "path": "scripts/ai/codex/WSL_SETUP_INSTRUCTIONS.md",
+          "line": 178,
+          "source_group": "scripts",
+          "text": ".\\launch-codex-wsl.ps1 setup"
         }
       ]
     },
@@ -989,7 +990,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 139,
+      "reference_count": 136,
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
@@ -1005,25 +1006,25 @@
         },
         {
           "path": "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
-          "line": 98,
+          "line": 111,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\codex\\run-codex.ps1"
         },
         {
           "path": "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
-          "line": 99,
+          "line": 112,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\codex\\run-codex.ps1 exec \"analyze the failing launcher flow\""
         },
         {
           "path": "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
-          "line": 100,
+          "line": 113,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\codex\\run-codex.ps1 check"
         },
         {
           "path": "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
-          "line": 119,
+          "line": 131,
           "source_group": "docs",
           "text": ".\\scripts\\ai\\codex\\run-codex.ps1 check"
         },
@@ -1034,10 +1035,10 @@
           "text": "| `codex.ps1` | `scripts/ai/codex/run-codex.ps1` | Do not restore root PowerShell transport. |"
         },
         {
-          "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 253,
-          "source_group": "docs",
-          "text": ".\\scripts\\ai\\codex\\run-codex.ps1"
+          "path": "scripts/ai/__main__.py",
+          "line": 27,
+          "source_group": "scripts",
+          "text": "launcher = _DIR / \"codex\" / \"run-codex.ps1\""
         }
       ]
     },
@@ -1230,7 +1231,7 @@
         },
         {
           "path": "tests/architecture/test_root_hygiene_review_registry.py",
-          "line": 494,
+          "line": 500,
           "source_group": "tests",
           "text": "\"setup-codex-wsl.ps1\": \"scripts/ai/codex/setup.ps1\","
         },
@@ -2131,17 +2132,17 @@
       "type": "sh",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 8,
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 95,
+          "line": 96,
           "source_group": "docs",
           "text": "bash scripts/ai/mcp/check.sh"
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 102,
+          "line": 103,
           "source_group": "docs",
           "text": "| GitHub MCP says token missing | Set `GITHUB_PERSONAL_ACCESS_TOKEN` or `GITHUB_TOKEN`; verify alias normalization with `test_env_loading.sh` or `check.sh`. |"
         },
@@ -2170,16 +2171,16 @@
           "text": "1. ✅ Запустить тест: `bash scripts/ai/mcp/check.sh`"
         },
         {
-          "path": "docs/CODEX_HANG_FIX.md",
-          "line": 64,
-          "source_group": "docs",
-          "text": "bash scripts/ai/mcp/check.sh"
+          "path": "scripts/ai/mcp/__main__.py",
+          "line": 27,
+          "source_group": "scripts",
+          "text": "\"check\": shell_command(\"check.sh\"),"
         },
         {
-          "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 100,
-          "source_group": "docs",
-          "text": "bash scripts/ai/mcp/check.sh"
+          "path": "scripts/startup.sh",
+          "line": 10,
+          "source_group": "scripts",
+          "text": "exec bash \"${repo_root}/scripts/ai/mcp/check.sh\""
         }
       ],
       "owner": "@bioetl-platform",
@@ -2192,7 +2193,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 33,
+      "reference_count": 32,
       "references": [
         {
           "path": "docs/05-operations/deployment/NEO4J-COMPLETION-GUIDE.md",
@@ -2259,7 +2260,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 51,
+          "line": 52,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.ps1\": \"Test-McpRequiredToken\","
         }
@@ -2274,7 +2275,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 87,
+          "line": 88,
           "source_group": "docs",
           "text": "BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/github-mcp-wrapper.sh"
         },
@@ -2298,7 +2299,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 37,
+          "line": 38,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/github-mcp-wrapper.sh\": \"mcp_validate_required_token\","
         }
@@ -2346,7 +2347,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 52,
+          "line": 53,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.ps1\": \"Test-McpRequiredToken\","
         }
@@ -2365,7 +2366,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 88,
+          "line": 89,
           "source_group": "docs",
           "text": "BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/mcp_brave_search_wrapper.sh"
         },
@@ -2383,7 +2384,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 38,
+          "line": 39,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_brave_search_wrapper.sh\": \"mcp_validate_required_token\","
         }
@@ -2464,7 +2465,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 70,
+          "line": 73,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_docker_docs_wrapper.sh`"
         }
@@ -2523,7 +2524,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 71,
+          "line": 74,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_dockerhub_wrapper.sh`"
         }
@@ -2542,7 +2543,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 53,
+          "line": 54,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.ps1\": \"Test-McpOptionalToken\","
         }
@@ -2561,7 +2562,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 89,
+          "line": 90,
           "source_group": "docs",
           "text": "BIOETL_MCP_VALIDATE_ONLY=1 scripts/ai/mcp/mcp_grafana_wrapper.sh"
         },
@@ -2579,7 +2580,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 39,
+          "line": 40,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_grafana_wrapper.sh\": \"mcp_validate_optional_token\","
         }
@@ -2631,7 +2632,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 72,
+          "line": 75,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_needle_wrapper.sh`"
         }
@@ -2650,7 +2651,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 55,
+          "line": 56,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.ps1\": \"Test-McpNeo4jCredentials\","
         }
@@ -2681,13 +2682,13 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 41,
+          "line": 42,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_cypher_wrapper.sh\": \"mcp_validate_neo4j_credentials\","
         },
         {
           "path": "tests/unit/repo_backed/scripts/ai/mcp/test_token_validation_helpers.py",
-          "line": 27,
+          "line": 28,
           "source_group": "tests",
           "text": "ROOT / \"scripts\" / \"ai\" / \"mcp\" / \"mcp_neo4j_cypher_wrapper.sh\","
         }
@@ -2702,7 +2703,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 56,
+          "line": 57,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_neo4j_memory_wrapper.ps1\": \"Test-McpNeo4jCredentials\","
         }
@@ -2778,7 +2779,7 @@
       "references": [
         {
           "path": "docs/00-project/ai/mcp-governance.md",
-          "line": 73,
+          "line": 76,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/mcp_paper_search_wrapper.sh`"
         }
@@ -2797,7 +2798,7 @@
       "references": [
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 54,
+          "line": 55,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.ps1\": \"Test-McpOptionalToken\","
         }
@@ -2828,7 +2829,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 40,
+          "line": 41,
           "source_group": "tests",
           "text": "\"scripts/ai/mcp/mcp_prometheus_wrapper.sh\": \"mcp_validate_optional_token\","
         }
@@ -2893,29 +2894,11 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 3,
       "references": [
         {
-          "path": "docs/CODEX_HANG_FIX.md",
-          "line": 65,
-          "source_group": "docs",
-          "text": "python scripts/ai/mcp/protocol_smoke.py --config .mcp.json --server memory"
-        },
-        {
-          "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 101,
-          "source_group": "docs",
-          "text": "python scripts/ai/mcp/protocol_smoke.py --config .mcp.json --server memory"
-        },
-        {
-          "path": "docs/DOCKER_SETUP.md",
-          "line": 89,
-          "source_group": "docs",
-          "text": "python scripts/ai/mcp/protocol_smoke.py --config .mcp.json --server memory"
-        },
-        {
           "path": "scripts/ai/mcp/check.sh",
-          "line": 230,
+          "line": 237,
           "source_group": "scripts",
           "text": "if python3 \"${SCRIPT_DIR}/protocol_smoke.py\" --config \"${PROJECT_MCP_CONFIG}\" --server memory --timeout 15 >/dev/null; then"
         },
@@ -3087,7 +3070,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 4,
       "references": [
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
@@ -3100,6 +3083,12 @@
           "line": 116,
           "source_group": "docs",
           "text": "| `scripts/ai/mcp/support/load_repo_env.sh`    | Env variable loader                |"
+        },
+        {
+          "path": "scripts/ai/codex/helper/run-codex-impl.sh",
+          "line": 24,
+          "source_group": "scripts",
+          "text": "REPO_ENV_LOADER=\"${REPO_ROOT}/scripts/ai/mcp/support/load_repo_env.sh\""
         },
         {
           "path": "scripts/ai/mcp/test_env_loading.sh",
@@ -3124,7 +3113,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 73,
+          "line": 74,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.ps1`"
         },
@@ -3181,7 +3170,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 72,
+          "line": 73,
           "source_group": "docs",
           "text": "- `scripts/ai/mcp/support/token_validation.sh`"
         },
@@ -3238,7 +3227,7 @@
         },
         {
           "path": "docs/00-project/ai/mcp-token-configuration.md",
-          "line": 102,
+          "line": 103,
           "source_group": "docs",
           "text": "| GitHub MCP says token missing | Set `GITHUB_PERSONAL_ACCESS_TOKEN` or `GITHUB_TOKEN`; verify alias normalization with `test_env_loading.sh` or `check.sh`. |"
         },
@@ -3250,7 +3239,7 @@
         },
         {
           "path": "tests/architecture/test_mcp_token_configuration.py",
-          "line": 66,
+          "line": 67,
           "source_group": "tests",
           "text": "text = _read(\"scripts/ai/mcp/test_env_loading.sh\")"
         }
@@ -3277,13 +3266,13 @@
         },
         {
           "path": "docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md",
-          "line": 97,
+          "line": 99,
           "source_group": "docs",
           "text": "governance anchors, use `scripts/ai/sync_ai_governance.py --check` before"
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
-          "line": 167,
+          "line": 180,
           "source_group": "docs",
           "text": "uv run python scripts/ai/sync_ai_governance.py"
         },
@@ -3310,25 +3299,55 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 3,
+      "reference_count": 10,
       "references": [
         {
           "path": "docs/00-project/ai/rules/README.md",
-          "line": 168,
+          "line": 102,
+          "source_group": "docs",
+          "text": "2. `sync_cursor_rules.py --deploy` + `sync_windsurf_rules.py`"
+        },
+        {
+          "path": "docs/00-project/ai/rules/README.md",
+          "line": 181,
+          "source_group": "docs",
+          "text": "uv run python scripts/ai/sync_cursor_rules.py --deploy"
+        },
+        {
+          "path": "docs/00-project/ai/rules/README.md",
+          "line": 192,
           "source_group": "docs",
           "text": "uv run python scripts/ai/sync_cursor_rules.py --deploy"
         },
         {
           "path": "docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md",
-          "line": 76,
+          "line": 77,
           "source_group": "docs",
           "text": "| Cursor IDE | `.cursor/rules/*.mdc` | `scripts/ai/sync_cursor_rules.py --deploy` |"
         },
         {
           "path": "docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md",
-          "line": 82,
+          "line": 85,
           "source_group": "docs",
           "text": "uv run python scripts/ai/sync_cursor_rules.py --check"
+        },
+        {
+          "path": "docs/00-project/ai/rules/cursor/07-qodo-enforcement.mdc",
+          "line": 83,
+          "source_group": "docs",
+          "text": "uv run python scripts/ai/sync_cursor_rules.py --deploy"
+        },
+        {
+          "path": "docs/00-project/ai/rules/windsurf/rules/07-qodo-enforcement.md",
+          "line": 82,
+          "source_group": "docs",
+          "text": "uv run python scripts/ai/sync_cursor_rules.py --deploy"
+        },
+        {
+          "path": "docs/00-project/ai/rules/windsurf/workflows/post-change.md",
+          "line": 20,
+          "source_group": "docs",
+          "text": "uv run python scripts/ai/sync_cursor_rules.py --deploy"
         }
       ],
       "owner": "@bioetl-platform",
@@ -3341,7 +3360,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 13,
+      "reference_count": 15,
       "references": [
         {
           "path": "Makefile",
@@ -3369,27 +3388,27 @@
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
-          "line": 169,
+          "line": 102,
+          "source_group": "docs",
+          "text": "2. `sync_cursor_rules.py --deploy` + `sync_windsurf_rules.py`"
+        },
+        {
+          "path": "docs/00-project/ai/rules/README.md",
+          "line": 182,
           "source_group": "docs",
           "text": "uv run python scripts/ai/sync_windsurf_rules.py"
         },
         {
           "path": "docs/00-project/ai/rules/README.md",
-          "line": 175,
+          "line": 193,
           "source_group": "docs",
-          "text": "Индекс синхронизации: `07-qodo-enforcement.mdc`. После обновления cursor rules выполните `sync_windsurf_rules.py`."
+          "text": "uv run python scripts/ai/sync_windsurf_rules.py"
         },
         {
           "path": "docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md",
-          "line": 77,
+          "line": 78,
           "source_group": "docs",
           "text": "| Windsurf | `docs/00-project/ai/rules/windsurf/rules/*.md` | `scripts/ai/sync_windsurf_rules.py` |"
-        },
-        {
-          "path": "docs/00-project/ai/rules/RULES_COVERAGE_MATRIX.md",
-          "line": 83,
-          "source_group": "docs",
-          "text": "uv run python scripts/ai/sync_windsurf_rules.py --check"
         }
       ],
       "owner": "@bioetl-platform",
@@ -3816,19 +3835,19 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 176,
+          "line": 211,
           "source_group": "docs",
           "text": "| `scripts.diagrams`                | `uv run python -m scripts.diagrams`                | Diagram lint, check, fix, render            |"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 203,
+          "line": 238,
           "source_group": "docs",
           "text": "uv run python -m scripts.diagrams lint"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 204,
+          "line": 239,
           "source_group": "docs",
           "text": "uv run python -m scripts.diagrams check-quality-gates"
         }
@@ -5446,7 +5465,7 @@
         "grafana-dashboard-extension",
         "py-doc-bot"
       ],
-      "reference_count": 163,
+      "reference_count": 162,
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-extension/references/grafana-prometheus-prerequisites.md",
@@ -5776,7 +5795,7 @@
       "agent_usage": [
         "py-doc-bot"
       ],
-      "reference_count": 39,
+      "reference_count": 38,
       "references": [
         {
           "path": ".codex/skills/py-doc-bot/SKILL.md",
@@ -5816,7 +5835,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1307,
+          "line": 1412,
           "source_group": "docs",
           "text": "автоматические docs-проверки (`python -m scripts.docs check-links` и"
         },
@@ -6721,13 +6740,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 171,
+          "line": 206,
           "source_group": "docs",
           "text": "| `scripts.engineering.baselines`   | `uv run python -m scripts.engineering.baselines`   | Baseline maintenance for engineering checks |"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 216,
+          "line": 251,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.baselines dq-baseline --dry-run"
         },
@@ -6787,7 +6806,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 380,
+          "line": 399,
           "source_group": "ci",
           "text": "run: uv run python -m scripts.engineering.ci neo4j-memory-live"
         },
@@ -6817,13 +6836,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 170,
+          "line": 205,
           "source_group": "docs",
           "text": "| `scripts.engineering.ci`          | `uv run python -m scripts.engineering.ci`          | CI pipeline: pytest runner, quality gates   |"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 212,
+          "line": 247,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.ci quality-gate"
         }
@@ -7137,7 +7156,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 821,
+          "line": 840,
           "source_group": "ci",
           "text": "scripts/engineering/ci/run_pytest_resilient.py \\"
         },
@@ -7407,7 +7426,7 @@
       "references": [
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1651,
+          "line": 1775,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.dev run-tests cov"
         },
@@ -7419,7 +7438,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 179,
+          "line": 214,
           "source_group": "docs",
           "text": "| `scripts.engineering.dev`         | `uv run python -m scripts.engineering.dev`         | Dev setup, test runner, mock metrics        |"
         },
@@ -8214,7 +8233,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 145,
+          "line": 180,
           "source_group": "docs",
           "text": ".\\scripts\\engineering\\dev\\setup_env_windows.ps1"
         },
@@ -8271,7 +8290,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 151,
+          "line": 186,
           "source_group": "docs",
           "text": "bash scripts/engineering/dev/setup_env_wsl.sh"
         },
@@ -8367,7 +8386,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 180,
+          "line": 215,
           "source_group": "docs",
           "text": "| `scripts.engineering.diagnostics` | `uv run python -m scripts.engineering.diagnostics` | Debug: cleanup, pandera, storage            |"
         },
@@ -8810,7 +8829,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 189,
+          "line": 224,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.qa check-c901"
         },
@@ -9430,6 +9449,119 @@
       "next_step": "Retain only as a bounded historical GitHub issue seeding helper tied to a legacy markdown source and local .env token flow; either replace it with a governed issue-creation workflow or retire it once no reviewed maintenance lane needs it."
     },
     {
+      "path": "scripts/engineering/qa/docker_stability_campaign/commands.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/engineering/qa/docker_stability_campaign/cycles.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/engineering/qa/docker_stability_campaign/faults.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/engineering/qa/docker_stability_campaign/model.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/engineering/qa/docker_stability_campaign/promotion.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/engineering/qa/docker_stability_campaign/runner.py",
+      "type": "py",
+      "status": "active",
+      "agent_usage": [],
+      "reference_count": 77,
+      "references": [
+        {
+          "path": "docs/00-project/RULES.md",
+          "line": 1510,
+          "source_group": "docs",
+          "text": "| **Файл:строки**      | Точная ссылка на код (`runner.py:116-123`)    |"
+        },
+        {
+          "path": "docs/00-project/RULES.md",
+          "line": 1522,
+          "source_group": "docs",
+          "text": "- **Файл**: `runner.py:116-123` (175 строк, 9 методов)"
+        },
+        {
+          "path": "docs/00-project/ai/agents/guides/CLAUDE.md",
+          "line": 98,
+          "source_group": "docs",
+          "text": "grep -n \"class PipelineRunner\" src/bioetl/application/core/runner.py"
+        },
+        {
+          "path": "docs/00-project/ai/agents/guides/CLAUDE.md",
+          "line": 99,
+          "source_group": "docs",
+          "text": "wc -l src/bioetl/application/core/runner.py  # Проверить размер"
+        },
+        {
+          "path": "docs/00-project/ai/agents/guides/CLAUDE.md",
+          "line": 100,
+          "source_group": "docs",
+          "text": "grep -n \"def \" src/bioetl/application/core/runner.py  # Проверить методы"
+        },
+        {
+          "path": "docs/00-project/ai/agents/guides/CLAUDE.md",
+          "line": 138,
+          "source_group": "docs",
+          "text": "wc -l src/bioetl/application/core/runner.py"
+        },
+        {
+          "path": "docs/00-project/ai/agents/guides/CLAUDE.md",
+          "line": 139,
+          "source_group": "docs",
+          "text": "grep -c \"def \\|async def \" src/bioetl/application/core/runner.py"
+        },
+        {
+          "path": "docs/00-project/ai/agents/guides/CLAUDE.md",
+          "line": 142,
+          "source_group": "docs",
+          "text": "grep -n \"self\\.-.*\\.\" src/bioetl/application/core/runner.py | head -20"
+        }
+      ]
+    },
+    {
+      "path": "scripts/engineering/qa/docker_stability_campaign/soak.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
+      "path": "scripts/engineering/qa/docker_stability_campaign/stage_support.py",
+      "type": "py",
+      "status": "orphan",
+      "agent_usage": [],
+      "reference_count": 0,
+      "references": []
+    },
+    {
       "path": "scripts/engineering/qa/extract_pubchem_property_vocab.py",
       "type": "py",
       "status": "active",
@@ -9568,7 +9700,7 @@
         },
         {
           "path": ".github/workflows/tests.yml",
-          "line": 429,
+          "line": 448,
           "source_group": "ci",
           "text": "run: uv run python scripts/engineering/qa/generate_architecture_dependency_map.py --check"
         },
@@ -9580,7 +9712,7 @@
         },
         {
           "path": "docs/00-project/RULES.md",
-          "line": 1521,
+          "line": 1633,
           "source_group": "docs",
           "text": "- `python scripts/engineering/qa/generate_architecture_dependency_map.py --update`"
         },
@@ -9664,7 +9796,7 @@
       "references": [
         {
           "path": ".github/workflows/tests.yml",
-          "line": 741,
+          "line": 760,
           "source_group": "ci",
           "text": "uv run python scripts/engineering/qa/generate_hotspot_degradation_report.py \\"
         },
@@ -9836,7 +9968,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 182,
+          "line": 217,
           "source_group": "docs",
           "text": "Каждая группа поддерживает `--help` и `<command> --help`. Скрипты также доступны напрямую: `python scripts/engineering/qa/naming_audit.py`."
         },
@@ -10831,9 +10963,9 @@
       "references": [
         {
           "path": "docs/05-operations/runbooks/docker-image-resource-promotion.md",
-          "line": 46,
+          "line": 72,
           "source_group": "docs",
-          "text": "`run_docker_stability_campaign.py`; retain its per-cycle/probe/recovery JSON"
+          "text": "python scripts/engineering/qa/run_docker_stability_campaign.py \\"
         }
       ],
       "owner": "@bioetl-platform",
@@ -10942,13 +11074,19 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 1,
+      "reference_count": 2,
       "references": [
         {
           "path": "scripts/engineering/qa/__main__.py",
           "line": 161,
           "source_group": "scripts",
           "text": "\"scripts.engineering.qa.run_observability_closure_campaign\""
+        },
+        {
+          "path": "tests/architecture/test_observability_dashboard_tooling.py",
+          "line": 165,
+          "source_group": "tests",
+          "text": "Path(\"scripts/engineering/qa/run_observability_closure_campaign.py\"),"
         }
       ]
     },
@@ -11080,7 +11218,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 174,
+          "line": 209,
           "source_group": "docs",
           "text": "| `scripts.engineering.qa.vcr`      | `uv run python -m scripts.engineering.qa.vcr`      | VCR governance: placement, naming, secrets  |"
         }
@@ -11142,7 +11280,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 208,
+          "line": 243,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.qa.vcr check-placement"
         },
@@ -11199,7 +11337,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 188,
+          "line": 223,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.qa check-naming --check"
         },
@@ -11696,7 +11834,7 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 190,
+          "line": 225,
           "source_group": "docs",
           "text": "uv run python -m scripts.engineering.repo check-inventory --check"
         },
@@ -12246,7 +12384,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 12,
+      "reference_count": 11,
       "references": [
         {
           "path": "docs/00-project/ai/memory/neo4j-project-memory-seed.json",
@@ -12291,10 +12429,10 @@
           "text": "**Ready to start?** Run: `bash scripts/memory/setup/wsl_startup.sh`"
         },
         {
-          "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
-          "line": 128,
-          "source_group": "docs",
-          "text": "| WSL setup             | `scripts/memory/setup/wsl_startup.sh` |"
+          "path": "scripts/memory/README.md",
+          "line": 18,
+          "source_group": "scripts",
+          "text": "- `bash scripts/memory/setup/wsl_startup.sh`"
         }
       ]
     },
@@ -12326,7 +12464,7 @@
       "agent_usage": [
         "grafana-dashboard-render"
       ],
-      "reference_count": 57,
+      "reference_count": 58,
       "references": [
         {
           "path": ".codex/skills/grafana-dashboard-render/SKILL.md",
@@ -12519,13 +12657,13 @@
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 173,
+          "line": 208,
           "source_group": "docs",
           "text": "| `scripts.ops.data`                | `uv run python -m scripts.ops.data`                | Data integrity: checksums, delta, data dir  |"
         },
         {
           "path": "docs/00-project/ai/memory/agent-memory.md",
-          "line": 209,
+          "line": 244,
           "source_group": "docs",
           "text": "uv run python -m scripts.ops.data checksums --generate"
         },
@@ -12674,19 +12812,13 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 27,
+      "reference_count": 23,
       "references": [
         {
           "path": "docs/00-project/governance/03-file-policy.md",
           "line": 57,
           "source_group": "docs",
           "text": "| `docker-setup.ps1` | retired root script | `scripts/ops/docker-setup.ps1` | do not restore root filename; use the scripts-owned command-compatible helper |"
-        },
-        {
-          "path": "docs/05-operations/runbooks/docker-compose-project-migration.md",
-          "line": 39,
-          "source_group": "docs",
-          "text": "`scripts/ops/docker-setup.ps1` before starting a consumer. The former"
         },
         {
           "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
@@ -12723,6 +12855,12 @@
           "line": 71,
           "source_group": "docs",
           "text": "| `start` | `scripts/ops/docker-setup.sh start` | `.\\scripts\\ops\\docker-setup.ps1 start` | retained main stack start plus health check |"
+        },
+        {
+          "path": "docs/05-operations/verification/docker-helper-root-relocation-audit.md",
+          "line": 72,
+          "source_group": "docs",
+          "text": "| `start-full` | `scripts/ops/docker-setup.sh start-full` | `.\\scripts\\ops\\docker-setup.ps1 start-full` | retained image build, full helper stack start, and health check |"
         }
       ]
     },
@@ -12731,7 +12869,7 @@
       "type": "sh",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 58,
+      "reference_count": 56,
       "references": [
         {
           "path": "Makefile",
@@ -13512,7 +13650,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 6,
+      "reference_count": 7,
       "references": [
         {
           "path": ".github/ISSUES/AUD-OBS-20260714-002-Add-Truthful-Observability-Validation-Gates.md",
@@ -13545,6 +13683,12 @@
           "text": "/ \"audit_live_grafana_panels.py\""
         },
         {
+          "path": "tests/architecture/test_observability_dashboard_tooling.py",
+          "line": 163,
+          "source_group": "tests",
+          "text": "Path(\"scripts/ops/observability/grafana/audit_live_grafana_panels.py\"),"
+        },
+        {
           "path": "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py",
           "line": 990,
           "source_group": "tests",
@@ -13567,13 +13711,13 @@
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 152,
+          "line": 267,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/check_grafana_dashboard_audit_preflight.py\""
         },
         {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
-          "line": 48,
+          "line": 91,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/check_grafana_dashboard_audit_preflight.py\","
         }
@@ -13618,7 +13762,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ops/__main__.py",
@@ -13631,6 +13775,12 @@
           "line": 231,
           "source_group": "tests",
           "text": "/ \"rerender_grafana_screenshots.py\""
+        },
+        {
+          "path": "tests/architecture/test_observability_dashboard_tooling.py",
+          "line": 164,
+          "source_group": "tests",
+          "text": "Path(\"scripts/ops/observability/grafana/rerender_grafana_screenshots.py\"),"
         }
       ]
     },
@@ -13639,7 +13789,7 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 2,
+      "reference_count": 3,
       "references": [
         {
           "path": "scripts/ops/__main__.py",
@@ -13648,8 +13798,14 @@
           "text": "\"observability/grafana/run_grafana_dashboard_audit_cycle.py\""
         },
         {
+          "path": "tests/architecture/test_observability_dashboard_tooling.py",
+          "line": 162,
+          "source_group": "tests",
+          "text": "Path(\"scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py\"),"
+        },
+        {
           "path": "tests/unit/scripts/ops/observability/test_grafana_dashboard_audit_cycle.py",
-          "line": 575,
+          "line": 714,
           "source_group": "tests",
           "text": "expected_target=\"observability/grafana/run_grafana_dashboard_audit_cycle.py\","
         }
@@ -13701,7 +13857,7 @@
         },
         {
           "path": "docs/03-guides/dashboards/README.md",
-          "line": 81,
+          "line": 102,
           "source_group": "docs",
           "text": "- On Linux, `setup_grafana_screenshot_runtime.sh` is the canonical bootstrap"
         },
@@ -13713,19 +13869,19 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 791,
+          "line": 806,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` to install repo-local \""
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 872,
+          "line": 887,
           "source_group": "scripts",
           "text": "\"setup_grafana_screenshot_runtime.sh` or \""
         },
         {
           "path": "tests/architecture/test_observability_dashboard_tooling.py",
-          "line": 149,
+          "line": 264,
           "source_group": "tests",
           "text": "\"scripts/ops/observability/grafana/setup_grafana_screenshot_runtime.sh\""
         },
@@ -13756,7 +13912,7 @@
       "references": [
         {
           "path": "grafana/README.md",
-          "line": 1668,
+          "line": 1701,
           "source_group": "other",
           "text": "powershell -ExecutionPolicy Bypass -File scripts/ops/observability/grafana/start_quarantine_explorer.ps1"
         }
@@ -13984,35 +14140,23 @@
       "type": "py",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 8,
+      "reference_count": 6,
       "references": [
         {
           "path": "docs/05-operations/runbooks/docker-compose-project-migration.md",
-          "line": 11,
+          "line": 44,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/docker_runtime_preflight.py"
         },
         {
           "path": "docs/05-operations/runbooks/docker-image-resource-promotion.md",
-          "line": 16,
+          "line": 50,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/docker_runtime_preflight.py --static-only"
         },
         {
-          "path": "docs/DOCKER_QUICKSTART.md",
-          "line": 28,
-          "source_group": "docs",
-          "text": "`python scripts/ops/runtime/docker/docker_runtime_preflight.py`. The root"
-        },
-        {
-          "path": "docs/DOCKER_SETUP.md",
-          "line": 32,
-          "source_group": "docs",
-          "text": "`python scripts/ops/runtime/docker/docker_runtime_preflight.py`. Root Compose"
-        },
-        {
           "path": "scripts/ops/runtime/docker/runtime_manager.py",
-          "line": 362,
+          "line": 381,
           "source_group": "scripts",
           "text": "str(ROOT / \"scripts/ops/runtime/docker/docker_runtime_preflight.py\"),"
         },
@@ -14024,13 +14168,13 @@
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
-          "line": 131,
+          "line": 182,
           "source_group": "tests",
           "text": "if \"docker_runtime_preflight.py\" in \" \".join(current):"
         },
         {
           "path": "tests/unit/repo_backed/scripts/ops/docker/test_runtime_manager.py",
-          "line": 206,
+          "line": 257,
           "source_group": "tests",
           "text": "if \"docker_runtime_preflight.py\" in \" \".join(current) or \"config\" in current:"
         }
@@ -14041,35 +14185,23 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 3,
       "references": [
         {
-          "path": "docs/05-operations/runbooks/docker-image-resource-promotion.md",
-          "line": 26,
-          "source_group": "docs",
-          "text": "Use `docker_runtime_probe.py` during baseline, canary, the 100-cycle campaign,"
-        },
-        {
           "path": "docs/05-operations/runbooks/docker-stability.md",
-          "line": 14,
+          "line": 46,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/docker_runtime_probe.py --stack main"
         },
         {
-          "path": "docs/DOCKER_SETUP.md",
-          "line": 38,
-          "source_group": "docs",
-          "text": "`scripts/ops/runtime/docker/docker_runtime_probe.py`; for readiness-aware"
-        },
-        {
-          "path": "scripts/engineering/qa/run_docker_stability_campaign.py",
-          "line": 21,
+          "path": "scripts/engineering/qa/docker_stability_campaign/commands.py",
+          "line": 184,
           "source_group": "scripts",
-          "text": "PROBE = ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\""
+          "text": "str(runtime_origin / \"scripts/ops/runtime/docker/docker_runtime_probe.py\"),"
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 645,
+          "line": 673,
           "source_group": "tests",
           "text": "probe = (ROOT / \"scripts/ops/runtime/docker/docker_runtime_probe.py\").read_text("
         }
@@ -14084,7 +14216,7 @@
       "type": "ps1",
       "status": "active",
       "agent_usage": [],
-      "reference_count": 5,
+      "reference_count": 9,
       "references": [
         {
           "path": "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
@@ -14093,16 +14225,34 @@
           "text": ".\\scripts\\ops\\runtime\\docker\\restart-docker.ps1 -TimeoutSeconds 180"
         },
         {
+          "path": "docs/05-operations/runbooks/docker-stability.md",
+          "line": 57,
+          "source_group": "docs",
+          "text": "`scripts/ops/runtime/docker/restart-docker.ps1`. Its v2 report bounds every"
+        },
+        {
           "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
-          "line": 44,
+          "line": 47,
+          "source_group": "docs",
+          "text": ".\\scripts\\ops\\runtime\\docker\\restart-docker.ps1 `"
+        },
+        {
+          "path": "docs/DOCKER_QUICKSTART.md",
+          "line": 55,
           "source_group": "docs",
           "text": ".\\scripts\\ops\\runtime\\docker\\restart-docker.ps1 -TimeoutSeconds 180"
         },
         {
-          "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
-          "line": 127,
+          "path": "docs/DOCKER_SETUP.md",
+          "line": 108,
           "source_group": "docs",
-          "text": "| Manual Docker restart | `scripts/ops/runtime/docker/restart-docker.ps1` |"
+          "text": ".\\scripts\\ops\\runtime\\docker\\restart-docker.ps1 `"
+        },
+        {
+          "path": "scripts/engineering/qa/docker_stability_campaign/commands.py",
+          "line": 82,
+          "source_group": "scripts",
+          "text": "script = runtime_origin / \"scripts/ops/runtime/docker/restart-docker.ps1\""
         },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
@@ -14112,7 +14262,7 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 606,
+          "line": 617,
           "source_group": "tests",
           "text": "recovery = (ROOT / \"scripts/ops/runtime/docker/restart-docker.ps1\").read_text("
         }
@@ -14123,7 +14273,7 @@
       "type": "py",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 14,
+      "reference_count": 49,
       "references": [
         {
           "path": "Makefile",
@@ -14132,46 +14282,46 @@
           "text": "$(RUN) python scripts/ops/runtime/docker/runtime_manager.py clean --stack main --confirm-destructive CLEAN"
         },
         {
-          "path": "docs/05-operations/runbooks/docker-stability.md",
-          "line": 15,
+          "path": "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
+          "line": 138,
           "source_group": "docs",
-          "text": "python scripts/ops/runtime/docker/runtime_manager.py diagnose --stack main"
+          "text": "python scripts/ops/runtime/docker/runtime_manager.py check --stack main"
         },
         {
-          "path": "docs/05-operations/runbooks/docker-stability.md",
-          "line": 16,
+          "path": "docs/05-operations/runbooks/codex-wsl-docker-sandbox-troubleshooting.md",
+          "line": 139,
           "source_group": "docs",
           "text": "python scripts/ops/runtime/docker/runtime_manager.py status --stack main"
         },
         {
-          "path": "docs/05-operations/runbooks/docker-stability.md",
-          "line": 19,
-          "source_group": "docs",
-          "text": "Use `runtime_manager.py recover --stack <stack>` only after preflight passes."
-        },
-        {
-          "path": "docs/CODEX_HANG_FIX.md",
+          "path": "docs/05-operations/runbooks/docker-compose-project-migration.md",
           "line": 68,
           "source_group": "docs",
-          "text": "python scripts/ops/runtime/docker/runtime_manager.py diagnose --stack main"
+          "text": "| `monitoring` | `bioetl-monitoring` | `bioetl-main`, `bioetl-monitoring` | `runtime_manager.py` |"
         },
         {
-          "path": "docs/DOCKER_SETUP.md",
-          "line": 40,
+          "path": "docs/05-operations/runbooks/docker-compose-project-migration.md",
+          "line": 69,
           "source_group": "docs",
-          "text": "`scripts/ops/runtime/docker/runtime_manager.py`."
+          "text": "| `runtime` | `bioetl-runtime` | `bioetl-main`, `bioetl-neo4j` | `runtime_manager.py` |"
         },
         {
-          "path": "makefile",
-          "line": 176,
-          "source_group": "build",
-          "text": "$(RUN) python scripts/ops/runtime/docker/runtime_manager.py clean --stack main --confirm-destructive CLEAN"
+          "path": "docs/05-operations/runbooks/docker-compose-project-migration.md",
+          "line": 71,
+          "source_group": "docs",
+          "text": "`runtime_manager.py start/recover` verifies these networks and creates a missing"
         },
         {
-          "path": "scripts/engineering/qa/run_docker_stability_campaign.py",
-          "line": 20,
-          "source_group": "scripts",
-          "text": "MANAGER = ROOT / \"scripts/ops/runtime/docker/runtime_manager.py\""
+          "path": "docs/05-operations/runbooks/docker-compose-project-migration.md",
+          "line": 144,
+          "source_group": "docs",
+          "text": "python scripts/ops/runtime/docker/runtime_manager.py check --stack neo4j"
+        },
+        {
+          "path": "docs/05-operations/runbooks/docker-compose-project-migration.md",
+          "line": 145,
+          "source_group": "docs",
+          "text": "python scripts/ops/runtime/docker/runtime_manager.py start --stack neo4j --timeout 180"
         }
       ],
       "owner": "@bioetl-platform",
@@ -14184,38 +14334,8 @@
       "type": "ps1",
       "status": "supporting",
       "agent_usage": [],
-      "reference_count": 7,
+      "reference_count": 2,
       "references": [
-        {
-          "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
-          "line": 50,
-          "source_group": "docs",
-          "text": ".\\scripts\\neo4j-recovery-checklist.ps1"
-        },
-        {
-          "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
-          "line": 81,
-          "source_group": "docs",
-          "text": "The `neo4j-recovery-checklist.ps1` does:"
-        },
-        {
-          "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
-          "line": 126,
-          "source_group": "docs",
-          "text": "| Automated recovery    | `scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1` |"
-        },
-        {
-          "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
-          "line": 151,
-          "source_group": "docs",
-          "text": "- `scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1` reports backend"
-        },
-        {
-          "path": "docs/05-operations/runbooks/neo4j-backend-recovery-quick-start.md",
-          "line": 178,
-          "source_group": "docs",
-          "text": "**Next**: Restart Docker Desktop, then run `.\\scripts\\neo4j-recovery-checklist.ps1`"
-        },
         {
           "path": "scripts/engineering/repo/check_scripts_inventory.py",
           "line": 217,
@@ -14566,7 +14686,7 @@
         },
         {
           "path": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
-          "line": 142,
+          "line": 148,
           "source_group": "scripts",
           "text": "\"credentials, reload repo env via scripts/ops/support/load_repo_env.sh or \""
         },
@@ -15305,9 +15425,9 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 600,
+          "line": 610,
           "source_group": "tests",
-          "text": "for relative in tuple(ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")):"
+          "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
         {
           "path": "tests/architecture/test_root_script_wrapper_surfaces.py",
@@ -15373,9 +15493,9 @@
         },
         {
           "path": "tests/architecture/test_docker_runtime_contracts.py",
-          "line": 600,
+          "line": 610,
           "source_group": "tests",
-          "text": "for relative in tuple(ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")):"
+          "text": "ROOT / \"scripts\" / name for name in (\"startup.ps1\", \"shutdown.ps1\")"
         },
         {
           "path": "tests/architecture/test_root_script_wrapper_surfaces.py",

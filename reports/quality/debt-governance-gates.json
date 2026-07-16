@@ -37,24 +37,24 @@
       "status": "pass"
     },
     {
-      "current": "605fd8215be54afd6f4ae29ae8f6572ead1d691ec069cdd095abe9cdd2505de5",
-      "limit": "605fd8215be54afd6f4ae29ae8f6572ead1d691ec069cdd095abe9cdd2505de5",
+      "current": "1234e8791e1d2939a4ca78753e3bd664d7dfebe3314b7200a235d9ee98bf4f12",
+      "limit": "9bfda049ac2414dff93febf9bd46d4957da16a82b9c12859edcb6c58c7378c69",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
       "source_artifact": "reports/quality/module-coverage-inventory.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": {
-        "source_module_count": 2226,
-        "source_tree_sha256": "605fd8215be54afd6f4ae29ae8f6572ead1d691ec069cdd095abe9cdd2505de5",
+        "source_module_count": 2227,
+        "source_tree_sha256": "9bfda049ac2414dff93febf9bd46d4957da16a82b9c12859edcb6c58c7378c69",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
-        "source_module_count": 2226,
-        "source_tree_sha256": "605fd8215be54afd6f4ae29ae8f6572ead1d691ec069cdd095abe9cdd2505de5",
+        "source_module_count": 2227,
+        "source_tree_sha256": "9bfda049ac2414dff93febf9bd46d4957da16a82b9c12859edcb6c58c7378c69",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -226,22 +226,22 @@
       "status": "pass"
     },
     {
-      "current": 34,
+      "current": 41,
       "limit": 34,
       "metric": "zero_reference_supporting_script_count",
       "name": "supporting_scripts_zero_reference_count",
       "remediation": "Triage or remove zero-reference supporting scripts; budgets must not grow.",
       "source_artifact": "configs/quality/scripts_inventory_manifest.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
-      "current": 0,
+      "current": 7,
       "limit": 0,
       "metric": "untriaged_zero_reference_supporting_script_count",
       "name": "supporting_scripts_untriaged_zero_reference_count",
       "remediation": "Add owner/removal metadata for every zero-reference supporting script.",
       "source_artifact": "configs/quality/scripts_inventory_manifest.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": 0,
@@ -397,7 +397,7 @@
       "status": "pass"
     },
     {
-      "current": "03cdbb37252376f9d5d21bfb3409286c3eae1a0a5d4ec8ba65fcc06bd8362c9c",
+      "current": "58fbc456285590e01b1dbd3a195d628c21b9245266ad5b32194f1419b5c77140",
       "limit": "clean remote-main artifact blobs",
       "metric": "baseline_artifact_fingerprint",
       "name": "remote_main_architecture_debt_baseline",
@@ -406,13 +406,13 @@
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": 2,
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
       "remediation": "Regenerate stale quality artifacts with their canonical QA commands.",
       "source_artifact": "reports/quality/*.json",
-      "status": "pass"
+      "status": "fail"
     }
   ],
   "generated_by": "scripts.engineering.qa.report_debt_governance_gates",
@@ -422,23 +422,28 @@
     "architecture_quality_scorecard": false,
     "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
-    "hotspot_family_baseline": false,
-    "module_coverage_inventory": false,
+    "hotspot_family_baseline": true,
+    "module_coverage_inventory": true,
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 0,
-    "pass": 44,
+    "fail": 4,
+    "pass": 40,
     "warn": 0
   },
   "summary": {
     "architecture_quality_scorecard_integral_score": 8.66,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 0,
-    "failing_gates": [],
+    "fail_count": 4,
+    "failing_gates": [
+      "module_coverage_source_tree_hash_current",
+      "supporting_scripts_zero_reference_count",
+      "supporting_scripts_untriaged_zero_reference_count",
+      "generated_artifact_drift"
+    ],
     "gate_count": 44,
-    "pass_count": 44,
-    "release_gate_status": "passing",
+    "pass_count": 40,
+    "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []
   }

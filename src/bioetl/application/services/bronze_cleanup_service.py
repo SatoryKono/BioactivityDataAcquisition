@@ -85,6 +85,8 @@ class BronzeCleanupService:
         Returns:
             BronzeCleanupResult with cleanup statistics.
         """
+        if retention_days < 0:
+            raise ValueError("retention_days cannot be negative")
         now = self.clock.now() if self.clock is not None else current_utc_time()
         cutoff_date = now - timedelta(days=retention_days)
 

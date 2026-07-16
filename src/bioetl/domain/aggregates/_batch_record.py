@@ -7,6 +7,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from bioetl.domain._immutability import deep_freeze_json
+
 from bioetl.domain.types import (
     BronzeRecord,
     ContentHash,
@@ -46,6 +48,7 @@ class BatchRecord:
             raise ValueError(f"Record index cannot be negative: {self.index}")
         if not self.is_valid and not self.error:
             raise ValueError("Invalid record must have an error message")
+        object.__setattr__(self, "data", deep_freeze_json(self.data))
 
     def with_validation_error(
         self, error: str, error_code: str | None = None

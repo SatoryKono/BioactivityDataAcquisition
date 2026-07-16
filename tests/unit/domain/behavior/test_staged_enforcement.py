@@ -49,7 +49,7 @@ def test_policy_resolves_observe_soft_and_hard_stages() -> None:
     assert policy.get_effective_stage(0.8) == EnforcementStage.HARD_FAIL
 
 
-def test_engine_verdicts_cover_empty_unknown_soft_and_hard_paths() -> None:
+def test_engine_verdicts_respect_current_stage_cap() -> None:
     engine = StagedEnforcementEngine()
 
     assert engine.get_enforcement_verdict("fixture_governance", 0, 0) == (
@@ -63,9 +63,9 @@ def test_engine_verdicts_cover_empty_unknown_soft_and_hard_paths() -> None:
     assert engine.get_enforcement_verdict("fixture_governance", 1, 2)[0] == (
         EnforcementStage.SOFT_FAIL
     )
-    assert engine.get_enforcement_verdict("fixture_governance", 4, 5)[0] == (
-        EnforcementStage.HARD_FAIL
-    )
+    stage, message = engine.get_enforcement_verdict("fixture_governance", 4, 5)
+    assert stage is EnforcementStage.SOFT_FAIL
+    assert "Soft fail threshold exceeded" in message
 
 
 def test_engine_reports_pass_rates_and_blocking_decision() -> None:
@@ -80,7 +80,7 @@ def test_engine_reports_pass_rates_and_blocking_decision() -> None:
     assert report["failed_checks"] == 1
     assert report["pass_rates"]["fixture_governance"] == 0.0
     assert report["pass_rates"]["schema_compatibility"] == 1.0
-    assert engine.should_block_ci() is True
+    assert engine.should_block_ci() is False
 
 
 def test_grouping_and_policy_serialization_helpers_are_stable() -> None:

@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
 
-from bioetl.domain.config._converters import freeze_sequences
+from bioetl.domain.config._converters import freeze_sequences, require_literal
 from bioetl.domain.config.validation import (
     ConditionalValidation,
     CrossFieldValidation,
@@ -41,6 +41,15 @@ class DQReportConfig:
     sample_size: int = 10
     output_path: str | None = None
 
+    def __post_init__(self) -> None:
+        require_literal(
+            self.format,
+            field_name="format",
+            allowed=frozenset({"json", "yaml", "csv"}),
+        )
+        if self.sample_size < 0:
+            raise ValueError("sample_size must be non-negative")
+
 
 @dataclass(frozen=True, slots=True)
 class KeyNullabilityRule:
@@ -55,6 +64,13 @@ class KeyNullabilityRule:
     field: str
     key_type: Literal["merge", "partition"]
     nullable: bool = False
+
+    def __post_init__(self) -> None:
+        require_literal(
+            self.key_type,
+            field_name="key_type",
+            allowed=frozenset({"merge", "partition"}),
+        )
 
 
 @dataclass(frozen=True, slots=True)
@@ -106,6 +122,16 @@ class DQConfig:
         self.validate_thresholds(
             soft_fail_threshold=self.soft_fail_threshold,
             hard_fail_threshold=self.hard_fail_threshold,
+        )
+        require_literal(
+            self.invalid_record_policy,
+            field_name="invalid_record_policy",
+            allowed=frozenset({"quarantine", "skip", "fail"}),
+        )
+        require_literal(
+            self.strictness_mode,
+            field_name="strictness_mode",
+            allowed=frozenset({"lenient", "moderate", "strict"}),
         )
         freeze_sequences(
             self,

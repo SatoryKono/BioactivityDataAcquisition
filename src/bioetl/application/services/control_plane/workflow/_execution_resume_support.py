@@ -72,6 +72,28 @@ def validate_resume_state(
     repair_steps: tuple[str, ...],
 ) -> None:
     """Reject resume requests that would violate workflow replay invariants."""
+    if latest_state.workflow_name != workflow_name:
+        raise RuntimeError(
+            "Workflow resume state belongs to a different workflow: "
+            f"expected {workflow_name!r}, got {latest_state.workflow_name!r}"
+        )
+    if not latest_state.manifest_id.strip() or not latest_state.execution_fingerprint.strip():
+        raise RuntimeError("Workflow resume state is damaged: identity fields are missing")
+    step_ids = tuple(step.step_id for step in latest_state.steps)
+    if not step_ids or len(step_ids) != len(set(step_ids)):
+        raise RuntimeError("Workflow resume state is damaged: step identities are missing or duplicated")
+    unknown_selected = set(latest_state.selected_step_ids).difference(step_ids)
+    unknown_completed = set(latest_state.completed_transform_fingerprints).difference(step_ids)
+    if unknown_selected or unknown_completed:
+        raise RuntimeError(
+            "Workflow resume state is damaged: persisted step references are inconsistent"
+        )
+    allowed_statuses = {"created", "running", "incomplete", "failed", "success"}
+    if latest_state.status not in allowed_statuses or any(
+        step.status not in {"pending", "running", "success", "failed"}
+        for step in latest_state.steps
+    ):
+        raise RuntimeError("Workflow resume state is damaged: unknown lifecycle status")
     if latest_state.execution_fingerprint != current_fingerprint:
         raise RuntimeError(
             "Workflow configuration changed since the last execution; "

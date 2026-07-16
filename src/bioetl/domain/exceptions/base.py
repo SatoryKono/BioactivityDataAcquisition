@@ -6,10 +6,64 @@ Each category defines a default error type for classification.
 
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING, ClassVar
+from urllib.parse import urlsplit, urlunsplit
 
 if TYPE_CHECKING:
     from bioetl.domain.types import ErrorType
+
+_SECRET_MARKERS = (
+    "password",
+    "passwd",
+    "token",
+    "secret",
+    "api_key",
+    "apikey",
+    "authorization",
+    "cookie",
+    "credential",
+)
+_INLINE_SECRET = re.compile(
+    r"(?i)\b(password|passwd|token|secret|api[_-]?key|authorization)\b"
+    r"\s*[:=]\s*([^\s,;&]+)"
+)
+
+
+def _redact_string(value: str) -> str:
+    redacted = _INLINE_SECRET.sub(lambda match: f"{match.group(1)}=[REDACTED]", value)
+    if "://" not in redacted:
+        return redacted
+    try:
+        parsed = urlsplit(redacted)
+        port = parsed.port
+    except ValueError:
+        return "[REDACTED URL]"
+    if not parsed.scheme or not parsed.netloc:
+        return redacted
+    hostname = parsed.hostname or ""
+    if port is not None:
+        hostname = f"{hostname}:{port}"
+    query = "[REDACTED]" if parsed.query else ""
+    return urlunsplit((parsed.scheme, hostname, parsed.path, query, ""))
+
+def _redact(value: object, key: str = "") -> object:
+    if any(marker in key.lower() for marker in _SECRET_MARKERS):
+        return "[REDACTED]"
+    if isinstance(value, dict):
+        return {str(k): _redact(v, str(k)) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return type(value)(_redact(v, key) for v in value)
+    if isinstance(value, set):
+        return {_redact(item, key) for item in value}
+    if isinstance(value, BaseException):
+        return {
+            "error_type": type(value).__name__,
+            "message": _redact_string(str(value)),
+        }
+    if isinstance(value, str):
+        return _redact_string(value)
+    return value
 
 
 __all__ = [
@@ -112,7 +166,7 @@ class BioETLError(Exception):
             # Skip excluded attributes
             if key in self._CONTEXT_EXCLUDE:
                 continue
-            result[key] = value
+            result[key] = _redact(value, key)
         return result
 
     def to_structured_context(
@@ -139,8 +193,8 @@ class BioETLError(Exception):
         if resolved_reason_code is not None:
             structured["reason_code"] = resolved_reason_code
         structured.update(self.context)
-        structured.update(extra)
-        return structured
+        structured.update({key: _redact(value, key) for key, value in extra.items()})
+        return {key: _redact(value, key) for key, value in structured.items()}
 
     def with_context(self, **extra: object) -> BioETLError:
         """Return self with additional context attributes.

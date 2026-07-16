@@ -10,7 +10,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from bioetl.domain.medallion import Layer
 from bioetl.domain.models._metadata_common import (
@@ -19,6 +19,7 @@ from bioetl.domain.models._metadata_common import (
     GovernanceMetadata,
     PipelineMetadata,
     RuntimeMetadata,
+    validate_utc_datetime,
 )
 
 __all__ = [
@@ -54,6 +55,11 @@ class RateLimitInfo(BaseModel):
     retry_after_seconds: float | None = Field(
         default=None, description="Seconds to wait before retry"
     )
+
+    @field_validator("reset_at")
+    @classmethod
+    def _require_utc(cls, value: datetime | None) -> datetime | None:
+        return validate_utc_datetime(value)
 
 
 class APIRequestDetails(BaseModel):
@@ -95,6 +101,11 @@ class APIRequestDetails(BaseModel):
     timestamp: datetime | None = Field(
         default=None, description="UTC timestamp when request was made"
     )
+
+    @field_validator("timestamp")
+    @classmethod
+    def _require_utc(cls, value: datetime | None) -> datetime | None:
+        return validate_utc_datetime(value)
 
 
 class InputSnapshotRef(BaseModel):
@@ -152,6 +163,11 @@ class InputSnapshotRef(BaseModel):
         default=None,
         description="UTC timestamp when the snapshot was captured",
     )
+
+    @field_validator("captured_at")
+    @classmethod
+    def _require_utc(cls, value: datetime | None) -> datetime | None:
+        return validate_utc_datetime(value)
 
 
 class SourceMetadata(BaseModel):

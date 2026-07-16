@@ -10,7 +10,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from bioetl.domain.medallion import Layer
 from bioetl.domain.models._metadata_common import (
@@ -19,6 +19,7 @@ from bioetl.domain.models._metadata_common import (
     GovernanceMetadata,
     PipelineMetadata,
     RuntimeMetadata,
+    validate_utc_datetime,
 )
 from bioetl.domain.models._metadata_silver import DQSummary, LineageMetadata
 
@@ -40,7 +41,7 @@ class GoldOutputExt(BaseModel):
 
     Attributes:
         partition_count: Number of partitions.
-        format: Output format (delta or parquet).
+        format: Output format (Delta Lake only).
     """
 
     partition_count: int = Field(
@@ -48,7 +49,7 @@ class GoldOutputExt(BaseModel):
         ge=0,
         description="Number of partitions",
     )
-    format: Literal["delta", "parquet"] = Field(
+    format: Literal["delta"] = Field(
         default="delta",
         description="Output format",
     )
@@ -103,6 +104,11 @@ class CompositeOutputExt(GoldOutputExt):
         default_factory=CompositeSchemaValidationMetadata,
         description="Schema validation details for composite merged write",
     )
+
+    @field_validator("lineage_created_at")
+    @classmethod
+    def _require_utc(cls, value: datetime | None) -> datetime | None:
+        return validate_utc_datetime(value)
 
 
 class SchemaColumnMetadata(BaseModel):

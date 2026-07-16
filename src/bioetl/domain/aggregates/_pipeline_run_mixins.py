@@ -89,8 +89,7 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
             completed_at: Explicit stage completion timestamp.
         """
         self._assert_running("record_stage_success")
-        self._stages.append(
-            StageResult(
+        completed = StageResult(
                 stage=stage,
                 status=StageStatus.SUCCESS,
                 started_at=started_at,
@@ -98,7 +97,12 @@ class _PipelineRunLifecycleMixin(_PipelineRunAttrs):
                 result=result,
                 records_processed=records_processed,
             )
-        )
+        for index in range(len(self._stages) - 1, -1, -1):
+            if self._stages[index].stage == stage and self._stages[index].status == StageStatus.RUNNING:
+                self._stages[index] = completed
+                break
+        else:
+            self._stages.append(completed)
 
     def record_stage_failure(
         self,

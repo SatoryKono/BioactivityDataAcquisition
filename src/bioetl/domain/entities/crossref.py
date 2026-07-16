@@ -28,6 +28,7 @@ from pydantic import BaseModel, ConfigDict
 from pydantic import Field as PydanticField
 
 from bioetl.domain.entities.publication_base import PublicationEntityBase
+from bioetl.domain._immutability import freeze_fields
 
 # === Pydantic DTO Model ===
 
@@ -220,6 +221,13 @@ class CrossRefPublicationEntity(PublicationEntityBase):
 
     # Override: Default source for CrossRef
     _source: str = "crossref"
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        freeze_fields(
+            self,
+            ("issn", "subject_keywords", "content_domain_domains", "alternative_id"),
+        )
 
     def _validate_invariants(self) -> None:
         """Validate CrossRef-specific publication invariants."""

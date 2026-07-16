@@ -28,6 +28,7 @@ from bioetl.domain.behavior._dq_rule_evaluators_vocab import (
 )
 from bioetl.domain.config.validation import CrossFieldValidation
 from bioetl.domain.config.validation import FieldValidation
+from bioetl.domain.exceptions import ValidationError
 
 
 pytestmark = pytest.mark.unit
@@ -382,7 +383,11 @@ def test_field_rule_dispatch_covers_malformed_rule_inputs_and_unknown_dispatcher
     None
 ):
     unknown_rule = SimpleNamespace(field="field", validation_type="unknown")
-    assert not _field_rule_violated({"field": "value"}, unknown_rule)  # type: ignore[arg-type]
+    with pytest.raises(
+        ValidationError,
+        match="Unknown field validation type: 'unknown'",
+    ):
+        _field_rule_violated({"field": "value"}, unknown_rule)  # type: ignore[arg-type]
 
     assert _field_rule_violated(
         {"doi": "10.1000/example"},
@@ -404,10 +409,18 @@ def test_field_rule_dispatch_covers_malformed_rule_inputs_and_unknown_dispatcher
         {"authors": object()},
         FieldValidation(field="authors", validation_type="not_empty_list"),
     )
-    assert not _field_rule_violated(
-        {"field": "value"},
-        FieldValidation(field="field", validation_type="custom", validator="unknown"),
-    )
+    with pytest.raises(
+        ValidationError,
+        match="Unknown custom validator: 'unknown'",
+    ):
+        _field_rule_violated(
+            {"field": "value"},
+            FieldValidation(
+                field="field",
+                validation_type="custom",
+                validator="unknown",
+            ),
+        )
     assert _field_rule_violated(
         {"protein_class_id": "PC1", "parent_id": "PC1"},
         FieldValidation(
@@ -485,12 +498,20 @@ def test_cross_rule_dispatch_covers_standard_conditions_and_unknown_condition() 
             validator="validate_hierarchy_no_self_reference",
         ),
     )
-    assert not _cross_rule_violated(
-        {"a": 1},
-        CrossFieldValidation(name="unknown", fields=("a",), condition="custom"),
-    )
+    with pytest.raises(
+        ValidationError,
+        match="Unknown custom cross-field validator: None",
+    ):
+        _cross_rule_violated(
+            {"a": 1},
+            CrossFieldValidation(name="unknown", fields=("a",), condition="custom"),
+        )
     unknown_rule = SimpleNamespace(fields=("a",), condition="unknown")
-    assert not _cross_rule_violated({"a": 1}, unknown_rule)  # type: ignore[arg-type]
+    with pytest.raises(
+        ValidationError,
+        match="Unknown cross-field validation condition: 'unknown'",
+    ):
+        _cross_rule_violated({"a": 1}, unknown_rule)  # type: ignore[arg-type]
 
 
 def test_cross_rule_equality_passes_with_zero_or_one_present_value() -> None:
@@ -540,12 +561,16 @@ class _UnknownConditionalRule:
     condition_value = "target"
 
 
-def test_conditional_matches_uses_registered_matchers_and_unknown_operator_is_false() -> (
+def test_conditional_matches_uses_registered_matchers_and_rejects_unknown_operator() -> (
     None
 ):
     assert _conditional_matches({"kind": "target"}, _ConditionalRule()) is True  # type: ignore[arg-type]
     assert _conditional_matches({"kind": "other"}, _ConditionalRule()) is False  # type: ignore[arg-type]
-    assert _conditional_matches({"kind": "target"}, _UnknownConditionalRule()) is False  # type: ignore[arg-type]
+    with pytest.raises(
+        ValidationError,
+        match="Unknown conditional operator: 'unknown'",
+    ):
+        _conditional_matches({"kind": "target"}, _UnknownConditionalRule())  # type: ignore[arg-type]
 
 
 def test_condition_options_and_membership_matchers_are_tuple_stable() -> None:

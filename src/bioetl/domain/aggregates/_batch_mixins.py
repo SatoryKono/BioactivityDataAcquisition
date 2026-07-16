@@ -93,7 +93,7 @@ class _BatchReadModelMixin(_BatchAttrs):
     @property
     def metadata(self) -> MetaDict:
         """Return a copy of the batch metadata dictionary."""
-        return self._metadata.copy()
+        return deepcopy(self._metadata)
 
     def collect_events(self) -> list[DomainEvent]:
         """Collect and clear accumulated domain events."""

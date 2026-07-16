@@ -22,6 +22,7 @@ from pydantic import BaseModel, ConfigDict
 from pydantic import Field as PydanticField
 
 from bioetl.domain.entities.publication_base import PublicationEntityBase
+from bioetl.domain._immutability import freeze_fields
 from bioetl.domain.types import JsonDict
 
 # === Pydantic DTO Model ===
@@ -237,6 +238,20 @@ class PubMedPublicationEntity(PublicationEntityBase):
 
     # Override: Default source for PubMed
     _source: str = "pubmed"
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        freeze_fields(
+            self,
+            (
+                "publication_types",
+                "subject_keywords",
+                "subject_mesh",
+                "chemicals",
+                "gene_symbols",
+                "databanks",
+            ),
+        )
 
     def _validate_invariants(self) -> None:
         """Validate PubMed-specific publication invariants."""

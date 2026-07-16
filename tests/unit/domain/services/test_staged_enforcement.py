@@ -106,7 +106,7 @@ def test_get_enforcement_verdict_handles_empty_counts_and_missing_policy() -> No
     [
         (1, 10, EnforcementStage.OBSERVE, "Observation mode"),
         (4, 10, EnforcementStage.SOFT_FAIL, "Soft fail threshold exceeded"),
-        (8, 10, EnforcementStage.HARD_FAIL, "Hard fail threshold exceeded"),
+        (8, 10, EnforcementStage.SOFT_FAIL, "Soft fail threshold exceeded"),
     ],
 )
 def test_get_enforcement_verdict_builds_stage_specific_messages(
@@ -199,7 +199,21 @@ def test_engine_register_result_generate_report_and_block_ci_only_on_hard_fail()
 
     engine.register_result(blocking)
 
-    assert engine.should_block_ci() is True
+    assert engine.should_block_ci() is False
+
+    hard_fail_engine = StagedEnforcementEngine(
+        policies={
+            "fixture_governance": EnforcementPolicy(
+                check_name="fixture_governance",
+                current_stage=EnforcementStage.HARD_FAIL,
+                failure_threshold=0.8,
+                warning_threshold=0.3,
+            )
+        }
+    )
+    hard_fail_engine.register_result(blocking)
+
+    assert hard_fail_engine.should_block_ci() is True
 
 
 def test_engine_should_block_ci_ignores_results_without_policy() -> None:

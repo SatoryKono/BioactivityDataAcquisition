@@ -9,7 +9,11 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Literal
 
-from bioetl.domain.config._converters import convert_write_mode, freeze_sequences
+from bioetl.domain.config._converters import (
+    convert_write_mode,
+    freeze_sequences,
+    require_literal,
+)
 from bioetl.domain.medallion import GoldWriteMode, SilverWriteMode
 
 
@@ -73,6 +77,11 @@ class TableConfig:
     def __post_init__(self) -> None:
         """Convert incoming values to proper types for immutability."""
         freeze_sequences(self, ("primary_keys", "partition_cols"))
+        require_literal(
+            self.on_schema_mismatch,
+            field_name="on_schema_mismatch",
+            allowed=frozenset({"error", "evolve", "ignore"}),
+        )
         # Convert string write modes to enums (backward compatibility)
         object.__setattr__(
             self,

@@ -18,7 +18,7 @@ MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current baseline is reconciled with
 `reports/quality/module-coverage-inventory.json` snapshot `2026-07-16`
 (`source_module_count=2226`,
-`source_tree_sha256=605fd8215be54afd6f4ae29ae8f6572ead1d691ec069cdd095abe9cdd2505de5`).
+`source_tree_sha256=9bfda049ac2414dff93febf9bd46d4957da16a82b9c12859edcb6c58c7378c69`).
 Raw files dated before `2026-07-16` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence.

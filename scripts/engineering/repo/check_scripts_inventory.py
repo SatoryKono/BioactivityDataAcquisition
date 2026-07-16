@@ -13,6 +13,7 @@ It classifies each script by discovered call-sites and can:
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import os
 import re
@@ -119,6 +120,10 @@ MODULE_REF_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
 )
 MODULE_STRING_REF_PATTERN: Final[re.Pattern[str]] = re.compile(
     r"[\"']((?:scripts|src\.tools)(?:\.[A-Za-z0-9_]+)+)[\"']"
+)
+RELATIVE_IMPORT_CANDIDATE_PATTERN: Final[re.Pattern[str]] = re.compile(
+    r"^\s*from\s+\.+[A-Za-z0-9_.]*\s+import\s+",
+    re.MULTILINE,
 )
 SCRIPT_PATH_ALIASES: Final[dict[str, tuple[str, ...]]] = {
     "scripts/ops/launchers/codex/codex-exec.bat": ("scripts/codex-exec.bat",),
@@ -451,6 +456,56 @@ def _discover_module_refs(
     return discovered
 
 
+def _discover_relative_import_refs(
+    *,
+    rel: str,
+    text: str,
+    source_group: str,
+    script_set: set[str],
+) -> list[tuple[str, RefEvidence]]:
+    """Resolve package-relative Python imports to inventoried helper modules."""
+    if not rel.endswith(".py"):
+        return []
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        return []
+
+    package_parts = Path(rel).parent.parts
+    lines = text.splitlines()
+    discovered: list[tuple[str, RefEvidence]] = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.ImportFrom) or node.level == 0:
+            continue
+        retained_parts = len(package_parts) - (node.level - 1)
+        if retained_parts < 0:
+            continue
+        base_parts = package_parts[:retained_parts]
+        module_names = (
+            [node.module]
+            if node.module
+            else [alias.name for alias in node.names if alias.name != "*"]
+        )
+        raw_line = lines[node.lineno - 1] if node.lineno <= len(lines) else ""
+        evidence = _make_ref_evidence(
+            rel=rel,
+            line_no=node.lineno,
+            raw_line=raw_line,
+            source_group=source_group,
+        )
+        for module_name in module_names:
+            module_parts = tuple(module_name.split("."))
+            candidate_base = Path(*base_parts, *module_parts)
+            candidate_paths = (
+                candidate_base.with_suffix(".py").as_posix(),
+                (candidate_base / "__init__.py").as_posix(),
+            )
+            for candidate_path in candidate_paths:
+                if candidate_path in script_set and candidate_path != rel:
+                    discovered.append((candidate_path, evidence))
+    return discovered
+
+
 def _discover_basename_refs(
     *,
     rel: str,
@@ -501,6 +556,10 @@ def _discover_refs_in_file(
     normalized_text = text.replace("\\", "/")
     has_script_path_refs = any(token in normalized_text for token in SCRIPT_PATH_TOKENS)
     has_module_refs = MODULE_REF_CANDIDATE_PATTERN.search(normalized_text) is not None
+    has_relative_import_refs = (
+        rel.endswith(".py")
+        and RELATIVE_IMPORT_CANDIDATE_PATTERN.search(text) is not None
+    )
     has_dispatcher_module_refs = _has_dispatcher_module_refs(rel, normalized_text)
     has_basename_refs = _line_has_basename_script_candidate(
         normalized_text, basename_map
@@ -508,6 +567,7 @@ def _discover_refs_in_file(
     if not (
         has_script_path_refs
         or has_module_refs
+        or has_relative_import_refs
         or has_dispatcher_module_refs
         or has_basename_refs
     ):
@@ -521,6 +581,15 @@ def _discover_refs_in_file(
         source_group=source_group,
         script_set=script_set,
     )
+    if has_relative_import_refs:
+        discovered.extend(
+            _discover_relative_import_refs(
+                rel=rel,
+                text=text,
+                source_group=source_group,
+                script_set=script_set,
+            )
+        )
     discovered.extend(
         _discover_dispatcher_module_refs_in_file(
             rel=rel,
