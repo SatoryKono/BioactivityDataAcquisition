@@ -95,8 +95,8 @@ tests:
   - name: optional-docker-runtime-primary-incident
     interval: 1m
     input_series:
-      - series: 'bioetl_docker_runtime_primary_cause{project="bioetl-main",stack="main",cause="oom_killed"}'
-        values: '1 1 1'
+      - series: 'bioetl_docker_runtime_primary_cause{project="bioetl-main",stack="main"}'
+        values: '5 5 5'
     alert_rule_test:
       - eval_time: 2m
         alertname: BioETLDockerRuntimeIncident
@@ -106,10 +106,9 @@ tests:
               owner: bioetl-observability
               stack: main
               project: bioetl-main
-              cause: oom_killed
             exp_annotations:
               summary: Optional Docker runtime has one actionable incident
-              description: Host probe classified stack=main with primary cause=oom_killed; inspect the bounded report before recovery.
+              description: Host probe classified stack=main with bounded primary cause code=5; inspect the bounded report before recovery.
               runbook: docs/05-operations/runbooks/docker-stability.md
 
   - name: optional-docker-runtime-probe-missing

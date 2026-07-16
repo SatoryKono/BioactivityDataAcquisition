@@ -3,7 +3,8 @@
 # Usage:
 #   prometheus.exe --config.file=grafana/prometheus.yml
 #
-# BioETL exposes metrics at http://localhost:8000/metrics
+# BioETL exposes metrics at http://bioetl:8000/metrics on the shared
+# bioetl-monitoring Docker network.
 # (configurable via BIOETL_METRICS_PORT environment variable).
 
 global:
@@ -21,7 +22,7 @@ alerting:
 scrape_configs:
   - job_name: 'bioetl'
     static_configs:
-      - targets: ['host.docker.internal:8000']
+      - targets: ['bioetl:8000']
     metrics_path: /metrics
 
   # Quarantine Explorer (bioetl quarantine serve). Compose service DNS is the

@@ -643,6 +643,9 @@ def test_host_probe_has_bounded_labels_and_no_container_socket_mount() -> None:
     assert "primary_cause" in probe
     assert "--pushgateway-url" in probe
     assert "/var/run/docker.sock" not in probe
+    assert contract["host_probe"]["metric_labels"][
+        "bioetl_docker_runtime_primary_cause"
+    ] == ["project", "stack"]
     for metric, labels in contract["host_probe"]["metric_labels"].items():
         assert metric in probe
         assert labels == sorted(labels)

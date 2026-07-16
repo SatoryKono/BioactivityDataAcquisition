@@ -48,7 +48,7 @@ host_probe:
     bioetl_docker_runtime_disk_free_bytes: [project, stack]
     bioetl_docker_runtime_recovery_attempts: [project, stack]
     bioetl_docker_runtime_recovery_duration_seconds: [project, stack]
-    bioetl_docker_runtime_primary_cause: [cause, project, stack]
+    bioetl_docker_runtime_primary_cause: [project, stack]
     bioetl_docker_runtime_resource_peak_ratio: [project, resource, service, stack]
     bioetl_docker_runtime_service_ready: [project, service, stack]
     bioetl_docker_runtime_service_restart_count: [project, service, stack]
