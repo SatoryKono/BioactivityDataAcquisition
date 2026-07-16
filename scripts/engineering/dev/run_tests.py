@@ -6,11 +6,45 @@ Public wrappers:
 - scripts/engineering/dev/run_tests.ps1
 """
 
+# ruff: noqa: E402 -- keep the help path import-light on slow Windows mounts.
+
 from __future__ import annotations
+
+import sys
+
+USAGE = """BioETL Test Runner
+
+Usage:
+  python scripts/engineering/dev/run_tests.py <command> [pytest-args...]
+
+Commands:
+  all           Run all tests (stop on first failure)
+  unit          Unit tests only (tests/unit/)
+  arch          Architecture tests (tests/architecture/)
+  integration   Integration tests (tests/integration/)
+  contract      Contract tests (tests/contract/)
+  contract-live Contract tests with live APIs + network enabled
+  smoke         Smoke tests (tests/smoke/)
+  security      Security tests (tests/security/)
+  memory        Dedicated Neo4j project-memory and MCP tests
+  cov           All non-memory tests with coverage report (fail-under=85%)
+  quick         Unit + smoke (fast feedback loop)
+  parallel      All tests via pytest-xdist (-n auto)
+  changed       Run tests related to files changed vs a base branch (default: main)
+  marker <m>    Run tests by marker, e.g.: marker slow
+  failed        Re-run only failed tests from last run
+  file <path>   Run a specific test file
+  help          Show this message
+"""
+
+if __name__ == "__main__" and (
+    len(sys.argv) == 1 or sys.argv[1] in {"help", "--help", "-h"}
+):
+    print(USAGE)
+    raise SystemExit(0)
 
 import os
 import subprocess
-import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -77,30 +111,7 @@ def _print_fail(msg: str) -> None:
 
 
 def _usage() -> str:
-    return """BioETL Test Runner
-
-Usage:
-  python scripts/engineering/dev/run_tests.py <command> [pytest-args...]
-
-Commands:
-  all           Run all tests (stop on first failure)
-  unit          Unit tests only (tests/unit/)
-  arch          Architecture tests (tests/architecture/)
-  integration   Integration tests (tests/integration/)
-  contract      Contract tests (tests/contract/)
-  contract-live Contract tests with live APIs + network enabled
-  smoke         Smoke tests (tests/smoke/)
-  security      Security tests (tests/security/)
-  memory        Dedicated Neo4j project-memory and MCP tests
-  cov           All non-memory tests with coverage report (fail-under=85%)
-  quick         Unit + smoke (fast feedback loop)
-  parallel      All tests via pytest-xdist (-n auto)
-  changed       Run tests related to files changed vs a base branch (default: main)
-  marker <m>    Run tests by marker, e.g.: marker slow
-  failed        Re-run only failed tests from last run
-  file <path>   Run a specific test file
-  help          Show this message
-"""
+    return USAGE
 
 
 def _default_parallel_workers() -> str:

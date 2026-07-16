@@ -1,5 +1,8 @@
 # Docker quick start
 
+> BIOETL_DOCKER_HELPER_ADR010_ADJUNCT — Local-Only Docker helpers governed by ADR-010.
+> Contract: `configs/quality/docker_helper_contracts.yaml`
+
 Docker — optional local adjunct. Выполняйте команды из Linux filesystem mirror,
 не из `/mnt/*` или `/tmp`, и не создавайте/не изменяйте `.env`.
 
@@ -22,7 +25,7 @@ python scripts/ops/runtime/docker/runtime_manager.py status --stack monitoring
 ```
 
 Manager сам создаёт отсутствующую contracted external network и отклоняет
-конфликтующий owner. Не запускайте параллельный raw Compose project из другого
+конфликтующий owner. Не запускайте параллельный raw Compose проект из другого
 origin.
 
 ## Logs, diagnostics, recovery, stop

@@ -33,8 +33,8 @@ runtime проекта остаётся Python/venv; Docker не требует�
    ```
 
 `start` и `recover` идемпотентно создают отсутствующие contracted external
-networks с owner label. Существующая сеть с другим owner отклоняется; manager
-никогда не удаляет и не пересоздаёт её автоматически.
+networks с owner label. Существующая сеть без owner label или с другим owner
+отклоняется; manager никогда не удаляет и не пересоздаёт её автоматически.
 
 ## Поддерживаемый lifecycle
 
@@ -115,6 +115,11 @@ trials выполняются только запланированной ком
 `docs/05-operations/runbooks/docker-image-resource-promotion.md`. Campaign
 требует точный disruption token и существующий GPG signing fingerprint; он не
 создаёт ключи, `.env`, volumes или host configuration.
+
+До первой lifecycle-мутации campaign требует наличие всех target volumes из
+`migration.volume_map` и записывает каждый legacy volume как `present` либо
+`not_applicable`. Отсутствующий target volume останавливает новый campaign до
+отдельно одобренной migration-процедуры.
 
 См. также:
 

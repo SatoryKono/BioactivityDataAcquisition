@@ -31,7 +31,8 @@ This runbook applies only to the optional local Docker helpers permitted by
 ADR-010. The canonical BioETL runtime remains the Python/venv flow.
 
 Obtain a maintenance window, capture current projects/volumes/origins, inject
-required environment values through the process, and do not edit `.env`.
+required environment values through the process; repository `.env` files are
+never created or changed by this procedure.
 
 ## Procedure
 
@@ -68,9 +69,9 @@ The shared networks are external infrastructure with stable literal names:
 | `runtime` | `bioetl-runtime` | `bioetl-main`, `bioetl-neo4j` | `runtime_manager.py` |
 
 `runtime_manager.py start/recover` verifies these networks and creates a missing
-network with its contracted owner label. It refuses a conflicting owner and
-never deletes or recreates an existing network automatically. The former
-project-local network `bioetl-main_warp-network` carries no persistent data and
+network with its contracted owner label. It refuses a missing or conflicting
+owner and never deletes or recreates an existing network automatically. The
+former project-local network `bioetl-main_warp-network` carries no persistent data and
 MUST NOT be reused; after all legacy consumers are stopped it may be removed
 only as a separate, explicit cleanup operation.
 

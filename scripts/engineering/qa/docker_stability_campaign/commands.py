@@ -68,6 +68,63 @@ def remaining_seconds(deadline: float, *, reserve: float = 0.0) -> float:
     return remaining
 
 
+def desktop_recovery_diagnostic_bundle(
+    runtime_origin: Path,
+    report: Path,
+    timeout: float = 180.0,
+) -> dict[str, Any]:
+    """Run bounded evidence-first Desktop recovery without destructive fallback."""
+    if report.exists():
+        raise FileExistsError(f"refusing to replace Desktop recovery evidence: {report}")
+    report.parent.mkdir(parents=True, exist_ok=True)
+    script = runtime_origin / "scripts/ops/runtime/docker/restart-docker.ps1"
+    converted_script = run_command(
+        ["wslpath", "-w", str(script)],
+        10.0,
+        cwd=runtime_origin,
+    )
+    converted_report = run_command(
+        ["wslpath", "-w", str(report)],
+        10.0,
+        cwd=runtime_origin,
+    )
+    if converted_script["returncode"] != 0 or converted_report["returncode"] != 0:
+        return {
+            "returncode": 1,
+            "primary_cause": "diagnostic_path_conversion_failed",
+            "script_path": converted_script,
+            "report_path": converted_report,
+            "diagnostic_bundle_present": False,
+        }
+    internal_timeout = max(10, min(175, int(timeout) - 5))
+    result = run_command(
+        [
+            "powershell.exe",
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            str(converted_script["stdout"]).strip(),
+            "-TimeoutSeconds",
+            str(internal_timeout),
+            "-CommandTimeoutSeconds",
+            "15",
+            "-ReportPath",
+            str(converted_report["stdout"]).strip(),
+        ],
+        timeout,
+        cwd=runtime_origin,
+    )
+    payload = load_json(report)
+    result["diagnostic_bundle_present"] = bool(payload)
+    result["diagnostic_bundle"] = str(report)
+    result["diagnostic_schema_version"] = payload.get("schema_version")
+    if not payload:
+        result["returncode"] = 1
+        result["primary_cause"] = "diagnostic_bundle_missing"
+    return result
+
+
 def manager_command(
     runtime_origin: Path,
     action: str,

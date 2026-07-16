@@ -9,6 +9,7 @@ from typing import Any
 
 from .commands import (
     bundle_volume_ids,
+    desktop_recovery_diagnostic_bundle,
     observe_docker_vm_reserve,
     probe_command,
     record_probe,
@@ -121,7 +122,21 @@ def run_recovery_trials(
         resolved = clean
         if incident_id:
             state.setdefault("incident_ids", []).append(incident_id)
-            resolved = True
+            desktop_diagnostics = desktop_recovery_diagnostic_bundle(
+                runtime_origin,
+                trial_dir / "docker-desktop-recovery.json",
+                180.0,
+            )
+            post_trial_restore.append(
+                {
+                    "action": "desktop-recovery-diagnostics",
+                    "result": desktop_diagnostics,
+                }
+            )
+            resolved = (
+                desktop_diagnostics["returncode"] == 0
+                and bool(desktop_diagnostics.get("diagnostic_bundle_present"))
+            )
             for spec in bundle:
                 repair = manager_step(
                     runtime_origin,
