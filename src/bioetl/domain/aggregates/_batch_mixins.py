@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from copy import deepcopy
 from typing import TYPE_CHECKING
 
 import bioetl.domain.aggregates._batch_lifecycle as lifecycle
@@ -136,7 +137,7 @@ class _BatchMutationMixin(_BatchReadModelMixin):
             index=self.next_index,
             entity_id=entity_id,
             content_hash=content_hash,
-            data=data,
+            data=deepcopy(data),
             is_valid=True,
         )
         self._records.append(record)

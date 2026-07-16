@@ -93,7 +93,10 @@ class StagedEnforcementEngine:
         if not policy:
             return EnforcementStage.OBSERVE, "No policy defined"
 
-        effective_stage = policy.get_effective_stage(failure_rate)
+        threshold_stage = policy.get_effective_stage(failure_rate)
+        effective_stage = _stage_allowed_by_current_policy(
+            threshold_stage, policy.current_stage
+        )
 
         if effective_stage == EnforcementStage.HARD_FAIL:
             message = f"Hard fail threshold exceeded ({failure_rate:.1%} >= {policy.failure_threshold:.1%})"
@@ -125,11 +128,25 @@ class StagedEnforcementEngine:
             if not result.passed:
                 failure_rate = 1.0  # Single failure
                 if (
-                    policy.get_effective_stage(failure_rate)
+                    _stage_allowed_by_current_policy(
+                        policy.get_effective_stage(failure_rate), policy.current_stage
+                    )
                     == EnforcementStage.HARD_FAIL
                 ):
                     return True
         return False
+
+
+def _stage_allowed_by_current_policy(
+    threshold_stage: EnforcementStage, configured_stage: EnforcementStage
+) -> EnforcementStage:
+    """Cap threshold-derived enforcement by the configured rollout stage."""
+    order = {
+        EnforcementStage.OBSERVE: 0,
+        EnforcementStage.SOFT_FAIL: 1,
+        EnforcementStage.HARD_FAIL: 2,
+    }
+    return threshold_stage if order[threshold_stage] <= order[configured_stage] else configured_stage
 
 
 def create_enforcement_engine() -> StagedEnforcementEngine:

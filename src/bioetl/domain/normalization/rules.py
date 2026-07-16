@@ -11,6 +11,7 @@ from bioetl.domain.normalization._chembl_units import (
     normalize_standard_unit as normalize_chembl_standard_unit,
 )
 from bioetl.domain.normalization.text import normalize_string
+from bioetl.domain.exceptions import ValidationError
 
 __all__ = [
     "BINARY_FLAG_MAPPING",
@@ -260,7 +261,9 @@ def _apply_case_strategy(normalized: str, strategy: str) -> str:
         "lowercase": normalized.lower(),
         "preserve": normalized,
     }
-    return strategy_map.get(strategy, normalized)
+    if strategy not in strategy_map:
+        raise ValidationError(f"Unknown case strategy: {strategy!r}", field="strategy")
+    return strategy_map[strategy]
 
 
 def normalize_cross_pipeline_case(

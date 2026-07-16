@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from copy import deepcopy
 from typing import TYPE_CHECKING
 
 import bioetl.domain.aggregates._batch_lifecycle as lifecycle
@@ -55,7 +56,7 @@ class Batch(_BatchMutationMixin, _BatchLifecycleMixin):
         self._created_at = created_at
         self._sealed_at: datetime | None = None
         self._events: list[DomainEvent] = []
-        self._metadata: MetaDict = metadata or {}
+        self._metadata: MetaDict = deepcopy(metadata) if metadata is not None else {}
 
     @classmethod
     def create(
