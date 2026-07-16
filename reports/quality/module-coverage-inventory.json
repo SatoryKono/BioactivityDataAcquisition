@@ -17753,7 +17753,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.control_plane._run_manifest_scope_rebuild",
       "path": "src/bioetl/infrastructure/control_plane/_run_manifest_scope_rebuild.py",
-      "source_lines": 143
+      "source_lines": 146
     },
     {
       "coverage_percent": 87.82,
@@ -40015,7 +40015,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.control_plane._run_manifest_scope_rebuild",
       "path": "src/bioetl/infrastructure/control_plane/_run_manifest_scope_rebuild.py",
-      "source_lines": 143
+      "source_lines": 146
     },
     {
       "coverage_percent": 87.82,
@@ -44530,7 +44530,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "5d910a3d52558b336af19c1d64804cdbfec59f0a1711fad321a104a02f436f31",
+  "source_tree_sha256": "91ba385686c64097f7819427c9d092c8ee41e74108044b09ff8794e260dc16c9",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {

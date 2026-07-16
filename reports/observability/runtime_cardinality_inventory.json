@@ -190,6 +190,7 @@
     "bioetl_data_source_retry_exhausted_total",
     "bioetl_dq_anomaly_detected_total",
     "bioetl_dq_baseline_samples",
+    "bioetl_dq_baseline_updated_total",
     "bioetl_dq_blocked_records",
     "bioetl_dq_check_duration_ms",
     "bioetl_dq_check_duration_seconds",
@@ -862,7 +863,9 @@
     "bioetl_data_freshness_seconds",
     "bioetl_data_source_retries_total",
     "bioetl_data_source_retry_exhausted_total",
+    "bioetl_dq_anomaly_detected_total",
     "bioetl_dq_baseline_samples",
+    "bioetl_dq_baseline_updated_total",
     "bioetl_dq_check_duration_ms",
     "bioetl_dq_check_failures_total",
     "bioetl_dq_context_build_failures_total",
@@ -872,6 +875,7 @@
     "bioetl_dq_records_quarantined_total",
     "bioetl_dq_report_generated_total",
     "bioetl_dq_report_skipped_total",
+    "bioetl_dq_soft_threshold_exceeded_total",
     "bioetl_dq_validation_failures_total",
     "bioetl_dq_validation_record_count",
     "bioetl_dq_validation_score",
@@ -929,6 +933,8 @@
     "bioetl_replay_drift_events_total",
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
+    "bioetl_shutdown_completed_total",
+    "bioetl_shutdown_initiated_total",
     "bioetl_silver_csv_export_failures_total",
     "bioetl_silver_csv_export_start_total",
     "bioetl_silver_csv_export_success_total",
@@ -1319,12 +1325,16 @@
     ],
     "bioetl_dq_anomaly_detected_total": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
+      "docs/04-reference/observability/metrics-catalog.md",
       "grafana/dashboards/bioetl-dq-v2.json"
     ],
     "bioetl_dq_baseline_samples": [
       "docs/03-guides/metrics-monitoring.md",
       "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md"
+    ],
+    "bioetl_dq_baseline_updated_total": [
+      "docs/04-reference/observability/metrics-catalog.md"
     ],
     "bioetl_dq_blocked_records": [
       "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md",
@@ -1407,6 +1417,7 @@
     ],
     "bioetl_dq_soft_threshold_exceeded_total": [
       "docs/03-guides/dashboards/panel-contract-inventory.json",
+      "docs/04-reference/observability/metrics-catalog.md",
       "grafana/dashboards/bioetl-dq-v2.json"
     ],
     "bioetl_dq_status": [
@@ -1944,8 +1955,6 @@
       "docs/03-guides/dashboards/dashboard-v2-usage.md",
       "docs/03-guides/dashboards/panel-contract-inventory.json",
       "docs/03-guides/dashboards/panels/bioetl-dq-v2-panels.md",
-      "docs/03-guides/dashboards/panels/bioetl-overview-v2-panels.md",
-      "docs/03-guides/dashboards/panels/bioetl-provider-health-v2-panels.md",
       "docs/03-guides/dashboards/panels/bioetl-runtime-panels.md",
       "docs/03-guides/dashboards/panels/bioetl-silver-reject-explorer-panels.md",
       "docs/03-guides/dashboards/variable-reference.md",
@@ -2298,10 +2307,12 @@
     ],
     "bioetl_workflow_expected": [
       "docs/03-guides/dashboards/variable-reference.md",
+      "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md"
     ],
     "bioetl_workflow_pipeline_expected": [
       "docs/03-guides/dashboards/variable-reference.md",
+      "docs/04-reference/observability/metrics-catalog.md",
       "grafana/README.md"
     ],
     "bioetl_workflow_pipeline_verdict_status": [
@@ -2432,7 +2443,9 @@
     "bioetl_data_freshness_seconds",
     "bioetl_data_source_retries_total",
     "bioetl_data_source_retry_exhausted_total",
+    "bioetl_dq_anomaly_detected_total",
     "bioetl_dq_baseline_samples",
+    "bioetl_dq_baseline_updated_total",
     "bioetl_dq_check_duration_ms",
     "bioetl_dq_check_failures_total",
     "bioetl_dq_context_build_failures_total",
@@ -2442,6 +2455,7 @@
     "bioetl_dq_records_quarantined_total",
     "bioetl_dq_report_generated_total",
     "bioetl_dq_report_skipped_total",
+    "bioetl_dq_soft_threshold_exceeded_total",
     "bioetl_dq_validation_failures_total",
     "bioetl_dq_validation_record_count",
     "bioetl_dq_validation_score",
@@ -2512,6 +2526,8 @@
     "bioetl_replay_drift_events_total",
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
+    "bioetl_shutdown_completed_total",
+    "bioetl_shutdown_initiated_total",
     "bioetl_silver_csv_export_failures_total",
     "bioetl_silver_csv_export_start_total",
     "bioetl_silver_csv_export_success_total",
@@ -2705,7 +2721,9 @@
     "bioetl_data_freshness_seconds",
     "bioetl_data_source_retries_total",
     "bioetl_data_source_retry_exhausted_total",
+    "bioetl_dq_anomaly_detected_total",
     "bioetl_dq_baseline_samples",
+    "bioetl_dq_baseline_updated_total",
     "bioetl_dq_check_duration_ms",
     "bioetl_dq_check_failures_total",
     "bioetl_dq_context_build_failures_total",
@@ -2715,6 +2733,7 @@
     "bioetl_dq_records_quarantined_total",
     "bioetl_dq_report_generated_total",
     "bioetl_dq_report_skipped_total",
+    "bioetl_dq_soft_threshold_exceeded_total",
     "bioetl_dq_validation_failures_total",
     "bioetl_dq_validation_record_count",
     "bioetl_dq_validation_score",
@@ -2785,6 +2804,8 @@
     "bioetl_replay_drift_events_total",
     "bioetl_replay_lag_seconds",
     "bioetl_replay_reconstructability_events_total",
+    "bioetl_shutdown_completed_total",
+    "bioetl_shutdown_initiated_total",
     "bioetl_silver_csv_export_failures_total",
     "bioetl_silver_csv_export_start_total",
     "bioetl_silver_csv_export_success_total",

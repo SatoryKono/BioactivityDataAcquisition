@@ -214,7 +214,7 @@ def test_issue_5684_governance_freshness_gates_are_passing() -> None:
     gates = _load_json(DEBT_GATES)
     review = _load_json(RUNTIME_CARDINALITY_REVIEW)
     generated_at = datetime.fromisoformat(review["generated_at"].replace("Z", "+00:00"))
-    age_days = (REFERENCE_NOW - generated_at).days
+    age_days = (datetime.now(UTC) - generated_at).days
 
     # Skip release gate status check for local development with uncommitted changes
     # assert gates["summary"]["release_gate_status"] == "passing"

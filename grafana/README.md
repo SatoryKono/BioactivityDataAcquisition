@@ -111,6 +111,11 @@ ______________________________________________________________________
 > checks and then expands coverage from shipped dashboard JSON so every
 > executable Prometheus, HTTP, Loki, and Tempo handoff target gets an evidence
 > row or an explicit blocked/expected-empty classification.
+> Its governed per-request timeout is `15s`, which covers bounded Loki
+> `query_range` fan-out on the local stack without treating sparse logs as a
+> datasource outage. Missing DQ freshness samples are reported as
+> `telemetry_missing`: the corresponding panels render `UNKNOWN`, never a false
+> healthy zero.
 > `python -m scripts.ops check-grafana-audit-preflight` is the fast readiness
 > gate for full dashboard audits: it verifies Grafana, explicit
 > `frontend/settings` render auth, Prometheus, Playwright browser/runtime
@@ -122,9 +127,13 @@ ______________________________________________________________________
 > marker combined with `No data` fail the capture. Screenshot preflight verifies
 > the manifest's actual theme/viewport and terminal-state result.
 > `python -m scripts.ops run-grafana-audit-cycle` is the canonical full audit
-> workflow: service preflight, reviewed live discovery of filled dashboards,
-> screenshot refresh for that filled-dashboard subset, screenshot freshness
-> re-check for the same subset, then the reviewed live panel audit. If the
+> workflow. It reports two independent release outcomes in
+> `reports/observability/grafana/dashboard-release-gates.json`:
+> `dashboard_semantic_gate` covers datasource/backend readiness and the reviewed
+> live panel audit, while `dashboard_render_gate` covers render auth,
+> Playwright/expanded-row capture, screenshots, and the render manifest. The
+> semantic audit runs before screenshot refresh, so a browser-host failure does
+> not hide PromQL, LogQL, HTTP, or datasource evidence. If the
 > discovery pass times out, the cycle falls back to the last successful
 > `reports/observability/grafana/live-panel-audit.json` subset before failing
 > hard. By default the cycle also force-refreshes the detached Quarantine
@@ -1140,6 +1149,9 @@ not use it as a Prometheus label.
 `max_over_time(...[$__range])` instead of `increase(...[$__range])`. A completed
 BioETL run may first appear to Prometheus as an already non-zero sample; plain
 `increase()` then returns `0` and hides real Bronze/DQ/reject evidence.
+This value is the maximum published final snapshot observed inside the selected
+window, not an arithmetic total across multiple runs. Use RunLedger when an
+exact multi-run total is required.
 
 Для bounded reason-level summary dashboard дополнительно использует:
 
@@ -2295,8 +2307,11 @@ Use `increase(<counter>[$window])` for event-delta counters such as
 `bioetl_silver_validation_failures_total`. Use `max_over_time(...)` only for
 pushed snapshot/range-evidence totals where the latest pushed value inside the
 window is the intended evidence, including `bioetl_records_processed_total`,
-`bioetl_stage_records_total`, `bioetl_dq_records_quarantined_total`, and
-`bioetl_silver_filter_rejections_total`.
+`bioetl_stage_records_total`, and `bioetl_dq_records_quarantined_total`.
+`bioetl_silver_filter_rejections_total` may use `max_over_time()` only for a
+boolean recent-event presence gate; reason/field event totals use `increase()`.
+Pushed snapshot evidence is not an exact multi-run total; reconcile exact totals
+from RunLedger.
 
 ### Как метрики переживают перезапуск приложения?
 

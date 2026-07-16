@@ -26,12 +26,14 @@ Dashboard `3. Provider Health` monitors provider current status, health-check la
 ### 4. ID
 - **Type:** Table
 - **Purpose:** Show run ID, pipeline, run type, and timestamp.
-- **Data sources:** `bioetl_pipeline_runs`
+- **Data sources:** Quarantine Explorer HTTP control-plane identity endpoint
+  `/ops/control-plane/identity-table`; this is not a Prometheus panel.
 
 ### 5. Processed Records
 - **Type:** Table
 - **Purpose:** Show records processed by stage.
-- **Data sources:** `bioetl_records_processed_total`
+- **Data sources:** Quarantine Explorer HTTP
+  `/ops/observability/processed-records`; this is not a Prometheus panel.
 
 ### 6. Monitor GLOBAL Provider Severity Matrix
 - **Type:** Table

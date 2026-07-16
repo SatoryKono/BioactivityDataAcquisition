@@ -2,14 +2,18 @@
 
 Complete catalog of all Prometheus metrics defined in BioETL observability system.
 
-**Runtime Metrics: 181** (excluding aliases)
-**Governed Recording/Current-State Metrics: 46**
+**Runtime Metrics: 161** (excluding aliases; derived from
+`REGISTERED_PROMETHEUS_METRIC_NAMES`)
+**Governed Recording/Current-State Metrics: 40**
+
+Canonical reconciliation command:
+`python -m scripts.engineering.qa report-observability-metric-inventory --json`.
 
 ## Table of Contents
 
 - [Adapter Metrics](#adapter-metrics) - 17 metrics
-- [Core Metrics](#core-metrics) - 46 metrics
-- [Health Metrics](#health-metrics) - 10 metrics
+- [Core Metrics](#core-metrics) - 45 metrics
+- [Health Metrics](#health-metrics) - 11 metrics
 - [Pipeline Checkpoint Metrics](#pipeline-checkpoint-metrics) - 7 metrics
 - [Pipeline Composite Metrics](#pipeline-composite-metrics) - 1 metric
 - [Pipeline Control Plane Metrics](#pipeline-control-plane-metrics) - 10 metrics
@@ -19,9 +23,9 @@ Complete catalog of all Prometheus metrics defined in BioETL observability syste
 - [Pipeline Quality Metrics](#pipeline-quality-metrics) - 6 metrics
 - [Pipeline Replay Metrics](#pipeline-replay-metrics) - 3 metrics
 - [Pipeline Transform Metrics](#pipeline-transform-metrics) - 3 metrics
-- [Pipeline Workflow Metrics](#pipeline-workflow-metrics) - 7 metrics
-- [Storage Metrics](#storage-metrics) - 33 metrics
-- [Governed Recording And Current-State Metrics](#governed-recording-and-current-state-metrics) - 46 metrics
+- [Pipeline Workflow Metrics](#pipeline-workflow-metrics) - 13 metrics
+- [Storage Metrics](#storage-metrics) - 30 metrics
+- [Governed Recording And Current-State Metrics](#governed-recording-and-current-state-metrics) - 40 metrics
 
 ---
 
@@ -93,10 +97,10 @@ Complete catalog of all Prometheus metrics defined in BioETL observability syste
 | `bioetl_dq_validation_score` | Gauge | pipeline, entity | Data quality validation score (0.0-1.0, where 1.0 = all records valid) |
 | `bioetl_dq_validation_record_count` | Gauge | pipeline, entity | Record count associated with the latest entity-level DQ validation score |
 | `bioetl_data_freshness_seconds` | Gauge | pipeline, entity | Unix timestamp in seconds for the last successful data ingestion for pipeline/entity; consumers derive lag via time() - metric |
-| `bioetl_dq_anomaly_detected` | Counter | pipeline, metric, severity, anomaly_type | Total number of data quality anomalies detected |
+| `bioetl_dq_anomaly_detected_total` | Counter | pipeline, metric, severity, anomaly_type | Total number of data quality anomalies detected |
 | `bioetl_dq_check_duration_ms` | Histogram | pipeline | Duration of data quality check in milliseconds |
 | `bioetl_dq_monitor_enabled` | Gauge | pipeline, entity | Whether anomaly detection is configured for the pipeline/entity (1 enabled, 0 disabled) |
-| `bioetl_dq_baseline_updated` | Counter | pipeline, metric | Number of times DQ monitor baseline was updated |
+| `bioetl_dq_baseline_updated_total` | Counter | pipeline, metric | Number of times DQ monitor baseline was updated |
 | `bioetl_dq_monitor_disabled_total` | Counter | pipeline, entity | Total DQ evaluations executed without an anomaly monitor configured |
 | `bioetl_dq_baseline_samples` | Gauge | pipeline, metric | Current number of samples in DQ baseline |
 | `bioetl_metrics_publication_events_total` | Counter | pipeline, run_type, target, status | Total best-effort metrics publication attempts by target and status |
@@ -181,8 +185,8 @@ Complete catalog of all Prometheus metrics defined in BioETL observability syste
 | `bioetl_postrun_phase_events_total` | Counter | pipeline, phase, status | Total bounded postrun phase outcomes by pipeline, phase, and status |
 | `bioetl_postrun_phase_duration_seconds` | Histogram | pipeline, phase, status | Duration of postrun subphases in seconds |
 | `bioetl_observability_events_total` | Counter | event, provider, pipeline, severity, error_type | Unified observability events emitted by pipeline observer |
-| `bioetl_shutdown_initiated` | Counter | reason | Total shutdown initiations |
-| `bioetl_shutdown_completed` | Counter | reason | Total shutdown completions |
+| `bioetl_shutdown_initiated_total` | Counter | reason | Total shutdown initiations |
+| `bioetl_shutdown_completed_total` | Counter | reason | Total shutdown completions |
 | `bioetl_storage_optimization_total` | Counter | pipeline, status | Total storage optimization operations |
 
 ---
@@ -220,7 +224,7 @@ Complete catalog of all Prometheus metrics defined in BioETL observability syste
 |-------------|------|--------|-------------|
 | `bioetl_structural_policy_events_total` | Counter | provider, entity_type, action | Total structural-policy events emitted by transformer structural enforcement |
 | `bioetl_structural_policy_shadow_comparisons_total` | Counter | provider, entity_type, comparison | Total shadow comparisons between structural policy and semantic silver filters |
-| `bioetl_dq_soft_threshold_exceeded` | Counter | pipeline | Total times DQ soft threshold was exceeded |
+| `bioetl_dq_soft_threshold_exceeded_total` | Counter | pipeline | Total times DQ soft threshold was exceeded |
 | `bioetl_dq_context_build_failures_total` | Counter | pipeline, stage, reason | Total failures while building DQ dataframe context for report generation |
 | `bioetl_dq_report_skipped_total` | Counter | pipeline, stage, reason | Total DQ report generation skips by pipeline and medallion stage |
 | `bioetl_dq_report_generated_total` | Counter | pipeline, stage | Total successfully generated DQ reports by pipeline and medallion stage |
@@ -259,9 +263,15 @@ Complete catalog of all Prometheus metrics defined in BioETL observability syste
 |-------------|------|--------|-------------|
 | `bioetl_workflow_runs_total` | Counter | workflow, status, pipeline_context, run_type_context, provider_context | Total declarative workflow run outcomes by bounded workflow and status |
 | `bioetl_workflow_current_status` | Gauge | workflow, pipeline_context, run_type_context, provider_context | Current terminal workflow status by bounded workflow context: 0=OK, 1=WARN, 2=CRIT |
+| `bioetl_workflow_expected` | Gauge | workflow, provider | Planned workflow scopes for dashboard selector universes |
+| `bioetl_workflow_pipeline_expected` | Gauge | workflow, pipeline, run_type, provider | Planned workflow pipeline/run_type scopes for dashboard selector universes |
 | `bioetl_workflow_reconciliation_rows_scanned_total` | Counter | - | Total workflow reconciliation rows scanned |
 | `bioetl_workflow_reconciliation_rows_retained_total` | Counter | - | Total workflow reconciliation rows retained |
 | `bioetl_workflow_reconciliation_rows_deleted_total` | Counter | - | Total workflow reconciliation rows deleted |
+| `bioetl_workflow_row_reconciliation_left_rows_total` | Counter | layer | Total left-side rows inspected by workflow row reconciliation |
+| `bioetl_workflow_row_reconciliation_right_rows_total` | Counter | layer | Total right-side rows inspected by workflow row reconciliation |
+| `bioetl_workflow_row_reconciliation_kept_rows_total` | Counter | layer | Total rows retained by workflow row reconciliation |
+| `bioetl_workflow_row_reconciliation_excluded_rows_total` | Counter | layer | Total rows excluded by workflow row reconciliation |
 | `bioetl_workflow_step_events_total` | Counter | workflow, step_kind, status, pipeline_context, run_type_context, provider_context | Total declarative workflow step outcomes by bounded workflow, step kind, and status |
 | `bioetl_workflow_step_duration_seconds` | Histogram | workflow, step_kind, status, pipeline_context, run_type_context, provider_context | Duration of declarative workflow step execution by bounded workflow, step kind, and status |
 
@@ -335,14 +345,9 @@ separate from actual `record:` outputs and direct runtime collector families.
 | `bioetl_pipeline_phase_duration_seconds` | Policy alias |
 | `bioetl_provider_status` | Policy alias |
 | `bioetl_runtime_status` | Policy alias |
-| `bioetl_shutdown_completed_total` | Policy alias |
-| `bioetl_shutdown_initiated_total` | Policy alias |
 | `bioetl_silver_filter_reject_field_total` | Policy alias |
 | `bioetl_silver_filter_reject_reason_total` | Policy alias |
 | `bioetl_silver_reject_rate` | Policy alias |
-| `bioetl_workflow_reconciliation_rows_deleted_total` | Policy alias |
-| `bioetl_workflow_reconciliation_rows_retained_total` | Policy alias |
-| `bioetl_workflow_reconciliation_rows_scanned_total` | Policy alias |
 | `bioetl_workflow_status` | Policy alias |
 
 ## Governed Recording And Current-State Inventory
@@ -360,8 +365,6 @@ separate from actual `record:` outputs and direct runtime collector families.
 | `bioetl_pipeline_phase_duration_seconds` | Recording rule | rule-defined | Pipeline phase duration projection normalized for dashboard use |
 | `bioetl_provider_status` | Recording rule | rule-defined | Provider status projection for provider health dashboards |
 | `bioetl_runtime_status` | Recording rule | rule-defined | Runtime status projection for overview/runtime dashboards |
-| `bioetl_shutdown_completed_total` | Recording rule | reason | Shutdown completion projection aligned with shutdown event metrics |
-| `bioetl_shutdown_initiated_total` | Recording rule | reason | Shutdown initiation projection aligned with shutdown event metrics |
 | `bioetl_silver_filter_reject_field_total` | Recording rule | field | Silver reject count grouped by field |
 | `bioetl_silver_filter_reject_reason_total` | Recording rule | reason_code | Silver reject count grouped by reason |
 | `bioetl_silver_reject_rate` | Recording rule | rule-defined | Silver reject-rate projection for reject explorer and DQ dashboards |
@@ -373,10 +376,6 @@ separate from actual `record:` outputs and direct runtime collector families.
 | `bioetl_processed_records_gold_skipped_current` | Recording rule | rule-defined | Current Gold skipped-record projection |
 | `bioetl_processed_records_gold_written_current` | Recording rule | rule-defined | Current Gold written-record projection |
 | `bioetl_processed_records_reconciliation_status` | Recording rule | rule-defined | Current processed-record reconciliation status projection |
-| `bioetl_workflow_row_reconciliation_left_rows_total` | Counter contract | layer | Left-side rows inspected by workflow row reconciliation |
-| `bioetl_workflow_row_reconciliation_right_rows_total` | Counter contract | layer | Right-side rows inspected by workflow row reconciliation |
-| `bioetl_workflow_row_reconciliation_kept_rows_total` | Counter contract | layer | Rows retained by workflow row reconciliation |
-| `bioetl_workflow_row_reconciliation_excluded_rows_total` | Counter contract | layer | Rows excluded by workflow row reconciliation |
 | `bioetl_processed_records_silver_deduplicated_current` | Recording rule | rule-defined | Current Silver deduplicated-record projection |
 | `bioetl_processed_records_silver_filtered_out_current` | Recording rule | rule-defined | Current Silver filtered-out-record projection |
 | `bioetl_processed_records_silver_quarantined_current` | Recording rule | rule-defined | Current Silver quarantined-record projection |
@@ -400,13 +399,13 @@ separate from actual `record:` outputs and direct runtime collector families.
 
 ## Summary
 
-- **Runtime Metrics**: 181 (excluding aliases)
-- **Governed Recording/Current-State Metrics**: 46
+- **Runtime Metrics**: 161 (excluding aliases; canonical registry-backed count)
+- **Governed Recording/Current-State Metrics**: 40
 - **Total Categories**: 15
 - **Metric Types Distribution**:
-  - Counter: ~110 metrics
-  - Histogram: ~35 metrics
-  - Gauge: ~36 metrics
+  - Counter: 111 metrics
+  - Histogram: 25 metrics
+  - Gauge: 25 metrics
 
 ## Notes
 

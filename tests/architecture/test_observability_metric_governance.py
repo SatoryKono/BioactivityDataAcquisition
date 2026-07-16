@@ -156,10 +156,11 @@ def test_typed_observability_inventory_is_bidirectional_and_source_specific() ->
     report = inventory.collect_typed_observability_inventory(ROOT)
 
     assert len(report["recording_rule_outputs"]) == 103
-    assert len(report["policy_alias_metrics"]) == 20
+    assert len(report["policy_alias_metrics"]) == 15
     assert report["recording_outputs_without_declaration"] == []
     assert report["recording_declarations_without_output"] == []
     assert report["policy_aliases_overlapping_outputs"] == []
+    assert report["policy_aliases_overlapping_runtime_metrics"] == []
     assert report["policy_aliases_without_catalog"] == []
     assert report["catalog_aliases_without_declaration"] == []
     assert report["prometheus_run_id_selector_violations"] == []
@@ -292,6 +293,7 @@ def test_observability_metric_governance_declares_required_views_and_evidence_pa
         "recording_outputs_without_declaration",
         "recording_declarations_without_output",
         "policy_aliases_overlapping_outputs",
+        "policy_aliases_overlapping_runtime_metrics",
         "policy_aliases_without_catalog",
         "catalog_aliases_without_declaration",
         "http_semantics_violations",

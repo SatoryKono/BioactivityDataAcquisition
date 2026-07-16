@@ -25,6 +25,7 @@ typed_observability_views:
     - recording_outputs_without_declaration
     - recording_declarations_without_output
     - policy_aliases_overlapping_outputs
+    - policy_aliases_overlapping_runtime_metrics
     - policy_aliases_without_catalog
     - catalog_aliases_without_declaration
     - http_semantics_violations

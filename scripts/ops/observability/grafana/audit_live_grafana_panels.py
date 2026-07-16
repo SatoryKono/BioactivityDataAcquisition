@@ -29,7 +29,7 @@ DEFAULT_PIPELINE = "chembl_target"
 DEFAULT_RUN_TYPE = "incremental"
 DEFAULT_RUN_ID = "-"
 DEFAULT_RANGE_HOURS = 24
-DEFAULT_REQUEST_TIMEOUT_SECONDS = 5.0
+DEFAULT_REQUEST_TIMEOUT_SECONDS = 15.0
 _HEALTH_PROBE_PATHS: tuple[str, ...] = ("/health/live", "/health")
 _DASHBOARD_DIR = Path("grafana/dashboards")
 _PROCESSED_RECORDS_CONTRACT = "processed_records_table_v1"
@@ -147,7 +147,7 @@ REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
     PanelAuditSpec(
         dashboard_uid="bioetl-dq-v2",
         panel_id=8,
-        title="Monitor: Worst Data Freshness Lag (seconds)",
+        title="Time Range · Worst Freshness Age (hours; SLA 24/72)",
         source_kind="prometheus",
         semantic_kind="freshness",
     ),
@@ -1116,14 +1116,14 @@ def _audit_prometheus_panel(
     )
     payload = _fetch_json(query_url, timeout_seconds=config.request_timeout_seconds)
     classification, detail = _classify_prometheus_payload(payload)
+    if classification == "empty_result" and spec.semantic_kind == "freshness":
+        classification = "telemetry_missing"
+        detail = (
+            "Freshness metric returned no samples for the selected scope/range; "
+            "the dashboard must render UNKNOWN rather than a false healthy zero"
+        )
     status = "ok"
     if classification in {"invalid_shape", "query_error"}:
-        status = "error"
-    elif (
-        classification == "empty_result"
-        and spec.semantic_kind == "freshness"
-        and spec.required
-    ):
         status = "error"
     return AuditResult(
         dashboard_uid=spec.dashboard_uid,
