@@ -34,22 +34,14 @@ def build_fault_cases() -> tuple[FaultCase, ...]:
             "selected_service_termination",
             "service_unready",
             (FaultOperation("kill_service", "main", "bioetl"),),
-            (
-                FaultOperation(
-                    "probe", "main", expected="cause:service_unready"
-                ),
-            ),
+            (FaultOperation("probe", "main", expected="cause:service_unready"),),
             (FaultOperation("recover", "main", expected="success"),),
         ),
         FaultCase(
             "failed_health_readiness",
             "service_unready",
             (FaultOperation("pause_service", "main", "bioetl"),),
-            (
-                FaultOperation(
-                    "probe", "main", expected="cause:service_unready"
-                ),
-            ),
+            (FaultOperation("probe", "main", expected="cause:service_unready"),),
             (
                 FaultOperation("unpause_service", "main", "bioetl"),
                 FaultOperation("recover", "main"),
@@ -62,11 +54,7 @@ def build_fault_cases() -> tuple[FaultCase, ...]:
                 FaultOperation("stop", "main"),
                 FaultOperation("reserve_port", port=8081),
             ),
-            (
-                FaultOperation(
-                    "start", "main", expected="finding:HOST_PORT_COLLISION"
-                ),
-            ),
+            (FaultOperation("start", "main", expected="finding:HOST_PORT_COLLISION"),),
             (
                 FaultOperation("release_port", port=8081),
                 FaultOperation("recover", "main"),
@@ -96,16 +84,10 @@ def build_fault_cases() -> tuple[FaultCase, ...]:
         FaultCase(
             "bounded_memory_pid_pressure",
             "bounded_pressure",
-            (
-                FaultOperation(
-                    "bounded_pressure", "main", "bioetl", max_seconds=15.0
-                ),
-            ),
+            (FaultOperation("bounded_pressure", "main", "bioetl", max_seconds=15.0),),
             (FaultOperation("probe", "main", expected="success"),),
             (
-                FaultOperation(
-                    "clear_pressure", "main", "bioetl", max_seconds=15.0
-                ),
+                FaultOperation("clear_pressure", "main", "bioetl", max_seconds=15.0),
                 FaultOperation("probe", "main", expected="success"),
             ),
         ),
@@ -412,7 +394,11 @@ def execute_fault_case(
                     )
                     passed = operation_passed(result, operation.expected)
                 except Exception as exc:  # evidence must survive every host failure
-                    result = {"returncode": 1, "error": type(exc).__name__, "message": str(exc)}
+                    result = {
+                        "returncode": 1,
+                        "error": type(exc).__name__,
+                        "message": str(exc),
+                    }
                     passed = False
                 steps.append(
                     {
@@ -437,7 +423,11 @@ def execute_fault_case(
                 )
                 passed = operation_passed(result, operation.expected)
             except Exception as exc:
-                result = {"returncode": 1, "error": type(exc).__name__, "message": str(exc)}
+                result = {
+                    "returncode": 1,
+                    "error": type(exc).__name__,
+                    "message": str(exc),
+                }
                 passed = False
             steps.append(
                 {

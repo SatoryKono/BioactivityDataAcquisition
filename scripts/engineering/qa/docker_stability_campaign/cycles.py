@@ -94,7 +94,9 @@ def bootstrap_campaign(
         baselines[spec.stack] = baseline.relative_to(evidence_dir).as_posix()
         record_probe(state, probe)
     capacity = observe_docker_vm_reserve(state, runtime_origin)
-    passed = not origins and len(baselines) == len(bundle) and capacity["returncode"] == 0
+    passed = (
+        not origins and len(baselines) == len(bundle) and capacity["returncode"] == 0
+    )
     atomic_json(
         evidence_dir / "bootstrap" / "bootstrap.json",
         {
@@ -209,8 +211,16 @@ def run_cycle(
             )
             steps.extend(
                 (
-                    {"stack": spec.stack, "action": "idempotent-start", "result": result},
-                    {"stack": spec.stack, "action": "idempotent-probe", "result": sample},
+                    {
+                        "stack": spec.stack,
+                        "action": "idempotent-start",
+                        "result": result,
+                    },
+                    {
+                        "stack": spec.stack,
+                        "action": "idempotent-probe",
+                        "result": sample,
+                    },
                 )
             )
             if result["returncode"] != 0 or sample["returncode"] != 0:
@@ -218,9 +228,9 @@ def run_cycle(
                 break
             record_probe(state, probe)
             if probe_services(probe) != initial_ids[spec.stack]:
-                state["image_or_project_drift"] = int(
-                    state.get("image_or_project_drift", 0)
-                ) + 1
+                state["image_or_project_drift"] = (
+                    int(state.get("image_or_project_drift", 0)) + 1
+                )
                 failure = f"container-identity-{spec.stack}"
                 break
     for spec in reversed(bundle):

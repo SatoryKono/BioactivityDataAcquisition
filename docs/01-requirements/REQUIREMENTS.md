@@ -19,6 +19,7 @@ This document catalogs testable requirements for the BioETL project.
 - ADR-018: Gold Strict Validation
 - ADR-027: DQ Rules Externalization
 - ADR-045: Data Quality Contract System
+- REQ-DQ-002: Метрика `bioetl_dq_validation_score` с bounded labels `pipeline`, `entity`
 
 ### Observability Requirements
 - ADR-006: Logger and Metrics Ports

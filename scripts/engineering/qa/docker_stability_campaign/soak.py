@@ -182,9 +182,9 @@ def run_soak(
             index_and_save(state, state_path, evidence_dir)
             return False
         if previous is not None:
-            state["soak_observed_seconds"] = float(
-                state["soak_observed_seconds"]
-            ) + (sampled_at - float(previous))
+            state["soak_observed_seconds"] = float(state["soak_observed_seconds"]) + (
+                sampled_at - float(previous)
+            )
         state["soak_last_sample_at"] = sampled_at
         state["soak_samples_current_window"] = sequence
         state["last_failure"] = None

@@ -250,9 +250,7 @@ def test_fault_case_reserves_deadline_for_restore(
 
     deadlines = dict(executor.calls)
     assert deadlines["recover"] > deadlines["probe"]
-    report = model.load_json(
-        tmp_path / "raw" / "faults" / case.name / "case.json"
-    )
+    report = model.load_json(tmp_path / "raw" / "faults" / case.name / "case.json")
     assert report["steps"][-1]["phase"] == "restore"
     assert report["steps"][-1]["operation"] == "recover"
 
@@ -613,9 +611,7 @@ def test_failed_recovery_trial_captures_v2_desktop_diagnostics(
         return {"returncode": 0, "diagnostic_bundle_present": True}
 
     monkeypatch.setattr(promotion, "probe_command", probe)
-    monkeypatch.setattr(
-        promotion, "desktop_recovery_diagnostic_bundle", diagnostics
-    )
+    monkeypatch.setattr(promotion, "desktop_recovery_diagnostic_bundle", diagnostics)
 
     assert promotion.run_recovery_trials(
         state,
@@ -631,9 +627,7 @@ def test_failed_recovery_trial_captures_v2_desktop_diagnostics(
     ]
     trial = model.load_json(evidence / "recovery" / "trial-001" / "trial.json")
     assert trial["success"] is False
-    assert trial["post_trial_restore"][0]["action"] == (
-        "desktop-recovery-diagnostics"
-    )
+    assert trial["post_trial_restore"][0]["action"] == ("desktop-recovery-diagnostics")
     assert trial["incident_resolved"] is True
 
 

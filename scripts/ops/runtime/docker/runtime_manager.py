@@ -212,12 +212,7 @@ def collect_snapshots(
         item = details[0]
         state = item.get("State") or {}
         config = item.get("Config") or {}
-        image = str(
-            item.get("Image")
-            or config.get("Image")
-            or row.get("Image")
-            or ""
-        )
+        image = str(item.get("Image") or config.get("Image") or row.get("Image") or "")
         image_id = str(item.get("ImageID") or image)
         image_digests: tuple[str, ...] = ()
         if image_id:
@@ -297,7 +292,10 @@ def readiness_findings(
         expected_digest = _digest_from_image(expected)
         observed_images = (snapshot.image, *snapshot.image_digests)
         image_matches = (
-            any(expected_digest == _digest_from_image(image) for image in observed_images)
+            any(
+                expected_digest == _digest_from_image(image)
+                for image in observed_images
+            )
             if expected_digest
             else expected in observed_images
         )
@@ -629,9 +627,7 @@ def start_or_recover(
                 min(max(0.1, deadline - clock()), 30.0),
             )
             if render.returncode != 0:
-                findings = [
-                    {"cause": "compose_render_failed", "stderr": render.stderr}
-                ]
+                findings = [{"cause": "compose_render_failed", "stderr": render.stderr}]
                 snapshots = []
                 attempts = 0
             else:
@@ -647,9 +643,7 @@ def start_or_recover(
                 for attempts in range(1, max_attempts + 1):
                     remaining = deadline - clock()
                     if remaining <= 0:
-                        findings = [
-                            {"cause": "readiness_timeout", "attempt": attempts}
-                        ]
+                        findings = [{"cause": "readiness_timeout", "attempt": attempts}]
                         break
                     command = _compose(
                         spec,
