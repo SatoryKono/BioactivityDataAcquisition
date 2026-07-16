@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "qodo-get-rules": {
+      "source": "qodo-ai/qodo-skills",
+      "sourceType": "github",
+      "skillPath": "skills/qodo-get-rules/SKILL.md",
+      "computedHash": "f6257be994770ea7f78a57ee3d416f182bee7fd2521c9a059e7eea6f186bbd39"
+    },
+    "qodo-pr-resolver": {
+      "source": "qodo-ai/qodo-skills",
+      "sourceType": "github",
+      "skillPath": "skills/qodo-pr-resolver/SKILL.md",
+      "computedHash": "8064d3b114ccaa0d0b42dbcf5ab2441151e1555a1088aea5caed453a88baef4f"
+    }
+  }
+}

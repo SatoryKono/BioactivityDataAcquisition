@@ -300,9 +300,9 @@ review_lanes:
         canonical_path: mint.json
         action_if_reintroduced: retain_as_exact_root_docs_tooling_entrypoint_while_mintlify_requires_the_standard_filename
       - path: pr_compliance_checklist.yaml
-        current_live_state: present_approved_root_surface
-        canonical_path: pr_compliance_checklist.yaml
-        action_if_reintroduced: retain_as_exact_root_pull_request_compliance_tooling_contract_while_tracked_review_automation_requires_the_filename
+        current_live_state: absent_from_root_baseline
+        canonical_path: null
+        action_if_reintroduced: do_not_restore_root_qodo_checklist; maintain_the_tracked_qodo_source_under_.qodo
       - path: sonar-project.properties
         current_live_state: absent_from_root_baseline
         canonical_path: null

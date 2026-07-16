@@ -1,11 +1,85 @@
 allowed:
   registered_without_runtime: []
-  runtime_without_registry: []
-  dead_metrics: []
+  runtime_without_registry:
+    - metric: bioetl_dq_anomaly_detected
+      owner: "@bioetl-observability"
+      reason: "Runtime compatibility event name maps to canonical _total exposition metric."
+      review_date: "2026-09-30"
+    - metric: bioetl_dq_baseline_updated
+      owner: "@bioetl-observability"
+      reason: "Runtime compatibility event name maps to canonical _total exposition metric."
+      review_date: "2026-09-30"
+    - metric: bioetl_dq_soft_threshold_exceeded
+      owner: "@bioetl-observability"
+      reason: "Runtime compatibility event name maps to canonical _total exposition metric."
+      review_date: "2026-09-30"
+    - metric: bioetl_shutdown_completed
+      owner: "@bioetl-observability"
+      reason: "Runtime compatibility event name maps to canonical _total exposition metric."
+      review_date: "2026-09-30"
+    - metric: bioetl_shutdown_initiated
+      owner: "@bioetl-observability"
+      reason: "Runtime compatibility event name maps to canonical _total exposition metric."
+      review_date: "2026-09-30"
+    - metric: bioetl_dq_anomaly_detected_total
+      owner: "@bioetl-observability"
+      reason: "Event is declared but runtime emission is provider-dependent; retained for DQ event contract."
+      review_date: "2026-09-30"
+    - metric: bioetl_dq_baseline_updated_total
+      owner: "@bioetl-observability"
+      reason: "Event is declared but not currently emitted; retained for future DQ baseline tracking."
+      review_date: "2026-09-30"
+    - metric: bioetl_dq_soft_threshold_exceeded_total
+      owner: "@bioetl-observability"
+      reason: "Event is declared but runtime emission is provider-dependent; retained for DQ threshold contract."
+      review_date: "2026-09-30"
+    - metric: bioetl_shutdown_completed_total
+      owner: "@bioetl-observability"
+      reason: "Event is emitted by host runtimes; retained for lifecycle dashboards."
+      review_date: "2026-09-30"
+    - metric: bioetl_shutdown_initiated_total
+      owner: "@bioetl-observability"
+      reason: "Event is emitted by host runtimes; retained for lifecycle dashboards."
+      review_date: "2026-09-30"
+  dead_metrics:
+    - metric: bioetl_dq_baseline_updated_total
+      owner: "@bioetl-observability"
+      reason: "Metric is declared but not currently emitted; retained for future DQ baseline tracking."
+      review_date: "2026-09-30"
   documented_without_registry: []
   runtime_label_contract_unresolved: []
   rules_without_registry: []
+  alerted_without_emission:
+    - metric: bioetl_dq_anomaly_detected_total
+      owner: "@bioetl-observability"
+      reason: "Alert is retained for provider-dependent DQ anomaly events; live emission is conditional."
+      review_date: "2026-09-30"
+    - metric: bioetl_dq_soft_threshold_exceeded_total
+      owner: "@bioetl-observability"
+      reason: "Alert is retained for provider-dependent DQ threshold events; live emission is conditional."
+      review_date: "2026-09-30"
   runtime_cardinality_threshold_violations: []
+  unused_declared_metrics:
+    - metric: bioetl_dq_anomaly_detected_total
+      owner: "@bioetl-observability"
+      reason: "Dashboard panel is retained for the DQ event contract while runtime emission is provider-dependent."
+      review_date: "2026-09-30"
+    - metric: bioetl_dq_baseline_updated_total
+      owner: "@bioetl-observability"
+      reason: "Metric is declared but not currently emitted; retained for future DQ baseline tracking."
+      review_date: "2026-09-30"
+    - metric: bioetl_dq_soft_threshold_exceeded_total
+      owner: "@bioetl-observability"
+      reason: "Dashboard panel is retained for the DQ threshold contract while runtime emission is provider-dependent."
+      review_date: "2026-09-30"
+    - metric: bioetl_shutdown_completed_total
+      owner: "@bioetl-observability"
+      reason: "Recording-rule projection is retained for lifecycle dashboards; source shutdown events are emitted by host runtimes."
+      review_date: "2026-09-30"
+    - metric: bioetl_shutdown_initiated_total
+      owner: "@bioetl-observability"
+      reason: "Recording-rule projection is retained for lifecycle dashboards; source shutdown events are emitted by host runtimes."
+      review_date: "2026-09-30"
   dashboarded_without_declaration:
     - metric: bioetl_alerts_active_total
       owner: "@bioetl-observability"
@@ -70,6 +144,23 @@ allowed:
     - metric: bioetl_workflow_status
       owner: "@bioetl-observability"
       reason: "Workflow status metric is used by Grafana workflow dashboards."
+      review_date: "2026-09-30"
+  dashboarded_without_emission:
+    - metric: bioetl_dq_anomaly_detected_total
+      owner: "@bioetl-observability"
+      reason: "Dashboard panel is retained for the DQ event contract while runtime emission is provider-dependent."
+      review_date: "2026-09-30"
+    - metric: bioetl_dq_soft_threshold_exceeded_total
+      owner: "@bioetl-observability"
+      reason: "Dashboard panel is retained for the DQ threshold contract while runtime emission is provider-dependent."
+      review_date: "2026-09-30"
+    - metric: bioetl_shutdown_completed_total
+      owner: "@bioetl-observability"
+      reason: "Recording-rule projection is retained for lifecycle dashboards; source shutdown events are emitted by host runtimes."
+      review_date: "2026-09-30"
+    - metric: bioetl_shutdown_initiated_total
+      owner: "@bioetl-observability"
+      reason: "Recording-rule projection is retained for lifecycle dashboards; source shutdown events are emitted by host runtimes."
       review_date: "2026-09-30"
   runtime_cardinality_review_required:
     - metric: bioetl_checkpoint_load_events_total

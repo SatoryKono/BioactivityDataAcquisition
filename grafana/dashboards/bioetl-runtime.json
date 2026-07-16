@@ -3111,7 +3111,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum by(reason) (increase(bioetl_shutdown_initiated[$__interval])) or vector(0))",
+              "expr": "round(sum by(reason) (increase(bioetl_shutdown_initiated_total[$__interval])) or vector(0))",
               "legendFormat": "{{reason}}",
               "refId": "A"
             }
@@ -3192,7 +3192,7 @@
           },
           "targets": [
             {
-              "expr": "round(sum by(reason) (increase(bioetl_shutdown_completed[$__interval])) or vector(0))",
+              "expr": "round(sum by(reason) (increase(bioetl_shutdown_completed_total[$__interval])) or vector(0))",
               "legendFormat": "{{reason}}",
               "refId": "A"
             }

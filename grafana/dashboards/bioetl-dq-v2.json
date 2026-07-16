@@ -2417,7 +2417,7 @@
           },
           "targets": [
             {
-              "expr": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) + ((sum(increase(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) * 0))",
+              "expr": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) + ((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) * 0))",
               "legendFormat": "Validation Failures",
               "refId": "A"
             }
@@ -2814,7 +2814,7 @@
           },
           "targets": [
             {
-              "expr": "sum by (severity, anomaly_type) (increase(bioetl_dq_anomaly_detected{pipeline=~\"$pipeline\"}[$__interval]))",
+              "expr": "sum by (severity, anomaly_type) (increase(bioetl_dq_anomaly_detected_total{pipeline=~\"$pipeline\"}[$__interval]))",
               "legendFormat": "{{severity}} / {{anomaly_type}}",
               "refId": "A"
             }
@@ -2904,7 +2904,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "description": "Selected-range trend of domain-emitted DQ threshold events. Uses bioetl_dq_soft_threshold_exceeded and hard_fail validation counters only; Grafana does not recompute entity YAML thresholds here. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row.",
+          "description": "Selected-range trend of domain-emitted DQ threshold events. Uses bioetl_dq_soft_threshold_exceeded_total and hard_fail validation counters only; Grafana does not recompute entity YAML thresholds here. Dense legend is hidden by default; full identifiers remain available in the tooltip/detail row.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -2961,7 +2961,7 @@
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "round((sum(increase(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[$__interval])) or vector(0)) + (sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__interval])) or vector(0)))",
+              "expr": "round((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__interval])) or vector(0)) + (sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__interval])) or vector(0)))",
               "legendFormat": "threshold events",
               "range": true,
               "refId": "A"

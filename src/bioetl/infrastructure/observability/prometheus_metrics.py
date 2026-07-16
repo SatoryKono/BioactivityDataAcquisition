@@ -22,6 +22,16 @@ from bioetl.infrastructure.observability.prometheus_metric_registries import (
 
 __all__ = ["COUNTERS", "GAUGES", "HISTOGRAMS", "PrometheusMetrics"]
 
+# Compatibility aliases kept at the adapter boundary while callers migrate to
+# the exposition-contract `_total` suffix used by the registered Counter.
+_COUNTER_ALIASES = {
+    "bioetl_dq_anomaly_detected": "bioetl_dq_anomaly_detected_total",
+    "bioetl_dq_soft_threshold_exceeded": "bioetl_dq_soft_threshold_exceeded_total",
+    "bioetl_dq_baseline_updated": "bioetl_dq_baseline_updated_total",
+    "bioetl_shutdown_initiated": "bioetl_shutdown_initiated_total",
+    "bioetl_shutdown_completed": "bioetl_shutdown_completed_total",
+}
+
 
 class _HistogramObserver(Protocol):
     def observe(self, _amount: float) -> None: ...
@@ -139,6 +149,7 @@ class PrometheusMetrics(MetricsPort):
             labels: Canonical labels dict.
         """
         resolved_labels = resolve_metric_labels(labels)
+        name = _COUNTER_ALIASES.get(name, name)
         counter: _CounterMetric = _require_registered_metric(
             name=name,
             registry=COUNTERS,

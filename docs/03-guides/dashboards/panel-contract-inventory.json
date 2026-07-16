@@ -1954,13 +1954,13 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) + ((sum(increase(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) * 0))",
+      "formula": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) + ((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) * 0))",
       "kind": "promql",
       "panel_id": 7,
       "panel_title": "Track: Silver Validation Failures in Range",
-      "query": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) + ((sum(increase(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) * 0))",
+      "query": "round((sum(increase(bioetl_silver_validation_failures_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) + ((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__range])) or vector(0)) * 0))",
       "query_tokens": [
-        "bioetl_dq_soft_threshold_exceeded",
+        "bioetl_dq_soft_threshold_exceeded_total",
         "bioetl_silver_validation_failures_total"
       ],
       "ref_id": "A",
@@ -2027,13 +2027,13 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "sum by (severity, anomaly_type) (increase(bioetl_dq_anomaly_detected{pipeline=~\"$pipeline\"}[$__interval]))",
+      "formula": "sum by (severity, anomaly_type) (increase(bioetl_dq_anomaly_detected_total{pipeline=~\"$pipeline\"}[$__interval]))",
       "kind": "promql",
       "panel_id": 10,
       "panel_title": "Track: Anomalies Detected",
-      "query": "sum by (severity, anomaly_type) (increase(bioetl_dq_anomaly_detected{pipeline=~\"$pipeline\"}[$__interval]))",
+      "query": "sum by (severity, anomaly_type) (increase(bioetl_dq_anomaly_detected_total{pipeline=~\"$pipeline\"}[$__interval]))",
       "query_tokens": [
-        "bioetl_dq_anomaly_detected"
+        "bioetl_dq_anomaly_detected_total"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -2337,13 +2337,13 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "round((sum(increase(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[$__interval])) or vector(0)) + (sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__interval])) or vector(0)))",
+      "formula": "round((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__interval])) or vector(0)) + (sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__interval])) or vector(0)))",
       "kind": "promql",
       "panel_id": 155,
       "panel_title": "Track: DQ Threshold Events in Range Trend",
-      "query": "round((sum(increase(bioetl_dq_soft_threshold_exceeded{pipeline=~\"$pipeline\"}[$__interval])) or vector(0)) + (sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__interval])) or vector(0)))",
+      "query": "round((sum(increase(bioetl_dq_soft_threshold_exceeded_total{pipeline=~\"$pipeline\"}[$__interval])) or vector(0)) + (sum(increase(bioetl_dq_validation_failures_total{pipeline=~\"$pipeline\", severity=\"hard_fail\"}[$__interval])) or vector(0)))",
       "query_tokens": [
-        "bioetl_dq_soft_threshold_exceeded",
+        "bioetl_dq_soft_threshold_exceeded_total",
         "bioetl_dq_validation_failures_total"
       ],
       "ref_id": "A",
@@ -4152,13 +4152,13 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "round(sum by(reason) (increase(bioetl_shutdown_initiated[$__interval])) or vector(0))",
+      "formula": "round(sum by(reason) (increase(bioetl_shutdown_initiated_total[$__interval])) or vector(0))",
       "kind": "promql",
       "panel_id": 209,
       "panel_title": "Track GLOBAL Shutdown Initiated by Reason / Interval",
-      "query": "round(sum by(reason) (increase(bioetl_shutdown_initiated[$__interval])) or vector(0))",
+      "query": "round(sum by(reason) (increase(bioetl_shutdown_initiated_total[$__interval])) or vector(0))",
       "query_tokens": [
-        "bioetl_shutdown_initiated"
+        "bioetl_shutdown_initiated_total"
       ],
       "ref_id": "A",
       "runbook_urls": [],
@@ -4175,13 +4175,13 @@
       "datasource_type": "prometheus",
       "documents_backend_down": false,
       "documents_valid_empty": false,
-      "formula": "round(sum by(reason) (increase(bioetl_shutdown_completed[$__interval])) or vector(0))",
+      "formula": "round(sum by(reason) (increase(bioetl_shutdown_completed_total[$__interval])) or vector(0))",
       "kind": "promql",
       "panel_id": 210,
       "panel_title": "Track GLOBAL Shutdown Completed by Reason / Interval",
-      "query": "round(sum by(reason) (increase(bioetl_shutdown_completed[$__interval])) or vector(0))",
+      "query": "round(sum by(reason) (increase(bioetl_shutdown_completed_total[$__interval])) or vector(0))",
       "query_tokens": [
-        "bioetl_shutdown_completed"
+        "bioetl_shutdown_completed_total"
       ],
       "ref_id": "A",
       "runbook_urls": [],

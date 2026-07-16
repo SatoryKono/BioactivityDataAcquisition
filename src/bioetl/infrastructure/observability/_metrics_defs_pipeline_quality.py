@@ -26,7 +26,7 @@ STRUCTURAL_POLICY_SHADOW_COMPARISONS_TOTAL = Counter(
 )
 
 DQ_SOFT_THRESHOLD_EXCEEDED = Counter(
-    "bioetl_dq_soft_threshold_exceeded",
+    "bioetl_dq_soft_threshold_exceeded_total",
     "Total times DQ soft threshold was exceeded",
     ["pipeline"],
 )

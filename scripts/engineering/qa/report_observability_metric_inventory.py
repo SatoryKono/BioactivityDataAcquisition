@@ -194,11 +194,15 @@ _CHECK_DRIFT_KEYS: Final[tuple[str, ...]] = (
     "dead_metrics",
     "documented_without_registry",
     "rules_without_registry",
+    "dashboarded_without_emission",
+    "alerted_without_emission",
     "runtime_cardinality_review_required",
     "declared_risky_label_review_required",
     "runtime_label_contract_violations",
     "runtime_label_contract_unresolved",
     "runtime_cardinality_threshold_violations",
+    "unused_declared_metrics",
+    "unused_declared_observability_events",
 )
 _ALLOWLIST_METADATA_REQUIRED_KEYS: Final[frozenset[str]] = frozenset(
     {
@@ -2486,7 +2490,7 @@ def collect_metric_inventory(
     retired_declared_observability_events_emitted = sorted(
         set(retired_declared_observability_events) & set(emitted_observability_events)
     )
-    unused_declared_observability_events = sorted(
+    raw_unused_declared_observability_events = sorted(
         set(declared_observability_events) - set(emitted_observability_events)
     )
     emitted_observability_events_without_contract = sorted(
@@ -2504,7 +2508,16 @@ def collect_metric_inventory(
     runtime_set = direct_runtime_set | helper_runtime_set
     docs_set = set(docs_mentions)
     rules_set = set(rules_mentions)
-    registry_only_metrics = runtime_registered_set - runtime_set
+    # Prometheus client counters expose a base metric name at runtime while
+    # the registry stores the canonical ``_total`` sample name.  Treat only
+    # registered, exact suffix pairs as equivalent; do not generalize this to
+    # arbitrary names because that would hide genuine registry drift.
+    runtime_counter_aliases = {
+        f"{metric_name}_total"
+        for metric_name in runtime_set
+        if f"{metric_name}_total" in runtime_registered_set
+    }
+    registry_only_metrics = runtime_registered_set - runtime_set - runtime_counter_aliases
     runtime_without_registry = runtime_set - registered_set
     dead_metrics = registry_only_metrics - docs_set - rules_set
     documented_without_runtime = (docs_set & runtime_registered_set) - runtime_set
@@ -2515,6 +2528,37 @@ def collect_metric_inventory(
     observed_series_counts = _observed_runtime_series_counts()
     cardinality_thresholds = _load_runtime_cardinality_thresholds(repo_root)
     drift_allowlist = _load_drift_allowlist(repo_root / _DEFAULT_DRIFT_ALLOWLIST)
+    reviewed_dashboarded_without_emission = drift_allowlist.get(
+        "dashboarded_without_emission", set()
+    )
+    raw_documented_without_runtime = (docs_set & runtime_registered_set) - runtime_set
+    documented_without_runtime = sorted(
+        raw_documented_without_runtime - reviewed_dashboarded_without_emission
+    )
+    reviewed_unused_declared_metrics = drift_allowlist.get(
+        "unused_declared_metrics", set()
+    )
+    registry_only_metrics = sorted(
+        set(registry_only_metrics) - reviewed_unused_declared_metrics
+    )
+    reviewed_runtime_without_registry = drift_allowlist.get(
+        "runtime_without_registry", set()
+    )
+    runtime_without_registry = sorted(
+        set(runtime_without_registry) - reviewed_runtime_without_registry
+    )
+    reviewed_unused_declared_observability_events = drift_allowlist.get(
+        "unused_declared_observability_events", set()
+    )
+    unused_declared_observability_events = sorted(
+        set(raw_unused_declared_observability_events) - reviewed_unused_declared_observability_events
+    )
+    reviewed_alerted_without_emission = drift_allowlist.get(
+        "alerted_without_emission", set()
+    )
+    ruled_without_runtime = sorted(
+        set(ruled_without_runtime) - reviewed_alerted_without_emission
+    )
     reviewed_runtime_cardinality = drift_allowlist.get(
         "runtime_cardinality_review_required", set()
     ) | set(cardinality_thresholds)

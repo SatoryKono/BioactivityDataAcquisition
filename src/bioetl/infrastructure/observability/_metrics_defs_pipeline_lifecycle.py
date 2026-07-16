@@ -48,13 +48,13 @@ OBSERVABILITY_EVENTS_TOTAL = Counter(
 )
 
 SHUTDOWN_INITIATED = Counter(
-    "bioetl_shutdown_initiated",
+    "bioetl_shutdown_initiated_total",
     "Total shutdown initiations",
     ["reason"],
 )
 
 SHUTDOWN_COMPLETED = Counter(
-    "bioetl_shutdown_completed",
+    "bioetl_shutdown_completed_total",
     "Total shutdown completions",
     ["reason"],
 )

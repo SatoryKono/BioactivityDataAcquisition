@@ -115,6 +115,54 @@ class TestPrometheusMetrics:
                 labels={"label": "value"},
             )
 
+    def test_increment_counter_with_compatibility_alias(self, prometheus_metrics):
+        """Compatibility aliases map old metric names to new _total suffixed names."""
+        with patch.dict(
+            COUNTERS,
+            {
+                "bioetl_dq_anomaly_detected_total": MagicMock(),
+                "bioetl_dq_soft_threshold_exceeded_total": MagicMock(),
+                "bioetl_dq_baseline_updated_total": MagicMock(),
+                "bioetl_shutdown_initiated_total": MagicMock(),
+                "bioetl_shutdown_completed_total": MagicMock(),
+            },
+        ):
+            # Test old metric names are aliased to new _total names
+            prometheus_metrics.increment_counter(
+                name="bioetl_dq_anomaly_detected",
+                value=1,
+                labels={"pipeline": "test", "metric": "test", "severity": "warning", "anomaly_type": "spike"},
+            )
+            COUNTERS["bioetl_dq_anomaly_detected_total"].labels.assert_called_once()
+
+            prometheus_metrics.increment_counter(
+                name="bioetl_dq_soft_threshold_exceeded",
+                value=1,
+                labels={"pipeline": "test"},
+            )
+            COUNTERS["bioetl_dq_soft_threshold_exceeded_total"].labels.assert_called_once()
+
+            prometheus_metrics.increment_counter(
+                name="bioetl_dq_baseline_updated",
+                value=1,
+                labels={"pipeline": "test", "metric": "test"},
+            )
+            COUNTERS["bioetl_dq_baseline_updated_total"].labels.assert_called_once()
+
+            prometheus_metrics.increment_counter(
+                name="bioetl_shutdown_initiated",
+                value=1,
+                labels={"reason": "test"},
+            )
+            COUNTERS["bioetl_shutdown_initiated_total"].labels.assert_called_once()
+
+            prometheus_metrics.increment_counter(
+                name="bioetl_shutdown_completed",
+                value=1,
+                labels={"reason": "test"},
+            )
+            COUNTERS["bioetl_shutdown_completed_total"].labels.assert_called_once()
+
     def test_filter_source_metrics_normalize_source_kind_label(
         self, prometheus_metrics
     ):

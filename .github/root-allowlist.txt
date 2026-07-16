@@ -26,7 +26,6 @@ Makefile
 README.md
 mkdocs.yml
 mint.json
-pr_compliance_checklist.yaml
 package-lock.json
 package.json
 pyproject.toml

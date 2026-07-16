@@ -5,14 +5,11 @@
     "bioetl_health_check_latency_seconds": 500,
     "bioetl_pipeline_runs_total": 500
   },
-  "degraded_reasons": [],
-  "generated_at": "2026-06-29T16:17:28Z",
-  "live_observed_series": {
-    "bioetl_checkpoint_load_events_total": 0,
-    "bioetl_checkpoint_saved_at_seconds": 0,
-    "bioetl_health_check_latency_seconds": 0,
-    "bioetl_pipeline_runs_total": 0
-  },
+  "degraded_reasons": [
+    "live Prometheus review failed for: bioetl_checkpoint_load_events_total, bioetl_checkpoint_saved_at_seconds, bioetl_health_check_latency_seconds, bioetl_pipeline_runs_total"
+  ],
+  "generated_at": "2026-07-16T06:11:38Z",
+  "live_observed_series": {},
   "live_threshold_violations": [],
   "local_cardinality_fallback_allowed": false,
   "local_observed_series": {
@@ -22,12 +19,17 @@
     "bioetl_pipeline_runs_total": 0
   },
   "local_threshold_violations": [],
-  "mode": "live_review",
-  "prometheus_base_url": "http://127.0.0.1:18091",
-  "prometheus_base_url_source": "cli",
+  "mode": "live_review_unavailable",
+  "prometheus_base_url": "http://172.18.0.3:9090",
+  "prometheus_base_url_source": "env",
   "prometheus_token_env_var": "BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN",
   "prometheus_url_env_var": "BIOETL_OBSERVABILITY_PROMETHEUS_URL",
-  "query_errors": {},
+  "query_errors": {
+    "bioetl_checkpoint_load_events_total": "[Errno 1] Operation not permitted",
+    "bioetl_checkpoint_saved_at_seconds": "[Errno 1] Operation not permitted",
+    "bioetl_health_check_latency_seconds": "[Errno 1] Operation not permitted",
+    "bioetl_pipeline_runs_total": "[Errno 1] Operation not permitted"
+  },
   "review_required_metrics": [],
   "reviewed_metrics": [
     "bioetl_checkpoint_load_events_total",
@@ -37,5 +39,5 @@
   ],
   "source_command": "python -m scripts.engineering.qa.report_observability_metric_inventory --check --write-evidence reports/observability/runtime_cardinality_inventory.json --review-json-out reports/observability/runtime_cardinality_review.json --summary-out \"$GITHUB_STEP_SUMMARY\" --fail-on-degraded-live-review",
   "static_threshold_violations": [],
-  "status": "passed"
+  "status": "degraded"
 }
