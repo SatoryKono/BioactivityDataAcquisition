@@ -15,7 +15,7 @@ governance stack.
 
 **Layers** (dependency direction: domain → application → infrastructure):
 - **domain/**: Pure logic, Ports (typing.Protocol), NO I/O
-- **application/**: Orchestration, use cases  
+- **application/**: Orchestration, use cases
 - **infrastructure/**: Adapters, concrete implementations
 - **composition/**: DI wiring, ONLY place knowing all layers
 - **interfaces/**: CLI/adapters; may import domain/application/composition, but
@@ -39,7 +39,7 @@ from __future__ import annotations
 
 **Type hints:** `list[str]`, `X | None`, `X | Y`; public interfaces fully
 annotated; `Any` only as a documented narrow boundary.
-**Lint:** `mypy --strict`, `ruff`  
+**Lint:** `mypy --strict`, `ruff`
 **Coverage:** ≥85%
 
 ## Data Architecture (Medallion)
@@ -55,8 +55,8 @@ before write; Gold validation is strict and fail-closed. Silver validation is so
 only for permissible schema drift; contract validation before write is mandatory
 and must fail or quarantine invalid data.
 
-**Gold Modes:** `overwrite` (aggregates), `append` (facts), `scd2` (history)  
-**VACUUM:** Weekly, 7 days retention  
+**Gold Modes:** `overwrite` (aggregates), `append` (facts), `scd2` (history)
+**VACUUM:** Weekly, 7 days retention
 **Quarantine:** Single table, 30 days retention
 
 ## Critical Rules

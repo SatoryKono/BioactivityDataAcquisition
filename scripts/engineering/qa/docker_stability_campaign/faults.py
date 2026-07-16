@@ -102,7 +102,12 @@ def build_fault_cases() -> tuple[FaultCase, ...]:
                 ),
             ),
             (FaultOperation("probe", "main", expected="success"),),
-            (),
+            (
+                FaultOperation(
+                    "clear_pressure", "main", "bioetl", max_seconds=15.0
+                ),
+                FaultOperation("probe", "main", expected="success"),
+            ),
         ),
         FaultCase(
             "desktop_engine_restart",
@@ -270,19 +275,75 @@ class HostFaultExecutor:
             spec = self._spec(operation)
             # Keep the injected load intentionally small and time-bounded. Its purpose
             # is to exercise resource telemetry and cleanup, not breach the 80% gate.
-            program = (
-                "import multiprocessing as m,time; "
-                "buf=bytearray(16*1024*1024); "
-                "p=m.Process(target=time.sleep,args=(10,)); p.start(); "
-                "time.sleep(10); p.join(); assert len(buf)==16*1024*1024"
-            )
+            program = """import multiprocessing as m
+import os
+from pathlib import Path
+import time
+
+marker = Path('/tmp/bioetl-fault-pressure.pids')
+buf = bytearray(16 * 1024 * 1024)
+child = m.Process(target=time.sleep, args=(10,))
+child.start()
+marker.write_text(f"{os.getpid()} {child.pid}", encoding="ascii")
+try:
+    time.sleep(10)
+    child.join()
+    assert len(buf) == 16 * 1024 * 1024
+finally:
+    if child.is_alive():
+        child.terminate()
+        child.join(timeout=2)
+    marker.unlink(missing_ok=True)
+"""
             return compose_command(
                 self.runtime_origin,
                 spec,
                 (
                     "exec",
                     "-T",
-                    "--detach",
+                    str(operation.service),
+                    "python",
+                    "-c",
+                    program,
+                ),
+                timeout,
+            )
+        if operation.kind == "clear_pressure":
+            spec = self._spec(operation)
+            program = """import os
+from pathlib import Path
+import signal
+import time
+
+marker = Path('/tmp/bioetl-fault-pressure.pids')
+pids = [int(value) for value in marker.read_text(encoding='ascii').split()] if marker.exists() else []
+for pid in reversed(pids):
+    try:
+        os.kill(pid, signal.SIGTERM)
+    except ProcessLookupError:
+        pass
+deadline = time.monotonic() + 5
+while time.monotonic() < deadline:
+    alive = []
+    for pid in pids:
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            continue
+        alive.append(pid)
+    if not alive:
+        break
+    time.sleep(0.1)
+else:
+    raise SystemExit('pressure workload did not terminate')
+marker.unlink(missing_ok=True)
+"""
+            return compose_command(
+                self.runtime_origin,
+                spec,
+                (
+                    "exec",
+                    "-T",
                     str(operation.service),
                     "python",
                     "-c",
@@ -321,7 +382,13 @@ def execute_fault_case(
         raise FileExistsError(
             f"refusing to rerun an incomplete fault with retained evidence: {evidence_path}"
         )
-    deadline = time.monotonic() + case.max_seconds
+    started = time.monotonic()
+    deadline = started + case.max_seconds
+    restore_budget = min(
+        case.max_seconds * 0.4,
+        sum(operation.max_seconds for operation in case.restore),
+    )
+    operation_deadline = deadline - restore_budget
     steps: list[dict[str, Any]] = []
     failures: list[str] = []
     before = {
@@ -339,7 +406,7 @@ def execute_fault_case(
                 try:
                     result = executor.execute(
                         operation,
-                        deadline=deadline,
+                        deadline=operation_deadline,
                         case_name=case.name,
                         ordinal=ordinal,
                     )

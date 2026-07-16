@@ -18,7 +18,6 @@ NAVIGATOR_REGISTRY = ROOT / "docs/02-architecture/adr-registry.md"
 REGISTRY_INDEX = ROOT / "docs/02-architecture/adr-registry/index.md"
 REGISTRY_JSON = ROOT / "docs/02-architecture/adr-registry/registry.json"
 RULES_PATH = ROOT / "docs/00-project/RULES.md"
-REQUIREMENTS_PATH = ROOT / "docs/01-requirements/REQUIREMENTS.md"
 FILTERS_README = ROOT / "docs/filters/README.md"
 
 
@@ -47,13 +46,10 @@ def test_adr_registry_mirrors_track_latest_decision_index() -> None:
 
 def test_rules_and_requirements_do_not_publish_stale_adr_ceiling() -> None:
     rules_text = RULES_PATH.read_text(encoding="utf-8")
-    requirements_text = REQUIREMENTS_PATH.read_text(encoding="utf-8")
     decisions_index_text = DECISIONS_INDEX.read_text(encoding="utf-8")
 
     assert "[ADR-049]" in rules_text
     assert "[ADR-050]" in rules_text
-    assert "ADR registry verified through ADR-050" in requirements_text
-    assert "ADR registry verified through ADR-048" not in requirements_text
     assert "ADR-050" in decisions_index_text
 
 

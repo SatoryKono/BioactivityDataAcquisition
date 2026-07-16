@@ -56,9 +56,7 @@ def _write_gate_sources(
                 "generated_at": "2026-07-16T00:00:00+00:00",
                 "occurrence_id": observed_occurrence,
                 "semantic_gate": {"status": semantic_status},
-                "results": [
-                    {"dashboard_uid": "bioetl-dq-v2", "panel_id": 101}
-                ],
+                "results": [{"dashboard_uid": "bioetl-dq-v2", "panel_id": 101}],
             }
         ),
         encoding="utf-8",

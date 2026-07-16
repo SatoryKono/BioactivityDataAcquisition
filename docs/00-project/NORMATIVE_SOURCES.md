@@ -25,7 +25,6 @@ BioETL не использует один монолитный файл «все
 | Слой | Файл | Назначение |
 | ---- | ---- | ---------- |
 | Constitution | [RULES.md](RULES.md) | Архитектура, Medallion, DQ, composite, API/retry, determinism, observability, testing, naming, governance (RFC 2119) |
-| Requirements | [REQUIREMENTS.md](../01-requirements/REQUIREMENTS.md) | Тестируемые `REQ-*` требования, синхронизированные с RULES |
 | Decisions | [decisions/](../02-architecture/decisions/) | Accepted ADR — точечные архитектурные решения |
 
 Дополнительные индексы (не заменяют RULES):
@@ -45,17 +44,17 @@ mirrors в `docs/00-project/ai/**` остаются navigation/guidance surfaces
 
 ## Что читать по теме
 
-| Тема | RULES | REQUIREMENTS | ADR |
-| ---- | ----- | ------------ | --- |
-| Hexagonal / layer boundaries | §1 | REQ-ARCH-* | ADR-005, ADR-048 |
-| Medallion Bronze/Silver/Gold | §2 | REQ-DATA-* | ADR-002, ADR-014, ADR-018 |
-| Composite pipelines | §2.9 | REQ-COMP-* | ADR-026 |
-| DQ contracts | §2.8 | REQ-DQ-* | ADR-027, ADR-045 |
-| Control-plane / replay | §2.4, §6.1 | REQ-CTRL-* | ADR-044, ADR-046, ADR-047 |
-| HTTP client / retry / rate limit | §4.1.1, §5.1 | REQ-API-* | ADR-032 |
-| Observability | §3.2 | REQ-OBS-* | ADR-017, ADR-019 |
-| Testing | §4.2 | REQ-TEST-* | ADR-042 |
-| Naming / packaging | §4.4, governance | REQ-NAMING-* | ADR-024, ADR-041 |
+| Тема | RULES | ADR |
+| ---- | ----- | --- |
+| Hexagonal / layer boundaries | §1 | ADR-005, ADR-048 |
+| Medallion Bronze/Silver/Gold | §2 | ADR-002, ADR-014, ADR-018 |
+| Composite pipelines | §2.9 | ADR-026 |
+| DQ contracts | §2.8 | ADR-027, ADR-045 |
+| Control-plane / replay | §2.4, §6.1 | ADR-044, ADR-046, ADR-047 |
+| HTTP client / retry / rate limit | §4.1.1, §5.1 | ADR-032 |
+| Observability | §3.2 | ADR-017, ADR-019 |
+| Testing | §4.2 | ADR-042 |
+| Naming / packaging | §4.4, governance | ADR-024, ADR-041 |
 
 ## Version policy
 

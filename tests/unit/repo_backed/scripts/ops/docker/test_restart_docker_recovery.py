@@ -148,7 +148,9 @@ def _run(
             ]
         )
     started = time.monotonic()
-    result = subprocess.run(command, env=env, text=True, capture_output=True, timeout=15)
+    result = subprocess.run(
+        command, env=env, text=True, capture_output=True, timeout=15
+    )
     elapsed = time.monotonic() - started
     return result, json.loads(report.read_text(encoding="utf-8-sig")), elapsed
 
@@ -214,9 +216,7 @@ def test_report_recursively_redacts_observations_and_classifications(
     assert diagnostics["bind_path_translation"]["classification"] == (
         "translated_source_observed"
     )
-    assert diagnostics["data_capacity"]["classification"] == (
-        "reserve_at_least_4_gib"
-    )
+    assert diagnostics["data_capacity"]["classification"] == ("reserve_at_least_4_gib")
 
 
 def test_last_resort_requires_switch_and_should_process_confirmation(
@@ -232,9 +232,11 @@ def test_last_resort_requires_switch_and_should_process_confirmation(
     assert payload["last_resort_token_valid"] is True
     assert "last_resort_requested" in payload["actions"]
     source = SCRIPT.read_text(encoding="utf-8")
-    assert source.index("if ($ConfirmLastResort)") < source.index(
-        "$PSCmdlet.ShouldProcess"
-    ) < source.index("Stop-Process -Force")
+    assert (
+        source.index("if ($ConfirmLastResort)")
+        < source.index("$PSCmdlet.ShouldProcess")
+        < source.index("Stop-Process -Force")
+    )
 
 
 def test_last_resort_rejects_confirm_false_bypass() -> None:

@@ -101,9 +101,7 @@ def test_audit_cycle_gate_output_writes_review_evidence(tmp_path: Path) -> None:
                 "generated_at": "2026-07-16T00:00:00+00:00",
                 "occurrence_id": config.occurrence_id,
                 "terminal_state_validation": {"status": "ok"},
-                "dashboards": [
-                    {"uid": "bioetl-dq-v2", "renderStatus": "rendered"}
-                ],
+                "dashboards": [{"uid": "bioetl-dq-v2", "renderStatus": "rendered"}],
             }
         ),
         encoding="utf-8",

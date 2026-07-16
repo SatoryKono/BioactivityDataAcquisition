@@ -545,9 +545,7 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         == "service_started"
     )
     for service_name in ("loki", "promtail", "tempo"):
-        assert monitoring["services"][service_name]["healthcheck"] == {
-            "disable": True
-        }
+        assert monitoring["services"][service_name]["healthcheck"] == {"disable": True}
     assert renderer_health == [
         "CMD",
         "grafana-image-renderer",
@@ -562,7 +560,9 @@ def test_readiness_and_build_tools_fail_closed() -> None:
     assert "uv==0.11.26" in operations_dockerfile
     assert "sys.exit(0)" not in dockerfile
     assert "/health/ready" in dockerfile
-    assert 'CMD ["health", "server", "--host", "0.0.0.0", "--port", "8000"]' in dockerfile
+    assert (
+        'CMD ["health", "server", "--host", "0.0.0.0", "--port", "8000"]' in dockerfile
+    )
     assert main["services"]["bioetl"]["command"][-1] == "8081"
     assert main["services"]["bioetl"]["ports"] == ["127.0.0.1:8081:8081"]
 
@@ -606,7 +606,9 @@ def test_lifecycle_entrypoints_delegate_to_fail_closed_runtime_manager() -> None
         assert "Start-Sleep" not in adapter
         assert "docker compose" not in adapter
 
-    for relative in tuple(ROOT / "scripts" / name for name in ("startup.ps1", "shutdown.ps1")):
+    for relative in tuple(
+        ROOT / "scripts" / name for name in ("startup.ps1", "shutdown.ps1")
+    ):
         adapter = relative.read_text(encoding="utf-8")
         assert "$ProjectDir = Split-Path -Parent $PSScriptRoot" in adapter
 
