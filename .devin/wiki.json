@@ -29,9 +29,9 @@
       "purpose": "Covers RULES.md, ADR index, documentation governance, file-policy, and the project's contribution guidelines. Explains how architectural decisions are recorded and enforced.",
       "parent": "BioETL Overview",
       "page_notes": [
-        {
-          "content": "Canonical anchors: docs/00-project/RULES.md, docs/01-requirements/REQUIREMENTS.md, docs/02-architecture/decisions/, docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md."
-        }
+        "Canonical anchors: docs/00-project/RULES.md, docs/01-requirements/REQUIREMENTS.md, docs/02-architecture/decisions/, docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md.",
+        "AI rules surfaces: docs/00-project/ai/rules/cursor/*.mdc (SSOT for Cursor/Windsurf guidance), docs/00-project/ai/rules/windsurf/ (Cascade mirror), docs/00-project/ai/rules/bioetl-ai-rules.md (universal condensed). Qodo index: docs/00-project/ai/rules/cursor/07-qodo-enforcement.mdc (66 IDs, synced 2026-07-16); evidence reports/quality/qodo-rules-extract-2026-07-16.md.",
+        "Devin enforcement workflows: .devin/workflows/review.md, post-change.md, pre-commit.md, qodo-sync.md — keep aligned with Cascade workflows under docs/00-project/ai/rules/windsurf/workflows/."
       ]
     },
     {
@@ -69,12 +69,9 @@
       "purpose": "Explains how AI runtime surfaces stay source-first: AGENTS.md, runtime sources in .codex and .gemini, the canonical memory workflow, MCP governance, and DeepWiki as a derived navigation layer. Links to the authoritative memory and validation docs.",
       "parent": "Project Governance and Rules",
       "page_notes": [
-        {
-          "content": "Canonical anchors: AGENTS.md, docs/00-project/ai/memory/README.md, docs/00-project/ai/memory/agent-memory.md, docs/00-project/ai/agents/guides/MEMORY_USAGE.md, src/memory/DAILY_WORKFLOW.md, docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md, docs/00-project/ai/mcp-governance.md, .codex/settings.json, .gemini/settings.json."
-        },
-        {
-          "content": "DeepWiki is derived navigation only; canonical truth remains in docs, configs, code, tests, and accepted ADRs."
-        }
+        "Canonical anchors: AGENTS.md, docs/00-project/ai/memory/README.md, docs/00-project/ai/memory/agent-memory.md, docs/00-project/ai/agents/guides/MEMORY_USAGE.md, src/memory/DAILY_WORKFLOW.md, docs/00-project/ai/agents/policy/AI_RUNTIME_MIRROR_OWNERSHIP.md, docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md.",
+        "DeepWiki is derived navigation only; canonical truth remains in docs, configs, code, tests, and accepted ADRs.",
+        "Cursor/Windsurf rules SSOT: docs/00-project/ai/rules/cursor/; deploy via scripts/ai/sync_cursor_rules.py --deploy and scripts/ai/sync_windsurf_rules.py. Devin skills parity: .devin/skills/** vs .codex/skills/** per skills-mirror-contract.json."
       ]
     },
     {
@@ -1425,9 +1422,8 @@
       "parent": "File Policy Enforcement",
       "purpose": "Documents which surfaces are treated as secret-bearing and how the workflow keeps them out of normal edits.",
       "page_notes": [
-        {
-          "content": "Coverage: secret-bearing file policy, protected surfaces, and post-change validation expectations. Canonical anchors: docs/00-project/RULES.md, docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md, .gitignore."
-        }
+        "Coverage: secret-bearing file policy, protected surfaces, and post-change validation expectations. Canonical anchors: docs/00-project/RULES.md, docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md, docs/00-project/ai/rules/cursor/05-agent-workflow.mdc, 08-operations.mdc.",
+        "Qodo themes: no secrets in code/docs/tests/logs/tracked configs/** YAML; do not weaken .env gitignore/COPY protections; .env edits require explicit per-task approval. Evidence: reports/quality/qodo-rules-extract-2026-07-16.md."
       ]
     },
     {

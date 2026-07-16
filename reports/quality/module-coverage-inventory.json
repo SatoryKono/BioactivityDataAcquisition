@@ -18613,7 +18613,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.observability.tracing",
       "path": "src/bioetl/infrastructure/observability/tracing.py",
-      "source_lines": 324
+      "source_lines": 354
     },
     {
       "coverage_percent": 98.31,
@@ -40875,7 +40875,7 @@
       "missing_lines": 0,
       "module": "bioetl.infrastructure.observability.tracing",
       "path": "src/bioetl/infrastructure/observability/tracing.py",
-      "source_lines": 324
+      "source_lines": 354
     },
     {
       "coverage_percent": 98.31,
@@ -44530,7 +44530,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-  "source_tree_sha256": "91ba385686c64097f7819427c9d092c8ee41e74108044b09ff8794e260dc16c9",
+  "source_tree_sha256": "605fd8215be54afd6f4ae29ae8f6572ead1d691ec069cdd095abe9cdd2505de5",
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
@@ -44782,6 +44782,7 @@
       }
     },
     "source_module_count": 2226,
+    "source_tree_sha256": "605fd8215be54afd6f4ae29ae8f6572ead1d691ec069cdd095abe9cdd2505de5",
     "status_counts": {
       "coverage_xml_missing": 0,
       "fully_covered": 1398,

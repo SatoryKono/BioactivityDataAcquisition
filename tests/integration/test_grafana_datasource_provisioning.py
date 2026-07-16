@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -147,6 +148,55 @@ def test_audit_profile_mounts_explicit_roots_read_only_and_uses_bounded_loki_job
     assert services["grafana"]["depends_on"]["quarantine-explorer-audit"] == {
         "condition": "service_healthy"
     }
+
+
+def test_default_runtime_log_sink_reaches_canonical_loki_dashboard_job() -> None:
+    compose = _load_monitoring_compose()
+    promtail_service = compose["services"]["promtail"]
+    assert "./reports/logs:/workspace-report-logs:ro" in promtail_service["volumes"]
+
+    logging_source = Path(
+        "src/bioetl/infrastructure/observability/logging_config.py"
+    ).read_text(encoding="utf-8")
+    assert '_DEFAULT_LOG_FILE = Path("reports") / "logs" / "bioetl.log"' in logging_source
+
+    promtail = yaml.safe_load(
+        Path("grafana/promtail-config.yml").read_text(encoding="utf-8")
+    )
+    runtime_jobs = [
+        job
+        for job in promtail["scrape_configs"]
+        if job["job_name"] == "bioetl-runtime-reports"
+    ]
+    assert len(runtime_jobs) == 1
+    assert runtime_jobs[0]["static_configs"] == [
+        {
+            "targets": ["localhost"],
+            "labels": {
+                "job": "bioetl",
+                "__path__": "/workspace-report-logs/*.log",
+            },
+        }
+    ]
+
+    dashboard = json.loads(
+        Path("grafana/dashboards/bioetl-runtime.json").read_text(encoding="utf-8")
+    )
+    pending = list(dashboard["panels"])
+    panels: dict[int, dict[str, object]] = {}
+    while pending:
+        panel = pending.pop()
+        panels[int(panel["id"])] = panel
+        nested = panel.get("panels")
+        if isinstance(nested, list):
+            pending.extend(nested)
+    for panel_id in (250, 251, 257):
+        expressions = [
+            str(target.get("expr", "")) for target in panels[panel_id]["targets"]
+        ]
+        assert expressions
+        assert all('{job="bioetl"}' in expression for expression in expressions)
+        assert all("bioetl-reports" not in expression for expression in expressions)
 
 
 def test_monitoring_images_are_pinned_and_legacy_pushgateway_datasource_is_inert() -> (

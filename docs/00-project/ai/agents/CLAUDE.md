@@ -6,7 +6,7 @@ Deprecated compatibility path.
 - Runtime-oriented docs: [../memory/agent-memory.md](../memory/agent-memory.md)
 - Dashboard extension playbook (LLM): [../../../03-guides/dashboards/dashboard-extension-llm.md](../../../03-guides/dashboards/dashboard-extension-llm.md)
 
-*Synchronized with RULES.md v6.1.4 (2026-06-25)*
+*Synchronized with RULES.md v6.1.5 (2026-07-16)*
 
 ## Env File Guardrail
 

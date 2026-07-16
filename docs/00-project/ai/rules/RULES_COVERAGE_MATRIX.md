@@ -1,17 +1,17 @@
 ______________________________________________________________________
 
-Version: 1.1.0
+Version: 1.1.1
 Status: internal-published
 Class: internal
 Owner: BioETL Team
-Last verified: '2026-07-04'
-Aligned with: consolidated AI rules digest 2.0.0 (RULES v6.1.4, REQUIREMENTS v1.10, ADR-050)
+Last verified: '2026-07-16'
+Aligned with: consolidated AI rules digest 2.0.0 (RULES v6.1.5, REQUIREMENTS v1.12, 168 requirements, ADR-050); Qodo extract 66 rules (2026-07-16)
 
 ______________________________________________________________________
 
 # Cursor Rules Coverage Matrix
 
-Карта покрытия `docs/00-project/RULES.md` v6.1.4 тематическими `.mdc` правилами.
+Карта покрытия `docs/00-project/RULES.md` v6.1.5 тематическими `.mdc` правилами.
 Канон — `RULES.md` + `REQUIREMENTS.md` + ADR; правила — condensed guidance.
 
 ## Legend
@@ -44,6 +44,7 @@ ______________________________________________________________________
 | §4.2 | Testing policy | REQ-TEST-* | `03-testing.mdc` | covered |
 | §4.3 | Determinism | REQ-CTRL-* | `01-data-quality.mdc`, `00-bioetl-core-governance.mdc` | covered |
 | §4.4 | Python standards | REQ-NAMING-* | `02-code-style.mdc` | covered |
+| §4.5 | Qodo-reconciled change-set gates | REQ-GOV-* | `07-qodo-enforcement.mdc`, thematic `00`–`11` rules | covered |
 | §5.1 | Rate limiting | REQ-RATE-* | `04-patterns.mdc`, `08-operations.mdc` | covered |
 | §5.2 | Secrets | REQ-OPS-* | `08-operations.mdc`, `05-agent-workflow.mdc` | covered |
 | §5.3 | Graceful shutdown / checkpoints | REQ-OPS-* | `08-operations.mdc` | covered |
@@ -75,6 +76,8 @@ ______________________________________________________________________
 | Canonical | `docs/00-project/ai/rules/cursor/*.mdc` | edit here |
 | Cursor IDE | `.cursor/rules/*.mdc` | `scripts/ai/sync_cursor_rules.py --deploy` |
 | Windsurf | `docs/00-project/ai/rules/windsurf/rules/*.md` | `scripts/ai/sync_windsurf_rules.py` |
+| Devin workflows | `.devin/workflows/*.md` | manual parity with Windsurf workflows |
+| Devin DeepWiki | `.devin/wiki.json` | navigation notes only |
 
 ## Verification commands
 
@@ -88,5 +91,8 @@ uv run python -m scripts.docs check-drift --runtime-mirrors --freshness
 
 | Date | Change |
 | ---- | ------ |
+| 2026-07-16 | Align matrix with RULES v6.1.5 / REQUIREMENTS v1.12 and add explicit §4.5 / REQ-GOV-* coverage |
+| 2026-07-16 | Sync Windsurf/Devin workflows + DeepWiki notes to Qodo extract (66 IDs) |
+| 2026-07-16 | Sync Qodo extract (66 IDs) into `07-qodo-enforcement` + thematic gap-fill (`02`–`06`, `08`, `11`, architecture) |
 | 2026-07-04 | Sync with consolidated rules digest 2.0.0; expanded 00–04, 08–11; improved coverage matrix |
 | 2026-07-04 | Initial matrix; added rules `08`–`11`; closed gaps §2.4, §3.1–3.2, §5, §7–8 |

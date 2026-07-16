@@ -32,13 +32,18 @@ from __future__ import annotations
 import os
 from collections.abc import Mapping
 from contextlib import suppress
+from importlib import import_module
+from importlib.metadata import PackageNotFoundError, version
 from typing import Any, Protocol, cast
 from urllib.parse import urlparse
 
 from bioetl.domain.ports.noop import NoOpTracing
 
-# Store OTLP exporter class if available (for runtime use)
-# This avoids reassigning an imported type to None, which mypy strict rejects
+_OTLP_EXPORTER_MODULE = "opentelemetry.exporter.otlp.proto.grpc.trace_exporter"
+_OTLP_EXPORTER_DISTRIBUTION = "opentelemetry-exporter-otlp"
+
+# Cache the optional exporter only after tracing is actually initialized. Importing
+# it eagerly loads grpc._cython.cygrpc, which can block module import on Windows.
 _OtlpExporterClass: (
     type[
         Any  # Any: OTel exporter class resolved at runtime
@@ -46,22 +51,47 @@ _OtlpExporterClass: (
     | None
 ) = None
 
+
+def _otlp_exporter_is_installed() -> bool:
+    """Return whether the optional OTLP exporter distribution is installed.
+
+    Uses package metadata instead of ``find_spec``/import so module import does
+    not load the native gRPC extension.
+    """
+    try:
+        version(_OTLP_EXPORTER_DISTRIBUTION)
+    except PackageNotFoundError:
+        return False
+    return True
+
+
+def _load_otlp_exporter_class() -> type[Any] | None:
+    """Load and cache the optional OTLP exporter on first runtime use."""
+    global OTLP_AVAILABLE, _OtlpExporterClass
+
+    if not OTLP_AVAILABLE:
+        return None
+    if _OtlpExporterClass is not None:
+        return _OtlpExporterClass
+
+    try:
+        exporter_module = import_module(_OTLP_EXPORTER_MODULE)
+    except ImportError:
+        # Optional dependency missing or incomplete; other exceptions must surface.
+        OTLP_AVAILABLE = False
+        return None
+
+    _OtlpExporterClass = cast(type[Any], exporter_module.OTLPSpanExporter)
+    return _OtlpExporterClass
+
+
 try:
     from opentelemetry.sdk.resources import Resource
     from opentelemetry.sdk.trace import TracerProvider
     from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 
-    try:
-        from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import (
-            OTLPSpanExporter,
-        )
-
-        _OtlpExporterClass = OTLPSpanExporter
-        OTLP_AVAILABLE = True
-    except ImportError:
-        OTLP_AVAILABLE = False
-
     OTEL_AVAILABLE = True
+    OTLP_AVAILABLE = _otlp_exporter_is_installed()
 except ImportError:
     OTEL_AVAILABLE = False
     OTLP_AVAILABLE = False
@@ -221,10 +251,10 @@ def _get_otlp_insecure_setting() -> str | None:
 def _build_telemetry_exporter() -> (
     Any  # Any: exporter type depends on runtime-selected telemetry backend.
 ):
-    # Any: exporter implementation is selected dynamically between console and OTLP classes.
     # Any: exporter class is selected dynamically between console and OTLP implementations.
     """Create the most appropriate tracing exporter for the current runtime."""
-    if not OTLP_AVAILABLE or _OtlpExporterClass is None:
+    exporter_class = _load_otlp_exporter_class()
+    if exporter_class is None:
         return ConsoleSpanExporter()
 
     exporter_kwargs: dict[str, str | bool] = {}
@@ -239,7 +269,7 @@ def _build_telemetry_exporter() -> (
     elif insecure_override is not None:
         exporter_kwargs["insecure"] = _parse_bool_env(insecure_override)
 
-    return _OtlpExporterClass(**exporter_kwargs)
+    return exporter_class(**exporter_kwargs)
 
 
 def _resolve_service_name(default_service_name: str) -> str:

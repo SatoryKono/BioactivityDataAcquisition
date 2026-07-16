@@ -15,7 +15,7 @@ ______________________________________________________________________
 
 ## Purpose
 
-This page is the canonical published inventory of the **37** live GitHub Actions
+This page is the canonical published inventory of the **38** live GitHub Actions
 workflows shipped under `.github/workflows/`.
 
 Use it when you need to answer:
@@ -79,6 +79,7 @@ Use it when you need to answer:
 
 | File | Workflow name | Triggers | Primary purpose |
 | --- | --- | --- | --- |
+| `dashboard-render-host.yml` | `Dashboard render release evidence (host-only)` | `workflow_dispatch` | Dashboard rendering and release evidence generation on self-hosted runner |
 | `docker.yml` | `Docker Build & Compose Validation` | `push`, `pull_request` | Optional helper-image and compose validation |
 | `labeler.yml` | `Labeler` | `pull_request_target` | Applies repository labels to PRs |
 | `release.yml` | _(unnamed in YAML)_ | `release`, `workflow_dispatch` | Build, publish, and release-asset workflow |

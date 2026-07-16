@@ -284,7 +284,7 @@ ______________________________________________________________________
 
 - **Bronze**: JSONL, append-only
 - **Silver**: Delta Lake, merge/upsert по `content-hash`
-- **Gold**: Delta/Parquet, overwrite/append
+- **Gold**: Delta Lake, overwrite/append
 
 ### 4.1. Операционные Политики (CRITICAL)
 

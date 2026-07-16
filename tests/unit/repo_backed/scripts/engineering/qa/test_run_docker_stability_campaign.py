@@ -1,352 +1,416 @@
 from __future__ import annotations
 
+import argparse
+import json
 import subprocess
 from pathlib import Path
-from typing import Any
 
 import pytest
 
-from scripts.engineering.qa import run_docker_stability_campaign as campaign
+from scripts.engineering.qa.docker_stability_campaign import commands, faults, model
+from scripts.engineering.qa.docker_stability_campaign import runner as campaign
+from scripts.engineering.qa.docker_stability_campaign import promotion
 
 pytestmark = pytest.mark.repo_backed
 
 
-@pytest.fixture
-def release_contract() -> dict[str, Any]:
-    return {
+def _passing_state() -> dict[str, object]:
+    state = model.new_state(stack="main", project="bioetl-main", cycles=100, soak_hours=72)
+    state.update(
+        completed_cycles=100,
+        soak_observed_seconds=72 * 3600,
+        engine_recovery_trials=100,
+        engine_recovery_successes=99,
+        probe_samples=1,
+        docker_vm_min_free_bytes=4 * 1024**3,
+        fault_cases={name: {"passed": True} for name in model.FAULT_CASE_NAMES},
+    )
+    return state
+
+
+def test_release_gates_cannot_pass_partial_or_unsigned_campaign() -> None:
+    state = _passing_state()
+    state.update(completed_cycles=99, soak_observed_seconds=72 * 3600 - 1)
+
+    gates = model.release_gates(state, signature_exists=False)
+
+    assert gates["cycles_complete"] is False
+    assert gates["soak_complete"] is False
+    assert gates["detached_signature_present"] is False
+
+
+def test_release_gates_require_complete_fault_matrix_and_vm_reserve() -> None:
+    state = _passing_state()
+    state["fault_cases"] = {}
+    state["docker_vm_min_free_bytes"] = 4 * 1024**3 - 1
+
+    gates = model.release_gates(state, signature_exists=True)
+
+    assert gates["fault_matrix_complete"] is False
+    assert gates["fault_matrix_clean"] is False
+    assert gates["docker_vm_reserve_at_least_4_gib"] is False
+
+
+def test_release_gates_allow_one_resolved_recovery_failure() -> None:
+    gates = model.release_gates(_passing_state(), signature_exists=True)
+
+    assert gates["engine_recovery_99_of_100"] is True
+    assert all(gates.values())
+
+
+def test_subprocess_timeout_is_bounded_evidence(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    def timeout(*_args: object, **_kwargs: object) -> None:
+        raise subprocess.TimeoutExpired(["docker", "desktop", "restart"], 1)
+
+    monkeypatch.setattr(commands.subprocess, "run", timeout)
+
+    result = commands.run_command(
+        ["docker", "desktop", "restart"], 1, cwd=tmp_path
+    )
+
+    assert result["returncode"] == 124
+    assert result["timed_out"] is True
+    assert "timed out" in result["stderr"]
+
+
+def test_command_evidence_redacts_split_secret_value(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(
+        commands.subprocess,
+        "run",
+        lambda *_args, **_kwargs: subprocess.CompletedProcess(
+            ["tool"], 1, stdout="", stderr="--token ghp_secretvalue12345"
+        ),
+    )
+
+    result = commands.run_command(
+        ["tool", "--password", "do-not-store"], 1, cwd=tmp_path
+    )
+
+    assert result["command"][-1] == "<redacted>"
+    assert "ghp_" not in result["stderr"]
+
+
+@pytest.mark.parametrize(
+    ("result", "expected", "passed"),
+    [
+        ({"returncode": 0}, "success", True),
+        ({"returncode": 2, "primary_cause": "service_unready"}, "cause:service_unready", True),
+        ({"returncode": 2, "primary_cause": "unknown"}, "cause:service_unready", False),
+        ({"returncode": 2, "preflight_findings": ["HOST_PORT_COLLISION"]}, "finding:HOST_PORT_COLLISION", True),
+        ({"returncode": 2}, "finding:HOST_PORT_COLLISION", False),
+        ({"returncode": -15, "interrupted": True}, "interrupted", True),
+        ({"returncode": 1}, "interrupted", False),
+    ],
+)
+def test_fault_outcomes_are_exact(
+    result: dict[str, object], expected: str, passed: bool
+) -> None:
+    assert faults.operation_passed(result, expected) is passed
+
+
+def test_fault_matrix_covers_every_required_case_once() -> None:
+    cases = faults.build_fault_cases()
+
+    assert tuple(case.name for case in cases) == model.FAULT_CASE_NAMES
+    assert all(case.max_seconds <= 180 for case in cases)
+    assert all(operation.expected for case in cases for operation in case.observe)
+
+
+class _FakeFaultExecutor:
+    def __init__(self, tmp_path: Path, *, fail_apply: bool = False) -> None:
+        self.runtime_origin = tmp_path
+        self.specs = {
+            "main": model.StackSpec("main", "bioetl-main", "", ("bioetl",)),
+            "monitoring": model.StackSpec(
+                "monitoring", "bioetl-monitoring", "", ("prometheus",)
+            ),
+        }
+        self.fail_apply = fail_apply
+        self.closed = False
+
+    def execute(
+        self,
+        operation: model.FaultOperation,
+        **_kwargs: object,
+    ) -> dict[str, object]:
+        if self.fail_apply and operation.kind == "kill_service":
+            return {"returncode": 1}
+        if operation.expected.startswith("cause:"):
+            return {
+                "returncode": 2,
+                "primary_cause": operation.expected.partition(":")[2],
+            }
+        if operation.expected.startswith("finding:"):
+            return {
+                "returncode": 2,
+                "preflight_findings": [operation.expected.partition(":")[2]],
+            }
+        if operation.expected == "interrupted":
+            return {"returncode": -15, "interrupted": True}
+        return {"returncode": 0}
+
+    def close(self) -> None:
+        self.closed = True
+
+
+@pytest.mark.parametrize("case_name", model.FAULT_CASE_NAMES)
+def test_each_fault_case_is_restored_and_individually_evidenced(
+    case_name: str, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(faults, "volume_ids", lambda *_args, **_kwargs: {"data"})
+    case = next(item for item in faults.build_fault_cases() if item.name == case_name)
+    executor = _FakeFaultExecutor(tmp_path)
+    state = model.new_state(
+        bundle=tuple(executor.specs.values()), cycles=100, soak_hours=72
+    )
+    evidence = tmp_path / "raw"
+
+    assert faults.execute_fault_case(
+        case, executor, state, tmp_path / "state.json", evidence
+    )
+
+    report = model.load_json(evidence / "faults" / case_name / "case.json")
+    assert report["passed"] is True
+    assert report["volume_ids_before"] == report["volume_ids_after"]
+    assert executor.closed is True
+    assert state["fault_cases"][case_name]["passed"] is True
+
+
+def test_failed_fault_emits_one_incident_and_evidence_cannot_be_replaced(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(faults, "volume_ids", lambda *_args, **_kwargs: {"data"})
+    case = faults.build_fault_cases()[0]
+    executor = _FakeFaultExecutor(tmp_path, fail_apply=True)
+    state = model.new_state(
+        bundle=tuple(executor.specs.values()), cycles=100, soak_hours=72
+    )
+    evidence = tmp_path / "raw"
+
+    assert not faults.execute_fault_case(
+        case, executor, state, tmp_path / "state.json", evidence
+    )
+    assert state["incident_ids"] == [f"fault-{case.name}"]
+
+    with pytest.raises(FileExistsError):
+        faults.execute_fault_case(
+            case,
+            _FakeFaultExecutor(tmp_path, fail_apply=True),
+            state,
+            tmp_path / "state.json",
+            evidence,
+        )
+
+
+def test_recursive_redaction_covers_nested_credentials_and_uri_userinfo() -> None:
+    protected = model.redact(
+        {
+            "credential": "value",
+            "nested": [
+                "Authorization: bearer-value",
+                "https://user:pass@example.test",
+                "ghp_abcdefghijklmnopqrstuvwxyz123456",
+            ],
+        }
+    )
+
+    assert protected["credential"] == "<redacted>"
+    assert "bearer-value" not in json.dumps(protected)
+    assert "user:pass" not in json.dumps(protected)
+    assert "ghp_" not in json.dumps(protected)
+
+
+def test_resume_evidence_rejects_changed_or_unindexed_files(tmp_path: Path) -> None:
+    evidence = tmp_path / "evidence"
+    report = evidence / "cycle.json"
+    state: dict[str, object] = {"evidence_sha256": {}}
+    model.atomic_json(report, {"ok": True})
+    model.remember_evidence(state, report, evidence)
+    model.validate_evidence_index(state, evidence)
+
+    model.atomic_json(report, {"ok": False})
+    with pytest.raises(ValueError, match="changed"):
+        model.validate_evidence_index(state, evidence)
+
+    model.atomic_json(report, {"ok": True})
+    model.atomic_json(evidence / "unindexed.json", {"ok": True})
+    with pytest.raises(ValueError, match="set differs"):
+        model.validate_evidence_index(state, evidence)
+
+
+def test_new_evidence_refuses_replacement(tmp_path: Path) -> None:
+    evidence = tmp_path / "immutable.json"
+    model.atomic_json(evidence, {"generation": 1}, replace=False)
+
+    with pytest.raises(FileExistsError):
+        model.atomic_json(evidence, {"generation": 2}, replace=False)
+
+
+@pytest.mark.parametrize(
+    ("path", "kind"),
+    [
+        ("/home/fedor/runtime", "linux"),
+        ("/mnt/e/repository", "mnt"),
+        ("/tmp/runtime", "tmp"),
+        (r"C:\\repo", "windows"),
+        ("relative/path", "relative"),
+    ],
+)
+def test_runtime_origin_classification(path: str, kind: str) -> None:
+    assert model.origin_kind(path) == kind
+
+
+def test_compose_origins_require_both_projects_inside_linux_mirror() -> None:
+    runtime = Path("/home/fedor/.local/share/bioetl-runtime/test-origin")
+    bundle = (
+        model.StackSpec("main", "bioetl-main", "docker-compose.yml", ("bioetl",)),
+        model.StackSpec(
+            "monitoring",
+            "bioetl-monitoring",
+            "docker-compose.monitoring.yml",
+            ("prometheus",),
+        ),
+    )
+    rows = [
+        {"Name": "bioetl-main", "ConfigFiles": str(runtime / "docker-compose.yml")}
+    ]
+
+    findings = model.compose_origin_findings(rows, bundle, runtime)
+
+    assert findings == ["bioetl-monitoring: project not running"]
+
+
+def test_release_bundle_pins_both_projects_and_protected_volume_names() -> None:
+    contract = {
         "stacks": {
             "main": {
                 "project_name": "bioetl-main",
                 "compose_file": "docker-compose.yml",
                 "required_services": ["bioetl"],
+                "migration": {"volume_map": {}},
             },
             "monitoring": {
                 "project_name": "bioetl-monitoring",
                 "compose_file": "docker-compose.monitoring.yml",
-                "required_services": ["prometheus", "grafana"],
+                "required_services": ["prometheus"],
+                "migration": {
+                    "volume_map": {
+                        "legacy-prometheus": "bioetl-monitoring-prometheus"
+                    }
+                },
             },
-        },
-        "host_ports": {8081: {"stack": "main", "service": "bioetl"}},
+        }
     }
 
+    bundle = model.release_bundle(contract)
 
-def test_release_bundle_is_explicit_and_contains_both_projects(
-    release_contract: dict[str, Any],
-) -> None:
-    bundle = campaign._release_bundle(release_contract)
-
-    assert [(spec.stack, spec.project) for spec in bundle] == [
+    assert [(item.stack, item.project) for item in bundle] == [
         ("main", "bioetl-main"),
         ("monitoring", "bioetl-monitoring"),
     ]
+    assert bundle[1].protected_volumes == (
+        "bioetl-monitoring-prometheus",
+        "legacy-prometheus",
+    )
 
 
-@pytest.mark.parametrize(
-    ("origin", "kind"),
-    [
-        (r"C:\\repo\\compose.yml", "windows"),
-        ("/mnt/e/repo/docker-compose.yml", "mnt"),
-        ("/tmp/runtime/docker-compose.yml", "tmp"),
-        ("/home/operator/runtime/docker-compose.yml", "linux"),
-    ],
-)
-def test_runtime_origin_classification_refuses_noncanonical_locations(
-    origin: str, kind: str
-) -> None:
-    assert campaign._origin_kind(origin) == kind
+def test_validate_args_refuses_reduced_thresholds() -> None:
+    args = argparse.Namespace(
+        execute=True,
+        cycles=99,
+        soak_hours=72,
+        engine_recovery_trials=100,
+        soak_sample_seconds=60,
+        confirm_host_disruption=campaign.CONFIRM_TOKEN,
+        signing_key="key",
+        signing_fingerprint="A" * 40,
+    )
+
+    with pytest.raises(ValueError, match="cannot be reduced"):
+        campaign.validate_args(args)
 
 
-def test_runtime_mirror_does_not_require_git_metadata(
+def test_validate_args_requires_exact_disruption_token_and_full_fingerprint() -> None:
+    args = argparse.Namespace(
+        execute=True,
+        cycles=100,
+        soak_hours=72,
+        engine_recovery_trials=100,
+        soak_sample_seconds=60,
+        confirm_host_disruption="yes",
+        signing_key="key",
+        signing_fingerprint="ABCD",
+    )
+    with pytest.raises(ValueError, match="exact scheduling token"):
+        campaign.validate_args(args)
+
+    args.confirm_host_disruption = campaign.CONFIRM_TOKEN
+    with pytest.raises(ValueError, match="full hexadecimal"):
+        campaign.validate_args(args)
+
+
+def test_secret_signing_identity_requires_exact_full_fingerprint(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    monkeypatch.setattr(campaign, "_origin_kind", lambda _path: "linux")
-
-    assert campaign._canonical_runtime_origin(tmp_path) == tmp_path.resolve()
-
-
-def test_live_compose_origin_pin_rejects_windows_mnt_tmp_and_outside_mirror(
-    release_contract: dict[str, Any],
-) -> None:
-    bundle = campaign._release_bundle(release_contract)
-    rows = [
-        {"Name": "bioetl-main", "ConfigFiles": r"E:\\repo\\docker-compose.yml"},
-        {
-            "Name": "bioetl-monitoring",
-            "ConfigFiles": "/home/runtime/docker-compose.monitoring.yml,/tmp/override.yml",
-        },
-    ]
-
-    findings = campaign._compose_origin_findings(rows, bundle, Path("/home/runtime"))
-
-    assert findings == [
-        "bioetl-main: noncanonical origin",
-        "bioetl-monitoring: noncanonical origin",
-    ]
-
-
-def test_bundle_volume_identity_captures_every_selected_project(
-    monkeypatch: pytest.MonkeyPatch, release_contract: dict[str, Any]
-) -> None:
-    bundle = campaign._release_bundle(release_contract)
-    seen: list[str] = []
-
-    def volume_ids(project: str, _origin: Path) -> set[str]:
-        seen.append(project)
-        return {f"{project}_data"}
-
-    monkeypatch.setattr(campaign, "_volume_ids", volume_ids)
-
-    assert campaign._bundle_volume_ids(bundle, Path("/home/runtime")) == {
-        "bioetl-main": ["bioetl-main_data"],
-        "bioetl-monitoring": ["bioetl-monitoring_data"],
-    }
-    assert seen == ["bioetl-main", "bioetl-monitoring"]
-
-
-def test_fault_matrix_has_every_required_case_and_case_local_restore(
-    release_contract: dict[str, Any],
-) -> None:
-    cases = campaign.build_fault_cases(
-        campaign._release_bundle(release_contract), release_contract
-    )
-
-    assert tuple(case.name for case in cases) == campaign.FAULT_CASE_NAMES
-    assert all(case.restore for case in cases)
-    assert all(case.max_seconds <= 180 for case in cases)
-    assert (
-        next(case for case in cases if case.name == "occupied_required_port")
-        .apply[-1]
-        .port
-        == 8081
-    )
-
-
-@pytest.mark.parametrize("case_name", campaign.FAULT_CASE_NAMES)
-def test_each_fault_primitive_is_reversible_and_individually_evidenced(
-    case_name: str,
-    tmp_path: Path,
-    release_contract: dict[str, Any],
-) -> None:
-    cases = campaign.build_fault_cases(
-        campaign._release_bundle(release_contract), release_contract
-    )
-    case = next(candidate for candidate in cases if candidate.name == case_name)
-    state = campaign.new_state(
-        bundle=campaign._release_bundle(release_contract),
-        runtime_origin=Path("/home/runtime"),
-        contract_sha256="a" * 64,
-        cycles=100,
-        soak_hours=72,
-    )
-
-    def executor(
-        operation: campaign.FaultOperation, _remaining: float
-    ) -> dict[str, Any]:
-        if operation.expected == "failure":
-            return {"returncode": 1}
-        if operation.expected.startswith("classification:"):
-            return {
-                "returncode": 0,
-                "classification": operation.expected.partition(":")[2],
-            }
-        return {"returncode": 0}
-
-    assert campaign.execute_fault_case(
-        case,
-        executor=executor,
-        volume_snapshot=lambda: {"bioetl-main": ["data"]},
-        state=state,
-        state_path=tmp_path / "state.json",
-        evidence_dir=tmp_path / "raw",
-    )
-    evidence = campaign._load(tmp_path / "raw" / f"fault-{case_name}.json")
-    assert evidence["passed"] is True
-    assert evidence["restored"] is True
-    assert not list((tmp_path / "raw").glob("incident-*.json"))
-
-
-def test_failed_fault_emits_exactly_one_incident_and_cannot_be_replaced(
-    tmp_path: Path, release_contract: dict[str, Any]
-) -> None:
-    case = campaign.build_fault_cases(
-        campaign._release_bundle(release_contract), release_contract
-    )[0]
-    state = campaign.new_state(
-        bundle=campaign._release_bundle(release_contract),
-        cycles=100,
-        soak_hours=72,
-    )
-
-    def fail_apply(
-        operation: campaign.FaultOperation, _remaining: float
-    ) -> dict[str, Any]:
-        return {"returncode": 0 if operation in case.restore else 1}
-
-    assert not campaign.execute_fault_case(
-        case,
-        executor=fail_apply,
-        volume_snapshot=lambda: {},
-        state=state,
-        state_path=tmp_path / "state.json",
-        evidence_dir=tmp_path / "raw",
-    )
-    assert len(list((tmp_path / "raw").glob("incident-*.json"))) == 1
-    with pytest.raises(FileExistsError):
-        campaign.execute_fault_case(
-            case,
-            executor=fail_apply,
-            volume_snapshot=lambda: {},
-            state=state,
-            state_path=tmp_path / "state.json",
-            evidence_dir=tmp_path / "raw",
-        )
-
-
-def test_recursive_redaction_covers_credentials_authorization_and_github_tokens() -> (
-    None
-):
-    payload = {
-        "credential": "value",
-        "nested": [
-            "Authorization: Bearer-value",
-            "ghp_abcdefghijklmnopqrstuvwxyz123456",
-        ],
-    }
-
-    assert campaign._redact(payload) == {
-        "credential": "<redacted>",
-        "nested": ["Authorization: <redacted>", "<redacted-github-token>"],
-    }
-
-
-def test_image_drift_uses_observed_compose_identity_without_mutating_images(
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-    release_contract: dict[str, Any],
-) -> None:
-    commands: list[list[str]] = []
-
-    def run(command: list[str], _timeout: float, **_kwargs: object) -> dict[str, Any]:
-        commands.append(command)
-        return {"returncode": 0, "stdout": '[{"ID":"sha256:actual"}]'}
-
-    monkeypatch.setattr(campaign, "_run", run)
-    executor = campaign._HostFaultExecutor(
-        tmp_path, campaign._release_bundle(release_contract), tmp_path
-    )
-
-    injected = executor(
-        campaign.FaultOperation("inject_expected_image_drift", "main"), 10
-    )
-    classified = executor(campaign.FaultOperation("classify_image_drift", "main"), 10)
-
-    assert injected["actual_identity_sha256"] != injected["expected_identity_sha256"]
-    assert classified["classification"] == "image_identity_drift"
-    assert commands[0][-3:] == ["images", "--format", "json"]
-    assert all("tag" not in command and "pull" not in command for command in commands)
-
-
-def test_signing_identity_must_match_exact_secret_key_fingerprint(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
     monkeypatch.setattr(
-        campaign,
-        "_run",
+        promotion,
+        "run_command",
         lambda *_args, **_kwargs: {
             "returncode": 0,
-            "stdout": "fpr:::::::::ABCDEF1234567890:\n",
+            "stdout": f"fpr:::::::::{'A' * 40}:\n",
         },
     )
 
-    assert campaign._signing_identity_matches("release", "ABCDEF1234567890")
-    assert not campaign._signing_identity_matches("release", "0000000000000000")
+    assert promotion.secret_fingerprint(tmp_path, "release", "A" * 40)
+    assert not promotion.secret_fingerprint(tmp_path, "release", "B" * 40)
 
 
-def test_signature_valid_requires_expected_fingerprint(
+def test_signed_summary_is_not_modified_after_signature(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
+    state = _passing_state()
+    state.update(
+        campaign_identity={"run": "test"},
+        initial_volume_ids={"bioetl-main": []},
+        final_volume_ids={},
+        evidence_sha256={},
+    )
+    state_path = tmp_path / "state.json"
+    evidence = tmp_path / "raw"
+    evidence.mkdir()
     summary = tmp_path / "summary.json"
-    signature = tmp_path / "summary.json.asc"
-    summary.write_text("{}\n", encoding="utf-8")
-    signature.write_text("signature", encoding="utf-8")
-
+    bundle = (model.StackSpec("main", "bioetl-main", "", ("bioetl",)),)
     monkeypatch.setattr(
-        campaign,
-        "_run",
-        lambda *_args: {
-            "returncode": 0,
-            "stdout": "[GNUPG:] VALIDSIG ABCD1234 2026-07-15 1 10 00 1 00 ABCD1234\n",
-        },
+        promotion,
+        "bundle_volume_ids",
+        lambda *_args, **_kwargs: {"bioetl-main": []},
     )
 
-    assert campaign._signature_valid(summary, signature, "ABCD1234") is True
-    assert campaign._signature_valid(summary, signature, "FFFF9999") is False
+    def sign(_origin: Path, summary_path: Path, *_args: str):
+        signature = summary_path.with_suffix(summary_path.suffix + ".asc")
+        signature.write_text("signed", encoding="utf-8")
+        return signature, True, {"verify": {"returncode": 0}}
 
+    monkeypatch.setattr(promotion, "sign_and_verify", sign)
 
-def test_release_gates_cannot_pass_partial_or_unsigned_campaign() -> None:
-    state = campaign.new_state(
-        stack="main", project="bioetl-main", cycles=100, soak_hours=72
-    )
-    state.update(
-        completed_cycles=99,
-        soak_observed_seconds=72 * 3600 - 1,
-        engine_recovery_trials=100,
-        engine_recovery_successes=99,
-    )
-
-    gates = campaign.release_gates(state, signature_exists=False)
-
-    assert gates["cycles_complete"] is False
-    assert gates["soak_complete"] is False
-    assert gates["detached_signature_present"] is False
-    assert gates["soak_continuous"] is True
-
-
-def test_release_gates_require_99_of_100_and_preserved_volumes() -> None:
-    state = campaign.new_state(
-        stack="main", project="bioetl-main", cycles=100, soak_hours=72
-    )
-    state.update(
-        completed_cycles=100,
-        soak_observed_seconds=72 * 3600,
-        engine_recovery_trials=100,
-        engine_recovery_successes=98,
-        volume_loss=True,
+    assert promotion.finalize_campaign(
+        state,
+        state_path,
+        evidence,
+        tmp_path,
+        summary,
+        "key",
+        "A" * 40,
+        bundle,
+    ) is True
+    signed_bytes = summary.read_bytes()
+    receipt = json.loads(
+        summary.with_suffix(".json.verification.json").read_text(encoding="utf-8")
     )
 
-    gates = campaign.release_gates(state, signature_exists=True)
-
-    assert gates["engine_recovery_99_of_100"] is False
-    assert gates["volumes_preserved"] is False
-
-
-def test_subprocess_timeout_is_evidence_not_an_uncaught_exception(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    def timeout(*_args: object, **_kwargs: object) -> None:
-        raise subprocess.TimeoutExpired(["docker", "desktop", "restart"], 180)
-
-    monkeypatch.setattr(campaign.subprocess, "run", timeout)
-
-    result = campaign._run(["docker", "desktop", "restart"], 180)
-
-    assert result["returncode"] == 127
-    assert "timed out" in result["stderr"]
-
-
-def test_release_gates_reject_interrupted_soak() -> None:
-    state = campaign.new_state(
-        stack="main", project="bioetl-main", cycles=100, soak_hours=72
-    )
-    state.update(
-        completed_cycles=100,
-        soak_observed_seconds=72 * 3600,
-        soak_interruptions=1,
-        engine_recovery_trials=100,
-        engine_recovery_successes=100,
-        probe_samples=1,
-    )
-
-    gates = campaign.release_gates(state, signature_exists=True)
-
-    assert gates["soak_continuous"] is False
+    assert summary.read_bytes() == signed_bytes
+    assert receipt["promotion_passed"] is True

@@ -1,7 +1,7 @@
 ______________________________________________________________________
 
-Version: 6.1.4
-Last verified: 2026-06-25
+Version: 6.1.5
+Last verified: 2026-07-16
 Status: active
 Class: published
 Owner: BioETL Team
@@ -87,6 +87,20 @@ ______________________________________________________________________
   > Минимальное требование — 4 критических порта выше; остальные декорированы для единообразия.
 
 - **Импорт**: Порты **MUST** импортироваться из фасада (`from bioetl.domain.ports import ...`), а не из внутренних модулей. Это правило относится и к runtime-oriented контрактам (`LoggerPort`, `RunnerFactoryPort`, `RunnablePort`, `RateLimiterPort`, `CircuitBreakerPort`): они по проектной политике остаются в `domain.ports` как чистые cross-layer abstractions, а не считаются infrastructure leakage. Проверяется архитектурным тестом.
+
+- **Dependency direction**: `domain` **MUST NOT** зависеть от `application` или
+  `infrastructure`; `application` и `interfaces` **MUST NOT** импортировать
+  concrete infrastructure implementations. Infrastructure adapters **MUST**
+  ограничиваться mapping, технической оркестрацией и delegation в domain /
+  application services; бизнес-правила и state transitions внутри adapters
+  запрещены.
+- **Dependency injection**: зависимости **MUST** передаваться через
+  конструкторы или явные параметры. Создание concrete dependencies и
+  service-locator/global-registry lookup вне `composition/` **MUST NOT**
+  использоваться. Factories и wiring принадлежат только composition root.
+- **Naming**: cross-layer ports, application services, factories и adapters
+  **MUST** использовать проектные суффиксы `*Port`, `*Service`, `*Factory` и
+  `*Adapter`, если тип выполняет соответствующую роль.
 
 - **Суффикс `*Protocol` вне `domain/ports/`**: Классы с суффиксом `*Protocol` **MAY** определяться в любом слое для layer-internal structural typing (mixin contracts, local interface shapes). Они **НЕ являются** нарушением ARCH-003. Разграничение: `*Port` — cross-layer контракт в `domain/ports/`, `*Protocol` — layer-internal контракт, не экспортируемый за пределы модуля/слоя.
 
@@ -206,6 +220,24 @@ uv run python -m pytest tests/architecture/test_regression_metrics.py -q
 | **Bronze** (Сырые) | **JSONL + zstd** | Мин./Нет                   | 90 дней hot -> Archive (local archive policy) | Path: `bronze/{provider}/{entity}/{date}/`. Append-only.                                                               |
 | **Silver** (Норм.) | **Delta Lake**   | Мягкая (учет дрейфа схемы) | Постоянно                                     | **Merge/Upsert**. Raw Parquet в Silver **MUST NOT** использоваться. Обязателен ACID. Time Travel — для Ops, не для DR. |
 | **Gold** (Витрины) | Delta Lake       | Строгая (`strict=True`)    | Постоянно                                     | Версионированные снимки (SCD Type 2) или партиционирование по дате.                                                    |
+
+Для всех write paths Silver и Gold действуют дополнительные инварианты:
+
+- Silver и Gold **MUST** записываться как Delta Lake tables; raw Parquet для
+  этих medallion layers **MUST NOT** использоваться.
+- Точный итоговый DataFrame, передаваемый writer-у, **MUST** пройти Pandera
+  validation после последней трансформации и непосредственно перед write.
+  Любая трансформация после validation требует повторной validation.
+- Silver validation **MUST** проверять schema, nullability, types и применимые
+  DQ/business constraints. Невалидные строки должны остановить write или быть
+  явно перенаправлены в quarantine; результат validation нельзя игнорировать.
+- Gold validation **MUST** быть fail-closed и использовать strict schema
+  (`strict=True`, с явной coercion policy). `SchemaError` / `SchemaErrors`
+  **MUST NOT** перехватываться с последующим выполнением write.
+- Merge/upsert **MUST** сопоставлять записи по declared primary key или
+  документированному стабильному business key. Mutable/non-unique fields и
+  timestamps **MUST NOT** входить в match predicate; повтор того же input не
+  должен создавать дополнительные logical rows.
 
 #### 2.1.1. Silver Write Modes (Режимы Записи)
 
@@ -1049,6 +1081,16 @@ class LegacyAdapter(BaseSyncAdapter):
   - **Маркер**: `@pytest.mark.e2e` для селективного запуска.
   - **Запуск**: `pytest tests/e2e/ -v -m e2e`.
 - **Contract Tests**: Ежемесячный запуск против *реальных* API (Live) в отдельном CI workflow для обнаружения нарушения контрактов.
+- **Behavior changes**: любое изменение наблюдаемого поведения **MUST**
+  сопровождаться новым или обновлённым regression test. Для bug fix тест
+  **MUST** воспроизводить прежний дефект и проходить после исправления.
+- **Assertion integrity**: assertions **MUST NOT** ослабляться или удаляться
+  только ради прохождения suite. Переход от exact equality к permissive
+  contains/range check требует явного contract-based обоснования.
+- **Deterministic tests**: unit/integration tests **MUST NOT** зависеть от
+  uncontrolled wall-clock time, unseeded randomness или live network.
+  Используются fixed/frozen time, seeded inputs, mocks, fixtures или VCR
+  cassettes. Live contract tests остаются отдельным явно маркированным workflow.
 
 #### 4.2.1. Тестовые Зависимости и Установка
 
@@ -1093,6 +1135,13 @@ pip install -e ".[tests]"
 1. Retry jitter **MUST** быть детерминистичным при `deterministic=True`
 1. `PipelineContext.started-at` — единственный источник времени для batch
 1. Application и Interfaces слои **MUST NOT** импортировать `structlog` напрямую — использовать `LoggerPort` из `domain.ports`
+1. Output artifacts **MUST** использовать stable ordering, canonical
+   serialization и UTC timestamps. Locale-dependent formatting и iteration по
+   unsorted sets/maps в persisted output запрещены.
+1. Artifact files **MUST** записываться атомарно: temporary file в том же
+   filesystem, flush/close, затем `os.replace()` в final path. Прямая запись в
+   final artifact path запрещена, если partial file может быть прочитан другим
+   процессом или последующим run.
 
 #### Архитектурные Тесты (REQ-ARCH-030)
 
@@ -1179,6 +1228,48 @@ from __future__ import annotations
 - **MUST** использовать новый стиль типов: `list[str]` вместо `List[str]`
 - **MUST** использовать `X | None` вместо `Optional[X]`
 - **SHOULD** использовать `X | Y` вместо `Union[X, Y]`
+- Все новые или изменённые public functions, methods и externally visible
+  attributes **MUST** иметь явные parameter/attribute и return annotations и
+  проходить `mypy --strict`.
+- `Any` **MUST NOT** использоваться как способ скрыть type-checking defect или
+  заменить выводимый конкретный тип. Допустим только минимальный boundary для
+  действительно dynamic/untyped integration; он **MUST** быть локализован,
+  сразу преобразован в конкретный type/Protocol/TypedDict/model и снабжён
+  кратким обоснованием.
+
+### 4.5. Change-set Governance Gates (Qodo Reconciliation)
+
+Эта секция нормализует Qodo extraction от 2026-07-16 для repository scope
+`/SatoryKono/BioactivityDataAcquisition/`. Исходный endpoint — semantic
+`POST /rules/search`, а не list/export API; `top_k` ограничен 20, поэтому набор
+из 66 unique Qodo rule IDs является broad best-effort union, а не доказанно
+полным organization-wide export. Qodo response не содержал `severity`; значение
+`UNSPECIFIED` сохраняется и **MUST NOT** заменяться догадкой.
+
+RFC 2119 levels ниже определяются канонической BioETL policy, а не Qodo
+severity. Duplicate-looking Qodo records с разными IDs сохраняются в
+traceability mapping, но сводятся к одному project gate.
+
+| Gate | Project rule | Qodo rule IDs |
+| ---- | ------------ | ------------- |
+| `QG-SEC-001` | Tracked code, docs, configs, YAML, tests, fixtures, logs и examples **MUST NOT** содержать live secrets, credentials, private keys или production-looking tokens; logging/serialization **MUST NOT** раскрывать sensitive configuration. | `717996`, `717895`, `717966`, `718010`, `717976`, `718034`, `717812` |
+| `QG-SEC-002` | `.env` protections, ignore patterns, packaging exclusions и restrictive access **MUST NOT** ослабляться; любая операция над `.env`/`.env.*` требует explicit per-task user approval. | `1433724`, `717904`, `717802` |
+| `QG-CFG-001` | Critical config modes **MUST** быть required, иметь documented allowed values и fail on unknown values; tracked YAML **MUST** сохранять canonical deterministic key order. | `718012`, `718032`, `718013`, `718011`, `718031` |
+| `QG-TYPE-001` | Public interfaces **MUST** иметь полные type annotations; `Any` **MUST NOT** маскировать type errors и допустим только как documented narrow boundary. | `718001`, `717987`, `717867`, `717880`, `717968` |
+| `QG-DET-001` | Persisted outputs **MUST** использовать stable ordering, canonical serialization и UTC timestamps. | `718014`, `717993` |
+| `QG-DATA-001` | Merge/upsert **MUST** быть idempotent и keyed only by declared primary/documented stable business key. | `1433434` |
+| `QG-COV-001` | При изменении `src/bioetl/**/*.py` тот же changeset **MUST** обновить `reports/quality/module-coverage-inventory.json:source_tree_sha256` и пройти architecture hash guard. | `837441` |
+| `QG-DEBT-001` | Technical-debt budgets, quality thresholds и exclusions **MUST NOT** ослабляться или расширяться; лимиты могут только сохраняться или ужесточаться. | `883024` |
+| `QG-DOC-001` | Contributor-facing scripts/commands и schema/column/CLI changes **MUST** синхронно обновлять active contributor docs; breaking CLI/API/schema/config changes требуют migration notes и changelog/version impact в том же changeset. | `1433447`, `717893`, `718030`, `718009`, `718035`, `718017`, `717995` |
+| `QG-TEST-001` | Behavior/public-contract changes **MUST** иметь regression tests; assertions **MUST NOT** ослабляться ради green suite. | `717831`, `717936`, `718008`, `718007`, `718028` |
+| `QG-PORT-001` | Ports **MUST** импортироваться только через facade `bioetl.domain.ports`. | `717998` |
+| `QG-HTTP-001` | Provider/runtime outbound HTTP **MUST** идти через `UnifiedHTTPClient` или thin delegating wrapper; новые direct low-level clients запрещены. | `1433318` |
+| `QG-ART-001` | Artifact writes **MUST** использовать temporary file и atomic `os.replace()` в final path. | `717994` |
+| `QG-TSTDET-001` | Tests **MUST** контролировать time/random/network; external APIs используют fixtures/VCR, кроме explicit live-contract workflow. | `718005`, `718026`, `718006` |
+| `QG-GOV-001` | Documentation **MUST NOT** противоречить `.importlinter`, CI, `AGENTS.md` или normative stack; Qodo config **MUST NOT** вводить undocumented keys или unsupported schema/version values. | `1433681`, `1433499` |
+| `QG-LOG-001` | Runtime/application logging **MUST** использовать structured logging ports/framework; `print()`/`pprint()` запрещены вне sanctioned one-off scripts, REPL/examples и user-facing CLI output. | `718004`, `717896` |
+| `QG-ARCH-001` | Constructor DI, composition-owned wiring, inward dependency direction, pure domain, adapter delegation и suffix naming **MUST** соблюдаться; service locator запрещён. | `718021`, `1433571`, `718000`, `1433310`, `718020`, `717830`, `717999`, `717997`, `717826`, `717965`, `718002`, `718023`, `717897` |
+| `QG-MED-001` | Silver/Gold writes **MUST** использовать Delta Lake и exact-final-DataFrame Pandera validation; Gold strict validation fail-closed, Silver invalid data fails or quarantines before write. | `1559442`, `1433655`, `718003`, `1433643`, `1433385`, `1433400` |
 
 ## 5. Операции (Лимиты, Секреты, Shutdown)
 
@@ -1191,7 +1282,21 @@ from __future__ import annotations
 
 - **Источник**: Переменные окружения (`os.environ`).
 - **Формат**: `BIOETL_{PROVIDER}_{KEY}` (например, `BIOETL_PUBCHEM_API_KEY`).
-- **Запрещено**: Хардкод секретов **MUST NOT**. Файлы `.env` в git **MUST NOT**.
+- **Запрещено**: Хардкод секретов **MUST NOT** встречаться в source, tracked
+  YAML/config, docs, tests, fixtures, examples, CI, Dockerfiles или log samples.
+  Inline credentials в URLs/connection strings, PEM blocks, JWT-like values и
+  production-looking token prefixes считаются violations, если это не явно
+  безопасные placeholders.
+- **Logging**: environment maps, full configuration objects, authorization
+  headers, tokens, passwords и secret-bearing connection strings **MUST NOT**
+  логироваться или сериализоваться в published artifacts.
+- **Tracked YAML**: secret-bearing keys допускают только placeholder или
+  external reference (`${ENV_VAR}`, secret manager reference); live values
+  запрещены.
+- **`.env`**: файлы `.env`/`.env.*` в git **MUST NOT** попадать. Ignore,
+  packaging/COPY exclusions и file access protections для secret sources
+  **MUST NOT** ослабляться. Создание, изменение, rename, move, overwrite или
+  delete любого `.env` требует explicit per-task user approval.
 
 ### 5.3. Graceful Shutdown (Штатное завершение)
 
@@ -1308,6 +1413,13 @@ async with services:  # --aenter-- инициализирует ресурсы
   выделенные generated-doc checks в CI).
 - **Карта и Схемы**: Генерируются скриптами в CI (pydantic-to-json-schema, eralchemy2, mkdocs).
 - **Именование**: Зеркальное (`src/bioetl/.../{provider}/` \<-> `docs/04-reference/providers/{provider}/`).
+- **Contributor sync**: изменения contributor-facing commands, scripts,
+  flags, paths, bootstrap/test flow или required checks **MUST** обновлять
+  соответствующие active contributor/governance docs в том же changeset.
+- **Governance consistency**: docs о layer boundaries, imports, required
+  checks и sanctioned tooling **MUST** соответствовать `.importlinter`, CI,
+  `AGENTS.md`, этому документу и accepted ADRs; docs mirrors не могут вводить
+  исключения самостоятельно.
 
 ## 6.1. Детерминизм и Воспроизводимость
 
@@ -1592,6 +1704,18 @@ grep -B2 -A2 "ComponentName" docs/99-archive/refactoring-plan.md
 ______________________________________________________________________
 
 ## 8. Управление Изменениями
+
+Любое backward-incompatible изменение public CLI/API, schema/column или
+critical config contract **MUST** включать в том же changeset:
+
+1. явно помеченные migration/breaking-change notes с old -> new behavior;
+1. affected consumers и пошаговый adaptation path;
+1. version/changelog impact;
+1. обновлённые regression tests и active documentation.
+
+Silent breaking changes запрещены. Qodo repository configuration также
+**MUST NOT** содержать undocumented keys или unsupported schema/version values;
+ключи проверяются по актуальной authoritative Qodo schema/reference.
 
 ### 8.1. Контракты Данных (Data Contracts)
 
@@ -1991,6 +2115,11 @@ fields:
 
 ## История Изменений (Changelog)
 
+- **6.1.5** (2026-07-16): Qodo rules reconciliation. 66 unique Qodo rule IDs
+  из broad best-effort semantic extraction нормализованы в 18 project gates;
+  усилены secret/config/type/test/determinism/atomic-write/docs/change-control,
+  architecture и Silver/Gold validation requirements. Qodo severity сохранена
+  как `UNSPECIFIED`, без inference; technical-debt budgets не изменены.
 - **6.1.4** (2026-06-25): Governance closure follow-up. Явно закреплены policy guardrails для pipeline IDs (`<provider>_<entity>` как current stable external identifier, конфликтующее legacy wording `<entity>_<source>` запрещено без ADR/migration plan) и для HTTP abstraction naming (`UnifiedHTTPClient` как единственный sanctioned runtime client, `UnifiedAPIClient` допустим только как controlled rename через ADR).
 - **5.28** (2026-06-16): ADR Registry Governance Sync. Приложение F и generated ADR registry mirrors синхронизированы через ADR-050; published appendix теперь перечисляет ADR-049/050, а generated registry surfaces явно помечены как derived mirrors с canonical owner в `decisions/README.md`.
 - **5.27** (2026-05-26, updated 2026-06-22): Domain Schema Boundary Sync. Добавлен ADR-048 и закреплено, что Pandera/Pandas допустимы в domain только как schema-contract representation под `domain/schemas` и `domain/contracts`; runtime Pandera monkeypatching retired, а retained bootstrap seam теперь выполняет только explicit validation без package import side effects.

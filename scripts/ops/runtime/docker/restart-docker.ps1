@@ -2,6 +2,7 @@
 [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
 param(
     [switch]$ConfirmLastResort,
+    [string]$LastResortConfirmation = '',
     [ValidateRange(10, 180)] [int]$TimeoutSeconds = 180,
     [ValidateRange(1, 60)] [int]$CommandTimeoutSeconds = 15,
     [string]$ReportPath = "reports/quality/docker-desktop-recovery.json"
@@ -12,6 +13,7 @@ $Started = Get-Date
 $RecoveryDeadline = $Started.AddSeconds($TimeoutSeconds)
 $Observations = [System.Collections.Generic.List[object]]::new()
 $Actions = [System.Collections.Generic.List[string]]::new()
+$LastResortToken = 'I_UNDERSTAND_FORCE_TERMINATION_IS_DESTRUCTIVE'
 $Diagnostics = [ordered]@{
     desktop = [ordered]@{}
     daemon_identity = [ordered]@{}
@@ -209,7 +211,7 @@ function Get-CliOrigins {
 function Collect-Diagnostics {
     $Capabilities = [ordered]@{}
     $DesktopRows = [ordered]@{}
-    foreach ($DesktopCommand in @('status', 'restart', 'start', 'logs', 'diagnose')) {
+    foreach ($DesktopCommand in @('status', 'restart', 'stop', 'start', 'logs', 'diagnose')) {
         $Capabilities[$DesktopCommand] = Test-DesktopCapability $DesktopCommand
     }
     foreach ($DesktopCommand in @('status', 'logs', 'diagnose')) {
@@ -328,7 +330,10 @@ function Collect-Diagnostics {
         foreach ($Match in [regex]::Matches([string]$Container.Ports, '(?:(?:0\.0\.0\.0|\[?::\]?):)?(?<port>\d+)->')) {
             $Port = $Match.Groups['port'].Value
             if (-not $PortOwners.Contains($Port)) { $PortOwners[$Port] = @() }
-            $PortOwners[$Port] = @($PortOwners[$Port]) + @([string]$Container.Names)
+            $PortOwners[$Port] = @(
+                (@($PortOwners[$Port]) + @([string]$Container.Names)) |
+                    Sort-Object -Unique
+            )
         }
     }
     $DuplicatePorts = @($PortOwners.Keys | Where-Object { @($PortOwners[$_]).Count -gt 1 })
@@ -383,10 +388,13 @@ function Write-RecoveryReport {
         observations = $Observations
         redaction_applied = $true
         last_resort_requested = [bool]$ConfirmLastResort
+        last_resort_token_valid = ($LastResortConfirmation -ceq $LastResortToken)
     }
+    $Temporary = "$Target.tmp"
     (Protect-SensitiveValue $Payload) |
         ConvertTo-Json -Depth 12 |
-        Set-Content -LiteralPath $Target -Encoding utf8
+        Set-Content -LiteralPath $Temporary -Encoding utf8
+    Move-Item -LiteralPath $Temporary -Destination $Target -Force
 }
 
 $InitiallyReady = Test-DockerReady
@@ -398,16 +406,32 @@ if ($InitiallyReady) {
 }
 
 $RestartSupported = [bool]$Diagnostics.desktop.capabilities.restart
+$StopSupported = [bool]$Diagnostics.desktop.capabilities.stop
 $StartSupported = [bool]$Diagnostics.desktop.capabilities.start
 if ($RestartSupported) {
-    $Restart = Invoke-BoundedCommand 'docker' @('desktop', 'restart')
+    $Restart = Invoke-BoundedCommand 'docker' @('desktop', 'restart', '--detach')
     $Actions.Add('docker_desktop_restart')
     if (($Restart.returncode -ne 0) -or $Restart.timed_out) {
-        Write-RecoveryReport 'desktop_restart_failed' $false $Actions
-        throw 'Supported Docker Desktop restart did not complete successfully within its command deadline.'
+        if (-not ($StopSupported -and $StartSupported)) {
+            Write-RecoveryReport 'desktop_restart_failed' $false $Actions
+            throw 'Supported Docker Desktop restart failed and the supported stop/start fallback is unavailable.'
+        }
+        $Actions.Add('docker_desktop_restart_failed_bounded')
+        $Stop = Invoke-BoundedCommand 'docker' @('desktop', 'stop', '--detach')
+        $Actions.Add('docker_desktop_stop')
+        if (($Stop.returncode -ne 0) -or $Stop.timed_out) {
+            Write-RecoveryReport 'desktop_stop_failed' $false $Actions
+            throw 'Supported Docker Desktop stop fallback did not complete successfully within its command deadline.'
+        }
+        $Start = Invoke-BoundedCommand 'docker' @('desktop', 'start', '--detach')
+        $Actions.Add('docker_desktop_start')
+        if (($Start.returncode -ne 0) -or $Start.timed_out) {
+            Write-RecoveryReport 'desktop_start_failed' $false $Actions
+            throw 'Supported Docker Desktop start fallback did not complete successfully within its command deadline.'
+        }
     }
 } elseif ($StartSupported) {
-    $Start = Invoke-BoundedCommand 'docker' @('desktop', 'start')
+    $Start = Invoke-BoundedCommand 'docker' @('desktop', 'start', '--detach')
     $Actions.Add('docker_desktop_start')
     if (($Start.returncode -ne 0) -or $Start.timed_out) {
         Write-RecoveryReport 'desktop_start_failed' $false $Actions
@@ -431,16 +455,26 @@ while ((Get-RemainingMilliseconds) -gt 0) {
 $Actions.Add('bounded_recovery_exhausted')
 if ($ConfirmLastResort) {
     $Actions.Add('last_resort_requested')
-    $Desktop = Get-Process -Name 'Docker Desktop' -ErrorAction SilentlyContinue
-    if ($Desktop) {
-        if ($PSCmdlet.ShouldProcess('Docker Desktop', 'force terminate after evidence capture as the explicitly confirmed last resort')) {
-            Write-RecoveryReport 'confirmed_last_resort_requested' $false $Actions
-            $Desktop | Stop-Process -Force
-            throw 'Confirmed last-resort termination completed; review the report before rerunning bounded recovery.'
-        }
-        $Actions.Add('last_resort_not_confirmed')
+    $ConfirmExplicitlyDisabled = (
+        $PSBoundParameters.ContainsKey('Confirm') -and
+        -not [bool]$PSBoundParameters['Confirm']
+    )
+    if ($LastResortConfirmation -cne $LastResortToken) {
+        $Actions.Add('last_resort_token_rejected')
+    } elseif ($ConfirmExplicitlyDisabled) {
+        $Actions.Add('last_resort_confirmation_bypass_rejected')
     } else {
-        $Actions.Add('last_resort_process_not_found')
+        $Desktop = Get-Process -Name 'Docker Desktop' -ErrorAction SilentlyContinue
+        if ($Desktop) {
+            if ($PSCmdlet.ShouldProcess('Docker Desktop', 'force terminate after evidence capture as the explicitly confirmed last resort')) {
+                Write-RecoveryReport 'confirmed_last_resort_requested' $false $Actions
+                $Desktop | Stop-Process -Force
+                throw 'Confirmed last-resort termination completed; review the report before rerunning bounded recovery.'
+            }
+            $Actions.Add('last_resort_not_confirmed')
+        } else {
+            $Actions.Add('last_resort_process_not_found')
+        }
     }
 }
 

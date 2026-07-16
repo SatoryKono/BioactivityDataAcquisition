@@ -52,6 +52,11 @@ Skipping steps is a contract governance violation.
 - **Data DQ issues**: manual analysis + replay — DQ errors **MUST NOT** auto-rollback app version
 - Document last known-good artifacts and compatibility checks
 
+## Config Mode Contracts
+
+- Critical mode/enum fields in YAML schemas **MUST** be required with documented allowed values (no silent implicit defaults). Canonical list: `run_mode`, `environment`, `run_type`, `data_layer`, Silver/Gold write modes — see `02-code-style.mdc` §Configuration
+- Breaking YAML key renames/removals/semantics **MUST** ship migration notes with the change
+
 ## Silent Changes Forbidden
 
 No silent breaking changes to CLI/API/schema/storage semantics/hashing. Consumers **MUST** get migration guidance and verifiable acceptance criteria.

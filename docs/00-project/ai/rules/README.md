@@ -28,7 +28,7 @@ docs/00-project/ai/rules/
 └── [скопировать в .cursor/rules/ и .windsurf/]
 ```
 
-Источник канонических правил: `docs/00-project/NORMATIVE_SOURCES.md` → `docs/00-project/RULES.md` (v6.1.4)
+Источник канонических правил: `docs/00-project/NORMATIVE_SOURCES.md` → `docs/00-project/RULES.md` (v6.1.5)
 Текущую canonical version всегда сверяйте по `Version:` header в `RULES.md`.
 
 Этот каталог является condensed AI guidance surface. Он **не заменяет**
@@ -89,6 +89,19 @@ uv run python scripts/ai/sync_windsurf_rules.py --check
 ```
 
 **Workflows (slash commands):** `/review`, `/post-change`, `/pre-commit`, `/qodo-sync`
+
+### B2. Devin
+
+**Tracked workflows:** `.devin/workflows/`
+Держите parity с Cascade workflows: `review`, `post-change`, `pre-commit`, `qodo-sync` (плюс специализированный `audit-documents`).
+
+**DeepWiki:** `.devin/wiki.json` — navigation only; не заменяет `RULES.md` / ADR / Cursor SSOT.
+
+При обновлении Qodo/rules:
+1. Править `docs/00-project/ai/rules/cursor/*.mdc`
+2. `sync_cursor_rules.py --deploy` + `sync_windsurf_rules.py`
+3. Синхронизировать текст `.devin/workflows/{review,post-change,pre-commit,qodo-sync,audit-documents}.md`
+4. При необходимости обновить notes в `.devin/wiki.json` (Project Governance / AI Runtime / Secret Rules)
 
 ### C. Codex / Claude-style CLI workflows
 
@@ -171,8 +184,14 @@ interfaces/     → CLI
 
 ### Синхронизация с Qodo platform
 
-Правила Qodo загружаются через skill `/qodo-get-rules` и интегрируются в тематические `.mdc` файлы.
-Индекс синхронизации: `07-qodo-enforcement.mdc`. После обновления cursor rules выполните `sync_windsurf_rules.py`.
+Правила Qodo загружаются через skill `/qodo-get-rules` (или полный extract в `reports/quality/qodo-rules-extract-*.md`) и интегрируются в тематические `.mdc` файлы.
+Индекс синхронизации: `07-qodo-enforcement.mdc` (последний sync: **2026-07-16**, 66 unique rule IDs).
+После обновления cursor rules:
+
+```bash
+uv run python scripts/ai/sync_cursor_rules.py --deploy
+uv run python scripts/ai/sync_windsurf_rules.py
+```
 
 ## Команды верификации
 

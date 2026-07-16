@@ -1,6 +1,6 @@
 ______________________________________________________________________
 
-Version: 1.0.0
+Version: 1.1.0
 Status: active
 Class: internal-published
 Owner: BioETL Team
@@ -8,173 +8,97 @@ Reviewers:
 
 - BioETL Team
   Priority: P2
-  Runtime profile: Local-Only optional Neo4j memory backend for AI/runtime tooling.
-  Last verified: '2026-05-13'
+  Runtime profile: Local-Only optional Neo4j memory backend.
+  Last verified: '2026-07-16'
 
 ______________________________________________________________________
 
-# Neo4j Backend Recovery - Quick Start
+# Neo4j backend recovery — quick start
 
 ## Trigger
 
-- Use this runbook when the optional Neo4j memory backend is unavailable,
-  `docker ps` hangs, Bolt/HTTP health checks fail, or AI memory tooling reports
-  Neo4j connectivity errors.
-- Do not use it for BioETL pipeline runtime recovery; this backend is an
-  auxiliary memory surface, not a required ETL dependency.
+Use this runbook when the optional Neo4j memory backend is unavailable or its
+HTTP/Bolt readiness fails.
 
 ## Impact
 
-- Priority: P2.
-- Delayed recovery reduces AI memory retrieval quality and graph-backed
-  diagnostics, but does not block local-only BioETL pipeline execution.
+Priority P2. Neo4j is not a required BioETL pipeline dependency; failure
+reduces auxiliary memory retrieval only.
 
 ## Preconditions
 
-- Docker Desktop is installed and available to the local operator.
-- The repository checkout contains the Neo4j recovery scripts listed below.
-- No production BioETL runtime must be stopped to recover this optional memory
-  backend.
-
-## TL;DR
-
-1. **Run evidence-first bounded Docker Desktop recovery**:
-
-   ```powershell
-   .\scripts\ops\runtime\docker\restart-docker.ps1 -TimeoutSeconds 180
-   ```
-
-1. **Run automated recovery**:
-
-   ```powershell
-   .\scripts\neo4j-recovery-checklist.ps1
-   ```
-
-1. **If all green**: Backend ready ✅
-
-1. **If any red**: Check `docker logs bioetl-neo4j` for errors
-
-______________________________________________________________________
-
-## What Changed
-
-**Fixed**:
-
-- ✅ WSL scripts now use `docker.exe` (Windows daemon)
-- ✅ WSL scripts test `host.docker.internal` (not localhost)
-- ✅ Test files loaded from repo root (not /tmp)
-- ✅ Removed false claim: "TLS is root cause" → "TLS suspected but unconfirmed"
-- ✅ Reduced memory: 512m → 256m heap (stability)
-
-**Already correct**:
-
-- ✅ MCP configuration 100% ready
-- ✅ Environment variables synchronized
-- ✅ Test scripts in right location
-
-______________________________________________________________________
-
-## Recovery Script Workflow
+- Work from the canonical Linux filesystem runtime origin.
+- Supply required Neo4j values through the current process environment; do not
+  create or edit `.env`.
+- Preserve `bioetl-neo4j_neo4j_data`, its legacy source volume and verified
+  backups. Recovery never uses volume deletion or prune.
 
 ## Procedure
 
-The `neo4j-recovery-checklist.ps1` does:
+1. Run the read-only contract and host gate:
 
-1. ✅ Verify Docker daemon responsive
-1. ✅ Preserve volumes and project ownership
-1. ✅ Start the pinned Neo4j image through the readiness manager
-1. ⏳ Poll bounded readiness
-1. ✅ Check container status
-1. ✅ Test HTTP port (7474)
-1. ✅ Test Bolt driver (7687)
-1. ✅ Verify environment config
+   ```bash
+   python scripts/ops/runtime/docker/runtime_manager.py check --stack neo4j
+   ```
 
-**Expected output**: Green checkmarks, final line says "BACKEND READY"
+2. If Docker Desktop/WSL is unavailable, capture bounded evidence first:
 
-______________________________________________________________________
+   ```powershell
+   .\scripts\ops\runtime\docker\restart-docker.ps1 `
+     -TimeoutSeconds 180 `
+     -ReportPath reports/quality/docker-desktop-recovery.json
+   ```
 
-## If Tests Fail
+3. Diagnose, recover and verify readiness through the single lifecycle owner:
 
-Check the specific error message, then:
+   ```bash
+   python scripts/ops/runtime/docker/runtime_manager.py diagnose --stack neo4j
+   python scripts/ops/runtime/docker/runtime_manager.py recover --stack neo4j --timeout 180
+   python scripts/ops/runtime/docker/runtime_manager.py status --stack neo4j
+   ```
 
-| Error                | Cause                 | Fix                                |
-| -------------------- | --------------------- | ---------------------------------- |
-| "docker ps hangs"    | Docker daemon frozen  | Restart again                      |
-| "Container Exited"   | Startup failed        | `docker logs bioetl-neo4j \| tail` |
-| "HTTP timeout"       | Startup incomplete    | Wait 30 more seconds               |
-| "ECONNRESET on Bolt" | Protocol/config issue | Check logs for OOM/errors          |
+4. Run the backend-specific protocol check when configured:
 
-______________________________________________________________________
+   ```bash
+   bash scripts/ai/mcp/check_neo4j_memory.sh
+   ```
 
-## After Backend Works
+Do not replace readiness polling with fixed sleeps or direct restart loops.
+`status` must report the required service healthy; a merely running container
+is not success.
 
-```bash
-# In Codex (any shell)
-codex interactive
+## Escalation
 
-# Use the memory MCP
-# Type: "Use @neo4j-memory to remember this"
-# Should work if backend responded to test
-```
-
-______________________________________________________________________
-
-## Files Reference
-
-| Need                  | File                                   |
-| --------------------- | -------------------------------------- |
-| Automated recovery    | `scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1` |
-| Manual Docker restart | `scripts/ops/runtime/docker/restart-docker.ps1` |
-| WSL setup             | `scripts/memory/setup/wsl_startup.sh` |
-| Docker Compose        | `docker-compose.neo4j.yml`             |
-| MCP/backend check     | `scripts/ai/mcp/check_neo4j_memory.sh` |
-| Detailed guide        | `docs/05-operations/runbooks/neo4j-complete-recovery-guide.md` |
-| Memory sync/query     | `scripts/memory/README.md` |
-
-______________________________________________________________________
-
-## Root Cause (Honest Assessment)
-
-We don't know yet. Possibilities:
-
-1. **Startup instability** ← Most likely (symptoms match)
-1. **Memory exhaustion** ← Fixed by reducing heap
-1. **TLS encryption** ← Fixed by adding `encryption: 'ENCRYPTION_OFF'`
-1. **Docker daemon issue** ← Fixed by manual restart
-
-Once tests run, we'll see which one was actually broken.
-
-______________________________________________________________________
+If the same bounded recovery fails three times, preserve the incident report,
+manager diagnostics and recent bounded logs, then escalate. Do not remove the
+container or volume as an automatic next step.
 
 ## Verification
 
-- `scripts/ops/runtime/neo4j/neo4j-recovery-checklist.ps1` reports backend
-  ready.
-- HTTP port `7474` and Bolt port `7687` checks pass.
-- `scripts/ai/mcp/check_neo4j_memory.sh` or the local MCP backend check can
-  connect without authentication/configuration errors.
+- manager preflight has no errors;
+- `status --stack neo4j` succeeds;
+- HTTP 7474 and Bolt 7687 protocol checks succeed;
+- volume identity before/after is unchanged;
+- no new restart, OOM, unhealthy or image-identity finding exists.
 
 ## Rollback/Recovery
 
-- If recovery makes the local Docker state worse, stop and remove only the
-  reviewed `bioetl-neo4j` container, then restart Docker Desktop.
-- Restore previous MCP/backend configuration from git if configuration files
-  were edited during diagnosis.
-- Escalate to the detailed Neo4j recovery guide if the quick-start checklist
-  still fails after one clean Docker restart.
+Stop only through `runtime_manager.py stop --stack neo4j`. Restore a target
+volume only from a verified backup while retaining the legacy source. Never use
+`down -v`, prune, VHDX deletion or an unbounded Docker Desktop restart.
 
 ## Post-incident
 
-- Record the failing check, final recovery action, and any changed local
-  configuration in the related issue or session note.
-- Update this quick-start if the root cause becomes known and repeatable.
+Record the failing check, bounded recovery actions, evidence paths, volume
+identity, operator and follow-up owner.
 
 ## Compliance
 
-- Local-only posture remains unchanged; do not make Neo4j a required BioETL
-  runtime service.
-- Do not store secrets or provider credentials in Neo4j recovery logs.
+Neo4j remains optional under ADR-010. Recovery does not store credentials in
+reports, mutate `.env` or delete protected volumes.
 
-**Next**: Restart Docker Desktop, then run `.\scripts\neo4j-recovery-checklist.ps1`
+## References
 
-Expect: 10 minutes total
+- `docs/DOCKER_SETUP.md`
+- `docs/05-operations/runbooks/docker-compose-project-migration.md`
+- `docs/05-operations/runbooks/docker-stability.md`

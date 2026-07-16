@@ -1,47 +1,146 @@
+______________________________________________________________________
+
+Version: 1.0.0
+Status: active
+Class: internal-published
+Owner: BioETL Team
+Reviewers:
+
+- BioETL Team
+  Priority: P1
+  Runtime profile: Local-Only optional Docker adjunct (ADR-010).
+  Last verified: '2026-07-16'
+
+______________________________________________________________________
+
 # Docker image and resource promotion
 
-Docker remains an optional local adjunct under ADR-010. Image or resource
-changes are promoted only from a reviewed supported host lane; this procedure
-does not authorize edits to `.env`, `.wslconfig`, volumes, or Docker data.
+## Trigger
 
-## Image identity
+Use this procedure when a retained Docker image/resource change or the complete
+workstation bundle is proposed for promotion.
 
-Every retained `image:` and Dockerfile `FROM` reference must include an
-immutable `sha256` digest. Build tooling is version-pinned in the Dockerfile.
-To update an image, resolve the candidate digest from the upstream registry,
-record its tag, digest, upstream release URL, architecture, and retrieval time
-in the change, update exactly one service, then run:
+## Impact
+
+Priority P1 for the optional Docker lane. A failed or incomplete campaign
+blocks Docker promotion but does not change the canonical Python/venv runtime.
+
+## Preconditions
+
+Docker remains an optional local adjunct under ADR-010. Promotion is performed
+only on an explicitly scheduled workstation lane. This runbook does not
+authorize edits to `.env`, `.wslconfig`, volumes, VHDX or Docker data. Obtain
+explicit host-disruption scheduling and an approved signing identity first.
+
+## Procedure
+
+## Static and image gates
+
+Every retained `image:` and Dockerfile `FROM` reference must use an immutable
+`sha256` digest. Record upstream tag, digest, release URL, architecture and
+retrieval timestamp, then run:
 
 ```bash
 python scripts/ops/runtime/docker/docker_runtime_preflight.py --static-only
-docker compose -p <project> -f <compose-file> config --quiet
 python -m pytest tests/architecture/test_docker_runtime_contracts.py -q
 ```
 
-Rollback restores the last passing digest for that service. It never removes
-named volumes or weakens readiness/resource limits.
+Compose rendering and readiness are owned by `runtime_manager.py`; do not add a
+parallel raw Compose promotion path.
 
-## Resource calibration
+## Host-lane approval
 
-Use `docker_runtime_probe.py` during baseline, canary, the 100-cycle campaign,
-and the continuous 72-hour soak. The campaign report must retain raw probe
-hashes and prove for every service:
+Before `--execute`, the operator must:
 
-- memory, CPU, and PID peak ratios remain below `0.80` of their hard limits;
-- Docker-VM free memory reserve remains at least 4 GiB;
-- disk reserve satisfies `docker_runtime_contracts.yaml`;
-- restart delta, OOM kills, unresolved unhealthy state, and identity drift are
-  all zero.
+1. confirm that repeated target-service and Docker Desktop interruption is
+   scheduled and that unrelated local containers may be affected;
+2. synchronize the reviewed revision to one Linux filesystem runtime origin;
+3. inject required environment values into the process without a repository
+   `.env`;
+4. select an existing approved GPG secret key and its exact full fingerprint.
 
-Do not infer calibration from the configured numbers. A missing or partial
-campaign is a failed promotion gate. Increase a service limit only from
-measured baseline/canary evidence and preserve the 4 GiB VM reserve; retry,
-timeout, health, and technical-debt thresholds may not be raised to waive a
-failure.
+The campaign does not create a signing identity. Run from the Linux runtime
+origin:
 
-## Controlled failures
+```bash
+python scripts/engineering/qa/run_docker_stability_campaign.py \
+  --runtime-origin /home/<user>/.local/share/bioetl-runtime/BioactivityDataAcquisition2 \
+  --contract configs/quality/docker_runtime_contracts.yaml \
+  --cycles 100 \
+  --soak-hours 72 \
+  --soak-sample-seconds 60 \
+  --engine-recovery-trials 100 \
+  --confirm-host-disruption I_UNDERSTAND_THIS_INTERRUPTS_DOCKER_DESKTOP \
+  --signing-key <approved-key-id> \
+  --signing-fingerprint <full-approved-fingerprint> \
+  --execute
+```
 
-Memory, PID, failed-readiness, termination, and engine-interruption exercises
-run only in the explicitly scheduled host lane. Use
-`run_docker_stability_campaign.py`; retain its per-cycle/probe/recovery JSON
-and detached GPG signature. Unscheduled CI runs static and unit gates only.
+## Mandatory coverage
+
+The immutable release bundle is `bioetl-main` plus stateful
+`bioetl-monitoring`. The runner records both projects and every protected
+current/legacy volume across:
+
+- selected service termination;
+- failed health/readiness;
+- occupied required port;
+- expected-image identity drift classification;
+- interrupted startup;
+- bounded memory/PID pressure;
+- supported Docker Desktop engine restart;
+- 100 cold/warm idempotency cycles;
+- one uninterrupted 72-hour soak;
+- 100 bounded engine recovery trials.
+
+The first clean 24 hours may satisfy RF-017 only when its evidence also covers
+both stacks, exact Run/Manifest ID, numeric Processed Records (including a
+legitimate zero), host/in-network Prometheus parity and reviewed Grafana panels.
+
+## Resume and evidence integrity
+
+Resume requires an exact match for runtime origin, contract hash, release
+bundle, thresholds, sample interval, evidence/summary paths, fault set and
+signing fingerprint. Every existing JSON hash and the complete evidence set are
+validated before host mutation. A sampling gap resets the clean soak window;
+elapsed time is never reconstructed from configured intervals.
+
+The operational summary is written once and then signed once. It is not
+modified after signing. A separate verification receipt records the exact
+`VALIDSIG` fingerprint, summary/signature hashes, final gates and promotion
+result.
+
+## Release gates
+
+- 100 clean cycles and complete fault matrix;
+- continuous 72-hour window with zero unexpected restart, OOM, unresolved
+  unhealthy state or identity/origin drift;
+- every resource peak below 80% of its hard limit;
+- Docker VM free reserve at least 4 GiB and contract disk reserve preserved;
+- at least 99/100 engine recoveries complete within 180 seconds;
+- zero protected volume loss and exactly one incident record for each failed
+  start/recovery;
+- detached signature verified against the approved fingerprint.
+
+A missing/partial artifact or failed gate blocks promotion. Do not raise retry,
+timeout, resource, health or technical-debt budgets to waive a failure.
+
+## Verification
+
+Verify the detached signature receipt, every release gate, raw evidence hash,
+protected volume map and exact campaign identity. A missing field is failure.
+
+## Rollback/Recovery
+
+Restore the last passing pinned image/config bundle and retain failed campaign
+evidence. Never roll back by deleting volumes, VHDX or Docker data.
+
+## Post-incident
+
+Record the failed gate, primary cause, affected trial/window, operator and
+follow-up issue. Start a new campaign identity only after the defect is fixed.
+
+## Compliance
+
+Docker remains optional under ADR-010; `.env`/`.wslconfig` and technical-debt
+budgets remain unchanged by this procedure.

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import platform
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -11,6 +12,11 @@ from unittest.mock import MagicMock
 from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
+
+# Skip on Windows due to Delta Lake write timeout issues on network drives
+if platform.system() == "Windows":
+    pytest.skip("Gold writer tests skipped on Windows due to Delta Lake timeout", allow_module_level=True)
+
 from deltalake import DeltaTable
 from pandera.pandas import Column, DataFrameSchema
 

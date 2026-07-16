@@ -5,7 +5,7 @@ description: "Core BioETL governance and invariants"
 
 # BioETL Core Governance
 
-**Canonical references:** `AGENTS.md`, `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/RULES.md` (v6.1.4), `docs/01-requirements/REQUIREMENTS.md` (v1.10, 156 reqs), `docs/02-architecture/decisions/` (ADR-001…ADR-050).
+**Canonical references:** `AGENTS.md`, `docs/00-project/NORMATIVE_SOURCES.md`, `docs/00-project/RULES.md` (v6.1.5), `docs/01-requirements/REQUIREMENTS.md` (v1.12, 168 reqs), `docs/02-architecture/decisions/` (ADR-001…ADR-050).
 
 Condensed AI guidance — **does not replace** canonical RULES/ADR. On conflict, canonical text + executable gates win.
 
@@ -62,6 +62,7 @@ Hexagonal (Ports & Adapters) + DDD + Medallion + Composite Pipeline Pattern. Con
 - `run_id`, hashes, paths, record IDs as Prometheus labels
 - Checkpoint before durable commit; write after lock loss
 - Merge on failing architecture/type/security/schema/coverage gates
+- **Increase technical-debt budgets** — debt budgets may only shrink or stay unchanged; no new/widened linter or Sonar exclusions
 
 ## Definition of Done (summary)
 

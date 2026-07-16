@@ -265,7 +265,6 @@
 05-operations/verification/neo4j-memory-qa-examples.md
 05-operations/verification/neo4j-memory-windows-verification.md
 05-operations/verification/root-hygiene-refactoring-plan-2026-07-08.md
-CODEX_HANG_FIX.md
 D-01 Governance & Style Guide.md
 D-02 Provider Integration Handbook.md
 D-03 Data Contracts & Schema Specification.md

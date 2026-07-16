@@ -4,6 +4,11 @@ description: "BioETL operations — secrets, locks, shutdown, local-only runtime
 globs:
   - "configs/**/*.yaml"
   - "src/**/*.py"
+  - "Dockerfile*"
+  - "**/Dockerfile*"
+  - "docker-compose*.yml"
+  - ".github/workflows/**/*.yml"
+  - ".github/workflows/**/*.yaml"
 ---
 
 # Operations (Local-Only)
@@ -14,8 +19,10 @@ globs:
 
 - Source: `os.environ` only; format `BIOETL_{PROVIDER}_{KEY}`
 - Hardcoded secrets and committed `.env` **MUST NOT**
+- Tracked `configs/**/*.yaml`: secret-valued fields only — no live tokens/passwords/connection strings; use placeholders or env/secret refs
 - Least privilege for secrets and `data/output` write paths
 - `.env` edits require explicit per-task user approval (see `05-agent-workflow`)
+- Do not narrow `.gitignore` secret patterns or package `.env` into Docker/CI artifacts
 
 ## Locks (MemoryLock only — ADR-010)
 

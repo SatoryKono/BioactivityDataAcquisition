@@ -198,7 +198,7 @@ def collect_snapshots(
                     '{"State":{{json .State}},'
                     '"RestartCount":{{.RestartCount}},'
                     '"Image":{{json .Config.Image}},'
-                    '"RepoDigests":{{json .RepoDigests}}}'
+                    '"ImageID":{{json .Image}}}'
                 ),
                 container_id,
             ],
@@ -212,6 +212,35 @@ def collect_snapshots(
         item = details[0]
         state = item.get("State") or {}
         config = item.get("Config") or {}
+        image = str(
+            item.get("Image")
+            or config.get("Image")
+            or row.get("Image")
+            or ""
+        )
+        image_id = str(item.get("ImageID") or image)
+        image_digests: tuple[str, ...] = ()
+        if image_id:
+            image_inspection = runner(
+                [
+                    "docker",
+                    "image",
+                    "inspect",
+                    "--format",
+                    '{"RepoDigests":{{json .RepoDigests}}}',
+                    image_id,
+                ],
+                ROOT,
+                timeout,
+            )
+            observations.append(image_inspection)
+            image_details = _json_rows(image_inspection.stdout)
+            if image_inspection.returncode == 0 and image_details:
+                image_digests = tuple(
+                    str(value)
+                    for value in (image_details[0].get("RepoDigests") or [])
+                    if value
+                )
         health = (state.get("Health") or {}).get("Status", "none")
         snapshots.append(
             ServiceSnapshot(
@@ -221,17 +250,8 @@ def collect_snapshots(
                 health=str(health).lower(),
                 restart_count=int(item.get("RestartCount") or 0),
                 oom_killed=bool(state.get("OOMKilled", False)),
-                image=str(
-                    item.get("Image")
-                    or config.get("Image")
-                    or row.get("Image")
-                    or ""
-                ),
-                image_digests=tuple(
-                    str(value)
-                    for value in (item.get("RepoDigests") or [])
-                    if value
-                ),
+                image=image,
+                image_digests=image_digests,
             )
         )
     return snapshots, observations
@@ -303,6 +323,7 @@ _CAUSE_PRIORITY = {
     "preflight_failed": 1,
     "compose_render_failed": 2,
     "project_origin_drift": 3,
+    "network_owner_drift": 3,
     "port_owner_drift": 4,
     "image_identity_drift": 5,
     "oom_killed": 6,
@@ -411,6 +432,108 @@ def diagnose(
     return payload
 
 
+def ensure_shared_networks(
+    spec: StackSpec,
+    contract_path: Path,
+    output: Path,
+    *,
+    runner: Runner = _run,
+    timeout: float = 15.0,
+) -> tuple[bool, list[dict[str, Any]]]:
+    """Create missing contracted external networks and reject conflicting owners."""
+    try:
+        contract = _load_contract(contract_path)
+    except OSError:
+        # Focused unit fixtures may supply an in-memory preflight without a file.
+        # Production preflight cannot succeed when the contract is absent.
+        return True, []
+    networks = [
+        raw
+        for raw in contract.get("shared_networks", {}).values()
+        if isinstance(raw, Mapping) and spec.name in raw.get("consumers", [])
+    ]
+    observations: list[dict[str, Any]] = []
+    findings: list[dict[str, Any]] = []
+    for raw in networks:
+        name = str(raw["name"])
+        owner = str(raw["owner"])
+        inspection = runner(
+            [
+                "docker",
+                "network",
+                "inspect",
+                "--format",
+                '{{ index .Labels "com.bioetl.owner" }}',
+                name,
+            ],
+            ROOT,
+            timeout,
+        )
+        created = False
+        if inspection.returncode != 0:
+            creation = runner(
+                [
+                    "docker",
+                    "network",
+                    "create",
+                    "--label",
+                    f"com.bioetl.owner={owner}",
+                    name,
+                ],
+                ROOT,
+                timeout,
+            )
+            created = creation.returncode == 0
+            observations.append(
+                {
+                    "name": name,
+                    "owner": owner,
+                    "created": created,
+                    "inspect": asdict(inspection),
+                    "create": asdict(creation),
+                }
+            )
+            if not created:
+                findings.append(
+                    {"cause": "network_owner_drift", "network": name, "owner": owner}
+                )
+            continue
+        observed_owner = inspection.stdout.strip()
+        owner_ok = not observed_owner or observed_owner == owner
+        observations.append(
+            {
+                "name": name,
+                "owner": owner,
+                "observed_owner": observed_owner or None,
+                "created": created,
+                "owner_ok": owner_ok,
+                "inspect": asdict(inspection),
+            }
+        )
+        if not owner_ok:
+            findings.append(
+                {
+                    "cause": "network_owner_drift",
+                    "network": name,
+                    "expected_owner": owner,
+                    "observed_owner": observed_owner,
+                }
+            )
+    write_report(
+        output,
+        {
+            "schema_version": "bioetl-docker-shared-networks-v1",
+            "generated_at": datetime.now(UTC).isoformat(),
+            "stack": spec.name,
+            "ok": not findings,
+            "findings": findings,
+            "networks": observations,
+            "redaction_applied": True,
+        },
+    )
+    return not findings, findings
+
+
 def _wait_ready(
     spec: StackSpec,
     baseline: Mapping[str, int],
@@ -476,81 +599,103 @@ def start_or_recover(
         snapshots: list[ServiceSnapshot] = []
         attempts = 0
     else:
-        render = runner(
-            _compose(spec, "config", "--quiet"),
-            ROOT,
-            min(max(0.1, deadline - clock()), 30.0),
+        networks_ok, network_findings = ensure_shared_networks(
+            spec,
+            contract_path,
+            report_dir / f"docker-runtime-{spec.name}-networks.json",
+            runner=runner,
+            timeout=min(max(0.1, deadline - clock()), 30.0),
         )
-        if render.returncode != 0:
-            findings = [{"cause": "compose_render_failed", "stderr": render.stderr}]
+        if not networks_ok:
+            findings = network_findings
             snapshots = []
             attempts = 0
         else:
-            before, _ = collect_snapshots(
-                spec,
-                runner=runner,
-                timeout=min(15.0, max(0.1, deadline - clock())),
-            )
-            baseline = {row.service: row.restart_count for row in before}
-            findings = [{"cause": "recovery_exhausted"}]
-            snapshots = before
-            attempts = 0
-            for attempts in range(1, max_attempts + 1):
-                remaining = deadline - clock()
-                if remaining <= 0:
-                    findings = [{"cause": "readiness_timeout", "attempt": attempts}]
-                    break
-                command = _compose(
-                    spec,
-                    "up",
-                    "-d",
-                    "--wait",
-                    "--wait-timeout",
-                    str(max(1, int(remaining))),
-                    *spec.required_services,
-                )
-                result = runner(command, ROOT, remaining)
-                history.append(
-                    {
-                        "attempt": attempts,
-                        "returncode": result.returncode,
-                        "elapsed_seconds": round(clock() - started, 3),
-                    }
-                )
-                if result.returncode == 0:
-                    remaining = max(0.0, deadline - clock())
-                    snapshots, findings = _wait_ready(
-                        spec,
-                        baseline,
-                        runner=runner,
-                        timeout=remaining,
-                        poll_interval=poll_interval,
-                        stabilization_seconds=stabilization_seconds,
-                        sleep=sleep,
-                        clock=clock,
-                    )
-                    if not findings:
-                        return 0
-                else:
-                    findings = [
-                        {
-                            "cause": "service_unready",
-                            "stderr": result.stderr,
-                            "attempt": attempts,
-                        }
-                    ]
-                if attempts < max_attempts:
-                    sleep(min(2 ** (attempts - 1), 4, max(0.0, deadline - clock())))
-            log_result = runner(
-                _compose(spec, "logs", "--no-color", "--tail", "100"),
+            render = runner(
+                _compose(spec, "config", "--quiet"),
                 ROOT,
-                min(15.0, max(0.1, deadline - clock())),
+                min(max(0.1, deadline - clock()), 30.0),
             )
-            recent_logs = {
-                "captured": log_result.returncode == 0,
-                "stdout": _bounded(log_result.stdout),
-                "stderr": _bounded(log_result.stderr),
-            }
+            if render.returncode != 0:
+                findings = [
+                    {"cause": "compose_render_failed", "stderr": render.stderr}
+                ]
+                snapshots = []
+                attempts = 0
+            else:
+                before, _ = collect_snapshots(
+                    spec,
+                    runner=runner,
+                    timeout=min(15.0, max(0.1, deadline - clock())),
+                )
+                baseline = {row.service: row.restart_count for row in before}
+                findings = [{"cause": "recovery_exhausted"}]
+                snapshots = before
+                attempts = 0
+                for attempts in range(1, max_attempts + 1):
+                    remaining = deadline - clock()
+                    if remaining <= 0:
+                        findings = [
+                            {"cause": "readiness_timeout", "attempt": attempts}
+                        ]
+                        break
+                    command = _compose(
+                        spec,
+                        "up",
+                        "-d",
+                        "--wait",
+                        "--wait-timeout",
+                        str(max(1, int(remaining))),
+                        *spec.required_services,
+                    )
+                    result = runner(command, ROOT, remaining)
+                    history.append(
+                        {
+                            "attempt": attempts,
+                            "returncode": result.returncode,
+                            "elapsed_seconds": round(clock() - started, 3),
+                        }
+                    )
+                    if result.returncode == 0:
+                        remaining = max(0.0, deadline - clock())
+                        snapshots, findings = _wait_ready(
+                            spec,
+                            baseline,
+                            runner=runner,
+                            timeout=remaining,
+                            poll_interval=poll_interval,
+                            stabilization_seconds=stabilization_seconds,
+                            sleep=sleep,
+                            clock=clock,
+                        )
+                        if not findings:
+                            return 0
+                    else:
+                        findings = [
+                            {
+                                "cause": "service_unready",
+                                "stderr": result.stderr,
+                                "attempt": attempts,
+                            }
+                        ]
+                    if attempts < max_attempts:
+                        sleep(
+                            min(
+                                2 ** (attempts - 1),
+                                4,
+                                max(0.0, deadline - clock()),
+                            )
+                        )
+                log_result = runner(
+                    _compose(spec, "logs", "--no-color", "--tail", "100"),
+                    ROOT,
+                    min(15.0, max(0.1, deadline - clock())),
+                )
+                recent_logs = {
+                    "captured": log_result.returncode == 0,
+                    "stdout": _bounded(log_result.stdout),
+                    "stderr": _bounded(log_result.stderr),
+                }
     cause = primary_cause(findings)
     disk = shutil.disk_usage(ROOT)
     incident = {

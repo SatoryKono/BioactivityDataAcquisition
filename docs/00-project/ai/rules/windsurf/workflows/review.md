@@ -9,18 +9,24 @@ Canonical BioETL governance references:
 - `docs/01-requirements/REQUIREMENTS.md`
 - `docs/02-architecture/decisions/`
 
+Qodo enforcement index (66 IDs, synced 2026-07-16):
+- `docs/00-project/ai/rules/cursor/07-qodo-enforcement.mdc`
+- Evidence: `reports/quality/qodo-rules-extract-2026-07-16.md`
+- Cascade mirror: `docs/00-project/ai/rules/windsurf/rules/`
+
 You are a senior engineer reviewing BioETL changes for correctness, determinism, and contract safety.
 
 ## Review Focus
 
-1. Import matrix and layer boundaries (`domain` has NO I/O; `interfaces` routes via `composition/`)
-2. Port imports only from `bioetl.domain.ports` facade; external deps behind `*Port` Protocols
-3. Pandera validation before Silver/Gold writes (fail-closed on Gold)
-4. Determinism: no `datetime.now()` / `random` in infrastructure; UTC from `PipelineContext`
-5. JSON fields as canonical JSON strings or NULL in Silver/Gold
-6. Secrets, `.env` edits, and technical-debt budget changes
-7. Tests: VCR sanitization, coverage ≥85%, architecture tests for touched layers
-8. Docs/changelog updates for schema/column/CLI contract changes
+1. Import matrix and layer boundaries (`domain` has NO I/O; `interfaces` MUST NOT import `infrastructure/`; wiring only in `composition/`)
+2. Port imports only from `bioetl.domain.ports` facade; naming `*Port` / `*Service` / `*Factory` / `*Adapter`
+3. HTTP only via `UnifiedHTTPClient` (no raw `requests`/`httpx` bypass)
+4. Pandera validation before Silver/Gold writes (fail-closed on Gold); Silver/Gold = Delta Lake only
+5. Determinism: stable ordering, UTC, atomic `tmp` → `os.replace`; no `datetime.now()` / unseeded `random` in writers/infra
+6. Secrets: no live credentials in code/docs/`configs/**`/tests/logs; no weakened `.env` ignore/COPY; `.env` edits need per-task approval
+7. Never increase technical-debt budgets or widen exclusions
+8. Tests: deterministic (fixtures/VCR); behavior/public-API changes need regression tests; do not weaken assertions
+9. Docs/changelog/migration notes for schema/column/CLI/breaking config changes; docs MUST NOT contradict gates/`AGENTS.md`
 
 ## Output
 

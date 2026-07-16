@@ -138,6 +138,20 @@ ______________________________________________________________________
 > viable screenshot/manifest check. The final render preflight uses
 > `--skip-semantic-checks`, so Prometheus or Quarantine Explorer availability
 > cannot contaminate the browser verdict.
+> A release occurrence is cryptographically traceable rather than path-only:
+> the semantic report, render manifest, and gate receipt share one
+> `occurrence_id`; the receipt records commit/tree identity, SHA-256, terminal
+> status, and dashboard/panel scope for both source artifacts. Missing or
+> cross-occurrence evidence fails closed. Unit tests with a temporary screenshot
+> directory also write their gate beside that directory and cannot overwrite the
+> canonical repository report.
+>
+> Default CI runs a token-free semantic policy/fixture gate and uploads the
+> `dashboard-semantic-policy` artifact. Browser rendering is host-only and manual
+> via `.github/workflows/dashboard-render-host.yml`; that workflow uploads the
+> semantic source, render source, and combined receipt independently. Local
+> review may run either path, default CI blocks on semantic policy, and release
+> requires both live gates from the same supported-host occurrence.
 >
 > Semantic severity is fail-closed and panel-attributable in the live audit
 > artifact. `query_invalid` blocks. `datasource_unavailable` and
@@ -148,6 +162,9 @@ ______________________________________________________________________
 > render `UNKNOWN`). Each decision records dashboard UID, panel ID, datasource
 > kind, required/optional status, original classification, canonical
 > classification, and gate decision.
+> Normal runtime files under `reports/logs/` are scraped by Promtail as
+> `{job="bioetl"}`, matching Runtime panels `#250`, `#251`, and `#257`.
+> Audit-only logs keep the separate `{job="bioetl-audit"}` boundary.
 >
 > If the
 > discovery pass times out, the cycle falls back to the last successful

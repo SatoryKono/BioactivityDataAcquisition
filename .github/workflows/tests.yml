@@ -322,6 +322,25 @@ jobs:
                       tests/integration/test_dashboard_navigation_contract_sync.py \
                       -q --tb=short
 
+            -   name: Dashboard semantic release policy gate (token-free)
+                run: |
+                    mkdir -p reports/observability/ci
+                    uv run pytest \
+                      tests/architecture/test_observability_dashboard_tooling.py \
+                      tests/integration/test_dashboard_no_data_policy.py \
+                      tests/integration/test_grafana_datasource_provisioning.py::test_default_runtime_log_sink_reaches_canonical_loki_dashboard_job \
+                      tests/integration/test_grafana_surface_contracts.py \
+                      -q --tb=short \
+                      --junitxml=reports/observability/ci/dashboard-semantic-policy.xml
+
+            -   name: Upload dashboard semantic policy evidence
+                if: always()
+                uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+                with:
+                    name: dashboard-semantic-policy
+                    path: reports/observability/ci/dashboard-semantic-policy.xml
+                    if-no-files-found: error
+
             -   name: Prometheus rules syntax + promtool test vectors
                 run: uv run python -m scripts.engineering.qa check-prometheus-rules --runner docker
 

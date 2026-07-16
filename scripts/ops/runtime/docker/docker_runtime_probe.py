@@ -15,7 +15,7 @@ import time
 import urllib.parse
 import urllib.request
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -504,6 +504,11 @@ def _parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--metrics-output", type=Path)
     parser.add_argument("--baseline", type=Path)
     parser.add_argument("--incident", type=Path)
+    parser.add_argument(
+        "--expected-image-override",
+        metavar="SERVICE=IMAGE",
+        help="Test-only expected identity override used by the scheduled drift fault.",
+    )
     parser.add_argument("--pushgateway-url")
     parser.add_argument("--timeout", type=float, default=15.0)
     return parser.parse_args(argv)
@@ -514,6 +519,20 @@ def main(argv: Sequence[str] | None = None) -> int:
     contract = args.contract.resolve()
     try:
         spec = resolve_stack(contract, args.stack)
+        if args.expected_image_override:
+            service, separator, image = args.expected_image_override.partition("=")
+            if (
+                separator != "="
+                or not service
+                or not image
+                or service not in spec.required_services
+                or service not in spec.expected_images
+            ):
+                raise ValueError("Invalid required-service expected image override")
+            spec = replace(
+                spec,
+                expected_images={**spec.expected_images, service: image},
+            )
         report = build_report(
             spec,
             contract,

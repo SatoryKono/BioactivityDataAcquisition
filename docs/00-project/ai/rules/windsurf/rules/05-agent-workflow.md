@@ -30,10 +30,11 @@ Follow `docs/00-project/ai/agents/policy/POST_CHANGE_VALIDATION.md`:
 
 ## Hard Guardrails
 
-- **Never increase technical-debt budgets** — debt may only shrink or stay unchanged; no new/widened linter or Sonar exclusions
-- **Never edit `.env` files** without explicit per-task user approval documented in task/PR
-- **No secrets** in code, docs, configs, tests, or logs — scan for high-entropy strings, PEM blocks, credential URLs, token prefixes (`sk_live_`, `AKIA`, `ghp_`)
-- **Do not weaken `.env` protections** — keep `.gitignore` patterns, do not COPY `.env` into Docker/CI artifacts
+- **Never increase technical-debt budgets** — debt may only shrink or stay unchanged; no new/widened linter or Sonar exclusions (`sonar.exclusions`, ignore lists, coverage globs)
+- **Never edit `.env` files** without explicit per-task user approval documented in task/PR (generic “we can edit .env” does not count)
+- **No secrets** in code, docs, configs, tests, logs, or tracked non-code artifacts — scan high-entropy strings, PEM blocks, credential URLs, token prefixes (`sk_live_`, `AKIA`, `ghp_`, `xoxb-`)
+- **No secrets in tracked `configs/**` YAML** — secret-valued fields only: placeholders, `${ENV_VAR}`, or secret-manager refs; ordinary non-secret config values remain allowed
+- **Do not weaken `.env` protections** — keep `.gitignore` patterns; do not COPY/ADD `.env` into Docker/CI artifacts; do not log entire env maps
 - **No silent breaking changes** to CLI/API/schema contracts
 - BioETL stays **local-only by default** (no Docker/Redis unless task requires it)
 - After `src/bioetl/**/*.py` changes: refresh `reports/quality/module-coverage-inventory.json` (`source_tree_sha256` MUST change)

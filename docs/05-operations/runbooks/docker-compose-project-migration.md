@@ -1,7 +1,39 @@
+______________________________________________________________________
+
+Version: 1.0.0
+Status: active
+Class: internal-published
+Owner: BioETL Team
+Reviewers:
+
+- BioETL Team
+  Priority: P1
+  Runtime profile: Local-Only optional Docker adjunct (ADR-010).
+  Last verified: '2026-07-16'
+
+______________________________________________________________________
+
 # Docker Compose project migration
+
+## Trigger
+
+Use this runbook for a workstation cutover from a legacy/shared Compose project
+or mixed repository origin to the contracted project bundle.
+
+## Impact
+
+Priority P1 for stateful Docker cutover. Incorrect execution can make optional
+monitoring/Neo4j data unavailable, so source volumes and backups are retained.
+
+## Preconditions
 
 This runbook applies only to the optional local Docker helpers permitted by
 ADR-010. The canonical BioETL runtime remains the Python/venv flow.
+
+Obtain a maintenance window, capture current projects/volumes/origins, inject
+required environment values through the process, and do not edit `.env`.
+
+## Procedure
 
 ## Ownership contract
 
@@ -32,11 +64,12 @@ The shared networks are external infrastructure with stable literal names:
 
 | Logical network | External name | Consumers | Owner |
 |---|---|---|---|
-| `monitoring` | `bioetl-monitoring` | `bioetl-main`, `bioetl-monitoring` | `scripts/ops/docker-setup` |
-| `runtime` | `bioetl-runtime` | `bioetl-main`, `bioetl-neo4j` | `scripts/ops/docker-setup` |
+| `monitoring` | `bioetl-monitoring` | `bioetl-main`, `bioetl-monitoring` | `runtime_manager.py` |
+| `runtime` | `bioetl-runtime` | `bioetl-main`, `bioetl-neo4j` | `runtime_manager.py` |
 
-Create or verify these networks through `scripts/ops/docker-setup.sh` or
-`scripts/ops/docker-setup.ps1` before starting a consumer. The former
+`runtime_manager.py start/recover` verifies these networks and creates a missing
+network with its contracted owner label. It refuses a conflicting owner and
+never deletes or recreates an existing network automatically. The former
 project-local network `bioetl-main_warp-network` carries no persistent data and
 MUST NOT be reused; after all legacy consumers are stopped it may be removed
 only as a separate, explicit cleanup operation.
@@ -73,8 +106,8 @@ Grafana provisioning, and Compose files needed by the selected services. A
 partial data copy can make exact RunManifest identity work while leaving other
 HTTP panels unavailable, so the live panel audit remains mandatory.
 
-Pass required values through the process or an explicitly named local
-`--env-file`; never create or rewrite a repository `.env` as part of cutover.
+Pass required values through the current process from the approved local secret
+store; never create, read, or rewrite a repository `.env` as part of cutover.
 
 ## Mandatory Neo4j backup/restore drill
 
@@ -103,14 +136,13 @@ legacy volume must never be cut over on static evidence alone.
 
 ## Cutover
 
-After a successful drill, create the target volume, restore the verified
-archive, verify both external networks, and start only:
+After a successful drill, create the target volume and restore the verified
+archive. Then use the single readiness-aware lifecycle owner:
 
 ```bash
-docker network inspect bioetl-runtime
-docker network inspect bioetl-monitoring
-docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml up -d
-docker compose -p bioetl-neo4j -f docker-compose.neo4j.yml ps
+python scripts/ops/runtime/docker/runtime_manager.py check --stack neo4j
+python scripts/ops/runtime/docker/runtime_manager.py start --stack neo4j --timeout 180
+python scripts/ops/runtime/docker/runtime_manager.py status --stack neo4j
 ```
 
 Use the project-specific commands from the table for every other stack. To
@@ -121,15 +153,17 @@ For the main and monitoring cutover, start only the canonical projects and
 wait for readiness:
 
 ```bash
-docker compose -p bioetl-main -f docker-compose.yml up -d --wait bioetl
-docker compose -p bioetl-monitoring -f docker-compose.monitoring.yml \
-  --profile tracing up -d --wait \
-  prometheus pushgateway loki promtail tempo renderer grafana
+python scripts/ops/runtime/docker/runtime_manager.py start --stack main --timeout 180
+python scripts/ops/runtime/docker/runtime_manager.py start --stack monitoring --timeout 180
+python scripts/ops/runtime/docker/runtime_manager.py status --stack main
+python scripts/ops/runtime/docker/runtime_manager.py status --stack monitoring
 ```
 
 Grafana 12 uses `GF_PLUGINS_PREINSTALL` only. Do not also set legacy
 `GF_INSTALL_PLUGINS`: the duplicate CLI installer delays readiness and can
 restart the container while a restored plugin volume is being inspected.
+
+## Verification
 
 Before promotion, require all of the following:
 
@@ -145,3 +179,18 @@ Before promotion, require all of the following:
 Retain the verified backups and all legacy source volumes throughout the
 observation. If a stateful canary fails, restore only the affected target
 volume from its verified backup; do not prune or delete the legacy source.
+
+## Rollback/Recovery
+
+Stop only the affected contracted project without volumes and restore its
+target volume from the verified backup. Keep every legacy source volume intact.
+
+## Post-incident
+
+Record the project/origin map, volume hashes, commands, panel/Prometheus
+evidence, observation window and follow-up owner.
+
+## Compliance
+
+Docker remains optional under ADR-010. Cutover does not create/edit `.env`,
+delete protected data or increase retry, timeout, resource or debt budgets.
