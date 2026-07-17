@@ -85,6 +85,7 @@ non_aggregate_clusters:
   - {name: value_objects, path: src/bioetl/domain/value_objects, <<: *support_cluster}
   - {name: workflow, path: src/bioetl/domain/workflow, <<: *support_cluster}
 non_aggregate_root_modules:
+  - {module: bioetl.domain._immutability, path: src/bioetl/domain/_immutability.py, <<: *support_module}
   - {module: bioetl.domain._observability_contract_core, path: src/bioetl/domain/_observability_contract_core.py, <<: *support_module}
   - {module: bioetl.domain._observability_contract_primitives, path: src/bioetl/domain/_observability_contract_primitives.py, <<: *support_module}
   - {module: bioetl.domain.constants, path: src/bioetl/domain/constants.py, <<: *support_module}

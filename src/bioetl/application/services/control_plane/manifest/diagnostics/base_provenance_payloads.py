@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from bioetl.domain.control_plane import RunManifest
+from bioetl.domain.control_plane import RunCodeProvenance, RunManifest
 
 
 def _build_base_summary_code_provenance_payload(
-    code_provenance: object,
+    code_provenance: RunCodeProvenance,
     dependency_lock_state: object,
     code_provenance_state: dict[str, object],
 ) -> dict[str, object]:

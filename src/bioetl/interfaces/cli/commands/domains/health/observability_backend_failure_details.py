@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Sequence
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Protocol
 from urllib.error import HTTPError, URLError
 from urllib.request import build_opener
+
+from bioetl.interfaces.cli.commands.domains.health.observability_backend_probes import (
+    _HttpProbeResponse,
+    _UrlOpenFn,
+)
 
 
 class _SupportsPoll(Protocol):
@@ -15,9 +20,29 @@ class _SupportsPoll(Protocol):
     def poll(self) -> int | None: ...
 
 
-def _open_url(url: str, *, timeout: float) -> object:
+class _ResponseOpener(Protocol):
+    """Standard-library opener surface with a typed probe response."""
+
+    def open(
+        self,
+        fullurl: str,
+        data: bytes | None = None,
+        timeout: float = ...,
+    ) -> _HttpProbeResponse: ...
+
+
+def _open_probe_response(
+    opener: _ResponseOpener,
+    url: str,
+    *,
+    timeout: float,
+) -> _HttpProbeResponse:
+    return opener.open(url, timeout=timeout)
+
+
+def _open_url(url: str, *, timeout: float) -> _HttpProbeResponse:
     """Open one HTTP probe URL through a short-lived standard-library opener."""
-    return build_opener().open(url, timeout=timeout)
+    return _open_probe_response(build_opener(), url, timeout=timeout)
 
 
 def _read_backend_startup_log_excerpt(
@@ -92,7 +117,7 @@ def _describe_required_probe_failure(
     *,
     required_probe_paths: tuple[str, ...],
     timeout_seconds: float = 1.0,
-    urlopen_fn: Callable[..., object] = _open_url,
+    urlopen_fn: _UrlOpenFn = _open_url,
 ) -> str | None:
     if not required_probe_paths:
         return None
@@ -102,7 +127,7 @@ def _describe_required_probe_failure(
     probe_url = f"{base_url}{path}"
     try:
         with urlopen_fn(probe_url, timeout=timeout_seconds) as response:
-            status = int(getattr(response, "status", 200))
+            status = response.status
             if status < 400:
                 return None
             return f"Capability probe {probe_url} returned HTTP {status}."

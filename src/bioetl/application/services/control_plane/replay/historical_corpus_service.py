@@ -13,11 +13,19 @@ from bioetl.application.services.control_plane.replay.historical_certification_s
     HistoricalReplayCertificationService,
 )
 from bioetl.application.services.control_plane.replay.historical_corpus_models import (
-    HistoricalReplayBulkCertificationRecord,
-    HistoricalReplayBulkCertificationResult,
-    HistoricalReplayBulkCertificationSpec,
-    HistoricalReplayCertifiabilityInventory,
-    HistoricalReplayCertifiabilityRecord,
+    HistoricalReplayBulkCertificationRecord as HistoricalReplayBulkCertificationRecord,
+)
+from bioetl.application.services.control_plane.replay.historical_corpus_models import (
+    HistoricalReplayBulkCertificationResult as HistoricalReplayBulkCertificationResult,
+)
+from bioetl.application.services.control_plane.replay.historical_corpus_models import (
+    HistoricalReplayBulkCertificationSpec as HistoricalReplayBulkCertificationSpec,
+)
+from bioetl.application.services.control_plane.replay.historical_corpus_models import (
+    HistoricalReplayCertifiabilityInventory as HistoricalReplayCertifiabilityInventory,
+)
+from bioetl.application.services.control_plane.replay.historical_corpus_models import (
+    HistoricalReplayCertifiabilityRecord as HistoricalReplayCertifiabilityRecord,
 )
 from bioetl.application.services.control_plane.replay.historical_corpus_policy import (
     bulk_spec_order_key,

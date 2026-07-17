@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Protocol, cast
+from typing import TYPE_CHECKING, Protocol
 from urllib.parse import unquote
+
+if TYPE_CHECKING:
+    from bioetl.application.services.quarantine_service import QuarantineService
 
 _NOT_FOUND_MESSAGE = "Not Found"
 
@@ -26,7 +29,8 @@ class _HealthResponseSupport(Protocol):
 
 
 class _HealthQuarantineRoutingHost(_HealthResponseSupport, Protocol):
-    _quarantine_service: object | None
+    @property
+    def _quarantine_service(self) -> QuarantineService | None: ...
 
     def _read_required_param(self, query: dict[str, str], name: str) -> str: ...
 
@@ -51,9 +55,8 @@ async def dispatch_quarantine_request(
     query: dict[str, str],
 ) -> None:
     """Route record-level quarantine explorer requests."""
-    response_support = cast(_HealthResponseSupport, host)
     if host._quarantine_service is None:
-        await response_support._send_response(
+        await host._send_response(
             writer,
             503,
             "Quarantine explorer unavailable",
@@ -79,9 +82,9 @@ async def dispatch_quarantine_request(
                 raise ValueError("Missing payload_hash in path")
             await handle_filtered_record_detail(host, writer, query, payload_hash)
             return
-        await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
+        await host._send_response(writer, 404, _NOT_FOUND_MESSAGE)
     except ValueError as exc:
-        await response_support._send_response(writer, 400, str(exc))
+        await host._send_response(writer, 400, str(exc))
 
 
 async def handle_filtered_records(

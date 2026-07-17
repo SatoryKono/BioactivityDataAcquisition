@@ -32,9 +32,13 @@ from pydantic_settings import (
 )
 
 from bioetl.domain.config import PipelineConfig
-from bioetl.infrastructure.config._observability_settings import ObservabilitySettings
+from bioetl.infrastructure.config._observability_settings import (
+    ObservabilitySettings as ObservabilitySettings,
+)
 from bioetl.infrastructure.config._path_settings import StoragePathSettingsMixin
-from bioetl.infrastructure.config._pipeline_settings import PipelineSettings
+from bioetl.infrastructure.config._pipeline_settings import (
+    PipelineSettings as PipelineSettings,
+)
 from bioetl.infrastructure.config._settings_validation import (
     coerce_silver_dedup_timeout_seconds,
 )

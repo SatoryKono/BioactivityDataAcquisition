@@ -46,12 +46,17 @@ _REGISTERED_COMPOSITE_FAMILIES = (
 )
 _REGISTERED_STRICT_SOURCE_FAMILIES = _REGISTERED_SOURCE_FAMILIES
 _REGISTERED_STRICT_COMPOSITE_FAMILIES = _REGISTERED_COMPOSITE_FAMILIES
-_REGISTERED_FAMILY_EXECUTION_CONTEXTS = dict.fromkeys(
-    _REGISTERED_SOURCE_FAMILIES,
-    "source",
-) | dict.fromkeys(
-    _REGISTERED_COMPOSITE_FAMILIES,
-    "composite",
+_SOURCE_EXECUTION_CONTEXT: ReproducibilityExecutionContext = "source"
+_COMPOSITE_EXECUTION_CONTEXT: ReproducibilityExecutionContext = "composite"
+_REGISTERED_FAMILY_EXECUTION_CONTEXTS: dict[str, ReproducibilityExecutionContext] = (
+    dict.fromkeys(
+        _REGISTERED_SOURCE_FAMILIES,
+        _SOURCE_EXECUTION_CONTEXT,
+    )
+    | dict.fromkeys(
+        _REGISTERED_COMPOSITE_FAMILIES,
+        _COMPOSITE_EXECUTION_CONTEXT,
+    )
 )
 
 # Compatibility aliases retained for generated docs/tests that still use the

@@ -4,16 +4,18 @@ from __future__ import annotations
 
 import inspect
 from collections.abc import Awaitable, Callable, Sequence
-from typing import TYPE_CHECKING, Any, Protocol, cast
+from typing import TYPE_CHECKING, Protocol, TypeGuard
 
 import orjson
 
 from bioetl.domain.behavior.dq_metrics_calculator import (
+    DQMetricsCalculator,
     DQMetricsInput,
 )
 from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports import (
     LoggerPort,
+    MetadataCoordinatorPort,
 )
 from bioetl.domain.ports.noop import NoOpMetadataWriter
 from bioetl.domain.types import BronzeRecord
@@ -28,11 +30,23 @@ if TYPE_CHECKING:
 class _SilverMetadataWriterProtocol(Protocol):
     """Structural protocol for canonical Silver metadata operations host."""
 
-    _host: object | None
-    _logger: LoggerPort
-    _metadata_coordinator: object | None
-    _metadata_writer: object | None
-    _dq_calculator: object | None
+    @property
+    def _host(self) -> object | None: ...
+
+    @property
+    def _logger(self) -> LoggerPort: ...
+
+    @property
+    def _metadata_coordinator(self) -> MetadataCoordinatorPort | None: ...
+
+    @property
+    def _metadata_writer(self) -> object | None: ...
+
+    @property
+    def _dq_calculator(self) -> DQMetricsCalculator | None: ...
+
+    @property
+    def _flat_structure(self) -> bool: ...
 
     async def compute_dq_metrics(
         self,
@@ -54,6 +68,95 @@ class _SilverMetadataWriterProtocol(Protocol):
 
 
 _GetDeltaVersion = Callable[[str], Awaitable[int | None]]
+
+
+class _DeltaVersionHost(Protocol):
+    """Host exposing the optional Delta-version compatibility hook."""
+
+    async def _get_delta_version(self, table_path: str) -> int | None: ...
+
+
+class _BasePathMetadataWriter(Protocol):
+    """Metadata writer accepting the canonical ``base_path`` keyword."""
+
+    async def write_silver_metadata(
+        self,
+        *,
+        base_path: str,
+        metadata: SilverMetadata,
+        table_name: str | None = None,
+        flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
+    ) -> object: ...
+
+
+class _TablePathMetadataWriter(Protocol):
+    """Compatibility writer accepting a ``table_path`` keyword."""
+
+    async def write_silver_metadata(
+        self,
+        *,
+        table_path: str,
+        metadata: SilverMetadata,
+        table_name: str | None = None,
+        flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
+    ) -> object: ...
+
+
+class _PositionalMetadataWriter(Protocol):
+    """Legacy writer accepting path and metadata positionally."""
+
+    async def write_silver_metadata(
+        self,
+        path: str,
+        metadata: SilverMetadata,
+        *,
+        table_name: str | None = None,
+        flat_structure: bool = False,
+        provider: str | None = None,
+        entity: str | None = None,
+    ) -> object: ...
+
+
+def _has_delta_version_hook(host: object) -> TypeGuard[_DeltaVersionHost]:
+    """Narrow a host after checking its optional Delta-version hook."""
+    return callable(getattr(host, "_get_delta_version", None))
+
+
+def _writer_parameters(writer: object) -> inspect.Signature | None:
+    """Return a metadata-writer signature when the write hook is callable."""
+    write_method = getattr(writer, "write_silver_metadata", None)
+    if not callable(write_method):
+        return None
+    return inspect.signature(write_method)
+
+
+def _accepts_writer_keyword(signature: inspect.Signature, name: str) -> bool:
+    """Return whether a signature accepts one named keyword or arbitrary ones."""
+    return name in signature.parameters or any(
+        parameter.kind is inspect.Parameter.VAR_KEYWORD
+        for parameter in signature.parameters.values()
+    )
+
+
+def _is_base_path_writer(writer: object) -> TypeGuard[_BasePathMetadataWriter]:
+    """Narrow a writer exposing the canonical keyword signature."""
+    signature = _writer_parameters(writer)
+    return signature is not None and _accepts_writer_keyword(signature, "base_path")
+
+
+def _is_table_path_writer(writer: object) -> TypeGuard[_TablePathMetadataWriter]:
+    """Narrow a writer exposing the compatibility keyword signature."""
+    signature = _writer_parameters(writer)
+    return signature is not None and "table_path" in signature.parameters
+
+
+def _is_positional_writer(writer: object) -> TypeGuard[_PositionalMetadataWriter]:
+    """Narrow a writer exposing a callable legacy write hook."""
+    return _writer_parameters(writer) is not None
 
 
 def _normalize_record_value_for_dq_metrics(value: object) -> object:
@@ -181,14 +284,9 @@ async def resolve_version_after(
     metadata_ops: _SilverMetadataWriterProtocol, table_path: str
 ) -> int | None:
     """Read Delta version via host helper when available."""
-    if metadata_ops._host is not None and hasattr(
-        metadata_ops._host, "_get_delta_version"
-    ):
-        get_delta_version = cast(
-            _GetDeltaVersion,
-            metadata_ops._host._get_delta_version,
-        )
-        return await get_delta_version(table_path)
+    host = metadata_ops._host
+    if host is not None and _has_delta_version_hook(host):
+        return await host._get_delta_version(table_path)
     return 0
 
 
@@ -260,26 +358,29 @@ async def write_silver_metadata_file(
         )
         return
 
-    write_silver_metadata = metadata_ops._metadata_writer.write_silver_metadata
-    parameters = inspect.signature(write_silver_metadata).parameters
-    accepts_var_kwargs = any(
-        parameter.kind is inspect.Parameter.VAR_KEYWORD
-        for parameter in parameters.values()
-    )
-
-    kwargs: dict[str, Any] = {  # Any: dynamic metadata writer kwargs
-        "metadata": metadata
-    }  # Any: dynamic metadata writer kwargs
-    if "base_path" in parameters or accepts_var_kwargs:
-        kwargs["base_path"] = table_path
-    elif "table_path" in parameters:
-        kwargs["table_path"] = table_path
-    else:
-        legacy_write = cast(  # Any: legacy signature compatibility
-            Any,  # Any: legacy signature compatibility
-            write_silver_metadata,
+    writer = metadata_ops._metadata_writer
+    if _is_base_path_writer(writer):
+        await writer.write_silver_metadata(
+            base_path=table_path,
+            metadata=metadata,
+            table_name=table_name,
+            flat_structure=metadata_ops._flat_structure,
+            provider=provider_name,
+            entity=entity_name,
         )
-        await legacy_write(
+        return
+    if _is_table_path_writer(writer):
+        await writer.write_silver_metadata(
+            table_path=table_path,
+            metadata=metadata,
+            table_name=table_name,
+            flat_structure=metadata_ops._flat_structure,
+            provider=provider_name,
+            entity=entity_name,
+        )
+        return
+    if _is_positional_writer(writer):
+        await writer.write_silver_metadata(
             table_path,
             metadata,
             table_name=table_name,
@@ -288,14 +389,4 @@ async def write_silver_metadata_file(
             entity=entity_name,
         )
         return
-
-    if "table_name" in parameters or accepts_var_kwargs:
-        kwargs["table_name"] = table_name
-    if "flat_structure" in parameters or accepts_var_kwargs:
-        kwargs["flat_structure"] = metadata_ops._flat_structure
-    if "provider" in parameters or accepts_var_kwargs:
-        kwargs["provider"] = provider_name
-    if "entity" in parameters or accepts_var_kwargs:
-        kwargs["entity"] = entity_name
-
-    await write_silver_metadata(**kwargs)
+    raise TypeError("Metadata writer must expose an async write_silver_metadata hook")

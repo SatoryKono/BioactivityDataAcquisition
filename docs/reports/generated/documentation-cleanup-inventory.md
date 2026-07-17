@@ -26,8 +26,8 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_draft | 108 |
-| active_quality_baseline | 19 |
-| closeout_evidence | 27 |
+| active_quality_baseline | 20 |
+| closeout_evidence | 28 |
 | docs_reports_curated_entrypoint | 2 |
 | docs_reports_generated_or_route_owned | 2 |
 | docs_reports_retention_sensitive_evidence | 14 |
@@ -321,11 +321,13 @@
 | docs-export-merged-markdown | `src/tools/generate_docs_export.py` | ignored_local_export |
 | docs-reports-generated-curated-misc | `multiple governed docs and quality generators` | tracked_or_local_curated_generated_doc |
 | documentation-cleanup-inventory | `scripts/docs/checks/documentation_cleanup_inventory.py` | tracked_curated_generated_doc |
+| domain-io-taint-inventory-quality-baseline | `scripts/engineering/qa/report_domain_io_taint_inventory.py` | tracked_quality_baseline |
 | dq-contracts-generated-doc | `scripts/check_dq_dsl_parity.py` | tracked_curated_generated_doc |
 | duplication-baseline-quality-report | `scripts/engineering/qa/report_duplication_baseline.py` | working_output |
 | engineering-closeout-curated-docs | `manual closeout plus architecture QA verification` | tracked_curated_generated_doc |
 | field-level-diagnostics-quality-report | `scripts/schema/generate_field_level_diagnostics.py` | working_output |
 | file-merger-working-reports | `src/tools/file_merger.py` | working_output |
+| flaky-test-burndown-review-quality-baseline | `scripts/engineering/qa/report_flaky_test_burndown_review.py` | tracked_quality_baseline |
 | full-app-duplication-baseline-quality-report | `scripts/engineering/qa/report_duplication_baseline.py` | tracked_quality_baseline |
 | grafana-dashboard-release-gate-report | `scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py` | working_output |
 | grafana-dashboard-screenshot-report | `scripts/ops/observability/grafana/rerender_grafana_screenshots.py` | working_output |

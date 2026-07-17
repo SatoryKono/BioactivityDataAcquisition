@@ -16,6 +16,7 @@ TEST_FILE_LOC_EXEMPTIONS = {
     "tests/testing_support/bronze_writer.py": 2025,
     "tests/testing_support/neo4j_memory_sync.py": 3300,
     "tests/integration/test_grafana_dashboard_links.py": 2350,
+    "tests/unit/repo_backed/scripts/ops/observability/test_grafana_dashboard_tooling.py": 2200,
 }
 
 TEST_FUNCTION_LOC_EXEMPTIONS = {

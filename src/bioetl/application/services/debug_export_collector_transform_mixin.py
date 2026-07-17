@@ -30,6 +30,18 @@ from .debug_export_helpers import (
 class DebugExportTransformRowsMixin:
     """Record Bronze/Silver transform rows into collector-owned tables."""
 
+    _run_id: str
+    _workflow_id: str
+    _pipeline_id: str
+    _provider_id: str
+    _bronze_rows: list[dict[str, object]]
+    _silver_full_rows: list[dict[str, object]]
+    _silver_rejected_rows: list[dict[str, object]]
+    _silver_quarantine_rows: list[dict[str, object]]
+    _gold_full_rows: list[dict[str, object]]
+    _gold_rejected_rows: list[dict[str, object]]
+    _gold_record_index_by_hash: dict[str, int]
+
     def record_bronze_batch(
         self,
         *,

@@ -135,7 +135,7 @@ def _drop_windows_listener_pid(port: int, pid: int) -> bool:
     return _terminate_pid_with_sigterm(port, pid)
 
 
-def _run_taskkill(pid: int) -> subprocess.CompletedProcess[object]:
+def _run_taskkill(pid: int) -> subprocess.CompletedProcess[str]:
     taskkill = _resolve_system_executable("taskkill")
     if taskkill is None:
         return subprocess.CompletedProcess(args=(), returncode=1)

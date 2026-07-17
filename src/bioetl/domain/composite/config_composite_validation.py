@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Protocol
 
 __all__ = [
@@ -11,28 +12,44 @@ __all__ = [
 
 
 class _SeedConfigProtocol(Protocol):
-    output_keys: tuple[str, ...]
+    @property
+    def output_keys(self) -> tuple[str, ...]: ...
 
 
 class _DependencyConfigProtocol(Protocol):
-    pipeline: str
-    join_keys: tuple[str, ...]
-    uses_seed_keys: bool
+    @property
+    def pipeline(self) -> str: ...
+
+    @property
+    def join_keys(self) -> tuple[str, ...]: ...
+
+    @property
+    def uses_seed_keys(self) -> bool: ...
 
 
 class _EnricherConfigProtocol(Protocol):
-    pipeline: str
-    join_keys: tuple[str, ...]
+    @property
+    def pipeline(self) -> str: ...
+
+    @property
+    def join_keys(self) -> tuple[str, ...]: ...
 
 
 class CompositeConfigProtocol(Protocol):
-    name: str
-    version: str
-    seed: _SeedConfigProtocol
-    enrichers: tuple[_EnricherConfigProtocol, ...] | list[_EnricherConfigProtocol]
-    dependencies: (
-        tuple[_DependencyConfigProtocol, ...] | list[_DependencyConfigProtocol]
-    )
+    @property
+    def name(self) -> str: ...
+
+    @property
+    def version(self) -> str: ...
+
+    @property
+    def seed(self) -> _SeedConfigProtocol: ...
+
+    @property
+    def enrichers(self) -> Sequence[_EnricherConfigProtocol]: ...
+
+    @property
+    def dependencies(self) -> Sequence[_DependencyConfigProtocol]: ...
 
 
 def coerce_composite_collections(config: CompositeConfigProtocol) -> None:

@@ -37,6 +37,7 @@ Commands:
     report-pipeline-config-contract-ownership-map Generate/check pipeline-config-contract ownership traces
     report-contract-coverage-matrix Generate/check contract coverage matrix for active entity configs
     report-domain-io-taint-inventory Generate/check semantic Domain I/O taint inventory
+    report-flaky-test-burndown-review Generate/check tracked flaky-test review evidence
     report-port-adapter-factory-coverage Generate/check core port-adapter-factory coverage matrix
     report-module-coverage Generate/check module-level coverage inventory
     check-branch-coverage Enforce branch coverage from reports/coverage/coverage.xml
@@ -113,6 +114,9 @@ COMMAND_MODULES: dict[str, str] = {
     "report-contract-coverage-matrix": "scripts.engineering.qa.report_contract_coverage_matrix",
     "report-domain-io-taint-inventory": (
         "scripts.engineering.qa.report_domain_io_taint_inventory"
+    ),
+    "report-flaky-test-burndown-review": (
+        "scripts.engineering.qa.report_flaky_test_burndown_review"
     ),
     "report-port-adapter-factory-coverage": (
         "scripts.engineering.qa.report_port_adapter_factory_coverage"

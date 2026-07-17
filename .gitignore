@@ -157,6 +157,8 @@ log_test.txt
 !/reports/quality/total-tech-debt-audit-main-2026-07-01.md
 !/reports/quality/test-governance-current.json
 !/reports/quality/test-fixture-asset-duplication.json
+!/reports/quality/flaky-test-burndown-review.json
+!/reports/quality/domain-io-taint-inventory.json
 !/reports/quality/config-contract-registry-artifact-duplication.json
 !/reports/quality/config-surface-backlog.json
 !/reports/quality/pipeline-config-contract-ownership-map.json
@@ -424,3 +426,5 @@ data/2026-07-03_20-21-59.gif
 .github/workflows/docs.yml
 .xml
 .github/workflows/docs.yml
+/_loop_*
+/_loop_*

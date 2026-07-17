@@ -138,7 +138,15 @@ def _build_context(**overrides: object) -> SimpleNamespace:
         "dry_run": False,
         "skip_gold": False,
         "start_offset": None,
+        "exact_replay": False,
         "input_filter": SimpleNamespace(enabled=False),
+        "workflow_run_id": None,
+        "workflow_name": None,
+        "workflow_step_id": None,
+        "workflow_id": "standalone",
+        "debug_export_enabled": False,
+        "debug_export_formats": (),
+        "debug_export_dir": None,
     }
     values.update(overrides)
     return SimpleNamespace(**values)

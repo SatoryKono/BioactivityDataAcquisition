@@ -59,6 +59,20 @@ class SilverMaintenanceOperations:
             return audit_timestamp
         return self._audit_timestamp_factory()
 
+    def _resolve_audit_context(
+        self,
+        *,
+        audit_timestamp: datetime | None,
+    ) -> tuple[AuditPort, datetime] | None:
+        """Pair the configured audit port with its deterministic event timestamp."""
+        audit = self._audit
+        if audit is None:
+            return None
+        return (
+            audit,
+            self._resolve_audit_timestamp(audit_timestamp=audit_timestamp),
+        )
+
     async def maybe_export_csv(
         self,
         table_name: str,
@@ -78,10 +92,8 @@ class SilverMaintenanceOperations:
         if self._csv_exporter is None:
             return
         _ = export_path
-        event_timestamp = (
-            self._resolve_audit_timestamp(audit_timestamp=audit_timestamp)
-            if self._audit is not None
-            else None
+        audit_context = self._resolve_audit_context(
+            audit_timestamp=audit_timestamp,
         )
 
         if self._metrics:
@@ -99,8 +111,9 @@ class SilverMaintenanceOperations:
                     1,
                     labels={"table": table_name, "pipeline": self._pipeline_name},
                 )
-            if self._audit:
-                self._audit.log_event(
+            if audit_context is not None:
+                audit, event_timestamp = audit_context
+                audit.log_event(
                     "SilverCsvExport",
                     {"table": table_name, "rows": len(arrow_data), "status": "success"},
                     timestamp=event_timestamp,
@@ -116,8 +129,9 @@ class SilverMaintenanceOperations:
                         "error_type": type(e).__name__,
                     },
                 )
-            if self._audit:
-                self._audit.log_event(
+            if audit_context is not None:
+                audit, event_timestamp = audit_context
+                audit.log_event(
                     "SilverCsvExport",
                     {"table": table_name, "status": "failed", "error": str(e)},
                     timestamp=event_timestamp,
@@ -144,10 +158,8 @@ class SilverMaintenanceOperations:
         """
         if self._metrics:
             self._metrics.increment_counter("bioetl_silver_vacuum_start_total", 1)
-        event_timestamp = (
-            self._resolve_audit_timestamp(audit_timestamp=audit_timestamp)
-            if self._audit is not None
-            else None
+        audit_context = self._resolve_audit_context(
+            audit_timestamp=audit_timestamp,
         )
 
         removed_files = await self._retention_manager.vacuum(
@@ -169,8 +181,9 @@ class SilverMaintenanceOperations:
                 float(files_removed),
             )
 
-        if self._audit:
-            self._audit.log_event(
+        if audit_context is not None:
+            audit, event_timestamp = audit_context
+            audit.log_event(
                 "SilverVacuum",
                 result,
                 timestamp=event_timestamp,
@@ -197,10 +210,8 @@ class SilverMaintenanceOperations:
         """
         if self._metrics:
             self._metrics.increment_counter("bioetl_silver_optimize_start_total", 1)
-        event_timestamp = (
-            self._resolve_audit_timestamp(audit_timestamp=audit_timestamp)
-            if self._audit is not None
-            else None
+        audit_context = self._resolve_audit_context(
+            audit_timestamp=audit_timestamp,
         )
 
         result = await self._retention_manager.optimize(
@@ -213,8 +224,9 @@ class SilverMaintenanceOperations:
         if self._metrics:
             self._metrics.increment_counter("bioetl_silver_optimize_success_total", 1)
 
-        if self._audit:
-            self._audit.log_event(
+        if audit_context is not None:
+            audit, event_timestamp = audit_context
+            audit.log_event(
                 "SilverOptimize",
                 result,
                 timestamp=event_timestamp,

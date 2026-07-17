@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 from importlib import import_module
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bioetl.interfaces.cli.commands.maintenance import maintenance as maintenance
 
 __all__ = ["maintenance"]
 

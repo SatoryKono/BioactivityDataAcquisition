@@ -10,6 +10,7 @@ import pytest
 
 from bioetl.application.services.debug_export_service import (
     DebugExportConfig,
+    DebugExportPack,
     DebugExportResult,
     DebugExportService,
 )
@@ -19,6 +20,15 @@ pytestmark = pytest.mark.unit
 
 _RUN_ID = UUID("00000000-0000-0000-0000-000000000101")
 _BATCH_ID = UUID("00000000-0000-0000-0000-000000000102")
+
+
+class _AsyncDebugExportWriter:
+    def __init__(self, result: DebugExportResult) -> None:
+        self._result = result
+
+    async def write_pack(self, *, pack: DebugExportPack) -> DebugExportResult:
+        del pack
+        return self._result
 
 
 def test_debug_export_service_collects_success_and_failure_rows() -> None:
@@ -80,6 +90,7 @@ def test_debug_export_service_collects_success_and_failure_rows() -> None:
         == "SCHEMA_REQUIRED_FIELD_MISSING"
     )
     assert len(pack.tables["dq_summary"]) == 2
+    assert pack.tables["reason_dictionary"] == pack.reason_dictionary
 
 
 def test_debug_export_service_hashes_records_without_content_hash() -> None:
@@ -145,6 +156,28 @@ def test_debug_export_service_finalize_persists_pack_with_manifest_id() -> None:
     assert written_pack.status == "failed"
     assert written_pack.manifest_id == "manifest-123"
     assert written_pack.tables["bronze_index"] == ()
+
+
+@pytest.mark.asyncio
+async def test_debug_export_service_persist_awaits_async_writer_result() -> None:
+    expected = DebugExportResult(
+        root_path="artifacts/debug_exports/standalone/chembl_activity/run-1",
+        manifest_path=(
+            "artifacts/debug_exports/standalone/chembl_activity/run-1/manifest.json"
+        ),
+        debug_export_hash="hash-async",
+    )
+    service = DebugExportService(
+        config=DebugExportConfig(enabled=True, formats=("csv",)),
+        run_id=_RUN_ID,
+        pipeline_id="chembl_activity",
+        provider_id="chembl",
+        writer=_AsyncDebugExportWriter(expected),
+    )
+
+    result = await service.persist(status="failed")
+
+    assert result is expected
 
 
 def test_debug_export_service_serializes_datetime_source_metadata() -> None:

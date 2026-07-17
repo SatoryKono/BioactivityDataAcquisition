@@ -2,10 +2,15 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
+from datetime import datetime
+from pathlib import Path
 from typing import Protocol
 
 import orjson
 
+from bioetl.domain.models.metadata import SourceMetadata
+from bioetl.domain.ports import AuditPort
 from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.infrastructure.storage.bronze.pipeline_helpers import (
     BronzeWriteArtifacts,
@@ -20,13 +25,13 @@ class _BronzeWriteExecutionHostProtocol(Protocol):
     """Host contract for Bronze write execution and post-write side effects."""
 
     save_json: bool
-    _audit: object | None
+    _audit: AuditPort | None
     _save_metadata: bool
 
     def _write_atomic_stream(
         self,
-        records: object,
-        output_path: object,
+        records: Iterator[bytes],
+        output_path: Path,
     ) -> tuple[int, int]: ...
 
     async def _write_json_copy(
@@ -57,7 +62,7 @@ class _BronzeWriteExecutionHostProtocol(Protocol):
         self,
         *,
         run_id: RunID,
-        ingestion_ts: object,
+        ingestion_ts: datetime,
         relative_path: str,
         batch_id: BatchID,
         run_type: RunType,
@@ -79,9 +84,9 @@ class _BronzeWriteExecutionHostProtocol(Protocol):
         record_count: int,
         compressed_size: int,
         relative_path: str,
-        ingestion_ts: object,
+        ingestion_ts: datetime,
         duration: float,
-        source_metadata: object | None,
+        source_metadata: SourceMetadata | None,
     ) -> None: ...
 
 

@@ -7,6 +7,7 @@ from pathlib import Path
 from scripts.engineering.qa.report_compatibility_importer_census import (
     REMOVED_COMPATIBILITY_SURFACES,
     build_compatibility_importer_census,
+    validate_compatibility_metadata_consistency,
 )
 from scripts.engineering.qa.report_dead_code_inventory import build_dead_code_inventory
 
@@ -17,6 +18,106 @@ pytestmark = pytest.mark.unit
 def _write(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
+
+
+def _write_compatibility_metadata_fixture(tmp_path: Path) -> dict[str, object]:
+    _write(
+        tmp_path / "configs/quality/compatibility_facade_inventory.yaml",
+        """version: 1
+policy_scope: compatibility_facades
+transition_debt: []
+retained_entrypoints:
+  - path: src/bioetl/composition/health_api.py
+    compatibility_role: Public health facade.
+    canonical_target: bioetl.composition.health_api
+    status: public-entrypoint
+    owner: bioetl.composition
+    introduced_in: 2026-05 public export review
+    review_date: '2026-09-30'
+    external_breaking_change_required: true
+    internal_callers_zero: true
+    allowed_call_sites: No first-party imports.
+    migration_path: Use the owner module.
+    exit_criteria: First-party imports stay at zero.
+""",
+    )
+    _write(
+        tmp_path
+        / "docs/02-architecture/07-compatibility-facade-inventory.md",
+        "| Path | Compatibility role | Canonical target | Status | Owner | "
+        "Introduced in | Allowed call sites | Review date | Migration path | "
+        "Exit criteria |\n"
+        "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n"
+        "| `src/bioetl/composition/health_api.py` | Public health facade. | "
+        "`bioetl.composition.health_api` | `public-entrypoint` | "
+        "`bioetl.composition` | `2026-05 public export review` | "
+        "No first-party imports. | `2026-09-30` | Use the owner module. | "
+        "First-party imports stay at zero. |\n",
+    )
+    return {
+        "retained_entrypoints": [
+            {
+                "path": "src/bioetl/composition/health_api.py",
+                "canonical_target": "bioetl.composition.health_api",
+                "status": "public-entrypoint",
+                "owner": "bioetl.composition",
+                "external_breaking_change_required": True,
+                "internal_callers_zero": True,
+                "usage_classification": "stable_public_api_zero_first_party_src",
+                "src_importers": [],
+                "src_importer_count": 0,
+            }
+        ]
+    }
+
+
+def test_compatibility_metadata_consistency_accepts_aligned_artifacts(
+    tmp_path: Path,
+) -> None:
+    census_payload = _write_compatibility_metadata_fixture(tmp_path)
+
+    assert (
+        validate_compatibility_metadata_consistency(
+            tmp_path,
+            census_payload=census_payload,
+        )
+        == ()
+    )
+
+
+def test_compatibility_metadata_consistency_reports_cross_artifact_drift(
+    tmp_path: Path,
+) -> None:
+    census_payload = _write_compatibility_metadata_fixture(tmp_path)
+    inventory_doc = (
+        tmp_path
+        / "docs/02-architecture/07-compatibility-facade-inventory.md"
+    )
+    _write(
+        inventory_doc,
+        inventory_doc.read_text(encoding="utf-8").replace(
+            "Public health facade.",
+            "Outdated health role.",
+            1,
+        ),
+    )
+    retained_rows = census_payload["retained_entrypoints"]
+    assert isinstance(retained_rows, list)
+    retained_row = retained_rows[0]
+    assert isinstance(retained_row, dict)
+    retained_row["usage_classification"] = (
+        "stable_public_api_with_reviewed_first_party_usage"
+    )
+    retained_row["src_importer_count"] = 1
+
+    violations = validate_compatibility_metadata_consistency(
+        tmp_path,
+        census_payload=census_payload,
+    )
+
+    assert any("compatibility_role" in violation for violation in violations)
+    assert any("usage_classification" in violation for violation in violations)
+    assert any("is internal_callers_zero" in violation for violation in violations)
 
 
 def test_build_compatibility_importer_census_counts_retained_entrypoints_and_twins(

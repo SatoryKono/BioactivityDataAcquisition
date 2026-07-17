@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import datetime
-from inspect import isawaitable
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
 from uuid import UUID
@@ -59,7 +58,6 @@ def create_debug_export_collector(
     )
 
 
-@dataclass(frozen=True, slots=True)
 class DebugExportCollectorBuilderProtocol(Protocol):
     """Factory contract for constructing the collector dependency."""
 
@@ -76,7 +74,6 @@ class DebugExportCollectorBuilderProtocol(Protocol):
         ...
 
 
-@dataclass(frozen=True, slots=True)
 class DebugExportWriterProtocol(Protocol):
     """Infrastructure writer contract for persisted debug export packs."""
 
@@ -84,7 +81,7 @@ class DebugExportWriterProtocol(Protocol):
         self,
         *,
         pack: DebugExportPack,
-    ) -> DebugExportResult:
+    ) -> DebugExportResult | Awaitable[DebugExportResult]:
         """Persist the provided audit pack and return artifact metadata."""
         ...
 
@@ -160,16 +157,16 @@ class DebugExportService(DebugExportServiceRecordingMixin):
                 "Debug export is not enabled or writer is not configured"
             )
         result = self._writer.write_pack(pack=self.build_pack(status=status))
-        if isawaitable(result):
-            return await result
-        return result
+        if isinstance(result, DebugExportResult):
+            return result
+        return await result
 
     def finalize(
         self,
         *,
         status: str,
         manifest_id: str | None,
-    ) -> DebugExportResult | None:
+    ) -> DebugExportResult | Awaitable[DebugExportResult] | None:
         """Persist the collected pack once the run reaches its terminal state."""
         if not self.enabled or self._writer is None:
             return None

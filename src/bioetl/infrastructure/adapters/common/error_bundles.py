@@ -22,8 +22,8 @@ __all__ = [
 
 
 def build_common_network_error_bundle(
-    *extra_errors: type[BaseException],
-) -> tuple[type[BaseException], ...]:
+    *extra_errors: type[Exception],
+) -> tuple[type[Exception], ...]:
     """Return the canonical network/runtime error bundle shared by adapters."""
     return (
         BioETLError,

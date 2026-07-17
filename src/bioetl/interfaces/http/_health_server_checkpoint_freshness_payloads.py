@@ -11,6 +11,8 @@ def extract_checkpoint_saved_at_epoch_seconds(
     raw_value = metadata.get("checkpoint_saved_at_epoch_seconds")
     if raw_value is None:
         return None
+    if not isinstance(raw_value, (str, bytes, bytearray, int, float)):
+        return None
     try:
         value = float(raw_value)
     except (TypeError, ValueError):

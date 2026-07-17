@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import pyarrow as pa
 from deltalake import DeltaTable
 from deltalake.exceptions import TableNotFoundError
 
@@ -49,7 +50,7 @@ def _load_scoped_pyarrow_table(
     *,
     pipeline_single: str,
     filters: list[tuple[str, str, object]],
-):
+) -> pa.Table:
     """Read rows scoped by pipeline for partitioned and legacy non-partitioned tables."""
     if "pipeline" in _delta_partition_columns(dt):
         return dt.to_pyarrow_table(

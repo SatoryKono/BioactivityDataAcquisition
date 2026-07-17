@@ -20,18 +20,22 @@ __all__ = [
 ]
 
 HealthCheckMode = Literal["strict", "probe"]
-CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE = "structural_only_compat"
-LEGACY_SILVER_FILTER_COMPATIBILITY_MODE = "structural_only_auto_promote"
-SILVER_FILTER_COMPATIBILITY_MODES = frozenset(
+SilverFilterCompatibilityMode = Literal[
+    "structural_only_compat",
+    "structural_only_auto_promote",
+]
+CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE: SilverFilterCompatibilityMode = (
+    "structural_only_compat"
+)
+LEGACY_SILVER_FILTER_COMPATIBILITY_MODE: SilverFilterCompatibilityMode = (
+    "structural_only_auto_promote"
+)
+SILVER_FILTER_COMPATIBILITY_MODES: frozenset[SilverFilterCompatibilityMode] = frozenset(
     {
         CANONICAL_SILVER_FILTER_COMPATIBILITY_MODE,
         LEGACY_SILVER_FILTER_COMPATIBILITY_MODE,
     }
 )
-SilverFilterCompatibilityMode = Literal[
-    "structural_only_compat",
-    "structural_only_auto_promote",
-]
 
 
 @dataclass(frozen=True, slots=True)

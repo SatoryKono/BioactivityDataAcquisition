@@ -3,81 +3,33 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.application.core.lifecycle.shutdown import PipelineShutdownError
-from bioetl.domain.ports import LoggerPort
-
-
-class _HeartbeatTaskProtocol(Protocol):
-    async def start(self) -> None: ...
-
-    async def stop(self) -> None: ...
-
-
-class _HeartbeatFactoryProtocol(Protocol):
-    def __call__(
-        self,
-        *,
-        lock_port: object,
-        lock_key: object,
-        owner_id: object,
-        exclusive: object,
-        interval: object,
-        shutdown_signal: object,
-        logger: object,
-    ) -> _HeartbeatTaskProtocol: ...
-
-
-class _LockContextHolderProtocol(Protocol):
-    def set(self, context: object) -> None: ...
-
-    def clear(self) -> None: ...
-
-
-class _LockPortProtocol(Protocol):
-    async def acquire(
-        self,
-        *,
-        key: str,
-        owner_id: object,
-        ttl: object,
-        wait: object,
-        wait_timeout: object,
-        exclusive: bool,
-    ) -> FencingToken | None: ...
-
-    async def release(
-        self,
-        key: str,
-        owner_id: object,
-        *,
-        exclusive: bool,
-    ) -> bool: ...
-
-
-class _LockConfigProtocol(Protocol):
-    lock_key: str
-    lock_ttl: object
-    wait_for_lock: object
-    wait_timeout: object
-    exclusive: bool
-    heartbeat_interval: object
+from bioetl.application.core.config import LockConfig
+from bioetl.application.core.lifecycle.heartbeat import HeartbeatTask
+from bioetl.application.core.lifecycle.shutdown import (
+    PipelineShutdownError,
+    ShutdownSignal,
+)
+from bioetl.domain.locking import LockContext, LockContextHolder
+from bioetl.domain.ports import LockPort, LoggerPort
+from bioetl.domain.types import RunID
 
 
 class _LockRuntimeHostProtocol(Protocol):
-    _lock: _LockPortProtocol
-    _config: _LockConfigProtocol
-    _run_id: object
-    _context_holder: _LockContextHolderProtocol | None
+    _lock: LockPort
+    _config: LockConfig
+    _run_id: RunID
+    _context_holder: LockContextHolder | None
     _logger: LoggerPort
-    _heartbeat_factory: _HeartbeatFactoryProtocol
-    _shutdown_signal: object
-    _heartbeat: _HeartbeatTaskProtocol | None
+    _heartbeat_factory: Callable[..., HeartbeatTask]
+    _shutdown_signal: ShutdownSignal
+    _heartbeat: HeartbeatTask | None
     _acquired_at: float | None
     _fencing_token: FencingToken | None
 
-    def get_context(self) -> object | None: ...
+    def get_context(self) -> LockContext | None: ...
 
 
 if TYPE_CHECKING:
@@ -155,9 +107,9 @@ async def start_heartbeat(host: _LockRuntimeHostProtocol) -> None:
     await host._heartbeat.start()
 
 
-async def enter_lock_context(
-    host: _LockRuntimeHostProtocol,
-) -> _LockRuntimeHostProtocol:
+async def enter_lock_context[LockRuntimeHostT: _LockRuntimeHostProtocol](
+    host: LockRuntimeHostT,
+) -> LockRuntimeHostT:
     """Acquire the lock for async context-manager usage and start heartbeat."""
     token = await acquire_lock(host)
     if token is None:

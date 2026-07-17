@@ -19,7 +19,7 @@ from bioetl.interfaces.cli.commands._run_manifest_historical_support import (
     _load_universe_external_records,
 )
 from bioetl.interfaces.cli.commands._run_manifest_output import (
-    render_text_payload,
+    render_text_payload as render_text_payload,
 )
 from bioetl.interfaces.cli.commands._run_manifest_services import (
     get_forensic_run_diff_service,

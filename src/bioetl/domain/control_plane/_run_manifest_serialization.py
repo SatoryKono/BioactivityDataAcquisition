@@ -46,7 +46,7 @@ class _FrozenManifestMapping(dict[object, object]):
     def update(self, *_args: object, **_kwargs: object) -> None:
         self._raise_immutable()
 
-    def __ior__(self, other: object) -> object:
+    def __ior__(self, other: object) -> NoReturn:
         self._raise_immutable()
 
 
