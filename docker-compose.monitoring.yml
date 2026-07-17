@@ -70,14 +70,12 @@ services:
     restart: unless-stopped
     healthcheck:
       test:
-        - "CMD"
-        - "/usr/bin/loki"
-        - "-config.file=/etc/loki/config.yml"
-        - "-verify-config=true"
-      interval: 20s
+        - "CMD-SHELL"
+        - "wget --quiet --tries=1 --timeout=2 -O /dev/null http://localhost:3100/ready"
+      interval: 10s
       timeout: 5s
-      retries: 3
-      start_period: 15s
+      retries: 6
+      start_period: 60s
     mem_limit: 768m
     mem_reservation: 384m
     cpus: 0.75
