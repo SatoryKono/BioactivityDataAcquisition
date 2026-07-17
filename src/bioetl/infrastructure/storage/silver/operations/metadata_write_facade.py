@@ -21,11 +21,15 @@ from bioetl.infrastructure.storage.silver.operations.metadata_audit_operations i
     log_internal_silver_audit_operation,
     log_silver_audit_operation,
 )
+from bioetl.infrastructure.storage.silver.operations.metadata_context_facade import (
+    _SilverMetadataContextFacade,
+)
 from bioetl.infrastructure.storage.silver.operations.metadata_finalization_operations import (
     finalize_silver_write_result_operation,
     prepare_silver_write_finalization_context_operation,
 )
 from bioetl.infrastructure.storage.silver.operations.metadata_write_operations import (
+    _ExecuteSilverMetadataWrite,
     write_internal_silver_metadata_operation,
     write_silver_merged_metadata_operation,
     write_silver_metadata_via_support_request,
@@ -40,14 +44,14 @@ from bioetl.infrastructure.storage.silver.prepared_operation_models import (
 __all__ = ["_SilverMetadataWriteFacade"]
 
 
-def _resolve_execute_silver_metadata_write():
+def _resolve_execute_silver_metadata_write() -> _ExecuteSilverMetadataWrite:
     """Resolve the legacy patch seam from ``operations.metadata_operations``."""
     from bioetl.infrastructure.storage.silver.operations import metadata_operations
 
     return metadata_operations._execute_silver_metadata_write
 
 
-class _SilverMetadataWriteFacade:
+class _SilverMetadataWriteFacade(_SilverMetadataContextFacade):
     """Write, audit, and finalization methods for metadata services."""
 
     async def _write_silver_metadata(

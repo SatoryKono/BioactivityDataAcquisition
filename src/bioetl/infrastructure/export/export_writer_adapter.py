@@ -26,17 +26,18 @@ class ExportWriterAdapter(ExportWriterPort):
         table_name: str,
         layer: str,
         fmt: str,
-        output_dir: Path,
-    ) -> Path:
+        output_dir: str,
+    ) -> str:
         """Write one exported table and return the created file path."""
-        output_dir.mkdir(parents=True, exist_ok=True)
+        output_dir_obj = Path(output_dir)
+        output_dir_obj.mkdir(parents=True, exist_ok=True)
         safe_name = f"{layer}_{table_name.replace('.', '_')}"
         if fmt == "csv":
-            return _write_delimited_file(table, output_dir / f"{safe_name}.csv", ",")
+            return str(_write_delimited_file(table, output_dir_obj / f"{safe_name}.csv", ","))
         if fmt == "tsv":
-            return _write_delimited_file(table, output_dir / f"{safe_name}.tsv", "\t")
+            return str(_write_delimited_file(table, output_dir_obj / f"{safe_name}.tsv", "\t"))
         if fmt == "xlsx":
-            return _write_xlsx_file(table, output_dir / f"{safe_name}.xlsx")
+            return str(_write_xlsx_file(table, output_dir_obj / f"{safe_name}.xlsx"))
         raise ValueError(f"Unsupported format: {fmt}")
 
     def write_manifest(
@@ -44,20 +45,22 @@ class ExportWriterAdapter(ExportWriterPort):
         *,
         manifest_name: str,
         payload: dict[str, object],
-        output_dir: Path,
-    ) -> Path:
+        output_dir: str,
+    ) -> str:
         """Write one deterministic JSON export manifest and return its path."""
-        output_dir.mkdir(parents=True, exist_ok=True)
-        output_path = output_dir / f"{manifest_name}.json"
+        output_dir_obj = Path(output_dir)
+        output_dir_obj.mkdir(parents=True, exist_ok=True)
+        output_path = output_dir_obj / f"{manifest_name}.json"
         content = json.dumps(payload, indent=2, sort_keys=True) + "\n"
         atomic_write_text(output_path, content)
-        return output_path
+        return str(output_path)
 
-    def fingerprint_file(self, *, path: Path) -> ExportFileFingerprint:
+    def fingerprint_file(self, *, path: str) -> ExportFileFingerprint:
         """Return sha256 and byte size for one exported file."""
+        path_obj = Path(path)
         digest = hashlib.sha256()
         size_bytes = 0
-        with path.open("rb") as handle:
+        with path_obj.open("rb") as handle:
             for chunk in iter(lambda: handle.read(1024 * 1024), b""):
                 size_bytes += len(chunk)
                 digest.update(chunk)

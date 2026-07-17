@@ -35,7 +35,8 @@ class _RunManifestLookupPort(Protocol):
 
 
 class _ControlPlaneScopeHost(Protocol):
-    _run_manifest_port: _RunManifestLookupPort | None
+    @property
+    def _run_manifest_port(self) -> _RunManifestLookupPort | None: ...
 
     def _read_required_param(self, query: dict[str, str], name: str) -> str: ...
 

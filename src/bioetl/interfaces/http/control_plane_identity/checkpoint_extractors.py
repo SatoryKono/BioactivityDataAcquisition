@@ -6,17 +6,13 @@ This module extracts legacy HTTP identity anchor values.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from bioetl.domain.control_plane import RunManifest
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 from bioetl.interfaces.http.control_plane_identity.formatting import (
     is_present,
     mapping_value,
 )
-
-if TYPE_CHECKING:
-    from bioetl.interfaces.http.control_plane_identity.anchor_values import AnchorValues
+from bioetl.interfaces.http.control_plane_identity.types import AnchorValues
 
 
 def checkpoint_anchor_payload(manifest: RunManifest) -> dict[str, object]:

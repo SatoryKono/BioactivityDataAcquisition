@@ -82,9 +82,9 @@ def build_status_payload(
     inspection: WorkflowInspectionResult | None,
 ) -> dict[str, object]:
     """Build workflow status payload for text/json/yaml rendering."""
-    steps = []
+    steps: list[dict[str, object]] = []
     for step in config.steps:
-        base = {
+        base: dict[str, object] = {
             "step_id": step.step_id,
             "depends_on": list(step.depends_on),
         }
@@ -150,7 +150,10 @@ def render_status_payload(payload: dict[str, object]) -> str:
     """Render workflow status payload as human-readable text."""
     workflow_name = str(payload["workflow"])
     version = str(payload["version"])
-    topological = payload.get("topological_step_ids", [])
+    topological_payload = payload.get("topological_step_ids", [])
+    topological = (
+        topological_payload if isinstance(topological_payload, (list, tuple)) else ()
+    )
     steps = payload.get("steps", [])
     lines = [
         f"Workflow Status / {workflow_name}",
@@ -208,7 +211,10 @@ def _render_status_steps(steps: object) -> list[str]:
 
 def _render_status_step(step: dict[str, object]) -> str:
     """Render one workflow status step."""
-    depends_on = step.get("depends_on") or []
+    depends_on_payload = step.get("depends_on") or []
+    depends_on = (
+        depends_on_payload if isinstance(depends_on_payload, (list, tuple)) else ()
+    )
     depends_rendered = ", ".join(str(item) for item in depends_on) or "-"
     kind = str(step.get("kind", step.get("step_kind", "unknown")))
     if kind == "pipeline" and "pipeline_name" in step:

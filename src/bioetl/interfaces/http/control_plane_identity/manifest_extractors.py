@@ -7,7 +7,6 @@ This module extracts legacy HTTP identity anchor values.
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import TYPE_CHECKING
 
 from bioetl.domain.control_plane import (
     RunArtifactRef,
@@ -20,9 +19,7 @@ from bioetl.interfaces.http.control_plane_identity.formatting import (
     is_present,
     join_non_empty,
 )
-
-if TYPE_CHECKING:
-    from bioetl.interfaces.http.control_plane_identity.anchor_values import AnchorValues
+from bioetl.interfaces.http.control_plane_identity.types import AnchorValues
 
 
 def identity_graph_diagnostics(manifest: RunManifest) -> dict[str, object]:

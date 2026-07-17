@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from datetime import datetime
-from typing import Protocol, cast
+from typing import Protocol
 
 from bioetl.domain.medallion import SilverWriteMode
+from bioetl.domain.models.metadata import SilverMetadata
+from bioetl.domain.ports import AuditPort
 from bioetl.domain.types import BatchID, BronzeRecord, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
@@ -25,12 +27,24 @@ from bioetl.infrastructure.storage.silver.operations.metadata_write_support impo
 )
 from bioetl.infrastructure.storage.silver.prepared_operation_models import (
     _build_silver_merged_metadata_write_request,
+    _PreparedSilverMetadataWriteOperation,
     _SilverMergedMetadataWriteRequest,
 )
 
 
-class _SilverMetadataWriteOps(Protocol):
+class _SilverMetadataWriteOps(_SilverMetadataWriteHostProtocol, Protocol):
     """Minimal facade surface needed by Silver metadata write helpers."""
+
+    @property
+    def _audit(self) -> AuditPort | None: ...
+
+    async def _persist_silver_metadata(
+        self,
+        *,
+        metadata: SilverMetadata,
+        table_name: str,
+        table_path: str,
+    ) -> SilverWriteResult | None: ...
 
     def _should_skip_silver_metadata_write(
         self,
@@ -45,7 +59,7 @@ _ExecuteSilverMetadataWrite = Callable[
     [
         _SilverMetadataWriteHostProtocol,
         _SilverMetadataWriteRequest | _SilverMergedMetadataWriteRequest,
-        Callable[..., Awaitable[object]],
+        Callable[..., Awaitable[_PreparedSilverMetadataWriteOperation]],
     ],
     Awaitable[None],
 ]
@@ -101,7 +115,7 @@ async def write_internal_silver_metadata_operation(
     ):
         return
     await execute_silver_metadata_write(
-        cast(_SilverMetadataWriteHostProtocol, metadata_ops),
+        metadata_ops,
         request,
         _prepare_silver_metadata_write,
     )
@@ -127,7 +141,7 @@ async def write_silver_merged_metadata_operation(
     ):
         return
     await execute_silver_metadata_write(
-        cast(_SilverMetadataWriteHostProtocol, metadata_ops),
+        metadata_ops,
         _build_silver_merged_metadata_write_request(
             table_path=table_path,
             table_name=table_name,

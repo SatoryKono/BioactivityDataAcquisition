@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Protocol
+from typing import Protocol, runtime_checkable
 
+from bioetl.domain.ports import CheckpointPort
 from bioetl.interfaces.http._health_server_control_plane_scope import _IdentityScope
 
 _CheckpointTuple = tuple[object, dict[str, object]]
@@ -11,10 +12,19 @@ _CheckpointEvidence = tuple[_CheckpointTuple | None, str, str | None, bool]
 
 
 class _CheckpointLookupHost(Protocol):
-    _checkpoint_port: object | None
+    @property
+    def _checkpoint_port(self) -> CheckpointPort | None: ...
 
     @staticmethod
     def _is_all_scope_token(value: str | None) -> bool: ...
+
+
+@runtime_checkable
+class _LatestCheckpointLookupPort(Protocol):
+    async def load_latest_for_pipeline(
+        self,
+        pipeline: str,
+    ) -> _CheckpointTuple | None: ...
 
 
 async def load_checkpoint_freshness_evidence(
@@ -23,16 +33,20 @@ async def load_checkpoint_freshness_evidence(
     scope: _IdentityScope,
     target_pipeline: str,
 ) -> _CheckpointEvidence:
+    checkpoint_port = host._checkpoint_port
+    if checkpoint_port is None:
+        return None, "checkpoint_port_unavailable", None, False
+
     checkpoint_tuple: _CheckpointTuple | None = None
     evidence_source = "mutable_latest_pointer"
     manifest_id: str | None = None
 
     if scope.selected_run_id is not None and scope.resolved_manifest is not None:
         manifest_id = scope.resolved_manifest.manifest_id
-        checkpoint_tuple = await host._checkpoint_port.load_for_manifest_id(manifest_id)
+        checkpoint_tuple = await checkpoint_port.load_for_manifest_id(manifest_id)
         evidence_source = "immutable_manifest_history"
         if checkpoint_tuple is None:
-            checkpoint_tuple = await host._checkpoint_port.load_for_run(
+            checkpoint_tuple = await checkpoint_port.load_for_run(
                 scope.resolved_manifest.pipeline_name,
                 scope.resolved_manifest.run_id,
             )
@@ -40,11 +54,11 @@ async def load_checkpoint_freshness_evidence(
     elif scope.selected_pipelines or not host._is_all_scope_token(
         scope.requested_pipeline
     ):
-        checkpoint_tuple = await host._checkpoint_port.load(target_pipeline)
-        if checkpoint_tuple is None and hasattr(
-            host._checkpoint_port, "load_latest_for_pipeline"
+        checkpoint_tuple = await checkpoint_port.load(target_pipeline)
+        if checkpoint_tuple is None and isinstance(
+            checkpoint_port, _LatestCheckpointLookupPort
         ):
-            checkpoint_tuple = await host._checkpoint_port.load_latest_for_pipeline(
+            checkpoint_tuple = await checkpoint_port.load_latest_for_pipeline(
                 target_pipeline
             )
             if checkpoint_tuple is not None:

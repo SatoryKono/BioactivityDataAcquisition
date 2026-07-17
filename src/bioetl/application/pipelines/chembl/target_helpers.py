@@ -9,7 +9,7 @@ from bioetl.application.core.dict_transformers import aggregate_nested_lists
 from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterator
 
 
 class XrefHelper:
@@ -191,7 +191,7 @@ class SynonymHelper:
     @staticmethod
     def iter_component_synonym_payloads(
         components: list[JsonDict],
-    ):
+    ) -> Iterator[Mapping[str, object]]:
         """Yield validated synonym payload dicts from target components."""
         for component in components:
             if not isinstance(component, Mapping):
@@ -208,7 +208,7 @@ class SynonymHelper:
     @classmethod
     def project_single_synonym(
         cls,
-        payload: JsonDict,
+        payload: Mapping[str, object],
         buckets: dict[str, list[str]],
         seen_by_field: dict[str, set[str]],
     ) -> None:
@@ -281,8 +281,15 @@ class ComponentHelper:
     @staticmethod
     def flatten_target_components(
         components: list[JsonDict] | None,
-        extract_list_field: Callable,
-    ) -> dict[str, list | None]:
+        extract_list_field: Callable[
+            [
+                list[JsonDict] | None,
+                str,
+                Callable[[object], object] | None,
+            ],
+            list[object] | None,
+        ],
+    ) -> dict[str, list[object] | None]:
         """Flatten target components into aggregated lists.
 
         Args:
@@ -307,7 +314,7 @@ class ComponentHelper:
         )
 
     @staticmethod
-    def empty_component_result() -> dict[str, list | None]:
+    def empty_component_result() -> dict[str, list[object] | None]:
         """Return empty result dict for missing components."""
         return {
             "component_accessions": None,
@@ -320,17 +327,42 @@ class ComponentHelper:
     @staticmethod
     def extract_basic_component_fields(
         components: list[JsonDict],
-        extract_list_field: Callable,
-    ) -> dict[str, list | None]:
+        extract_list_field: Callable[
+            [
+                list[JsonDict] | None,
+                str,
+                Callable[[object], object] | None,
+            ],
+            list[object] | None,
+        ],
+    ) -> dict[str, list[object] | None]:
         """Extract basic fields from component list via dict_transformers."""
         from bioetl.domain.transformations import safe_int
 
         return {
-            "component_accessions": extract_list_field(components, "accession"),
-            "component_ids": extract_list_field(components, "component_id", safe_int),
-            "component_types": extract_list_field(components, "component_type"),
-            "component_relationships": extract_list_field(components, "relationship"),
+            "component_accessions": extract_list_field(
+                components,
+                "accession",
+                None,
+            ),
+            "component_ids": extract_list_field(
+                components,
+                "component_id",
+                safe_int,
+            ),
+            "component_types": extract_list_field(
+                components,
+                "component_type",
+                None,
+            ),
+            "component_relationships": extract_list_field(
+                components,
+                "relationship",
+                None,
+            ),
             "component_descriptions": extract_list_field(
-                components, "component_description"
+                components,
+                "component_description",
+                None,
             ),
         }

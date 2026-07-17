@@ -281,7 +281,7 @@ def write_export_sidecar_manifests(
     strict: bool = False,
 ) -> tuple[Path, ...]:
     """Write deterministic provenance, licensing, and checksum manifests."""
-    data_fingerprint = writer.fingerprint_file(path=output_path)
+    data_fingerprint = writer.fingerprint_file(path=str(output_path))
     sidecars = build_export_sidecar_payloads(
         table_name=table_name,
         layer=layer,
@@ -304,28 +304,31 @@ def write_export_sidecar_manifests(
         strict=strict,
     )
     manifest_prefix = output_path.stem
-    provenance_path = writer.write_manifest(
+    provenance_path_str = writer.write_manifest(
         manifest_name=f"{manifest_prefix}.provenance-manifest",
         payload=sidecars.provenance_manifest,
-        output_dir=output_path.parent,
+        output_dir=str(output_path.parent),
     )
-    licensing_path = writer.write_manifest(
+    provenance_path = Path(provenance_path_str)
+    licensing_path_str = writer.write_manifest(
         manifest_name=f"{manifest_prefix}.licensing-manifest",
         payload=sidecars.licensing_manifest,
-        output_dir=output_path.parent,
+        output_dir=str(output_path.parent),
     )
+    licensing_path = Path(licensing_path_str)
     checksum_payload = build_export_checksum_manifest(
         dataset_bundle_id=sidecars.dataset_bundle_id,
         generated_at=str(sidecars.provenance_manifest["generated_at"]),
         fingerprints=(
             data_fingerprint,
-            writer.fingerprint_file(path=provenance_path),
-            writer.fingerprint_file(path=licensing_path),
+            writer.fingerprint_file(path=str(provenance_path)),
+            writer.fingerprint_file(path=str(licensing_path)),
         ),
     )
-    checksums_path = writer.write_manifest(
+    checksums_path_str = writer.write_manifest(
         manifest_name=f"{manifest_prefix}.checksums-manifest",
         payload=checksum_payload,
-        output_dir=output_path.parent,
+        output_dir=str(output_path.parent),
     )
+    checksums_path = Path(checksums_path_str)
     return (provenance_path, licensing_path, checksums_path)

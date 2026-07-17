@@ -5,7 +5,15 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
+from bioetl.domain.behavior.dq_metrics_calculator import DQMetricsCalculator
 from bioetl.domain.models.metadata import SilverMetadata
+from bioetl.domain.ports import (
+    AuditPort,
+    LineageStorePort,
+    LoggerPort,
+    MetadataCoordinatorPort,
+    MetricsPort,
+)
 from bioetl.domain.types import BronzeRecord
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.infrastructure.storage.silver.operations.metadata_dq_operations import (
@@ -31,6 +39,15 @@ __all__ = ["_SilverMetadataContextFacade"]
 
 class _SilverMetadataContextFacade:
     """Context, DQ, and sidecar-persistence methods for metadata services."""
+
+    _logger: LoggerPort
+    _metrics: MetricsPort | None
+    _audit: AuditPort | None
+    _metadata_writer: object | None
+    _metadata_coordinator: MetadataCoordinatorPort | None
+    _lineage_store: LineageStorePort | None
+    _dq_calculator: DQMetricsCalculator | None
+    _host: object | None
 
     @property
     def _flat_structure(self) -> bool:

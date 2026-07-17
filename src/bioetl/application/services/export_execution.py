@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Iterator
 from pathlib import Path
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from bioetl.application.services.export_manifests import write_export_sidecar_manifests
 from bioetl.application.services.export_models import ExportOptions, ExportResult
@@ -32,11 +33,28 @@ _SENSITIVE_COLUMN_TOKENS = frozenset(
 )
 
 
+class _SchemaField(Protocol):
+    """Named field surface exposed by export table schemas."""
+
+    @property
+    def name(self) -> str: ...
+
+
+class _ExportSchema(Protocol):
+    """Iterable schema surface used by export governance."""
+
+    def __iter__(self) -> Iterator[_SchemaField]: ...
+
+
+@runtime_checkable
 class _SelectableTable(Protocol):
     """Minimal table surface needed by export redaction helpers."""
 
-    schema: object
-    num_rows: int
+    @property
+    def schema(self) -> _ExportSchema: ...
+
+    @property
+    def num_rows(self) -> int: ...
 
     def select(self, columns: list[str]) -> _SelectableTable: ...
 
@@ -60,11 +78,13 @@ async def export_existing_table(
         format=options.format,
         limit=options.limit,
     )
-    table = await reader.read_table(
+    table_payload = await reader.read_table(
         table_path.as_posix(), columns=options.columns, limit=options.limit
     )
+    if not isinstance(table_payload, _SelectableTable):
+        raise TypeError("Delta reader returned a table without export capabilities")
     export_table, redacted_columns = apply_redaction_policy(
-        table=table,
+        table=table_payload,
         options=options,
     )
     row_count = export_table.num_rows
@@ -76,13 +96,13 @@ async def export_existing_table(
         output_columns=tuple(field.name for field in export_table.schema),
         redacted_columns=redacted_columns,
     )
-    output_path = writer.write_export(
+    output_path = Path(writer.write_export(
         table=export_table,
         table_name=table_name,
         layer=layer,
         fmt=options.format,
-        output_dir=options.output_path or export_path,
-    )
+        output_dir=str(options.output_path or export_path),
+    ))
     manifest_paths = write_export_manifests_if_enabled(
         writer=writer,
         table=export_table,

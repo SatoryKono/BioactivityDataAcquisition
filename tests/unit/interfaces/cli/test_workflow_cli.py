@@ -30,6 +30,10 @@ pytestmark = pytest.mark.unit
 class _FakeWorkflowRunnerService:
     received_config: object | None = None
     received_kwargs: dict[str, object] | None = None
+    recorded_expected_pipeline_metrics_config: object | None = None
+
+    def record_expected_pipeline_metrics(self, config: object) -> None:
+        self.recorded_expected_pipeline_metrics_config = config
 
     async def run_workflow(
         self,
@@ -580,6 +584,9 @@ def test_workflow_run_reports_blocked_destructive_dry_run_step(
     import bioetl.interfaces.cli.commands.workflow as workflow_cmd
 
     class _PreviewWorkflowExecutionService:
+        def record_expected_pipeline_metrics(self, config: object) -> None:
+            del config
+
         async def run_workflow(
             self,
             config: object,
@@ -730,6 +737,9 @@ def test_workflow_run_publishes_metrics_even_when_workflow_fails(
     from bioetl.interfaces.cli.exit_codes import ExitCode
 
     class _FailingWorkflowExecutionService:
+        def record_expected_pipeline_metrics(self, config: object) -> None:
+            del config
+
         async def run_workflow(
             self,
             config: object,

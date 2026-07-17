@@ -37,10 +37,3 @@ exemptions:
     owner_tests:
       - tests/unit/domain/control_plane/test_run_manifest_dq.py
       - tests/unit/domain/control_plane/test_run_manifest_immutability.py
-  - source: src/bioetl/domain/_immutability.py
-    policy: private_module
-    reason: >
-      Private immutability utilities are exercised through domain owner tests rather
-      than a mirrored same-path sibling module. This is a private support module.
-    owner_tests:
-      - tests/unit/domain/control_plane/test_run_manifest_immutability.py
