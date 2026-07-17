@@ -190,9 +190,12 @@ def test_audit_launcher_blocks_failed_promtail_sentinel_delivery(
     probe_log_root = tmp_path / "probe-logs"
     data_root.mkdir()
     log_root.mkdir()
-    ticks = iter((0.0, 0.1, 1.1))
+    ticks = iter((0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.75, 1.1))
+    request_timeouts: list[float] = []
+    sleeps: list[float] = []
 
-    def fake_open(url: str, **_kwargs: object) -> _ProbeResponse:
+    def fake_open(url: str, **kwargs: object) -> _ProbeResponse:
+        request_timeouts.append(float(kwargs["timeout"]))
         if url == audit_stack_subject.READY_URL:
             return _ProbeResponse({"data_root": str(data_root.resolve())})
         if url == audit_stack_subject.CATALOG_URL:
@@ -210,7 +213,7 @@ def test_audit_launcher_blocks_failed_promtail_sentinel_delivery(
             run=lambda *_args, **_kwargs: object(),
             opener=fake_open,
             monotonic=lambda: next(ticks),
-            sleep=lambda _seconds: None,
+            sleep=sleeps.append,
             wall_time_ns=lambda: 1_700_000_000_000_000_000,
             sentinel_id="not-delivered",
             probe_log_root=probe_log_root,
@@ -221,6 +224,8 @@ def test_audit_launcher_blocks_failed_promtail_sentinel_delivery(
         encoding="utf-8"
     )
     assert list(log_root.iterdir()) == []
+    assert request_timeouts == pytest.approx([0.8, 0.7, 0.6, 0.5])
+    assert sleeps == pytest.approx([0.25])
 
 
 def test_promtail_probe_reports_unavailable_shipper() -> None:
@@ -229,6 +234,7 @@ def test_promtail_probe_reports_unavailable_shipper() -> None:
 
     result = audit_stack_subject.probe_promtail_audit_delivery(
         marker=f"{audit_stack_subject.PROMTAIL_SENTINEL_PREFIX}unavailable",
+        sentinel_written_ns=0,
         opener=unavailable,
     )
 

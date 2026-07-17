@@ -183,8 +183,12 @@ the served `data_root` exactly equals the requested root. It also writes one
 unique JSONL sentinel into a launcher-managed OS temporary probe directory,
 mounts that directory separately from the operator's read-only log root, probes
 Promtail's loopback-only `/ready` endpoint, and fails unless that exact sentinel
-becomes visible through Loki within the shared startup timeout. It writes no
-`.env` file and does not modify the requested data or log roots.
+becomes visible through Loki within the bounded post-Compose verification
+timeout. The sentinel is written atomically after `compose up` returns, and the
+bounded Loki query range starts from that write timestamp with a clock-skew
+margin. `BIOETL_AUDIT_PROBE_LOG_ROOT` is launcher-managed internal wiring;
+direct invocation of the override is not a supported operator interface. The
+launcher writes no `.env` file and does not modify the requested data or log roots.
 `promtail-audit` publishes only the bounded `job=bioetl-audit` Loki label; the
 sentinel identity remains log content and is never promoted to a label.
 
