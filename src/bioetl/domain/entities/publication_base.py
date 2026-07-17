@@ -93,7 +93,7 @@ class PublicationEntityBase(BaseEntity):
 
     # Journal information
     journal: str | None = None
-    issn: str | None = None
+    issn: str | list[str] | None = None
     issn_list: str | None = None
     publisher: str | None = None
 

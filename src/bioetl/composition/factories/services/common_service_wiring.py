@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.composition.factories.services.port_factories import (
     create_checkpoint,
@@ -35,29 +35,67 @@ if TYPE_CHECKING:
         LoggerPort,
         MetricsPort,
         QuarantinePort,
+        SettingsPort,
         SilverValidatorPort,
         TracingPort,
     )
-    from bioetl.composition.factories.storage import StorageContext, StorageFactory
+    from bioetl.composition.factories.storage import StorageContext
     from bioetl.infrastructure.config.settings_api import Settings
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+
+class _StorageFactoryProtocol(Protocol):
+    """Structural contract shared by the lazy and concrete storage factories."""
+
+    @staticmethod
+    def create(
+        settings: Settings,
+        config: PipelineYamlConfig,
+        logger: LoggerPort,
+        metrics: MetricsPort,
+        audit: AuditPort,
+        tracing: TracingPort | None = None,
+        metadata_coordinator: MetadataCoordinator | None = None,
+        silver_validator: SilverValidatorPort | None = None,
+        pipeline_name: str | None = None,
+    ) -> StorageContext: ...
 
 
 class _LazyStorageFactory:
     """Patchable storage factory seam without importing storage at module load."""
 
     @staticmethod
-    def create(*args: object, **kwargs: object) -> object:
+    def create(
+        settings: Settings,
+        config: PipelineYamlConfig,
+        logger: LoggerPort,
+        metrics: MetricsPort,
+        audit: AuditPort,
+        tracing: TracingPort | None = None,
+        metadata_coordinator: MetadataCoordinator | None = None,
+        silver_validator: SilverValidatorPort | None = None,
+        pipeline_name: str | None = None,
+    ) -> StorageContext:
         from bioetl.composition.factories.storage import StorageFactory
 
-        return StorageFactory.create(*args, **kwargs)
+        return StorageFactory.create(
+            settings,
+            config,
+            logger,
+            metrics=metrics,
+            audit=audit,
+            tracing=tracing,
+            metadata_coordinator=metadata_coordinator,
+            silver_validator=silver_validator,
+            pipeline_name=pipeline_name,
+        )
 
 
 StorageFactory = _LazyStorageFactory
 
 
 def _create_metrics_from_settings(settings: Settings) -> MetricsPort:
-    return create_metrics(settings)
+    return create_metrics(cast("SettingsPort", settings))
 
 
 def _create_checkpoint_for_storage(storage_ctx: StorageContext) -> CheckpointPort:
@@ -65,7 +103,7 @@ def _create_checkpoint_for_storage(storage_ctx: StorageContext) -> CheckpointPor
 
 
 def _create_quarantine_from_settings(settings: Settings) -> QuarantinePort:
-    return create_quarantine(settings)
+    return create_quarantine(cast("SettingsPort", settings))
 
 
 @dataclass(frozen=True, slots=True)
@@ -99,7 +137,7 @@ class CommonServicePortsRequest:
     metadata_coordinator: MetadataCoordinator | None = None
     silver_validator: SilverValidatorPort | None = None
     create_metrics_fn: Callable[[Settings], MetricsPort] = _create_metrics_from_settings
-    storage_factory: type[StorageFactory] | None = None
+    storage_factory: type[_StorageFactoryProtocol] | None = None
     create_lock_fn: Callable[[], LockPort] = create_lock
     create_checkpoint_fn: Callable[[StorageContext], CheckpointPort] = (
         _create_checkpoint_for_storage

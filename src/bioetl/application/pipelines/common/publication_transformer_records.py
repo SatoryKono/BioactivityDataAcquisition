@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from functools import partial
 from typing import TYPE_CHECKING, cast
 
 from bioetl.application.core.pre_silver_record import PreSilverRecord
@@ -45,7 +44,7 @@ def resolve_publication_entity_id(
     return cast(
         str,
         transformer.compute_entity_id(
-            source_id=primary_id,
+            source_id=str(primary_id),
             record={primary_id_field: primary_id},
         ),
     )
@@ -87,15 +86,54 @@ def build_pre_silver_publication_record(
         prepared.primary_id_field,
         prepared.primary_id,
     )
+
+    def build_silver_record(
+        context: PipelineContext,
+        staged_entity_id: str,
+        content_hash: str,
+        index: int,
+        business_data: JsonDict,
+    ) -> JsonDict:
+        return build_publication_silver_record(
+            transformer,
+            context,
+            staged_entity_id,
+            content_hash,
+            index,
+            business_data,
+        )
+
+    def apply_structural_policy(
+        context: PipelineContext,
+        record: JsonDict,
+        index: int,
+    ) -> JsonDict | None:
+        return cast(
+            "JsonDict | None",
+            transformer._apply_structural_policy(
+                context,
+                cast("SilverRecord", record),
+                index,
+            ),
+        )
+
+    def apply_silver_filter(
+        context: PipelineContext,
+        record: JsonDict,
+        index: int,
+    ) -> None:
+        transformer._apply_silver_filter(
+            context,
+            cast("SilverRecord", record),
+            index,
+        )
+
     return PreSilverRecord(
         entity_id=entity_id,
         business_data=prepared.business_data,
-        build_silver_record=partial(
-            build_publication_silver_record,
-            transformer,
-        ),
-        apply_structural_policy=transformer._apply_structural_policy,
-        apply_silver_filter=transformer._apply_silver_filter,
+        build_silver_record=build_silver_record,
+        apply_structural_policy=apply_structural_policy,
+        apply_silver_filter=apply_silver_filter,
     )
 
 

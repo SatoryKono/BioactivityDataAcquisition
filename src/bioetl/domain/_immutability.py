@@ -54,18 +54,44 @@ class FrozenDict(dict[str, object]):
         return self
 
 
+def _freeze_list(value: list[object]) -> FrozenList:
+    return FrozenList(deep_freeze_json(item) for item in value)
+
+
+def _freeze_tuple(value: tuple[object, ...]) -> tuple[object, ...]:
+    return tuple(deep_freeze_json(item) for item in value)
+
+
+def _freeze_set(value: set[object]) -> frozenset[object]:
+    return frozenset(deep_freeze_json(item) for item in value)
+
+
+def _deep_freeze_sequence(value: object) -> object:
+    """Freeze supported sequence/set containers or copy a scalar value."""
+    if isinstance(value, list):
+        return _freeze_list(value)
+    if isinstance(value, tuple):
+        return _freeze_tuple(value)
+    if isinstance(value, set):
+        return _freeze_set(value)
+    return deepcopy(value)
+
+
 def deep_freeze_json(value: object) -> object:
     """Snapshot JSON-like nested state into mutation-resistant containers."""
     if isinstance(value, dict):
         return FrozenDict(
             {str(key): deep_freeze_json(item) for key, item in value.items()}
         )
-    if isinstance(value, list):
-        return FrozenList(deep_freeze_json(item) for item in value)
-    if isinstance(value, tuple):
-        return tuple(deep_freeze_json(item) for item in value)
-    if isinstance(value, set):
-        return frozenset(deep_freeze_json(item) for item in value)
+    return _deep_freeze_sequence(value)
+
+
+def _deep_thaw_sequence(value: object) -> object:
+    """Thaw supported sequence/set containers or copy a scalar value."""
+    if isinstance(value, (list, tuple)):
+        return [deep_thaw_json(item) for item in value]
+    if isinstance(value, (set, frozenset)):
+        return [deep_thaw_json(item) for item in value]
     return deepcopy(value)
 
 
@@ -73,11 +99,7 @@ def deep_thaw_json(value: object) -> object:
     """Return a detached mutable JSON-compatible copy of a frozen snapshot."""
     if isinstance(value, dict):
         return {str(key): deep_thaw_json(item) for key, item in value.items()}
-    if isinstance(value, (list, tuple)):
-        return [deep_thaw_json(item) for item in value]
-    if isinstance(value, (set, frozenset)):
-        return [deep_thaw_json(item) for item in value]
-    return deepcopy(value)
+    return _deep_thaw_sequence(value)
 
 
 def freeze_fields(instance: object, field_names: tuple[str, ...]) -> None:

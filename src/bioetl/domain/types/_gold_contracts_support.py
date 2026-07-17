@@ -3,13 +3,30 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Literal, cast
+from typing import Literal, Protocol, cast, runtime_checkable
 
 GOLD_CONTRACT_VERSION_UNKNOWN = "0.0.0"
 GoldBusinessRuleCondition = Literal["not_null", "range", "in_list", "regex"]
 GoldBusinessRuleSeverity = Literal["error", "warn"]
 GoldBusinessRuleDecision = Literal["pass", "warn", "fail", "quarantine"]
 GoldBusinessRuleSemanticScope = Literal["business", "profile"]
+
+
+@runtime_checkable
+class _SchemaConvertible(Protocol):
+    def to_schema(self) -> object:
+        """Return the concrete schema represented by this object."""
+        ...
+
+
+def invoke_to_schema(schema: object) -> object | None:
+    """Resolve a schema factory without weakening the input type to Any."""
+    if not isinstance(schema, _SchemaConvertible):
+        return None
+    try:
+        return schema.to_schema()
+    except (AttributeError, RuntimeError, TypeError, ValueError):
+        return None
 
 
 def normalize_column_name(value: object, *, field_name: str) -> str:

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 
 from bioetl.application.services.control_plane.manifest.diagnostics.operator_replay_mode import (
     _resolve_operator_replay_mode,
@@ -50,6 +50,17 @@ class _ReplayProjectionBundle:
     exact_replay_eligible: bool
 
 
+class _ReplayProjectionContextKwargs(TypedDict):
+    """Typed shared keyword payload for replay projection builders."""
+
+    manifest: RunManifest
+    input_snapshots: list[dict[str, object]]
+    requested_exact_replay: bool
+    resume_requested: bool
+    policy_assessment: ReproducibilityPolicyAssessment
+    replay_family_context: ReplayFamilyContext
+
+
 def _build_replay_projection_context_kwargs(
     manifest: RunManifest,
     input_snapshots: list[dict[str, object]],
@@ -57,7 +68,7 @@ def _build_replay_projection_context_kwargs(
     resume_requested: bool,
     policy_assessment: ReproducibilityPolicyAssessment,
     replay_family_context: ReplayFamilyContext,
-) -> dict[str, object]:
+) -> _ReplayProjectionContextKwargs:
     """Return shared replay-projection context kwargs."""
     return {
         "manifest": manifest,

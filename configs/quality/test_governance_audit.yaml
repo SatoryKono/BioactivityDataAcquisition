@@ -595,7 +595,7 @@ test_audit_closeout_2026_07_08:
     test_file_count_definition: tests/**/test_*.py from pyproject python_files
     repo_backed_unit_lane: repo-backed-unit
     repo_backed_unit_subtree: tests/unit/repo_backed/
-    repo_backed_unit_test_files: 34
+    repo_backed_unit_test_files: 35
     performance_baseline_reports:
     - reports/test-telemetry/slowest-tests.json
     - reports/test-telemetry/slowest-tests.md
@@ -803,11 +803,11 @@ oversized_test_module_inventory:
     source: tests/integration/test_grafana_config.py
     source_lines_after_split: 1561
     extracted_surface: tests/integration/test_grafana_surface_contracts.py
-    extracted_surface_lines: 697
+    extracted_surface_lines: 711
     owner: observability-dashboards
   - issue_ref: '#4505'
     source: tests/integration/test_grafana_surface_contracts.py
-    source_lines_after_split: 697
+    source_lines_after_split: 711
     extracted_surface: tests/integration/test_grafana_technical_policy.py
     extracted_surface_lines: 52
     owner: observability-dashboards
@@ -976,7 +976,9 @@ repo_backed_unit_test_exceptions:
   - path: tests/unit/repo_backed/application/composite/test_non_chembl_join_key_normalization.py
     target_lane: repo-backed-unit
     protected_surface: tests/fixtures/normalization/non_chembl_identifier_cases.yaml
-      + configs/composites/{molecule,target}.yaml
+  - path: tests/unit/repo_backed/scripts/ops/test_migrate_gold_parquet_to_delta.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ops/migrate_gold_parquet_to_delta.py
   - path: tests/unit/repo_backed/application/pipelines/crossref/test_business_data_builder.py
     target_lane: repo-backed-unit
     protected_surface: src/bioetl/application/pipelines/crossref/_business_data_builder.py

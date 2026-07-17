@@ -8,13 +8,13 @@ import tempfile
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Protocol
 
 import click
 
 from bioetl.domain.exceptions import BioETLError
 from bioetl.interfaces.cli.commands.domains.health.failure_handling import (
-    handle_health_failure as _handle_health_failure,
+    handle_health_failure,
 )
 from bioetl.interfaces.cli.commands.domains.health.rendering import (
     build_health_server_info_lines,
@@ -35,9 +35,39 @@ if TYPE_CHECKING:
 
 DEFAULT_HEALTH_SERVER_PORT = 8081
 
+_handle_health_failure = handle_health_failure
+
 _HEALTH_SERVER_DOMAIN_ERROR_TITLE = "Health server failed with domain error"
 _HEALTH_SERVER_UNEXPECTED_ERROR_TITLE = "Unexpected error in health server command"
 _HEALTH_SERVER_INTERRUPTED_MESSAGE = "Health server interrupted by user (Ctrl+C)"
+
+
+class _HealthObservabilitySettings(Protocol):
+    @property
+    def metrics_enabled(self) -> bool: ...
+
+    @property
+    def metrics_server_enabled(self) -> bool: ...
+
+    @property
+    def metrics_fail_fast(self) -> bool: ...
+
+    @property
+    def metrics_retry_count(self) -> int: ...
+
+    @property
+    def metrics_retry_delay(self) -> float: ...
+
+
+class _HealthRuntimeSettings(Protocol):
+    @property
+    def metrics_port(self) -> int: ...
+
+    @property
+    def metrics_addr(self) -> str: ...
+
+    @property
+    def observability(self) -> _HealthObservabilitySettings: ...
 
 
 def get_health_server_dependencies(
@@ -74,10 +104,10 @@ def get_quarantine_runtime_service(
         get_quarantine_runtime_service as _impl,
     )
 
-    return cast("QuarantineRuntimeServiceProtocol", _impl(pipeline))
+    return _impl(pipeline)
 
 
-def get_runtime_settings() -> object:
+def get_runtime_settings() -> _HealthRuntimeSettings:
     """Load runtime settings through the composition boundary."""
     from bioetl.composition.runtime_builders.config_access import get_settings as _impl
 

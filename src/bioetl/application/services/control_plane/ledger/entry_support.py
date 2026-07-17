@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Protocol, cast
+from typing import Protocol
 
 from bioetl.application.services.control_plane.ledger.diagnostic_support import (
     _RunLedgerCorrelationFieldsProtocol,
@@ -18,6 +18,7 @@ from bioetl.application.services.control_plane.ledger.idempotency import (
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.control_plane.run_ledger import infer_ledger_event_family
 from bioetl.domain.normalization import normalize_run_ledger_payload
+from bioetl.domain.ports import RunLedgerPort
 from bioetl.domain.types import RunID
 
 _IDEMPOTENCY_KEY_FIELDS = (
@@ -36,10 +37,6 @@ _IDEMPOTENCY_KEY_FIELDS = (
 )
 
 
-class _RunLedgerPortProtocol(Protocol):
-    def append(self, entry: RunLedgerEntry) -> None: ...
-
-
 @dataclass(slots=True)
 class RunLedgerEntryRequest:
     event_type: str
@@ -54,12 +51,23 @@ class RunLedgerEntryRequest:
 
 
 class _RunLedgerServiceEntryProtocol(_RunLedgerCorrelationFieldsProtocol, Protocol):
-    ledger_port: _RunLedgerPortProtocol
-    manifest_id: str
-    run_id: object
-    composite_run_id: str | None
-    _entry_id_factory: Callable[[], str]
-    _occurred_at_factory: Callable[[], datetime]
+    @property
+    def ledger_port(self) -> RunLedgerPort: ...
+
+    @property
+    def manifest_id(self) -> str: ...
+
+    @property
+    def run_id(self) -> RunID: ...
+
+    @property
+    def composite_run_id(self) -> str | None: ...
+
+    @property
+    def _entry_id_factory(self) -> Callable[[], str]: ...
+
+    @property
+    def _occurred_at_factory(self) -> Callable[[], datetime]: ...
 
 
 def build_run_ledger_idempotency_key(payload: Mapping[str, object]) -> str:
@@ -107,7 +115,7 @@ def append_run_ledger_entry(
                     event_type=request.event_type,
                     event_family=event_family,
                     manifest_id=service.manifest_id,
-                    run_id=cast(RunID, service.run_id),
+                    run_id=service.run_id,
                     composite_run_id=service.composite_run_id,
                     status=request.status,
                     stage=request.stage,

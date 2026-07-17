@@ -6,6 +6,8 @@ This module extracts legacy HTTP identity anchor values.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from bioetl.domain.control_plane import RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.run_ledger import (
     COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
@@ -23,6 +25,9 @@ from bioetl.interfaces.http.control_plane_identity.manifest_extractors import (
     artifact_ref_values,
     input_snapshots,
 )
+
+if TYPE_CHECKING:
+    from bioetl.interfaces.http.control_plane_identity.anchor_values import AnchorValues
 
 _COMPOSITE_EVENTS = frozenset(
     {
@@ -99,7 +104,7 @@ def bronze_batch_ids(
     return dedupe(values)
 
 
-def extract_ledger_anchors(ledger_event: dict[str, object]) -> list[object]:
+def extract_ledger_anchors(ledger_event: dict[str, object]) -> list[AnchorValues]:
     """Extract legacy HTTP identity anchor values from ledger-event mappings."""
     from bioetl.interfaces.http.control_plane_identity.anchor_values import (
         anchor_values_from_mapping,

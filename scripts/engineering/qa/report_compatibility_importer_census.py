@@ -912,10 +912,10 @@ def build_compatibility_importer_census(
     twin_rows: list[dict[str, object]] = []
     for pair in twin_pairs:
         public_importers = importer_map.get(
-            pair["public_module"], {"src": (), "tests": ()}
+            pair.get("public_module", ""), {"src": (), "tests": ()}
         )
         private_importers = importer_map.get(
-            pair["private_module"], {"src": (), "tests": ()}
+            pair.get("private_module", ""), {"src": (), "tests": ()}
         )
         twin_rows.append(
             {
@@ -934,7 +934,7 @@ def build_compatibility_importer_census(
     }
     tracked_twin_rows: list[dict[str, object]] = []
     for family in tracked_twin_families:
-        public_module = str(family["public_module"])
+        public_module = str(family.get("public_module", ""))
         live_row = twin_rows_by_public_module.get(public_module)
         if live_row is None:
             continue

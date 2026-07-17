@@ -14,6 +14,8 @@ from scripts.engineering.qa.report_flaky_test_burndown_review import (
     main,
 )
 
+pytestmark = pytest.mark.unit
+
 
 def _write_inputs(
     repo_root: Path,

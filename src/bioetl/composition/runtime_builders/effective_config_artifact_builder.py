@@ -18,7 +18,7 @@ from bioetl.composition.runtime_builders._manifest_publication_context_support i
 )
 from bioetl.composition.runtime_builders._effective_config_artifact_builder_support import (
     build_composite_runtime_overrides_snapshot,
-    build_effective_config_source_refs,
+    build_effective_config_source_refs as build_effective_config_source_refs,
     build_resolved_config_snapshot,
     build_runtime_overrides_snapshot,
     resolve_effective_config_entity,

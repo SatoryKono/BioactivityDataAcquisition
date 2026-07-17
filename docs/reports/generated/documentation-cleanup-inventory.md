@@ -7,19 +7,19 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3006 |
-| Tracked doc-like files | 1824 |
-| Ignored local docs/reports files | 1182 |
+| Doc-like files | 3030 |
+| Tracked doc-like files | 1834 |
+| Ignored local docs/reports files | 1196 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
-| Generated routes | 60 |
+| Generated routes | 62 |
 
 ## Tracking State
 
 | Tracking State | Count |
 | --- | --- |
-| ignored_local | 1182 |
-| tracked | 1824 |
+| ignored_local | 1196 |
+| tracked | 1834 |
 
 ## Lifecycle Counts
 
@@ -27,10 +27,10 @@
 | --- | --- |
 | active_backlog | 1 |
 | active_draft | 108 |
-| active_quality_baseline | 19 |
-| closeout_evidence | 27 |
+| active_quality_baseline | 20 |
+| closeout_evidence | 28 |
 | docs_reports_curated_entrypoint | 2 |
-| docs_reports_curated_or_historical_report | 22 |
+| docs_reports_curated_or_historical_report | 36 |
 | docs_reports_generated_or_route_owned | 23 |
 | docs_reports_retention_sensitive_evidence | 1153 |
 | generated_skill_license_mirror | 5 |
@@ -43,7 +43,7 @@
 | plans_governance_entrypoint | 1 |
 | published_skill_reference_redirect | 36 |
 | supporting_context | 12 |
-| working_report | 29 |
+| working_report | 36 |
 
 ## GitHub Issue Drafts And Packs
 
@@ -59,30 +59,30 @@
 
 | Status | Count |
 | --- | --- |
-| Active | 1944 |
+| Active | 1945 |
 | Archived | 61 |
 | Canonical | 63 |
-| Generated | 706 |
-| Working | 232 |
+| Generated | 707 |
+| Working | 254 |
 
 ## Surface Families
 
 | Surface | Count |
 | --- | --- |
-| active | 1944 |
+| active | 1945 |
 | archive | 61 |
 | canonical | 63 |
-| generated | 706 |
-| working | 232 |
+| generated | 707 |
+| working | 254 |
 
 ## Recommended Actions
 
 | Action | Count |
 | --- | --- |
 | archive-after-github-state-check | 121 |
-| archive-after-migration | 61 |
-| generate-automatically | 706 |
-| keep | 2114 |
+| archive-after-migration | 81 |
+| generate-automatically | 707 |
+| keep | 2117 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -113,6 +113,7 @@
 | `docs/reports/audits/grafana-dashboard-audit-github-issues-2026-05-19.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audits/interoperability-docs-reconciliation-2026-04-28.md` | Working | 0 | archive-after-migration |
 | `docs/reports/audits/script-inventory-analysis.md` | Working | 0 | archive-after-migration |
+| `docs/reports/concurrency/async_concurrency_analysis.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-05-03.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-05-07.md` | Working | 0 | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-05-08.md` | Working | 0 | archive-after-migration |
@@ -121,12 +122,25 @@
 | `docs/reports/docs-link-check-report.json` | Working | 0 | archive-after-migration |
 | `docs/reports/docs-parity-report.json` | Working | 0 | archive-after-migration |
 | `docs/reports/documentation-audit-report-2026-07-13.md` | Working | 0 | archive-after-migration |
+| `docs/reports/documentation/quick_wins_documentation_and_rollback.md` | Working | 0 | archive-after-migration |
+| `docs/reports/dq/gold_foreign_key_dq_fail_closed_enforcement_analysis.md` | Working | 0 | archive-after-migration |
+| `docs/reports/governance/contract_governance_corrections_analysis.md` | Working | 0 | archive-after-migration |
 | `docs/reports/governance_check_report.json` | Working | 0 | archive-after-migration |
 | `docs/reports/grafana_silver_filter_rejections_prompt.md` | Working | 0 | archive-after-migration |
 | `docs/reports/great-expectations-spike-2026-04-01.md` | Working | 1 | archive-after-migration |
 | `docs/reports/knowledge-graphs/bioetl-architecture-graph.json` | Working | 0 | archive-after-migration |
 | `docs/reports/knowledge-graphs/bioetl-runtime-detail-graph.json` | Working | 0 | archive-after-migration |
+| `docs/reports/lifecycle/resume_state_validation_analysis.md` | Working | 0 | archive-after-migration |
+| `docs/reports/lifecycle/workflow_state_lock_acquisition_ordering_analysis.md` | Working | 0 | archive-after-migration |
+| `docs/reports/observability/tracing_span_coverage_analysis.md` | Working | 0 | archive-after-migration |
+| `docs/reports/resource-management/file_io_resource_management_analysis.md` | Working | 0 | archive-after-migration |
 | `docs/reports/scripts-inventory-2026-03-01.md` | Working | 0 | archive-after-migration |
+| `docs/reports/security/dq_report_xss_prevention.md` | Working | 0 | archive-after-migration |
+| `docs/reports/security/security_test_coverage_analysis.md` | Working | 0 | archive-after-migration |
+| `docs/reports/security/structured_exception_recursive_redaction_analysis.md` | Working | 0 | archive-after-migration |
+| `docs/reports/test-health/skip_marker_analysis.md` | Working | 0 | archive-after-migration |
+| `docs/reports/test-health/vcr_lifecycle_analysis.md` | Working | 0 | archive-after-migration |
+| `docs/reports/testing/phase2_integration_testing_plan.md` | Working | 0 | archive-after-migration |
 | `reports/observability/runtime_cardinality_allowlist_review_5574.json` | Working | 0 | archive-after-migration |
 | `reports/observability/runtime_cardinality_review.json` | Working | 0 | archive-after-migration |
 | `reports/plans/obs-program-6247-6268/04-refactoring-log.md` | Working | 0 | archive-after-migration |
@@ -150,6 +164,11 @@
 | `reports/quality/root-hygiene-review-evidence.json` | Working | 0 | archive-after-migration |
 | `reports/quality/silver-gold-filter-parity-report.json` | Working | 0 | archive-after-migration |
 | `reports/quality/total-tech-debt-audit-main-2026-07-01.md` | Working | 0 | archive-after-migration |
+| `reports/review/S1-domain.md` | Working | 0 | archive-after-migration |
+| `reports/review/S1.1-contracts-ports.md` | Working | 0 | archive-after-migration |
+| `reports/review/S1.2-logic-models.md` | Working | 0 | archive-after-migration |
+| `reports/review/S2-application.md` | Working | 0 | archive-after-migration |
+| `reports/review/S2.1-core-composite.md` | Working | 0 | archive-after-migration |
 
 ## Generated Artifact Examples
 
@@ -294,6 +313,7 @@
 | `docs/reports/audits/grafana-dashboard-audit-github-issues-2026-05-19.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/audits/interoperability-docs-reconciliation-2026-04-28.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/audits/script-inventory-analysis.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/concurrency/async_concurrency_analysis.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-05-03.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-05-07.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/dashboard-ux-checks/2026-05-08.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
@@ -302,6 +322,8 @@
 | `docs/reports/docs-link-check-report.json` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/docs-parity-report.json` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/documentation-audit-report-2026-07-13.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/documentation/quick_wins_documentation_and_rollback.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
+| `docs/reports/dq/gold_foreign_key_dq_fail_closed_enforcement_analysis.md` | ignored_local | docs_reports_curated_or_historical_report | archive-after-migration |
 | `docs/reports/evidence/INDEX.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/adapter-interface-alignment/01-pillars/pillars.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/adapter-interface-alignment/02-evidence/adapter-interface-alignment/EV-adapter-alignment-biblio-data-source-creators-centralize-helper-wiring.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
@@ -322,9 +344,6 @@
 | `docs/reports/evidence/adapter-interface-alignment/summary.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/architecture-doc-drift/SUMMARY.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 | `docs/reports/evidence/architecture-foundations/01-pillars/PILLARS.md` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/architecture-foundations/02-evidence/architecture-patterns/EV-patterns-dependency-injection-lives-in-composition.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/architecture-foundations/02-evidence/architecture-patterns/EV-patterns-domain-driven-design-primitives.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
-| `docs/reports/evidence/architecture-foundations/02-evidence/architecture-patterns/EV-patterns-hexagonal-ports-and-adapters-is-explicit.yaml` | ignored_local | docs_reports_retention_sensitive_evidence | keep |
 
 ## Generated Route Registry
 
@@ -361,11 +380,13 @@
 | docs-export-merged-markdown | `src/tools/generate_docs_export.py` | ignored_local_export |
 | docs-reports-generated-curated-misc | `multiple governed docs and quality generators` | tracked_or_local_curated_generated_doc |
 | documentation-cleanup-inventory | `scripts/docs/checks/documentation_cleanup_inventory.py` | tracked_curated_generated_doc |
+| domain-io-taint-inventory-quality-baseline | `scripts/engineering/qa/report_domain_io_taint_inventory.py` | tracked_quality_baseline |
 | dq-contracts-generated-doc | `scripts/check_dq_dsl_parity.py` | tracked_curated_generated_doc |
 | duplication-baseline-quality-report | `scripts/engineering/qa/report_duplication_baseline.py` | working_output |
 | engineering-closeout-curated-docs | `manual closeout plus architecture QA verification` | tracked_curated_generated_doc |
 | field-level-diagnostics-quality-report | `scripts/schema/generate_field_level_diagnostics.py` | working_output |
 | file-merger-working-reports | `src/tools/file_merger.py` | working_output |
+| flaky-test-burndown-review-quality-baseline | `scripts/engineering/qa/report_flaky_test_burndown_review.py` | tracked_quality_baseline |
 | full-app-duplication-baseline-quality-report | `scripts/engineering/qa/report_duplication_baseline.py` | tracked_quality_baseline |
 | grafana-dashboard-screenshot-report | `scripts/ops/observability/grafana/rerender_grafana_screenshots.py` | working_output |
 | grafana-live-panel-audit-report | `scripts/ops/observability/grafana/audit_live_grafana_panels.py` | working_output |

@@ -12,7 +12,9 @@ from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.infrastructure.storage.bronze.facade_contracts import (
     BRONZE_WRITE_ERRORS,
-    BronzeWriterRuntimeServices,
+)
+from bioetl.infrastructure.storage.bronze.facade_contracts import (
+    BronzeWriterRuntimeServices as BronzeWriterRuntimeServices,
 )
 from bioetl.infrastructure.storage.bronze.io_mixin import BronzeWriterIOMixin
 from bioetl.infrastructure.storage.bronze.metadata_mixin import (

@@ -14,6 +14,7 @@ from .debug_export_helpers import (
     _normalize_optional_text,
     _payload_hash,
     _primary_key,
+    _record_payload,
     _source_record_id,
 )
 
@@ -28,7 +29,7 @@ def build_dq_summary_rows(
     gold_rejected_rows: Sequence[dict[str, object]],
 ) -> tuple[dict[str, object], ...]:
     """Build deterministic DQ summary rows from collected exclusion tables."""
-    counter = Counter()
+    counter: Counter[tuple[object, object, object, object]] = Counter()
     for rows in (
         silver_rejected_rows,
         silver_quarantine_rows,
@@ -67,13 +68,7 @@ def get_sorted_lineage_rows(
 
 def source_metadata_attrs(source_metadata: object | None) -> dict[str, object]:
     """Return JSON-like source metadata attributes from supported object shapes."""
-    if isinstance(source_metadata, dict):
-        return dict(source_metadata)
-    if hasattr(source_metadata, "model_dump"):
-        return source_metadata.model_dump()
-    if hasattr(source_metadata, "__dict__"):
-        return source_metadata.__dict__
-    return {}
+    return _record_payload(source_metadata)
 
 
 def resolve_debug_record_index(record: Mapping[str, object]) -> int | None:

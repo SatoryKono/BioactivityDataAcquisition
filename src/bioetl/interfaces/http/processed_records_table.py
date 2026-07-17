@@ -90,7 +90,9 @@ def build_processed_records_table_payload_from_prometheus(
 ) -> dict[str, object]:
     """Fetch current accounting metrics and return the dashboard table payload."""
     if _support.is_unknown_scope(pipeline):
-        metric_values = {spec.metric: None for spec in PROCESSED_RECORDS_ROW_SPECS}
+        metric_values: dict[str, float | int | None] = {
+            spec.metric: None for spec in PROCESSED_RECORDS_ROW_SPECS
+        }
         return build_processed_records_table_payload(
             metric_values=metric_values,
             pipeline=pipeline,
@@ -123,7 +125,9 @@ def build_processed_records_table_payload_from_ledger(
             run_type=run_type,
         )
 
-    metric_values = {spec.metric: 0 for spec in PROCESSED_RECORDS_ROW_SPECS}
+    metric_values: dict[str, float | int | None] = {
+        spec.metric: 0 for spec in PROCESSED_RECORDS_ROW_SPECS
+    }
     latest_snapshot = _support.latest_metrics_snapshot(ledger_entries)
     if latest_snapshot:
         metric_values.update(

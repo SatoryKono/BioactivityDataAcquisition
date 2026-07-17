@@ -228,6 +228,9 @@ def test_reason_hash_and_sort_helpers_cover_branch_variants() -> None:
         {"record_index": "5", "primary_key": "B", "payload_hash": "H"}
     ) == (5, "B", "H")
     assert helpers._row_sort_key(
+        {"record_index": 5.9, "primary_key": "B", "payload_hash": "H"}
+    ) == (5, "B", "H")
+    assert helpers._row_sort_key(
         {"record_index": "bad", "primary_key": "B", "payload_hash": "H"}
     ) == (None, "B", "H")
     assert helpers._row_sort_key(

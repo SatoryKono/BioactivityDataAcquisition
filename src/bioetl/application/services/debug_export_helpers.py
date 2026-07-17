@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from datetime import UTC, date, datetime
 from pathlib import PurePath
+from typing import SupportsIndex, SupportsInt
 from uuid import UUID
 
 from bioetl.domain.behavior.identity_service import EntityIdentityGenerator
@@ -238,10 +239,15 @@ def _payload_hash(
 
 def _row_sort_key(row: Mapping[str, object]) -> tuple[int | None, str, str]:
     index_value = row.get("record_index")
-    try:
-        record_index = int(index_value) if index_value is not None else None
-    except (TypeError, ValueError):
-        record_index = None
+    record_index: int | None = None
+    if isinstance(
+        index_value,
+        str | bytes | bytearray | SupportsInt | SupportsIndex,
+    ):
+        try:
+            record_index = int(index_value)
+        except (TypeError, ValueError):
+            pass
     return (
         record_index,
         _normalize_text(row.get("primary_key")),

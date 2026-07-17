@@ -11,6 +11,7 @@ from bioetl.composition.runtime_builders._config_access_loaders import (
     create_source_config_loader as _create_source_config_loader,
 )
 from bioetl.infrastructure.config.config_root import resolve_configs_root
+from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 __all__ = [
@@ -42,7 +43,7 @@ def create_source_config_loader(configs_root: Path) -> Callable[[str], object]:
     return _create_source_config_loader(configs_root)
 
 
-def get_settings():
+def get_settings() -> Settings:
     """Resolve settings through the infrastructure package at call time."""
     from bioetl.infrastructure.config.settings_api import get_settings as _get_settings
 

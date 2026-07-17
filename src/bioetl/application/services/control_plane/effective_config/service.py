@@ -65,30 +65,30 @@ class EffectiveConfigService:
             normalization_profile_hash=normalization_profile_hash,
         )
         resolved_artifact_id = artifact_id or build_effective_config_artifact_id(
-            context["semantic_identity_payload"]
+            context.semantic_identity_payload
         )
         return EffectiveConfigArtifact(
             artifact_id=resolved_artifact_id,
             pipeline_name=pipeline_name,
             pipeline_kind=pipeline_kind,
             source_refs=source_refs,
-            source_class_provenance=context["source_class_provenance"],
-            resolution_policy=context["resolved_policy"],
-            resolved_config=context["resolved_snapshot"],
-            runtime_overrides=context["overrides_snapshot"],
-            execution_environment=context["execution_environment"],
-            effective_execution_config=context["effective_snapshot"],
-            resolved_config_hash=context["resolved_snapshot"].config_hash,
-            effective_config_hash=context["effective_snapshot"].effective_hash,
-            source_fingerprint=context["source_fingerprint"],
-            contract_refs=context["contract_refs"],
+            source_class_provenance=context.source_class_provenance,
+            resolution_policy=context.resolved_policy,
+            resolved_config=context.resolved_snapshot,
+            runtime_overrides=context.overrides_snapshot,
+            execution_environment=context.execution_environment,
+            effective_execution_config=context.effective_snapshot,
+            resolved_config_hash=context.resolved_snapshot.config_hash,
+            effective_config_hash=context.effective_snapshot.effective_hash,
+            source_fingerprint=context.source_fingerprint,
+            contract_refs=context.contract_refs,
             normalization_profile_ref=normalization_profile_ref,
             normalization_profile_version=normalization_profile_version,
             normalization_profile_hash=normalization_profile_hash,
-            dq_policy_refs=context["dq_policy_refs"],
-            dq_rule_bundle_versions=context["dq_rule_bundle_versions"],
-            dq_contract_compatibility_hash=context["dq_contract_compatibility_hash"],
-            dq_policy_snapshots=context["dq_policy_snapshots"],
+            dq_policy_refs=context.dq_policy_refs,
+            dq_rule_bundle_versions=context.dq_rule_bundle_versions,
+            dq_contract_compatibility_hash=context.dq_contract_compatibility_hash,
+            dq_policy_snapshots=context.dq_policy_snapshots,
         )
 
     def serialize_artifact(self, artifact: EffectiveConfigArtifact) -> str:

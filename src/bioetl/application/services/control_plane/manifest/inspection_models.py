@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from bioetl.application.services.control_plane.manifest.inspection_result_model import (  # noqa: F401
-    RunManifestInspectionResult,
+from bioetl.application.services.control_plane.manifest.inspection_result_model import (
+    RunManifestInspectionResult as RunManifestInspectionResult,
 )
 
 

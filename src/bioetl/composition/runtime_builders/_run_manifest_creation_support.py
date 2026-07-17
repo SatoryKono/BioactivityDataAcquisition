@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from typing import TYPE_CHECKING
 
 import bioetl.composition.runtime_builders.run_manifest_support as _manifest_support
 from bioetl.application.services.control_plane.manifest.service import (
@@ -12,7 +13,7 @@ from bioetl.composition.runtime_builders._run_manifest_attr_support import (
     read_attr as _read_attr,
 )
 from bioetl.composition.runtime_builders._run_manifest_creation_support_helpers import (
-    RunManifestCreateRequestInputs as _RunManifestCreateRequestInputs,
+    RunManifestCreateRequestInputs,
 )
 from bioetl.composition.runtime_builders._run_manifest_creation_support_helpers import (
     assemble_manifest_create_spec as _assemble_manifest_create_spec,
@@ -45,9 +46,18 @@ from bioetl.domain.control_plane.reproducibility_policy import (
     STRICT_PERSISTENCE_PROFILES,
 )
 
+if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.ledger.service import (
+        RunLedgerService,
+    )
+    from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
+    from bioetl.domain.context import PipelineRunContext
+
+_RunManifestCreateRequestInputs = RunManifestCreateRequestInputs
+
 
 def build_manifest_create_request(
-    request_inputs: _RunManifestCreateRequestInputs,
+    request_inputs: RunManifestCreateRequestInputs,
 ) -> RunManifestCreateSpec:
     """Build the canonical RunManifest create request."""
     ctx = request_inputs.ctx
@@ -60,8 +70,8 @@ def build_manifest_create_request(
         inputs=inputs,
         provider=request_inputs.provider,
         entity=request_inputs.entity,
-        required_persistence_profile=_read_attr(
-            reproducibility_context, "required_persistence_profile"
+        required_persistence_profile=(
+            reproducibility_context.required_persistence_profile
         ),
     )
     replay_of_run_id, replay_of_manifest_id = (
@@ -100,11 +110,11 @@ def build_manifest_create_request(
     )
     validate_required_runtime_persistence_profile(
         request=request,
-        required_persistence_profile=_read_attr(
-            reproducibility_context, "required_persistence_profile"
+        required_persistence_profile=(
+            reproducibility_context.required_persistence_profile
         ),
-        strict_exact_replay_supported=_read_attr(
-            reproducibility_context, "strict_exact_replay_supported", False
+        strict_exact_replay_supported=(
+            reproducibility_context.strict_exact_replay_supported
         ),
     )
     return request
@@ -186,6 +196,9 @@ def emit_replay_reconstructability_metric(
         )
 
 
-def create_ledger_service(inputs: object, ctx: object) -> object:
+def create_ledger_service(
+    inputs: RunnerInputs,
+    ctx: PipelineRunContext,
+) -> RunLedgerService | None:
     """Keep the public ownership seam local to this support module."""
     return _create_ledger_service(inputs, ctx)

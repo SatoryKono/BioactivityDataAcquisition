@@ -7,13 +7,33 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from uuid import UUID
+
+    from bioetl.composition.observability import ObservabilityBundle
     from bioetl.composition.bootstrap.runtime.assembly import RuntimeBootstrapPhases
+    from bioetl.composition.factories.pipeline.registry import (
+        PipelineFactoryRegistrationState,
+        PipelineRegistryProtocol,
+    )
     from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.composition.runtime_builders.runner_builder_wiring import (
         RunnerFactoryWiring,
         RunnerInputWiring,
     )
-    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+    from bioetl.domain.context import PipelineRunContext
+    from bioetl.domain.filtering import InputFilterConfig
+    from bioetl.domain.ports import (
+        AuditPort,
+        DQMonitorPort,
+        LoggerPort,
+        MetricsPort,
+        TracingPort,
+    )
+    from bioetl.infrastructure.config.settings_api import Settings
+    from bioetl.infrastructure.schemas.pipeline_config import (
+        InputFilterYamlConfig,
+        PipelineYamlConfig,
+    )
 
 __all__ = [
     "build_bootstrap_runner_factory_wiring",
@@ -24,25 +44,69 @@ __all__ = [
 ]
 
 
-def assemble_filter_config(*args: object, **kwargs: object) -> object:
+def assemble_filter_config(
+    *,
+    yaml_filter: InputFilterYamlConfig,
+    ctx: PipelineRunContext,
+    test_mode: bool,
+) -> InputFilterConfig | None:
     """Lazy wrapper for the bootstrap filter-config assembler seam."""
     from bioetl.composition.bootstrap.runtime.assembly import (
         assemble_filter_config as _assemble_filter_config,
     )
 
-    return _assemble_filter_config(*args, **kwargs)
+    return _assemble_filter_config(
+        yaml_filter=yaml_filter,
+        ctx=ctx,
+        test_mode=test_mode,
+    )
 
 
-def bootstrap_observability_bundle(*args: object, **kwargs: object) -> object:
+def bootstrap_observability_bundle(
+    *,
+    pipeline: str,
+    run_id: UUID,
+    settings: Settings,
+    log_level: str,
+    logger_bootstrapper: Callable[[str, UUID, str], LoggerPort] | None = None,
+    tracer_bootstrapper: Callable[[Settings], TracingPort] | None = None,
+    metrics_bootstrapper: Callable[[Settings], MetricsPort] | None = None,
+    audit_bootstrapper: Callable[
+        [Settings, LoggerPort, MetricsPort, TracingPort], AuditPort
+    ]
+    | None = None,
+    dq_monitor_bootstrapper: Callable[
+        [Settings, LoggerPort | None], DQMonitorPort | None
+    ]
+    | None = None,
+    preflight_validator: Callable[..., None] | None = None,
+    yaml_config: object | None = None,
+    skip_gold: bool = False,
+) -> ObservabilityBundle:
     """Lazy wrapper for bootstrap observability wiring."""
     from bioetl.composition.bootstrap.runtime.observability_bundle import (
         bootstrap_observability_bundle_impl as _bootstrap_observability_bundle,
     )
 
-    return _bootstrap_observability_bundle(*args, **kwargs)
+    return _bootstrap_observability_bundle(
+        pipeline=pipeline,
+        run_id=run_id,
+        settings=settings,
+        log_level=log_level,
+        logger_bootstrapper=logger_bootstrapper,
+        tracer_bootstrapper=tracer_bootstrapper,
+        metrics_bootstrapper=metrics_bootstrapper,
+        audit_bootstrapper=audit_bootstrapper,
+        dq_monitor_bootstrapper=dq_monitor_bootstrapper,
+        preflight_validator=preflight_validator,
+        yaml_config=yaml_config,
+        skip_gold=skip_gold,
+    )
 
 
-def create_pipeline_config_loader(configs_root: Path) -> Callable[[str], object]:
+def create_pipeline_config_loader(
+    configs_root: Path,
+) -> Callable[[str], PipelineYamlConfig]:
     """Lazy wrapper for pipeline-config loader construction."""
     from bioetl.composition.runtime_builders.config_access import (
         create_pipeline_config_loader as _create_pipeline_config_loader,
@@ -58,7 +122,7 @@ def create_registry() -> PipelineRegistry:
     return _create_registry()
 
 
-def create_source_config_loader(configs_root: Path) -> Callable[..., object]:
+def create_source_config_loader(configs_root: Path) -> Callable[[str], object]:
     """Lazy wrapper for source-config loader construction."""
     from bioetl.composition.runtime_builders.config_access import (
         create_source_config_loader as _create_source_config_loader,
@@ -76,7 +140,7 @@ def ensure_providers_loaded() -> None:
     _ensure_providers_loaded()
 
 
-def get_settings() -> object:
+def get_settings() -> Settings:
     """Lazy wrapper for runtime settings access."""
     from bioetl.composition.runtime_builders.config_access import (
         get_settings as _get_settings,
@@ -117,13 +181,20 @@ def initialize_protein_class_target_type_mapping(configs_root: Path) -> None:
     _initialize(configs_root)
 
 
-def register_all_pipelines(*args: object, **kwargs: object) -> object:
+def register_all_pipelines(
+    registry: PipelineRegistryProtocol | None = None,
+    *,
+    registration_state: PipelineFactoryRegistrationState | None = None,
+) -> None:
     """Lazy wrapper for full pipeline registration."""
     from bioetl.composition.factories.pipeline.registry import (
         register_all_pipelines as _register_all_pipelines,
     )
 
-    return _register_all_pipelines(*args, **kwargs)
+    _register_all_pipelines(
+        registry=registry,
+        registration_state=registration_state,
+    )
 
 
 def prepare_runtime_registry(
