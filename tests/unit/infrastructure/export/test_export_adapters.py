@@ -482,7 +482,7 @@ def test_export_catalog_adapter_lists_and_resolves_delta_tables(tmp_path: Path) 
     (base / "README.txt").write_text("not a provider", encoding="utf-8")
 
     assert adapter.list_tables(base_path=base, layer="silver") == [
-        ("activities", table_dir)
+        ("activities", str(table_dir))
     ]
     assert (
         adapter.resolve_table_path(
@@ -490,7 +490,7 @@ def test_export_catalog_adapter_lists_and_resolves_delta_tables(tmp_path: Path) 
             table_name="activities",
             layer="silver",
         )
-        == table_dir.resolve()
+        == str(table_dir.resolve())
     )
     with pytest.raises(FileNotFoundError, match="Table 'missing' not found"):
         adapter.resolve_table_path(
