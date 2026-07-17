@@ -48,10 +48,12 @@ class _FakePytestItem:
         *,
         config: _FakeConfig | None = None,
         markers: dict[str, object] | None = None,
+        nodeid: str = "test_item.py::test_func",
     ) -> None:
         self.config = config or _FakeConfig(option=_FakeOptionNamespace())
         self._markers = markers or {}
         self.added_markers: list[object] = []
+        self.nodeid = nodeid
 
     def get_closest_marker(self, name: str) -> object | None:
         return self._markers.get(name)
@@ -115,7 +117,7 @@ def test_pytest_itemcollected_tracks_pre_deselection_count() -> None:
     config = _FakeConfig(option=_FakeOptionNamespace(lf=True))
     root_conftest._reset_last_failed_collection_state(config)
 
-    item = type("Item", (), {"config": config})()
+    item = _FakePytestItem(config=config)
     root_conftest.pytest_itemcollected(item)
     root_conftest.pytest_itemcollected(item)
 
