@@ -278,6 +278,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain as a bounded manual test-governance report utility while testing guidance still references the direct script path; promote it into the canonical scripts.engineering.qa surface or retire it after the broader test-governance workflow is consolidated."
     },
+    "scripts/engineering/qa/report_flaky_test_burndown_review.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the deterministic implementation behind the governed scripts.engineering.qa report-flaky-test-burndown-review command; keep the module supporting while the QA router remains the canonical active entrypoint."
+    },
     "scripts/engineering/qa/refresh_test_governance_baseline.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
@@ -439,6 +445,12 @@
       "decision": "shared_helper_module",
       "review_by": "2026-10-15",
       "next_step": "Retain as the recovery-trial and promotion-gate helper behind the opt-in Docker stability campaign; keep promotion evidence fail-closed and reviewable."
+    },
+    "scripts/engineering/qa/docker_stability_campaign/runner.py": {
+      "owner": "@bioetl-platform",
+      "decision": "shared_helper_module",
+      "review_by": "2026-10-15",
+      "next_step": "Retain as the CLI orchestration implementation behind the supporting opt-in Docker stability campaign facade; keep it supporting while host-disruptive execution remains explicitly scheduled."
     },
     "scripts/engineering/qa/docker_stability_campaign/soak.py": {
       "owner": "@bioetl-platform",
