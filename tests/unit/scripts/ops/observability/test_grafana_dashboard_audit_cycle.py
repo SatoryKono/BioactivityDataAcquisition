@@ -89,7 +89,7 @@ def _write_gate_sources(
 
 
 @pytest.fixture
-def matching_gate_sources(monkeypatch: Any) -> None:
+def matching_gate_sources(monkeypatch: pytest.MonkeyPatch) -> None:
     """Materialize occurrence-matched sources for mocked successful gate stages."""
     write_gate_report = cycle_subject._write_gate_report
 
@@ -126,7 +126,7 @@ def test_grafana_audit_preflight_router_exposes_command() -> None:
 
 
 def test_grafana_audit_preflight_parser_uses_grafana_env_defaults(
-    monkeypatch: Any, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     monkeypatch.setenv("GRAFANA_USERNAME", "viewer")
     monkeypatch.setenv("GRAFANA_PASSWORD", "secret")
@@ -144,7 +144,7 @@ def test_grafana_audit_preflight_parser_uses_grafana_env_defaults(
 
 
 def test_grafana_audit_preflight_render_auth_reports_unauthorized(
-    monkeypatch: Any,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     def raise_unauthorized(*_args: object, **_kwargs: object) -> object:
         raise HTTPError(
@@ -170,7 +170,7 @@ def test_grafana_audit_preflight_render_auth_reports_unauthorized(
 
 
 def test_grafana_audit_preflight_playwright_runtime_surfaces_probe_detail(
-    monkeypatch: Any,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
         rerender_subject,
@@ -371,7 +371,7 @@ def test_grafana_audit_preflight_rejects_actual_viewport_or_theme_drift() -> Non
 
 
 def test_grafana_audit_preflight_screenshot_check_enforces_terminal_manifest(
-    monkeypatch: Any, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     screenshot_dir = tmp_path / "screens"
     screenshot_dir.mkdir()
@@ -405,7 +405,7 @@ def test_grafana_audit_preflight_screenshot_check_enforces_terminal_manifest(
 
 
 def test_grafana_audit_preflight_run_checks_collects_ok_results(
-    monkeypatch: Any, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     monkeypatch.setattr(
         preflight_subject,
@@ -472,7 +472,7 @@ def test_grafana_audit_preflight_run_checks_collects_ok_results(
 
 
 def test_grafana_audit_preflight_can_skip_screenshot_check(
-    monkeypatch: Any, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     monkeypatch.setattr(
         preflight_subject,
@@ -548,7 +548,7 @@ def test_grafana_audit_preflight_can_skip_screenshot_check(
 
 
 def test_grafana_audit_preflight_can_run_semantic_checks_without_render_runtime(
-    monkeypatch: Any, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     monkeypatch.setattr(
         preflight_subject,
@@ -593,7 +593,7 @@ def test_grafana_audit_preflight_can_run_semantic_checks_without_render_runtime(
 
 
 def test_preflight_can_run_render_checks_without_semantic_checks(
-    monkeypatch: Any, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     monkeypatch.setattr(
         preflight_subject,
@@ -789,7 +789,7 @@ def test_grafana_audit_cycle_router_exposes_command() -> None:
 
 @pytest.mark.usefixtures("matching_gate_sources")
 def test_grafana_audit_cycle_runs_preflight_rerender_and_live_audit(
-    monkeypatch: Any, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     calls: list[tuple[str, list[str]]] = []
 
@@ -861,7 +861,7 @@ def test_grafana_audit_cycle_runs_preflight_rerender_and_live_audit(
 
 
 def test_grafana_audit_cycle_exit_code_uses_validated_release_result(
-    monkeypatch: Any, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     observed_claims: dict[str, str] = {}
 
@@ -907,7 +907,7 @@ def test_grafana_audit_cycle_exit_code_uses_validated_release_result(
 
 @pytest.mark.usefixtures("matching_gate_sources")
 def test_grafana_audit_cycle_keeps_render_gate_after_semantic_preflight_failure(
-    monkeypatch: Any, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     calls: list[str] = []
 
@@ -952,7 +952,7 @@ def test_grafana_audit_cycle_keeps_render_gate_after_semantic_preflight_failure(
 
 @pytest.mark.usefixtures("matching_gate_sources")
 def test_grafana_audit_cycle_skips_semantic_network_when_backend_is_unavailable(
-    monkeypatch: Any, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     calls: list[str] = []
 
@@ -1036,7 +1036,7 @@ def test_nondefault_screenshot_dir_cannot_write_canonical_gate(tmp_path: Path) -
 
 @pytest.mark.usefixtures("matching_gate_sources")
 def test_grafana_audit_cycle_keeps_both_gates_when_filled_discovery_fails(
-    monkeypatch: Any, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     calls: list[str] = []
 
@@ -1088,7 +1088,7 @@ def test_grafana_audit_cycle_keeps_both_gates_when_filled_discovery_fails(
 
 @pytest.mark.usefixtures("matching_gate_sources")
 def test_grafana_audit_cycle_uses_cached_filled_dashboards_after_timeout(
-    monkeypatch: Any, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     calls: list[tuple[str, list[str]]] = []
 
@@ -1147,7 +1147,7 @@ def test_grafana_audit_cycle_uses_cached_filled_dashboards_after_timeout(
 
 @pytest.mark.usefixtures("matching_gate_sources")
 def test_grafana_audit_cycle_can_disable_filled_dashboard_filtering(
-    monkeypatch: Any, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     rerender_argv: list[str] = []
 
@@ -1178,7 +1178,7 @@ def test_grafana_audit_cycle_can_disable_filled_dashboard_filtering(
 
 @pytest.mark.usefixtures("matching_gate_sources")
 def test_grafana_audit_cycle_retries_backend_on_fallback_port(
-    monkeypatch: Any, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     ensured_ports: list[int] = []
     calls: list[tuple[str, list[str]]] = []
@@ -1254,7 +1254,7 @@ def test_grafana_audit_cycle_retries_backend_on_fallback_port(
 
 @pytest.mark.usefixtures("matching_gate_sources")
 def test_grafana_audit_cycle_reuses_existing_backend_when_fallback_start_fails(
-    monkeypatch: Any, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     calls: list[tuple[str, list[str]]] = []
 
@@ -1320,7 +1320,7 @@ def test_grafana_audit_cycle_reuses_existing_backend_when_fallback_start_fails(
 
 @pytest.mark.usefixtures("matching_gate_sources")
 def test_grafana_audit_cycle_uses_managed_backend_when_detached_backend_fails(
-    monkeypatch: Any, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     calls: list[tuple[str, list[str]]] = []
 
@@ -1391,7 +1391,7 @@ def test_grafana_audit_cycle_uses_managed_backend_when_detached_backend_fails(
 
 @pytest.mark.usefixtures("matching_gate_sources")
 def test_grafana_audit_cycle_can_disable_backend_refresh(
-    monkeypatch: Any, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     dropped: list[int] = []
 
@@ -1431,7 +1431,9 @@ def test_grafana_audit_cycle_can_disable_backend_refresh(
     assert dropped == []
 
 
-def test_live_audit_writes_report(monkeypatch: Any, tmp_path: Path) -> None:
+def test_live_audit_writes_report(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     output_path = tmp_path / "live-panel-audit.json"
     config = audit_subject.AuditConfig(
         prometheus_base_url="http://localhost:9090",
