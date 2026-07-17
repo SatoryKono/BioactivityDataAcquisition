@@ -69,7 +69,15 @@ services:
       - monitoring
     restart: unless-stopped
     healthcheck:
-      disable: true
+      test:
+        - "CMD"
+        - "/usr/bin/loki"
+        - "-config.file=/etc/loki/config.yml"
+        - "-verify-config=true"
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     mem_limit: 768m
     mem_reservation: 384m
     cpus: 0.75
@@ -89,7 +97,7 @@ services:
       - ./reports/logs:/workspace-report-logs:ro
     depends_on:
       loki:
-        condition: service_started
+        condition: service_healthy
     networks:
       - monitoring
     restart: unless-stopped

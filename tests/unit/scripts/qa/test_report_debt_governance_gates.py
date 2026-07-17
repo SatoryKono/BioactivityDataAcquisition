@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 import json
+from pathlib import Path
 import subprocess
 
 import pytest
@@ -327,6 +328,148 @@ def test_flaky_untriaged_entries_require_triage_status() -> None:
         "tests/unit/test_b.py::test_missing",
         "tests/unit/test_c.py::test_unknown",
     ]
+
+
+def test_flaky_review_input_preflight_fails_closed_when_artifact_is_missing(
+    tmp_path: Path,
+) -> None:
+    payload, gate = gates._load_json_input_with_preflight(
+        tmp_path,
+        gates.FLAKY_TEST_REVIEW_PATH,
+        gate_name="flaky_test_review_input_preflight",
+    )
+
+    assert payload == {}
+    assert gate.status == "fail"
+    assert gate.current == "missing"
+    assert gate.source_artifact == gates.FLAKY_TEST_REVIEW_PATH
+
+
+def test_flaky_review_input_preflight_fails_closed_for_invalid_json(
+    tmp_path: Path,
+) -> None:
+    review_path = tmp_path / gates.FLAKY_TEST_REVIEW_PATH
+    review_path.parent.mkdir(parents=True)
+    review_path.write_text("{not-json}\n", encoding="utf-8")
+
+    payload, gate = gates._load_json_input_with_preflight(
+        tmp_path,
+        gates.FLAKY_TEST_REVIEW_PATH,
+        gate_name="flaky_test_review_input_preflight",
+    )
+
+    assert payload == {}
+    assert gate.status == "fail"
+    assert gate.current == "invalid_json"
+
+
+def test_flaky_review_input_preflight_fails_closed_for_non_object_json(
+    tmp_path: Path,
+) -> None:
+    review_path = tmp_path / gates.FLAKY_TEST_REVIEW_PATH
+    review_path.parent.mkdir(parents=True)
+    review_path.write_text("[]\n", encoding="utf-8")
+
+    payload, gate = gates._load_json_input_with_preflight(
+        tmp_path,
+        gates.FLAKY_TEST_REVIEW_PATH,
+        gate_name="flaky_test_review_input_preflight",
+    )
+
+    assert payload == {}
+    assert gate.status == "fail"
+    assert gate.current == "invalid_top_level_type"
+
+
+def test_flaky_review_input_preflight_fails_closed_when_artifact_is_unreadable(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def _raise_os_error(
+        _path: Path,
+        *,
+        encoding: str | None = None,
+        errors: str | None = None,
+    ) -> str:
+        del encoding, errors
+        raise OSError("permission denied")
+
+    monkeypatch.setattr(Path, "read_text", _raise_os_error)
+
+    payload, gate = gates._load_json_input_with_preflight(
+        tmp_path,
+        gates.FLAKY_TEST_REVIEW_PATH,
+        gate_name="flaky_test_review_input_preflight",
+    )
+
+    assert payload == {}
+    assert gate.status == "fail"
+    assert gate.current == "unreadable"
+
+
+def test_flaky_review_input_preflight_returns_payload_for_valid_object(
+    tmp_path: Path,
+) -> None:
+    review_path = tmp_path / gates.FLAKY_TEST_REVIEW_PATH
+    review_path.parent.mkdir(parents=True)
+    review_path.write_text('{"summary": {"total_flaky": 0}}\n', encoding="utf-8")
+
+    payload, gate = gates._load_json_input_with_preflight(
+        tmp_path,
+        gates.FLAKY_TEST_REVIEW_PATH,
+        gate_name="flaky_test_review_input_preflight",
+    )
+
+    assert payload == {"summary": {"total_flaky": 0}}
+    assert gate.status == "pass"
+    assert gate.current == "available_valid_object"
+
+
+def test_build_payload__missing_flaky_review__fails_gate_without_crashing(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module_coverage = gates._load_json(
+        gates.PROJECT_ROOT,
+        "reports/quality/module-coverage-inventory.json",
+    )
+    monkeypatch.setattr(
+        gates,
+        "FLAKY_TEST_REVIEW_PATH",
+        "reports/quality/__missing_flaky_test_review__.json",
+    )
+    monkeypatch.setattr(
+        gates,
+        "_refresh_existing_inventory_source_tree",
+        lambda payload, *, repo_root: {
+            "source_tree_sha256": module_coverage["source_tree_sha256"]
+        },
+    )
+    monkeypatch.setattr(
+        gates,
+        "_artifact_matches_builder",
+        lambda *, repo_root, rel_path, payload_builder: True,
+    )
+    monkeypatch.setattr(
+        gates,
+        "_hotspot_family_baseline_artifact_matches_builder",
+        lambda *, repo_root: True,
+    )
+    monkeypatch.setattr(
+        gates,
+        "_remote_main_baseline_artifact_matches_builder",
+        lambda *, repo_root: True,
+    )
+
+    payload = gates.build_payload(repo_root=gates.PROJECT_ROOT)
+
+    preflight_gate = next(
+        row
+        for row in payload["gates"]
+        if row["name"] == "flaky_test_review_input_preflight"
+    )
+    assert preflight_gate["status"] == "fail"
+    assert preflight_gate["current"] == "missing"
+    assert payload["summary"]["release_gate_status"] == "failing"
 
 
 def test_build_payload_fails_release_when_module_coverage_inventory_hash_is_stale(

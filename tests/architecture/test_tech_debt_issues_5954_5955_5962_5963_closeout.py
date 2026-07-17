@@ -52,7 +52,6 @@ def test_issue_5954_memory_workflow_smoke_is_bounded_and_wired() -> None:
 
 
 def test_issue_5955_debt_governance_rollup_blocks_budget_growth() -> None:
-    gates = _load_json(DEBT_GATES)
     tests_workflow = TESTS_WORKFLOW.read_text(encoding="utf-8")
 
     # Skip release gate status check for local development with uncommitted changes
@@ -69,11 +68,24 @@ def test_issue_5955_debt_governance_rollup_blocks_budget_growth() -> None:
 def test_issue_5962_flaky_inventory_is_explicit_and_fail_fast() -> None:
     gates = _load_json(DEBT_GATES)
     review = _load_json(FLAKY_REVIEW)
+    tests_workflow = TESTS_WORKFLOW.read_text(encoding="utf-8")
+    test_governance_position = tests_workflow.index(
+        "Validate committed test-governance snapshots"
+    )
+    flaky_review_position = tests_workflow.index(
+        "Validate flaky-test burndown review evidence"
+    )
+    debt_rollup_position = tests_workflow.index(
+        "Validate debt-governance fail-fast gates"
+    )
 
     assert "#5962" in review["linked_issues"]
     assert review["summary"]["total_flaky"] == 0
     assert review["reviewed_flaky_tests"] == []
     assert review["policy"]["no_growth_gate"].endswith("flaky_test_total_count")
+    assert "report-flaky-test-burndown-review --check" in tests_workflow
+    assert test_governance_position < flaky_review_position < debt_rollup_position
+    assert _gate(gates, "flaky_test_review_input_preflight")["status"] == "pass"
     assert _gate(gates, "flaky_test_total_count")["status"] == "pass"
     assert _gate(gates, "flaky_test_untriaged_count")["status"] == "pass"
 

@@ -41,6 +41,26 @@ DEFAULT_CONTROL_PLANE_ROOT_FACADE = (
     / "quality"
     / "application_control_plane_root_facade_inventory.yaml"
 )
+_INVENTORY_DOC_CELL_COUNT = 10
+_DOC_METADATA_FIELDS = (
+    "status",
+    "canonical_target",
+    "owner",
+    "introduced_in",
+    "review_date",
+    "compatibility_role",
+    "allowed_call_sites",
+    "migration_path",
+    "exit_criteria",
+)
+_CENSUS_METADATA_FIELDS = (
+    "status",
+    "canonical_target",
+    "owner",
+    "external_breaking_change_required",
+    "internal_callers_zero",
+    "usage_classification",
+)
 REMOVED_COMPATIBILITY_SURFACES: tuple[dict[str, str], ...] = (
     {
         "issue_id": "4541",
@@ -324,6 +344,190 @@ def _usage_classification(row: dict[str, Any]) -> str:
     if external_breaking_change_required:
         return "stable_public_api_with_reviewed_first_party_usage"
     return "compatibility_surface_under_active_migration"
+
+
+def _load_mapping(path: Path) -> dict[str, Any]:
+    payload = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    if not isinstance(payload, dict):
+        raise ValueError(f"{path} must contain a mapping root")
+    return payload
+
+
+def _mapping_rows(
+    payload: dict[str, Any], section_name: str
+) -> tuple[dict[str, Any], ...]:
+    rows = payload.get(section_name, [])
+    if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+        raise ValueError(f"{section_name} must contain a list of mappings")
+    return tuple(rows)
+
+
+def _parse_inventory_doc_line(line: str) -> dict[str, Any] | None:
+    stripped = line.strip()
+    if not stripped.startswith("| `src/bioetl/"):
+        return None
+    cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+    if len(cells) != _INVENTORY_DOC_CELL_COUNT:
+        raise ValueError(f"Unexpected compatibility inventory row format: {line}")
+    return {
+        "path": cells[0].strip("`"),
+        "compatibility_role": cells[1],
+        "canonical_target": cells[2].strip("`"),
+        "status": cells[3].strip("`"),
+        "owner": cells[4].strip("`"),
+        "introduced_in": cells[5].strip("`"),
+        "allowed_call_sites": cells[6],
+        "review_date": cells[7].strip("`"),
+        "migration_path": cells[8],
+        "exit_criteria": cells[9],
+    }
+
+
+def _index_metadata_rows(
+    rows: tuple[dict[str, Any], ...], *, artifact_name: str
+) -> dict[str, dict[str, Any]]:
+    paths = tuple(str(row.get("path", "")) for row in rows)
+    if any(not path for path in paths):
+        raise ValueError(f"{artifact_name} contains a row without a path")
+    indexed = dict(zip(paths, rows, strict=True))
+    if len(indexed) != len(rows):
+        raise ValueError(f"{artifact_name} contains duplicate paths")
+    return indexed
+
+
+def _load_inventory_doc_rows(path: Path) -> dict[str, dict[str, Any]]:
+    parsed_rows = tuple(
+        parsed
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if (parsed := _parse_inventory_doc_line(line)) is not None
+    )
+    return _index_metadata_rows(parsed_rows, artifact_name=path.as_posix())
+
+
+def _normalize_metadata_value(value: Any) -> Any:
+    if isinstance(value, str):
+        return " ".join(value.split())
+    return value
+
+
+def _row_set_mismatches(
+    *,
+    artifact_name: str,
+    expected_rows: dict[str, dict[str, Any]],
+    actual_rows: dict[str, dict[str, Any]],
+) -> tuple[str, ...]:
+    missing = tuple(sorted(expected_rows.keys() - actual_rows.keys()))
+    unexpected = tuple(sorted(actual_rows.keys() - expected_rows.keys()))
+    return tuple(
+        [f"{artifact_name}: missing row {path}" for path in missing]
+        + [f"{artifact_name}: unexpected row {path}" for path in unexpected]
+    )
+
+
+def _field_mismatches(
+    *,
+    artifact_name: str,
+    expected_rows: dict[str, dict[str, Any]],
+    actual_rows: dict[str, dict[str, Any]],
+    fields: tuple[str, ...],
+) -> tuple[str, ...]:
+    return tuple(
+        f"{artifact_name}: {path}.{field}: expected "
+        f"{expected_rows[path].get(field)!r}, got {actual_rows[path].get(field)!r}"
+        for path in sorted(expected_rows.keys() & actual_rows.keys())
+        for field in fields
+        if _normalize_metadata_value(expected_rows[path].get(field))
+        != _normalize_metadata_value(actual_rows[path].get(field))
+    )
+
+
+def _expected_census_rows(
+    retained_rows: tuple[dict[str, Any], ...],
+) -> dict[str, dict[str, Any]]:
+    return {
+        str(row["path"]): {
+            **row,
+            "usage_classification": _usage_classification(row),
+        }
+        for row in retained_rows
+    }
+
+
+def _zero_caller_mismatches(
+    *,
+    expected_rows: dict[str, dict[str, Any]],
+    census_rows: dict[str, dict[str, Any]],
+) -> tuple[str, ...]:
+    return tuple(
+        "compatibility census: "
+        f"{path} is internal_callers_zero but reports "
+        f"{census_rows[path].get('src_importer_count')} src importer(s)"
+        for path in sorted(expected_rows.keys() & census_rows.keys())
+        if bool(expected_rows[path].get("internal_callers_zero"))
+        and census_rows[path].get("src_importer_count") != 0
+    )
+
+
+def validate_compatibility_metadata_consistency(
+    repo_root: Path,
+    *,
+    census_payload: dict[str, object],
+) -> tuple[str, ...]:
+    """Validate registry, curated docs, and census semantic parity."""
+    registry_payload = _load_mapping(
+        repo_root / "configs" / "quality" / "compatibility_facade_inventory.yaml"
+    )
+    transition_rows = _mapping_rows(registry_payload, "transition_debt")
+    retained_rows = _mapping_rows(registry_payload, "retained_entrypoints")
+    registry_doc_rows = _index_metadata_rows(
+        (*transition_rows, *retained_rows),
+        artifact_name="compatibility registry",
+    )
+    inventory_doc_rows = _load_inventory_doc_rows(
+        repo_root
+        / "docs"
+        / "02-architecture"
+        / "07-compatibility-facade-inventory.md"
+    )
+    expected_census_rows = _expected_census_rows(retained_rows)
+    census_rows = _index_metadata_rows(
+        _mapping_rows(census_payload, "retained_entrypoints"),
+        artifact_name="compatibility census",
+    )
+    return (
+        *_row_set_mismatches(
+            artifact_name="compatibility inventory doc",
+            expected_rows=registry_doc_rows,
+            actual_rows=inventory_doc_rows,
+        ),
+        *_field_mismatches(
+            artifact_name="compatibility inventory doc",
+            expected_rows=registry_doc_rows,
+            actual_rows=inventory_doc_rows,
+            fields=_DOC_METADATA_FIELDS,
+        ),
+        *_row_set_mismatches(
+            artifact_name="compatibility census",
+            expected_rows=expected_census_rows,
+            actual_rows=census_rows,
+        ),
+        *_field_mismatches(
+            artifact_name="compatibility census",
+            expected_rows=expected_census_rows,
+            actual_rows=census_rows,
+            fields=_CENSUS_METADATA_FIELDS,
+        ),
+        *_zero_caller_mismatches(
+            expected_rows=expected_census_rows,
+            census_rows=census_rows,
+        ),
+    )
+
+
+def _print_semantic_consistency_violations(violations: tuple[str, ...]) -> None:
+    print("[compatibility-importer-census] FAIL: metadata semantic drift")
+    for violation in violations:
+        print(f"  - {violation}")
 
 
 def _surface_classification(
@@ -937,7 +1141,8 @@ def _render_markdown(payload: dict[str, object]) -> str:
             "",
             "## Retained Public Export Facades",
             "",
-            "| Path | Public exports | Lazy exports | Retained wrappers outside `__all__` | Duplicate exports | Resolution conflicts |",
+            "| Path | Public exports | Lazy exports | Retained wrappers outside "
+            "`__all__` | Duplicate exports | Resolution conflicts |",
             "| --- | ---: | ---: | --- | --- | --- |",
         ]
     )
@@ -1125,6 +1330,13 @@ def main() -> int:
     md_out = Path(args.md_out)
     rendered_json = json.dumps(payload, indent=2) + "\n"
     rendered_markdown = _render_markdown(payload)
+    semantic_violations = validate_compatibility_metadata_consistency(
+        repo_root,
+        census_payload=payload,
+    )
+    if semantic_violations:
+        _print_semantic_consistency_violations(semantic_violations)
+        return 1
     if args.check:
         if not json_out.exists():
             print(f"[compatibility-importer-census] missing JSON artifact: {json_out}")

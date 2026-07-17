@@ -11,20 +11,24 @@ from importlib import import_module
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bioetl.composition.providers.decorators import register_provider
+    from bioetl.composition.providers.decorators import (
+        register_provider as register_provider,
+    )
     from bioetl.composition.providers.loader import (
-        ensure_providers_loaded,
-        load_providers,
+        ensure_providers_loaded as ensure_providers_loaded,
+        load_providers as load_providers,
     )
     from bioetl.composition.providers.provider_registry import (
-        DataSourceCreatorProtocol,
-        HttpConfig,
-        ProviderConfig,
-        ProviderRegistry,
-        create_provider_registry,
-        get_default_provider_registry,
+        DataSourceCreatorProtocol as DataSourceCreatorProtocol,
+        HttpConfig as HttpConfig,
+        ProviderConfig as ProviderConfig,
+        ProviderRegistry as ProviderRegistry,
+        create_provider_registry as create_provider_registry,
+        get_default_provider_registry as get_default_provider_registry,
     )
-    from bioetl.composition.providers.registration import register_all_providers
+    from bioetl.composition.providers.registration import (
+        register_all_providers as register_all_providers,
+    )
 
 _PUBLIC_EXPORTS = {
     "DataSourceCreatorProtocol": (

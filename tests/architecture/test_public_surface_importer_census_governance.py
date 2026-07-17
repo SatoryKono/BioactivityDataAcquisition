@@ -370,11 +370,7 @@ def test_narrow_first_party_retained_entrypoints_do_not_gain_src_importers() -> 
         if isinstance(row, dict)
     }
     expected_src_importers = {
-        "src/bioetl/composition/health_api.py": {
-            "src/bioetl/interfaces/cli/commands/domains/health/server_integration.py",
-            "src/bioetl/interfaces/cli/commands/domains/quarantine/runtime_access.py",
-            "src/bioetl/interfaces/cli/commands/health.py",
-        },
+        "src/bioetl/composition/health_api.py": set(),
         "src/bioetl/composition/maintenance_api.py": set(),
     }
 
@@ -424,7 +420,7 @@ def test_retained_public_export_owner_usage_map_is_published() -> None:
     entrypoints = by_path["src/bioetl/composition/entrypoints.py"]
     assert entrypoints["owner"] == "bioetl.composition"
     assert entrypoints["usage_classification"] == (
-        "stable_public_api_with_reviewed_first_party_usage"
+        "stable_public_api_zero_first_party_src"
     )
     assert entrypoints["public_export_count"] > 0
 

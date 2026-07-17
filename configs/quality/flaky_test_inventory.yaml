@@ -1,0 +1,57 @@
+schema_version: 1
+reviewed_on: "2026-07-17"
+linked_issues:
+  - 5514
+  - 5962
+  - 6351
+
+evidence_scope: >-
+  Curated flaky-test inventory bound to the current tracked static
+  test-governance fingerprint. This inventory does not replace repeated-run
+  CI telemetry or claim that static analysis can detect intermittent outcomes.
+
+flaky_test_definition:
+  - intermittent pass/fail outcome across repeated or sharded runs
+  - order-dependent behavior
+  - live-network leakage into deterministic lanes
+  - timing-sensitive assertion without a bounded deterministic seam
+  - nondeterministic ID, clock, random, VCR, fixture, or golden-data behavior
+
+remediation_workflow:
+  - stabilize with deterministic clock, ID, and fixture seams
+  - quarantine only with owner, triage_status, cause, and removal condition
+  - do not hide nondeterminism with retries or relaxed assertions
+
+dimensions:
+  layers:
+    - application
+    - composition
+    - domain
+    - infrastructure
+    - interfaces
+  categories:
+    - Contract
+    - Data
+    - Import
+    - Infrastructure
+    - State
+    - Type
+  severities:
+    - P1
+    - P2
+    - P3
+  triage_statuses:
+    - fixed
+    - manual-review
+    - needs-triage
+    - quarantined
+  alert_levels:
+    - critical
+    - warning
+
+reviewed_flaky_tests: []
+
+review_notes:
+  - The curated residual flaky-test inventory is empty at this review point.
+  - Current suite size and source identity are derived from test-governance-current.json.
+  - Repeated-run CI telemetry remains the authority for discovering intermittent outcomes.

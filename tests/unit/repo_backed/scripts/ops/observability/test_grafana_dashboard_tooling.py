@@ -1474,6 +1474,199 @@ def test_live_audit_loki_panel_uses_query_range(monkeypatch: Any) -> None:
     assert "range_hours=1" in result.detail
 
 
+def test_live_audit_loki_instant_panel_uses_bounded_query_endpoint(
+    monkeypatch: Any,
+) -> None:
+    config = audit_subject.AuditConfig(
+        prometheus_base_url="http://localhost:9090",
+        app_base_url="http://localhost:8081",
+        loki_base_url="http://localhost:3100",
+        tempo_base_url="http://localhost:3200",
+        grafana_base_url="http://localhost:3000",
+        grafana_username="admin",
+        grafana_password="changeme",
+        workflow="chembl_target",
+        pipeline="chembl_target",
+        run_type="backfill",
+        run_id="run-123",
+        range_hours=24,
+        output_path=Path("reports/observability/grafana/live-panel-audit.json"),
+    )
+    spec = audit_subject.PanelAuditSpec(
+        dashboard_uid="bioetl-runtime",
+        panel_id=257,
+        title="Inspect Top Warning Events by Event / Logger / Range",
+        source_kind="loki",
+        semantic_kind="loki_query",
+        target_ref_id="A",
+    )
+    panel = {
+        "targets": [
+            {
+                "refId": "A",
+                "expr": 'count_over_time({job="bioetl"}[$__range])',
+                "instant": True,
+            }
+        ]
+    }
+    captured: dict[str, str] = {}
+
+    def fake_fetch_json(url: str, *, timeout_seconds: float) -> object:
+        assert 0 < timeout_seconds <= config.request_timeout_seconds
+        captured["url"] = url
+        return {
+            "status": "success",
+            "data": {
+                "resultType": "vector",
+                "result": [{"metric": {"event": "warning"}, "value": [1, "1"]}],
+            },
+        }
+
+    monkeypatch.setattr(audit_subject, "_fetch_text", lambda *_args, **_kwargs: "ready")
+    monkeypatch.setattr(audit_subject, "_fetch_json", fake_fetch_json)
+
+    result = audit_subject._audit_loki_panel(spec, panel, config)
+
+    assert "/loki/api/v1/query?" in captured["url"]
+    assert "/query_range?" not in captured["url"]
+    query = parse_qs(urlparse(captured["url"]).query)
+    assert query["query"] == ['count_over_time({job="bioetl"}[1h])']
+    assert "time" in query
+    assert "start" not in query
+    assert "end" not in query
+    assert result.status == "ok"
+    assert result.classification == "nonempty_result"
+    assert "endpoint=query" in result.detail
+
+
+def test_live_audit_loki_panel_fails_when_total_latency_exceeds_budget(
+    monkeypatch: Any,
+) -> None:
+    config = audit_subject.AuditConfig(
+        prometheus_base_url="http://localhost:9090",
+        app_base_url="http://localhost:8081",
+        loki_base_url="http://localhost:3100",
+        tempo_base_url="http://localhost:3200",
+        grafana_base_url="http://localhost:3000",
+        grafana_username="admin",
+        grafana_password="changeme",
+        workflow="chembl_target",
+        pipeline="chembl_target",
+        run_type="backfill",
+        run_id="run-123",
+        range_hours=24,
+        output_path=Path("reports/observability/grafana/live-panel-audit.json"),
+    )
+    spec = audit_subject.PanelAuditSpec(
+        dashboard_uid="bioetl-runtime",
+        panel_id=250,
+        title="Inspect Warning Logs",
+        source_kind="loki",
+        semantic_kind="loki_query",
+        target_ref_id="A",
+    )
+    panel = {"targets": [{"refId": "A", "expr": '{job="bioetl"}'}]}
+    monotonic_values = iter((100.0, 100.2, 115.2))
+
+    monkeypatch.setattr(audit_subject, "monotonic", lambda: next(monotonic_values))
+    monkeypatch.setattr(audit_subject, "_fetch_text", lambda *_args, **_kwargs: "ready")
+    monkeypatch.setattr(
+        audit_subject,
+        "_fetch_json",
+        lambda *_args, **_kwargs: {
+            "status": "success",
+            "data": {"resultType": "streams", "result": []},
+        },
+    )
+
+    result = audit_subject._audit_loki_panel(spec, panel, config)
+
+    assert result.status == "error"
+    assert result.classification == "timeout_budget_exceeded"
+    assert "budget_seconds=15.000" in result.detail
+
+
+def test_live_audit_loki_fixtures_execute_positive_and_empty_paths(
+    monkeypatch: Any,
+) -> None:
+    fixture_path = Path("tests/fixtures/grafana/loki_runtime_panel_events.jsonl")
+    fixtures = {
+        item["kind"]: item
+        for item in (
+            json.loads(line)
+            for line in fixture_path.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        )
+    }
+    config = audit_subject.AuditConfig(
+        prometheus_base_url="http://localhost:9090",
+        app_base_url="http://localhost:8081",
+        loki_base_url="http://localhost:3100",
+        tempo_base_url="http://localhost:3200",
+        grafana_base_url="http://localhost:3000",
+        grafana_username="admin",
+        grafana_password="changeme",
+        workflow="chembl_activity",
+        pipeline="chembl_activity",
+        run_type="backfill",
+        run_id="fixture-run",
+        range_hours=24,
+        output_path=Path("reports/observability/grafana/live-panel-audit.json"),
+    )
+    monkeypatch.setattr(audit_subject, "_fetch_text", lambda *_args, **_kwargs: "ready")
+
+    positive_cases = (("warning", 250), ("warning", 257), ("malformed", 251))
+    for kind, panel_id in positive_cases:
+        spec = audit_subject.PanelAuditSpec(
+            dashboard_uid="bioetl-runtime",
+            panel_id=panel_id,
+            title=f"fixture-panel-{panel_id}",
+            source_kind="loki",
+            semantic_kind="loki_query",
+            target_ref_id="A",
+        )
+        panel = audit_subject._find_panel(spec)
+        panel_result = fixtures[kind]["panel_results"][str(panel_id)]
+        monkeypatch.setattr(
+            audit_subject,
+            "_fetch_json",
+            lambda *_args, _panel_result=panel_result, **_kwargs: {
+                "status": "success",
+                "data": _panel_result,
+            },
+        )
+
+        result = audit_subject._audit_loki_panel(spec, panel, config)
+
+        assert result.status == "ok"
+        assert result.classification == "nonempty_result"
+
+    for panel_id in fixtures["empty"]["expected_panel_ids"]:
+        spec = audit_subject.PanelAuditSpec(
+            dashboard_uid="bioetl-runtime",
+            panel_id=panel_id,
+            title=f"fixture-panel-{panel_id}",
+            source_kind="loki",
+            semantic_kind="loki_query",
+            target_ref_id="A",
+        )
+        panel = audit_subject._find_panel(spec)
+        panel_result = fixtures["empty"]["panel_results"][str(panel_id)]
+        monkeypatch.setattr(
+            audit_subject,
+            "_fetch_json",
+            lambda *_args, _panel_result=panel_result, **_kwargs: {
+                "status": "success",
+                "data": _panel_result,
+            },
+        )
+
+        result = audit_subject._audit_loki_panel(spec, panel, config)
+
+        assert result.status == "ok"
+        assert result.classification == "expected_empty"
+
+
 def test_live_audit_effective_specs_include_generated_loki_and_tempo_coverage() -> None:
     specs = audit_subject.effective_panel_specs()
     keys = {
@@ -1487,6 +1680,18 @@ def test_live_audit_effective_specs_include_generated_loki_and_tempo_coverage() 
         for spec in specs
     )
     assert len(specs) > len(audit_subject.REVIEWED_PANEL_SPECS)
+
+
+def test_live_audit_requires_curated_runtime_loki_panels() -> None:
+    required_loki_panel_ids = {
+        spec.panel_id
+        for spec in audit_subject.effective_panel_specs()
+        if spec.dashboard_uid == "bioetl-runtime"
+        and spec.source_kind == "loki"
+        and spec.required
+    }
+
+    assert required_loki_panel_ids == {250, 251, 257}
 
 
 def test_live_audit_required_reviewed_specs_use_concrete_target_refs() -> None:

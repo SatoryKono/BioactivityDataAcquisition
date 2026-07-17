@@ -6,9 +6,31 @@ the transformer support graph during module initialization.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from bioetl.application.core.wiring._lazy_export_facade import (
     install_lazy_export_facade,
 )
+
+if TYPE_CHECKING:
+    from bioetl.application.core.base_transformer import (
+        BaseTransformer as BaseTransformer,
+    )
+    from bioetl.application.core.base_transformer import (
+        TransformerDependencyContext as TransformerDependencyContext,
+    )
+    from bioetl.application.core.base_transformer.contract_policy import (
+        DefaultContractPolicy as DefaultContractPolicy,
+    )
+    from bioetl.application.core.base_transformer.structural_policy import (
+        NoOpStructuralPolicy as NoOpStructuralPolicy,
+    )
+    from bioetl.application.core.base_transformer.structural_policy import (
+        StructuralPolicyProtocol as StructuralPolicyProtocol,
+    )
+    from bioetl.application.core.base_transformer.structural_policy import (
+        build_structural_policy as build_structural_policy,
+    )
 
 _PUBLIC_EXPORTS = {
     "BaseTransformer": (
