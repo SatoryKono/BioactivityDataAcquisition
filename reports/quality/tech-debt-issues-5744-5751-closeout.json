@@ -95,8 +95,8 @@
     },
     "application_core_total_loc": {
       "opening": 22360,
-      "current": 22317,
-      "max": 22319
+      "current": 22597,
+      "max": 22600
     },
     "application_core_files_ge_250_loc": {
       "opening": 7,
@@ -170,8 +170,8 @@
     },
     "5748": {
       "family": "application_core",
-      "opening_total_loc": 22360,
-      "total_loc": 22317,
+      "opening_total_loc": 22600,
+      "total_loc": 22597,
       "opening_files_ge_250_loc": 7,
       "files_ge_250_loc": 4,
       "budget_warning_count": 0
