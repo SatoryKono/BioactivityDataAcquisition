@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-13'
+  Last verified: '2026-07-17'
 
 ______________________________________________________________________
 
 # Dashboards Docs Index
 
-Дата сверки: **2026-07-13**
+Дата сверки: **2026-07-17**
 Источник истины: `grafana/dashboards/*.json`
 
 ## Актуальные документы
@@ -47,8 +47,8 @@ ______________________________________________________________________
 - Runtime zero-count cards fail closed: selected pipeline/run_type cards anchor
   `0` to `bioetl_runtime_pipeline_run_type_universe`, GLOBAL provider handoff
   anchors `0` to `bioetl_provider_current_status`, and missing scope remains
-  `UNKNOWN`. Unstructured Loki hygiene renders parsed `.__error__`, not the
-  template function form.
+  `UNKNOWN`. Unstructured Loki hygiene renders only parsed `.__error__`; the
+  raw source line is never emitted because it may contain secret-bearing data.
 
 Текущий reproducible render contract:
 
@@ -78,22 +78,30 @@ ______________________________________________________________________
 - Every full-cycle occurrence has one `occurrence_id`. The semantic report,
   Playwright manifest, and combined receipt must carry the same value; the
   receipt records the current commit/tree plus SHA-256 and dashboard/panel scope
-  for both sources. Missing, malformed, or cross-occurrence sources force the
-  affected gate to `fail` even if an in-process check claimed `pass`.
+  for both sources. Render scope is derived from each dashboard's
+  `terminalStateValidation.panelStates`; UID-only, missing, malformed, or
+  cross-occurrence sources force the affected gate to `fail` even if an
+  in-process check claimed `pass`.
 - Default CI runs the token-free static/fixture semantic policy and publishes
-  `dashboard-semantic-policy`. Live browser evidence is deliberately separate:
+  `dashboard-semantic-policy`, including metric inventory, JSON/provisioning,
+  selectors/variables, panel-contract drift, registry/runtime/docs
+  bidirectionality, datasource-boundary, and no-data evidence. Live browser
+  evidence is deliberately separate:
   the manual self-hosted `dashboard-render-host.yml` workflow publishes semantic
   source, render source, and combined occurrence receipt as three artifacts.
   A semantic CI failure blocks normal review; release requires both occurrence-
   bound live gates to pass on the supported host lane.
 - Semantic severity is UID/panel-attributable: invalid queries block; required
   datasource/backend unavailability blocks; unreviewed empty or unknown
-  results require review; zero and expected-empty pass. `telemetry_missing`
+  results require review; zero and expected-empty pass. Any unrecognized
+  classification also fails closed to explicit review. `telemetry_missing`
   passes only for explicitly reviewed DQ freshness panels `#8` and `#101`,
   where the visual contract is `UNKNOWN` rather than zero.
-- Live audit uses a governed `15s` datasource timeout. Sparse Loki results are
-  `expected_empty`; missing freshness samples are `telemetry_missing` and must
-  render `UNKNOWN`, not zero.
+- Live audit uses a governed total `15s` Loki budget, including `/ready`, and a
+  maximum one-hour lookback. Runtime panels `#250/#251` use `query_range`, while
+  instant aggregation panel `#257` uses `/query`; all three are required
+  semantic evidence. Sparse Loki results are `expected_empty`; missing freshness
+  samples are `telemetry_missing` and must render `UNKNOWN`, not zero.
 - Normal repository-local runtime logs from `reports/logs/bioetl.log` are
   scraped with the canonical Loki label `job="bioetl"`; audit-only logs remain
   isolated under `job="bioetl-audit"`.

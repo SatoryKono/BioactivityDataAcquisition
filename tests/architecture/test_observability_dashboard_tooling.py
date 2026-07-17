@@ -101,7 +101,16 @@ def test_audit_cycle_gate_output_writes_review_evidence(tmp_path: Path) -> None:
                 "generated_at": "2026-07-16T00:00:00+00:00",
                 "occurrence_id": config.occurrence_id,
                 "terminal_state_validation": {"status": "ok"},
-                "dashboards": [{"uid": "bioetl-dq-v2", "renderStatus": "rendered"}],
+                "dashboards": [
+                    {
+                        "uid": "bioetl-dq-v2",
+                        "renderStatus": "rendered",
+                        "terminalStateValidation": {
+                            "status": "ok",
+                            "panelStates": [{"id": 101, "classification": "healthy"}],
+                        },
+                    }
+                ],
             }
         ),
         encoding="utf-8",
@@ -121,6 +130,42 @@ def test_audit_cycle_gate_output_writes_review_evidence(tmp_path: Path) -> None:
     assert payload["release_passed"] is True
     assert payload["dashboard_semantic_gate"]["source_artifact"]["sha256"]
     assert payload["dashboard_render_gate"]["source_artifact"]["sha256"]
+    assert payload["dashboard_semantic_gate"]["source_artifact"]["dashboard_scope"] == [
+        "bioetl-dq-v2#101"
+    ]
+    assert payload["dashboard_render_gate"]["source_artifact"]["dashboard_scope"] == [
+        "bioetl-dq-v2#101"
+    ]
+
+
+def test_ci_dashboard_semantic_gate_covers_declared_release_contracts() -> None:
+    workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
+    semantic_step = workflow.split(
+        "-   name: Dashboard semantic release policy gate (token-free)", 1
+    )[1].split("-   name: Upload dashboard semantic policy evidence", 1)[0]
+
+    required_contracts = (
+        "report-observability-metric-inventory",
+        "tests/architecture/test_observability_dashboard_contracts.py",
+        "tests/architecture/test_observability_dashboard_tooling.py",
+        "tests/architecture/test_observability_docs_drift.py",
+        "tests/architecture/test_observability_metric_governance.py",
+        "tests/integration/ci/test_dashboard_active_docs_sync.py",
+        "tests/integration/test_dashboard_no_data_policy.py",
+        "tests/integration/test_grafana_config.py",
+        "tests/integration/test_grafana_datasource_provisioning.py",
+        "tests/integration/test_grafana_selector_contract.py",
+        "tests/integration/test_grafana_surface_contracts.py",
+        "tests/integration/test_grafana_variable_reference.py",
+    )
+    for contract in required_contracts:
+        assert contract in semantic_step
+
+    upload_step = workflow.split(
+        "-   name: Upload dashboard semantic policy evidence", 1
+    )[1].split("-   name: Prometheus rules syntax + promtool test vectors", 1)[0]
+    assert "reports/observability/ci/dashboard-semantic-policy.xml" in upload_step
+    assert "reports/observability/runtime_cardinality_review_pr.json" in upload_step
 
 
 @pytest.mark.parametrize(
@@ -131,6 +176,9 @@ def test_audit_cycle_gate_output_writes_review_evidence(tmp_path: Path) -> None:
         ("blocked_backend_unavailable", "error", "fail"),
         ("empty_result", "ok", "review_required"),
         ("zero_result", "ok", "pass"),
+        ("nonzero_result", "ok", "pass"),
+        ("nonempty_result", "ok", "pass"),
+        ("resolved_numeric", "ok", "pass"),
         ("expected_empty", "ok", "pass"),
         ("unknown_result", "ok", "review_required"),
     ],
