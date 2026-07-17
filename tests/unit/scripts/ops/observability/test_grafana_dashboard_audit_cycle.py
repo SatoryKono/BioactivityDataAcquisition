@@ -712,6 +712,7 @@ def test_grafana_gate_rejects_render_source_without_panel_scope(
     render_source = payload["dashboard_render_gate"]["source_artifact"]
     assert payload["dashboard_semantic_gate"]["status"] == "pass"
     assert payload["dashboard_render_gate"]["status"] == "fail"
+    assert render_source["terminal_status"] == "fail"
     assert render_source["validated"] is False
     assert render_source["dashboard_scope"] == []
 

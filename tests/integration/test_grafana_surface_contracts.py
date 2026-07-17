@@ -130,6 +130,7 @@ def test_runtime_dashboard_keeps_loki_log_hygiene_in_collapsed_tracing_row() -> 
 def test_runtime_warning_loki_queries_filter_parsed_fields_after_json() -> None:
     """Warning log panels must not filter parsed JSON fields in the Loki selector."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    assert dashboard["version"] == 3
     panels = {
         panel.get("title"): panel
         for panel in get_dashboard_panels(dashboard)
