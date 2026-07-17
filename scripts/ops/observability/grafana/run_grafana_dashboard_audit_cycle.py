@@ -416,11 +416,13 @@ def _artifact_descriptor(
                     panel_scope_complete = False
                     continue
                 terminal_validation = item.get("terminalStateValidation")
-                panel_states = (
-                    terminal_validation.get("panelStates")
-                    if isinstance(terminal_validation, dict)
-                    else None
-                )
+                if (
+                    not isinstance(terminal_validation, dict)
+                    or terminal_validation.get("status") != "ok"
+                ):
+                    panel_scope_complete = False
+                    continue
+                panel_states = terminal_validation.get("panelStates")
                 if not isinstance(panel_states, list) or not panel_states:
                     panel_scope_complete = False
                     continue
