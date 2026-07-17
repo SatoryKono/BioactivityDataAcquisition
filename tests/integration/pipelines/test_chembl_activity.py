@@ -60,28 +60,14 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
         # Verify Bronze files exist
         import glob
 
-        # Pipeline writes to data/output/bronze in production mode
-        # Look in both temp directory and production path
+        # The integration storage fixture routes all layers to the test directory.
         bronze_files = glob.glob(f"{self.bronze_path}/**/*.jsonl.zst", recursive=True)
         if not bronze_files:
             bronze_files = glob.glob(
                 f"{self.bronze_path}/**/*.jsonl.zstd", recursive=True
             )
 
-        # If not found in temp directory, check production path
-        if not bronze_files:
-            prod_bronze_path = "data/output/bronze"
-            bronze_files = glob.glob(
-                f"{prod_bronze_path}/**/*.jsonl.zst", recursive=True
-            )
-            if not bronze_files:
-                bronze_files = glob.glob(
-                    f"{prod_bronze_path}/**/*.jsonl.zstd", recursive=True
-                )
-
-        assert len(bronze_files) > 0, (
-            f"No bronze files found in {self.bronze_path} or data/output/bronze"
-        )
+        assert len(bronze_files) > 0, f"No bronze files found in {self.bronze_path}"
 
         # Verify Silver Delta Table
         from deltalake import DeltaTable
@@ -91,17 +77,11 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
             runner._pipeline.config.effective_silver_table
         )  # e.g., chembl_activity
 
-        # Try temp directory first, then production path
-        try:
-            silver_table_path = self.resolve_delta_table_path(
-                self.silver_path,
-                silver_table_name,
-            )
-            dt_silver = DeltaTable(silver_table_path)
-        except Exception:
-            # Fall back to production path
-            silver_table_path = f"data/output/silver/{silver_table_name}"
-            dt_silver = DeltaTable(silver_table_path)
+        silver_table_path = self.resolve_delta_table_path(
+            self.silver_path,
+            silver_table_name,
+        )
+        dt_silver = DeltaTable(silver_table_path)
         silver_df = dt_silver.to_pyarrow_table()
         assert len(silver_df) > 0
 
@@ -116,8 +96,10 @@ class TestChemblActivityPipeline(IntegrationPipelineTestCase):
         if not gold_table_name:
             gold_table_name = f"{runner._pipeline.config.provider}.{runner._pipeline.config.entity_type}"
 
-        # Use production path since gold writer also writes there
-        gold_table_path = f"data/output/gold/{gold_table_name.replace('.', '/')}"
+        gold_table_path = self.resolve_delta_table_path(
+            self.gold_path,
+            gold_table_name,
+        )
 
         dt_gold = DeltaTable(gold_table_path)
         gold_df = dt_gold.to_pyarrow_table()

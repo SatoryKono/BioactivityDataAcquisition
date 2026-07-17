@@ -230,8 +230,17 @@ class E2EDeltaTableCorruptionError(RuntimeError):
 
 
 def _prefer_active_parquet_delta_reads(*, platform: str = sys.platform) -> bool:
-    """Return whether E2E Delta assertions should bypass DeltaTable Arrow scans."""
-    return platform == "win32"
+    """Return whether E2E assertions should bypass DeltaTable Arrow scans."""
+    if platform == "win32":
+        return True
+    if platform != "linux":
+        return False
+    try:
+        return "microsoft" in Path("/proc/version").read_text(
+            encoding="utf-8"
+        ).lower()
+    except OSError:
+        return False
 
 
 def _resolve_parquet_file_uri(file_uri: str) -> str:
@@ -270,10 +279,37 @@ def _read_active_parquet_records_from_delta_log(
     table_path: Path,
     columns: list[str] | None = None,
 ) -> list[dict[str, Any]]:
-    """Read active parquet rows using only Delta log metadata."""
+    """Read active parquet rows without invoking the native Delta scanner."""
     try:
-        table = _load_delta_table()(str(table_path))
-        return _read_active_parquet_records(table, columns)
+        active_paths: dict[str, Path] = {}
+        commit_paths = sorted((table_path / "_delta_log").glob("*.json"))
+        if not commit_paths:
+            raise ValueError("Delta log has no JSON commits")
+
+        for commit_path in commit_paths:
+            for line in commit_path.read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                action = json.loads(line)
+                add = action.get("add")
+                if isinstance(add, dict) and isinstance(add.get("path"), str):
+                    relative_path = unquote(add["path"])
+                    active_paths[relative_path] = table_path / relative_path
+                remove = action.get("remove")
+                if isinstance(remove, dict) and isinstance(remove.get("path"), str):
+                    active_paths.pop(unquote(remove["path"]), None)
+
+        parquet_paths = [active_paths[key] for key in sorted(active_paths)]
+        if not parquet_paths:
+            return []
+        pq = _load_pyarrow_parquet()
+        tables = [pq.read_table(path, columns=columns) for path in parquet_paths]
+        if len(tables) == 1:
+            return cast(list[dict[str, Any]], tables[0].to_pylist())
+
+        import pyarrow as pa
+
+        return cast(list[dict[str, Any]], pa.concat_tables(tables).to_pylist())
     except (KeyboardInterrupt, SystemExit):
         raise
     except BaseException as exc:
@@ -285,6 +321,12 @@ def _read_active_parquet_records_from_delta_log(
 
 async def _read_delta_records(table_path: Path) -> list[dict[str, Any]]:
     """Read active Delta rows via the shared Delta scanner helper with timeout protection."""
+    if _prefer_active_parquet_delta_reads():
+        # The fallback only parses the local Delta JSON log and reads the
+        # resulting bounded parquet files. Running it directly avoids a WSL
+        # executor-completion hang observed after a full pipeline shutdown.
+        return _read_active_parquet_records_from_delta_log(table_path)
+
     loop = asyncio.get_running_loop()
 
     # Use a shorter timeout for delta reads to prevent indefinite hangs
@@ -293,8 +335,6 @@ async def _read_delta_records(table_path: Path) -> list[dict[str, Any]]:
 
     def _read_records_with_primary_strategy() -> list[dict[str, Any]]:
         table = _load_delta_table()(str(table_path))
-        if _prefer_active_parquet_delta_reads():
-            return _read_active_parquet_records_from_delta_log(table_path)
         return _load_delta_record_reader()(table)
 
     try:
@@ -578,10 +618,7 @@ def managed_e2e_data_dir(data_dir: Path) -> Generator[Path, None, None]:
     E2E suites can share one data directory when they intentionally reuse the
     same pipeline run output across multiple assertions.
     """
-    from unittest.mock import PropertyMock, patch
-
     from bioetl.infrastructure.config._base import (
-        Settings,
         get_pipeline_config,
         get_settings,
     )
@@ -606,45 +643,26 @@ def managed_e2e_data_dir(data_dir: Path) -> Generator[Path, None, None]:
     get_settings.cache_clear()
     get_pipeline_config.cache_clear()
 
-    # Patch Settings properties to use output/ subdirectory
-    with (
-        patch.object(
-            Settings,
-            "bronze_path",
-            new_callable=PropertyMock,
-            return_value=data_dir / "output" / "bronze",
-        ),
-        patch.object(
-            Settings,
-            "silver_path",
-            new_callable=PropertyMock,
-            return_value=data_dir / "output" / "silver",
-        ),
-        patch.object(
-            Settings,
-            "gold_path",
-            new_callable=PropertyMock,
-            return_value=data_dir / "output" / "gold",
-        ),
-    ):
-        try:
-            yield data_dir
-        finally:
-            if previous_data_dir is None:
-                os.environ.pop("BIOETL_DATA_DIR", None)
-            else:
-                os.environ["BIOETL_DATA_DIR"] = previous_data_dir
-            if previous_required_profile is None:
-                os.environ.pop(
-                    "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE",
-                    None,
-                )
-            else:
-                os.environ[
-                    "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE"
-                ] = previous_required_profile
-            get_settings.cache_clear()
-            get_pipeline_config.cache_clear()
+    try:
+        # StoragePathSettingsMixin derives the medallion paths from data_dir;
+        # BIOETL_DATA_DIR therefore provides the required output/* isolation.
+        yield data_dir
+    finally:
+        if previous_data_dir is None:
+            os.environ.pop("BIOETL_DATA_DIR", None)
+        else:
+            os.environ["BIOETL_DATA_DIR"] = previous_data_dir
+        if previous_required_profile is None:
+            os.environ.pop(
+                "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE",
+                None,
+            )
+        else:
+            os.environ[
+                "BIOETL_PIPELINE__CONTROL_PLANE__REQUIRED_PERSISTENCE_PROFILE"
+            ] = previous_required_profile
+        get_settings.cache_clear()
+        get_pipeline_config.cache_clear()
 
 
 def clone_e2e_data_dir_snapshot(snapshot_dir: Path, target_dir: Path) -> None:

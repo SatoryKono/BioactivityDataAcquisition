@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from bioetl.domain._immutability import freeze_fields
 from bioetl.domain.entities.base import BaseEntity
 from bioetl.domain.entities.publication_base import PublicationEntityBase
 
@@ -90,19 +89,6 @@ class Target(BaseEntity):
     component_relationships: list[str] | None = None
     component_descriptions: list[str] | None = None
 
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        freeze_fields(
-            self,
-            (
-                "component_accessions",
-                "component_ids",
-                "component_types",
-                "component_relationships",
-                "component_descriptions",
-            ),
-        )
-
     def _validate_invariants(self) -> None:
         if not self.target_id:
             raise ValueError("Target ChEMBL ID is required")
@@ -123,10 +109,6 @@ class TargetComponent(BaseEntity):
     protein_classifications: str | None = None
     protein_classification_id: int | None = None
     protein_classification_ids: list[int] | None = None
-
-    def __post_init__(self) -> None:
-        super().__post_init__()
-        freeze_fields(self, ("protein_classification_ids",))
 
     def _validate_invariants(self) -> None:
         if not self.component_id:
