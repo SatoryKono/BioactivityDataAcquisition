@@ -68,7 +68,7 @@ async def export_existing_table(
     table_name: str,
     layer: str,
     options: ExportOptions,
-    table_path: Path,
+    table_path: Path | str,
 ) -> ExportResult:
     """Export an existing table and build success result."""
     logger.info(
@@ -78,8 +78,9 @@ async def export_existing_table(
         format=options.format,
         limit=options.limit,
     )
+    table_path_str = table_path if isinstance(table_path, str) else table_path.as_posix()
     table_payload = await reader.read_table(
-        table_path.as_posix(), columns=options.columns, limit=options.limit
+        table_path_str, columns=options.columns, limit=options.limit
     )
     if not isinstance(table_payload, _SelectableTable):
         raise TypeError("Delta reader returned a table without export capabilities")
@@ -183,7 +184,7 @@ def create_missing_table_result(
     table_name: str,
     layer: str,
     options: ExportOptions,
-    table_path: Path,
+    table_path: Path | str,
 ) -> ExportResult:
     """Build result payload for missing table case."""
     return ExportResult(
