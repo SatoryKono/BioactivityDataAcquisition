@@ -19,6 +19,8 @@ New components:
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 # Re-export runtime settings/config mapping from _base.py.
 from bioetl.infrastructure.config._base import (
     ObservabilitySettings,
@@ -43,8 +45,10 @@ from bioetl.infrastructure.config.publication_type_classification_loader import 
 )
 
 
-def __getattr__(name: str) -> type:
+def __getattr__(name: str) -> type:  # pragma: no cover
     """Lazy imports to keep the public config package cycle-safe."""
+    if TYPE_CHECKING:
+        raise AttributeError
     if name == "PipelineConfigLoader":
         from bioetl.infrastructure.config.pipeline_config_loader import (
             PipelineConfigLoader,

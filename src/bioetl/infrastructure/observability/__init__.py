@@ -95,6 +95,8 @@ def __getattr__(
     name: str,
 ) -> Any:  # Any: lazy module exports expose heterogeneous adapter types
     """Lazily resolve public re-exports on first access."""
+    if TYPE_CHECKING:
+        raise AttributeError
     try:
         module_name, attr_name = _EXPORT_MAP[name]
     except KeyError as exc:  # pragma: no cover - normal attribute error path

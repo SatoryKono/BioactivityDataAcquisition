@@ -1,61 +1,30 @@
 """Stable application-core seam for composition-owned transformer wiring.
 
 This compatibility facade preserves historical imports without eagerly loading
-the transformer support graph during module initialization.
+the transformer support graph during module initialization. Static exports are
+declared in the adjacent stub.
 """
 
 from __future__ import annotations
-
-from typing import TYPE_CHECKING
 
 from bioetl.application.core.wiring._lazy_export_facade import (
     install_lazy_export_facade,
 )
 
-if TYPE_CHECKING:
-    from bioetl.application.core.base_transformer import (
-        BaseTransformer as BaseTransformer,
-    )
-    from bioetl.application.core.base_transformer import (
-        TransformerDependencyContext as TransformerDependencyContext,
-    )
-    from bioetl.application.core.base_transformer.contract_policy import (
-        DefaultContractPolicy as DefaultContractPolicy,
-    )
-    from bioetl.application.core.base_transformer.structural_policy import (
-        NoOpStructuralPolicy as NoOpStructuralPolicy,
-    )
-    from bioetl.application.core.base_transformer.structural_policy import (
-        StructuralPolicyProtocol as StructuralPolicyProtocol,
-    )
-    from bioetl.application.core.base_transformer.structural_policy import (
-        build_structural_policy as build_structural_policy,
-    )
-
 _PUBLIC_EXPORTS = {
-    "BaseTransformer": (
-        "bioetl.application.core.base_transformer",
-        "BaseTransformer",
-    ),
+    "BaseTransformer": "bioetl.application.core.base_transformer",
     "DefaultContractPolicy": (
-        "bioetl.application.core.base_transformer.contract_policy",
-        "DefaultContractPolicy",
+        "bioetl.application.core.base_transformer.contract_policy"
     ),
     "NoOpStructuralPolicy": (
-        "bioetl.application.core.base_transformer.structural_policy",
-        "NoOpStructuralPolicy",
+        "bioetl.application.core.base_transformer.structural_policy"
     ),
     "StructuralPolicyProtocol": (
-        "bioetl.application.core.base_transformer.structural_policy",
-        "StructuralPolicyProtocol",
+        "bioetl.application.core.base_transformer.structural_policy"
     ),
-    "TransformerDependencyContext": (
-        "bioetl.application.core.base_transformer",
-        "TransformerDependencyContext",
-    ),
+    "TransformerDependencyContext": "bioetl.application.core.base_transformer",
     "build_structural_policy": (
-        "bioetl.application.core.base_transformer.structural_policy",
-        "build_structural_policy",
+        "bioetl.application.core.base_transformer.structural_policy"
     ),
 }
 

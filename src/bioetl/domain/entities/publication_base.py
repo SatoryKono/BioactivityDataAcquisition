@@ -24,6 +24,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from bioetl.domain._immutability import freeze_fields
 from bioetl.domain.entities.base import BaseEntity
 
 
@@ -131,6 +132,11 @@ class PublicationEntityBase(BaseEntity):
 
     # Data source identifier (system metadata field)
     _source: str = ""
+
+    def __post_init__(self) -> None:
+        """Validate the entity and freeze inherited collection-shaped fields."""
+        super().__post_init__()
+        freeze_fields(self, ("issn",))
 
     def _validate_invariants(self) -> None:
         """Publication entities share the BaseEntity invariant hook chain."""

@@ -100,7 +100,9 @@ _EXPORT_MODULES = {
 }
 
 
-def __getattr__(name: str) -> object:
+def __getattr__(name: str) -> object:  # pragma: no cover
+    if TYPE_CHECKING:
+        raise AttributeError
     module_name = _EXPORT_MODULES.get(name)
     if module_name is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

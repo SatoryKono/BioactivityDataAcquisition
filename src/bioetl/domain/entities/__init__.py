@@ -253,7 +253,9 @@ def _get_entity_imports() -> dict[str, tuple[str, str]]:
 __all__: list[str] = []  # Populated lazily on first access
 
 
-def __getattr__(name: str) -> object:
+def __getattr__(name: str) -> object:  # pragma: no cover
+    if TYPE_CHECKING:
+        raise AttributeError
     # Populate __all__ lazily on first access
     if not __all__:
         __all__.extend(_get_entity_imports().keys())

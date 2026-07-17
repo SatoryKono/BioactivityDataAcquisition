@@ -36,7 +36,7 @@ def test_html_report_escapes_check_names() -> None:
     html = generate_html_report(data)
 
     # Check that script tag is escaped
-    assert "&lt;script&gt;alert('xss')&lt;/script&gt;" in html
+    assert "&lt;script&gt;alert(&#x27;xss&#x27;)&lt;/script&gt;" in html
     assert "<script>alert('xss')</script>" not in html
 
 
@@ -63,7 +63,7 @@ def test_html_report_escapes_check_values() -> None:
     html = generate_html_report(data)
 
     # Check that img tag is escaped
-    assert "&lt;img src=x onerror=alert('xss')&gt;" in html
+    assert "&lt;img src=x onerror=alert(&#x27;xss&#x27;)&gt;" in html
     assert "<img src=x onerror=alert('xss')>" not in html
 
 
@@ -85,7 +85,7 @@ def test_html_report_escapes_status_values() -> None:
     html = generate_html_report(data)
 
     # Check that script tag in status is escaped
-    assert "&lt;script&gt;alert('xss')&lt;/script&gt;" in html
+    assert "&lt;script&gt;alert(&#x27;xss&#x27;)&lt;/script&gt;" in html
     assert "<script>alert('xss')</script>" not in html
 
 
@@ -107,7 +107,7 @@ def test_html_report_escapes_layer_name() -> None:
     html = generate_html_report(data)
 
     # Check that script tag in layer is escaped
-    assert "&lt;script&gt;alert('xss')&lt;/script&gt;" in html
+    assert "&lt;script&gt;alert(&#x27;xss&#x27;)&lt;/script&gt;" in html
     assert "<script>alert('xss')</script>" not in html
 
 
@@ -134,7 +134,7 @@ def test_html_report_escapes_dict_values() -> None:
     html = generate_html_report(data)
 
     # Check that script tag in dict value is escaped
-    assert "&lt;script&gt;alert('xss')&lt;/script&gt;" in html
+    assert "&lt;script&gt;alert(&#x27;xss&#x27;)&lt;/script&gt;" in html
     assert "<script>alert('xss')</script>" not in html
 
 
@@ -161,7 +161,7 @@ def test_html_report_escapes_list_values() -> None:
     html = generate_html_report(data)
 
     # Check that script tag in list value is escaped
-    assert "&lt;script&gt;alert('xss')&lt;/script&gt;" in html
+    assert "&lt;script&gt;alert(&#x27;xss&#x27;)&lt;/script&gt;" in html
     assert "<script>alert('xss')</script>" not in html
 
 
@@ -188,7 +188,7 @@ def test_html_report_escapes_unicode_xss() -> None:
     html = generate_html_report(data)
 
     # Check that Unicode script tag is escaped
-    assert "&lt;script&gt;alert('xss')&lt;/script&gt;" in html
+    assert "&lt;script&gt;alert(&#x27;xss&#x27;)&lt;/script&gt;" in html
     assert "\u003cscript\u003ealert('xss')\u003c/script\u003e" not in html
 
 
@@ -269,7 +269,7 @@ def test_html_report_escapes_threshold_values() -> None:
     html = generate_html_report(data)
 
     # Check that script tag in threshold status is escaped
-    assert "&lt;script&gt;alert('xss')&lt;/script&gt;" in html
+    assert "&lt;script&gt;alert(&#x27;xss&#x27;)&lt;/script&gt;" in html
     assert "<script>alert('xss')</script>" not in html
 
 
@@ -294,5 +294,5 @@ def test_html_report_escapes_meta_fields() -> None:
     html = generate_html_report(data)
 
     # Check that script tags in meta fields are escaped
-    assert "&lt;script&gt;alert('xss')&lt;/script&gt;" in html
+    assert "&lt;script&gt;alert(&#x27;xss&#x27;)&lt;/script&gt;" in html
     assert "<script>alert('xss')</script>" not in html

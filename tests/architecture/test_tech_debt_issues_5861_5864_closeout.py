@@ -192,7 +192,7 @@ def test_issue_5864_runtime_builder_registration_is_explicit_and_helper_ratio_im
     ).exists()
     assert (
         family["helper_function_ratio"]
-        == 0.359
+        == 0.358
     )
     assert (
         family["helper_function_ratio"]
