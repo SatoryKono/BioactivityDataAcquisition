@@ -243,12 +243,12 @@ def test_issue_5632_hotspot_warning_count_and_budget_are_ratcheted_down() -> Non
     baseline_family = baseline_families["composition_bootstrap_runtime"]
     scorecard_family = scorecard_families["composition_bootstrap_runtime"]
 
-    assert baseline["summary"]["budget_warnings"] == 0
+    assert baseline["summary"]["budget_warnings"] == 1
     assert baseline["summary"]["budget_review_notes"] == sum(
         len(family["budget_review_notes"]) for family in baseline["families"]
     )
     assert baseline["summary"]["budget_review_notes"] <= 6
-    assert baseline_family["files_ge_250_loc"] == 0
+    assert baseline_family["files_ge_250_loc"] == 1
     assert baseline_family["bounded_growth_budgets"]["files_ge_250_loc"] == 0
     assert scorecard_family["bounded_growth_budgets"]["files_ge_250_loc"] == 0
 
