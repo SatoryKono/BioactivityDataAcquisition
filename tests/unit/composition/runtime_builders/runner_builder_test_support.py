@@ -139,6 +139,7 @@ def _build_context(**overrides: object) -> SimpleNamespace:
         "skip_gold": False,
         "start_offset": None,
         "exact_replay": False,
+        "debug": False,
         "input_filter": SimpleNamespace(enabled=False),
         "workflow_run_id": None,
         "workflow_name": None,
@@ -179,6 +180,7 @@ def _build_settings(
     settings_values: dict[str, object] = {
         "pipeline": SimpleNamespace(**pipeline_values),
         "test_mode": test_mode,
+        "debug": False,
         "bronze_path": data_dir if data_dir is not None else "/tmp/bioetl-test-data",
     }
     if data_dir is not None:

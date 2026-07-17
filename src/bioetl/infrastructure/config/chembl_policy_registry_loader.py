@@ -30,6 +30,14 @@ class ChemblPolicyRegistryLoader:
         controlled = self._load_yaml(self._controlled_vocab_path)
         ontology = self._load_yaml(self._ontology_path)
         reference_identifiers = self._load_yaml(self._reference_identifier_path)
+        controlled_vocabularies = self._family_payloads(
+            controlled,
+            key="controlled_vocabularies",
+        )
+        reference_identifier_families = self._family_payloads(
+            reference_identifiers,
+            key="reference_identifier_families",
+        )
 
         return ChemblPolicyRegistryData(
             strict_boolean_families=self._load_strict_scalar_families(
@@ -44,11 +52,12 @@ class ChemblPolicyRegistryLoader:
                 ChemblControlledVocabularyFamily(
                     family_name=str(family_name),
                     invalid_value_mode=str(payload["invalid_value_mode"]),
-                    fields=tuple(str(field_ref) for field_ref in payload["fields"]),
+                    fields=self._string_tuple(
+                        payload.get("fields", ()),
+                        field_name=f"controlled_vocabularies.{family_name}.fields",
+                    ),
                 )
-                for family_name, payload in controlled[
-                    "controlled_vocabularies"
-                ].items()
+                for family_name, payload in controlled_vocabularies.items()
             ),
             ontology_families=self._load_ontology_families(ontology),
             publication_classification_fields=(
@@ -61,13 +70,42 @@ class ChemblPolicyRegistryLoader:
                     family_name=str(family_name),
                     reference_family=str(payload["reference_family"]),
                     invalid_value_mode=str(payload["invalid_value_mode"]),
-                    fields=tuple(str(field_ref) for field_ref in payload["fields"]),
+                    fields=self._string_tuple(
+                        payload.get("fields", ()),
+                        field_name=(
+                            f"reference_identifier_families.{family_name}.fields"
+                        ),
+                    ),
                 )
-                for family_name, payload in reference_identifiers[
-                    "reference_identifier_families"
-                ].items()
+                for family_name, payload in reference_identifier_families.items()
             ),
         )
+
+    @staticmethod
+    def _family_payloads(
+        payload: dict[str, object],
+        *,
+        key: str,
+    ) -> dict[str, dict[str, object]]:
+        """Validate and normalize one named YAML family mapping."""
+        raw_families = payload.get(key, {})
+        if not isinstance(raw_families, dict):
+            raise TypeError(f"{key} must decode to a mapping")
+        families: dict[str, dict[str, object]] = {}
+        for family_name, raw_family in raw_families.items():
+            if not isinstance(raw_family, dict):
+                raise TypeError(f"{key}.{family_name} must decode to a mapping")
+            families[str(family_name)] = {
+                str(field_name): value for field_name, value in raw_family.items()
+            }
+        return families
+
+    @staticmethod
+    def _string_tuple(value: object, *, field_name: str) -> tuple[str, ...]:
+        """Validate and normalize a YAML sequence of scalar identifiers."""
+        if not isinstance(value, list | tuple):
+            raise TypeError(f"{field_name} must decode to a sequence")
+        return tuple(str(item) for item in value)
 
     @staticmethod
     def _load_ontology_families(
@@ -81,11 +119,10 @@ class ChemblPolicyRegistryLoader:
                 f"families must decode to a mapping; got {type(families)!r}"
             )
 
-        augmented_families = {
-            str(family_name): dict(family_payload)
-            for family_name, family_payload in families.items()
-            if isinstance(family_payload, dict)
-        }
+        augmented_families = ChemblPolicyRegistryLoader._family_payloads(
+            payload,
+            key="families",
+        )
         ChemblPolicyRegistryLoader._merge_unit_companion_policies(
             augmented_families,
             payload.get("unit_companion_policies", {}),
@@ -94,34 +131,51 @@ class ChemblPolicyRegistryLoader:
         return tuple(
             ChemblOntologyPolicyFamily(
                 family_name=family_name,
-                fields=tuple(str(field_ref) for field_ref in family_payload["fields"]),
+                fields=ChemblPolicyRegistryLoader._string_tuple(
+                    family_payload.get("fields", ()),
+                    field_name=f"families.{family_name}.fields",
+                ),
                 companion_governance=str(
                     family_payload.get("companion_governance", "full_companion_bundle")
                 ),
-                code_label_fields=tuple(
-                    str(field_ref)
-                    for field_ref in family_payload.get("code_label_fields", ())
+                code_label_fields=ChemblPolicyRegistryLoader._string_tuple(
+                    family_payload.get("code_label_fields", ()),
+                    field_name=f"families.{family_name}.code_label_fields",
                 ),
-                iri_fields=tuple(
-                    str(field_ref)
-                    for field_ref in family_payload.get("companion_fields", {}).get(
-                        "iri", ()
-                    )
+                iri_fields=ChemblPolicyRegistryLoader._companion_field_values(
+                    family_payload,
+                    family_name=family_name,
+                    field_name="iri",
                 ),
-                mapping_status_fields=tuple(
-                    str(field_ref)
-                    for field_ref in family_payload.get("companion_fields", {}).get(
-                        "mapping_status", ()
-                    )
+                mapping_status_fields=ChemblPolicyRegistryLoader._companion_field_values(
+                    family_payload,
+                    family_name=family_name,
+                    field_name="mapping_status",
                 ),
-                version_fields=tuple(
-                    str(field_ref)
-                    for field_ref in family_payload.get("companion_fields", {}).get(
-                        "version", ()
-                    )
+                version_fields=ChemblPolicyRegistryLoader._companion_field_values(
+                    family_payload,
+                    family_name=family_name,
+                    field_name="version",
                 ),
             )
             for family_name, family_payload in augmented_families.items()
+        )
+
+    @staticmethod
+    def _companion_field_values(
+        family_payload: dict[str, object],
+        *,
+        family_name: str,
+        field_name: str,
+    ) -> tuple[str, ...]:
+        companion_fields = family_payload.get("companion_fields", {})
+        if not isinstance(companion_fields, dict):
+            raise TypeError(
+                f"families.{family_name}.companion_fields must decode to a mapping"
+            )
+        return ChemblPolicyRegistryLoader._string_tuple(
+            companion_fields.get(field_name, ()),
+            field_name=f"families.{family_name}.companion_fields.{field_name}",
         )
 
     @staticmethod
@@ -167,21 +221,35 @@ class ChemblPolicyRegistryLoader:
         policy_fields: tuple[str, ...],
     ) -> None:
         base_suffix = f".{family_name}_units"
-        family_fields = [
-            str(field_ref) for field_ref in family_payload.get("fields", ())
-        ]
+        family_fields = list(
+            ChemblPolicyRegistryLoader._string_tuple(
+                family_payload.get("fields", ()),
+                field_name=f"families.{family_name}.fields",
+            )
+        )
         companion_fields = family_payload.setdefault("companion_fields", {})
         if not isinstance(companion_fields, dict):
             companion_fields = {}
             family_payload["companion_fields"] = companion_fields
 
-        iri_fields = [str(field_ref) for field_ref in companion_fields.get("iri", ())]
-        mapping_status_fields = [
-            str(field_ref) for field_ref in companion_fields.get("mapping_status", ())
-        ]
-        version_fields = [
-            str(field_ref) for field_ref in companion_fields.get("version", ())
-        ]
+        iri_fields = list(
+            ChemblPolicyRegistryLoader._string_tuple(
+                companion_fields.get("iri", ()),
+                field_name=f"families.{family_name}.companion_fields.iri",
+            )
+        )
+        mapping_status_fields = list(
+            ChemblPolicyRegistryLoader._string_tuple(
+                companion_fields.get("mapping_status", ()),
+                field_name=(f"families.{family_name}.companion_fields.mapping_status"),
+            )
+        )
+        version_fields = list(
+            ChemblPolicyRegistryLoader._string_tuple(
+                companion_fields.get("version", ()),
+                field_name=f"families.{family_name}.companion_fields.version",
+            )
+        )
 
         for field_ref in policy_fields:
             if not field_ref.endswith(base_suffix):
@@ -215,17 +283,19 @@ class ChemblPolicyRegistryLoader:
         *,
         registry_key: str,
     ) -> tuple[ChemblStrictScalarFamily, ...]:
-        families = payload.get(registry_key, {})
-        if not isinstance(families, dict):
-            raise TypeError(
-                f"{registry_key} must decode to a mapping; got {type(families)!r}"
-            )
+        families = ChemblPolicyRegistryLoader._family_payloads(
+            payload,
+            key=registry_key,
+        )
 
         return tuple(
             ChemblStrictScalarFamily(
                 family_name=str(family_name),
                 invalid_value_mode=str(family_payload["invalid_value_mode"]),
-                fields=tuple(str(field_ref) for field_ref in family_payload["fields"]),
+                fields=ChemblPolicyRegistryLoader._string_tuple(
+                    family_payload.get("fields", ()),
+                    field_name=f"{registry_key}.{family_name}.fields",
+                ),
             )
             for family_name, family_payload in families.items()
         )
@@ -241,4 +311,4 @@ class ChemblPolicyRegistryLoader:
         payload = yaml.safe_load(path.read_text(encoding="utf-8"))
         if not isinstance(payload, dict):
             raise TypeError(f"{path} must decode to a mapping; got {type(payload)!r}")
-        return payload
+        return {str(key): value for key, value in payload.items()}

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from pathlib import Path
-from typing import cast
+from typing import Protocol, TypeGuard
 
 import yaml
 from pydantic import ValidationError
@@ -40,9 +40,21 @@ __all__ = [
     "resolve_composite_gold_schema",
 ]
 
+
+class CompositeConfigSchema(Protocol):
+    """Validated infrastructure schema convertible to the domain model."""
+
+    def to_domain(self) -> CompositeConfig: ...
+
+
 ConfigPayloadValidator = Callable[[JsonDict], object]
 DQOverrideMerger = Callable[[dict[str, object], Path], None]
 SharedPolicyMerger = Callable[[dict[str, object], Path], None]
+
+
+def _is_composite_config_schema(value: object) -> TypeGuard[CompositeConfigSchema]:
+    """Narrow a validated schema by its domain-conversion contract."""
+    return callable(getattr(value, "to_domain", None))
 
 
 def resolve_composite_gold_schema(
@@ -80,12 +92,14 @@ def load_composite_config(
             f"Invalid composite config '{name}': expected top-level mapping in YAML"
         )
 
-    mutable_payload = cast(JsonDict, raw_payload)
+    mutable_payload: JsonDict = {str(key): value for key, value in raw_payload.items()}
     shared_policy_merger(mutable_payload, config_path)
     dq_override_merger(mutable_payload, config_path)
 
     try:
         schema = validate_payload(mutable_payload)
+        if not _is_composite_config_schema(schema):
+            raise TypeError("validated composite schema must expose to_domain()")
         return schema.to_domain()
     except (ValidationError, TypeError, ValueError) as error:
         raise ValueError(f"Invalid composite config '{name}': {error}") from error

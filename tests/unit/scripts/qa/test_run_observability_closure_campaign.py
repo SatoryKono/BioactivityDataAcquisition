@@ -32,6 +32,16 @@ def _stub_registry_cli(monkeypatch: pytest.MonkeyPatch) -> None:
         return campaign.CHEMBL_PIPELINES, completed
 
     monkeypatch.setattr(campaign, "_registry_pipeline_command", fake_registry)
+    monkeypatch.setattr(
+        campaign,
+        "_source_provenance",
+        lambda _repo_root, **_kwargs: {
+            "revision": "test-revision",
+            "tree": "test-tree",
+            "clean": True,
+            "dirty_entries": (),
+        },
+    )
 
     def fake_phase(**kwargs: object) -> campaign.PhaseEvidence:
         name = str(kwargs["name"])

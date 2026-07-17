@@ -32,7 +32,7 @@ from scripts.engineering.qa.report_test_governance_audit import (
 _MIN_PARALLEL_CACHE_FILES = 128
 _DEFAULT_CACHE_WORKERS = 8
 _MAX_CACHE_WORKERS = 16
-_MAX_CACHE_WORKERS_NETWORK = 4
+_MAX_CACHE_WORKERS_NETWORK = 1
 _ARCHITECTURE_CACHE_VERSION = "v3"
 _ARCHITECTURE_CACHE_DIR = Path(
     os.environ.get(
@@ -117,6 +117,9 @@ def _cache_worker_count(total_files: int) -> int:
                 return 1  # Single-threaded for network drives
         except Exception:
             pass
+
+    if Path.cwd().as_posix().startswith("/mnt/"):
+        return min(total_files, _MAX_CACHE_WORKERS_NETWORK)
 
     if total_files < _MIN_PARALLEL_CACHE_FILES:
         return 1

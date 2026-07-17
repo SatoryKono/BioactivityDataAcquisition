@@ -33,11 +33,23 @@ from bioetl.domain.behavior._dq_value_coercion import (
 from bioetl.domain.exceptions import ValidationError
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+    from typing import TypeAlias
+
     from bioetl.domain.config.validation import (
+        ConditionalValidation,
         CrossFieldValidation,
         FieldValidation,
     )
     from bioetl.domain.types import JsonDict
+
+    _SpecialCustomRuleEvaluator: TypeAlias = Callable[[JsonDict, object], bool]
+    _FieldRuleEvaluator: TypeAlias = Callable[
+        [JsonDict, FieldValidation, object], bool
+    ]
+    _CrossRuleEvaluator: TypeAlias = Callable[
+        [JsonDict, CrossFieldValidation, int], bool
+    ]
 
 
 def _field_rule_violated(record: JsonDict, rule: FieldValidation) -> bool:
@@ -63,7 +75,7 @@ def _cross_rule_violated(record: JsonDict, rule: CrossFieldValidation) -> bool:
     return evaluator(record, rule, present_count)
 
 
-def _conditional_matches(record: JsonDict, rule: CrossFieldValidation) -> bool:
+def _conditional_matches(record: JsonDict, rule: ConditionalValidation) -> bool:
     value = record.get(rule.condition_field)
     evaluator = _CONDITIONAL_MATCHERS.get(rule.condition_operator)
     if evaluator is None:
@@ -123,7 +135,7 @@ def _hierarchy_no_self_reference_rule_violated(
     return _custom_cross_rule_violated(record, "validate_hierarchy_no_self_reference")
 
 
-_SPECIAL_CUSTOM_RULE_EVALUATORS = {
+_SPECIAL_CUSTOM_RULE_EVALUATORS: dict[str, _SpecialCustomRuleEvaluator] = {
     "smiles_validator": _smiles_rule_violated,
     "validate_target_organism_supported_name": _target_organism_rule_violated,
     "validate_hierarchy_no_self_reference": _hierarchy_no_self_reference_rule_violated,
@@ -135,7 +147,11 @@ def _custom_rule_violated(
     value: object,
     validator_name: str | None,
 ) -> bool:
-    special_evaluator = _SPECIAL_CUSTOM_RULE_EVALUATORS.get(validator_name)
+    special_evaluator = (
+        None
+        if validator_name is None
+        else _SPECIAL_CUSTOM_RULE_EVALUATORS.get(validator_name)
+    )
     if special_evaluator is not None:
         return special_evaluator(record, value)
 
@@ -235,7 +251,7 @@ def _custom_field_rule_violated(
     return _custom_rule_violated(record, value, rule.validator)
 
 
-_FIELD_RULE_EVALUATORS = {
+_FIELD_RULE_EVALUATORS: dict[str, _FieldRuleEvaluator] = {
     "required": _required_rule_violated,
     "not_null": _not_null_rule_violated,
     "range": _range_field_rule_violated,
@@ -247,7 +263,7 @@ _FIELD_RULE_EVALUATORS = {
 }
 
 
-_CROSS_RULE_EVALUATORS = {
+_CROSS_RULE_EVALUATORS: dict[str, _CrossRuleEvaluator] = {
     "all_present": _all_present_rule_violated,
     "any_present": _any_present_rule_violated,
     "equality": _equality_rule_violated,
