@@ -1081,18 +1081,18 @@
   "critical_behavior_envelope_count": 5,
   "critical_behavior_envelopes": {
     "control_plane_replay": {
-      "assertion_backed_tests": 56,
+      "assertion_backed_tests": 58,
       "assertion_examples": [
-        "tests/architecture/test_determinism_identity_policy.py:166",
-        "tests/architecture/test_determinism_identity_policy.py:320",
-        "tests/architecture/test_determinism_identity_policy.py:348",
-        "tests/architecture/test_determinism_identity_policy.py:385",
-        "tests/architecture/test_determinism_identity_policy.py:434",
-        "tests/architecture/test_determinism_identity_policy.py:455",
+        "tests/architecture/test_determinism_identity_policy.py:233",
+        "tests/architecture/test_determinism_identity_policy.py:387",
+        "tests/architecture/test_determinism_identity_policy.py:415",
+        "tests/architecture/test_determinism_identity_policy.py:450",
+        "tests/architecture/test_determinism_identity_policy.py:461",
+        "tests/architecture/test_determinism_identity_policy.py:498",
+        "tests/architecture/test_determinism_identity_policy.py:547",
+        "tests/architecture/test_determinism_identity_policy.py:568",
         "tests/architecture/test_replay_time_seam_inventory.py:139",
-        "tests/architecture/test_replay_time_seam_inventory.py:149",
-        "tests/unit/application/services/test_checkpoint_execution_identity_alignment.py:96",
-        "tests/unit/application/services/test_checkpoint_execution_identity_alignment.py:135"
+        "tests/architecture/test_replay_time_seam_inventory.py:149"
       ],
       "assertless_tests": [],
       "intentional_no_exception_tests": 0,
@@ -1102,7 +1102,7 @@
         "tests/architecture/test_determinism_identity_policy.py",
         "tests/architecture/test_replay_time_seam_inventory.py"
       ],
-      "test_count": 56
+      "test_count": 58
     },
     "gold_strict_contracts": {
       "assertion_backed_tests": 16,
@@ -1230,10 +1230,10 @@
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
-    "marked_test_files": 34,
+    "marked_test_files": 35,
     "marker": "pytest.mark.repo_backed",
     "subtree": "tests/unit/repo_backed/",
-    "test_files": 34,
+    "test_files": 35,
     "unmarked_test_files": []
   },
   "report": {
@@ -2016,18 +2016,18 @@
     "critical_behavior_envelope_count": 5,
     "critical_behavior_envelopes": {
       "control_plane_replay": {
-        "assertion_backed_tests": 56,
+        "assertion_backed_tests": 58,
         "assertion_examples": [
-          "tests/architecture/test_determinism_identity_policy.py:166",
-          "tests/architecture/test_determinism_identity_policy.py:320",
-          "tests/architecture/test_determinism_identity_policy.py:348",
-          "tests/architecture/test_determinism_identity_policy.py:385",
-          "tests/architecture/test_determinism_identity_policy.py:434",
-          "tests/architecture/test_determinism_identity_policy.py:455",
+          "tests/architecture/test_determinism_identity_policy.py:233",
+          "tests/architecture/test_determinism_identity_policy.py:387",
+          "tests/architecture/test_determinism_identity_policy.py:415",
+          "tests/architecture/test_determinism_identity_policy.py:450",
+          "tests/architecture/test_determinism_identity_policy.py:461",
+          "tests/architecture/test_determinism_identity_policy.py:498",
+          "tests/architecture/test_determinism_identity_policy.py:547",
+          "tests/architecture/test_determinism_identity_policy.py:568",
           "tests/architecture/test_replay_time_seam_inventory.py:139",
-          "tests/architecture/test_replay_time_seam_inventory.py:149",
-          "tests/unit/application/services/test_checkpoint_execution_identity_alignment.py:96",
-          "tests/unit/application/services/test_checkpoint_execution_identity_alignment.py:135"
+          "tests/architecture/test_replay_time_seam_inventory.py:149"
         ],
         "assertless_tests": [],
         "intentional_no_exception_tests": 0,
@@ -2037,7 +2037,7 @@
           "tests/architecture/test_determinism_identity_policy.py",
           "tests/architecture/test_replay_time_seam_inventory.py"
         ],
-        "test_count": 56
+        "test_count": 58
       },
       "gold_strict_contracts": {
         "assertion_backed_tests": 16,
@@ -2164,10 +2164,10 @@
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
-      "marked_test_files": 34,
+      "marked_test_files": 35,
       "marker": "pytest.mark.repo_backed",
       "subtree": "tests/unit/repo_backed/",
-      "test_files": 34,
+      "test_files": 35,
       "unmarked_test_files": []
     },
     "root": ".",
@@ -2176,8 +2176,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2004,
-      "test_python_file_count": 2214,
+      "test_glob_file_count": 2013,
+      "test_python_file_count": 2222,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2219,12 +2219,12 @@
       "top_level_directory_count_including_pycache": 17
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2004,
-    "total_test_functions": 22456,
+    "total_test_files": 2013,
+    "total_test_functions": 22502,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "ea157cab893aa3411da441d30171a151ea75234ecde373d7ce5f79fe1b229e4c",
+  "source_tree_sha256": "77cb564eba7461b1222fd768e6d52b6a7a093146b53c88e524edc9f0870669ed",
   "summary": {
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
@@ -2242,8 +2242,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2004,
-    "test_python_file_count": 2214,
+    "test_glob_file_count": 2013,
+    "test_python_file_count": 2222,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2285,7 +2285,7 @@
     "top_level_directory_count_including_pycache": 17
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2004,
-  "total_test_functions": 22456,
+  "total_test_files": 2013,
+  "total_test_functions": 22502,
   "uuid4_call_sites": 0
 }
