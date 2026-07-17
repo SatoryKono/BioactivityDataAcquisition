@@ -3,10 +3,16 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 from pathlib import Path
 
 import pytest
 import yaml
+
+from scripts.ops.observability import (
+    start_read_only_audit_stack as audit_stack_subject,
+)
 
 
 pytestmark = pytest.mark.integration
@@ -15,6 +21,22 @@ RENDERER_IMAGE = (
     "grafana/grafana-image-renderer"
     "@sha256:c0c920e6974b0d30ae25313051344afcd2054362529968ebd9545a4b2bc8119b"
 )
+
+
+class _ProbeResponse:
+    def __init__(self, payload: object) -> None:
+        self._payload = (
+            payload if isinstance(payload, bytes) else json.dumps(payload).encode()
+        )
+
+    def __enter__(self) -> _ProbeResponse:
+        return self
+
+    def __exit__(self, *_args: object) -> None:
+        return None
+
+    def read(self) -> bytes:
+        return self._payload
 
 
 def _load_monitoring_compose() -> dict[str, object]:
@@ -128,6 +150,10 @@ def test_audit_profile_mounts_explicit_roots_read_only_and_uses_bounded_loki_job
         "${BIOETL_AUDIT_LOG_ROOT:?Pass an explicit absolute log root}:/audit-logs:ro"
         in (audit_promtail["volumes"])
     )
+    assert (
+        "${BIOETL_AUDIT_PROBE_LOG_ROOT:?Pass an explicit absolute probe log root}:"
+        "/audit-probe:ro" in (audit_promtail["volumes"])
+    )
     assert "audit" in services["loki"]["profiles"]
 
     promtail = yaml.safe_load(
@@ -137,10 +163,13 @@ def test_audit_profile_mounts_explicit_roots_read_only_and_uses_bounded_loki_job
         job for job in promtail["scrape_configs"] if job["job_name"] == "bioetl-audit"
     ]
     assert len(audit_jobs) == 1
-    audit_labels = audit_jobs[0]["static_configs"][0]["labels"]
+    audit_labels = {
+        tuple(sorted(config["labels"].items()))
+        for config in audit_jobs[0]["static_configs"]
+    }
     assert audit_labels == {
-        "job": "bioetl-audit",
-        "__path__": "/audit-logs/*.log",
+        (("__path__", "/audit-logs/*.log"), ("job", "bioetl-audit")),
+        (("__path__", "/audit-probe/*.log"), ("job", "bioetl-audit")),
     }
     assert services["grafana"]["environment"] == [
         "BIOETL_QUARANTINE_EXPLORER_URL=http://quarantine-explorer-audit:8081"
@@ -149,88 +178,62 @@ def test_audit_profile_mounts_explicit_roots_read_only_and_uses_bounded_loki_job
         "condition": "service_healthy"
     }
     assert audit_promtail["depends_on"]["loki"] == {"condition": "service_started"}
+    assert audit_promtail["healthcheck"] == {"disable": True}
+    assert audit_promtail["ports"] == ["127.0.0.1:19080:9080"]
 
-    # Config-level gate: Grafana must depend on healthy Promtail to block audit on shipper failure
-    assert "promtail-audit" in services["grafana"]["depends_on"], (
-        "Grafana must depend on promtail-audit to prevent audit from starting with dead shipper"
-    )
-    assert services["grafana"]["depends_on"]["promtail-audit"] == {
-        "condition": "service_healthy"
-    }, "Promtail dependency must wait for service_healthy to gate audit startup"
 
-    # Promtail must have an active healthcheck
-    assert "healthcheck" in audit_promtail
-    healthcheck = audit_promtail["healthcheck"]
-    assert healthcheck.get("disable") is not True, (
-        "Promtail healthcheck must not be disabled; expected_empty results can hide dead shippers"
-    )
-    assert "test" in healthcheck, "Promtail must have an active healthcheck test"
+def test_audit_launcher_blocks_failed_promtail_sentinel_delivery(
+    tmp_path: Path,
+) -> None:
+    data_root = tmp_path / "data"
+    log_root = tmp_path / "logs"
+    probe_log_root = tmp_path / "probe-logs"
+    data_root.mkdir()
+    log_root.mkdir()
+    ticks = iter((0.0, 0.1, 1.1))
 
-    # Behavioral component: verify the healthcheck command actually detects dead Promtail
-    import subprocess
-    import shutil
-    import socket
-    import threading
-    from http.server import HTTPServer, BaseHTTPRequestHandler
+    def fake_open(url: str, **_kwargs: object) -> _ProbeResponse:
+        if url == audit_stack_subject.READY_URL:
+            return _ProbeResponse({"data_root": str(data_root.resolve())})
+        if url == audit_stack_subject.CATALOG_URL:
+            return _ProbeResponse({"items": []})
+        if url == audit_stack_subject.PROMTAIL_READY_URL:
+            return _ProbeResponse(b"Ready\n")
+        assert url.startswith(audit_stack_subject.LOKI_QUERY_RANGE_URL)
+        return _ProbeResponse({"status": "success", "data": {"result": []}})
 
-    healthcheck_cmd = healthcheck["test"]
-    assert healthcheck_cmd[0] == "CMD", "Expected Docker healthcheck CMD format"
-    # Drop "CMD" sentinel and extract actual command
-    actual_cmd = healthcheck_cmd[1:]
-
-    if not shutil.which(actual_cmd[0]):
-        pytest.skip(f"{actual_cmd[0]} not available in test environment")
-
-    # Test 1: healthy Promtail (responds 200 on /ready)
-    class HealthyHandler(BaseHTTPRequestHandler):
-        def do_GET(self):
-            if self.path == "/ready":
-                self.send_response(200)
-                self.end_headers()
-                self.wfile.write(b"OK")
-            else:
-                self.send_response(404)
-                self.end_headers()
-
-        def log_message(self, format, *args):
-            pass  # Suppress logs
-
-    # Find free port
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(("127.0.0.1", 0))
-        healthy_port = s.getsockname()[1]
-
-    server = HTTPServer(("127.0.0.1", healthy_port), HealthyHandler)
-    server_thread = threading.Thread(target=server.serve_forever, daemon=True)
-    server_thread.start()
-
-    try:
-        # Replace localhost:9080 with our test server
-        test_cmd = [
-            arg.replace("localhost:9080", f"127.0.0.1:{healthy_port}")
-            for arg in actual_cmd
-        ]
-        result = subprocess.run(test_cmd, capture_output=True, timeout=5)
-        assert result.returncode == 0, (
-            f"Healthcheck should succeed against responding server, "
-            f"got exit {result.returncode}: {result.stderr.decode()}"
+    with pytest.raises(RuntimeError, match="promtail_state=pending"):
+        audit_stack_subject.start_and_verify_audit_stack(
+            data_root=data_root.resolve(),
+            log_root=log_root.resolve(),
+            timeout_seconds=1.0,
+            run=lambda *_args, **_kwargs: object(),
+            opener=fake_open,
+            monotonic=lambda: next(ticks),
+            sleep=lambda _seconds: None,
+            wall_time_ns=lambda: 1_700_000_000_000_000_000,
+            sentinel_id="not-delivered",
+            probe_log_root=probe_log_root,
         )
-    finally:
-        server.shutdown()
 
-    # Test 2: dead Promtail (closed port)
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(("127.0.0.1", 0))
-        dead_port = s.getsockname()[1]
-    # Port is now closed
-
-    test_cmd = [
-        arg.replace("localhost:9080", f"127.0.0.1:{dead_port}") for arg in actual_cmd
-    ]
-    result = subprocess.run(test_cmd, capture_output=True, timeout=5)
-    assert result.returncode != 0, (
-        f"Healthcheck should fail against closed port, got exit {result.returncode}"
+    sentinel = probe_log_root / "bioetl-promtail-audit-sentinel-not-delivered.log"
+    assert audit_stack_subject.PROMTAIL_SENTINEL_PREFIX in sentinel.read_text(
+        encoding="utf-8"
     )
+    assert list(log_root.iterdir()) == []
+
+
+def test_promtail_probe_reports_unavailable_shipper() -> None:
+    def unavailable(*_args: object, **_kwargs: object) -> _ProbeResponse:
+        raise OSError("connection refused")
+
+    result = audit_stack_subject.probe_promtail_audit_delivery(
+        marker=f"{audit_stack_subject.PROMTAIL_SENTINEL_PREFIX}unavailable",
+        opener=unavailable,
+    )
+
+    assert result.state is audit_stack_subject.PromtailAuditState.DOWN
+    assert "connection refused" in result.detail
 
 
 def test_default_runtime_log_sink_reaches_canonical_loki_dashboard_job() -> None:
@@ -425,6 +428,7 @@ def test_bootstrap_script_detects_tracing_datasource_reachability() -> None:
     assert "AUTO_POLL_SECONDS=1" in content
     assert "deadline=$(($(date +%s) + AUTO_WAIT_SECONDS))" in content
     assert 'remaining="$(remaining_auto_wait_seconds)"' in content
+    assert 'requested_timeout="${2:-2}"' in content
     assert '--timeout="${probe_timeout}"' in content
     assert "wait_for_auto_tracing_ready()" in content
     assert 'probe_ready "http://loki:3100/ready" "${remaining}"' in content
@@ -434,79 +438,51 @@ def test_bootstrap_script_detects_tracing_datasource_reachability() -> None:
     assert "name: Tempo" in content
 
 
-def test_probe_ready_handles_both_one_and_two_argument_forms() -> None:
-    """probe_ready must support one-argument calls (default timeout) and two-argument calls (minimum timeout)."""
-    import subprocess
-    import tempfile
-    import os
-
-    # Extract probe_ready function from the actual script
-    script_content = Path("grafana/scripts/bootstrap-datasources.sh").read_text(
-        encoding="utf-8"
+@pytest.mark.parametrize(
+    ("timeout_args", "expected_timeout"),
+    [
+        ((), "--timeout=2"),
+        (("1",), "--timeout=1"),
+    ],
+)
+def test_bootstrap_probe_ready_honors_one_and_two_argument_forms(
+    tmp_path: Path,
+    timeout_args: tuple[str, ...],
+    expected_timeout: str,
+) -> None:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    wget = fake_bin / "wget"
+    wget.write_text(
+        '#!/bin/sh\nprintf \'%s\\n\' "$@" > "$BIOETL_WGET_ARGS_FILE"\n',
+        encoding="utf-8",
+    )
+    wget.chmod(0o755)
+    args_file = tmp_path / "wget-args.txt"
+    environment = os.environ.copy()
+    environment.update(
+        {
+            "BIOETL_BOOTSTRAP_PROBE_ONLY": "1",
+            "BIOETL_WGET_ARGS_FILE": str(args_file),
+            "PATH": f"{fake_bin}{os.pathsep}{environment['PATH']}",
+        }
     )
 
-    # Create a stub wget that records the timeout argument
-    with tempfile.TemporaryDirectory() as tmpdir:
-        stub_wget = Path(tmpdir) / "wget"
-        stub_wget.write_text(
-            "#!/bin/sh\n"
-            'for arg in "$@"; do\n'
-            '  case "$arg" in\n'
-            '    --timeout=*) echo "${arg#--timeout=}" > "$TIMEOUT_RECORD" ;;\n'
-            "  esac\n"
-            "done\n"
-            "exit 0\n",
-            encoding="utf-8",
-        )
-        stub_wget.chmod(0o755)
+    result = subprocess.run(
+        [
+            "sh",
+            "grafana/scripts/bootstrap-datasources.sh",
+            "http://loki:3100/ready",
+            *timeout_args,
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        env=environment,
+    )
 
-        timeout_record = Path(tmpdir) / "timeout.txt"
-
-        # Extract probe_ready function and wrap in test script
-        test_script = Path(tmpdir) / "test_probe_ready.sh"
-        test_script.write_text(
-            f'#!/bin/sh\nexport PATH="{tmpdir}:$PATH"\n'
-            f'export TIMEOUT_RECORD="{timeout_record}"\n\n'
-            # Extract the probe_ready function
-            + script_content.split("probe_ready() {")[1].split("\n}\n")[0]
-            + "\n}\n\n"
-            + 'probe_ready "$@"\n',
-            encoding="utf-8",
-        )
-        test_script.chmod(0o755)
-
-        # Test 1: one-argument call (should default to timeout=2)
-        timeout_record.unlink(missing_ok=True)
-        result = subprocess.run(
-            [str(test_script), "http://dummy.example"],
-            capture_output=True,
-            text=True,
-        )
-        assert result.returncode == 0, f"One-arg call failed: {result.stderr}"
-        observed_timeout = timeout_record.read_text().strip()
-        assert observed_timeout == "2", f"Expected default timeout 2, got {observed_timeout}"
-
-        # Test 2: two-argument call with small timeout (should preserve it)
-        timeout_record.unlink(missing_ok=True)
-        result = subprocess.run(
-            [str(test_script), "http://dummy.example", "1"],
-            capture_output=True,
-            text=True,
-        )
-        assert result.returncode == 0, f"Two-arg (small) call failed: {result.stderr}"
-        observed_timeout = timeout_record.read_text().strip()
-        assert observed_timeout == "1", f"Expected timeout 1, got {observed_timeout}"
-
-        # Test 3: two-argument call with large timeout (should cap at 2)
-        timeout_record.unlink(missing_ok=True)
-        result = subprocess.run(
-            [str(test_script), "http://dummy.example", "10"],
-            capture_output=True,
-            text=True,
-        )
-        assert result.returncode == 0, f"Two-arg (large) call failed: {result.stderr}"
-        observed_timeout = timeout_record.read_text().strip()
-        assert observed_timeout == "2", f"Expected capped timeout 2, got {observed_timeout}"
+    assert result.returncode == 0, result.stderr
+    assert expected_timeout in args_file.read_text(encoding="utf-8").splitlines()
 
 
 def test_bootstrap_script_prunes_stale_local_renderer_plugin_in_remote_mode() -> None:

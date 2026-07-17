@@ -28,3 +28,8 @@ scrape_configs:
         labels:
           job: bioetl-audit
           __path__: /audit-logs/*.log
+      - targets:
+          - localhost
+        labels:
+          job: bioetl-audit
+          __path__: /audit-probe/*.log

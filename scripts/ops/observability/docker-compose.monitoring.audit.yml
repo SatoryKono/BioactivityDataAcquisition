@@ -52,6 +52,9 @@ services:
     volumes:
       - ./grafana/promtail-config.yml:/etc/promtail/config.yml:ro
       - "${BIOETL_AUDIT_LOG_ROOT:?Pass an explicit absolute log root}:/audit-logs:ro"
+      - "${BIOETL_AUDIT_PROBE_LOG_ROOT:?Pass an explicit absolute probe log root}:/audit-probe:ro"
+    ports:
+      - "127.0.0.1:19080:9080"
     depends_on:
       loki:
         condition: service_started
@@ -59,11 +62,7 @@ services:
       - monitoring
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--timeout=2", "--spider", "http://localhost:9080/ready"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
+      disable: true
     mem_limit: 256m
     mem_reservation: 128m
     cpus: 0.50
@@ -77,6 +76,4 @@ services:
       - BIOETL_QUARANTINE_EXPLORER_URL=http://quarantine-explorer-audit:8081
     depends_on:
       quarantine-explorer-audit:
-        condition: service_healthy
-      promtail-audit:
         condition: service_healthy
