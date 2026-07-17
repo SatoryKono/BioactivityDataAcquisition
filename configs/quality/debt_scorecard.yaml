@@ -511,17 +511,18 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 50
-      total_loc: 6145
-      files_ge_250_loc: 1
-      helper_function_ratio: 0.302
+      total_loc: 6101
+      files_ge_250_loc: 0
+      helper_function_ratio: 0.309
       max_internal_fan_in: 2
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.tracing_bootstrap
     trend:
-      status: reduced_2026-07-07_tracing_bootstrap_headroom_restored
-      next_action: 2026-07-07 refresh aligns the scorecard with the committed hotspot-family
-        baseline at 49 files, 6010 LOC, 0 files_ge_250_loc, helper_function_ratio
-        0.309, and max_internal_fan_in 2. Bounded-growth budgets remain flat at 0
-        files_ge_250_loc and max_internal_fan_in 3; no technical-debt budget is increased.
+      status: reduced_2026-07-17_pipeline_bootstrap_lazy_dependency_seam_restored
+      next_action: 2026-07-17 restores the focused lazy-dependency seam and aligns
+        the scorecard with the live hotspot-family baseline at 50 files, 6101 LOC,
+        0 files_ge_250_loc, helper_function_ratio 0.309, and max_internal_fan_in 2.
+        Bounded-growth budgets remain flat at 0 files_ge_250_loc and max_internal_fan_in
+        3; no technical-debt budget is increased.
   - name: composition_factories_pipeline
     owner: '@bioetl-platform'
     linked_rf: RF-023

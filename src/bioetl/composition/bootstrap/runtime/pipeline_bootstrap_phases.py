@@ -6,15 +6,19 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from bioetl.composition.bootstrap.runtime._pipeline_bootstrap_lazy_dependencies import (
+    initialize_chembl_policy_registry,
+    initialize_protein_class_target_type_mapping,
+    initialize_publication_controlled_vocabulary,
+    initialize_publication_type_classification,
+    register_all_pipelines,
+)
+
 if TYPE_CHECKING:
     from uuid import UUID
 
     from bioetl.composition.observability import ObservabilityBundle
     from bioetl.composition.bootstrap.runtime.assembly import RuntimeBootstrapPhases
-    from bioetl.composition.factories.pipeline.registry import (
-        PipelineFactoryRegistrationState,
-        PipelineRegistryProtocol,
-    )
     from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.composition.runtime_builders.runner_builder_wiring import (
         RunnerFactoryWiring,
@@ -147,54 +151,6 @@ def get_settings() -> Settings:
     )
 
     return _get_settings()
-
-
-def initialize_chembl_policy_registry(configs_root: Path) -> None:
-    from bioetl.composition.bootstrap.runtime.normalization_policy_init import (
-        initialize_chembl_policy_registry as _initialize,
-    )
-
-    _initialize(configs_root)
-
-
-def initialize_publication_controlled_vocabulary(configs_root: Path) -> None:
-    from bioetl.composition.bootstrap.runtime.publication_vocab_init import (
-        initialize_publication_controlled_vocabulary as _initialize,
-    )
-
-    _initialize(configs_root)
-
-
-def initialize_publication_type_classification(configs_root: Path) -> None:
-    from bioetl.composition.bootstrap.runtime.classification_init import (
-        initialize_publication_type_classification as _initialize,
-    )
-
-    _initialize(configs_root)
-
-
-def initialize_protein_class_target_type_mapping(configs_root: Path) -> None:
-    from bioetl.composition.bootstrap.runtime.classification_init import (
-        initialize_protein_class_target_type_mapping as _initialize,
-    )
-
-    _initialize(configs_root)
-
-
-def register_all_pipelines(
-    registry: PipelineRegistryProtocol | None = None,
-    *,
-    registration_state: PipelineFactoryRegistrationState | None = None,
-) -> None:
-    """Lazy wrapper for full pipeline registration."""
-    from bioetl.composition.factories.pipeline.registry import (
-        register_all_pipelines as _register_all_pipelines,
-    )
-
-    _register_all_pipelines(
-        registry=registry,
-        registration_state=registration_state,
-    )
 
 
 def prepare_runtime_registry(

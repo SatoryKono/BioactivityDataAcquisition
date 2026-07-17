@@ -3,7 +3,7 @@
     "snapshot_date": "2026-06-01",
     "families": 5,
     "scorecard": "configs/quality/debt_scorecard.yaml",
-    "budget_warnings": 1,
+    "budget_warnings": 0,
     "budget_review_notes": 0
   },
   "families": [
@@ -41,18 +41,16 @@
       ],
       "duplication_clusters": 0,
       "files": 50,
-      "total_loc": 6145,
-      "files_ge_250_loc": 1,
-      "helper_function_ratio": 0.302,
+      "total_loc": 6101,
+      "files_ge_250_loc": 0,
+      "helper_function_ratio": 0.309,
       "max_internal_fan_in": 2,
       "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.tracing_bootstrap",
       "bounded_growth_budgets": {
         "files_ge_250_loc": 0,
         "max_internal_fan_in": 3
       },
-      "budget_warnings": [
-        "over_budget:files_ge_250_loc=1/0"
-      ],
+      "budget_warnings": [],
       "budget_review_notes": []
     },
     {

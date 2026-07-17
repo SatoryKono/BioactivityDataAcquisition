@@ -122,7 +122,7 @@ class TestExportService:
         mock_table.to_pylist.return_value = [{"id": 1}, {"id": 2}]
         mock_reader.read_table.return_value = mock_table
 
-        mock_catalog.resolve_table_path.return_value = Path("data/silver/activity")
+        mock_catalog.resolve_table_path.return_value = "data/silver/activity"
 
         service = ExportService(
             reader=mock_reader,
@@ -208,7 +208,7 @@ class TestExportService:
         mock_writer = MagicMock()
         mock_logger = MagicMock()
 
-        mock_catalog.resolve_table_path.return_value = Path("data/silver/activity")
+        mock_catalog.resolve_table_path.return_value = "data/silver/activity"
 
         service = ExportService(
             reader=mock_reader,
@@ -221,9 +221,9 @@ class TestExportService:
 
         path = service._get_table_path("activity", "silver")
 
-        assert path == Path("data/silver/activity")
+        assert path == "data/silver/activity"
         mock_catalog.resolve_table_path.assert_called_once_with(
-            base_path=Path("data/silver"),
+            base_path="data/silver",
             table_name="activity",
             layer="silver",
         )
@@ -344,7 +344,7 @@ class TestExportService:
                 "standard_value": [42.0],
             }
         )
-        mock_catalog.resolve_table_path.return_value = Path("data/silver/activity")
+        mock_catalog.resolve_table_path.return_value = "data/silver/activity"
         mock_reader.table_exists.return_value = True
         mock_reader.read_table.return_value = table
         mock_writer.write_export.return_value = export_path
@@ -353,11 +353,12 @@ class TestExportService:
             *,
             manifest_name: str,
             payload: dict[str, object],
-            output_dir: Path,
+            output_dir: Path | str,
         ) -> Path:
             if payload["manifest_type"] == "bioetl.dataset_snapshot.provenance":
                 provenance_payloads.append(payload)
-            return output_dir / f"{manifest_name}.json"
+            output_dir_path = output_dir if isinstance(output_dir, Path) else Path(output_dir)
+            return output_dir_path / f"{manifest_name}.json"
 
         mock_writer.write_manifest.side_effect = _manifest_path
         mock_writer.fingerprint_file.side_effect = lambda *, path: (
@@ -387,6 +388,8 @@ class TestExportService:
         result = await service.export("chembl.activity", options=options)
         written_table = mock_writer.write_export.call_args.kwargs["table"]
 
+        if not result.success:
+            print(f"Export failed: {result.error}")
         assert result.success is True
         assert result.audit_ref is not None
         assert result.checksum_manifest_path == Path(
@@ -415,7 +418,7 @@ class TestExportService:
         mock_logger = MagicMock()
         table = pa.table({"record_id": [1], "raw_payload": ["secret"]})
 
-        mock_catalog.resolve_table_path.return_value = Path("data/silver/activity")
+        mock_catalog.resolve_table_path.return_value = "data/silver/activity"
         mock_reader.table_exists.return_value = True
         mock_reader.read_table.return_value = table
         service = ExportService(

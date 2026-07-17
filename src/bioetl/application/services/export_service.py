@@ -141,7 +141,7 @@ class ExportService:
         """
         table_path = self._get_table_path(table_name, layer)
 
-        table_path_ref = table_path.as_posix()
+        table_path_ref = table_path if isinstance(table_path, str) else table_path.as_posix()
         schema = await self.reader.get_schema(table_path_ref)
         if not isinstance(schema, _PreviewSchema):
             raise TypeError("Delta reader returned a non-iterable preview schema")
@@ -185,7 +185,8 @@ class ExportService:
         table_path = self._get_table_path(table_name, layer)
 
         try:
-            if not await self.reader.table_exists(table_path.as_posix()):
+            table_path_str = table_path if isinstance(table_path, str) else table_path.as_posix()
+            if not await self.reader.table_exists(table_path_str):
                 return self._create_missing_table_result(
                     table_name=table_name,
                     layer=layer,
@@ -219,7 +220,7 @@ class ExportService:
         table_name: str,
         layer: str,
         options: ExportOptions,
-        table_path: Path,
+        table_path: Path | str,
     ) -> ExportResult:
         """Build result payload for missing table case."""
         return _create_missing_table_result(
@@ -269,16 +270,15 @@ class ExportService:
             error=error,
         )
 
-    def _get_table_path(self, table_name: str, layer: str) -> Path:
+    def _get_table_path(self, table_name: str, layer: str) -> Path | str:
         """Get the table path through the catalog adapter."""
         base_path = self._get_layer_base_path(layer)
-        return Path(
-            self.catalog.resolve_table_path(
-                base_path=str(base_path),
-                table_name=table_name,
-                layer=layer,
-            )
+        result = self.catalog.resolve_table_path(
+            base_path=str(base_path),
+            table_name=table_name,
+            layer=layer,
         )
+        return result if isinstance(result, str) else Path(result)
 
     def _get_layer_base_path(self, layer: str) -> Path:
         """Resolve the root path for one export layer."""

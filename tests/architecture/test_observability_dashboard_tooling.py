@@ -105,9 +105,7 @@ def test_audit_cycle_gate_output_writes_review_evidence(tmp_path: Path) -> None:
                     {
                         "uid": "bioetl-dq-v2",
                         "renderStatus": "rendered",
-                        "terminalStateValidation": {
-                            "panelStates": [{"id": 101}]
-                        }
+                        "terminalStateValidation": {"panelStates": [{"id": 101}]},
                     }
                 ],
             }
