@@ -32,6 +32,10 @@ reviews:
     enabled: true
     drafts: false
 
+  # Keep assignment and label mutations disabled until pilot validation.
+  auto_assign_reviewers: false
+  auto_apply_labels: false
+
   # High-level summary instructions
   high_level_summary_instructions: |
     Provide one sentence about the goal and resulting behavior.
@@ -76,13 +80,16 @@ reviews:
   # Suggested reviewers instructions (disabled until demo handles are replaced)
   suggested_reviewers_instructions:
     - reviewers:
-        - "security-team"
+        - handle: "security-team"
+          type: "group"
       instructions: "Request review for changes to auth, access control, secrets, cryptography, network exposure, or sensitive data."
     - reviewers:
-        - "data-platform"
+        - handle: "data-platform"
+          type: "group"
       instructions: "Request review for migrations, persisted formats, ETL contracts, lineage, or idempotency changes."
     - reviewers:
-        - "api-owners"
+        - handle: "api-owners"
+          type: "group"
       instructions: "Request review for public API, CLI, events, versioned schemas, or config format changes."
 
   # Path-based review instructions
@@ -294,10 +301,6 @@ issue_enrichment:
         instructions: "Apply for security vulnerabilities or sensitive data issues."
       - label: "needs-reproduction"
         instructions: "Apply when issue lacks sufficient reproduction data or evidence."
-
-# Disable automatic label application, reviewer assignment, and post-merge actions until pilot validation
-auto_assign_reviewers: false
-apply_labels: false
 
 # Chat settings
 chat:

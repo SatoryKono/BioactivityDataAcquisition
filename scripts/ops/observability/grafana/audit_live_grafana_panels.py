@@ -10,7 +10,7 @@ import os
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from time import monotonic
+from time import monotonic, sleep
 from typing import Any, Literal, cast
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode, urlsplit, urlunsplit
@@ -34,6 +34,8 @@ DEFAULT_RUN_ID = "-"
 DEFAULT_RANGE_HOURS = 24
 DEFAULT_REQUEST_TIMEOUT_SECONDS = 15.0
 MAX_LOKI_RANGE_HOURS = 1
+LOKI_READINESS_POLL_INTERVAL_SECONDS = 0.25
+LOKI_READINESS_PROBE_TIMEOUT_SECONDS = 2.0
 _HEALTH_PROBE_PATHS: tuple[str, ...] = ("/health/live", "/health")
 _DASHBOARD_DIR = Path("grafana/dashboards")
 _PROCESSED_RECORDS_CONTRACT = "processed_records_table_v1"
@@ -1376,6 +1378,70 @@ def _audit_http_panel(
     )
 
 
+def _wait_for_loki_ready(
+    config: AuditConfig,
+    *,
+    started_at: float,
+) -> tuple[float, str | None]:
+    """Poll Loki readiness while preserving the shared readiness/query budget."""
+    remaining_timeout = config.request_timeout_seconds
+    last_detail: str | None = None
+    while remaining_timeout > 0:
+        try:
+            readiness = _fetch_text(
+                f"{config.loki_base_url}/ready",
+                timeout_seconds=min(
+                    remaining_timeout,
+                    LOKI_READINESS_PROBE_TIMEOUT_SECONDS,
+                ),
+            )
+            if readiness.strip().lower() == "ready":
+                elapsed = monotonic() - started_at
+                return (config.request_timeout_seconds - elapsed, None)
+            last_detail = f"unexpected /ready response: {readiness[:80]!r}"
+        except (HTTPError, URLError, OSError, UnicodeError) as exc:
+            last_detail = f"{type(exc).__name__}: {exc}"
+
+        elapsed = monotonic() - started_at
+        remaining_timeout = config.request_timeout_seconds - elapsed
+        if remaining_timeout <= 0:
+            break
+        sleep(min(LOKI_READINESS_POLL_INTERVAL_SECONDS, remaining_timeout))
+        elapsed = monotonic() - started_at
+        remaining_timeout = config.request_timeout_seconds - elapsed
+    return (remaining_timeout, last_detail)
+
+
+def _loki_timeout_result(
+    spec: PanelAuditSpec,
+    config: AuditConfig,
+    *,
+    rendered_expr: str,
+    phase: str,
+    latency_seconds: float,
+    last_detail: str | None = None,
+) -> AuditResult:
+    detail = (
+        f"Loki {phase} exhausted the governed request budget; "
+        f"latency_seconds={latency_seconds:.3f}; "
+        f"budget_seconds={config.request_timeout_seconds:.3f}"
+    )
+    if last_detail:
+        detail += f"; last_readiness={last_detail}"
+    return AuditResult(
+        dashboard_uid=spec.dashboard_uid,
+        panel_id=spec.panel_id,
+        title=spec.title,
+        source_kind=spec.source_kind,
+        semantic_kind=spec.semantic_kind,
+        status="error" if spec.required else "ok",
+        classification="timeout_budget_exceeded",
+        detail=detail,
+        query_preview=rendered_expr[:400],
+        target_ref_id=spec.target_ref_id,
+    )
+
+
 def _audit_loki_panel(
     spec: PanelAuditSpec,
     panel: dict[str, Any],
@@ -1419,32 +1485,20 @@ def _audit_loki_panel(
         query_params
     )
     started_at = monotonic()
-    try:
-        readiness = _fetch_text(
-            f"{config.loki_base_url}/ready",
-            timeout_seconds=config.request_timeout_seconds,
+    remaining_timeout, readiness_detail = _wait_for_loki_ready(
+        config,
+        started_at=started_at,
+    )
+    if remaining_timeout <= 0:
+        return _loki_timeout_result(
+            spec,
+            config,
+            rendered_expr=rendered_expr,
+            phase="readiness polling",
+            latency_seconds=monotonic() - started_at,
+            last_detail=readiness_detail,
         )
-        if readiness.strip().lower() != "ready":
-            raise ValueError(f"unexpected /ready response: {readiness[:80]!r}")
-        elapsed_after_ready = monotonic() - started_at
-        remaining_timeout = config.request_timeout_seconds - elapsed_after_ready
-        if remaining_timeout <= 0:
-            return AuditResult(
-                dashboard_uid=spec.dashboard_uid,
-                panel_id=spec.panel_id,
-                title=spec.title,
-                source_kind=spec.source_kind,
-                semantic_kind=spec.semantic_kind,
-                status="error" if spec.required else "ok",
-                classification="timeout_budget_exceeded",
-                detail=(
-                    "Loki readiness probe exhausted the governed request budget; "
-                    f"latency_seconds={elapsed_after_ready:.3f}; "
-                    f"budget_seconds={config.request_timeout_seconds:.3f}"
-                ),
-                query_preview=rendered_expr[:400],
-                target_ref_id=spec.target_ref_id,
-            )
+    try:
         payload = _fetch_json(
             query_url,
             timeout_seconds=remaining_timeout,
@@ -1458,27 +1512,18 @@ def _audit_loki_panel(
             semantic_kind=spec.semantic_kind,
             status="error" if spec.required else "ok",
             classification="blocked_unavailable",
-            detail=f"Loki readiness/query could not be executed: {exc}",
+            detail=f"Loki query could not be executed after readiness: {exc}",
             query_preview=rendered_expr[:400],
             target_ref_id=spec.target_ref_id,
         )
     latency_seconds = monotonic() - started_at
     if latency_seconds > config.request_timeout_seconds:
-        return AuditResult(
-            dashboard_uid=spec.dashboard_uid,
-            panel_id=spec.panel_id,
-            title=spec.title,
-            source_kind=spec.source_kind,
-            semantic_kind=spec.semantic_kind,
-            status="error" if spec.required else "ok",
-            classification="timeout_budget_exceeded",
-            detail=(
-                "Loki readiness/query exceeded the governed request budget; "
-                f"latency_seconds={latency_seconds:.3f}; "
-                f"budget_seconds={config.request_timeout_seconds:.3f}"
-            ),
-            query_preview=rendered_expr[:400],
-            target_ref_id=spec.target_ref_id,
+        return _loki_timeout_result(
+            spec,
+            config,
+            rendered_expr=rendered_expr,
+            phase="readiness/query",
+            latency_seconds=latency_seconds,
         )
     classification, detail = _classify_loki_payload(payload)
     status = "error" if classification in {"invalid_shape", "query_error"} else "ok"

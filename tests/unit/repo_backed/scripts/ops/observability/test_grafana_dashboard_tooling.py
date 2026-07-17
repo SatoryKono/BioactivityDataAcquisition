@@ -1461,14 +1461,24 @@ def test_live_audit_loki_panel_uses_query_range(monkeypatch: Any) -> None:
         ]
     }
     captured: dict[str, str] = {}
+    readiness_responses = iter(("starting", "ready"))
+    readiness_calls: list[str] = []
+    readiness_sleeps: list[float] = []
+
+    def fake_fetch_text(url: str, *, timeout_seconds: float) -> str:
+        assert url == "http://localhost:3100/ready"
+        assert 0 < timeout_seconds <= 2.0
+        readiness_calls.append(url)
+        return next(readiness_responses)
 
     def fake_fetch_json(url: str, *, timeout_seconds: float) -> object:
         assert 0 < timeout_seconds <= config.request_timeout_seconds
         captured["url"] = url
         return {"status": "success", "data": {"result": []}}
 
-    monkeypatch.setattr(audit_subject, "_fetch_text", lambda *_args, **_kwargs: "ready")
+    monkeypatch.setattr(audit_subject, "_fetch_text", fake_fetch_text)
     monkeypatch.setattr(audit_subject, "_fetch_json", fake_fetch_json)
+    monkeypatch.setattr(audit_subject, "sleep", readiness_sleeps.append)
 
     result = audit_subject._audit_loki_panel(spec, panel, config)
 
@@ -1483,6 +1493,11 @@ def test_live_audit_loki_panel_uses_query_range(monkeypatch: Any) -> None:
     assert result.classification == "expected_empty"
     assert "endpoint=query_range" in result.detail
     assert "range_hours=1" in result.detail
+    assert readiness_calls == [
+        "http://localhost:3100/ready",
+        "http://localhost:3100/ready",
+    ]
+    assert readiness_sleeps == [audit_subject.LOKI_READINESS_POLL_INTERVAL_SECONDS]
 
 
 def test_live_audit_loki_instant_panel_uses_bounded_query_endpoint(
@@ -1595,6 +1610,59 @@ def test_live_audit_loki_panel_fails_when_total_latency_exceeds_budget(
     assert result.status == "error"
     assert result.classification == "timeout_budget_exceeded"
     assert "budget_seconds=15.000" in result.detail
+
+
+def test_live_audit_loki_panel_fails_when_readiness_polling_exhausts_budget(
+    monkeypatch: Any,
+) -> None:
+    config = audit_subject.AuditConfig(
+        prometheus_base_url="http://localhost:9090",
+        app_base_url="http://localhost:8081",
+        loki_base_url="http://localhost:3100",
+        tempo_base_url="http://localhost:3200",
+        grafana_base_url="http://localhost:3000",
+        grafana_username="admin",
+        grafana_password="changeme",
+        workflow="chembl_target",
+        pipeline="chembl_target",
+        run_type="backfill",
+        run_id="run-123",
+        range_hours=24,
+        output_path=Path("reports/observability/grafana/live-panel-audit.json"),
+        request_timeout_seconds=0.5,
+    )
+    spec = audit_subject.PanelAuditSpec(
+        dashboard_uid="bioetl-runtime",
+        panel_id=250,
+        title="Inspect Warning Logs",
+        source_kind="loki",
+        semantic_kind="loki_query",
+        target_ref_id="A",
+    )
+    panel = {"targets": [{"refId": "A", "expr": '{job="bioetl"}'}]}
+    monotonic_values = iter((100.0, 100.4, 100.6, 100.6))
+    readiness_sleeps: list[float] = []
+
+    monkeypatch.setattr(audit_subject, "monotonic", lambda: next(monotonic_values))
+    monkeypatch.setattr(
+        audit_subject, "_fetch_text", lambda *_args, **_kwargs: "starting"
+    )
+    monkeypatch.setattr(
+        audit_subject,
+        "_fetch_json",
+        lambda *_args, **_kwargs: pytest.fail(
+            "query must not run before Loki is ready"
+        ),
+    )
+    monkeypatch.setattr(audit_subject, "sleep", readiness_sleeps.append)
+
+    result = audit_subject._audit_loki_panel(spec, panel, config)
+
+    assert result.status == "error"
+    assert result.classification == "timeout_budget_exceeded"
+    assert "readiness polling" in result.detail
+    assert "last_readiness=unexpected /ready response" in result.detail
+    assert readiness_sleeps == [pytest.approx(0.1)]
 
 
 def test_live_audit_loki_fixtures_execute_positive_and_empty_paths(
