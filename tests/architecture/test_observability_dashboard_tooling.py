@@ -116,7 +116,7 @@ def test_audit_cycle_gate_output_writes_review_evidence(tmp_path: Path) -> None:
         encoding="utf-8",
     )
 
-    audit_cycle._write_gate_report(
+    release_passed = audit_cycle._write_gate_report(
         config,
         semantic_status="pass",
         render_status="pass",
@@ -125,6 +125,7 @@ def test_audit_cycle_gate_output_writes_review_evidence(tmp_path: Path) -> None:
     )
 
     payload = json.loads(output_path.read_text(encoding="utf-8"))
+    assert release_passed is True
     assert payload["dashboard_semantic_gate"]["status"] == "pass"
     assert payload["dashboard_render_gate"]["status"] == "pass"
     assert payload["release_passed"] is True
