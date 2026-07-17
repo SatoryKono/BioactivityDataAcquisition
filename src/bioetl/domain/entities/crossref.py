@@ -121,6 +121,10 @@ class PublicationRecord(BaseModel):
         default_factory=list, description="Subject areas"
     )
 
+    def model_post_init(self, _context: object, /) -> None:
+        """Detach and freeze nested DTO collections after validation."""
+        freeze_fields(self, ("issn", "subjects"))
+
     # Note: _source is set by transformer via entity_to_silver_record() mapping
 
 

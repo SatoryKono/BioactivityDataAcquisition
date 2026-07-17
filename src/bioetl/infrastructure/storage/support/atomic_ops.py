@@ -48,8 +48,6 @@ if TYPE_CHECKING:
 
 def __getattr__(name: str) -> object:  # pragma: no cover
     """Lazily expose compatibility re-exports without creating import cycles."""
-    if TYPE_CHECKING:
-        raise AttributeError
     if name == "AtomicWriteGroup":
         return getattr(
             import_module("bioetl.infrastructure.storage.support.atomic_group"),
