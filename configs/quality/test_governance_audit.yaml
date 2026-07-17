@@ -968,9 +968,6 @@ repo_backed_unit_test_exceptions:
   - path: tests/unit/repo_backed/application/composite/test_non_chembl_join_key_normalization.py
     target_lane: repo-backed-unit
     protected_surface: tests/fixtures/normalization/non_chembl_identifier_cases.yaml
-  - path: tests/unit/repo_backed/scripts/ops/test_migrate_gold_parquet_to_delta.py
-    target_lane: repo-backed-unit
-    protected_surface: scripts/ops/migrations/active/migrate_gold_parquet_to_delta.py
   - path: tests/unit/repo_backed/application/pipelines/crossref/test_business_data_builder.py
     target_lane: repo-backed-unit
     protected_surface: src/bioetl/application/pipelines/crossref/_business_data_builder.py
@@ -1078,6 +1075,9 @@ repo_backed_unit_test_exceptions:
   - path: tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py
     target_lane: repo-backed-unit
     protected_surface: scripts/engineering/qa/run_docker_stability_campaign.py
+  - path: tests/unit/repo_backed/scripts/ops/test_migrate_gold_parquet_to_delta.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ops/migrations/active/migrate_gold_parquet_to_delta.py
 mixed_scope_unit_path_policy:
   issue_ref: '#4665'
   decision: logical_unit_ownership_with_dedicated_repo_backed_subtree

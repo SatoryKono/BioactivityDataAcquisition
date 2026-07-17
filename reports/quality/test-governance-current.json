@@ -184,14 +184,14 @@
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "381",
+      "line": "383",
       "path": "tests/unit/composition/test_observability_contract.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_noop_metrics_all_methods_are_noop"
     },
     {
       "category": "intentional_no_exception_contract",
-      "line": "391",
+      "line": "393",
       "path": "tests/unit/composition/test_observability_contract.py",
       "rationale": "explicit no-op/smoke/does-not-raise contract tests",
       "test_name": "test_noop_metrics_close_is_idempotent"
@@ -1422,14 +1422,14 @@
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "381",
+        "line": "383",
         "path": "tests/unit/composition/test_observability_contract.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_noop_metrics_all_methods_are_noop"
       },
       {
         "category": "intentional_no_exception_contract",
-        "line": "391",
+        "line": "393",
         "path": "tests/unit/composition/test_observability_contract.py",
         "rationale": "explicit no-op/smoke/does-not-raise contract tests",
         "test_name": "test_noop_metrics_close_is_idempotent"
@@ -2220,11 +2220,11 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2013,
-    "total_test_functions": 22501,
+    "total_test_functions": 22502,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "2b8770140850467c1360da9a8bac88e39d0cf16b6b55f6ce4c329d0c0b67c843",
+  "source_tree_sha256": "7d23eafbe1a43312e50edd4279581d22c71dd4ff326852d87ca6f907f89b013f",
   "summary": {
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
@@ -2286,6 +2286,6 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2013,
-  "total_test_functions": 22501,
+  "total_test_functions": 22502,
   "uuid4_call_sites": 0
 }

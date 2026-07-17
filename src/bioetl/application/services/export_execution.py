@@ -96,13 +96,15 @@ async def export_existing_table(
         output_columns=tuple(field.name for field in export_table.schema),
         redacted_columns=redacted_columns,
     )
-    output_path = Path(writer.write_export(
-        table=export_table,
-        table_name=table_name,
-        layer=layer,
-        fmt=options.format,
-        output_dir=str(options.output_path or export_path),
-    ))
+    output_path = Path(
+        writer.write_export(
+            table=export_table,
+            table_name=table_name,
+            layer=layer,
+            fmt=options.format,
+            output_dir=str(options.output_path or export_path),
+        )
+    )
     manifest_paths = write_export_manifests_if_enabled(
         writer=writer,
         table=export_table,

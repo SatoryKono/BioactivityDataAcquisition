@@ -204,12 +204,9 @@ def test_issue_5683_dead_code_inventory_has_no_untriaged_candidates() -> None:
         == summary["repo_wide_zero_import_candidate_count"]
     )
     assert summary["repo_wide_candidates_without_owner_tests_count"] == 0
-    dispositions = set(summary["repo_wide_disposition_counts"])
-    assert dispositions <= {
-        "retain_canonical_owner_module",
+    assert set(summary["repo_wide_disposition_counts"]) == {
         "retain_module_entrypoint",
     }
-    assert "retain_module_entrypoint" in dispositions
 
 
 def test_issue_5684_governance_freshness_gates_are_passing() -> None:

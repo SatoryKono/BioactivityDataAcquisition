@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-17T10:00:07.188222+00:00",
+  "generated_at": "2026-07-17T10:06:28.964599+00:00",
   "summary": {
     "total_scripts": 479,
     "status_counts": {
-      "active": 344,
-      "supporting": 135
+      "active": 343,
+      "supporting": 136
     },
     "reference_group_coverage": {
       "agents": 5,
@@ -616,7 +616,7 @@
         },
         {
           "path": "tests/architecture/test_tech_debt_issues_5790_5796_closeout.py",
-          "line": 423,
+          "line": 424,
           "source_group": "tests",
           "text": "assert \"scripts/ai/codex/helper/run-codex-wsl-noninteractive.sh\" in backlog_text"
         }
@@ -13881,7 +13881,7 @@
     {
       "path": "scripts/ops/migrations/active/migrate_gold_parquet_to_delta.py",
       "type": "py",
-      "status": "active",
+      "status": "supporting",
       "agent_usage": [],
       "reference_count": 2,
       "references": [
@@ -13899,9 +13899,9 @@
         }
       ],
       "owner": "@bioetl-platform",
-      "lifecycle_decision": "active",
+      "lifecycle_decision": "legacy_manual_utility",
       "review_by": "2026-09-30",
-      "next_step": "Retain as the supported repeatable Gold Parquet-to-Delta migration while the operator guide and repo-backed owner tests use this canonical active path; remove only after the migration window closes and reference proof is complete."
+      "next_step": "Retain as a bounded manual migration for legacy Gold Parquet datasets while the operator guide and repo-backed owner tests use this canonical path; remove after the migration window closes and reference proof is complete."
     },
     {
       "path": "scripts/ops/migrations/oneoff/migrate_exemption_keys_to_paths.py",

@@ -272,11 +272,13 @@ class ExportService:
     def _get_table_path(self, table_name: str, layer: str) -> Path:
         """Get the table path through the catalog adapter."""
         base_path = self._get_layer_base_path(layer)
-        return Path(self.catalog.resolve_table_path(
-            base_path=str(base_path),
-            table_name=table_name,
-            layer=layer,
-        ))
+        return Path(
+            self.catalog.resolve_table_path(
+                base_path=str(base_path),
+                table_name=table_name,
+                layer=layer,
+            )
+        )
 
     def _get_layer_base_path(self, layer: str) -> Path:
         """Resolve the root path for one export layer."""

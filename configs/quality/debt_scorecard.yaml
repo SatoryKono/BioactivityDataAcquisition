@@ -482,9 +482,9 @@ hotspot_family_ratchets:
     metrics:
       duplication_clusters: 0
       files: 180
-      total_loc: 22319
+      total_loc: 22597
       files_ge_250_loc: 4
-      helper_function_ratio: 0.357
+      helper_function_ratio: 0.36
       max_internal_fan_in: 7
       max_internal_fan_in_module: bioetl.application.core.span_helpers
     trend:
@@ -1014,8 +1014,8 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed triage recalibration
         updates the tracked debt budget intentionally.
     repo_wide_zero_import_candidate_count:
-      current_count: 2
-      max_count: 2
+      current_count: 1
+      max_count: 1
       linked_issue: '#6352'
       owner: '@bioetl-architecture'
       rationale: Repo-wide zero-import candidates reduced to 2 after recent cleanup
@@ -1024,8 +1024,8 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh
         updates the classified candidate set intentionally.
     repo_wide_classified_zero_import_candidate_count:
-      current_count: 2
-      max_count: 2
+      current_count: 1
+      max_count: 1
       linked_issue: '#6352'
       owner: '@bioetl-architecture'
       rationale: Every repo-wide zero-import candidate remains covered by an explicit
@@ -1050,8 +1050,8 @@ retirement_governance_metrics:
       ratchet_policy: Non-growth fail-fast unless the reviewed candidate set intentionally
         shrinks and the owner-test evidence is regenerated in lockstep.
     repo_wide_candidates_without_owner_tests_count:
-      current_count: 1
-      max_count: 1
+      current_count: 0
+      max_count: 0
       linked_issue: '#6352'
       owner: '@bioetl-architecture'
       rationale: One repo-wide zero-import candidate lacks owner test evidence and
