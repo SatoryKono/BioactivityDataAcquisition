@@ -209,7 +209,8 @@
       "status": "closeable",
       "theme": "governance_artifact_rebaseline",
       "outcome": "remote-main baseline records required-on-remote and branch-introduction semantics for governance artifacts; quality scorecard, module coverage, duplication baseline, remote baseline, and debt gates are regenerated against the current artifacts",
-      "debt_outcome": "improved"
+      "debt_outcome": "improved",
+      "integral_score": 8.66
     },
     "5938": {
       "status": "closeable",
@@ -247,4 +248,3 @@
     "condition": "all six issues have source-backed evidence and no ratchet current value exceeds its max"
   }
 }
-
