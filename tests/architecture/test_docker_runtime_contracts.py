@@ -10,7 +10,6 @@ from collections import namedtuple
 from pathlib import Path
 from types import ModuleType
 from typing import Any
-from unittest.mock import patch
 
 import pytest
 import yaml
@@ -418,11 +417,7 @@ def test_known_bad_fixture_reports_filesystem_warp_and_ownership(
     contract_path = tmp_path / "contract.yml"
     contract_path.write_text(yaml.safe_dump(contract), encoding="utf-8")
 
-    with patch(
-        "scripts.ops.runtime.docker.docker_runtime_preflight._capacity_observation",
-        return_value=({}, []),
-    ):
-        report = preflight.build_report(tmp_path, contract_path, static_only=True)
+    report = preflight.build_report(tmp_path, contract_path, static_only=True)
     finding_codes = {finding["code"] for finding in report["findings"]}
 
     assert report["summary"]["ok"] is False
@@ -540,13 +535,17 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         monitoring["services"]["grafana"]["depends_on"]["renderer"]["condition"]
         == "service_healthy"
     )
-    # Loki now has a healthcheck (verify-config), so promtail can depend on service_healthy
+    # Loki, Promtail, and Tempo are distroless images and do not contain the
+    # wget command used by the former in-container checks.  Compose therefore
+    # must not publish a false/unexecutable health verdict for these optional
+    # services.  Their bounded HTTP/query readiness is enforced by the live
+    # tracing smoke and dashboard semantic audit instead.
     assert (
         monitoring["services"]["promtail"]["depends_on"]["loki"]["condition"]
-        == "service_healthy"
+        == "service_started"
     )
-    # Tempo remains without healthcheck (distroless image)
-    assert monitoring["services"]["tempo"]["healthcheck"] == {"disable": True}
+    for service_name in ("loki", "promtail", "tempo"):
+        assert monitoring["services"][service_name]["healthcheck"] == {"disable": True}
     assert renderer_health == [
         "CMD",
         "grafana-image-renderer",

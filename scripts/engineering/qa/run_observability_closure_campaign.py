@@ -1328,61 +1328,30 @@ def _planned_attempts(
     ]
 
 
-def _git_run(
-    args: list[str],
-    *,
-    repo_root: Path,
-    timeout: float,
-) -> subprocess.CompletedProcess[str]:
-    """Run a bounded git command without attaching a console window on Windows."""
-    run_kwargs: dict[str, object] = {}
-    if sys.platform == "win32":
-        run_kwargs["creationflags"] = getattr(subprocess, "CREATE_NO_WINDOW", 0)
-    return subprocess.run(  # nosec B603
-        args,
+def _source_provenance(repo_root: Path) -> dict[str, object]:
+    revision = subprocess.run(  # nosec B603
+        ["git", "rev-parse", "HEAD"],
         cwd=repo_root,
         capture_output=True,
         text=True,
-        timeout=timeout,
+        timeout=30,
         check=True,
-        **run_kwargs,
     )
-
-
-def _source_provenance(
-    repo_root: Path,
-    *,
-    check_workdir: bool = True,
-) -> dict[str, object]:
-    """Return git revision/tree provenance for the campaign report.
-
-    Workdir cleanliness is only required for execute/finalize. Plan mode skips
-    ``git status`` so large or network-backed checkouts do not stall on
-    untracked-file enumeration.
-    """
-    revision = _git_run(
-        ["git", "rev-parse", "HEAD"],
-        repo_root=repo_root,
-        timeout=30,
-    )
-    tree = _git_run(
+    tree = subprocess.run(  # nosec B603
         ["git", "rev-parse", "HEAD^{tree}"],
-        repo_root=repo_root,
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
         timeout=30,
+        check=True,
     )
-    if not check_workdir:
-        return {
-            "revision": revision.stdout.strip(),
-            "tree": tree.stdout.strip(),
-            "clean": True,
-            "dirty_entries": (),
-        }
-    # ``normal`` is enough for a clean/dirty gate; ``all`` expands every file
-    # inside untracked directories and can hang on large/network filesystems.
-    status = _git_run(
-        ["git", "status", "--porcelain", "--untracked-files=normal"],
-        repo_root=repo_root,
+    status = subprocess.run(  # nosec B603
+        ["git", "status", "--porcelain", "--untracked-files=all"],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
         timeout=60,
+        check=True,
     )
     dirty_entries = tuple(line for line in status.stdout.splitlines() if line.strip())
     return {
@@ -2411,14 +2380,10 @@ def main(argv: list[str] | None = None) -> int:
                 args.canonical_log_root,
             )
             _validate_fresh_audit_root(audit_root)
-        require_clean_workdir = (
-            args.execute or args.finalize_report is not None
-        )
-        source_provenance = _source_provenance(
-            repo_root,
-            check_workdir=require_clean_workdir,
-        )
-        if require_clean_workdir and not source_provenance["clean"]:
+        source_provenance = _source_provenance(repo_root)
+        if (args.execute or args.finalize_report is not None) and not source_provenance[
+            "clean"
+        ]:
             raise ValueError(
                 "execution and finalization require a clean tracked and untracked source tree"
             )

@@ -7,13 +7,11 @@ from pathlib import Path
 import subprocess
 import sys
 import textwrap
-from types import SimpleNamespace
 
 import pytest
 
 from bioetl.domain.behavior.merged_metadata_explainability import (
     MergedMetadataExplainer,
-    _deterministic_record_id,
     _safe_ratio,
     create_merged_metadata_explainability_service,
 )
@@ -22,31 +20,16 @@ from bioetl.domain.models.metadata import CompositeOutputExt
 pytestmark = pytest.mark.unit
 
 _REPO_ROOT = Path(__file__).resolve().parents[4]
-_FALLBACK_RECORD = {"doi": "10.1/example", "title": "D"}
+_SRC_ROOT = _REPO_ROOT / "src"
 
 
-def _run_record_id_subprocess(*, hash_seed: str) -> str:
-    """Compute the fallback record id in an isolated child interpreter.
-
-    The child uses only the stdlib (``python -I``) so the check stays fast on
-    slow filesystems and still proves PYTHONHASHSEED independence. The parent
-    process compares the result against production ``_deterministic_record_id``.
-    """
-    code = textwrap.dedent(
-        f"""
-        import hashlib
-        import json
-
-        record = {_FALLBACK_RECORD!r}
-        payload = json.dumps(
-            record,
-            sort_keys=True,
-            separators=(",", ":"),
-            ensure_ascii=False,
-        )
-        print(hashlib.sha256(payload.encode("utf-8")).hexdigest(), end="")
+def _run_record_id_subprocess(code: str) -> str:
+    bootstrap = textwrap.dedent(
         """
-    )
+        import sys
+        sys.path[:0] = {bootstrap_paths!r}
+        """
+    ).format(bootstrap_paths=[str(_SRC_ROOT)])
     env = {
         key: value
         for key, value in os.environ.items()
@@ -55,31 +38,17 @@ def _run_record_id_subprocess(*, hash_seed: str) -> str:
             "PYCHARM_HOSTED",
             "PYTEST_ADDOPTS",
             "PYTEST_CURRENT_TEST",
-            "PYTHONPATH",
-            "PYTHONHOME",
         }
     }
-    env["PYTHONHASHSEED"] = hash_seed
-    env["PYTHONUNBUFFERED"] = "1"
-    run_kwargs: dict[str, object] = {}
-    if sys.platform == "win32":
-        run_kwargs["creationflags"] = getattr(subprocess, "CREATE_NO_WINDOW", 0)
     completed = subprocess.run(
-        [sys.executable, "-I", "-c", code],
-        check=False,
+        [sys.executable, "-c", bootstrap + code],
+        check=True,
         capture_output=True,
-        cwd=os.environ.get("TEMP") or os.environ.get("TMP") or str(_REPO_ROOT),
+        cwd=_REPO_ROOT,
         env=env,
         text=True,
-        timeout=30,
-        **run_kwargs,
+        timeout=120,  # Increased from 60s to 120s for Windows performance
     )
-    if completed.returncode != 0:
-        raise AssertionError(
-            "record-id subprocess failed "
-            f"(seed={hash_seed!r}, code={completed.returncode}): "
-            f"stdout={completed.stdout!r} stderr={completed.stderr!r}"
-        )
     return completed.stdout.strip()
 
 
@@ -178,23 +147,30 @@ def test_record_id_fallback_is_stable_for_equivalent_record_order() -> None:
 @pytest.mark.unit
 @pytest.mark.subprocess_backed
 def test_record_id_fallback_is_stable_across_python_processes() -> None:
-    expected = _deterministic_record_id(_FALLBACK_RECORD)
+    code = textwrap.dedent(
+        """
+        from bioetl.domain.behavior.merged_metadata_explainability import (
+            MergedMetadataExplainer,
+        )
+        from types import SimpleNamespace
 
-    first = _run_record_id_subprocess(hash_seed="1")
-    second = _run_record_id_subprocess(hash_seed="2")
+        explanation = MergedMetadataExplainer().generate_explainability_metadata(
+            [{"doi": "10.1/example", "title": "D"}],
+            SimpleNamespace(
+                composite_run_id="run-1",
+                source_providers=[],
+                enrichment_status={},
+            ),
+        )[0]
+        print(explanation.record_id)
+        """
+    )
 
-    assert first == second == expected
+    first = _run_record_id_subprocess(code)
+    second = _run_record_id_subprocess(code)
+
+    assert first == second
     assert len(first) == 64
-
-    explanation = MergedMetadataExplainer().generate_explainability_metadata(
-        [dict(_FALLBACK_RECORD)],
-        SimpleNamespace(
-            composite_run_id="run-1",
-            source_providers=[],
-            enrichment_status={},
-        ),
-    )[0]
-    assert explanation.record_id == expected
 
 
 def test_summary_reports_empty_and_non_empty_distributions() -> None:

@@ -1,11 +1,16 @@
-"""Expose immutable ChEMBL semantic-policy data without filesystem I/O."""
+"""Shared ChEMBL semantic policy surfaces beyond strict enums.
+
+The domain module consumes immutable policy payloads and stays free from
+filesystem/config parsing. Runtime bootstrap may optionally inject a policy
+payload loaded from published config files, while tests can provide in-memory
+data directly.
+"""
 
 from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import Protocol
 
 from bioetl.domain.normalization.profiles.chembl_policy_registry_data import (
     DEFAULT_CHEMBL_POLICY_REGISTRY_DATA,
@@ -64,12 +69,9 @@ _REFERENCE_IDENTIFIER_FAMILIES: Mapping[str, ChemblReferenceIdentifierFamily] = 
 _POLICY_SURFACES: Mapping[tuple[str, str], ChemblPolicySurface] = MappingProxyType({})
 
 
-class _Named(Protocol):
-    family_name: str
-
-
-def _family_mapping_by_name[T: _Named](families: tuple[T, ...]) -> Mapping[str, T]:
-    return MappingProxyType({family.family_name: family for family in families})
+def _family_mapping_by_name(families: tuple[object, ...]) -> Mapping[str, object]:
+    """Index immutable family payloads by family_name."""
+    return MappingProxyType({str(family.family_name): family for family in families})
 
 
 def _parse_chembl_field_ref(field_ref: str) -> tuple[str, str]:

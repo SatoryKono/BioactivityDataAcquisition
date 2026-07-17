@@ -33,29 +33,33 @@ from bioetl.domain.exceptions import BioETLError
 
 def _make_pipeline() -> SimpleNamespace:
     """Create a minimal pipeline namespace for composition tests."""
-    services = SimpleNamespace()
-    services.dq_monitor = MagicMock()
-    services.metrics = MagicMock()
-    services.storage = MagicMock()
-    services.dq_report_service = MagicMock()
-    services.metadata_coordinator = MagicMock()
-    services.metadata_writer = MagicMock()
-    services.logger = MagicMock()
-    services.tracing = MagicMock()
-    services.bronze_dq_analyzer = None
-    services.silver_dq_analyzer = None
-    services.gold_dq_analyzer = None
-    services.dq_report_writer = None
+    dq_monitor = MagicMock()
+    metrics = MagicMock()
+    storage = MagicMock()
+    dq_report_service = MagicMock()
+    metadata_coordinator = MagicMock()
+    metadata_writer = MagicMock()
 
+    services = SimpleNamespace(
+        dq_monitor=dq_monitor,
+        metrics=metrics,
+        storage=storage,
+        dq_report_service=dq_report_service,
+        metadata_coordinator=metadata_coordinator,
+        metadata_writer=metadata_writer,
+    )
     config = SimpleNamespace(
         dq=MagicMock(),
         pipeline_name="chembl_activity",
         entity_type="activity",
     )
+    runtime = MagicMock()
+    context = MagicMock()
+
     return SimpleNamespace(
         config=config,
-        runtime=MagicMock(),
-        context=MagicMock(),
+        runtime=runtime,
+        context=context,
         services=services,
     )
 

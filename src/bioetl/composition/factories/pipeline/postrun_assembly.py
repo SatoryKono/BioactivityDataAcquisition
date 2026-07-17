@@ -2,11 +2,8 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol, runtime_checkable
+from typing import TYPE_CHECKING
 
-from bioetl.application.core.pipeline_aux_service_protocols import (
-    PipelinePostrunServicesProtocol,
-)
 from bioetl.application.core.postrun import (
     PostrunCleanupService,
     PostrunCompactService,
@@ -31,7 +28,6 @@ if TYPE_CHECKING:
     from bioetl.domain.config import PipelineConfig, RuntimeConfig
     from bioetl.domain.ports import (
         BronzeDQConfigPort,
-        DQMonitorPort,
         GoldDQConfigPort,
         LoggerPort,
         SilverDQConfigPort,
@@ -109,45 +105,17 @@ def build_postrun_dependency_context(
     )
 
 
-@runtime_checkable
-class _PostrunAssemblyServicesProtocol(
-    PipelinePostrunServicesProtocol,
-    Protocol,
-):
-    """Service bundle surface required while assembling postrun orchestration."""
-
-    @property
-    def dq_monitor(self) -> DQMonitorPort | None: ...
-
-    @property
-    def dq_report_service(self) -> DQReportService | None: ...
-
-
-def _resolve_postrun_services(
-    pipeline: BasePipeline,
-) -> _PostrunAssemblyServicesProtocol:
-    """Validate and narrow the pipeline service bundle at the composition boundary."""
-    services = pipeline.services
-    if not isinstance(services, _PostrunAssemblyServicesProtocol):
-        raise TypeError(
-            "Postrun assembly requires DQ, storage, metadata, and observability "
-            "services"
-        )
-    return services
-
-
 def _build_pipeline_dq_service(
     *,
     pipeline: BasePipeline,
-    services: _PostrunAssemblyServicesProtocol,
     logger_port: LoggerPort,
 ) -> DataQualityService:
     """Build the pipeline-scoped DataQualityService from outer wiring."""
     return DataQualityService(
-        dq_monitor=services.dq_monitor,
+        dq_monitor=pipeline.services.dq_monitor,
         config=pipeline.config.dq,
         logger=logger_port,
-        metrics=services.metrics,
+        metrics=pipeline.services.metrics,
         pipeline_name=pipeline.config.pipeline_name,
         entity_type=pipeline.config.entity_type,
         run_type=pipeline.runtime.run_type.value,
@@ -157,7 +125,6 @@ def _build_pipeline_dq_service(
 def _build_pipeline_postrun_dependencies(
     *,
     pipeline: BasePipeline,
-    services: _PostrunAssemblyServicesProtocol,
     logger_port: LoggerPort,
     dq_configs: DQConfigsContext,
 ) -> PostrunDependencyContext:
@@ -166,14 +133,14 @@ def _build_pipeline_postrun_dependencies(
         config=pipeline.config,
         runtime=pipeline.runtime,
         context=pipeline.context,
-        storage=services.storage,
+        storage=pipeline.services.storage,
         logger_port=logger_port,
-        dq_report_service=services.dq_report_service,
+        dq_report_service=pipeline.services.dq_report_service,
         bronze_dq_config=dq_configs.bronze,
         silver_dq_config=dq_configs.silver,
         gold_dq_config=dq_configs.gold,
-        metadata_coordinator=services.metadata_coordinator,
-        metadata_writer=services.metadata_writer,
+        metadata_coordinator=pipeline.services.metadata_coordinator,
+        metadata_writer=pipeline.services.metadata_writer,
     )
 
 
@@ -187,15 +154,12 @@ def build_postrun_service(
 ) -> PostrunService:
     """Build the postrun service and its collaborators in the composition layer."""
     resolved_tracer = resolve_tracer(tracer)
-    services = _resolve_postrun_services(pipeline)
     dq_service = _build_pipeline_dq_service(
         pipeline=pipeline,
-        services=services,
         logger_port=logger_port,
     )
     dependencies = _build_pipeline_postrun_dependencies(
         pipeline=pipeline,
-        services=services,
         logger_port=logger_port,
         dq_configs=dq_configs,
     )
@@ -206,6 +170,6 @@ def build_postrun_service(
         dq_service=dq_service,
         lifecycle_service=lifecycle_service,
         dependencies=dependencies,
-        services=services,
+        services=pipeline.services,
         tracer=resolved_tracer,
     )

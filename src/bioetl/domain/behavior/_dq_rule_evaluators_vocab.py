@@ -8,7 +8,7 @@ from collections.abc import Callable
 from typing import TYPE_CHECKING
 
 from bioetl.domain.mapping.organism_classification import classify_organism
-from bioetl.domain.schemas._chembl_enum_catalog_target_publication import (
+from bioetl.domain.schemas.constants import (
     TARGET_COMPONENT_RELATIONSHIPS,
     TARGET_COMPONENT_TYPES,
 )
@@ -64,8 +64,6 @@ def _resolve_custom_validation_strategy(
 def _target_json_vocabulary_strategy(value: object, validator_name: str | None) -> bool:
     """Validate against target component JSON vocabulary."""
     vocab = _target_json_vocabulary(validator_name)
-    if vocab is None:
-        return True
     return _target_json_vocabulary_rule_violated(value, allowed_values=vocab)
 
 
@@ -74,16 +72,12 @@ def _target_xref_json_vocabulary_strategy(
 ) -> bool:
     """Validate against target xref JSON vocabulary."""
     xref_vocab = _target_xref_json_vocabulary(validator_name)
-    if xref_vocab is None:
-        return True
     return _target_xref_json_vocabulary_rule_violated(value, allowed_values=xref_vocab)
 
 
 def _publication_taxonomy_strategy(value: object, validator_name: str | None) -> bool:
     """Validate against publication taxonomy vocabulary."""
     pub_taxonomy = _publication_taxonomy_vocabulary(validator_name)
-    if pub_taxonomy is None:
-        return True
     return _publication_taxonomy_rule_violated(value, allowed_values=pub_taxonomy)
 
 
@@ -107,8 +101,6 @@ def _publication_taxonomy_vocabulary(
         "validate_publication_subclass_taxonomy": "publication_subclass",
         "validate_publication_class_taxonomy": "publication_class",
     }
-    if validator_name is None:
-        return None
     field_name = mapping.get(validator_name)
     if field_name is None:
         return None
@@ -188,18 +180,10 @@ def _looks_like_json_list(value: str) -> bool:
 
 def _decode_json_list_like(value: str) -> list[object] | None:
     try:
-        parsed: object = json.loads(value)
+        parsed = json.loads(value)
     except json.JSONDecodeError:
         return None
     return parsed if isinstance(parsed, list) else None
-
-
-def _get_taxonomy_id(record: JsonDict) -> int | str | None:
-    """Extract and validate taxonomy_id from record."""
-    taxonomy_id = record.get("taxonomy_id")
-    if not isinstance(taxonomy_id, int | str):
-        return None
-    return taxonomy_id
 
 
 def validate_target_organism_rule_violated(
@@ -220,8 +204,7 @@ def validate_target_organism_rule_violated(
     if not organism:
         return True
 
-    taxonomy_id = _get_taxonomy_id(record)
-    classification = classify_organism(organism, taxonomy_id)
+    classification = classify_organism(organism, record.get("taxonomy_id"))
     if classification.organism_class is not None:
         return False
     # When a taxonomy_id is present but still unresolved, the record carries

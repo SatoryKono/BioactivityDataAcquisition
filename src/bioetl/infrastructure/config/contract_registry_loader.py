@@ -5,7 +5,6 @@ from __future__ import annotations
 import os
 import threading
 from pathlib import Path
-from typing import Protocol, TypeGuard
 
 import yaml
 
@@ -17,29 +16,6 @@ _CONTRACT_REGISTRY_PATH_FROM_CONFIGS_ROOT = DEFAULT_CONTRACT_REGISTRY_PATH.relat
 )
 
 _YAML_LOAD_TIMEOUT_SECONDS = 30.0
-
-
-class _DriveTypeFunction(Protocol):
-    """Typed subset of the Windows ``GetDriveTypeW`` function object."""
-
-    argtypes: list[object]
-    restype: object
-
-    def __call__(self, root_path: str) -> int: ...
-
-
-def _is_drive_type_function(value: object) -> TypeGuard[_DriveTypeFunction]:
-    return callable(value) and hasattr(value, "argtypes") and hasattr(value, "restype")
-
-
-def _yaml_mapping(path: Path) -> JsonDict:
-    """Decode one YAML document and require a string-keyed mapping root."""
-    loaded: object = yaml.safe_load(path.read_text(encoding="utf-8"))
-    if loaded is None:
-        raise ValueError(f"YAML load returned None: {path}")
-    if not isinstance(loaded, dict):
-        raise ValueError(f"YAML document expected mapping root: {path}")
-    return {str(key): value for key, value in loaded.items()}
 
 
 def _is_likely_network_drive(path: Path) -> bool:
@@ -58,17 +34,13 @@ def _is_likely_network_drive(path: Path) -> bool:
         import ctypes
         from ctypes import wintypes
 
-        drive_remote = 4
-        windll: object = getattr(ctypes, "windll", None)
-        kernel32: object = getattr(windll, "kernel32", None)
-        get_drive_type: object = getattr(kernel32, "GetDriveTypeW", None)
-        if not _is_drive_type_function(get_drive_type):
-            return False
-        get_drive_type.argtypes = [wintypes.LPCWSTR]
-        get_drive_type.restype = wintypes.DWORD
+        DRIVE_REMOTE = 4
+        kernel32 = ctypes.windll.kernel32
+        kernel32.GetDriveTypeW.argtypes = [wintypes.LPCWSTR]
+        kernel32.GetDriveTypeW.restype = wintypes.DWORD
 
-        drive_type = get_drive_type(drive + "\\")
-        return drive_type == drive_remote
+        drive_type = kernel32.GetDriveTypeW(drive + "\\")
+        return drive_type == DRIVE_REMOTE
     except (OSError, AttributeError, TypeError):
         # If detection fails, assume local to avoid false positives
         return False
@@ -80,7 +52,7 @@ def _load_yaml_with_timeout(
     """Load YAML file with timeout protection for network drives."""
     if not _is_likely_network_drive(path):
         # Direct read for local drives
-        return _yaml_mapping(path)
+        return yaml.safe_load(path.read_text(encoding="utf-8"))
 
     # Timeout-protected read for network drives
     result: JsonDict | None = None
@@ -89,7 +61,7 @@ def _load_yaml_with_timeout(
     def _target() -> None:
         nonlocal result, exception
         try:
-            result = _yaml_mapping(path)
+            result = yaml.safe_load(path.read_text(encoding="utf-8"))
         except (OSError, yaml.YAMLError, ValueError) as e:
             exception = e
 
