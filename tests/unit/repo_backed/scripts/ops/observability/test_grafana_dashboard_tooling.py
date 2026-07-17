@@ -1046,26 +1046,37 @@ def test_live_audit_classifies_prometheus_zero_and_nonzero_results() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    ("panel_id", "title", "expr"),
+    [
+        (
+            8,
+            "Time Range · Worst Freshness Age (hours; SLA 24/72)",
+            "(max(clamp_min(time() - max_over_time(bioetl_data_freshness_seconds"
+            '{pipeline=~"$pipeline"}[$__range]), 0))) / 3600',
+        ),
+        (
+            101,
+            "Review: Latest Successful Data Timestamp",
+            "max(max_over_time(bioetl_data_freshness_seconds"
+            '{pipeline=~"$pipeline"}[$__range])) * 1000',
+        ),
+    ],
+)
 def test_live_audit_treats_missing_freshness_as_explicit_telemetry_gap(
     monkeypatch: Any,
+    panel_id: int,
+    title: str,
+    expr: str,
 ) -> None:
     spec = audit_subject.PanelAuditSpec(
         dashboard_uid="bioetl-dq-v2",
-        panel_id=101,
-        title="Review: Latest Successful Data Timestamp",
+        panel_id=panel_id,
+        title=title,
         source_kind="prometheus",
         semantic_kind="freshness",
     )
-    panel = {
-        "targets": [
-            {
-                "expr": (
-                    "max(max_over_time(bioetl_data_freshness_seconds"
-                    '{pipeline=~"$pipeline"}[$__range])) * 1000'
-                )
-            }
-        ]
-    }
+    panel = {"targets": [{"expr": expr}]}
     config = audit_subject.AuditConfig(
         prometheus_base_url="http://localhost:9090",
         app_base_url="http://localhost:8081",
