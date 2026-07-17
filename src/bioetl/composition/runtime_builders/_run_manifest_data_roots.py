@@ -42,8 +42,10 @@ def build_planned_artifacts(*args: object, **kwargs: object) -> object:
     ).build_planned_artifacts(*args, **kwargs)
 
 
-def __getattr__(name: str) -> object:
+def __getattr__(name: str) -> object:  # pragma: no cover
     """Lazily expose legacy path helpers without static facade fan-in."""
+    if TYPE_CHECKING:
+        raise AttributeError
     if name == "control_plane_root":
         return getattr(
             import_module(

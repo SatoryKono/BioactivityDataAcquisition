@@ -28,6 +28,10 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from bioetl.domain.ports import HealthCheckResult, LoggerPort, MetricsPort
+    from bioetl.infrastructure.adapters.http.health_tracker import ProviderHealthTracker
+
 from bioetl.domain.types import HealthStatus
 from bioetl.infrastructure.adapters.http._health_monitor_models import (
     HealthAdjustedConfig,
@@ -41,10 +45,6 @@ from bioetl.infrastructure.adapters.http._health_monitor_support import (
     record_health_check_transition,
     record_success_transition,
 )
-
-if TYPE_CHECKING:
-    from bioetl.domain.ports import HealthCheckResult, LoggerPort, MetricsPort
-    from bioetl.infrastructure.adapters.http.health_tracker import ProviderHealthTracker
 
 
 @dataclass
@@ -236,8 +236,10 @@ class ProviderHealthMonitor:
         )
 
 
-def __getattr__(name: str) -> object:
+def __getattr__(name: str) -> object:  # pragma: no cover
     """Resolve compatibility re-exports without eager tracker imports."""
+    if TYPE_CHECKING:
+        raise AttributeError
     if name != "ProviderHealthTracker":
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
     from bioetl.infrastructure.adapters.http.health_tracker import ProviderHealthTracker

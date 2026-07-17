@@ -46,8 +46,10 @@ if TYPE_CHECKING:
     from bioetl.infrastructure.storage.support.atomic_group import AtomicWriteGroup
 
 
-def __getattr__(name: str) -> object:
+def __getattr__(name: str) -> object:  # pragma: no cover
     """Lazily expose compatibility re-exports without creating import cycles."""
+    if TYPE_CHECKING:
+        raise AttributeError
     if name == "AtomicWriteGroup":
         return getattr(
             import_module("bioetl.infrastructure.storage.support.atomic_group"),
