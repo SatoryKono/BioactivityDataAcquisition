@@ -535,16 +535,20 @@ def test_readiness_and_build_tools_fail_closed() -> None:
         monitoring["services"]["grafana"]["depends_on"]["renderer"]["condition"]
         == "service_healthy"
     )
-    # Loki, Promtail, and Tempo are distroless images and do not contain the
-    # wget command used by the former in-container checks.  Compose therefore
-    # must not publish a false/unexecutable health verdict for these optional
-    # services.  Their bounded HTTP/query readiness is enforced by the live
-    # tracing smoke and dashboard semantic audit instead.
+    # The distroless Loki image cannot use wget, but its own binary can perform
+    # a fail-closed configuration check. Promtail and Tempo still expose no
+    # executable in-container health probe, so their healthchecks remain disabled.
     assert (
         monitoring["services"]["promtail"]["depends_on"]["loki"]["condition"]
-        == "service_started"
+        == "service_healthy"
     )
-    for service_name in ("loki", "promtail", "tempo"):
+    assert monitoring["services"]["loki"]["healthcheck"]["test"] == [
+        "CMD",
+        "/usr/bin/loki",
+        "-config.file=/etc/loki/config.yml",
+        "-verify-config=true",
+    ]
+    for service_name in ("promtail", "tempo"):
         assert monitoring["services"][service_name]["healthcheck"] == {"disable": True}
     assert renderer_health == [
         "CMD",
