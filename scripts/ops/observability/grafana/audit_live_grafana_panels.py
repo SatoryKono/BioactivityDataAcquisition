@@ -10,6 +10,7 @@ import os
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from time import monotonic, sleep
 from typing import Any, Literal, cast
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode, urlsplit, urlunsplit
@@ -32,6 +33,9 @@ DEFAULT_RUN_TYPE = "incremental"
 DEFAULT_RUN_ID = "-"
 DEFAULT_RANGE_HOURS = 24
 DEFAULT_REQUEST_TIMEOUT_SECONDS = 15.0
+MAX_LOKI_RANGE_HOURS = 1
+LOKI_READINESS_POLL_INTERVAL_SECONDS = 0.25
+LOKI_READINESS_PROBE_TIMEOUT_SECONDS = 2.0
 _HEALTH_PROBE_PATHS: tuple[str, ...] = ("/health/live", "/health")
 _DASHBOARD_DIR = Path("grafana/dashboards")
 _PROCESSED_RECORDS_CONTRACT = "processed_records_table_v1"
@@ -106,10 +110,17 @@ class AuditResult:
 
 SEMANTIC_CLASSIFICATION_POLICY: dict[str, str] = {
     "query_invalid": "block",
+    "timeout_budget_exceeded": "block_when_required",
     "datasource_unavailable": "block_when_required",
     "blocked_backend_unavailable": "block_when_required",
     "empty_result": "review_required",
     "zero_result": "pass",
+    "nonzero_result": "pass",
+    "nonempty_result": "pass",
+    "nonempty_table": "pass",
+    "resolved_identity": "pass",
+    "resolved_numeric": "pass",
+    "resolved_zero": "pass",
     "expected_empty": "pass",
     "unknown_result": "review_required",
     "telemetry_missing": "review_required_unless_explicitly_reviewed",
@@ -120,7 +131,12 @@ _SEMANTIC_CLASSIFICATION_ALIASES = {
     "missing_url": "query_invalid",
     "query_error": "query_invalid",
     "blocked_unavailable": "datasource_unavailable",
+    "no_data": "empty_result",
+    "partial_data": "unknown_result",
+    "unresolved_identity": "unknown_result",
+    "zero_state_unknown_denominator": "unknown_result",
 }
+_UNREGISTERED_CLASSIFICATION_POLICY = "review_required"
 _REVIEWED_SEMANTIC_OUTCOMES = frozenset(
     {
         ("bioetl-dq-v2", 8, "telemetry_missing"),
@@ -148,7 +164,10 @@ def semantic_gate_evidence(results: list[AuditResult]) -> dict[str, Any]:
             result.panel_id,
             canonical,
         ) in _REVIEWED_SEMANTIC_OUTCOMES
-        policy = SEMANTIC_CLASSIFICATION_POLICY.get(canonical, "pass")
+        policy = SEMANTIC_CLASSIFICATION_POLICY.get(
+            canonical,
+            _UNREGISTERED_CLASSIFICATION_POLICY,
+        )
         if result.status != "ok":
             decision = "block"
         elif policy == "block":
@@ -184,11 +203,36 @@ def semantic_gate_evidence(results: list[AuditResult]) -> dict[str, Any]:
         "blocking_count": blocking_count,
         "review_count": review_count,
         "classification_policy": SEMANTIC_CLASSIFICATION_POLICY,
+        "unregistered_classification_policy": _UNREGISTERED_CLASSIFICATION_POLICY,
         "panel_outcomes": outcomes,
     }
 
 
 REVIEWED_PANEL_SPECS: tuple[PanelAuditSpec, ...] = (
+    PanelAuditSpec(
+        dashboard_uid="bioetl-runtime",
+        panel_id=250,
+        title="Inspect Warning Logs",
+        source_kind="loki",
+        semantic_kind="loki_query",
+        target_ref_id="A",
+    ),
+    PanelAuditSpec(
+        dashboard_uid="bioetl-runtime",
+        panel_id=251,
+        title="Inspect GLOBAL Unstructured Logs",
+        source_kind="loki",
+        semantic_kind="loki_query",
+        target_ref_id="A",
+    ),
+    PanelAuditSpec(
+        dashboard_uid="bioetl-runtime",
+        panel_id=257,
+        title="Inspect Top Warning Events by Event / Logger / Range",
+        source_kind="loki",
+        semantic_kind="loki_query",
+        target_ref_id="A",
+    ),
     PanelAuditSpec(
         dashboard_uid="bioetl-control-plane-v1",
         panel_id=9402,
@@ -574,14 +618,25 @@ def effective_panel_specs() -> tuple[PanelAuditSpec, ...]:
     return tuple(specs)
 
 
-def _time_window(config: AuditConfig) -> tuple[str, str]:
+def _time_window(
+    config: AuditConfig,
+    *,
+    range_hours: int | None = None,
+) -> tuple[str, str]:
+    effective_range_hours = config.range_hours if range_hours is None else range_hours
     end = datetime.now(tz=UTC)
-    start = end - timedelta(hours=config.range_hours)
+    start = end - timedelta(hours=effective_range_hours)
     return start.isoformat(), end.isoformat()
 
 
-def _substitute_dashboard_tokens(template: str, config: AuditConfig) -> str:
-    start_iso, end_iso = _time_window(config)
+def _substitute_dashboard_tokens(
+    template: str,
+    config: AuditConfig,
+    *,
+    range_hours: int | None = None,
+) -> str:
+    effective_range_hours = config.range_hours if range_hours is None else range_hours
+    start_iso, end_iso = _time_window(config, range_hours=effective_range_hours)
     quarantine_run_id = "" if config.run_id in {"", "-"} else config.run_id
     replacements = {
         "$workflow": config.workflow,
@@ -639,9 +694,9 @@ def _substitute_dashboard_tokens(template: str, config: AuditConfig) -> str:
         "$provider_hint": "chembl",
         "${provider_hint}": "chembl",
         "${provider_hint:regex}": "chembl",
-        "$__range": f"{config.range_hours}h",
-        "${__range}": f"{config.range_hours}h",
-        "${__range_s}": str(config.range_hours * 3600),
+        "$__range": f"{effective_range_hours}h",
+        "${__range}": f"{effective_range_hours}h",
+        "${__range_s}": str(effective_range_hours * 3600),
         "$__interval": "5m",
         "${__interval}": "5m",
         "$__rate_interval": "5m",
@@ -664,8 +719,15 @@ def _substitute_dashboard_tokens(template: str, config: AuditConfig) -> str:
     return rendered
 
 
+def _bounded_loki_range_hours(config: AuditConfig) -> int:
+    return max(1, min(config.range_hours, MAX_LOKI_RANGE_HOURS))
+
+
 def _loki_query_range_bounds(config: AuditConfig) -> tuple[str, str]:
-    start_iso, end_iso = _time_window(config)
+    start_iso, end_iso = _time_window(
+        config,
+        range_hours=_bounded_loki_range_hours(config),
+    )
     start = datetime.fromisoformat(start_iso).timestamp()
     end = datetime.fromisoformat(end_iso).timestamp()
     return (str(int(start * 1_000_000_000)), str(int(end * 1_000_000_000)))
@@ -1316,6 +1378,70 @@ def _audit_http_panel(
     )
 
 
+def _wait_for_loki_ready(
+    config: AuditConfig,
+    *,
+    started_at: float,
+) -> tuple[float, str | None]:
+    """Poll Loki readiness while preserving the shared readiness/query budget."""
+    remaining_timeout = config.request_timeout_seconds
+    last_detail: str | None = None
+    while remaining_timeout > 0:
+        try:
+            readiness = _fetch_text(
+                f"{config.loki_base_url}/ready",
+                timeout_seconds=min(
+                    remaining_timeout,
+                    LOKI_READINESS_PROBE_TIMEOUT_SECONDS,
+                ),
+            )
+            if readiness.strip().lower() == "ready":
+                elapsed = monotonic() - started_at
+                return (config.request_timeout_seconds - elapsed, None)
+            last_detail = f"unexpected /ready response: {readiness[:80]!r}"
+        except (HTTPError, URLError, OSError, UnicodeError) as exc:
+            last_detail = f"{type(exc).__name__}: {exc}"
+
+        elapsed = monotonic() - started_at
+        remaining_timeout = config.request_timeout_seconds - elapsed
+        if remaining_timeout <= 0:
+            break
+        sleep(min(LOKI_READINESS_POLL_INTERVAL_SECONDS, remaining_timeout))
+        elapsed = monotonic() - started_at
+        remaining_timeout = config.request_timeout_seconds - elapsed
+    return (remaining_timeout, last_detail)
+
+
+def _loki_timeout_result(
+    spec: PanelAuditSpec,
+    config: AuditConfig,
+    *,
+    rendered_expr: str,
+    phase: str,
+    latency_seconds: float,
+    last_detail: str | None = None,
+) -> AuditResult:
+    detail = (
+        f"Loki {phase} exhausted the governed request budget; "
+        f"latency_seconds={latency_seconds:.3f}; "
+        f"budget_seconds={config.request_timeout_seconds:.3f}"
+    )
+    if last_detail:
+        detail += f"; last_readiness={last_detail}"
+    return AuditResult(
+        dashboard_uid=spec.dashboard_uid,
+        panel_id=spec.panel_id,
+        title=spec.title,
+        source_kind=spec.source_kind,
+        semantic_kind=spec.semantic_kind,
+        status="error" if spec.required else "ok",
+        classification="timeout_budget_exceeded",
+        detail=detail,
+        query_preview=rendered_expr[:400],
+        target_ref_id=spec.target_ref_id,
+    )
+
+
 def _audit_loki_panel(
     spec: PanelAuditSpec,
     panel: dict[str, Any],
@@ -1336,22 +1462,48 @@ def _audit_loki_panel(
             query_preview="",
             target_ref_id=spec.target_ref_id,
         )
-    rendered_expr = _substitute_dashboard_tokens(expr, config)
+    bounded_range_hours = _bounded_loki_range_hours(config)
+    rendered_expr = _substitute_dashboard_tokens(
+        expr,
+        config,
+        range_hours=bounded_range_hours,
+    )
     start_ns, end_ns = _loki_query_range_bounds(config)
-    query_url = f"{config.loki_base_url}/loki/api/v1/query_range?" + urlencode(
-        {
+    instant = target.get("instant") is True if target is not None else False
+    endpoint = "query" if instant else "query_range"
+    query_params = (
+        {"query": rendered_expr, "time": end_ns}
+        if instant
+        else {
             "query": rendered_expr,
             "start": start_ns,
             "end": end_ns,
             "limit": "100",
         }
     )
+    query_url = f"{config.loki_base_url}/loki/api/v1/{endpoint}?" + urlencode(
+        query_params
+    )
+    started_at = monotonic()
+    remaining_timeout, readiness_detail = _wait_for_loki_ready(
+        config,
+        started_at=started_at,
+    )
+    if remaining_timeout <= 0:
+        return _loki_timeout_result(
+            spec,
+            config,
+            rendered_expr=rendered_expr,
+            phase="readiness polling",
+            latency_seconds=monotonic() - started_at,
+            last_detail=readiness_detail,
+        )
     try:
         payload = _fetch_json(
             query_url,
-            timeout_seconds=config.request_timeout_seconds,
+            timeout_seconds=remaining_timeout,
         )
-    except (HTTPError, URLError, OSError, json.JSONDecodeError) as exc:
+    except (HTTPError, URLError, OSError, ValueError, json.JSONDecodeError) as exc:
         return AuditResult(
             dashboard_uid=spec.dashboard_uid,
             panel_id=spec.panel_id,
@@ -1360,9 +1512,18 @@ def _audit_loki_panel(
             semantic_kind=spec.semantic_kind,
             status="error" if spec.required else "ok",
             classification="blocked_unavailable",
-            detail=f"Loki query could not be executed: {exc}",
+            detail=f"Loki query could not be executed after readiness: {exc}",
             query_preview=rendered_expr[:400],
             target_ref_id=spec.target_ref_id,
+        )
+    latency_seconds = monotonic() - started_at
+    if latency_seconds > config.request_timeout_seconds:
+        return _loki_timeout_result(
+            spec,
+            config,
+            rendered_expr=rendered_expr,
+            phase="readiness/query",
+            latency_seconds=latency_seconds,
         )
     classification, detail = _classify_loki_payload(payload)
     status = "error" if classification in {"invalid_shape", "query_error"} else "ok"
@@ -1374,7 +1535,11 @@ def _audit_loki_panel(
         semantic_kind=spec.semantic_kind,
         status=status,
         classification=classification,
-        detail=f"{detail}; endpoint=query_range; start={start_ns}; end={end_ns}",
+        detail=(
+            f"{detail}; endpoint={endpoint}; range_hours={bounded_range_hours}; "
+            f"latency_seconds={latency_seconds:.3f}; "
+            + (f"time={end_ns}" if instant else f"start={start_ns}; end={end_ns}")
+        ),
         query_preview=rendered_expr[:400],
         target_ref_id=spec.target_ref_id,
     )
@@ -1582,6 +1747,7 @@ def _write_report(
             "run_type": config.run_type,
             "run_id": config.run_id,
             "range_hours": config.range_hours,
+            "loki_range_hours": _bounded_loki_range_hours(config),
             "request_timeout_seconds": config.request_timeout_seconds,
         },
         "runtime_provenance": {

@@ -31,6 +31,7 @@ from scripts.ops.observability.grafana import (
     rerender_grafana_screenshots as rerender,
 )
 
+from bioetl.infrastructure.storage.support.atomic_ops import atomic_write_text
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime import (
     DEFAULT_HEALTH_SERVER_PORT,
     DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PATHS_READY_TIMEOUT_SECONDS,
@@ -45,7 +46,6 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime
     wait_for_observability_backend_ready,
     wait_for_observability_backend_required_paths_ready,
 )
-from bioetl.infrastructure.storage.support.atomic_ops import atomic_write_text
 
 DEFAULT_GRAFANA_BASE_URL = "http://localhost:3000"
 DEFAULT_PROMETHEUS_BASE_URL = "http://localhost:9090"
@@ -271,7 +271,7 @@ def _write_gate_report(
     render_status: str,
     semantic_detail: str,
     render_detail: str,
-) -> None:
+) -> bool:
     output_path = _resolve_gate_output_path(config.gate_output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     semantic_source = _artifact_descriptor(
@@ -296,6 +296,7 @@ def _write_gate_report(
         and render_source["terminal_status"] == render_status
         else "fail"
     )
+    release_passed = semantic_effective == "pass" and render_effective == "pass"
     payload = {
         "schema_version": 2,
         "generated_at": datetime.now(tz=UTC).isoformat(),
@@ -320,13 +321,13 @@ def _write_gate_report(
             "detail": render_detail,
             "source_artifact": render_source,
         },
-        "release_passed": semantic_effective == "pass"
-        and render_effective == "pass",
+        "release_passed": release_passed,
     }
     atomic_write_text(
         output_path,
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
     )
+    return release_passed
 
 
 def _git_identity() -> dict[str, str]:
@@ -409,19 +410,43 @@ def _artifact_descriptor(
                 for item in dashboards
             )
         )
-        descriptor["terminal_status"] = "pass" if terminal_ok and rendered else "fail"
+        panel_scope: set[str] = set()
+        panel_scope_complete = isinstance(dashboards, list) and bool(dashboards)
         if isinstance(dashboards, list):
-            descriptor["dashboard_scope"] = sorted(
-                {
-                    str(item.get("uid"))
-                    for item in dashboards
-                    if isinstance(item, dict) and item.get("uid")
-                }
-            )
+            for item in dashboards:
+                if not isinstance(item, dict) or not item.get("uid"):
+                    panel_scope_complete = False
+                    continue
+                terminal_validation = item.get("terminalStateValidation")
+                if (
+                    not isinstance(terminal_validation, dict)
+                    or terminal_validation.get("status") != "ok"
+                ):
+                    panel_scope_complete = False
+                    continue
+                panel_states = terminal_validation.get("panelStates")
+                if not isinstance(panel_states, list) or not panel_states:
+                    panel_scope_complete = False
+                    continue
+                for panel_state in panel_states:
+                    panel_id = (
+                        panel_state.get("id") if isinstance(panel_state, dict) else None
+                    )
+                    if panel_id is None:
+                        panel_scope_complete = False
+                        continue
+                    panel_scope.add(f"{item['uid']}#{panel_id}")
+        descriptor["dashboard_scope"] = sorted(panel_scope)
+        descriptor["terminal_status"] = (
+            "pass"
+            if terminal_ok and rendered and panel_scope_complete and panel_scope
+            else "fail"
+        )
     descriptor["validated"] = bool(
         descriptor["occurrence_match"]
         and descriptor["generated_at"]
         and descriptor["sha256"]
+        and descriptor["dashboard_scope"]
     )
     return descriptor
 
@@ -879,10 +904,7 @@ def main(argv: list[str] | None = None) -> int:
                 ValueError,
                 json.JSONDecodeError,
             ) as exc:
-                print(
-                    "grafana-audit-cycle: filled-dashboard discovery failed "
-                    f"({exc})"
-                )
+                print(f"grafana-audit-cycle: filled-dashboard discovery failed ({exc})")
 
             print("grafana-audit-cycle: live panel semantic gate")
             try:
@@ -941,14 +963,14 @@ def main(argv: list[str] | None = None) -> int:
             else "Screenshot rerender or render-only preflight failed."
         )
 
-        _write_gate_report(
+        release_passed = _write_gate_report(
             config,
             semantic_status=semantic_status,
             render_status=render_status,
             semantic_detail=semantic_detail,
             render_detail=render_detail,
         )
-        return 0 if semantic_status == "pass" and render_status == "pass" else 1
+        return 0 if release_passed else 1
     finally:
         if (
             managed_backend_process is not None

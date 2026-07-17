@@ -4,7 +4,10 @@ import pytest
 
 import ast
 import json
+import shlex
 from pathlib import Path
+
+import yaml
 
 from scripts.ops.observability.grafana import audit_live_grafana_panels as live_audit
 from scripts.ops.observability.grafana import (
@@ -101,13 +104,22 @@ def test_audit_cycle_gate_output_writes_review_evidence(tmp_path: Path) -> None:
                 "generated_at": "2026-07-16T00:00:00+00:00",
                 "occurrence_id": config.occurrence_id,
                 "terminal_state_validation": {"status": "ok"},
-                "dashboards": [{"uid": "bioetl-dq-v2", "renderStatus": "rendered"}],
+                "dashboards": [
+                    {
+                        "uid": "bioetl-dq-v2",
+                        "renderStatus": "rendered",
+                        "terminalStateValidation": {
+                            "status": "ok",
+                            "panelStates": [{"id": 101, "classification": "healthy"}],
+                        },
+                    }
+                ],
             }
         ),
         encoding="utf-8",
     )
 
-    audit_cycle._write_gate_report(
+    release_passed = audit_cycle._write_gate_report(
         config,
         semantic_status="pass",
         render_status="pass",
@@ -116,11 +128,91 @@ def test_audit_cycle_gate_output_writes_review_evidence(tmp_path: Path) -> None:
     )
 
     payload = json.loads(output_path.read_text(encoding="utf-8"))
+    assert release_passed is True
     assert payload["dashboard_semantic_gate"]["status"] == "pass"
     assert payload["dashboard_render_gate"]["status"] == "pass"
     assert payload["release_passed"] is True
     assert payload["dashboard_semantic_gate"]["source_artifact"]["sha256"]
     assert payload["dashboard_render_gate"]["source_artifact"]["sha256"]
+    assert payload["dashboard_semantic_gate"]["source_artifact"]["dashboard_scope"] == [
+        "bioetl-dq-v2#101"
+    ]
+    assert payload["dashboard_render_gate"]["source_artifact"]["dashboard_scope"] == [
+        "bioetl-dq-v2#101"
+    ]
+
+
+def test_ci_dashboard_semantic_gate_covers_declared_release_contracts() -> None:
+    workflow = yaml.safe_load(
+        Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
+    )
+    steps = [
+        step
+        for job in workflow["jobs"].values()
+        for step in job.get("steps", [])
+        if isinstance(step, dict)
+    ]
+
+    def named_step(name: str) -> dict[str, object]:
+        matches = [step for step in steps if step.get("name") == name]
+        assert len(matches) == 1, name
+        return matches[0]
+
+    semantic_step = named_step("Dashboard semantic release policy gate (token-free)")
+    semantic_run = semantic_step.get("run")
+    assert isinstance(semantic_run, str)
+
+    required_contracts = (
+        "report-observability-metric-inventory",
+        "tests/architecture/test_observability_dashboard_contracts.py",
+        "tests/architecture/test_observability_dashboard_tooling.py",
+        "tests/architecture/test_observability_docs_drift.py",
+        "tests/architecture/test_observability_metric_governance.py",
+        "tests/integration/ci/test_dashboard_active_docs_sync.py",
+        "tests/integration/test_dashboard_no_data_policy.py",
+        "tests/integration/test_grafana_config.py",
+        "tests/integration/test_grafana_datasource_provisioning.py",
+        "tests/integration/test_grafana_selector_contract.py",
+        "tests/integration/test_grafana_surface_contracts.py",
+        "tests/integration/test_grafana_variable_reference.py",
+    )
+    logical_commands = [
+        shlex.split(line, comments=True, posix=True)
+        for line in semantic_run.replace("\\\n", " ").splitlines()
+        if line.strip()
+    ]
+    report_contract, *pytest_contracts = required_contracts
+    assert any(
+        command[:6]
+        == [
+            "uv",
+            "run",
+            "python",
+            "-m",
+            "scripts.engineering.qa",
+            report_contract,
+        ]
+        for command in logical_commands
+    )
+    pytest_commands = [
+        command
+        for command in logical_commands
+        if command[:3] == ["uv", "run", "pytest"]
+    ]
+    assert len(pytest_commands) == 1
+    pytest_arguments = set(pytest_commands[0][3:])
+    for contract in pytest_contracts:
+        assert contract in pytest_arguments
+
+    upload_step = named_step("Upload dashboard semantic policy evidence")
+    upload_config = upload_step.get("with")
+    assert isinstance(upload_config, dict)
+    upload_paths = upload_config.get("path")
+    assert isinstance(upload_paths, str)
+    assert {path.strip() for path in upload_paths.splitlines() if path.strip()} == {
+        "reports/observability/ci/dashboard-semantic-policy.xml",
+        "reports/observability/runtime_cardinality_review_pr.json",
+    }
 
 
 @pytest.mark.parametrize(
@@ -131,6 +223,9 @@ def test_audit_cycle_gate_output_writes_review_evidence(tmp_path: Path) -> None:
         ("blocked_backend_unavailable", "error", "fail"),
         ("empty_result", "ok", "review_required"),
         ("zero_result", "ok", "pass"),
+        ("nonzero_result", "ok", "pass"),
+        ("nonempty_result", "ok", "pass"),
+        ("resolved_numeric", "ok", "pass"),
         ("expected_empty", "ok", "pass"),
         ("unknown_result", "ok", "review_required"),
     ],
