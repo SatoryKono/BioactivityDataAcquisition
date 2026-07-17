@@ -11,7 +11,10 @@ import time
 from collections.abc import Callable, Sequence
 from enum import StrEnum
 from pathlib import Path
-from tempfile import mkdtemp
+from tempfile import NamedTemporaryFile, mkdtemp
+
+
+MAX_PROBE_TIMEOUT_SECONDS = 3.0
 from typing import Any, NamedTuple
 from urllib.parse import urlencode
 from urllib.request import urlopen
@@ -109,8 +112,9 @@ def _read_json_payload(
     url: str,
     *,
     opener: Callable[..., Any],
+    timeout: float = MAX_PROBE_TIMEOUT_SECONDS,
 ) -> dict[str, Any]:
-    with opener(url, timeout=3.0) as response:
+    with opener(url, timeout=timeout) as response:
         payload = json.loads(response.read().decode("utf-8"))
     if not isinstance(payload, dict):
         raise ValueError(f"backend returned a non-object payload for {url}")
@@ -121,8 +125,9 @@ def _read_text_payload(
     url: str,
     *,
     opener: Callable[..., Any],
+    timeout: float = MAX_PROBE_TIMEOUT_SECONDS,
 ) -> str:
-    with opener(url, timeout=3.0) as response:
+    with opener(url, timeout=timeout) as response:
         return response.read().decode("utf-8").strip()
 
 
@@ -131,18 +136,27 @@ def write_promtail_audit_sentinel(probe_log_root: Path, *, sentinel_id: str) -> 
     probe_log_root.mkdir(parents=True, exist_ok=True)
     marker = f"{PROMTAIL_SENTINEL_PREFIX}{sentinel_id}"
     path = probe_log_root / f"bioetl-promtail-audit-sentinel-{sentinel_id}.log"
-    path.write_text(
-        json.dumps(
-            {
-                "event": "bioetl_promtail_audit_sentinel",
-                "level": "info",
-                "message": marker,
-            },
-            sort_keys=True,
-        )
-        + "\n",
+    payload = json.dumps(
+        {
+            "event": "bioetl_promtail_audit_sentinel",
+            "level": "info",
+            "message": marker,
+        },
+        sort_keys=True,
+    ) + "\n"
+    with NamedTemporaryFile(
+        mode="w",
         encoding="utf-8",
-    )
+        dir=probe_log_root,
+        prefix=f".{path.name}.",
+        delete=False,
+    ) as temporary:
+        temporary.write(payload)
+        temporary_path = Path(temporary.name)
+    try:
+        os.replace(temporary_path, path)
+    finally:
+        temporary_path.unlink(missing_ok=True)
     return marker
 
 
@@ -151,10 +165,12 @@ def probe_promtail_audit_delivery(
     marker: str,
     opener: Callable[..., Any] = urlopen,
     wall_time_ns: Callable[[], int] = time.time_ns,
+    sentinel_written_ns: int | None = None,
+    timeout: float = MAX_PROBE_TIMEOUT_SECONDS,
 ) -> PromtailAuditProbeResult:
     """Require both Promtail readiness and observable Loki sentinel delivery."""
     try:
-        readiness = _read_text_payload(PROMTAIL_READY_URL, opener=opener)
+        readiness = _read_text_payload(PROMTAIL_READY_URL, opener=opener, timeout=timeout)
     except (OSError, UnicodeError) as exc:
         return PromtailAuditProbeResult(
             PromtailAuditState.DOWN,
@@ -167,16 +183,17 @@ def probe_promtail_audit_delivery(
         )
 
     end_ns = wall_time_ns()
+    start_ns = (sentinel_written_ns or end_ns) - PROMTAIL_SENTINEL_LOOKBACK_NS
     query_url = f"{LOKI_QUERY_RANGE_URL}?" + urlencode(
         {
             "query": f'{{job="bioetl-audit"}} |= "{marker}"',
-            "start": end_ns - PROMTAIL_SENTINEL_LOOKBACK_NS,
+            "start": start_ns,
             "end": end_ns,
             "limit": 100,
         }
     )
     try:
-        payload = _read_json_payload(query_url, opener=opener)
+        payload = _read_json_payload(query_url, opener=opener, timeout=timeout)
     except (OSError, UnicodeError, ValueError, json.JSONDecodeError) as exc:
         return PromtailAuditProbeResult(
             PromtailAuditState.DOWN,
@@ -211,10 +228,11 @@ def probe_audit_backend(
     *,
     expected_data_root: Path,
     opener: Callable[..., Any] = urlopen,
+    timeout: float = MAX_PROBE_TIMEOUT_SECONDS,
 ) -> AuditBackendProbeResult:
     """Classify readiness, routing, and whether the audit catalog has data."""
     try:
-        ready_payload = _read_json_payload(READY_URL, opener=opener)
+        ready_payload = _read_json_payload(READY_URL, opener=opener, timeout=timeout)
     except TimeoutError as exc:
         return AuditBackendProbeResult(
             AuditBackendState.TIMEOUT,
@@ -239,7 +257,7 @@ def probe_audit_backend(
         )
 
     try:
-        catalog_payload = _read_json_payload(CATALOG_URL, opener=opener)
+        catalog_payload = _read_json_payload(CATALOG_URL, opener=opener, timeout=timeout)
     except TimeoutError as exc:
         return AuditBackendProbeResult(
             AuditBackendState.TIMEOUT,
@@ -289,6 +307,8 @@ def start_and_verify_audit_stack(
     ).resolve()
     if managed_probe_root:
         resolved_probe_log_root.chmod(0o755)
+    sentinel_written_ns = wall_time_ns()
+    deadline = monotonic() + timeout_seconds
     marker = write_promtail_audit_sentinel(
         resolved_probe_log_root,
         sentinel_id=sentinel_id or uuid4().hex,
@@ -304,7 +324,6 @@ def start_and_verify_audit_stack(
         check=True,
     )
 
-    deadline = monotonic() + timeout_seconds
     last_result = AuditBackendProbeResult(
         AuditBackendState.DOWN,
         "backend not probed",
@@ -314,9 +333,12 @@ def start_and_verify_audit_stack(
         "Promtail not probed",
     )
     while monotonic() < deadline:
+        remaining = max(0.0, deadline - monotonic())
+        probe_timeout = min(MAX_PROBE_TIMEOUT_SECONDS, max(0.1, remaining))
         last_result = probe_audit_backend(
             expected_data_root=data_root,
             opener=opener,
+            timeout=probe_timeout,
         )
         if last_result.state in {
             AuditBackendState.VALID_EMPTY,
@@ -326,6 +348,8 @@ def start_and_verify_audit_stack(
                 marker=marker,
                 opener=opener,
                 wall_time_ns=wall_time_ns,
+                sentinel_written_ns=sentinel_written_ns,
+                timeout=min(MAX_PROBE_TIMEOUT_SECONDS, max(0.1, deadline - monotonic())),
             )
             if last_promtail.state is PromtailAuditState.DELIVERED:
                 return last_result
@@ -334,7 +358,7 @@ def start_and_verify_audit_stack(
                 "read-only audit backend verification failed: "
                 f"state={last_result.state.value}; {last_result.detail}"
             )
-        sleep(1.0)
+        sleep(min(1.0, max(0.0, deadline - monotonic())))
     raise RuntimeError(
         "read-only audit stack verification failed: "
         f"backend_state={last_result.state.value}; {last_result.detail}; "
