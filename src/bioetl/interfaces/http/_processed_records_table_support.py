@@ -9,12 +9,12 @@ from dataclasses import dataclass
 from typing import Literal
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
-from urllib.request import build_opener
 from uuid import UUID
 
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.control_plane.run_ledger import ARTIFACT_PUBLISHED_EVENT
 from bioetl.domain.types import RunID
+from bioetl.interfaces.http._processed_records_http import open_url as _open_url
 
 PROCESSED_RECORDS_TABLE_CONTRACT = "processed_records_table_v1"
 DEFAULT_PROMETHEUS_BASE_URL = "http://localhost:9090"
@@ -248,11 +248,6 @@ def display_token(parameter: str, display_text: str) -> str:
     return f"{parameter}|{display_text}"
 
 
-def _open_url(url: str, *, timeout: float) -> object:
-    """Open one Prometheus API URL through a short-lived standard-library opener."""
-    return build_opener().open(url, timeout=timeout)
-
-
 def row_status(
     *,
     parameter: str,
@@ -275,7 +270,7 @@ def format_percentage(
 ) -> str:
     if denominator == "constant_100":
         return "100%" if value is not None else "No data"
-    if value is None or bronze_value in {None, 0}:
+    if value is None or bronze_value is None or bronze_value == 0:
         return "No data"
 
     percentage = value / bronze_value * 100
@@ -393,6 +388,8 @@ def _optional_text(value: object | None) -> str | None:
 def _optional_int(value: object | None) -> int | None:
     if isinstance(value, bool) or value is None:
         return None
+    if not isinstance(value, (str, bytes, bytearray, int, float)):
+        return None
     try:
         return int(value)
     except (TypeError, ValueError):
@@ -400,8 +397,7 @@ def _optional_int(value: object | None) -> int | None:
 
 
 def _sum_metric_values(
-    metric_values: dict[str, float | int | None],
-    metrics: tuple[str, ...],
+    metric_values: dict[str, float | int | None], metrics: tuple[str, ...]
 ) -> float | None:
     values = tuple(_as_float(metric_values.get(metric)) for metric in metrics)
     if any(value is None for value in values):

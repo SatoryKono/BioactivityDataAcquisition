@@ -9,40 +9,19 @@ from bioetl.application.services._checkpoint_service_support import (
     _CHECKPOINT_OPERATOR_ERRORS,
 )
 from bioetl.application.services.checkpoint_models import CheckpointInfo
+from bioetl.domain.ports import CheckpointPort, LoggerPort
 from bioetl.domain.types import RunID
 
 if TYPE_CHECKING:
     from bioetl.domain.types import JsonDict
 
 
-class _CheckpointPortProtocol(Protocol):
-    async def list_all(self) -> list[str]: ...
-
-    async def load(self, pipeline_name: str) -> tuple[RunID, JsonDict] | None: ...
-
-    async def load_for_run(
-        self,
-        pipeline_name: str,
-        run_id: RunID,
-    ) -> tuple[RunID, JsonDict] | None: ...
-
-    async def load_for_manifest_id(
-        self,
-        manifest_id: str,
-    ) -> tuple[RunID, JsonDict] | None: ...
-
-    async def delete(self, pipeline_name: str) -> None: ...
-
-
-class _CheckpointLoggerProtocol(Protocol):
-    def debug(self, event: str, **kwargs: object) -> None: ...
-
-    def info(self, event: str, **kwargs: object) -> None: ...
-
-
 class _CheckpointServiceRuntimeHost(Protocol):
-    checkpoint_port: _CheckpointPortProtocol
-    logger: _CheckpointLoggerProtocol
+    @property
+    def checkpoint_port(self) -> CheckpointPort: ...
+
+    @property
+    def logger(self) -> LoggerPort: ...
 
     def _record_operator_metrics(
         self,

@@ -20,7 +20,9 @@ from bioetl.application.composite.preflight_validator import (
 )
 from bioetl.application.composite.runner_pkg.runner_result_types import (
     CompositeResultBuildContext,
-    _PreparedCompositeResultContext,
+)
+from bioetl.application.composite.runner_pkg.runner_result_types import (
+    _PreparedCompositeResultContext as _PreparedCompositeResultContext,
 )
 from bioetl.application.composite.runtime_models import (
     CompositeExecutionContext,

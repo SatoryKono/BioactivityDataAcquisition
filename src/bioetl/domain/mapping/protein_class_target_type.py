@@ -5,7 +5,7 @@ from __future__ import annotations
 import unicodedata
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
-from typing import Any, Final, Protocol
+from typing import Final, Protocol
 
 from . import protein_class_target_type_helpers as helpers
 
@@ -99,8 +99,11 @@ _mapping_data: ProteinClassTargetTypeMappingData | None = None
 
 
 class _NormalizedTopLevelLike(Protocol):
-    canonical_l1: str
-    counts_for_target_type: bool
+    @property
+    def canonical_l1(self) -> str: ...
+
+    @property
+    def counts_for_target_type(self) -> bool: ...
 
 
 def initialize_protein_class_target_type_mapping(
@@ -157,20 +160,20 @@ def normalize_protein_class_top_level(
     )
 
 
-def normalized_top_level_from_row(
+def normalized_top_level_from_row[NormalizedTopLevelT: _NormalizedTopLevelLike](
     row: Mapping[str, object],
     mapping_data: ProteinClassTargetTypeMappingData,
     *,
-    normalized_top_level_cls: type[
-        Any  # Any: Polymorphic class type for normalized top-level objects.
+    normalized_top_level_cls: helpers._NormalizedTopLevelConstructor[
+        NormalizedTopLevelT
     ],
     normalize_top_level: Callable[
         [object, ProteinClassTargetTypeMappingData | None],
-        Any,  # Any: Return type matches polymorphic normalized object type
+        NormalizedTopLevelT,
     ],
     normalize_label: Callable[[object], str | None],
     non_counting_classes: frozenset[str],
-) -> Any:  # Any: Return type matches polymorphic normalized object type
+) -> NormalizedTopLevelT:
     """Resolve one source row into canonical top-level evidence."""
     canonical_l1 = normalize_label(row.get("canonical_l1"))
     if canonical_l1 is not None:

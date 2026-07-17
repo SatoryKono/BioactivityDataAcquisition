@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from bioetl.composition.occurrence_identity import (
     create_runtime_occurrence_id,
@@ -30,9 +30,14 @@ if TYPE_CHECKING:
     from bioetl.application.services.workflow_runner_service import (
         WorkflowRunnerService,
     )
+    from bioetl.application.services.workflow_transform_artifacts import (
+        WorkflowTransformArtifactSinkProtocol,
+    )
+    from bioetl.application.workflow.transforms import WorkflowTransformRegistry
     from bioetl.domain.control_plane import WorkflowManifest
-    from bioetl.domain.ports import LockPort, WorkflowLedgerPort
+    from bioetl.domain.ports import LockPort, MetricsPort, WorkflowLedgerPort
     from bioetl.domain.workflow import WorkflowConfig
+    from bioetl.infrastructure.config.settings_api import Settings
 
 __all__ = [
     "get_workflow_execution_service",
@@ -41,7 +46,24 @@ __all__ = [
     "load_workflow_config",
 ]
 
-_WORKFLOW_MEMORY_LOCK: object | None = None
+_WORKFLOW_MEMORY_LOCK: LockPort | None = None
+
+
+@runtime_checkable
+class _WorkflowMetricsFactory(Protocol):
+    """Lazy metrics-factory contract for canonical workflow settings."""
+
+    def __call__(self, settings: Settings, /) -> MetricsPort: ...
+
+
+def _create_workflow_metrics(settings: Settings) -> MetricsPort:
+    """Resolve the patchable metrics factory through a typed lazy boundary."""
+    from bioetl.composition.factories.services.port_factories import create_metrics
+
+    candidate: object = create_metrics
+    if not isinstance(candidate, _WorkflowMetricsFactory):
+        raise TypeError("Workflow metrics factory does not satisfy its contract")
+    return candidate(settings)
 
 
 def load_workflow_config(name: str) -> WorkflowConfig:
@@ -65,10 +87,10 @@ def _default_pipeline_runner_service_factory(
 
 
 def _build_workflow_transform_registry(
-    settings: object,
-    metrics: object,
-    artifact_sink: object | None = None,
-):
+    settings: Settings,
+    metrics: MetricsPort,
+    artifact_sink: WorkflowTransformArtifactSinkProtocol | None = None,
+) -> WorkflowTransformRegistry:
     """Assemble workflow transform storage and builtin transform registry."""
     from bioetl.application.workflow.transforms import WorkflowTransformRegistry
     from bioetl.application.workflow.transforms.builtins import (
@@ -180,12 +202,11 @@ def get_workflow_runner_service(
     from bioetl.application.services.workflow_transform_service import (
         WorkflowTransformService,
     )
-    from bioetl.composition.factories.services.port_factories import create_metrics
     from bioetl.infrastructure.control_plane import FileWorkflowTransformArtifactStore
     from bioetl.infrastructure.time import SystemClock
 
     settings = get_settings()
-    metrics = create_metrics(settings)
+    metrics = _create_workflow_metrics(settings)
     output_root = Path(settings.data_dir) / "output" / "control"
     artifact_sink = FileWorkflowTransformArtifactStore(
         base_path=output_root / "workflow_transform_results",
@@ -212,7 +233,7 @@ def get_workflow_runner_service(
     )
 
 
-def _get_workflow_memory_lock() -> object:
+def _get_workflow_memory_lock() -> LockPort:
     global _WORKFLOW_MEMORY_LOCK
     if _WORKFLOW_MEMORY_LOCK is None:
         from bioetl.infrastructure.locking import MemoryLock
@@ -249,7 +270,6 @@ def get_workflow_execution_service(
     from bioetl.application.services.control_plane.workflow.manifest_service import (
         WorkflowManifestService,
     )
-    from bioetl.composition.factories.services.port_factories import create_metrics
     from bioetl.infrastructure.control_plane import (
         FileWorkflowExecutionStateStore,
         FileWorkflowLedgerStore,
@@ -258,7 +278,7 @@ def get_workflow_execution_service(
     from bioetl.infrastructure.time import SystemClock
 
     settings = get_settings()
-    metrics = create_metrics(settings)
+    metrics = _create_workflow_metrics(settings)
     output_root = Path(settings.data_dir) / "output" / "control"
     manifest_store = FileWorkflowManifestStore(
         base_path=output_root / "workflow_manifest",
@@ -286,7 +306,7 @@ def get_workflow_execution_service(
         workflow_state_port=state_store,
         workflow_lock_port=workflow_lock_port
         if workflow_lock_port is not None
-        else cast("LockPort", _get_workflow_memory_lock()),
+        else _get_workflow_memory_lock(),
         run_id_factory=lambda: create_runtime_occurrence_run_id("workflow_execution"),
     )
 
@@ -296,7 +316,6 @@ def get_workflow_inspection_service() -> WorkflowInspectionService:
     from bioetl.application.services.control_plane.workflow.inspection_service import (
         WorkflowInspectionService,
     )
-    from bioetl.composition.factories.services.port_factories import create_metrics
     from bioetl.infrastructure.control_plane import (
         FileWorkflowExecutionStateStore,
         FileWorkflowLedgerStore,
@@ -304,7 +323,7 @@ def get_workflow_inspection_service() -> WorkflowInspectionService:
     )
 
     settings = get_settings()
-    metrics = create_metrics(settings)
+    metrics = _create_workflow_metrics(settings)
     output_root = Path(settings.data_dir) / "output" / "control"
     return WorkflowInspectionService(
         manifest_port=FileWorkflowManifestStore(

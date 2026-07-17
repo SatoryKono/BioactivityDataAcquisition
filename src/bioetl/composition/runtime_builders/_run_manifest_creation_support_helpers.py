@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.services.control_plane.ledger.service import (
     RunLedgerService,
@@ -11,11 +11,12 @@ from bioetl.application.services.control_plane.ledger.service import (
 from bioetl.application.services.control_plane.manifest.service import (
     RunManifestCreateSpec,
 )
-from bioetl.composition.runtime_builders._run_manifest_attr_support import (
-    read_attr as _read_attr,
-)
 from bioetl.composition.runtime_builders._run_manifest_planned_artifacts import (
     build_planned_artifacts,
+)
+from bioetl.composition.services.versioning import (
+    CodeRevisionProvenance,
+    get_pipeline_version,
 )
 from bioetl.composition.runtime_builders._snapshot_mapping_support import (
     to_serializable_mapping,
@@ -23,24 +24,40 @@ from bioetl.composition.runtime_builders._snapshot_mapping_support import (
 from bioetl.domain.filtering.silver_filter_identity import (
     resolve_silver_filter_compatibility_mode,
 )
-from bioetl.composition.services.versioning import get_pipeline_version
-from bioetl.domain.control_plane import ReplayCapability
+from bioetl.domain.control_plane import ReplayCapability, RunSourceRef
 
 if TYPE_CHECKING:
     from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
+    from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
+        ManifestReproducibilityContext,
+    )
     from bioetl.composition.runtime_builders.run_manifest_contract_identity import (
         RunManifestContractIdentity,
     )
     from bioetl.domain.context import PipelineRunContext
+    from bioetl.infrastructure.config.settings_api import Settings
+
+
+class _ManifestSourceRefBuilder(Protocol):
+    def build_run_source_refs(
+        self,
+        *,
+        ctx: PipelineRunContext,
+        cached_bronze: object | None,
+        settings: Settings,
+        provider: str,
+        entity: str,
+        required_persistence_profile: str,
+    ) -> tuple[RunSourceRef, ...]: ...
 
 
 @dataclass(frozen=True, slots=True)
 class RunManifestCreateRequestInputs:
-    ctx: object
-    inputs: object
+    ctx: PipelineRunContext
+    inputs: RunnerInputs
     provider: str
     entity: str
-    reproducibility_context: object
+    reproducibility_context: ManifestReproducibilityContext
     run_type_value: str
     execution_context_value: str
     config_hash: str
@@ -59,13 +76,13 @@ def current_silver_filter_compatibility_mode() -> str:
 
 def build_manifest_source_refs(
     *,
-    manifest_support: object,
+    manifest_support: _ManifestSourceRefBuilder,
     ctx: PipelineRunContext,
     inputs: RunnerInputs,
     provider: str,
     entity: str,
     required_persistence_profile: str,
-) -> tuple[object, ...]:
+) -> tuple[RunSourceRef, ...]:
     return manifest_support.build_run_source_refs(
         ctx=ctx,
         cached_bronze=inputs.cached_bronze,
@@ -78,61 +95,61 @@ def build_manifest_source_refs(
 
 def assemble_manifest_create_spec(
     *,
-    request_inputs: object,
-    source_refs: tuple[object, ...],
-    replay_of_run_id: object,
-    replay_of_manifest_id: object,
-    code_revision: object,
+    request_inputs: RunManifestCreateRequestInputs,
+    source_refs: tuple[RunSourceRef, ...],
+    replay_of_run_id: str | None,
+    replay_of_manifest_id: str | None,
+    code_revision: CodeRevisionProvenance,
     replay_capability: ReplayCapability,
     launch_context: dict[str, object],
 ) -> RunManifestCreateSpec:
     """Build one manifest creation spec from resolved runtime inputs."""
-    ctx = _read_attr(request_inputs, "ctx")
-    inputs = _read_attr(request_inputs, "inputs")
-    runtime_config = to_serializable_mapping(_read_attr(inputs, "runtime_config"))
+    ctx = request_inputs.ctx
+    inputs = request_inputs.inputs
+    runtime_config = to_serializable_mapping(inputs.runtime_config)
     runtime_config.setdefault(
         "silver_filter_compatibility_mode",
         current_silver_filter_compatibility_mode(),
     )
-    contract_identity = _read_attr(request_inputs, "contract_identity")
-    provider = _read_attr(request_inputs, "provider")
-    entity = _read_attr(request_inputs, "entity")
+    contract_identity = request_inputs.contract_identity
+    provider = request_inputs.provider
+    entity = request_inputs.entity
     return RunManifestCreateSpec(
         run_id=ctx.run_id,
-        run_type=_read_attr(ctx, "run_type", "incremental"),
+        run_type=ctx.run_type,
         pipeline_name=ctx.pipeline_name,
         provider=provider,
         entity=entity,
         launch_context=launch_context,
         runtime_config=runtime_config,
-        resolved_config=to_serializable_mapping(_read_attr(inputs, "yaml_config")),
+        resolved_config=to_serializable_mapping(inputs.yaml_config),
         replay_of_run_id=replay_of_run_id,
         replay_of_manifest_id=replay_of_manifest_id,
-        workflow_run_id=getattr(ctx, "workflow_run_id", None),
-        workflow_name=getattr(ctx, "workflow_name", None),
-        workflow_step_id=getattr(ctx, "workflow_step_id", None),
+        workflow_run_id=ctx.workflow_run_id,
+        workflow_name=ctx.workflow_name,
+        workflow_step_id=ctx.workflow_step_id,
         source_refs=source_refs,
         planned_artifacts=build_planned_artifacts(
-            settings=_read_attr(inputs, "settings"),
+            settings=inputs.settings,
             provider=provider,
             entity=entity,
             run_id=str(ctx.run_id),
             pipeline_name=ctx.pipeline_name,
-            workflow_id=str(getattr(ctx, "workflow_id", "standalone")),
+            workflow_id=ctx.workflow_id,
             debug_export_root=(
-                getattr(ctx, "debug_export_dir", None)
-                if bool(getattr(ctx, "debug_export_enabled", False))
+                ctx.debug_export_dir
+                if ctx.debug_export_enabled
                 else None
             ),
         ),
-        pipeline_version=get_pipeline_version(_read_attr(inputs, "yaml_config")),
+        pipeline_version=get_pipeline_version(inputs.yaml_config),
         git_commit=code_revision.git_commit,
         source_revision_state=code_revision.source_revision_state,
         dependency_lock_hash=code_revision.dependency_lock_hash,
-        config_hash=_read_attr(request_inputs, "config_hash"),
-        resolved_config_hash=_read_attr(request_inputs, "resolved_config_hash"),
-        effective_config_hash=_read_attr(request_inputs, "effective_config_hash"),
-        source_fingerprint=_read_attr(request_inputs, "source_fingerprint"),
+        config_hash=request_inputs.config_hash,
+        resolved_config_hash=request_inputs.resolved_config_hash,
+        effective_config_hash=request_inputs.effective_config_hash,
+        source_fingerprint=request_inputs.source_fingerprint,
         contract_ref=contract_identity.contract_ref,
         contract_version=contract_identity.contract_version,
         contract_schema_hash=contract_identity.contract_schema_hash,
@@ -141,12 +158,8 @@ def assemble_manifest_create_spec(
         normalization_profile_ref=contract_identity.normalization_profile_ref,
         normalization_profile_version=contract_identity.normalization_profile_version,
         normalization_profile_hash=contract_identity.normalization_profile_hash,
-        dq_contract_compatibility_hash=_read_attr(
-            request_inputs, "dq_contract_compatibility_hash"
-        ),
-        effective_config_artifact_id=_read_attr(
-            request_inputs, "effective_config_artifact_id"
-        ),
+        dq_contract_compatibility_hash=request_inputs.dq_contract_compatibility_hash,
+        effective_config_artifact_id=request_inputs.effective_config_artifact_id,
         replay_capability=replay_capability,
     )
 

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Mapping
-from typing import Final
+from typing import Final, Protocol, TypeVar
 
 NON_COUNTING_CLASSES: Final = frozenset({"missing", "unknown", "unclassified_protein"})
 UNKNOWN_NONEMPTY_CLASS: Final = "other_classified_protein"
@@ -41,6 +41,47 @@ BOOL_BY_TOKEN: Final[dict[str, bool]] = {
     "y": True,
     "yes": True,
 }
+
+
+class _NormalizedTopLevelLike(Protocol):
+    """Read-only normalized top-level evidence required by helper policies."""
+
+    @property
+    def canonical_l1(self) -> str: ...
+
+    @property
+    def counts_for_target_type(self) -> bool: ...
+
+
+class _TopLevelMappingEntryLike(Protocol):
+    """Read-only mapping entry fields used to construct normalized evidence."""
+
+    @property
+    def canonical_l1(self) -> str: ...
+
+    @property
+    def counts_for_target_type(self) -> bool: ...
+
+
+_NormalizedTopLevelT_co = TypeVar(
+    "_NormalizedTopLevelT_co",
+    bound=_NormalizedTopLevelLike,
+    covariant=True,
+)
+
+
+class _NormalizedTopLevelConstructor(Protocol[_NormalizedTopLevelT_co]):
+    """Constructor contract for one normalized top-level evidence model."""
+
+    def __call__(
+        self,
+        *,
+        raw_l1: str | None,
+        canonical_l1: str,
+        counts_for_target_type: bool,
+        normalization_status: str,
+        normalization_notes: str | None,
+    ) -> _NormalizedTopLevelT_co: ...
 
 
 def target_type_decision(
@@ -83,7 +124,9 @@ def matching_major_families(label: str) -> tuple[str, ...]:
     return tuple(sorted(set(matches)))
 
 
-def missing_top_level(normalized_top_level_cls: type[object]) -> object:
+def missing_top_level[NormalizedTopLevelT: _NormalizedTopLevelLike](
+    normalized_top_level_cls: _NormalizedTopLevelConstructor[NormalizedTopLevelT],
+) -> NormalizedTopLevelT:
     return normalized_top_level_cls(
         raw_l1=None,
         canonical_l1=MISSING_CLASS,
@@ -93,10 +136,10 @@ def missing_top_level(normalized_top_level_cls: type[object]) -> object:
     )
 
 
-def fallback_top_level(
+def fallback_top_level[NormalizedTopLevelT: _NormalizedTopLevelLike](
     raw_l1: str,
-    normalized_top_level_cls: type[object],
-) -> object:
+    normalized_top_level_cls: _NormalizedTopLevelConstructor[NormalizedTopLevelT],
+) -> NormalizedTopLevelT:
     return normalized_top_level_cls(
         raw_l1=raw_l1,
         canonical_l1=UNKNOWN_NONEMPTY_CLASS,
@@ -106,11 +149,11 @@ def fallback_top_level(
     )
 
 
-def mapped_top_level(
+def mapped_top_level[NormalizedTopLevelT: _NormalizedTopLevelLike](
     raw_l1: str,
-    entry: object,
-    normalized_top_level_cls: type[object],
-) -> object:
+    entry: _TopLevelMappingEntryLike,
+    normalized_top_level_cls: _NormalizedTopLevelConstructor[NormalizedTopLevelT],
+) -> NormalizedTopLevelT:
     status = "ok" if entry.counts_for_target_type else "non_counting"
     return normalized_top_level_cls(
         raw_l1=raw_l1,

@@ -7,6 +7,7 @@ from deltalake import DeltaTable as DeltaTableType
 
 from bioetl.infrastructure.storage.delta.resilience import (
     DEFAULT_SILVER_MERGE_POLICY,
+    SilverMergeResiliencePolicy,
 )
 from bioetl.infrastructure.storage.silver.delta_helpers import (
     _build_dispatch_policy,
@@ -37,7 +38,9 @@ __all__ = [
 ]
 
 
-def _resolve_merge_policy(host: _SilverDeltaHostProtocol):
+def _resolve_merge_policy(
+    host: _SilverDeltaHostProtocol,
+) -> SilverMergeResiliencePolicy:
     """Resolve the configured merge policy with the canonical default fallback."""
     return (
         getattr(

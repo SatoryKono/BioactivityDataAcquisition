@@ -17,8 +17,8 @@ Current-baseline note (2026-07-17): architectural planning and GitHub issues
 MUST cite this summary or a newer regenerated package-topology pack for current
 counts. The current baseline is reconciled with
 `reports/quality/module-coverage-inventory.json` snapshot `2026-07-17`
-(`source_module_count=2229`,
-`source_tree_sha256=a81bdc28cf13de73db633a28b0cc4457374bd7cbecfb574215cb617e2129260b`).
+(`source_module_count=2237`,
+`source_tree_sha256=743bd4b51d703cc0fa041b6a7d61fe96af4b6105fd234a1322248e8a47f89bb1`).
 Raw files dated before `2026-07-17` are retained only as historical detailed
 inputs and must be refreshed before they are used for line-item topology
 evidence.
@@ -54,9 +54,9 @@ Collected: `6`
 
 - The repository is not flat at the top level; it is split into clear zones for source, config, tests, scripts, docs, and reports.
 - `src/bioetl/` reflects the intended layered architecture through distinct first-order package groups.
-- Current Python file count under `src/bioetl` is `2229`, including two
+- Current Python file count under `src/bioetl` is `2237`, including two
   top-level package modules outside the five first-order architecture layers.
-- Current layer file counts are: `domain=569`, `application=664`, `infrastructure=584`, `composition=274`, `interfaces=136`.
+- Current layer file counts are: `domain=575`, `application=664`, `infrastructure=584`, `composition=274`, `interfaces=138`.
 - Current first-order package counts are: `domain=22`, `application=6`, `infrastructure=20`, `composition=5`, `interfaces=2`.
 - `application` and `infrastructure` are now the broadest package surfaces by Python file count; `infrastructure` remains the broadest adapter and external-system implementation boundary.
 

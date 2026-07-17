@@ -25,7 +25,7 @@ def _build_gold_write_request(
     run_id: RunID | None,
     silver_refs: list[SilverWriteResult] | None,
     contract_version: str | None = None,
-) -> object:
+) -> GoldWriteRequest:
     """Build the canonical Gold write request."""
     return GoldWriteRequest(
         table_name=table_name,

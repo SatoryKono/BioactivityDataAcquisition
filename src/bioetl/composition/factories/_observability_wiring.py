@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from pathlib import Path
+from typing import Protocol
 
 from bioetl.composition.observability_resolution import resolve_metrics_port
 
@@ -15,13 +16,16 @@ from bioetl.infrastructure.config.settings_api import Settings
 from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 from .datasource.data_source_factory import DataSourceCreatorProtocol
-from .services.factory import BaseServicesFactory
+
+
+class _MetricsFactory(Protocol):
+    def _create_metrics(self, settings: Settings) -> MetricsPort: ...
 
 
 def create_shared_metrics(
     *,
     settings: Settings,
-    base_services_factory: type[BaseServicesFactory],
+    base_services_factory: _MetricsFactory,
 ) -> MetricsPort:
     """Create shared pipeline metrics via base services factory.
 

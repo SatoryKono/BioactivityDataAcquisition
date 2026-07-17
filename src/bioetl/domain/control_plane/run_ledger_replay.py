@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass, field, replace
 from datetime import datetime
-from typing import cast
 
 from bioetl.domain.composite.result import (
     DependencyResult,
@@ -64,10 +63,7 @@ def _project_stage_completed(
     update = STAGE_COMPLETION_UPDATES.get((entry.stage or "").strip().lower())
     if update is None:
         return projection
-    return cast(
-        RunLedgerReplayProjection,
-        replace(projection, **update),
-    )
+    return replace(projection, **update)
 
 
 def _details(entry: RunLedgerEntry) -> dict[str, object]:
@@ -91,14 +87,14 @@ def _optional_text(payload: dict[str, object], key: str) -> str | None:
 
 def _int_value(payload: dict[str, object], key: str) -> int:
     try:
-        return int(payload.get(key, 0) or 0)
+        return int(str(payload.get(key, 0) or 0))
     except (TypeError, ValueError):
         return 0
 
 
 def _float_value(payload: dict[str, object], key: str) -> float:
     try:
-        return float(payload.get(key, 0.0) or 0.0)
+        return float(str(payload.get(key, 0.0) or 0.0))
     except (TypeError, ValueError):
         return 0.0
 
@@ -178,9 +174,9 @@ def _snapshot_identity(
     snapshot_id = _optional_text(payload, "snapshot_id")
     content_hash = _optional_text(payload, "content_hash")
     immutable_uri = _optional_text(payload, "immutable_uri")
-    if None in (snapshot_id, content_hash, immutable_uri):
+    if snapshot_id is None or content_hash is None or immutable_uri is None:
         return None
-    return cast(tuple[str, str, str], (snapshot_id, content_hash, immutable_uri))
+    return snapshot_id, content_hash, immutable_uri
 
 
 def _project_input_snapshot_published(

@@ -19,7 +19,7 @@ from bioetl.application.composite.column_orderer_semantic import (
 )
 from bioetl.application.composite.column_priority_orderer import get_enricher_prefix
 from bioetl.application.composite.column_service_priority import (
-    ColumnPriorityOrderingPolicy,
+    ColumnPriorityOrderingPolicy as ColumnPriorityOrderingPolicy,
 )
 from bioetl.application.composite.column_service_support import (
     collect_explicit_group_columns,

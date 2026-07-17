@@ -3,8 +3,41 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from typing import TypedDict
 
+from bioetl.domain.types import JsonDict
 from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
+
+
+class _CoreIdentityOverrides(TypedDict):
+    dq_contract_compatibility_hash: str | None
+    dq_policy_hash: str | None
+    dq_rule_bundle_version: str | None
+    pipeline_name: str | None
+    run_type: str | None
+    pipeline_version: str | None
+    git_commit: str | None
+    dependency_lock_hash: str | None
+    effective_config_hash: str | None
+    effective_config_artifact_id: str | None
+
+
+class _ReplayIdentityOverrides(TypedDict):
+    execution_fingerprint: str | None
+    composite_run_identity: str | None
+    manifest_id: str | None
+    contract_ref: str | None
+    contract_version: str | None
+    normalization_profile_ref: str | None
+    normalization_profile_version: str | None
+    normalization_profile_hash: str | None
+    exact_replay: bool | None
+    input_snapshot_refs: tuple[JsonDict, ...]
+    input_snapshot_ids: tuple[str, ...]
+    input_snapshot_fingerprint: str | None
+    silver_filter_compatibility_mode: str | None
+    memory_decision_trace: tuple[JsonDict, ...]
+    run_context: JsonDict | None
 
 
 def _prefer_identity_value(
@@ -34,7 +67,7 @@ def _prefer_identity_sequence[T](
 def _build_core_identity_overrides(
     metadata: CheckpointMetadata,
     identity: CheckpointMetadata,
-) -> dict[str, object]:
+) -> _CoreIdentityOverrides:
     """Build core execution-identity overrides for checkpoint enrichment."""
     return {
         "dq_contract_compatibility_hash": _prefer_identity_value(
@@ -77,7 +110,7 @@ def _build_core_identity_overrides(
 def _build_replay_identity_overrides(
     metadata: CheckpointMetadata,
     identity: CheckpointMetadata,
-) -> dict[str, object]:
+) -> _ReplayIdentityOverrides:
     """Build replay and traceability identity overrides for checkpoint enrichment."""
     return {
         "execution_fingerprint": _prefer_identity_value(

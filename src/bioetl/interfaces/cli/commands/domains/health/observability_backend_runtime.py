@@ -4,12 +4,23 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
-from typing import Protocol
+from typing import TYPE_CHECKING
 
 from bioetl.interfaces.cli.commands.domains.health._observability_backend_startup import (
-    _STARTUP_DETACHED_HOOK_KEYS,
-    _STARTUP_DETACHED_KEYS,
     ensure_observability_backend_started_impl,
+)
+from bioetl.interfaces.cli.commands.domains.health._observability_backend_startup_types import (
+    _DropStaleBackendFn,
+    _ListenerPidFn,
+    _MessagePrinter,
+    _ObservabilityBackendFailureHandlers,
+    _ObservabilityBackendRuntimeHooks,
+    _ObservabilityBackendStartupKwargs,
+    _ProbeFn,
+    _RequiredProbeFn,
+    _StartFn,
+    _WaitFn,
+    _WaitRequiredPathsFn,
 )
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_failure_details import (
     _append_backend_startup_diagnostic,
@@ -44,21 +55,13 @@ from bioetl.interfaces.cli.commands.domains.health.server_integration import (
 )
 from bioetl.interfaces.cli.formatters import echo_info, echo_warning
 
-
-class _StartedBackendProcess(Protocol):
-    """Minimal process surface needed after detached backend startup."""
-
-    args: object
-    pid: int | None
-
-
-class _ObservabilityBackendCliInput(Protocol):
-    """Minimal dataclass-like CLI payload supporting backend attachment."""
-
-    ensure_observability_backend: bool
-    observability_backend_port: int
-    health_server: bool
-    health_port: int
+if TYPE_CHECKING:
+    from bioetl.interfaces.cli.commands.domains.run.command_policy import (
+        RunCommandInput,
+    )
+    from bioetl.interfaces.cli.commands.domains.run_all.command_policy import (
+        RunAllCommandInput,
+    )
 
 
 DEFAULT_OBSERVABILITY_BACKEND_PROBE_HOST = "127.0.0.1"
@@ -66,12 +69,6 @@ DEFAULT_OBSERVABILITY_BACKEND_BIND_HOST = "0.0.0.0"
 _CONTROL_PLANE_READY_PROBE_PATH = "/ops/control-plane/ready"
 
 _DETACHED_STATUS = frozenset({"reused", "started"})
-_STARTUP_KWARG_KEYS = ("enabled", *_STARTUP_DETACHED_KEYS)
-_RUNTIME_HOOK_KEYS = (
-    *_STARTUP_DETACHED_HOOK_KEYS,
-    "drop_stale_backend_fn",
-    "listener_pid_fn",
-)
 
 
 @dataclass(frozen=True, slots=True)
@@ -114,9 +111,15 @@ def resolve_observability_backend_cli_options(
     default_port: int = DEFAULT_HEALTH_SERVER_PORT,
 ) -> tuple[bool, int]:
     """Read backend auto-start options from raw Click kwargs mapping."""
+    raw_port = options.get("observability_backend_port", default_port)
+    if isinstance(raw_port, bool) or not isinstance(
+        raw_port,
+        (str, bytes, bytearray, int, float),
+    ):
+        raise TypeError("observability_backend_port must be a numeric CLI value")
     return (
         bool(options.get("ensure_observability_backend", True)),
-        int(options.get("observability_backend_port", default_port)),
+        int(raw_port),
     )
 
 
@@ -151,13 +154,13 @@ def build_observability_backend_cli_kwargs_from_options(
 
 
 def attach_observability_backend_to_cli_input(
-    cli_input: _ObservabilityBackendCliInput,
+    cli_input: RunCommandInput | RunAllCommandInput,
     *,
     required_probe_paths: tuple[str, ...],
     ensure_backend_started_fn: Callable[..., ObservabilityBackendEnsureResult]
     | None = None,
     disable_transient_health_server_fn: Callable[..., bool] | None = None,
-) -> _ObservabilityBackendCliInput:
+) -> RunCommandInput | RunAllCommandInput:
     """Ensure backend startup and disable the transient health server when replaced."""
     ensure_backend_started = (
         ensure_backend_started_fn or ensure_observability_backend_started
@@ -205,45 +208,46 @@ def _observability_backend_startup_kwargs(
     required_probe_timeout_seconds: float,
     poll_seconds: float,
     required_probe_paths: tuple[str, ...],
-) -> dict[str, object]:
-    values = (
-        enabled,
-        build_observability_backend_health_url(host=probe_host, port=port),
-        build_detached_backend_log_path(port),
-        port,
-        bind_host,
-        ready_timeout_seconds,
-        required_probe_timeout_seconds,
-        poll_seconds,
-        required_probe_paths,
-    )
-    return dict(zip(_STARTUP_KWARG_KEYS, values, strict=True))
+) -> _ObservabilityBackendStartupKwargs:
+    return {
+        "enabled": enabled,
+        "health_url": build_observability_backend_health_url(
+            host=probe_host,
+            port=port,
+        ),
+        "startup_log_path": build_detached_backend_log_path(port),
+        "port": port,
+        "bind_host": bind_host,
+        "ready_timeout_seconds": ready_timeout_seconds,
+        "required_probe_timeout_seconds": required_probe_timeout_seconds,
+        "poll_seconds": poll_seconds,
+        "required_probe_paths": required_probe_paths,
+    }
 
 
 def _observability_backend_runtime_hooks(
     *,
-    probe_fn: Callable[..., bool],
-    required_probe_fn: Callable[..., bool],
-    start_fn: Callable[..., _StartedBackendProcess],
-    wait_fn: Callable[..., bool],
-    wait_required_paths_fn: Callable[..., bool],
-    drop_stale_backend_fn: Callable[[int], bool],
-    listener_pid_fn: Callable[[int], int | None],
-    info_printer: Callable[[str], None],
-    warning_printer: Callable[[str], None],
-) -> dict[str, Callable[..., object]]:
-    values: tuple[Callable[..., object], ...] = (
-        probe_fn,
-        required_probe_fn,
-        start_fn,
-        wait_fn,
-        wait_required_paths_fn,
-        info_printer,
-        warning_printer,
-        drop_stale_backend_fn,
-        listener_pid_fn,
-    )
-    return dict(zip(_RUNTIME_HOOK_KEYS, values, strict=True))
+    probe_fn: _ProbeFn,
+    required_probe_fn: _RequiredProbeFn,
+    start_fn: _StartFn,
+    wait_fn: _WaitFn,
+    wait_required_paths_fn: _WaitRequiredPathsFn,
+    drop_stale_backend_fn: _DropStaleBackendFn,
+    listener_pid_fn: _ListenerPidFn,
+    info_printer: _MessagePrinter,
+    warning_printer: _MessagePrinter,
+) -> _ObservabilityBackendRuntimeHooks:
+    return {
+        "probe_fn": probe_fn,
+        "required_probe_fn": required_probe_fn,
+        "start_fn": start_fn,
+        "wait_fn": wait_fn,
+        "wait_required_paths_fn": wait_required_paths_fn,
+        "drop_stale_backend_fn": drop_stale_backend_fn,
+        "listener_pid_fn": listener_pid_fn,
+        "info_printer": info_printer,
+        "warning_printer": warning_printer,
+    }
 
 
 def ensure_observability_backend_started(
@@ -256,17 +260,17 @@ def ensure_observability_backend_started(
     required_probe_timeout_seconds: float = DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PROBE_TIMEOUT_SECONDS,
     poll_seconds: float = DEFAULT_OBSERVABILITY_BACKEND_POLL_SECONDS,
     required_probe_paths: tuple[str, ...] = (),
-    probe_fn: Callable[..., bool] = probe_observability_backend,
-    required_probe_fn: Callable[..., bool] = probe_observability_backend_required_paths,
-    start_fn: Callable[..., _StartedBackendProcess] = start_detached_quarantine_backend,
-    wait_fn: Callable[..., bool] = wait_for_observability_backend_ready,
-    wait_required_paths_fn: Callable[
-        ..., bool
-    ] = wait_for_observability_backend_required_paths_ready,
-    drop_stale_backend_fn: Callable[[int], bool] = drop_listening_backend_on_port,
-    listener_pid_fn: Callable[[int], int | None] = find_listening_backend_pid_by_port,
-    info_printer: Callable[[str], None] = echo_info,
-    warning_printer: Callable[[str], None] = echo_warning,
+    probe_fn: _ProbeFn = probe_observability_backend,
+    required_probe_fn: _RequiredProbeFn = probe_observability_backend_required_paths,
+    start_fn: _StartFn = start_detached_quarantine_backend,
+    wait_fn: _WaitFn = wait_for_observability_backend_ready,
+    wait_required_paths_fn: _WaitRequiredPathsFn = (
+        wait_for_observability_backend_required_paths_ready
+    ),
+    drop_stale_backend_fn: _DropStaleBackendFn = drop_listening_backend_on_port,
+    listener_pid_fn: _ListenerPidFn = find_listening_backend_pid_by_port,
+    info_printer: _MessagePrinter = echo_info,
+    warning_printer: _MessagePrinter = echo_warning,
 ) -> ObservabilityBackendEnsureResult:
     """Ensure the detached backend is running with runtime-local patch points."""
     runtime_hooks = _observability_backend_runtime_hooks(
@@ -297,7 +301,7 @@ def ensure_observability_backend_started(
     )
 
 
-def _observability_backend_failure_kwargs() -> dict[str, Callable[..., object]]:
+def _observability_backend_failure_kwargs() -> _ObservabilityBackendFailureHandlers:
     return {
         "build_startup_failure_detail_fn": _build_startup_failure_detail,
         "describe_required_probe_failure_fn": _describe_required_probe_failure,

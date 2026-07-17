@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from bioetl.application.services.control_plane.effective_config.provenance_support import (
     build_source_class_provenance,
 )
@@ -22,10 +24,36 @@ from bioetl.domain.config.dq import DQConfig
 from bioetl.domain.control_plane.effective_config_artifact import (
     ConfigResolutionPolicy,
     ConfigSourceRef,
+    DQPolicySnapshot,
+    EffectiveExecutionConfig,
+    ExecutionEnvironmentSnapshot,
+    ResolvedConfigSnapshot,
+    RuntimeOverrideSnapshot,
+    SourceClassProvenance,
 )
 from bioetl.domain.types import JsonDict
+from bioetl.domain.types.dq_contracts import DQPolicyRef
 
-__all__ = ["build_effective_config_context"]
+__all__ = ["EffectiveConfigContext", "build_effective_config_context"]
+
+
+@dataclass(frozen=True, slots=True)
+class EffectiveConfigContext:
+    """Typed derived values used to assemble one effective-config artifact."""
+
+    contract_refs: list[str]
+    dq_contract_compatibility_hash: str
+    dq_policy_refs: list[DQPolicyRef]
+    dq_policy_snapshots: list[DQPolicySnapshot]
+    dq_rule_bundle_versions: dict[str, str]
+    effective_snapshot: EffectiveExecutionConfig
+    execution_environment: ExecutionEnvironmentSnapshot
+    overrides_snapshot: RuntimeOverrideSnapshot
+    resolved_policy: ConfigResolutionPolicy
+    resolved_snapshot: ResolvedConfigSnapshot
+    semantic_identity_payload: JsonDict
+    source_class_provenance: tuple[SourceClassProvenance, ...]
+    source_fingerprint: str
 
 
 def build_effective_config_context(
@@ -41,7 +69,7 @@ def build_effective_config_context(
     normalization_profile_ref: str | None,
     normalization_profile_version: str | None,
     normalization_profile_hash: str | None,
-) -> dict[str, object]:
+) -> EffectiveConfigContext:
     """Build derived snapshots and semantic payload context for one artifact."""
     resolved_policy = resolve_resolution_policy(resolution_policy)
     resolved_snapshot = build_resolved_config_snapshot(
@@ -105,18 +133,18 @@ def build_effective_config_context(
             dq_policy_snapshots=dq_policy_snapshots,
         ),
     )
-    return {
-        "contract_refs": contract_refs,
-        "dq_contract_compatibility_hash": dq_contract_compatibility_hash,
-        "dq_policy_refs": dq_policy_refs,
-        "dq_policy_snapshots": dq_policy_snapshots,
-        "dq_rule_bundle_versions": dq_rule_bundle_versions,
-        "effective_snapshot": effective_snapshot,
-        "execution_environment": execution_environment,
-        "overrides_snapshot": overrides_snapshot,
-        "resolved_policy": resolved_policy,
-        "resolved_snapshot": resolved_snapshot,
-        "semantic_identity_payload": semantic_identity_payload,
-        "source_class_provenance": source_class_provenance,
-        "source_fingerprint": source_fingerprint,
-    }
+    return EffectiveConfigContext(
+        contract_refs=contract_refs,
+        dq_contract_compatibility_hash=dq_contract_compatibility_hash,
+        dq_policy_refs=dq_policy_refs,
+        dq_policy_snapshots=dq_policy_snapshots,
+        dq_rule_bundle_versions=dq_rule_bundle_versions,
+        effective_snapshot=effective_snapshot,
+        execution_environment=execution_environment,
+        overrides_snapshot=overrides_snapshot,
+        resolved_policy=resolved_policy,
+        resolved_snapshot=resolved_snapshot,
+        semantic_identity_payload=semantic_identity_payload,
+        source_class_provenance=source_class_provenance,
+        source_fingerprint=source_fingerprint,
+    )

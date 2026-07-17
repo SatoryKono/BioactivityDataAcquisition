@@ -10,7 +10,9 @@ from typing import Literal, Protocol, cast
 
 from bioetl.application.services.export_models import (
     ExportOptions,
+    ExportRedactionProfile,
     ExportResult,
+    ExportRole,
     TableInfo,
     TablePreview,
 )
@@ -173,6 +175,20 @@ def _parse_export_format(output_format: str) -> ExportFormat:
     return "csv"
 
 
+def _parse_export_role(role: str) -> ExportRole:
+    """Parse a CLI role into the export authorization literal."""
+    if role in {"viewer", "investigator", "exporter", "admin"}:
+        return cast("ExportRole", role)
+    return "viewer"
+
+
+def _parse_redaction_profile(profile: str) -> ExportRedactionProfile:
+    """Parse a CLI redaction profile into the supported literal."""
+    if profile in {"default", "none"}:
+        return cast("ExportRedactionProfile", profile)
+    return "default"
+
+
 def _build_export_options(
     output_format: str,
     output: Path | None,
@@ -192,14 +208,10 @@ def _build_export_options(
         limit=limit,
         columns=_parse_columns(columns),
         requester=requester,
-        role=role
-        if role in {"viewer", "investigator", "exporter", "admin"}
-        else "viewer",
+        role=_parse_export_role(role),
         filters_hash=filters_hash,
         expires_at=expires_at,
-        redaction_profile=(
-            redaction_profile if redaction_profile in {"default", "none"} else "default"
-        ),
+        redaction_profile=_parse_redaction_profile(redaction_profile),
     )
 
 

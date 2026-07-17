@@ -47,16 +47,24 @@ class _PublicationRecordNormalizer(Protocol):
 
 
 class _SupportsPublicationBusinessNormalization(Protocol):
-    _record_normalizer: _PublicationRecordNormalizer
+    @property
+    def _record_normalizer(self) -> _PublicationRecordNormalizer: ...
 
 
 class PublicationAssemblyTransformer(Protocol):
     """Structural protocol for publication assembly helper functions."""
 
-    _data_extractor: _PublicationDataExtractor
-    _identifier_resolver: _PublicationIdentifierResolver
-    _metadata_strategy: _PublicationMetadataStrategy
-    _record_normalizer: _PublicationRecordNormalizer
+    @property
+    def _data_extractor(self) -> _PublicationDataExtractor: ...
+
+    @property
+    def _identifier_resolver(self) -> _PublicationIdentifierResolver: ...
+
+    @property
+    def _metadata_strategy(self) -> _PublicationMetadataStrategy: ...
+
+    @property
+    def _record_normalizer(self) -> _PublicationRecordNormalizer: ...
 
     def _normalize_content_fields(
         self,
@@ -71,12 +79,15 @@ class PublicationAssemblyTransformer(Protocol):
         primary_id: PrimaryId,
     ) -> None: ...
 
-    def _create_entity(
+    def _create_entity[EntityT: BaseEntity](
         self,
-        entity_class: type[BaseEntity],
+        entity_class: type[EntityT],
         context: PipelineContext,
-        **kwargs: object,
-    ) -> BaseEntity: ...
+        entity_id: str,
+        content_hash: str,
+        index: int,
+        **business_data: object,
+    ) -> EntityT: ...
 
     def entity_to_silver_record(self, entity: BaseEntity) -> SilverRecord:
         """Project a domain entity into a serializable Silver-layer record."""

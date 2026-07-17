@@ -2,9 +2,20 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 PUBCHEM_CHEMICAL_STANDARDIZATION_POLICY_VERSION = "pubchem-basic-v1"
 
-PUBCHEM_CHEMICAL_STANDARDIZATION_STATUSES: tuple[str, ...] = (
+_PubChemChemicalStandardizationStatus = Literal[
+    "standardized",
+    "partial",
+    "invalid",
+    "missing_structure",
+]
+
+PUBCHEM_CHEMICAL_STANDARDIZATION_STATUSES: tuple[
+    _PubChemChemicalStandardizationStatus, ...
+] = (
     "standardized",
     "partial",
     "invalid",

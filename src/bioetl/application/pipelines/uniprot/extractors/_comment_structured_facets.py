@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from bioetl.application.pipelines.uniprot.extractors._comment_helpers import (
-    _ISOFORM_SECTION_NORMALIZERS,
+    _ISOFORM_SECTION_NORMALIZERS as _ISOFORM_SECTION_NORMALIZERS,
+)
+from bioetl.application.pipelines.uniprot.extractors._comment_helpers import (
     _build_isoform_data,
     _extract_biophys_from_comment,
     _extract_cofactor_entry,

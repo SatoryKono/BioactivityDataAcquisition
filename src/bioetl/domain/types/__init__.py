@@ -10,6 +10,13 @@ from importlib import import_module
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from bioetl.domain.aggregates.events import DomainEvent as DomainEvent
+    from bioetl.domain.types.contract_rollout import (
+        ContractRolloutPolicy as ContractRolloutPolicy,
+    )
+    from bioetl.domain.types.contract_rollout import (
+        VersionedContractTarget as VersionedContractTarget,
+    )
     from bioetl.domain.types.debug_export import (
         DebugExportPack as DebugExportPack,
     )
@@ -135,6 +142,11 @@ if TYPE_CHECKING:
     )
 
 _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
+    "bioetl.domain.aggregates.events": ("DomainEvent",),
+    "bioetl.domain.types.contract_rollout": (
+        "ContractRolloutPolicy",
+        "VersionedContractTarget",
+    ),
     "bioetl.domain.types.enums": (
         "CellularityType",
         "CircuitBreakerState",
