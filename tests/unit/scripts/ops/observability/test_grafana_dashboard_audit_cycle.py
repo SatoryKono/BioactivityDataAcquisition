@@ -680,9 +680,8 @@ def test_grafana_audit_cycle_writes_independent_gate_evidence(tmp_path: Path) ->
     assert payload["dashboard_semantic_gate"]["source_artifact"]["dashboard_scope"] == [
         "bioetl-dq-v2#101"
     ]
-    assert payload["dashboard_render_gate"]["source_artifact"]["dashboard_scope"] == [
-        "bioetl-dq-v2#101"
-    ]
+    assert payload["dashboard_render_gate"]["source_artifact"]["dashboard_scope"] == []
+    assert payload["dashboard_render_gate"]["source_artifact"]["validated"] is False
 
 
 def test_grafana_audit_cycle_records_render_gate_when_semantic_gate_fails(
@@ -746,8 +745,13 @@ def test_grafana_gate_rejects_cross_occurrence_source_artifacts(
     assert payload["release_passed"] is False
 
 
-def test_grafana_gate_rejects_render_source_without_panel_scope(
+@pytest.mark.parametrize(
+    "terminal_mutation",
+    ["missing", "empty_panel_states", "failed_status"],
+)
+def test_grafana_gate_rejects_render_source_without_valid_panel_scope(
     tmp_path: Path,
+    terminal_mutation: str,
 ) -> None:
     config = cycle_subject._parse_args(
         [
@@ -760,7 +764,13 @@ def test_grafana_gate_rejects_render_source_without_panel_scope(
     _write_gate_sources(config, semantic_status="pass", render_status="pass")
     manifest_path = config.screenshot_dir / "render-manifest.json"
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    manifest["dashboards"][0].pop("terminalStateValidation")
+    terminal_validation = manifest["dashboards"][0]["terminalStateValidation"]
+    if terminal_mutation == "missing":
+        manifest["dashboards"][0].pop("terminalStateValidation")
+    elif terminal_mutation == "empty_panel_states":
+        terminal_validation["panelStates"] = []
+    else:
+        terminal_validation["status"] = "error"
     manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
 
     cycle_subject._write_gate_report(

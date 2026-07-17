@@ -4,6 +4,7 @@ import pytest
 
 import ast
 import json
+import shlex
 from pathlib import Path
 
 import yaml
@@ -175,8 +176,33 @@ def test_ci_dashboard_semantic_gate_covers_declared_release_contracts() -> None:
         "tests/integration/test_grafana_surface_contracts.py",
         "tests/integration/test_grafana_variable_reference.py",
     )
-    for contract in required_contracts:
-        assert contract in semantic_run
+    logical_commands = [
+        shlex.split(line, comments=True, posix=True)
+        for line in semantic_run.replace("\\\n", " ").splitlines()
+        if line.strip()
+    ]
+    report_contract, *pytest_contracts = required_contracts
+    assert any(
+        command[:6]
+        == [
+            "uv",
+            "run",
+            "python",
+            "-m",
+            "scripts.engineering.qa",
+            report_contract,
+        ]
+        for command in logical_commands
+    )
+    pytest_commands = [
+        command
+        for command in logical_commands
+        if command[:3] == ["uv", "run", "pytest"]
+    ]
+    assert len(pytest_commands) == 1
+    pytest_arguments = set(pytest_commands[0][3:])
+    for contract in pytest_contracts:
+        assert contract in pytest_arguments
 
     upload_step = named_step("Upload dashboard semantic policy evidence")
     upload_config = upload_step.get("with")
