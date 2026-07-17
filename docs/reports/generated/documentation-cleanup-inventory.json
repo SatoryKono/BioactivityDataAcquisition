@@ -85262,6 +85262,16 @@
     },
     {
       "commit_policy": "working_output",
+      "generator": "scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py",
+      "id": "grafana-dashboard-release-gate-report",
+      "notes": "Occurrence-bound semantic/render release receipt stays a local or CI working artifact and is uploaded by the host-only release workflow.",
+      "output_kind": "working_report",
+      "outputs": [
+        "reports/observability/grafana/dashboard-release-gates.json"
+      ]
+    },
+    {
+      "commit_policy": "working_output",
       "generator": "scripts/ops/observability/grafana/rerender_grafana_screenshots.py",
       "id": "grafana-dashboard-screenshot-report",
       "notes": "Grafana render API screenshots are local working outputs under reports/.",
@@ -85591,7 +85601,7 @@
     },
     "docs_reports_local_count": 1214,
     "duplicate_group_count": 2,
-    "generated_route_count": 62,
+    "generated_route_count": 63,
     "generated_without_route_count": 175,
     "generated_without_route_or_exception_count": 0,
     "github_issue_lifecycle_counts": {
