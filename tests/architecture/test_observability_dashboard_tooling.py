@@ -6,6 +6,8 @@ import ast
 import json
 from pathlib import Path
 
+import yaml
+
 from scripts.ops.observability.grafana import audit_live_grafana_panels as live_audit
 from scripts.ops.observability.grafana import (
     run_grafana_dashboard_audit_cycle as audit_cycle,
@@ -140,10 +142,24 @@ def test_audit_cycle_gate_output_writes_review_evidence(tmp_path: Path) -> None:
 
 
 def test_ci_dashboard_semantic_gate_covers_declared_release_contracts() -> None:
-    workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
-    semantic_step = workflow.split(
-        "-   name: Dashboard semantic release policy gate (token-free)", 1
-    )[1].split("-   name: Upload dashboard semantic policy evidence", 1)[0]
+    workflow = yaml.safe_load(
+        Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
+    )
+    steps = [
+        step
+        for job in workflow["jobs"].values()
+        for step in job.get("steps", [])
+        if isinstance(step, dict)
+    ]
+
+    def named_step(name: str) -> dict[str, object]:
+        matches = [step for step in steps if step.get("name") == name]
+        assert len(matches) == 1, name
+        return matches[0]
+
+    semantic_step = named_step("Dashboard semantic release policy gate (token-free)")
+    semantic_run = semantic_step.get("run")
+    assert isinstance(semantic_run, str)
 
     required_contracts = (
         "report-observability-metric-inventory",
@@ -160,13 +176,17 @@ def test_ci_dashboard_semantic_gate_covers_declared_release_contracts() -> None:
         "tests/integration/test_grafana_variable_reference.py",
     )
     for contract in required_contracts:
-        assert contract in semantic_step
+        assert contract in semantic_run
 
-    upload_step = workflow.split(
-        "-   name: Upload dashboard semantic policy evidence", 1
-    )[1].split("-   name: Prometheus rules syntax + promtool test vectors", 1)[0]
-    assert "reports/observability/ci/dashboard-semantic-policy.xml" in upload_step
-    assert "reports/observability/runtime_cardinality_review_pr.json" in upload_step
+    upload_step = named_step("Upload dashboard semantic policy evidence")
+    upload_config = upload_step.get("with")
+    assert isinstance(upload_config, dict)
+    upload_paths = upload_config.get("path")
+    assert isinstance(upload_paths, str)
+    assert {path.strip() for path in upload_paths.splitlines() if path.strip()} == {
+        "reports/observability/ci/dashboard-semantic-policy.xml",
+        "reports/observability/runtime_cardinality_review_pr.json",
+    }
 
 
 @pytest.mark.parametrize(
