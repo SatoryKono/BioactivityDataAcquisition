@@ -28,6 +28,8 @@ if TYPE_CHECKING:
         push_metrics_to_gateway,
         run_pipeline,
     )
+    from bioetl.domain.ports import LoggerPort
+    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 
 _COMPOSITION_EXECUTION_API_MODULE = "bioetl.composition.execution_api"
 _COMPOSITION_COMPOSITE_API_MODULE = "bioetl.composition.composite_api"
@@ -69,15 +71,30 @@ install_lazy_exports(
 )
 
 
-def start_metrics_server(*args: object, **kwargs: object) -> object:
+def start_metrics_server(
+    port: int = 8000,
+    addr: str = "0.0.0.0",
+    *,
+    fail_fast: bool = False,
+    retry_count: int = 3,
+    retry_delay: float = 1.0,
+    logger: LoggerPort | None = None,
+) -> bool:
     """Retained compatibility wrapper for observability-owned metrics startup."""
     from bioetl.composition.observability_api import start_metrics_server as _impl
 
-    return _impl(*args, **kwargs)
+    return _impl(
+        port=port,
+        addr=addr,
+        fail_fast=fail_fast,
+        retry_count=retry_count,
+        retry_delay=retry_delay,
+        logger=logger,
+    )
 
 
-def load_pipeline_config(*args: object, **kwargs: object) -> object:
+def load_pipeline_config(pipeline_name: str) -> PipelineYamlConfig:
     """Retained compatibility wrapper for composite-owned pipeline config loading."""
     from bioetl.composition.composite_api import load_pipeline_config as _impl
 
-    return _impl(*args, **kwargs)
+    return _impl(pipeline_name)

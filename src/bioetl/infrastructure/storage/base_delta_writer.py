@@ -19,17 +19,28 @@ from bioetl.infrastructure.storage.delta.table_ops import (
 __all__ = ["BaseDeltaWriter", "DeltaTableNotFoundError", "coerce_null_types_for_delta"]
 
 if TYPE_CHECKING:
+    from deltalake import DeltaTable as DeltaTableType
+
     from bioetl.domain.ports import LoggerPort
+    from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
+    from bioetl.infrastructure.storage.support.retention import RetentionPolicy
 
 
-def DeltaTable(*args: object, **kwargs: object) -> object:
+def DeltaTable(
+    table_uri: str | Path,
+    version: int | None = None,
+    storage_options: dict[str, str] | None = None,
+    without_files: bool = False,
+) -> DeltaTableType:
     """Lazy compatibility seam for Delta table construction and tests."""
     from deltalake import DeltaTable as _DeltaTable
 
-    normalized_args = list(args)
-    if normalized_args and isinstance(normalized_args[0], str | Path):
-        normalized_args[0] = normalize_delta_filesystem_path(normalized_args[0])
-    return _DeltaTable(*normalized_args, **kwargs)
+    return _DeltaTable(
+        normalize_delta_filesystem_path(table_uri),
+        version=version,
+        storage_options=storage_options,
+        without_files=without_files,
+    )
 
 
 # Any: arbitrary Python value from heterogeneous record fields; returns same or JSON string
@@ -55,7 +66,7 @@ def _get_string_fields(schema: object) -> set[str]:
 
 
 def _read_delta_records(
-    table: object,
+    table: DeltaTableType,
     columns: list[str] | None = None,
 ) -> list[BronzeRecord]:
     """Read Delta rows into generic record dictionaries."""
@@ -66,7 +77,7 @@ def _read_delta_records(
     return _read_delta_records_impl(table, columns)
 
 
-def _load_delta_table(table_path: str) -> object:
+def _load_delta_table(table_path: str) -> DeltaTableType:
     """Open a Delta table from its resolved filesystem path."""
     return DeltaTable(table_path)
 
@@ -89,7 +100,7 @@ def _resolve_delta_table_path(
     )
 
 
-def _get_delta_table_arrow_schema(table: object) -> object:
+def _get_delta_table_arrow_schema(table: DeltaTableType) -> object:
     """Extract the PyArrow schema from an opened Delta table."""
     from bioetl.infrastructure.storage.delta.table_ops import (
         get_delta_table_arrow_schema as _get_delta_table_arrow_schema_impl,
@@ -133,8 +144,8 @@ class BaseDeltaWriter(BaseDeltaWriterTableAccessMixin):
         base_path: str | Path,
         logger: LoggerPort,
         flat_structure: bool = False,
-        arrow_converter: object | None = None,
-        retention_policy: object | None = None,
+        arrow_converter: ArrowDataConverter | None = None,
+        retention_policy: RetentionPolicy | None = None,
     ) -> None:
         """Initialize base Delta writer."""
         if arrow_converter is None:

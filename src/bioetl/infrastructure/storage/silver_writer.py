@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING, Literal
 
 from deltalake import DeltaTable, write_deltalake
 
@@ -11,6 +12,8 @@ from bioetl.domain.ports import (
     LoggerPort,
     TracingPort,
 )
+from bioetl.domain.types import BronzeRecord
+from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
 from bioetl.infrastructure.storage.base_delta_writer import (
     BaseDeltaWriter,
     _clear_delta_tables,
@@ -34,6 +37,29 @@ from bioetl.infrastructure.storage.silver.writer_runtime_support import (
     _rewire_runtime_services,
 )
 
+if TYPE_CHECKING:
+    from bioetl.infrastructure.storage.silver.operations.arrow_operations import (
+        SilverArrowOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.delta_operations import (
+        SilverDeltaOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.maintenance_operations import (
+        SilverMaintenanceOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.merged_operations import (
+        SilverMergedOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.metadata_operations import (
+        SilverMetadataOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.postwrite_operations import (
+        SilverPostwriteOperations,
+    )
+    from bioetl.infrastructure.storage.silver.operations.validation_operations import (
+        SilverValidationOperations,
+    )
+
 __all__ = ["SilverWriteMode", "SilverWriter", "_SilverWriteExecutionContext"]
 
 # Keep Delta Lake dependency explicit in the root infrastructure adapter for
@@ -49,14 +75,14 @@ class SilverWriter(
     """Writer for Silver layer (normalized data in Delta Lake)."""
 
     _tracing: TracingPort | None
-    _contract_rollout_policy: object | None
-    _maintenance: object | None
-    _metadata: object | None
-    _validation: object | None
-    _delta: object | None
-    _arrow: object | None
-    _merged: object | None
-    _postwrite: object | None
+    _contract_rollout_policy: ContractRolloutPolicy | None
+    _maintenance: SilverMaintenanceOperations | None
+    _metadata: SilverMetadataOperations | None
+    _validation: SilverValidationOperations | None
+    _delta: SilverDeltaOperations | None
+    _arrow: SilverArrowOperations | None
+    _merged: SilverMergedOperations | None
+    _postwrite: SilverPostwriteOperations | None
     _host: object | None
 
     def __setattr__(self, name: str, value: object) -> None:
@@ -113,7 +139,7 @@ class SilverWriter(
 
     def _validate_silver_pandera(
         self,
-        records: list[object],
+        records: list[BronzeRecord],
         table_name: str,
     ) -> None:
         super()._validate_silver_pandera(records, table_name)
@@ -121,8 +147,8 @@ class SilverWriter(
     async def _check_schema_drift(
         self,
         table_name: str,
-        records: list[object],
-        on_schema_mismatch: str,
+        records: list[BronzeRecord],
+        on_schema_mismatch: Literal["error", "evolve", "ignore"],
     ) -> None:
         await super()._check_schema_drift(table_name, records, on_schema_mismatch)
 

@@ -81,4 +81,10 @@ class SilverRecord(TypedDict, total=False):
 
     entity_id: str
     content_hash: str
+    activity_type: object
+    activity_relation: object
+    activity_value: object
+    type: object
+    relation: object
+    value: object
     # Other fields are dynamic based on entity type

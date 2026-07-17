@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from time import perf_counter
+from typing import TYPE_CHECKING
 
 from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.domain.types import RunID
@@ -11,12 +12,39 @@ from bioetl.infrastructure.control_plane._read_metrics import (
     emit_control_plane_read_metrics,
 )
 
+if TYPE_CHECKING:
+    from bioetl.domain.ports import MetricsPort
+
 
 class FileLineageQueriesMixin:
     """Query methods for ``FileLineageStore``."""
 
     base_path: Path
-    metrics: object | None
+    metrics: MetricsPort | None
+
+    if TYPE_CHECKING:
+
+        def _load_fragment(
+            self,
+            fragment_id: str,
+        ) -> LineageGraphFragment | None: ...
+
+        def _load_fragment_ids(self, index_path: Path, *, key: str) -> list[str]: ...
+
+        def _semantic_fragment_index_path(self, fragment_id: str) -> Path: ...
+
+        def _run_index_path(self, run_id: str) -> Path: ...
+
+        def _manifest_index_path(self, manifest_id: str) -> Path: ...
+
+        def _node_index_path(self, node_id: str) -> Path: ...
+
+        def _load_from_index(
+            self,
+            index_path: Path,
+            *,
+            key: str,
+        ) -> list[LineageGraphFragment]: ...
 
     def get_occurrence(self, fragment_id: str) -> LineageGraphFragment | None:
         """Load one stored occurrence fragment id without semantic fallback."""

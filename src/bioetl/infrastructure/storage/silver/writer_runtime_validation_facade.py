@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 import pyarrow as pa
 
@@ -18,6 +18,11 @@ from bioetl.infrastructure.storage.silver.writer_runtime_invocation import (
     _prepare_silver_write_payload_via_validation,
 )
 
+if TYPE_CHECKING:
+    from bioetl.infrastructure.storage.silver.operations.validation_operations import (
+        SilverValidationOperations,
+    )
+
 __all__ = ["_SilverWriterRuntimeValidationFacade"]
 
 _SILVER_VALIDATION_OPERATIONS_REQUIRED = "Silver validation operations are required"
@@ -25,6 +30,8 @@ _SILVER_VALIDATION_OPERATIONS_REQUIRED = "Silver validation operations are requi
 
 class _SilverWriterRuntimeValidationFacade:
     """Validation-service delegation methods for the runtime facade."""
+
+    _validation: SilverValidationOperations | None
 
     def _enforce_write_policy(self, mode: SilverWriteMode, table_name: str) -> None:
         """Delegate Silver write-mode enforcement to the validation service."""

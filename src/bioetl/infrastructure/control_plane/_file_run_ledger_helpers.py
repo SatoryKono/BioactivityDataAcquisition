@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.control_plane.run_ledger import (
@@ -21,6 +22,22 @@ if TYPE_CHECKING:
 
 class RunLedgerCorruptionError(ValueError):
     """Raised when persisted JSONL ledger contents are structurally corrupted."""
+
+
+class _LedgerOSModule(Protocol):
+    """Narrow filesystem operations used by crash-safe ledger appends."""
+
+    O_RDWR: int
+
+    def open(self, path: Path, flags: int, mode: int = 0o777) -> int: ...
+
+    def ftruncate(self, file_descriptor: int, length: int) -> None: ...
+
+    def close(self, file_descriptor: int) -> None: ...
+
+    def fstat(self, file_descriptor: int) -> os.stat_result: ...
+
+    def write(self, file_descriptor: int, payload: bytes) -> int: ...
 
 
 def resolve_ledger_pipeline(entry: RunLedgerEntry) -> str:
@@ -122,8 +139,8 @@ def truncate_ledger_to_offset(
     path: Path,
     *,
     offset: int,
-    os_module: object = os,
-    flush_file_descriptor: object,
+    os_module: _LedgerOSModule = os,
+    flush_file_descriptor: Callable[[int], None],
 ) -> None:
     """Best-effort rollback to one known-good byte offset."""
     if not path.exists():
@@ -141,8 +158,8 @@ def append_jsonl_payload(
     payload: bytes,
     *,
     open_flags: int,
-    os_module: object = os,
-    flush_file_descriptor: object,
+    os_module: _LedgerOSModule = os,
+    flush_file_descriptor: Callable[[int], None],
 ) -> int:
     """Append one full JSONL payload with rollback on partial writes."""
     path.parent.mkdir(parents=True, exist_ok=True)

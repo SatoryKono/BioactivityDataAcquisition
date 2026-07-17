@@ -29,21 +29,7 @@ def test_build_pipeline_runner_rejects_exact_replay_without_materialized_cached_
     empty_bronze_root = tmp_path / "cached_bronze" / "chembl" / "activity"
     empty_bronze_root.mkdir(parents=True)
 
-    context = SimpleNamespace(
-        pipeline_name="chembl_activity",
-        run_id=deterministic_uuid_from_callsite("test_runner_builder_profiles"),
-        log_level="INFO",
-        vacuum=None,
-        run_type="incremental",
-        resume=False,
-        limit=25,
-        query=None,
-        dry_run=False,
-        skip_gold=False,
-        start_offset=None,
-        exact_replay=True,
-        input_filter=SimpleNamespace(enabled=False),
-    )
+    context = _build_context(limit=25, exact_replay=True)
 
     with pytest.raises(
         RuntimeError,
@@ -110,23 +96,6 @@ def test_build_pipeline_runner_keeps_snapshot_backed_execution_identity_stable_a
     (bronze_day / "batch_2026-01-01_demo.jsonl.zst").write_bytes(b"snapshot-bytes")
     (bronze_day / "batch_2026-01-01_extra.jsonl.zst").write_bytes(b"snapshot-bytes-2")
 
-    def _build_context() -> SimpleNamespace:
-        return SimpleNamespace(
-            pipeline_name="chembl_activity",
-            run_id=deterministic_uuid_from_callsite("test_runner_builder_profiles"),
-            log_level="INFO",
-            vacuum=None,
-            run_type="incremental",
-            resume=False,
-            limit=100,
-            query=None,
-            dry_run=False,
-            skip_gold=False,
-            start_offset=None,
-            exact_replay=True,
-            input_filter=SimpleNamespace(enabled=False),
-        )
-
     def _build_runner_once() -> dict[str, object]:
         fake_factory = _FakeFactory()
         fake_registry = _FakeRegistry(factory=fake_factory)
@@ -139,7 +108,7 @@ def test_build_pipeline_runner_keeps_snapshot_backed_execution_identity_stable_a
             ),
         ):
             runner_builder.build_pipeline_runner(
-                _build_context(),
+                _build_context(limit=100, exact_replay=True),
                 registry=fake_registry,
                 wiring=resolve_runner_builder_wiring(
                     legacy_overrides=LegacyRunnerBuilderOverrides(
@@ -1029,20 +998,7 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
         ),
     )
 
-    context = SimpleNamespace(
-        pipeline_name="chembl_activity",
-        run_id=deterministic_uuid_from_callsite("test_runner_builder_profiles"),
-        log_level="INFO",
-        vacuum=None,
-        run_type="incremental",
-        resume=False,
-        limit=25,
-        query=None,
-        dry_run=False,
-        skip_gold=False,
-        start_offset=None,
-        input_filter=SimpleNamespace(enabled=False),
-    )
+    context = _build_context(limit=25)
 
     with _clean_provenance_context_if_unpatched():
         runner_builder.build_pipeline_runner(

@@ -123,7 +123,7 @@ class ActivityTransformer(BaseChemblTransformer):
 
     @staticmethod
     def _coalesce_activity_relation(
-        business_data: GoldRecord,
+        business_data: Mapping[str, object],
     ) -> object | None:
         """Prefer the raw relation operator, but fall back to standard_relation.
 
@@ -232,7 +232,7 @@ class ActivityTransformer(BaseChemblTransformer):
         silver_record.pop("type", None)
         silver_record.pop("relation", None)
         silver_record.pop("value", None)
-        return cast("SilverRecord", silver_record)
+        return silver_record
 
     def transform_for_gold(
         self,
