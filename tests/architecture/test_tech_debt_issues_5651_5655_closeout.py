@@ -219,9 +219,6 @@ def test_issue_5653_dead_code_review_window_is_current_and_fully_triaged() -> No
         == summary["repo_wide_zero_import_candidate_count"]
     )
     assert summary["repo_wide_candidates_without_owner_tests_count"] == 0
-    dispositions = set(summary["repo_wide_disposition_counts"])
-    assert dispositions <= {
-        "retain_canonical_owner_module",
+    assert set(summary["repo_wide_disposition_counts"]) == {
         "retain_module_entrypoint",
     }
-    assert "retain_module_entrypoint" in dispositions
