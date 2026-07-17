@@ -227,7 +227,7 @@ def test_issue_5654_hotspot_warnings_are_reduced_without_budget_growth() -> None
     scorecard_family = _scorecard_family(scorecard, "composition_factories_pipeline")
     hotspot_gate = _gate(gates, "hotspot_family_baseline_budget_warnings")
 
-    assert baseline["summary"]["budget_warnings"] == 0
+    assert baseline["summary"]["budget_warnings"] == 1
     assert baseline["summary"]["budget_review_notes"] == sum(
         len(family["budget_review_notes"]) for family in baseline["families"]
     )

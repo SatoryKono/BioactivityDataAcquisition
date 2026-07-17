@@ -9,21 +9,18 @@ from bioetl.interfaces.cli.commands.domains.shared.public_module_alias import (
 )
 
 if TYPE_CHECKING:
-    from bioetl.interfaces.cli.commands.health import (
-        get_health_server_dependencies as get_health_server_dependencies,
-    )
-    from bioetl.interfaces.cli.commands.health import (
-        get_health_service as get_health_service,
-    )
-    from bioetl.interfaces.cli.commands.health import (
-        health as health,
-    )
-    from bioetl.interfaces.cli.commands.health import (
-        health_check as health_check,
-    )
-    from bioetl.interfaces.cli.commands.health import (
-        health_server_command as health_server_command,
-    )
+    from collections.abc import Callable
+
+    import click
+
+    from bioetl.application.services.health_service import HealthService
+    from bioetl.composition.health_service_access import HealthServerDependencies
+
+    get_health_server_dependencies: Callable[[], HealthServerDependencies]
+    get_health_service: Callable[[], HealthService]
+    health: click.Group
+    health_check: click.Command
+    health_server_command: click.Command
 
 install_public_module_alias(
     globals(),
