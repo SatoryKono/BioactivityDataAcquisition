@@ -148,7 +148,8 @@ def test_audit_profile_mounts_explicit_roots_read_only_and_uses_bounded_loki_job
     assert services["grafana"]["depends_on"]["quarantine-explorer-audit"] == {
         "condition": "service_healthy"
     }
-    assert audit_promtail["depends_on"]["loki"] == {"condition": "service_healthy"}
+    assert audit_promtail["depends_on"]["loki"] == {"condition": "service_started"}
+    assert audit_promtail["healthcheck"] == {"disable": True}
 
 
 def test_default_runtime_log_sink_reaches_canonical_loki_dashboard_job() -> None:
@@ -253,7 +254,7 @@ def test_grafana_uses_remote_renderer_sidecar() -> None:
         "/usr/local/bin/bioetl-bootstrap-grafana.sh",
     ]
     assert renderer["image"] == RENDERER_IMAGE
-    assert renderer["shm_size"] == "1gb"
+    assert renderer["shm_size"] == "4gb"
     assert renderer["healthcheck"]["test"] == [
         "CMD",
         "grafana-image-renderer",
@@ -267,11 +268,11 @@ def test_grafana_uses_remote_renderer_sidecar() -> None:
         "BROWSER_FLAGS=--no-sandbox,--disable-dev-shm-usage" in renderer["environment"]
     )
     assert (
-        "BROWSER_READINESS_TIMEOUT=${GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT:-90s}"
+        "BROWSER_READINESS_TIMEOUT=${GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT:-180s}"
         in renderer["environment"]
     )
     assert (
-        "GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-1GiB}"
+        "GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-10GiB}"
         in renderer["environment"]
     )
     assert not any(
@@ -352,10 +353,12 @@ def test_bootstrap_script_detects_tracing_datasource_reachability() -> None:
     assert "BIOETL_ENABLE_TRACING_DATASOURCES:-auto" in content
     assert "AUTO_WAIT_SECONDS=30" in content
     assert "AUTO_POLL_SECONDS=1" in content
-    assert 'wget --quiet --tries=1 --timeout=2 -O /dev/null "$1"' in content
+    assert "deadline=$(($(date +%s) + AUTO_WAIT_SECONDS))" in content
+    assert 'remaining="$(remaining_auto_wait_seconds)"' in content
+    assert '--timeout="${probe_timeout}"' in content
     assert "wait_for_auto_tracing_ready()" in content
-    assert 'probe_ready "http://loki:3100/ready"' in content
-    assert 'probe_ready "http://tempo:3200/ready"' in content
+    assert 'probe_ready "http://loki:3100/ready" "${remaining}"' in content
+    assert 'probe_ready "http://tempo:3200/ready" "${remaining}"' in content
     assert "deleteDatasources:" in content
     assert "name: Loki" in content
     assert "name: Tempo" in content
