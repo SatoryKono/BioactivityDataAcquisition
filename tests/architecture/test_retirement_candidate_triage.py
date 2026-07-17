@@ -138,7 +138,6 @@ def test_retirement_triage_entries_are_explicit_and_actionable() -> None:
         "retain_public_facade",
         "retain_compat_shim",
         "retain_canonical_owner_module",
-        "retain_private_module",
     }
     assert _iter_repo_wide_zero_import_entries(triage)
 
@@ -303,7 +302,7 @@ def test_repo_wide_zero_import_classification_exactly_covers_candidates() -> Non
 
 
 def test_retained_zero_import_rows_have_owner_test_evidence() -> None:
-    """Retained zero-import residue must materialize explicit owner-test evidence for non-private modules."""
+    """Retained zero-import residue must materialize explicit owner-test evidence."""
     inventory = build_dead_code_inventory(PROJECT_ROOT)
     summary = inventory["summary"]
     assert isinstance(summary, dict)
@@ -311,9 +310,6 @@ def test_retained_zero_import_rows_have_owner_test_evidence() -> None:
     zero_candidates = inventory["repo_wide_zero_import_candidates"]
     assert isinstance(zero_candidates, list)
     for row in zero_candidates:
-        # Private modules (retain_private_module) are exempt from owner-test requirements
-        if row.get("disposition") == "retain_private_module":
-            continue
         assert isinstance(row.get("evidence_lane"), str) and row["evidence_lane"]
         assert int(row["owner_test_count"]) > 0, (
             f"Repo-wide zero-import candidate lacks owner tests: {row['path']}"
@@ -337,17 +333,10 @@ def test_retained_zero_import_rows_have_owner_test_evidence() -> None:
             row["owner_test_paths_exist_count"]
         ), f"Owner-test paths drifted for retained triage row: {row['module_path']}"
 
-    # Private modules (retain_private_module) are exempt from owner-test requirements
-    non_private_candidates = [
-        row for row in zero_candidates
-        if row.get("disposition") != "retain_private_module"
-    ]
     assert summary["repo_wide_owner_test_anchored_candidate_count"] == len(
-        non_private_candidates
+        zero_candidates
     )
-    assert summary["repo_wide_candidates_without_owner_tests_count"] == len(
-        [row for row in zero_candidates if row.get("disposition") == "retain_private_module"]
-    )
+    assert summary["repo_wide_candidates_without_owner_tests_count"] == 0
     assert summary["triaged_retained_without_owner_tests_count"] == 0
     retained_triage_count = sum(
         1 for row in triaged_rows if row.get("disposition") == "retain_active"

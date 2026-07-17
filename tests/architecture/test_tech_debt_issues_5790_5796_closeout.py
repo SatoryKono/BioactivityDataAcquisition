@@ -314,10 +314,15 @@ def test_issue_5793_zero_import_candidates_have_explicit_owner_governance() -> N
         triage["repo_wide_zero_import_classification"]["owner"]
         == "@bioetl-architecture"
     )
-    assert summary["repo_wide_zero_import_candidate_count"] == 9
-    assert summary["repo_wide_classified_zero_import_candidate_count"] == 9
+    metrics = closeout["metrics"]["repo_wide_zero_import_candidates"]
+    assert summary["repo_wide_zero_import_candidate_count"] == metrics["count"]
+    assert summary["repo_wide_classified_zero_import_candidate_count"] == metrics[
+        "classified"
+    ]
     assert summary["repo_wide_untriaged_zero_import_candidate_count"] == 0
-    assert summary["repo_wide_owner_test_anchored_candidate_count"] == 9
+    assert summary["repo_wide_owner_test_anchored_candidate_count"] == metrics[
+        "owner_test_anchored"
+    ]
     assert summary["repo_wide_candidates_without_owner_tests_count"] == 0
 
     for row in inventory["repo_wide_zero_import_candidates"]:

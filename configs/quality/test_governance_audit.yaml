@@ -76,56 +76,49 @@ budget_ratchet:
   - issue: '#5763'
     owner: test-governance
     status: telemetry_governance_baseline_refresh_then_duplicate_names_zeroed
-    note: >-
-      Refreshed telemetry governance baseline and separated expensive report
-      collection from test execution. The residual duplicate-name inventory is now
-      zero names and zero occurrences; new generic duplicate test names are not
-      allowed.
+    note: Refreshed telemetry governance baseline and separated expensive report collection
+      from test execution. The residual duplicate-name inventory is now zero names
+      and zero occurrences; new generic duplicate test names are not allowed.
   - issue: '#5752'
     owner: test-governance
     status: compatibility_test_file_max_ratcheted_to_0
-    note: >-
-      After renaming the last compatibility-classified Pandera runtime test to the
-      canonical Python 3.14 support surface, the live compatibility filename inventory
-      reached zero. compatibility_test_file_max is now ratcheted from 1 to 0 to
-      match the zero live inventory without reducing governance coverage.
+    note: After renaming the last compatibility-classified Pandera runtime test to
+      the canonical Python 3.14 support surface, the live compatibility filename inventory
+      reached zero. compatibility_test_file_max is now ratcheted from 1 to 0 to match
+      the zero live inventory without reducing governance coverage.
   - issue: '#5682'
     owner: test-governance
     status: compatibility_inventory_reclassified_silver_filter_identity_24
-    note: >-
-      Renamed the Silver filter compatibility-surface guard to an identity-surface
+    note: Renamed the Silver filter compatibility-surface guard to an identity-surface
       guard because it validates current canonical filter identity semantics rather
       than preserving a legacy import or compatibility path. The live compatibility
-      filename inventory dropped from 25 to 24, and the fail-fast budget was
-      ratcheted to 24. No technical-debt budget was increased.
+      filename inventory dropped from 25 to 24, and the fail-fast budget was ratcheted
+      to 24. No technical-debt budget was increased.
   - issue: '#5625'
     owner: test-governance
     status: compatibility_inventory_reclassified_active_checkpoint_policy_25
-    note: >-
-      Renamed the active checkpoint policy retired-mode guard out of compatibility-style
+    note: Renamed the active checkpoint policy retired-mode guard out of compatibility-style
       filename inventory because it validates removed mode absence on current active
       policy surfaces rather than preserving a legacy compatibility path. The live
-      compatibility filename inventory dropped from 26 to 25, and the fail-fast
-      budget was ratcheted to 25. No technical-debt budget was increased.
+      compatibility filename inventory dropped from 26 to 25, and the fail-fast budget
+      was ratcheted to 25. No technical-debt budget was increased.
   - issue: '#5435'
     owner: test-governance
     status: compatibility_inventory_reclassified_live_26_budget_ratcheted_26
-    note: >-
-      Renamed three governance-oriented architecture tests out of compatibility-style
+    note: Renamed three governance-oriented architecture tests out of compatibility-style
       filenames because they validate curated telemetry, remediation evidence, and
-      root-script wrapper surfaces rather than active backward-compat behavior.
-      The live compatibility filename inventory dropped from 29 to 26, and the
-      fail-fast budget was ratcheted to the live threshold of 26. No technical-debt
-      budget was increased.
+      root-script wrapper surfaces rather than active backward-compat behavior. The
+      live compatibility filename inventory dropped from 29 to 26, and the fail-fast
+      budget was ratcheted to the live threshold of 26. No technical-debt budget was
+      increased.
   - issue: '#5200'
     owner: test-governance
     status: rf_009_closeout_duplicate_name_tracking
-    note: >-
-      RF-009 closeout updated to track duplicate names instead of enforcing zero.
+    note: 'RF-009 closeout updated to track duplicate names instead of enforcing zero.
       After #5763 telemetry governance baseline refresh, duplicate_name_zero changed
       to duplicate_name_tracking and live_metrics updated to reflect current state
       (2 duplicate names, 4 occurrences). duplicate_name_zero ratchet is no longer
-      applicable; duplicate_name_tracking surface now monitors the live inventory.
+      applicable; duplicate_name_tracking surface now monitors the live inventory.'
   - issue: '#5123'
     owner: architecture-governance
     status: silver_semantic_compatibility_guard_enforced
@@ -261,11 +254,12 @@ budget_ratchet:
   - issue: '#5102'
     owner: test-governance
     status: pandera_compatibility_test_retired_after_shim_removal
-    note: >
-      Issue #5917 removed the obsolete Pandera runtime compatibility shim and
-      its shim-specific Python 3.14 support tests after the supported Pandera
-      dependency declared Python 3.14 support. The retained runtime bootstrap seam
-      is now a no-op, and the compatibility test file budget remains ratcheted.
+    note: 'Issue #5917 removed the obsolete Pandera runtime compatibility shim and
+      its shim-specific Python 3.14 support tests after the supported Pandera dependency
+      declared Python 3.14 support. The retained runtime bootstrap seam is now a no-op,
+      and the compatibility test file budget remains ratcheted.
+
+      '
   - issue: '#5103'
     owner: test-governance
     status: memory_legacy_aliases_retained_with_rationale
@@ -311,26 +305,24 @@ budget_ratchet:
     note: Gold nullable numeric governance remains an active contract gate, not a
       retained compatibility shim. Renamed test_gold_nullable_numeric_compatibility.py
       to test_gold_nullable_numeric_contract.py, removed it from compatibility filename
-      inventory, and ratcheted compatibility_test_file_max from 32 to 31 without
-      reducing coverage.
+      inventory, and ratcheted compatibility_test_file_max from 32 to 31 without reducing
+      coverage.
   - issue: '#5351'
     owner: test-governance
     status: compatibility_test_file_max_ratcheted_to_30
     note: Composition entrypoints removed-symbol enforcement is a current architecture
-      guard, not retained deprecated-import compatibility behavior. Renamed
-      test_composition_entrypoints_deprecated_imports.py to
-      test_composition_entrypoints_removed_symbol_guards.py, removed it from the
+      guard, not retained deprecated-import compatibility behavior. Renamed test_composition_entrypoints_deprecated_imports.py
+      to test_composition_entrypoints_removed_symbol_guards.py, removed it from the
       compatibility filename inventory, and ratcheted compatibility_test_file_max
       from 31 to 30 without reducing coverage.
   - issue: '#5372'
     owner: test-governance
     status: compatibility_test_file_max_ratcheted_to_29
-    note: CLI runtime wrapper boundary coverage remains active, but the filename
-      no longer advertises retained compatibility aliases after the wrapper surface
-      was normalized. Renamed test_runtime_compat_aliases.py to
-      test_runtime_wrapper_contracts.py, removed it from the compatibility filename
-      inventory, and ratcheted compatibility_test_file_max from 30 to 29 without
-      reducing coverage.
+    note: CLI runtime wrapper boundary coverage remains active, but the filename no
+      longer advertises retained compatibility aliases after the wrapper surface was
+      normalized. Renamed test_runtime_compat_aliases.py to test_runtime_wrapper_contracts.py,
+      removed it from the compatibility filename inventory, and ratcheted compatibility_test_file_max
+      from 30 to 29 without reducing coverage.
   - issue: '#5107'
     owner: test-governance
     status: architecture_shim_guards_retained_with_rationale
@@ -347,9 +339,9 @@ budget_ratchet:
   - issue: markerless_drift_2026_06_17
     owner: test-governance
     status: markerless_ratcheted_to_4
-    note: 'Live governance audit detected 4 markerless test functions. Budget ratcheted
-      from 0 to 4 to reflect current state. Requires investigation to identify the specific
-      markerless functions and add appropriate lane markers.'
+    note: Live governance audit detected 4 markerless test functions. Budget ratcheted
+      from 0 to 4 to reflect current state. Requires investigation to identify the
+      specific markerless functions and add appropriate lane markers.
   touch_policy: Refactors touching test families must reduce the applicable budget
     or keep it flat with an explicit owner rationale; increasing a debt budget requires
     a separate governance review.
@@ -751,14 +743,14 @@ duplicate_name_triage:
   top_generic_names: []
   zero_enforcement:
     issue_set:
-      - '#4894'
-      - '#4895'
-      - '#4896'
-      - '#4897'
-      - '#4898'
-      - '#4899'
-      - '#4900'
-      - '#4901'
+    - '#4894'
+    - '#4895'
+    - '#4896'
+    - '#4897'
+    - '#4898'
+    - '#4899'
+    - '#4900'
+    - '#4901'
     artifact: reports/quality/test-governance-current.json
     naming_contract: test_<subject>__<condition>__<expected_behavior>
     decision: fail_fast_duplicate_name_tracking
@@ -813,7 +805,7 @@ oversized_test_module_inventory:
     owner: observability-dashboards
   - issue_ref: '#4506'
     source: tests/unit/composition/runtime_builders/test_runner_builder_profiles.py
-    source_lines_after_split: 1140
+    source_lines_after_split: 1096
     extracted_surface: tests/unit/composition/runtime_builders/test_runner_builder_contracts.py
     extracted_surface_lines: 220
     owner: composition-runtime
@@ -840,8 +832,8 @@ platform_sensitive_snapshot_tests:
   owner: memory-governance
   review_date: '2026-09-30'
   rationale: Neo4j memory snapshot invariant tests intentionally build a full repo
-    snapshot; they remain outside fast lanes through explicit memory markers,
-    bounded timeout policy, shared snapshot caching, and Windows skip guards.
+    snapshot; they remain outside fast lanes through explicit memory markers, bounded
+    timeout policy, shared snapshot caching, and Windows skip guards.
   required_markers:
   - memory
   min_timeout_seconds: 180
@@ -976,9 +968,6 @@ repo_backed_unit_test_exceptions:
   - path: tests/unit/repo_backed/application/composite/test_non_chembl_join_key_normalization.py
     target_lane: repo-backed-unit
     protected_surface: tests/fixtures/normalization/non_chembl_identifier_cases.yaml
-  - path: tests/unit/repo_backed/scripts/ops/test_migrate_gold_parquet_to_delta.py
-    target_lane: repo-backed-unit
-    protected_surface: scripts/ops/migrate_gold_parquet_to_delta.py
   - path: tests/unit/repo_backed/application/pipelines/crossref/test_business_data_builder.py
     target_lane: repo-backed-unit
     protected_surface: src/bioetl/application/pipelines/crossref/_business_data_builder.py
@@ -1086,13 +1075,16 @@ repo_backed_unit_test_exceptions:
   - path: tests/unit/repo_backed/scripts/engineering/qa/test_run_docker_stability_campaign.py
     target_lane: repo-backed-unit
     protected_surface: scripts/engineering/qa/run_docker_stability_campaign.py
+  - path: tests/unit/repo_backed/scripts/ops/test_migrate_gold_parquet_to_delta.py
+    target_lane: repo-backed-unit
+    protected_surface: scripts/ops/migrations/active/migrate_gold_parquet_to_delta.py
 mixed_scope_unit_path_policy:
   issue_ref: '#4665'
   decision: logical_unit_ownership_with_dedicated_repo_backed_subtree
-  rationale: tests/unit path still communicates layer ownership, but checked-in
-    repo reads now live in a dedicated tests/unit/repo_backed subtree so canonical
-    pure-unit lanes keep a cleaner filesystem boundary while retained repo-backed
-    contracts stay deterministic and local-only.
+  rationale: tests/unit path still communicates layer ownership, but checked-in repo
+    reads now live in a dedicated tests/unit/repo_backed subtree so canonical pure-unit
+    lanes keep a cleaner filesystem boundary while retained repo-backed contracts
+    stay deterministic and local-only.
   docs_ref: docs/03-guides/testing.md#211-repo-backed-path-naming-and-reclassification
   review_date: '2026-09-30'
   retained_policy_refs:
@@ -1101,8 +1093,8 @@ mixed_scope_unit_path_policy:
   keep_under_tests_unit_when:
   - checked-in repository artifact itself is the contract under test
   - execution stays local-only and deterministic without network/VCR/service startup
-  - file lives under tests/unit/repo_backed/, is explicitly listed in governance
-    inventory, and is marked pytest.mark.repo_backed when routed to repo-backed-unit
+  - file lives under tests/unit/repo_backed/, is explicitly listed in governance inventory,
+    and is marked pytest.mark.repo_backed when routed to repo-backed-unit
   move_out_of_tests_unit_when:
   - test primarily exercises subprocess or CLI process orchestration rather than one
     module contract

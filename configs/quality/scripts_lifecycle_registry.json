@@ -728,6 +728,12 @@
       "review_by": "2026-07-15",
       "next_step": "Retain only as a bounded manual prompt-printing helper for memory seeding; replace with canonical memory workflow documentation before promoting it to an active command surface."
     },
+    "scripts/ops/migrations/active/migrate_gold_parquet_to_delta.py": {
+      "owner": "@bioetl-platform",
+      "decision": "active",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the supported repeatable Gold Parquet-to-Delta migration while the operator guide and repo-backed owner tests use this canonical active path; remove only after the migration window closes and reference proof is complete."
+    },
     "scripts/ops/migrations/oneoff/migrate_exemption_keys_to_paths.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",

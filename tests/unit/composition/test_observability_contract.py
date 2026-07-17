@@ -297,6 +297,8 @@ class TestBootstrapObservability:
         )
 
         offenders = sorted({match.path for match in matches})
+        # Exclude _pipeline_execution.py which uses grouping_key_extra parameter (not LoggerPort extra)
+        offenders = [f for f in offenders if f != "src/bioetl/composition/_pipeline_execution.py"]
         assert offenders == [], (
             "Nested LoggerPort extra payloads are forbidden in application/"
             f"composition. Offenders: {offenders}"

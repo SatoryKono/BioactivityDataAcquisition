@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 from bioetl.domain.control_plane import RunInputSnapshotRef, RunLedgerEntry, RunManifest
 from bioetl.interfaces.http.control_plane_identity.checkpoint_extractors import (
     checkpoint_value,
@@ -38,16 +36,7 @@ from bioetl.interfaces.http.control_plane_identity.replay_extractors import (
     runtime_mode,
 )
 from bioetl.interfaces.http.control_plane_identity.specs import SPEC_BY_NAME
-from bioetl.interfaces.http.control_plane_identity.types import AnchorSpec
-
-
-@dataclass(frozen=True, slots=True)
-class AnchorValues:
-    """Resolved value for one identity anchor from one control-plane source."""
-
-    spec: AnchorSpec
-    value: object
-    source: str
+from bioetl.interfaces.http.control_plane_identity.types import AnchorValues
 
 
 def anchor_values_from_mapping(

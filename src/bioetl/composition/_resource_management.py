@@ -21,6 +21,8 @@ from bioetl.composition._pipeline_execution import (
 if TYPE_CHECKING:
     from collections.abc import Awaitable
 
+    from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
 
 __all__ = [
     "archive_table",
@@ -90,7 +92,22 @@ class MedallionLifecycleServiceProtocol(Protocol):
 class CleanupPreviewProtocol(Protocol):
     """Minimal preview payload contract for cleanup dry-run operations."""
 
-    total_files: int
+    @property
+    def total_files(self) -> int:
+        """Return the number of files affected by the cleanup."""
+        ...
+
+
+class CleanupServiceProtocol(Protocol):
+    """Minimal cleanup service contract used by preview entrypoints."""
+
+    def preview(
+        self,
+        silver_table: str,
+        gold_table: str | None = None,
+    ) -> Awaitable[CleanupPreviewProtocol]:
+        """Preview cleanup impact for the requested tables."""
+        ...
 
 
 def bootstrap_quarantine_runtime_service(pipeline: str) -> object:
@@ -120,7 +137,7 @@ def bootstrap_lifecycle_service() -> object:
     return impl()
 
 
-def bootstrap_cleanup_service() -> object:
+def bootstrap_cleanup_service() -> CleanupServiceProtocol:
     """Resolve the cleanup bootstrap lazily for patch-friendly tests."""
     from bioetl.composition.bootstrap.cli.storage import (
         bootstrap_cleanup_service as impl,
@@ -129,7 +146,7 @@ def bootstrap_cleanup_service() -> object:
     return impl()
 
 
-def load_pipeline_config(pipeline: str) -> object:
+def load_pipeline_config(pipeline: str) -> PipelineYamlConfig:
     """Resolve pipeline config loading lazily for patch-friendly tests."""
     from bioetl.infrastructure.config.pipeline_config_api import (
         load_pipeline_config as impl,
@@ -281,12 +298,9 @@ async def preview_cleanup(pipeline: str) -> CleanupPreviewProtocol:
     gold_table = (
         pipeline_cfg.gold_table or f"{pipeline_cfg.provider}.{pipeline_cfg.entity_type}"
     )
-    return cast(
-        CleanupPreviewProtocol,
-        await cleanup_service.preview(
-            silver_table=silver_table,
-            gold_table=gold_table,
-        ),
+    return await cleanup_service.preview(
+        silver_table=silver_table,
+        gold_table=gold_table,
     )
 
 

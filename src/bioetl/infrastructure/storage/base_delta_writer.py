@@ -4,26 +4,23 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
+from deltalake import DeltaTable as DeltaTableType
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
 
+from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import BronzeRecord
 from bioetl.infrastructure.storage.base_delta_writer_access import (
     BaseDeltaWriterTableAccessMixin,
 )
+from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
 from bioetl.infrastructure.storage.delta.table_ops import (
     normalize_delta_filesystem_path,
 )
+from bioetl.infrastructure.storage.support.retention import RetentionPolicy
 
 __all__ = ["BaseDeltaWriter", "DeltaTableNotFoundError", "coerce_null_types_for_delta"]
-
-if TYPE_CHECKING:
-    from deltalake import DeltaTable as DeltaTableType
-
-    from bioetl.domain.ports import LoggerPort
-    from bioetl.infrastructure.storage.delta.arrow_converter import ArrowDataConverter
-    from bioetl.infrastructure.storage.support.retention import RetentionPolicy
 
 
 def DeltaTable(

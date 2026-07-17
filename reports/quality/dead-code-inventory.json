@@ -15,15 +15,14 @@
   "summary": {
     "triaged_entry_count": 18,
     "triaged_entries_below_min_importers": 0,
-    "repo_wide_zero_import_candidate_count": 2,
-    "repo_wide_classified_zero_import_candidate_count": 2,
+    "repo_wide_zero_import_candidate_count": 1,
+    "repo_wide_classified_zero_import_candidate_count": 1,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
     "repo_wide_owner_test_anchored_candidate_count": 1,
-    "repo_wide_candidates_without_owner_tests_count": 1,
+    "repo_wide_candidates_without_owner_tests_count": 0,
     "repo_wide_non_static_reachability_candidate_count": 1,
     "repo_wide_disposition_counts": {
-      "retain_module_entrypoint": 1,
-      "retain_private_module": 1
+      "retain_module_entrypoint": 1
     },
     "repo_wide_evidence_lane_counts": {
       "module_entrypoint_owner_suite": 1
@@ -362,24 +361,6 @@
       ],
       "owner_test_count": 1,
       "owner_test_paths_exist_count": 1
-    },
-    {
-      "module_name": "bioetl.domain.normalization.profiles._stable",
-      "path": "src/bioetl/domain/normalization/profiles/_stable.py",
-      "is_private_module": true,
-      "src_importer_count": 0,
-      "test_importer_count": 0,
-      "classification_status": "classified",
-      "disposition": "retain_private_module",
-      "reviewed_on": "2026-07-13",
-      "review_by": "2026-09-14",
-      "linked_issue": "#4541",
-      "rationale": "Private type definitions for normalization profiles; used internally by profile loading infrastructure",
-      "owner": "@bioetl-architecture",
-      "evidence_lane": null,
-      "owner_tests": [],
-      "owner_test_count": 0,
-      "owner_test_paths_exist_count": 0
     }
   ]
 }

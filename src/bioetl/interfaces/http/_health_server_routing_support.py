@@ -3,10 +3,16 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Protocol, cast
+from typing import Protocol
 
 from bioetl.application.runtime_clock import current_utc_time
 from bioetl.domain.control_plane import WorkflowManifest
+from bioetl.domain.ports import (
+    CheckpointPort,
+    RunLedgerPort,
+    RunManifestPort,
+    WorkflowManifestPort,
+)
 from bioetl.interfaces.http._health_server_checkpoint_freshness_payloads import (
     build_checkpoint_freshness_ok_payload,
     build_checkpoint_freshness_unknown_payload,
@@ -17,6 +23,7 @@ from bioetl.interfaces.http._health_server_checkpoint_lookup import (
     load_checkpoint_freshness_evidence,
 )
 from bioetl.interfaces.http._health_server_control_plane_scope import (
+    _IdentityScope,
     read_selected_run_id,
     resolve_control_plane_identity_scope,
 )
@@ -54,19 +61,22 @@ class _HealthResponseSupport(Protocol):
         payload: dict[str, object],
     ) -> None: ...
 
-    async def _handle_request_error(
-        self,
-        writer: asyncio.StreamWriter,
-        error: BaseException,
-    ) -> None: ...
-
 
 class _HealthRoutingHost(_HealthResponseSupport, Protocol):
-    _checkpoint_port: object | None
-    _run_manifest_port: object | None
-    _run_ledger_port: object | None
-    _workflow_manifest_port: object | None
-    _data_root: str | None
+    @property
+    def _checkpoint_port(self) -> CheckpointPort | None: ...
+
+    @property
+    def _run_manifest_port(self) -> RunManifestPort | None: ...
+
+    @property
+    def _run_ledger_port(self) -> RunLedgerPort | None: ...
+
+    @property
+    def _workflow_manifest_port(self) -> WorkflowManifestPort | None: ...
+
+    @property
+    def _data_root(self) -> str | None: ...
 
     def _read_required_param(self, query: dict[str, str], name: str) -> str: ...
 
@@ -101,9 +111,8 @@ async def dispatch_control_plane_request(
     query: dict[str, str],
 ) -> None:
     """Route control-plane selector helper endpoints."""
-    response_support = cast(_HealthResponseSupport, host)
     if host._run_manifest_port is None:
-        await response_support._send_response(
+        await host._send_response(
             writer,
             503,
             "Control-plane selector catalog unavailable",
@@ -129,9 +138,9 @@ async def dispatch_control_plane_request(
         if path == "/ops/control-plane/checkpoint-freshness":
             await handle_control_plane_checkpoint_freshness(host, writer, query)
             return
-        await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
+        await host._send_response(writer, 404, _NOT_FOUND_MESSAGE)
     except ValueError as exc:
-        await response_support._send_response(writer, 400, str(exc))
+        await host._send_response(writer, 400, str(exc))
 
 
 async def handle_control_plane_ready(
@@ -193,9 +202,17 @@ async def handle_control_plane_filter_options(
     )
     if response_shape != "list" and dimension == "run_id":
         payload["run_ids"] = [
-            value for value in payload.get("items", []) if value != RUN_ID_NO_SELECTION
+            value
+            for value in _string_payload_items(payload.get("items"))
+            if value != RUN_ID_NO_SELECTION
         ]
     await host._send_payload_response(writer, 200, payload)
+
+
+def _string_payload_items(value: object) -> tuple[str, ...]:
+    if not isinstance(value, list):
+        return ()
+    return tuple(item for item in value if isinstance(item, str))
 
 
 def _read_truthy_query_param(query: dict[str, str], name: str) -> bool:
@@ -232,18 +249,13 @@ async def _list_workflow_manifests(
     host: _HealthRoutingHost,
 ) -> tuple[WorkflowManifest, ...]:
     workflow_manifest_port = getattr(host, "_workflow_manifest_port", None)
-    if workflow_manifest_port is None or not hasattr(
-        workflow_manifest_port, "list_all"
-    ):
+    if workflow_manifest_port is None:
         return ()
-    return cast(
-        tuple[WorkflowManifest, ...],
-        await asyncio.to_thread(workflow_manifest_port.list_all),
-    )
+    return await asyncio.to_thread(workflow_manifest_port.list_all)
 
 
-def _resolved_scope_pipeline(scope: object) -> str:
-    resolved_manifest = getattr(scope, "resolved_manifest", None)
+def _resolved_scope_pipeline(scope: _IdentityScope) -> str:
+    resolved_manifest = scope.resolved_manifest
     if resolved_manifest is not None:
         return str(resolved_manifest.pipeline_name)
     return str(scope.requested_pipeline)

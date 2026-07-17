@@ -2,19 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import datetime
-
-# Forward declarations to avoid circular imports
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from bioetl.domain.control_plane.run_manifest import (
-        ReplayCapability,
-        RunArtifactRef,
-        RunCodeProvenance,
-        RunInputSnapshotRef,
-        RunSourceRef,
-    )
 
 
 def _load_optional_str(payload: dict[str, object], key: str) -> str | None:
@@ -23,12 +12,14 @@ def _load_optional_str(payload: dict[str, object], key: str) -> str | None:
     return None if value is None else str(value)
 
 
-def _load_code_provenance(raw_code: object) -> RunCodeProvenance:
+def _load_code_provenance[CodeProvenanceT](
+    raw_code: object,
+    *,
+    provenance_type: Callable[..., CodeProvenanceT],
+) -> CodeProvenanceT:
     """Deserialize code provenance payload safely."""
-    from bioetl.domain.control_plane.run_manifest import RunCodeProvenance
-
     payload = _load_object_mapping(raw_code)
-    return RunCodeProvenance(
+    return provenance_type(
         pipeline_version=_load_optional_str(payload, "pipeline_version"),
         git_commit=_load_optional_str(payload, "git_commit"),
         source_revision_state=_load_optional_str(payload, "source_revision_state"),
@@ -60,12 +51,15 @@ def _load_code_provenance(raw_code: object) -> RunCodeProvenance:
     )
 
 
-def _load_replay_capability(raw_value: object) -> ReplayCapability:
-    from bioetl.domain.control_plane.run_manifest import ReplayCapability
-
+def _load_replay_capability[ReplayCapabilityT](
+    raw_value: object,
+    *,
+    capability_type: Callable[[str], ReplayCapabilityT],
+    rebuild_only: ReplayCapabilityT,
+) -> ReplayCapabilityT:
     if raw_value is None:
-        return ReplayCapability.REBUILD_ONLY
-    return ReplayCapability(str(raw_value))
+        return rebuild_only
+    return capability_type(str(raw_value))
 
 
 def _load_object_mapping(raw_mapping: object) -> dict[str, object]:
@@ -74,38 +68,50 @@ def _load_object_mapping(raw_mapping: object) -> dict[str, object]:
     return {str(key): value for key, value in raw_mapping.items()}
 
 
-def _load_source_refs(raw_sources: object) -> tuple[RunSourceRef, ...]:
-    from bioetl.domain.control_plane.run_manifest import RunSourceRef
-
+def _load_source_refs[SourceRefT, SnapshotRefT](
+    raw_sources: object,
+    *,
+    source_ref_type: Callable[..., SourceRefT],
+    snapshot_ref_type: Callable[..., SnapshotRefT],
+) -> tuple[SourceRefT, ...]:
     if not isinstance(raw_sources, list):
         return ()
     return tuple(
-        RunSourceRef(
+        source_ref_type(
             provider=str(item["provider"]),
             entity=str(item["entity"]),
             pipeline_name=str(item["pipeline_name"]),
             query=(None if item.get("query") is None else str(item["query"])),
-            input_snapshots=_load_input_snapshots(item.get("input_snapshots")),
+            input_snapshots=_load_input_snapshots(
+                item.get("input_snapshots"),
+                snapshot_ref_type=snapshot_ref_type,
+            ),
         )
         for item in raw_sources
         if isinstance(item, dict)
     )
 
 
-def _load_input_snapshots(raw_snapshots: object) -> tuple[RunInputSnapshotRef, ...]:
+def _load_input_snapshots[SnapshotRefT](
+    raw_snapshots: object,
+    *,
+    snapshot_ref_type: Callable[..., SnapshotRefT],
+) -> tuple[SnapshotRefT, ...]:
     if not isinstance(raw_snapshots, list):
         return ()
     return tuple(
-        _load_input_snapshot_ref(item)
+        _load_input_snapshot_ref(item, snapshot_ref_type=snapshot_ref_type)
         for item in raw_snapshots
         if isinstance(item, dict)
     )
 
 
-def _load_input_snapshot_ref(item: dict[str, object]) -> RunInputSnapshotRef:
-    from bioetl.domain.control_plane.run_manifest import RunInputSnapshotRef
-
-    return RunInputSnapshotRef(
+def _load_input_snapshot_ref[SnapshotRefT](
+    item: dict[str, object],
+    *,
+    snapshot_ref_type: Callable[..., SnapshotRefT],
+) -> SnapshotRefT:
+    return snapshot_ref_type(
         snapshot_id=str(item["snapshot_id"]),
         content_hash=str(item["content_hash"]),
         immutable_uri=_load_optional_snapshot_text(item, "immutable_uri"),
@@ -136,13 +142,15 @@ def _load_optional_snapshot_datetime(
     return None if raw_value is None else datetime.fromisoformat(str(raw_value))
 
 
-def _load_artifacts(raw_artifacts: object) -> tuple[RunArtifactRef, ...]:
-    from bioetl.domain.control_plane.run_manifest import RunArtifactRef
-
+def _load_artifacts[ArtifactRefT](
+    raw_artifacts: object,
+    *,
+    artifact_type: Callable[..., ArtifactRefT],
+) -> tuple[ArtifactRefT, ...]:
     if not isinstance(raw_artifacts, list):
         return ()
     return tuple(
-        RunArtifactRef(layer=str(item["layer"]), path=str(item["path"]))
+        artifact_type(layer=str(item["layer"]), path=str(item["path"]))
         for item in raw_artifacts
         if isinstance(item, dict)
     )

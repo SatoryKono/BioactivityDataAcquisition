@@ -11,6 +11,7 @@ from bioetl.domain.types import BronzeRecord
 from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
 from bioetl.infrastructure.storage.silver.operations.metadata_runtime_support import (
+    _SilverMetadataWriterProtocol,
     compute_dq_metrics_from_arrow_data,
     persist_silver_metadata,
     resolve_finalization_dq_metrics,
@@ -24,23 +25,23 @@ from bioetl.infrastructure.storage.silver.operations.metadata_runtime_support im
 )
 
 
-def get_flat_structure(metadata_ops: object) -> bool:
+def get_flat_structure(metadata_ops: _SilverMetadataWriterProtocol) -> bool:
     """Resolve flat-structure metadata mode from the current host, if any."""
     return resolve_flat_structure(getattr(metadata_ops, "_host", None))
 
 
-def get_transform_version(metadata_ops: object) -> str | None:
+def get_transform_version(metadata_ops: _SilverMetadataWriterProtocol) -> str | None:
     """Resolve transform version from the current host, if any."""
     return resolve_transform_version(getattr(metadata_ops, "_host", None))
 
 
-def get_transform_steps(metadata_ops: object) -> tuple[str, ...]:
+def get_transform_steps(metadata_ops: _SilverMetadataWriterProtocol) -> tuple[str, ...]:
     """Resolve transform steps from the current host with a stable fallback."""
     return resolve_transform_steps(getattr(metadata_ops, "_host", None))
 
 
 def resolve_silver_manifest_id(
-    metadata_ops: object,
+    metadata_ops: _SilverMetadataWriterProtocol,
     *,
     records: list[BronzeRecord],
 ) -> str | None:
@@ -49,7 +50,7 @@ def resolve_silver_manifest_id(
 
 
 async def persist_silver_metadata_operation(
-    metadata_ops: object,
+    metadata_ops: _SilverMetadataWriterProtocol,
     *,
     metadata: SilverMetadata,
     table_name: str,
@@ -65,7 +66,7 @@ async def persist_silver_metadata_operation(
 
 
 async def resolve_finalization_dq_metrics_operation(
-    metadata_ops: object,
+    metadata_ops: _SilverMetadataWriterProtocol,
     *,
     table_name: str,
     records: list[BronzeRecord],
@@ -83,7 +84,7 @@ async def resolve_finalization_dq_metrics_operation(
 
 
 async def resolve_version_after_operation(
-    metadata_ops: object,
+    metadata_ops: _SilverMetadataWriterProtocol,
     table_path: str,
 ) -> int | None:
     """Read Delta version via host helper when available."""
@@ -91,7 +92,7 @@ async def resolve_version_after_operation(
 
 
 async def compute_silver_dq_metrics_operation(
-    metadata_ops: object,
+    metadata_ops: _SilverMetadataWriterProtocol,
     arrow_data: pa.Table,
     *,
     quarantined_count: int | None = None,
@@ -107,7 +108,7 @@ async def compute_silver_dq_metrics_operation(
 
 
 def should_skip_silver_metadata_write_operation(
-    metadata_ops: object,
+    metadata_ops: _SilverMetadataWriterProtocol,
     *,
     records: list[BronzeRecord],
     table_path: str,
@@ -119,7 +120,7 @@ def should_skip_silver_metadata_write_operation(
 
 
 async def write_silver_metadata_file_operation(
-    metadata_ops: object,
+    metadata_ops: _SilverMetadataWriterProtocol,
     *,
     table_path: str,
     metadata: SilverMetadata,

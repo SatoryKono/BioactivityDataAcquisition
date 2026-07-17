@@ -110,6 +110,7 @@ dev = [
     # Docs link checker plugin tests import BeautifulSoup directly
     "beautifulsoup4>=4.11.0",
     "mypy==1.20.2",
+    "types-openpyxl>=3.1",
     "ruff>=0.4",
     "basedpyright>=1.0",
     "pyrefly>=0.18",

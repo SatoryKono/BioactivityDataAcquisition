@@ -8,6 +8,7 @@ from dataclasses import replace
 from bioetl.domain.workflow import (
     WorkflowConfig,
     WorkflowRunOptionsConfig,
+    WorkflowStep,
     WorkflowStepConfig,
 )
 
@@ -188,7 +189,7 @@ def apply_cli_override_config(
     if not override.to_mapping():
         return config
 
-    updated_steps = []
+    updated_steps: list[WorkflowStep] = []
     for step in config.steps:
         if isinstance(step, WorkflowStepConfig):
             updated_steps.append(

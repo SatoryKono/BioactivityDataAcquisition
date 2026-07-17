@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Protocol, cast
+from typing import Protocol
 
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.types import RunID
@@ -33,8 +33,11 @@ class _HealthResponseSupport(Protocol):
 
 
 class _HealthObservabilityRoutingHost(_HealthResponseSupport, Protocol):
-    _prometheus_base_url: str
-    _run_ledger_port: _RunLedgerLookup | None
+    @property
+    def _prometheus_base_url(self) -> str: ...
+
+    @property
+    def _run_ledger_port(self) -> _RunLedgerLookup | None: ...
 
     def _read_required_param(self, query: dict[str, str], name: str) -> str: ...
 
@@ -54,16 +57,15 @@ async def dispatch_observability_request(
     query: dict[str, str],
 ) -> None:
     """Route dashboard observability helper endpoints."""
-    response_support = cast(_HealthResponseSupport, host)
     try:
         if path == "/ops/observability/processed-records":
             await handle_processed_records_table(host, writer, query)
             return
-        await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
+        await host._send_response(writer, 404, _NOT_FOUND_MESSAGE)
     except ValueError as exc:
-        await response_support._send_response(writer, 400, str(exc))
+        await host._send_response(writer, 400, str(exc))
     except RuntimeError as exc:
-        await response_support._send_response(writer, 502, str(exc))
+        await host._send_response(writer, 502, str(exc))
 
 
 async def handle_processed_records_table(

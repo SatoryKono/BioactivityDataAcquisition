@@ -96,6 +96,8 @@ class _SilverWriterMetadataRuntimeProtocol(
     async def _prepare_silver_write_finalization_context(
         self,
         request: _SilverWriteFinalizationPreparationRequest,
+        *,
+        perf_counter: Callable[[], float] | None = None,
     ) -> _PreparedSilverWriteFinalizationContext: ...
 
     async def _get_delta_version(self, table_path: str) -> int | None: ...

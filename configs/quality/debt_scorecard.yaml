@@ -156,8 +156,8 @@ sanctioned_public_entrypoint_governance:
       owner: '@bioetl-architecture'
       linked_issue: '4565'
       rationale: One sanctioned public entrypoint remains in the narrow-first-party-callers
-        governance state so the stable facade can remain public while ordinary
-        first-party callers stay confined to the reviewed owner seam.
+        governance state so the stable facade can remain public while ordinary first-party
+        callers stay confined to the reviewed owner seam.
       review_cadence: quarterly
       review_policy: Ratchet first-party callers toward reviewed facade exports and
         keep deeper owner modules hidden behind the sanctioned public seam.
@@ -258,7 +258,10 @@ config_surface_ratchet:
     report_artifact: docs/config-discrepancies-report.md
     matrix_artifact: docs/04-reference/config_comparison_matrix.csv
     expected_direction: downward
-    ratchet_policy: Config-surface metrics must not grow without an explicit scorecard budget update; inconsistent-parameter count ratchets downward during Stream B burn-down. Entity rows use effective pipeline config merged from configs/base/pipeline.yaml and configs/base/quality.yaml.
+    ratchet_policy: Config-surface metrics must not grow without an explicit scorecard
+      budget update; inconsistent-parameter count ratchets downward during Stream
+      B burn-down. Entity rows use effective pipeline config merged from configs/base/pipeline.yaml
+      and configs/base/quality.yaml.
   metrics:
     config_count:
       current_count: 27
@@ -377,9 +380,9 @@ config_surface_ratchet:
     owner: '@bioetl-config'
     mode: fail-fast-no-growth
     artifact: reports/quality/config-discrepancy-baseline.json
-    rationale: Compatibility-legacy config parameters are retired from entity
-      effective and composite runtime config surfaces; zero-count guards block
-      reintroduction while keeping cleanup monotonic.
+    rationale: Compatibility-legacy config parameters are retired from entity effective
+      and composite runtime config surfaces; zero-count guards block reintroduction
+      while keeping cleanup monotonic.
     groups:
       entity_effective:
         compatibility_legacy:
@@ -399,8 +402,8 @@ config_surface_ratchet:
           owner: '@bioetl-config'
           rationale: Composite runtime configs no longer expose composite.field_aliases
             compatibility_legacy taxonomy entries; keep this family at zero.
-          ratchet_policy: Zero-budget fail-fast; any reintroduction of composite
-            field_aliases requires removal, not budget growth.
+          ratchet_policy: Zero-budget fail-fast; any reintroduction of composite field_aliases
+            requires removal, not budget growth.
 registry_groups:
   size_metrics:
     registries:
@@ -487,10 +490,10 @@ hotspot_family_ratchets:
     trend:
       status: reviewed_2026-07-07_application_core_live_metric_refresh
       next_action: 2026-07-07 refreshes measured application_core metrics against
-        the committed hotspot-family baseline at 180 files, 22319 LOC, 4
-        files_ge_250_loc, helper_function_ratio 0.357, and max_internal_fan_in
-        7. Bounded-growth budgets remain flat at 7 files_ge_250_loc and
-        max_internal_fan_in 10; no technical-debt budget is increased.
+        the committed hotspot-family baseline at 180 files, 22319 LOC, 4 files_ge_250_loc,
+        helper_function_ratio 0.357, and max_internal_fan_in 7. Bounded-growth budgets
+        remain flat at 7 files_ge_250_loc and max_internal_fan_in 10; no technical-debt
+        budget is increased.
   - name: composition_bootstrap_runtime
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -515,11 +518,10 @@ hotspot_family_ratchets:
       max_internal_fan_in_module: bioetl.composition.bootstrap.runtime.tracing_bootstrap
     trend:
       status: reduced_2026-07-07_tracing_bootstrap_headroom_restored
-      next_action: 2026-07-07 refresh aligns the scorecard with the committed
-        hotspot-family baseline at 49 files, 6010 LOC, 0 files_ge_250_loc,
-        helper_function_ratio 0.309, and max_internal_fan_in 2. Bounded-growth
-        budgets remain flat at 0 files_ge_250_loc and max_internal_fan_in 3;
-        no technical-debt budget is increased.
+      next_action: 2026-07-07 refresh aligns the scorecard with the committed hotspot-family
+        baseline at 49 files, 6010 LOC, 0 files_ge_250_loc, helper_function_ratio
+        0.309, and max_internal_fan_in 2. Bounded-growth budgets remain flat at 0
+        files_ge_250_loc and max_internal_fan_in 3; no technical-debt budget is increased.
   - name: composition_factories_pipeline
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -544,11 +546,11 @@ hotspot_family_ratchets:
       max_internal_fan_in_module: bioetl.composition.factories.pipeline.transformer_builder
     trend:
       status: reduced_2026-07-06_pipeline_factories_fan_in_below_reviewed_budget
-      next_action: 2026-07-06 refresh aligns the scorecard with the committed
-        hotspot-family baseline at 35 files, 4647 LOC, 2 files_ge_250_loc,
-        helper_function_ratio 0.417, and max_internal_fan_in 2. The family
-        remains below the files_ge_250_loc budget at 2/3 while max_internal_fan_in
-        is below budget at 2/3; no technical-debt budget is increased.
+      next_action: 2026-07-06 refresh aligns the scorecard with the committed hotspot-family
+        baseline at 35 files, 4647 LOC, 2 files_ge_250_loc, helper_function_ratio
+        0.417, and max_internal_fan_in 2. The family remains below the files_ge_250_loc
+        budget at 2/3 while max_internal_fan_in is below budget at 2/3; no technical-debt
+        budget is increased.
   - name: application_services_control_plane
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -572,12 +574,11 @@ hotspot_family_ratchets:
       max_internal_fan_in_module: bioetl.application.services.control_plane.workflow.manifest_models
     trend:
       status: reduced_2026-07-14_issue_6289_large_file_census_restored
-      next_action: 2026-07-14 issue 6289 refreshes the measured control-plane
-        snapshot to 124 files, 15126 LOC, 11 files_ge_250_loc, helper_function_ratio
-        0.458, and max_internal_fan_in 3 after moving historical replay record
-        models out of historical_universe_service.py. Bounded-growth budgets remain
-        flat at 16 files_ge_250_loc and max_internal_fan_in 4; no technical-debt
-        budget is increased.
+      next_action: 2026-07-14 issue 6289 refreshes the measured control-plane snapshot
+        to 124 files, 15126 LOC, 11 files_ge_250_loc, helper_function_ratio 0.458,
+        and max_internal_fan_in 3 after moving historical replay record models out
+        of historical_universe_service.py. Bounded-growth budgets remain flat at 16
+        files_ge_250_loc and max_internal_fan_in 4; no technical-debt budget is increased.
   - name: composition_runtime_builders
     owner: '@bioetl-platform'
     linked_rf: RF-023
@@ -601,26 +602,24 @@ hotspot_family_ratchets:
       max_internal_fan_in_module: bioetl.composition.runtime_builders.run_manifest_support
     trend:
       status: reduced_2026-07-08_issue_6060_runtime_builder_fan_in_headroom
-      next_action: 2026-07-08 issue 6060 splits contract-identity shape helpers,
-        runtime-input type-only imports, effective-config serialization, and
-        data-root / runner policy seams across narrower owners, lowering measured
-        max_internal_fan_in from 4 to 3 while preserving the existing bounded
-        budget of 5. No technical-debt budget is increased.
+      next_action: 2026-07-08 issue 6060 splits contract-identity shape helpers, runtime-input
+        type-only imports, effective-config serialization, and data-root / runner
+        policy seams across narrower owners, lowering measured max_internal_fan_in
+        from 4 to 3 while preserving the existing bounded budget of 5. No technical-debt
+        budget is increased.
 full_app_duplication_ratchets:
   snapshot_date: '2026-07-07'
   mode: fail-fast
   artifact_policy:
     generator_command: python -m scripts.engineering.qa report-duplication-baseline
       --targets src/bioetl/infrastructure/adapters src/bioetl/application/pipelines
-      src/bioetl/composition/bootstrap src/bioetl/interfaces/cli --json-out
-      reports/quality/full-app-duplication-baseline.json --md-out
-      reports/quality/full-app-duplication-baseline.md
-      --exclude-actionability-category export_facade_or_package_barrel
+      src/bioetl/composition/bootstrap src/bioetl/interfaces/cli --json-out reports/quality/full-app-duplication-baseline.json
+      --md-out reports/quality/full-app-duplication-baseline.md --exclude-actionability-category
+      export_facade_or_package_barrel
     baseline_artifact: reports/quality/full-app-duplication-baseline.json
     expected_direction: downward
-    ratchet_policy: Full-app duplication families must ratchet downward during
-      structural burn-down; budgets must not grow without an explicit scorecard
-      update.
+    ratchet_policy: Full-app duplication families must ratchet downward during structural
+      burn-down; budgets must not grow without an explicit scorecard update.
   families:
   - name: infrastructure_adapters
     owner: '@bioetl-infrastructure'
@@ -669,8 +668,8 @@ supporting_scripts_governance:
       max_count: 34
       owner: '@bioetl-platform'
       linked_issue: '#5845'
-      ratchet_policy: Zero-reference supporting scripts must stay triaged with
-        owner metadata; count may only decrease after removal.
+      ratchet_policy: Zero-reference supporting scripts must stay triaged with owner
+        metadata; count may only decrease after removal.
     untriaged_zero_reference_supporting_script_count:
       current_count: 0
       max_count: 0
@@ -692,7 +691,7 @@ oversized_source_module_inventory:
     owner: '@bioetl-control-plane'
     target_split: split checkpoint policy evaluation from diagnostic payload assembly
   - path: src/bioetl/infrastructure/config/_base.py
-    lines: 239
+    lines: 243
     owner: '@bioetl-config'
     target_split: separate config discovery, validation, and environment resolution
       helpers
@@ -713,7 +712,7 @@ oversized_source_module_inventory:
     owner: '@bioetl-reproducibility'
     target_split: separate score-card policy rules from manifest projection helpers
   - path: src/bioetl/interfaces/cli/commands/domains/health/server_integration.py
-    lines: 379
+    lines: 409
     owner: '@bioetl-interfaces'
     target_split: split health server integration, metrics server wiring, and quarantine
       service helpers
@@ -997,11 +996,10 @@ retirement_governance_metrics:
     reviewed_on: '2026-06-17'
     owner: '@bioetl-architecture'
     outcome: retired_zero_import_composition_registry_facade
-    rationale: Issue 5278 retired the zero-import composition.registry module,
-      moved the registry owner implementation behind statically imported
-      registry_core, and kept the public API on composition.registry_api. Repo-wide
-      zero-import candidates fell from 11 to 10 while untriaged candidates remained
-      at zero.
+    rationale: Issue 5278 retired the zero-import composition.registry module, moved
+      the registry owner implementation behind statically imported registry_core,
+      and kept the public API on composition.registry_api. Repo-wide zero-import candidates
+      fell from 11 to 10 while untriaged candidates remained at zero.
   review_policy: Review dead-code triage and repo-wide zero-import classifications
     together; growth in tracked retirement debt or any untriaged zero-import candidate
     requires an explicit reviewed rebaseline.
@@ -1020,8 +1018,9 @@ retirement_governance_metrics:
       max_count: 2
       linked_issue: '#6352'
       owner: '@bioetl-architecture'
-      rationale: Repo-wide zero-import candidates reduced to 2 after recent cleanup and
-        reclassification. The retired composition.registry facade is no longer counted.
+      rationale: Repo-wide zero-import candidates reduced to 2 after recent cleanup
+        and reclassification. The retired composition.registry facade is no longer
+        counted.
       ratchet_policy: Non-growth fail-fast unless a reviewed dead-code inventory refresh
         updates the classified candidate set intentionally.
     repo_wide_classified_zero_import_candidate_count:
@@ -1045,10 +1044,9 @@ retirement_governance_metrics:
       max_count: 1
       linked_issue: '#6352'
       owner: '@bioetl-architecture'
-      rationale: >-
-        Only 1 of 2 repo-wide zero-import candidates is anchored by evidence:
-        __main__.py has explicit owner-test suites. The remaining module
-        requires owner test evidence or classification review.
+      rationale: 'Only 1 of 2 repo-wide zero-import candidates is anchored by evidence:
+        __main__.py has explicit owner-test suites. The remaining module requires
+        owner test evidence or classification review.'
       ratchet_policy: Non-growth fail-fast unless the reviewed candidate set intentionally
         shrinks and the owner-test evidence is regenerated in lockstep.
     repo_wide_candidates_without_owner_tests_count:
@@ -1083,8 +1081,8 @@ retirement_governance_metrics:
       max_count: 0
       linked_issue: '#4654'
       owner: '@bioetl-architecture'
-      rationale: Reviewed retained retirement-triage entries without owner tests
-        are not allowed to persist.
+      rationale: Reviewed retained retirement-triage entries without owner tests are
+        not allowed to persist.
       ratchet_policy: Zero-budget fail-fast metric.
 quarterly_targets:
 - quarter: 2026-Q1
@@ -1167,8 +1165,8 @@ test_governance_debt_metrics:
       current_count: 0
       max_count: 0
       target_count: 0
-      ratchet_policy: Downward ratchet only; keep max_count at zero after the
-        final compatibility filename inventory retirement.
+      ratchet_policy: Downward ratchet only; keep max_count at zero after the final
+        compatibility filename inventory retirement.
       rationale: 'Issues #4925, #4967, #5023, #5034, #5101, #5102, #5104, #5106, #5107,
         #5345, #5351, #5372, #5625, #5682, and the 2026-06-30 retirement wave reduced
         compatibility test filename inventory from 37 to zero by removing obsolete
