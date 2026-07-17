@@ -572,6 +572,7 @@ def test_workflow_run_starts_metrics_server_and_publishes_metrics(
             "grouping_key_extra": {
                 "workflow_run_id": "00000000-0000-0000-0000-000000000111"
             },
+            "metric_names": None,
         },
     ]
 
@@ -814,6 +815,7 @@ def test_workflow_run_publishes_metrics_even_when_workflow_fails(
             "grouping_key_extra": {
                 "workflow_run_id": "00000000-0000-0000-0000-000000000222"
             },
+            "metric_names": None,
         },
     ]
 

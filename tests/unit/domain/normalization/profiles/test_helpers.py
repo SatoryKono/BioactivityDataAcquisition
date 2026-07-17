@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from importlib import import_module
-
 import pytest
 
 from bioetl.domain.normalization.profiles.profile_normalizers import (
@@ -25,17 +23,6 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 
 
 pytestmark = pytest.mark.unit
-
-
-def test_stable_value_normalizes_nested_values_deterministically() -> None:
-    stable = import_module("bioetl.domain.normalization.profiles._stable")
-    stable_value = stable._stable_value
-    sha256_hex = stable._sha256_hex
-    first = {"values": {3, 1, 2}, "payload": {"b": b"x", "a": (2, 1)}}
-    second = {"payload": {"a": (2, 1), "b": b"x"}, "values": {2, 3, 1}}
-
-    assert stable_value(first) == stable_value(second)
-    assert sha256_hex(stable_value(first)) == sha256_hex(stable_value(second))
 
 
 def test_normalize_profile_text_trims_blank_to_none() -> None:

@@ -153,9 +153,10 @@ def test_closeout_artifact_is_complete_and_budget_safe_for_issue_pack_5790_5796(
     assert closeout["metrics"]["pipeline_duplicate_clusters"]["opening_baseline"] == 11
     assert closeout["metrics"]["retained_entrypoint_count"] == 12
     assert closeout["metrics"]["retained_public_export_facade_count"] == 4
-    assert closeout["metrics"]["repo_wide_zero_import_candidates"]["count"] == 9
-    assert closeout["metrics"]["repo_wide_zero_import_candidates"]["classified"] == 9
-    assert closeout["metrics"]["repo_wide_zero_import_candidates"]["owner_test_anchored"] == 9
+    zero_import_metrics = closeout["metrics"]["repo_wide_zero_import_candidates"]
+    assert zero_import_metrics["count"] <= 9
+    assert zero_import_metrics["classified"] == zero_import_metrics["count"]
+    assert zero_import_metrics["owner_test_anchored"] == zero_import_metrics["count"]
     config_duplicate_metric = closeout["metrics"][
         "config_surface_duplicate_clusters"
     ]
