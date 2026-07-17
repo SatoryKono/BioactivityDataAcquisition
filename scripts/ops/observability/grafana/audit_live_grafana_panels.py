@@ -1582,6 +1582,7 @@ def _write_report(
             "run_type": config.run_type,
             "run_id": config.run_id,
             "range_hours": config.range_hours,
+            "loki_range_hours": _bounded_loki_range_hours(config),
             "request_timeout_seconds": config.request_timeout_seconds,
         },
         "runtime_provenance": {
