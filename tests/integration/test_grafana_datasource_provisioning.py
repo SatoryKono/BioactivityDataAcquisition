@@ -25,6 +25,7 @@ RENDERER_IMAGE = (
 
 class _ProbeResponse:
     def __init__(self, payload: object) -> None:
+        """Store the payload as bytes, serializing non-byte values as JSON."""
         self._payload = (
             payload if isinstance(payload, bytes) else json.dumps(payload).encode()
         )
@@ -36,10 +37,16 @@ class _ProbeResponse:
         return None
 
     def read(self) -> bytes:
+        """Return the stored payload as bytes."""
         return self._payload
 
 
 def _load_monitoring_compose() -> dict[str, object]:
+    """Load and parse the monitoring Docker Compose configuration.
+    
+    Returns:
+    	dict[str, object]: The parsed monitoring Compose configuration.
+    """
     compose_path = Path("docker-compose.monitoring.yml")
     return yaml.safe_load(compose_path.read_text(encoding="utf-8"))
 
@@ -193,6 +200,15 @@ def test_audit_launcher_blocks_failed_promtail_sentinel_delivery(
     ticks = iter((0.0, 0.1, 1.1))
 
     def fake_open(url: str, **_kwargs: object) -> _ProbeResponse:
+        """
+        Provide deterministic probe responses for audit stack readiness and Loki queries.
+        
+        Parameters:
+        	url (str): The endpoint being probed.
+        
+        Returns:
+        	_ProbeResponse: The endpoint-specific response payload.
+        """
         if url == audit_stack_subject.READY_URL:
             return _ProbeResponse({"data_root": str(data_root.resolve())})
         if url == audit_stack_subject.CATALOG_URL:
@@ -225,6 +241,12 @@ def test_audit_launcher_blocks_failed_promtail_sentinel_delivery(
 
 def test_promtail_probe_reports_unavailable_shipper() -> None:
     def unavailable(*_args: object, **_kwargs: object) -> _ProbeResponse:
+        """
+        Simulate an unavailable Promtail endpoint.
+        
+        Raises:
+            OSError: Always raised with a connection refusal message.
+        """
         raise OSError("connection refused")
 
     result = audit_stack_subject.probe_promtail_audit_delivery(
@@ -237,6 +259,7 @@ def test_promtail_probe_reports_unavailable_shipper() -> None:
 
 
 def test_default_runtime_log_sink_reaches_canonical_loki_dashboard_job() -> None:
+    """Verify that runtime logs are written, shipped to Loki, and referenced by the canonical Grafana dashboard job."""
     compose = _load_monitoring_compose()
     promtail_service = compose["services"]["promtail"]
     assert "./reports/logs:/workspace-report-logs:ro" in promtail_service["volumes"]

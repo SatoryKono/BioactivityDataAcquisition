@@ -97,6 +97,9 @@ def test_live_audit_treats_missing_freshness_as_explicit_telemetry_gap(
     title: str,
     expr: str,
 ) -> None:
+    """
+    Verify that missing Prometheus freshness data is classified as an explicit telemetry gap.
+    """
     spec = audit_subject.PanelAuditSpec(
         dashboard_uid="bioetl-dq-v2",
         panel_id=panel_id,
@@ -702,6 +705,7 @@ def test_live_audit_loki_panel_fails_when_readiness_polling_exhausts_budget(
 def test_live_audit_loki_fixtures_execute_positive_and_empty_paths(
     monkeypatch: Any,
 ) -> None:
+    """Execute fixture-backed Loki audits for positive and expected-empty panel results."""
     fixture_path = Path("tests/fixtures/grafana/loki_runtime_panel_events.jsonl")
     fixtures = {
         item["kind"]: item
@@ -902,6 +906,14 @@ def test_runtime_log_hygiene_trend_uses_aggregated_loki_range_queries() -> None:
     )
 
     def walk_panels(panels: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Flatten nested dashboard panels into a single list.
+        
+        Parameters:
+        	panels (list[dict[str, Any]]): Dashboard panels to traverse.
+        
+        Returns:
+        	list[dict[str, Any]]: Panels in traversal order, including nested panels.
+        """
         result: list[dict[str, Any]] = []
         for panel in panels:
             result.append(panel)
@@ -925,6 +937,15 @@ def test_prometheus_dashboard_panels_do_not_filter_on_run_id_labels() -> None:
         dashboard = json.loads(path.read_text(encoding="utf-8"))
 
         def walk_panels(panels: list[dict[str, Any]]) -> list[dict[str, Any]]:
+            """
+            Flatten a hierarchy of dashboard panels into a single list.
+            
+            Parameters:
+            	panels (list[dict[str, Any]]): Dashboard panels, which may contain nested panels.
+            
+            Returns:
+            	list[dict[str, Any]]: All input panels and their nested panels in traversal order.
+            """
             result: list[dict[str, Any]] = []
             for panel in panels:
                 result.append(panel)
@@ -966,6 +987,15 @@ def test_run_id_independent_metric_panels_disclose_scope() -> None:
         dashboard = json.loads(path.read_text(encoding="utf-8"))
 
         def walk_panels(panels: list[dict[str, Any]]) -> list[dict[str, Any]]:
+            """
+            Flatten a hierarchy of dashboard panels into a single list.
+            
+            Parameters:
+            	panels (list[dict[str, Any]]): Dashboard panels, which may contain nested panels.
+            
+            Returns:
+            	list[dict[str, Any]]: All input panels and their nested panels in traversal order.
+            """
             result: list[dict[str, Any]] = []
             for panel in panels:
                 result.append(panel)
@@ -1135,6 +1165,15 @@ def test_live_audit_resolves_http_backend_through_grafana_datasource_proxy(
         return {"status": "ok"}
 
     def fake_fetch_json(url: str, *, timeout_seconds: float) -> object:
+        """Raise an operating system error containing the requested URL.
+        
+        Parameters:
+        	url (str): URL associated with the failed request
+        	timeout_seconds (float): Request timeout in seconds
+        
+        Raises:
+        	OSError: Always, with `url` as the error message.
+        """
         raise OSError(url)
 
     monkeypatch.setattr(audit_subject, "_request_json", fake_request_json)

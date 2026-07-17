@@ -14,6 +14,7 @@ STALE_RENDERER_PLUGIN_DIR="/var/lib/grafana/plugins/grafana-image-renderer"
 ENABLE_LOKI="false"
 ENABLE_TEMPO="false"
 
+# probe_ready checks whether a URL is reachable within the requested timeout, capped at two seconds.
 probe_ready() {
   requested_timeout="${2:-2}"
   probe_timeout=2
@@ -33,6 +34,7 @@ remaining_auto_wait_seconds() {
   fi
 }
 
+# wait_for_auto_tracing_ready detects Loki and Tempo readiness within the automatic detection window and updates their enablement flags.
 wait_for_auto_tracing_ready() {
   deadline=$(($(date +%s) + AUTO_WAIT_SECONDS))
 

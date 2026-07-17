@@ -357,6 +357,17 @@ def _artifact_descriptor(
     occurrence_id: str,
     kind: str,
 ) -> dict[str, object]:
+    """
+    Build a validated descriptor for a semantic or render audit artifact.
+    
+    Parameters:
+        path (Path): Path to the artifact JSON file.
+        occurrence_id (str): Expected occurrence identifier for the artifact.
+        kind (str): Artifact type, either ``"semantic"`` or ``"render"``.
+    
+    Returns:
+        dict[str, object]: Artifact metadata, terminal status, dashboard scope, and validation state. Returns a failed default descriptor when the file is missing, unreadable, invalid JSON, or has an unsupported structure.
+    """
     resolved = path.expanduser().resolve()
     descriptor: dict[str, object] = {
         "path": str(resolved),

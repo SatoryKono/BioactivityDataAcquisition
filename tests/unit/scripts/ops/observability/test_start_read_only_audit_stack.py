@@ -23,15 +23,27 @@ def _load_subject() -> ModuleType:
 
 class _Response:
     def __init__(self, payload: object) -> None:
+        """Initialize the response wrapper with a payload.
+        
+        Parameters:
+        	payload (object): The response content to store.
+        """
         self.payload = payload
 
     def __enter__(self) -> _Response:
+        """Return this response wrapper for use within a context manager."""
         return self
 
     def __exit__(self, *_args: object) -> None:
         return None
 
     def read(self) -> bytes:
+        """
+        Read the payload as UTF-8 encoded bytes.
+        
+        Returns:
+            bytes: The original bytes payload or a JSON-encoded payload.
+        """
         if isinstance(self.payload, bytes):
             return self.payload
         return json.dumps(self.payload).encode("utf-8")

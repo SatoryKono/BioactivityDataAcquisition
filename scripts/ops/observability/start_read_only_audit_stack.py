@@ -72,7 +72,19 @@ class PromtailAuditProbeResult(NamedTuple):
 
 
 def require_absolute_directory(value: str, *, option_name: str) -> Path:
-    """Return one resolved existing directory or fail before Docker is invoked."""
+    """
+    Resolve an absolute path and verify that it identifies an existing directory.
+    
+    Parameters:
+    	value (str): Path to validate.
+    	option_name (str): Command-line option name used in validation errors.
+    
+    Returns:
+    	Path: The resolved directory path.
+    
+    Raises:
+    	ValueError: If the path is relative or does not identify a directory.
+    """
     path = Path(value)
     if not path.is_absolute():
         raise ValueError(f"{option_name} must be an absolute path: {value}")
@@ -110,6 +122,19 @@ def _read_json_payload(
     *,
     opener: Callable[..., Any],
 ) -> dict[str, Any]:
+    """
+    Read and validate a JSON object from a URL.
+    
+    Parameters:
+    	url (str): The URL to fetch.
+    	opener (Callable[..., Any]): Callable used to open the URL.
+    
+    Returns:
+    	dict[str, Any]: The decoded JSON object.
+    
+    Raises:
+    	ValueError: If the response does not contain a JSON object.
+    """
     with opener(url, timeout=3.0) as response:
         payload = json.loads(response.read().decode("utf-8"))
     if not isinstance(payload, dict):
@@ -122,12 +147,30 @@ def _read_text_payload(
     *,
     opener: Callable[..., Any],
 ) -> str:
+    """Read and return a UTF-8 response body with surrounding whitespace removed.
+    
+    Parameters:
+    	url (str): The URL to open.
+    	opener (Callable[..., Any]): Callable used to open the URL.
+    
+    Returns:
+    	str: The decoded and stripped response body.
+    """
     with opener(url, timeout=3.0) as response:
         return response.read().decode("utf-8").strip()
 
 
 def write_promtail_audit_sentinel(probe_log_root: Path, *, sentinel_id: str) -> str:
-    """Write one unique probe line outside the operator's read-only log root."""
+    """
+    Write a uniquely identifiable audit sentinel log line to the probe directory.
+    
+    Parameters:
+        probe_log_root (Path): Directory where the sentinel log file is created.
+        sentinel_id (str): Identifier used to make the sentinel marker and filename unique.
+    
+    Returns:
+        str: The sentinel marker written in the log entry.
+    """
     probe_log_root.mkdir(parents=True, exist_ok=True)
     marker = f"{PROMTAIL_SENTINEL_PREFIX}{sentinel_id}"
     path = probe_log_root / f"bioetl-promtail-audit-sentinel-{sentinel_id}.log"
@@ -152,7 +195,17 @@ def probe_promtail_audit_delivery(
     opener: Callable[..., Any] = urlopen,
     wall_time_ns: Callable[[], int] = time.time_ns,
 ) -> PromtailAuditProbeResult:
-    """Require both Promtail readiness and observable Loki sentinel delivery."""
+    """
+    Verify Promtail readiness and the visibility of an audit sentinel in Loki.
+    
+    Parameters:
+        marker (str): Sentinel text to search for in Loki.
+        wall_time_ns (Callable[[], int]): Clock function returning the query end time in nanoseconds.
+    
+    Returns:
+        PromtailAuditProbeResult: Probe state and detail describing whether Promtail is down,
+            ready with delivery pending, or has delivered the sentinel.
+    """
     try:
         readiness = _read_text_payload(PROMTAIL_READY_URL, opener=opener)
     except (OSError, UnicodeError) as exc:
@@ -212,7 +265,16 @@ def probe_audit_backend(
     expected_data_root: Path,
     opener: Callable[..., Any] = urlopen,
 ) -> AuditBackendProbeResult:
-    """Classify readiness, routing, and whether the audit catalog has data."""
+    """
+    Classify the audit backend by readiness, data-root routing, and catalog contents.
+    
+    Parameters:
+    	expected_data_root (Path): Directory the backend is expected to serve.
+    	opener (Callable[..., Any]): Callable used to open backend endpoints.
+    
+    Returns:
+    	AuditBackendProbeResult: The backend state, diagnostic detail, served data root, and catalog item count when available.
+    """
     try:
         ready_payload = _read_json_payload(READY_URL, opener=opener)
     except TimeoutError as exc:
@@ -282,7 +344,23 @@ def start_and_verify_audit_stack(
     sentinel_id: str | None = None,
     probe_log_root: Path | None = None,
 ) -> AuditBackendProbeResult:
-    """Start the audit stack and prove routing, catalog, and log delivery."""
+    """
+    Start the audit stack and verify its data routing, catalog, and sentinel log delivery.
+    
+    Parameters:
+        data_root (Path): Expected root directory served by the audit backend.
+        log_root (Path): Directory containing audit logs.
+        timeout_seconds (float): Maximum time to wait for verification.
+        sentinel_id (str | None): Optional identifier for the Promtail audit sentinel.
+        probe_log_root (Path | None): Optional directory in which to write the sentinel log.
+    
+    Returns:
+        AuditBackendProbeResult: The verified audit backend probe result.
+    
+    Raises:
+        RuntimeError: If the backend serves the wrong data root or verification does not
+            complete before the timeout.
+    """
     managed_probe_root = probe_log_root is None
     resolved_probe_log_root = (
         probe_log_root or Path(mkdtemp(prefix="bioetl-promtail-audit-probe-"))

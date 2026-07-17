@@ -1447,6 +1447,17 @@ def _audit_loki_panel(
     panel: dict[str, Any],
     config: AuditConfig,
 ) -> AuditResult:
+    """
+    Audit a Grafana panel backed by Loki and classify its query response.
+    
+    Parameters:
+    	spec (PanelAuditSpec): Panel audit specification, including query selection and required status.
+    	panel (dict[str, Any]): Grafana panel definition containing the Loki target.
+    	config (AuditConfig): Runtime configuration for Loki access, time range, and request timeout.
+    
+    Returns:
+    	AuditResult: The panel’s Loki audit outcome, including classification, query preview, timing, and execution details.
+    """
     target = _select_target(panel, spec, field="expr")
     expr = str(target.get("expr") or "") if target is not None else ""
     if not expr:
