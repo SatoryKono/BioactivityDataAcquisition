@@ -170,14 +170,21 @@ def test_documentation_cleanup_inventory_covers_root_entrypoints() -> None:
         assert rows[path]["root_doc_kind"] == kind
 
 
-def test_documentation_cleanup_inventory_includes_local_docs_reports() -> None:
-    """Ignored local docs/reports artifacts remain visible in cleanup planning."""
+def test_documentation_cleanup_inventory_accounts_for_local_docs_reports() -> None:
+    """Available local docs/reports artifacts must be counted deterministically."""
     payload = _inventory_payload()
     summary = payload["summary"]
     assert isinstance(summary, dict)
     rows = _rows_by_path()
 
-    assert summary["total_doc_like_ignored_local"] >= 1000
+    docs_report_rows = [
+        row for path, row in rows.items() if path.startswith("docs/reports/")
+    ]
+    ignored_local_rows = [
+        row for row in docs_report_rows if row["tracking_state"] == "ignored_local"
+    ]
+    assert summary["docs_reports_local_count"] == len(docs_report_rows)
+    assert summary["total_doc_like_ignored_local"] == len(ignored_local_rows)
     assert rows["docs/reports/README.md"]["tracking_state"] == "tracked"
     assert rows["docs/reports/index.md"]["tracking_state"] == "tracked"
     assert (
