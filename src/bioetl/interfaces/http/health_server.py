@@ -50,7 +50,6 @@ class HealthServer(
         workflow_manifest_port: WorkflowManifestPort | None = None,
         prometheus_base_url: str | None = None,
         logger: LoggerPort | None = None,
-        clock: ClockPort | None = None,
     ) -> None:
         """Initialize health server.
 
@@ -76,8 +75,6 @@ class HealthServer(
                 Defaults to http://localhost:9090.
             logger: Optional LoggerPort for structured server event logging.
                 Server events are silently dropped when None.
-            clock: Optional ClockPort for response timestamps. Falls back to the
-                sanctioned runtime UTC clock when None.
         """
         self.host = host
         self.port = port
@@ -92,7 +89,7 @@ class HealthServer(
             prometheus_base_url or DEFAULT_PROMETHEUS_BASE_URL
         ).rstrip("/")
         self._logger = logger
-        self._clock = clock
+        self._clock: ClockPort | None = None
         self._server: asyncio.Server | None = None
         self._start_time: float | None = None
         self._request_error_allowlist = (
@@ -113,6 +110,10 @@ class HealthServer(
     def set_data_root(self, data_root: str | None) -> None:
         """Set the explicit data root served by read-only explorer ports."""
         self._data_root = data_root
+
+    def set_clock(self, clock: ClockPort | None) -> None:
+        """Set the optional response clock after server construction."""
+        self._clock = clock
 
     async def start(self) -> None:
         """Start the health server."""
@@ -216,8 +217,8 @@ async def run_health_server(
         workflow_manifest_port=workflow_manifest_port,
         prometheus_base_url=prometheus_base_url,
         logger=logger,
-        clock=clock,
     )
+    server.set_clock(clock)
     await server.start()
     try:
         while True:
