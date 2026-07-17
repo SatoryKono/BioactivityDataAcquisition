@@ -54,16 +54,12 @@ services:
       - "${BIOETL_AUDIT_LOG_ROOT:?Pass an explicit absolute log root}:/audit-logs:ro"
     depends_on:
       loki:
-        condition: service_healthy
+        condition: service_started
     networks:
       - monitoring
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9080/ready"]
-      interval: 15s
-      timeout: 5s
-      retries: 4
-      start_period: 20s
+      disable: true
     mem_limit: 256m
     mem_reservation: 128m
     cpus: 0.50
