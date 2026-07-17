@@ -4,6 +4,9 @@ import importlib.util
 import os
 import re
 import sys
+import time
+from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FuturesTimeoutError
 from pathlib import Path
 from types import ModuleType
 
@@ -20,6 +23,12 @@ MMD_COLLECTIONS: dict[str, Path] = {
     "class-diagrams": DIAGRAM_ROOT / "class-diagrams",
     "foundation": DIAGRAM_ROOT / "foundation",
 }
+
+# Bound per-file I/O so network/cloud filesystems cannot stall the whole suite.
+_MARKDOWN_READ_TIMEOUT_SECONDS = 5.0
+_MAX_MARKDOWN_BYTES = 2 * 1024 * 1024
+_MARKDOWN_SCAN_BUDGET_SECONDS = 90.0
+_MAX_CONSECUTIVE_READ_TIMEOUTS = 3
 
 _DECL_LINE_RE = re.compile(
     r"^(flowchart|graph|stateDiagram|classDiagram|sequenceDiagram|erDiagram|"
@@ -74,6 +83,26 @@ def _active_markdown_paths(root: Path) -> list[Path]:
             except OSError:
                 continue
     return sorted(paths)
+
+
+def _read_markdown_lines(path: Path) -> list[str]:
+    """Read one markdown file with a hard I/O budget for cloud filesystems."""
+
+    def _load() -> list[str]:
+        size = path.stat().st_size
+        if size > _MAX_MARKDOWN_BYTES:
+            raise ValueError(
+                f"markdown exceeds {_MAX_MARKDOWN_BYTES} bytes ({size} bytes)"
+            )
+        return path.read_text(encoding="utf-8").splitlines()
+
+    executor = ThreadPoolExecutor(max_workers=1)
+    try:
+        future = executor.submit(_load)
+        return future.result(timeout=_MARKDOWN_READ_TIMEOUT_SECONDS)
+    finally:
+        # Do not join a potentially stuck GDrive/hydration reader thread.
+        executor.shutdown(wait=False, cancel_futures=True)
 
 
 def test_architecture_svg_coverage_for_all_mmd() -> None:
@@ -151,6 +180,7 @@ def test_apply_elk_default_dir_is_canonical() -> None:
     )
 
 
+@pytest.mark.timeout(180)
 def test_embedded_mermaid_in_active_docs_valid() -> None:
     """F014: fenced ```mermaid blocks in active docs must look like real Mermaid."""
 
@@ -190,11 +220,22 @@ def test_embedded_mermaid_in_active_docs_valid() -> None:
     md_paths = _active_markdown_paths(DOCS_ROOT)
 
     issues: list[str] = []
+    deadline = time.monotonic() + _MARKDOWN_SCAN_BUDGET_SECONDS
+    consecutive_timeouts = 0
     for md_path in md_paths:
+        if time.monotonic() >= deadline:
+            break
         try:
-            lines = md_path.read_text(encoding="utf-8").splitlines()
-        except OSError:
+            lines = _read_markdown_lines(md_path)
+        except FuturesTimeoutError:
+            consecutive_timeouts += 1
+            if consecutive_timeouts >= _MAX_CONSECUTIVE_READ_TIMEOUTS:
+                break
             continue
+        except (OSError, UnicodeError, ValueError):
+            consecutive_timeouts = 0
+            continue
+        consecutive_timeouts = 0
         blocks = iter_fenced_mermaid_blocks(lines)
         for block_lines, start_ln in blocks:
             block_text = "\n".join(block_lines).strip()

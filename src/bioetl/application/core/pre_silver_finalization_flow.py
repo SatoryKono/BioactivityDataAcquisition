@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.core.record_normalization_processor import (
     RecordNormalizationProcessor,
@@ -13,6 +13,32 @@ from bioetl.domain.types import JsonDict
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
     from bioetl.domain.types import SilverRecord
+
+
+class _PreSilverFinalizationOwner(Protocol):
+    """Transformer surface required by the finalization flow."""
+
+    def compute_content_hash(
+        self,
+        business_data: JsonDict,
+        *,
+        exclude_none: bool = True,
+    ) -> str: ...
+
+    def compute_entity_id(
+        self,
+        source_id: str | None,
+        record: JsonDict,
+    ) -> str: ...
+
+    def _build_pre_silver_record(
+        self,
+        context: PipelineContext,
+        entity_id: str,
+        content_hash: str,
+        index: int,
+        business_data: JsonDict,
+    ) -> SilverRecord: ...
 
 
 class _PreSilverFinalizationFlowMixin:
@@ -37,13 +63,10 @@ class _PreSilverFinalizationFlowMixin:
         context: PipelineContext,
         index: int,
     ) -> JsonDict:
-        return cast(
-            JsonDict,
-            self._build_record_normalizer().project_normalization_findings(
-                silver_record,
-                context=context,
-                index=index,
-            ),
+        return self._build_record_normalizer().project_normalization_findings(
+            silver_record,
+            context=context,
+            index=index,
         )
 
     def _finalize_staged_business_data(
@@ -54,12 +77,13 @@ class _PreSilverFinalizationFlowMixin:
         index: int,
         business_data: JsonDict,
     ) -> JsonDict:
+        owner = cast("_PreSilverFinalizationOwner", self)
         normalized_business_data = self._normalize_business_data(business_data)
-        content_hash = self.compute_content_hash(
+        content_hash = owner.compute_content_hash(
             normalized_business_data,
             exclude_none=True,
         )
-        silver_record = self._build_pre_silver_record(
+        silver_record = owner._build_pre_silver_record(
             context,
             entity_id,
             content_hash,
@@ -81,7 +105,8 @@ class _PreSilverFinalizationFlowMixin:
         index: int,
         business_data: JsonDict,
     ) -> JsonDict:
-        entity_id = self.compute_entity_id(
+        owner = cast("_PreSilverFinalizationOwner", self)
+        entity_id = owner.compute_entity_id(
             source_id=source_id,
             record=identity_record,
         )
@@ -137,13 +162,14 @@ class _PreSilverFinalizationFlowMixin:
         business_data: JsonDict,
         resolve_entity_id: Callable[[JsonDict], str],
     ) -> JsonDict:
+        owner = cast("_PreSilverFinalizationOwner", self)
         normalized_business_data = self._normalize_business_data(business_data)
         entity_id = resolve_entity_id(normalized_business_data)
-        content_hash = self.compute_content_hash(
+        content_hash = owner.compute_content_hash(
             normalized_business_data,
             exclude_none=True,
         )
-        silver_record = self._build_pre_silver_record(
+        silver_record = owner._build_pre_silver_record(
             context,
             entity_id,
             content_hash,

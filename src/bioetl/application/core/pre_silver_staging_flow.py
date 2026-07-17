@@ -3,9 +3,48 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from typing import TYPE_CHECKING, Protocol, cast
 
 from bioetl.application.core.pre_silver_record import PreSilverRecord
 from bioetl.domain.types import JsonDict
+
+if TYPE_CHECKING:
+    from bioetl.domain.context import PipelineContext
+
+
+class _PreSilverStagingOwner(Protocol):
+    """Transformer surface required by the staging flow."""
+
+    def _build_pre_silver_json_record(
+        self,
+        context: PipelineContext,
+        entity_id: str,
+        content_hash: str,
+        index: int,
+        business_data: JsonDict,
+    ) -> JsonDict: ...
+
+    def _apply_pre_silver_structural_policy(
+        self,
+        context: PipelineContext,
+        record: JsonDict,
+        index: int,
+    ) -> JsonDict | None: ...
+
+    def _apply_pre_silver_filter(
+        self,
+        context: PipelineContext,
+        record: JsonDict,
+        index: int,
+    ) -> None: ...
+
+    def compute_entity_id(
+        self,
+        source_id: str | None,
+        record: JsonDict,
+    ) -> str: ...
+
+    def _normalize_business_data(self, business_data: JsonDict) -> JsonDict: ...
 
 
 class _PreSilverStagingFlowMixin:
@@ -17,12 +56,13 @@ class _PreSilverStagingFlowMixin:
         entity_id: str,
         business_data: JsonDict,
     ) -> PreSilverRecord:
+        owner = cast("_PreSilverStagingOwner", self)
         return PreSilverRecord(
             entity_id=entity_id,
             business_data=business_data,
-            build_silver_record=self._build_pre_silver_json_record,
-            apply_structural_policy=self._apply_pre_silver_structural_policy,
-            apply_silver_filter=self._apply_pre_silver_filter,
+            build_silver_record=owner._build_pre_silver_json_record,
+            apply_structural_policy=owner._apply_pre_silver_structural_policy,
+            apply_silver_filter=owner._apply_pre_silver_filter,
         )
 
     def _build_pre_silver_from_business_data(
@@ -32,7 +72,8 @@ class _PreSilverStagingFlowMixin:
         identity_record: JsonDict,
         business_data: JsonDict,
     ) -> PreSilverRecord:
-        entity_id = self.compute_entity_id(
+        owner = cast("_PreSilverStagingOwner", self)
+        entity_id = owner.compute_entity_id(
             source_id=source_id,
             record=identity_record,
         )
@@ -73,7 +114,8 @@ class _PreSilverStagingFlowMixin:
         business_data: JsonDict,
         resolve_entity_id: Callable[[JsonDict], str],
     ) -> PreSilverRecord:
-        normalized_business_data = self._normalize_business_data(business_data)
+        owner = cast("_PreSilverStagingOwner", self)
+        normalized_business_data = owner._normalize_business_data(business_data)
         entity_id = resolve_entity_id(normalized_business_data)
         return self._build_pre_silver_payload(
             entity_id=entity_id,

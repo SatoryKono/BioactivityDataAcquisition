@@ -162,11 +162,11 @@
   },
   "metrics": {
     "source_module_count": {
-      "current": 2236,
+      "current": 2237,
       "source": "reports/quality/module-coverage-inventory.json"
     },
     "source_tree_sha256": {
-      "current": "66a60064a43d5fa0d37167fafab9fcf525e5411b34ee83bfadb87ff9379324dd",
+      "current": "d874974c239d95701b7af0703f29159ca49ad6a22bf08541799bdfb70958cf5c",
       "source": "reports/quality/module-coverage-inventory.json"
     },
     "architecture_quality_score": {
@@ -247,4 +247,3 @@
     "condition": "all six issues have source-backed evidence and no ratchet current value exceeds its max"
   }
 }
-

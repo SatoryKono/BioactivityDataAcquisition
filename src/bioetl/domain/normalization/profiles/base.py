@@ -72,15 +72,16 @@ class FieldRule:
     @property
     def identity(self) -> FieldRuleIdentity:
         """Return deterministic compatibility metadata for one field rule."""
+        normalizer_ref = _normalizer_ref(self.normalizer)
         payload = {
             "field_name": self.field_name,
-            "normalizer_ref": _normalizer_ref(self.normalizer),
+            "normalizer_ref": normalizer_ref,
             "include_in_hash": self.include_in_hash,
             "set_like": self.set_like,
         }
         return FieldRuleIdentity(
             field_name=self.field_name,
-            normalizer_ref=payload["normalizer_ref"],
+            normalizer_ref=normalizer_ref,
             include_in_hash=self.include_in_hash,
             set_like=self.set_like,
             compatibility_hash=_sha256_hex(payload),

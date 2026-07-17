@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from importlib import import_module
+from typing import Protocol, TypeVar, runtime_checkable
 
 from bioetl.application.composite._preflight_types import (
     FieldInfo,
@@ -13,6 +15,17 @@ from bioetl.domain.composite import CompositeConfig
 from bioetl.domain.exceptions import BioETLError, DataQualityError
 from bioetl.domain.normalization.profiles import resolve_normalization_profile
 from bioetl.domain.ports import LoggerPort
+
+_SourceAliasPayloadT = TypeVar("_SourceAliasPayloadT")
+
+
+@runtime_checkable
+class _SchemaBuilder(Protocol):
+    """Runtime schema builder surface exposed by generated schema classes."""
+
+    def to_schema(self) -> object:
+        """Build the concrete schema instance."""
+        ...
 
 
 def _find_schema_class(module: object) -> type | None:
@@ -49,10 +62,10 @@ class PreflightSchemaOrchestrationMixin:
 
     def _register_source_aliases(
         self,
-        result: dict[str, SchemaFields],
+        result: dict[str, _SourceAliasPayloadT],
         *,
         pipeline_name: str,
-        fields: SchemaFields,
+        fields: _SourceAliasPayloadT,
         is_seed: bool = False,
     ) -> None:
         """Register canonical and compatibility source aliases for a schema payload."""
@@ -201,16 +214,26 @@ class PreflightSchemaOrchestrationMixin:
         fields: SchemaFields = {}
 
         try:
-            schema_instance = schema_class.to_schema()  # type: ignore[attr-defined]
-            for col_name, col_info in schema_instance.columns.items():
-                dtype_str = str(col_info.dtype) if col_info.dtype else "object"
+            if not isinstance(schema_class, _SchemaBuilder):
+                raise TypeError("Generated schema class does not expose to_schema()")
+            schema_instance = schema_class.to_schema()
+            columns_payload: object = getattr(schema_instance, "columns", None)
+            if not isinstance(columns_payload, Mapping):
+                raise TypeError("Generated schema instance does not expose columns")
+            columns: Mapping[object, object] = columns_payload
+            for col_name, col_info in columns.items():
+                if not isinstance(col_name, str):
+                    raise TypeError("Generated schema column names must be strings")
+                dtype: object = getattr(col_info, "dtype", None)
+                dtype_str = str(dtype) if dtype else "object"
                 dtype_str = self._simplify_dtype(dtype_str)
+                nullable_value: object = getattr(col_info, "nullable", None)
+                if nullable_value is not None and not isinstance(nullable_value, bool):
+                    raise TypeError("Generated schema nullable flags must be boolean")
                 fields[col_name] = FieldInfo(
                     name=col_name,
                     dtype=dtype_str,
-                    nullable=col_info.nullable
-                    if col_info.nullable is not None
-                    else True,
+                    nullable=nullable_value if nullable_value is not None else True,
                     source=source,
                 )
         except (ValueError, TypeError, RuntimeError, DataQualityError) as error:

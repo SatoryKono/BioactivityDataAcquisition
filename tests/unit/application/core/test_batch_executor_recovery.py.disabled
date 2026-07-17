@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import asyncio
+import platform
+
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
@@ -12,10 +14,15 @@ from bioetl.domain.types.checkpoint_metadata import CheckpointMetadata
 from bioetl.domain.context import PipelineContext
 from bioetl.domain.config import DQConfig
 from bioetl.domain.types import HealthStatus
+from bioetl.domain.types import JsonDict
 from bioetl.domain.types import RunType
 from tests.unit.application.core.test_batch_executor_memory import (
     _create_batch_executor,
 )
+
+# Skip all tests in this module on Windows due to hanging issues
+if platform.system() == "Windows":
+    pytest.skip("Batch executor recovery tests hang on Windows", allow_module_level=True)
 
 
 class FakeDataSource:

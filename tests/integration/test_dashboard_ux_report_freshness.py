@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import date, timedelta
 from pathlib import Path
 import subprocess
+import sys
 
 import pytest
 
@@ -14,6 +15,25 @@ _DASHBOARD_GLOB = "grafana/dashboards/*.json"
 _REPORTS_DIR = Path("docs/reports/dashboard-ux-checks")
 _CHANGE_NOTES_PATH = Path("docs/03-guides/dashboards/dashboard-v2-updates.md")
 POLICY_REVIEW_DATE = date(2026, 5, 19)
+_GIT_TIMEOUT_SECONDS = 30.0
+
+
+def _git_run(cmd: list[str]) -> subprocess.CompletedProcess[str] | None:
+    """Run one bounded git command; return None on timeout/OS failure."""
+    run_kwargs: dict[str, object] = {}
+    if sys.platform == "win32":
+        run_kwargs["creationflags"] = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+    try:
+        return subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=_GIT_TIMEOUT_SECONDS,
+            **run_kwargs,
+        )
+    except (subprocess.TimeoutExpired, OSError):
+        return None
 
 
 def _git_changed_files() -> list[str]:
@@ -23,12 +43,15 @@ def _git_changed_files() -> list[str]:
         ["git", "diff", "--name-only", "--cached"],
     )
     for cmd in commands:
-        result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+        result = _git_run(cmd)
+        if result is None:
+            continue
         if result.returncode == 0 and result.stdout.strip():
             return [line.strip() for line in result.stdout.splitlines() if line.strip()]
     return []
 
 
+@pytest.mark.timeout(90)
 def test_dashboard_json_changes_require_fresh_ux_report_and_change_note_link() -> None:
     changed_files = _git_changed_files()
     dashboard_changed = any(

@@ -266,6 +266,32 @@ def pytest_collection_modifyitems(
     del config
     for item in items:
         _extend_windows_pycharm_vcr_timeout(item)
+    _warm_up_vcr_import_if_selected(items)
+
+
+def _selection_uses_vcr(items: list[pytest.Item]) -> bool:
+    """Return True when any collected item needs the vcr marker or fixture."""
+    for item in items:
+        if item.get_closest_marker("vcr") is not None:
+            return True
+        if "vcr" in getattr(item, "fixturenames", ()):
+            return True
+    return False
+
+
+def _warm_up_vcr_import_if_selected(items: list[pytest.Item]) -> None:
+    """Import vcrpy once during collection so its cold import cost stays out of
+    any single test's timeout budget.
+
+    On cloud-synced checkouts (e.g. Google Drive) the first ``import vcr`` can
+    stall while the installed package source hydrates from the remote. Paying
+    that one-time cost here, during collection and outside per-test timeouts,
+    prevents a spurious first-test timeout. ``_load_vcrpy`` is cached, so this
+    stays a single session-scoped warm-up and non-vcr/collect-only runs skip it.
+    """
+    if not _selection_uses_vcr(items):
+        return
+    _load_vcrpy()
 
 
 def _extend_windows_pycharm_vcr_timeout(item: pytest.Item) -> None:

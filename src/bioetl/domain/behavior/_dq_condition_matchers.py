@@ -5,6 +5,10 @@ Extracted from _dq_rule_evaluators.py to meet file size limits.
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
+_ConditionalMatcher = Callable[[object, str | tuple[str, ...]], bool]
+
 
 def _eq_condition_matches(
     value: object,
@@ -40,7 +44,7 @@ def _condition_options(condition_value: str | tuple[str, ...]) -> tuple[str, ...
     return (condition_value,)
 
 
-_CONDITIONAL_MATCHERS = {
+_CONDITIONAL_MATCHERS: dict[str, _ConditionalMatcher] = {
     "eq": _eq_condition_matches,
     "ne": _ne_condition_matches,
     "in": _in_condition_matches,

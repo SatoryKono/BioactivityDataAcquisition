@@ -29,7 +29,7 @@ def test_handle_control_plane_setup_returns_effective_manifest_profile(
 ) -> None:
     """Attachment closure must follow the manifest-resolved strict profile."""
     logger = MagicMock()
-    ctx = SimpleNamespace(skip_gold=False, exact_replay=True)
+    ctx = SimpleNamespace(skip_gold=False, exact_replay=True, debug=False)
     inputs = SimpleNamespace(
         settings=SimpleNamespace(data_dir="/tmp/bioetl-test-data"),
         yaml_config=SimpleNamespace(),
@@ -160,6 +160,7 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
         dry_run=False,
         skip_gold=False,
         start_offset=None,
+        debug=False,
         input_filter=SimpleNamespace(enabled=False),
         workflow_run_id=None,
         workflow_name=None,

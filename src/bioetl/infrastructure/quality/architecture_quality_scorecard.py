@@ -30,15 +30,28 @@ def _load_json(
     repo_root: Path, rel_path: str
 ) -> dict[str, Any]:  # Any: JSON can have any value type
     path = repo_root / rel_path
-    return json.loads(path.read_text(encoding="utf-8"))
+    payload: object = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise TypeError(f"Architecture quality artifact must be a JSON object: {path}")
+    return {str(key): value for key, value in payload.items()}
 
 
 def _load_yaml(
     repo_root: Path, rel_path: str
 ) -> dict[str, Any]:  # Any: YAML can have any value type
     path = repo_root / rel_path
-    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
-    return payload if isinstance(payload, dict) else {}
+    payload: object = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        return {}
+    return {str(key): value for key, value in payload.items()}
+
+
+def _category_numeric_value(category: dict[str, object], key: str) -> float:
+    """Return one numeric category field or fail on an invalid scoring payload."""
+    value = category.get(key)
+    if not isinstance(value, int | float):
+        raise TypeError(f"Category field '{key}' must be numeric")
+    return float(value)
 
 
 def _load_scorecard_inputs(
@@ -296,11 +309,14 @@ def build_architecture_quality_scorecard(
     )
     categories = _build_categories(metrics)
     integral_score = round(
-        sum(float(category["weighted_score"]) for category in categories),
+        sum(
+            _category_numeric_value(category, "weighted_score")
+            for category in categories
+        ),
         2,
     )
     weights_sum = round(
-        sum(float(category["weight"]) for category in categories),
+        sum(_category_numeric_value(category, "weight") for category in categories),
         2,
     )
     source_artifacts = _build_source_artifacts(

@@ -455,7 +455,16 @@ class TestCompositionRootIntegrity:
         has_factory_usage = any(
             re.search(pattern, content) for pattern in expected_patterns
         )
-        phase_has_factory_usage = "bioetl.composition.factories" in phase_content
+        # Check for factory delegation in phase file or its lazy dependencies
+        lazy_deps_file = phase_file.with_name("_pipeline_bootstrap_lazy_dependencies.py")
+        if lazy_deps_file.exists():
+            lazy_deps_content = lazy_deps_file.read_text(encoding="utf-8")
+            phase_has_factory_usage = (
+                "bioetl.composition.factories" in phase_content
+                or "bioetl.composition.factories" in lazy_deps_content
+            )
+        else:
+            phase_has_factory_usage = "bioetl.composition.factories" in phase_content
 
         assert has_factory_usage and phase_has_factory_usage, (
             "bootstrap_pipeline_runner() should delegate to factories for object creation.\n"
