@@ -149,7 +149,88 @@ def test_audit_profile_mounts_explicit_roots_read_only_and_uses_bounded_loki_job
         "condition": "service_healthy"
     }
     assert audit_promtail["depends_on"]["loki"] == {"condition": "service_started"}
-    assert audit_promtail["healthcheck"] == {"disable": True}
+
+    # Config-level gate: Grafana must depend on healthy Promtail to block audit on shipper failure
+    assert "promtail-audit" in services["grafana"]["depends_on"], (
+        "Grafana must depend on promtail-audit to prevent audit from starting with dead shipper"
+    )
+    assert services["grafana"]["depends_on"]["promtail-audit"] == {
+        "condition": "service_healthy"
+    }, "Promtail dependency must wait for service_healthy to gate audit startup"
+
+    # Promtail must have an active healthcheck
+    assert "healthcheck" in audit_promtail
+    healthcheck = audit_promtail["healthcheck"]
+    assert healthcheck.get("disable") is not True, (
+        "Promtail healthcheck must not be disabled; expected_empty results can hide dead shippers"
+    )
+    assert "test" in healthcheck, "Promtail must have an active healthcheck test"
+
+    # Behavioral component: verify the healthcheck command actually detects dead Promtail
+    import subprocess
+    import shutil
+    import socket
+    import threading
+    from http.server import HTTPServer, BaseHTTPRequestHandler
+
+    healthcheck_cmd = healthcheck["test"]
+    assert healthcheck_cmd[0] == "CMD", "Expected Docker healthcheck CMD format"
+    # Drop "CMD" sentinel and extract actual command
+    actual_cmd = healthcheck_cmd[1:]
+
+    if not shutil.which(actual_cmd[0]):
+        pytest.skip(f"{actual_cmd[0]} not available in test environment")
+
+    # Test 1: healthy Promtail (responds 200 on /ready)
+    class HealthyHandler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            if self.path == "/ready":
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(b"OK")
+            else:
+                self.send_response(404)
+                self.end_headers()
+
+        def log_message(self, format, *args):
+            pass  # Suppress logs
+
+    # Find free port
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("127.0.0.1", 0))
+        healthy_port = s.getsockname()[1]
+
+    server = HTTPServer(("127.0.0.1", healthy_port), HealthyHandler)
+    server_thread = threading.Thread(target=server.serve_forever, daemon=True)
+    server_thread.start()
+
+    try:
+        # Replace localhost:9080 with our test server
+        test_cmd = [
+            arg.replace("localhost:9080", f"127.0.0.1:{healthy_port}")
+            for arg in actual_cmd
+        ]
+        result = subprocess.run(test_cmd, capture_output=True, timeout=5)
+        assert result.returncode == 0, (
+            f"Healthcheck should succeed against responding server, "
+            f"got exit {result.returncode}: {result.stderr.decode()}"
+        )
+    finally:
+        server.shutdown()
+
+    # Test 2: dead Promtail (closed port)
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("127.0.0.1", 0))
+        dead_port = s.getsockname()[1]
+    # Port is now closed
+
+    test_cmd = [
+        arg.replace("localhost:9080", f"127.0.0.1:{dead_port}") for arg in actual_cmd
+    ]
+    result = subprocess.run(test_cmd, capture_output=True, timeout=5)
+    assert result.returncode != 0, (
+        f"Healthcheck should fail against closed port, got exit {result.returncode}"
+    )
 
 
 def test_default_runtime_log_sink_reaches_canonical_loki_dashboard_job() -> None:
@@ -351,6 +432,81 @@ def test_bootstrap_script_detects_tracing_datasource_reachability() -> None:
     assert "deleteDatasources:" in content
     assert "name: Loki" in content
     assert "name: Tempo" in content
+
+
+def test_probe_ready_handles_both_one_and_two_argument_forms() -> None:
+    """probe_ready must support one-argument calls (default timeout) and two-argument calls (minimum timeout)."""
+    import subprocess
+    import tempfile
+    import os
+
+    # Extract probe_ready function from the actual script
+    script_content = Path("grafana/scripts/bootstrap-datasources.sh").read_text(
+        encoding="utf-8"
+    )
+
+    # Create a stub wget that records the timeout argument
+    with tempfile.TemporaryDirectory() as tmpdir:
+        stub_wget = Path(tmpdir) / "wget"
+        stub_wget.write_text(
+            "#!/bin/sh\n"
+            'for arg in "$@"; do\n'
+            '  case "$arg" in\n'
+            '    --timeout=*) echo "${arg#--timeout=}" > "$TIMEOUT_RECORD" ;;\n'
+            "  esac\n"
+            "done\n"
+            "exit 0\n",
+            encoding="utf-8",
+        )
+        stub_wget.chmod(0o755)
+
+        timeout_record = Path(tmpdir) / "timeout.txt"
+
+        # Extract probe_ready function and wrap in test script
+        test_script = Path(tmpdir) / "test_probe_ready.sh"
+        test_script.write_text(
+            f'#!/bin/sh\nexport PATH="{tmpdir}:$PATH"\n'
+            f'export TIMEOUT_RECORD="{timeout_record}"\n\n'
+            # Extract the probe_ready function
+            + script_content.split("probe_ready() {")[1].split("\n}\n")[0]
+            + "\n}\n\n"
+            + 'probe_ready "$@"\n',
+            encoding="utf-8",
+        )
+        test_script.chmod(0o755)
+
+        # Test 1: one-argument call (should default to timeout=2)
+        timeout_record.unlink(missing_ok=True)
+        result = subprocess.run(
+            [str(test_script), "http://dummy.example"],
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, f"One-arg call failed: {result.stderr}"
+        observed_timeout = timeout_record.read_text().strip()
+        assert observed_timeout == "2", f"Expected default timeout 2, got {observed_timeout}"
+
+        # Test 2: two-argument call with small timeout (should preserve it)
+        timeout_record.unlink(missing_ok=True)
+        result = subprocess.run(
+            [str(test_script), "http://dummy.example", "1"],
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, f"Two-arg (small) call failed: {result.stderr}"
+        observed_timeout = timeout_record.read_text().strip()
+        assert observed_timeout == "1", f"Expected timeout 1, got {observed_timeout}"
+
+        # Test 3: two-argument call with large timeout (should cap at 2)
+        timeout_record.unlink(missing_ok=True)
+        result = subprocess.run(
+            [str(test_script), "http://dummy.example", "10"],
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, f"Two-arg (large) call failed: {result.stderr}"
+        observed_timeout = timeout_record.read_text().strip()
+        assert observed_timeout == "2", f"Expected capped timeout 2, got {observed_timeout}"
 
 
 def test_bootstrap_script_prunes_stale_local_renderer_plugin_in_remote_mode() -> None:
