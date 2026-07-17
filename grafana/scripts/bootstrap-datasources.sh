@@ -19,9 +19,9 @@ rm -f "${TARGET_DIR}"/*.yml
 cp "${CORE_DIR}"/*.yml "${TARGET_DIR}/"
 
 probe_ready() {
-  probe_timeout=2
-  if [ "$2" -lt "${probe_timeout}" ]; then
-    probe_timeout="$2"
+  probe_timeout="${2:-2}"
+  if [ "${probe_timeout}" -gt 2 ] 2>/dev/null; then
+    probe_timeout=2
   fi
   wget --quiet --tries=1 --timeout="${probe_timeout}" -O /dev/null "$1"
 }
