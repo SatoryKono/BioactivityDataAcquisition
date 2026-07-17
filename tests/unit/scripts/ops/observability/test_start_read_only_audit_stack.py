@@ -6,6 +6,7 @@ import importlib.util
 import json
 from pathlib import Path
 from types import ModuleType
+from urllib.parse import parse_qs, urlparse
 
 import pytest
 
@@ -50,6 +51,74 @@ def test_require_absolute_directory_is_fail_closed(tmp_path: Path) -> None:
     file_path.write_text("x", encoding="utf-8")
     with pytest.raises(ValueError, match="must identify a directory"):
         subject.require_absolute_directory(str(file_path), option_name="--data-root")
+
+
+def test_promtail_sentinel_write_is_atomic(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    subject = _load_subject()
+    observed: dict[str, Path] = {}
+    real_replace = subject.os.replace
+
+    def observe_replace(source: Path, target: Path) -> None:
+        observed.update(source=source, target=target)
+        assert source.suffix == ".tmp"
+        assert source.is_file()
+        assert not target.exists()
+        real_replace(source, target)
+
+    monkeypatch.setattr(subject.os, "replace", observe_replace)
+
+    marker = subject.write_promtail_audit_sentinel(
+        tmp_path,
+        sentinel_id="atomic",
+    )
+
+    target = tmp_path / "bioetl-promtail-audit-sentinel-atomic.log"
+    assert observed["target"] == target
+    assert marker in target.read_text(encoding="utf-8")
+    assert list(tmp_path.glob("*.tmp")) == []
+
+
+def test_promtail_query_range_is_anchored_to_sentinel_write_time() -> None:
+    subject = _load_subject()
+    requested_urls: list[str] = []
+    sentinel_written_ns = 400_000_000_000
+
+    def fake_open(url: str, **_kwargs: object) -> _Response:
+        requested_urls.append(url)
+        if url == subject.PROMTAIL_READY_URL:
+            return _Response(b"Ready\n")
+        return _Response({"status": "success", "data": {"result": []}})
+
+    result = subject.probe_promtail_audit_delivery(
+        marker=f"{subject.PROMTAIL_SENTINEL_PREFIX}window",
+        sentinel_written_ns=sentinel_written_ns,
+        opener=fake_open,
+        wall_time_ns=lambda: 900_000_000_000,
+    )
+
+    query = parse_qs(urlparse(requested_urls[-1]).query)
+    assert result.state is subject.PromtailAuditState.PENDING
+    assert int(query["start"][0]) == (
+        sentinel_written_ns - subject.PROMTAIL_SENTINEL_CLOCK_SKEW_NS
+    )
+    assert int(query["end"][0]) == 900_000_000_000
+
+
+def test_bounded_request_timeout_uses_only_remaining_budget() -> None:
+    subject = _load_subject()
+
+    assert subject._bounded_request_timeout(
+        deadline=2.0,
+        monotonic=lambda: 1.75,
+    ) == pytest.approx(0.25)
+    with pytest.raises(TimeoutError, match="budget exhausted"):
+        subject._bounded_request_timeout(
+            deadline=2.0,
+            monotonic=lambda: 2.0,
+        )
 
 
 def test_start_and_verify_routes_grafana_backend_to_requested_root(
@@ -134,7 +203,7 @@ def test_start_and_verify_routes_grafana_backend_to_requested_root(
 
 def test_start_and_verify_rejects_backend_serving_wrong_root(tmp_path: Path) -> None:
     subject = _load_subject()
-    ticks = iter((0.0, 0.1, 1.1, 1.2))
+    ticks = iter((0.0, 0.1, 0.2))
 
     with pytest.raises(RuntimeError, match="backend served data_root"):
         subject.start_and_verify_audit_stack(
