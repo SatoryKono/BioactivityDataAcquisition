@@ -61,6 +61,7 @@ class PromtailAuditState(StrEnum):
     """Observable state of Promtail readiness and sentinel delivery."""
 
     DOWN = "down"
+    TIMEOUT = "timeout"
     PENDING = "pending"
     DELIVERED = "delivered"
 
@@ -187,6 +188,11 @@ def probe_promtail_audit_delivery(
                 monotonic=monotonic,
             ),
         )
+    except TimeoutError as exc:
+        return PromtailAuditProbeResult(
+            PromtailAuditState.TIMEOUT,
+            f"Promtail readiness request timed out: {exc}",
+        )
     except (OSError, UnicodeError) as exc:
         return PromtailAuditProbeResult(
             PromtailAuditState.DOWN,
@@ -215,6 +221,11 @@ def probe_promtail_audit_delivery(
                 deadline=deadline,
                 monotonic=monotonic,
             ),
+        )
+    except TimeoutError as exc:
+        return PromtailAuditProbeResult(
+            PromtailAuditState.TIMEOUT,
+            f"Loki sentinel query timed out: {exc}",
         )
     except (OSError, UnicodeError, ValueError, json.JSONDecodeError) as exc:
         return PromtailAuditProbeResult(

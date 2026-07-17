@@ -121,6 +121,38 @@ def test_bounded_request_timeout_uses_only_remaining_budget() -> None:
         )
 
 
+def test_promtail_probe_reports_exhausted_readiness_budget_as_timeout() -> None:
+    subject = _load_subject()
+
+    result = subject.probe_promtail_audit_delivery(
+        marker=f"{subject.PROMTAIL_SENTINEL_PREFIX}readiness-timeout",
+        sentinel_written_ns=0,
+        deadline=1.0,
+        monotonic=lambda: 1.0,
+    )
+
+    assert result.state is subject.PromtailAuditState.TIMEOUT
+    assert "readiness request timed out" in result.detail
+    assert "budget exhausted" in result.detail
+
+
+def test_promtail_probe_reports_exhausted_loki_budget_as_timeout() -> None:
+    subject = _load_subject()
+    ticks = iter((0.5, 1.0))
+
+    result = subject.probe_promtail_audit_delivery(
+        marker=f"{subject.PROMTAIL_SENTINEL_PREFIX}loki-timeout",
+        sentinel_written_ns=0,
+        opener=lambda *_args, **_kwargs: _Response(b"Ready\n"),
+        deadline=1.0,
+        monotonic=lambda: next(ticks),
+    )
+
+    assert result.state is subject.PromtailAuditState.TIMEOUT
+    assert "Loki sentinel query timed out" in result.detail
+    assert "budget exhausted" in result.detail
+
+
 def test_start_and_verify_routes_grafana_backend_to_requested_root(
     tmp_path: Path,
 ) -> None:
