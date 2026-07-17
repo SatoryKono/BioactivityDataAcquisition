@@ -5,6 +5,8 @@ from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from bioetl.domain._immutability import freeze_fields
+
 
 class MoleculeRecord(BaseModel):
     """Chemical compound DTO from ChEMBL.
@@ -216,6 +218,19 @@ class TargetRecord(BaseModel):
     cross_references: str | None = Field(
         default=None, description="Cross references as JSON"
     )
+
+    def model_post_init(self, _context: object, /) -> None:
+        """Detach and freeze nested component collections after validation."""
+        freeze_fields(
+            self,
+            (
+                "component_accessions",
+                "component_ids",
+                "component_types",
+                "component_relationships",
+                "component_descriptions",
+            ),
+        )
 
 
 __all__ = [
