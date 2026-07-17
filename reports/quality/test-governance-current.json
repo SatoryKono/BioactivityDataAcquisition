@@ -107,7 +107,7 @@
     },
     {
       "category": "architecture_helper_guard",
-      "line": "1110",
+      "line": "1116",
       "path": "tests/architecture/test_quality_debt_scorecard.py",
       "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
       "test_name": "test_growth_rollout_warns_registry_section_before_cutoff"
@@ -759,7 +759,7 @@
     "tests/architecture/test_port_contracts_hypothesis.py:562",
     "tests/architecture/test_port_contracts_hypothesis.py:596",
     "tests/architecture/test_port_contracts_resilience_concurrency.py:183",
-    "tests/architecture/test_quality_debt_scorecard.py:1110",
+    "tests/architecture/test_quality_debt_scorecard.py:1116",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:74",
     "tests/integration/infrastructure/storage/test_delta_reader.py:576",
     "tests/unit/application/core/test_batch_tracing.py:110",
@@ -1183,7 +1183,7 @@
         "tests/architecture/test_test_governance_audit.py:345",
         "tests/architecture/test_test_governance_audit.py:385",
         "tests/architecture/test_test_governance_audit.py:406",
-        "tests/architecture/test_test_governance_audit.py:421"
+        "tests/architecture/test_test_governance_audit.py:422"
       ],
       "assertless_tests": [],
       "intentional_no_exception_tests": 0,
@@ -1230,10 +1230,10 @@
   "repo_backed_unit_inventory": {
     "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
     "lane": "repo-backed-unit",
-    "marked_test_files": 35,
+    "marked_test_files": 36,
     "marker": "pytest.mark.repo_backed",
     "subtree": "tests/unit/repo_backed/",
-    "test_files": 35,
+    "test_files": 36,
     "unmarked_test_files": []
   },
   "report": {
@@ -1345,7 +1345,7 @@
       },
       {
         "category": "architecture_helper_guard",
-        "line": "1110",
+        "line": "1116",
         "path": "tests/architecture/test_quality_debt_scorecard.py",
         "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
         "test_name": "test_growth_rollout_warns_registry_section_before_cutoff"
@@ -1997,7 +1997,7 @@
       "tests/architecture/test_port_contracts_hypothesis.py:562",
       "tests/architecture/test_port_contracts_hypothesis.py:596",
       "tests/architecture/test_port_contracts_resilience_concurrency.py:183",
-      "tests/architecture/test_quality_debt_scorecard.py:1110",
+      "tests/architecture/test_quality_debt_scorecard.py:1116",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:74",
       "tests/integration/infrastructure/storage/test_delta_reader.py:576",
       "tests/unit/application/core/test_batch_tracing.py:110",
@@ -2118,7 +2118,7 @@
           "tests/architecture/test_test_governance_audit.py:345",
           "tests/architecture/test_test_governance_audit.py:385",
           "tests/architecture/test_test_governance_audit.py:406",
-          "tests/architecture/test_test_governance_audit.py:421"
+          "tests/architecture/test_test_governance_audit.py:422"
         ],
         "assertless_tests": [],
         "intentional_no_exception_tests": 0,
@@ -2164,10 +2164,10 @@
     "repo_backed_unit_inventory": {
       "decision": "dedicated_repo_backed_unit_lane_not_zero_inventory",
       "lane": "repo-backed-unit",
-      "marked_test_files": 35,
+      "marked_test_files": 36,
       "marker": "pytest.mark.repo_backed",
       "subtree": "tests/unit/repo_backed/",
-      "test_files": 35,
+      "test_files": 36,
       "unmarked_test_files": []
     },
     "root": ".",
@@ -2176,8 +2176,8 @@
         "test_*.py"
       ],
       "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-      "test_glob_file_count": 2005,
-      "test_python_file_count": 2215,
+      "test_glob_file_count": 2014,
+      "test_python_file_count": 2224,
       "top_level_directories": [
         "tests/architecture/",
         "tests/benchmarks/",
@@ -2216,12 +2216,12 @@
       "top_level_directory_count_including_pycache": 15
     },
     "top_duplicate_test_names": [],
-    "total_test_files": 2005,
-    "total_test_functions": 22472,
+    "total_test_files": 2014,
+    "total_test_functions": 22515,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "a1ea805c0fb8846986540658b145d13beda243d2930280f5f7082656bbd5a541",
+  "source_tree_sha256": "07cdb356fdca117c20dda9d97086135a9246fa5baff157ed90045a6957b9a6f5",
   "summary": {
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
@@ -2239,8 +2239,8 @@
       "test_*.py"
     ],
     "test_file_count_definition": "tests/**/test_*.py matching pyproject tool.pytest.ini_options.python_files",
-    "test_glob_file_count": 2005,
-    "test_python_file_count": 2215,
+    "test_glob_file_count": 2014,
+    "test_python_file_count": 2224,
     "top_level_directories": [
       "tests/architecture/",
       "tests/benchmarks/",
@@ -2279,7 +2279,7 @@
     "top_level_directory_count_including_pycache": 15
   },
   "top_duplicate_test_names": [],
-  "total_test_files": 2005,
-  "total_test_functions": 22472,
+  "total_test_files": 2014,
+  "total_test_functions": 22515,
   "uuid4_call_sites": 0
 }

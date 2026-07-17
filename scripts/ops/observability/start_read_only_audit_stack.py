@@ -34,7 +34,8 @@ CATALOG_URL = (
 PROMTAIL_READY_URL = "http://127.0.0.1:19080/ready"
 LOKI_QUERY_RANGE_URL = "http://127.0.0.1:3100/loki/api/v1/query_range"
 PROMTAIL_SENTINEL_PREFIX = "bioetl-promtail-audit-sentinel:"
-PROMTAIL_SENTINEL_LOOKBACK_NS = 300 * 1_000_000_000
+PROMTAIL_SENTINEL_CLOCK_SKEW_NS = 5 * 1_000_000_000
+MAX_PROBE_REQUEST_TIMEOUT_SECONDS = 3.0
 
 
 class AuditBackendState(StrEnum):
@@ -60,6 +61,7 @@ class PromtailAuditState(StrEnum):
     """Observable state of Promtail readiness and sentinel delivery."""
 
     DOWN = "down"
+    TIMEOUT = "timeout"
     PENDING = "pending"
     DELIVERED = "delivered"
 
@@ -109,8 +111,9 @@ def _read_json_payload(
     url: str,
     *,
     opener: Callable[..., Any],
+    timeout_seconds: float,
 ) -> dict[str, Any]:
-    with opener(url, timeout=3.0) as response:
+    with opener(url, timeout=timeout_seconds) as response:
         payload = json.loads(response.read().decode("utf-8"))
     if not isinstance(payload, dict):
         raise ValueError(f"backend returned a non-object payload for {url}")
@@ -121,9 +124,24 @@ def _read_text_payload(
     url: str,
     *,
     opener: Callable[..., Any],
+    timeout_seconds: float,
 ) -> str:
-    with opener(url, timeout=3.0) as response:
+    with opener(url, timeout=timeout_seconds) as response:
         return response.read().decode("utf-8").strip()
+
+
+def _bounded_request_timeout(
+    *,
+    deadline: float | None,
+    monotonic: Callable[[], float],
+) -> float:
+    """Return a per-request timeout that cannot exceed the shared deadline."""
+    if deadline is None:
+        return MAX_PROBE_REQUEST_TIMEOUT_SECONDS
+    remaining = deadline - monotonic()
+    if remaining <= 0.0:
+        raise TimeoutError("audit verification timeout budget exhausted")
+    return min(MAX_PROBE_REQUEST_TIMEOUT_SECONDS, remaining)
 
 
 def write_promtail_audit_sentinel(probe_log_root: Path, *, sentinel_id: str) -> str:
@@ -131,7 +149,8 @@ def write_promtail_audit_sentinel(probe_log_root: Path, *, sentinel_id: str) -> 
     probe_log_root.mkdir(parents=True, exist_ok=True)
     marker = f"{PROMTAIL_SENTINEL_PREFIX}{sentinel_id}"
     path = probe_log_root / f"bioetl-promtail-audit-sentinel-{sentinel_id}.log"
-    path.write_text(
+    temporary_path = path.with_suffix(".tmp")
+    content = (
         json.dumps(
             {
                 "event": "bioetl_promtail_audit_sentinel",
@@ -140,21 +159,40 @@ def write_promtail_audit_sentinel(probe_log_root: Path, *, sentinel_id: str) -> 
             },
             sort_keys=True,
         )
-        + "\n",
-        encoding="utf-8",
+        + "\n"
     )
+    try:
+        temporary_path.write_text(content, encoding="utf-8")
+        os.replace(temporary_path, path)
+    finally:
+        temporary_path.unlink(missing_ok=True)
     return marker
 
 
 def probe_promtail_audit_delivery(
     *,
     marker: str,
+    sentinel_written_ns: int,
     opener: Callable[..., Any] = urlopen,
     wall_time_ns: Callable[[], int] = time.time_ns,
+    deadline: float | None = None,
+    monotonic: Callable[[], float] = time.monotonic,
 ) -> PromtailAuditProbeResult:
     """Require both Promtail readiness and observable Loki sentinel delivery."""
     try:
-        readiness = _read_text_payload(PROMTAIL_READY_URL, opener=opener)
+        readiness = _read_text_payload(
+            PROMTAIL_READY_URL,
+            opener=opener,
+            timeout_seconds=_bounded_request_timeout(
+                deadline=deadline,
+                monotonic=monotonic,
+            ),
+        )
+    except TimeoutError as exc:
+        return PromtailAuditProbeResult(
+            PromtailAuditState.TIMEOUT,
+            f"Promtail readiness request timed out: {exc}",
+        )
     except (OSError, UnicodeError) as exc:
         return PromtailAuditProbeResult(
             PromtailAuditState.DOWN,
@@ -166,17 +204,29 @@ def probe_promtail_audit_delivery(
             f"Promtail readiness returned {readiness[:80]!r}",
         )
 
-    end_ns = wall_time_ns()
+    end_ns = max(wall_time_ns(), sentinel_written_ns)
     query_url = f"{LOKI_QUERY_RANGE_URL}?" + urlencode(
         {
             "query": f'{{job="bioetl-audit"}} |= "{marker}"',
-            "start": end_ns - PROMTAIL_SENTINEL_LOOKBACK_NS,
+            "start": max(0, sentinel_written_ns - PROMTAIL_SENTINEL_CLOCK_SKEW_NS),
             "end": end_ns,
             "limit": 100,
         }
     )
     try:
-        payload = _read_json_payload(query_url, opener=opener)
+        payload = _read_json_payload(
+            query_url,
+            opener=opener,
+            timeout_seconds=_bounded_request_timeout(
+                deadline=deadline,
+                monotonic=monotonic,
+            ),
+        )
+    except TimeoutError as exc:
+        return PromtailAuditProbeResult(
+            PromtailAuditState.TIMEOUT,
+            f"Loki sentinel query timed out: {exc}",
+        )
     except (OSError, UnicodeError, ValueError, json.JSONDecodeError) as exc:
         return PromtailAuditProbeResult(
             PromtailAuditState.DOWN,
@@ -211,10 +261,19 @@ def probe_audit_backend(
     *,
     expected_data_root: Path,
     opener: Callable[..., Any] = urlopen,
+    deadline: float | None = None,
+    monotonic: Callable[[], float] = time.monotonic,
 ) -> AuditBackendProbeResult:
     """Classify readiness, routing, and whether the audit catalog has data."""
     try:
-        ready_payload = _read_json_payload(READY_URL, opener=opener)
+        ready_payload = _read_json_payload(
+            READY_URL,
+            opener=opener,
+            timeout_seconds=_bounded_request_timeout(
+                deadline=deadline,
+                monotonic=monotonic,
+            ),
+        )
     except TimeoutError as exc:
         return AuditBackendProbeResult(
             AuditBackendState.TIMEOUT,
@@ -239,7 +298,14 @@ def probe_audit_backend(
         )
 
     try:
-        catalog_payload = _read_json_payload(CATALOG_URL, opener=opener)
+        catalog_payload = _read_json_payload(
+            CATALOG_URL,
+            opener=opener,
+            timeout_seconds=_bounded_request_timeout(
+                deadline=deadline,
+                monotonic=monotonic,
+            ),
+        )
     except TimeoutError as exc:
         return AuditBackendProbeResult(
             AuditBackendState.TIMEOUT,
@@ -287,12 +353,9 @@ def start_and_verify_audit_stack(
     resolved_probe_log_root = (
         probe_log_root or Path(mkdtemp(prefix="bioetl-promtail-audit-probe-"))
     ).resolve()
+    resolved_probe_log_root.mkdir(parents=True, exist_ok=True)
     if managed_probe_root:
         resolved_probe_log_root.chmod(0o755)
-    marker = write_promtail_audit_sentinel(
-        resolved_probe_log_root,
-        sentinel_id=sentinel_id or uuid4().hex,
-    )
     environment = os.environ.copy()
     environment["BIOETL_AUDIT_DATA_ROOT"] = str(data_root)
     environment["BIOETL_AUDIT_LOG_ROOT"] = str(log_root)
@@ -304,6 +367,11 @@ def start_and_verify_audit_stack(
         check=True,
     )
 
+    marker = write_promtail_audit_sentinel(
+        resolved_probe_log_root,
+        sentinel_id=sentinel_id or uuid4().hex,
+    )
+    sentinel_written_ns = wall_time_ns()
     deadline = monotonic() + timeout_seconds
     last_result = AuditBackendProbeResult(
         AuditBackendState.DOWN,
@@ -313,10 +381,15 @@ def start_and_verify_audit_stack(
         PromtailAuditState.DOWN,
         "Promtail not probed",
     )
-    while monotonic() < deadline:
+    while True:
+        remaining = deadline - monotonic()
+        if remaining <= 0.0:
+            break
         last_result = probe_audit_backend(
             expected_data_root=data_root,
             opener=opener,
+            deadline=deadline,
+            monotonic=monotonic,
         )
         if last_result.state in {
             AuditBackendState.VALID_EMPTY,
@@ -324,8 +397,11 @@ def start_and_verify_audit_stack(
         }:
             last_promtail = probe_promtail_audit_delivery(
                 marker=marker,
+                sentinel_written_ns=sentinel_written_ns,
                 opener=opener,
                 wall_time_ns=wall_time_ns,
+                deadline=deadline,
+                monotonic=monotonic,
             )
             if last_promtail.state is PromtailAuditState.DELIVERED:
                 return last_result
@@ -334,7 +410,10 @@ def start_and_verify_audit_stack(
                 "read-only audit backend verification failed: "
                 f"state={last_result.state.value}; {last_result.detail}"
             )
-        sleep(1.0)
+        remaining = deadline - monotonic()
+        if remaining <= 0.0:
+            break
+        sleep(min(1.0, remaining))
     raise RuntimeError(
         "read-only audit stack verification failed: "
         f"backend_state={last_result.state.value}; {last_result.detail}; "
