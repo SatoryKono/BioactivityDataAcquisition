@@ -6,7 +6,7 @@ Implements RULES.md §2.1 - Data export functionality.
 from __future__ import annotations
 
 from importlib import import_module
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 __all__ = [
     "CsvExporter",
@@ -27,6 +27,8 @@ def __getattr__(
     name: str,
 ) -> Any:  # Any: Dynamically returns attributes from lazily imported modules.
     """Lazily import export adapters to avoid importing optional stacks eagerly."""
+    if TYPE_CHECKING:
+        raise AttributeError
     module_name = _EXPORT_ATTRIBUTE_MODULES.get(name)
     if module_name is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

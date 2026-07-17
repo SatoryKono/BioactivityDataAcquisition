@@ -56,8 +56,10 @@ __all__ = [
 ]
 
 
-def __getattr__(name: str) -> object:
+def __getattr__(name: str) -> object:  # pragma: no cover
     """Lazily expose compatibility symbols from the public resolver facade."""
+    if TYPE_CHECKING:
+        raise AttributeError
     if name == "ResolvedVacuumSettings":
         from bioetl.composition.runtime_builders.inputs_runtime_models import (
             ResolvedVacuumSettings,
