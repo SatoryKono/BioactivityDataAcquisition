@@ -2187,6 +2187,7 @@
         "tests/fixtures/",
         "tests/golden/",
         "tests/helpers/",
+        "tests/infrastructure/",
         "tests/integration/",
         "tests/performance/",
         "tests/security/",
@@ -2196,6 +2197,7 @@
         "tests/unit/"
       ],
       "top_level_directories_including_pycache": [
+        "tests/__pycache__/",
         "tests/architecture/",
         "tests/benchmarks/",
         "tests/contract/",
@@ -2204,6 +2206,7 @@
         "tests/fixtures/",
         "tests/golden/",
         "tests/helpers/",
+        "tests/infrastructure/",
         "tests/integration/",
         "tests/performance/",
         "tests/security/",
@@ -2212,8 +2215,8 @@
         "tests/testing_support/",
         "tests/unit/"
       ],
-      "top_level_directory_count": 15,
-      "top_level_directory_count_including_pycache": 15
+      "top_level_directory_count": 16,
+      "top_level_directory_count_including_pycache": 17
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2014,
@@ -2221,7 +2224,7 @@
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "fc6f2c115f21ff3c6b86514c79544a54a42598eb411c9d7b4316d86800a57baa",
+  "source_tree_sha256": "9f11bf9a777dcb0ac33fcc3ce7bfd4cb7db048ae11d1e19376dad33e160fe8fb",
   "summary": {
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
@@ -2250,6 +2253,7 @@
       "tests/fixtures/",
       "tests/golden/",
       "tests/helpers/",
+      "tests/infrastructure/",
       "tests/integration/",
       "tests/performance/",
       "tests/security/",
@@ -2259,6 +2263,7 @@
       "tests/unit/"
     ],
     "top_level_directories_including_pycache": [
+      "tests/__pycache__/",
       "tests/architecture/",
       "tests/benchmarks/",
       "tests/contract/",
@@ -2267,6 +2272,7 @@
       "tests/fixtures/",
       "tests/golden/",
       "tests/helpers/",
+      "tests/infrastructure/",
       "tests/integration/",
       "tests/performance/",
       "tests/security/",
@@ -2275,8 +2281,8 @@
       "tests/testing_support/",
       "tests/unit/"
     ],
-    "top_level_directory_count": 15,
-    "top_level_directory_count_including_pycache": 15
+    "top_level_directory_count": 16,
+    "top_level_directory_count_including_pycache": 17
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2014,
