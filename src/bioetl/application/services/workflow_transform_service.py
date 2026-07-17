@@ -11,9 +11,11 @@ from typing import TYPE_CHECKING
 
 from bioetl.application.workflow.transforms import (
     WorkflowTransformCallable,
-    WorkflowTransformDestructiveCommit,
     WorkflowTransformRegistry,
     WorkflowTransformRuntimeContext,
+)
+from bioetl.application.workflow.transforms import (
+    WorkflowTransformDestructiveCommit as WorkflowTransformDestructiveCommit,
 )
 from bioetl.domain.exceptions import BioETLError
 from bioetl.domain.workflow import TransformStepConfig, WorkflowTransformSpec

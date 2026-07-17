@@ -4,13 +4,22 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Protocol
 
-from bioetl.application.core.batch_execution import prepare_execution_context
+from bioetl.application.core.batch_execution import (
+    BatchExecutionRunService,
+    prepare_execution_context,
+)
+from bioetl.application.core.batch_executor_protocols import (
+    BatchStateCommitProtocol,
+    PipelineProcessingProtocol,
+)
+from bioetl.application.core.batch_memory_manager import BatchMemoryManagerService
 from bioetl.application.core.batch_runtime_failure_policy import (
     PIPELINE_EXECUTION_ERRORS,
 )
 from bioetl.application.core.lifecycle.batch_fsm import (
     BatchExecutionCommand,
     BatchExecutionEvent,
+    BatchExecutionFSM,
     BatchExecutionState,
 )
 
@@ -21,15 +30,21 @@ if TYPE_CHECKING:
 
 
 class _BatchExecutorHostProtocol(Protocol):
+    records_fetched: int
+    records_bronze: int
+    records_silver: int
+    records_gold: int
+    records_gold_excluded_by_contract: int
+    records_quarantined: int
     _resume_offset: int
     _query_string: str | None
-    _fsm: object
+    _fsm: BatchExecutionFSM
     _fsm_state: BatchExecutionState
-    _execution_run_service: object
-    _processing_port: object
-    _execution_state_service: object
-    _memory: object
-    _batch_result_type: type[object]
+    _execution_run_service: BatchExecutionRunService
+    _processing_port: PipelineProcessingProtocol
+    _execution_state_service: BatchStateCommitProtocol
+    _memory: BatchMemoryManagerService
+    _batch_result_type: type[BatchResult]
 
     async def _run_extraction_loop(
         self,

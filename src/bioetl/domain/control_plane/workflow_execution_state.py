@@ -176,7 +176,7 @@ def _load_optional_int(payload: dict[str, object], key: str) -> int | None:
     if value is None:
         return None
     try:
-        return int(value)
+        return int(str(value))
     except (TypeError, ValueError):
         return None
 

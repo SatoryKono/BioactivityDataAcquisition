@@ -25,6 +25,7 @@
         "docs/00-project/glossary.md",
         "docs/00-project/index.md",
         "docs/01-requirements/REQUIREMENTS.md",
+        "docs/03-guides/gold-contract-v1-1-migration.md",
         "docs/05-operations/vacuum-retention.md",
         "scripts/generate_adr_registry.py",
         "tests/architecture/test_config_topology_docs_drift.py",

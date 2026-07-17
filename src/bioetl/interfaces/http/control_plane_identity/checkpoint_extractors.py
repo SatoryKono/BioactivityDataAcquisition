@@ -12,6 +12,7 @@ from bioetl.interfaces.http.control_plane_identity.formatting import (
     is_present,
     mapping_value,
 )
+from bioetl.interfaces.http.control_plane_identity.types import AnchorValues
 
 
 def checkpoint_anchor_payload(manifest: RunManifest) -> dict[str, object]:
@@ -88,7 +89,9 @@ def first_payload_value(manifest: RunManifest, *keys: str) -> object | None:
     return None
 
 
-def extract_checkpoint_anchors(checkpoint_data: dict[str, object]) -> list[object]:
+def extract_checkpoint_anchors(
+    checkpoint_data: dict[str, object],
+) -> list[AnchorValues]:
     """Extract legacy HTTP identity anchor values from checkpoint mappings."""
     from bioetl.interfaces.http.control_plane_identity.anchor_values import (
         anchor_values_from_mapping,

@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 
 from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
+    ManifestReproducibilityContext,
     resolve_manifest_reproducibility_context,
 )
 from bioetl.composition.runtime_builders._run_manifest_snapshot_support import (
@@ -30,8 +31,18 @@ class ResolvedManifestPublicationContext:
 
     provider: str
     entity: str
-    reproducibility_context: object
+    reproducibility_context: ManifestReproducibilityContext
     contract_identity: RunManifestContractIdentity
+
+
+class ManifestPublicationIdentityKwargs(TypedDict):
+    """Typed keyword payload for manifest publication identity resolution."""
+
+    ctx: PipelineRunContext
+    inputs: RunnerInputs
+    provider: str
+    entity: str
+    reproducibility_context: ManifestReproducibilityContext | None
 
 
 def contract_identity_requires_strict_resolution(
@@ -49,7 +60,7 @@ def contract_identity_requires_strict_resolution(
 def resolve_manifest_publication_context(
     ctx: PipelineRunContext,
     inputs: RunnerInputs,
-    reproducibility_context: object | None = None,
+    reproducibility_context: ManifestReproducibilityContext | None = None,
     contract_identity: RunManifestContractIdentity | None = None,
 ) -> ResolvedManifestPublicationContext:
     """Resolve provider, reproducibility context, and contract identity."""
@@ -91,9 +102,9 @@ def ensure_manifest_publication_identity(
     inputs: RunnerInputs,
     provider: str,
     entity: str,
-    reproducibility_context: object | None = None,
+    reproducibility_context: ManifestReproducibilityContext | None = None,
     contract_identity: RunManifestContractIdentity | None = None,
-) -> tuple[object, RunManifestContractIdentity]:
+) -> tuple[ManifestReproducibilityContext, RunManifestContractIdentity]:
     """Fill missing reproducibility context and contract identity for one run."""
     contract_ref = f"{provider}.{entity}"
     if reproducibility_context is None:
@@ -123,8 +134,8 @@ def build_manifest_publication_identity_kwargs(
     inputs: RunnerInputs,
     provider: str,
     entity: str,
-    reproducibility_context: object | None = None,
-) -> dict[str, object]:
+    reproducibility_context: ManifestReproducibilityContext | None = None,
+) -> ManifestPublicationIdentityKwargs:
     """Return the shared identity-resolution kwargs used by manifest builders."""
     return {
         "ctx": ctx,
@@ -140,19 +151,22 @@ def resolve_manifest_publication_identity(
     inputs: RunnerInputs,
     provider: str,
     entity: str,
-    reproducibility_context: object | None = None,
+    reproducibility_context: ManifestReproducibilityContext | None = None,
     contract_identity: RunManifestContractIdentity | None = None,
-) -> tuple[object, RunManifestContractIdentity]:
+) -> tuple[ManifestReproducibilityContext, RunManifestContractIdentity]:
     """Resolve missing manifest publication identity inputs in one call."""
     return ensure_manifest_publication_identity(
-        **build_manifest_publication_identity_kwargs(
-            ctx, inputs, provider, entity, reproducibility_context
-        ),
+        ctx=ctx,
+        inputs=inputs,
+        provider=provider,
+        entity=entity,
+        reproducibility_context=reproducibility_context,
         contract_identity=contract_identity,
     )
 
 
 __all__ = [
+    "ManifestPublicationIdentityKwargs",
     "ResolvedManifestPublicationContext",
     "build_manifest_publication_identity_kwargs",
     "contract_identity_requires_strict_resolution",

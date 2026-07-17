@@ -27,10 +27,16 @@ from bioetl.interfaces.cli.commands.domains.run_all.execution import (
     run_batch_with_policy as run_batch_with_policy_impl,
 )
 from bioetl.interfaces.cli.commands.domains.run_all.public_runtime_deps import (
-    RunAllBatchRuntime,
-    RunAllCallbackRuntime,
-    RunAllPolicyRuntime,
-    RunAllPresentationRuntime,
+    RunAllBatchRuntime as RunAllBatchRuntime,
+)
+from bioetl.interfaces.cli.commands.domains.run_all.public_runtime_deps import (
+    RunAllCallbackRuntime as RunAllCallbackRuntime,
+)
+from bioetl.interfaces.cli.commands.domains.run_all.public_runtime_deps import (
+    RunAllPolicyRuntime as RunAllPolicyRuntime,
+)
+from bioetl.interfaces.cli.commands.domains.run_all.public_runtime_deps import (
+    RunAllPresentationRuntime as RunAllPresentationRuntime,
 )
 from bioetl.interfaces.cli.commands.domains.run_all.support import (
     BatchRunResult,

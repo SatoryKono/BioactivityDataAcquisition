@@ -57,6 +57,35 @@ ALLOWED_BASELINE_IMPORTS: frozenset[tuple[str, str]] = frozenset(
             "bioetl/composition/bootstrap/runtime/_composite_control_plane_support.py",
             "bioetl.composition.runtime_builders._snapshot_mapping_support",
         ),
+        # Domain immutability utilities (RF-6225)
+        (
+            "bioetl/domain/aggregates/_batch_record.py",
+            "bioetl.domain._immutability",
+        ),
+        (
+            "bioetl/domain/control_plane/contract_registry_types.py",
+            "bioetl.domain._immutability",
+        ),
+        (
+            "bioetl/domain/control_plane/workflow_manifest.py",
+            "bioetl.domain._immutability",
+        ),
+        (
+            "bioetl/domain/entities/crossref.py",
+            "bioetl.domain._immutability",
+        ),
+        (
+            "bioetl/domain/entities/openalex.py",
+            "bioetl.domain._immutability",
+        ),
+        (
+            "bioetl/domain/entities/pubmed.py",
+            "bioetl.domain._immutability",
+        ),
+        (
+            "bioetl/domain/workflow/transform_spec.py",
+            "bioetl.domain._immutability",
+        ),
     }
 )
 

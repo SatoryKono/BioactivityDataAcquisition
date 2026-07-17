@@ -122,7 +122,7 @@ def test_full_mermaid_matches_foundation_mmd() -> None:
         mmd_body = extract_body(mmd_path)
         view_body = extract_body(view_path)
         assert mmd_body == view_body, (
-            f"Drift in diagram body for {mmd_path.relative_to(DIAGRAM_ROOT)} ↔ {view_path}"
+            f"Drift in diagram body for {mmd_path.relative_to(DIAGRAM_ROOT)} â†” {view_path}"
         )
 
 

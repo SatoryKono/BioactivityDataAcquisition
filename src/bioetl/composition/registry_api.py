@@ -7,7 +7,15 @@ from typing import TYPE_CHECKING
 from bioetl.composition.lazy_exports import install_lazy_exports
 
 if TYPE_CHECKING:
-    pass
+    from bioetl.composition.factories.pipeline.registry import (
+        register_all_pipelines as register_all_pipelines,
+    )
+    from bioetl.composition.factories.pipeline.registry_core import (
+        PipelineDefinition as PipelineDefinition,
+        PipelineRegistry as PipelineRegistry,
+        create_registry as create_registry,
+        get_default_registry as get_default_registry,
+    )
 
 _PUBLIC_EXPORTS = {
     "PipelineDefinition": (

@@ -1631,7 +1631,7 @@
       "symbol": "FILTERED_OUT_SILVER",
       "path": "src/bioetl/infrastructure/quarantine/filtered_reads.py",
       "occurrence_count": 2,
-      "first_line": 91,
+      "first_line": 92,
       "role": "Temporary legacy Silver reject alias",
       "migration_relevance": "Alias remains a compatibility surface, not target semantic rejection taxonomy.",
       "notes": ""
@@ -1895,7 +1895,7 @@
       "symbol": "_apply_pre_silver_filter",
       "path": "src/bioetl/application/core/pre_silver_adapter_mixin.py",
       "occurrence_count": 1,
-      "first_line": 88,
+      "first_line": 116,
       "role": "Pre-Silver adapter filter callsite",
       "migration_relevance": "Pre-Silver path still delegates to the structural Silver filter gate.",
       "notes": ""
@@ -1938,8 +1938,8 @@
       "surface": "silver_filter_application",
       "symbol": "apply_silver_filter",
       "path": "src/bioetl/application/core/pre_silver_adapter_mixin.py",
-      "occurrence_count": 1,
-      "first_line": 94,
+      "occurrence_count": 2,
+      "first_line": 44,
       "role": "Runtime Silver filter application callsite",
       "migration_relevance": "Any new runtime application gate must remain structural-only or be inventoried.",
       "notes": ""
@@ -1971,8 +1971,8 @@
       "surface": "silver_filter_application",
       "symbol": "apply_silver_filter",
       "path": "src/bioetl/application/pipelines/common/publication_transformer_records.py",
-      "occurrence_count": 2,
-      "first_line": 98,
+      "occurrence_count": 4,
+      "first_line": 120,
       "role": "Runtime Silver filter application callsite",
       "migration_relevance": "Any new runtime application gate must remain structural-only or be inventoried.",
       "notes": ""
@@ -2015,8 +2015,8 @@
       "surface": "runtime_identity",
       "symbol": "silver_filter_compatibility_mode",
       "path": "src/bioetl/application/core/lifecycle/checkpoint_identity_overrides.py",
-      "occurrence_count": 3,
-      "first_line": 131,
+      "occurrence_count": 4,
+      "first_line": 38,
       "role": "Execution identity compatibility mode",
       "migration_relevance": "Run manifest/checkpoint/effective config identity must preserve compatibility mode.",
       "notes": ""
@@ -2027,7 +2027,7 @@
       "symbol": "silver_filter_compatibility_mode",
       "path": "src/bioetl/domain/config/runtime.py",
       "occurrence_count": 6,
-      "first_line": 101,
+      "first_line": 105,
       "role": "Execution identity compatibility mode",
       "migration_relevance": "Run manifest/checkpoint/effective config identity must preserve compatibility mode.",
       "notes": ""

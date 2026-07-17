@@ -3,10 +3,19 @@
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Protocol, cast
+from typing import TYPE_CHECKING
 from urllib.parse import parse_qs, urlsplit
 
 from bioetl.application.runtime_clock import current_utc_time
+from bioetl.application.services.quarantine_service import QuarantineService
+from bioetl.domain.ports import (
+    CheckpointPort,
+    ClockPort,
+    HealthMonitorPort,
+    RunLedgerPort,
+    RunManifestPort,
+    WorkflowManifestPort,
+)
 from bioetl.domain.types import HealthStatus, JsonDict
 from bioetl.interfaces.http._health_server_routing_support import (
     dispatch_control_plane_request,
@@ -15,66 +24,8 @@ from bioetl.interfaces.http._health_server_routing_support import (
 )
 from bioetl.interfaces.http.types import HealthResponse
 
-if TYPE_CHECKING:
-    from bioetl.application.services.quarantine_service import QuarantineService
-    from bioetl.domain.ports import (
-        ClockPort,
-        HealthMonitorPort,
-        RunLedgerPort,
-        RunManifestPort,
-    )
-
 _NOT_FOUND_MESSAGE = "Not Found"
 _PROMETHEUS_TEXT_CONTENT_TYPE = "text/plain; version=0.0.4; charset=utf-8"
-
-
-class _HealthResponseSupport(Protocol):
-    """Typed support contract for HTTP response helpers."""
-
-    async def _send_json_response(
-        self,
-        writer: asyncio.StreamWriter,
-        response: HealthResponse,
-    ) -> None: ...
-
-    async def _send_response(
-        self,
-        writer: asyncio.StreamWriter,
-        status_code: int,
-        message: str,
-    ) -> None: ...
-
-    async def _send_payload_response(
-        self,
-        writer: asyncio.StreamWriter,
-        status_code: int,
-        payload: dict[str, object],
-    ) -> None: ...
-
-    async def _send_text_response(
-        self,
-        writer: asyncio.StreamWriter,
-        status_code: int,
-        body: str,
-        *,
-        content_type: str = "text/plain; charset=utf-8",
-    ) -> None: ...
-
-    async def _handle_request_error(
-        self,
-        writer: asyncio.StreamWriter,
-        error: BaseException,
-    ) -> None: ...
-
-
-class _HealthStateSupport(Protocol):
-    """Typed support contract for state aggregation helpers."""
-
-    def _get_overall_status(self) -> HealthStatus: ...
-
-    def _get_provider_statuses(
-        self,
-    ) -> dict[str, JsonDict]: ...  # Any: provider-specific status fields
 
 
 class HealthServerRoutingMixin:
@@ -82,11 +33,48 @@ class HealthServerRoutingMixin:
 
     _health_monitor: HealthMonitorPort | None
     _quarantine_service: QuarantineService | None
-    _checkpoint_port: object | None
+    _checkpoint_port: CheckpointPort | None
     _run_manifest_port: RunManifestPort | None
     _run_ledger_port: RunLedgerPort | None
+    _workflow_manifest_port: WorkflowManifestPort | None
     _clock: ClockPort | None
+    _data_root: str | None
     _prometheus_base_url: str
+
+    if TYPE_CHECKING:
+        # Supplied by sibling mixins in the concrete HealthServer MRO.
+        async def _send_json_response(
+            self,
+            writer: asyncio.StreamWriter,
+            response: HealthResponse,
+        ) -> None: ...
+
+        async def _send_response(
+            self,
+            writer: asyncio.StreamWriter,
+            status_code: int,
+            message: str,
+        ) -> None: ...
+
+        async def _send_payload_response(
+            self,
+            writer: asyncio.StreamWriter,
+            status_code: int,
+            payload: dict[str, object],
+        ) -> None: ...
+
+        async def _send_text_response(
+            self,
+            writer: asyncio.StreamWriter,
+            status_code: int,
+            body: str,
+            *,
+            content_type: str = "text/plain; charset=utf-8",
+        ) -> None: ...
+
+        def _get_overall_status(self) -> HealthStatus: ...
+
+        def _get_provider_statuses(self) -> dict[str, JsonDict]: ...
 
     @property
     def uptime_seconds(self) -> float:
@@ -95,9 +83,8 @@ class HealthServerRoutingMixin:
 
     def _response_timestamp(self) -> str:
         """Return the sanctioned timestamp source for health responses."""
-        clock = cast("ClockPort | None", getattr(self, "_clock", None))
-        if clock is not None:
-            return clock.now().isoformat()
+        if self._clock is not None:
+            return self._clock.now().isoformat()
         return current_utc_time().isoformat()
 
     async def _route_request(self, writer: asyncio.StreamWriter, path: str) -> None:
@@ -112,9 +99,8 @@ class HealthServerRoutingMixin:
             "/health/ready": self._handle_readiness,
             "/health/providers": self._handle_providers,
         }
-        response_support = cast(_HealthResponseSupport, self)
         if route_path == "/metrics":
-            await response_support._send_text_response(
+            await self._send_text_response(
                 writer,
                 200,
                 self._handle_metrics(),
@@ -124,7 +110,7 @@ class HealthServerRoutingMixin:
         handler = handlers.get(route_path)
         if handler:
             response = await handler()
-            await response_support._send_json_response(writer, response)
+            await self._send_json_response(writer, response)
             return
         if route_path.startswith("/ops/quarantine/"):
             await dispatch_quarantine_request(
@@ -150,7 +136,7 @@ class HealthServerRoutingMixin:
                 query=query,
             )
             return
-        await response_support._send_response(writer, 404, _NOT_FOUND_MESSAGE)
+        await self._send_response(writer, 404, _NOT_FOUND_MESSAGE)
 
     def _parse_query_params(self, raw_query: str) -> dict[str, str]:
         """Parse query string into a single-value key/value mapping."""
@@ -240,8 +226,7 @@ class HealthServerRoutingMixin:
     async def _handle_health(self) -> HealthResponse:
         """Handle /health endpoint - overall health status."""
         await asyncio.sleep(0)
-        state_support = cast(_HealthStateSupport, self)
-        status = state_support._get_overall_status()
+        status = self._get_overall_status()
         checks: JsonDict = {  # Any: response payload values are heterogeneous
             "server": {
                 "status": "healthy",
@@ -249,7 +234,7 @@ class HealthServerRoutingMixin:
             }
         }
         if self._health_monitor:
-            checks["providers"] = state_support._get_provider_statuses()
+            checks["providers"] = self._get_provider_statuses()
         return HealthResponse(
             status=status.value.lower(),
             timestamp=self._response_timestamp(),
@@ -279,8 +264,7 @@ class HealthServerRoutingMixin:
                 timestamp=self._response_timestamp(),
                 checks={"message": "No health monitor configured"},
             )
-        state_support = cast(_HealthStateSupport, self)
-        provider_statuses = state_support._get_provider_statuses()
+        provider_statuses = self._get_provider_statuses()
         has_unhealthy = any(
             status.get("status") == "unhealthy" for status in provider_statuses.values()
         )
@@ -300,11 +284,10 @@ class HealthServerRoutingMixin:
                 timestamp=self._response_timestamp(),
                 checks={"message": "No health monitor configured"},
             )
-        state_support = cast(_HealthStateSupport, self)
         return HealthResponse(
-            status=state_support._get_overall_status().value.lower(),
+            status=self._get_overall_status().value.lower(),
             timestamp=self._response_timestamp(),
-            checks={"providers": state_support._get_provider_statuses()},
+            checks={"providers": self._get_provider_statuses()},
         )
 
     def _handle_metrics(self) -> str:

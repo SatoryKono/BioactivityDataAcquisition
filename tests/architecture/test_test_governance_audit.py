@@ -412,8 +412,9 @@ def test_tests_workflow_runs_strict_test_audit_preflight_before_governance_close
     command = "scripts/engineering/qa/check_test_audit_preflight.py --strict"
 
     assert command in workflow
+    # The observability metric inventory check runs in the "Dashboard semantic release policy gate" step
     assert workflow.index(command) < workflow.index(
-        "Observability metric inventory drift gate"
+        "Dashboard semantic release policy gate"
     )
 
 

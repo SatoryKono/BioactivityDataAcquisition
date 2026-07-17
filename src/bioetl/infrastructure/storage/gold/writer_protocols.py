@@ -3,9 +3,20 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Protocol
 
+from bioetl.domain.ports import LoggerPort
 from bioetl.domain.types import GoldRecord, ScdConfig
+from bioetl.domain.types.contract_rollout import ContractRolloutPolicy
+from bioetl.infrastructure.storage.gold.pipeline_helpers import (
+    GoldWriteDispatchContext,
+    GoldWritePostwriteContext,
+    GoldWriteRequest,
+    PreparedGoldWriteContext,
+)
+
+if TYPE_CHECKING:
+    from pandera.polars import DataFrameSchema
 
 __all__ = [
     "_GoldWriterHost",
@@ -31,10 +42,11 @@ class _ResolvedSchema(Protocol):
 class _GoldWriterHost(Protocol):
     """Host contract needed by Gold write support helpers."""
 
-    logger: Any  # Any: facade host may provide structlog-like or test-double logger implementations.
-    _contract_rollout_policy: (
-        Any  # Any: rollout policy is runtime-wired and only duck-typed at this seam.
-    )
+    @property
+    def logger(self) -> LoggerPort: ...
+
+    @property
+    def _contract_rollout_policy(self) -> ContractRolloutPolicy | None: ...
 
     async def _prepare_write_gold(
         self,
@@ -42,14 +54,14 @@ class _GoldWriterHost(Protocol):
         table_name: str,
         records: list[GoldRecord],
         mode: str,
-        schema: object,
+        schema: DataFrameSchema,
         scd_config: ScdConfig | None,
         ingestion_ts: datetime | None,
         contract_version: str | None = None,
-    ) -> object: ...
+    ) -> PreparedGoldWriteContext: ...
 
-    async def _dispatch_write(self, context: object) -> None: ...
+    async def _dispatch_write(self, context: GoldWriteDispatchContext) -> None: ...
 
-    async def _post_write_gold(self, context: object) -> None: ...
+    async def _post_write_gold(self, context: GoldWritePostwriteContext) -> None: ...
 
-    async def _write_single_target(self, *, request: object) -> None: ...
+    async def _write_single_target(self, *, request: GoldWriteRequest) -> None: ...

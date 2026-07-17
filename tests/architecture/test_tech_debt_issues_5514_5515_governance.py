@@ -8,11 +8,14 @@ from typing import Any
 
 import pytest
 
+from scripts.engineering.qa.report_flaky_test_burndown_review import build_payload
+
 pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
 FLAKY_REVIEW = ROOT / "reports" / "quality" / "flaky-test-burndown-review.json"
-FLAKINESS_DB = ROOT / "reports" / "test-swarm" / "SWARM-001" / "flakiness-database.json"
+FLAKY_INVENTORY = ROOT / "configs" / "quality" / "flaky_test_inventory.yaml"
+TEST_GOVERNANCE = ROOT / "reports" / "quality" / "test-governance-current.json"
 RUNTIME_CARDINALITY_INVENTORY = (
     ROOT / "reports" / "observability" / "runtime_cardinality_inventory.json"
 )
@@ -27,23 +30,31 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload
 
 
-def test_issue_5514_flaky_test_burndown_review_matches_swarm_telemetry() -> None:
+def test_issue_5514_flaky_test_burndown_review_matches_canonical_inputs() -> None:
     review = _load_json(FLAKY_REVIEW)
-    source = _load_json(FLAKINESS_DB)
+    test_governance = _load_json(TEST_GOVERNANCE)
 
+    assert review == build_payload(ROOT)
     assert review["linked_issue"] == "#5514"
-    assert review["decision"] == "closeable_zero_residual_flaky_tests"
+    assert review["decision"] == "reviewed_inventory_clear"
+    assert review["source_artifacts"] == [
+        "configs/quality/flaky_test_inventory.yaml",
+        "reports/quality/test-governance-current.json",
+    ]
+    assert FLAKY_INVENTORY.exists()
     for relative_path in review["source_artifacts"]:
         assert (ROOT / relative_path).exists(), relative_path
 
-    assert review["summary"]["total_tests_analyzed"] == source["total_tests_analyzed"]
-    assert review["summary"]["total_flaky"] == source["summary"]["total_flaky"]
-    assert review["summary"]["by_layer"] == source["summary"]["by_layer"]
-    assert review["summary"]["by_category"] == source["summary"]["by_category"]
-    assert review["summary"]["by_severity"] == source["summary"]["by_severity"]
-    assert review["summary"]["by_triage"] == source["summary"]["by_triage"]
-    assert review["summary"]["by_alert_level"] == source["summary"]["by_alert_level"]
-    assert review["reviewed_flaky_tests"] == source["flaky_tests"] == []
+    assert (
+        review["summary"]["total_tests_analyzed"]
+        == test_governance["report"]["total_test_functions"]
+    )
+    assert (
+        review["source_fingerprints"]["test_governance_source_tree_sha256"]
+        == test_governance["source_tree_sha256"]
+    )
+    assert review["summary"]["total_flaky"] == 0
+    assert review["reviewed_flaky_tests"] == []
 
 
 def test_issue_5515_runtime_cardinality_inventory_has_no_unused_event_debt() -> None:

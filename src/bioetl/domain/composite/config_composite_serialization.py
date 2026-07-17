@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Protocol
 
+from bioetl.domain.composite.config_composite_protocols import (
+    CompositeConfigProtocol,
+)
 from bioetl.domain.composite.config_parsing import (
     optional_bool,
     optional_int,
@@ -22,46 +24,6 @@ __all__ = [
     "composite_from_dict",
     "composite_to_dict",
 ]
-
-
-class _SeedConfigProtocol(Protocol):
-    pipeline: str
-    output_keys: tuple[str, ...]
-    silver_table: str
-
-
-class _DependencyConfigProtocol(Protocol):
-    pipeline: str
-    join_keys: tuple[str, ...]
-    required: bool
-    timeout_seconds: int
-    silver_table: str | None
-    filter_fields: tuple[str, ...] | None
-
-
-class _EnricherConfigProtocol(Protocol):
-    pipeline: str
-    join_keys: tuple[str, ...]
-    required: bool
-    timeout_seconds: int
-
-
-class _MergeConfigProtocol(Protocol):
-    strategy: MergeStrategy
-    conflict_resolution: ConflictResolution
-    output_silver_path: str
-    output_gold_path: str
-    sort_by_silver: tuple[str, ...]
-    sort_by_gold: tuple[str, ...]
-
-
-class CompositeConfigProtocol(Protocol):
-    name: str
-    version: str
-    seed: _SeedConfigProtocol
-    dependencies: tuple[_DependencyConfigProtocol, ...]
-    enrichers: tuple[_EnricherConfigProtocol, ...]
-    merge: _MergeConfigProtocol
 
 
 def _build_seed_config[_ConfigT](

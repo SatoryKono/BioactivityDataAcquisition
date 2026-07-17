@@ -288,9 +288,9 @@ class DebugExportAdapter:
                         "stored_fragment_id": fragment.stored_fragment_id,
                         "manifest_id": fragment.manifest_id,
                         "run_id": fragment.run_id,
-                        "node_id": edge.from_node_id,
+                        "node_id": edge.source.node_id,
                         "edge_type": edge.edge_type,
-                        "related_node_id": edge.to_node_id,
+                        "related_node_id": edge.target.node_id,
                         "node_type": "",
                     }
                 )

@@ -28,7 +28,15 @@ def _load_status_events(
         dt = DeltaTable(event_path, storage_options=storage_options)
     except TableNotFoundError:
         return []
-    return dt.to_pyarrow_table().to_pylist()
+    raw_rows: object = dt.to_pyarrow_table().to_pylist()
+    if not isinstance(raw_rows, list):
+        raise TypeError("Quarantine status event rows must be a list")
+    events: list[JsonDict] = []
+    for row in raw_rows:
+        if not isinstance(row, dict):
+            raise TypeError("Quarantine status event row must be a mapping")
+        events.append({str(key): value for key, value in row.items()})
+    return events
 
 
 def _next_status_sequence(

@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Protocol, cast
+from typing import TYPE_CHECKING, Protocol, cast
+
+if TYPE_CHECKING:
+    import pyarrow as pa
 
 try:
     import pyarrow.compute as pc
@@ -11,9 +14,17 @@ except ImportError:
 
 
 class _PyArrowComputeModule(Protocol):
-    def equal(self, left: object, right: object): ...
+    def equal(
+        self,
+        left: object,
+        right: object,
+    ) -> pa.Array | pa.ChunkedArray: ...
 
-    def and_(self, left: object, right: object): ...
+    def and_(
+        self,
+        left: object,
+        right: object,
+    ) -> pa.Array | pa.ChunkedArray: ...
 
 
 def _require_pyarrow_compute() -> _PyArrowComputeModule:
@@ -26,13 +37,13 @@ def _require_pyarrow_compute() -> _PyArrowComputeModule:
     return cast(_PyArrowComputeModule, pc)
 
 
-def equal_mask(left: object, right: object):
+def equal_mask(left: object, right: object) -> pa.Array | pa.ChunkedArray:
     """Create equality mask for PyArrow arrays."""
     compute = _require_pyarrow_compute()
     return compute.equal(left, right)
 
 
-def and_mask(left: object, right: object):
+def and_mask(left: object, right: object) -> pa.Array | pa.ChunkedArray:
     """Create AND mask for PyArrow arrays."""
     compute = _require_pyarrow_compute()
     return compute.and_(left, right)

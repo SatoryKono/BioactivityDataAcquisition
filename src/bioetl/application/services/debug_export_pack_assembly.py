@@ -4,16 +4,21 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from bioetl.domain.types import DebugExportPack
 
 from .debug_export_collector import build_dq_summary_rows, get_sorted_lineage_rows
+from .debug_export_helpers import _record_payload
 from .debug_reason_dictionary import DEBUG_REASON_DICTIONARY
+
+if TYPE_CHECKING:
+    from .debug_export_collector import DebugExportCollector
 
 
 def build_debug_export_pack(
     *,
-    collector: object,
+    collector: DebugExportCollector,
     run_id: str,
     pipeline_id: str,
     provider_id: str,
@@ -29,7 +34,10 @@ def build_debug_export_pack(
     silver_rejected_rows = collector._silver_rejected_rows
     silver_quarantine_rows = collector._silver_quarantine_rows
     gold_rejected_rows = collector._gold_rejected_rows
-    tables = {
+    reason_dictionary_rows = tuple(
+        _record_payload(row) for row in DEBUG_REASON_DICTIONARY
+    )
+    tables: dict[str, tuple[dict[str, object], ...]] = {
         "bronze_index": tuple(collector._bronze_rows),
         "silver_full": tuple(collector._silver_full_rows),
         "silver_rejected": tuple(silver_rejected_rows),
@@ -45,7 +53,7 @@ def build_debug_export_pack(
             gold_rejected_rows=gold_rejected_rows,
         ),
         "lineage": get_sorted_lineage_rows(collector._lineage_rows),
-        "reason_dictionary": DEBUG_REASON_DICTIONARY,
+        "reason_dictionary": reason_dictionary_rows,
     }
     return DebugExportPack(
         run_id=run_id,

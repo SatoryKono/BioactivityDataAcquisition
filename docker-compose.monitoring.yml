@@ -16,22 +16,22 @@ services:
       - '--web.enable-admin-api'
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
+      interval: 30s
+      timeout: 15s
+      retries: 10
+      start_period: 60s
     networks:
       - monitoring
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
-    mem_limit: 1g
+    mem_limit: 10g
     mem_reservation: 512m
-    cpus: 1.0
-    pids_limit: 256
+    cpus: 8.0
+    pids_limit: 2560
     init: true
-    stop_grace_period: 30s
-    logging: {driver: json-file, options: {max-size: "20m", max-file: "5"}}
+    stop_grace_period: 120s
+    logging: {driver: json-file, options: {max-size: "200m", max-file: "10"}}
 
   pushgateway:
     image: prom/pushgateway:v1.11.3@sha256:74fa117cef2d7e383112d25139ff1c2d2e309c35389a9e0554a47136a1482e48
@@ -43,17 +43,17 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9091/-/healthy"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
-    mem_limit: 256m
+      interval: 30s
+      timeout: 15s
+      retries: 10
+      start_period: 60s
+    mem_limit: 2560m
     mem_reservation: 128m
-    cpus: 0.50
-    pids_limit: 128
+    cpus: 5.0
+    pids_limit: 1280
     init: true
-    stop_grace_period: 20s
-    logging: {driver: json-file, options: {max-size: "10m", max-file: "3"}}
+    stop_grace_period: 120s
+    logging: {driver: json-file, options: {max-size: "100m", max-file: "10"}}
 
   loki:
     image: grafana/loki:3.7.0@sha256:c316b7c7589a5eeca843b6926c7446149d18300b79ac8538dc4ae063bc478da2
@@ -69,14 +69,20 @@ services:
       - monitoring
     restart: unless-stopped
     healthcheck:
-      disable: true
+      test:
+        - "CMD-SHELL"
+        - "wget --quiet --tries=1 --timeout=2 -O /dev/null http://localhost:3100/ready"
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 60s
     mem_limit: 768m
     mem_reservation: 384m
-    cpus: 0.75
-    pids_limit: 256
+    cpus: 7.5
+    pids_limit: 2560
     init: true
-    stop_grace_period: 30s
-    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
+    stop_grace_period: 120s
+    logging: {driver: local, options: {max-size: "100m", max-file: "10"}}
 
   promtail:
     image: grafana/promtail:3.6.8@sha256:6cfa64ec432b24a912d640e2edb940eeae2666f61861a66c121d763dd7241381
@@ -89,19 +95,19 @@ services:
       - ./reports/logs:/workspace-report-logs:ro
     depends_on:
       loki:
-        condition: service_started
+        condition: service_healthy
     networks:
       - monitoring
     restart: unless-stopped
     healthcheck:
       disable: true
-    mem_limit: 256m
+    mem_limit: 2560m
     mem_reservation: 128m
-    cpus: 0.50
-    pids_limit: 128
+    cpus: 5.0
+    pids_limit: 1280
     init: true
-    stop_grace_period: 20s
-    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
+    stop_grace_period: 120s
+    logging: {driver: local, options: {max-size: "100m", max-file: "10"}}
 
   tempo:
     image: grafana/tempo:2.10.3@sha256:cac9de2ac9f6da8efca5b64b690a7cb8c786a0c49cac7b4517dd1b0089a6c703
@@ -120,13 +126,13 @@ services:
     restart: unless-stopped
     healthcheck:
       disable: true
-    mem_limit: 768m
+    mem_limit: 7680m
     mem_reservation: 384m
-    cpus: 0.75
-    pids_limit: 256
+    cpus: 7.5
+    pids_limit: 2560
     init: true
-    stop_grace_period: 30s
-    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
+    stop_grace_period: 120s
+    logging: {driver: local, options: {max-size: "100m", max-file: "10"}}
 
   grafana:
     image: grafana/grafana:12.0.0@sha256:263cbefd5d9b179893c47c415daab4da5c1f3d6770154741eca4f45c81119884
@@ -137,7 +143,6 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_METRICS_ENABLED=true
-      # Grafana 12+ startup plugin installer flag.
       - GF_PLUGINS_PREINSTALL=yesoreyeram-infinity-datasource
       - GF_LOG_LEVEL=info
       - GF_SERVER_ROOT_URL=http://localhost:3000
@@ -164,49 +169,49 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
+      interval: 30s
+      timeout: 15s
+      retries: 10
+      start_period: 120s
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
       - monitoring
     restart: unless-stopped
-    mem_limit: 768m
+    mem_limit: 7680m
     mem_reservation: 384m
-    cpus: 1.0
-    pids_limit: 256
+    cpus: 8.0
+    pids_limit: 2560
     init: true
-    stop_grace_period: 30s
-    logging: {driver: local, options: {max-size: "20m", max-file: "5"}}
+    stop_grace_period: 120s
+    logging: {driver: local, options: {max-size: "200m", max-file: "10"}}
 
   renderer:
     image: grafana/grafana-image-renderer@sha256:c0c920e6974b0d30ae25313051344afcd2054362529968ebd9545a4b2bc8119b
-    shm_size: "1gb"
+    shm_size: "4gb"
     environment:
       - ENABLE_METRICS=true
       - HTTP_HOST=0.0.0.0
       - AUTH_TOKEN=${GF_RENDERING_RENDERER_TOKEN:?GF_RENDERING_RENDERER_TOKEN is required}
       - BROWSER_FLAGS=--no-sandbox,--disable-dev-shm-usage
-      - BROWSER_READINESS_TIMEOUT=${GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT:-90s}
-      - GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-1GiB}
+      - BROWSER_READINESS_TIMEOUT=${GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT:-180s}
+      - GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-10GiB}
     networks:
       - monitoring
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "grafana-image-renderer", "healthcheck"]
-      interval: 15s
-      timeout: 5s
-      retries: 6
-      start_period: 45s
-    mem_limit: 1536m
+      interval: 30s
+      timeout: 15s
+      retries: 10
+      start_period: 180s
+    mem_limit: 15360m
     mem_reservation: 768m
-    cpus: 2.0
-    pids_limit: 512
+    cpus: 8.0
+    pids_limit: 5120
     init: true
-    stop_grace_period: 30s
-    logging: {driver: local, options: {max-size: "20m", max-file: "5"}}
+    stop_grace_period: 120s
+    logging: {driver: local, options: {max-size: "200m", max-file: "10"}}
 
 volumes:
   prometheus-data:

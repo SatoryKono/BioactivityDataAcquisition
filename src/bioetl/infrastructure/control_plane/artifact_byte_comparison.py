@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -50,9 +50,11 @@ def _load_structured_payload(path: Path) -> object | None:
     suffix = path.suffix.lower()
     text = path.read_text(encoding="utf-8")
     if suffix == ".json":
-        return json.loads(text)
+        payload: object = json.loads(text)
+        return payload
     if suffix in {".yaml", ".yml"}:
-        return yaml.safe_load(text)
+        payload = yaml.safe_load(text)
+        return payload
     return None
 
 
@@ -93,17 +95,17 @@ def _collect_difference_paths(
     if isinstance(left, list) and isinstance(right, list):
         if len(left) != len(right):
             return (prefix or "value",)
-        paths: list[str] = []
+        list_paths: list[str] = []
         for index, (left_item, right_item) in enumerate(zip(left, right, strict=True)):
             next_prefix = f"{prefix}[{index}]" if prefix else f"[{index}]"
-            paths.extend(
+            list_paths.extend(
                 _collect_difference_paths(
                     left_item,
                     right_item,
                     prefix=next_prefix,
                 )
             )
-        return tuple(paths)
+        return tuple(list_paths)
     if left == right:
         return ()
     return (prefix or "value",)
@@ -166,7 +168,7 @@ class _ArtifactComparisonState:
 
 
 def _flatten_candidate_paths(
-    refs: tuple[Mapping[str, object], ...] | list[Mapping[str, object]],
+    refs: Sequence[Mapping[str, object]],
 ) -> tuple[_CandidatePath, ...]:
     return tuple(candidate for ref in refs for candidate in _candidate_paths(ref))
 
@@ -341,8 +343,8 @@ class FileArtifactByteComparisonAdapter(ArtifactByteComparisonPort):
 
     def compare_artifacts(
         self,
-        left_refs: tuple[Mapping[str, object], ...] | list[Mapping[str, object]],
-        right_refs: tuple[Mapping[str, object], ...] | list[Mapping[str, object]],
+        left_refs: Sequence[Mapping[str, object]],
+        right_refs: Sequence[Mapping[str, object]],
     ) -> dict[str, object]:
         left_paths = _flatten_candidate_paths(left_refs)
         right_paths = _flatten_candidate_paths(right_refs)

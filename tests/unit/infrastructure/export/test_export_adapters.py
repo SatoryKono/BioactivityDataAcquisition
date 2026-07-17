@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -12,35 +11,19 @@ import pytest
 import pyarrow as pa
 
 import bioetl.infrastructure.export.debug_export_adapter as debug_adapter_module
+from bioetl.domain.lineage import (
+    LineageEdge,
+    LineageEdgeType,
+    LineageGraphFragment,
+    LineageNodeRef,
+    LineageNodeType,
+)
 from bioetl.domain.types import DebugExportPack
 from bioetl.infrastructure.export.csv_exporter import CsvExporter
 from bioetl.infrastructure.export.debug_export_adapter import DebugExportAdapter
 from bioetl.infrastructure.export.export_catalog_adapter import ExportCatalogAdapter
 
 pytestmark = pytest.mark.unit
-
-
-@dataclass(frozen=True)
-class _Node:
-    node_id: str
-    node_type: str
-
-
-@dataclass(frozen=True)
-class _Edge:
-    from_node_id: str
-    to_node_id: str
-    edge_type: str
-
-
-@dataclass(frozen=True)
-class _Fragment:
-    fragment_id: str
-    stored_fragment_id: str
-    manifest_id: str | None
-    run_id: str
-    nodes: tuple[_Node, ...]
-    edges: tuple[_Edge, ...]
 
 
 class _Logger:
@@ -241,24 +224,38 @@ def test_load_lineage_rows_handles_no_store_errors_and_fragment_rows(
         == []
     )
 
-    fragment = _Fragment(
+    source = LineageNodeRef(
+        node_type=LineageNodeType.SOURCE_SYSTEM,
+        node_id="node-1",
+    )
+    target = LineageNodeRef(
+        node_type=LineageNodeType.DATASET,
+        node_id="node-2",
+    )
+    fragment = LineageGraphFragment(
         fragment_id="fragment-1",
         stored_fragment_id="stored-1",
         manifest_id="manifest-1",
         run_id="00000000-0000-0000-0000-000000000123",
-        nodes=(_Node("node-1", "record"),),
-        edges=(_Edge("node-1", "node-2", "derived_from"),),
+        nodes=(source,),
+        edges=(
+            LineageEdge(
+                edge_type=LineageEdgeType.DERIVED_FROM,
+                source=source,
+                target=target,
+            ),
+        ),
     )
 
     class FakeStore:
         def __init__(self, *, base_path: Path) -> None:
             self.base_path = base_path
 
-        def list_by_manifest_id(self, manifest_id: str) -> list[_Fragment]:
+        def list_by_manifest_id(self, manifest_id: str) -> list[LineageGraphFragment]:
             assert manifest_id == "manifest-1"
             return [fragment]
 
-        def list_by_run_id(self, run_id: object) -> list[_Fragment]:
+        def list_by_run_id(self, run_id: object) -> list[LineageGraphFragment]:
             assert str(run_id) == "00000000-0000-0000-0000-000000000123"
             return [fragment]
 
@@ -274,7 +271,7 @@ def test_load_lineage_rows_handles_no_store_errors_and_fragment_rows(
             "node_id": "node-1",
             "edge_type": "",
             "related_node_id": "",
-            "node_type": "record",
+            "node_type": LineageNodeType.SOURCE_SYSTEM,
         },
         {
             "fragment_id": "fragment-1",
@@ -282,7 +279,7 @@ def test_load_lineage_rows_handles_no_store_errors_and_fragment_rows(
             "manifest_id": "manifest-1",
             "run_id": "00000000-0000-0000-0000-000000000123",
             "node_id": "node-1",
-            "edge_type": "derived_from",
+            "edge_type": LineageEdgeType.DERIVED_FROM,
             "related_node_id": "node-2",
             "node_type": "",
         },

@@ -5,7 +5,7 @@ from __future__ import annotations
 __all__ = ["SilverWriterMetadataMixin", "time"]
 
 import time
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from datetime import datetime
 
 from deltalake.exceptions import TableNotFoundError as DeltaTableNotFoundError
@@ -229,10 +229,12 @@ class SilverWriterMetadataMixin:
     async def _prepare_silver_write_finalization_context(
         self: _SilverWriterMetadataRuntimeProtocol,
         request: _SilverWriteFinalizationPreparationRequest,
+        *,
+        perf_counter: Callable[[], float] | None = None,
     ) -> _PreparedSilverWriteFinalizationContext:
         """Prepare DQ/version/timing context before Silver metadata persistence."""
         return await prepare_silver_write_finalization_context_operation(
             self,
             request,
-            perf_counter=time.perf_counter,
+            perf_counter=perf_counter or time.perf_counter,
         )

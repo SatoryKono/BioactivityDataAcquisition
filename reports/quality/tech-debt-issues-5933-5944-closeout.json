@@ -1,0 +1,250 @@
+{
+  "schema_version": "tech-debt-issues-5933-5944-closeout-v1",
+  "generated_on": "2026-07-04",
+  "generated_by": "codex",
+  "debt_budget_policy": "flat_or_decreasing_only",
+  "debt_budget_outcome": "reduced_or_unchanged",
+  "parent_theme": "governance-quality-closeout-2026-07-04",
+  "issues": [
+    {
+      "number": 5933,
+      "title": "Rebaseline audit against governance artifacts",
+      "status": "closed-ready",
+      "evidence": [
+        "reports/quality/debt-governance-gates.json",
+        "reports/quality/architecture-quality-scorecard.json",
+        "reports/quality/module-coverage-inventory.json",
+        "reports/quality/full-app-duplication-baseline.json",
+        "reports/quality/architecture-debt-remote-main-baseline.json",
+        "configs/quality/debt_scorecard.yaml",
+        "scripts/engineering/qa/report_architecture_debt_remote_main_baseline.py",
+        "scripts/engineering/qa/report_debt_governance_gates.py",
+        "tests/unit/scripts/qa/test_report_debt_governance_gates.py"
+      ]
+    },
+    {
+      "number": 5938,
+      "title": "SILVER_FILTER_ALIAS sunset readiness",
+      "status": "closed-ready",
+      "evidence": [
+        "src/bioetl/interfaces/cli/commands/quarantine.py",
+        "tests/unit/interfaces/cli/commands/test_quarantine.py",
+        "docs/05-operations/runbooks/quarantine-management.md",
+        "docs/04-reference/cli.md",
+        "docs/filters/inventory-baseline.json"
+      ]
+    },
+    {
+      "number": 5937,
+      "title": "HTTP control_plane_identity migration readiness",
+      "status": "closed-ready",
+      "evidence": [
+        "src/bioetl/interfaces/http/control_plane_identity/types.py",
+        "tests/integration/interfaces/http/test_control_plane_identity.py"
+      ]
+    },
+    {
+      "number": 5942,
+      "title": "Observability adapter tests/runtime cardinality",
+      "status": "closed-ready",
+      "evidence": [
+        "reports/observability/runtime_cardinality_inventory.json",
+        "reports/observability/runtime_cardinality_review.json",
+        "reports/quality/debt-governance-gates.json",
+        "src/bioetl/interfaces/cli/commands/domains/health/observability_backend_runtime.py",
+        "tests/unit/interfaces/cli/commands/test_observability_backend_runtime.py"
+      ]
+    },
+    {
+      "number": 5943,
+      "title": "Infrastructure config/config-compat tests",
+      "status": "closed-ready",
+      "evidence": [
+        "configs/quality/config_compatibility_registry.yaml",
+        "reports/quality/config-discrepancy-baseline.json",
+        "reports/quality/contract-coverage-matrix.json",
+        "tests/unit/infrastructure/config/test_source_normalizers.py",
+        "tests/unit/infrastructure/config/test_pipeline_normalizers.py",
+        "tests/unit/infrastructure/test_config_dynamic.py"
+      ]
+    },
+    {
+      "number": 5944,
+      "title": "Test-governance closeout",
+      "status": "closed-ready",
+      "evidence": [
+        "reports/quality/test-governance-current.json",
+        "reports/quality/test-governance.json",
+        "reports/quality/fixture-duplication-inventory.json",
+        "reports/quality/dead-code-inventory.json",
+        "reports/quality/compatibility-importer-census.json",
+        "reports/quality/module-coverage-inventory.json",
+        "configs/quality/scripts_inventory_manifest.json"
+      ]
+    }
+  ],
+  "ratchets": {
+    "module_uncovered_modules": {
+      "current": 0,
+      "max": 0,
+      "source": "reports/quality/module-coverage-inventory.json"
+    },
+    "module_unmeasured_modules": {
+      "current": 0,
+      "max": 0,
+      "source": "reports/quality/module-coverage-inventory.json"
+    },
+    "full_app_duplicate_clusters": {
+      "current": 0,
+      "max": 2,
+      "source": "reports/quality/full-app-duplication-baseline.json"
+    },
+    "infrastructure_adapter_duplicate_clusters": {
+      "current": 0,
+      "max": 0,
+      "source": "reports/quality/full-app-duplication-baseline.json"
+    },
+    "application_pipeline_duplicate_clusters": {
+      "current": 0,
+      "max": 2,
+      "source": "reports/quality/full-app-duplication-baseline.json"
+    },
+    "composition_bootstrap_duplicate_clusters": {
+      "current": 0,
+      "max": 0,
+      "source": "reports/quality/full-app-duplication-baseline.json"
+    },
+    "interfaces_cli_duplicate_clusters": {
+      "current": 0,
+      "max": 0,
+      "source": "reports/quality/full-app-duplication-baseline.json"
+    },
+    "config_inconsistent_parameters": {
+      "current": 0,
+      "max": 0,
+      "source": "reports/quality/config-discrepancy-baseline.json"
+    },
+    "config_raw_inconsistent_parameters": {
+      "current": 0,
+      "max": 0,
+      "source": "reports/quality/config-discrepancy-baseline.json"
+    },
+    "contract_missing_gold_enabled": {
+      "current": 0,
+      "max": 0,
+      "source": "reports/quality/contract-coverage-matrix.json"
+    },
+    "observability_dashboarded_without_emission": {
+      "current": 0,
+      "max": 0,
+      "source": "reports/observability/runtime_cardinality_inventory.json"
+    },
+    "runtime_cardinality_review_required": {
+      "current": 0,
+      "max": 0,
+      "source": "reports/observability/runtime_cardinality_inventory.json"
+    },
+    "runtime_cardinality_threshold_violations": {
+      "current": 0,
+      "max": 0,
+      "source": "reports/observability/runtime_cardinality_inventory.json"
+    },
+    "compatibility_test_files": {
+      "current": 0,
+      "max": 0,
+      "source": "reports/quality/test-governance-current.json"
+    },
+    "dead_code_untriaged_zero_import_candidates": {
+      "current": 0,
+      "max": 0,
+      "source": "reports/quality/dead-code-inventory.json"
+    }
+  },
+  "metrics": {
+    "source_module_count": {
+      "current": 2236,
+      "source": "reports/quality/module-coverage-inventory.json"
+    },
+    "source_tree_sha256": {
+      "current": "66a60064a43d5fa0d37167fafab9fcf525e5411b34ee83bfadb87ff9379324dd",
+      "source": "reports/quality/module-coverage-inventory.json"
+    },
+    "architecture_quality_score": {
+      "current": 8.66,
+      "source": "reports/quality/architecture-quality-scorecard.json"
+    },
+    "config_count": {
+      "current": 27,
+      "source": "reports/quality/config-discrepancy-baseline.json"
+    },
+    "unique_config_parameter_count": {
+      "current": 419,
+      "source": "reports/quality/config-discrepancy-baseline.json"
+    },
+    "covered_gold_enabled_contracts": {
+      "current": 27,
+      "source": "reports/quality/contract-coverage-matrix.json"
+    },
+    "config_compatibility_accepted_shapes": {
+      "current": 2,
+      "max": 2,
+      "source": "configs/quality/config_compatibility_registry.yaml"
+    },
+    "config_compatibility_retired_rejected_shapes": {
+      "current": 7,
+      "min": 6,
+      "source": "configs/quality/config_compatibility_registry.yaml"
+    },
+    "retained_entrypoint_count": {
+      "current": 12,
+      "source": "reports/quality/compatibility-importer-census.json"
+    },
+    "retained_public_export_facade_count": {
+      "current": 4,
+      "source": "reports/quality/compatibility-importer-census.json"
+    }
+  },
+  "outcomes": {
+    "5933": {
+      "status": "closeable",
+      "theme": "governance_artifact_rebaseline",
+      "outcome": "remote-main baseline records required-on-remote and branch-introduction semantics for governance artifacts; quality scorecard, module coverage, duplication baseline, remote baseline, and debt gates are regenerated against the current artifacts",
+      "debt_outcome": "improved",
+      "integral_score": 8.66
+    },
+    "5938": {
+      "status": "closeable",
+      "theme": "silver_filter_alias_sunset",
+      "outcome": "the deprecated --silver-filter-only alias is documented and tested as a Silver-only shortcut for FILTERED_OUT_SILVER through the 2026-09-30 sunset",
+      "debt_outcome": "unchanged_but_governed"
+    },
+    "5937": {
+      "status": "closeable",
+      "theme": "http_control_plane_identity_migration",
+      "outcome": "control_plane_identity HTTP types expose canonical contract fields while preserving legacy aliases through the 2026-12-31 compatibility sunset",
+      "debt_outcome": "unchanged_but_governed"
+    },
+    "5942": {
+      "status": "closeable",
+      "theme": "observability_runtime_cardinality",
+      "outcome": "observability backend runtime duplication was reduced and runtime cardinality release evidence remains passed with zero review-required or threshold-violation metrics",
+      "debt_outcome": "improved"
+    },
+    "5943": {
+      "status": "closeable",
+      "theme": "infrastructure_config_compatibility",
+      "outcome": "config compatibility shapes remain bounded at two accepted canonical aliases, retired rejected shapes stay above the burn-down floor, and config/contract discrepancy reports remain clean",
+      "debt_outcome": "unchanged_but_governed"
+    },
+    "5944": {
+      "status": "closeable",
+      "theme": "test_governance_closeout",
+      "outcome": "test governance, dead-code, compatibility importer, and module coverage inventories have zero budget violations for the closeout-critical metrics",
+      "debt_outcome": "unchanged_but_governed"
+    }
+  },
+  "closeout": {
+    "status": "closeable",
+    "condition": "all six issues have source-backed evidence and no ratchet current value exceeds its max"
+  }
+}

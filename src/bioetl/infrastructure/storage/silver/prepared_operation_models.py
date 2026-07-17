@@ -8,6 +8,7 @@ from datetime import datetime
 from bioetl.domain.lineage import LineageGraphFragment
 from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.types import BronzeRecord
+from bioetl.domain.value_objects.dq_metrics import BatchDQMetrics
 from bioetl.infrastructure.storage.silver.merged_request_support import (
     _build_merged_write_request_from_mapping,
 )
@@ -48,7 +49,7 @@ class _ResolvedSilverMetadataContext:
 class _PreparedSilverWriteFinalizationContext:
     """Prepared metadata/result context for one completed Silver write."""
 
-    dq_metrics: object
+    dq_metrics: BatchDQMetrics
     version_after: int | None
     completed_at: datetime
 

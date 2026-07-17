@@ -4,11 +4,15 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.base_transformer import BaseTransformer
+    from bioetl.application.core.pipeline_services import PipelineService
+    from bioetl.application.services.lineage.metadata_coordinator import (
+        MetadataCoordinator,
+    )
     from bioetl.composition.factories.datasource.data_source_factory import (
         DataSourceCreatorProtocol,
     )
@@ -16,13 +20,41 @@ if TYPE_CHECKING:
         _PipelineCreationInputs,
         _PipelineCreationRequest,
     )
-    from bioetl.composition.factories.services.factory import BaseServicesFactory
-    from bioetl.domain.config import DQConfig, PipelineConfig
     from bioetl.domain.context import CachedBronzeContext
     from bioetl.domain.filtering import InputFilterConfig
-    from bioetl.domain.ports import DataSourcePort, LoggerPort, MetricsPort
+    from bioetl.domain.ports import (
+        AuditPort,
+        DataSourcePort,
+        DQMonitorPort,
+        LoggerPort,
+        MetricsPort,
+        SilverValidatorPort,
+        TracingPort,
+    )
     from bioetl.infrastructure.config.settings_api import Settings
+    from bioetl.infrastructure.config.domain_config_resolver import DomainConfigMapper
     from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
+
+
+class BaseServicesFactoryProtocol(Protocol):
+    """Class-like service factory surface used by lazy composition seams."""
+
+    def _create_metrics(self, settings: Settings) -> MetricsPort: ...
+
+    def create_common_services(
+        self,
+        settings: Settings,
+        logger: LoggerPort,
+        data_source: DataSourcePort,
+        pipeline_config: PipelineYamlConfig,
+        pipeline_name: str,
+        audit: AuditPort | None = None,
+        metrics: MetricsPort | None = None,
+        tracer: TracingPort | None = None,
+        dq_monitor: DQMonitorPort | None = None,
+        metadata_coordinator: MetadataCoordinator | None = None,
+        silver_validator: SilverValidatorPort | None = None,
+    ) -> PipelineService: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -30,22 +62,18 @@ class ServiceBundleDependencies:
     """Explicit dependency set for service-bundle wiring."""
 
     load_pipeline_config: Callable[[str], PipelineYamlConfig]
-    yaml_config_to_domain: Callable[
-        [PipelineYamlConfig, DQConfig | None], PipelineConfig
-    ]
+    yaml_config_to_domain: DomainConfigMapper
     compute_config_hash: Callable[[PipelineYamlConfig | dict[str, object]], str]
-    base_services_factory: type[BaseServicesFactory]
+    base_services_factory: BaseServicesFactoryProtocol
 
 
 def resolve_service_bundle_dependencies(
     *,
     override: ServiceBundleDependencies | None,
     load_pipeline_config_fn: Callable[[str], PipelineYamlConfig],
-    yaml_config_to_domain_fn: Callable[
-        [PipelineYamlConfig, DQConfig | None], PipelineConfig
-    ],
+    yaml_config_to_domain_fn: DomainConfigMapper,
     compute_config_hash_fn: Callable[[PipelineYamlConfig | dict[str, object]], str],
-    base_services_factory: type[BaseServicesFactory],
+    base_services_factory: BaseServicesFactoryProtocol,
 ) -> ServiceBundleDependencies:
     """Resolve runtime dependencies with an optional test override."""
     if override is not None:

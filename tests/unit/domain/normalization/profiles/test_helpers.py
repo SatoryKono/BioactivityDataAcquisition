@@ -4,6 +4,10 @@ from __future__ import annotations
 
 import pytest
 
+from bioetl.domain.normalization.profiles._normalization_helpers import (
+    _sha256_hex,
+    _stable_value,
+)
 from bioetl.domain.normalization.profiles.profile_normalizers import (
     normalize_profile_abstract,
     normalize_profile_canonical_smiles,
@@ -23,6 +27,14 @@ from bioetl.domain.normalization.profiles.profile_normalizers import (
 
 
 pytestmark = pytest.mark.unit
+
+
+def test_stable_value_normalizes_nested_values_deterministically() -> None:
+    first = {"values": {3, 1, 2}, "payload": {"b": b"x", "a": (2, 1)}}
+    second = {"payload": {"a": (2, 1), "b": b"x"}, "values": {2, 3, 1}}
+
+    assert _stable_value(first) == _stable_value(second)
+    assert _sha256_hex(_stable_value(first)) == _sha256_hex(_stable_value(second))
 
 
 def test_normalize_profile_text_trims_blank_to_none() -> None:

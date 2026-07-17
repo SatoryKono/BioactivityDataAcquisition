@@ -34,6 +34,8 @@ from bioetl.composition.factories.pipeline.transformer_builder import (
     TransformerBuilder,
 )
 from bioetl.domain.config import DQConfig, PipelineConfig, RuntimeConfig
+from bioetl.domain.context import CachedBronzeContext
+from bioetl.domain.filtering import InputFilterConfig
 from bioetl.domain.ports import (
     AuditPort,
     DQMonitorPort,
@@ -44,6 +46,7 @@ from bioetl.domain.ports import (
 )
 from bioetl.domain.types import RunID
 from bioetl.infrastructure.config.domain_config_resolver import (
+    DomainConfigMapper,
     resolve_domain_pipeline_config,
 )
 from bioetl.infrastructure.config.settings_api import Settings
@@ -53,23 +56,16 @@ from bioetl.infrastructure.schemas.pipeline_config import PipelineYamlConfig
 class _ServiceBundleDeps(Protocol):
     """Subset of dependencies required by pipeline creation internals."""
 
-    def load_pipeline_config(self, pipeline_name: str) -> PipelineYamlConfig:
-        """Load a pipeline YAML configuration by name."""
-        ...
+    @property
+    def load_pipeline_config(self) -> Callable[[str], PipelineYamlConfig]: ...
 
-    def yaml_config_to_domain(
-        self,
-        yaml_config: PipelineYamlConfig,
-        resolved_dq_config: DQConfig | None = None,
-    ) -> PipelineConfig:
-        """Convert a YAML pipeline config to a domain PipelineConfig."""
-        ...
+    @property
+    def yaml_config_to_domain(self) -> DomainConfigMapper: ...
 
+    @property
     def compute_config_hash(
-        self, config: PipelineYamlConfig | dict[str, object]
-    ) -> str:
-        """Compute a deterministic hash of the pipeline configuration."""
-        ...
+        self,
+    ) -> Callable[[PipelineYamlConfig | dict[str, object]], str]: ...
 
 
 class _BuildPipelineServicesFn(Protocol):
@@ -83,13 +79,12 @@ class _BuildPipelineServicesFn(Protocol):
         logger: LoggerPort,
         audit: AuditPort | None,
         config: PipelineYamlConfig | None = None,
-        filter_config: object | None = None,
+        filter_config: InputFilterConfig | None = None,
         tracer: TracingPort | None = None,
         dq_monitor: DQMonitorPort | None = None,
         metadata_coordinator: MetadataCoordinator | None = None,
-        cached_bronze: object | None = None,
+        cached_bronze: CachedBronzeContext | None = None,
         silver_validator: SilverValidatorPort | None = None,
-        _deps: object | None = None,
     ) -> PipelineService: ...
 
 
@@ -104,11 +99,11 @@ class _PipelineCreationRequest(ControlPlaneArtifacts):
     logger: LoggerPort
     audit: AuditPort | None = None
     config: PipelineYamlConfig | None = None
-    filter_config: object | None = None
+    filter_config: InputFilterConfig | None = None
     tracer: TracingPort | None = None
     dq_monitor: DQMonitorPort | None = None
     metrics: MetricsPort | None = None
-    cached_bronze: object | None = None
+    cached_bronze: CachedBronzeContext | None = None
 
 
 @dataclass(frozen=True, slots=True)

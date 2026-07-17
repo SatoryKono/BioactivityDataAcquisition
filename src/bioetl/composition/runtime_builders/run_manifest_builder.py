@@ -10,15 +10,19 @@ from bioetl.application.services.control_plane.ledger.service import (
 )
 from bioetl.composition.runtime_builders._manifest_publication_context_support import (
     ResolvedManifestPublicationContext,
-    build_manifest_publication_identity_kwargs,
     resolve_manifest_publication_identity,
     resolve_manifest_publication_context,
 )
+from bioetl.composition.runtime_builders._run_manifest_builder_policy import (
+    ManifestReproducibilityContext,
+)
 from bioetl.composition.runtime_builders._run_manifest_creation_support import (
-    _RunManifestCreateRequestInputs,
     build_manifest_create_request,
     create_ledger_service,
     emit_replay_reconstructability_metric,
+)
+from bioetl.composition.runtime_builders._run_manifest_creation_support_helpers import (
+    RunManifestCreateRequestInputs,
 )
 from bioetl.composition.runtime_builders._run_manifest_publication_support import (
     create_manifest_record,
@@ -30,7 +34,11 @@ from bioetl.composition.runtime_builders._runner_control_plane_policy_support im
 from bioetl.domain.normalization import compute_input_snapshot_identity_fingerprint
 
 if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.manifest.service import (
+        RunManifestCreateSpec,
+    )
     from bioetl.composition.runtime_builders.runner_inputs import RunnerInputs
+    from bioetl.domain.control_plane import RunManifest
     from bioetl.domain.context import PipelineRunContext
 
 RunManifestProvenanceBundle = _manifest_support.RunManifestProvenanceBundle
@@ -38,7 +46,7 @@ RunManifestProvenanceBundle = _manifest_support.RunManifestProvenanceBundle
 
 def _create_control_plane_refs(
     *,
-    manifest: object,
+    manifest: RunManifest,
     provenance: RunManifestProvenanceBundle,
     contract_identity: _manifest_support.RunManifestContractIdentity,
     required_persistence_profile: str,
@@ -80,7 +88,7 @@ def create_run_manifest(
     inputs: RunnerInputs,
     ledger_enabled: bool,
     provenance: RunManifestProvenanceBundle,
-    reproducibility_context: object | None = None,
+    reproducibility_context: ManifestReproducibilityContext | None = None,
     contract_identity: _manifest_support.RunManifestContractIdentity | None = None,
 ) -> tuple[_manifest_support.ManifestControlPlaneRefs, RunLedgerService | None]:
     run_type_value, execution_context_value = (
@@ -125,7 +133,7 @@ def _publish_manifest_and_refs(
     inputs: RunnerInputs,
     ledger_enabled: bool,
     manifest_context: ResolvedManifestPublicationContext,
-    manifest_create_request: object,
+    manifest_create_request: RunManifestCreateSpec,
     provenance: RunManifestProvenanceBundle,
 ) -> tuple[_manifest_support.ManifestControlPlaneRefs, RunLedgerService | None]:
     """Persist the manifest record and translate it into runner control-plane refs."""
@@ -164,20 +172,22 @@ def _build_manifest_create_request(
     inputs: RunnerInputs,
     provider: str,
     entity: str,
-    reproducibility_context: object,
+    reproducibility_context: ManifestReproducibilityContext,
     run_type_value: str,
     execution_context_value: str,
     provenance: RunManifestProvenanceBundle,
     contract_identity: _manifest_support.RunManifestContractIdentity,
-) -> object:
+) -> RunManifestCreateSpec:
     reproducibility_context, contract_identity = resolve_manifest_publication_identity(
         ctx, inputs, provider, entity, reproducibility_context, contract_identity
     )
     return build_manifest_create_request(
-        _RunManifestCreateRequestInputs(
-            **build_manifest_publication_identity_kwargs(
-                ctx, inputs, provider, entity, reproducibility_context
-            ),
+        RunManifestCreateRequestInputs(
+            ctx=ctx,
+            inputs=inputs,
+            provider=provider,
+            entity=entity,
+            reproducibility_context=reproducibility_context,
             run_type_value=run_type_value,
             execution_context_value=execution_context_value,
             config_hash=provenance.resolved_config_hash,

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import datetime
 from typing import cast
 
@@ -34,7 +35,7 @@ _RICH_COMPOSITE_REPLAY_EVENTS = frozenset(
 def _build_effective_source_refs(
     *,
     manifest: RunManifest,
-    input_snapshots: list[object],
+    input_snapshots: Sequence[object],
 ) -> tuple[RunSourceRef, ...]:
     snapshots_by_source = _group_input_snapshots_by_source(
         manifest=manifest,
@@ -53,7 +54,7 @@ def _build_effective_source_refs(
 def _group_input_snapshots_by_source(
     *,
     manifest: RunManifest,
-    input_snapshots: list[object],
+    input_snapshots: Sequence[object],
 ) -> dict[tuple[str, str, str, str | None], list[RunInputSnapshotRef]]:
     """Group input snapshots by their effective source identity."""
     snapshots_by_source: dict[

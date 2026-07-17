@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING
+from types import TracebackType
+from typing import TYPE_CHECKING, Protocol, Self
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
@@ -14,6 +15,28 @@ DEFAULT_OBSERVABILITY_BACKEND_READY_TIMEOUT_SECONDS = 20.0
 DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PATHS_READY_TIMEOUT_SECONDS = 60.0
 DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PROBE_TIMEOUT_SECONDS = 5.0
 DEFAULT_OBSERVABILITY_BACKEND_POLL_SECONDS = 0.25
+
+
+class _HttpProbeResponse(Protocol):
+    """HTTP response surface consumed by observability probes."""
+
+    @property
+    def status(self) -> int: ...
+
+    def __enter__(self) -> Self: ...
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> bool | None: ...
+
+
+class _UrlOpenFn(Protocol):
+    """Callable contract for opening one observability probe URL."""
+
+    def __call__(self, url: str, *, timeout: float) -> _HttpProbeResponse: ...
 
 
 def _build_observability_backend_probe_urls(health_url: str) -> tuple[str, ...]:
@@ -29,14 +52,13 @@ def probe_observability_backend(
     health_url: str,
     *,
     timeout_seconds: float = 1.0,
-    urlopen_fn: Callable[..., object] = urlopen,
+    urlopen_fn: _UrlOpenFn = urlopen,
 ) -> bool:
     """Return True when the observability backend responds successfully."""
     for probe_url in _build_observability_backend_probe_urls(health_url):
         try:
             with urlopen_fn(probe_url, timeout=timeout_seconds) as response:
-                status = getattr(response, "status", 200)
-                if int(status) < 400:
+                if response.status < 400:
                     return True
         except (HTTPError, URLError, OSError, ValueError):
             continue
@@ -48,7 +70,7 @@ def probe_observability_backend_required_paths(
     *,
     required_probe_paths: tuple[str, ...],
     timeout_seconds: float = 1.0,
-    urlopen_fn: Callable[..., object] = urlopen,
+    urlopen_fn: _UrlOpenFn = urlopen,
 ) -> bool:
     """Return True when the backend exposes all required HTTP capability paths."""
     if not required_probe_paths:
@@ -62,8 +84,7 @@ def probe_observability_backend_required_paths(
         path = raw_path if raw_path.startswith("/") else f"/{raw_path}"
         try:
             with urlopen_fn(f"{base_url}{path}", timeout=timeout_seconds) as response:
-                status = getattr(response, "status", 200)
-                if int(status) >= 400:
+                if response.status >= 400:
                     return False
         except (HTTPError, URLError, OSError, ValueError):
             return False

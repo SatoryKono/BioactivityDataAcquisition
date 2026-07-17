@@ -2,6 +2,13 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bioetl.interfaces.cli.commands.domains.quarantine.command import (
+        quarantine as quarantine,
+    )
+
 __all__ = ["quarantine"]
 
 

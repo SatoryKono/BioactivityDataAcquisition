@@ -9,7 +9,6 @@ from bioetl.domain.models.metadata import SilverMetadata
 from bioetl.domain.ports import (
     LineageStorePort,
     MetadataCoordinatorPort,
-    MetadataWriterPort,
     MetricsPort,
 )
 from bioetl.domain.types import BronzeRecord
@@ -24,13 +23,23 @@ __all__ = [
 class _SilverMetadataWriteHostProtocol(Protocol):
     """Typed host contract for Silver metadata sidecar stages."""
 
-    _metadata_coordinator: MetadataCoordinatorPort | None
-    _lineage_store: LineageStorePort | None
-    _metadata_writer: MetadataWriterPort
-    _metrics: MetricsPort | None
-    _flat_structure: bool
-    _transform_version: str | None
-    _transform_steps: tuple[str, ...]
+    @property
+    def _metadata_coordinator(self) -> MetadataCoordinatorPort | None: ...
+
+    @property
+    def _lineage_store(self) -> LineageStorePort | None: ...
+
+    @property
+    def _metrics(self) -> MetricsPort | None: ...
+
+    @property
+    def _flat_structure(self) -> bool: ...
+
+    @property
+    def _transform_version(self) -> str | None: ...
+
+    @property
+    def _transform_steps(self) -> tuple[str, ...]: ...
 
     async def _get_delta_version(self, table_path: str) -> int | None: ...
 

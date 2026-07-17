@@ -10,7 +10,7 @@ from bioetl.composition.runtime_builders._effective_config_graph_support import 
 )
 from bioetl.composition.runtime_builders._effective_config_source_refs_support import (
     build_effective_config_source_refs as _build_effective_config_source_refs,
-    resolve_effective_config_entity,
+    resolve_effective_config_entity as resolve_effective_config_entity,
 )
 from bioetl.composition.runtime_builders._effective_config_runtime_snapshot_support import (
     add_silver_filter_compatibility_defaults,
@@ -31,9 +31,9 @@ from bioetl.composition.runtime_builders._snapshot_mapping_support import (
 from bioetl.infrastructure.config.config_root import resolve_configs_root
 
 if TYPE_CHECKING:
+    from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
     from bioetl.domain.context import PipelineRunContext
     from bioetl.infrastructure.config.settings_api import Settings
-    from bioetl.domain.control_plane.effective_config_artifact import ConfigSourceRef
 
 
 def build_runtime_overrides_snapshot(

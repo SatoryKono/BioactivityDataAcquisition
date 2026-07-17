@@ -11,6 +11,7 @@ from ._gold_contracts_support import (
     GOLD_CONTRACT_VERSION_UNKNOWN,
     coerce_mapping,
     default_rule_id,
+    invoke_to_schema,
     normalize_contract_version,
     normalize_optional_text,
     normalize_text_or_empty,
@@ -246,16 +247,6 @@ def _extract_version_from_config(schema: object) -> str | None:
     return normalize_optional_text(getattr(config, "contract_version", None))
 
 
-def _invoke_to_schema(schema: object) -> object | None:
-    to_schema = getattr(schema, "to_schema", None)
-    if not callable(to_schema):
-        return None
-    try:
-        return to_schema()
-    except (AttributeError, RuntimeError, TypeError, ValueError):
-        return None
-
-
 def _known_contract_version_or_none(version: str) -> str | None:
     if version == GOLD_CONTRACT_VERSION_UNKNOWN:
         return None
@@ -264,7 +255,7 @@ def _known_contract_version_or_none(version: str) -> str | None:
 
 def _extract_version_from_to_schema(schema: object) -> str | None:
     """Extract version by calling to_schema() if available."""
-    resolved_schema = _invoke_to_schema(schema)
+    resolved_schema = invoke_to_schema(schema)
     if resolved_schema is None or resolved_schema is schema:
         return None
     return _known_contract_version_or_none(

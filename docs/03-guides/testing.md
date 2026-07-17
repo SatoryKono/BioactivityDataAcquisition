@@ -244,6 +244,14 @@ fixture-duplication reports are not current merge-blocking gates. This keeps VCR
 cassettes, golden JSON, and other tracked fixture payloads visible even though
 `jscpd` does not scan those artifact classes directly.
 
+The tracked flaky-test review is generated from
+`configs/quality/flaky_test_inventory.yaml` and the current
+`reports/quality/test-governance-current.json` fingerprint. Regenerate it with
+`python -m scripts.engineering.qa report-flaky-test-burndown-review` and verify
+it with `--check`. The curated inventory records reviewed intermittent failures;
+static test-governance evidence supplies source identity and suite size, but does
+not replace repeated-run CI telemetry for discovering flakiness.
+
 Failure classifications are informational and come from
 `configs/quality/test_health_classifiers.yaml`; pytest exit codes and quality
 gates remain the blocking signals.

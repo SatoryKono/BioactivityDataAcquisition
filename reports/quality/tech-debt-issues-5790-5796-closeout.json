@@ -15,9 +15,9 @@
       "current": 0
     },
     "repo_wide_zero_import_candidates": {
-      "count": 9,
-      "classified": 9,
-      "owner_test_anchored": 9
+      "count": 1,
+      "classified": 1,
+      "owner_test_anchored": 1
     },
     "config_surface_duplicate_clusters": {
       "opening_baseline": 24,

@@ -67,19 +67,21 @@ def resolve_delta_table_path(
     """Resolve the contract path for a Delta table."""
     normalized_input = base_path.replace("\\", "/")
     if "://" in normalized_input:
-        normalized_base = normalized_input.rstrip("/")
+        normalized_remote_base = normalized_input.rstrip("/")
         if flat_structure:
-            return normalized_base
+            return normalized_remote_base
         relative_path = "/".join(part for part in table_name.split(".") if part)
         return (
-            f"{normalized_base}/{relative_path}" if relative_path else normalized_base
+            f"{normalized_remote_base}/{relative_path}"
+            if relative_path
+            else normalized_remote_base
         )
 
-    normalized_base = Path(normalized_input).expanduser()
+    normalized_base_path = Path(normalized_input).expanduser()
     if flat_structure:
-        return normalized_base.as_posix()
+        return normalized_base_path.as_posix()
     relative_parts = [part for part in table_name.split(".") if part]
-    return normalized_base.joinpath(*relative_parts).as_posix()
+    return normalized_base_path.joinpath(*relative_parts).as_posix()
 
 
 def get_delta_table_arrow_schema(table: DeltaTable) -> pa.Schema:

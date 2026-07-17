@@ -17,6 +17,7 @@ Requirements:
 from __future__ import annotations
 
 from bioetl.domain.constants import META_FIELDS
+from bioetl.domain.normalization.hash_identity import HashDatetimePolicy
 from bioetl.domain.transformations import (
     generate_content_hash,
     normalize_for_hash,
@@ -119,7 +120,7 @@ class EntityIdentityGenerator:
         exclude_none: bool = False,
         include_fields: set[str] | None = None,
         exclude_fields: set[str] | None = None,
-        datetime_policy: str = "v2_datetime_utc",
+        datetime_policy: HashDatetimePolicy = "v2_datetime_utc",
     ) -> ContentHash:
         """Compute SHA256 content hash for record versioning.
 

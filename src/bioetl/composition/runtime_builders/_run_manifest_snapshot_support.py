@@ -14,7 +14,7 @@ from bioetl.composition.runtime_builders._run_manifest_snapshot_resolution impor
     resolve_replay_parentage_mapping_value,
 )
 from bioetl.composition.runtime_builders._snapshot_mapping_support import (
-    to_serializable_mapping,
+    to_serializable_mapping as to_serializable_mapping,
 )
 
 if TYPE_CHECKING:

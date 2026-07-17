@@ -3,58 +3,49 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Callable, Mapping
 from pathlib import Path
-from typing import Protocol, cast
 
+from bioetl.interfaces.cli.commands.domains.health._observability_backend_startup_types import (
+    _AppendBackendStartupDiagnosticFn,
+    _BackendResultConstructor,
+    _BuildStartupFailureDetailFn,
+    _DescribeRequiredProbeFailureFn,
+    _DropStaleBackendFn,
+    _ListenerPidFn,
+    _MessagePrinter,
+    _ObservabilityBackendFailureHandlers,
+    _ObservabilityBackendRuntimeHooks,
+    _ObservabilityBackendStartupKwargs,
+    _ProbeFn,
+    _PythonExecutableToTupleFn,
+    _RequiredProbeFn,
+    _StartedBackendProcess,
+    _StartFn,
+    _WaitFn,
+    _WaitRequiredPathsFn,
+)
 from bioetl.interfaces.cli.commands.domains.health.observability_backend_probes import (
     DEFAULT_OBSERVABILITY_BACKEND_REQUIRED_PATHS_READY_TIMEOUT_SECONDS,
 )
 
 DEFAULT_OBSERVABILITY_BACKEND_PROBE_HOST = "127.0.0.1"
 DEFAULT_OBSERVABILITY_BACKEND_BIND_HOST = "0.0.0.0"
-_STARTUP_DETACHED_KEYS = (
-    "health_url",
-    "startup_log_path",
-    "port",
-    "bind_host",
-    "ready_timeout_seconds",
-    "required_probe_timeout_seconds",
-    "poll_seconds",
-    "required_probe_paths",
-)
-_STARTUP_DETACHED_HOOK_KEYS = (
-    "probe_fn",
-    "required_probe_fn",
-    "start_fn",
-    "wait_fn",
-    "wait_required_paths_fn",
-    "info_printer",
-    "warning_printer",
-)
 
 
-class _StartedBackendProcess(Protocol):
-    """Minimal process surface needed after detached backend startup."""
-
-    args: object
-    pid: int | None
-
-
-def _reuse_observability_backend_if_ready(
+def _reuse_observability_backend_if_ready[ResultT](
     *,
     health_url: str,
     port: int,
     required_probe_paths: tuple[str, ...],
-    probe_fn: Callable[..., bool],
-    required_probe_fn: Callable[..., bool],
+    probe_fn: _ProbeFn,
+    required_probe_fn: _RequiredProbeFn,
     required_probe_timeout_seconds: float,
-    drop_stale_backend_fn: Callable[[int], bool],
-    listener_pid_fn: Callable[[int], int | None],
-    info_printer: Callable[[str], None],
-    warning_printer: Callable[[str], None],
-    result_factory: Callable[..., object],
-) -> object | None:
+    drop_stale_backend_fn: _DropStaleBackendFn,
+    listener_pid_fn: _ListenerPidFn,
+    info_printer: _MessagePrinter,
+    warning_printer: _MessagePrinter,
+    result_factory: _BackendResultConstructor[ResultT],
+) -> ResultT | None:
     if not probe_fn(health_url):
         existing_pid = listener_pid_fn(port)
         if existing_pid is None:
@@ -102,7 +93,7 @@ def _reuse_observability_backend_if_ready(
     )
 
 
-def _start_observability_backend_detached(
+def _start_observability_backend_detached[ResultT](
     *,
     health_url: str,
     startup_log_path: Path,
@@ -112,19 +103,19 @@ def _start_observability_backend_detached(
     required_probe_timeout_seconds: float,
     poll_seconds: float,
     required_probe_paths: tuple[str, ...],
-    probe_fn: Callable[..., bool],
-    required_probe_fn: Callable[..., bool],
-    start_fn: Callable[..., _StartedBackendProcess],
-    wait_fn: Callable[..., bool],
-    wait_required_paths_fn: Callable[..., bool],
-    info_printer: Callable[[str], None],
-    warning_printer: Callable[[str], None],
-    result_factory: Callable[..., object],
-    build_startup_failure_detail_fn: Callable[..., str],
-    describe_required_probe_failure_fn: Callable[..., str | None],
-    append_backend_startup_diagnostic_fn: Callable[..., None],
-    python_executable_to_tuple_fn: Callable[[object], tuple[str, ...]],
-) -> object:
+    probe_fn: _ProbeFn,
+    required_probe_fn: _RequiredProbeFn,
+    start_fn: _StartFn,
+    wait_fn: _WaitFn,
+    wait_required_paths_fn: _WaitRequiredPathsFn,
+    info_printer: _MessagePrinter,
+    warning_printer: _MessagePrinter,
+    result_factory: _BackendResultConstructor[ResultT],
+    build_startup_failure_detail_fn: _BuildStartupFailureDetailFn,
+    describe_required_probe_failure_fn: _DescribeRequiredProbeFailureFn,
+    append_backend_startup_diagnostic_fn: _AppendBackendStartupDiagnosticFn,
+    python_executable_to_tuple_fn: _PythonExecutableToTupleFn,
+) -> ResultT:
     try:
         process = start_fn(bind_host=bind_host, port=port)
     except OSError as exc:
@@ -183,14 +174,14 @@ def _start_observability_backend_detached(
     )
 
 
-def _build_started_backend_result(
+def _build_started_backend_result[ResultT](
     *,
     health_url: str,
     process: _StartedBackendProcess,
     command: tuple[str, ...],
-    info_printer: Callable[[str], None],
-    result_factory: Callable[..., object],
-) -> object:
+    info_printer: _MessagePrinter,
+    result_factory: _BackendResultConstructor[ResultT],
+) -> ResultT:
     info_printer(f"Observability backend: started {health_url}")
     return result_factory(
         status="started",
@@ -201,7 +192,7 @@ def _build_started_backend_result(
     )
 
 
-def _build_backend_capability_failure_result(
+def _build_backend_capability_failure_result[ResultT](
     *,
     health_url: str,
     startup_log_path: Path,
@@ -209,12 +200,12 @@ def _build_backend_capability_failure_result(
     command: tuple[str, ...],
     required_probe_paths: tuple[str, ...],
     required_probe_timeout_seconds: float,
-    warning_printer: Callable[[str], None],
-    result_factory: Callable[..., object],
-    build_startup_failure_detail_fn: Callable[..., str],
-    describe_required_probe_failure_fn: Callable[..., str | None],
-    append_backend_startup_diagnostic_fn: Callable[..., None],
-) -> object:
+    warning_printer: _MessagePrinter,
+    result_factory: _BackendResultConstructor[ResultT],
+    build_startup_failure_detail_fn: _BuildStartupFailureDetailFn,
+    describe_required_probe_failure_fn: _DescribeRequiredProbeFailureFn,
+    append_backend_startup_diagnostic_fn: _AppendBackendStartupDiagnosticFn,
+) -> ResultT:
     capability_failure_detail = describe_required_probe_failure_fn(
         health_url,
         required_probe_paths=required_probe_paths,
@@ -251,16 +242,16 @@ def _build_backend_capability_failure_result(
     )
 
 
-def ensure_observability_backend_started_impl(
+def ensure_observability_backend_started_impl[ResultT](
     *,
-    startup_kwargs: Mapping[str, object],
-    runtime_hooks: Mapping[str, Callable[..., object]],
-    failure_handlers: Mapping[str, Callable[..., object]],
-    result_factory: Callable[..., object],
-) -> object:
+    startup_kwargs: _ObservabilityBackendStartupKwargs,
+    runtime_hooks: _ObservabilityBackendRuntimeHooks,
+    failure_handlers: _ObservabilityBackendFailureHandlers,
+    result_factory: _BackendResultConstructor[ResultT],
+) -> ResultT:
     """Ensure the detached backend is running using runtime-injected patch points."""
-    enabled = cast("bool", startup_kwargs["enabled"])
-    health_url = cast("str", startup_kwargs["health_url"])
+    enabled = startup_kwargs["enabled"]
+    health_url = startup_kwargs["health_url"]
     if not enabled:
         return result_factory(
             status="disabled",
@@ -270,40 +261,47 @@ def ensure_observability_backend_started_impl(
 
     reuse_result = _reuse_observability_backend_if_ready(
         health_url=health_url,
-        port=cast("int", startup_kwargs["port"]),
-        required_probe_paths=cast(
-            "tuple[str, ...]",
-            startup_kwargs["required_probe_paths"],
-        ),
-        probe_fn=cast("Callable[..., bool]", runtime_hooks["probe_fn"]),
-        required_probe_fn=cast(
-            "Callable[..., bool]",
-            runtime_hooks["required_probe_fn"],
-        ),
-        required_probe_timeout_seconds=cast(
-            "float",
-            startup_kwargs["required_probe_timeout_seconds"],
-        ),
-        drop_stale_backend_fn=cast(
-            "Callable[[int], bool]",
-            runtime_hooks["drop_stale_backend_fn"],
-        ),
-        listener_pid_fn=cast(
-            "Callable[[int], int | None]",
-            runtime_hooks["listener_pid_fn"],
-        ),
-        info_printer=cast("Callable[[str], None]", runtime_hooks["info_printer"]),
-        warning_printer=cast("Callable[[str], None]", runtime_hooks["warning_printer"]),
+        port=startup_kwargs["port"],
+        required_probe_paths=startup_kwargs["required_probe_paths"],
+        probe_fn=runtime_hooks["probe_fn"],
+        required_probe_fn=runtime_hooks["required_probe_fn"],
+        required_probe_timeout_seconds=startup_kwargs["required_probe_timeout_seconds"],
+        drop_stale_backend_fn=runtime_hooks["drop_stale_backend_fn"],
+        listener_pid_fn=runtime_hooks["listener_pid_fn"],
+        info_printer=runtime_hooks["info_printer"],
+        warning_printer=runtime_hooks["warning_printer"],
         result_factory=result_factory,
     )
     if reuse_result is not None:
         return reuse_result
 
     return _start_observability_backend_detached(
+        health_url=startup_kwargs["health_url"],
+        startup_log_path=startup_kwargs["startup_log_path"],
+        port=startup_kwargs["port"],
+        bind_host=startup_kwargs["bind_host"],
+        ready_timeout_seconds=startup_kwargs["ready_timeout_seconds"],
+        required_probe_timeout_seconds=startup_kwargs["required_probe_timeout_seconds"],
+        poll_seconds=startup_kwargs["poll_seconds"],
+        required_probe_paths=startup_kwargs["required_probe_paths"],
+        probe_fn=runtime_hooks["probe_fn"],
+        required_probe_fn=runtime_hooks["required_probe_fn"],
+        start_fn=runtime_hooks["start_fn"],
+        wait_fn=runtime_hooks["wait_fn"],
+        wait_required_paths_fn=runtime_hooks["wait_required_paths_fn"],
+        info_printer=runtime_hooks["info_printer"],
+        warning_printer=runtime_hooks["warning_printer"],
         result_factory=result_factory,
-        **{key: startup_kwargs[key] for key in _STARTUP_DETACHED_KEYS},
-        **{key: runtime_hooks[key] for key in _STARTUP_DETACHED_HOOK_KEYS},
-        **failure_handlers,
+        build_startup_failure_detail_fn=failure_handlers[
+            "build_startup_failure_detail_fn"
+        ],
+        describe_required_probe_failure_fn=failure_handlers[
+            "describe_required_probe_failure_fn"
+        ],
+        append_backend_startup_diagnostic_fn=failure_handlers[
+            "append_backend_startup_diagnostic_fn"
+        ],
+        python_executable_to_tuple_fn=failure_handlers["python_executable_to_tuple_fn"],
     )
 
 

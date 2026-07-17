@@ -136,6 +136,15 @@ class AnchorSpec:
 
 
 @dataclass(frozen=True, slots=True)
+class AnchorValues:
+    """Resolved value for one identity anchor from one control-plane source."""
+
+    spec: AnchorSpec
+    value: object
+    source: str
+
+
+@dataclass(frozen=True, slots=True)
 class AnchorSourceModel:
     """Machine-readable source classification for one identity anchor."""
 

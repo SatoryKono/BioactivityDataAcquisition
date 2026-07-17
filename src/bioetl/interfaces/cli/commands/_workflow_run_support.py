@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable, Mapping
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal, Protocol
 from uuid import UUID
 
 import click
@@ -51,8 +51,38 @@ _WORKFLOW_PLANNED_PUBLICATION_METRIC_NAMES = (
 )
 
 if TYPE_CHECKING:
+    from bioetl.application.services.control_plane.workflow.execution_service import (
+        WorkflowExecutionService,
+    )
+    from bioetl.application.services.workflow_runner_service import (
+        WorkflowRunExecutionResult,
+    )
     from bioetl.composition.registry_api import PipelineRegistry
-    from bioetl.domain.workflow import WorkflowConfig
+    from bioetl.domain.workflow import WorkflowConfig, WorkflowStepConfig
+
+
+class _WorkflowExecutionServiceResolver(Protocol):
+    """Callable boundary for resolving the workflow execution service."""
+
+    def __call__(
+        self,
+        registry: PipelineRegistry | None = None,
+    ) -> WorkflowExecutionService: ...
+
+
+class _MetricsPublisher(Protocol):
+    """Callable boundary for best-effort workflow metrics publication."""
+
+    def __call__(
+        self,
+        run_label: str = "bioetl",
+        *,
+        pipeline_name: str | None = None,
+        run_type: str | None = None,
+        grouping_key_extra: Mapping[str, str] | None = None,
+        metric_names: tuple[str, ...] | None = None,
+    ) -> object: ...
+
 
 __all__ = [
     "_build_workflow_override_config",
@@ -60,6 +90,8 @@ __all__ = [
     "_handle_workflow_result",
     "_load_and_apply_workflow_config",
     "_validate_run_workflow_options",
+    "_WorkflowExecutionServiceResolver",
+    "_MetricsPublisher",
 ]
 
 
@@ -122,7 +154,7 @@ def _load_and_apply_workflow_config(
     name: str,
     only_steps: str | None,
     override_config: WorkflowRunOptionsConfig,
-) -> object:
+) -> WorkflowConfig:
     """Load workflow config and apply CLI overrides."""
     try:
         config = load_workflow_config_fn(name)
@@ -137,10 +169,10 @@ def _load_and_apply_workflow_config(
 
 def _execute_workflow_and_publish_metrics(
     *,
-    get_workflow_execution_service_fn: Callable[..., object],
+    get_workflow_execution_service_fn: _WorkflowExecutionServiceResolver,
     ensure_metrics_server_started_fn: Callable[[], object],
-    publish_metrics_safely_fn: Callable[..., object],
-    config: object,
+    publish_metrics_safely_fn: _MetricsPublisher,
+    config: WorkflowConfig,
     registry: PipelineRegistry | None,
     dry_run: bool,
     only_steps: str | None,
@@ -150,7 +182,7 @@ def _execute_workflow_and_publish_metrics(
     force_steps: str | None,
     repair_steps: str | None,
     incremental: bool,
-) -> object:
+) -> WorkflowRunExecutionResult:
     """Execute workflow and publish metrics."""
     parsed_force_steps = parse_only_steps(force_steps) or ()
     parsed_repair_steps = parse_only_steps(repair_steps) or ()
@@ -177,37 +209,33 @@ def _execute_workflow_and_publish_metrics(
     if dry_run:
         return result
 
-    publication_kwargs: dict[str, object] = {
-        "run_label": "bioetl",
-        "pipeline_name": _workflow_metrics_pipeline_name(config),
-        "run_type": _workflow_metrics_run_type(config),
-        "grouping_key_extra": (
-            {"workflow_run_id": result.workflow_run_id}
-            if result.workflow_run_id is not None
-            else None
-        ),
-    }
-    if publication_kwargs["pipeline_name"] is None:
-        publication_kwargs["metric_names"] = _WORKFLOW_PUBLICATION_METRIC_NAMES
-    publish_metrics_safely_fn(**publication_kwargs)
+    pipeline_name = _workflow_metrics_pipeline_name(config)
+    run_type = _workflow_metrics_run_type(config)
+    grouping_key_extra = (
+        {"workflow_run_id": result.workflow_run_id}
+        if result.workflow_run_id is not None
+        else None
+    )
+    metric_names = _WORKFLOW_PUBLICATION_METRIC_NAMES if pipeline_name is None else None
+    publish_metrics_safely_fn(
+        run_label="bioetl",
+        pipeline_name=pipeline_name,
+        run_type=run_type,
+        grouping_key_extra=grouping_key_extra,
+        metric_names=metric_names,
+    )
     return result
 
 
 def _record_expected_pipeline_metrics(
-    workflow_execution_service: object,
-    config: object,
+    workflow_execution_service: WorkflowExecutionService,
+    config: WorkflowConfig,
 ) -> None:
-    """Record planned workflow pipeline selector scopes when the service supports it."""
-    recorder = getattr(
-        workflow_execution_service,
-        "record_expected_pipeline_metrics",
-        None,
-    )
-    if callable(recorder):
-        recorder(config)
+    """Record planned workflow pipeline selector scopes."""
+    workflow_execution_service.record_expected_pipeline_metrics(config)
 
 
-def _handle_workflow_result(result: object) -> None:
+def _handle_workflow_result(result: WorkflowRunExecutionResult) -> None:
     """Handle workflow execution result and exit with appropriate code."""
     if result.status == "success":
         raise click.exceptions.Exit(ExitCode.OK)
@@ -216,7 +244,7 @@ def _handle_workflow_result(result: object) -> None:
     raise click.exceptions.Exit(ExitCode.PIPELINE_ERROR)
 
 
-def _workflow_metrics_pipeline_name(config: object) -> str | None:
+def _workflow_metrics_pipeline_name(config: WorkflowConfig) -> str | None:
     """Resolve a Pushgateway-safe pipeline grouping label for workflows."""
     single_pipeline_name = getattr(config, "single_pipeline_name", None)
     if isinstance(single_pipeline_name, str) and single_pipeline_name:
@@ -224,7 +252,7 @@ def _workflow_metrics_pipeline_name(config: object) -> str | None:
     return None
 
 
-def _workflow_metrics_run_type(config: object) -> str | None:
+def _workflow_metrics_run_type(config: WorkflowConfig) -> str | None:
     """Resolve the effective workflow run_type for metrics publication."""
     single_pipeline_name = getattr(config, "single_pipeline_name", None)
     if not isinstance(single_pipeline_name, str) or not single_pipeline_name:
@@ -239,7 +267,7 @@ def _workflow_metrics_run_type(config: object) -> str | None:
     return "incremental"
 
 
-def _workflow_failure_message(result: object) -> str:
+def _workflow_failure_message(result: WorkflowRunExecutionResult) -> str:
     """Extract one human-readable failure message from a workflow result."""
     top_level_error = getattr(result, "error_message", None)
     if isinstance(top_level_error, str) and top_level_error:
@@ -291,7 +319,7 @@ def _validate_workflow_pipeline_replay_prerequisites(config: WorkflowConfig) -> 
 
 def _resolve_workflow_step_required_profile(
     *,
-    step: object,
+    step: WorkflowStepConfig,
     configured_profile: str,
     exact_replay: bool,
 ) -> str:
@@ -300,7 +328,9 @@ def _resolve_workflow_step_required_profile(
     if not isinstance(pipeline_name, str) or "_" not in pipeline_name:
         return configured_profile
     provider, entity = pipeline_name.split("_", 1)
-    execution_context = "composite" if provider == "composite" else "source"
+    execution_context: Literal["source", "composite"] = (
+        "composite" if provider == "composite" else "source"
+    )
     profile = resolve_reproducibility_family_profile(
         provider=provider,
         entity=entity,
@@ -317,12 +347,23 @@ def _resolve_workflow_step_required_profile(
 
 def _resolve_step_option(
     config: WorkflowConfig,
-    step: object,
-    field_name: str,
-) -> object:
+    step: WorkflowStepConfig,
+    field_name: Literal[
+        "exact_replay",
+        "use_cached_bronze",
+        "required_persistence_profile",
+    ],
+) -> bool | str | None:
     """Resolve one workflow step run option with workflow defaults fallback."""
-    step_options = step.run_options
-    step_value = getattr(step_options, field_name)
-    if step_value is not None:
-        return step_value
-    return getattr(config.defaults, field_name)
+    if field_name == "exact_replay":
+        step_value = step.run_options.exact_replay
+        return step_value if step_value is not None else config.defaults.exact_replay
+    if field_name == "use_cached_bronze":
+        step_value = step.run_options.use_cached_bronze
+        return (
+            step_value if step_value is not None else config.defaults.use_cached_bronze
+        )
+    profile_value = step.run_options.required_persistence_profile
+    if profile_value is not None:
+        return profile_value
+    return config.defaults.required_persistence_profile

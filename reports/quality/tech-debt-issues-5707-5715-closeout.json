@@ -167,7 +167,8 @@
       "module_coverage_source_tree_sha256": "5ef949891ade248c2553e54996c1e21622e603b9c52b0ada23a645720a19806a",
       "architecture_quality_score": 8.66,
       "remote_main_baseline_fingerprint": "fdcb0d409d81267179b18f694b11497e4903525f4eb56a879cc12b2b61e8ade1",
-      "architecture_quality_scorecard_source_tree_sha256": "29ac149740746d6d6eac2ccbf68607d047b1400e1a83629b34041f7fb5f79070"
+      "architecture_quality_scorecard_source_tree_sha256": "29ac149740746d6d6eac2ccbf68607d047b1400e1a83629b34041f7fb5f79070",
+      "integral_score": 8.66
     },
     "5708": {
       "shared_delegation_helper": "src/bioetl/infrastructure/adapters/decorators/_data_source_delegation.py",
@@ -227,10 +228,10 @@
       "uuid4_call_sites": 0
     },
     "5714": {
-      "repo_wide_zero_import_candidate_count": 9,
-      "repo_wide_classified_zero_import_candidate_count": 9,
+      "repo_wide_zero_import_candidate_count": 1,
+      "repo_wide_classified_zero_import_candidate_count": 1,
       "repo_wide_untriaged_zero_import_candidate_count": 0,
-      "repo_wide_owner_test_anchored_candidate_count": 9,
+      "repo_wide_owner_test_anchored_candidate_count": 1,
       "repo_wide_candidates_without_owner_tests_count": 0,
       "review_window_next_review_by": "2026-09-14"
     },

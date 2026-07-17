@@ -10,19 +10,25 @@ from bioetl.infrastructure.storage.silver.finalization_models import (
     _SilverWriteFinalizationPreparationRequest,
     _SilverWriteResultFinalizationRequest,
 )
-from bioetl.infrastructure.storage.silver.metadata_write_models import (
-    _SilverMetadataWriteRequest,
+from bioetl.infrastructure.storage.silver.metadata_operation_protocols import (
+    _SilverWriteFinalizationHostProtocol,
 )
-from bioetl.infrastructure.storage.silver.operations.metadata_finalization_support import (
+from bioetl.infrastructure.storage.silver.metadata_result_finalization import (
     _build_silver_write_result,
     _prepare_silver_write_finalization_context,
+)
+from bioetl.infrastructure.storage.silver.metadata_write_models import (
+    _SilverMetadataWriteRequest,
 )
 from bioetl.infrastructure.storage.silver.prepared_operation_models import (
     _PreparedSilverWriteFinalizationContext,
 )
 
 
-class _SilverMetadataFinalizationOps(Protocol):
+class _SilverMetadataFinalizationOps(
+    _SilverWriteFinalizationHostProtocol,
+    Protocol,
+):
     """Minimal facade surface needed by Silver metadata finalization helpers."""
 
     async def _prepare_silver_write_finalization_context(

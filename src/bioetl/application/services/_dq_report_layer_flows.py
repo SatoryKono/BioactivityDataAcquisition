@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable, Mapping
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from bioetl.application.services.dq_report_models import (
     _DQ_REPORT_ERRORS,
@@ -23,6 +23,22 @@ if TYPE_CHECKING:
         SilverDQAnalyzerPort,
         SilverDQConfigPort,
     )
+    from bioetl.domain.value_objects.dq_report import (
+        BronzeDQReport,
+        DQReportSummary,
+        GoldDQReport,
+        SilverDQReport,
+    )
+
+
+class _DQReport(Protocol):
+    """Shared read-only report surface used by stage orchestration."""
+
+    @property
+    def summary(self) -> DQReportSummary: ...
+
+    @property
+    def checks(self) -> Mapping[str, object]: ...
 
 _ANALYZER_OR_WRITER_UNAVAILABLE = "analyzer or writer not available"
 _NO_DATA_REASON_BY_STAGE = {
@@ -55,12 +71,12 @@ def _skip_report_generation(
     )
 
 
-async def _finalize_generated_report(
+async def _finalize_generated_report[ReportT: _DQReport](
     *,
     context: DQReportContext,
     stage: str,
-    report: object,
-    write_report: Callable[[object], object],
+    report: ReportT,
+    write_report: Callable[[ReportT], Awaitable[Path]],
     logger: LoggerPort,
     emit_generated_metric: Callable[[str, str], None],
     emit_check_failure_metric: Callable[[str, str, str, str], None],
@@ -84,7 +100,7 @@ async def _finalize_generated_report(
     return path
 
 
-async def _generate_report_for_stage(
+async def _generate_report_for_stage[ReportT: _DQReport](
     *,
     context: DQReportContext,
     stage: str,
@@ -92,8 +108,8 @@ async def _generate_report_for_stage(
     report_writer_available: bool,
     data_available: bool,
     missing_data_reason_key: str,
-    analyze_report: Callable[[], object],
-    write_report: Callable[[object], Awaitable[Path]],
+    analyze_report: Callable[[], ReportT],
+    write_report: Callable[[ReportT], Awaitable[Path]],
     logger: LoggerPort,
     emit_skipped_metric: Callable[[str, str, str], None],
     emit_generated_metric: Callable[[str, str], None],
@@ -170,8 +186,10 @@ async def generate_bronze_report(
 ) -> Path | None:
     """Generate Bronze DQ report when analyzer and data are available."""
 
-    def _analyze_report() -> object:
+    def _analyze_report() -> BronzeDQReport:
         assert analyzer is not None
+        assert context.bronze_records is not None
+        assert context.bronze_batch_id is not None
         return analyzer.analyze(
             records=iter(context.bronze_records),
             run_id=context.run_id,
@@ -182,7 +200,7 @@ async def generate_bronze_report(
             timestamp=context.timestamp,
         )
 
-    async def _write_report(report: object) -> Path:
+    async def _write_report(report: BronzeDQReport) -> Path:
         assert report_writer is not None
         return await report_writer.write_bronze_report(
             report=report,
@@ -225,8 +243,9 @@ async def generate_silver_report(
 ) -> Path | None:
     """Generate Silver DQ report when analyzer and data are available."""
 
-    def _analyze_report() -> object:
+    def _analyze_report() -> SilverDQReport:
         assert analyzer is not None
+        assert context.silver_target_table is not None
         analyze_request = SilverDQAnalyzeRequest(
             data=context.silver_data,
             run_id=context.run_id,
@@ -245,7 +264,7 @@ async def generate_silver_report(
         )
         return analyzer.analyze(analyze_request)
 
-    async def _write_report(report: object) -> Path:
+    async def _write_report(report: SilverDQReport) -> Path:
         assert report_writer is not None
         return await report_writer.write_silver_report(
             report=report,
@@ -288,8 +307,9 @@ async def generate_gold_report(
 ) -> Path | None:
     """Generate Gold DQ report when analyzer and data are available."""
 
-    def _analyze_report() -> object:
+    def _analyze_report() -> GoldDQReport:
         assert analyzer is not None
+        assert context.gold_target_table is not None
         return analyzer.analyze(
             data=context.gold_data,
             run_id=context.run_id,
@@ -304,7 +324,7 @@ async def generate_gold_report(
             contract_version=context.gold_contract_version,
         )
 
-    async def _write_report(report: object) -> Path:
+    async def _write_report(report: GoldDQReport) -> Path:
         assert report_writer is not None
         return await report_writer.write_gold_report(
             report=report,

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from bioetl.domain.exceptions import ValidationError
 from bioetl.domain.normalization._chembl_units import (
     CHEMBL_STANDARD_UNIT_CANONICALS,
 )
@@ -11,7 +12,6 @@ from bioetl.domain.normalization._chembl_units import (
     normalize_standard_unit as normalize_chembl_standard_unit,
 )
 from bioetl.domain.normalization.text import normalize_string
-from bioetl.domain.exceptions import ValidationError
 
 __all__ = [
     "BINARY_FLAG_MAPPING",

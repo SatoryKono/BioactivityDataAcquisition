@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime
 from typing import TYPE_CHECKING
+from uuid import UUID
 
 from bioetl.application.runtime_timestamps import (
     capture_runtime_timing_anchor,
@@ -18,7 +21,9 @@ from bioetl.composition.registry_api import PipelineRegistry
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineRunContext
-    from bioetl.domain.ports import ExecutionMetricsRunnerPort
+    from bioetl.domain.ports import ClockPort, ExecutionMetricsRunnerPort
+    from bioetl.domain.types import RunID
+    from bioetl.infrastructure.config.settings_api import Settings
 
 
 __all__ = [
@@ -32,14 +37,14 @@ __all__ = [
 ]
 
 
-def get_settings() -> object:
+def get_settings() -> Settings:
     """Resolve runtime settings lazily while keeping a patchable module seam."""
     from bioetl.composition.runtime_builders.config_access import get_settings as impl
 
     return impl()
 
 
-def maybe_start_metrics_server(settings: object) -> object:
+def maybe_start_metrics_server(settings: Settings) -> bool:
     """Resolve metrics-server startup lazily while keeping a patchable seam."""
     from bioetl.composition.bootstrap.runtime.observability import (
         maybe_start_metrics_server as impl,
@@ -48,13 +53,28 @@ def maybe_start_metrics_server(settings: object) -> object:
     return impl(settings)
 
 
-def build_pipeline_context(*args: object, **kwargs: object) -> object:
+def build_pipeline_context(
+    name: str,
+    options: RunOptions,
+    *,
+    run_id: RunID | UUID | str | None = None,
+    run_id_factory: Callable[[], RunID | UUID | str] | None = None,
+    clock: ClockPort | None = None,
+    started_at: datetime | None = None,
+) -> PipelineRunContext:
     """Forward to the canonical runtime context builder lazily."""
     from bioetl.composition.bootstrap.runtime.pipeline_context_builder import (
         build_pipeline_context as build_pipeline_context_impl,
     )
 
-    return build_pipeline_context_impl(*args, **kwargs)
+    return build_pipeline_context_impl(
+        name,
+        options,
+        run_id=run_id,
+        run_id_factory=run_id_factory,
+        clock=clock,
+        started_at=started_at,
+    )
 
 
 def _ensure_registrations(registry: PipelineRegistry | None = None) -> None:
@@ -96,16 +116,13 @@ def push_metrics_to_gateway(
         push_metrics_to_gateway as push_metrics_to_gateway_impl,
     )
 
-    gateway_kwargs: dict[str, object] = {
-        "run_label": run_label,
-        "pipeline_name": pipeline_name,
-        "run_type": run_type,
-    }
-    if grouping_key_extra is not None:
-        gateway_kwargs["grouping_key_extra"] = grouping_key_extra
-    if metric_names is not None:
-        gateway_kwargs["metric_names"] = metric_names
-    return push_metrics_to_gateway_impl(**gateway_kwargs)
+    return push_metrics_to_gateway_impl(
+        run_label=run_label,
+        pipeline_name=pipeline_name,
+        run_type=run_type,
+        grouping_key_extra=grouping_key_extra,
+        metric_names=metric_names,
+    )
 
 
 def ensure_metrics_server_started() -> bool:

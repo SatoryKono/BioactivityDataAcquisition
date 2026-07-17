@@ -44,6 +44,7 @@ from bioetl.application.services.control_plane.manifest.replay_family_contract_p
 )
 from bioetl.domain.control_plane import ReplayCapability, RunLedgerEntry, RunManifest
 from bioetl.domain.control_plane.reproducibility_policy import (
+    ReproducibilityPolicyAssessment,
     assess_reproducibility_policy,
 )
 
@@ -53,7 +54,7 @@ class _ReplayRefreshContext:
     """Replay-refresh inputs reused after snapshot materialization."""
 
     effective_manifest: RunManifest
-    policy_assessment: object
+    policy_assessment: ReproducibilityPolicyAssessment
     input_snapshots: list[dict[str, object]]
     resume_requested: bool
     requested_exact_replay: bool
@@ -107,13 +108,12 @@ def build_diagnostics_summary(
 def _refresh_replay_summary_build_policy_assessment(
     manifest: RunManifest,
     summary: dict[str, object],
-    input_snapshots: list[object],
+    input_snapshots: list[dict[str, object]],
 ) -> _ReplayRefreshContext:
     """Build policy assessment from materialized snapshots."""
-    snapshot_payloads = cast("list[dict[str, object]]", input_snapshots)
     source_refs = _build_effective_source_refs(
         manifest=manifest,
-        input_snapshots=snapshot_payloads,
+        input_snapshots=input_snapshots,
     )
     replay_assessment_seed = cast(
         "dict[str, object]",
@@ -149,7 +149,7 @@ def _refresh_replay_summary_build_policy_assessment(
     return _ReplayRefreshContext(
         effective_manifest=effective_manifest,
         policy_assessment=policy_assessment,
-        input_snapshots=snapshot_payloads,
+        input_snapshots=input_snapshots,
         resume_requested=resume_requested,
         requested_exact_replay=requested_exact_replay,
     )
@@ -200,7 +200,7 @@ def _refresh_replay_summary_update_snapshot_fields(
     input_snapshots = refresh_context.input_snapshots
     policy_assessment = refresh_context.policy_assessment
     materialization_mode = resolve_post_manifest_input_snapshot_materialization_mode(
-        cast("list[dict[str, object]]", input_snapshots)
+        input_snapshots
     )
     if materialization_mode is not None:
         updated["input_snapshot_materialization_mode"] = materialization_mode
@@ -214,7 +214,7 @@ def _refresh_replay_summary_update_snapshot_fields(
         policy_assessment.snapshot_envelope.missing_snapshot_source_refs
     )
     updated["snapshot_status"] = _resolve_snapshot_status(
-        input_snapshots=cast("list[dict[str, object]]", input_snapshots),
+        input_snapshots=input_snapshots,
         exact_replay_eligible=exact_replay_eligible,
         replay_mode=replay_mode,
     )
@@ -264,10 +264,17 @@ def _refresh_replay_summary_from_materialized_snapshots(
     input_snapshots = summary.get("input_snapshots")
     if not isinstance(input_snapshots, list) or not input_snapshots:
         return summary
+    snapshot_payloads = [
+        {str(key): value for key, value in item.items()}
+        for item in input_snapshots
+        if isinstance(item, dict)
+    ]
+    if not snapshot_payloads:
+        return summary
     refresh_context = _refresh_replay_summary_build_policy_assessment(
         manifest=manifest,
         summary=summary,
-        input_snapshots=cast("list[object]", input_snapshots),
+        input_snapshots=snapshot_payloads,
     )
     return _build_refresh_summary_update(
         summary=summary,
