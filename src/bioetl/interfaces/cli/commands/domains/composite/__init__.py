@@ -6,9 +6,9 @@ from importlib import import_module
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bioetl.interfaces.cli.commands.run_composite import (
-        run_composite as run_composite,
-    )
+    import click
+
+    run_composite: click.Command
 
 __all__ = ["run_composite"]
 
