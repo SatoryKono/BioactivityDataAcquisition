@@ -97,8 +97,9 @@ ______________________________________________________________________
   classification also fails closed to explicit review. `telemetry_missing`
   passes only for explicitly reviewed DQ freshness panels `#8` and `#101`,
   where the visual contract is `UNKNOWN` rather than zero.
-- Live audit uses a governed total `15s` Loki budget, including `/ready`, and a
-  maximum one-hour lookback. Runtime panels `#250/#251` use `query_range`, while
+- Live audit polls Loki `/ready` within a governed total `15s` readiness/query
+  budget and uses a maximum one-hour lookback. Runtime panels `#250/#251` use
+  `query_range`, while
   instant aggregation panel `#257` uses `/query`; all three are required
   semantic evidence. Sparse Loki results are `expected_empty`; missing freshness
   samples are `telemetry_missing` and must render `UNKNOWN`, not zero.

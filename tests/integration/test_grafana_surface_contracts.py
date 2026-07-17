@@ -188,12 +188,31 @@ def test_runtime_loki_panel_fixtures_cover_warning_and_malformed_paths() -> None
     assert warning["line"]["pipeline"] == "chembl_activity"
     assert warning["line"]["level"] == "warning"
     assert set(warning["panel_results"]) == {"250", "257"}
+    warning_stream = warning["panel_results"]["250"]
+    assert warning_stream["resultType"] == "streams"
+    assert warning_stream["result"][0]["stream"]["event"] == warning["line"]["event"]
+    assert (
+        json.loads(warning_stream["result"][0]["values"][0][1])["event"]
+        == warning["line"]["event"]
+    )
+    warning_vector = warning["panel_results"]["257"]
+    assert warning_vector["resultType"] == "vector"
+    assert warning_vector["result"][0]["metric"]["event"] == warning["line"]["event"]
+    assert warning_vector["result"][0]["value"][1] == "1"
     assert malformed["expected_panel_ids"] == [251]
     assert set(malformed["panel_results"]) == {"251"}
     with pytest.raises(json.JSONDecodeError):
         json.loads(malformed["line"])
+    malformed_stream = malformed["panel_results"]["251"]
+    assert malformed_stream["resultType"] == "streams"
+    assert malformed_stream["result"][0]["values"][0][1] == "JSONParserErr"
     assert empty["expected_panel_ids"] == [250, 251, 257]
     assert empty["line"] is None
+    assert set(empty["panel_results"]) == {"250", "251", "257"}
+    assert {
+        panel_id: panel_result["resultType"]
+        for panel_id, panel_result in empty["panel_results"].items()
+    } == {"250": "streams", "251": "streams", "257": "vector"}
     assert all(
         panel_result["result"] == [] for panel_result in empty["panel_results"].values()
     )
