@@ -24,12 +24,14 @@ def test_write_export_creates_csv_file(
 ) -> None:
     adapter = ExportWriterAdapter()
 
-    output_path = adapter.write_export(
-        table=table,
-        table_name="chembl.activity",
-        layer="silver",
-        fmt="csv",
-        output_dir=tmp_path / "exports",
+    output_path = Path(
+        adapter.write_export(
+            table=table,
+            table_name="chembl.activity",
+            layer="silver",
+            fmt="csv",
+            output_dir=str(tmp_path / "exports"),
+        )
     )
 
     assert output_path.exists()
@@ -48,17 +50,19 @@ def test_write_export_rejects_unsupported_format(
             table_name="chembl.activity",
             layer="silver",
             fmt="json",
-            output_dir=tmp_path / "exports",
+            output_dir=str(tmp_path / "exports"),
         )
 
 
 def test_write_manifest_creates_stable_json(tmp_path: Path) -> None:
     adapter = ExportWriterAdapter()
 
-    output_path = adapter.write_manifest(
-        manifest_name="silver_chembl_activity.provenance-manifest",
-        payload={"b": 2, "a": 1},
-        output_dir=tmp_path / "exports",
+    output_path = Path(
+        adapter.write_manifest(
+            manifest_name="silver_chembl_activity.provenance-manifest",
+            payload={"b": 2, "a": 1},
+            output_dir=str(tmp_path / "exports"),
+        )
     )
 
     assert output_path.name == "silver_chembl_activity.provenance-manifest.json"
@@ -71,9 +75,9 @@ def test_fingerprint_file_returns_sha256_and_size(tmp_path: Path) -> None:
     output_path.parent.mkdir()
     output_path.write_text("export", encoding="utf-8")
 
-    fingerprint = adapter.fingerprint_file(path=output_path)
+    fingerprint = adapter.fingerprint_file(path=str(output_path))
 
-    assert fingerprint.path == output_path
+    assert fingerprint.path == str(output_path)
     assert fingerprint.size_bytes == 6
     assert fingerprint.sha256 == (
         "d46aee08cc49f6d1eb41800c1d6bab4506c960c700cff0efffe490d7cb1de5e3"

@@ -410,12 +410,11 @@ def test_tests_workflow_runs_strict_test_audit_preflight_before_governance_close
         encoding="utf-8"
     )
     command = "scripts/engineering/qa/check_test_audit_preflight.py --strict"
+    observability_gate = "report-observability-metric-inventory"
 
     assert command in workflow
-    # The observability metric inventory check runs in the "Dashboard semantic release policy gate" step
-    assert workflow.index(command) < workflow.index(
-        "Dashboard semantic release policy gate"
-    )
+    assert observability_gate in workflow
+    assert workflow.index(command) < workflow.index(observability_gate)
 
 
 @pytest.mark.architecture

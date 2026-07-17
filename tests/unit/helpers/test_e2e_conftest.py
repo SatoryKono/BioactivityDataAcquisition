@@ -91,12 +91,8 @@ def test_read_delta_records_prefers_active_parquet_reader_on_windows(
     observed: dict[str, object] = {}
     expected = [{"entity_id": "row-1"}]
 
-    def _fake_load_delta_table() -> object:
-        def _factory(path: str) -> object:
-            observed["path"] = path
-            return object()
-
-        return _factory
+    def _unexpected_load_delta_table() -> object:
+        raise AssertionError("native DeltaTable should be bypassed on win32 E2E")
 
     def _unexpected_load_delta_record_reader() -> object:
         raise AssertionError("shared delta reader should not be used on win32 E2E")
@@ -109,7 +105,11 @@ def test_read_delta_records_prefers_active_parquet_reader_on_windows(
         observed["columns"] = columns
         return expected
 
-    monkeypatch.setattr(e2e_conftest, "_load_delta_table", _fake_load_delta_table)
+    monkeypatch.setattr(
+        e2e_conftest,
+        "_load_delta_table",
+        _unexpected_load_delta_table,
+    )
     monkeypatch.setattr(
         e2e_conftest,
         "_load_delta_record_reader",
@@ -139,10 +139,52 @@ def test_read_delta_records_prefers_active_parquet_reader_on_windows(
 
     assert result == expected
     assert observed == {
-        "path": str(tmp_path / "silver" / "chembl_activity"),
         "fallback_path": str(tmp_path / "silver" / "chembl_activity"),
         "columns": None,
     }
+
+
+def test_delta_log_fallback_reads_only_current_active_parquet(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    table_path = tmp_path / "silver" / "chembl_activity"
+    delta_log = table_path / "_delta_log"
+    delta_log.mkdir(parents=True)
+    (delta_log / "00000000000000000000.json").write_text(
+        '{"add":{"path":"old.parquet"}}\n'
+        '{"add":{"path":"active%20row.parquet"}}\n',
+        encoding="utf-8",
+    )
+    (delta_log / "00000000000000000001.json").write_text(
+        '{"remove":{"path":"old.parquet"}}\n',
+        encoding="utf-8",
+    )
+    observed: list[Path] = []
+
+    class _FakeArrowTable:
+        def to_pylist(self) -> list[dict[str, str]]:
+            return [{"entity_id": "active-row"}]
+
+    class _FakeParquet:
+        @staticmethod
+        def read_table(
+            path: Path, *, columns: list[str] | None = None
+        ) -> _FakeArrowTable:
+            assert columns is None
+            observed.append(path)
+            return _FakeArrowTable()
+
+    monkeypatch.setattr(
+        e2e_conftest,
+        "_load_pyarrow_parquet",
+        lambda: _FakeParquet,
+    )
+
+    records = e2e_conftest._read_active_parquet_records_from_delta_log(table_path)
+
+    assert records == [{"entity_id": "active-row"}]
+    assert observed == [table_path / "active row.parquet"]
 
 
 def test_read_delta_records_timeout_surfaces_harness_context(

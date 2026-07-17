@@ -5,6 +5,8 @@ from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from bioetl.domain._immutability import freeze_fields
+
 
 class ChemblPublicationRecord(BaseModel):
     """Scientific publication DTO from ChEMBL.
@@ -156,6 +158,10 @@ class TargetComponentRecord(BaseModel):
     protein_classifications: str | None = Field(
         default=None, description="Protein classifications as JSON"
     )
+
+    def model_post_init(self, _context: object, /) -> None:
+        """Detach and freeze nested classification identifiers."""
+        freeze_fields(self, ("protein_classification_ids",))
 
 
 class ProteinClassRecord(BaseModel):

@@ -181,7 +181,9 @@ _PUBLIC_EXPORTS = {
 __all__ = list(_PUBLIC_EXPORTS)
 
 
-def __getattr__(name: str) -> object:
+def __getattr__(name: str) -> object:  # pragma: no cover
+    if TYPE_CHECKING:
+        raise AttributeError
     export = _PUBLIC_EXPORTS.get(name)
     if export is None:
         raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

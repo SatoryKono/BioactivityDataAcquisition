@@ -17,6 +17,7 @@ from ._filter_primitives import (
     check_single_list_length,
     check_single_range,
     get_list_length,
+    is_empty_value,
 )
 
 
@@ -27,7 +28,7 @@ def evaluate_required_fields(
     """Evaluate required-field rules."""
     for field in required_fields:
         actual = record.get(field)
-        if actual in (None, ""):
+        if is_empty_value(actual):
             return FilterDecision.rejected(
                 reason_code="required_field_missing",
                 rule_type="required_fields",

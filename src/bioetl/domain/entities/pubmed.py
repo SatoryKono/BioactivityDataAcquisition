@@ -128,6 +128,20 @@ class ArticleRecord(BaseModel):
         default=None, description="Raw XML content (forensic)"
     )
 
+    def model_post_init(self, _context: object, /) -> None:
+        """Detach and freeze nested DTO collections after validation."""
+        freeze_fields(
+            self,
+            (
+                "publication_types",
+                "keywords",
+                "mesh_terms",
+                "chemicals",
+                "gene_symbols",
+                "databanks",
+            ),
+        )
+
 
 # === Dataclass Domain Entity ===
 

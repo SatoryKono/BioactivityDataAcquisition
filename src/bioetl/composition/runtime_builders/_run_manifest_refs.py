@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from importlib import import_module
+from typing import TYPE_CHECKING
 
 from bioetl.composition.runtime_builders._run_manifest_data_roots import (
     DataRootMode as DataRootMode,
@@ -16,8 +17,10 @@ from bioetl.composition.runtime_builders._run_manifest_identity_ref_values impor
 )
 
 
-def __getattr__(name: str) -> object:
+def __getattr__(name: str) -> object:  # pragma: no cover
     """Lazily expose legacy path helpers without raising their static fan-in."""
+    if TYPE_CHECKING:
+        raise AttributeError
     if name == "control_plane_root":
         return getattr(
             import_module(
