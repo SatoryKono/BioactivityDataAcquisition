@@ -59,7 +59,11 @@ services:
       - monitoring
     restart: unless-stopped
     healthcheck:
-      disable: true
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--timeout=2", "--spider", "http://127.0.0.1:9080/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     mem_limit: 256m
     mem_reservation: 128m
     cpus: 0.50

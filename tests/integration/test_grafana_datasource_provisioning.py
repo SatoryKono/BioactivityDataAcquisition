@@ -149,7 +149,19 @@ def test_audit_profile_mounts_explicit_roots_read_only_and_uses_bounded_loki_job
         "condition": "service_healthy"
     }
     assert audit_promtail["depends_on"]["loki"] == {"condition": "service_started"}
-    assert audit_promtail["healthcheck"] == {"disable": True}
+    # Promtail must have an observable readiness check to prevent dead/non-delivering shippers
+    # from hiding behind expected_empty audit results
+    assert "healthcheck" in audit_promtail
+    healthcheck = audit_promtail["healthcheck"]
+    assert healthcheck.get("disable") is not True, (
+        "Promtail audit healthcheck must not be disabled; a dead shipper must fail the audit"
+    )
+    assert "test" in healthcheck, (
+        "Promtail audit must have an observable healthcheck test command"
+    )
+    assert any("ready" in str(item).lower() for item in healthcheck["test"]), (
+        "Promtail healthcheck must probe the /ready endpoint to detect non-delivering shippers"
+    )
 
 
 def test_default_runtime_log_sink_reaches_canonical_loki_dashboard_job() -> None:
@@ -351,6 +363,23 @@ def test_bootstrap_script_detects_tracing_datasource_reachability() -> None:
     assert "deleteDatasources:" in content
     assert "name: Loki" in content
     assert "name: Tempo" in content
+
+
+def test_probe_ready_function_handles_one_and_two_arg_invocations() -> None:
+    """probe_ready must accept both one-arg (default timeout) and two-arg (bounded timeout) forms."""
+    content = Path("grafana/scripts/bootstrap-datasources.sh").read_text(
+        encoding="utf-8"
+    )
+    assert 'probe_timeout="${2:-2}"' in content, (
+        "probe_ready must initialize timeout from ${2:-2} to handle one-arg calls"
+    )
+    # Verify that the function is actually called with both forms in the script
+    assert 'probe_ready "http://loki:3100/ready" "${remaining}"' in content, (
+        "probe_ready must be called with two arguments for bounded timeout"
+    )
+    assert 'probe_ready "http://tempo:3200/ready" "${remaining}"' in content, (
+        "probe_ready must be called with two arguments for bounded timeout"
+    )
 
 
 def test_bootstrap_script_prunes_stale_local_renderer_plugin_in_remote_mode() -> None:
