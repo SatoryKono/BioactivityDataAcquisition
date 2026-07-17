@@ -69,6 +69,11 @@ _SECRET_PATTERNS: list[tuple[re.Pattern[str], str]] = [
     ),
     # Bearer tokens in headers
     (re.compile(r"Bearer\s+[\w.-]+", re.IGNORECASE), "Bearer [REDACTED]"),
+    # Stripe/OpenAI-style prefixed tokens that can appear outside key=value text.
+    (
+        re.compile(r"(?<![\w])(?:sk|pk)_(?:live|test)_[A-Za-z0-9_-]+", re.IGNORECASE),
+        "[REDACTED_KEY]",
+    ),
     # AWS-style keys
     (re.compile(r"AKIA[0-9A-Z]{16}"), "[REDACTED_AWS_KEY]"),
     # Generic long alphanumeric that look like keys (32+ chars)
@@ -78,6 +83,14 @@ _SECRET_PATTERNS: list[tuple[re.Pattern[str], str]] = [
 # UUID pattern used to avoid redacting identifiers like run_id, batch_id
 _UUID_PATTERN = re.compile(
     r"^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$",
+    re.IGNORECASE,
+)
+
+_SENSITIVE_LOG_FIELD_PATTERN = re.compile(
+    r"(?:^|[_-])(?:"
+    r"api[_-]?key|auth(?:orization)?|bearer|credential(?:s)?|"
+    r"password|passwd|pwd|private[_-]?key|secret|token"
+    r")(?:$|[_-])",
     re.IGNORECASE,
 )
 
@@ -108,6 +121,28 @@ def _mask_secrets(value: Any) -> Any:  # Any: structlog context values of arbitr
     return result
 
 
+def _mask_log_value(
+    value: Any,  # Any: structlog context values of arbitrary type
+    *,
+    field_name: object | None = None,
+) -> Any:  # Any: preserves the heterogeneous structlog value shape
+    """Recursively redact a structured log value and sensitive field names."""
+    if field_name is not None and _SENSITIVE_LOG_FIELD_PATTERN.search(str(field_name)):
+        return "[REDACTED]"
+    if isinstance(value, str):
+        return _mask_secrets(value)
+    if isinstance(value, dict):
+        return {
+            key: _mask_log_value(nested, field_name=key)
+            for key, nested in value.items()
+        }
+    if isinstance(value, list):
+        return [_mask_log_value(item) for item in value]
+    if isinstance(value, tuple):
+        return tuple(_mask_log_value(item) for item in value)
+    return value
+
+
 def secret_filter_processor(
     logger: Any,  # Any: structlog wrapped logger instance
     _method_name: str,
@@ -115,8 +150,9 @@ def secret_filter_processor(
 ) -> JsonDict:  # Any: OTel span attributes are heterogeneous
     """Structlog processor that filters secrets from log entries.
 
-    Scans all string values in the event dict and masks potential secrets
-    like API keys, tokens, passwords, and authorization headers.
+    Recursively scans structured values and masks potential secrets like API
+    keys, tokens, passwords, and authorization headers. Values under sensitive
+    field names are redacted even when their text has no recognizable prefix.
 
     Args:
         logger: The wrapped logger object
@@ -127,14 +163,7 @@ def secret_filter_processor(
         Event dict with secrets masked
     """
     for key, value in event_dict.items():
-        if isinstance(value, str):
-            event_dict[key] = _mask_secrets(value)
-        elif isinstance(value, dict):
-            # Recursively mask nested dicts
-            event_dict[key] = {
-                k: _mask_secrets(v) if isinstance(v, str) else v
-                for k, v in value.items()
-            }
+        event_dict[key] = _mask_log_value(value, field_name=key)
 
     return event_dict
 
