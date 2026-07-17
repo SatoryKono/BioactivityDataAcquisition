@@ -443,6 +443,7 @@ def test_bootstrap_script_detects_tracing_datasource_reachability() -> None:
     [
         ((), "--timeout=2"),
         (("1",), "--timeout=1"),
+        (("10",), "--timeout=2"),
     ],
 )
 def test_bootstrap_probe_ready_honors_one_and_two_argument_forms(
