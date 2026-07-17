@@ -44,9 +44,7 @@ def _normalizer_ref(normalizer: FieldNormalizer) -> str:
         closure = getattr(normalizer, "__closure__", None) or ()
         semantics = {
             "defaults": _stable_value(getattr(normalizer, "__defaults__", None)),
-            "kwdefaults": _stable_value(
-                getattr(normalizer, "__kwdefaults__", None)
-            ),
+            "kwdefaults": _stable_value(getattr(normalizer, "__kwdefaults__", None)),
             "closure": [_stable_value(cell.cell_contents) for cell in closure],
         }
         if any(semantics.values()):
@@ -68,7 +66,10 @@ def _sha256_hex(payload: object) -> str:
 
 def _stable_value(value: object) -> object:
     if isinstance(value, Mapping):
-        return {str(k): _stable_value(v) for k, v in sorted(value.items(), key=lambda i: str(i[0]))}
+        return {
+            str(k): _stable_value(v)
+            for k, v in sorted(value.items(), key=lambda i: str(i[0]))
+        }
     if isinstance(value, (list, tuple)):
         return [_stable_value(v) for v in value]
     if isinstance(value, (set, frozenset)):
