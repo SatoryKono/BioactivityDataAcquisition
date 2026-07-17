@@ -627,7 +627,9 @@ Variable handoff policy for dashboard links remains strict and bounded:
   `Track GLOBAL Log Hygiene Trend`. Это optional tracing-profile evidence, а
   не first-screen status; row collapsed by default in the canonical dashboard
   to avoid datasource warning noise when the optional tracing profile is not
-  enabled. Log panels используют активный Grafana time range;
+  enabled. Panels `#250`, `#251` и `#257` используют bounded one-hour lookback
+  независимо от более широкого активного Grafana time range; trend panel
+  `#258` продолжает использовать активный time range;
   unstructured parser-error panel intentionally renders parsed `.__error__`;
   Prometheus condition-summary panels в runtime используют shipped fixed-window
   recording rules и не зависят от `$__range`; freshness handoff is explicitly

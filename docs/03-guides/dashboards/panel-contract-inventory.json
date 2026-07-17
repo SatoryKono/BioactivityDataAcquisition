@@ -4816,11 +4816,11 @@
       "datasource_type": "loki",
       "documents_backend_down": false,
       "documents_valid_empty": true,
-      "formula": "{job=\"bioetl\"} | json | __error__!=\"\" | line_format \"{{.__error__}} {{__line__}}\"",
+      "formula": "{job=\"bioetl\"} | json | __error__!=\"\" | line_format \"{{.__error__}}\"",
       "kind": "loki",
       "panel_id": 251,
       "panel_title": "Inspect GLOBAL Unstructured Logs",
-      "query": "{job=\"bioetl\"} | json | __error__!=\"\" | line_format \"{{.__error__}} {{__line__}}\"",
+      "query": "{job=\"bioetl\"} | json | __error__!=\"\" | line_format \"{{.__error__}}\"",
       "query_tokens": [
         "job"
       ],
@@ -4862,11 +4862,11 @@
       "datasource_type": "loki",
       "documents_backend_down": false,
       "documents_valid_empty": true,
-      "formula": "topk(10, sum by (event, logger) (count_over_time({job=\"bioetl\"} | json | __error__=\"\" | pipeline=~\"$pipeline\" | level=\"warning\" [$__range])))",
+      "formula": "topk(10, sum by (event, logger) (count_over_time({job=\"bioetl\"} | json | __error__=\"\" | pipeline=~\"$pipeline\" | level=\"warning\" [1h])))",
       "kind": "loki",
       "panel_id": 257,
       "panel_title": "Inspect Top Warning Events by Event / Logger / Range",
-      "query": "topk(10, sum by (event, logger) (count_over_time({job=\"bioetl\"} | json | __error__=\"\" | pipeline=~\"$pipeline\" | level=\"warning\" [$__range])))",
+      "query": "topk(10, sum by (event, logger) (count_over_time({job=\"bioetl\"} | json | __error__=\"\" | pipeline=~\"$pipeline\" | level=\"warning\" [1h])))",
       "query_tokens": [
         "event",
         "job",

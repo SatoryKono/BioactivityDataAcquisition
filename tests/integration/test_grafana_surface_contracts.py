@@ -130,6 +130,7 @@ def test_runtime_dashboard_keeps_loki_log_hygiene_in_collapsed_tracing_row() -> 
 def test_runtime_warning_loki_queries_filter_parsed_fields_after_json() -> None:
     """Warning log panels must not filter parsed JSON fields in the Loki selector."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
+    assert dashboard["version"] == 3
     panels = {
         panel.get("title"): panel
         for panel in get_dashboard_panels(dashboard)
@@ -138,6 +139,7 @@ def test_runtime_warning_loki_queries_filter_parsed_fields_after_json() -> None:
 
     warning_panel = panels["Inspect Warning Logs"]
     warning_expr = warning_panel["targets"][0]["expr"]
+    assert warning_panel["timeFrom"] == "1h"
     assert '{job="bioetl"}' in warning_expr
     assert '{job="bioetl", level="warning"}' not in warning_expr
     assert "| json" in warning_expr
@@ -147,6 +149,7 @@ def test_runtime_warning_loki_queries_filter_parsed_fields_after_json() -> None:
 
     top_warning_panel = panels["Inspect Top Warning Events by Event / Logger / Range"]
     top_warning_expr = top_warning_panel["targets"][0]["expr"]
+    assert top_warning_panel["timeFrom"] == "1h"
     assert '{job="bioetl"}' in top_warning_expr
     assert '{job="bioetl", level="warning"}' not in top_warning_expr
     assert '| pipeline=~"$pipeline"' in top_warning_expr
@@ -154,15 +157,19 @@ def test_runtime_warning_loki_queries_filter_parsed_fields_after_json() -> None:
     assert "sum by (event, logger)" in top_warning_expr
     assert "sum by (message)" not in top_warning_expr
     assert "topk(10" in top_warning_expr
+    assert "[1h]" in top_warning_expr
+    assert "$__range" not in top_warning_expr
     assert top_warning_panel["type"] == "table"
 
     unstructured_panel = panels["Inspect GLOBAL Unstructured Logs"]
     unstructured_expr = unstructured_panel["targets"][0]["expr"]
+    assert unstructured_panel["timeFrom"] == "1h"
     assert '{job="bioetl"}' in unstructured_expr
     assert "| json" in unstructured_expr
     assert '__error__!=""' in unstructured_expr
     assert "{{.__error__}}" in unstructured_expr
     assert "{{__error__}}" not in unstructured_expr
+    assert "__line__" not in unstructured_expr
 
 
 def test_runtime_loki_panel_fixtures_cover_warning_and_malformed_paths() -> None:
@@ -175,13 +182,40 @@ def test_runtime_loki_panel_fixtures_cover_warning_and_malformed_paths() -> None
 
     warning = next(item for item in fixtures if item["kind"] == "warning")
     malformed = next(item for item in fixtures if item["kind"] == "malformed")
+    empty = next(item for item in fixtures if item["kind"] == "empty")
     assert warning["expected_panel_ids"] == [250, 257]
     assert set(warning["line"]) >= {"pipeline", "level", "event", "logger"}
     assert warning["line"]["pipeline"] == "chembl_activity"
     assert warning["line"]["level"] == "warning"
+    assert set(warning["panel_results"]) == {"250", "257"}
+    warning_stream = warning["panel_results"]["250"]
+    assert warning_stream["resultType"] == "streams"
+    assert warning_stream["result"][0]["stream"]["event"] == warning["line"]["event"]
+    assert (
+        json.loads(warning_stream["result"][0]["values"][0][1])["event"]
+        == warning["line"]["event"]
+    )
+    warning_vector = warning["panel_results"]["257"]
+    assert warning_vector["resultType"] == "vector"
+    assert warning_vector["result"][0]["metric"]["event"] == warning["line"]["event"]
+    assert warning_vector["result"][0]["value"][1] == "1"
     assert malformed["expected_panel_ids"] == [251]
+    assert set(malformed["panel_results"]) == {"251"}
     with pytest.raises(json.JSONDecodeError):
         json.loads(malformed["line"])
+    malformed_stream = malformed["panel_results"]["251"]
+    assert malformed_stream["resultType"] == "streams"
+    assert malformed_stream["result"][0]["values"][0][1] == "JSONParserErr"
+    assert empty["expected_panel_ids"] == [250, 251, 257]
+    assert empty["line"] is None
+    assert set(empty["panel_results"]) == {"250", "251", "257"}
+    assert {
+        panel_id: panel_result["resultType"]
+        for panel_id, panel_result in empty["panel_results"].items()
+    } == {"250": "streams", "251": "streams", "257": "vector"}
+    assert all(
+        panel_result["result"] == [] for panel_result in empty["panel_results"].values()
+    )
 
 
 def test_runtime_dashboard_describes_tracing_optional_mode() -> None:
