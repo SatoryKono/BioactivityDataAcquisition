@@ -2,12 +2,24 @@
 
 from __future__ import annotations
 
+from typing import TypedDict
+
 from bioetl.domain.types import JsonDict
 from bioetl.infrastructure.quarantine._statistics_helpers import (
     bucket_start_iso,
     resolve_bucket_seconds,
 )
 from bioetl.infrastructure.quarantine.filtered_reads import _load_filtered_rows
+
+
+class _TimeseriesBucket(TypedDict):
+    """Mutable accumulator for one quarantine timeseries bucket."""
+
+    bucket_start: str
+    reject_count: int
+    bronze_records: int
+    reject_ratio: float
+    run_ids: set[str]
 
 
 def get_filtered_timeseries(
@@ -40,7 +52,7 @@ def get_filtered_timeseries(
         include_payload_preview=False,
     )
     bucket_seconds = resolve_bucket_seconds(bucket)
-    buckets: dict[str, dict] = {}
+    buckets: dict[str, _TimeseriesBucket] = {}
     for row in rows:
         bucket_start = bucket_start_iso(
             row.get("ingestion_ts"),
@@ -63,11 +75,18 @@ def get_filtered_timeseries(
         if isinstance(run_id_value, str) and run_id_value.strip():
             bucket_row["run_ids"].add(run_id_value.strip())
 
-    ordered_rows: list[dict] = []
+    ordered_rows: list[JsonDict] = []
     for bucket_start in sorted(buckets):
         bucket_row = buckets[bucket_start]
-        bucket_row["run_ids"] = sorted(bucket_row["run_ids"])
-        ordered_rows.append(bucket_row)
+        ordered_rows.append(
+            {
+                "bucket_start": bucket_row["bucket_start"],
+                "reject_count": bucket_row["reject_count"],
+                "bronze_records": bucket_row["bronze_records"],
+                "reject_ratio": bucket_row["reject_ratio"],
+                "run_ids": sorted(bucket_row["run_ids"]),
+            }
+        )
     return {
         "bucket": bucket.strip().lower(),
         "rows": ordered_rows,

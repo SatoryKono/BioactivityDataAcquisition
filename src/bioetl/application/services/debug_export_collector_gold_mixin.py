@@ -28,6 +28,13 @@ from .debug_export_helpers import (
 class DebugExportGoldRowsMixin:
     """Record Gold rejection and lineage rows into collector-owned tables."""
 
+    _run_id: str
+    _workflow_id: str
+    _pipeline_id: str
+    _provider_id: str
+    _gold_rejected_rows: list[dict[str, object]]
+    _lineage_rows: list[dict[str, object]]
+
     def record_gold_filter(
         self,
         *,

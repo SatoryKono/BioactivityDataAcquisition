@@ -6,11 +6,11 @@
 - next_review_by: 2026-09-14
 - review_cycle_days: 90
 - triaged_entry_count: 18
-- repo_wide_zero_import_candidate_count: 3
-- repo_wide_classified_zero_import_candidate_count: 3
+- repo_wide_zero_import_candidate_count: 2
+- repo_wide_classified_zero_import_candidate_count: 2
 - repo_wide_untriaged_zero_import_candidate_count: 0
 - repo_wide_owner_test_anchored_candidate_count: 1
-- repo_wide_candidates_without_owner_tests_count: 2
+- repo_wide_candidates_without_owner_tests_count: 1
 - repo_wide_non_static_reachability_candidate_count: 1
 - triaged_retained_owner_test_anchored_count: 14
 - triaged_retained_without_owner_tests_count: 0
@@ -45,7 +45,6 @@
 | Module | Disposition | Path |
 | --- | --- | --- |
 | `bioetl.__main__` | `retain_module_entrypoint` | `src/bioetl/__main__.py` |
-| `bioetl.domain.exceptions._redaction` | `retain_private_module` | `src/bioetl/domain/exceptions/_redaction.py` |
 | `bioetl.domain.normalization.profiles._stable` | `retain_private_module` | `src/bioetl/domain/normalization/profiles/_stable.py` |
 
 ## Retained Owner-Test Evidence

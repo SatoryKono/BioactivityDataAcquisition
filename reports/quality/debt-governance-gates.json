@@ -46,7 +46,7 @@
       "status": "pass"
     },
     {
-      "current": "cbcd46a0a6fbb415e2ae47f9f10e88a5d7270dd4c84a0ad859f43a43716c43c0",
+      "current": "e2961651d28f3b28657c4e4dbb14b8c58212c9f606b0124b28e5d35ba7764ec6",
       "limit": "b77b9ae460a47e16ceb91a740379dadfc5bd3c7454b5e69e500f4002224f06ac",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",

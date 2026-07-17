@@ -4,16 +4,20 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from bioetl.domain.types import DebugExportPack
 
 from .debug_export_collector import build_dq_summary_rows, get_sorted_lineage_rows
 from .debug_reason_dictionary import DEBUG_REASON_DICTIONARY
 
+if TYPE_CHECKING:
+    from .debug_export_collector import DebugExportCollector
+
 
 def build_debug_export_pack(
     *,
-    collector: object,
+    collector: DebugExportCollector,
     run_id: str,
     pipeline_id: str,
     provider_id: str,

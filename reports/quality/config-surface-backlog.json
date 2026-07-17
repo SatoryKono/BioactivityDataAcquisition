@@ -1,126 +1,747 @@
 {
-  "summary": {
-    "snapshot_date": "2026-06-01",
-    "families": 5,
-    "scorecard": "configs/quality/debt_scorecard.yaml",
-    "budget_warnings": 0,
-    "budget_review_notes": 0
-  },
-  "families": [
-    {
-      "name": "application_core",
-      "owner": "@bioetl-architecture",
-      "linked_rf": "RF-023",
-      "ratchet_stage": "active",
-      "ratchet_scope": "duplication-non-growth-plus-bounded-growth",
-      "path_prefixes": [
-        "src/bioetl/application/core/"
-      ],
-      "duplication_clusters": 0,
-      "files": 180,
-      "total_loc": 22427,
-      "files_ge_250_loc": 4,
-      "helper_function_ratio": 0.357,
-      "max_internal_fan_in": 7,
-      "max_internal_fan_in_module": "bioetl.application.core.span_helpers",
-      "bounded_growth_budgets": {
-        "files_ge_250_loc": 7,
-        "max_internal_fan_in": 10
+  "duplication_audit": {
+    "clusters": [
+      {
+        "block_path": "composite.normalized_anchor_policy",
+        "fingerprint": "e46c148477ca",
+        "governance": {
+          "decision": "retain_shared_composite_policy",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-composite",
+          "rationale": "Composite normalized-anchor policy is shared to keep join-key normalization deterministic across composite entities.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 5,
+        "occurrences": [
+          {
+            "block_path": "composite.normalized_anchor_policy",
+            "path": "configs/composites/activity.yaml",
+            "surface_kind": "composite_config"
+          },
+          {
+            "block_path": "composite.normalized_anchor_policy",
+            "path": "configs/composites/assay.yaml",
+            "surface_kind": "composite_config"
+          },
+          {
+            "block_path": "composite.normalized_anchor_policy",
+            "path": "configs/composites/molecule.yaml",
+            "surface_kind": "composite_config"
+          },
+          {
+            "block_path": "composite.normalized_anchor_policy",
+            "path": "configs/composites/publication.yaml",
+            "surface_kind": "composite_config"
+          },
+          {
+            "block_path": "composite.normalized_anchor_policy",
+            "path": "configs/composites/target.yaml",
+            "surface_kind": "composite_config"
+          }
+        ],
+        "serialized_bytes": 743,
+        "surface_kind_counts": {
+          "composite_config": 5
+        }
       },
-      "budget_warnings": [],
-      "budget_review_notes": []
+      {
+        "block_path": "composite.normalized_anchor_policy.pubchem_compound",
+        "fingerprint": "4975749a62bd",
+        "governance": {
+          "decision": "retain_shared_composite_policy",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-composite",
+          "rationale": "Composite normalized-anchor policy is shared to keep join-key normalization deterministic across composite entities.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 5,
+        "occurrences": [
+          {
+            "block_path": "composite.normalized_anchor_policy.pubchem_compound",
+            "path": "configs/composites/activity.yaml",
+            "surface_kind": "composite_config"
+          },
+          {
+            "block_path": "composite.normalized_anchor_policy.pubchem_compound",
+            "path": "configs/composites/assay.yaml",
+            "surface_kind": "composite_config"
+          },
+          {
+            "block_path": "composite.normalized_anchor_policy.pubchem_compound",
+            "path": "configs/composites/molecule.yaml",
+            "surface_kind": "composite_config"
+          },
+          {
+            "block_path": "composite.normalized_anchor_policy.pubchem_compound",
+            "path": "configs/composites/publication.yaml",
+            "surface_kind": "composite_config"
+          },
+          {
+            "block_path": "composite.normalized_anchor_policy.pubchem_compound",
+            "path": "configs/composites/target.yaml",
+            "surface_kind": "composite_config"
+          }
+        ],
+        "serialized_bytes": 402,
+        "surface_kind_counts": {
+          "composite_config": 5
+        }
+      },
+      {
+        "block_path": "composite.normalized_anchor_policy.uniprot_idmapping",
+        "fingerprint": "c49f3b866e29",
+        "governance": {
+          "decision": "retain_shared_composite_policy",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-composite",
+          "rationale": "Composite normalized-anchor policy is shared to keep join-key normalization deterministic across composite entities.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 5,
+        "occurrences": [
+          {
+            "block_path": "composite.normalized_anchor_policy.uniprot_idmapping",
+            "path": "configs/composites/activity.yaml",
+            "surface_kind": "composite_config"
+          },
+          {
+            "block_path": "composite.normalized_anchor_policy.uniprot_idmapping",
+            "path": "configs/composites/assay.yaml",
+            "surface_kind": "composite_config"
+          },
+          {
+            "block_path": "composite.normalized_anchor_policy.uniprot_idmapping",
+            "path": "configs/composites/molecule.yaml",
+            "surface_kind": "composite_config"
+          },
+          {
+            "block_path": "composite.normalized_anchor_policy.uniprot_idmapping",
+            "path": "configs/composites/publication.yaml",
+            "surface_kind": "composite_config"
+          },
+          {
+            "block_path": "composite.normalized_anchor_policy.uniprot_idmapping",
+            "path": "configs/composites/target.yaml",
+            "surface_kind": "composite_config"
+          }
+        ],
+        "serialized_bytes": 296,
+        "surface_kind_counts": {
+          "composite_config": 5
+        }
+      },
+      {
+        "block_path": "pipelines.crossref_publication.shadow_analysis",
+        "fingerprint": "5da6b9d64a46",
+        "governance": {
+          "decision": "retain_shared_quality_shadow_analysis_policy",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-dq",
+          "rationale": "Quality-registry shadow-analysis blocks intentionally share provider-family boundary policy; retained duplication stays visible in the config backlog and must not grow without review.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 4,
+        "occurrences": [
+          {
+            "block_path": "pipelines.crossref_publication.shadow_analysis",
+            "path": "configs/quality/silver_filter_boundary_inventory.yaml",
+            "surface_kind": "quality_registry"
+          },
+          {
+            "block_path": "pipelines.openalex_publication.shadow_analysis",
+            "path": "configs/quality/silver_filter_boundary_inventory.yaml",
+            "surface_kind": "quality_registry"
+          },
+          {
+            "block_path": "pipelines.pubmed_publication.shadow_analysis",
+            "path": "configs/quality/silver_filter_boundary_inventory.yaml",
+            "surface_kind": "quality_registry"
+          },
+          {
+            "block_path": "pipelines.semanticscholar_publication.shadow_analysis",
+            "path": "configs/quality/silver_filter_boundary_inventory.yaml",
+            "surface_kind": "quality_registry"
+          }
+        ],
+        "serialized_bytes": 1008,
+        "surface_kind_counts": {
+          "quality_registry": 4
+        }
+      },
+      {
+        "block_path": "pipelines.chembl_protein_class.shadow_analysis",
+        "fingerprint": "a2eaf2554a60",
+        "governance": {
+          "decision": "retain_shared_quality_shadow_analysis_policy",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-dq",
+          "rationale": "Quality-registry shadow-analysis blocks intentionally share provider-family boundary policy; retained duplication stays visible in the config backlog and must not grow without review.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 4,
+        "occurrences": [
+          {
+            "block_path": "pipelines.chembl_protein_class.shadow_analysis",
+            "path": "configs/quality/silver_filter_boundary_inventory.yaml",
+            "surface_kind": "quality_registry"
+          },
+          {
+            "block_path": "pipelines.chembl_target_component.shadow_analysis",
+            "path": "configs/quality/silver_filter_boundary_inventory.yaml",
+            "surface_kind": "quality_registry"
+          },
+          {
+            "block_path": "pipelines.uniprot_idmapping.shadow_analysis",
+            "path": "configs/quality/silver_filter_boundary_inventory.yaml",
+            "surface_kind": "quality_registry"
+          },
+          {
+            "block_path": "pipelines.uniprot_protein.shadow_analysis",
+            "path": "configs/quality/silver_filter_boundary_inventory.yaml",
+            "surface_kind": "quality_registry"
+          }
+        ],
+        "serialized_bytes": 982,
+        "surface_kind_counts": {
+          "quality_registry": 4
+        }
+      },
+      {
+        "block_path": "$defs.FieldValidationConfig",
+        "fingerprint": "7769fb18a6b5",
+        "governance": {
+          "decision": "retain_generated_schema_contract",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-contracts",
+          "rationale": "Field validation definitions are duplicated by generated schema artifacts; retention is contract-owned rather than unresolved review-required debt.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 3,
+        "occurrences": [
+          {
+            "block_path": "$defs.FieldValidationConfig",
+            "path": "configs/_schema/composite.json",
+            "surface_kind": "other_config"
+          },
+          {
+            "block_path": "$defs.FieldValidationConfig",
+            "path": "configs/_schema/dq.json",
+            "surface_kind": "other_config"
+          },
+          {
+            "block_path": "$defs.FieldValidationConfig",
+            "path": "configs/_schema/pipeline.json",
+            "surface_kind": "other_config"
+          }
+        ],
+        "serialized_bytes": 1892,
+        "surface_kind_counts": {
+          "other_config": 3
+        }
+      },
+      {
+        "block_path": "$defs.FieldValidationConfig.properties",
+        "fingerprint": "7a6fad1cee9e",
+        "governance": {
+          "decision": "retain_generated_schema_contract",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-contracts",
+          "rationale": "Field validation definitions are duplicated by generated schema artifacts; retention is contract-owned rather than unresolved review-required debt.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 3,
+        "occurrences": [
+          {
+            "block_path": "$defs.FieldValidationConfig.properties",
+            "path": "configs/_schema/composite.json",
+            "surface_kind": "other_config"
+          },
+          {
+            "block_path": "$defs.FieldValidationConfig.properties",
+            "path": "configs/_schema/dq.json",
+            "surface_kind": "other_config"
+          },
+          {
+            "block_path": "$defs.FieldValidationConfig.properties",
+            "path": "configs/_schema/pipeline.json",
+            "surface_kind": "other_config"
+          }
+        ],
+        "serialized_bytes": 1725,
+        "surface_kind_counts": {
+          "other_config": 3
+        }
+      },
+      {
+        "block_path": "$defs.CrossFieldValidationConfig",
+        "fingerprint": "d3ef6ba00ead",
+        "governance": {
+          "decision": "retain_generated_schema_contract",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-contracts",
+          "rationale": "Cross-field validation definitions are generated schema contract mirrors and remain explicit contract-owned duplication.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 3,
+        "occurrences": [
+          {
+            "block_path": "$defs.CrossFieldValidationConfig",
+            "path": "configs/_schema/composite.json",
+            "surface_kind": "other_config"
+          },
+          {
+            "block_path": "$defs.CrossFieldValidationConfig",
+            "path": "configs/_schema/dq.json",
+            "surface_kind": "other_config"
+          },
+          {
+            "block_path": "$defs.CrossFieldValidationConfig",
+            "path": "configs/_schema/pipeline.json",
+            "surface_kind": "other_config"
+          }
+        ],
+        "serialized_bytes": 1391,
+        "surface_kind_counts": {
+          "other_config": 3
+        }
+      },
+      {
+        "block_path": "$defs.CrossFieldValidationConfig.properties",
+        "fingerprint": "5b766ba073cd",
+        "governance": {
+          "decision": "retain_generated_schema_contract",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-contracts",
+          "rationale": "Cross-field validation definitions are generated schema contract mirrors and remain explicit contract-owned duplication.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 3,
+        "occurrences": [
+          {
+            "block_path": "$defs.CrossFieldValidationConfig.properties",
+            "path": "configs/_schema/composite.json",
+            "surface_kind": "other_config"
+          },
+          {
+            "block_path": "$defs.CrossFieldValidationConfig.properties",
+            "path": "configs/_schema/dq.json",
+            "surface_kind": "other_config"
+          },
+          {
+            "block_path": "$defs.CrossFieldValidationConfig.properties",
+            "path": "configs/_schema/pipeline.json",
+            "surface_kind": "other_config"
+          }
+        ],
+        "serialized_bytes": 1208,
+        "surface_kind_counts": {
+          "other_config": 3
+        }
+      },
+      {
+        "block_path": "pipeline.sink.gold",
+        "fingerprint": "224fb15fbaa3",
+        "governance": {
+          "decision": "retain_shared_entity_gold_sink_policy",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-config",
+          "rationale": "Gold sink settings are shared intentionally across matching entity configs to preserve deterministic sink layout policy.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 3,
+        "occurrences": [
+          {
+            "block_path": "pipeline.sink.gold",
+            "path": "configs/entities/chembl/assay.yaml",
+            "surface_kind": "entity_config"
+          },
+          {
+            "block_path": "pipeline.sink.gold",
+            "path": "configs/entities/chembl/publication.yaml",
+            "surface_kind": "entity_config"
+          },
+          {
+            "block_path": "pipeline.sink.gold",
+            "path": "configs/entities/chembl/target.yaml",
+            "surface_kind": "entity_config"
+          }
+        ],
+        "serialized_bytes": 205,
+        "surface_kind_counts": {
+          "entity_config": 3
+        }
+      },
+      {
+        "block_path": "$defs.GoldFiltersConfig.properties",
+        "fingerprint": "ecd4f7b37f6e",
+        "governance": {
+          "decision": "retain_generated_gold_filter_schema_contract",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-contracts",
+          "rationale": "Gold filter schema properties are generated contract surfaces and stay contract-owned until the generated definitions collapse.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 2,
+        "occurrences": [
+          {
+            "block_path": "$defs.GoldFiltersConfig.properties",
+            "path": "configs/_schema/pipeline.json",
+            "surface_kind": "other_config"
+          },
+          {
+            "block_path": "$defs.SilverFiltersConfig.properties",
+            "path": "configs/_schema/pipeline.json",
+            "surface_kind": "other_config"
+          }
+        ],
+        "serialized_bytes": 1037,
+        "surface_kind_counts": {
+          "other_config": 2
+        }
+      },
+      {
+        "block_path": "pipelines.chembl_cell_line.shadow_analysis",
+        "fingerprint": "5978e7a685a1",
+        "governance": {
+          "decision": "retain_shared_quality_shadow_analysis_policy",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-dq",
+          "rationale": "Quality-registry shadow-analysis blocks intentionally share provider-family boundary policy; retained duplication stays visible in the config backlog and must not grow without review.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 2,
+        "occurrences": [
+          {
+            "block_path": "pipelines.chembl_cell_line.shadow_analysis",
+            "path": "configs/quality/silver_filter_boundary_inventory.yaml",
+            "surface_kind": "quality_registry"
+          },
+          {
+            "block_path": "pipelines.chembl_tissue.shadow_analysis",
+            "path": "configs/quality/silver_filter_boundary_inventory.yaml",
+            "surface_kind": "quality_registry"
+          }
+        ],
+        "serialized_bytes": 1009,
+        "surface_kind_counts": {
+          "quality_registry": 2
+        }
+      },
+      {
+        "block_path": "$defs.ConditionalValidationConfig",
+        "fingerprint": "5abe5348de02",
+        "governance": {
+          "decision": "retain_generated_schema_contract",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-contracts",
+          "rationale": "Conditional validation definitions are generated schema contract mirrors and remain explicit contract-owned duplication.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 2,
+        "occurrences": [
+          {
+            "block_path": "$defs.ConditionalValidationConfig",
+            "path": "configs/_schema/dq.json",
+            "surface_kind": "other_config"
+          },
+          {
+            "block_path": "$defs.ConditionalValidationConfig",
+            "path": "configs/_schema/pipeline.json",
+            "surface_kind": "other_config"
+          }
+        ],
+        "serialized_bytes": 920,
+        "surface_kind_counts": {
+          "other_config": 2
+        }
+      },
+      {
+        "block_path": "$defs.DQReportYamlConfig",
+        "fingerprint": "100ac5201f77",
+        "governance": {
+          "decision": "retain_generated_dq_schema_contract",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-dq",
+          "rationale": "DQ report YAML schema definitions are duplicated by generated contract artifacts and remain DQ-owned until schema generation is consolidated.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 2,
+        "occurrences": [
+          {
+            "block_path": "$defs.DQReportYamlConfig",
+            "path": "configs/_schema/dq.json",
+            "surface_kind": "other_config"
+          },
+          {
+            "block_path": "$defs.DQReportYamlConfig",
+            "path": "configs/_schema/pipeline.json",
+            "surface_kind": "other_config"
+          }
+        ],
+        "serialized_bytes": 805,
+        "surface_kind_counts": {
+          "other_config": 2
+        }
+      },
+      {
+        "block_path": "$defs.ConditionalValidationConfig.properties",
+        "fingerprint": "4e5f43f73bcd",
+        "governance": {
+          "decision": "retain_generated_schema_contract",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-contracts",
+          "rationale": "Conditional validation definitions are generated schema contract mirrors and remain explicit contract-owned duplication.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 2,
+        "occurrences": [
+          {
+            "block_path": "$defs.ConditionalValidationConfig.properties",
+            "path": "configs/_schema/dq.json",
+            "surface_kind": "other_config"
+          },
+          {
+            "block_path": "$defs.ConditionalValidationConfig.properties",
+            "path": "configs/_schema/pipeline.json",
+            "surface_kind": "other_config"
+          }
+        ],
+        "serialized_bytes": 721,
+        "surface_kind_counts": {
+          "other_config": 2
+        }
+      },
+      {
+        "block_path": "$defs.DQReportYamlConfig.properties",
+        "fingerprint": "872e4e7e6fbc",
+        "governance": {
+          "decision": "retain_generated_dq_schema_contract",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-dq",
+          "rationale": "DQ report YAML schema definitions are duplicated by generated contract artifacts and remain DQ-owned until schema generation is consolidated.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 2,
+        "occurrences": [
+          {
+            "block_path": "$defs.DQReportYamlConfig.properties",
+            "path": "configs/_schema/dq.json",
+            "surface_kind": "other_config"
+          },
+          {
+            "block_path": "$defs.DQReportYamlConfig.properties",
+            "path": "configs/_schema/pipeline.json",
+            "surface_kind": "other_config"
+          }
+        ],
+        "serialized_bytes": 682,
+        "surface_kind_counts": {
+          "other_config": 2
+        }
+      },
+      {
+        "block_path": "$defs.ColumnGroupSchema",
+        "fingerprint": "c2443d564c4f",
+        "governance": {
+          "decision": "retain_generated_schema_contract",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-contracts",
+          "rationale": "Column-group schema definitions are generated contract mirrors; the backlog keeps them visible without leaving them review-free.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 2,
+        "occurrences": [
+          {
+            "block_path": "$defs.ColumnGroupSchema",
+            "path": "configs/_schema/composite.json",
+            "surface_kind": "other_config"
+          },
+          {
+            "block_path": "$defs.ColumnGroupSchema",
+            "path": "configs/_schema/pipeline.json",
+            "surface_kind": "other_config"
+          }
+        ],
+        "serialized_bytes": 681,
+        "surface_kind_counts": {
+          "other_config": 2
+        }
+      },
+      {
+        "block_path": "$defs.ColumnGroupSchema.properties",
+        "fingerprint": "010edc828eaf",
+        "governance": {
+          "decision": "retain_generated_schema_contract",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-contracts",
+          "rationale": "Column-group schema definitions are generated contract mirrors; the backlog keeps them visible without leaving them review-free.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 2,
+        "occurrences": [
+          {
+            "block_path": "$defs.ColumnGroupSchema.properties",
+            "path": "configs/_schema/composite.json",
+            "surface_kind": "other_config"
+          },
+          {
+            "block_path": "$defs.ColumnGroupSchema.properties",
+            "path": "configs/_schema/pipeline.json",
+            "surface_kind": "other_config"
+          }
+        ],
+        "serialized_bytes": 529,
+        "surface_kind_counts": {
+          "other_config": 2
+        }
+      },
+      {
+        "block_path": "entries.scripts/engineering/qa/report_domain_io_taint_inventory.py",
+        "fingerprint": "4820989d76df",
+        "governance": {
+          "decision": "retain_shared_lifecycle_registry_entry",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-architecture",
+          "rationale": "The duplicated script-inventory lifecycle row is a quality registry mirror and stays explicitly architecture-owned.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 2,
+        "occurrences": [
+          {
+            "block_path": "entries.scripts/engineering/qa/report_domain_io_taint_inventory.py",
+            "path": "configs/quality/scripts_lifecycle_registry.json",
+            "surface_kind": "quality_registry"
+          },
+          {
+            "block_path": "entries.scripts/engineering/qa/report_port_adapter_factory_coverage.py",
+            "path": "configs/quality/scripts_lifecycle_registry.json",
+            "surface_kind": "quality_registry"
+          }
+        ],
+        "serialized_bytes": 306,
+        "surface_kind_counts": {
+          "quality_registry": 2
+        }
+      },
+      {
+        "block_path": "aliases.S7-architecture-fast-boundary",
+        "fingerprint": "1bb34d738e78",
+        "governance": {
+          "decision": "retain_shared_test_shard_alias",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-test-platform",
+          "rationale": "The S7 architecture shard alias is intentionally mirrored between quality registries so local and CI shard routing stay deterministic.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 2,
+        "occurrences": [
+          {
+            "block_path": "aliases.S7-architecture-fast-boundary",
+            "path": "configs/quality/pytest_shards.yaml",
+            "surface_kind": "quality_registry"
+          },
+          {
+            "block_path": "aliases.S7-crosscutting-architecture",
+            "path": "configs/quality/pytest_shards.yaml",
+            "surface_kind": "quality_registry"
+          }
+        ],
+        "serialized_bytes": 222,
+        "surface_kind_counts": {
+          "quality_registry": 2
+        }
+      },
+      {
+        "block_path": "aliases.S7-architecture-fast-boundary.expands_to",
+        "fingerprint": "1d3179719323",
+        "governance": {
+          "decision": "retain_shared_test_shard_alias",
+          "linked_issue": "#5568",
+          "owner": "@bioetl-test-platform",
+          "rationale": "The S7 architecture shard alias is intentionally mirrored between quality registries so local and CI shard routing stay deterministic.",
+          "review_date": "2026-09-30"
+        },
+        "occurrence_count": 2,
+        "occurrences": [
+          {
+            "block_path": "aliases.S7-architecture-fast-boundary.expands_to",
+            "path": "configs/quality/pytest_shards.yaml",
+            "surface_kind": "quality_registry"
+          },
+          {
+            "block_path": "aliases.S7-crosscutting-architecture.expands_to",
+            "path": "configs/quality/pytest_shards.yaml",
+            "surface_kind": "quality_registry"
+          }
+        ],
+        "serialized_bytes": 206,
+        "surface_kind_counts": {
+          "quality_registry": 2
+        }
+      }
+    ],
+    "notes": [
+      "This audit covers structured config/contract/registry surfaces under configs/** that JSCPD intentionally ignores.",
+      "Clusters report exact canonical JSON subtree duplicates only; near-duplicate prose and comment drift stay out of scope.",
+      "The audit is report-only and exists to make YAML/JSON governance duplication reviewable in CI-visible artifacts.",
+      "Every reported duplicate cluster carries owner/rationale metadata so retained duplication is explicit debt rather than implicit residue."
+    ],
+    "scope": {
+      "file_suffixes": [
+        ".yaml",
+        ".yml",
+        ".json"
+      ],
+      "files_scanned": 210,
+      "ignored_by_jscpd_patterns": [
+        "**/configs/**",
+        "**/*.yaml",
+        "**/*.yml",
+        "**/*.json"
+      ],
+      "max_traversal_depth": 2,
+      "root": "configs",
+      "structured_block_min_bytes": 200
     },
-    {
-      "name": "composition_bootstrap_runtime",
-      "owner": "@bioetl-platform",
-      "linked_rf": "RF-023",
-      "ratchet_stage": "active",
-      "ratchet_scope": "duplication-non-growth-plus-bounded-growth",
-      "path_prefixes": [
-        "src/bioetl/composition/bootstrap/runtime/"
-      ],
-      "duplication_clusters": 0,
-      "files": 49,
-      "total_loc": 6010,
-      "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.309,
-      "max_internal_fan_in": 2,
-      "max_internal_fan_in_module": "bioetl.composition.bootstrap.runtime.tracing_bootstrap",
-      "bounded_growth_budgets": {
-        "files_ge_250_loc": 0,
-        "max_internal_fan_in": 3
-      },
-      "budget_warnings": [],
-      "budget_review_notes": []
-    },
-    {
-      "name": "composition_factories_pipeline",
-      "owner": "@bioetl-platform",
-      "linked_rf": "RF-023",
-      "ratchet_stage": "active",
-      "ratchet_scope": "duplication-non-growth-plus-bounded-growth",
-      "path_prefixes": [
-        "src/bioetl/composition/factories/pipeline/"
-      ],
-      "duplication_clusters": 0,
-      "files": 35,
-      "total_loc": 4647,
-      "files_ge_250_loc": 2,
-      "helper_function_ratio": 0.417,
-      "max_internal_fan_in": 2,
-      "max_internal_fan_in_module": "bioetl.composition.factories.pipeline.transformer_builder",
-      "bounded_growth_budgets": {
-        "files_ge_250_loc": 3,
-        "max_internal_fan_in": 3
-      },
-      "budget_warnings": [],
-      "budget_review_notes": []
-    },
-    {
-      "name": "application_services_control_plane",
-      "owner": "@bioetl-platform",
-      "linked_rf": "RF-023",
-      "ratchet_stage": "reviewed-baseline",
-      "ratchet_scope": "duplication-report-plus-bounded-growth",
-      "path_prefixes": [
-        "src/bioetl/application/services/control_plane/"
-      ],
-      "duplication_clusters": 0,
-      "files": 124,
-      "total_loc": 15177,
-      "files_ge_250_loc": 11,
-      "helper_function_ratio": 0.451,
-      "max_internal_fan_in": 3,
-      "max_internal_fan_in_module": "bioetl.application.services.control_plane.workflow.manifest_models",
-      "bounded_growth_budgets": {
-        "files_ge_250_loc": 16,
-        "max_internal_fan_in": 4
-      },
-      "budget_warnings": [],
-      "budget_review_notes": []
-    },
-    {
-      "name": "composition_runtime_builders",
-      "owner": "@bioetl-platform",
-      "linked_rf": "RF-023",
-      "ratchet_stage": "reviewed-baseline",
-      "ratchet_scope": "duplication-report-plus-bounded-growth",
-      "path_prefixes": [
-        "src/bioetl/composition/runtime_builders/"
-      ],
-      "duplication_clusters": 0,
-      "files": 55,
-      "total_loc": 6744,
-      "files_ge_250_loc": 0,
-      "helper_function_ratio": 0.359,
-      "max_internal_fan_in": 3,
-      "max_internal_fan_in_module": "bioetl.composition.runtime_builders.run_manifest_support",
-      "bounded_growth_budgets": {
-        "files_ge_250_loc": 3,
-        "max_internal_fan_in": 5
-      },
-      "budget_warnings": [],
-      "budget_review_notes": []
+    "summary": {
+      "affected_file_count": 14,
+      "duplicate_cluster_count": 21,
+      "duplicate_occurrence_count": 60,
+      "reported_cluster_count": 21
     }
-  ]
+  },
+  "entity_effective": {
+    "actionable_partial_key_count": 0,
+    "categories": {},
+    "config_count": 22,
+    "inconsistent_parameter_count": 0,
+    "partial_key_count": 0,
+    "presence_histogram": {},
+    "raw_inconsistent_parameter_count": 0,
+    "sanctioned_partial_parameter_count": 0,
+    "unique_parameter_count": 262
+  },
+  "families": {
+    "composite_runtime": {
+      "config_count": 5,
+      "inconsistent_parameter_count": 0,
+      "raw_inconsistent_parameter_count": 0,
+      "sanctioned_partial_parameter_count": 0,
+      "unique_parameter_count": 157
+    },
+    "entity_effective": {
+      "config_count": 22,
+      "inconsistent_parameter_count": 0,
+      "raw_inconsistent_parameter_count": 0,
+      "sanctioned_partial_parameter_count": 0,
+      "unique_parameter_count": 262
+    }
+  },
+  "notes": [
+    "actionable_partial_key_count excludes keys under INTENTIONAL_PREFIXES.",
+    "hash_policy is common across all 22 entity configs after Stream B design review.",
+    "composite_runtime family is at zero inconsistent keys as of Stream B plateau.",
+    "Residual entity drift is limited to intentional entity-specific filters, metadata policy blocks, schema field-alias surfaces, and pipeline overrides."
+  ],
+  "snapshot_date": "2026-07-17"
 }
