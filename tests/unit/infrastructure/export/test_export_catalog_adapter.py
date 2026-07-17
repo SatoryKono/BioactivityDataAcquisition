@@ -29,7 +29,10 @@ def test_list_tables_returns_discovered_delta_tables(
     tables = adapter.list_tables(base_path=base_path, layer="silver")
 
     assert tables == [
-        ("chembl.activity", base_path / "chembl" / "default" / "chembl.activity")
+        (
+            "chembl.activity",
+            str(base_path / "chembl" / "default" / "chembl.activity"),
+        )
     ]
 
 
@@ -53,7 +56,7 @@ def test_resolve_table_path_returns_matching_table(
         layer="gold",
     )
 
-    assert resolved == table_path.resolve()
+    assert resolved == str(table_path.resolve())
 
 
 def test_resolve_table_path_raises_for_missing_base(
