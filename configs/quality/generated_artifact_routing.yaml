@@ -576,6 +576,15 @@ routes:
       - reports/observability/grafana/live-panel-audit.json
     notes: Live datasource/frame audit output stays under reports/observability/grafana.
 
+  - id: grafana-dashboard-release-gate-report
+    generator: scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py
+    output_kind: working_report
+    commit_policy: working_output
+    outputs:
+      - reports/observability/grafana/dashboard-release-gates.json
+    notes: Occurrence-bound semantic/render release receipt stays a local or CI
+      working artifact and is uploaded by the host-only release workflow.
+
   - id: observability-runtime-cardinality-evidence
     generator: scripts/engineering/qa/report_observability_metric_inventory.py
     output_kind: working_report
