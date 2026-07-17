@@ -646,7 +646,10 @@ def test_playwright_screenshot_script_uses_multiple_panel_readiness_selectors() 
     assert "await page.close();" in script
     assert "GRAFANA_SCREENSHOT_EXPAND_COLLAPSED_ROWS" in script
     assert "--expand-collapsed-rows" in script
-    assert "const networkIdleTimeoutMs = Math.max(3000, Math.min(CONFIG.timeoutMs, 15000))" in script
+    assert (
+        "const networkIdleTimeoutMs = Math.max(3000, Math.min(CONFIG.timeoutMs, 15000))"
+        in script
+    )
     assert "requiredNonRowPanels" in script
     assert "validateDashboardTerminalStates" in script
     assert "terminalStateValidation" in script
@@ -1096,6 +1099,7 @@ def test_live_audit_treats_missing_freshness_as_explicit_telemetry_gap(
 
 def test_live_audit_default_timeout_covers_bounded_loki_range_queries() -> None:
     assert audit_subject.DEFAULT_REQUEST_TIMEOUT_SECONDS == 15.0
+    assert audit_subject.MAX_LOKI_RANGE_HOURS == 1
 
 
 def test_live_audit_treats_checkpoint_freshness_unknown_as_valid_unknown_state(
@@ -1155,6 +1159,74 @@ def test_live_audit_classifies_http_zero_state_and_nonzero() -> None:
         == "zero_state_unknown_denominator"
     )
     assert audit_subject._classify_http_payload(nonzero_payload)[0] == "nonzero_result"
+
+
+def test_semantic_gate_maps_unknown_denominator_to_review_required(
+    monkeypatch: Any,
+) -> None:
+    spec = audit_subject.PanelAuditSpec(
+        dashboard_uid="bioetl-silver-reject-explorer",
+        panel_id=3,
+        title="Track Reject Rate vs Bronze",
+        source_kind="http",
+        semantic_kind="http_summary",
+        target_ref_id="A",
+    )
+    result = audit_subject.AuditResult(
+        dashboard_uid=spec.dashboard_uid,
+        panel_id=spec.panel_id,
+        title=spec.title,
+        source_kind=spec.source_kind,
+        semantic_kind=spec.semantic_kind,
+        status="ok",
+        classification="zero_state_unknown_denominator",
+        detail="fixture",
+        query_preview="fixture",
+        target_ref_id=spec.target_ref_id,
+    )
+    monkeypatch.setattr(audit_subject, "effective_panel_specs", lambda: (spec,))
+
+    evidence = audit_subject.semantic_gate_evidence([result])
+
+    assert evidence["status"] == "review_required"
+    assert evidence["review_count"] == 1
+    assert evidence["panel_outcomes"][0]["canonical_classification"] == (
+        "unknown_result"
+    )
+    assert evidence["panel_outcomes"][0]["decision"] == "review"
+
+
+def test_semantic_gate_treats_unregistered_classification_as_review_required(
+    monkeypatch: Any,
+) -> None:
+    spec = audit_subject.PanelAuditSpec(
+        dashboard_uid="bioetl-runtime",
+        panel_id=250,
+        title="Inspect Warning Logs",
+        source_kind="loki",
+        semantic_kind="loki_query",
+        target_ref_id="A",
+    )
+    result = audit_subject.AuditResult(
+        dashboard_uid=spec.dashboard_uid,
+        panel_id=spec.panel_id,
+        title=spec.title,
+        source_kind=spec.source_kind,
+        semantic_kind=spec.semantic_kind,
+        status="ok",
+        classification="unregistered_fixture_state",
+        detail="fixture",
+        query_preview="fixture",
+        target_ref_id=spec.target_ref_id,
+    )
+    monkeypatch.setattr(audit_subject, "effective_panel_specs", lambda: (spec,))
+
+    evidence = audit_subject.semantic_gate_evidence([result])
+
+    assert evidence["status"] == "review_required"
+    assert evidence["review_count"] == 1
+    assert evidence["unregistered_classification_policy"] == "review_required"
+    assert evidence["panel_outcomes"][0]["decision"] == "review"
 
 
 def test_live_audit_classifies_http_freshness_zero_and_empty() -> None:
@@ -1369,14 +1441,22 @@ def test_live_audit_loki_panel_uses_query_range(monkeypatch: Any) -> None:
         target_ref_id="A",
         required=False,
     )
-    panel = {"targets": [{"refId": "A", "expr": '{job="bioetl"}'}]}
+    panel = {
+        "targets": [
+            {
+                "refId": "A",
+                "expr": 'count_over_time({job="bioetl"}[$__range])',
+            }
+        ]
+    }
     captured: dict[str, str] = {}
 
     def fake_fetch_json(url: str, *, timeout_seconds: float) -> object:
-        assert timeout_seconds == config.request_timeout_seconds
+        assert 0 < timeout_seconds <= config.request_timeout_seconds
         captured["url"] = url
         return {"status": "success", "data": {"result": []}}
 
+    monkeypatch.setattr(audit_subject, "_fetch_text", lambda *_args, **_kwargs: "ready")
     monkeypatch.setattr(audit_subject, "_fetch_json", fake_fetch_json)
 
     result = audit_subject._audit_loki_panel(spec, panel, config)
@@ -1385,9 +1465,13 @@ def test_live_audit_loki_panel_uses_query_range(monkeypatch: Any) -> None:
     assert "start=" in captured["url"]
     assert "end=" in captured["url"]
     assert "limit=100" in captured["url"]
+    query = parse_qs(urlparse(captured["url"]).query)
+    assert query["query"] == ['count_over_time({job="bioetl"}[1h])']
+    assert int(query["end"][0]) - int(query["start"][0]) == 3_600_000_000_000
     assert result.status == "ok"
     assert result.classification == "expected_empty"
     assert "endpoint=query_range" in result.detail
+    assert "range_hours=1" in result.detail
 
 
 def test_live_audit_effective_specs_include_generated_loki_and_tempo_coverage() -> None:
