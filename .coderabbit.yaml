@@ -13,16 +13,20 @@ tone_instructions: "Be concise, neutral, and evidence-based. Prioritize correctn
 reviews:
   # Enable high-level summary
   high_level_summary: true
-  
+
   # Show summary in walkthrough
   high_level_summary_in_walkthrough: true
-  
+
   # Review profile
   profile: "assertive"
-  
+
+  # Review every changed repository path unless a future rule excludes it.
+  path_filters:
+    - "**"
+
   # Request changes workflow
   request_changes_workflow: false
-  
+
   # Auto review settings
   auto_review:
     enabled: true
@@ -71,11 +75,14 @@ reviews:
 
   # Suggested reviewers instructions (disabled until demo handles are replaced)
   suggested_reviewers_instructions:
-    - handle: "security-team"
+    - reviewers:
+        - "security-team"
       instructions: "Request review for changes to auth, access control, secrets, cryptography, network exposure, or sensitive data."
-    - handle: "data-platform"
+    - reviewers:
+        - "data-platform"
       instructions: "Request review for migrations, persisted formats, ETL contracts, lineage, or idempotency changes."
-    - handle: "api-owners"
+    - reviewers:
+        - "api-owners"
       instructions: "Request review for public API, CLI, events, versioned schemas, or config format changes."
 
   # Path-based review instructions
