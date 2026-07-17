@@ -111,8 +111,8 @@ ______________________________________________________________________
 > checks and then expands coverage from shipped dashboard JSON so every
 > executable Prometheus, HTTP, Loki, and Tempo handoff target gets an evidence
 > row or an explicit blocked/expected-empty classification.
-> Its governed total Loki budget is `15s`, including the `/ready` probe. Loki
-> lookback is bounded to at most one hour: Runtime panels `#250` and `#251`
+> It polls Loki `/ready` within a governed total `15s` readiness/query budget.
+> Loki lookback is bounded to at most one hour: Runtime panels `#250` and `#251`
 > use `query_range`, while instant aggregation panel `#257` uses `/query`.
 > Sparse logs are not treated as a datasource outage, but all three panels are
 > required semantic evidence and backend unavailability therefore blocks the

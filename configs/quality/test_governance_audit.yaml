@@ -432,7 +432,6 @@ rf_009_closeout:
     markerless_test_functions: 0
     uuid4_call_sites: 0
     date_today_call_sites: 0
-  target_line: 422
 test_audit_closeout_2026_06_19:
   decision: closeable
   closed_on: '2026-06-19'
@@ -796,11 +795,11 @@ oversized_test_module_inventory:
     source: tests/integration/test_grafana_config.py
     source_lines_after_split: 1561
     extracted_surface: tests/integration/test_grafana_surface_contracts.py
-    extracted_surface_lines: 712
+    extracted_surface_lines: 711
     owner: observability-dashboards
   - issue_ref: '#4505'
     source: tests/integration/test_grafana_surface_contracts.py
-    source_lines_after_split: 712
+    source_lines_after_split: 711
     extracted_surface: tests/integration/test_grafana_technical_policy.py
     extracted_surface_lines: 52
     owner: observability-dashboards

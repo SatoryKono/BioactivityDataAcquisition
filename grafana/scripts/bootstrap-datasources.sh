@@ -19,26 +19,51 @@ rm -f "${TARGET_DIR}"/*.yml
 cp "${CORE_DIR}"/*.yml "${TARGET_DIR}/"
 
 probe_ready() {
-  wget --quiet --tries=1 --timeout=2 -O /dev/null "$1"
+  probe_timeout=2
+  if [ "$2" -lt "${probe_timeout}" ]; then
+    probe_timeout="$2"
+  fi
+  wget --quiet --tries=1 --timeout="${probe_timeout}" -O /dev/null "$1"
+}
+
+remaining_auto_wait_seconds() {
+  now="$(date +%s)"
+  remaining=$((deadline - now))
+  if [ "${remaining}" -gt 0 ]; then
+    printf '%s\n' "${remaining}"
+  else
+    printf '%s\n' 0
+  fi
 }
 
 wait_for_auto_tracing_ready() {
-  elapsed=0
+  deadline=$(($(date +%s) + AUTO_WAIT_SECONDS))
 
-  while [ "${elapsed}" -lt "${AUTO_WAIT_SECONDS}" ]; do
-    if [ "${ENABLE_LOKI}" != "true" ] && probe_ready "http://loki:3100/ready" 2>/dev/null; then
+  while :; do
+    remaining="$(remaining_auto_wait_seconds)"
+    [ "${remaining}" -gt 0 ] || break
+    if [ "${ENABLE_LOKI}" != "true" ] && probe_ready "http://loki:3100/ready" "${remaining}" 2>/dev/null; then
       ENABLE_LOKI="true"
       echo "[bioetl-grafana] detected Loki ready"
     fi
-    if [ "${ENABLE_TEMPO}" != "true" ] && probe_ready "http://tempo:3200/ready" 2>/dev/null; then
+
+    remaining="$(remaining_auto_wait_seconds)"
+    [ "${remaining}" -gt 0 ] || break
+    if [ "${ENABLE_TEMPO}" != "true" ] && probe_ready "http://tempo:3200/ready" "${remaining}" 2>/dev/null; then
       ENABLE_TEMPO="true"
       echo "[bioetl-grafana] detected Tempo ready"
     fi
     if [ "${ENABLE_LOKI}" = "true" ] && [ "${ENABLE_TEMPO}" = "true" ]; then
       break
     fi
-    sleep "${AUTO_POLL_SECONDS}"
-    elapsed=$((elapsed + AUTO_POLL_SECONDS))
+
+    remaining="$(remaining_auto_wait_seconds)"
+    [ "${remaining}" -gt 0 ] || break
+    sleep_seconds="${AUTO_POLL_SECONDS}"
+    if [ "${remaining}" -lt "${sleep_seconds}" ]; then
+      sleep_seconds="${remaining}"
+    fi
+    sleep "${sleep_seconds}"
   done
 }
 

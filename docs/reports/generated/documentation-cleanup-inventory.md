@@ -12,7 +12,7 @@
 | Ignored local docs/reports files | 1196 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
-| Generated routes | 62 |
+| Generated routes | 63 |
 
 ## Tracking State
 
@@ -388,6 +388,7 @@
 | file-merger-working-reports | `src/tools/file_merger.py` | working_output |
 | flaky-test-burndown-review-quality-baseline | `scripts/engineering/qa/report_flaky_test_burndown_review.py` | tracked_quality_baseline |
 | full-app-duplication-baseline-quality-report | `scripts/engineering/qa/report_duplication_baseline.py` | tracked_quality_baseline |
+| grafana-dashboard-release-gate-report | `scripts/ops/observability/grafana/run_grafana_dashboard_audit_cycle.py` | working_output |
 | grafana-dashboard-screenshot-report | `scripts/ops/observability/grafana/rerender_grafana_screenshots.py` | working_output |
 | grafana-live-panel-audit-report | `scripts/ops/observability/grafana/audit_live_grafana_panels.py` | working_output |
 | hotspot-family-baseline-quality-report | `scripts/engineering/qa/report_hotspot_family_baseline.py` | tracked_quality_baseline |

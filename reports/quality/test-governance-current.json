@@ -107,7 +107,7 @@
     },
     {
       "category": "architecture_helper_guard",
-      "line": "1116",
+      "line": "1110",
       "path": "tests/architecture/test_quality_debt_scorecard.py",
       "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
       "test_name": "test_growth_rollout_warns_registry_section_before_cutoff"
@@ -759,7 +759,7 @@
     "tests/architecture/test_port_contracts_hypothesis.py:562",
     "tests/architecture/test_port_contracts_hypothesis.py:596",
     "tests/architecture/test_port_contracts_resilience_concurrency.py:183",
-    "tests/architecture/test_quality_debt_scorecard.py:1116",
+    "tests/architecture/test_quality_debt_scorecard.py:1110",
     "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:74",
     "tests/integration/infrastructure/storage/test_delta_reader.py:576",
     "tests/unit/application/core/test_batch_tracing.py:110",
@@ -1183,7 +1183,7 @@
         "tests/architecture/test_test_governance_audit.py:345",
         "tests/architecture/test_test_governance_audit.py:385",
         "tests/architecture/test_test_governance_audit.py:406",
-        "tests/architecture/test_test_governance_audit.py:422"
+        "tests/architecture/test_test_governance_audit.py:421"
       ],
       "assertless_tests": [],
       "intentional_no_exception_tests": 0,
@@ -1345,7 +1345,7 @@
       },
       {
         "category": "architecture_helper_guard",
-        "line": "1116",
+        "line": "1110",
         "path": "tests/architecture/test_quality_debt_scorecard.py",
         "rationale": "architecture policy tests whose assertions are delegated to shared guard helpers or pytest.fail paths",
         "test_name": "test_growth_rollout_warns_registry_section_before_cutoff"
@@ -1997,7 +1997,7 @@
       "tests/architecture/test_port_contracts_hypothesis.py:562",
       "tests/architecture/test_port_contracts_hypothesis.py:596",
       "tests/architecture/test_port_contracts_resilience_concurrency.py:183",
-      "tests/architecture/test_quality_debt_scorecard.py:1116",
+      "tests/architecture/test_quality_debt_scorecard.py:1110",
       "tests/integration/infrastructure/storage/test_bronze_writer_side_effects_mixin.py:74",
       "tests/integration/infrastructure/storage/test_delta_reader.py:576",
       "tests/unit/application/core/test_batch_tracing.py:110",
@@ -2118,7 +2118,7 @@
           "tests/architecture/test_test_governance_audit.py:345",
           "tests/architecture/test_test_governance_audit.py:385",
           "tests/architecture/test_test_governance_audit.py:406",
-          "tests/architecture/test_test_governance_audit.py:422"
+          "tests/architecture/test_test_governance_audit.py:421"
         ],
         "assertless_tests": [],
         "intentional_no_exception_tests": 0,
@@ -2220,11 +2220,11 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2013,
-    "total_test_functions": 22503,
+    "total_test_functions": 22502,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "f844344d1ca101f5eec426182f99a87476eb6a06ce002e43eaa4adc4546033bc",
+  "source_tree_sha256": "c9a32d9792a9170a0d7b8bdcbff0f2743b8cd95e6d67eb654900617866d7c6f7",
   "summary": {
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
@@ -2286,6 +2286,6 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2013,
-  "total_test_functions": 22503,
+  "total_test_functions": 22502,
   "uuid4_call_sites": 0
 }
