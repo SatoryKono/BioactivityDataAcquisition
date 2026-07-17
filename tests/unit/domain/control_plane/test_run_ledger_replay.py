@@ -347,6 +347,34 @@ class TestRunLedgerReplayProjection:
             "records_merged": 10,
         }
 
+    @pytest.mark.parametrize(
+        ("raw_value", "expected"),
+        [(1, 1), (1.0, 1), ("1", 1), ("not-an-integer", 0)],
+    )
+    def test_replays_integer_fields_without_stringifying_json_numbers(
+        self,
+        raw_value: object,
+        expected: int,
+    ) -> None:
+        projection = project_run_ledger_replay(
+            [
+                _entry(
+                    entry_id="entry-dependency",
+                    event_type=COMPOSITE_DEPENDENCY_COMPLETED_EVENT,
+                    occurred_at=datetime(2024, 6, 1, 9, 0, tzinfo=UTC),
+                    details={
+                        "dependency_name": "chembl_molecule",
+                        "pipeline_name": "chembl_molecule",
+                        "status": "success",
+                        "records_extracted": raw_value,
+                    },
+                )
+            ]
+        )
+
+        result = projection.dependency_results["chembl_molecule"]
+        assert result.records_extracted == expected
+
     def test_projects_input_snapshot_publication_events_deterministically(self) -> None:
         projection = project_run_ledger_replay(
             [

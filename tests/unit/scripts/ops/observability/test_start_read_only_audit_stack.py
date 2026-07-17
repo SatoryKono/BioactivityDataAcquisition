@@ -22,7 +22,7 @@ def _load_subject() -> ModuleType:
 
 
 class _Response:
-    def __init__(self, payload: dict[str, object]) -> None:
+    def __init__(self, payload: object) -> None:
         self.payload = payload
 
     def __enter__(self) -> _Response:
@@ -32,6 +32,8 @@ class _Response:
         return None
 
     def read(self) -> bytes:
+        if isinstance(self.payload, bytes):
+            return self.payload
         return json.dumps(self.payload).encode("utf-8")
 
 
@@ -56,6 +58,7 @@ def test_start_and_verify_routes_grafana_backend_to_requested_root(
     subject = _load_subject()
     data_root = tmp_path / "data"
     log_root = tmp_path / "logs"
+    probe_log_root = tmp_path / "probe-logs"
     data_root.mkdir()
     log_root.mkdir()
     captured: dict[str, object] = {}
@@ -68,8 +71,28 @@ def test_start_and_verify_routes_grafana_backend_to_requested_root(
     def fake_open(url: str, **_kwargs: object) -> _Response:
         if url == subject.READY_URL:
             return _Response({"data_root": str(data_root.resolve())})
-        assert url == subject.CATALOG_URL
-        return _Response({"items": []})
+        if url == subject.CATALOG_URL:
+            return _Response({"items": []})
+        if url == subject.PROMTAIL_READY_URL:
+            return _Response(b"Ready\n")
+        assert url.startswith(subject.LOKI_QUERY_RANGE_URL)
+        return _Response(
+            {
+                "status": "success",
+                "data": {
+                    "result": [
+                        {
+                            "values": [
+                                [
+                                    "1700000000000000000",
+                                    f"{subject.PROMTAIL_SENTINEL_PREFIX}test-success",
+                                ]
+                            ]
+                        }
+                    ]
+                },
+            }
+        )
 
     result = subject.start_and_verify_audit_stack(
         data_root=data_root.resolve(),
@@ -77,6 +100,9 @@ def test_start_and_verify_routes_grafana_backend_to_requested_root(
         timeout_seconds=5.0,
         run=fake_run,
         opener=fake_open,
+        sentinel_id="test-success",
+        wall_time_ns=lambda: 1_700_000_000_000_000_000,
+        probe_log_root=probe_log_root,
     )
 
     assert result.state is subject.AuditBackendState.VALID_EMPTY
@@ -99,6 +125,11 @@ def test_start_and_verify_routes_grafana_backend_to_requested_root(
     assert isinstance(environment, dict)
     assert environment["BIOETL_AUDIT_DATA_ROOT"] == str(data_root.resolve())
     assert environment["BIOETL_AUDIT_LOG_ROOT"] == str(log_root.resolve())
+    assert environment["BIOETL_AUDIT_PROBE_LOG_ROOT"] == str(probe_log_root.resolve())
+    assert (
+        probe_log_root / "bioetl-promtail-audit-sentinel-test-success.log"
+    ).is_file()
+    assert list(log_root.iterdir()) == []
 
 
 def test_start_and_verify_rejects_backend_serving_wrong_root(tmp_path: Path) -> None:
@@ -114,6 +145,7 @@ def test_start_and_verify_rejects_backend_serving_wrong_root(tmp_path: Path) -> 
             opener=lambda *_args, **_kwargs: _Response({"data_root": "/wrong"}),
             monotonic=lambda: next(ticks),
             sleep=lambda _seconds: None,
+            probe_log_root=tmp_path / "probe-logs",
         )
 
 

@@ -1504,6 +1504,16 @@ def _audit_loki_panel(
             timeout_seconds=remaining_timeout,
         )
     except (HTTPError, URLError, OSError, ValueError, json.JSONDecodeError) as exc:
+        latency_seconds = monotonic() - started_at
+        if latency_seconds >= config.request_timeout_seconds:
+            return _loki_timeout_result(
+                spec,
+                config,
+                rendered_expr=rendered_expr,
+                phase="readiness/query",
+                latency_seconds=latency_seconds,
+                last_detail=f"{type(exc).__name__}: {exc}",
+            )
         return AuditResult(
             dashboard_uid=spec.dashboard_uid,
             panel_id=spec.panel_id,

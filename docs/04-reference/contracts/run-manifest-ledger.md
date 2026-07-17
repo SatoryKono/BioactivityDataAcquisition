@@ -179,9 +179,14 @@ Docker. The override requires both selectors through Compose `:?` guards,
 mounts them read-only, points Grafana explicitly at
 `http://quarantine-explorer-audit:8081`, and makes Grafana wait for that backend.
 After startup the launcher probes `/ops/control-plane/ready` and fails unless
-the served `data_root` exactly equals the requested root. It writes no `.env`
-file. `promtail-audit` publishes only the bounded `job=bioetl-audit` Loki label
-and does not add run or manifest IDs as labels.
+the served `data_root` exactly equals the requested root. It also writes one
+unique JSONL sentinel into a launcher-managed OS temporary probe directory,
+mounts that directory separately from the operator's read-only log root, probes
+Promtail's loopback-only `/ready` endpoint, and fails unless that exact sentinel
+becomes visible through Loki within the shared startup timeout. It writes no
+`.env` file and does not modify the requested data or log roots.
+`promtail-audit` publishes only the bounded `job=bioetl-audit` Loki label; the
+sentinel identity remains log content and is never promoted to a label.
 
 ## Lifecycle Management
 

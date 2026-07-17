@@ -374,7 +374,7 @@ def _artifact_descriptor(
     try:
         raw = resolved.read_bytes()
         payload = json.loads(raw)
-    except (OSError, json.JSONDecodeError):
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
         return descriptor
     if not isinstance(payload, dict):
         return descriptor

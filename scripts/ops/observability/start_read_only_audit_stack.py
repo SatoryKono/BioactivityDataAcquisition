@@ -11,8 +11,11 @@ import time
 from collections.abc import Callable, Sequence
 from enum import StrEnum
 from pathlib import Path
+from tempfile import mkdtemp
 from typing import Any, NamedTuple
+from urllib.parse import urlencode
 from urllib.request import urlopen
+from uuid import uuid4
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 BASE_COMPOSE = REPO_ROOT / "docker-compose.monitoring.yml"
@@ -28,6 +31,10 @@ CATALOG_URL = (
     "http://127.0.0.1:18081/ops/control-plane/filter-options"
     "?dimension=pipeline&response_shape=list"
 )
+PROMTAIL_READY_URL = "http://127.0.0.1:19080/ready"
+LOKI_QUERY_RANGE_URL = "http://127.0.0.1:3100/loki/api/v1/query_range"
+PROMTAIL_SENTINEL_PREFIX = "bioetl-promtail-audit-sentinel:"
+PROMTAIL_SENTINEL_LOOKBACK_NS = 300 * 1_000_000_000
 
 
 class AuditBackendState(StrEnum):
@@ -47,6 +54,21 @@ class AuditBackendProbeResult(NamedTuple):
     detail: str
     data_root: str | None = None
     item_count: int | None = None
+
+
+class PromtailAuditState(StrEnum):
+    """Observable state of Promtail readiness and sentinel delivery."""
+
+    DOWN = "down"
+    PENDING = "pending"
+    DELIVERED = "delivered"
+
+
+class PromtailAuditProbeResult(NamedTuple):
+    """One fail-closed Promtail readiness and delivery result."""
+
+    state: PromtailAuditState
+    detail: str
 
 
 def require_absolute_directory(value: str, *, option_name: str) -> Path:
@@ -93,6 +115,96 @@ def _read_json_payload(
     if not isinstance(payload, dict):
         raise ValueError(f"backend returned a non-object payload for {url}")
     return payload
+
+
+def _read_text_payload(
+    url: str,
+    *,
+    opener: Callable[..., Any],
+) -> str:
+    with opener(url, timeout=3.0) as response:
+        return response.read().decode("utf-8").strip()
+
+
+def write_promtail_audit_sentinel(probe_log_root: Path, *, sentinel_id: str) -> str:
+    """Write one unique probe line outside the operator's read-only log root."""
+    probe_log_root.mkdir(parents=True, exist_ok=True)
+    marker = f"{PROMTAIL_SENTINEL_PREFIX}{sentinel_id}"
+    path = probe_log_root / f"bioetl-promtail-audit-sentinel-{sentinel_id}.log"
+    path.write_text(
+        json.dumps(
+            {
+                "event": "bioetl_promtail_audit_sentinel",
+                "level": "info",
+                "message": marker,
+            },
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    return marker
+
+
+def probe_promtail_audit_delivery(
+    *,
+    marker: str,
+    opener: Callable[..., Any] = urlopen,
+    wall_time_ns: Callable[[], int] = time.time_ns,
+) -> PromtailAuditProbeResult:
+    """Require both Promtail readiness and observable Loki sentinel delivery."""
+    try:
+        readiness = _read_text_payload(PROMTAIL_READY_URL, opener=opener)
+    except (OSError, UnicodeError) as exc:
+        return PromtailAuditProbeResult(
+            PromtailAuditState.DOWN,
+            f"Promtail readiness request failed: {type(exc).__name__}: {exc}",
+        )
+    if readiness.lower() != "ready":
+        return PromtailAuditProbeResult(
+            PromtailAuditState.DOWN,
+            f"Promtail readiness returned {readiness[:80]!r}",
+        )
+
+    end_ns = wall_time_ns()
+    query_url = f"{LOKI_QUERY_RANGE_URL}?" + urlencode(
+        {
+            "query": f'{{job="bioetl-audit"}} |= "{marker}"',
+            "start": end_ns - PROMTAIL_SENTINEL_LOOKBACK_NS,
+            "end": end_ns,
+            "limit": 100,
+        }
+    )
+    try:
+        payload = _read_json_payload(query_url, opener=opener)
+    except (OSError, UnicodeError, ValueError, json.JSONDecodeError) as exc:
+        return PromtailAuditProbeResult(
+            PromtailAuditState.DOWN,
+            f"Loki sentinel query failed: {type(exc).__name__}: {exc}",
+        )
+    data = payload.get("data")
+    results = data.get("result") if isinstance(data, dict) else None
+    if payload.get("status") != "success" or not isinstance(results, list):
+        return PromtailAuditProbeResult(
+            PromtailAuditState.DOWN,
+            "Loki sentinel query returned an invalid response shape",
+        )
+    for result in results:
+        values = result.get("values") if isinstance(result, dict) else None
+        if not isinstance(values, list):
+            continue
+        if any(
+            isinstance(value, list) and len(value) >= 2 and marker in str(value[1])
+            for value in values
+        ):
+            return PromtailAuditProbeResult(
+                PromtailAuditState.DELIVERED,
+                "Promtail audit sentinel is visible in Loki",
+            )
+    return PromtailAuditProbeResult(
+        PromtailAuditState.PENDING,
+        "Promtail is ready but the audit sentinel is not yet visible in Loki",
+    )
 
 
 def probe_audit_backend(
@@ -166,11 +278,25 @@ def start_and_verify_audit_stack(
     opener: Callable[..., Any] = urlopen,
     monotonic: Callable[[], float] = time.monotonic,
     sleep: Callable[[float], None] = time.sleep,
+    wall_time_ns: Callable[[], int] = time.time_ns,
+    sentinel_id: str | None = None,
+    probe_log_root: Path | None = None,
 ) -> AuditBackendProbeResult:
-    """Start the audit stack and prove routing plus a valid catalog response."""
+    """Start the audit stack and prove routing, catalog, and log delivery."""
+    managed_probe_root = probe_log_root is None
+    resolved_probe_log_root = (
+        probe_log_root or Path(mkdtemp(prefix="bioetl-promtail-audit-probe-"))
+    ).resolve()
+    if managed_probe_root:
+        resolved_probe_log_root.chmod(0o755)
+    marker = write_promtail_audit_sentinel(
+        resolved_probe_log_root,
+        sentinel_id=sentinel_id or uuid4().hex,
+    )
     environment = os.environ.copy()
     environment["BIOETL_AUDIT_DATA_ROOT"] = str(data_root)
     environment["BIOETL_AUDIT_LOG_ROOT"] = str(log_root)
+    environment["BIOETL_AUDIT_PROBE_LOG_ROOT"] = str(resolved_probe_log_root)
     run(
         build_compose_command(),
         cwd=REPO_ROOT,
@@ -183,6 +309,10 @@ def start_and_verify_audit_stack(
         AuditBackendState.DOWN,
         "backend not probed",
     )
+    last_promtail = PromtailAuditProbeResult(
+        PromtailAuditState.DOWN,
+        "Promtail not probed",
+    )
     while monotonic() < deadline:
         last_result = probe_audit_backend(
             expected_data_root=data_root,
@@ -192,7 +322,13 @@ def start_and_verify_audit_stack(
             AuditBackendState.VALID_EMPTY,
             AuditBackendState.POPULATED,
         }:
-            return last_result
+            last_promtail = probe_promtail_audit_delivery(
+                marker=marker,
+                opener=opener,
+                wall_time_ns=wall_time_ns,
+            )
+            if last_promtail.state is PromtailAuditState.DELIVERED:
+                return last_result
         if last_result.state is AuditBackendState.WRONG_ROOT:
             raise RuntimeError(
                 "read-only audit backend verification failed: "
@@ -200,8 +336,9 @@ def start_and_verify_audit_stack(
             )
         sleep(1.0)
     raise RuntimeError(
-        "read-only audit backend verification failed: "
-        f"state={last_result.state.value}; {last_result.detail}"
+        "read-only audit stack verification failed: "
+        f"backend_state={last_result.state.value}; {last_result.detail}; "
+        f"promtail_state={last_promtail.state.value}; {last_promtail.detail}"
     )
 
 
