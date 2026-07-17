@@ -5,10 +5,10 @@ from __future__ import annotations
 import hashlib
 import inspect
 import json
-from types import MappingProxyType
 from collections.abc import Callable, Collection, Mapping
 from dataclasses import dataclass, field
 from functools import cache
+from types import MappingProxyType
 
 __all__ = [
     "FieldRule",
