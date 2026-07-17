@@ -47,7 +47,7 @@ def latest_scope_catalog_path(base_path: Path) -> Path:
     return base_path / _INDEX_DIR / _CATALOG_FILE
 
 
-def _validate_scope_item(item: dict) -> tuple[str, RunType]:
+def _validate_scope_item(item: object) -> tuple[str, RunType]:
     """Validate a single scope item and return the parsed tuple."""
     if not isinstance(item, dict):
         raise ValueError("latest-scope catalog scope must be a JSON object")
@@ -55,6 +55,8 @@ def _validate_scope_item(item: dict) -> tuple[str, RunType]:
     run_type_value = item.get("run_type")
     if not isinstance(pipeline_name, str) or not pipeline_name:
         raise ValueError("latest-scope catalog pipeline_name is malformed")
+    if not isinstance(run_type_value, str):
+        raise ValueError("latest-scope catalog run_type is malformed")
     try:
         run_type = RunType(run_type_value)
     except (TypeError, ValueError) as error:

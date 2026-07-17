@@ -59,7 +59,6 @@ def create_debug_export_collector(
     )
 
 
-@dataclass(frozen=True, slots=True)
 class DebugExportCollectorBuilderProtocol(Protocol):
     """Factory contract for constructing the collector dependency."""
 
@@ -76,7 +75,6 @@ class DebugExportCollectorBuilderProtocol(Protocol):
         ...
 
 
-@dataclass(frozen=True, slots=True)
 class DebugExportWriterProtocol(Protocol):
     """Infrastructure writer contract for persisted debug export packs."""
 

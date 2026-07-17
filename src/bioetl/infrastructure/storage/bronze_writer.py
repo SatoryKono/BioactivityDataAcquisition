@@ -22,6 +22,7 @@ from bioetl.infrastructure.storage.bronze.metrics_mixin import (
     BronzeWriterMetricsMixin,
 )
 from bioetl.infrastructure.storage.bronze.pipeline_helpers import (
+    BronzeWriteArtifacts,
     BronzeWritePostwriteContext,
     BronzeWritePrepared,
     BronzeWriteRequest,
@@ -251,6 +252,6 @@ class BronzeWriter(
     async def _write_bronze_data_and_sidecar(
         self,
         prepared: BronzeWritePrepared,
-    ):
+    ) -> BronzeWriteArtifacts:
         """Write compressed JSONL data and metadata sidecar to disk."""
         return await write_bronze_data_and_sidecar(self, prepared)
