@@ -623,6 +623,15 @@ def _iter_runtime_candidate_paths(repo_root: Path) -> list[Path]:
     if cached is not None:
         return list(cached)
 
+    discovered = _iter_candidate_paths_with_git_grep(
+        root,
+        markers=_RUNTIME_SCAN_MARKERS,
+        excluded_parts=_RUNTIME_EXCLUDE_PARTS,
+    )
+    if discovered is not None:
+        _RUNTIME_CANDIDATE_PATH_CACHE[cache_key] = tuple(discovered)
+        return discovered
+
     discovered = _iter_runtime_candidate_paths_with_rg(root)
     if discovered:
         _RUNTIME_CANDIDATE_PATH_CACHE[cache_key] = tuple(discovered)
@@ -642,12 +651,74 @@ def _iter_runtime_candidate_paths(repo_root: Path) -> list[Path]:
     return fallback
 
 
-def _iter_runtime_candidate_paths_with_rg(root: Path) -> list[Path]:
-    """Discover runtime Python candidates with ripgrep before AST parsing."""
+def _candidate_paths_from_stdout(
+    stdout: str,
+    *,
+    excluded_parts: tuple[str, ...],
+) -> list[Path]:
+    """Normalize bounded discovery output to filtered Python paths."""
+    paths: set[Path] = set()
+    for line in stdout.splitlines():
+        if not line:
+            continue
+        raw_path = Path(line)
+        path = _REPO_ROOT / raw_path if not raw_path.is_absolute() else raw_path
+        path_str = path.as_posix()
+        if path.suffix != ".py" or any(
+            excluded in path_str for excluded in excluded_parts
+        ):
+            continue
+        paths.add(path)
+    return sorted(paths)
+
+
+def _iter_candidate_paths_with_git_grep(
+    root: Path,
+    *,
+    markers: tuple[str, ...],
+    excluded_parts: tuple[str, ...],
+) -> list[Path] | None:
+    """Use bounded Git-native discovery before touching GDrive files in Python."""
+    pathspec = _repo_relative_pathspec(root)
+    if pathspec is None:
+        return None
+    patterns = [pattern for marker in markers for pattern in ("-e", marker)]
+    try:
+        result, stdout = _run_text_discovery_command(
+            [
+                "git",
+                "-C",
+                _REPO_ROOT.as_posix(),
+                "grep",
+                "--untracked",
+                "-I",
+                "-l",
+                "-F",
+                *patterns,
+                "--",
+                pathspec,
+            ],
+            timeout=_TEXT_DISCOVERY_TIMEOUT_SECONDS,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if result.returncode not in {0, 1}:
+        return None
+    return _candidate_paths_from_stdout(
+        stdout,
+        excluded_parts=excluded_parts,
+    )
+
+
+def _iter_candidate_paths_with_rg(
+    root: Path,
+    *,
+    markers: tuple[str, ...],
+    excluded_parts: tuple[str, ...],
+) -> list[Path]:
+    """Discover Python candidates with bounded ripgrep before direct reads."""
     regexes = [
-        pattern
-        for marker in _RUNTIME_SCAN_MARKERS
-        for pattern in ("-e", re.escape(marker))
+        pattern for marker in markers for pattern in ("-e", re.escape(marker))
     ]
     try:
         result, stdout = _run_text_discovery_command(
@@ -667,19 +738,19 @@ def _iter_runtime_candidate_paths_with_rg(root: Path) -> list[Path]:
         return []
     if result.returncode not in {0, 1}:
         return []
+    return _candidate_paths_from_stdout(
+        stdout,
+        excluded_parts=excluded_parts,
+    )
 
-    paths: list[Path] = []
-    for line in stdout.splitlines():
-        if not line:
-            continue
-        path = _REPO_ROOT / line if not Path(line).is_absolute() else Path(line)
-        path_str = path.as_posix()
-        if path.suffix != ".py" or any(
-            excluded in path_str for excluded in _RUNTIME_EXCLUDE_PARTS
-        ):
-            continue
-        paths.append(path)
-    return sorted(set(paths))
+
+def _iter_runtime_candidate_paths_with_rg(root: Path) -> list[Path]:
+    """Discover runtime Python candidates with ripgrep before AST parsing."""
+    return _iter_candidate_paths_with_rg(
+        root,
+        markers=_RUNTIME_SCAN_MARKERS,
+        excluded_parts=_RUNTIME_EXCLUDE_PARTS,
+    )
 
 
 def _iter_runtime_event_candidate_paths(repo_root: Path) -> list[Path]:
@@ -689,6 +760,15 @@ def _iter_runtime_event_candidate_paths(repo_root: Path) -> list[Path]:
     cached = _RUNTIME_EVENT_CANDIDATE_PATH_CACHE.get(cache_key)
     if cached is not None:
         return list(cached)
+
+    discovered = _iter_candidate_paths_with_git_grep(
+        root,
+        markers=_RUNTIME_EVENT_SCAN_MARKERS,
+        excluded_parts=("src/bioetl/infrastructure",),
+    )
+    if discovered is not None:
+        _RUNTIME_EVENT_CANDIDATE_PATH_CACHE[cache_key] = tuple(discovered)
+        return discovered
 
     discovered = _iter_runtime_event_candidate_paths_with_rg(root)
     if discovered:
@@ -711,40 +791,11 @@ def _iter_runtime_event_candidate_paths(repo_root: Path) -> list[Path]:
 
 def _iter_runtime_event_candidate_paths_with_rg(root: Path) -> list[Path]:
     """Discover runtime event candidates with ripgrep before AST parsing."""
-    regexes = [
-        pattern
-        for marker in _RUNTIME_EVENT_SCAN_MARKERS
-        for pattern in ("-e", re.escape(marker))
-    ]
-    try:
-        result, stdout = _run_text_discovery_command(
-            [
-                "rg",
-                "--files-with-matches",
-                "--color",
-                "never",
-                "--glob",
-                "*.py",
-                *regexes,
-                root.as_posix(),
-            ],
-            timeout=_TEXT_DISCOVERY_TIMEOUT_SECONDS,
-        )
-    except (OSError, subprocess.TimeoutExpired):
-        return []
-    if result.returncode not in {0, 1}:
-        return []
-
-    paths: list[Path] = []
-    for line in stdout.splitlines():
-        if not line:
-            continue
-        path = _REPO_ROOT / line if not Path(line).is_absolute() else Path(line)
-        path_str = path.as_posix()
-        if path.suffix != ".py" or "src/bioetl/infrastructure" in path_str:
-            continue
-        paths.append(path)
-    return sorted(set(paths))
+    return _iter_candidate_paths_with_rg(
+        root,
+        markers=_RUNTIME_EVENT_SCAN_MARKERS,
+        excluded_parts=("src/bioetl/infrastructure",),
+    )
 
 
 def _collect_runtime_candidate_texts(repo_root: Path) -> list[tuple[Path, str]]:
