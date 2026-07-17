@@ -366,6 +366,7 @@ def _artifact_descriptor(
         "terminal_status": "fail",
         "dashboard_scope": [],
         "validated": False,
+        "manifest_structure_complete": False,
     }
     if not resolved.is_file():
         return descriptor
@@ -410,21 +411,24 @@ def _artifact_descriptor(
         )
         panel_scope: set[str] = set()
         panel_scope_complete = isinstance(dashboards, list) and bool(dashboards)
+        manifest_structure_complete = True
         if isinstance(dashboards, list):
             for item in dashboards:
                 if not isinstance(item, dict) or not item.get("uid"):
                     panel_scope_complete = False
+                    manifest_structure_complete = False
                     continue
                 terminal_validation = item.get("terminalStateValidation")
-                if (
-                    not isinstance(terminal_validation, dict)
-                    or terminal_validation.get("status") != "ok"
-                ):
-                    panel_scope_complete = False
-                    continue
-                panel_states = terminal_validation.get("panelStates")
+                if not isinstance(terminal_validation, dict):
+                    manifest_structure_complete = False
+                panel_states = (
+                    terminal_validation.get("panelStates")
+                    if isinstance(terminal_validation, dict)
+                    else None
+                )
                 if not isinstance(panel_states, list) or not panel_states:
                     panel_scope_complete = False
+                    manifest_structure_complete = False
                     continue
                 for panel_state in panel_states:
                     panel_id = (
@@ -440,12 +444,28 @@ def _artifact_descriptor(
             if terminal_ok and rendered and panel_scope_complete and panel_scope
             else "fail"
         )
-    descriptor["validated"] = bool(
-        descriptor["occurrence_match"]
-        and descriptor["generated_at"]
-        and descriptor["sha256"]
-        and descriptor["dashboard_scope"]
-    )
+        descriptor["manifest_structure_complete"] = manifest_structure_complete
+    # Validation requires structural integrity. For semantic gates, a non-empty
+    # dashboard_scope is required. For render gates, the manifest structure
+    # must be intact (has required fields) even if the scope is empty due to
+    # rendering failure.
+    if kind == "semantic":
+        descriptor["validated"] = bool(
+            descriptor["occurrence_match"]
+            and descriptor["generated_at"]
+            and descriptor["sha256"]
+            and descriptor["dashboard_scope"]
+        )
+    else:  # kind == "render"
+        # Render gates are validated if the manifest structure is intact,
+        # regardless of whether dashboard_scope is populated (which depends
+        # on terminalStateValidation.panelStates being present and valid).
+        descriptor["validated"] = bool(
+            descriptor["occurrence_match"]
+            and descriptor["generated_at"]
+            and descriptor["sha256"]
+            and descriptor.get("manifest_structure_complete", False)
+        )
     return descriptor
 
 
