@@ -29,6 +29,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `report-vcr-metadata`            | `report_vcr_metadata_catalog.py`                      | Generate/check canonical VCR metadata catalog                                                     |
 | `check-vcr-replay-preflight`     | `vcr/check_replay_preflight.py`                       | Fail fast on unresolved replay VCR pointers and cheap catalog drift                                |
 | `report-provider-contract-drift` | `report_provider_contract_drift.py`                   | Generate provider contract drift diagnostics from replay cassettes                                |
+| `report-domain-io-taint-inventory` | `report_domain_io_taint_inventory.py`               | Generate/check semantic Domain I/O taint evidence                                                  |
 | `check-prometheus-rules`         | `check_prometheus_rules.py`                           | Run deterministic promtool syntax and rule-vector validation                                      |
 | `report-dashboard-inventory`     | `report_dashboard_inventory.py`                       | Generate/check dashboard inventory parity, provisioning drift, deployed drift, and local health   |
 | `report-dashboard-panel-audit-matrix` | `report_dashboard_panel_audit_matrix.py`         | Generate/check the dashboard panel audit matrix mirror                                            |
@@ -36,6 +37,7 @@ python -m scripts.engineering.qa <command> [args...]
 | `report-dashboard-promql-scope`  | `report_dashboard_promql_scope.py`                    | Generate/check dashboard PromQL scope, forbidden `run_id` selectors, and deprecated metric tokens |
 | `assemble-observability-closure-evidence` | `assemble_observability_closure_evidence.py` | Validate, hash, and occurrence-bind one typed closure-campaign evidence envelope                    |
 | `report-family-baseline`         | `report_hotspot_family_baseline.py`                   | Generate/check RF-06 hotspot-family baseline artifacts                                            |
+| `report-flaky-test-burndown-review` | `report_flaky_test_burndown_review.py`             | Generate/check curated flaky-test review evidence bound to current test governance                 |
 | `report-adr-enforcement-matrix`  | `report_adr_enforcement_matrix.py`                    | Generate/check accepted ADR enforcement coverage matrix                                           |
 | `report-invariant-audit-rebaseline` | `report_invariant_audit_rebaseline.py`              | Generate/check stale invariant-audit evidence matrix and duplicate-issue gates                    |
 | `report-architecture-debt-remote-main-baseline` | `report_architecture_debt_remote_main_baseline.py` | Generate/check clean remote-main architecture debt baseline artifacts                             |
@@ -69,12 +71,14 @@ python -m scripts.engineering.qa <command> [args...]
 | `report-dep-map`                 | After changing imports in `src/bioetl/`; use `--check` for drift detection, `--update` to regenerate                                             | Pre-commit hook + CI gate                  |
 | `report-vcr-metadata`            | When updating VCR fixture governance rollout or sidecar inventory; use `--check` for drift detection, `--update` to regenerate                   | Architecture / test-governance maintenance |
 | `report-provider-contract-drift` | When reviewing provider-facing API drift in PR/CI; writes a machine-readable replay report and can fail on warnings/breaking drift               | Provider contract replay CI gate           |
+| `report-domain-io-taint-inventory` | After changing Domain imports or I/O-adjacent calls; use `--check` to detect stale or unreviewed taint evidence                               | Architecture governance / CI drift check   |
 | `check-prometheus-rules`         | After changing repo-backed Prometheus rule files or promtool vector tests; default covers observability and control-plane rule files; use `--runner docker` in CI | Observability rule validation gate         |
 | `report-dashboard-inventory`     | When validating shipped Grafana dashboards against docs, provisioning, or exported/deployed snapshots; use `--health-summary` for a local rollup | Dashboard governance / drift check         |
 | `report-dashboard-panel-audit-matrix` | When shipped dashboard panel audit metadata must match the generated docs mirror                                                        | Docs CI dashboard governance gate          |
 | `report-panel-title-inventory`   | After changing shipped Grafana dashboard panel titles or layout rows; use `--check` to catch generated mirror drift                              | Docs CI dashboard governance gate          |
 | `report-dashboard-promql-scope`  | After changing dashboard PromQL, selectors, or deprecated observability metrics; use `--check` to catch forbidden `run_id` selectors and stale metric tokens | Dashboard PromQL governance gate           |
 | `report-family-baseline`         | When reviewing RF-06 hotspot-family budgets or checking that the committed family baseline artifacts still match the code                        | Manual, preflight / CI drift check         |
+| `report-flaky-test-burndown-review` | After changing the curated flaky inventory or test-governance snapshot; use `--check` to fail on missing or stale review evidence              | Test governance / CI drift check           |
 | `report-adr-enforcement-matrix`  | When accepted ADR coverage must be mapped to implementation owners and enforcement owners                                                        | Architecture governance / CI drift check   |
 | `report-invariant-audit-rebaseline` | When converting architecture/invariant audits into GitHub issues; validates stale paths, current anchors, and duplicate issue evidence        | Audit governance / issue triage gate       |
 | `report-architecture-debt-remote-main-baseline` | Before debt closeout; records clean `origin/main` architecture debt evidence from Git tree blobs                                      | Architecture debt closeout / CI drift check |
@@ -119,8 +123,12 @@ python scripts/engineering/qa/report_vcr_metadata_catalog.py --check
 python scripts/engineering/qa/report_vcr_metadata_catalog.py --update
 python -m scripts.engineering.qa check-vcr-replay-preflight --strict
 python scripts/engineering/qa/report_provider_contract_drift.py --output reports/quality/provider-contract-drift-report.json --fail-on breaking
+python -m scripts.engineering.qa report-domain-io-taint-inventory
+python -m scripts.engineering.qa report-domain-io-taint-inventory --check
 python -m scripts.engineering.qa report-family-baseline --check
 python -m scripts.engineering.qa report-family-baseline --update
+python -m scripts.engineering.qa report-flaky-test-burndown-review
+python -m scripts.engineering.qa report-flaky-test-burndown-review --check
 python -m scripts.engineering.qa report-adr-enforcement-matrix --check
 python -m scripts.engineering.qa report-adr-enforcement-matrix --update
 python -m scripts.engineering.qa report-invariant-audit-rebaseline --check

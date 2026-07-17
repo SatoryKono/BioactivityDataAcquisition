@@ -14,13 +14,14 @@ from bioetl.infrastructure.control_plane import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.domain.ports import MetricsPort
     from bioetl.infrastructure.config.settings_api import Settings
 
 
 def create_run_manifest_store(
     *,
     settings: Settings,
-    metrics: object | None = None,
+    metrics: MetricsPort | None = None,
 ) -> FileRunManifestStore:
     """Create the canonical file-backed run-manifest store."""
     return FileRunManifestStore(
@@ -32,7 +33,7 @@ def create_run_manifest_store(
 def create_run_ledger_store(
     *,
     settings: Settings,
-    metrics: object | None = None,
+    metrics: MetricsPort | None = None,
 ) -> FileRunLedgerStore:
     """Create the canonical file-backed run-ledger store."""
     return FileRunLedgerStore(

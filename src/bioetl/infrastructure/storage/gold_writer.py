@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio  # noqa: F401 - compatibility monkeypatch target in tests
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from deltalake.exceptions import CommitFailedError, TableNotFoundError  # noqa: F401
 
@@ -67,6 +67,8 @@ from bioetl.infrastructure.storage.gold.writer_schema_helpers import (
 )
 
 if TYPE_CHECKING:
+    import pyarrow as pa
+    from deltalake import DeltaTable as DeltaTableType
     from pandera.polars import DataFrameSchema
 
     from bioetl.domain.ports import LoggerPort
@@ -82,36 +84,54 @@ if TYPE_CHECKING:
 __all__ = ["GoldWriteMode", "GoldWriter", "_normalize_scd_config"]
 
 
-def _normalize_scd_config(scd_config: object, primary_keys: list[str] | None) -> object:
+def _normalize_scd_config(
+    scd_config: ScdConfig,
+    primary_keys: list[str] | None,
+) -> ScdConfig:
     """Compatibility wrapper preserving the public helper import path."""
     return _normalize_scd_config_impl(scd_config, primary_keys)
 
 
-def DeltaTable(*args: object, **kwargs: object) -> object:
+def DeltaTable(
+    table_uri: str | Path,
+    version: int | None = None,
+    storage_options: dict[str, str] | None = None,
+    without_files: bool = False,
+) -> DeltaTableType:
     """Lazy compatibility seam for tests and Delta write helpers."""
     from deltalake import DeltaTable as _DeltaTable
 
-    normalized_args = list(args)
-    if normalized_args and isinstance(normalized_args[0], str | Path):
-        normalized_args[0] = normalize_delta_filesystem_path(normalized_args[0])
-    return _DeltaTable(*normalized_args, **kwargs)
+    return _DeltaTable(
+        normalize_delta_filesystem_path(table_uri),
+        version=version,
+        storage_options=storage_options,
+        without_files=without_files,
+    )
 
 
-def write_deltalake(*args: object, **kwargs: object) -> object:
+def write_deltalake(
+    table_or_uri: str | Path | DeltaTableType,
+    data: pa.Table,
+    *,
+    partition_by: list[str] | str | None = None,
+    mode: Literal["error", "append", "overwrite", "ignore"] = "error",
+    schema_mode: Literal["overwrite"] | None = None,
+) -> None:
     """Lazy compatibility seam for tests and Delta write helpers."""
     from deltalake import write_deltalake as _write_deltalake
 
-    normalized_args = list(args)
-    normalized_kwargs = dict(kwargs)
-    if normalized_args and isinstance(normalized_args[0], str | Path):
-        normalized_args[0] = normalize_delta_filesystem_path(normalized_args[0])
-    if "table_or_uri" in normalized_kwargs and isinstance(
-        normalized_kwargs["table_or_uri"], str | Path
-    ):
-        normalized_kwargs["table_or_uri"] = normalize_delta_filesystem_path(
-            normalized_kwargs["table_or_uri"]
-        )
-    return _write_deltalake(*normalized_args, **normalized_kwargs)
+    normalized_table = (
+        normalize_delta_filesystem_path(table_or_uri)
+        if isinstance(table_or_uri, str | Path)
+        else table_or_uri
+    )
+    _write_deltalake(
+        table_or_uri=normalized_table,
+        data=data,
+        partition_by=partition_by,
+        mode=mode,
+        schema_mode=schema_mode,
+    )
 
 
 GOLD_WRITE_RETRY_ERRORS = (

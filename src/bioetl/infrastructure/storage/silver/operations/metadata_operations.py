@@ -16,9 +16,6 @@ from bioetl.domain.ports import (
 from bioetl.infrastructure.storage.silver.metadata_operations import (
     _execute_silver_metadata_write,
 )
-from bioetl.infrastructure.storage.silver.operations.metadata_context_facade import (
-    _SilverMetadataContextFacade,
-)
 from bioetl.infrastructure.storage.silver.operations.metadata_write_facade import (
     _SilverMetadataWriteFacade,
 )
@@ -28,7 +25,6 @@ __all__ = ["SilverMetadataOperations", "_execute_silver_metadata_write"]
 
 @dataclass(frozen=True, slots=True)
 class SilverMetadataOperations(
-    _SilverMetadataContextFacade,
     _SilverMetadataWriteFacade,
 ):
     """Silver-layer metadata operations via composition."""

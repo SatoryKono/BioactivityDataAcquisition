@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from bioetl.composition.factories.pipeline.creation_support import (
-    _BuildPipelineServicesFn,
     _create_pipeline_with_services_impl,
     _PipelineCreationInputs,
-    _ServiceBundleDeps,
 )
 from bioetl.composition.factories.services._bundle_support import (
+    BaseServicesFactoryProtocol,
     ServiceBundleDependencies,
     resolve_service_bundle_dependencies,
 )
@@ -25,6 +24,7 @@ from bioetl.infrastructure.config.pipeline_config_api import (
 )
 
 if TYPE_CHECKING:
+    from bioetl.application.core.base import BasePipeline
     from bioetl.application.core.pipeline_services import PipelineService
     from bioetl.application.services.lineage.metadata_coordinator import (
         MetadataCoordinator,
@@ -60,17 +60,45 @@ __all__ = [
 class _BaseServicesFactoryProxy:
     """Lazy proxy preserving the bundle-level BaseServicesFactory patch seam."""
 
-    def _resolve(self) -> object:
+    def _resolve(self) -> BaseServicesFactoryProtocol:
         from bioetl.composition.factories.services.factory import BaseServicesFactory
 
         return BaseServicesFactory
 
-    def __getattr__(self, name: str) -> object:
-        return getattr(self._resolve(), name)
+    def _create_metrics(self, settings: Settings) -> MetricsPort:
+        return self._resolve()._create_metrics(settings)
+
+    def create_common_services(
+        self,
+        settings: Settings,
+        logger: LoggerPort,
+        data_source: DataSourcePort,
+        pipeline_config: PipelineYamlConfig,
+        pipeline_name: str,
+        audit: AuditPort | None = None,
+        metrics: MetricsPort | None = None,
+        tracer: TracingPort | None = None,
+        dq_monitor: DQMonitorPort | None = None,
+        metadata_coordinator: MetadataCoordinator | None = None,
+        silver_validator: SilverValidatorPort | None = None,
+    ) -> PipelineService:
+        return self._resolve().create_common_services(
+            settings=settings,
+            logger=logger,
+            data_source=data_source,
+            pipeline_config=pipeline_config,
+            pipeline_name=pipeline_name,
+            audit=audit,
+            metrics=metrics,
+            tracer=tracer,
+            dq_monitor=dq_monitor,
+            metadata_coordinator=metadata_coordinator,
+            silver_validator=silver_validator,
+        )
 
 
 PipelineCreationInputs = _PipelineCreationInputs
-BaseServicesFactory = _BaseServicesFactoryProxy()
+BaseServicesFactory: BaseServicesFactoryProtocol = _BaseServicesFactoryProxy()
 _DEFAULT_BASE_SERVICES_FACTORY = BaseServicesFactory
 
 
@@ -100,7 +128,7 @@ def compute_config_hash(config: PipelineYamlConfig | dict[str, object]) -> str:
     return config_hash
 
 
-def _resolve_base_services_factory() -> object:
+def _resolve_base_services_factory() -> BaseServicesFactoryProtocol:
     """Respect both bundle-local and canonical factory patch seams."""
     local_factory = BaseServicesFactory
     if local_factory is not _DEFAULT_BASE_SERVICES_FACTORY:
@@ -129,20 +157,50 @@ def _extract_entity_type(pipeline_name: str) -> str | None:
     return pipeline_name.split("_")[-1] if "_" in pipeline_name else None
 
 
-def _create_data_source(*args: object, **kwargs: object) -> object:
+def _create_data_source(
+    *,
+    create_data_source_fn: DataSourceCreatorProtocol,
+    settings: Settings,
+    pipeline_config: PipelineYamlConfig,
+    logger: LoggerPort,
+    filter_config: InputFilterConfig | None,
+    metrics: MetricsPort | None,
+    pipeline_name: str,
+) -> DataSourcePort:
     from bioetl.composition.factories.services.observability_api import (
         _create_data_source as _create_data_source_impl,
     )
 
-    return _create_data_source_impl(*args, **kwargs)
+    return _create_data_source_impl(
+        create_data_source_fn=create_data_source_fn,
+        settings=settings,
+        pipeline_config=pipeline_config,
+        logger=logger,
+        filter_config=filter_config,
+        metrics=metrics,
+        pipeline_name=pipeline_name,
+    )
 
 
-def _create_cached_bronze_data_source(*args: object, **kwargs: object) -> object:
+def _create_cached_bronze_data_source(
+    *,
+    settings: Settings,
+    pipeline_config: PipelineYamlConfig,
+    logger: LoggerPort,
+    metrics: MetricsPort | None = None,
+    cached_bronze: CachedBronzeContext,
+) -> DataSourcePort:
     from bioetl.composition.factories.services.observability_api import (
         _create_cached_bronze_data_source as _create_cached_bronze_data_source_impl,
     )
 
-    return _create_cached_bronze_data_source_impl(*args, **kwargs)
+    return _create_cached_bronze_data_source_impl(
+        settings=settings,
+        pipeline_config=pipeline_config,
+        logger=logger,
+        metrics=metrics,
+        cached_bronze=cached_bronze,
+    )
 
 
 def _create_pipeline_data_source(
@@ -222,23 +280,17 @@ def build_pipeline_services(
 
 
 def create_pipeline_with_services(
-    inputs: object,
+    inputs: _PipelineCreationInputs,
     _deps: ServiceBundleDependencies | None = None,
-) -> object:
+) -> BasePipeline:
     """Create a pipeline instance with its resolved service bundle."""
     # Compatibility markers for architecture static checks:
     # transformer_class(...) happens inside the delegated builder path.
     # transformer=transformer is preserved at the pipeline constructor boundary.
-    resolved_deps = cast(
-        _ServiceBundleDeps,
-        _resolve_service_bundle_dependencies(_deps),
-    )
+    resolved_deps = _resolve_service_bundle_dependencies(_deps)
     return _create_pipeline_with_services_impl(
         inputs,
         deps=resolved_deps,
         extract_entity_type=_extract_entity_type,
-        build_pipeline_services_fn=cast(
-            _BuildPipelineServicesFn,
-            build_pipeline_services,
-        ),
+        build_pipeline_services_fn=build_pipeline_services,
     )

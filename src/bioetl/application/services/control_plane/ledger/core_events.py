@@ -14,6 +14,7 @@ from bioetl.domain.control_plane.run_ledger import (
     DQ_POLICY_APPLIED_EVENT,
     MANIFEST_CREATED_EVENT,
 )
+from bioetl.domain.types import RunID
 from bioetl.domain.types.dq_contracts import DQDisposition
 
 __all__ = [
@@ -24,8 +25,11 @@ __all__ = [
 
 
 class _RunLedgerCoreEventAppender(Protocol):
-    manifest_id: str
-    run_id: object
+    @property
+    def manifest_id(self) -> str: ...
+
+    @property
+    def run_id(self) -> RunID: ...
 
     def _append(
         self,

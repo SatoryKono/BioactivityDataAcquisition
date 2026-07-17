@@ -5,7 +5,9 @@ from __future__ import annotations
 from bioetl.application.core.lifecycle.checkpoint_disposition_policy import (
     resolve_incompatible_checkpoint_disposition,
     resolve_missing_compatibility_context_disposition,
-    strict_checkpoint_resume_required,
+)
+from bioetl.application.core.lifecycle.checkpoint_disposition_policy import (
+    strict_checkpoint_resume_required as strict_checkpoint_resume_required,
 )
 from bioetl.application.core.lifecycle.checkpoint_identity_overrides import (
     checkpoint_identity_payload,

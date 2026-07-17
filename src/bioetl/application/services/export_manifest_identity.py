@@ -41,8 +41,9 @@ def dataset_bundle_id(
 
 def fingerprint_payload(fingerprint: ExportFileFingerprint) -> dict[str, object]:
     """Project a file fingerprint into manifest-safe JSON fields."""
+    path_str = fingerprint.path if isinstance(fingerprint.path, str) else fingerprint.path.as_posix()
     return {
-        "path": fingerprint.path.as_posix(),
+        "path": path_str,
         "size_bytes": fingerprint.size_bytes,
         "sha256": fingerprint.sha256,
     }

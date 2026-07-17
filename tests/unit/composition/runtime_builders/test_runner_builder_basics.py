@@ -161,6 +161,12 @@ def test_build_pipeline_runner_wires_dependencies(tmp_path: Path) -> None:
         skip_gold=False,
         start_offset=None,
         input_filter=SimpleNamespace(enabled=False),
+        workflow_run_id=None,
+        workflow_name=None,
+        workflow_step_id=None,
+        workflow_id="standalone",
+        debug_export_enabled=False,
+        debug_export_dir=None,
     )
 
     with patch(

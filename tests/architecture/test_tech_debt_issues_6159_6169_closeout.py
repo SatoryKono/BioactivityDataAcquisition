@@ -230,15 +230,15 @@ def test_issue_6165_dead_code_zero_import_candidates_are_triaged() -> None:
 
     assert (
         summary["repo_wide_zero_import_candidate_count"]
-        == (outcome["repo_wide_zero_import_candidate_count"])
+        == outcome["repo_wide_zero_import_candidate_count"]
     )
     assert (
         summary["repo_wide_untriaged_zero_import_candidate_count"]
-        == (outcome["repo_wide_untriaged_zero_import_candidate_count"])
+        == outcome["repo_wide_untriaged_zero_import_candidate_count"]
     )
     assert (
         summary["repo_wide_owner_test_anchored_candidate_count"]
-        == (outcome["repo_wide_owner_test_anchored_candidate_count"])
+        == outcome["repo_wide_owner_test_anchored_candidate_count"]
     )
     for row in inventory["repo_wide_zero_import_candidates"]:
         assert row["classification_status"] == "classified"

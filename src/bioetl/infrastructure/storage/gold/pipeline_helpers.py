@@ -4,12 +4,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 from bioetl.domain.medallion import GoldWriteMode
 from bioetl.domain.ports import AuditPort
 from bioetl.domain.types import GoldRecord, RunID, ScdConfig
 from bioetl.domain.value_objects.silver_result import SilverWriteResult
+
+if TYPE_CHECKING:
+    from pandera.polars import DataFrameSchema
 
 
 @dataclass(frozen=True, slots=True)
@@ -76,14 +79,14 @@ class _GoldWritePreparationHostProtocol(Protocol):
 
     def _validate_schema_strict(
         self,
-        schema: object,
+        schema: DataFrameSchema,
         contract_version: str | None = None,
     ) -> None: ...
 
     async def _validate_records_against_schema(
         self,
         records: list[GoldRecord],
-        schema: object,
+        schema: DataFrameSchema,
         contract_version: str | None = None,
     ) -> None: ...
 
@@ -146,7 +149,7 @@ async def prepare_gold_write(
     table_name: str,
     records: list[GoldRecord],
     mode: str,
-    schema: object,
+    schema: DataFrameSchema,
     scd_config: ScdConfig | None,
     ingestion_ts: datetime | None,
     contract_version: str | None = None,

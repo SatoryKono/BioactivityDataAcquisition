@@ -216,9 +216,18 @@ def test_issue_5842_zero_import_candidates_are_fully_governed() -> None:
         summary["repo_wide_zero_import_candidate_count"]
         == closeout["metrics"]["repo_wide_zero_import_candidates"]["current"]
     )
-    assert summary["repo_wide_classified_zero_import_candidate_count"] == 9
+    assert (
+        summary["repo_wide_classified_zero_import_candidate_count"]
+        == closeout["metrics"]["repo_wide_zero_import_candidates"]["classified"]
+    )
     assert summary["repo_wide_untriaged_zero_import_candidate_count"] == 0
     assert summary["repo_wide_candidates_without_owner_tests_count"] == 0
+    assert (
+        summary["repo_wide_owner_test_anchored_candidate_count"]
+        == closeout["metrics"]["repo_wide_zero_import_candidates"][
+            "owner_test_anchored"
+        ]
+    )
 
     for row in inventory["repo_wide_zero_import_candidates"]:
         assert row["classification_status"] == "classified"

@@ -10,7 +10,11 @@ import os
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+<<<<<<< HEAD
 from time import monotonic, sleep
+=======
+from time import monotonic
+>>>>>>> origin/agent/close-p0-6349-6352
 from typing import Any, Literal, cast
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode, urlsplit, urlunsplit
@@ -1419,6 +1423,7 @@ def _audit_loki_panel(
         query_params
     )
     started_at = monotonic()
+<<<<<<< HEAD
     readiness = ""
     readiness_error: Exception | None = None
     try:
@@ -1458,6 +1463,38 @@ def _audit_loki_panel(
         if remaining_timeout <= 0:
             raise TimeoutError("Loki readiness probe exhausted the governed request budget")
         payload = _fetch_json(query_url, timeout_seconds=remaining_timeout)
+=======
+    try:
+        readiness = _fetch_text(
+            f"{config.loki_base_url}/ready",
+            timeout_seconds=config.request_timeout_seconds,
+        )
+        if readiness.strip().lower() != "ready":
+            raise ValueError(f"unexpected /ready response: {readiness[:80]!r}")
+        elapsed_after_ready = monotonic() - started_at
+        remaining_timeout = config.request_timeout_seconds - elapsed_after_ready
+        if remaining_timeout <= 0:
+            return AuditResult(
+                dashboard_uid=spec.dashboard_uid,
+                panel_id=spec.panel_id,
+                title=spec.title,
+                source_kind=spec.source_kind,
+                semantic_kind=spec.semantic_kind,
+                status="error" if spec.required else "ok",
+                classification="timeout_budget_exceeded",
+                detail=(
+                    "Loki readiness probe exhausted the governed request budget; "
+                    f"latency_seconds={elapsed_after_ready:.3f}; "
+                    f"budget_seconds={config.request_timeout_seconds:.3f}"
+                ),
+                query_preview=rendered_expr[:400],
+                target_ref_id=spec.target_ref_id,
+            )
+        payload = _fetch_json(
+            query_url,
+            timeout_seconds=remaining_timeout,
+        )
+>>>>>>> origin/agent/close-p0-6349-6352
     except (HTTPError, URLError, OSError, ValueError, json.JSONDecodeError) as exc:
         return AuditResult(
             dashboard_uid=spec.dashboard_uid,
@@ -1466,11 +1503,15 @@ def _audit_loki_panel(
             source_kind=spec.source_kind,
             semantic_kind=spec.semantic_kind,
             status="error" if spec.required else "ok",
+<<<<<<< HEAD
             classification=(
                 "timeout_budget_exceeded"
                 if isinstance(exc, TimeoutError)
                 else "blocked_unavailable"
             ),
+=======
+            classification="blocked_unavailable",
+>>>>>>> origin/agent/close-p0-6349-6352
             detail=f"Loki readiness/query could not be executed: {exc}",
             query_preview=rendered_expr[:400],
             target_ref_id=spec.target_ref_id,

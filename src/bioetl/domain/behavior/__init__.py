@@ -6,40 +6,76 @@ from importlib import import_module
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bioetl.domain.behavior.activity_aggregator import ActivityAggregator
-    from bioetl.domain.behavior.author_normalization_service import AuthorNormalizer
+    from bioetl.domain.behavior.activity_aggregator import (
+        ActivityAggregator as ActivityAggregator,
+    )
+    from bioetl.domain.behavior.author_normalization_service import (
+        AuthorNormalizer as AuthorNormalizer,
+    )
     from bioetl.domain.behavior.chemical_standardization import (
-        CHEMICAL_STANDARDIZATION_POLICY_VERSION,
-        CHEMICAL_STANDARDIZATION_STATUSES,
-        ChemicalStandardizationResult,
-        ChemicalStandardizationStatus,
-        standardize_chemical_structure,
+        CHEMICAL_STANDARDIZATION_POLICY_VERSION as CHEMICAL_STANDARDIZATION_POLICY_VERSION,
     )
-    from bioetl.domain.behavior.composite_validation_layer import CompositeValidator
-    from bioetl.domain.behavior.data_normalization_config import DataNormalizationConfig
-    from bioetl.domain.behavior.data_normalization_service import DefaultDataNormalizer
+    from bioetl.domain.behavior.chemical_standardization import (
+        CHEMICAL_STANDARDIZATION_STATUSES as CHEMICAL_STANDARDIZATION_STATUSES,
+    )
+    from bioetl.domain.behavior.chemical_standardization import (
+        ChemicalStandardizationResult as ChemicalStandardizationResult,
+    )
+    from bioetl.domain.behavior.chemical_standardization import (
+        ChemicalStandardizationStatus as ChemicalStandardizationStatus,
+    )
+    from bioetl.domain.behavior.chemical_standardization import (
+        standardize_chemical_structure as standardize_chemical_structure,
+    )
+    from bioetl.domain.behavior.composite_validation_layer import (
+        CompositeValidator as CompositeValidator,
+    )
+    from bioetl.domain.behavior.data_normalization_config import (
+        DataNormalizationConfig as DataNormalizationConfig,
+    )
+    from bioetl.domain.behavior.data_normalization_service import (
+        DefaultDataNormalizer as DefaultDataNormalizer,
+    )
     from bioetl.domain.behavior.dq_metrics_calculator import (
-        DQMetricsCalculator,
-        DQMetricsInput,
+        DQMetricsCalculator as DQMetricsCalculator,
     )
-    from bioetl.domain.behavior.dq_serializer import DQReportSerializer
-    from bioetl.domain.behavior.identity_service import EntityIdentityGenerator
+    from bioetl.domain.behavior.dq_metrics_calculator import (
+        DQMetricsInput as DQMetricsInput,
+    )
+    from bioetl.domain.behavior.dq_serializer import (
+        DQReportSerializer as DQReportSerializer,
+    )
+    from bioetl.domain.behavior.identity_service import (
+        EntityIdentityGenerator as EntityIdentityGenerator,
+    )
     from bioetl.domain.behavior.merged_metadata_explainability import (
-        MergedMetadataExplainer,
+        MergedMetadataExplainer as MergedMetadataExplainer,
     )
-    from bioetl.domain.behavior.normalization_config import NormalizationConfig
-    from bioetl.domain.behavior.normalization_service import BioactivityNormalizer
+    from bioetl.domain.behavior.normalization_config import (
+        NormalizationConfig as NormalizationConfig,
+    )
+    from bioetl.domain.behavior.normalization_service import (
+        BioactivityNormalizer as BioactivityNormalizer,
+    )
     from bioetl.domain.behavior.organism_classification_service import (
-        ClassificationStats,
-        OrganismClassifier,
+        ClassificationStats as ClassificationStats,
     )
-    from bioetl.domain.behavior.preflight_governance import PreflightGovernor
+    from bioetl.domain.behavior.organism_classification_service import (
+        OrganismClassifier as OrganismClassifier,
+    )
+    from bioetl.domain.behavior.preflight_governance import (
+        PreflightGovernor as PreflightGovernor,
+    )
     from bioetl.domain.behavior.text_similarity import (
-        jaccard_similarity,
-        normalize_text,
+        jaccard_similarity as jaccard_similarity,
     )
-    from bioetl.domain.behavior.unit_converter import UnitConverter
-    from bioetl.domain.behavior.value_validator import ValueValidator
+    from bioetl.domain.behavior.text_similarity import (
+        normalize_text as normalize_text,
+    )
+    from bioetl.domain.behavior.unit_converter import UnitConverter as UnitConverter
+    from bioetl.domain.behavior.value_validator import (
+        ValueValidator as ValueValidator,
+    )
     # PhasedMigrationCoordinator removed - retired shim (2026-07-03)
 
 _PUBLIC_EXPORTS = {

@@ -25,7 +25,9 @@ from bioetl.application.services.workflow_runner_support import (
     workflow_result_from_state,
 )
 from bioetl.application.services.workflow_transform_service import (
-    WorkflowTransformDestructiveCommit,
+    WorkflowTransformDestructiveCommit as WorkflowTransformDestructiveCommit,
+)
+from bioetl.application.services.workflow_transform_service import (
     WorkflowTransformService,
 )
 from bioetl.application.services.workflow_transition_policy import (

@@ -50,7 +50,7 @@ class TargetTransformer(BaseChemblTransformer):
     def _flatten_target_components(
         self,
         components: list[JsonDict] | None,
-    ) -> dict[str, list | None]:
+    ) -> dict[str, list[object] | None]:
         """Flatten target components into aggregated lists.
 
         Args:
@@ -169,16 +169,17 @@ class TargetTransformer(BaseChemblTransformer):
         business_data: JsonDict,
     ) -> SilverRecord:
         """Align silver output with the published target schema field name."""
-        description = silver_record.get("target_description")
+        target_record: JsonDict = dict(silver_record)
+        description = target_record.get("target_description")
         if description is None:
-            description = silver_record.pop("description", None)
+            description = target_record.pop("description", None)
         if description is None:
             description = business_data.get("target_description")
         if description is None:
             description = business_data.get("description")
-        silver_record.pop("description", None)
-        silver_record["target_description"] = description
-        return silver_record
+        target_record.pop("description", None)
+        target_record["target_description"] = description
+        return cast("SilverRecord", target_record)
 
     def transform_for_gold(
         self,

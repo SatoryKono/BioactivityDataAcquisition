@@ -33,7 +33,6 @@ _ASYNC_TIMEOUT_DIAGNOSTIC_MARGIN_SECONDS = 5.0
 _DISABLED_ENV_VALUES = frozenset({"0", "false", "no", "off"})
 _WINDOWS_XDIST_WORKER_CAP_ENV = "BIOETL_PYTEST_WINDOWS_XDIST_WORKERS"
 _DEFAULT_WINDOWS_XDIST_WORKER_CAP = 1
-_WINDOWS_PYCHARM_VCR_TIMEOUT_SECONDS = 180
 _RUNTIME_BOOTSTRAP_PIPELINE_PATH = (
     Path(__file__).resolve().parents[1]
     / "src"
@@ -248,7 +247,6 @@ def pytest_configure(config):
     _configure_wsl_timeout(config)
     if _selected_paths_need_hypothesis(config):
         _configure_hypothesis_profiles()
-        _disable_hypothesis_local_constant_scan_on_wsl()
 
 
 def pytest_itemcollected(item: pytest.Item) -> None:
@@ -256,35 +254,6 @@ def pytest_itemcollected(item: pytest.Item) -> None:
     config = item.config
     config._bioetl_last_failed_collected_count = (
         _last_failed_collected_count(config) + 1
-    )
-
-
-def pytest_collection_modifyitems(
-    config: pytest.Config, items: list[pytest.Item]
-) -> None:
-    """Give VCR tests enough setup budget on Windows/PyCharm cloud checkouts."""
-    del config
-    for item in items:
-        _extend_windows_pycharm_vcr_timeout(item)
-
-
-def _extend_windows_pycharm_vcr_timeout(item: pytest.Item) -> None:
-    """Apply a Windows/PyCharm-only timeout marker for VCR setup imports."""
-    if not _should_extend_windows_pycharm_vcr_timeout(item):
-        return
-    item.add_marker(pytest.mark.timeout(_WINDOWS_PYCHARM_VCR_TIMEOUT_SECONDS))
-
-
-def _should_extend_windows_pycharm_vcr_timeout(item: pytest.Item) -> bool:
-    if not sys.platform.startswith("win") or not _is_pycharm_pytest_runner():
-        return False
-    if item.get_closest_marker("vcr") is None:
-        return False
-    if item.get_closest_marker("timeout") is not None:
-        return False
-    current_timeout = _timeout_seconds_for_item(item)
-    return current_timeout is not None and (
-        current_timeout < _WINDOWS_PYCHARM_VCR_TIMEOUT_SECONDS
     )
 
 
@@ -436,30 +405,6 @@ def _configure_wsl_timeout(config: pytest.Config) -> None:
             config.inicfg["timeout"] = "180"
     except (ValueError, TypeError, AttributeError):
         config.inicfg["timeout"] = "180"
-
-
-def _disable_hypothesis_local_constant_scan_on_wsl() -> None:
-    """Avoid Hypothesis local-constant path resolution stalls on WSL mounts."""
-    if not _is_wsl():
-        return
-
-    try:
-        from hypothesis.internal.conjecture import providers as hypothesis_providers
-    except ImportError:  # pragma: no cover
-        return
-
-    if getattr(
-        hypothesis_providers,
-        "_bioetl_wsl_local_constant_scan_disabled",
-        False,
-    ):
-        return
-
-    def _empty_local_constants() -> object:
-        return hypothesis_providers._local_constants
-
-    hypothesis_providers._get_local_constants = _empty_local_constants
-    hypothesis_providers._bioetl_wsl_local_constant_scan_disabled = True
 
 
 def _is_pycharm_pytest_runner() -> bool:
@@ -775,41 +720,6 @@ def populated_isolated_registry(isolated_registry: Any) -> Any:
 
     register_all_pipelines(registry=isolated_registry)
     return isolated_registry
-
-
-@pytest.fixture(scope="session")
-def session_bootstrap_registry_cache() -> Any:
-    """Return opt-in session bootstrap cache for expensive repo-backed tests."""
-    from tests.helpers.bootstrap_cache import BootstrapRegistryCache
-
-    return BootstrapRegistryCache()
-
-
-@pytest.fixture(scope="session")
-def cached_bootstrap_registries(
-    project_root: Path,
-    session_bootstrap_registry_cache: Any,
-) -> Any:
-    """Return cached populated pipeline/provider registries for this test session."""
-    return session_bootstrap_registry_cache.get_or_build(
-        configs_root=project_root / "configs",
-    )
-
-
-@pytest.fixture
-def cached_populated_isolated_registry(cached_bootstrap_registries: Any) -> Any:
-    """Return a per-test pipeline registry clone from the session cache."""
-    from tests.helpers.bootstrap_cache import clone_pipeline_registry
-
-    return clone_pipeline_registry(cached_bootstrap_registries.pipeline_registry)
-
-
-@pytest.fixture
-def cached_provider_registry(cached_bootstrap_registries: Any) -> Any:
-    """Return a per-test provider registry clone from the session cache."""
-    from tests.helpers.bootstrap_cache import clone_provider_registry
-
-    return clone_provider_registry(cached_bootstrap_registries.provider_registry)
 
 
 @pytest.fixture(autouse=True)

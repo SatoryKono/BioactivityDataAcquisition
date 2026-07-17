@@ -224,7 +224,9 @@ def _load_retained_entrypoint_paths(repo_root: Path) -> set[str]:
 def _module_name_to_repo_path(module_name: str) -> str:
     """Convert a bioetl module name into its source path."""
     if not module_name.startswith("bioetl."):
-        raise ValueError(f"Unsupported module name outside bioetl package: {module_name}")
+        raise ValueError(
+            f"Unsupported module name outside bioetl package: {module_name}"
+        )
     relative = "/".join(module_name.split(".")[1:])
     return f"src/bioetl/{relative}.py"
 
@@ -401,9 +403,7 @@ def build_dead_code_inventory(
         repo_wide_classifications,
         allowed_repo_wide_dispositions,
         repo_wide_default_owner,
-    ) = (
-        _load_repo_wide_zero_import_classifications(triage_payload)
-    )
+    ) = _load_repo_wide_zero_import_classifications(triage_payload)
 
     triaged_rows: list[dict[str, object]] = []
     triaged_retained_evidence_lane_counts: dict[str, int] = {}

@@ -36,8 +36,8 @@ REPLAY_TAXONOMY_FIELDS: tuple[str, ...] = (
     "lineage_closure_boundary",
 )
 
-LIST_DEFAULTS: dict[str, object] = {
-    "input_snapshot_missing_source_refs": [],
-    "exact_replay_blockers": [],
-    "append_mode_semantic_sinks": [],
+LIST_DEFAULTS: dict[str, tuple[object, ...]] = {
+    "input_snapshot_missing_source_refs": (),
+    "exact_replay_blockers": (),
+    "append_mode_semantic_sinks": (),
 }

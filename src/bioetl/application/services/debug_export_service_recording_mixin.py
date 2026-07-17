@@ -2,16 +2,28 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from bioetl.domain.types import BatchID, BronzeRecord, ErrorType, GoldRecord
 
 from .debug_export_helpers import _jsonable_payload
 
+if TYPE_CHECKING:
+    from .debug_export_collector import DebugExportCollector
+
 
 class DebugExportServiceRecordingMixin:
     """Delegate enabled debug-export recording calls to the collector."""
+
+    _collector: DebugExportCollector
+    _created_at_factory: Callable[[], datetime]
+
+    @property
+    def enabled(self) -> bool:
+        """Return whether debug-export recording is enabled."""
+        raise NotImplementedError
 
     def record_bronze_batch(
         self,

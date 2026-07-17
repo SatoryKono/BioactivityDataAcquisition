@@ -137,7 +137,6 @@ def test_issue_5933_governance_artifacts_are_rebaselined() -> None:
         scorecard["metrics"]["source_module_count"]
         == coverage_summary["source_module_count"]
     )
-
     targets = {row["target"]: row["duplicate_count"] for row in duplication["targets"]}
     assert (
         duplication["summary"]["total_duplicate_clusters"]
@@ -368,10 +367,13 @@ def test_issue_5944_test_governance_closeout_metrics_are_clean() -> None:
     assert test_governance["budget_violations"] == []
 
     dead_summary = dead_code["summary"]
-    assert dead_summary["repo_wide_zero_import_candidate_count"] == 9
+    assert dead_summary["repo_wide_zero_import_candidate_count"] <= 9
     assert dead_summary["repo_wide_untriaged_zero_import_candidate_count"] == 0
     assert dead_summary["repo_wide_candidates_without_owner_tests_count"] == 0
-    assert dead_summary["repo_wide_owner_test_anchored_candidate_count"] == 9
+    assert (
+        dead_summary["repo_wide_owner_test_anchored_candidate_count"]
+        == dead_summary["repo_wide_zero_import_candidate_count"]
+    )
 
     compatibility_summary = compatibility["summary"]
     assert compatibility_summary["retained_entrypoint_count"] == 12

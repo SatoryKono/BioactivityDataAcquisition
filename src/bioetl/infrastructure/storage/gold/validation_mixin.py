@@ -17,8 +17,6 @@ from bioetl.domain.types import (
 if TYPE_CHECKING:
     from datetime import datetime
 
-    from pandera.polars import DataFrameSchema
-
     from bioetl.domain.types import GoldRecord, ScdConfig
 
 
@@ -80,7 +78,7 @@ class GoldWriterValidationMixin:
 
     def _validate_schema_strict(
         self,
-        schema: DataFrameSchema,
+        schema: object,
         contract_version: str | None = None,
     ) -> None:
         """Validate that schema has strict=True."""
@@ -102,7 +100,7 @@ class GoldWriterValidationMixin:
     async def _validate_records_against_schema(
         self: _RunInExecutorHost,
         records: list[GoldRecord],
-        schema: DataFrameSchema,
+        schema: object,
         contract_version: str | None = None,
     ) -> None:
         """Validate records against Pandera schema."""

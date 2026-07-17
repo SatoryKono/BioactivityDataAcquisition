@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, ClassVar, cast
 
 from bioetl.application.core.pre_silver_finalization_flow import (
     _PreSilverFinalizationFlowMixin,
@@ -12,13 +12,41 @@ from bioetl.domain.types import JsonDict
 
 if TYPE_CHECKING:
     from bioetl.domain.context import PipelineContext
-    from bioetl.domain.types import SilverRecord
+    from bioetl.domain.types import GoldRecord, SilverRecord
 
 
 class _PreSilverRecordAdapterMixin:
     """Build entity-backed records and adapt Silver hooks to JSON payloads."""
 
-    entity_class: type[object]
+    entity_class: ClassVar[type[object]]
+
+    if TYPE_CHECKING:
+
+        def _create_entity[EntityT](
+            self,
+            entity_class: type[EntityT],
+            context: PipelineContext,
+            entity_id: str,
+            content_hash: str,
+            index: int,
+            **business_data: object,
+        ) -> EntityT: ...
+
+        def entity_to_silver_record(self, entity: object) -> GoldRecord: ...
+
+        def _apply_structural_policy(
+            self,
+            context: PipelineContext,
+            result: SilverRecord | None,
+            index: int,
+        ) -> SilverRecord | None: ...
+
+        def _apply_silver_filter(
+            self,
+            context: PipelineContext,
+            result: SilverRecord | None,
+            index: int,
+        ) -> None: ...
 
     def _build_pre_silver_record(
         self,

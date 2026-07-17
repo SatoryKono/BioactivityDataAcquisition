@@ -264,7 +264,7 @@ def write_export_sidecar_manifests(
     table_name: str,
     layer: str,
     export_format: str,
-    output_path: Path,
+    output_path: Path | str,
     row_count: int,
     generated_at: str | None = None,
     allow_nondeterministic_generated_at: bool = False,
@@ -281,7 +281,8 @@ def write_export_sidecar_manifests(
     strict: bool = False,
 ) -> tuple[Path, ...]:
     """Write deterministic provenance, licensing, and checksum manifests."""
-    data_fingerprint = writer.fingerprint_file(path=output_path)
+    output_path_str = output_path if isinstance(output_path, str) else str(output_path)
+    data_fingerprint = writer.fingerprint_file(path=output_path_str)
     sidecars = build_export_sidecar_payloads(
         table_name=table_name,
         layer=layer,
@@ -303,29 +304,33 @@ def write_export_sidecar_manifests(
         redacted_columns=redacted_columns,
         strict=strict,
     )
-    manifest_prefix = output_path.stem
-    provenance_path = writer.write_manifest(
+    output_path_obj = output_path if isinstance(output_path, Path) else Path(output_path)
+    manifest_prefix = output_path_obj.stem
+    provenance_path_str = writer.write_manifest(
         manifest_name=f"{manifest_prefix}.provenance-manifest",
         payload=sidecars.provenance_manifest,
-        output_dir=output_path.parent,
+        output_dir=str(output_path_obj.parent),
     )
-    licensing_path = writer.write_manifest(
+    provenance_path = Path(provenance_path_str)
+    licensing_path_str = writer.write_manifest(
         manifest_name=f"{manifest_prefix}.licensing-manifest",
         payload=sidecars.licensing_manifest,
-        output_dir=output_path.parent,
+        output_dir=str(output_path_obj.parent),
     )
+    licensing_path = Path(licensing_path_str)
     checksum_payload = build_export_checksum_manifest(
         dataset_bundle_id=sidecars.dataset_bundle_id,
         generated_at=str(sidecars.provenance_manifest["generated_at"]),
         fingerprints=(
             data_fingerprint,
-            writer.fingerprint_file(path=provenance_path),
-            writer.fingerprint_file(path=licensing_path),
+            writer.fingerprint_file(path=str(provenance_path)),
+            writer.fingerprint_file(path=str(licensing_path)),
         ),
     )
-    checksums_path = writer.write_manifest(
+    checksums_path_str = writer.write_manifest(
         manifest_name=f"{manifest_prefix}.checksums-manifest",
         payload=checksum_payload,
-        output_dir=output_path.parent,
+        output_dir=str(output_path_obj.parent),
     )
+    checksums_path = Path(checksums_path_str)
     return (provenance_path, licensing_path, checksums_path)

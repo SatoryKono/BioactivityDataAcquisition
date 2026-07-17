@@ -14,15 +14,19 @@ from bioetl.domain.ports import LoggerPort, MetricsPort, TracingPort
 class PipelineLoggingServicesProtocol(Protocol):
     """Services surface that only needs the structured logger seam."""
 
-    logger: LoggerPort
+    @property
+    def logger(self) -> LoggerPort: ...
 
 
 @runtime_checkable
 class PipelineObservabilityServicesProtocol(PipelineLoggingServicesProtocol, Protocol):
     """Observability ports shared across runner, batch, and postrun paths."""
 
-    metrics: MetricsPort
-    tracing: TracingPort
+    @property
+    def metrics(self) -> MetricsPort: ...
+
+    @property
+    def tracing(self) -> TracingPort: ...
 
 
 @runtime_checkable

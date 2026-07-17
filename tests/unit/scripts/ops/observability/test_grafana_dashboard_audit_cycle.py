@@ -683,6 +683,40 @@ def test_grafana_audit_cycle_records_render_gate_when_semantic_gate_fails(
     assert "manifest contract passed" in payload["dashboard_render_gate"]["detail"]
 
 
+def test_grafana_gate_rejects_render_source_without_panel_scope(
+    tmp_path: Path,
+) -> None:
+    config = cycle_subject._parse_args(
+        [
+            "--screenshot-dir",
+            str(tmp_path / "screenshots"),
+            "--gate-output",
+            str(tmp_path / "dashboard-release-gates.json"),
+        ]
+    )
+    _write_gate_sources(config, semantic_status="pass", render_status="pass")
+    manifest_path = config.screenshot_dir / "render-manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["dashboards"][0].pop("terminalStateValidation")
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    cycle_subject._write_gate_report(
+        config,
+        semantic_status="pass",
+        render_status="pass",
+        semantic_detail="semantic evidence passed",
+        render_detail="render evidence claimed pass without panel scope",
+    )
+
+    payload = json.loads(config.gate_output_path.read_text(encoding="utf-8"))
+    render_source = payload["dashboard_render_gate"]["source_artifact"]
+    assert payload["dashboard_semantic_gate"]["status"] == "pass"
+    assert payload["dashboard_render_gate"]["status"] == "fail"
+    assert render_source["terminal_status"] == "fail"
+    assert render_source["validated"] is False
+    assert render_source["dashboard_scope"] == []
+
+
 def test_grafana_gate_rejects_cross_occurrence_source_artifacts(
     tmp_path: Path,
 ) -> None:

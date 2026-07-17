@@ -246,6 +246,9 @@ jobs:
                       --json-out reports/quality/test-governance-current.json \
                       --fixture-duplication-out reports/quality/test-fixture-asset-duplication.json
 
+            -   name: Validate flaky-test burndown review evidence
+                run: uv run python -m scripts.engineering.qa report-flaky-test-burndown-review --check
+
             -   name: Validate config/contract/registry artifact duplication audit
                 run: uv run python -m scripts.engineering.qa report-artifact-duplication-audit --check
 
@@ -257,6 +260,9 @@ jobs:
 
             -   name: Validate contract coverage matrix artifact
                 run: uv run python -m scripts.engineering.qa report-contract-coverage-matrix --check
+
+            -   name: Validate Domain I/O taint inventory artifact
+                run: uv run python -m scripts.engineering.qa report-domain-io-taint-inventory --check
 
             -   name: Validate port-adapter-factory coverage map artifact
                 run: uv run python -m scripts.engineering.qa report-port-adapter-factory-coverage --check

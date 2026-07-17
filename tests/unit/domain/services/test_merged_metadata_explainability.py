@@ -31,7 +31,7 @@ class TestMergedMetadataExplainer:
             composite_run_id="test_run_123",
             source_providers=["chembl", "pubchem"],
             enrichment_status={"uniprot": "applied", "go": "not_applied"},
-            lineage_created_at=FIXED_TEST_TIME.replace(tzinfo=None),
+            lineage_created_at=FIXED_TEST_TIME,
         )
 
     @pytest.fixture

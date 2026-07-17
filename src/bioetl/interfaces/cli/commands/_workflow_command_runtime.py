@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 from uuid import UUID
 
 from bioetl.domain.workflow import WorkflowConfig, WorkflowStepConfig
@@ -19,10 +19,29 @@ from bioetl.interfaces.cli.commands.domains.health.observability_backend_runtime
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from bioetl.application.services.control_plane.workflow.execution_service import (
-        WorkflowExecutionService,
-    )
     from bioetl.composition.registry_api import PipelineRegistry
+    from bioetl.interfaces.cli.commands._workflow_run_support import (
+        _MetricsPublisher,
+        _WorkflowExecutionServiceResolver,
+    )
+
+
+class _WorkflowExecutionKwargs(TypedDict):
+    """Exact kwargs contract shared by workflow CLI execution helpers."""
+
+    get_workflow_execution_service_fn: _WorkflowExecutionServiceResolver
+    ensure_metrics_server_started_fn: Callable[[], object]
+    publish_metrics_safely_fn: _MetricsPublisher
+    config: WorkflowConfig
+    registry: PipelineRegistry | None
+    dry_run: bool
+    only_steps: str | None
+    resume_last: bool
+    resume_manifest_id: str | None
+    resume_run_id: UUID | None
+    force_steps: str | None
+    repair_steps: str | None
+    incremental: bool
 
 
 def workflow_pipeline_probe_paths(config: WorkflowConfig) -> tuple[str, ...]:
@@ -37,9 +56,9 @@ def workflow_pipeline_probe_paths(config: WorkflowConfig) -> tuple[str, ...]:
 
 def build_workflow_execution_kwargs(
     *,
-    get_workflow_execution_service_fn: Callable[..., WorkflowExecutionService],
+    get_workflow_execution_service_fn: _WorkflowExecutionServiceResolver,
     ensure_metrics_server_started_fn: Callable[[], object],
-    publish_metrics_safely_fn: Callable[..., object],
+    publish_metrics_safely_fn: _MetricsPublisher,
     config: WorkflowConfig,
     registry: PipelineRegistry | None,
     dry_run: bool,
@@ -50,7 +69,7 @@ def build_workflow_execution_kwargs(
     force_steps: str | None,
     repair_steps: str | None,
     incremental: bool,
-) -> dict[str, object]:
+) -> _WorkflowExecutionKwargs:
     """Bundle workflow execution kwargs for shared CLI/runtime call sites."""
     return {
         "get_workflow_execution_service_fn": get_workflow_execution_service_fn,
@@ -72,7 +91,7 @@ def build_workflow_execution_kwargs(
 def execute_workflow_with_backend(
     *,
     config: WorkflowConfig,
-    execution_kwargs: dict[str, object],
+    execution_kwargs: _WorkflowExecutionKwargs,
     dry_run: bool,
     only_steps: str | None,
     resume_last: bool,

@@ -7,6 +7,7 @@ from collections.abc import Iterable, Mapping
 from typing import Final
 
 import polars as pl
+from polars.datatypes import DataTypeClass
 
 from bioetl.domain.mapping.protein_class_target_type import (
     MAJOR_FAMILY_RULE_VERSION,
@@ -29,7 +30,7 @@ MULTIFUNCTIONAL_TARGET_NAME: Final = "Multifunctional target"
 _RESOLVED_STATUS: Final = "resolved"
 _LEVELS: Final = (1, 2, 3, 4, 5)
 
-_SUMMARY_SCHEMA: Final[dict[str, pl.DataType]] = {
+_SUMMARY_SCHEMA: Final[dict[str, DataTypeClass | pl.DataType]] = {
     "target_id": pl.Utf8,
     "protein_classifications": pl.Utf8,
     **{f"target_protein_class_id_L{level}": pl.Utf8 for level in _LEVELS},

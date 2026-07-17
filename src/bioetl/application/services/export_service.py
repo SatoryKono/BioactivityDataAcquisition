@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol, TypeGuard, runtime_checkable
 
 from bioetl.application.services.export_execution import (
     create_failed_result as _create_failed_result,
@@ -51,6 +52,37 @@ _EXPORT_OPERATION_ERRORS = (
 )
 
 
+class _PreviewField(Protocol):
+    """Column metadata surface required for table previews."""
+
+    @property
+    def name(self) -> str: ...
+
+    @property
+    def type(self) -> object: ...
+
+    @property
+    def nullable(self) -> bool: ...
+
+
+@runtime_checkable
+class _PreviewSchema(Protocol):
+    """Iterable schema returned by preview-capable Delta readers."""
+
+    def __iter__(self) -> Iterator[_PreviewField]: ...
+
+
+class _PreviewTable(Protocol):
+    """Sample table surface required for preview serialization."""
+
+    def to_pylist(self) -> list[dict[str, object]]: ...
+
+
+def _is_preview_table(value: object) -> TypeGuard[_PreviewTable]:
+    """Return whether a Delta reader payload supports preview serialization."""
+    return callable(getattr(value, "to_pylist", None))
+
+
 @dataclass
 class ExportService:
     """Service for exporting Delta Lake tables to various formats."""
@@ -75,17 +107,17 @@ class ExportService:
         tables: list[TableInfo] = []
         if layer in ("all", "silver"):
             tables.extend(
-                TableInfo(name=name, layer="silver", path=path)
+                TableInfo(name=name, layer="silver", path=Path(path))
                 for name, path in self.catalog.list_tables(
-                    base_path=self.silver_path,
+                    base_path=str(self.silver_path),
                     layer="silver",
                 )
             )
         if layer in ("all", "gold"):
             tables.extend(
-                TableInfo(name=name, layer="gold", path=path)
+                TableInfo(name=name, layer="gold", path=Path(path))
                 for name, path in self.catalog.list_tables(
-                    base_path=self.gold_path,
+                    base_path=str(self.gold_path),
                     layer="gold",
                 )
             )
@@ -109,8 +141,10 @@ class ExportService:
         """
         table_path = self._get_table_path(table_name, layer)
 
-        table_path_ref = table_path.as_posix()
+        table_path_ref = table_path if isinstance(table_path, str) else table_path.as_posix()
         schema = await self.reader.get_schema(table_path_ref)
+        if not isinstance(schema, _PreviewSchema):
+            raise TypeError("Delta reader returned a non-iterable preview schema")
         columns = tuple(
             ColumnInfo(name=f.name, type=str(f.type), nullable=f.nullable)
             for f in schema
@@ -118,6 +152,8 @@ class ExportService:
 
         row_count = await self.reader.get_row_count(table_path_ref)
         sample_table = await self.reader.read_table(table_path_ref, limit=sample_rows)
+        if not _is_preview_table(sample_table):
+            raise TypeError("Delta reader returned a table without preview support")
         samples = tuple(sample_table.to_pylist())
 
         return TablePreview(
@@ -149,7 +185,8 @@ class ExportService:
         table_path = self._get_table_path(table_name, layer)
 
         try:
-            if not await self.reader.table_exists(table_path.as_posix()):
+            table_path_str = table_path if isinstance(table_path, str) else table_path.as_posix()
+            if not await self.reader.table_exists(table_path_str):
                 return self._create_missing_table_result(
                     table_name=table_name,
                     layer=layer,
@@ -183,7 +220,7 @@ class ExportService:
         table_name: str,
         layer: str,
         options: ExportOptions,
-        table_path: Path,
+        table_path: Path | str,
     ) -> ExportResult:
         """Build result payload for missing table case."""
         return _create_missing_table_result(
@@ -233,14 +270,15 @@ class ExportService:
             error=error,
         )
 
-    def _get_table_path(self, table_name: str, layer: str) -> Path:
+    def _get_table_path(self, table_name: str, layer: str) -> Path | str:
         """Get the table path through the catalog adapter."""
         base_path = self._get_layer_base_path(layer)
-        return self.catalog.resolve_table_path(
-            base_path=base_path,
+        result = self.catalog.resolve_table_path(
+            base_path=str(base_path),
             table_name=table_name,
             layer=layer,
         )
+        return result if isinstance(result, str) else Path(result)
 
     def _get_layer_base_path(self, layer: str) -> Path:
         """Resolve the root path for one export layer."""

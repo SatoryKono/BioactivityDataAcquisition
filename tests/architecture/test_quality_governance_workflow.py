@@ -78,6 +78,8 @@ def test_tests_workflow_runs_generated_architecture_evidence_gates() -> None:
     workflow = Path(".github/workflows/tests.yml").read_text(encoding="utf-8")
     assert "Validate contract coverage matrix artifact" in workflow
     assert "report-contract-coverage-matrix --check" in workflow
+    assert "Validate Domain I/O taint inventory artifact" in workflow
+    assert "report-domain-io-taint-inventory --check" in workflow
     assert "Validate port-adapter-factory coverage map artifact" in workflow
     assert "report-port-adapter-factory-coverage --check" in workflow
     assert "Validate domain aggregate invariant registry" in workflow

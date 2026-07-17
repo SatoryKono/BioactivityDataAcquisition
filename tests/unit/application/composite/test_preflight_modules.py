@@ -1,4 +1,4 @@
-"""Unit tests for preflight modules — types, rules, reporting, orchestration."""
+"""Unit tests for preflight modules â€” types, rules, reporting, orchestration."""
 
 from __future__ import annotations
 

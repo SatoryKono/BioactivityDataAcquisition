@@ -8,6 +8,8 @@ from bioetl.composition.lazy_exports import install_lazy_exports
 from bioetl.composition.runtime_builders.registry_manifest import PUBLIC_LAZY_EXPORTS
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from bioetl.composition.registry_api import PipelineRegistry
     from bioetl.composition.runtime_builders.ledger_collaborator import (
         PipelineRunnerProtocol,
@@ -16,6 +18,7 @@ if TYPE_CHECKING:
         RunnerBuilderWiring,
     )
     from bioetl.domain.context import PipelineRunContext
+    from bioetl.infrastructure.config.settings_api import Settings
 
     def build_pipeline_runner(
         ctx: PipelineRunContext,
@@ -25,9 +28,9 @@ if TYPE_CHECKING:
     ) -> PipelineRunnerProtocol: ...
 
     def control_plane_root(
-        settings: object,
+        settings: Settings,
         store_name: str,
-    ) -> object: ...
+    ) -> Path: ...
 
 
 __all__ = [

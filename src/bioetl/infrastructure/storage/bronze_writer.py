@@ -12,7 +12,9 @@ from bioetl.domain.types import BatchID, RunID, RunType
 from bioetl.domain.value_objects.bronze_result import BronzeWriteResult
 from bioetl.infrastructure.storage.bronze.facade_contracts import (
     BRONZE_WRITE_ERRORS,
-    BronzeWriterRuntimeServices,
+)
+from bioetl.infrastructure.storage.bronze.facade_contracts import (
+    BronzeWriterRuntimeServices as BronzeWriterRuntimeServices,
 )
 from bioetl.infrastructure.storage.bronze.io_mixin import BronzeWriterIOMixin
 from bioetl.infrastructure.storage.bronze.metadata_mixin import (
@@ -22,6 +24,7 @@ from bioetl.infrastructure.storage.bronze.metrics_mixin import (
     BronzeWriterMetricsMixin,
 )
 from bioetl.infrastructure.storage.bronze.pipeline_helpers import (
+    BronzeWriteArtifacts,
     BronzeWritePostwriteContext,
     BronzeWritePrepared,
     BronzeWriteRequest,
@@ -251,6 +254,6 @@ class BronzeWriter(
     async def _write_bronze_data_and_sidecar(
         self,
         prepared: BronzeWritePrepared,
-    ):
+    ) -> BronzeWriteArtifacts:
         """Write compressed JSONL data and metadata sidecar to disk."""
         return await write_bronze_data_and_sidecar(self, prepared)
