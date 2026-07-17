@@ -717,9 +717,7 @@ def _iter_candidate_paths_with_rg(
     excluded_parts: tuple[str, ...],
 ) -> list[Path]:
     """Discover Python candidates with bounded ripgrep before direct reads."""
-    regexes = [
-        pattern for marker in markers for pattern in ("-e", re.escape(marker))
-    ]
+    regexes = [pattern for marker in markers for pattern in ("-e", re.escape(marker))]
     try:
         result, stdout = _run_text_discovery_command(
             [
