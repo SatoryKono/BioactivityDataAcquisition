@@ -6,7 +6,8 @@ CORE_DIR="/etc/bioetl-grafana/datasources-core"
 TRACING_DIR="/etc/bioetl-grafana/datasources-tracing"
 PRUNE_FILE="${TARGET_DIR}/tracing-prune.yml"
 TRACING_FLAG="$(printf '%s' "${BIOETL_ENABLE_TRACING_DATASOURCES:-auto}" | tr -d '\r' | xargs)"
-AUTO_WAIT_SECONDS=8
+# Loki intentionally keeps /ready false while its ingester settles after startup.
+AUTO_WAIT_SECONDS=30
 AUTO_POLL_SECONDS=1
 RENDERING_SERVER_URL="${GF_RENDERING_SERVER_URL:-}"
 STALE_RENDERER_PLUGIN_DIR="/var/lib/grafana/plugins/grafana-image-renderer"

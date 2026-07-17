@@ -111,9 +111,12 @@ ______________________________________________________________________
 > checks and then expands coverage from shipped dashboard JSON so every
 > executable Prometheus, HTTP, Loki, and Tempo handoff target gets an evidence
 > row or an explicit blocked/expected-empty classification.
-> Its governed per-request timeout is `15s`, which covers bounded Loki
-> `query_range` fan-out on the local stack without treating sparse logs as a
-> datasource outage. Missing DQ freshness samples are reported as
+> Its governed total Loki budget is `15s`, including the `/ready` probe. Loki
+> lookback is bounded to at most one hour: Runtime panels `#250` and `#251`
+> use `query_range`, while instant aggregation panel `#257` uses `/query`.
+> Sparse logs are not treated as a datasource outage, but all three panels are
+> required semantic evidence and backend unavailability therefore blocks the
+> gate. Missing DQ freshness samples are reported as
 > `telemetry_missing`: the corresponding panels render `UNKNOWN`, never a false
 > healthy zero.
 > `python -m scripts.ops check-grafana-audit-preflight` is the fast readiness
@@ -141,17 +144,22 @@ ______________________________________________________________________
 > A release occurrence is cryptographically traceable rather than path-only:
 > the semantic report, render manifest, and gate receipt share one
 > `occurrence_id`; the receipt records commit/tree identity, SHA-256, terminal
-> status, and dashboard/panel scope for both source artifacts. Missing or
+> status, and dashboard/panel scope for both source artifacts. Render panel scope
+> is read from `terminalStateValidation.panelStates`; UID-only, missing, or
 > cross-occurrence evidence fails closed. Unit tests with a temporary screenshot
 > directory also write their gate beside that directory and cannot overwrite the
 > canonical repository report.
 >
 > Default CI runs a token-free semantic policy/fixture gate and uploads the
-> `dashboard-semantic-policy` artifact. Browser rendering is host-only and manual
+> `dashboard-semantic-policy` artifact. That artifact includes metric inventory,
+> JSON/provisioning, selector/variable-reference, panel-contract drift,
+> registry/runtime/docs bidirectionality, datasource-boundary, and no-data
+> evidence. Browser rendering is host-only and manual
 > via `.github/workflows/dashboard-render-host.yml`; that workflow uploads the
 > semantic source, render source, and combined receipt independently. Local
 > review may run either path, default CI blocks on semantic policy, and release
-> requires both live gates from the same supported-host occurrence.
+> requires both live gates from the same supported-host occurrence. Unknown
+> semantic classifications fail closed to explicit review.
 >
 > Semantic severity is fail-closed and panel-attributable in the live audit
 > artifact. `query_invalid` blocks. `datasource_unavailable` and

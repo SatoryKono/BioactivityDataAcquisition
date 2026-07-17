@@ -148,6 +148,7 @@ def test_audit_profile_mounts_explicit_roots_read_only_and_uses_bounded_loki_job
     assert services["grafana"]["depends_on"]["quarantine-explorer-audit"] == {
         "condition": "service_healthy"
     }
+    assert audit_promtail["depends_on"]["loki"] == {"condition": "service_healthy"}
 
 
 def test_default_runtime_log_sink_reaches_canonical_loki_dashboard_job() -> None:
@@ -165,6 +166,18 @@ def test_default_runtime_log_sink_reaches_canonical_loki_dashboard_job() -> None
     promtail = yaml.safe_load(
         Path("grafana/promtail-config.yml").read_text(encoding="utf-8")
     )
+    assert promtail["clients"] == [
+        {
+            "url": "http://loki:3100/loki/api/v1/push",
+            "backoff_config": {
+                "min_period": "500ms",
+                "max_period": "5s",
+                "max_retries": 20,
+            },
+            "timeout": "10s",
+        }
+    ]
+    assert promtail_service["depends_on"]["loki"] == {"condition": "service_healthy"}
     runtime_jobs = [
         job
         for job in promtail["scrape_configs"]
@@ -304,6 +317,18 @@ def test_tracing_datasource_default_matches_optional_tracing_profile() -> None:
     assert loki["profiles"] == ["tracing"]
     assert promtail["profiles"] == ["tracing"]
     assert tempo["profiles"] == ["tracing"]
+    assert loki["healthcheck"] == {
+        "test": [
+            "CMD",
+            "/usr/bin/loki",
+            "-config.file=/etc/loki/config.yml",
+            "-verify-config=true",
+        ],
+        "interval": "20s",
+        "timeout": "5s",
+        "retries": 3,
+        "start_period": "15s",
+    }
     assert (
         "BIOETL_ENABLE_TRACING_DATASOURCES=${BIOETL_ENABLE_TRACING_DATASOURCES:-auto}"
         in grafana["environment"]
@@ -325,7 +350,7 @@ def test_bootstrap_script_detects_tracing_datasource_reachability() -> None:
         encoding="utf-8"
     )
     assert "BIOETL_ENABLE_TRACING_DATASOURCES:-auto" in content
-    assert "AUTO_WAIT_SECONDS=8" in content
+    assert "AUTO_WAIT_SECONDS=30" in content
     assert "AUTO_POLL_SECONDS=1" in content
     assert 'wget --quiet --tries=1 --timeout=2 -O /dev/null "$1"' in content
     assert "wait_for_auto_tracing_ready()" in content
