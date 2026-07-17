@@ -5,7 +5,6 @@ from __future__ import annotations
 from bioetl.application.services.control_plane.replay.historical_identity_models import (
     HistoricalReplayRunIdentity,
     build_historical_certified_identity_payload_from_record,
-    build_historical_identity_core_payload,
 )
 
 
@@ -62,12 +61,15 @@ def build_historical_certified_identity_payload(
 ) -> dict[str, object]:
     """Return one JSON-safe historical replay row with shared identity anchors."""
     return build_historical_run_identity_payload(
-        **build_historical_identity_core_payload(identity),
-        **build_historical_certification_payload(
-            certification_status=certification_status,
-            replay_occurrence_kind=replay_occurrence_kind,
-            blocking_reasons=blocking_reasons,
-        ),
+        manifest_id=identity.manifest_id,
+        run_id=identity.run_id,
+        pipeline_name=identity.pipeline_name,
+        provider=identity.provider,
+        entity=identity.entity,
+        execution_context=identity.execution_context,
+        certification_status=certification_status,
+        replay_occurrence_kind=replay_occurrence_kind,
+        blocking_reasons=blocking_reasons,
         **extra_fields,
     )
 

@@ -1,0 +1,80 @@
+{
+  "decision": "reviewed_inventory_clear",
+  "evidence_scope": "Curated flaky-test inventory bound to the current tracked static test-governance fingerprint. This inventory does not replace repeated-run CI telemetry or claim that static analysis can detect intermittent outcomes.",
+  "generated_by": "scripts.engineering.qa.report_flaky_test_burndown_review",
+  "linked_issue": "#5514",
+  "linked_issues": [
+    "#5514",
+    "#5962",
+    "#6351"
+  ],
+  "policy": {
+    "flaky_test_definition": [
+      "intermittent pass/fail outcome across repeated or sharded runs",
+      "order-dependent behavior",
+      "live-network leakage into deterministic lanes",
+      "timing-sensitive assertion without a bounded deterministic seam",
+      "nondeterministic ID, clock, random, VCR, fixture, or golden-data behavior"
+    ],
+    "no_growth_gate": "reports/quality/debt-governance-gates.json::flaky_test_total_count",
+    "remediation_workflow": [
+      "stabilize with deterministic clock, ID, and fixture seams",
+      "quarantine only with owner, triage_status, cause, and removal condition",
+      "do not hide nondeterminism with retries or relaxed assertions"
+    ],
+    "untriaged_gate": "reports/quality/debt-governance-gates.json::flaky_test_untriaged_count"
+  },
+  "review_notes": [
+    "The curated residual flaky-test inventory is empty at this review point.",
+    "Current suite size and source identity are derived from test-governance-current.json.",
+    "Repeated-run CI telemetry remains the authority for discovering intermittent outcomes."
+  ],
+  "reviewed_flaky_tests": [],
+  "reviewed_on": "2026-07-17",
+  "schema_version": "flaky-test-burndown-review-v2",
+  "source_artifacts": [
+    "configs/quality/flaky_test_inventory.yaml",
+    "reports/quality/test-governance-current.json"
+  ],
+  "source_fingerprints": {
+    "curated_inventory_sha256": "a15f2b7fd6925b5c7307f5b50cb72558135ba665b9e71d28aa4ad6971cae347c",
+    "test_governance_source_tree_sha256": "808c471c2f4da231a4ec818763e8bd592798dd30d692bd9f5ab43d3d1d93f608"
+  },
+  "summary": {
+    "by_alert_level": {
+      "critical": 0,
+      "warning": 0
+    },
+    "by_category": {
+      "Contract": 0,
+      "Data": 0,
+      "Import": 0,
+      "Infrastructure": 0,
+      "State": 0,
+      "Type": 0
+    },
+    "by_layer": {
+      "application": 0,
+      "composition": 0,
+      "domain": 0,
+      "infrastructure": 0,
+      "interfaces": 0
+    },
+    "by_severity": {
+      "P1": 0,
+      "P2": 0,
+      "P3": 0
+    },
+    "by_triage": {
+      "fixed": 0,
+      "manual-review": 0,
+      "needs-triage": 0,
+      "quarantined": 0
+    },
+    "test_governance_budget_violation_count": 0,
+    "test_governance_source_tree_sha256": "808c471c2f4da231a4ec818763e8bd592798dd30d692bd9f5ab43d3d1d93f608",
+    "total_flaky": 0,
+    "total_test_files": 2012,
+    "total_tests_analyzed": 22494
+  }
+}

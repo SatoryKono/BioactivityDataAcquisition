@@ -55,7 +55,6 @@ def test_generated_artifact_routing_inventory_is_valid() -> None:
     assert payload["schema_version"] == 1
     routes = payload.get("routes")
     assert isinstance(routes, list) and routes, "routes must be a non-empty list"
-    allowed_roots = _allowed_output_roots(payload)
     forbidden_roots = tuple(payload.get("forbidden_output_roots") or ())
     assert forbidden_roots, "forbidden_output_roots must be declared"
 
@@ -72,7 +71,7 @@ def test_generated_artifact_routing_inventory_is_valid() -> None:
             f"{route_id}: generator required"
         )
         # Skip generator existence check for fallback routes with non-file generators
-        # (e.g., "multiple governed docs and quality generators", "manual closeout", 
+        # (e.g., "multiple governed docs and quality generators", "manual closeout",
         # "docs API reference generation workflow", or combined generators with " and ")
         if (
             "/" not in generator
@@ -110,6 +109,8 @@ def test_generated_artifact_routing_covers_core_generators() -> None:
         "scripts/engineering/ci/validate_contract_registry.py",
         "scripts/engineering/ci/validate_registry_dq_refs.py",
         "scripts/engineering/ci/validate_schema_classifier_gate.py",
+        "scripts/engineering/qa/report_domain_io_taint_inventory.py",
+        "scripts/engineering/qa/report_flaky_test_burndown_review.py",
     }
 
     assert expected_generators.issubset(generators), (

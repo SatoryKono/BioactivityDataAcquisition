@@ -5,7 +5,7 @@ from __future__ import annotations
 import threading
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Literal
-from urllib.parse import urlparse
+from urllib.parse import SplitResult, parse_qsl, urlsplit
 
 if TYPE_CHECKING:
     import httpx
@@ -44,8 +44,8 @@ class APIRequestCollector:
         timestamp: datetime | None = None,
     ) -> None:
         """Record normalized request telemetry (URL, timing, status, and rate-limit data)."""
-        parsed = urlparse(url)
-        base_url = f"{parsed.scheme}://{parsed.netloc}"
+        parsed = urlsplit(url)
+        base_url = self._sanitize_base_url(parsed)
         endpoint = parsed.path
 
         if params is None:
@@ -184,12 +184,20 @@ class APIRequestCollector:
         """Parse query string into dict."""
         if not query_string:
             return {}
-        params: dict[str, str | int | float | bool | None] = {}
-        for part in query_string.split("&"):
-            if "=" in part:
-                key, value = part.split("=", 1)
-                params[key] = value
-        return params
+        return dict(parse_qsl(query_string, keep_blank_values=True))
+
+    @staticmethod
+    def _sanitize_base_url(parsed: SplitResult) -> str:
+        """Build a credential-free base URL while preserving host and port."""
+        hostname = parsed.hostname or ""
+        if ":" in hostname and not hostname.startswith("["):
+            hostname = f"[{hostname}]"
+        try:
+            port = parsed.port
+        except ValueError as exc:
+            raise ValueError("Request URL contains an invalid port") from exc
+        netloc = f"{hostname}:{port}" if port is not None else hostname
+        return f"{parsed.scheme}://{netloc}"
 
     def _sanitize_params(
         self,
@@ -206,12 +214,13 @@ class APIRequestCollector:
             "password",
             "auth",
             "authorization",
-            "x-api-key",
+            "x_api_key",
             "bearer",
         }
         result: dict[str, str | int | float | bool | None] = {}
         for key, value in params.items():
-            if key.lower() in sensitive_keys:
+            normalized_key = key.lower().replace("-", "_")
+            if normalized_key in sensitive_keys:
                 result[key] = "[REDACTED]"
             elif isinstance(value, (str, int, float, bool)) or value is None:
                 result[key] = value

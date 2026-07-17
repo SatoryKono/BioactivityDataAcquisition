@@ -3219,7 +3219,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "description": "Pipeline-scoped structured warning logs for the selected pipeline over the active range. Columns are parsed JSON fields (not a single flattened line). Empty state is neutral; warning visual weight is reserved for returned warning rows. Terminal-state contract: successful empty=VALID EMPTY; datasource/query failures=ERROR; blank/loading is forbidden.",
+          "description": "Pipeline-scoped structured warning logs for the selected pipeline over the bounded last hour. Columns are parsed JSON fields (not a single flattened line). Empty state is neutral; warning visual weight is reserved for returned warning rows. Terminal-state contract: successful empty=VALID EMPTY; datasource/query failures=ERROR; blank/loading is forbidden.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3359,11 +3359,12 @@
               "refId": "A"
             }
           ],
+          "timeFrom": "1h",
           "title": "Inspect Warning Logs",
           "type": "table"
         },
         {
-          "description": "GLOBAL log events that failed JSON parsing or are missing expected fields over the active range. Not pipeline-scoped runtime evidence; compare with pipeline-scoped warning logs. Terminal-state contract: successful empty=VALID EMPTY; datasource/query failures=ERROR; blank/loading is forbidden.",
+          "description": "GLOBAL log events that failed JSON parsing over the bounded last hour. Only the bounded parser error is rendered; the raw source line is intentionally excluded because it may contain secret-bearing payloads. Not pipeline-scoped runtime evidence; compare with pipeline-scoped warning logs. Terminal-state contract: successful empty=VALID EMPTY; datasource/query failures=ERROR; blank/loading is forbidden.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3404,10 +3405,11 @@
           },
           "targets": [
             {
-              "expr": "{job=\"bioetl\"} | json | __error__!=\"\" | line_format \"{{.__error__}} {{__line__}}\"",
+              "expr": "{job=\"bioetl\"} | json | __error__!=\"\" | line_format \"{{.__error__}}\"",
               "refId": "A"
             }
           ],
+          "timeFrom": "1h",
           "title": "Inspect GLOBAL Unstructured Logs",
           "type": "table"
         },
@@ -3416,7 +3418,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "description": "Top parsed warning events by bounded event/logger dimensions over the active Grafana range. This avoids grouping by raw message text, which can include dynamic identifiers and create noisy high-cardinality series. run_type is intentionally not filtered because structured logs do not guarantee a run_type field. Terminal-state contract: successful empty=VALID EMPTY; datasource/query failures=ERROR; blank/loading is forbidden.",
+          "description": "Top parsed warning events by bounded event/logger dimensions over the bounded last hour. This avoids grouping by raw message text, which can include dynamic identifiers and create noisy high-cardinality series. run_type is intentionally not filtered because structured logs do not guarantee a run_type field. Terminal-state contract: successful empty=VALID EMPTY; datasource/query failures=ERROR; blank/loading is forbidden.",
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3472,11 +3474,12 @@
           },
           "targets": [
             {
-              "expr": "topk(10, sum by (event, logger) (count_over_time({job=\"bioetl\"} | json | __error__=\"\" | pipeline=~\"$pipeline\" | level=\"warning\" [$__range])))",
+              "expr": "topk(10, sum by (event, logger) (count_over_time({job=\"bioetl\"} | json | __error__=\"\" | pipeline=~\"$pipeline\" | level=\"warning\" [1h])))",
               "instant": true,
               "refId": "A"
             }
           ],
+          "timeFrom": "1h",
           "title": "Inspect Top Warning Events by Event / Logger / Range",
           "transformations": [
             {
@@ -3809,5 +3812,5 @@
   "timezone": "browser",
   "title": "2. Runtime",
   "uid": "bioetl-runtime",
-  "version": 2
+  "version": 3
 }

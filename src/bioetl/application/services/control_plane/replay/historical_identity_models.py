@@ -31,15 +31,32 @@ HistoricalReplayRunIdentity = HistoricalReplayRunIdentityRecord
 
 
 class _HistoricalReplayCertifiedIdentity(Protocol):
-    manifest_id: str
-    run_id: str
-    pipeline_name: str
-    provider: str
-    entity: str
-    execution_context: str
-    certification_status: str
-    replay_occurrence_kind: str
-    blocking_reasons: tuple[str, ...]
+    @property
+    def manifest_id(self) -> str: ...
+
+    @property
+    def run_id(self) -> str: ...
+
+    @property
+    def pipeline_name(self) -> str: ...
+
+    @property
+    def provider(self) -> str: ...
+
+    @property
+    def entity(self) -> str: ...
+
+    @property
+    def execution_context(self) -> str: ...
+
+    @property
+    def certification_status(self) -> str: ...
+
+    @property
+    def replay_occurrence_kind(self) -> str: ...
+
+    @property
+    def blocking_reasons(self) -> tuple[str, ...]: ...
 
 
 @dataclass(frozen=True, slots=True)

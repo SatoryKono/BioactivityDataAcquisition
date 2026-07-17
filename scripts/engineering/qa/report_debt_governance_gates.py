@@ -108,6 +108,50 @@ def _load_json(repo_root: Path, rel_path: str) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _load_json_input_with_preflight(
+    repo_root: Path,
+    rel_path: str,
+    *,
+    gate_name: str,
+) -> tuple[dict[str, Any], Gate]:
+    """Load one required JSON input without crashing the evidence rollup."""
+    path = repo_root / rel_path
+    current: str
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        current = "missing"
+    except json.JSONDecodeError:
+        current = "invalid_json"
+    except OSError:
+        current = "unreadable"
+    else:
+        if isinstance(payload, dict):
+            return payload, Gate(
+                name=gate_name,
+                status="pass",
+                metric="required_json_input",
+                current="available_valid_object",
+                limit="available_valid_object",
+                source_artifact=rel_path,
+                remediation="No action required.",
+            )
+        current = "invalid_top_level_type"
+
+    return {}, Gate(
+        name=gate_name,
+        status="fail",
+        metric="required_json_input",
+        current=current,
+        limit="available_valid_object",
+        source_artifact=rel_path,
+        remediation=(
+            "Run the canonical producer for this input and publish the generated "
+            "artifact before rerunning debt-governance gates."
+        ),
+    )
+
+
 def _load_yaml(repo_root: Path, rel_path: str) -> dict[str, Any]:
     payload = yaml.safe_load((repo_root / rel_path).read_text(encoding="utf-8"))
     return payload if isinstance(payload, dict) else {}
@@ -822,6 +866,11 @@ def build_payload(
     """Build normalized debt-governance gate payload."""
     repo_root = repo_root.resolve()
     gates: list[Gate] = []
+    flaky_review, flaky_review_preflight_gate = _load_json_input_with_preflight(
+        repo_root,
+        FLAKY_TEST_REVIEW_PATH,
+        gate_name="flaky_test_review_input_preflight",
+    )
 
     architecture_scorecard = _load_json(
         repo_root,
@@ -853,7 +902,6 @@ def build_payload(
     test_governance = _load_json(
         repo_root, "reports/quality/test-governance-current.json"
     )
-    flaky_review = _load_json(repo_root, FLAKY_TEST_REVIEW_PATH)
     runtime_cardinality = _load_json(
         repo_root,
         "reports/observability/runtime_cardinality_inventory.json",
@@ -878,6 +926,7 @@ def build_payload(
     )
 
     gates.extend(_debt_scorecard_gates())
+    gates.append(flaky_review_preflight_gate)
     gates.append(
         _debt_scorecard_budget_no_growth_gate(
             repo_root=repo_root,

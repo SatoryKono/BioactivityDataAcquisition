@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from typing import Never
 
 
-def _immutable(*_args: object, **_kwargs: object) -> None:
+def _immutable(*_args: object, **_kwargs: object) -> Never:
     raise TypeError("nested state is immutable")
 
 

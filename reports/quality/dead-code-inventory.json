@@ -15,18 +15,17 @@
   "summary": {
     "triaged_entry_count": 18,
     "triaged_entries_below_min_importers": 0,
-    "repo_wide_zero_import_candidate_count": 9,
-    "repo_wide_classified_zero_import_candidate_count": 9,
+    "repo_wide_zero_import_candidate_count": 3,
+    "repo_wide_classified_zero_import_candidate_count": 3,
     "repo_wide_untriaged_zero_import_candidate_count": 0,
-    "repo_wide_owner_test_anchored_candidate_count": 9,
-    "repo_wide_candidates_without_owner_tests_count": 0,
+    "repo_wide_owner_test_anchored_candidate_count": 1,
+    "repo_wide_candidates_without_owner_tests_count": 2,
     "repo_wide_non_static_reachability_candidate_count": 1,
     "repo_wide_disposition_counts": {
-      "retain_canonical_owner_module": 8,
-      "retain_module_entrypoint": 1
+      "retain_module_entrypoint": 1,
+      "retain_private_module": 2
     },
     "repo_wide_evidence_lane_counts": {
-      "canonical_owner_contract": 8,
       "module_entrypoint_owner_suite": 1
     },
     "triaged_retained_owner_test_anchored_count": 14,
@@ -365,180 +364,40 @@
       "owner_test_paths_exist_count": 1
     },
     {
-      "module_name": "bioetl.domain.ports.data_normalization",
-      "path": "src/bioetl/domain/ports/data_normalization.py",
-      "is_private_module": false,
+      "module_name": "bioetl.domain.exceptions._redaction",
+      "path": "src/bioetl/domain/exceptions/_redaction.py",
+      "is_private_module": true,
       "src_importer_count": 0,
       "test_importer_count": 0,
       "classification_status": "classified",
-      "disposition": "retain_canonical_owner_module",
-      "reviewed_on": "2026-06-16",
+      "disposition": "retain_private_module",
+      "reviewed_on": "2026-07-13",
       "review_by": "2026-09-14",
       "linked_issue": "#4541",
-      "rationale": "Port owner module for data_normalization; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
+      "rationale": "Private redaction utilities extracted from base.py for separation of concerns; used internally by domain exceptions",
       "owner": "@bioetl-architecture",
-      "evidence_lane": "canonical_owner_contract",
-      "owner_tests": [
-        "tests/architecture/test_domain_public_api.py",
-        "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
-        "tests/architecture/test_port_contracts.py"
-      ],
-      "owner_test_count": 3,
-      "owner_test_paths_exist_count": 3
+      "evidence_lane": null,
+      "owner_tests": [],
+      "owner_test_count": 0,
+      "owner_test_paths_exist_count": 0
     },
     {
-      "module_name": "bioetl.domain.ports.data_source",
-      "path": "src/bioetl/domain/ports/data_source.py",
-      "is_private_module": false,
+      "module_name": "bioetl.domain.normalization.profiles._stable",
+      "path": "src/bioetl/domain/normalization/profiles/_stable.py",
+      "is_private_module": true,
       "src_importer_count": 0,
       "test_importer_count": 0,
       "classification_status": "classified",
-      "disposition": "retain_canonical_owner_module",
-      "reviewed_on": "2026-06-16",
+      "disposition": "retain_private_module",
+      "reviewed_on": "2026-07-13",
       "review_by": "2026-09-14",
       "linked_issue": "#4541",
-      "rationale": "Port owner module for data_source; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
+      "rationale": "Private type definitions for normalization profiles; used internally by profile loading infrastructure",
       "owner": "@bioetl-architecture",
-      "evidence_lane": "canonical_owner_contract",
-      "owner_tests": [
-        "tests/architecture/test_domain_public_api.py",
-        "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
-        "tests/architecture/test_port_contracts.py"
-      ],
-      "owner_test_count": 3,
-      "owner_test_paths_exist_count": 3
-    },
-    {
-      "module_name": "bioetl.domain.ports.delta_reader",
-      "path": "src/bioetl/domain/ports/delta_reader.py",
-      "is_private_module": false,
-      "src_importer_count": 0,
-      "test_importer_count": 0,
-      "classification_status": "classified",
-      "disposition": "retain_canonical_owner_module",
-      "reviewed_on": "2026-06-16",
-      "review_by": "2026-09-14",
-      "linked_issue": "#4541",
-      "rationale": "Port owner module for delta_reader; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
-      "owner": "@bioetl-architecture",
-      "evidence_lane": "canonical_owner_contract",
-      "owner_tests": [
-        "tests/architecture/test_domain_public_api.py",
-        "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
-        "tests/architecture/test_port_contracts.py"
-      ],
-      "owner_test_count": 3,
-      "owner_test_paths_exist_count": 3
-    },
-    {
-      "module_name": "bioetl.domain.ports.filtering",
-      "path": "src/bioetl/domain/ports/filtering.py",
-      "is_private_module": false,
-      "src_importer_count": 0,
-      "test_importer_count": 0,
-      "classification_status": "classified",
-      "disposition": "retain_canonical_owner_module",
-      "reviewed_on": "2026-06-16",
-      "review_by": "2026-09-14",
-      "linked_issue": "#4541",
-      "rationale": "Port owner module for filtering; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
-      "owner": "@bioetl-architecture",
-      "evidence_lane": "canonical_owner_contract",
-      "owner_tests": [
-        "tests/architecture/test_domain_public_api.py",
-        "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
-        "tests/architecture/test_port_contracts.py"
-      ],
-      "owner_test_count": 3,
-      "owner_test_paths_exist_count": 3
-    },
-    {
-      "module_name": "bioetl.domain.ports.idmapping",
-      "path": "src/bioetl/domain/ports/idmapping.py",
-      "is_private_module": false,
-      "src_importer_count": 0,
-      "test_importer_count": 0,
-      "classification_status": "classified",
-      "disposition": "retain_canonical_owner_module",
-      "reviewed_on": "2026-06-16",
-      "review_by": "2026-09-14",
-      "linked_issue": "#4541",
-      "rationale": "Port owner module for idmapping; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
-      "owner": "@bioetl-architecture",
-      "evidence_lane": "canonical_owner_contract",
-      "owner_tests": [
-        "tests/architecture/test_domain_public_api.py",
-        "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
-        "tests/architecture/test_port_contracts.py"
-      ],
-      "owner_test_count": 3,
-      "owner_test_paths_exist_count": 3
-    },
-    {
-      "module_name": "bioetl.domain.ports.pii",
-      "path": "src/bioetl/domain/ports/pii.py",
-      "is_private_module": false,
-      "src_importer_count": 0,
-      "test_importer_count": 0,
-      "classification_status": "classified",
-      "disposition": "retain_canonical_owner_module",
-      "reviewed_on": "2026-06-16",
-      "review_by": "2026-09-14",
-      "linked_issue": "#4541",
-      "rationale": "Port owner module for pii; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
-      "owner": "@bioetl-architecture",
-      "evidence_lane": "canonical_owner_contract",
-      "owner_tests": [
-        "tests/architecture/test_domain_public_api.py",
-        "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
-        "tests/architecture/test_port_contracts.py"
-      ],
-      "owner_test_count": 3,
-      "owner_test_paths_exist_count": 3
-    },
-    {
-      "module_name": "bioetl.domain.ports.protein_classification",
-      "path": "src/bioetl/domain/ports/protein_classification.py",
-      "is_private_module": false,
-      "src_importer_count": 0,
-      "test_importer_count": 0,
-      "classification_status": "classified",
-      "disposition": "retain_canonical_owner_module",
-      "reviewed_on": "2026-06-16",
-      "review_by": "2026-09-14",
-      "linked_issue": "#4541",
-      "rationale": "Port owner module for protein_classification; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
-      "owner": "@bioetl-architecture",
-      "evidence_lane": "canonical_owner_contract",
-      "owner_tests": [
-        "tests/architecture/test_domain_public_api.py",
-        "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
-        "tests/architecture/test_port_contracts.py"
-      ],
-      "owner_test_count": 3,
-      "owner_test_paths_exist_count": 3
-    },
-    {
-      "module_name": "bioetl.domain.ports.resilience",
-      "path": "src/bioetl/domain/ports/resilience.py",
-      "is_private_module": false,
-      "src_importer_count": 0,
-      "test_importer_count": 0,
-      "classification_status": "classified",
-      "disposition": "retain_canonical_owner_module",
-      "reviewed_on": "2026-06-16",
-      "review_by": "2026-09-14",
-      "linked_issue": "#4541",
-      "rationale": "Port owner module for resilience; imports now go through bioetl.domain.ports facade per REQ-ARCH-027",
-      "owner": "@bioetl-architecture",
-      "evidence_lane": "canonical_owner_contract",
-      "owner_tests": [
-        "tests/architecture/test_domain_public_api.py",
-        "tests/architecture/test_domain_ports_no_filesystem_or_engine_types.py",
-        "tests/architecture/test_port_contracts.py"
-      ],
-      "owner_test_count": 3,
-      "owner_test_paths_exist_count": 3
+      "evidence_lane": null,
+      "owner_tests": [],
+      "owner_test_count": 0,
+      "owner_test_paths_exist_count": 0
     }
   ]
 }

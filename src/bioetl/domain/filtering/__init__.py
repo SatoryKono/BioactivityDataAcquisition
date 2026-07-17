@@ -7,6 +7,43 @@ imports without eagerly importing all filtering submodules.
 from __future__ import annotations
 
 from importlib import import_module
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bioetl.domain.filtering._base_filter_config import (
+        BaseFilterConfig as BaseFilterConfig,
+    )
+    from bioetl.domain.filtering._base_filter_config import (
+        FilterDecision as FilterDecision,
+    )
+    from bioetl.domain.filtering.column_filter import (
+        FilterOperator as FilterOperator,
+    )
+    from bioetl.domain.filtering.column_filter import (
+        GoldColumnFilter as GoldColumnFilter,
+    )
+    from bioetl.domain.filtering.gold_config import (
+        GoldFilterConfig as GoldFilterConfig,
+    )
+    from bioetl.domain.filtering.input_config import (
+        FilterColumn as FilterColumn,
+    )
+    from bioetl.domain.filtering.input_config import (
+        InputFilterConfig as InputFilterConfig,
+    )
+    from bioetl.domain.filtering.list_filters import (
+        GoldListContainsFilter as GoldListContainsFilter,
+    )
+    from bioetl.domain.filtering.list_filters import (
+        GoldListLengthFilter as GoldListLengthFilter,
+    )
+    from bioetl.domain.filtering.load_result import (
+        FilterLoadResult as FilterLoadResult,
+    )
+    from bioetl.domain.filtering.range_filter import GoldRangeFilter as GoldRangeFilter
+    from bioetl.domain.filtering.silver_config import (
+        SilverFilterConfig as SilverFilterConfig,
+    )
 
 _EXPORT_GROUPS: dict[str, tuple[str, ...]] = {
     "bioetl.domain.filtering._base_filter_config": (

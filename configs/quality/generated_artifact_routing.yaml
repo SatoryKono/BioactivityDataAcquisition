@@ -338,6 +338,24 @@ routes:
       - reports/quality/test-fixture-asset-duplication.json
     notes: Test-governance tracked artifacts include fixture-asset visibility inventory.
 
+  - id: flaky-test-burndown-review-quality-baseline
+    generator: scripts/engineering/qa/report_flaky_test_burndown_review.py
+    output_kind: working_report
+    commit_policy: tracked_quality_baseline
+    outputs:
+      - reports/quality/flaky-test-burndown-review.json
+    notes: Deterministic flaky-test review evidence is generated from the curated
+      inventory and the current tracked test-governance fingerprint.
+
+  - id: domain-io-taint-inventory-quality-baseline
+    generator: scripts/engineering/qa/report_domain_io_taint_inventory.py
+    output_kind: working_report
+    commit_policy: tracked_quality_baseline
+    outputs:
+      - reports/quality/domain-io-taint-inventory.json
+    notes: Semantic Domain I/O taint evidence is tracked and checked against the
+      current source tree.
+
   - id: config-contract-registry-artifact-duplication-quality-report
     generator: scripts/engineering/qa/report_artifact_duplication_audit.py
     output_kind: working_report

@@ -2220,11 +2220,11 @@
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2012,
-    "total_test_functions": 22481,
+    "total_test_functions": 22489,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "f6329702b8530ea9a185b769de41dde9b36c9ceebca479dfd4b18e8eda32c71b",
+  "source_tree_sha256": "661be832bfd73f0f17c18f69badfdbbced555870c7a444f43364e32914191c80",
   "summary": {
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
@@ -2286,6 +2286,7 @@
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2012,
-  "total_test_functions": 22481,
+  "total_test_functions": 22489,
   "uuid4_call_sites": 0
 }
+
