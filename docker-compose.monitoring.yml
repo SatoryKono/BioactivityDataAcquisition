@@ -70,7 +70,6 @@ services:
     restart: unless-stopped
     healthcheck:
       test:
-<<<<<<< HEAD
         - "CMD-SHELL"
         - "wget --quiet --tries=1 --timeout=2 -O /dev/null http://localhost:3100/ready"
       interval: 10s
@@ -78,17 +77,6 @@ services:
       retries: 6
       start_period: 60s
     mem_limit: 768m
-=======
-        - "CMD"
-        - "/usr/bin/loki"
-        - "-config.file=/etc/loki/config.yml"
-        - "-verify-config=true"
-      interval: 20s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
-    mem_limit: 7680m
->>>>>>> origin/agent/close-p0-6349-6352
     mem_reservation: 384m
     cpus: 7.5
     pids_limit: 2560

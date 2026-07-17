@@ -3219,11 +3219,7 @@
             "type": "loki",
             "uid": "loki"
           },
-<<<<<<< HEAD
           "description": "Pipeline-scoped structured warning logs for the selected pipeline over the bounded last hour. Columns are parsed JSON fields (not a single flattened line). Empty state is neutral; warning visual weight is reserved for returned warning rows. Terminal-state contract: successful empty=VALID EMPTY; datasource/query failures=ERROR; blank/loading is forbidden.",
-=======
-          "description": "Pipeline-scoped structured warning logs for the selected pipeline over the bounded 1h window (last hour). Columns are parsed JSON fields (not a single flattened line). Empty state is neutral; warning visual weight is reserved for returned warning rows. Terminal-state contract: successful empty=VALID EMPTY; datasource/query failures=ERROR; blank/loading is forbidden.",
->>>>>>> origin/agent/close-p0-6349-6352
           "fieldConfig": {
             "defaults": {
               "color": {
@@ -3368,11 +3364,7 @@
           "type": "table"
         },
         {
-<<<<<<< HEAD
           "description": "GLOBAL log events that failed JSON parsing over the bounded last hour. Only the bounded parser error is rendered; the raw source line is intentionally excluded because it may contain secret-bearing payloads. Not pipeline-scoped runtime evidence; compare with pipeline-scoped warning logs. Terminal-state contract: successful empty=VALID EMPTY; datasource/query failures=ERROR; blank/loading is forbidden.",
-=======
-          "description": "GLOBAL log events that failed JSON parsing over the bounded 1h window (last hour). Only the bounded parser error is rendered; the raw source line is intentionally excluded because it may contain secret-bearing payloads. Not pipeline-scoped runtime evidence; compare with pipeline-scoped warning logs. Terminal-state contract: successful empty=VALID EMPTY; datasource/query failures=ERROR; blank/loading is forbidden.",
->>>>>>> origin/agent/close-p0-6349-6352
           "fieldConfig": {
             "defaults": {
               "color": {
