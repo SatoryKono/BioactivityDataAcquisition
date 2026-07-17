@@ -38,56 +38,67 @@ _EXPECTED_CHEMBL_CONTRACT_SURFACE: dict[str, dict[str, str]] = {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_assay_parameters_v1.0.json",
         "contract_version": "1.0.0",
+        "normalization_profile_hash": "49c2eaf04353bcec9f87e75439b5e753d166fc5daf5de4974200d83bc7e3df72",
     },
     "chembl.cell_line": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_cell_line_v1.0.json",
         "contract_version": "1.0.0",
+        "normalization_profile_hash": "9cfc00ac9b5fe34f99cabedb3988f7d9090a4b93d3f2943d8021ac218eb711e7",
     },
     "chembl.compound_record": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_compound_record_v1.0.json",
         "contract_version": "1.0.0",
+        "normalization_profile_hash": "66d1e0248a0dfea6ee45f88c9e14d551bc072a2e6d95e123456d787a975b4684",
     },
     "chembl.molecule": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_molecule_protein_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_molecule_v1.0.json",
         "contract_version": "1.0.0",
+        "normalization_profile_hash": "6e164cc96d7ae16bfd2df7e712f5d4f2534cd6e9f7334bd38aec36fa396b1f2b",
     },
     "chembl.protein_class": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_molecule_protein_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_protein_class_v1.0.json",
         "contract_version": "1.0.0",
+        "normalization_profile_hash": "bbe60d25376d451e1adaea0d48eafbee3f5420e33e7a163b502d7e1930be0b90",
     },
     "chembl.publication": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_publication_v1.0.json",
         "contract_version": "1.0.0",
+        "normalization_profile_hash": "cd01070bbbfeb8c2d8602f095c4ec3905f2687ac539ad5d006f0c4f498d873cf",
     },
     "chembl.publication_similarity": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_publication_similarity_v1.0.json",
         "contract_version": "1.0.0",
+        "normalization_profile_hash": "657878c5a190656b33f472d2b4c102e5fd1ecb6497e4d775843a3be415739dff",
     },
     "chembl.publication_term": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_reference_publication_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_publication_term_v1.0.json",
         "contract_version": "1.0.0",
+        "normalization_profile_hash": "ecab0661137d9bda7e23aa97c5ab4240d44235381c999fa7d49a5466d251da0d",
     },
     "chembl.subcellular_fraction": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_subcellular_fraction_v1.0.json",
         "contract_version": "1.0.0",
+        "normalization_profile_hash": "5c5489251189638b12ff5f1102ae8440f31e24b67ff78d7674f7e63b95cbb21a",
     },
     "chembl.target": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_target_v3.0.json",
         "contract_version": "3.0.0",
+        "normalization_profile_hash": "a503ff9fc90e001939c9bcd01c8da12ede2d6edad2759e23e33a69cae675534c",
     },
     "chembl.target_component": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_target_component_v1.0.json",
         "contract_version": "1.0.0",
+        "normalization_profile_hash": "653ad5fcf9dbad98383a9dabd50f8f29f9c529e1326803a883573cf38074096e",
     },
     "chembl.target_protein_classification": {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
@@ -98,6 +109,7 @@ _EXPECTED_CHEMBL_CONTRACT_SURFACE: dict[str, dict[str, str]] = {
         "source_path": "../../src/bioetl/domain/contracts/gold/_chembl_target_lookup_schemas.py",
         "artifact": "../../docs/04-reference/contracts/gold/chembl_tissue_v1.0.json",
         "contract_version": "1.0.0",
+        "normalization_profile_hash": "442f35f1b18e7bfb8c6903788f8a5250a49affbd12c89111529182e3d8f19afb",
     },
 }
 
