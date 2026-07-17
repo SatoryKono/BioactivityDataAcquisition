@@ -368,7 +368,6 @@ def _artifact_descriptor(
         "terminal_status": "fail",
         "dashboard_scope": [],
         "validated": False,
-        "manifest_structure_complete": False,
     }
     if not resolved.is_file():
         return descriptor

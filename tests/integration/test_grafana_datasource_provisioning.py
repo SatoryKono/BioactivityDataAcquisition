@@ -262,7 +262,7 @@ def test_default_runtime_log_sink_reaches_canonical_loki_dashboard_job() -> None
             "timeout": "10s",
         }
     ]
-    assert promtail_service["depends_on"]["loki"] == {"condition": "service_started"}
+    assert promtail_service["depends_on"]["loki"] == {"condition": "service_healthy"}
     runtime_jobs = [
         job
         for job in promtail["scrape_configs"]
@@ -338,7 +338,7 @@ def test_grafana_uses_remote_renderer_sidecar() -> None:
         "/usr/local/bin/bioetl-bootstrap-grafana.sh",
     ]
     assert renderer["image"] == RENDERER_IMAGE
-    assert renderer["shm_size"] == "4gb"
+    assert renderer["shm_size"] == "1gb"
     assert renderer["healthcheck"]["test"] == [
         "CMD",
         "grafana-image-renderer",
@@ -352,11 +352,11 @@ def test_grafana_uses_remote_renderer_sidecar() -> None:
         "BROWSER_FLAGS=--no-sandbox,--disable-dev-shm-usage" in renderer["environment"]
     )
     assert (
-        "BROWSER_READINESS_TIMEOUT=${GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT:-180s}"
+        "BROWSER_READINESS_TIMEOUT=${GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT:-90s}"
         in renderer["environment"]
     )
     assert (
-        "GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-10GiB}"
+        "GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-1GiB}"
         in renderer["environment"]
     )
     assert not any(
@@ -402,7 +402,12 @@ def test_tracing_datasource_default_matches_optional_tracing_profile() -> None:
     assert loki["profiles"] == ["tracing"]
     assert promtail["profiles"] == ["tracing"]
     assert tempo["profiles"] == ["tracing"]
-    assert loki["healthcheck"] == {"disable": True}
+    assert loki["healthcheck"]["test"] == [
+        "CMD",
+        "/usr/bin/loki",
+        "-config.file=/etc/loki/config.yml",
+        "-verify-config=true",
+    ]
     assert (
         "BIOETL_ENABLE_TRACING_DATASOURCES=${BIOETL_ENABLE_TRACING_DATASOURCES:-auto}"
         in grafana["environment"]

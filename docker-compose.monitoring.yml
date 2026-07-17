@@ -70,8 +70,10 @@ services:
     restart: unless-stopped
     healthcheck:
       test:
-        - "CMD-SHELL"
-        - "wget --quiet --tries=1 --timeout=2 -O /dev/null http://localhost:3100/ready"
+        - "CMD"
+        - "/usr/bin/loki"
+        - "-config.file=/etc/loki/config.yml"
+        - "-verify-config=true"
       interval: 10s
       timeout: 5s
       retries: 6
@@ -188,14 +190,14 @@ services:
 
   renderer:
     image: grafana/grafana-image-renderer@sha256:c0c920e6974b0d30ae25313051344afcd2054362529968ebd9545a4b2bc8119b
-    shm_size: "4gb"
+    shm_size: "1gb"
     environment:
       - ENABLE_METRICS=true
       - HTTP_HOST=0.0.0.0
       - AUTH_TOKEN=${GF_RENDERING_RENDERER_TOKEN:?GF_RENDERING_RENDERER_TOKEN is required}
       - BROWSER_FLAGS=--no-sandbox,--disable-dev-shm-usage
-      - BROWSER_READINESS_TIMEOUT=${GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT:-180s}
-      - GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-10GiB}
+      - BROWSER_READINESS_TIMEOUT=${GRAFANA_IMAGE_RENDERER_READINESS_TIMEOUT:-90s}
+      - GOMEMLIMIT=${GRAFANA_IMAGE_RENDERER_GOMEMLIMIT:-1GiB}
     networks:
       - monitoring
     restart: unless-stopped
