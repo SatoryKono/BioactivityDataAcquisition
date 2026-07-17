@@ -24,7 +24,9 @@ def _default_enum_path(provider: str, base_path: Path | None = None) -> Path:
     return root / "configs" / "enums" / f"{provider}.yaml"
 
 
-def _freeze_sequences(value: object) -> object:
+def _freeze_sequences(
+    value: Any,  # Any: recursive function handles arbitrary YAML structures
+) -> Any:  # Any: recursive function handles arbitrary YAML structures
     if isinstance(value, dict):
         return {str(key): _freeze_sequences(item) for key, item in value.items()}
     if isinstance(value, list):
@@ -52,17 +54,14 @@ def load_provider_enums_from_file(
         yaml_path = _default_enum_path(normalized_provider)
 
     with yaml_path.open() as f:
-        payload: object = yaml.safe_load(f)
+        payload = yaml.safe_load(f)
     if payload is None:
         return {}
     if not isinstance(payload, dict):
         raise ValueError(f"Enum config must be a YAML mapping: {yaml_path}")
-    normalized: dict[str, object] = {str(key): value for key, value in payload.items()}
+    normalized = {str(key): value for key, value in payload.items()}
     if yaml_path == _default_enum_path(normalized_provider):
-        frozen = _freeze_sequences(normalized)
-        if not isinstance(frozen, dict):
-            raise TypeError("Frozen enum config must remain a mapping")
-        return {str(key): value for key, value in frozen.items()}
+        return _freeze_sequences(normalized)
     return normalized
 
 

@@ -1620,22 +1620,11 @@ def _write_artifacts(
 ) -> None:
     json_out.parent.mkdir(parents=True, exist_ok=True)
     md_out.parent.mkdir(parents=True, exist_ok=True)
-    _write_text_atomically(
-        json_out,
+    json_out.write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
     )
-    _write_text_atomically(md_out, render_markdown(payload))
-
-
-def _write_text_atomically(path: Path, text: str) -> None:
-    """Replace one generated artifact without truncating a mounted-drive target."""
-    tmp_path = path.with_name(f".{path.name}.{os.getpid()}.tmp")
-    try:
-        tmp_path.write_text(text, encoding="utf-8")
-        tmp_path.replace(path)
-    finally:
-        if tmp_path.exists():
-            tmp_path.unlink()
+    md_out.write_text(render_markdown(payload), encoding="utf-8")
 
 
 def _check_artifacts(

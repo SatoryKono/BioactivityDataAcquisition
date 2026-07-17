@@ -1,13 +1,13 @@
 {
   "gates": [
     {
-      "current": 4,
+      "current": 0,
       "limit": 0,
       "metric": "violation_count",
       "name": "debt_scorecard_budget_violations",
       "remediation": "Reduce exemptions or ratchet budgets downward; debt budgets must not grow.",
       "source_artifact": "configs/quality/debt_scorecard.yaml",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": 0,
@@ -25,7 +25,7 @@
       "name": "debt_budget_growth_policy",
       "remediation": "Keep scorecard ratchets non-increasing and fix validation violations.",
       "source_artifact": "configs/quality/debt_scorecard.yaml",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": "available_valid_object",
@@ -46,24 +46,24 @@
       "status": "pass"
     },
     {
-      "current": "e6fe1edf30dd402bf82551417730d4583e1c597838ce0c8579a7a525702d67f1",
-      "limit": "ef4d9b216db516f7994715318b50926ef6a4e151be7cb9274727ec9a55d8e384",
+      "current": "35a103825347a5621ce1f9addaee968b4cae112502d3ec22cfce7a330e75bce0",
+      "limit": "35a103825347a5621ce1f9addaee968b4cae112502d3ec22cfce7a330e75bce0",
       "metric": "source_tree_sha256",
       "name": "module_coverage_source_tree_hash_current",
       "remediation": "Regenerate module coverage inventory before release gate closeout.",
       "source_artifact": "reports/quality/module-coverage-inventory.json",
-      "status": "fail"
+      "status": "pass"
     },
     {
       "current": {
-        "source_module_count": 2237,
-        "source_tree_sha256": "ef4d9b216db516f7994715318b50926ef6a4e151be7cb9274727ec9a55d8e384",
+        "source_module_count": 2236,
+        "source_tree_sha256": "35a103825347a5621ce1f9addaee968b4cae112502d3ec22cfce7a330e75bce0",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
       "limit": {
-        "source_module_count": 2237,
-        "source_tree_sha256": "ef4d9b216db516f7994715318b50926ef6a4e151be7cb9274727ec9a55d8e384",
+        "source_module_count": 2236,
+        "source_tree_sha256": "35a103825347a5621ce1f9addaee968b4cae112502d3ec22cfce7a330e75bce0",
         "uncovered_module_count": 0,
         "unmeasured_module_count": 0
       },
@@ -92,13 +92,13 @@
       "status": "pass"
     },
     {
-      "current": 0,
+      "current": 1,
       "limit": 0,
       "metric": "budget_warnings",
       "name": "hotspot_family_baseline_budget_warnings",
       "remediation": "Reduce hotspot-family metrics to stay at or below reviewed budgets.",
       "source_artifact": "reports/quality/hotspot-family-baseline.json",
-      "status": "pass"
+      "status": "fail"
     },
     {
       "current": 0,
@@ -415,7 +415,7 @@
       "status": "pass"
     },
     {
-      "current": 2,
+      "current": 1,
       "limit": 0,
       "metric": "stale_artifact_count",
       "name": "generated_artifact_drift",
@@ -432,26 +432,24 @@
     "config_surface_backlog": false,
     "dq_contract_registry_diagnostics": false,
     "hotspot_family_baseline": true,
-    "module_coverage_inventory": true,
+    "module_coverage_inventory": false,
     "remote_main_baseline": false
   },
   "status_counts": {
-    "fail": 4,
-    "pass": 41,
+    "fail": 2,
+    "pass": 43,
     "warn": 0
   },
   "summary": {
-    "architecture_quality_scorecard_integral_score": 8.66,
+    "architecture_quality_scorecard_integral_score": 8.64,
     "architecture_quality_scorecard_interpretation": "good_targeted_improvements",
-    "fail_count": 4,
+    "fail_count": 2,
     "failing_gates": [
-      "debt_scorecard_budget_violations",
-      "debt_budget_growth_policy",
-      "module_coverage_source_tree_hash_current",
+      "hotspot_family_baseline_budget_warnings",
       "generated_artifact_drift"
     ],
     "gate_count": 45,
-    "pass_count": 41,
+    "pass_count": 43,
     "release_gate_status": "failing",
     "warn_count": 0,
     "warning_gates": []

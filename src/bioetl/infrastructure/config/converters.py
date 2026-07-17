@@ -14,7 +14,6 @@ from bioetl.domain.composite import ColumnGroupConfig, DataSchemaConfig
 from bioetl.domain.config import (
     DQConfig,
     FieldPolicyConfig,
-    IdempotencyContract,
     PipelineConfig,
     TableConfig,
 )
@@ -61,7 +60,7 @@ def _extract_write_modes(
 
 def _extract_idempotency_contracts(
     yaml_config: PipelineYamlConfig,
-) -> tuple[IdempotencyContract | None, IdempotencyContract | None]:
+) -> tuple[str | None, str | None]:
     """Extract effective sink idempotency contracts from merged config."""
     silver_config = yaml_config.sink.get("silver")
     gold_config = yaml_config.sink.get("gold")
@@ -76,10 +75,7 @@ def _extract_idempotency_contracts(
         if gold_config and gold_config.idempotency_contract is not None
         else None
     )
-    return (
-        IdempotencyContract(silver_contract) if silver_contract else None,
-        IdempotencyContract(gold_contract) if gold_contract else None,
-    )
+    return silver_contract or None, gold_contract or None
 
 
 def _build_silver_filters(yaml_config: PipelineYamlConfig) -> SilverFilterConfig:

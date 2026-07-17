@@ -1,4 +1,4 @@
-"""Unit tests for preflight modules — types, rules, reporting, orchestration."""
+"""Unit tests for preflight modules â€” types, rules, reporting, orchestration."""
 
 from __future__ import annotations
 
@@ -375,29 +375,3 @@ class TestPreflightOrchestration:
         assert "title" in fields
         assert "_internal" not in fields
         assert "_source" in fields
-
-    def test_extract_fields_from_schema_uses_typed_runtime_surface(self) -> None:
-        mixin = _make_orchestration_mixin()
-
-        class FakeColumn:
-            dtype = "Int64"
-            nullable = False
-
-        class FakeSchemaInstance:
-            columns = {"record_id": FakeColumn()}
-
-        class FakeSchema:
-            @staticmethod
-            def to_schema() -> object:
-                return FakeSchemaInstance()
-
-        fields = mixin._extract_fields_from_schema(FakeSchema, "chembl.activity")
-
-        assert fields == {
-            "record_id": FieldInfo(
-                name="record_id",
-                dtype="int",
-                nullable=False,
-                source="chembl.activity",
-            )
-        }

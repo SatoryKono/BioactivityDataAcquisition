@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from tests.helpers.deterministic_ids import deterministic_uuid_from_callsite
 
 import pytest
 
@@ -27,7 +28,9 @@ def test_build_pipeline_runner_rejects_exact_replay_without_materialized_cached_
     fake_registry = _FakeRegistry(factory=fake_factory)
     empty_bronze_root = tmp_path / "cached_bronze" / "chembl" / "activity"
     empty_bronze_root.mkdir(parents=True)
+
     context = _build_context(limit=25, exact_replay=True)
+
     with pytest.raises(
         RuntimeError,
         match="Cached Bronze execution requires at least one persisted batch file for snapshot provenance",
@@ -43,7 +46,6 @@ def test_build_pipeline_runner_rejects_exact_replay_without_materialized_cached_
                         data_dir=str(tmp_path),
                         pipeline=SimpleNamespace(heartbeat_interval=30),
                         test_mode=False,
-                        debug=False,
                     ),
                     load_pipeline_config_fn=lambda _: SimpleNamespace(
                         provider="chembl",
@@ -116,7 +118,6 @@ def test_build_pipeline_runner_keeps_snapshot_backed_execution_identity_stable_a
                             data_dir=str(tmp_path),
                             pipeline=SimpleNamespace(heartbeat_interval=30),
                             test_mode=False,
-                            debug=False,
                         ),
                         load_pipeline_config_fn=lambda _: SimpleNamespace(
                             provider="chembl",
@@ -996,7 +997,9 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
             gold=SimpleNamespace(_metadata_writer=gold_writer),
         ),
     )
+
     context = _build_context(limit=25)
+
     with _clean_provenance_context_if_unpatched():
         runner_builder.build_pipeline_runner(
             context,
@@ -1017,7 +1020,6 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
                             ),
                         ),
                         test_mode=False,
-                        debug=False,
                     ),
                     load_pipeline_config_fn=lambda _: SimpleNamespace(
                         provider="chembl",
@@ -1089,8 +1091,6 @@ def test_build_pipeline_runner_attaches_artifact_recorder_to_metadata_writers(
     ledger_payload = json.loads(lines[1])
     assert ledger_payload["event_type"] == "artifact_published"
     assert ledger_payload["stage"] == "silver"
-    assert (
-        ledger_payload["details"]["artifact_content_hash"] == "sha256:silver-artifact"
-    )
+    assert ledger_payload["details"]["artifact_content_hash"] == "sha256:silver-artifact"
     assert ledger_payload["dataset_ref"] == "silver:chembl.activity@1"
     assert ledger_payload["lineage_fragment_id"] == "silver:fragment-1"

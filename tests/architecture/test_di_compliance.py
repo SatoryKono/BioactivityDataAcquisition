@@ -4,7 +4,7 @@ REQ-ARCH-DI-001: Application layer MUST NOT instantiate infrastructure.
 REQ-ARCH-DI-002: Factory classes MUST be in composition layer only.
 REQ-ARCH-DI-003: Dependencies MUST be injected through constructors.
 
-See CLAUDE.md §2.2 and §11 Anti-Patterns.
+See CLAUDE.md Â§2.2 and Â§11 Anti-Patterns.
 """
 
 from __future__ import annotations
@@ -322,7 +322,7 @@ class TestDICompliance:
         This test uses AST analysis to find actual instantiation calls,
         not class definitions or type hints.
 
-        See CLAUDE.md §2.2 Dependency Injection and §11 Anti-Patterns.
+        See CLAUDE.md Â§2.2 Dependency Injection and Â§11 Anti-Patterns.
         """
         violations = []
         for py_file, _content, tree in _iter_parsed_files(application_python_files):
@@ -343,7 +343,7 @@ class TestDICompliance:
             "Move instantiation to composition layer (factories/bootstrap).\n\n"
             "Violations found:\n"
             + "\n".join(f"  - {v}" for v in violations)
-            + "\n\nSee CLAUDE.md §2.2 and §11 for details."
+            + "\n\nSee CLAUDE.md Â§2.2 and Â§11 for details."
         )
 
     def test_factories_only_in_composition(self, src_dir: Path) -> None:
@@ -428,7 +428,7 @@ class TestCompositionRootIntegrity:
         rather than having inline instantiation of complex objects.
 
         Note: bootstrap_pipeline_runner() is now defined in composition/bootstrap/runtime/pipeline.py
-        as part of the CLI/runtime split (see CLAUDE.md §2.1).
+        as part of the CLI/runtime split (see CLAUDE.md Â§2.1).
         """
         # bootstrap_pipeline_runner is now in composition/bootstrap/runtime/pipeline.py
         bootstrap_file = (
@@ -455,16 +455,7 @@ class TestCompositionRootIntegrity:
         has_factory_usage = any(
             re.search(pattern, content) for pattern in expected_patterns
         )
-        # Check for factory delegation in phase file or its lazy dependencies
-        lazy_deps_file = phase_file.with_name("_pipeline_bootstrap_lazy_dependencies.py")
-        if lazy_deps_file.exists():
-            lazy_deps_content = lazy_deps_file.read_text(encoding="utf-8")
-            phase_has_factory_usage = (
-                "bioetl.composition.factories" in phase_content
-                or "bioetl.composition.factories" in lazy_deps_content
-            )
-        else:
-            phase_has_factory_usage = "bioetl.composition.factories" in phase_content
+        phase_has_factory_usage = "bioetl.composition.factories" in phase_content
 
         assert has_factory_usage and phase_has_factory_usage, (
             "bootstrap_pipeline_runner() should delegate to factories for object creation.\n"

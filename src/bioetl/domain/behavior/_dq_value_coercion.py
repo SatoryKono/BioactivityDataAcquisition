@@ -28,7 +28,7 @@ def _coerce_list_like(value: object) -> list[object] | None:
 
 
 def _coerce_numeric_value(value: object) -> float | None:
-    if isinstance(value, bool) or not isinstance(value, int | float | str):
+    if isinstance(value, bool):
         return None
     try:
         numeric_value = float(value)
@@ -60,7 +60,7 @@ def _looks_like_json_list(value: str) -> bool:
 
 def _decode_json_list_like(value: str) -> list[object] | None:
     try:
-        parsed: object = json.loads(value)
+        parsed = json.loads(value)
     except json.JSONDecodeError:
         return None
     return parsed if isinstance(parsed, list) else None
