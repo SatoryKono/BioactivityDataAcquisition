@@ -194,6 +194,7 @@ def test_runtime_loki_panel_fixtures_cover_warning_and_malformed_paths() -> None
         json.loads(malformed["line"])
     assert empty["expected_panel_ids"] == [250, 251, 257]
     assert empty["line"] is None
+    assert set(empty["panel_results"]) == {"250", "251", "257"}
     assert all(
         panel_result["result"] == [] for panel_result in empty["panel_results"].values()
     )

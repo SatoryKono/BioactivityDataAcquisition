@@ -271,7 +271,7 @@ def _write_gate_report(
     render_status: str,
     semantic_detail: str,
     render_detail: str,
-) -> None:
+) -> bool:
     output_path = _resolve_gate_output_path(config.gate_output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     semantic_source = _artifact_descriptor(
@@ -296,6 +296,7 @@ def _write_gate_report(
         and render_source["terminal_status"] == render_status
         else "fail"
     )
+    release_passed = semantic_effective == "pass" and render_effective == "pass"
     payload = {
         "schema_version": 2,
         "generated_at": datetime.now(tz=UTC).isoformat(),
@@ -320,12 +321,13 @@ def _write_gate_report(
             "detail": render_detail,
             "source_artifact": render_source,
         },
-        "release_passed": semantic_effective == "pass" and render_effective == "pass",
+        "release_passed": release_passed,
     }
     atomic_write_text(
         output_path,
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
     )
+    return release_passed
 
 
 def _git_identity() -> dict[str, str]:
@@ -959,14 +961,14 @@ def main(argv: list[str] | None = None) -> int:
             else "Screenshot rerender or render-only preflight failed."
         )
 
-        _write_gate_report(
+        release_passed = _write_gate_report(
             config,
             semantic_status=semantic_status,
             render_status=render_status,
             semantic_detail=semantic_detail,
             render_detail=render_detail,
         )
-        return 0 if semantic_status == "pass" and render_status == "pass" else 1
+        return 0 if release_passed else 1
     finally:
         if (
             managed_backend_process is not None

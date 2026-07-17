@@ -342,10 +342,12 @@ def test_bootstrap_script_detects_tracing_datasource_reachability() -> None:
     assert "BIOETL_ENABLE_TRACING_DATASOURCES:-auto" in content
     assert "AUTO_WAIT_SECONDS=30" in content
     assert "AUTO_POLL_SECONDS=1" in content
-    assert 'wget --quiet --tries=1 --timeout=2 -O /dev/null "$1"' in content
+    assert "deadline=$(($(date +%s) + AUTO_WAIT_SECONDS))" in content
+    assert 'remaining="$(remaining_auto_wait_seconds)"' in content
+    assert '--timeout="${probe_timeout}"' in content
     assert "wait_for_auto_tracing_ready()" in content
-    assert 'probe_ready "http://loki:3100/ready"' in content
-    assert 'probe_ready "http://tempo:3200/ready"' in content
+    assert 'probe_ready "http://loki:3100/ready" "${remaining}"' in content
+    assert 'probe_ready "http://tempo:3200/ready" "${remaining}"' in content
     assert "deleteDatasources:" in content
     assert "name: Loki" in content
     assert "name: Tempo" in content
