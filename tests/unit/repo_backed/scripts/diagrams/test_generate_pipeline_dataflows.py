@@ -93,6 +93,7 @@ def test_mermaid_views_cover_all_fields_without_oversized_nodes(
     views = render_mermaid_views(activity_ir)
 
     assert tuple(views) == DIAGRAM_FILENAMES
+    assert "classDef criteriaCard font-size:14px" in views[DIAGRAM_FILENAMES[1]]
     expected_sheets = (
         activity_ir.silver.fields[:60],
         activity_ir.silver.fields[60:],
