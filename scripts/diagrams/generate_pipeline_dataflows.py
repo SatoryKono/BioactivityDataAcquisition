@@ -113,7 +113,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    outputs = build_outputs(args)
+    try:
+        outputs = build_outputs(args)
+    except Exception as exc:
+        print(
+            f"Unable to build pipeline dataflow artifacts for {args.pipeline}: {exc}",
+            file=sys.stderr,
+        )
+        return 1
     if args.check:
         stale = _check_outputs(outputs)
         if stale:
