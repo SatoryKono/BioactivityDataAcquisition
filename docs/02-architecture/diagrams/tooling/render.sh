@@ -113,11 +113,11 @@ cleanup_temp_files() {
 trap cleanup_temp_files EXIT
 
 normalize_mmdc_version() {
-  sed -E 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/'
+  grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' | head -n 1
 }
 
 detect_mmdc_version() {
-  MMDC_SKIP_VERSION_CHECK=1 "$MMDC_BIN" --version 2>/dev/null | head -n 1 | normalize_mmdc_version || true
+  MMDC_SKIP_VERSION_CHECK=1 "$MMDC_BIN" --version 2>/dev/null | normalize_mmdc_version || true
 }
 
 enforce_mmdc_version() {

@@ -15,6 +15,7 @@ import argparse
 import ast
 import csv
 import json
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, cast
@@ -109,7 +110,11 @@ def _load_yaml(path: Path) -> dict[str, Any]:
 
 
 def _entity_config_paths() -> list[Path]:
-    return sorted(path for path in ENTITIES_DIR.rglob("*.yaml") if path.is_file())
+    return sorted(
+        path
+        for path in ENTITIES_DIR.rglob("*.yaml")
+        if path.is_file() and path.relative_to(ENTITIES_DIR).parts[0] != "composite"
+    )
 
 
 def _read_ast(path: Path) -> ast.Module:
@@ -509,12 +514,12 @@ def _build_layer_flow_summary(
     silver_pyarrow_ref: str,
     silver_include_groups: list[str],
     silver_exclude_fields: list[str],
-    silver_pyarrow_columns: list[object],
-    silver_pandera_columns: list[object],
+    silver_pyarrow_columns: Sequence[object],
+    silver_pandera_columns: Sequence[object],
     gold_contract_ref: str,
     gold_include_groups: list[str],
     gold_exclude_fields: list[str],
-    gold_columns: list[object],
+    gold_columns: Sequence[object],
 ) -> dict[str, object]:
     return {
         "bronze": {"column_groups": bronze_groups},
@@ -841,6 +846,40 @@ def build_unified_schema_rows() -> list[dict[str, str]]:
 
     rows.sort(key=lambda row: (row["provider"], row["entity"], row["pipeline_name"]))
     return rows
+
+
+def build_unified_schema_row(pipeline_name: str) -> dict[str, str]:
+    """Build one unified schema-map row for a registered entity pipeline.
+
+    Args:
+        pipeline_name: Canonical ``<provider>_<entity>`` pipeline identifier.
+
+    Returns:
+        One row using the same shape as :func:`build_unified_schema_rows`.
+
+    Raises:
+        ValueError: If the pipeline is not registered or its entity config is absent.
+    """
+    registry = _pipeline_registry()
+    binding = registry.get(pipeline_name)
+    if binding is None:
+        raise ValueError(f"No pipeline registry entry found for {pipeline_name}")
+
+    path = ENTITIES_DIR / binding.provider / f"{binding.entity_type}.yaml"
+    if not path.is_file():
+        raise ValueError(
+            f"Entity config not found for {pipeline_name}: "
+            f"{path.relative_to(PROJECT_ROOT).as_posix()}"
+        )
+
+    return _build_row_from_config_path(
+        path,
+        registry=registry,
+        pyarrow_locations=_scan_pyarrow_schemas(),
+        pandera_locations=_scan_pandera_models(DOMAIN_SCHEMA_DIR),
+        gold_locations=_scan_pandera_models(GOLD_CONTRACT_DIR, suffix="Schema"),
+        pyarrow_field_blocks=_scan_pyarrow_field_blocks(PUBLICATION_FIELD_BLOCKS),
+    )
 
 
 def write_csv(rows: list[dict[str, str]], output_path: Path) -> None:

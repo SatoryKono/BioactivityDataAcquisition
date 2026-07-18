@@ -1,8 +1,8 @@
 # Diagram Descriptions Index
 
-_Автогенерация: 2026-07-08T10:42:35+03:00_
+_Автогенерация: 2026-07-18T17:33:44+03:00_
 
-- Карточек описаний: **319**
+- Карточек описаний: **325**
 - Формат публикации: family-oriented index для derived description cards.
 - Source of truth: individual description cards под `descriptions/<family>/`.
 
@@ -17,7 +17,7 @@ _Автогенерация: 2026-07-08T10:42:35+03:00_
 
 ## Family Overview
 
-- Architecture cards: **83**
+- Architecture cards: **89**
 - Class cards: **16**
 - Foundation cards: **55**
 - View cards: **165** across **38** parent families
@@ -107,6 +107,12 @@ _Автогенерация: 2026-07-08T10:42:35+03:00_
 - [46-filter-config-resolution-and-column-filter-evaluation](architecture/46-filter-config-resolution-and-column-filter-evaluation.md)
 - [47-run-manifest-domain-model-and-serialization-surface](architecture/47-run-manifest-domain-model-and-serialization-surface.md)
 - [48-effective-config-artifact-domain-model](architecture/48-effective-config-artifact-domain-model.md)
+- [49-chembl-activity-dataflow](architecture/49-chembl-activity-dataflow.md)
+- [50-chembl-activity-filter-criteria](architecture/50-chembl-activity-filter-criteria.md)
+- [51a-chembl-activity-silver-fields-1](architecture/51a-chembl-activity-silver-fields-1.md)
+- [51b-chembl-activity-silver-fields-2](architecture/51b-chembl-activity-silver-fields-2.md)
+- [52a-chembl-activity-gold-fields-1](architecture/52a-chembl-activity-gold-fields-1.md)
+- [52b-chembl-activity-gold-fields-2](architecture/52b-chembl-activity-gold-fields-2.md)
 
 ## Class Diagram Cards
 
