@@ -34,7 +34,8 @@ FIELDS_PER_SHEET = 60
 
 _INIT = (
     "%%{init: {'theme': 'neutral', 'themeVariables': "
-    "{'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%"
+    "{'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}, "
+    "'flowchart': {'wrappingWidth': 360}}}%%"
 )
 _PALETTE = """    classDef source fill:#f1f5f9,stroke:#64748b,stroke-width:2px
     classDef process fill:#f0fdf4,stroke:#16a34a,stroke-width:2px
