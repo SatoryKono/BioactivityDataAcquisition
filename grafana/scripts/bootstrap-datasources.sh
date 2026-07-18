@@ -14,11 +14,14 @@ STALE_RENDERER_PLUGIN_DIR="/var/lib/grafana/plugins/grafana-image-renderer"
 ENABLE_LOKI="false"
 ENABLE_TEMPO="false"
 
+mkdir -p "${TARGET_DIR}"
+rm -f "${TARGET_DIR}"/*.yml
+cp "${CORE_DIR}"/*.yml "${TARGET_DIR}/"
+
 probe_ready() {
-  requested_timeout="${2:-2}"
   probe_timeout=2
-  if [ "${requested_timeout}" -lt "${probe_timeout}" ]; then
-    probe_timeout="${requested_timeout}"
+  if [ "$2" -lt "${probe_timeout}" ]; then
+    probe_timeout="$2"
   fi
   wget --quiet --tries=1 --timeout="${probe_timeout}" -O /dev/null "$1"
 }
@@ -63,17 +66,6 @@ wait_for_auto_tracing_ready() {
     sleep "${sleep_seconds}"
   done
 }
-
-# Behavioral test seam for the bounded probe helper. Production invocations do
-# not set this flag and continue into normal datasource provisioning below.
-if [ "${BIOETL_BOOTSTRAP_PROBE_ONLY:-}" = "1" ]; then
-  probe_ready "$@"
-  exit 0
-fi
-
-mkdir -p "${TARGET_DIR}"
-rm -f "${TARGET_DIR}"/*.yml
-cp "${CORE_DIR}"/*.yml "${TARGET_DIR}/"
 
 case "${TRACING_FLAG}" in
   true)

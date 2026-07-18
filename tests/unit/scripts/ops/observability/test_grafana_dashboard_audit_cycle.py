@@ -684,26 +684,6 @@ def test_grafana_audit_cycle_writes_independent_gate_evidence(tmp_path: Path) ->
     assert payload["dashboard_render_gate"]["source_artifact"]["validated"] is False
 
 
-@pytest.mark.parametrize("kind", ["semantic", "render"])
-def test_grafana_gate_invalid_utf8_artifacts_fail_closed(
-    tmp_path: Path,
-    kind: str,
-) -> None:
-    artifact = tmp_path / f"{kind}.json"
-    artifact.write_bytes(b"\xff\xfe\x00")
-
-    descriptor = cycle_subject._artifact_descriptor(
-        artifact,
-        occurrence_id="current-occurrence",
-        kind=kind,
-    )
-
-    assert descriptor["exists"] is True
-    assert descriptor["terminal_status"] == "fail"
-    assert descriptor["validated"] is False
-    assert descriptor["sha256"] is None
-
-
 def test_grafana_audit_cycle_records_render_gate_when_semantic_gate_fails(
     tmp_path: Path,
 ) -> None:

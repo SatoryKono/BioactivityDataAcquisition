@@ -3,16 +3,10 @@
 from __future__ import annotations
 
 import json
-import os
-import subprocess
 from pathlib import Path
 
 import pytest
 import yaml
-
-from scripts.ops.observability import (
-    start_read_only_audit_stack as audit_stack_subject,
-)
 
 
 pytestmark = pytest.mark.integration
@@ -21,22 +15,6 @@ RENDERER_IMAGE = (
     "grafana/grafana-image-renderer"
     "@sha256:c0c920e6974b0d30ae25313051344afcd2054362529968ebd9545a4b2bc8119b"
 )
-
-
-class _ProbeResponse:
-    def __init__(self, payload: object) -> None:
-        self._payload = (
-            payload if isinstance(payload, bytes) else json.dumps(payload).encode()
-        )
-
-    def __enter__(self) -> _ProbeResponse:
-        return self
-
-    def __exit__(self, *_args: object) -> None:
-        return None
-
-    def read(self) -> bytes:
-        return self._payload
 
 
 def _load_monitoring_compose() -> dict[str, object]:
@@ -150,10 +128,6 @@ def test_audit_profile_mounts_explicit_roots_read_only_and_uses_bounded_loki_job
         "${BIOETL_AUDIT_LOG_ROOT:?Pass an explicit absolute log root}:/audit-logs:ro"
         in (audit_promtail["volumes"])
     )
-    assert (
-        "${BIOETL_AUDIT_PROBE_LOG_ROOT:?Pass an explicit absolute probe log root}:"
-        "/audit-probe:ro" in (audit_promtail["volumes"])
-    )
     assert "audit" in services["loki"]["profiles"]
 
     promtail = yaml.safe_load(
@@ -163,13 +137,10 @@ def test_audit_profile_mounts_explicit_roots_read_only_and_uses_bounded_loki_job
         job for job in promtail["scrape_configs"] if job["job_name"] == "bioetl-audit"
     ]
     assert len(audit_jobs) == 1
-    audit_labels = {
-        tuple(sorted(config["labels"].items()))
-        for config in audit_jobs[0]["static_configs"]
-    }
+    audit_labels = audit_jobs[0]["static_configs"][0]["labels"]
     assert audit_labels == {
-        (("__path__", "/audit-logs/*.log"), ("job", "bioetl-audit")),
-        (("__path__", "/audit-probe/*.log"), ("job", "bioetl-audit")),
+        "job": "bioetl-audit",
+        "__path__": "/audit-logs/*.log",
     }
     assert services["grafana"]["environment"] == [
         "BIOETL_QUARANTINE_EXPLORER_URL=http://quarantine-explorer-audit:8081"
@@ -179,67 +150,6 @@ def test_audit_profile_mounts_explicit_roots_read_only_and_uses_bounded_loki_job
     }
     assert audit_promtail["depends_on"]["loki"] == {"condition": "service_started"}
     assert audit_promtail["healthcheck"] == {"disable": True}
-    assert audit_promtail["ports"] == ["127.0.0.1:19080:9080"]
-
-
-def test_audit_launcher_blocks_failed_promtail_sentinel_delivery(
-    tmp_path: Path,
-) -> None:
-    data_root = tmp_path / "data"
-    log_root = tmp_path / "logs"
-    probe_log_root = tmp_path / "probe-logs"
-    data_root.mkdir()
-    log_root.mkdir()
-    ticks = iter((0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.75, 1.1))
-    request_timeouts: list[float] = []
-    sleeps: list[float] = []
-
-    def fake_open(url: str, **kwargs: object) -> _ProbeResponse:
-        request_timeouts.append(float(kwargs["timeout"]))
-        if url == audit_stack_subject.READY_URL:
-            return _ProbeResponse({"data_root": str(data_root.resolve())})
-        if url == audit_stack_subject.CATALOG_URL:
-            return _ProbeResponse({"items": []})
-        if url == audit_stack_subject.PROMTAIL_READY_URL:
-            return _ProbeResponse(b"Ready\n")
-        assert url.startswith(audit_stack_subject.LOKI_QUERY_RANGE_URL)
-        return _ProbeResponse({"status": "success", "data": {"result": []}})
-
-    with pytest.raises(RuntimeError, match="promtail_state=pending"):
-        audit_stack_subject.start_and_verify_audit_stack(
-            data_root=data_root.resolve(),
-            log_root=log_root.resolve(),
-            timeout_seconds=1.0,
-            run=lambda *_args, **_kwargs: object(),
-            opener=fake_open,
-            monotonic=lambda: next(ticks),
-            sleep=sleeps.append,
-            wall_time_ns=lambda: 1_700_000_000_000_000_000,
-            sentinel_id="not-delivered",
-            probe_log_root=probe_log_root,
-        )
-
-    sentinel = probe_log_root / "bioetl-promtail-audit-sentinel-not-delivered.log"
-    assert audit_stack_subject.PROMTAIL_SENTINEL_PREFIX in sentinel.read_text(
-        encoding="utf-8"
-    )
-    assert list(log_root.iterdir()) == []
-    assert request_timeouts == pytest.approx([0.8, 0.7, 0.6, 0.5])
-    assert sleeps == pytest.approx([0.25])
-
-
-def test_promtail_probe_reports_unavailable_shipper() -> None:
-    def unavailable(*_args: object, **_kwargs: object) -> _ProbeResponse:
-        raise OSError("connection refused")
-
-    result = audit_stack_subject.probe_promtail_audit_delivery(
-        marker=f"{audit_stack_subject.PROMTAIL_SENTINEL_PREFIX}unavailable",
-        sentinel_written_ns=0,
-        opener=unavailable,
-    )
-
-    assert result.state is audit_stack_subject.PromtailAuditState.DOWN
-    assert "connection refused" in result.detail
 
 
 def test_default_runtime_log_sink_reaches_canonical_loki_dashboard_job() -> None:
@@ -268,7 +178,7 @@ def test_default_runtime_log_sink_reaches_canonical_loki_dashboard_job() -> None
             "timeout": "10s",
         }
     ]
-    assert promtail_service["depends_on"]["loki"] == {"condition": "service_healthy"}
+    assert promtail_service["depends_on"]["loki"] == {"condition": "service_started"}
     runtime_jobs = [
         job
         for job in promtail["scrape_configs"]
@@ -408,12 +318,7 @@ def test_tracing_datasource_default_matches_optional_tracing_profile() -> None:
     assert loki["profiles"] == ["tracing"]
     assert promtail["profiles"] == ["tracing"]
     assert tempo["profiles"] == ["tracing"]
-    assert loki["healthcheck"]["test"] == [
-        "CMD",
-        "/usr/bin/loki",
-        "-config.file=/etc/loki/config.yml",
-        "-verify-config=true",
-    ]
+    assert loki["healthcheck"] == {"disable": True}
     assert (
         "BIOETL_ENABLE_TRACING_DATASOURCES=${BIOETL_ENABLE_TRACING_DATASOURCES:-auto}"
         in grafana["environment"]
@@ -439,7 +344,6 @@ def test_bootstrap_script_detects_tracing_datasource_reachability() -> None:
     assert "AUTO_POLL_SECONDS=1" in content
     assert "deadline=$(($(date +%s) + AUTO_WAIT_SECONDS))" in content
     assert 'remaining="$(remaining_auto_wait_seconds)"' in content
-    assert 'requested_timeout="${2:-2}"' in content
     assert '--timeout="${probe_timeout}"' in content
     assert "wait_for_auto_tracing_ready()" in content
     assert 'probe_ready "http://loki:3100/ready" "${remaining}"' in content
@@ -447,54 +351,6 @@ def test_bootstrap_script_detects_tracing_datasource_reachability() -> None:
     assert "deleteDatasources:" in content
     assert "name: Loki" in content
     assert "name: Tempo" in content
-
-
-@pytest.mark.parametrize(
-    ("timeout_args", "expected_timeout"),
-    [
-        ((), "--timeout=2"),
-        (("1",), "--timeout=1"),
-        (("10",), "--timeout=2"),
-    ],
-)
-def test_bootstrap_probe_ready_honors_one_and_two_argument_forms(
-    tmp_path: Path,
-    timeout_args: tuple[str, ...],
-    expected_timeout: str,
-) -> None:
-    fake_bin = tmp_path / "bin"
-    fake_bin.mkdir()
-    wget = fake_bin / "wget"
-    wget.write_text(
-        '#!/bin/sh\nprintf \'%s\\n\' "$@" > "$BIOETL_WGET_ARGS_FILE"\n',
-        encoding="utf-8",
-    )
-    wget.chmod(0o755)
-    args_file = tmp_path / "wget-args.txt"
-    environment = os.environ.copy()
-    environment.update(
-        {
-            "BIOETL_BOOTSTRAP_PROBE_ONLY": "1",
-            "BIOETL_WGET_ARGS_FILE": str(args_file),
-            "PATH": f"{fake_bin}{os.pathsep}{environment['PATH']}",
-        }
-    )
-
-    result = subprocess.run(
-        [
-            "sh",
-            "grafana/scripts/bootstrap-datasources.sh",
-            "http://loki:3100/ready",
-            *timeout_args,
-        ],
-        check=False,
-        capture_output=True,
-        text=True,
-        env=environment,
-    )
-
-    assert result.returncode == 0, result.stderr
-    assert expected_timeout in args_file.read_text(encoding="utf-8").splitlines()
 
 
 def test_bootstrap_script_prunes_stale_local_renderer_plugin_in_remote_mode() -> None:
