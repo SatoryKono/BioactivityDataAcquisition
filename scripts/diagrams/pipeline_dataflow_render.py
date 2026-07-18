@@ -31,6 +31,7 @@ ARTIFACT_FILENAMES = (
 )
 FIELDS_PER_NODE = 5
 FIELDS_PER_SHEET = 60
+_EXCLUDE_IF_PRESENT = "exclude if present"
 
 _INIT = (
     "%%{init: {'theme': 'neutral', 'themeVariables': "
@@ -60,6 +61,16 @@ def _mermaid_escape(value: object) -> str:
     )
 
 
+def _compact_mapping(value: dict[object, object]) -> str:
+    if {"min", "max"} <= set(value):
+        left = "[" if value.get("include_min", True) else "("
+        right = "]" if value.get("include_max", True) else ")"
+        minimum = "-inf" if value.get("min") is None else str(value["min"])
+        maximum = "+inf" if value.get("max") is None else str(value["max"])
+        return f"{left}{minimum}, {maximum}{right}"
+    return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+
+
 def _compact_value(value: object) -> str:
     if isinstance(value, bool):
         return "true" if value else "false"
@@ -67,14 +78,8 @@ def _compact_value(value: object) -> str:
         return "null"
     if isinstance(value, list):
         return ", ".join(str(item) for item in value)
-    if isinstance(value, dict) and {"min", "max"} <= set(value):
-        left = "[" if value.get("include_min", True) else "("
-        right = "]" if value.get("include_max", True) else ")"
-        minimum = "-inf" if value.get("min") is None else str(value["min"])
-        maximum = "+inf" if value.get("max") is None else str(value["max"])
-        return f"{left}{minimum}, {maximum}{right}"
     if isinstance(value, dict):
-        return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+        return _compact_mapping(value)
     return str(value)
 
 
@@ -85,7 +90,7 @@ def _criterion_line(criterion: CriterionIR) -> str:
         return _mermaid_escape(f"{criterion.field} present")
     if criterion.operator == "is null":
         return _mermaid_escape(f"{criterion.field} missing")
-    if criterion.operator == "exclude if present":
+    if criterion.operator == _EXCLUDE_IF_PRESENT:
         return _mermaid_escape(f"{criterion.field} {criterion.operator}")
     return _mermaid_escape(
         f"{criterion.field} {criterion.operator} {_compact_value(criterion.value)}"
@@ -176,10 +181,10 @@ def _criteria_node(node_id: str, title: str, criteria: Sequence[CriterionIR]) ->
 def _criteria(ir: PipelineDataflowIR) -> str:
     extraction_chunks = _chunks(ir.extraction_criteria, FIELDS_PER_NODE)
     silver_required = [
-        item for item in ir.silver_criteria if item.operator != "exclude if present"
+        item for item in ir.silver_criteria if item.operator != _EXCLUDE_IF_PRESENT
     ]
     silver_exclusions = [
-        item for item in ir.silver_criteria if item.operator == "exclude if present"
+        item for item in ir.silver_criteria if item.operator == _EXCLUDE_IF_PRESENT
     ]
     silver_chunks = _chunks(silver_required, FIELDS_PER_NODE)
     gold_columns = [item for item in ir.gold_criteria if item.category == "column"]
@@ -441,7 +446,7 @@ def _dq_field_table(ir: PipelineDataflowIR) -> list[str]:
 def _dq_cross_table(ir: PipelineDataflowIR) -> list[str]:
     lines = ["| Name | Fields | Condition | Severity |", "|---|---|---|---|"]
     for rule in ir.dq.cross_field_validations:
-        fields = cast("list[str]", rule["fields"])
+        fields = cast(list[str], rule["fields"])
         lines.append(
             f"| `{rule['name']}` | `{', '.join(fields)}` | "
             f"{rule['condition']} | {rule['severity']} |"
@@ -452,7 +457,7 @@ def _dq_cross_table(ir: PipelineDataflowIR) -> list[str]:
 def _dq_conditional_table(ir: PipelineDataflowIR) -> list[str]:
     lines = ["| Name | When | Then |", "|---|---|---|"]
     for rule in ir.dq.conditional_validations:
-        then_validations = cast("list[dict[str, object]]", rule["then_validations"])
+        then_validations = cast(list[dict[str, object]], rule["then_validations"])
         validators = ", ".join(
             f"{item['field']}:{item['validation_type']}" for item in then_validations
         )

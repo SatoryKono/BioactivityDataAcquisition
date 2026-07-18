@@ -93,7 +93,10 @@ def test_mermaid_views_cover_all_fields_without_oversized_nodes(
     views = render_mermaid_views(activity_ir)
 
     assert tuple(views) == DIAGRAM_FILENAMES
-    assert "classDef criteriaCard font-size:14px" in views[DIAGRAM_FILENAMES[1]]
+    criteria_source = views[DIAGRAM_FILENAMES[1]]
+    assert "classDef criteriaCard font-size:14px" in criteria_source
+    assert "activity_id range [1.0, 10000000000.0]" in criteria_source
+    assert "data_validity_comment exclude if present" in criteria_source
     expected_sheets = (
         activity_ir.silver.fields[:60],
         activity_ir.silver.fields[60:],

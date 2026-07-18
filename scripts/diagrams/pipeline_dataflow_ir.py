@@ -36,6 +36,7 @@ _SYSTEM_PREFIX = (
     "_index",
 )
 _DQ_SUFFIX = ("_dq_error", "_dq_warn")
+type _JsonObject = dict[str, Any]
 
 
 class _ArrowField(Protocol):
@@ -157,7 +158,7 @@ class PipelineDataflowIR:
 
     def to_dict(self) -> dict[str, object]:
         """Return a JSON-compatible representation with deterministic values."""
-        return cast("dict[str, object]", _json_compatible(asdict(self)))
+        return cast(dict[str, object], _json_compatible(asdict(self)))
 
 
 def _json_compatible(value: Any) -> Any:  # Any: recursive JSON normalization
@@ -185,7 +186,7 @@ def _canonical_hash(payload: dict[str, object]) -> str:
 def _import_arrow_schema(qualified_name: str) -> _ArrowSchema:
     module_name, symbol_name = qualified_name.rsplit(".", 1)
     return cast(
-        "_ArrowSchema", getattr(importlib.import_module(module_name), symbol_name)
+        _ArrowSchema, getattr(importlib.import_module(module_name), symbol_name)
     )
 
 
@@ -194,7 +195,7 @@ def _module_path(qualified_name: str) -> str:
     return f"src/{module_name.replace('.', '/')}.py"
 
 
-def _group_for(field: str, groups: list[dict[str, Any]]) -> str:
+def _group_for(field: str, groups: list[_JsonObject]) -> str:
     for group in groups:
         fields = group.get("fields") or []
         if field in fields:
@@ -205,10 +206,33 @@ def _group_for(field: str, groups: list[dict[str, Any]]) -> str:
     return "unmapped"
 
 
+def _append_projected_group(
+    group: _JsonObject,
+    *,
+    available: set[str],
+    selected: list[str],
+    used: set[str],
+) -> None:
+    """Append one configured group's explicit and pattern-matched fields."""
+    for field in group.get("fields") or []:
+        name = str(field)
+        if name in available and name not in used:
+            selected.append(name)
+            used.add(name)
+
+    pattern = group.get("pattern")
+    if not pattern:
+        return
+    for name in sorted(available - used):
+        if re.search(str(pattern), name):
+            selected.append(name)
+            used.add(name)
+
+
 def _project_fields(
     available: list[str],
     *,
-    groups: list[dict[str, Any]],
+    groups: list[_JsonObject],
     include_groups: list[str],
     exclude_fields: list[str],
 ) -> list[str]:
@@ -219,18 +243,12 @@ def _project_fields(
     by_name = {str(group["name"]): group for group in groups}
 
     for group_name in include_groups:
-        group = by_name[group_name]
-        for field in group.get("fields") or []:
-            name = str(field)
-            if name in available_set and name not in used:
-                selected.append(name)
-                used.add(name)
-        pattern = group.get("pattern")
-        if pattern:
-            for name in sorted(available_set - used):
-                if re.search(str(pattern), name):
-                    selected.append(name)
-                    used.add(name)
+        _append_projected_group(
+            by_name[group_name],
+            available=available_set,
+            selected=selected,
+            used=used,
+        )
 
     selected = [
         name
@@ -411,14 +429,14 @@ def build_pipeline_dataflow_ir(
     """Resolve live config and contracts into the canonical pipeline diagram IR."""
     root = (configs_root or PROJECT_ROOT / "configs").resolve()
     config = load_pipeline_config_from_root(pipeline_name, configs_root=root)
-    effective = cast("dict[str, Any]", _json_compatible(config.model_dump(mode="json")))
+    effective = cast(_JsonObject, _json_compatible(config.model_dump(mode="json")))
     provider = str(effective["provider"])
     entity = str(effective["entity_type"])
     schema_row = build_unified_schema_row(pipeline_name)
 
-    groups = cast("list[dict[str, Any]]", effective["data_schema"]["column_groups"])
-    silver_policy = cast("dict[str, Any]", effective["data_schema"]["silver"])
-    gold_policy = cast("dict[str, Any]", effective["data_schema"]["gold"])
+    groups = cast(list[_JsonObject], effective["data_schema"]["column_groups"])
+    silver_policy = cast(_JsonObject, effective["data_schema"]["silver"])
+    gold_policy = cast(_JsonObject, effective["data_schema"]["gold"])
 
     silver_schema = _import_arrow_schema(schema_row["silver_pyarrow_schema"])
     silver_metadata = {
@@ -449,8 +467,8 @@ def build_pipeline_dataflow_ir(
         for index, name in enumerate(silver_output, start=1)
     )
 
-    gold_contract = cast("dict[str, Any]", json.loads(schema_row["gold_json_contract"]))
-    gold_properties = cast("dict[str, dict[str, Any]]", gold_contract["properties"])
+    gold_contract = cast(_JsonObject, json.loads(schema_row["gold_json_contract"]))
+    gold_properties = cast(dict[str, _JsonObject], gold_contract["properties"])
     gold_names = list(gold_properties)
     gold_output = _project_fields(
         gold_names,
