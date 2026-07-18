@@ -230,6 +230,46 @@ jobs:
             echo "No diagram-related files changed — mermaid jobs will be skipped."
           fi
 
+  render-generated-pipeline-dataflows:
+    needs: detect-diagram-changes
+    if: needs.detect-diagram-changes.outputs.diagrams_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Mermaid CLI
+        uses: ./.github/actions/setup-mermaid
+        with:
+          install-librsvg: "true"
+
+      - name: Render generated ChEMBL activity dataflows
+        env:
+          REQUIRE_SVGO: "1"
+        run: |
+          bash docs/02-architecture/diagrams/tooling/render.sh \
+            --dir docs/02-architecture/diagrams/architecture \
+            --filter '*chembl-activity*' \
+            --puppeteer /tmp/puppeteer-config.json
+
+      - name: Validate generated ChEMBL activity artifacts
+        run: |
+          python3 scripts/diagrams/check_diagram_artifacts.py \
+            --manifest docs/02-architecture/diagrams/manifests/chembl-activity-dataflow.txt \
+            --require-png
+          python3 scripts/diagrams/check_svg_text_visibility.py \
+            --manifest docs/02-architecture/diagrams/manifests/chembl-activity-dataflow.txt
+
+      - name: Upload generated ChEMBL activity renders
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
+        with:
+          name: chembl-activity-dataflow-renders
+          path: |
+            docs/02-architecture/diagrams/architecture/svg/*chembl-activity*.svg
+            docs/02-architecture/diagrams/architecture/png/*chembl-activity*.png
+            docs/02-architecture/diagrams/architecture/svg/INDEX.md
+            docs/02-architecture/diagrams/architecture/png/INDEX.md
+
   validate-mermaid:
     needs: detect-diagram-changes
     if: needs.detect-diagram-changes.outputs.diagrams_changed == 'true'
