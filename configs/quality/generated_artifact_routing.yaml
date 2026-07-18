@@ -516,18 +516,18 @@ routes:
     output_kind: curated_generated_docs
     commit_policy: tracked_curated_generated_doc
     outputs:
-      - docs/02-architecture/diagrams/architecture/49-chembl-activity-dataflow.mmd
-      - docs/02-architecture/diagrams/architecture/50-chembl-activity-filter-criteria.mmd
-      - docs/02-architecture/diagrams/architecture/51a-chembl-activity-silver-fields-1.mmd
-      - docs/02-architecture/diagrams/architecture/51b-chembl-activity-silver-fields-2.mmd
-      - docs/02-architecture/diagrams/architecture/52a-chembl-activity-gold-fields-1.mmd
-      - docs/02-architecture/diagrams/architecture/52b-chembl-activity-gold-fields-2.mmd
-      - docs/02-architecture/diagrams/descriptions/architecture/49-chembl-activity-dataflow.md
-      - docs/02-architecture/diagrams/descriptions/architecture/50-chembl-activity-filter-criteria.md
-      - docs/02-architecture/diagrams/descriptions/architecture/51a-chembl-activity-silver-fields-1.md
-      - docs/02-architecture/diagrams/descriptions/architecture/51b-chembl-activity-silver-fields-2.md
-      - docs/02-architecture/diagrams/descriptions/architecture/52a-chembl-activity-gold-fields-1.md
-      - docs/02-architecture/diagrams/descriptions/architecture/52b-chembl-activity-gold-fields-2.md
+      - docs/02-architecture/diagrams/architecture/49-chembl-pipeline-activity-dataflow.mmd
+      - docs/02-architecture/diagrams/architecture/50-chembl-pipeline-activity-filter-criteria.mmd
+      - docs/02-architecture/diagrams/architecture/51a-chembl-pipeline-activity-silver-fields-1.mmd
+      - docs/02-architecture/diagrams/architecture/51b-chembl-pipeline-activity-silver-fields-2.mmd
+      - docs/02-architecture/diagrams/architecture/52a-chembl-pipeline-activity-gold-fields-1.mmd
+      - docs/02-architecture/diagrams/architecture/52b-chembl-pipeline-activity-gold-fields-2.mmd
+      - docs/02-architecture/diagrams/descriptions/architecture/49-chembl-pipeline-activity-dataflow.md
+      - docs/02-architecture/diagrams/descriptions/architecture/50-chembl-pipeline-activity-filter-criteria.md
+      - docs/02-architecture/diagrams/descriptions/architecture/51a-chembl-pipeline-activity-silver-fields-1.md
+      - docs/02-architecture/diagrams/descriptions/architecture/51b-chembl-pipeline-activity-silver-fields-2.md
+      - docs/02-architecture/diagrams/descriptions/architecture/52a-chembl-pipeline-activity-gold-fields-1.md
+      - docs/02-architecture/diagrams/descriptions/architecture/52b-chembl-pipeline-activity-gold-fields-2.md
       - docs/02-architecture/generated/pipeline-dataflows/chembl_activity/
     notes: Typed effective-config IR owns the ChEMBL activity Mermaid views,
       description cards, field inventory, and pipeline passport.
