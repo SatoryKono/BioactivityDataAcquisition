@@ -104,6 +104,7 @@ def test_mermaid_views_cover_all_fields_without_oversized_nodes(
     ):
         source = views[filename]
         assert "flowchart TB" in source
+        assert "'wrappingWidth': 360" in source
         assert source.count("    Layer -->") == 2
         assert all(f"<br/>{field.name}" in source for field in expected_fields)
         field_nodes = [
