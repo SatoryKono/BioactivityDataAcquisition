@@ -11,25 +11,25 @@ Reviewers:
 
 ______________________________________________________________________
 
-# ChEMBL Activity Gold Output Fields 1 Of 2
+# ChEMBL Activity Gold Output Fields 2 Of 2
 
-- Исходная диаграмма: `architecture/52a-chembl_activity-gold-fields-1.mmd`
-- SVG: `architecture/svg/52a-chembl_activity-gold-fields-1.svg`
+- Исходная диаграмма: `architecture/52b-chembl-pipeline-activity-gold-fields-2.mmd`
+- SVG: `architecture/svg/52b-chembl-pipeline-activity-gold-fields-2.svg`
 - Паспорт: `generated/pipeline-dataflows/chembl_activity/pipeline-passport.md`
 
 ## Описание
 
-Первая часть фактической Gold-проекции после применения групп колонок и исключений слоя.
+Вторая часть фактической Gold-проекции; поля контракта вне проекции перечислены отдельно в паспорте.
 
 Диаграмма генерируется из единого типизированного IR; ручное редактирование источника не предусмотрено.
 
 ## Связанные представления
 
-- `49-chembl_activity-dataflow`
-- `50-chembl_activity-filter-criteria`
-- `51a-chembl_activity-silver-fields-1`
-- `51b-chembl_activity-silver-fields-2`
-- `52b-chembl_activity-gold-fields-2`
+- `49-chembl-pipeline-activity-dataflow`
+- `50-chembl-pipeline-activity-filter-criteria`
+- `51a-chembl-pipeline-activity-silver-fields-1`
+- `51b-chembl-pipeline-activity-silver-fields-2`
+- `52a-chembl-pipeline-activity-gold-fields-1`
 
 ## Метаданные
 

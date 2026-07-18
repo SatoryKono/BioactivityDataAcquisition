@@ -12,12 +12,12 @@ This passport is generated from the resolved effective configuration and live sc
 
 ## Linked Views
 
-- [49-chembl_activity-dataflow](../../../diagrams/architecture/svg/49-chembl_activity-dataflow.svg)
-- [50-chembl_activity-filter-criteria](../../../diagrams/architecture/svg/50-chembl_activity-filter-criteria.svg)
-- [51a-chembl_activity-silver-fields-1](../../../diagrams/architecture/svg/51a-chembl_activity-silver-fields-1.svg)
-- [51b-chembl_activity-silver-fields-2](../../../diagrams/architecture/svg/51b-chembl_activity-silver-fields-2.svg)
-- [52a-chembl_activity-gold-fields-1](../../../diagrams/architecture/svg/52a-chembl_activity-gold-fields-1.svg)
-- [52b-chembl_activity-gold-fields-2](../../../diagrams/architecture/svg/52b-chembl_activity-gold-fields-2.svg)
+- [49-chembl-pipeline-activity-dataflow](../../../diagrams/architecture/svg/49-chembl-pipeline-activity-dataflow.svg)
+- [50-chembl-pipeline-activity-filter-criteria](../../../diagrams/architecture/svg/50-chembl-pipeline-activity-filter-criteria.svg)
+- [51a-chembl-pipeline-activity-silver-fields-1](../../../diagrams/architecture/svg/51a-chembl-pipeline-activity-silver-fields-1.svg)
+- [51b-chembl-pipeline-activity-silver-fields-2](../../../diagrams/architecture/svg/51b-chembl-pipeline-activity-silver-fields-2.svg)
+- [52a-chembl-pipeline-activity-gold-fields-1](../../../diagrams/architecture/svg/52a-chembl-pipeline-activity-gold-fields-1.svg)
+- [52b-chembl-pipeline-activity-gold-fields-2](../../../diagrams/architecture/svg/52b-chembl-pipeline-activity-gold-fields-2.svg)
 
 Machine-readable companions: [IR JSON](pipeline-dataflow-ir.json) and [field CSV](fields.csv).
 
