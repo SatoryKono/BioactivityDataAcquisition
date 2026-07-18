@@ -314,6 +314,8 @@ def _field_view(
         (
             "",
             f"    class Layer,{','.join(node_ids)} {layer_class}",
+            f"    class {','.join(node_ids)} fieldCard",
+            "    classDef fieldCard font-size:13px",
             _PALETTE,
             "",
         )
