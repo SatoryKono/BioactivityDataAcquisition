@@ -11,29 +11,29 @@ Reviewers:
 
 ______________________________________________________________________
 
-# ChEMBL Activity Silver Output Fields 2 Of 2
+# ChEMBL Activity Source To Silver And Gold
 
-- Исходная диаграмма: `architecture/51b-chembl_activity-silver-fields-2.mmd`
-- SVG: `architecture/svg/51b-chembl_activity-silver-fields-2.svg`
+- Исходная диаграмма: `architecture/49-chembl-pipeline-activity-dataflow.mmd`
+- SVG: `architecture/svg/49-chembl-pipeline-activity-dataflow.svg`
 - Паспорт: `generated/pipeline-dataflows/chembl_activity/pipeline-passport.md`
 
 ## Описание
 
-Вторая часть полного списка полей, реально публикуемых в слой Silver, в детерминированном порядке записи.
+Показывает сквозной путь записи от API ChEMBL через Bronze, структурную фильтрацию и DQ к фактическим выходам Silver и Gold.
 
 Диаграмма генерируется из единого типизированного IR; ручное редактирование источника не предусмотрено.
 
 ## Связанные представления
 
-- `49-chembl_activity-dataflow`
-- `50-chembl_activity-filter-criteria`
-- `51a-chembl_activity-silver-fields-1`
-- `52a-chembl_activity-gold-fields-1`
-- `52b-chembl_activity-gold-fields-2`
+- `50-chembl-pipeline-activity-filter-criteria`
+- `51a-chembl-pipeline-activity-silver-fields-1`
+- `51b-chembl-pipeline-activity-silver-fields-2`
+- `52a-chembl-pipeline-activity-gold-fields-1`
+- `52b-chembl-pipeline-activity-gold-fields-2`
 
 ## Метаданные
 
 - Тип: `flowchart`
-- Уровень: `Pipeline / Silver Contract`
+- Уровень: `Pipeline / Dataflow`
 - Дата метаданных: `2026-07-18`
 - Источник истины: `pipeline-dataflow-ir.json`
