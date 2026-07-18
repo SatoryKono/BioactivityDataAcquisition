@@ -107,12 +107,12 @@ _Автогенерация: 2026-07-18T17:33:44+03:00_
 - [46-filter-config-resolution-and-column-filter-evaluation](architecture/46-filter-config-resolution-and-column-filter-evaluation.md)
 - [47-run-manifest-domain-model-and-serialization-surface](architecture/47-run-manifest-domain-model-and-serialization-surface.md)
 - [48-effective-config-artifact-domain-model](architecture/48-effective-config-artifact-domain-model.md)
-- [49-chembl_activity-dataflow](architecture/49-chembl_activity-dataflow.md)
-- [50-chembl_activity-filter-criteria](architecture/50-chembl_activity-filter-criteria.md)
-- [51a-chembl_activity-silver-fields-1](architecture/51a-chembl_activity-silver-fields-1.md)
-- [51b-chembl_activity-silver-fields-2](architecture/51b-chembl_activity-silver-fields-2.md)
-- [52a-chembl_activity-gold-fields-1](architecture/52a-chembl_activity-gold-fields-1.md)
-- [52b-chembl_activity-gold-fields-2](architecture/52b-chembl_activity-gold-fields-2.md)
+- [49-chembl-pipeline-activity-dataflow](architecture/49-chembl-pipeline-activity-dataflow.md)
+- [50-chembl-pipeline-activity-filter-criteria](architecture/50-chembl-pipeline-activity-filter-criteria.md)
+- [51a-chembl-pipeline-activity-silver-fields-1](architecture/51a-chembl-pipeline-activity-silver-fields-1.md)
+- [51b-chembl-pipeline-activity-silver-fields-2](architecture/51b-chembl-pipeline-activity-silver-fields-2.md)
+- [52a-chembl-pipeline-activity-gold-fields-1](architecture/52a-chembl-pipeline-activity-gold-fields-1.md)
+- [52b-chembl-pipeline-activity-gold-fields-2](architecture/52b-chembl-pipeline-activity-gold-fields-2.md)
 
 ## Class Diagram Cards
 
