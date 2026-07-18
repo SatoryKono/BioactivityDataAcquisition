@@ -44750,13 +44750,7 @@
   ],
   "schema_version": 1,
   "snapshot_date": "2026-07-13",
-<<<<<<< HEAD
   "source_tree_sha256": "a4e5eaad63a1183e90854327a73ed0047b98b74886a0ec527cda415deaaeb38e",
-||||||| 52246f5d22
-  "source_tree_sha256": "41f4bbbb4089f51aa8767411e69119e32ba79de2f3ff5ae614fbcb8e41e0f38a",
-=======
-  "source_tree_sha256": "106eeb675bce60d18556c398bf333a9ed49534efccdc1822b003bb9e8f647dbf",
->>>>>>> master_20260717-5
   "summary": {
     "coverage_xml_present": true,
     "hotspot_family_coverage": {
