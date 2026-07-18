@@ -17,12 +17,12 @@ from scripts.diagrams.pipeline_dataflow_ir import (
 )
 
 DIAGRAM_FILENAMES = (
-    "49-chembl-activity-dataflow.mmd",
-    "50-chembl-activity-filter-criteria.mmd",
-    "51a-chembl-activity-silver-fields-1.mmd",
-    "51b-chembl-activity-silver-fields-2.mmd",
-    "52a-chembl-activity-gold-fields-1.mmd",
-    "52b-chembl-activity-gold-fields-2.mmd",
+    "49-chembl_activity-dataflow.mmd",
+    "50-chembl_activity-filter-criteria.mmd",
+    "51a-chembl_activity-silver-fields-1.mmd",
+    "51b-chembl_activity-silver-fields-2.mmd",
+    "52a-chembl_activity-gold-fields-1.mmd",
+    "52b-chembl_activity-gold-fields-2.mmd",
 )
 ARTIFACT_FILENAMES = (
     "pipeline-dataflow-ir.json",

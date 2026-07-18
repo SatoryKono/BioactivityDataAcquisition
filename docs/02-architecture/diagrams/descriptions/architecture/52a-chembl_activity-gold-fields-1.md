@@ -13,8 +13,8 @@ ______________________________________________________________________
 
 # ChEMBL Activity Gold Output Fields 1 Of 2
 
-- Исходная диаграмма: `architecture/52a-chembl-activity-gold-fields-1.mmd`
-- SVG: `architecture/svg/52a-chembl-activity-gold-fields-1.svg`
+- Исходная диаграмма: `architecture/52a-chembl_activity-gold-fields-1.mmd`
+- SVG: `architecture/svg/52a-chembl_activity-gold-fields-1.svg`
 - Паспорт: `generated/pipeline-dataflows/chembl_activity/pipeline-passport.md`
 
 ## Описание
@@ -25,11 +25,11 @@ ______________________________________________________________________
 
 ## Связанные представления
 
-- `49-chembl-activity-dataflow`
-- `50-chembl-activity-filter-criteria`
-- `51a-chembl-activity-silver-fields-1`
-- `51b-chembl-activity-silver-fields-2`
-- `52b-chembl-activity-gold-fields-2`
+- `49-chembl_activity-dataflow`
+- `50-chembl_activity-filter-criteria`
+- `51a-chembl_activity-silver-fields-1`
+- `51b-chembl_activity-silver-fields-2`
+- `52b-chembl_activity-gold-fields-2`
 
 ## Метаданные
 

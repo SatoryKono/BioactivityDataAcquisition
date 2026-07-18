@@ -249,24 +249,24 @@ jobs:
         run: |
           bash docs/02-architecture/diagrams/tooling/render.sh \
             --dir docs/02-architecture/diagrams/architecture \
-            --filter '*chembl-activity*' \
+            --filter '*chembl_activity*' \
             --puppeteer /tmp/puppeteer-config.json
 
       - name: Validate generated ChEMBL activity artifacts
         run: |
           python3 scripts/diagrams/check_diagram_artifacts.py \
-            --manifest docs/02-architecture/diagrams/manifests/chembl-activity-dataflow.txt \
+            --manifest docs/02-architecture/diagrams/manifests/chembl_activity-dataflow.txt \
             --require-png
           python3 scripts/diagrams/check_svg_text_visibility.py \
-            --manifest docs/02-architecture/diagrams/manifests/chembl-activity-dataflow.txt
+            --manifest docs/02-architecture/diagrams/manifests/chembl_activity-dataflow.txt
 
       - name: Upload generated ChEMBL activity renders
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v4
         with:
-          name: chembl-activity-dataflow-renders
+          name: chembl_activity-dataflow-renders
           path: |
-            docs/02-architecture/diagrams/architecture/svg/*chembl-activity*.svg
-            docs/02-architecture/diagrams/architecture/png/*chembl-activity*.png
+            docs/02-architecture/diagrams/architecture/svg/*chembl_activity*.svg
+            docs/02-architecture/diagrams/architecture/png/*chembl_activity*.png
             docs/02-architecture/diagrams/architecture/svg/INDEX.md
             docs/02-architecture/diagrams/architecture/png/INDEX.md
 

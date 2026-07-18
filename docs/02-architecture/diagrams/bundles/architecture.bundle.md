@@ -88,12 +88,12 @@
 - [46-filter-config-resolution-and-column-filter-evaluation — Filter Config Resolution And Column Filter Evaluation](#46-filter-config-resolution-and-column-filter-evaluation)
 - [47-run-manifest-domain-model-and-serialization-surface — Run Manifest Domain Model And Serialization Surface](#47-run-manifest-domain-model-and-serialization-surface)
 - [48-effective-config-artifact-domain-model — Effective Config Artifact Domain Model](#48-effective-config-artifact-domain-model)
-- [49-chembl-activity-dataflow — ChEMBL Activity Source To Silver And Gold](#49-chembl-activity-dataflow)
-- [50-chembl-activity-filter-criteria — ChEMBL Activity Query And Filtering Criteria](#50-chembl-activity-filter-criteria)
-- [51a-chembl-activity-silver-fields-1 — ChEMBL Activity Silver Output Fields 1 Of 2](#51a-chembl-activity-silver-fields-1)
-- [51b-chembl-activity-silver-fields-2 — ChEMBL Activity Silver Output Fields 2 Of 2](#51b-chembl-activity-silver-fields-2)
-- [52a-chembl-activity-gold-fields-1 — ChEMBL Activity Gold Output Fields 1 Of 2](#52a-chembl-activity-gold-fields-1)
-- [52b-chembl-activity-gold-fields-2 — ChEMBL Activity Gold Output Fields 2 Of 2](#52b-chembl-activity-gold-fields-2)
+- [49-chembl_activity-dataflow — ChEMBL Activity Source To Silver And Gold](#49-chembl_activity-dataflow)
+- [50-chembl_activity-filter-criteria — ChEMBL Activity Query And Filtering Criteria](#50-chembl_activity-filter-criteria)
+- [51a-chembl_activity-silver-fields-1 — ChEMBL Activity Silver Output Fields 1 Of 2](#51a-chembl_activity-silver-fields-1)
+- [51b-chembl_activity-silver-fields-2 — ChEMBL Activity Silver Output Fields 2 Of 2](#51b-chembl_activity-silver-fields-2)
+- [52a-chembl_activity-gold-fields-1 — ChEMBL Activity Gold Output Fields 1 Of 2](#52a-chembl_activity-gold-fields-1)
+- [52b-chembl_activity-gold-fields-2 — ChEMBL Activity Gold Output Fields 2 Of 2](#52b-chembl_activity-gold-fields-2)
 
 \newpage
 
@@ -1653,11 +1653,11 @@
 
 <div style="page-break-before: always;"></div>
 
-## 49-chembl-activity-dataflow
+## 49-chembl_activity-dataflow
 
 **ChEMBL Activity Source To Silver And Gold**
 
-![49-chembl-activity-dataflow](../architecture/svg/49-chembl-activity-dataflow.svg)
+![49-chembl_activity-dataflow](../architecture/svg/49-chembl_activity-dataflow.svg)
 
 ### Описание
 Диаграмма «ChEMBL Activity Source To Silver And Gold» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Pipeline / Dataflow». В комментариях исходника зафиксирован фокус диаграммы: Generated from the resolved chembl_activity configuration and contracts.. Схема имеет плотность порядка 14 узлов и 13 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: ChEMBL activity API, Source query 9 criteria, Bronze records raw source payload, Input-file filter disabled, Activity Transformer Bronze to Silver, Silver structural filter 29 criteria. Связанный ADR: ADR-002, ADR-040.
@@ -1673,11 +1673,11 @@
 
 <div style="page-break-before: always;"></div>
 
-## 50-chembl-activity-filter-criteria
+## 50-chembl_activity-filter-criteria
 
 **ChEMBL Activity Query And Filtering Criteria**
 
-![50-chembl-activity-filter-criteria](../architecture/svg/50-chembl-activity-filter-criteria.svg)
+![50-chembl_activity-filter-criteria](../architecture/svg/50-chembl_activity-filter-criteria.svg)
 
 ### Описание
 Диаграмма «ChEMBL Activity Query And Filtering Criteria» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Pipeline / Rules». В комментариях исходника зафиксирован фокус диаграммы: Generated from the resolved chembl_activity configuration and contracts.. Схема имеет плотность порядка 17 узлов и 25 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Source query criteria applied by ChEMBL API, Input-file filter enabled = false activity_id column, Silver structural criteria, Required fields 1 activity_id molecule_id assay_id target_id publication_id, Required fields 5 pchembl_value uo_units journal publication_year _state, Required fields 6 assay_type potential_duplicate standard_relation. Связанный ADR: ADR-002, ADR-040.
@@ -1693,11 +1693,11 @@
 
 <div style="page-break-before: always;"></div>
 
-## 51a-chembl-activity-silver-fields-1
+## 51a-chembl_activity-silver-fields-1
 
 **ChEMBL Activity Silver Output Fields 1 Of 2**
 
-![51a-chembl-activity-silver-fields-1](../architecture/svg/51a-chembl-activity-silver-fields-1.svg)
+![51a-chembl_activity-silver-fields-1](../architecture/svg/51a-chembl_activity-silver-fields-1.svg)
 
 ### Описание
 Диаграмма «ChEMBL Activity Silver Output Fields 1 Of 2» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Pipeline / Silver Contract». В комментариях исходника зафиксирован фокус диаграммы: Generated from the resolved chembl_activity configuration and contracts.. Схема имеет плотность порядка 13 узлов и 12 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Silver output sheet 1 of 2 60 fields, Fields 1-5 entity_id content_hash _run_id _run_type _source_batch_id, Fields 6-10 _ingestion_ts _index _state activity_id assay_id, Fields 36-40 activity_type activity_relation activity_value units text_value. Связанный ADR: ADR-002, ADR-040.
@@ -1713,11 +1713,11 @@
 
 <div style="page-break-before: always;"></div>
 
-## 51b-chembl-activity-silver-fields-2
+## 51b-chembl_activity-silver-fields-2
 
 **ChEMBL Activity Silver Output Fields 2 Of 2**
 
-![51b-chembl-activity-silver-fields-2](../architecture/svg/51b-chembl-activity-silver-fields-2.svg)
+![51b-chembl_activity-silver-fields-2](../architecture/svg/51b-chembl_activity-silver-fields-2.svg)
 
 ### Описание
 Диаграмма «ChEMBL Activity Silver Output Fields 2 Of 2» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Pipeline / Silver Contract». В комментариях исходника зафиксирован фокус диаграммы: Generated from the resolved chembl_activity configuration and contracts.. Схема имеет плотность порядка 5 узлов и 4 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Silver output sheet 2 of 2 17 fields, Fields 76-77 _dq_error _dq_warn. Связанный ADR: ADR-002, ADR-040.
@@ -1733,11 +1733,11 @@
 
 <div style="page-break-before: always;"></div>
 
-## 52a-chembl-activity-gold-fields-1
+## 52a-chembl_activity-gold-fields-1
 
 **ChEMBL Activity Gold Output Fields 1 Of 2**
 
-![52a-chembl-activity-gold-fields-1](../architecture/svg/52a-chembl-activity-gold-fields-1.svg)
+![52a-chembl_activity-gold-fields-1](../architecture/svg/52a-chembl_activity-gold-fields-1.svg)
 
 ### Описание
 Диаграмма «ChEMBL Activity Gold Output Fields 1 Of 2» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Pipeline / Gold Contract». В комментариях исходника зафиксирован фокус диаграммы: Generated from the resolved chembl_activity configuration and contracts.. Схема имеет плотность порядка 13 узлов и 12 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Gold output sheet 1 of 2 60 fields, Fields 1-5 entity_id content_hash activity_id assay_id molecule_id. Связанный ADR: ADR-002, ADR-040.
@@ -1753,11 +1753,11 @@
 
 <div style="page-break-before: always;"></div>
 
-## 52b-chembl-activity-gold-fields-2
+## 52b-chembl_activity-gold-fields-2
 
 **ChEMBL Activity Gold Output Fields 2 Of 2**
 
-![52b-chembl-activity-gold-fields-2](../architecture/svg/52b-chembl-activity-gold-fields-2.svg)
+![52b-chembl_activity-gold-fields-2](../architecture/svg/52b-chembl_activity-gold-fields-2.svg)
 
 ### Описание
 Диаграмма «ChEMBL Activity Gold Output Fields 2 Of 2» из architecture-набора детализирует конкретный архитектурный компонент или подсистему BioETL. Она представлена в формате блок-схема потоков (flowchart) и служит ориентиром на уровне детализации «Pipeline / Gold Contract». В комментариях исходника зафиксирован фокус диаграммы: Generated from the resolved chembl_activity configuration and contracts.. Схема имеет плотность порядка 3 узлов и 2 связей; её удобно использовать как обзорный архитектурный срез для проверки влияния изменений, согласования интерфейсов и подготовки рефакторинга, но не как исчерпывающий каталог текущей кодовой поверхности. Показательные узлы для быстрого чтения: Gold output sheet 2 of 2 6 fields, Fields 66-66 publication_year. Связанный ADR: ADR-002, ADR-040.
