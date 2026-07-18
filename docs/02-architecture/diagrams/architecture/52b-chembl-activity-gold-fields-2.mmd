@@ -8,12 +8,13 @@
 %% @nodes   3
 %% @adr     ADR-002, ADR-040
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
-flowchart LR
+flowchart TB
     Layer["Gold output<br/>sheet 2 of 2<br/>6 fields"]
     Fields1["Fields 61-65<br/>bao_ontology_version<br/>journal<br/>publication_doi<br/>publication_pmid<br/>publication_pmc_id"]
     Fields2["Fields 66-66<br/>publication_year"]
 
-    Layer --> Fields1 --> Fields2
+    Layer --> Fields1
+    Layer --> Fields2
 
     class Layer,Fields1,Fields2 gold
     classDef source fill:#f1f5f9,stroke:#64748b,stroke-width:2px
