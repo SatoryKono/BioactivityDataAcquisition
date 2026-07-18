@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Generated `chembl_activity` pipeline dataflow documentation:** Added a
+  typed effective-config IR, six Mermaid views, a pipeline passport, and
+  machine-readable JSON/CSV companions covering source criteria, stage-level
+  filters, post-processing hooks, DQ policy, and the actual Silver/Gold output
+  projections. CI now checks the generated artifacts for drift when their
+  configuration, schemas, transformer, or generator inputs change.
+
 ### Changed
 
 - **Grafana render-first remediation program (#6246-#6253):** Unified all

@@ -19,11 +19,23 @@ on:
       - 'configs/quality/xwalk_missing_backlog.yaml'
       - 'docs/**'
       - 'scripts/docs/**'
+      - 'scripts/diagrams/**'
+      - 'scripts/schema/generate_unified_schema_map.py'
+      - 'configs/base/pipeline.yaml'
+      - 'configs/base/quality.yaml'
+      - 'configs/providers/chembl.yaml'
+      - 'configs/entities/chembl/activity.yaml'
+      - 'src/bioetl/application/pipelines/chembl/activity_transformer.py'
+      - 'src/bioetl/composition/factories/pipeline/_registry_manifest_chembl.py'
+      - 'src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py'
+      - 'src/bioetl/domain/schemas/chembl/activity.py'
+      - 'src/bioetl/infrastructure/schemas/silver_chembl_core.py'
       - 'scripts/engineering/qa/check_xwalk_missing_backlog.py'
       - '.github/actions/setup-python-uv/**'
       - 'tests/architecture/test_ai_runtime_governance_links.py'
       - 'tests/architecture/test_check_doc_links_guardrails.py'
       - 'tests/unit/scripts/qa/test_check_xwalk_missing_backlog.py'
+      - 'tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py'
       - 'mkdocs.yml'
       - 'pyproject.toml'
       - 'uv.lock'
@@ -43,11 +55,23 @@ on:
       - 'configs/quality/xwalk_missing_backlog.yaml'
       - 'docs/**'
       - 'scripts/docs/**'
+      - 'scripts/diagrams/**'
+      - 'scripts/schema/generate_unified_schema_map.py'
+      - 'configs/base/pipeline.yaml'
+      - 'configs/base/quality.yaml'
+      - 'configs/providers/chembl.yaml'
+      - 'configs/entities/chembl/activity.yaml'
+      - 'src/bioetl/application/pipelines/chembl/activity_transformer.py'
+      - 'src/bioetl/composition/factories/pipeline/_registry_manifest_chembl.py'
+      - 'src/bioetl/domain/contracts/gold/_chembl_activity_assay_schemas.py'
+      - 'src/bioetl/domain/schemas/chembl/activity.py'
+      - 'src/bioetl/infrastructure/schemas/silver_chembl_core.py'
       - 'scripts/engineering/qa/check_xwalk_missing_backlog.py'
       - '.github/actions/setup-python-uv/**'
       - 'tests/architecture/test_ai_runtime_governance_links.py'
       - 'tests/architecture/test_check_doc_links_guardrails.py'
       - 'tests/unit/scripts/qa/test_check_xwalk_missing_backlog.py'
+      - 'tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py'
       - 'mkdocs.yml'
       - 'pyproject.toml'
       - 'uv.lock'
@@ -64,6 +88,12 @@ jobs:
         uses: ./.github/actions/setup-python-uv
         with:
           python-version: "3.13"
+
+      - name: Check generated pipeline dataflow drift
+        run: |
+          uv run python -m scripts.diagrams generate-dataflows \
+            --pipeline chembl_activity \
+            --check
 
       - name: Run docs-governance architecture tests
         run: |
@@ -97,6 +127,7 @@ jobs:
             tests/architecture/test_ai_runtime_governance_links.py \
             tests/architecture/test_runtime_agent_docs_drift.py \
             tests/architecture/test_workflow_cli_running_boundaries.py \
+            tests/unit/repo_backed/scripts/diagrams/test_generate_pipeline_dataflows.py \
             -q --tb=short
 
       - name: Validate xwalk missing backlog

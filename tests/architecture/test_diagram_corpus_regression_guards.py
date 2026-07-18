@@ -71,14 +71,19 @@ def test_precommit_diagram_paths_cover_canonical_tree() -> None:
 
 
 def test_mmdc_docker_fallback_is_version_pinned() -> None:
-    wrapper = (REPO_ROOT / "scripts" / "diagrams" / "mmdc_wrapper.sh").read_text(
-        encoding="utf-8"
-    )
+    wrapper_path = REPO_ROOT / "scripts" / "diagrams" / "mmdc_wrapper.sh"
+    wrapper = wrapper_path.read_text(encoding="utf-8")
+    renderer = (
+        REPO_ROOT / "docs" / "02-architecture" / "diagrams" / "tooling" / "render.sh"
+    ).read_text(encoding="utf-8")
 
     assert "minlag/mermaid-cli:10.6.1" in wrapper
     assert 'MMDC_REQUIRED_VERSION="${MMDC_REQUIRED_VERSION:-10.6.1}"' in wrapper
     assert "MMDC_ALLOW_VERSION_DRIFT" in wrapper
     assert "MMDC_DOCKER_IMAGE:-minlag/mermaid-cli}" not in wrapper
+    assert "grep -Eo '[0-9]+\\.[0-9]+\\.[0-9]+' | head -n 1" in wrapper
+    assert "grep -Eo '[0-9]+\\.[0-9]+\\.[0-9]+' | head -n 1" in renderer
+    assert wrapper_path.stat().st_mode & 0o111
 
 
 def test_diagram_renderer_uses_atomic_svg_and_png_writes() -> None:
@@ -142,10 +147,10 @@ def test_governance_docs_match_active_diagram_counts() -> None:
         mmd_total,
         view_count,
     ) == (
-        83,
+        89,
         94,
         55,
-        233,
+        239,
         165,
     )
 
