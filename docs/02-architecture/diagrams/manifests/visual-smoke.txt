@@ -2,7 +2,7 @@
 # Keep this list small and stable; every path must exist in VCS.
 
 # architecture/
-docs/02-architecture/diagrams/architecture/svg/49-chembl-activity-dataflow.svg
+docs/02-architecture/diagrams/architecture/svg/49-chembl_activity-dataflow.svg
 
 # foundation/
 docs/02-architecture/diagrams/foundation/svg/01-full-system-component.svg
