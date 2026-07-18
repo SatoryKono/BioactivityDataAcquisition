@@ -106,6 +106,7 @@ def test_mermaid_views_cover_all_fields_without_oversized_nodes(
         assert "flowchart TB" in source
         assert "'wrappingWidth': 360" in source
         assert source.count("    Layer -->") == 2
+        assert "classDef fieldCard font-size:13px" in source
         assert all(f"<br/>{field.name}" in source for field in expected_fields)
         field_nodes = [
             line for line in source.splitlines() if "Fields" in line and '["' in line
