@@ -241,6 +241,11 @@ def _project_fields(
     selected: list[str] = []
     used: set[str] = set()
     by_name = {str(group["name"]): group for group in groups}
+    missing = [group_name for group_name in include_groups if group_name not in by_name]
+    if missing:
+        raise ValueError(
+            f"Unknown column groups: {missing}; available: {sorted(by_name)}"
+        )
 
     for group_name in include_groups:
         _append_projected_group(
@@ -500,15 +505,28 @@ def build_pipeline_dataflow_ir(
         PROJECT_ROOT
         / "src/bioetl/composition/factories/pipeline/_registry_manifest_chembl.py"
     )
-    manifest_text = manifest_path.read_text(encoding="utf-8")
-    transformer_match = re.search(
-        rf'pipeline_name="{re.escape(pipeline_name)}".*?transformer_class="([^"]+)"',
-        manifest_text,
-        flags=re.DOTALL,
+    manifest_tree = ast.parse(
+        manifest_path.read_text(encoding="utf-8"), filename=str(manifest_path)
     )
-    if transformer_match is None:
-        raise ValueError(f"Transformer registry entry not found for {pipeline_name}")
-    transformer_class = transformer_match.group(1)
+    transformer_class = None
+    for node in ast.walk(manifest_tree):
+        if not isinstance(node, ast.Call):
+            continue
+        kwargs = {kw.arg: kw.value for kw in node.keywords if kw.arg is not None}
+        name_node = kwargs.get("pipeline_name")
+        transformer_node = kwargs.get("transformer_class")
+        if (
+            isinstance(name_node, ast.Constant)
+            and name_node.value == pipeline_name
+            and isinstance(transformer_node, ast.Constant)
+            and isinstance(transformer_node.value, str)
+        ):
+            transformer_class = transformer_node.value
+            break
+    if transformer_class is None:
+        raise ValueError(
+            f"Transformer registry entry not found for {pipeline_name} in {manifest_path}"
+        )
 
     input_filter = effective["input_filter"]
     input_criteria = (
