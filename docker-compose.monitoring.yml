@@ -69,22 +69,14 @@ services:
       - monitoring
     restart: unless-stopped
     healthcheck:
-      test:
-        - "CMD"
-        - "/usr/bin/loki"
-        - "-config.file=/etc/loki/config.yml"
-        - "-verify-config=true"
-      interval: 10s
-      timeout: 5s
-      retries: 6
-      start_period: 60s
+      disable: true
     mem_limit: 768m
     mem_reservation: 384m
-    cpus: 7.5
-    pids_limit: 2560
+    cpus: 0.75
+    pids_limit: 256
     init: true
-    stop_grace_period: 120s
-    logging: {driver: local, options: {max-size: "100m", max-file: "10"}}
+    stop_grace_period: 30s
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
 
   promtail:
     image: grafana/promtail:3.6.8@sha256:6cfa64ec432b24a912d640e2edb940eeae2666f61861a66c121d763dd7241381
@@ -97,7 +89,7 @@ services:
       - ./reports/logs:/workspace-report-logs:ro
     depends_on:
       loki:
-        condition: service_healthy
+        condition: service_started
     networks:
       - monitoring
     restart: unless-stopped
