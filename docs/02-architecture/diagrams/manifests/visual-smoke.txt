@@ -1,6 +1,9 @@
 # Diagram visual smoke baseline set (relative to repository root).
 # Keep this list small and stable; every path must exist in VCS.
 
+# architecture/
+docs/02-architecture/diagrams/architecture/svg/49-chembl-activity-dataflow.svg
+
 # foundation/
 docs/02-architecture/diagrams/foundation/svg/01-full-system-component.svg
 docs/02-architecture/diagrams/foundation/svg/30-port-adapter-mapping.svg

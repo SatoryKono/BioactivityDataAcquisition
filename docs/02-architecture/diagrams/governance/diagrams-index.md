@@ -7,13 +7,13 @@ Owner: BioETL Team
 Reviewers:
 
 - BioETL Team
-  Last verified: '2026-07-08'
+  Last verified: '2026-07-18'
 
 ______________________________________________________________________
 
 # BioETL Architecture Diagrams Index
 
-*Updated: 2026-07-08*
+*Updated: 2026-07-18*
 
 > **Canonical root:** [docs/02-architecture/diagrams/](../README.md)
 > **Diagram governance:** [ADR-040](../../decisions/ADR-040-diagram-governance.md)
@@ -22,7 +22,7 @@ ______________________________________________________________________
 ## Repository Layout
 
 - Canonical `.mmd` sources:
-  - `architecture/` — 83 files
+  - `architecture/` — 89 files
   - `class-diagrams/` — 94 files
   - `foundation/` — 55 files
 - Decomposed `.mermaid` views:
@@ -41,7 +41,7 @@ ______________________________________________________________________
 
 ## Canonical Families
 
-- Architecture core (48 primary topics; 83 `.mmd` files including decomposed sub-diagrams):
+- Architecture core (52 primary topics; 89 `.mmd` files including decomposed sub-diagrams):
   - `architecture/01-high-level-hexagonal.mmd`
   - `architecture/02-layer-dependency-matrix.mmd`
   - `architecture/03-medallion-data-flow.mmd`

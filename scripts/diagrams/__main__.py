@@ -35,6 +35,7 @@ Fix:
     fix-pagebreaks       Fix pagebreaks in bundles
 
 Render:
+    generate-dataflows   Generate pipeline dataflow diagrams and field inventories
     docs-agent           Run full diagram docs pipeline
     render-pdf           Refresh architecture Markdown bundle
     render-pdf-desc      Generate PDF with descriptions
@@ -52,6 +53,7 @@ from pathlib import Path
 
 from scripts.engineering.common.cli_dispatch import (
     dispatch_cli,
+    module_command,
     python_command,
     shell_command,
 )
@@ -82,6 +84,9 @@ COMMAND_SPECS = {
     "fix-sizes": python_command("uniform_diagram_sizes.py"),
     "fix-pagebreaks": python_command("fix_pagebreaks_in_bundles.py"),
     # Render
+    "generate-dataflows": module_command(
+        "scripts.diagrams.generate_pipeline_dataflows"
+    ),
     "docs-agent": shell_command("run_diagram_docs_agent.sh"),
     "render-pdf": python_command(
         "generate_all_bundles.py", "--collection", "architecture"

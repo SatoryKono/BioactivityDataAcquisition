@@ -479,6 +479,7 @@ nav:
                     -   "Diagram Root README": 02-architecture/diagrams/README.md
                     -   "Historical Diagram Catalog": 02-architecture/diagrams/governance/diagram-catalog.md
                     -   "Class Diagram Description Overview": 02-architecture/diagrams/descriptions/class-summary.md
+                    -   "ChEMBL Activity Dataflow Passport": 02-architecture/generated/pipeline-dataflows/chembl_activity/pipeline-passport.md
                     -   "Architecture Bundle": 02-architecture/diagrams/bundles/architecture.bundle.md
                     -   "Foundation Bundle": 02-architecture/diagrams/bundles/foundation.bundle.md
                     -   "Class Bundle": 02-architecture/diagrams/bundles/class.bundle.md
@@ -589,6 +590,13 @@ nav:
                             -   "21 Idempotent Processing Guards": 02-architecture/diagrams/descriptions/architecture/21-idempotent-processing-guards.md
                             -   "22 Data Operations Observability": 02-architecture/diagrams/descriptions/architecture/22-data-operations-observability.md
                             -   "23 Reproducible Run Contract": 02-architecture/diagrams/descriptions/architecture/23-reproducible-run-contract.md
+                    -   "ChEMBL Activity Dataflow":
+                            -   "49 Source To Silver And Gold": 02-architecture/diagrams/descriptions/architecture/49-chembl-activity-dataflow.md
+                            -   "50 Filter Criteria": 02-architecture/diagrams/descriptions/architecture/50-chembl-activity-filter-criteria.md
+                            -   "51A Silver Fields Part 1": 02-architecture/diagrams/descriptions/architecture/51a-chembl-activity-silver-fields-1.md
+                            -   "51B Silver Fields Part 2": 02-architecture/diagrams/descriptions/architecture/51b-chembl-activity-silver-fields-2.md
+                            -   "52A Gold Fields Part 1": 02-architecture/diagrams/descriptions/architecture/52a-chembl-activity-gold-fields-1.md
+                            -   "52B Gold Fields Part 2": 02-architecture/diagrams/descriptions/architecture/52b-chembl-activity-gold-fields-2.md
                 -   "Class Diagrams":
                     -   "Index": 02-architecture/diagrams/descriptions/class/INDEX.md
                     -   "01 Domain Ports": 02-architecture/diagrams/descriptions/class/01-domain-ports.md

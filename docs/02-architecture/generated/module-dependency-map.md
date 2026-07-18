@@ -5,8 +5,16 @@
 
 ## Summary
 
+<<<<<<< HEAD
 - Scanned modules: `2237`
 - Internal import edges (raw): `6992`
+||||||| parent of 1065641633 (docs(diagrams): generate chembl activity dataflow)
+- Scanned modules: `2234`
+- Internal import edges (raw): `6966`
+=======
+- Scanned modules: `2235`
+- Internal import edges (raw): `6970`
+>>>>>>> 1065641633 (docs(diagrams): generate chembl activity dataflow)
 - Aggregated layer edges: `13`
 - Layer policy violations: `0`
 - Cross-layer module-group edges (total): `303`
@@ -27,7 +35,13 @@ flowchart LR
     composition -->|681 OK| composition
     composition -->|274 OK| domain
     composition -->|228 OK| infrastructure
+<<<<<<< HEAD
     domain -->|1140 OK| domain
+||||||| parent of 1065641633 (docs(diagrams): generate chembl activity dataflow)
+    domain -->|1136 OK| domain
+=======
+    domain -->|1139 OK| domain
+>>>>>>> 1065641633 (docs(diagrams): generate chembl activity dataflow)
     infrastructure -->|716 OK| domain
     infrastructure -->|1099 OK| infrastructure
     interfaces -->|36 OK| application
@@ -46,7 +60,13 @@ flowchart LR
 | `composition`    | `composition`    |     681 | allowed |
 | `composition`    | `domain`         |     274 | allowed |
 | `composition`    | `infrastructure` |     228 | allowed |
+<<<<<<< HEAD
 | `domain`         | `domain`         |    1140 | allowed |
+||||||| parent of 1065641633 (docs(diagrams): generate chembl activity dataflow)
+| `domain`         | `domain`         |    1136 | allowed |
+=======
+| `domain`         | `domain`         |    1139 | allowed |
+>>>>>>> 1065641633 (docs(diagrams): generate chembl activity dataflow)
 | `infrastructure` | `domain`         |     716 | allowed |
 | `infrastructure` | `infrastructure` |    1099 | allowed |
 | `interfaces`     | `application`    |      36 | allowed |

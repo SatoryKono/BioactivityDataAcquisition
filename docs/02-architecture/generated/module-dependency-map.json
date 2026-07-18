@@ -1,12 +1,26 @@
 {
   "summary": {
+<<<<<<< HEAD
     "scanned_modules": 2237,
     "total_internal_imports": 6992,
+||||||| parent of 1065641633 (docs(diagrams): generate chembl activity dataflow)
+    "scanned_modules": 2234,
+    "total_internal_imports": 6966,
+=======
+    "scanned_modules": 2235,
+    "total_internal_imports": 6970,
+>>>>>>> 1065641633 (docs(diagrams): generate chembl activity dataflow)
     "layer_edges": 13,
     "cross_layer_group_edges": 55,
     "cross_layer_group_edges_total": 303,
     "violations": 0,
+<<<<<<< HEAD
     "source_fingerprint": "7d80efdc029a0bc2965fce1c7b8218313a75f828046da28da7003e8801b79488"
+||||||| parent of 1065641633 (docs(diagrams): generate chembl activity dataflow)
+    "source_fingerprint": "75cdf7e6d3c7e58e86fa496b9924e2ad209cd0549487a5f4c5522dda31de66e8"
+=======
+    "source_fingerprint": "42bcf708ba331a070dca9b3a2584993605b51772a71cd3bf48f3e749c1027d97"
+>>>>>>> 1065641633 (docs(diagrams): generate chembl activity dataflow)
   },
   "layer_edges": [
     {
@@ -48,7 +62,13 @@
     {
       "source": "domain",
       "target": "domain",
+<<<<<<< HEAD
       "imports": 1140,
+||||||| parent of 1065641633 (docs(diagrams): generate chembl activity dataflow)
+      "imports": 1136,
+=======
+      "imports": 1139,
+>>>>>>> 1065641633 (docs(diagrams): generate chembl activity dataflow)
       "allowed": true
     },
     {

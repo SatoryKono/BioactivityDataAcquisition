@@ -444,7 +444,7 @@ renders; reserve it for explicit canary diagnostics.
 ```
 docs/02-architecture/diagrams/
   architecture/
-    *.mmd           # source diagrams (83)
+    *.mmd           # source diagrams (89)
     svg/*.svg       # rendered vector (scalable)
     png/*.png       # rendered raster (300 DPI)
   class-diagrams/
