@@ -172,6 +172,8 @@ def _detect_label_kind(
 
     if "fieldCard" in tokens:
         return "field-card"
+    if "criteriaCard" in tokens:
+        return "criteria-card"
     if "methods-group" in tokens:
         return "methods"
     if "members-group" in tokens:
@@ -364,14 +366,14 @@ def _build_fallback_text(
 
     center_x = x + width / 2.0
     font_size = 13.0 if label_kind == "field-card" else 14.0
-    if label_kind in {"field-card", "methods"}:
+    if label_kind in {"criteria-card", "field-card", "methods"}:
         # Keep classDiagram method signatures on a single fallback line.
         # Mermaid already sized the original foreignObject for the unwrapped
         # method text, and post-wrap fallback labels cause vertical overlap
         # because sibling method slots keep Mermaid's original 24px spacing.
-        # Generated field cards have the same constraint: Mermaid sizes each
-        # card for six explicit lines, so re-wrapping a long field name here
-        # would create a seventh line outside the node boundary.
+        # Generated field and criteria cards have the same constraint: Mermaid
+        # sizes them for explicit source lines, so re-wrapping a field name or
+        # criterion here would create extra lines outside the node boundary.
         wrapped_lines = [
             _sanitize_label_line(line, label_kind=label_kind)
             for line in text_lines
@@ -401,7 +403,7 @@ def _build_fallback_text(
     text_elem.set("y", _fmt_float(first_line_y))
     text_elem.set("text-anchor", "middle")
     text_elem.set("xml:space", "preserve")
-    if label_kind == "field-card":
+    if label_kind in {"criteria-card", "field-card"}:
         text_elem.set("font-size", f"{_fmt_float(font_size)}px")
 
     cls = fo.attrib.get("class", "").strip()

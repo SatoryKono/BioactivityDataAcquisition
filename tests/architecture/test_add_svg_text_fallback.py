@@ -80,6 +80,33 @@ def test_build_fallback_text_keeps_field_card_names_on_one_line() -> None:
     ]
 
 
+def test_build_fallback_text_keeps_criteria_on_explicit_lines() -> None:
+    module = _load_fallback_module()
+    fo = ET.fromstring(
+        """
+        <foreignObject xmlns="http://www.w3.org/2000/svg"
+                       xmlns:html="http://www.w3.org/1999/xhtml"
+                       x="0" y="0" width="160" height="90">
+          <html:div>
+            <html:span>
+              <html:p>Ranges<html:br/>activity_id range [1.0, 10000000000.0]</html:p>
+            </html:span>
+          </html:div>
+        </foreignObject>
+        """
+    )
+
+    fallback = module._build_fallback_text(fo, label_kind="criteria-card")
+    assert fallback is not None
+    assert fallback.attrib["font-size"] == "14px"
+
+    tspans = [child for child in fallback if child.tag.endswith("tspan")]
+    assert [tspan.text for tspan in tspans] == [
+        "Ranges",
+        "activity_id range [1.0, 10000000000.0]",
+    ]
+
+
 def test_add_fallbacks_replaces_old_single_line_text(tmp_path: Path) -> None:
     module = _load_fallback_module()
     svg_path = tmp_path / "sample.svg"
