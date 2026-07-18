@@ -8,14 +8,15 @@
 %% @nodes   5
 %% @adr     ADR-002, ADR-040
 %%{init: {'theme': 'neutral', 'themeVariables': {'fontFamily': 'Inter, system-ui', 'lineWidth': '2'}}}%%
-flowchart LR
+flowchart TB
     Layer["Silver output<br/>sheet 2 of 2<br/>17 fields"]
     Fields1["Fields 61-65<br/>target_taxonomy_id<br/>assay_type<br/>assay_description<br/>assay_variant_accession<br/>assay_variant_mutation"]
     Fields2["Fields 66-70<br/>bao_format<br/>bao_format_iri<br/>bao_format_mapping_status<br/>bao_label<br/>bao_ontology_version"]
     Fields3["Fields 71-75<br/>journal<br/>publication_doi<br/>publication_pmid<br/>publication_pmc_id<br/>publication_year"]
     Fields4["Fields 76-77<br/>_dq_error<br/>_dq_warn"]
 
-    Layer --> Fields1 --> Fields2 --> Fields3 --> Fields4
+    Layer --> Fields1 --> Fields2
+    Layer --> Fields3 --> Fields4
 
     class Layer,Fields1,Fields2,Fields3,Fields4 silver
     classDef source fill:#f1f5f9,stroke:#64748b,stroke-width:2px
