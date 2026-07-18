@@ -288,7 +288,7 @@ def _field_view(
     )
     lines.extend(
         (
-            "flowchart LR",
+            "flowchart TB",
             (
                 f'    Layer["{layer_name} output<br/>sheet {sheet} of '
                 f'{total_sheets}<br/>{len(fields)} fields"]'
@@ -304,7 +304,10 @@ def _field_view(
         lines.append(f'    {node_id}["{"<br/>".join(labels)}"]')
     lines.append("")
     if node_ids:
-        lines.append(f"    Layer --> {' --> '.join(node_ids)}")
+        split_at = (len(node_ids) + 1) // 2
+        for column in (node_ids[:split_at], node_ids[split_at:]):
+            if column:
+                lines.append(f"    Layer --> {' --> '.join(column)}")
     layer_class = layer_name.lower()
     lines.extend(
         (
