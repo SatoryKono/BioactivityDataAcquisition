@@ -3360,7 +3360,7 @@
             }
           ],
           "timeFrom": "1h",
-          "title": "Inspect Warning Logs (1h)",
+          "title": "Inspect Warning Logs",
           "type": "table"
         },
         {
@@ -3410,7 +3410,7 @@
             }
           ],
           "timeFrom": "1h",
-          "title": "Inspect GLOBAL Unstructured Logs (1h)",
+          "title": "Inspect GLOBAL Unstructured Logs",
           "type": "table"
         },
         {
