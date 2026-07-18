@@ -243,6 +243,15 @@ def _criteria(ir: PipelineDataflowIR) -> str:
         lines.append(f"    SilverStage --> Silver{index} --> GoldStage")
     if silver_exclusions:
         lines.append("    SilverStage --> SilverExclude --> GoldStage")
+    criteria_card_ids = [
+        *(f"Extract{index}" for index in range(1, len(extraction_chunks) + 1)),
+        *(f"Silver{index}" for index in range(1, len(silver_chunks) + 1)),
+        *(["SilverExclude"] if silver_exclusions else []),
+        "GoldColumns",
+        "GoldRanges",
+        "GoldRequired",
+        "DQ",
+    ]
     lines.extend(
         (
             "    GoldStage --> GoldColumns --> DQ",
@@ -261,6 +270,8 @@ def _criteria(ir: PipelineDataflowIR) -> str:
             "    class SilverExclude warning",
             "    class GoldStage,GoldColumns,GoldRanges,GoldRequired gold",
             "    class DQ dq",
+            f"    class {','.join(criteria_card_ids)} criteriaCard",
+            "    classDef criteriaCard font-size:14px",
             _PALETTE,
             "",
         )
