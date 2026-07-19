@@ -27,3 +27,41 @@ scrape_configs:
     static_configs:
       - targets: ['host.docker.internal:9323']
     scrape_interval: 30s
+
+  - job_name: 'bioetl'
+    static_configs:
+      - targets: ['bioetl:8000']
+
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+
+  - job_name: 'quarantine-explorer'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['quarantine-explorer:8081']
+
+  - job_name: 'grafana-image-renderer'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['renderer:8081']
+
+  - job_name: 'redis'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['redis:6379']
+
+  - job_name: 'minio-cluster'
+    metrics_path: /minio/v2/metrics/cluster
+    static_configs:
+      - targets: ['minio:9000']
+
+  - job_name: 'minio-node'
+    metrics_path: /minio/v2/metrics/node
+    static_configs:
+      - targets: ['minio:9000']
+
+  - job_name: 'alertmanager'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['alertmanager:9093']

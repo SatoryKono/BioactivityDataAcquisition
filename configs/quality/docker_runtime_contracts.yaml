@@ -246,6 +246,9 @@ host_ports:
   9121: {stack: redis, service: redis-exporter, bind: 127.0.0.1}
 
 retained_container_names:
+  bioetl:
+    stack: main
+    reason: Main helper health checks and operator diagnostics address this name.
   bioetl-neo4j:
     stack: neo4j
     reason: Existing Neo4j recovery, MCP, and operator scripts address this name.

@@ -7,8 +7,8 @@
 
 | Metric | Value |
 | --- | --- |
-| Doc-like files | 3033 |
-| Tracked doc-like files | 1837 |
+| Doc-like files | 3050 |
+| Tracked doc-like files | 1854 |
 | Ignored local docs/reports files | 1196 |
 | Duplicate groups | 2 |
 | Generated without route or exception | 0 |
@@ -19,7 +19,7 @@
 | Tracking State | Count |
 | --- | --- |
 | ignored_local | 1196 |
-| tracked | 1837 |
+| tracked | 1854 |
 
 ## Lifecycle Counts
 
@@ -60,7 +60,7 @@
 | Status | Count |
 | --- | --- |
 | Active | 1945 |
-| Archived | 61 |
+| Archived | 78 |
 | Canonical | 63 |
 | Generated | 707 |
 | Working | 257 |
@@ -70,7 +70,7 @@
 | Surface | Count |
 | --- | --- |
 | active | 1945 |
-| archive | 61 |
+| archive | 78 |
 | canonical | 63 |
 | generated | 707 |
 | working | 257 |
@@ -82,7 +82,7 @@
 | archive-after-github-state-check | 121 |
 | archive-after-migration | 81 |
 | generate-automatically | 707 |
-| keep | 2120 |
+| keep | 2137 |
 | reconcile-with-github-state | 4 |
 
 ## Cleanup Candidates
@@ -163,7 +163,7 @@
 | `reports/quality/root-hygiene-cleanup-classification.json` | Working | 0 | archive-after-migration |
 | `reports/quality/root-hygiene-review-evidence.json` | Working | 0 | archive-after-migration |
 | `reports/quality/silver-gold-filter-parity-report.json` | Working | 0 | archive-after-migration |
-| `reports/quality/total-tech-debt-audit-main-2026-07-01.md` | Working | 0 | archive-after-migration |
+| `reports/quality/total-tech-debt-audit-main-current.md` | Working | 0 | archive-after-migration |
 | `reports/review/S1-domain.md` | Working | 0 | archive-after-migration |
 | `reports/review/S1.1-contracts-ports.md` | Working | 0 | archive-after-migration |
 | `reports/review/S1.2-logic-models.md` | Working | 0 | archive-after-migration |
