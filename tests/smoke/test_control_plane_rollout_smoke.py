@@ -9,6 +9,7 @@ from tests.helpers.deterministic_ids import deterministic_run_uuid_from_callsite
 
 import pytest
 
+import bioetl.infrastructure.control_plane.file_run_ledger_store as run_ledger_store_module
 from bioetl.application.services.control_plane.manifest.inspection_service import (
     RunManifestInspectionService,
 )
@@ -53,7 +54,11 @@ def _make_manifest(run_id: RunID) -> RunManifest:
 @pytest.mark.smoke
 def test_control_plane_rollout_smoke_emits_artifacts_and_aggregate_metrics(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    # This smoke test verifies control-plane artifacts and metrics, not durable
+    # flush semantics. Avoid Windows/cloud-synced filesystem fsync stalls.
+    monkeypatch.setattr(run_ledger_store_module.os, "fsync", lambda _fd: None)
     metrics = MagicMock(spec=MetricsPort)
     run_id = deterministic_run_uuid_from_callsite("test_control_plane_rollout_smoke")
     manifest_store = FileRunManifestStore(
