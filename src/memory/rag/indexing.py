@@ -246,8 +246,7 @@ def _serialize_catalog(catalog: dict[str, Any]) -> str:
 
 def _serialize_chunks(chunks: list[dict[str, Any]]) -> str:
     return "".join(
-        f"{json.dumps(chunk, sort_keys=True, ensure_ascii=True)}\n"
-        for chunk in chunks
+        f"{json.dumps(chunk, sort_keys=True, ensure_ascii=True)}\n" for chunk in chunks
     )
 
 
@@ -259,7 +258,9 @@ def _canonical_rag_output_dirs(root: Path) -> tuple[Path, Path]:
     )
 
 
-def _guard_workflow_output_scope(root: Path, output_dir: Path, build_scope: str) -> None:
+def _guard_workflow_output_scope(
+    root: Path, output_dir: Path, build_scope: str
+) -> None:
     if build_scope != WORKFLOW_BUILD_SCOPE:
         return
     resolved_output = output_dir.resolve()

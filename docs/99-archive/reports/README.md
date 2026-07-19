@@ -27,6 +27,9 @@ surface.
 ## Usage Rules
 
 - Treat these files as historical evidence, not as current normative guidance.
+- Resolve the one current technical-debt audit through
+  `configs/quality/technical_debt_audit_registry.yaml`; dated audit files under
+  `quality/` are superseded snapshots.
 - Prefer `docs/reports/index.md` for the active curated reports surface.
 - Prefer active documentation under `docs/00-05` for current workflows,
   architecture, contracts, and operator procedures.

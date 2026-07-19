@@ -9,7 +9,9 @@ import pytest
 
 from memory.rag.indexing import build_rag_manifests, write_rag_manifests
 from memory.rag.validation import (
+    RagManifestValidationError,
     normalize_rag_source_path,
+    require_valid_rag_manifest,
     validate_rag_manifest_files,
     validate_rag_manifest_payload,
 )
@@ -63,6 +65,11 @@ def test_validator_detects_source_content_drift(tmp_path: Path) -> None:
     assert "source_content_mismatch" in _issue_codes(report)
     assert "source_identity_mismatch" in _issue_codes(report)
     assert report.stale_chunk_count == len(chunks)
+    with pytest.raises(
+        RagManifestValidationError,
+        match=r"source_content_mismatch@docs/00-project/overview\.md",
+    ):
+        require_valid_rag_manifest(report)
 
 
 def test_validator_detects_full_source_set_drift(tmp_path: Path) -> None:
@@ -144,9 +151,12 @@ def test_devin_wiki_virtual_fragments_are_normalized_to_base_source(
     report = validate_rag_manifest_payload(tmp_path, catalog, chunks)
 
     assert report.ok is True
-    assert normalize_rag_source_path(
-        ".devin/wiki.json#architecture", allow_virtual_fragment=True
-    ) == ".devin/wiki.json"
+    assert (
+        normalize_rag_source_path(
+            ".devin/wiki.json#architecture", allow_virtual_fragment=True
+        )
+        == ".devin/wiki.json"
+    )
 
 
 def test_manifest_file_validator_requires_requested_scope(tmp_path: Path) -> None:

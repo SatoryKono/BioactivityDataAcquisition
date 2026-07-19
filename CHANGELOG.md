@@ -65,6 +65,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Stale RAG chunks and memory drift (#6355):** Canonical full RAG manifests
+  now publish transactionally into the rebuild-only derived lane and carry
+  exact Git/source-surface identity. Retrieval and pretest reject missing
+  sources, catalog/chunk drift, incomplete full-corpus coverage, and stale
+  source identity; bounded workflow manifests can no longer replace canonical
+  output. Removed tracked generated RAG JSON/JSONL artifacts. Technical-debt
+  audit consumers now resolve one SHA-pinned current report through a validated
+  lifecycle registry, with the superseded dated report archived unchanged.
+
 - **WSL MCP `fetch` startup:** The canonical MCP generator now launches
   `mcp-server-fetch==2025.4.7` with `uvx --python 3.13`, preventing the stdio
   handshake hang observed when `uvx` selected CPython 3.14. Portable generated

@@ -154,7 +154,6 @@ log_test.txt
 !/reports/quality/issue-5376-coverage-tail-closeout.json
 !/reports/quality/low-coverage-targeted-tests-6045.json
 !/reports/quality/total-tech-debt-audit-main-2026-06-16.md
-!/reports/quality/total-tech-debt-audit-main-2026-07-01.md
 !/reports/quality/total-tech-debt-audit-main-current.md
 !/reports/quality/test-governance-current.json
 !/reports/quality/test-fixture-asset-duplication.json
@@ -426,6 +425,13 @@ scripts/docs/build/**/*.pyc
 !/docs/reports/evidence/project-legacy-compatibility-remediation/06-status/recovered-cross-synthesis-provenance-2026-05-21.yaml
 /src/memory/episodic/summaries
 /src/memory/episodic
+# Memory rebuild-only artifacts are generated locally by the memory workflow.
+/src/memory/derived/rag/manifests/
+/src/memory/rag/manifests/
+/src/memory/graph/exports/
+/src/memory/graph/projections/
+/src/memory/graph/indexes/
+/src/memory/timeline/events/
 data/2026-07-03_20-21-59.gif
 .github/workflows/docs.yml
 .xml

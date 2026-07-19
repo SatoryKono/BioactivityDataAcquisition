@@ -57,6 +57,7 @@ Commands:
     report-invariant-audit-rebaseline Generate/check stale invariant-audit rebaseline matrix
     report-architecture-debt-remote-main-baseline Generate/check clean remote-main architecture debt baseline
     report-debt-governance-gates Generate/check debt-reduction fail-fast gate rollup
+    validate-technical-debt-audit Validate and resolve the SHA-pinned current technical-debt audit
     run-architecture-audit-read-only Run check-only architecture evidence diagnostics
     analyze-duplicate-functions Analyze duplicate function names across selected code areas
     calibrate-hotspots   Calibrate hotspot budgets
@@ -145,6 +146,9 @@ COMMAND_MODULES: dict[str, str] = {
         "scripts.engineering.qa.report_architecture_debt_remote_main_baseline"
     ),
     "report-debt-governance-gates": "scripts.engineering.qa.report_debt_governance_gates",
+    "validate-technical-debt-audit": (
+        "scripts.engineering.qa.technical_debt_audit_registry"
+    ),
     "run-architecture-audit-read-only": (
         "scripts.engineering.qa.run_architecture_audit_read_only"
     ),

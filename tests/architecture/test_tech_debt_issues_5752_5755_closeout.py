@@ -8,6 +8,11 @@ from pathlib import Path
 
 import pytest
 
+from scripts.engineering.qa.technical_debt_audit_registry import (
+    resolve_current_technical_debt_audit,
+    validate_technical_debt_audit_registry,
+)
+
 pytestmark = pytest.mark.architecture
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -19,7 +24,7 @@ COMPATIBILITY_CENSUS = (
 TEST_GOVERNANCE = ROOT / "reports" / "quality" / "test-governance-current.json"
 SCORECARD = ROOT / "reports" / "quality" / "architecture-quality-scorecard.json"
 DEBT_GATES = ROOT / "reports" / "quality" / "debt-governance-gates.json"
-DEBT_REPORT = ROOT / "reports" / "quality" / "total-tech-debt-audit-main-2026-07-01.md"
+DEBT_REPORT = resolve_current_technical_debt_audit(ROOT)
 CURRENT_STATE = ROOT / "docs" / "02-architecture" / "current-state-inventory.md"
 REPRO_SUITE = (
     ROOT / "tests" / "integration" / "ci" / "test_reproducibility_contract_suite.py"
@@ -100,35 +105,50 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
     debt_report = DEBT_REPORT.read_text(encoding="utf-8")
     current_state = CURRENT_STATE.read_text(encoding="utf-8")
 
+    assert validate_technical_debt_audit_registry(ROOT) == []
+
     assert compatibility["summary"]["retained_entrypoint_count"] == 12
+    assert compatibility["summary"]["retained_public_export_facade_count"] == 4
+    assert compatibility["summary"]["twin_pair_count"] == 0
     assert test_governance["report"]["compatibility_test_files"] == 0
     assert test_governance["report"]["duplicate_test_names"] == 0
     assert test_governance["report"]["markerless_test_functions"] == 0
-    # Skip total_test_functions check for local development with uncommitted changes
-    # assert test_governance["report"]["total_test_functions"] == 21786
-    # Skip total_test_files check for local development with uncommitted changes
-    # assert test_governance["report"]["total_test_files"] == 1935
+    assert test_governance["report"]["total_test_functions"] == 22520
+    assert test_governance["report"]["total_test_files"] == 2014
+    assert test_governance["report"]["assertless_total_candidates"] == 105
     assert scorecard["integral_score"] == 8.92
     assert (
         gates["summary"]["architecture_quality_scorecard_integral_score"]
         == scorecard["integral_score"]
     )
-    # Skip release gate status check for local development with uncommitted changes
-    # assert gates["summary"]["release_gate_status"] == "passing"
-    # assert gates["summary"]["pass_count"] == gates["summary"]["gate_count"]
-    # assert gates["summary"]["fail_count"] == 0
+    assert gates["summary"]["release_gate_status"] == "passing"
+    assert gates["summary"]["pass_count"] == gates["summary"]["gate_count"] == 45
+    assert gates["summary"]["fail_count"] == 0
 
-    # Skip integral score check because the dated debt report retains its 8.66 snapshot.
-    # assert "Integral score is `8.92`" in debt_report
-    assert "Retained entrypoints `12`" in debt_report
-    assert "0 compatibility test files" in debt_report
-    assert "91 supporting scripts" in debt_report
-    # Skip test function count check for local development with uncommitted changes
-    # assert "21,786 test functions, 1,935 test files" in debt_report
+    retained_by_path = {
+        row["path"]: row
+        for row in compatibility["retained_entrypoints"]
+        if isinstance(row, dict)
+    }
+    domain_config = retained_by_path["src/bioetl/domain/composite/config.py"]
+    merger = retained_by_path["src/bioetl/application/composite/merger.py"]
+    assert (
+        domain_config["src_importer_count"],
+        domain_config["test_importer_count"],
+    ) == (
+        0,
+        39,
+    )
+    assert (merger["src_importer_count"], merger["test_importer_count"]) == (0, 5)
+    assert not (ROOT / "src/bioetl/infrastructure/compat/pandera_compat.py").exists()
 
-    # Skip architecture quality score check as current-state-inventory.md is stale
-    # assert (
-    #     "| Architecture quality score | `8.92` (`good_targeted_improvements`) |"
-    #     in current_state
-    # )
+    assert "Lifecycle status: current" in debt_report
+    assert "Integral score `8.92`" in debt_report
+    assert "`45/45` debt-governance gates passing" in debt_report
+    assert "`22,520` test functions across `2,014` pytest" in debt_report
+    assert "| `bioetl.domain.composite.config` | 0 | 39 |" in debt_report
+    assert "| `bioetl.application.composite.merger` | 0 | 5 |" in debt_report
+
+    assert "`8.92`" in current_state
+    assert "assertless_total_candidates=105" in current_state
     assert "compatibility_test_files=0" in current_state

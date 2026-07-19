@@ -90,11 +90,23 @@ The current RAG MVP builds deterministic manifests for:
 - operational engineering assets under `.github/workflows/`, `grafana/`, and
   `scripts/engineering/`
 
-Generate manifests with:
+Generate and validate the canonical full corpus with:
 
 ```bash
-python -m memory.rag.indexing --print-summary
+python -m memory.rag.indexing --build-scope full --print-summary
+python -m memory.rag.validation \
+  --manifest-dir src/memory/derived/rag/manifests \
+  --require-build-scope full
 ```
+
+The canonical pair is rebuild-only under
+`src/memory/derived/rag/manifests/`; generated JSON/JSONL files are not
+committed. Publication is transactional across `corpus_catalog.json` and
+`chunks.jsonl`, and validation rejects missing sources, chunk/content drift,
+incomplete full-corpus coverage, or source-identity mismatch. A
+`--build-scope workflow` build may use `--query` and `--max-sources`, but must
+write to a temporary or external directory and cannot replace either canonical
+in-repo manifest lane.
 
 ## Timeline MVP
 
@@ -244,10 +256,13 @@ Current default stance:
 
 - `policy/`, `catalog/`, `schemas/`, and `curated/` are versioned
 - `episodic/` is ephemeral and prunable
-- generated RAG and timeline artifacts are rebuild-only; the workflow prefers
-  `derived/rag/manifests/` and `derived/timeline/events/` when present, with
-  compatibility fallback to the legacy `rag/manifests/` and `timeline/events/`
-  paths
+- generated RAG and timeline artifacts are rebuild-only; full RAG builds write
+  to `derived/rag/manifests/`, while the legacy `rag/manifests/` lane remains a
+  read-only migration fallback and generated JSON/JSONL files are never tracked
+- bounded workflow-scope RAG manifests are temporary query artifacts and must
+  not be published into either canonical in-repo RAG lane
+- readers accept a RAG pair only after catalog/chunk structure, source content,
+  eligible full-corpus coverage, and source identity validate together
 - `graph/exports/`, `graph/projections/`, and `graph/indexes/` are rebuild-only
 
 ## Notes workflow
