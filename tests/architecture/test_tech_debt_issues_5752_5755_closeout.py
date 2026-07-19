@@ -113,8 +113,8 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
     assert test_governance["report"]["compatibility_test_files"] == 0
     assert test_governance["report"]["duplicate_test_names"] == 0
     assert test_governance["report"]["markerless_test_functions"] == 0
-    assert test_governance["report"]["total_test_functions"] == 22520
-    assert test_governance["report"]["total_test_files"] == 2014
+    assert test_governance["report"]["total_test_functions"] == 22556
+    assert test_governance["report"]["total_test_files"] == 2020
     assert test_governance["report"]["assertless_total_candidates"] == 105
     assert scorecard["integral_score"] == 8.92
     assert (
@@ -145,7 +145,7 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
     assert "Lifecycle status: current" in debt_report
     assert "Integral score `8.92`" in debt_report
     assert "`45/45` debt-governance gates passing" in debt_report
-    assert "`22,520` test functions across `2,014` pytest" in debt_report
+    assert "`22,556` test functions across `2,020` pytest" in debt_report
     assert "| `bioetl.domain.composite.config` | 0 | 39 |" in debt_report
     assert "| `bioetl.application.composite.merger` | 0 | 5 |" in debt_report
 

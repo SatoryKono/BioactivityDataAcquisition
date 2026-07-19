@@ -602,6 +602,12 @@
       "review_by": "2026-09-30",
       "next_step": "Retain as the bounded read-only architecture-audit coordinator; keep it non-active while it is a governance helper rather than a general developer bootstrap entrypoint."
     },
+    "scripts/engineering/qa/technical_debt_audit_registry.py": {
+      "owner": "@bioetl-architecture",
+      "decision": "shared_helper_module",
+      "review_by": "2026-09-30",
+      "next_step": "Retain as the SHA-pinned technical-debt audit lifecycle resolver and validation helper consumed by closeout guards and TDX publishing; keep it supporting unless it becomes a separately budgeted active operator workflow."
+    },
     "scripts/engineering/repo/cleanup_root_local_clutter.py": {
       "owner": "@bioetl-platform",
       "decision": "legacy_manual_utility",
