@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 import memory.query as query_module
+from tests.helpers.memory_manifests import write_test_rag_manifest
 from memory.query import (
     RagQueryOptions,
     _emit,
@@ -42,15 +43,35 @@ def test_default_generated_memory_paths_prefer_ready_derived_artifacts(
 ) -> None:
     memory_root = tmp_path / "src" / "memory"
     derived_chunks = memory_root / "derived" / "rag" / "manifests" / "chunks.jsonl"
-    derived_chunks.parent.mkdir(parents=True, exist_ok=True)
-    derived_chunks.write_text('{"id":"chunk-1"}\n', encoding="utf-8")
+    write_test_rag_manifest(
+        derived_chunks,
+        [
+            {
+                "content": "derived",
+                "id": "chunk-1",
+                "source_path": "docs/00-project/overview.md",
+                "source_type": "doc",
+            }
+        ],
+        build_scope="full",
+    )
     derived_events = memory_root / "derived" / "timeline" / "events"
     derived_events.mkdir(parents=True, exist_ok=True)
     (derived_events / "runs.jsonl").write_text('{"id":"run-1"}\n', encoding="utf-8")
 
     legacy_chunks = memory_root / "rag" / "manifests" / "chunks.jsonl"
-    legacy_chunks.parent.mkdir(parents=True, exist_ok=True)
-    legacy_chunks.write_text('{"id":"legacy"}\n', encoding="utf-8")
+    write_test_rag_manifest(
+        legacy_chunks,
+        [
+            {
+                "content": "legacy",
+                "id": "legacy",
+                "source_path": "docs/00-project/legacy.md",
+                "source_type": "doc",
+            }
+        ],
+        build_scope="full",
+    )
     legacy_events = memory_root / "timeline" / "events"
     legacy_events.mkdir(parents=True, exist_ok=True)
     (legacy_events / "runs.jsonl").write_text('{"id":"legacy-run"}\n', encoding="utf-8")
@@ -64,8 +85,18 @@ def test_default_generated_memory_paths_fallback_to_legacy_artifacts(
 ) -> None:
     memory_root = tmp_path / "src" / "memory"
     legacy_chunks = memory_root / "rag" / "manifests" / "chunks.jsonl"
-    legacy_chunks.parent.mkdir(parents=True, exist_ok=True)
-    legacy_chunks.write_text('{"id":"legacy"}\n', encoding="utf-8")
+    write_test_rag_manifest(
+        legacy_chunks,
+        [
+            {
+                "content": "legacy",
+                "id": "legacy",
+                "source_path": "docs/00-project/legacy.md",
+                "source_type": "doc",
+            }
+        ],
+        build_scope="full",
+    )
     legacy_events = memory_root / "timeline" / "events"
     legacy_events.mkdir(parents=True, exist_ok=True)
     (legacy_events / "runs.jsonl").write_text('{"id":"legacy-run"}\n', encoding="utf-8")
@@ -105,10 +136,7 @@ def test_query_rag_filters_local_manifest(tmp_path: Path) -> None:
             "symbol_kind": "function",
         },
     ]
-    chunks_path.write_text(
-        "\n".join(json.dumps(row, sort_keys=True) for row in rows) + "\n",
-        encoding="utf-8",
-    )
+    write_test_rag_manifest(chunks_path, rows)
 
     payload = query_rag(
         RagQueryOptions(
@@ -162,10 +190,7 @@ def test_query_rag_profile_prefers_runtime_code_for_implementation_tasks(
             "confidence": "derived",
         },
     ]
-    chunks_path.write_text(
-        "\n".join(json.dumps(row, sort_keys=True) for row in rows) + "\n",
-        encoding="utf-8",
-    )
+    write_test_rag_manifest(chunks_path, rows)
 
     payload = query_rag(
         RagQueryOptions(
@@ -213,10 +238,7 @@ def test_query_rag_boosts_file_relation_context(tmp_path: Path) -> None:
             "symbol_kind": "function",
         },
     ]
-    chunks_path.write_text(
-        "\n".join(json.dumps(row, sort_keys=True) for row in rows) + "\n",
-        encoding="utf-8",
-    )
+    write_test_rag_manifest(chunks_path, rows)
     index_path = tmp_path / "file_relations.json"
     index_path.write_text(
         json.dumps(
@@ -372,8 +394,9 @@ def test_query_timeline_profile_prefers_incidents_for_operations_tasks(
 
 def test_query_all_aggregates_local_surfaces(tmp_path: Path) -> None:
     chunks_path = tmp_path / "chunks.jsonl"
-    chunks_path.write_text(
-        json.dumps(
+    write_test_rag_manifest(
+        chunks_path,
+        [
             {
                 "id": "chunk-1",
                 "title": "Pipeline",
@@ -386,11 +409,8 @@ def test_query_all_aggregates_local_surfaces(tmp_path: Path) -> None:
                 "related_refs": ["pipeline::chembl_activity"],
                 "graph_node_refs": ["pipeline_surface:chembl_activity"],
                 "confidence": "derived",
-            },
-            sort_keys=True,
-        )
-        + "\n",
-        encoding="utf-8",
+            }
+        ],
     )
     events_dir = tmp_path / "events"
     events_dir.mkdir()

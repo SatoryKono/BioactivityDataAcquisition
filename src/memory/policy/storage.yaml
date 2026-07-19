@@ -22,8 +22,10 @@ artifact_classes:
   rag_manifest:
     storage_mode: rebuild_only
     commit_to_git: false
-    default_paths: ["src/memory/rag/manifests"]
-    notes: "Deterministic retrieval manifests should be rebuilt in CI or locally."
+    default_paths:
+      - "src/memory/derived/rag/manifests"
+      - "src/memory/rag/manifests"
+    notes: "Derived is the preferred rebuild-only lane; the legacy path remains a read fallback during migration."
   graph_export:
     storage_mode: rebuild_only
     commit_to_git: false

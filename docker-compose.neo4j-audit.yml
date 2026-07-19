@@ -29,3 +29,17 @@ services:
     init: true
     stop_grace_period: 60s
     logging: {driver: local, options: {max-size: "20m", max-file: "5"}}
+    volumes:
+      - neo4j_audit_data:/data
+      - neo4j_audit_logs:/logs
+    networks:
+      - runtime
+
+volumes:
+  neo4j_audit_data:
+  neo4j_audit_logs:
+
+networks:
+  runtime:
+    external: true
+    name: bioetl-runtime

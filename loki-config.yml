@@ -9,12 +9,10 @@ ingester:
 limits_config:
   reject_old_samples: true
   reject_old_samples_max_age: 168h
-  ingestion_rate_mb: 256
-  ingestion_burst_size_mb: 512
 
 schema_config:
   configs:
-    - from: 2024-01-01
+    - from: 2020-10-24
       store: boltdb-shipper
       object_store: filesystem
       schema: v11
@@ -32,9 +30,3 @@ storage_config:
     cache_location: /loki/boltdb-shipper-cache
   filesystem:
     directory: /loki/chunks
-
-chunk_store_config:
-  max_look_back_period: 0s
-
-table_manager:
-  enabled: false

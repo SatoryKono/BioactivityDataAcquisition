@@ -480,6 +480,14 @@ run_memory_checks() {
     run_step memory-refresh-smoke \
         "$PYTHON_BIN" -m memory.tooling.refresh_all \
         --output-root "$MEMORY_TMP_OUTPUT" \
+        --rag-build-scope full \
+        --json
+
+    run_step memory-rag-manifest-validate \
+        "$PYTHON_BIN" -m memory.rag.validation \
+        --root "$REPO_ROOT" \
+        --manifest-dir "$MEMORY_TMP_OUTPUT/rag/manifests" \
+        --require-build-scope full \
         --json
 
     run_step memory-prune-dry-run \

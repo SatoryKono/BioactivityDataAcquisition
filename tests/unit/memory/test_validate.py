@@ -419,6 +419,9 @@ artifact_classes:
 
 def test_generated_memory_artifact_classifier_blocks_rebuild_only_outputs() -> None:
     assert _is_tracked_generated_memory_artifact(
+        "src/memory/derived/rag/manifests/chunks.jsonl"
+    )
+    assert _is_tracked_generated_memory_artifact(
         "src/memory/rag/manifests/chunks.jsonl"
     )
     assert _is_tracked_generated_memory_artifact(
@@ -435,6 +438,9 @@ def test_generated_memory_artifact_classifier_blocks_rebuild_only_outputs() -> N
     )
     assert not _is_tracked_generated_memory_artifact(
         "src/memory/rag/manifests/README.md"
+    )
+    assert not _is_tracked_generated_memory_artifact(
+        "src/memory/derived/rag/manifests/README.md"
     )
     assert not _is_tracked_generated_memory_artifact("src/memory/README.md")
 

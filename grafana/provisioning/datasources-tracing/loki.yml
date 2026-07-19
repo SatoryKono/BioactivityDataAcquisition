@@ -4,6 +4,23 @@ datasources:
   - name: Loki
     type: loki
     uid: loki
-    access: proxy
     url: http://loki:3100
+    access: proxy
+    isDefault: false
     editable: true
+
+  - name: Tempo
+    type: tempo
+    uid: tempo
+    url: http://tempo:3200
+    access: proxy
+    isDefault: false
+    editable: true
+    jsonData:
+      nodeGraph:
+        enabled: true
+      search:
+        enabled: true
+      lokiSearch:
+        enabled: true
+        datasourceUid: loki

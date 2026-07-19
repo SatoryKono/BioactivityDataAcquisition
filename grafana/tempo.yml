@@ -1,52 +1,35 @@
-target: all
-stream_over_http_enabled: true
-
 server:
   http_listen_port: 3200
+  grpc_listen_port: 4317
+  grpc_server_max_recv_msg_size: 33554432
+  log_level: info
 
 distributor:
-  receivers:
-    otlp:
-      protocols:
-        grpc:
-          endpoint: 0.0.0.0:4317
-        http:
-          endpoint: 0.0.0.0:4318
+  rate_limit_bytes: 33554432
 
 ingester:
   max_block_duration: 5m
 
-compactor:
-  compaction:
-    block_retention: 24h
+storage:
+  trace:
+    backend: local
+    local:
+      path: /tmp/tempo/blocks
+    cache: memcached
+    memcached:
+      consistent_hash: true
+      host: localhost
+      service: memcached
+      update_interval: 1m
 
 metrics_generator:
   registry:
     external_labels:
-      source: tempo
-      cluster: bioetl-local
+      cluster: bioetl
   storage:
-    path: /tmp/tempo/generator/wal
-    remote_write: []
-  traces_storage:
-    path: /tmp/tempo/generator/traces
-  processor:
-    local_blocks:
-      filter_server_spans: false
-      flush_to_storage: true
-
-storage:
-  trace:
-    backend: local
-    wal:
-      path: /tmp/tempo/wal
-    local:
-      path: /tmp/tempo/blocks
+    path: /tmp/tempo/wal
 
 overrides:
   defaults:
     metrics_generator:
-      processors:
-        - service-graphs
-        - span-metrics
-        - local-blocks
+      processors: [batch, resource_detection, spanmetrics]

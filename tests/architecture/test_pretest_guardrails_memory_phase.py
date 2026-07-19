@@ -24,6 +24,11 @@ def test_pretest_guardrails_script_runs_memory_phase() -> None:
     assert '"$PYTHON_BIN" -m memory.tooling.workflow smoke' in script
     assert "memory-refresh-smoke" in script
     assert '"$PYTHON_BIN" -m memory.tooling.refresh_all' in script
+    assert "--rag-build-scope full" in script
+    assert "memory-rag-manifest-validate" in script
+    assert '"$PYTHON_BIN" -m memory.rag.validation' in script
+    assert '"$MEMORY_TMP_OUTPUT/rag/manifests"' in script
+    assert "--require-build-scope full" in script
     assert "TMP_DIR" not in script
     assert "memory-prune-dry-run" in script
     assert '"$PYTHON_BIN" -m memory.tooling.prune --json' in script

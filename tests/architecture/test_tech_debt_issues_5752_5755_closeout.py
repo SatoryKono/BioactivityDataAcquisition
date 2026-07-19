@@ -108,14 +108,18 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
     # assert test_governance["report"]["total_test_functions"] == 21786
     # Skip total_test_files check for local development with uncommitted changes
     # assert test_governance["report"]["total_test_files"] == 1935
-    assert scorecard["integral_score"] == 8.66
+    assert scorecard["integral_score"] == 8.92
+    assert (
+        gates["summary"]["architecture_quality_scorecard_integral_score"]
+        == scorecard["integral_score"]
+    )
     # Skip release gate status check for local development with uncommitted changes
     # assert gates["summary"]["release_gate_status"] == "passing"
     # assert gates["summary"]["pass_count"] == gates["summary"]["gate_count"]
     # assert gates["summary"]["fail_count"] == 0
 
-    # Skip integral score check as debt report is stale (8.58 vs current 8.66)
-    # assert "Integral score is `8.66`" in debt_report
+    # Skip integral score check because the dated debt report retains its 8.66 snapshot.
+    # assert "Integral score is `8.92`" in debt_report
     assert "Retained entrypoints `12`" in debt_report
     assert "0 compatibility test files" in debt_report
     assert "91 supporting scripts" in debt_report
@@ -124,7 +128,7 @@ def test_issue_5752_narrative_reports_match_live_governance_artifacts() -> None:
 
     # Skip architecture quality score check as current-state-inventory.md is stale
     # assert (
-    #     "| Architecture quality score | `8.66` (`good_targeted_improvements`) |"
+    #     "| Architecture quality score | `8.92` (`good_targeted_improvements`) |"
     #     in current_state
     # )
     assert "compatibility_test_files=0" in current_state

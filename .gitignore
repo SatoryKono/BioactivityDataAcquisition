@@ -155,6 +155,7 @@ log_test.txt
 !/reports/quality/low-coverage-targeted-tests-6045.json
 !/reports/quality/total-tech-debt-audit-main-2026-06-16.md
 !/reports/quality/total-tech-debt-audit-main-2026-07-01.md
+!/reports/quality/total-tech-debt-audit-main-current.md
 !/reports/quality/test-governance-current.json
 !/reports/quality/test-fixture-asset-duplication.json
 !/reports/quality/flaky-test-burndown-review.json
@@ -385,6 +386,9 @@ scripts/docs/build/**/*.pyc
 !/docs/99-archive/root-status-artifacts/
 /docs/99-archive/root-status-artifacts/*
 !/docs/99-archive/root-status-artifacts/BRANCH_CLEANUP_PLAN.md
+!/docs/99-archive/reports/
+!/docs/99-archive/reports/quality/
+!/docs/99-archive/reports/quality/total-tech-debt-audit-main-2026-07-01.md
 # docs/reports is retention-sensitive. Keep broad local reports ignored and
 # allowlist only curated entrypoints, generated cleanup inventory, and reviewed
 # bounded evidence manifests.
