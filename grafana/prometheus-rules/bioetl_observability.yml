@@ -489,17 +489,13 @@ groups:
       - record: bioetl_runtime_trust_gap_status_10m
         expr: >-
           clamp_max(
-            max(1 - max_over_time(up{job="bioetl"}[10m]))
+            # Pushgateway compatibility: check for actual BioETL metrics presence instead of scrape status
+            max(absent_over_time(bioetl_pipeline_runs_total[10m]))
             + on() group_left()
             (
               (sum(increase(prometheus_rule_evaluation_failures_total{rule_group=~".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$"}[10m])) > bool 0)
               or ((time() - max(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$"})) > bool 60)
               or absent(prometheus_rule_group_last_evaluation_timestamp_seconds{rule_group=~".*bioetl_observability[.]yml;bioetl_runtime_dashboard_recording$"})
-            )
-            # Pushgateway compatibility: check for actual BioETL metrics presence instead of scrape status
-            + on() group_left()
-            (
-              (absent_over_time(bioetl_pipeline_runs_total[10m]) and absent_over_time(up{job="bioetl"}[10m]))
             ),
             2
           )
@@ -884,13 +880,13 @@ groups:
   - name: bioetl_monitoring_stack_observability
     rules:
       - alert: BioETLMetricsEndpointUnavailable
-        expr: absent_over_time(bioetl_pipeline_runs_total[10m]) and absent_over_time(up{job="bioetl"}[10m])
+        expr: absent_over_time(bioetl_pipeline_runs_total[10m])
         for: 5m
         labels:
           severity: critical
         annotations:
           summary: "BioETL metrics are unavailable"
-          description: "No BioETL metrics (bioetl_pipeline_runs_total) have been observed for 10m, and the scrape endpoint is also unavailable. This indicates either BioETL is not running or metrics collection is completely broken."
+          description: "No BioETL metrics (bioetl_pipeline_runs_total) have been observed for 10m via either direct scrape or Pushgateway. This indicates either BioETL is not running or metrics collection is completely broken."
           runbook: "docs/05-operations/runbooks/observability-checklist.md"
 
       - alert: BioETLMetricsEndpointScrapeMissing
