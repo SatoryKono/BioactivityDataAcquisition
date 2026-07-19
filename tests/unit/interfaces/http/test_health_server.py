@@ -658,8 +658,14 @@ class TestHealthServerQuarantineExplorer:
         )
 
         assert status_code == 503
-        assert status_text == "Quarantine explorer unavailable"
-        assert "Quarantine explorer unavailable" in body
+        assert status_text == "Service Unavailable"
+        assert json.loads(body) == {
+            "contract": "forensic_endpoint_error_v1",
+            "status": "unavailable",
+            "endpoint": "filtered-records",
+            "reason": "backend_unavailable",
+            "retryable": True,
+        }
 
     @pytest.mark.asyncio(loop_scope="module")
     async def test_records_endpoint_requires_pipeline_scope(

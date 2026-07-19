@@ -3,10 +3,16 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
 from typing import Protocol
 
 from bioetl.domain.control_plane import RunLedgerEntry
 from bioetl.domain.types import RunID
+from bioetl.interfaces.http._forensic_request_budget import (
+    ForensicEndpointUnavailable,
+    forensic_unavailable_payload,
+    run_bounded_forensic_operation,
+)
 from bioetl.interfaces.http.processed_records_table import (
     build_processed_records_table_payload_from_ledger,
     build_processed_records_table_payload_from_prometheus,
@@ -33,6 +39,9 @@ class _HealthResponseSupport(Protocol):
 
 
 class _HealthObservabilityRoutingHost(_HealthResponseSupport, Protocol):
+    @property
+    def _forensic_endpoint_limiter(self) -> asyncio.Semaphore: ...
+
     @property
     def _prometheus_base_url(self) -> str: ...
 
@@ -79,21 +88,54 @@ async def handle_processed_records_table(
     selected_run_id = read_processed_records_run_id(
         host._read_optional_param(query, "run_id")
     )
+    operation: Callable[[], dict[str, object]]
     if selected_run_id is not None and host._run_ledger_port is not None:
-        payload = build_processed_records_table_payload_from_ledger(
-            ledger_entries=tuple(
-                host._run_ledger_port.list_entries_by_run_id(selected_run_id)
-            ),
-            pipeline=pipeline,
-            run_type=run_type,
+
+        def build_from_ledger() -> dict[str, object]:
+            return build_processed_records_table_payload_from_ledger(
+                ledger_entries=tuple(
+                    host._run_ledger_port.list_entries_by_run_id(selected_run_id)
+                ),
+                pipeline=pipeline,
+                run_type=run_type,
+            )
+
+        operation = build_from_ledger
+    else:
+
+        def build_from_prometheus() -> dict[str, object]:
+            return build_processed_records_table_payload_from_prometheus(
+                prometheus_base_url=host._prometheus_base_url,
+                pipeline=pipeline,
+                run_type=run_type,
+            )
+
+        operation = build_from_prometheus
+
+    try:
+        payload = await run_bounded_forensic_operation(
+            limiter=host._forensic_endpoint_limiter,
+            operation_factory=lambda: asyncio.to_thread(operation),
         )
-        await host._send_payload_response(writer, 200, payload)
+    except ForensicEndpointUnavailable as exc:
+        await host._send_payload_response(
+            writer,
+            exc.status_code,
+            forensic_unavailable_payload(
+                endpoint="processed-records",
+                reason=exc.reason,
+            ),
+        )
+        return
+    except (ConnectionError, OSError, RuntimeError):
+        await host._send_payload_response(
+            writer,
+            503,
+            forensic_unavailable_payload(
+                endpoint="processed-records",
+                reason="backend_unavailable",
+            ),
+        )
         return
 
-    payload = await asyncio.to_thread(
-        build_processed_records_table_payload_from_prometheus,
-        prometheus_base_url=host._prometheus_base_url,
-        pipeline=pipeline,
-        run_type=run_type,
-    )
     await host._send_payload_response(writer, 200, payload)

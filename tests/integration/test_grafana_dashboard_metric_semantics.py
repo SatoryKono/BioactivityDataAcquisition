@@ -835,6 +835,10 @@ def test_dq_score_uses_validation_metric(dashboard_file, panel_title):
         f"Panel '{panel_title}' in {dashboard_file} must use "
         "bioetl_dq_validation_record_count for volume-aware weighting"
     )
+    assert all("last_over_time(" in expr and "[7d]" in expr for expr in expressions), (
+        f"Panel '{panel_title}' in {dashboard_file} must retain the last real DQ "
+        "sample between representative runs"
+    )
     assert all("or vector(0)" not in expr for expr in expressions), (
         f"Panel '{panel_title}' in {dashboard_file} must preserve no-data state "
         "instead of coercing missing telemetry to zero"
@@ -861,6 +865,7 @@ def test_worst_entity_dq_score_preserves_no_data_state() -> None:
 
     expressions = [target.get("expr", "") for target in panel.get("targets", [])]
     assert any("bioetl_dq_validation_score" in expr for expr in expressions)
+    assert all("last_over_time(" in expr and "[7d]" in expr for expr in expressions)
     assert all("or vector(0)" not in expr for expr in expressions), (
         "Monitor: Worst-Entity DQ Score must preserve no-data rather than rendering score 0"
     )

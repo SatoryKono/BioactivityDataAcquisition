@@ -2325,6 +2325,90 @@ def _query_prometheus_scalar(
     raise RuntimeError("Prometheus query did not return a single scalar result")
 
 
+def _query_prometheus_label_values(
+    *,
+    prometheus_base_url: str,
+    metric_name: str,
+    label_names: frozenset[str],
+    bearer_token: str,
+) -> dict[str, list[str]]:
+    """Return bounded observed label values for one watched metric family."""
+    selector = (
+        "{__name__=~" + json.dumps(_prometheus_metric_family_matcher(metric_name)) + "}"
+    )
+    request = Request(
+        url=prometheus_base_url.rstrip("/")
+        + "/api/v1/query?"
+        + urlencode({"query": selector}),
+        headers={"Accept": "application/json"},
+    )
+    if bearer_token:
+        request.add_header("Authorization", f"Bearer {bearer_token}")
+
+    try:
+        with urlopen(request, timeout=_PROMETHEUS_QUERY_TIMEOUT_SECONDS) as response:
+            payload = json.load(response)
+    except HTTPError as exc:  # pragma: no cover - exercised via mocked failure paths
+        raise RuntimeError(f"HTTP {exc.code}") from exc
+    except URLError as exc:  # pragma: no cover - exercised via mocked failure paths
+        raise RuntimeError(str(exc.reason)) from exc
+
+    if not isinstance(payload, dict) or payload.get("status") != "success":
+        raise RuntimeError("unexpected Prometheus query API response")
+    data = payload.get("data")
+    if not isinstance(data, dict) or not isinstance(data.get("result"), list):
+        raise RuntimeError("missing Prometheus query API data payload")
+
+    observed: dict[str, set[str]] = {label_name: set() for label_name in label_names}
+    for sample in data["result"]:
+        if not isinstance(sample, dict) or not isinstance(sample.get("metric"), dict):
+            continue
+        labelset = sample["metric"]
+        for label_name in label_names:
+            value = labelset.get(label_name)
+            if isinstance(value, str):
+                observed[label_name].add(value)
+    return {
+        label_name: sorted(values) for label_name, values in sorted(observed.items())
+    }
+
+
+def _git_source_provenance(repo_root: Path) -> dict[str, object]:
+    """Capture revision and dirty state without coupling the two git probes."""
+
+    def run_git(*args: str) -> subprocess.CompletedProcess[str] | None:
+        try:
+            return subprocess.run(
+                ["git", *args],
+                cwd=repo_root,
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            return None
+
+    revision_result = run_git("rev-parse", "HEAD")
+    revision = (
+        revision_result.stdout.strip()
+        if revision_result is not None and revision_result.returncode == 0
+        else None
+    )
+
+    tracked_result = run_git("diff-index", "--quiet", "HEAD", "--")
+    untracked_result = run_git("ls-files", "--others", "--exclude-standard")
+    dirty: bool | None = None
+    if tracked_result is not None and tracked_result.returncode in {0, 1}:
+        dirty = tracked_result.returncode == 1
+    if untracked_result is not None and untracked_result.returncode == 0:
+        dirty = bool(untracked_result.stdout.strip()) or bool(dirty)
+    return {
+        "source_revision": revision,
+        "source_worktree_dirty": dirty,
+    }
+
+
 RuntimeCardinalityReviewSummary = dict[str, object]
 
 
@@ -2380,6 +2464,7 @@ def _build_runtime_cardinality_review_summary(
     resolved_base_url, url_source = _resolve_prometheus_base_url(prometheus_base_url)
     query_results: dict[str, int] = {}
     query_errors: dict[str, str] = {}
+    observed_label_values: dict[str, dict[str, list[str]]] = {}
     degraded_reasons: list[str] = []
     live_threshold_violations: list[str] = []
     local_observed_series = _local_observed_series_counts(report)
@@ -2422,6 +2507,14 @@ def _build_runtime_cardinality_review_summary(
         "live_threshold_violations": live_threshold_violations,
         "degraded_reasons": degraded_reasons,
         "query_errors": query_errors,
+        "label_keys": {
+            metric_name: sorted(
+                REGISTERED_PROMETHEUS_METRIC_LABELS.get(metric_name, frozenset())
+            )
+            for metric_name in reviewed_metrics
+        },
+        "observed_label_values": observed_label_values,
+        **_git_source_provenance(repo_root),
     }
     if not reviewed_metrics:
         summary["mode"] = "no_reviewed_metrics"
@@ -2484,6 +2577,15 @@ def _build_runtime_cardinality_review_summary(
             query_results[metric_name] = _query_prometheus_scalar(
                 prometheus_base_url=resolved_base_url,
                 query=query,
+                bearer_token=bearer_token,
+            )
+            observed_label_values[metric_name] = _query_prometheus_label_values(
+                prometheus_base_url=resolved_base_url,
+                metric_name=metric_name,
+                label_names=REGISTERED_PROMETHEUS_METRIC_LABELS.get(
+                    metric_name,
+                    frozenset(),
+                ),
                 bearer_token=bearer_token,
             )
         except RuntimeError as exc:
@@ -2622,7 +2724,9 @@ def collect_metric_inventory(
     registry_only_metric_set = runtime_registered_set - canonical_runtime_set
     runtime_without_registry_set = runtime_set - registered_set - runtime_counter_bases
     dead_metrics = registry_only_metric_set - docs_set - rules_set
-    ruled_without_runtime_set = (rules_set & runtime_registered_set) - canonical_runtime_set
+    ruled_without_runtime_set = (
+        rules_set & runtime_registered_set
+    ) - canonical_runtime_set
     combined_emitters = _combine_metric_emitters(
         runtime_mentions, helper_backed_mentions
     )
@@ -3120,13 +3224,9 @@ def _render_runtime_cardinality_review_summary(
 ) -> str:
     reviewed_metrics = summary.get("reviewed_metrics", [])
     review_required_metrics = summary.get("review_required_metrics", [])
-    reviewed_count = (
-        len(reviewed_metrics) if isinstance(reviewed_metrics, list) else 0
-    )
+    reviewed_count = len(reviewed_metrics) if isinstance(reviewed_metrics, list) else 0
     review_required_count = (
-        len(review_required_metrics)
-        if isinstance(review_required_metrics, list)
-        else 0
+        len(review_required_metrics) if isinstance(review_required_metrics, list) else 0
     )
     lines = [
         "## Observability Runtime Cardinality Review",
@@ -3177,7 +3277,9 @@ def _append_runtime_cardinality_review_summary(
         handle.write(prefix + _render_runtime_cardinality_review_summary(summary))
 
 
-def _typed_inventory_violations(typed_report: dict[str, object]) -> dict[str, list[str]]:
+def _typed_inventory_violations(
+    typed_report: dict[str, object],
+) -> dict[str, list[str]]:
     violations: dict[str, list[str]] = {}
     for key in (
         "recording_outputs_without_declaration",

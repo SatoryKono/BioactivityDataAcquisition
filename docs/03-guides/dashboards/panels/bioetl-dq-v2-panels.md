@@ -70,8 +70,9 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 
 ### 11. Monitor: Data Quality Score (Volume-weighted)
 - **Type:** Stat
-- **Purpose:** Show TIME RANGE volume-weighted DQ score on the canonical
-  `0.0-1.0` ratio scale as neutral supporting evidence.
+- **Purpose:** Show the latest volume-weighted DQ score retained for up to seven
+  days between runs on the canonical `0.0-1.0` ratio scale. If no score/count
+  pair exists in that window the panel remains `UNKNOWN`; absence is not `0`.
 - **Data sources:** `bioetl_dq_validation_score`
 
 ### 12. Track: Source Records in Range (Bronze)
@@ -86,8 +87,9 @@ is `SELECTED RUN`, and score/count/freshness evidence below the answer row is
 
 ### 14. Monitor: Worst-Entity DQ Score
 - **Type:** Stat
-- **Purpose:** Show TIME RANGE worst-entity DQ score on the canonical `0.0-1.0`
-  ratio scale as neutral supporting evidence.
+- **Purpose:** Show the latest worst-entity DQ score retained for up to seven
+  days between runs on the canonical `0.0-1.0` ratio scale. A missing sample
+  remains `UNKNOWN`, never a synthetic zero.
 - **Data sources:** `bioetl_dq_validation_score`
 
 ### 15. Track: Records Quarantined in Range

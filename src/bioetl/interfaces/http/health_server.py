@@ -18,6 +18,9 @@ from bioetl.domain.ports import (
     RunManifestPort,
     WorkflowManifestPort,
 )
+from bioetl.interfaces.http._forensic_request_budget import (
+    FORENSIC_ENDPOINT_CONCURRENCY,
+)
 from bioetl.interfaces.http.health_server_http_mixin import HealthServerHTTPMixin
 from bioetl.interfaces.http.health_server_routing_mixin import (
     HealthServerRoutingMixin,
@@ -91,6 +94,9 @@ class HealthServer(
         self._logger = logger
         self._clock: ClockPort | None = None
         self._server: asyncio.Server | None = None
+        self._forensic_endpoint_limiter = asyncio.Semaphore(
+            FORENSIC_ENDPOINT_CONCURRENCY
+        )
         self._start_time: float | None = None
         self._request_error_allowlist = (
             UnicodeDecodeError,

@@ -10,7 +10,13 @@ import pytest
 
 from bioetl.domain.types import HealthStatus
 from bioetl.interfaces.http import (
+    _health_server_observability_routing as observability_routing,
+)
+from bioetl.interfaces.http import (
     _health_server_quarantine_routing as quarantine_routing,
+)
+from bioetl.interfaces.http._forensic_request_budget import (
+    ForensicEndpointUnavailable,
 )
 from bioetl.interfaces.http import _health_server_routing_support as routing_support
 from bioetl.interfaces.http import health_server_routing_mixin as routing_mixin_module
@@ -89,6 +95,7 @@ class _RoutingHost(HealthServerRoutingMixin):
         self._run_ledger_port: object | None = object()
         self._clock: object | None = _Clock()
         self._prometheus_base_url = "http://prometheus.test"
+        self._forensic_endpoint_limiter = asyncio.Semaphore(4)
         self.provider_statuses: dict[str, dict[str, object]] = {}
         self.overall_status = HealthStatus.HEALTHY
 
@@ -579,7 +586,17 @@ async def test_quarantine_routing_dispatches_filtered_explorer_branches() -> Non
         path="/ops/quarantine/filtered-records",
         query={"pipeline": "chembl_activity"},
     )
-    assert host.sent[-1] == ("text", 503, "Quarantine explorer unavailable")
+    assert host.sent[-1] == (
+        "payload",
+        503,
+        {
+            "contract": "forensic_endpoint_error_v1",
+            "status": "unavailable",
+            "endpoint": "filtered-records",
+            "reason": "backend_unavailable",
+            "retryable": True,
+        },
+    )
 
     service = _QuarantineService()
     host._quarantine_service = service
@@ -685,6 +702,94 @@ async def test_quarantine_routing_dispatches_filtered_explorer_branches() -> Non
         "text",
         400,
         "Missing required query parameter: pipeline",
+    )
+
+
+@pytest.mark.asyncio
+async def test_filtered_stats_deadline_returns_typed_504(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    host = _RoutingHost()
+    host._quarantine_service = _QuarantineService()
+    writer = _Writer()
+
+    async def deadline(**_kwargs: object) -> object:
+        raise ForensicEndpointUnavailable(
+            reason="deadline_exceeded",
+            status_code=504,
+        )
+
+    monkeypatch.setattr(
+        quarantine_routing,
+        "run_bounded_forensic_operation",
+        deadline,
+    )
+
+    await quarantine_routing.dispatch_quarantine_request(
+        host,
+        writer=writer,
+        path="/ops/quarantine/filtered-stats",
+        query={"pipeline": "chembl_activity"},
+    )
+
+    assert host.sent[-1] == (
+        "payload",
+        504,
+        {
+            "contract": "forensic_endpoint_error_v1",
+            "status": "unavailable",
+            "endpoint": "filtered-stats",
+            "reason": "deadline_exceeded",
+            "retryable": True,
+        },
+    )
+
+
+@pytest.mark.asyncio
+async def test_processed_records_distinguishes_empty_and_backend_unavailable(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    host = _RoutingHost()
+    writer = _Writer()
+    empty_payload = {"contract": "processed_records_table_v1", "rows": []}
+    monkeypatch.setattr(
+        observability_routing,
+        "build_processed_records_table_payload_from_prometheus",
+        lambda **_kwargs: empty_payload,
+    )
+
+    await observability_routing.dispatch_observability_request(
+        host,
+        writer=writer,
+        path="/ops/observability/processed-records",
+        query={"pipeline": "chembl_activity"},
+    )
+    assert host.sent[-1] == ("payload", 200, empty_payload)
+
+    def unavailable(**_kwargs: object) -> dict[str, object]:
+        raise RuntimeError("Prometheus unavailable")
+
+    monkeypatch.setattr(
+        observability_routing,
+        "build_processed_records_table_payload_from_prometheus",
+        unavailable,
+    )
+    await observability_routing.dispatch_observability_request(
+        host,
+        writer=writer,
+        path="/ops/observability/processed-records",
+        query={"pipeline": "chembl_activity"},
+    )
+    assert host.sent[-1] == (
+        "payload",
+        503,
+        {
+            "contract": "forensic_endpoint_error_v1",
+            "status": "unavailable",
+            "endpoint": "processed-records",
+            "reason": "backend_unavailable",
+            "retryable": True,
+        },
     )
 
 

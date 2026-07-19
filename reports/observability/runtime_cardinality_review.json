@@ -6,12 +6,29 @@
     "bioetl_pipeline_runs_total": 500
   },
   "degraded_reasons": [],
-  "generated_at": "2026-07-16T07:51:03Z",
+  "generated_at": "2026-07-19T21:18:19Z",
+  "label_keys": {
+    "bioetl_checkpoint_load_events_total": [
+      "pipeline",
+      "status"
+    ],
+    "bioetl_checkpoint_saved_at_seconds": [
+      "pipeline"
+    ],
+    "bioetl_health_check_latency_seconds": [
+      "provider"
+    ],
+    "bioetl_pipeline_runs_total": [
+      "pipeline",
+      "run_type",
+      "status"
+    ]
+  },
   "live_observed_series": {
-    "bioetl_checkpoint_load_events_total": 0,
-    "bioetl_checkpoint_saved_at_seconds": 0,
-    "bioetl_health_check_latency_seconds": 0,
-    "bioetl_pipeline_runs_total": 0
+    "bioetl_checkpoint_load_events_total": 108,
+    "bioetl_checkpoint_saved_at_seconds": 27,
+    "bioetl_health_check_latency_seconds": 7,
+    "bioetl_pipeline_runs_total": 162
   },
   "live_threshold_violations": [],
   "local_cardinality_fallback_allowed": false,
@@ -23,7 +40,128 @@
   },
   "local_threshold_violations": [],
   "mode": "live_review",
-  "prometheus_base_url": "http://127.0.0.1:9090",
+  "observed_label_values": {
+    "bioetl_checkpoint_load_events_total": {
+      "pipeline": [
+        "chembl_activity",
+        "chembl_assay",
+        "chembl_assay_parameters",
+        "chembl_cell_line",
+        "chembl_compound_record",
+        "chembl_molecule",
+        "chembl_protein_class",
+        "chembl_publication",
+        "chembl_publication_similarity",
+        "chembl_publication_term",
+        "chembl_subcellular_fraction",
+        "chembl_target",
+        "chembl_target_component",
+        "chembl_target_protein_classification",
+        "chembl_tissue",
+        "composite_activity",
+        "composite_assay",
+        "composite_molecule",
+        "composite_publication",
+        "composite_target",
+        "crossref_publication",
+        "openalex_publication",
+        "pubchem_compound",
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "uniprot_idmapping",
+        "uniprot_protein"
+      ],
+      "status": [
+        "blocked",
+        "failed",
+        "loaded",
+        "missing"
+      ]
+    },
+    "bioetl_checkpoint_saved_at_seconds": {
+      "pipeline": [
+        "chembl_activity",
+        "chembl_assay",
+        "chembl_assay_parameters",
+        "chembl_cell_line",
+        "chembl_compound_record",
+        "chembl_molecule",
+        "chembl_protein_class",
+        "chembl_publication",
+        "chembl_publication_similarity",
+        "chembl_publication_term",
+        "chembl_subcellular_fraction",
+        "chembl_target",
+        "chembl_target_component",
+        "chembl_target_protein_classification",
+        "chembl_tissue",
+        "composite_activity",
+        "composite_assay",
+        "composite_molecule",
+        "composite_publication",
+        "composite_target",
+        "crossref_publication",
+        "openalex_publication",
+        "pubchem_compound",
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "uniprot_idmapping",
+        "uniprot_protein"
+      ]
+    },
+    "bioetl_health_check_latency_seconds": {
+      "provider": [
+        "chembl",
+        "crossref",
+        "openalex",
+        "pubchem",
+        "pubmed",
+        "semanticscholar",
+        "uniprot"
+      ]
+    },
+    "bioetl_pipeline_runs_total": {
+      "pipeline": [
+        "chembl_activity",
+        "chembl_assay",
+        "chembl_assay_parameters",
+        "chembl_cell_line",
+        "chembl_compound_record",
+        "chembl_molecule",
+        "chembl_protein_class",
+        "chembl_publication",
+        "chembl_publication_similarity",
+        "chembl_publication_term",
+        "chembl_subcellular_fraction",
+        "chembl_target",
+        "chembl_target_component",
+        "chembl_target_protein_classification",
+        "chembl_tissue",
+        "composite_activity",
+        "composite_assay",
+        "composite_molecule",
+        "composite_publication",
+        "composite_target",
+        "crossref_publication",
+        "openalex_publication",
+        "pubchem_compound",
+        "pubmed_publication",
+        "semanticscholar_publication",
+        "uniprot_idmapping",
+        "uniprot_protein"
+      ],
+      "run_type": [
+        "backfill",
+        "incremental"
+      ],
+      "status": [
+        "failed",
+        "shutdown",
+        "success"
+      ]
+    }
+  },
+  "prometheus_base_url": "http://localhost:9090",
   "prometheus_base_url_source": "cli",
   "prometheus_token_env_var": "BIOETL_OBSERVABILITY_PROMETHEUS_TOKEN",
   "prometheus_url_env_var": "BIOETL_OBSERVABILITY_PROMETHEUS_URL",
@@ -36,6 +174,8 @@
     "bioetl_pipeline_runs_total"
   ],
   "source_command": "python -m scripts.engineering.qa.report_observability_metric_inventory --check --write-evidence reports/observability/runtime_cardinality_inventory.json --review-json-out reports/observability/runtime_cardinality_review.json --summary-out \"$GITHUB_STEP_SUMMARY\" --fail-on-degraded-live-review",
+  "source_revision": "ce5ff5c4fc188ac678b3e248ed95df11d3e48a5b",
+  "source_worktree_dirty": true,
   "static_threshold_violations": [],
   "status": "passed"
 }

@@ -54,6 +54,49 @@ class _FakeDeltaTable:
         return _FakeArrowTable(self._rows)
 
 
+@dataclass
+class _FakeSchemaField:
+    name: str
+
+
+@dataclass
+class _FakeSchema:
+    fields: list[_FakeSchemaField]
+
+
+class _ProjectionDeltaTable(_FakeDeltaTable):
+    def __init__(self, rows: list[dict[str, object]]) -> None:
+        super().__init__(rows, partition_columns=["pipeline"])
+        self.columns: list[str] | None = None
+
+    def schema(self) -> _FakeSchema:
+        return _FakeSchema(
+            [
+                _FakeSchemaField(name)
+                for name in (
+                    "ingestion_ts",
+                    "pipeline",
+                    "run_id",
+                    "payload_hash",
+                    "error_code",
+                    "error_details",
+                    "dq_status",
+                    "payload",
+                )
+            ]
+        )
+
+    def to_pyarrow_table(
+        self,
+        *,
+        partitions: list[tuple[str, str, object]] | None,
+        filters: list[tuple[str, str, object]] | None,
+        columns: list[str] | None = None,
+    ) -> _FakeArrowTable:
+        self.columns = columns
+        return super().to_pyarrow_table(partitions=partitions, filters=filters)
+
+
 def test_record_encoding_quotes_strings_booleans_numbers_and_hashes() -> None:
     assert record_encoding.quote_literal("O'Hara") == "'O''Hara'"
     assert record_encoding.quote_literal(True) == "true"
@@ -64,6 +107,32 @@ def test_record_encoding_quotes_strings_booleans_numbers_and_hashes() -> None:
     assert record_encoding.calculate_hash('{"a":1}') == (
         "015abd7f5cc57a2dd94b7590f04ad8084273905ee33ec5cebeae62276a97f862"
     )
+
+
+def test_filtered_stats_projection_excludes_large_payload_column(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    table = _ProjectionDeltaTable([])
+    monkeypatch.setattr(filtered_reads, "DeltaTable", lambda *_a, **_kw: table)
+
+    filtered_reads._load_filtered_rows(
+        "delta/path",
+        None,
+        pipeline="chembl_activity",
+        run_type=None,
+        reason_code=None,
+        field=None,
+        run_id=None,
+        payload_hash=None,
+        from_ts=None,
+        to_ts=None,
+        include_payload=False,
+        include_payload_preview=False,
+    )
+
+    assert table.columns is not None
+    assert "payload" not in table.columns
+    assert {"pipeline", "run_id", "error_details"} <= set(table.columns)
 
 
 def test_statistics_bucket_helpers_normalize_supported_buckets() -> None:
