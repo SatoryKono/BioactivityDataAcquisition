@@ -26,9 +26,7 @@ RULES_PATH = Path("grafana/prometheus-rules/bioetl_observability.yml")
 MAX_OVER_TIME_COUNTER_POLICY_PATH = Path(
     "configs/quality/promql_max_over_time_counter_policy.yaml"
 )
-_MAX_OVER_TIME_METRIC_RE = re.compile(
-    r"max_over_time\(\s*([a-zA-Z_:][a-zA-Z0-9_:]*)"
-)
+_MAX_OVER_TIME_METRIC_RE = re.compile(r"max_over_time\(\s*([a-zA-Z_:][a-zA-Z0-9_:]*)")
 _PROCESSED_RECORDS_DASHBOARDS = (
     "bioetl-control-plane-v1.json",
     "bioetl-dq-v2.json",
@@ -1053,7 +1051,8 @@ def test_runtime_diagnostic_panels_preserve_unknown_no_data_state() -> None:
 
 
 def test_runtime_telemetry_gap_checks_scrape_and_rule_health() -> None:
-    """Runtime telemetry gap must include Prometheus rule health, not scrape only."""
+    """Runtime telemetry gap must include Prometheus rule health and actual metrics presence
+    (Pushgateway-compatible)."""
     dashboard = load_dashboard(Path("grafana/dashboards/bioetl-runtime.json"))
     panel = next(
         (
@@ -1075,7 +1074,8 @@ def test_runtime_telemetry_gap_checks_scrape_and_rule_health() -> None:
         for rule in group.get("rules", [])
         if rule.get("record") == "bioetl_runtime_trust_gap_status_10m"
     )
-    assert 'up{job="bioetl"}' in rule_expr
+    # Pushgateway compatibility: check for actual BioETL metrics presence instead of scrape status
+    assert "absent_over_time(bioetl_pipeline_runs_total[10m])" in rule_expr
     assert "prometheus_rule_evaluation_failures_total" in rule_expr
     assert "prometheus_rule_group_last_evaluation_timestamp_seconds" in rule_expr
     assert "absent(" in rule_expr
