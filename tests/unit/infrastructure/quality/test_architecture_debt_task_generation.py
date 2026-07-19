@@ -12,6 +12,7 @@ from pathlib import Path
 import yaml
 
 from bioetl.infrastructure.quality import architecture_debt_task_generation as tasks
+from bioetl.infrastructure.quality import architecture_debt_artifact_tasks
 from bioetl.infrastructure.quality.architecture_debt_task_generation import (
     generate_architecture_debt_tasks_payload,
 )
@@ -373,6 +374,21 @@ def test_generate_tasks_payload_does_not_infer_zero_growth_limit(
     )
 
     assert payload["tasks"] == []
+
+
+def test_transition_task_counts_do_not_double_count_sunset_or_expired_subsets() -> None:
+    generated: list[dict[str, object]] = []
+    architecture_debt_artifact_tasks._append_transition_compatibility_tasks(
+        generated,
+        {
+            "transition_compat_count": {"current_count": 1, "target_count": 0},
+            "sunset_compat_count": {"current_count": 1, "target_count": 0},
+            "expired_compat_count": {"current_count": 1, "max_count": 0},
+        },
+    )
+
+    assert [task["id"] for task in generated] == ["ARD-COMPAT-003"]
+    assert generated[0]["current_value"] == 1
 
 
 def test_default_output_path_uses_quality_reports_directory(tmp_path: Path) -> None:

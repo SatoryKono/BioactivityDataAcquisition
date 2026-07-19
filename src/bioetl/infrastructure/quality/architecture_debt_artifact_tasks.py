@@ -75,6 +75,10 @@ def _metric_policy(
     return cast(dict[str, object], policy) if isinstance(policy, dict) else {}
 
 
+def _count_value(value: object) -> int:
+    return value if isinstance(value, int) and not isinstance(value, bool) else 0
+
+
 def _append_reviewed_metric_task(
     tasks: list[dict[str, object]],
     *,
@@ -87,9 +91,10 @@ def _append_reviewed_metric_task(
     notes: list[str],
     source_artifact: str = "configs/quality/debt_scorecard.yaml",
 ) -> None:
-    if limit_field not in policy:
+    raw_limit = policy.get(limit_field)
+    if not isinstance(raw_limit, int) or isinstance(raw_limit, bool):
         return
-    limit_value = int(policy[limit_field])  # type: ignore[call-overload]
+    limit_value = raw_limit
     if current_value <= limit_value:
         return
     tasks.append(
@@ -105,6 +110,134 @@ def _append_reviewed_metric_task(
             goal=goal,
             notes=notes,
         )
+    )
+
+
+def _append_transition_compatibility_tasks(
+    tasks: list[dict[str, object]],
+    compatibility_metrics: dict[str, object],
+) -> None:
+    raw_counts = {
+        metric_name: _count_value(
+            _metric_policy(compatibility_metrics, metric_name).get("current_count")
+        )
+        for metric_name in (
+            "transition_compat_count",
+            "sunset_compat_count",
+            "expired_compat_count",
+        )
+    }
+    exclusive_counts = {
+        "transition_compat_count": max(
+            0,
+            raw_counts["transition_compat_count"] - raw_counts["sunset_compat_count"],
+        ),
+        "sunset_compat_count": max(
+            0,
+            raw_counts["sunset_compat_count"] - raw_counts["expired_compat_count"],
+        ),
+        "expired_compat_count": raw_counts["expired_compat_count"],
+    }
+    for task_id, metric_name, limit_field in (
+        ("ARD-COMPAT-001", "transition_compat_count", "target_count"),
+        ("ARD-COMPAT-002", "sunset_compat_count", "target_count"),
+        ("ARD-COMPAT-003", "expired_compat_count", "max_count"),
+    ):
+        policy = _metric_policy(compatibility_metrics, metric_name)
+        current_value = exclusive_counts[metric_name]
+        _append_reviewed_metric_task(
+            tasks,
+            task_id=task_id,
+            registry_key=f"compatibility_debt_metrics.{metric_name}",
+            policy=policy,
+            current_value=current_value,
+            limit_field=limit_field,
+            goal=(
+                "Сократить рассмотренный transition/sunset compatibility debt до "
+                "утверждённого target без затрагивания постоянного публичного API."
+            ),
+            notes=[
+                f"{metric_name}={raw_counts[metric_name]}",
+                f"exclusive_actionable_count={current_value}",
+            ],
+        )
+
+
+def _append_public_surface_tasks(
+    tasks: list[dict[str, object]],
+    summary: dict[str, object],
+    public_metrics: dict[str, object],
+) -> None:
+    public_entrypoint_count = _count_value(
+        summary.get(
+            "sanctioned_public_entrypoint_count",
+            summary.get("retained_entrypoint_count", 0),
+        )
+    )
+    _append_reviewed_metric_task(
+        tasks,
+        task_id="ARD-COMPAT-004",
+        registry_key="sanctioned_public_entrypoint_governance.public_entrypoint_count",
+        policy=_metric_policy(public_metrics, "public_entrypoint_count"),
+        current_value=public_entrypoint_count,
+        limit_field="current_count",
+        goal=(
+            "Устранить нерецензированный рост санкционированных public entrypoint seams."
+        ),
+        notes=[
+            f"live_public_entrypoint_count={public_entrypoint_count}",
+            "Reviewed permanent public API remains informational while count is flat.",
+        ],
+        source_artifact="reports/quality/compatibility-importer-census.json",
+    )
+
+    public_export_count = _count_value(
+        summary.get(
+            "sanctioned_public_export_facade_count",
+            summary.get("retained_public_export_facade_count", 0),
+        )
+    )
+    _append_reviewed_metric_task(
+        tasks,
+        task_id="ARD-COMPAT-005",
+        registry_key=(
+            "sanctioned_public_entrypoint_governance.public_export_facade_count"
+        ),
+        policy=_metric_policy(public_metrics, "public_export_facade_count"),
+        current_value=public_export_count,
+        limit_field="current_count",
+        goal="Устранить нерецензированный рост public export facade seams.",
+        notes=[
+            f"live_public_export_facade_count={public_export_count}",
+            "Reviewed permanent public export facades are not compatibility debt.",
+        ],
+        source_artifact="reports/quality/compatibility-importer-census.json",
+    )
+
+    conflict_count = max(
+        _count_value(
+            summary.get("retained_public_export_facades_with_duplicate_exports")
+        ),
+        _count_value(
+            summary.get("retained_public_export_facades_with_resolution_conflicts")
+        ),
+        _count_value(
+            summary.get("retained_public_export_facades_with_wrapper_contract_drift")
+        ),
+    )
+    _append_reviewed_metric_task(
+        tasks,
+        task_id="ARD-COMPAT-006",
+        registry_key=(
+            "sanctioned_public_entrypoint_governance."
+            "public_export_facade_conflict_count"
+        ),
+        policy=_metric_policy(public_metrics, "public_export_facade_conflict_count"),
+        current_value=conflict_count,
+        limit_field="current_count",
+        goal="Устранить конфликт или drift в санкционированном public export facade.",
+        notes=[f"live_public_export_facade_conflict_count={conflict_count}"],
+        source_artifact="reports/quality/compatibility-importer-census.json",
     )
 
 
@@ -130,95 +263,8 @@ def build_compatibility_surface_tasks(
     )
     public_metrics = cast(dict[str, object], public_governance.get("metrics", {}))
     tasks: list[dict[str, object]] = []
-
-    for task_id, metric_name, limit_field in (
-        ("ARD-COMPAT-001", "transition_compat_count", "target_count"),
-        ("ARD-COMPAT-002", "sunset_compat_count", "target_count"),
-        ("ARD-COMPAT-003", "expired_compat_count", "max_count"),
-    ):
-        policy = _metric_policy(compatibility_metrics, metric_name)
-        current_value = int(policy.get("current_count", 0))  # type: ignore[call-overload]
-        _append_reviewed_metric_task(
-            tasks,
-            task_id=task_id,
-            registry_key=f"compatibility_debt_metrics.{metric_name}",
-            policy=policy,
-            current_value=current_value,
-            limit_field=limit_field,
-            goal=(
-                "Сократить рассмотренный transition/sunset compatibility debt до "
-                "утверждённого target без затрагивания постоянного публичного API."
-            ),
-            notes=[f"{metric_name}={current_value}"],
-        )
-
-    public_entrypoint_count = int(  # type: ignore[call-overload]
-        summary.get(
-            "sanctioned_public_entrypoint_count",
-            summary.get("retained_entrypoint_count", 0),
-        )
-    )
-    _append_reviewed_metric_task(
-        tasks,
-        task_id="ARD-COMPAT-004",
-        registry_key="sanctioned_public_entrypoint_governance.public_entrypoint_count",
-        policy=_metric_policy(public_metrics, "public_entrypoint_count"),
-        current_value=public_entrypoint_count,
-        limit_field="current_count",
-        goal=(
-            "Устранить нерецензированный рост санкционированных public entrypoint seams."
-        ),
-        notes=[
-            f"live_public_entrypoint_count={public_entrypoint_count}",
-            "Reviewed permanent public API remains informational while count is flat.",
-        ],
-        source_artifact="reports/quality/compatibility-importer-census.json",
-    )
-
-    public_export_count = int(  # type: ignore[call-overload]
-        summary.get(
-            "sanctioned_public_export_facade_count",
-            summary.get("retained_public_export_facade_count", 0),
-        )
-    )
-    _append_reviewed_metric_task(
-        tasks,
-        task_id="ARD-COMPAT-005",
-        registry_key=(
-            "sanctioned_public_entrypoint_governance.public_export_facade_count"
-        ),
-        policy=_metric_policy(public_metrics, "public_export_facade_count"),
-        current_value=public_export_count,
-        limit_field="current_count",
-        goal="Устранить нерецензированный рост public export facade seams.",
-        notes=[
-            f"live_public_export_facade_count={public_export_count}",
-            "Reviewed permanent public export facades are not compatibility debt.",
-        ],
-        source_artifact="reports/quality/compatibility-importer-census.json",
-    )
-
-    conflict_count = max(  # type: ignore[call-overload]
-        int(summary.get("retained_public_export_facades_with_duplicate_exports", 0)),  # type: ignore[call-overload]
-        int(summary.get("retained_public_export_facades_with_resolution_conflicts", 0)),  # type: ignore[call-overload]
-        int(  # type: ignore[call-overload]
-            summary.get("retained_public_export_facades_with_wrapper_contract_drift", 0)
-        ),
-    )
-    _append_reviewed_metric_task(
-        tasks,
-        task_id="ARD-COMPAT-006",
-        registry_key=(
-            "sanctioned_public_entrypoint_governance."
-            "public_export_facade_conflict_count"
-        ),
-        policy=_metric_policy(public_metrics, "public_export_facade_conflict_count"),
-        current_value=conflict_count,
-        limit_field="current_count",
-        goal="Устранить конфликт или drift в санкционированном public export facade.",
-        notes=[f"live_public_export_facade_conflict_count={conflict_count}"],
-        source_artifact="reports/quality/compatibility-importer-census.json",
-    )
+    _append_transition_compatibility_tasks(tasks, compatibility_metrics)
+    _append_public_surface_tasks(tasks, summary, public_metrics)
     return tasks
 
 
@@ -242,7 +288,7 @@ def build_duplication_tasks(
         categories: list[str] = []
         if isinstance(actionability, list):
             categories = [
-                str(item.get("category"))  # type: ignore[arg-type]
+                str(item.get("category"))
                 for item in actionability
                 if isinstance(item, dict) and item.get("category")
             ]
@@ -322,8 +368,8 @@ def build_dead_code_review_tasks(
         return []
     summary = cast(dict[str, object], inventory.get("summary", {}))
     review_window = cast(dict[str, object], inventory.get("review_window", {}))
-    untriaged_candidates = int(  # type: ignore[call-overload]
-        summary.get("repo_wide_untriaged_zero_import_candidate_count", 0)
+    untriaged_candidates = _count_value(
+        summary.get("repo_wide_untriaged_zero_import_candidate_count")
     )
     scorecard = load_yaml_if_present(artifact_paths["debt_scorecard"])
     retirement_governance = cast(

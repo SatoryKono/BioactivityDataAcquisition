@@ -102,6 +102,7 @@ def _resolve_base_summary_replay_context(
             manifest=manifest,
             requested_exact_replay=requested_exact_replay,
             resume_requested=resume_requested,
+            continuation_mode=str(operator_replay_projection["continuation_mode"]),
             policy_assessment=policy_assessment,
             replay_family_context=replay_family_context,
         ),

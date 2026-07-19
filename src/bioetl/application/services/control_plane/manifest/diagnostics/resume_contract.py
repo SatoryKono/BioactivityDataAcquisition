@@ -8,9 +8,6 @@ from bioetl.application.services.control_plane.manifest.diagnostics.replay_invar
     _resolve_applied_checkpoint_compatibility_policy,
     _resolve_requested_checkpoint_compatibility_policy,
 )
-from bioetl.application.services.control_plane.manifest.diagnostics.replay_state import (
-    _resolve_continuation_mode,
-)
 from bioetl.domain.control_plane import ReplayCapability, RunManifest
 from bioetl.domain.control_plane.execution_context import (
     is_composite_execution_context as _is_composite_execution_context,
@@ -63,6 +60,7 @@ def _build_resume_contract(
     manifest: RunManifest,
     requested_exact_replay: bool,
     resume_requested: bool,
+    continuation_mode: str,
     policy_assessment: ReproducibilityPolicyAssessment,
     replay_family_context: ReplayFamilyContext,
 ) -> dict[str, object]:
@@ -81,12 +79,6 @@ def _build_resume_contract(
     )
     is_composite = _is_composite_execution_context(manifest)
     execution_context = "composite" if is_composite else "ordinary"
-    continuation_mode = _resolve_continuation_mode(
-        manifest=manifest,
-        requested_exact_replay=requested_exact_replay,
-        resume_requested=resume_requested,
-        replay_family_context=replay_family_context,
-    )
     guarantee, evidence_source, ledger_suffix_replay = _resolve_resume_guarantee(
         continuation_mode=continuation_mode,
     )

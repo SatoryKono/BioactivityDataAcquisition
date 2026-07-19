@@ -32,7 +32,7 @@ class BatchWriterIOMixin:
         replay_timestamp_anchor = getattr(
             self._context, "replay_timestamp_anchor", None
         )
-        return (
+        return (  # type: ignore[no-any-return]
             replay_timestamp_anchor
             if replay_timestamp_anchor is not None
             else self._context.started_at

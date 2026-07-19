@@ -191,10 +191,11 @@ operational; do not copy generated snapshot counters back into it by hand.
   carry an explicit `phase`, `target_state`, and `completion_gate` in the YAML
   burn-down plan so quarterly review can distinguish stable API from caller-narrowing
   work.
-- The first safe removal wave for sanctioned compatibility burden is the
-  zero-import maintenance CLI seam, which was removed from retained-entrypoint
-  debt tracking while leaving any future external command retirement to a
-  separate breaking-change review.
+- The previously proposed first removal wave for the maintenance CLI seam is
+  deferred: the live census reports two reviewed first-party importers. It may
+  leave retained-entrypoint debt tracking only after those importers return to
+  zero; any future external command retirement remains a separate
+  breaking-change review.
 - Measured-only modules are not sanctioned public import targets for first-party `src/`; they
   remain tracked only to prevent silent compatibility-surface drift while owners decide whether to
   retain, promote, or remove them.

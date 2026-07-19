@@ -2187,7 +2187,6 @@
         "tests/fixtures/",
         "tests/golden/",
         "tests/helpers/",
-        "tests/infrastructure/",
         "tests/integration/",
         "tests/performance/",
         "tests/security/",
@@ -2206,7 +2205,6 @@
         "tests/fixtures/",
         "tests/golden/",
         "tests/helpers/",
-        "tests/infrastructure/",
         "tests/integration/",
         "tests/performance/",
         "tests/security/",
@@ -2215,16 +2213,16 @@
         "tests/testing_support/",
         "tests/unit/"
       ],
-      "top_level_directory_count": 16,
-      "top_level_directory_count_including_pycache": 17
+      "top_level_directory_count": 15,
+      "top_level_directory_count_including_pycache": 16
     },
     "top_duplicate_test_names": [],
     "total_test_files": 2014,
-    "total_test_functions": 22513,
+    "total_test_functions": 22514,
     "uuid4_call_sites": 0
   },
   "root": ".",
-  "source_tree_sha256": "b5ecfd49a8e31b0f10ca87bec296833b2c4f57ac10a5532ff25d4b6967331c72",
+  "source_tree_sha256": "edee495dc1f73aa56b5c25be8f575288eb15b0f822abc319ca6415439c5b874e",
   "summary": {
     "assertless_total_candidates": 105,
     "compatibility_test_files": 0,
@@ -2253,7 +2251,6 @@
       "tests/fixtures/",
       "tests/golden/",
       "tests/helpers/",
-      "tests/infrastructure/",
       "tests/integration/",
       "tests/performance/",
       "tests/security/",
@@ -2272,7 +2269,6 @@
       "tests/fixtures/",
       "tests/golden/",
       "tests/helpers/",
-      "tests/infrastructure/",
       "tests/integration/",
       "tests/performance/",
       "tests/security/",
@@ -2281,11 +2277,11 @@
       "tests/testing_support/",
       "tests/unit/"
     ],
-    "top_level_directory_count": 16,
-    "top_level_directory_count_including_pycache": 17
+    "top_level_directory_count": 15,
+    "top_level_directory_count_including_pycache": 16
   },
   "top_duplicate_test_names": [],
   "total_test_files": 2014,
-  "total_test_functions": 22513,
+  "total_test_functions": 22514,
   "uuid4_call_sites": 0
 }

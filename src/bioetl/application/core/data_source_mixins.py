@@ -71,7 +71,7 @@ class _WrappedAdapterHealthDelegationMixin:
 
         check_health = getattr(self._data_source, "check_health", None)
         if check_health is not None and callable(check_health):
-            return await check_health()
+            return await check_health()  # type: ignore[no-any-return]
         return HealthCheckResult(
             status=await self._data_source.health_check(),
             latency_ms=0.0,
