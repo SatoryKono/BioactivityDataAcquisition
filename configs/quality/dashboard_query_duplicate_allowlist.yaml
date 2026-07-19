@@ -4,40 +4,69 @@ rationale: >
   Dashboard query reuse is allowed only when the repeated expression is an
   intentional shared operator view, not accidental copy/paste drift.
 exact_duplicates:
-  allowed_groups:
+  resolved_groups:
     - id: dq-volume-weighted-score-shared-card
       owner: "@bioetl-observability"
-      linked_issue: "#4876"
-      rationale: Same DQ score expression is intentionally reused for current card and trend context.
-      panel_refs:
-        - "bioetl-dq-v2.json :: Monitor: Data Quality Score (Volume-weighted)"
-        - "bioetl-dq-v2.json :: Track: Data Quality Score Trend (Volume-weighted)"
-    - id: control-plane-replay-safety-status
-      owner: "@bioetl-observability"
-      linked_issue: "#4876"
-      rationale: Control-plane replay safety is intentionally surfaced in both Status and Monitor panels.
-      panel_refs:
-        - "bioetl-control-plane-v1.json :: Monitor: Replay Safety State"
-        - "bioetl-control-plane-v1.json :: Status"
+      linked_issue: "#6360"
+      resolution: queries_now_have_distinct_time_semantics
+      rationale: The current stat uses a fixed latest-sample lookback while the trend remains selected-range evidence, so the former exact duplicate no longer exists.
+  allowed_groups:
     - id: dq-current-status-shared-card
       owner: "@bioetl-observability"
-      linked_issue: "#4876"
-      rationale: DQ status expression is intentionally reused for top-level and diagnostic status cards.
+      linked_issue: "#6360"
+      disposition: retain_recording_rule_selector
+      recording_rule_decision: already_canonical
+      normalized_expression: 'max(bioetl_dq_current_status{pipeline=~"$pipeline"})'
+      rationale: DQ status intentionally reuses the existing canonical current-status recording rule for top-level and diagnostic cards.
       panel_refs:
         - "bioetl-dq-v2.json :: Monitor DQ Current Status"
         - "bioetl-dq-v2.json :: Status"
     - id: runtime-current-status-shared-card
       owner: "@bioetl-observability"
-      linked_issue: "#6213"
+      linked_issue: "#6360"
+      disposition: retain_recording_rule_selector
+      recording_rule_decision: already_canonical
+      normalized_expression: 'max(bioetl_runtime_current_status_trusted{pipeline=~"$pipeline",run_type=~"$run_type"})'
       rationale: Runtime status cards intentionally reuse only the trust-gated recording-rule selector.
       panel_refs:
         - "bioetl-runtime.json :: Runtime Status"
         - "bioetl-runtime.json :: Status"
 near_duplicates:
-  max_count: 12
+  max_count: 4
   owner: "@bioetl-observability"
-  linked_issue: "#4876"
+  linked_issue: "#6360"
   rationale: >
-    Current audited baseline is 12 near-duplicate families, mostly intentional
-    p50/p95/p99 histogram triplets and layer/status variants. Growth beyond 12
-    requires review.
+    Current cross-panel audited baseline is four reviewed near-duplicate
+    families. Growth beyond four or a panel-set change requires review.
+  reviewed_groups:
+    - id: processed-record-stage-range-variants
+      disposition: retain_semantic_variants
+      recording_rule_decision: rejected_distinct_stage_and_range_semantics
+      rationale: Bronze, Gold, and filtered-out views intentionally retain different stage semantics; pre-recording the dashboard range would be invalid.
+      panel_refs:
+        - "bioetl-dq-v2.json :: Track: Clean Records in Range (Gold)"
+        - "bioetl-dq-v2.json :: Track: Silver Filter Rejects in Range"
+        - "bioetl-dq-v2.json :: Track: Source Records in Range (Bronze)"
+        - "bioetl-overview-v2.json :: Silver Rejects + Rate"
+    - id: workflow-step-outcome-range-variants
+      disposition: retain_semantic_variants
+      recording_rule_decision: rejected_distinct_step_predicates
+      rationale: Pipeline failure, transform failure, and skipped-event predicates answer different workflow questions and are inexpensive bounded counters.
+      panel_refs:
+        - "bioetl-workflow-overview.json :: Failed Pipeline Steps / Range"
+        - "bioetl-workflow-overview.json :: Failed Transform Steps / Range"
+        - "bioetl-workflow-overview.json :: Skipped Step Events / Range"
+    - id: provider-http-error-class-variants
+      disposition: retain_semantic_variants
+      recording_rule_decision: rejected_distinct_error_taxonomy
+      rationale: Timeout/network and rate-limit regex classes are intentionally distinct operator diagnoses; merging them would erase cause semantics.
+      panel_refs:
+        - "bioetl-provider-health-v2.json :: Inspect Network Timeout Errors by Method"
+        - "bioetl-provider-health-v2.json :: Inspect Rate Limit Errors by Method"
+    - id: runtime-blocker-topk-depth-variants
+      disposition: retain_presentation_variants
+      recording_rule_decision: rejected_topk_is_consumer_specific
+      rationale: Top-3 is the first-screen summary and top-20 is the explicit drilldown; recording either topk would make the other consumer semantically wrong.
+      panel_refs:
+        - "bioetl-runtime.json :: Inspect Active Runtime Blocker Detail"
+        - "bioetl-runtime.json :: Runtime Blockers"
