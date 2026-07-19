@@ -36,6 +36,11 @@ def test_architecture_quality_scorecard_carries_live_evidence_metrics() -> None:
 
     assert metrics["layer_violations"] == 0
     assert metrics["retained_entrypoint_count"] >= 0
+    assert metrics["transition_compat_count"] >= 0
+    assert metrics["expired_compat_count"] >= 0
+    assert metrics["public_entrypoint_growth_count"] == 0
+    assert metrics["public_export_facade_growth_count"] == 0
+    assert metrics["public_export_facade_conflict_count"] == 0
     assert metrics["unmeasured_module_count"] >= 0
     assert metrics["contract_blocking_issue_count"] == 0
     assert metrics["dq_blocking_issue_count"] == 0
@@ -57,6 +62,12 @@ def test_architecture_quality_scorecard_integral_score_improves_with_debt_reduct
         "total_duplicate_clusters": 95,
         "retained_entrypoint_count": 12,
         "retained_public_export_facade_count": 4,
+        "transition_compat_count": 0,
+        "sunset_compat_count": 0,
+        "expired_compat_count": 0,
+        "public_entrypoint_growth_count": 0,
+        "public_export_facade_growth_count": 0,
+        "public_export_facade_conflict_count": 0,
         "twin_pair_count": 0,
         "compatibility_test_file_count": 25,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
@@ -72,8 +83,6 @@ def test_architecture_quality_scorecard_integral_score_improves_with_debt_reduct
         **baseline_metrics,
         "hotspot_budget_warning_count": 4,
         "total_duplicate_clusters": 54,
-        "retained_entrypoint_count": 9,
-        "retained_public_export_facade_count": 2,
         "compatibility_test_file_count": 18,
     }
 
@@ -101,6 +110,12 @@ def test_architecture_quality_scorecard_integral_score_drops_with_regressions() 
         "total_duplicate_clusters": 95,
         "retained_entrypoint_count": 12,
         "retained_public_export_facade_count": 4,
+        "transition_compat_count": 0,
+        "sunset_compat_count": 0,
+        "expired_compat_count": 0,
+        "public_entrypoint_growth_count": 0,
+        "public_export_facade_growth_count": 0,
+        "public_export_facade_conflict_count": 0,
         "twin_pair_count": 0,
         "compatibility_test_file_count": 25,
         "repo_wide_untriaged_zero_import_candidate_count": 0,
@@ -119,8 +134,12 @@ def test_architecture_quality_scorecard_integral_score_drops_with_regressions() 
         "uncovered_module_count": 2,
         "hotspot_budget_warning_count": 11,
         "total_duplicate_clusters": 140,
-        "retained_entrypoint_count": 18,
-        "retained_public_export_facade_count": 7,
+        "transition_compat_count": 3,
+        "sunset_compat_count": 2,
+        "expired_compat_count": 1,
+        "public_entrypoint_growth_count": 6,
+        "public_export_facade_growth_count": 3,
+        "public_export_facade_conflict_count": 1,
         "contract_blocking_issue_count": 1,
         "dq_blocking_issue_count": 2,
         "dashboarded_without_emission_count": 1,
@@ -140,3 +159,40 @@ def test_architecture_quality_scorecard_integral_score_drops_with_regressions() 
     )
 
     assert regressed_integral < baseline_integral
+
+
+def test_architecture_quality_scorecard_does_not_penalize_retained_public_api() -> None:
+    metrics = {
+        "layer_violations": 0,
+        "source_module_count": 2180,
+        "unmeasured_module_count": 0,
+        "uncovered_module_count": 0,
+        "hotspot_family_count": 5,
+        "hotspot_budget_warning_count": 8,
+        "total_duplicate_clusters": 95,
+        "retained_entrypoint_count": 12,
+        "retained_public_export_facade_count": 4,
+        "transition_compat_count": 0,
+        "sunset_compat_count": 0,
+        "expired_compat_count": 0,
+        "public_entrypoint_growth_count": 0,
+        "public_export_facade_growth_count": 0,
+        "public_export_facade_conflict_count": 0,
+        "twin_pair_count": 0,
+        "compatibility_test_file_count": 25,
+        "repo_wide_untriaged_zero_import_candidate_count": 0,
+        "contract_blocking_issue_count": 0,
+        "dq_blocking_issue_count": 0,
+        "dashboarded_without_emission_count": 0,
+        "dashboarded_without_declaration_count": 0,
+        "runtime_cardinality_review_required_count": 0,
+        "runtime_cardinality_threshold_violation_count": 0,
+        "adr_enforcement_blocking_gap_count": 0,
+    }
+    retained_counts_changed = {
+        **metrics,
+        "retained_entrypoint_count": 30,
+        "retained_public_export_facade_count": 10,
+    }
+
+    assert _build_categories(retained_counts_changed) == _build_categories(metrics)

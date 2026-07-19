@@ -67,6 +67,45 @@ def _build_artifact_task(
     }
 
 
+def _metric_policy(
+    metrics: dict[str, object],
+    metric_name: str,
+) -> dict[str, object]:
+    policy = metrics.get(metric_name, {})
+    return cast(dict[str, object], policy) if isinstance(policy, dict) else {}
+
+
+def _append_reviewed_metric_task(
+    tasks: list[dict[str, object]],
+    *,
+    task_id: str,
+    registry_key: str,
+    policy: dict[str, object],
+    current_value: int,
+    limit_field: str,
+    goal: str,
+    notes: list[str],
+    source_artifact: str = "configs/quality/debt_scorecard.yaml",
+) -> None:
+    limit_value = int(policy.get(limit_field, 0))
+    if current_value <= limit_value:
+        return
+    tasks.append(
+        _build_artifact_task(
+            task_id=task_id,
+            task_family="compatibility_surface",
+            registry_key=registry_key,
+            owner=policy.get("owner", "@bioetl-architecture"),
+            current_value=current_value,
+            limit_value=limit_value,
+            target_file=None,
+            source_artifact=source_artifact,
+            goal=goal,
+            notes=notes,
+        )
+    )
+
+
 def build_compatibility_surface_tasks(
     *,
     artifact_paths: dict[str, Path],
@@ -76,12 +115,40 @@ def build_compatibility_surface_tasks(
         return []
     summary = cast(dict[str, object], census.get("summary", {}))
     scorecard = load_yaml_if_present(artifact_paths["debt_scorecard"])
-    governance = cast(
+    compatibility_governance = cast(
+        dict[str, object],
+        scorecard.get("compatibility_debt_metrics", {}),
+    )
+    compatibility_metrics = cast(
+        dict[str, object], compatibility_governance.get("metrics", {})
+    )
+    public_governance = cast(
         dict[str, object],
         scorecard.get("sanctioned_public_entrypoint_governance", {}),
     )
-    metrics = cast(dict[str, object], governance.get("metrics", {}))
+    public_metrics = cast(dict[str, object], public_governance.get("metrics", {}))
     tasks: list[dict[str, object]] = []
+
+    for task_id, metric_name, limit_field in (
+        ("ARD-COMPAT-001", "transition_compat_count", "target_count"),
+        ("ARD-COMPAT-002", "sunset_compat_count", "target_count"),
+        ("ARD-COMPAT-003", "expired_compat_count", "max_count"),
+    ):
+        policy = _metric_policy(compatibility_metrics, metric_name)
+        current_value = int(policy.get("current_count", 0))
+        _append_reviewed_metric_task(
+            tasks,
+            task_id=task_id,
+            registry_key=f"compatibility_debt_metrics.{metric_name}",
+            policy=policy,
+            current_value=current_value,
+            limit_field=limit_field,
+            goal=(
+                "Сократить рассмотренный transition/sunset compatibility debt до "
+                "утверждённого target без затрагивания постоянного публичного API."
+            ),
+            notes=[f"{metric_name}={current_value}"],
+        )
 
     public_entrypoint_count = int(
         summary.get(
@@ -89,30 +156,22 @@ def build_compatibility_surface_tasks(
             summary.get("retained_entrypoint_count", 0),
         )
     )
-    if public_entrypoint_count > 0:
-        tasks.append(
-            _build_artifact_task(
-                task_id="ARD-COMPAT-001",
-                task_family="compatibility_surface",
-                registry_key="sanctioned_public_entrypoint_governance.public_entrypoint_count",
-                owner=cast(
-                    dict[str, object],
-                    metrics.get("public_entrypoint_count", {}),
-                ).get("owner", "@bioetl-architecture"),
-                current_value=public_entrypoint_count,
-                limit_value=0,
-                target_file=None,
-                source_artifact="reports/quality/compatibility-importer-census.json",
-                goal=(
-                    "Свести публичную compatibility/governance burden к "
-                    "минимально необходимому набору санкционированных entrypoint seams."
-                ),
-                notes=[
-                    f"sanctioned_public_entrypoint_count={public_entrypoint_count}",
-                    "Review sanctioned public API inventory before adding or retaining seams.",
-                ],
-            )
-        )
+    _append_reviewed_metric_task(
+        tasks,
+        task_id="ARD-COMPAT-004",
+        registry_key="sanctioned_public_entrypoint_governance.public_entrypoint_count",
+        policy=_metric_policy(public_metrics, "public_entrypoint_count"),
+        current_value=public_entrypoint_count,
+        limit_field="current_count",
+        goal=(
+            "Устранить нерецензированный рост санкционированных public entrypoint seams."
+        ),
+        notes=[
+            f"live_public_entrypoint_count={public_entrypoint_count}",
+            "Reviewed permanent public API remains informational while count is flat.",
+        ],
+        source_artifact="reports/quality/compatibility-importer-census.json",
+    )
 
     public_export_count = int(
         summary.get(
@@ -120,27 +179,44 @@ def build_compatibility_surface_tasks(
             summary.get("retained_public_export_facade_count", 0),
         )
     )
-    if public_export_count > 0:
-        tasks.append(
-            _build_artifact_task(
-                task_id="ARD-COMPAT-002",
-                task_family="compatibility_surface",
-                registry_key="sanctioned_public_entrypoint_governance.public_export_facade_count",
-                owner="@bioetl-architecture",
-                current_value=public_export_count,
-                limit_value=0,
-                target_file=None,
-                source_artifact="reports/quality/compatibility-importer-census.json",
-                goal=(
-                    "Сократить число публичных lazy/export facade seams или "
-                    "жёстко удерживать их без роста как отдельный governance surface."
-                ),
-                notes=[
-                    f"sanctioned_public_export_facade_count={public_export_count}",
-                    "Collapse reviewed facade burden before introducing new package-root exports.",
-                ],
-            )
-        )
+    _append_reviewed_metric_task(
+        tasks,
+        task_id="ARD-COMPAT-005",
+        registry_key=(
+            "sanctioned_public_entrypoint_governance.public_export_facade_count"
+        ),
+        policy=_metric_policy(public_metrics, "public_export_facade_count"),
+        current_value=public_export_count,
+        limit_field="current_count",
+        goal="Устранить нерецензированный рост public export facade seams.",
+        notes=[
+            f"live_public_export_facade_count={public_export_count}",
+            "Reviewed permanent public export facades are not compatibility debt.",
+        ],
+        source_artifact="reports/quality/compatibility-importer-census.json",
+    )
+
+    conflict_count = max(
+        int(summary.get("retained_public_export_facades_with_duplicate_exports", 0)),
+        int(summary.get("retained_public_export_facades_with_resolution_conflicts", 0)),
+        int(
+            summary.get("retained_public_export_facades_with_wrapper_contract_drift", 0)
+        ),
+    )
+    _append_reviewed_metric_task(
+        tasks,
+        task_id="ARD-COMPAT-006",
+        registry_key=(
+            "sanctioned_public_entrypoint_governance."
+            "public_export_facade_conflict_count"
+        ),
+        policy=_metric_policy(public_metrics, "public_export_facade_conflict_count"),
+        current_value=conflict_count,
+        limit_field="current_count",
+        goal="Устранить конфликт или drift в санкционированном public export facade.",
+        notes=[f"live_public_export_facade_conflict_count={conflict_count}"],
+        source_artifact="reports/quality/compatibility-importer-census.json",
+    )
     return tasks
 
 
@@ -243,18 +319,32 @@ def build_dead_code_review_tasks(
     if not inventory:
         return []
     summary = cast(dict[str, object], inventory.get("summary", {}))
-    retained_candidates = int(summary.get("repo_wide_zero_import_candidate_count", 0))
-    if retained_candidates <= 0:
+    untriaged_candidates = int(
+        summary.get("repo_wide_untriaged_zero_import_candidate_count", 0)
+    )
+    scorecard = load_yaml_if_present(artifact_paths["debt_scorecard"])
+    retirement_governance = cast(
+        dict[str, object], scorecard.get("retirement_governance_metrics", {})
+    )
+    retirement_metrics = cast(
+        dict[str, object], retirement_governance.get("metrics", {})
+    )
+    policy = _metric_policy(
+        retirement_metrics,
+        "repo_wide_untriaged_zero_import_candidate_count",
+    )
+    limit_value = int(policy.get("max_count", 0))
+    if untriaged_candidates <= limit_value:
         return []
     review_window = cast(dict[str, object], inventory.get("review_window", {}))
     return [
         _build_artifact_task(
             task_id="ARD-DEAD-001",
             task_family="dead_code_review",
-            registry_key="repo_wide_zero_import_candidate_count",
-            owner="@bioetl-architecture",
-            current_value=retained_candidates,
-            limit_value=0,
+            registry_key="repo_wide_untriaged_zero_import_candidate_count",
+            owner=policy.get("owner", "@bioetl-architecture"),
+            current_value=untriaged_candidates,
+            limit_value=limit_value,
             target_file=None,
             source_artifact="reports/quality/dead-code-inventory.json",
             goal=(
@@ -262,8 +352,12 @@ def build_dead_code_review_tasks(
                 "без роста untriaged residual."
             ),
             notes=[
-                f"repo_wide_zero_import_candidate_count={retained_candidates}",
+                (
+                    "repo_wide_untriaged_zero_import_candidate_count="
+                    f"{untriaged_candidates}"
+                ),
                 f"review_mode={review_window.get('mode', 'unknown')}",
+                "Classified canonical owners and module entrypoints are excluded.",
             ],
         )
     ]

@@ -13,7 +13,11 @@ _CATEGORY_BASELINES: tuple[dict[str, object], ...] = (
         "id": "hexagonal_ports_adapters",
         "name": "Hexagonal / Ports & Adapters",
         "weight": 0.11,
-        "metric_keys": ("layer_violations", "retained_entrypoint_count"),
+        "metric_keys": (
+            "layer_violations",
+            "transition_compat_count",
+            "expired_compat_count",
+        ),
     },
     {
         "id": "ddd_invariants",
@@ -25,7 +29,12 @@ _CATEGORY_BASELINES: tuple[dict[str, object], ...] = (
         "id": "composition_di",
         "name": "Composition root / DI",
         "weight": 0.10,
-        "metric_keys": ("layer_violations", "retained_public_export_facade_count"),
+        "metric_keys": (
+            "layer_violations",
+            "public_entrypoint_growth_count",
+            "public_export_facade_growth_count",
+            "public_export_facade_conflict_count",
+        ),
     },
     {
         "id": "module_boundaries_coupling",
@@ -42,7 +51,7 @@ _CATEGORY_BASELINES: tuple[dict[str, object], ...] = (
         "id": "naming_package_consistency",
         "name": "Naming / package consistency",
         "weight": 0.08,
-        "metric_keys": ("retained_entrypoint_count", "twin_pair_count"),
+        "metric_keys": ("expired_compat_count", "twin_pair_count"),
     },
     {
         "id": "test_strategy_testability",
@@ -82,7 +91,12 @@ _CATEGORY_BASELINES: tuple[dict[str, object], ...] = (
         "name": "Debt burden / evolution friction",
         "weight": 0.06,
         "metric_keys": (
-            "retained_entrypoint_count",
+            "transition_compat_count",
+            "sunset_compat_count",
+            "expired_compat_count",
+            "public_entrypoint_growth_count",
+            "public_export_facade_growth_count",
+            "public_export_facade_conflict_count",
             "repo_wide_untriaged_zero_import_candidate_count",
             "hotspot_budget_warning_count",
             "total_duplicate_clusters",
@@ -112,7 +126,8 @@ def _score_hexagonal_ports_adapters(metrics: dict[str, object]) -> float:
     return _clamp_score(
         9.2
         - 1.5 * _metric_int(metrics, "layer_violations")
-        - 0.05 * _metric_int(metrics, "retained_entrypoint_count")
+        - 0.5 * _metric_int(metrics, "transition_compat_count")
+        - 1.0 * _metric_int(metrics, "expired_compat_count")
     )
 
 
@@ -128,7 +143,9 @@ def _score_composition_di(metrics: dict[str, object]) -> float:
     return _clamp_score(
         9.0
         - 1.5 * _metric_int(metrics, "layer_violations")
-        - 0.25 * _metric_int(metrics, "retained_public_export_facade_count")
+        - 0.5 * _metric_int(metrics, "public_entrypoint_growth_count")
+        - 0.75 * _metric_int(metrics, "public_export_facade_growth_count")
+        - 1.0 * _metric_int(metrics, "public_export_facade_conflict_count")
     )
 
 
@@ -144,7 +161,7 @@ def _score_module_boundaries_coupling(metrics: dict[str, object]) -> float:
 def _score_naming_package_consistency(metrics: dict[str, object]) -> float:
     return _clamp_score(
         8.8
-        - 0.06 * _metric_int(metrics, "retained_entrypoint_count")
+        - 0.8 * _metric_int(metrics, "expired_compat_count")
         - 0.8 * _metric_int(metrics, "twin_pair_count")
     )
 
@@ -181,7 +198,12 @@ def _score_determinism_replay_observability(metrics: dict[str, object]) -> float
 def _score_debt_burden_evolution_friction(metrics: dict[str, object]) -> float:
     return _clamp_score(
         8.5
-        - 0.06 * _metric_int(metrics, "retained_entrypoint_count")
+        - 0.2 * _metric_int(metrics, "transition_compat_count")
+        - 0.2 * _metric_int(metrics, "sunset_compat_count")
+        - 0.5 * _metric_int(metrics, "expired_compat_count")
+        - 0.2 * _metric_int(metrics, "public_entrypoint_growth_count")
+        - 0.25 * _metric_int(metrics, "public_export_facade_growth_count")
+        - 0.5 * _metric_int(metrics, "public_export_facade_conflict_count")
         - 0.5 * _metric_int(metrics, "repo_wide_untriaged_zero_import_candidate_count")
         - 0.08 * _metric_int(metrics, "hotspot_budget_warning_count")
         - 0.01 * _metric_int(metrics, "total_duplicate_clusters")
