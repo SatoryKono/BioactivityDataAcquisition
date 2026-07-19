@@ -42,7 +42,10 @@ ______________________________________________________________________
 > а durable lessons — промоутиться в `src/memory/curated/`.
 > Workflow-time refresh теперь обязан быть surface-aware: timeline recovery не
 > должна ждать full RAG rebuild, а временный RAG refresh должен оставаться
-> bounded и query-focused.
+> bounded и query-focused вне canonical in-repo manifest lanes. Canonical full
+> RAG живёт в rebuild-only `src/memory/derived/rag/manifests/`; retrieval
+> допускается только после проверки catalog/chunk pair, source content,
+> eligible source set и source identity.
 > На регулярной cadence и перед release/governance review запускай
 > `python -m memory.tooling.workflow review-curated`
 > и архивируй superseded curated notes вместо тихого накопления stale memory.

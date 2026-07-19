@@ -261,7 +261,10 @@ def test_pre_task_workflow_refreshes_if_event_projection_dir_is_empty(
         rag_dir = output_root / "rag" / "manifests"
         write_test_rag_manifest(
             rag_dir / "chunks.jsonl",
-            [json.loads(line) for line in chunks_path.read_text(encoding="utf-8").splitlines()],
+            [
+                json.loads(line)
+                for line in chunks_path.read_text(encoding="utf-8").splitlines()
+            ],
         )
         refreshed_events = output_root / "timeline" / "events"
         refreshed_events.mkdir(parents=True, exist_ok=True)

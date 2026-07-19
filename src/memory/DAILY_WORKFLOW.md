@@ -52,6 +52,9 @@ What it does:
 - uses a bounded workflow-time RAG rebuild when temporary chunk manifests are
   needed, instead of rebuilding the full deterministic corpus during every
   pre-task call
+- validates the catalog/chunk pair before retrieval; a stale, incomplete, or
+  source-mismatched pair is treated as unavailable and refreshed or reported as
+  degraded
 - creates an episodic session note in `src/memory/episodic/sessions/`
 
 If refresh is skipped with `--skip-refresh-if-missing`, the workflow still
@@ -251,8 +254,11 @@ Do not promote:
 
 - `src/memory/episodic/` is short-lived and subject to pruning.
 - `src/memory/curated/` is durable and versioned.
-- Generated RAG and timeline artifacts are rebuild-only. The workflow prefers
-  `derived/rag/manifests/` and `derived/timeline/events/` when present, with
-  fallback to the legacy `rag/manifests/` and `timeline/events/` paths.
+- Generated RAG and timeline artifacts are rebuild-only. Canonical full RAG
+  output lives in `derived/rag/manifests/`; `rag/manifests/` is a read-only
+  migration fallback, and neither lane tracks generated JSON/JSONL files.
+- Workflow-scope RAG output is ephemeral and must stay outside both canonical
+  in-repo manifest lanes. Readers require the catalog/chunk pair, source
+  content, eligible source set, and source identity to validate together.
 - `graph/exports/` is rebuild-only.
 - If memory and runtime source disagree, runtime source wins.

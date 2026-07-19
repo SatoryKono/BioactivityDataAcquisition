@@ -21,6 +21,8 @@ as a replacement for runtime truth.
    If rebuild-only artifacts are missing, the workflow refreshes only the
    missing surfaces and uses a bounded workflow-time RAG rebuild instead of a
    full deterministic corpus rebuild.
+   RAG retrieval requires a valid catalog/chunk pair whose source contents,
+   eligible source set, and source identity still match the checkout.
 1. Read retrieved context in the order `catalog -> graph -> rag -> source`.
 1. Cross-check important claims with repo search, active docs, configs, tests,
    and accepted ADRs.
@@ -39,6 +41,12 @@ If `pre-task` runs in degraded mode, treat that as a retrieval warning, not as
 permission to skip canonical source verification. Session notes should still be
 created, and catalog context may still be available even when RAG or timeline
 artifacts are absent.
+
+Canonical full RAG generation writes rebuild-only artifacts to
+`src/memory/derived/rag/manifests/`. The legacy `src/memory/rag/manifests/`
+directory is a read-only migration fallback. Generated JSON/JSONL files are not
+committed, and bounded workflow-scope manifests must remain in a temporary or
+external output directory.
 
 ## Conflict Priority
 

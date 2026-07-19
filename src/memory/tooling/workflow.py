@@ -739,22 +739,53 @@ def post_task_workflow(
 
 
 def _write_smoke_inputs(root: Path) -> tuple[Path, Path]:
-    chunks_path = root / "chunks.jsonl"
-    chunks_path.write_text(
+    from memory.rag.chunking import content_hash
+
+    chunk_content = "memory workflow pre post smoke"
+    source_path = "src/memory/DAILY_WORKFLOW.md"
+    chunk = {
+        "id": "memory-workflow-smoke-chunk",
+        "title": "Memory workflow smoke",
+        "content": chunk_content,
+        "content_hash": content_hash(chunk_content),
+        "source_path": source_path,
+        "source_type": "doc",
+        "domain": "memory",
+        "repo_zone": "canonical_runtime",
+        "symbol_kind": "markdown_section",
+    }
+    catalog_path = root / "corpus_catalog.json"
+    catalog_path.write_text(
         json.dumps(
             {
-                "id": "memory-workflow-smoke-chunk",
-                "title": "Memory workflow smoke",
-                "content": "memory workflow pre post smoke",
-                "source_path": "src/memory/DAILY_WORKFLOW.md",
-                "source_type": "doc",
-                "domain": "memory",
-                "repo_zone": "canonical_runtime",
-                "symbol_kind": "markdown_section",
+                "build_scope": "workflow",
+                "chunk_count": 1,
+                "focus_query": "memory workflow",
+                "generator_version": 2,
+                "git_head_sha": None,
+                "source_count": 1,
+                "source_surface_sha256": "0" * 64,
+                "sources": [
+                    {
+                        "content_hash": "0" * 64,
+                        "domain": "memory",
+                        "owner": "BioETL Team",
+                        "repo_zone": "canonical_runtime",
+                        "section_count": 1,
+                        "source_path": source_path,
+                        "source_type": "doc",
+                    }
+                ],
+                "working_tree_state": "unavailable",
             },
             sort_keys=True,
         )
         + "\n",
+        encoding="utf-8",
+    )
+    chunks_path = root / "chunks.jsonl"
+    chunks_path.write_text(
+        json.dumps(chunk, sort_keys=True) + "\n",
         encoding="utf-8",
     )
     events_dir = root / "events"
@@ -812,11 +843,14 @@ def smoke_workflow(
             summary_note_path=summary_note_path,
             validation_timeout_seconds=validation_timeout_seconds,
         )
+        # Check file existence before context manager exits
+        session_exists = session_note_path.exists()
+        summary_exists = summary_note_path.exists()
         ok = bool(
             pre_payload.get("ok")
             and post_payload.get("ok")
-            and session_note_path.exists()
-            and summary_note_path.exists()
+            and session_exists
+            and summary_exists
         )
         return {
             "kind": "smoke",

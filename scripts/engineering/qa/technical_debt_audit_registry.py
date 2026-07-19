@@ -36,8 +36,14 @@ def _repo_root() -> Path:
 
 def _safe_relative_path(raw_path: str) -> str:
     pure_path = PurePosixPath(raw_path)
-    if pure_path.is_absolute() or ".." in pure_path.parts or pure_path.as_posix() != raw_path:
-        raise ValueError(f"audit registry path must be canonical and relative: {raw_path}")
+    if (
+        pure_path.is_absolute()
+        or ".." in pure_path.parts
+        or pure_path.as_posix() != raw_path
+    ):
+        raise ValueError(
+            f"audit registry path must be canonical and relative: {raw_path}"
+        )
     return raw_path
 
 
@@ -46,10 +52,14 @@ def _record_from_mapping(payload: dict[str, Any]) -> TechnicalDebtAuditRecord:
     if not isinstance(evidence_paths, list) or not all(
         isinstance(path, str) for path in evidence_paths
     ):
-        raise ValueError("technical-debt audit evidence_paths must be a list of strings")
+        raise ValueError(
+            "technical-debt audit evidence_paths must be a list of strings"
+        )
     required_strings = ("id", "status", "report_path")
     if not all(isinstance(payload.get(key), str) for key in required_strings):
-        raise ValueError("technical-debt audit records require id, status, and report_path")
+        raise ValueError(
+            "technical-debt audit records require id, status, and report_path"
+        )
     return TechnicalDebtAuditRecord(
         audit_id=str(payload["id"]),
         status=str(payload["status"]),
@@ -116,7 +126,9 @@ def compute_evidence_surface_sha256(
         normalized = _safe_relative_path(relative_path)
         evidence_path = root / normalized
         if not evidence_path.is_file():
-            raise FileNotFoundError(f"technical-debt audit evidence is missing: {normalized}")
+            raise FileNotFoundError(
+                f"technical-debt audit evidence is missing: {normalized}"
+            )
         identities.append(
             {
                 "path": normalized,
@@ -179,7 +191,9 @@ def validate_technical_debt_audit_registry(
         if record.status == "superseded" and not record.report_path.startswith(
             "docs/99-archive/"
         ):
-            issues.append(f"superseded audit must live in archive: {record.report_path}")
+            issues.append(
+                f"superseded audit must live in archive: {record.report_path}"
+            )
     if current.report_path.startswith("docs/99-archive/"):
         issues.append("current audit must not live in docs/99-archive")
     if current.audited_commit_sha is None or not SHA_PATTERN.fullmatch(
@@ -241,7 +255,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     issues = validate_technical_debt_audit_registry(root, args.registry)
     if args.json:
-        print(json.dumps({"issues": issues, "ok": not issues}, indent=2, sort_keys=True))
+        print(
+            json.dumps({"issues": issues, "ok": not issues}, indent=2, sort_keys=True)
+        )
     elif issues:
         print("Technical-debt audit registry validation failed:")
         for issue in issues:
