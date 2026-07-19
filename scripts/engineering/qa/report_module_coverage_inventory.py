@@ -1077,6 +1077,7 @@ def _refresh_existing_inventory_source_tree(
 
     refreshed = dict(payload)
     summary = dict(refreshed.get("summary", {}))
+    summary.pop("source_tree_sha256", None)
     summary.update(
         {
             "source_module_count": len(refreshed_rows),

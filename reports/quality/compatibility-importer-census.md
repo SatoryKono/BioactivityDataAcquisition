@@ -1,6 +1,6 @@
 # Compatibility Importer Census
 
-- snapshot_date: 2026-07-18
+- snapshot_date: 2026-07-19
 - retained_entrypoint_count: 12
 - retained_public_entrypoint_burden: 0
 - removed_compatibility_surface_count: 23
@@ -73,12 +73,12 @@
 ## First Safe Removal Wave
 
 - linked_issue: #5485
-- review_date: 2026-06-19
+- review_date: 2026-07-19
 
 | Path | Owner | Previous status | Surface classification | src importers | test importers | Action |
 | --- | --- | --- | --- | ---: | ---: | --- |
-| `src/bioetl/interfaces/cli/commands/maintenance.py` | `bioetl.interfaces.cli.commands` | `public-entrypoint` | `confirmed-unused` | 2 | 0 | `remove_from_retained_entrypoint_debt_inventory` |
-Migration prerequisites for `src/bioetl/interfaces/cli/commands/maintenance.py`: Keep public CLI discovery wired through `bioetl.interfaces.cli.commands.maintenance` without reintroducing new first-party importer debt.; Keep ordinary runtime maintenance access narrowed to `src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py`.; Treat any future retirement of the public maintenance command itself as a separate external-breaking-change review, not part of this debt ratchet wave.
+| `src/bioetl/interfaces/cli/commands/maintenance.py` | `bioetl.interfaces.cli.commands` | `public-entrypoint` | `first-party-active` | 2 | 0 | `defer_until_first_party_importers_zero` |
+Migration prerequisites for `src/bioetl/interfaces/cli/commands/maintenance.py`: Keep public CLI discovery and the maintenance owner package lazy while narrowing first-party references to zero before reconsidering removal from debt tracking.; Keep ordinary runtime maintenance access narrowed to `src/bioetl/interfaces/cli/commands/domains/maintenance/service_access.py`.; Treat any future retirement of the public maintenance command itself as a separate external-breaking-change review, not part of this debt ratchet wave.
 
 ## Removed Compatibility Surfaces
 
