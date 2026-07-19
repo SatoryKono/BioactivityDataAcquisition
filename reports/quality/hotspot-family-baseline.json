@@ -85,7 +85,7 @@
       "path_prefixes": [
         "src/bioetl/application/services/control_plane/"
       ],
-      "duplication_clusters": 6,
+      "duplication_clusters": 1,
       "files": 124,
       "total_loc": 15299,
       "files_ge_250_loc": 11,
@@ -108,7 +108,7 @@
       "path_prefixes": [
         "src/bioetl/composition/runtime_builders/"
       ],
-      "duplication_clusters": 6,
+      "duplication_clusters": 5,
       "files": 55,
       "total_loc": 6842,
       "files_ge_250_loc": 0,
