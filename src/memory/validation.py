@@ -36,6 +36,7 @@ CURATED_KIND_BY_DIR = {
     "domain_knowledge": "domain_knowledge",
 }
 REBUILD_ONLY_DIRS = (
+    "src/memory/derived/rag/manifests",
     "src/memory/rag/manifests",
     "src/memory/graph/exports",
     "src/memory/graph/projections",

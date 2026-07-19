@@ -355,7 +355,7 @@ def test_build_rag_manifests_fails_on_missing_tracked_source_paths(
         ],
     )
 
-    with pytest.raises(FileNotFoundError, match="_inspection_output.py"):
+    with pytest.raises(FileNotFoundError, match=r"_inspection_output\.py"):
         build_rag_manifests(tmp_path)
 
 
@@ -427,3 +427,59 @@ def test_write_rag_manifests_persists_build_scope_metadata(tmp_path: Path) -> No
     assert catalog["build_scope"] == "workflow"
     assert catalog["focus_query"] == "workflow"
     assert catalog["source_count"] == 1
+
+
+def test_write_rag_manifests_restores_previous_pair_when_publish_fails(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    (tmp_path / "docs/00-project").mkdir(parents=True)
+    (tmp_path / "docs/00-project/overview.md").write_text(
+        "# Overview\nCurrent\n",
+        encoding="utf-8",
+    )
+    output_dir = tmp_path / "out"
+    output_dir.mkdir()
+    catalog_path = output_dir / "corpus_catalog.json"
+    chunks_path = output_dir / "chunks.jsonl"
+    catalog_path.write_text('{"old":"catalog"}\n', encoding="utf-8")
+    chunks_path.write_text('{"old":"chunks"}\n', encoding="utf-8")
+    original_replace = rag_indexing.os.replace
+
+    def _fail_new_chunks_publish(source: Path, target: Path) -> None:
+        source_path = Path(source)
+        target_path = Path(target)
+        if (
+            source_path.name == "chunks.jsonl"
+            and source_path.parent.name.startswith(".rag-manifests-")
+            and target_path == chunks_path
+        ):
+            raise OSError("simulated second-file publication failure")
+        original_replace(source, target)
+
+    monkeypatch.setattr(rag_indexing.os, "replace", _fail_new_chunks_publish)
+
+    with pytest.raises(OSError, match="second-file publication failure"):
+        write_rag_manifests(tmp_path, output_dir)
+
+    assert catalog_path.read_text(encoding="utf-8") == '{"old":"catalog"}\n'
+    assert chunks_path.read_text(encoding="utf-8") == '{"old":"chunks"}\n'
+    assert not list(tmp_path.glob(".rag-manifests-*"))
+
+
+def test_workflow_manifest_cannot_publish_to_canonical_repo_directory(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "src/memory/tooling/workflow.py"
+    source.parent.mkdir(parents=True)
+    source.write_text("def run() -> None:\n    return None\n", encoding="utf-8")
+    canonical_dir = tmp_path / "src/memory/derived/rag/manifests"
+
+    with pytest.raises(ValueError, match="workflow-scoped RAG manifests"):
+        write_rag_manifests(
+            tmp_path,
+            canonical_dir,
+            build_scope="workflow",
+            focus_query="workflow",
+            max_sources=1,
+        )

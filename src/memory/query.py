@@ -92,11 +92,21 @@ def _resolve_memory_root(memory_root: Path | None = None) -> Path:
 def default_rag_chunks_path(memory_root: Path | None = None) -> Path:
     """Prefer ready derived RAG artifacts, with legacy fallback for compatibility."""
     resolved_root = _resolve_memory_root(memory_root)
+    repo_root = resolved_root.parent.parent
+    semantic_root = repo_root if (repo_root / ".git").exists() else None
     derived_path = resolved_root / "derived" / "rag" / "manifests" / "chunks.jsonl"
     legacy_path = resolved_root / "rag" / "manifests" / "chunks.jsonl"
-    if rag_chunks_ready(derived_path):
+    if rag_chunks_ready(
+        derived_path,
+        repo_root=semantic_root,
+        require_build_scope="full",
+    ):
         return derived_path
-    if rag_chunks_ready(legacy_path):
+    if rag_chunks_ready(
+        legacy_path,
+        repo_root=semantic_root,
+        require_build_scope="full",
+    ):
         return legacy_path
     if derived_path.parent.exists():
         return derived_path

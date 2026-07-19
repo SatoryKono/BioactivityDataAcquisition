@@ -1,66 +1,54 @@
-name: bioetl-main
+version: '3.8'
 
 services:
-  bioetl:
-    build:
-      context: .
-      dockerfile: Dockerfile.bioetl
-    restart: on-failure:3
-    mem_limit: 1536m
-    mem_reservation: 768m
-    cpus: 2.0
-    pids_limit: 512
-    init: true
-    stop_grace_period: 30s
-    logging:
-      driver: local
-      options:
-        max-size: "20m"
-        max-file: "5"
-    volumes:
-      - ./src:/app/src
-      - ./configs:/app/configs
-      - ./data:/app/data
-      - ./logs:/app/logs
-      - ./reports:/app/reports
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
     ports:
-      - "127.0.0.1:8081:8081"
-    environment:
-      NEO4J_URI: bolt://neo4j:7687
-      NEO4J_USERNAME: ${NEO4J_USERNAME:?NEO4J_USERNAME is required}
-      NEO4J_PASSWORD: ${NEO4J_PASSWORD:?NEO4J_PASSWORD is required}
-      PYTHONUNBUFFERED: "1"
-      PYTHONPYCACHEPREFIX: /tmp/bioetl-pycache
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      BIOETL_LOG_FILE: /app/logs/bioetl.log
-      BIOETL_METRICS_PORT: "8000"
-      BIOETL_METRICS_ADDR: 0.0.0.0
-      BIOETL_OBSERVABILITY__METRICS_ENABLED: "true"
-      BIOETL_OBSERVABILITY__METRICS_SERVER_ENABLED: "true"
-      BIOETL_OBSERVABILITY__DQ_MONITOR_ENABLED: "true"
-    command: ["quarantine", "serve", "--host", "0.0.0.0", "--port", "8081"]
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
     networks:
-      runtime:
-      monitoring:
-        aliases:
-          - quarantine-explorer
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "python",
-          "-c",
-          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8081/health/ready').read(); exit(0)",
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 45s
+      - monitoring
+
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki-config.yml:/etc/loki/local-config.yml
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yml
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+      - loki
+    networks:
+      - monitoring
+
+volumes:
+  prometheus_data:
+  loki_data:
+  grafana_data:
 
 networks:
-  runtime:
-    external: true
-    name: bioetl-runtime
   monitoring:
-    external: true
-    name: bioetl-monitoring
+    driver: bridge

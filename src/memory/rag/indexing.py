@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import shutil
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -22,10 +25,16 @@ from memory.rag.filters import (
     WORKFLOW_RAG_SOURCE_IDS,
     iter_rag_sources,
 )
+from memory.rag.validation import (
+    capture_rag_source_identity,
+    require_valid_rag_manifest,
+    validate_rag_manifest_files,
+    validate_rag_manifest_payload,
+)
 from memory.resources import CATALOG_DIR, MEMORY_ROOT, load_yaml_resource
 
-DEFAULT_OUTPUT_DIR = MEMORY_ROOT / "rag" / "manifests"
-GENERATOR_VERSION = 1
+DEFAULT_OUTPUT_DIR = MEMORY_ROOT / "derived" / "rag" / "manifests"
+GENERATOR_VERSION = 2
 DEFAULT_BUILD_SCOPE = "full"
 WORKFLOW_BUILD_SCOPE = "workflow"
 
@@ -103,6 +112,8 @@ def _resolve_rag_sources(
         )
     if build_scope != DEFAULT_BUILD_SCOPE:
         raise ValueError(f"unsupported RAG build scope: {build_scope}")
+    if max_sources is not None:
+        raise ValueError("full RAG builds cannot cap the eligible source set")
     return iter_rag_sources(
         root,
         selected_ids=DEFAULT_SELECTED_SOURCE_IDS,
@@ -148,8 +159,8 @@ def build_rag_manifests(
             continue
 
         source_path = root / rel_path
-        if not source_path.exists():
-            continue
+        if not source_path.is_file():
+            raise FileNotFoundError(f"RAG source does not exist: {rel_path_str}")
 
         text = source_path.read_text(encoding="utf-8")
         sections = chunk_source(rel_path, text)
@@ -204,15 +215,95 @@ def build_rag_manifests(
                 }
             )
 
+    source_identity = capture_rag_source_identity(
+        root,
+        [source["source_path"] for source in corpus_sources],
+    )
     catalog = {
         "generator_version": GENERATOR_VERSION,
         "build_scope": build_scope,
         "focus_query": focus_query,
+        **source_identity,
         "source_count": len(corpus_sources),
         "chunk_count": len(chunk_records),
         "sources": corpus_sources,
     }
+    require_valid_rag_manifest(
+        validate_rag_manifest_payload(
+            root,
+            catalog,
+            chunk_records,
+            require_build_scope=build_scope,
+            expected_source_paths=sources,
+        )
+    )
     return catalog, chunk_records
+
+
+def _serialize_catalog(catalog: dict[str, Any]) -> str:
+    return json.dumps(catalog, indent=2, sort_keys=True) + "\n"
+
+
+def _serialize_chunks(chunks: list[dict[str, Any]]) -> str:
+    return "".join(
+        f"{json.dumps(chunk, sort_keys=True, ensure_ascii=True)}\n"
+        for chunk in chunks
+    )
+
+
+def _canonical_rag_output_dirs(root: Path) -> tuple[Path, Path]:
+    memory_root = root.resolve() / "src" / "memory"
+    return (
+        memory_root / "derived" / "rag" / "manifests",
+        memory_root / "rag" / "manifests",
+    )
+
+
+def _guard_workflow_output_scope(root: Path, output_dir: Path, build_scope: str) -> None:
+    if build_scope != WORKFLOW_BUILD_SCOPE:
+        return
+    resolved_output = output_dir.resolve()
+    if resolved_output in _canonical_rag_output_dirs(root):
+        raise ValueError(
+            "workflow-scoped RAG manifests must use a temporary or external output "
+            "directory, not an in-repository canonical RAG directory"
+        )
+
+
+def _publish_manifest_pair(
+    staged_catalog: Path,
+    staged_chunks: Path,
+    output_dir: Path,
+) -> tuple[Path, Path]:
+    """Publish a validated pair transactionally and restore old files on failure."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    targets = (
+        (staged_catalog, output_dir / "corpus_catalog.json"),
+        (staged_chunks, output_dir / "chunks.jsonl"),
+    )
+    backup_dir = Path(tempfile.mkdtemp(prefix=".rag-backup-", dir=output_dir))
+    backups: dict[Path, Path] = {}
+    published: list[Path] = []
+    try:
+        for _, target in targets:
+            if target.exists():
+                backup = backup_dir / target.name
+                os.replace(target, backup)  # noqa: PTH105 - policy requires os.replace
+                backups[target] = backup
+        for staged_path, target in targets:
+            os.replace(staged_path, target)  # noqa: PTH105 - policy requires os.replace
+            published.append(target)
+    except Exception:
+        for target in reversed(published):
+            if target.exists():
+                target.unlink()
+        for target, backup in backups.items():
+            if backup.exists():
+                os.replace(backup, target)  # noqa: PTH105 - policy requires os.replace
+        raise
+    finally:
+        shutil.rmtree(backup_dir, ignore_errors=True)
+    return targets[0][1], targets[1][1]
 
 
 def write_rag_manifests(
@@ -223,26 +314,34 @@ def write_rag_manifests(
     focus_query: str | None = None,
     max_sources: int | None = None,
 ) -> tuple[Path, Path]:
-    """Write deterministic corpus catalog and chunk manifests."""
-    output_dir.mkdir(parents=True, exist_ok=True)
+    """Build, validate, and transactionally publish deterministic manifests."""
+    _guard_workflow_output_scope(root, output_dir, build_scope)
     catalog, chunks = build_rag_manifests(
         root,
         build_scope=build_scope,
         focus_query=focus_query,
         max_sources=max_sources,
     )
-    catalog_path = output_dir / "corpus_catalog.json"
-    chunks_path = output_dir / "chunks.jsonl"
-    catalog_path.parent.mkdir(parents=True, exist_ok=True)
-    catalog_path.write_text(
-        json.dumps(catalog, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    output_dir.parent.mkdir(parents=True, exist_ok=True)
+    staging_dir = Path(
+        tempfile.mkdtemp(prefix=".rag-manifests-", dir=output_dir.parent)
     )
-    chunks_path.parent.mkdir(parents=True, exist_ok=True)
-    with chunks_path.open("w", encoding="utf-8") as handle:
-        for chunk in chunks:
-            handle.write(json.dumps(chunk, sort_keys=True, ensure_ascii=True))
-            handle.write("\n")
-    return catalog_path, chunks_path
+    try:
+        staged_catalog = staging_dir / "corpus_catalog.json"
+        staged_chunks = staging_dir / "chunks.jsonl"
+        staged_catalog.write_text(_serialize_catalog(catalog), encoding="utf-8")
+        staged_chunks.write_text(_serialize_chunks(chunks), encoding="utf-8")
+        require_valid_rag_manifest(
+            validate_rag_manifest_files(
+                root,
+                staged_catalog,
+                staged_chunks,
+                require_build_scope=build_scope,
+            )
+        )
+        return _publish_manifest_pair(staged_catalog, staged_chunks, output_dir)
+    finally:
+        shutil.rmtree(staging_dir, ignore_errors=True)
 
 
 def _build_parser() -> argparse.ArgumentParser:

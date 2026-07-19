@@ -10,6 +10,7 @@ import pytest
 
 from memory.notes import parse_markdown_note
 from memory.tooling import workflow
+from tests.helpers.memory_manifests import write_test_rag_manifest
 
 pytestmark = pytest.mark.integration
 
@@ -18,8 +19,9 @@ def test_pre_task_workflow_creates_session_note_and_uses_local_surfaces(
     tmp_path: Path,
 ) -> None:
     chunks_path = tmp_path / "chunks.jsonl"
-    chunks_path.write_text(
-        json.dumps(
+    write_test_rag_manifest(
+        chunks_path,
+        [
             {
                 "id": "chunk-1",
                 "title": "Pipeline",
@@ -29,11 +31,8 @@ def test_pre_task_workflow_creates_session_note_and_uses_local_surfaces(
                 "domain": "runtime",
                 "repo_zone": "canonical_runtime",
                 "symbol_kind": "function",
-            },
-            sort_keys=True,
-        )
-        + "\n",
-        encoding="utf-8",
+            }
+        ],
     )
     events_dir = tmp_path / "events"
     events_dir.mkdir()
@@ -115,9 +114,9 @@ def test_pre_task_workflow_refreshes_if_manifests_are_missing(
         assert rag_max_sources == 160
         assert allow_partial is True
         rag_dir = output_root / "rag" / "manifests"
-        rag_dir.mkdir(parents=True, exist_ok=True)
-        (rag_dir / "chunks.jsonl").write_text(
-            json.dumps(
+        write_test_rag_manifest(
+            rag_dir / "chunks.jsonl",
+            [
                 {
                     "id": "chunk-1",
                     "title": "Refresh result",
@@ -127,11 +126,8 @@ def test_pre_task_workflow_refreshes_if_manifests_are_missing(
                     "domain": "project",
                     "repo_zone": "canonical_project_docs",
                     "symbol_kind": "markdown_section",
-                },
-                sort_keys=True,
-            )
-            + "\n",
-            encoding="utf-8",
+                }
+            ],
         )
         events_dir = output_root / "timeline" / "events"
         events_dir.mkdir(parents=True, exist_ok=True)
@@ -224,8 +220,9 @@ def test_pre_task_workflow_refreshes_if_event_projection_dir_is_empty(
     refresh_calls: list[Path] = []
     session_note_path = tmp_path / "session-empty-events.md"
     chunks_path = tmp_path / "chunks.jsonl"
-    chunks_path.write_text(
-        json.dumps(
+    write_test_rag_manifest(
+        chunks_path,
+        [
             {
                 "id": "chunk-1",
                 "title": "Local chunk",
@@ -235,11 +232,8 @@ def test_pre_task_workflow_refreshes_if_event_projection_dir_is_empty(
                 "domain": "memory",
                 "repo_zone": "canonical_runtime",
                 "symbol_kind": "function",
-            },
-            sort_keys=True,
-        )
-        + "\n",
-        encoding="utf-8",
+            }
+        ],
     )
     events_dir = tmp_path / "events"
     events_dir.mkdir()
@@ -265,8 +259,10 @@ def test_pre_task_workflow_refreshes_if_event_projection_dir_is_empty(
         assert rag_max_sources == 160
         assert allow_partial is True
         rag_dir = output_root / "rag" / "manifests"
-        rag_dir.mkdir(parents=True, exist_ok=True)
-        (rag_dir / "chunks.jsonl").write_text(chunks_path.read_text(encoding="utf-8"))
+        write_test_rag_manifest(
+            rag_dir / "chunks.jsonl",
+            [json.loads(line) for line in chunks_path.read_text(encoding="utf-8").splitlines()],
+        )
         refreshed_events = output_root / "timeline" / "events"
         refreshed_events.mkdir(parents=True, exist_ok=True)
         (refreshed_events / "runs.jsonl").write_text(

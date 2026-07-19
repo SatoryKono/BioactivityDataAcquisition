@@ -59,6 +59,24 @@ def test_refresh_all_generates_rag_and_timeline_outputs(tmp_path: Path) -> None:
     assert (output_root / "timeline/events/ci.jsonl").exists()
 
 
+def test_refresh_all_rejects_workflow_scope_in_canonical_derived_lane(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "src/memory/tooling/demo.py"
+    source.parent.mkdir(parents=True)
+    source.write_text("VALUE = 1\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="workflow-scoped RAG manifests"):
+        refresh_all(
+            tmp_path,
+            tmp_path / "src/memory/derived",
+            include_timeline=False,
+            rag_build_scope="workflow",
+            rag_focus_query="demo",
+            rag_max_sources=1,
+        )
+
+
 def test_refresh_all_can_import_expanded_graph_file_relations(tmp_path: Path) -> None:
     snapshot_path = tmp_path / "bioetl_knowledge_graph_expanded.json"
     snapshot_path.write_text(
