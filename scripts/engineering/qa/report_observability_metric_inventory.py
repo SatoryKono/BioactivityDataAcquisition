@@ -21,10 +21,11 @@ import os
 import re
 import subprocess
 import sys
+import types
 from collections import defaultdict
 from datetime import UTC, date, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Final, cast
+from typing import Final, Protocol, TypedDict
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -52,6 +53,12 @@ from bioetl.infrastructure.observability.prometheus_metric_registries import (  
     GAUGES,
     HISTOGRAMS,
 )
+
+
+class _StartupInfoLike(Protocol):
+    dwFlags: int
+    wShowWindow: int
+
 
 _CANONICAL_METRIC_RE = re.compile(r"\bbioetl_[a-z0-9_]+\b")
 _PROMETHEUS_METRIC_NAME_RE = re.compile(r"^[A-Za-z_:][A-Za-z0-9_:]*$")
@@ -85,8 +92,9 @@ _RUNTIME_EXCLUDE_PARTS = (
     "src/bioetl/domain",
 )
 _TEXT_SUFFIXES = {".py", ".md", ".json", ".yml", ".yaml"}
+MetricInventoryReport = dict[str, list[str] | dict[str, list[str]]]
 _TEXT_FILE_DISCOVERY_CACHE: dict[str, tuple[Path, ...]] = {}
-_METRIC_INVENTORY_CACHE: dict[str, dict[str, object]] = {}
+_METRIC_INVENTORY_CACHE: dict[str, MetricInventoryReport] = {}
 _SOURCE_TEXT_CACHE: dict[str, str | None] = {}
 _RUNTIME_CANDIDATE_TEXT_CACHE: dict[str, str | None] = {}
 _RUNTIME_CANDIDATE_PATH_CACHE: dict[str, tuple[Path, ...]] = {}
@@ -334,7 +342,7 @@ def _run_text_discovery_command(
     timeout: float,
 ) -> tuple[subprocess.CompletedProcess[str], str]:
     """Capture small discovery output through a bounded subprocess call."""
-    result = subprocess.run(  # type: ignore[arg-type]
+    result = subprocess.run(
         command,
         capture_output=True,
         text=True,
@@ -347,15 +355,20 @@ def _run_text_discovery_command(
     return result, result.stdout or ""
 
 
+class _WindowsSubprocessKwargs(TypedDict, total=False):
+    creationflags: int
+    startupinfo: _StartupInfoLike
+
+
 def _hidden_windows_subprocess_kwargs(
     *,
     os_name: str = os.name,
-    subprocess_module: object = subprocess,
-) -> dict[str, int]:
+    subprocess_module: types.ModuleType = subprocess,
+) -> _WindowsSubprocessKwargs:
     if os_name != "nt":
         return {}
 
-    kwargs: dict[str, int] = {}
+    kwargs: _WindowsSubprocessKwargs = {}
     create_no_window = int(getattr(subprocess_module, "CREATE_NO_WINDOW", 0))
     if create_no_window:
         kwargs["creationflags"] = create_no_window
@@ -469,7 +482,7 @@ def _scan_canonical_metric_mentions_with_git_grep(
     for index in range(0, len(relative_paths), _METRIC_MENTION_GREP_CHUNK_SIZE):
         chunk = relative_paths[index : index + _METRIC_MENTION_GREP_CHUNK_SIZE]
         try:
-            result = subprocess.run(  # type: ignore[arg-type]
+            result = subprocess.run(
                 [
                     "git",
                     "-C",
@@ -544,7 +557,7 @@ def _scan_canonical_metric_mentions_with_rg(
                 check=False,
                 timeout=_METRIC_MENTION_GREP_TIMEOUT_SECONDS,
                 **_hidden_windows_subprocess_kwargs(),
-            )  # type: ignore[arg-type]
+            )
         except OSError:
             return None
         except subprocess.TimeoutExpired:
@@ -1513,9 +1526,23 @@ def _load_declared_metric_definitions(repo_root: Path) -> dict[str, set[str]]:
     return definitions
 
 
+def _coerce_int(value: object, *, default: int = -1) -> int:
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str):
+        try:
+            return int(value)
+        except ValueError:
+            return default
+    return default
+
+
 def _iter_dashboard_panels(payload: dict[str, object]) -> list[dict[str, object]]:
     panels: list[dict[str, object]] = []
-    for raw_panel in payload.get("panels", []):
+    raw_panels = payload.get("panels", [])
+    if not isinstance(raw_panels, list):
+        return panels
+    for raw_panel in raw_panels:
         if not isinstance(raw_panel, dict):
             continue
         panels.append(raw_panel)
@@ -1526,7 +1553,8 @@ def _iter_dashboard_panels(payload: dict[str, object]) -> list[dict[str, object]
 def _panel_runbook_urls(panel: dict[str, object]) -> list[str]:
     """Return deterministic runbook links from panel and field data links."""
     urls: set[str] = set()
-    candidates: list[object] = list(panel.get("links", []))
+    raw_links = panel.get("links", [])
+    candidates: list[object] = list(raw_links) if isinstance(raw_links, list) else []
     field_config = panel.get("fieldConfig", {})
     if isinstance(field_config, dict):
         defaults = field_config.get("defaults", {})
@@ -1600,7 +1628,7 @@ def _panel_contract(
     datasource_type: str,
 ) -> dict[str, object]:
     """Build one complete, deterministic dashboard target documentation row."""
-    panel_id = int(panel.get("id", -1))
+    panel_id = _coerce_int(panel.get("id", -1))
     kind = _target_kind(datasource_type=datasource_type, target=target)
     query = str(target.get("url") or target.get("expr") or target.get("query") or "")
     description = str(panel.get("description", ""))
@@ -1774,14 +1802,17 @@ def collect_typed_observability_inventory(repo_root: Path) -> dict[str, object]:
         payload = json.loads(dashboard_path.read_text(encoding="utf-8"))
         dashboard_uid = str(payload.get("uid", dashboard_path.stem))
         for panel in _iter_dashboard_panels(payload):
-            panel_id = int(panel.get("id", -1))
+            panel_id = _coerce_int(panel.get("id", -1))
             panel_datasource = panel.get("datasource", {})
             panel_datasource_type = (
                 str(panel_datasource.get("type", ""))
                 if isinstance(panel_datasource, dict)
                 else str(panel_datasource)
             )
-            for target in panel.get("targets", []):
+            raw_targets = panel.get("targets", [])
+            if not isinstance(raw_targets, list):
+                continue
+            for target in raw_targets:
                 if not isinstance(target, dict):
                     continue
                 expr = str(target.get("expr", ""))
@@ -1841,7 +1872,7 @@ def collect_typed_observability_inventory(repo_root: Path) -> dict[str, object]:
     typed_targets.sort(
         key=lambda row: (
             str(row["dashboard_uid"]),
-            int(row["panel_id"]),
+            _coerce_int(row.get("panel_id", -1)),
             str(row["ref_id"]),
             str(row["kind"]),
         )
@@ -1868,7 +1899,7 @@ def collect_typed_observability_inventory(repo_root: Path) -> dict[str, object]:
             http_targets,
             key=lambda row: (
                 str(row["dashboard_uid"]),
-                int(row["panel_id"]),
+                _coerce_int(row.get("panel_id", -1)),
                 str(row["ref_id"]),
                 str(row["url"]),
             ),
@@ -2483,12 +2514,12 @@ def _build_runtime_cardinality_review_summary(
 
 def collect_metric_inventory(
     repo_root: Path,
-) -> dict[str, list[str] | dict[str, list[str]]]:
+) -> MetricInventoryReport:
     repo_root = repo_root.resolve()
     cache_key = repo_root.as_posix()
     cached = _METRIC_INVENTORY_CACHE.get(cache_key)
     if cached is not None:
-        return cached  # type: ignore[return-value]
+        return cached
     declared_metric_definitions = _load_declared_metric_definitions(repo_root)
     declared_rule_metrics = declared_metric_definitions["recording_rule_metrics"]
     declared_policy_aliases = declared_metric_definitions["policy_alias_metrics"]
@@ -2588,10 +2619,10 @@ def collect_metric_inventory(
         for metric_name in helper_runtime_set
         if f"{metric_name}_total" in runtime_registered_set
     }
-    registry_only_metrics = runtime_registered_set - canonical_runtime_set
-    runtime_without_registry = runtime_set - registered_set - runtime_counter_bases
-    dead_metrics = registry_only_metrics - docs_set - rules_set
-    ruled_without_runtime = (rules_set & runtime_registered_set) - canonical_runtime_set
+    registry_only_metric_set = runtime_registered_set - canonical_runtime_set
+    runtime_without_registry_set = runtime_set - registered_set - runtime_counter_bases
+    dead_metrics = registry_only_metric_set - docs_set - rules_set
+    ruled_without_runtime_set = (rules_set & runtime_registered_set) - canonical_runtime_set
     combined_emitters = _combine_metric_emitters(
         runtime_mentions, helper_backed_mentions
     )
@@ -2611,13 +2642,13 @@ def collect_metric_inventory(
         "unused_declared_metrics", set()
     )
     registry_only_metrics = sorted(
-        set(registry_only_metrics) - reviewed_unused_declared_metrics
+        registry_only_metric_set - reviewed_unused_declared_metrics
     )
     reviewed_runtime_without_registry = drift_allowlist.get(
         "runtime_without_registry", set()
     )
     runtime_without_registry = sorted(
-        set(runtime_without_registry) - reviewed_runtime_without_registry
+        runtime_without_registry_set - reviewed_runtime_without_registry
     )
     reviewed_unused_declared_observability_events = drift_allowlist.get(
         "unused_declared_observability_events", set()
@@ -2630,7 +2661,7 @@ def collect_metric_inventory(
         "alerted_without_emission", set()
     )
     ruled_without_runtime = sorted(
-        set(ruled_without_runtime) - reviewed_alerted_without_emission
+        ruled_without_runtime_set - reviewed_alerted_without_emission
     )
     reviewed_runtime_cardinality = drift_allowlist.get(
         "runtime_cardinality_review_required", set()
@@ -2684,7 +2715,7 @@ def collect_metric_inventory(
         and metric_name not in contract_bounded_risky_labels
     ]
 
-    report: dict[str, list[str] | dict[str, list[str]]] = {
+    report: MetricInventoryReport = {
         "declared_metrics": registered,
         "emitted_metrics": sorted(registered_set & canonical_runtime_set),
         "declared_observability_events": declared_observability_events,
@@ -3008,9 +3039,6 @@ def _render_text(report: dict[str, list[str] | dict[str, list[str]]]) -> str:
     return "\n".join(lines)
 
 
-MetricInventoryReport = dict[str, list[str] | dict[str, list[str]]]
-
-
 def _write_evidence_report(
     report: MetricInventoryReport, *, repo_root: Path, evidence_path: Path | None
 ) -> None:
@@ -3090,14 +3118,24 @@ def _write_runtime_cardinality_review_summary(
 def _render_runtime_cardinality_review_summary(
     summary: RuntimeCardinalityReviewSummary,
 ) -> str:
+    reviewed_metrics = summary.get("reviewed_metrics", [])
+    review_required_metrics = summary.get("review_required_metrics", [])
+    reviewed_count = (
+        len(reviewed_metrics) if isinstance(reviewed_metrics, list) else 0
+    )
+    review_required_count = (
+        len(review_required_metrics)
+        if isinstance(review_required_metrics, list)
+        else 0
+    )
     lines = [
         "## Observability Runtime Cardinality Review",
         "",
         f"- Status: `{summary['status']}`",
         f"- Mode: `{summary['mode']}`",
         f"- Prometheus source: `{summary['prometheus_base_url_source']}`",
-        f"- Reviewed metrics: `{len(summary['reviewed_metrics'])}`",
-        f"- Review-required metrics: `{len(summary['review_required_metrics'])}`",
+        f"- Reviewed metrics: `{reviewed_count}`",
+        f"- Review-required metrics: `{review_required_count}`",
     ]
 
     degraded_reasons = summary.get("degraded_reasons", [])
@@ -3139,29 +3177,35 @@ def _append_runtime_cardinality_review_summary(
         handle.write(prefix + _render_runtime_cardinality_review_summary(summary))
 
 
+def _typed_inventory_violations(typed_report: dict[str, object]) -> dict[str, list[str]]:
+    violations: dict[str, list[str]] = {}
+    for key in (
+        "recording_outputs_without_declaration",
+        "recording_declarations_without_output",
+        "policy_aliases_overlapping_outputs",
+        "policy_aliases_overlapping_runtime_metrics",
+        "policy_aliases_without_catalog",
+        "catalog_aliases_without_declaration",
+        "http_semantics_violations",
+        "panel_contract_drift",
+        "prometheus_run_id_selector_violations",
+    ):
+        value = typed_report.get(key)
+        if isinstance(value, list) and value:
+            violations[key] = [item for item in value if isinstance(item, str)]
+    return violations
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = _build_parser()
     args = parser.parse_args(argv)
+    violations: dict[str, list[str]]
     if args.typed_observability_views:
         typed_report = collect_typed_observability_inventory(args.repo_root)
         if args.update_panel_contracts:
             write_panel_contract_inventory(args.repo_root, typed_report)
             typed_report["panel_contract_drift"] = []
-        violations = {
-            key: typed_report[key]
-            for key in (
-                "recording_outputs_without_declaration",
-                "recording_declarations_without_output",
-                "policy_aliases_overlapping_outputs",
-                "policy_aliases_overlapping_runtime_metrics",
-                "policy_aliases_without_catalog",
-                "catalog_aliases_without_declaration",
-                "http_semantics_violations",
-                "panel_contract_drift",
-                "prometheus_run_id_selector_violations",
-            )
-            if typed_report[key]
-        }
+        violations = _typed_inventory_violations(typed_report)
         if args.json:
             json.dump(typed_report, sys.stdout, indent=2, sort_keys=True)
             sys.stdout.write("\n")

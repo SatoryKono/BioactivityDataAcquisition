@@ -12,8 +12,40 @@ import sys
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
+from typing import TypedDict
 
 import yaml
+
+
+class ADRJsonRegistryEntry(TypedDict):
+    adr_number: str
+    title: str
+    file_path: str
+    status: str
+    source_status: str | None
+    category: str
+    owner: str
+    decision_date: str | None
+    last_reviewed: str | None
+    context: str
+    decision: str
+    consequences: str
+    supersedes: list[str]
+    superseded_by: list[str]
+    related: list[str]
+    tags: list[str]
+
+
+class ADRJsonRegistryStats(TypedDict):
+    by_status: dict[str, int]
+    by_category: dict[str, int]
+
+
+class ADRJsonRegistry(TypedDict):
+    generated: str
+    total_adrs: int
+    adrs: list[ADRJsonRegistryEntry]
+    stats: ADRJsonRegistryStats
 
 
 @dataclass
@@ -52,13 +84,13 @@ class ADRMetadata:
 class ADRRegistryGenerator:
     """Generates ADR registry with metadata."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.adr_dir = Path("docs/02-architecture/decisions")
         self.output_dir = Path("docs/02-architecture/adr-registry")
         self.navigator_registry_file = Path("docs/02-architecture/adr-registry.md")
         self.adr_index_file = self.adr_dir / "README.md"
         self.adr_index_metadata = self._load_adr_index_metadata()
-        self.adrs = []
+        self.adrs: list[ADRMetadata] = []
 
     def _load_adr_index_metadata(self) -> dict[str, dict[str, str]]:
         """Load title/category/date/status metadata from the live ADR index table."""
@@ -106,17 +138,19 @@ class ADRRegistryGenerator:
             return match.group(1)
         return None
 
-    def parse_adr_front_matter(self, content: str) -> dict:
+    def parse_adr_front_matter(self, content: str) -> dict[str, object]:
         """Parse YAML front matter from ADR content."""
 
-        metadata = {}
+        metadata: dict[str, object] = {}
 
         if content.startswith("---"):
             front_matter_end = content.find("\n---", 1)
             if front_matter_end != -1:
                 front_matter = content[3:front_matter_end].strip()
                 try:
-                    metadata = yaml.safe_load(front_matter) or {}
+                    loaded = yaml.safe_load(front_matter)
+                    if isinstance(loaded, dict):
+                        metadata = loaded
                 except Exception as e:
                     print(f"⚠️  Error parsing front matter: {e}")
 
@@ -172,8 +206,25 @@ class ADRRegistryGenerator:
             return None
         return normalized
 
+    @staticmethod
+    def _metadata_str_value(value: object) -> str | None:
+        if value is None:
+            return None
+        if isinstance(value, str):
+            return value
+        return str(value)
+
+    @staticmethod
+    def _metadata_tags(value: object) -> list[str]:
+        if isinstance(value, list):
+            return [item for item in value if isinstance(item, str)]
+        return []
+
     def _extract_decision_date(
-        self, content: str, front_matter: dict, index_metadata: dict
+        self,
+        content: str,
+        front_matter: dict[str, object],
+        index_metadata: dict[str, str],
     ) -> str | None:
         candidates = (
             front_matter.get("date"),
@@ -181,7 +232,9 @@ class ADRRegistryGenerator:
             index_metadata.get("decision_date"),
         )
         for candidate in candidates:
-            normalized = self._normalize_metadata_value(candidate)
+            normalized = self._normalize_metadata_value(
+                candidate if isinstance(candidate, str) else None
+            )
             if normalized is not None:
                 return normalized
 
@@ -265,7 +318,7 @@ class ADRRegistryGenerator:
     def determine_adr_status(
         self,
         content: str,
-        metadata: dict,
+        metadata: dict[str, object],
         *,
         relationships: dict[str, list[str]] | None = None,
     ) -> str:
@@ -333,7 +386,7 @@ class ADRRegistryGenerator:
                 index_metadata,
             )
             last_reviewed = self._normalize_metadata_value(
-                front_matter.get("last_reviewed")
+                self._metadata_str_value(front_matter.get("last_reviewed"))
             ) or self._normalize_metadata_value(
                 self._extract_inline_metadata_value(
                     content,
@@ -341,7 +394,7 @@ class ADRRegistryGenerator:
                 )
             )
             owner = self._normalize_metadata_value(
-                front_matter.get("owner")
+                self._metadata_str_value(front_matter.get("owner"))
             ) or self._normalize_metadata_value(
                 self._extract_inline_metadata_value(
                     content,
@@ -357,7 +410,9 @@ class ADRRegistryGenerator:
 
             # Determine status
             source_status = (
-                self._normalize_metadata_value(front_matter.get("status"))
+                self._normalize_metadata_value(
+                    self._metadata_str_value(front_matter.get("status"))
+                )
                 or self._normalize_metadata_value(
                     self._extract_inline_metadata_value(content, labels=("Status",))
                 )
@@ -372,11 +427,19 @@ class ADRRegistryGenerator:
                 relationships=relationships,
             )
 
+            resolved_title = (
+                self._metadata_str_value(front_matter.get("title"))
+                or index_metadata.get("title")
+            )
+            resolved_category = (
+                self._metadata_str_value(front_matter.get("category"))
+                or index_metadata.get("category")
+            )
+
             # Create metadata object
             adr_metadata = ADRMetadata(
                 adr_number=adr_number,
-                title=front_matter.get("title")
-                or index_metadata.get("title")
+                title=resolved_title
                 or file_path.stem.replace(f"ADR-{adr_number}-", "").replace("-", " "),
                 file_path=str(file_path.relative_to(self.adr_dir)),
                 status=status,
@@ -389,9 +452,8 @@ class ADRRegistryGenerator:
                 supersedes=relationships.get("supersedes", []),
                 superseded_by=relationships.get("superseded_by", []),
                 related=relationships.get("related", []),
-                category=front_matter.get("category")
-                or index_metadata.get("category", "architecture"),
-                tags=front_matter.get("tags", []),
+                category=resolved_category or "architecture",
+                tags=self._metadata_tags(front_matter.get("tags", [])),
                 owner=owner or "BioETL Team",
             )
 
@@ -589,12 +651,12 @@ class ADRRegistryGenerator:
             return "# ADR Status Dashboard\n\nNo ADRs found."
 
         # Count by status
-        status_counts = {}
+        status_counts: dict[str, int] = {}
         for adr in self.adrs:
             status_counts[adr.status] = status_counts.get(adr.status, 0) + 1
 
         # Count by category
-        category_counts = {}
+        category_counts: dict[str, int] = {}
         for adr in self.adrs:
             category_counts[adr.category] = category_counts.get(adr.category, 0) + 1
 
@@ -674,23 +736,15 @@ class ADRRegistryGenerator:
 
         return "\n".join(lines)
 
-    def generate_json_registry(self) -> dict:
+    def generate_json_registry(self) -> ADRJsonRegistry:
         """Generate JSON registry for programmatic access."""
 
-        registry = {
-            "generated": datetime.now().isoformat(),
-            "total_adrs": len(self.adrs),
-            "adrs": [],
-            "stats": {"by_status": {}, "by_category": {}},
-        }
-
-        # Count stats
-        status_counts = {}
-        category_counts = {}
+        adrs: list[ADRJsonRegistryEntry] = []
+        status_counts: dict[str, int] = {}
+        category_counts: dict[str, int] = {}
 
         for adr in self.adrs:
-            # Convert to dict
-            adr_dict = {
+            adr_dict: ADRJsonRegistryEntry = {
                 "adr_number": adr.adr_number,
                 "title": adr.title,
                 "file_path": adr.file_path,
@@ -709,18 +763,22 @@ class ADRRegistryGenerator:
                 "tags": adr.tags,
             }
 
-            registry["adrs"].append(adr_dict)
+            adrs.append(adr_dict)
 
-            # Update stats
             status_counts[adr.status] = status_counts.get(adr.status, 0) + 1
             category_counts[adr.category] = category_counts.get(adr.category, 0) + 1
 
-        registry["stats"]["by_status"] = status_counts
-        registry["stats"]["by_category"] = category_counts
+        return {
+            "generated": datetime.now().isoformat(),
+            "total_adrs": len(self.adrs),
+            "adrs": adrs,
+            "stats": {
+                "by_status": status_counts,
+                "by_category": category_counts,
+            },
+        }
 
-        return registry
-
-    def write_output_files(self):
+    def write_output_files(self) -> None:
         """Write all output files to the registry directory."""
 
         # Create output directory
@@ -883,7 +941,7 @@ The ADR registry integrates with:
 """
 
 
-def main():
+def main() -> None:
     """Main entry point."""
 
     print("🚀 Generating ADR Registry...")
